@@ -122,7 +122,14 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        /* e o PRODUTO do andar, que faltava: sem ele o compilador multiplicava
         * CONTANDO — um laço de |Y| voltas —, e um contador do par com o átomo
         * alto fora da conta nunca chegava a zero. No fim, como manda a VOLTA. */
-       OP_MUL16 };
+       OP_MUL16,
+       /* O ESPALHAMENTO, e é ele que tira o último salto do avaliador. Devolve a
+        * máscara INTEIRA se o argumento é não-nulo, e zero se é nulo: o booleano
+        * deixa de viver na coordenada 0 e passa a viver em todas. Com ele o teste
+        * de uma condição não ramifica — `<` e `>` são o bit de sinal espalhado, e
+        * `=` é o complemento disso —, e o molde da linha recebe já a máscara sem
+        * ter de a fabricar com `0 − ACC`. No FIM, como manda a VOLTA. */
+       OP_ESPALHA };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
 #define FL_LT   0x04
@@ -155,8 +162,6 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_ZERO    1
 #define S_UM      2
 #define S_TMP     3
-#define S_ESP     4          /* 0−ACC: o booleano ESPALHADO por todos os bits —
-                              * é ele que dispensa o salto condicional do molde */
 /* O MARTELO: cabeçalho 80 átomos + alvo 32 átomos. Longe das linhas. */
 /* O CANAL É UM BACKEND DE LOAD/STORE, NÃO UM PROTOCOLO À PARTE.
  *
@@ -197,6 +202,9 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_MASK16  59         /* o mesmo, um andar acima: {0, 0x80} — o bit 15 do par   */
 #define S_ACC     6          /* o acumulador booleano da cláusula inteira                */
 #define S_V       7          /* o valor do SET — o átomo BAIXO                          */
+#define S_CHEIO   69         /* {0xFF,0xFF}: o VERDADEIRO, espalhado por todos os
+                              * bits. O booleano deixou de viver na coordenada 0 —
+                              * vive na largura toda, e é isso que dispensa o salto */
 #define S_VA      68         /* o átomo ALTO do valor do SET (o par, Lei 7) — 68 está
                               * livre entre o S_CORPO (60..67) e o S_EXPR (72..199); o
                               * 56 que eu tinha posto é o S_KZ+7 */
@@ -1355,6 +1363,13 @@ static int passo(Regs *r, unsigned prog_len){
         W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
         x = ula_add16(a, b, NULL);
         r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_ESPALHA:
+        /* não-nulo -> todos os bits; nulo -> nenhum. É a única instrução que
+         * transporta um booleano para a largura toda da Word. */
+        r->R.total = (r->A.total || r->A.e) ? 0xFF : 0;
+        r->R.e     = (r->A.total || r->A.e) ? 0xFF : 0;
+        break;
+
     case OP_MUL16: {
         W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
         x = ula_mul16(a, b);
@@ -2328,16 +2343,31 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
     Word w; w.total = k; w.e = 0;
     mem_grava(kslot, w);
 
-    emit_copia(S_ZERO, destino);
+    /* SEM SALTO NENHUM, e o resultado é a MÁSCARA e não o bit.
+     *
+     * Isto eram dois saltos por condição: comparar, saltar se zero, saltar por
+     * cima, copiar o um. O caminho percorrido dependia do dado — e era daí que
+     * vinham os três passos por linha que casa, o resto de dependência que o
+     * §W24 mediu depois de o molde ter deixado de ramificar.
+     *
+     * O `<` e o `>` já eram o bit de sinal da diferença; falta espalhá-lo, e é
+     * uma instrução. O `=` é o complemento: a diferença é zero exatamente
+     * quando o espalhamento dá nada, e negar é o XOR com a máscara cheia. O
+     * destino passa a valer $0$ ou TUDO, que é o que o molde da linha quer
+     * cruzar com a coordenada — e assim ele também deixa de ter de fabricar a
+     * máscara. */
     if(cmp_op == '='){
         MOVE(sc, +1);
         MOVE(kslot, +1);
         emit1(OP_SUB);
         MOVE(S_TMP, -1);
         MOVE(S_TMP, +1);
-        MOVE(S_ZERO, +1);
-        emit1(OP_CMP);
-        emit1(OP_JZ);  emit1(3); emit1(0);
+        emit1(OP_ESPALHA);          /* diferente de zero -> tudo */
+        MOVE(S_TMP, -1);
+        MOVE(S_TMP, +1);
+        MOVE(S_CHEIO, +1);
+        emit1(OP_XOR);              /* nega: igual a zero -> tudo */
+        MOVE(destino, -1);
     } else {
         if(cmp_op == '<'){ MOVE(kslot, +1); MOVE(sc, +1); }
         else             { MOVE(sc, +1); MOVE(kslot, +1); }
@@ -2345,18 +2375,12 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
         MOVE(S_TMP, -1);
         MOVE(S_TMP, +1);
         MOVE(S_MASK, +1);
-        emit1(OP_AND);
+        emit1(OP_AND);              /* o bit de sinal, e mais nada */
         MOVE(S_TMP, -1);
         MOVE(S_TMP, +1);
-        MOVE(S_ZERO, +1);
-        emit1(OP_CMP);
-        emit1(OP_JNZ); emit1(3); emit1(0);
+        emit1(OP_ESPALHA);          /* e espalha-se por toda a largura */
+        MOVE(destino, -1);
     }
-    emit1(OP_JMP);
-    unsigned pos = pc_emit; emit1(0); emit1(0);
-    unsigned ini = pc_emit;
-    emit_copia(S_UM, destino);
-    salto_poe(pos, ini);
 }
 
 /* MULTIPLICAÇÃO POR CONSTANTE, NAS COORDENADAS DO REI.
@@ -2503,26 +2527,26 @@ static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned ksl
     Word w; w.total = (Word8)((unsigned long)k & 255u);
     w.e = (Word8)(((unsigned long)k >> 8) & 255u);
     mem_grava(kslot, w);
-    emit_copia(S_ZERO, destino);
+    /* o andar de cima segue a mesma regra do de baixo: sem salto, e o resultado
+     * é a MÁSCARA. A diferença é só a largura — aqui o sinal é o bit 15 do par,
+     * e a subtracção atravessa o átomo. */
     if(cmp_op == '='){
         MOVE(sc, +1); MOVE(kslot, +1); emit1(OP_SUB16);
-        MOVE(tmp, -1); MOVE(tmp, +1); MOVE(S_ZERO, +1); emit1(OP_CMP16);
-        emit1(OP_JZ);  emit1(3); emit1(0);
+        MOVE(tmp, -1);
+        MOVE(tmp, +1); emit1(OP_ESPALHA);
+        MOVE(tmp, -1);
+        MOVE(tmp, +1); MOVE(S_CHEIO, +1); emit1(OP_XOR);
+        MOVE(destino, -1);
     } else {
         if(cmp_op == '<'){ MOVE(kslot, +1); MOVE(sc, +1); }
         else             { MOVE(sc, +1); MOVE(kslot, +1); }
         emit1(OP_SUB16);
-        MOVE(tmp, -1); MOVE(tmp, +1);
-        MOVE(S_MASK16, +1); emit1(OP_AND);        /* o bit 15: o sinal do par */
-        MOVE(tmp, -1); MOVE(tmp, +1);
-        MOVE(S_ZERO, +1); emit1(OP_CMP);
-        emit1(OP_JNZ); emit1(3); emit1(0);
+        MOVE(tmp, -1);
+        MOVE(tmp, +1); MOVE(S_MASK16, +1); emit1(OP_AND);   /* o bit 15: o sinal do par */
+        MOVE(tmp, -1);
+        MOVE(tmp, +1); emit1(OP_ESPALHA);
+        MOVE(destino, -1);
     }
-    emit1(OP_JMP);
-    unsigned pos = pc_emit; emit1(0); emit1(0);
-    unsigned ini = pc_emit;
-    emit_copia(S_UM, destino);
-    salto_poe(pos, ini);
 }
 
 /* A FORMA LINEAR INTEIRA TEM DE CABER, e não só cada coluna. O avaliador decide
@@ -2793,7 +2817,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             }
             emit_teste16(acc, a->aop[j], dest, S_KZ + (unsigned)j, 0, acc + 5);
             if(a->anega[j]){
-                MOVE(dest, +1); MOVE(S_UM, +1); emit1(OP_XOR); MOVE(dest, -1);
+                MOVE(dest, +1); MOVE(S_CHEIO, +1); emit1(OP_XOR); MOVE(dest, -1);
             }
             continue;
         }
@@ -2865,7 +2889,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
         emit_teste(acc, a->aop[j], 0, dest, S_KZ + (unsigned)j);
         if(a->anega[j]){
             MOVE(dest, +1);
-            MOVE(S_UM, +1);
+            MOVE(S_CHEIO, +1);
             emit1(OP_XOR);
             MOVE(dest, -1);
         }
@@ -2896,7 +2920,7 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
         emit_no(a, a->raiz, i, ncols, S_EXPR);
         emit_copia(S_EXPR, S_ACC);
     } else {
-        emit_copia(S_UM, S_ACC);
+        emit_copia(S_CHEIO, S_ACC);   /* sem WHERE tudo casa, e o verdadeiro é a máscara */
     }
 
     /* AS QUATRO FACES NUM PASSO SÓ, E NO ESPAÇO DE FASES.
@@ -2935,25 +2959,13 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
     emit1(OP_AND);                       /* vivo_i = VIVO ∧ e_i  (0 ou e_i) */
     MOVE(S_TMP, -1);
 
-    MOVE(S_ACC,  +1);
-    MOVE(S_ZERO, +1);
-    /* A SUBTRACÇÃO TEM DE ATRAVESSAR O ÁTOMO, e o OP_SUB não atravessa.
-     *
-     * O `0 − ACC` espalha o booleano por todos os bits — mas o OP_SUB opera
-     * componente a componente, porque a Word é um PAR e o vai-um não passa de um
-     * átomo para o outro. Com ACC = {1,0} dava {0xFF,0}: só o átomo BAIXO ficava
-     * cheio, e as coordenadas e_8..e_15 nunca acendiam. Mediu-se ao número: de
-     * 84 linhas marcavam-se 44 = 5×8 + 4, que são exactamente as de índice com
-     * `i mod 16 < 8`. A metade de cima do campo não existia.
-     *
-     * Aqui a Word não é um par: é UM número de dezasseis bits, e o espalhamento
-     * quer os dezasseis. É o OP_SUB16 — o mesmo andar da torre que a célula usa
-     * para crescer —, e `0 − 1` dá 0xFFFF, que é a máscara inteira. */
-    emit1(OP_SUB16);                     /* 0 − ACC = 0x0000 ou 0xFFFF */
-    MOVE(S_ESP, -1);
-
+    /* E O ACC JÁ VEM ESPALHADO. Aqui fazia-se `0 − ACC` em SUB16 para levar um
+     * booleano de {0,1} à largura toda — o passo que dispensava o salto no
+     * molde. Agora quem o produz é o próprio avaliador, com OP_ESPALHA, e o
+     * ACC chega em $0$ ou TUDO: a máscara é fabricada UMA vez, onde a condição
+     * se decide, e não outra vez por linha. */
     MOVE(S_TMP, +1);
-    MOVE(S_ESP, +1);
+    MOVE(S_ACC, +1);
     emit1(OP_AND);                       /* × : a coordenada, se a condição vale */
     MOVE(S_TMP, -1);
 
@@ -3012,6 +3024,7 @@ static void prepara(long v, long col_do_set){
      * constante que só se escreve uma vez é a mesma falha com outra cara: nada
      * pode ficar fora da memória entre uma varredura e a seguinte. */
     w.total = (Word8)~0u; w.e = 0; mem_grava(S_MT, w);
+    w.total = 0xFF; w.e = 0xFF; mem_grava(S_CHEIO, w); /* o verdadeiro, em todos os bits */
     w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
     w.total = 0; w.e = 0x80; mem_grava(S_MASK16, w); /* bit 15 do par — o sinal um andar acima */
 }

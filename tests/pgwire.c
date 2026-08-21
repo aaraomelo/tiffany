@@ -3329,8 +3329,8 @@ int main(void){
         long p_base = passos[2];                    /* o caso em que nada casa */
         int lei = 1;
         for(int k = 0; k < 3; k++)
-            if(passos[k] != p_base + 3 * linhas[k]) lei = 0;
-        printf("      -> passos = %ld + 3·(as que casam), nos três: %s\n",
+            if(passos[k] != p_base) lei = 0;
+        printf("      -> passos = %ld nos TRÊS, sem termo em |I|: %s\n",
                p_base, lei ? "sim" : "NAO");
         if(!lei) mal++;
 
@@ -3348,10 +3348,9 @@ int main(void){
         /* o dobro das linhas dobra a BASE — e é a base que se compara, porque o
          * termo 3·|I| também dobrou. Sem isto, «cresce» passaria por qualquer
          * crescimento, e o que se afirma é que ele é o Θ(|X|) da varredura. */
-        long base_grande = p_grande - 3 * 40;
-        printf("\n      CONTROLO — o dobro das linhas: base %ld contra %ld  %s\n",
-               base_grande, p_base, base_grande == 2 * p_base ? "(o dobro exacto: Θ(|X|))" : "NAO");
-        if(base_grande != 2 * p_base) mal++;
+        printf("\n      CONTROLO — o dobro das linhas: %ld contra %ld  %s\n",
+               p_grande, p_base, p_grande == 2 * p_base ? "(o dobro exacto: Θ(|X|))" : "NAO");
+        if(p_grande != 2 * p_base) mal++;
 
         /* e as três respostas continuam certas — o custo constante não pode ser
          * comprado com um resultado errado */
@@ -3376,22 +3375,25 @@ int main(void){
            " enchia só o átomo BAIXO — de 84 linhas marcavam-se 44, que são exactamente as de"
            " índice `i mod 16 < 8`. A metade de cima do campo não existia, e foi o número 44 a"
            " dizer qual era o defeito. ISTO NÃO SE MEDE PELO RESULTADO, que não mudou: mede-se"
-           " pelo CUSTO — e AQUI A MEDIÇÃO CORRIGIU A AFIRMAÇÃO, o que fica escrito porque é o"
-           " resultado. Esperava-se que a MESMA consulta sobre conteúdos diferentes custasse o"
-           " MESMO, e não custa: 2960, 2930 e 2900 para vinte, dez e zero casamentos. Não são"
-           " iguais, mas estão em progressão EXACTA, e a lei lê-se de uma vez —"
-           " passos = c·|X| + 3·|I|. A dependência do dado não desapareceu: encolheu para TRÊS"
-           " passos por linha que casa, e esses três não vêm do molde — vêm do AVALIADOR da"
-           " condição, que ainda ramifica com JZ curtos. O molde é a parte que deixou de olhar,"
-           " e é isso que se afirma, com o escopo à frente. Antes de medir escrevi a comparação"
-           " errada: `a > 0` contra `a > 999` contra `a > 10`, que deu 1660, 1920 e 2930 — três"
-           " números sem lei nenhuma, porque a CONSTANTE compila em Zeckendorf e três"
-           " constantes são três PROGRAMAS. Tinha mudado o dado e a chave ao mesmo tempo, e o"
-           " que media era a chave. O CONTROLO fecha pelo tamanho: com o dobro das linhas a"
-           " BASE dobra EXACTAMENTE — 2900 para 5800 —, que é o Θ(|X|) da varredura, e"
-           " compara-se a base e não o total, porque o termo 3·|I| também dobrou. E as três"
-           " respostas continuam certas, porque um custo comprado com um resultado errado não"
-           " é um resultado.",
+           " pelo CUSTO, e ele é agora IGUAL nos três: a mesma consulta sobre conteúdos"
+           " diferentes — vinte casamentos, dez, zero — custa 2700 passos, e a lei não tem"
+           " termo em |I| nenhum: passos = c·|X|. O motor deixou de olhar para o dado antes de"
+           " decidir por onde ir. ISTO LEVOU DOIS PASSOS, e o segundo veio depois de o primeiro"
+           " ser medido. Ao tirar os saltos do MOLDE ficou 2900 + 3·|I|: três passos por linha"
+           " que casa, e eles não vinham do molde — vinham do AVALIADOR da condição, que ainda"
+           " ramificava com JZ curtos para escolher entre o zero e o um. Tirá-los pedia uma"
+           " instrução que a máquina não tinha, e é uma só: ESPALHAR, que devolve a máscara"
+           " inteira se o argumento é não-nulo e zero se é nulo. Com ela `<` e `>` são o bit de"
+           " sinal espalhado e `=` é o complemento disso, o resultado de uma condição passa de"
+           " um BIT a uma MÁSCARA, e o molde deixa de ter de a fabricar — a máscara nasce onde"
+           " a condição se decide, uma vez, e não outra vez por linha. O CONTROLO fecha pelo"
+           " tamanho: com o dobro das linhas o custo dobra EXACTAMENTE, 2700 para 5400, que é o"
+           " Θ(|X|) da varredura — sem isto, «igual nos três» passaria por o número ser fixo. E"
+           " as três respostas continuam certas, 20, 10 e 0, porque um custo comprado com um"
+           " resultado errado não é um resultado. Antes de tudo isto escrevi a comparação"
+           " errada: `a > 0` contra `a > 999` contra `a > 10`, que deu três números sem lei"
+           " nenhuma, porque a CONSTANTE compila em Zeckendorf e três constantes são três"
+           " PROGRAMAS — tinha mudado o dado e a chave ao mesmo tempo.",
            mal == 0);
     }
 
