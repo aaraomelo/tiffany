@@ -1365,7 +1365,7 @@ espaço de trabalho.
 \medskip\noindent Peças do contrato:
 \begin{itemize}\itemsep2pt
 \item \code{SlotWord} --- $\Word_8$, 1 byte/slot (ABI disco). Par $(a,b)$ da
-      classe $\mathbb{Z}$ = \textbf{dois} slots (\code{inteiros def:w8}, Lei~7)
+      a classe do segundo degrau $=$ \textbf{dois} slots (\code{inteiros def:w8}, Lei~7)
 \item \code{S\_CF=2048}, \code{rt\_cf\_slot\_*} --- acumulador FC; soma de
       coeficientes + carry; produto = convolução + carry
 \item \code{slot\_mem.h} --- \code{pread/pwrite}; caminho \code{sql.c},
@@ -1527,7 +1527,9 @@ $G$ reconta o que a métrica esquece. O inverso restaura a
 representação injectiva:
 
 \begin{teorema}[levantamento da aranha --- $G\equiv1$ na folha]\label{thm:aranha-inversa}
-Seja $\pi\colon I\to\mathbb{Z}^{2}$ uma realização (p.ex.\ Heighway) e
+Seja $\pi\colon I\to X_2^{\,2}$ uma realização (p.ex.\ Heighway) --- e $X_2$
+é o \textbf{segundo degrau}, $X_1^{\,2}/{\sim}$, que o corpo CONSTRÓI
+(\code{inteiros thm:z}; \code{aranha}, a escada) e este documento não importa --- e
 $G(x)=|\pi^{-1}(x)|$. Para cada $i\in I$ seja
 \[
 k(i)\;=\;\bigl|\{j\in I:j\le i,\ \pi(j)=\pi(i)\}\bigr|
@@ -1688,6 +1690,28 @@ Koch \code{tests/koch.c};
 álgebra PT \code{tests/portugues\_aranha.c} §PA1--§PA8;
 álgebra EN \code{tests/ingles\_aranha.c} §IA1--§IA8;
 álgebra ES \code{tests/espanhol\_aranha.c} §EA1--§EA8.}
+\subsection*{O algoritmo são duas linhas}
+
+\noindent O corpo prova-o e o \code{papers/aranha.c} executa-o. Lido um byte
+$b$:
+\[
+\boxed{\;
+e=\operatorname{pop}(b\wedge\mathtt{0xAA}),\qquad
+o=\operatorname{pop}(b\wedge\mathtt{0x55}),\qquad
+\text{sai } [\,e+o,\ e\,].
+\;}
+\]
+As máscaras são complementares, logo \textbf{particionam} o byte --- é a cisão.
+O \emph{popcount} é a soma. E o par que sai \emph{é o gato aplicado uma vez},
+$\otimes(e,o)=(e+o,e)$ --- não há torre a correr. A fase que não aparece
+recupera-se, $o=(e+o)-e$, que é o esquilo: a saída é um \textbf{levantamento}, e
+o total $e+o$ é a conservação.
+
+\medskip\noindent\textbf{É este o tamanho do objecto.} Tudo o que este documento
+descreve --- os slots, a ISA, a porta SQL --- é a realização persistente destas
+duas linhas: o resto é o que foi preciso para as correr sobre um banco em vez de
+sobre um ficheiro, e nada disso as acrescenta.
+
 \subsection*{As quatro operações, e onde cada uma vive}
 
 \noindent O corpo fixa o algoritmo em quatro operações --- \code{aranha.tex}, a
@@ -1833,7 +1857,7 @@ uint16 precede qualquer projeção para byte, como \code{d16\_mult} precede
 \code{Qz} em \code{racionais.tex}.
 
 \medido{\code{inteiros.c} §NT1--§NT11 ($14/14$); \code{aranha\_g.c} §AG1--§AG11;
-\code{metrica.c} §M3--§M8 (conservação $|\det|=1$ em $\mathbb{Z}^{2}$);
+\code{metrica.c} §M3--§M8 (conservação $|\det|=1$ em $X_2^{\,2}$);
 \code{migracao.c} §GW; \code{cadeia.c} §KW ($10/10$);
 \code{reducao.c} §DW; \code{palavra.c} §PW.}
 \colunas{\code{inteiros.tex}; \code{algebrico thm:metrica}}

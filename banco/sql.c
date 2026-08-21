@@ -3061,6 +3061,13 @@ static long lim_n = -1;              /* -1 = sem LIMIT */
  * campo que o motor já constrói. Não há estrutura nova: usa-se a MESMA árvore
  * que ordena, lida por classe em vez de por ordem. */
 static char grp_col[64] = "";        /* a coluna do GROUP BY, "" se não houver */
+/* DISTINCT É O REPRESENTANTE CANÓNICO k=1. O `thm:levantamento` dá a folha
+ * k(i) = quantas vezes a célula já foi visitada até i, e a sua cláusula (3) diz
+ * que na fibra de x os k são exactamente {1,…,G(x)}. O `thm:escada` fecha:
+ * «marcar cada fibra com k=1 É escolher o representante canónico». Logo
+ * DISTINCT não é uma passagem a filtrar repetidos — é ficar com a folha 1 de
+ * cada fibra, e a fibra é a mesma do GROUP BY. */
+static int  dis_usa = 0;             /* 1 se a consulta pediu DISTINCT */
 
 /* ── ORDENAR É DESCER A ÁRVORE, e a árvore é a do banco ─────────────────────
  *
@@ -3289,6 +3296,11 @@ static int varre(const char *resto, int acao){
     int proj_n = 0, proj[SQL_OUT_MAX_COLS];
     if(acao == ACAO_MARCA){
         char cols[256];
+        /* DISTINCT vem antes da lista, e diz-se já o que ele exige: UMA coluna.
+         * Sobre a linha inteira seria preciso indexar a linha, e a árvore
+         * indexa um valor — recusa-se em vez de devolver repetidos. */
+        pula(&p);
+        dis_usa = palavra(&p, "DISTINCT") ? 1 : 0;
         if(!lista_colunas(&p, cols, sizeof cols)) return 0;
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
@@ -3369,6 +3381,7 @@ static int varre(const char *resto, int acao){
      * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
      * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
     ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1;
+    /* o dis_usa é lido acima, com a lista de colunas */
     if(acao == ACAO_MARCA){
         const char *q = p;
         pula(&q);
@@ -3760,6 +3773,47 @@ static int varre(const char *resto, int acao){
         return 1;
     }
 
+    /* ── DISTINCT: a folha k=1 de cada fibra ────────────────────────────
+     *
+     * Desliga do bitmap tudo o que não é o PRIMEIRO da sua fibra. Usa a mesma
+     * árvore: inserida a chave (valor, índice), o percurso por ordem traz as
+     * linhas da mesma fibra CONTÍGUAS e por índice crescente, de modo que a
+     * primeira de cada corrida é a folha k=1 — o representante canónico do
+     * `thm:escada`. Não se filtra comparando pares: lê-se a ordem. */
+    if(acao == ACAO_MARCA && dis_usa){
+        if(proj_n != 1){
+            printf("erro: DISTINCT pede UMA coluna — a linha inteira não é indexável"
+                   " pela árvore. RECUSADO.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "DISTINCT: uma coluna de cada vez; a linha inteira nao e"
+                         " indexavel pela arvore"); }
+            return 0;
+        }
+        int dc = proj[0];
+        int seq[SQL_OUT_MAX_ROWS], n = 0, postos = 0;
+        ord_limpa();
+        for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!ord_insere(celula_valor(i, dc, ncols), (int)i)){
+                printf("erro: a árvore do DISTINCT não coube — RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "DISTINCT: a arvore nao coube; recusa em vez de devolver"
+                             " repetidos"); }
+                return 0;
+            }
+            postos++;
+        }
+        ord_percorre(0, 0, 0, seq, &n, SQL_OUT_MAX_ROWS, 0);
+        { long anterior = 0; int primeiro = 1;
+          for(int k = 0; k < n; k++){
+              long v = celula_valor(seq[k], dc, ncols);
+              if(!primeiro && v == anterior) bit_poe(S_MATCH, seq[k], 0);  /* k>1: sai */
+              anterior = v; primeiro = 0;
+          } }
+    }
+
     long emitidas = 0;
     for(long ii = 0; ii < (ord_usa ? ord_n : nrows); ii++){
         long i = ord_usa ? ord_seq[ii] : ii;
@@ -3814,8 +3868,25 @@ static int varre(const char *resto, int acao){
                 unsigned long alto = mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
                 snprintf(cel, sizeof cel, "%lu", (unsigned long)c.total | (alto << 8));
             }
-            printf("%s", cel);
-            if(j+1 < ncols) printf(" | ");
+            /* A PROJECÇÃO VALE PARA OS DOIS LADOS.
+             *
+             * O §W17 pôs a lista de colunas a ser respeitada — mas só no
+             * SqlOut, que é o que o protocolo lê. A impressão em texto
+             * continuava a despejar a linha inteira: `SELECT a FROM t` mostrava
+             * as três colunas a quem estava no terminal e uma a quem estava no
+             * socket. Metade do par corrigida é o defeito que este ficheiro
+             * persegue desde o princípio — responder outra coisa é pior do que
+             * recusar, e responder DUAS coisas diferentes é pior ainda. */
+            { int mostra = 1, ultima = 1;
+              if(proj_n){
+                  mostra = 0;
+                  for(int k = 0; k < proj_n; k++) if(proj[k] == j){ mostra = 1; break; }
+                  ultima = (proj_n && proj[proj_n-1] == j);
+              } else ultima = (j + 1 >= ncols);
+              if(mostra){
+                  printf("%s", cel);
+                  if(!ultima) printf(" | ");
+              } }
             if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS){
                 if(!proj_n){
                     if(j < SQL_OUT_MAX_COLS)

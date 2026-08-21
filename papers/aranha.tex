@@ -19,7 +19,9 @@
 \definecolor{cinza}{gray}{0.35}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
-\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+%% O SEGUNDO DEGRAU, e não um conjunto importado: este documento CONSTRÓI-O
+%% (§escada, X_2 = X_1^2/~). Escrever Z seria usar o que se vai construir.
+\newcommand{\Zc}{\ensuremath{X_2}}
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
 \newcommand{\colunas}[3]{%
@@ -1066,7 +1068,10 @@ da álgebra de incidência da ordem $(I,\le)$, e a inversa que a segunda usa é 
 mesma que a obra já corre na árvore dos divisores.
 
 \begin{definicao}[$W$, e $S$ como matriz]\label{def:incid}
-$W=\Z^{I}$ com a base canónica $\{\delta_t\}$, $\dim W=\abs{I}$. Na base, o
+$W=X_2^{\,I}$ com a base canónica $\{\delta_t\}$, $\dim W=\abs{I}$ --- e $X_2$ é
+o \textbf{segundo degrau}, que a §\ref{sec:escada} constrói como
+$X_1^{\,2}/{\sim}$ e não um conjunto importado de fora: os coeficientes que aqui
+se usam são os do degrau que fecha a face do \emph{oposto}. Na base, o
 deslocamento $S$ da Def.~\ref{def:ops} é a matriz \textbf{subdiagonal de uns},
 $S_{ij}=[\,i=j+1\,]$. A álgebra de incidência de $(I,\le)$ representa-se, nesta base, por matrizes
 triangulares inferiores, e nela vivem os \emph{mesmos} $\zeta$ e $\mu$ do
@@ -1276,16 +1281,20 @@ outros três passos do ciclo são os mesmos nas duas.
 \noindent Tudo o que se segue é construção sobre a base, no discreto, e com
 funções genéricas. Convém começar por separar \textbf{dois andares algébricos},
 que se confundem com facilidade --- e não são da mesma natureza: em baixo um
-espaço vetorial sobre um corpo, em cima um módulo livre sobre \Z.
+espaço vetorial sobre um corpo, em cima um módulo livre sobre \Zc.
 
 \begin{definicao}[os dois andares]\label{def:doisandares}
 \textbf{Em baixo}, o espaço onde a trajetória anda: $X=F_{2^m}$ como espaço
 vetorial sobre $B$, de dimensão $m$, com a base $\{e_k=2^{k}\}$ do
 Teor.~\ref{thm:base8} --- e as direções de aresta de $Q_m$ \emph{são} essa base.
 \textbf{Em cima}, o espaço das funções sobre ele --- que é um \emph{módulo
-livre} sobre \Z, e não um espaço vetorial, porque \Z\ não é corpo:
+livre} sobre o \textbf{segundo degrau} $X_2$, e não um espaço vetorial, porque
+$X_2$ não é corpo. \emph{E $X_2$ não é importado}: é o que a §\ref{sec:escada}
+constrói, $X_2=X_1^{\,2}/{\sim}$ com $(a,b)\sim(c,d)\iff a+d=b+c$ --- o degrau
+que fecha a face do \textbf{oposto}, $\partial x+x=0$. Tem soma, tem opostos e
+não tem inversos, e é exatamente isso que aqui se usa:
 \[
-V=\Z^{X}\cong\Z^{2^{m}},\qquad \operatorname{rank}_{\Z}V=\abs{X}=2^{m},
+V=\Zc^{X}\cong\Zc^{2^{m}},\qquad \operatorname{rank}_{\Zc}V=\abs{X}=2^{m},
 \qquad \text{base } \{\delta_x\}_{x\in X},
 \]
 onde $\delta_x(y)=[\,y=x\,]$. O campo $G$ é um \textbf{vetor} de $V$, e a sua
@@ -1306,7 +1315,7 @@ A operação de $X$ estende-se a $V$ por bilinearidade a partir da base:
 \qquad\Longrightarrow\qquad
 (f*g)(y)=\sum_{x}f(x)\,g(x\oplus y).
 \]
-Com este produto, $V$ é o \textbf{anel de grupo} $\Z[X]$, comutativo e com
+Com este produto, $V$ é o \textbf{anel de grupo} $\Zc[X]$, comutativo e com
 unidade $\delta_0$.
 \end{definicao}
 
@@ -1317,7 +1326,7 @@ $C_fC_g=C_gC_f=C_{f*g}$.
 \end{lema}
 
 \begin{proof}
-Linearidade e comutatividade herdam-se do produto de $\Z[X]$, que é comutativo e
+Linearidade e comutatividade herdam-se do produto de $\Zc[X]$, que é comutativo e
 associativo por $X$ o ser. Explicitamente, $C_f C_g(h)=f*(g*h)=(f*g)*h=C_{f*g}(h)$.
 \end{proof}
 
@@ -1331,7 +1340,7 @@ geral falha quando há espaços próprios comuns de dimensão maior que um.
 \subsection*{O dual, e quem são os vetores próprios}
 
 \begin{definicao}[o dual e o emparelhamento]\label{def:dual}
-$V^{*}=\operatorname{Hom}(V,\Z)$, e o emparelhamento canónico é
+$V^{*}=\operatorname{Hom}(V,\Zc)$, e o emparelhamento canónico é
 $\langle\varphi,f\rangle=\varphi(f)$. Para cada $k\in X$, o \textbf{caractere}
 \[
 \chi_k\colon X\to\{\pm1\},\qquad \chi_k(j)=(-1)^{\langle k,j\rangle},
@@ -2163,7 +2172,7 @@ $2$ & espiral quadrada & $4097$ & $1025$ & $4$ & sim & sim & sempre à esquerda 
 $2$ & reta axial & $4097$ & $1$ & $4097$ & não & sim & $x\mapsto x+e_0$ \\
 $2$ & reta diagonal & $4097$ & $1$ & $4097$ & não & não & passo $(1,1)$: não é aresta \\
 $2$ & relógio $J$ & $61$ & $16$ & $4$ & sim & não & $(a,b)\mapsto(-b,a)$, período $4$ \\
-$2$ & Julia, $c=-1$ & $61$ & $31$ & $2$ & sim & sim & $z\mapsto z^{2}+c$ em $\Z[i]$ \\
+$2$ & Julia, $c=-1$ & $61$ & $31$ & $2$ & sim & sim & $z\mapsto z^{2}+c$ em $\Zc[i]$ \\
 $4$ & o passo da máquina & $512$ & $12$ & $48$ & sim & não & (registo, slot, banco, andar) \\
 \bottomrule
 \end{tabular}
@@ -2190,7 +2199,7 @@ o Cantor não dobra, apesar de ser a mais intrincada das figuras da lista.
 
 \medskip\noindent\textbf{$\max G$ é uma medida da curva.} Medido, o dragão de
 posto $3$ da tabela tem $\max G=3$ e o do plano $2$: dobra \emph{mais}, e não menos.
-A grandeza compara as duas curvas, que são construções distintas --- a de $\Z^3$
+A grandeza compara as duas curvas, que são construções distintas --- a de $\Zc^3$
 roda o plano da viragem --- e não os dois espaços. A dimensão, essa, já apareceu
 onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert \mathcal{V}(x)\rvert=2n$.
 
@@ -2244,13 +2253,13 @@ $\oslash$ & \textbf{o esquilo} $\times\sigma'$ & \textbf{desce} --- a deconvolu�
 \end{tabular}
 \end{center}
 
-\begin{definicao}[o gato e o esquilo em $\Z^{n}$]\label{def:gato}
+\begin{definicao}[o gato e o esquilo em $\Zc^{n}$]\label{def:gato}
 Fixado um inteiro $m\ge1$ --- o \textbf{metal} ---, o \textbf{gato} é
-$\otimes\colon\Z^{n}\to\Z^{n}$,
+$\otimes\colon\Zc^{n}\to\Zc^{n}$,
 \[
 (\otimes c)_0=m\,c_0+c_{n-1},\qquad (\otimes c)_i=c_{i-1}\ \ (1\le i\le n-1),
 \]
-e o \textbf{esquilo} é $\oslash\colon\Z^{n}\to\Z^{n}$,
+e o \textbf{esquilo} é $\oslash\colon\Zc^{n}\to\Zc^{n}$,
 \[
 (\oslash d)_j=d_{j+1}\ \ (0\le j\le n-2),\qquad
 (\oslash d)_{n-1}=d_0-m\,d_1 .
@@ -2262,9 +2271,9 @@ $p(x)=x^{n}-m\,x^{n-1}-1$.
 \begin{teorema}[a volta é exata, e é inteira]\label{thm:gato}
 Com a Def.~\ref{def:gato}:
 \begin{enumerate}\itemsep3pt
-\item[(1)] $\oslash\circ\otimes=\mathrm{id}$ em $\Z^{n}$, para todo $n\ge2$ e
+\item[(1)] $\oslash\circ\otimes=\mathrm{id}$ em $\Zc^{n}$, para todo $n\ge2$ e
 todo $m$ --- \textbf{sem hipótese nenhuma sobre o vetor}.
-\item[(2)] $\lvert\det\otimes\rvert=1$, e portanto $\otimes\in\mathrm{GL}_n(\Z)$:
+\item[(2)] $\lvert\det\otimes\rvert=1$, e portanto $\otimes\in\mathrm{GL}_n(\Zc)$:
 a inversa tem entradas \emph{inteiras}, e a volta não sai do anel.
 \item[(3)] Em $n=2$ o polinómio é $x^{2}=mx+1$, cujas raízes são
 $\sigma=\tfrac{m+\sqrt{m^{2}+4}}2$ e $\sigma'=-1/\sigma$, com
@@ -2374,7 +2383,7 @@ dobra e controlos §AN4;
 Teor.~\ref{thm:bolas} §AN6 (bolas particionam; todo ponto é centro; a euclidiana
 falha ambas com o mesmo raio);
 Teor.~\ref{thm:periodo} §AN8 ($\lvert\{G>1\}\rvert=p$ e $\lvert\{G=1\}\rvert=\ell$
-sobre $z\mapsto z^2+c$ em $\Z[i]$, com o período obtido por busca independente e
+sobre $z\mapsto z^2+c$ em $\Zc[i]$, com o período obtido por busca independente e
 a órbita que escapa como controlo);
 ciclo em qualquer posto e Teor.~\ref{thm:fecho} §AN13;
 Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
@@ -2475,7 +2484,7 @@ o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
 Teor.~\ref{thm:periodo} (a cauda $\ell$ e o período $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
-         postos $1$ a $4$, árvore, $\Z[i]$}
+         postos $1$ a $4$, árvore, $\Zc[i]$}
         {\code{tests/aranha\_n.c} §AN1--§AN36;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
