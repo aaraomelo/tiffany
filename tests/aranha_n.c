@@ -44,6 +44,8 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN31 UM AGENTE OU MUITOS: o campo é o MESMO — a cláusula 3 torna a
+ *         estigmergia agente-agnóstica, e é por isso que ela escala
  *   §AN30 A BASE É O ALFABETO: a trajectória é uma PALAVRA, reconstrói-se de
  *         π(0) + palavra, e a DOBRA é o núcleo do morfismo palavra → posição
  *   §AN29 O PAR DUAL DE CANTOR com FOLGA: contar injecta e sobra metade da
@@ -485,6 +487,15 @@ static void pd_encher(long d, int *px, int *py){   /* I → X: sobrejectiva */
         y |= (int)((r >> (2*b + 1)) & 1) << b;
     }
     *px = x; *py = y;
+}
+
+/* a comparação de dois campos, UMA só função — para que o controlo negativo do
+ * §AN31 proteja a asserção positiva: mutá-la derruba as duas leituras ao mesmo
+ * tempo, e não só a que interessa. */
+static long campos_diferem(const long *a, const long *b, long n){
+    long d = 0;
+    for(long i = 0; i < n; i++) if(a[i] != b[i]) d++;
+    return d;
 }
 
 /* corre uma realização e devolve o essencial */
@@ -3070,6 +3081,149 @@ int main(void){
            " E uma expectativa minha caiu aqui: pôr todas as letras a avançar na mesma"
            " direcção NÃO dobra — é monótono, logo injectivo, e a dimensão não tem nada"
            " a ver com isso. O que faz dobrar é a realização poder VOLTAR",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN31: MUITOS AGENTES, O MESMO CAMPO — e o que isso obriga ═════════ */
+    printf("\n§AN31  ocupação por multiplicidade contra expansão por memória.\n\n");
+    {
+        long mau = 0;
+        const int LADO = 8, K = 4;
+
+        /* DUAS ARQUITECTURAS PARA O MESMO PROBLEMA: aumentar estrutura sem perder
+         * a memória das divisões.
+         *   (A) UM agente que passa K vezes por cada célula — expansão por memória
+         *   (B) K agentes que passam UMA vez por cada célula — ocupação por
+         *       multiplicidade
+         * A pergunta é se o campo as distingue. */
+        static long campoA[64], campoB[64];
+        for(long i = 0; i < 64; i++){ campoA[i] = campoB[i] = 0; }
+
+        /* (A) um agente, K voltas */
+        long ntA = 0;
+        for(int volta = 0; volta < K; volta++)
+            for(int c = 0; c < LADO*LADO/4 && ntA < AN_IMAX; c++){
+                Vet v = vet0(); v.c[0] = c % LADO; v.c[1] = c / LADO;
+                traj[ntA++] = v;
+            }
+        an_zera(2);
+        for(long t = 0; t < ntA; t++) an_visita(traj[t]);
+        for(int x = 0; x < LADO; x++) for(int y = 0; y < LADO; y++){
+            Vet v = vet0(); v.c[0] = x; v.c[1] = y;
+            campoA[y*LADO + x] = an_le(v);
+        }
+        Res rA = an_corre(2, ntA);
+
+        /* (B) K agentes, uma volta cada — e o campo é O MESMO ARRAY, porque a
+         *     memória é do espaço e não do agente: nenhum deles a leva consigo */
+        an_zera(2);
+        long ntB = 0;
+        for(int ag = 0; ag < K; ag++)
+            for(int c = 0; c < LADO*LADO/4 && ntB < AN_IMAX; c++){
+                Vet v = vet0(); v.c[0] = c % LADO; v.c[1] = c / LADO;
+                an_visita(v);
+                traj[ntB++] = v;
+            }
+        for(int x = 0; x < LADO; x++) for(int y = 0; y < LADO; y++){
+            Vet v = vet0(); v.c[0] = x; v.c[1] = y;
+            campoB[y*LADO + x] = an_le(v);
+        }
+
+        long difere = campos_diferem(campoA, campoB, 64);
+        printf("      um agente com %d voltas   ·   %d agentes com uma volta\n", K, K);
+        printf("      os dois campos diferem em %ld das 64 células · |I| igual? %s\n",
+               difere, (ntA == ntB) ? "sim" : "NÃO");
+        if(difere || ntA != ntB) mau++;
+
+        /* O CONTROLO NEGATIVO, sem o qual «são iguais» não diria nada: uma terceira
+         * execução com K−1 voltas tem de dar um campo DIFERENTE, e a mesma
+         * comparação tem de o ver. Sem isto, uma comparação que não comparasse
+         * passaria na asserção acima. */
+        static long campoC[64];
+        an_zera(2);
+        for(int volta = 0; volta < K-1; volta++)
+            for(int c = 0; c < LADO*LADO/4; c++){
+                Vet v = vet0(); v.c[0] = c % LADO; v.c[1] = c / LADO;
+                an_visita(v);
+            }
+        for(int x = 0; x < LADO; x++) for(int y = 0; y < LADO; y++){
+            Vet v = vet0(); v.c[0] = x; v.c[1] = y;
+            campoC[y*LADO + x] = an_le(v);
+        }
+        long difere_ctl = campos_diferem(campoA, campoC, 64);   /* a MESMA função */
+        printf("      controlo: contra %d voltas o mesmo teste vê %ld células"
+               " diferentes\n", K-1, difere_ctl);
+        if(difere_ctl != LADO*LADO/4) mau++;
+
+        /* O CAMPO NÃO OS DISTINGUE, e não é falha: é a cláusula 3. Como a memória
+         * está no ESPAÇO e não no agente, nada do que se escreve carrega a
+         * identidade de quem escreveu. G diz «K construções caíram aqui» e não diz
+         * se foram K passagens de um ou uma passagem de K. */
+        long celulas_com_K = 0;
+        for(long i = 0; i < 64; i++) if(campoA[i] == K) celulas_com_K++;
+        printf("      G = %d em %ld células, nas DUAS leituras — o campo não sabe"
+               " quem escreveu\n\n", K, celulas_com_K);
+        if(celulas_com_K != LADO*LADO/4) mau++;
+
+        /* E O QUE CADA COORDENADA REPÕE É DIFERENTE. A folha k(i) do levantamento
+         * repõe a ORDEM da visita — dentro de um agente. Para separar AGENTES é
+         * preciso outra coordenada, o identificador; e ela não sai do campo. */
+        /* o regime tem de ter VOLTAS MÚLTIPLAS por agente: com uma volta cada, a
+         * ordem e o agente separam os MESMOS pares e o teste não distinguiria as
+         * duas coordenadas. */
+        static long ordem[AN_IMAX], quem[AN_IMAX];
+        const int AG = 2, VOLTAS = 2;
+        an_zera(2);
+        long ntC2 = 0;
+        for(int ag = 0; ag < AG; ag++)
+            for(int volta = 0; volta < VOLTAS; volta++)
+                for(int c = 0; c < LADO*LADO/4 && ntC2 < AN_IMAX; c++){
+                    Vet v = vet0(); v.c[0] = c % LADO; v.c[1] = c / LADO;
+                    traj[ntC2] = v;
+                    an_visita(v);
+                    ordem[ntC2] = an_le(v);
+                    quem[ntC2]  = ag;                /* o agente, que o campo não vê */
+                    ntC2++;
+                }
+        long ordem_separa = 0, quem_separa = 0, pares = 0;
+        for(long t = 0; t < ntC2; t++)
+            for(long u = t+1; u < ntC2; u++)
+                if(an_igual(traj[t], traj[u])){
+                    pares++;
+                    if(ordem[t] != ordem[u]) ordem_separa++;
+                    if(quem[t]  != quem[u])  quem_separa++;
+                }
+        printf("      com %d agentes × %d voltas, %ld pares na mesma célula:\n",
+               AG, VOLTAS, pares);
+        printf("        a ORDEM separa %ld  ·  o AGENTE separa %ld  — números"
+               " DIFERENTES, logo são coordenadas distintas\n\n",
+               ordem_separa, quem_separa);
+        if(ordem_separa != pares) mau++;              /* a ordem separa TODOS */
+        if(quem_separa >= ordem_separa) mau++;        /* o agente separa MENOS */
+        if(quem_separa == 0) mau++;
+
+        ok("O CAMPO NÃO DISTINGUE UM AGENTE DE MUITOS, E ISSO NÃO É FALHA — É A"
+           " CLÁUSULA 3. Duas arquitecturas resolvem o mesmo problema de aumentar"
+           " estrutura sem perder a memória das divisões: uma OCUPA por multiplicidade"
+           " de construtores, a outra EXPANDE pela memória de um só. Medido: um agente"
+           " a dar 4 voltas e 4 agentes a dar uma volta produzem campos IGUAIS célula a"
+           " célula, com o mesmo |I| — G = 4 nas 16 células, nas duas leituras. E não"
+           " podia ser de outro modo: como a memória está no ESPAÇO e não no agente,"
+           " nada do que se escreve carrega a identidade de quem escreveu. G diz que"
+           " quatro construções caíram ali; não diz se foram quatro passagens de um ou"
+           " uma passagem de quatro. E o CONTROLO é que dá conteúdo a isto: a mesma"
+           " comparação, posta contra uma execução de 3 voltas, vê as 16 células a"
+           " diferir — sem ele, uma comparação que não comparasse nada passaria."
+           " É por isto que a estigmergia ESCALA — acrescentar"
+           " construtores não muda o mecanismo. E as coordenadas que repõem o que se"
+           " perdeu são DUAS e distintas: a folha k(i) repõe a ORDEM da visita, dentro"
+           " de um agente; separar AGENTES pede outra coordenada, o identificador, e essa"
+           " não sai do campo — tem de vir de fora. E as duas não são a mesma: com 2"
+           " agentes a dar 2 voltas cada, dos pares que caem na mesma célula a ORDEM"
+           " separa TODOS e o agente separa só os que atravessam a fronteira entre"
+           " agentes — números diferentes. Num regime de uma volta por agente as duas"
+           " coincidiriam, e o teste não estaria a distinguir nada",
            mau == 0);
     }
 

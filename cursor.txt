@@ -2279,3 +2279,41 @@ foram coladas ali.
   gume      56 mutações, 56 mordem
   bateria   529 : 529, 0 falhas · 29 unidades passaram, 0 falharam
   paper     22 páginas
+
+§48 — UM AGENTE OU MUITOS: o campo é o mesmo, e é por isso que escala
+======================================================================
+A metáfora que ele trouxe — abelha (muitas construtoras, ocupação simultânea)
+contra aranha (uma construtora, memória incorporada) — tinha matemática por
+baixo, e é mensurável.
+
+A PERGUNTA: o campo distingue as duas arquitecturas?
+     (A) UM agente que passa K vezes por cada célula
+     (B) K agentes que passam UMA vez cada
+NÃO DISTINGUE. Medido: campos IGUAIS nas 64 células, mesmo |I|, G = 4 nas 16.
+E não podia ser de outro modo — é a CLÁUSULA 3: como a memória está no ESPAÇO e
+não no agente, nada do que se escreve carrega a identidade de quem escreveu. G
+diz «quatro construções caíram aqui»; não diz se foram quatro passagens de um ou
+uma passagem de quatro. É POR ISTO QUE A ESTIGMERGIA ESCALA: acrescentar
+construtores não muda o mecanismo.
+
+E AS DUAS COORDENADAS NÃO SÃO A MESMA:
+     a folha k(i)      repõe a ORDEM da visita, dentro de um agente
+     o identificador   separa AGENTES — e NÃO SAI DO CAMPO, vem de fora
+Medido com 2 agentes × 2 voltas: dos 96 pares que caem na mesma célula, a ordem
+separa 96 e o agente separa 64.
+
+DUAS FALHAS MINHAS QUE O GUME APANHOU, E A PRIMEIRA É DAS PIORES
+  1. A COMPARAÇÃO SEM CONTROLO. «Os dois campos são iguais» passava com uma
+     comparação que NÃO COMPARASSE — mutei `a[i] != b[i]` para `a[i] != a[i]` e
+     nada caiu. Acrescentei o controlo negativo (contra 3 voltas, vê 16 células a
+     diferir), mas ele estava NOUTRO LAÇO e não protegia. Só protegeu quando
+     extraí UMA função de comparação usada nos dois sítios: aí mutá-la derruba as
+     duas leituras ao mesmo tempo.
+  2. TEXTO E CÓDIGO A DIVERGIR. A asserção falava de «2 agentes × 2 voltas» e o
+     código tinha o regime antigo, de uma volta por agente — uma substituição
+     minha que abortou a meio e eu não verifiquei. O texto descrevia um regime
+     que o código não corria.
+
+  gume      58 mutações, 58 mordem
+  bateria   529 : 529, 0 falhas · 30 unidades passaram, 0 falharam
+  paper     22 páginas

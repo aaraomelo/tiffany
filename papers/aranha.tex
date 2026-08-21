@@ -580,6 +580,31 @@ uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
       $J^{4}=\mathrm{id}$ da bidualidade, agora na grade.
 \end{enumerate}
 
+\begin{teorema}[o campo não distingue um agente de muitos]\label{thm:agentes}
+Sejam duas execuções com o mesmo conjunto de escritas: uma em que \emph{um}
+agente visita cada célula $K$ vezes, outra em que $K$ agentes a visitam uma vez
+cada. Os campos resultantes são iguais célula a célula, e $\abs{I}$ é o mesmo.
+\end{teorema}
+
+\begin{proof}
+Pela cláusula~(3), cada escrita incrementa $G$ na célula corrente e nada mais
+regista; em particular nenhuma escrita carrega a identidade de quem a fez. Como
+as duas execuções produzem a mesma multiplicidade de escritas por célula, os
+campos coincidem.
+\end{proof}
+
+\medskip\noindent Isto não é uma limitação, é a cláusula~(3) a fazer o seu
+trabalho, e tem duas consequências. A primeira é que o mecanismo \textbf{escala}:
+acrescentar construtores não muda nada no ciclo, e uma ocupação por
+\emph{multiplicidade de agentes} e uma expansão pela \emph{memória de um só} são
+indistinguíveis do lado do espaço. A segunda é sobre o que cada coordenada repõe:
+a folha $k(i)$ do Teor.~\ref{thm:levantamento} repõe a \emph{ordem} da visita,
+dentro de um agente; separar \emph{agentes} pede outra coordenada --- o
+identificador ---, e essa não sai do campo. São coordenadas distintas: com dois
+agentes a dar duas voltas cada, a ordem separa \emph{todos} os pares que caem na
+mesma célula ($96$ de $96$), e o identificador separa só os que atravessam a
+fronteira entre agentes ($64$).
+
 \medskip\noindent\textbf{Não há deliberação em passo nenhum.} A decisão do
 ponto~3 não é uma escolha entre planos: é o mínimo de $\mathcal{P}_t(x)$, e
 $\mathcal{P}_t(x)$ é o que está escrito no chão. O agente não compara percursos
@@ -1724,6 +1749,10 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+Teor.~\ref{thm:agentes} §AN31 (um agente com $4$ voltas e $4$ agentes com uma:
+campos iguais nas $64$ células, $G=4$ nas $16$, com o controlo negativo a ver as
+$16$ a diferir contra $3$ voltas; e a ordem a separar $96$ de $96$ pares contra
+o identificador a separar $64$);
 Teor.~\ref{thm:palavra} §AN30 (as $1024$ letras do dragão; a reconstrução com
 divergência $0$; a palavra permutada a chegar ao mesmo fim por outro caminho; a
 paridade no hipercubo; e a mesma palavra com três $T$ a dar $\max G$ de $2$, $1$
@@ -1759,7 +1788,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN30;
+        {\code{tests/aranha\_n.c} §AN1--§AN31;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
