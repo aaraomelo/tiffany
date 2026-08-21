@@ -2710,3 +2710,35 @@ euclidiana a diferença encolhe. A dobra está na representação, e o campo con
   gume      65 mutações, 65 mordem
   bateria   529 : 529, 0 falhas · 33 unidades passaram, 0 falharam
   paper     26 páginas
+
+§60 — A DOBRA É O PREÇO DE REPRESENTAR UMA DINÂMICA POR UM ESTADO
+=================================================================
+A revisão trouxe três formulações melhores do que as minhas, e uma delas é o
+teorema central dito de outra maneira.
+
+1. A ABERTURA DA §B→I, seca e cada linha um resultado abaixo:
+        O finito é CODIFICADO.
+        O infinito é CAMINHADO.
+        A representação COMPRIME.
+        A dobra MEDE o que foi perdido.
+
+2. A DISTINÇÃO QUE SE CONFUNDE, e vale a pena separar:
+        «há infinitos passos»   ≠   «existe um objecto chamado ∞»
+   A primeira é sobre o PROCESSO e é a que se usa; a segunda põe no ESPAÇO o que
+   pertencia à DINÂMICA.
+
+3. E A GENERALIZAÇÃO DO TEOREMA CENTRAL:
+        A DOBRA É O PREÇO DE REPRESENTAR UMA DINÂMICA POR UM ESTADO.
+   A trajectória é a dinâmica, a posição é o estado, e G mede exactamente o que
+   a passagem de uma à outra deitou fora. É o paper inteiro numa frase, e não
+   acrescenta nada ao que está provado — arruma-o.
+
+E uma afinação no 0.999…: não é preciso dizer que as caminhadas «se encontram».
+ELAS NÃO SE ENCONTRAM — é a REPRESENTAÇÃO que as identifica.
+
+O que NÃO entrou, da segunda revisão: «encerramento perfeito», «perfeito estado
+de graça», «a matemática emerge da necessidade computacional pura». São elogios,
+não resultados. E ela chama ℚ e ℝ aos degraus — que este documento já não usa.
+
+  bateria   529 : 529, 0 falhas
+  paper     27 páginas
