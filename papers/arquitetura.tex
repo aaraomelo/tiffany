@@ -2131,8 +2131,41 @@ inserir desce pelos símbolos; ordenar percorre (este documento;
 \code{tests/dualsort\_banco.c}). A mesma \code{MOVE} serve $500$ corpos sem
 instrução nova (\code{tests/move.c}).
 
+\medskip\noindent\textbf{E há uma instrução que não opera sobre os dados: serve
+para NÃO RAMIFICAR.} Ela chama-se \code{ESPALHA}, e devolve a máscara
+\emph{inteira} se o argumento é não-nulo e zero se é nulo --- leva o booleano da
+coordenada $0$ para a largura toda. Não acrescenta poder de cálculo nenhum: o
+que ela substitui é um \emph{salto}. E o salto é o que faz o tempo entrar, porque
+o caminho percorrido passa a depender do que foi lido.
+
+\medskip\noindent Com ela, uma comparação deixa de escolher entre o zero e o um:
+$<$ e $>$ são o bit de sinal da diferença \emph{espalhado}, e $=$ é o complemento
+disso --- o \code{XOR} com a máscara cheia. O resultado de uma condição passa
+assim de um \textbf{bit} a uma \textbf{máscara}, e isso propaga-se sozinho: o
+\code{AND}/\code{OR} entre ramos funciona igual, a negação é o \code{XOR}, e o
+laço que marca as linhas deixa de ter de fabricar a máscara --- ela nasce onde a
+condição se decide, \emph{uma} vez, e não outra vez por linha.
+\[
+\boxed{\;\text{marcar} \;=\; \text{campo} \;\lor\; \bigl(\text{vivo}_i \land
+\text{condição}\bigr)\;}
+\]
+sem um único salto condicional no caminho. É a leitura da dobra no metal: saltar
+é escolher \emph{um} lado, e espalhar é tomar \textbf{os dois} --- o que não vale
+é apagado pela máscara em vez de ser evitado por um desvio.
+
+\medskip\noindent\textbf{E o que se ganha mede-se no CUSTO, não no resultado},
+que não muda. A mesma consulta sobre conteúdos diferentes --- vinte linhas a
+casar, dez, nenhuma --- custava $2960$, $2930$ e $2900$ passos, isto é
+$c\cdot|X| + 3\cdot|I|$; passou a custar $2700$ nos três, e a lei perdeu o termo
+em $|I|$. O motor deixou de olhar para o dado antes de decidir por onde ir, e
+com o dobro das linhas o custo dobra exatamente. Note-se o que isto \emph{não}
+contradiz: a \code{MOVE} continua a servir os $500$ corpos sem instrução nova ---
+o \code{ESPALHA} não é um corpo nem uma aritmética, é a supressão de um desvio.
+
 \medido{\code{tests/move.c}; \code{tests/isa4.c}; \code{tests/dualsort\_banco.c};
-\code{tests/promove.c} (promover/desce $1\to2\to4$).}
+\code{tests/promove.c} (promover/desce $1\to2\to4$);
+\code{tests/pgwire.c} §W24 (custo igual nos três conteúdos, e o dobro exacto com
+o dobro das linhas) e §W25.}
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}
