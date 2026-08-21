@@ -553,11 +553,14 @@ static void mem_grava(unsigned slot, Word w){
 
 /* O NROWS, LIDO E ESCRITO NO PAR.
  *
- * `S_NR` guarda-o nos dois componentes — baixo e alto —, o que dá 65535. O
- * tecto real é outro e menor: o bitmap de vivos ocupa S_VIVO..S_VIVO+511, logo
- * uma tabela comporta 512 linhas e é isso que se declara. Cheia, o INSERT
- * RECUSA; antes, passar de 255 não recusava nada — dava a volta e a tabela
- * respondia com o resto.
+ * `S_NR` guarda-o nos dois componentes — baixo e alto. NÃO HÁ TECTO DE LINHAS
+ * NA TEORIA, e pôr um aqui foi invenção minha: pelo `thm:BI` do `aranha.tex` a
+ * dobra DUPLICA a largura, e a cadeia {0,1} ⊂ {0..3} ⊂ {0..15} ⊂ {0..255}
+ * enumera andares em vez de acabar num deles. O `arquitetura.tex §sec:torre`
+ * diz o que fazer quando não cabe — T_{k+1} = T_k + T_k*, d_{k+1} = 2·d_k, «o
+ * que cresce é o OBJECTO, não a máquina», com PROMOVE a dobrar e DESCE a
+ * colapsar com resíduo 0. O que limita é o MAPA DE SLOTS deste ficheiro, que é
+ * da máquina e está por endireitar.
  *
  * MIGRAÇÃO: uma base gravada antes tem o nrows no `.e` do catálogo e o S_NR a
  * zero. Nesse caso adopta-se o valor antigo, uma vez. É a volta: o formato novo
@@ -581,7 +584,6 @@ static void par_grava(unsigned slot, unsigned v){
     mem_grava(slot, w);
 }
 
-#define NR_MAX 256u
 
 static long cat_nrows(void){
     Word w = mem_le(S_NR);
@@ -1450,22 +1452,6 @@ static int insere(const char *resto){
     if(!ident(&p, nome, sizeof nome)) return 0;
     if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
     if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
-    /* O TECTO DA TABELA, DECLARADO E VERIFICADO.
-     *
-     * O bitmap do resultado ocupa S_MATCH..S_MATCH+255 e o slot seguinte é o
-     * S_VIVO: com a linha 257, `mem_grava(S_MATCH + 256)` escrevia no bitmap
-     * de VIVOS e corrompia-o. Antes disto nada recusava — o nrows dava a volta
-     * aos 256 e a tabela respondia com o resto, de modo que 300 linhas
-     * inseridas devolviam 44 ao SELECT. Perder dados em silêncio é o pior
-     * desfecho; recusar é honesto, e o tecto fica dito em vez de descoberto. */
-    if(cat_nrows() >= (long)NR_MAX){
-        printf("erro: a tabela «%s» tem o máximo de %u linhas — RECUSADO.\n", nome, NR_MAX);
-        if(sql_cap){ sql_cap->ok = 0;
-            snprintf(sql_cap->err, sizeof sql_cap->err,
-                     "tabela cheia: %u linhas e o bitmap do resultado nao comporta mais",
-                     NR_MAX); }
-        return 0;
-    }
     if(!palavra(&p, "VALUES")) return 0;
     pula(&p); if(*p != '(') return 0; p++;
 

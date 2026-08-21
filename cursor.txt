@@ -112,8 +112,8 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (23 asserções, 0 fal
               SEM casar uma linha, e tem de bater com §W19 (passo 2 da §7)
      §W21     MAX-CUT = MASSA: C = |A||B| são as arestas do corte E os pares
               candidatos; M·n = n²−δ² decide qual junção é mais cara (passo 3)
-     §W22     O NÚMERO QUE NÃO CABE NUM BYTE: nrows e count de 16 bits, e o
-              tecto da tabela a RECUSAR em vez de dar a volta
+     §W22     O CONTADOR SOBE DE ANDAR: nrows e count de 16 bits (OP_ADD16),
+              em vez de dar a volta aos 255
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -354,10 +354,35 @@ O QUE FOI CONSERTADO, e cada um perdia dados ou mentia:
 · **os termos** (reg_termo) — passam a ir no par, e o que não couber é RECUSADO.
 · **S_NOCAB** nas duas leituras que tinham ficado dessincronizadas do `no_novo`.
 
-E UM TECTO QUE NÃO ERA VERIFICADO: o bitmap do resultado ocupa S_MATCH..+255 e
-o slot seguinte é o S_VIVO — a linha 257 escrevia o seu match POR CIMA do
-primeiro vivo. O INSERT passa a RECUSAR com mensagem quando a tabela enche.
-**O TECTO REAL DE UMA TABELA É 256 LINHAS**, e agora está dito.
+NÃO HÁ TECTO DE LINHAS, E EU INVENTEI UM — retirado.
+Cheguei a pôr `NR_MAX 256` com o INSERT a RECUSAR, e chamei-lhe lei. Não é: o
+256 saiu do MEU mapa de slots (o bitmap do resultado tem 256 slots), não dos
+papers. O que os papers dizem, e está escrito:
+
+     thm:BI (aranha)          «a dobra a duplicar a largura», e a cadeia
+                              {0,1} ⊂ {0..3} ⊂ {0..15} ⊂ {0..255} ENUMERA
+                              andares — não acaba num deles
+     thm:encaixe (naturais)   o suporte do andar k é {0,…,2^(2^k)−1}, k qualquer
+     §sec:torre (arquitetura) T_{k+1} = T_k + T_k*, d_{k+1} = 2·d_k, e
+                              «O QUE CRESCE É O OBJECTO, NÃO A MÁQUINA»;
+                              PROMOVE dobra, DESCE colapsa com resíduo 0
+                              (realizado em `lib/promove.h`)
+     word_isa.h               «coef. que crescem SOBEM A TORRE»
+
+QUEM NÃO CABE PROMOVE. Amputar a tabela é o contrário da lei — é a saturação
+travestida de teorema, que já está registada na memória.
+
+O QUE FICA POR FAZER, E É DA MÁQUINA: o mapa de slots do `sql.c` tem zonas
+indexadas por linha com capacidades DIFERENTES umas das outras, medidas:
+
+     S_MATCH   256 slots   256 linhas
+     S_VIVO    512 slots   512 linhas
+     S_LINHAS  3072 slots  3072/ncols   (e S_LIN começa em 4096)
+     S_DEN     3072 slots  3072/ncols
+     S_ALTO      62 slots    62/ncols   <- e o slot seguinte é o S_TXLIVRE
+
+Endireitar isto é DOBRAR as larguras até serem coerentes, não pôr um tecto.
+É remapear memória, mexe em bases já gravadas, e NÃO se faz sem o Aarão.
 
 O QUE NÃO SE MEXEU, E PORQUÊ: em `banco/sql.c` linhas ~5414-5435 o byte baixo é
 lido DE PROPÓSITO — é a demonstração do levantamento, onde o baixo é π (que

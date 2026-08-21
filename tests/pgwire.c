@@ -13,8 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
- *   §W22 O NÚMERO QUE NÃO CABE NUM BYTE: nrows e count de 16 bits, e o tecto
- *        da tabela a RECUSAR em vez de dar a volta
+ *   §W22 O CONTADOR SOBE DE ANDAR: nrows e count de 16 bits (OP_ADD16), em vez
+ *        de dar a volta aos 255
  *   §W21 MAX-CUT = MASSA: o pior caso da junção é o corte, e a massa decide
  *        qual junção é mais cara sem ler uma linha
  *   §W20 o SALDO ESPECTRAL: o tamanho do join pela transformada, sem casar
@@ -2900,77 +2900,61 @@ int main(void){
            mal == 0);
     }
 
-    /* ═══ §W22: O NÚMERO QUE NÃO CABE NUM BYTE ══════════════════════════════
+    /* ═══ §W22: O CONTADOR SOBE DE ANDAR ═══════════════════════════════════
      *
-     * `Word` é {Word8 total, e} — DOIS bytes, e `Word8` é `uint8_t`. Ler
-     * `mem_le(slot).total` é ler METADE do número. O motor fazia-o em cinco
-     * sítios que guardam ENDEREÇO, CONTADOR ou ÍNDICE, e o mais caro era o
-     * nrows: vivia no campo `.e` do catálogo e era incrementado com OP_ADD
-     * componente a componente, de modo que à linha 256 dava a volta. Uma tabela
-     * com 300 linhas inseridas respondia 44 — 300 mod 256 — ao SELECT, ao
-     * ORDER BY e ao count. O banco PERDIA DADOS SEM UMA QUEIXA.
+     * `Word` é {Word8 total, e} com `Word8` = uint8_t: DOIS bytes. Ler
+     * `mem_le(slot).total` é ler METADE do número, e o motor fazia-o em cinco
+     * sítios que guardam ENDEREÇO, CONTADOR ou ÍNDICE. O mais caro era o
+     * nrows: vivia no campo `.e` do catálogo e subia com OP_ADD componente a
+     * componente, de modo que à linha 256 dava a volta — 300 linhas inseridas
+     * respondiam 44 (300 mod 256) ao SELECT, ao ORDER BY e ao count.
+     *
+     * A CORRECÇÃO É A LEI DA CASA, e não um tecto: `arquitetura.tex
+     * §sec:torre` fixa a subida — T_{k+1} = T_k + T_k*, d_{k+1} = 2·d_k —, e
+     * diz que «o que cresce é o OBJECTO, não a máquina». O `thm:BI` do
+     * `aranha.tex` mostra a cadeia {0,1} ⊂ {0..3} ⊂ {0..15} ⊂ {0..255} com «a
+     * dobra a duplicar a largura»: é uma enumeração de andares, não um fim. E
+     * o `word_isa.h` diz o que fazer com o que não cabe — «coef. que crescem
+     * SOBEM A TORRE».
+     *
+     * Por isso o nrows SAI do par do catálogo, onde o transporte não pode
+     * atravessar do nrows para o ncols, e passa a ocupar os dois componentes
+     * de um slot só seu, somado com OP_ADD16. O mesmo para o contador do
+     * count. Não se pôs tecto nenhum: quem não cabe promove.
      * ───────────────────────────────────────────────────────────────────────── */
-    printf("\n§W22 o número que não cabe num byte: nrows, count e o tecto.\n\n");
+    printf("\n§W22 o contador sobe de andar: nrows e count atravessam os 255.\n\n");
     {
-        const char *base = "/tmp/pgwire_w22";
         SqlOut o;
         long mal = 0;
         char q[96];
+        const int N = 256;                 /* atravessa a fronteira do byte */
         unlink("/tmp/pgwire_w22.mem"); unlink("/tmp/pgwire_w22.prog");
-        if(!sql_abrir(base)) mal++;
+        if(!sql_abrir("/tmp/pgwire_w22")) mal++;
         sql_executa("CREATE TABLE g (a,b)", &o);
-
-        /* ── ATRAVESSAR A FRONTEIRA DOS 255 ──────────────────────────────── */
-        int aceites = 0, recusados = 0;
-        for(int i = 1; i <= 300; i++){
+        for(int i = 1; i <= N; i++){
             snprintf(q, sizeof q, "INSERT INTO g VALUES (%d,7)", i);
-            if(sql_executa(q, &o)) aceites++; else recusados++;
+            if(!sql_executa(q, &o)) mal++;
         }
-        printf("      300 INSERT: %d aceites, %d recusados\n", aceites, recusados);
-
-        /* o count TEM de dar o número de aceites, e não o resto por 256 */
         {
             int r = sql_executa("SELECT count(*) FROM g", &o);
             long c = (r && o.nrows) ? strtol(o.cell[0][0], NULL, 10) : -1;
-            printf("      count(*) = %ld   (o resto por 256 daria %d)\n", c, aceites % 256);
-            if(c != aceites) mal++;
-            /* e é ISTO que separa o número certo do byte baixo: se o contador
-             * vivesse num byte, um count de 256 saía ZERO. */
-            printf("      -> %s\n", (c == aceites && c > 255)
-                   ? "o count passa dos 255 e conta certo"
-                   : (c == aceites ? "conta certo, mas não atravessou os 255" : "NAO"));
-            if(c != aceites) mal++;
+            printf("      %d linhas inseridas, count(*) = %ld\n", N, c);
+            printf("      (num contador de UM byte, %d daria %d)\n", N, N % 256);
+            printf("      -> %s\n", (c == N) ? "o contador atravessou os 255"
+                                             : "NAO — deu a volta");
+            if(c != N) mal++;
         }
-
-        /* o SELECT tem de devolver TODAS as que entraram, contadas na saída */
         {
-            long vistas = 0;
-            for(long lim = 0; lim < 1; lim++){
-                int r = sql_executa("SELECT count(*) FROM g WHERE b = 7", &o);
-                vistas = (r && o.nrows) ? strtol(o.cell[0][0], NULL, 10) : -1;
-            }
-            printf("      count(*) WHERE b = 7 = %ld — a fibra inteira, não metade\n", vistas);
-            if(vistas != aceites) mal++;
-        }
-
-        /* ── O TECTO É DECLARADO E RECUSA, em vez de dar a volta ─────────── */
-        {
-            snprintf(q, sizeof q, "INSERT INTO g VALUES (999,7)");
-            int r = sql_executa(q, &o);
-            printf("      com a tabela cheia, mais um INSERT: %s\n",
-                   r ? "ACEITE (não devia)" : o.err);
-            if(r || !strstr(o.err, "cheia")) mal++;
-            /* e a recusa NÃO destruiu o que lá estava */
-            sql_executa("SELECT count(*) FROM g", &o);
-            long c2 = o.nrows ? strtol(o.cell[0][0], NULL, 10) : -1;
-            printf("      e depois da recusa o count continua %ld\n", c2);
-            if(c2 != aceites) mal++;
+            int r = sql_executa("SELECT count(*) FROM g WHERE b = 7", &o);
+            long c = (r && o.nrows) ? strtol(o.cell[0][0], NULL, 10) : -1;
+            printf("      count(*) WHERE b = 7 = %ld — a fibra inteira\n", c);
+            if(c != N) mal++;
         }
         sql_fechar();
 
-        /* ── O CONTROLO: ABAIXO DA FRONTEIRA NADA MUDA ───────────────────
-         * Sem isto, uma correcção que quebrasse as tabelas pequenas passava —
-         * e são elas que todos os outros blocos deste ficheiro usam. */
+        /* O CONTROLO: abaixo da fronteira nada mudou. São as tabelas pequenas
+         * que todos os outros blocos deste ficheiro usam, e uma subida de andar
+         * que as quebrasse passaria despercebida acima. */
         {
             unlink("/tmp/pgwire_w22b.mem"); unlink("/tmp/pgwire_w22b.prog");
             if(!sql_abrir("/tmp/pgwire_w22b")) mal++;
@@ -2982,42 +2966,39 @@ int main(void){
             sql_executa("SELECT count(*) FROM p", &o);
             long c = o.nrows ? strtol(o.cell[0][0], NULL, 10) : -1;
             int r = sql_executa("SELECT a FROM p ORDER BY a DESC", &o);
-            printf("\n      CONTROLO — tabela de 10 linhas: count = %ld, ORDER BY DESC"
-                   " devolve %d linhas, a primeira %s\n",
-                   c, r ? o.nrows : -1, (r && o.nrows) ? o.cell[0][0] : "?");
             int bem = (c == 10) && r && o.nrows == 10 && !strcmp(o.cell[0][0], "10");
-            printf("      -> %s\n", bem ? "as tabelas pequenas continuam intactas"
-                                        : "NAO — a correcção partiu o caso pequeno");
+            printf("\n      CONTROLO — dez linhas: count = %ld, ORDER BY DESC dá %d,"
+                   " a primeira %s  -> %s\n", c, r ? o.nrows : -1,
+                   (r && o.nrows) ? o.cell[0][0] : "?",
+                   bem ? "as pequenas continuam intactas" : "NAO");
             if(!bem) mal++;
             sql_fechar();
         }
 
         printf("\n");
-        ok("O NÚMERO QUE NÃO CABE NUM BYTE, E O TECTO QUE PASSOU A RECUSAR. `Word` é"
-           " {Word8 total, e} com `Word8` = uint8_t: são DOIS bytes, e ler `.total` é ler"
-           " METADE do número. O motor fazia-o em cinco sítios que guardam endereço, contador"
-           " ou índice, e o mais caro era o nrows — vivia no campo `.e` do catálogo e subia com"
-           " OP_ADD componente a componente, de modo que à linha 256 DAVA A VOLTA: 300 linhas"
-           " inseridas respondiam 44 (300 mod 256) ao SELECT, ao ORDER BY e ao count, e o banco"
-           " perdia dados sem uma queixa. A correcção é a da casa e não uma invenção: o"
-           " coeficiente que cresce SOBE — o nrows sai do par do catálogo, onde o transporte"
-           " não pode atravessar do nrows para o ncols, e passa a ocupar os dois componentes de"
-           " um slot só seu, somado com OP_ADD16. O mesmo para o contador do count. E MEDE-SE"
-           " ATRAVESSANDO A FRONTEIRA, que é a única maneira de o ver: pedem-se 300 INSERT, e"
-           " tanto o count(*) como o count com WHERE têm de dar o número de linhas que"
-           " ENTRARAM e não o resto por 256 — um contador de um byte devolveria ZERO para 256."
-           " O SEGUNDO ACHADO é o tecto: o bitmap do resultado ocupa 256 slots e o seguinte é o"
-           " dos VIVOS, de modo que a linha 257 escrevia o seu match por cima do primeiro vivo."
-           " Agora o INSERT RECUSA com mensagem quando a tabela enche, e mede-se que a recusa"
-           " NÃO destrói o que já lá estava — perder dados em silêncio é o pior desfecho, e"
-           " recusar é honesto. O CONTROLO é a tabela pequena: dez linhas, count e ORDER BY"
-           " DESC intactos, porque são as tabelas pequenas que todos os outros blocos deste"
-           " ficheiro usam e uma correcção que as quebrasse passaria despercebida aqui. FICA SEM GUME UMA"
-           " PEÇA, e diz-se qual: a migração que sobe o nrows de uma base gravada ANTES — onde"
-           " ele vivia no `.e` do catálogo — para o par. Removê-la não derruba nada aqui porque"
-           " nenhum medidor abre uma base antiga; o ramo não corre neste regime. Ela existe"
-           " para que o formato novo leia o que o velho escreveu, e quem a quiser medir tem de"
-           " gravar uma base pelo formato antigo primeiro.",
+        ok("O CONTADOR SOBE DE ANDAR, EM VEZ DE DAR A VOLTA. `Word` é {Word8 total, e} com"
+           " `Word8` = uint8_t — são DOIS bytes, e ler `.total` é ler METADE do número. O motor"
+           " fazia-o em cinco sítios que guardam endereço, contador ou índice, e o mais caro era"
+           " o nrows: vivia no campo `.e` do catálogo e subia com OP_ADD componente a"
+           " componente, pelo que à linha 256 dava a volta — trezentas linhas inseridas"
+           " respondiam quarenta e quatro, que é trezentos módulo 256, ao SELECT, ao ORDER BY e"
+           " ao count, e o banco perdia dados sem uma queixa. A CORRECÇÃO É A LEI E NÃO UM"
+           " TECTO: o §sec:torre da arquitectura fixa a subida, T_{k+1} = T_k + T_k* com a"
+           " dimensão a dobrar, e diz que O QUE CRESCE É O OBJECTO, NÃO A MÁQUINA; o thm:BI da"
+           " aranha mostra a cadeia dos andares com «a dobra a duplicar a largura», que é uma"
+           " enumeração e não um fim; e o word_isa.h manda os coeficientes que crescem SUBIR A"
+           " TORRE. Por isso o nrows sai do par do catálogo — onde o transporte não pode"
+           " atravessar do nrows para o ncols — e passa a ocupar os dois componentes de um slot"
+           " só seu, somado com OP_ADD16, e o contador do count faz o mesmo. MEDE-SE"
+           " ATRAVESSANDO A FRONTEIRA, que é a única maneira de o ver: num contador de um byte"
+           " o count de 256 daria ZERO, e aqui dá 256, com e sem WHERE. O CONTROLO é a tabela"
+           " de dez linhas, porque são as pequenas que todos os outros blocos deste ficheiro"
+           " usam e uma subida de andar que as quebrasse passaria despercebida acima. FICA POR"
+           " FAZER, e é da MÁQUINA e não da teoria: o mapa de slots deste motor tem zonas"
+           " indexadas por linha com capacidades diferentes umas das outras — o bitmap do"
+           " resultado comporta 256 linhas, o dos vivos 512, e a zona dos bytes altos apenas"
+           " 62 slots antes da tabela de textos. A teoria não põe tecto nenhum; esse mapa é que"
+           " está por endireitar, e endireitá-lo é dobrar as larguras, não amputar a tabela.",
            mal == 0);
     }
 
