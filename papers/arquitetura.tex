@@ -302,6 +302,10 @@ pontos fixos, $x^{\dagger}=x$, isto é, $x=c$ --- e ele é um só.
 \noindent A estaca troca de lado. O que ela fixa é o centro, e é por isso que ele não pertence a
 nenhum dos lados: \emph{é a fronteira entre eles}.
 
+\medskip\noindent\textbf{E ela é a face aditiva do operador.} Escrita ao
+contrário, $x\dg=2c-x$ é $x\dg+x=2c$: é a primeira equação do princípio, com o
+centro no lugar do zero. Com $c=0$ são a mesma linha.
+
 \begin{definicao}[a Lei 2 e o $J$]
 A Lei 2 escreve-se, onde o dual é a inversa,
 \[
@@ -310,22 +314,28 @@ A Lei 2 escreve-se, onde o dual é a inversa,
 o que força $f^{2}=-1$. Em duas coordenadas isso é $J(a,b)=(-b,a)$: uma rotação de um quarto.
 \end{definicao}
 
+\medskip\noindent\textbf{E a Lei 2 é onde as duas faces do operador coincidem.}
+Dizer $-f=f^{-1}$ é dizer que o mesmo $\partial f$ resolve as duas equações do
+princípio ao mesmo tempo --- $\partial f+f=0$ dá $\partial f=-f$, e
+$\partial f\cdot f=1$ dá $\partial f=f^{-1}$ ---, e igualá-las força
+$f^{2}=-1$. O oposto e o inverso são em geral duas coisas; no rotor são uma.
+
 \begin{teorema}[a bidualidade fecha]
 $J^{2}=-1$ e $J^{4}=\mathrm{id}$. A órbita de $J$ visita \textbf{quatro} quadrantes distintos e
 volta ao primeiro.
 \end{teorema}
 
-\begin{proof}
-Aplicando $J$ duas vezes a $(a,b)$ obtém-se $(-a,-b)$, que é $-1$ vezes o par; aplicando quatro,
-$(a,b)$. Como $J$ leva cada quadrante ao seguinte e $J^{4}$ é a identidade, os quatro são
-distintos e o quinto passo é o primeiro. \end{proof}
+\noindent\emph{Demonstração:} \code{papers/aranha.tex}, teorema \emph{o fecho,
+e o único sítio onde a dimensão faz mais} --- lá com o rotor
+$R_{ij}$ no plano coordenado e a contagem $\binom{n}{2}$ dos planos, que é o que
+diz por que no posto $2$ o rotor e a bidualidade se confundem.
 
 \noindent \textbf{É este fecho que faz a órbita do par voltar} --- os quatro quadrantes da cruz ---, e
 não uma condição imposta por fora. A \emph{terminação do ordenar}, essa, não sai daqui (um ciclo de
 período $4$ \emph{repete}, não termina): sai da \textbf{estaca} --- cada passagem tira a fronteira e
 reduz \emph{estritamente} os dois lados (adiante, e é o que a mutação confirma).
 
-\section{O algoritmo}\label{sec:algoritmo-ordena}
+\section{O algoritmo}
 
 Seja $A$ uma lista finita. Se $|A|\leq 1$, ela já está ordenada. Caso contrário, tome-se
 $c=\min A+\lfloor(\max A-\min A)/2\rfloor$ e classifique-se cada elemento pelo \textbf{sinal da
@@ -847,7 +857,7 @@ memória Hopfield; código \code{app/src/rede\_dual.js}, medidor
 \code{tests/rede\_dual.js}. Hopfield $=$ memória da volta; $\lambda^{+}+\lambda^{-}=0$
 segue da dualidade reversível (Metrónomo), não do atrator sozinho.
 
-\section{A permutação é o dual, e a reversibilidade é o teste}\label{sec:permuta}
+\section{A permutação é o dual, e a reversibilidade é o teste}
 
 O objeto não é a ordenação. \textbf{Uma sequência \emph{é} uma régua}, e ordená-la é levá-la ao
 \textbf{ponto fixo} --- a forma canónica. Daí converte-se para qualquer outra: é isso a conversão
@@ -965,6 +975,11 @@ A régua não mede um espaço previamente dado; ela determina a estrutura pela
 qual o espaço discreto pode ser construído e reconhecido como realização da
 álgebra da régua.
 \end{lema}
+
+\noindent\emph{Não é aqui um teorema:} é a decisão de leitura que organiza o
+resto (coordenador, 08/2026). O que dela se demonstra --- que a régua fixa a
+transformação admissível e que a involução dá a reversibilidade --- está em
+\code{papers/corpo\_algebrico.tex} e mede-se nos medidores citados adiante.
 
 \noindent A cadeia conceptual (decisão do coordenador, 08/2026) \textbf{não} é
 $\text{espaço}\to\text{agente}\to\text{trajetória}$. É:
@@ -1311,8 +1326,10 @@ A memória estigmérgica é a composição
 \]
 \end{teorema}
 
-\noindent\emph{Demonstração:} \code{papers/aranha.tex}, Teor.~1 --- a prova usa
-só a igualdade em $X$, e é isso que faz o Cor.~\ref{cor:aranha-n}.
+\noindent\emph{Demonstração:} \code{papers/aranha.tex}, teorema
+\emph{multiplicidade geométrica} --- citado pelo nome e não pelo número, que a
+renumeração parte em silêncio. A prova usa só a igualdade em $X$, e é isso que
+faz o Cor.~\ref{cor:aranha-n}.
 
 \noindent\textbf{O que isto \emph{não} duplica.} A \textbf{dobra da torre}
 $T_{k+1}=T_{k}+T_{k}^{\ast}$ (\S\ref{sec:torre}) duplica a \emph{álgebra}.
@@ -1352,6 +1369,11 @@ paridade}: $0$ par, $1$ ímpar. A descida $E_{16}\to\mathrm{GF}(2)$
 informação de quantas vezes ela ocorreu
 (\code{tests/aranha\_g.c} §AG6--§AG7: $G=0$ e $G=2$ colidem em $B=0$).
 \end{corolario}
+
+\noindent\emph{Demonstração:} \code{papers/aranha.tex}, teorema
+\emph{multiplicidade geométrica}, cláusula \emph{sentir é ler $G$} --- a leitura
+local decide $G=0$ contra $G>0$ consultando o valor escrito em cada vizinho, e
+não a história do agente.
 
 \medskip\noindent\textbf{Realização: o ciclo da aranha.}
 Cada passo do autómato \emph{é} um cláusula do teorema, não um extra:
@@ -1424,8 +1446,9 @@ A recta injectiva (§AG3) é o caso degenerado $G\equiv1$ já na base
 por construção.
 \end{teorema}
 
-\noindent\emph{Demonstração:} \code{papers/aranha.tex}, Teor.~5 --- lá com a
-fibra vertical $\{1,\dots,G(x)\}$ e a volta, que é o que faz dele um inverso.
+\noindent\emph{Demonstração:} \code{papers/aranha.tex}, teorema
+\emph{levantamento em folhas} --- lá com a fibra vertical $\{1,\dots,G(x)\}$ e a
+volta, que é o que faz dele um inverso.
 
 \begin{corolario}[a aranha em $\Z^{n}$, e o levantamento a subir um andar]\label{cor:aranha-n}
 No Teor.~\ref{thm:multiplicidade} substitua-se $\Z^{2}$ por um conjunto $X$
@@ -1439,13 +1462,19 @@ onde $|V(x)|=2n$ na grade. Em particular:
       lida à letra.
 \item $X$ ultramétrico: a célula \emph{é} a bola, e as bolas particionam.
 \item Órbita determinista: $|\{x:G(x)>1\}|$ é o \textbf{período} e
-      $|\{x:G(x)=1\}|$ a \textbf{cauda} (sob $N\ge\mu+2p-1$) --- o $\rho$ de
+      $|\{x:G(x)=1\}|$ a \textbf{cauda} $\ell$ (sob $N\ge\ell+2p-1$; $\mu$ é a
+      diferença finita, não a cauda) --- o $\rho$ de
       Floyd sem o segundo cursor, porque a memória é do espaço.
 \item Levantamento: $\tilde\pi=(\pi,k)$ leva $\Z^{n}$ em $\Z^{n+1}$ --- a folha é
       \textbf{uma} coordenada, seja qual for $n$ --- e a \textbf{volta} devolve
       $G$ por recontagem, resíduo $0$.
 \end{enumerate}
 \end{corolario}
+
+\noindent\emph{Demonstração:} \code{papers/aranha.tex}, teoremas \emph{o $n$
+entra num sítio só} e \emph{levantamento em folhas} --- e as quatro alíneas são
+lá quatro resultados separados: a grade, o ultramétrico, a órbita determinista e
+a folha.
 
 \medskip\noindent E a régua do dragão: a curva de Heighway sai por dois caminhos
 sem uma linha em comum --- a régua de bits

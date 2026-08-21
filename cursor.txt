@@ -3027,3 +3027,42 @@ acrescentadas, NENHUMA removida: a redacção jurídica que lá estava não se t
   aranha.tex 29 páginas · 64 enunciados, 0 sem prova · 0 refs mortas · 0 ℕℚℝ𝔽
   arquitetura.tex 26 páginas, com a §0 reduzida ao operador e às duas equações
   bateria 529 : 529, 35 unidades, 0 falhas
+
+§66 — A ARQUITETURA NÃO DEMONSTRA: DESCE PARA papers/
+======================================================
+«arquitetura evita demonstração, se precisar desce para os papers de papers/».
+
+A regra já estava escrita no documento — «o degrau prova e mede o objecto; aqui
+executa-se, e não se redemonstra» — mas não estava CUMPRIDA. Verificado enunciado
+a enunciado:
+     antes:  1 prova local, 3 enunciados sem remissão nenhuma
+     agora:  0 provas locais, 0 enunciados sem remissão
+
+  · [a bidualidade fecha] tinha prova local de quatro linhas — desceu para o
+    `aranha.tex`, teorema «o fecho, e o único sítio onde a dimensão faz mais»,
+    que é onde o rotor no plano coordenado e a contagem C(n,2) vivem.
+  · [régua antes do espaço] não é teorema e passou a dizê-lo: é a decisão de
+    leitura que organiza o resto, e o que dela se demonstra está no algébrico.
+  · [sentir é ler multiplicidade] e [a aranha em ℤⁿ] passaram a remeter para os
+    teoremas do `aranha.tex` pelo NOME.
+
+E DUAS CITAÇÕES CRUZADAS ERRADAS, que o LaTeX não apanha porque são texto:
+     «papers/aranha.tex, Teor. 1»  →  a multiplicidade é o Teorema 11
+     «papers/aranha.tex, Teor. 5»  →  o levantamento é o Teorema 28
+  As renumerações de hoje partiram as duas EM SILÊNCIO. Agora citam-se pelo
+  NOME do teorema, que a renumeração não move. É a mesma lição da §64 noutro
+  sítio: o número é uma coordenada, o nome é o objecto.
+
+E o μ OUTRA VEZ a designar a cauda («sob N ≥ μ+2p−1»), a letra despedida há
+muito — no `aranha.tex` é ℓ, e μ é a diferença finita. Corrigido, com a ressalva
+escrita ao lado para não voltar.
+
+DUAS LIGAÇÕES AO OPERADOR, e são identificações literais e não analogias:
+  · a ESTACA é a face aditiva:  x† = 2c − x  é  x† + x = 2c, a primeira equação
+    com o centro no lugar do zero. Com c = 0 são a mesma linha.
+  · a LEI 2 é onde as duas faces coincidem: −f = f⁻¹ diz que o mesmo ∂f resolve
+    as duas equações ao mesmo tempo, e igualá-las força f² = −1. O oposto e o
+    inverso são em geral duas coisas; no rotor são uma.
+
+  arquitetura.tex 27 páginas · 0 provas locais · 0 refs mortas · 9 labels órfãos
+  (os mesmos de antes da sessão; os dois que eu tinha acrescentado foram removidos)
