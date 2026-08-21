@@ -2057,6 +2057,23 @@ Selo em \code{tools/atestados.txt}. Referências órfãs: \code{tests/refs.c} ($
 {\footnotesize\color{cinza}\noindent
 Irmãos: \code{corpo\_algebrico.tex} · \code{corpo\_topologico.tex} ·
 \code{racionais.tex} · \code{catalogo.tex}.
+\medskip\noindent\textbf{Os dois níveis, aqui em números.} O `aranha.tex`
+distingue o índice do \emph{ciclo} do índice da \emph{operação}, e diz que a
+conservação vale em cada nível com o seu $\abs{I}$. Nesta máquina isso é
+concreto e mede-se: três comandos que escrevem no mesmo sítio dão
+$\max G = 3$ contadas as \textbf{visitas} e $81$ contadas as \textbf{escritas de
+slot}, porque cada comando toca também os contadores e o mapa de linhas, e não
+só a célula do valor. Os dois números estão certos e são de níveis diferentes;
+dizer qual se está a contar é parte de dizer o número. E a conservação fecha no
+nível das escritas: $\sum_x G(x) = \abs{I} = 127$ sobre $47$ slots
+(\code{tests/pgwire.c} §W16).
+
+\medskip\noindent E é no nível das \emph{escritas} que o desfazer vive: a pilha
+de \code{banco/sql.c} guarda o par (endereço, valor anterior) por cada escrita
+--- o levantamento do \code{aranha.tex} com a folha a ser o valor substituído
+---, e o \code{ROLLBACK} repõe lendo-a ao contrário, o que a leva ao $k=1$ de
+cada endereço.
+
 Provas da §\ref{sec:aranha}: \code{papers/aranha.tex} (autocontido). Teoria e catálogo em
 \href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
 Proprietário --- uso mediante contrato e pagamento (ver \texttt{LICENSE}).\par}
