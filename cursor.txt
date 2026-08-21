@@ -105,6 +105,7 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (18 asserções):
      §W14     count(*), que conta ALÉM do que o SqlOut comporta
      §W15     ROLLBACK desfaz, pelo levantamento
      §W16     o motor como realização: ∑G = |I| = 127 sobre 47 slots
+     §W17     a PROJECÇÃO de colunas; ORDER BY e LIMIT RECUSADOS (ver §5)
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -113,6 +114,15 @@ SELECT com WHERE, count(*), SHOW, SET, BEGIN/COMMIT/ROLLBACK.
 
 5. O QUE FICA FORA, E É PRECISO SABER
 ─────────────────────────────────────
+· ORDER BY e LIMIT: RECUSADOS com a razão, não ignorados. Eram deitados fora em
+  silêncio — o cliente pedia ordenado e recebia por ordem de inserção, sem erro.
+  A PISTA PARA OS FAZER, se for para fazer: a métrica do aranha.tex é uma FORMA
+  QUADRÁTICA (∂τ)² = g_uv ∂xᵘ ∂xᵛ e «o percurso só sonda a DIAGONAL de g» — uma
+  régua g^(k) mede só a direcção k e é cega às outras, que é ordenar por uma
+  coluna. E a casa JÁ ORDENA NO BANCO: `tests/dualsort_banco.c` — a árvore
+  ordena (inserir é descer pelos símbolos, ordenar é percorrer por ordem) e é
+  PERMUTAÇÃO. Falta ligar as duas estruturas: o motor SQL varre linhas no .mem,
+  o dualsort usa a árvore do conversa.c. NÃO INVENTAR uma terceira.
 · JUNÇÕES, GROUP BY e agregados além do count — é MOTOR, não protocolo.
 · pg_catalog além de pg_type/pg_proc/pg_class/pg_attribute/pg_database: RECUSA.
 · O TECTO DO ROLLBACK: pilha fixa de 16384 escritas. Cheia, o ROLLBACK RECUSA —

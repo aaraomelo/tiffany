@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W17 a PROJECÇÃO de colunas, e ORDER BY/LIMIT recusados em vez de ignorados
  *   §W16 o MOTOR como realização: a pilha É a trajectória, ∑G = |I| medido no
  *        banco, a fibra do WHERE, e o representante k=1
  *   §W15 o ROLLBACK DESFAZ, pelo levantamento: guardar o valor anterior e ler
@@ -2119,6 +2120,119 @@ int main(void){
            " porquê: cada UPDATE escreve o bitmap e os contadores, não só a célula do valor,"
            " e a pilha regista TODAS as escritas. O que se afirma é o que se mediu. O CONTROLO exige que o campo meça o que lá está e não"
            " devolva um número fixo, medindo-o também numa transacção de leitura.",
+           mal == 0);
+    }
+
+    /* ═══ §W17: A PROJECÇÃO, E O QUE SE RECUSA EM VEZ DE IGNORAR ════════════
+     *
+     * Uma sondagem no psql encontrou TRÊS mentiras do mesmo tipo — o cliente
+     * pedia uma coisa e recebia outra, sem erro:
+     *
+     *     SELECT a FROM s          devolvia as TRÊS colunas
+     *     SELECT * FROM s ORDER BY a   devolvia por ordem de inserção
+     *     SELECT * FROM s LIMIT 2      devolvia tudo
+     *
+     * A lista de colunas era lida e deitada fora; o que vinha depois do WHERE
+     * era ignorado. Responder outra coisa é pior do que recusar: quem chama
+     * sabe lidar com um erro, não sabe lidar com uma resposta que se parece com
+     * a que pediu.
+     *
+     * A projecção IMPLEMENTA-SE, porque o motor já tem as colunas. O ORDER BY e
+     * o LIMIT RECUSAM-SE, com a razão à frente, até serem feitos.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W17 a projecção de colunas, e o que se recusa em vez de ignorar.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w17";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w17.mem");
+        unlink("/tmp/pgwire_w17.prog");
+        unlink("/tmp/pgwire_w17__s.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE s (a,b,c)", &o);
+        sql_executa("INSERT INTO s VALUES (3,30,300)", &o);
+        sql_executa("INSERT INTO s VALUES (1,10,100)", &o);
+
+        /* (a) a projecção devolve o que se pediu — nem mais, nem por outra ordem */
+        {
+            struct { const char *q; int nc; const char *c0; const char *v00; } casos[] = {
+                { "SELECT * FROM s",      3, "a", "3"   },
+                { "SELECT a FROM s",      1, "a", "3"   },
+                { "SELECT a, c FROM s",   2, "a", "3"   },
+                { "SELECT c, a FROM s",   2, "c", "300" },
+            };
+            printf("      consulta                cols  1.ª coluna  1.ª célula\n");
+            for(unsigned k = 0; k < sizeof casos / sizeof casos[0]; k++){
+                int r = sql_executa(casos[k].q, &o);
+                int bate = r && o.ncols == casos[k].nc
+                           && !strcmp(o.col[0], casos[k].c0)
+                           && !strcmp(o.cell[0][0], casos[k].v00);
+                printf("      %-23s %-5d %-11s %-10s %s\n", casos[k].q, o.ncols,
+                       o.ncols ? o.col[0] : "?", o.nrows ? o.cell[0][0] : "?",
+                       bate ? "" : "NAO BATE");
+                if(!bate) mal++;
+            }
+            /* a ORDEM pedida é a ordem devolvida: `c, a` não é `a, c` */
+            sql_executa("SELECT c, a FROM s", &o);
+            int ordem = (o.ncols == 2 && !strcmp(o.col[0], "c") && !strcmp(o.col[1], "a"));
+            printf("\n      e a ORDEM das colunas é a pedida (c,a): %s\n",
+                   ordem ? "sim" : "NAO");
+            if(!ordem) mal++;
+        }
+
+        /* (b) o que NÃO se sabe fazer é RECUSADO com a razão — não ignorado */
+        {
+            const char *fora[] = {
+                "SELECT * FROM s ORDER BY a",
+                "SELECT * FROM s LIMIT 2",
+                "SELECT * FROM s WHERE a > 0 ORDER BY b",
+                "SELECT zzz FROM s",
+            };
+            int recusadas = 0, com_razao = 0;
+            printf("\n      o que se recusa, e porquê:\n");
+            for(unsigned k = 0; k < sizeof fora / sizeof fora[0]; k++){
+                int r = sql_executa(fora[k], &o);
+                if(!r) recusadas++;
+                if(!r && o.err[0]) com_razao++;
+                printf("        %-38s %s\n", fora[k],
+                       r ? "RESPONDEU (mau)" : "recusado com mensagem");
+            }
+            if(recusadas != 4 || com_razao != 4) mal++;
+        }
+
+        /* ── O CONTROLO: o que É suportado tem de continuar a passar. Uma recusa
+         * demasiado larga engoliria as consultas boas, e as quatro linhas de (a)
+         * não o veriam porque nenhuma delas tem WHERE. */
+        {
+            int r = sql_executa("SELECT a FROM s WHERE a > 1", &o);
+            int bate = r && o.ncols == 1 && o.nrows == 1 && !strcmp(o.cell[0][0], "3");
+            printf("\n      CONTROLO — projecção COM WHERE: %d col, %d linha, %s  %s\n",
+                   o.ncols, o.nrows, o.nrows ? o.cell[0][0] : "?",
+                   bate ? "(continua a passar)" : "NAO");
+            if(!bate) mal++;
+            /* e o ponto e vírgula final não pode ser tomado por sobra */
+            int r2 = sql_executa("SELECT * FROM s;", &o);
+            printf("      e o ponto e vírgula final não é tomado por sobra: %s\n",
+                   (r2 && o.nrows == 2) ? "sim" : "NAO");
+            if(!r2 || o.nrows != 2) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("A PROJECÇÃO DEVOLVE O QUE SE PEDIU, E O RESTO RECUSA-SE. Uma sondagem no psql"
+           " encontrou três mentiras do mesmo tipo, e é o pior tipo que há: o cliente pedia"
+           " uma coisa e recebia outra SEM ERRO. `SELECT a FROM s` devolvia as três colunas"
+           " — a lista era lida e deitada fora —; `ORDER BY` devolvia por ordem de inserção;"
+           " e `LIMIT` devolvia tudo. Nenhuma asserção o via, porque todas pediam `*`. A"
+           " PROJECÇÃO IMPLEMENTA-SE, porque o motor já tem as colunas: devolve as pedidas,"
+           " pela ORDEM pedida — `c, a` não é `a, c` —, e uma coluna que não existe é"
+           " recusada pelo nome. O ORDER BY e o LIMIT RECUSAM-SE com a razão à frente, até"
+           " serem feitos: responder outra coisa é pior do que recusar, porque quem chama"
+           " sabe lidar com um erro e não sabe lidar com uma resposta que se parece com a"
+           " que pediu. E O CONTROLO impede a recusa de ser larga demais: a projecção COM"
+           " WHERE tem de continuar a passar — nenhuma das linhas anteriores o veria,"
+           " porque nenhuma tinha WHERE —, e o ponto e vírgula final não pode ser tomado"
+           " por sobra.",
            mal == 0);
     }
 

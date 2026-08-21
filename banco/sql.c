@@ -2744,6 +2744,25 @@ static int checa_corpos(unsigned citadas, long ncols){
     return 1;
 }
 
+/* lê `*` ou `c1, c2, …` até ao FROM; devolve 0 se não reconhecer */
+static int lista_colunas(const char **pp, char *out, int cap){
+    const char *p = *pp;
+    int n = 0;
+    pula(&p);
+    if(*p == '*'){ snprintf(out, (size_t)cap, "*"); *pp = p + 1; return 1; }
+    for(;;){
+        char nome[64];
+        if(!ident(&p, nome, sizeof nome)) return 0;
+        n += snprintf(out + n, (size_t)(cap - n), "%s%s", n ? "," : "", nome);
+        pula(&p);
+        if(*p == ','){ p++; continue; }
+        break;
+    }
+    *pp = p;
+    return n > 0;
+}
+static char proj_cols[256] = "*";
+
 static int varre(const char *resto, int acao){
     const char *p = resto;
     char nome[64], alvo[64];
@@ -2751,11 +2770,20 @@ static int varre(const char *resto, int acao){
     int col_set = 0, tem_where;
     struct arvore cl;
 
+    /* A LISTA DE COLUNAS ERA LIDA E DEITADA FORA.
+     *
+     * `SELECT a FROM s` devolvia as TRÊS colunas — o cliente pedia uma e recebia
+     * outra coisa, sem erro. É o pior desfecho que há, e apareceu a sondar com o
+     * psql. Agora a lista é guardada e a projecção aplica-se ao resultado; o que
+     * não se souber resolver é RECUSADO com mensagem, nunca ignorado. */
+    int proj_n = 0, proj[SQL_OUT_MAX_COLS];
     if(acao == ACAO_MARCA){
-        char cols[64];
-        if(!ident(&p, cols, sizeof cols)) return 0;
+        char cols[256];
+        if(!lista_colunas(&p, cols, sizeof cols)) return 0;
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
+        proj_n = (strcmp(cols, "*") == 0) ? 0 : -1;   /* −1: resolver depois de abrir */
+        snprintf(proj_cols, sizeof proj_cols, "%s", cols);
     } else if(acao == ACAO_SET){
         if(!ident(&p, nome, sizeof nome)) return 0;
         if(!palavra(&p, "SET")) return 0;
@@ -2789,10 +2817,54 @@ static int varre(const char *resto, int acao){
             return 0;
         }
     }
+    /* resolver a projecção agora que a tabela está aberta: cada nome tem de ser
+     * uma coluna DESTA tabela, ou a consulta é recusada. */
+    if(acao == ACAO_MARCA && proj_n < 0){
+        const char *q = proj_cols;
+        proj_n = 0;
+        while(*q && proj_n < SQL_OUT_MAX_COLS){
+            char nome_c[64]; int i = 0;
+            while(*q && *q != ',' && i + 1 < (int)sizeof nome_c) nome_c[i++] = *q++;
+            nome_c[i] = 0;
+            if(*q == ',') q++;
+            { int c = col_indice(nome_c);
+              if(c < 0){
+                  printf("erro: a coluna «%s» não existe na tabela «%s» — RECUSADA.\n",
+                         nome_c, nome);
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "column \"%s\" does not exist", nome_c); }
+                  return 0;
+              }
+              proj[proj_n++] = c; }
+        }
+    }
+
     citadas_where = 0;
     tem_where = le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
+        return 0;
+    }
+
+    /* O QUE SOBRA NÃO SE IGNORA.
+     *
+     * `ORDER BY` e `LIMIT` eram deitados fora em silêncio: o cliente pedia as
+     * linhas ordenadas e recebia-as por ordem de inserção, sem erro nenhum, e
+     * acreditava. Responder outra coisa é pior do que recusar — quem chama sabe
+     * lidar com um erro, não sabe lidar com uma resposta que parece a que pediu. */
+    pula(&p);
+    if(*p == ';') { p++; pula(&p); }
+    if(*p){
+        char sobra[64]; int i = 0;
+        while(p[i] && i + 1 < (int)sizeof sobra){ sobra[i] = p[i]; i++; }
+        sobra[i] = 0;
+        printf("erro: «%s» não é entendido — a consulta é RECUSADA, e nada é devolvido.\n",
+               sobra);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "nao suportado: \"%.60s\" — este motor nao ordena nem limita;"
+                     " recusa em vez de devolver as linhas por outra ordem", sobra); }
         return 0;
     }
 
@@ -2904,12 +2976,16 @@ static int varre(const char *resto, int acao){
         return 1;
     }
     if(sql_cap){
-        sql_cap->ncols = (int)(ncols > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : ncols);
-        for(int j = 0; j < sql_cap->ncols; j++)
+        /* A PROJECÇÃO: só as colunas pedidas, e por esta ordem. Com `*` são
+         * todas; com uma lista, são as dela — que é o que o cliente pediu. */
+        int nsaida = proj_n ? proj_n : (int)(ncols > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : ncols);
+        sql_cap->ncols = nsaida;
+        for(int j = 0; j < nsaida; j++)
             { char cn[S_COLNOME_W * 2 + 2];
-              col_nome_le((int)j, cn, (int)sizeof cn);
+              int src = proj_n ? proj[j] : j;
+              col_nome_le(src, cn, (int)sizeof cn);
               if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
-              else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + (int)j);
+              else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + src);
               sql_cap->tipo[j] = SQL_TIPO_INT4; }
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
         sql_cap->nrows = 0;
@@ -2966,8 +3042,17 @@ static int varre(const char *resto, int acao){
             }
             printf("%s", cel);
             if(j+1 < ncols) printf(" | ");
-            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
-                snprintf(sql_cap->cell[row_i][j], SQL_OUT_CELL, "%s", cel);
+            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS){
+                if(!proj_n){
+                    if(j < SQL_OUT_MAX_COLS)
+                        snprintf(sql_cap->cell[row_i][j], SQL_OUT_CELL, "%s", cel);
+                }else{
+                    /* a mesma coluna pode ser pedida mais do que uma vez */
+                    for(int k = 0; k < proj_n; k++)
+                        if(proj[k] == (int)j)
+                            snprintf(sql_cap->cell[row_i][k], SQL_OUT_CELL, "%s", cel);
+                }
+            }
         }
         printf("\n");
     }
