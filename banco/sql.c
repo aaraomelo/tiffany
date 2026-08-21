@@ -208,12 +208,20 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  * enum avisa; então o coeficiente que cresce SOBE, como manda o `word_isa.h`
  * («coef. que crescem sobem a torre»): sai do par do catálogo e passa a ocupar
  * os dois componentes de um slot só seu, somado com OP_ADD16. */
-#define S_NR      69         /* nrows em 16 bits (baixo, alto) — o par inteiro. 69..71
-                              * é a folga entre S_VA (68) e S_EXPR (72); pus isto em 9 à
-                              * primeira e 9 é S_K[1], a constante da segunda condição —
-                              * o nrows nascia em 258. O mapa está declarado por
-                              * INTERVALOS logo acima, e é preciso lê-los.              */
-#define S_UM16    70         /* a constante 1 do OP_ADD16 que sobe o nrows de andar      */
+/* O TOPO, e não a contagem.
+ *
+ * `S_NR` guarda quantos slots de linha já foram usados — é onde o próximo
+ * INSERT escreve. NÃO é quantas linhas existem: essa é ∑ sobre o bitmap de
+ * vivos (o popcount), porque o DELETE desliga a coordenada e não move as
+ * outras. Duas grandezas, dois sítios: o topo é um contador e sobe de andar
+ * com OP_ADD16; a contagem lê-se do campo e não se guarda.
+ *
+ * NÃO HÁ TECTO DE LINHAS NA TEORIA — pôr um aqui foi invenção minha, e saiu.
+ * Pelo `thm:BI` a dobra DUPLICA a largura, e o `§sec:torre` da arquitectura diz
+ * o que fazer quando não cabe: T_{k+1} = T_k + T_k*, «o que cresce é o OBJECTO,
+ * não a máquina». O que limita é o mapa de slots, que é da máquina. */
+#define S_NR      69         /* o TOPO: quantos slots de linha já foram usados */
+#define S_UM16    70         /* a constante 1 do OP_ADD16 que sobe o TOPO de andar       */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
 /* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver docs/TOOLKIT.md).
  *
@@ -1138,6 +1146,22 @@ static W16 mul16_zeck(unsigned n, W16 x, Word8 *transbordo){
     return acc;
 }
 /* GOLD: A_1 = [[1,1],[1,0]] — ×σ, σ²=σ+1. NEGRO: inversa (det −1). Envelope Word_8. */
+/* ⊗ O GATO E ⊘ O ESQUILO — a Def.~65 e o Teor.~66 do `aranha.tex`, em n=2.
+ *
+ * Estas duas funções são o algoritmo da aranha estigmérgica na sua forma mais
+ * curta, e já cá estavam antes de o paper as nomear:
+ *
+ *     ⊗ gato    (a,b) ↦ (m·a + b, a)      SOBE  — a convolução, ×σ
+ *     ⊘ esquilo (a,b) ↦ (b, a − m·b)      DESCE — a deconvolução, ×σ'
+ *
+ * e ⊘∘⊗ = id sem hipótese nenhuma sobre o par, porque |det| = 1 e a inversa é
+ * inteira (Teor.~66(1) e (2)): (b, (m·a+b) − m·a) = (b, ... ) devolve o
+ * original coordenada a coordenada, e em passo nenhum se divide. O `n` é o
+ * METAL — 1 ouro, 2 prata, 3 bronze —, com σ+σ' = n o traço e σσ' = −1 o
+ * determinante. É o par ζ/μ do Teor.~da acumulação lido no espaço em vez de no
+ * tempo, e a única linha da tabela das dualidades que inverte DOS DOIS LADOS.
+ *
+ * Medido em `tests/neuronio.c`, que corre a volta em toda dimensão de 2 a 8. */
 static Word cifra_an(Word w, int n){
     Word r = { (Word8)((int)n*(int)w.total + (int)w.e), w.total }; return r; }
 static Word decifra_an(Word w, int n){
@@ -4738,10 +4762,14 @@ static int executa(const char *sql){
         return 0;
     }
     if(palavra(&p, "SELECT")){
-        /* COUNT(*) — e o motor já conta. O S_CONTA guarda quantas linhas
-         * casaram, e não satura como o SqlOut, que só materializa as primeiras.
-         * Corre-se a MESMA varredura, com a mesma condição, e devolve-se o
-         * número: não é uma segunda contagem, é a que o WHERE já fez. */
+        /* COUNT(*) — E NÃO SE CONTA: LÊ-SE O CAMPO.
+         *
+         * O bitmap tem uma coordenada por linha, e quantas casaram é quantos
+         * bits estão ligados: ∑, o popcount do `neuronio.c` («∑ soma popcount,
+         * o Kirchhoff»). Corre-se a MESMA varredura que o WHERE, e depois
+         * soma-se o campo — não é uma segunda contagem, é a leitura da que já
+         * ficou escrita. E não satura como o SqlOut, que só materializa as
+         * primeiras linhas. */
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "COUNT", 5)){
             const char *r = q + 5;
