@@ -7,7 +7,11 @@ DBPASS=$(cat /root/.erp_db_pass)
 JWT=$(cat /root/.erp_jwt)
 # Conexões: DIRECT sempre no superusuário (migrate/DDL). Runtime no erp_app só
 # quando o arquivo de ativação da RLS nativa existir (senão fica no superusuário).
-DB_SUPER="postgresql://erp:${DBPASS}@erp-postgres-prod:5432/erp?schema=public"
+# 21/08/2026: o postgres saiu do docker. Era o container erp-postgres-prod; agora é o
+# cluster `erp` do postgresql-16 do sistema, na porta 5436, alcançado pelo host — e por
+# isso o `docker run` abaixo ganhou --add-host=host.docker.internal:host-gateway, que
+# este container (ao contrário do patria-api) não tinha.
+DB_SUPER="postgresql://erp:${DBPASS}@host.docker.internal:5436/erp?schema=public"
 DB_RUNTIME="$DB_SUPER"
 NATIVE_FLAG=""
 # Se o app vai conectar como erp_app (não-super), a RLS nativa PRECISA estar
@@ -45,7 +49,7 @@ if [ -f /root/.erp_supplier_live ]; then
   LIVE_FLAG="-e SUPPLIER_INTEGRATION_LIVE=on"
 fi
 docker rm -f patria-erp 2>/dev/null || true
-docker run -d --name patria-erp --network erp-net --restart unless-stopped \
+docker run -d --name patria-erp --add-host=host.docker.internal:host-gateway --network erp-net --restart unless-stopped \
   -p 127.0.0.1:8090:8080 \
   -e PORT=8080 -e NODE_ENV=production \
   -e DATABASE_URL="$DB_RUNTIME" \
