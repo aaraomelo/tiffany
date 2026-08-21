@@ -47,5 +47,8 @@ int  sql_tx_desfaz(void);      /* 0 se a pilha encheu: então NÃO se desfaz nad
 void sql_tx_fecha(void);
 int  sql_tx_cheia(void);
 long sql_tx_escritas(void);
+/* o campo G da transacção corrente, lido na pilha: |I|, |supp G| e max G */
+void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
+                  long *soma_G);
 
 #endif

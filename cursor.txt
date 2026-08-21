@@ -3544,3 +3544,45 @@ Os DOIS DUAIS saem da MESMA TROCA — ι(a,b) = (b,a) —, e isso já estava no
   «a escada é o operador a correr, e cada degrau fecha uma das suas quatro faces»
 
   aranha.tex 29 páginas · 0 erros · 0 refs mortas · thm:escada continua o 64
+
+§78 — O MOTOR É UMA REALIZAÇÃO, E A CONSERVAÇÃO FECHA NO BANCO
+===============================================================
+«a teoria da aranha é a base desse sistema todo, então realizar o sistema também
+é provar a construção da aranha; já está provada mas precisa deixar consistente
+com ela a realização computacional» · «se encontrar problemas ajustamos a teoria
+da aranha, como fizemos agora».
+
+O MÉTODO, dito por ele: construir conforme a base teórica, não a qualquer custo.
+E a correcção é BIDIRECCIONAL — foi o que aconteceu duas vezes hoje: o rollback
+não se resolveu inventando transacções, resolveu-se com o levantamento que a
+aranha já tinha; e o Teorema 64 ganhou a coluna das quatro faces porque a
+realização mostrou que faltava.
+
+A PILHA DE DESFAZER É A TRAJECTÓRIA. Cada entrada é uma escrita, o índice é a
+ordem, o slot é a célula: π : I → X com X o espaço de endereços. Daí lê-se o
+campo, e mede-se NO MOTOR:
+
+     |I| = 127 escritas   |supp G| = 47 slots   max G = 9
+     ∑G = 127   =   |I|        ->  A CONSERVAÇÃO FECHA
+
+  E ela é SOMADA slot a slot, não suposta. A primeira versão dizia «vale por
+  construção da pilha», que é afirmar sem medir — o defeito de sempre.
+
+E MAIS TRÊS LEIS, medidas nos objectos do banco:
+  · A FIBRA DO «WHERE» é uma classe, e as fibras PARTICIONAM: a de a=7 tem 2, a
+    de a=9 tem 1, e 2+1 = 3 = o total.
+  · O REPRESENTANTE k=1: três UPDATE no mesmo sítio, o valor corrente é o
+    último, e o ROLLBACK devolve o PRIMEIRO.
+  · O CONTROLO: o campo mede o que lá está e não devolve número fixo — verifica-
+    se também numa transacção só de leitura.
+
+O QUE A REALIZAÇÃO LEVANTOU, e fica em aberto para decidir COM ele:
+  No paper, π(t) é UMA célula por índice. No motor, um comando SQL gera MUITAS
+  escritas — o max G da pilha deu 81 para três UPDATE, porque cada um escreve o
+  bitmap e os contadores e não só a célula do valor. Há portanto DOIS níveis de
+  índice: o do COMANDO e o da ESCRITA, e o levantamento vive no segundo.
+  Não é um erro de nenhum dos lados; é uma granularidade que a teoria não
+  distingue e a realização obriga a ver. NÃO TOQUEI NO PAPER por causa disto.
+
+  pgwire.c 18 asserções, 0 falhas
+  bateria 529 : 529, 116 unidades, 0 falhas

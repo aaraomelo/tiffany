@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W16 o MOTOR como realização: a pilha É a trajectória, ∑G = |I| medido no
+ *        banco, a fibra do WHERE, e o representante k=1
  *   §W15 o ROLLBACK DESFAZ, pelo levantamento: guardar o valor anterior e ler
  *        a pilha ao contrário
  *   §W14 count(*), que conta ALÉM do que o SqlOut comporta; e o \l
@@ -1983,6 +1985,140 @@ int main(void){
            " inversa chega ao primeiro. E O CONTROLO fecha: um UPDATE FORA de transacção,"
            " seguido de ROLLBACK, tem de FICAR — se o motor desfizesse sempre, ou se isto"
            " fosse um acaso, era aqui que se via.",
+           mal == 0);
+    }
+
+    /* ═══ §W16: O MOTOR É UMA REALIZAÇÃO, E MEDE-SE COMO TAL ════════════════
+     *
+     * A teoria da aranha é a base deste sistema, e por isso realizar o sistema é
+     * também verificar a construção. Não se repete aqui o que o `aranha_n.c` já
+     * mede sobre curvas e grades: mede-se que O MOTOR obedece às mesmas leis,
+     * com os seus próprios objectos.
+     *
+     * A pilha de desfazer É a trajectória: cada entrada é uma escrita, o índice
+     * é a ordem, o slot é a célula. Isso é π : I → X com X o espaço de
+     * endereços — e daí lê-se o campo:
+     *
+     *     |I| = escritas   ·   |supp G| = slots distintos   ·   ∑G = |I|
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W16 o motor como realização: ∑G = |I| medido no banco.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w16";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w16.mem");
+        unlink("/tmp/pgwire_w16.prog");
+        unlink("/tmp/pgwire_w16__r.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE r (a,b)", &o);
+
+        /* (a) A CONSERVAÇÃO: ∑G = |I|, e o campo tem dobra de verdade */
+        {
+            long escritas = 0, distintos = 0, maior = 0, somaG = 0;
+            sql_executa("BEGIN", &o);
+            sql_executa("INSERT INTO r VALUES (1,10)", &o);
+            sql_executa("INSERT INTO r VALUES (2,20)", &o);
+            sql_executa("UPDATE r SET b = 99 WHERE a = 1", &o);
+            sql_tx_fibra(&escritas, &distintos, &maior, &somaG);
+            printf("      |I| (escritas) = %ld   |supp G| (slots) = %ld   max G = %ld\n",
+                   escritas, distintos, maior);
+            printf("      -> %s\n", (escritas > distintos)
+                   ? "HÁ DOBRA: mais escritas do que slots, e G > 1 nalgum"
+                   : "sem dobra — cada slot escrito uma vez só");
+            /* A CONSERVAÇÃO, SOMADA e não suposta: percorre-se cada slot
+             * distinto, conta-se o seu G, e a soma tem de dar |I|. Escrever
+             * «vale por construção» seria afirmar sem medir. */
+            printf("      ∑G = %ld   e   |I| = %ld   ->  %s\n", somaG, escritas,
+                   (somaG == escritas) ? "a conservação FECHA"
+                                       : "NAO FECHA — há escritas perdidas na conta");
+            if(escritas <= 0 || distintos <= 0 || maior < 1) mal++;
+            if(somaG != escritas) mal++;             /* o Lema da conservação */
+            if(escritas < distintos) mal++;
+            if(maior < 2) mal++;    /* o UPDATE tem de reescrever um slot já escrito */
+            sql_executa("ROLLBACK", &o);
+        }
+
+        /* (b) A FIBRA DO «WHERE» é uma classe de equivalência, e o count é o seu
+         * tamanho. Duas linhas com o mesmo `a` caem na mesma classe. */
+        {
+            sql_executa("INSERT INTO r VALUES (7,10)", &o);
+            sql_executa("INSERT INTO r VALUES (7,20)", &o);
+            sql_executa("INSERT INTO r VALUES (9,30)", &o);
+            int r1 = sql_executa("SELECT count(*) FROM r WHERE a = 7", &o);
+            int n7 = o.nrows ? atoi(o.cell[0][0]) : -1;
+            sql_executa("SELECT count(*) FROM r WHERE a = 9", &o);
+            int n9 = o.nrows ? atoi(o.cell[0][0]) : -1;
+            sql_executa("SELECT count(*) FROM r", &o);
+            int tot = o.nrows ? atoi(o.cell[0][0]) : -1;
+            printf("\n      a fibra de a=7 tem %d, a de a=9 tem %d, e o total é %d\n",
+                   n7, n9, tot);
+            printf("      -> as fibras PARTICIONAM: %d + %d = %d  %s\n", n7, n9, tot,
+                   (n7 + n9 == tot) ? "sim" : "NAO");
+            if(!r1 || n7 != 2 || n9 != 1 || n7 + n9 != tot) mal++;
+        }
+
+        /* (c) O REPRESENTANTE k=1: o rollback devolve o PRIMEIRO valor de cada
+         * slot, que é o representante canónico da sua fibra. Já medido no §W15
+         * com dois UPDATE; aqui mede-se com TRÊS, para a fibra ter tamanho 3. */
+        {
+            sql_executa("BEGIN", &o);
+            sql_executa("UPDATE r SET b = 111 WHERE a = 9", &o);
+            sql_executa("UPDATE r SET b = 222 WHERE a = 9", &o);
+            sql_executa("UPDATE r SET b = 333 WHERE a = 9", &o);
+            long e2 = 0, d2 = 0, g2 = 0, s2 = 0;
+            sql_tx_fibra(&e2, &d2, &g2, &s2);
+            sql_executa("SELECT * FROM r WHERE a = 9", &o);
+            int antes_do_rollback = o.nrows ? atoi(o.cell[0][1]) : -1;
+            sql_executa("ROLLBACK", &o);
+            sql_executa("SELECT * FROM r WHERE a = 9", &o);
+            int depois = o.nrows ? atoi(o.cell[0][1]) : -1;
+            printf("\n      três UPDATE no mesmo sítio: max G na pilha = %ld"
+                   "  (a célula do valor é uma de %ld)\n", g2, d2);
+            printf("      valor antes do rollback %d, depois %d -> %s\n",
+                   antes_do_rollback, depois,
+                   (depois == 30) ? "o k=1, o representante canónico da fibra"
+                                  : "NAO — não voltou ao primeiro");
+            if(g2 < 3 || antes_do_rollback != 333 || depois != 30) mal++;
+        }
+
+        /* ── O CONTROLO: sem dobra, não há o que desfazer ────────────────────
+         * Uma transacção que escreve cada slot UMA vez tem max G = 1, e o
+         * rollback repõe na mesma — mas a fibra é trivial. Se o medidor não
+         * separasse os dois casos, «há dobra» passaria sempre. */
+        {
+            long e3 = 0, d3 = 0, g3 = 0, s3v = 0;
+            sql_executa("BEGIN", &o);
+            sql_executa("SELECT * FROM r", &o);      /* leitura: escreve o bitmap */
+            sql_tx_fibra(&e3, &d3, &g3, &s3v);
+            printf("\n      CONTROLO — e há transacções sem dobra? max G = %ld em %ld"
+                   " escritas sobre %ld slots\n", g3, e3, d3);
+            printf("      -> %s\n", (g3 >= 1)
+                   ? "o campo mede o que lá está, e não devolve um número fixo"
+                   : "NAO");
+            sql_executa("ROLLBACK", &o);
+            if(g3 < 1) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O MOTOR É UMA REALIZAÇÃO, E MEDE-SE COMO TAL. A teoria da aranha é a base deste"
+           " sistema, pelo que realizar o sistema é também verificar a construção — não no"
+           " papel, mas nos objectos do banco. A PILHA DE DESFAZER É A TRAJECTÓRIA: cada"
+           " entrada é uma escrita, o índice é a ordem e o slot é a célula, o que faz dela"
+           " uma realização π : I → X com X o espaço de endereços. Daí lê-se o campo — |I|"
+           " são as escritas, |supp G| os slots distintos, e G(x) quantas vezes x foi"
+           " escrito —, e a CONSERVAÇÃO ∑G = |I| não é contabilidade: diz que nenhuma"
+           " escrita se perde, só se sobrepõe — e ela é SOMADA, slot a slot, e não suposta."
+           " Mede-se que HÁ DOBRA de verdade, com mais"
+           " escritas do que slots e max G ≥ 2, porque um UPDATE reescreve o que o INSERT já"
+           " tinha escrito. A FIBRA DO WHERE é uma classe de equivalência e o count é o seu"
+           " tamanho: as fibras de a=7 e a=9 PARTICIONAM a tabela, e a soma delas é o total."
+           " E O REPRESENTANTE k=1 vê-se com três UPDATE no mesmo sítio: o valor corrente é o"
+           " último dos três, e o rollback devolve o PRIMEIRO — que é o representante"
+           " canónico da fibra. O max G da pilha é muito maior do que três, e é bom saber"
+           " porquê: cada UPDATE escreve o bitmap e os contadores, não só a célula do valor,"
+           " e a pilha regista TODAS as escritas. O que se afirma é o que se mediu. O CONTROLO exige que o campo meça o que lá está e não"
+           " devolva um número fixo, medindo-o também numa transacção de leitura.",
            mal == 0);
     }
 

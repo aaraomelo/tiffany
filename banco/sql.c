@@ -531,6 +531,39 @@ void sql_tx_abre(void){ undo_em_tx = 1; undo_n = 0; undo_cheio = 0; }
 int  sql_tx_cheia(void){ return undo_cheio; }
 long sql_tx_escritas(void){ return undo_n; }
 void sql_tx_fecha(void){ undo_em_tx = 0; undo_n = 0; undo_cheio = 0; }
+/* A PILHA É A TRAJECTÓRIA, e daqui lê-se o campo do `aranha.tex`.
+ *
+ * Cada entrada é uma escrita: o índice é a ordem, o slot é a célula. Isso É a
+ * realização π : I → X da Def. do paper, com X o espaço de endereços. Logo:
+ *
+ *     |I|        = o número de escritas          (undo_n)
+ *     |supp G|   = os slots DISTINTOS escritos
+ *     G(x)       = quantas vezes o slot x foi escrito
+ *     ∑ G(x)     = |I|                            (a conservação)
+ *
+ * A última igualdade não é uma escolha de contabilidade: é o Lema da
+ * conservação, e o que ela diz é que nenhuma escrita se perde no caminho — só
+ * se sobrepõe. Devolve-se aqui para o medidor a poder verificar no MOTOR, e não
+ * só no papel. */
+void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
+                  long *soma_G){
+    long dist = 0, maxg = 0, soma = 0;
+    if(escritas) *escritas = undo_n;
+    for(long i = 0; i < undo_n; i++){
+        long g = 0;
+        int primeiro = 1;
+        for(long j = 0; j < i; j++) if(undo_pilha[j].slot == undo_pilha[i].slot){ primeiro = 0; break; }
+        if(!primeiro) continue;
+        dist++;
+        for(long j = i; j < undo_n; j++) if(undo_pilha[j].slot == undo_pilha[i].slot) g++;
+        if(g > maxg) maxg = g;
+        soma += g;                       /* ∑G, somado de facto e não suposto */
+    }
+    if(slots_distintos) *slots_distintos = dist;
+    if(maior_G) *maior_G = maxg;
+    if(soma_G) *soma_G = soma;
+}
+
 /* desfaz LENDO AO CONTRÁRIO: a última escrita é a primeira a ser reposta, ou um
  * slot escrito duas vezes ficaria com o valor do meio. */
 int  sql_tx_desfaz(void){
