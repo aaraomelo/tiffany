@@ -1,4 +1,4 @@
-Este repositório é software e documentação PROPRIETÁRIOS.
+Este repositório contém software e documentação PROPRIETÁRIOS.
 
 Copyright (c) 2026 Aarão Melo Lopes. Todos os direitos reservados.
 
@@ -6,79 +6,145 @@ Copyright (c) 2026 Aarão Melo Lopes. Todos os direitos reservados.
   A LEI DESTE REPOSITÓRIO, E ELA É A MESMA CÁ FORA
 ═══════════════════════════════════════════════════════════════════════════════
 
-O trabalho aqui dentro parte de um operador e das duas equações que ele cumpre
-sobre o seu argumento:
+O trabalho aqui desenvolvido parte de um operador e das duas relações que ele
+satisfaz sobre o seu argumento:
 
         ∂x + x = 0                    ∂x · x = 1
 
-O operador é o que CONSERVA: composto com aquilo a que se aplica, devolve o
-invariante. Uma acção sem o seu dual não conserva — perde. É por isso que este
-repositório mede o que afirma, guarda a volta de cada passo e conta o
-apagamento: o critério de toda a obra é o apagamento ser ZERO.
+O operador é aquilo que CONSERVA: composto com aquilo a que se aplica, devolve
+o invariante. Uma ação sem o seu dual não conserva — perde. É por isso que este
+repositório mede aquilo que afirma, preserva a possibilidade de reconstrução
+de cada passo e trata o apagamento como perda: o critério metodológico da obra
+é que nada seja perdido sem que essa perda seja identificada e medida.
 
-A licença é essa mesma lei aplicada ao USO. Usar é uma acção sobre trabalho
-alheio, e uma acção sem o seu dual não conserva: deixa de um lado o que tirou
-do outro. O dual do uso são as DUAS obrigações abaixo — o acordo escrito e o
-pagamento —, e são duas porque as equações são duas. Sem elas o uso não fecha,
-e o que não fecha não está licenciado.
+A licença é a leitura desse mesmo princípio aplicada ao USO. Usar é uma ação
+sobre trabalho alheio e, nesta licença, essa ação somente é autorizada quando
+acompanhada das obrigações correspondentes. O dual do uso são as DUAS
+obrigações estabelecidas abaixo: o acordo escrito e o pagamento. São duas,
+porque ambas constituem condições da autorização aqui concedida.
 
-Isto é a leitura. O que vale juridicamente é o que se segue, e está dito em
-linguagem corrente de propósito.
+Isto é a leitura conceitual da licença. O que produz efeitos jurídicos é o
+texto que se segue, interpretado segundo a legislação aplicável.
 
 ═══════════════════════════════════════════════════════════════════════════════
   LICENÇA COMERCIAL — USO MEDIANTE CONTRATO E PAGAMENTO
 ═══════════════════════════════════════════════════════════════════════════════
 
-Aplica-se a TODO o repositório: código (tests/, lib/, tools/, banco/, app/ e
-qualquer fonte .c, .h, .sh, .py, .js, .sql, …), papers/ e demais textos
-(.tex, PDF gerados, figuras em assets/, memoria/, corpus/), salvo indicação
-explícita em contrário num ficheiro concreto.
+1. OBJETO E ABRANGÊNCIA
 
-NÃO é concedida licença gratuita de uso, cópia, modificação, distribuição,
-sublicenciamento, publicação ou exploração comercial.
+Esta licença aplica-se a todo o conteúdo deste repositório pertencente ao
+titular dos direitos, incluindo, entre outros:
 
-Quem quiser usar o código, os papers ou qualquer parte substancial deste
-trabalho precisa de:
+  • código em tests/, lib/, tools/, banco/, app/ e demais diretórios;
+  • arquivos-fonte .c, .h, .sh, .py, .js, .sql e similares;
+  • papers/ e demais textos;
+  • arquivos .tex e PDFs gerados;
+  • figuras e demais materiais em assets/, memoria/, corpus/ e diretórios
+    equivalentes;
+
+salvo quando um arquivo específico indicar expressamente licença ou condição
+diferente.
+
+Materiais de terceiros permanecem sujeitos às respectivas licenças e não são
+abrangidos por esta licença, conforme indicado na seção "OBRAS DE TERCEIROS".
+
+2. AUSÊNCIA DE LICENÇA GRATUITA
+
+Salvo disposição expressa em contrário, NÃO é concedida licença gratuita para
+uso, cópia, modificação, distribuição, sublicenciamento, publicação,
+incorporação ou exploração comercial do conteúdo proprietário deste
+repositório.
+
+3. LICENÇA MEDIANTE ACORDO E PAGAMENTO
+
+Qualquer pessoa ou organização que pretenda obter autorização para usar,
+copiar, modificar, distribuir, publicar, incorporar ou explorar
+comercialmente conteúdo proprietário deste repositório deverá obter,
+previamente:
+
   1. acordo escrito com o titular dos direitos; e
-  2. pagamento nas condições desse acordo.
+  2. pagamento nas condições estabelecidas nesse acordo.
 
-São as duas, e não uma: acordo sem pagamento não licencia, pagamento sem
-acordo não licencia.
+São as duas, e não uma:
 
-Contacto para licenciamento:
+  acordo sem pagamento não constitui a licença aqui oferecida;
+  pagamento sem acordo escrito não constitui a licença aqui oferecida.
+
+O alcance, prazo, território, modalidades de uso, número de usuários,
+distribuição, sublicenciamento e demais condições eventualmente autorizadas
+serão aqueles definidos no acordo escrito correspondente.
+
+4. CONTACTO PARA LICENCIAMENTO
+
+Titular dos direitos:
   Aarão Melo Lopes
+
+E-mail:
   aarao.melo.lopes@gmail.com
+
+Site:
   https://goldenkingdom.patriatechnology.com
 
-Sem licença válida: é proibido usar, copiar, modificar, fundir, publicar,
-distribuir, sublicenciar ou vender o Software ou os textos, no todo ou em
+5. USOS NÃO AUTORIZADOS
+
+Na ausência de licença válida ou de outra autorização legal aplicável, é
+proibido, na extensão permitida pela legislação aplicável, usar, copiar,
+modificar, adaptar, incorporar, fundir, publicar, distribuir, sublicenciar,
+vender ou explorar o conteúdo proprietário deste repositório, no todo ou em
 parte.
 
-O SOFTWARE E OS TEXTOS SÃO FORNECIDOS «TAL COMO ESTÃO», SEM GARANTIA DE
-QUALQUER TIPO, EXPRESSA OU IMPLÍCITA. EM NENHUM CASO O AUTOR SERÁ RESPONSÁVEL
-POR RECLAMAÇÕES, DANOS OU OUTRA RESPONSABILIDADE DECORRENTE DO USO OU DA
-IMPOSSIBILIDADE DE USO.
+6. ATRIBUIÇÃO E INTEGRIDADE DA AUTORIA
+
+Nenhuma licença concedida ao abrigo deste documento autoriza remover ou
+obscurecer, de forma intencional, avisos de copyright, autoria ou origem
+presentes nos arquivos licenciados.
+
+A exigência de preservação da autoria integra o regime de uso da obra. As
+condições específicas para identificação do autor em materiais derivados,
+redistribuições ou publicações poderão ser estabelecidas no acordo de
+licenciamento.
+
+7. ISENÇÃO DE GARANTIAS E LIMITAÇÃO DE RESPONSABILIDADE
+
+NA MÁXIMA EXTENSÃO PERMITIDA PELA LEGISLAÇÃO APLICÁVEL, O SOFTWARE E OS
+TEXTOS SÃO FORNECIDOS "TAL COMO ESTÃO", SEM GARANTIAS DE QUALQUER TIPO,
+EXPRESSAS OU IMPLÍCITAS.
+
+NA MÁXIMA EXTENSÃO PERMITIDA PELA LEGISLAÇÃO APLICÁVEL, O TITULAR DOS
+DIREITOS NÃO SERÁ RESPONSÁVEL POR DANOS, PERDAS, RECLAMAÇÕES OU OUTRAS
+RESPONSABILIDADES DECORRENTES DO USO, DA IMPOSSIBILIDADE DE USO OU DA
+DISTRIBUIÇÃO DO SOFTWARE OU DOS TEXTOS.
 
 ═══════════════════════════════════════════════════════════════════════════════
   ATRIBUIÇÃO: O APAGAMENTO É ZERO
 ═══════════════════════════════════════════════════════════════════════════════
 
-Nenhuma licença concedida ao abrigo deste documento autoriza remover, alterar
-ou obscurecer a indicação de autoria e de origem, nos ficheiros ou em qualquer
-material derivado. A obra inteira é construída sobre a exigência de que nada se
-perca no caminho; a autoria não é exceção.
+A obra é construída sobre a exigência metodológica de que nada se perca sem
+que a perda seja identificada.
+
+No plano jurídico da autoria, isso significa que nenhuma licença concedida
+por este documento autoriza a remoção ou o obscurecimento deliberado da
+indicação de autoria e origem presente na obra.
+
+A autoria não é exceção ao princípio de conservação que orienta o trabalho.
 
 ═══════════════════════════════════════════════════════════════════════════════
   NOTA DO AUTOR
 ═══════════════════════════════════════════════════════════════════════════════
 
-Este trabalho é meu e por isso disponho dele. Disponho assim: quem quiser
-usar, paga e combina. Os medidores em tests/ existem para quem tiver licença
-verificar — não para uso livre.
+Este trabalho é meu e, dentro dos direitos que a lei me confere, disponho dele
+nas condições estabelecidas nesta licença.
+
+Quem quiser obter uma licença de uso deve entrar em contato, celebrar o acordo
+correspondente e cumprir as condições nele estabelecidas.
+
+Os medidores em tests/ existem para permitir a verificação das afirmações dos
+papers. O acesso ou uso desses materiais permanece sujeito às condições de
+licenciamento aplicáveis.
 
 Quem verificar, verifica tudo: os medidores estão aqui para serem corridos
-contra as afirmações dos papers, e é assim que este trabalho se defende — pela
-medida, não pela palavra.
+contra as afirmações dos papers, e é assim que este trabalho procura se
+defender — pela medida, não pela palavra.
 
   — Aarão Melo Lopes, agosto de 2026
 
@@ -86,7 +152,14 @@ medida, não pela palavra.
   OBRAS DE TERCEIROS
 ═══════════════════════════════════════════════════════════════════════════════
 
-Os PDFs de obras de terceiros usados como referência de leitura NÃO fazem
-parte deste repositório e estão excluídos em .gitignore. As fontes públicas
-em que o trabalho se apoia estão citadas nos próprios documentos e
-mantêm as suas licenças originais.
+Os PDFs e demais materiais de terceiros utilizados como referências de leitura
+NÃO fazem parte do conteúdo proprietário deste repositório quando assim
+identificados e permanecem sujeitos às respectivas licenças.
+
+Quando aplicável, esses materiais são excluídos do controle de versão por
+.gitignore.
+
+As fontes públicas utilizadas como referência são citadas nos documentos
+correspondentes e mantêm as suas próprias licenças e condições de uso.
+
+═══════════════════════════════════════════════════════════════════════════════
