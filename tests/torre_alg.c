@@ -9,7 +9,8 @@
  *
  * Não confundir involução com retração: espaços e representações diferentes.
  *
- *   §T1  INVOLUÇÃO: ι, dual das metades, hip_conj — cada uma ν∘ν = id
+ *   §T1  INVOLUÇÃO: ι, dual das metades (D32, D64, I128), hip_conj — ν∘ν = id
+ *        nos CINCO andares da torre
  *   §T2  RETRAÇÃO: p/q → slots → p'/q' exacto (Σ∘Π sobre a palavra FC)
  *   §T3  SUBIDA: 16→32→64 — a largura segue a dobra, não um tipo escolhido
  *   §T4  OS TRÊS PIPELINES SÃO DISTINTOS — o que cada um preserva e o que muda
@@ -25,6 +26,7 @@
 #include <unistd.h>
 #include "unidade.h"
 #include "torre_alg.h"
+#include "i128.h"
 #include "dual16.h"
 #include "dual32.h"
 #include "torre.h"
@@ -41,30 +43,59 @@ printf("    Contrato: lib/torre_alg.h — álgebra → operação → dual → l
 /* ── §T1  INVOLUÇÃO ─────────────────────────────────────────────────────────── */
 printf("\n§T1  INVOLUÇÃO ν∘ν = id — swap, dual das metades, conj (estrutural).\n\n");
 {
-    int ok_i = 0, ok_d32 = 0, ok_d64 = 0, ok_c = 0;
+    /* E CADA UMA TEM DE MOVER ALGUMA COISA. `ν∘ν = id` sozinho passa com ν = id —
+     * a identidade É uma involução —, e foi assim que esta asserção esteve escrita:
+     * pôr `i128_dual` a devolver o argumento não a derrubava. Um dual que não move
+     * nada não é o dual: é a ausência dele com o nome certo. Por isso cada andar
+     * traz também a TESTEMUNHA ν(x) ≠ x. */
+    int ok_i = 0, ok_d32 = 0, ok_d64 = 0, ok_c = 0, ok_i128 = 0;
+    int move_i = 0, move_d32 = 0, move_d64 = 0, move_c = 0, move_i128 = 0;
     D32par par = { d16_mult(7, 11), d16_mult(13, 17) };
     D32par ida = d16_par_dual(par);
     D32par volta = d16_par_dual(ida);
     if(d32par_igual(volta, par)) ok_i++;
+    if(!d32par_igual(ida, par)) move_i++;
 
     D32 prod = d16_mult(30000, 30000);
     if(d16_cmp(d32_dual(d32_dual(prod)), prod) == 0) ok_d32++;
+    if(d16_cmp(d32_dual(prod), prod) != 0) move_d32++;
 
     D64 p64 = d64_mult(60000u, 60000u);
     if(d64_cmp(d64_dual(d64_dual(p64)), p64) == 0) ok_d64++;
+    if(d64_cmp(d64_dual(p64), p64) != 0) move_d64++;
+
+    /* O ANDAR QUE FALTAVA. A torre tem CINCO andares (E₁₆, D32, D64, I128, Hip) e
+     * esta asserção media QUATRO: o I128 era o único sem dual, e por isso não
+     * entrava aqui. Contar «quatro sítios» quando a torre tem cinco não falha
+     * nenhuma asserção — some um andar, e o texto continua a fechar. */
+    I128 p128 = i128_smul(3037000499LL, 3037000499LL);   /* produto que passa dos 64 */
+    if(i128_cmp(i128_dual(i128_dual(p128)), p128) == 0) ok_i128++;
+    if(i128_cmp(i128_dual(p128), p128) != 0) move_i128++;
 
     Hip x = hip0(4);
     x.c[0] = 2; x.c[1] = -3; x.c[2] = 5; x.c[3] = -7;
     if(hip_igual(hip_conj(hip_conj(x)), x)) ok_c++;
+    if(!hip_igual(hip_conj(x), x)) move_c++;
 
     printf("      ι∘ι no par racional (D32par)     %s\n", ok_i ? "sim" : "NÃO");
     printf("      dual∘dual em D32 (metades)      %s\n", ok_d32 ? "sim" : "NÃO");
     printf("      dual∘dual em D64 (metades)      %s\n", ok_d64 ? "sim" : "NÃO");
-    printf("      hip_conj∘hip_conj (dim 4)       %s\n\n", ok_c ? "sim" : "NÃO");
-    ok("a INVOLUÇÃO fecha em quatro sítios independentes: swap ι(p,q)=(q,p) no par"
-       " racional, troca das metades alto/baixo em D32 e D64, e conjugação Cayley–"
-       "Dickson — cada uma ν∘ν = id, e NENHUMA delas é retração Σ∘Π (ordem do coordenador (§3)",
-       ok_i && ok_d32 && ok_d64 && ok_c);
+    printf("      dual∘dual em I128 (metades)     %s\n", ok_i128 ? "sim" : "NÃO");
+    printf("      hip_conj∘hip_conj (dim 4)       %s\n", ok_c ? "sim" : "NÃO");
+    printf("      e cada uma MOVE: %d de 5 andares têm ν(x) ≠ x\n\n",
+           move_i + move_d32 + move_d64 + move_i128 + move_c);
+    ok("a INVOLUÇÃO fecha nos CINCO andares da torre, e eram quatro: swap ι(p,q)=(q,p)"
+       " no par racional, troca das metades alto/baixo em D32, D64 e I128, e conjugação"
+       " Cayley–Dickson — cada uma ν∘ν = id, e NENHUMA delas é retração Σ∘Π (ordem do"
+       " coordenador §3). O I128 era o único andar SEM dual: o `torre_alg.h` fixa quatro"
+       " operações estruturais por andar — soma, produto, dual, inversão/fibra — e ali"
+       " havia duas. Contar «quatro sítios» com a torre a ter cinco não falhava asserção"
+       " nenhuma: some um andar e o texto continua a fechar. E cada uma MOVE alguma"
+       " coisa — ν(x) ≠ x exibido nos cinco: `ν∘ν = id` sozinho passa com ν = id,"
+       " porque a identidade É uma involução, e um dual que não move nada é a"
+       " ausência dele com o nome certo",
+       ok_i && ok_d32 && ok_d64 && ok_i128 && ok_c
+       && move_i && move_d32 && move_d64 && move_i128 && move_c);
 }
 
 /* ── §T2  RETRAÇÃO ──────────────────────────────────────────────────────────── */

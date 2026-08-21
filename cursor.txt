@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        6af5d0672f9be840      bash tools/bateria.sh
+    selo        0f22a402273d8a60      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1525,3 +1525,48 @@ A LIÇÃO, outra vez sobre mim: o §30 leu o primeiro paper e trouxe a OPERAÇÃ
 §31 leu o quarto e trouxe o SÍTIO onde a memória mora; este leu o dragão e
 trouxe o NOME do que eu já tinha feito às cegas. Construir sem o nome funciona e
 fica sem lei — e sem lei não há como saber se está completo.
+
+
+33. AUDITORIA DA TORRE — o contrato contra o que existe
+=========================================================
+Li o `corpo_algebrico.tex` §sec:torre e conferi o `lib/torre_alg.h` cláusula a
+cláusula contra o código. O que BATE, e é a maior parte:
+
+  · os cinco andares existem e têm os headers que o contrato nomeia
+  · `d16_mult/soma/par_dual`, `d64_mult/soma/dual`, `i128_mul/add`,
+    `hip_soma/mult/conj/inverso` — todos onde o contrato diz
+  · a indexação NÃO se contradiz: `TORRE_DK(k) = 2<<k` com d_0 = 2 parece
+    discordar do «1→2→4→8 em três passos» do thm:torre, e o próprio
+    `corpo_topologico thm:rn` reconcilia-os: «o índice k da torre operacional
+    d_k = 2^{k+1} conta andares APÓS a primeira dobra A_0→A_1»
+  · §T2 (retração Σ∘Π), §T3 (subida 16→32→64), §T4 (os três pipelines
+    distintos), `geometria_real.c §L3` — todos presentes e verdes
+
+TRÊS COISAS NÃO BATIAM
+----------------------
+1. O CONTRATO ESTAVA DESACTUALIZADO. Dizia «FC: stride RT_CF_MAX+3» e o
+   `slot_map.h` tem `2·RT_CF_MAX+3` desde o §17 (o termo passou a Word_8²). O
+   header que FIXA a realização mentia sobre ela.
+
+2. UM ANDAR SEM DUAL. O `torre_alg.h` fixa QUATRO operações estruturais por
+   andar — soma, produto, dual, inversão/fibra — e o I128 tinha DUAS. Era o
+   único da torre sem dual (E₁₆ tem o swap ι, D32 tem `d32_dual`, D64 tem
+   `d64_dual`, Hip tem `hip_conj`). Acrescentado `i128_dual`: a troca das
+   metades (hi,lo), a mesma dos andares de baixo um andar acima.
+
+3. O MEDIDOR CONTAVA QUATRO ANDARES NUMA TORRE DE CINCO. O §T1 media a
+   involução em «quatro sítios independentes» — e some um andar sem que nada
+   falhe: o texto continua a fechar com quatro.
+
+E A QUARTA, QUE É A PIOR: `ν∘ν = id` PASSA COM ν = id
+------------------------------------------------------
+A identidade É uma involução. Pôr `i128_dual` a devolver o argumento não
+derrubava a asserção — e o mesmo valia para os quatro andares que já lá
+estavam: `d32_dual` a devolver `w` também passava. Um dual que não move nada
+não é o dual: é a ausência dele com o nome certo.
+
+  correcção  cada andar traz agora a TESTEMUNHA ν(x) ≠ x, exibida
+  gume       o dual do I128 vira identidade → cai (4 de 5 movem) · o dual do
+             D32 vira identidade → cai também, e esse andar já lá estava
+
+  bateria    101 medidores reabertos pelo i128.h, 1232 unidades, 0 falhas

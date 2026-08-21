@@ -184,6 +184,23 @@ static I128 i128_gcd(I128 a, I128 b){
     return i128_is_zero(a) ? i128_from_i64(1) : a;
 }
 
+/* ── O DUAL DESTE ANDAR — a troca das metades, ν∘ν = id ──────────────────────
+ * `torre_alg.h` fixa QUATRO operações estruturais por andar: soma, produto,
+ * dual e inversão/fibra. Este andar tinha soma e produto e não tinha DUAL — era
+ * o único da torre sem ele (E₁₆ tem o swap ι, D32 tem `d32_dual`, D64 tem
+ * `d64_dual`, Hip tem `hip_conj`), e o medidor `torre_alg.c` §T1 media a
+ * involução em QUATRO sítios onde a torre tem cinco.
+ *
+ * É a mesma troca alto/baixo dos andares de baixo, um andar acima: o par é
+ * (hi, lo) e o dual troca-os. Aplicado duas vezes devolve — que é o que faz
+ * dele uma involução e não uma permutação qualquer. */
+static I128 i128_dual(I128 x){
+    I128 r;
+    r.hi = (int64_t)x.lo;
+    r.lo = (uint64_t)x.hi;
+    return r;
+}
+
 static I128 i128_shl(I128 a, int sh){
     if(sh <= 0) return a;
     if(sh >= 128) return i128_zero();

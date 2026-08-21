@@ -37,7 +37,7 @@
  *   E₁₆       Qz  racionais.h    ⊕ ⊗ swap(inverso)  — envelope §Q16
  *   32        D32 dual16.h       d16_mult d16_soma  d16_par_*  d16_par_dual
  *   64        D64 dual32.h       d64_mult d64_soma  d32_par_*  d64_dual
- *   128       I128 i128.h        i128_mul i128_add  (produto 64×64 quando cabe)
+ *   128       I128 i128.h        i128_mul i128_add  i128_dual  (produto 64×64)
  *   2ⁿ·dim    Hip torre.h        hip_soma hip_mult hip_conj hip_inverso
  *
  *   16 → 32 → 64 → 128 NÃO é escada de tipos C: é
@@ -53,7 +53,9 @@
  *
  *   Peça: SlotWord = Word_8 = 1 byte/slot (slot_mem.h; def:w8)
  *         Par (a,b) da classe ℤ = dois slots. Par ≠ classe (Lei 7).
- *   FC:   S_CF = 2048, stride RT_CF_MAX+3 (sinal, n, termos, flag)
+ *   FC:   S_CF = 2048, stride 2·RT_CF_MAX+3 (sinal, n, termos em PARES de
+ *         átomos, flag) — o quociente a_k não cabe num átomo, e o par é a Word
+ *         da ISA (Lei 7); acima de 65535 a escrita RECUSA-SE em vez de enrolar
  *   API:  rt_cf_slot_* (rt_cf_slot.h) ≡ sql.c / conversa.c / isa_disk.h
  *
  *   Soma de coeficientes + carry; produto = convolução + carry (posicional).
