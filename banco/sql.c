@@ -216,6 +216,21 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  * A região fica acima das linhas (S_LINHAS + MAXLIN·8 = 3024) e dos
  * denominadores (S_DEN + MAXLIN·8 = 35792), longe do mapa que a ISA percorre.
  * Dois caracteres por Word, como o nome da tabela — é a mesma Lei 7. */
+/* ── O ÁTOMO ALTO DE CADA CÉLULA — 40960.., um plano paralelo ────────────────
+ * A célula é `{numerador, denominador}` em dois átomos, e a ULA soma componente
+ * a componente: o valor de uma coluna inteira vive em OITO bits. O `INSERT ...
+ * VALUES (1000,...)` era recusado (§24) porque guardar 232 em vez de 1000 é pior.
+ *
+ * O byte ALTO passa a viver num plano à parte — como o denominador já vive em
+ * S_DEN —, e a Word da linha não muda: TODA a aritmética emitida continua a ler
+ * o que sempre leu. O que muda é a ESCRITA e a LEITURA, que são a fronteira.
+ *
+ * E a metade que falta diz-se em vez de se fingir: o avaliador do WHERE é
+ * polinomial e de oito bits (o `S_MT` mascara o `.e` e os produtos são de átomo),
+ * logo uma comparação que cite uma coluna com valores acima de 255 é RECUSADA,
+ * contada, e com o motivo escrito. Alargar o avaliador é o trio seguinte —
+ * a aritmética do andar já está provada (`ula_add16`, §26). */
+#define S_ALTO      40960u
 #define S_COLNOME   36864u
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
 #define S_COLNOME_N 8u         /* tantas quantas o S_CORPO segura */
@@ -229,6 +244,7 @@ static int fmem = -1, fprog = -1;
 static char g_base[512];          /* caminho da base aberta — blobs em <base>_corpo/ */
 static char g_tabela[64];         /* a tabela cujo .mem está aberto ("" = a sem nome) */
 static long cel_recusadas = 0;    /* células que não couberam no envelope — contadas À PARTE */
+static long cmp_recusadas = 0;    /* comparações recusadas por a coluna ser larga */
 static int usa_tabela(const char *nome, int cria_se_falta);   /* definida com abrir_base */
 static int usa_tabela_z(const char *nome, int cria_se_falta, int zera);
 static int tabela_existe(const char *nome);
@@ -539,6 +555,21 @@ static int col_indice(const char *nome){
     if(col_tem_nomes()) return -1;              /* tem nomes e não é nenhum deles */
     if(alvo[1] == 0 && alvo[0] >= 'a' && alvo[0] <= 'z') return alvo[0] - 'a';
     return -1;
+}
+
+/* ── A COLUNA LARGA, E PORQUE É QUE ELA NÃO SE COMPARA ────────────────────────
+ * O avaliador do WHERE é polinomial e de OITO bits: o `S_MT` mascara o `.e` e os
+ * produtos são de átomo. Uma coluna cujos valores passem de 255 não cabe nele —
+ * e a diferença entre recusar e não recusar é a diferença entre um banco que diz
+ * o que não sabe e um que responde à toa.
+ *
+ * Isto é o outro lado do §26: a aritmética de 16 bits já está provada, e o que
+ * falta é o CAMINHO — o avaliador inteiro, que é o trio seguinte. Até lá o dado
+ * guarda-se com 16 bits e a comparação diz que não chega lá. */
+static int col_larga(long j, long ncols, long nrows){
+    for(long i = 0; i < nrows; i++)
+        if(mem_le(S_ALTO + (unsigned)(i*ncols + j)).total != 0) return 1;
+    return 0;
 }
 
 /* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
@@ -1151,7 +1182,8 @@ static int insere(const char *resto){
         long cpj = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
         int assinado = (cpj == CORPO_RACIONAL || cpj == CORPO_AUREO || cpj == CORPO_CRISTAL
                         || den[j] > 1 || den[j] < 0);
-        long lo = assinado ? -128 : 0, hi = assinado ? 127 : 255;
+        /* a coluna inteira passa a segurar 16 bits — o byte alto vai para S_ALTO */
+        long lo = assinado ? -128 : 0, hi = assinado ? 127 : 65535;
         long lo2 = (cpj == CORPO_AUREO || cpj == CORPO_CRISTAL) ? -128 : 1;
         long hi2 = (cpj == CORPO_AUREO || cpj == CORPO_CRISTAL) ? 127 : 255;
         if(v[j] < lo || v[j] > hi || den[j] < lo2 || den[j] > hi2){
@@ -1176,6 +1208,10 @@ static int insere(const char *resto){
         w.total = v[j]; w.e = den[j];      /* e = denominador; 1 para inteiro */
         mem_grava(S_K + (unsigned)j, w);                        /* a constante, na memória */
         emit_copia(S_K + (unsigned)j, S_LINHAS + (unsigned)(nrows*ncols + j));
+        /* o byte ALTO no plano paralelo — a Word da linha não muda, e por isso
+         * toda a aritmética emitida continua a ler exactamente o que sempre leu */
+        { Word wa; wa.total = (Word8)(((unsigned long)v[j] >> 8) & 255u); wa.e = 0;
+          mem_grava(S_ALTO + (unsigned)(nrows*ncols + j), wa); }
         Word wd; wd.total = den[j]; wd.e = 0;
         mem_grava(S_KZ + (unsigned)j, wd);
         emit_copia(S_KZ + (unsigned)j, S_DEN + (unsigned)(nrows*ncols + j));
@@ -2214,6 +2250,29 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
+    /* E A LARGURA: o avaliador é de oito bits, e uma coluna que guarde acima de
+     * 255 não cabe nele. Recusa-se, conta-se, e diz-se porquê — não se compara
+     * meio valor. O SELECT sem WHERE continua a devolver o número inteiro. */
+    if(tem_where > 0){
+        for(long j = 0; j < ncols && j < NCOL; j++){
+            if(!(citadas_where & (1u << j))) continue;
+            if(!col_larga(j, ncols, nrows)) continue;
+            char cn[S_COLNOME_W * 2 + 2];
+            col_nome_le((int)j, cn, (int)sizeof cn);
+            if(!cn[0]) snprintf(cn, sizeof cn, "%c", 'a' + (int)j);
+            printf("erro: a coluna «%s» guarda valores acima de 255, e o avaliador do"
+                   " WHERE é de oito bits.\n A comparação é RECUSADA — o valor está"
+                   " guardado inteiro e o SELECT sem WHERE devolve-o; o que não se faz"
+                   " é comparar metade dele.\n", cn);
+            if(sql_cap){
+                sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" holds values above the 8-bit evaluator", cn);
+            }
+            cmp_recusadas++;
+            return 0;
+        }
+    }
     if(nrows <= 0){
         /* A TABELA VAZIA TAMBÉM TEM COLUNAS, e uma consulta que não devolve linhas
          * tem de devolver a DESCRIÇÃO delas e o `CommandComplete`. Esta saída
@@ -2342,7 +2401,12 @@ static int varre(const char *resto, int acao){
                 Par cls = ra_classe((Par){ (long)(int8_t)c.total, c.e ? (long)c.e : 1 });
                 if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
                 else          snprintf(cel, sizeof cel, "%ld", cls.a);
-            } else snprintf(cel, sizeof cel, "%ld", (long)c.total);
+            } else {
+                /* o valor de uma coluna inteira é o par (baixo, alto) lido como UM
+                 * número — a dobra do §26 aplicada à fronteira de leitura */
+                unsigned long alto = mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                snprintf(cel, sizeof cel, "%lu", (unsigned long)c.total | (alto << 8));
+            }
             printf("%s", cel);
             if(j+1 < ncols) printf(" | ");
             if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
@@ -3675,23 +3739,42 @@ int main(int argc, char **argv){
              * disco sem uma palavra. Os dois lados: 255 encosta e entra, 256 é
              * recusado. Medir só o que passa deixava «recusa sempre» indistinguível. */
             {
-                SqlOut e1;
-                executa("CREATE TABLE env (a,b)");
-                int cabe = executa("INSERT INTO env VALUES (255,0)");
-                int nao  = executa("INSERT INTO env VALUES (256,0)");
+                SqlOut e1, e2, e3;
+                executa("CREATE TABLE env (pequeno,grande)");
+                int cabe = executa("INSERT INTO env VALUES (255,1000)");
+                int alto = executa("INSERT INTO env VALUES (9,65535)");   /* o largo é o «grande» */
+                int nao  = executa("INSERT INTO env VALUES (65536,0)");
                 int neg  = executa("INSERT INTO env VALUES (-1,0)");
                 sql_cap = &e1; memset(&e1, 0, sizeof e1); executa("SELECT * FROM env");
+                /* e a outra metade: o WHERE numa coluna estreita corre; numa LARGA
+                 * é recusado, porque o avaliador é de oito bits e comparar metade
+                 * de um valor era responder à toa */
+                sql_cap = &e2; memset(&e2, 0, sizeof e2);
+                int cmp_estreita = executa("SELECT * FROM env WHERE pequeno = 255");
+                sql_cap = &e3; memset(&e3, 0, sizeof e3);
+                int cmp_larga = executa("SELECT * FROM env WHERE grande > 100");
                 sql_cap = NULL;
-                printf("     255 %s · 256 %s · −1 %s · linhas guardadas %d (lida: %s)\n",
-                       cabe ? "entra" : "RECUSADO", nao ? "ENTRA (mau)" : "recusado",
-                       neg ? "ENTRA (mau)" : "recusado", e1.nrows,
-                       e1.nrows ? e1.cell[0][0] : "—");
-                ok("O ENVELOPE DA CÉLULA DIZ-SE E RECUSA: a Word_8 segura 0..255 numa coluna"
-                   " inteira, e 255 ENCOSTA e volta exacto enquanto 256 e −1 são RECUSADOS"
-                   " com erro. Antes, o 500 entrava como 244 e o −1 como 255 — o dado ficava"
-                   " truncado no disco e nada o dizia. Alargar a célula é subir a torre; o"
-                   " que não se pode é guardar lixo em silêncio",
-                   cabe && !nao && !neg && e1.nrows == 1 && !strcmp(e1.cell[0][0], "255"));
+                printf("     65535 %s · 65536 %s · −1 %s · lido [%s][%s] e [%s][%s]\n",
+                       (cabe && alto) ? "entra" : "RECUSADO",
+                       nao ? "ENTRA (mau)" : "recusado", neg ? "ENTRA (mau)" : "recusado",
+                       e1.nrows > 0 ? e1.cell[0][0] : "—", e1.nrows > 0 ? e1.cell[0][1] : "—",
+                       e1.nrows > 1 ? e1.cell[1][0] : "—", e1.nrows > 1 ? e1.cell[1][1] : "—");
+                printf("     WHERE na estreita %s · na LARGA %s\n",
+                       cmp_estreita ? "corre" : "RECUSADO (mau)",
+                       cmp_larga ? "CORRE (mau)" : "recusado");
+                ok("O DADO TEM DEZASSEIS BITS E O QUE NÃO CABE É RECUSADO: o byte alto vive"
+                   " num plano paralelo (S_ALTO), como o denominador já vivia em S_DEN, e a"
+                   " Word da linha não muda — toda a aritmética emitida continua a ler o que"
+                   " sempre leu. 1000 e 65535 entram e voltam EXACTOS; 65536 e −1 são"
+                   " recusados. E A METADE QUE FALTA DIZ-SE: o avaliador do WHERE é"
+                   " polinomial e de oito bits, logo um WHERE que cite uma coluna com"
+                   " valores acima de 255 é RECUSADO com o motivo escrito — o valor está"
+                   " guardado inteiro e o SELECT devolve-o; o que não se faz é comparar"
+                   " metade dele. Antes, o 500 entrava como 244 e nada o dizia",
+                   cabe && alto && !nao && !neg && e1.nrows == 2
+                   && !strcmp(e1.cell[0][0], "255") && !strcmp(e1.cell[0][1], "1000")
+                   && !strcmp(e1.cell[1][1], "65535")
+                   && cmp_estreita && e2.nrows == 1 && !cmp_larga);
             }
             /* ── OS NOMES DAS COLUNAS ────────────────────────────────────────────
              * `CREATE TABLE cliente (nome,idade,saldo)` lia os três identificadores

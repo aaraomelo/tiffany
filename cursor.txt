@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        95641528b8eb3bd0      bash tools/bateria.sh
+    selo        1beb6d3fa1bb01f0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1083,8 +1083,9 @@ fontes exige repor E RECONSTRUIR entre cada um; um a um, e não em lote.
   4. OS NOMES DE COLUNA SÃO DESCARTADOS. `CREATE TABLE cliente
      (nome,idade,saldo)` → o SELECT devolve `a`,`b`,`c`, e
      `WHERE idade > 20` é «comando recusado».                      RESOLVIDO
-  5. O ALCANCE DE UMA CÉLULA É 0..255 (um átomo). Alargar é subir a torre —
-     uma célula de Word_8⁴.                                        POR FAZER
+  5. O ALCANCE DE UMA CÉLULA É 0..255 (um átomo).      DADO: 16 bits (§27)
+     Falta o AVALIADOR do WHERE, que é polinomial e de 8 — a comparação numa
+     coluna larga é RECUSADA, contada e explicada.
   6. Catálogo mínimo para um driver ligar (PG6).                   POR FAZER
 
 A TABELA É UM FICHEIRO .mem
@@ -1221,3 +1222,50 @@ A aritmética está provada; falta o CAMINHO DO DADO:
     que lêem slots à mão (`mem_le(S_LINHAS + 0)`, `+2`, `+4`) mudam de endereço
 Enquanto isso não for feito, o que não cabe é RECUSADO (§24) — o que não se pode
 é guardar lixo em silêncio.
+
+
+27. O DADO PASSA A DEZASSEIS BITS — e a metade que falta diz-se
+=================================================================
+O §26 provou a aritmética do andar; falta o caminho. O caminho tem DUAS metades,
+e elas não custam o mesmo:
+
+  a FRONTEIRA   escrever e ler uma célula — barata, e feita agora
+  o AVALIADOR   o WHERE, que é POLINOMIAL dentro da ISA: o `S_MT` mascara o `.e`,
+                os produtos são de átomo e a comparação é um OP_SUB de 8 com o
+                bit de sinal. Alargar isto é alargar toda a avaliação — trio
+                próprio, e não este.
+
+FEITO
+-----
+  S_ALTO = 40960: o byte ALTO de cada célula num plano paralelo, como o
+  denominador já vivia em S_DEN. **A Word da linha NÃO MUDA** — e é isso que
+  torna a mudança barata: toda a aritmética emitida continua a ler exactamente
+  o que sempre leu, e nenhuma das 23 ocorrências de S_LINHAS mexe.
+
+    INSERT (255,1000) · (9,65535)   entram e voltam EXACTOS
+    INSERT (65536,·) e (−1,·)       recusados, contados em cel_recusadas
+
+E A METADE QUE FALTA DIZ-SE, EM VEZ DE SE FINGIR
+------------------------------------------------
+Um WHERE que cite uma coluna com valores acima de 255 é RECUSADO:
+
+    column "grande" holds values above the 8-bit evaluator
+
+contado em `cmp_recusadas`. O valor está guardado inteiro e o SELECT devolve-o;
+o que não se faz é comparar METADE dele. Um banco que responde à toa é pior que
+um que diz o que não sabe.
+
+  medidor  banco/sql.c: 65535 encosta e volta, 65536 e −1 recusados, o WHERE na
+           coluna ESTREITA corre e na LARGA é recusado — os dois lados
+  gume     o byte alto não guardado → cai · o leitor sem compor → cai · a
+           comparação sem recusar → cai · o envelope de volta a 255 → cai
+
+O TRIO SEGUINTE, escrito para não se perder
+-------------------------------------------
+  · OP_ADD16 / OP_SUB16 / OP_CMP16 no despacho (a ULA já os tem: §26)
+  · o acumulador da expressão (linhas ~1769) e a comparação (~1702) passam a
+    usá-los; OP_ADD/OP_SUB ficam COMPONENTE A COMPONENTE, que é o que o
+    catálogo precisa (nrows vive no `.e` e não pode receber transporte)
+  · o `S_MT` deixa de mascarar o `.e` no caminho das colunas inteiras
+  · os produtos de dois valores de 16 bits pedem 32 — é o andar seguinte outra
+    vez, e é onde a torre volta a dobrar
