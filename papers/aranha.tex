@@ -168,7 +168,7 @@ célula a célula.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O objeto}\label{sec:objeto}
 
-\subsection*{O ponto de partida: o operador}
+\subsection*{O ponto de partida: a dobra}
 
 \noindent Em quatro frases, e cada uma é um resultado abaixo:
 \[
@@ -181,54 +181,104 @@ célula a célula.
 \end{array}}
 \]
 
-\medskip\noindent O documento parte de \emph{um} símbolo --- um símbolo
-\textbf{bruto}, sem partes --- e de \emph{uma} operação sobre ele. O binário não
-é o ponto de partida: é o que se obtém quando a operação corre uma vez.
+\medskip\noindent O documento parte de \emph{dois} extremos e de \emph{uma}
+operação sobre eles: dobrar ao meio. Não se supõem números, nem símbolos, nem
+quantos são --- tudo o que segue é o que a dobra produz, e produz por indução.
 
 \begin{definicao}[o operador]\label{def:op}
-O \textbf{operador} $\partial$ é uma acção que \textbf{conserva}: existe uma
-composição associativa $\circ$ tal que
+Dado um intervalo de extremos $a$ e $b$, a \textbf{dobra} é a acção que os
+\emph{troca}:
 \[
-\boxed{\;x\circ\partial x \;=\; \text{o mesmo, qualquer que seja }x\;}
+\boxed{\;\partial x \;=\; a+b-x\;}
 \]
-Esse valor comum chama-se o \textbf{invariante} da composição. Pede-se ainda que
-$\partial$ seja uma acção \emph{efetiva} --- $\partial\neq\mathrm{id}$ ---, ou
-não haveria nada a conservar.
+Ela \textbf{conserva}: para todo $x$, a composição $x\circ\partial x$ vale
+sempre o mesmo --- a soma dos extremos --- e a esse valor comum chama-se o
+\textbf{invariante}. Pede-se ainda que $\partial$ seja \emph{efetiva}
+($\partial\neq\mathrm{id}$) e que tenha \textbf{volta}: de $\partial x$
+recupera-se $x$. Sem a volta não há o que conservar, e é ela que distingue uma
+dobra de um esmagamento.
 
-\medskip\noindent E isto diz-se de uma vez, na forma que serve para operar. O
-operador compõe-se de uma só maneira, aplicando-o outra vez, e conservar é a sua
-composição não perder tamanho:
+\medskip\noindent Normalizando os extremos a $0$ e $1$ --- que é só escolher a
+régua --- fica $\partial x=1-x$, e o invariante vale $1$:
 \[
-\boxed{\;|\partial^{2}|=1\;}
+\boxed{\;|\,x\circ\partial x\,|=1\;}
 \]
-\textbf{É esta a definição, e dela sai tudo --- sem nunca escrever um sinal.} O
-$|\cdot|$ diz apenas que o invariante é uma \textbf{unidade}: não diz qual, e
-não traz negativo nenhum. Sobre dois símbolos ela decide sozinha.
+O $|\cdot|$ diz apenas que o invariante é uma \textbf{unidade}. Não diz qual, e
+não traz sinal nenhum: nada do que segue precisa de escrever um número negativo.
+\end{definicao}
 
-\medskip\noindent\textbf{Primeiro, $\partial$.} Varrendo $\partial$ e a
-composição, os que cumprem $|x\circ\partial x|=1$ com $\partial$ efetivo são
-\emph{três}: a troca e as duas \emph{constantes}. As constantes colapsam os dois
-símbolos num só e por isso não têm \textbf{volta} --- e a volta é o que a
-definição pede, porque sem ela não há o que conservar. Fica \textbf{uma}:
+\begin{teorema}[uma composição não chega]\label{thm:duas}
+Com $\partial$ da Def.~\ref{def:op}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O invariante é o neutro.} O valor comum $e$ cumpre
+$e\circ x=x\circ e=x$.
+\item[(2)] \textbf{$\partial$ é involutiva, e o neutro é o seu ponto fixo.}
+$\partial\partial x=x$, e $\partial e=e$.
+\item[(3)] \textbf{O ponto fixo da dobra é o MEIO.} $\partial x=x$ dá
+$x=\tfrac{a+b}{2}$ --- um só, e é o centro. Ele não é acrescentado ao conjunto:
+é \emph{produzido} pela dobra, e por (2) é ele que serve de neutro.
+\item[(4)] \textbf{Nos extremos sozinhos não há meio, e por isso uma composição
+não chega.} Sobre $\{0,1\}$ apenas, $\partial$ troca os dois e não fixa nenhum;
+então (2) é impossível numa composição só. É preciso uma \textbf{segunda}, e o
+seu invariante é o \emph{outro} extremo:
 \[
-\boxed{\;\partial 1 = 0,\qquad \partial 0 = 1\;}
+\boxed{\;\partial x + x = 0\;}\qquad\qquad\boxed{\;\partial x\cdot x = 1\;}
 \]
+--- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra, e o
+invariante de cada uma é o neutro da outra.
+\item[(5)] \textbf{Dobrando, a estrutura repete-se dos DOIS lados.} O meio parte
+o intervalo em $[a,m]$ e $[m,b]$, e cada um, reescalado, é uma cópia exata do
+inteiro --- mesma dobra, mesmo meio, mesmos extremos. \emph{O ponto fixo de uma
+dobra é extremo da seguinte}: $m$ é o que $\partial$ não move em $[a,b]$ e é
+justamente o que $\partial$ \emph{troca} nos dois pedaços.
+\item[(6)] \textbf{E a indução dá todos os pontos.} Ao fim de $n$ dobras há
+$2^{n}$ intervalos e $2^{n}+1$ pontos, e eles são exatamente os $k/2^{n}$ com
+$0\le k\le 2^{n}$. Nada se escolhe pelo caminho: cada nível é o anterior
+dobrado, e a escolha de \emph{qual lado} em cada passo é a coordenada que o
+Teor.~\ref{thm:coord} vai ler.
+\end{enumerate}
+\end{teorema}
 
-\medskip\noindent\textbf{Daí sai a multiplicação.} O invariante é o neutro
-(Teor.~\ref{thm:duas}(1)), logo $1\cdot x=x$; e $\partial 1=0$, pelo que o $0$
-fica \emph{absorvente}, $0\cdot x=0$. Não sobra casa por preencher: varridas as
-tabelas comutativas com $1$ neutro e $0$ absorvente, há exatamente \textbf{uma}.
+\begin{proof}
+(1) Aplicando a definição a $x$ e a $\partial x$ vem
+$x\circ\partial x=e=\partial x\circ\partial\partial x$. Compondo
+$e\circ x=(x\circ\partial x)\circ x$ e usando a associatividade, o valor não
+depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
 
-\medskip\noindent\textbf{E daí sai a soma, com o oposto e sem negativo.}
-Compondo $\partial$ consigo mesmo lê-se $\partial\partial=1$, e a equação da
-outra face é
-\[
-\boxed{\;\partial\partial + 1 = 0\;}
-\]
-isto é $1+1=0$: \textbf{o oposto de $1$ é $1$}. Nunca é preciso escrever $-1$ ---
-o sinal não entra porque não faz falta, e o que noutras aritméticas seria um
-símbolo novo é aqui o próprio $1$. Com $0$ neutro, a tabela fica outra vez
-\textbf{forçada}: uma só.
+(2) $\partial\partial x=a+b-(a+b-x)=x$, directamente. E $e\circ\partial e=e$ por
+definição, $e\circ\partial e=\partial e$ por (1); donde $\partial e=e$.
+
+(3) $a+b-x=x$ tem a única solução $x=\tfrac{a+b}{2}$, e ela existe sempre que o
+$2$ se inverta. Note-se que \emph{escrever} a dobra já usa o dois --- é o número
+de extremos ---, pelo que tê-lo é condição de a construção operar; e tê-lo é ter
+o seu dual $\tfrac12$, que é o próprio meio. A composição e o ponto fixo são o
+mesmo dado lido dos dois lados.
+
+(4) Se $\partial$ não fixa nada, (2) não pode valer numa composição só. Com dois
+objetos trocados, o invariante teria de ser fixo e nenhum o é; restam
+\emph{duas} composições, cada uma com o seu invariante, e os dois invariantes
+são os dois objetos. Chamando-lhes $0$ e $1$, e $+$ e $\cdot$ às composições,
+a Def.~\ref{def:op} lê-se nas duas equações do enunciado. \emph{Varrido:}
+sobre três objetos, as composições com $\partial$ efetivo cujo invariante é
+neutro são $81$, e em \emph{todas} o neutro é fixo por $\partial$ --- que é (2)
+medido --- ao passo que sobre dois, com $\partial$ a trocá-los, não há
+\textbf{nenhuma}, que é (4). \code{tests/meio.c} §M5--§M6.
+
+(5) A aplicação afim que leva $[a,m]$ em $[a,b]$ transporta a dobra na dobra,
+porque $\partial$ é afim e os afins compõem-se; o mesmo do outro lado. E $m$ é
+fixo em $[a,b]$ por (3) e é extremo de cada pedaço por construção --- é a mesma
+frase dita nos dois níveis.
+
+(6) Por indução: o nível $0$ tem $1$ intervalo e $2$ pontos; dobrar cada
+intervalo duplica-os e acrescenta um ponto por intervalo, o que dá $2^{n}$ e
+$2^{n}+1$. Que os pontos sejam os $k/2^{n}$ sai de (3) aplicado a cada pedaço,
+cujo meio é a média de dois diádicos consecutivos. Medido nos primeiros níveis
+em \code{tests/meio.c} §M3.
+\end{proof}
+
+\begin{teorema}[as soluções são únicas]\label{thm:B}
+No nível $0$ --- os dois extremos, sem meio --- as duas composições do
+Teor.~\ref{thm:duas}(4) ficam \textbf{forçadas}, e sem que se escreva um sinal:
 \[
 \begin{array}{c|cc}
 \cdot & 0 & 1\\\hline
@@ -242,267 +292,37 @@ símbolo novo é aqui o próprio $1$. Com $0$ neutro, a tabela fica outra vez
 1 & 1 & 0
 \end{array}
 \]
-
-\medskip\noindent\textbf{E as duas faces trocam os papéis.} Medindo os
-invariantes: $x+\partial x=1$ para os dois $x$, e $x\cdot\partial x=0$ para os
-dois. \emph{O invariante de cada face é o neutro da outra} --- e é essa troca,
-não um sinal, que faz o par. As duas equações do operador leem-se então
-\[
-\boxed{\;\partial x + x = 0\;}\qquad\qquad\boxed{\;\partial x\cdot x = 1\;}
-\]
-com $\cdot$ a distribuir sobre $+$. Tudo isto está varrido em
-\code{tests/meio.c} §M7, e em nenhum passo se usou um número que não estivesse
-já construído.
-\end{definicao}
-
-\medskip\noindent É o único dado. Nem símbolos, nem operações, nem números: uma
-acção que não altera aquilo que a composição mede. Tudo o que segue --- que as
-operações são \emph{duas}, que os símbolos são \emph{dois}, e quais --- é
-consequência, e demonstra-se.
-
-\begin{teorema}[uma composição não chega]\label{thm:duas}
-Com $\partial$ da Def.~\ref{def:op}:
-\begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{O invariante é o neutro.} O valor comum $e$ cumpre
-$e\circ x=x\circ e=x$.
-\item[(2)] \textbf{A composição do operador é incremental, e há UMA equação
-primitiva: $\partial^{2}=\partial$.} A única maneira de compor $\partial$ é
-aplicá-lo outra vez --- $\partial^{n+1}=\partial\circ\partial^{n}$ ---, e o
-expoente é a \emph{contagem} das aplicações, não um símbolo novo. A relação que
-fecha essa sucessão diz-se no primeiro passo em que há o que dizer, o segundo, e
-a forma crua da conservação é
-\[
-\boxed{\;\partial^{2}=\partial\;}
-\]
---- \emph{aplicar de novo não muda}. Dela sai já a lei do oposto: escrevendo a
-Def.~\ref{def:op} em $\partial x$ vem $\partial x\circ\partial^{2}x=e$, e
-substituindo $\partial^{2}=\partial$ fica $\partial x\circ\partial x=e$, isto é
-$y\circ y=e$: \textbf{cada objeto é o seu próprio oposto} --- que é a conclusão
-do Teor.~\ref{thm:B} obtida aqui, antes de haver tabelas.
-
-\item[(2$'$)] \textbf{Mas a primitiva colapsa, e a correção é única.} Escrita
-como $\partial(\partial+1)=0$ --- e é $+1$ e não $-1$, porque o oposto de $1$
-\emph{é} $1$ ---, ela \emph{factoriza}, e onde não há divisores de
-zero força $\partial=0$ ou $\partial=1$ --- ambos não efetivos, que a
-Def.~\ref{def:op} proíbe. Corrige-se pelo mínimo: somando-lhe o que a estrutura
-\emph{tem}. As formas são $\partial^{2}=\alpha\partial+\beta$ com
-$\alpha,\beta\in\{0,1\}$, cada uma \emph{é} o seu par $(\alpha,\beta)$, e
-\[
-\underbrace{(1,0)}_{\partial^{2}=\partial}\;+\;\underbrace{(0,1)}_{\partial^{2}=1}
-\;=\;\underbrace{(1,1)}_{\partial^{2}=\partial+1}
-\]
---- a corrigida é a \textbf{composição} da primitiva com a unidade, e não uma
-equação posta à mão. Das quatro, \textbf{uma só é irredutível}: $t^{2}+t$,
-$t^{2}$ e $t^{2}+1$ têm raiz e factorizam; $t^{2}+t+1$ não tem. E uma equação
-que factoriza dá um $\partial$ que \emph{anula} ou \emph{fixa}, nunca um que
-\textbf{volte} --- e a Def.~\ref{def:op} pede a volta. Fica
-$\partial^{2}=\partial+1$, de período \textbf{três}.
-
-\item[(2$''$)] \textbf{E há um segundo regime, que é o do binário.} O que
-acabou de se dizer trata $\partial$ como \emph{linear}. Sendo ele \emph{afim},
-$\partial x=ax+b$, aparece uma solução que a leitura linear não vê: a
-\textbf{translação} $\partial x=x+1$, efetiva, bijetiva, involutiva
-($\partial^{2}=\mathrm{id}$) e \textbf{sem ponto fixo}. É dela que sai o
-binário, e é a ausência do ponto fixo que lá obriga a segunda composição (5). Os
-dois períodos vivem por isso em dois regimes: a translação afim dá \emph{dois}
-objetos e nenhum meio; o irredutível linear dá \emph{três} e o meio.
-\item[(2$'''$)] \textbf{E o $2$ da composição TEM DE ESTAR no conjunto ---
-senão nada disto opera.} Escrever $\partial^{2}$ é usar o \emph{dois}: é a
-contagem das composições. Um número usado e não contido é um número trazido de
-fora, e a construção deixa de ser operacional. Contê-lo é conter o seu
-\textbf{dual}, $\tfrac12$ --- e esse é exatamente \emph{o ponto fixo}:
-\[
-\partial x = 1-x \;\Longrightarrow\; x=\tfrac12 ,
-\qquad\qquad
-\tfrac12\cdot 2 = 1 .
-\]
-\textbf{A composição e o ponto fixo são o mesmo dado, um dual do outro}: o grau
-é $1/m$ e o meio é $1/\text{grau}$. Por isso o meio não é um símbolo a mais no
-conjunto --- é o que o conjunto já devia ter para poder contar as suas próprias
-composições, e incluí-lo obriga a incluir o $2$, que é o par que fecha.
-
-\medskip\noindent E com $\partial=\tfrac12$ a relação escreve-se
-\[
-\boxed{\;\partial^{2}+1=0\;}
-\]
-que força $\tfrac14$ a ser o \emph{oposto} de $1$ --- o oposto já construído,
-não um sinal novo ---, isto é $5=0$: a característica \textbf{cinco}, e só
-ela --- varridas as outras, nenhuma serve. Lá $\tfrac12=3$ e $3^{2}=-1$, e
-$\partial$ tem período \textbf{quatro}: é o operador que \emph{roda}, não o que
-espelha. E o $5$ não é um número qualquer: é o \emph{discriminante} de
-$x^{2}=x+1$, a equação de (2$'$) --- $1+4=5$. Em característica cinco ela
-\textbf{degenera}, o discriminante anula-se, e as duas folhas colidem numa raiz
-\emph{dupla}, que é $3=\tfrac12$. \emph{O meio é a cúspide}: o ponto onde o
-período $3$ e o período $4$ se tocam, e é por isso que ele é o objeto que ambos
-fixam.
-
-\item[(3)] \textbf{O neutro é ponto fixo.} $\partial e=e$.
-\item[(4)] \textbf{O período CONTA os objetos.} As potências distintas de
-$\partial$ são tantas quantas o período, e cada uma leva o argumento a um
-objeto: $\partial^{2}=1$ dá \emph{dois}, $\partial^{2}=\partial+1$ dá
-\emph{três}. Os objetos não são postulados nem contados à mão --- são a órbita
-de $\partial$, e o seu número é o período da equação de (2).
-\item[(5)] \textbf{Com dois, uma composição não chega.} No período $2$,
-$\partial$ troca os dois objetos e não fixa nenhum; então (3) é impossível numa
-composição só, e é preciso uma \textbf{segunda}, cujo invariante é o
-\emph{outro} objeto. É daqui que saem as duas faces.
-\item[(6)] \textbf{Com três, o ponto fixo existe --- e é o MEIO.} No período
-$3$, uma involução de três objetos fixa exatamente \emph{um}: três é ímpar e as
-transposições emparelham, pelo que sobra sempre um, e só um. Por (3) o neutro
-tem de ser fixo, e havendo um só fixo o neutro \textbf{é} ele. Chama-se-lhe $m$,
-o \emph{meio}, e não foi acrescentado: foi \textbf{deduzido} --- é o objeto que
-$\partial$ não move, e (3) obriga-o a ser o invariante.
-\end{enumerate}
+Em particular $1+1=0$: \textbf{o oposto de $1$ é $1$}, e o $-1$ nunca precisa de
+ser escrito --- o que noutras aritméticas seria um símbolo novo é aqui o próprio
+$1$. Cada objeto é o seu próprio oposto, que é a primeira equação lida sobre os
+dois.
 \end{teorema}
 
 \begin{proof}
-(1) Aplicando a definição a $x$ e a $\partial x$ vem
-$x\circ\partial x=e=\partial x\circ\partial\partial x$. Compondo
-$e\circ x=(x\circ\partial x)\circ x$ e usando a associatividade, o valor não
-depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
+O invariante da segunda face é o neutro dela, logo $1\cdot x=x$; e $\partial
+1=0$, pelo que $0$ fica absorvente, $0\cdot x=0$ --- as quatro entradas ficam
+determinadas. Para a primeira, $0$ é neutro e falta $1+1$: da Def.~\ref{def:op}
+em $x=1$ vem $\partial 1+1=0$, isto é $0+1=1$, e em $x=0$ vem $1+0=1$; compondo
+$\partial$ consigo lê-se $\partial\partial=1$, donde $1+1=0$. Varridas as
+tabelas comutativas com esses neutros há exatamente \textbf{uma} de cada
+(\code{tests/meio.c} §M7).
 
-(2) A substituição é directa: a Def.~\ref{def:op} avaliada em $\partial x$ dá
-$\partial x\circ\partial^{2}x=e$, e $\partial^{2}=\partial$ transforma o segundo
-factor no primeiro. (2$'$) A factorização $\partial(\partial+1)=0$ é a própria
-equação reescrita; que $t^{2}+t$, $t^{2}$ e $t^{2}+1$ têm raiz em dois símbolos
-verifica-se avaliando nos dois, e que $t^{2}+t+1$ não tem, também --- vale $1$
-nos dois. Iterando: com $\beta=0$ a relação é $\partial^{2}=\alpha\partial$, e
-$\partial$ leva tudo para dentro da sua imagem e lá fica, sem caminho de volta,
-porque dois objetos distintos podem ter a mesma imagem. (2$''$) Para $\partial$
-afim, $\partial^{2}x=a^{2}x+ab+b$; a involução pede $a^{2}=1$ e $b(a+1)=0$, que
-em dois símbolos deixa $a=1$ com $b$ livre, e $b=1$ é a translação --- efetiva
-porque $b\neq0$, e sem ponto fixo porque $x+1=x$ não tem solução.
-
-No período $2$ recupera-se a involução pelo caminho antigo, e ele continua a
-valer: de $x\circ\partial x=e$ e $\partial x\circ\partial\partial x=e$, o
-elemento $\partial x$ tem $x$ e $\partial\partial x$ como inversos; numa
-composição associativa o inverso é único, logo $\partial\partial x=x$.
-
-(3) $e\circ\partial e=e$ por definição, e $e\circ\partial e=\partial e$ por (1);
-donde $\partial e=e$.
-
-(4) As potências $\partial^{0},\dots,\partial^{k-1}$ são distintas até ao
-período $k$ e repetem-se depois; aplicadas a um objeto dão a sua órbita, e o
-número de objetos é o comprimento dela.
-
-(5) Se $\partial$ não tem ponto fixo, (3) não pode valer, e a composição não
-existe --- não há uma. Com dois objetos e $\partial$ a trocá-los, o invariante de
-uma composição teria de ser fixo por $\partial$, e nenhum dos dois o é. Resta que
-haja \emph{duas} composições, cada uma com o seu invariante, e que os dois
-invariantes sejam os dois objetos: um é o neutro de uma, o outro é o neutro da
-outra. Chamando-lhes $0$ e $1$, e escrevendo $+$ e $\cdot$ para as duas
-composições, a Def.~\ref{def:op} lê-se
-\[
-\boxed{\;\partial x + x = 0\qquad\qquad \partial x\cdot x = 1\;}
-\]
---- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra.
-
-(6) Uma involução de três objetos é um produto de transposições disjuntas, e em
-três elementos não cabem duas disjuntas: há uma, e sobra um objeto fixo --- um
-só. Por (3) o neutro é fixo; sendo único o fixo, o neutro é ele. Escrevendo $m$
-para esse objeto, a Def.~\ref{def:op} lê-se
-\[
-\boxed{\;\partial x \circ x = m\;}
-\]
-com $m$ neutro da composição. É a terceira leitura da \emph{mesma} definição:
-não é uma lei nova, é o invariante a ser agora o objeto que $\partial$ fixa em
-vez de um dos que ele troca. \emph{Varrido:} das composições sobre três objetos
-em que $x\circ\partial x$ é constante e o invariante é neutro, sobrevivem
-$9$, e em \textbf{todas} o neutro é $m$ --- nunca um dos outros dois; e com
-$\partial$ sem ponto fixo (um $3$-ciclo) não sobrevive \textbf{nenhuma}, que é
-(5) medido do outro lado. \code{tests/meio.c} §M5.
+Sobre dois símbolos com invariantes distintos sobrevivem exatamente \emph{duas}
+soluções, e a segunda é a primeira com $0$ e $1$ trocados: a mesma estrutura
+noutra nomeação. Partir do $0$ e construir o $1$, ou o contrário, é o mesmo
+percurso lido nos dois sentidos.
 \end{proof}
 
-\medskip\noindent\textbf{E a verificação é por varredura.} Sobre \emph{três}
-objetos, das $81$ soluções com uma composição \emph{todas} têm o neutro fixo por
-$\partial$, e \textbf{nenhuma} o tem não fixo --- que é (3) medido; sobre
-\emph{dois}, com $\partial$ a trocá-los, não há solução nenhuma com uma
-composição só, que é (4).
-
-\begin{teorema}[as soluções são únicas]\label{thm:B}
-Com as duas composições do Teor.~\ref{thm:duas}, os seus invariantes $0$ e $1$, e
-as duas a formarem uma só estrutura (distributividade), as tabelas ficam
-\textbf{forçadas}:
-\[
-0+0=0,\qquad 0+1=1+0=1,\qquad 1+1=0,
-\qquad
-0\cdot x=0,\qquad 1\cdot x=x .
-\]
-Em particular $1+1=0$, donde $x+x=0$: cada símbolo é o seu próprio oposto --- a
-primeira equação lida sobre os dois.
-
-\medskip\noindent\textbf{E no período $3$ a solução é OUTRA, e é o ternário.}
-As tabelas de cima são o período $2$ do Teor.~\ref{thm:duas}(2): $\partial$ troca
-os dois objetos, não fixa nenhum, e por (5) são precisas \emph{duas}
-composições. No período $3$ os objetos são \emph{três} --- (4) conta-os --- e um
-deles é fixo, o meio $m$, que (6) obriga a ser o neutro. Aí a conta muda de
-lado: \textbf{uma composição chega}, porque o que impedia era a falta de ponto
-fixo. E ela é \textbf{única}:
-\[
-\begin{array}{c|ccc}
-\odot & 0 & m & 1\\\hline
-0 & 1 & 0 & m\\
-m & 0 & m & 1\\
-1 & m & 1 & 0
-\end{array}
-\qquad\qquad
-\partial x \odot x = m \quad\text{para todo }x .
-\]
-Das composições sobre três objetos que conservam, têm o invariante como neutro,
-e são comutativas e associativas, sobrevive \textbf{exatamente uma} --- e é o
-\textbf{ciclo de ordem três}: $m$ tem ordem $1$ e os outros dois têm ordem $3$, que são
-justamente os que $\partial$ troca. Trocando qual dos três é o meio saem
-\emph{três} soluções, e são a mesma estrutura renomeada, como no período $2$
-eram duas.
-
-\medskip\noindent\textbf{E os dois períodos são duais, na conta das faces.} O
-binário tem duas composições e nenhum meio; o ternário tem um meio e uma
-composição só. Não é coincidência: é a \emph{mesma} cláusula (3) a ser paga de
-dois modos --- ou se arranja um segundo invariante fora, ou já há um dentro. O
-que num lado é uma face a mais, no outro é o ponto fixo.
-\[
-\begin{array}{lccc}
-\hline
- & \text{ponto fixo} & \text{composições} & \text{estrutura}\\\hline
-\partial^{2}=1        & \text{nenhum} & \text{duas} & B=\{0,1\}\\
-\partial^{2}=\partial+1 & m           & \text{uma}  & \{0,m,1\},\ \text{ciclo de }3\\\hline
-\end{array}
-\]
-\emph{Varrido em} \code{tests/meio.c} §M5--§M6.
-
-\end{teorema}
-
-\begin{proof}
-Da primeira equação: o oposto de $1$ existe e é um dos dois símbolos; se fosse
-$0$, viria $1+0=0$, contra $0$ ser o neutro; logo é $1$, e $1+1=0$. As restantes
-somas são o neutro. Da segunda: $1\cdot x=x$ é o neutro, e $0\cdot x=0$ sai de
-$0\cdot x=(0+0)\cdot x=0\cdot x+0\cdot x$. Ficam determinadas as quatro entradas
-de cada tabela, sem escolha por fazer.
-
-Varrendo os pares de tabelas sobre dois símbolos com invariantes distintos,
-sobrevivem exatamente \textbf{duas} soluções, e a segunda é a primeira com $0$ e
-$1$ trocados: a mesma estrutura noutra nomeação. Partir do $0$ e construir o $1$,
-ou o contrário, é o mesmo percurso lido nos dois sentidos.
-
-Quanto ao período $3$: as composições sobre três objetos são $3^{9}$, e
-varrem-se todas. Exigindo que $x\odot\partial x$ seja constante (Def.~\ref{def:op}),
-que esse invariante seja neutro (cláusula (1)), e que $\odot$ seja comutativa e
-associativa, sobrevive \textbf{uma}, a da tabela; sem a associatividade
-sobrevivem nove, e todas com o neutro em $m$ --- nunca num dos outros dois, o
-que é (6) medido. Com $\partial$ sem ponto fixo, isto é, um $3$-ciclo, não
-sobrevive \textbf{nenhuma}, o que é (5) medido do outro lado. \qedhere
-\end{proof}
-
-\medskip\noindent\textbf{E isto é o Teor.~\ref{thm:duas}(4) visto do outro
-lado.} Lá, o que força \emph{duas} composições é $\partial$ \textbf{não} ter
-ponto fixo em $B$; o meio seria esse ponto fixo, e é justamente ele que a
-distributividade não deixa entrar como símbolo. Os dois resultados dizem o
-mesmo: $B$ não contém o seu centro, e não o contém \emph{porque} contê-lo
-partiria a estrutura --- não por falta de sítio. É o que a varredura dos
-\emph{três} símbolos já dizia (p.~\pageref{thm:duas}), e é onde a escada paga o
-que costuma pagar: o meio existe, mas um andar acima, onde o $2$ se inverte, e
-lá ele não é símbolo nenhum --- é a metade da leitura que o
-Teor.~\ref{thm:BI} devolve, com a outra metade, que é o sinal, junto.
+\medskip\noindent\textbf{E o meio, quando entra, muda a conta das faces.} O
+nível $0$ precisa de \emph{duas} composições porque não contém o seu centro; o
+nível $1$ contém-no, e aí uma chega --- o ponto fixo existe e serve de neutro,
+que era o que faltava. Varrido sobre três objetos: as composições que conservam
+com o invariante por neutro são nove, e em \textbf{todas} ele é o meio, nunca um
+dos extremos; exigindo também comutatividade e associatividade sobra
+\textbf{uma}, o ciclo de ordem três, com o meio de ordem $1$ e os extremos de
+ordem $3$. E com $\partial$ sem ponto fixo não sobrevive \emph{nenhuma}. Não são
+dois teoremas: é o mesmo, medido dos dois lados
+(\code{tests/meio.c} §M6).
 
 \begin{definicao}[o binário]\label{def:B}
 $B$ é o conjunto dos dois símbolos do Teor.~\ref{thm:B}.
