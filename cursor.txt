@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        8aa1a8468eca3cf0      bash tools/bateria.sh
+    selo        439b3a5411d40fd0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1438,3 +1438,42 @@ O ESTADO DO BANCO
   várias tabelas por base · nomes de coluna · valores 0..65535 exactos ·
   SELECT/INSERT/UPDATE/DELETE com WHERE em dezasseis bits, produto incluído ·
   tudo o que não cabe é recusado com o motivo · porta FEBE com fachada libpq
+
+
+31. A MARCA ESTÁ NO AMBIENTE — a aranha estigmérgica, e o banco é um dos agentes
+==================================================================================
+O Aarão mandou-me ler a cadeia INTEIRA, e o §30 tinha lido só o primeiro paper.
+O algoritmo está em `arquitetura.tex` §sec:aranha, thm:multiplicidade:
+
+  cláusula 3   «A memória NÃO pertence ao agente. A escrita incremental
+                G_{t+1}(x) = G_t(x) + 1_{x=π(t)} materializa no espaço tudo o que
+                distingue região já percorrida de região nova. O agente NÃO
+                conserva a sequência π(0),…,π(t).»
+  cláusula 4   «SENTIR É LER G.»
+  §sec:pecas   «o agente (autómato, tradutor, BANCO, aranha estigmérgica) não
+                carrega o mapa: o mapa é ESTADO DO AMBIENTE, e a regra local de
+                leitura/escrita produz a geometria global.»
+
+E EU TINHA ESCRITO O CONTRÁRIO. O `col_max` — que decide o andar do avaliador —
+percorria TODAS AS LINHAS a cada consulta para saber a largura da coluna. É o
+agente a reconstruir a trajectória em vez de ler a marca que o espaço já tem.
+
+  S_COLMAX  uma marca por coluna. A ESCRITA deixa-a (INSERT e UPDATE), a leitura
+            lê-a. Uma leitura, não uma varredura.
+  não desce  um valor menor não a baixa, e o DELETE também não — o traço não se
+            desescreve. O efeito é ser CONSERVADOR: pode recusar o que hoje já
+            caberia, nunca aceitar o que não cabe. É a estigmergia, não um
+            descuido, e diz-se.
+  base antiga  sem marca e com linhas, reconstrói-se UMA vez e fica escrita —
+            paga-se uma, não uma por consulta
+
+  medidor  a marca sobe com o INSERT (300) e com o UPDATE (5000), NÃO desce com
+           um valor menor nem com o DELETE, e a base sem marca reconstrói e
+           DEIXA ESCRITO. Sem o último caso a compatibilidade era promessa; sem
+           o do DELETE, a estigmergia era uma palavra no comentário.
+  gume     o INSERT sem marcar → cai · o UPDATE sem marcar → cai · a marca a
+           descer → caem DUAS · a base antiga sem reconstruir → cai
+
+A LIÇÃO, e é sobre mim: li `naturais.tex` e parei. A lei do produto estava lá e
+estava certa — mas o ALGORITMO, o que diz onde a memória mora, estava no quarto
+documento. Ler o primeiro dá a operação; ler a cadeia dá o sítio onde ela corre.

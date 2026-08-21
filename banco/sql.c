@@ -248,6 +248,25 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  * logo uma comparação que cite uma coluna com valores acima de 255 é RECUSADA,
  * contada, e com o motivo escrito. Alargar o avaliador é o trio seguinte —
  * a aritmética do andar já está provada (`ula_add16`, §26). */
+/* ── A MARCA DA COLUNA — 45056.., uma por coluna ─────────────────────────────
+ * `arquitetura.tex` §sec:aranha, thm:multiplicidade, cláusula 3: «A memória NÃO
+ * pertence ao agente. A escrita incremental G_{t+1}(x) = G_t(x) + 1 materializa
+ * no espaço tudo o que distingue região já percorrida de região nova. O agente
+ * NÃO conserva a sequência π(0)…π(t).» E a cláusula 4: «SENTIR É LER G».
+ *
+ * O banco está lá nomeado: «o agente (autómato, tradutor, BANCO, aranha
+ * estigmérgica) não carrega o mapa: o mapa é ESTADO DO AMBIENTE, e a regra local
+ * de leitura/escrita produz a geometria global.»
+ *
+ * E eu tinha escrito o contrário: o `col_max` percorria TODAS as linhas a cada
+ * consulta para saber a largura da coluna — o agente a reconstruir a trajectória
+ * em vez de ler a marca que o ambiente já tem. A escrita deixa a marca; a
+ * leitura lê-a, e é local.
+ *
+ * A marca NÃO DESCE quando uma linha é apagada, e isso é a estigmergia e não um
+ * descuido: o traço não se desescreve. O efeito é ser CONSERVADOR — pode recusar
+ * uma consulta que hoje já caberia —, nunca aceitar uma que não cabe. */
+#define S_COLMAX    45056u
 #define S_ALTO      40960u
 #define S_COLNOME   36864u
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
@@ -584,10 +603,38 @@ static int col_indice(const char *nome){
  * Isto é o outro lado do §26: a aritmética de 16 bits já está provada, e o que
  * falta é o CAMINHO — o avaliador inteiro, que é o trio seguinte. Até lá o dado
  * guarda-se com 16 bits e a comparação diz que não chega lá. */
+/* a ESCRITA deixa a marca: max(marca, valor) — o que muda a cada passo fica no
+ * ambiente, e não numa lista que o agente carregue. */
+static void col_marca(long j, unsigned long v){
+    if(j < 0 || j >= (long)S_COLNOME_N) return;
+    Word m = mem_le(S_COLMAX + (unsigned)j);
+    unsigned long antes = (unsigned long)m.total | ((unsigned long)m.e << 8);
+    if(v <= antes) return;
+    m.total = (Word8)(v & 255u); m.e = (Word8)((v >> 8) & 255u);
+    mem_grava(S_COLMAX + (unsigned)j, m);
+}
+
+/* e SENTIR É LER A MARCA — uma leitura, não uma varredura.
+ *
+ * A volta pelas linhas fica para UM caso, e diz-se qual: uma base escrita antes
+ * de a marca existir tem o slot a zero com linhas lá dentro. Aí percorre-se uma
+ * vez e ESCREVE-SE a marca — paga-se uma, não uma por consulta. */
+static unsigned long col_max(long j, long ncols, long nrows){
+    Word m = mem_le(S_COLMAX + (unsigned)j);
+    unsigned long marca = (unsigned long)m.total | ((unsigned long)m.e << 8);
+    if(marca || nrows <= 0) return marca;
+    unsigned long v_max = 0;
+    for(long i = 0; i < nrows; i++){
+        unsigned long v = (unsigned long)mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total
+                        | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total << 8);
+        if(v > v_max) v_max = v;
+    }
+    col_marca(j, v_max);                     /* a marca fica escrita: uma vez */
+    return v_max;
+}
+
 static int col_larga(long j, long ncols, long nrows){
-    for(long i = 0; i < nrows; i++)
-        if(mem_le(S_ALTO + (unsigned)(i*ncols + j)).total != 0) return 1;
-    return 0;
+    return col_max(j, ncols, nrows) > 255u;              /* lê a marca */
 }
 
 /* ── E O ENVELOPE DA COMPARAÇÃO É ASSINADO ───────────────────────────────────
@@ -600,12 +647,7 @@ static int col_larga(long j, long ncols, long nrows){
  * disso é RECUSADO — não se responde ao contrário. */
 #define CMP16_MAX 32767L
 static int col_larguissima(long j, long ncols, long nrows){
-    for(long i = 0; i < nrows; i++){
-        unsigned long v = (unsigned long)mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total
-                        | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total << 8);
-        if(v > (unsigned long)CMP16_MAX) return 1;
-    }
-    return 0;
+    return col_max(j, ncols, nrows) > (unsigned long)CMP16_MAX;
 }
 
 /* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
@@ -1321,6 +1363,10 @@ static int insere(const char *resto){
          * toda a aritmética emitida continua a ler exactamente o que sempre leu */
         { Word wa; wa.total = (Word8)(((unsigned long)v[j] >> 8) & 255u); wa.e = 0;
           mem_grava(S_ALTO + (unsigned)(nrows*ncols + j), wa); }
+        /* e a ESCRITA DEIXA A MARCA — thm:multiplicidade cláusula 3. Sem isto o
+         * leitor teria de percorrer as linhas para saber a largura, que é o
+         * agente a carregar o mapa. */
+        if(v[j] >= 0) col_marca(j, (unsigned long)v[j]);
         Word wd; wd.total = den[j]; wd.e = 0;
         mem_grava(S_KZ + (unsigned)j, wd);
         emit_copia(S_KZ + (unsigned)j, S_DEN + (unsigned)(nrows*ncols + j));
@@ -2040,17 +2086,6 @@ static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned ksl
     pwrite(fprog, &rel, 1, (off_t)pos);
 }
 
-/* o maior valor guardado numa coluna (baixo + 256·alto) */
-static unsigned long col_max(long j, long ncols, long nrows){
-    unsigned long m = 0;
-    for(long i = 0; i < nrows; i++){
-        unsigned long v = (unsigned long)mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total
-                        | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total << 8);
-        if(v > m) m = v;
-    }
-    return m;
-}
-
 /* A FORMA LINEAR INTEIRA TEM DE CABER, e não só cada coluna. O avaliador decide
  * pelo sinal de `c0 + Σ c_i·x_i`, logo é ESSA soma que precisa de caber em
  * 0..32767 — `2·32767` já não cabe, e a resposta sairia ao contrário. O pior
@@ -2479,7 +2514,7 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
 }
 
 /* prepara as constantes e devolve o catálogo */
-static void prepara(long v){
+static void prepara(long v, long col_do_set){
     Word w = {0,0};
     mem_grava(S_ZERO, w);
     mem_grava(S_CONTA, w);
@@ -2489,6 +2524,8 @@ static void prepara(long v){
      * `SET saldo = 30000` sobre um saldo de 20000 dava 20016, e nada o dizia. */
     w.total = (Word8)((unsigned long)v & 255u); w.e = 0;                mem_grava(S_V, w);
     w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0;         mem_grava(S_VA, w);
+    /* o UPDATE também é escrita, e também deixa a marca */
+    if(v >= 0) col_marca(col_do_set, (unsigned long)v);
     w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
     w.total = 0; w.e = 0x80; mem_grava(S_MASK16, w); /* bit 15 do par — o sinal um andar acima */
 }
@@ -2701,7 +2738,7 @@ static int varre(const char *resto, int acao){
     /* A guarda que recusava consulta sobre coluna racional saiu daqui: a contração está
      * emitida em emit_atomos e a comparação é sobre o NUMERADOR do denominador comum. O que
      * era recusa honesta virou conta feita — inclusive com mais de uma coluna racional. */
-    prepara(v);
+    prepara(v, acao == ACAO_SET ? col_set : -1);
     Word z = {0,0};
     for(long i = 0; i < nrows; i++) mem_grava(S_MATCH + (unsigned)i, z);
 
@@ -4487,6 +4524,59 @@ int main(int argc, char **argv){
                    && p2.nrows == 1 && !strcmp(p2.cell[0][0], "100")
                    && p3.nrows == 1 && !strcmp(p3.cell[0][0], "100")
                    && p4.nrows == 2);
+            }
+            /* ── A MARCA ESTÁ NO AMBIENTE, NÃO NO AGENTE ────────────────────────
+             * `arquitetura.tex` §sec:aranha, thm:multiplicidade cláusula 3: «a
+             * memória NÃO pertence ao agente; a escrita incremental materializa no
+             * espaço tudo o que distingue região já percorrida de região nova, e o
+             * agente NÃO conserva a sequência». Cláusula 4: «SENTIR É LER G». E o
+             * banco está lá nomeado entre os agentes que «não carregam o mapa».
+             *
+             * O `col_max` percorria TODAS as linhas a cada consulta — o agente a
+             * reconstruir a trajectória. Agora a ESCRITA deixa a marca e a leitura
+             * lê-a. Mede-se o que isso obriga:
+             *   (a) a marca sobe com o INSERT e com o UPDATE
+             *   (b) ela NÃO DESCE com o DELETE — o traço não se desescreve, e o
+             *       efeito é ser conservador, nunca aceitar o que não cabe
+             *   (c) uma base ANTIGA, sem marca escrita, reconstrói-a UMA vez
+             * Sem (c) a compatibilidade era uma promessa; sem (b), a estigmergia
+             * era uma palavra no comentário. */
+            {
+                executa("CREATE TABLE marca (v)");
+                Word m0 = mem_le(S_COLMAX + 0);
+                executa("INSERT INTO marca VALUES (300)");
+                Word m1 = mem_le(S_COLMAX + 0);
+                executa("INSERT INTO marca VALUES (7)");
+                Word m2 = mem_le(S_COLMAX + 0);        /* não desce com um valor menor */
+                executa("UPDATE marca SET v = 5000 WHERE v = 7");
+                Word m3 = mem_le(S_COLMAX + 0);
+                executa("DELETE FROM marca WHERE v = 5000");
+                Word m4 = mem_le(S_COLMAX + 0);        /* NÃO desce com o DELETE */
+                unsigned long v0 = (unsigned long)m0.total | ((unsigned long)m0.e << 8);
+                unsigned long v1 = (unsigned long)m1.total | ((unsigned long)m1.e << 8);
+                unsigned long v2 = (unsigned long)m2.total | ((unsigned long)m2.e << 8);
+                unsigned long v3 = (unsigned long)m3.total | ((unsigned long)m3.e << 8);
+                unsigned long v4 = (unsigned long)m4.total | ((unsigned long)m4.e << 8);
+                /* (c) a base antiga: apaga-se a marca com linhas lá dentro */
+                { Word z = {0,0}; mem_grava(S_COLMAX + 0, z); }
+                unsigned long v5 = col_max(0, mem_le(S_CAT).total, mem_le(S_CAT).e);
+                Word m6 = mem_le(S_COLMAX + 0);
+                unsigned long v6 = (unsigned long)m6.total | ((unsigned long)m6.e << 8);
+                printf("\n     marca: %lu → %lu (INSERT 300) → %lu (INSERT 7) → %lu"
+                       " (UPDATE 5000) → %lu (DELETE)\n"
+                       "     e a base sem marca reconstrói: leu %lu e DEIXOU escrito %lu\n",
+                       v0, v1, v2, v3, v4, v5, v6);
+                ok("A MARCA ESTÁ NO AMBIENTE E NÃO NO AGENTE, que é o thm:multiplicidade a"
+                   " correr: a ESCRITA deixa a marca (300 no INSERT, 5000 no UPDATE) e a"
+                   " leitura LÊ-A — antes o banco percorria todas as linhas a cada consulta"
+                   " para saber a largura da coluna, que é o agente a reconstruir a"
+                   " trajectória em vez de ler o que o espaço já tem. Um valor MENOR não a"
+                   " baixa, e o DELETE também não: o traço não se desescreve, e isso torna"
+                   " o banco CONSERVADOR — pode recusar o que hoje já caberia, nunca aceitar"
+                   " o que não cabe. E a base ANTIGA, sem marca nenhuma, reconstrói-a UMA"
+                   " vez e deixa-a escrita: paga-se uma, não uma por consulta",
+                   v0 == 0 && v1 == 300 && v2 == 300 && v3 == 5000 && v4 == 5000
+                   && v5 == 5000 && v6 == 5000);
             }
             /* ── E A BASE ANTIGA CONTINUA A ANDAR ────────────────────────────────
              * A letra é o RECURSO, e um recurso que nunca corre não é compatibilidade:
