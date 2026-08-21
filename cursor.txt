@@ -107,6 +107,7 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (18 asserções):
      §W16     o motor como realização: ∑G = |I| = 127 sobre 47 slots
      §W17     a PROJECÇÃO de colunas; LIMIT e GROUP BY recusados com a razão
      §W18     o ORDER BY pela ÁRVORE do banco, com a fibra dos repetidos separada
+     §W19     o JOIN como BIPARTIÇÃO — o corte, na mesma árvore (passo 1 da §7)
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -165,14 +166,22 @@ O QUE FALTA, e é a metade do CORTE:
     M = 4C/n, com C = |A|·|B|.
 
   OS PASSOS, por ordem, e cada um com o seu medidor:
-   1. o join de igualdade `A JOIN B ON A.x = B.y` como CORTE: a bipartição das
-      linhas de A pelo valor de x, e a de B por y — duas ordens, e o casamento é
-      percorrer as duas árvores em paralelo (merge da ordem, que é o dual do
-      corte). O ORDER BY já dá as duas ordens.
-   2. o SALDO como controlo: F(G)_k dá o tamanho do corte sem visitar as linhas,
-      e tem de bater com a contagem directa — DOIS CAMINHOS.
-   3. max-cut = massa (M = 4C/n) para dizer QUAL junção é a mais barata, que é o
-      que um planeador de consultas decide à mão.
+   1. FEITO (§W19). O join de igualdade `A JOIN B ON A.x = B.y` como BIPARTIÇÃO:
+      a direita é copiada para o banco (S_JDIR) e indexada na MESMA árvore que
+      ordena; cada linha da esquerda desce por ela e encontra a sua classe. O
+      que na ordem é «percorrer todos os símbolos» é aqui «descer por um só».
+      Mede-se a bipartição dos DOIS lados — sem par não sai — e que NÃO é o
+      produto cartesiano. Tecto declarado: se a direita não couber, RECUSA.
+   2. POR FAZER — o SALDO como segundo caminho: F(G)_k = Σ_t χ_k(π(t)) dá o
+      tamanho do corte SEM visitar as linhas, e tem de bater com a contagem
+      directa. É o «dois caminhos» aplicado ao join, e o `aranha_n.c` §AN12 já
+      mede a transformada.
+   3. POR FAZER — max-cut = massa (M = 4C/n, C = |A|·|B|) para dizer QUAL junção
+      é a mais barata: é o que um planeador de consultas decide à mão.
+
+  O QUE O JOIN AINDA NÃO FAZ, e é preciso saber: só igualdade (não `<`, `>`),
+  só duas tabelas, os nomes das colunas da esquerda saem como letras (a tabela
+  aberta no fim é a direita), e não há LEFT/RIGHT/OUTER — só o interno.
 
   NÃO INVENTAR uma terceira estrutura. O corte e a ordem já existem; o join é
   ligá-los.

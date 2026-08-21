@@ -2838,6 +2838,135 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
     return 1;
 }
 
+/* ── O JOIN É O CORTE, e o corte é o dual da ordem ──────────────────────────
+ *
+ * «Ordenar dá a PROFUNDIDADE — o caminho inteiro, todos os dígitos; cortar dá a
+ * PARIDADE — um dígito» (arquitetura.tex §sec:cortar). Um join de igualdade é
+ * uma BIPARTIÇÃO: para cada valor da coluna de junção, as linhas que casam e as
+ * que não casam. E a bipartição faz-se com a MESMA árvore que ordena — descer
+ * pelos símbolos do valor é escolher a classe.
+ *
+ * Não há aqui uma estrutura nova: a árvore de S_ORD indexa a tabela da direita
+ * pelo valor da coluna de junção, e cada linha da esquerda desce por ela e
+ * encontra a sua classe. O que na ordem era «percorrer todos os símbolos» é
+ * aqui «descer por um só» — a profundidade e a paridade, o MOVE nos dois
+ * sentidos.
+ *
+ * A DIREITA VIVE NO .mem, não em RAM: as suas linhas são copiadas para a zona
+ * S_JDIR antes de a tabela ser trocada, porque o motor tem UMA tabela aberta de
+ * cada vez. O tecto é declarado e verificado. */
+#define S_JDIR     (S_LINHAS + 30000u)   /* as linhas da direita, no banco */
+#define S_JCAB     (S_JDIR - 1)
+#define J_MAXLIN   64
+#define J_MAXCOL   16
+
+static char j_tab_dir[64] = "";   /* a tabela da direita, "" se não há JOIN */
+static char j_col_esq[64] = "";   /* a coluna da esquerda no ON            */
+static char j_col_dir[64] = "";   /* a coluna da direita no ON             */
+
+/* O VALOR DE UMA CÉLULA É O PAR (baixo, alto), e não o byte baixo.
+ *
+ * Li só `.total` na primeira versão do JOIN e do ORDER BY, e um saldo de 300
+ * saiu 44 — que é 300 mod 256. O envelope é de oito bits e o número vive no
+ * PAR: é a dobra da fronteira de leitura, e ignorá-la é ler metade do valor. */
+static long celula_valor(long i, long j, long nc){
+    return (long)((unsigned long)mem_le(S_LINHAS + (unsigned)(i*nc + j)).total
+                | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*nc + j)).total << 8));
+}
+
+/* FASE 1 do join: copiar a tabela da DIREITA para o banco e indexá-la.
+ *
+ * O motor tem UMA tabela aberta de cada vez, logo a direita tem de ser lida
+ * primeiro e guardada. Guarda-se no .mem (S_JDIR), não em memória: linha a
+ * linha, célula a célula. E ao mesmo tempo desce-se a árvore com o valor da
+ * coluna de junção — que é a BIPARTIÇÃO: cada valor é uma classe, e as linhas
+ * com o mesmo valor caem na mesma.
+ *
+ * Devolve o número de linhas guardadas, ou −1 se não coube (e aí a consulta é
+ * recusada: um join com metade da direita é um join errado, não um join menor). */
+static int j_carrega_direita(long *ncols_dir){
+    Word cat;
+    long nc, nr;
+    int oc, postos = 0;
+    if(!usa_tabela(j_tab_dir, 0)) return -1;
+    if(!cat_nome_bate(j_tab_dir)) return -1;
+    oc = col_indice(j_col_dir);
+    if(oc < 0) return -2;                         /* a coluna não existe lá */
+    cat = mem_le(S_CAT); nc = cat.total; nr = cat.e;
+    if(nc > J_MAXCOL) return -1;
+    ord_limpa();
+    for(long i = 0; i < nr; i++){
+        if(mem_le(S_VIVO + (unsigned)i).total == 0) continue;
+        if(postos >= J_MAXLIN) return -1;
+        for(long j = 0; j < nc; j++){
+            long v = celula_valor(i, j, nc);
+            Word par = { (Word8)(v & 255), (Word8)((v >> 8) & 255) };
+            mem_grava(S_JDIR + (unsigned)(postos*J_MAXCOL + j), par);   /* o PAR */
+        }
+        if(!ord_insere(celula_valor(i, oc, nc), postos)) return -1;
+        postos++;
+    }
+    { Word c = { postos, nc }; mem_grava(S_JCAB, c); }
+    *ncols_dir = nc;
+    return postos;
+}
+
+/* as linhas da direita cujo valor de junção é `v` — desce a árvore por ele */
+static int j_casam(long v, int *saida, int cap){
+    unsigned long ch = ((unsigned long)(v + 2147483648L) << 8);
+    unsigned no = 0;
+    int n = 0;
+    /* desce os 8 nibbles do VALOR; os 2 do índice ficam para o percurso */
+    for(int d = ORD_NIV - 1; d >= 2; d--){
+        unsigned sim = (unsigned)((ch >> (4*d)) & 15u);
+        no = (unsigned)mem_le(S_ORD + no*ORD_LARG + sim).total;
+        if(!no) return 0;                          /* nenhuma linha com este valor */
+    }
+    /* os dois últimos níveis são o índice: percorre-os e recolhe */
+    for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
+        unsigned n1 = (unsigned)mem_le(S_ORD + no*ORD_LARG + a1).total;
+        if(!n1) continue;
+        for(unsigned a2 = 0; a2 < ORD_LARG; a2++){
+            unsigned n2 = (unsigned)mem_le(S_ORD + n1*ORD_LARG + a2).total;
+            if(!n2) continue;
+            if(n < cap) saida[n++] = (int)((a1 << 4) | a2);
+        }
+    }
+    return n;
+}
+
+/* lê `JOIN <tab> ON <a>.<x> = <b>.<y>`; devolve 1 se leu, 0 se não é join */
+static int le_join(const char **pp, const char *tab_esq){
+    const char *p = *pp;
+    char q1[64], q2[64], c1[64], c2[64];
+    pula(&p);
+    if(!palavra(&p, "JOIN")){
+        if(!palavra(&p, "INNER")) return 0;
+        if(!palavra(&p, "JOIN")) return 0;
+    }
+    if(!ident(&p, j_tab_dir, sizeof j_tab_dir)) return 0;
+    if(!palavra(&p, "ON")) return 0;
+    /* <q1>.<c1> = <q2>.<c2> — os qualificadores dizem de que lado é cada um */
+    if(!ident(&p, q1, sizeof q1)) return 0;
+    pula(&p); if(*p != '.') return 0; p++;
+    if(!ident(&p, c1, sizeof c1)) return 0;
+    pula(&p); if(*p != '=') return 0; p++;
+    if(!ident(&p, q2, sizeof q2)) return 0;
+    pula(&p); if(*p != '.') return 0; p++;
+    if(!ident(&p, c2, sizeof c2)) return 0;
+    /* qual é de que lado: o qualificador tem de nomear uma das duas tabelas */
+    if(!strcasecmp(q1, tab_esq) && !strcasecmp(q2, j_tab_dir)){
+        snprintf(j_col_esq, sizeof j_col_esq, "%s", c1);
+        snprintf(j_col_dir, sizeof j_col_dir, "%s", c2);
+    }else if(!strcasecmp(q2, tab_esq) && !strcasecmp(q1, j_tab_dir)){
+        snprintf(j_col_esq, sizeof j_col_esq, "%s", c2);
+        snprintf(j_col_dir, sizeof j_col_dir, "%s", c1);
+    }else return 0;
+    *pp = p;
+    return 1;
+}
+
+
 static int varre(const char *resto, int acao){
     const char *p = resto;
     char nome[64], alvo[64];
@@ -2857,6 +2986,8 @@ static int varre(const char *resto, int acao){
         if(!lista_colunas(&p, cols, sizeof cols)) return 0;
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
+        j_tab_dir[0] = 0;
+        le_join(&p, nome);          /* se houver JOIN, fica lido aqui */
         proj_n = (strcmp(cols, "*") == 0) ? 0 : -1;   /* −1: resolver depois de abrir */
         snprintf(proj_cols, sizeof proj_cols, "%s", cols);
     } else if(acao == ACAO_SET){
@@ -3094,6 +3225,116 @@ static int varre(const char *resto, int acao){
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
         sql_cap->nrows = 0;
     }
+    /* ── O JOIN: a bipartição, e a emissão do produto ────────────────────
+     *
+     * A direita já está no banco e indexada (fase 1). Para cada linha da
+     * esquerda que o WHERE deixou passar, desce-se a árvore com o valor da
+     * coluna de junção e emitem-se as linhas da classe. Linhas sem classe não
+     * saem — é o join interno, e é a bipartição a fazer o seu trabalho. */
+    if(acao == ACAO_MARCA && j_tab_dir[0]){
+        long ncols_dir = 0;
+        int nd, oce;
+        long nc_esq = ncols, nr_esq = nrows;
+        /* a esquerda tem de ser lida ANTES de trocar de tabela: copia-se o que
+         * o WHERE marcou, e só depois se abre a direita. */
+        static Word esq[J_MAXLIN][J_MAXCOL];
+        static long esq_v[J_MAXLIN];
+        int ne = 0;
+        oce = col_indice(j_col_esq);
+        if(oce < 0){
+            printf("erro: a coluna «%s» não existe na tabela «%s» — RECUSADA.\n",
+                   j_col_esq, nome);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" does not exist", j_col_esq); }
+            return 0;
+        }
+        for(long i = 0; i < nr_esq && ne < J_MAXLIN; i++){
+            if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
+            for(long j = 0; j < nc_esq && j < J_MAXCOL; j++){
+                long v = celula_valor(i, j, nc_esq);
+                Word par = { (Word8)(v & 255), (Word8)((v >> 8) & 255) };
+                esq[ne][j] = par;
+            }
+            esq_v[ne] = celula_valor(i, oce, nc_esq);
+            ne++;
+        }
+        nd = j_carrega_direita(&ncols_dir);
+        if(nd == -2){
+            printf("erro: a coluna «%s» não existe na tabela «%s» — RECUSADA.\n",
+                   j_col_dir, j_tab_dir);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" does not exist", j_col_dir); }
+            return 0;
+        }
+        if(nd < 0){
+            printf("erro: a direita do JOIN não coube — RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "JOIN: a tabela da direita nao coube; recusa em vez de juntar"
+                         " metade"); }
+            return 0;
+        }
+        /* emitir: as colunas da esquerda seguidas das da direita */
+        if(sql_cap){
+            int nsai = (int)(nc_esq + ncols_dir);
+            if(nsai > SQL_OUT_MAX_COLS) nsai = SQL_OUT_MAX_COLS;
+            memset(sql_cap->col, 0, sizeof sql_cap->col);
+            sql_cap->ncols = nsai;
+            sql_cap->nrows = 0;
+            for(int j = 0; j < nsai; j++){
+                char cn[S_COLNOME_W * 2 + 2];
+                if(j < nc_esq){
+                    /* os nomes da esquerda já não estão à mão: a tabela aberta é
+                     * a direita. Usam-se os da direita para as suas colunas e a
+                     * letra para as da esquerda, que é o que o motor faz quando
+                     * não tem nome guardado. */
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + j);
+                }else{
+                    col_nome_le((int)(j - nc_esq), cn, (int)sizeof cn);
+                    if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
+                    else snprintf(sql_cap->col[j], sizeof sql_cap->col[j],
+                                  "%c", 'a' + (int)(j - nc_esq));
+                }
+                sql_cap->tipo[j] = SQL_TIPO_INT4;
+            }
+        }
+        { long saiu = 0;
+          for(int e = 0; e < ne; e++){
+            int casos[J_MAXLIN], nca = j_casam(esq_v[e], casos, J_MAXLIN);
+            for(int k = 0; k < nca; k++){
+                int d = casos[k];
+                if(d >= nd) continue;
+                printf("   ");
+                for(long j = 0; j < nc_esq; j++){
+                    long ve = (long)esq[e][j].total | ((long)esq[e][j].e << 8);
+                    printf("%ld", ve);
+                    printf(" | ");
+                    if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
+                        snprintf(sql_cap->cell[sql_cap->nrows][j], SQL_OUT_CELL, "%ld", ve);
+                }
+                for(long j = 0; j < ncols_dir; j++){
+                    Word w = mem_le(S_JDIR + (unsigned)(d*J_MAXCOL + j));
+                    long v = (long)w.total | ((long)w.e << 8);
+                    printf("%ld", v);
+                    if(j + 1 < ncols_dir) printf(" | ");
+                    { int col = (int)(nc_esq + j);
+                      if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && col < SQL_OUT_MAX_COLS)
+                          snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "%ld", v); }
+                }
+                printf("\n");
+                if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
+                saiu++;
+            }
+          }
+          if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", saiu);
+          printf("-- JOIN: %ld linha(s) da esquerda, %d da direita, %ld emitidas\n",
+                 (long)ne, nd, saiu);
+        }
+        return 1;
+    }
+
     /* A ORDEM, quando pedida: insere-se (valor, índice) na árvore do banco e
      * percorre-se por símbolos. As linhas saem por essa ordem em vez da ordem
      * de inserção. Se a árvore não couber, a consulta é RECUSADA — ordenar
@@ -3106,10 +3347,7 @@ static int varre(const char *resto, int acao){
         ord_limpa();
         for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
             if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
-            { Word cv = mem_le(S_LINHAS + (unsigned)(i*ncols + oc));
-              long v = (long)(signed char)cv.total;      /* o corpo com sinal */
-              if(mem_le(S_CORPO + (unsigned)oc).total == CORPO_INTEIRO && cv.total < 128)
-                  v = (long)cv.total;
+            { long v = celula_valor(i, oc, ncols);     /* o PAR, não o byte baixo */
               if(!ord_insere(v, (int)i)){
                   printf("erro: a árvore de ordenação não coube — RECUSADA.\n");
                   if(sql_cap){ sql_cap->ok = 0;

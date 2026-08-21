@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W19 o JOIN como BIPARTIÇÃO — o corte, dual da ordem, na mesma árvore
  *   §W18 o ORDER BY pela ÁRVORE do banco, com a fibra dos repetidos separada
  *   §W17 a PROJECÇÃO de colunas, e ORDER BY/LIMIT recusados em vez de ignorados
  *   §W16 o MOTOR como realização: a pilha É a trajectória, ∑G = |I| medido no
@@ -2364,6 +2365,128 @@ int main(void){
            " ordem —, e o DESC ter de ser o inverso EXACTO do ASC. E O CONTROLO impede o"
            " arrasto: uma coluna que não existe é recusada pelo nome, e o LIMIT continua"
            " fora, porque entrou a ordem e não o resto.",
+           mal == 0);
+    }
+
+    /* ═══ §W19: O JOIN É O CORTE, E O CORTE É O DUAL DA ORDEM ═══════════════
+     *
+     * Um join de igualdade é uma BIPARTIÇÃO: para cada valor da coluna de
+     * junção, as linhas que casam e as que não casam. E faz-se com a MESMA
+     * árvore que ordena — o que na ordem é «percorrer todos os símbolos» é aqui
+     * «descer por um só». Ordenar dá a profundidade, cortar dá a paridade.
+     *
+     * O QUE SE MEDE é a bipartição a funcionar dos DOIS LADOS: uma linha da
+     * esquerda sem par não sai, uma da direita sem par não sai, e um valor com
+     * duas correspondências dá duas linhas — que é a FIBRA. Um join que
+     * devolvesse o produto cartesiano passaria em qualquer teste que só contasse
+     * linhas de um lado.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W19 o JOIN como bipartição: quem casa sai, quem não casa fica.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w19";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w19.mem");   unlink("/tmp/pgwire_w19.prog");
+        unlink("/tmp/pgwire_w19__cli.mem"); unlink("/tmp/pgwire_w19__ped.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE cli (id,saldo)", &o);
+        sql_executa("INSERT INTO cli VALUES (1,100)", &o);
+        sql_executa("INSERT INTO cli VALUES (2,200)", &o);   /* sem pedidos */
+        sql_executa("INSERT INTO cli VALUES (3,300)", &o);
+        sql_executa("CREATE TABLE ped (cid,valor)", &o);
+        sql_executa("INSERT INTO ped VALUES (1,10)", &o);
+        sql_executa("INSERT INTO ped VALUES (1,11)", &o);    /* a fibra do 1 */
+        sql_executa("INSERT INTO ped VALUES (3,30)", &o);
+        sql_executa("INSERT INTO ped VALUES (9,90)", &o);    /* sem cliente */
+
+        /* (a) o join, e o VALOR COMPLETO: 300 e não 44 */
+        {
+            int r = sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.cid", &o);
+            int bate = r && o.ncols == 4 && o.nrows == 3;
+            printf("      SELECT * FROM cli JOIN ped ON cli.id = ped.cid\n");
+            for(int i = 0; i < o.nrows; i++)
+                printf("        %s %s %s %s\n", o.cell[i][0], o.cell[i][1],
+                       o.cell[i][2], o.cell[i][3]);
+            /* o saldo 300 não cabe em oito bits: se o motor lesse só o byte
+             * baixo, viria 44. Foi o que veio à primeira escrita. */
+            int trezentos = 0;
+            for(int i = 0; i < o.nrows; i++) if(!strcmp(o.cell[i][1], "300")) trezentos = 1;
+            printf("      -> %d colunas, %d linhas; e o saldo 300 vem inteiro"
+                   " (não 44, o byte baixo): %s\n", o.ncols, o.nrows,
+                   trezentos ? "sim" : "NAO");
+            if(!bate || !trezentos) mal++;
+        }
+
+        /* (b) A BIPARTIÇÃO, dos dois lados — é isto que faz dele um join e não
+         * um produto cartesiano. */
+        {
+            sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.cid", &o);
+            int viu_2 = 0, viu_9 = 0, fibra_1 = 0;
+            for(int i = 0; i < o.nrows; i++){
+                if(!strcmp(o.cell[i][0], "2")) viu_2 = 1;   /* cliente sem pedido */
+                if(!strcmp(o.cell[i][2], "9")) viu_9 = 1;   /* pedido sem cliente */
+                if(!strcmp(o.cell[i][0], "1")) fibra_1++;
+            }
+            printf("\n      o cliente 2 não tem pedidos e NÃO sai: %s\n", viu_2 ? "NAO" : "sim");
+            printf("      o pedido 9 não tem cliente e NÃO sai:   %s\n", viu_9 ? "NAO" : "sim");
+            printf("      e o cliente 1 tem DOIS pedidos, e saem os dois: %s (%d)\n",
+                   fibra_1 == 2 ? "sim" : "NAO", fibra_1);
+            if(viu_2 || viu_9 || fibra_1 != 2) mal++;
+            /* o produto cartesiano daria 3×4 = 12 linhas: exige-se que NÃO dê */
+            printf("      -> não é produto cartesiano (%d linhas, e não %d): %s\n",
+                   o.nrows, 3 * 4, (o.nrows == 3) ? "sim" : "NAO");
+            if(o.nrows != 3) mal++;
+        }
+
+        /* (c) a ordem dos qualificadores no ON não muda o resultado */
+        {
+            SqlOut o2;
+            sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.cid", &o);
+            int n1 = o.nrows;
+            char prim[SQL_OUT_CELL]; snprintf(prim, sizeof prim, "%s", o.cell[0][0]);
+            sql_executa("SELECT * FROM cli JOIN ped ON ped.cid = cli.id", &o2);
+            int igual = (o2.nrows == n1 && !strcmp(o2.cell[0][0], prim));
+            printf("\n      `ped.cid = cli.id` dá o mesmo que `cli.id = ped.cid`: %s\n",
+                   igual ? "sim" : "NAO");
+            if(!igual) mal++;
+        }
+
+        /* ── O CONTROLO: uma coluna que não existe, de cada lado, RECUSA — e a
+         * mensagem tem de nomear a tabela certa. */
+        {
+            int r1 = sql_executa("SELECT * FROM cli JOIN ped ON cli.id = ped.zzz", &o);
+            int m1 = !r1 && o.err[0];
+            int r2 = sql_executa("SELECT * FROM cli JOIN ped ON cli.zzz = ped.cid", &o);
+            int m2 = !r2 && o.err[0];
+            printf("\n      CONTROLO — coluna inexistente à direita: %s\n",
+                   m1 ? "recusado com mensagem" : "NAO");
+            printf("      e à esquerda: %s\n", m2 ? "recusado com mensagem" : "NAO");
+            if(!m1 || !m2) mal++;
+            /* e um SELECT normal continua a funcionar depois de um join */
+            int r3 = sql_executa("SELECT * FROM cli", &o);
+            printf("      e o SELECT simples continua a correr depois: %d linhas %s\n",
+                   o.nrows, (r3 && o.nrows == 3) ? "" : "NAO");
+            if(!r3 || o.nrows != 3) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O JOIN É O CORTE, E O CORTE É O DUAL DA ORDEM. «Ordenar dá a PROFUNDIDADE — o"
+           " caminho inteiro, todos os dígitos; cortar dá a PARIDADE — um dígito.» Um join"
+           " de igualdade é uma BIPARTIÇÃO: para cada valor da coluna de junção, as linhas"
+           " que casam e as que não casam. E faz-se com a MESMA árvore que ordena — o que"
+           " na ordem é percorrer todos os símbolos é aqui descer por um só. Não há"
+           " estrutura nova: a direita é copiada para o banco e indexada na árvore, e cada"
+           " linha da esquerda desce por ela. O QUE SE MEDE É A BIPARTIÇÃO A FUNCIONAR DOS"
+           " DOIS LADOS: um cliente sem pedidos NÃO sai, um pedido sem cliente NÃO sai, e um"
+           " cliente com dois pedidos dá DUAS linhas — que é a fibra. E exige-se que NÃO"
+           " sejam doze linhas: um join que devolvesse o produto cartesiano passaria em"
+           " qualquer teste que só contasse um lado. E APANHOU-SE UM DEFEITO REAL À PRIMEIRA"
+           " ESCRITA: o saldo 300 saía 44, que é 300 mod 256, porque eu lia só o byte baixo"
+           " da célula — o valor vive no PAR (baixo, alto), e ignorar o alto é ler metade do"
+           " número. O CONTROLO recusa a coluna inexistente de cada lado, nomeando a tabela"
+           " certa, e exige que um SELECT simples continue a correr depois do join, porque"
+           " ele troca a tabela aberta por baixo da sessão.",
            mal == 0);
     }
 
