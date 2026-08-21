@@ -2624,3 +2624,35 @@ identificada, é multiplicada por σ.
   de 25 ocorrências de ℕ para ZERO · ℤ só onde é rótulo
   bateria   529 : 529, 0 falhas
   paper     25 páginas
+
+§58 — A CADEIA CANÓNICA A PARTIR DE I, E OS SÍMBOLOS QUE SOBRAM
+================================================================
+«secção 16: inclui a realização canónica de todos via I.» E depois: «secção 5,
+na tabela de grafos, dá um ℤ».
+
+A CADEIA ESCRITA A PARTIR DA LISTA, e só dela — cada domínio é o contradomínio
+do anterior:
+     X₁ = I contado
+     X₂ = X₁²/∼           (a,b) ∼ (c,d) ⟺ a+d = b+c
+     X₃ = (X₂ × X₂*)/∼    (p,q) ∼ (r,s) ⟺ ps = qr
+     X₄ = os cortes de X₃
+com as realizações que os ligam:
+     π₁: I → X₁            contar a lista
+     π₂: X₁² → X₂          (a,b) ↦ a − b
+     π₃: X₂ × X₂* → X₃     (p,q) ↦ p/q reduzido
+     π₄: X₃ → X₄           q ↦ o cilindro que o contém
+Nenhuma precisa de símbolo importado: o primeiro domínio é I e o resto encadeia.
+
+E OS SÍMBOLOS DEFAULT SAÍRAM TODOS:
+     ℕ, ℚ, ℝ    ZERO ocorrências — as macros foram removidas do preâmbulo
+     ℤ como rótulo de grade   →   «posto n» («no posto 2 há um plano e um rotor»)
+     (ℤ/2)^m                  →   𝔽₂^m, que é o corpo e é mais próprio
+     ρ: Q_M → ℤ               →   ρ: Q_M → I
+     «im ρ ⊆ 2ℤ»              →   «a imagem só contém índices pares»
+
+O QUE FICA DE ℤ, e é legítimo: o ANEL DOS COEFICIENTES — ℤ[X] (o anel de grupo),
+ℤ^I e ℤ^X (os módulos livres), Hom(V,ℤ), e ℤ[i] (Gauss, no Julia). Isso é
+álgebra linear com coeficientes inteiros, não um degrau da escada.
+
+  bateria   529 : 529, 0 falhas
+  paper     25 páginas

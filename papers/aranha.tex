@@ -20,8 +20,6 @@
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
 \newcommand{\Z}{\ensuremath{\mathbb{Z}}}
-\newcommand{\Q}{\ensuremath{\mathbb{Q}}}
-\newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
 \newcommand{\colunas}[3]{%
@@ -67,7 +65,7 @@ sem visitar a trajetória.
 teorema, só a igualdade em $X$. Para a quarta, uma vizinhança. Para a inversão,
 a álgebra de incidência de uma ordem --- a mesma de que a inversão de Möbius na
 árvore dos divisores é o outro caso. E para a leitura espectral, os caracteres
-de $(\Z/2)^m$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
+de $\mathbb{F}_2^{\,m}$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
 
 \medskip\noindent\textbf{E o eixo é uma dualidade}, que se repete em cada
 andar: \emph{multiplicidade} é o que o campo vê, \emph{memória} é o que a
@@ -353,7 +351,7 @@ campo percorre três, e não são o mesmo:
 \toprule
 grafo & vértice & aresta & grau \\
 \midrule
-a grade $\Z^n$ & um ponto & $x\sim x\pm e_i$ & $2n$ \\
+a grade de posto $n$ & um ponto & $x\sim x\pm e_i$ & $2n$ \\
 a árvore do encaixe & uma bola & mãe\,--\,filha & $3$ (interno) \\
 o hipercubo $Q_m$ & palavra de $m$ bits & um bit trocado & $m$ \\
 \bottomrule
@@ -378,7 +376,7 @@ convenção da construção dos naturais, em que o índice é a \emph{largura em
 bits}: $F_w$ denota $\mathrm{GF}(2^{w})$, e não um corpo de cardinalidade $w$.
 Com ela, o andar seguinte é $F_{2w}=F_w\oplus\sigma F_w$, com
 $\sigma^2=\sigma+\lambda$. Em característica $2$ a soma é o ou-exclusivo
-coordenada a coordenada, logo $(F_{2w},+)\cong(\Z/2)^{2w}$ --- isto é,
+coordenada a coordenada, logo $(F_{2w},+)\cong\mathbb{F}_2^{\,2w}$ --- isto é,
 $\mathrm{GF}(2^{2w})$ como grupo aditivo é o espaço binário de dimensão $2w$ ---
 e o seu grafo com os geradores canónicos \textbf{é} $Q_{2w}$:
 duas cópias de $F_w$ ligadas pelo emparelhamento $\sigma$. É a mesma dobra
@@ -528,7 +526,7 @@ na própria base, sem inventar codificação nenhuma.
 
 \begin{definicao}[a palavra da trajetória]\label{def:palavra}
 Seja $\mathcal{A}$ o alfabeto das direções de aresta --- $2n$ letras na grade
-$\Z^n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
+numa grade de posto $n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
 involutivo. Um percurso determina a \textbf{palavra} $s_0s_1\cdots s_{N-1}$ com
 $\pi(t+1)=\pi(t)+T(e_{s_t})$, onde $T$ diz como cada letra se realiza.
 \end{definicao}
@@ -587,7 +585,7 @@ espaço. Quando a colagem faz a folha voltar sobre si própria, uma célula rece
 mais do que uma ordem, e é aí, e só aí, que $G>1$. A dobra não é defeito da
 palavra: é o ato de colagem. O dragão não é a folha nem o espaço --- é a
 \emph{folha já colada}. Com a \emph{mesma} palavra: $\pm e_i$ em
-$\Z^2$ dá $\max G=2$; quatro direções independentes em $\Z^4$ dão $G\equiv1$,
+no posto $2$ dá $\max G=2$; quatro direções independentes no posto $4$ dão $G\equiv1$,
 porque somas de letras distintas nunca colidem; e $\pm e_0$ numa reta dá
 $\max G=28$, porque há menos para onde ir. A dobra é propriedade da
 \textbf{realização}. O que a produz não é a dimensão: é $T$ poder \emph{voltar}
@@ -693,8 +691,8 @@ com a aranha a ser só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
 \medskip\noindent\textbf{Representação de $G$.} O campo atribui a cada célula do
 seu suporte um cardinal, e $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
 Armazená-lo como \emph{tabela sobre $X$} --- por exemplo um arranjo
-$G[m]\times[m]$ quando $X=\Z^2$ --- é uma escolha de representação, não o
-algoritmo: custa $\lvert X\rvert$ e não $\abs{I}$, e em $\Z^3$ com $m=2048$ pede
+$G[m]\times[m]$ numa grade de posto $2$ --- é uma escolha de representação, não o
+algoritmo: custa $\lvert X\rvert$ e não $\abs{I}$, e no posto $3$ com $m=2048$ pede
 $2048^3$ células. A representação fiel à cláusula (3) é \textbf{esparsa}: a
 memória existe onde a trajetória passou. Com endereçamento aberto num arranjo
 fixo de capacidade $C\ge2\abs{I}$, uma escrita ou leitura custa $O(1)$ esperado
@@ -704,7 +702,7 @@ decidida antes de correr: não há alocação dinâmica em parte nenhuma.
 \medskip\noindent\textbf{Complexidade, e onde o $n$ aparece nela.} São $N+1$
 passos. O passo~1 escreve num ponto: $O(1)$. Os passos~2 e~3 leem
 $\lvert V(x)\rvert$ valores e tomam o mínimo: $\Theta(\lvert V(x)\rvert)$, que
-em $\Z^n$ é $\Theta(n)$. Total:
+é $\Theta(n)$ no posto $n$. Total:
 \[
 \Theta\bigl(n\,\abs{I}\bigr)\ \text{operações},\qquad
 \Theta\bigl(\abs{I}\bigr)\ \text{memória},
@@ -806,7 +804,7 @@ duas vezes: a prova de (1) usa (3) e a ordem dos índices; a corrida usa só a
 igualdade de vetores.
 
 \emph{Segunda:} $\operatorname{pr}_1$ não é um passo que se execute. Correr o
-campo em dimensão $n$ sobre os vetores de $\Z^{n+1}$ \emph{é} a projeção --- a
+campo em dimensão $n$ sobre vetores de $n+1$ coordenadas \emph{é} a projeção --- a
 folha está no vetor e o campo não a lê. Escrever ``zerar a última coordenada''
 antes de recontar é uma linha que não faz nada.
 
@@ -922,7 +920,7 @@ função de Möbius.
 
 \medskip\noindent\textbf{Duas convoluções, dois papéis.} A desta secção é a da
 \emph{ordem} $(I,\le)$, e serve para o directo e o inverso da própria aranha. A
-da §\ref{sec:transf} é a do \emph{grupo} $(\Z/2)^m$, e serve para compor e
+da §\ref{sec:transf} é a do \emph{grupo} $\mathbb{F}_2^{\,m}$, e serve para compor e
 decompor \emph{campos} de percursos diferentes. Não são a mesma operação, e
 convém não as confundir: uma acumula ao longo do \emph{domínio} $I$, a outra
 soma sobre o \emph{contradomínio} $X$.
@@ -1300,7 +1298,7 @@ O caso injetivo é a cláusula (2) do Teorema~\ref{thm:multiplicidade}.
 enunciado é falso, e falso do modo mais banal: se a trajetória parar depois de
 entrar no ciclo mas antes de o fechar duas vezes, as células do ciclo ainda
 visitadas uma só vez contam para $\{G=1\}$. Exemplo mínimo, um passo abaixo do
-limiar: $f(z)=z^2-1$ sobre \Z\ com $\pi(0)=0$ e $N=2$ dá a órbita $0,-1,0$, com
+limiar: $f(z)=z^2-1$ com $\pi(0)=0$ e $N=2$ dá a órbita $0,-1,0$, com
 $\ell=0$ e $p=2$, logo o limiar é $N\ge3$; e
 $\lvert\{G>1\}\rvert=1\neq2=p$. Com $N=3$ a órbita é $0,-1,0,-1$ e o enunciado
 vale.
@@ -1333,7 +1331,7 @@ que preserva a identidade das células e não pode preservar a adjacência.
 Seja $Q_M=\{0,\dots,M-1\}^2$ o quadrado discreto e $q_0,\dots,q_{M^2-1}$ uma
 enumeração dos seus pontos (por exemplo em serpentina). A aplicação
 \[
-\rho\colon Q_M\longrightarrow\Z,\qquad \rho(q_t)=2t
+\rho\colon Q_M\longrightarrow I,\qquad \rho(q_t)=2t
 \]
 é \textbf{injetiva} e \textbf{não sobrejetiva}: a sua imagem são os pares, e
 todos os ímpares ficam por usar. Assim, as duas realizações trocam exatamente os
@@ -1352,7 +1350,7 @@ $\rho\colon X\to I$ \ (conta) & sim & não & \textbf{buraco}: índices por usar 
 
 \begin{proof}
 Injetividade: $t\mapsto2t$ é injetiva e a enumeração é bijetiva sobre $Q_M$.
-Não sobrejetividade: $\operatorname{im}\rho\subseteq2\Z$.
+Não sobrejetividade: a imagem só contém índices pares.
 \end{proof}
 
 \begin{corolario}[a folga é uma só]\label{cor:folga}
@@ -1589,7 +1587,8 @@ um significado exato e finito, e o campo $G$ lê-o.
 
 \begin{definicao}[a soma parcial como realização]\label{def:serie}
 Dada uma sucessão de termos inteiros $(a_k)$, ponha-se $S_0=a_0$ e
-$S_{t+1}=S_t+a_{t+1}$. A realização é $\pi(t)=S_t$, com $X=\Z$.
+$S_{t+1}=S_t+a_{t+1}$. A realização é $\pi(t)=S_t$, com $X$ o degrau
+$I^{2}/{\sim}$.
 \end{definicao}
 
 \begin{teorema}[o campo lê o custo da série]\label{thm:serie}
@@ -1637,7 +1636,7 @@ para ler a célula.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O dragão: a régua de bits e a dobra}\label{sec:dragao}
 
-\noindent A curva de Heighway é a realização em $\Z^2$ que dobra mais
+\noindent A curva de Heighway é a realização de posto $2$ que dobra mais
 economicamente, e é onde $G>1$ se vê a olho. Ela admite duas construções sem uma
 linha em comum, e é essa coincidência que a fixa.
 
@@ -1740,6 +1739,32 @@ documentos desta obra. O que se verifica aqui é outra coisa: que os
 degraus construídos por \emph{quociente} são realizações no sentido da
 Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
+\subsection*{A cadeia canónica, a partir de $I$}
+
+\noindent Cada degrau tem por domínio o que o degrau anterior produziu, de modo
+que a escada inteira se escreve a partir da lista e de mais nada:
+\[
+\boxed{
+\begin{array}{lll}
+X_1 & = & I \text{ contado}\\[2pt]
+X_2 & = & X_1^{\,2}/{\sim}, \qquad (a,b)\sim(c,d)\iff a+d=b+c\\[2pt]
+X_3 & = & \bigl(X_2\times X_2^{\ast}\bigr)/{\sim}, \qquad (p,q)\sim(r,s)\iff ps=qr\\[2pt]
+X_4 & = & \text{os cortes de } X_3
+\end{array}}
+\]
+com $X_2^{\ast}$ os elementos invertíveis. E as realizações que ligam cada um ao
+seguinte são
+\[
+\pi_1\colon I\to X_1,\qquad
+\pi_2\colon X_1^{\,2}\to X_2,\qquad
+\pi_3\colon X_2\times X_2^{\ast}\to X_3,\qquad
+\pi_4\colon X_3\to X_4,
+\]
+respetivamente: contar a lista; $(a,b)\mapsto a-b$; $(p,q)\mapsto p/q$ reduzido;
+e $q\mapsto$ o cilindro que o contém. Nenhuma delas precisa de um símbolo
+importado: o domínio de cada uma é o contradomínio da anterior, e o primeiro
+domínio é $I$.
+
 \medskip\noindent\textbf{O primeiro degrau parte da lista.} Contar os símbolos
 de $I$ é já realizá-los, e os degraus seguintes constroem-se sobre esse
 resultado: $I^{2}/{\sim}$, depois as frações, depois os cortes. Há uma diferença
@@ -1757,12 +1782,12 @@ o primeiro, não há quociente a identificar, e a fibra é a da soma:
 \begin{center}\footnotesize
 \begin{tabular}{@{}llll@{}}
 \toprule
-andar & $\pi\colon I\to X$ & a fibra é & o representante $k=1$ \\
+$\pi_k\colon I_k\to X_k$ & a aplicação & a fibra é & o representante $k=1$ \\
 \midrule
-a lista contada \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
-$I^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
-$\Q=\operatorname{Frac}(\Z)$ & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
-$\R$ & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
+$\pi_1$: a lista contada \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
+$\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
+$\pi_3$: as frações & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
+$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1787,7 +1812,7 @@ foram esquecidos juntos.}\ }
 Passar ao quociente é projetar, e a multiplicidade é o tamanho da classe --- o
 que o documento dos inteiros chama ``memória por duplicidade'' é este campo. A segunda é sobre o
 levantamento: marcar cada fibra com $k=1$ \emph{é} escolher o representante
-canónico, e em $\Q$ isso dá literalmente a fração irredutível.
+canónico, e no degrau das frações isso dá literalmente a fração irredutível.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{As dualidades, reunidas}\label{sec:dualidades}
@@ -1875,7 +1900,7 @@ que contasse mal. Servem a reta axial e o Cantor. E note-se que são \emph{dois}
 o Cantor não dobra, apesar de ser a mais intrincada das figuras da lista.
 
 \medskip\noindent\textbf{$\max G$ é uma medida da curva.} Medido, o dragão de
-$\Z^3$ da tabela tem $\max G=3$ e o do plano $2$: dobra \emph{mais}, e não menos.
+posto $3$ da tabela tem $\max G=3$ e o do plano $2$: dobra \emph{mais}, e não menos.
 A grandeza compara as duas curvas, que são construções distintas --- a de $\Z^3$
 roda o plano da viragem --- e não os dois espaços. A dimensão, essa, já apareceu
 onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert V(x)\rvert=2n$.
@@ -1885,7 +1910,7 @@ onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert V(x)\rvert=2n$.
 
 \medido{Teor.~\ref{thm:multiplicidade} e Teor.~\ref{thm:dimensao}:
 \code{tests/aranha\_n.c} §AN1--§AN2 (campo incremental $=$ recontagem e
-$\sum G=\abs{I}$ em $\Z^1$--$\Z^4$), §AN7 ($\abs{V(x)}=2n$, vizinhos distintos);
+$\sum G=\abs{I}$ nos postos $1$ a $4$), §AN7 ($\abs{V(x)}=2n$, vizinhos distintos);
 Teor.~\ref{thm:dragao} §AN3 (bits $=$ dobra $D_k+D_k^{*}$, $k=1..12$, com os
 dois sinais de $R$ corridos e exatamente um a bater);
 dobra e controlos §AN4;
@@ -1894,7 +1919,7 @@ falha ambas com o mesmo raio);
 Teor.~\ref{thm:periodo} §AN8 ($\lvert\{G>1\}\rvert=p$ e $\lvert\{G=1\}\rvert=\ell$
 sobre $z\mapsto z^2+c$ em $\Z[i]$, com o período obtido por busca independente e
 a órbita que escapa como controlo);
-ciclo em $\Z^n$ e Teor.~\ref{thm:fecho} §AN13;
+ciclo em qualquer posto e Teor.~\ref{thm:fecho} §AN13;
 Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
 passo, nem uma a mais --- o autómato não varre) (leitura a distinguir $G{=}0$ de
 $G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
@@ -1971,7 +1996,7 @@ o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
 Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
-         $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
+         postos $1$ a $4$, árvore, $\Z[i]$}
         {\code{tests/aranha\_n.c} §AN1--§AN32;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
