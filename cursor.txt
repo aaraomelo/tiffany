@@ -280,8 +280,16 @@ O QUE FALTA, e é a metade do CORTE:
   O PLANO DOS JOINS ESTÁ FECHADO (1, 2 e 3). O que o join ainda não faz está
   abaixo.
 
-  O QUE O JOIN AINDA NÃO FAZ, e é preciso saber: só igualdade (não `<`, `>`),
-  só duas tabelas, e não há LEFT/RIGHT/OUTER — só o interno.
+  A DESIGUALDADE É A ORDEM, e o dual do corte. Na igualdade desce-se a árvore
+  por UM símbolo e a fibra sai inteira (o corte, a paridade); na desigualdade
+  percorre-se a árvore POR ORDEM e toma-se o sufixo ou o prefixo (a
+  profundidade). Não há estrutura nova — é o mesmo MOVE nos dois sentidos, na
+  mesma árvore. Fazem-se `<`, `<=`, `>`, `>=`, e quando os lados do ON vêm
+  trocados o operador VIRA, senão a condição é outra.
+
+  O QUE O JOIN AINDA NÃO FAZ: só duas tabelas, e não há LEFT/RIGHT/OUTER — só o
+  interno. (O LEFT é a fibra VAZIA: as linhas da esquerda com G=0 do lado
+  direito, e o `def:objeto` já diz que o suporte é {x : G(x) > 0}.)
   (Os NOMES da esquerda já saem certos: a junção troca a tabela aberta por
   baixo da sessão, e por isso as colunas da esquerda vinham como letras — os
   nomes não estavam perdidos, estavam noutro ficheiro, e agora lêem-se ANTES de

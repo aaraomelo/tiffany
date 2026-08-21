@@ -3204,6 +3204,7 @@ static long celula_valor(long i, long j, long nc){
  *
  * Devolve o número de linhas guardadas, ou −1 se não coube (e aí a consulta é
  * recusada: um join com metade da direita é um join errado, não um join menor). */
+static int j_col_dir_idx = -1;       /* a coluna de junção na direita */
 static int j_carrega_direita(long *ncols_dir){
     Word cat;
     long nc, nr;
@@ -3212,6 +3213,7 @@ static int j_carrega_direita(long *ncols_dir){
     if(!cat_nome_bate(j_tab_dir)) return -1;
     oc = col_indice(j_col_dir);
     if(oc < 0) return -2;                         /* a coluna não existe lá */
+    j_col_dir_idx = oc;                           /* para a desigualdade a ler */
     cat = mem_le(S_CAT); nc = cat.total; nr = cat_nrows();
     if(nc > J_MAXCOL) return -1;
     ord_limpa();
@@ -3231,6 +3233,13 @@ static int j_carrega_direita(long *ncols_dir){
     return postos;
 }
 
+/* o valor da coluna de junção da linha `d` da direita, lido do S_JDIR */
+static long j_valor_dir(int d, long ncols_dir){
+    int oc = j_col_dir_idx;
+    if(oc < 0 || oc >= (int)ncols_dir) return 0;
+    Word w = mem_le(S_JDIR + (unsigned)(d*J_MAXCOL + oc));
+    return (long)w.total | ((long)w.e << 8);
+}
 /* as linhas da direita cujo valor de junção é `v` — desce a árvore por ele */
 static int j_casam(long v, int *saida, int cap){
     unsigned long ch = ((unsigned long)(v + 2147483648L) << 8);
@@ -3256,6 +3265,9 @@ static int j_casam(long v, int *saida, int cap){
 }
 
 /* lê `JOIN <tab> ON <a>.<x> = <b>.<y>`; devolve 1 se leu, 0 se não é join */
+enum { J_IG = 0, J_LT, J_LE, J_GT, J_GE };
+static int j_op = J_IG;              /* o operador do ON */
+
 static int le_join(const char **pp, const char *tab_esq){
     const char *p = *pp;
     char q1[64], q2[64], c1[64], c2[64];
@@ -3270,7 +3282,16 @@ static int le_join(const char **pp, const char *tab_esq){
     if(!ident(&p, q1, sizeof q1)) return 0;
     pula(&p); if(*p != '.') return 0; p++;
     if(!ident(&p, c1, sizeof c1)) return 0;
-    pula(&p); if(*p != '=') return 0; p++;
+    /* O OPERADOR É O DUAL. A igualdade é o CORTE — descer a árvore por UM
+     * símbolo, e a fibra sai inteira. A desigualdade é a ORDEM — «ordenar dá a
+     * PROFUNDIDADE, o caminho inteiro; cortar dá a PARIDADE, um dígito»
+     * (arquitetura §max-cut): percorre-se a árvore por ordem e toma-se o
+     * SUFIXO. É o mesmo MOVE nos dois sentidos, na mesma árvore. */
+    pula(&p);
+    if(*p == '='){ j_op = J_IG; p++; }
+    else if(*p == '<'){ p++; if(*p == '='){ j_op = J_LE; p++; } else j_op = J_LT; }
+    else if(*p == '>'){ p++; if(*p == '='){ j_op = J_GE; p++; } else j_op = J_GT; }
+    else return 0;
     if(!ident(&p, q2, sizeof q2)) return 0;
     pula(&p); if(*p != '.') return 0; p++;
     if(!ident(&p, c2, sizeof c2)) return 0;
@@ -3281,6 +3302,9 @@ static int le_join(const char **pp, const char *tab_esq){
     }else if(!strcasecmp(q2, tab_esq) && !strcasecmp(q1, j_tab_dir)){
         snprintf(j_col_esq, sizeof j_col_esq, "%s", c2);
         snprintf(j_col_dir, sizeof j_col_dir, "%s", c1);
+        /* os lados vieram trocados: o operador VIRA, senão a condição é outra */
+        if(j_op == J_LT) j_op = J_GT; else if(j_op == J_GT) j_op = J_LT;
+        else if(j_op == J_LE) j_op = J_GE; else if(j_op == J_GE) j_op = J_LE;
     }else return 0;
     *pp = p;
     return 1;
@@ -3713,9 +3737,32 @@ static int varre(const char *resto, int acao){
                 sql_cap->tipo[j] = SQL_TIPO_INT4;
             }
         }
+        /* A DIREITA POR ORDEM — para a desigualdade, que é o dual do corte.
+         *
+         * Na igualdade desce-se a árvore por UM símbolo e a fibra sai inteira
+         * (o corte). Na desigualdade percorre-se a árvore POR ORDEM e toma-se o
+         * SUFIXO ou o PREFIXO: as linhas estão já ordenadas pelo valor, porque
+         * é isso que a árvore faz. Não há estrutura nova — é o mesmo MOVE nos
+         * dois sentidos, «ordenar dá a profundidade, cortar dá a paridade». */
+        int ordem[J_MAXLIN], n_ord = 0;
+        if(j_op != J_IG) ord_percorre(0, 0, 0, ordem, &n_ord, J_MAXLIN, 0);
+
         { long saiu = 0;
           for(int e = 0; e < ne; e++){
-            int casos[J_MAXLIN], nca = j_casam(esq_v[e], casos, J_MAXLIN);
+            int casos[J_MAXLIN], nca;
+            if(j_op == J_IG) nca = j_casam(esq_v[e], casos, J_MAXLIN);
+            else {
+                /* o sufixo (ou prefixo) da ordem: os que cumprem a desigualdade */
+                nca = 0;
+                for(int t = 0; t < n_ord && nca < J_MAXLIN; t++){
+                    long vd = j_valor_dir(ordem[t], ncols_dir);
+                    int passa = (j_op == J_LT) ? (esq_v[e] <  vd)
+                              : (j_op == J_LE) ? (esq_v[e] <= vd)
+                              : (j_op == J_GT) ? (esq_v[e] >  vd)
+                                               : (esq_v[e] >= vd);
+                    if(passa) casos[nca++] = ordem[t];
+                }
+            }
             for(int k = 0; k < nca; k++){
                 int d = casos[k];
                 if(d >= nd) continue;
