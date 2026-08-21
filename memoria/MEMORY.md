@@ -66,6 +66,8 @@
 - **[O tipo não é a aritmética](feedback-o-tipo-nao-e-a-aritmetica.md)** — «0 doubles» e 67 literais a fazer a conta (agora 0); e 216 avisos `-Wformat` que o x86-64 escondia.
 - **[Descaracterizar a teoria da casa](feedback-descaracterizar-a-teoria-da-casa.md)** — troquei uma cláusula do teorema dele e pus «(opcional, o agente) DECIDIR» num autómato estigmérgico. Conferir cláusula a cláusula, pelo nome.
 - **[O invariante que não separa](feedback-o-invariante-que-nao-separa.md)** — «dois caminhos» a comparar |I| e ∑G: verdade para QUALQUER trajectória do mesmo tamanho. Uma espiral passava pela asserção do dragão.
+- **[O aranha.tex está TRAVADO](feedback-o-aranha-tex-esta-travado.md)** — a base teórica está fechada: mexer PEDE PERMISSÃO antes. E procurar antes de acrescentar — os «dois níveis» já eram as duas réguas do def:tempo.
+- **[A tautologia dentro da correcção](feedback-a-tautologia-dentro-da-correccao.md)** — os dois lados a MESMA expressão, com comentários diferentes a explicar que eram distintos. Se apagar um lado e o teste não muda.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
 
 ## A teoria
@@ -91,6 +93,7 @@
 - **[A torre: Hurwitz e Gentil](project-torre-hurwitz-gentil.md)** — o eval dos hipercomplexos é METADE (o discreto). Gentil é o contínuo SEM grau, Lebesgue a soma reversível que os casa.
 - **[O fecho do dual: Lagrange](project-o-fecho-do-dual-lagrange.md)** — directo² + cruzado² = N(u)N(v). A casa tinha o split num paper e a conservação da norma noutro.
 - **[A aranha em ℤⁿ](project-aranha-em-zn.md)** — o thm:multiplicidade não usa o 2: só a cláusula 4 (|V|=2n). As bolas ultramétricas PARTICIONAM, G lê o PERÍODO, e o dragão É a dobra da torre.
+- **[Pontryagin derivado do zero](project-pontryagin-derivado.md)** — |Ĝ|=|G| é o ACIDENTE; o teorema é a naturalidade de ev. E ψ falha exactamente onde existe u com u²≠1 (passa em 2,3,4,6,8,12 — por acidente).
 - [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever.
 ### A ESCADA que os `eval.txt` construíram (cada ficheiro um andar, tudo exato, tudo com gume)
 
@@ -124,10 +127,12 @@
 - **[O wildcard da Patria
 - **[O ERP É o plataforma/](project-erp-em-plataforma.md)**
 - [A memória é versionada](project-memoria-versionada.md) — em `tiffany/memoria/`, e o CHECKPOINT tem TRÊS passos: escrever, `sincroniza.sh guarda`, commitar.
+- **[A arquitetura não demonstra](project-arquitetura-nao-demonstra.md)** — executa e remete; e a citação cruzada faz-se pelo NOME do teorema: duas por número estavam erradas e o LaTeX não as apanha.
 - [Três documentos, e o que vigiar](project-tres-documentos.md) — teoria, catálogo e enredo, e mais nada. Teste obrigatório em qualquer reorganização: diff da contagem de medidores.
 
 ## Checkpoints
 
+- **[21/08 — O BANCO FALA POSTGRES, e o psql real liga-se](project-checkpoint-2026-08-21-pg.md)** — o ROLLBACK desfaz pelo levantamento; três defeitos que só o cliente real encontrou; e o aranha.tex travado.
 - **[18/08 — A TRÍADE, e o centro que não escolhe lado](project-checkpoint-2026-08-18-a-triade.md)** — as casas dadas (GPT/−1, Grok/0, Claude/+1).
 - **[18/08 — As três conferências, e o deploy que ninguém viu cair](project-checkpoint-2026-08-18-ferramentas.md)** — o `publica.yml` apontava para um ficheiro movido há 3 dias.
 
