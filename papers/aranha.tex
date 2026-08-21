@@ -427,54 +427,6 @@ incidentes: $G$ não é uma contagem entre outras --- é a que fecha a
 contabilidade local do percurso. É o \emph{handshaking} dito sobre a
 trajetória.
 
-\subsection*{A aresta é a memória local, e a base é o alfabeto}
-
-\noindent Uma aresta não é só a ligação entre dois vértices: é o registo de
-\emph{por qual divisão} se saiu. Um vértice interior da grade tem $2n$ saídas ---
-$\{x\pm e_i\}$ ---, e escolher uma é escrever informação. Daí que os passos se
-codifiquem na própria base, sem inventar codificação nenhuma.
-
-\begin{definicao}[a palavra da trajetória]\label{def:palavra}
-Seja $\mathcal{A}$ o alfabeto das direções de aresta --- $2n$ letras na grade
-$\Z^n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
-involutivo. Um percurso determina a \textbf{palavra} $s_0s_1\cdots s_{N-1}$ com
-$\pi(t+1)=\pi(t)+T(e_{s_t})$, onde $T$ diz como cada letra se realiza.
-\end{definicao}
-
-\begin{teorema}[a palavra reconstrói, e a dobra é o núcleo]\label{thm:palavra}
-$\pi$ recupera-se de $\pi(0)$ e da palavra. Além disso, a posição é a
-\emph{soma} das letras realizadas, e a soma é comutativa; logo o morfismo
-$w\colon\mathcal{A}^{*}\to X$, $w(s_0\cdots s_{t-1})=\sum_u T(e_{s_u})$, tem
-\textbf{núcleo}, e
-\[
-G(x)>1
-\iff
-\text{dois prefixos da palavra têm a mesma imagem por }w
-\iff
-\text{um fator da palavra está em }\ker w .
-\]
-\end{teorema}
-
-\begin{proof}
-A reconstrução é a recorrência da Def.~\ref{def:palavra}. Se $\pi(i)=\pi(j)$
-com $i<j$, os prefixos de comprimentos $i$ e $j$ têm a mesma imagem, e o fator
-entre eles tem imagem $0$; o recíproco é a mesma conta ao contrário.
-\end{proof}
-
-\medskip\noindent Um fator com imagem $0$ é um \emph{ciclo fechado}, o que
-liga isto ao Teor.~\ref{thm:euler}: a dobra é a célula \textbf{esquecer a
-ordem}, e $G$ conta quantas ordens lá chegaram.
-
-\medskip\noindent\textbf{E a estrutura não é a geometria.} A palavra vive no
-alfabeto; a geometria entra por $T$. O dragão não \emph{é} a estrutura --- é a
-imagem dela sob um $T$ particular. Com a \emph{mesma} palavra: $\pm e_i$ em
-$\Z^2$ dá $\max G=2$; quatro direções independentes em $\Z^4$ dão $G\equiv1$,
-porque somas de letras distintas nunca colidem; e $\pm e_0$ numa reta dá
-$\max G=28$, porque há menos para onde ir. A dobra é propriedade da
-\textbf{realização}. O que a produz não é a dimensão: é $T$ poder \emph{voltar}
---- todas as letras a avançar no mesmo sentido dá uma realização monótona, logo
-injetiva, em qualquer dimensão.
-
 \begin{teorema}[a dobra vista por Euler]\label{thm:euler}
 Seja $\pi$ um percurso conexo, $V=\lvert\operatorname{supp}G\rvert$ o número de
 células e $A$ o de arestas \emph{distintas} usadas. A característica do
@@ -510,6 +462,85 @@ As réguas indexam-se pelo mesmo $k$: a da direção $e_j=2^{j}$ sobrevive a
 $\pi_k$ exatamente quando $2^{j}<2^{2^{k}}$, e portanto sobrevivem $2^{k}$
 réguas das oito.
 \end{corolario}
+
+\begin{proof}
+Truncar aos $2^{k}$ bits baixos é reter a componente em $F_{2^{k}}$ e esquecer a
+que multiplica $\sigma$, que é o que $\pi_k(x\oplus y^{*})=x$ diz; e embeber é
+pôr essa segunda componente a zero, donde a composição é a identidade. A
+contagem das réguas é a de índices $j$ com $2^{j}$ abaixo do módulo.
+\end{proof}
+
+\subsection*{A aresta é a memória da divisão, e a base é o alfabeto}
+
+\noindent Uma aresta não é a ligação entre dois vértices: ela \textbf{é a
+memória da divisão}. Um vértice interior da grade divide-se em $2n$ saídas ---
+$\{x\pm e_i\}$ ---, e a aresta é o registo de \emph{por qual delas} se saiu. Daí
+que $\lvert V(x)\rvert=2n$ não seja uma contagem de vizinhos, mas a capacidade
+local de abrir o estado em direções distintas; e daí que os passos se codifiquem
+na própria base, sem inventar codificação nenhuma.
+
+\begin{definicao}[a palavra da trajetória]\label{def:palavra}
+Seja $\mathcal{A}$ o alfabeto das direções de aresta --- $2n$ letras na grade
+$\Z^n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
+involutivo. Um percurso determina a \textbf{palavra} $s_0s_1\cdots s_{N-1}$ com
+$\pi(t+1)=\pi(t)+T(e_{s_t})$, onde $T$ diz como cada letra se realiza.
+\end{definicao}
+
+\begin{teorema}[a palavra reconstrói, e a dobra é o núcleo]\label{thm:palavra}
+$\pi$ recupera-se de $\pi(0)$ e da palavra. Além disso, a posição é a
+\emph{soma} das letras realizadas, e a soma é comutativa; logo o morfismo
+$w\colon\mathcal{A}^{*}\to X$, $w(s_0\cdots s_{t-1})=\sum_u T(e_{s_u})$, tem
+\textbf{núcleo}, e
+\[
+G(x)>1
+\iff
+\text{dois prefixos da palavra têm a mesma imagem por }w
+\iff
+\text{um fator da palavra está em }\ker w .
+\]
+\end{teorema}
+
+\begin{proof}
+A reconstrução é a recorrência da Def.~\ref{def:palavra}. Se $\pi(i)=\pi(j)$
+com $i<j$, os prefixos de comprimentos $i$ e $j$ têm a mesma imagem, e o fator
+entre eles tem imagem $0$; o recíproco é a mesma conta ao contrário.
+\end{proof}
+
+\medskip\noindent Um fator com imagem $0$ é um \emph{ciclo fechado}, o que liga
+isto ao Teor.~\ref{thm:euler}: a dobra é a célula \textbf{esquecer a ordem}, e
+$G$ conta quantas ordens lá chegaram. Em três linhas, e cada uma guarda menos
+que a anterior:
+\[
+\boxed{
+\begin{array}{l}
+\text{a \textbf{palavra} guarda a sequência das escolhas;}\\
+\text{a \textbf{aresta} \emph{é} a memória da divisão que produziu a posição;}\\
+\text{o \textbf{espaço} guarda só a posição --- e }G\text{ mede o que se colapsou.}
+\end{array}}
+\]
+Em duas linhas:
+\[
+\boxed{\ \text{aresta}=\text{memória da divisão}\ }
+\qquad
+\boxed{\ \text{dobra}=\text{a célula esquecer a ordem}\ }
+\]
+No hipercubo isto é literal: a posição retém apenas a \emph{paridade} de cada
+letra, e toda a ordem é o que a projeção esquece.
+
+\medskip\noindent\textbf{E a estrutura não é a geometria.} A palavra vive no
+alfabeto; a geometria entra por $T$. Vale a pena dizê-lo com uma imagem, porque
+ela é literal: a \textbf{palavra é a folha} --- plana, de ordem total, escrita
+num alfabeto de movimentos --- e $T$ é o \textbf{ato de colar} essa folha no
+espaço. Quando a colagem faz a folha voltar sobre si própria, uma célula recebe
+mais do que uma ordem, e é aí, e só aí, que $G>1$. A dobra não é defeito da
+palavra: é o ato de colagem. O dragão não é a folha nem o espaço --- é a
+\emph{folha já colada}. Com a \emph{mesma} palavra: $\pm e_i$ em
+$\Z^2$ dá $\max G=2$; quatro direções independentes em $\Z^4$ dão $G\equiv1$,
+porque somas de letras distintas nunca colidem; e $\pm e_0$ numa reta dá
+$\max G=28$, porque há menos para onde ir. A dobra é propriedade da
+\textbf{realização}. O que a produz não é a dimensão: é $T$ poder \emph{voltar}
+--- todas as letras a avançar no mesmo sentido dá uma realização monótona, logo
+injetiva, em qualquer dimensão.
 
 \medskip\noindent\textbf{Os dois operadores são duais.} $S$ varia o parâmetro e
 $A$ mede a vizinhança: um é a realização \emph{dinâmica}, o outro a
@@ -787,6 +818,13 @@ $f=F*\mu$, ou seja $f(n)=\sum_{d\mid n}\mu(d)F(n/d)$. A álgebra não muda ---
 $\zeta$ acumula, $\mu$ desacumula --- e só muda a ordem sobre a qual se acumula.
 \end{corolario}
 
+\begin{proof}
+A Def.~\ref{def:incid} não usa que a ordem seja total: usa apenas que os
+intervalos $[u,t]$ sejam finitos, o que a divisibilidade cumpre. Com essa ordem,
+$\mathbf{1}$ é a função $\zeta$ e a sua inversa na álgebra é, por definição, a
+função de Möbius.
+\end{proof}
+
 \medskip\noindent\textbf{Duas convoluções, dois papéis.} A desta secção é a da
 \emph{ordem} $(I,\le)$, e serve para o directo e o inverso da própria aranha. A
 da §\ref{sec:transf} é a do \emph{grupo} $(\Z/2)^m$, e serve para compor e
@@ -1010,8 +1048,8 @@ ortogonalidade: $\langle\chi_j,f\rangle=n\,c_j$. Logo
 \[
 \boxed{\;c=\tfrac1n\,F(f)\;}
 \]
-e é $n^{-1}F$, e não $F$, a mudança de coordenadas propriamente dita --- o que a
-igualdade $F^{-1}=\tfrac1nF$ do Teor.~\ref{thm:H} já dizia. Em particular
+e é $n^{-1}F$, e não $F$, a mudança de coordenadas propriamente dita --- como o
+teorema seguinte torna a dizer, ao dar $F^{-1}=\tfrac1nF$. Em particular
 $F(\delta_a)_k=\chi_k(a)$: a coluna $a$ de $H$ é a imagem de $\delta_a$.
 
 \begin{teorema}[inversa, involutividade e Parseval]\label{thm:H}
@@ -1188,8 +1226,9 @@ posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A realização contrária: dobra contra buraco}\label{sec:dual}
 
-\noindent A realização comprime o parâmetro no espaço --- \emph{encher} ---, e o
-excesso de índices aparece como \textbf{dobra}: $G>1$. A pergunta dual é o que
+\noindent Pelo Teor.~\ref{thm:palavra}, uma realização é uma \textbf{projeção com
+perda}: leva a palavra na sua imagem e esquece o resto. \emph{Encher} comprime o
+parâmetro no espaço, e o excesso de índices aparece como \textbf{dobra}: $G>1$. A pergunta dual é o que
 acontece na direção contrária --- \emph{contar}, do espaço para o parâmetro --- e
 a resposta não é ``a inversa'', porque não há uma: pelo Teor.~\ref{thm:dimensao}
 o grau proíbe-a. O que há é uma \textbf{realização injetiva do espaço na régua},
@@ -1229,7 +1268,8 @@ injetiva do quadrado na régua}, e o nome carrega o que ela preserva --- a
 identidade das células --- e o que não pode preservar.
 
 \medskip\noindent Donde a dualidade é entre \textbf{dobra} e \textbf{buraco}, e
-não entre duas inversas. Quem comprime o parâmetro no espaço paga com $G>1$;
+não entre duas curvas postas lado a lado: são duas maneiras de transportar a
+mesma estrutura de passos para o espaço, e cada uma perde o que a outra guarda. Quem comprime o parâmetro no espaço paga com $G>1$;
 quem espalha o espaço no parâmetro paga com índices por usar. E o par
 $(\pi,\rho)$ é a mesma \emph{retração} de sempre: pode-se ter
 $\pi\circ\rho=\mathrm{id}_X$, mas nunca $\rho\circ\pi=\mathrm{id}_I$ --- o que
@@ -1393,6 +1433,13 @@ dobra desaparece, $\tilde G\equiv1$. As três coisas ---
 \emph{dobrar}, \emph{ler só o estado} e \emph{não ter período} --- não podem
 valer as três.
 \end{corolario}
+
+\begin{proof}
+A incompatibilidade das três é o Teor.~\ref{thm:leitura} lido ao contrário. A
+coluna do campo é o Teor.~\ref{thm:periodo} de um lado e a
+Def.~\ref{def:objeto} do outro; e que o levantamento apaga a dobra é o
+Teor.~\ref{thm:levantamento}(1).
+\end{proof}
 
 \medskip\noindent\textbf{E verifica-se.} Que o passo lê o parâmetro não se
 argumenta: procura-se na trajetória a mesma célula com sucessores

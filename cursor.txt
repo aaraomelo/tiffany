@@ -2213,3 +2213,43 @@ DUAS EXPECTATIVAS MINHAS CAÍRAM AQUI
   gume      55 mutações, 55 mordem
   bateria   529 : 529, 0 falhas · 29 unidades passaram, 0 falharam
   paper     21 páginas
+
+§46 — A REVISÃO GERAL, e a frase que arruma tudo: a folha colada
+=================================================================
+«eval e revisão geral». Fiz as duas.
+
+A CORRECÇÃO DELE, e é de precisão: NÃO é «memória da aresta» — a ARESTA É A
+MEMÓRIA DA DIVISÃO. O genitivo estava ao contrário: não é memória sobre a
+aresta, é a aresta a SER o registo de por qual das 2n saídas se saiu. Corrigido
+no paper e no medidor. Donde |V(x)| = 2n deixa de ser contagem de vizinhos e
+passa a ser a CAPACIDADE LOCAL DE ABRIR O ESTADO em direcções distintas.
+
+E A IMAGEM QUE FECHA A SECÇÃO, dele e literal:
+     a PALAVRA é a FOLHA — plana, ordem total, alfabeto de movimentos
+     T é o ACTO DE COLAR a folha no espaço
+     quando a colagem faz a folha voltar sobre si, a célula recebe mais do que
+     uma ordem — e é aí, e SÓ aí, que G > 1
+     «o dragão não é a folha nem o espaço: é a FOLHA JÁ COLADA»
+A dobra não é defeito da palavra: é o acto de colagem. E isso é exactamente o
+que o §AN30 mede com três T sobre a mesma palavra.
+
+E as duas linhas que ele destacou, agora no paper:
+     aresta = memória da divisão        dobra = a célula esquecer a ordem
+
+A REVISÃO GERAL DAS 22 PÁGINAS, com as ferramentas que montei:
+  · REFERÊNCIAS: 0 órfãs, 0 labels sem uso, e as para a frente reduzidas às
+    duas antecipações deliberadas da abertura. O thm:euler estava a ser usado 24
+    linhas antes de existir — a subsecção da palavra passou para depois dele.
+    E o thm:H era citado 3 linhas antes: reformulado para não antecipar.
+  · PROVAS: 36 enunciados e 33 provas. Os três em falta eram corolários —
+    cor:pik, cor:mobius, cor:duais — que eu tinha deixado como «imediatos». Cada
+    um ganhou a sua justificação.
+  · SÍMBOLOS: onze letras gregas em uso, nenhuma colidida (ℓ cauda, μ Möbius,
+    τ tempo próprio, υ régua de bits, θ dobra por salto, ρ a realização
+    contrária — todas separadas depois da §40).
+  · NÚMEROS: cruzados AUTOMATICAMENTE os do corpo do paper contra a saída do
+    medidor. ZERO números sem correspondência medida.
+
+  gume      55 mutações, 55 mordem
+  bateria   529 : 529, 0 falhas · 29 unidades passaram, 0 falharam
+  paper     22 páginas

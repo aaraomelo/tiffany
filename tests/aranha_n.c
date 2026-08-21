@@ -2911,7 +2911,8 @@ int main(void){
         if(nao_letra) mau++;
 
         /* (b) O TESTE: reconstruir π(t) SÓ de π(0) e da palavra. Se fechar, a
-         *     memória da aresta deixa de ser interpretação e passa a construção. */
+         *     aresta como memória da divisão deixa de ser interpretação e passa a
+         *     construção. */
         long recon_mau = 0;
         {
             Vet p = traj[0];
@@ -3018,13 +3019,14 @@ int main(void){
         if(dobram == 0 || nao == 0) mau++;
 
         ok("A BASE ORTONORMAL É O ALFABETO, E A TRAJECTÓRIA É UMA PALAVRA NELE. Cada"
-           " passo é uma aresta, e uma aresta é a DIVISÃO por onde se saiu do vértice:"
+           " passo é uma aresta, e a aresta É A MEMÓRIA DA DIVISÃO — o registo de por"
+           " qual das saídas do vértice se saiu:"
            " na grade ℤⁿ o alfabeto tem 2n letras — direcção e sentido, porque +e_i ≠"
            " −e_i —, e no hipercubo encolhe para m, porque ⊕e_i é involutivo e não há"
            " sentido a codificar. O TESTE FECHA: extraída a palavra do dragão, todas as"
            " 1024 letras existem, e π(t) reconstrói-se de π(0) mais a palavra com"
-           " divergência ZERO — a memória da aresta deixa de ser interpretação e passa"
-           " a construção. E DAÍ SAI A DOBRA, que é o que interessa: a posição é a SOMA"
+           " divergência ZERO — a aresta como MEMÓRIA DA DIVISÃO deixa de ser"
+           " interpretação e passa a construção. E DAÍ SAI A DOBRA, que é o que interessa: a posição é a SOMA"
            " dos passos, e a soma é COMUTATIVA — permutar a palavra leva ao mesmo sítio"
            " por outro caminho, medido aqui com a palavra ao contrário. Logo o morfismo"
            " palavra → posição tem NÚCLEO, e a dobra é exactamente esse núcleo: a célula"
