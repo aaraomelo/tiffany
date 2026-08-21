@@ -125,7 +125,7 @@ jobs:
       - name: Smoke test
         run: |
           for i in $(seq 1 15); do
-            code=$(ssh server 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${{ steps.alvo.outputs.porta }}/api/health' || echo 000)
+            code=$(ssh server 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${{ steps.alvo.outputs.porta }}/api/health') || code=000
             echo "tentativa $i: health=$code"
             [ "$code" = "200" ] && exit 0
             sleep 4

@@ -36,7 +36,9 @@ docker compose -f "$COMPOSE" build "$CONTAINER"
 docker compose -f "$COMPOSE" up -d --force-recreate "$CONTAINER"
 
 for i in $(seq 1 20); do
-  S=$(curl -sf -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORTA$SAUDE" 2>/dev/null || echo 000)
+  # o `|| echo 000` que aqui esteve colava-se ao 000 que o próprio curl imprime e dava
+  # "000000" — nunca dá falso positivo (compara-se com 200), mas mente no que mostra.
+  S=$(curl -sf -o /dev/null -w '%{http_code}' "http://127.0.0.1:$PORTA$SAUDE" 2>/dev/null) || S=000
   [ "$S" = "200" ] && { echo "no ar: $CONTAINER responde 200 em $PORTA$SAUDE"; exit 0; }
   echo "  tentativa $i: $S"
   sleep 5

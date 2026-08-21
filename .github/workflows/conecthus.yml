@@ -44,6 +44,19 @@ on:
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    # o postgres é para a VALIDAÇÃO, não para o deploy: o tiffany-api corre aqui as suas
+    # migrations contra uma base descartável antes de tocar no servidor. O tiffany-app
+    # ignora-o — `services` declara-se no job, não no passo, e um postgres a mais não custa.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: validacao
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       fail-fast: false          # a landpage não deve ficar por publicar porque a api falhou
       matrix:
@@ -101,6 +114,53 @@ jobs:
           npm ci
           npm run build
 
+      - name: Validação antes de publicar
+        if: steps.quero.outputs.sim == '1'
+        working-directory: plataforma/conecthus/${{ matrix.app }}
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/validacao
+          API_KEY_PATRICIA: validacao
+          API_KEY_WORKER: validacao
+          API_KEY_ADMIN: validacao
+          PORT: '8080'
+          ENABLE_WORKER: 'false'
+        run: |
+          # Isto veio dos deploy.yml originais e é a metade que impede um deploy de partir
+          # produção: a app SOBE aqui, contra uma base descartável, e só se responder 200 é
+          # que o artefato viaja. As chaves são de mentira — só têm de existir para o
+          # arranque; o que se mede é se ele arranca, não o que ele faz.
+          if [ "${{ matrix.app }}" = "tiffany-api" ]; then
+            npx prisma migrate deploy 2>&1 | tail -5
+            mkdir -p public
+            node dist/main.js > /tmp/validacao.log 2>&1 &
+            PID=$!
+            # `localhost` e não 127.0.0.1: MEDIDO aqui — o vite preview liga-se só a ::1, e
+            # o mesmo pode valer para outros. localhost resolve para o que existir.
+            # E o código sai limpo: `curl -w` já imprime 000 ao falhar, portanto um
+            # `|| echo 000` colado dava "000000" e nunca igualava "200".
+            S=000
+            for i in $(seq 1 15); do
+              S=$(curl -sf -o /dev/null -w '%{http_code}' http://localhost:8080/api/health 2>/dev/null) || S=000
+              [ "$S" = "200" ] && break
+              sleep 2
+            done
+            kill $PID 2>/dev/null || true
+            [ "$S" = "200" ] || { echo "a app não subiu (HTTP $S). O que ela disse:"; cat /tmp/validacao.log; exit 1; }
+            echo "arranca e responde 200"
+          else
+            npx vite preview --port 4173 > /tmp/validacao.log 2>&1 &
+            PID=$!
+            S=000
+            for i in $(seq 1 10); do
+              S=$(curl -sf -o /dev/null -w '%{http_code}' http://localhost:4173/ 2>/dev/null) || S=000
+              [ "$S" = "200" ] && break
+              sleep 2
+            done
+            kill $PID 2>/dev/null || true
+            [ "$S" = "200" ] || { echo "o build não serve (HTTP $S):"; cat /tmp/validacao.log; exit 1; }
+            echo "o build serve 200"
+          fi
+
       - name: Artefato
         if: steps.quero.outputs.sim == '1'
         working-directory: plataforma/conecthus/${{ matrix.app }}
@@ -151,3 +211,20 @@ jobs:
             '${{ matrix.app }}' \
             '${{ steps.alvo.outputs.ambiente }}' \
             '${{ steps.alvo.outputs.saude }}' && rm -f /tmp/conecthus-deploy.sh"
+
+      - name: Contar a falha à API
+        if: failure() && steps.quero.outputs.sim == '1'
+        run: |
+          # Os originais faziam isto e vale a pena manter: a API tem um webhook que recebe o
+          # diagnóstico do deploy que falhou. `|| true` de propósito — um deploy falhado não
+          # pode falhar DUAS vezes por causa do aviso.
+          case "${{ steps.alvo.outputs.ambiente }}" in
+            producao) H=patria.patriatechnology.com ;;
+            homolog)  H=patria.homolog.patriatechnology.com ;;
+            *)        H=patria.dev.patriatechnology.com ;;
+          esac
+          DIAG=$(tail -50 /tmp/validacao.log 2>/dev/null || echo 'falhou antes da validação')
+          jq -n --arg sha "${{ github.sha }}" --arg app "${{ matrix.app }}" --arg diag "$DIAG" \
+             '{commitSha: $sha, app: $app, diagnostic: $diag}' \
+          | curl -sf -X POST "https://$H/api/webhooks/deploy-diagnostic" \
+              -H 'Content-Type: application/json' -d @- || true
