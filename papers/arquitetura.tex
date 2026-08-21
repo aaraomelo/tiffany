@@ -2023,6 +2023,44 @@ comando & camada & efeito \\
 \end{tabular}
 \end{center}
 
+\medskip\noindent\textbf{O \code{SELECT}, cláusula a cláusula --- e cada uma é um
+enunciado do corpo.} Nenhuma foi acrescentada por ser SQL: todas já existiam
+como teorema, e o que a porta faz é dar-lhes o nome que o cliente conhece.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+cláusula & o que é & onde está provado \\
+\midrule
+\code{WHERE} & a \textbf{fibra}: marca o bitmap & \code{aranha thm:multiplicidade}(3) \\
+\code{count(*)} & $\sum$ --- o \emph{popcount} do campo & \code{aranha lem:conserva} \\
+\code{ORDER BY} & a \textbf{profundidade}: descer a árvore & §\ref{sec:cortar} \\
+\code{JOIN ON =} & o \textbf{corte}: a bipartição, na mesma árvore & §\ref{sec:cortar} \\
+\code{GROUP BY} & a \textbf{fibra} de $\pi$: o \emph{count} é $G(x)$ & \code{aranha thm:escada} \\
+\code{HAVING} & o \code{WHERE} \textbf{sobre $G$} & \code{aranha thm:multiplicidade}(2) \\
+\code{DISTINCT} & o \textbf{representante canónico} $k=1$ & \code{aranha thm:levantamento}(3) \\
+\code{LIMIT} & o \textbf{prefixo} da lista & \code{aranha thm:BI} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Duas leituras que valem a pena. \textbf{Primeira:} \code{GROUP BY} e
+\code{DISTINCT} são a \emph{mesma} fibra lida de duas maneiras --- um devolve o
+tamanho $G(x)$, o outro devolve a folha $k=1$ ---, e por isso correm na mesma
+árvore que já ordenava e juntava; não há uma estrutura por cláusula.
+\textbf{Segunda:} \code{HAVING count(*) > 1} não é uma conveniência de sintaxe.
+Pelo Teor. da multiplicidade, $G(x)>1$ \emph{é} a existência de dois índices
+distintos na mesma célula --- é pedir ao motor as células onde a realização
+dobrou.
+
+\medskip\noindent\textbf{E o que a porta não faz, RECUSA com a razão.} Um erro
+disfarçado de resultado vazio é o pior desfecho para quem chama, e a regra vale
+nos dois sentidos: \code{DISTINCT} pede uma coluna --- a linha inteira não é
+indexável pela árvore ---; a junção só compara \emph{igualdade}, só duas tabelas
+e não tem \code{LEFT}/\code{RIGHT}/\code{OUTER}; e se a árvore não couber, a
+consulta é recusada em vez de devolver metade de uma ordem, de um grupo ou de
+uma junção.
+
 \medskip\noindent\textbf{Entrada das apps.} O manifesto declara
 \code{entrada\_apps=pgwire}: drivers falam o Frontend/Backend Protocol
 (v3) com a Tiffany --- Auth trust, Simple Query, Extended Query

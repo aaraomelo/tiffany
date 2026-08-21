@@ -281,8 +281,11 @@ O QUE FALTA, e é a metade do CORTE:
   abaixo.
 
   O QUE O JOIN AINDA NÃO FAZ, e é preciso saber: só igualdade (não `<`, `>`),
-  só duas tabelas, os nomes das colunas da esquerda saem como letras (a tabela
-  aberta no fim é a direita), e não há LEFT/RIGHT/OUTER — só o interno.
+  só duas tabelas, e não há LEFT/RIGHT/OUTER — só o interno.
+  (Os NOMES da esquerda já saem certos: a junção troca a tabela aberta por
+  baixo da sessão, e por isso as colunas da esquerda vinham como letras — os
+  nomes não estavam perdidos, estavam noutro ficheiro, e agora lêem-se ANTES de
+  trocar. Um nome inventado é responder outra coisa.)
 
   NÃO INVENTAR uma terceira estrutura. O corte e a ordem já existem; o join é
   ligá-los.

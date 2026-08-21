@@ -3646,6 +3646,8 @@ static int varre(const char *resto, int acao){
                          "column \"%s\" does not exist", j_col_esq); }
             return 0;
         }
+        char nome_esq[J_MAXCOL][S_COLNOME_W * 2 + 2];
+        for(int j = 0; j < J_MAXCOL; j++) nome_esq[j][0] = 0;
         for(long i = 0; i < nr_esq && ne < J_MAXLIN; i++){
             if(!bit_le(S_MATCH, i)) continue;
             for(long j = 0; j < nc_esq && j < J_MAXCOL; j++){
@@ -3656,6 +3658,20 @@ static int varre(const char *resto, int acao){
             esq_v[ne] = celula_valor(i, oce, nc_esq);
             ne++;
         }
+        /* OS NOMES DA ESQUERDA LÊEM-SE ENQUANTO ELA ESTÁ ABERTA.
+         *
+         * A junção troca a tabela aberta por baixo da sessão — quem fica aberta
+         * no fim é a direita —, e por isso as colunas da esquerda saíam como
+         * LETRAS: o cliente pedia `cli JOIN ped` e recebia `a | b | cid | valor`
+         * em vez de `id | saldo | cid | valor`. Os nomes não estavam perdidos,
+         * estavam noutro ficheiro; bastava lê-los ANTES de trocar. É a mesma
+         * regra do resto: quem pergunta tem de receber o que pediu, e um nome
+         * inventado é responder outra coisa. */
+        { char cn[S_COLNOME_W * 2 + 2];
+          for(long j = 0; j < nc_esq && j < J_MAXCOL; j++){
+              col_nome_le((int)j, cn, (int)sizeof cn);
+              snprintf(nome_esq[j], sizeof nome_esq[0], "%s", cn);
+          } }
         nd = j_carrega_direita(&ncols_dir);
         if(nd == -2){
             printf("erro: a coluna «%s» não existe na tabela «%s» — RECUSADA.\n",
@@ -3683,11 +3699,11 @@ static int varre(const char *resto, int acao){
             for(int j = 0; j < nsai; j++){
                 char cn[S_COLNOME_W * 2 + 2];
                 if(j < nc_esq){
-                    /* os nomes da esquerda já não estão à mão: a tabela aberta é
-                     * a direita. Usam-se os da direita para as suas colunas e a
-                     * letra para as da esquerda, que é o que o motor faz quando
-                     * não tem nome guardado. */
-                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + j);
+                    /* lidos acima, enquanto a esquerda ainda estava aberta */
+                    if(j < J_MAXCOL && nome_esq[j][0])
+                        snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", nome_esq[j]);
+                    else
+                        snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + (int)j);
                 }else{
                     col_nome_le((int)(j - nc_esq), cn, (int)sizeof cn);
                     if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
