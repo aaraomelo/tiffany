@@ -44,6 +44,8 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN30 A BASE É O ALFABETO: a trajectória é uma PALAVRA, reconstrói-se de
+ *         π(0) + palavra, e a DOBRA é o núcleo do morfismo palavra → posição
  *   §AN29 O PAR DUAL DE CANTOR com FOLGA: contar injecta e sobra metade da
  *         recta · encher cobre com G ≡ 2 · a retracção, e o que o levantamento repõe
  *   §AN28 A REVISÃO EXTERNA medida: τ = N pede a DIAGONAL 1 e não g = I · no
@@ -2875,6 +2877,170 @@ int main(void){
            " DOBRA e BURACO, e não entre duas inversas: quem comprime a recta no"
            " quadrado paga com G > 1; quem espalha o quadrado na recta paga com"
            " índices por usar",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN30: A BASE É O ALFABETO — a trajectória como PALAVRA ════════════ */
+    printf("\n§AN30  a trajectória como palavra no alfabeto das arestas.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) EXTRAIR A PALAVRA. Se cada passo é uma aresta, ele é uma letra: a
+         *     direcção da base por onde se saiu. Na grade ℤⁿ o alfabeto tem 2n
+         *     letras — direcção E sentido, porque +e_i ≠ −e_i. */
+        long nt = real_dragao(1024);
+        static int pal[AN_IMAX];
+        long nao_letra = 0;
+        for(long t = 0; t + 1 < nt; t++){
+            int letra = -1;
+            for(int i = 0; i < 2 && letra < 0; i++)
+                for(int sg = -1; sg <= 1 && letra < 0; sg += 2){
+                    int ok1 = 1;
+                    for(int j = 0; j < 2; j++){
+                        int esperado = traj[t].c[j] + ((j==i) ? sg : 0);
+                        if(traj[t+1].c[j] != esperado) ok1 = 0;
+                    }
+                    if(ok1) letra = 2*i + (sg > 0 ? 1 : 0);
+                }
+            if(letra < 0) nao_letra++;
+            pal[t] = letra;
+        }
+        printf("      a palavra do dragão: %ld letras num alfabeto de 4 · passos sem"
+               " letra: %ld\n", nt-1, nao_letra);
+        if(nao_letra) mau++;
+
+        /* (b) O TESTE: reconstruir π(t) SÓ de π(0) e da palavra. Se fechar, a
+         *     memória da aresta deixa de ser interpretação e passa a construção. */
+        long recon_mau = 0;
+        {
+            Vet p = traj[0];
+            for(long t = 0; t + 1 < nt; t++){
+                int i = pal[t] / 2, sg = (pal[t] % 2) ? +1 : -1;
+                p.c[i] += sg;
+                if(!an_igual(p, traj[t+1])) recon_mau++;
+            }
+        }
+        printf("      reconstruir π(t) de π(0) + palavra: divergências %ld em %ld\n\n",
+               recon_mau, nt-1);
+        if(recon_mau) mau++;
+
+        /* (c) E A PALAVRA TEM MAIS DO QUE A POSIÇÃO. A posição é a SOMA dos
+         *     passos, e a soma é comutativa: permutar as letras leva ao mesmo
+         *     sítio. Logo o morfismo palavra → posição tem NÚCLEO, e é esse núcleo
+         *     que produz a dobra. Exibe-se: a palavra do dragão permutada dá a
+         *     mesma posição final e uma trajectória diferente. */
+        static int pal2[AN_IMAX];
+        for(long t = 0; t + 1 < nt; t++) pal2[t] = pal[nt-2-t];   /* palavra ao contrário */
+        Vet fim1 = traj[0], fim2 = traj[0];
+        long difere_caminho = 0;
+        {
+            Vet a = traj[0], b = traj[0];
+            for(long t = 0; t + 1 < nt; t++){
+                int i1 = pal[t]/2,  s1 = (pal[t]%2)  ? +1 : -1;
+                int i2 = pal2[t]/2, s2 = (pal2[t]%2) ? +1 : -1;
+                a.c[i1] += s1; b.c[i2] += s2;
+                if(!an_igual(a, b)) difere_caminho++;
+            }
+            fim1 = a; fim2 = b;
+        }
+        printf("      a mesma palavra permutada: chega ao MESMO fim? %s · caminho"
+               " diferente em %ld dos %ld passos\n",
+               an_igual(fim1, fim2) ? "sim" : "NÃO", difere_caminho, nt-1);
+        if(!an_igual(fim1, fim2)) mau++;
+        if(difere_caminho == 0) mau++;
+
+        /* (d) NO HIPERCUBO O ALFABETO ENCOLHE PARA m, porque ⊕e_i é involutivo:
+         *     não há sentido a codificar. E a posição depende só das PARIDADES das
+         *     letras — a ordem desaparece por completo. */
+        const int MH = 8;
+        long par_mau = 0;
+        for(long amostra = 0; amostra < 64; amostra++){
+            long x1 = 0, x2 = 0, conta[8] = {0,0,0,0,0,0,0,0};
+            /* o regime importa: com passo uniforme cada letra sairia o mesmo
+             * número de vezes, e «paridade» coincidiria com «presença». Aqui as
+             * contagens são desiguais de propósito, e há letras a PAR. */
+            for(int t = 0; t < 37 + (int)(amostra % 5); t++){
+                int letra = (int)((amostra*7 + t*t) % MH);
+                x1 ^= (1L << letra);
+                conta[letra]++;
+            }
+            for(int i = 0; i < MH; i++) if(conta[i] & 1) x2 ^= (1L << i);
+            if(x1 != x2) par_mau++;
+        }
+        /* e conta-se quantas letras saem a PAR, senão o teste não distinguiria
+         * paridade de presença */
+        long letras_pares = 0;
+        {
+            long conta[8] = {0,0,0,0,0,0,0,0};
+            for(int t = 0; t < 39; t++) conta[(int)((7 + t*t) % MH)]++;
+            for(int i = 0; i < MH; i++) if(conta[i] && !(conta[i] & 1)) letras_pares++;
+        }
+        printf("      no hipercubo: alfabeto de %d letras, e a posição é a PARIDADE"
+               " de cada letra — %s em 64 palavras\n", MH, par_mau ? "NÃO" : "confere");
+        printf("      (e há %ld letras a sair um número PAR de vezes: sem elas, paridade"
+               " e presença coincidiriam)\n\n", letras_pares);
+        if(par_mau) mau++;
+        if(letras_pares == 0) mau++;
+
+        /* (e) E A PALAVRA NÃO É A GEOMETRIA. A estrutura está na BASE; o dragão é
+         *     a IMAGEM dela depois de uma transformação T que diz como cada letra
+         *     se realiza. Mesma palavra, três T diferentes, três campos: a DOBRA é
+         *     da REALIZAÇÃO, e não da palavra. */
+        printf("      realização T da mesma palavra   n   |I|    células   max G   dobra?\n");
+        struct { const char *nome; int n; } ts[3];
+        ts[0].nome = "±e_i em ℤ² (o dragão)"; ts[0].n = 2;
+        ts[1].nome = "4 direcções em ℤ⁴";     ts[1].n = 4;
+        ts[2].nome = "±e_0 na recta ℤ¹";      ts[2].n = 1;
+        long dobram = 0, nao = 0;
+        for(int m = 0; m < 3; m++){
+            static Vet real[AN_IMAX];
+            Vet p = vet0();
+            long np = 0;
+            real[np++] = p;
+            for(long t = 0; t + 1 < nt; t++){
+                int L = pal[t];
+                if(m == 0){ int i = L/2, sg = (L%2)?+1:-1; p.c[i] += sg; }
+                else if(m == 1){ p.c[L] += 1; }            /* cada letra, uma direcção */
+                else { p.c[0] += (L % 2) ? +1 : -1; }       /* uma recta, dois sentidos */
+                real[np++] = p;
+            }
+            for(long t = 0; t < np; t++) traj[t] = real[t];
+            Res r = an_corre(ts[m].n, np);
+            printf("      %-30s %d   %-6ld %-9ld %-7ld %s\n",
+                   ts[m].nome, ts[m].n, r.nt, r.celulas, r.max_g,
+                   r.max_g > 1 ? "sim" : "não");
+            if(r.soma != r.nt || !r.recontou) mau++;
+            if(r.max_g > 1) dobram++; else nao++;
+        }
+        printf("\n");
+        /* a mesma palavra dobra numa realização e não noutra — é o que se afirma */
+        if(dobram == 0 || nao == 0) mau++;
+
+        ok("A BASE ORTONORMAL É O ALFABETO, E A TRAJECTÓRIA É UMA PALAVRA NELE. Cada"
+           " passo é uma aresta, e uma aresta é a DIVISÃO por onde se saiu do vértice:"
+           " na grade ℤⁿ o alfabeto tem 2n letras — direcção e sentido, porque +e_i ≠"
+           " −e_i —, e no hipercubo encolhe para m, porque ⊕e_i é involutivo e não há"
+           " sentido a codificar. O TESTE FECHA: extraída a palavra do dragão, todas as"
+           " 1024 letras existem, e π(t) reconstrói-se de π(0) mais a palavra com"
+           " divergência ZERO — a memória da aresta deixa de ser interpretação e passa"
+           " a construção. E DAÍ SAI A DOBRA, que é o que interessa: a posição é a SOMA"
+           " dos passos, e a soma é COMUTATIVA — permutar a palavra leva ao mesmo sítio"
+           " por outro caminho, medido aqui com a palavra ao contrário. Logo o morfismo"
+           " palavra → posição tem NÚCLEO, e a dobra é exactamente esse núcleo: a célula"
+           " esquece a ordem, e G conta quantas ordens lá chegaram. No hipercubo isto vê-se"
+           " no osso — a posição é só a PARIDADE de cada letra, e tudo o resto da palavra"
+           " é o que a projecção deita fora. E DAQUI SAI A SEPARAÇÃO QUE FALTAVA: a"
+           " estrutura está na BASE, e a geometria é uma TRANSFORMAÇÃO T que diz como"
+           " cada letra se realiza — P_{t+1} = P_t + T(e_{s_t}). O dragão não é a"
+           " estrutura: é a imagem dela sob um T. Medido com a MESMA palavra e três T:"
+           " com ±e_i em ℤ² dobra; com quatro direcções independentes em ℤ⁴ NÃO dobra,"
+           " porque nenhuma soma de letras distintas colide; e com ±e_0 numa RECTA"
+           " dobra mais do que no plano, porque há menos onde ir. Logo a DOBRA é"
+           " propriedade da REALIZAÇÃO e não da palavra, que é a mesma nas três."
+           " E uma expectativa minha caiu aqui: pôr todas as letras a avançar na mesma"
+           " direcção NÃO dobra — é monótono, logo injectivo, e a dimensão não tem nada"
+           " a ver com isso. O que faz dobrar é a realização poder VOLTAR",
            mau == 0);
     }
 

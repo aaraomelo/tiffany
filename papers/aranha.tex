@@ -427,6 +427,54 @@ incidentes: $G$ não é uma contagem entre outras --- é a que fecha a
 contabilidade local do percurso. É o \emph{handshaking} dito sobre a
 trajetória.
 
+\subsection*{A aresta é a memória local, e a base é o alfabeto}
+
+\noindent Uma aresta não é só a ligação entre dois vértices: é o registo de
+\emph{por qual divisão} se saiu. Um vértice interior da grade tem $2n$ saídas ---
+$\{x\pm e_i\}$ ---, e escolher uma é escrever informação. Daí que os passos se
+codifiquem na própria base, sem inventar codificação nenhuma.
+
+\begin{definicao}[a palavra da trajetória]\label{def:palavra}
+Seja $\mathcal{A}$ o alfabeto das direções de aresta --- $2n$ letras na grade
+$\Z^n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
+involutivo. Um percurso determina a \textbf{palavra} $s_0s_1\cdots s_{N-1}$ com
+$\pi(t+1)=\pi(t)+T(e_{s_t})$, onde $T$ diz como cada letra se realiza.
+\end{definicao}
+
+\begin{teorema}[a palavra reconstrói, e a dobra é o núcleo]\label{thm:palavra}
+$\pi$ recupera-se de $\pi(0)$ e da palavra. Além disso, a posição é a
+\emph{soma} das letras realizadas, e a soma é comutativa; logo o morfismo
+$w\colon\mathcal{A}^{*}\to X$, $w(s_0\cdots s_{t-1})=\sum_u T(e_{s_u})$, tem
+\textbf{núcleo}, e
+\[
+G(x)>1
+\iff
+\text{dois prefixos da palavra têm a mesma imagem por }w
+\iff
+\text{um fator da palavra está em }\ker w .
+\]
+\end{teorema}
+
+\begin{proof}
+A reconstrução é a recorrência da Def.~\ref{def:palavra}. Se $\pi(i)=\pi(j)$
+com $i<j$, os prefixos de comprimentos $i$ e $j$ têm a mesma imagem, e o fator
+entre eles tem imagem $0$; o recíproco é a mesma conta ao contrário.
+\end{proof}
+
+\medskip\noindent Um fator com imagem $0$ é um \emph{ciclo fechado}, o que
+liga isto ao Teor.~\ref{thm:euler}: a dobra é a célula \textbf{esquecer a
+ordem}, e $G$ conta quantas ordens lá chegaram.
+
+\medskip\noindent\textbf{E a estrutura não é a geometria.} A palavra vive no
+alfabeto; a geometria entra por $T$. O dragão não \emph{é} a estrutura --- é a
+imagem dela sob um $T$ particular. Com a \emph{mesma} palavra: $\pm e_i$ em
+$\Z^2$ dá $\max G=2$; quatro direções independentes em $\Z^4$ dão $G\equiv1$,
+porque somas de letras distintas nunca colidem; e $\pm e_0$ numa reta dá
+$\max G=28$, porque há menos para onde ir. A dobra é propriedade da
+\textbf{realização}. O que a produz não é a dimensão: é $T$ poder \emph{voltar}
+--- todas as letras a avançar no mesmo sentido dá uma realização monótona, logo
+injetiva, em qualquer dimensão.
+
 \begin{teorema}[a dobra vista por Euler]\label{thm:euler}
 Seja $\pi$ um percurso conexo, $V=\lvert\operatorname{supp}G\rvert$ o número de
 células e $A$ o de arestas \emph{distintas} usadas. A característica do
@@ -1605,6 +1653,10 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+Teor.~\ref{thm:palavra} §AN30 (as $1024$ letras do dragão; a reconstrução com
+divergência $0$; a palavra permutada a chegar ao mesmo fim por outro caminho; a
+paridade no hipercubo; e a mesma palavra com três $T$ a dar $\max G$ de $2$, $1$
+e $28$);
 Teor.~\ref{thm:contraria} §AN29 (contar injetiva com $256$ lugares por usar;
 encher com $G\equiv2$; $\pi\circ\rho=\mathrm{id}$ e $\rho\circ\pi$ a falhar em
 $256$ de $512$; $\tilde\pi$ bijetiva sobre $X\times\{1,2\}$, $512$ de $512$; a
@@ -1634,7 +1686,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN29;
+        {\code{tests/aranha\_n.c} §AN1--§AN30;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 

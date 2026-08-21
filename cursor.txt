@@ -2168,3 +2168,48 @@ Um vértice interior tem |V| = 4 e a recta dá 2. Não é dificuldade de constru
   gume      52 mutações, 52 mordem
   bateria   529 : 529, 0 falhas · 28 unidades passaram, 0 falharam
   paper     21 páginas
+
+§45 — A ARESTA É MEMÓRIA, A BASE É O ALFABETO, E A GEOMETRIA É UMA ESCOLHA
+==========================================================================
+A revisão externa deu o passo que faltava e terminou com um TESTE, que era o
+certo: «pegar a trajectória do dragão, extrair s_t, reconstruir π(t) só de π(0)
+e da palavra de arestas, e verificar que volta célula a célula. Se fechar, a
+memória da aresta deixa de ser interpretação e passa a construção.»
+
+FECHOU (§AN30). A palavra do dragão tem 1024 letras num alfabeto de 4, todas
+existem, e π(t) reconstrói-se de π(0) + palavra com divergência ZERO.
+
+A LEITURA QUE ISSO ABRE: uma aresta não é a ligação entre dois vértices — é o
+REGISTO DA DIVISÃO por onde se saiu. Um vértice tem 2n saídas, e escolher uma é
+escrever informação. Donde o alfabeto:
+     na grade ℤⁿ    2n letras   (direcção E sentido: +e_i ≠ −e_i)
+     no hipercubo   m letras    (⊕e_i é involutivo, não há sentido a codificar)
+E no hipercubo a posição é só a PARIDADE de cada letra — tudo o resto da palavra
+é o que a projecção deita fora.
+
+E DAÍ SAI A DOBRA, que é o que eu não tinha: a posição é a SOMA das letras, e a
+soma é COMUTATIVA. Logo o morfismo palavra → posição TEM NÚCLEO, e
+     G(x) > 1  ⟺  dois prefixos com a mesma imagem  ⟺  um FACTOR no núcleo
+e um factor com imagem 0 é um CICLO FECHADO — que liga ao thm:euler. A DOBRA É A
+CÉLULA ESQUECER A ORDEM, e G conta quantas ordens lá chegaram. Medido: a palavra
+do dragão ao contrário chega ao MESMO fim por um caminho diferente em 1023 dos
+1024 passos.
+
+E A SEPARAÇÃO FINAL, que reorganiza a secção toda: A ESTRUTURA ESTÁ NA BASE, e a
+geometria entra por uma TRANSFORMAÇÃO T — P_{t+1} = P_t + T(e_{s_t}). O dragão
+NÃO É a estrutura: é a imagem dela sob um T. Com a MESMA palavra:
+     ±e_i em ℤ²             690 células   max G 2      dobra
+     4 direcções em ℤ⁴     1025 células   max G 1      NÃO dobra
+     ±e_0 na recta ℤ¹        64 células   max G 28     dobra muito
+A DOBRA É PROPRIEDADE DA REALIZAÇÃO, e não da palavra — que é a mesma nas três.
+
+DUAS EXPECTATIVAS MINHAS CAÍRAM AQUI
+  · pôr todas as letras a avançar na MESMA direcção não dobra: é monótono, logo
+    injectivo, e a dimensão não tem nada a ver. O que faz dobrar é T poder VOLTAR.
+  · e o gume apanhou um regime meu: com 40 passos e 8 letras cada uma sai 5
+    vezes — sempre ímpar —, e aí «paridade» e «presença» coincidem. O teste não
+    distinguia. Corrigido para um regime com letras a sair a PAR.
+
+  gume      55 mutações, 55 mordem
+  bateria   529 : 529, 0 falhas · 29 unidades passaram, 0 falharam
+  paper     21 páginas
