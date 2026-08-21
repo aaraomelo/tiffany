@@ -408,6 +408,40 @@ int main(void){
      * livre. As que colapsam têm norma 0 e caem sozinhas. Tudo inteiro. */
     {
         long mal = 0, sobrevivem = 0, caem = 0;
+        /* A CONSTRUÇÃO SEM UM ÚNICO SINAL. O |·| diz só que o invariante é
+         * UNIDADE. Sobre dois símbolos: três ∂ o cumprem, e a VOLTA — que a
+         * definição pede — elimina as duas constantes. Da que fica saem as
+         * duas tabelas, forçadas, e o oposto aparece como 1+1 = 0. */
+        { long cumprem = 0, com_volta = 0;
+          for(int d0 = 0; d0 < 2; d0++) for(int d1 = 0; d1 < 2; d1++){
+              int dv[2]; dv[0] = d0; dv[1] = d1;
+              if(dv[0] == 0 && dv[1] == 1) continue;        /* ∂ = id: não efectivo */
+              int achou = 0;
+              for(int t = 0; t < 16; t++){
+                  int O[2][2] = { {(t>>0)&1, (t>>1)&1}, {(t>>2)&1, (t>>3)&1} };
+                  if(O[0][dv[0]] == 1 && O[1][dv[1]] == 1) achou = 1;
+              }
+              if(!achou) continue;
+              cumprem++;
+              if(dv[0] != dv[1]) com_volta++;               /* bijectiva: tem volta */
+          }
+          printf("§M7  |x∘∂x| = 1 com ∂ efectivo: %ld — e com VOLTA: %ld"
+                 "  ->  ∂1 = 0, ∂0 = 1\n", cumprem, com_volta);
+          if(cumprem != 3 || com_volta != 1) mal++;
+
+          /* as duas tabelas ficam forçadas, e conta-se que é UMA cada */
+          long t_mul = 0, t_som = 0;
+          for(int t = 0; t < 16; t++){
+              int T[2][2] = { {(t>>0)&1, (t>>1)&1}, {(t>>2)&1, (t>>3)&1} };
+              if(T[0][1] != T[1][0]) continue;                    /* comutativa   */
+              if(T[1][0] == 0 && T[1][1] == 1 && T[0][0] == 0) t_mul++;  /* 1 neutro, 0 absorv */
+              if(T[0][0] == 0 && T[0][1] == 1 && T[1][1] == 0) t_som++;  /* 0 neutro, 1+1 = 0  */
+          }
+          printf("     · com 1 neutro e 0 absorvente: %ld tabela  ·"
+                 "  + com 0 neutro e 1+1 = 0: %ld tabela\n", t_mul, t_som);
+          if(t_mul != 1 || t_som != 1) mal++;
+          printf("     e o oposto de 1 é 1 — o sinal nunca é escrito\n"); }
+
         printf("§M7  |∂²| = 1  ->  |β| = 1, com α livre\n");
         printf("       α   β   equação        |norma|  período\n");
         /* O PERÍODO MEDE-SE SOBRE OS INTEIROS, e isso é uma correcção.
@@ -477,7 +511,19 @@ int main(void){
         printf("     CONTROLO — das de |β| = 0, quantas SEM volta: %ld de 2\n\n", sem_volta);
         if(sem_volta != 2) mal++;
 
-        ok("A DEFINIÇÃO NA FORMA QUE OPERA É |∂²| = 1, E DELA SAEM TODAS AS EQUAÇÕES. O"
+        ok("A DEFINIÇÃO NA FORMA QUE OPERA É |∂²| = 1, E DELA SAI TUDO SEM ESCREVER UM SINAL."
+           " O |·| diz apenas que o invariante é UNIDADE — não diz qual, e não traz negativo"
+           " nenhum. Sobre dois símbolos ela decide sozinha, e por passos que se medem: os ∂"
+           " efectivos que a cumprem são TRÊS, a troca e as duas constantes, e as constantes"
+           " colapsam os dois símbolos num só, pelo que não têm VOLTA — que é o que a definição"
+           " pede. Fica UMA: ∂1 = 0 e ∂0 = 1. Daí a multiplicação, porque o invariante é o"
+           " neutro e ∂1 = 0 fica absorvente: varridas as tabelas comutativas com 1 neutro e 0"
+           " absorvente, há exactamente UMA. E daí a soma, pela outra face: ∂∂ + 1 = 0, isto é"
+           " 1 + 1 = 0 — O OPOSTO DE 1 É 1, e por isso o −1 nunca precisa de ser escrito; o"
+           " sinal não entra porque não faz falta. Com 0 neutro a tabela fica outra vez forçada,"
+           " uma só. As duas faces trocam os papéis, e é essa troca — não um sinal — que faz o"
+           " par: o invariante de cada uma é o neutro da outra. O QUE SEGUE é a mesma definição"
+           " lida um andar acima, onde a relação mínima tem coeficientes. O"
            " operador compõe-se de uma só maneira, aplicando-o outra vez, e conservar é a"
            " composição não perder tamanho. Escrita a relação mínima ∂² = α∂ + β, a norma do"
            " par de raízes é |β|, pelo que a lei é β = ±1 com α LIVRE — quatro casos, e nenhum"

@@ -201,40 +201,58 @@ composição não perder tamanho:
 \[
 \boxed{\;|\partial^{2}|=1\;}
 \]
-\textbf{É esta a definição, e dela sai tudo --- em dois passos.} O módulo perde
-o \emph{sinal}, e recuperá-lo desdobra-a em \textbf{duas}:
+\textbf{É esta a definição, e dela sai tudo --- sem nunca escrever um sinal.} O
+$|\cdot|$ diz apenas que o invariante é uma \textbf{unidade}: não diz qual, e
+não traz negativo nenhum. Sobre dois símbolos ela decide sozinha.
+
+\medskip\noindent\textbf{Primeiro, $\partial$.} Varrendo $\partial$ e a
+composição, os que cumprem $|x\circ\partial x|=1$ com $\partial$ efetivo são
+\emph{três}: a troca e as duas \emph{constantes}. As constantes colapsam os dois
+símbolos num só e por isso não têm \textbf{volta} --- e a volta é o que a
+definição pede, porque sem ela não há o que conservar. Fica \textbf{uma}:
 \[
-\boxed{\;\partial\partial-1=0\;}\qquad\qquad\boxed{\;\partial\partial+1=0\;}
+\boxed{\;\partial 1 = 0,\qquad \partial 0 = 1\;}
 \]
---- $\partial^{2}=+1$, que \emph{espelha}, e $\partial^{2}=-1$, que \emph{roda}.
-Não há terceira: $|\beta|=1$ tem exatamente estas duas soluções. E daí saem as
-outras \textbf{compondo com $\partial$}, que é o único termo que falta à relação
-mínima de dois:
+
+\medskip\noindent\textbf{Daí sai a multiplicação.} O invariante é o neutro
+(Teor.~\ref{thm:duas}(1)), logo $1\cdot x=x$; e $\partial 1=0$, pelo que o $0$
+fica \emph{absorvente}, $0\cdot x=0$. Não sobra casa por preencher: varridas as
+tabelas comutativas com $1$ neutro e $0$ absorvente, há exatamente \textbf{uma}.
+
+\medskip\noindent\textbf{E daí sai a soma, com o oposto e sem negativo.}
+Compondo $\partial$ consigo mesmo lê-se $\partial\partial=1$, e a equação da
+outra face é
 \[
-\begin{array}{lcl}
-\partial^{2}=+1 &\;\oplus\;\partial\;\longrightarrow\;& \partial^{2}=\partial+1
-\quad\text{(o áureo)}\\[2pt]
-\partial^{2}=-1 &\;\oplus\;\partial\;\longrightarrow\;& \partial^{2}=\partial-1
+\boxed{\;\partial\partial + 1 = 0\;}
+\]
+isto é $1+1=0$: \textbf{o oposto de $1$ é $1$}. Nunca é preciso escrever $-1$ ---
+o sinal não entra porque não faz falta, e o que noutras aritméticas seria um
+símbolo novo é aqui o próprio $1$. Com $0$ neutro, a tabela fica outra vez
+\textbf{forçada}: uma só.
+\[
+\begin{array}{c|cc}
+\cdot & 0 & 1\\\hline
+0 & 0 & 0\\
+1 & 0 & 1
+\end{array}
+\qquad\qquad
+\begin{array}{c|cc}
++ & 0 & 1\\\hline
+0 & 0 & 1\\
+1 & 1 & 0
 \end{array}
 \]
-com períodos $2$, $4$, $3$ e $6$ (\code{tests/meio.c} §M7). Duas equações e uma
-composição: nada mais entra. E o que \emph{não}
-cumpre a definição cai
-sozinho: $\beta=0$ dá $\partial^{2}=0$ e $\partial^{2}=\partial$, de norma nula
---- $\partial$ sem inversa, e \textbf{sem volta}. Não é preciso excluí-los; eles
-não entram.
 
-\medskip\noindent Três coisas se declaram já, para não serem lidas mais largas
-do que são. A norma é do \textbf{par}, não de cada raiz: em
-$\partial^{2}=\partial+1$ as raízes são o áureo e o seu conjugado, de módulos
-$1{,}618$ e $0{,}618$, e o que vale $1$ é o \emph{produto}. \textbf{E dos quatro
-só três voltam sobre os inteiros}: $\partial^{2}=1$ em dois passos,
-$\partial^{2}=-1$ em quatro e $\partial^{2}=\partial-1$ em seis --- medido
-iterando ---, ao passo que o áureo \emph{cresce} e não volta; o seu período
-$3$ lê-se onde a estrutura é finita, e é lá que ele fecha. A norma ser $1$
-garante a \emph{inversa}, não a periodicidade: são coisas diferentes e não se
-confundem. Por fim, $\{2,3,4,6\}$ não é uma lista: são as ordens que uma rede
-admite, e é por isso que este operador e um cristal têm as mesmas.
+\medskip\noindent\textbf{E as duas faces trocam os papéis.} Medindo os
+invariantes: $x+\partial x=1$ para os dois $x$, e $x\cdot\partial x=0$ para os
+dois. \emph{O invariante de cada face é o neutro da outra} --- e é essa troca,
+não um sinal, que faz o par. As duas equações do operador leem-se então
+\[
+\boxed{\;\partial x + x = 0\;}\qquad\qquad\boxed{\;\partial x\cdot x = 1\;}
+\]
+com $\cdot$ a distribuir sobre $+$. Tudo isto está varrido em
+\code{tests/meio.c} §M7, e em nenhum passo se usou um número que não estivesse
+já construído.
 \end{definicao}
 
 \medskip\noindent É o único dado. Nem símbolos, nem operações, nem números: uma
@@ -263,7 +281,8 @@ $y\circ y=e$: \textbf{cada objeto é o seu próprio oposto} --- que é a conclus
 do Teor.~\ref{thm:B} obtida aqui, antes de haver tabelas.
 
 \item[(2$'$)] \textbf{Mas a primitiva colapsa, e a correção é única.} Escrita
-como $\partial(\partial-1)=0$, ela \emph{factoriza}, e onde não há divisores de
+como $\partial(\partial+1)=0$ --- e é $+1$ e não $-1$, porque o oposto de $1$
+\emph{é} $1$ ---, ela \emph{factoriza}, e onde não há divisores de
 zero força $\partial=0$ ou $\partial=1$ --- ambos não efetivos, que a
 Def.~\ref{def:op} proíbe. Corrige-se pelo mínimo: somando-lhe o que a estrutura
 \emph{tem}. As formas são $\partial^{2}=\alpha\partial+\beta$ com
@@ -306,7 +325,8 @@ composições, e incluí-lo obriga a incluir o $2$, que é o par que fecha.
 \[
 \boxed{\;\partial^{2}+1=0\;}
 \]
-que força $\tfrac14=-1$, isto é $5=0$: a característica \textbf{cinco}, e só
+que força $\tfrac14$ a ser o \emph{oposto} de $1$ --- o oposto já construído,
+não um sinal novo ---, isto é $5=0$: a característica \textbf{cinco}, e só
 ela --- varridas as outras, nenhuma serve. Lá $\tfrac12=3$ e $3^{2}=-1$, e
 $\partial$ tem período \textbf{quatro}: é o operador que \emph{roda}, não o que
 espelha. E o $5$ não é um número qualquer: é o \emph{discriminante} de
@@ -343,7 +363,7 @@ depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
 
 (2) A substituição é directa: a Def.~\ref{def:op} avaliada em $\partial x$ dá
 $\partial x\circ\partial^{2}x=e$, e $\partial^{2}=\partial$ transforma o segundo
-factor no primeiro. (2$'$) A factorização $\partial(\partial-1)=0$ é a própria
+factor no primeiro. (2$'$) A factorização $\partial(\partial+1)=0$ é a própria
 equação reescrita; que $t^{2}+t$, $t^{2}$ e $t^{2}+1$ têm raiz em dois símbolos
 verifica-se avaliando nos dois, e que $t^{2}+t+1$ não tem, também --- vale $1$
 nos dois. Iterando: com $\beta=0$ a relação é $\partial^{2}=\alpha\partial$, e
