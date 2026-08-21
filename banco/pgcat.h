@@ -110,6 +110,7 @@ static void pgcat_uma(SqlOut *o, const char *col, const char *val, const char *t
     if(!o) return;
     memset(o, 0, sizeof *o);
     o->ok = 1; o->ncols = 1; o->nrows = 1;
+    o->tipo[0] = SQL_TIPO_TEXT;          /* o catálogo devolve TEXTO, não int4 */
     snprintf(o->col[0], sizeof o->col[0], "%s", col);
     snprintf(o->cell[0][0], sizeof o->cell[0][0], "%s", val);
     snprintf(o->tag, sizeof o->tag, "%s", tag);
@@ -136,6 +137,7 @@ static int pgcat_responde(const char *sql, SqlOut *out){
             if(out){
                 memset(out, 0, sizeof *out);
                 out->ok = 1; out->ncols = 2;
+                out->tipo[0] = out->tipo[1] = SQL_TIPO_TEXT;
                 snprintf(out->col[0], sizeof out->col[0], "name");
                 snprintf(out->col[1], sizeof out->col[1], "setting");
                 int n = pgcat_n < SQL_OUT_MAX_ROWS ? pgcat_n : SQL_OUT_MAX_ROWS;

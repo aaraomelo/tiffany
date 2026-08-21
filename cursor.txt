@@ -3107,3 +3107,41 @@ só do lado de cá.
 
   pgwire.c 10 asserções, 0 falhas · smoke FEBE ok
   bateria 529 : 529, 108 unidades, 0 falhas
+
+§68 — O VALOR CERTO COM O TIPO ERRADO, E ELE ATRAVESSAVA O PROTOCOLO
+=====================================================================
+Fui ver o que o `RowDescription` anuncia, e estava assim:
+
+        pg_buf_i32(w, PG_OID_INT4);       /* SEMPRE */
+        pg_buf_i16(w, 4);                 /* typlen SEMPRE 4 */
+
+TODAS as colunas iam como int4, incluindo o `SELECT version()` que devolve
+«Tiffany-pgwire/0.1». E NENHUMA asserção o via — porque no wire tudo viaja em
+FORMATO TEXTO, logo o valor chegava certo célula a célula. Era o valor certo com
+o TIPO errado, que é o defeito que a comparação de strings não apanha.
+
+E não era decorativo: o OID está lá para o cliente converter. Um driver que
+confiasse nele tentaria ler «Tiffany-pgwire/0.1» como inteiro.
+
+A CORRECÇÃO: o tipo nasce onde a coluna nasce.
+  · `SqlOut` ganhou `tipo[]` — o tipo acompanha a coluna, não é decidido no wire
+  · o CATÁLOGO declara TEXT; o MOTOR declara INT4 (guarda inteiros)
+  · o typlen ANDA COM O OID: −1 (variável) para texto, 4 para int4. Anunciar 4
+    num texto é dizer ao cliente que lá cabem quatro bytes.
+  · e o CLIENTE nem lia o OID — saltava-o no parse do 'T'. Agora guarda-o, e
+    expõe `PQftype`/`PQfsize`, que são os nomes do libpq.
+
+     consulta                OID   typlen
+     SELECT version()        25    −1      TEXT
+     SHOW client_encoding    25    −1      TEXT
+     SELECT * FROM w9        23     4      INT4
+
+E O GUME É AS DUAS RESPOSTAS TEREM DE SER DIFERENTES: exige-se ver TEXT e ver
+INT4 na MESMA corrida. Um servidor que anunciasse um OID único passaria em cada
+linha isolada — que é precisamente o defeito que aqui estava. Sem essa exigência
+o medidor novo teria passado sobre o código velho.
+
+E mede-se em TODAS as colunas, não só na primeira.
+
+  pgwire.c 11 asserções, 0 falhas
+  bateria 529 : 529, 109 unidades, 0 falhas

@@ -2756,6 +2756,7 @@ static int varre(const char *resto, int acao){
                 col_nome_le(j, cn, (int)sizeof cn);
                 if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
                 else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + j);
+                sql_cap->tipo[j] = SQL_TIPO_INT4;   /* o motor guarda inteiros */
             }
             sql_cap->nrows = 0;
             snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 0");
@@ -2819,7 +2820,8 @@ static int varre(const char *resto, int acao){
             { char cn[S_COLNOME_W * 2 + 2];
               col_nome_le((int)j, cn, (int)sizeof cn);
               if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
-              else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + (int)j); }
+              else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + (int)j);
+              sql_cap->tipo[j] = SQL_TIPO_INT4; }
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
         sql_cap->nrows = 0;
     }

@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W9  o TIPO acompanha a coluna: catálogo TEXT, motor INT4 — e o gume é as
+ *        duas respostas terem de ser diferentes
  *   §W8  Trio PG6: o catálogo de SESSÃO — version/SHOW/SET/current_* e as tags de
  *        transacção — ANTES do motor, com o controlo a exigir que o motor corra
  *
@@ -1045,6 +1047,129 @@ int main(void){
            " certa. Por fim, os DOIS CAMINHOS: a mesma pergunta pelo socket (PQexec sobre o"
            " nosso FEBE) e pela porta directa dá a mesma resposta — o catálogo atravessa o"
            " protocolo, e não vive só do lado de cá.",
+           mal == 0);
+    }
+
+    /* ═══ §W9: O TIPO ACOMPANHA A COLUNA ═════════════════════════════════════
+     *
+     * O RowDescription anunciava TUDO como int4 — inclusive `SELECT version()`,
+     * que devolve texto. O valor chegava certo porque o formato do wire é texto;
+     * o TIPO é que ia errado, e nenhuma comparação de células o via. Um cliente
+     * que confiasse no OID converteria "Tiffany-pgwire/0.1" para inteiro.
+     *
+     * Aqui mede-se o que o servidor DIZ contra o que a coluna É — e o gume é
+     * haver DUAS respostas: se todas as colunas dessem o mesmo OID, o teste
+     * passaria sem separar nada.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W9 o tipo acompanha a coluna: catálogo é TEXT, motor é INT4.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w9";
+        long mal = 0;
+        int sv9[2] = {-1,-1};
+        pid_t kid9 = -1;
+        unlink("/tmp/pgwire_w9.mem");
+        unlink("/tmp/pgwire_w9.prog");
+        signal(SIGPIPE, SIG_IGN);
+
+        /* semeia pela porta directa */
+        if(!sql_abrir(base)) mal++;
+        else{
+            SqlOut sd;
+            sql_executa("CREATE TABLE w9 (a,b)", &sd);
+            sql_executa("INSERT INTO w9 VALUES (7,70)", &sd);
+            sql_fechar();
+        }
+
+        if(pipe(sv9) < 0) mal++;
+        if(!mal) kid9 = fork();
+        if(!mal && kid9 < 0) mal++;
+        if(!mal && kid9 == 0){
+            int lfd, cfd, porto = 0;
+            close(sv9[0]);
+            if(!sql_abrir(base)) _exit(3);
+            lfd = pgwire_listen(0, &porto);
+            if(lfd < 0){ sql_fechar(); _exit(4); }
+            {
+                uint8_t m[3];
+                m[0] = (uint8_t)((porto >> 8) & 0xff);
+                m[1] = (uint8_t)(porto & 0xff);
+                m[2] = 'R';
+                if(write(sv9[1], m, 3) != 3){ close(lfd); sql_fechar(); _exit(5); }
+            }
+            cfd = accept(lfd, NULL, NULL);
+            if(cfd >= 0){ pgwire_serve_conn(cfd, 77, 88); close(cfd); }
+            close(lfd); sql_fechar();
+            _exit(0);
+        }
+        if(!mal && kid9 > 0){
+            uint8_t m[3];
+            int porto = 0, st = -1;
+            int viu_text = 0, viu_int4 = 0;
+            char conninfo[128];
+            PGconn *c;
+            close(sv9[1]); sv9[1] = -1;
+            if(read(sv9[0], m, 3) != 3 || m[2] != 'R') mal++;
+            else porto = ((int)m[0] << 8) | (int)m[1];
+            close(sv9[0]); sv9[0] = -1;
+            snprintf(conninfo, sizeof conninfo,
+                     "host=127.0.0.1 port=%d user=tiffany dbname=reino", porto);
+            c = PQconnectdb(conninfo);
+            if(PQstatus(c) != CONNECTION_OK){ printf("      PQconnectdb: %s\n",
+                                                    PQerrorMessage(c)); mal++; }
+            else{
+                struct { const char *sql; int oid; int len; const char *porque; } casos[] = {
+                    { "SELECT version()",      PG_OID_TEXT, -1, "o catálogo devolve texto" },
+                    { "SHOW client_encoding",  PG_OID_TEXT, -1, "um parâmetro é texto"     },
+                    { "SELECT * FROM w9",      PG_OID_INT4,  4, "o motor guarda inteiros"  },
+                };
+                printf("      consulta                   coluna  OID   typlen   esperado   %s\n", "");
+                for(unsigned k = 0; k < sizeof casos / sizeof casos[0]; k++){
+                    PGresult *r = PQexec(c, casos[k].sql);
+                    int oid = 0, len = 0, bate = 0;
+                    if(PQresultStatus(r) == PGRES_TUPLES_OK && PQnfields(r) > 0){
+                        oid = PQftype(r, 0); len = PQfsize(r, 0);
+                        bate = (oid == casos[k].oid && len == casos[k].len);
+                        if(oid == PG_OID_TEXT) viu_text = 1;
+                        if(oid == PG_OID_INT4) viu_int4 = 1;
+                        /* e TODAS as colunas, não só a primeira */
+                        for(int j = 0; j < PQnfields(r); j++)
+                            if(PQftype(r, j) != casos[k].oid
+                               || PQfsize(r, j) != casos[k].len) bate = 0;
+                    }
+                    printf("      %-26s %-7s %-5d %-8d %-10d %s\n",
+                           casos[k].sql, PQnfields(r) ? PQfname(r, 0) : "?",
+                           oid, len, casos[k].oid, bate ? casos[k].porque : "NAO BATE");
+                    if(!bate) mal++;
+                    PQclear(r);
+                }
+                /* O GUME: as duas respostas TÊM de ser diferentes. Se o servidor
+                 * anunciasse um OID único, cada linha acima passaria à mesma —
+                 * e era exactamente o defeito que estava lá antes. */
+                printf("\n      viu TEXT: %s · viu INT4: %s · o wire separa os dois: %s\n",
+                       viu_text ? "sim" : "NAO", viu_int4 ? "sim" : "NAO",
+                       (viu_text && viu_int4) ? "sim" : "NAO — o teste não separa nada");
+                if(!viu_text || !viu_int4) mal++;
+                PQfinish(c);
+            }
+            waitpid(kid9, &st, 0);
+        }
+        if(sv9[0] >= 0) close(sv9[0]);
+        if(sv9[1] >= 0) close(sv9[1]);
+
+        printf("\n");
+        ok("O TIPO ACOMPANHA A COLUNA, e antes não acompanhava: o RowDescription anunciava"
+           " TUDO como int4 com typlen 4 — inclusive `SELECT version()`, que devolve texto."
+           " O valor chegava certo, porque no wire tudo viaja em formato texto, e por isso"
+           " NENHUMA comparação de células o apanhava: era o valor certo com o TIPO errado."
+           " Um cliente que confiasse no OID — e é para isso que ele lá está — converteria"
+           " «Tiffany-pgwire/0.1» para inteiro. Agora o tipo nasce onde a coluna nasce: o"
+           " catálogo declara TEXT, o motor declara INT4, e o typlen anda com o OID (−1 para"
+           " variável, 4 para int4), porque anunciar 4 num texto é dizer ao cliente que lá"
+           " cabem quatro bytes. Mede-se pelo WIRE, com PQftype e PQfsize — que o cliente"
+           " antes nem lia, saltava o OID —, em TODAS as colunas e não só na primeira. E O"
+           " GUME É AS DUAS RESPOSTAS TEREM DE SER DIFERENTES: exige-se ver TEXT e ver INT4"
+           " na mesma corrida, porque um servidor que anunciasse um OID único passaria em"
+           " cada linha isolada — que é precisamente o defeito que aqui estava.",
            mal == 0);
     }
 

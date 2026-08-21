@@ -9,6 +9,8 @@
 #define SQL_OUT_MAX_COLS 8
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64
+#define SQL_TIPO_INT4    23
+#define SQL_TIPO_TEXT    25
 
 typedef struct {
     int ok;
@@ -17,6 +19,11 @@ typedef struct {
     int ncols;
     int nrows;
     char col[SQL_OUT_MAX_COLS][32];
+    /* O TIPO ACOMPANHA A COLUNA. Sem isto o wire anunciava tudo como int4 —
+     * incluindo `SELECT version()`, que devolve texto —, e um cliente que
+     * confiasse no OID convertia mal. O valor ia certo e o TIPO ia errado, que é
+     * o defeito que nenhuma comparação de strings apanha. */
+    int tipo[SQL_OUT_MAX_COLS];   /* PG_OID_INT4 (23) ou PG_OID_TEXT (25) */
     char cell[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS][SQL_OUT_CELL];
 } SqlOut;
 

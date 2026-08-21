@@ -62,6 +62,11 @@ typedef struct {
     int ncols, nrows;
     int truncado;                       /* linhas/colunas que não couberam */
     char col[SQL_OUT_MAX_COLS][32];
+    /* O TIPO QUE O SERVIDOR ANUNCIOU. Antes o cliente saltava o OID e ninguém
+     * via que tudo ia como int4 — inclusive o texto do catálogo. Guardar aqui é
+     * o que permite ao teste comparar o que foi dito com o que era. */
+    int  ftype[SQL_OUT_MAX_COLS];       /* typeOID */
+    int  fsize[SQL_OUT_MAX_COLS];       /* typlen: 4 (int4) ou −1 (variável) */
     char cell[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS][SQL_OUT_CELL];
     char tag[80];                       /* CommandComplete: "SELECT 2", … */
     char err[200];
@@ -300,7 +305,14 @@ static PGresult *PQexec(PGconn *c, const char *sql){
             for(k = 0; k < nf && i < pn; k++){
                 const char *nome = (const char *)(pay + i);
                 int L = (int)strlen(nome);
-                if(k < r->ncols) snprintf(r->col[k], sizeof r->col[k], "%s", nome);
+                if(k < r->ncols){
+                    snprintf(r->col[k], sizeof r->col[k], "%s", nome);
+                    /* o OID e o typlen vêm depois de nome\0 + tableOID(4) + attr(2) */
+                    if(i + L + 1 + 4 + 2 + 4 + 2 <= pn){
+                        r->ftype[k] = pg_get_i32(pay + i + L + 1 + 4 + 2);
+                        r->fsize[k] = pg_get_i16(pay + i + L + 1 + 4 + 2 + 4);
+                    }
+                }
                 i += L + 1 + 4 + 2 + 4 + 2 + 4 + 2;   /* table,attr,oid,len,mod,fmt */
             }
             r->estado = PGRES_TUPLES_OK;
@@ -362,6 +374,13 @@ static const char *PQresStatus(PQExecStatusType s){
 }
 static int PQntuples(const PGresult *r){ return r ? r->nrows : 0; }
 static int PQnfields(const PGresult *r){ return r ? r->ncols : 0; }
+/* o tipo que o servidor anunciou para a coluna — o mesmo nome do libpq */
+static int PQftype(const PGresult *r, int c){
+    return (r && c >= 0 && c < r->ncols) ? r->ftype[c] : 0;
+}
+static int PQfsize(const PGresult *r, int c){
+    return (r && c >= 0 && c < r->ncols) ? r->fsize[c] : 0;
+}
 static const char *PQfname(const PGresult *r, int col){
     if(!r || col < 0 || col >= r->ncols) return NULL;
     return r->col[col];

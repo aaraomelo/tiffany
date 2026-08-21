@@ -124,20 +124,27 @@ static void pg_put_command_complete(PgBuf *w, const char *tag){
 /* ── Backend: RowDescription (texto; OID int4 por coluna) ────────────────────
  * 'T' + Int16(nfields) + por campo: name\0 + tableOID + attr + typeOID +
  * typelen + typmod + format */
-static void pg_put_row_description(PgBuf *w, int ncols, char col[][32]){
+static void pg_put_row_description_t(PgBuf *w, int ncols, char col[][32],
+                                     const int *tipo){
     int off = pg_msg_begin(w, PG_MSG_ROW_DESC);
     int i;
     pg_buf_i16(w, (int16_t)ncols);
     for(i = 0; i < ncols; i++){
+        int oid = (tipo && tipo[i]) ? tipo[i] : PG_OID_INT4;
         pg_buf_cstr(w, col[i]);
         pg_buf_i32(w, 0);                 /* table OID */
         pg_buf_i16(w, (int16_t)(i + 1));  /* attr number */
-        pg_buf_i32(w, PG_OID_INT4);
-        pg_buf_i16(w, 4);                 /* typlen */
+        pg_buf_i32(w, oid);
+        /* typlen ANDA COM O OID: 4 para int4, −1 (variável) para text. Anunciar
+         * 4 num texto é dizer ao cliente que lá cabem quatro bytes. */
+        pg_buf_i16(w, (int16_t)(oid == PG_OID_TEXT ? -1 : 4));
         pg_buf_i32(w, -1);                /* typmod */
         pg_buf_i16(w, 0);                 /* text format */
     }
     pg_msg_end(w, off);
+}
+static void pg_put_row_description(PgBuf *w, int ncols, char col[][32]){
+    pg_put_row_description_t(w, ncols, col, NULL);
 }
 
 /* ── Backend: DataRow (valores em texto) ───────────────────────────────────── */
@@ -162,7 +169,7 @@ static void pg_reply_sql_rows(PgBuf *w, const SqlOut *o){
         return;
     }
     if(o->ncols > 0){
-        pg_put_row_description(w, o->ncols, (char (*)[32])o->col);
+        pg_put_row_description_t(w, o->ncols, (char (*)[32])o->col, o->tipo);
         for(i = 0; i < o->nrows; i++)
             pg_put_data_row(w, o->ncols, (char (*)[SQL_OUT_CELL])o->cell[i]);
     }
