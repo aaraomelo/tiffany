@@ -255,3 +255,5 @@ tests/claim_control
 tests/claim_fronteira
 .tmp-banco-*
 corpus/
+node_modules/
+**/node_modules/

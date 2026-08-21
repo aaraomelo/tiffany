@@ -22,9 +22,9 @@ tar -xzf "$ART" -C "$DIR"
 rm -f "$ART"
 echo "extraído em $DIR"
 
-if [ "$MIGRAR" != "0" ] && [ "$APP" = "patria-api" ]; then
+if [ "$MIGRAR" != "0" ] && [ "$APP" = "tiffany-api" ]; then
   E=$(echo "$AMB" | tr a-z A-Z); [ "$E" = "PRODUCAO" ] && E=PROD
-  URL=$(grep "^patria-api $E DATABASE_URL=" "$VARS" | cut -d= -f2-)
+  URL=$(grep "^tiffany-api $E DATABASE_URL=" "$VARS" | cut -d= -f2-)
   [ -n "$URL" ] || { echo "sem DATABASE_URL para $E em $VARS"; exit 1; }
   cd "$DIR"
   npm install prisma@5.22.0 --no-save >/dev/null 2>&1

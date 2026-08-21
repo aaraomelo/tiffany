@@ -1,7 +1,8 @@
 name: Publicar o ERP
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  O ERP vive em plataforma/ desde 20/08/2026, e este workflow é o que o põe no
+#  O ERP vive em plataforma/tiffany-erp/ desde 20/08/2026 (chamou-se patria-erp até lá;
+#  o container no servidor AINDA se chama patria-erp — ver o aviso no fim), e este workflow é o que o põe no
 #  ar. Substitui os dois que vieram com ele (deploy.yml e deploy-homolog.yml, do
 #  Patria-Labs/patria-erp, hoje arquivado): o GitHub só corre os workflows da
 #  RAIZ do repositório, portanto aqueles eram letra morta e foram absorvidos por
@@ -28,7 +29,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'plataforma/**'
+      - 'plataforma/tiffany-erp/**'
       - '.github/workflows/erp.yml'
   workflow_dispatch:
     inputs:
@@ -47,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: plataforma/erp-api
+        working-directory: plataforma/tiffany-erp/erp-api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -105,14 +106,14 @@ jobs:
           for i in 1 2 3; do ssh-keyscan -4 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break; sleep 3; done
 
       - name: Sync source
-        # a origem é plataforma/ e não ./ — é a única mudança de caminho que a
-        # mudança de casa obrigou. Os excludes continuam relativos à origem.
+        # a origem é plataforma/tiffany-erp/ e não ./ — foi o que as duas mudanças de
+        # casa obrigaram. Os excludes continuam relativos à origem.
         run: |
           rsync -az --delete \
             --exclude node_modules --exclude dist --exclude .git \
             --exclude 'erp-api/public' --exclude estrategia --exclude .claude \
             --exclude clients \
-            plataforma/ server:${{ steps.alvo.outputs.dir }}/
+            plataforma/tiffany-erp/ server:${{ steps.alvo.outputs.dir }}/
 
       - name: Build & restart
         run: ssh server 'sh ${{ steps.alvo.outputs.dir }}/${{ steps.alvo.outputs.script }}'
@@ -130,3 +131,10 @@ jobs:
             sleep 4
           done
           echo "health nao ficou 200 a tempo em ${{ steps.alvo.outputs.ambiente }}"; exit 1
+
+#  ATENÇÃO ÀS DUAS RÉGUAS: aqui o app chama-se tiffany-erp (é o directório); no
+#  servidor o container e o directório chamam-se AINDA patria-erp. Não é descuido:
+#  renomear containers vivos é outra operação, com paragem. Enquanto forem
+#  diferentes, o nome do servidor entra SEMPRE por parâmetro explícito (o passo
+#  "Qual ambiente"), nunca derivado do nome da pasta — que é como um renome de
+#  pasta derrubaria produção sem ninguém perceber porquê.

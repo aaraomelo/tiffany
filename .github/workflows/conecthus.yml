@@ -1,7 +1,8 @@
-name: Publicar o Conecthus (patria-api e landpage)
+name: Publicar o Conecthus (tiffany-api e tiffany-app)
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Os dois vieram de Patria-Labs (patria-api e landpage), que foram APAGADOS.
+#  Os dois vieram de Patria-Labs (patria-api e landpage, hoje tiffany-api e
+#  tiffany-app), e esses repositórios foram APAGADOS.
 #  Com eles morreram os workflows que os punham no ar — e os dois estão em
 #  produção, seis containers entre prod, homolog e dev. Este ficheiro é o que
 #  ficou no lugar deles, e é mais curto que os originais por uma razão só:
@@ -46,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false          # a landpage não deve ficar por publicar porque a api falhou
       matrix:
-        app: [patria-api, landpage]
+        app: [tiffany-api, tiffany-app]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,17 +71,22 @@ jobs:
           APP="${{ matrix.app }}"
           # os nomes e portas vieram das environment variables dos repos apagados;
           # não são segredo — são caminhos e nomes de container.
+          # DUAS RÉGUAS, e é deliberado: à esquerda o nome DAQUI (a pasta), à direita o
+          # nome NO SERVIDOR (container e directório), que continua a ser o antigo. Renomear
+          # containers vivos é outra operação. Por isso o nome do servidor entra sempre
+          # explícito nesta tabela e nunca se deriva do nome da pasta.
           case "$APP-$AMB" in
-            patria-api-producao) D=/root/patria-api;          C=patria-api;          P=8080; F=/root/docker-compose.prod.yml ;;
-            patria-api-homolog)  D=/root/patria-api-homolog;  C=patria-api-homolog;  P=8081; F=/root/docker-compose.homolog.yml ;;
-            patria-api-dev)      D=/root/patria-api-dev;      C=patria-api-dev;      P=8082; F=/root/docker-compose.dev.yml ;;
-            landpage-producao)   D=/root/landpage;            C=landpage;            P=3000; F=/root/docker-compose.prod.yml ;;
-            landpage-homolog)    D=/root/landpage-homolog;    C=landpage-homolog;    P=3001; F=/root/docker-compose.homolog.yml ;;
-            landpage-dev)        D=/root/landpage-dev;        C=landpage-dev;        P=3002; F=/root/docker-compose.dev.yml ;;
+            tiffany-api-producao) D=/root/patria-api;          C=patria-api;          P=8080; F=/root/docker-compose.prod.yml ;;
+            tiffany-api-homolog)  D=/root/patria-api-homolog;  C=patria-api-homolog;  P=8081; F=/root/docker-compose.homolog.yml ;;
+            tiffany-api-dev)      D=/root/patria-api-dev;      C=patria-api-dev;      P=8082; F=/root/docker-compose.dev.yml ;;
+            tiffany-app-producao) D=/root/landpage;            C=landpage;            P=3000; F=/root/docker-compose.prod.yml ;;
+            tiffany-app-homolog)  D=/root/landpage-homolog;    C=landpage-homolog;    P=3001; F=/root/docker-compose.homolog.yml ;;
+            tiffany-app-dev)      D=/root/landpage-dev;        C=landpage-dev;        P=3002; F=/root/docker-compose.dev.yml ;;
+            *) echo "combinação desconhecida: $APP-$AMB"; exit 1 ;;
           esac
           { echo "dir=$D"; echo "container=$C"; echo "porta=$P"; echo "compose=$F"; echo "ambiente=$AMB"; } >> "$GITHUB_OUTPUT"
           # a api responde /api/health; a landpage serve a raiz
-          [ "$APP" = "patria-api" ] && echo "saude=/api/health" >> "$GITHUB_OUTPUT" || echo "saude=/" >> "$GITHUB_OUTPUT"
+          [ "$APP" = "tiffany-api" ] && echo "saude=/api/health" >> "$GITHUB_OUTPUT" || echo "saude=/" >> "$GITHUB_OUTPUT"
           echo "→ $APP em $AMB: $C na porta $P"
 
       - uses: actions/setup-node@v4
@@ -100,7 +106,7 @@ jobs:
         working-directory: plataforma/conecthus/${{ matrix.app }}
         run: |
           # cada um leva o que o seu Dockerfile precisa, e nada mais
-          if [ "${{ matrix.app }}" = "patria-api" ]; then
+          if [ "${{ matrix.app }}" = "tiffany-api" ]; then
             tar -czf /tmp/artefato.tar.gz dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md
           else
             tar -czf /tmp/artefato.tar.gz dist Dockerfile nginx-container.conf
