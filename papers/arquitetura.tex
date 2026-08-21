@@ -48,10 +48,23 @@
        {do bit à query --- a máquina no metal e a porta comercial}
 \maketitle
 
-\section*{O princípio: um operador}
+\section*{O princípio: uma dobra}
 
-\noindent Antes das camadas, o que as gera. O dado é um \textbf{operador} e as
-duas equações que ele cumpre:
+\noindent Antes das camadas, o que as gera. O dado são \textbf{dois extremos} e
+a acção que os \emph{troca} --- a \textbf{dobra}:
+\[
+\boxed{\;\partial x = a+b-x\;}
+\]
+O seu ponto fixo é o \textbf{meio}, $\tfrac{a+b}{2}$; e dobrando outra vez de
+cada lado --- a mesma estrutura nos dois --- a indução dá todos os pontos, $2^{n}$
+intervalos e $2^{n}+1$ pontos ao fim de $n$ passos. \emph{O ponto fixo de uma
+dobra é extremo da seguinte}, e é essa recursão que o resto do documento
+executa (\code{aranha.tex} Def.~1 e Teor.~2).
+
+\medskip\noindent\textbf{Nos extremos sozinhos não há meio, e é dessa falta que
+saem as duas faces.} Sem ponto fixo, o invariante de uma composição não pode
+ser o neutro; são precisas \emph{duas}, cada uma com o seu, e os dois
+invariantes são os dois extremos:
 \[
 \boxed{\;
 \partial x + x = 0
@@ -60,14 +73,16 @@ duas equações que ele cumpre:
 \;}
 \]
 --- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra, e é
-nelas que $0$ e $1$ nascem: são o que o operador devolve em cada uma. As duas
-operações são duais uma da outra, e por isso não são dois operadores: são as
-duas faces do mesmo.
+nelas que $0$ e $1$ nascem: são o que a dobra devolve em cada uma. Não são dois
+operadores: são as duas faces do mesmo, e o invariante de cada uma é o neutro da
+outra. As tabelas saem daí forçadas, e sem que se escreva um sinal --- o oposto
+de $1$ \emph{é} $1$, pelo que o $-1$ nunca precisa de existir.
 
-\medskip\noindent\textbf{E o \code{MOVE} é este operador no metal.} Ler e
-escrever não são duas instruções que se implementam juntas por economia: são
-\emph{uma} operação e o seu dual, e o que as separa é um \textbf{sinal} ---
-$+1$ para ler, $-1$ para escrever (\S\ref{sec:isa}). Todo este documento é a
+\medskip\noindent\textbf{E o \code{MOVE} é esta dobra no metal.} Ler e escrever
+não são duas instruções que se implementam juntas por economia: são \emph{uma}
+operação e o seu dual --- os dois lados do mesmo vinco ---, e o que as separa é
+um \textbf{sinal}: $+1$ para ler, $-1$ para escrever (\S\ref{sec:isa}). O sinal
+é qual dos lados da dobra se toma, e o slot é o meio. Todo este documento é a
 consequência de a máquina ter uma instrução e um sinal, em vez de duas
 instruções.
 
@@ -126,8 +141,8 @@ fecha. A posição não se escolhe: \textbf{lê-se pelo que ele consome}.
 construção aritmética está feita em cinco papers, e lê-se num sentido só:
 \[
 \boxed{\;
-\underbrace{\partial}_{\text{o operador}}
-\;\xrightarrow[\text{as duas equações}]{}\;
+\underbrace{\partial}_{\text{a dobra}}
+\;\xrightarrow[\text{sem meio: duas faces}]{}\;
 \underbrace{\mathbb{F}_2}_{\text{um bit}}
 \;\xrightarrow[\text{3 dobras}]{\ \code{naturais}\ }\;
 \underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}

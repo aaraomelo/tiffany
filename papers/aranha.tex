@@ -214,14 +214,23 @@ Com $\partial$ da Def.~\ref{def:op}:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{O invariante é o neutro.} O valor comum $e$ cumpre
 $e\circ x=x\circ e=x$.
-\item[(2)] \textbf{$\partial$ é involutiva, e o neutro é o seu ponto fixo.}
-$\partial\partial x=x$, e $\partial e=e$.
-\item[(3)] \textbf{O ponto fixo da dobra é o MEIO.} $\partial x=x$ dá
-$x=\tfrac{a+b}{2}$ --- um só, e é o centro. Ele não é acrescentado ao conjunto:
-é \emph{produzido} pela dobra, e por (2) é ele que serve de neutro.
+\item[(2)] \textbf{$\partial$ é involutiva, e tem um ponto fixo: o MEIO.} São
+factos da dobra e não dependem de composição nenhuma:
+\[
+\partial^{2}=\mathrm{id},\qquad \partial m=m,\qquad m=\tfrac{a+b}{2} .
+\]
+O meio é \emph{um só} e não é acrescentado ao conjunto --- é \textbf{produzido}
+pela dobra.
+\item[(3)] \textbf{E onde houver composição, é ele o neutro dela.} Isto é
+condicional, e de propósito: por (1) o invariante é o neutro, e por (2) o
+invariante de uma composição compatível com $\partial$ tem de ser fixo por
+$\partial$; havendo um só fixo, é o meio. \emph{Enquanto não houver a face, o
+meio é só o centro} --- a identificação com o neutro nasce com a composição, não
+antes dela.
 \item[(4)] \textbf{Nos extremos sozinhos não há meio, e por isso uma composição
 não chega.} Sobre $\{0,1\}$ apenas, $\partial$ troca os dois e não fixa nenhum;
-então (2) é impossível numa composição só. É preciso uma \textbf{segunda}, e o
+então (3) não pode valer numa composição só --- o invariante teria de ser fixo,
+e não há fixo nenhum. É preciso uma \textbf{segunda}, e o
 seu invariante é o \emph{outro} extremo:
 \[
 \boxed{\;\partial x + x = 0\;}\qquad\qquad\boxed{\;\partial x\cdot x = 1\;}
@@ -247,16 +256,19 @@ $x\circ\partial x=e=\partial x\circ\partial\partial x$. Compondo
 $e\circ x=(x\circ\partial x)\circ x$ e usando a associatividade, o valor não
 depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
 
-(2) $\partial\partial x=a+b-(a+b-x)=x$, directamente. E $e\circ\partial e=e$ por
-definição, $e\circ\partial e=\partial e$ por (1); donde $\partial e=e$.
+(2) $\partial\partial x=a+b-(a+b-x)=x$, directamente; e $a+b-x=x$ tem a única
+solução $x=\tfrac{a+b}{2}$, que existe sempre que o $2$ se inverta. Note-se que
+\emph{escrever} a dobra já usa o dois --- é o número de extremos ---, pelo que
+tê-lo é condição de a construção operar; e tê-lo é ter o seu dual $\tfrac12$,
+que é o próprio meio. Nada disto menciona composição: são factos da reflexão.
 
-(3) $a+b-x=x$ tem a única solução $x=\tfrac{a+b}{2}$, e ela existe sempre que o
-$2$ se inverta. Note-se que \emph{escrever} a dobra já usa o dois --- é o número
-de extremos ---, pelo que tê-lo é condição de a construção operar; e tê-lo é ter
-o seu dual $\tfrac12$, que é o próprio meio. A composição e o ponto fixo são o
-mesmo dado lido dos dois lados.
+(3) Dada uma composição $\circ$ que cumpra a Def.~\ref{def:op}, o seu invariante
+$e$ é neutro por (1), e de $e\circ\partial e=e$ com $e\circ\partial e=\partial e$
+vem $\partial e=e$: o invariante é fixo por $\partial$. Como o único fixo é $m$,
+é $m$. A implicação corre neste sentido e não no outro --- é a face que obriga o
+seu neutro a ser o centro, e não o centro que se declara neutro por si.
 
-(4) Se $\partial$ não fixa nada, (2) não pode valer numa composição só. Com dois
+(4) Se $\partial$ não fixa nada, (3) não pode valer numa composição só. Com dois
 objetos trocados, o invariante teria de ser fixo e nenhum o é; restam
 \emph{duas} composições, cada uma com o seu invariante, e os dois invariantes
 são os dois objetos. Chamando-lhes $0$ e $1$, e $+$ e $\cdot$ às composições,
@@ -268,7 +280,7 @@ medido --- ao passo que sobre dois, com $\partial$ a trocá-los, não há
 
 (5) A aplicação afim que leva $[a,m]$ em $[a,b]$ transporta a dobra na dobra,
 porque $\partial$ é afim e os afins compõem-se; o mesmo do outro lado. E $m$ é
-fixo em $[a,b]$ por (3) e é extremo de cada pedaço por construção --- é a mesma
+fixo em $[a,b]$ por (2) e é extremo de cada pedaço por construção --- é a mesma
 frase dita nos dois níveis.
 
 (6) Por indução: o nível $0$ tem $1$ intervalo e $2$ pontos; dobrar cada
