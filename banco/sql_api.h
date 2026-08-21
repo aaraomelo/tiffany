@@ -56,6 +56,10 @@ void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
  * faces correm num passo só —, pelo que este número depende do TAMANHO da
  * tabela e não do conteúdo dela. */
 extern long sql_ultimos_passos;
+/* os nós visitados na última descida da árvore — a PROFUNDIDADE do índice, que
+ * não cresce com o tamanho da tabela. É esta a medida do índice, e não os
+ * passos, que com ele são zero: zero não distingue não-correr de não-fazer. */
+extern long sql_ultimos_nos;
 int  sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
                     long *fora);
 

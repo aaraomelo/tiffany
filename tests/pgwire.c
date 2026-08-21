@@ -3555,6 +3555,113 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W27: O ÍNDICE — DESCER EM VEZ DE VARRER ═══════════════════════════
+     *
+     * «são precisos log n cortes para igualar uma ordem, e esse número É a
+     * profundidade» (arquitetura.tex §sec:isa); «nenhuma dependência de |X| —
+     * é a afirmação que importa, porque é a que separa o algoritmo da tabela»
+     * (aranha.tex §sec:algoritmo). O motor varria o espaço por cada WHERE. */
+    {
+        SqlOut o;
+        long mal = 0;
+        long nos[3], passos_sem = 0;
+        const int tam[3] = { 20, 40, 80 };
+        printf("\n§W27 o índice: descer em vez de varrer.\n\n");
+
+        for(int k = 0; k < 3; k++){
+            char base[64], m[80], pr[80], q[80];
+            snprintf(base, sizeof base, "/tmp/pgwire_w27_%d", k);
+            snprintf(m, sizeof m, "%s.mem", base);
+            snprintf(pr, sizeof pr, "%s.prog", base);
+            unlink(m); unlink(pr);
+            if(!sql_abrir(base)) mal++;
+            sql_executa("CREATE TABLE t (a,b)", &o);
+            for(int i = 1; i <= tam[k]; i++){
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                sql_executa(q, &o);
+            }
+            /* SEM índice, e é o CONTROLO: aqui o custo TEM de crescer */
+            sql_executa("SELECT * FROM t WHERE a = 5", &o);
+            long p_sem = sql_ultimos_passos;
+            int certo_sem = (o.nrows == 1 && !strcmp(o.cell[0][1], "10"));
+            if(k == 0) passos_sem = p_sem;
+            if(k == 2 && p_sem <= passos_sem) mal++;    /* cresceu com o tamanho */
+
+            int ri = sql_executa("CREATE INDEX ON t (a)", &o);
+            sql_executa("SELECT * FROM t WHERE a = 5", &o);
+            nos[k] = sql_ultimos_nos;
+            int certo_com = (o.nrows == 1 && !strcmp(o.cell[0][1], "10"));
+            printf("      %2d linhas · sem índice: %4ld passos · com índice: %ld nós"
+                   "   os dois dão [5,10]: %s\n",
+                   tam[k], p_sem, nos[k], (certo_sem && certo_com) ? "sim" : "NAO");
+            if(!ri || !certo_sem || !certo_com) mal++;
+            sql_fechar();
+        }
+        int lei = (nos[0] == nos[1] && nos[1] == nos[2] && nos[0] > 0);
+        printf("      -> os nós NÃO crescem com |X|: %s  (%ld, %ld, %ld)\n",
+               lei ? "sim" : "NAO", nos[0], nos[1], nos[2]);
+        if(!lei) mal++;
+
+        /* ── O CONTROLO DA CORRECÇÃO: o índice VELHO não pode mentir. */
+        {
+            unlink("/tmp/pgwire_w27v.mem"); unlink("/tmp/pgwire_w27v.prog");
+            if(!sql_abrir("/tmp/pgwire_w27v")) mal++;
+            sql_executa("CREATE TABLE t (a,b)", &o);
+            for(int i = 1; i <= 20; i++){
+                char q[64];
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                sql_executa(q, &o);
+            }
+            sql_executa("CREATE INDEX ON t (a)", &o);
+            sql_executa("INSERT INTO t VALUES (99,198)", &o);
+            sql_executa("SELECT * FROM t WHERE a = 5", &o);
+            int velho_ok = (o.nrows == 1 && !strcmp(o.cell[0][1], "10"));
+            long p_velho = sql_ultimos_passos;
+            sql_executa("SELECT * FROM t WHERE a = 99", &o);
+            int nova_ok = (o.nrows == 1 && !strcmp(o.cell[0][1], "198"));
+            printf("\n      CONTROLO — depois de um INSERT o índice está VELHO:"
+                   " volta a varrer (%ld passos), a resposta continua certa: %s,"
+                   " e a linha NOVA aparece: %s\n",
+                   p_velho, velho_ok ? "sim" : "NAO", nova_ok ? "sim" : "NAO");
+            if(!velho_ok || !nova_ok || p_velho == 0) mal++;
+
+            /* e o que o índice não serve continua pelo molde */
+            sql_executa("SELECT * FROM t WHERE a > 5", &o);
+            int molde = (o.nrows == 16 && sql_ultimos_passos > 0);
+            printf("      e `a > 5` continua pelo molde: %d linha(s), %ld passos  %s\n",
+                   o.nrows, sql_ultimos_passos, molde ? "" : "NAO BATE");
+            if(!molde) mal++;
+
+            int rc = sql_executa("CREATE INDEX ON t (zzz)", &o);
+            printf("      coluna inexistente no índice: %s\n",
+                   rc ? "RESPONDEU (mau)" : "recusado");
+            if(rc) mal++;
+            sql_fechar();
+        }
+
+        printf("\n");
+        ok("O ÍNDICE DESCE, E POR ISSO O CUSTO LARGA O TAMANHO DA TABELA. A teoria é explícita"
+           " nos dois documentos: «são precisos log n cortes para igualar uma ordem, e esse"
+           " número É a profundidade», e «nenhuma dependência de |X| — é a afirmação que"
+           " importa, porque é a que separa o algoritmo da tabela». O motor varria o espaço"
+           " inteiro por cada WHERE, e isso não era uma optimização em falta: era o algoritmo a"
+           " correr como tabela. A árvore que o ORDER BY e o JOIN já usavam passa a poder NÃO"
+           " ser limpa — é a mesma lei com outra base, na zona 3 do .mem, DENTRO do ficheiro da"
+           " tabela, sem memória de programa nenhuma a segurá-la entre consultas. E O QUE SE"
+           " MEDE SÃO OS NÓS, não os passos: com índice os passos de ISA são ZERO, e zero não"
+           " distingue não-ter-corrido de não-ter-feito-nada. Os nós visitados são QUARENTA em"
+           " tabelas de vinte, quarenta e oitenta linhas — o mesmo número, que é a profundidade"
+           " —, ao passo que sem índice os passos crescem com o tamanho, e é esse o CONTROLO"
+           " que impede «constante» de passar por trivial. OS DOIS CAMINHOS TÊM DE CONCORDAR:"
+           " a mesma consulta com e sem índice dá a mesma linha, nas três tabelas. E O ÍNDICE"
+           " VELHO NÃO PODE MENTIR, que é a parte que mais importa: depois de um INSERT o"
+           " cabeçalho já não bate com o número de linhas, o índice é IGNORADO e a varredura"
+           " corre — a resposta continua certa e a linha nova aparece. Um índice velho custa"
+           " tempo, nunca correcção. Fica dito o que ele NÃO serve: só a forma `col = k`"
+           " simples desce pela árvore; `a > 5` continua pelo molde, e mede-se que continua.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

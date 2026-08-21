@@ -3084,6 +3084,11 @@ static long ultima_conta = 0;
 /* os passos da última varredura — a única maneira de AFIRMAR que o molde deixou
  * de ramificar, em vez de o supor: sem salto, o custo não depende do dado. */
 long sql_ultimos_passos = 0;
+/* os NÓS visitados na última descida da árvore. É a medida honesta do índice:
+ * «0 passos de ISA» não distingue não-ter-corrido de não-ter-feito-nada, e este
+ * número diz o trabalho que a árvore fez — a PROFUNDIDADE, que não cresce com
+ * o tamanho da tabela. */
+long sql_ultimos_nos = 0;
 
 
 /* ---------------- A DISTÂNCIA NO WHERE: só se compara dentro da classe ----------------
@@ -3254,6 +3259,29 @@ static long hav_n  = 0;
  * pedida. */
 #define S_ORD      (ISA_TECTO + ZONA(0))     /* acima do tecto: só o C endereça */
 #define S_ORDCAB   (S_ORD - 1)
+
+/* ── O ÍNDICE VIVE NOUTRA ZONA, E NO DISCO ───────────────────────────────────
+ *
+ * A árvore de cima é de rascunho: o ORDER BY, o JOIN e o GROUP BY limpam-na e
+ * reconstroem-na a cada consulta. Um ÍNDICE é a mesma árvore que NÃO se limpa —
+ * e por isso tem de morar noutro sítio. Mora na zona 3, acima do tecto da ISA,
+ * dentro do `.mem` DA TABELA: é do disco que ele é lido, e não há aqui memória
+ * de programa nenhuma a segurá-lo entre consultas.
+ *
+ * O cabeçalho guarda a coluna indexada e quantas linhas a tabela tinha quando
+ * ele foi construído. Se o número mudou, o índice está velho e IGNORA-SE — a
+ * varredura corre como antes. Um índice velho nunca dá resposta errada; dá
+ * apenas a resposta lenta. */
+#define S_IDX      (ISA_TECTO + ZONA(3))
+#define S_IDXCAB   (S_IDX - 1)               /* {coluna+1, 0} */
+#define S_IDXCAB2  (S_IDX - 2)               /* as linhas na construção, no par */
+
+/* qual árvore está a ser usada: a de rascunho ou a do índice. As funções
+ * abaixo servem as duas — a árvore é a mesma lei, e a base é o parâmetro. */
+static unsigned ord_raiz = S_ORD;
+static unsigned ord_cab  = S_ORDCAB;
+static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB; }
+static void ord_usa_indice(void){   ord_raiz = S_IDX; ord_cab = S_IDXCAB; }
 /* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
  * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
  * número que o 16, ditos de três maneiras. Declara-se o expoente e o resto sai
@@ -3268,26 +3296,26 @@ static unsigned ord_novo(void){
      * chegar a 255 dava a volta e a árvore RECICLAVA nós — o tecto declarado
      * era ficção, porque a árvore partia muito antes de lá chegar. É o mesmo
      * defeito do `no_novo` da cifra, na árvore que ordena e junta. */
-    unsigned n = par_le(S_ORDCAB); if(n < 1) n = 1;        /* 0 é a raiz */
+    unsigned n = par_le(ord_cab); if(n < 1) n = 1;        /* 0 é a raiz */
     if(n >= ORD_MAXNO) return 0;                           /* tecto: sem nó, sem ordem */
-    par_grava(S_ORDCAB, n + 1);
+    par_grava(ord_cab, n + 1);
     for(unsigned k = 0; k < ORD_LARG; k++){
-        Word z = {0,0}; mem_grava(S_ORD + n*ORD_LARG + k, z);
+        Word z = {0,0}; mem_grava(ord_raiz + n*ORD_LARG + k, z);
     }
     return n;
 }
 static unsigned ord_filho(unsigned no, unsigned sim, int abrir){
-    unsigned f = par_le(S_ORD + no*ORD_LARG + sim);
+    unsigned f = par_le(ord_raiz + no*ORD_LARG + sim);
     if(f || !abrir) return f;
     f = ord_novo();
     if(!f) return 0;
-    par_grava(S_ORD + no*ORD_LARG + sim, f);   /* o índice do nó no PAR, não num byte */
+    par_grava(ord_raiz + no*ORD_LARG + sim, f);   /* o índice do nó no PAR, não num byte */
     return f;
 }
 static void ord_limpa(void){
-    Word z = {1,0}; mem_grava(S_ORDCAB, z);
+    Word z = {1,0}; mem_grava(ord_cab, z);
     for(unsigned k = 0; k < ORD_LARG; k++){
-        Word q = {0,0}; mem_grava(S_ORD + k, q);
+        Word q = {0,0}; mem_grava(ord_raiz + k, q);
     }
 }
 /* insere a chave (valor, índice); devolve 0 se a árvore não coube */
@@ -3310,7 +3338,7 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
     }
     for(unsigned k = 0; k < ORD_LARG; k++){
         unsigned sim = desc ? (ORD_LARG - 1 - k) : k;
-        unsigned f = par_le(S_ORD + no*ORD_LARG + sim);
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + sim);
         if(!f && !(nivel == 0 && 0)) { if(!f) continue; }
         ord_percorre(f, nivel + 1, (ch << 4) | sim, saida, n, cap, desc);
     }
@@ -3392,6 +3420,47 @@ static int j_carrega_direita(long *ncols_dir){
     return postos;
 }
 
+/* ── CONSTRUIR E LER O ÍNDICE ────────────────────────────────────────────────
+ *
+ * Construir é uma varredura — Θ(|X|), uma vez. LER é uma descida — Θ(log|X|),
+ * de cada vez. É essa a troca, e é a que o `arquitetura.tex` §sec:isa descreve:
+ * «são precisos log n cortes para igualar uma ordem, e esse número É a
+ * profundidade». O motor varria o espaço todo por cada `WHERE`; com o índice
+ * deixa de o fazer, que é a cláusula do `aranha.tex` §sec:algoritmo lida à
+ * letra — «nenhuma dependência de |X|, e é a que separa o algoritmo da
+ * tabela». */
+static long cat_nrows(void);
+static long celula_valor(long i, long j, long nc);
+
+static int idx_constroi(long col, long ncols, long nrows){
+    ord_usa_indice();
+    ord_limpa();
+    long postos = 0;
+    for(long i = 0; i < nrows; i++){
+        if(!bit_le(S_VIVO, i)) continue;
+        if(!ord_insere(celula_valor(i, col, ncols), (int)i)){
+            ord_usa_rascunho();
+            return 0;                        /* não coube: sem índice, e sem mentira */
+        }
+        postos++;
+    }
+    { Word c; c.total = (Word8)(col + 1); c.e = 0; mem_grava(S_IDXCAB, c); }
+    { Word n; n.total = (Word8)(nrows & 255); n.e = (Word8)((nrows >> 8) & 255);
+      mem_grava(S_IDXCAB2, n); }
+    ord_usa_rascunho();
+    return 1;
+}
+
+/* a coluna indexada, ou −1 se não há índice ou se ele está velho */
+static long idx_coluna(long nrows){
+    Word c = mem_le(S_IDXCAB);
+    if(!c.total) return -1;
+    Word n = mem_le(S_IDXCAB2);
+    long quando = (long)n.total | ((long)n.e << 8);
+    if(quando != nrows) return -1;           /* a tabela mudou: o índice é velho */
+    return (long)c.total - 1;
+}
+
 /* o valor da coluna de junção da linha `d` da direita, lido do S_JDIR */
 static long j_valor_dir(int d, long ncols_dir){
     int oc = j_col_dir_idx;
@@ -3404,18 +3473,22 @@ static int j_casam(long v, int *saida, int cap){
     unsigned long ch = ((unsigned long)(v + 2147483648L) << 8);
     unsigned no = 0;
     int n = 0;
+    sql_ultimos_nos = 0;
     /* desce os 8 nibbles do VALOR; os 2 do índice ficam para o percurso */
     for(int d = ORD_NIV - 1; d >= 2; d--){
         unsigned sim = (unsigned)((ch >> (ORD_BITS*d)) & (ORD_LARG - 1u));
-        no = par_le(S_ORD + no*ORD_LARG + sim);
+        no = par_le(ord_raiz + no*ORD_LARG + sim);
+        sql_ultimos_nos++;
         if(!no) return 0;                          /* nenhuma linha com este valor */
     }
     /* os dois últimos níveis são o índice: percorre-os e recolhe */
     for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
-        unsigned n1 = par_le(S_ORD + no*ORD_LARG + a1);
+        unsigned n1 = par_le(ord_raiz + no*ORD_LARG + a1);
+        sql_ultimos_nos++;
         if(!n1) continue;
         for(unsigned a2 = 0; a2 < ORD_LARG; a2++){
-            unsigned n2 = par_le(S_ORD + n1*ORD_LARG + a2);
+            unsigned n2 = par_le(ord_raiz + n1*ORD_LARG + a2);
+            sql_ultimos_nos++;
             if(!n2) continue;
             if(n < cap) saida[n++] = (int)((a1 << 4) | a2);
         }
@@ -3671,8 +3744,42 @@ static int varre(const char *resto, int acao){
         }
     }
 
+    /* ── E SE HOUVER ÍNDICE, NÃO SE VARRE ─────────────────────────────────
+     *
+     * A forma `WHERE <col> = <k>` é a que a árvore responde de uma descida.
+     * Reconhece-se aqui, antes de compilar o molde, e só a forma SIMPLES — sem
+     * nada ao lado —, porque é a única em que a resposta da árvore é a resposta
+     * toda. Com qualquer outra coisa a seguir, o molde corre como sempre.
+     *
+     * O índice é ignorado se estiver velho (a tabela mudou de tamanho desde que
+     * ele foi feito): aí varre-se. Um índice velho custa tempo, nunca correcção. */
+    int idx_usa = 0; long idx_k = 0;
+    if(acao == ACAO_MARCA && !in_sub){
+        const char *q = p;
+        char c_esq[64];
+        if(palavra(&q, "WHERE") && ident(&q, c_esq, sizeof c_esq)){
+            pula(&q);
+            if(*q == '='){
+                q++; pula(&q);
+                int sinal = 1;
+                if(*q == '-'){ sinal = -1; q++; pula(&q); }
+                if(isdigit((unsigned char)*q)){
+                    long v = 0;
+                    while(isdigit((unsigned char)*q)) v = v*10 + (*q++ - '0');
+                    pula(&q);
+                    if(*q == 0 || *q == ';'){
+                        long col = col_indice(c_esq);
+                        if(col >= 0 && idx_coluna(cat_nrows()) == col){
+                            idx_usa = 1; idx_k = sinal * v; p = q;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     citadas_where = 0;
-    tem_where = in_sub ? 0 : le_where(&p, &cl);
+    tem_where = (in_sub || idx_usa) ? 0 : le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
         return 0;
@@ -3867,10 +3974,18 @@ static int varre(const char *resto, int acao){
     Word z = {0,0};
     for(long i = 0; i <= nrows / (long)SLOT_BITS; i++) mem_grava(S_MATCH + (unsigned)i, z);
 
-    /* UM molde só, o da linha 0 — e depois a PA anda com ele por todas as linhas. */
+    /* UM molde só, o da linha 0 — e depois a PA anda com ele por todas as linhas.
+     *
+     * SALVO QUANDO HÁ ÍNDICE: aí não se emite nem se corre nada. Era isto que
+     * faltava para a lei valer — o molde continuava a passar por todas as
+     * linhas só para as marcar, e o custo crescia com |X| na mesma (medido:
+     * 320, 640, 1280 passos para 20, 40 e 80 linhas, com o índice já a
+     * responder). Quem responde é a árvore, e a árvore não varre. */
     pc_emit = 0; nrel = 0; rel_ncols = ncols; salto_estourou = 0;
-    emit_linha(0, ncols, &cl, tem_where, acao, col_set);
-    emit1(OP_HALT);
+    if(!idx_usa){
+        emit_linha(0, ncols, &cl, tem_where, acao, col_set);
+        emit1(OP_HALT);
+    }
     rel_ncols = 0;
     if(salto_estourou){
         printf("erro: o corpo passa o que a Word do deslocamento alcança"
@@ -3881,7 +3996,8 @@ static int varre(const char *resto, int acao){
         return 0;
     }
     long passos = 0;
-    for(long i = 0; i < nrows; i++){ rel_anda(i); passos += rodar(pc_emit); }
+    if(!idx_usa)
+        for(long i = 0; i < nrows; i++){ rel_anda(i); passos += rodar(pc_emit); }
 
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
@@ -3903,6 +4019,23 @@ static int varre(const char *resto, int acao){
      * RESTAURA-SE a que estava aberta, porque uma consulta não pode trocar a
      * tabela da sessão por baixo de quem a fez. Para cada linha marcada,
      * desce-se a árvore pelo seu valor: fibra vazia, o bit desliga. */
+    if(idx_usa){
+        /* A DESCIDA, e é aqui que |X| sai da conta. O molde correu sobre nada —
+         * não há WHERE compilado —, pelo que o campo está com todas as vivas;
+         * apaga-se e acendem-se só as que a árvore devolveu. Os passos da ISA
+         * não contam esta parte porque ela não é ISA: é a árvore, e a árvore é
+         * o corte. */
+        { Word z = {0,0};
+          for(long q = 0; q <= nrows / (long)SLOT_BITS; q++)
+              mem_grava(S_MATCH + (unsigned)q, z); }
+        ord_usa_indice();
+        int achados[J_MAXLIN];
+        int n = j_casam(idx_k, achados, J_MAXLIN);
+        ord_usa_rascunho();
+        for(int t = 0; t < n; t++)
+            if(achados[t] >= 0 && achados[t] < nrows) bit_poe(S_MATCH, achados[t], 1);
+    }
+
     if(in_sub){
         long nc_sub = 0;
         char guarda[64];
@@ -5561,7 +5694,39 @@ static int import_idioma(const char *p){
 
 static int executa(const char *sql){
     const char *p = sql;
-    if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
+    if(palavra(&p, "CREATE")){
+        { const char *q = p;
+          if(palavra(&q, "INDEX")){
+            /* CREATE INDEX ON <tabela> (<coluna>) — o ON é obrigatório porque o
+             * índice é DA tabela, e o nome do índice não se guarda: há um por
+             * tabela, e é a coluna que o identifica. */
+            char t[64], c[64];
+            if(!palavra(&q, "ON") || !ident(&q, t, sizeof t)) return 0;
+            pula(&q); if(*q != '(') return 0; q++;
+            if(!ident(&q, c, sizeof c)) return 0;
+            pula(&q); if(*q != ')') return 0;
+            if(!usa_tabela(t, 0)){ printf("erro: a tabela «%s» não existe.\n", t); return 0; }
+            long col = col_indice(c);
+            if(col < 0){
+                printf("erro: a coluna «%s» não existe na tabela «%s» — RECUSADA.\n", c, t);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "column \"%s\" does not exist", c); }
+                return 0;
+            }
+            Word cat = mem_le(S_CAT);
+            long nc = cat.total, nr = cat_nrows();
+            if(!idx_constroi(col, nc, nr)){
+                printf("erro: o índice não coube — RECUSADO (a tabela fica sem ele).\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err, "index did not fit"); }
+                return 0;
+            }
+            printf("índice criado sobre «%s»(%s): %ld linha(s) indexadas\n", t, c, nr);
+            if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE INDEX");
+            return 1;
+          } }
+        if(!palavra(&p, "TABLE")) return 0; return cria(p); }
     if(palavra(&p, "INSERT")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return insere_texto(q+5);
