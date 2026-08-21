@@ -728,6 +728,64 @@ $\delta=0$ (partição equilibrada):
 \]
 Isso é a cruz e a meia volta no mesmo sítio.
 
+\subsection*{A realização: o max-cut é o pior caso da junção}
+
+As arestas que uma bipartição corta no grafo completo são $C=|A||B|$, e numa junção de igualdade
+essas arestas são \emph{exactamente} os pares candidatos --- o produto cartesiano. O max-cut deixa
+por isso de ser um problema ao lado: é o \textbf{tecto do trabalho} da junção. E o tecto é
+\emph{atingido}, não hipotético: com a coluna de junção constante dos dois lados, a junção devolve
+as $C$ linhas. Medido em duas partições do mesmo $n=8$:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+& $|A|$ & $|B|$ & $\delta$ & $M\!\cdot\!n=n^2-\delta^2$ & linhas emitidas \\
+\midrule
+equilibrada & $4$ & $4$ & $0$ & $64$ & $16$ \\
+desequilibrada & $1$ & $7$ & $6$ & $28$ & $7$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Escreve-se $M\!\cdot\!n=n^{2}-\delta^{2}$ e não $M$, para não trazer uma vírgula que os
+dados nunca tiveram: a identidade $M\!\cdot\!n=4C$ é inteira. As duas razões batem em cruz
+($64\cdot 7=28\cdot 16$), e a leitura no domínio é o inverso do costume: \textbf{a junção
+equilibrada é a mais cara}.
+
+\subsection*{E a massa governa a saída, não a construção}
+
+A previsão era que a junção mais cara em massa \emph{escrevesse} mais. \textbf{A medição diz o
+contrário}, e fica registada porque é o resultado:
+
+\begin{center}\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& $|$direita$|$ & escritas na pilha \\
+\midrule
+\code{a4 JOIN b4} (massa $64$) & $4$ & $287$ \\
+\code{a1 JOIN b7} (massa $28$) & $7$ & $332$ \\
+\code{b7 JOIN a1} (massa $28$, a \emph{mesma} junção) & $1$ & $242$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O motivo estava no próprio controlo: $C=|A||B|$ é \textbf{simétrico} e as escritas não
+são. Quem escreve é a fase que copia a tabela da \emph{direita} para o banco, logo a construção
+custa $|$direita$|$. São duas grandezas, e a massa governa uma:
+\[
+\boxed{
+\begin{array}{lll}
+\text{a \textsc{saída}} & C=|A||B| & \text{simétrica} \;\longrightarrow\; \text{a massa} \\[0.2em]
+\text{a \textsc{construção}} & |\text{direita}| & \text{assimétrica} \;\longrightarrow\; \text{o tamanho do lado}
+\end{array}}
+\]
+Uma quantidade simétrica não pode prever uma assimétrica. A massa escolhe \textbf{qual} junção
+fazer; o tamanho do lado escolhe \textbf{por que ordem} fazê-la. Um planeador de consultas decide
+as duas à mão, por heurística; aqui a primeira sai do teorema e a segunda sai medida.
+
+\medskip
+\noindent \textsc{medido em} \code{tests/pgwire.c} §W21.
+
 \subsection*{E o que o corte carrega é o corpo ordenado}
 
 Não é um número que se extrai da sequência: \textbf{o corte carrega o corpo ordenado na borda}. A

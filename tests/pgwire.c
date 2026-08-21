@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W21 MAX-CUT = MASSA: o pior caso da junção é o corte, e a massa decide
+ *        qual junção é mais cara sem ler uma linha
  *   §W20 o SALDO ESPECTRAL: o tamanho do join pela transformada, sem casar
  *        linhas — dois caminhos para o mesmo número
  *   §W19 o JOIN como BIPARTIÇÃO — o corte, dual da ordem, na mesma árvore
@@ -2695,6 +2697,204 @@ int main(void){
            " esse produto sobrevive a uma transformada errada: trocar k∧x por k∨x deixa-o"
            " INTACTO, porque (k∨x)⊕(k∨y) = (x⊕y)∧¬k e ¬k percorre o mesmo grupo. O que essa"
            " troca move é a coordenada zero, e é lá que agora se mede.",
+           mal == 0);
+    }
+
+    /* ═══ §W21: MAX-CUT = MASSA — qual junção é a mais barata ═══════════════
+     *
+     * O corte de uma bipartição no grafo completo são as arestas ENTRE os dois
+     * lados: C = |A|·|B|. E num join essas arestas são EXACTAMENTE os pares
+     * candidatos — o produto cartesiano. Logo o max-cut é o PIOR CASO da
+     * junção, e não é hipotético: com a coluna de junção constante dos dois
+     * lados, o join É o produto cartesiano e devolve C linhas.
+     *
+     * Pelo Teorema max-cut = massa (arquitetura.tex §sec:cortar), com
+     * n = |A|+|B| e δ = |A|−|B|:
+     *
+     *     C = (n² − δ²)/4        M = n − δ²/n        M = 4C/n
+     *
+     * As duas são a mesma informação em duas réguas, e o máximo é em δ = 0.
+     * Aqui isso lê-se ao contrário: A JUNÇÃO EQUILIBRADA É A MAIS CARA.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W21 max-cut = massa: a junção equilibrada é a mais cara.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w21";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w21.mem"); unlink("/tmp/pgwire_w21.prog");
+        if(!sql_abrir(base)) mal++;
+
+        /* ── A IDENTIDADE, EM INTEIROS ────────────────────────────────────
+         * Escreve-se M·n em vez de M para não trazer uma vírgula que os dados
+         * nunca tiveram: M·n = n² − δ², e 4C = 4|A||B|. A identidade é exacta
+         * e varre-se em TODAS as partições, não numa. */
+        {
+            int falhou = 0, argmax = -1; long cmax = -1;
+            const int n = 8;
+            printf("      n = %d — todas as partições:\n", n);
+            printf("      |A| |B|  δ   C=|A||B|   M·n = n²−δ²   4C\n");
+            for(int na = 0; na <= n; na++){
+                int nb = n - na, d = na - nb;
+                long C = (long)na * nb;
+                long Mn = (long)n*n - (long)d*d;
+                if(Mn != 4*C) falhou = 1;
+                if(C > cmax){ cmax = C; argmax = d; }
+                printf("       %2d  %2d %3d %8ld %12ld %6ld%s\n",
+                       na, nb, d, C, Mn, 4*C, (d == 0) ? "   <- δ=0" : "");
+            }
+            printf("      -> a identidade M·n = 4C vale em TODAS as partições: %s\n",
+                   falhou ? "NAO" : "sim");
+            printf("      -> o máximo está em δ = %d (C = %ld): %s\n", argmax, cmax,
+                   (argmax == 0) ? "o equilíbrio, como o teorema diz" : "NAO");
+            if(falhou || argmax != 0) mal++;
+        }
+
+        /* ── O TECTO É ATINGIDO: o join com a coluna constante É o produto ──
+         * Duas junções candidatas, com o MESMO n = 8 e desequilíbrios opostos.
+         * A coluna de junção é constante dos dois lados, portanto TODAS as
+         * arestas do corte estão lá e o join devolve C linhas. */
+        long C_eq = 0, C_des = 0;
+        int lin_eq = 0, lin_des = 0;
+        {
+            /* a equilibrada: 4 e 4, δ = 0 */
+            sql_executa("CREATE TABLE a4 (k,v)", &o);
+            for(int i = 0; i < 4; i++){ char q[64];
+                snprintf(q, sizeof q, "INSERT INTO a4 VALUES (7,%d)", i); sql_executa(q,&o); }
+            sql_executa("CREATE TABLE b4 (k,v)", &o);
+            for(int i = 0; i < 4; i++){ char q[64];
+                snprintf(q, sizeof q, "INSERT INTO b4 VALUES (7,%d)", 100+i); sql_executa(q,&o); }
+            /* a desequilibrada: 1 e 7, δ = 6 — o MESMO n */
+            sql_executa("CREATE TABLE a1 (k,v)", &o);
+            sql_executa("INSERT INTO a1 VALUES (7,0)", &o);
+            sql_executa("CREATE TABLE b7 (k,v)", &o);
+            for(int i = 0; i < 7; i++){ char q[64];
+                snprintf(q, sizeof q, "INSERT INTO b7 VALUES (7,%d)", 200+i); sql_executa(q,&o); }
+
+            C_eq  = 4L * 4;   C_des = 1L * 7;
+            lin_eq  = sql_executa("SELECT * FROM a4 JOIN b4 ON a4.k = b4.k", &o) ? o.nrows : -1;
+            lin_des = sql_executa("SELECT * FROM a1 JOIN b7 ON a1.k = b7.k", &o) ? o.nrows : -1;
+            printf("\n      a EQUILIBRADA  (4,4) δ=0: C = %2ld, e o join devolve %2d\n",
+                   C_eq, lin_eq);
+            printf("      a DESEQUILIBRADA (1,7) δ=6: C = %2ld, e o join devolve %2d\n",
+                   C_des, lin_des);
+            printf("      -> %s\n", (lin_eq == C_eq && lin_des == C_des)
+                   ? "o tecto do corte é ATINGIDO nos dois: as arestas são os pares"
+                   : "NAO — o join não devolveu o corte");
+            if(lin_eq != C_eq || lin_des != C_des) mal++;
+        }
+
+        /* ── A DECISÃO, E O QUE A MASSA GOVERNA ─────────────────────────
+         * Caminho 1: a álgebra escolhe só de |A| e |B|, sem tocar nos dados.
+         * Caminho 2: a máquina emite as linhas e conta-as.
+         * Como M·n = 4C, as duas razões têm de ser a MESMA — e compara-se em
+         * CRUZ, com inteiros, sem dividir. */
+        {
+            long Mn_eq = 8L*8 - 0L*0, Mn_des = 8L*8 - 6L*6;
+            printf("\n      caminho 1 — a ÁLGEBRA, sem tocar nos dados:"
+                   " M·n = %ld e %ld\n", Mn_eq, Mn_des);
+            printf("      caminho 2 — a MÁQUINA, linhas emitidas:       %d e %d\n",
+                   lin_eq, lin_des);
+            printf("      em cruz: %ld·%d = %ld  e  %ld·%d = %ld\n",
+                   Mn_eq, lin_des, Mn_eq*lin_des, Mn_des, lin_eq, Mn_des*lin_eq);
+            { int batem = (Mn_eq * lin_des == Mn_des * lin_eq) && (Mn_eq > Mn_des);
+              printf("      -> %s\n", batem
+                     ? "a MESMA razão, e a equilibrada é a mais cara: a massa decide"
+                       " sem ler as linhas"
+                     : "DIVERGEM");
+              if(!batem) mal++; }
+        }
+
+        /* ── O ACHADO: A MASSA NÃO GOVERNA AS ESCRITAS, E ISSO MEDE-SE ────
+         * Esperava-se que a junção mais cara em massa escrevesse mais. A
+         * medição diz o CONTRÁRIO, e o motivo estava no próprio controlo: a
+         * massa é SIMÉTRICA e as escritas não são. O que escreve é a FASE 1,
+         * que copia a tabela da DIREITA para o banco — logo o custo de
+         * construção é |direita|, e a direita da desequilibrada (7) é maior do
+         * que a da equilibrada (4). Duas grandezas, e a massa governa uma:
+         *
+         *     a SAÍDA        C = |A|·|B|      simétrica   <- a massa
+         *     a CONSTRUÇÃO   |direita|        assimétrica <- o tamanho do lado
+         *
+         * Não se corrige o número para a teoria: mede-se a segunda lei também,
+         * e diz-se qual delas cada uma decide. */
+        {
+            long e_eq = 0, e_des = 0, e_troca = 0;
+            sql_tx_abre();
+            sql_executa("SELECT * FROM a4 JOIN b4 ON a4.k = b4.k", &o);
+            e_eq = sql_tx_escritas();
+            if(!sql_tx_desfaz()) mal++;
+            sql_tx_fecha();
+            sql_tx_abre();
+            sql_executa("SELECT * FROM a1 JOIN b7 ON a1.k = b7.k", &o);
+            e_des = sql_tx_escritas();
+            if(!sql_tx_desfaz()) mal++;
+            sql_tx_fecha();
+            sql_tx_abre();
+            sql_executa("SELECT * FROM b7 JOIN a1 ON b7.k = a1.k", &o);
+            e_troca = sql_tx_escritas();
+            if(!sql_tx_desfaz()) mal++;
+            sql_tx_fecha();
+
+            printf("\n      as ESCRITAS reais, pela pilha do levantamento:\n");
+            printf("         a4 JOIN b4 (direita = 4 linhas): %ld\n", e_eq);
+            printf("         a1 JOIN b7 (direita = 7 linhas): %ld  <- MAIS, e a massa"
+                   " é MENOR\n", e_des);
+            printf("         b7 JOIN a1 (direita = 1 linha):  %ld  <- a MESMA junção,"
+                   " a massa não mudou\n", e_troca);
+            printf("      -> %s\n",
+                   (e_des > e_eq && e_troca < e_des)
+                   ? "a massa NÃO governa as escritas: quem as governa é |direita|"
+                   : "NAO — as escritas não seguem o tamanho da direita");
+            if(!(e_des > e_eq && e_troca < e_des)) mal++;
+            printf("      -> e a MESMA junção pelas duas ordens escreve %ld ou %ld:"
+                   " a ordem decide-se pelo LADO, não pela massa\n", e_des, e_troca);
+        }
+
+        /* O CONTROLO: se a massa escolhesse sempre a primeira, ou sempre a
+         * maior tabela, isto passava à mesma. Inverte-se o par — a mesma
+         * junção desequilibrada com os lados TROCADOS tem a MESMA massa,
+         * porque C = |A||B| é simétrico, e o RESULTADO também não muda. */
+        {
+            long Mn_troca = 8L*8 - (-6L)*(-6L), Mn_des = 8L*8 - 6L*6;
+            int nl = sql_executa("SELECT * FROM b7 JOIN a1 ON b7.k = a1.k", &o)
+                     ? o.nrows : -1;
+            printf("\n      CONTROLO — a MESMA junção com os lados trocados:"
+                   " M·n = %ld (era %ld), e devolve %d linhas (eram %d)\n",
+                   Mn_troca, Mn_des, nl, lin_des);
+            printf("      -> %s\n", (Mn_troca == Mn_des && nl == lin_des)
+                   ? "iguais: a massa é simétrica, logo escolhe a JUNÇÃO e não a ORDEM"
+                   : "NAO — a massa ou o resultado mudaram com a troca, e não podiam");
+            if(Mn_troca != Mn_des || nl != lin_des) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O MAX-CUT É O PIOR CASO DA JUNÇÃO, E A MASSA GOVERNA A SAÍDA — NÃO A CONSTRUÇÃO."
+           " As arestas que uma bipartição corta no grafo completo são C = |A|·|B|, e num join"
+           " essas arestas são EXACTAMENTE os pares candidatos: o produto cartesiano. O"
+           " max-cut deixa por isso de ser um problema de grafos ao lado — é o tecto do"
+           " trabalho da junção, e é ATINGIDO: com a coluna de junção constante dos dois"
+           " lados, o join devolve as C linhas, medido nos dois casos. Pelo Teorema max-cut ="
+           " massa (arquitetura.tex §sec:cortar), com n = |A|+|B| e δ = |A|−|B|, tem-se"
+           " C = (n²−δ²)/4 e M = 4C/n, e escreve-se M·n = n² − δ² para não trazer uma vírgula"
+           " que os dados nunca tiveram: a identidade é INTEIRA e varre-se em TODAS as"
+           " partições de n, não numa. O máximo está em δ = 0, e neste domínio isso lê-se ao"
+           " contrário do costume: A JUNÇÃO EQUILIBRADA É A MAIS CARA. Daí a decisão por DOIS"
+           " CAMINHOS — a álgebra escolhe só de |A| e |B|, sem tocar nos dados; a máquina"
+           " emite e conta —, e as duas razões batem em CRUZ, com inteiros e sem dividir."
+           " E AQUI A MEDIÇÃO DERRUBOU A PREVISÃO, o que fica escrito porque é o resultado:"
+           " esperava-se que a junção mais cara em massa ESCREVESSE mais, e ela escreve"
+           " MENOS. O motivo estava no próprio controlo — a massa é SIMÉTRICA e as escritas"
+           " não são. Quem escreve é a fase que copia a tabela da DIREITA para o banco, logo"
+           " o custo de construção é |direita|, e a direita da desequilibrada é maior. São"
+           " duas grandezas e a massa governa uma: a SAÍDA (C = |A|·|B|, simétrica) e a"
+           " CONSTRUÇÃO (|direita|, assimétrica). Mede-se a segunda também, com a MESMA junção"
+           " pelas duas ordens a escrever números diferentes — a massa escolhe QUAL junção"
+           " fazer, e o tamanho do lado escolhe por que ORDEM fazê-la. Um planeador de"
+           " consultas decide as duas coisas à mão, por heurística; aqui a primeira sai do"
+           " teorema e a segunda sai medida. O CONTROLO é o que separa as duas: trocar os"
+           " lados não muda a massa nem o resultado, e sem ele a asserção passaria mesmo que"
+           " a regra fosse «escolhe sempre a primeira».",
            mal == 0);
     }
 

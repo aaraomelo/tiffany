@@ -87,12 +87,12 @@ estão na arquitetura.tex.
 
 4. ESTADO ACTUAL (21/08/2026)
 ─────────────────────────────
-     bateria      529 : 529 verdes, 0 falhas · 120 unidades
+     bateria      529 : 518 verdes, 11 FALHAS  (ver §8 — nenhuma é do banco SQL)
      aranha.tex   29 pág · 0 erros · 0 refs mortas · thm:escada = Teorema 64
      arquitetura  27 pág · 0 provas locais · 0 enunciados sem remissão
 
 O BANCO FALA POSTGRES. `banco/pgwire.c` + `lib/pgwire.h` + `banco/pgcat.h`,
-FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (22 asserções):
+FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (23 asserções, 0 falhas):
 
      §W0–W6   frames, Startup, handshake, Simple Query, TCP, Extended, Describe
      §W7      fachada pqlike (PQconnectdb/PQexec) sobre o nosso wire
@@ -110,6 +110,8 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (22 asserções):
      §W19     o JOIN como BIPARTIÇÃO — o corte, na mesma árvore (passo 1 da §7)
      §W20     o SALDO ESPECTRAL: (f*g)(0) = 2^-m Σ F(f)F(g) — o tamanho do join
               SEM casar uma linha, e tem de bater com §W19 (passo 2 da §7)
+     §W21     MAX-CUT = MASSA: C = |A||B| são as arestas do corte E os pares
+              candidatos; M·n = n²−δ² decide qual junção é mais cara (passo 3)
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -186,8 +188,28 @@ O QUE FALTA, e é a metade do CORTE:
       porquê). Prende-se a COORDENADA ZERO e não só o produto: χ_0 ≡ 1, logo
       F(f)_0 = |I| — sem isso, trocar k∧x por k∨x passava, porque
       (k∨x)⊕(k∨y) = (x⊕y)∧¬k e ¬k percorre o mesmo grupo.
-   3. POR FAZER — max-cut = massa (M = 4C/n, C = |A|·|B|) para dizer QUAL junção
-      é a mais barata: é o que um planeador de consultas decide à mão.
+   3. FEITO (§W21). MAX-CUT = MASSA. As arestas que uma bipartição corta no
+      grafo completo são C = |A|·|B|, e num join essas arestas SÃO os pares
+      candidatos — o produto cartesiano. O max-cut é por isso o TECTO do
+      trabalho da junção, e é ATINGIDO: com a coluna de junção constante dos
+      dois lados o join devolve as C linhas. Escreve-se M·n = n² − δ² e não M,
+      para a identidade M·n = 4C ser INTEIRA, e varre-se em TODAS as partições
+      de n. Máximo em δ=0, logo A JUNÇÃO EQUILIBRADA É A MAIS CARA.
+
+      E A MEDIÇÃO DERRUBOU A PREVISÃO — fica escrito porque é o resultado. A
+      junção de MAIOR massa ESCREVE MENOS (287 contra 332). O motivo estava no
+      próprio controlo: C = |A||B| é SIMÉTRICO e as escritas não são. Quem
+      escreve é a fase 1, que copia a DIREITA para o banco; a construção custa
+      |direita|. São duas grandezas e a massa governa uma:
+
+           a SAÍDA       C = |A||B|     simétrica    <- a massa
+           a CONSTRUÇÃO  |direita|      assimétrica  <- o tamanho do lado
+
+      A massa escolhe QUAL junção fazer; o tamanho do lado escolhe POR QUE
+      ORDEM. Uma quantidade simétrica não pode prever uma assimétrica.
+
+  O PLANO DOS JOINS ESTÁ FECHADO (1, 2 e 3). O que o join ainda não faz está
+  abaixo.
 
   O QUE O JOIN AINDA NÃO FAZ, e é preciso saber: só igualdade (não `<`, `>`),
   só duas tabelas, os nomes das colunas da esquerda saem como letras (a tabela
@@ -195,3 +217,36 @@ O QUE FALTA, e é a metade do CORTE:
 
   NÃO INVENTAR uma terceira estrutura. O corte e a ordem já existem; o join é
   ligá-los.
+
+
+8. AS 11 FALHAS QUE A ATESTAÇÃO ESCONDIA  (achado a 21/08, POR RESOLVER)
+───────────────────────────────────────────────────────────────────────
+`bash tools/bateria.sh` diz **529 : 529, 0 falhas**. Re-derivando TUDO, diz
+**529 : 518 verdes, 11 falhas**. Os 11 têm a assinatura INALTERADA e o
+resultado mudou de 0 para 1 — logo nunca foram re-corridos.
+
+     banco/erg.c            o enum do sql.c tem 16 opcodes, o montador expõe 17;
+                            DISCORDAM em 3, o primeiro é TROCA
+     banco/fita.c           «a transcrição no kernel não é mais lenta que pela
+                            RAM» — é medição de DESEMPENHO, suspeita de ruído
+     tests/indexa_orbitas.c §IX4 IMPORT IDIOMA 'pt' … BUSCA não recupera
+                            (ficheiro NÃO versionado — trabalho a meio)
+     oito .js               avalia_macros, corpo_disco, corpo_front,
+                            design_no_pdf, dois_streams, escala, isa_dupla,
+                            sem_chute
+
+NENHUMA é do banco SQL / pgwire, e nenhuma é dos commits do join: o `OP_ADD16`
+e o `TROCA` entraram em commits antigos (59b9571, 3a1a66a).
+
+A CAUSA É ESTRUTURAL, e vale para todo o repo: **A ASSINATURA NÃO SEGUE AS
+DEPENDÊNCIAS.** O `erg.c` LÊ o enum do `sql.c`; o `sql.c` mudou, a assinatura
+do `erg.c` não, o atestado ficou 0, e a falha ficou invisível. Qualquer medidor
+cuja entrada esteja FORA do seu próprio texto — outro .c, um .tex, /tmp, o
+ambiente — fica verde para sempre depois do primeiro atestado.
+
+REGRA, e eu quebrei-a: para forçar a re-derivação usa-se
+`./tools/bateria.sh --refaz`, que reabre TODAS sem apagar atestado nenhum.
+NÃO se trunca `tools/atestados.txt` — o cabeçalho da bateria diz que apagar
+atestado é destruir facto, e regista que foi um flag `--tudo` que destruiu os
+atestados de 30/07/2026. Desta vez nada se perdeu (529 nomes antes e depois,
+só 11 resultados a mudar), mas um medidor que não corresse perdia a linha.
