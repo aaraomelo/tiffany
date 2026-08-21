@@ -2317,3 +2317,48 @@ DUAS FALHAS MINHAS QUE O GUME APANHOU, E A PRIMEIRA É DAS PIORES
   gume      58 mutações, 58 mordem
   bateria   529 : 529, 0 falhas · 30 unidades passaram, 0 falharam
   paper     22 páginas
+
+§49 — O EIXO: multiplicidade e memória, e as dualidades reunidas
+=================================================================
+Ordem: mudar os títulos e «revisar de novo trazendo a dualidade».
+
+  A ARANHA ESTIGMÉRGICA
+  multiplicidade e memória
+  a aranha e a abelha: duas maneiras de construir o espaço
+
+A FRASE QUE O SUBTÍTULO CARREGA, e que a §AN31 demonstrou:
+     MULTIPLICIDADE é o que o campo VÊ
+     MEMÓRIA é o que a construção PRESERVA
+E a formulação forte do thm:agentes, que era o nome que faltava: G É UM
+INVARIANTE DE IDENTIDADE. Ele regista OCUPAÇÃO, não IDENTIDADE — e a razão é
+estrutural, não acidental: a cadeia
+     base → palavra de arestas → T → posição → G
+NÃO CONTÉM, EM ETAPA NENHUMA, quem construiu. Por isso o campo não o pode
+devolver.
+
+A REVISÃO PELA DUALIDADE deu uma secção nova que reúne o que estava espalhado —
+nove pares, e NENHUM é analogia: cada linha é um enunciado do documento, com a
+sua prova. Verifiquei os doze rótulos citados: todos apontam para o enunciado
+certo (e um estava errado — a linha do pr₁/ι citava o thm:levantamento quando o
+ι vive no cor:pik).
+
+     o que comprime          o que repõe              o preço
+     π  a realização         π̃  o levantamento        uma coordenada de folha
+     ζ  acumular             μ = ζ⁻¹  diferenciar     — inverte sempre
+     π_k descer um andar     ι_k subir                só um lado fecha
+     encher (sobrejectiva)   contar (injectiva)       dobra OU buraco
+     posição                 palavra de arestas       a ordem
+     vértice G               aresta G_ar              — uma determina a outra
+     V  base {δ_x}           V* base {χ_k}            o factor n
+     W  S nilpotente         V  C_f diagonalizável    sempre / se f̂ ≠ 0
+     ocupação: muitos        expansão: um             o identificador
+
+E TRÊS OBSERVAÇÕES SOBRE A TABELA, todas já demonstradas:
+  1. os pares não são involuções — são RETRACÇÕES, e só um lado fecha. A
+     excepção é ζ/μ, que inverte dos dois lados POR NILPOTÊNCIA.
+  2. o preço é sempre UMA coordenada, nunca n delas — a folha sobe um andar
+     seja qual for a dimensão.
+  3. a folga é UMA SÓ e conta-se: |I| − |X| dos dois lados (cor:folga).
+
+  bateria   529 : 529, 0 falhas
+  paper     23 páginas

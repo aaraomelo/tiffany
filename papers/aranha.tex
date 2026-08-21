@@ -40,8 +40,8 @@
 \begin{document}
 \interfacen{6}
 \gkcapa{A Aranha Estigmérgica}
-       {convolução e deconvolução}
-       {a memória no espaço, e a operação que a desfaz}
+       {multiplicidade e memória}
+       {a aranha e a abelha: duas maneiras de construir o espaço}
 \maketitle
 
 \begin{abstract}\noindent
@@ -69,6 +69,17 @@ teorema, só a igualdade em $X$. Para a quarta, uma vizinhança. Para a inversã
 a álgebra de incidência de uma ordem --- a mesma de que a inversão de Möbius na
 árvore dos divisores é o outro caso. E para a leitura espectral, os caracteres
 de $(\Z/2)^m$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
+
+\medskip\noindent\textbf{E o eixo é uma dualidade}, que se repete em cada
+andar: \emph{multiplicidade} é o que o campo vê, \emph{memória} é o que a
+construção preserva. A pipeline
+\[
+\text{base}\longrightarrow\text{palavra de arestas}\longrightarrow T
+\longrightarrow\text{posição}\longrightarrow G
+\]
+não contém, em etapa nenhuma, a identidade de quem construiu --- e é por isso
+que uma \emph{aranha} que passa quatro vezes e quatro \emph{abelhas} que passam
+uma vez deixam o mesmo campo.
 
 \medskip\noindent Todo enunciado usado é enunciado e demonstrado aqui; onde um
 irmão da mesma obra já dizia o mesmo, o texto foi duplicado e não referenciado.
@@ -580,7 +591,7 @@ uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
       $J^{4}=\mathrm{id}$ da bidualidade, agora na grade.
 \end{enumerate}
 
-\begin{teorema}[o campo não distingue um agente de muitos]\label{thm:agentes}
+\begin{teorema}[$G$ é invariante de identidade]\label{thm:agentes}
 Sejam duas execuções com o mesmo conjunto de escritas: uma em que \emph{um}
 agente visita cada célula $K$ vezes, outra em que $K$ agentes a visitam uma vez
 cada. Os campos resultantes são iguais célula a célula, e $\abs{I}$ é o mesmo.
@@ -593,13 +604,19 @@ as duas execuções produzem a mesma multiplicidade de escritas por célula, os
 campos coincidem.
 \end{proof}
 
-\medskip\noindent Isto não é uma limitação, é a cláusula~(3) a fazer o seu
-trabalho, e tem duas consequências. A primeira é que o mecanismo \textbf{escala}:
+\medskip\noindent Noutros termos: $G$ regista \textbf{ocupação}, não
+\textbf{identidade}. Nenhuma etapa da cadeia
+\[
+\text{base}\longrightarrow\text{palavra de arestas}\longrightarrow T
+\longrightarrow\text{posição}\longrightarrow G
+\]
+carrega quem construiu, e por isso o campo não pode devolvê-lo. Isto não é uma
+limitação, é a cláusula~(3) a fazer o seu trabalho, e tem duas consequências. A primeira é que o mecanismo \textbf{escala}:
 acrescentar construtores não muda nada no ciclo, e uma ocupação por
 \emph{multiplicidade de agentes} e uma expansão pela \emph{memória de um só} são
 indistinguíveis do lado do espaço. A segunda é sobre o que cada coordenada repõe:
-a folha $k(i)$ do Teor.~\ref{thm:levantamento} repõe a \emph{ordem} da visita,
-dentro de um agente; separar \emph{agentes} pede outra coordenada --- o
+a folha $k(i)$ do levantamento (§\ref{sec:inversa}) repõe a \emph{ordem} da
+visita, dentro de um agente; separar \emph{agentes} pede outra coordenada --- o
 identificador ---, e essa não sai do campo. São coordenadas distintas: com dois
 agentes a dar duas voltas cada, a ordem separa \emph{todos} os pares que caem na
 mesma célula ($96$ de $96$), e o identificador separa só os que atravessam a
@@ -1649,6 +1666,48 @@ Def.~\ref{def:dobrar} nunca olha para um índice --- copia, inverte e roda a cur
 inteira. A coincidência em $2^{12}$ pontos é sobre a curva, e não sobre a
 medida: $\abs{I}$ e $\sum_x G(x)$ coincidem para qualquer realização do mesmo
 comprimento (Teor.~\ref{thm:medida}).
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{As dualidades, reunidas}\label{sec:dualidades}
+
+\noindent Uma mesma figura repetiu-se em cada andar: um lado \emph{comprime} e
+perde uma distinção; o outro \emph{repõe-na} noutro sítio, e paga por isso.
+Nenhuma linha da tabela é analogia --- cada uma é um enunciado deste documento,
+com a sua prova.
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+o que comprime & o que repõe & o preço & onde \\
+\midrule
+$\pi$: a realização & $\tilde\pi$: o levantamento & uma coordenada de folha & Teor.~\ref{thm:levantamento} \\
+$\zeta$: acumular & $\mu=\zeta^{-1}$: diferenciar & --- (inverte sempre) & Teor.~\ref{thm:mu}, \ref{thm:zeta-mu} \\
+$\pi_k$: descer um andar & $\iota_k$: subir & só um lado fecha & Cor.~\ref{cor:pik} \\
+encher: $\pi$ sobrejetiva & contar: $\rho$ injetiva & dobra \emph{ou} buraco & Teor.~\ref{thm:contraria} \\
+posição & palavra de arestas & a ordem & Teor.~\ref{thm:palavra} \\
+vértice: $G$ & aresta: $G_{\mathrm{ar}}$ & --- (uma determina a outra) & Teor.~\ref{thm:handshake} \\
+$V$: base $\{\delta_x\}$ & $V^{*}$: base $\{\chi_k\}$ & o fator $n$ & Def.~\ref{def:dual}, Teor.~\ref{thm:H} \\
+$W$: $S$ nilpotente & $V$: $C_f$ diagonalizável & inverte sempre \emph{vs} se $\widehat f\neq0$ & Lema~\ref{lem:nilp}, Teor.~\ref{thm:proprios} \\
+ocupação: muitos agentes & expansão: um agente & o identificador & Teor.~\ref{thm:agentes} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent Três observações sobre a tabela, e cada uma foi demonstrada
+acima. \textbf{Primeira:} os pares não são involuções --- são \emph{retrações}.
+Só um lado fecha, e é isso que os distingue de $\nu\circ\nu=\mathrm{id}$: a
+exceção é $\zeta/\mu$, que inverte dos dois lados por nilpotência
+(Lema~\ref{lem:nilp}). \textbf{Segunda:} o preço é sempre \emph{uma} coordenada,
+nunca $n$ delas --- a folha do levantamento sobe um andar seja qual for a
+dimensão. \textbf{Terceira:} a folga é uma só, e conta-se
+(Cor.~\ref{cor:folga}): o que de um lado aparece como colagem em excesso é, do
+outro, lugar por preencher, e o número é $\abs{I}-\abs{X}$ nos dois.
+
+\medskip\noindent Em uma frase, que é também o subtítulo:
+\[
+\boxed{\ \textbf{multiplicidade} \text{ é o que o campo vê};\qquad
+\textbf{memória} \text{ é o que a construção preserva.}\ }
+\]
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Realizações}\label{sec:realizacoes}
