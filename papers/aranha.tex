@@ -629,18 +629,42 @@ reorganizar a que havia.
 da álgebra de incidência da ordem $(I,\le)$, e a inversa que a segunda usa é a
 mesma que a obra já corre na árvore dos divisores.
 
-\begin{definicao}[a álgebra de incidência de $(I,\le)$]\label{def:incid}
-Para $u\le t$ em $I$, ponha-se $\zeta(u,t)=1$. A convolução de duas funções da
-ordem é $(f*g)(u,t)=\sum_{u\le v\le t}f(u,v)\,g(v,t)$, e sobre funções de um só
-índice ela lê-se
+\begin{definicao}[$W$, e $S$ como matriz]\label{def:incid}
+$W=\Z^{I}$ com a base canónica $\{\delta_t\}$, $\dim W=\abs{I}$. Na base, o
+deslocamento $S$ da Def.~\ref{def:ops} é a matriz \textbf{subdiagonal de uns},
+$S_{ij}=[\,i=j+1\,]$. A \textbf{álgebra de incidência} de $(I,\le)$ é a álgebra
+das matrizes triangulares inferiores geradas por $S$, com
 \[
-(a*\zeta)(t)=\sum_{u\le t}a(u).
+\zeta=\sum_{j\ge0}S^{j}\quad(\text{a triangular de uns}),\qquad
+\mu=1-S ,
 \]
+e o produto dessa álgebra escreve-se
+$(f*g)(u,t)=\sum_{u\le v\le t}f(u,v)\,g(v,t)$; sobre funções de um índice,
+$(a*\zeta)(t)=\sum_{u\le t}a(u)$.
 \end{definicao}
 
-\noindent Comparando com o Teor.~\ref{thm:shift}: a convolução com $\zeta$ \emph{é}
-a acumulação $Z=(1-S)^{-1}$, e o $\mu$ abaixo é a diferença finita $1-S$. São os
-mesmos dois operadores, agora com o nome que a álgebra de incidência lhes dá.
+\begin{lema}[$S$ é nilpotente, e é um bloco de Jordan]\label{lem:nilp}
+$S^{\dim W}=0$, e nenhum expoente menor a anula. O único valor próprio de $S$ é
+$0$, e $\dim\ker S=1$: $S$ \textbf{não} é diagonalizável.
+\end{lema}
+
+\begin{proof}
+$S^{j}$ desloca $j$ posições, logo $S^{j}_{ik}=[\,i=k+j\,]$, que é não nula
+enquanto $j<\dim W$ e nula depois. Sendo triangular com diagonal nula, o
+polinómio característico é $\lambda^{\dim W}$, e o núcleo é gerado por
+$\delta_0$ apenas.
+\end{proof}
+
+\medskip\noindent\textbf{É daqui que sai tudo o resto}, e sem nenhuma noção de
+convergência: uma matriz nilpotente torna $1-S$ invertível, com inversa a
+\emph{série de Neumann finita} $\sum_{j<\dim W}S^{j}$ --- que é exatamente
+$\zeta$. Compare-se com a §\ref{sec:transf}: lá os operadores comutam e
+\emph{diagonalizam}, e a inversão existe se e só se nenhum valor próprio se
+anula; aqui o operador é um bloco de Jordan e não diagonaliza, mas a inversão
+existe \emph{sempre}. Duas álgebras lineares, dois motivos de invertibilidade ---
+e as duas operações da aranha, uma em cada.
+
+
 
 \begin{teorema}[$\mu=\zeta^{-1}$ na ordem total]\label{thm:mu}
 Na ordem total, a inversa de $\zeta$ é
@@ -796,138 +820,206 @@ exatamente o conjunto dos pontos com o prefixo de $p-1$ bits, que é a bola-mãe
 outros três passos do ciclo são os mesmos nas duas.
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section{A transformada algébrica sobre o campo}\label{sec:transf}
+\section{A estrutura linear: o espaço, o dual, a transformada}\label{sec:transf}
 
-\noindent O campo $G$ é uma função sobre $X$, e quando $X$ é um grupo finito há
-uma transformada. Aqui $X=(\Z/2)^m$ --- que é o grupo dos endereços da árvore da
-§\ref{sec:ultra}, o mesmo em que a aranha já corria --- e os caracteres tomam
-valores $\pm1$: a transformada é \textbf{inteira}, sem uma vírgula em parte
-nenhuma.
+\noindent Tudo o que se segue é construção sobre a base, no discreto, e com
+funções genéricas. Convém começar por separar \textbf{dois espaços vetoriais},
+que vivem em andares diferentes e se confundem com facilidade.
 
-\begin{definicao}[o caractere e a transformada]\label{def:transf}
-Para $k,j\in(\Z/2)^m$ --- os vértices de $Q_m$ --- escreva-se $\langle k,j\rangle$ a paridade do número de
-bits comuns. O \textbf{caractere} é $\chi_k(j)=(-1)^{\langle k,j\rangle}$, e a
-transformada é
+\begin{definicao}[os dois andares]\label{def:doisandares}
+\textbf{Em baixo}, o espaço onde a trajetória anda: $X=F_{2^m}$ como espaço
+vetorial sobre $\mathbb{F}_2$, de dimensão $m$, com a base $\{e_k=2^{k}\}$ do
+Teor.~\ref{thm:base8} --- e as direções de aresta de $Q_m$ \emph{são} essa base.
+\textbf{Em cima}, o espaço das funções sobre ele:
 \[
-F(x)_k=\sum_{j} x_j\,\chi_k(j),\qquad n=2^m .
+V=\Z^{X},\qquad \dim V=n=2^{m},\qquad \text{base canónica } \{\delta_x\}_{x\in X},
 \]
-A operação do grupo é o \textbf{ou-exclusivo}, e a convolução correspondente é
-$(f*g)(y)=\sum_x f(x)\,g(x\oplus y)$.
+onde $\delta_x(y)=[\,y=x\,]$. O campo $G$ é um \textbf{vetor} de $V$, e a sua
+escrita na base canónica
+\[
+G=\sum_{x\in X}G(x)\,\delta_x
+\]
+é o que antes se chamou ``a ida é uma soma de Diracs'': os valores de $G$
+\emph{são} as suas coordenadas na base canónica.
 \end{definicao}
 
-\medskip\noindent\textbf{O que $\chi_k$ é no grafo.} Não é um vértice. É uma
-\textbf{função $\pm1$ sobre os vértices} de $Q_m$ --- uma \textbf{bipartição}
-deles ---, e o índice $k$ é o conjunto de \emph{direções de aresta} em que essa
-bipartição alterna: a aresta $j\sim j\oplus e_i$ muda de sinal exatamente quando
-o bit $i$ de $k$ vale $1$. O \textbf{corte} que $\chi_k$ define tem
-$\lvert k\rvert\,2^{m-1}$ arestas, com $\lvert k\rvert$ o peso de Hamming:
-$\lvert k\rvert=0$ é a função constante e não corta nenhuma, $\lvert k\rvert=m$
-é a paridade e corta todas, $\lvert k\rvert=m/2$ parte-as ao meio.
+\subsection*{O produto: $V$ é o anel de grupo}
 
-\begin{lema}[ortogonalidade --- e o Dirac]\label{lem:orto}
+\begin{definicao}[convolução]\label{def:conv}
+A operação de $X$ estende-se a $V$ por bilinearidade a partir da base:
+\[
+\delta_a*\delta_b=\delta_{a\oplus b}
+\qquad\Longrightarrow\qquad
+(f*g)(y)=\sum_{x}f(x)\,g(x\oplus y).
+\]
+Com este produto, $V$ é o \textbf{anel de grupo} $\Z[X]$, comutativo e com
+unidade $\delta_0$.
+\end{definicao}
+
+\begin{lema}[os operadores de convolução comutam]\label{lem:comuta}
+Para cada $f\in V$, $C_f\colon V\to V$, $C_f(g)=f*g$, é linear, e
+$C_fC_g=C_gC_f=C_{f*g}$.
+\end{lema}
+
+\begin{proof}
+Linearidade e comutatividade herdam-se do produto de $\Z[X]$, que é comutativo e
+associativo por $X$ o ser. Explicitamente, $C_f C_g(h)=f*(g*h)=(f*g)*h=C_{f*g}(h)$.
+\end{proof}
+
+\medskip\noindent É este lema que obriga o resto. Uma família de operadores
+lineares que \emph{comutam} admite, quando diagonalizável, uma base própria
+\textbf{comum}. A pergunta deixa de ser ``que transformada escolher'' e passa a
+ser ``qual é essa base'' --- e ela é única a menos de escala.
+
+\subsection*{O dual, e quem são os vetores próprios}
+
+\begin{definicao}[o dual e o emparelhamento]\label{def:dual}
+$V^{*}=\operatorname{Hom}(V,\Z)$, e o emparelhamento canónico é
+$\langle\varphi,f\rangle=\varphi(f)$. Para cada $k\in X$, o \textbf{caractere}
+\[
+\chi_k\colon X\to\{\pm1\},\qquad \chi_k(j)=(-1)^{\langle k,j\rangle},
+\]
+com $\langle k,j\rangle=$ paridade$(k\wedge j)$ --- a mesma forma bilinear que
+torna $\{e_k\}$ ortonormal (Teor.~\ref{thm:base8}) --- define tanto um
+\emph{vetor} de $V$ como o \emph{funcional} $f\mapsto\sum_j f(j)\chi_k(j)$.
+\end{definicao}
+
+\begin{lema}[ortogonalidade]\label{lem:orto}
 $\chi_k(j\oplus j')=\chi_k(j)\chi_k(j')$, e
 $\sum_k \chi_k(j)\chi_k(j')=n\,\delta_{j,j'}$.
 \end{lema}
 
 \begin{proof}
 A primeira: $\langle k,j\oplus j'\rangle\equiv\langle k,j\rangle+\langle k,j'\rangle
-\pmod 2$, porque o bit comum a $k$ e $j\oplus j'$ está exatamente num dos dois
+\pmod 2$, porque um bit comum a $k$ e $j\oplus j'$ está em exatamente um dos dois
 quando não está em ambos. Para a segunda, $\chi_k(j)\chi_k(j')=\chi_k(j\oplus j')$;
-se $j=j'$ a soma é $\sum_k 1=n$. Se $j\neq j'$, ponha-se $d=j\oplus j'\neq0$ e
-fixe-se um bit $b$ onde $d$ vale $1$. Emparelhando cada $k$ com $k\oplus e_b$,
-os dois termos são simétricos --- $\chi_{k\oplus e_b}(d)=-\chi_k(d)$ --- e a
-soma cancela aos pares.
+se $j=j'$ a soma é $n$. Se $j\neq j'$, ponha-se $d=j\oplus j'\neq0$ e fixe-se um
+bit $b$ com $d_b=1$; emparelhando $k$ com $k\oplus e_b$ vem
+$\chi_{k\oplus e_b}(d)=-\chi_k(d)$, e a soma cancela aos pares.
 \end{proof}
 
-\begin{teorema}[os caracteres são os modos próprios do grafo]\label{thm:modos}
-Com $A$ a adjacência de $Q_m$ (Def.~\ref{def:ops}),
+\begin{teorema}[os caracteres são a base própria comum]\label{thm:proprios}
+Para todos $f\in V$ e $k\in X$,
 \[
-A\,\chi_k=(m-2\lvert k\rvert)\,\chi_k,
+\boxed{\;C_f\,\chi_k \;=\; \widehat{f}(k)\,\chi_k,\qquad
+\widehat{f}(k):=\sum_j f(j)\chi_k(j)\;}
 \]
-e o valor próprio é, em cada vértice, o número de arestas em que $\chi_k$
-\emph{concorda} menos o número em que \emph{discorda}.
+--- cada $\chi_k$ é vetor próprio de \emph{todos} os operadores de convolução ao
+mesmo tempo, e o valor próprio de $C_f$ em $\chi_k$ é a coordenada
+$\widehat{f}(k)$. Os $n$ caracteres são linearmente independentes, logo formam
+base de $V$.
 \end{teorema}
 
 \begin{proof}
-$(A\chi_k)(x)=\sum_i\chi_k(x\oplus e_i)=\chi_k(x)\sum_i\chi_k(e_i)$ pelo
-Lema~\ref{lem:orto}, e $\chi_k(e_i)=(-1)^{k_i}$ vale $-1$ nas $\lvert k\rvert$
-direções de $k$ e $+1$ nas outras $m-\lvert k\rvert$; a soma é
-$(m-\lvert k\rvert)-\lvert k\rvert$.
+$(f*\chi_k)(y)=\sum_x f(x)\chi_k(x\oplus y)=\chi_k(y)\sum_x f(x)\chi_k(x)$ pelo
+Lema~\ref{lem:orto}, que é $\widehat{f}(k)\chi_k(y)$. A independência sai da
+ortogonalidade: $\sum_j\chi_k(j)\chi_{k'}(j)=n\delta_{kk'}$, e uma família
+ortogonal de vetores não nulos é livre.
 \end{proof}
 
-\medskip\noindent Os caracteres não foram escolhidos: são a
-diagonalização deste grafo.
+\subsection*{A transformada é a mudança de base}
 
-\begin{teorema}[a ida da aranha é uma soma de Diracs]\label{thm:dirac}
-$G=\sum_{t\in I}\delta_{\pi(t)}$, e portanto
+\begin{definicao}[a transformada]\label{def:transf}
+$F\colon V\to V$, $F(f)_k=\widehat{f}(k)=\langle\chi_k,f\rangle$. Na base
+canónica a sua matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: a transformada é
+a \textbf{mudança de coordenadas} de $\{\delta_x\}$ para $\{\chi_k\}$, e é
+inteira.
+\end{definicao}
+
+\medskip\noindent Em particular $F(\delta_a)_k=\chi_k(a)$: as colunas de $H$ são
+as imagens da base canónica, que é o que uma matriz de mudança de base é.
+
+\begin{teorema}[inversa, bidualidade e Parseval]\label{thm:H}
+$H^{2}=n\,I$; logo $F$ é invertível com $F^{-1}=\tfrac1n F$, e
 \[
-F(G)_k=\sum_{t\in I}\chi_k\bigl(\pi(t)\bigr).
+F\circ F=n\cdot\mathrm{id},\qquad
+\lVert F(f)\rVert^{2}=n\lVert f\rVert^{2}.
 \]
 \end{teorema}
 
 \begin{proof}
-A primeira igualdade é a Def.~\ref{def:objeto} escrita como soma de indicatrizes.
-$F$ é linear e $F(\delta_a)_k=\chi_k(a)$; some-se sobre $t$.
+$(H^2)_{k j}=\sum_x\chi_k(x)\chi_x(j)$. Como $\langle k,x\rangle=\langle x,k\rangle$,
+isto é $\sum_x\chi_x(k)\chi_x(j)=n\delta_{kj}$ pelo Lema~\ref{lem:orto}. A norma
+sai da mesma soma: $\lVert Hf\rVert^2=\sum_k\sum_{j,j'}f_jf_{j'}\chi_k(j)\chi_k(j')
+=n\lVert f\rVert^2$.
 \end{proof}
 
-\medskip\noindent Lida com o Teor.~\ref{thm:modos}: $F(G)_k$ é o \textbf{saldo}
-da trajetória no corte $k$ --- de que lado dele esteve, somado sobre os passos.
+\medskip\noindent $F\circ F=n\cdot\mathrm{id}$ é a \textbf{bidualidade} lida em
+coordenadas: passar ao dual duas vezes devolve o espaço, a menos da escala. E é
+por $X$ ser autodual --- $\widehat{X}\cong X$ pela forma $\langle\cdot,\cdot\rangle$ ---
+que os caracteres se indexam pelos próprios pontos de $X$, e a matriz é
+simétrica.
 
-\begin{teorema}[a dobra lê-se na norma]\label{thm:dobra-norma}
-Com $F$ da Def.~\ref{def:transf}, seja
-$P=\bigl\lvert\{(i,j): i<j,\ \pi(i)=\pi(j)\}\bigr\rvert$ o número de pares
-dobrados. Então
+\subsection*{O que daqui se lê}
+
+\begin{teorema}[a dobra na norma]\label{thm:dobra-norma}
+Seja $P$ o número de pares $i<j$ com $\pi(i)=\pi(j)$. Então
 \[
-\sum_{x}G(x)^2=\abs{I}+2P,\qquad
-\lVert F(G)\rVert^2=n\Bigl(\abs{I}+2P\Bigr),
+\sum_x G(x)^2=\abs{I}+2P,
+\qquad
+\lVert F(G)\rVert^{2}=n\bigl(\abs{I}+2P\bigr),
 \]
-e em particular $\pi$ é injetiva se e só se $\lVert F(G)\rVert^2=n\abs{I}$.
+e $\pi$ é injetiva se e só se $\lVert F(G)\rVert^{2}=n\abs{I}$.
 \end{teorema}
 
 \begin{proof}
-$\sum_x G(x)^2=\sum_x\lvert\pi^{-1}(x)\rvert^2
-=\bigl\lvert\{(i,j):\pi(i)=\pi(j)\}\bigr\rvert$, contando pares \emph{ordenados}.
-Esse conjunto parte-se na diagonal $i=j$, que dá $\abs{I}$, e nos pares com
-$i\neq j$, que são $2P$. Para a segunda, pelo Lema~\ref{lem:orto},
-$\lVert F(x)\rVert^2=\sum_k\sum_{j,j'}x_jx_{j'}\chi_k(j)\chi_k(j')
-=\sum_{j,j'}x_jx_{j'}\,n\,\delta_{j,j'}=n\lVert x\rVert^2$. A equivalência: $\pi$
-é injetiva se e só se $P=0$.
+$\sum_x G(x)^2=\lvert\{(i,j):\pi(i)=\pi(j)\}\rvert$ contando pares ordenados, que
+se parte na diagonal ($\abs{I}$) e nos $2P$ restantes. A segunda igualdade é
+Parseval (Teor.~\ref{thm:H}), e a equivalência é $P=0$.
 \end{proof}
 
-\medskip\noindent A leitura vale a pena: a \emph{dobra} --- que é a
-identificação $i\sim j$, definida sobre a trajetória --- lê-se num único número
-calculado sobre o \emph{campo}, sem visitar a trajetória. É o mesmo que dizer
-que $\lVert F(G)\rVert^2/n-\abs{I}$ conta as identificações, e é exato em
-inteiros.
+\medskip\noindent A dobra --- definida sobre a trajetória --- lê-se num único
+número calculado sobre o campo, sem visitar a trajetória. E cada coordenada
+$\widehat{G}(k)$ tem leitura própria: por $F(G)_k=\sum_t\chi_k(\pi(t))$, é o
+\textbf{saldo} da trajetória no \emph{corte} que $\chi_k$ define no grafo --- a
+bipartição dos vértices que alterna nas direções de $k$, com
+$\lvert k\rvert\,2^{m-1}$ arestas cortadas.
 
-\begin{teorema}[convolução e deconvolução]\label{thm:conv}
-$F(f*g)_k=F(f)_k\,F(g)_k$ para todo $k$. Em consequência, se $F(f)_k\neq0$ para
-todo $k$, então $g$ recupera-se de $f*g$ e de $f$ por
-$F(g)_k=F(f*g)_k/F(f)_k$ seguido da volta
-$g_j=\frac1n\sum_k F(g)_k\chi_k(j)$. Se algum $F(f)_k=0$, a recuperação não
-existe: $f$ aniquila essa componente e ela não pode ser lida no produto.
+\begin{corolario}[a adjacência é uma convolução, e daí o seu espectro]\label{thm:modos}
+Seja $\alpha=\sum_{i=1}^{m}\delta_{e_i}$ a indicadora das direções de aresta.
+Então o operador de adjacência da Def.~\ref{def:ops} é $A=C_\alpha$, e portanto
+\[
+A\,\chi_k=\widehat{\alpha}(k)\,\chi_k
+=\bigl(m-2\lvert k\rvert\bigr)\,\chi_k ,
+\]
+com $\lvert k\rvert$ o peso de Hamming: o valor próprio é, em cada vértice, o
+número de arestas em que $\chi_k$ \emph{concorda} menos aquele em que
+\emph{discorda}.
+\end{corolario}
+
+\begin{proof}
+$(\alpha*f)(y)=\sum_x\alpha(x)f(x\oplus y)=\sum_i f(e_i\oplus y)$, que é a soma
+sobre os vizinhos de $y$: logo $A=C_\alpha$. Pelo Teor.~\ref{thm:proprios} o
+valor próprio é $\widehat{\alpha}(k)=\sum_i\chi_k(e_i)=\sum_i(-1)^{k_i}$, que
+vale $-1$ nas $\lvert k\rvert$ direções de $k$ e $+1$ nas outras.
+\end{proof}
+
+\medskip\noindent Os caracteres não foram escolhidos, e agora vê-se duas vezes
+porquê: são a base própria comum de \emph{todas} as convoluções
+(Teor.~\ref{thm:proprios}), e a adjacência do grafo é uma delas.
+
+\begin{teorema}[convolução, deconvolução, e onde degenera]\label{thm:conv}
+$F(f*g)=F(f)\cdot F(g)$ ponto a ponto. Se $\widehat{f}(k)\neq0$ para todo $k$,
+então $C_f$ é invertível e
+$g=F^{-1}\bigl(F(f*g)/F(f)\bigr)$. Se $\widehat{f}(k_0)=0$ para algum $k_0$,
+então $C_f$ é singular: $\chi_{k_0}\in\ker C_f$, e dois $g$ que difiram por um
+múltiplo de $\chi_{k_0}$ dão o mesmo produto.
 \end{teorema}
 
 \begin{proof}
-$F(f*g)_k=\sum_y\sum_x f(x)g(x\oplus y)\chi_k(y)$. Substituindo $y=x\oplus z$ e
-usando $\chi_k(x\oplus z)=\chi_k(x)\chi_k(z)$ (Lema~\ref{lem:orto}), a soma
-fatoriza em $\bigl(\sum_x f(x)\chi_k(x)\bigr)\bigl(\sum_z g(z)\chi_k(z)\bigr)$.
-A inversão é o Lema~\ref{lem:orto} aplicado duas vezes. E se $F(f)_{k_0}=0$
-então $F(f*g)_{k_0}=0$ quaisquer que sejam os $g$, logo dois $g$ que difiram
-apenas nessa componente dão o mesmo produto.
+O produto é o Teor.~\ref{thm:proprios} lido em coordenadas: na base própria, um
+operador que age por multiplicação escalar compõe-se multiplicando escalares. A
+inversão é diagonal, e existe exatamente quando nenhum valor próprio é nulo. O
+núcleo é gerado pelos $\chi_k$ com $\widehat{f}(k)=0$.
 \end{proof}
 
-\medskip\noindent\textbf{A degenerescência não é rara.} O campo de um percurso
-que visita $0$ e $1$ uma vez cada tem $F_k=1+\chi_k(1)$, que se anula em
-\emph{metade} dos $k$. A condição do Teor.~\ref{thm:conv} é a condição, e não um
-detalhe.
-
-\medskip\noindent\textbf{E um factor que não testa nada.} Se $f=a\,\delta_0+b\,\mathbf{1}$,
-a convolução $f*g$ é a mesma em \emph{qualquer} grupo finito de ordem $n$: o
-Dirac é neutro e a constante dá $b\sum g$ em toda a parte. Um campo desta forma
-tem espectro sem zeros e serve para a deconvolução --- mas nada do que se
-verifique com ele fala do grupo $(\Z/2)^m$ em particular. O factor
-$3\delta_0+\delta_1$, com espectro $\{4,2\}$, não tem esse defeito.
+\medskip\noindent A degenerescência não é rara e tem agora nome próprio: é $C_f$
+ter núcleo. O campo de um percurso que visita $0$ e $1$ uma vez cada tem
+$\widehat{f}(k)=1+\chi_k(1)$, nulo em \emph{metade} dos $k$ --- o núcleo tem
+dimensão $n/2$. E um $f=a\,\delta_0+b\,\mathbf{1}$ tem espectro sem zeros mas é
+inútil como teste: $\delta_0$ é a unidade do anel e $\mathbf{1}$ é o projetor
+sobre o caractere trivial, de modo que $C_f$ é a mesma coisa em \emph{qualquer}
+grupo de ordem $n$.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Órbitas deterministas: $G$ conta o período}\label{sec:periodo}
@@ -1380,18 +1472,25 @@ o espaço $F_{2w}=F_w\oplus\sigma F_w$ como $Q_{2w}$ §AN19;
 Teor.~\ref{thm:shift}, \ref{thm:handshake} e Def.~\ref{def:percurso} §AN18
 ($(1-S)\zeta=\mathrm{id}$; quais realizações são percursos e quais não; e a lei
 local com $0$ violações em $513$ vértices);
-Teor.~\ref{thm:hiper} e \ref{thm:modos} §AN17 (grau nos três grafos;
+Teor.~\ref{thm:hiper} e Cor.~\ref{thm:modos} §AN17 (grau nos três grafos;
 $A\chi_k=(m-2|k|)\chi_k$ exato em inteiros; o corte com $|k|2^{m-1}$ arestas);
 Teor.~\ref{thm:medida} §AN16 (a mesma medida com dobras diferentes: Heighway e
 a espiral, e a reta como controlo);
+Lema~\ref{lem:nilp} §AN27 ($S^{12}=0$ com $12$ mínimo; $\sum S^j$ a ser a
+triangular de uns; $\dim\ker S=1$; e os $n$ caracteres de norma $n$ do outro
+lado);
 Teor.~\ref{thm:mu}, \ref{thm:zeta-mu} e Cor.~\ref{cor:mobius} §AN15
 ($\mu=\zeta^{-1}$ em $4096$ pares; o directo e o inverso com resíduo $0$ sobre a
 fibra mais funda que a realização tem; e a mesma inversão na árvore dos
 divisores);
-Teor.~\ref{thm:dirac}, \ref{thm:dobra-norma} e \ref{thm:conv} §AN12
-(a ida como soma de Diracs; a dobra na norma por três caminhos, com o percurso
-injetivo a dar excesso zero; convolução diagonalizada e deconvolução com resíduo
-$0$; e a degenerescência exibida);
+Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
+(as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
+com o percurso injetivo a dar excesso zero; convolução diagonalizada e
+deconvolução com resíduo $0$; e a degenerescência exibida);
+Lema~\ref{lem:comuta}, Teor.~\ref{thm:proprios} e \ref{thm:H} §AN26
+($\delta_a*\delta_b=\delta_{a\oplus b}$; $C_fC_g=C_gC_f$;
+$C_f\chi_k=\widehat f(k)\chi_k$; $F\circ F=n\cdot\mathrm{id}$; e
+$F(\delta_a)_k=\chi_k(a)$ com a volta exata);
 Teor.~\ref{thm:leitura} e Cor.~\ref{cor:duais} §AN10 (a mesma célula do dragão
 com sucessores diferentes, exibida; Julia, relógio e reta a lerem o estado; e o
 período $4$ do relógio no campo);
@@ -1409,7 +1508,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN25;
+        {\code{tests/aranha\_n.c} §AN1--§AN27;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 

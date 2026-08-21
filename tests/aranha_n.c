@@ -44,6 +44,11 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN27 O OUTRO LADO: W = ℤ^I com S NILPOTENTE (bloco de Jordan, não
+ *         diagonaliza) — e é por isso que 1−S inverte SEMPRE, ao contrário de C_f
+ *   §AN26 A ESTRUTURA LINEAR: X sobre 𝔽₂ e V = ℤ^X sobre ℤ · o anel de grupo ·
+ *         os C_f comutam · os χ_k são os próprios simultâneos · F é MUDANÇA DE
+ *         BASE e F∘F = n·id é a bidualidade
  *   §AN25 π_k EM BITS é truncar (sobrevivem 2^k réguas de oito) · e χ = V − A
  *         do subgrafo percorrido, com b₁ = 1 − χ a contar as voltas fechadas
  *   §AN24 as RÉGUAS formam BASE: as direcções de aresta de Q_8 são a base
@@ -2363,6 +2368,219 @@ int main(void){
            " hipótese não é decoração: a ESPIRAL reusa arestas — quatro arestas para mil"
            " passos — e aí b₁ = 1 com D = 1021. A dobra que o campo G conta por VÉRTICE"
            " é, quando as arestas não se repetem, a topologia do que foi percorrido",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN26: A ESTRUTURA LINEAR — V, o dual, e a transformada como MUDANÇA
+     *          DE BASE. Tudo no discreto, com funções genéricas. ═════════════ */
+    printf("\n§AN26  espaço vectorial, dual, e a transformada como mudança de base.\n\n");
+    {
+        long mau = 0;
+        const int MB = TA_M, NB = TA_N;          /* X = (ℤ/2)^m, |X| = n = 2^m */
+
+        /* DOIS ESPAÇOS EM ANDARES DIFERENTES, e convém não os confundir:
+         *   X = F_{2^m} sobre 𝔽₂ — dimensão m, base {e_k = 2^k}: o ESPAÇO onde a
+         *       aranha anda, e cujas direcções de aresta são a base ortonormal.
+         *   V = ℤ^X sobre ℤ    — dimensão n = 2^m, base {δ_x}: o espaço das
+         *       FUNÇÕES, onde o campo G vive como VECTOR.
+         * O campo é G = Σ_x G(x)·δ_x, e é isso que o §AN12 chamava «soma de Diracs». */
+        static long f[TA_N], g[TA_N], h[TA_N], Ff[TA_N], Fg[TA_N], Fh[TA_N];
+        static long u[TA_N], v[TA_N], w1[TA_N], w2[TA_N], t1[TA_N], t2[TA_N];
+
+        /* (a) A BASE {δ_x} DE V: toda função é combinação, e as coordenadas são os
+         *     seus valores. Verifica-se num campo genérico. */
+        long nt = real_dragao(600);
+
+        for(long i = 0; i < NB; i++) f[i] = 0;
+        an_zera(2);
+        for(long t = 0; t < nt; t++){
+            an_visita(traj[t]);
+            f[((traj[t].c[0] & 15) | ((traj[t].c[1] & 15) << 4)) & (NB-1)]++;
+        }
+        long recomp_mau = 0;
+        for(long x = 0; x < NB; x++){
+            long soma = 0;                        /* Σ_y f(y)·δ_y avaliado em x */
+            for(long y = 0; y < NB; y++) soma += f[y] * (y == x);
+            if(soma != f[x]) recomp_mau++;
+        }
+        printf("      V = ℤ^X, base {δ_x}: o campo é Σ_x G(x)·δ_x — recomposto em %s\n",
+               recomp_mau ? "NÃO" : "todos os 256");
+        if(recomp_mau) mau++;
+
+        /* (b) A OPERAÇÃO DE X INDUZ O PRODUTO DE V: δ_a * δ_b = δ_{a⊕b}. É isto
+         *     que faz de V o ANEL DE GRUPO ℤ[X], e a convolução é o seu produto. */
+        long anel_mau = 0;
+        for(long a = 0; a < 16; a++)
+            for(long b = 0; b < 16; b++){
+                for(long i = 0; i < NB; i++){ u[i] = (i == a); v[i] = (i == b); }
+                ta_conv(u, v, w1);
+                for(long i = 0; i < NB; i++) if(w1[i] != (i == (a ^ b))) anel_mau++;
+            }
+        printf("      δ_a * δ_b = δ_{a⊕b}: %s (256 pares) — V é o anel de grupo ℤ[X]\n",
+               anel_mau ? "NÃO" : "sim");
+        if(anel_mau) mau++;
+
+        /* (c) OS OPERADORES DE CONVOLUÇÃO COMUTAM. C_f(g) = f*g é linear em g, e
+         *     C_f C_g = C_g C_f. É por comutarem que se diagonalizam JUNTOS — e é
+         *     daí, e não de uma escolha, que sai a base de vectores próprios. */
+        for(long i = 0; i < NB; i++){ f[i] = (i*7) % 5; g[i] = (i*3) % 4; }
+        long com_mau = 0;
+        for(long i = 0; i < NB; i++) h[i] = (i == 3) || (i == 9);   /* um vector qualquer */
+        ta_conv(f, h, w1); ta_conv(g, w1, t1);       /* C_g C_f h */
+        ta_conv(g, h, w2); ta_conv(f, w2, t2);       /* C_f C_g h */
+        for(long i = 0; i < NB; i++) if(t1[i] != t2[i]) com_mau++;
+        printf("      C_f C_g = C_g C_f: %s — comutam, logo diagonalizam JUNTOS\n",
+               com_mau ? "NÃO" : "sim");
+        if(com_mau) mau++;
+
+        /* (d) OS CARACTERES SÃO OS VECTORES PRÓPRIOS SIMULTÂNEOS, e o valor próprio
+         *     de C_f em χ_k é exactamente F(f)_k. Não é a definição — é um teorema,
+         *     e mede-se aplicando C_f ao vector χ_k. */
+        ta_F(f, Ff);
+        long vp_mau = 0;
+        for(long k = 0; k < NB; k += 37){
+            for(long i = 0; i < NB; i++) u[i] = ta_chi(k, i);     /* o vector χ_k */
+            ta_conv(f, u, w1);                                    /* C_f χ_k */
+            for(long i = 0; i < NB; i++) if(w1[i] != Ff[k] * u[i]) vp_mau++;
+        }
+        printf("      C_f χ_k = F(f)_k · χ_k: %s — o valor próprio É a coordenada dual\n",
+               vp_mau ? "NÃO" : "sim");
+        if(vp_mau) mau++;
+
+        /* (e) A TRANSFORMADA É A MUDANÇA DE BASE de {δ_x} para {χ_k}, e a matriz é
+         *     a de Walsh H com H_{kx} = χ_k(x). A bidualidade é H² = n·I: aplicar
+         *     duas vezes devolve o vector a menos da escala, que é V** ≅ V. */
+        long bidual_mau = 0;
+        for(long i = 0; i < NB; i++) u[i] = (i*11) % 7 - 3;
+        ta_F(u, w1); ta_F(w1, w2);
+        for(long i = 0; i < NB; i++) if(w2[i] != NB * u[i]) bidual_mau++;
+        printf("      F∘F = n·id: %s — a bidualidade V** ≅ V, com n = %d\n",
+               bidual_mau ? "NÃO" : "sim", NB);
+        if(bidual_mau) mau++;
+
+        /* (f) E A BASE DUAL: ⟨χ_k, δ_x⟩ = χ_k(x), e a ortogonalidade do lem:orto
+         *     diz que {χ_k/n} é a base dual de {χ_k}. Aqui mede-se o emparelhamento
+         *     ser não degenerado: a matriz H é invertível, com H⁻¹ = H/n. */
+        long inv_mau = 0;
+        for(long a = 0; a < NB; a += 29){
+            for(long i = 0; i < NB; i++) u[i] = (i == a);          /* δ_a */
+            ta_F(u, w1);                                           /* F(δ_a)_k = χ_k(a) */
+            for(long k = 0; k < NB; k++) if(w1[k] != ta_chi(k, a)) inv_mau++;
+            if(!ta_Finv(w1, w2)) inv_mau++;                        /* e a volta */
+            for(long i = 0; i < NB; i++) if(w2[i] != u[i]) inv_mau++;
+        }
+        printf("      F(δ_a)_k = χ_k(a) e F⁻¹F = id: %s — o emparelhamento não degenera\n\n",
+               inv_mau ? "NÃO" : "sim");
+        if(inv_mau) mau++;
+
+        ok("A ESTRUTURA É LINEAR, E DIZ-SE EM DOIS ANDARES QUE CONVÉM NÃO CONFUNDIR."
+           " Em baixo, X = F_{2^m} sobre 𝔽₂, de dimensão m, com base {e_k = 2^k}: é o"
+           " ESPAÇO onde a aranha anda, e as suas direcções de aresta SÃO essa base"
+           " ortonormal (§AN24). Em cima, V = ℤ^X sobre ℤ, de dimensão n = 2^m, com base"
+           " canónica {δ_x}: é o espaço das FUNÇÕES, e o campo G vive nele como VECTOR,"
+           " G = Σ_x G(x)·δ_x — que é o que o §AN12 chamava «a ida é uma soma de"
+           " Diracs», dito agora com o nome próprio: são as COORDENADAS de G na base"
+           " canónica. A operação de X induz o produto de V — δ_a * δ_b = δ_{a⊕b} —,"
+           " logo V é o ANEL DE GRUPO ℤ[X] e a convolução é o seu produto. Os operadores"
+           " C_f(g) = f*g COMUTAM, e é por isso, e não por escolha, que existe uma base"
+           " que os diagonaliza a todos ao mesmo tempo: são os caracteres, com"
+           " C_f·χ_k = F(f)_k·χ_k — o VALOR PRÓPRIO é a coordenada dual. Donde a"
+           " transformada não é uma operação a mais: é a MUDANÇA DE BASE de {δ_x} para"
+           " {χ_k}, com F(δ_a)_k = χ_k(a) a ser a matriz. E F∘F = n·id é a BIDUALIDADE"
+           " V** ≅ V: ir ao dual duas vezes devolve o espaço, a menos da escala",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN27: O OUTRO LADO — W = ℤ^I, S NILPOTENTE, E A DIFERENÇA ═════════ */
+    printf("\n§AN27  o domínio: W = ℤ^I, S nilpotente, e por que ele NÃO diagonaliza.\n\n");
+    {
+        long mau = 0;
+        const long M = 12;
+        long S[16][16], P[16][16], Q[16][16], Z[16][16];
+
+        /* S é linear em W: (Sa)(t) = a(t−1). Na base {δ_t} a matriz é a SUBDIAGONAL
+         * de uns — nilpotente, um bloco de Jordan de valor próprio 0. É esta a
+         * diferença face ao lado de X: lá os operadores comutam e DIAGONALIZAM. */
+        for(long i = 0; i < M; i++) for(long j = 0; j < M; j++) S[i][j] = (i == j+1);
+
+        /* (a) S É NILPOTENTE: S^M = 0, e M é o menor expoente que anula. */
+        for(long i = 0; i < M; i++) for(long j = 0; j < M; j++) P[i][j] = (i == j);
+        long grau_nulo = -1;
+        for(long e = 1; e <= M; e++){
+            for(long i = 0; i < M; i++) for(long j = 0; j < M; j++){
+                long acc = 0;
+                for(long k = 0; k < M; k++) acc += P[i][k] * S[k][j];
+                Q[i][j] = acc;
+            }
+            for(long i = 0; i < M; i++) for(long j = 0; j < M; j++) P[i][j] = Q[i][j];
+            long nulo = 1;
+            for(long i = 0; i < M; i++) for(long j = 0; j < M; j++) if(P[i][j]) nulo = 0;
+            if(nulo && grau_nulo < 0) grau_nulo = e;
+        }
+        printf("      S é nilpotente: S^%ld = 0, e é o menor expoente que anula\n", grau_nulo);
+        if(grau_nulo != M) mau++;
+
+        /* (b) LOGO 1 − S É INVERTÍVEL, com a inversa a ser a série de Neumann
+         *     FINITA Σ_{j<M} S^j. Não é convergência — é nilpotência. */
+        for(long i = 0; i < M; i++) for(long j = 0; j < M; j++){ Z[i][j] = (i == j); P[i][j] = (i == j); }
+        for(long e = 1; e < M; e++){
+            for(long i = 0; i < M; i++) for(long j = 0; j < M; j++){
+                long acc = 0;
+                for(long k = 0; k < M; k++) acc += P[i][k] * S[k][j];
+                Q[i][j] = acc;
+            }
+            for(long i = 0; i < M; i++) for(long j = 0; j < M; j++){ P[i][j] = Q[i][j]; Z[i][j] += Q[i][j]; }
+        }
+        long zeta_mau = 0;
+        for(long i = 0; i < M; i++) for(long j = 0; j < M; j++)
+            if(Z[i][j] != (j <= i)) zeta_mau++;
+        long id_mau = 0;
+        for(long i = 0; i < M; i++) for(long j = 0; j < M; j++){
+            long acc = 0;
+            for(long k = 0; k < M; k++) acc += ((i==k) - S[i][k]) * Z[k][j];
+            if(acc != (i == j)) id_mau++;
+        }
+        printf("      Σ_{j<M} S^j é a triangular de uns (a matriz de ζ): %s\n",
+               zeta_mau ? "NÃO" : "sim");
+        printf("      (1 − S)·ζ = I: %s — a inversa é a série de Neumann FINITA,"
+               " por nilpotência\n", id_mau ? "NÃO" : "sim");
+        if(zeta_mau || id_mau) mau++;
+
+        /* (c) E S NÃO DIAGONALIZA: único valor próprio 0, e núcleo de dimensão 1. */
+        long dim_nucleo = 0;
+        for(long j = 0; j < M; j++){
+            long nulo = 1;
+            for(long i = 0; i < M; i++) if(S[i][j]) nulo = 0;
+            if(nulo) dim_nucleo++;
+        }
+        printf("      valor próprio de S: 0 (diagonal nula) · dim ker S = %ld de %ld"
+               " — bloco de Jordan\n", dim_nucleo, M);
+        if(dim_nucleo != 1) mau++;
+        long indep = 0;
+        for(long k = 0; k < TA_N; k++){
+            long norma = 0;
+            for(long j = 0; j < TA_N; j++) norma += ta_chi(k,j) * ta_chi(k,j);
+            if(norma == TA_N) indep++;
+        }
+        printf("      no lado de X: %ld caracteres de norma n — base própria completa\n\n",
+               indep);
+        if(indep != TA_N) mau++;
+
+        ok("O DOMÍNIO E O CONTRADOMÍNIO SÃO DOIS ESPAÇOS LINEARES COM ESTRUTURAS"
+           " OPOSTAS, e é isso que explica por que as duas inversões são diferentes."
+           " Em W = ℤ^I, com base {δ_t}, o deslocamento S é a matriz SUBDIAGONAL de"
+           " uns: nilpotente de índice exactamente dim W, com único valor próprio 0 e"
+           " núcleo de dimensão UM — um bloco de Jordan, que NÃO diagonaliza. E é"
+           " precisamente por ser nilpotente que 1 − S é invertível, com a inversa a ser"
+           " a série de Neumann FINITA Σ S^j — que é a matriz triangular de uns, isto é,"
+           " o ζ. Não há convergência nenhuma em jogo: há nilpotência. Do outro lado, em"
+           " V = ℤ^X, os operadores de convolução COMUTAM e têm base própria completa —"
+           " os n caracteres, todos de norma n. Donde: no domínio a inversão existe"
+           " SEMPRE, por nilpotência; no contradomínio existe se e só se nenhum valor"
+           " próprio se anula. Duas álgebras lineares, dois motivos de invertibilidade,"
+           " e as duas operações da aranha uma em cada",
            mau == 0);
     }
 

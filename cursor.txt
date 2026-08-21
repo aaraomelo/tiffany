@@ -1985,3 +1985,53 @@ O GUME APANHOU MAIS DUAS TAUTOLOGIAS MINHAS
   gume      41 mutações, 41 mordem
   bateria   529 : 529, 0 falhas · 24 unidades passaram, 0 falharam
   paper     18 páginas
+
+§41 — A REESCRITA CONSTRUTIVA: espaço vectorial, dual, e as duas álgebras
+=========================================================================
+Ordem: «agora que tem a construção com a base ortonormal, reescreve a
+transformada, a convolução e a deconvolução DESCENDO construtivamente na base do
+espaço, em funções genéricas, tudo no discreto — e dá a linguagem da álgebra
+linear: espaço vectorial e espaço dual».
+
+DOIS ESPAÇOS EM ANDARES DIFERENTES, e confundi-los é o erro fácil (§AN26):
+  EM BAIXO   X = F_{2^m} sobre 𝔽₂, dim m, base {e_k = 2^k} — o espaço ONDE a
+             aranha anda, e as direcções de aresta de Q_m SÃO essa base (§AN24)
+  EM CIMA    V = ℤ^X sobre ℤ, dim n = 2^m, base {δ_x} — o espaço das FUNÇÕES,
+             onde o campo G vive como VECTOR: G = Σ_x G(x)·δ_x
+O que eu chamava «a ida é uma soma de Diracs» tem agora o nome próprio: são as
+COORDENADAS de G na base canónica.
+
+A DESCIDA, e cada passo obriga o seguinte:
+  1. a operação de X estende-se a V por bilinearidade: δ_a * δ_b = δ_{a⊕b}
+     ⟹ V É O ANEL DE GRUPO ℤ[X], e a convolução é o seu produto
+  2. os operadores C_f(g) = f*g COMUTAM (C_f C_g = C_{f*g})
+  3. ⟹ existe base própria COMUM. A pergunta deixa de ser «que transformada
+     escolher» e passa a ser «qual é essa base» — e é única a menos de escala
+  4. são os CARACTERES: C_f·χ_k = f̂(k)·χ_k, e o VALOR PRÓPRIO é a coordenada dual
+  5. ⟹ a transformada não é operação nova: é a MUDANÇA DE BASE de {δ_x} para
+     {χ_k}, com matriz H_{kx} = χ_k(x) e F(δ_a)_k = χ_k(a)
+  6. H² = n·I ⟹ F∘F = n·id, que é a BIDUALIDADE V** ≅ V em coordenadas; e é por
+     X ser AUTODUAL pela forma ⟨·,·⟩ que os caracteres se indexam por X
+  7. a convolução vira produto ponto a ponto, a deconvolução vira divisão
+     diagonal, e a degenerescência tem nome: C_f TER NÚCLEO
+
+E A ADJACÊNCIA É UMA CONVOLUÇÃO — o espectro do grafo passa a COROLÁRIO. Com
+α = Σ_i δ_{e_i} a indicadora das direcções, A = C_α, logo
+     A·χ_k = α̂(k)·χ_k = (m − 2|k|)·χ_k.
+Os caracteres não foram escolhidos, e agora vê-se DUAS vezes porquê.
+
+O OUTRO LADO, E A ESTRUTURA É OPOSTA (§AN27). Em W = ℤ^I com base {δ_t}, o
+deslocamento S é a matriz SUBDIAGONAL de uns:
+  · NILPOTENTE de índice exactamente dim W (medido: S¹² = 0, e 12 é o mínimo)
+  · único valor próprio 0, dim ker S = 1 — um BLOCO DE JORDAN, não diagonaliza
+  · e é POR SER NILPOTENTE que 1 − S inverte, com a inversa a ser a série de
+    Neumann FINITA Σ S^j — que é a triangular de uns, isto é, o ζ
+NÃO HÁ CONVERGÊNCIA NENHUMA EM JOGO: há nilpotência. E daí a frase que fecha:
+  no DOMÍNIO a inversão existe SEMPRE (nilpotência)
+  no CONTRADOMÍNIO existe sse nenhum valor próprio se anula (diagonalização)
+Duas álgebras lineares, dois motivos de invertibilidade, e as duas operações da
+aranha uma em cada.
+
+  gume      45 mutações, 45 mordem
+  bateria   529 : 529, 0 falhas · 26 unidades passaram, 0 falharam
+  paper     19 páginas
