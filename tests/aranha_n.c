@@ -40,6 +40,8 @@
  *   §AN7  a vizinhança é o único sítio onde o n entra: |V(x)| = 2n
  *   §AN8  o JULIA: |{x : G(x) > 1}| = o PERÍODO da órbita, e G = 1 é a cauda
  *   §AN9  a ARANHA INVERSA em ℤⁿ: π̃ sobe UM andar, e a VOLTA devolve G
+ *   §AN10 quem lê o ESPAÇO e quem lê o ÍNDICE: a aranha e o dragão são duais
+ *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *
  *   cc -O2 -std=c99 -w -I../lib -o aranha_n aranha_n.c && ./aranha_n
  */
@@ -301,6 +303,62 @@ static int an_levanta_injectivo(long nt){
         for(long j = i + 1; j < nt; j++)
             if(k_de[i] == k_de[j] && an_igual(traj[i], traj[j])) return 0;
     return 1;
+}
+
+
+/* ── A SÉRIE DE PI, em inteiros: arctan(1/n) por soma alternada ──────────────
+ * Nenhum dígito escrito à mão. A escala é 10^8 para o valor caber num átomo do
+ * vector (int), e o critério de paragem é o termo ir a ZERO na divisão inteira
+ * — que é o que "convergir" quer dizer quando não há vírgula. */
+static long arctan_inv(long n, long S, long *termos){
+    long termo = S/n, soma = termo, n2 = n*n, p = 1;
+    for(long k = 1; k < 200; k++){
+        termo /= n2;
+        long t = termo/(2*k + 1);
+        soma = (k & 1) ? soma - t : soma + t;
+        p++;
+        if(t == 0 && termo == 0) break;
+    }
+    if(termos) *termos = p;
+    return soma;
+}
+/* a TRAJECTÓRIA das somas parciais: π(t) = S_t. O passo continua depois de o
+ * termo ir a zero, e é aí que a trajectória entra no seu PONTO FIXO. */
+static long real_serie(long n, long S, long passos){
+    long termo = S/n, soma = termo, n2 = n*n, t = 0;
+    Vet v = vet0(); v.c[0] = (int)soma; traj[t++] = v;
+    for(long k = 1; k <= passos && t < AN_IMAX; k++){
+        termo /= n2;
+        long x = termo/(2*k + 1);
+        soma = (k & 1) ? soma - x : soma + x;
+        v = vet0(); v.c[0] = (int)soma; traj[t++] = v;
+    }
+    return t;
+}
+
+/* ── O RELÓGIO: a meia-volta involutiva M² = id, e o rotor de período 4 ──────
+ * A rotação J: (a,b) ↦ (−b,a). É determinista por construção — o passo lê o
+ * ESTADO e mais nada — e é o relógio que a casa já corria. */
+static long real_relogio(long a0, long b0, long passos){
+    long t = 0; int a = (int)a0, b = (int)b0;
+    Vet v = vet0(); v.c[0] = a; v.c[1] = b; traj[t++] = v;
+    for(long s = 0; s < passos && t < AN_IMAX; s++){
+        int na = -b, nb = a;  a = na; b = nb;
+        v = vet0(); v.c[0] = a; v.c[1] = b; traj[t++] = v;
+    }
+    return t;
+}
+
+/* O PASSO É FUNÇÃO DO ESTADO? Procura na trajectória DUAS ocorrências da mesma
+ * célula com sucessores DIFERENTES. Devolve 1 se achar (logo NÃO determinista)
+ * e escreve a testemunha. Não é uma opinião sobre a construção: é uma busca. */
+static int nao_determinista(long nt, long *oi, long *oj){
+    for(long i = 0; i + 1 < nt; i++)
+        for(long j = i + 1; j + 1 < nt; j++)
+            if(an_igual(traj[i], traj[j]) && !an_igual(traj[i+1], traj[j+1])){
+                if(oi) *oi = i; if(oj) *oj = j; return 1;
+            }
+    return 0;
 }
 
 /* corre uma realização e devolve o essencial */
@@ -602,6 +660,28 @@ int main(void){
             if(!bate || !bate_cauda || !r.recontou || r.soma != r.nt) mau++;
             if(per > 0) presos++; else escapou++;
         }
+        /* A HIPÓTESE É NECESSÁRIA, e mede-se retirando-a: se a trajectória parar
+         * depois de entrar no ciclo mas antes de o fechar duas vezes, as células
+         * do ciclo ainda visitadas uma só vez contam para a cauda. Exige-se
+         * N ≥ μ + 2p − 1; aqui μ = 0 e p = 2, logo N ≥ 3. */
+        long curto_dobradas = -1, curto_per = -1, longo_dobradas = -1, longo_per = -1;
+        {
+            long nt = real_julia(-1, 0, 2, 0, 0);        /* N = 2: falta UM passo */
+            Res r = an_corre(2, nt);
+            curto_dobradas = r.dobradas; curto_per = periodo_busca(nt, 0);
+        }
+        {
+            long nt = real_julia(-1, 0, 3, 0, 0);        /* N = 3: a hipótese cumpre-se */
+            Res r = an_corre(2, nt);
+            longo_dobradas = r.dobradas; longo_per = periodo_busca(nt, 0);
+        }
+        printf("      a hipótese N ≥ μ+2p−1 (μ=0, p=2, logo N≥3):\n");
+        printf("        N=2  período %ld  mas |{G>1}| = %ld   ← a lei FALHA sem ela\n",
+               curto_per, curto_dobradas);
+        printf("        N=3  período %ld  e   |{G>1}| = %ld   ← e volta a valer\n",
+               longo_per, longo_dobradas);
+        if(!(curto_per == 2 && curto_dobradas != curto_per)) mau++;
+        if(!(longo_per == 2 && longo_dobradas == longo_per)) mau++;
         printf("\n");
         ok("O CAMPO G LÊ O PERÍODO, e é a cláusula 3 a pagar: numa órbita DETERMINISTA"
            " — z ↦ z² + c no reticulado de Gauss, tudo inteiro — a célula É o estado,"
@@ -613,7 +693,13 @@ int main(void){
            " (c=1, z0=1): período 0, nenhuma célula com G > 1, e a cauda é tudo."
            " Isto é o `thm:multiplicidade` a dar de graça o que o algoritmo clássico"
            " resolve com DUAS patas, lebre e tartaruga: a aranha tem uma só, porque a"
-           " memória não é dela — é do espaço",
+           " memória não é dela — é do espaço. E A HIPÓTESE N ≥ μ+2p−1 NÃO É"
+           " DECORAÇÃO: retirada, a lei cai — a mesma órbita c=−1 truncada em N=2"
+           " (um passo abaixo do limiar) tem período 2 e UMA só célula com G > 1,"
+           " porque parou antes de fechar a segunda volta. Com N=3 volta a valer."
+           " O contra-exemplo não pode ser N=1: aí não há repetição nenhuma e a"
+           " hipótese do próprio teorema falha, logo não seria contra-exemplo. Uma hipótese que não se exibe"
+           " a falhar quando é retirada não estava a fazer trabalho nenhum",
            mau == 0 && presos == 3 && escapou == 1);
     }
 
@@ -710,6 +796,108 @@ int main(void){
            " e duas não. Contei o Cantor entre as que dobram antes de olhar para o"
            " max G da sua própria linha, que a §AN4 já tinha medido a 1",
            mau == 0 && casos == 5 && com_dobra == 3 && degenerados == 2);
+    }
+
+
+    /* ═══ §AN10: o passo lê o ESTADO ou lê o ÍNDICE — e onde está o outro ════ */
+    printf("\n§AN10  quem lê o espaço e quem lê o tempo: a aranha e o dragão.\n\n");
+    {
+        long mau = 0, det = 0, ndet = 0;
+        struct { const char *nome; int n; int espera_det; } cs[4];
+        cs[0].nome = "dragão ℤ²"; cs[0].n = 2; cs[0].espera_det = 0;
+        cs[1].nome = "Julia ℤ[i]"; cs[1].n = 2; cs[1].espera_det = 1;
+        cs[2].nome = "relógio J";  cs[2].n = 2; cs[2].espera_det = 1;
+        cs[3].nome = "recta";      cs[3].n = 2; cs[3].espera_det = 1;
+        printf("      realização    |I|    células  o passo lê   testemunha\n");
+        for(int c = 0; c < 4; c++){
+            long nt;
+            if(c == 0)      nt = real_dragao(512);
+            else if(c == 1) nt = real_julia(-1, 0, 60, 0, 0);
+            else if(c == 2) nt = real_relogio(3, 1, 60);
+            else            nt = real_recta(512, 2);
+            Res r = an_corre(cs[c].n, nt);
+            long i = -1, j = -1;
+            int nd = nao_determinista(nt, &i, &j);
+            char test[96];
+            if(nd) snprintf(test, sizeof test, "π(%ld)=π(%ld) e π(%ld)≠π(%ld)", i, j, i+1, j+1);
+            else   snprintf(test, sizeof test, "—");
+            printf("      %-13s %-6ld %-8ld %-12s %s\n",
+                   cs[c].nome, r.nt, r.celulas, nd ? "o ÍNDICE" : "o ESTADO", test);
+            if(nd == cs[c].espera_det) mau++;
+            if(nd) ndet++; else det++;
+            if(!r.recontou || r.soma != r.nt) mau++;
+        }
+        /* E O RELÓGIO LÊ-SE NO CAMPO: período 4, cauda 0. */
+        long ntr = real_relogio(3, 1, 60);
+        Res rr = an_corre(2, ntr);
+        long cauda_r = 0, per_r = periodo_busca(ntr, &cauda_r);
+        printf("\n      o relógio no campo: período %ld (busca) · |{G>1}| = %ld · cauda %ld\n\n",
+               per_r, rr.dobradas, cauda_r);
+        if(per_r != 4 || rr.dobradas != per_r || cauda_r != 0) mau++;
+
+        ok("NÃO HÁ NADA FORA: a hipótese do §AN8 não separa o matemático do resto —"
+           " separa DUAS DEPENDÊNCIAS, e as duas vivem aqui dentro. Ou o passo é função"
+           " da CÉLULA (o Julia, o relógio J, a recta) ou é função do ÍNDICE (o dragão)."
+           " E não é opinião sobre a construção: procura-se na trajectória a mesma célula"
+           " com sucessores DIFERENTES, e no dragão ela existe e exibe-se. É por isso que"
+           " ele dobra sem ter período — a viragem `drag_esq(s)` lê s, não lê onde está."
+           " OS DOIS SÃO DUAIS: a ARANHA põe a memória no ESPAÇO e o agente não guarda a"
+           " história; o DRAGÃO põe-na no ÍNDICE e o espaço não a tem. O levantamento"
+           " π̃ = (π,k) é a ponte, e cobra o preço no §AN9: junta os dois num estado só e"
+           " a dobra desaparece, G̃ ≡ 1. Não se pode ter as duas coisas ao mesmo tempo."
+           " E o relógio da casa — a meia-volta involutiva, J:(a,b)↦(−b,a) — é"
+           " determinista, logo o §AN8 aplica-se-lhe e lê o seu período: 4",
+           mau == 0 && det == 3 && ndet == 1);
+    }
+
+    /* ═══ §AN11: a SÉRIE DE π — o campo lê o custo da convergência ═══════════ */
+    printf("\n§AN11  a série de π: três caminhos, e o G a ler o custo.\n\n");
+    {
+        const long S = 100000000L;                 /* escala 10^8, tudo inteiro */
+        long t5, t239, t2, t3, t7;
+        long a5 = arctan_inv(5, S, &t5), a239 = arctan_inv(239, S, &t239);
+        long a2 = arctan_inv(2, S, &t2), a3 = arctan_inv(3, S, &t3);
+        long a7 = arctan_inv(7, S, &t7);
+        long machin = 16*a5 - 4*a239, euler = 4*a2 + 4*a3, herman = 8*a2 - 4*a7;
+        const long CORTE = 100;                    /* 6 casas: o que a escala 10^8 sustenta */
+        printf("      Machin  16·atan(1/5) − 4·atan(1/239) = %ld\n", machin);
+        printf("      Euler    4·atan(1/2) + 4·atan(1/3)   = %ld\n", euler);
+        printf("      Hermann  8·atan(1/2) − 4·atan(1/7)   = %ld\n", herman);
+        printf("      a 6 casas: %ld · %ld · %ld\n\n", machin/CORTE, euler/CORTE, herman/CORTE);
+        int concordam = (machin/CORTE == euler/CORTE) && (euler/CORTE == herman/CORTE);
+
+        /* a trajectória das somas parciais, e o campo sobre ela */
+        long mau = 0;
+        printf("      arctan(1/n)   termos até o termo ir a 0   |I|   células  |{G>1}|  período  cauda\n");
+        struct { long n, termos; } sr[4];
+        sr[0].n = 5; sr[0].termos = t5;  sr[1].n = 239; sr[1].termos = t239;
+        sr[2].n = 2; sr[2].termos = t2;  sr[3].n = 3;   sr[3].termos = t3;
+        for(int c = 0; c < 4; c++){
+            long PASSOS = 40;
+            long nt = real_serie(sr[c].n, S, PASSOS);
+            Res r = an_corre(1, nt);
+            long cauda = 0, per = periodo_busca(nt, &cauda);
+            printf("      1/%-11ld %-27ld %-5ld %-8ld %-8ld %-8ld %ld\n",
+                   sr[c].n, sr[c].termos, r.nt, r.celulas, r.dobradas, per, cauda);
+            /* o ponto fixo é UM: período 1. E a cauda que o campo lê é o número de
+             * somas parciais DISTINTAS antes de estabilizar — o custo da série. */
+            if(per != 1) mau++;
+            if(r.dobradas != 1) mau++;
+            if(cauda != r.celulas - 1) mau++;
+            if(cauda + 1 > sr[c].termos) mau++;   /* nunca mais distintas que termos */
+            if(!r.recontou || r.soma != r.nt) mau++;
+        }
+        printf("\n");
+        ok("A SÉRIE DE π É UMA ÓRBITA, E O CAMPO LÊ O SEU CUSTO: as somas parciais de"
+           " arctan(1/n) em aritmética inteira formam uma trajectória que entra num PONTO"
+           " FIXO quando o termo vai a zero — e convergir, sem vírgula, é exactamente"
+           " isso. O §AN8 lê-o: período 1, uma única célula com G > 1 (o ponto fixo), e a"
+           " cauda é o número de somas parciais DISTINTAS, que é o custo da série. E o"
+           " valor não é escrito à mão: Machin, Euler e Hermann são três somas alternadas"
+           " independentes, em inteiros, e exige-se que os três coincidam a 6 casas — se"
+           " eu tivesse copiado os dígitos, esta asserção não poderia falhar. π está"
+           " DENTRO: é construído, não citado",
+           mau == 0 && concordam && machin > 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

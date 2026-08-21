@@ -1,0 +1,754 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  papers/aranha.tex — A ARANHA ESTIGMÉRGICA: a multiplicidade geométrica.
+%
+%  Compila: pdflatex aranha.tex
+%
+%  AUTOCONTIDO por decisão do coordenador (20/08/2026): toda a matemática de
+%  que precisa está DENTRO. Onde um irmão já dizia a mesma coisa, o enunciado
+%  foi DUPLICADO e não referenciado — este documento lê-se sem abrir outro.
+%  As únicas coisas de fora são o estilo da capa e os medidores citados.
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\Q}{\ensuremath{\mathbb{Q}}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova}: #1\sepcol\textbf{realiza}: #2\sepcol\textbf{verifica}: #3\par}\smallskip}
+\providecommand{\interfacen}[1]{}
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\renewcommand{\proofname}{Demonstração}
+
+\input{gkcapa}
+
+\begin{document}
+\interfacen{6}
+\gkcapa{A Aranha}
+       {multiplicidade geométrica · memória no espaço}
+       {a dobra que a projecção faz, e a coordenada que a desfaz}
+\maketitle
+
+\begin{abstract}\noindent
+Uma trajetória discreta realizada num espaço identifica índices distintos na
+mesma célula. Essa identificação \emph{é} a dobra da trajetória, e o número de
+índices por célula --- a \textbf{multiplicidade geométrica} $G$ --- é a memória
+de que essa dobra aconteceu. Prova-se aqui que $G$ é registável por
+\textbf{escrita local no espaço}, sem que o agente conserve a sua própria
+história; que a dimensão do espaço entra num sítio só, a vizinhança, e como
+$\abs{V(x)}=2n$; que a fibra perdida pela projeção volta como \emph{uma}
+coordenada de folha, seja qual for a dimensão, com volta exata; que em espaços
+ultramétricos a célula \emph{é} a bola e as bolas particionam; e que numa órbita
+determinista $G$ conta o período. Fecha-se com a curva de Heighway obtida por
+dois caminhos disjuntos --- uma régua de bits e a dobra $D_{k+1}=D_k+D_k^{*}$
+--- e com a demonstração de que coincidem.
+
+\medskip\noindent\textbf{Auto-contenção.} Todo enunciado usado está enunciado e
+demonstrado neste documento. Onde um irmão da mesma obra já dizia o mesmo, o
+texto foi duplicado em vez de referenciado.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O objeto}\label{sec:objeto}
+
+\begin{definicao}[trajetória, realização, multiplicidade]\label{def:objeto}
+Seja $I=\{0,1,\dots,N\}$ um segmento inicial de \N\ --- a \textbf{parametrização}
+--- e $X$ um conjunto com igualdade decidível. Uma \textbf{realização} é uma
+aplicação
+\[
+\pi\colon I\longrightarrow X ,
+\]
+lida como ``o índice $i$ ocupa a célula $\pi(i)$''. A \textbf{multiplicidade
+geométrica} de $\pi$ é
+\[
+G\colon X\to\N,\qquad G(x)=\bigl\lvert\pi^{-1}(x)\bigr\rvert
+=\bigl\lvert\{i\in I:\pi(i)=x\}\bigr\rvert .
+\]
+O \textbf{suporte} de $G$ é $\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
+\end{definicao}
+
+\medskip\noindent\textbf{A letra.} $\pi$ é aqui a \textbf{projeção} --- a letra
+padrão do fibrado, e a mesma do $\pi_k$ com que o Maestro desce um andar da
+torre. O \emph{número} $\pi$ aparece na §\ref{sec:serie}, e aparece
+\textbf{construído}: três somas alternadas independentes em aritmética inteira,
+sem um dígito citado. São duas coisas com a mesma letra e a convenção fica dita
+aqui, no primeiro uso; onde houver risco, escreve-se ``o número $\pi$''.
+
+\medskip\noindent Note-se o que \emph{não} está na definição: nem estrutura algébrica em
+$X$, nem métrica, nem dimensão. Só igualdade. Esta economia não é elegância --- é
+o conteúdo do Teorema~\ref{thm:multiplicidade}, e é o que se paga no
+Teorema~\ref{thm:dimensao}, onde a dimensão finalmente aparece e se vê que
+aparece uma vez só.
+
+\begin{definicao}[dobra]\label{def:dobra}
+A relação $i\sim j \iff \pi(i)=\pi(j)$ é uma equivalência em $I$. Chama-se
+\textbf{dobra} de $\pi$, e as suas classes são as fibras $\pi^{-1}(x)$.
+\end{definicao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A multiplicidade: quatro cláusulas, nenhuma sobre o espaço}
+
+\begin{teorema}[multiplicidade geométrica]\label{thm:multiplicidade}
+Com a Def.~\ref{def:objeto}, sejam $G_t(x)=\lvert\{i\le t:\pi(i)=x\}\rvert$ os
+campos parciais. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Duplicidade é dobra.} Para $i\neq j$ tem-se $\pi(i)=\pi(j)$
+se e só se $i$ e $j$ pertencem à mesma classe de $\sim$. A dobra da
+Def.~\ref{def:dobra} é a fibra de $\pi$ --- não uma metáfora dela.
+\item[(2)] \textbf{$G$ regista a dobra.} $G(x)>1$ se e só se existem $i\neq j$
+com $\pi(i)=\pi(j)=x$. Em particular $\pi$ é injetiva se e só se $G\le1$.
+\item[(3)] \textbf{A memória não pertence ao agente.} Vale a recorrência local
+\[
+G_{t+1}(x)=G_t(x)+\mathbf{1}_{\{x=\pi(t+1)\}},\qquad G_{-1}\equiv0,
+\]
+e $G=G_N$. Cada passo altera $G$ num único ponto, e esse ponto é a célula
+corrente. Nenhum passo consulta $\pi(0),\dots,\pi(t)$.
+\item[(4)] \textbf{Conservação.} $\displaystyle\sum_{x\in X}G(x)=\abs{I}=N+1$, e
+a soma é finita porque $\operatorname{supp}G$ tem no máximo $\abs{I}$ elementos.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são a definição de fibra e a sua cardinalidade.
+
+(3) Fixe-se $x$. Por definição $G_{t+1}(x)=\lvert\{i\le t+1:\pi(i)=x\}\rvert$, e
+o conjunto contado difere do de $G_t(x)$ exatamente pelo elemento $t+1$, que lá
+está se e só se $\pi(t+1)=x$. Donde a recorrência. A cláusula ``num único ponto''
+é a leitura da mesma igualdade: para $x\neq\pi(t+1)$ a indicatriz anula-se e
+$G_{t+1}(x)=G_t(x)$. O termo direito só depende de $t+1$ através de $\pi(t+1)$,
+que é o dado corrente: a história não é consultada.
+
+(4) As fibras $\pi^{-1}(x)$, $x\in\operatorname{im}\pi$, particionam $I$, e a
+cardinalidade é aditiva sobre partições finitas:
+$\sum_x\lvert\pi^{-1}(x)\rvert=\lvert I\rvert$. Fora do suporte os termos são
+nulos.
+\end{proof}
+
+\medskip\noindent\textbf{O que a prova usou.} Só a igualdade em $X$, para
+decidir $x=\pi(t+1)$ e para formar as fibras. Nenhuma das quatro cláusulas
+menciona a estrutura de $X$. É este o resultado: a memória estigmérgica não é um
+fenómeno do plano.
+
+\medskip\noindent A composição que o teorema exibe é
+\[
+\boxed{\ \text{trajetória}\ \xrightarrow{\ \pi\ }\ \text{célula}\
+\xrightarrow{\ +1\ }\ \text{campo }G\ \xrightarrow{\ \text{leitura local}\ }\
+\text{decisão}\ }
+\]
+e o agente é o que fecha o ciclo lendo o que ele próprio escreveu, sem guardar
+que o escreveu.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O algoritmo}\label{sec:algoritmo}
+
+\noindent A cláusula (3) do Teorema~\ref{thm:multiplicidade} \emph{é} um
+algoritmo. Escrito:
+
+\medskip\noindent\textbf{Algoritmo A (a aranha).}
+\begin{enumerate}\itemsep2pt
+\item Inicializar $G\equiv0$ (o campo vazio).
+\item Para $t=0,\dots,N$: ler $x\leftarrow\pi(t)$; escrever $G(x)\leftarrow G(x)+1$.
+\item \emph{(opcional, o agente)} antes de escrever, ler a vizinhança
+$\mathcal{P}_t(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}$ e decidir o passo seguinte
+com base nela.
+\end{enumerate}
+
+\medskip\noindent\textbf{Estado.} O algoritmo mantém $G$ e o índice corrente.
+Não mantém a sequência. Este é o ponto e não uma otimização: um agente que
+guardasse $\pi(0),\dots,\pi(t)$ teria a informação toda e o campo seria
+supérfluo.
+
+\medskip\noindent\textbf{Representação de $G$.} O campo é uma aplicação
+$\operatorname{supp}G\to\N$ com $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
+Armazená-lo como \emph{tabela sobre $X$} --- por exemplo um arranjo
+$G[m]\times[m]$ quando $X=\Z^2$ --- é uma escolha de representação, não o
+algoritmo: custa $\lvert X\rvert$ e não $\abs{I}$, e em $\Z^3$ com $m=2048$ pede
+$2048^3$ células. A representação fiel à cláusula (3) é \textbf{esparsa}: a
+memória existe onde a trajetória passou. Com endereçamento aberto num arranjo
+fixo de capacidade $C\ge2\abs{I}$, o custo é $O(1)$ amortizado por passo e a
+memória total é $O(\abs{I})$, decidida antes de correr --- não há alocação
+dinâmica em parte nenhuma do algoritmo.
+
+\medskip\noindent\textbf{Complexidade.} $N+1$ passos, cada um com uma leitura e
+uma escrita: $\Theta(\abs{I})$ operações, $\Theta(\abs{I})$ memória, e nenhuma
+dependência de $\lvert X\rvert$.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Onde a dimensão entra}\label{sec:dimensao}
+
+\noindent A cláusula (3) do algoritmo pede uma \emph{vizinhança}. É aqui, e só
+aqui, que a estrutura de $X$ é chamada.
+
+\begin{definicao}[a grade e a sua vizinhança]\label{def:grade}
+Em $X=\Z^n$ com a base canónica $e_1,\dots,e_n$, a vizinhança de $x$ é
+\[
+V(x)=\{x\pm e_i : i=1,\dots,n\}.
+\]
+\end{definicao}
+
+\begin{teorema}[o $n$ entra num sítio só]\label{thm:dimensao}
+Em $\Z^n$ tem-se $\lvert V(x)\rvert=2n$ para todo $x$, e os $2n$ vizinhos são
+distintos. Além disso, o Teorema~\ref{thm:multiplicidade} e o Algoritmo~A valem
+palavra por palavra em $\Z^n$ para todo $n\ge1$, sem alteração nenhuma: a
+dimensão não ocorre em nenhuma das quatro cláusulas.
+\end{teorema}
+
+\begin{proof}
+Os $2n$ pontos $x\pm e_i$ são distintos: $x+\varepsilon e_i=x+\varepsilon'e_j$
+com $\varepsilon,\varepsilon'\in\{+1,-1\}$ dá $\varepsilon e_i=\varepsilon'e_j$,
+e como os $e_i$ são livres isso força $i=j$ e $\varepsilon=\varepsilon'$. A
+segunda afirmação é imediata da demonstração do
+Teorema~\ref{thm:multiplicidade}, que usou apenas a igualdade em $X$, e $\Z^n$
+tem igualdade decidível coordenada a coordenada.
+\end{proof}
+
+\medskip\noindent\textbf{Leitura.} Enunciar o teorema em $\Z^2$ e realizá-lo num
+arranjo do plano dá a impressão de que o $2$ é do teorema. Não é: é do exemplo, e
+do arranjo. O $n$ aparece uma vez, no tamanho da vizinhança.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O levantamento, e a volta}\label{sec:inversa}
+
+\noindent A projeção $\pi$ perde exatamente a dobra. A pergunta dual: pode a
+dobra ser \emph{desfeita} sem inventar geometria? Sim, e ao preço de uma
+coordenada.
+
+\begin{definicao}[número de visita]\label{def:k}
+Para $i\in I$,
+\[
+k(i)=\bigl\lvert\{j\in I: j\le i,\ \pi(j)=\pi(i)\}\bigr\rvert .
+\]
+\end{definicao}
+
+\begin{teorema}[levantamento em folhas]\label{thm:levantamento}
+Seja $\tilde\pi\colon I\to X\times\N$, $\tilde\pi(i)=\bigl(\pi(i),k(i)\bigr)$, e
+$\tilde G$ a multiplicidade de $\tilde\pi$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Injetividade:} $\tilde\pi$ é injetiva, e portanto
+$\tilde G\equiv1$ em $\operatorname{im}\tilde\pi$.
+\item[(2)] \textbf{Projeção:} $\operatorname{pr}_1\circ\tilde\pi=\pi$.
+\item[(3)] \textbf{Fibra vertical:} para cada $x\in\operatorname{im}\pi$,
+$\{k(i):\pi(i)=x\}=\{1,2,\dots,G(x)\}$, exatamente.
+\item[(4)] \textbf{Conservação:}
+$\lvert\operatorname{im}\tilde\pi\rvert=\abs{I}=\sum_x G(x)$.
+\item[(5)] \textbf{Volta:} $G$ recupera-se de $\tilde\pi$ sem qualquer outro
+dado, por $G(x)=\bigl\lvert\{i:\operatorname{pr}_1\tilde\pi(i)=x\}\bigr\rvert$.
+\end{enumerate}
+Além disso, se $X=\Z^n$ então $X\times\N\subseteq\Z^{n+1}$: o levantamento sobe
+\textbf{um} andar, seja qual for $n$.
+\end{teorema}
+
+\begin{proof}
+(3) primeiro, porque as outras se apoiam nela. Fixe-se $x$ e sejam
+$i_1<i_2<\dots<i_g$ os índices da fibra $\pi^{-1}(x)$, $g=G(x)$. Por
+definição $k(i_r)=\lvert\{j\le i_r:\pi(j)=x\}\rvert=\lvert\{i_1,\dots,i_r\}\rvert=r$.
+Logo $k$ restrita à fibra é a enumeração $i_r\mapsto r$, que é uma bijeção sobre
+$\{1,\dots,g\}$.
+
+(1) Sejam $\tilde\pi(i)=\tilde\pi(j)$. Então $\pi(i)=\pi(j)=:x$, logo $i$ e $j$
+estão na mesma fibra, e $k(i)=k(j)$. Por (3) $k$ é injetiva nessa fibra, donde
+$i=j$. Que $\tilde G\equiv1$ é a cláusula (2) do
+Teorema~\ref{thm:multiplicidade} aplicada a $\tilde\pi$.
+
+(2) $\operatorname{pr}_1\bigl(\pi(i),k(i)\bigr)=\pi(i)$, por definição de
+$\operatorname{pr}_1$.
+
+(4) Por (1), $\tilde\pi$ é uma bijeção de $I$ sobre a sua imagem, donde
+$\lvert\operatorname{im}\tilde\pi\rvert=\abs{I}$; a segunda igualdade é a
+cláusula (4) do Teorema~\ref{thm:multiplicidade}.
+
+(5) Por (2), $\{i:\operatorname{pr}_1\tilde\pi(i)=x\}=\{i:\pi(i)=x\}=\pi^{-1}(x)$,
+cuja cardinalidade é $G(x)$ por definição.
+
+A última afirmação é a inclusão $\Z^n\times\N\subseteq\Z^n\times\Z=\Z^{n+1}$.
+\end{proof}
+
+\medskip\noindent\textbf{Algoritmo B (a aranha inversa).}
+\begin{enumerate}\itemsep2pt
+\item Inicializar um campo $c\equiv0$ sobre $X$.
+\item Para $i=0,\dots,N$: ler $x\leftarrow\pi(i)$; escrever
+$c(x)\leftarrow c(x)+1$; emitir $\tilde\pi(i)=\bigl(x,\,c(x)\bigr)$.
+\end{enumerate}
+O campo $c$ é o próprio $G$ parcial: o Algoritmo~B é o Algoritmo~A com o valor
+lido a sair. Não inventa geometria --- desfaz a identificação $i\sim j$ que a
+realização tinha feito.
+
+\medskip\noindent\textbf{Três observações que a prática obriga a escrever.}
+
+\emph{Primeira:} a injetividade de $\tilde\pi$ não precisa de ser verificada par
+a par. Basta correr o Algoritmo~A \emph{sobre $\tilde\pi$}, em dimensão $n+1$, e
+ler $\max\tilde G$. Isto é uma verificação por outro caminho, não a mesma conta
+duas vezes: a prova de (1) usa (3) e a ordem dos índices; a corrida usa só a
+igualdade de vetores.
+
+\emph{Segunda:} $\operatorname{pr}_1$ não é um passo que se execute. Correr o
+campo em dimensão $n$ sobre os vetores de $\Z^{n+1}$ \emph{é} a projeção --- a
+folha está no vetor e o campo não a lê. Escrever ``zerar a última coordenada''
+antes de recontar é uma linha que não faz nada.
+
+\emph{Terceira:} a volta (5) é o que distingue um \emph{inverso} de um
+\emph{levantamento}. Um levantamento que não devolvesse $G$ teria acrescentado
+informação em vez de reorganizar a que havia.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Espaços ultramétricos: a célula é a bola}\label{sec:ultra}
+
+\noindent O Teorema~\ref{thm:multiplicidade} não pediu métrica. Mas quando $X$
+tem uma, a relação entre $G$ e as bolas diz o que a métrica é.
+
+\begin{definicao}[a árvore do encaixe]\label{def:arvore}
+Para $a,b$ inteiros de $p$ bits, seja $\delta(a,b)$ a profundidade da primeira
+divergência: o menor $q\ge0$ tal que os bits de peso $p-1,\dots,p-q$ de $a$ e $b$
+coincidem e o de peso $p-1-q$ difere; e $\delta(a,a)=p$. Ponha-se
+\[
+d(a,b)=2^{-\delta(a,b)} .
+\]
+\end{definicao}
+
+\begin{lema}[$d$ é ultramétrica]\label{lem:ultra}
+$d(a,c)\le\max\{d(a,b),d(b,c)\}$ para quaisquer $a,b,c$.
+\end{lema}
+
+\begin{proof}
+Se $a$ e $b$ concordam nos $\delta(a,b)$ bits mais altos e $b$ e $c$ nos
+$\delta(b,c)$, então $a$ e $c$ concordam nos primeiros
+$\min\{\delta(a,b),\delta(b,c)\}$, logo
+$\delta(a,c)\ge\min\{\delta(a,b),\delta(b,c)\}$. Aplicando $t\mapsto2^{-t}$, que
+inverte a ordem, vem $d(a,c)\le\max\{d(a,b),d(b,c)\}$.
+\end{proof}
+
+\begin{teorema}[as bolas particionam]\label{thm:bolas}
+Seja $(X,d)$ ultramétrico e $B(a,r)=\{x: d(a,x)\le r\}$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Todo ponto é centro:} se $b\in B(a,r)$ então $B(b,r)=B(a,r)$.
+\item[(2)] \textbf{Partição:} duas bolas de raio $r$ ou coincidem ou são
+disjuntas. Em particular, para cada $r$ as bolas de raio $r$ formam uma partição
+de $X$.
+\item[(3)] Fixado $r$, seja $\pi_r(i)$ a bola de raio $r$ que contém $i$. Então
+$\pi_r$ é uma realização no sentido da Def.~\ref{def:objeto}, a sua célula
+\emph{é} a bola, e $G(x)$ é o número de índices dentro dela.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Seja $x\in B(a,r)$. Então $d(b,x)\le\max\{d(b,a),d(a,x)\}\le r$, logo
+$x\in B(b,r)$ e $B(a,r)\subseteq B(b,r)$. Como $b\in B(a,r)$ implica
+$a\in B(b,r)$ (a ultramétrica é simétrica), a inclusão contrária sai do mesmo
+argumento com os papéis trocados.
+
+(2) Se $c\in B(a,r)\cap B(b,r)$, por (1) tem-se $B(a,r)=B(c,r)=B(b,r)$. Se a
+interseção é vazia, nada há a provar. Que cobrem $X$ é imediato:
+$a\in B(a,r)$.
+
+(3) A aplicação $i\mapsto\pi_r(i)$ está bem definida por (2) --- há
+\emph{exatamente} uma bola de raio $r$ contendo $i$ --- e o contradomínio tem
+igualdade decidível (duas bolas são iguais ou disjuntas, e testa-se pela
+interseção). A afirmação sobre $G$ é a Def.~\ref{def:objeto}.
+\end{proof}
+
+\medskip\noindent\textbf{O que a ultramétrica é, e o que não é.} Não é uma
+desigualdade triangular ``mais apertada'' de que se tire um número melhor: é a
+propriedade de partição do Teorema~\ref{thm:bolas}. Numa métrica euclidiana as
+bolas de raio fixo cruzam-se parcialmente --- existem $a,b$ e pontos $x,y,z$ com
+$x\in B(a)\cap B(b)$, $y\in B(a)\setminus B(b)$, $z\in B(b)\setminus B(a)$ --- e
+nenhum ponto interior é centro de todas as bolas que o contêm. É por isso que
+$\sum_x G(x)=\abs{I}$ não exige cuidado nenhum aqui: não há sobreposição a haver.
+
+\medskip\noindent\textbf{E é a métrica do corte.} Dois reais construídos como
+cortes estão próximos nesta métrica quando \emph{concordam até fundo}: a
+distância decai com a profundidade em que a expansão binária ainda coincide.
+É a topologia que o encaixe induz, e o campo $G$ corre nela com o Algoritmo~A
+inalterado --- a única coisa que $X$ tinha de ter era igualdade, e bolas
+comparam-se por igualdade.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Órbitas deterministas: $G$ conta o período}\label{sec:periodo}
+
+\begin{definicao}[realização determinista]\label{def:determinista}
+$\pi$ diz-se \textbf{determinista} se existe $f\colon X\to X$ com
+$\pi(t+1)=f(\pi(t))$ para todo $t<N$.
+\end{definicao}
+
+\begin{teorema}[o período lê-se no campo]\label{thm:periodo}
+Seja $\pi$ determinista. Se existem $i<j$ com $\pi(i)=\pi(j)$, sejam
+\[
+\mu=\min\{i:\exists j>i,\ \pi(j)=\pi(i)\}\quad(\text{a \textbf{cauda}}),\qquad
+p=\min\{j-\mu:\ j>\mu,\ \pi(j)=\pi(\mu)\}\quad(\text{o \textbf{período}}).
+\]
+Se $N\ge\mu+2p-1$, então
+\[
+\bigl\lvert\{x: G(x)>1\}\bigr\rvert=p
+\qquad\text{e}\qquad
+\bigl\lvert\{x: G(x)=1\}\bigr\rvert=\mu .
+\]
+Se, pelo contrário, $\pi$ é injetiva, então $G\equiv1$ e ambos os conjuntos são,
+respetivamente, vazio e $\operatorname{im}\pi$.
+\end{teorema}
+
+\begin{proof}
+Comece-se pela propriedade que o determinismo dá: se $\pi(i)=\pi(j)$ então
+$\pi(i+m)=\pi(j+m)$ para todo $m$ com $j+m\le N$, por indução em $m$ aplicando
+$f$. Logo a sucessão é periódica de período $p$ a partir de $\mu$:
+$\pi(t+p)=\pi(t)$ para todo $t\ge\mu$ com $t+p\le N$.
+
+\emph{As células do ciclo são $p$ e são distintas.} Sejam
+$C=\{\pi(\mu),\pi(\mu+1),\dots,\pi(\mu+p-1)\}$. Se fosse
+$\pi(\mu+r)=\pi(\mu+s)$ com $0\le r<s<p$, aplicando $f$ $\,(p-s)$ vezes viria
+$\pi(\mu+r+p-s)=\pi(\mu+p)=\pi(\mu)$ com $0<r+p-s<p$, contra a minimalidade de
+$p$. Logo $\lvert C\rvert=p$.
+
+\emph{As células da cauda são $\mu$, distintas entre si e disjuntas de $C$.}
+Sejam $T=\{\pi(0),\dots,\pi(\mu-1)\}$. Se $\pi(a)=\pi(b)$ com $a<b<\mu$, então
+$a$ seria um índice repetido menor que $\mu$, contra a minimalidade de $\mu$;
+logo $\lvert T\rvert=\mu$. Se $\pi(a)=\pi(\mu+r)$ com $a<\mu$ e $0\le r<p$,
+aplicando $f$ $\,(p-r)$ vezes viria $\pi(a+p-r)=\pi(\mu)$ --- e como
+$a<\mu$, o índice $a$ repete-se, contra a minimalidade de $\mu$ novamente.
+
+\emph{Contagem.} Como $N\ge\mu+2p-1$, a órbita completa pelo menos duas voltas:
+cada $x\in C$ é atingido em dois índices distintos $\mu+r$ e $\mu+r+p$, ambos
+$\le N$, donde $G(x)\ge2$. Cada $x\in T$ é atingido uma só vez, por
+$T\cap C=\emptyset$ e pela injetividade em $T$, donde $G(x)=1$. E
+$\operatorname{im}\pi=T\cup C$. Logo $\{G>1\}=C$ com $p$ elementos e $\{G=1\}=T$
+com $\mu$ elementos.
+
+O caso injetivo é a cláusula (2) do Teorema~\ref{thm:multiplicidade}.
+\end{proof}
+
+\medskip\noindent\textbf{A hipótese $N\ge\mu+2p-1$ é necessária.} Sem ela o
+enunciado é falso, e falso do modo mais banal: se a trajetória parar depois de
+entrar no ciclo mas antes de o fechar duas vezes, as células do ciclo ainda
+visitadas uma só vez contam para $\{G=1\}$. Exemplo mínimo, um passo abaixo do
+limiar: $f(z)=z^2-1$ sobre \Z\ com $\pi(0)=0$ e $N=2$ dá a órbita $0,-1,0$, com
+$\mu=0$ e $p=2$, logo o limiar é $N\ge3$; e
+$\lvert\{G>1\}\rvert=1\neq2=p$. Com $N=3$ a órbita é $0,-1,0,-1$ e o enunciado
+vale.
+
+\medskip\noindent O contra-exemplo \emph{não} pode ser $N=1$. Aí a órbita é
+$0,-1$ sem repetição nenhuma, a hipótese do próprio teorema --- existirem $i<j$
+com $\pi(i)=\pi(j)$ --- falha, e $\mu$ e $p$ nem estão definidos pela
+trajetória. Um caso onde a hipótese principal não se verifica não testemunha
+nada sobre a hipótese auxiliar.
+
+\medskip\noindent\textbf{Leitura: a deteção de ciclo sem o segundo ponteiro.} O
+algoritmo clássico de deteção de ciclo mantém dois cursores a velocidades
+diferentes precisamente porque o agente não tem memória do percurso. O
+Teorema~\ref{thm:periodo} diz que, se a memória estiver \emph{no espaço}, um
+cursor basta: $\mu$ e $p$ lêem-se no campo, sem segunda passagem e sem comparar
+posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que o passo lê: o espaço ou o tempo}\label{sec:leitura}
+
+\noindent A Def.~\ref{def:determinista} pede que o passo seja função da célula.
+Isto não separa objetos matemáticos de outros --- separa \textbf{duas
+dependências}, e ambas são construções correntes. O teorema seguinte diz que a
+escolha não é livre.
+
+\begin{teorema}[dobrar sem período obriga a ler o índice]\label{thm:leitura}
+Seja $\pi\colon I\to X$ com $G(x)>1$ para algum $x$ (dobra) e tal que $\pi$
+\emph{não} é eventualmente periódica. Então não existe $f\colon X\to X$ com
+$\pi(t+1)=f(\pi(t))$: o passo depende necessariamente do índice.
+\end{teorema}
+
+\begin{proof}
+Suponha-se que $f$ existe. Como $\pi$ dobra, há $i<j$ com $\pi(i)=\pi(j)$.
+Aplicando $f$ repetidamente, $\pi(i+m)=\pi(j+m)$ para todo $m$ admissível, logo
+$\pi(t+(j-i))=\pi(t)$ para todo $t\ge i$: $\pi$ é eventualmente periódica de
+período $j-i$ a partir de $i$, contra a hipótese.
+\end{proof}
+
+\begin{corolario}[a aranha e o dragão são duais]\label{cor:duais}
+Sejam as duas maneiras de uma trajetória guardar a sua própria história:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{a aranha} & \textbf{o dragão} \\
+\midrule
+a memória está & no \textbf{espaço} ($G$) & no \textbf{índice} \\
+o passo lê & a célula: $\pi(t{+}1)=f(\pi(t))$ & o índice: $\pi(t{+}1)=g(t,\pi(t))$ \\
+o campo $G$ lê & período e cauda (Teor.~\ref{thm:periodo}) & a dobra, e só ela \\
+\bottomrule
+\end{tabular}
+\end{center}
+O levantamento $\tilde\pi=(\pi,k)$ do Teor.~\ref{thm:levantamento} é a ponte
+entre os dois --- e cobra o preço: junta espaço e história num só estado, e a
+dobra desaparece, $\tilde G\equiv1$. As três coisas ---
+\emph{dobrar}, \emph{ler só o estado} e \emph{não ter período} --- não podem
+valer ao mesmo tempo.
+\end{corolario}
+
+\medskip\noindent\textbf{E não é uma opinião sobre a construção.} Que o passo
+lê o índice verifica-se: procura-se na trajetória a mesma célula com sucessores
+\emph{diferentes}. Na curva de Heighway ela existe --- a viragem
+$\code{drag\_esq}(s)$ lê $s$, não lê onde a curva está --- e a testemunha exibe-se
+com os quatro índices. No Julia, no relógio e na reta não existe.
+
+\medskip\noindent\textbf{O relógio.} A rotação $J\colon(a,b)\mapsto(-b,a)$ é
+função do estado e mais nada; é involutiva ao quadrado, $J^2=-\mathrm{id}$ e
+$J^4=\mathrm{id}$. Pelo Teor.~\ref{thm:periodo} o campo lê-lhe o período sem
+qualquer aparato: quatro células, cada uma com $G>1$, cauda zero. É o mesmo
+relógio com que a obra conta as suas dobras, e a leitura ``uma colisão é uma
+marca do contador; ler é seguir as marcas'' é a cláusula~(3) do
+Teor.~\ref{thm:multiplicidade} dita noutras palavras.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A série do número $\pi$}\label{sec:serie}
+
+\noindent Uma série é uma trajetória: a sucessão das suas somas parciais. Em
+aritmética \emph{inteira} --- sem vírgula, com divisão inteira --- convergir tem
+um significado exato e finito, e o campo $G$ lê-o.
+
+\begin{definicao}[a soma parcial como realização]\label{def:serie}
+Dada uma sucessão de termos inteiros $(a_k)$, ponha-se $S_0=a_0$ e
+$S_{t+1}=S_t+a_{t+1}$. A realização é $\pi(t)=S_t$, com $X=\Z$.
+\end{definicao}
+
+\begin{teorema}[o campo lê o custo da série]\label{thm:serie}
+Suponha-se que existe $T$ com $a_k=0$ para todo $k>T$ (os termos anulam-se em
+tempo finito, que é o que a divisão inteira faz), e que
+$S_0,\dots,S_T$ são distintos. Se $N\ge T+1$, então
+\[
+\bigl\lvert\{x:G(x)>1\}\bigr\rvert=1,\qquad
+\bigl\lvert\{x:G(x)=1\}\bigr\rvert=T,
+\]
+isto é: o período é $1$ --- a trajetória entrou num ponto fixo --- e a cauda
+conta exatamente as somas parciais distintas, que é o \textbf{custo} da série.
+\end{teorema}
+
+\begin{proof}
+Para $t>T$ tem-se $S_{t+1}=S_t$, logo $\pi(t)=S_T$ para todo $t\ge T$: a
+trajetória é constante a partir de $T$, o que é ser periódica de período $p=1$.
+Como $S_0,\dots,S_T$ são distintos, o primeiro índice repetido é $\mu=T$, e o
+Teor.~\ref{thm:periodo} aplica-se (a hipótese $N\ge\mu+2p-1=T+1$ é a do
+enunciado). Donde $\lvert\{G>1\}\rvert=p=1$ e $\lvert\{G=1\}\rvert=\mu=T$.
+\end{proof}
+
+\medskip\noindent\textbf{O valor, e por que não é citado.} Com
+$\arctan\frac1n=\sum_{k\ge0}\frac{(-1)^k}{(2k+1)n^{2k+1}}$ avaliado em escala
+inteira $S=10^{8}$, três combinações independentes,
+\[
+16\arctan\tfrac15-4\arctan\tfrac1{239},\qquad
+4\arctan\tfrac12+4\arctan\tfrac13,\qquad
+8\arctan\tfrac12-4\arctan\tfrac17,
+\]
+têm de dar o mesmo número. Nenhum dígito é escrito à mão: se fossem copiados, a
+igualdade não poderia falhar, e assim pode --- basta que qualquer uma das três
+somas esteja errada. O número $\pi$ está \emph{dentro}: é produzido pela mesma
+aritmética inteira que constrói o resto, e é sobre a trajetória das suas somas
+parciais que o Teor.~\ref{thm:serie} corre.
+
+\medskip\noindent\textbf{Onde ela cai nas duas dependências.} O termo $a_k$ é
+função de $k$, não da soma corrente: a série, como trajetória, lê o
+\emph{índice}. Ela dobra apenas no fim, ao entrar no ponto fixo --- e é aí, e só
+aí, que passa a ser função do estado ($x\mapsto x$). É o Cor.~\ref{cor:duais} no
+caso mais simples possível: a convergência \emph{é} a passagem de ler o tempo
+para ler o espaço.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O dragão: a régua de bits e a dobra}\label{sec:dragao}
+
+\noindent A curva de Heighway é a realização em $\Z^2$ que dobra mais
+economicamente, e é onde $G>1$ se vê a olho. Ela admite duas construções sem uma
+linha em comum, e é essa coincidência que a fixa.
+
+\begin{definicao}[régua de bits]\label{def:bits}
+Para $k\ge1$ escreva-se $k=2^{a}m$ com $m$ ímpar. Ponha-se
+\[
+\tau(k)=\begin{cases}+1 & m\equiv1\pmod 4\\[2pt] -1 & m\equiv3\pmod 4.\end{cases}
+\]
+A \textbf{curva de bits} $C_K$ é a sucessão de pontos $P_0=(0,0)$,
+$P_{s+1}=P_s+u_s$, onde $u_0=(1,0)$ e $u_{s}=R_{\tau(s)}\,u_{s-1}$, com
+$R_{+1}$ a rotação de $+90^{\circ}$ e $R_{-1}$ a de $-90^{\circ}$, para
+$s=1,\dots,2^{K}-1$.
+\end{definicao}
+
+\begin{definicao}[a dobra]\label{def:dobrar}
+Dada uma sucessão finita de pontos $D=(P_0,\dots,P_M)$ com extremo $F=P_M$, o seu
+\textbf{dual} $D^{*}$ é
+\[
+D^{*}=\bigl(Q_0,\dots,Q_M\bigr),\qquad Q_j=F+R\,(F-P_{M-j}),
+\]
+com $R$ uma rotação fixa de $\pm90^{\circ}$. A \textbf{soma} $D+D^{*}$ é a
+concatenação de $D$ com $D^{*}$ suprimindo o ponto repetido $Q_0=F$. Define-se
+$D_0=\bigl((0,0),(1,0)\bigr)$ e $D_{k+1}=D_k+D_k^{*}$.
+\end{definicao}
+
+\noindent Em palavras: $D^{*}$ é a curva percorrida ao contrário e rodada de
+$90^{\circ}$ em torno do ponto final. É a dobra do papel --- dobrar a tira ao
+meio é colar-lhe a sua própria imagem invertida --- e é o mesmo passo
+$T_{k+1}=T_k+T_k^{*}$ com que a obra constrói as suas torres, aqui numa curva.
+
+\begin{lema}[antissimetria da régua]\label{lem:anti}
+Para $1\le j<2^{k}$ vale $\tau(2^{k}+j)=-\tau(2^{k}-j)$.
+\end{lema}
+
+\begin{proof}
+Escreva-se $j=2^{a}m$ com $m$ ímpar; como $j<2^{k}$, tem-se $a<k$. Então
+\[
+2^{k}-j=2^{a}\bigl(2^{k-a}-m\bigr),\qquad
+2^{k}+j=2^{a}\bigl(2^{k-a}+m\bigr),
+\]
+e como $a<k$ o fator $2^{k-a}$ é par, logo $2^{k-a}\mp m$ são \emph{ímpares} ---
+são portanto as partes ímpares de $2^{k}\mp j$. Ora
+\[
+\bigl(2^{k-a}-m\bigr)+\bigl(2^{k-a}+m\bigr)=2^{\,k-a+1}\equiv0\pmod 4,
+\]
+porque $k-a+1\ge2$. Dois ímpares cuja soma é $\equiv0\pmod4$ são um $\equiv1$ e
+o outro $\equiv3$ módulo $4$. Logo $\tau$ toma valores opostos neles.
+\end{proof}
+
+\begin{teorema}[os dois caminhos dão a mesma curva]\label{thm:dragao}
+Para todo $k\ge0$, a curva de bits $C_k$ da Def.~\ref{def:bits} e a curva
+$D_k$ da Def.~\ref{def:dobrar} coincidem ponto a ponto, para uma das duas
+escolhas do sinal de $R$ --- a mesma para todo $k$.
+\end{teorema}
+
+\begin{proof}
+Indução em $k$. Para $k=0$ ambas são $\bigl((0,0),(1,0)\bigr)$.
+
+Suponha-se $C_k=D_k$, com $M=2^{k}$ passos e extremo $F=P_M$. A curva $C_{k+1}$
+tem $2^{k+1}$ passos e as suas primeiras $M$ direções são as de $C_k$ --- porque
+$\tau(s)$ não depende de $k$ --- logo $C_{k+1}$ prolonga $C_k$ e o seu ponto de
+índice $M$ é $F$. Resta identificar a segunda metade.
+
+Para $1\le j<M$, a direção do passo $M+j$ de $C_{k+1}$ obtém-se da anterior pela
+rotação $R_{\tau(M+j)}$, e pelo Lema~\ref{lem:anti} $\tau(M+j)=-\tau(M-j)$. Ou
+seja: \emph{a sucessão de viragens da segunda metade é a da primeira metade lida
+de trás para a frente e com os sinais trocados.}
+
+Traduza-se isto em pontos. Percorrer $C_k$ ao contrário troca cada viragem pela
+oposta --- é a definição de percorrer ao contrário, pois uma viragem à esquerda
+vista do outro sentido é uma viragem à direita. Logo a sucessão de viragens de
+$\operatorname{rev}(C_k)$ é exatamente $\bigl(-\tau(M-j)\bigr)_j$, que é a da
+segunda metade de $C_{k+1}$. Duas curvas com a mesma sucessão de viragens e o
+mesmo passo unitário diferem por uma isometria direta do plano; como ambas
+começam em $F$, a isometria é a rotação em torno de $F$ que leva a primeira
+direção de $\operatorname{rev}(C_k)$ na primeira direção da segunda metade de
+$C_{k+1}$. Essa rotação é de $\pm90^{\circ}$, porque a direção do passo $M+1$ se
+obtém da do passo $M$ por $R_{\tau(M+1)}$ e $\tau$ toma valores em
+$\{\pm1\}$. Portanto a segunda metade de $C_{k+1}$ é
+$F+R\,(F-P_{M-j})$, que é $D_k^{*}$, e $C_{k+1}=D_k+D_k^{*}=D_{k+1}$.
+
+Que o sinal de $R$ é o \emph{mesmo} para todo $k$: ele é determinado por
+$\tau(M+1)=\tau(2^{k}+1)$, e $2^{k}+1$ é ímpar com $2^{k}+1\equiv1\pmod4$ para
+$k\ge2$, valor constante.
+\end{proof}
+
+\medskip\noindent\textbf{Por que isto é uma verificação e não uma repetição.} A
+Def.~\ref{def:bits} decide cada viragem por uma conta sobre os bits do índice; a
+Def.~\ref{def:dobrar} nunca olha para um índice --- copia, inverte e roda a curva
+inteira. Não partilham uma linha. Quando duas construções assim coincidem em
+$2^{12}$ pontos, o que se testou foi o objeto, não o contador.
+
+\medskip\noindent\textbf{E o que não serve como verificação.} Comparar
+$\abs{I}$ ou $\sum_x G(x)$ entre duas implementações \emph{não} distingue o
+dragão de coisa nenhuma: pela cláusula (4) do Teorema~\ref{thm:multiplicidade},
+$\sum G=\abs{I}$ vale para \emph{qualquer} realização com o mesmo número de
+passos. Uma espiral quadrada passa nesse teste. O invariante tem de separar a
+classe que se afirma estar a separar.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Realizações}\label{sec:realizacoes}
+
+\noindent O Algoritmo~A corre em todas elas sem uma linha diferente.
+
+\begin{center}\small
+\begin{tabular}{@{}llp{0.44\textwidth}@{}}
+\toprule
+$n$ & realização & o que é \\
+\midrule
+$1$ & Cantor & o endereço ternário do terço médio; $G\equiv1$ --- o pó são
+endereços distintos, e é por isso que tem medida nula sem se auto-intersetar \\
+$2$ & Heighway & a curva da §\ref{sec:dragao}; $\max G=2$ \\
+$3$ & dragão no espaço & a mesma regra de viragem com o \emph{plano} da viragem
+a rodar de eixo; é uma realização em $\Z^3$, não ``o mesmo dragão com mais
+espaço'' \\
+$2$ & Julia sobre $\Z[i]$ & $z\mapsto z^{2}+c$ com tudo inteiro: determinista, e
+o Teorema~\ref{thm:periodo} aplica-se \\
+$2$ & o relógio $J$ & $(a,b)\mapsto(-b,a)$: função do estado, $J^4=\mathrm{id}$;
+o campo lê-lhe o período $4$ com cauda $0$ \\
+$1$ & as somas parciais & §\ref{sec:serie}: a série do número $\pi$ em inteiros;
+período $1$, e a cauda é o custo \\
+$4$ & o passo da máquina & $(\text{registo},\text{slot},\text{banco},\text{andar})$;
+a aranha não sabe que é uma máquina, lê e escreve o mesmo $G$ \\
+$k$ & a árvore do encaixe & §\ref{sec:ultra}: a célula \emph{é} a bola \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Controlos.} Uma afirmação ``$G>1$ aqui'' só tem
+conteúdo com uma realização onde $G\equiv1$ ao lado; senão passaria com um campo
+que contasse mal. Servem a reta (injetiva por construção) e o Cantor. E note-se
+que são \emph{dois}: o Cantor não dobra, apesar de ser a mais intrincada das
+figuras da lista.
+
+\medskip\noindent\textbf{$\max G$ é uma medida da curva.} Medido, o dragão de
+$\Z^3$ da tabela tem $\max G=3$ e o do plano $2$: dobra \emph{mais}, e não menos.
+A grandeza compara as duas curvas, que são construções distintas --- a de $\Z^3$
+roda o plano da viragem --- e não os dois espaços. A dimensão, essa, já apareceu
+onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert V(x)\rvert=2n$.
+
+\medskip\noindent\textbf{E a memória é do algoritmo, não da tabela.} O
+Teor.~\ref{thm:multiplicidade}(3) escreve num ponto por passo, e o suporte de $G$
+tem no máximo $\abs{I}$ pontos: o custo é $\Theta(\abs{I})$ em qualquer $n$, como
+a §\ref{sec:algoritmo} conta. Um arranjo denso sobre $X$ custaria
+$\lvert X\rvert$ --- em $\Z^3$ com lado $2048$, $2048^3$ células --- e essa é uma
+propriedade da tabela escolhida.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Medido}
+
+\medido{Teor.~\ref{thm:multiplicidade} e Teor.~\ref{thm:dimensao}:
+\code{tests/aranha\_n.c} §AN1--§AN2 (campo incremental $=$ recontagem e
+$\sum G=\abs{I}$ em $\Z^1$--$\Z^4$), §AN7 ($\abs{V(x)}=2n$, vizinhos distintos);
+Teor.~\ref{thm:dragao} §AN3 (bits $=$ dobra $D_k+D_k^{*}$, $k=1..12$, com os
+dois sinais de $R$ corridos e exatamente um a bater);
+dobra e controlos §AN4;
+Teor.~\ref{thm:bolas} §AN6 (bolas particionam; todo ponto é centro; a euclidiana
+falha ambas com o mesmo raio);
+Teor.~\ref{thm:periodo} §AN8 ($\lvert\{G>1\}\rvert=p$ e $\lvert\{G=1\}\rvert=\mu$
+sobre $z\mapsto z^2+c$ em $\Z[i]$, com o período obtido por busca independente e
+a órbita que escapa como controlo);
+Teor.~\ref{thm:leitura} e Cor.~\ref{cor:duais} §AN10 (a mesma célula do dragão
+com sucessores diferentes, exibida; Julia, relógio e reta a lerem o estado; e o
+período $4$ do relógio no campo);
+Teor.~\ref{thm:serie} §AN11 (período $1$, cauda $=$ custo, e Machin, Euler e
+Hermann a coincidirem sem um dígito escrito à mão);
+Teor.~\ref{thm:levantamento} §AN5 e §AN9 ($\tilde G\equiv1$ pela própria aranha em
+dimensão $n+1$; $\operatorname{pr}_1\circ\tilde\pi=\pi$ com resíduo $0$; fibra
+vertical $\{1..G\}$; e a volta a devolver $G$ célula a célula);
+o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
+\code{tests/aranha\_inversa.c} §AI1--§AI7.}
+
+\colunas{Teor.~\ref{thm:multiplicidade} (só igualdade); Teor.~\ref{thm:levantamento}
+(a fibra volta como uma coordenada); Teor.~\ref{thm:bolas} (partição);
+Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
+Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
+        {campo esparso, $O(1)$/passo, sem alocação dinâmica;
+         $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
+        {\code{tests/aranha\_n.c} §AN1--§AN11;
+         \code{tests/aranha\_g.c} §AG1--§AG11;
+         \code{tests/aranha\_inversa.c} §AI1--§AI7}
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Documento autocontido: todo enunciado usado está demonstrado acima.
+Números: \code{bash tools/bateria.sh}.
+Proprietário --- uso mediante contrato e pagamento (ver \texttt{LICENSE}).\par}
+
+\end{document}

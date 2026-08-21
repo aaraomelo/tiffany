@@ -1623,3 +1623,59 @@ O QUE O GUME APANHOU EM MIM (13 mutações, 13 mordem)
 
   papers    arquitetura.tex Cor. cor:aranha-n e Cor. cor:aranha-inversa-n
   bateria   529 : 529, 0 falhas · 8 unidades passaram, 0 falharam
+
+§35 — papers/aranha.tex, AUTOCONTIDO. E a pergunta que desfez uma frase minha.
+=============================================================================
+Ordem: escrever o paper com a DEMONSTRAÇÃO e o ALGORITMO, autocontido — o que
+precisar de outro paper, DUPLICA. E: os outros apontam para ele, ele não aponta
+para ninguém. No arquitetura fica o algoritmo sintético, sem prova.
+
+  papers/aranha.tex   10 páginas, 9 teoremas com prova, 0 erros
+  arquitetura.tex     as duas provas saíram; ficou o enunciado + o algoritmo
+  reais.tex           aponta-lhe a partir da ultramétrica
+
+O QUE ELE PERGUNTOU, E TINHA RAZÃO
+Eu tinha escrito «o Teorema exige determinismo» e uma secção «O QUE NÃO SE
+AFIRMA». Ele: «diz aí o que pode estar fora da matemática?» e «o que não se
+afirma não se afirma — isso é devaneio da sua cabeça?».
+
+NÃO HÁ NADA FORA, e a frase estava mal escrita. A hipótese não separa o
+matemático do resto: separa DUAS DEPENDÊNCIAS, e as duas vivem cá dentro.
+  · o passo lê a CÉLULA — o Julia, o relógio J, a recta
+  · o passo lê o ÍNDICE — o DRAGÃO, cuja viragem drag_esq(s) lê s
+E é um TEOREMA, não uma ressalva (§AN10, thm:leitura): dobrar sem período
+OBRIGA a ler o índice — se o passo fosse função da célula, a primeira repetição
+fecharia a órbita. A testemunha exibe-se: π(7)=π(11) e π(8)≠π(12).
+
+O OUTRO MONSTRO ERA O DRAGÃO, e são DUAIS:
+  a ARANHA põe a memória no ESPAÇO — o agente não guarda a história
+  o DRAGÃO põe-na no ÍNDICE      — o espaço não a tem
+  o levantamento π̃=(π,k) é a ponte, e cobra: junta os dois num estado só e a
+  dobra desaparece, G̃≡1. Dobrar · ler só o estado · não ter período: escolhem-se
+  dois. Nunca três.
+
+E A SECÇÃO NEGATIVA SAIU. Os quatro pontos dela eram coisas que eu MEDI e
+AFIRMO, escritas na negativa: max G é uma medida da CURVA (3 contra 2, e a
+razão é a curva ser outra); o custo é Θ(|I|) e o arranjo denso é a tabela; a
+hipótese N ≥ μ+2p−1 tem contra-exemplo MEDIDO. Todas voltaram como afirmação.
+
+O RELÓGIO, que ele mandou procurar nas referências (arquitetura §221-241):
+«uma colisão é uma MARCA do contador; ler é SEGUIR AS MARCAS; os naturais que
+ninguém marcou não são visitados». Isso É o campo G — a casa já corria a aranha
+e chamava-lhe outro nome. J:(a,b)↦(−b,a) é função do estado, J⁴=id, e o campo
+lê-lhe o período: 4, cauda 0.
+
+A SÉRIE DE π (§AN11, thm:serie). Uma série É uma trajectória — as somas
+parciais — e em aritmética INTEIRA convergir é entrar num PONTO FIXO, em tempo
+finito. O campo lê: período 1, e a cauda é o CUSTO (somas parciais distintas:
+1/2 → 10, 1/3 → 6, 1/5 → 4, 1/239 → 1). O valor sai por TRÊS caminhos —
+Machin, Euler, Hermann — a coincidir a 6 casas, sem um dígito escrito à mão.
+E ela cai do lado do ÍNDICE: o termo a_k é função de k. Dobra só no fim, ao
+entrar no ponto fixo — a convergência É a passagem de ler o tempo a ler o
+espaço.
+
+A COLISÃO DE LETRA, declarada no 1.º uso: π é a PROJECÇÃO (a do fibrado, a do
+π_k do Maestro); o NÚMERO π aparece na §serie, e aparece CONSTRUÍDO.
+
+  gume      17 mutações, 17 mordem
+  bateria   529 : 529, 0 falhas · 10 unidades passaram, 0 falharam
