@@ -81,6 +81,7 @@
 #include "unidade.h"
 #include "contrato.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
 #include "sql_api.h"    /* porta C para pgwire — captura de resultado */
+#include "pgcat.h"      /* Trio PG6: o catálogo de SESSÃO, antes do motor */
 
 static SqlOut *sql_cap = NULL;   /* preenchido por sql_executa quando out!=NULL */
 
@@ -3943,12 +3944,17 @@ int sql_abrir(const char *base){
         disco_prende(DISCO_BASE(25),"dados/sql_rel.bin",(size_t)NREL,sizeof(Rel));
         disco_ok = 1;
     }
+    pgcat_base_nome(base);
     return abrir_base(base);
 }
 void sql_fechar(void){ fechar_base(); sql_cap = NULL; }
 int sql_executa(const char *sql, SqlOut *out){
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;
+    /* Trio PG6: o catálogo é da SESSÃO e responde ANTES do motor. Se não for
+     * dele, o motor corre como se esta camada não existisse — e é isso que o
+     * controlo do medidor exige. */
+    if(pgcat_responde(sql, out)){ sql_cap = NULL; return out ? out->ok : 1; }
     int r = executa(sql);
     if(out){
         out->ok = r;

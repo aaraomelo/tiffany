@@ -3066,3 +3066,44 @@ DUAS LIGAÇÕES AO OPERADOR, e são identificações literais e não analogias:
 
   arquitetura.tex 27 páginas · 0 provas locais · 0 refs mortas · 9 labels órfãos
   (os mesmos de antes da sessão; os dois que eu tinha acrescentado foram removidos)
+
+§67 — TRIO PG6: O CATÁLOGO É DA SESSÃO, E O CONTROLO APANHOU-ME
+================================================================
+«voltar pro sistema SQL e postgres e migração geral».
+
+O QUE FALTAVA: um cliente real não começa por pedir dados. Pergunta QUEM É o
+servidor e em que estado está — e essas perguntas não tocam no .mem nem na ISA.
+São da LIGAÇÃO. Por isso o catálogo não é mais um comando dentro do motor: é uma
+FACHADA ANTES dele.
+
+     sql_executa ─┬─ pgcat_responde   →  tratou? devolve
+                  └─ executa           →  o motor, o bytecode, o disco
+
+`banco/pgcat.h`, sem RAM dinâmica — 24 parâmetros num arranjo fixo, decidido em
+compilação. Responde a version(), current_database(), current_schema(),
+current_user, SHOW <par>, SHOW ALL, SET, e BEGIN/COMMIT/ROLLBACK.
+
+TRÊS EXIGÊNCIAS, e a terceira é a que dá conteúdo às outras duas
+  · A IDA GUARDA A VOLTA. `SET application_name = 'tiffany-psql'` e o SHOW
+    devolve-o; e um parâmetro NOVO (tiffany.medida = 529) também. Um catálogo
+    que aceitasse o SET sem o devolver era um sorvedouro, não um catálogo.
+  · O DESCONHECIDO É ERRO COM MENSAGEM, e não uma linha vazia — quem chama tem
+    de distinguir «vale isto» de «não existe». É o mesmo gume do §W7.
+  · O CONTROLO: a fachada corre ANTES do motor, logo se respondesse a tudo o
+    motor nunca corria e NENHUMA das asserções acima o notava. Exige-se que uma
+    consulta normal atravesse — CREATE, dois INSERT, SELECT com WHERE.
+
+E O CONTROLO FALHOU À PRIMEIRA, que é para o que ele serve:
+     1 linha inserida … agora 0 linhas
+     erro: o WHERE não foi entendido
+  Não era a fachada — era o meu bloco de teste a não abrir base própria. Sem o
+  controlo eu teria publicado «o catálogo responde» com o motor mudo por baixo,
+  e as nove asserções de cima passavam todas.
+
+E OS DOIS CAMINHOS: a mesma pergunta pelo socket (PQexec sobre o nosso FEBE,
+com fork + listener no padrão do §W7) e pela porta directa — version() e
+client_encoding, 0 divergências. O catálogo atravessa o protocolo, e não vive
+só do lado de cá.
+
+  pgwire.c 10 asserções, 0 falhas · smoke FEBE ok
+  bateria 529 : 529, 108 unidades, 0 falhas

@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W8  Trio PG6: o catálogo de SESSÃO — version/SHOW/SET/current_* e as tags de
+ *        transacção — ANTES do motor, com o controlo a exigir que o motor corra
  *
  *   cc -O2 -std=c99 -w -Ilib -Ibanco -DSQL_NO_MAIN -DPGWIRE_NO_MAIN -o /tmp/pgwire \
  *      tests/pgwire.c banco/sql.c banco/pgwire.c -lm && /tmp/pgwire
@@ -840,6 +842,210 @@ int main(void){
            " nenhuma asserção o via porque nos testes a tabela do UPDATE era sempre a"
            " que já estava aberta",
            mal == 0 && nrows_ref == 2 && ncols_ref == 3);
+    }
+
+    /* ═══ §W8: TRIO PG6 — o catálogo de SESSÃO, e o controlo que o limita ════
+     *
+     * Um cliente real não começa por pedir dados: pergunta QUEM É o servidor e
+     * em que estado está. Essas perguntas não tocam no .mem — são da ligação —,
+     * e por isso o catálogo responde ANTES do motor. O que dá conteúdo a esta
+     * camada não é ela responder: é ela NÃO responder ao que não é dela.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W8 Trio PG6: catálogo de sessão (version/SHOW/SET) e o motor intacto.\n\n");
+    {
+        long mal = 0;
+        SqlOut o;
+        const char *base = "/tmp/pgwire_w8";
+        unlink("/tmp/pgwire_w8.mem");
+        unlink("/tmp/pgwire_w8.prog");
+        if(!sql_abrir(base)){ mal++; printf("      sql_abrir FALHOU\n"); }
+
+        printf("      consulta                      cols linhas  resultado\n");
+        #define PG6(q, esp_cols, esp_val) do {                                  \
+            int r = sql_executa((q), &o);                                       \
+            int bate = r && o.ncols == (esp_cols) &&                            \
+                       ((esp_val) == NULL || !strcmp(o.cell[0][0], (esp_val))); \
+            printf("      %-29s %-4d %-7d %s\n", (q), o.ncols, o.nrows,         \
+                   bate ? (o.nrows ? o.cell[0][0] : o.tag) : "NAO BATE");       \
+            if(!bate) mal++;                                                    \
+        } while(0)
+
+        PG6("SELECT version()",          1, "Tiffany-pgwire/0.1");
+        PG6("SELECT current_schema()",   1, "public");
+        PG6("SELECT current_database()", 1, "pgwire_w8");
+        PG6("SELECT current_user",       1, "tiffany");
+        PG6("SHOW client_encoding",      1, "UTF8");
+        PG6("SHOW server_version",       1, "Tiffany-pgwire/0.1");
+
+        /* A IDA GUARDA A VOLTA: o que o SET escreve, o SHOW lê. Um catálogo que
+         * aceitasse o SET e não o devolvesse era um sorvedouro, não um catálogo. */
+        {
+            int r1 = sql_executa("SET application_name = 'tiffany-psql'", &o);
+            int tag_set = r1 && !strcmp(o.tag, "SET") && o.ncols == 0;
+            int r2 = sql_executa("SHOW application_name", &o);
+            int voltou = r2 && o.nrows == 1 && !strcmp(o.cell[0][0], "tiffany-psql");
+            printf("\n      SET application_name -> tag \"%s\"; SHOW devolve \"%s\": %s\n",
+                   tag_set ? "SET" : "?", voltou ? o.cell[0][0] : "?",
+                   (tag_set && voltou) ? "a ida guarda a volta" : "NAO");
+            if(!tag_set || !voltou) mal++;
+            /* e um parâmetro NOVO, que não estava na tabela inicial */
+            sql_executa("SET tiffany.medida = 529", &o);
+            r2 = sql_executa("SHOW tiffany.medida", &o);
+            if(!r2 || strcmp(o.cell[0][0], "529")) mal++;
+            printf("      e um parâmetro novo: SHOW tiffany.medida = \"%s\"\n",
+                   r2 ? o.cell[0][0] : "?");
+        }
+
+        /* O DESCONHECIDO É ERRO, e não uma linha vazia: quem chama tem de poder
+         * distinguir «vale isto» de «não existe». */
+        {
+            int r = sql_executa("SHOW nao_existe_este", &o);
+            int e_erro = !r && o.err[0] && o.nrows == 0;
+            printf("      SHOW de parâmetro inexistente -> %s (%s)\n",
+                   e_erro ? "erro COM mensagem" : "NAO", o.err[0] ? o.err : "sem mensagem");
+            if(!e_erro) mal++;
+        }
+
+        /* SHOW ALL: duas colunas, e tantas linhas quantos os parâmetros */
+        {
+            int r = sql_executa("SHOW ALL", &o);
+            int bate = r && o.ncols == 2 && o.nrows >= 8;
+            printf("      SHOW ALL -> %d colunas, %d parâmetros: %s\n",
+                   o.ncols, o.nrows, bate ? "sim" : "NAO");
+            if(!bate) mal++;
+        }
+
+        /* as transacções, que os drivers mandam antes de tudo */
+        {
+            const char *tx[3] = { "BEGIN", "COMMIT", "ROLLBACK" };
+            int bate = 1;
+            for(int i = 0; i < 3; i++){
+                int r = sql_executa(tx[i], &o);
+                if(!r || strcmp(o.tag, tx[i]) || o.ncols) bate = 0;
+            }
+            printf("      BEGIN/COMMIT/ROLLBACK -> tags próprias, sem colunas: %s\n",
+                   bate ? "sim" : "NAO");
+            if(!bate) mal++;
+        }
+
+        /* ── O CONTROLO, e é ele que dá conteúdo a tudo o que está acima ──────
+         * A fachada corre ANTES do motor. Se ela respondesse a tudo, o motor
+         * nunca corria e nenhuma das asserções acima o notaria. Exige-se então
+         * que uma consulta NORMAL atravesse: mesma sessão, dados reais. */
+        {
+            int r1 = sql_executa("CREATE TABLE pg6 (a,b)", &o);
+            int r2 = sql_executa("INSERT INTO pg6 VALUES (7,70)", &o);
+            int r3 = sql_executa("INSERT INTO pg6 VALUES (9,90)", &o);
+            int r4 = sql_executa("SELECT * FROM pg6 WHERE a = 7", &o);
+            int passou = r1 && r2 && r3 && r4 && o.nrows == 1 && o.ncols == 2
+                         && !strcmp(o.cell[0][0], "7") && !strcmp(o.cell[0][1], "70");
+            printf("\n      CONTROLO — o motor continua a correr:"
+                   " SELECT * FROM pg6 WHERE a = 7 -> %d linha(s), (%s,%s): %s\n",
+                   o.nrows, o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+                   passou ? "passa ao motor" : "NAO PASSOU");
+            if(!passou) mal++;
+            /* e um SELECT de coluna, que também não é do catálogo */
+            int r5 = sql_executa("SELECT * FROM pg6", &o);
+            if(!r5 || o.nrows != 2) mal++;
+            printf("      e SELECT * FROM pg6 -> %d linhas (a fachada não engoliu)\n", o.nrows);
+        }
+
+        /* ── E PELO WIRE, que é o que o cliente vê ──────────────────────────
+         * O catálogo tem de atravessar o protocolo, não só a porta directa: o
+         * mesmo servidor, o mesmo socket, e a resposta a bater célula a célula. */
+        {
+            char ref_ver[64] = "", ref_enc[64] = "";
+            int sv8[2] = {-1,-1};
+            pid_t kid8 = -1;
+            signal(SIGPIPE, SIG_IGN);
+            if(sql_executa("SELECT version()", &o) && o.nrows == 1)
+                snprintf(ref_ver, sizeof ref_ver, "%s", o.cell[0][0]);
+            if(sql_executa("SHOW client_encoding", &o) && o.nrows == 1)
+                snprintf(ref_enc, sizeof ref_enc, "%s", o.cell[0][0]);
+            sql_fechar();
+
+            if(pipe(sv8) < 0) mal++;
+            if(!mal) kid8 = fork();
+            if(!mal && kid8 < 0) mal++;
+            if(!mal && kid8 == 0){
+                int lfd, cfd, porto = 0;
+                close(sv8[0]);
+                if(!sql_abrir(base)) _exit(3);
+                lfd = pgwire_listen(0, &porto);
+                if(lfd < 0){ sql_fechar(); _exit(4); }
+                {
+                    uint8_t m[3];
+                    m[0] = (uint8_t)((porto >> 8) & 0xff);
+                    m[1] = (uint8_t)(porto & 0xff);
+                    m[2] = 'R';
+                    if(write(sv8[1], m, 3) != 3){ close(lfd); sql_fechar(); _exit(5); }
+                }
+                cfd = accept(lfd, NULL, NULL);
+                if(cfd >= 0){ pgwire_serve_conn(cfd, 77, 88); close(cfd); }
+                close(lfd); sql_fechar();
+                _exit(0);
+            }
+            if(!mal && kid8 > 0){
+                uint8_t m[3];
+                int porto = 0, st = -1, difs = 0;
+                char conninfo[128];
+                PGconn *c;
+                PGresult *rv, *re;
+                close(sv8[1]); sv8[1] = -1;
+                if(read(sv8[0], m, 3) != 3 || m[2] != 'R') mal++;
+                else porto = ((int)m[0] << 8) | (int)m[1];
+                close(sv8[0]); sv8[0] = -1;
+                snprintf(conninfo, sizeof conninfo,
+                         "host=127.0.0.1 port=%d user=tiffany dbname=reino", porto);
+                c = PQconnectdb(conninfo);
+                if(PQstatus(c) != CONNECTION_OK){
+                    printf("      PQconnectdb: %s\n", PQerrorMessage(c)); mal++;
+                }else{
+                    rv = PQexec(c, "SELECT version()");
+                    if(PQresultStatus(rv) != PGRES_TUPLES_OK || PQntuples(rv) != 1
+                       || strcmp(PQgetvalue(rv, 0, 0), ref_ver)) difs++;
+                    printf("\n      pelo WIRE:  PQexec(\"SELECT version()\")   = \"%s\"\n",
+                           PQresultStatus(rv) == PGRES_TUPLES_OK && PQntuples(rv)
+                           ? PQgetvalue(rv, 0, 0) : "(nada)");
+                    PQclear(rv);
+                    re = PQexec(c, "SHOW client_encoding");
+                    if(PQresultStatus(re) != PGRES_TUPLES_OK || PQntuples(re) != 1
+                       || strcmp(PQgetvalue(re, 0, 0), ref_enc)) difs++;
+                    printf("      pelo WIRE:  PQexec(\"SHOW client_encoding\") = \"%s\"\n",
+                           PQresultStatus(re) == PGRES_TUPLES_OK && PQntuples(re)
+                           ? PQgetvalue(re, 0, 0) : "(nada)");
+                    PQclear(re);
+                    printf("      pela PORTA: \"%s\" e \"%s\"  ·  divergências: %d\n",
+                           ref_ver, ref_enc, difs);
+                    if(difs) mal++;
+                    PQfinish(c);
+                }
+                waitpid(kid8, &st, 0);
+            }
+            if(sv8[0] >= 0) close(sv8[0]);
+            if(sv8[1] >= 0) close(sv8[1]);
+        }
+        #undef PG6
+
+        printf("\n");
+        ok("O CATÁLOGO É DA SESSÃO, E O MOTOR FICA INTACTO — que é o Trio PG6. Um cliente"
+           " real não começa por pedir dados: pergunta quem é o servidor e em que estado"
+           " está, e essas perguntas não tocam no .mem nem na ISA. Por isso o catálogo é uma"
+           " FACHADA ANTES do motor, e não mais um comando dentro dele. Respondem"
+           " `SELECT version()`, `current_schema()`, `current_user`, `SHOW <par>`,"
+           " `SHOW ALL`, `SET`, e as tags BEGIN/COMMIT/ROLLBACK que os drivers mandam antes"
+           " de tudo. A IDA GUARDA A VOLTA: o que o SET escreve o SHOW lê — incluindo um"
+           " parâmetro NOVO, que não estava na tabela inicial —, e um catálogo que aceitasse"
+           " o SET sem o devolver era um sorvedouro. O DESCONHECIDO É ERRO com mensagem, e"
+           " não uma linha vazia: quem chama tem de distinguir «vale isto» de «não existe»."
+           " E O CONTROLO É O QUE DÁ CONTEÚDO A ISTO TUDO: a fachada corre ANTES do motor,"
+           " logo se respondesse a tudo o motor nunca correria e NENHUMA das asserções"
+           " acima o notaria — exige-se por isso que uma consulta normal atravesse, na"
+           " MESMA sessão, com CREATE, dois INSERT e um SELECT com WHERE a devolver a linha"
+           " certa. Por fim, os DOIS CAMINHOS: a mesma pergunta pelo socket (PQexec sobre o"
+           " nosso FEBE) e pela porta directa dá a mesma resposta — o catálogo atravessa o"
+           " protocolo, e não vive só do lado de cá.",
+           mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
