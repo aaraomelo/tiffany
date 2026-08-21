@@ -2199,7 +2199,6 @@ int main(void){
             const char *fora[] = {
                 "SELECT zzz FROM s",
                 "SELECT * FROM s UNION SELECT * FROM s",
-                "SELECT * FROM s WHERE a IN (SELECT a FROM s)",
             };
             const unsigned nfora = sizeof fora / sizeof fora[0];
             int recusadas = 0, com_razao = 0;
@@ -2277,8 +2276,8 @@ int main(void){
            " `sum`, `max` e `min` estavam —, pelo que `SELECT a, count(*) FROM s GROUP BY a`,"
            " que é a forma que qualquer cliente escreve, parava no parêntesis e devolvia zero"
            " SEM MENSAGEM NENHUMA: nem erro, nem linhas. Não é um erro disfarçado de resultado"
-           " vazio; é um erro disfarçado de NADA. No que fica fora estão agora as formas que"
-           " este motor de facto não lê — a subconsulta e a união. Responder outra coisa é pior do que recusar, porque quem chama"
+           " vazio; é um erro disfarçado de NADA. E a subconsulta saiu desta lista quando o"
+           " §W25 a pôs a funcionar pela árvore; fica fora a união. Responder outra coisa é pior do que recusar, porque quem chama"
            " sabe lidar com um erro e não sabe lidar com uma resposta que se parece com a"
            " que pediu. E O CONTROLO impede a recusa de ser larga demais: a projecção COM"
            " WHERE tem de continuar a passar — nenhuma das linhas anteriores o veria,"
@@ -3393,6 +3392,82 @@ int main(void){
            " compara-se a base e não o total, porque o termo 3·|I| também dobrou. E as três"
            " respostas continuam certas, porque um custo comprado com um resultado errado não"
            " é um resultado.",
+           mal == 0);
+    }
+
+    /* ═══ §W25: A SUBCONSULTA É A PERTENÇA A UMA FIBRA ═══════════════════════ */
+    {
+        const char *base = "/tmp/pgwire_w25";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w25.mem");
+        unlink("/tmp/pgwire_w25.prog");
+        unlink("/tmp/pgwire_w25__s.mem");
+        printf("\n§W25 a subconsulta: pertença à fibra, pela árvore do banco.\n\n");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE a (x,y)", &o);
+        for(int i = 1; i <= 6; i++){
+            char q[64];
+            snprintf(q, sizeof q, "INSERT INTO a VALUES (%d,%d)", i, i * 10);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE TABLE b (x,z)", &o);
+        sql_executa("INSERT INTO b VALUES (2,99)", &o);
+        sql_executa("INSERT INTO b VALUES (5,99)", &o);
+        sql_executa("INSERT INTO b VALUES (2,88)", &o);   /* o 2 REPETIDO */
+
+        int r = sql_executa("SELECT * FROM a WHERE x IN (SELECT x FROM b)", &o);
+        int bate = r && o.nrows == 2 && !strcmp(o.cell[0][0], "2")
+                     && !strcmp(o.cell[1][0], "5");
+        printf("      x IN (SELECT x FROM b): %d linha(s)", o.nrows);
+        for(int i = 0; i < o.nrows; i++) printf("  [%s,%s]", o.cell[i][0], o.cell[i][1]);
+        printf("   %s\n", bate ? "" : "NAO BATE");
+        if(!bate) mal++;
+
+        int uma_so = (o.nrows == 2);
+        printf("      o 2 está DUAS vezes na direita e sai UMA linha: %s"
+               "   (pertencer não é emparelhar)\n", uma_so ? "sim" : "NAO");
+        if(!uma_so) mal++;
+
+        int rc = sql_executa("SELECT count(*) FROM a WHERE x IN (SELECT x FROM b)", &o);
+        int cok = rc && o.nrows == 1 && !strcmp(o.cell[0][0], "2");
+        printf("      count(*) pela subconsulta: %s  %s\n",
+               o.nrows ? o.cell[0][0] : "?", cok ? "" : "NAO BATE");
+        if(!cok) mal++;
+
+        int rs = sql_executa("SELECT * FROM a", &o);
+        int sessao = rs && o.nrows == 6;
+        printf("\n      CONTROLO — a sessão ficou intacta: %d linhas  %s\n",
+               o.nrows, sessao ? "(a tabela foi restaurada)" : "NAO");
+        if(!sessao) mal++;
+
+        int r1 = sql_executa("SELECT * FROM a WHERE x IN (SELECT zzz FROM b)", &o);
+        int r2 = sql_executa("SELECT * FROM a WHERE zzz IN (SELECT x FROM b)", &o);
+        printf("      coluna inexistente na subconsulta: %s  ·  à esquerda: %s\n",
+               r1 ? "RESPONDEU (mau)" : "recusado", r2 ? "RESPONDEU (mau)" : "recusado");
+        if(r1 || r2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A SUBCONSULTA É A PERTENÇA A UMA FIBRA, E NÃO TROUXE MAQUINARIA NENHUMA. A árvore"
+           " que o join usa para casar já responde «este valor está lá?», e o que separa os"
+           " dois é apenas o que se faz com a resposta: o join produz o PAR, o IN fica-se pelo"
+           " BIT. É o corte sem a segunda metade — descer por um valor é a dobra, e o que se lê"
+           " no fim do caminho é se a fibra é vazia ou não. O GUME É A REPETIÇÃO: a direita tem"
+           " o mesmo valor DUAS vezes, e um join daria duas linhas para ele, ao passo que o IN"
+           " dá UMA, porque pertencer não é emparelhar. Sem essa linha o IN podia estar"
+           " implementado como um join e nenhuma asserção o via. E O CONTROLO É A SESSÃO, por"
+           " uma razão que custou duas tentativas: a subconsulta ABRE outra tabela para montar"
+           " a árvore, e a árvore vive no .mem — voltar à tabela de origem relê-o e APAGA-A. À"
+           " primeira escrita a decisão era tomada depois de voltar, e a descida devolvia zero"
+           " para valores que lá estavam. Decide-se por isso com a tabela da subconsulta ainda"
+           " aberta, guarda-se a resposta, e só então se volta; e exige-se que a tabela da"
+           " sessão seja restaurada, porque uma consulta não pode trocá-la por baixo de quem a"
+           " fez. Houve um segundo defeito do mesmo feitio: reutilizar as variáveis do join"
+           " para guardar a tabela da subconsulta ACORDAVA o caminho do join, que espera uma"
+           " coluna de junção à esquerda e não a encontrava. O estado partilhado ligava dois"
+           " caminhos que nada têm um com o outro; a árvore é que é comum, e empresta-se na"
+           " hora.",
            mal == 0);
     }
 

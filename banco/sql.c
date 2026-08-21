@@ -3598,8 +3598,68 @@ static int varre(const char *resto, int acao){
         }
     }
 
+    /* ── WHERE <col> IN (SELECT <col> FROM <tabela>) ──────────────────────
+     *
+     * A SUBCONSULTA É A PERTENÇA A UMA FIBRA, e por isso não traz maquinaria
+     * nova: a árvore que o JOIN usa para casar já responde «este valor está
+     * lá?». A diferença entre as duas é o que se faz com a resposta — o join
+     * produz o PAR, o IN fica-se pelo bit. É o corte do §sec:dual sem a
+     * segunda metade: descer por um valor é a dobra, e o que se lê no fim do
+     * caminho é se a fibra é vazia ou não.
+     *
+     * Lê-se ANTES do WHERE geral, porque a sua condição não compila para a
+     * ISA: a árvore vive do lado de cá. As formas compostas — o IN dentro de
+     * um AND, ou com outras condições ao lado — são RECUSADAS com a razão,
+     * que é o que este motor faz com tudo o que ainda não sabe ler. */
+    /* variáveis PRÓPRIAS, e não as do join: escrever em `j_tab_dir` acorda o
+     * caminho do JOIN mais abaixo, que espera um `j_col_esq` que aqui não
+     * existe — e a consulta era recusada com «a coluna “” não existe». O
+     * estado partilhado é que ligava dois caminhos que nada têm um com o
+     * outro; a árvore é que é comum, e essa empresta-se na hora. */
+    char in_tab[64] = "", in_col[64] = "";
+    int in_sub = 0, in_col_esq = -1;
+    {
+        const char *q = p;
+        pula(&q);
+        char c_esq[64];
+        if(palavra(&q, "WHERE") && ident(&q, c_esq, sizeof c_esq)){
+            pula(&q);
+            if(palavra(&q, "IN")){
+                pula(&q);
+                if(*q == '('){
+                    const char *r = q + 1;
+                    pula(&r);
+                    char c_sub[64], t_sub[64];
+                    if(palavra(&r, "SELECT") && ident(&r, c_sub, sizeof c_sub)
+                       && (pula(&r), palavra(&r, "FROM"))
+                       && ident(&r, t_sub, sizeof t_sub)){
+                        pula(&r);
+                        if(*r == ')'){
+                            r++; pula(&r);
+                            if(*r == 0 || *r == ';'){
+                                in_col_esq = col_indice(c_esq);
+                                if(in_col_esq < 0){
+                                    printf("erro: a coluna «%s» não existe na tabela «%s»"
+                                           " — RECUSADA.\n", c_esq, nome);
+                                    if(sql_cap){ sql_cap->ok = 0;
+                                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                                 "column \"%s\" does not exist", c_esq); }
+                                    return 0;
+                                }
+                                snprintf(in_tab, sizeof in_tab, "%s", t_sub);
+                                snprintf(in_col, sizeof in_col, "%s", c_sub);
+                                in_sub = 1;
+                                p = r;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     citadas_where = 0;
-    tem_where = le_where(&p, &cl);
+    tem_where = in_sub ? 0 : le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
         return 0;
@@ -3823,6 +3883,76 @@ static int varre(const char *resto, int acao){
      * pede.
      *
      * O que estava mesmo errado era o salto do bytecode, e já subiu de andar. */
+    /* ── A SUBCONSULTA FILTRA O CAMPO, e é uma descida por linha ───────────
+     *
+     * O molde marcou o que o WHERE deixou; falta tirar as que não pertencem.
+     * Carrega-se a tabela da subconsulta na MESMA árvore do join — e depois
+     * RESTAURA-SE a que estava aberta, porque uma consulta não pode trocar a
+     * tabela da sessão por baixo de quem a fez. Para cada linha marcada,
+     * desce-se a árvore pelo seu valor: fibra vazia, o bit desliga. */
+    if(in_sub){
+        long nc_sub = 0;
+        char guarda[64];
+        snprintf(guarda, sizeof guarda, "%s", nome);
+
+        /* A ESQUERDA LÊ-SE ANTES DE TROCAR DE TABELA, como no join: abrir outra
+         * tabela relê o .mem, e o campo que o WHERE deixou vive lá. Recolhe-se
+         * primeiro o par (índice, valor) das linhas marcadas; só depois se
+         * carrega a subconsulta. */
+        static long in_idx[J_MAXLIN];
+        static long in_val[J_MAXLIN];
+        int ne = 0, estourou = 0;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(ne >= J_MAXLIN){ estourou = 1; break; }
+            in_idx[ne] = i;
+            in_val[ne] = celula_valor(i, in_col_esq, ncols);
+            ne++;
+        }
+        if(estourou){
+            printf("erro: a subconsulta não coube (mais de %d linhas marcadas)"
+                   " — RECUSADA.\n", J_MAXLIN);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "subquery: left side too large"); }
+            return 0;
+        }
+
+        snprintf(j_tab_dir, sizeof j_tab_dir, "%s", in_tab);
+        snprintf(j_col_dir, sizeof j_col_dir, "%s", in_col);
+        int postos = j_carrega_direita(&nc_sub);
+        j_tab_dir[0] = 0; j_col_dir[0] = 0;      /* devolve-se logo */
+        if(postos < 0){
+            usa_tabela(guarda, 0);
+            printf("erro: a subconsulta não pôde ser lida (tabela «%s» ou coluna «%s»)"
+                   " — RECUSADA.\n", in_tab, in_col);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "subquery: relation or column not readable"); }
+            return 0;
+        }
+        /* A DECISÃO TOMA-SE COM A TABELA DA SUBCONSULTA AINDA ABERTA. A árvore
+         * vive no .mem, e voltar à tabela de origem relê-o e apaga-a — foi o
+         * que aconteceu à primeira escrita: `j_casam` devolvia zero para
+         * valores que lá estavam, porque já não havia árvore. Decide-se aqui,
+         * guarda-se a resposta em memória local, e só depois se volta. */
+        static unsigned char passa[J_MAXLIN];
+        for(int k = 0; k < ne; k++){
+            int achados[4];
+            passa[k] = (unsigned char)(j_casam(in_val[k], achados, 4) > 0);
+        }
+
+        if(!usa_tabela(guarda, 0)) return 0;
+
+        /* de volta em casa, o campo reescreve-se do zero: a troca de tabela
+         * mexeu-lhe, e o que vale é a decisão que já está tomada. */
+        { Word z = {0,0};
+          for(long q = 0; q <= nrows / (long)SLOT_BITS; q++)
+              mem_grava(S_MATCH + (unsigned)q, z); }
+        for(int k = 0; k < ne; k++)
+            if(passa[k]) bit_poe(S_MATCH, in_idx[k], 1);
+    }
+
     long achou = bits_conta(S_MATCH, nrows);
     ultima_conta = achou;
     if(acao != ACAO_MARCA){
