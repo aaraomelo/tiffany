@@ -340,7 +340,15 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * descuido: o traço não se desescreve. O efeito é ser CONSERVADOR — pode recusar
  * uma consulta que hoje já caberia —, nunca aceitar uma que não cabe. */
 #define S_COLMAX    45056u
-#define S_ALTO      40960u
+/* O S_ALTO GUARDA UMA CÉLULA POR LINHA×COLUNA, tal como o S_LINHAS — e tinha
+ * SESSENTA E DOIS slots antes do S_TXLIVRE, quando precisa de tantos quantos o
+ * S_LINHAS tem. Uma tabela com mais de 31 linhas de dois campos escrevia o byte
+ * alto por cima do ponteiro da zona de texto. Passa para a folga que existe
+ * depois do S_COLMAX (que usa dezasseis slots e tem cento e noventa mil até ao
+ * S_NO), com o MESMO tamanho do S_LINHAS — que é o que a simetria exige: as
+ * duas metades da mesma célula, o baixo e o alto, têm de caber igual. */
+#define S_ALTO      45072u
+#define S_ALTO_N    (S_LIN - S_LINHAS)      /* tantos quantos o S_LINHAS: as duas metades */
 #define S_COLNOME   36864u
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
 #define S_COLNOME_N 8u         /* tantas quantas o S_CORPO segura */
