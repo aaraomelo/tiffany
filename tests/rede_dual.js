@@ -88,15 +88,34 @@ const esc = (x) => Math.round(x * 1e12)
     const bits = featBits(f1)
     const W = hebbW(e.padroes)
     const atr = hopfieldRecall(bits, W)
-    let bestOv = -2
-    let bestY = null
-    for (const q of e.padroes) {
+    /* auditoria 20/08: estava `bestOv > 0.3` — um limiar escrito à mão, e a esconder
+     * os dois factos que aqui há. O overlap é INTEIRO sobre inteiro (os bits são ±1,
+     * logo a soma é um inteiro e o denominador é o comprimento), e medido: o padrão
+     * certo dá 32/32 — recall PERFEITO, não «acima de um limiar» — e o outro dá
+     * −2/32. Dizer «> 0,3» perdia a exactidão de um lado e a MARGEM do outro.
+     *
+     * Agora não há número escolhido: afirma-se que o recall é EXACTO (s = n) e que
+     * ele está estritamente acima de todos os outros padrões — uma comparação entre
+     * quantidades medidas, que é o que separa recuperar de acertar por sorte. */
+    const ovs = e.padroes.map((q) => {
       let s = 0
       for (let i = 0; i < atr.length; i++) s += atr[i] * q.bits[i]
-      const ov = s / atr.length
-      if (ov > bestOv) { bestOv = ov; bestY = q.Y }
-    }
-    ok('§R3 recall Hebb encontra y1 com overlap>0.3', bestY === y1 && bestOv > 0.3)
+      return { Y: q.Y, s, n: atr.length }
+    })
+    let melhor = ovs[0]
+    for (const o of ovs) if (o.s > melhor.s) melhor = o
+    const bestY = melhor.Y
+    const exacto = melhor.s === melhor.n                     /* overlap = 1, sem vírgula */
+    const segundo = ovs.filter((o) => o !== melhor).reduce((a, o) => (a === null || o.s > a.s ? o : a), null)
+    const separa = segundo === null || melhor.s > segundo.s
+    console.log('      overlaps (inteiros): ' + ovs.map((o) => o.s + '/' + o.n).join('  ') +
+                ' — margem ' + (segundo ? melhor.s - segundo.s : '—'))
+    ok('§R3 o recall de Hebb encontra y1 e o overlap é EXACTAMENTE 1 (' + melhor.s + '/' +
+       melhor.n + '), com margem ' + (segundo ? melhor.s - segundo.s : '—') + ' sobre o padrão' +
+       ' seguinte. Sem limiar: os bits são ±1, logo o overlap é um inteiro sobre um inteiro,' +
+       ' e o que se afirma é a igualdade s = n e a SEPARAÇÃO entre quantidades medidas. O' +
+       ' «> 0,3» que aqui estava era um número meu, e escondia que o recall é perfeito',
+      bestY === y1 && exacto && separa)
   }
 
   /* §R4 λ */

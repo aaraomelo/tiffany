@@ -288,21 +288,55 @@ console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
   for (const b of bordas) { const k2 = Math.round(b * 2) / 2; urna.set(k2, (urna.get(k2) || 0) + 1) }
   let MARGEM = 0, votos = 0
   for (const [k2, n2] of urna) if (n2 > votos) { votos = n2; MARGEM = k2 }
-  let just = 0, ragged = 0, pior = 0
+  /* auditoria 20/08: o `pior < 1.0` da asserção era TAUTOLOGIA. `pior` é o máximo
+   * de `dif` entre as linhas que JÁ cumprem `dif < 1.0` — a condição da classe
+   * repetida como se fosse medida. Passava sempre que houvesse uma linha na margem.
+   *
+   * E o 1,0 também não era régua: MEDIDO, a distribuição separa-se sozinha. As
+   * linhas na margem vão até 0,569pt e a de fora mais próxima está a 1,674pt —
+   * não há UMA borda entre as duas. O que se afirma agora é isso, e pode falhar:
+   * o pior desvio de dentro é estritamente menor que o menor desvio de fora, com
+   * a distância entre eles dita. O 1,0 é um NOME para esse vazio, não um corte
+   * que decida — qualquer valor entre 0,569 e 1,674 dá a mesma partição. */
+  const CORTE = 1.0
+  let just = 0, ragged = 0, pior = 0, menorFora = Infinity
   for (const b of bordas) {
     const dif = Math.abs(b - MARGEM)
-    if (dif < 1.0) { just++; if (dif > pior) pior = dif } else ragged++
+    if (dif < CORTE) { just++; if (dif > pior) pior = dif }
+    else { ragged++; if (dif < menorFora) menorFora = dif }
   }
-  console.log('      margem (a moda das bordas): ' + MARGEM.toFixed(1) + 'pt · na margem: ' + just + ', fora: ' + ragged + ', pior desvio ' + pior.toFixed(2) + 'pt')
+  /* E `menorFora > pior` TAMBÉM não podia falhar — foi a primeira coisa que eu
+   * escrevi a corrigir isto, e é a mesma tautologia com outra cara: de
+   * `pior < CORTE <= menorFora` ela sai de graça. Trocar a comparação não chega.
+   *
+   * O que PODE falhar é a LARGURA do vazio, e ela compara-se com a escala que o
+   * próprio objecto dá — a dispersão do aglomerado. Se o intervalo de cortes que
+   * produzem esta MESMA partição for mais largo do que todo o espalhamento das
+   * linhas justificadas, então mover o corte não muda nada e ele não é régua: é
+   * um nome. É o que se afirma, e um único desvio a cair perto do corte derruba-o. */
+  const folga = ragged > 0 ? menorFora - pior : 0
+  const vazio = ragged > 0 && folga > pior
+  console.log('      margem (a moda das bordas): ' + MARGEM.toFixed(1) + 'pt · na margem: ' + just +
+              ', fora: ' + ragged + ', pior desvio ' + pior.toFixed(3) + 'pt')
+  console.log('      vazio à volta do corte: ' + pior.toFixed(3) + 'pt … ' +
+              menorFora.toFixed(3) + 'pt = ' + folga.toFixed(3) + 'pt sem uma única borda' +
+              ' — e o aglomerado inteiro espalha-se por ' + pior.toFixed(3) + 'pt, logo o vazio' +
+              ' é ' + (pior > 0 ? (folga / pior).toFixed(1) : '∞') + '× maior que ele')
   /* o computacional é metade fórmulas em display — «a maioria» era do documento
    * antigo. O que se afirma: o aglomerado na margem é GRANDE (a justificação
    * existe e fecha na moda) e as fora também existem (fins de parágrafo,
    * displays — a outra metade). */
-  ok('o aglomerado na margem é grande (a justificação existe e fecha, com pior desvio < 1pt)' +
-     ' e há linhas fora dela (fins de parágrafo e displays — a outra metade: se todas' +
-     ' acabassem, era texto forçado). Os avanços vêm da moda do próprio documento, por' +
-     ' (fonte, glifo) — a régua de cada fonte, não a da regular para tudo',
-     just > 100 && ragged > 0 && pior < 1.0)
+  ok('o aglomerado na margem é grande (a justificação existe e fecha) e há linhas fora dela' +
+     ' (fins de parágrafo e displays — a outra metade: se todas acabassem, era texto forçado).' +
+     ' Os avanços vêm da moda do próprio documento, por (fonte, glifo) — a régua de cada fonte,' +
+     ' não a da regular para tudo. E O CORTE NÃO DECIDE, que é o ponto: à volta dele há ' +
+     folga.toFixed(3) + 'pt sem uma única borda, e isso é ' + (pior > 0 ? (folga / pior).toFixed(1) : '∞') +
+     '× o espalhamento inteiro do aglomerado (' + pior.toFixed(3) + 'pt) — mover o corte dentro' +
+     ' desse vazio dá a MESMA partição, logo ele é um nome e não uma régua. Duas asserções' +
+     ' vazias caíram aqui: o `pior < 1.0` era a condição da própria classe repetida como se' +
+     ' fosse medida, e o `menorFora > pior` que eu escrevi a corrigi-lo saía de graça de' +
+     ' `pior < CORTE <= menorFora` — a mesma tautologia com outra cara',
+     just > 100 && ragged > 0 && vazio)
 }
 
 console.log('\n§N7  RESÍDUO 0: nenhum par de glifos anda para trás, em nenhum documento.\n')

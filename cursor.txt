@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        610fb6ed2aa4e400      bash tools/bateria.sh
+    selo        f5c305ee911a2440      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1030,3 +1030,41 @@ emitiam `#UNIT` — app_arranca (6), design_no_pdf (4), dois_streams (5),
 escala (4), sem_chute (7). A bateria contava UMA unidade grossa (o exit) por
 ficheiro: 26 asserções escondidas atrás de 5. Corrigido; é a mesma lição que o
 `bateria.sh` já tinha escrita em comentário sobre todo o .py e .js.
+
+
+23. OS LIMIARES QUE FICARAM, E DUAS TAUTOLOGIAS (uma escrita por mim)
+=======================================================================
+Varridos os 104 `.js` à procura de literal de vírgula DENTRO de uma comparação:
+41 ocorrências, e a maioria não é régua — são cotas de magnitude sobre tamanhos
+de ficheiro (`tam > 1e5`), conversões de visualização (`/1e6`) e entradas de
+funções. Três decidiam mesmo:
+
+  escala.js §T3     `|t − m/1000| <= 0,02` — ver §22.
+  rede_dual.js §R3  `bestOv > 0.3`. MEDIDO: o overlap certo é 32/32 = 1 EXACTO e
+                    o outro é −2/32. O limiar escondia as duas coisas — a
+                    exactidão de um lado e a MARGEM (34) do outro. Os bits são
+                    ±1, logo o overlap é inteiro sobre inteiro: afirma-se s = n
+                    e a separação estrita, sem número escolhido.
+                    gume: bit invertido → cai · escolher o pior → cai · dois
+                    padrões com o MESMO overlap (margem 0) → cai
+  sem_chute.js §N6  `pior < 1.0` era TAUTOLOGIA: `pior` é o máximo entre as
+                    linhas que JÁ cumprem `dif < 1.0` — a condição da classe
+                    repetida como se fosse medida.
+
+E A SEGUNDA TAUTOLOGIA FOI MINHA, dentro da correcção. Escrevi
+`menorFora > pior` e ela sai de graça de `pior < CORTE ≤ menorFora`. Trocar a
+comparação não chega: o CORTE tem de sair da conta.
+  O que ficou: a LARGURA do vazio contra a escala que o objecto dá — a dispersão
+  do próprio aglomerado. Medido: 400 linhas até 0,569pt, a de fora mais próxima
+  a 1,674pt, 1,105pt sem uma única borda = 1,9× o espalhamento inteiro. Mover o
+  corte dentro do vazio dá a MESMA partição, logo ele é um nome e não uma régua.
+  gume: uma borda a 0,9pt (dentro do vazio) → CAI. Uma a 1,2pt e o corte a 0,3pt
+  sobrevivem, e é correcto: a tese é sobre a FORMA da distribuição, não sobre o
+  1,0 — um ponto isolado não destrói a bimodalidade.
+
+E UMA ARMADILHA DO PRÓPRIO GUME, que custou uma leitura errada: o `sem_chute`
+MUTA `tests/tex_core.c` e repõe-no num `finally`. O meu `timeout` matou um
+mutante a meio e deixou o ficheiro trocado — as três corridas seguintes leram um
+binário `tex` construído do fonte mutado, e o ficheiro INTACTO passou a falhar
+duas asserções que nada tinham a ver. Correr mutantes de um medidor que mexe em
+fontes exige repor E RECONSTRUIR entre cada um; um a um, e não em lote.
