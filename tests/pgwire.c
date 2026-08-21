@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W10 a lista de tabelas do \dt por reconhecimento de assinatura, e a
+ *        FRONTEIRA: o resto de pg_catalog continua recusado
  *   §W9  o TIPO acompanha a coluna: catálogo TEXT, motor INT4 — e o gume é as
  *        duas respostas terem de ser diferentes
  *   §W8  Trio PG6: o catálogo de SESSÃO — version/SHOW/SET/current_* e as tags de
@@ -1170,6 +1172,103 @@ int main(void){
            " GUME É AS DUAS RESPOSTAS TEREM DE SER DIFERENTES: exige-se ver TEXT e ver INT4"
            " na mesma corrida, porque um servidor que anunciasse um OID único passaria em"
            " cada linha isolada — que é precisamente o defeito que aqui estava.",
+           mal == 0);
+    }
+
+    /* ═══ §W10: A LISTA DE TABELAS, E A FRONTEIRA DECLARADA ══════════════════
+     *
+     * O `\dt` do psql não pergunta «que tabelas há»: manda uma consulta com JOIN
+     * sobre pg_class e pg_namespace, um CASE de oito ramos, duas funções de
+     * catálogo e um operador de expressão regular. Aqui RECONHECE-SE a consulta
+     * pela assinatura e responde-se com as tabelas do disco — é compatibilidade,
+     * não é um pg_catalog, e a asserção diz isso.
+     *
+     * O GUME é a fronteira: uma consulta a pg_catalog que NÃO seja esta tem de
+     * ser RECUSADA. Um reconhecedor demasiado largo responderia a qualquer coisa
+     * com «pg_» dentro, e responder ao acaso é pior do que recusar.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W10 a lista de tabelas do \\dt, e o que fica de fora.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w10";
+        SqlOut o;
+        long mal = 0;
+        const char *q_dt =
+            "SELECT n.nspname as \"Schema\", c.relname as \"Name\", "
+            "CASE c.relkind WHEN 'r' THEN 'table' END as \"Type\" "
+            "FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n "
+            "ON n.oid = c.relnamespace WHERE c.relkind IN ('r','p','') ORDER BY 1,2;";
+
+        unlink("/tmp/pgwire_w10.mem");
+        unlink("/tmp/pgwire_w10.prog");
+        unlink("/tmp/pgwire_w10__alfa.mem");
+        unlink("/tmp/pgwire_w10__beta.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE beta (x,y)", &o);
+        sql_executa("CREATE TABLE alfa (a,b)", &o);
+
+        {
+            int r = sql_executa(q_dt, &o);
+            int bate = r && o.ncols == 4 && o.nrows == 2
+                       && !strcmp(o.cell[0][1], "alfa")     /* ordenado por nome */
+                       && !strcmp(o.cell[1][1], "beta")
+                       && !strcmp(o.cell[0][0], "public")
+                       && !strcmp(o.cell[0][2], "table");
+            printf("      a consulta do \\dt -> %d colunas, %d linhas: %s, %s\n",
+                   o.ncols, o.nrows,
+                   o.nrows > 0 ? o.cell[0][1] : "?", o.nrows > 1 ? o.cell[1][1] : "?");
+            printf("      e vêm ORDENADAS por nome (a consulta pede ORDER BY 1,2): %s\n",
+                   bate ? "sim" : "NAO");
+            if(!bate) mal++;
+            /* e as colunas são TEXTO, não int4 */
+            for(int j = 0; j < o.ncols; j++)
+                if(o.tipo[j] != SQL_TIPO_TEXT) mal++;
+        }
+
+        /* ── O GUME: a fronteira. Estas são de pg_catalog e NÃO são a assinatura;
+         * têm de ser recusadas, e não respondidas ao acaso. */
+        {
+            const char *fora[] = {
+                "SELECT * FROM pg_catalog.pg_type",
+                "SELECT oid, typname FROM pg_type WHERE typname = 'int4'",
+                "SELECT pg_catalog.pg_get_userbyid(10)",
+            };
+            int recusadas = 0;
+            printf("\n      a fronteira — o que NÃO é a assinatura tem de ser recusado:\n");
+            for(unsigned k = 0; k < sizeof fora / sizeof fora[0]; k++){
+                int r = sql_executa(fora[k], &o);
+                printf("        %-52s %s\n", fora[k], r ? "RESPONDEU (mau)" : "recusado");
+                if(!r) recusadas++;
+            }
+            if(recusadas != 3) mal++;
+            printf("      recusadas %d de 3 — responder ao acaso é pior que recusar\n",
+                   recusadas);
+        }
+
+        /* e o motor continua intacto, como sempre */
+        {
+            sql_executa("INSERT INTO alfa VALUES (5,50)", &o);
+            int r = sql_executa("SELECT * FROM alfa", &o);
+            int ok_motor = r && o.nrows == 1 && o.tipo[0] == SQL_TIPO_INT4;
+            printf("      e o motor intacto: SELECT * FROM alfa -> %d linha, tipo int4: %s\n",
+                   o.nrows, ok_motor ? "sim" : "NAO");
+            if(!ok_motor) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O `\\dt` RESPONDE, E A FRONTEIRA ESTÁ DECLARADA. O psql não pergunta «que tabelas"
+           " há»: manda uma consulta com JOIN sobre pg_class e pg_namespace, um CASE de oito"
+           " ramos, duas funções de catálogo e um operador de expressão regular — e nem o"
+           " pg_catalog nem as junções existem aqui. O que se faz é RECONHECER a consulta"
+           " pela assinatura e responder com as tabelas que o disco tem, ordenadas por nome"
+           " porque é isso que o ORDER BY 1,2 pede, e com as quatro colunas em TEXTO. Isto é"
+           " uma camada de compatibilidade, não um catálogo, e vale mais dizê-lo do que"
+           " deixar parecer o contrário. O GUME É A FRONTEIRA: três consultas a pg_catalog"
+           " que NÃO são a assinatura — pg_type, um SELECT com WHERE sobre typname, e uma"
+           " função de catálogo — têm de ser RECUSADAS, e são as três. Um reconhecedor"
+           " demasiado largo responderia a qualquer coisa com «pg_» dentro, e responder ao"
+           " acaso é pior do que recusar: quem chama sabe lidar com um erro, não sabe lidar"
+           " com uma resposta inventada. E o motor continua intacto ao lado, com o seu int4.",
            mal == 0);
     }
 

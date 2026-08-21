@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <strings.h>
+#include <dirent.h>
 #include "sql_api.h"
 
 #define PGCAT_MAX_PARAM   24
@@ -122,6 +123,75 @@ static void pgcat_so_tag(SqlOut *o, const char *tag){
     snprintf(o->tag, sizeof o->tag, "%s", tag);
 }
 
+/* ── \dt e \d: RECONHECIMENTO DE PADRÃO, e convém dizer o que isto é ─────────
+ *
+ * O `\dt` do psql não pergunta «que tabelas há»: manda uma consulta com JOIN
+ * sobre pg_class e pg_namespace, um CASE de oito ramos, duas funções de
+ * catálogo e um operador de expressão regular. Implementar aquilo a sério é
+ * implementar um pg_catalog e um motor que faça junções — e nenhum dos dois
+ * existe aqui.
+ *
+ * O que se faz é outra coisa, e a distinção importa: RECONHECE-SE a consulta
+ * pela sua assinatura e responde-se com as tabelas que o disco tem. É uma
+ * camada de compatibilidade, não um catálogo, e a fronteira é essa: qualquer
+ * consulta a pg_catalog que não seja esta continua a ser recusada, e é bom que
+ * seja — recusar é honesto, responder ao acaso não.
+ * ───────────────────────────────────────────────────────────────────────────── */
+static char pgcat_dir[512]  = ".";
+static char pgcat_pref[128] = "";
+
+static int pgcat_e_lista_tabelas(const char *sql){
+    /* a assinatura: as três coisas que só a consulta do \dt tem juntas */
+    return strstr(sql, "pg_catalog.pg_class") != NULL
+        && strstr(sql, "relkind")            != NULL
+        && strstr(sql, "relname")            != NULL;
+}
+
+static int pgcat_lista_tabelas(SqlOut *out){
+    DIR *d;
+    struct dirent *e;
+    int n = 0;
+    size_t plen = strlen(pgcat_pref);
+    if(!out) return 1;
+    memset(out, 0, sizeof *out);
+    out->ok = 1; out->ncols = 4;
+    out->tipo[0] = out->tipo[1] = out->tipo[2] = out->tipo[3] = SQL_TIPO_TEXT;
+    snprintf(out->col[0], sizeof out->col[0], "Schema");
+    snprintf(out->col[1], sizeof out->col[1], "Name");
+    snprintf(out->col[2], sizeof out->col[2], "Type");
+    snprintf(out->col[3], sizeof out->col[3], "Owner");
+    d = opendir(pgcat_dir);
+    if(d){
+        while((e = readdir(d)) != NULL && n < SQL_OUT_MAX_ROWS){
+            const char *nm = e->d_name;
+            size_t L = strlen(nm);
+            if(plen == 0 || strncmp(nm, pgcat_pref, plen)) continue;
+            if(L < plen + 4 || strcmp(nm + L - 4, ".mem")) continue;
+            {
+                size_t corpo = L - plen - 4;
+                if(corpo == 0) continue;              /* a base sem tabela nomeada */
+                snprintf(out->cell[n][0], SQL_OUT_CELL, "public");
+                snprintf(out->cell[n][1], SQL_OUT_CELL, "%.*s", (int)corpo, nm + plen);
+                snprintf(out->cell[n][2], SQL_OUT_CELL, "table");
+                snprintf(out->cell[n][3], SQL_OUT_CELL, "%s", pgcat_user);
+                n++;
+            }
+        }
+        closedir(d);
+    }
+    /* ordenado por nome, como o ORDER BY 1,2 da consulta pede */
+    for(int i = 0; i < n; i++) for(int j = i + 1; j < n; j++)
+        if(strcmp(out->cell[i][1], out->cell[j][1]) > 0){
+            char t[SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+            memcpy(t, out->cell[i], sizeof t);
+            memcpy(out->cell[i], out->cell[j], sizeof t);
+            memcpy(out->cell[j], t, sizeof t);
+        }
+    out->nrows = n;
+    snprintf(out->tag, sizeof out->tag, "SELECT %d", n);
+    return 1;
+}
+
 /* Devolve 1 se ESTA camada tratou a consulta (e preencheu out); 0 se não é
  * dela — e então o motor corre, como se esta camada não existisse. */
 static int pgcat_responde(const char *sql, SqlOut *out){
@@ -196,6 +266,9 @@ static int pgcat_responde(const char *sql, SqlOut *out){
     if(pgcat_pal(sql, "COMMIT"))   { pgcat_so_tag(out, "COMMIT");   return 1; }
     if(pgcat_pal(sql, "ROLLBACK")) { pgcat_so_tag(out, "ROLLBACK"); return 1; }
 
+    /* ── a consulta do \dt, reconhecida pela assinatura ─────────────────── */
+    if(pgcat_e_lista_tabelas(sql)) return pgcat_lista_tabelas(out);
+
     /* ── SELECT <função de catálogo>() ──────────────────────────────────── */
     if((p = pgcat_pal(sql, "SELECT")) != NULL){
         const char *q = p;
@@ -229,6 +302,14 @@ static void pgcat_base_nome(const char *nome){
     const char *b = nome ? nome : "tiffany";
     const char *s = strrchr(b, '/');
     snprintf(pgcat_base, sizeof pgcat_base, "%s", s ? s + 1 : b);
+    /* o directório e o prefixo dos ficheiros de tabela: <base>__<nome>.mem */
+    if(s){
+        int nd = (int)(s - b);
+        snprintf(pgcat_dir, sizeof pgcat_dir, "%.*s", nd ? nd : 1, nd ? b : "/");
+    }else{
+        snprintf(pgcat_dir, sizeof pgcat_dir, ".");
+    }
+    snprintf(pgcat_pref, sizeof pgcat_pref, "%s__", pgcat_base);
 }
 
 #endif

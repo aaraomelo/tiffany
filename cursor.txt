@@ -3145,3 +3145,63 @@ E mede-se em TODAS as colunas, não só na primeira.
 
   pgwire.c 11 asserções, 0 falhas
   bateria 529 : 529, 109 unidades, 0 falhas
+
+§69 — O psql REAL LIGOU-SE, E JÁ ESTAVA TUDO CÁ: quatro Postgres a correr
+==========================================================================
+«pode instalar, na verdade vê o que já tem no erp em plataforma/tiffany-erp».
+
+NÃO FOI PRECISO INSTALAR NADA. O ERP tem quatro Postgres em contentores —
+patria-erp-db (pgvector/pg16, porto 5435), easysync-crm-db (5434), easypay-db
+(5433), postgres-easysync (5432) —, logo o psql REAL já estava na máquina. Eu
+tinha dado «não há cliente real» como limite quando o limite era eu não ter
+olhado.
+
+     docker run --rm --network host postgres:16 psql "host=127.0.0.1 port=…"
+
+E O psql 16.14 LIGOU-SE AO NOSSO SERVIDOR:
+     SELECT version()          Tiffany-pgwire/0.1
+     SELECT * FROM cliente     as duas linhas, id e saldo
+     SHOW client_encoding      UTF8
+     SET application_name      SET, e o SHOW devolve-o
+     SELECT current_database() tiff_psql
+     BEGIN                     BEGIN
+     modo interactivo          SELECT com WHERE, prompt e tudo
+
+E A CORRECÇÃO DO TIPO DE HÁ UMA HORA VÊ-SE NO ECRÃ: o psql alinha os numéricos
+à DIREITA e os textos à ESQUERDA, e é o OID que lho diz. Com o int4 de antes,
+«UTF8» viria alinhado à direita. O cliente real usou exactamente o que o §W9
+corrigiu — a prova que eu não tinha.
+
+O QUE FALTAVA: `\dt` e `\d`. Pedi ao psql a consulta que ele faz (`psql -E`) e
+ela é um JOIN sobre pg_class e pg_namespace, um CASE de oito ramos, duas funções
+de catálogo e um operador de expressão regular. Nem pg_catalog nem junções
+existem aqui.
+
+O QUE SE FEZ, e a distinção importa: RECONHECE-SE a consulta pela assinatura e
+responde-se com as tabelas do disco (`<base>__<nome>.mem`), ordenadas por nome
+porque é o que o ORDER BY 1,2 pede, com as quatro colunas em TEXTO. É uma camada
+de COMPATIBILIDADE, não um catálogo, e está escrito assim no código.
+
+     $ psql … -c 'CREATE TABLE produto (sku,preco)' -c '\dt' -c 'SELECT * …'
+       CREATE TABLE
+       INSERT 0 1
+       Schema |  Name   | Type  |  Owner
+       public | cliente | table | tiffany
+       public | produto | table | tiffany
+       sku | preco
+        10 |   250
+
+E O GUME É A FRONTEIRA: três consultas a pg_catalog que NÃO são a assinatura —
+pg_type, um SELECT com WHERE sobre typname, e uma função de catálogo — têm de
+ser RECUSADAS, e são as três. Um reconhecedor demasiado largo responderia a
+qualquer coisa com «pg_» dentro. Responder ao acaso é PIOR que recusar: quem
+chama sabe lidar com um erro, não sabe lidar com uma resposta inventada.
+
+A DISTÂNCIA ATÉ AO ERP, medida e não estimada: o schema Prisma tem 77 modelos,
+45 enums, 2130 linhas, com UUID, Decimal(18,4), vector(1024) do pgvector,
+pgcrypto e RLS nativa. O nosso motor tem inteiros. A migração do ERP não é o
+próximo passo — é outra ordem de grandeza, e convém dizê-lo antes de alguém
+contar com ela.
+
+  pgwire.c 12 asserções, 0 falhas
+  bateria 529 : 529, 110 unidades, 0 falhas
