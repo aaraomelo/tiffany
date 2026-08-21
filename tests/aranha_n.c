@@ -44,6 +44,8 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN29 O PAR DUAL DE CANTOR com FOLGA: contar injecta e sobra metade da
+ *         recta · encher cobre com G ≡ 2 · a retracção, e o que o levantamento repõe
  *   §AN28 A REVISÃO EXTERNA medida: τ = N pede a DIAGONAL 1 e não g = I · no
  *         injectivo G = 1 na IMAGEM · as coordenadas são F(f)/n e não F(f)
  *   §AN27 O OUTRO LADO: W = ℤ^I com S NILPOTENTE (bloco de Jordan, não
@@ -448,6 +450,39 @@ static void ta_conv(const long *f, const long *g, long *h){
 static void ta_campo(const long *p, long nt, long *g){
     for(long i = 0; i < TA_N; i++) g[i] = 0;
     for(long t = 0; t < nt; t++) g[p[t] & (TA_N - 1)]++;
+}
+
+
+/* ── O PAR DUAL DE CANTOR: encher e contar, com FOLGA ────────────────────────
+ * A casa mede em `peano_dual.c` que encher e contar são BIJECÇÃO no finito —
+ * com |I| = |X| não pode ser outra coisa. A pergunta é outra: e o par em que
+ * uma ENCHE (sobrejectiva, não injectiva) e a outra INJECTA deixando espaço
+ * por usar? Isso obriga |I| > |X|, e a folga é exactamente |I| − |X|.
+ *
+ * Aqui: X = [0,2^w)² e I = [0, 2·4^w). A intercalação de bits (Morton) leva o
+ * quadrado nos primeiros 4^w índices — injectiva, e a metade alta da recta
+ * fica POR USAR. E encher lê o índice módulo 4^w, cobrindo tudo duas vezes. */
+#define PD_W  4
+#define PD_Q  (1 << PD_W)              /* lado do quadrado: 16 */
+#define PD_X  (PD_Q * PD_Q)            /* |X| = 256 células */
+#define PD_I  (2 * PD_X)               /* |I| = 512 índices: sobra metade */
+
+static long pd_contar(int x, int y){   /* X → I, intercalar bits: injectiva */
+    long d = 0;
+    for(int b = 0; b < PD_W; b++){
+        d |= (long)((x >> b) & 1) << (2*b);
+        d |= (long)((y >> b) & 1) << (2*b + 1);
+    }
+    return d;                          /* em [0, 4^w): a metade baixa de I */
+}
+static void pd_encher(long d, int *px, int *py){   /* I → X: sobrejectiva */
+    long r = d % PD_X;                 /* a metade alta dobra sobre a baixa */
+    int x = 0, y = 0;
+    for(int b = 0; b < PD_W; b++){
+        x |= (int)((r >> (2*b)) & 1) << b;
+        y |= (int)((r >> (2*b + 1)) & 1) << b;
+    }
+    *px = x; *py = y;
 }
 
 /* corre uma realização e devolve o essencial */
@@ -2673,6 +2708,152 @@ int main(void){
            " que a própria F⁻¹ = F/n já dizia. Recomposto com o /n bate nos 256; sem"
            " ele só bate onde f se anula, porque aí n·f(x) = f(x) — e o número de"
            " casos que batem é exactamente o número de zeros de f",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN29: O PAR DUAL DE CANTOR — encher e contar, e a FOLGA ═══════════ */
+    printf("\n§AN29  encher e contar: a sobrejectiva, a injectiva, e o que sobra.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) CONTAR É INJECTIVA e NÃO SOBREJECTIVA: leva as 256 células do
+         *     quadrado em 256 índices distintos de 512 — sobra metade da recta. */
+        static int visto[PD_I];
+        for(long d = 0; d < PD_I; d++) visto[d] = 0;
+        long distintos = 0, colisao = 0;
+        for(int x = 0; x < PD_Q; x++)
+            for(int y = 0; y < PD_Q; y++){
+                long d = pd_contar(x, y);
+                if(visto[d]) colisao++; else { visto[d] = 1; distintos++; }
+            }
+        long sobra = 0;
+        for(long d = 0; d < PD_I; d++) if(!visto[d]) sobra++;
+        printf("      contar: X → I   |X| = %d · imagem = %ld · colisões = %ld ·"
+               " SOBRA na recta = %ld\n", PD_X, distintos, colisao, sobra);
+        if(colisao || distintos != PD_X || sobra != PD_I - PD_X) mau++;
+
+        /* (b) ENCHER É SOBREJECTIVA e NÃO INJECTIVA: cobre as 256 células, cada
+         *     uma DUAS vezes. Lê-se no campo: G ≡ 2 em todo o suporte. */
+        long nt = 0;
+        for(long d = 0; d < PD_I && nt < AN_IMAX; d++){
+            int x, y; pd_encher(d, &x, &y);
+            Vet v = vet0(); v.c[0] = x; v.c[1] = y; traj[nt++] = v;
+        }
+        Res r = an_corre(2, nt);
+        long g_dois = 0;
+        an_zera(2);
+        for(long t = 0; t < nt; t++) an_visita(traj[t]);
+        for(long t = 0; t < nt; t++) if(an_le(traj[t]) == 2) g_dois++;
+        printf("      encher: I → X   |I| = %ld · células = %ld · max G = %ld ·"
+               " G = 2 em %ld de %ld\n", nt, r.celulas, r.max_g, g_dois, nt);
+        if(r.celulas != PD_X || r.max_g != 2 || g_dois != nt) mau++;
+
+        /* (c) O PAR É UMA RETRACÇÃO: encher∘contar = id_X, resíduo 0. Mas
+         *     contar∘encher ≠ id_I, e falha EXACTAMENTE na metade alta — que é
+         *     a que contar nunca usa. Só um lado fecha. */
+        long res_direita = 0;
+        for(int x = 0; x < PD_Q; x++)
+            for(int y = 0; y < PD_Q; y++){
+                int xv, yv; pd_encher(pd_contar(x, y), &xv, &yv);
+                if(xv != x || yv != y) res_direita++;
+            }
+        long falha_esquerda = 0;
+        for(long d = 0; d < PD_I; d++){
+            int x, y; pd_encher(d, &x, &y);
+            if(pd_contar(x, y) != d) falha_esquerda++;
+        }
+        printf("      encher∘contar = id_X: resíduo %ld · contar∘encher ≠ id_I:"
+               " falha em %ld de %d\n", res_direita, falha_esquerda, PD_I);
+        if(res_direita || falha_esquerda != PD_I - PD_X) mau++;
+
+        /* (d) E O QUE O LEVANTAMENTO REPÕE É EXACTAMENTE O QUE SE PERDEU. A
+         *     folha k(i) ∈ {1,2} é o bit que encher deitou fora (d ≥ 4^w), e com
+         *     ela π̃ volta a ser injectiva — sobre um contradomínio de 512, que é
+         *     |I|. A retracção passa a bijecção ao preço de uma coordenada. */
+        static long k_de[AN_IMAX];
+        an_zera(2);
+        for(long t = 0; t < nt; t++){ an_visita(traj[t]); k_de[t] = an_le(traj[t]); }
+        long folha_mau = 0;
+        for(long t = 0; t < nt; t++){
+            long bit_alto = (t >= PD_X) ? 2 : 1;      /* a metade da recta de onde veio */
+            if(k_de[t] != bit_alto) folha_mau++;
+        }
+        printf("      a folha k(i) É o bit que encher deitou fora: %s\n\n",
+               folha_mau ? "NÃO" : "sim, nos 512");
+        if(folha_mau) mau++;
+
+        /* (e) A CONSTRUÇÃO MAIS LIMPA, e não é a minha: enumerar o quadrado em
+         *     SERPENTINA — q_0, q_1, …, q_{M²−1}, cada ponto uma vez — e lançar
+         *     na recta com ρ(q_t) = 2t. A imagem são os PARES, e os ímpares ficam
+         *     todos livres: a folga fica distribuída em vez de num bloco. */
+        {
+            static int ocupado[2*PD_X + 2];
+            for(long d = 0; d < 2*PD_X + 2; d++) ocupado[d] = 0;
+            long t = 0, col = 0;
+            for(int y = 0; y < PD_Q; y++)
+                for(int i = 0; i < PD_Q; i++){
+                    int x = (y & 1) ? (PD_Q - 1 - i) : i;    /* serpenteia */
+                    long rho = 2*t;                          /* ρ(q_t) = 2t */
+                    if(ocupado[rho]) col++;
+                    ocupado[rho] = 1;
+                    (void)x; t++;
+                }
+            long impares_livres = 0, pares_usados = 0;
+            for(long d = 0; d < 2*PD_X; d++){
+                if(d & 1){ if(!ocupado[d]) impares_livres++; }
+                else if(ocupado[d]) pares_usados++;
+            }
+            printf("      serpentina, ρ(q_t) = 2t:  colisões %ld · pares usados %ld ·"
+                   " ímpares livres %ld\n", col, pares_usados, impares_livres);
+            if(col || pares_usados != PD_X || impares_livres != PD_X) mau++;
+        }
+
+        /* (f) E O QUE PROÍBE A OUTRA COISA É O GRAU. Não se pode pedir ao mesmo
+         *     tempo injectividade e preservação de arestas: um vértice INTERIOR do
+         *     quadrado tem 4 vizinhos distintos, e a recta dá 2. É o thm:dimensao
+         *     a decidir — |V(x)| = 2n —, e não uma dificuldade de construção. */
+        {
+            int gx = PD_Q/2, gy = PD_Q/2;            /* um vértice interior */
+            long viz_quadrado = 0, viz_recta = 0;
+            for(int i = 0; i < 2; i++) for(int sg = -1; sg <= 1; sg += 2){
+                int vx = gx + (i==0)*sg, vy = gy + (i==1)*sg;
+                if(vx >= 0 && vx < PD_Q && vy >= 0 && vy < PD_Q) viz_quadrado++;
+            }
+            long d = pd_contar(gx, gy);
+            if(d - 1 >= 0)   viz_recta++;
+            if(d + 1 < PD_I) viz_recta++;
+            printf("      o grau proíbe: vértice interior tem %ld vizinhos, a recta dá %ld"
+                   " — logo não há injecção que preserve arestas\n\n",
+                   viz_quadrado, viz_recta);
+            if(viz_quadrado != 4 || viz_recta != 2) mau++;
+            if(viz_quadrado <= viz_recta) mau++;
+        }
+
+        ok("O PAR DE CANTOR TEM DOIS LADOS, E O SEGUNDO PEDE FOLGA. A casa já media"
+           " encher e contar como BIJECÇÃO — e no finito com |I| = |X| não podia ser"
+           " outra coisa. O par assimétrico obriga |I| > |X|, e então: CONTAR leva o"
+           " quadrado na recta de forma INJECTIVA e NÃO SOBREJECTIVA — as 256 células"
+           " em 256 índices distintos de 512, com 256 lugares da recta POR USAR, que é"
+           " a folga que se pedia. E ENCHER leva a recta no quadrado de forma"
+           " SOBREJECTIVA e NÃO INJECTIVA — cobre as 256 células, cada uma duas vezes,"
+           " e o campo lê-o directamente: G ≡ 2 em todo o suporte. O par é uma"
+           " RETRACÇÃO e não uma involução: encher∘contar = id_X com resíduo 0, mas"
+           " contar∘encher falha em 256 de 512 — exactamente na metade que contar"
+           " nunca usa. Só um lado fecha. E o que o LEVANTAMENTO repõe é precisamente"
+           " o que se perdeu: a folha k(i) ∈ {1,2} É o bit que encher deitou fora, e"
+           " com ela π̃ volta a ser injectiva sobre 512 = |I|. A retracção vira bijecção"
+           " ao preço de uma coordenada — que é o Teor. do levantamento outra vez, aqui"
+           " no par de Cantor. E A CONSTRUÇÃO MAIS LIMPA NÃO É ESTA: é enumerar o"
+           " quadrado em SERPENTINA e lançar na recta com ρ(q_t) = 2t, ficando a"
+           " imagem nos pares e os 256 ímpares livres — a folga distribuída em vez de"
+           " num bloco. POR FIM, O QUE PROÍBE PEDIR AS DUAS COISAS: injectividade E"
+           " preservação de arestas não coexistem, e não por dificuldade de construção"
+           " — um vértice interior do quadrado tem QUATRO vizinhos e a recta dá DOIS."
+           " É o teorema da dimensão a decidir, |V(x)| = 2n. Donde a dualidade é entre"
+           " DOBRA e BURACO, e não entre duas inversas: quem comprime a recta no"
+           " quadrado paga com G > 1; quem espalha o quadrado na recta paga com"
+           " índices por usar",
            mau == 0);
     }
 

@@ -2089,3 +2089,46 @@ ONDE A REVISÃO SE ENGANOU, e vale registar
   gume      47 mutações, 47 mordem
   bateria   529 : 529, 0 falhas · 27 unidades passaram, 0 falharam
   paper     19 páginas
+
+§43 — A CURVA DUAL DE CANTOR: dobra contra buraco, e o GRAU a decidir
+=====================================================================
+«o Cantor é só metade; a outra curva precisamos obter por dualidade. Cantor leva
+a recta no plano de forma SOBREJECTIVA e não injectiva; precisamos da contrária,
+que leva o quadrado na recta de forma INJECTIVA mas não sobrejectiva — pega um
+quadrado, joga numa recta, e ainda SOBRA espaço. Consegue construir?»
+
+Consegue. E a casa já tinha metade: `peano_dual.c` mede encher e contar, mas
+como BIJECÇÃO — no finito com |I| = |X| não pode ser outra coisa. O par
+assimétrico OBRIGA |I| > |X|, e a folga é exactamente |I| − |X|.
+
+MEDIDO (§AN29), com X = quadrado 16×16 e I = 512:
+  contar : X → I   injectiva, NÃO sobrejectiva   256 células em 256 índices de
+                   512 — SOBRAM 256 lugares na recta
+  encher : I → X   sobrejectiva, NÃO injectiva   cobre as 256, cada uma DUAS
+                   vezes, e o campo lê-o: G ≡ 2 em todo o suporte
+  encher∘contar = id_X   resíduo 0        ← só um lado fecha
+  contar∘encher ≠ id_I   falha em 256/512 ← exactamente a metade por usar
+
+E A CONSTRUÇÃO MAIS LIMPA NÃO É A MINHA — é a que veio na revisão: enumerar o
+quadrado em SERPENTINA e lançar com ρ(q_t) = 2t. A imagem são os PARES e os 256
+ímpares ficam livres: a folga distribuída em vez de num bloco. Medido também.
+
+O QUE PROÍBE PEDIR AS DUAS COISAS, e é o coração: injectividade E preservação de
+arestas não coexistem — e não por dificuldade de construção. Um vértice INTERIOR
+do quadrado tem QUATRO vizinhos e a recta dá DOIS. É o thm:dimensao a decidir,
+|V(x)| = 2n. Quatro imagens distintas e adjacentes não cabem em dois lugares.
+(É o análogo discreto do teorema de Netto: contínua e injectiva entre dimensões
+diferentes não existe.)
+
+DONDE A DUALIDADE É ENTRE DOBRA E BURACO, e não entre duas inversas:
+     π: I → X   enche   não injectiva   sobrejectiva   paga com G > 1
+     ρ: X → I   conta   injectiva       não sobrej.    paga com índices por usar
+E o Cantor deixa de ser um exemplo isolado na tabela: passa a ser um dos lados.
+
+E O LEVANTAMENTO É A PONTE OUTRA VEZ: com |I| = 2|X| e G ≡ 2, a folha
+k(i) ∈ {1,2} É EXACTAMENTE o bit que encher deitou fora, e π̃ volta a ser
+injectiva sobre 512 = |I|. A retracção vira bijecção ao preço de uma coordenada.
+
+  gume      50 mutações, 50 mordem
+  bateria   529 : 529, 0 falhas · 28 unidades passaram, 0 falharam
+  paper     20 páginas

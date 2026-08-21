@@ -1127,6 +1127,62 @@ cursor basta: $\ell$ e $p$ lêem-se no campo, sem segunda passagem e sem compara
 posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{A realização contrária: dobra contra buraco}\label{sec:dual}
+
+\noindent A realização comprime o parâmetro no espaço, e o excesso de índices
+aparece como \textbf{dobra}: $G>1$. A pergunta dual é o que acontece na direção
+contrária --- do espaço para o parâmetro --- e a resposta não é ``a inversa'',
+porque não há uma.
+
+\begin{teorema}[a realização contrária, e o que ela paga]\label{thm:contraria}
+Seja $Q_M=\{0,\dots,M-1\}^2$ o quadrado discreto e $q_0,\dots,q_{M^2-1}$ uma
+enumeração dos seus pontos (por exemplo em serpentina). A aplicação
+\[
+\rho\colon Q_M\longrightarrow\Z,\qquad \rho(q_t)=2t
+\]
+é \textbf{injetiva} e \textbf{não sobrejetiva}: a sua imagem são os pares, e
+todos os ímpares ficam por usar. Assim, as duas realizações trocam exatamente os
+dois defeitos:
+\begin{center}\small
+\begin{tabular}{@{}lccl@{}}
+\toprule
+ & injetiva & sobrejetiva & o que paga \\
+\midrule
+$\pi\colon I\to X$ \ (enche) & não & sim & \textbf{dobra}: $G>1$ \\
+$\rho\colon X\to I$ \ (conta) & sim & não & \textbf{buraco}: índices por usar \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{teorema}
+
+\begin{proof}
+Injetividade: $t\mapsto2t$ é injetiva e a enumeração é bijetiva sobre $Q_M$.
+Não sobrejetividade: $\operatorname{im}\rho\subseteq2\Z$.
+\end{proof}
+
+\medskip\noindent\textbf{E não se pode pedir as duas coisas.} Se além de
+injetiva se exigisse que $\rho$ levasse vizinhos em vizinhos, ela seria um
+mergulho de grafos de $Q_M$ no caminho --- e isso não existe, por uma razão que
+já está neste paper: pelo Teor.~\ref{thm:dimensao} um vértice interior do
+quadrado tem $\lvert V(x)\rvert=4$ vizinhos distintos, enquanto na reta
+$\lvert V\rvert=2$. Quatro imagens distintas e adjacentes não cabem em dois
+lugares. \emph{O grau decide}, e não a habilidade de quem constrói.
+
+\medskip\noindent Donde a dualidade é entre \textbf{dobra} e \textbf{buraco}, e
+não entre duas inversas. Quem comprime o parâmetro no espaço paga com $G>1$;
+quem espalha o espaço no parâmetro paga com índices por usar. E o par
+$(\pi,\rho)$ é a mesma \emph{retração} de sempre: pode-se ter
+$\pi\circ\rho=\mathrm{id}_X$, mas nunca $\rho\circ\pi=\mathrm{id}_I$ --- o que
+sobra na reta não tem de onde vir.
+
+\medskip\noindent\textbf{E o levantamento é a ponte, outra vez.} Com
+$\abs{I}=2\abs{X}$ e $\pi$ a cobrir cada célula duas vezes, tem-se $G\equiv2$; a
+folha $k(i)\in\{1,2\}$ do Teor.~\ref{thm:levantamento} é \emph{exatamente} o bit
+que $\pi$ deitou fora, e $\tilde\pi$ é injetiva sobre $\abs{I}$ pontos. A
+retração vira bijeção ao preço de uma coordenada --- que é o mesmo preço de
+sempre.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{O espaço e o tempo}\label{sec:leitura}
 
 \noindent O \textbf{espaço} está definido na §\ref{sec:geo}: é o que a dobra
@@ -1434,7 +1490,7 @@ comprimento (Teor.~\ref{thm:medida}).
 \toprule
 $n$ & realização & $\abs{I}$ & $\max G$ & células & dobra & percurso & \\
 \midrule
-$1$ & Cantor & $512$ & $1$ & $512$ & não & não & o endereço ternário do terço médio \\
+$1$ & Cantor & $512$ & $1$ & $512$ & não & não & o endereço ternário do terço médio; e um dos lados da §\ref{sec:dual} \\
 $2$ & Heighway & $4097$ & $2$ & $2558$ & sim & sim & a curva da §\ref{sec:dragao} \\
 $3$ & dragão no espaço & $2049$ & $3$ & $1750$ & sim & sim & a mesma dobra com o plano da viragem a rodar \\
 $2$ & espiral quadrada & $4097$ & $1025$ & $4$ & sim & sim & sempre à esquerda \\
@@ -1523,6 +1579,9 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+Teor.~\ref{thm:contraria} §AN29 (contar injetiva com $256$ lugares por usar;
+encher com $G\equiv2$; $\pi\circ\rho=\mathrm{id}$ e $\rho\circ\pi$ a falhar em
+$256$ de $512$; a serpentina com $\rho=2t$; e o grau $4$ contra $2$);
 os três pontos da revisão externa §AN28 ($\tau=N$ com
 $g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$, que tem a diagonal
 a $1$ e o cruzado a $3$; $G=1$ na imagem e $0$ fora; e $c=\tfrac1nF(f)$ a
@@ -1548,7 +1607,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN28;
+        {\code{tests/aranha\_n.c} §AN1--§AN29;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
