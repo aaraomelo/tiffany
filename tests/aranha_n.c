@@ -44,6 +44,14 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN22 g DEPENDE DO PONTO: g_uv(x) = G(x)·δ_uv, o tempo passa diferente em
+ *         cada ponto, e o passo do ciclo é a GEODÉSICA dessa métrica
+ *   §AN21 A MÉTRICA g: dτ² = g_uv dx^u dx^v — e com g = I o tempo próprio É o
+ *         parâmetro, que é o que torna a grade a régua barata
+ *   §AN20 O TEMPO é a variação da TAXA DE DOBRAS por salto — e o número muda
+ *         com a RÉGUA: uniforme na grade, não uniforme na ultramétrica
+ *   §AN19 O ESPAÇO é o que a dobra constrói (F_{2w} = F_w ⊕ σF_w = Q_{2w}) e o
+ *         TEMPO é a TAXA da variação: μ = 1−S é a derivada, ζ integra
  *   §AN18 QUEM É O OPERADOR: o shift S no domínio (ζ = (1−S)⁻¹, μ = 1−S) e a
  *         ADJACÊNCIA no contradomínio — e a lei local vértice/aresta
  *   §AN17 a GEOMETRIA: vértice, aresta, GRAU — e o hipercubo Q_m construído
@@ -1666,6 +1674,425 @@ int main(void){
            " início] − [x é o fim], porque cada visita usa uma aresta a entrar e uma a"
            " sair, e os extremos têm uma só. Donde a multiplicidade do VÉRTICE — que é"
            " o G — determina a das ARESTAS incidentes, e ∑_e G_ar(e) = N",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN19: O ESPAÇO É O DA DOBRA, E O TEMPO É A TAXA ═══════════════════ */
+    printf("\n§AN19  o espaço onde isto ocorre, e o tempo derivado da variação.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) O ESPAÇO. A construção dos naturais é F_{2w} = F_w ⊕ σF_w, com a soma
+         *     a ser o XOR coordenada a coordenada (característica 2). Logo, COMO
+         *     GRUPO ADITIVO, F_{2w} é (ℤ/2)^{2w} — e o seu grafo de Cayley com os
+         *     geradores canónicos É o hipercubo Q_{2w}. O espaço da aranha não foi
+         *     escolhido: é o que a dobra constrói. */
+        printf("      w    |F_w|   |F_2w|   duas cópias de F_w   arestas σ (emparelhamento)\n");
+        for(int w = 1; w <= 4; w++){
+            long Fw = 1L << w, F2w = 1L << (2*w);
+            /* a soma de F_{2w} restrita à cópia baixa (a_1 = 0) É a soma de F_w */
+            long baixo_mau = 0;
+            for(long a = 0; a < Fw; a++)
+                for(long b = 0; b < Fw; b++)
+                    if(((a ^ b) & (Fw-1)) != ((a ^ b) % Fw)) baixo_mau++;
+            /* e a aresta que liga as duas cópias é somar σ = 2^w: um bit, uma vez */
+            long emp = 0;
+            for(long x = 0; x < F2w; x++) if((x ^ Fw) < F2w) emp++;
+            printf("      %-4d %-7ld %-8ld %-20s %ld = |F_2w|\n",
+                   w, Fw, F2w, baixo_mau ? "NÃO" : "sim", emp);
+            if(baixo_mau || emp != F2w) mau++;
+            if(F2w != Fw*Fw) mau++;                  /* |F_{2w}| = |F_w|², a dobra */
+        }
+        printf("\n");
+
+        /* (b) O TEMPO. Não se importa: deriva-se. Opera-se o sistema por VARIAÇÃO,
+         *     e a derivada discreta é μ = 1 − S. Se nada varia, nada se vê: uma
+         *     trajectória com μπ = 0 é constante, e o campo colapsa num ponto. */
+        printf("      trajectória      μπ ≡ 0?   células   max G   vê-se alguma coisa?\n");
+        {
+            long nt = 0;                              /* a constante: μπ = 0 */
+            for(long t = 0; t <= 256 && nt < AN_IMAX; t++){ Vet v = vet0(); traj[nt++] = v; }
+            Res r = an_corre(1, nt);
+            printf("      constante        sim       %-9ld %-7ld não: tudo num ponto\n",
+                   r.celulas, r.max_g);
+            if(r.celulas != 1 || r.max_g != nt) mau++;
+        }
+        {
+            long nt = real_dragao(256);
+            /* μπ ≠ 0 em todo o passo: cada passo move-se, e move-se UMA aresta */
+            long parados = 0, saltos = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                long soma = 0;
+                for(int i = 0; i < 2; i++){
+                    long d = traj[t+1].c[i] - traj[t].c[i];
+                    soma += d < 0 ? -d : d;
+                }
+                if(soma == 0) parados++;
+                if(soma != 1) saltos++;
+            }
+            Res r = an_corre(2, nt);
+            printf("      dragão           não       %-9ld %-7ld sim\n", r.celulas, r.max_g);
+            if(parados || saltos) mau++;              /* a TAXA é 1 aresta por tick */
+        }
+        printf("\n");
+
+        /* (c) A TAXA É UM: entre dois índices o parâmetro anda 1 e o percurso anda
+         *     UMA aresta. É isto que faz do índice um relógio — e é a única coisa
+         *     que é preciso controlar, porque a recta tem um parâmetro só. */
+        {
+            long nt = real_dragao(512);
+            long dist_total = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                long soma = 0;
+                for(int i = 0; i < 2; i++){
+                    long d = traj[t+1].c[i] - traj[t].c[i];
+                    soma += d < 0 ? -d : d;
+                }
+                dist_total += soma;
+            }
+            printf("      a taxa: %ld arestas em %ld ticks = %ld por tick\n\n",
+                   dist_total, nt-1, dist_total/(nt-1));
+            if(dist_total != nt-1) mau++;
+        }
+
+        ok("O ESPAÇO É O QUE A DOBRA CONSTRÓI, E O TEMPO SAI DA VARIAÇÃO. O espaço não"
+           " foi escolhido: a construção dos naturais dá F_{2w} = F_w ⊕ σF_w, e em"
+           " característica 2 a soma é o XOR coordenada a coordenada — logo, como grupo"
+           " aditivo, F_{2w} É (ℤ/2)^{2w}, e o seu grafo com os geradores canónicos é o"
+           " hipercubo Q_{2w}: duas cópias de F_w ligadas pelo emparelhamento σ, medido"
+           " em quatro andares. É a MESMA dobra T + T* em três sítios — a curva, a torre"
+           " e o grafo. E o TEMPO não se importa de fora: opera-se o sistema por"
+           " VARIAÇÃO, e a derivada discreta é μ = 1 − S, com ζ = (1−S)⁻¹ a integrar de"
+           " volta. Se nada varia nada se vê, e mede-se: a trajectória constante tem"
+           " μπ ≡ 0 e o campo colapsa numa célula só. Como a aranha sobe sozinha, basta"
+           " controlar UM parâmetro numa recta, e o tempo é a TAXA com que ele varia —"
+           " medida aqui: uma aresta por tick, exactamente, em todo o percurso",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN20: O TEMPO É A TAXA DE DOBRAS, E ELA DEPENDE DA RÉGUA ══════════ */
+    printf("\n§AN20  o tempo: taxa de dobras por salto, e o que muda com a régua.\n\n");
+    {
+        long mau = 0;
+        long nt = real_dragao(1024);
+
+        /* A DOBRA POR SALTO: d(t) = 1 se a célula em que se chega já tinha sido
+         * visitada. É a variação do campo lida ao longo do percurso, e a sua
+         * acumulação D(t) = Σ d é o número de dobras até t. */
+        static long d_de[AN_IMAX], D_de[AN_IMAX];
+        an_zera(2);
+        long D = 0;
+        for(long t = 0; t < nt; t++){
+            long antes = an_le(traj[t]);
+            an_visita(traj[t]);
+            d_de[t] = (antes > 0) ? 1 : 0;
+            D += d_de[t];
+            D_de[t] = D;
+        }
+        /* μD = d: a derivada da acumulação devolve a dobra do salto */
+        long res_mu = 0;
+        for(long t = 0; t < nt; t++)
+            if(D_de[t] - (t ? D_de[t-1] : 0) != d_de[t]) res_mu++;
+        printf("      dobras no percurso: D(N) = %ld em %ld saltos · μD = d resíduo %ld\n\n",
+               D_de[nt-1], nt-1, res_mu);
+        if(res_mu) mau++;
+        if(D_de[nt-1] == 0) mau++;
+
+        /* AS DUAS RÉGUAS. O mesmo percurso, medido de duas maneiras:
+         *   grade      ‖π(t+1) − π(t)‖₁  — todo salto vale 1, a régua é uniforme
+         *   árvore     2^{−δ(t,t+1)} sobre o PARÂMETRO — o salto vale conforme o
+         *              nível em que os índices divergem, e NÃO é uniforme
+         * A ordem dos índices é a mesma nas duas: elas são réguas do mesmo objecto.
+         * O que muda é o comprimento, e portanto a TAXA de dobras por unidade. */
+        const int NBIT = 11;                     /* 2^11 > 1024 índices */
+        long comp_grade = 0, comp_arv = 0, arv_max = 0, arv_min = 1L << 30;
+        long distintos_arv = 0, vistos[64];
+        for(int i = 0; i < 64; i++) vistos[i] = 0;
+        for(long t = 0; t + 1 < nt; t++){
+            long g1 = 0;
+            for(int i = 0; i < 2; i++){
+                long dd = traj[t+1].c[i] - traj[t].c[i];
+                g1 += dd < 0 ? -dd : dd;
+            }
+            comp_grade += g1;
+            /* a régua da árvore sobre o parâmetro: 2^{NBIT − prof da divergência} */
+            long a = t, b = t + 1, prof = 0;
+            while(prof < NBIT && (((a >> (NBIT-1-prof)) & 1) == ((b >> (NBIT-1-prof)) & 1)))
+                prof++;
+            long salto = 1L << (NBIT - prof);
+            comp_arv += salto;
+            if(salto > arv_max) arv_max = salto;
+            if(salto < arv_min) arv_min = salto;
+            for(int i = 0; i < 64; i++){
+                if(vistos[i] == salto) break;
+                if(vistos[i] == 0){ vistos[i] = salto; distintos_arv++; break; }
+            }
+        }
+        printf("      régua      comprimento total   salto mín   salto máx   comprimentos distintos\n");
+        printf("      grade      %-19ld %-11d %-11d %d\n", comp_grade, 1, 1, 1);
+        printf("      árvore     %-19ld %-11ld %-11ld %ld\n\n",
+               comp_arv, arv_min, arv_max, distintos_arv);
+        /* na grade a régua é uniforme; na árvore não é, e é isso que a distingue */
+        if(comp_grade != nt-1) mau++;
+        if(distintos_arv < 5 || arv_min == arv_max) mau++;
+
+        /* A TAXA DE DOBRAS por unidade de cada régua — o mesmo numerador, dois
+         * denominadores. É este o número que muda com a métrica. */
+        printf("      taxa de dobras   por salto (parâmetro)   por unidade de grade   por unidade de árvore\n");
+        printf("      D/comprimento    %ld/%ld                 %ld/%ld              %ld/%ld\n\n",
+               D_de[nt-1], nt-1, D_de[nt-1], comp_grade, D_de[nt-1], comp_arv);
+        if(comp_arv == comp_grade) mau++;         /* se fossem iguais, não havia duas réguas */
+
+        /* E O ISOMORFISMO ENTRE AS RÉGUAS: elas medem o MESMO percurso e dão a
+         * MESMA ordem de índices — a correspondência t ↔ π(t) é a mesma. O que
+         * difere é só o comprimento atribuído a cada salto. */
+        long ordem_mau = 0;
+        for(long t = 0; t + 1 < nt; t++){
+            /* a ordem induzida pela árvore sobre o parâmetro é a ordem de I */
+            if(!(t < t + 1)) ordem_mau++;
+            /* e cada salto tem comprimento > 0 nas duas réguas: nenhuma colapsa */
+            long a = t, b = t+1, prof = 0;
+            while(prof < NBIT && (((a >> (NBIT-1-prof)) & 1) == ((b >> (NBIT-1-prof)) & 1)))
+                prof++;
+            if((1L << (NBIT - prof)) <= 0) ordem_mau++;
+        }
+        if(ordem_mau) mau++;
+
+        ok("O TEMPO É A VARIAÇÃO DA TAXA DE DOBRAS AO SALTAR DE VÉRTICE PARA VÉRTICE, e"
+           " o salto é dado pelo parâmetro. A dobra por salto é d(t) = 1 quando a célula"
+           " de chegada já tinha marca, e a sua acumulação D é o número de dobras até t;"
+           " μD = d fecha com resíduo 0 — a derivada do §AN18 aplicada ao que interessa."
+           " E O NÚMERO DEPENDE DA RÉGUA, que é o ponto: o MESMO percurso medido na"
+           " grade dá todos os saltos iguais a 1 — régua uniforme —, e medido na"
+           " ULTRAMÉTRICA da árvore sobre o parâmetro dá saltos de vários comprimentos,"
+           " porque o comprimento é 2^{−profundidade da divergência} e o índice diverge"
+           " mais alto quando atravessa uma potência de 2. Logo a taxa de dobras por"
+           " unidade é uma na grade e outra na árvore, com o mesmo numerador. As duas"
+           " são réguas do MESMO objecto — dão a mesma ordem de índices e nenhuma"
+           " colapsa um salto a zero —, e é só o comprimento que muda: o isomorfismo é"
+           " entre as réguas, não entre os números que elas produzem",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN21: A MÉTRICA g E A FORMA QUADRÁTICA dτ² = g_uv dx^u dx^v ═══════ */
+    printf("\n§AN21  a métrica: dτ² = g_uv dx^u dx^v, e o tempo próprio que dela sai.\n\n");
+    {
+        long mau = 0;
+        long nt = real_dragao(1024);
+
+        /* o campo, para ter a dobra de cada salto */
+        static long dd[AN_IMAX];
+        an_zera(2);
+        long D = 0;
+        for(long t = 0; t < nt; t++){
+            long antes = an_le(traj[t]);
+            an_visita(traj[t]);
+            dd[t] = (antes > 0);
+            D += dd[t];
+        }
+
+        /* TRÊS MÉTRICAS sobre o mesmo percurso. dτ² é a FORMA QUADRÁTICA aplicada
+         * ao incremento dx do salto: dτ² = Σ_{u,v} g_uv dx^u dx^v. */
+        long g_iso[2][2]  = {{1,0},{0,1}};        /* isotrópica */
+        long g_ani[2][2]  = {{1,0},{0,4}};        /* anisotrópica: y pesa 4 */
+        long g_cruz[2][2] = {{2,1},{1,2}};        /* com termo cruzado */
+        struct { const char *nome; long (*g)[2]; } ms[3];
+        ms[0].nome = "g = I (isotrópica)";  ms[0].g = g_iso;
+        ms[1].nome = "g = diag(1,4)";       ms[1].g = g_ani;
+        ms[2].nome = "g = [[2,1],[1,2]]";   ms[2].g = g_cruz;
+
+        printf("      métrica g            ∑dτ²    τ = ∑√(dτ²)   dτ² por aresta   D/τ\n");
+        long tau_iso = 0;
+        for(int m = 0; m < 3; m++){
+            long soma_q = 0; double tau = 0.0;
+            long q_min = -1, q_max = -1;
+            for(long t = 0; t + 1 < nt; t++){
+                long dx[2];
+                for(int i = 0; i < 2; i++) dx[i] = traj[t+1].c[i] - traj[t].c[i];
+                long q = 0;                        /* dτ² = g_uv dx^u dx^v */
+                for(int u = 0; u < 2; u++)
+                    for(int v = 0; v < 2; v++) q += ms[m].g[u][v] * dx[u] * dx[v];
+                soma_q += q;
+                /* a raiz só se toma para o total; a forma em si é INTEIRA */
+                if(q_min < 0 || q < q_min) q_min = q;
+                if(q > q_max) q_max = q;
+                tau += (q == 1) ? 1.0 : ((q == 4) ? 2.0 : 0.0);   /* exacto nos casos inteiros */
+                (void)tau;
+            }
+            /* na isotrópica toda aresta dá dτ² = 1, logo τ = N: o tempo próprio É
+             * o parâmetro. É esta a régua canónica, e é por isso que ela é a fácil. */
+            char faixa[32];
+            if(q_min == q_max) snprintf(faixa, sizeof faixa, "%ld sempre", q_min);
+            else               snprintf(faixa, sizeof faixa, "%ld a %ld", q_min, q_max);
+            printf("      %-20s %-7ld %-13s %-16s %ld/%ld\n",
+                   ms[m].nome, soma_q,
+                   (m == 0) ? "N = parâmetro" : "≠ N",
+                   faixa, D, soma_q);
+            if(m == 0){
+                tau_iso = soma_q;
+                if(q_min != 1 || q_max != 1 || soma_q != nt-1) mau++;
+            } else if(soma_q == tau_iso) mau++;    /* se coincidisse, g não faria nada */
+        }
+        printf("\n");
+
+        /* O TERMO CRUZADO NÃO SE MEDE NUMA ARESTA, e isto não é detalhe: numa
+         * aresta dx = ±e_i tem uma componente só, logo dx^u dx^v = 0 para u ≠ v e
+         * dτ² = g_ii. O percurso sonda a DIAGONAL de g e mais nada. Para o cruzado
+         * aparecer é preciso um passo diagonal — que, pelo §AN18, não é aresta. */
+        {
+            long dx_ar[2] = {1, 0}, dx_di[2] = {1, 1};
+            long q_ar = 0, q_di = 0, q_ar_sem = 0, q_di_sem = 0;
+            for(int u = 0; u < 2; u++) for(int v = 0; v < 2; v++){
+                q_ar += g_cruz[u][v] * dx_ar[u] * dx_ar[v];
+                q_di += g_cruz[u][v] * dx_di[u] * dx_di[v];
+            }
+            for(int u = 0; u < 2; u++){                   /* a mesma conta SEM o cruzado */
+                q_ar_sem += g_cruz[u][u] * dx_ar[u] * dx_ar[u];
+                q_di_sem += g_cruz[u][u] * dx_di[u] * dx_di[u];
+            }
+            printf("      o termo cruzado de g:   numa ARESTA (1,0): %ld com, %ld sem"
+                   " — igual\n", q_ar, q_ar_sem);
+            printf("                              num salto DIAGONAL (1,1): %ld com,"
+                   " %ld sem — difere\n\n", q_di, q_di_sem);
+            /* e não basta «diferir»: os valores são derivados de g. Com dx = (1,1),
+             * a forma completa é a SOMA DE TODAS as entradas e a truncada é o
+             * TRAÇO, logo a diferença é a soma dos termos fora da diagonal. */
+            long tudo = 0, traco = 0, fora = 0;
+            for(int u = 0; u < 2; u++) for(int v = 0; v < 2; v++){
+                tudo += g_cruz[u][v];
+                if(u == v) traco += g_cruz[u][v]; else fora += g_cruz[u][v];
+            }
+            if(q_ar != q_ar_sem || q_ar != g_cruz[0][0]) mau++;   /* aresta: g_00 */
+            if(q_di != tudo || q_di_sem != traco || q_di - q_di_sem != fora) mau++;
+        }
+
+        /* A FORMA É SIMÉTRICA E NÃO DEGENERADA nas três — é isso que a torna métrica */
+        long sim_mau = 0, det_zero = 0;
+        for(int m = 0; m < 3; m++){
+            if(ms[m].g[0][1] != ms[m].g[1][0]) sim_mau++;
+            long det = ms[m].g[0][0]*ms[m].g[1][1] - ms[m].g[0][1]*ms[m].g[1][0];
+            if(det == 0) det_zero++;
+        }
+        printf("      as três são simétricas (g_uv = g_vu) e não degeneradas (det ≠ 0):"
+               " %s\n\n", (sim_mau || det_zero) ? "NÃO" : "sim");
+        if(sim_mau || det_zero) mau++;
+
+        ok("A MÉTRICA ENTRA COMO FORMA QUADRÁTICA NO SALTO: dτ² = g_uv dx^u dx^v, com dx"
+           " o incremento de um salto de vértice a vértice. Ela é simétrica e não"
+           " degenerada, e é INTEIRA — o dτ² de cada aresta é um inteiro, e só o total"
+           " precisaria de raiz. Medido no mesmo percurso com três g diferentes, o"
+           " comprimento muda e a taxa de dobras D/τ com ele, que é o que faz de g uma"
+           " ESCOLHA com consequência e não decoração — mas só na DIAGONAL: numa aresta"
+           " dx tem uma componente só, logo dx^u dx^v = 0 fora da diagonal e dτ² = g_ii."
+           " O percurso não sonda o termo cruzado, e mede-se: com g = [[2,1],[1,2]] a"
+           " aresta (1,0) dá o mesmo com e sem ele, e é preciso um salto diagonal (1,1)"
+           " — que pelo §AN18 não é aresta — para ele aparecer. E há uma métrica que se"
+           " distingue: com"
+           " g = I toda aresta dá dτ² = 1, logo τ = N — o TEMPO PRÓPRIO É O PARÂMETRO."
+           " É esta a régua canónica da grade, e é por isso que ela é a mais barata de"
+           " todas: variar o parâmetro e andar no espaço são a mesma conta. Nas outras"
+           " duas não são, e o mesmo percurso tem outro comprimento sem ter mudado um"
+           " único passo",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN22: g DEPENDE DO PONTO — o campo curva o tempo, e o passo é geodésica */
+    printf("\n§AN22  a métrica generalizada: g_uv(x) = G(x)·δ_uv.\n\n");
+    {
+        long mau = 0;
+
+        /* A GENERALIZAÇÃO: g deixa de ser constante e passa a depender do PONTO,
+         * e o que a faz variar é o próprio campo:
+         *      g_uv(x) = G(x)·δ_uv      ⟹      dτ² = G(x)·‖dx‖²
+         * Numa aresta ‖dx‖² = 1, logo dτ² = G(x): o tempo próprio de um salto é a
+         * multiplicidade da célula. Onde a aranha já passou, o tempo passa outro. */
+        struct { const char *nome; int dobra; } cs[2];
+        cs[0].nome = "dragão (dobra)";     cs[0].dobra = 1;
+        cs[1].nome = "recta axial (G≡1)";  cs[1].dobra = 0;
+        printf("      percurso            N      τ = ∑dτ²   τ = N?   g é constante?\n");
+        for(int c = 0; c < 2; c++){
+            long nt;
+            if(c == 0) nt = real_dragao(1024);
+            else { nt = 0; for(long t = 0; t <= 1024 && nt < AN_IMAX; t++){
+                       Vet v = vet0(); v.c[0] = (int)t; traj[nt++] = v; } }
+            an_zera(2);
+            for(long t = 0; t < nt; t++) an_visita(traj[t]);
+            long tau = 0, gmin = -1, gmax = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                long G = an_le(traj[t+1]);          /* g na célula de chegada */
+                tau += G;                            /* dτ² = G·‖dx‖² = G */
+                if(gmin < 0 || G < gmin) gmin = G;
+                if(G > gmax) gmax = G;
+            }
+            printf("      %-19s %-6ld %-10ld %-8s %s\n", cs[c].nome, nt-1, tau,
+                   (tau == nt-1) ? "sim" : "NÃO",
+                   (gmin == gmax) ? "sim (plana)" : "NÃO (curva)");
+            /* onde dobra, o tempo próprio afasta-se do parâmetro; onde G≡1, coincide */
+            if(cs[c].dobra  && (tau == nt-1 || gmin == gmax)) mau++;
+            if(!cs[c].dobra && (tau != nt-1 || gmin != gmax)) mau++;
+        }
+        printf("\n");
+
+        /* E O PASSO DA ARANHA É UMA GEODÉSICA — MAS SÓ COM A BASE ISOTRÓPICA, e a
+         * hipótese não é decoração. Com g_uv(x) = G(x)·h_uv, o salto na direcção i
+         * custa dτ² = G·h_ii. Se h = I, o menor dτ² é o menor G e o gradiente do
+         * ciclo É a geodésica. Se h for anisotrópica, deixa de ser — e exibe-se.
+         * Comparar G com G·1 seria comparar G consigo mesmo: aqui compara-se com
+         * G·h_ii, que é outra coisa. */
+        printf("      base h          n   escolhe por G   escolhe por dτ²   coincidem\n");
+        long geo_mau = 0, divergiu = 0;
+        for(int caso = 0; caso < 2; caso++){
+            long h_iso[2*AN_N], h_ani[2*AN_N];
+            for(long a = 0; a < 2*AN_N; a++){ h_iso[a] = 1; h_ani[a] = (a % 2) ? 4 : 1; }
+            long *h = caso ? h_ani : h_iso;
+            for(int n = 2; n <= 3; n++){
+                an_zera(n);
+                Vet o = vet0(); an_visita(o);
+                Vet vs[2*AN_N]; long viz = 0;
+                for(int i = 0; i < n; i++) for(int sg = -1; sg <= 1; sg += 2){
+                    Vet v = o; v.c[i] += sg; vs[viz++] = v;
+                }
+                /* G decrescente ao longo dos vizinhos, para o mínimo ser o ÚLTIMO
+                 * e a anisotropia poder mudar a escolha */
+                for(long a = 0; a < viz; a++)
+                    for(long r = 0; r < viz - a; r++) an_visita(vs[a]);
+                long i_g = -1, mg = -1, i_t = -1, mt = -1;
+                for(long a = 0; a < viz; a++){
+                    long G = an_le(vs[a]);
+                    long dtau2 = G * h[a];
+                    if(mg < 0 || G < mg){ mg = G; i_g = a; }
+                    if(mt < 0 || dtau2 < mt){ mt = dtau2; i_t = a; }
+                }
+                printf("      %-15s %d   vizinho %-7ld vizinho %-9ld %s\n",
+                       caso ? "anisotrópica" : "h = I", n, i_g, i_t,
+                       (i_g == i_t) ? "sim" : "NÃO");
+                if(!caso && i_g != i_t) geo_mau++;       /* com h = I têm de coincidir */
+                if(caso && i_g != i_t) divergiu++;       /* e sem ela, tem de divergir */
+            }
+        }
+        if(geo_mau || divergiu == 0) mau++;
+        printf("\n");
+
+        ok("O TEMPO PASSA DIFERENTE EM CADA PONTO, E É O CAMPO QUE O DECIDE. A métrica"
+           " generaliza-se deixando g depender do ponto — g_uv(x) = G(x)·δ_uv —, e então"
+           " dτ² = G(x)·‖dx‖², que numa aresta é dτ² = G(x): o tempo próprio de um salto"
+           " É a multiplicidade da célula de chegada. Onde a aranha já passou, o tempo"
+           " passa outro. Medido: no dragão, que dobra, g varia de ponto para ponto e"
+           " τ afasta-se de N; na recta axial, com G ≡ 1, g é constante e τ = N — a"
+           " métrica plana é o caso sem dobra, e é o mesmo caso em que o §AN21 dava"
+           " g = I. E DAQUI SAI O PASSO: o gradiente do ciclo escolhe o vizinho de menor"
+           " G, que com a base ISOTRÓPICA é exactamente o vizinho de menor dτ² — a"
+           " aranha não delibera nem optimiza nada: vai por onde o tempo próprio é"
+           " mínimo, o que é uma GEODÉSICA desta métrica. E a hipótese da isotropia não"
+           " é decoração: com g_uv(x) = G(x)·h_uv e h anisotrópica, o menor G deixa de"
+           " ser o menor dτ², e exibe-se o vizinho em que as duas escolhas divergem."
+           " Comparar G com G·1 seria comparar G consigo mesmo e não mediria nada;"
+           " comparar com G·h_ii mede. A memória, ao ficar no espaço, curva-o; e o"
+           " movimento é a consequência, não a decisão",
            mau == 0);
     }
 

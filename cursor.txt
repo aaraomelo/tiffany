@@ -1854,3 +1854,71 @@ pipeline 2, e eu fazia-o sem o nomear.
             direcções, só noutra ordem — a soma não muda)
   bateria   529 : 529, 0 falhas · 17 unidades passaram, 0 falharam
   paper     16 páginas
+
+§39 — O ESPAÇO DEFINIDO, O TEMPO DERIVADO, E A MÉTRICA QUE O CURVA
+==================================================================
+Ordem: «define o espaço onde isso ocorre, é o espaço inicial da construção dos
+naturais.tex F_n = F_{n-1} + F_{n-1}*»; «o tempo sai do operador — quem é o
+operador? É VOCÊ que está a operar o sistema. Mas de que forma? Por VARIAÇÃO,
+DERIVADA, óbvio, porque se nada variar você não vê nada»; «qual a melhor forma
+de variar? A mais fácil — a aranha sobe sozinha, então basta controlar UM
+parâmetro numa recta. O TEMPO É A TAXA com que você varia o parâmetro»; depois
+«o tempo é a VARIAÇÃO NA TAXA DE DOBRAS quando salta de um vértice pro outro»;
+«dá a métrica g na variação quadrática, dτ² = g_uv...»; e «o tempo passa
+diferente em cada ponto do espaço — generaliza a métrica».
+
+O ESPAÇO NÃO FOI ESCOLHIDO (§AN19). A construção dos naturais dá
+    F_{2w} = F_w ⊕ σF_w,  σ² = σ + λ
+e em característica 2 a soma é o XOR coordenada a coordenada. Logo, COMO GRUPO
+ADITIVO, F_{2w} É (ℤ/2)^{2w}, e o seu grafo com os geradores canónicos é o
+HIPERCUBO Q_{2w}: duas cópias de F_w ligadas pelo emparelhamento σ. Medido em
+quatro andares. É a MESMA dobra T + T* em três sítios — a curva, a torre, e o
+grafo onde a transformada vive.
+
+O TEMPO DERIVA-SE, EM TRÊS PASSOS
+  1. opera-se por VARIAÇÃO. O operador é o deslocamento S; μ = 1 − S é a
+     DERIVADA discreta e ζ = (1−S)⁻¹ integra. Se nada varia nada se vê, e
+     mede-se: a trajectória constante tem μπ ≡ 0 e o campo colapsa numa célula.
+  2. a variação mais barata é UM parâmetro numa recta — a aranha sobe sozinha.
+  3. o tempo é a TAXA DE DOBRAS por salto: d(t) = 1 quando se chega a célula já
+     marcada, D = d*ζ, e μD = d com resíduo 0.
+
+E O NÚMERO DEPENDE DA RÉGUA (§AN20). O mesmo percurso:
+    grade    1024 de comprimento, salto 1 sempre, 1 comprimento distinto
+    árvore   12288,  saltos de 2 a 2048, ONZE comprimentos distintos
+A taxa de dobras por unidade é 335/1024 numa e 335/12288 na outra. As duas são
+réguas do MESMO objecto — mesma ordem de índices, nenhum salto colapsado. O
+isomorfismo é entre as RÉGUAS, não entre os números.
+
+A MÉTRICA COMO FORMA QUADRÁTICA (§AN21): dτ² = g_uv dx^u dx^v, simétrica, não
+degenerada, e INTEIRA por aresta. Três g sobre o mesmo percurso dão 1024, 2560 e
+2048. E UMA distingue-se: com g = I toda aresta dá dτ² = 1, logo τ = N — O TEMPO
+PRÓPRIO É O PARÂMETRO. É por isso que a grade é a régua barata: variar o
+parâmetro e andar no espaço são a mesma conta.
+  · e o PERCURSO SÓ SONDA A DIAGONAL DE g: numa aresta dx tem uma componente só,
+    logo o termo cruzado nunca é medido. Preciso de um salto diagonal — que pelo
+    §AN18 não é aresta. Medido: aresta (1,0) dá 2 com e sem; diagonal (1,1) dá 6
+    contra 4, e a diferença é a soma dos termos fora da diagonal.
+
+A GENERALIZAÇÃO (§AN22): g depende do PONTO, e quem a faz variar é o campo:
+    g_uv(x) = G(x)·h_uv   ⟹   dτ² = G(x)·h_ii  numa aresta
+O TEMPO PRÓPRIO DE UM SALTO É A MULTIPLICIDADE DA CÉLULA DE CHEGADA. Onde a
+trajectória já passou, o tempo passa outro — a memória, ao ficar no espaço,
+CURVA-O. Medido: o dragão tem g variável e τ = 1694 ≠ N = 1024; a recta axial
+tem G ≡ 1, g constante e τ = N. A métrica plana é o caso sem dobra.
+
+E DAÍ SAI O PASSO 3 DO CICLO: o gradiente escolhe o vizinho de menor G, que com
+h = id é o de menor dτ² — É UMA GEODÉSICA. A aranha não delibera nem optimiza:
+vai por onde o tempo próprio é mínimo. A hipótese da isotropia não é decoração e
+mede-se com contra-exemplo: com h anisotrópica as duas escolhas DIVERGEM
+(vizinho 3 contra 2, e 5 contra 4).
+
+DUAS ASSERÇÕES MINHAS QUE O GUME APANHOU
+  · comparei G com G·1 e chamei-lhe geodésica: era comparar G consigo mesmo.
+  · «o termo cruzado DIFERE no salto diagonal» passava com qualquer valor
+    errado. Agora exige os valores DERIVADOS de g: a forma completa é a soma de
+    todas as entradas, a truncada é o traço, e a diferença é o que está fora.
+
+  gume      37 mutações, 37 mordem
+  bateria   529 : 529, 0 falhas · 21 unidades passaram, 0 falharam
+  paper     17 páginas

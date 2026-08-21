@@ -312,62 +312,15 @@ um emparelhamento perfeito com $2^{m-1}$ arestas. A contagem $m\,2^{m-1}$ sai de
 cada um dos $2^m$ vértices ter grau $m$.
 \end{proof}
 
-\medskip\noindent É a mesma dobra $T_{k+1}=T_k+T_k^{*}$ da §\ref{sec:dragao}: o
-grafo em que a transformada da §\ref{sec:transf} vive é construído pelo passo que
-constrói a curva.
-
-\subsection*{O operador}
-
-\noindent O índice $t$ não é tempo importado de fora: é a \textbf{contagem das
-aplicações de um operador}. São dois, um de cada lado de $\pi$.
-
-\begin{definicao}[os dois operadores]\label{def:ops}
-No domínio, o \textbf{deslocamento} $S$, $(Sa)(t)=a(t-1)$. No contradomínio, a
-\textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
-\end{definicao}
-
-\begin{teorema}[$\zeta$ e $\mu$ saem de $S$]\label{thm:shift}
-$\zeta=\sum_{j\ge0}S^{j}=(1-S)^{-1}$ e $\mu=1-S$.
-\end{teorema}
-
-\begin{proof}
-$(\sum_{j\ge0}S^j a)(t)=\sum_{j\ge0}a(t-j)=\sum_{u\le t}a(u)=(a*\zeta)(t)$, com
-a soma finita porque $a$ se anula abaixo de $0$. E $(1-S)$ aplicado a isso
-telescopa: $(a*\zeta)(t)-(a*\zeta)(t-1)=a(t)$. Logo $(1-S)\zeta=\mathrm{id}$, e
-$\mu=1-S$ pelo Teor.~\ref{thm:mu}.
-\end{proof}
-
-\begin{definicao}[percurso]\label{def:percurso}
-$\pi$ é um \textbf{percurso} no grafo quando $\pi(t+1)\in V(\pi(t))$ para todo
-$t<N$, isto é, quando cada passo é uma \emph{aresta}. Nesse caso o índice conta
-arestas: $\abs{I}=N+1$ vértices visitados e $N$ arestas percorridas.
-\end{definicao}
-
-\medskip\noindent Ser percurso é uma condição sobre o \emph{par}
-(realização, grafo), e não uma propriedade da realização: na grade, a curva de
-Heighway e a reta axial são percursos; a reta \emph{diagonal} não é --- o seu
-passo $(1,1)$ não é aresta ---, e a rotação $J$ também não, porque salta.
-
-\begin{teorema}[a lei local: vértice e aresta]\label{thm:handshake}
-Seja $\pi$ um percurso e $G_{\mathrm{ar}}(e)$ o número de vezes que ele usa a
-aresta $e$. Então, para cada vértice $x$,
-\[
-\sum_{e\,\ni\,x}G_{\mathrm{ar}}(e)\;=\;2\,G(x)\;-\;[\,x=\pi(0)\,]\;-\;[\,x=\pi(N)\,],
-\qquad\text{e}\qquad \sum_{e}G_{\mathrm{ar}}(e)=N .
-\]
-\end{teorema}
-
-\begin{proof}
-Cada visita a $x$ num índice interior $0<t<N$ usa duas arestas incidentes, a de
-$t-1$ para $t$ e a de $t$ para $t+1$; a visita em $t=0$ usa uma só, e a em $t=N$
-também. Somando sobre as $G(x)$ visitas vem o enunciado. A segunda igualdade é
-contar as $N$ arestas do percurso.
-\end{proof}
-
-\medskip\noindent A multiplicidade do vértice determina, assim, a das arestas
-incidentes: $G$ não é uma contagem entre outras --- é a que fecha a
-contabilidade local do percurso. É o \emph{handshaking} dito sobre a
-trajetória.
+\medskip\noindent\textbf{E o espaço não foi escolhido.} A construção dos
+naturais dá o andar seguinte por $F_{2w}=F_w\oplus\sigma F_w$, com
+$\sigma^2=\sigma+\lambda$. Em característica $2$ a soma é o ou-exclusivo
+coordenada a coordenada, logo \emph{como grupo aditivo} $F_{2w}$ é
+$(\Z/2)^{2w}$, e o seu grafo com os geradores canónicos \textbf{é} $Q_{2w}$:
+duas cópias de $F_w$ ligadas pelo emparelhamento $\sigma$. É a mesma dobra
+$T+T^{*}$ em três sítios --- a curva da §\ref{sec:dragao}, a torre, e o grafo em
+que a transformada da §\ref{sec:transf} vive. O espaço da aranha é o que a
+dobra constrói.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O ciclo da aranha}\label{sec:algoritmo}
@@ -916,12 +869,156 @@ cursor basta: $\mu$ e $p$ lêem-se no campo, sem segunda passagem e sem comparar
 posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section{O que o passo lê: a célula ou o índice}\label{sec:leitura}
+\section{O espaço e o tempo}\label{sec:leitura}
 
-\noindent A Def.~\ref{def:determinista} pede que o passo seja função da célula.
-Isto não separa objetos matemáticos de outros --- separa \textbf{duas
-dependências}, e ambas são construções correntes. O teorema seguinte diz que a
-escolha não é livre.
+\noindent O \textbf{espaço} está definido na §\ref{sec:geo}: é o que a dobra
+constrói, $F_{2w}=F_w\oplus\sigma F_w$, cujo grafo aditivo é $Q_{2w}$. Falta o
+\textbf{tempo}, e ele não se importa de fora --- deriva-se.
+
+\subsection*{O tempo}
+
+\noindent Opera-se um sistema \textbf{variando-o}: se nada varia, nada se vê. A
+variação mais barata é um parâmetro numa \emph{reta} --- e chega, porque a
+aranha sobe sozinha e não há mais nada a controlar. O operador dessa variação é
+o deslocamento $S$ da Def.~\ref{def:ops}, e a sua diferença $\mu=1-S$ é a
+\textbf{derivada} discreta, com $\zeta=(1-S)^{-1}$ a integrar de volta
+(Teor.~\ref{thm:shift}).
+
+\begin{definicao}[tempo]\label{def:tempo}
+Seja $d(t)=[\,G_{t}(\pi(t))>1\,]$ --- vale $1$ quando o salto chega a uma célula
+que já tinha marca --- e $D=d*\zeta$ a sua acumulação, a \textbf{taxa de dobras}
+do percurso. O \textbf{tempo} é a variação dessa taxa ao saltar de um vértice
+para o vizinho, indexada pelo parâmetro: $\mu D=d$.
+\end{definicao}
+
+\medskip\noindent\textbf{E o número depende da régua.} O comprimento de um salto
+não é dado pelo percurso --- é dado pela métrica com que se mede. O mesmo
+percurso, medido na grade, tem todos os saltos iguais a $1$; medido na
+ultramétrica da árvore (§\ref{sec:ultra}) sobre o parâmetro, tem saltos de
+comprimento $2^{-\delta(t,t+1)}$, que varia com a profundidade em que os índices
+divergem --- e diverge no topo sempre que se atravessa uma potência de $2$. Logo
+a \emph{taxa de dobras por unidade de comprimento} é uma na grade e outra na
+árvore, com o mesmo numerador. As duas são réguas do mesmo objeto: dão a mesma
+ordem de índices e nenhuma colapsa um salto a zero. O isomorfismo é entre as
+réguas, e não entre os números que elas produzem.
+
+\subsection*{A métrica}
+
+\noindent O comprimento de um salto vem de uma \textbf{forma quadrática} no seu
+incremento:
+\[
+\boxed{\;d\tau^{2}=g_{uv}\,dx^{u}dx^{v}\;}
+\]
+com $g$ simétrica e não degenerada. Sobre uma aresta o valor é \emph{inteiro}:
+só o comprimento total precisaria de raiz.
+
+\medskip\noindent\textbf{E o percurso só sonda a diagonal de $g$.} Uma aresta é
+$dx=\pm e_i$, com uma componente só, logo $dx^udx^v=0$ fora da diagonal e
+$d\tau^{2}=g_{ii}$: os termos cruzados não são medidos por passo nenhum de um
+percurso da grade. Para os medir seria preciso um salto diagonal --- que, pela
+Def.~\ref{def:percurso}, não é aresta.
+
+\begin{teorema}[a régua canónica]\label{thm:gcanon}
+Com $g_{uv}=\delta_{uv}$, toda aresta dá $d\tau^{2}=1$ e portanto $\tau=N$: o
+\textbf{tempo próprio coincide com o parâmetro}. Para qualquer outra $g$
+constante, $\tau\neq N$ em geral.
+\end{teorema}
+
+\begin{proof}
+Uma aresta é $dx=\pm e_i$, logo $g_{uv}dx^udx^v=g_{ii}$, que vale $1$ para todo
+$i$ se e só se a diagonal de $g$ é constante igual a $1$. Somando sobre os $N$
+saltos vem $\tau=N$.
+\end{proof}
+
+\medskip\noindent É esta a razão de a grade ser a régua barata: nela, variar o
+parâmetro e andar no espaço são a mesma conta. É a variação \emph{mais fácil},
+e não é preciso mais --- há um parâmetro só, numa reta.
+
+\medskip\noindent\textbf{E $g$ não tem de ser constante.} Generalizando-a para
+depender do ponto, e deixando que o que a faça variar seja o próprio campo,
+\[
+g_{uv}(x)=G(x)\,h_{uv}
+\qquad\Longrightarrow\qquad
+d\tau^{2}=G(x)\,h_{uv}dx^udx^v ,
+\]
+que numa aresta na direção $i$ vale $G(x)\,h_{ii}$: \textbf{o tempo próprio de um
+salto é a multiplicidade da célula de chegada}. Onde a trajetória já passou, o
+tempo passa outro --- e é a memória, ao ficar no espaço, que o curva. Com
+$G\equiv1$ a métrica é plana e $\tau=N$; onde há dobra, $\tau$ afasta-se do
+parâmetro.
+
+\begin{teorema}[o passo é uma geodésica]\label{thm:geodesica}
+Se $h=\mathrm{id}$, o vizinho de menor $G$ é o vizinho de menor $d\tau^{2}$, e
+portanto o passo~3 do ciclo (§\ref{sec:algoritmo}) move-se por onde o tempo
+próprio é mínimo. A hipótese é necessária: para $h$ anisotrópica as duas escolhas
+divergem.
+\end{teorema}
+
+\begin{proof}
+Com $h=\mathrm{id}$, $d\tau^{2}=G(y)$ para todo vizinho $y$, e minimizar um é
+minimizar o outro. Com $h_{ii}$ não constante, $d\tau^{2}=G(y)h_{ii}$ e um
+vizinho de $G$ maior pode ter $d\tau^{2}$ menor; exibe-se um.
+\end{proof}
+
+\medskip\noindent Fica assim dito o que o passo~3 é: não uma heurística de
+exploração nem uma escolha, mas o movimento que a métrica impõe. A aranha não
+decide --- \emph{cai}.
+
+\medskip\noindent\textbf{Os dois operadores são duais.} $S$ varia o parâmetro e
+$A$ mede a vizinhança: um é a realização \emph{dinâmica}, o outro a
+\emph{métrica}, e é o mesmo eixo lido dos dois lados --- como o par
+$\Pi/\Sigma$, o cone que desce e a espiral que sobe. Daí que a trajetória tenha
+duas leituras possíveis, e que a escolha entre elas não seja livre:
+
+\begin{definicao}[os dois operadores]\label{def:ops}
+No domínio, o \textbf{deslocamento} $S$, $(Sa)(t)=a(t-1)$. No contradomínio, a
+\textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
+\end{definicao}
+
+\begin{teorema}[$\zeta$ e $\mu$ saem de $S$]\label{thm:shift}
+$\zeta=\sum_{j\ge0}S^{j}=(1-S)^{-1}$ e $\mu=1-S$.
+\end{teorema}
+
+\begin{proof}
+$(\sum_{j\ge0}S^j a)(t)=\sum_{j\ge0}a(t-j)=\sum_{u\le t}a(u)=(a*\zeta)(t)$, com
+a soma finita porque $a$ se anula abaixo de $0$. E $(1-S)$ aplicado a isso
+telescopa: $(a*\zeta)(t)-(a*\zeta)(t-1)=a(t)$. Logo $(1-S)\zeta=\mathrm{id}$, e
+$\mu=1-S$ pelo Teor.~\ref{thm:mu}.
+\end{proof}
+
+\begin{definicao}[percurso]\label{def:percurso}
+$\pi$ é um \textbf{percurso} no grafo quando $\pi(t+1)\in V(\pi(t))$ para todo
+$t<N$, isto é, quando cada passo é uma \emph{aresta}. Nesse caso o índice conta
+arestas: $\abs{I}=N+1$ vértices visitados e $N$ arestas percorridas.
+\end{definicao}
+
+\medskip\noindent Ser percurso é uma condição sobre o \emph{par}
+(realização, grafo), e não uma propriedade da realização: na grade, a curva de
+Heighway e a reta axial são percursos; a reta \emph{diagonal} não é --- o seu
+passo $(1,1)$ não é aresta ---, e a rotação $J$ também não, porque salta.
+
+\begin{teorema}[a lei local: vértice e aresta]\label{thm:handshake}
+Seja $\pi$ um percurso e $G_{\mathrm{ar}}(e)$ o número de vezes que ele usa a
+aresta $e$. Então, para cada vértice $x$,
+\[
+\sum_{e\,\ni\,x}G_{\mathrm{ar}}(e)\;=\;2\,G(x)\;-\;[\,x=\pi(0)\,]\;-\;[\,x=\pi(N)\,],
+\qquad\text{e}\qquad \sum_{e}G_{\mathrm{ar}}(e)=N .
+\]
+\end{teorema}
+
+\begin{proof}
+Cada visita a $x$ num índice interior $0<t<N$ usa duas arestas incidentes, a de
+$t-1$ para $t$ e a de $t$ para $t+1$; a visita em $t=0$ usa uma só, e a em $t=N$
+também. Somando sobre as $G(x)$ visitas vem o enunciado. A segunda igualdade é
+contar as $N$ arestas do percurso.
+\end{proof}
+
+\medskip\noindent A multiplicidade do vértice determina, assim, a das arestas
+incidentes: $G$ não é uma contagem entre outras --- é a que fecha a
+contabilidade local do percurso. É o \emph{handshaking} dito sobre a
+trajetória.
+
+\subsection*{O que o passo lê}
 
 \begin{teorema}[dobrar sem período obriga a ler o índice]\label{thm:leitura}
 Seja $\pi\colon I\to X$ com $G(x)>1$ para algum $x$ (dobra) e tal que $\pi$
@@ -943,32 +1040,26 @@ Sejam as duas maneiras de uma trajetória guardar a sua própria história:
 \toprule
  & \textbf{a aranha} & \textbf{o dragão} \\
 \midrule
-a marca fica & no contradomínio $X$: é $G$ & no domínio $I$: é o índice \\
-o passo lê & a célula: $\pi(t{+}1)=f(\pi(t))$ & o índice: $\pi(t{+}1)=g(t,\pi(t))$ \\
+a marca fica & no \textbf{espaço}: é $G$ & no \textbf{tempo}: é o índice \\
+o passo lê & a célula: $\pi(t{+}1)=f(\pi(t))$ & o parâmetro: $\pi(t{+}1)=g(t,\pi(t))$ \\
 o campo $G$ lê & período e cauda (Teor.~\ref{thm:periodo}) & a dobra, e só ela \\
 \bottomrule
 \end{tabular}
 \end{center}
 O levantamento $\tilde\pi=(\pi,k)$ do Teor.~\ref{thm:levantamento} é a ponte
-entre os dois --- e cobra o preço: junta espaço e história num só estado, e a
+entre os dois --- e cobra o preço: junta espaço e tempo num só estado, e a
 dobra desaparece, $\tilde G\equiv1$. As três coisas ---
 \emph{dobrar}, \emph{ler só o estado} e \emph{não ter período} --- não podem
 valer as três.
 \end{corolario}
 
-\medskip\noindent\textbf{E verifica-se.} Que o passo lê o índice não se
+\medskip\noindent\textbf{E verifica-se.} Que o passo lê o parâmetro não se
 argumenta: procura-se na trajetória a mesma célula com sucessores
-\emph{diferentes}. Na curva de Heighway ela existe --- a viragem
-$\code{drag\_esq}(s)$ lê $s$, não lê onde a curva está --- e a testemunha exibe-se
-com os quatro índices. No Julia, no relógio e na reta não existe.
-
-\medskip\noindent\textbf{O relógio.} A rotação $J\colon(a,b)\mapsto(-b,a)$ é
-função do estado e mais nada; é involutiva ao quadrado, $J^2=-\mathrm{id}$ e
-$J^4=\mathrm{id}$. Pelo Teor.~\ref{thm:periodo} o campo lê-lhe o período sem
-qualquer aparato: quatro células, cada uma com $G>1$, cauda zero. É o mesmo
-relógio com que a obra conta as suas dobras, e a leitura ``uma colisão é uma
-marca do contador; ler é seguir as marcas'' é a cláusula~(3) do
-Teor.~\ref{thm:multiplicidade} dita noutras palavras.
+\emph{diferentes}. Na curva de Heighway ela existe --- $\code{drag\_esq}(s)$ lê
+$s$, não lê onde a curva está --- e exibe-se com os quatro índices; no Julia, no
+relógio $J$ e na reta não existe. E o relógio $J\colon(a,b)\mapsto(-b,a)$, com
+$J^2=-\mathrm{id}$ e $J^4=\mathrm{id}$, é função da célula: o campo lê-lhe o
+período sem aparato nenhum --- quatro células com $G>1$, cauda zero.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A série do número $\pi$}\label{sec:serie}
@@ -1180,6 +1271,14 @@ Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
 passo, nem uma a mais --- o autómato não varre) (leitura a distinguir $G{=}0$ de
 $G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
 $0,1,3,6$ planos com $R^4=\mathrm{id}$);
+Teor.~\ref{thm:gcanon} e \ref{thm:geodesica} §AN21--§AN22 ($d\tau^2$ inteiro por
+aresta com três $g$; $\tau=N$ só com $g=\mathrm{id}$; $g_{uv}(x)=G(x)\delta_{uv}$
+curva onde há dobra e é plana com $G\equiv1$; e a geodésica a divergir do
+gradiente quando $h$ é anisotrópica);
+Def.~\ref{def:tempo} §AN20 ($\mu D=d$ com resíduo $0$; e a mesma trajetória com
+salto uniforme $1$ na grade e $11$ comprimentos distintos na árvore, de $2$ a
+$2048$ --- a taxa de dobras por unidade muda com a régua);
+o espaço $F_{2w}=F_w\oplus\sigma F_w$ como $Q_{2w}$ §AN19;
 Teor.~\ref{thm:shift}, \ref{thm:handshake} e Def.~\ref{def:percurso} §AN18
 ($(1-S)\zeta=\mathrm{id}$; quais realizações são percursos e quais não; e a lei
 local com $0$ violações em $513$ vértices);
@@ -1212,7 +1311,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN18;
+        {\code{tests/aranha\_n.c} §AN1--§AN22;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
