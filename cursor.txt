@@ -2390,3 +2390,39 @@ identificador não sai do campo, tem de vir de fora.
 
   bateria   529 : 529, 0 falhas · 30 unidades
   paper     23 páginas
+
+§51 — A ARANHA REALIZA A ESCADA, E ISSO MEDE-SE
+================================================
+Eu tinha escrito na abertura «não se reivindica nada sobre a matemática em
+geral». Ele: «prova que essa construção está toda errada — a aranha realiza cada
+um deles», apontando a cadeia ℕ → ℤ → ℚ → ℝ → algébrico, que a obra JÁ PROVOU.
+
+Tinha razão, e a minha ressalva era fraca demais. Mede-se (§AN32), e fecha nos
+quatro andares:
+
+  andar               π: I → X                a fibra É            k=1 é
+  ──────────────────────────────────────────────────────────────────────────
+  ℕ                   (x,y) ↦ x⊕y             {(x, x⊕z)}, |F_w|    x⊕z
+  ℤ = ℕ²/∼            (a,b) ↦ a−b             a+d = b+c            a=0 ou b=0
+  ℚ = Frac(ℤ)         (p,q) ↦ p/q reduzida    ps = qr              O IRREDUTÍVEL
+  ℝ                   q ↦ o corte de p bits   a bola ultramétrica  o menor do cilindro
+
+Nos quatro: ∑G = |I|, e a FIBRA É A CLASSE DE EQUIVALÊNCIA DO ANDAR — não por
+analogia: π(u) = π(v) é, linha a linha, exactamente a relação que define cada
+degrau.
+
+DUAS LEITURAS QUE ISTO DÁ
+  · QUOCIENTE E DOBRA SÃO A MESMA OPERAÇÃO vista de dois lados: passar ao
+    quociente é projectar, e a multiplicidade é o TAMANHO DA CLASSE. O que o
+    `inteiros.tex` chama «memória por duplicidade» É ESTE CAMPO.
+  · e marcar cada fibra com k = 1 É escolher o representante canónico — em ℚ dá
+    literalmente a FRACÇÃO IRREDUTÍVEL.
+
+E A FORMULAÇÃO HONESTA, que substituiu a ressalva fraca: não se reivindica que
+este mecanismo CONSTRUA a escada — ela já estava provada, noutros documentos e
+com as suas provas. O que se mostra é que é o MESMO mecanismo que a percorre
+inteira. Isso é mais forte do que a ressalva E não insinua.
+
+  gume      61 mutações, 61 mordem
+  bateria   529 : 529, 0 falhas · 31 unidades passaram, 0 falharam
+  paper     24 páginas

@@ -81,13 +81,15 @@ não contém, em etapa nenhuma, a identidade de quem construiu --- e é por isso
 que uma \emph{aranha} que passa quatro vezes e quatro \emph{abelhas} que passam
 uma vez deixam o mesmo campo.
 
-\medskip\noindent\textbf{O que se reivindica, e o que não.} O que este documento
-mostra é uma \emph{economia de hipóteses}: de um só dado --- uma aplicação e a
+\medskip\noindent\textbf{O alcance.} De um só dado --- uma aplicação e a
 igualdade no contradomínio --- saem, com demonstração, o percurso, a memória, a
-multiplicidade, o tempo, a métrica, a transformada, e as dualidades que os
-ligam. Cada um deles é aqui um enunciado com prova e com medida, não uma
-interpretação. Não se reivindica nada sobre a natureza, nem sobre a matemática
-em geral: o alcance é o dos teoremas enunciados, e termina onde eles terminam.
+multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
+E há uma segunda afirmação, mais forte e igualmente medida: a escada
+$\N\to\Z\to\Q\to\R$ --- que a obra constrói noutros documentos e ali demonstra
+--- tem \emph{cada degrau} na forma da Def.~\ref{def:objeto}, com $G$ a contar a
+classe de equivalência do andar (§\ref{sec:escada}). Não se reivindica que este
+mecanismo construa a escada: ela já estava provada. O que se mostra é que é o
+\emph{mesmo} mecanismo que a percorre inteira.
 
 \medskip\noindent Todo enunciado usado é enunciado e demonstrado aqui; onde um
 irmão da mesma obra já dizia o mesmo, o texto foi duplicado e não referenciado.
@@ -1687,6 +1689,48 @@ medida: $\abs{I}$ e $\sum_x G(x)$ coincidem para qualquer realização do mesmo
 comprimento (Teor.~\ref{thm:medida}).
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{A escada, andar a andar}\label{sec:escada}
+
+\noindent A construção de $\N$, $\Z$, $\Q$ e $\R$ está feita e demonstrada
+noutros documentos desta obra. O que se verifica aqui é outra coisa: que
+\emph{cada degrau dela} é uma realização no sentido da Def.~\ref{def:objeto},
+e que o campo $G$ conta, em cada um, a classe de equivalência que o define.
+
+\begin{teorema}[cada andar é uma realização]\label{thm:escada}
+Nos quatro casos abaixo, $\pi$ é uma realização, $\sum_x G(x)=\abs{I}$, e a
+fibra $\pi^{-1}(x)$ \emph{é} a classe de equivalência do andar:
+\begin{center}\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+andar & $\pi\colon I\to X$ & a fibra é & o representante $k=1$ \\
+\midrule
+$\N$ & $(x,y)\mapsto x\oplus y$ & $\{(x,x\oplus z)\}$, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
+$\Z=\N^2/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
+$\Q=\operatorname{Frac}(\Z)$ & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
+$\R$ & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{teorema}
+
+\begin{proof}
+Em cada linha, $\pi$ está definida em todo o domínio e o contradomínio tem
+igualdade decidível, o que é a Def.~\ref{def:objeto}; a conservação é o
+Lema~\ref{lem:conserva}. Que a fibra é a classe: $\pi(u)=\pi(v)$ é, linha a
+linha, $x\oplus y=x'\oplus y'$, $a-b=c-d$ (isto é $a+d=b+c$), $p/q=r/s$ (isto é
+$ps=qr$), e ter o mesmo prefixo de $p$ bits --- que são exatamente as relações
+que definem cada andar. O representante $k=1$ é o primeiro da fibra na ordem do
+domínio, e a enumeração escolhida fá-lo coincidir com o canónico.
+\end{proof}
+
+\medskip\noindent Duas leituras. A primeira é que \emph{quociente} e
+\emph{dobra} são a mesma operação vista de dois lados: passar ao quociente é
+projetar, e a multiplicidade é o tamanho da classe --- o que o documento dos
+inteiros chama ``memória por duplicidade'' é este campo. A segunda é sobre o
+levantamento: marcar cada fibra com $k=1$ \emph{é} escolher o representante
+canónico, e em $\Q$ isso dá literalmente a fração irredutível.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{As dualidades, reunidas}\label{sec:dualidades}
 
 \noindent Uma mesma figura repetiu-se em cada andar: um lado \emph{comprime} e
@@ -1828,6 +1872,8 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+Teor.~\ref{thm:escada} §AN32 (os quatro andares, com $\sum G=\abs{I}$, a fibra a
+ser a classe e o $k=1$ a ser o canónico);
 Teor.~\ref{thm:agentes} §AN31 (um agente com $4$ voltas e $4$ agentes com uma:
 campos iguais nas $64$ células, $G=4$ nas $16$, com o controlo negativo a ver as
 $16$ a diferir contra $3$ voltas; e a ordem a separar $96$ de $96$ pares contra
@@ -1867,7 +1913,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN31;
+        {\code{tests/aranha\_n.c} §AN1--§AN32;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
