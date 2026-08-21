@@ -2627,21 +2627,32 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
     unsigned pos_pos = pc_emit; emit1(0); emit1(0);
     /* cnt < 0 : passo = −X, delta = +1 */
     unsigned ini_neg = pc_emit;
-    MOVE(X, +1); MOVE(S_ZERO, +1); emit1(OP_SUB);
-    MOVE(passo, -1);                       /* R = 0 − X */
+    MOVE(X, +1); MOVE(S_ZERO, +1); emit1(OP_SUB16);
+    MOVE(passo, -1);                       /* R = 0 − X, no andar de cima */
     emit_copia(S_UM, delta);
     emit1(OP_JMP);
     unsigned pos_fim_neg = pc_emit; emit1(0); emit1(0);
     unsigned ini_pos = pc_emit;
     /* cnt ≥ 0 : passo = +X, delta = −1 */
     emit_copia(X, passo);
-    MOVE(S_UM, +1); MOVE(S_ZERO, +1); emit1(OP_SUB);
-    MOVE(delta, -1);                       /* R = 0 − 1 */
+    MOVE(S_UM, +1); MOVE(S_ZERO, +1); emit1(OP_SUB16);
+    MOVE(delta, -1);                       /* R = 0 − 1, no andar de cima */
     unsigned depois = pc_emit;
     salto_rel(pos_pos, (long)ini_pos - (long)ini_neg);
     salto_rel(pos_fim_neg, (long)depois - (long)ini_pos);
 
-    /* o laço: enquanto cnt != 0 { dest += passo ; cnt += delta } */
+    /* o laço: enquanto cnt != 0 { dest += passo ; cnt += delta }
+     *
+     * E AS DUAS SOMAS SÃO DO ANDAR DE CIMA. O OP_ADD soma componente a
+     * componente — é o que o catálogo precisa, para o transporte não atravessar
+     * do nrows para o ncols. Aqui é o contrário: `cnt` é UM número, e o `delta`
+     * é (−1, 0). Com a soma componente a componente o átomo ALTO do cnt nunca
+     * muda, o CMP compara os dois e nunca dá zero, e o laço não termina.
+     *
+     * Era um VAZAMENTO: o átomo alto ficava fora da conta. E nasceu de eu ter
+     * posto as células no PAR sem trazer a multiplicação com elas — quando os
+     * valores cabiam num átomo, o alto era zero e não se via. O andar de cima
+     * tem instruções próprias (OP_ADD16), e é delas que isto precisa. */
     unsigned topo = pc_emit;
     MOVE(cnt, +1);
     MOVE(S_ZERO, +1);
@@ -2649,8 +2660,8 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
     emit1(OP_JZ);
     unsigned pos_sai = pc_emit; emit1(0); emit1(0);
     unsigned corpo = pc_emit;
-    MOVE(dest, +1); MOVE(passo, +1); emit1(OP_ADD); MOVE(dest, -1);
-    MOVE(cnt, +1);  MOVE(delta, +1); emit1(OP_ADD); MOVE(cnt, -1);
+    MOVE(dest, +1); MOVE(passo, +1); emit1(OP_ADD16); MOVE(dest, -1);
+    MOVE(cnt, +1);  MOVE(delta, +1); emit1(OP_ADD16); MOVE(cnt, -1);
     emit1(OP_JMP);
     unsigned pos_volta = pc_emit; emit1(0); emit1(0);
     unsigned fim = pc_emit;
@@ -2994,6 +3005,21 @@ static void prepara(long v, long col_do_set){
         mem_grava(S_BITM + k, m);
         mem_grava(S_BITN + k, n);
     }
+    /* A MÁSCARA QUE ZERA O ÁTOMO ALTO, e ela FALTAVA AQUI.
+     *
+     * O S_MT era escrito uma só vez, no CREATE TABLE, e o `prepara` — que corre
+     * antes de CADA varredura e repõe todas as outras constantes — não o
+     * repunha. Numa base reaberta valia o que sobrasse: zero, ou lixo. E ele é
+     * o AND que zera o átomo alto antes da multiplicação, de modo que o
+     * contador do laço recebia um número que não era o dele e a máquina ficava
+     * a contar até ao guarda dos cinquenta milhões de passos.
+     *
+     * O próprio ficheiro já tinha avisado, noutro sítio: «as constantes
+     * escrevem-se ao COMPILAR e o programa corre depois — se a constante for
+     * sobrescrita entre as duas fases, a máquina lê o valor trocado». Uma
+     * constante que só se escreve uma vez é a mesma falha com outra cara: nada
+     * pode ficar fora da memória entre uma varredura e a seguinte. */
+    w.total = (Word8)~0u; w.e = 0; mem_grava(S_MT, w);
     w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
     w.total = 0; w.e = 0x80; mem_grava(S_MASK16, w); /* bit 15 do par — o sinal um andar acima */
 }
