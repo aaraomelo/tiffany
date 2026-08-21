@@ -1,0 +1,66 @@
+# O evolution-api — a ponte de WhatsApp que alimenta o patria-api.
+#
+# Veio de /root/docker-compose.evolution.yml na VPS, onde vivia solto na raiz e com os
+# segredos em CLARO dentro do próprio ficheiro. Aqui é o contrário: o ficheiro é público
+# (está no git) e os segredos vivem num .env ao lado, no servidor, com chmod 600.
+#
+# Esteve QUATRO MESES em baixo — `Exited (1)`, sem ninguém dar por isso, porque nada o
+# vigiava. O `restart: unless-stopped` só o traz de volta se o docker reiniciar; não o
+# ressuscita de um exit. Quem quiser garantia disso tem de a pôr algures.
+#
+# DEPENDÊNCIAS, e são três — as duas primeiras vivem FORA deste ficheiro:
+#   postgres    o host `postgres` na rede externa patria-prod_default (é o container
+#               postgres-prod, que responde por esse alias), base `evolution`
+#   redis       este compose sobe-o, e é só dele
+#   patria-api  o destino do WEBHOOK_GLOBAL_URL: host.docker.internal:8080. O evolution
+#               EMPURRA para lá as mensagens; se o patria-api mudar de porta, muda o .env.
+#
+# COMO SE MEXE, no servidor (o -p fixa o nome do projeto: sem ele, o nome sai do
+# directório e as redes trocam de nome à primeira mudança de caminho):
+#
+#     cd /root/plataforma/evolution && docker compose -p evolution up -d
+#
+# A API fica em 127.0.0.1:8088 (o container escuta 8080 lá dentro) e NÃO é exposta pelo
+# nginx — quem fala com ela é o patria-api, pela rede local.
+
+services:
+  redis-evolution:
+    image: redis:7-alpine
+    container_name: redis-evolution
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  evolution-api:
+    image: atendai/evolution-api:latest
+    container_name: evolution-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8088:8080"
+    environment:
+      # os três que trazem segredo ou endereço vêm do .env, não daqui
+      - AUTHENTICATION_API_KEY=${AUTHENTICATION_API_KEY:?falta no .env}
+      - DATABASE_CONNECTION_URI=${DATABASE_CONNECTION_URI:?falta no .env}
+      - WEBHOOK_GLOBAL_URL=${WEBHOOK_GLOBAL_URL:?falta no .env}
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis-evolution:6379
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=false
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+      - LOG_LEVEL=DEBUG
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis-evolution
+    networks:
+      - default
+      - patria-prod_default
+
+networks:
+  patria-prod_default:
+    external: true
