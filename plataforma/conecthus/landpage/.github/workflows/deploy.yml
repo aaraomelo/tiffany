@@ -1,0 +1,148 @@
+name: Deploy Landpage
+
+on:
+  push:
+    branches: [main, homolog, develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'PROD' || github.ref_name == 'homolog' && 'HOMOLOG' || 'DEV' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Pre-deploy validation
+        run: |
+          npx vite preview --port 4173 --host > /tmp/validation.log 2>&1 &
+          PASSED=false
+          for i in $(seq 1 10); do
+            if curl -sf -o /dev/null http://127.0.0.1:4173/ 2>/dev/null; then
+              PASSED=true
+              break
+            fi
+            echo "Waiting for preview server... ($i/10)"
+            sleep 2
+          done
+          kill %1 2>/dev/null || true
+          if [ "$PASSED" != "true" ]; then
+            echo "Vite preview could not serve the build" >> /tmp/validation.log
+            echo "❌ Pre-deploy validation failed"
+            exit 1
+          fi
+          echo "✅ Pre-deploy validation passed"
+
+      - name: Create deploy artifact
+        id: artifact
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          FILE_NAME=landpage-${{ github.ref_name }}-${TIMESTAMP}.tar.gz
+          tar -czf $FILE_NAME dist Dockerfile nginx-container.conf
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Install AWS CLI
+        run: |
+          curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+
+      - name: Upload to R2
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws configure set default.region auto
+          aws s3 cp ${{ steps.artifact.outputs.FILE_NAME }} \
+            s3://patria-deploys/${{ steps.artifact.outputs.FILE_NAME }} \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+
+      - name: Generate presigned URL
+        id: presign
+        run: |
+          URL=$(aws s3 presign s3://patria-deploys/${{ steps.artifact.outputs.FILE_NAME }} \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --expires-in 1800)
+          echo "DOWNLOAD_URL=$URL" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "Host server" >> ~/.ssh/config
+          echo "  HostName ${{ vars.SSH_HOST }}" >> ~/.ssh/config
+          echo "  User ${{ vars.SSH_USER }}" >> ~/.ssh/config
+          echo "  ConnectTimeout 30" >> ~/.ssh/config
+          echo "  ServerAliveInterval 15" >> ~/.ssh/config
+          echo "  ServerAliveCountMax 3" >> ~/.ssh/config
+          for i in 1 2 3; do
+            ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
+            sleep 5
+          done
+
+      - name: Create deploy script
+        run: |
+          cat > /tmp/deploy.sh << 'SCRIPT'
+          #!/bin/bash
+          set -e
+          DEPLOY_DIR="$1"
+          COMPOSE_FILE="$2"
+          CONTAINER_NAME="$3"
+          PORT="$4"
+
+          echo "⬇️ Downloading from R2..."
+          URL=$(cat /tmp/download_url.txt)
+          curl -sfL "$URL" -o /tmp/landpage-deploy.tar.gz
+          rm -f /tmp/download_url.txt
+
+          echo "📦 Extracting..."
+          mkdir -p $DEPLOY_DIR
+          tar -xzf /tmp/landpage-deploy.tar.gz -C $DEPLOY_DIR
+          rm -f /tmp/landpage-deploy.tar.gz
+
+          echo "🐳 Building and restarting..."
+          docker compose -f $COMPOSE_FILE build $CONTAINER_NAME
+          docker compose -f $COMPOSE_FILE up -d --force-recreate $CONTAINER_NAME
+
+          echo "🔍 Health check..."
+          sleep 5
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/ || echo 'FAIL')
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Health check failed: $STATUS"
+            docker logs $CONTAINER_NAME --tail 20
+            exit 1
+          fi
+          echo "✅ Deploy OK (HTTP $STATUS)"
+          SCRIPT
+
+      - name: Deploy via single SSH
+        run: |
+          echo '${{ steps.presign.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
+          for i in 1 2 3; do
+            scp /tmp/download_url.txt /tmp/deploy.sh server:/tmp/ && \
+            ssh server "chmod +x /tmp/deploy.sh && bash /tmp/deploy.sh '${{ vars.DEPLOY_DIR }}' '${{ vars.COMPOSE_FILE }}' '${{ vars.CONTAINER_NAME }}' '${{ vars.PORT }}' && rm -f /tmp/deploy.sh" && break
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+
+      - name: Report deploy failure
+        if: failure()
+        run: |
+          API_HOST=${{ github.ref_name == 'main' && 'patria.patriatechnology.com' || github.ref_name == 'homolog' && 'patria.homolog.patriatechnology.com' || 'patria.dev.patriatechnology.com' }}
+          DIAG=$(cat /tmp/validation.log 2>/dev/null | tail -50 || echo 'Pre-deploy validation failed')
+          PAYLOAD=$(jq -n --arg sha "${{ github.sha }}" --arg diag "$DIAG" '{commitSha: $sha, diagnostic: $diag}')
+          curl -sf -X POST "https://$API_HOST/api/webhooks/deploy-diagnostic" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" || true
+
+      - name: Cleanup R2
+        if: always()
+        run: |
+          aws s3 rm s3://patria-deploys/${{ steps.artifact.outputs.FILE_NAME }} \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com 2>/dev/null || true

@@ -1,0 +1,151 @@
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.about-content .badge {
+  margin-bottom: 16px;
+}
+
+.about-content h2 {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 24px;
+}
+
+.about-content p {
+  font-size: 17px;
+  color: var(--gray-400);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.about-features {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about-feature {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.about-feature:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(108, 58, 237, 0.3);
+}
+
+.about-feature-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  background: rgba(108, 58, 237, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-light);
+}
+
+.about-feature h4 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.about-feature p {
+  font-size: 14px;
+  color: var(--gray-400);
+  margin: 0;
+}
+
+.founders-section {
+  margin-top: 80px;
+  text-align: center;
+}
+
+.founders-section h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--white);
+  margin-bottom: 40px;
+}
+
+.founders-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.founder-card {
+  padding: 36px 24px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.founder-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(108, 58, 237, 0.3);
+}
+
+.founder-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 24px;
+  margin: 0 auto 20px;
+}
+
+.founder-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.founder-role {
+  font-size: 14px;
+  color: var(--primary-light);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .founders-grid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .founders-section {
+    margin-top: 56px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .about-content h2 {
+    font-size: 32px;
+  }
+}
