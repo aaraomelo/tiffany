@@ -2565,3 +2565,30 @@ percorre; a geometria é o que a percorrência produz.
                Möbius (a divisibilidade)
   bateria      529 : 529, 0 falhas
   paper        24 páginas
+
+§56 — O ABSTRACT SEM ℕ
+=======================
+«no abstract vc invoca ℕ de novo dizendo que NÃO é ponto de partida — se não é,
+não invoca, não confunde. Você já disse que constrói todos e pronto. ℕ não é
+especial, são apenas símbolos DEFAULT da matemática. A matemática não é
+especial.»
+
+Certo, e era o resto do mesmo vício. O abstract tinha:
+     «— e ℕ entra ali como uma das realizações, não como ponto de partida.»
+     «Não se reivindica que este mecanismo construa a escada: ela já estava
+      provada. O que se mostra é que é o MESMO mecanismo que a percorre inteira.»
+A primeira é pura defesa: nomeia ℕ para dizer que não o nomeia. A segunda gasta
+três frases a distinguir o que se faz do que não se faz.
+
+AGORA É UMA FRASE, e diz só o que acontece:
+     «E o mesmo mecanismo percorre a escada aritmética que a obra constrói
+      noutros documentos: cada degrau tem a forma da Def. 1, e nos que são
+      construídos por quociente é G que conta a classe de equivalência do andar.»
+O crédito à obra fica («que a obra constrói noutros documentos»), sem a
+ressalva. E o abstract passou a ter ZERO ocorrências de ℕ.
+
+A LIÇÃO, e é geral: negar um pressuposto é uma forma de o manter em cena. Se ele
+não faz parte da construção, não aparece — nem para ser dispensado.
+
+  bateria   529 : 529, 0 falhas
+  paper     24 páginas
