@@ -1,0 +1,67 @@
+name: deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Rodar seed de módulos/packs após o deploy'
+        type: boolean
+        default: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: erp-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar dependências
+        run: npm ci
+      - name: Prisma generate
+        run: DATABASE_URL="postgresql://build:build@localhost:5432/build" npx prisma generate
+      - name: Testes (RLS, contrato de perfis, guardrail)
+        run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          {
+            echo "Host server"
+            echo "  HostName ${{ vars.SSH_HOST }}"
+            echo "  User ${{ vars.SSH_USER }}"
+            echo "  AddressFamily inet"
+            echo "  ConnectTimeout 30"
+            echo "  StrictHostKeyChecking accept-new"
+          } >> ~/.ssh/config
+          for i in 1 2 3; do ssh-keyscan -4 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break; sleep 3; done
+      - name: Sync source
+        run: |
+          rsync -az --delete \
+            --exclude node_modules --exclude dist --exclude .git \
+            --exclude 'erp-api/public' --exclude estrategia --exclude .claude \
+            ./ server:/root/patria-erp/
+      - name: Build & restart
+        run: ssh server 'sh /root/patria-erp/deploy/deploy.sh'
+      - name: Seed (manual)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.seed }}
+        run: ssh server 'sh /root/patria-erp/deploy/seed.sh'
+      - name: Smoke test
+        run: |
+          for i in $(seq 1 15); do
+            code=$(ssh server 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8090/api/health' || echo 000)
+            echo "tentativa $i: health=$code"
+            [ "$code" = "200" ] && exit 0
+            sleep 4
+          done
+          echo "health nao ficou 200 a tempo"; exit 1

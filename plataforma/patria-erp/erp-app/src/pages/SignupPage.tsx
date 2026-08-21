@@ -1,0 +1,181 @@
+import { CheckCircle, ErrorOutlined } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  Checkbox,
+  Container,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  api,
+  checkAlias,
+  fetchSegments,
+  setSession,
+  signup,
+  type Segment,
+  type StoredUser,
+} from '../api'
+import { useSnackbar } from '../components/Snackbar'
+import { useT } from '../i18n/LangContext'
+import { LangSwitcher } from '../i18n/LangSwitcher'
+
+function slugify(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32)
+}
+
+// Rótulo do segmento via i18n, com fallback ao valor vindo da API.
+export function segLabel(t: (k: string) => string, s: Segment, field: 'name' | 'desc'): string {
+  const key = `segment.${s.slug}.${field}`
+  const v = t(key)
+  return v === key ? (field === 'name' ? s.name : s.description ?? '') : v
+}
+
+export function SignupPage() {
+  const t = useT()
+  const snackbar = useSnackbar()
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [packSlugs, setPackSlugs] = useState<string[]>(params.get('segment') ? [params.get('segment')!] : [])
+  const [name, setName] = useState('')
+  const [alias, setAlias] = useState('')
+  const [aliasTouched, setAliasTouched] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [aliasState, setAliasState] = useState<'idle' | 'checking' | 'ok' | 'taken' | 'invalid'>('idle')
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    fetchSegments().then((s) => {
+      setSegments(s)
+      if (!params.get('segment')) {
+        setPackSlugs((cur) => cur.length ? cur : [s.find((x) => x.isDefault)?.slug || s[0]?.slug].filter(Boolean) as string[])
+      }
+    }).catch(() => {})
+  }, [])
+
+  function toggleSegment(slug: string) {
+    setPackSlugs((cur) => cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug])
+  }
+
+  // alias acompanha o nome até o usuário editar manualmente
+  const suggested = useMemo(() => slugify(name), [name])
+  const effectiveAlias = aliasTouched ? alias : suggested
+
+  useEffect(() => {
+    const a = effectiveAlias
+    if (!a) { setAliasState('idle'); return }
+    setAliasState('checking')
+    const id = setTimeout(() => {
+      checkAlias(a)
+        .then((r) => setAliasState(r.available ? 'ok' : (r.reason === 'invalid' ? 'invalid' : 'taken')))
+        .catch(() => setAliasState('idle'))
+    }, 400)
+    return () => clearTimeout(id)
+  }, [effectiveAlias])
+
+  const canSubmit = packSlugs.length > 0 && name.trim() && effectiveAlias && aliasState === 'ok' && email.trim() && password.length >= 8
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!canSubmit) return
+    setBusy(true)
+    try {
+      await signup({ alias: effectiveAlias, name, packSlugs, adminEmail: email, adminName: name, adminPassword: password })
+      // auto-login (fricção zero)
+      const res = await api<{ accessToken: string; user: StoredUser }>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, tenantAlias: effectiveAlias }),
+      })
+      setSession(res.accessToken, res.user)
+      snackbar.success(t('signup.welcome', { name }))
+      navigate('/inicio')
+    } catch (err) {
+      const body = (err as { body?: { message?: string | string[] } }).body
+      const msg = Array.isArray(body?.message) ? body!.message.join(', ') : (body?.message ?? (err as Error).message)
+      snackbar.error(msg)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 2, py: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, flex: 1 }}>Patria Technology</Typography>
+        <LangSwitcher />
+      </Box>
+
+      <Container maxWidth="sm" sx={{ py: { xs: 4, md: 6 } }}>
+        <Typography variant="h4" sx={{ fontWeight: 800 }}>{t('signup.title')}</Typography>
+        <Typography color="text.secondary" sx={{ mt: 0.5, mb: 3 }}>{t('signup.subtitle')}</Typography>
+
+        <Box component="form" onSubmit={submit}>
+          <Stack spacing={2.5}>
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t('signup.segment')}</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>{t('signup.segment_hint')}</Typography>
+              <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' } }}>
+                {segments.map((s) => {
+                  const on = packSlugs.includes(s.slug)
+                  return (
+                    <Card key={s.slug} variant="outlined" sx={{ borderColor: on ? 'primary.main' : 'divider', borderWidth: on ? 2 : 1 }}>
+                      <CardActionArea onClick={() => toggleSegment(s.slug)}>
+                        <CardContent sx={{ py: 1.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                          <Checkbox checked={on} size="small" sx={{ p: 0, mt: 0.25 }} tabIndex={-1} />
+                          <Box>
+                            <Typography sx={{ fontWeight: 600 }}>{segLabel(t, s, 'name')}</Typography>
+                            <Typography variant="caption" color="text.secondary">{segLabel(t, s, 'desc')}</Typography>
+                          </Box>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  )
+                })}
+              </Box>
+            </Box>
+
+            <TextField label={t('signup.business_name')} value={name} onChange={(e) => setName(e.target.value)} required size="small" fullWidth />
+
+            <TextField
+              label={t('signup.address')}
+              value={effectiveAlias}
+              onChange={(e) => { setAliasTouched(true); setAlias(slugify(e.target.value)) }}
+              required size="small" fullWidth
+              helperText={aliasState === 'taken' ? t('signup.alias_taken') : aliasState === 'invalid' ? t('signup.alias_invalid') : t('signup.address_hint', { alias: effectiveAlias || 'seu-negocio' })}
+              error={aliasState === 'taken' || aliasState === 'invalid'}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {aliasState === 'ok' && <CheckCircle color="success" fontSize="small" />}
+                      {(aliasState === 'taken' || aliasState === 'invalid') && <ErrorOutlined color="error" fontSize="small" />}
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+
+            <TextField label={t('common.email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required size="small" fullWidth />
+            <TextField label={t('login.password')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required size="small" fullWidth helperText={t('signup.password_hint')} />
+
+            <Button type="submit" variant="contained" size="large" disabled={!canSubmit || busy}>
+              {busy ? '…' : t('signup.submit')}
+            </Button>
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>{t('signup.free_note')}</Typography>
+          </Stack>
+        </Box>
+      </Container>
+    </Box>
+  )
+}

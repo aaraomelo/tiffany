@@ -1,0 +1,966 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{lmodern}
+\usepackage{tcolorbox}
+\usepackage{titlesec}
+\usepackage{listings}
+
+\hypersetup{colorlinks=true, urlcolor=blue!60!black, linkcolor=blue!50!black,
+            citecolor=blue!50!black, pdfborder={0 0 0}}
+\setlength{\emergencystretch}{3em}
+\sloppy
+
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{ok}{HTML}{2E7D32}
+\definecolor{warn}{HTML}{B45309}
+\definecolor{codebg}{RGB}{245,247,250}
+\definecolor{codeborder}{RGB}{210,215,225}
+\definecolor{noticebg}{RGB}{232,242,250}
+\definecolor{noticeborder}{RGB}{31,78,121}
+\definecolor{warnbg}{RGB}{253,246,225}
+\definecolor{warnborder}{RGB}{180,115,9}
+
+\titleformat{\section}{\Large\bfseries\color{accent}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\color{accent!85!black}}{\thesubsection}{0.7em}{}
+
+\newtcolorbox{notice}{
+  colback=noticebg, colframe=noticeborder, boxrule=0.6pt,
+  arc=2pt, top=4pt, bottom=4pt, left=8pt, right=8pt
+}
+\newtcolorbox{cuidado}{
+  colback=warnbg, colframe=warnborder, boxrule=0.6pt,
+  arc=2pt, top=4pt, bottom=4pt, left=8pt, right=8pt
+}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{codebg},
+  frame=single, framerule=0.4pt, rulecolor=\color{codeborder},
+  framesep=4pt, xleftmargin=6pt, xrightmargin=4pt,
+  columns=fullflexible, keepspaces=true, breaklines=true,
+  literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {â}{{\^a}}1 {ê}{{\^e}}1 {ô}{{\^o}}1
+    {ã}{{\~a}}1 {õ}{{\~o}}1 {ç}{{\c{c}}}1 {Ç}{{\c{C}}}1,
+}
+
+\title{\textbf{Plano do ERP Patria --- v1}\\[0.4em]
+  \large ERP grátis, multi-tenant SaaS e on-premise,
+  monetizado via IA hipercomplexa de recomendação a fornecedores}
+\author{Aarão Melo Lopes \and Claude (Patria Technology)}
+\date{25 de maio de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{notice}
+\textbf{Resumo executivo.} Construir um ERP completo (PDV, estoque, financeiro,
+ordem de serviço, checkout) distribuído em dois modos a partir do mesmo
+código: SaaS multi-tenant em \texttt{*.patriatechnology.com} e instalação
+on-premise via Docker Compose na intranet do cliente. O produto é
+\emph{grátis} para o lojista. Checkout entra 100\% funcional desde o dia 1
+via \emph{conta interna} (Patria custodia o saldo em sua conta PagBank
+principal e faz payout para a conta bancária do lojista; default D+1 com
+opção de o lojista mudar para saque sob demanda) e oferece chave PagBank
+própria como opt-in. Taxa por transação repassada ao lojista sem markup.
+A receita vem da camada de IA: o NCO-HiperGNN (papers AF/AE/CT) ranqueia e
+sugere produtos, e o fornecedor/distribuidor paga pela visibilidade
+qualificada e por dados agregados anonimizados. Lançamento direto em
+escala nacional, sem cold start regional.
+\end{notice}
+
+\tableofcontents
+\newpage
+
+%==================================================================
+\section{Contexto e mercado-alvo}
+%==================================================================
+
+\subsection{Público-alvo}
+
+Quatro segmentos, com prioridade comercial nesta ordem:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Comércio e materiais de construção} (lojas pequenas e médias).
+        Mais carente de ERP decente, ticket médio razoável, baixa concorrência
+        forte em N/NE.
+  \item \textbf{Peças e serviços} (autopeças, oficina, eletrônica, marcenaria).
+        Combina produto físico com mão de obra; OS é central.
+  \item \textbf{Food service} (restaurantes, bares, lanchonetes), público da
+        Pigz. Entrada posterior, com vantagem de já ter base de lojas instalada.
+  \item \textbf{Eventos} (casas noturnas, festas, festivais), também mira
+        adjacente à Pigz; ingressos e comanda eletrônica.
+\end{enumerate}
+
+\subsection{Diagnóstico do mercado}
+
+O mercado de ERP brasileiro para PMEs é saturado em mensalidade fixa (Bling,
+Omie, Tiny, Conta Azul, TOTVS de pequeno porte) e em PDV-via-maquininha
+(Stone Ton, PagSeguro Moderninha, InfinitePay). Arquitetura, qualidade de UX
+ou catálogo de features \emph{não} são diferenciadores defensáveis --- todos os
+players conseguem construir tudo o que descrevemos como núcleo.
+
+A brecha real está em \textbf{modelo de receita} e em \textbf{inteligência
+preditiva matematicamente fundada}, não em features.
+
+\subsection{Por que agora}
+
+A Patria Technology já tem operando três peças que ninguém na concorrência
+combina:
+
+\begin{enumerate}[leftmargin=2em]
+  \item Infraestrutura SaaS multi-tenant em produção (Patria + Patrícia),
+        roteamento por subdomínio, worker headless via Claude Code,
+        deploy automático.
+  \item Solver neural NCO-HiperGNN treinado e validado (paper AF), com
+        \emph{bound de tempo} ($\sim 10$ms) \emph{e bound de qualidade}
+        ($C(s)^2/m^5$ rigoroso, paper AE) --- combinação que não existe
+        em outro solver disponível no mercado.
+  \item Integração PagBank em produção (PIX + cartão tokenizado), tabela
+        \texttt{billing\_events}, webhook em
+        \texttt{nco.patriatechnology.com}, validada e aprovada em 13/05/2026.
+\end{enumerate}
+
+%==================================================================
+\section{Modelo de negócio}
+%==================================================================
+
+\subsection{Princípio}
+
+\begin{notice}
+\textbf{Tudo grátis para o lojista, inclusive financeiro.} Receita vem do
+\textbf{lado do fornecedor}, mediada por inteligência preditiva.
+\end{notice}
+
+\subsection{Fontes de receita}
+
+Cinco vetores, do mais simples ao mais complexo:
+
+\begin{longtable}{@{}p{2.7cm}p{6.5cm}p{5.5cm}@{}}
+\toprule
+\textbf{Vetor} & \textbf{Como cobra} & \textbf{Pré-requisito} \\
+\midrule
+\endhead
+Sugestão patrocinada de reposição & ``Tá acabando seu cimento --- sugiro
+Votorantim com 7\% off agora.'' Fornecedor paga por sugestão aceita (CPA) ou
+por lead qualificado (CPL). Sempre com \emph{flag patrocinado} visível ao
+lojista. & Catálogo unificado de SKU + sinal de intenção de reposição (NCO
+forecast). \\
+\addlinespace
+Marketplace de compras integrado & Lojista compra fornecedor dentro do ERP.
+Take rate (1--3\%) sobre GMV, ou spread no crédito (parcelamento da compra).
+& Conexão B2B com distribuidores; capital de giro para antecipar (já
+disponível via fintech parceira). \\
+\addlinespace
+Insights agregados para indústria & Dashboard tipo Nielsen para Coca,
+Brahma, Votorantim, indústrias de material e peças. ``Marca X cresceu 12\% no
+varejo de bairro de Boa Vista nas últimas 4 semanas.'' Assinatura mensal
+recorrente. & Massa crítica de lojas (alguns milhares), sync agregado
+anonimizado opt-in. \\
+\addlinespace
+Trade marketing digital ao consumidor & Banner/cupom no cardápio digital,
+totem, link de delivery do lojista. Marca paga CPM/CPC. & Canal de
+consumidor final implementado (food/eventos). \\
+\addlinespace
+Crédito patrocinado pelo fornecedor & ``Coca te empresta R\$\,5k a juro
+zero para repor estoque dela.'' Patria intermedeia, leva spread. & Score de
+risco com base no histórico do ERP. \\
+\bottomrule
+\end{longtable}
+
+\textbf{Fase 1 de receita:} foco em (1) e (2), os mais rápidos de validar.
+(3) e (4) são consequência de massa instalada. (5) é prêmio depois da
+maturidade.
+
+\subsection{Por que isso é defensável}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Versus ERPs tradicionais (Bling, Omie, Tiny, Conta Azul):}
+        eles cobram mensalidade do lojista. Nós não cobramos. Quem está com
+        caixa apertado nunca vai escolher pagar R\$\,200/mês se ``grátis''
+        existe.
+  \item \textbf{Versus fintechs com PDV (Stone, PagSeguro, InfinitePay):}
+        elas vieram da maquininha; o ERP delas é fraco ou adendo. Nós viemos
+        do ERP, que é o cérebro da loja. ERP é \emph{sticky}, maquininha é
+        \emph{commodity}.
+  \item \textbf{Versus Pigz:} a Pigz cobra mensalidade. Nós não. E nossa IA
+        de recomendação tem fundação matemática rigorosa (bound de
+        qualidade), não treino-e-funciona.
+  \item \textbf{Versus qualquer recomendador clássico:} NCO-HiperGNN tem
+        bound rigoroso de tempo \emph{e} qualidade. É o único quadrante
+        marcado em \cite{paperAF}. Vira SLA contratual com fornecedor.
+\end{itemize}
+
+%==================================================================
+\section{Diferenciais técnicos derivados do NCO}
+%==================================================================
+
+\subsection{O que o NCO-HiperGNN entrega ao ERP}
+
+A camada de IA, executada localmente (CPU) ou via cloud (GPU em GEX44),
+resolve quatro problemas industriais com latência $\sim 10$ms e variância
+$7{,}5\times$ menor que heurísticas clássicas:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Forecast de venda por SKU.} Previsão de quantidade vendida
+        no próximo período, derivada do histórico do ERP. Usa estrutura de
+        cluster temporal $\to$ atribuição via partição.
+  \item \textbf{Detecção de ruptura de estoque.} Probabilidade de
+        zerar dada a curva de venda + lead time do fornecedor.
+  \item \textbf{Segmentação automática de SKUs e clientes.} Grupos coesos
+        para ações de venda (cross-sell, upsell), por simetria $S_3$ entre
+        canais imaginários do quaternion.
+  \item \textbf{Roteamento e escalonamento.} Coloração de grafo para
+        agenda de entregas, OS, alocação de mesa (food).
+\end{enumerate}
+
+\subsection{Bound rigoroso vira SLA contratual}
+
+Pela equação $C(s)^2 = 36(1-s^2)^2$ (paper AE) e arquitetura $m=4, L=4$, o
+modelo entrega:
+
+\begin{itemize}[leftmargin=2em]
+  \item Latência $p_{99} < 50$ms para $n \le 500$ SKUs.
+  \item Variância de output $\sigma_K \le C(s)/\sqrt{Km^5} \approx 0{,}07$
+        para $K=8$ rollouts.
+  \item Reprodutibilidade determinística com mesmo input + seed.
+\end{itemize}
+
+Esses três números viram cláusula de SLA para o cliente fornecedor que
+patrocina sugestões.
+
+\subsection{Decomposição micro/macro (paper CT)}
+
+A teoria de campo médio descrita no paper CT permite servir dois lados
+da plataforma de forma matematicamente coerente:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Micro --- ao lojista.} Sugestão individual baseada na
+        microdinâmica de cada elétron algébrico (paper A): ``compre Y,
+        promova Z, repor X agora''.
+  \item \textbf{Macro --- ao fornecedor.} Estado físico do agregado
+        $S = \mathrm{mean}_k(s_k v_k)$ sobre toda a rede de lojas, com
+        decomposição $S = s_\| V + S_\perp$. Defeito perpendicular
+        $S_\perp$ revela \emph{heterogeneidade real} do mercado --- insight
+        que Nielsen e GfK não entregam com essa granularidade.
+\end{itemize}
+
+São \emph{dois produtos sobre a mesma infraestrutura}, separáveis sem
+perder coerência.
+
+%==================================================================
+\section{Arquitetura}
+%==================================================================
+
+\subsection{Topologia: um código, dois ambientes}
+
+\begin{longtable}{@{}p{2.5cm}p{5.5cm}p{6.5cm}@{}}
+\toprule
+\textbf{Aspecto} & \textbf{SaaS} & \textbf{On-premise} \\
+\midrule
+\endhead
+Hosting & Servidor Patria
+(\texttt{erp.patriatechnology.com}, subdomínios) & Intranet do cliente
+(\texttt{erp.empresa.local}) \\
+Auth & Login web Patria + plano & Login interno do cliente \\
+Multi-tenant & Sim, via header \texttt{X-Tenant} & Sim (uma instalação
+serve N lojas da mesma empresa), \texttt{X-Tenant} interno; default
+\texttt{tenant=default} se single-loja \\
+Banco & Postgres central com pgvector & Postgres local no Docker Compose \\
+LLM & Anthropic via Patria & BYOK (Anthropic/OpenAI key do cliente) ou Ollama
+local opcional \\
+NCO inference & Cloud (GEX44 ou réplica) & Container Python local com modelo
+TorchScript step 80k empacotado (CPU-only acceptable) \\
+Cloud sync & N/A & Opt-in. Sobe agregados anonimizados, baixa catálogo de
+fornecedor e atualizações \\
+Atualização & CI/CD automático & Manual via
+\texttt{docker compose pull \&\& up -d} \\
+\bottomrule
+\end{longtable}
+
+Diferença vive em variáveis de ambiente e em uma tabela \texttt{Installation}
+com \texttt{mode}, \texttt{edition}, \texttt{cloudSyncEnabled}, \texttt{ncoMode},
+\texttt{llmProvider}. Schema único.
+
+\subsection{Estrutura de diretório}
+
+\begin{lstlisting}
+patria-erp/
+|-- erp-api/                  NestJS + Prisma (já criado)
+|-- erp-app/                  Vite + React + TS (já criado)
+|-- erp-worker/               Prisma direto, Claude headless, jobs
+|-- nco-inference/            Python + FastAPI, TorchScript step 80k
+|-- catalog-cloud/            Catálogo unificado de fornecedor (apenas SaaS)
+|-- docker-compose.yml        SaaS deployment
+|-- docker-compose.local.yml  on-premise bundle
+|-- install.sh                instalador on-premise
+|-- estrategia/               este plano e futuros docs
+\end{lstlisting}
+
+\subsection{Princípios de design herdados do integrator Easysync}
+
+A leitura do CLAUDE.md do Easysync integrator
+(\texttt{/easysync/integrator/integrator/}) revela um ERP de varejo
+maduro (Spring Boot, DB2, Liquibase, Kafka+Debezium) com domínio bem
+modelado. Herdamos:
+
+\begin{itemize}[leftmargin=2em]
+  \item Divisão modular: \texttt{product, customer-supplier, stock,
+        warehouse, service-order, budget, order, payment, cash, invoice,
+        promotion, vehicle, warranty-term, notification, webhook}.
+  \item Entidade \texttt{CustomerSupplier} unificada (cliente e fornecedor
+        no mesmo cadastro --- decisão deles, mantida).
+  \item Desenho do módulo \texttt{Cash}: \texttt{CashSession} com estados
+        \texttt{OPEN/PARTIALLY\_CLOSED/CLOSED}, \texttt{CashOperation}
+        para sangria/reforço/troca de operador, \texttt{CashPhysicalClose}
+        por forma de pagamento.
+  \item Filtros dinâmicos via \texttt{SearchFilter} (no NestJS, helper
+        Prisma-where).
+  \item Feature flags por módulo (\texttt{*\_ENABLED}).
+\end{itemize}
+
+Modernizamos:
+
+\begin{longtable}{@{}p{5.5cm}p{8cm}@{}}
+\toprule
+\textbf{Integrator (referência)} & \textbf{ERP Patria (nosso)} \\
+\midrule
+\endhead
+Spring Boot 3.3 / Java 21 & NestJS 11 / TypeScript / Node 22 \\
+DB2 + Postgres secundário & Postgres único com pgvector \\
+TF-IDF embeddings em \texttt{*\_EMBEDDING} & pgvector vector(768) + Gemini
+embeddings, padrão Patria \\
+Kafka + Debezium CDC & Outbox pattern interno + webhook HMAC, mais simples
+para escala média \\
+Chatbot TF-IDF + GPT & Patrícia (Claude + tools) + NCO-HiperGNN com bound
+rigoroso \\
+JWT manual com jjwt & \texttt{@nestjs/jwt} + Passport \\
+iText (PDF) + Apache POI (Excel) + escpos-coffee & V2; MVP usa
+puppeteer (PDF) + CSV; impressora térmica via driver web \\
+GraalVM nativo opcional & NestJS standard (startup já rápido) \\
+\bottomrule
+\end{longtable}
+
+\subsection{Stack tecnológica}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Backend:} NestJS 11, TypeScript, Prisma 6, PostgreSQL 16 +
+        pgvector, JWT via \texttt{@nestjs/jwt}, ConfigModule global.
+  \item \textbf{Frontend:} Vite 5, React 19, TypeScript 5.6, proxy
+        \texttt{/api $\to$ :3001}.
+  \item \textbf{Worker:} Node 22, Prisma direto no banco, Claude Code
+        headless via CLI (padrão patria-worker).
+  \item \textbf{NCO inference:} Python 3.11, FastAPI, PyTorch (TorchScript
+        congelado do checkpoint step 80k), CPU como default no on-premise.
+  \item \textbf{Embeddings:} Gemini \texttt{gemini-embedding-001} 768d no
+        SaaS; \texttt{paraphrase-multilingual-mpnet-base-v2} local no
+        on-premise (mesmo padrão do
+        \texttt{theory-embedder.service:9301} da Patria).
+  \item \textbf{IA conversacional:} Claude Sonnet 4.6 (SaaS), Anthropic
+        BYOK ou Ollama local (on-premise).
+  \item \textbf{Pagamento:} integração PagBank reaproveitada da Patria
+        (PIX + cartão tokenizado, tokenização client-side).
+  \item \textbf{Deploy:} Docker Compose, imagens versionadas no registry.
+\end{itemize}
+
+%==================================================================
+\section{Módulos de domínio}
+%==================================================================
+
+\subsection{Lista canônica}
+
+\begin{longtable}{@{}p{3.5cm}p{6cm}p{4.5cm}@{}}
+\toprule
+\textbf{Módulo} & \textbf{Escopo} & \textbf{Status} \\
+\midrule
+\endhead
+\texttt{auth} & login, JWT, roles, recuperação de senha & F1 \\
+\texttt{installation} & singleton com modo, edição, feature flags & F1 \\
+\texttt{tenant} & multi-tenant via \texttt{X-Tenant}, ALS interceptor & F1 \\
+\texttt{customer-supplier} & cadastro unificado cliente/fornecedor & F1 \\
+\texttt{product} & catálogo, hierarquia (Group/Subgroup/Section/Division),
+embeddings pgvector & F1 \\
+\texttt{warehouse} & depósitos & F1 \\
+\texttt{stock} & saldo por SKU/depósito, movimento, ajuste & F1 \\
+\texttt{promotion + price} & tabelas de preço, promoções & F2 \\
+\texttt{order} & venda, item, desconto, parcela & F2 \\
+\texttt{payment} & métodos de pagamento, conciliação & F2 \\
+\texttt{checkout} & integração PagBank (PIX + cartão), tokenização
+client-side, webhook & F2 \\
+\texttt{cash} & sessão, sangria, reforço, troca de operador, fechamento
+físico & F2 \\
+\texttt{service-order} & OS, vinculação a veículo/equipamento, peça +
+mão de obra & F3 \\
+\texttt{vehicle} & veículo do cliente (oficina) & F3 \\
+\texttt{warranty-term} & termos de garantia & F3 \\
+\texttt{budget} & orçamento $\to$ efetiva em OS ou Order & F3 \\
+\texttt{nco} & forecast, ruptura, cluster, sugestão & F4 \\
+\texttt{catalog-sync} & sync opt-in cloud, ofertas patrocinadas & F4 \\
+\texttt{invoice} & NF-e/NFC-e/NFS-e, integração SEFAZ & F5 \\
+\texttt{webhook} & webhooks externos, HMAC, retry com backoff & F6 \\
+\texttt{notification} & websocket, in-app, e-mail & F6 \\
+\texttt{logistic} & frete, entrega & F6 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Modelo de dados resumido (núcleo)}
+
+\begin{lstlisting}
+Installation { id, mode (saas|on_premise), edition, flags, createdAt }
+Tenant       { id, alias, name, status, plan, createdAt }
+User         { id, tenantId, email, hash, role, occupationId }
+
+CustomerSupplier { id, tenantId, type (CUSTOMER|SUPPLIER|BOTH),
+                   name, document, contacts, address, embedding }
+
+Product   { id, tenantId, sku, name, division, section, group, subgroup,
+            unit, brand, gtin, costPrice, embedding, ... }
+Warehouse { id, tenantId, name, address }
+Stock     { id, tenantId, productId, warehouseId, qty, avgCost }
+StockMovement { id, tenantId, productId, warehouseId, qty, type, refId }
+
+Order        { id, tenantId, customerId, items, total, status,
+               paymentId, cashSessionId }
+OrderItem    { id, orderId, productId, qty, price, discount }
+Payment      { id, tenantId, orderId, method, amount, status,
+               pagbankOrderId, pagbankChargeId, paidAt,
+               paymentMode (INTERNAL_WALLET|OWN_PAGBANK|OWN_OTHER) }
+BillingEvent { id, tenantId, source, payload, processed, createdAt }
+
+PaymentMode      { tenantId, mode, credentials (encrypted), createdAt }
+MerchantWallet   { id, tenantId, currency, balance, blocked,
+                   totalReceived, totalPaidOut }
+WalletTransaction{ id, walletId, type, amount, balanceAfter,
+                   refType, refId, createdAt }
+PayoutPolicy     { tenantId, mode (AUTO_D1|MANUAL),
+                   minAmount, bankAccountId }
+BankAccount      { id, tenantId, type, bank, agency, account,
+                   pixKey, pixKeyType, holderName, holderDocument }
+Payout           { id, tenantId, walletId, amount, fee, netAmount,
+                   status, scheduledFor, processedAt,
+                   externalTxId, failureReason }
+
+Cash             { id, tenantId, name }
+CashSession      { id, cashId, openedBy, openedAt, closedAt, status }
+CashOperation    { id, sessionId, type, amount, operatorId, createdAt }
+CashPhysicalClose{ id, sessionId, method, amount, diff }
+
+ServiceOrder { id, tenantId, customerId, vehicleId, items[],
+               labor[], status, warrantyTermId }
+Vehicle      { id, tenantId, customerId, plate, model, brand, year }
+Budget       { id, tenantId, customerId, items, total, status,
+               convertedToId, convertedToType }
+
+NcoJob       { id, tenantId, type, input, output, latencyMs,
+               modelVersion, createdAt }
+CatalogSyncLog { id, direction, kind, count, createdAt }
+\end{lstlisting}
+
+%==================================================================
+\section{Checkout: conta interna + chave própria opcional}
+%==================================================================
+
+\subsection{Princípio: fricção zero}
+
+\begin{notice}
+\textbf{Filosofia.} O lojista entra e vende no minuto 1, sem precisar
+abrir conta PagBank, sem documentação, sem espera de homologação. O ERP
+usa a conta PagBank principal da Patria como \emph{custodiante técnico} e
+mantém um \emph{ledger interno} por lojista. Payouts automáticos
+transferem o saldo do lojista para a conta bancária dele cadastrada no
+onboarding (D+1 default; lojista pode optar por acumular). Lojista que
+prefira autonomia configura a chave PagBank própria a qualquer momento e
+o ERP passa a operar em BYOK. Taxa por transação é repassada ao lojista
+sem markup --- a Patria não lucra na taxa.
+\end{notice}
+
+\subsection{Base técnica reaproveitada da Patria}
+
+A integração PagBank foi homologada em produção em 13/05/2026 (anexo v4,
+\texttt{nco.patriatechnology.com}). Já cobre:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{PIX:} \texttt{POST /api/billing/checkout} cria order com
+        \texttt{qr\_codes}; PagBank retorna copia-cola + PNG.
+  \item \textbf{Cartão de crédito:} tokenização client-side via SDK
+        \texttt{pagseguro.min.js}; backend recebe apenas string
+        \texttt{encrypted}; PAN e CVV nunca trafegam pelo backend.
+  \item \textbf{Webhooks:} \texttt{POST /api/webhooks/pagbank} grava em
+        \texttt{billing\_events} (\texttt{processed=false}), depois processa
+        e marca como \texttt{processed=true}. Idempotência via
+        \texttt{reference\_id = pat-<tenant>-<timestamp>}.
+  \item \textbf{Conta principal:} \texttt{patriatechnology53@gmail.com}
+        (PROD).
+\end{itemize}
+
+Essa stack é extraída para módulo compartilhado e usada pelo ERP em dois
+cenários: cobrança da mensalidade Patria (quando houver edição paga) e
+cobrança do cliente final do lojista no PDV/OS.
+
+\subsection{Três modos de operação por tenant}
+
+\begin{longtable}{@{}p{3.5cm}p{5.5cm}p{5.5cm}@{}}
+\toprule
+\textbf{Modo} & \textbf{Como funciona} & \textbf{Quando usar} \\
+\midrule
+\endhead
+\texttt{INTERNAL\_WALLET} (default) & Recebimento cai na conta PagBank
+Patria; ledger interno credita o lojista; payout D+1 (default) ou sob
+demanda para a conta bancária dele. & Lojista pequeno/médio que quer
+começar a vender hoje sem burocracia. \\
+\addlinespace
+\texttt{OWN\_PAGBANK} (BYOK) & Lojista configura token PagBank próprio
+no onboarding ou nas configurações; checkout opera diretamente na conta
+dele. & Lojista que já tem conta PagBank, prefere autonomia, ou quer
+evitar custódia. \\
+\addlinespace
+\texttt{OWN\_OTHER} (futuro) & Slot para outras integrações: Mercado Pago,
+Stone, Asaas, InfinitePay. Mesma interface, adapter por provedor. & Quando
+houver demanda real. \\
+\bottomrule
+\end{longtable}
+
+A configuração vive em \texttt{PaymentMode} por tenant; mudar de modo é
+operação manual com validação (não pode mudar com saldo virtual maior
+que zero sem saque antes).
+
+\subsection{Ledger interno (modo \texttt{INTERNAL\_WALLET})}
+
+A custódia técnica do saldo na conta PagBank Patria é refletida em um
+ledger contábil de dupla entrada simplificado:
+
+\begin{lstlisting}
+MerchantWallet {
+  id, tenantId, currency='BRL',
+  balance,         -- saldo disponivel para payout
+  blocked,         -- reservado (pre-autorizacao, contestacao pendente)
+  totalReceived,   -- acumulado vitalicio recebido
+  totalPaidOut,    -- acumulado vitalicio pago ao lojista
+  createdAt, updatedAt
+}
+
+WalletTransaction {
+  id, walletId, type, amount, balanceAfter,
+  -- types:
+  --   SALE_CREDIT       (venda confirmada via webhook PAID)
+  --   FEE_DEBIT         (taxa PagBank repassada)
+  --   PAYOUT_DEBIT      (transferencia ao lojista)
+  --   PAYOUT_FEE_DEBIT  (taxa do payout, se Pix tiver custo)
+  --   REFUND_DEBIT      (estorno parcial/total)
+  --   CHARGEBACK_DEBIT  (contestacao ganha pelo cliente final)
+  --   MANUAL_ADJUST     (correcao operacional, motivo obrigatorio)
+  refType, refId,  -- ligacao ao Order/Payment/Payout originador
+  createdAt
+}
+\end{lstlisting}
+
+\subsection{Política de payout (modelo híbrido)}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Default D+1.} Toda venda confirmada hoje vira payout
+        automático no próximo dia útil para a conta bancária cadastrada.
+        Minimiza tempo de custódia (e portanto exposição da Patria) e dá
+        previsibilidade ao lojista.
+  \item \textbf{Opt-in: acumular.} Lojista pode mudar para modo manual,
+        em que o saldo acumula e ele clica em ``sacar'' quando quiser
+        (mínimo configurável, ex.\ R\$\,50).
+  \item \textbf{Worker} \texttt{erp-worker} roda job diário 06:00:
+        consolida saldo, gera \texttt{Payout} pendente, dispara Pix da
+        conta Patria para a conta do lojista, marca \texttt{PROCESSED} no
+        retorno.
+\end{itemize}
+
+\begin{lstlisting}
+PayoutPolicy {
+  tenantId,
+  mode (AUTO_D1 | MANUAL),
+  minAmount,            -- so dispara payout >= esse valor
+  bankAccountId         -- destino
+}
+
+BankAccount {
+  id, tenantId, type (CHECKING|SAVINGS|PIX),
+  bank, agency, account, accountDigit,
+  pixKey, pixKeyType (CPF|CNPJ|EMAIL|PHONE|RANDOM),
+  holderName, holderDocument
+}
+
+Payout {
+  id, tenantId, walletId, amount, fee, netAmount,
+  status (PENDING | PROCESSING | PAID | FAILED | CANCELLED),
+  scheduledFor, processedAt,
+  externalTxId,         -- end-to-end ID do Pix executado
+  failureReason
+}
+\end{lstlisting}
+
+\subsection{Taxa: repasse sem markup}
+
+A taxa cobrada pelo PagBank por transação (PIX \textasciitilde 0{,}99\%,
+crédito 1x \textasciitilde 3{,}19\%, com variações por modalidade) é
+\textbf{repassada integralmente ao lojista, sem markup}. Patria não lucra
+na taxa --- isso preserva a promessa ``grátis'' (no sentido honesto: o
+lojista paga exatamente o que pagaria se tivesse conta PagBank própria).
+A receita Patria continua vindo da camada de IA / fornecedor, não de
+spread financeiro.
+
+A \texttt{FEE\_DEBIT} é lançada na mesma transação do \texttt{SALE\_CREDIT}
+e o lojista vê o valor líquido na tela.
+
+\subsection{Fluxos suportados no PDV}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{PIX no balcão:} backend gera QR code, balcão exibe (TV,
+        totem ou impressora térmica), cliente paga, webhook confirma,
+        \texttt{Payment.status=PAID}, baixa de estoque, recibo, e
+        \texttt{SALE\_CREDIT} no \texttt{MerchantWallet} (modo interno) ou
+        crédito direto na conta PagBank do lojista (BYOK).
+  \item \textbf{Cartão presencial:} maquininha física PagBank (Order API).
+        Status sincrônico + webhook redundante.
+  \item \textbf{Cartão remoto / link de pagamento:} URL gerada pelo
+        backend, cliente paga sem estar fisicamente na loja (forte para
+        material de construção, oficina e venda B2B).
+  \item \textbf{Crediário interno:} parcela registrada em
+        \texttt{AccountsReceivable}, sem trânsito por PagBank
+        (instrumento próprio do lojista, sem custódia).
+\end{itemize}
+
+\subsection{Considerações on-premise}
+
+\begin{itemize}[leftmargin=2em]
+  \item Cliente on-premise pode operar em modo \texttt{OWN\_PAGBANK}
+        configurando \texttt{PAGBANK\_TOKEN} no \texttt{.env} --- checkout
+        idêntico ao SaaS, sem dependência da Patria central.
+  \item Cliente on-premise pode operar em \texttt{INTERNAL\_WALLET} se
+        ativar \texttt{CLOUD\_SYNC\_ENABLED=true} e aceitar termo
+        específico de custódia --- requer reconciliação periódica com o
+        cloud Patria.
+  \item Sem internet, checkout PagBank fica offline; crediário e
+        dinheiro continuam funcionais.
+\end{itemize}
+
+\subsection{Migração futura para split nativo (PagBank Plus/Connect)}
+
+Quando o volume justificar e o PagBank Plus/Connect (ou equivalente)
+estiver integrado, o modo \texttt{INTERNAL\_WALLET} migra para
+\emph{split nativo}: o pagamento já é dividido na origem entre a conta
+do lojista (subaccount no PagBank/BaaS) e uma eventual conta de taxa da
+Patria. Custódia some, peso regulatório some, ledger continua existindo
+mas vira espelho do que o PagBank/BaaS reporta. Migração transparente
+para o lojista; nenhuma mudança de UX.
+
+%==================================================================
+\section{Sync cloud opt-in}
+%==================================================================
+
+\subsection{Motivação}
+
+Sem dado agregado, vetores de receita (3) e (4) não funcionam, e a IA
+não melhora. Mas o on-premise por contrato \emph{não} pode forçar
+nada. Solução: opt-in transparente.
+
+\subsection{Modelo do que sobe}
+
+Apenas \textbf{agregados anonimizados}. Endpoint
+\texttt{GET /admin/cloud-sync/preview} mostra ao cliente exatamente o que
+seria enviado antes de habilitar.
+
+\begin{itemize}[leftmargin=2em]
+  \item Vendas agregadas por SKU/categoria/semana (sem PII, sem valor
+        individual).
+  \item Eventos de ruptura.
+  \item Sinais de intenção de reposição.
+  \item Métricas operacionais (tempo médio de OS, taxa de cancelamento).
+\end{itemize}
+
+\subsection{Modelo do que desce}
+
+\begin{itemize}[leftmargin=2em]
+  \item Catálogo enriquecido de fornecedor (códigos, fotos, descrições,
+        equivalências, ofertas patrocinadas).
+  \item Atualizações de modelo NCO (novos checkpoints).
+  \item Patches de aplicação (opt-in).
+\end{itemize}
+
+\subsection{Privacidade}
+
+\begin{cuidado}
+\textbf{LGPD.} Nenhum dado pessoal de cliente final do lojista
+(CPF, nome, telefone, endereço) sobe ao cloud em nenhum cenário. Apenas
+agregados estatísticos. O termo de uso explicita o que é coletado,
+para qual finalidade, e o cliente pode revogar a qualquer momento.
+Acordo de processamento de dados (DPA) padrão.
+\end{cuidado}
+
+%==================================================================
+\section{Fases de entrega}
+%==================================================================
+
+\subsection{F1 --- Núcleo comum (auth + cadastros + estoque)}
+
+\textbf{Escopo.} \texttt{auth, installation, tenant, customer-supplier,
+product, warehouse, stock}.
+
+\textbf{Entregáveis.}
+\begin{itemize}[leftmargin=2em]
+  \item Login/logout, recuperação de senha.
+  \item Cadastro de empresa (Installation) e usuário inicial admin.
+  \item CRUD de cliente/fornecedor unificado.
+  \item CRUD de produto com hierarquia Division/Section/Group/Subgroup.
+  \item Embedding pgvector na criação/atualização de produto e
+        customer-supplier (Gemini no SaaS, modelo local no on-premise).
+  \item CRUD de depósito.
+  \item Saldo de estoque por SKU/depósito + movimentação manual (entrada,
+        saída, ajuste).
+\end{itemize}
+
+\textbf{Critério de aceite.}
+\begin{itemize}[leftmargin=2em]
+  \item Multi-tenant funcional (header \texttt{X-Tenant} isola dados em
+        \emph{todos} os endpoints).
+  \item Embeddings populados; \texttt{GET /products/search?q=...} retorna
+        por similaridade.
+  \item Build SaaS e build on-premise (Docker Compose) ambos rodando.
+\end{itemize}
+
+\subsection{F2 --- Vendas + Checkout + Caixa}
+
+\textbf{Escopo.} \texttt{order, payment, checkout, cash, promotion, price}.
+
+\textbf{Entregáveis.}
+\begin{itemize}[leftmargin=2em]
+  \item Venda com múltiplos itens, descontos por item e total.
+  \item Tabela de preços + promoções por período.
+  \item Caixa: \texttt{CashSession} (open/partially\_closed/closed),
+        sangria, reforço, troca de operador (atômico), fechamento físico
+        por método.
+  \item \textbf{Checkout 100\% funcional} com os três modos:
+        \texttt{INTERNAL\_WALLET} (default), \texttt{OWN\_PAGBANK} (BYOK),
+        \texttt{OWN\_OTHER} (slot para futuro). PIX balcão, cartão
+        presencial via Order API, link de pagamento remoto.
+  \item \textbf{Wallet interno}: \texttt{MerchantWallet} +
+        \texttt{WalletTransaction} + reconciliação automática com webhook
+        PagBank.
+  \item \textbf{Payout automático D+1} via worker (Pix da conta Patria
+        para a conta bancária do lojista); opt-in de modo manual ``sacar
+        quando quiser''.
+  \item Onboarding: lojista cadastra \texttt{BankAccount}, escolhe modo
+        (interno é default), aceita termo de custódia se for interno.
+  \item Repasse de taxa PagBank ao lojista sem markup, visível como
+        \texttt{FEE\_DEBIT} na timeline da wallet.
+  \item Crediário interno (\texttt{AccountsReceivable} básico, parcelas).
+  \item PDV web responsivo no \texttt{erp-app}.
+\end{itemize}
+
+\textbf{Critério de aceite.}
+\begin{itemize}[leftmargin=2em]
+  \item Venda completa: scan/SKU $\to$ carrinho $\to$ pagamento
+        (PIX/cartão/dinheiro) $\to$ baixa de estoque $\to$ recibo $\to$
+        crédito no wallet do lojista (modo interno) ou na conta dele
+        (BYOK).
+  \item Webhook PagBank atualiza \texttt{Payment.status},
+        \texttt{WalletTransaction} \texttt{SALE\_CREDIT}+\texttt{FEE\_DEBIT}
+        atômicos.
+  \item Job de payout D+1 executa, faz Pix, lança \texttt{PAYOUT\_DEBIT};
+        lojista vê dinheiro na conta bancária no dia seguinte.
+  \item Tenant pode alternar entre modos (com restrição: saldo zerado).
+  \item Sessão de caixa abre, opera, fecha; relatório de fechamento bate
+        contra contagem física.
+\end{itemize}
+
+\subsection{F3 --- Vertical OS (peças + serviços)}
+
+\textbf{Escopo.} \texttt{service-order, vehicle, warranty-term, budget}.
+
+\textbf{Entregáveis.}
+\begin{itemize}[leftmargin=2em]
+  \item Cadastro de veículo/equipamento por cliente, histórico de OS.
+  \item OS com peça + mão de obra no mesmo documento, status
+        (aberta/em andamento/aguardando peça/finalizada/entregue).
+  \item Orçamento que converte em OS ou Order.
+  \item Termo de garantia anexável à OS.
+\end{itemize}
+
+\textbf{Critério de aceite.}
+\begin{itemize}[leftmargin=2em]
+  \item Ciclo orçamento $\to$ aprovação $\to$ execução $\to$ entrega
+        funcional para oficina/autopeças piloto.
+  \item Cálculo de baixa de estoque correto na finalização.
+  \item PDF de OS gerado e impresso.
+\end{itemize}
+
+\subsection{F4 --- IA: NCO + sync de catálogo}
+
+\textbf{Escopo.} \texttt{nco, catalog-sync}.
+
+\textbf{Entregáveis.}
+\begin{itemize}[leftmargin=2em]
+  \item Container \texttt{nco-inference} empacotado, modelo TorchScript
+        step 80k embutido, endpoints \texttt{POST /partition},
+        \texttt{POST /forecast}, \texttt{POST /cluster}.
+  \item Worker \texttt{erp-worker} agendado: forecast noturno de top-N
+        SKUs, detecção de ruptura, geração de \texttt{NcoJob}.
+  \item Sugestão patrocinada de reposição na tela do PDV (com flag visual
+        ``patrocinado'').
+  \item \texttt{catalog-sync} bidirecional, opt-in, com endpoint de preview.
+\end{itemize}
+
+\textbf{Critério de aceite.}
+\begin{itemize}[leftmargin=2em]
+  \item Previsão de ruptura disparada com lead time suficiente para
+        reposição em pelo menos 80\% dos SKUs de giro alto da loja piloto.
+  \item Sugestão de fornecedor aparece no carrinho com ranking explicado.
+  \item Sync funciona ida e volta em loja com internet intermitente.
+\end{itemize}
+
+\subsection{F5 --- Fiscal (NF-e/NFC-e/NFS-e)}
+
+\textbf{Escopo.} \texttt{invoice}.
+
+\textbf{Entregáveis.}
+\begin{itemize}[leftmargin=2em]
+  \item Integração com homologação SEFAZ por estado (UF do tenant).
+  \item Emissão de NF-e (B2B), NFC-e (B2C presencial), NFS-e (serviço,
+        para OS).
+  \item Cancelamento, carta de correção, contingência.
+\end{itemize}
+
+\textbf{Crítico.} Esta fase tem dependência regulatória pesada. Usar
+biblioteca consolidada (nfe.io, FocusNFe, eNotas) como primeira opção;
+implementação própria só se justificar economicamente.
+
+\subsection{F6 --- Extras}
+
+\textbf{Escopo.} \texttt{webhook, notification, logistic, integration}.
+
+\begin{itemize}[leftmargin=2em]
+  \item Webhooks externos para o cliente (loja envia evento para sistema
+        próprio).
+  \item Notificações em tempo real (websocket), in-app, e-mail.
+  \item Frete (cálculo via integração com transportadora ou Correios) e
+        rastreio.
+\end{itemize}
+
+%==================================================================
+\section{Riscos e mitigações}
+%==================================================================
+
+\begin{longtable}{@{}p{4.5cm}p{4.5cm}p{5.5cm}@{}}
+\toprule
+\textbf{Risco} & \textbf{Probabilidade/impacto} & \textbf{Mitigação} \\
+\midrule
+\endhead
+Adoção lenta por desconfiança (``ERP grátis é golpe'') & Alta / alto &
+Reputação Patria, casos piloto com depoimento, transparência total no
+modelo de receita, código aberto opcional. \\
+\addlinespace
+\textbf{Regulatório BACEN} no modo \texttt{INTERNAL\_WALLET} (Patria
+custodia saldo de terceiros na conta PagBank principal) & Média / muito
+alto &
+Quatro mitigações combinadas:
+(1) \textbf{Payout D+1 agressivo} mantém tempo médio de custódia
+$< 24$h, minimizando saldo agregado retido.
+(2) \textbf{Limite por tenant} configurável (ex.\ R\$\,50k de saldo
+máximo); acima disso forçar BYOK ou saque imediato.
+(3) \textbf{Consulta a advogado especialista em fintech} antes de
+operar acima de saldo agregado de R\$\,1\,M ou
+$> 100$ tenants ativos no modo interno.
+(4) \textbf{Plano explícito de migração} para PagBank Plus/Connect
+ou BaaS (Asaas/Pagar.me/Celcoin) com sub-account emitida por IP
+autorizado, eliminando custódia. \\
+\addlinespace
+Fornecedor não topa pagar até massa crítica & Alta / alto &
+Receita inicial não depende disso. Lojista já recebe valor real (forecast,
+ruptura, sugestão sem patrocínio) desde dia 1. Receita do fornecedor é
+camada 2, aceitar latência. \\
+\addlinespace
+Cliente percebe ranking como ``vendido'' & Média / alto &
+Flag \emph{patrocinado} sempre visível, ranking transparente (qualidade
+empírica × lance, como Google Ads), publicar metodologia. \\
+\addlinespace
+LGPD: vazamento ou processamento indevido & Baixa / muito alto &
+Anonimização rigorosa no sync, opt-in explícito, DPA padrão, criptografia
+em trânsito e em repouso, log de acesso. \\
+\addlinespace
+Suporte on-premise difícil (debug remoto) & Alta / médio &
+Telemetria opt-in (apenas erros, sem dado), comando \texttt{erp-doctor}
+gera bundle de diagnóstico anônimo para enviar ao suporte. \\
+\addlinespace
+NCO-HiperGNN out-of-distribution colapsa em domínio novo & Média / alto &
+Treinar na distribuição do cliente (custo $\sim 3$ dias GPU), conforme
+limitação documentada no paper AF; modelo fallback (heurístico) para
+domínios sem treino. \\
+\addlinespace
+Concorrência (Stone, PagSeguro) replica modelo & Média / alto &
+Defensável por: bound matemático do NCO (paper AE), Patrícia
+(orquestração via Claude), tempo de mercado. Velocidade > perfeição. \\
+\addlinespace
+Bug de fiscal causa NF-e rejeitada em produção & Alta / alto &
+Usar provedor consolidado (FocusNFe etc.) até maturidade, fila de
+retentativa, alerta para diretor responsável. \\
+\bottomrule
+\end{longtable}
+
+%==================================================================
+\section{Próximos passos imediatos}
+%==================================================================
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Validar este plano.} Aarão revisa, ajusta escopo das fases,
+        confirma ordem de prioridade.
+  \item \textbf{Definir tenant inicial de teste.} Uma loja real (idealmente
+        material de construção ou autopeças em Boa Vista) que aceite
+        colaborar como piloto de F1+F2.
+  \item \textbf{Começar F1.} Estruturar módulos \texttt{auth, installation,
+        tenant, customer-supplier, product, warehouse, stock} no erp-api
+        já criado. Schema Prisma definitivo. Primeira tela do erp-app.
+  \item \textbf{Preparar nco-inference.} Exportar TorchScript do checkpoint
+        step 80k do GEX44, validar inferência local CPU.
+  \item \textbf{Reuso PagBank.} Extrair módulo \texttt{checkout} da Patria
+        para biblioteca compartilhada (\texttt{@patria/checkout}?) ou
+        copiar verbatim para erp-api. Adicionar camada
+        \texttt{wallet} + \texttt{payout} acima da integração crua.
+  \item \textbf{Termo de custódia (modo interno).} Redigir termo
+        específico explicando que a Patria custodia o saldo na conta
+        PagBank principal e faz payout D+1, sem juros, sem retenção
+        operacional, sem cobrança extra. Aceite obrigatório no onboarding
+        de tenant que escolher modo \texttt{INTERNAL\_WALLET}. Consulta
+        rápida com advogado fintech antes de publicar.
+\end{enumerate}
+
+%==================================================================
+\section*{Referências internas}
+%==================================================================
+
+\begin{thebibliography}{9}
+\bibitem{paperAF} Lopes, A.; Claude.
+\emph{Paper AF --- NCO-HiperGNN: solver neural para problemas combinatoriais
+de partição via álgebra hipercomplexa generalizada}, 2026.
+\bibitem{paperAE} Lopes, A.; Claude.
+\emph{Paper AE --- Ponte Schur-Weyl: Hochschild $\leftrightarrow$ tensorial},
+2026.
+\bibitem{paperCT} Lopes, A.; Claude.
+\emph{Paper CT --- Mecânica de campo médio em álgebras hipercomplexas},
+2026.
+\bibitem{ncoPartition} Lopes, A.; Claude.
+\texttt{NCO\_PARTITIONING.md} --- roadmap do produto NCO, 2026.
+\bibitem{pagbankV4} Patria Technology.
+\emph{Anexo v4 --- Validação PagBank em PRODUÇÃO}, 13/05/2026.
+\bibitem{integratorClaude} Easysync.
+\texttt{integrator/CLAUDE.md} --- referência de arquitetura ERP de varejo
+maduro.
+\bibitem{patriaProduct} Patria Technology.
+\texttt{patria-api/PRODUCT.md} --- visão do produto Patria.
+\end{thebibliography}
+
+\end{document}
