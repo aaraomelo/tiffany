@@ -2895,3 +2895,64 @@ pior: EU ESCREVI UMA TAUTOLOGIA DENTRO DA CORRECÇÃO DE UMA TAUTOLOGIA.
   e a esgotá-lo. A linha antiga está citada no comentário, com a data.
 
   gume  12 mutações, 12 mordem
+
+§64 — O OPERADOR É O PRINCÍPIO; O BINÁRIO JÁ É A REALIZAÇÃO DELE
+==================================================================
+«isso aqui é uma cadeia, fomos claros que parte de um símbolo bruto, pode
+começar de 0 e construir o 1, ou pode começar de 1 e construir o 0 — o operador
+fazer isso é dinâmico. O operador está espalhado para todo lado, é para
+CONCENTRAR ele como princípio inicial, não o binário: binário já é a realização
+do operador em cima do símbolo (esse símbolo não é apenas binário, ele é um
+BLOCO BRUTO e o operador divide ele todo em dois dígitos DUAIS em binário e
+constrói tudo).» · «o processo dá as coordenadas ordenadas, a TUPLA do objeto —
+não o objeto, mas a REPRESENTAÇÃO dele.»
+
+EU TINHA CORRIGIDO A ORDEM E PARADO UM ANDAR CEDO DEMAIS. No §62 mudei «começa
+da lista» para «começa do binário» e chamei-lhe resolvido. Mas o binário
+também não é o princípio: é o que o operador PRODUZ ao correr uma vez. O que
+estava mal não era o ponto de partida ser um conjunto errado — era ser um
+CONJUNTO, quando o dado é uma OPERAÇÃO.
+
+A ORDEM AGORA
+     bloco bruto            Def. def:bloco   um símbolo INDIVISO, ainda sem partes
+     ∂, o operador          Def. def:op      divide um bloco em dois, com a troca τ
+     o binário              Teor. thm:op     o que ∂ dá ao correr UMA vez
+     a tupla ordenada       Teor. thm:coord  o que ∂ dá ao correr w vezes
+     a lista                Teor. thm:BI     a ordem das tuplas, pelo transporte
+
+E DUAS COISAS QUE SÓ AGORA TÊM SÍTIO.
+  A NOMEAÇÃO NÃO É PARÂMETRO. Chamar 0 a uma metade ou à outra dá corpos
+  ISOMORFOS, e o isomorfismo é a própria τ — «partir do 0 e construir o 1, ou o
+  contrário, é o mesmo percurso lido nos dois sentidos». Medido a construir as
+  DUAS tabelas do zero (uma com o neutro em cada metade) e a exibir τ; e com o
+  CONTROLO que dá conteúdo à afirmação: a identidade no lugar de τ NÃO serve,
+  6 discordâncias.
+
+  A TUPLA É A REPRESENTAÇÃO, NÃO O OBJETO. É a lista ORDENADA das decisões de ∂,
+  e a ordem é a contagem das aplicações — não uma etiqueta. Permutar duas
+  componentes muda o objeto em 32 das 64, e as 32 em que não muda são
+  EXACTAMENTE as de componentes iguais: não há excepção estrutural, há tuplas
+  sem o que permutar.
+
+A CONCENTRAÇÃO (thm:umop, §AN35c) — o operador estava em oito sítios e é UM:
+     o que se divide           as duas partes        a troca τ
+     o bloco                   as duas metades       x ↦ x+1
+     a largura 2w              F_w e σF_w            trocar o bit de σ
+     o vértice                 +e_i e −e_i           inverter o sentido
+     a bola 2^{-p}             as duas irmãs         trocar o bit p
+     a curva D_{k+1}           D_k e D_k*            a dobra do papel
+     o corte de χ_k            χ=+1 e χ=−1           somar e_b com k_b=1
+     ─────────────────────  as seis com τ²=id e SEM ponto fixo, 68 156 casos
+     o passo                   o que foi / o que falta   ζ ↔ μ   (inversos)
+     a realização              a fibra / a base          π ↔ π̃   (retracção)
+
+  E os dois últimos estão em último de propósito: NÃO são involuções. μζ = id
+  fecha dos dois lados por nilpotência, mas pr₁∘π̃ = π fecha de UM SÓ — e A
+  DOBRA É JUSTAMENTE ONDE A INVOLUÇÃO DEIXA DE FECHAR. Medido: a volta falha em
+  256 de 512, com max G = 2.
+
+        ∂ divide;  τ lembra a divisão;  G conta onde τ já não chega.
+
+  gume  8 mutações no §AN35, 8 mordem (e uma sobreviveu à primeira: mutei METADE
+        de um controlo de duas linhas — mutação parcial, outra vez)
+  bateria 529 : 529, 34 unidades, 0 falhas · aranha.tex 30 páginas

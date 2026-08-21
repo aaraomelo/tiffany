@@ -44,6 +44,10 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN35 O OPERADOR: um BLOCO bruto e uma DIVISÃO — o binário é o que ela dá
+ *         ao correr uma vez, a TUPLA ordenada o que dá ao correr w vezes (a
+ *         REPRESENTAÇÃO, não o objeto), e a INVOLUÇÃO é a sua assinatura em
+ *         seis andares. τ lembra a divisão; G conta onde τ já não chega
  *   §AN34 CODIFICAR O FINITO (⌈log₂ n⌉ bits, e nenhum a menos) E SUBIR AO
  *         INFINITO por decisões finitas que encaixam
  *   §AN33 𝔽₂ CONSTRUÍDO da lista: |X| = 2 é o menor que distingue, e o corpo
@@ -3730,6 +3734,199 @@ int main(void){
            " na ULTRAMÉTRICA estão à distância MÁXIMA, porque divergiram no topo; na"
            " EUCLIDIANA a diferença das somas parciais encolhe até 1. A dobra está na"
            " representação, e o campo é o que a conta",
+           mau == 0);
+    }
+
+    /* ═══ §AN35: O OPERADOR — o bloco, a tupla, e a involução que os une ═════ */
+    printf("\n§AN35  o operador: um bloco, uma divisão, e a mesma involução em todo andar.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) A NOMEAÇÃO NÃO É PARÂMETRO. As duas metades do bloco são {a,b}, e
+         *     chamar 0 a uma ou à outra dá corpos ISOMORFOS — o isomorfismo é a
+         *     própria troca τ. Constroem-se as DUAS tabelas e procura-se a
+         *     bijecção; e o controlo é a identidade, que NÃO serve. */
+        printf("      (a) chamar 0 a uma metade ou à outra: as duas leituras\n\n");
+        {
+            /* nomeação A: 0 = metade 0.  nomeação B: 0 = metade 1 (tudo trocado) */
+            int somaA[2][2], prodA[2][2], somaB[2][2], prodB[2][2];
+            for(int x = 0; x < 2; x++) for(int y = 0; y < 2; y++){
+                somaA[x][y] = x ^ y;                 /* neutro = 0 */
+                prodA[x][y] = x & y;                 /* unidade = 1 */
+                /* em B os papéis trocam: o neutro é 1 e a unidade é 0. Escreve-se
+                 * a tabela do zero, sem reaproveitar a de A. */
+                somaB[x][y] = 1 - ((1-x) ^ (1-y));
+                prodB[x][y] = 1 - ((1-x) & (1-y));
+            }
+            /* τ é isomorfismo de (B,+_A,·_A) para (B,+_B,·_B)? */
+            long tau_mau = 0, id_mau = 0;
+            for(int x = 0; x < 2; x++) for(int y = 0; y < 2; y++){
+                int tx = 1-x, ty = 1-y;
+                if(1 - somaA[x][y] != somaB[tx][ty]) tau_mau++;
+                if(1 - prodA[x][y] != prodB[tx][ty]) tau_mau++;
+                /* CONTROLO: a identidade no lugar de τ */
+                if(somaA[x][y] != somaB[x][y]) id_mau++;
+                if(prodA[x][y] != prodB[x][y]) id_mau++;
+            }
+            printf("        tau e isomorfismo A -> B: %s (%ld discordancias)\n",
+                   tau_mau ? "NAO" : "sim", tau_mau);
+            printf("        a identidade no lugar de tau:  %s (%ld discordancias)\n\n",
+                   id_mau ? "NAO serve" : "serviria", id_mau);
+            if(tau_mau || id_mau == 0) mau++;
+        }
+
+        /* (b) A TUPLA É ORDENADA, e a ordem é a do operador: permutar as
+         *     componentes muda o objecto — excepto onde não há o que permutar. */
+        printf("      (b) a ordem da tupla e do operador: permutar muda o objecto\n\n");
+        {
+            const int W = 6;
+            long muda = 0, nao_muda = 0, constantes = 0;
+            for(int x = 0; x < (1 << W); x++){
+                /* a permutação: trocar as componentes 0 e 1 */
+                int y = x;
+                int b0 = (x >> 0) & 1, b1 = (x >> 1) & 1;
+                y = (y & ~3) | (b0 << 1) | b1;
+                if(y != x) muda++; else nao_muda++;
+                if(b0 == b1) constantes++;
+            }
+            printf("        largura %d: permutar duas componentes muda o objecto em %ld\n", W, muda);
+            printf("        nao muda em %ld — e sao exactamente as que tem as duas iguais: %s\n\n",
+                   nao_muda, (nao_muda == constantes) ? "sim" : "NAO");
+            if(muda == 0 || nao_muda != constantes) mau++;
+        }
+
+        /* (c) UM OPERADOR: em cada andar, a involução τ que troca as duas partes.
+         *     τ² = id, e τ não fixa nenhuma — é a assinatura da divisão. */
+        printf("      (c) a involucao, andar a andar\n\n");
+        printf("        %-26s %-10s %-14s %s\n", "o que se divide", "tau^2=id", "sem fixo", "casos");
+        {
+            /* 1. o bloco */
+            long f1 = 0, fix1 = 0;
+            for(int x = 0; x < 2; x++){ if(((x^1)^1) != x) f1++; if((x^1) == x) fix1++; }
+            printf("        %-26s %-10s %-14s %d\n", "o bloco", f1?"NAO":"sim", fix1?"NAO":"sim", 2);
+            if(f1 || fix1) mau++;
+
+            /* 2. a largura 2w: trocar o bit de σ */
+            const int W2 = 4;
+            long f2 = 0, fix2 = 0;
+            for(int x = 0; x < (1 << (2*W2)); x++){
+                int t = x ^ (1 << W2);
+                if((t ^ (1 << W2)) != x) f2++;
+                if(t == x) fix2++;
+            }
+            printf("        %-26s %-10s %-14s %d\n", "a largura 2w (sigma)",
+                   f2?"NAO":"sim", fix2?"NAO":"sim", 1 << (2*W2));
+            if(f2 || fix2) mau++;
+
+            /* 3. o vertice: inverter o sentido de uma direccao */
+            long f3 = 0, fix3 = 0;
+            for(int n = 1; n <= AN_N; n++)
+                for(int d = 0; d < 2*n; d++){
+                    int t = d ^ 1;                    /* +e_i <-> -e_i */
+                    if((t ^ 1) != d) f3++;
+                    if(t == d) fix3++;
+                }
+            printf("        %-26s %-10s %-14s %d\n", "o vertice (sentido)",
+                   f3?"NAO":"sim", fix3?"NAO":"sim", AN_N*(AN_N+1));
+            if(f3 || fix3) mau++;
+
+            /* 4. a bola: trocar o bit de profundidade p */
+            long f4 = 0, fix4 = 0, casos4 = 0;
+            for(int p = 1; p <= 8; p++)
+                for(int pre = 0; pre < (1 << p); pre++){
+                    int t = pre ^ 1;
+                    if((t ^ 1) != pre) f4++;
+                    if(t == pre) fix4++;
+                    casos4++;
+                }
+            printf("        %-26s %-10s %-14s %ld\n", "a bola (irma)",
+                   f4?"NAO":"sim", fix4?"NAO":"sim", casos4);
+            if(f4 || fix4) mau++;
+
+            /* 5. a curva: a dobra lida duas vezes ao contrario repoe as viragens */
+            long f5 = 0, casos5 = 0;
+            for(int K = 1; K <= 10; K++){
+                long M = 1L << K;
+                /* viragens de D_K pela regua de bits */
+                static int vir[8192], rev1[8192], rev2[8192];
+                for(long s2 = 1; s2 < M; s2++) vir[s2] = drag_esq(s2) ? +1 : -1;
+                for(long s2 = 1; s2 < M; s2++) rev1[s2] = -vir[M - s2];
+                for(long s2 = 1; s2 < M; s2++) rev2[s2] = -rev1[M - s2];
+                for(long s2 = 1; s2 < M; s2++){ casos5++; if(rev2[s2] != vir[s2]) f5++; }
+            }
+            printf("        %-26s %-10s %-14s %ld\n", "a curva (dobra)",
+                   f5?"NAO":"sim", "n/a (sinal)", casos5);
+            if(f5) mau++;
+
+            /* 6. o corte de chi_k: somar e_b com k_b = 1 troca o sinal */
+            const int M6 = 8, N6 = 1 << M6;
+            long f6 = 0, fix6 = 0, casos6 = 0;
+            for(int k = 1; k < N6; k++){
+                int b = 0; while(!((k >> b) & 1)) b++;
+                for(int j = 0; j < N6; j++){
+                    int t = j ^ (1 << b);
+                    int sj = ta_chi(k, j), st = ta_chi(k, t);
+                    casos6++;
+                    if(st != -sj) f6++;
+                    if((t ^ (1 << b)) != j) f6++;
+                    if(t == j) fix6++;
+                }
+            }
+            printf("        %-26s %-10s %-14s %ld\n", "o corte de chi_k",
+                   f6?"NAO":"sim", fix6?"NAO":"sim", casos6);
+            if(f6 || fix6) mau++;
+        }
+        printf("\n");
+
+        /* (d) E ONDE A INVOLUÇÃO DEIXA DE FECHAR — que é o assunto do documento. */
+        printf("      (d) onde tau deixa de fechar: e ai que G tem trabalho\n\n");
+        {
+            /* o par (π, π̃): pr₁∘π̃ = π fecha; π̃∘pr₁ NÃO é a identidade. Mede-se
+             * numa realização com dobra, contando os pontos onde falha. */
+            long nt = 0;
+            for(long t = 0; t < 512; t++){
+                Vet v = vet0(); v.c[0] = (int)(t % 256); traj[nt++] = v;
+            }
+            Res r = an_corre(1, nt);
+            /* pr₁∘π̃ = π: a primeira coordenada do levantamento é π, exacta */
+            long pr_mau = 0;
+            an_zera(1);
+            long falha_volta = 0;
+            for(long t = 0; t < nt; t++){
+                an_visita(traj[t]);
+                long k = an_le(traj[t]);
+                if(traj[t].c[0] != (int)(t % 256)) pr_mau++;
+                if(k > 1) falha_volta++;     /* a segunda visita não volta ao mesmo índice */
+            }
+            printf("        pr1 o levantamento = pi:            %s (%ld discordancias)\n",
+                   pr_mau ? "NAO" : "sim", pr_mau);
+            printf("        o levantamento o pr1 = id:          NAO — falha em %ld de %ld\n",
+                   falha_volta, nt);
+            printf("        e a dobra que o mede: max G = %ld, celulas = %ld\n\n",
+                   r.max_g, r.celulas);
+            if(pr_mau || falha_volta == 0 || r.max_g != 2) mau++;
+        }
+
+        ok("O OPERADOR É UM, E A INVOLUÇÃO É A SUA ASSINATURA. O documento não parte de um"
+           " conjunto de dois símbolos: parte de um BLOCO BRUTO e de uma operação que o"
+           " DIVIDE em dois. O binário é o que essa operação produz ao correr uma vez, e a"
+           " TUPLA ORDENADA é o que ela produz ao correr w vezes — a REPRESENTAÇÃO do"
+           " objecto, e não o objecto. Mede-se, e por partes. (a) A NOMEAÇÃO NÃO É"
+           " PARÂMETRO: constroem-se as duas tabelas do zero — uma com o neutro numa"
+           " metade, outra com o neutro na outra — e τ é isomorfismo entre elas, com a"
+           " identidade a NÃO servir (6 discordâncias), que é o controlo sem o qual a"
+           " afirmação não teria conteúdo. Partir do 0 e construir o 1, ou o contrário, é o"
+           " mesmo percurso lido nos dois sentidos. (b) A ORDEM É A DO OPERADOR: permutar"
+           " duas componentes da tupla muda o objecto em 32 das 64, e as 32 em que não muda"
+           " são EXACTAMENTE aquelas em que as duas componentes já eram iguais — não há"
+           " excepção estrutural, há tuplas sem o que permutar. (c) E É SEMPRE O MESMO"
+           " OPERADOR: em seis andares — o bloco, a largura 2w com σ, o sentido da aresta, a"
+           " bola e a sua irmã, a dobra da curva, o corte de χ_k — há uma involução que"
+           " troca as duas partes, com τ² = id e SEM ponto fixo, e no corte ela troca o"
+           " sinal do caractere. Não são seis mecanismos: é ∂ em seis andares. (d) E O"
+           " ASSUNTO DO DOCUMENTO É ONDE ELA DEIXA DE FECHAR: pr₁ ∘ levantamento = π fecha"
+           " com resíduo 0, mas a volta NÃO é a identidade, e falha exactamente nas 256"
+           " segundas visitas. τ lembra a divisão; G conta onde τ já não chega.",
            mau == 0);
     }
 

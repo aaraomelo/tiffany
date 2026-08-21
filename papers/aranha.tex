@@ -109,7 +109,9 @@ Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{sec:ge
 Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{thm:multiplicidade}(3) \\
 O que acontece quando volta? & a dobra: $G>1$ & Def.~\ref{def:dobra} \\
 Como se representam os passos? & por uma palavra no alfabeto das arestas & Teor.~\ref{thm:palavra} \\
-O que é o ponto de partida? & uma distinção: dois símbolos & Def.~\ref{def:B} \\
+O que é o ponto de partida? & um bloco bruto, e o operador que o divide & Def.~\ref{def:bloco},~\ref{def:op} \\
+Donde vêm os dois dígitos? & de uma divisão --- e são duais & Teor.~\ref{thm:op} \\
+E as coordenadas? & são a tupla ordenada: a \emph{representação} & Teor.~\ref{thm:coord} \\
 Como se codifica um finito qualquer? & em $\lceil\log_2 c\rceil$ bits, e não em menos & Teor.~\ref{thm:B},~\ref{thm:BI} \\
 Como se continua sem terminar? & caminhando: cada decisão é finita & §\ref{sec:objeto} \\
 Como se constroem os degraus? & o primeiro pela dobra, os outros por quociente & Teor.~\ref{thm:BI},~\ref{thm:escada} \\
@@ -125,11 +127,13 @@ não são uma lista de tópicos: cada uma é o domínio da seguinte, e cada seta
 abaixo é um enunciado deste documento --- nenhuma é analogia:
 \[
 \boxed{\;
-\underset{\text{Def.~\ref{def:B}}}{\text{distinção}}
+\underset{\text{Def.~\ref{def:op}}}{\text{operador}}
+\;\to\;
+\underset{\text{Teor.~\ref{thm:op}}}{\text{binário}}
+\;\to\;
+\underset{\text{Teor.~\ref{thm:coord}}}{\text{tupla}}
 \;\to\;
 \underset{\text{Teor.~\ref{thm:BI}}}{\text{lista}}
-\;\to\;
-\underset{\text{Teor.~\ref{thm:shift}}}{\text{operador}}
 \;\to\;
 \underset{\text{§\ref{sec:geo}}}{\text{aresta}}
 \;\to\;
@@ -141,9 +145,14 @@ abaixo é um enunciado deste documento --- nenhuma é analogia:
 \;\to\;
 G \;}
 \]
-O \textbf{operador} entra aí como teorema e não como definição: o índice não é
-tempo posto de fora, é a contagem das aplicações de $S$, e o que $S$ gera ---
-acumular, e a diferença que o desfaz --- é o Teor.~\ref{thm:shift}.
+\noindent\textbf{E o primeiro elo é o operador, não um conjunto.} O documento
+não parte do binário: parte de \emph{um símbolo bruto} --- um bloco, sem partes
+--- e de uma operação que o \emph{divide em dois}. O binário é o que essa
+operação produz ao correr uma vez (Teor.~\ref{thm:op}); a tupla é o que ela
+produz ao correr $w$ vezes, e é a \emph{representação} do objeto e não o objeto
+(Teor.~\ref{thm:coord}). Daí que o índice não seja tempo posto de fora: é a
+contagem das aplicações do operador, e o que ele gera --- acumular, e a
+diferença que o desfaz --- é o Teor.~\ref{thm:shift}.
 
 \medskip\noindent\textbf{E há um elo que se quer pôr no princípio e não pode
 lá estar}: a \emph{estratégia} --- uma aranha que volta muitas vezes, ou muitas
@@ -156,7 +165,7 @@ célula a célula.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O objeto}\label{sec:objeto}
 
-\subsection*{O ponto de partida: uma distinção}
+\subsection*{O ponto de partida: o bloco, e o operador que o divide}
 
 \noindent Em quatro frases, e cada uma é um resultado abaixo:
 \[
@@ -169,13 +178,162 @@ célula a célula.
 \end{array}}
 \]
 
-\medskip\noindent Define-se \emph{uma distinção}, e constrói-se a lista. É esse
-o percurso, e é curto.
+\medskip\noindent O documento parte de \emph{um} símbolo --- um símbolo
+\textbf{bruto}, sem partes --- e de \emph{uma} operação sobre ele. O binário não
+é o ponto de partida: é o que se obtém quando a operação corre uma vez.
+
+\begin{definicao}[o bloco]\label{def:bloco}
+Um \textbf{bloco} é um símbolo \emph{indiviso}: um objeto do qual ainda se não
+disse nada, e em particular nem se disse que tem partes. Não é ``$0$'' nem
+``$1$'' --- não é ainda um dígito, porque não há dois.
+\end{definicao}
+
+\begin{definicao}[o operador]\label{def:op}
+O \textbf{operador} $\partial$ \emph{divide um bloco em dois}, e marca cada
+metade pela outra:
+\[
+\boxed{\;\partial\colon\ \text{bloco}\ \longmapsto\ (\,\text{parte},\ \text{co-parte}\,)\;}
+\]
+com a \textbf{troca} $\tau$ que permuta as duas metades. É este --- e não um
+conjunto --- o dado do documento.
+\end{definicao}
+
+\begin{teorema}[o operador dá o binário, e a nomeação não é dado]\label{thm:op}
+Aplicado a um bloco, $\partial$ produz duas metades, e:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A troca é uma involução:} $\tau^{2}=\mathrm{id}$, e $\tau$
+não fixa nenhuma das duas --- é o que ``distintas'' quer dizer.
+\item[(2)] \textbf{As duas metades são duais:} cada uma é determinada pela
+outra, $\tau$ leva uma na outra, e não há terceira.
+\item[(3)] \textbf{A nomeação é livre e não é um parâmetro:} chamar $0$ a uma e
+$1$ à outra, ou o contrário, dá estruturas \emph{isomorfas} --- o isomorfismo é
+$\tau$. Partir do $0$ e construir o $1$, ou partir do $1$ e construir o $0$, é
+o mesmo percurso lido nos dois sentidos.
+\end{enumerate}
+Ao conjunto das duas metades chama-se $B$, e $\tau(x)$ escreve-se $x+1$.
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são o que a divisão em \emph{duas} partes marcadas uma pela outra
+diz: $\tau$ troca-as, e trocá-las duas vezes repõe-nas. Se $\tau$ fixasse uma,
+as duas não estariam marcadas uma pela outra, e a divisão não teria produzido
+duas coisas. (3) Um isomorfismo entre as duas nomeações é uma bijeção que
+respeite tudo o que há --- e o que há é $\tau$; ora $\tau$ é ela própria essa
+bijeção, e é involutiva, de modo que a leitura contrária existe e é a mesma. A
+prova não usa nome nenhum, o que é exatamente a afirmação.
+\end{proof}
+
+\medskip\noindent\textbf{E é por isso que não há parâmetro livre.} O que o
+teorema seguinte mostra --- que as tabelas de $B$ estão determinadas --- não é
+um facto sobre \emph{dois símbolos}: é um facto sobre \emph{uma divisão}. Não se
+escolheu $B$ entre estruturas possíveis; correu-se $\partial$ uma vez.
 
 \begin{definicao}[o binário]\label{def:B}
-$B$ é o conjunto de \textbf{dois símbolos distinguíveis}. É o único dado deste
-documento: uma distinção.
+$B$ é o conjunto das duas metades do Teor.~\ref{thm:op}: o resultado de uma
+aplicação do operador.
 \end{definicao}
+
+\medskip\noindent\textbf{E o operador não corre uma vez.} Cada metade é ela
+própria um bloco, e $\partial$ volta a aplicar-se. O que daí sai não é um
+conjunto maior: é uma \emph{sucessão de decisões}, e é ela que interessa.
+
+\begin{teorema}[o processo dá as coordenadas, e elas são a representação]\label{thm:coord}
+Aplicando $\partial$ sucessivamente --- ao bloco, depois à metade escolhida,
+depois à metade dessa --- fica registada, por ordem, qual metade se tomou em
+cada passo. Essa sucessão é a \textbf{tupla}
+\[
+\boxed{\;x=(x_1,x_2,\dots,x_w)\in B^{w}\;}
+\]
+e sobre ela valem três coisas:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Ordenada, e a ordem é a do operador.} O índice $j$ não é uma
+etiqueta escolhida: é a \emph{contagem das aplicações} de $\partial$. Permutar
+as componentes muda o objeto representado.
+\item[(2)] \textbf{É a representação, não o objeto.} A tupla é a lista das
+decisões que levaram ao objeto; o objeto é aquilo a que elas levaram. As duas
+coisas não têm o mesmo estatuto, e é da diferença entre elas que este documento
+trata.
+\item[(3)] \textbf{E a passagem de uma à outra perde.} Duas tuplas distintas
+podem representar o mesmo objeto, e uma largura finita obriga a que representem
+--- é a \textbf{dobra}, medida por $G$ (Def.~\ref{def:dobra}); ao passo que um
+objeto pode admitir mais do que uma tupla, e admite (§\ref{sec:objeto}, o caso
+$0{,}999\ldots$).
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Por construção: o passo $j$ só existe depois do passo $j-1$, porque divide o
+que ele produziu; a sucessão é portanto ordenada pelo próprio processo, e é
+essa a única ordem que há. (2) A tupla é um objeto de $B^{w}$ e o representado
+vive onde o processo o pôs; a aplicação de um para o outro é o que a
+Def.~\ref{def:objeto} chama realização, e nada obriga a que seja injetiva. (3) É
+a contagem: em largura $w$ há $2^{w}$ tuplas, e realizar mais elementos do que
+esse número identifica-os --- que é a cláusula (2) do
+Teor.~\ref{thm:multiplicidade}.
+\end{proof}
+
+\medskip\noindent\textbf{Donde as três palavras deste documento, já todas
+presentes.} O \emph{operador} decide; a \emph{tupla} regista as decisões, por
+ordem; e o \emph{objeto} é onde elas caem. A tupla ordenada de $w$ decisões é o
+que adiante se chama a \textbf{palavra} (Teor.~\ref{thm:palavra}) --- lá o
+alfabeto é o das direções de aresta, e a divisão que $\partial$ faz num bloco é
+a que o vértice faz nas suas saídas; a \textbf{aresta é a memória dessa
+divisão}. E $G$ conta o que a passagem da tupla ao objeto deitou fora.
+
+\subsection*{E é sempre o mesmo operador}
+
+\noindent Um documento que introduzisse $\partial$ no princípio e depois
+trouxesse, andar a andar, um mecanismo novo para cada secção, teria posto o
+operador no sítio errado. Não é o caso: o que se segue são \emph{aplicações do
+mesmo} $\partial$, e o que as identifica é a involução do Teor.~\ref{thm:op}(1).
+
+\begin{teorema}[um operador, e a involução é a assinatura]\label{thm:umop}
+Em cada linha da tabela abaixo há um objeto, uma partição dele em \emph{duas}
+partes, e uma \textbf{involução} $\tau$ que as troca --- $\tau^{2}=\mathrm{id}$,
+e $\tau$ não fixa nenhuma das duas. Nenhuma das linhas é analogia: cada uma é
+um enunciado deste documento, e a coluna da direita diz qual.
+\begin{center}\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+o que se divide & as duas partes & a troca $\tau$ & onde \\
+\midrule
+o bloco & as duas metades & $x\mapsto x+1$ & Teor.~\ref{thm:op} \\
+a largura $2w$ & $F_w$ e $\sigma F_w$ & trocar o bit de $\sigma$ & Teor.~\ref{thm:espaco} \\
+o vértice & $+e_i$ e $-e_i$ & inverter o sentido & Def.~\ref{def:grade} \\
+a bola de raio $2^{-p}$ & as duas irmãs & trocar o bit $p$ & Teor.~\ref{thm:viz-arvore} \\
+a curva $\mathcal{D}_{k+1}$ & $\mathcal{D}_k$ e $\mathcal{D}_k^{*}$ & a dobra do papel & Def.~\ref{def:dobrar} \\
+o campo, no corte $k$ & $\chi_k=+1$ e $\chi_k=-1$ & somar $e_j$ com $k_j=1$ & Def.~\ref{def:dual} \\
+o passo & o que já foi e o que falta & $\zeta\leftrightarrow\mu$ & Teor.~\ref{thm:shift} \\
+a realização & a fibra e a base & $\pi\leftrightarrow\tilde\pi$ & Teor.~\ref{thm:levantamento} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{teorema}
+
+\begin{proof}
+Linha a linha, e cada uma remete para o resultado que a prova. $x\mapsto x+1$ é
+involutiva porque $1+1=0$ (Teor.~\ref{thm:B}) e não fixa nada porque $1\neq0$.
+Trocar um bit é involutivo pela mesma razão, e é o que dá as duas cópias em
+$F_{2w}=F_w\oplus\sigma F_w$ (Teor.~\ref{thm:espaco}), as duas irmãs da árvore
+(Teor.~\ref{thm:viz-arvore}) e as duas metades do corte de $\chi_k$
+(Lema~\ref{lem:orto}: $\chi_k(j\oplus e_j)=-\chi_k(j)$). Inverter o sentido de
+uma direção é involutivo e $+e_i\neq-e_i$ na grade (Def.~\ref{def:palavra}).
+Na curva, $\mathcal{D}^{*}$ é a mesma curva lida ao contrário e rodada, e
+lê-la duas vezes ao contrário repõe-na (Def.~\ref{def:dobrar}). Os dois
+últimos pares são retrações e não involuções, e é por isso que aparecem em
+último: $\mu\zeta=\mathrm{id}$ fecha dos dois lados por nilpotência
+(Lema~\ref{lem:nilp}), mas $\operatorname{pr}_1\tilde\pi=\pi$ fecha de um só
+(Teor.~\ref{thm:levantamento}) --- \emph{a dobra é justamente onde a involução
+deixa de fechar}, e é ela que $G$ conta.
+\end{proof}
+
+\medskip\noindent Em uma linha, e é o resumo do documento inteiro:
+\[
+\boxed{\ \partial\ \text{divide};\quad \tau\ \text{lembra a divisão};\quad
+G\ \text{conta onde }\tau\ \text{já não chega.}\ }
+\]
+A dualidade é a \textbf{memória da divisão} --- é isso que a involução é ---, e
+a multiplicidade é o que sobra quando a memória não cabe na largura.
 
 \begin{teorema}[em $B$ não há parâmetro livre]\label{thm:B}
 Em dois símbolos nada fica por decidir. Nomeando $0$ o neutro da soma e $1$ o
@@ -2183,6 +2341,14 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+Def.~\ref{def:bloco}, Def.~\ref{def:op}, Teor.~\ref{thm:op},
+\ref{thm:coord} e \ref{thm:umop} §AN35 (as duas nomeações a darem tabelas
+isomorfas por $\tau$, com a identidade a NÃO servir como controlo; permutar a
+tupla a mudar o objeto em $32$ das $64$, e as outras $32$ a serem exatamente as
+de componentes iguais; a involução com $\tau^2=\mathrm{id}$ e sem ponto fixo nos
+seis andares --- bloco, largura $2w$, sentido da aresta, bola irmã, dobra da
+curva e corte de $\chi_k$, $68\,156$ casos; e a volta a NÃO fechar em $256$ de
+$512$, que é onde $G$ tem trabalho);
 Teor.~\ref{thm:B} e \ref{thm:BI} §AN33 (as quatro aplicações, as duas
 invertíveis e involutivas, a única tabela de produto em dezasseis, e o encaixe
 por prefixos);
@@ -2230,7 +2396,7 @@ Teor.~\ref{thm:periodo} (a cauda $\ell$ e o período $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          postos $1$ a $4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN34;
+        {\code{tests/aranha\_n.c} §AN1--§AN35;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
