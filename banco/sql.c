@@ -3267,12 +3267,29 @@ static int j_casam(long v, int *saida, int cap){
 /* lê `JOIN <tab> ON <a>.<x> = <b>.<y>`; devolve 1 se leu, 0 se não é join */
 enum { J_IG = 0, J_LT, J_LE, J_GT, J_GE };
 static int j_op = J_IG;              /* o operador do ON */
+static int j_left = 0;               /* 1 se LEFT: emite também a fibra vazia */
 
 static int le_join(const char **pp, const char *tab_esq){
     const char *p = *pp;
     char q1[64], q2[64], c1[64], c2[64];
     pula(&p);
-    if(!palavra(&p, "JOIN")){
+    /* LEFT É A FIBRA VAZIA.
+     *
+     * O interno emite os pares; o LEFT emite TAMBÉM as linhas da esquerda cuja
+     * fibra do lado direito é vazia — G(x) = 0. O `def:objeto` já o diz: «o
+     * suporte de G é {x : G(x) > 0}», e o que está fora do suporte é
+     * exactamente o que o interno deita fora.
+     *
+     * E o que sai nas colunas da direita é ZERO, que aqui não é um valor
+     * inventado nem um NULL: é a AUSÊNCIA — «o dual é dado pela ausência do
+     * bit, b=0, o suporte NEUTRO» —, e o 0 é o que o operador devolve numa das
+     * suas faces (Def. do operador). Declara-se em vez de se fingir. */
+    j_left = 0;
+    if(palavra(&p, "LEFT")){
+        j_left = 1;
+        palavra(&p, "OUTER");                    /* LEFT OUTER JOIN é o mesmo */
+        if(!palavra(&p, "JOIN")) return 0;
+    } else if(!palavra(&p, "JOIN")){
         if(!palavra(&p, "INNER")) return 0;
         if(!palavra(&p, "JOIN")) return 0;
     }
@@ -3762,6 +3779,26 @@ static int varre(const char *resto, int acao){
                                                : (esq_v[e] >= vd);
                     if(passa) casos[nca++] = ordem[t];
                 }
+            }
+            /* LEFT: a fibra vazia sai na mesma, com a AUSÊNCIA à direita */
+            if(j_left && nca == 0){
+                printf("   ");
+                for(long j = 0; j < nc_esq; j++){
+                    long ve = (long)esq[e][j].total | ((long)esq[e][j].e << 8);
+                    printf("%ld | ", ve);
+                    if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
+                        snprintf(sql_cap->cell[sql_cap->nrows][j], SQL_OUT_CELL, "%ld", ve);
+                }
+                for(long j = 0; j < ncols_dir; j++){
+                    printf("0");                       /* a ausência: b = 0 */
+                    if(j + 1 < ncols_dir) printf(" | ");
+                    { int col = (int)(nc_esq + j);
+                      if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && col < SQL_OUT_MAX_COLS)
+                          snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "0"); }
+                }
+                printf("\n");
+                if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
+                saiu++;
             }
             for(int k = 0; k < nca; k++){
                 int d = casos[k];

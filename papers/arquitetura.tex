@@ -2037,6 +2037,7 @@ cláusula & o que é & onde está provado \\
 \code{ORDER BY} & a \textbf{profundidade}: descer a árvore & §\ref{sec:cortar} \\
 \code{JOIN ON =} & o \textbf{corte}: a bipartição --- descer por um símbolo & §\ref{sec:cortar} \\
 \code{JOIN ON <,>} & a \textbf{ordem}: o sufixo, na mesma árvore & §\ref{sec:cortar} \\
+\code{LEFT JOIN} & a \textbf{fibra vazia}: $G(x)=0$, fora do suporte & \code{aranha def:objeto} \\
 \code{GROUP BY} & a \textbf{fibra} de $\pi$: o \emph{count} é $G(x)$ & \code{aranha thm:escada} \\
 \code{HAVING} & o \code{WHERE} \textbf{sobre $G$} & \code{aranha thm:multiplicidade}(2) \\
 \code{DISTINCT} & o \textbf{representante canónico} $k=1$ & \code{aranha thm:levantamento}(3) \\
@@ -2058,7 +2059,7 @@ dobrou.
 disfarçado de resultado vazio é o pior desfecho para quem chama, e a regra vale
 nos dois sentidos: \code{DISTINCT} pede uma coluna --- a linha inteira não é
 indexável pela árvore ---; a junção corre em duas tabelas
-e não tem \code{LEFT}/\code{RIGHT}/\code{OUTER}; e se a árvore não couber, a
+e o \code{RIGHT} não está feito; e se a árvore não couber, a
 consulta é recusada em vez de devolver metade de uma ordem, de um grupo ou de
 uma junção.
 

@@ -287,9 +287,16 @@ O QUE FALTA, e é a metade do CORTE:
   mesma árvore. Fazem-se `<`, `<=`, `>`, `>=`, e quando os lados do ON vêm
   trocados o operador VIRA, senão a condição é outra.
 
-  O QUE O JOIN AINDA NÃO FAZ: só duas tabelas, e não há LEFT/RIGHT/OUTER — só o
-  interno. (O LEFT é a fibra VAZIA: as linhas da esquerda com G=0 do lado
-  direito, e o `def:objeto` já diz que o suporte é {x : G(x) > 0}.)
+  O LEFT É A FIBRA VAZIA. O interno emite os pares; o LEFT emite TAMBÉM as
+  linhas cuja fibra do lado direito é vazia — G(x) = 0 —, e o `def:objeto` já
+  o diz: «o suporte de G é {x : G(x) > 0}», de modo que o que está FORA do
+  suporte é exactamente o que o interno deita fora. O que sai nas colunas da
+  direita é ZERO, e não é um NULL inventado: é a AUSÊNCIA — «o dual é dado pela
+  ausência do bit, b=0, o suporte neutro» — e o 0 é o que o operador devolve
+  numa das suas faces. Declara-se em vez de se fingir.
+
+  O QUE O JOIN AINDA NÃO FAZ: só duas tabelas, e o RIGHT não está feito (é o
+  LEFT com os lados trocados, e o motor já sabe virar o operador).
   (Os NOMES da esquerda já saem certos: a junção troca a tabela aberta por
   baixo da sessão, e por isso as colunas da esquerda vinham como letras — os
   nomes não estavam perdidos, estavam noutro ficheiro, e agora lêem-se ANTES de
