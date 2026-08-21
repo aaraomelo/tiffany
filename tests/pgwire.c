@@ -2198,7 +2198,7 @@ int main(void){
              * ainda não sabe ler. */
             const char *fora[] = {
                 "SELECT zzz FROM s",
-                "SELECT * FROM s UNION SELECT * FROM s",
+                "SELECT * FROM s ORDER BY a NULLS FIRST",
             };
             const unsigned nfora = sizeof fora / sizeof fora[0];
             int recusadas = 0, com_razao = 0;
@@ -2276,8 +2276,9 @@ int main(void){
            " `sum`, `max` e `min` estavam —, pelo que `SELECT a, count(*) FROM s GROUP BY a`,"
            " que é a forma que qualquer cliente escreve, parava no parêntesis e devolvia zero"
            " SEM MENSAGEM NENHUMA: nem erro, nem linhas. Não é um erro disfarçado de resultado"
-           " vazio; é um erro disfarçado de NADA. E a subconsulta saiu desta lista quando o"
-           " §W25 a pôs a funcionar pela árvore; fica fora a união. Responder outra coisa é pior do que recusar, porque quem chama"
+           " vazio; é um erro disfarçado de NADA. E a lista esvaziou-se pelos dois lados: a"
+           " subconsulta saiu quando o §W25 a pôs a funcionar pela árvore, e a união quando o"
+           " §W26 a fez — o que fica é o que o parser de facto não lê. Responder outra coisa é pior do que recusar, porque quem chama"
            " sabe lidar com um erro e não sabe lidar com uma resposta que se parece com a"
            " que pediu. E O CONTROLO impede a recusa de ser larga demais: a projecção COM"
            " WHERE tem de continuar a passar — nenhuma das linhas anteriores o veria,"
@@ -3470,6 +3471,87 @@ int main(void){
            " coluna de junção à esquerda e não a encontrava. O estado partilhado ligava dois"
            " caminhos que nada têm um com o outro; a árvore é que é comum, e empresta-se na"
            " hora.",
+           mal == 0);
+    }
+
+    /* ═══ §W26: A UNIÃO É O DUAL DO `IN` ═════════════════════════════════════ */
+    {
+        const char *base = "/tmp/pgwire_w26";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w26.mem");
+        unlink("/tmp/pgwire_w26.prog");
+        unlink("/tmp/pgwire_w26__s.mem");
+        printf("\n§W26 a união: o join do reticulado, dual da pertença.\n\n");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE a (x)", &o);
+        sql_executa("INSERT INTO a VALUES (1)", &o);
+        sql_executa("INSERT INTO a VALUES (2)", &o);
+        sql_executa("INSERT INTO a VALUES (3)", &o);
+        sql_executa("CREATE TABLE b (x)", &o);
+        sql_executa("INSERT INTO b VALUES (3)", &o);
+        sql_executa("INSERT INTO b VALUES (4)", &o);
+
+        int r1 = sql_executa("SELECT * FROM a UNION SELECT * FROM b", &o);
+        int n1 = o.nrows;
+        printf("      a UNION b: %d linha(s):", n1);
+        for(int i = 0; i < o.nrows; i++) printf(" %s", o.cell[i][0]);
+        printf("   (esperado 4: o 3 uma vez)\n");
+        if(!r1 || n1 != 4) mal++;
+
+        int r2 = sql_executa("SELECT * FROM a UNION ALL SELECT * FROM b", &o);
+        int n2 = o.nrows;
+        printf("      a UNION ALL b: %d linha(s):", n2);
+        for(int i = 0; i < o.nrows; i++) printf(" %s", o.cell[i][0]);
+        printf("   (esperado 5: o 3 duas vezes)\n");
+        if(!r2 || n2 != 5) mal++;
+
+        /* O GUME: os dois números têm de ser DIFERENTES. Uma união que nunca
+         * removesse nada passaria por união em qualquer tabela sem repetidos. */
+        printf("      -> UNION e UNION ALL dão números DIFERENTES: %s (%d vs %d)\n",
+               n1 != n2 ? "sim" : "NAO", n1, n2);
+        if(n1 == n2) mal++;
+
+        /* E A IDEMPOTÊNCIA, que é a lei do join: x ∨ x = x. Sai de graça se o
+         * representante é um por valor, e falha em qualquer implementação que
+         * apenas concatene. */
+        int r3 = sql_executa("SELECT * FROM a UNION SELECT * FROM a", &o);
+        int idem = r3 && o.nrows == 3;
+        printf("      a UNION a = a (idempotência do join): %d linha(s)  %s\n",
+               o.nrows, idem ? "" : "NAO BATE");
+        if(!idem) mal++;
+
+        /* ── O CONTROLO: as formas que não fecham são RECUSADAS com a razão. */
+        int e1 = sql_executa("SELECT * FROM a UNION SELECT zzz FROM b", &o);
+        int e2 = sql_executa("SELECT * FROM a UNION SELECT * FROM b UNION SELECT * FROM a", &o);
+        printf("\n      CONTROLO — lado inválido: %s  ·  encadeada: %s\n",
+               e1 ? "RESPONDEU (mau)" : "recusado", e2 ? "RESPONDEU (mau)" : "recusado");
+        if(e1 || e2) mal++;
+
+        int rs = sql_executa("SELECT * FROM a", &o);
+        int sessao = rs && o.nrows == 3;
+        printf("      e a sessão ficou intacta: %d linhas  %s\n",
+               o.nrows, sessao ? "" : "NAO");
+        if(!sessao) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A UNIÃO É O DUAL DA PERTENÇA, E É A ÚNICA CLÁUSULA QUE VIVE NA FACHADA. O `IN` do"
+           " §W25 pergunta se um valor está na fibra do outro lado e fica-se pelo bit — é a"
+           " INTERSECÇÃO; a união é o outro membro do par, o join do reticulado, e por isso não"
+           " corre no molde nem precisa da árvore: corre as duas consultas e junta o que saiu."
+           " Vive na fachada porque é a única que fala de DUAS RESPOSTAS em vez de duas"
+           " tabelas. O GUME SÃO AS DUAS FORMAS TEREM DE DIFERIR: `UNION` deixa UM"
+           " representante por valor — o k=1 do levantamento, o mesmo do DISTINCT — e"
+           " `UNION ALL` deixa a fibra inteira, pelo que sobre as mesmas tabelas os números"
+           " têm de ser DIFERENTES, quatro contra cinco. Sem essa exigência, uma implementação"
+           " que nunca removesse nada passaria por união em qualquer par de tabelas sem"
+           " repetidos — que são todas as dos outros blocos deste ficheiro. E A IDEMPOTÊNCIA"
+           " FECHA-O PELA LEI: a UNION a = a, que é x ∨ x = x, e sai de graça se o"
+           " representante é um por valor mas falha em qualquer coisa que apenas concatene. O"
+           " CONTROLO recusa o que não fecha — um lado inválido e a forma encadeada, que este"
+           " motor não lê — e exige que a sessão fique intacta, porque a união abre as duas"
+           " tabelas por baixo de quem perguntou.",
            mal == 0);
     }
 

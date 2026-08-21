@@ -5801,7 +5801,113 @@ int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
     return dentro;
 }
 
+/* ── A UNIÃO É O DUAL DO `IN` ────────────────────────────────────────────────
+ *
+ * O `IN` pergunta se um valor pertence à fibra do outro lado, e fica-se pelo
+ * bit: é a INTERSECÇÃO. A união é o outro membro do par — o join do reticulado
+ * —, e por isso não corre no molde nem precisa da árvore: corre as duas
+ * consultas e junta o que saiu. É a única cláusula deste motor que vive
+ * inteiramente na fachada, e vive lá porque é a única que fala de DUAS
+ * respostas em vez de duas tabelas.
+ *
+ * E as duas formas distinguem-se, que é o que lhes dá conteúdo: `UNION` deixa
+ * UM representante por valor — o k=1 do levantamento, o mesmo do DISTINCT —, e
+ * `UNION ALL` deixa a fibra inteira. Sem medir as duas, uma implementação que
+ * nunca removesse nada passaria por união.
+ *
+ * Só o topo: uma união de duas consultas, não encadeada. O que passar disso é
+ * recusado com a razão. */
+static int uniao_ha(const char *sql, const char **corte, int *todos){
+    int prof = 0;
+    for(const char *q = sql; *q; q++){
+        if(*q == '(') prof++;
+        else if(*q == ')') prof--;
+        else if(prof == 0 && (*q == 'U' || *q == 'u')
+                && !strncasecmp(q, "UNION", 5)
+                && (q == sql || !isalnum((unsigned char)q[-1]))
+                && !isalnum((unsigned char)q[5])){
+            const char *r = q + 5;
+            while(*r == ' ' || *r == '\t') r++;
+            *todos = (!strncasecmp(r, "ALL", 3) && !isalnum((unsigned char)r[3]));
+            *corte = q;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int sql_executa_1(const char *sql, SqlOut *out);
+
 int sql_executa(const char *sql, SqlOut *out){
+    const char *corte; int todos = 0;
+    if(out && uniao_ha(sql, &corte, &todos)){
+        char esq[512], dir[512];
+        size_t n = (size_t)(corte - sql);
+        if(n >= sizeof esq){
+            memset(out, 0, sizeof *out);
+            snprintf(out->err, sizeof out->err, "UNION: consulta demasiado longa");
+            return 0;
+        }
+        memcpy(esq, sql, n); esq[n] = 0;
+        snprintf(dir, sizeof dir, "%s", corte + 5 + (todos ? 4 : 0));
+        { const char *c2; int t2;
+          if(uniao_ha(dir, &c2, &t2)){
+            memset(out, 0, sizeof *out);
+            printf("erro: UNION encadeada — RECUSADA (só duas consultas).\n");
+            snprintf(out->err, sizeof out->err, "UNION: only two queries supported");
+            return 0; } }
+
+        SqlOut a, b;
+        int ra = sql_executa_1(esq, &a);
+        int rb = sql_executa_1(dir, &b);
+        memset(out, 0, sizeof *out);
+        if(!ra || !rb){
+            out->ok = 0;
+            snprintf(out->err, sizeof out->err, "%s",
+                     !ra && a.err[0] ? a.err : (b.err[0] ? b.err : "UNION: um dos lados falhou"));
+            printf("erro: um dos lados da UNION falhou — RECUSADA.\n");
+            return 0;
+        }
+        if(a.ncols != b.ncols){
+            out->ok = 0;
+            printf("erro: os dois lados da UNION têm %d e %d colunas — RECUSADA.\n",
+                   a.ncols, b.ncols);
+            snprintf(out->err, sizeof out->err,
+                     "each UNION query must have the same number of columns");
+            return 0;
+        }
+        out->ok = 1; out->ncols = a.ncols;
+        for(int c = 0; c < a.ncols; c++){
+            snprintf(out->col[c], sizeof out->col[c], "%s", a.col[c]);
+            out->tipo[c] = a.tipo[c];
+        }
+        for(int lado = 0; lado < 2; lado++){
+            SqlOut *L = lado ? &b : &a;
+            for(int i = 0; i < L->nrows && out->nrows < SQL_OUT_MAX_ROWS; i++){
+                if(!todos){
+                    int repetida = 0;
+                    for(int j = 0; j < out->nrows && !repetida; j++){
+                        int igual = 1;
+                        for(int c = 0; c < out->ncols; c++)
+                            if(strcmp(out->cell[j][c], L->cell[i][c])){ igual = 0; break; }
+                        repetida = igual;
+                    }
+                    if(repetida) continue;      /* um representante por valor */
+                }
+                for(int c = 0; c < out->ncols; c++)
+                    snprintf(out->cell[out->nrows][c], SQL_OUT_CELL, "%s", L->cell[i][c]);
+                out->nrows++;
+            }
+        }
+        snprintf(out->tag, sizeof out->tag, "SELECT %d", out->nrows);
+        printf("-- UNION%s: %d + %d linha(s) -> %d\n", todos ? " ALL" : "",
+               a.nrows, b.nrows, out->nrows);
+        return 1;
+    }
+    return sql_executa_1(sql, out);
+}
+
+static int sql_executa_1(const char *sql, SqlOut *out){
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;
     /* Trio PG6: o catálogo é da SESSÃO e responde ANTES do motor. Se não for
