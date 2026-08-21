@@ -2044,17 +2044,31 @@ três últimos --- os que se constroem \emph{por} quociente --- a fibra
 $\pi^{-1}(x)$ \emph{é} a classe de equivalência que define o andar. No primeiro
 não há quociente a identificar, e a fibra é a da soma:
 \begin{center}\footnotesize
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}lllll@{}}
 \toprule
-$\pi$ & a aplicação & a fibra é & o representante $k=1$ \\
+$\pi$ & a aplicação & a fibra é & o repr. $k=1$ & o \textbf{dual} \\
 \midrule
-a soma em $X_1$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\abs{X_1}$ & $x\oplus z$ \\
-$\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
-$\pi_3$: as frações & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
-$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
+a soma em $X_1$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, $\abs{X_1}$ & $x\oplus z$ & --- \\
+$\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ & o \textbf{oposto} \\
+$\pi_3$: as frações & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível & o \textbf{inverso} \\
+$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola (§\ref{sec:ultra}) & o menor do cilindro & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\medskip\noindent\textbf{E a última coluna fecha o documento no seu princípio.}
+As duas equações da Def.~\ref{def:op} não se resolvem ao mesmo tempo: a escada
+resolve \emph{uma por andar}, e com a \textbf{mesma troca}. O par $(a,b)$
+trocado por $\iota(a,b)=(b,a)$ induz
+\[
+\underbrace{\partial x+x=0}_{\text{o \textbf{oposto}, em }X_2}
+\qquad\text{e}\qquad
+\underbrace{\partial x\cdot x=1}_{\text{o \textbf{inverso}, nas frações}}
+\]
+--- é a \emph{mesma} operação, lida na aritmética de cada andar. É esta a
+síntese: \textbf{a escada é o operador a correr, e cada degrau é uma das suas
+faces a fechar.} Os outros dois não trazem dual novo, e é por isso que a coluna
+deles está vazia: o primeiro é a \emph{dobra} e o último é o \emph{limite}.
 \end{teorema}
 
 \begin{proof}

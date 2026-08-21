@@ -3480,3 +3480,35 @@ olhar para o meio:
 
   pgwire.c 17 asserções, 0 falhas
   bateria 529 : 529, 115 unidades, 0 falhas
+
+§76 — O TEOREMA 64 É A SÍNTESE, E FALTAVA-LHE A COLUNA DO DUAL
+===============================================================
+«esse teorema 64 é o último, o mais completo, é a síntese da operação dual».
+
+O `thm:escada` mostrava que cada degrau é uma REALIZAÇÃO — a aplicação, a fibra,
+o representante k=1 — e não dizia QUE DUAL cada um traz. Fui ver o que a casa já
+diz, e é mais forte do que eu esperava. No `inteiros.tex` e no `racionais.tex`:
+
+     k=0 (ℤ)        ι(a,b) = (b,a)  ⟹  oposto aditivo
+     k=1 (frações)  ι(a,b) = (b,a)  ⟹  inverso multiplicativo
+
+A MESMA TROCA. O par trocado dá o OPOSTO num andar e o INVERSO no seguinte —
+não são duas operações, é uma, lida na aritmética de cada degrau.
+
+E isso são exactamente as DUAS EQUAÇÕES DA DEFINIÇÃO 1 do mesmo paper:
+
+     ∂x + x = 0     o oposto, em X₂
+     ∂x · x = 1     o inverso, nas frações
+
+  A ESCADA NÃO RESOLVE AS DUAS AO MESMO TEMPO: resolve UMA POR ANDAR. É esta a
+  síntese — a escada é o operador a correr, e cada degrau é uma das suas faces a
+  fechar. O primeiro degrau e o último não trazem dual novo, e a coluna deles
+  fica VAZIA: o primeiro é a dobra, o último é o limite.
+
+O que se acrescentou foi UMA COLUNA à tabela e o parágrafo que a lê. Nada de
+teorema novo — o teorema já era este, e o que lhe faltava era dizer o que ele
+sintetiza. E o Teorema 64 CONTINUA A SER O 64: acrescentar dentro de um
+enunciado não desloca a numeração, ao contrário de inserir um enunciado novo,
+que foi o erro do §75.
+
+  aranha.tex 29 páginas · 0 erros · 0 refs mortas · thm:escada = 64
