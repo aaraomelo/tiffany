@@ -2820,3 +2820,78 @@ REVISÃO FINAL DAS 28 PÁGINAS
                                                               hipóteses sobre X)
   gume      66 mutações, 66 mordem
   bateria   529 : 529, 0 falhas · 33 unidades passaram, 0 falharam
+
+§63 — PONTRYAGIN, DERIVADO DO ZERO; E A ATRIBUIÇÃO QUE NÃO PODIA FALHAR
+========================================================================
+«busca referências de pontryagin e vamos derivar do 0 ele».
+
+O INVENTÁRIO PRIMEIRO. A casa cita Pontryagin em quatro papers e chama-lhe «o
+eixo» — a álgebra opera e não alcança, a topologia alcança e não opera —, e o
+`bidual.c` §B5 mede-o em ℤ/n, n = 2..24. Fui ler o que lá estava:
+
+        long bidual = distintos;
+        if(distintos != n || bidual != n) mau++;
+
+A segunda condição não pode falhar sem a primeira. NÃO HAVIA BIDUAL NENHUM
+CONSTRUÍDO: a variável era uma cópia. E o defeito de fundo é maior do que a
+linha: **|Ĝ| = |G| NÃO É O TEOREMA DE PONTRYAGIN.** É o acidente de tamanho. O
+teorema é que a AVALIAÇÃO
+
+        ev : X → X̂̂,      ev_x(χ) = χ(x)
+
+é isomorfismo e é NATURAL — comuta com todo morfismo, porque não escolhe nada.
+Um iso X → X̂ também existe, mas depende do gerador; medir tamanhos e concluir
+«bidualidade» é confundir os dois.
+
+O QUE SE DERIVOU (tests/pontryagin.c, 9 asserções, 0 falhas)
+  §PG1  o dual é grupo — fecho, neutro e inverso em todos os pares
+  §PG2  |X̂| = |X| nos doze grupos — E OS ISOS X → X̂ SÃO MUITOS: 1, 2, 4, 6, 8,
+        12, 48, 168… nenhum distinguido pelo grupo
+  §PG3  a separação (e é dela, e só dela, que sai a injecção)
+  §PG4  a fibra de todo caractere é UNIFORME — a ortogonalidade dita sem somar
+        uma raiz da unidade, e é a MESMA fibra da aranha, aqui constante
+  §PG5  ev construída como tabela, e X̂̂ ENUMERADO POR OUTRO CAMINHO
+  §PG6  a naturalidade: 1078 morfismos, 114 190 quadrados, 0 falhas
+  §PG7  O GUME: ψ falha, ev não — e ψ falha EXACTAMENTE onde pode
+  §PG8  a troca ⊕ → ⊗, e a restrição = redução do índice (a torre dos relógios)
+  §PG9  a fronteira: a finitude entra em dois sítios, e a testemunha de que a
+        contagem é essencial (2x: ℤ/4 → ℤ/8 é injectiva e não sobrejectiva)
+
+Tudo em ℤ/e: os valores dos caracteres não vivem em ℂ — vivem no expoente, e a
+troca ⊕ → ⊗ é isso mesmo. Zero vírgulas.
+
+O ACHADO DO §PG7, e é uma lei e não um resumo:
+
+        ψ : X → X̂ falha a naturalidade  ⟺  existe u com u² ≢ 1 (mod n)
+
+     n:   2  3  4  5  6  7  8  9 10 11 12
+     u²≠1 n  n  n  S  n  S  n  S  S  S  n
+     ψ    ✓  ✓  ✓  ✗  ✓  ✗  ✗* ✗  ✗  ✗  ✓        (n a n, sem excepção)
+
+  Nos n em que TODA unidade tem u² = 1 — 2,3,4,6,8,12 — ψ PASSA, e passa por
+  acidente do grupo. Se eu tivesse varrido só esses, tinha publicado «ψ é
+  natural». É a varredura onde o defeito não vive, outra vez.
+
+E O QUE O GUME APANHOU EM MIM — quatro sobreviventes de doze, e a primeira é a
+pior: EU ESCREVI UMA TAUTOLOGIA DENTRO DA CORRECÇÃO DE UMA TAUTOLOGIA.
+
+        int esq = chiY[k][ fmap[x] ];      /* ev_{f(x)}(chi) */
+        int dir = chiY[k][ fmap[x] ];      /* = (chi∘f)(x)   */
+        if(esq != dir) falhas_nat++;
+
+  Os dois lados são a MESMA expressão, escritos com comentários diferentes. A
+  criticar o `bidual.c` por não construir o bidual, não construí o meu segundo
+  lado. Refeito: o esquerdo avalia em Y; o direito CONSTRÓI χ∘f, PROCURA-O na
+  lista de X̂ — que é o que f̂ é — e avalia a tabela encontrada. Dois caminhos.
+
+  E as outras três: uma era defeito real da asserção (contar o caractere nulo
+  como separador passava — a asserção não exigia que NENHUM x fosse visto por
+  TODOS), e duas eram gume mal feito por mim: mutei o ramo de detecção de uma
+  propriedade que é verdadeira, logo o ramo nunca corre; e mutei ψ para uma
+  permutação que a ordem de descoberta tornava equivalente. Só a asserção da
+  correspondência n a n é que as mata.
+
+  A correcção do §B5: o bidual passou a ser enumerado, ev construída, injectiva
+  e a esgotá-lo. A linha antiga está citada no comentário, com a data.
+
+  gume  12 mutações, 12 mordem

@@ -58,7 +58,7 @@ executa, e que são uma inversa da outra. Escrever o campo é a
 Enquanto a família $\{G_t\}$ existe, a trajetória inteira volta sem nada dela ter
 sido guardado; retendo só $G=G_N$, o que se perde repõe-se com \emph{uma}
 coordenada de folha, seja qual for a dimensão, e com volta exata. Pelo caminho:
-a dimensão de $X$ entra num sítio único --- a vizinhança, $\lvert V(x)\rvert=2n$
+a dimensão de $X$ entra num sítio único --- a vizinhança, $\lvert \mathcal{V}(x)\rvert=2n$
 na grade e $1$ na árvore ---; sobre ultramétricos a célula \emph{é} a bola; numa
 órbita determinista $G$ conta o período; e a dobra lê-se na norma do espectro,
 sem visitar a trajetória.
@@ -67,7 +67,7 @@ sem visitar a trajetória.
 teorema, só a igualdade em $X$. Para a quarta, uma vizinhança. Para a inversão,
 a álgebra de incidência de uma ordem --- a mesma de que a inversão de Möbius na
 árvore dos divisores é o outro caso. E para a leitura espectral, os caracteres
-de $\mathbb{F}_2^{\,m}$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
+de $B^{\,m}$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
 
 \medskip\noindent\textbf{E o eixo é uma dualidade}, que se repete em cada
 andar: \emph{multiplicidade} é o que o campo vê, \emph{memória} é o que a
@@ -110,15 +110,48 @@ Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref
 O que acontece quando volta? & a dobra: $G>1$ & Def.~\ref{def:dobra} \\
 Como se representam os passos? & por uma palavra no alfabeto das arestas & Teor.~\ref{thm:palavra} \\
 O que é o ponto de partida? & uma distinção: dois símbolos & Def.~\ref{def:B} \\
-Como se codifica um finito qualquer? & em $\lceil\log_2 n\rceil$ bits, e não em menos & Teor.~\ref{thm:B},~\ref{thm:BI} \\
+Como se codifica um finito qualquer? & em $\lceil\log_2 c\rceil$ bits, e não em menos & Teor.~\ref{thm:B},~\ref{thm:BI} \\
 Como se continua sem terminar? & caminhando: cada decisão é finita & §\ref{sec:objeto} \\
-Como se constroem os degraus? & por quociente da caminhada & Teor.~\ref{thm:escada} \\
+Como se constroem os degraus? & o primeiro pela dobra, os outros por quociente & Teor.~\ref{thm:BI},~\ref{thm:escada} \\
 O que têm todos em comum? & a fibra da realização & Teor.~\ref{thm:escada} \\
 E o que mede a fibra? & $G$ & Def.~\ref{def:objeto} \\
 E se forem muitos construtores? & o campo não os distingue & Teor.~\ref{thm:agentes} \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\medskip\noindent\textbf{E as respostas encadeiam-se.} Postas por ordem, elas
+não são uma lista de tópicos: cada uma é o domínio da seguinte, e cada seta
+abaixo é um enunciado deste documento --- nenhuma é analogia:
+\[
+\boxed{\;
+\underset{\text{Def.~\ref{def:B}}}{\text{distinção}}
+\;\to\;
+\underset{\text{Teor.~\ref{thm:BI}}}{\text{lista}}
+\;\to\;
+\underset{\text{Teor.~\ref{thm:shift}}}{\text{operador}}
+\;\to\;
+\underset{\text{§\ref{sec:geo}}}{\text{aresta}}
+\;\to\;
+\underset{\text{Teor.~\ref{thm:palavra}}}{\text{palavra}}
+\;\to\;
+\underset{\text{Def.~\ref{def:objeto}}}{\text{posição}}
+\;\to\;
+\underset{\text{Teor.~\ref{thm:multiplicidade}}}{\text{fibra}}
+\;\to\;
+G \;}
+\]
+O \textbf{operador} entra aí como teorema e não como definição: o índice não é
+tempo posto de fora, é a contagem das aplicações de $S$, e o que $S$ gera ---
+acumular, e a diferença que o desfaz --- é o Teor.~\ref{thm:shift}.
+
+\medskip\noindent\textbf{E há um elo que se quer pôr no princípio e não pode
+lá estar}: a \emph{estratégia} --- uma aranha que volta muitas vezes, ou muitas
+abelhas que passam uma vez cada. Ela é o que a cadeia \textbf{não} transporta: a
+posição é uma soma comutativa, e a soma descarta o construtor antes de a posição
+existir. Por isso a estratégia está no \emph{título} e não na cadeia, e o que
+disso se demonstra é o Teor.~\ref{thm:agentes} --- as duas deixam o mesmo campo,
+célula a célula.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O objeto}\label{sec:objeto}
@@ -168,7 +201,10 @@ escolha por fazer.
 
 \medskip\noindent Não é que entre as estruturas possíveis se escolha uma: é que
 com dois símbolos \emph{não há mais do que uma}. Toda a construção seguinte
-herda esta ausência de liberdade.
+herda esta ausência de liberdade. É esta a estrutura que correntemente se
+escreve $B$; aqui escreve-se $B$, e a diferença não é de notação: lá
+é um objeto que se dá, aqui é o que o teorema acabou de \emph{obter}. O nome
+clássico não volta a aparecer no documento.
 
 \medskip\noindent\textbf{Construção da lista.} Com $B$ definido e a sua estrutura
 fixada, a lista não precisa de ser dada: constrói-se, e o núcleo mínimo da
@@ -206,11 +242,14 @@ andar ao anterior, e a ordem resultante é total.
 \boxed{\;B\;\longrightarrow\;I\;\longrightarrow\;I^{2}/{\sim}\;\longrightarrow\;
 \text{as frações}\;\longrightarrow\;\text{os cortes}\;}
 \]
-e o resto deste documento corre sobre ela.
+e o resto deste documento corre sobre ela. Ao segundo andar $I^{2}/{\sim}$ ---
+construído na §\ref{sec:escada} --- chama-se \Z\ quando ele aparecer como anel
+de coeficientes (§\ref{sec:zeta}, §\ref{sec:transf}): é o nome corrente de um
+andar \emph{desta} cadeia, e não um símbolo trazido de fora.
 
 \medskip\noindent\textbf{Codificar o finito, e subir.} Com $B$ construído,
-\emph{qualquer} objeto finito se representa: um conjunto de $n$ elementos entra
-em $\lceil\log_2 n\rceil$ bits injetivamente, e não entra em menos. A lista não é
+\emph{qualquer} objeto finito se representa: um conjunto de $c$ elementos entra
+em $\lceil\log_2 c\rceil$ bits injetivamente, e não entra em menos. A lista não é
 uma codificação escolhida --- é a largura que chega, e é a única.
 
 \medskip\noindent\textbf{E não se começa infinito.} A subida não termina num
@@ -385,9 +424,9 @@ e $G=G_N$. Cada passo altera $G$ num único ponto, e esse ponto é a célula
 corrente. Nenhum passo consulta $\pi(0),\dots,\pi(t)$.
 \item[(4)] \textbf{Sentir é ler $G$.} A leitura local
       \[
-      \mathcal{P}_t(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}
+      \mathcal{P}_t(x)=\bigl(G_t(y)\bigr)_{y\in \mathcal{V}(x)}
       \]
-      sobre uma vizinhança $V(x)$ distingue $G=0$ (célula ainda não realizada) de
+      sobre uma vizinhança $\mathcal{V}(x)$ distingue $G=0$ (célula ainda não realizada) de
       $G>0$ (já realizada). A distinção é propriedade do \emph{espaço}, e não
       propriedade cognitiva do agente.
 \end{enumerate}
@@ -405,7 +444,7 @@ que é o dado corrente: a história não é consultada.
 
 (4) Por (2), $G_t(y)=0$ significa que nenhum índice $\le t$ realizou $y$, e
 $G_t(y)>0$ que algum realizou. A leitura de $\mathcal{P}_t(x)$ decide isso para
-cada $y\in V(x)$ consultando o valor escrito \emph{em} $y$ --- valor que está no
+cada $y\in \mathcal{V}(x)$ consultando o valor escrito \emph{em} $y$ --- valor que está no
 espaço, e não no agente, por (3). Nenhum passo desta leitura consulta
 $\pi(0),\dots,\pi(t)$.
 \end{proof}
@@ -415,7 +454,7 @@ $\pi(0),\dots,\pi(t)$.
 \medskip\noindent\textbf{O que a prova usou.} As cláusulas (1)--(3) usam só a
 igualdade em $X$: para decidir $x=\pi(t+1)$ e para formar as fibras. Nenhuma
 delas menciona mais estrutura. A cláusula~(4) pede uma coisa a mais, e uma só
---- a \emph{vizinhança} $V(x)$ ---, e é lá que a estrutura de $X$ entra, na
+--- a \emph{vizinhança} $\mathcal{V}(x)$ ---, e é lá que a estrutura de $X$ entra, na
 §\ref{sec:dimensao}. É este o resultado: a memória estigmérgica não é um
 fenómeno do plano, e o sítio por onde o plano entrava está isolado numa
 cláusula.
@@ -441,18 +480,18 @@ Diz-se que $X$ é uma \textbf{grade de posto $n$} quando é gerado por $n$
 direções independentes $e_1,\dots,e_n$ --- a base canónica --- e cada uma se
 percorre nos dois sentidos. A vizinhança de $x$ é então
 \[
-V(x)=\{x\pm e_i : i=1,\dots,n\}.
+\mathcal{V}(x)=\{x\pm e_i : i=1,\dots,n\}.
 \]
 É só disto que a construção precisa: as direções e os dois sentidos.
 \end{definicao}
 
 \begin{teorema}[o $n$ entra num sítio só]\label{thm:dimensao}
 Numa grade de posto $n$ (Def.~\ref{def:grade}) tem-se
-$\lvert V(x)\rvert=2n$ para todo $x$, e os $2n$ vizinhos são distintos. Além
+$\lvert \mathcal{V}(x)\rvert=2n$ para todo $x$, e os $2n$ vizinhos são distintos. Além
 disso, as cláusulas (1)--(3) do Teorema~\ref{thm:multiplicidade} e os passos 1 e
 3 do ciclo valem palavra por palavra em qualquer posto $n\ge1$, sem alteração
 nenhuma. A dimensão ocorre num sítio único --- a cláusula~(4) --- e ocorre como
-$\lvert V(x)\rvert=2n$.
+$\lvert \mathcal{V}(x)\rvert=2n$.
 \end{teorema}
 
 \begin{proof}
@@ -482,7 +521,7 @@ de planos é a de pares não ordenados de índices.
 \end{proof}
 
 \medskip\noindent Este é o único passo em que a dimensão faz mais do que contar
-vizinhos. Nos passos 1 a 3 ela entra só como $\lvert V(x)\rvert=2n$; no fecho,
+vizinhos. Nos passos 1 a 3 ela entra só como $\lvert \mathcal{V}(x)\rvert=2n$; no fecho,
 ela decide \emph{quantos} rotores há. E o fecho é o mesmo $J^{4}=\mathrm{id}$ da
 bidualidade: no posto $2$ há um plano e um rotor, que é a razão por que ali os
 dois se confundem.
@@ -508,8 +547,8 @@ correm iguais em qualquer dimensão.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Os grafos, e quem é o operador}\label{sec:geo}
 
-\noindent $V(x)$ apareceu como ``a vizinhança''. Ela é o conjunto dos vértices
-adjacentes a $x$ num \textbf{grafo}, e $\lvert V(x)\rvert$ é o \textbf{grau}. O
+\noindent $\mathcal{V}(x)$ apareceu como ``a vizinhança''. Ela é o conjunto dos vértices
+adjacentes a $x$ num \textbf{grafo}, e $\lvert \mathcal{V}(x)\rvert$ é o \textbf{grau}. O
 campo percorre três, e não são o mesmo:
 
 \begin{center}\small
@@ -538,11 +577,11 @@ cada um dos $2^m$ vértices ter grau $m$.
 \end{proof}
 
 \begin{teorema}[o espaço não é escolhido: a dobra dá o hipercubo]\label{thm:espaco}
-Seja $F_w$ o andar de largura $w$ da construção dos naturais --- $F_w$ denota
-$\mathrm{GF}(2^{w})$, e não um corpo de cardinalidade $w$ ---, com
+Seja $F_w$ o andar de largura $w$ da escada --- o índice conta a
+\emph{largura}, de modo que $F_w$ tem $2^{w}$ elementos e não $w$ ---, com
 $F_{2w}=F_w\oplus\sigma F_w$ e $\sigma^2=\sigma+\lambda$. Então
 \[
-(F_{2w},+)\;\cong\;\mathbb{F}_2^{\,2w},
+(F_{2w},+)\;\cong\;B^{\,2w},
 \]
 e o grafo de $F_{2w}$ com os geradores canónicos \textbf{é} $Q_{2w}$: duas
 cópias do grafo de $F_w$ ligadas pelo emparelhamento $\sigma$.
@@ -563,16 +602,16 @@ a dobra constrói.
 
 \begin{teorema}[as direções de aresta são a base ortonormal]\label{thm:base8}
 As $m$ direções de aresta de $Q_m$ são os $e_k=2^{k}$, e para $m=8$ elas são a
-base de $F_8$ sobre $\mathbb{F}_2$ obtida como \emph{produtos} dos três
+base de $F_8$ sobre $B$ obtida como \emph{produtos} dos três
 geradores das três dobras --- ortonormal para
-$\langle a,b\rangle=$ paridade$(a\wedge b)$, com Gram $=I$. Uma \textbf{régua} é
+$\langle a,b\rangle=$ paridade$(a\wedge b)$, com Gram $=\mathrm{Id}$. Uma \textbf{régua} é
 um peso por direção, $g^{(k)}$ medindo só $e_k$: cada uma é cega às outras sete,
 as oito compostas medem todo salto, e tirando uma qualquer fica uma direção por
 medir.
 \end{teorema}
 
 \begin{proof}
-Que $\{e_k\}$ é base com Gram $=I$ está na construção dos naturais, e verifica-se
+Que $\{e_k\}$ é base com Gram $=\mathrm{Id}$ está na construção dos naturais, e verifica-se
 nos $64$ pares. Que $g^{(k)}(dx,dx)=(dx^{k})^{2}$ vale $1$ em $e_k$ e $0$ nas
 outras direções é a definição; a soma das oito é a identidade, e retirar a
 $j$-ésima anula a medida de $e_j$.
@@ -593,17 +632,18 @@ aplicações de um operador}. São dois, um de cada lado de $\pi$.
 \begin{definicao}[os dois operadores]\label{def:ops}
 No domínio, o \textbf{deslocamento} $S$ da tupla: $S\delta_{i_t}=\delta_{i_{t+1}}$,
 que leva cada símbolo no seguinte da lista. No contradomínio, a
-\textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
+\textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in \mathcal{V}(x)}f(y)$.
 \end{definicao}
 
 \begin{teorema}[o que $S$ gera]\label{thm:shift}
-Sobre sucessões que se anulam abaixo de $0$, a série $Z=\sum_{j\ge0}S^{j}$ está
-bem definida --- em cada índice tem um número finito de termos --- e
+Sobre sucessões que se anulam abaixo de $0$, a série
+$\zeta=\sum_{j\ge0}S^{j}$ está bem definida --- em cada índice tem um número
+finito de termos --- e
 \[
-Z\,a\,(t)=\sum_{u\le t}a(u),\qquad (1-S)\,Z=\mathrm{id}.
+\zeta\,a\,(t)=\sum_{u\le t}a(u),\qquad (1-S)\,\zeta=\mathrm{id}.
 \]
-Isto é: $S$ gera a \textbf{acumulação} $Z=(1-S)^{-1}$, cujo inverso $1-S$ é a
-\textbf{diferença finita}.
+Isto é: $S$ gera a \textbf{acumulação} $\zeta=(1-S)^{-1}$, cujo inverso
+$\mu:=1-S$ é a \textbf{diferença finita}.
 \end{teorema}
 
 \begin{proof}
@@ -612,12 +652,13 @@ donde a soma é $\sum_{u\le t}a(u)$. Aplicando $1-S$ a esse resultado telescopa:
 $\sum_{u\le t}a(u)-\sum_{u\le t-1}a(u)=a(t)$.
 \end{proof}
 
-\medskip\noindent Estes dois --- acumular e diferenciar --- reaparecem na
-§\ref{sec:zeta} com os nomes que a álgebra de incidência lhes dá, $\zeta$ e
-$\mu$, e é lá que se vê que são o directo e o inverso da própria aranha.
+\medskip\noindent As letras são as definitivas, e não há segundas: estes dois
+operadores --- acumular e diferenciar --- \emph{são} os $\zeta$ e $\mu$ da
+álgebra de incidência, e a §\ref{sec:zeta} não os redefine: mostra de que
+álgebra são, e que são o directo e o inverso da própria aranha.
 
 \begin{definicao}[percurso]\label{def:percurso}
-$\pi$ é um \textbf{percurso} no grafo quando $\pi(t+1)\in V(\pi(t))$ para todo
+$\pi$ é um \textbf{percurso} no grafo quando $\pi(t+1)\in \mathcal{V}(\pi(t))$ para todo
 $t<N$, isto é, quando cada passo é uma \emph{aresta}. Nesse caso o índice conta
 arestas: $\abs{I}=N+1$ vértices visitados e $N$ arestas percorridas.
 \end{definicao}
@@ -650,24 +691,26 @@ contabilidade local do percurso. É o \emph{handshaking} dito sobre a
 trajetória.
 
 \begin{teorema}[a dobra vista por Euler]\label{thm:euler}
-Seja $\pi$ um percurso conexo, $V=\lvert\operatorname{supp}G\rvert$ o número de
-células e $A$ o de arestas \emph{distintas} usadas. A característica do
-subgrafo percorrido é $\chi=V-A$, e o número de ciclos independentes é
-$b_1=1-\chi$. Se além disso \textbf{nenhuma aresta se repete} --- $A=N$ ---,
+Seja $\pi$ um percurso conexo, $v=\lvert\operatorname{supp}G\rvert$ o número de
+células e $a$ o de arestas \emph{distintas} usadas --- minúsculas, porque $V$ é
+o espaço da §\ref{sec:transf} e $A$ é a adjacência da Def.~\ref{def:ops}. A
+característica do subgrafo percorrido é $\chi=v-a$, e o número de ciclos
+independentes é $b_1=1-\chi$. Se além disso \textbf{nenhuma aresta se repete}
+--- $a=N$ ---,
 então
 \[
-b_1\;=\;D,\qquad D:=\abs{I}-V ,
+b_1\;=\;D,\qquad D:=\abs{I}-v ,
 \]
 com $D$ o número de revisitas: cada dobra fecha um ciclo, e um só.
 \end{teorema}
 
 \begin{proof}
-Para um grafo conexo de dimensão $1$, $b_1=A-V+1$, donde $b_1=1-\chi$. Com
-$A=N=\abs{I}-1$ vem $b_1=\abs{I}-1-V+1=\abs{I}-V=D$.
+Para um grafo conexo de dimensão $1$, $b_1=a-v+1$, donde $b_1=1-\chi$. Com
+$a=N=\abs{I}-1$ vem $b_1=\abs{I}-1-v+1=\abs{I}-v=D$.
 \end{proof}
 
 \medskip\noindent A hipótese é necessária: a espiral quadrada de $1024$ passos
-usa $4$ arestas, e aí $b_1=1$ com $D=\abs{I}-V=1025-4=1021$. Sem ela, o que $G$ conta por
+usa $4$ arestas, e aí $b_1=1$ com $D=\abs{I}-v=1025-4=1021$. Sem ela, o que $G$ conta por
 \emph{vértice} deixa de ser o que a topologia conta em \emph{ciclos}. E a reta
 axial dá $\chi=1$ com $b_1=0$: percorrer sem dobrar é percorrer uma
 \textbf{árvore}.
@@ -697,13 +740,13 @@ contagem das réguas é a de índices $j$ com $2^{j}$ abaixo do módulo.
 \noindent Uma aresta não é a ligação entre dois vértices: ela \textbf{é a
 memória da divisão}. Um vértice interior da grade divide-se em $2n$ saídas ---
 $\{x\pm e_i\}$ ---, e a aresta é o registo de \emph{por qual delas} se saiu. Daí
-que $\lvert V(x)\rvert=2n$ não seja uma contagem de vizinhos, mas a capacidade
+que $\lvert \mathcal{V}(x)\rvert=2n$ não seja uma contagem de vizinhos, mas a capacidade
 local de abrir o estado em direções distintas; e daí que os passos se codifiquem
 na própria base, sem inventar codificação nenhuma.
 
 \begin{definicao}[a palavra da trajetória]\label{def:palavra}
-Seja $\mathcal{A}$ o alfabeto das direções de aresta --- $2n$ letras na grade
-numa grade de posto $n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
+Seja $\mathcal{A}$ o alfabeto das direções de aresta --- $2n$ letras numa
+grade de posto $n$, porque $+e_i\neq-e_i$; $m$ letras no hipercubo, porque $\oplus e_i$ é
 involutivo. Um percurso determina a \textbf{palavra} $s_0s_1\cdots s_{N-1}$ com
 $\pi(t+1)=\pi(t)+T(e_{s_t})$, onde $T$ diz como cada letra se realiza.
 \end{definicao}
@@ -761,8 +804,7 @@ num alfabeto de movimentos --- e $T$ é o \textbf{ato de colar} essa folha no
 espaço. Quando a colagem faz a folha voltar sobre si própria, uma célula recebe
 mais do que uma ordem, e é aí, e só aí, que $G>1$. A dobra não é defeito da
 palavra: é o ato de colagem. O dragão não é a folha nem o espaço --- é a
-\emph{folha já colada}. Com a \emph{mesma} palavra: $\pm e_i$ em
-no posto $2$ dá $\max G=2$; quatro direções independentes no posto $4$ dão $G\equiv1$,
+\emph{folha já colada}. Com a \emph{mesma} palavra: $\pm e_i$ no posto $2$ dá $\max G=2$; quatro direções independentes no posto $4$ dão $G\equiv1$,
 porque somas de letras distintas nunca colidem; e $\pm e_0$ numa reta dá
 $\max G=28$, porque há menos para onde ir. A dobra é propriedade da
 \textbf{realização}. O que a produz não é a dimensão: é $T$ poder \emph{voltar}
@@ -792,7 +834,7 @@ uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
 \begin{enumerate}\itemsep3pt
 \item[1.] \textbf{Escrita} --- $G(x)\mathrel{+}=1$ na célula corrente $x=\pi(t)$.
       Realiza a cláusula~(3).
-\item[2.] \textbf{Leitura} --- $\mathcal{P}_{t}(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}$
+\item[2.] \textbf{Leitura} --- $\mathcal{P}_{t}(x)=\bigl(G_t(y)\bigr)_{y\in \mathcal{V}(x)}$
       sobre a vizinhança; a fronteira lê-se como obstáculo, $+\infty$. Realiza a
       cláusula~(4).
 \item[3.] \textbf{Decisão} --- gradiente de exploração: o passo vai ao vizinho de
@@ -878,7 +920,7 @@ decidida antes de correr: não há alocação dinâmica em parte nenhuma.
 
 \medskip\noindent\textbf{Complexidade, e onde o $n$ aparece nela.} São $N+1$
 passos. O passo~1 escreve num ponto: $O(1)$. Os passos~2 e~3 leem
-$\lvert V(x)\rvert$ valores e tomam o mínimo: $\Theta(\lvert V(x)\rvert)$, que
+$\lvert \mathcal{V}(x)\rvert$ valores e tomam o mínimo: $\Theta(\lvert \mathcal{V}(x)\rvert)$, que
 é $\Theta(n)$ no posto $n$. Total:
 \[
 \Theta\bigl(n\,\abs{I}\bigr)\ \text{operações},\qquad
@@ -1001,7 +1043,8 @@ mesma que a obra já corre na árvore dos divisores.
 $W=\Z^{I}$ com a base canónica $\{\delta_t\}$, $\dim W=\abs{I}$. Na base, o
 deslocamento $S$ da Def.~\ref{def:ops} é a matriz \textbf{subdiagonal de uns},
 $S_{ij}=[\,i=j+1\,]$. A álgebra de incidência de $(I,\le)$ representa-se, nesta base, por matrizes
-triangulares inferiores; nela vivem
+triangulares inferiores, e nela vivem os \emph{mesmos} $\zeta$ e $\mu$ do
+Teor.~\ref{thm:shift} --- aqui em forma de matriz:
 \[
 \zeta=\sum_{j\ge0}S^{j}\quad(\text{a triangular de uns}),\qquad
 \mu=1-S ,
@@ -1081,10 +1124,10 @@ ponto é um levantamento com $\tilde G\equiv1$.
 \end{proof}
 
 \begin{corolario}[é a mesma inversão da árvore dos divisores]\label{cor:mobius}
-Troque-se a ordem $(I,\preceq)$ pela ordem por \emph{divisibilidade}. A mesma
-Def.~\ref{def:incid} dá $F=f*\mathbf{1}$, isto é
-$F(n)=\sum_{d\mid n}f(d)$, e a inversa de $\mathbf{1}$ é a função de Möbius:
-$f=F*\mu$, ou seja $f(n)=\sum_{d\mid n}\mu(d)F(n/d)$. A álgebra não muda ---
+Troque-se a ordem $(I,\le)$ pela ordem por \emph{divisibilidade}. A mesma
+Def.~\ref{def:incid} dá $g=f*\mathbf{1}$, isto é
+$g(n)=\sum_{d\mid n}f(d)$, e a inversa de $\mathbf{1}$ é a função de Möbius:
+$f=g*\mu$, ou seja $f(n)=\sum_{d\mid n}\mu(d)\,g(n/d)$. A álgebra não muda ---
 $\zeta$ acumula, $\mu$ desacumula --- e só muda a ordem sobre a qual se acumula.
 \end{corolario}
 
@@ -1097,7 +1140,7 @@ função de Möbius.
 
 \medskip\noindent\textbf{Duas convoluções, dois papéis.} A desta secção é a da
 \emph{ordem} $(I,\le)$, e serve para o directo e o inverso da própria aranha. A
-da §\ref{sec:transf} é a do \emph{grupo} $\mathbb{F}_2^{\,m}$, e serve para compor e
+da §\ref{sec:transf} é a do \emph{grupo} $B^{\,m}$, e serve para compor e
 decompor \emph{campos} de percursos diferentes. Não são a mesma operação, e
 convém não as confundir: uma acumula ao longo do \emph{domínio} $I$, a outra
 soma sobre o \emph{contradomínio} $X$.
@@ -1135,9 +1178,10 @@ inverte a ordem, vem $d(a,c)\le\max\{d(a,b),d(b,c)\}$.
 
 \begin{teorema}[as bolas particionam]\label{thm:bolas}
 Seja $(X,d)$ ultramétrico --- $d$ cumprindo o Lema~\ref{lem:ultra} --- e
-$B(a,r)=\{x: d(a,x)\le r\}$. Então:
+$\mathcal{B}(a,r)=\{x: d(a,x)\le r\}$ a bola --- caligráfico, para não
+colidir com o binário $B$ da Def.~\ref{def:B}. Então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{Todo ponto é centro:} se $b\in B(a,r)$ então $B(b,r)=B(a,r)$.
+\item[(1)] \textbf{Todo ponto é centro:} se $b\in \mathcal{B}(a,r)$ então $\mathcal{B}(b,r)=\mathcal{B}(a,r)$.
 \item[(2)] \textbf{Partição:} duas bolas de raio $r$ ou coincidem ou são
 disjuntas. Em particular, para cada $r$ as bolas de raio $r$ formam uma partição
 de $X$.
@@ -1148,14 +1192,14 @@ $\pi_r$ é uma realização no sentido da Def.~\ref{def:objeto}, a sua célula
 \end{teorema}
 
 \begin{proof}
-(1) Seja $x\in B(a,r)$. Então $d(b,x)\le\max\{d(b,a),d(a,x)\}\le r$, logo
-$x\in B(b,r)$ e $B(a,r)\subseteq B(b,r)$. Como $b\in B(a,r)$ implica
-$a\in B(b,r)$ (a ultramétrica é simétrica), a inclusão contrária sai do mesmo
+(1) Seja $x\in \mathcal{B}(a,r)$. Então $d(b,x)\le\max\{d(b,a),d(a,x)\}\le r$, logo
+$x\in \mathcal{B}(b,r)$ e $\mathcal{B}(a,r)\subseteq \mathcal{B}(b,r)$. Como $b\in \mathcal{B}(a,r)$ implica
+$a\in \mathcal{B}(b,r)$ (a ultramétrica é simétrica), a inclusão contrária sai do mesmo
 argumento com os papéis trocados.
 
-(2) Se $c\in B(a,r)\cap B(b,r)$, por (1) tem-se $B(a,r)=B(c,r)=B(b,r)$. Se a
+(2) Se $c\in \mathcal{B}(a,r)\cap \mathcal{B}(b,r)$, por (1) tem-se $\mathcal{B}(a,r)=\mathcal{B}(c,r)=\mathcal{B}(b,r)$. Se a
 interseção é vazia, nada há a provar. Que cobrem $X$ é imediato:
-$a\in B(a,r)$.
+$a\in \mathcal{B}(a,r)$.
 
 (3) A aplicação $i\mapsto\pi_r(i)$ está bem definida por (2): há
 \emph{exatamente} uma bola de raio $r$ contendo $i$. Quanto à igualdade no
@@ -1169,7 +1213,7 @@ igualdade de prefixos. A afirmação sobre $G$ é a Def.~\ref{def:objeto}.
 desigualdade triangular ``mais apertada'' de que se tire um número melhor: é a
 propriedade de partição do Teorema~\ref{thm:bolas}. Numa métrica euclidiana as
 bolas de raio fixo cruzam-se parcialmente --- existem $a,b$ e pontos $x,y,z$ com
-$x\in B(a)\cap B(b)$, $y\in B(a)\setminus B(b)$, $z\in B(b)\setminus B(a)$ --- e
+$x\in \mathcal{B}(a)\cap \mathcal{B}(b)$, $y\in \mathcal{B}(a)\setminus \mathcal{B}(b)$, $z\in \mathcal{B}(b)\setminus \mathcal{B}(a)$ --- e
 nenhum ponto interior é centro de todas as bolas que o contêm. É por isso que
 $\sum_x G(x)=\abs{I}$ não exige cuidado nenhum aqui: não há sobreposição a haver.
 
@@ -1184,7 +1228,7 @@ sem alteração, porque só pedem igualdade. A cláusula~(4) pede uma
 \emph{vizinhança}, e a árvore dá uma: cada bola de raio $2^{-p}$ tem
 \textbf{exatamente um} irmão --- a bola com o mesmo prefixo de $p-1$ bits e o
 bit seguinte trocado --- e as duas particionam a bola-mãe de raio $2^{-(p-1)}$.
-Logo $\lvert V(x)\rvert=1$, e o custo dos passos 2 e 3 é $\Theta(1)$ e não
+Logo $\lvert \mathcal{V}(x)\rvert=1$, e o custo dos passos 2 e 3 é $\Theta(1)$ e não
 $\Theta(n)$.
 \end{teorema}
 
@@ -1209,12 +1253,12 @@ espaço vetorial sobre um corpo, em cima um módulo livre sobre \Z.
 
 \begin{definicao}[os dois andares]\label{def:doisandares}
 \textbf{Em baixo}, o espaço onde a trajetória anda: $X=F_{2^m}$ como espaço
-vetorial sobre $\mathbb{F}_2$, de dimensão $m$, com a base $\{e_k=2^{k}\}$ do
+vetorial sobre $B$, de dimensão $m$, com a base $\{e_k=2^{k}\}$ do
 Teor.~\ref{thm:base8} --- e as direções de aresta de $Q_m$ \emph{são} essa base.
 \textbf{Em cima}, o espaço das funções sobre ele --- que é um \emph{módulo
 livre} sobre \Z, e não um espaço vetorial, porque \Z\ não é corpo:
 \[
-V=\Z^{X}\cong\Z^{n},\qquad \operatorname{rank}_{\Z}V=n=2^{m},
+V=\Z^{X}\cong\Z^{2^{m}},\qquad \operatorname{rank}_{\Z}V=\abs{X}=2^{m},
 \qquad \text{base } \{\delta_x\}_{x\in X},
 \]
 onde $\delta_x(y)=[\,y=x\,]$. O campo $G$ é um \textbf{vetor} de $V$, e a sua
@@ -1272,14 +1316,14 @@ torna $\{e_k\}$ ortonormal (Teor.~\ref{thm:base8}) --- define tanto um
 
 \begin{lema}[ortogonalidade]\label{lem:orto}
 $\chi_k(j\oplus j')=\chi_k(j)\chi_k(j')$, e
-$\sum_k \chi_k(j)\chi_k(j')=n\,\delta_{j,j'}$.
+$\sum_k \chi_k(j)\chi_k(j')=2^{m}\,\delta_{j,j'}$.
 \end{lema}
 
 \begin{proof}
 A primeira: $\langle k,j\oplus j'\rangle\equiv\langle k,j\rangle+\langle k,j'\rangle
 \pmod 2$, porque um bit comum a $k$ e $j\oplus j'$ está em exatamente um dos dois
 quando não está em ambos. Para a segunda, $\chi_k(j)\chi_k(j')=\chi_k(j\oplus j')$;
-se $j=j'$ a soma é $n$. Se $j\neq j'$, ponha-se $d=j\oplus j'\neq0$ e fixe-se um
+se $j=j'$ a soma é $2^{m}$. Se $j\neq j'$, ponha-se $d=j\oplus j'\neq0$ e fixe-se um
 bit $b$ com $d_b=1$; emparelhando $k$ com $k\oplus e_b$ vem
 $\chi_{k\oplus e_b}(d)=-\chi_k(d)$, e a soma cancela aos pares.
 \end{proof}
@@ -1292,21 +1336,21 @@ Com $\chi$ da Def.~\ref{def:dual}, para todos $f\in V$ e $k\in X$,
 \]
 --- cada $\chi_k$ é vetor próprio de \emph{todos} os operadores de convolução ao
 mesmo tempo, e o valor próprio de $C_f$ em $\chi_k$ é a coordenada
-$\widehat{f}(k)$. Os $n$ caracteres são linearmente independentes, logo formam
+$\widehat{f}(k)$. Os $2^{m}$ caracteres são linearmente independentes, logo formam
 base de $V$.
 \end{teorema}
 
 \begin{proof}
 $(f*\chi_k)(y)=\sum_x f(x)\chi_k(x\oplus y)=\chi_k(y)\sum_x f(x)\chi_k(x)$ pelo
 Lema~\ref{lem:orto}, que é $\widehat{f}(k)\chi_k(y)$. A independência sai da
-ortogonalidade: $\sum_j\chi_k(j)\chi_{k'}(j)=n\delta_{kk'}$, e uma família
+ortogonalidade: $\sum_j\chi_k(j)\chi_{k'}(j)=2^{m}\delta_{kk'}$, e uma família
 ortogonal de vetores não nulos é livre.
 \end{proof}
 
 \subsection*{A transformada é a mudança de base}
 
 \begin{definicao}[a transformada]\label{def:transf}
-$F\colon V\to V$, $F(f)_k=\widehat{f}(k)=\langle\chi_k,f\rangle=\sum_x f(x)\chi_k(x)$.
+$\mathcal{F}\colon V\to V$, $\mathcal{F}(f)_k=\widehat{f}(k)=\langle\chi_k,f\rangle=\sum_x f(x)\chi_k(x)$.
 Na base canónica a sua matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: é a
 \textbf{avaliação nos caracteres}, inteira.
 \end{definicao}
@@ -1314,30 +1358,30 @@ Na base canónica a sua matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: é a
 \medskip\noindent\textbf{E ela é a mudança de base \emph{não normalizada}.} As
 coordenadas $c$ de $f$ na base $\{\chi_k\}$ --- isto é, os $c$ com
 $f=\sum_k c_k\chi_k$ --- obtêm-se emparelhando com $\chi_j$ e usando a
-ortogonalidade: $\langle\chi_j,f\rangle=n\,c_j$. Logo
+ortogonalidade: $\langle\chi_j,f\rangle=2^{m}c_j$. Logo
 \[
-\boxed{\;c=\tfrac1n\,F(f)\;}
+\boxed{\;c=2^{-m}\,\mathcal{F}(f)\;}
 \]
-e é $n^{-1}F$, e não $F$, a mudança de coordenadas propriamente dita --- como o
-teorema seguinte torna a dizer, ao dar $F^{-1}=\tfrac1nF$. Em particular
-$F(\delta_a)_k=\chi_k(a)$: a coluna $a$ de $H$ é a imagem de $\delta_a$.
+e é $2^{-m}\mathcal{F}$, e não $\mathcal{F}$, a mudança de coordenadas propriamente dita --- como o
+teorema seguinte torna a dizer, ao dar $\mathcal{F}^{-1}=2^{-m}\mathcal{F}$. Em particular
+$\mathcal{F}(\delta_a)_k=\chi_k(a)$: a coluna $a$ de $H$ é a imagem de $\delta_a$.
 
 \begin{teorema}[inversa, involutividade e Parseval]\label{thm:H}
-Com $H$ da Def.~\ref{def:transf}, $H^{2}=n\,I$; logo $F$ é invertível com $F^{-1}=\tfrac1n F$, e
+Com $H$ da Def.~\ref{def:transf}, $H^{2}=2^{m}\,\mathrm{Id}$; logo $\mathcal{F}$ é invertível com $\mathcal{F}^{-1}=2^{-m}\mathcal{F}$, e
 \[
-F\circ F=n\cdot\mathrm{id},\qquad
-\lVert F(f)\rVert^{2}=n\lVert f\rVert^{2}.
+\mathcal{F}\circ \mathcal{F}=2^{m}\cdot\mathrm{id},\qquad
+\lVert \mathcal{F}(f)\rVert^{2}=2^{m}\lVert f\rVert^{2}.
 \]
 \end{teorema}
 
 \begin{proof}
 $(H^2)_{k j}=\sum_x\chi_k(x)\chi_x(j)$. Como $\langle k,x\rangle=\langle x,k\rangle$,
-isto é $\sum_x\chi_x(k)\chi_x(j)=n\delta_{kj}$ pelo Lema~\ref{lem:orto}. A norma
+isto é $\sum_x\chi_x(k)\chi_x(j)=2^{m}\delta_{kj}$ pelo Lema~\ref{lem:orto}. A norma
 sai da mesma soma: $\lVert Hf\rVert^2=\sum_k\sum_{j,j'}f_jf_{j'}\chi_k(j)\chi_k(j')
-=n\lVert f\rVert^2$.
+=2^{m}\lVert f\rVert^2$.
 \end{proof}
 
-\medskip\noindent $F\circ F=n\cdot\mathrm{id}$ é a \textbf{involutividade} da
+\medskip\noindent $\mathcal{F}\circ \mathcal{F}=2^{m}\cdot\mathrm{id}$ é a \textbf{involutividade} da
 transformada não normalizada: aplicá-la duas vezes devolve o vetor a menos da
 escala. Convém não a confundir com a \textbf{bidualidade} $V\cong V^{**}$, que é
 uma afirmação independente e canónica. O que as liga aqui é $X$ ser
@@ -1352,9 +1396,9 @@ Seja $P$ o número de pares $i<j$ com $\pi(i)=\pi(j)$. Então
 \[
 \sum_x G(x)^2=\abs{I}+2P,
 \qquad
-\lVert F(G)\rVert^{2}=n\bigl(\abs{I}+2P\bigr),
+\lVert \mathcal{F}(G)\rVert^{2}=2^{m}\bigl(\abs{I}+2P\bigr),
 \]
-e $\pi$ é injetiva se e só se $\lVert F(G)\rVert^{2}=n\abs{I}$.
+e $\pi$ é injetiva se e só se $\lVert \mathcal{F}(G)\rVert^{2}=2^{m}\abs{I}$.
 \end{teorema}
 
 \begin{proof}
@@ -1365,7 +1409,7 @@ Parseval (Teor.~\ref{thm:H}), e a equivalência é $P=0$.
 
 \medskip\noindent A dobra --- definida sobre a trajetória --- lê-se num único
 número calculado sobre o campo, sem visitar a trajetória. E cada coordenada
-$\widehat{G}(k)$ tem leitura própria: por $F(G)_k=\sum_t\chi_k(\pi(t))$, é o
+$\widehat{G}(k)$ tem leitura própria: por $\mathcal{F}(G)_k=\sum_t\chi_k(\pi(t))$, é o
 \textbf{saldo} da trajetória no \emph{corte} que $\chi_k$ define no grafo --- a
 bipartição dos vértices que alterna nas direções de $k$, com
 $\lvert k\rvert\,2^{m-1}$ arestas cortadas.
@@ -1394,9 +1438,9 @@ porquê: são a base própria comum de \emph{todas} as convoluções
 (Teor.~\ref{thm:proprios}), e a adjacência do grafo é uma delas.
 
 \begin{teorema}[convolução, deconvolução, e onde degenera]\label{thm:conv}
-$F(f*g)=F(f)\cdot F(g)$ ponto a ponto. Se $\widehat{f}(k)\neq0$ para todo $k$,
+$\mathcal{F}(f*g)=\mathcal{F}(f)\cdot \mathcal{F}(g)$ ponto a ponto. Se $\widehat{f}(k)\neq0$ para todo $k$,
 então $C_f$ é invertível e
-$g=F^{-1}\bigl(F(f*g)/F(f)\bigr)$. Se $\widehat{f}(k_0)=0$ para algum $k_0$,
+$g=F^{-1}\bigl(\mathcal{F}(f*g)/\mathcal{F}(f)\bigr)$. Se $\widehat{f}(k_0)=0$ para algum $k_0$,
 então $C_f$ é singular: $\chi_{k_0}\in\ker C_f$, e dois $g$ que difiram por um
 múltiplo de $\chi_{k_0}$ dão o mesmo produto.
 \end{teorema}
@@ -1411,10 +1455,10 @@ núcleo é gerado pelos $\chi_k$ com $\widehat{f}(k)=0$.
 \medskip\noindent A degenerescência não é rara e tem agora nome próprio: é $C_f$
 ter núcleo. O campo de um percurso que visita $0$ e $1$ uma vez cada tem
 $\widehat{f}(k)=1+\chi_k(1)$, nulo em \emph{metade} dos $k$ --- o núcleo tem
-dimensão $n/2$. E um $f=a\,\delta_0+b\,\mathbf{1}$ tem espectro sem zeros mas é
+dimensão $2^{m-1}$. E um $f=a\,\delta_0+b\,\mathbf{1}$ tem espectro sem zeros mas é
 inútil como teste: $\delta_0$ é a unidade do anel e $\mathbf{1}$ é o projetor
 sobre o caractere trivial, de modo que $C_f$ é a mesma coisa em \emph{qualquer}
-grupo de ordem $n$.
+grupo da mesma ordem.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Órbitas deterministas: $G$ conta o período}\label{sec:periodo}
@@ -1505,10 +1549,10 @@ o grau proíbe-a. O que há é uma \textbf{realização injetiva do espaço na r
 que preserva a identidade das células e não pode preservar a adjacência.
 
 \begin{teorema}[a realização contrária, e o que ela paga]\label{thm:contraria}
-Seja $Q_M=\{0,\dots,M-1\}^2$ o quadrado discreto e $q_0,\dots,q_{M^2-1}$ uma
+Seja $\Gamma_M=\{0,\dots,M-1\}^2$ o quadrado discreto e $q_0,\dots,q_{M^2-1}$ uma
 enumeração dos seus pontos (por exemplo em serpentina). A aplicação
 \[
-\rho\colon Q_M\longrightarrow I,\qquad \rho(q_t)=2t
+\rho\colon \Gamma_M\longrightarrow I,\qquad \rho(q_t)=2t
 \]
 é \textbf{injetiva} e \textbf{não sobrejetiva}: a sua imagem são os pares, e
 todos os ímpares ficam por usar. Assim, as duas realizações trocam exatamente os
@@ -1526,7 +1570,7 @@ $\rho\colon X\to I$ \ (conta) & sim & não & \textbf{buraco}: índices por usar 
 \end{teorema}
 
 \begin{proof}
-Injetividade: $t\mapsto2t$ é injetiva e a enumeração é bijetiva sobre $Q_M$.
+Injetividade: $t\mapsto2t$ é injetiva e a enumeração é bijetiva sobre $\Gamma_M$.
 Não sobrejetividade: a imagem só contém índices pares.
 \end{proof}
 
@@ -1615,7 +1659,8 @@ Três coisas distintas, cada uma com o seu nome:
 \item[(iii)] A \textbf{dobra acumulada} $D=\theta*\zeta$, com
       $\theta(t)=[\,G_{t}(\pi(t))>1\,]$, e $\mu D=\theta$. Esta \emph{não} é um
       tempo: é memória. O que dela se lê é a \textbf{taxa de dobras} $dD/d\tau$,
-      que muda com a régua.
+      que muda com a régua. No fim do percurso $D(N)=\abs{I}-v$ --- o mesmo $D$
+      do Teor.~\ref{thm:euler}, e não outra grandeza com a mesma letra.
 \end{enumerate}
 (A letra $d$ fica reservada à distância da §\ref{sec:ultra}.)
 \end{definicao}
@@ -1763,16 +1808,16 @@ aritmética \emph{inteira} --- sem vírgula, com divisão inteira --- convergir 
 um significado exato e finito, e o campo $G$ lê-o.
 
 \begin{definicao}[a soma parcial como realização]\label{def:serie}
-Dada uma sucessão de termos inteiros $(a_k)$, ponha-se $S_0=a_0$ e
-$S_{t+1}=S_t+a_{t+1}$. A realização é $\pi(t)=S_t$, com $X$ o degrau
-$I^{2}/{\sim}$.
+Dada uma sucessão de termos inteiros $(a_k)$, a realização \emph{é} a sucessão
+das somas parciais: $\pi(0)=a_0$ e $\pi(t+1)=\pi(t)+a_{t+1}$, com $X$ o degrau
+$I^{2}/{\sim}$. (Não se introduz letra para a soma parcial: $S$ é o
+deslocamento da Def.~\ref{def:ops}, e aqui a soma parcial é o próprio $\pi$.)
 \end{definicao}
 
 \begin{teorema}[o campo lê o custo da série]\label{thm:serie}
 Com $\pi$ da Def.~\ref{def:serie}, suponha-se que existe $T$ com $a_k=0$ para
-todo $k>T$ (os termos anulam-se em
-um número finito de termos, que é o que a divisão inteira faz), e que
-$S_0,\dots,S_T$ são distintos. Se $N\ge T+1$, então
+todo $k>T$ (os termos anulam-se ao fim de um número finito de parcelas, que é
+o que a divisão inteira faz), e que $\pi(0),\dots,\pi(T)$ são distintos. Se $N\ge T+1$, então
 \[
 \bigl\lvert\{x:G(x)>1\}\bigr\rvert=1,\qquad
 \bigl\lvert\{x:G(x)=1\}\bigr\rvert=T,
@@ -1782,16 +1827,16 @@ conta exatamente as somas parciais distintas, que é o \textbf{custo} da série.
 \end{teorema}
 
 \begin{proof}
-Para $t>T$ tem-se $S_{t+1}=S_t$, logo $\pi(t)=S_T$ para todo $t\ge T$: a
+Para $t>T$ tem-se $\pi(t+1)=\pi(t)$, logo $\pi(t)=\pi(T)$ para todo $t\ge T$: a
 trajetória é constante a partir de $T$, o que é ser periódica de período $p=1$.
-Como $S_0,\dots,S_T$ são distintos, o primeiro índice repetido é $\ell=T$, e o
+Como $\pi(0),\dots,\pi(T)$ são distintos, o primeiro índice repetido é $\ell=T$, e o
 Teor.~\ref{thm:periodo} aplica-se (a hipótese $N\ge\ell+2p-1=T+1$ é a do
 enunciado). Donde $\lvert\{G>1\}\rvert=p=1$ e $\lvert\{G=1\}\rvert=\ell=T$.
 \end{proof}
 
 \medskip\noindent\textbf{O valor, e por que não é citado.} Com
 $\arctan\frac1n=\sum_{k\ge0}\frac{(-1)^k}{(2k+1)n^{2k+1}}$ avaliado em escala
-inteira $S=10^{8}$, três combinações independentes,
+inteira $E=10^{8}$, três combinações independentes,
 \[
 16\arctan\tfrac15-4\arctan\tfrac1{239},\qquad
 4\arctan\tfrac12+4\arctan\tfrac13,\qquad
@@ -1822,24 +1867,25 @@ Para $k\ge1$ escreva-se $k=2^{a}m$ com $m$ ímpar. Ponha-se
 \[
 \upsilon(k)=\begin{cases}+1 & m\equiv1\pmod 4\\[2pt] -1 & m\equiv3\pmod 4.\end{cases}
 \]
-A \textbf{curva de bits} $C_K$ é a sucessão $P_0=(0,0)$, $P_1=P_0+u_0$ com
+A \textbf{curva de bits} $\mathcal{C}_K$ é a sucessão $P_0=(0,0)$, $P_1=P_0+u_0$ com
 $u_0=(1,0)$, e $P_{s+1}=P_s+u_s$ para $s=1,\dots,2^{K}-1$, onde
 $u_{s}=R_{\upsilon(s)}\,u_{s-1}$, com $R_{+1}$ a rotação de $+90^{\circ}$ e
 $R_{-1}$ a de $-90^{\circ}$. São $2^{K}$ passos ao todo.
 \end{definicao}
 
 \begin{definicao}[a dobra]\label{def:dobrar}
-Dada uma sucessão finita de pontos $D=(P_0,\dots,P_M)$ com extremo $F=P_M$, o seu
-\textbf{dual} $D^{*}$ é
+Dada uma sucessão finita de pontos $\mathcal{D}=(P_0,\dots,P_M)$, o seu \textbf{dual}
+$\mathcal{D}^{*}$ é
 \[
-D^{*}=\bigl(Q_0,\dots,Q_M\bigr),\qquad Q_j=F+R\,(F-P_{M-j}),
+\mathcal{D}^{*}=\bigl(P^{*}_0,\dots,P^{*}_M\bigr),\qquad
+P^{*}_j=P_M+R\,(P_M-P_{M-j}),
 \]
-com $R$ uma rotação fixa de $\pm90^{\circ}$. A \textbf{soma} $D+D^{*}$ é a
-concatenação de $D$ com $D^{*}$ suprimindo o ponto repetido $Q_0=F$. Define-se
-$D_0=\bigl((0,0),(1,0)\bigr)$ e $D_{k+1}=D_k+D_k^{*}$.
+com $R$ uma rotação fixa de $\pm90^{\circ}$. A \textbf{soma} $\mathcal{D}+\mathcal{D}^{*}$ é a
+concatenação de $\mathcal{D}$ com $\mathcal{D}^{*}$ suprimindo o ponto repetido $P^{*}_0=P_M$. Define-se
+$\mathcal{D}_0=\bigl((0,0),(1,0)\bigr)$ e $\mathcal{D}_{k+1}=\mathcal{D}_k+\mathcal{D}_k^{*}$.
 \end{definicao}
 
-\noindent Em palavras: $D^{*}$ é a curva percorrida ao contrário e rodada de
+\noindent Em palavras: $\mathcal{D}^{*}$ é a curva percorrida ao contrário e rodada de
 $90^{\circ}$ em torno do ponto final. É a dobra do papel --- dobrar a tira ao
 meio é colar-lhe a sua própria imagem invertida --- e é o mesmo passo
 $T_{k+1}=T_k+T_k^{*}$ com que a obra constrói as suas torres, aqui numa curva.
@@ -1864,36 +1910,36 @@ o outro $\equiv3$ módulo $4$. Logo $\upsilon$ toma valores opostos neles.
 \end{proof}
 
 \begin{teorema}[os dois caminhos dão a mesma curva]\label{thm:dragao}
-Para todo $k\ge0$, a curva de bits $C_k$ da Def.~\ref{def:bits} e a curva
-$D_k$ da Def.~\ref{def:dobrar} coincidem ponto a ponto, para uma das duas
+Para todo $k\ge0$, a curva de bits $\mathcal{C}_k$ da Def.~\ref{def:bits} e a curva
+$\mathcal{D}_k$ da Def.~\ref{def:dobrar} coincidem ponto a ponto, para uma das duas
 escolhas do sinal de $R$ --- a mesma para todo $k$.
 \end{teorema}
 
 \begin{proof}
 Indução em $k$. Para $k=0$ ambas são $\bigl((0,0),(1,0)\bigr)$.
 
-Suponha-se $C_k=D_k$, com $M=2^{k}$ passos e extremo $F=P_M$. A curva $C_{k+1}$
-tem $2^{k+1}$ passos e as suas primeiras $M$ direções são as de $C_k$ --- porque
-$\upsilon(s)$ não depende de $k$ --- logo $C_{k+1}$ prolonga $C_k$ e o seu ponto de
-índice $M$ é $F$. Resta identificar a segunda metade.
+Suponha-se $\mathcal{C}_k=\mathcal{D}_k$, com $M=2^{k}$ passos, de extremo $P_M$. A curva $\mathcal{C}_{k+1}$
+tem $2^{k+1}$ passos e as suas primeiras $M$ direções são as de $\mathcal{C}_k$ --- porque
+$\upsilon(s)$ não depende de $k$ --- logo $\mathcal{C}_{k+1}$ prolonga $\mathcal{C}_k$ e o seu ponto de
+índice $M$ é $P_M$. Resta identificar a segunda metade.
 
-Para $1\le j<M$, a direção do passo $M+j$ de $C_{k+1}$ obtém-se da anterior pela
+Para $1\le j<M$, a direção do passo $M+j$ de $\mathcal{C}_{k+1}$ obtém-se da anterior pela
 rotação $R_{\upsilon(M+j)}$, e pelo Lema~\ref{lem:anti} $\upsilon(M+j)=-\upsilon(M-j)$. Ou
 seja: \emph{a sucessão de viragens da segunda metade é a da primeira metade lida
 de trás para a frente e com os sinais trocados.}
 
-Traduza-se isto em pontos. Percorrer $C_k$ ao contrário troca cada viragem pela
+Traduza-se isto em pontos. Percorrer $\mathcal{C}_k$ ao contrário troca cada viragem pela
 oposta --- é a definição de percorrer ao contrário, pois uma viragem à esquerda
 vista do outro sentido é uma viragem à direita. Logo a sucessão de viragens de
-$\operatorname{rev}(C_k)$ é exatamente $\bigl(-\upsilon(M-j)\bigr)_j$, que é a da
-segunda metade de $C_{k+1}$. Duas curvas com a mesma sucessão de viragens e o
+$\operatorname{rev}(\mathcal{C}_k)$ é exatamente $\bigl(-\upsilon(M-j)\bigr)_j$, que é a da
+segunda metade de $\mathcal{C}_{k+1}$. Duas curvas com a mesma sucessão de viragens e o
 mesmo passo unitário diferem por uma isometria direta do plano; como ambas
-começam em $F$, a isometria é a rotação em torno de $F$ que leva a primeira
-direção de $\operatorname{rev}(C_k)$ na primeira direção da segunda metade de
-$C_{k+1}$. Essa rotação é de $\pm90^{\circ}$, porque a direção do passo $M+1$ se
+começam em $P_M$, a isometria é a rotação em torno de $P_M$ que leva a primeira
+direção de $\operatorname{rev}(\mathcal{C}_k)$ na primeira direção da segunda metade de
+$\mathcal{C}_{k+1}$. Essa rotação é de $\pm90^{\circ}$, porque a direção do passo $M+1$ se
 obtém da do passo $M$ por $R_{\upsilon(M+1)}$ e $\upsilon$ toma valores em
-$\{\pm1\}$. Portanto a segunda metade de $C_{k+1}$ é
-$F+R\,(F-P_{M-j})$, que é $D_k^{*}$, e $C_{k+1}=D_k+D_k^{*}=D_{k+1}$.
+$\{\pm1\}$. Portanto a segunda metade de $\mathcal{C}_{k+1}$ é
+$P_M+R\,(P_M-P_{M-j})$, que é $\mathcal{D}_k^{*}$, e $\mathcal{C}_{k+1}=\mathcal{D}_k+\mathcal{D}_k^{*}=\mathcal{D}_{k+1}$.
 
 Que o sinal de $R$ é o \emph{mesmo} para todo $k$: ele é determinado por
 $\upsilon(M+1)=\upsilon(2^{k}+1)$. Os casos $k=0$ e $k=1$ verificam-se
@@ -1916,52 +1962,55 @@ documentos desta obra. O que se verifica aqui é outra coisa: que os
 degraus construídos por \emph{quociente} são realizações no sentido da
 Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
-\subsection*{A cadeia canónica, a partir de $I$}
+\subsection*{A cadeia canónica, a partir de $B$}
 
-\noindent Cada degrau tem por domínio o que o degrau anterior produziu, de modo
-que a escada inteira se escreve a partir da lista e de mais nada:
+\noindent A escada não parte da lista --- parte da \emph{distinção}. O primeiro
+andar é o do Teor.~\ref{thm:BI}: as palavras em $B$, com a soma por transporte e
+o encaixe por prefixos. Daí em diante, cada degrau tem por domínio o que o
+anterior produziu, de modo que a escada inteira se escreve a partir de $B$ e de
+mais nada:
 \[
 \boxed{
 \begin{array}{lll}
-X_1 & = & I \text{ contado}\\[2pt]
+X_1 & = & I,\ \text{as palavras em } B \text{ (Teor.~\ref{thm:BI})}\\[2pt]
 X_2 & = & X_1^{\,2}/{\sim}, \qquad (a,b)\sim(c,d)\iff a+d=b+c\\[2pt]
 X_3 & = & \bigl(X_2\times X_2^{\ast}\bigr)/{\sim}, \qquad (p,q)\sim(r,s)\iff ps=qr\\[2pt]
 X_4 & = & \text{os cortes de } X_3
 \end{array}}
 \]
-com $X_2^{\ast}$ os elementos invertíveis. E as realizações que ligam cada um ao
-seguinte são
+com $X_2^{\ast}$ os elementos invertíveis. A passagem $B\to X_1$ é o teorema do
+transporte; as três seguintes são realizações,
 \[
-\pi_1\colon I\to X_1,\qquad
 \pi_2\colon X_1^{\,2}\to X_2,\qquad
 \pi_3\colon X_2\times X_2^{\ast}\to X_3,\qquad
 \pi_4\colon X_3\to X_4,
 \]
-respetivamente: contar a lista; $(a,b)\mapsto a-b$; $(p,q)\mapsto p/q$ reduzido;
-e $q\mapsto$ o cilindro que o contém. Nenhuma delas precisa de um símbolo
-importado: o domínio de cada uma é o contradomínio da anterior, e o primeiro
-domínio é $I$.
+respetivamente $(a,b)\mapsto a-b$, $(p,q)\mapsto p/q$ reduzido, e $q\mapsto$ o
+cilindro que o contém. Nenhuma precisa de um símbolo importado: o domínio de
+cada uma é o contradomínio da anterior, e o único dado de toda a cadeia é a
+distinção da Def.~\ref{def:B}.
 
-\medskip\noindent\textbf{O primeiro degrau parte da lista.} Contar os símbolos
-de $I$ é já realizá-los, e os degraus seguintes constroem-se sobre esse
-resultado: $I^{2}/{\sim}$, depois as frações, depois os cortes. Há uma diferença
-no primeiro, e é factual: a obra constrói-o \emph{sem quociente} --- a segunda
-cópia da dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é
-\emph{multiplicada} por $\sigma$ ---, ao passo que os outros três são
-construídos \emph{por} quociente. Daí que, na tabela, a fibra do primeiro seja a
-da soma e não uma classe de equivalência.
+\medskip\noindent\textbf{E o primeiro andar não é um quociente.} A diferença é
+factual, e separa o primeiro degrau dos outros três: $X_1$ constrói-se
+\emph{sem identificar nada} --- na dobra $F_{2w}=F_w\oplus\sigma F_w$ a segunda
+cópia não é colada à primeira, é \emph{multiplicada} por $\sigma$ ---, ao passo
+que $X_2$, $X_3$ e $X_4$ são construídos \emph{por} quociente. Sobre $X_1$ há
+realizações, e a mais simples é a própria soma; mas a fibra dela é a fibra da
+soma, e não uma classe de equivalência que defina o andar. Daí que, na tabela, a
+primeira linha tenha outro estatuto: mede-se, e mede bem, mas não é o que
+constrói $X_1$.
 
 \begin{teorema}[os degraus por quociente são realizações]\label{thm:escada}
 Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos
-três últimos --- os que a obra constrói \emph{por quociente} --- a fibra
-$\pi^{-1}(x)$ \emph{é} a classe de equivalência que define o andar. No primeiro,
-o primeiro, não há quociente a identificar, e a fibra é a da soma:
+três últimos --- os que se constroem \emph{por} quociente --- a fibra
+$\pi^{-1}(x)$ \emph{é} a classe de equivalência que define o andar. No primeiro
+não há quociente a identificar, e a fibra é a da soma:
 \begin{center}\footnotesize
 \begin{tabular}{@{}llll@{}}
 \toprule
-$\pi_k\colon I_k\to X_k$ & a aplicação & a fibra é & o representante $k=1$ \\
+$\pi$ & a aplicação & a fibra é & o representante $k=1$ \\
 \midrule
-$\pi_1$: a lista contada \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
+a soma em $X_1$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\abs{X_1}$ & $x\oplus z$ \\
 $\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
 $\pi_3$: as frações & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
 $\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
@@ -1976,9 +2025,10 @@ igualdade decidível, o que é a Def.~\ref{def:objeto}; a conservação é o
 Lema~\ref{lem:conserva}. Nas três últimas linhas, $\pi(u)=\pi(v)$ é,
 respetivamente, $a-b=c-d$ (isto é $a+d=b+c$), $p/q=r/s$ (isto é $ps=qr$), e ter
 o mesmo prefixo de $p$ bits --- que são exatamente as relações que definem esses
-andares. Na primeira, $\pi(u)=\pi(v)$ é $x\oplus y=x'\oplus y'$, que é uma
-relação legítima mas não a que constrói o andar. O representante $k=1$ é o primeiro da fibra na ordem do
-domínio, e a enumeração escolhida fá-lo coincidir com o canónico.
+andares. Na primeira, $\pi(u)=\pi(v)$ é $x\oplus y=x'\oplus y'$, relação
+legítima mas não a que constrói o andar. O representante $k=1$ é o primeiro da
+fibra na ordem do domínio, e a enumeração escolhida fá-lo coincidir com o
+canónico.
 \end{proof}
 
 \medskip\noindent Duas leituras. A primeira, em uma frase:
@@ -2010,7 +2060,7 @@ $\pi_k$: descer um andar & $\iota_k$: subir & só um lado fecha & Cor.~\ref{cor:
 encher: $\pi$ sobrejetiva & contar: $\rho$ injetiva & dobra \emph{ou} buraco & Teor.~\ref{thm:contraria} \\
 posição & palavra de arestas & a ordem & Teor.~\ref{thm:palavra} \\
 vértice: $G$ & aresta: $G_{\mathrm{ar}}$ & --- (uma determina a outra) & Teor.~\ref{thm:handshake} \\
-$V$: base $\{\delta_x\}$ & $V^{*}$: base $\{\chi_k\}$ & o fator $n$ & Def.~\ref{def:dual}, Teor.~\ref{thm:H} \\
+$V$: base $\{\delta_x\}$ & $V^{*}$: base $\{\chi_k\}$ & o fator $2^{m}$ & Def.~\ref{def:dual}, Teor.~\ref{thm:H} \\
 $W$: $S$ nilpotente & $V$: $C_f$ diagonalizável & inverte sempre \emph{vs} se $\widehat f\neq0$ & Lema~\ref{lem:nilp}, Teor.~\ref{thm:proprios} \\
 ocupação: muitos agentes & expansão: um agente & o identificador & Teor.~\ref{thm:agentes} \\
 construção & construtor & --- (não se repõe) & Teor.~\ref{thm:agentes} \\
@@ -2063,7 +2113,7 @@ puramente geométrica da imagem da curva --- depende de quantas vezes a
 parametrização visita cada célula. Duas realizações ficam de
 fora por serem de outro tipo: as \emph{somas parciais} da §\ref{sec:serie}, com
 período $1$ e a cauda a ser o custo; e a \emph{árvore do encaixe} da
-§\ref{sec:ultra}, onde a célula é a bola e $\lvert V\rvert=1$.
+§\ref{sec:ultra}, onde a célula é a bola e $\lvert\mathcal{V}\rvert=1$.
 
 \medskip\noindent\textbf{Dobrar e ser percurso são independentes}, e as quatro
 combinações estão na tabela: a espiral dobra e é percurso; o relógio dobra e não
@@ -2080,15 +2130,15 @@ o Cantor não dobra, apesar de ser a mais intrincada das figuras da lista.
 posto $3$ da tabela tem $\max G=3$ e o do plano $2$: dobra \emph{mais}, e não menos.
 A grandeza compara as duas curvas, que são construções distintas --- a de $\Z^3$
 roda o plano da viragem --- e não os dois espaços. A dimensão, essa, já apareceu
-onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert V(x)\rvert=2n$.
+onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert \mathcal{V}(x)\rvert=2n$.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Medido}
 
 \medido{Teor.~\ref{thm:multiplicidade} e Teor.~\ref{thm:dimensao}:
 \code{tests/aranha\_n.c} §AN1--§AN2 (campo incremental $=$ recontagem e
-$\sum G=\abs{I}$ nos postos $1$ a $4$), §AN7 ($\abs{V(x)}=2n$, vizinhos distintos);
-Teor.~\ref{thm:dragao} §AN3 (bits $=$ dobra $D_k+D_k^{*}$, $k=1..12$, com os
+$\sum G=\abs{I}$ nos postos $1$ a $4$), §AN7 ($\abs{\mathcal{V}(x)}=2n$, vizinhos distintos);
+Teor.~\ref{thm:dragao} §AN3 (bits $=$ dobra $\mathcal{D}_k+\mathcal{D}_k^{*}$, $k=1..12$, com os
 dois sinais de $R$ corridos e exatamente um a bater);
 dobra e controlos §AN4;
 Teor.~\ref{thm:bolas} §AN6 (bolas particionam; todo ponto é centro; a euclidiana
@@ -2101,7 +2151,7 @@ Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
 passo, nem uma a mais --- o autómato não varre) (leitura a distinguir $G{=}0$ de
 $G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
 $0,1,3,6$ planos com $R^4=\mathrm{id}$);
-Teor.~\ref{thm:espaco} e \ref{thm:base8} §AN19, §AN24 (Gram $=I$ pelos caracteres; as oito réguas cegas e
+Teor.~\ref{thm:espaco} e \ref{thm:base8} §AN19, §AN24 (Gram $=\mathrm{Id}$ pelos caracteres; as oito réguas cegas e
 compostas; os $256$ elementos a reconstruírem-se das coordenadas);
 Teor.~\ref{thm:euler} e Cor.~\ref{cor:pik} §AN25 ($b_1=D=335$ no dragão, a
 espiral a reusar arestas, a reta a ser árvore; e $\pi_k$ a truncar);
@@ -2123,7 +2173,7 @@ $A\chi_k=(m-2|k|)\chi_k$ exato em inteiros; o corte com $|k|2^{m-1}$ arestas);
 Teor.~\ref{thm:medida} §AN16 (a mesma medida com dobras diferentes: Heighway e
 a espiral, e a reta como controlo);
 Lema~\ref{lem:nilp} §AN27 ($S^{12}=0$ com $12$ mínimo; $\sum S^j$ a ser a
-triangular de uns; $\dim\ker S=1$; e os $n$ caracteres de norma $n$ do outro
+triangular de uns; $\dim\ker S=1$; e os $2^{m}$ caracteres de norma $2^{m}$ do outro
 lado);
 Teor.~\ref{thm:mu}, \ref{thm:zeta-mu} e Cor.~\ref{cor:mobius} §AN15
 ($\mu=\zeta^{-1}$ em $4096$ pares; o directo e o inverso com resíduo $0$ sobre a
@@ -2136,11 +2186,11 @@ deconvolução com resíduo $0$; e a degenerescência exibida);
 Teor.~\ref{thm:B} e \ref{thm:BI} §AN33 (as quatro aplicações, as duas
 invertíveis e involutivas, a única tabela de produto em dezasseis, e o encaixe
 por prefixos);
-a codificação e a subida §AN34 ($\lceil\log_2 n\rceil$ bits para $n$ de $1$ a
+a codificação e a subida §AN34 ($\lceil\log_2 c\rceil$ bits para $c$ de $1$ a
 $64$ e nenhum a menos; os cilindros a refinarem; e duas caminhadas a separarem-se
 num passo finito);
-Teor.~\ref{thm:escada} §AN32 (os quatro andares, com $\sum G=\abs{I}$, a fibra a
-ser a classe e o $k=1$ a ser o canónico);
+Teor.~\ref{thm:escada} §AN32 (os quatro casos, com $\sum G=\abs{I}$; nos três
+por quociente a fibra a ser a classe, e o $k=1$ a ser o canónico);
 Teor.~\ref{thm:agentes} §AN31 (um agente com $4$ voltas e $4$ agentes com uma:
 campos iguais nas $64$ células, $G=4$ nas $16$, com o controlo negativo a ver as
 $16$ a diferir contra $3$ voltas; e a ordem a separar $96$ de $96$ pares contra
@@ -2157,12 +2207,12 @@ $256$ de $512$; $\tilde\pi$ bijetiva sobre $X\times\{1,2\}$, $512$ de $512$; a
 serpentina com $\rho=2t$; e o grau $4$ contra $2$);
 os três pontos da revisão externa §AN28 ($\tau=N$ com
 $g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$, que tem a diagonal
-a $1$ e o cruzado a $3$; $G=1$ na imagem e $0$ fora; e $c=\tfrac1nF(f)$ a
-recompor $f$ nos $256$, com o passo sem $n$ a bater só nos zeros de $f$);
+a $1$ e o cruzado a $3$; $G=1$ na imagem e $0$ fora; e $c=2^{-m}\mathcal{F}(f)$ a
+recompor $f$ nos $256$, com o passo sem a normalização a bater só nos zeros de $f$);
 Lema~\ref{lem:comuta}, Teor.~\ref{thm:proprios} e \ref{thm:H} §AN26
 ($\delta_a*\delta_b=\delta_{a\oplus b}$; $C_fC_g=C_gC_f$;
-$C_f\chi_k=\widehat f(k)\chi_k$; $F\circ F=n\cdot\mathrm{id}$; e
-$F(\delta_a)_k=\chi_k(a)$ com a volta exata);
+$C_f\chi_k=\widehat f(k)\chi_k$; $\mathcal{F}\circ \mathcal{F}=2^{m}\cdot\mathrm{id}$; e
+$\mathcal{F}(\delta_a)_k=\chi_k(a)$ com a volta exata);
 Teor.~\ref{thm:leitura} e Cor.~\ref{cor:duais} §AN10 (a mesma célula do dragão
 com sucessores diferentes, exibida; Julia, relógio e reta a lerem o estado; e o
 período $4$ do relógio no campo);
@@ -2176,7 +2226,7 @@ o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
 
 \colunas{Teor.~\ref{thm:multiplicidade} (só igualdade); Teor.~\ref{thm:levantamento}
 (a fibra volta como uma coordenada); Teor.~\ref{thm:bolas} (partição);
-Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
+Teor.~\ref{thm:periodo} (a cauda $\ell$ e o período $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          postos $1$ a $4$, árvore, $\Z[i]$}

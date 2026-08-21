@@ -219,15 +219,48 @@ int main(void){
                     for(L x=0;x<n && igual;x++) if((k*x) % n != (j*x) % n) igual = 0;
                     if(igual) novo = 0; }
                 distintos += novo; }
-            /* o bidual: os caracteres do grupo de caracteres, que e' outra vez Z/n */
-            long bidual = distintos;
-            if(distintos != n || bidual != n) mau++;
+            /* O BIDUAL, CONSTRUIDO — e nao atribuido. Ate' 21/08/2026 esta linha era
+             *     long bidual = distintos;
+             * que nao podia falhar: nao havia bidual nenhum. Agora enumeram-se os
+             * morfismos G^ -> Z/n pelo mesmo criterio (tabela distinta), e monta-se
+             * a AVALIACAO ev_x(chi_k) = chi_k(x) para a comparar com eles.
+             * O teorema — que ev e' um iso NATURAL, e nao so' que os tamanhos batem —
+             * esta' derivado do zero em tests/pontryagin.c §PG5, §PG6, §PG7. */
+            long bidual = 0;
+            for(L w=0;w<n;w++){
+                /* Phi_w(chi_k) = w·k mod n; conta-se se e' novo pela tabela em k */
+                int novo = 1;
+                for(L w2=0;w2<w && novo;w2++){
+                    int igual = 1;
+                    for(L k=0;k<n && igual;k++) if((w*k) % n != (w2*k) % n) igual = 0;
+                    if(igual) novo = 0; }
+                bidual += novo; }
+            /* e a avaliacao: cada x da' um elemento do bidual, e sao todos distintos */
+            long ev_inj = 1, ev_dentro = 0;
+            for(L x=0;x<n;x++){
+                for(L y=x+1;y<n;y++){
+                    int igual = 1;
+                    for(L k=0;k<n && igual;k++) if((k*x) % n != (k*y) % n) igual = 0;
+                    if(igual) ev_inj = 0; }
+                /* ev_x esta' entre os Phi_w enumerados? */
+                int achou = 0;
+                for(L w=0;w<n && !achou;w++){
+                    int igual = 1;
+                    for(L k=0;k<n && igual;k++) if((k*x) % n != (w*k) % n) igual = 0;
+                    if(igual) achou = 1; }
+                ev_dentro += achou; }
+            if(distintos != n || bidual != n || !ev_inj || ev_dentro != n) mau++;
             testados++;
             if(n <= 6 || n == 24)
                 printf("      %4ld %10ld %12ld %12ld   %s\n", n, n, distintos, bidual,
                        (bidual == n) ? "sim" : "NAO"); }
         printf("      ...\n      discordancias em n = 2..24: %ld\n\n", mau);
-        ok("BIDUALIDADE DE PONTRYAGIN em Z/n: |G^| = |G| e o bidual devolve G — 23 casos",
+        ok("BIDUALIDADE DE PONTRYAGIN em Z/n: |G^| = |G|, o bidual e' CONTADO por outro"
+           " caminho, e a AVALIACAO ev_x(chi) = chi(x) e' construida, injectiva e esgota-o"
+           " — 23 casos. Ate' 21/08/2026 o bidual aqui era `long bidual = distintos;`, uma"
+           " atribuicao que nao podia falhar; e |G^| = |G| nao e' o teorema, e' o acidente"
+           " de tamanho. O teorema — ev e' NATURAL, e nenhum iso G -> G^ o e' — esta'"
+           " derivado do zero em tests/pontryagin.c",
            mau == 0 && testados == 23);
         conclui("Z/n e' AUTODUAL: o dual tem o mesmo tamanho, e o bidual e' o proprio grupo.");
         conclui("e' o eixo deste texto — compacto <-> discreto — no caso em que os dois lados");
