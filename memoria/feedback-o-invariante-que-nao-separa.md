@@ -30,4 +30,13 @@ E o irmão que apareceu no mesmo ficheiro: **a previsão escrita dentro da
 asserção**. Escrevi «e o dragão no espaço dobra MENOS que no plano, que é o
 que se espera» e pus a condição a exigi-lo. Dobra MAIS. O texto da asserção
 não é sítio para hipóteses — é o sítio do que ficou medido.
-Ver [[project-aranha-em-zn]].
+**E o mesmo defeito do lado do OBJECTO, não da grandeza.** Para medir a
+convolução no grupo `(ℤ/2)^m` escolhi como factor um campo `δ₀ + constante`.
+Tem espectro sem zeros — a condição que eu precisava — mas a sua convolução é a
+**mesma em qualquer grupo finito**: o Dirac é neutro e a constante dá `b·∑g` em
+toda a parte. O gume disse-o: trocar o XOR por soma cíclica não derrubava nada.
+A grandeza separava; o objecto é que era invariante à propriedade em teste.
+Pergunta gémea da de cima: **este objecto podia estar noutro grupo e dar o
+mesmo?** Serve `3δ₀ + δ₁`, com espectro `{4,2}`.
+
+Ver [[project-aranha-em-zn]], [[feedback-descaracterizar-a-teoria-da-casa]].

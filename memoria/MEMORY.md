@@ -64,6 +64,7 @@
 - **[Varrer com três colunas](feedback-varrer-onde-o-defeito-nao-vive-colunas.md)** — S_CORPO e S_EXPR pisavam-se nas colunas 4–7, e todos os medidores usam três. O regime era o nº de colunas.
 - **[A constante que trunca](feedback-a-constante-que-trunca.md)** — trocar o tipo e deixar o literal em vírgula: `long t = 0.7` → 0, e exp(tA) virou a IDENTIDADE. CINCO tautologias.
 - **[O tipo não é a aritmética](feedback-o-tipo-nao-e-a-aritmetica.md)** — «0 doubles» e 67 literais a fazer a conta (agora 0); e 216 avisos `-Wformat` que o x86-64 escondia.
+- **[Descaracterizar a teoria da casa](feedback-descaracterizar-a-teoria-da-casa.md)** — troquei uma cláusula do teorema dele e pus «(opcional, o agente) DECIDIR» num autómato estigmérgico. Conferir cláusula a cláusula, pelo nome.
 - **[O invariante que não separa](feedback-o-invariante-que-nao-separa.md)** — «dois caminhos» a comparar |I| e ∑G: verdade para QUALQUER trajectória do mesmo tamanho. Uma espiral passava pela asserção do dragão.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO.
 
