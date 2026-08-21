@@ -2201,6 +2201,36 @@ onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert \mathcal{V}(x)\rver
 ele tem \textbf{quatro} operações --- nem uma a mais. Nenhuma é nova: cada uma é
 um enunciado das secções anteriores, escrito como passo.
 
+\medskip\noindent\textbf{E ele cabe em três linhas.} Sobre um ficheiro lido byte
+a byte, com $b$ o byte corrente:
+\[
+\boxed{\;
+e=\operatorname{pop}(b\wedge \mathtt{0xAA}),
+\qquad
+o=\operatorname{pop}(b\wedge \mathtt{0x55}),
+\qquad
+\text{sai } [\,e+o,\ e\,].
+\;}
+\]
+As duas máscaras são \textbf{complementares} --- $\mathtt{0xAA}\vee\mathtt{0x55}
+=\mathtt{0xFF}$ e $\mathtt{0xAA}\wedge\mathtt{0x55}=0$ ---, logo particionam o
+byte: é a cisão $\oplus$ em duas fases, as posições de índice par e as de índice
+ímpar. O $\operatorname{pop}$ é o $\sum$. E o par que sai \emph{é o gato aplicado
+uma vez}: por Def.~\ref{def:gato} com $m=1$ e $n=2$,
+\[
+\otimes(e,o)=(1\cdot e+o,\ e)=[\,e+o,\ e\,].
+\]
+Não há torre nenhuma a correr --- \textbf{uma} aplicação. E a saída é um
+\emph{levantamento} no sentido do Teor.~\ref{thm:levantamento}: guardado
+$(e+o,\,e)$, a fase que não aparece recupera-se, $o=(e+o)-e$, que é exatamente o
+esquilo,
+\[
+\oslash(e+o,\,e)=\bigl(e,\ (e+o)-1\cdot e\bigr)=(e,o).
+\]
+O total $e+o=\operatorname{pop}(b)$ é a conservação (Lema~\ref{lem:conserva}); a
+segunda coordenada é a coordenada de folha que desdobra. \emph{Três linhas, e as
+quatro operações estão lá.}
+
 \begin{center}\small
 \begin{tabular}{@{}llll@{}}
 \toprule
@@ -2432,7 +2462,9 @@ Hermann a coincidirem sem um dígito escrito à mão);
 Teor.~\ref{thm:levantamento} §AN5 e §AN9 ($\tilde G\equiv1$ pela própria aranha em
 dimensão $n+1$; $\operatorname{pr}_1\circ\tilde\pi=\pi$ com resíduo $0$; fibra
 vertical $\{1..G\}$; e a volta a devolver $G$ célula a célula);
-Teor.~\ref{thm:gato} e \ref{thm:bitunico} \code{tests/neuronio.c} (a volta
+Teor.~\ref{thm:gato} e \ref{thm:bitunico} \code{papers/aranha.c} (a forma de três
+linhas: as duas máscaras complementares, o \emph{popcount} e uma aplicação do gato) e
+\code{tests/neuronio.c} (a volta
 $\oslash\otimes=\mathrm{id}$ em toda dimensão de $2$ a $8$; o bit único a desenhar o
 metal e a deconvolução a devolvê-lo com resíduo $0$; e a razão a tender para $\sigma$);
 o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
