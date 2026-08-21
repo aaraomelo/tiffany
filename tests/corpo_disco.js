@@ -97,8 +97,37 @@ function ok (q, cond) {
     const utf16 = disco.bytesLS(ls)
     console.log(`   grava ${grava.n} slots z=${grava.zTotal} (${(grava.zTotal / 1048576).toFixed(2)} MiB)` +
       ` LS utf16 ${(utf16 / 1048576).toFixed(2)} MiB  grava ${ms.toFixed(0)} ms  lê-tudo ${msLe.toFixed(0)} ms  mau=${mau}`)
-    ok('§D1 o mapa no LS devolve cada ficheiro igual — deflate é roupa, o slot é o corpo',
-      mau === 0 && disco.mapaBate(mapa, manifesto.soma, lista) && utf16 < 5.5 * 1048576 && utf16 > 4 * 1048576)
+    /* O CUSTO NÃO É A LEI.
+     *
+     * Aqui exigia-se `utf16 < 5.5 MiB && utf16 > 4 MiB` — dois números à mão,
+     * e a asserção caiu quando o corpo cresceu para 5,57 MiB: o mapa continuava
+     * a devolver cada ficheiro igual (mau=0) e o medidor dizia que não. Pelo
+     * Teor. «a medida conserva-se, a fibra perde-se» do `aranha.tex`, a medida
+     * de contagem NÃO distingue realizações — logo um tamanho não pertence a
+     * uma asserção sobre a volta ser exacta. Imprime-se, que é informação.
+     *
+     * E o que fica no lugar é uma lei, sem limiar: a soma dos comprimentos dos
+     * VALORES dos slots no LS é exactamente o `zTotal` que o gravador declarou.
+     * São dois caminhos independentes — quem comprime diz quanto comprimiu,
+     * quem guarda diz quanto guarda — e a ida guarda a volta. O factor 2 do
+     * `bytesLS` é a codificação UTF-16 do storage, dois bytes por unidade, e o
+     * excesso sobre o conteúdo é o ÍNDICE: os nomes das chaves mais o mapa. */
+    let conteudo = 0, indice = 0
+    for (let i = 0; i < ls.length; i++) {
+      const k = ls.key(i)
+      if (!k || k.indexOf('gk:corpo') !== 0) continue
+      const v = (ls.getItem(k) || '').length
+      if (k === disco.CHAVE_MAPA) indice += v; else conteudo += v
+      indice += k.length
+    }
+    console.log(`   conteudo=${conteudo} (zTotal=${grava.zTotal})  indice=${indice}` +
+      `  utf16=${utf16} = 2x${conteudo + indice}`)
+    ok('§D1 o mapa no LS devolve cada ficheiro igual — deflate é roupa, o slot é o corpo.' +
+      ' E o que o LS guarda é EXACTAMENTE o que o gravador comprimiu: os dois caminhos batem' +
+      ' sem limiar nenhum, onde antes havia dois numeros a mao que caducaram quando o corpo' +
+      ' cresceu',
+      mau === 0 && disco.mapaBate(mapa, manifesto.soma, lista) &&
+      conteudo === grava.zTotal && utf16 === 2 * (conteudo + indice))
   }
 
   /* ─── §D2 lazy: fontes+estilo+este .tex ────────────────────────────────────── */

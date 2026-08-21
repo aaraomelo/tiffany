@@ -501,26 +501,69 @@ static void secao_E1(void){
     if(!f) f = fopen("tools/sql.c", "r");
     if(!f){ ok("o sql.c abre para o confronto dos opcodes", 0); return; }
 
-    /* extrair os nomes do enum, na ordem: o número é a posição, com OP_HALT=0 */
+    /* extrair os nomes do enum, na ordem: o número é a posição, com OP_HALT=0
+     *
+     * LÊ-SE O CÓDIGO, NÃO O TEXTO. Este laço lia a linha inteira, comentário
+     * incluído, e pagou as duas contas: o comentário do enum diz «o OP_ADD tem
+     * de continuar componente a componente» — e o OP_ADD entrava como opcode,
+     * na posição errada —, e a linha seguinte tem `{ncols, nrows}`, cujo `}`
+     * fazia o laço PARAR a meio do enum. Lia 16 nomes, os últimos falsos, e
+     * nunca via ADD16, SUB16, CMP16, NEGRO_OURO, ESQUILO, TROCA nem MARTELO. O
+     * próprio enum avisa que este ficheiro o lê e que os nomes não se escrevem
+     * em comentário; a defesa não pode ser essa vigilância. Tira-se o
+     * comentário ANTES de extrair, que é ler na notação em que está escrito. */
     char nomes[64][32]; int n = 0;
     char linha[512];
-    int dentro = 0;
+    int dentro = 0, em_com = 0;
     while(fgets(linha, sizeof linha, f)){
-        if(!dentro && strstr(linha, "enum { OP_HALT=0")) dentro = 1;
+        char lim[512]; int m = 0;
+        /* remove /* … *​/ e // …, atravessando linhas: o que sobra é código */
+        for(char *q = linha; *q && m < (int)sizeof lim - 1; ){
+            if(em_com){
+                if(q[0] == '*' && q[1] == '/'){ em_com = 0; q += 2; } else q++;
+            }else if(q[0] == '/' && q[1] == '*'){ em_com = 1; q += 2;
+            }else if(q[0] == '/' && q[1] == '/'){ break;
+            }else lim[m++] = *q++;
+        }
+        lim[m] = 0;
+        if(!dentro && strstr(lim, "enum { OP_HALT=0")) dentro = 1;
         else if(!dentro) continue;
-        for(char *p = linha; (p = strstr(p, "OP_")) != NULL; ){
+        for(char *p = lim; (p = strstr(p, "OP_")) != NULL; ){
             char nome[32]; int k = 0;
             p += 3;
             while(*p && (isalnum((unsigned char)*p) || *p == '_') && k < 31) nome[k++] = *p++;
             nome[k] = 0;
             if(k && n < 64){ snprintf(nomes[n], sizeof nomes[0], "%s", nome); n++; }
         }
-        if(dentro && strchr(linha, '}')) break;
+        if(dentro && strchr(lim, '}')) break;
     }
     fclose(f);
 
     printf("     o enum do sql.c tem %d opcodes; este montador expõe %d ao piloto\n", n, NISA);
-    ok("o enum do sql.c foi lido (não é lista vazia a passar por acaso)", n >= 20);
+
+    /* A LEITURA É UMA REALIZAÇÃO, E TEM DE SER INJETIVA.
+     *
+     * A asserção que aqui estava era `n >= 20` — um número à mão, e sobre a
+     * MEDIDA. Pelo Teor. «a medida conserva-se, a fibra perde-se» do
+     * `aranha.tex`, a contagem NÃO distingue realizações: dezasseis nomes lidos
+     * do código e dezasseis lidos de código-mais-comentário-truncado dão a
+     * mesma medida e dobras diferentes. O que separa é a DOBRA, e o critério é
+     * o Teor. da multiplicidade geométrica: π é injetiva se e só se G ≤ 1.
+     *
+     * Aqui π é `posição ↦ nome`. Um enum de C tem nomes DISTINTOS por
+     * construção, logo G ≡ 1 é lei e não gosto — e era exactamente isso que o
+     * comentário partia, ao pôr um segundo OP_ADD na lista. Mede-se a dobra. */
+    int repetidos = 0; char rep[32] = "";
+    for(int i = 0; i < n; i++)
+        for(int j = i + 1; j < n; j++)
+            if(!strcmp(nomes[i], nomes[j])){
+                repetidos++;
+                if(!rep[0]) snprintf(rep, sizeof rep, "%s", nomes[i]);
+            }
+    if(repetidos) printf("     G > 1 em %d par(es); o primeiro nome dobrado é %s\n",
+                         repetidos, rep);
+    ok("a leitura do enum é INJETIVA — G ≡ 1, que é o que um enum garante e uma"
+       " contagem não vê", repetidos == 0 && n > 0);
 
     /* cada opcode que EU exponho tem de ter, no sql.c, o mesmo número */
     int discordam = 0; const char *culpado = "";

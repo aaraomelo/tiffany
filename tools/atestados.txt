@@ -26,7 +26,7 @@ assinatura_tradutor 23c1bfad85d49ce7 0
 ataque 4c496a7d40308bc3 0
 aurea f4c540cb10500c79 0
 autoria_tradutor 54dbff42fcf53020 0
-avalia_macros 570641b1d2651ef7 1
+avalia_macros 570641b1d2651ef7 0
 aya 41a5f3a3acf28519 0
 backend_ttf d424e63b03499a7f 0
 backends_wasm 722e91f3af901796 0
@@ -98,11 +98,11 @@ coroacao fc3edc511ec0d5a0 0
 corpo 3e35814751fcf7f2 0
 corpo256 51ce51809d41ff88 0
 corpo_autossimilar cfed1db62ac9d8ef 0
-corpo_disco f2eebc62aeadbbe8 1
+corpo_disco da0ca9c0cf55b39d 0
 corpo_do_numero 05128b8768b7248c 0
 corpo_dual 829b5470e1022d51 0
 corpo_fisico 0f93ca09de7295e5 0
-corpo_front 35a1840a5a95c810 1
+corpo_front 35a1840a5a95c810 0
 corpo_topologico 758fe1d34c087623 0
 corpo_unico 1bd998fec3548994 0
 corpo_viveiro f61705d6ae49eafb 0
@@ -133,7 +133,7 @@ derivacao_primitivas 3d04c680af7012a7 0
 descida_mobius 35d55f28509bc55d 0
 desenha 5918033b43ea7382 0
 design f782a62b62cb35d7 0
-design_no_pdf 56c19bf7591a6b78 1
+design_no_pdf 56c19bf7591a6b78 0
 diagonal 3e9007a09dd88e37 0
 dif bdaa45952a512e90 0
 diferentes d4a187e78ff3e615 0
@@ -147,7 +147,7 @@ dissipa 5b58decdaef8f8e4 0
 dissipa_pagina 7faa928d7f9722ab 0
 distancia bb960179a9ee2f70 0
 dna 91ca1866b22e5466 0
-dois_streams 1248e3df62bbe48b 1
+dois_streams 1248e3df62bbe48b 0
 dominios 9431d614d0a87cd9 0
 dourada 8133e2c774ab1242 0
 dourada_banco d8495af90c42bb1b 0
@@ -182,9 +182,9 @@ entre ff067afd0df154f7 0
 entrega 5e7be49869d7d9b2 0
 entropia_dual 0e62dee11e3fc413 0
 equivalencia_universal db7d0dc65a704ccf 0
-erg 018ff0de6dcd8a6a 1
+erg 6cf6fc038a4448a1 0
 escada ae20f8b70c7d45e4 0
-escala b5c334f9d5c62319 1
+escala b5c334f9d5c62319 0
 escala_dourada 5c990fc76f6f0948 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
@@ -213,7 +213,7 @@ fecha 37ef68dc4bee5da1 0
 fecho_convexo c990307f513c1d36 0
 fermat 493d7f99a09da8fa 0
 fisica b69674987d594da3 0
-fita 9c72ed8abcd5cbf7 1
+fita 9c72ed8abcd5cbf7 0
 fonte_banco efabbe1b5817063b 0
 fonte_corpo b71085ec1b3db094 0
 forca f3697bbcd4f53da2 0
@@ -251,7 +251,7 @@ hopfield fa5962b6da636f1d 0
 hurwitz 1504bb355f1e9e1d 0
 icc e80be34cd2b3af21 0
 idioma_orbita c6d1625040bc6bd9 0
-indexa_orbitas a510bf95b2d7fb95 1
+indexa_orbitas a510bf95b2d7fb95 0
 inducao de73aa397239e4f6 0
 ingles_aranha 496226db44a25d25 0
 instrumento d09d241923908750 0
@@ -259,7 +259,7 @@ inteiros 0ab4d56920e90e18 0
 interface_padrao b7c184e06453facb 0
 inversor_trial 1dcf9d322733ba89 0
 isa4 7a0f4f0c1bc558e8 0
-isa_dupla 153fd4762a86077d 1
+isa_dupla 0c879e01aa1eae83 0
 isa_wasm 907a1b97c1fe47d4 0
 isomorfo 28e3b9ab11b008a3 0
 isserlis 80e3a1b07a23ece1 0
@@ -367,7 +367,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire b4f597d2883b6068 0
+pgwire ea2e908619bace6f 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -442,7 +442,7 @@ sair_pu a64d5e2b256b4dc8 0
 saltos 93de14f9c7a1d0c7 0
 selberg 48f58a9cd271066d 0
 selo 178fcc4bb50fd9d2 0
-sem_chute 942e5653474e3f91 1
+sem_chute 942e5653474e3f91 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 458155145c6d26d3 0
 semente bdf47d333634825f 0
@@ -457,7 +457,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 955f0e4af83be1a9 0
+sql cd249ad00f3261d8 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0

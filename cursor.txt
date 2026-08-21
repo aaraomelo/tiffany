@@ -87,7 +87,7 @@ estão na arquitetura.tex.
 
 4. ESTADO ACTUAL (21/08/2026)
 ─────────────────────────────
-     bateria      529 : 518 verdes, 11 FALHAS  (ver §8 — nenhuma é do banco SQL)
+     bateria      529 : 529 verdes, 0 falhas · 5089 unidades (--refaz, tudo re-derivado)
      aranha.tex   29 pág · 0 erros · 0 refs mortas · thm:escada = Teorema 64
      arquitetura  27 pág · 0 provas locais · 0 enunciados sem remissão
 
@@ -219,34 +219,105 @@ O QUE FALTA, e é a metade do CORTE:
   ligá-los.
 
 
-8. AS 11 FALHAS QUE A ATESTAÇÃO ESCONDIA  (achado a 21/08, POR RESOLVER)
-───────────────────────────────────────────────────────────────────────
-`bash tools/bateria.sh` diz **529 : 529, 0 falhas**. Re-derivando TUDO, diz
-**529 : 518 verdes, 11 falhas**. Os 11 têm a assinatura INALTERADA e o
-resultado mudou de 0 para 1 — logo nunca foram re-corridos.
+8. AS 11 FALHAS QUE A ATESTAÇÃO ESCONDIA — CONSERTADAS (21/08)
+─────────────────────────────────────────────────────────────
+`bash tools/bateria.sh` dizia 529:529 com 0 falhas; re-derivando TUDO dizia
+529:518 com 11. Os 11 tinham assinatura INALTERADA e nunca eram re-corridos.
+Agora: **529:529, 0 falhas, 5089 unidades**, com `--refaz`.
 
-     banco/erg.c            o enum do sql.c tem 16 opcodes, o montador expõe 17;
-                            DISCORDAM em 3, o primeiro é TROCA
-     banco/fita.c           «a transcrição no kernel não é mais lenta que pela
-                            RAM» — é medição de DESEMPENHO, suspeita de ruído
-     tests/indexa_orbitas.c §IX4 IMPORT IDIOMA 'pt' … BUSCA não recupera
-                            (ficheiro NÃO versionado — trabalho a meio)
-     oito .js               avalia_macros, corpo_disco, corpo_front,
-                            design_no_pdf, dois_streams, escala, isa_dupla,
-                            sem_chute
-
-NENHUMA é do banco SQL / pgwire, e nenhuma é dos commits do join: o `OP_ADD16`
-e o `TROCA` entraram em commits antigos (59b9571, 3a1a66a).
-
-A CAUSA É ESTRUTURAL, e vale para todo o repo: **A ASSINATURA NÃO SEGUE AS
-DEPENDÊNCIAS.** O `erg.c` LÊ o enum do `sql.c`; o `sql.c` mudou, a assinatura
-do `erg.c` não, o atestado ficou 0, e a falha ficou invisível. Qualquer medidor
-cuja entrada esteja FORA do seu próprio texto — outro .c, um .tex, /tmp, o
-ambiente — fica verde para sempre depois do primeiro atestado.
-
-REGRA, e eu quebrei-a: para forçar a re-derivação usa-se
+REGRA, e quebrei-a uma vez: para forçar a re-derivação usa-se
 `./tools/bateria.sh --refaz`, que reabre TODAS sem apagar atestado nenhum.
 NÃO se trunca `tools/atestados.txt` — o cabeçalho da bateria diz que apagar
 atestado é destruir facto, e regista que foi um flag `--tudo` que destruiu os
-atestados de 30/07/2026. Desta vez nada se perdeu (529 nomes antes e depois,
-só 11 resultados a mudar), mas um medidor que não corresse perdia a linha.
+atestados de 30/07/2026.
+
+AS ONZE, POR CAUSA:
+
+· SEIS .js (avalia_macros, corpo_front, design_no_pdf, dois_streams, escala,
+  sem_chute) — ESTADO PARTILHADO, não defeito: passam isolados e passam no
+  `--refaz`. Todos compõem PDFs a partir dos mesmos .tex, e o `escala.js`
+  ALTERA o estilo.tex durante a corrida. Se voltarem a cair em conjunto, é aqui
+  que se olha — e /tmp é tmpfs (RAM), com 12G de tecto.
+
+· `banco/fita.c` — RUÍDO: a asserção é «a transcrição no kernel não é mais
+  lenta que pela RAM», uma medição de DESEMPENHO. Passa isolada.
+
+· `banco/erg.c` — DOIS defeitos, e o segundo é o grave.
+  (1) O parser que lê o enum do sql.c lia COMENTÁRIO como código: o comentário
+      dizia «o OP_ADD tem de continuar…» e injectava um OP_ADD falso, e a linha
+      seguinte tinha `{ncols, nrows}`, cujo `}` fazia o laço PARAR a meio. Lia
+      16 nomes; agora tira os comentários antes de extrair e lê 22.
+  (2) O `sql.c` tinha ADD16/SUB16/CMP16 no MEIO do enum, contra a regra que o
+      próprio ficheiro declara duas linhas abaixo: «A VOLTA. Acrescentados no
+      FIM de propósito: o número de cada opcode antigo não muda.» Empurravam
+      NEGRO_OURO, ESQUILO, TROCA e MARTELO três casas — um programa compilado
+      com NEGRO_OURO=15 passava a executar ADD16. Repostos NO FIM, e o erg.c
+      alinhou SOZINHO, sem se lhe tocar: é a prova de que a regra era a certa.
+  E a asserção `n >= 20` saiu: era sobre a MEDIDA, e pelo Teor. «a medida
+  conserva-se, a fibra perde-se» (aranha.tex) a contagem NÃO distingue
+  realizações. No lugar ficou a DOBRA: a leitura tem de ser INJETIVA, G ≡ 1,
+  que é o que um enum garante e uma contagem não vê.
+
+· `tests/corpo_disco.js` — LIMIAR À MÃO caducado. Exigia `4 MiB < utf16 <
+  5,5 MiB` e o corpo cresceu para 5,57: o mapa devolvia cada ficheiro igual
+  (mau=0) e o medidor dizia que não. Um tamanho não pertence a uma asserção
+  sobre a volta ser exacta — imprime-se. No lugar, uma lei SEM LIMIAR: a soma
+  dos valores dos slots no LS é EXACTAMENTE o zTotal que o gravador declarou
+  (2912442 = 2912442), e utf16 = 2×(conteúdo+índice) pela codificação UTF-16.
+
+· `tests/isa_dupla.js` — AS DUAS REALIZAÇÕES ESTÃO EM ANDARES DIFERENTES.
+  O `erg` é a máquina do sql.c: Word_8², oito bits por componente. O `isa.c`
+  empacota OITO bytes por componente (`poe(1030+k, lo, hi)`) e opera na palavra
+  do host — um andar acima. Divergiam SEMPRE no sinal: 2−7 dá 251 em baixo e
+  −5 em cima, o MESMO elemento nas duas vistas que o `word_isa.h` declara
+  («visão assinada do envelope — I/O local, não largura semântica»).
+  A comparação faz-se RESTRINGINDO ao andar comum, e isso NÃO é normalizar
+  para passar: é o Teor. do encaixe (`naturais.tex thm:encaixe`) — «para k<k'
+  as operações do andar k' RESTRINGEM às do andar k, sem conversão de
+  representação entre andares» — com o Cor. w8 a dizer que «a identificação é
+  a IDENTIDADE: o bit j do inteiro é a coordenada j na base».
+  FICA POR MEDIR, e está dito no medidor: se o andar de cima errasse nos bits
+  ACIMA do oitavo, esta comparação não o via — não há com que os comparar.
+  NÃO SE MEXEU no `isa.c` nem no `traduz.c`: tentei fechar o envelope lá e era
+  chutar. O `traduz.c` mostrou-se sensível ao TAMANHO DO TEXTO do fonte
+  (comentários incluídos) — o mesmo código com comentário longo emite um wasm
+  que devolve ZERO em todos os slots, sem uma queixa. NÃO ESTÁ DIAGNOSTICADO.
+
+· `tests/indexa_orbitas.c` — TRÊS defeitos no motor, e o mesmo três vezes.
+  Importava 64 chaves e a BUSCA recuperava ZERO.
+  (1) `S_TXLIVRE` guardava um ENDEREÇO (S_TEXTO = 41024) em `.total`, que é UM
+      BYTE. Escrever truncava; ler dava ≤255; logo `base < S_TEXTO` era SEMPRE
+      verdade e todas as entradas eram gravadas EM CIMA UMAS DAS OUTRAS. Do
+      outro lado a busca varre `for(base=S_TEXTO; base<livre; …)` com o mesmo
+      `livre` truncado — MENOR que S_TEXTO —, e o laço NUNCA CORRIA: listagem
+      vazia com a tabela cheia. Agora guarda o DESLOCAMENTO no PAR, com tecto
+      VERIFICADO (65535 slots; cheio, RECUSA em vez de escrever por cima).
+  (2) `no_novo` guardava o contador de nós em `.total`: ao chegar a 255, `n+1`
+      truncava a 0 e voltava a 1 — a árvore RECICLAVA nós, e dois caminhos
+      distintos davam no mesmo sítio. Era esta a origem das «8 colisões» (64
+      chaves DISTINTAS, 56 postas). Não era a cifra a dobrar: era o contador a
+      dar a volta. `no_novo`/`no_filho`/`desce_termo` passam pelo PAR.
+  (3) `cif_poe` era `void`: quem chamava não sabia se pôs, e o `poe_chave_texto`
+      devolvia 1 sempre. O IMPORT contava o que TENTOU pôr, não o que ficou —
+      «64 chaves (0 -> 55)» com o medidor a comparar 64 com 64 e a passar essa
+      metade. Agora devolve 1/0 e o IMPORT diz quantas dobraram.
+  É O MESMO DEFEITO DO §W19 (`celula_valor`), TERCEIRA E QUARTA VEZES NO MESMO
+  MOTOR: o valor vive no PAR (baixo, alto), e ler só `.total` é ler METADE do
+  número. Vale a pena varrer o `sql.c` por `mem_le(...).total` à procura de
+  outros — todo o que guarde endereço, contador ou índice está sob suspeita.
+
+GUME: seis mutações mordem (contador ao byte baixo, ponteiro ao byte baixo, o
+encaixe removido, o dado do corpo_disco mudado, opcode novo no meio do enum,
+nome repetido no enum). Duas NÃO mordem e diz-se porquê: pôr um OP_ falso num
+comentário já não afecta nada — é a correcção a funcionar —, e `cif_poe` a
+voltar a `void` é indetectável porque, com o contador corrigido, JÁ NÃO HÁ
+COLISÕES e o ramo não corre.
+
+A CAUSA DE TODAS SEREM INVISÍVEIS: a assinatura da bateria segue os headers
+(`cc -MM`) mas NÃO segue as dependências de LEITURA. O `erg.c` LÊ o enum do
+`sql.c` em tempo de execução; o `sql.c` mudou, a assinatura do `erg.c` não, e a
+falha ficou atestada a verde. Qualquer medidor cuja entrada esteja FORA do seu
+próprio texto — outro .c, um .tex, /tmp, o ambiente — fica verde para sempre
+depois do primeiro atestado. Há já uma excepção À MÃO para o pgwire.c (soma o
+sql.c e o pgwire.c à assinatura), no mesmo ficheiro que diz «nada de listas à
+mão, que envelhecem caladas». POR RESOLVER.

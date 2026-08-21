@@ -139,14 +139,46 @@ function wasmCorre(fita, sementes, lerSlots) {
 }
 
 /* ── o confronto: as duas realizações, slot a slot ────────────────────────────────── */
+/* AS DUAS REALIZAÇÕES ESTÃO EM ANDARES DIFERENTES DA TORRE, E COMPARAM-SE NO COMUM.
+ *
+ * O `erg` é a máquina do `sql.c`: Word_8², oito bits por componente. O `isa.c`
+ * empacota OITO bytes por componente (ver `poe(1030+k, lo, hi)` abaixo) e opera
+ * na palavra do host — está um andar acima. Por isso divergiam, e sempre no
+ * SINAL: a subtracção 2−7 dá 251 no andar de baixo e −5 no de cima, que é o
+ * MESMO elemento lido nas duas vistas que o `word_isa.h` declara («visão
+ * assinada do envelope — I/O local, não largura semântica»).
+ *
+ * A comparação faz-se RESTRINGINDO ao andar comum, e isso não é normalizar
+ * para o teste passar: é o Teor. do encaixe (`naturais.tex thm:encaixe`) —
+ * «para k < k' as operações do andar k' RESTRINGEM às do andar k, cadeia de
+ * subcorpos, sem conversão de representação entre andares» — com o Cor. w8 a
+ * dizer que «a identificação é a IDENTIDADE: o bit j do inteiro é a coordenada
+ * j na base». Restringir é ler os oito bits baixos, e mais nada.
+ *
+ * O QUE ISTO DEIXA DE FORA, dito e não escondido: se o andar de cima errasse
+ * nos bits ACIMA do oitavo, esta comparação não o via. Não há com que o
+ * comparar — o `sql.c` não tem esses bits —, e medi-lo pede um terceiro
+ * caminho no mesmo andar. O que aqui se afirma é o encaixe, no seu escopo. */
+const ENVELOPE = (x) => BigInt.asUintN(8, BigInt(x));
+
 function confronta(nome, asm, sementes, lerSlots) {
     const erg = ergCorre(asm, sementes, lerSlots);
     const wasm = wasmCorre(erg.fita, sementes, lerSlots);
     let iguais = 0;
     for (let i = 0; i < lerSlots.length; i++)
-        if (erg.lidos[i][0] === wasm[i][0] && erg.lidos[i][1] === wasm[i][1]) iguais++;
+        if (ENVELOPE(erg.lidos[i][0]) === ENVELOPE(wasm[i][0]) &&
+            ENVELOPE(erg.lidos[i][1]) === ENVELOPE(wasm[i][1])) iguais++;
+    /* DIZER QUAL DIVERGE, e o que a outra realização deu. Imprimia-se só a
+     * contagem e o lado do erg: com «2/3 slots iguais» não se sabe qual dos
+     * três, nem contra o quê — e um confronto que não nomeia o culpado obriga
+     * a instrumentar o medidor outra vez para o descobrir. */
     console.log(`   ${nome}: ${erg.fita.length} bytes de fita, ${iguais}/${lerSlots.length}` +
                 ` slots iguais   erg=${JSON.stringify(erg.lidos.map(String))}`);
+    for (let i = 0; i < lerSlots.length; i++)
+        if (ENVELOPE(erg.lidos[i][0]) !== ENVELOPE(wasm[i][0]) ||
+            ENVELOPE(erg.lidos[i][1]) !== ENVELOPE(wasm[i][1]))
+            console.log(`      DIVERGE no slot ${lerSlots[i]}, JÁ no envelope:` +
+                        ` erg=${erg.lidos[i]}  wasm=${wasm[i]}`);
     return { erg, wasm, iguais, total: lerSlots.length };
 }
 

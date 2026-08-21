@@ -89,13 +89,6 @@ static SqlOut *sql_cap = NULL;   /* preenchido por sql_executa quando out!=NULL 
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_GOLD, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
        OP_FOLD, OP_LOADS,
-       /* O ANDAR DE CIMA COMO INSTRUÇÕES PRÓPRIAS. O OP_ADD tem de continuar
-        * componente a componente: o catálogo guarda {ncols, nrows} numa Word e o
-        * `nrows++` soma 1 ao `.e` — com transporte a atravessar, um nrows de 255
-        * a passar a 256 subiria para o ncols. O par e o número são leituras
-        * DIFERENTES da mesma Word, e por isso são instruções diferentes.
-        * (E o GOLD de 16 não precisa de opcode: é ADD16 mais uma cópia.) */
-       OP_ADD16, OP_SUB16, OP_CMP16,
        /* saíram quatro nomes que estavam só neste enum: sem um único `case`, sem
         * entrada no montador e sem uso. Reservados que nunca correram — e manter
         * redundância custa mais do que a tirar. (Os nomes não se escrevem aqui: o
@@ -109,7 +102,23 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        /* O MARTELO. A prova de trabalho é uma TAREFA DO BANCO, não de um processo que fala com
         * ele: o SELECT e o UPDATE já correm nesta máquina, e o martelo corre ao lado deles. Como
         * OP_GOLD, ele não é um programa — é um opcode que a máquina executa. */
-       OP_MARTELO };
+       OP_MARTELO,
+       /* O ANDAR DE CIMA COMO INSTRUÇÕES PRÓPRIAS. O ADD de oito tem de continuar
+        * componente a componente: o catálogo guarda o par numa Word e o `nrows++`
+        * soma 1 ao segundo componente — com transporte a atravessar, um segundo
+        * componente de 255 a passar a 256 subiria para o primeiro. O par e o
+        * número são leituras DIFERENTES da mesma Word, e por isso são instruções
+        * diferentes. (E o GOLD de 16 não precisa de opcode: é o ADD de 16 mais
+        * uma cópia.)
+        *
+        * E ESTES ESTAVAM NO MEIO, contra a regra que o parágrafo acima declara.
+        * Entraram depois do LOADS e empurraram NEGRO_OURO, ESQUILO, TROCA e
+        * MARTELO três casas — de modo que um programa compilado antes, com
+        * NEGRO_OURO no 15, passou a executar o ADD de 16. A regra da VOLTA não é
+        * decoração: quem acrescenta acrescenta NO FIM. Medido pelo erg.c §E1,
+        * que confronta este enum com o montador e dizia «DISCORDAM em 3, o
+        * primeiro é TROCA». */
+       OP_ADD16, OP_SUB16, OP_CMP16 };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
 #define FL_LT   0x04
@@ -3591,14 +3600,33 @@ static int distancia_texto(const char *p){
 #define MAXT      4096
 static long n_leituras = 0;      /* o contador honesto: quantos nos o caminho tocou */
 static long txt_n(void){ return mem_le(S_TXCAB).total; }
+/* O ÍNDICE DE NÓ VIVE NO PAR, COMO TUDO O RESTO NESTE MOTOR.
+ *
+ * `no_novo` guardava o contador em `.total`, que é UM BYTE: ao chegar a 255,
+ * `n+1` truncava a zero, o `if(n < 1) n = 1` repunha-o em 1, e a partir daí a
+ * árvore RECICLAVA nós — dois caminhos distintos passavam a dar no mesmo sítio.
+ * Era essa a origem das «colisões» que o IMPORT via: das 64 chaves distintas do
+ * corpus, oito caíam em cima de outra. Não era a cifra a dobrar: era o contador
+ * a dar a volta. Mesmo defeito do `celula_valor` (§W19 do pgwire) e do
+ * `S_TXLIVRE` acima — o valor vive no PAR (baixo, alto), e ler só o baixo é ler
+ * metade do número. Com dezasseis bits cabem 65535 nós, e a zona vai até
+ * S_CANAL, que dá folga para ~38000. */
+static unsigned par_le(unsigned slot){
+    Word w = mem_le(slot);
+    return (unsigned)((unsigned long)w.total | ((unsigned long)w.e << 8));
+}
+static void par_grava(unsigned slot, unsigned v){
+    Word w = { (Word8)(v & 255u), (Word8)((v >> 8) & 255u) };
+    mem_grava(slot, w);
+}
 static unsigned no_filho(unsigned no, long d){
     n_leituras++;
-    return (unsigned)mem_le(S_NO + no*LARG + (unsigned)d).total;
+    return par_le(S_NO + no*LARG + (unsigned)d);
 }
 static unsigned no_novo(void){
-    long n = mem_le(S_NOCAB).total; if(n < 1) n = 1;      /* 0 e a raiz */
-    Word c = { n + 1, 0 }; mem_grava(S_NOCAB, c);
-    return (unsigned)n;
+    unsigned n = par_le(S_NOCAB); if(n < 1) n = 1;        /* 0 e a raiz */
+    par_grava(S_NOCAB, n + 1);
+    return n;
 }
 /* UM TERMO NAO TEM TECTO. O no tem 256 slots, mas o termo pode ser qualquer inteiro — grande,
  * zero ou negativo. O slot 0 e o marcador de fim; o slot 254 diz "o termo e negativo, segue o
@@ -3620,8 +3648,7 @@ static unsigned desce_termo(unsigned no, long t, int abrir){
         if(!f){
             if(!abrir) return 0;
             f = no_novo();
-            Word w = { (long)f, 0 };
-            mem_grava(S_NO + no*LARG + (unsigned)passo[k], w);
+            par_grava(S_NO + no*LARG + (unsigned)passo[k], f);
         }
         no = f;
     }
@@ -3633,14 +3660,39 @@ static unsigned desce_termo(unsigned no, long t, int abrir){
  *
  * Agora entra so a assinatura. A roupa recupera-se quando alguem a quiser ver — e e por isso que
  * o comprimento foi para o fim da cifra: e o DUAL, e e ele que diz onde o lado proprio acaba. */
+/* O PONTEIRO DA ZONA DE TEXTO VIVE NO PAR, E É UM DESLOCAMENTO.
+ *
+ * Guardava-se `base` — um endereço absoluto, e S_TEXTO vale S_LINHAS+40000 =
+ * 41024 — no `.total` de uma Word, que é UM BYTE. Escrever truncava, ler dava
+ * um número ≤255, e portanto `base < S_TEXTO` era SEMPRE verdade: todas as
+ * entradas eram gravadas EM CIMA UMAS DAS OUTRAS, no mesmo sítio, e a tabela
+ * nunca crescia. Do outro lado, a busca varre `for(base = S_TEXTO; base <
+ * livre; ...)` com o mesmo `livre` truncado — menor que S_TEXTO —, de modo que
+ * o laço NUNCA CORRIA e a listagem saía vazia com a tabela cheia. Foi assim que
+ * o `indexa_orbitas.c` §IX4 importava 64 chaves e recuperava zero.
+ *
+ * É o mesmo defeito que o §W19 do `pgwire.c` apanhou no `celula_valor`, no
+ * mesmo motor: o valor vive no PAR (baixo, alto), e ler só o baixo é ler metade
+ * do número. Guarda-se o DESLOCAMENTO em relação a S_TEXTO, e não o endereço:
+ * começa em zero, e os dezasseis bits do par dão 65535 slots de texto em vez
+ * dos 24511 que sobravam ao endereço absoluto. E o tecto é VERIFICADO: cheio,
+ * recusa — gravar por cima é o que se acabou de corrigir. */
+#define TX_SLOTS 65535u
+
+static unsigned tx_livre(void){
+    Word w = mem_le(S_TXLIVRE);
+    return S_TEXTO + (unsigned)((unsigned long)w.total | ((unsigned long)w.e << 8));
+}
 static unsigned reg_grava(const long *a, size_t n){
-    unsigned base = (unsigned)mem_le(S_TXLIVRE).total;
-    if(base < S_TEXTO) base = S_TEXTO;
+    unsigned base = tx_livre();
+    unsigned fim  = (unsigned)(base + 1 + n);
+    if(fim - S_TEXTO >= TX_SLOTS) return 0;      /* cheio: RECUSA, não escreve por cima */
     Word w; memset(&w, 0, sizeof w);
     w.total = (long)n; mem_grava(base, w);
     for(size_t k = 0; k < n; k++){ w.total = a[k]; mem_grava(base + 1 + (unsigned)k, w); }
-    memset(&w, 0, sizeof w);
-    w.total = (long)(base + 1 + n); mem_grava(S_TXLIVRE, w);
+    { unsigned off = fim - S_TEXTO;
+      Word p2 = { (Word8)(off & 255u), (Word8)((off >> 8) & 255u) };
+      mem_grava(S_TXLIVRE, p2); }
     return base;
 }
 static size_t reg_n(unsigned base){ return (size_t)mem_le(base).total; }
@@ -3678,14 +3730,29 @@ static void reg_mostra(unsigned base, char *out, size_t lim){
         snprintf(out + c, lim - (size_t)c, "]");
     }
 }
-static void cif_poe(const long *a, size_t n){
+/* Devolve 1 se PÔS, 0 se o lugar já estava ocupado.
+ *
+ * Era `void`, e quem chamava não tinha como saber: o `poe_chave_texto` devolvia
+ * 1 sempre que a cifra se formava, de modo que o IMPORT contava as chaves que
+ * TENTOU pôr e não as que ficaram. Medido no `indexa_orbitas.c` §IX4: «64
+ * chaves (0 -> 55)» — sessenta e quatro tentadas, cinquenta e cinco na tabela,
+ * com o medidor a comparar 64 com 64 e a dar essa metade por boa.
+ *
+ * As nove que faltam são a DOBRA: duas entradas distintas descem ao MESMO nó e
+ * a segunda cai neste `return`. Pelo `aranha.tex`, π perde exactamente a dobra,
+ * e desfazê-la custa UMA coordenada (Teor. do levantamento em folhas).
+ * Enquanto o levantamento não estiver aqui, o que se pode e deve é parar de
+ * mentir sobre o número: quem chama fica a saber que houve colisão. */
+static int cif_poe(const long *a, size_t n){
     unsigned no = 0;
     for(size_t k = 0; k < n; k++) no = desce_termo(no, a[k], 1);
-    if(mem_le(S_NO + no*LARG).total) return;              /* ja la esta, no seu lugar */
+    if(par_le(S_NO + no*LARG)) return 0;                  /* ja la esta, no seu lugar */
     unsigned base = reg_grava(a, n);
-    Word wb = { (long)base, 0 }; mem_grava(S_NO + no*LARG, wb);
+    if(!base) return 0;                                   /* zona de texto cheia */
+    par_grava(S_NO + no*LARG, base - S_TEXTO);
     Word wi = { txt_n() + 1, 0 }; mem_grava(S_TXCAB, wi);
     barreira();
+    return 1;
 }
 static long acha_cifra(const long *a, size_t n, size_t *desceu_out){
     unsigned no = 0; size_t desceu = 0;
@@ -3695,7 +3762,7 @@ static long acha_cifra(const long *a, size_t n, size_t *desceu_out){
         no = f; desceu++;
     }
     *desceu_out = desceu;
-    return (desceu == n) ? mem_le(S_NO + no*LARG).total : 0;
+    return (desceu == n) ? (long)par_le(S_NO + no*LARG) : 0;
 }
 static void mostra_cifra(const long *a, size_t n){
     printf("[");
@@ -4145,7 +4212,7 @@ static int busca_texto(const char *p){
     long a[MAXT]; size_t na; char rot[128];
     if(!cifra_entrada(&p, a, MAXT, &na, rot, sizeof rot)) return 0;
     if(txt_n() <= 0){ printf("(tabela vazia)\n"); return 1; }
-    unsigned livre = (unsigned)mem_le(S_TXLIVRE).total;
+    unsigned livre = tx_livre();      /* o PAR, não o byte baixo — ver reg_grava */
     printf("      alvo: %s   ", rot); mostra_cifra(a, na); printf("\n\n");
     printf("      entrada            cifra              prefixo  distancia\n");
     size_t melhor = 0; unsigned vence = 0; int primeiro = 1;
@@ -4174,8 +4241,7 @@ static int poe_chave_texto(const char *s){
     char buf[512]; const char *p = buf;
     snprintf(buf, sizeof buf, "'%s'", s);
     if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
-    cif_poe(a, n);
-    return 1;
+    return cif_poe(a, n);          /* 0 se o lugar já estava ocupado: é a dobra */
 }
 static void le_caminho_arg(const char **p, char *cam, size_t cap, const char *def){
     pula(p);
@@ -4339,7 +4405,7 @@ static int import_idioma(const char *p){
         f = fopen(cam, "rb");
     }
     if(!f){ printf("nao abri idioma %s\n", iso_norm); return 0; }
-    long antes = txt_n(), postas = 0;
+    long antes = txt_n(), postas = 0, dobradas = 0;
     char lin[512];
     while(fgets(lin, sizeof lin, f)){
         if(lin[0] == '#' || lin[0] == '\n' || lin[0] == '\r') continue;
@@ -4356,11 +4422,17 @@ static int import_idioma(const char *p){
             /* resto = slug|n=…;maxG=…;tilde1=…;ck=…  → idioma/<iso>/orbita/<slug>|meta */
             snprintf(entrada, sizeof entrada, "idioma/%s/orbita/%s", iso_norm, resto);
         else continue;
-        if(poe_chave_texto(entrada)) postas++;
+        if(poe_chave_texto(entrada)) postas++; else dobradas++;
     }
     fclose(f);
+    /* DIZ-SE O QUE FICOU, E O QUE DOBROU. O número que interessa a quem importa
+     * é quantas chaves são RECUPERÁVEIS, e essa é `postas` — que agora bate com
+     * o crescimento da tabela por construção, e não por sorte. */
     printf("      IMPORT IDIOMA %s: %ld chaves (%ld -> %ld) de %s\n",
            iso_norm, postas, antes, txt_n(), cam);
+    if(dobradas)
+        printf("      e %ld entrada(s) caíram no lugar de outra — a DOBRA da cifra,"
+               " e essas NAO se recuperam pela busca\n", dobradas);
     return postas > 0;
 }
 
