@@ -2046,29 +2046,39 @@ não há quociente a identificar, e a fibra é a da soma:
 \begin{center}\footnotesize
 \begin{tabular}{@{}lllll@{}}
 \toprule
-$\pi$ & a aplicação & a fibra é & o repr. $k=1$ & o \textbf{dual} \\
+$\pi$ & a aplicação & a fibra é & o repr. $k=1$ & a \textbf{face} que fecha \\
 \midrule
-a soma em $X_1$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, $\abs{X_1}$ & $x\oplus z$ & --- \\
-$\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ & o \textbf{oposto} \\
-$\pi_3$: as frações & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível & o \textbf{inverso} \\
-$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola (§\ref{sec:ultra}) & o menor do cilindro & --- \\
+a soma em $X_1$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, $\abs{X_1}$ & $x\oplus z$ & o \textbf{neutro} $0$ (Def.~\ref{def:op}) \\
+$\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ & o \textbf{oposto}: $\partial x+x=0$ \\
+$\pi_3$: as frações & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível & o \textbf{inverso}: $\partial x\cdot x=1$ \\
+$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola (§\ref{sec:ultra}) & o menor do cilindro & o \textbf{neutro} $1$ (Def.~\ref{def:op}) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \medskip\noindent\textbf{E a última coluna fecha o documento no seu princípio.}
-As duas equações da Def.~\ref{def:op} não se resolvem ao mesmo tempo: a escada
-resolve \emph{uma por andar}, e com a \textbf{mesma troca}. O par $(a,b)$
-trocado por $\iota(a,b)=(b,a)$ induz
+As duas equações da Def.~\ref{def:op} têm \textbf{quatro} peças, e não duas ---
+duas \emph{operações} e dois \emph{neutros}:
 \[
-\underbrace{\partial x+x=0}_{\text{o \textbf{oposto}, em }X_2}
-\qquad\text{e}\qquad
-\underbrace{\partial x\cdot x=1}_{\text{o \textbf{inverso}, nas frações}}
+\boxed{\;
+\underbrace{\partial x+x=0}_{+\ \text{e}\ 0}
+\qquad\qquad
+\underbrace{\partial x\cdot x=1}_{\times\ \text{e}\ 1}
+\;}
 \]
---- é a \emph{mesma} operação, lida na aritmética de cada andar. É esta a
-síntese: \textbf{a escada é o operador a correr, e cada degrau é uma das suas
-faces a fechar.} Os outros dois não trazem dual novo, e é por isso que a coluna
-deles está vazia: o primeiro é a \emph{dobra} e o último é o \emph{limite}.
+São essas as \textbf{faces da operação}, e a escada percorre-as. Não as resolve
+ao mesmo tempo: resolve \emph{uma por andar}, e os dois duais saem da
+\textbf{mesma troca} --- o par $(a,b)$ trocado por $\iota(a,b)=(b,a)$ induz o
+\emph{oposto} em $X_2$ e o \emph{inverso} nas frações, que é a mesma operação
+lida na aritmética de cada andar.
+
+\medskip\noindent E os dois neutros não nascem na escada: nascem na
+Def.~\ref{def:op}, porque é lá que as duas equações os \emph{nomeiam} --- $0$ é
+o que o operador devolve numa face, $1$ o que devolve na outra. O primeiro
+degrau é onde o $0$ passa a ter uma soma que o deixe quieto; o último é onde o
+$1$ deixa de ser um símbolo e passa a ser o limite de uma escala. É esta a
+síntese: \textbf{a escada é o operador a correr, e cada degrau fecha uma das
+suas quatro faces.}
 \end{teorema}
 
 \begin{proof}

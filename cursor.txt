@@ -3512,3 +3512,35 @@ enunciado não desloca a numeração, ao contrário de inserir um enunciado novo
 que foi o erro do §75.
 
   aranha.tex 29 páginas · 0 erros · 0 refs mortas · thm:escada = 64
+
+§77 — AS QUATRO FACES: 0, +, ×, 1 — e os dois «—» eram preguiça minha
+======================================================================
+«vc colocou o oposto e o inverso mas os outros parecem ser 0 e 1; alinha com o
+operador: é elemento neutro aditivo, oposto, inverso e elemento neutro
+multiplicativo, são sempre 0, 1, +, ×, essas são as faces da operação».
+
+Eu tinha posto «---» nos degraus 1 e 4, e chamei-lhes «não trazem dual novo».
+Era preguiça: se as faces são QUATRO, cada degrau tem a sua.
+
+AS DUAS EQUAÇÕES TÊM QUATRO PEÇAS, e não duas:
+
+        ∂x + x = 0            ∂x · x = 1
+        └─ + e 0 ─┘           └─ × e 1 ─┘
+
+     π₁  a soma em X₁      o NEUTRO 0        (Def. 1)
+     π₂  X₁²/∼             o OPOSTO          ∂x + x = 0
+     π₃  as frações        o INVERSO         ∂x · x = 1
+     π₄  os cortes         o NEUTRO 1        (Def. 1)
+
+E OS DOIS NEUTROS NÃO NASCEM NA ESCADA: nascem na Definição 1, porque é LÁ que
+as duas equações os NOMEIAM — o 0 é o que o operador devolve numa face, o 1 o
+que devolve na outra. O que os degraus fazem é outra coisa: o primeiro é onde o
+0 passa a ter uma soma que o deixe quieto; o último é onde o 1 deixa de ser um
+símbolo e passa a ser o limite de uma escala.
+
+Os DOIS DUAIS saem da MESMA TROCA — ι(a,b) = (b,a) —, e isso já estava no
+`inteiros.tex` e no `racionais.tex`: oposto num andar, inverso no seguinte.
+
+  «a escada é o operador a correr, e cada degrau fecha uma das suas quatro faces»
+
+  aranha.tex 29 páginas · 0 erros · 0 refs mortas · thm:escada continua o 64
