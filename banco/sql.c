@@ -185,7 +185,8 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_CB      (S_CAB + 500u)          /* coinbase em átomos */
 #define S_FOLD_ARG (S_CB + 800u)         /* u32 LE base do OP_FOLD */
 #define S_FAIXA   (S_FOLD_ARG + 4u)      /* u32 LE de, u32 LE ate — OP_MARTELO */
-#define S_CONTA   4
+/* o S_CONTA saiu: contar é ∑ sobre o campo (bits_conta), não um contador
+ * a ser incrementado por linha. Ver `neuronio.c`: «∑ soma popcount». */
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
 #define S_MASK16  59         /* o mesmo, um andar acima: {0, 0x80} — o bit 15 do par   */
 #define S_ACC     6          /* o acumulador booleano da cláusula inteira                */
@@ -212,7 +213,7 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
                               * primeira e 9 é S_K[1], a constante da segunda condição —
                               * o nrows nascia em 258. O mapa está declarado por
                               * INTERVALOS logo acima, e é preciso lê-los.              */
-#define S_UM16    70         /* a constante 1 para o OP_ADD16 do nrows                   */
+#define S_UM16    70         /* a constante 1 do OP_ADD16 que sobe o nrows de andar      */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
 /* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver docs/TOOLKIT.md).
  *
@@ -677,6 +678,30 @@ static void bit_poe(unsigned base, long i, int liga){
     unsigned v = atomo_le(w, a);
     atomo_poe(&w, a, liga ? (v | m) : (v & ~m));
     mem_grava(sl, w);
+}
+
+/* ∑ — O KIRCHHOFF: CONTAR É POPCOUNT, NÃO VARRER.
+ *
+ * `tests/neuronio.c`, no cabeçalho: «⊕ cisão b agrupado mod n · ∑ soma
+ * POPCOUNT (o Kirchhoff)». O bitmap tem uma coordenada por linha, logo quantas
+ * linhas casaram é QUANTOS BITS ESTÃO LIGADOS — e isso soma-se sobre os slots,
+ * sem visitar linha nenhuma. É o `thm:dobra-norma` do `aranha.tex` na sua forma
+ * mais simples: «lê-se num único número calculado sobre o campo, sem visitar a
+ * trajetória».
+ *
+ * Estava um contador a ser incrementado linha a linha DENTRO do bytecode, com
+ * um slot próprio e um OP_ADD16 por linha que casa. Era trabalho a mais para
+ * saber o que o campo já diz. */
+static long bits_conta(unsigned base, long n){
+    long soma = 0;
+    for(long sl = 0; sl <= n / (long)SLOT_BITS; sl++){
+        Word w = mem_le(base + (unsigned)sl);
+        for(unsigned a = 0; a < WORD_ISA_ATOMS; a++){
+            unsigned v = atomo_le(w, a);
+            while(v){ soma += (long)(v & 1u); v >>= 1; }
+        }
+    }
+    return soma;
 }
 
 static long cat_nrows(void){
@@ -2837,15 +2862,10 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
     MOVE_M(S_BITM,  +1, REL_MASC);
     emit1(OP_OR);
     MOVE_M(S_MATCH, -1, REL_BITMAP);
-    /* O CONTADOR SOBE DE ANDAR. Somava-se 1 com OP_ADD, componente a
-     * componente, e o `.total` é UM BYTE: à 256.ª linha que casa o count dava a
-     * volta e respondia 0. Com ADD16 o par é UM número de dezasseis bits, e o
-     * transporte atravessa como deve — aqui pode, porque o slot é só do
-     * contador e não guarda um par de coisas distintas como o catálogo. */
-    MOVE(S_CONTA, +1);
-    MOVE(S_UM16, +1);
-    emit1(OP_ADD16);
-    MOVE(S_CONTA, -1);
+    /* E NÃO SE CONTA AQUI. O bit que se acabou de ligar É a contagem: quem
+     * quiser o número soma os popcounts do campo (∑, o Kirchhoff do
+     * `neuronio.c`). Um contador incrementado por linha era guardar duas vezes
+     * a mesma informação — e foi por viver num byte que dava a volta aos 255. */
     { unsigned char d = (unsigned char)(pc_emit - ini);
       pwrite(fprog, &d, 1, (off_t)pos);
       /* o salto do vivo é mais longo: salta também o teste do ACC */
@@ -2857,9 +2877,7 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
 static void prepara(long v, long col_do_set){
     Word w = {0,0};
     mem_grava(S_ZERO, w);
-    mem_grava(S_CONTA, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
-    w.total = 1; w.e = 0;                 mem_grava(S_UM16, w);   /* o um do ADD16 */
     /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA. Escrever
      * só o baixo deixava o átomo alto do valor ANTERIOR na célula — um
      * `SET saldo = 30000` sobre um saldo de 20000 dava 20016, e nada o dizia. */
@@ -3433,7 +3451,7 @@ static int varre(const char *resto, int acao){
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
 
-    long achou = (long)par_le(S_CONTA);   /* o PAR: o count passa de 255 */
+    long achou = bits_conta(S_MATCH, nrows);   /* ∑ = popcount do campo */
     ultima_conta = achou;
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
@@ -4736,7 +4754,7 @@ static int executa(const char *sql){
                     snprintf(resto, sizeof resto, "*%s", fim + 1);
                     ok = varre(resto, ACAO_MARCA);
                     if(sql_cap){
-                        long n = (long)par_le(S_CONTA);
+                        long n = bits_conta(S_MATCH, cat_nrows());
                         memset(sql_cap, 0, sizeof *sql_cap);
                         sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
                         sql_cap->tipo[0] = SQL_TIPO_INT8;

@@ -2195,6 +2195,144 @@ roda o plano da viragem --- e não os dois espaços. A dimensão, essa, já apar
 onde tinha de aparecer: no Teor.~\ref{thm:dimensao}, $\lvert \mathcal{V}(x)\rvert=2n$.
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{O algoritmo da aranha estigmérgica}\label{sec:neuronio}
+
+\noindent O documento fecha com o algoritmo que executa tudo o que ficou dito, e
+ele tem \textbf{quatro} operações --- nem uma a mais. Nenhuma é nova: cada uma é
+um enunciado das secções anteriores, escrito como passo.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & a operação & o que faz & de onde vem \\
+\midrule
+$\oplus$ & \textbf{cisão} & agrupar em $n$ fases & Def.~\ref{def:objeto}: é a realização $\pi$ \\
+$\sum$ & \textbf{soma} & \emph{popcount} --- o Kirchhoff & Lema~\ref{lem:conserva}: $\sum_x G(x)=\abs{I}$ \\
+$\otimes$ & \textbf{o gato} $\times\sigma$ & \textbf{sobe} --- a convolução & Teor.~\ref{thm:shift}: $\zeta$ acumula \\
+$\oslash$ & \textbf{o esquilo} $\times\sigma'$ & \textbf{desce} --- a deconvolução & Teor.~\ref{thm:mu}: $\mu=\zeta^{-1}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{definicao}[o gato e o esquilo em $\Z^{n}$]\label{def:gato}
+Fixado um inteiro $m\ge1$ --- o \textbf{metal} ---, o \textbf{gato} é
+$\otimes\colon\Z^{n}\to\Z^{n}$,
+\[
+(\otimes c)_0=m\,c_0+c_{n-1},\qquad (\otimes c)_i=c_{i-1}\ \ (1\le i\le n-1),
+\]
+e o \textbf{esquilo} é $\oslash\colon\Z^{n}\to\Z^{n}$,
+\[
+(\oslash d)_j=d_{j+1}\ \ (0\le j\le n-2),\qquad
+(\oslash d)_{n-1}=d_0-m\,d_1 .
+\]
+Na base canónica $\otimes$ é a matriz \emph{companheira} de
+$p(x)=x^{n}-m\,x^{n-1}-1$.
+\end{definicao}
+
+\begin{teorema}[a volta é exata, e é inteira]\label{thm:gato}
+Com a Def.~\ref{def:gato}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] $\oslash\circ\otimes=\mathrm{id}$ em $\Z^{n}$, para todo $n\ge2$ e
+todo $m$ --- \textbf{sem hipótese nenhuma sobre o vetor}.
+\item[(2)] $\lvert\det\otimes\rvert=1$, e portanto $\otimes\in\mathrm{GL}_n(\Z)$:
+a inversa tem entradas \emph{inteiras}, e a volta não sai do anel.
+\item[(3)] Em $n=2$ o polinómio é $x^{2}=mx+1$, cujas raízes são
+$\sigma=\tfrac{m+\sqrt{m^{2}+4}}2$ e $\sigma'=-1/\sigma$, com
+\[
+\sigma+\sigma'=m\ (\text{o traço}),\qquad \sigma\sigma'=-1\ (\text{o determinante}),
+\]
+e $\lvert\sigma\rvert>1$, $\lvert\sigma'\rvert<1$: um \textbf{sorvedouro} e uma
+\textbf{fonte}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Escreva-se $d=\otimes c$. Para $1\le i\le n-1$ tem-se $d_i=c_{i-1}$, logo
+para $0\le j\le n-2$ vem $(\oslash d)_j=d_{j+1}=c_j$. Falta a última:
+$(\oslash d)_{n-1}=d_0-m\,d_1=(m\,c_0+c_{n-1})-m\,c_0=c_{n-1}$. Todas as
+coordenadas coincidem, e em nenhum passo se dividiu.
+
+(2) Desenvolvendo o determinante pela primeira linha, o único termo não nulo é o
+da entrada $c_{n-1}$, cujo menor é a identidade de ordem $n-1$; donde
+$\det=\pm1$. Uma matriz inteira de determinante $\pm1$ tem inversa inteira, que
+é a fórmula de (1).
+
+(3) É o polinómio característico em $n=2$: traço $m$ e determinante $-1$ dão
+$x^{2}-mx-1$. As raízes são as do enunciado, o seu produto é $-1$ e a sua soma é
+$m$; de $\sigma\sigma'=-1$ vem $\sigma'=-1/\sigma$, e como $\sigma>1$ para
+$m\ge1$, o outro tem módulo menor que $1$.
+\end{proof}
+
+\medskip\noindent\textbf{E este par é o par da §\ref{sec:zeta}, noutra base.} O
+Teor.~\ref{thm:shift} deu $\zeta$ a \emph{acumular} e $\mu=1-S$ a
+\emph{diferenciar}, com $\mu=\zeta^{-1}$ (Teor.~\ref{thm:mu}); o gato acumula ao
+longo da fase e o esquilo desfaz, com a mesma exatidão e pelo mesmo motivo --- a
+inversa existe \emph{sempre}, e não sob condição. A diferença é onde a
+acumulação corre: lá ao longo do domínio $I$, aqui ao longo das $n$ fases da
+cisão. É o Teor.~\ref{thm:zeta-mu} lido no espaço em vez de no tempo.
+
+\begin{teorema}[um bit desenha a estrutura, e o dual é a ausência]\label{thm:bitunico}
+Seja $n=2$ e $c=(1,0)$ --- \textbf{um} bit ligado, e o resto no neutro. Então
+$\otimes^{k}c$ é o par de termos consecutivos da recorrência metálica
+$u_{k+1}=m\,u_k+u_{k-1}$ com $u_0=1$, $u_{-1}=0$; em particular, para $m=1$ são
+os números de Fibonacci, e
+\[
+\frac{(\otimes^{k}c)_0}{(\otimes^{k}c)_1}\;\longrightarrow\;\sigma .
+\]
+E $\oslash^{k}\otimes^{k}c=c$: a deconvolução devolve o bit único, com resíduo
+$0$.
+\end{teorema}
+
+\begin{proof}
+Por (1) do Teor.~\ref{thm:gato}, $\oslash^{k}\otimes^{k}=\mathrm{id}$. Para a
+primeira parte, em $n=2$ o gato é $(a,b)\mapsto(ma+b,\,a)$, que é exatamente o
+passo da recorrência com o par a guardar dois termos consecutivos --- a
+\emph{memória de ordem dois}. A razão de termos consecutivos de uma recorrência
+linear de raízes $\sigma,\sigma'$ com $\lvert\sigma'\rvert<1$ tende para
+$\sigma$, porque a componente em $\sigma'$ decai.
+\end{proof}
+
+\medskip\noindent\textbf{O discreto e o contínuo, de um bit só.} O dado é
+$b\in B$, e $B$ é o dos dois símbolos da Def.~\ref{def:B} --- que nasceram das
+duas equações do operador (Def.~\ref{def:op}). A \emph{presença} $b=1$ é o único
+operacional; a \emph{ausência} $b=0$ é o suporte neutro, e é ela o dual. Sobre
+esse dado:
+\[
+\boxed{
+\begin{array}{l}
+\text{o \textbf{discreto} é o bit;}\\
+\text{o \textbf{contínuo} é o rasto da convolução --- a razão que tende para }\sigma;\\
+\text{o \textbf{dual} é o bit ausente.}
+\end{array}}
+\]
+Não há aqui dois mundos a conciliar: há uma operação a correr sobre um símbolo,
+e $\sigma$ aparece \emph{construído}, como o número $\pi$ da §\ref{sec:serie}
+aparece --- pela mesma aritmética inteira que constrói o resto, e não importado.
+
+\medskip\noindent\textbf{E as quatro operações fecham as quatro faces.} O
+Teor.~\ref{thm:escada} mostrou que a escada percorre as quatro peças das duas
+equações --- $0$, $+$, $\times$, $1$ ---, uma por andar. O algoritmo percorre-as
+num passo:
+\[
+\begin{array}{llll}
+\oplus\ \text{cisão} & \text{a realização} & \pi\colon I\to X & \text{o \textbf{neutro} }0\ \text{é o suporte}\\
+\sum\ \text{soma} & \text{a conservação} & \sum_x G(x)=\abs{I} & \text{o \textbf{}}+\\
+\otimes\ \text{gato} & \text{a convolução} & \zeta,\ \times\sigma & \text{o \textbf{}}\times\\
+\oslash\ \text{esquilo} & \text{a deconvolução} & \mu=\zeta^{-1},\ \times\sigma' & \text{o \textbf{neutro} }1:\ \oslash\otimes=\mathrm{id}
+\end{array}
+\]
+--- e a última linha é literalmente a segunda equação da Def.~\ref{def:op},
+$\partial x\cdot x=1$, com o gato no lugar de $x$ e o esquilo no de $\partial x$.
+
+\medskip\noindent\textbf{Onde a aranha entra.} O campo $G$ da
+Def.~\ref{def:objeto} é o que a cisão escreve; o $\sum$ lê-o sem visitar a
+trajetória, que é o Teor.~\ref{thm:dobra-norma}; e o par $\otimes/\oslash$ é a
+linha $\zeta/\mu$ da tabela da §\ref{sec:dualidades} --- a única que
+\emph{inverte dos dois lados}, ao passo que as outras são retrações. O gato sobe
+a torre e o esquilo desce-a: é a mesma dobra $T+T^{*}$ do Teor.~\ref{thm:espaco},
+agora a correr.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{Medido}
 
 \medido{Teor.~\ref{thm:multiplicidade} e Teor.~\ref{thm:dimensao}:
@@ -2294,6 +2432,9 @@ Hermann a coincidirem sem um dígito escrito à mão);
 Teor.~\ref{thm:levantamento} §AN5 e §AN9 ($\tilde G\equiv1$ pela própria aranha em
 dimensão $n+1$; $\operatorname{pr}_1\circ\tilde\pi=\pi$ com resíduo $0$; fibra
 vertical $\{1..G\}$; e a volta a devolver $G$ célula a célula);
+Teor.~\ref{thm:gato} e \ref{thm:bitunico} \code{tests/neuronio.c} (a volta
+$\oslash\otimes=\mathrm{id}$ em toda dimensão de $2$ a $8$; o bit único a desenhar o
+metal e a deconvolução a devolvê-lo com resíduo $0$; e a razão a tender para $\sigma$);
 o plano \code{tests/aranha\_g.c} §AG1--§AG11 e
 \code{tests/aranha\_inversa.c} §AI1--§AI7.}
 
