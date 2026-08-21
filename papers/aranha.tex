@@ -44,11 +44,14 @@
 \maketitle
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} De \textbf{um operador} e das duas equações que ele
-cumpre --- $\partial x+x=0$ e $\partial x\cdot x=1$ ---, e é nelas que $0$ e $1$
-nascem: são o que ele devolve em cada face. As duas operações saem daí,
-determinadas e não escolhidas, e delas a soma com transporte; a \textbf{lista}
-$I$ é o objeto finito que daí se obtém. Só
+\textbf{De onde parte.} De \textbf{dois extremos e de uma dobra}: a acção que
+os troca, $\partial x=a+b-x$. O seu ponto fixo é o \emph{meio}, e dobrando outra
+vez de cada lado --- a mesma estrutura nos dois --- a indução dá todos os
+pontos. Nos extremos sozinhos não há meio, e é essa falta que obriga a
+\emph{duas} composições, com as duas equações $\partial x+x=0$ e
+$\partial x\cdot x=1$: é nelas que $0$ e $1$ nascem, como o que a dobra devolve
+em cada face. As tabelas saem daí forçadas, sem que se escreva um sinal, e delas
+a soma com transporte; a \textbf{lista} $I$ é o objeto finito que daí se obtém. Só
 então entra uma \textbf{realização} $\pi\colon I\to X$ num conjunto $X$ com
 igualdade decidível, e não se supõe métrica, nem dimensão, nem estrutura
 algébrica em $X$. A realização identifica índices distintos na mesma célula;
@@ -113,8 +116,8 @@ Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{sec:ge
 Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{thm:multiplicidade}(3) \\
 O que acontece quando volta? & a dobra: $G>1$ & Def.~\ref{def:dobra} \\
 Como se representam os passos? & por uma palavra no alfabeto das arestas & Teor.~\ref{thm:palavra} \\
-O que é o ponto de partida? & o operador, e as suas duas equações & Def.~\ref{def:op} \\
-Donde vêm as operações e os dois dígitos? & das duas equações do operador & Def.~\ref{def:op}, Teor.~\ref{thm:B} \\
+O que é o ponto de partida? & dois extremos e a dobra que os troca & Def.~\ref{def:op} \\
+Donde vêm as operações e os dois dígitos? & da dobra: sem meio, são precisas duas faces & Def.~\ref{def:op}, Teor.~\ref{thm:B} \\
 E as coordenadas? & são a tupla ordenada: a \emph{representação} & Teor.~\ref{thm:coord} \\
 Como se codifica um finito qualquer? & em $\lceil\log_2 c\rceil$ bits, e não em menos & Teor.~\ref{thm:B},~\ref{thm:BI} \\
 Como se continua sem terminar? & caminhando: cada decisão é finita & §\ref{sec:objeto} \\
@@ -131,7 +134,7 @@ não são uma lista de tópicos: cada uma é o domínio da seguinte, e cada seta
 abaixo é um enunciado deste documento --- nenhuma é analogia:
 \[
 \boxed{\;
-\underset{\text{Def.~\ref{def:op}}}{\text{operador}}
+\underset{\text{Def.~\ref{def:op}}}{\text{dobra}}
 \;\to\;
 \underset{\text{Teor.~\ref{thm:B}}}{\text{binário}}
 \;\to\;
@@ -149,21 +152,20 @@ abaixo é um enunciado deste documento --- nenhuma é analogia:
 \;\to\;
 G \;}
 \]
-\noindent\textbf{E o primeiro elo é o operador, não um conjunto.} O documento
-não parte do binário: parte de \emph{um operador} e das duas equações que ele
-cumpre sobre o seu argumento. O binário é o que elas dão
-(Teor.~\ref{thm:B}); a tupla é o que o operador produz ao correr $w$ vezes, e é
-a \emph{representação} do objeto e não o objeto (Teor.~\ref{thm:coord}). Daí que o índice não seja tempo posto de fora: é a
-contagem das aplicações do operador, e o que ele gera --- acumular, e a
-diferença que o desfaz --- é o Teor.~\ref{thm:shift}.
+\noindent\textbf{E o primeiro elo é a dobra, não um conjunto.} O documento não
+parte do binário: parte de \emph{dois extremos} e da acção que os troca. O
+binário é o que ela dá quando corre uma vez (Teor.~\ref{thm:B}); a tupla é o que
+ela produz ao correr $w$ vezes, e é a \emph{representação} do objeto e não o
+objeto (Teor.~\ref{thm:coord}). Daí que o índice não seja tempo posto de fora:
+é a contagem das dobras, e o que ela gera --- acumular, e a diferença que o
+desfaz --- é o Teor.~\ref{thm:shift}.
 
-\medskip\noindent\textbf{E há um elo que se quer pôr no princípio e não pode
-lá estar}: a \emph{estratégia} --- uma aranha que volta muitas vezes, ou muitas
-abelhas que passam uma vez cada. Ela é o que a cadeia \textbf{não} transporta: a
-posição é uma soma comutativa, e a soma descarta o construtor antes de a posição
-existir. Por isso a estratégia está no \emph{título} e não na cadeia, e o que
-disso se demonstra é o Teor.~\ref{thm:agentes} --- as duas deixam o mesmo campo,
-célula a célula.
+\medskip\noindent\textbf{E há um elo que se quer pôr no princípio e não pode lá
+estar}: a \emph{estratégia} --- uma aranha que volta muitas vezes, ou muitas
+abelhas que passam uma vez cada. A cadeia não a transporta, porque a posição é
+uma soma comutativa e a soma descarta o construtor antes de a posição existir.
+Por isso ela está no \emph{título} e não na cadeia, e o que dela se demonstra é
+o Teor.~\ref{thm:agentes}: as duas deixam o mesmo campo, célula a célula.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O objeto}\label{sec:objeto}
@@ -344,45 +346,32 @@ andares uns dentro dos outros,
 com as palavras de largura $w$ em número de $2^{w}$ e a dobra a duplicar a
 largura. A \textbf{lista} $I$ é essa ordem.
 
-\medskip\noindent\textbf{E a mesma identidade lê-se a partir do meio}, passando
-o $2$ para o outro lado. Com a \textbf{média} $m=\tfrac{a+b}{2}$ e o
-\textbf{desvio} $\delta=\tfrac{a-b}{2}$ --- \emph{com sinal} ---,
+\medskip\noindent\textbf{E a mesma identidade lê-se a partir do meio.} O meio
+da Def.~\ref{def:op} é $m=\tfrac{a+b}{2}$; escrevendo o \textbf{desvio}
+$\delta=\tfrac{a-b}{2}$ \emph{com sinal},
 \[
 \boxed{\;a \;=\; m+\delta\,,\qquad\qquad b \;=\; m-\delta\;}
 \]
-e isto é uma \textbf{igualdade}, não uma aproximação: o par $(m,\delta)$ e o par
-$(a,b)$ são a mesma coisa escrita duas vezes, e a volta $\,(m,\delta)\mapsto
-(m+\delta,\,m-\delta)$ devolve o par \emph{ordenado} com resíduo $0$
-(\code{tests/meio.c} §M3). $m$ é a
-parte que $\partial$ fixa e $\delta$ a parte que ele reflete: é a decomposição em
-simétrico e antissimétrico, e é ela que torna a operação legível --- não são
-duas coisas, é um centro e um afastamento.
+--- igualdade e não aproximação: $(m,\delta)$ e $(a,b)$ são a mesma coisa
+escrita duas vezes, e a volta devolve o par \emph{ordenado} com resíduo $0$. É a
+dobra outra vez: $m$ é o que $\partial$ fixa, $\delta$ o que ele reflete.
 
-\medskip\noindent\textbf{E só depois entram $\vee$ e $\wedge$}, que é onde a
-intensidade aparece:
-\[
-a\vee b \;=\; m+|\delta|\,,\qquad\qquad a\wedge b \;=\; m-|\delta| .
-\]
-O módulo não é o objeto: é a \emph{intensidade}, e a intensidade é
-\textbf{metade}. O que ela deixa cair é o sinal de $\delta$, isto é, \emph{qual
-dos dois é qual} --- e isso mede-se: os nove pares ordenados de
-$\{0,\tfrac12,1\}$ caem em \textbf{seis} imagens por $(a\vee b,a\wedge b)$, e as
-três colisões são exatamente os pares trocados. Por $(m,\delta)$ são nove em
-nove. A soma guarda o par; o módulo guarda só o quanto.
+\medskip\noindent\textbf{Só depois entram $\vee$ e $\wedge$}, e é aí que se
+perde: $a\vee b=m+|\delta|$ e $a\wedge b=m-|\delta|$. O módulo não é o objeto ---
+é a \emph{intensidade}, e a intensidade é \textbf{metade}, porque deixa cair o
+sinal de $\delta$, isto é, \emph{qual dos dois é qual}. Mede-se: os nove pares
+ordenados de $\{0,\tfrac12,1\}$ caem em \textbf{seis} imagens por
+$(a\vee b,a\wedge b)$, e as três colisões são os pares trocados; por
+$(m,\delta)$ são nove em nove.
 
-\medskip\noindent\textbf{E daqui sai a conservação, que não foi pedida.} O
-produto do par escreve-se, por distributividade,
-\[
-\boxed{\;a\,b \;=\; (m+\delta)(m-\delta) \;=\; m^{2}-\delta^{2}\;}
-\]
-e $\partial$, que troca $a$ com $b$, troca o \emph{sinal} de $\delta$ e fixa $m$.
-Como $\delta$ entra ao \textbf{quadrado}, o que $\partial$ move não sobrevive:
-$m^{2}-\delta^{2}$ é \emph{invariante}. A conservação da norma não é uma
-hipótese posta à entrada --- é o que a decomposição dá, depois de as leis
-estarem no sítio, e é a forma quadrática do par a aparecer sozinha
-(\code{tests/meio.c} §M4, com o controlo a exigir que a troca mova de facto o
-desvio em seis dos nove pares --- se ela fosse a identidade, qualquer expressão
-seria invariante e não haveria teorema nenhum).
+\medskip\noindent\textbf{E daqui sai a conservação, que não foi pedida.}
+Expandindo, $a\,b=(m+\delta)(m-\delta)=m^{2}-\delta^{2}$; e $\partial$, que
+troca $a$ com $b$, é $\delta\mapsto-\delta$ com $m$ fixo. Como $\delta$ entra ao
+\textbf{quadrado}, o que $\partial$ move não sobrevive, e o produto é
+\emph{invariante}. A conservação da norma não é hipótese posta à entrada --- é o
+que a decomposição dá depois de as leis estarem no sítio
+(\code{tests/meio.c} §M3--§M4, com o controlo a exigir que a troca mova de facto
+o desvio em seis dos nove pares).
 \end{teorema}
 
 \begin{proof}
@@ -482,6 +471,12 @@ aparece uma vez só.
 \begin{definicao}[dobra]\label{def:dobra}
 A relação $i\sim j \iff \pi(i)=\pi(j)$ é uma equivalência em $I$. Chama-se
 \textbf{dobra} de $\pi$, e as suas classes são as fibras $\pi^{-1}(x)$.
+
+\medskip\noindent É a \emph{mesma} palavra da Def.~\ref{def:op}, e de propósito:
+lá a dobra é a \textbf{acção} que traz um extremo sobre o outro; aqui é a
+\textbf{identificação} que essa acção produz --- o que se sobrepõe passa a ser
+indistinguível, e é isso que a equivalência regista. Uma é o gesto, a outra é a
+marca que ele deixa; e $G$ conta quantos vieram parar ao mesmo sítio.
 \end{definicao}
 
 \begin{lema}[conservação]\label{lem:conserva}
