@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        e390daf4df69a5b0      bash tools/bateria.sh
+    selo        8aa1a8468eca3cf0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1083,8 +1083,8 @@ fontes exige repor E RECONSTRUIR entre cada um; um a um, e não em lote.
   4. OS NOMES DE COLUNA SÃO DESCARTADOS. `CREATE TABLE cliente
      (nome,idade,saldo)` → o SELECT devolve `a`,`b`,`c`, e
      `WHERE idade > 20` é «comando recusado».                      RESOLVIDO
-  5. O ALCANCE DE UMA CÉLULA. DADO: 16 bits (§27). AVALIADOR: a forma LINEAR
-     corre em 16 (§29). Falta o grau ≥ 2 (produto de 16×16 pede 32).
+  5. O ALCANCE DE UMA CÉLULA. DADO: 16 bits (§27). AVALIADOR: 16 bits, com o
+     PRODUTO incluído (§30). O andar escolhe-se pela FORMA.
   6. Catálogo mínimo para um driver ligar (PG6).                   POR FAZER
 
 A TABELA É UM FICHEIRO .mem
@@ -1385,3 +1385,56 @@ FALTA
 -----
   · grau ≥ 2 sobre colunas largas: `emit_mul` de 16×16 → acumulador de 32
   · e aí o envelope da comparação sobe com ele
+
+
+30. O PRODUTO, E O ANDAR ESCOLHE-SE PELA FORMA
+================================================
+O PRODUTO SAI DA CADEIA, NÃO DE UM IDIOMA DE MÁQUINA. Fui ler os papers antes de
+escrever, e a última linha do `naturais.tex` thm:transporte diz-o:
+
+    «as duas operações que a iteração usa são a soma e o produto de 𝔽₂, as
+     únicas primitivas de um bit; O PRODUTO DE ℕ SEGUE POR DESLOCAMENTO E SOMA»
+
+e o lem:desloc dá a outra metade: multiplicar pelo gerador da dobra É deslocar,
+x⊗σ = 2^w·x. Então
+
+    x·y = Σ_i  y_i · (x << i)     com  x<<1 = x + x  (ADD16)  e  y_i = AND
+
+  emit_mul16   dezasseis passos, o `<<` é `x+x` e o bit do multiplicador é um AND
+               com a máscara — cada máscara no SEU slot, porque as constantes
+               escrevem-se ao COMPILAR e o programa corre depois
+  rascunho     o átomo passou de 12 a 48 slots (ATOMO_SLOTS): 4096 + 16·48 =
+               4864, e a região seguinte só começa em 33792
+
+E O DEFEITO QUE ISTO DESTAPOU — ANTERIOR A TUDO ISTO
+-----------------------------------------------------
+O avaliador de oito bits decide pelo bit 7 da diferença, logo a forma
+`c0 + Σ c_i·x_i` tem de caber em ±127. Com a = 100 e b = 50 o `a*b` dá 5000, e
+ele RESPONDIA À TOA:
+
+    WHERE a*b > 1000   devolvia (3,7) e (150,2) — as duas que NÃO casam —
+                       e deixava de fora (100,50), que é a única que casa
+
+Medido no commit anterior E no de antes: o produto estourava em silêncio.
+Nenhuma asserção o via porque as tabelas dos medidores têm valores pequenos e o
+produto nunca lá passava de 127.
+
+A CORRECÇÃO É A REGRA: o andar escolhe-se pelo que a FORMA precisa, não pelo que
+a coluna guarda. O majorante calcula-se em compilação com o maior valor de cada
+coluna — separando o máximo do mínimo, que um coeficiente negativo SUBTRAI —, e
+
+    cabe em ±127     → o andar de oito, byte a byte como sempre foi
+    cabe em ±32767   → o andar de dezasseis
+    o resto          → RECUSADO, com o motivo escrito
+
+  medidor  as três consultas com produto dão agora a única linha certa, e a
+           quarta (`a > 50`, que cabe em oito) continua no andar velho — as duas
+           metades medem-se
+  gume     o andar escolhido pela COLUNA → cai · o produto sem deslocar → cai ·
+           o bit do multiplicador não testado (soma sempre) → cai
+
+O ESTADO DO BANCO
+-----------------
+  várias tabelas por base · nomes de coluna · valores 0..65535 exactos ·
+  SELECT/INSERT/UPDATE/DELETE com WHERE em dezasseis bits, produto incluído ·
+  tudo o que não cabe é recusado com o motivo · porta FEBE com fachada libpq

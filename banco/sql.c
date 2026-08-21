@@ -183,6 +183,13 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
+/* O rascunho por átomo passou de 12 a 48 slots: o produto de dezasseis bits
+ * precisa das dezasseis máscaras de bit, cada uma no SEU slot — as constantes
+ * escrevem-se ao COMPILAR e o programa corre depois, logo partilhar um slot
+ * daria o valor trocado (é a lição que o S_UM já custou aqui). Cabe: com 16
+ * átomos são 4096 + 16·48 = 4864, e a região seguinte (S_DEN) só começa em
+ * 33792. */
+#define ATOMO_SLOTS 48u
 /* A ÁRVORE DA EXPRESSÃO COMEÇAVA EM 64 — E O CORPO DA COLUNA VIVE EM 60..67.
  *
  * As duas regiões PISAVAM-SE em 64..67, que são as colunas 4 a 7. Numa tabela com
@@ -1962,6 +1969,48 @@ static void emit_mul_zeck16(unsigned acc, unsigned x, long n, int soma,
     }
 }
 
+/* ── O PRODUTO DE DEZASSEIS BITS: DESLOCAMENTO E SOMA ────────────────────────
+ *
+ * Não é um idioma de máquina: é o que o `naturais.tex` escreve na última linha
+ * do thm:transporte — «as duas operações que a iteração usa são a soma e o
+ * produto de 𝔽₂, as únicas primitivas de um bit; O PRODUTO DE ℕ SEGUE POR
+ * DESLOCAMENTO E SOMA». E o lem:desloc diz a outra metade: multiplicar pelo
+ * gerador da dobra É deslocar, x⊗σ = 2^w·x.
+ *
+ * Então:   x·y = Σ_i  y_i · (x << i)
+ * com o `<<` a ser `x + x` (ADD16, onde o vai-um atravessa — §26) e o `y_i` a
+ * ser um AND com a máscara do bit i.
+ *
+ * O produto TEM de caber em dezasseis bits, e cabe por construção: o
+ * `cl_cabe16` recusa em compilação qualquer forma cujo pior caso passe de
+ * 32767, que é o envelope da comparação. Não há aqui tecto por descobrir — há
+ * um tecto já verificado antes de o programa ser emitido. */
+static void emit_mul16(unsigned dest, unsigned X, unsigned Y, unsigned base){
+    unsigned desl = base, tmp = base + 1, masc = base + 2;   /* masc..masc+15 */
+    emit_copia(S_ZERO, dest);
+    emit_copia(X, desl);
+    for(int i = 0; i < 16; i++){
+        /* a máscara do bit i, cada uma no seu slot (a constante é de compilação) */
+        Word m; m.total = (Word8)(i < 8 ? (1u << i) : 0u);
+        m.e = (Word8)(i >= 8 ? (1u << (i - 8)) : 0u);
+        mem_grava(masc + (unsigned)i, m);
+        /* tmp ← Y ∧ máscara ; salta a soma se for zero */
+        MOVE(Y, +1); MOVE(masc + (unsigned)i, +1); emit1(OP_AND);
+        MOVE(tmp, -1);
+        MOVE(tmp, +1); MOVE(S_ZERO, +1); emit1(OP_CMP);
+        emit1(OP_JZ);
+        unsigned pos = pc_emit; emit1(0);
+        unsigned ini = pc_emit;
+        MOVE(dest, +1); MOVE(desl, +1); emit1(OP_ADD16); MOVE(dest, -1);
+        { unsigned char rel = (unsigned char)(pc_emit - ini);
+          pwrite(fprog, &rel, 1, (off_t)pos); }
+        /* e o deslocamento: x << 1 é x + x (lem:desloc) */
+        if(i < 15){
+            MOVE(desl, +1); MOVE(desl, +1); emit1(OP_ADD16); MOVE(desl, -1);
+        }
+    }
+}
+
 /* a comparação com zero, um andar acima: o sinal é o bit 15 do par */
 static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned kslot,
                          long k, unsigned tmp){
@@ -2006,6 +2055,29 @@ static unsigned long col_max(long j, long ncols, long nrows){
  * pelo sinal de `c0 + Σ c_i·x_i`, logo é ESSA soma que precisa de caber em
  * 0..32767 — `2·32767` já não cabe, e a resposta sairia ao contrário. O pior
  * caso calcula-se em compilação, com o maior valor que cada coluna guarda. */
+/* a forma de UM átomo cabe em ±limite? — o mesmo majorante, por átomo */
+static int atom_cabe(const struct arvore *a, int j, long ncols, long nrows, long long limite){
+    long long alto = 0, baixo = 0;
+    for(int cod = 0; cod < NMON; cod++){
+        long c = a->av[j].c[cod];
+        if(!c) continue;
+        int d[KGRAU]; mi_de(cod, d);
+        if(mi_cod(d) != cod) continue;
+        long long mag = 1;
+        for(int t = 0; t < KGRAU; t++){
+            if(!d[t]) continue;
+            long cc = d[t] - 1;
+            if(cc >= ncols) return 0;
+            unsigned long mx = col_max(cc, ncols, nrows);
+            mag *= (long long)(mx ? mx : 1);
+            if(mag > 0x7FFFFFFFLL) return 0;
+        }
+        long long parcela = (long long)c * mag;
+        if(parcela > 0) alto += parcela; else baixo += parcela;
+    }
+    return !(alto > limite || baixo < -(limite + 1));
+}
+
 static int cl_cabe16(const struct arvore *a, long ncols, long nrows){
     for(int j = 0; j < a->natomo; j++){
         /* o MÁXIMO e o MÍNIMO da forma, separados: somar magnitudes ignorava que
@@ -2170,9 +2242,10 @@ static void emit_transporte(long t, unsigned s){
 }
 
 static void emit_atomos(const struct arvore *a, long linha, long ncols){
+    long nrows_atual = mem_le(S_CAT).e;
     for(int j = 0; j < a->natomo; j++){
         unsigned dest = S_COND + (unsigned)j;
-        unsigned acc  = S_LIN + (unsigned)(j*12);
+        unsigned acc  = S_LIN + (unsigned)(j*ATOMO_SLOTS);
         /* O MAPA DO RASCUNHO, dito de uma vez — cada átomo tem acc..acc+11 e emit_mul
          * consome QUATRO a partir do base. Foi a sobreposição disto que me custou duas
          * tentativas hoje: cada ordem inventada batia noutra ordem inventada. */
@@ -2217,17 +2290,24 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
          * produto de dois de dezasseis pede TRINTA E DOIS — é a torre a dobrar
          * outra vez, e é o trio seguinte. Até lá esse caso continua RECUSADO, com
          * o motivo escrito. O caminho de oito bits fica byte a byte como estava. */
-        int atom_largo = 0, atom_grau = 0;
-        for(int cc = 0; cc < NCOL && cc < ncols; cc++)
-            if(cit[cc] && col_larga(cc, ncols, mem_le(S_CAT).e)) atom_largo = 1;
-        for(int cod = 0; cod < NMON; cod++){
-            if(!a->av[j].c[cod]) continue;
-            int dd[KGRAU]; mi_de(cod, dd);
-            if(mi_cod(dd) != cod) continue;
-            if(mi_grau(cod) > atom_grau) atom_grau = mi_grau(cod);
-        }
-        if(atom_largo && atom_grau <= 1){
+        /* ── O ANDAR ESCOLHE-SE PELO QUE A FORMA PRECISA ─────────────────────
+         * Não pelo que a coluna guarda. O avaliador de oito bits decide pelo bit 7
+         * da diferença, logo a forma `c0 + Σ c_i·x_i` tem de caber em ±127 — e com
+         * duas colunas de 100 e 50 o `a*b` dá 5000, que lá não cabe. MEDIDO no
+         * commit anterior e neste: `WHERE a*b > 1000` devolvia (3,7) e (150,2) e
+         * deixava de fora o (100,50), que é o único que casa. O produto estourava
+         * em silêncio, e nenhuma asserção o via porque as tabelas dos medidores
+         * têm valores pequenos.
+         *
+         * Agora o majorante da forma — calculado em compilação com o maior valor
+         * que cada coluna guarda — escolhe o andar: cabe em ±127 usa o de oito,
+         * cabe em ±32767 usa o de dezasseis, e o que não cabe é RECUSADO. */
+        int atom_largo = !atom_cabe(a, j, ncols, nrows_atual, 127);
+        if(atom_largo){
+            /* o mapa do rascunho de 16: acc, x16, ga, gb, tmp16, o slot do teste,
+             * o produto e a base do emit_mul16 (que consome 18 a partir dela) */
             unsigned x16 = acc + 1, ga = acc + 2, gb = acc + 3, tmp16 = acc + 4;
+            unsigned p16 = acc + 6, q16 = acc + 7, base16 = acc + 8;
             long c0 = a->av[j].c[0];
             emit_copia(S_ZERO, acc);
             if(c0){
@@ -2243,11 +2323,27 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 if(!c) continue;
                 int d1[KGRAU]; mi_de(cod, d1);
                 if(mi_cod(d1) != cod) continue;
-                if(mi_grau(cod) != 1) continue;
-                int cc = -1;
-                for(int t = 0; t < KGRAU; t++) if(d1[t]) cc = d1[t] - 1;
-                if(cc < 0 || cc >= ncols) continue;
-                emit_valor16(x16, linha, ncols, cc, tmp16);
+                int gr = mi_grau(cod), fora16 = 0;
+                for(int t = 0; t < KGRAU; t++)
+                    if(d1[t] && d1[t]-1 >= ncols) fora16 = 1;
+                if(fora16) continue;
+                if(gr == 1){
+                    int cc = -1;
+                    for(int t = 0; t < KGRAU; t++) if(d1[t]) cc = d1[t] - 1;
+                    emit_valor16(x16, linha, ncols, cc, tmp16);
+                }else{
+                    /* GRAU >= 2: o monómio é um produto de colunas, e o produto de
+                     * dezasseis bits é deslocamento e soma (naturais thm:transporte,
+                     * lem:desloc). Encadeia-se um factor de cada vez. */
+                    int primeiro = 1;
+                    for(int t = 0; t < KGRAU; t++){
+                        if(!d1[t]) continue;
+                        emit_valor16(q16, linha, ncols, d1[t] - 1, tmp16);
+                        if(primeiro){ emit_copia(q16, x16); primeiro = 0; }
+                        else { emit_mul16(p16, x16, q16, base16); emit_copia(p16, x16); }
+                    }
+                    if(primeiro) continue;
+                }
                 emit_mul_zeck16(acc, x16, c < 0 ? -c : c, c > 0, ga, gb, tmp16);
             }
             emit_teste16(acc, a->aop[j], dest, S_KZ + (unsigned)j, 0, acc + 5);
@@ -2553,11 +2649,9 @@ static int varre(const char *resto, int acao){
     if(tem_where > 0){
         for(long j = 0; j < ncols && j < NCOL; j++){
             if(!(citadas_where & (1u << j))) continue;
-            if(!col_larga(j, ncols, nrows)) continue;
-            /* o andar de dezasseis faz a forma LINEAR e decide pelo SINAL: pede
-             * grau ≤ 1 e valores dentro de 0..32767. O que sai disso recusa-se. */
-            if(!cl_tem_grau2(&cl) && !col_larguissima(j, ncols, nrows)
-               && cl_cabe16(&cl, ncols, nrows)) continue;
+            /* o andar de cima faz até 32767 e decide pelo SINAL; o que passa disso
+             * — na FORMA ou no próprio valor guardado — é recusado */
+            if(!col_larguissima(j, ncols, nrows) && cl_cabe16(&cl, ncols, nrows)) continue;
             char cn[S_COLNOME_W * 2 + 2];
             col_nome_le((int)j, cn, (int)sizeof cn);
             if(!cn[0]) snprintf(cn, sizeof cn, "%c", 'a' + (int)j);
@@ -4343,6 +4437,56 @@ int main(int argc, char **argv){
                    && !q6 && !q7 && !q8
                    && q9 && r6.nrows == 1 && !strcmp(r6.cell[0][0], "1000")
                    && q10 && r7.nrows == 1 && !strcmp(r7.cell[0][0], "30000"));
+            }
+            /* ── O PRODUTO NO ANDAR DE CIMA, E O ANDAR ESCOLHE-SE PELA FORMA ─────
+             * O avaliador de oito bits decide pelo bit 7 da diferença: a forma
+             * `c0 + Σ c_i·x_i` tem de caber em ±127. Com duas colunas de 100 e 50 o
+             * `a*b` dá 5000, que lá não cabe — e ele respondia à toa. MEDIDO no
+             * commit anterior: `WHERE a*b > 1000` devolvia (3,7) e (150,2), as duas
+             * que NÃO casam, e deixava de fora o (100,50), que é o único que casa.
+             * Nenhuma asserção o via, porque as tabelas dos medidores têm valores
+             * pequenos e o produto nunca lá passava de 127.
+             *
+             * O produto de dezasseis é DESLOCAMENTO E SOMA, e isso não é idioma de
+             * máquina: é a última linha do `naturais.tex` thm:transporte — «as duas
+             * operações que a iteração usa são a soma e o produto de 𝔽₂ […]; o
+             * produto de ℕ segue por deslocamento e soma» — com o lem:desloc a dar
+             * a outra metade: multiplicar pelo gerador da dobra É deslocar. O `<<`
+             * é `x + x` em ADD16, e o bit do multiplicador é um AND. */
+            {
+                SqlOut p1, p2, p3, p4;
+                executa("CREATE TABLE prod (a,b)");
+                executa("INSERT INTO prod VALUES (100,50)");
+                executa("INSERT INTO prod VALUES (3,7)");
+                executa("INSERT INTO prod VALUES (150,2)");
+                sql_cap = &p1; memset(&p1, 0, sizeof p1);
+                int w1 = executa("SELECT * FROM prod WHERE a * b > 1000");
+                sql_cap = &p2; memset(&p2, 0, sizeof p2);
+                int w2 = executa("SELECT * FROM prod WHERE a * b = 5000");
+                sql_cap = &p3; memset(&p3, 0, sizeof p3);
+                int w3 = executa("SELECT * FROM prod WHERE a * a > 5000");
+                sql_cap = &p4; memset(&p4, 0, sizeof p4);
+                int w4 = executa("SELECT * FROM prod WHERE a > 50");   /* cabe em 8: o andar velho */
+                sql_cap = NULL;
+                printf("\n     a*b>1000 %d · a*b=5000 %d · a*a>5000 %d · a>50 %d (este cabe em 8)\n",
+                       p1.nrows, p2.nrows, p3.nrows, p4.nrows);
+                ok("O PRODUTO CORRE NO ANDAR DE CIMA, E O ANDAR ESCOLHE-SE PELA FORMA — não"
+                   " pelo que a coluna guarda. O avaliador de oito decide pelo bit 7 da"
+                   " diferença, logo `c0 + Σ c_i·x_i` tem de caber em ±127; com a = 100 e"
+                   " b = 50 o produto dá 5000 e ele respondia à toa: `a*b > 1000` devolvia"
+                   " as DUAS que não casam e deixava de fora a única que casa. O majorante"
+                   " da forma calcula-se em compilação com o maior valor de cada coluna e"
+                   " escolhe: ±127 usa o andar velho, ±32767 usa o novo, o resto é"
+                   " recusado. E o produto de 16 é DESLOCAMENTO E SOMA — a última linha do"
+                   " thm:transporte do naturais.tex —, com o `<<` a ser `x+x` em ADD16 e o"
+                   " bit do multiplicador a ser um AND. As três consultas dão agora o único"
+                   " (100,50), e a quarta, que cabe em oito, continua a correr no andar"
+                   " velho: as duas metades medem-se",
+                   w1 && w2 && w3 && w4
+                   && p1.nrows == 1 && !strcmp(p1.cell[0][0], "100")
+                   && p2.nrows == 1 && !strcmp(p2.cell[0][0], "100")
+                   && p3.nrows == 1 && !strcmp(p3.cell[0][0], "100")
+                   && p4.nrows == 2);
             }
             /* ── E A BASE ANTIGA CONTINUA A ANDAR ────────────────────────────────
              * A letra é o RECURSO, e um recurso que nunca corre não é compatibilidade:
