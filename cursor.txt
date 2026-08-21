@@ -168,7 +168,19 @@ SELECT com WHERE, count(*), SHOW, SET, BEGIN/COMMIT/ROLLBACK.
 
 5. O QUE FICA FORA, E É PRECISO SABER
 ─────────────────────────────────────
-· LIMIT e GROUP BY: FEITOS, e os dois saem da teoria.
+· LIMIT, GROUP BY, HAVING e DISTINCT: FEITOS, e todos saem da teoria.
+  DISTINCT é o REPRESENTANTE CANÓNICO k=1 — o `thm:levantamento` (3) diz que na
+  fibra de x os k são {1,…,G(x)}, e o `thm:escada` fecha: «marcar cada fibra com
+  k=1 É escolher o representante canónico». Não se filtram repetidos comparando
+  pares: insere-se na árvore e a primeira de cada corrida é a folha 1. Pede UMA
+  coluna e recusa `DISTINCT *` — a linha inteira não é indexável pela árvore.
+  HAVING é o WHERE sobre G. O tamanho de cada fibra É G(x), e o
+  `thm:multiplicidade` (2) diz que «G(x) > 1 se e só se existem i ≠ j com
+  π(i) = π(j)»: `HAVING count(*) > 1` é pedir as células onde a realização
+  DOBROU, e `= 1` é pedir onde ela é injectiva.
+  E A PROJECÇÃO VALIA SÓ METADE: o §W17 pô-la a ser respeitada no SqlOut, mas a
+  impressão em texto continuava a despejar a linha inteira — `SELECT a FROM t`
+  mostrava três colunas no terminal e uma no socket. Corrigido nos dois lados.
   LIMIT n é o PREFIXO da lista — o `thm:BI` constrói I como uma ORDEM, com «o
   encaixe por prefixos a ordenar os andares uns dentro dos outros», e um
   prefixo é fechado para as operações do andar. Corre DEPOIS do WHERE e da

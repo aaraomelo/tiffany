@@ -3068,6 +3068,13 @@ static char grp_col[64] = "";        /* a coluna do GROUP BY, "" se não houver 
  * DISTINCT não é uma passagem a filtrar repetidos — é ficar com a folha 1 de
  * cada fibra, e a fibra é a mesma do GROUP BY. */
 static int  dis_usa = 0;             /* 1 se a consulta pediu DISTINCT */
+/* HAVING É O WHERE SOBRE G. O GROUP BY dá as fibras e o tamanho de cada uma é
+ * G(x); filtrar por esse número é filtrar pela DOBRA. E o `thm:multiplicidade`
+ * cláusula (2) diz o que isso significa: «G(x) > 1 se e só se existem i ≠ j com
+ * π(i) = π(j)» — de modo que `HAVING count(*) > 1` não é uma conveniência de
+ * SQL, é pedir ao motor as células onde a realização dobrou. */
+static int  hav_op = 0;              /* 0 = sem HAVING; 1 '>', 2 '<', 3 '=' */
+static long hav_n  = 0;
 
 /* ── ORDENAR É DESCER A ÁRVORE, e a árvore é a do banco ─────────────────────
  *
@@ -3380,7 +3387,7 @@ static int varre(const char *resto, int acao){
     /* ── ORDER BY <coluna> [ASC|DESC] ─────────────────────────────────────
      * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
      * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
-    ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1;
+    ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1; hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
     if(acao == ACAO_MARCA){
         const char *q = p;
@@ -3402,6 +3409,44 @@ static int varre(const char *resto, int acao){
                 return 0;
             }
             p = q; pula(&q);
+            /* ── HAVING count(*) <op> <n> ── o WHERE sobre G ─────────────── */
+            if(palavra(&q, "HAVING")){
+                pula(&q);
+                if(!palavra(&q, "COUNT")){
+                    printf("erro: HAVING pede count(*) — é sobre G que ele filtra."
+                           " RECUSADO.\n");
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "HAVING: so count(*), que e o tamanho da fibra"); }
+                    return 0;
+                }
+                pula(&q);
+                if(*q == '('){ q++; pula(&q); if(*q == '*') q++; pula(&q);
+                               if(*q == ')') q++; }
+                pula(&q);
+                if(*q == '>'){ hav_op = 1; q++; }
+                else if(*q == '<'){ hav_op = 2; q++; }
+                else if(*q == '='){ hav_op = 3; q++; }
+                else {
+                    printf("erro: HAVING pede >, < ou = — RECUSADO.\n");
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "HAVING: esperava >, < ou ="); }
+                    return 0;
+                }
+                pula(&q);
+                { long v = 0; int viu = 0;
+                  while(*q >= '0' && *q <= '9'){ v = v*10 + (*q - '0'); q++; viu = 1; }
+                  if(!viu){
+                      printf("erro: HAVING sem número — RECUSADO.\n");
+                      if(sql_cap){ sql_cap->ok = 0;
+                          snprintf(sql_cap->err, sizeof sql_cap->err,
+                                   "HAVING: esperava um numero"); }
+                      return 0;
+                  }
+                  hav_n = v; }
+                p = q; pula(&q);
+            }
         }
         if(palavra(&q, "ORDER")){
             if(!palavra(&q, "BY")){
@@ -3758,6 +3803,11 @@ static int varre(const char *resto, int acao){
           while(k < n){
               long v = celula_valor(seq[k], gc, ncols), g = 0;
               while(k < n && celula_valor(seq[k], gc, ncols) == v){ g++; k++; }
+              /* o HAVING: filtra a fibra pelo seu G. `count(*) > 1` é pedir as
+               * células onde a realização DOBROU — thm:multiplicidade (2). */
+              if(hav_op == 1 && !(g >  hav_n)) continue;
+              if(hav_op == 2 && !(g <  hav_n)) continue;
+              if(hav_op == 3 && !(g == hav_n)) continue;
               if(lim_n >= 0 && grupos >= lim_n) break;      /* o prefixo */
               printf("   %ld | %ld\n", v, g);
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
@@ -3767,8 +3817,13 @@ static int varre(const char *resto, int acao){
               }
               grupos++; soma += g;
           }
-          printf("-- %ld grupo(s), ∑G = %ld (a conservação: é o que o WHERE deixou)\n",
-                 grupos, soma);
+          /* ∑G sobre o que SOBROU. Sem HAVING é o Lema da conservação inteiro —
+           * ∑G = |I|, o que o WHERE deixou; com HAVING é a soma das fibras que
+           * passaram, e diz-se qual dos dois é para não se ler o segundo como o
+           * primeiro. */
+          printf("-- %ld grupo(s), ∑G = %ld (%s)\n", grupos, soma,
+                 hav_op ? "a soma das fibras que o HAVING deixou"
+                        : "a conservação: ∑G = |I|, o que o WHERE deixou");
           if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", grupos); }
         return 1;
     }
