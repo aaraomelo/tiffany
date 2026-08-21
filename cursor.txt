@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        72cd31064e3d00c0      bash tools/bateria.sh
+    selo        e390daf4df69a5b0      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1083,9 +1083,8 @@ fontes exige repor E RECONSTRUIR entre cada um; um a um, e não em lote.
   4. OS NOMES DE COLUNA SÃO DESCARTADOS. `CREATE TABLE cliente
      (nome,idade,saldo)` → o SELECT devolve `a`,`b`,`c`, e
      `WHERE idade > 20` é «comando recusado».                      RESOLVIDO
-  5. O ALCANCE DE UMA CÉLULA É 0..255 (um átomo).      DADO: 16 bits (§27)
-     Falta o AVALIADOR do WHERE, que é polinomial e de 8 — a comparação numa
-     coluna larga é RECUSADA, contada e explicada.
+  5. O ALCANCE DE UMA CÉLULA. DADO: 16 bits (§27). AVALIADOR: a forma LINEAR
+     corre em 16 (§29). Falta o grau ≥ 2 (produto de 16×16 pede 32).
   6. Catálogo mínimo para um driver ligar (PG6).                   POR FAZER
 
 A TABELA É UM FICHEIRO .mem
@@ -1335,3 +1334,54 @@ O QUE FALTA PARA O AVALIADOR (as duas peças que sobram)
     torre dobra outra vez (a mesma conta, um andar acima)
   · e OP_ADD/OP_SUB ficam componente a componente — o catálogo guarda
     {ncols, nrows} numa Word e o `nrows++` soma ao `.e`
+
+
+29. O AVALIADOR NO ANDAR DE CIMA — o WHERE compara dezasseis bits
+==================================================================
+O §27 guardava dezasseis bits e RECUSAVA compará-los; o §28 provou o rei. Aqui
+o átomo LINEAR passa a correr no andar de cima, e o de oito fica intacto ao lado.
+
+COMO, e sem uma instrução nova para montar
+------------------------------------------
+  emit_valor16   o valor está em dois sítios (o baixo na linha, o alto em
+                 S_ALTO). Junta-se numa Word: TROCA leva (alto,0) a (0,alto) e o
+                 OP_ADD — COMPONENTE A COMPONENTE, que aqui é exactamente o que
+                 se quer — soma-lhe (baixo,0). Fica {baixo, alto}.
+  OP_ADD16/SUB16/CMP16   a Word lida como UM número. O OP_ADD fica como estava:
+                 o catálogo guarda {ncols, nrows} e o `nrows++` soma ao `.e`.
+  emit_mul_zeck16  o rei de 16 NÃO é opcode — GOLD = (a,b) ↦ (a+b, a) sobre dois
+                 slots são um ADD16 e uma cópia
+  emit_teste16   o sinal é o bit 15: máscara {0, 0x80} em S_MASK16
+
+E O ENVELOPE DA COMPARAÇÃO NÃO É O DO ARMAZENAMENTO
+----------------------------------------------------
+A célula guarda 0..65535 e o SELECT devolve-o. A comparação decide pelo SINAL da
+diferença, logo pede que a FORMA INTEIRA caia em 0..32767. Três coisas ficam de
+fora, cada uma com o seu motivo escrito:
+
+    grau >= 2               um produto de 16×16 pede 32 — a torre dobra outra vez
+    valor > 32767           o par lê-se NEGATIVO (`50000 < 100` dava verdadeiro)
+    2·x com x até 32767     a FORMA estoura, mesmo com a coluna a caber
+
+  E o majorante da forma não soma magnitudes: separa o MÁXIMO do MÍNIMO, senão
+  `medio − 100` com medio a 32767 era recusado — e ali a conta dá 32667.
+
+O QUE A LIGAÇÃO PONTA A PONTA APANHOU (outra vez)
+--------------------------------------------------
+`UPDATE ... SET v = 30000` escrevia só o átomo BAIXO e o alto ficava do valor
+ANTERIOR: sobre um v de 1000 dava 29952 — a linha errada no disco, calada.
+Nenhuma asserção o via. S_VA guarda o átomo alto do valor do SET e o emitido
+copia os dois.
+
+  medidor  cinco consultas certas em valores que o andar de oito não sabia ler,
+           os três casos recusados, um coeficiente MAIOR QUE UM que cabe (3·v,
+           que é F(4) e três deslocamentos do rei — com c = 1 errar o número de
+           passos acertava na mesma), e o UPDATE de 30000 lido de volta
+  gume     7 mutações, todas caem: o alto não junto · o ADD16 componente a
+           componente · o sinal no bit 7 · o rei com i passos · o limite da forma
+           · o envelope assinado · o SET só com o baixo
+
+FALTA
+-----
+  · grau ≥ 2 sobre colunas largas: `emit_mul` de 16×16 → acumulador de 32
+  · e aí o envelope da comparação sobe com ele

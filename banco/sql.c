@@ -88,6 +88,13 @@ static SqlOut *sql_cap = NULL;   /* preenchido por sql_executa quando out!=NULL 
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_GOLD, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
        OP_FOLD, OP_LOADS,
+       /* O ANDAR DE CIMA COMO INSTRUÇÕES PRÓPRIAS. O OP_ADD tem de continuar
+        * componente a componente: o catálogo guarda {ncols, nrows} numa Word e o
+        * `nrows++` soma 1 ao `.e` — com transporte a atravessar, um nrows de 255
+        * a passar a 256 subiria para o ncols. O par e o número são leituras
+        * DIFERENTES da mesma Word, e por isso são instruções diferentes.
+        * (E o GOLD de 16 não precisa de opcode: é ADD16 mais uma cópia.) */
+       OP_ADD16, OP_SUB16, OP_CMP16,
        /* saíram quatro nomes que estavam só neste enum: sem um único `case`, sem
         * entrada no montador e sem uso. Reservados que nunca correram — e manter
         * redundância custa mais do que a tirar. (Os nomes não se escrevem aqui: o
@@ -148,8 +155,12 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_FAIXA   (S_FOLD_ARG + 4u)      /* u32 LE de, u32 LE ate — OP_MARTELO */
 #define S_CONTA   4
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
+#define S_MASK16  59         /* o mesmo, um andar acima: {0, 0x80} — o bit 15 do par   */
 #define S_ACC     6          /* o acumulador booleano da cláusula inteira                */
-#define S_V       7          /* o valor do SET                                          */
+#define S_V       7          /* o valor do SET — o átomo BAIXO                          */
+#define S_VA      68         /* o átomo ALTO do valor do SET (o par, Lei 7) — 68 está
+                              * livre entre o S_CORPO (60..67) e o S_EXPR (72..199); o
+                              * 56 que eu tinha posto é o S_KZ+7 */
 #define S_K       8          /* 8..23  a constante de cada condição                     */
 #define S_COND    24         /* 24..39 o resultado de cada condição (0 ou 1)            */
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
@@ -572,6 +583,24 @@ static int col_larga(long j, long ncols, long nrows){
     return 0;
 }
 
+/* ── E O ENVELOPE DA COMPARAÇÃO É ASSINADO ───────────────────────────────────
+ * O avaliador decide pelo SINAL da diferença — é o bit 15 do par que dá o `<` e
+ * o `>`. Logo o envelope da COMPARAÇÃO não é o do armazenamento: um valor acima
+ * de 32767 lê-se NEGATIVO, e `50000 < 100` passava a verdadeiro.
+ *
+ * Guardar e comparar são coisas diferentes e têm envelopes diferentes: a célula
+ * guarda 0..65535 e o SELECT devolve-o; a comparação pede 0..32767. O que passa
+ * disso é RECUSADO — não se responde ao contrário. */
+#define CMP16_MAX 32767L
+static int col_larguissima(long j, long ncols, long nrows){
+    for(long i = 0; i < nrows; i++){
+        unsigned long v = (unsigned long)mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total
+                        | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total << 8);
+        if(v > (unsigned long)CMP16_MAX) return 1;
+    }
+    return 0;
+}
+
 /* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
  *
  * banco.c já tinha esta disciplina e o SQL não: aqui as células e o catálogo iam no MESMO
@@ -890,6 +919,23 @@ static int passo(Regs *r, unsigned prog_len){
     }
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
+    /* a Word lida como UM número de dezasseis bits: o vai-um atravessa (§26) */
+    case OP_ADD16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
+        x = ula_add16(a, b, NULL);
+        r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_SUB16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
+        x = ula_sub16(a, b, NULL);
+        r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_CMP16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e };
+        unsigned char f = 0;
+        if(zero(r->A) && zero(r->B)) f |= FL_ZERO;
+        if(ula_igual16(a, b)) f |= FL_EQ;
+        else if(ula_menor16(a, b)) f |= FL_LT;
+        r->flags = f;
+        break; }
     case OP_AND: r->R = ula_and(r->A, r->B); break;
     case OP_OR:  r->R = ula_or (r->A, r->B); break;
     case OP_XOR: r->R = ula_xor(r->A, r->B); break;
@@ -1864,6 +1910,142 @@ static void emit_mul_zeck(unsigned acc, unsigned termo, long n, int soma, unsign
     }
 }
 
+/* ══ O CAMINHO DE DEZASSEIS BITS — ao lado do de oito, não por cima ═══════════
+ *
+ * O valor de uma célula larga vive em dois sítios: o byte baixo no `.total` da
+ * linha e o alto no plano S_ALTO (§27). Para o avaliador o querer como UM número
+ * basta juntá-los numa Word — {baixo, alto} —, e aí `OP_ADD16` e companhia lêem-na
+ * como os dezasseis bits que ela é.
+ *
+ * E a junção faz-se com o que a ISA já tem: TROCA leva (alto,0) a (0,alto), e o
+ * OP_ADD — COMPONENTE A COMPONENTE, que aqui é exactamente o que se quer — junta
+ * (baixo,0) com (0,alto). Nenhuma instrução nova para montar o par. */
+static void emit_valor16(unsigned dest, long linha, long ncols, int cc, unsigned tmp){
+    /* dest ← (baixo, 0) */
+    emit_copia(S_LINHAS + (unsigned)(linha*ncols + cc), dest);
+    MOVE(dest, +1); MOVE(S_MT, +1); emit1(OP_AND); MOVE(dest, -1);
+    /* tmp ← (alto, 0) → TROCA → (0, alto) */
+    emit_copia(S_ALTO + (unsigned)(linha*ncols + cc), tmp);
+    MOVE(tmp, +1); MOVE(S_MT, +1); emit1(OP_AND); MOVE(tmp, -1);
+    MOVE(tmp, +1); emit1(OP_TROCA); MOVE(tmp, -1);
+    /* dest ← dest + tmp, componente a componente: (baixo, alto) */
+    MOVE(dest, +1); MOVE(tmp, +1); emit1(OP_ADD); MOVE(dest, -1);
+}
+
+/* n·x um andar acima: ZECKENDORF com o rei de dezasseis bits.
+ *
+ * O GOLD de 16 não é opcode: é (a,b) ↦ (a+b, a) sobre DOIS slots, e isso são um
+ * OP_ADD16 e uma cópia. A lei é a mesma do §28 — o que muda é quem a executa. */
+static void emit_mul_zeck16(unsigned acc, unsigned x, long n, int soma,
+                            unsigned ga, unsigned gb, unsigned tmp){
+    long fib[24]; int nf = 2;
+    fib[0] = 1; fib[1] = 2;                       /* F(2), F(3), … */
+    while(fib[nf-1] <= n/2 + 1 && nf < 23){ fib[nf] = fib[nf-1] + fib[nf-2]; nf++; }
+    long r = n;
+    for(int i = nf-1; i >= 0 && r > 0; i--){
+        if(fib[i] > r) continue;
+        r -= fib[i];
+        emit_copia(x, ga);                        /* o rei parte de (x, 0) */
+        emit_copia(S_ZERO, gb);
+        for(int t = 0; t <= i; t++){              /* fib[i] = F(i+2) → i+1 passos */
+            emit_copia(ga, tmp);                  /* guarda o a antigo */
+            MOVE(ga, +1); MOVE(gb, +1); emit1(OP_ADD16); MOVE(ga, -1);   /* a' = a + b */
+            emit_copia(tmp, gb);                                          /* b' = a     */
+        }
+        /* A ORDEM DO MOVE DECIDE O SINAL. `MOVE(x,+1)` empurra x para A e o A
+         * anterior para B, e o SUB faz A − B. Logo para `acc − ga` o ga entra
+         * PRIMEIRO — é o que o caminho de oito bits já fazia, e escrever os dois
+         * na mesma ordem dava `ga − acc`: o sinal ao contrário. */
+        if(soma){ MOVE(acc, +1); MOVE(ga, +1); emit1(OP_ADD16); }
+        else    { MOVE(ga, +1); MOVE(acc, +1); emit1(OP_SUB16); }
+        MOVE(acc, -1);
+    }
+}
+
+/* a comparação com zero, um andar acima: o sinal é o bit 15 do par */
+static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned kslot,
+                         long k, unsigned tmp){
+    Word w; w.total = (Word8)((unsigned long)k & 255u);
+    w.e = (Word8)(((unsigned long)k >> 8) & 255u);
+    mem_grava(kslot, w);
+    emit_copia(S_ZERO, destino);
+    if(cmp_op == '='){
+        MOVE(sc, +1); MOVE(kslot, +1); emit1(OP_SUB16);
+        MOVE(tmp, -1); MOVE(tmp, +1); MOVE(S_ZERO, +1); emit1(OP_CMP16);
+        emit1(OP_JZ); emit1(2);
+    } else {
+        if(cmp_op == '<'){ MOVE(kslot, +1); MOVE(sc, +1); }
+        else             { MOVE(sc, +1); MOVE(kslot, +1); }
+        emit1(OP_SUB16);
+        MOVE(tmp, -1); MOVE(tmp, +1);
+        MOVE(S_MASK16, +1); emit1(OP_AND);        /* o bit 15: o sinal do par */
+        MOVE(tmp, -1); MOVE(tmp, +1);
+        MOVE(S_ZERO, +1); emit1(OP_CMP);
+        emit1(OP_JNZ); emit1(2);
+    }
+    emit1(OP_JMP);
+    unsigned pos = pc_emit; emit1(0);
+    unsigned ini = pc_emit;
+    emit_copia(S_UM, destino);
+    unsigned char rel = (unsigned char)(pc_emit - ini);
+    pwrite(fprog, &rel, 1, (off_t)pos);
+}
+
+/* o maior valor guardado numa coluna (baixo + 256·alto) */
+static unsigned long col_max(long j, long ncols, long nrows){
+    unsigned long m = 0;
+    for(long i = 0; i < nrows; i++){
+        unsigned long v = (unsigned long)mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total
+                        | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total << 8);
+        if(v > m) m = v;
+    }
+    return m;
+}
+
+/* A FORMA LINEAR INTEIRA TEM DE CABER, e não só cada coluna. O avaliador decide
+ * pelo sinal de `c0 + Σ c_i·x_i`, logo é ESSA soma que precisa de caber em
+ * 0..32767 — `2·32767` já não cabe, e a resposta sairia ao contrário. O pior
+ * caso calcula-se em compilação, com o maior valor que cada coluna guarda. */
+static int cl_cabe16(const struct arvore *a, long ncols, long nrows){
+    for(int j = 0; j < a->natomo; j++){
+        /* o MÁXIMO e o MÍNIMO da forma, separados: somar magnitudes ignorava que
+         * um coeficiente negativo SUBTRAI, e recusava `medio − 100` com medio a
+         * chegar a 32767 — onde a conta dá 32667 e cabe à vontade. */
+        long long alto = 0, baixo = 0;
+        for(int cod = 0; cod < NMON; cod++){
+            long c = a->av[j].c[cod];
+            if(!c) continue;
+            int d[KGRAU]; mi_de(cod, d);
+            if(mi_cod(d) != cod) continue;
+            long long mag = 1;
+            for(int t = 0; t < KGRAU; t++){
+                if(!d[t]) continue;
+                long cc = d[t] - 1;
+                if(cc >= ncols) return 0;
+                unsigned long mx = col_max(cc, ncols, nrows);
+                mag *= (long long)(mx ? mx : 1);
+                if(mag > 0x7FFFFFFFLL) return 0;
+            }
+            long long parcela = (long long)c * mag;      /* x_i >= 0 sempre */
+            if(parcela > 0) alto += parcela; else baixo += parcela;
+        }
+        if(alto > CMP16_MAX || baixo < -(CMP16_MAX + 1)) return 0;
+    }
+    return 1;
+}
+
+/* algum átomo da cláusula tem monómio de grau ≥ 2? (o produto de dois valores) */
+static int cl_tem_grau2(const struct arvore *a){
+    for(int j = 0; j < a->natomo; j++)
+        for(int cod = 0; cod < NMON; cod++){
+            if(!a->av[j].c[cod]) continue;
+            int d[KGRAU]; mi_de(cod, d);
+            if(mi_cod(d) != cod) continue;
+            if(mi_grau(cod) >= 2) return 1;
+        }
+    return 0;
+}
+
 /* os átomos distintos, avaliados UMA vez por linha.
  *
  * O átomo já vem CONTRAÍDO num vetor: c0 + Σ c_i·x_i, comparado com 0. Se o vetor não tem
@@ -2024,6 +2206,57 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
         Word w; w.total = a->av[j].c[0]; w.e = 0;
         mem_grava(S_K + (unsigned)j, w);
         (void)ncit; (void)unica;
+
+        /* ── O ANDAR DE CIMA, QUANDO ELE É PRECISO ────────────────────────────
+         * Se alguma coluna citada guarda acima de 255, o caminho de oito bits não
+         * a sabe ler — e o §27 recusava a consulta inteira. Agora há o outro
+         * andar: monta-se o valor como {baixo, alto} numa Word e a conta corre em
+         * ADD16/SUB16, com o rei de Zeckendorf feito de ADD16 mais uma cópia.
+         *
+         * Só para GRAU ≤ 1. O grau 2 multiplica dois valores em execução, e um
+         * produto de dois de dezasseis pede TRINTA E DOIS — é a torre a dobrar
+         * outra vez, e é o trio seguinte. Até lá esse caso continua RECUSADO, com
+         * o motivo escrito. O caminho de oito bits fica byte a byte como estava. */
+        int atom_largo = 0, atom_grau = 0;
+        for(int cc = 0; cc < NCOL && cc < ncols; cc++)
+            if(cit[cc] && col_larga(cc, ncols, mem_le(S_CAT).e)) atom_largo = 1;
+        for(int cod = 0; cod < NMON; cod++){
+            if(!a->av[j].c[cod]) continue;
+            int dd[KGRAU]; mi_de(cod, dd);
+            if(mi_cod(dd) != cod) continue;
+            if(mi_grau(cod) > atom_grau) atom_grau = mi_grau(cod);
+        }
+        if(atom_largo && atom_grau <= 1){
+            unsigned x16 = acc + 1, ga = acc + 2, gb = acc + 3, tmp16 = acc + 4;
+            long c0 = a->av[j].c[0];
+            emit_copia(S_ZERO, acc);
+            if(c0){
+                Word wc; wc.total = (Word8)((unsigned long)(c0 < 0 ? -c0 : c0) & 255u);
+                wc.e = (Word8)(((unsigned long)(c0 < 0 ? -c0 : c0) >> 8) & 255u);
+                mem_grava(S_K + (unsigned)j, wc);
+                if(c0 > 0){ MOVE(acc, +1); MOVE(S_K + (unsigned)j, +1); emit1(OP_ADD16); }
+                else       { MOVE(S_K + (unsigned)j, +1); MOVE(acc, +1); emit1(OP_SUB16); }
+                MOVE(acc, -1);
+            }
+            for(int cod = 1; cod < NMON; cod++){
+                long c = a->av[j].c[cod];
+                if(!c) continue;
+                int d1[KGRAU]; mi_de(cod, d1);
+                if(mi_cod(d1) != cod) continue;
+                if(mi_grau(cod) != 1) continue;
+                int cc = -1;
+                for(int t = 0; t < KGRAU; t++) if(d1[t]) cc = d1[t] - 1;
+                if(cc < 0 || cc >= ncols) continue;
+                emit_valor16(x16, linha, ncols, cc, tmp16);
+                emit_mul_zeck16(acc, x16, c < 0 ? -c : c, c > 0, ga, gb, tmp16);
+            }
+            emit_teste16(acc, a->aop[j], dest, S_KZ + (unsigned)j, 0, acc + 5);
+            if(a->anega[j]){
+                MOVE(dest, +1); MOVE(S_UM, +1); emit1(OP_XOR); MOVE(dest, -1);
+            }
+            continue;
+        }
+
         emit_copia(S_ZERO, acc);          /* o constante entra pelo laço, como monômio vazio */
 
         /* percorre os monômios do multi-índice. Grau 0 já entrou; grau 1 tem coeficiente
@@ -2155,8 +2388,13 @@ static void prepara(long v){
     mem_grava(S_ZERO, w);
     mem_grava(S_CONTA, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
-    w.total = v; w.e = 0;                 mem_grava(S_V, w);
+    /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA. Escrever
+     * só o baixo deixava o átomo alto do valor ANTERIOR na célula — um
+     * `SET saldo = 30000` sobre um saldo de 20000 dava 20016, e nada o dizia. */
+    w.total = (Word8)((unsigned long)v & 255u); w.e = 0;                mem_grava(S_V, w);
+    w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0;         mem_grava(S_VA, w);
     w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
+    w.total = 0; w.e = 0x80; mem_grava(S_MASK16, w); /* bit 15 do par — o sinal um andar acima */
 }
 
 
@@ -2174,7 +2412,10 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
         emit1(OP_JZ);
         unsigned pos = pc_emit; emit1(0);
         unsigned ini = pc_emit;
-        if(acao == ACAO_SET) emit_copia(S_V,    S_LINHAS + (unsigned)(i*ncols + col_set));
+        if(acao == ACAO_SET){
+            emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
+            emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));   /* o par inteiro */
+        }
         else                 emit_copia(S_ZERO, S_VIVO  + (unsigned)i);
         unsigned char rel = (unsigned char)(pc_emit - ini);
         pwrite(fprog, &rel, 1, (off_t)pos);
@@ -2313,17 +2554,24 @@ static int varre(const char *resto, int acao){
         for(long j = 0; j < ncols && j < NCOL; j++){
             if(!(citadas_where & (1u << j))) continue;
             if(!col_larga(j, ncols, nrows)) continue;
+            /* o andar de dezasseis faz a forma LINEAR e decide pelo SINAL: pede
+             * grau ≤ 1 e valores dentro de 0..32767. O que sai disso recusa-se. */
+            if(!cl_tem_grau2(&cl) && !col_larguissima(j, ncols, nrows)
+               && cl_cabe16(&cl, ncols, nrows)) continue;
             char cn[S_COLNOME_W * 2 + 2];
             col_nome_le((int)j, cn, (int)sizeof cn);
             if(!cn[0]) snprintf(cn, sizeof cn, "%c", 'a' + (int)j);
-            printf("erro: a coluna «%s» guarda valores acima de 255, e o avaliador do"
-                   " WHERE é de oito bits.\n A comparação é RECUSADA — o valor está"
-                   " guardado inteiro e o SELECT sem WHERE devolve-o; o que não se faz"
-                   " é comparar metade dele.\n", cn);
+            printf("erro: a coluna «%s» não cabe no avaliador desta consulta.\n"
+                   " O andar de dezasseis faz a forma LINEAR e decide pelo SINAL da"
+                   " diferença: pede grau <= 1 e valores em 0..%ld. Um produto de dois"
+                   " valores de 16 pede 32, e acima de 32767 o par lê-se NEGATIVO.\n"
+                   " A comparação é RECUSADA — o valor está guardado inteiro e o SELECT"
+                   " devolve-o; o que não se faz é responder ao contrário.\n",
+                   cn, CMP16_MAX);
             if(sql_cap){
                 sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
-                         "column \"%s\" holds values above the 8-bit evaluator", cn);
+                         "column \"%s\" is wide and the term is not linear", cn);
             }
             cmp_recusadas++;
             return 0;
@@ -4005,6 +4253,96 @@ int main(int argc, char **argv){
                     * era escrever o resultado da medição dentro dela. */
                    mau == 0 && casos == 387 && largos > 100 && acima > 0
                    && w8est.total == 44 && w16_val(r16) == 300 && tr16 == 0);
+            }
+            /* ── O AVALIADOR NO ANDAR DE CIMA: o WHERE compara 16 bits ───────────
+             * O §27 guardava dezasseis bits e RECUSAVA compará-los. Agora o átomo
+             * linear corre no andar de cima: o valor monta-se como {baixo, alto}
+             * numa Word (TROCA + OP_ADD, sem instrução nova), a conta é ADD16/SUB16
+             * e o `c·x` é o rei de Zeckendorf feito de ADD16 mais uma cópia.
+             *
+             * E o ENVELOPE DA COMPARAÇÃO NÃO É O DO ARMAZENAMENTO. A célula guarda
+             * 0..65535 e o SELECT devolve-o; a comparação decide pelo SINAL da
+             * diferença, logo pede que a FORMA INTEIRA caia em 0..32767. Três
+             * coisas ficam de fora, e cada uma diz porquê:
+             *   grau >= 2   um produto de dois de 16 pede 32
+             *   valor > 32767   o par lê-se NEGATIVO
+             *   2·x com x até 32767   a forma estoura, mesmo com a coluna a caber
+             * Medem-se os dois lados: o que corre TEM de dar a resposta certa, e o
+             * que não cabe TEM de ser recusado — senão «recusa sempre» passava. */
+            {
+                SqlOut r1, r2, r3, r4, r5;
+                int q1, q2, q3, q4, q5, q6, q7;
+                executa("CREATE TABLE larga (pequeno,medio,enorme)");
+                executa("INSERT INTO larga VALUES (7,1000,50000)");
+                executa("INSERT INTO larga VALUES (9,20,3)");
+                executa("INSERT INTO larga VALUES (3,32767,7)");
+                sql_cap = &r1; memset(&r1, 0, sizeof r1);
+                q1 = executa("SELECT * FROM larga WHERE medio > 100");
+                sql_cap = &r2; memset(&r2, 0, sizeof r2);
+                q2 = executa("SELECT * FROM larga WHERE medio < 100");
+                sql_cap = &r3; memset(&r3, 0, sizeof r3);
+                q3 = executa("SELECT * FROM larga WHERE medio = 1000");
+                sql_cap = &r4; memset(&r4, 0, sizeof r4);
+                q4 = executa("SELECT * FROM larga WHERE medio > 30000");
+                sql_cap = &r5; memset(&r5, 0, sizeof r5);
+                q5 = executa("SELECT * FROM larga WHERE medio > 100 AND pequeno = 7");
+                sql_cap = NULL;
+                q6 = executa("SELECT * FROM larga WHERE medio * medio > 0");   /* grau 2 */
+                q7 = executa("SELECT * FROM larga WHERE enorme > 100");        /* > 32767 */
+                int q8 = executa("SELECT * FROM larga WHERE 2*medio > 2000");  /* a forma estoura */
+                /* E UM COEFICIENTE > 1 QUE CABE — senão o rei de Zeckendorf nunca é
+                 * exercitado: com c = 1 a decomposição é F(2) e um passo, e errar o
+                 * número de passos acerta na mesma. Aqui `3·x` com x até 1000 dá 3000,
+                 * bem dentro dos 32767, e F(4) = 3 pede TRÊS deslocamentos. */
+                SqlOut r6;
+                executa("CREATE TABLE larga2 (v)");
+                executa("INSERT INTO larga2 VALUES (1000)");
+                executa("INSERT INTO larga2 VALUES (300)");
+                executa("INSERT INTO larga2 VALUES (20)");
+                sql_cap = &r6; memset(&r6, 0, sizeof r6);
+                int q9 = executa("SELECT * FROM larga2 WHERE 3*v > 2000");
+                sql_cap = NULL;
+                /* E O UPDATE ESCREVE O PAR INTEIRO. Escrevia só o átomo baixo, e o
+                 * alto ficava do valor ANTERIOR: `SET v = 30000` sobre um v de 1000
+                 * dava 29952 — a linha errada no disco, calada. Foi a ligação ponta a
+                 * ponta pelo FEBE que o mostrou. */
+                SqlOut r7;
+                executa("UPDATE larga2 SET v = 30000 WHERE v = 1000");
+                sql_cap = &r7; memset(&r7, 0, sizeof r7);
+                int q10 = executa("SELECT * FROM larga2 WHERE v > 20000");
+                sql_cap = NULL;
+                printf("\n     >100 %d · <100 %d · =1000 %d · >30000 %d · com AND %d\n"
+                       "     recusados: grau2 %s · valor>32767 %s · forma a estourar %s\n",
+                       r1.nrows, r2.nrows, r3.nrows, r4.nrows, r5.nrows,
+                       q6 ? "NAO (mau)" : "sim", q7 ? "NAO (mau)" : "sim",
+                       q8 ? "NAO (mau)" : "sim");
+                printf("     e o coeficiente 3 (F(4), três deslocamentos do rei):"
+                       " 3·v > 2000 dá %d linha(s)%s\n", r6.nrows,
+                       r6.nrows == 1 ? " (só o 1000)" : "");
+                printf("     UPDATE v = 30000: lido de volta [%s]\n",
+                       r7.nrows ? r7.cell[0][0] : "—");
+                ok("O WHERE COMPARA DEZASSEIS BITS: o valor monta-se como {baixo, alto} numa"
+                   " Word — TROCA leva (alto,0) a (0,alto) e o OP_ADD componente a componente"
+                   " junta-os, sem instrução nova — e a conta corre em ADD16/SUB16 com o `c·x`"
+                   " a ser o rei de Zeckendorf. As cinco consultas dão a resposta CERTA em"
+                   " valores que o andar de oito não sabia ler. E o envelope da COMPARAÇÃO"
+                   " não é o do armazenamento: a célula guarda 0..65535 e o SELECT devolve-o,"
+                   " mas a decisão é pelo SINAL da diferença e pede a FORMA INTEIRA em"
+                   " 0..32767 — por isso o grau 2, o valor acima de 32767 e o `2·x` que"
+                   " estoura são RECUSADOS, cada um com o seu motivo. Sem os três, «recusa"
+                   " sempre» passava igual. E há um coeficiente MAIOR QUE UM que cabe —"
+                   " `3·v` com v até 1000 —, senão o rei de Zeckendorf nunca era"
+                   " exercitado: com c = 1 a decomposição é F(2) e um passo, e errar o"
+                   " número de passos acertava na mesma. E o UPDATE escreve o PAR: escrevia"
+                   " só o átomo baixo e o alto ficava do valor anterior — `SET v = 30000`"
+                   " sobre 1000 dava 29952, a linha errada no disco e calada",
+                   q1 && q2 && q3 && q4 && q5
+                   && r1.nrows == 2 && r2.nrows == 1 && r3.nrows == 1
+                   && r4.nrows == 1 && r5.nrows == 1
+                   && !strcmp(r3.cell[0][1], "1000") && !strcmp(r4.cell[0][1], "32767")
+                   && !q6 && !q7 && !q8
+                   && q9 && r6.nrows == 1 && !strcmp(r6.cell[0][0], "1000")
+                   && q10 && r7.nrows == 1 && !strcmp(r7.cell[0][0], "30000"));
             }
             /* ── E A BASE ANTIGA CONTINUA A ANDAR ────────────────────────────────
              * A letra é o RECURSO, e um recurso que nunca corre não é compatibilidade:
