@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        c131ccad8d479140      bash tools/bateria.sh
+    selo        6cd2c7a6a1b70680      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1082,7 +1082,7 @@ fontes exige repor E RECONSTRUIR entre cada um; um a um, e não em lote.
      com um `(int8_t)` à mão) e o SELECT mostrava **85**.           RESOLVIDO
   4. OS NOMES DE COLUNA SÃO DESCARTADOS. `CREATE TABLE cliente
      (nome,idade,saldo)` → o SELECT devolve `a`,`b`,`c`, e
-     `WHERE idade > 20` é «comando recusado».                      POR FAZER
+     `WHERE idade > 20` é «comando recusado».                      RESOLVIDO
   5. O ALCANCE DE UMA CÉLULA É 0..255 (um átomo). Alargar é subir a torre —
      uma célula de Word_8⁴.                                        POR FAZER
   6. Catálogo mínimo para um driver ligar (PG6).                   POR FAZER
@@ -1120,3 +1120,60 @@ sinal e mostrava outro número.
              cai (alfa devolve 1x3, as linhas da beta) · o envelope a aceitar
              tudo → cai · CREATE sem O_TRUNC → cai À SEGUNDA CORRIDA, e a
              primeira versão do meu gume não o via porque limpava o /tmp antes
+
+
+25. A COLUNA TEM NOME
+=======================
+`CREATE TABLE cliente (nome,idade,saldo)` lia os três identificadores e
+DEITAVA-OS FORA: só o corpo de cada coluna era guardado. A coluna era decidida
+por `nome[0] - 'a'` em três sítios, e a consequência não é cosmética —
+
+    SELECT * FROM cliente          →  colunas `a`, `b`, `c`
+    WHERE idade > 20               →  «comando recusado ou nao entendido»
+    UPDATE ... SET saldo = 99      →  pedia a coluna 's'−'a' = 18
+
+  região     S_COLNOME = 36864, 16 Words (32 caracteres) por coluna, 8 colunas —
+             acima das linhas (3024) e dos denominadores (35792), longe do mapa
+             que a ISA percorre. Dois caracteres por Word, como o nome da tabela.
+  ligado em  o CREATE guarda · o WHERE resolve · o SET resolve e RECUSA o que não
+             existe · o SELECT devolve o nome guardado
+  a LETRA    continua a valer onde NÃO há nomes guardados — as bases antigas e
+             todos os medidores que escrevem `(a,b,c)`. É recurso, não regra:
+             havendo nomes, `WHERE a` numa tabela `nome/idade/saldo` é RECUSADO.
+
+E A TABELA VAZIA TAMBÉM TEM COLUNAS. A saída antecipada de `varre` («ainda não
+há uma linha») devolvia `ncols = 0` e tag vazia: pela porta FEBE o driver ficava
+sem RowDescription e sem CommandComplete, e não distinguia «está vazia» de «a
+resposta perdeu-se». O caminho com WHERE já o fazia bem — a divergência era só
+aqui. Os DOIS caminhos até zero linhas dizem agora o mesmo.
+
+O DEFEITO QUE SÓ A LIGAÇÃO REAL MOSTROU
+---------------------------------------
+O `varre` resolvia a coluna do SET ANTES de abrir a tabela do FROM. Logo
+
+    SELECT * FROM conta            (a conta fica aberta)
+    UPDATE cliente SET saldo = 111 →  «column "saldo" does not exist»
+
+porque «saldo» era procurada na `conta`. Nenhuma asserção o via: nos testes a
+tabela do UPDATE era sempre a que já estava aberta. Foi uma sessão ponta a ponta
+pelo FEBE — CREATE, INSERT, SELECT noutra tabela, UPDATE de volta — que o
+mostrou. Abrir a tabela passou a vir PRIMEIRO, antes de resolver coluna nenhuma:
+uma coluna só existe DENTRO de uma tabela.
+
+  medidores  banco/sql.c (92 unidades): «A COLUNA TEM NOME», «A BASE ANTIGA
+             CONTINUA A ANDAR» (nomes apagados = base antiga, a letra volta a
+             valer), «UMA TABELA VAZIA TAMBÉM TEM COLUNAS»
+             tests/pgwire.c §W7: duas tabelas pela MESMA ligação, 5 passos
+  gume       8 mutações: o CREATE sem guardar · o WHERE pela letra · a saída a
+             devolver a,b,c · o SET pela letra · a letra a valer havendo nomes ·
+             a letra a NÃO valer sem nomes · col_tem_nomes a mentir · a ordem
+             trocada (3 de 5 passos). Todas caem.
+             E uma sobreviveu primeiro: tirar o recurso da letra não derrubava
+             nada, porque nenhuma tabela do medidor era antiga — o ramo da
+             compatibilidade nunca era visitado. Mede-se agora apagando os slots.
+
+PRÓXIMO
+-------
+  · o alcance de uma célula é UM átomo (0..255) — alargar é subir a torre, uma
+    célula de Word_8⁴. É o que falta para «funcional» a sério.
+  · catálogo mínimo do PG6 (version(), SHOW, o que um driver pede ao ligar)

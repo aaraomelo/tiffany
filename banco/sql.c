@@ -206,6 +206,19 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_DEN     33792      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
                               * move e→total, e a conta precisa de q como número. */
 #define S_LINHAS  1024
+/* ── O NOME DE CADA COLUNA — 36864.., 16 Words (32 caracteres) por coluna ─────
+ * O `CREATE TABLE cliente (nome,idade,saldo)` lia os três identificadores e
+ * DEITAVA-OS FORA: só o corpo de cada coluna era guardado. A consequência não é
+ * cosmética — o SELECT devolvia `a`, `b`, `c`, e `WHERE idade > 20` saía como
+ * «comando recusado», porque a coluna era decidida por `nome[0] - 'a'`. Um
+ * `UPDATE beta SET z = 99` pedia a coluna 25 numa tabela de três.
+ *
+ * A região fica acima das linhas (S_LINHAS + MAXLIN·8 = 3024) e dos
+ * denominadores (S_DEN + MAXLIN·8 = 35792), longe do mapa que a ISA percorre.
+ * Dois caracteres por Word, como o nome da tabela — é a mesma Lei 7. */
+#define S_COLNOME   36864u
+#define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
+#define S_COLNOME_N 8u         /* tantas quantas o S_CORPO segura */
 /* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
 #define MAXLIN    250
 #define MAXNO     64         /* nós da árvore do WHERE                                  */
@@ -470,6 +483,62 @@ static int cat_nome_recusa(const char *nome){
                  "relation \"%s\" does not exist", nome ? nome : "");
     }
     return 0;
+}
+
+/* ── OS NOMES DAS COLUNAS ─────────────────────────────────────────────────── */
+static void col_nome_grava(int j, const char *nome){
+    char n[S_COLNOME_W * 2 + 1];
+    unsigned i;
+    if(j < 0 || (unsigned)j >= S_COLNOME_N) return;
+    snprintf(n, sizeof n, "%s", nome ? nome : "");
+    for(i = 0; n[i]; i++) n[i] = baixa1(n[i]);
+    for(i = (unsigned)strlen(n); i < S_COLNOME_W * 2; i++) n[i] = 0;
+    for(i = 0; i < S_COLNOME_W; i++)
+        mem_grava(S_COLNOME + (unsigned)j * S_COLNOME_W + i,
+                  w8((unsigned)(unsigned char)n[2*i], (unsigned)(unsigned char)n[2*i + 1]));
+}
+
+static void col_nome_le(int j, char *out, int cap){
+    int k = 0;
+    unsigned i;
+    if(cap > 0) out[0] = 0;
+    if(j < 0 || (unsigned)j >= S_COLNOME_N) return;
+    for(i = 0; i < S_COLNOME_W && k + 2 < cap; i++){
+        Word w = mem_le(S_COLNOME + (unsigned)j * S_COLNOME_W + i);
+        out[k++] = (char)w.total;
+        out[k++] = (char)w.e;
+    }
+    if(k < cap) out[k] = 0; else out[cap - 1] = 0;
+}
+
+/* a tabela tem nomes guardados? (base antiga: não) */
+static int col_tem_nomes(void){
+    char n[S_COLNOME_W * 2 + 2];
+    col_nome_le(0, n, (int)sizeof n);
+    return n[0] != 0;
+}
+
+/* nome → índice da coluna. −1 quando não é coluna desta tabela.
+ *
+ * A LETRA CONTINUA A VALER, e tem de continuar: as bases antigas não têm nomes
+ * guardados, e todos os medidores da casa escrevem `(a,b,c)`. Mas ela é o RECURSO,
+ * não a regra — havendo nomes, é o nome que decide, e um `WHERE z` numa tabela de
+ * três colunas passa a ser recusado em vez de pedir a coluna 25. */
+static int col_indice(const char *nome){
+    char alvo[64], guardado[S_COLNOME_W * 2 + 2];
+    int i, j;
+    long ncols;
+    if(!nome || !nome[0]) return -1;
+    for(i = 0; nome[i] && i < (int)sizeof alvo - 1; i++) alvo[i] = baixa1(nome[i]);
+    alvo[i] = 0;
+    ncols = mem_le(S_CAT).total;
+    for(j = 0; j < (int)S_COLNOME_N && j < ncols; j++){
+        col_nome_le(j, guardado, (int)sizeof guardado);
+        if(guardado[0] && !strcmp(guardado, alvo)) return j;
+    }
+    if(col_tem_nomes()) return -1;              /* tem nomes e não é nenhum deles */
+    if(alvo[1] == 0 && alvo[0] >= 'a' && alvo[0] <= 'z') return alvo[0] - 'a';
+    return -1;
 }
 
 /* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
@@ -877,6 +946,7 @@ static int cria(const char *resto){
     long corpo[16], parm[16];
     while(1){
         if(!ident(&p, c, sizeof c)) break;
+        col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
         corpo[ncols] = CORPO_INTEIRO; parm[ncols] = 0;   /* sem tipo = INTEIRO, como sempre foi */
         pula(&p);
         char tipo[64];
@@ -1279,7 +1349,7 @@ static int le_fator_num(const char **p, struct tensor *t){
     if(isalpha((unsigned char)**p)){
         char nome[64];
         if(!ident(p, nome, sizeof nome)) return 0;
-        int col = (int)(nome[0] - 'a');
+        int col = col_indice(nome);          /* pelo NOME; a letra é o recurso das bases antigas */
         if(col < 0 || col >= NCOL) return 0;
         ten_var(t, col);                           /* o símbolo col+1 é a coluna */
         citadas_where |= 1u << col;                /* para a guarda de corpo — ver checa_corpos */
@@ -2036,18 +2106,36 @@ static int varre(const char *resto, int acao){
     } else if(acao == ACAO_SET){
         if(!ident(&p, nome, sizeof nome)) return 0;
         if(!palavra(&p, "SET")) return 0;
-        if(!ident(&p, alvo, sizeof alvo)) return 0;
-        pula(&p); if(*p != '=') return 0; p++;
-        if(!numero(&p, &v)) return 0;
-        col_set = (int)(alvo[0] - 'a'); if(col_set < 0) col_set = 0;
     } else {
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
-    /* o nome foi lido nos TRÊS ramos e não era usado em nenhum: agora ABRE a tabela
-     * (cada uma é o seu .mem) e confere que o catálogo lá dentro é mesmo o dela */
+    /* ABRIR A TABELA VEM PRIMEIRO — antes de resolver coluna nenhuma.
+     *
+     * O nome foi lido nos TRÊS ramos e não era usado em nenhum; agora abre-se o
+     * .mem da tabela e confere-se que o catálogo lá dentro é mesmo o dela. E isto
+     * tem de acontecer ANTES do `SET x` e do `WHERE`, porque uma coluna só existe
+     * DENTRO de uma tabela: com a ordem trocada, o `UPDATE cliente SET saldo`
+     * logo a seguir a um `SELECT * FROM conta` procurava a coluna «saldo» na
+     * `conta` e devolvia «column "saldo" does not exist». Foi a ligação ponta a
+     * ponta pelo FEBE que o mostrou — nenhuma asserção o via, porque nos testes a
+     * tabela do UPDATE era sempre a que já estava aberta. */
     if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
     if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
+    if(acao == ACAO_SET){
+        if(!ident(&p, alvo, sizeof alvo)) return 0;
+        pula(&p); if(*p != '=') return 0; p++;
+        if(!numero(&p, &v)) return 0;
+        col_set = col_indice(alvo);
+        if(col_set < 0){
+            printf("erro: a coluna «%s» não existe na tabela «%s» — o UPDATE é RECUSADO.\n",
+                   alvo, nome);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" does not exist", alvo); }
+            return 0;
+        }
+    }
     citadas_where = 0;
     tem_where = le_where(&p, &cl);
     if(tem_where < 0){
@@ -2059,7 +2147,32 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
-    if(nrows <= 0){ printf("(vazio)\n"); return 1; }
+    if(nrows <= 0){
+        /* A TABELA VAZIA TAMBÉM TEM COLUNAS, e uma consulta que não devolve linhas
+         * tem de devolver a DESCRIÇÃO delas e o `CommandComplete`. Esta saída
+         * antecipada devolvia `ncols = 0` e tag vazia: pela porta FEBE o driver
+         * ficava sem RowDescription e sem o «SELECT 0» que fecha o ciclo, e não
+         * distinguia «a tabela está vazia» de «a resposta perdeu-se».
+         *
+         * O caso com WHERE já o fazia bem — a divergência era só aqui, quando a
+         * tabela ainda não tem uma única linha. */
+        printf("(vazio)\n");
+        if(sql_cap && acao == ACAO_MARCA){
+            sql_cap->ncols = (int)(ncols > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : ncols);
+            for(int j = 0; j < sql_cap->ncols; j++){
+                char cn[S_COLNOME_W * 2 + 2];
+                col_nome_le(j, cn, (int)sizeof cn);
+                if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
+                else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + j);
+            }
+            sql_cap->nrows = 0;
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 0");
+        }else if(sql_cap){
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "%s 0",
+                     acao == ACAO_SET ? "UPDATE" : "DELETE");
+        }
+        return 1;
+    }
 
     /* A guarda que recusava consulta sobre coluna racional saiu daqui: a contração está
      * emitida em emit_atomos e a comparação é sobre o NUMERADOR do denominador comum. O que
@@ -2111,7 +2224,10 @@ static int varre(const char *resto, int acao){
     if(sql_cap){
         sql_cap->ncols = (int)(ncols > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : ncols);
         for(int j = 0; j < sql_cap->ncols; j++)
-            snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + j);
+            { char cn[S_COLNOME_W * 2 + 2];
+              col_nome_le((int)j, cn, (int)sizeof cn);
+              if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
+              else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + (int)j); }
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
         sql_cap->nrows = 0;
     }
@@ -3509,6 +3625,122 @@ int main(int argc, char **argv){
                    " truncado no disco e nada o dizia. Alargar a célula é subir a torre; o"
                    " que não se pode é guardar lixo em silêncio",
                    cabe && !nao && !neg && e1.nrows == 1 && !strcmp(e1.cell[0][0], "255"));
+            }
+            /* ── OS NOMES DAS COLUNAS ────────────────────────────────────────────
+             * `CREATE TABLE cliente (nome,idade,saldo)` lia os três identificadores
+             * e DEITAVA-OS FORA. O SELECT devolvia `a`,`b`,`c`; o `WHERE idade > 20`
+             * saía «comando recusado»; e o `UPDATE ... SET saldo` pedia a coluna
+             * 's'−'a' = 18 numa tabela de três, porque a coluna era decidida por
+             * `nome[0] - 'a'`.
+             *
+             * Mede-se o que PODE falhar, e pelos dois lados: os nomes voltam no
+             * SELECT, decidem no WHERE e no SET, e uma coluna que NÃO existe é
+             * recusada — sem a recusa, «resolve por nome» passava com a letra a
+             * fazer o trabalho na mesma. E a LETRA continua a valer onde não há
+             * nomes guardados, senão todas as bases antigas caíam. */
+            {
+                SqlOut c1, c2, c3;
+                executa("CREATE TABLE cliente (nome,idade,saldo)");
+                executa("INSERT INTO cliente VALUES (1,30,200)");
+                executa("INSERT INTO cliente VALUES (2,17,50)");
+                sql_cap = &c1; memset(&c1, 0, sizeof c1);
+                executa("SELECT * FROM cliente WHERE idade > 20");
+                sql_cap = &c2; memset(&c2, 0, sizeof c2);
+                int mau_nome = executa("SELECT * FROM cliente WHERE altura > 20");
+                /* e a LETRA deixa de valer onde há nomes: numa tabela cujas colunas se
+                 * chamam nome/idade/saldo, `WHERE a` não é a coluna 0 — é uma coluna que
+                 * não existe. Sem este caso, tirar a guarda que o garante não fazia cair
+                 * nada, porque «altura» tem mais de uma letra e era recusada na mesma. */
+                SqlOut cl; sql_cap = &cl; memset(&cl, 0, sizeof cl);
+                int letra_vale = executa("SELECT * FROM cliente WHERE a > 20");
+                sql_cap = &c3; memset(&c3, 0, sizeof c3);
+                int set_mau = executa("UPDATE cliente SET altura = 1 WHERE idade > 20");
+                sql_cap = NULL;
+                int set_bom = executa("UPDATE cliente SET saldo = 99 WHERE idade > 20");
+                SqlOut c4; sql_cap = &c4; memset(&c4, 0, sizeof c4);
+                executa("SELECT * FROM cliente");
+                sql_cap = NULL;
+                printf("\n     colunas: [%s][%s][%s] · WHERE idade>20 → %d linha(s)"
+                       " · «altura» %s · SET saldo %s\n",
+                       c1.col[0], c1.col[1], c1.col[2], c1.nrows,
+                       (!mau_nome && !set_mau) ? "recusada nos dois" : "ACEITE (mau)",
+                       set_bom ? "aplicado" : "RECUSADO (mau)");
+                printf("     e a letra «a» numa tabela com nomes: %s\n",
+                       letra_vale ? "ACEITE (mau)" : "recusada");
+                ok("A COLUNA TEM NOME, e ele decide: `CREATE TABLE cliente (nome,idade,saldo)`"
+                   " guarda os três, o SELECT devolve-os, o `WHERE idade > 20` corre e o"
+                   " `UPDATE ... SET saldo` acerta na coluna certa. Antes a coluna era"
+                   " `nome[0] - 'a'`: o SELECT dizia `a`,`b`,`c`, o WHERE por nome era"
+                   " recusado e o SET pedia a coluna 18. E o outro lado: uma coluna que não"
+                   " existe («altura») é RECUSADA no WHERE e no SET. E a LETRA deixa de"
+                   " valer onde há nomes: `WHERE a` nesta tabela é recusado, senão a letra"
+                   " fazia o trabalho na mesma e tirar a guarda não derrubava nada. Onde"
+                   " NÃO há nomes guardados — as bases antigas, e todos os medidores que"
+                   " escrevem (a,b,c) — a letra continua a ser a régua",
+                   !strcmp(c1.col[0], "nome") && !strcmp(c1.col[1], "idade")
+                   && !strcmp(c1.col[2], "saldo") && c1.nrows == 1
+                   && !mau_nome && !set_mau && set_bom && !letra_vale
+                   && !strcmp(c4.cell[0][2], "99") && !strcmp(c4.cell[1][2], "50"));
+            }
+            /* ── E A BASE ANTIGA CONTINUA A ANDAR ────────────────────────────────
+             * A letra é o RECURSO, e um recurso que nunca corre não é compatibilidade:
+             * é uma linha que ninguém mediu. Todas as tabelas deste ficheiro nascem
+             * com nomes guardados, logo o ramo da letra nunca era visitado — tirá-lo
+             * não derrubava nada.
+             *
+             * Uma base escrita antes desta mudança tem os slots do nome A ZERO, e é
+             * isso que se reproduz aqui: zeram-se, e o `WHERE a > 20` — que numa
+             * tabela com nomes é recusado — tem de voltar a valer. */
+            {
+                SqlOut o1, o2;
+                executa("CREATE TABLE antiga (nome,idade)");
+                executa("INSERT INTO antiga VALUES (1,30)");
+                executa("INSERT INTO antiga VALUES (2,17)");
+                sql_cap = &o1; memset(&o1, 0, sizeof o1);
+                int com_letra = executa("SELECT * FROM antiga WHERE a > 0");
+                sql_cap = NULL;
+                { Word z = {0,0}; unsigned i;      /* apaga os nomes: fica como uma base antiga */
+                  for(i = 0; i < S_COLNOME_N * S_COLNOME_W; i++) mem_grava(S_COLNOME + i, z); }
+                sql_cap = &o2; memset(&o2, 0, sizeof o2);
+                int sem_nomes = executa("SELECT * FROM antiga WHERE b > 20");
+                sql_cap = NULL;
+                printf("     com nomes: «a» %s · nomes apagados (base antiga): «b» %s,"
+                       " %d linha(s), colunas [%s][%s]\n",
+                       com_letra ? "ACEITE (mau)" : "recusada",
+                       sem_nomes ? "vale" : "RECUSADA (mau)", o2.nrows, o2.col[0], o2.col[1]);
+                ok("A BASE ANTIGA CONTINUA A ANDAR, e isso mede-se em vez de se prometer:"
+                   " apagados os slots do nome — que é exactamente o que uma base escrita"
+                   " antes desta mudança tem —, a LETRA volta a ser a régua, o `WHERE b > 20`"
+                   " corre, e o SELECT devolve `a`,`b`. Com os nomes lá, a mesma letra é"
+                   " recusada. São os dois lados do mesmo recurso, e sem o segundo o ramo"
+                   " da compatibilidade nunca era visitado por medidor nenhum",
+                   !com_letra && sem_nomes && o2.nrows == 1
+                   && !strcmp(o2.col[0], "a") && !strcmp(o2.col[1], "b"));
+            }
+            /* ── E A TABELA VAZIA TEM COLUNAS ─────────────────────────────────── */
+            {
+                SqlOut v1, v2;
+                executa("CREATE TABLE vazia (alfa,beta)");
+                sql_cap = &v1; memset(&v1, 0, sizeof v1);
+                executa("SELECT * FROM vazia");
+                sql_cap = NULL;                       /* senão o INSERT escreve por cima de v1 */
+                executa("INSERT INTO vazia VALUES (1,2)");
+                sql_cap = &v2; memset(&v2, 0, sizeof v2);
+                executa("SELECT * FROM vazia WHERE alfa = 9");
+                sql_cap = NULL;
+                printf("     vazia: sem linhas %dx%d tag=[%s] · com WHERE sem casar %dx%d"
+                       " tag=[%s]\n", v1.nrows, v1.ncols, v1.tag, v2.nrows, v2.ncols, v2.tag);
+                ok("UMA TABELA VAZIA TAMBÉM TEM COLUNAS: um SELECT que não devolve linhas"
+                   " devolve na mesma a DESCRIÇÃO delas e o «SELECT 0» que fecha o ciclo."
+                   " A saída antecipada do caso «ainda não há uma linha» devolvia ncols = 0"
+                   " e tag vazia — pela porta FEBE o driver ficava sem RowDescription e sem"
+                   " CommandComplete, e não distinguia «está vazia» de «a resposta"
+                   " perdeu-se». Os DOIS caminhos até zero linhas (tabela vazia e WHERE que"
+                   " não casa) têm de dizer o mesmo, e agora dizem",
+                   v1.ncols == 2 && v1.nrows == 0 && !strcmp(v1.tag, "SELECT 0")
+                   && !strcmp(v1.col[0], "alfa") && !strcmp(v1.col[1], "beta")
+                   && v2.ncols == v1.ncols && v2.nrows == 0
+                   && !strcmp(v2.tag, v1.tag) && !strcmp(v2.col[0], v1.col[0]));
             }
             executa("CREATE TABLE t (a,b,c)");     /* repõe a tabela do resto do teste */
             executa("INSERT INTO t VALUES (7,10,20)");

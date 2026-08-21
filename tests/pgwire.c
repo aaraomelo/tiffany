@@ -700,8 +700,8 @@ int main(void){
                 msg[2] = 'R';
                 if(write(sv[1], msg, 3) != 3){ close(lfd); sql_fechar(); _exit(5); }
             }
-            /* duas ligações: a boa e a do gume */
-            for(n = 0; n < 2; n++){
+            /* três ligações: a boa, a das duas tabelas e a do gume */
+            for(n = 0; n < 3; n++){
                 cfd = accept(lfd, NULL, NULL);
                 if(cfd < 0) break;
                 pgwire_serve_conn(cfd, 77, 88);
@@ -760,7 +760,46 @@ int main(void){
                 PQfinish(c);
             }
 
-            /* (3) O GUME: o erro tem de CHEGAR como erro, e não como zero linhas */
+            /* (3) DUAS TABELAS PELA MESMA LIGAÇÃO, e a coluna é da tabela do comando.
+             *
+             * Foi esta sequência que apanhou um defeito que nenhuma asserção via: o
+             * `varre` resolvia a coluna do SET ANTES de abrir a tabela do FROM, logo
+             * um `UPDATE cliente SET saldo` logo a seguir a um `SELECT * FROM conta`
+             * procurava «saldo» na `conta` e devolvia «column does not exist». Nos
+             * testes a tabela do UPDATE era sempre a que já estava aberta, e por isso
+             * o defeito não vivia lá. A ligação ponta a ponta é que o mostrou. */
+            {
+                PGconn *c3 = PQconnectdb(conninfo);
+                int seq_ok = 0;
+                if(PQstatus(c3) == CONNECTION_OK){
+                    PGresult *r;
+                    int passos = 0;
+                    r = PQexec(c3, "CREATE TABLE conta (dono,valor)");
+                    if(PQresultStatus(r) == PGRES_COMMAND_OK) passos++;
+                    PQclear(r);
+                    r = PQexec(c3, "INSERT INTO conta VALUES (1,99)");
+                    if(PQresultStatus(r) == PGRES_COMMAND_OK) passos++;
+                    PQclear(r);
+                    r = PQexec(c3, "SELECT * FROM conta");          /* a conta fica aberta */
+                    if(PQresultStatus(r) == PGRES_TUPLES_OK && PQntuples(r) == 1
+                       && PQnfields(r) == 2 && !strcmp(PQfname(r, 0), "dono")) passos++;
+                    PQclear(r);
+                    /* e agora o UPDATE noutra tabela, com a coluna DELA */
+                    r = PQexec(c3, "UPDATE t SET c = 111 WHERE a = 7");
+                    if(PQresultStatus(r) == PGRES_COMMAND_OK) passos++;
+                    PQclear(r);
+                    r = PQexec(c3, "SELECT * FROM t WHERE a = 7");
+                    if(PQresultStatus(r) == PGRES_TUPLES_OK && PQntuples(r) == 1
+                       && !strcmp(PQgetvalue(r, 0, 2), "111")) passos++;
+                    PQclear(r);
+                    printf("      duas tabelas pela mesma ligação: %d de 5 passos\n", passos);
+                    seq_ok = (passos == 5);
+                    PQfinish(c3);
+                }
+                if(!seq_ok) mal++;
+            }
+
+            /* (4) O GUME: o erro tem de CHEGAR como erro, e não como zero linhas */
             {
                 PGconn *c2 = PQconnectdb(conninfo);
                 int erro_ok = 0;
@@ -795,7 +834,11 @@ int main(void){
            " podia ser consistente consigo própria e errada. E o gume é o lado que"
            " tem de falhar — uma tabela que não existe chega como PGRES_FATAL_ERROR"
            " COM mensagem, e não como um SELECT de zero linhas, que é o desfecho que"
-           " engana quem chama",
+           " engana quem chama. E a mesma ligação serve DUAS tabelas — cria a `conta`,"
+           " lê-a, e a seguir faz UPDATE na `t` com uma coluna da `t`: foi essa sequência"
+           " que mostrou que a coluna era resolvida ANTES de a tabela ser aberta, e"
+           " nenhuma asserção o via porque nos testes a tabela do UPDATE era sempre a"
+           " que já estava aberta",
            mal == 0 && nrows_ref == 2 && ncols_ref == 3);
     }
 
