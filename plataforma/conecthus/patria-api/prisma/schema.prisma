@@ -1,0 +1,814 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  pending
+  planning
+  needs_info
+  awaiting_approval
+  approved
+  replanning
+  executing
+  deploying
+  completed
+  failed
+  rejected
+  cancelled
+  timed_out
+}
+
+enum ExecutionPhase {
+  planning
+  replanning
+  execution
+}
+
+enum Environment {
+  dev
+  homolog
+  prod
+}
+
+enum ProjectStatus {
+  planning
+  awaiting_review
+  approved
+  executing
+  paused
+  completed
+  failed
+  cancelled
+}
+
+// --- Projects ---
+
+model Project {
+  id                String        @id @default(uuid())
+  name              String
+  description       String?
+  status            ProjectStatus @default(planning)
+  autoApprove       Boolean       @default(false) @map("auto_approve")
+  createdBy         String        @default("patricia") @map("created_by")
+  channel           String        @default("whatsapp")
+  target            String        @default("+5511977808883")
+  totalSubtasks     Int           @default(0) @map("total_subtasks")
+  doneSubtasks      Int           @default(0) @map("done_subtasks")
+  environment       Environment   @default(dev)
+  promoteTo         Environment?  @map("promote_to")
+  branch            String?
+  branchDeleted     Boolean       @default(false) @map("branch_deleted")
+  deployedDevAt     DateTime?     @map("deployed_dev_at")
+  deployedHomologAt DateTime?     @map("deployed_homolog_at")
+  deployedProdAt    DateTime?     @map("deployed_prod_at")
+  tenantId          String        @default("patria") @map("tenant_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  subtasks  Task[]
+  plannings ProjectPlanning[]
+  sessions  ConversationSession[]
+
+  @@index([status])
+  @@index([tenantId])
+  @@map("projects")
+}
+
+model ProjectPlanning {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  role      String // "claude" | "director"
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("project_plannings")
+}
+
+// --- Tasks ---
+
+model Task {
+  id            String       @id @default(uuid())
+  status        TaskStatus   @default(pending)
+  command       String
+  description   String?
+  repo          String?      @map("project")
+  createdBy     String       @default("patricia") @map("created_by")
+  channel       String       @default("whatsapp")
+  target        String       @default("+5511977808883")
+  templateId    String?      @map("template_id")
+  replanCount   Int          @default(0) @map("replan_count")
+  projectId     String?      @map("project_id")
+  sortOrder     Int          @default(0) @map("sort_order")
+  dependsOnId   String?      @map("depends_on_id")
+  environment   Environment  @default(dev)
+  promoteTo     Environment? @map("promote_to")
+  branch        String?
+  branchDeleted Boolean      @default(false) @map("branch_deleted")
+  tenantId      String       @default("patria") @map("tenant_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  template      TaskTemplate?         @relation(fields: [templateId], references: [id])
+  parentProject Project?              @relation(fields: [projectId], references: [id])
+  dependsOn     Task?                 @relation("TaskDependency", fields: [dependsOnId], references: [id])
+  dependedBy    Task[]                @relation("TaskDependency")
+  executions    TaskExecution[]
+  transitions   TaskTransition[]
+  sessions      ConversationSession[]
+
+  @@index([status])
+  @@index([status, updatedAt])
+  @@index([projectId, sortOrder])
+  @@index([tenantId])
+  @@map("tasks")
+}
+
+model TaskExecution {
+  id         String         @id @default(uuid())
+  taskId     String         @map("task_id")
+  phase      ExecutionPhase
+  plan       String?
+  question   String?
+  feedback   String?
+  result     String?
+  commitSha  String?        @map("commit_sha")
+  startedAt  DateTime       @default(now()) @map("started_at")
+  finishedAt DateTime?      @map("finished_at")
+
+  task Task @relation(fields: [taskId], references: [id])
+
+  @@index([taskId])
+  @@map("task_executions")
+}
+
+model TaskTransition {
+  id         String   @id @default(uuid())
+  taskId     String   @map("task_id")
+  fromStatus String   @map("from_status")
+  toStatus   String   @map("to_status")
+  actor      String
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id])
+
+  @@index([taskId])
+  @@map("task_transitions")
+}
+
+// --- Auth ---
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  name            String?
+  lastName        String?   @map("last_name")
+  tenantId        String?   @unique @map("tenant_id")
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  tenant         Tenant?              @relation(fields: [tenantId], references: [id])
+  verifications  EmailVerification[]
+
+  @@map("users")
+}
+
+model EmailVerification {
+  id         Int      @id @default(autoincrement())
+  userId     String   @map("user_id")
+  token      String   @unique
+  expiresAt  DateTime @map("expires_at")
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("email_verifications")
+}
+
+model RevokedToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  revokedAt DateTime @default(now()) @map("revoked_at")
+
+  @@index([token])
+  @@map("revoked_tokens")
+}
+
+// --- Contacts ---
+
+model Contact {
+  id              String   @id @default(uuid())
+  name            String
+  email           String
+  message         String
+  phone           String?
+  whatsappConsent Boolean  @default(false) @map("whatsapp_consent")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("contacts")
+}
+
+// --- Patricia Gateway ---
+
+enum ConversationPhase {
+  idle
+  creating_task
+  discussing_project
+  monitoring
+  reviewing
+  diagnosing
+}
+
+model ConversationSession {
+  id              String            @id @default(uuid())
+  channel         String
+  target          String
+  phase           ConversationPhase @default(idle)
+  activeProjectId String?           @map("active_project_id")
+  activeTaskId    String?           @map("active_task_id")
+  lastUserMessage String?           @map("last_user_message")
+  lastActionAt    DateTime          @default(now()) @map("last_action_at")
+  metadata        Json?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  activeProject Project?             @relation(fields: [activeProjectId], references: [id])
+  activeTask    Task?                @relation(fields: [activeTaskId], references: [id])
+  actions       ConversationAction[]
+
+  @@unique([channel, target])
+  @@map("conversation_sessions")
+}
+
+model ConversationAction {
+  id           String   @id @default(uuid())
+  sessionId    String   @map("session_id")
+  action       String
+  endpoint     String?
+  requestBody  Json?    @map("request_body")
+  responseCode Int      @default(200) @map("response_code")
+  blocked      Boolean  @default(false)
+  blockReason  String?  @map("block_reason")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  session ConversationSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@map("conversation_actions")
+}
+
+model SpecialistSession {
+  id        String    @id @default(uuid())
+  channel   String
+  target    String
+  repo      String    @default("patria-api")
+  sessionId String?   @map("claude_session_id")
+  status    String    @default("active") // active | closed
+  createdAt DateTime  @default(now()) @map("created_at")
+  closedAt  DateTime? @map("closed_at")
+
+  @@unique([channel, target, status])
+  @@map("specialist_sessions")
+}
+
+model SpecialistMessage {
+  id         String   @id @default(uuid())
+  sessionRef String   @map("session_ref")
+  role       String // user | specialist
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([sessionRef])
+  @@map("specialist_messages")
+}
+
+model SpecialistQuery {
+  id        String   @id @default(uuid())
+  question  String
+  type      String   @default("diagnose") // diagnose | consult
+  repo      String?
+  projectId String?  @map("project_id")
+  channel   String   @default("whatsapp")
+  target    String   @default("+5511977808883")
+  status    String   @default("pending") // pending | processing | completed | failed
+  answer    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("specialist_queries")
+}
+
+// --- Tenants ---
+
+enum TenantPlan {
+  starter
+  pro
+  enterprise
+}
+
+enum TenantStatus {
+  trial
+  active
+  suspended
+}
+
+model Tenant {
+  id                String       @id @default(uuid())
+  alias             String       @unique
+  name              String
+  companyName       String       @map("company_name")
+  apiKey            String?      @unique @map("api_key")
+  plan              TenantPlan   @default(starter)
+  status            TenantStatus @default(trial)
+  githubOrg         String?      @map("github_org")
+  githubRepos       String[]     @map("github_repos")
+  githubAccessToken String?      @map("github_access_token")
+  trialEndsAt       DateTime?    @map("trial_ends_at")
+  // Billing
+  billingProvider   String?      @map("billing_provider")
+  billingEmail      String?      @map("billing_email")
+  subscriptionCode  String?      @map("subscription_code")
+  subscriptionStatus String?     @map("subscription_status")
+  planRenewsAt      DateTime?    @map("plan_renews_at")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  users TenantUser[]
+  owner User?
+
+  @@map("tenants")
+}
+
+model BillingEvent {
+  id         Int      @id @default(autoincrement())
+  ts         DateTime @default(now())
+  provider   String
+  eventType  String   @map("event_type")
+  tenantId   String?  @map("tenant_id")
+  payload    Json
+  processed  Boolean  @default(false)
+
+  @@index([ts(sort: Desc)])
+  @@index([tenantId])
+  @@map("billing_events")
+}
+
+model TenantUser {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  email        String
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("member")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("tenant_users")
+}
+
+// --- Patricia Memory ---
+
+model PatriciaMemory {
+  id             String    @id @default(uuid())
+  category       String // product, project, decision, preference, person, technical
+  priority       String    @default("long_term") // core, long_term, short_term
+  state          String    @default("active") // active, archived, expired
+  visibility     String    @default("global") // private, group, global
+  personId       String?   @map("person_id")
+  title          String
+  content        String
+  accessCount    Int       @default(0) @map("access_count")
+  lastAccessedAt DateTime? @map("last_accessed_at")
+  promotedAt     DateTime? @map("promoted_at")
+  sourceModel    String?   @map("source_model")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  person Person? @relation(fields: [personId], references: [id])
+
+  @@index([category])
+  @@index([priority])
+  @@index([state])
+  @@index([personId])
+  @@index([visibility])
+  @@index([accessCount(sort: Desc)])
+  @@map("patricia_memories")
+}
+
+// --- Profiles ---
+
+model Profile {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  systemPrompt String   @map("system_prompt")
+  allowedTools Json     @default("[]") @map("allowed_tools")
+  memoryAccess String   @default("own") @map("memory_access") // own, group, global, all
+  memoryRules  String?  @map("memory_rules")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  people Person[]
+
+  @@map("profiles")
+}
+
+// --- People ---
+
+model Person {
+  id          String   @id @default(uuid())
+  name        String
+  role        String   @default("member") // director, member
+  description String? // "irmã do Aarão", "amigo da igreja", etc.
+  email       String?
+  phone       String?
+  profileId   String?  @map("profile_id")
+  tenantId    String   @default("patria") @map("tenant_id")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  context      Json?    @default("{}")
+  passwordHash String?  @map("password_hash")
+
+  profile  Profile?           @relation(fields: [profileId], references: [id])
+  contacts MessagingContact[]
+  memories PatriciaMemory[]
+  messages PersonMessage[]
+
+  @@index([role])
+  @@index([phone])
+  @@index([tenantId])
+  @@map("people")
+}
+
+// embedding adicionado em 27/04/2026 — busca semântica cross-channel.
+model PersonMessage {
+  id         String                      @id @default(uuid())
+  personId   String                      @map("person_id")
+  channel    String
+  role       String // user | assistant
+  content    String
+  model      String?
+  embedding  Unsupported("vector(768)")?
+  embeddedAt DateTime?                   @map("embedded_at")
+  createdAt  DateTime                    @default(now()) @map("created_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+  @@index([createdAt])
+  @@index([embeddedAt])
+  @@map("person_messages")
+}
+
+// --- Messaging ---
+
+enum ChannelType {
+  whatsapp
+  telegram
+  web
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+model MessagingContact {
+  id          String      @id @default(uuid())
+  channelType ChannelType @map("channel_type")
+  remoteId    String      @map("remote_id")
+  displayName String?     @map("display_name")
+  phone       String?
+  isGroup     Boolean     @default(false) @map("is_group")
+  personId    String?     @map("person_id")
+  tenantId    String      @default("patria") @map("tenant_id")
+  metadata    Json?
+  lastSeenAt  DateTime?   @map("last_seen_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  person   Person?      @relation(fields: [personId], references: [id])
+  messages MessageLog[]
+
+  @@unique([channelType, remoteId])
+  @@index([tenantId])
+  @@index([phone])
+  @@map("messaging_contacts")
+}
+
+model MessageLog {
+  id           String           @id @default(uuid())
+  contactId    String           @map("contact_id")
+  direction    MessageDirection
+  content      String
+  messageId    String?          @map("message_id")
+  status       String           @default("pending")
+  errorMessage String?          @map("error_message")
+  metadata     Json?
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  contact MessagingContact @relation(fields: [contactId], references: [id])
+
+  @@index([contactId])
+  @@index([createdAt])
+  @@map("message_logs")
+}
+
+// --- Templates ---
+
+model TaskTemplate {
+  id                  String   @id @default(uuid())
+  name                String
+  slug                String   @unique
+  commandTemplate     String   @map("command_template")
+  descriptionTemplate String?  @map("description_template")
+  repo                String?  @map("project")
+  fields              Json     @default("[]")
+  createdBy           String   @map("created_by")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  tasks Task[]
+
+  @@index([slug])
+  @@map("task_templates")
+}
+
+model PatriciaConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("patricia_config")
+}
+
+// --- Teoria hipercomplexa: chunks de .tex com embedding pra busca semântica ---
+model TheoryChunk {
+  id          BigInt                      @id @default(autoincrement())
+  file        String // ex: "papers/paper_L_stokes.tex"
+  section     String? // ex: "6.10 Auto-amortecimento espectral"
+  chunkIdx    Int                         @map("chunk_idx") // ordem dentro da section
+  content     String                      @db.Text
+  contentHash String                      @map("content_hash") // sha1 pra detectar mudança
+  charCount   Int                         @map("char_count")
+  embedding   Unsupported("vector(768)")?
+  embeddedAt  DateTime?                   @map("embedded_at")
+  updatedAt   DateTime                    @updatedAt @map("updated_at")
+  createdAt   DateTime                    @default(now()) @map("created_at")
+
+  @@unique([file, chunkIdx])
+  @@index([file])
+  @@index([embeddedAt])
+  @@index([contentHash])
+  @@map("theory_chunks")
+}
+
+// --- Organism nerve: eventos vindos do GEX44 (multiverso) ---
+model OrganismEvent {
+  id         BigInt                      @id @default(autoincrement())
+  ts         DateTime                    @default(now())
+  receivedAt DateTime                    @default(now()) @map("received_at")
+  source     String // U1..U13, coracao, meta_veia, stokes, ...
+  kind       String // hunger, sated, rest, seizure, birth, death, drift, spike, ...
+  severity   Int                         @default(3) // 1..9
+  data       Json?
+  // embedding gerado async via Gemini — Prisma não modela vector nativamente
+  embedding  Unsupported("vector(768)")?
+  consumedAt DateTime?                   @map("consumed_at")
+  consumedBy String?                     @map("consumed_by")
+  notifiedAt DateTime?                   @map("notified_at")
+
+  @@index([ts(sort: Desc)])
+  @@index([kind])
+  @@index([source])
+  @@index([consumedAt])
+  @@map("organism_events")
+}
+
+// --- NCO API: log de chamadas para dashboard cliente ---
+model NcoCall {
+  id         BigInt   @id @default(autoincrement())
+  ts         DateTime @default(now())
+  apiKey     String   @map("api_key")
+  apiAgent   String   @map("api_agent") // patricia/worker/admin/tenant
+  endpoint   String // maxcut/coloring/mis
+  n          Int // tamanho do problema
+  modelName  String?  @map("model_name") // hiper/vet/3col
+  rollouts   Int?
+  result     Json? // cut/colors/independent_set + assignment (se quisermos guardar)
+  timeMs     Float?   @map("time_ms")
+  statusCode Int      @default(200) @map("status_code")
+  errorMsg   String?  @map("error_msg")
+
+  @@index([ts(sort: Desc)])
+  @@index([apiKey])
+  @@index([endpoint])
+  @@map("nco_calls")
+}
+
+// --- i18n: strings traduzidas servidas dinamicamente ---
+model I18nString {
+  id        Int      @id @default(autoincrement())
+  lang      String   // pt, en
+  key       String   // ex: dash.plan_label
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([lang, key])
+  @@index([lang])
+  @@map("i18n_strings")
+}
+
+// --- Papers: metadados + arquivos PDF/TeX versionados por idioma ---
+model Paper {
+  slug      String   @id
+  date      DateTime
+  authors   String[]
+  tags      String[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  i18n  PaperI18n[]
+  files PaperFile[]
+
+  @@map("papers")
+}
+
+model PaperI18n {
+  id         Int    @id @default(autoincrement())
+  paperSlug  String @map("paper_slug")
+  lang       String // pt, en
+  title      String
+  abstract   String @db.Text
+
+  paper Paper @relation(fields: [paperSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([paperSlug, lang])
+  @@index([lang])
+  @@map("paper_i18n")
+}
+
+model PaperFile {
+  id         Int      @id @default(autoincrement())
+  paperSlug  String   @map("paper_slug")
+  lang       String   // pt, en
+  kind       String   // pdf, tex
+  data       Bytes
+  sizeBytes  Int      @map("size_bytes")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  paper Paper @relation(fields: [paperSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([paperSlug, lang, kind])
+  @@index([paperSlug, lang])
+  @@map("paper_files")
+}
+
+// --- Outbound emails: cold outreach pra clientes Enterprise ---
+model OutboundEmail {
+  id          Int       @id @default(autoincrement())
+  toEmail     String    @map("to_email")
+  toName      String?   @map("to_name")
+  toCompany   String?   @map("to_company")
+  subject     String
+  body        String    @db.Text
+  status      String    @default("draft") // draft, queued, sent, failed, replied, opted_out
+  campaignTag String?   @map("campaign_tag") // ex: outbound_tier1_retail
+  createdAt   DateTime  @default(now()) @map("created_at")
+  sentAt      DateTime? @map("sent_at")
+  repliedAt   DateTime? @map("replied_at")
+  errorMsg    String?   @map("error_msg")
+  metadata    Json?
+
+  @@index([status])
+  @@index([campaignTag])
+  @@index([toEmail])
+  @@map("outbound_emails")
+}
+
+// --- CRM lite: prospects de outbound B2B Enterprise ---
+model Prospect {
+  id            Int       @id @default(autoincrement())
+  fullName      String    @map("full_name")
+  title         String?
+  company       String?
+  primaryEmail  String?   @map("primary_email")
+  emails        String[]  // work + personal
+  phones        String[]
+  location      String?
+  linkedinUrl   String?   @map("linkedin_url")
+  previousRoles Json?     @map("previous_roles")
+  source        String?   // apollo, linkedin, manual
+  metadata      Json?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([company])
+  @@index([primaryEmail])
+  @@map("prospects_b2b")
+}
+
+// ============ modelos preservados do main ============
+
+model CodeChunk {
+  id          BigInt    @id @default(autoincrement())
+  file        String    // ex: "bus/coracao_central.py"
+  symbol      String?   // nome de função/classe quando AST detecta; null em código top-level
+  kind        String    // "function" | "class" | "block" | "module"
+  startLine   Int       @map("start_line")
+  endLine     Int       @map("end_line")
+  content     String    @db.Text
+  contentHash String    @map("content_hash")
+  charCount   Int       @map("char_count")
+  embedding   Unsupported("vector(768)")?
+  embeddedAt  DateTime? @map("embedded_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@unique([file, startLine])
+  @@index([file])
+  @@index([symbol])
+  @@index([embeddedAt])
+  @@index([contentHash])
+  @@map("code_chunks")
+}
+
+model MediaJob {
+  id           String    @id @default(uuid())
+  kind         String    // "image" | "audio"
+  status       String    @default("pending") // pending | processing | done | failed
+  params       Json      // { prompt, provider, size, quality }
+  channel      String
+  target       String
+  resultUrl    String?   @map("result_url")
+  error        String?
+  attempts     Int       @default(0)
+  privacyMode  Boolean   @default(false) @map("privacy_mode")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  startedAt    DateTime? @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("media_jobs")
+}
+
+model MultiversoControlLog {
+  id          BigInt   @id @default(autoincrement())
+  ts          DateTime @default(now())
+  target      String                                // vid alvo
+  cmd         String                                // "override" | "pause" | ...
+  factor      Float?                                // 0..1 quando cmd=override
+  durationSec Int?     @map("duration_sec")
+  expiresAt   DateTime? @map("expires_at")
+  issuedBy    String   @default("patricia") @map("issued_by")
+  reason      String?  @db.Text                     // contexto livre
+  ackOk       Boolean? @map("ack_ok")               // server.py mandou ACK?
+
+  @@index([ts(sort: Desc)])
+  @@index([target])
+  @@map("multiverso_control_log")
+}
+
+model MultiversoVoluntario {
+  id           String    @id @default(uuid())
+  vid          String    @unique  // ex: "paubrasil-srv-tools" — bate com argVolunteerId
+  displayName  String    @map("display_name")  // ex: "Pau Brasil"
+  host         String?                          // ex: "paubrasil"
+  role         String    @default("voluntary")  // "voluntary" | "general" | "coord"
+  runtime      String    @default("python")     // "python" | "haskell-hs"
+  isLab        Boolean   @default(false) @map("is_lab")  // paubrasil é laboratório
+  description  String    @db.Text   // texto livre — base do embedding
+  embedding    Unsupported("vector(768)")?
+  embeddedAt   DateTime? @map("embedded_at")
+  lastSeenAt   DateTime? @map("last_seen_at")
+  lastMetrics  Json?     @map("last_metrics")   // snapshot mais recente do leaderboard
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([role])
+  @@index([runtime])
+  @@index([embeddedAt])
+  @@map("multiverso_voluntarios")
+}

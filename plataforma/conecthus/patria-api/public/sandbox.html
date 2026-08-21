@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🔒 Modo Privado</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    *{margin:0;padding:0}body{overflow:hidden;background:#000;touch-action:none}
+    canvas{display:block;width:100vw;height:100vh}
+    .overlay{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1}
+    .lock{font-size:48px;transition:all 1s ease}
+    .status{position:fixed;bottom:30px;left:0;right:0;text-align:center;font-family:-apple-system,sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,.7);z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="overlay"><div class="lock" id="lock">🔒</div></div>
+  <div class="status" id="status">Ativando...</div>
+  <script>
+  const canvas=document.getElementById('c');
+  const gl=canvas.getContext('webgl2');
+  let aS=0,tS=0,time=0,mx=.5,my=.5;
+
+  canvas.addEventListener('mousemove',e=>{mx=e.clientX/window.innerWidth;my=1.-e.clientY/window.innerHeight;});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];mx=t.clientX/window.innerWidth;my=1.-t.clientY/window.innerHeight;},{passive:false});
+
+  if(gl){
+    const vs=`#version 300 es
+in vec2 p;
+void main(){gl_Position=vec4(p,0,1);}`;
+
+    const fs=`#version 300 es
+precision highp float;
+uniform float iTime;
+uniform float S;
+uniform vec2 iResolution;
+uniform vec4 iMouse;
+out vec4 fragColor;
+
+void main(){
+  vec2 v=iResolution.xy;
+  vec2 u=.2*(gl_FragCoord.xy+gl_FragCoord.xy-v)/v.y;
+
+  vec4 z=vec4(1,2,3,0);
+  vec4 o=z;
+
+  float a=.5;
+  float t=iTime*1.1;
+
+  for(float i=1.;i<19.;i+=1.){
+    o+=(1.+cos(z+t))
+      /length((1.+i*dot(v,v))
+      *sin(1.5*u/(.5-dot(u,u))-9.*u.yx+t));
+
+    t+=1.;
+    a+=.03;
+    v=cos(t-7.*u*pow(a,i))-5.*u;
+
+    u*=mat2(cos(i+.02*t-z.wxzw*11.));
+
+    u+=tanh(40.*dot(u,u)*cos(1e2*u.yx+t))/2e2
+      +.2*a*u
+      +cos(4./exp(dot(o,o)/1e2)+t)/3e2;
+  }
+
+  o=25.6/(min(o,13.)+164./o)-dot(u,u)/250.;
+
+  // Color shift based on state
+  vec3 col=o.rgb;
+  col=mix(col.gbr*.8+vec3(.1,0,0), col, S);
+
+  fragColor=vec4(max(col,0.),1);
+}`;
+
+    function mk(t,s){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);
+      if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error('SHADER:',gl.getShaderInfoLog(sh));return sh;}
+    const prog=gl.createProgram();
+    gl.attachShader(prog,mk(gl.VERTEX_SHADER,vs));
+    gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fs));
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog,gl.LINK_STATUS))console.error('LINK:',gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    const uT=gl.getUniformLocation(prog,'iTime'),uS=gl.getUniformLocation(prog,'S');
+    const uR=gl.getUniformLocation(prog,'iResolution'),uM=gl.getUniformLocation(prog,'iMouse');
+
+    function resize(){const d=Math.min(devicePixelRatio,1.5);
+      const w=window.innerWidth*d,h=window.innerHeight*d;
+      if(w>0&&h>0){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}}
+    window.addEventListener('resize',resize);
+
+    function render(){time+=.016;aS+=(tS-aS)*.025;
+      if(canvas.width<2){resize();} // retry if not ready
+      gl.uniform1f(uT,time);gl.uniform1f(uS,aS);
+      gl.uniform2f(uR,canvas.width,canvas.height);
+      gl.uniform4f(uM,mx*canvas.width,my*canvas.height,0,0);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(render);}
+    // Wait for layout before first render
+    requestAnimationFrame(()=>{resize();render();});
+  } else {
+    document.getElementById('status').textContent='WebGL 2 não suportado';
+  }
+
+  const tg=window.Telegram.WebApp,chatId=tg.initDataUnsafe?.user?.id;let sse=null;
+  function setActive(){tS=1;document.getElementById('lock').textContent='🔒';
+    document.getElementById('lock').style.filter='drop-shadow(0 0 30px rgba(74,222,128,.9))';
+    document.getElementById('status').textContent='Modo privado ativo';}
+  function setInactive(){tS=0;document.getElementById('lock').textContent='🔓';
+    document.getElementById('lock').style.filter='drop-shadow(0 0 30px rgba(248,113,113,.9))';
+    document.getElementById('status').textContent='Modo privado encerrado';}
+  function connectSSE(){if(sse)try{sse.close();}catch{}
+    sse=new EventSource('/api/sandbox/stream?chatId='+chatId);
+    sse.onmessage=(e)=>{if(e.data==='close'){setInactive();setTimeout(()=>{try{tg.close();}catch{}},2000);}
+      if(e.data==='connected')setActive();};
+    sse.onerror=()=>{setInactive();setTimeout(connectSSE,3000);};}
+  async function activate(){try{const r=await fetch('/api/sandbox/activate',{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});
+    const d=await r.json();if(d.ok){setActive();connectSSE();}
+    else document.getElementById('status').textContent=d.error||'Erro';
+  }catch(e){document.getElementById('status').textContent='Erro: '+e.message;}}
+  if(tg.initData)activate();else{setActive();}
+  </script>
+</body>
+</html>
