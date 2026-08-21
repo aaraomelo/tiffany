@@ -2762,6 +2762,81 @@ static int lista_colunas(const char **pp, char *out, int cap){
     return n > 0;
 }
 static char proj_cols[256] = "*";
+static char ord_col[64] = "";        /* a coluna do ORDER BY, "" se não houver */
+static int  ord_desc = 0;
+
+/* ── ORDENAR É DESCER A ÁRVORE, e a árvore é a do banco ─────────────────────
+ *
+ * «ordenar e cortar são duais: ordenar dá a PROFUNDIDADE — o caminho inteiro,
+ * todos os dígitos; cortar dá a PARIDADE — um dígito» (arquitetura.tex §max-cut).
+ * Aqui usa-se a ordem: insere-se descendo pelos símbolos do valor, e percorre-se
+ * com os símbolos por ordem. É o mesmo mecanismo do `dualsort_banco.c` e do
+ * `no_filho` da cifra — não se inventa uma terceira estrutura.
+ *
+ * A CHAVE É (valor, índice), e não o valor: valores repetidos são uma FIBRA, e
+ * o índice da linha é a coordenada que os separa — o levantamento, outra vez.
+ * Sem ele os repetidos cairiam no mesmo caminho e perder-se-ia que linha era.
+ *
+ * O alfabeto é de 16 (um nibble por nível) e não de 256: com 256 cada nó custa
+ * 256 slots e a árvore não caberia na zona livre do .mem. Dez níveis cobrem os
+ * 32 bits do valor mais 8 do índice. O TECTO É VERIFICADO: se os nós acabarem,
+ * a consulta é RECUSADA — ordenar metade seria devolver uma ordem que não é a
+ * pedida. */
+#define S_ORD      (S_LINHAS + 25000u)   /* zona livre entre as linhas e os nomes */
+#define S_ORDCAB   (S_ORD - 1)
+#define ORD_LARG   16u                   /* um nibble por nível */
+#define ORD_NIV    10                    /* 8 do valor + 2 do índice */
+#define ORD_MAXNO  600u
+
+static unsigned ord_novo(void){
+    long n = mem_le(S_ORDCAB).total; if(n < 1) n = 1;      /* 0 é a raiz */
+    if((unsigned)n >= ORD_MAXNO) return 0;                 /* tecto: sem nó, sem ordem */
+    { Word c = { n + 1, 0 }; mem_grava(S_ORDCAB, c); }
+    for(unsigned k = 0; k < ORD_LARG; k++){
+        Word z = {0,0}; mem_grava(S_ORD + (unsigned)n*ORD_LARG + k, z);
+    }
+    return (unsigned)n;
+}
+static unsigned ord_filho(unsigned no, unsigned sim, int abrir){
+    unsigned f = (unsigned)mem_le(S_ORD + no*ORD_LARG + sim).total;
+    if(f || !abrir) return f;
+    f = ord_novo();
+    if(!f) return 0;
+    { Word w = { (Word8)f, 0 }; mem_grava(S_ORD + no*ORD_LARG + sim, w); }
+    return f;
+}
+static void ord_limpa(void){
+    Word z = {1,0}; mem_grava(S_ORDCAB, z);
+    for(unsigned k = 0; k < ORD_LARG; k++){
+        Word q = {0,0}; mem_grava(S_ORD + k, q);
+    }
+}
+/* insere a chave (valor, índice); devolve 0 se a árvore não coube */
+static int ord_insere(long valor, int idx){
+    unsigned long ch = ((unsigned long)(valor + 2147483648L) << 8) | (unsigned long)(idx & 255);
+    unsigned no = 0;
+    for(int d = ORD_NIV - 1; d >= 0; d--){
+        unsigned sim = (unsigned)((ch >> (4*d)) & 15u);
+        no = ord_filho(no, sim, 1);
+        if(!no && d > 0) return 0;
+    }
+    return 1;
+}
+/* percorre por ordem e devolve os índices; n é o tecto do arranjo de saída */
+static int ord_percorre(unsigned no, int nivel, unsigned long ch,
+                        int *saida, int *n, int cap, int desc){
+    if(nivel == ORD_NIV){
+        if(*n < cap) saida[(*n)++] = (int)(ch & 255u);
+        return 1;
+    }
+    for(unsigned k = 0; k < ORD_LARG; k++){
+        unsigned sim = desc ? (ORD_LARG - 1 - k) : k;
+        unsigned f = (unsigned)mem_le(S_ORD + no*ORD_LARG + sim).total;
+        if(!f && !(nivel == 0 && 0)) { if(!f) continue; }
+        ord_percorre(f, nivel + 1, (ch << 4) | sim, saida, n, cap, desc);
+    }
+    return 1;
+}
 
 static int varre(const char *resto, int acao){
     const char *p = resto;
@@ -2853,6 +2928,35 @@ static int varre(const char *resto, int acao){
      * linhas ordenadas e recebia-as por ordem de inserção, sem erro nenhum, e
      * acreditava. Responder outra coisa é pior do que recusar — quem chama sabe
      * lidar com um erro, não sabe lidar com uma resposta que parece a que pediu. */
+    /* ── ORDER BY <coluna> [ASC|DESC] ─────────────────────────────────────
+     * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
+     * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
+    ord_col[0] = 0; ord_desc = 0;
+    if(acao == ACAO_MARCA){
+        const char *q = p;
+        pula(&q);
+        if(palavra(&q, "ORDER")){
+            if(!palavra(&q, "BY")){
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "esperava BY depois de ORDER"); }
+                return 0;
+            }
+            if(!ident(&q, ord_col, sizeof ord_col)) return 0;
+            if(col_indice(ord_col) < 0){
+                printf("erro: a coluna «%s» não existe — o ORDER BY é RECUSADO.\n", ord_col);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "column \"%s\" does not exist", ord_col); }
+                return 0;
+            }
+            pula(&q);
+            if(palavra(&q, "DESC")) ord_desc = 1;
+            else if(palavra(&q, "ASC")) ord_desc = 0;
+            p = q;
+        }
+    }
+
     pula(&p);
     if(*p == ';') { p++; pula(&p); }
     if(*p){
@@ -2863,8 +2967,8 @@ static int varre(const char *resto, int acao){
                sobra);
         if(sql_cap){ sql_cap->ok = 0;
             snprintf(sql_cap->err, sizeof sql_cap->err,
-                     "nao suportado: \"%.60s\" — este motor nao ordena nem limita;"
-                     " recusa em vez de devolver as linhas por outra ordem", sobra); }
+                     "nao suportado: \"%.60s\" — recusa em vez de devolver outra coisa",
+                     sobra); }
         return 0;
     }
 
@@ -2990,7 +3094,40 @@ static int varre(const char *resto, int acao){
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
         sql_cap->nrows = 0;
     }
-    for(long i = 0; i < nrows; i++){
+    /* A ORDEM, quando pedida: insere-se (valor, índice) na árvore do banco e
+     * percorre-se por símbolos. As linhas saem por essa ordem em vez da ordem
+     * de inserção. Se a árvore não couber, a consulta é RECUSADA — ordenar
+     * metade seria devolver uma ordem que ninguém pediu. */
+    long ord_seq[SQL_OUT_MAX_ROWS];
+    int  ord_n = 0, ord_usa = 0;
+    if(acao == ACAO_MARCA && ord_col[0]){
+        int oc = col_indice(ord_col);
+        int postos = 0;
+        ord_limpa();
+        for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
+            if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
+            { Word cv = mem_le(S_LINHAS + (unsigned)(i*ncols + oc));
+              long v = (long)(signed char)cv.total;      /* o corpo com sinal */
+              if(mem_le(S_CORPO + (unsigned)oc).total == CORPO_INTEIRO && cv.total < 128)
+                  v = (long)cv.total;
+              if(!ord_insere(v, (int)i)){
+                  printf("erro: a árvore de ordenação não coube — RECUSADA.\n");
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "ORDER BY: a arvore nao coube; recusa em vez de ordenar"
+                               " metade"); }
+                  return 0;
+              }
+              postos++; }
+        }
+        { int n = 0, tmp[SQL_OUT_MAX_ROWS];
+          ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
+          for(int k = 0; k < n; k++) ord_seq[k] = tmp[k];
+          ord_n = n; ord_usa = 1; }
+    }
+
+    for(long ii = 0; ii < (ord_usa ? ord_n : nrows); ii++){
+        long i = ord_usa ? ord_seq[ii] : ii;
         if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
         printf("   ");
         int row_i = sql_cap ? sql_cap->nrows : -1;

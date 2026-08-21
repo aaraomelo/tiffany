@@ -105,7 +105,8 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (18 asserções):
      §W14     count(*), que conta ALÉM do que o SqlOut comporta
      §W15     ROLLBACK desfaz, pelo levantamento
      §W16     o motor como realização: ∑G = |I| = 127 sobre 47 slots
-     §W17     a PROJECÇÃO de colunas; ORDER BY e LIMIT RECUSADOS (ver §5)
+     §W17     a PROJECÇÃO de colunas; LIMIT e GROUP BY recusados com a razão
+     §W18     o ORDER BY pela ÁRVORE do banco, com a fibra dos repetidos separada
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -114,16 +115,8 @@ SELECT com WHERE, count(*), SHOW, SET, BEGIN/COMMIT/ROLLBACK.
 
 5. O QUE FICA FORA, E É PRECISO SABER
 ─────────────────────────────────────
-· ORDER BY e LIMIT: RECUSADOS com a razão, não ignorados. Eram deitados fora em
-  silêncio — o cliente pedia ordenado e recebia por ordem de inserção, sem erro.
-  A PISTA PARA OS FAZER, se for para fazer: a métrica do aranha.tex é uma FORMA
-  QUADRÁTICA (∂τ)² = g_uv ∂xᵘ ∂xᵛ e «o percurso só sonda a DIAGONAL de g» — uma
-  régua g^(k) mede só a direcção k e é cega às outras, que é ordenar por uma
-  coluna. E a casa JÁ ORDENA NO BANCO: `tests/dualsort_banco.c` — a árvore
-  ordena (inserir é descer pelos símbolos, ordenar é percorrer por ordem) e é
-  PERMUTAÇÃO. Falta ligar as duas estruturas: o motor SQL varre linhas no .mem,
-  o dualsort usa a árvore do conversa.c. NÃO INVENTAR uma terceira.
-· JUNÇÕES, GROUP BY e agregados além do count — é MOTOR, não protocolo.
+· LIMIT e GROUP BY: RECUSADOS com a razão, não ignorados. Ver a regra abaixo.
+· JUNÇÕES: ver o PLANO na §7 — não é protocolo, e não se inventa.
 · pg_catalog além de pg_type/pg_proc/pg_class/pg_attribute/pg_database: RECUSA.
 · O TECTO DO ROLLBACK: pilha fixa de 16384 escritas. Cheia, o ROLLBACK RECUSA —
   meia volta deixaria a base num estado que nunca existiu.
@@ -136,5 +129,50 @@ SELECT com WHERE, count(*), SHOW, SET, BEGIN/COMMIT/ROLLBACK.
 6. O QUE FAZER A SEGUIR
 ───────────────────────
 Sondar com o psql para achar o próximo limite REAL em vez de o adivinhar — foi
-o método que deu o count(*) e o ROLLBACK. Correr uma sessão, ver o que parte, e
-resolver pelo que a aranha já prova.
+o método que deu o count(*), o ROLLBACK, a projecção e o ORDER BY. Correr uma
+sessão, ver o que parte, e resolver pelo que a casa já prova.
+
+
+7. O PLANO DOS JOINS — ordenar e cortar são DUAIS
+─────────────────────────────────────────────────
+**O CORTE É O DUAL DA ORDEM.** Não é uma analogia: está provado, e as duas
+metades estão escritas.
+
+     ORDENAR  dá a PROFUNDIDADE   o caminho inteiro, todos os dígitos
+     CORTAR   dá a PARIDADE       um dígito, o último bit
+                                  «é o MOVE nos dois sentidos»
+     (arquitetura.tex §sec:cortar; e são precisos log n cortes para igualar
+      uma ordem — esse número É a profundidade)
+
+O QUE JÁ ESTÁ FEITO, e é a metade da ORDEM:
+  O ORDER BY corre pela árvore do banco (§W18): inserir é descer pelos símbolos,
+  ordenar é percorrer por ordem. A chave é (valor, índice) porque os valores
+  repetidos são uma FIBRA e o índice é a coordenada que os separa — o
+  levantamento. Nada disto foi inventado: são as peças do `dualsort_banco.c` e
+  do `no_filho` da cifra, na zona S_ORD do .mem.
+
+O QUE FALTA, e é a metade do CORTE:
+  Um JOIN é uma BIPARTIÇÃO das linhas — as que casam e as que não casam. E o
+  corte já está construído em dois sítios:
+
+  · `aranha.tex` §sec:transf — o corte de χ_k é «a bipartição dos vértices que
+    alterna nas direcções de k, com |k|·2^{m-1} arestas cortadas», e
+    F(G)_k = Σ_t χ_k(π(t)) é o SALDO da trajectória nesse corte. O corte lê-se
+    no ESPECTRO, sem visitar a trajectória.
+  · `arquitetura.tex` §sec:cortar — o corte constrói-se com MEIA VOLTA,
+    i ↦ (i + n/2) mod n, e o lado lê-se em quem ATRAVESSOU. «Não há busca, não
+    há comparação e não há escolha de centro: há uma rotação.» E max-cut = massa:
+    M = 4C/n, com C = |A|·|B|.
+
+  OS PASSOS, por ordem, e cada um com o seu medidor:
+   1. o join de igualdade `A JOIN B ON A.x = B.y` como CORTE: a bipartição das
+      linhas de A pelo valor de x, e a de B por y — duas ordens, e o casamento é
+      percorrer as duas árvores em paralelo (merge da ordem, que é o dual do
+      corte). O ORDER BY já dá as duas ordens.
+   2. o SALDO como controlo: F(G)_k dá o tamanho do corte sem visitar as linhas,
+      e tem de bater com a contagem directa — DOIS CAMINHOS.
+   3. max-cut = massa (M = 4C/n) para dizer QUAL junção é a mais barata, que é o
+      que um planeador de consultas decide à mão.
+
+  NÃO INVENTAR uma terceira estrutura. O corte e a ordem já existem; o join é
+  ligá-los.

@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W18 o ORDER BY pela ÁRVORE do banco, com a fibra dos repetidos separada
  *   §W17 a PROJECÇÃO de colunas, e ORDER BY/LIMIT recusados em vez de ignorados
  *   §W16 o MOTOR como realização: a pilha É a trajectória, ∑G = |I| medido no
  *        banco, a fibra do WHERE, e o representante k=1
@@ -2182,10 +2183,13 @@ int main(void){
 
         /* (b) o que NÃO se sabe fazer é RECUSADO com a razão — não ignorado */
         {
+            /* O ORDER BY saiu desta lista quando o §W18 o pôs a funcionar pela
+             * árvore do banco. O LIMIT continua fora, e com ele as formas que
+             * este motor não sabe ler. */
             const char *fora[] = {
-                "SELECT * FROM s ORDER BY a",
                 "SELECT * FROM s LIMIT 2",
-                "SELECT * FROM s WHERE a > 0 ORDER BY b",
+                "SELECT * FROM s GROUP BY a",
+                "SELECT * FROM s ORDER BY a LIMIT 1",
                 "SELECT zzz FROM s",
             };
             int recusadas = 0, com_razao = 0;
@@ -2226,13 +2230,140 @@ int main(void){
            " e `LIMIT` devolvia tudo. Nenhuma asserção o via, porque todas pediam `*`. A"
            " PROJECÇÃO IMPLEMENTA-SE, porque o motor já tem as colunas: devolve as pedidas,"
            " pela ORDEM pedida — `c, a` não é `a, c` —, e uma coluna que não existe é"
-           " recusada pelo nome. O ORDER BY e o LIMIT RECUSAM-SE com a razão à frente, até"
-           " serem feitos: responder outra coisa é pior do que recusar, porque quem chama"
+           " recusada pelo nome. O LIMIT e o GROUP BY RECUSAM-SE com a razão à frente, até"
+           " serem feitos — o ORDER BY saiu desta lista quando o §W18 o pôs a funcionar"
+           " pela árvore do banco. Responder outra coisa é pior do que recusar, porque quem chama"
            " sabe lidar com um erro e não sabe lidar com uma resposta que se parece com a"
            " que pediu. E O CONTROLO impede a recusa de ser larga demais: a projecção COM"
            " WHERE tem de continuar a passar — nenhuma das linhas anteriores o veria,"
            " porque nenhuma tinha WHERE —, e o ponto e vírgula final não pode ser tomado"
            " por sobra.",
+           mal == 0);
+    }
+
+    /* ═══ §W18: O ORDER BY É A ÁRVORE DO BANCO ══════════════════════════════
+     *
+     * «ordenar e cortar são duais: ordenar dá a PROFUNDIDADE — o caminho
+     * inteiro, todos os dígitos; cortar dá a PARIDADE — um dígito»
+     * (arquitetura.tex §max-cut). Aqui usa-se a ordem, e usa-se a árvore que o
+     * banco já tem: inserir é descer pelos símbolos do valor, ordenar é
+     * percorrer com os símbolos por ordem. Não se inventou uma terceira
+     * estrutura nem se ordenou em RAM.
+     *
+     * E A CHAVE É (valor, índice), não o valor: valores repetidos são uma FIBRA,
+     * e o índice da linha é a coordenada que os separa — o levantamento. Sem
+     * ele, dois valores iguais cairiam no mesmo caminho e perder-se-ia qual era
+     * qual.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W18 o ORDER BY: descer a árvore do banco, com a fibra separada.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w18";
+        SqlOut o;
+        long mal = 0;
+        char inser[8][8], asc[8][8], desc[8][8];
+        int n_ins = 0, n_asc = 0, n_desc = 0;
+        unlink("/tmp/pgwire_w18.mem");
+        unlink("/tmp/pgwire_w18.prog");
+        unlink("/tmp/pgwire_w18__v.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE v (a,b)", &o);
+        sql_executa("INSERT INTO v VALUES (5,50)", &o);
+        sql_executa("INSERT INTO v VALUES (2,20)", &o);
+        sql_executa("INSERT INTO v VALUES (9,90)", &o);
+        sql_executa("INSERT INTO v VALUES (2,99)", &o);
+
+        /* (a) sem ORDER BY sai por ordem de inserção; com ele, ordenado — e os
+         * dois TÊM de ser diferentes, ou o teste não mede nada. */
+        {
+            sql_executa("SELECT * FROM v", &o);
+            n_ins = o.nrows;
+            for(int i = 0; i < n_ins; i++) snprintf(inser[i], 8, "%s", o.cell[i][0]);
+            sql_executa("SELECT * FROM v ORDER BY a", &o);
+            n_asc = o.nrows;
+            for(int i = 0; i < n_asc; i++) snprintf(asc[i], 8, "%s", o.cell[i][0]);
+            int crescente = 1, difere = 0;
+            for(int i = 1; i < n_asc; i++) if(atoi(asc[i]) < atoi(asc[i-1])) crescente = 0;
+            for(int i = 0; i < n_asc && i < n_ins; i++) if(strcmp(asc[i], inser[i])) difere = 1;
+            printf("      inserção:  ");
+            for(int i = 0; i < n_ins; i++) printf("%s ", inser[i]);
+            printf("\n      ORDER BY a: ");
+            for(int i = 0; i < n_asc; i++) printf("%s ", asc[i]);
+            printf("\n      -> crescente: %s   e DIFERENTE da inserção: %s\n",
+                   crescente ? "sim" : "NAO", difere ? "sim" : "NAO — não mediu nada");
+            if(!crescente || !difere || n_asc != 4) mal++;
+        }
+
+        /* (b) DESC é o inverso exacto de ASC */
+        {
+            sql_executa("SELECT * FROM v ORDER BY a DESC", &o);
+            n_desc = o.nrows;
+            for(int i = 0; i < n_desc; i++) snprintf(desc[i], 8, "%s", o.cell[i][0]);
+            int inverso = (n_desc == n_asc);
+            for(int i = 0; i < n_desc && inverso; i++)
+                if(strcmp(desc[i], asc[n_asc - 1 - i])) inverso = 0;
+            printf("      ORDER BY a DESC: ");
+            for(int i = 0; i < n_desc; i++) printf("%s ", desc[i]);
+            printf("  -> é o inverso exacto de ASC: %s\n", inverso ? "sim" : "NAO");
+            if(!inverso) mal++;
+        }
+
+        /* (c) A FIBRA: os dois «2» são valores REPETIDOS, e têm de sair os dois,
+         * separados pela coordenada do índice. Uma árvore que só guardasse o
+         * valor colapsava-os num só. */
+        {
+            sql_executa("SELECT * FROM v ORDER BY a", &o);
+            int dois = 0, b20 = 0, b99 = 0;
+            for(int i = 0; i < o.nrows; i++) if(!strcmp(o.cell[i][0], "2")){
+                dois++;
+                if(!strcmp(o.cell[i][1], "20")) b20 = 1;
+                if(!strcmp(o.cell[i][1], "99")) b99 = 1;
+            }
+            printf("\n      a fibra do valor 2: %d linhas, com b=20 e b=99: %s\n",
+                   dois, (dois == 2 && b20 && b99) ? "as duas saíram"
+                                                  : "NAO — a fibra colapsou");
+            if(dois != 2 || !b20 || !b99) mal++;
+        }
+
+        /* (d) com WHERE e com projecção, tudo junto */
+        {
+            int r = sql_executa("SELECT a FROM v WHERE a > 2 ORDER BY a DESC", &o);
+            int bate = r && o.ncols == 1 && o.nrows == 2
+                       && !strcmp(o.cell[0][0], "9") && !strcmp(o.cell[1][0], "5");
+            printf("      WHERE + projecção + ORDER BY DESC -> %d col, %s %s  %s\n",
+                   o.ncols, o.nrows > 0 ? o.cell[0][0] : "?",
+                   o.nrows > 1 ? o.cell[1][0] : "?", bate ? "" : "NAO BATE");
+            if(!bate) mal++;
+        }
+
+        /* ── O CONTROLO: uma coluna que não existe RECUSA, e o LIMIT continua
+         * fora. A ordem entrou; o resto não entrou por arrasto. */
+        {
+            int r1 = sql_executa("SELECT * FROM v ORDER BY zzz", &o);
+            int r2 = sql_executa("SELECT * FROM v LIMIT 2", &o);
+            printf("\n      CONTROLO — ORDER BY de coluna inexistente: %s\n",
+                   r1 ? "RESPONDEU (mau)" : "recusado");
+            printf("      e o LIMIT continua fora: %s\n",
+                   r2 ? "RESPONDEU (mau)" : "recusado");
+            if(r1 || r2) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O ORDER BY É A ÁRVORE DO BANCO, E NÃO UMA ORDENAÇÃO NOVA. «Ordenar e cortar são"
+           " duais: ordenar dá a PROFUNDIDADE — o caminho inteiro, todos os dígitos; cortar"
+           " dá a PARIDADE — um dígito.» Usa-se a ordem, e usa-se a árvore que o banco já"
+           " tem: inserir é descer pelos símbolos do valor e ordenar é percorrer com os"
+           " símbolos por ordem, o mesmo mecanismo do `dualsort_banco.c` e do `no_filho` da"
+           " cifra. Não se inventou uma terceira estrutura nem se ordenou em RAM. E A CHAVE"
+           " É (valor, índice), não o valor: valores repetidos são uma FIBRA, e o índice da"
+           " linha é a coordenada que os separa — o levantamento outra vez. Mede-se com dois"
+           " valores IGUAIS na tabela, e exige-se que saiam os DOIS: uma árvore que só"
+           " guardasse o valor colapsava-os num só, e a asserção da ordem crescente passaria"
+           " à mesma. O GUME é a ordem ordenada ter de ser DIFERENTE da ordem de inserção —"
+           " sem isso, um ORDER BY que não fizesse nada passaria numa tabela já inserida por"
+           " ordem —, e o DESC ter de ser o inverso EXACTO do ASC. E O CONTROLO impede o"
+           " arrasto: uma coluna que não existe é recusada pelo nome, e o LIMIT continua"
+           " fora, porque entrou a ordem e não o resto.",
            mal == 0);
     }
 
