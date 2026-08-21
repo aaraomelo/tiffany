@@ -3267,7 +3267,8 @@ static int j_casam(long v, int *saida, int cap){
 /* lê `JOIN <tab> ON <a>.<x> = <b>.<y>`; devolve 1 se leu, 0 se não é join */
 enum { J_IG = 0, J_LT, J_LE, J_GT, J_GE };
 static int j_op = J_IG;              /* o operador do ON */
-static int j_left = 0;               /* 1 se LEFT: emite também a fibra vazia */
+static int j_left = 0;               /* 1 se LEFT: a fibra vazia da esquerda */
+static int j_right = 0;              /* 1 se RIGHT: a fibra vazia da direita  */
 
 static int le_join(const char **pp, const char *tab_esq){
     const char *p = *pp;
@@ -3284,10 +3285,18 @@ static int le_join(const char **pp, const char *tab_esq){
      * inventado nem um NULL: é a AUSÊNCIA — «o dual é dado pela ausência do
      * bit, b=0, o suporte NEUTRO» —, e o 0 é o que o operador devolve numa das
      * suas faces (Def. do operador). Declara-se em vez de se fingir. */
-    j_left = 0;
+    j_left = 0; j_right = 0;
     if(palavra(&p, "LEFT")){
         j_left = 1;
         palavra(&p, "OUTER");                    /* LEFT OUTER JOIN é o mesmo */
+        if(!palavra(&p, "JOIN")) return 0;
+    } else if(palavra(&p, "RIGHT")){
+        j_right = 1;
+        palavra(&p, "OUTER");
+        if(!palavra(&p, "JOIN")) return 0;
+    } else if(palavra(&p, "FULL")){
+        j_left = 1; j_right = 1;                 /* as duas fibras vazias */
+        palavra(&p, "OUTER");
         if(!palavra(&p, "JOIN")) return 0;
     } else if(!palavra(&p, "JOIN")){
         if(!palavra(&p, "INNER")) return 0;
@@ -3764,6 +3773,10 @@ static int varre(const char *resto, int acao){
         int ordem[J_MAXLIN], n_ord = 0;
         if(j_op != J_IG) ord_percorre(0, 0, 0, ordem, &n_ord, J_MAXLIN, 0);
 
+        /* O BITMAP DA DIREITA, PARA O RIGHT: a linha d é a coordenada d.
+         * São J_MAXLIN = 64 linhas, logo cabem num inteiro de 64 bits — o mesmo
+         * bit level do bitmap das linhas, à escala da junção. */
+        unsigned long long usados = 0ULL;
         { long saiu = 0;
           for(int e = 0; e < ne; e++){
             int casos[J_MAXLIN], nca;
@@ -3803,6 +3816,7 @@ static int varre(const char *resto, int acao){
             for(int k = 0; k < nca; k++){
                 int d = casos[k];
                 if(d >= nd) continue;
+                if(d < 64) usados |= (1ULL << d);      /* liga a coordenada d */
                 printf("   ");
                 for(long j = 0; j < nc_esq; j++){
                     long ve = (long)esq[e][j].total | ((long)esq[e][j].e << 8);
@@ -3824,6 +3838,32 @@ static int varre(const char *resto, int acao){
                 if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
                 saiu++;
             }
+          }
+          /* RIGHT: a fibra vazia do OUTRO lado. As linhas da direita que
+           * nenhuma da esquerda alcançou são as que ficaram com a coordenada
+           * desligada — o complemento do suporte, lido no bitmap. */
+          if(j_right){
+              for(int d = 0; d < nd && d < 64; d++){
+                  if(usados & (1ULL << d)) continue;
+                  printf("   ");
+                  for(long j = 0; j < nc_esq; j++){
+                      printf("0 | ");                      /* a ausência à esquerda */
+                      if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && j < SQL_OUT_MAX_COLS)
+                          snprintf(sql_cap->cell[sql_cap->nrows][j], SQL_OUT_CELL, "0");
+                  }
+                  for(long j = 0; j < ncols_dir; j++){
+                      Word w = mem_le(S_JDIR + (unsigned)(d*J_MAXCOL + j));
+                      long v = (long)w.total | ((long)w.e << 8);
+                      printf("%ld", v);
+                      if(j + 1 < ncols_dir) printf(" | ");
+                      { int col = (int)(nc_esq + j);
+                        if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS && col < SQL_OUT_MAX_COLS)
+                            snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "%ld", v); }
+                  }
+                  printf("\n");
+                  if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
+                  saiu++;
+              }
           }
           if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", saiu);
           printf("-- JOIN: %ld linha(s) da esquerda, %d da direita, %ld emitidas\n",

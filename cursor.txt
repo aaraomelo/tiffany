@@ -295,8 +295,13 @@ O QUE FALTA, e é a metade do CORTE:
   ausência do bit, b=0, o suporte neutro» — e o 0 é o que o operador devolve
   numa das suas faces. Declara-se em vez de se fingir.
 
-  O QUE O JOIN AINDA NÃO FAZ: só duas tabelas, e o RIGHT não está feito (é o
-  LEFT com os lados trocados, e o motor já sabe virar o operador).
+  E O RIGHT É A FIBRA VAZIA DO OUTRO LADO. Como o motor carrega a direita na
+  árvore e percorre a esquerda, saber quais da direita ficaram por alcançar é
+  ler o COMPLEMENTO do suporte — e o bitmap disso cabe num inteiro, porque
+  J_MAXLIN é 64: a linha d é a coordenada d, o mesmo bit level à escala da
+  junção. O FULL é os dois ao mesmo tempo, e não precisou de mais nada.
+
+  O QUE O JOIN AINDA NÃO FAZ: só duas tabelas.
   (Os NOMES da esquerda já saem certos: a junção troca a tabela aberta por
   baixo da sessão, e por isso as colunas da esquerda vinham como letras — os
   nomes não estavam perdidos, estavam noutro ficheiro, e agora lêem-se ANTES de
