@@ -3049,6 +3049,18 @@ static int lista_colunas(const char **pp, char *out, int cap){
 static char proj_cols[256] = "*";
 static char ord_col[64] = "";        /* a coluna do ORDER BY, "" se não houver */
 static int  ord_desc = 0;
+/* LIMIT n É O PREFIXO DA LISTA. O `thm:BI` do `aranha.tex` constrói I como uma
+ * ORDEM, com «o encaixe por prefixos a ordenar os andares uns dentro dos
+ * outros»: tomar as primeiras n é ficar com um prefixo, e um prefixo é fechado
+ * para as operações do andar. Não é uma paragem antecipada da varredura — é a
+ * restrição da lista, e por isso corre DEPOIS do WHERE e da ordem. */
+static long lim_n = -1;              /* -1 = sem LIMIT */
+/* GROUP BY É A FIBRA. `thm:escada`: «quocientar é esquecer a distinção; G mede
+ * quantos elementos foram esquecidos juntos.» Agrupar por uma coluna é a
+ * realização π: linha ↦ valor dessa coluna, e o count de cada grupo É G(x) — o
+ * campo que o motor já constrói. Não há estrutura nova: usa-se a MESMA árvore
+ * que ordena, lida por classe em vez de por ordem. */
+static char grp_col[64] = "";        /* a coluna do GROUP BY, "" se não houver */
 
 /* ── ORDENAR É DESCER A ÁRVORE, e a árvore é a do banco ─────────────────────
  *
@@ -3356,10 +3368,28 @@ static int varre(const char *resto, int acao){
     /* ── ORDER BY <coluna> [ASC|DESC] ─────────────────────────────────────
      * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
      * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
-    ord_col[0] = 0; ord_desc = 0;
+    ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1;
     if(acao == ACAO_MARCA){
         const char *q = p;
         pula(&q);
+        /* ── GROUP BY <coluna> ── a fibra: quocientar pela coluna ───────── */
+        if(palavra(&q, "GROUP")){
+            if(!palavra(&q, "BY")){
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "esperava BY depois de GROUP"); }
+                return 0;
+            }
+            if(!ident(&q, grp_col, sizeof grp_col)) return 0;
+            if(col_indice(grp_col) < 0){
+                printf("erro: a coluna «%s» não existe — o GROUP BY é RECUSADO.\n", grp_col);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "column \"%s\" does not exist", grp_col); }
+                return 0;
+            }
+            p = q; pula(&q);
+        }
         if(palavra(&q, "ORDER")){
             if(!palavra(&q, "BY")){
                 if(sql_cap){ sql_cap->ok = 0;
@@ -3379,6 +3409,21 @@ static int varre(const char *resto, int acao){
             if(palavra(&q, "DESC")) ord_desc = 1;
             else if(palavra(&q, "ASC")) ord_desc = 0;
             p = q;
+        }
+        /* ── LIMIT <n> ── o prefixo da lista ─────────────────────────────── */
+        pula(&q);
+        if(palavra(&q, "LIMIT")){
+            long v = 0; int viu = 0;
+            pula(&q);
+            while(*q >= '0' && *q <= '9'){ v = v*10 + (*q - '0'); q++; viu = 1; }
+            if(!viu){
+                printf("erro: LIMIT sem número — RECUSADO.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "LIMIT: esperava um numero"); }
+                return 0;
+            }
+            lim_n = v; p = q;
         }
     }
 
@@ -3658,9 +3703,69 @@ static int varre(const char *resto, int acao){
           ord_n = n; ord_usa = 1; }
     }
 
+    /* ── GROUP BY: A FIBRA, E O SEU TAMANHO É G ─────────────────────────
+     *
+     * `thm:escada`: «quocientar é esquecer a distinção; G mede quantos
+     * elementos foram esquecidos juntos». A realização é π: linha ↦ valor da
+     * coluna, e cada classe de equivalência é uma fibra π⁻¹(x). Usa-se a MESMA
+     * árvore que ordena — inserir é descer pelos símbolos do valor —, e depois
+     * basta percorrer por ordem: as linhas da mesma fibra saem CONTÍGUAS,
+     * porque a chave começa pelo valor. Contar cada corrida é contar G(x).
+     *
+     * E a conservação vale, e é o Lema da conservação: ∑ G(x) = |I| — a soma
+     * dos grupos é o número de linhas que casaram. */
+    if(acao == ACAO_MARCA && grp_col[0]){
+        int gc = col_indice(grp_col);
+        int postos = 0;
+        long seq[SQL_OUT_MAX_ROWS]; int n = 0;
+        ord_limpa();
+        for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!ord_insere(celula_valor(i, gc, ncols), (int)i)){
+                printf("erro: a árvore do GROUP BY não coube — RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "GROUP BY: a arvore nao coube; recusa em vez de agrupar"
+                             " metade"); }
+                return 0;
+            }
+            postos++;
+        }
+        { int tmp[SQL_OUT_MAX_ROWS];
+          ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
+          for(int k = 0; k < n; k++) seq[k] = tmp[k]; }
+        if(sql_cap){
+            memset(sql_cap->col, 0, sizeof sql_cap->col);
+            sql_cap->ncols = 2; sql_cap->nrows = 0;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s", grp_col);
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "count");
+            sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[1] = SQL_TIPO_INT8;
+        }
+        { long grupos = 0, soma = 0, k = 0;
+          while(k < n){
+              long v = celula_valor(seq[k], gc, ncols), g = 0;
+              while(k < n && celula_valor(seq[k], gc, ncols) == v){ g++; k++; }
+              if(lim_n >= 0 && grupos >= lim_n) break;      /* o prefixo */
+              printf("   %ld | %ld\n", v, g);
+              if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
+                  snprintf(sql_cap->cell[sql_cap->nrows][0], SQL_OUT_CELL, "%ld", v);
+                  snprintf(sql_cap->cell[sql_cap->nrows][1], SQL_OUT_CELL, "%ld", g);
+                  sql_cap->nrows++;
+              }
+              grupos++; soma += g;
+          }
+          printf("-- %ld grupo(s), ∑G = %ld (a conservação: é o que o WHERE deixou)\n",
+                 grupos, soma);
+          if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", grupos); }
+        return 1;
+    }
+
+    long emitidas = 0;
     for(long ii = 0; ii < (ord_usa ? ord_n : nrows); ii++){
         long i = ord_usa ? ord_seq[ii] : ii;
         if(!bit_le(S_MATCH, i)) continue;
+        if(lim_n >= 0 && emitidas >= lim_n) break;   /* LIMIT: o prefixo da lista */
+        emitidas++;
         printf("   ");
         int row_i = sql_cap ? sql_cap->nrows : -1;
         if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS) sql_cap->nrows++;

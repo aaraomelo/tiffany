@@ -168,7 +168,16 @@ SELECT com WHERE, count(*), SHOW, SET, BEGIN/COMMIT/ROLLBACK.
 
 5. O QUE FICA FORA, E É PRECISO SABER
 ─────────────────────────────────────
-· LIMIT e GROUP BY: RECUSADOS com a razão, não ignorados. Ver a regra abaixo.
+· LIMIT e GROUP BY: FEITOS, e os dois saem da teoria.
+  LIMIT n é o PREFIXO da lista — o `thm:BI` constrói I como uma ORDEM, com «o
+  encaixe por prefixos a ordenar os andares uns dentro dos outros», e um
+  prefixo é fechado para as operações do andar. Corre DEPOIS do WHERE e da
+  ordem, porque é a restrição da lista e não uma paragem da varredura.
+  GROUP BY é a FIBRA — `thm:escada`: «quocientar é esquecer a distinção; G mede
+  quantos elementos foram esquecidos juntos». A realização é π: linha ↦ valor
+  da coluna, e o count de cada grupo É G(x). Usa a MESMA árvore que ordena (as
+  linhas da mesma fibra saem contíguas, porque a chave começa pelo valor), e
+  imprime ∑G no fim — que é o Lema da conservação, ∑G = |I|.
 · JUNÇÕES: ver o PLANO na §7 — não é protocolo, e não se inventa.
 · pg_catalog além de pg_type/pg_proc/pg_class/pg_attribute/pg_database: RECUSA.
 · O TECTO DO ROLLBACK: pilha fixa de 16384 escritas. Cheia, o ROLLBACK RECUSA —
