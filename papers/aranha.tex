@@ -19,7 +19,6 @@
 \definecolor{cinza}{gray}{0.35}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\abs}[1]{\lvert #1\rvert}
-\newcommand{\N}{\ensuremath{\mathbb{N}}}
 \newcommand{\Z}{\ensuremath{\mathbb{Z}}}
 \newcommand{\Q}{\ensuremath{\mathbb{Q}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
@@ -85,8 +84,9 @@ uma vez deixam o mesmo campo.
 igualdade no contradomínio --- saem, com demonstração, o percurso, a memória, a
 multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
 E o mesmo mecanismo percorre a escada aritmética que a obra constrói noutros
-documentos: cada degrau tem a forma da Def.~\ref{def:objeto}, e nos que são
-construídos por quociente é $G$ que conta a classe de equivalência do andar
+documentos --- $I$, depois $I^{2}/{\sim}$, depois as frações, depois os cortes:
+cada degrau tem a forma da Def.~\ref{def:objeto}, e nos que são construídos por
+quociente é $G$ que conta a classe de equivalência do andar
 (§\ref{sec:escada}).
 
 \medskip\noindent Todo enunciado usado é enunciado e demonstrado aqui; onde um
@@ -273,18 +273,22 @@ produz é a distinção realizada/não realizada, e essa distinção é do espa�
 que o ciclo da §\ref{sec:algoritmo} tira o que lê.
 
 \begin{definicao}[a grade e a sua vizinhança]\label{def:grade}
-Em $X=\Z^n$ com a base canónica $e_1,\dots,e_n$, a vizinhança de $x$ é
+Diz-se que $X$ é uma \textbf{grade de posto $n$} quando é gerado por $n$
+direções independentes $e_1,\dots,e_n$ --- a base canónica --- e cada uma se
+percorre nos dois sentidos. A vizinhança de $x$ é então
 \[
 V(x)=\{x\pm e_i : i=1,\dots,n\}.
 \]
+É só disto que a construção precisa: as direções e os dois sentidos.
 \end{definicao}
 
 \begin{teorema}[o $n$ entra num sítio só]\label{thm:dimensao}
-Com $V$ a vizinhança da Def.~\ref{def:grade}, em $\Z^n$ tem-se
-$\lvert V(x)\rvert=2n$ para todo $x$ e os $2n$ vizinhos são distintos. Além disso, as cláusulas (1)--(3) do
-Teorema~\ref{thm:multiplicidade} e os passos 1 e 3 do ciclo valem palavra por
-palavra em $\Z^n$ para todo $n\ge1$, sem alteração nenhuma. A dimensão ocorre
-num sítio único --- a cláusula~(4) --- e ocorre como $\lvert V(x)\rvert=2n$.
+Numa grade de posto $n$ (Def.~\ref{def:grade}) tem-se
+$\lvert V(x)\rvert=2n$ para todo $x$, e os $2n$ vizinhos são distintos. Além
+disso, as cláusulas (1)--(3) do Teorema~\ref{thm:multiplicidade} e os passos 1 e
+3 do ciclo valem palavra por palavra em qualquer posto $n\ge1$, sem alteração
+nenhuma. A dimensão ocorre num sítio único --- a cláusula~(4) --- e ocorre como
+$\lvert V(x)\rvert=2n$.
 \end{teorema}
 
 \begin{proof}
@@ -292,17 +296,18 @@ Os $2n$ pontos $x\pm e_i$ são distintos: $x+\varepsilon e_i=x+\varepsilon'e_j$
 com $\varepsilon,\varepsilon'\in\{+1,-1\}$ dá $\varepsilon e_i=\varepsilon'e_j$,
 e como os $e_i$ são livres isso força $i=j$ e $\varepsilon=\varepsilon'$. A
 segunda afirmação é imediata da demonstração do
-Teorema~\ref{thm:multiplicidade}, que usou apenas a igualdade em $X$, e $\Z^n$
-tem igualdade decidível coordenada a coordenada.
+Teorema~\ref{thm:multiplicidade}, que usou apenas a igualdade em $X$ --- e numa
+grade ela decide-se coordenada a coordenada.
 \end{proof}
 
 \begin{teorema}[o fecho, e o único sítio onde a dimensão faz mais]\label{thm:fecho}
-O passo~4 do ciclo é o rotor $R^{4}=\mathrm{id}$. Em $\Z^n$ uma rotação de
-$90^{\circ}$ vive num \emph{plano} coordenado $(e_i,e_j)$, atuando por
+O passo~4 do ciclo é o rotor $R^{4}=\mathrm{id}$. Numa grade de posto $n$, uma
+rotação de $90^{\circ}$ vive num \emph{plano} coordenado $(e_i,e_j)$, atuando
+por
 $R_{ij}\colon(a,b)\mapsto(-b,a)$ nessas duas coordenadas e fixando as outras.
 Então $R_{ij}^{4}=\mathrm{id}$ para todo par $i<j$, e o número de planos é
-$\binom{n}{2}=n(n-1)/2$: nenhum em $\Z^1$, um em $\Z^2$, três em $\Z^3$, seis em
-$\Z^4$.
+$\binom{n}{2}=n(n-1)/2$: nenhum no posto $1$, um no posto $2$, três no $3$,
+seis no $4$.
 \end{teorema}
 
 \begin{proof}
@@ -315,12 +320,13 @@ de planos é a de pares não ordenados de índices.
 \medskip\noindent Este é o único passo em que a dimensão faz mais do que contar
 vizinhos. Nos passos 1 a 3 ela entra só como $\lvert V(x)\rvert=2n$; no fecho,
 ela decide \emph{quantos} rotores há. E o fecho é o mesmo $J^{4}=\mathrm{id}$ da
-bidualidade: em $\Z^2$ há um plano e um rotor, que é a razão por que ali os dois
-se confundem.
+bidualidade: no posto $2$ há um plano e um rotor, que é a razão por que ali os
+dois se confundem.
 
 \medskip\noindent\textbf{E é o grau que proíbe coisas.} A cláusula~(4) não é só
 onde a dimensão entra: é onde ela \emph{decide}. Uma aplicação injetiva das
-células de $\Z^2$ na reta que quisesse além disso levar vizinhos em vizinhos
+células de uma grade de posto $2$ na reta que quisesse além disso levar vizinhos
+em vizinhos
 precisaria de $4$ posições adjacentes à imagem de um vértice interior, e a reta
 oferece $2$. Logo
 \[
@@ -329,7 +335,7 @@ oferece $2$. Logo
 e a §\ref{sec:dual} vive inteiramente deste facto: nenhuma habilidade de
 construção o contorna, porque é uma contagem de graus.
 
-\medskip\noindent\textbf{Leitura.} Enunciar o teorema em $\Z^2$ e realizá-lo num
+\medskip\noindent\textbf{Leitura.} Enunciar o teorema no posto $2$ e realizá-lo num
 arranjo do plano dá a impressão de que o $2$ é do teorema. Não é: é do exemplo, e
 do arranjo. O $n$ aparece uma vez, no tamanho da vizinhança --- e é aí, e só aí,
 que o gradiente do passo~3 lê $2n$ valores em vez de $4$. Os outros três passos
@@ -725,7 +731,7 @@ k(i)=\bigl\lvert\{j\in I: j\le i,\ \pi(j)=\pi(i)\}\bigr\rvert .
 \end{definicao}
 
 \begin{teorema}[levantamento em folhas]\label{thm:levantamento}
-Seja $\tilde\pi\colon I\to X\times\N$, $\tilde\pi(i)=\bigl(\pi(i),k(i)\bigr)$ com
+Seja $\tilde\pi\colon I\to X\times I$, $\tilde\pi(i)=\bigl(\pi(i),k(i)\bigr)$ com
 $k$ da Def.~\ref{def:k}, e $\tilde G$ a multiplicidade de $\tilde\pi$. Então:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{Injetividade:} $\tilde\pi$ é injetiva, e portanto
@@ -738,7 +744,8 @@ $\lvert\operatorname{im}\tilde\pi\rvert=\abs{I}=\sum_x G(x)$.
 \item[(5)] \textbf{Volta:} $G$ recupera-se de $\tilde\pi$ sem qualquer outro
 dado, por $G(x)=\bigl\lvert\{i:\operatorname{pr}_1\tilde\pi(i)=x\}\bigr\rvert$.
 \end{enumerate}
-Além disso, se $X=\Z^n$ então $X\times\N\subseteq\Z^{n+1}$: o levantamento sobe
+Além disso, numa grade de posto $n$ o par $(x,k)$ ocupa $n+1$ direções: o
+levantamento sobe
 \textbf{um} andar, seja qual for $n$.
 
 A \textbf{curva inversa do dragão} é $\tilde\pi(I)$: mesma órbita combinatória,
@@ -770,7 +777,7 @@ Lema~\ref{lem:conserva}.
 (5) Por (2), $\{i:\operatorname{pr}_1\tilde\pi(i)=x\}=\{i:\pi(i)=x\}=\pi^{-1}(x)$,
 cuja cardinalidade é $G(x)$ por definição.
 
-A última afirmação é a inclusão $\Z^n\times\N\subseteq\Z^n\times\Z=\Z^{n+1}$.
+A última afirmação é que a folha acrescenta uma direção às $n$ da grade.
 \end{proof}
 
 \medskip\noindent\textbf{Algoritmo B (a aranha inversa).}
@@ -899,7 +906,7 @@ ponto é um levantamento com $\tilde G\equiv1$.
 \end{proof}
 
 \begin{corolario}[é a mesma inversão da árvore dos divisores]\label{cor:mobius}
-Troque-se a ordem $(I,\le)$ pela divisibilidade em $\N$. A mesma
+Troque-se a ordem $(I,\preceq)$ pela ordem por \emph{divisibilidade}. A mesma
 Def.~\ref{def:incid} dá $F=f*\mathbf{1}$, isto é
 $F(n)=\sum_{d\mid n}f(d)$, e a inversa de $\mathbf{1}$ é a função de Möbius:
 $f=F*\mu$, ou seja $f(n)=\sum_{d\mid n}\mu(d)F(n/d)$. A álgebra não muda ---
@@ -1424,8 +1431,8 @@ Três coisas distintas, cada uma com o seu nome:
 \begin{enumerate}\itemsep3pt
 \item[(i)] O \textbf{tempo} é o parâmetro: a \emph{contagem das aplicações do
       operador} $S$ ao longo da tupla. Contar essas aplicações é precisamente
-      realizar $I$ em $\N$ --- de modo que dizer ``o tempo'' e dizer ``a
-      realização da tupla que conta'' é dizer a mesma coisa.
+      contar a lista --- de modo que dizer ``o tempo'' e dizer ``a contagem dos
+      símbolos percorridos'' é dizer a mesma coisa.
 \item[(ii)] O \textbf{tempo próprio} $\tau$ é o mesmo percurso \emph{medido por
       uma régua}: $d\tau^{2}=g_{uv}dx^udx^v$. Coincide com $t$ exatamente quando
       a diagonal de $g$ usada vale $1$ --- ver a subsecção seguinte; com outra
@@ -1728,32 +1735,32 @@ comprimento (Teor.~\ref{thm:medida}).
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A escada, andar a andar}\label{sec:escada}
 
-\noindent A construção de $\N$, $\Z$, $\Q$ e $\R$ está feita e demonstrada
-noutros documentos desta obra. O que se verifica aqui é outra coisa: que os
+\noindent A construção da escada aritmética está feita e demonstrada noutros
+documentos desta obra. O que se verifica aqui é outra coisa: que os
 degraus construídos por \emph{quociente} são realizações no sentido da
 Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
-\medskip\noindent\textbf{$\N$ é uma das realizações.} Contar os símbolos de uma
-lista é realizá-la, e $\N$ é o que essa realização produz --- razão por que
-entra na tabela abaixo como os outros andares. Há uma diferença, e é factual: o
-documento dos naturais constrói $\N$ \emph{sem quociente} --- a segunda cópia da
-dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é \emph{multiplicada} por
-$\sigma$ ---, ao passo que $\Z$, $\Q$ e $\R$ são construídos \emph{por}
-quociente. Daí que, na tabela, a fibra de $\N$ seja a da soma e não uma classe
-de equivalência.
+\medskip\noindent\textbf{O primeiro degrau parte da lista.} Contar os símbolos
+de $I$ é já realizá-los, e os degraus seguintes constroem-se sobre esse
+resultado: $I^{2}/{\sim}$, depois as frações, depois os cortes. Há uma diferença
+no primeiro, e é factual: a obra constrói-o \emph{sem quociente} --- a segunda
+cópia da dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é
+\emph{multiplicada} por $\sigma$ ---, ao passo que os outros três são
+construídos \emph{por} quociente. Daí que, na tabela, a fibra do primeiro seja a
+da soma e não uma classe de equivalência.
 
 \begin{teorema}[os degraus por quociente são realizações]\label{thm:escada}
 Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos
 três últimos --- os que a obra constrói \emph{por quociente} --- a fibra
 $\pi^{-1}(x)$ \emph{é} a classe de equivalência que define o andar. No primeiro,
-$\N$, não há quociente a identificar, e a fibra é a da soma:
+o primeiro, não há quociente a identificar, e a fibra é a da soma:
 \begin{center}\footnotesize
 \begin{tabular}{@{}llll@{}}
 \toprule
 andar & $\pi\colon I\to X$ & a fibra é & o representante $k=1$ \\
 \midrule
-$\N$ \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
-$\Z=\N^2/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
+a lista contada \emph{(sem quociente)} & $(x,y)\mapsto x\oplus y$ & a fibra da soma, de tamanho $\lvert F_w\rvert$ & $x\oplus z$ \\
+$I^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ \\
 $\Q=\operatorname{Frac}(\Z)$ & $(p,q)\mapsto p/q$ reduzido & $ps=qr$ & o irredutível \\
 $\R$ & $q\mapsto$ o corte de $p$ bits & a bola ultramétrica (§\ref{sec:ultra}) & o menor do cilindro \\
 \bottomrule
@@ -1768,7 +1775,7 @@ Lema~\ref{lem:conserva}. Nas três últimas linhas, $\pi(u)=\pi(v)$ é,
 respetivamente, $a-b=c-d$ (isto é $a+d=b+c$), $p/q=r/s$ (isto é $ps=qr$), e ter
 o mesmo prefixo de $p$ bits --- que são exatamente as relações que definem esses
 andares. Na primeira, $\pi(u)=\pi(v)$ é $x\oplus y=x'\oplus y'$, que é uma
-relação legítima mas não a que constrói $\N$. O representante $k=1$ é o primeiro da fibra na ordem do
+relação legítima mas não a que constrói o andar. O representante $k=1$ é o primeiro da fibra na ordem do
 domínio, e a enumeração escolhida fá-lo coincidir com o canónico.
 \end{proof}
 

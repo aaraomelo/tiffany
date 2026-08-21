@@ -2592,3 +2592,35 @@ não faz parte da construção, não aparece — nem para ser dispensado.
 
   bateria   529 : 529, 0 falhas
   paper     24 páginas
+
+§57 — ℕ SAIU DO DOCUMENTO. E ℤ = I²/∼
+======================================
+Três ordens em sequência: «na página 4 vc já invoca ℤ também, pode tirar — dá o
+canónico»; «vê a construção de ℤ nos papers»; «troca ℕ por I em tudo, e
+ℤ = I²/∼».
+
+O ℤ ERA O MESMO VÍCIO UM ANDAR ACIMA. Eu escrevia «X = ℤⁿ com a base canónica»
+na definição da grade — e ℤ é, na obra, ela própria um QUOCIENTE (ℤ = ℕ²/∼ com
+a+d = b+c). Invocava uma construção que o meu paper depois ia «descobrir».
+     agora   X é uma GRADE DE POSTO n: gerado por n direcções independentes,
+             cada uma percorrida nos dois sentidos. É só disto que a construção
+             precisa — as direcções e os dois sentidos.
+E ao longo do texto «ℤⁿ» virou «posto n»: «no posto 2 há um plano e um rotor»,
+«nenhum no posto 1, um no posto 2, três no 3, seis no 4».
+
+E ℕ SAIU DO DOCUMENTO INTEIRO — até a macro \N foi removida do preâmbulo. Cada
+ocorrência foi resolvida no seu sítio, e não por substituição cega:
+     X × ℕ (o levantamento)      →  X × I — a folha é um ÍNDICE, logo vive na lista
+     divisibilidade em ℕ         →  «a ordem por divisibilidade»
+     «realizar I em ℕ»           →  «contar a lista»
+     ℕ→ℤ→ℚ→ℝ                     →  I, depois I²/∼, depois as fracções, depois os cortes
+     a tabela da escada          →  a lista contada · I²/∼ · Frac · o corte
+
+A ESCADA ESCREVE-SE AGORA SOBRE A LISTA, que é o único ponto de partida:
+     I  →  I²/∼  →  Frac  →  os cortes
+e o primeiro degrau é o único sem quociente — a segunda cópia da dobra não é
+identificada, é multiplicada por σ.
+
+  de 25 ocorrências de ℕ para ZERO · ℤ só onde é rótulo
+  bateria   529 : 529, 0 falhas
+  paper     25 páginas
