@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        f5c305ee911a2440      bash tools/bateria.sh
+    selo        c131ccad8d479140      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1068,3 +1068,55 @@ mutante a meio e deixou o ficheiro trocado — as três corridas seguintes leram
 binário `tex` construído do fonte mutado, e o ficheiro INTACTO passou a falhar
 duas asserções que nada tinham a ver. Correr mutantes de um medidor que mexe em
 fontes exige repor E RECONSTRUIR entre cada um; um a um, e não em lote.
+
+
+24. O DB FUNCIONAL — o que faltava, medido antes de mexer
+===========================================================
+«O PG deve ficar um db funcional». Medido, e não suposto:
+
+  1. UMA TABELA POR BASE. `CREATE TABLE beta` escrevia por cima da `alfa` — o
+     catálogo era `{ncols, nrows}` no slot 0 e mais nada.          RESOLVIDO
+  2. A CÉLULA ENROLAVA CALADA. 256→0, 500→244, −1→255, 70000→112, no disco e
+     sem uma palavra.                                              RESOLVIDO
+  3. O SELECT LIA SEM SINAL. `−2/6` fica `−1/3` no slot (o medidor confirma-o
+     com um `(int8_t)` à mão) e o SELECT mostrava **85**.           RESOLVIDO
+  4. OS NOMES DE COLUNA SÃO DESCARTADOS. `CREATE TABLE cliente
+     (nome,idade,saldo)` → o SELECT devolve `a`,`b`,`c`, e
+     `WHERE idade > 20` é «comando recusado».                      POR FAZER
+  5. O ALCANCE DE UMA CÉLULA É 0..255 (um átomo). Alargar é subir a torre —
+     uma célula de Word_8⁴.                                        POR FAZER
+  6. Catálogo mínimo para um driver ligar (PG6).                   POR FAZER
+
+A TABELA É UM FICHEIRO .mem
+---------------------------
+O motor lê UMA relação e sempre leu bem. O que faltava não era motor novo: era
+outro FICHEIRO. `<base>.mem` continua a ser a tabela sem nome (as bases antigas
+não mexem) e cada tabela nomeada é `<base>__<nome>.mem`; trocar de tabela é
+trocar o descritor, que é o que o banco já faz com o canal e o pool. O mapa de
+slots não muda uma linha e o `varre` não sabe que há mais tabelas.
+
+  · CREATE abre com O_TRUNC — a tabela começa LIMPA, como sempre começou quando
+    era uma só. Sem isso o medidor do sql deixou de ser idempotente: primeira
+    corrida 0 falhas, segunda 3. Um medidor que depende do que ficou de antes
+    não mede.
+  · compatibilidade: base antiga sem ficheiro por tabela cai no `<base>.mem`
+    quando o nome guardado bate (ou quando ela é tão antiga que nem nome tem)
+
+O ENVELOPE DIZ-SE, E RECUSA
+---------------------------
+A célula é uma Word_8²: um átomo para o numerador, outro para o denominador (ou
+o coeficiente de σ). O que não cabe é RECUSADO com erro — `value out of range
+for Word_8 cell` — e contado em `cel_recusadas`. E o alcance é o do CORPO: numa
+coluna inteira 0..255, num racional/áureo/cristal o componente é assinado.
+
+E o leitor passou a ler com o sinal que o corpo declara. Eram DUAS RÉGUAS para a
+mesma célula: o medidor lia o slot com `(int8_t)` e passava, o SELECT lia sem
+sinal e mostrava outro número.
+
+  medidores  banco/sql.c: «UMA BASE TEM VÁRIAS TABELAS» (alfa 2x2 e beta 1x3
+             coexistem, o WHERE na certa, `gama` recusada) e «O ENVELOPE DA
+             CÉLULA DIZ-SE E RECUSA» (255 encosta, 256 e −1 recusados)
+  gume       CREATE a ignorar o nome → cai · o SELECT sem trocar de tabela →
+             cai (alfa devolve 1x3, as linhas da beta) · o envelope a aceitar
+             tudo → cai · CREATE sem O_TRUNC → cai À SEGUNDA CORRIDA, e a
+             primeira versão do meu gume não o via porque limpava o /tmp antes

@@ -214,6 +214,11 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 /* ---------------- a memória É o disco ---------------- */
 static int fmem = -1, fprog = -1;
 static char g_base[512];          /* caminho da base aberta — blobs em <base>_corpo/ */
+static char g_tabela[64];         /* a tabela cujo .mem está aberto ("" = a sem nome) */
+static long cel_recusadas = 0;    /* células que não couberam no envelope — contadas À PARTE */
+static int usa_tabela(const char *nome, int cria_se_falta);   /* definida com abrir_base */
+static int usa_tabela_z(const char *nome, int cria_se_falta, int zera);
+static int tabela_existe(const char *nome);
 
 /* O backend do canal. Trocar isto por STOMP ou por TCP é trocar estas duas funções — o banco
  * não distingue, porque o que ele faz é sempre ler um slot e escrever um slot. */
@@ -860,6 +865,13 @@ static int cria(const char *resto){
     const char *p = resto;
     char nome[64];
     if(!ident(&p, nome, sizeof nome)) return 0;
+    /* a tabela é um ficheiro: abre-se (criando) ANTES de o catálogo lá ser escrito */
+    if(!usa_tabela_z(nome, 1, 1)){          /* CREATE: limpa */
+        printf("erro: não abri o ficheiro da tabela «%s»\n", nome);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "cannot create relation \"%s\"", nome); }
+        return 0;
+    }
     pula(&p); if(*p != '(') return 0; p++;
     long ncols = 0; char c[64];
     long corpo[16], parm[16];
@@ -925,6 +937,7 @@ static int insere(const char *resto){
     char nome[64];
     if(!palavra(&p, "INTO")) return 0;
     if(!ident(&p, nome, sizeof nome)) return 0;
+    if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
     if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
     if(!palavra(&p, "VALUES")) return 0;
     pula(&p); if(*p != '(') return 0; p++;
@@ -980,6 +993,44 @@ static int insere(const char *resto){
         nv++; pula(&p); if(*p == ','){ p++; continue; } break;
     }
     if(nv != ncols){ printf("erro: a tabela tem %ld colunas, vieram %ld\n", ncols, nv); return 0; }
+
+    /* ── O ENVELOPE DA CÉLULA DIZ-SE, E O QUE NÃO CABE É RECUSADO ────────────────
+     * A célula é uma Word_8² — um átomo para o numerador, outro para o denominador
+     * (ou para o coeficiente de σ, conforme o corpo). Logo cada componente vive em
+     * 0..255, e é isso que o banco pode guardar hoje.
+     *
+     * O que estava a acontecer: `INSERT INTO t VALUES (500,1000,65535)` era aceite e
+     * lido de volta como `244 232 255`. E `256` virava `0`, e `−1` virava `255`. O
+     * valor entrava truncado, no disco, sem uma palavra — que é o defeito que esta
+     * casa persegue em todo o lado menos aqui.
+     *
+     * A regra da casa é a mesma dos racionais e da FC: o que não cabe CONTA-SE e
+     * RECUSA-SE, não se enrola calado. Alargar a célula é subir a torre (uma célula
+     * de Word_8⁴), e é trabalho próprio — mas guardar lixo enquanto isso não é uma
+     * alternativa: é perder o dado sem o dizer. */
+    for(long j = 0; j < ncols; j++){
+        /* e o alcance é o do CORPO: num inteiro o envelope é 0..255 (o Word_8 da
+         * casa), num racional/áureo/cristal o componente é assinado, −128..127 */
+        long cpj = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+        int assinado = (cpj == CORPO_RACIONAL || cpj == CORPO_AUREO || cpj == CORPO_CRISTAL
+                        || den[j] > 1 || den[j] < 0);
+        long lo = assinado ? -128 : 0, hi = assinado ? 127 : 255;
+        long lo2 = (cpj == CORPO_AUREO || cpj == CORPO_CRISTAL) ? -128 : 1;
+        long hi2 = (cpj == CORPO_AUREO || cpj == CORPO_CRISTAL) ? 127 : 255;
+        if(v[j] < lo || v[j] > hi || den[j] < lo2 || den[j] > hi2){
+            printf("erro: o valor da coluna %ld não cabe no envelope Word_8 da célula"
+                   " (numerador %ld, segundo componente %ld; o envelope é %ld..%ld).\n"
+                   " A linha é RECUSADA e nada é escrito — alargar a célula é subir a"
+                   " torre, e não truncar em silêncio.\n", j, v[j], den[j], lo, hi);
+            if(sql_cap){
+                sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "value out of range for Word_8 cell: column %ld got %ld", j, v[j]);
+            }
+            cel_recusadas++;
+            return 0;
+        }
+    }
 
     /* compila o INSERT: cada valor entra por um slot de constante e é gravado pela ISA */
     pc_emit = 0;
@@ -1993,7 +2044,9 @@ static int varre(const char *resto, int acao){
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
-    /* o nome foi lido nos TRÊS ramos e não era usado em nenhum: agora decide */
+    /* o nome foi lido nos TRÊS ramos e não era usado em nenhum: agora ABRE a tabela
+     * (cada uma é o seu .mem) e confere que o catálogo lá dentro é mesmo o dela */
+    if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
     if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
     citadas_where = 0;
     tem_where = le_where(&p, &cl);
@@ -2083,14 +2136,27 @@ static int varre(const char *resto, int acao){
                     primeiro = 0;
                 }
                 if(o < sizeof cel - 1){ cel[o++] = '}'; cel[o] = 0; }
+            /* ── O LEITOR TEM DE LER COM O SINAL QUE O CORPO DECLARA ──────────────
+             * A célula é um octeto e a Word8 é sem sinal, mas o que ele SIGNIFICA
+             * vem do corpo da coluna: num RACIONAL o numerador é assinado (−1/3
+             * existe), no ÁUREO e no CRISTAL o coeficiente também (a−bσ existe),
+             * e num INTEIRO o envelope é o Word_8 de 0..255 que a casa declara.
+             *
+             * Estava a ler tudo SEM SINAL: `INSERT INTO k VALUES (-2/6,2)` guardava
+             * −1/3 correctamente no slot — o medidor confirma-o com um `(int8_t)` à
+             * mão — e o SELECT mostrava **85**, que é ra_classe(255,3). O valor no
+             * disco estava certo; era o texto que saía errado, e as duas leituras da
+             * MESMA célula não concordavam. */
             } else if(cp == CORPO_AUREO){
-                if(c.e) snprintf(cel, sizeof cel, "%ld%+ldσ", (long)c.total, (long)c.e);
-                else    snprintf(cel, sizeof cel, "%ld", (long)c.total);
+                long t = (long)(int8_t)c.total, e = (long)(int8_t)c.e;
+                if(e) snprintf(cel, sizeof cel, "%ld%+ldσ", t, e);
+                else  snprintf(cel, sizeof cel, "%ld", t);
             } else if(cp == CORPO_CRISTAL){
-                if(c.e) snprintf(cel, sizeof cel, "%ld%+ldω", (long)c.total, (long)c.e);
-                else    snprintf(cel, sizeof cel, "%ld", (long)c.total);
+                long t = (long)(int8_t)c.total, e = (long)(int8_t)c.e;
+                if(e) snprintf(cel, sizeof cel, "%ld%+ldω", t, e);
+                else  snprintf(cel, sizeof cel, "%ld", t);
             } else if(cp == CORPO_RACIONAL || c.e > 1){
-                Par cls = ra_classe((Par){ c.total, c.e ? c.e : 1 });
+                Par cls = ra_classe((Par){ (long)(int8_t)c.total, c.e ? (long)c.e : 1 });
                 if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
                 else          snprintf(cel, sizeof cel, "%ld", cls.a);
             } else snprintf(cel, sizeof cel, "%ld", (long)c.total);
@@ -3085,6 +3151,7 @@ static int executa(const char *sql){
 static int abrir_base(const char *base){
     char m[512], g[512];
     snprintf(g_base, sizeof g_base, "%s", base);
+    g_tabela[0] = 0;                       /* a base abre no ficheiro sem nome */
     snprintf(m, sizeof m, "%s.mem", base);
     snprintf(g, sizeof g, "%s.prog", base);
     fmem  = open(m, O_RDWR|O_CREAT, 0644);
@@ -3093,6 +3160,66 @@ static int abrir_base(const char *base){
     ftruncate(fmem, (off_t)(S_CB + 65536u) * (off_t)SLOTSZ);  /* Words=16 átomos + blobs */
     refaz_diario();          /* antes de qualquer comando: fechar o que ficou aberto */
     return 1;
+}
+
+/* ── A TABELA É UM FICHEIRO .mem ─────────────────────────────────────────────
+ * O motor sempre soube ler UMA relação: o catálogo é `{ncols, nrows}` no slot 0
+ * e as linhas moram em S_LINHAS. Era por isso que a base só tinha uma tabela —
+ * `CREATE TABLE beta` escrevia por cima da `alfa`, e (desde que a relação ganhou
+ * nome) o `SELECT * FROM alfa` seguinte era recusado.
+ *
+ * O que faltava não era um motor novo: era outro FICHEIRO. A memória É o disco,
+ * e o banco vê sempre um slot a ser lido e um slot a ser escrito — trocar de
+ * tabela é trocar o descritor. `<base>.mem` continua a ser a tabela sem nome (as
+ * bases antigas não mexem), e cada tabela nomeada é `<base>__<nome>.mem`.
+ *
+ * Assim o mapa de slots não muda uma linha, o `varre` não sabe que há mais
+ * tabelas, e o catálogo da base é a listagem do directório. */
+static void caminho_tabela(const char *nome, char *out, size_t cap, const char *ext){
+    if(!nome || !nome[0]) snprintf(out, cap, "%s%s", g_base, ext);
+    else                  snprintf(out, cap, "%s__%s%s", g_base, nome, ext);
+}
+
+static int tabela_existe(const char *nome){
+    char m[600];
+    caminho_tabela(nome, m, sizeof m, ".mem");
+    return access(m, F_OK) == 0;
+}
+
+/* Troca o .mem aberto para o da tabela `nome`. cria=1 permite criar o ficheiro.
+ * Devolve 0 quando a tabela não existe (e aí nada se troca). */
+static int usa_tabela_z(const char *nome, int cria_se_falta, int zera){
+    char alvo[600], baixo[64];
+    int i;
+    if(!nome) nome = "";
+    for(i = 0; nome[i] && i < (int)sizeof baixo - 1; i++) baixo[i] = baixa1(nome[i]);
+    baixo[i] = 0;
+    if(!zera && !strcmp(g_tabela, baixo) && fmem >= 0) return 1;   /* já é esta */
+
+    caminho_tabela(baixo, alvo, sizeof alvo, ".mem");
+    if(!cria_se_falta && access(alvo, F_OK) != 0){
+        /* COMPATIBILIDADE: uma base antiga tem tudo em <base>.mem, sem ficheiro
+         * por tabela. Se o nome bate com o que lá está guardado (ou se ela é tão
+         * antiga que nem nome tem), é essa a tabela — e nada se recusa. */
+        if(!g_tabela[0] && cat_nome_bate(baixo)) return 1;
+        return 0;
+    }
+    if(fmem >= 0){ fsync(fmem); close(fmem); }
+    fmem = open(alvo, O_RDWR | (cria_se_falta ? O_CREAT : 0) | (zera ? O_TRUNC : 0), 0644);
+    if(fmem < 0) return 0;
+    ftruncate(fmem, (off_t)(S_CB + 65536u) * (off_t)SLOTSZ);
+    snprintf(g_tabela, sizeof g_tabela, "%s", baixo);
+    refaz_diario();                       /* cada tabela tem o seu diário */
+    return 1;
+}
+
+/* CREATE TABLE começa a tabela LIMPA — é o que o motor sempre fez quando havia uma
+ * só (o catálogo era reescrito com nrows = 0). Com uma tabela por ficheiro isso
+ * deixou de bastar: o ficheiro sobrevivia entre corridas, e o medidor do sql, que
+ * cria as mesmas tabelas todas as vezes, passou a dar resultado diferente na
+ * segunda corrida. Um medidor que depende do que ficou de antes não mede. */
+static int usa_tabela(const char *nome, int cria_se_falta){
+    return usa_tabela_z(nome, cria_se_falta, 0);
 }
 static void fechar_base(void){ if(fmem>=0){fsync(fmem);close(fmem);} if(fprog>=0){fsync(fprog);close(fprog);} }
 
@@ -3322,6 +3449,66 @@ int main(int argc, char **argv){
                    && a1.total == CORPO_AUREO && a1.e == 1
                    && d0.total == a0.total && d0.e == a0.e
                    && d1.total == a1.total && d1.e == a1.e);
+            }
+            /* ── VÁRIAS TABELAS NA MESMA BASE, e cada uma é um ficheiro ──────────
+             * O motor lê UMA relação: catálogo no slot 0, linhas em S_LINHAS. Era por
+             * isso que a base só tinha uma tabela — `CREATE TABLE beta` escrevia por
+             * cima da `alfa`. O que faltava não era motor novo: era outro FICHEIRO.
+             * `<base>__<nome>.mem`, e trocar de tabela é trocar o descritor.
+             *
+             * Mede-se o que PODE falhar: as duas coexistem com formas diferentes, a
+             * primeira sobrevive a criar e usar a segunda, o WHERE corre na certa, e
+             * uma tabela que não existe é RECUSADA — sem isso, «multi-tabela» passava
+             * com uma tabela só e um nome ignorado. */
+            {
+                SqlOut a1, b1, a2, gg;
+                executa("CREATE TABLE alfa (a,b)");
+                executa("INSERT INTO alfa VALUES (1,2)");
+                executa("INSERT INTO alfa VALUES (3,4)");
+                executa("CREATE TABLE beta (a,b,c)");
+                executa("INSERT INTO beta VALUES (9,8,7)");
+                sql_cap = &a1; memset(&a1, 0, sizeof a1); executa("SELECT * FROM alfa");
+                sql_cap = &b1; memset(&b1, 0, sizeof b1); executa("SELECT * FROM beta");
+                sql_cap = &a2; memset(&a2, 0, sizeof a2); executa("SELECT * FROM alfa WHERE a = 3");
+                sql_cap = &gg; memset(&gg, 0, sizeof gg);
+                int achou_gama = executa("SELECT * FROM gama");
+                sql_cap = NULL;
+                printf("\n     alfa %dx%d · beta %dx%d · alfa WHERE %dx%d · gama %s\n",
+                       a1.nrows, a1.ncols, b1.nrows, b1.ncols, a2.nrows, a2.ncols,
+                       achou_gama ? "ACEITE (mau)" : "recusada");
+                ok("UMA BASE TEM VÁRIAS TABELAS, e a tabela é um ficheiro .mem: alfa (2x2) e"
+                   " beta (1x3) coexistem com formas DIFERENTES, a alfa volta inteira depois"
+                   " de a beta ser criada e usada, o WHERE corre na tabela certa, e a `gama`,"
+                   " que não existe, é RECUSADA. Antes disto o CREATE seguinte escrevia por"
+                   " cima do anterior e o nome do FROM era lido e deitado fora",
+                   a1.nrows == 2 && a1.ncols == 2 &&
+                   b1.nrows == 1 && b1.ncols == 3 &&
+                   a2.nrows == 1 && a2.ncols == 2 && !strcmp(a2.cell[0][0], "3") &&
+                   !achou_gama);
+            }
+            /* ── E O ENVELOPE DA CÉLULA RECUSA EM VEZ DE ENROLAR ─────────────────
+             * A célula é uma Word_8²: um átomo para o numerador. `INSERT VALUES
+             * (500,...)` era ACEITE e lido de volta como 244 — o dado perdia-se no
+             * disco sem uma palavra. Os dois lados: 255 encosta e entra, 256 é
+             * recusado. Medir só o que passa deixava «recusa sempre» indistinguível. */
+            {
+                SqlOut e1;
+                executa("CREATE TABLE env (a,b)");
+                int cabe = executa("INSERT INTO env VALUES (255,0)");
+                int nao  = executa("INSERT INTO env VALUES (256,0)");
+                int neg  = executa("INSERT INTO env VALUES (-1,0)");
+                sql_cap = &e1; memset(&e1, 0, sizeof e1); executa("SELECT * FROM env");
+                sql_cap = NULL;
+                printf("     255 %s · 256 %s · −1 %s · linhas guardadas %d (lida: %s)\n",
+                       cabe ? "entra" : "RECUSADO", nao ? "ENTRA (mau)" : "recusado",
+                       neg ? "ENTRA (mau)" : "recusado", e1.nrows,
+                       e1.nrows ? e1.cell[0][0] : "—");
+                ok("O ENVELOPE DA CÉLULA DIZ-SE E RECUSA: a Word_8 segura 0..255 numa coluna"
+                   " inteira, e 255 ENCOSTA e volta exacto enquanto 256 e −1 são RECUSADOS"
+                   " com erro. Antes, o 500 entrava como 244 e o −1 como 255 — o dado ficava"
+                   " truncado no disco e nada o dizia. Alargar a célula é subir a torre; o"
+                   " que não se pode é guardar lixo em silêncio",
+                   cabe && !nao && !neg && e1.nrows == 1 && !strcmp(e1.cell[0][0], "255"));
             }
             executa("CREATE TABLE t (a,b,c)");     /* repõe a tabela do resto do teste */
             executa("INSERT INTO t VALUES (7,10,20)");
