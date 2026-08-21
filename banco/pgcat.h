@@ -574,35 +574,30 @@ static int pgcat_responde(const char *sql, SqlOut *out){
         return 1;
     }
 
-    /* ── as transacções, e aqui há uma linha que NÃO se pode devolver ─────
+    /* ── as transacções, e agora elas DESFAZEM ──────────────────────────
      *
-     * BEGIN e COMMIT são verdade neste servidor: BEGIN não promete nada por si,
-     * e COMMIT diz que as escritas ficam — e ficam, porque foram directas ao
-     * disco. Devolver-lhes a tag não engana ninguém.
+     * Até aqui o ROLLBACK era recusado, porque devolver a tag sem desfazer era
+     * mentir. Passou a desfazer, e o mecanismo é o do levantamento: ESCREVER É
+     * QUOCIENTAR — o valor novo cola-se por cima do velho e a célula esquece
+     * qual era —, e guardar o valor ANTERIOR é a coordenada que desdobra.
+     * Desfaz-se lendo a pilha AO CONTRÁRIO, ou um endereço escrito duas vezes
+     * ficaria com o valor do meio.
      *
-     * O ROLLBACK é outra coisa. Ele PROMETE DESFAZER, e este motor escreve no
-     * .mem à medida que executa: não há registo de desfazer, e o que foi escrito
-     * está escrito. Devolver «ROLLBACK» seria dizer ao cliente que os seus
-     * INSERT foram anulados quando estão no disco — e ele seguiria em frente
-     * convencido de que a base está num estado que não está.
-     *
-     * Foi medido, e era exactamente isso que acontecia: BEGIN, INSERT, ROLLBACK,
-     * e a linha continuava lá. Por isso o ROLLBACK é RECUSADO com a razão à
-     * frente. Quebra o cliente que conta com ele — e é bom que quebre: perder
-     * dados em silêncio é pior do que parar. */
-    if(pgcat_pal(sql, "BEGIN"))  { pgcat_so_tag(out, "BEGIN");  return 1; }
-    if(pgcat_pal(sql, "COMMIT")) { pgcat_so_tag(out, "COMMIT"); return 1; }
+     * E O TECTO CONTINUA DECLARADO: se a pilha encher, o ROLLBACK RECUSA em vez
+     * de desfazer metade. Meia volta deixa a base num estado que nunca existiu,
+     * e isso é pior do que não voltar. */
+    if(pgcat_pal(sql, "BEGIN")){ sql_tx_abre(); pgcat_so_tag(out, "BEGIN"); return 1; }
+    if(pgcat_pal(sql, "COMMIT")){ sql_tx_fecha(); pgcat_so_tag(out, "COMMIT"); return 1; }
     if(pgcat_pal(sql, "ROLLBACK")){
+        if(sql_tx_desfaz()){ sql_tx_fecha(); pgcat_so_tag(out, "ROLLBACK"); return 1; }
         if(out){
             memset(out, 0, sizeof *out);
             out->ok = 0;
-            /* a mensagem cabe no campo: se fosse cortada, o cliente ficava com
-             * meia razao, e a razao e' o que aqui interessa. */
             snprintf(out->err, sizeof out->err,
-                     "ROLLBACK nao suportado: as escritas ja estao no disco e nao ha"
-                     " registo de desfazer. Recusa-se em vez de dizer que foram"
-                     " anuladas.");
+                     "ROLLBACK recusado: a transaccao escreveu mais do que a pilha de"
+                     " desfazer comporta. Nada foi desfeito — meia volta seria pior.");
         }
+        sql_tx_fecha();
         return 1;
     }
 

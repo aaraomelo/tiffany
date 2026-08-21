@@ -39,5 +39,13 @@ void sql_fechar(void);
 int  sql_executa(const char *sql, SqlOut *out);
 /* os nomes das colunas de uma tabela — para o catálogo, que não os pode inventar */
 int  sql_cols_de(const char *tabela, char nomes[][32], int cap);
+/* A TRANSACÇÃO, e ela é o levantamento do `aranha.tex`: escrever é dobrar — o
+ * valor novo cola-se por cima e a célula esquece qual era —, e guardar o
+ * anterior é a coordenada que desdobra, com volta exacta. */
+void sql_tx_abre(void);
+int  sql_tx_desfaz(void);      /* 0 se a pilha encheu: então NÃO se desfaz nada */
+void sql_tx_fecha(void);
+int  sql_tx_cheia(void);
+long sql_tx_escritas(void);
 
 #endif

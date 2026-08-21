@@ -483,11 +483,67 @@ static Word mem_le(unsigned slot){
         slot_mem_le(fmem, slot * 2u + 1u)
     };
 }
+/* ── O DESDOBRAR: a transacção guarda o que a escrita colou por cima ─────────
+ *
+ * O motor escrevia directo no disco e o ROLLBACK não desfazia nada — devolvia a
+ * tag e a linha ficava lá. A resposta não é inventar um sistema de transacções:
+ * é o LEVANTAMENTO que o `aranha.tex` já prova.
+ *
+ * Ali, π identifica índices na mesma célula (a DOBRA, G > 1) e o levantamento
+ * π̃ = (π, k) separa-os outra vez com UMA coordenada — o número da visita —,
+ * com volta exacta. Aqui é a mesma coisa: escrever é dobrar, porque o valor
+ * novo cola-se por cima do velho e a célula esquece qual era; e guardar o valor
+ * ANTERIOR é a coordenada de folha que desdobra.
+ *
+ * Em operadores é a segunda equação a correr ao contrário: acumular é ζ,
+ * desfazer é μ = ζ⁻¹, e desfaz-se LENDO A PILHA DE TRÁS PARA A FRENTE, que é a
+ * diferença finita aplicada à ordem das escritas.
+ *
+ * O TECTO É DECLARADO. A pilha é fixa — sem RAM em execução, como o resto da
+ * casa — e, se encher, a transacção fica MARCADA e o ROLLBACK RECUSA. Desfazer
+ * metade seria pior do que não desfazer: deixaria a base num estado que nunca
+ * existiu. */
+#define UNDO_MAX 16384
+typedef struct { unsigned slot; Word antes; } Desfaz;
+static Desfaz undo_pilha[UNDO_MAX];
+static long   undo_n = 0;
+static int    undo_em_tx = 0;
+static int    undo_cheio = 0;
 static void mem_grava(unsigned slot, Word w){
     if(slot >= S_CANAL){ canal_grava(slot, w); return; }
     if(slot >= S_POOL){ pool_grava(slot, w); return; }
+    /* dentro de uma transacção, o que se vai colar por cima fica guardado */
+    if(undo_em_tx){
+        if(undo_n < UNDO_MAX){
+            undo_pilha[undo_n].slot  = slot;
+            undo_pilha[undo_n].antes = mem_le(slot);
+            undo_n++;
+        }else{
+            undo_cheio = 1;                 /* e o ROLLBACK vai recusar */
+        }
+    }
     slot_mem_grava(fmem, slot * 2u,     w.total);
     slot_mem_grava(fmem, slot * 2u + 1u, w.e);
+}
+
+/* a transacção: abrir, desfazer, confirmar */
+void sql_tx_abre(void){ undo_em_tx = 1; undo_n = 0; undo_cheio = 0; }
+int  sql_tx_cheia(void){ return undo_cheio; }
+long sql_tx_escritas(void){ return undo_n; }
+void sql_tx_fecha(void){ undo_em_tx = 0; undo_n = 0; undo_cheio = 0; }
+/* desfaz LENDO AO CONTRÁRIO: a última escrita é a primeira a ser reposta, ou um
+ * slot escrito duas vezes ficaria com o valor do meio. */
+int  sql_tx_desfaz(void){
+    if(undo_cheio) return 0;
+    if(fmem < 0) return 0;
+    for(long i = undo_n - 1; i >= 0; i--){
+        unsigned s = undo_pilha[i].slot;
+        Word v = undo_pilha[i].antes;
+        slot_mem_grava(fmem, s * 2u,     v.total);
+        slot_mem_grava(fmem, s * 2u + 1u, v.e);
+    }
+    undo_n = 0;
+    return 1;
 }
 /* átomos físicos consecutivos (1 B = 1 índice) — cab/merkle/texto; sem stride Word */
 static void atomos_grava(unsigned base, const unsigned char *b, int n){

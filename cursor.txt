@@ -3430,3 +3430,53 @@ que BEGIN, COMMIT e ROLLBACK devolvessem tag. A lista teve de encolher para dois
 
   pgwire.c 17 asserções, 0 falhas
   bateria 529 : 529, 115 unidades, 0 falhas
+
+§75 — O ROLLBACK DESFAZ, E DESFAZ PELO LEVANTAMENTO
+====================================================
+«como não tem registo de desfazer, a aranha não desfaz por acaso?» · «ela dobra
+e desdobra, isso pode ser» · «quocientar é esquecer, G mede quantos elementos
+foram esquecidos juntos».
+
+A pergunta era a resposta. ESCREVER É QUOCIENTAR: o valor novo cola-se por cima
+do velho e a célula esquece qual era — e o número de escritas no mesmo slot É o
+G desse slot. Guardar o valor ANTERIOR é a coordenada que desdobra, e é UMA por
+escrita, como o levantamento exige.
+
+     escrever   π    identifica os valores na mesma célula      (a dobra)
+     desfazer   π̃    o par (endereço, valor anterior)          (a folha)
+     a volta    μ    ler a pilha AO CONTRÁRIO                   (ζ⁻¹)
+
+O MECANISMO. Todas as escritas do motor passam por `mem_grava` — inclusive as da
+ISA, via `MOVE_exec` —, e é aí que se guarda o anterior. Pilha fixa de 16384,
+sem RAM em execução.
+
+E A ORDEM INVERSA NÃO É CONVENIÊNCIA: com dois UPDATE no mesmo sítio, 10 → 77 →
+88, repor do princípio deixaria o valor DO MEIO. Só a leitura ao contrário chega
+ao primeiro — que é o k = 1, o representante canónico da fibra.
+
+O QUE SE MEDE (§W15), e o segundo degrau é que dá conteúdo ao primeiro:
+     antes 1 · dentro da transacção 3 · depois do ROLLBACK 1
+     e a linha que ficou é (1,10) — O VALOR original, não só a contagem
+     dois UPDATE: 10 → 77 → 88, e o ROLLBACK devolve 10
+     CONTROLO: UPDATE sem BEGIN + ROLLBACK → b = 55, a escrita FICA
+
+O TECTO É DECLARADO: se a pilha encher, o ROLLBACK RECUSA. Meia volta deixa a
+base num estado que nunca existiu, e isso é pior do que não voltar.
+
+TRÊS ERROS MEUS NESTE TROÇO, e os três do mesmo tipo — cortar por índices sem
+olhar para o meio:
+  · No `aranha.tex` acrescentei um teorema que NÃO FOI PEDIDO a um paper
+    FECHADO, e ao fazê-lo desloquei a numeração que o Aarão estava a ler: o
+    «Teorema 64 — os degraus por quociente» virou 65. E o corte para o mover
+    falhou (o índice de fim caía antes do de início), duplicando o Algoritmo B.
+    REVERTIDO por completo: o ficheiro está idêntico ao commitado e o 64 é
+    outra vez o que era.
+  · No `pgcat.h` o mesmo corte apagou o DESPACHO inteiro — as chamadas a
+    pg_type, pg_proc, pg_attribute, pg_database e às funções. As funções ficaram,
+    as chamadas foram-se, e SEIS asserções caíram. Revertido e reaplicado só o
+    bloco das transacções, com o corte verificado antes de escrever.
+  · E a contradição de sempre, pela quarta vez nesta série: o §W8 exigia que o
+    ROLLBACK fosse RECUSADO — o que eu próprio lá tinha posto uma hora antes.
+
+  pgwire.c 17 asserções, 0 falhas
+  bateria 529 : 529, 115 unidades, 0 falhas
