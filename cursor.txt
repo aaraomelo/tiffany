@@ -17,7 +17,7 @@ Fase PG: Trios PG1–PG4 FECHADOS. A PROMOÇÃO (saturo→promove) está PROPAGA
     formatos    0 avisos -Wformat no repo (eram 216; ver §17)
     git         0 includes fora do repositório  tests/refs.c §R5  (eram 3 headers)
     js          5 medidores .js passaram a emitir #UNIT: 26 unidades finas (§22)
-    selo        439b3a5411d40fd0      bash tools/bateria.sh
+    selo        6af5d0672f9be840      bash tools/bateria.sh
 
 Verificar SEMPRE com:  bash tools/bateria.sh   (lê AS DUAS linhas: total e unidades)
 
@@ -1477,3 +1477,51 @@ agente a reconstruir a trajectória em vez de ler a marca que o espaço já tem.
 A LIÇÃO, e é sobre mim: li `naturais.tex` e parei. A lei do produto estava lá e
 estava certa — mas o ALGORITMO, o que diz onde a memória mora, estava no quarto
 documento. Ler o primeiro dá a operação; ler a cadeia dá o sítio onde ela corre.
+
+
+32. O DRAGÃO E O INVERSO — o byte alto É a folha, e tem teorema
+=================================================================
+Li o dragão e o inverso da aranha, e o que eu tinha construído já lá estava
+descrito. Eu é que não lhe tinha dado o nome.
+
+A DOBRA (thm:multiplicidade)
+----------------------------
+A célula de oito bits é a realização
+
+    π : valor ⟼ célula,     célula = valor mod 256
+
+e ela DOBRA: 44, 300, 556 e 812 caem TODOS na mesma célula. Isso é literalmente
+a identificação `i ∼ j ⟺ π(i) = π(j)`, e G(célula) = |π⁻¹| conta quantos valores
+lá colapsam. O `INSERT ... VALUES (500)` a guardar 244 NÃO era um defeito de
+tipo: era a FIBRA a ser perdida na projecção — `algebrico thm:metrica`, |det|=1
+conserva a MEDIDA e não o percurso, «a pata some na marca».
+
+O LEVANTAMENTO (thm:aranha-inversa)
+------------------------------------
+    π̃(v) = (π(v), k(v))      com k = o byte ALTO
+
+«Não inventa geometria nova: desfaz a identificação i∼j que o dragão fez na
+grade. A métrica unimodular continua a governar a base; a folha é a fibra que
+|det| = 1 não via.»
+
+  (1) INJECTIVIDADE  G̃ ≡ 1 — os quatro pares (baixo,alto) são únicos e os quatro
+                     valores voltam DISTINTOS pelo SELECT
+  (2) PROJECÇÃO      pr₁ ∘ π̃ = π — o byte baixo guardado é exactamente v mod 256,
+                     que é a célula que uma base antiga tem
+  (3) DOBRA REAL     na BASE os quatro colapsam numa célula só, G = 4
+
+E A RECUSA ACIMA DE 32767 É A OUTRA METADE DO MESMO TEOREMA: o avaliador decide
+na BASE, e a base não vê a folha.
+
+E UMA TAUTOLOGIA MINHA, apanhada a tempo: escrevi a medida primeiro em
+aritmética de C — `(v&255) | ((v>>8)<<8) == v` varrido em 65536 valores, 0
+falhas. É uma IDENTIDADE, não uma medição: passaria com o banco desligado. A
+medida tem de ir ao .mem ver o que as células GUARDAM, e é o que faz agora.
+
+  gume   a folha não escrita → cai (e o mutante imprime [44][44][44][44], a dobra
+         crua) · a leitura a ignorar a folha → cai
+
+A LIÇÃO, outra vez sobre mim: o §30 leu o primeiro paper e trouxe a OPERAÇÃO; o
+§31 leu o quarto e trouxe o SÍTIO onde a memória mora; este leu o dragão e
+trouxe o NOME do que eu já tinha feito às cegas. Construir sem o nome funciona e
+fica sem lei — e sem lei não há como saber se está completo.

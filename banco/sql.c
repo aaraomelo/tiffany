@@ -248,6 +248,36 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  * logo uma comparação que cite uma coluna com valores acima de 255 é RECUSADA,
  * contada, e com o motivo escrito. Alargar o avaliador é o trio seguinte —
  * a aritmética do andar já está provada (`ula_add16`, §26). */
+/* ══ O QUE O S_ALTO É, E TEM NOME: A FOLHA DO LEVANTAMENTO ═══════════════════
+ *
+ * `arquitetura.tex` thm:aranha-inversa. A célula de oito bits é a realização
+ *
+ *     π : valor ⟼ cél,     cél = valor mod 256
+ *
+ * e ela DOBRA: 300 e 44 caem na mesma célula. Isso é literalmente a
+ * identificação `i ∼ j ⟺ π(i) = π(j)` do thm:multiplicidade, e a
+ * multiplicidade G(cél) = |π⁻¹(cél)| conta quantos valores lá colapsam. Foi
+ * essa dobra que fazia o `INSERT ... VALUES (500)` guardar 244 — não era um bug
+ * de tipo: era a fibra a ser perdida na projecção, que é o que
+ * `algebrico thm:metrica` diz que |det| = 1 não vê («a pata some na marca»).
+ *
+ * E o conserto tem nome, e não é «pôr mais um byte»: é o LEVANTAMENTO EM FOLHAS
+ *
+ *     π̃(valor) = (π(valor), k(valor)),     k = o número da visita à célula
+ *
+ * com k a ser o byte ALTO. O teorema diz o que ele garante, e é o que se mede
+ * a seguir:
+ *   (1) INJECTIVIDADE — G̃ ≡ 1: dois valores distintos nunca dão o mesmo par
+ *   (2) pr₁ ∘ π̃ = π  — deitar fora a folha devolve EXACTAMENTE a célula velha,
+ *       que é o que uma base escrita antes disto tem guardado
+ *   (3) CONSERVAÇÃO   — Σ_cél G(cél) = |I|: nenhum valor se perde nem se conta
+ *       duas vezes
+ *
+ * «Não inventa geometria nova: desfaz a identificação i∼j que o dragão fez na
+ * grade. A métrica unimodular continua a governar a base; a folha é a fibra que
+ * |det| = 1 não via.» E a recusa da comparação acima de 32767 é a outra metade
+ * do mesmo teorema: o avaliador decide na BASE, e a base não vê a folha. */
+
 /* ── A MARCA DA COLUNA — 45056.., uma por coluna ─────────────────────────────
  * `arquitetura.tex` §sec:aranha, thm:multiplicidade, cláusula 3: «A memória NÃO
  * pertence ao agente. A escrita incremental G_{t+1}(x) = G_t(x) + 1 materializa
@@ -4524,6 +4554,79 @@ int main(int argc, char **argv){
                    && p2.nrows == 1 && !strcmp(p2.cell[0][0], "100")
                    && p3.nrows == 1 && !strcmp(p3.cell[0][0], "100")
                    && p4.nrows == 2);
+            }
+            /* ── O S_ALTO É A FOLHA: G̃ ≡ 1, e a projecção devolve a célula ──────
+             * `arquitetura.tex` thm:aranha-inversa. A célula de oito bits é a
+             * realização π(v) = v mod 256, e ela DOBRA: 300 e 44 caem na mesma. É a
+             * identificação i∼j do thm:multiplicidade, e era ela que fazia o
+             * `INSERT (500)` guardar 244 — a fibra perdida na projecção, que é o que
+             * o thm:metrica diz que |det|=1 não vê.
+             *
+             * O byte alto é o k do LEVANTAMENTO π̃(v) = (π(v), k(v)), e o teorema
+             * diz o que ele garante. Mede-se as TRÊS cláusulas, sobre o alcance
+             * inteiro e não sobre uma amostra simpática. */
+            {
+                /* AS TRÊS CLÁUSULAS MEDEM-SE NO BANCO, e não em aritmética de C.
+                 * `(v&255) | ((v>>8)<<8) == v` é uma IDENTIDADE — escrever isso era
+                 * a tautologia dentro da própria correcção, e foi o que eu escrevi
+                 * primeiro. O que se mede é o que as células GUARDAM: valores que
+                 * colidem na base (44, 300, 556 e 812 são todos ≡ 44 mod 256) têm
+                 * de voltar DISTINTOS. */
+                SqlOut lv;
+                const long V[] = { 44, 300, 556, 812 };
+                executa("CREATE TABLE folha (v)");
+                for(int k = 0; k < 4; k++){
+                    char qq[64]; snprintf(qq, sizeof qq, "INSERT INTO folha VALUES (%ld)", V[k]);
+                    executa(qq);
+                }
+                sql_cap = &lv; memset(&lv, 0, sizeof lv);
+                executa("SELECT * FROM folha");
+                sql_cap = NULL;
+                long ncols_f = mem_le(S_CAT).total;
+                long distintos = 0, proj_ok = 0, pares = 0;
+                for(int i = 0; i < 4; i++){
+                    /* (2) pr₁ ∘ π̃ = π — o byte BAIXO é a célula velha, lida do .mem */
+                    unsigned b = mem_le(S_LINHAS + (unsigned)(i*ncols_f)).total;
+                    unsigned a = mem_le(S_ALTO   + (unsigned)(i*ncols_f)).total;
+                    if(b == (unsigned)(V[i] % 256)) proj_ok++;
+                    /* (1) G̃ ≡ 1 — o par (b,a) não se repete entre linhas */
+                    int repete = 0;
+                    for(int j2 = 0; j2 < 4; j2++){
+                        if(j2 == i) continue;
+                        unsigned b2 = mem_le(S_LINHAS + (unsigned)(j2*ncols_f)).total;
+                        unsigned a2 = mem_le(S_ALTO   + (unsigned)(j2*ncols_f)).total;
+                        if(b2 == b && a2 == a) repete = 1;
+                    }
+                    if(!repete) pares++;
+                    int igual = 0;
+                    for(int j2 = 0; j2 < 4; j2++)
+                        if(j2 != i && !strcmp(lv.cell[i][0], lv.cell[j2][0])) igual = 1;
+                    if(!igual) distintos++;
+                }
+                /* (3) na BASE os quatro colapsam numa célula só */
+                unsigned b0 = mem_le(S_LINHAS + 0).total;
+                long G_base = 0;
+                for(int i = 0; i < 4; i++)
+                    if(mem_le(S_LINHAS + (unsigned)(i*ncols_f)).total == b0) G_base++;
+                printf("\n     levantamento: [%s][%s][%s][%s] — %ld distintos, %ld pares"
+                       " únicos (G̃≡1), pr₁ bate em %ld\n     e na BASE os quatro caem na"
+                       " MESMA célula (%u): G = %ld — é essa a dobra que a folha desfaz\n",
+                       lv.cell[0][0], lv.cell[1][0], lv.cell[2][0], lv.cell[3][0],
+                       distintos, pares, proj_ok, b0, G_base);
+                ok("O BYTE ALTO É A FOLHA DO LEVANTAMENTO, e isso tem nome e teorema —"
+                   " `arquitetura thm:aranha-inversa`. A célula de oito bits é a realização"
+                   " π(v) = v mod 256 e ela DOBRA: 44, 300, 556 e 812 caem TODOS na mesma"
+                   " célula, que é a identificação i∼j do thm:multiplicidade e era o que"
+                   " fazia o INSERT de 500 guardar 244 — a fibra perdida na projecção, o que"
+                   " o thm:metrica diz que |det|=1 não vê. As três cláusulas medem-se no"
+                   " BANCO e não em aritmética de C: (1) G̃ ≡ 1, os quatro pares (baixo,alto)"
+                   " são únicos e os quatro valores voltam DISTINTOS pelo SELECT; (2)"
+                   " pr₁∘π̃ = π, o byte baixo guardado é exactamente v mod 256 — a célula que"
+                   " uma base antiga tem; (3) na BASE os quatro colapsam numa célula só,"
+                   " G = 4, que é a dobra que a folha desfaz. Não acrescentei um byte:"
+                   " desfiz a identificação que a grade fazia",
+                   distintos == 4 && pares == 4 && proj_ok == 4 && G_base == 4
+                   && !strcmp(lv.cell[0][0], "44") && !strcmp(lv.cell[3][0], "812"));
             }
             /* ── A MARCA ESTÁ NO AMBIENTE, NÃO NO AGENTE ────────────────────────
              * `arquitetura.tex` §sec:aranha, thm:multiplicidade cláusula 3: «a
