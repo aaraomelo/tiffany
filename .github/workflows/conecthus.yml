@@ -1,0 +1,147 @@
+name: Publicar o Conecthus (patria-api e landpage)
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Os dois vieram de Patria-Labs (patria-api e landpage), que foram APAGADOS.
+#  Com eles morreram os workflows que os punham no ar — e os dois estão em
+#  produção, seis containers entre prod, homolog e dev. Este ficheiro é o que
+#  ficou no lugar deles, e é mais curto que os originais por uma razão só:
+#
+#  SEM R2. O original construía o artefato, subia-o ao Cloudflare R2, assinava
+#  um URL e mandava o servidor descarregá-lo. Três saltos a fazer o que um faz —
+#  e os segredos R2_* viviam SÓ naqueles repositórios, ilegíveis por API, logo
+#  desapareceram com eles. Aqui o artefato vai por scp, que é a mesma travessia
+#  que o publica.yml deste repositório já fazia, com a chave que já temos.
+#
+#  E O QUE NÃO ATRAVESSA: o DATABASE_URL das migrations. Ele fica em
+#  /root/plataforma/conecthus/deploy-vars.txt no servidor (chmod 600), copiado
+#  das environment variables dos repos antes de os apagar. O script remoto
+#  procura-o lá; o workflow nunca o vê. É o mesmo princípio dos /root/.erp_* .
+#
+#  GATILHO, igual ao do erp.yml e pela mesma razão: o master é o tronco de
+#  trabalho diário, e um commit distraído não pode chegar a produção. Push com
+#  `paths:` publica em HOMOLOGAÇÃO; produção e dev são workflow_dispatch.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'plataforma/conecthus/**'
+      - '.github/workflows/conecthus.yml'
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Qual dos dois'
+        type: choice
+        options: [patria-api, landpage, ambos]
+        default: ambos
+      ambiente:
+        description: 'Onde publicar'
+        type: choice
+        options: [homolog, dev, producao]
+        default: homolog
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false          # a landpage não deve ficar por publicar porque a api falhou
+      matrix:
+        app: [patria-api, landpage]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2        # o `git diff HEAD~1` decide se há migrations a correr
+
+      - name: Este app entra nesta corrida?
+        id: quero
+        run: |
+          ESCOLHIDO="${{ github.event.inputs.app || 'ambos' }}"
+          if [ "$ESCOLHIDO" = "ambos" ] || [ "$ESCOLHIDO" = "${{ matrix.app }}" ]; then
+            echo "sim=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "sim=0" >> "$GITHUB_OUTPUT"; echo "→ ${{ matrix.app }} fica de fora desta corrida"
+          fi
+
+      - name: Qual ambiente
+        id: alvo
+        if: steps.quero.outputs.sim == '1'
+        run: |
+          AMB="${{ github.event.inputs.ambiente || 'homolog' }}"
+          APP="${{ matrix.app }}"
+          # os nomes e portas vieram das environment variables dos repos apagados;
+          # não são segredo — são caminhos e nomes de container.
+          case "$APP-$AMB" in
+            patria-api-producao) D=/root/patria-api;          C=patria-api;          P=8080; F=/root/docker-compose.prod.yml ;;
+            patria-api-homolog)  D=/root/patria-api-homolog;  C=patria-api-homolog;  P=8081; F=/root/docker-compose.homolog.yml ;;
+            patria-api-dev)      D=/root/patria-api-dev;      C=patria-api-dev;      P=8082; F=/root/docker-compose.dev.yml ;;
+            landpage-producao)   D=/root/landpage;            C=landpage;            P=3000; F=/root/docker-compose.prod.yml ;;
+            landpage-homolog)    D=/root/landpage-homolog;    C=landpage-homolog;    P=3001; F=/root/docker-compose.homolog.yml ;;
+            landpage-dev)        D=/root/landpage-dev;        C=landpage-dev;        P=3002; F=/root/docker-compose.dev.yml ;;
+          esac
+          { echo "dir=$D"; echo "container=$C"; echo "porta=$P"; echo "compose=$F"; echo "ambiente=$AMB"; } >> "$GITHUB_OUTPUT"
+          # a api responde /api/health; a landpage serve a raiz
+          [ "$APP" = "patria-api" ] && echo "saude=/api/health" >> "$GITHUB_OUTPUT" || echo "saude=/" >> "$GITHUB_OUTPUT"
+          echo "→ $APP em $AMB: $C na porta $P"
+
+      - uses: actions/setup-node@v4
+        if: steps.quero.outputs.sim == '1'
+        with:
+          node-version: 20
+
+      - name: Construir
+        if: steps.quero.outputs.sim == '1'
+        working-directory: plataforma/conecthus/${{ matrix.app }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Artefato
+        if: steps.quero.outputs.sim == '1'
+        working-directory: plataforma/conecthus/${{ matrix.app }}
+        run: |
+          # cada um leva o que o seu Dockerfile precisa, e nada mais
+          if [ "${{ matrix.app }}" = "patria-api" ]; then
+            tar -czf /tmp/artefato.tar.gz dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md
+          else
+            tar -czf /tmp/artefato.tar.gz dist Dockerfile nginx-container.conf
+          fi
+          echo "artefato: $(du -h /tmp/artefato.tar.gz | cut -f1)"
+
+      - name: O schema mudou? (só então há migrations)
+        id: schema
+        if: steps.quero.outputs.sim == '1'
+        run: |
+          N=$(git diff --name-only HEAD~1 HEAD -- plataforma/conecthus/${{ matrix.app }}/prisma/ | wc -l)
+          echo "mudou=$N" >> "$GITHUB_OUTPUT"
+          echo "ficheiros de schema tocados: $N"
+
+      - name: Setup SSH
+        if: steps.quero.outputs.sim == '1'
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          {
+            echo "Host server"
+            echo "  HostName ${{ vars.SSH_HOST }}"
+            echo "  User ${{ vars.SSH_USER }}"
+            echo "  AddressFamily inet"
+            echo "  ConnectTimeout 30"
+            echo "  ServerAliveInterval 15"
+          } >> ~/.ssh/config
+          for i in 1 2 3; do ssh-keyscan -4 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break; sleep 5; done
+
+      - name: Publicar
+        if: steps.quero.outputs.sim == '1'
+        run: |
+          scp /tmp/artefato.tar.gz server:/tmp/conecthus-artefato.tar.gz
+          scp plataforma/conecthus/deploy.sh server:/tmp/conecthus-deploy.sh
+          ssh server "chmod +x /tmp/conecthus-deploy.sh && /tmp/conecthus-deploy.sh \
+            '${{ steps.alvo.outputs.dir }}' \
+            '${{ steps.alvo.outputs.compose }}' \
+            '${{ steps.alvo.outputs.container }}' \
+            '${{ steps.alvo.outputs.porta }}' \
+            '${{ steps.schema.outputs.mudou }}' \
+            '${{ matrix.app }}' \
+            '${{ steps.alvo.outputs.ambiente }}' \
+            '${{ steps.alvo.outputs.saude }}' && rm -f /tmp/conecthus-deploy.sh"
