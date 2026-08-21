@@ -3851,7 +3851,37 @@ static int executa(const char *sql){
         if(!strncasecmp(q, "TEXTO", 5)) return acha_texto(q+5);
         return 0;
     }
-    if(palavra(&p, "SELECT")) return varre(p, ACAO_MARCA);
+    if(palavra(&p, "SELECT")){
+        /* COUNT(*) — e o motor já conta. O S_CONTA guarda quantas linhas
+         * casaram, e não satura como o SqlOut, que só materializa as primeiras.
+         * Corre-se a MESMA varredura, com a mesma condição, e devolve-se o
+         * número: não é uma segunda contagem, é a que o WHERE já fez. */
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "COUNT", 5)){
+            const char *r = q + 5;
+            pula(&r);
+            if(*r == '('){
+                const char *fim = strchr(r, ')');
+                if(fim){
+                    char resto[512];
+                    int ok;
+                    snprintf(resto, sizeof resto, "*%s", fim + 1);
+                    ok = varre(resto, ACAO_MARCA);
+                    if(sql_cap){
+                        long n = mem_le(S_CONTA).total;
+                        memset(sql_cap, 0, sizeof *sql_cap);
+                        sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
+                        sql_cap->tipo[0] = SQL_TIPO_INT8;
+                        snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "count");
+                        snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", n);
+                        snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+                    }
+                    return ok;
+                }
+            }
+        }
+        return varre(p, ACAO_MARCA);
+    }
     if(palavra(&p, "UPDATE")) return varre(p, ACAO_SET);
     if(palavra(&p, "DELETE")) return varre(p, ACAO_APAGA);
     if(palavra(&p, "DISTANCIA")){

@@ -607,6 +607,28 @@ static int pgcat_responde(const char *sql, SqlOut *out){
         }
     }
 
+    /* ── pg_database: o `\l`. Há UMA base aberta, e é essa ───────────────
+     * Não se inventa uma lista: este servidor serve a base com que arrancou, e
+     * é ela que aparece. Nove colunas, lidas por posição pelo psql. */
+    if(strstr(sql, "pg_catalog.pg_database") && strstr(sql, "datname")){
+        if(out){
+            const char *c[9] = { "Name", "Owner", "Encoding", "Locale Provider",
+                                 "Collate", "Ctype", "ICU Locale", "ICU Rules",
+                                 "Access privileges" };
+            const char *v[9] = { pgcat_base, pgcat_user, "UTF8", "libc",
+                                 "C", "C", "", "", "" };
+            memset(out, 0, sizeof *out);
+            out->ok = 1; out->ncols = 9; out->nrows = 1;
+            for(int j = 0; j < 9; j++){
+                snprintf(out->col[j], sizeof out->col[j], "%s", c[j]);
+                out->tipo[j] = SQL_TIPO_TEXT;
+                snprintf(out->cell[0][j], SQL_OUT_CELL, "%s", v[j]);
+            }
+            snprintf(out->tag, sizeof out->tag, "SELECT 1");
+        }
+        return 1;
+    }
+
     /* ── as tabelas de catálogo que, aqui, estão VAZIAS ──────────────────
      *
      * Uma tabela desta casa não tem herança, nem índices, nem restrições, nem

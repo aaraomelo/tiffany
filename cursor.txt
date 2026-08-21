@@ -3349,3 +3349,40 @@ NO psql REAL:
 
   pgwire.c 15 asserções, 0 falhas
   bateria 529 : 529, 113 unidades, 0 falhas
+
+§73 — count(*) CONTA O QUE NÃO CABE, E FOI A SONDAGEM QUE MOSTROU ONDE ERA
+===========================================================================
+Em vez de adivinhar o próximo buraco, corri uma SESSÃO no psql e vi o que
+partia. Passavam todos: CREATE, INSERT, UPDATE (tag «UPDATE 1»), DELETE (tag
+«DELETE 1») e SELECT. Caíam DOIS: `count(*)` e `\l`.
+
+O COUNT É O QUE INTERESSA, e o motor JÁ o faz: o `S_CONTA` guarda quantas linhas
+casaram com o WHERE. Devolver isso não é uma segunda passagem — é a contagem que
+a varredura já fez. Reescreve-se `count(*)` para `*`, corre-se a MESMA varredura
+com a MESMA condição, e lê-se o contador.
+
+E O GUME É O SqlOut: ele materializa 64 linhas e TRUNCA; o count NÃO PODE.
+
+     com 84 linhas na tabela (o SqlOut comporta 64):
+       SELECT * devolve 64  — truncado, e é o que se espera
+       count(*) devolve 84  — conta tudo, que é o ponto
+
+  Exige-se que os dois números sejam DIFERENTES nessa corrida. Sem isso, um
+  count que fosse o `nrows` do SqlOut passaria em TODAS as tabelas pequenas —
+  que são as de todos os outros blocos deste ficheiro — e mentiria na primeira
+  tabela a sério. É o mesmo defeito da saturação que a memória já regista:
+  «falha travestida de teorema».
+
+O TIPO É int8 e não int4, porque é o que o Postgres diz e quem lê o OID conta
+com isso.
+
+E O `\l` devolve UMA base — a que o servidor abriu. Inventar uma lista seria
+descrever um servidor que não somos.
+
+NO psql REAL:
+     \l          tiff_s | tiffany | UTF8 | libc | C | C
+     \dt         public | c | table ;  public | t | table
+     count(*)    3, e com WHERE a > 1 dá 2
+
+  pgwire.c 16 asserções, 0 falhas
+  bateria 529 : 529, 114 unidades, 0 falhas

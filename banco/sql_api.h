@@ -16,6 +16,7 @@
 #define SQL_OUT_CELL     64
 #define SQL_TIPO_INT4    23
 #define SQL_TIPO_TEXT    25
+#define SQL_TIPO_INT8    20    /* o count() do Postgres é bigint, não int4 */
 
 typedef struct {
     int ok;

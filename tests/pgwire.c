@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W14 count(*), que conta ALÉM do que o SqlOut comporta; e o \l
  *   §W13 o `\d <tabela>`: cinco consultas, o oid estável, as colunas do motor
  *   §W12 o tipo `vector` no catálogo, e os scripts do repo como FUNÇÕES —
  *        com a lista branca e o gume a forçar a porta
@@ -1738,6 +1739,118 @@ int main(void){
            " caminho: as propriedades da relação são TREZE colunas lidas por posição, e o"
            " SqlOut tinha oito — bastava para as tabelas desta casa e para tudo o que os"
            " medidores pediam, e caiu no primeiro cliente real.",
+           mal == 0);
+    }
+
+    /* ═══ §W14: count(*) E O QUE ELE CONTA ALÉM DO QUE CABE ══════════════════
+     *
+     * Uma sondagem com o psql mostrou o que passava e o que não: CREATE,
+     * INSERT, UPDATE, DELETE e SELECT atravessavam o wire com as tags certas, e
+     * caíam duas coisas — `count(*)` e `\l`.
+     *
+     * O count é o mais interessante, porque o motor JÁ conta: o S_CONTA guarda
+     * quantas linhas casaram com o WHERE, e não satura como o SqlOut, que só
+     * materializa as primeiras. Contar é devolver o que a varredura já sabe —
+     * não é uma segunda passagem.
+     *
+     * E É AÍ QUE ESTÁ O GUME: com mais linhas do que cabem no SqlOut, o SELECT
+     * trunca e o count NÃO PODE truncar. Se o count fosse o nrows do SqlOut,
+     * passaria em toda a tabela pequena e mentiria na primeira grande.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W14 count(*): o que o motor já conta, e o que o SqlOut não comporta.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w14";
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w14.mem");
+        unlink("/tmp/pgwire_w14.prog");
+        unlink("/tmp/pgwire_w14__g.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE g (a,b)", &o);
+
+        /* (a) o básico, e a bater com o SELECT */
+        {
+            for(int i = 1; i <= 5; i++){
+                char q[96];
+                snprintf(q, sizeof q, "INSERT INTO g VALUES (%d,%d)", i, i * 10);
+                sql_executa(q, &o);
+            }
+            int r1 = sql_executa("SELECT count(*) FROM g", &o);
+            int n_count = o.nrows ? atoi(o.cell[0][0]) : -1;
+            int tipo_count = o.tipo[0];
+            int r2 = sql_executa("SELECT * FROM g", &o);
+            int n_select = o.nrows;
+            printf("      count(*) = %d   ·   SELECT devolveu %d linhas   %s\n",
+                   n_count, n_select, (n_count == n_select) ? "batem" : "NAO BATEM");
+            printf("      e o tipo do count é int8 (%d), como no Postgres: %s\n",
+                   SQL_TIPO_INT8, tipo_count == SQL_TIPO_INT8 ? "sim" : "NAO");
+            if(!r1 || !r2 || n_count != n_select || n_count != 5) mal++;
+            if(tipo_count != SQL_TIPO_INT8) mal++;
+        }
+
+        /* (b) com WHERE — e o count tem de contar o QUE O WHERE deixou */
+        {
+            int r = sql_executa("SELECT count(*) FROM g WHERE a > 2", &o);
+            int n = o.nrows ? atoi(o.cell[0][0]) : -1;
+            sql_executa("SELECT * FROM g WHERE a > 2", &o);
+            printf("      count(*) WHERE a > 2 = %d   ·   o SELECT dá %d   %s\n",
+                   n, o.nrows, (n == o.nrows && n == 3) ? "batem" : "NAO");
+            if(!r || n != 3 || n != o.nrows) mal++;
+        }
+
+        /* ── O GUME: mais linhas do que o SqlOut comporta ─────────────────────
+         * O SELECT materializa SQL_OUT_MAX_ROWS e trunca; o count não pode. Se
+         * ele fosse o nrows do SqlOut, esta linha mentiria — e passaria em
+         * qualquer tabela pequena, que são todas as dos outros blocos. */
+        {
+            const int N = SQL_OUT_MAX_ROWS + 20;
+            for(int i = 6; i <= N; i++){
+                char q[96];
+                snprintf(q, sizeof q, "INSERT INTO g VALUES (%d,%d)", i, i * 10);
+                sql_executa(q, &o);
+            }
+            int r = sql_executa("SELECT count(*) FROM g", &o);
+            int n_count = o.nrows ? atoi(o.cell[0][0]) : -1;
+            sql_executa("SELECT * FROM g", &o);
+            int n_select = o.nrows;
+            printf("\n      com %d linhas na tabela (o SqlOut comporta %d):\n",
+                   N, SQL_OUT_MAX_ROWS);
+            printf("        SELECT * devolve %d — TRUNCADO, e é o que se espera\n", n_select);
+            printf("        count(*) devolve %d — %s\n", n_count,
+                   (n_count == N) ? "CONTA TUDO, que é o ponto"
+                                  : "NAO — está a contar o que coube");
+            if(!r || n_count != N) mal++;
+            if(n_select >= n_count) mal++;    /* o SELECT TEM de truncar aqui */
+        }
+
+        /* (c) e o `\l`: há UMA base, e é a que está aberta */
+        {
+            int r = sql_executa(
+                "SELECT d.datname as \"Name\", pg_catalog.pg_get_userbyid(d.datdba) "
+                "FROM pg_catalog.pg_database d ORDER BY 1;", &o);
+            int bate = r && o.nrows == 1 && strstr(o.cell[0][0], "pgwire_w14") != NULL;
+            printf("\n      \\l -> %d base: \"%s\"  %s\n", o.nrows,
+                   o.nrows ? o.cell[0][0] : "?",
+                   bate ? "(a que o servidor abriu)" : "NAO");
+            if(!bate) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O count(*) CONTA O QUE NÃO CABE, e é isso que o torna útil. Uma sondagem com o"
+           " psql mostrou onde estava o limite: CREATE, INSERT, UPDATE, DELETE e SELECT já"
+           " atravessavam o wire com as tags certas — UPDATE 1, DELETE 1 —, e caíam duas"
+           " coisas, o count(*) e o \\l. O count é o que interessa, porque o motor JÁ conta:"
+           " o S_CONTA guarda quantas linhas casaram com o WHERE, e devolver isso não é uma"
+           " segunda passagem, é a contagem que a varredura já fez. E O GUME É O SqlOut: ele"
+           " materializa um número fixo de linhas e trunca, e o count NÃO PODE truncar."
+           " Mede-se com mais linhas do que cabem — o SELECT devolve o que coube, o count"
+           " devolve o total, e exige-se que os dois números sejam DIFERENTES nessa corrida."
+           " Sem isso, um count que fosse o nrows do SqlOut passaria em todas as tabelas"
+           " pequenas, que são as de todos os outros blocos deste ficheiro, e mentiria na"
+           " primeira tabela a sério. O tipo é int8 e não int4, porque é o que o Postgres"
+           " diz e quem lê o OID conta com isso. E o \\l devolve UMA base — a que o servidor"
+           " abriu —, porque inventar uma lista seria descrever um servidor que não somos.",
            mal == 0);
     }
 
