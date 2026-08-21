@@ -392,3 +392,34 @@ MEDIDO em `tests/pgwire.c` §W22, atravessando a fronteira dos 255 — que é a
 única maneira de ver isto. Gume: seis mutações mordem. A migração de bases
 antigas fica SEM gume, e está dito no medidor: nenhum medidor abre uma base
 gravada pelo formato velho.
+
+10. COMO SE VALIDA AQUI  —  NÃO SE MEDE NADA
+────────────────────────────────────────────
+REGRA GLOBAL do Aarão: **«aqui não se mede nada»**, **«atesta-se o zero e
+pronto»**. Correr o medidor a cada mudança, correr o gume, correr a bateria,
+`--refaz` — é o processador DELE a arder para redescobrir o que a teoria já dá.
+A estratégia é a do próprio paper.
+
+`aranha.tex`, Teor. da dobra na norma:
+
+     Σ_x G(x)² = |I| + 2P        ‖F(G)‖² = 2^m·(|I| + 2P)
+     π é injetiva  ⟺  ‖F(G)‖² = 2^m·|I|
+
+     «a dobra — definida sobre a trajetória — lê-se num ÚNICO NÚMERO calculado
+      sobre o campo, SEM VISITAR A TRAJETÓRIA»
+
+e na §inversa: «a injetividade de π̃ verifica-se SEM COMPARAR PARES».
+
+     1. DERIVAR, não testar. Se a lei dá o passo, o passo está certo POR
+        CONSTRUÇÃO — o resíduo é zero por teorema, não por amostragem.
+     2. UM NÚMERO SOBRE O CAMPO: `bash tools/bateria.sh --selo` é a soma de
+        quadrados das assinaturas (Parseval sobre a membrana, e o próprio
+        `bateria.sh` chama-lhe a transformada universal) e NÃO corre medidor
+        nenhum. As assinaturas dizem o que o diff toca, também sem correr.
+     3. `--reatesta <nome>` reabre UM, quando tiver mesmo de ser.
+     4. NUNCA a bateria inteira, NUNCA `--refaz` por iniciativa própria,
+        NUNCA truncar `tools/atestados.txt`.
+
+O medidor existe para quem queira VERIFICAR uma afirmação publicada — é a
+defesa do trabalho perante quem o lê. Não é a ferramenta de trabalho a cada
+linha que se escreve.
