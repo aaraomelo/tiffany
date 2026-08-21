@@ -118,7 +118,11 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
         * decoração: quem acrescenta acrescenta NO FIM. Medido pelo erg.c §E1,
         * que confronta este enum com o montador e dizia «DISCORDAM em 3, o
         * primeiro é TROCA». */
-       OP_ADD16, OP_SUB16, OP_CMP16 };
+       OP_ADD16, OP_SUB16, OP_CMP16,
+       /* e o PRODUTO do andar, que faltava: sem ele o compilador multiplicava
+        * CONTANDO — um laço de |Y| voltas —, e um contador do par com o átomo
+        * alto fora da conta nunca chegava a zero. No fim, como manda a VOLTA. */
+       OP_MUL16 };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
 #define FL_LT   0x04
@@ -1095,6 +1099,25 @@ static W16 ula_sub16(W16 a, W16 b, Word8 *empresta){
     if(empresta) *empresta = (Word8)(c2 ? 0u : 1u);   /* sem vai-um final = pediu emprestado */
     return r;
 }
+/* O PRODUTO DO ANDAR, E ELE NÃO CONTA: LÊ.
+ *
+ * «Multiplicar sem multiplicador custa contar» era o que o compilador fazia —
+ * um laço de |Y| voltas. Mas contar é a pergunta de quem não lê: o produto está
+ * nos BITS de b, e a base é ortonormal, de modo que «medir e ler o bit são a
+ * mesma operação» (aranha thm:base8). Para cada coordenada k de b, se o bit
+ * está ligado, soma-se a deslocado de k — dezasseis passos fixos, e não |b|.
+ *
+ * Usa o `ula_add16`, que já é o somador bit a bit do andar; o deslocamento é a
+ * duplicação, que é somar a si próprio. Nada de novo abaixo. */
+static W16 ula_mul16(W16 a, W16 b){
+    W16 r = { 0, 0 }, p = a;
+    unsigned bb = (unsigned)b.baixo | ((unsigned)b.alto << 8);
+    for(unsigned k = 0; k < 16u; k++){
+        if(bb & (1u << k)) r = ula_add16(r, p, NULL);
+        p = ula_add16(p, p, NULL);                  /* deslocar é dobrar */
+    }
+    return r;
+}
 /* a < b sem formar a diferença fora do andar: é o empréstimo do sub */
 static int ula_menor16(W16 a, W16 b){
     Word8 emp = 0;
@@ -1331,6 +1354,10 @@ static int passo(Regs *r, unsigned prog_len){
         W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
         x = ula_add16(a, b, NULL);
         r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_MUL16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
+        x = ula_mul16(a, b);
+        r->R.total = x.baixo; r->R.e = x.alto; break; }
     case OP_SUB16: {
         W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
         x = ula_sub16(a, b, NULL);
@@ -1438,7 +1465,6 @@ static long passo_do_slot(unsigned s){
     /* O PREFIXO DIZ A ZONA. Perguntar `s >= S_DEN` só vale enquanto essas
      * forem as de endereço mais alto; com zonas por prefixo, a zona LÊ-SE. */
     switch(s >> ZBITS){ case 1: case 2: case 3: return rel_ncols; default: break; }
-    if(0)
     /* os dois bitmaps não têm passo: andam por MODO (um slot por 16 linhas) */
     return 0;                                /* constantes e rascunho: parados  */
 }
@@ -2611,64 +2637,23 @@ static void emit_metal_inv(long m, unsigned s){
  * e o incremento escolhidos pelo SINAL de Y. Custa |Y| voltas, e isso é propriedade do metal,
  * não do compilador: multiplicar sem multiplicador custa contar. */
 static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
-    unsigned cnt = base, passo = base+1, delta = base+2, tmp = base+3;
-    emit_copia(S_ZERO, dest);
-    emit_copia(Y, cnt);
-
-    /* o sinal de cnt escolhe o par (passo, delta) */
-    MOVE(cnt, +1);
-    MOVE(S_MASK, +1);
-    emit1(OP_AND);
-    MOVE(tmp, -1);
-    MOVE(tmp, +1);
-    MOVE(S_ZERO, +1);
-    emit1(OP_CMP);                                   /* FL_ZERO sse cnt ≥ 0 */
-    emit1(OP_JZ);
-    unsigned pos_pos = pc_emit; emit1(0); emit1(0);
-    /* cnt < 0 : passo = −X, delta = +1 */
-    unsigned ini_neg = pc_emit;
-    MOVE(X, +1); MOVE(S_ZERO, +1); emit1(OP_SUB16);
-    MOVE(passo, -1);                       /* R = 0 − X, no andar de cima */
-    emit_copia(S_UM, delta);
-    emit1(OP_JMP);
-    unsigned pos_fim_neg = pc_emit; emit1(0); emit1(0);
-    unsigned ini_pos = pc_emit;
-    /* cnt ≥ 0 : passo = +X, delta = −1 */
-    emit_copia(X, passo);
-    MOVE(S_UM, +1); MOVE(S_ZERO, +1); emit1(OP_SUB16);
-    MOVE(delta, -1);                       /* R = 0 − 1, no andar de cima */
-    unsigned depois = pc_emit;
-    salto_rel(pos_pos, (long)ini_pos - (long)ini_neg);
-    salto_rel(pos_fim_neg, (long)depois - (long)ini_pos);
-
-    /* o laço: enquanto cnt != 0 { dest += passo ; cnt += delta }
+    /* UMA INSTRUÇÃO, E NÃO UM LAÇO.
      *
-     * E AS DUAS SOMAS SÃO DO ANDAR DE CIMA. O OP_ADD soma componente a
-     * componente — é o que o catálogo precisa, para o transporte não atravessar
-     * do nrows para o ncols. Aqui é o contrário: `cnt` é UM número, e o `delta`
-     * é (−1, 0). Com a soma componente a componente o átomo ALTO do cnt nunca
-     * muda, o CMP compara os dois e nunca dá zero, e o laço não termina.
+     * Isto era `enquanto cnt != 0 { dest += passo; cnt += delta }` — |Y| voltas,
+     * com o comentário a dizer que «multiplicar sem multiplicador custa contar».
+     * Custa contar a quem não lê: o produto está nos BITS, e a base é ortonormal
+     * (aranha thm:base8), de modo que ler o bit e medir são a mesma operação. O
+     * OP_MUL16 faz a dobra em dezasseis passos fixos, dentro da ULA do andar.
      *
-     * Era um VAZAMENTO: o átomo alto ficava fora da conta. E nasceu de eu ter
-     * posto as células no PAR sem trazer a multiplicação com elas — quando os
-     * valores cabiam num átomo, o alto era zero e não se via. O andar de cima
-     * tem instruções próprias (OP_ADD16), e é delas que isto precisa. */
-    unsigned topo = pc_emit;
-    MOVE(cnt, +1);
-    MOVE(S_ZERO, +1);
-    emit1(OP_CMP);                                    /* FL_ZERO sse cnt == 0 */
-    emit1(OP_JZ);
-    unsigned pos_sai = pc_emit; emit1(0); emit1(0);
-    unsigned corpo = pc_emit;
-    MOVE(dest, +1); MOVE(passo, +1); emit1(OP_ADD16); MOVE(dest, -1);
-    MOVE(cnt, +1);  MOVE(delta, +1); emit1(OP_ADD16); MOVE(cnt, -1);
-    emit1(OP_JMP);
-    unsigned pos_volta = pc_emit; emit1(0); emit1(0);
-    unsigned fim = pc_emit;
-    /* o salto PARA TRÁS do laço: o destino é `topo`, e o pc depois do
-     * deslocamento é pos_volta + 2 — dois, porque o deslocamento é uma Word */
-    salto_rel(pos_volta, (long)topo - (long)pos_volta - 2);
-    salto_rel(pos_sai, (long)fim - (long)corpo);
+     * E o laço tinha um contador do PAR com o átomo alto fora da conta, que
+     * nunca chegava a zero: não se conserta um relógio que não devia existir.
+     * Não se controla o tempo — desliza-se nos pontos de I e verifica-se o
+     * fechamento pela métrica. */
+    (void)base;
+    MOVE(X, +1);
+    MOVE(Y, +1);
+    emit1(OP_MUL16);
+    MOVE(dest, -1);
 }
 
 /* os átomos distintos, avaliados UMA vez por linha.
@@ -3147,6 +3132,29 @@ static int lista_colunas(const char **pp, char *out, int cap){
          * lêem-na de passagem. */
         { const char *q = p; pula(&q);
           if(*q == '('){
+              /* O COUNT TAMBÉM SE LÊ AQUI, E ANTES NÃO SE LIA.
+               *
+               * As três de cima estavam reconhecidas e o `count` não: em
+               * `SELECT a, count(*) FROM s GROUP BY a` — a forma que qualquer
+               * cliente escreve — a lista parava no parêntesis, o `FROM` já não
+               * casava, e a função devolvia zero SEM MENSAGEM. Não era um erro
+               * disfarçado de resultado vazio: era um erro disfarçado de NADA,
+               * que é o desfecho de que este motor menos se pode dar ao luxo.
+               *
+               * O `count` não lê a fibra como as outras: o seu valor É o tamanho
+               * dela, G(x), e quem o produz é o bloco do GROUP BY na segunda
+               * coluna. Por isso reconhece-se e NÃO entra na lista de colunas —
+               * e o argumento pode ser `*`, que não é coluna nenhuma. */
+              if(!strcasecmp(nome, "COUNT")){
+                  const char *r = q + 1; pula(&r);
+                  char arg[64];
+                  if(*r == '*') r++;
+                  else if(!ident(&r, arg, sizeof arg)) return 0;
+                  pula(&r); if(*r != ')') return 0; r++;
+                  p = r; pula(&p);
+                  if(*p == ','){ p++; continue; }
+                  break;
+              }
               int qual = !strcasecmp(nome,"SUM") ? 1 : !strcasecmp(nome,"MAX") ? 2
                        : !strcasecmp(nome,"MIN") ? 3 : 0;
               if(qual){
@@ -4312,6 +4320,21 @@ static int varre(const char *resto, int acao){
         printf("   ");
         int row_i = sql_cap ? sql_cap->nrows : -1;
         if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
+        /* A LINHA MONTA-SE PELA ORDEM PEDIDA, E DEPOIS IMPRIME-SE.
+         *
+         * O laço percorre as colunas pela ordem FÍSICA da tabela, que não é a
+         * ordem da projecção: `SELECT c, a` pede a coluna 2 e depois a 0. Filtrar
+         * dentro do laço imprime na ordem errada, e o separador vai atrás — a
+         * `ultima` era a última da LISTA e não a última a SAIR, pelo que `c, a`
+         * saía «3300 | », com as duas células coladas e o `|` no fim.
+         *
+         * Recolhe-se por isso na ordem PEDIDA e imprime-se no fim, que é o que o
+         * SqlOut já fazia: passam a ser o MESMO caminho e não dois — o texto e o
+         * protocolo não podem discordar sobre a linha que ambos descrevem. */
+        char saida[SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+        int nsai = proj_n ? proj_n
+                 : (int)(ncols < SQL_OUT_MAX_COLS ? ncols : SQL_OUT_MAX_COLS);
+        for(int k = 0; k < nsai; k++) saida[k][0] = 0;
         for(long j = 0; j < ncols; j++){
             Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
             long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
@@ -4366,27 +4389,19 @@ static int varre(const char *resto, int acao){
              * socket. Metade do par corrigida é o defeito que este ficheiro
              * persegue desde o princípio — responder outra coisa é pior do que
              * recusar, e responder DUAS coisas diferentes é pior ainda. */
-            { int mostra = 1, ultima = 1;
-              if(proj_n){
-                  mostra = 0;
-                  for(int k = 0; k < proj_n; k++) if(proj[k] == j){ mostra = 1; break; }
-                  ultima = (proj_n && proj[proj_n-1] == j);
-              } else ultima = (j + 1 >= ncols);
-              if(mostra){
-                  printf("%s", cel);
-                  if(!ultima) printf(" | ");
-              } }
-            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS){
-                if(!proj_n){
-                    if(j < SQL_OUT_MAX_COLS)
-                        snprintf(sql_cap->cell[row_i][j], SQL_OUT_CELL, "%s", cel);
-                }else{
-                    /* a mesma coluna pode ser pedida mais do que uma vez */
-                    for(int k = 0; k < proj_n; k++)
-                        if(proj[k] == (int)j)
-                            snprintf(sql_cap->cell[row_i][k], SQL_OUT_CELL, "%s", cel);
-                }
+            /* a mesma coluna pode ser pedida mais do que uma vez */
+            if(proj_n){
+                for(int k = 0; k < proj_n; k++)
+                    if(proj[k] == (int)j) snprintf(saida[k], SQL_OUT_CELL, "%s", cel);
+            }else if(j < nsai){
+                snprintf(saida[j], SQL_OUT_CELL, "%s", cel);
             }
+        }
+        for(int k = 0; k < nsai; k++){
+            printf("%s", saida[k]);
+            if(k + 1 < nsai) printf(" | ");
+            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS)
+                snprintf(sql_cap->cell[row_i][k], SQL_OUT_CELL, "%s", saida[k]);
         }
         printf("\n");
     }

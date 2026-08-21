@@ -2193,24 +2193,52 @@ int main(void){
         /* (b) o que NÃO se sabe fazer é RECUSADO com a razão — não ignorado */
         {
             /* O ORDER BY saiu desta lista quando o §W18 o pôs a funcionar pela
-             * árvore do banco. O LIMIT continua fora, e com ele as formas que
-             * este motor não sabe ler. */
+             * árvore do banco, e o LIMIT e o GROUP BY saíram quando o §W23 os pôs
+             * a funcionar — a fibra e o prefixo. Fica fora o que este motor
+             * ainda não sabe ler. */
             const char *fora[] = {
-                "SELECT * FROM s LIMIT 2",
-                "SELECT * FROM s GROUP BY a",
-                "SELECT * FROM s ORDER BY a LIMIT 1",
                 "SELECT zzz FROM s",
+                "SELECT * FROM s UNION SELECT * FROM s",
+                "SELECT * FROM s WHERE a IN (SELECT a FROM s)",
             };
+            const unsigned nfora = sizeof fora / sizeof fora[0];
             int recusadas = 0, com_razao = 0;
             printf("\n      o que se recusa, e porquê:\n");
-            for(unsigned k = 0; k < sizeof fora / sizeof fora[0]; k++){
+            for(unsigned k = 0; k < nfora; k++){
                 int r = sql_executa(fora[k], &o);
                 if(!r) recusadas++;
                 if(!r && o.err[0]) com_razao++;
-                printf("        %-38s %s\n", fora[k],
+                printf("        %-44s %s\n", fora[k],
                        r ? "RESPONDEU (mau)" : "recusado com mensagem");
             }
-            if(recusadas != 4 || com_razao != 4) mal++;
+            if(recusadas != (int)nfora || com_razao != (int)nfora) mal++;
+
+            /* ── E A FRONTEIRA MOVEU-SE: o LIMIT e o GROUP BY estavam nesta lista
+             * e entraram no §W23 — o prefixo da lista e a fibra. Tirá-los daqui
+             * sem medir o que passaram a ser deixaria o bloco mais fraco do que
+             * estava; por isso mudam de lado e mede-se o RESULTADO. */
+            {
+                struct { const char *q; int nr; const char *v; } entrou[] = {
+                    { "SELECT * FROM s LIMIT 1",            1, "3" },
+                    { "SELECT * FROM s ORDER BY a LIMIT 1", 1, "1" },
+                };
+                printf("\n      e o que ENTROU (§W23), medido pelo resultado:\n");
+                for(unsigned k = 0; k < sizeof entrou / sizeof entrou[0]; k++){
+                    int r = sql_executa(entrou[k].q, &o);
+                    int bate = r && o.nrows == entrou[k].nr
+                               && !strcmp(o.cell[0][0], entrou[k].v);
+                    printf("        %-44s %d linha(s), a = %s  %s\n", entrou[k].q,
+                           o.nrows, o.nrows ? o.cell[0][0] : "?", bate ? "" : "NAO BATE");
+                    if(!bate) mal++;
+                }
+                /* o GROUP BY é a FIBRA: dois valores distintos, uma linha cada */
+                int rg = sql_executa("SELECT a, count(*) FROM s GROUP BY a", &o);
+                int gok = rg && o.nrows == 2;
+                printf("        %-44s %d grupo(s)  %s\n",
+                       "SELECT a, count(*) FROM s GROUP BY a", o.nrows,
+                       gok ? "(a fibra)" : "NAO BATE");
+                if(!gok) mal++;
+            }
         }
 
         /* ── O CONTROLO: o que É suportado tem de continuar a passar. Uma recusa
@@ -2239,9 +2267,18 @@ int main(void){
            " e `LIMIT` devolvia tudo. Nenhuma asserção o via, porque todas pediam `*`. A"
            " PROJECÇÃO IMPLEMENTA-SE, porque o motor já tem as colunas: devolve as pedidas,"
            " pela ORDEM pedida — `c, a` não é `a, c` —, e uma coluna que não existe é"
-           " recusada pelo nome. O LIMIT e o GROUP BY RECUSAM-SE com a razão à frente, até"
-           " serem feitos — o ORDER BY saiu desta lista quando o §W18 o pôs a funcionar"
-           " pela árvore do banco. Responder outra coisa é pior do que recusar, porque quem chama"
+           " recusada pelo nome. A LISTA DO QUE SE RECUSA É MÓVEL, e move-se para os DOIS"
+           " lados: o ORDER BY saiu dela quando o §W18 o pôs a funcionar pela árvore, e o"
+           " LIMIT e o GROUP BY saíram quando o §W23 os fez — o prefixo e a fibra. Tirá-los"
+           " daqui sem mais deixaria o bloco MAIS FRACO do que estava, pelo que mudam de lado"
+           " e passam a medir-se pelo RESULTADO: o LIMIT dá uma linha, o LIMIT sobre a ordem"
+           " dá a MENOR, e o GROUP BY com `count(*)` dá as duas fibras. E foi a escrever isto"
+           " que apareceu o defeito: `count` não estava reconhecido na lista de colunas — só"
+           " `sum`, `max` e `min` estavam —, pelo que `SELECT a, count(*) FROM s GROUP BY a`,"
+           " que é a forma que qualquer cliente escreve, parava no parêntesis e devolvia zero"
+           " SEM MENSAGEM NENHUMA: nem erro, nem linhas. Não é um erro disfarçado de resultado"
+           " vazio; é um erro disfarçado de NADA. No que fica fora estão agora as formas que"
+           " este motor de facto não lê — a subconsulta e a união. Responder outra coisa é pior do que recusar, porque quem chama"
            " sabe lidar com um erro e não sabe lidar com uma resposta que se parece com a"
            " que pediu. E O CONTROLO impede a recusa de ser larga demais: a projecção COM"
            " WHERE tem de continuar a passar — nenhuma das linhas anteriores o veria,"
@@ -2267,7 +2304,7 @@ int main(void){
     printf("\n§W18 o ORDER BY: descer a árvore do banco, com a fibra separada.\n\n");
     {
         const char *base = "/tmp/pgwire_w18";
-        SqlOut o;
+        SqlOut o, o2;
         long mal = 0;
         char inser[8][8], asc[8][8], desc[8][8];
         int n_ins = 0, n_asc = 0, n_desc = 0;
@@ -2344,16 +2381,31 @@ int main(void){
             if(!bate) mal++;
         }
 
-        /* ── O CONTROLO: uma coluna que não existe RECUSA, e o LIMIT continua
-         * fora. A ordem entrou; o resto não entrou por arrasto. */
+        /* ── O CONTROLO: uma coluna que não existe RECUSA — a ordem entrou, o
+         * resto não entrou por arrasto. E O LIMIT JÁ NÃO ESTÁ FORA: entrou no
+         * §W23 como o PREFIXO da lista, pelo que a asserção que aqui exigia
+         * recusá-lo passou a ser falsa e foi este medidor a apanhá-la — é o
+         * mesmo movimento do §W10 quando o pg_type entrou no catálogo. Mede-se
+         * agora o que ele passou a ser: o prefixo COMPÕE com a ordem, e por isso
+         * ASC e DESC dão os DOIS EXTREMOS e não a mesma lista cortada. */
         {
             int r1 = sql_executa("SELECT * FROM v ORDER BY zzz", &o);
-            int r2 = sql_executa("SELECT * FROM v LIMIT 2", &o);
             printf("\n      CONTROLO — ORDER BY de coluna inexistente: %s\n",
                    r1 ? "RESPONDEU (mau)" : "recusado");
-            printf("      e o LIMIT continua fora: %s\n",
-                   r2 ? "RESPONDEU (mau)" : "recusado");
-            if(r1 || r2) mal++;
+            if(r1) mal++;
+
+            int r2 = sql_executa("SELECT a FROM v ORDER BY a LIMIT 2", &o);
+            int asc_ok = r2 && o.nrows == 2 && !strcmp(o.cell[0][0], "2")
+                             && !strcmp(o.cell[1][0], "2");
+            int r3 = sql_executa("SELECT a FROM v ORDER BY a DESC LIMIT 2", &o2);
+            int des_ok = r3 && o2.nrows == 2 && !strcmp(o2.cell[0][0], "9")
+                             && !strcmp(o2.cell[1][0], "5");
+            printf("      e o LIMIT ENTROU, como prefixo da ordem: ASC LIMIT 2 -> %s %s"
+                   " | DESC LIMIT 2 -> %s %s  %s\n",
+                   o.nrows > 0 ? o.cell[0][0] : "?", o.nrows > 1 ? o.cell[1][0] : "?",
+                   o2.nrows > 0 ? o2.cell[0][0] : "?", o2.nrows > 1 ? o2.cell[1][0] : "?",
+                   (asc_ok && des_ok) ? "(os dois extremos)" : "NAO");
+            if(!asc_ok || !des_ok) mal++;
         }
         sql_fechar();
 
@@ -2371,8 +2423,13 @@ int main(void){
            " à mesma. O GUME é a ordem ordenada ter de ser DIFERENTE da ordem de inserção —"
            " sem isso, um ORDER BY que não fizesse nada passaria numa tabela já inserida por"
            " ordem —, e o DESC ter de ser o inverso EXACTO do ASC. E O CONTROLO impede o"
-           " arrasto: uma coluna que não existe é recusada pelo nome, e o LIMIT continua"
-           " fora, porque entrou a ordem e não o resto.",
+           " arrasto: uma coluna que não existe é recusada pelo nome. E O LIMIT JÁ NÃO ESTÁ"
+           " FORA: entrou no §W23 como o PREFIXO da lista, e a linha que aqui exigia recusá-lo"
+           " passou a ser FALSA — foi este medidor a apanhar a contradição entre dois blocos"
+           " seus, como o §W10 fez quando o pg_type entrou no catálogo. O que se mede agora é"
+           " a COMPOSIÇÃO: o prefixo aplica-se À ORDEM, e por isso ASC e DESC com o mesmo"
+           " LIMIT dão os DOIS EXTREMOS — um LIMIT que cortasse antes de ordenar dava a mesma"
+           " lista das duas vezes.",
            mal == 0);
     }
 
