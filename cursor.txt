@@ -1260,12 +1260,32 @@ um que diz o que não sabe.
   gume     o byte alto não guardado → cai · o leitor sem compor → cai · a
            comparação sem recusar → cai · o envelope de volta a 255 → cai
 
-O TRIO SEGUINTE, escrito para não se perder
--------------------------------------------
-  · OP_ADD16 / OP_SUB16 / OP_CMP16 no despacho (a ULA já os tem: §26)
-  · o acumulador da expressão (linhas ~1769) e a comparação (~1702) passam a
-    usá-los; OP_ADD/OP_SUB ficam COMPONENTE A COMPONENTE, que é o que o
-    catálogo precisa (nrows vive no `.e` e não pode receber transporte)
-  · o `S_MT` deixa de mascarar o `.e` no caminho das colunas inteiras
-  · os produtos de dois valores de 16 bits pedem 32 — é o andar seguinte outra
-    vez, e é onde a torre volta a dobrar
+O TRIO SEGUINTE — e o plano que eu tinha escrito estava ERRADO
+--------------------------------------------------------------
+Escrevi aqui «o `S_MT` deixa de mascarar o `.e` no caminho das colunas
+inteiras», como se o segundo átomo estivesse livre. NÃO ESTÁ. Fui ler o
+`emit_mul_zeck` e o `.e` é o REGISTO DE TRABALHO DO MULTIPLICADOR:
+
+  a ISA não tem MUL. `n·x` faz-se por Zeckendorf — todo inteiro é soma de
+  Fibonacci não consecutivos — e cada F(k) é `GOLD^(k−1)`, com
+  GOLD = (a,b) ↦ (a+b, a). Parte-se de (x, 0) e o `.e` carrega F(k−1)·x.
+  O `S_MT` limpa o `.e` ANTES dos deslocamentos e DEPOIS deles, e é por isso
+  que ele está lá — não é desperdício, é o estado a ser reposto a zero.
+
+Logo alargar o avaliador NÃO é tirar uma máscara. É:
+
+  · o valor passa a ocupar DOIS Words, e o GOLD tem de deslocar em 16 bits —
+    a mesma dobra do §26 aplicada ao rei, não à soma
+  · o acumulador cresce para 32: o produto de dois valores de 16 pede-o, e é
+    onde a torre volta a dobrar OUTRA VEZ
+  · OP_ADD/OP_SUB ficam COMPONENTE A COMPONENTE — o catálogo guarda
+    {ncols, nrows} numa Word e o `nrows++` soma 1 ao `.e`; com transporte a
+    atravessar, um nrows de 255 a passar a 256 subiria para o ncols. O par e o
+    número são leituras DIFERENTES da mesma Word, e por isso pedem instruções
+    diferentes (OP_ADD16 e companhia), não uma troca do OP_ADD.
+
+E NÃO SE ACRESCENTAM OS OPCODES ANTES DE HAVER QUEM OS EMITA. Escrevi-os,
+liguei-os ao despacho, e tirei-os: sem um `emit` que os use são um ramo que
+ninguém corre — a `ula_add16` e companhia ficam, porque essas TÊM utilizador (o
+medidor do §26). O andar existe e está provado; o que falta é o caminho, e o
+caminho é o avaliador inteiro.
