@@ -1679,3 +1679,54 @@ A COLISÃO DE LETRA, declarada no 1.º uso: π é a PROJECÇÃO (a do fibrado, a
 
   gume      17 mutações, 17 mordem
   bateria   529 : 529, 0 falhas · 10 unidades passaram, 0 falharam
+
+§36 — O QUE EU DESCARACTERIZEI, E A TRANSFORMADA ALGÉBRICA (§AN12, §AN13)
+=========================================================================
+Ele apanhou-me: «escreveu ler a vizinha e escolher e decidir o passo, não tem
+isso — colocou VARREDURA num autómato estigmérgico». E depois: «leia a base de
+papers e faça as provas com base na teoria daqui, não descaracterize tudo pra
+caber nas suas réguas».
+
+O DANO, lido na base (arquitetura §sec:aranha):
+1. TROQUEI A CLÁUSULA 4. A da casa é «SENTIR É LER G — a leitura local P_t(x)
+   sobre V(x) distingue G=0 de G>0; a distinção é propriedade do ESPAÇO, não
+   propriedade cognitiva». Eu pus a CONSERVAÇÃO (∑G=|I|) no lugar dela — que na
+   casa é §AG5 e não é cláusula nenhuma. E a seguir escrevi «só a cláusula 4 usa
+   a dimensão», frase que só faz sentido com a cláusula CERTA. Duas afirmações
+   erradas encadeadas, e a segunda parecia sólida.
+2. TRANSFORMEI O CICLO EM «ALGORITMO + OPCIONAL». A base diz: «cada passo do
+   autómato É uma cláusula do teorema, NÃO UM EXTRA» — Escrita · Leitura ·
+   Decisão · Fecho. Eu escrevi dois passos e um terceiro marcado «(opcional, o
+   agente) ... decidir o passo seguinte», que é deliberação — exactamente o que
+   a teoria NEGA. A decisão é o gradiente: o mínimo de G na vizinhança, que é o
+   que está escrito no chão. Não há escolha entre planos.
+3. E PERDI O FECHO. R⁴=id, rotação à direita + marca forte, «o mesmo J⁴=id da
+   bidualidade agora na grade». Não estava no meu paper de todo.
+
+REPOSTO, e MEDIDO (§AN13): o ciclo inteiro corre em ℤ¹–ℤ⁴. A leitura distingue
+G=0 de G>0; o gradiente escolhe o mínimo; a fronteira lê-se +∞ e o controlo
+mostra que o +∞ trabalha (tirado, é ela a escolhida). E o FECHO é o único passo
+em que a dimensão faz mais do que contar vizinhos: a rotação vive num PLANO, e
+em ℤⁿ há n(n−1)/2 — 0, 1, 3, 6. Em ℤ² há UM plano e um rotor, e é por isso que
+ali R⁴ e J⁴ se confundem.
+
+A TRANSFORMADA ALGÉBRICA (§AN12), e a base já existia: transformada.c §U1–§U5,
+grupo (ℤ/2)^m, caracteres ±1, TUDO INTEIRO. É o mesmo grupo dos endereços da
+árvore do §AN6 — a aranha já corria nele.
+  · a IDA é uma soma de Diracs: F(G)_k = Σ_t χ_k(π(t))
+  · a DOBRA lê-se na NORMA: ‖FG‖² = n·ΣG² e ΣG² = |I| + 2·(pares dobrados).
+    Logo π injectiva ⟺ ‖FG‖² = n|I| — a dobra mede-se SEM VISITAR a trajectória
+  · a CONVOLUÇÃO compõe campos (n² → n) e a DECONVOLUÇÃO decompõe, resíduo 0
+  · e onde DEGENERA: o campo {0,1} tem F_k = 1+χ_k(1), zero em METADE dos k
+
+A ESCOLHA DO FACTOR É PARTE DA MEDIDA, e custou duas tentativas:
+  (t·37 mod 97)      26 zeros no espectro — a volta não existe
+  «volta à origem»   δ₀ + constante: TODAS as convoluções coincidem, seja qual
+                     for o grupo. O gume disse-o — trocar XOR por soma cíclica
+                     não derrubava nada. Um objecto invariante à propriedade que
+                     se quer testar não a testa.
+  3·δ₀ + δ₁          espectro {4,2}: serve
+
+  gume      21 mutações, 21 mordem
+  bateria   529 : 529, 0 falhas · 12 unidades passaram, 0 falharam
+  paper     12 páginas

@@ -118,10 +118,27 @@ G_{t+1}(x)=G_t(x)+\mathbf{1}_{\{x=\pi(t+1)\}},\qquad G_{-1}\equiv0,
 \]
 e $G=G_N$. Cada passo altera $G$ num único ponto, e esse ponto é a célula
 corrente. Nenhum passo consulta $\pi(0),\dots,\pi(t)$.
-\item[(4)] \textbf{Conservação.} $\displaystyle\sum_{x\in X}G(x)=\abs{I}=N+1$, e
-a soma é finita porque $\operatorname{supp}G$ tem no máximo $\abs{I}$ elementos.
+\item[(4)] \textbf{Sentir é ler $G$.} A leitura local
+      \[
+      \mathcal{P}_t(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}
+      \]
+      sobre uma vizinhança $V(x)$ distingue $G=0$ (célula ainda não realizada) de
+      $G>0$ (já realizada). A distinção é propriedade do \emph{espaço}, e não
+      propriedade cognitiva do agente.
 \end{enumerate}
 \end{teorema}
+
+\begin{lema}[conservação]\label{lem:conserva}
+$\displaystyle\sum_{x\in X}G(x)=\abs{I}=N+1$, e a soma é finita porque
+$\operatorname{supp}G$ tem no máximo $\abs{I}$ elementos.
+\end{lema}
+
+\begin{proof}
+As fibras $\pi^{-1}(x)$, $x\in\operatorname{im}\pi$, particionam $I$, e a
+cardinalidade é aditiva sobre partições finitas:
+$\sum_x\lvert\pi^{-1}(x)\rvert=\lvert I\rvert$. Fora do suporte os termos são
+nulos.
+\end{proof}
 
 \begin{proof}
 (1) e (2) são a definição de fibra e a sua cardinalidade.
@@ -133,16 +150,20 @@ está se e só se $\pi(t+1)=x$. Donde a recorrência. A cláusula ``num único p
 $G_{t+1}(x)=G_t(x)$. O termo direito só depende de $t+1$ através de $\pi(t+1)$,
 que é o dado corrente: a história não é consultada.
 
-(4) As fibras $\pi^{-1}(x)$, $x\in\operatorname{im}\pi$, particionam $I$, e a
-cardinalidade é aditiva sobre partições finitas:
-$\sum_x\lvert\pi^{-1}(x)\rvert=\lvert I\rvert$. Fora do suporte os termos são
-nulos.
+(4) Por (2), $G_t(y)=0$ significa que nenhum índice $\le t$ realizou $y$, e
+$G_t(y)>0$ que algum realizou. A leitura de $\mathcal{P}_t(x)$ decide isso para
+cada $y\in V(x)$ consultando o valor escrito \emph{em} $y$ --- valor que está no
+espaço, e não no agente, por (3). Nenhum passo desta leitura consulta
+$\pi(0),\dots,\pi(t)$.
 \end{proof}
 
-\medskip\noindent\textbf{O que a prova usou.} Só a igualdade em $X$, para
-decidir $x=\pi(t+1)$ e para formar as fibras. Nenhuma das quatro cláusulas
-menciona a estrutura de $X$. É este o resultado: a memória estigmérgica não é um
-fenómeno do plano.
+\medskip\noindent\textbf{O que a prova usou.} As cláusulas (1)--(3) usam só a
+igualdade em $X$: para decidir $x=\pi(t+1)$ e para formar as fibras. Nenhuma
+delas menciona mais estrutura. A cláusula~(4) pede uma coisa a mais, e uma só
+--- a \emph{vizinhança} $V(x)$ ---, e é lá que a estrutura de $X$ entra, na
+§\ref{sec:dimensao}. É este o resultado: a memória estigmérgica não é um
+fenómeno do plano, e o sítio por onde o plano entrava está isolado numa
+cláusula.
 
 \medskip\noindent A composição que o teorema exibe é
 \[
@@ -159,19 +180,39 @@ que o escreveu.
 \noindent A cláusula (3) do Teorema~\ref{thm:multiplicidade} \emph{é} um
 algoritmo. Escrito:
 
-\medskip\noindent\textbf{Algoritmo A (a aranha).}
-\begin{enumerate}\itemsep2pt
-\item Inicializar $G\equiv0$ (o campo vazio).
-\item Para $t=0,\dots,N$: ler $x\leftarrow\pi(t)$; escrever $G(x)\leftarrow G(x)+1$.
-\item \emph{(opcional, o agente)} antes de escrever, ler a vizinhança
-$\mathcal{P}_t(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}$ e decidir o passo seguinte
-com base nela.
+\medskip\noindent\textbf{O ciclo da aranha.} Cada passo do autómato \emph{é}
+uma cláusula do Teor.~\ref{thm:multiplicidade}, e nenhum é um extra:
+
+\begin{enumerate}\itemsep3pt
+\item[1.] \textbf{Escrita} --- $G(x)\mathrel{+}=1$ na célula corrente $x=\pi(t)$.
+      Realiza a cláusula~(3).
+\item[2.] \textbf{Leitura} --- $\mathcal{P}_{t}(x)=\bigl(G_t(y)\bigr)_{y\in V(x)}$
+      sobre a vizinhança; a fronteira lê-se como obstáculo, $+\infty$. Realiza a
+      cláusula~(4).
+\item[3.] \textbf{Decisão} --- gradiente de exploração: o passo vai ao vizinho de
+      \emph{menor} $G$. Lê a dobra; não pergunta ``por onde passei?''.
+\item[4.] \textbf{Fecho} --- ao fim dos passos de exploração, o rotor
+      $R^{4}=\mathrm{id}$: rotação à direita e marca forte. É o mesmo
+      $J^{4}=\mathrm{id}$ da bidualidade, agora na grade.
 \end{enumerate}
 
-\medskip\noindent\textbf{Estado.} O algoritmo mantém $G$ e o índice corrente.
-Não mantém a sequência. Este é o ponto e não uma otimização: um agente que
-guardasse $\pi(0),\dots,\pi(t)$ teria a informação toda e o campo seria
-supérfluo.
+\medskip\noindent\textbf{Não há deliberação em passo nenhum.} A decisão do
+ponto~3 não é uma escolha entre planos: é o mínimo de $\mathcal{P}_t(x)$, e
+$\mathcal{P}_t(x)$ é o que está escrito no chão. O agente não compara percursos
+nem avalia futuros --- reage à marca. É por isso que a cláusula~(3) tem o peso
+que tem: \emph{tirada a marca do espaço, não sobra estado de onde decidir}. Um
+agente que guardasse $\pi(0),\dots,\pi(t)$ teria a informação toda e o campo
+seria supérfluo; a aranha é o caso em que ele não é.
+
+\medskip\noindent\textbf{Estado.} O autómato mantém $G$ --- que está no espaço
+--- e a célula corrente. Não mantém a sequência.
+
+\medskip\noindent E a cadeia fecha no espaço, e não na cabeça:
+\[
+\boxed{\ \text{representação}\longrightarrow\text{realização}
+\longrightarrow\text{identificação}\longrightarrow\text{multiplicidade}\ }
+\]
+com a aranha a ser só o último passo dinâmico. O mecanismo é $\pi$ e $G$.
 
 \medskip\noindent\textbf{Representação de $G$.} O campo é uma aplicação
 $\operatorname{supp}G\to\N$ com $\lvert\operatorname{supp}G\rvert\le\abs{I}$.
@@ -191,8 +232,9 @@ dependência de $\lvert X\rvert$.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Onde a dimensão entra}\label{sec:dimensao}
 
-\noindent A cláusula (3) do algoritmo pede uma \emph{vizinhança}. É aqui, e só
-aqui, que a estrutura de $X$ é chamada.
+\noindent A cláusula~(4) --- \emph{sentir é ler $G$} --- pede uma
+\emph{vizinhança}, e é o passo~2 do ciclo. É aqui, e só aqui, que a estrutura de
+$X$ é chamada; e é aqui que o passo~3, o gradiente, vai buscar o mínimo.
 
 \begin{definicao}[a grade e a sua vizinhança]\label{def:grade}
 Em $X=\Z^n$ com a base canónica $e_1,\dots,e_n$, a vizinhança de $x$ é
@@ -203,9 +245,10 @@ V(x)=\{x\pm e_i : i=1,\dots,n\}.
 
 \begin{teorema}[o $n$ entra num sítio só]\label{thm:dimensao}
 Em $\Z^n$ tem-se $\lvert V(x)\rvert=2n$ para todo $x$, e os $2n$ vizinhos são
-distintos. Além disso, o Teorema~\ref{thm:multiplicidade} e o Algoritmo~A valem
-palavra por palavra em $\Z^n$ para todo $n\ge1$, sem alteração nenhuma: a
-dimensão não ocorre em nenhuma das quatro cláusulas.
+distintos. Além disso, as cláusulas (1)--(3) do
+Teorema~\ref{thm:multiplicidade} e os passos 1 e 3 do ciclo valem palavra por
+palavra em $\Z^n$ para todo $n\ge1$, sem alteração nenhuma. A dimensão ocorre
+num sítio único --- a cláusula~(4) --- e ocorre como $\lvert V(x)\rvert=2n$.
 \end{teorema}
 
 \begin{proof}
@@ -217,9 +260,33 @@ Teorema~\ref{thm:multiplicidade}, que usou apenas a igualdade em $X$, e $\Z^n$
 tem igualdade decidível coordenada a coordenada.
 \end{proof}
 
+\begin{teorema}[o fecho, e o único sítio onde a dimensão faz mais]\label{thm:fecho}
+O passo~4 do ciclo é o rotor $R^{4}=\mathrm{id}$. Em $\Z^n$ uma rotação de
+$90^{\circ}$ vive num \emph{plano} coordenado $(e_i,e_j)$, atuando por
+$R_{ij}\colon(a,b)\mapsto(-b,a)$ nessas duas coordenadas e fixando as outras.
+Então $R_{ij}^{4}=\mathrm{id}$ para todo par $i<j$, e o número de planos é
+$\binom{n}{2}=n(n-1)/2$: nenhum em $\Z^1$, um em $\Z^2$, três em $\Z^3$, seis em
+$\Z^4$.
+\end{teorema}
+
+\begin{proof}
+Nas coordenadas $(i,j)$, $R_{ij}$ é a matriz $\left(\begin{smallmatrix}0&-1\\
+1&0\end{smallmatrix}\right)$, cujo quadrado é $-\mathrm{id}$ e cuja quarta
+potência é $\mathrm{id}$; as restantes coordenadas não são tocadas. A contagem
+de planos é a de pares não ordenados de índices.
+\end{proof}
+
+\medskip\noindent Este é o único passo em que a dimensão faz mais do que contar
+vizinhos. Nos passos 1 a 3 ela entra só como $\lvert V(x)\rvert=2n$; no fecho,
+ela decide \emph{quantos} rotores há. E o fecho é o mesmo $J^{4}=\mathrm{id}$ da
+bidualidade: em $\Z^2$ há um plano e um rotor, que é a razão por que ali os dois
+se confundem.
+
 \medskip\noindent\textbf{Leitura.} Enunciar o teorema em $\Z^2$ e realizá-lo num
 arranjo do plano dá a impressão de que o $2$ é do teorema. Não é: é do exemplo, e
-do arranjo. O $n$ aparece uma vez, no tamanho da vizinhança.
+do arranjo. O $n$ aparece uma vez, no tamanho da vizinhança --- e é aí, e só aí,
+que o gradiente do passo~3 tem de olhar para $2n$ valores em vez de $4$. O resto
+do ciclo não sabe em que dimensão está.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O levantamento, e a volta}\label{sec:inversa}
@@ -270,7 +337,7 @@ $\operatorname{pr}_1$.
 
 (4) Por (1), $\tilde\pi$ é uma bijeção de $I$ sobre a sua imagem, donde
 $\lvert\operatorname{im}\tilde\pi\rvert=\abs{I}$; a segunda igualdade é a
-cláusula (4) do Teorema~\ref{thm:multiplicidade}.
+Lema~\ref{lem:conserva}.
 
 (5) Por (2), $\{i:\operatorname{pr}_1\tilde\pi(i)=x\}=\{i:\pi(i)=x\}=\pi^{-1}(x)$,
 cuja cardinalidade é $G(x)$ por definição.
@@ -375,6 +442,108 @@ distância decai com a profundidade em que a expansão binária ainda coincide.
 É a topologia que o encaixe induz, e o campo $G$ corre nela com o Algoritmo~A
 inalterado --- a única coisa que $X$ tinha de ter era igualdade, e bolas
 comparam-se por igualdade.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A transformada algébrica sobre o campo}\label{sec:transf}
+
+\noindent O campo $G$ é uma função sobre $X$, e quando $X$ é um grupo finito há
+uma transformada. Aqui $X=(\Z/2)^m$ --- que é o grupo dos endereços da árvore da
+§\ref{sec:ultra}, o mesmo em que a aranha já corria --- e os caracteres tomam
+valores $\pm1$: a transformada é \textbf{inteira}, sem uma vírgula em parte
+nenhuma.
+
+\begin{definicao}[o caractere e a transformada]\label{def:transf}
+Para $k,j\in(\Z/2)^m$ escreva-se $\langle k,j\rangle$ a paridade do número de
+bits comuns. O \textbf{caractere} é $\chi_k(j)=(-1)^{\langle k,j\rangle}$, e a
+transformada é
+\[
+F(x)_k=\sum_{j} x_j\,\chi_k(j),\qquad n=2^m .
+\]
+A operação do grupo é o \textbf{ou-exclusivo}, e a convolução correspondente é
+$(f*g)(y)=\sum_x f(x)\,g(x\oplus y)$.
+\end{definicao}
+
+\begin{lema}[ortogonalidade --- e o Dirac]\label{lem:orto}
+$\chi_k(j\oplus j')=\chi_k(j)\chi_k(j')$, e
+$\sum_k \chi_k(j)\chi_k(j')=n\,\delta_{j,j'}$.
+\end{lema}
+
+\begin{proof}
+A primeira: $\langle k,j\oplus j'\rangle\equiv\langle k,j\rangle+\langle k,j'\rangle
+\pmod 2$, porque o bit comum a $k$ e $j\oplus j'$ está exatamente num dos dois
+quando não está em ambos. Para a segunda, $\chi_k(j)\chi_k(j')=\chi_k(j\oplus j')$;
+se $j=j'$ a soma é $\sum_k 1=n$. Se $j\neq j'$, ponha-se $d=j\oplus j'\neq0$ e
+fixe-se um bit $b$ onde $d$ vale $1$. Emparelhando cada $k$ com $k\oplus e_b$,
+os dois termos são simétricos --- $\chi_{k\oplus e_b}(d)=-\chi_k(d)$ --- e a
+soma cancela aos pares.
+\end{proof}
+
+\begin{teorema}[a ida da aranha é uma soma de Diracs]\label{thm:dirac}
+$G=\sum_{t\in I}\delta_{\pi(t)}$, e portanto
+\[
+F(G)_k=\sum_{t\in I}\chi_k\bigl(\pi(t)\bigr).
+\]
+\end{teorema}
+
+\begin{proof}
+A primeira igualdade é a Def.~\ref{def:objeto} escrita como soma de indicatrizes.
+$F$ é linear e $F(\delta_a)_k=\chi_k(a)$; some-se sobre $t$.
+\end{proof}
+
+\begin{teorema}[a dobra lê-se na norma]\label{thm:dobra-norma}
+Seja $P=\bigl\lvert\{(i,j): i<j,\ \pi(i)=\pi(j)\}\bigr\rvert$ o número de pares
+dobrados. Então
+\[
+\sum_{x}G(x)^2=\abs{I}+2P,\qquad
+\lVert F(G)\rVert^2=n\Bigl(\abs{I}+2P\Bigr),
+\]
+e em particular $\pi$ é injetiva se e só se $\lVert F(G)\rVert^2=n\abs{I}$.
+\end{teorema}
+
+\begin{proof}
+$\sum_x G(x)^2=\sum_x\lvert\pi^{-1}(x)\rvert^2
+=\bigl\lvert\{(i,j):\pi(i)=\pi(j)\}\bigr\rvert$, contando pares \emph{ordenados}.
+Esse conjunto parte-se na diagonal $i=j$, que dá $\abs{I}$, e nos pares com
+$i\neq j$, que são $2P$. Para a segunda, pelo Lema~\ref{lem:orto},
+$\lVert F(x)\rVert^2=\sum_k\sum_{j,j'}x_jx_{j'}\chi_k(j)\chi_k(j')
+=\sum_{j,j'}x_jx_{j'}\,n\,\delta_{j,j'}=n\lVert x\rVert^2$. A equivalência: $\pi$
+é injetiva se e só se $P=0$.
+\end{proof}
+
+\medskip\noindent A leitura vale a pena: a \emph{dobra} --- que é a
+identificação $i\sim j$, definida sobre a trajetória --- lê-se num único número
+calculado sobre o \emph{campo}, sem visitar a trajetória. É o mesmo que dizer
+que $\lVert F(G)\rVert^2/n-\abs{I}$ conta as identificações, e é exato em
+inteiros.
+
+\begin{teorema}[convolução e deconvolução]\label{thm:conv}
+$F(f*g)_k=F(f)_k\,F(g)_k$ para todo $k$. Em consequência, se $F(f)_k\neq0$ para
+todo $k$, então $g$ recupera-se de $f*g$ e de $f$ por
+$F(g)_k=F(f*g)_k/F(f)_k$ seguido da volta
+$g_j=\frac1n\sum_k F(g)_k\chi_k(j)$. Se algum $F(f)_k=0$, a recuperação não
+existe: $f$ aniquila essa componente e ela não pode ser lida no produto.
+\end{teorema}
+
+\begin{proof}
+$F(f*g)_k=\sum_y\sum_x f(x)g(x\oplus y)\chi_k(y)$. Substituindo $y=x\oplus z$ e
+usando $\chi_k(x\oplus z)=\chi_k(x)\chi_k(z)$ (Lema~\ref{lem:orto}), a soma
+fatoriza em $\bigl(\sum_x f(x)\chi_k(x)\bigr)\bigl(\sum_z g(z)\chi_k(z)\bigr)$.
+A inversão é o Lema~\ref{lem:orto} aplicado duas vezes. E se $F(f)_{k_0}=0$
+então $F(f*g)_{k_0}=0$ quaisquer que sejam os $g$, logo dois $g$ que difiram
+apenas nessa componente dão o mesmo produto.
+\end{proof}
+
+\medskip\noindent\textbf{A degenerescência não é rara.} O campo de um percurso
+que visita $0$ e $1$ uma vez cada tem $F_k=1+\chi_k(1)$, que se anula em
+\emph{metade} dos $k$. A condição do Teor.~\ref{thm:conv} é a condição, e não um
+detalhe.
+
+\medskip\noindent\textbf{E um factor que não testa nada.} Se $f=a\,\delta_0+b\,\mathbf{1}$,
+a convolução $f*g$ é a mesma em \emph{qualquer} grupo finito de ordem $n$: o
+Dirac é neutro e a constante dá $b\sum g$ em toda a parte. Um campo desta forma
+tem espectro sem zeros e serve para a deconvolução --- mas nada do que se
+verifique com ele fala do grupo $(\Z/2)^m$ em particular. O factor
+$3\delta_0+\delta_1$, com espectro $\{4,2\}$, não tem esse defeito.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Órbitas deterministas: $G$ conta o período}\label{sec:periodo}
@@ -657,7 +826,7 @@ $2^{12}$ pontos, o que se testou foi o objeto, não o contador.
 
 \medskip\noindent\textbf{E o que não serve como verificação.} Comparar
 $\abs{I}$ ou $\sum_x G(x)$ entre duas implementações \emph{não} distingue o
-dragão de coisa nenhuma: pela cláusula (4) do Teorema~\ref{thm:multiplicidade},
+dragão de coisa nenhuma: pelo Lema~\ref{lem:conserva},
 $\sum G=\abs{I}$ vale para \emph{qualquer} realização com o mesmo número de
 passos. Uma espiral quadrada passa nesse teste. O invariante tem de separar a
 classe que se afirma estar a separar.
@@ -724,6 +893,13 @@ falha ambas com o mesmo raio);
 Teor.~\ref{thm:periodo} §AN8 ($\lvert\{G>1\}\rvert=p$ e $\lvert\{G=1\}\rvert=\mu$
 sobre $z\mapsto z^2+c$ em $\Z[i]$, com o período obtido por busca independente e
 a órbita que escapa como controlo);
+ciclo em $\Z^n$ e Teor.~\ref{thm:fecho} §AN13 (leitura a distinguir $G{=}0$ de
+$G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
+$0,1,3,6$ planos com $R^4=\mathrm{id}$);
+Teor.~\ref{thm:dirac}, \ref{thm:dobra-norma} e \ref{thm:conv} §AN12
+(a ida como soma de Diracs; a dobra na norma por três caminhos, com o percurso
+injetivo a dar excesso zero; convolução diagonalizada e deconvolução com resíduo
+$0$; e a degenerescência exibida);
 Teor.~\ref{thm:leitura} e Cor.~\ref{cor:duais} §AN10 (a mesma célula do dragão
 com sucessores diferentes, exibida; Julia, relógio e reta a lerem o estado; e o
 período $4$ do relógio no campo);
@@ -741,7 +917,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $O(1)$/passo, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN11;
+        {\code{tests/aranha\_n.c} §AN1--§AN13;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 

@@ -42,6 +42,10 @@
  *   §AN9  a ARANHA INVERSA em ℤⁿ: π̃ sobe UM andar, e a VOLTA devolve G
  *   §AN10 quem lê o ESPAÇO e quem lê o ÍNDICE: a aranha e o dragão são duais
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
+ *   §AN13 o CICLO: escrita · leitura · decisão · fecho, em ℤⁿ — cada passo
+ *         É uma cláusula, e o gradiente não delibera: lê o mínimo do chão
+ *   §AN12 a TRANSFORMADA ALGÉBRICA: a ida é Dirac, a dobra é a NORMA, e a
+ *         convolução/deconvolução compõem e decompõem campos (e onde degenera)
  *
  *   cc -O2 -std=c99 -w -I../lib -o aranha_n aranha_n.c && ./aranha_n
  */
@@ -359,6 +363,56 @@ static int nao_determinista(long nt, long *oi, long *oj){
                 if(oi) *oi = i; if(oj) *oj = j; return 1;
             }
     return 0;
+}
+
+
+/* ── A TRANSFORMADA ALGÉBRICA: a mesma do `transformada.c` §U1--§U5 ──────────
+ * O grupo é (ℤ/2)^m e o caractere é χ_k(j) = (−1)^(bits comuns) — valores ±1,
+ * logo a transformada é INTEIRA e não há um único float. Sem normalizar, como
+ * a casa a usa: ‖Fx‖² = n‖x‖² (§U3), e a volta divide por n.
+ *
+ * É este o grupo em que a aranha já corria sem saber: o endereço de um índice
+ * na árvore do encaixe (§AN6) É um elemento de (ℤ/2)^m, e a convolução do
+ * grupo é o XOR. */
+#define TA_M   8
+#define TA_N   (1 << TA_M)
+
+static int ta_chi(long k, long j){
+    long b = k & j, p = 0;
+    while(b){ p ^= (b & 1); b >>= 1; }
+    return p ? -1 : 1;
+}
+static void ta_F(const long *x, long *X){
+    for(long k = 0; k < TA_N; k++){
+        long s = 0;
+        for(long j = 0; j < TA_N; j++) s += x[j] * ta_chi(k, j);
+        X[k] = s;
+    }
+}
+/* a VOLTA: x_j = (1/n) Σ_k X_k χ_k(j). Devolve 0 se alguma divisão não for exacta
+ * — a transformada é inteira, e uma divisão com resto seria a saída do anel. */
+static int ta_Finv(const long *X, long *x){
+    for(long j = 0; j < TA_N; j++){
+        long s = 0;
+        for(long k = 0; k < TA_N; k++) s += X[k] * ta_chi(k, j);
+        if(s % TA_N) return 0;
+        x[j] = s / TA_N;
+    }
+    return 1;
+}
+/* a CONVOLUÇÃO do grupo: (f*g)(y) = Σ_x f(x)·g(x⊕y). Custo n², e é o que a
+ * transformada evita. */
+static void ta_conv(const long *f, const long *g, long *h){
+    for(long y = 0; y < TA_N; y++){
+        long s = 0;
+        for(long x = 0; x < TA_N; x++) s += f[x] * g[x ^ y];
+        h[y] = s;
+    }
+}
+/* o campo G de um percurso, como vector sobre o grupo */
+static void ta_campo(const long *p, long nt, long *g){
+    for(long i = 0; i < TA_N; i++) g[i] = 0;
+    for(long t = 0; t < nt; t++) g[p[t] & (TA_N - 1)]++;
 }
 
 /* corre uma realização e devolve o essencial */
@@ -898,6 +952,214 @@ int main(void){
            " eu tivesse copiado os dígitos, esta asserção não poderia falhar. π está"
            " DENTRO: é construído, não citado",
            mau == 0 && concordam && machin > 0);
+    }
+
+
+    /* ═══ §AN12: a TRANSFORMADA ALGÉBRICA — a ida é Dirac, a dobra é a norma ══ */
+    printf("\n§AN12  a transformada algébrica sobre o campo: convolução e deconvolução.\n\n");
+    {
+        static long perA[4096], perB[4096], gA[TA_N], gB[TA_N], FA[TA_N], FB[TA_N];
+        static long h[TA_N], Fh[TA_N], Fq[TA_N], q[TA_N], gr[TA_N], Fr[TA_N];
+        long mau = 0;
+
+        /* Dois percursos, e a escolha deles é parte da medida — custou duas
+         * tentativas. O factor tem de ter espectro SEM ZEROS (senão não há
+         * deconvolução) e NÃO pode ser δ₀ mais uma constante: com esses, TODAS as
+         * convoluções coincidem, seja qual for o grupo, e a medida deixaria de
+         * falar deste grupo. O primeiro que escrevi, (t·37 mod 97), tinha 26 zeros
+         * em 256; o segundo, «volta sempre à origem», era δ₀ + constante e o gume
+         * mostrou-o: trocar o XOR por soma cíclica não derrubava nada.
+         * Este serve: A = 3·δ₀ + δ₁ tem espectro {4,2}, nunca zero, e não é
+         * invariante à escolha do grupo. */
+        long nA = 0;
+        perA[nA++] = 0; perA[nA++] = 0; perA[nA++] = 0; perA[nA++] = 1;
+        long nB = 0;
+        perB[nB++] = 0; perB[nB++] = 3; perB[nB++] = 5; perB[nB++] = 6;  /* injectivo */
+        ta_campo(perA, nA, gA);
+        ta_campo(perB, nB, gB);
+        ta_F(gA, FA); ta_F(gB, FB);
+
+        /* (a) A IDA É UMA SOMA DE DIRACS: F(G)_k = Σ_t χ_k(π(t)). Dois caminhos —
+         *     transformar o campo, ou somar os caracteres ao longo da trajectória. */
+        long dif_dirac = 0;
+        for(long k = 0; k < TA_N; k++){
+            long s = 0;
+            for(long t = 0; t < nA; t++) s += ta_chi(k, perA[t] & (TA_N-1));
+            if(s != FA[k]) dif_dirac++;
+        }
+        printf("      F(G)_k = Σ_t χ_k(π(t)):  divergências em %ld de %d\n", dif_dirac, TA_N);
+        if(dif_dirac) mau++;
+
+        /* (b) A DOBRA LÊ-SE NA NORMA. Três caminhos para a mesma quantidade:
+         *     contar os pares i<j com π(i)=π(j); somar G²; e ‖FG‖²/n. */
+        long pares = 0;
+        for(long i = 0; i < nA; i++)
+            for(long j = i+1; j < nA; j++)
+                if((perA[i] & (TA_N-1)) == (perA[j] & (TA_N-1))) pares++;
+        long somaq = 0; for(long i = 0; i < TA_N; i++) somaq += gA[i]*gA[i];
+        long normaF = 0; for(long k = 0; k < TA_N; k++) normaF += FA[k]*FA[k];
+        printf("      dobra:  pares = %ld · ΣG² = %ld · ‖FG‖²/n = %ld · |I| + 2·pares = %ld\n",
+               pares, somaq, normaF/TA_N, nA + 2*pares);
+        if(normaF % TA_N) mau++;
+        if(!(somaq == normaF/TA_N && somaq == nA + 2*pares)) mau++;
+
+        /* e o CONTROLO: no percurso injectivo o excesso é ZERO */
+        long paresB = 0;
+        for(long i = 0; i < nB; i++)
+            for(long j = i+1; j < nB; j++)
+                if((perB[i] & (TA_N-1)) == (perB[j] & (TA_N-1))) paresB++;
+        long somaqB = 0; for(long i = 0; i < TA_N; i++) somaqB += gB[i]*gB[i];
+        long normaFB = 0; for(long k = 0; k < TA_N; k++) normaFB += FB[k]*FB[k];
+        printf("      controlo injectivo:  pares = %ld · ΣG² = %ld = |I| = %ld · ‖FG‖²/n = %ld\n\n",
+               paresB, somaqB, nB, normaFB/TA_N);
+        if(!(paresB == 0 && somaqB == nB && normaFB/TA_N == nB)) mau++;
+
+        /* (c) A CONVOLUÇÃO, e a transformada a diagonalizá-la: F(f*g) = F(f)·F(g) */
+        ta_conv(gA, gB, h);
+        ta_F(h, Fh);
+        long dif_conv = 0;
+        for(long k = 0; k < TA_N; k++) if(Fh[k] != FA[k]*FB[k]) dif_conv++;
+        printf("      F(G_A * G_B) = F(G_A)·F(G_B):  divergências em %ld de %d  (custo n² → n)\n",
+               dif_conv, TA_N);
+        if(dif_conv) mau++;
+
+        /* (d) A DECONVOLUÇÃO: divide casa a casa e devolve o factor exacto */
+        long zeros = 0, resto = 0;
+        for(long k = 0; k < TA_N; k++){
+            if(FA[k] == 0){ zeros++; Fq[k] = 0; continue; }
+            if(Fh[k] % FA[k]) resto++;
+            Fq[k] = Fh[k] / FA[k];
+        }
+        int volta = zeros ? 0 : ta_Finv(Fq, q);
+        long dif_dec = 0;
+        if(volta) for(long i = 0; i < TA_N; i++) if(q[i] != gB[i]) dif_dec++;
+        printf("      deconvolução F(h)/F(G_A):  zeros no espectro %ld · restos %ld · resíduo %ld\n",
+               zeros, resto, volta ? dif_dec : -1);
+        if(zeros || resto || !volta || dif_dec) mau++;
+
+        /* (e) E ONDE ELA DEGENERA, exibido: um factor com zero no espectro. O campo
+         *     de um percurso que visita 0 e 1 uma vez cada tem F_k = 1 + χ_k(1),
+         *     que é ZERO em metade dos k — e aí a divisão não existe. */
+        for(long i = 0; i < TA_N; i++) gr[i] = 0;
+        gr[0] = 1; gr[1] = 1;
+        ta_F(gr, Fr);
+        long zeros_r = 0;
+        for(long k = 0; k < TA_N; k++) if(Fr[k] == 0) zeros_r++;
+        printf("      degenerescência: o campo {0,1} tem %ld zeros no espectro de %d"
+               " — metade, e aí a volta NÃO existe\n\n", zeros_r, TA_N);
+        if(zeros_r != TA_N/2) mau++;
+
+        ok("A TRANSFORMADA ALGÉBRICA APLICA-SE AO CAMPO, E O GRUPO JÁ ERA O DA CASA:"
+           " (ℤ/2)^m, caracteres ±1, tudo inteiro e sem um float — o mesmo do"
+           " `transformada.c` §U1--§U5, e o mesmo em que o endereço da árvore do §AN6 já"
+           " vivia. TRÊS COISAS. A IDA da aranha é uma soma de Diracs, e a transformada"
+           " di-lo: F(G)_k = Σ_t χ_k(π(t)), o delta a espalhar-se em tudo (§U5)."
+           " A DOBRA lê-se na NORMA: por Parseval (§U3) ‖FG‖² = n·ΣG², e ΣG² = |I| +"
+           " 2·(pares dobrados) — três caminhos para o mesmo número, e o percurso"
+           " injectivo dá excesso ZERO, que é o controlo. Logo π é injectiva ⟺"
+           " ‖FG‖² = n·|I|: a dobra mede-se sem visitar a trajectória. E a CONVOLUÇÃO"
+           " compõe campos com a transformada a diagonalizá-la casa a casa, custo n² → n,"
+           " enquanto a DECONVOLUÇÃO os decompõe, com resíduo 0 e divisão inteira exacta."
+           " MAS SÓ CONTRA UM FACTOR INVERTÍVEL NO ESPECTRO, e essa não é uma condição"
+           " técnica — é A condição. E A ESCOLHA DO FACTOR É PARTE DA MEDIDA, o que me"
+           " custou duas tentativas: (t·37 mod 97) tinha 26 zeros em 256 e a volta não"
+           " existia; e «voltar sempre à origem» era δ₀ mais uma constante — para esses,"
+           " TODAS as convoluções coincidem seja qual for o grupo, e o gume mostrou-o"
+           " (trocar o XOR por soma cíclica não derrubava nada). O que serve é"
+           " A = 3·δ₀ + δ₁, com espectro {4,2}. A degenerescência exibe-se no extremo:"
+           " o campo {0,1} tem F_k = 1 + χ_k(1), zero em METADE dos k. É a mesma do"
+           " `transformada_universal.c` §T4, neste grupo",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN13: o CICLO da aranha em ℤⁿ — escrita, leitura, decisão, fecho ══ */
+    printf("\n§AN13  o ciclo: escrita · leitura · decisão · fecho, em ℤⁿ.\n\n");
+    {
+        long mau = 0, dims = 0;
+        printf("      n   |V|  lê G=0 vs G>0  gradiente escolhe min  fronteira=∞  planos R⁴=id\n");
+        for(int n = 1; n <= 4; n++){
+            an_zera(n);
+            Vet o = vet0();
+            /* PASSO 1 — ESCRITA: a marca fica no espaço, não no agente */
+            an_visita(o);
+
+            /* monta a vizinhança e dá a cada vizinho um G diferente, para que o
+             * mínimo seja único e a decisão não possa acertar por acaso */
+            Vet vs[2*AN_N]; long viz = 0;
+            for(int i = 0; i < n; i++)
+                for(int sg = -1; sg <= 1; sg += 2){
+                    Vet v = o; v.c[i] += sg; vs[viz++] = v;
+                }
+            /* o vizinho 0 fica com G = 0 (nunca visitado); os outros com 2,3,4,… */
+            for(long a = 1; a < viz; a++)
+                for(long r = 0; r <= a; r++) an_visita(vs[a]);
+
+            /* PASSO 2 — LEITURA: P_t(x) sobre V(x) distingue G=0 de G>0 */
+            long zeros = 0, positivos = 0;
+            for(long a = 0; a < viz; a++){
+                if(an_le(vs[a]) == 0) zeros++; else positivos++;
+            }
+            int distingue = (zeros == 1 && positivos == viz - 1);
+
+            /* PASSO 3 — DECISÃO: gradiente, o vizinho de MENOR G. A fronteira lê-se
+             * como obstáculo (+∞) e por isso nunca é escolhida. Aqui a fronteira é
+             * o último vizinho, marcado com o valor de bloqueio. */
+            const long INF = 1L << 40;
+            long melhor = -1, melhorg = INF;
+            for(long a = 0; a < viz; a++){
+                long g = (a == viz - 1) ? INF : an_le(vs[a]);   /* fronteira */
+                if(g < melhorg){ melhorg = g; melhor = a; }
+            }
+            int escolheu_min = (melhor == 0 && melhorg == 0);
+            /* e o controlo da fronteira: sem o obstáculo ela seria a escolhida,
+             * o que mostra que o +∞ está a fazer trabalho */
+            long melhor2 = -1, melhorg2 = INF;
+            for(long a = 0; a < viz; a++){
+                long g = (a == viz - 1) ? 0 : an_le(vs[a]) + 1;
+                if(g < melhorg2){ melhorg2 = g; melhor2 = a; }
+            }
+            int fronteira_conta = (melhor2 == viz - 1);
+
+            /* PASSO 4 — FECHO: R⁴ = id. Em ℤⁿ a rotação de 90° vive num PLANO
+             * coordenado (e_i,e_j), e há n(n−1)/2 deles; em cada um, quatro
+             * aplicações devolvem o ponto. É o mesmo J⁴ = id da bidualidade. */
+            long planos = 0, planos_ok = 0;
+            for(int i = 0; i < n; i++)
+                for(int j = i+1; j < n; j++){
+                    Vet v = vet0();
+                    for(int c = 0; c < n; c++) v.c[c] = c + 1;
+                    Vet u = v;
+                    for(int r = 0; r < 4; r++){                  /* R: (a,b) ↦ (−b,a) */
+                        int a = u.c[i], b = u.c[j];
+                        u.c[i] = -b; u.c[j] = a;
+                    }
+                    planos++;
+                    if(an_igual(u, v)) planos_ok++;
+                }
+            int fecho_ok = (planos == (long)n*(n-1)/2) && (planos_ok == planos);
+
+            printf("      %d   %-4ld %-15s %-21s %-12s %ld de %ld\n",
+                   n, viz, distingue ? "sim" : "NÃO",
+                   escolheu_min ? "sim" : "NÃO",
+                   fronteira_conta ? "sim" : "NÃO", planos_ok, planos);
+            if(!distingue || !escolheu_min || !fronteira_conta || !fecho_ok) mau++;
+            if(viz != 2*n) mau++;
+            dims++;
+        }
+        printf("\n");
+        ok("O CICLO INTEIRO CORRE EM ℤⁿ, e cada passo dele É uma cláusula e não um"
+           " extra. ESCRITA: a marca fica no espaço. LEITURA: P_t(x) sobre V(x)"
+           " distingue G = 0 de G > 0 — exactamente um vizinho por visitar em cada"
+           " dimensão, e os outros 2n−1 já marcados. DECISÃO: o gradiente vai ao vizinho"
+           " de MENOR G, e não é escolha entre planos — é o mínimo do que está escrito"
+           " no chão; a fronteira lê-se como obstáculo (+∞) e por isso nunca é escolhida,"
+           " e o controlo mostra que o +∞ trabalha: tirado, é ela a escolhida. FECHO:"
+           " R⁴ = id, o mesmo J⁴ = id da bidualidade — e este é o único passo em que a"
+           " dimensão faz mais do que contar vizinhos, porque a rotação vive num PLANO"
+           " e em ℤⁿ há n(n−1)/2 deles: nenhum em ℤ¹, um em ℤ², três em ℤ³, seis em ℤ⁴,"
+           " e em cada um o rotor fecha",
+           mau == 0 && dims == 4);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
