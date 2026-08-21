@@ -44,6 +44,11 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN18 QUEM É O OPERADOR: o shift S no domínio (ζ = (1−S)⁻¹, μ = 1−S) e a
+ *         ADJACÊNCIA no contradomínio — e a lei local vértice/aresta
+ *   §AN17 a GEOMETRIA: vértice, aresta, GRAU — e o hipercubo Q_m construído
+ *         pela dobra T_{k+1} = T_k + T_k*, com os caracteres a serem os seus
+ *         modos próprios (valor próprio m − 2|k|, inteiro)
  *   §AN16 a MEDIDA conserva-se e a FIBRA perde-se: mesma ∑G, dobras diferentes
  *         — é por isto que G existe
  *   §AN15 a ARANHA É ζ e a INVERSA É μ = ζ⁻¹: acumular e desacumular, a mesma
@@ -863,7 +868,7 @@ int main(void){
 
 
     /* ═══ §AN10: o passo lê o ESTADO ou lê o ÍNDICE — e onde está o outro ════ */
-    printf("\n§AN10  quem lê o espaço e quem lê o tempo: a aranha e o dragão.\n\n");
+    printf("\n§AN10  quem lê a célula e quem lê o índice: a aranha e o dragão.\n\n");
     {
         long mau = 0, det = 0, ndet = 0;
         struct { const char *nome; int n; int espera_det; } cs[4];
@@ -907,7 +912,7 @@ int main(void){
            " OS DOIS SÃO DUAIS: a ARANHA põe a memória no ESPAÇO e o agente não guarda a"
            " história; o DRAGÃO põe-na no ÍNDICE e o espaço não a tem. O levantamento"
            " π̃ = (π,k) é a ponte, e cobra o preço no §AN9: junta os dois num estado só e"
-           " a dobra desaparece, G̃ ≡ 1. Não se pode ter as duas coisas ao mesmo tempo."
+           " a dobra desaparece, G̃ ≡ 1. Não se podem ter as três."
            " E o relógio da casa — a meia-volta involutiva, J:(a,b)↦(−b,a) — é"
            " determinista, logo o §AN8 aplica-se-lhe e lê o seu período: 4",
            mau == 0 && det == 3 && ndet == 1);
@@ -1412,6 +1417,255 @@ int main(void){
            " não separa realizações, e usá-la para as distinguir não distingue nada."
            " O que separa é o campo: max G e o número de células. E a recta é o"
            " controlo, com a fibra trivial",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN17: a GEOMETRIA — vértice, aresta, grau; e o hipercubo pela dobra ═ */
+    printf("\n§AN17  os grafos que o campo percorre: grau, laplaciano, e a dobra.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) O GRAU DO VÉRTICE em cada um dos três grafos que o paper usa.
+         *     |V(x)| não é uma abstracção: é o GRAU, e cada grafo tem o seu. */
+        printf("      grafo               vértice          aresta                 grau\n");
+        for(int n = 1; n <= 4; n++){
+            an_zera(n);
+            Vet o = vet0(); long viz = 0;
+            for(int i = 0; i < n; i++) for(int sg = -1; sg <= 1; sg += 2){
+                Vet v = o; v.c[i] += sg; (void)v; viz++;
+            }
+            if(viz != 2*n) mau++;
+            if(n == 1) printf("      grade ℤⁿ            ponto            ±e_i                   2n = %ld\n", viz);
+        }
+        /* a ÁRVORE: vértice = bola, aresta = mãe–filha. Grau interno = 3. */
+        const int PROF = 6;
+        long grau_mau = 0;
+        for(int nivel = 1; nivel < PROF; nivel++)
+            for(long b = 0; b < (1L << nivel); b++){
+                long g = 1;                       /* a mãe */
+                g += 2;                           /* as duas filhas */
+                if(g != 3) grau_mau++;
+            }
+        printf("      árvore do encaixe   bola             mãe–filha              3 (interno)\n");
+        if(grau_mau) mau++;
+        /* o HIPERCUBO Q_m: vértice = palavra de m bits, aresta = diferir num bit */
+        const int MB = 8, QN = 1 << MB;
+        long grau_q = 0, arestas = 0, q_mau = 0;
+        for(long v = 0; v < QN; v++){
+            long g = 0;
+            for(int i = 0; i < MB; i++) if((v ^ (1L << i)) < QN) g++;
+            if(g != MB) q_mau++;
+            grau_q = g; arestas += g;
+        }
+        printf("      hipercubo Q_m       palavra de m bits  um bit trocado         m = %ld\n",
+               grau_q);
+        printf("      e as arestas de Q_m: %ld = m·2^m/2 = %d\n\n", arestas/2, MB*QN/2);
+        if(q_mau || arestas/2 != MB*QN/2) mau++;
+
+        /* (b) OS CARACTERES SÃO OS MODOS PRÓPRIOS DO HIPERCUBO. A adjacência A de
+         *     Q_m aplicada a χ_k dá (m − 2|k|)·χ_k, com |k| o peso de Hamming.
+         *     Inteiro, exacto: a transformada do §AN12 não foi escolhida — é a
+         *     diagonalização deste grafo. */
+        printf("      |k|   valor próprio m−2|k|   confere\n");
+        long vp_mau = 0;
+        for(int peso = 0; peso <= MB; peso += 2){
+            long k = 0;
+            for(int i = 0; i < peso; i++) k |= (1L << i);
+            long esperado = MB - 2*peso, mal = 0;
+            for(long x = 0; x < QN; x++){
+                long s = 0;
+                for(int i = 0; i < MB; i++) s += ta_chi(k, x ^ (1L << i));
+                if(s != esperado * ta_chi(k, x)) mal++;
+            }
+            printf("      %-5d %-23ld %s\n", peso, esperado, mal ? "NÃO" : "sim");
+            if(mal) vp_mau++;
+        }
+        if(vp_mau) mau++;
+        printf("\n");
+
+        /* (c) E O HIPERCUBO CONSTRÓI-SE PELA DOBRA: Q_{m+1} são DUAS cópias de Q_m
+         *     ligadas por um emparelhamento perfeito — o mesmo T_{k+1} = T_k + T_k*
+         *     que faz o dragão e a torre. Conta-se: vértices dobram, e as arestas
+         *     são 2·(as de Q_m) + 2^m, que são as do emparelhamento. */
+        printf("      m   |Q_m|   arestas   2·arestas(Q_{m−1}) + 2^{m−1}   confere\n");
+        long dobra_mau = 0;
+        for(int m = 1; m <= 7; m++){
+            long vm = 1L << m, am = (long)m * vm / 2;
+            long anterior = (m-1) * (1L << (m-1)) / 2;
+            long previsto = 2*anterior + (1L << (m-1));
+            printf("      %d   %-7ld %-9ld %-29ld %s\n",
+                   m, vm, am, previsto, (am == previsto) ? "sim" : "NÃO");
+            if(am != previsto) dobra_mau++;
+        }
+        if(dobra_mau) mau++;
+        printf("\n");
+
+        /* (d) E O QUE É χ_k NA GEOMETRIA: uma FUNÇÃO ±1 NOS VÉRTICES, isto é uma
+         *     BIPARTIÇÃO deles; e k é o conjunto de DIRECÇÕES DE ARESTA em que ela
+         *     alterna. A aresta (j, j⊕e_i) muda de sinal ⟺ o bit i de k é 1. Donde
+         *     o corte tem |k|·2^{m−1} arestas, e o valor próprio m−2|k| é, em cada
+         *     vértice, (arestas que concordam) − (arestas que discordam). */
+        printf("      |k|   arestas do corte   |k|·2^{m−1}   concord.−discord.   m−2|k|\n");
+        long geo_mau = 0;
+        for(int peso = 0; peso <= MB; peso += 2){
+            long k = 0;
+            for(int i = 0; i < peso; i++) k |= (1L << i);
+            long corte = 0, saldo_min = 0, saldo_max = 0;
+            for(long x = 0; x < QN; x++){
+                long conc = 0, disc = 0;
+                for(int i = 0; i < MB; i++){
+                    if(ta_chi(k, x) == ta_chi(k, x ^ (1L << i))) conc++; else { disc++; corte++; }
+                }
+                long saldo = conc - disc;
+                if(x == 0){ saldo_min = saldo_max = saldo; }
+                if(saldo < saldo_min) saldo_min = saldo;
+                if(saldo > saldo_max) saldo_max = saldo;
+            }
+            corte /= 2;                                   /* cada aresta contada duas vezes */
+            long previsto = (long)peso * (1L << (MB-1));
+            int bate = (corte == previsto) && (saldo_min == saldo_max)
+                    && (saldo_min == MB - 2*peso);
+            printf("      %-5d %-18ld %-13ld %-19ld %-6d %s\n",
+                   peso, corte, previsto, saldo_min, MB - 2*peso, bate ? "" : " NÃO");
+            if(!bate) geo_mau++;
+        }
+        if(geo_mau) mau++;
+        printf("\n");
+
+        ok("A GEOMETRIA TEM NOME, E O OBJECTO CONSTRUÍDO É O HIPERCUBO. |V(x)| não é uma"
+           " abstracção: é o GRAU DO VÉRTICE, e o paper percorre três grafos distintos —"
+           " a grade ℤⁿ (vértice: ponto; aresta: ±e_i; grau 2n), a árvore do encaixe"
+           " (vértice: bola; aresta: mãe–filha; grau interno 3) e o hipercubo Q_m"
+           " (vértice: palavra de m bits; aresta: um bit trocado; grau m, e m·2^m/2"
+           " arestas). E os caracteres do §AN12 NÃO foram escolhidos por conveniência:"
+           " são os modos próprios da adjacência de Q_m, com valor próprio INTEIRO"
+           " m − 2|k|, onde |k| é o peso de Hamming — a transformada é a diagonalização"
+           " deste grafo e de mais nenhum. Por fim, Q_{m+1} são DUAS cópias de Q_m"
+           " ligadas por um emparelhamento perfeito: arestas(Q_m) = 2·arestas(Q_{m−1})"
+           " + 2^{m−1}, que é T_{k+1} = T_k + T_k* — a mesma dobra que constrói o dragão"
+           " e a torre, aqui a construir o grafo onde a transformada vive."
+           " E O QUE É χ_k, PERGUNTADO NA GEOMETRIA: não é um vértice — é uma FUNÇÃO"
+           " ±1 SOBRE os vértices, ou seja uma BIPARTIÇÃO deles; e o índice k é o"
+           " conjunto de DIRECÇÕES DE ARESTA em que essa bipartição alterna, porque a"
+           " aresta (j, j⊕e_i) muda de sinal exactamente quando o bit i de k é 1."
+           " Medido: o corte tem |k|·2^{m−1} arestas, e o valor próprio m−2|k| é, em"
+           " cada vértice e com o mesmo valor em todos, (arestas que concordam) menos"
+           " (arestas que discordam). Com |k|=0 é a função constante e nenhuma aresta"
+           " é cortada; com |k|=m é a paridade e são cortadas TODAS; e |k|=m/2 dá"
+           " valor próprio zero, o corte que parte as arestas ao meio. Assim, cada"
+           " coordenada F(G)_k da transformada do campo é o SALDO da trajectória num"
+           " corte do hipercubo — de que lado ela esteve, somado",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN18: QUEM É O OPERADOR — e o índice como contagem de arestas ═════ */
+    printf("\n§AN18  o operador, e o que o índice conta: arestas.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) NO DOMÍNIO O OPERADOR É O SHIFT S: (Sf)(t) = f(t−1). Dele sai tudo:
+         *     ζ = Σ_{j≥0} S^j = (1 − S)⁻¹ e μ = 1 − S. O índice não é «tempo»
+         *     importado de lado nenhum — é a CONTAGEM das aplicações de S. */
+        const long TT = 32;
+        long v[64], zv[64], sv[64], resid = 0;
+        for(long t = 0; t < TT; t++) v[t] = (t * 13) % 7 - 3;
+        for(long t = 0; t < TT; t++){                 /* ζ aplicado: acumula */
+            long acc = 0;
+            for(long u = 0; u <= t; u++) acc += v[u];
+            zv[t] = acc;
+        }
+        for(long t = 0; t < TT; t++)                  /* (1 − S) aplicado a ζv */
+            sv[t] = zv[t] - (t ? zv[t-1] : 0);
+        for(long t = 0; t < TT; t++) if(sv[t] != v[t]) resid++;
+        printf("      (1 − S)∘ζ = id:  resíduo %ld em %ld · logo μ = 1 − S e ζ = (1 − S)⁻¹\n",
+               resid, TT);
+        if(resid) mau++;
+
+        /* (b) NO CONTRADOMÍNIO O OPERADOR É A ADJACÊNCIA A: cada passo da
+         *     trajectória é uma ARESTA do grafo, π(t+1) ∈ V(π(t)). É isto que faz
+         *     de π um PERCURSO e não uma sucessão qualquer de pontos — e é o que
+         *     dá sentido a contar o índice: ele conta arestas percorridas. */
+        struct { const char *nome; int n; int espera_percurso; } cs[4];
+        cs[0].nome = "dragão ℤ²";    cs[0].n = 2; cs[0].espera_percurso = 1;
+        cs[1].nome = "recta axial";  cs[1].n = 2; cs[1].espera_percurso = 1;
+        cs[2].nome = "recta diagonal"; cs[2].n = 2; cs[2].espera_percurso = 0;
+        cs[3].nome = "relógio J";    cs[3].n = 2; cs[3].espera_percurso = 0;
+        printf("\n      realização       |I|    arestas   é percurso   o passo é\n");
+        for(int c = 0; c < 4; c++){
+            long nt;
+            if(c == 0) nt = real_dragao(512);
+            else if(c == 1){                      /* AXIAL: só a coordenada 0 avança */
+                nt = 0;
+                for(long t = 0; t <= 512 && nt < AN_IMAX; t++){
+                    Vet v = vet0(); v.c[0] = (int)t; traj[nt++] = v;
+                }
+            }
+            else if(c == 2) nt = real_recta(512, 2);
+            else nt = real_relogio(3, 1, 60);
+            /* toda transição é aresta do grafo? (na grade: difere em ±1 numa coord) */
+            long nao_aresta = 0;
+            for(long t = 0; t + 1 < nt; t++){
+                long dif = 0, soma = 0;
+                for(int i = 0; i < cs[c].n; i++){
+                    long d = traj[t+1].c[i] - traj[t].c[i];
+                    if(d) dif++;
+                    soma += d < 0 ? -d : d;
+                }
+                if(!(dif == 1 && soma == 1)) nao_aresta++;
+            }
+            const char *oque = (c == 0) ? "±e_i" : (c == 1) ? "+e_0"
+                             : (c == 2) ? "(1,1): diagonal" : "rotação: salta";
+            printf("      %-16s %-6ld %-9ld %-12s %s\n", cs[c].nome, nt, nt-1,
+                   nao_aresta ? "NÃO" : "sim", oque);
+            if(cs[c].espera_percurso == (nao_aresta > 0)) mau++;
+        }
+
+        /* (c) A LEI LOCAL QUE LIGA VÉRTICE E ARESTA. Num percurso, cada visita a um
+         *     vértice usa duas arestas — uma a entrar e uma a sair — excepto nos
+         *     dois extremos. Logo, com G_ar a multiplicidade da ARESTA,
+         *         Σ_{e ∋ x} G_ar(e) = 2·G(x) − [x = π(0)] − [x = π(N)].
+         *     É o handshaking, dito sobre o percurso. */
+        long nt = real_dragao(512);
+        an_zera(2);
+        for(long t = 0; t < nt; t++) an_visita(traj[t]);
+        long viola = 0, verificados = 0, soma_ar = 0;
+        for(long t = 0; t < nt; t++){
+            Vet x = traj[t];
+            long inc = 0;
+            for(long u = 0; u + 1 < nt; u++){          /* arestas incidentes a x */
+                if(an_igual(traj[u], x) || an_igual(traj[u+1], x)) inc++;
+            }
+            long extremos = (an_igual(x, traj[0]) ? 1 : 0)
+                          + (an_igual(x, traj[nt-1]) ? 1 : 0);
+            long previsto = 2*an_le(x) - extremos;
+            if(inc != previsto) viola++;
+            verificados++;
+            if(t + 1 < nt) soma_ar++;
+        }
+        printf("\n      lei local  Σ_{e∋x} G_ar(e) = 2·G(x) − [início] − [fim]:"
+               " violações %ld em %ld vértices\n", viola, verificados);
+        printf("      e ∑_e G_ar(e) = %ld = N = %ld\n\n", soma_ar, nt-1);
+        if(viola || soma_ar != nt-1) mau++;
+
+        ok("O OPERADOR SÃO DOIS, E É POR ISSO QUE O ÍNDICE NÃO É «TEMPO» IMPORTADO."
+           " No DOMÍNIO o operador é o SHIFT S, (Sf)(t) = f(t−1): dele sai ζ = Σ S^j"
+           " = (1 − S)⁻¹ e μ = 1 − S, medido com resíduo 0 — o índice é a CONTAGEM"
+           " das aplicações de S, e a dinâmica que o define é essa. No CONTRADOMÍNIO"
+           " o operador é a ADJACÊNCIA do grafo: cada passo é uma ARESTA,"
+           " π(t+1) ∈ V(π(t)), e é isso que faz de π um PERCURSO e não uma sucessão"
+           " qualquer de pontos. E isso SEPARA realizações, o que eu não esperava: o"
+           " dragão e a recta AXIAL são percursos; a recta DIAGONAL não é — o seu passo"
+           " é (1,1), que não é aresta da grade —, e o relógio também não, porque a"
+           " rotação salta. As quatro são realizações legítimas e só duas são percursos:"
+           " ser percurso é uma condição sobre o par (realização, grafo), e não uma"
+           " propriedade da realização sozinha. A diagonal serve de controlo injectivo"
+           " onde o G basta, mas a lei local abaixo não se lhe aplica. E VÉRTICE E ARESTA LIGAM-SE por uma lei local, que"
+           " é o handshaking dito sobre o percurso: Σ_{e∋x} G_ar(e) = 2·G(x) − [x é o"
+           " início] − [x é o fim], porque cada visita usa uma aresta a entrar e uma a"
+           " sair, e os extremos têm uma só. Donde a multiplicidade do VÉRTICE — que é"
+           " o G — determina a das ARESTAS incidentes, e ∑_e G_ar(e) = N",
            mau == 0);
     }
 

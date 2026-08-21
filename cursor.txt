@@ -1796,3 +1796,61 @@ na linguagem da casa, o que eu tinha achado sozinho e baptizado mal.
   gume      26 mutações, 26 mordem
   bateria   529 : 529, 0 falhas · 15 unidades passaram, 0 falharam
   paper     14 páginas
+
+§38 — «QUEM É O OPERADOR?» — a geometria que faltava, e o índice derivado
+=========================================================================
+Ele: «não vejo vértice nem aresta nem cone nem hipercubo nem nada disso, só a
+velha e manjada espiral»; «na definição 19 vc chama de caractere? o que é isso,
+o vértice ou o quê, na geometria?»; «o que porra é tempo cara?»; e depois a
+correcção fina: «não tem problema usar tempo DESDE QUE você DERIVE ele de uma
+dinâmica de um OPERADOR. A pergunta é: quem é o operador?»
+
+O TEMPO SAIU, E VOLTOU DERIVADO. Não havia tempo nenhum no objecto — havia o
+ÍNDICE, que é a parametrização. Mas ele não me mandou apagar: mandou DERIVAR.
+
+QUEM É O OPERADOR: SÃO DOIS, um de cada lado de π (§AN18)
+  · no DOMÍNIO, o DESLOCAMENTO S, (Sa)(t) = a(t−1). Dele sai tudo:
+        ζ = Σ_{j≥0} Sʲ = (1 − S)⁻¹      μ = 1 − S
+    e o índice é a CONTAGEM das aplicações de S. Medido: (1−S)∘ζ = id, resíduo 0.
+  · no CONTRADOMÍNIO, a ADJACÊNCIA A do grafo. Cada passo é uma ARESTA,
+    π(t+1) ∈ V(π(t)) — é isso que faz de π um PERCURSO.
+
+E SER PERCURSO SEPARA REALIZAÇÕES, o que eu não esperava e o medidor mostrou:
+    dragão ℤ²        percurso      passo ±e_i
+    recta AXIAL      percurso      passo +e_0
+    recta DIAGONAL   NÃO           passo (1,1) — não é aresta da grade
+    relógio J        NÃO           a rotação salta
+A «recta» que eu usava como controlo desde o §AN4 é a DIAGONAL: injectiva, sim,
+mas não é percurso. Ser percurso é condição sobre o PAR (realização, grafo).
+
+A LEI LOCAL QUE LIGA VÉRTICE E ARESTA — o handshaking dito sobre o percurso:
+    Σ_{e∋x} G_ar(e) = 2·G(x) − [x=π(0)] − [x=π(N)]      e   ∑_e G_ar(e) = N
+Cada visita usa uma aresta a entrar e uma a sair; os extremos têm uma só.
+0 violações em 513 vértices. G não é uma contagem entre outras: é a que fecha a
+contabilidade local.
+
+A GEOMETRIA TEM NOME (§AN17). |V(x)| não é abstracção — é o GRAU:
+    grade ℤⁿ            vértice: ponto        aresta: ±e_i          grau 2n
+    árvore do encaixe   vértice: bola         aresta: mãe–filha     grau 3
+    hipercubo Q_m       vértice: m bits       aresta: um bit        grau m
+E Q_m constrói-se PELA DOBRA: duas cópias de Q_{m−1} e um emparelhamento
+perfeito, ar(Q_m) = 2·ar(Q_{m−1}) + 2^{m−1}. É T_{k+1} = T_k + T_k* — o grafo
+onde a transformada vive é feito pelo passo que faz a curva.
+
+O QUE É χ_k NA GEOMETRIA, que era a pergunta: NÃO é um vértice. É uma FUNÇÃO ±1
+SOBRE os vértices — uma BIPARTIÇÃO —, e k é o conjunto de DIRECÇÕES DE ARESTA em
+que ela alterna. O corte tem |k|·2^{m−1} arestas; |k|=0 é a constante e não corta
+nada, |k|=m é a paridade e corta tudo, |k|=m/2 parte ao meio. E o valor próprio
+    A·χ_k = (m − 2|k|)·χ_k
+é, em cada vértice, (arestas que concordam) − (arestas que discordam). Medido
+exacto em inteiros. Os caracteres não foram escolhidos: são a DIAGONALIZAÇÃO
+deste grafo. Logo F(G)_k é o SALDO da trajectória no corte k.
+
+E O PAR (π̃, pr₁) TEM NOME NA CASA: é a RETRACÇÃO Σ∘Π = Id — a espiral sobe, o
+cone desce, e só um lado fecha. Não é involução. Está no torre_alg.h como o
+pipeline 2, e eu fazia-o sem o nomear.
+
+  gume      30 mutações, 30 mordem (a M27 era minha: (i+1)%m percorre as MESMAS
+            direcções, só noutra ordem — a soma não muda)
+  bateria   529 : 529, 0 falhas · 17 unidades passaram, 0 falharam
+  paper     16 páginas

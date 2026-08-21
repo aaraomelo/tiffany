@@ -281,6 +281,95 @@ que o gradiente do passo~3 lê $2n$ valores em vez de $4$. Os outros três passo
 correm iguais em qualquer dimensão.
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{Os grafos, e quem é o operador}\label{sec:geo}
+
+\noindent $V(x)$ apareceu como ``a vizinhança''. Ela é o conjunto dos vértices
+adjacentes a $x$ num \textbf{grafo}, e $\lvert V(x)\rvert$ é o \textbf{grau}. O
+campo percorre três, e não são o mesmo:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+grafo & vértice & aresta & grau \\
+\midrule
+a grade $\Z^n$ & um ponto & $x\sim x\pm e_i$ & $2n$ \\
+a árvore do encaixe & uma bola & mãe\,--\,filha & $3$ (interno) \\
+o hipercubo $Q_m$ & palavra de $m$ bits & um bit trocado & $m$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[o hipercubo constrói-se pela dobra]\label{thm:hiper}
+$Q_m$ tem $2^m$ vértices e $m\,2^{m-1}$ arestas, e $Q_m$ são duas cópias de
+$Q_{m-1}$ ligadas por um emparelhamento perfeito:
+$\mathrm{ar}(Q_m)=2\,\mathrm{ar}(Q_{m-1})+2^{m-1}$.
+\end{teorema}
+
+\begin{proof}
+Separando os vértices pelo último bit obtêm-se duas cópias de $Q_{m-1}$; as
+arestas entre elas são as que trocam esse bit, uma por vértice de cada cópia ---
+um emparelhamento perfeito com $2^{m-1}$ arestas. A contagem $m\,2^{m-1}$ sai de
+cada um dos $2^m$ vértices ter grau $m$.
+\end{proof}
+
+\medskip\noindent É a mesma dobra $T_{k+1}=T_k+T_k^{*}$ da §\ref{sec:dragao}: o
+grafo em que a transformada da §\ref{sec:transf} vive é construído pelo passo que
+constrói a curva.
+
+\subsection*{O operador}
+
+\noindent O índice $t$ não é tempo importado de fora: é a \textbf{contagem das
+aplicações de um operador}. São dois, um de cada lado de $\pi$.
+
+\begin{definicao}[os dois operadores]\label{def:ops}
+No domínio, o \textbf{deslocamento} $S$, $(Sa)(t)=a(t-1)$. No contradomínio, a
+\textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
+\end{definicao}
+
+\begin{teorema}[$\zeta$ e $\mu$ saem de $S$]\label{thm:shift}
+$\zeta=\sum_{j\ge0}S^{j}=(1-S)^{-1}$ e $\mu=1-S$.
+\end{teorema}
+
+\begin{proof}
+$(\sum_{j\ge0}S^j a)(t)=\sum_{j\ge0}a(t-j)=\sum_{u\le t}a(u)=(a*\zeta)(t)$, com
+a soma finita porque $a$ se anula abaixo de $0$. E $(1-S)$ aplicado a isso
+telescopa: $(a*\zeta)(t)-(a*\zeta)(t-1)=a(t)$. Logo $(1-S)\zeta=\mathrm{id}$, e
+$\mu=1-S$ pelo Teor.~\ref{thm:mu}.
+\end{proof}
+
+\begin{definicao}[percurso]\label{def:percurso}
+$\pi$ é um \textbf{percurso} no grafo quando $\pi(t+1)\in V(\pi(t))$ para todo
+$t<N$, isto é, quando cada passo é uma \emph{aresta}. Nesse caso o índice conta
+arestas: $\abs{I}=N+1$ vértices visitados e $N$ arestas percorridas.
+\end{definicao}
+
+\medskip\noindent Ser percurso é uma condição sobre o \emph{par}
+(realização, grafo), e não uma propriedade da realização: na grade, a curva de
+Heighway e a reta axial são percursos; a reta \emph{diagonal} não é --- o seu
+passo $(1,1)$ não é aresta ---, e a rotação $J$ também não, porque salta.
+
+\begin{teorema}[a lei local: vértice e aresta]\label{thm:handshake}
+Seja $\pi$ um percurso e $G_{\mathrm{ar}}(e)$ o número de vezes que ele usa a
+aresta $e$. Então, para cada vértice $x$,
+\[
+\sum_{e\,\ni\,x}G_{\mathrm{ar}}(e)\;=\;2\,G(x)\;-\;[\,x=\pi(0)\,]\;-\;[\,x=\pi(N)\,],
+\qquad\text{e}\qquad \sum_{e}G_{\mathrm{ar}}(e)=N .
+\]
+\end{teorema}
+
+\begin{proof}
+Cada visita a $x$ num índice interior $0<t<N$ usa duas arestas incidentes, a de
+$t-1$ para $t$ e a de $t$ para $t+1$; a visita em $t=0$ usa uma só, e a em $t=N$
+também. Somando sobre as $G(x)$ visitas vem o enunciado. A segunda igualdade é
+contar as $N$ arestas do percurso.
+\end{proof}
+
+\medskip\noindent A multiplicidade do vértice determina, assim, a das arestas
+incidentes: $G$ não é uma contagem entre outras --- é a que fecha a
+contabilidade local do percurso. É o \emph{handshaking} dito sobre a
+trajetória.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{O ciclo da aranha}\label{sec:algoritmo}
 
 \noindent Agora que a construção está feita --- objeto, multiplicidade,
@@ -424,6 +513,14 @@ O campo $c$ é o próprio $G$ parcial: o Algoritmo~B é o Algoritmo~A com o valo
 lido a sair. Não inventa geometria --- desfaz a identificação $i\sim j$ que a
 realização tinha feito.
 
+\medskip\noindent\textbf{O par é uma retração, não uma involução.}
+$\operatorname{pr}_1\circ\tilde\pi=\pi$ fecha de um lado só: $\tilde\pi$ sobe,
+$\operatorname{pr}_1$ desce, e $\tilde\pi\circ\operatorname{pr}_1$ não é a
+identidade --- nem está definida fora da imagem. É a forma do par
+$\Sigma\circ\Pi=\mathrm{Id}$ com que a obra separa \emph{reconstrução} de
+\emph{extração}, e distingue-se de uma involução $\nu\circ\nu=\mathrm{id}$, onde
+os dois lados fecham no mesmo espaço.
+
 \medskip\noindent\textbf{Duas notas sobre a execução.}
 
 \emph{Primeira:} a injetividade de $\tilde\pi$ verifica-se sem comparar pares. Basta correr o Algoritmo~A \emph{sobre $\tilde\pi$}, em dimensão $n+1$, e
@@ -456,6 +553,9 @@ ordem é $(f*g)(u,t)=\sum_{u\le v\le t}f(u,v)\,g(v,t)$, e sobre funções de um 
 (a*\zeta)(t)=\sum_{u\le t}a(u).
 \]
 \end{definicao}
+
+\noindent (Pelo Teor.~\ref{thm:shift}, $\zeta=(1-S)^{-1}$: a convolução com
+$\zeta$ é a soma de todas as potências do deslocamento.)
 
 \begin{teorema}[$\mu=\zeta^{-1}$ na ordem total]\label{thm:mu}
 Na ordem total, a inversa de $\zeta$ é
@@ -515,8 +615,8 @@ $\zeta$ acumula, $\mu$ desacumula --- e só muda a ordem sobre a qual se acumula
 \emph{ordem} $(I,\le)$, e serve para o directo e o inverso da própria aranha. A
 da §\ref{sec:transf} é a do \emph{grupo} $(\Z/2)^m$, e serve para compor e
 decompor \emph{campos} de percursos diferentes. Não são a mesma operação, e
-convém não as confundir: uma acumula ao longo do tempo, a outra soma sobre o
-espaço.
+convém não as confundir: uma acumula ao longo do \emph{domínio} $I$, a outra
+soma sobre o \emph{contradomínio} $X$.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Espaços ultramétricos: a célula é a bola}\label{sec:ultra}
@@ -605,10 +705,8 @@ mesmo início de $p-1$; há um só, porque o bit é binário. A união das duas 
 exatamente o conjunto dos pontos com o prefixo de $p-1$ bits, que é a bola-mãe.
 \end{proof}
 
-\medskip\noindent Isto não enfraquece o Teor.~\ref{thm:dimensao} --- confirma-o.
-A dimensão entra num sítio único, a vizinhança; e trocar a estrutura de $X$ troca
-exatamente esse número, $2n$ na grade e $1$ na árvore. Os outros três passos do
-ciclo são os mesmos.
+\medskip\noindent A vizinhança é o parâmetro: $2n$ na grade, $1$ na árvore. Os
+outros três passos do ciclo são os mesmos nas duas.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A transformada algébrica sobre o campo}\label{sec:transf}
@@ -629,6 +727,36 @@ F(x)_k=\sum_{j} x_j\,\chi_k(j),\qquad n=2^m .
 A operação do grupo é o \textbf{ou-exclusivo}, e a convolução correspondente é
 $(f*g)(y)=\sum_x f(x)\,g(x\oplus y)$.
 \end{definicao}
+
+\medskip\noindent\textbf{O que $\chi_k$ é no grafo.} Não é um vértice. É uma
+\textbf{função $\pm1$ sobre os vértices} de $Q_m$ --- uma \textbf{bipartição}
+deles ---, e o índice $k$ é o conjunto de \emph{direções de aresta} em que essa
+bipartição alterna: a aresta $j\sim j\oplus e_i$ muda de sinal exatamente quando
+o bit $i$ de $k$ vale $1$. O \textbf{corte} que $\chi_k$ define tem
+$\lvert k\rvert\,2^{m-1}$ arestas, com $\lvert k\rvert$ o peso de Hamming:
+$\lvert k\rvert=0$ é a função constante e não corta nenhuma, $\lvert k\rvert=m$
+é a paridade e corta todas, $\lvert k\rvert=m/2$ parte-as ao meio.
+
+\begin{teorema}[os caracteres são os modos próprios do grafo]\label{thm:modos}
+Com $A$ a adjacência de $Q_m$ (Def.~\ref{def:ops}),
+\[
+A\,\chi_k=(m-2\lvert k\rvert)\,\chi_k,
+\]
+e o valor próprio é, em cada vértice, o número de arestas em que $\chi_k$
+\emph{concorda} menos o número em que \emph{discorda}.
+\end{teorema}
+
+\begin{proof}
+$(A\chi_k)(x)=\sum_i\chi_k(x\oplus e_i)=\chi_k(x)\sum_i\chi_k(e_i)$ pelo
+Lema~\ref{lem:orto}, e $\chi_k(e_i)=(-1)^{k_i}$ vale $-1$ nas $\lvert k\rvert$
+direções de $k$ e $+1$ nas outras $m-\lvert k\rvert$; a soma é
+$(m-\lvert k\rvert)-\lvert k\rvert$.
+\end{proof}
+
+\medskip\noindent Daqui sai a leitura da transformada do campo: pelo
+Teor.~\ref{thm:dirac}, $F(G)_k=\sum_t\chi_k(\pi(t))$ é o \textbf{saldo} da
+trajetória no corte $k$ --- de que lado dele esteve, somado sobre os passos. Os
+caracteres não foram escolhidos: são a diagonalização deste grafo.
 
 \begin{lema}[ortogonalidade --- e o Dirac]\label{lem:orto}
 $\chi_k(j\oplus j')=\chi_k(j)\chi_k(j')$, e
@@ -788,7 +916,7 @@ cursor basta: $\mu$ e $p$ lêem-se no campo, sem segunda passagem e sem comparar
 posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section{O que o passo lê: o espaço ou o tempo}\label{sec:leitura}
+\section{O que o passo lê: a célula ou o índice}\label{sec:leitura}
 
 \noindent A Def.~\ref{def:determinista} pede que o passo seja função da célula.
 Isto não separa objetos matemáticos de outros --- separa \textbf{duas
@@ -815,7 +943,7 @@ Sejam as duas maneiras de uma trajetória guardar a sua própria história:
 \toprule
  & \textbf{a aranha} & \textbf{o dragão} \\
 \midrule
-a memória está & no \textbf{espaço} ($G$) & no \textbf{índice} \\
+a marca fica & no contradomínio $X$: é $G$ & no domínio $I$: é o índice \\
 o passo lê & a célula: $\pi(t{+}1)=f(\pi(t))$ & o índice: $\pi(t{+}1)=g(t,\pi(t))$ \\
 o campo $G$ lê & período e cauda (Teor.~\ref{thm:periodo}) & a dobra, e só ela \\
 \bottomrule
@@ -825,7 +953,7 @@ O levantamento $\tilde\pi=(\pi,k)$ do Teor.~\ref{thm:levantamento} é a ponte
 entre os dois --- e cobra o preço: junta espaço e história num só estado, e a
 dobra desaparece, $\tilde G\equiv1$. As três coisas ---
 \emph{dobrar}, \emph{ler só o estado} e \emph{não ter período} --- não podem
-valer ao mesmo tempo.
+valer as três.
 \end{corolario}
 
 \medskip\noindent\textbf{E verifica-se.} Que o passo lê o índice não se
@@ -856,7 +984,7 @@ $S_{t+1}=S_t+a_{t+1}$. A realização é $\pi(t)=S_t$, com $X=\Z$.
 
 \begin{teorema}[o campo lê o custo da série]\label{thm:serie}
 Suponha-se que existe $T$ com $a_k=0$ para todo $k>T$ (os termos anulam-se em
-tempo finito, que é o que a divisão inteira faz), e que
+um número finito de termos, que é o que a divisão inteira faz), e que
 $S_0,\dots,S_T$ são distintos. Se $N\ge T+1$, então
 \[
 \bigl\lvert\{x:G(x)>1\}\bigr\rvert=1,\qquad
@@ -892,8 +1020,8 @@ parciais que o Teor.~\ref{thm:serie} corre.
 função de $k$, não da soma corrente: a série, como trajetória, lê o
 \emph{índice}. Ela dobra apenas no fim, ao entrar no ponto fixo --- e é aí, e só
 aí, que passa a ser função do estado ($x\mapsto x$). É o Cor.~\ref{cor:duais} no
-caso mais simples possível: a convergência \emph{é} a passagem de ler o tempo
-para ler o espaço.
+caso mais simples possível: a convergência \emph{é} a passagem de ler o índice
+para ler a célula.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O dragão: a régua de bits e a dobra}\label{sec:dragao}
@@ -1052,6 +1180,11 @@ Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
 passo, nem uma a mais --- o autómato não varre) (leitura a distinguir $G{=}0$ de
 $G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
 $0,1,3,6$ planos com $R^4=\mathrm{id}$);
+Teor.~\ref{thm:shift}, \ref{thm:handshake} e Def.~\ref{def:percurso} §AN18
+($(1-S)\zeta=\mathrm{id}$; quais realizações são percursos e quais não; e a lei
+local com $0$ violações em $513$ vértices);
+Teor.~\ref{thm:hiper} e \ref{thm:modos} §AN17 (grau nos três grafos;
+$A\chi_k=(m-2|k|)\chi_k$ exato em inteiros; o corte com $|k|2^{m-1}$ arestas);
 Teor.~\ref{thm:medida} §AN16 (a mesma medida com dobras diferentes: Heighway e
 a espiral, e a reta como controlo);
 Teor.~\ref{thm:mu}, \ref{thm:zeta-mu} e Cor.~\ref{cor:mobius} §AN15
@@ -1079,7 +1212,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          $\Z^1$--$\Z^4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN16;
+        {\code{tests/aranha\_n.c} §AN1--§AN18;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 
