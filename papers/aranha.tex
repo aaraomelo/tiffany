@@ -391,7 +391,8 @@ não é a prova.)
 aplicações de um operador}. São dois, um de cada lado de $\pi$.
 
 \begin{definicao}[os dois operadores]\label{def:ops}
-No domínio, o \textbf{deslocamento} $S$, $(Sa)(t)=a(t-1)$. No contradomínio, a
+No domínio, o \textbf{deslocamento} $S$, $(Sa)(t)=a(t-1)$ --- que na base é
+$S\delta_t=\delta_{t+1}$, isto é, o \textbf{sucessor}. No contradomínio, a
 \textbf{adjacência} $A$ do grafo, $(Af)(x)=\sum_{y\in V(x)}f(y)$.
 \end{definicao}
 
@@ -1399,13 +1400,29 @@ o deslocamento $S$ da Def.~\ref{def:ops}, e a sua diferença $\mu=1-S$ é a
 \textbf{derivada} discreta, com $\zeta=(1-S)^{-1}$ a integrar de volta
 (Teor.~\ref{thm:shift}).
 
-\begin{definicao}[tempo]\label{def:tempo}
-Seja $\theta(t)=[\,G_{t}(\pi(t))>1\,]$ --- vale $1$ quando o salto chega a uma
-célula que já tinha marca --- e $D=\theta*\zeta$ a sua acumulação, a
-\textbf{taxa de dobras} do percurso. O \textbf{tempo} é a variação dessa taxa ao
-saltar de um vértice para o vizinho, indexada pelo parâmetro: $\mu D=\theta$.
+\begin{definicao}[o tempo, e as duas grandezas que o acompanham]\label{def:tempo}
+Três coisas distintas, cada uma com o seu nome:
+\begin{enumerate}\itemsep3pt
+\item[(i)] O \textbf{tempo} é o parâmetro $t$: a \emph{contagem das aplicações
+      do operador} $S$. Como $S$ é o sucessor --- $S\delta_t=\delta_{t+1}$ ---,
+      isto é dizer que o tempo \emph{é} a ordem de $\N$, e que $I$ é o segmento
+      inicial dela.
+\item[(ii)] O \textbf{tempo próprio} $\tau$ é o mesmo percurso \emph{medido por
+      uma régua}: $d\tau^{2}=g_{uv}dx^udx^v$. Coincide com $t$ exatamente quando
+      a diagonal de $g$ usada vale $1$ (Teor.~\ref{thm:gcanon}); com outra $g$,
+      não.
+\item[(iii)] A \textbf{dobra acumulada} $D=\theta*\zeta$, com
+      $\theta(t)=[\,G_{t}(\pi(t))>1\,]$, e $\mu D=\theta$. Esta \emph{não} é um
+      tempo: é memória. O que dela se lê é a \textbf{taxa de dobras} $dD/d\tau$,
+      que muda com a régua.
+\end{enumerate}
 (A letra $d$ fica reservada à distância da §\ref{sec:ultra}.)
 \end{definicao}
+
+\medskip\noindent A distinção não é de estilo. Chamar ``tempo'' a (iii) --- como
+uma versão anterior deste texto chamava --- confunde o que \emph{conta os
+passos} com o que \emph{mede o que os passos deixaram}. E é (i) que responde à
+pergunta de onde vem o tempo: dos passos do operador, e de mais nada.
 
 \medskip\noindent\textbf{E o número depende da régua.} O comprimento de um salto
 não é dado pelo percurso --- é dado pela métrica com que se mede. O mesmo
@@ -1462,7 +1479,8 @@ d\tau^{2}=G(x)\,h_{uv}dx^udx^v ,
 \]
 que numa aresta na direção $i$ vale $G(x)\,h_{ii}$: \textbf{o tempo próprio de um
 salto é a multiplicidade da célula de chegada}. Onde a trajetória já passou, o
-tempo passa outro --- e é a memória, ao ficar no espaço, que o curva. Com
+tempo \emph{próprio} passa outro --- e é a memória, ao ficar no espaço, que o
+curva. O parâmetro, esse, continua a contar os passos do sucessor, um por um. Com
 $G\equiv1$ a métrica é plana e $\tau=N$; onde há dobra, $\tau$ afasta-se do
 parâmetro.
 
@@ -1696,13 +1714,18 @@ noutros documentos desta obra. O que se verifica aqui é outra coisa: que os
 degraus construídos por \emph{quociente} são realizações no sentido da
 Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
 
-\medskip\noindent\textbf{E são três, não quatro.} O primeiro degrau é de outra
-natureza, e o documento dos naturais di-lo à letra: ali \emph{não há quociente}
---- a segunda cópia da dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é
-\emph{multiplicada} por $\sigma$. $\N$ é a torre mais o transporte, e não um
-conjunto de classes. A linha de $\N$ na tabela abaixo é, por isso, de estatuto
-diferente das outras três: é uma realização legítima --- a soma tem fibras ---
-mas não é o que define o andar.
+\medskip\noindent\textbf{E são três, não quatro --- porque $\N$ é o outro lado.}
+O documento dos naturais di-lo à letra: ali \emph{não há quociente} --- a segunda
+cópia da dobra $F_{2w}=F_w\oplus\sigma F_w$ não é identificada, é
+\emph{multiplicada} por $\sigma$. Mas a razão estrutural é mais simples do que
+isso: \textbf{$\N$ não está do lado onde se identifica}. Ele é o \emph{domínio} ---
+o próprio $I$, que a Def.~\ref{def:objeto} chama ``um segmento inicial de $\N$''
+--- enquanto $\Z$, $\Q$ e $\R$ são construídos por quociente no
+\emph{contradomínio}. E é a ordem total de $\N$ que dá o resto: o operador $S$ da
+Def.~\ref{def:ops} é o \textbf{sucessor}, o tempo é a contagem das suas
+aplicações (Def.~\ref{def:tempo}), e $\zeta$ é a acumulação ao longo dessa ordem.
+A linha de $\N$ na tabela abaixo é, por isso, de outro estatuto: uma realização
+legítima --- a soma tem fibras --- mas não o que define o andar.
 
 \begin{teorema}[os degraus por quociente são realizações]\label{thm:escada}
 Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos

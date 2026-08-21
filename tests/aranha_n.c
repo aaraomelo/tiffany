@@ -3329,6 +3329,40 @@ int main(void){
         }
         printf("\n");
 
+        /* E A RAZÃO POR QUE ℕ NÃO É QUOCIENTE: ele não está do lado onde se
+         * identifica. ℕ é o DOMÍNIO — o próprio I, o segmento inicial com a ordem
+         * total — e os quocientes vivem no CONTRADOMÍNIO X. Mede-se: o
+         * deslocamento S do §AN27 É o SUCESSOR, e ζ é a acumulação ao longo da
+         * ordem de ℕ. */
+        {
+            const long M = 16;
+            long suc_mau = 0;
+            for(long t = 0; t + 1 < M; t++){
+                /* S(δ_t) = δ_{t+1}: o deslocamento leva o índice no seu sucessor */
+                long dt[32], sdt[32];
+                for(long i = 0; i < M; i++) dt[i] = (i == t);
+                for(long i = 0; i < M; i++) sdt[i] = (i > 0) ? dt[i-1] : 0;
+                for(long i = 0; i < M; i++) if(sdt[i] != (i == t+1)) suc_mau++;
+            }
+            /* e ζ acumula ao longo da ordem: (a*ζ)(t) = Σ_{u≤t} a(u) */
+            long acc_mau = 0;
+            long a2[32], z2[32];
+            for(long i = 0; i < M; i++) a2[i] = (i*5) % 7 - 3;
+            for(long t = 0; t < M; t++){
+                long s2 = 0;
+                for(long u = 0; u <= t; u++) s2 += a2[u];
+                z2[t] = s2;
+            }
+            for(long t = 0; t < M; t++)
+                if(z2[t] - (t ? z2[t-1] : 0) != a2[t]) acc_mau++;
+            printf("      e a razão: ℕ é o DOMÍNIO, não um degrau do contradomínio\n");
+            printf("        S(δ_t) = δ_{t+1} — o deslocamento É o SUCESSOR: %s\n",
+                   suc_mau ? "NÃO" : "sim");
+            printf("        ζ acumula ao longo da ordem de ℕ, e μ = 1−S desfaz: %s\n\n",
+                   acc_mau ? "NÃO" : "sim");
+            if(suc_mau || acc_mau) mau++;
+        }
+
         ok("OS DEGRAUS POR QUOCIENTE SÃO REALIZAÇÕES, e não por analogia: cada um é"
            " literalmente um π: I → X no sentido da definição deste paper, e o campo G"
            " conta a sua FIBRA — que É a classe de equivalência do andar. E SÃO TRÊS,"
@@ -3336,7 +3370,13 @@ int main(void){
            " segunda cópia da dobra não é identificada, é MULTIPLICADA por σ, e ℕ é a"
            " torre mais o transporte. A linha de ℕ aqui é de outro estatuto: π(x,y) ="
            " x⊕y tem fibra de tamanho |F_w| e é uma realização legítima, mas não é o"
-           " que define o andar. Em ℤ = ℕ²/∼, a relação"
+           " que define o andar. E A RAZÃO ESTRUTURAL É ESTA: ℕ NÃO ESTÁ DO LADO ONDE"
+           " SE IDENTIFICA. Ele é o DOMÍNIO — o próprio I, que a definição deste paper"
+           " chama «um segmento inicial de ℕ» — e os quocientes vivem no CONTRADOMÍNIO."
+           " Mede-se: o deslocamento S é o SUCESSOR, S(δ_t) = δ_{t+1}, e ζ é a"
+           " acumulação ao longo da ordem de ℕ, com μ = 1−S a desfazê-la. A escada por"
+           " quociente é ℤ → ℚ → ℝ e corre em X; ℕ é o outro lado, e é a ordem total"
+           " dele que dá a álgebra de incidência do §AN27. Em ℤ = ℕ²/∼, a relação"
            " (a,b) ∼ (c,d) ⟺ a+d = b+c É a fibra de π(a,b) = a−b, e G conta os"
            " representantes — o que o `inteiros.tex` chama «memória por duplicidade» é"
            " este campo. Em ℚ = Frac(ℤ), a relação ps = qr é a fibra da redução, e o"

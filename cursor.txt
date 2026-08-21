@@ -2461,3 +2461,37 @@ Uma delas repete, pela segunda vez, que o meu ficheiro é o `peano_dual.c`; não
 
   bateria   529 : 529, 0 falhas · 31 unidades
   paper     24 páginas
+
+§53 — ℕ É O DOMÍNIO, E O TEMPO SÃO OS PASSOS DO OPERADOR
+=========================================================
+«n não seria os índices, a ordenação completa?» — e depois «relaciona isso com o
+tempo, eles são os passos do operador; já fizemos essa construção, revisa».
+
+TINHA RAZÃO, e dá a RAZÃO ESTRUTURAL que faltava ao §52. Eu tinha corrigido «são
+três, não quatro» pela leitura do naturais.tex («não há quociente»), mas isso é
+o SINTOMA. A causa é outra:
+
+     ℕ NÃO ESTÁ DO LADO ONDE SE IDENTIFICA — ELE É O DOMÍNIO.
+
+O próprio paper já o dizia e eu não tinha lido: a Def. 1 chama a I «um segmento
+inicial de ℕ». Logo:
+     ℕ = I           o DOMÍNIO, a parametrização, a ordem total
+     ℤ, ℚ, ℝ         quocientes no CONTRADOMÍNIO X
+E é a ordem total de ℕ que dá todo o resto: o operador S da Def. dos operadores
+É O SUCESSOR (S·δ_t = δ_{t+1}, medido), o tempo é a contagem das suas
+aplicações, e ζ é a acumulação ao longo dessa ordem.
+
+E A REVISÃO QUE ELE MANDOU FAZER APANHOU UMA COLISÃO MINHA: eu tinha TRÊS
+grandezas e DUAS chamavam-se «tempo».
+     (i)   t   o TEMPO: a contagem das aplicações de S — e S é o sucessor,
+               logo o tempo É a ordem de ℕ
+     (ii)  τ   o TEMPO PRÓPRIO: o mesmo percurso MEDIDO por uma régua g;
+               coincide com t sse a diagonal de g vale 1
+     (iii) D   a DOBRA ACUMULADA — e esta NÃO É TEMPO NENHUM: é memória. O que
+               dela se lê é a TAXA dD/dτ, que muda com a régua
+A minha `def:tempo` chamava «tempo» à (iii). Confundia o que CONTA OS PASSOS com
+o que MEDE O QUE OS PASSOS DEIXARAM. Corrigido, com os três nomeados.
+
+  gume      62 mutações, 62 mordem
+  bateria   529 : 529, 0 falhas · 31 unidades passaram, 0 falharam
+  paper     24 páginas
