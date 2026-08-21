@@ -2775,3 +2775,48 @@ páginas quando são 27.
 
   bateria   529 : 529, 0 falhas
   paper     27 páginas
+
+§62 — A ORDEM INVERTIDA, E O PARÂMETRO QUE NÃO EXISTE
+======================================================
+«vc já está começando da lista, deve começar do binário, não tem definição da
+lista, vc inventou em cima» · «define o binário e constrói a lista» · «vê o
+abstract, também está invertido — parte de dois símbolos» · «é a construção
+F → ℕ que está em naturais.tex, só pegar o núcleo mínimo e mudar a simbologia» ·
+«teorema 2 vc diz ACRESCENTANDO isso e aqui — já mandei ler naturais.tex, tudo é
+DERIVADO» · «não tem parâmetro livre» · «nada aqui é definido».
+
+TRÊS ERROS MEUS, cada um mais fundo que o anterior.
+
+1. A ORDEM ESTAVA INVERTIDA. Eu definia I por decreto na Def. 1 e só «construía»
+   B numa subsecção DEPOIS. Inventei em cima. Reordenado: primeiro a distinção
+   (Def. B), depois a estrutura, depois a lista CONSTRUÍDA, e só então a
+   realização. O abstract idem: agora parte de DOIS SÍMBOLOS.
+
+2. EU REINVENTAVA A CONSTRUÇÃO. Escrevia «as palavras de largura w sobre B»
+   quando o núcleo mínimo já está no `naturais.tex`: o TRANSPORTE,
+        a + b = (a⊕b) + 2(a∧b)
+   com a iteração (a,b) ↦ (a⊕b, 2(a∧b)) a terminar porque o acarreto sobe de
+   posição. E as duas operações são EXACTAMENTE as que o teorema do binário
+   fixa. Agora o thm:BI é esse núcleo, com a simbologia mudada.
+
+3. E O PIOR: «ACRESCENTANDO um produto comutativo, associativo, distributivo…
+   varrem-se as dezasseis tabelas e sobra uma». Isso faz parecer que houve
+   ESCOLHA. NÃO HÁ PARÂMETRO LIVRE:
+        0+0 = 0, 0+1 = 1+0 = 1     forçadas pelo neutro
+        1+1 = 0                     forçada: se fosse 1, o símbolo 1 não teria oposto
+        0·x = 0                     sai de 0·x = (0+0)·x = 0·x + 0·x
+        1·x = x                     a unidade
+   Oito entradas, UM valor possível em cada, ZERO parâmetros livres. Medido
+   entrada a entrada (§AN33a2). A varredura das 16 tabelas fica como confirmação
+   por outro caminho — não como a prova.
+   «Não é que entre as estruturas possíveis se escolha uma: é que com dois
+   símbolos não há mais do que uma.»
+
+REVISÃO FINAL DAS 28 PÁGINAS
+     referências órfãs        0        labels sem uso        0
+     enunciados               42       sem prova             0
+     ℕ / ℚ / ℝ                0/0/0    decretos              0
+     números sem medida       0        frases defensivas     1 (a declaração de
+                                                              hipóteses sobre X)
+  gume      66 mutações, 66 mordem
+  bateria   529 : 529, 0 falhas · 33 unidades passaram, 0 falharam

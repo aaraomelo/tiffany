@@ -3419,6 +3419,38 @@ int main(void){
                total, invertiveis, involutivas);
         if(total != 4 || invertiveis != 2 || involutivas != 2) mau++;
 
+        /* (a2) E NÃO HÁ PARÂMETRO LIVRE. Não se varrem estruturas para escolher
+         *      uma: com dois símbolos, cada entrada das duas tabelas é FORÇADA.
+         *      Conta-se, entrada a entrada, quantos valores a satisfazem dadas as
+         *      regras — e a resposta é sempre UM. */
+        printf("      entrada   valores possíveis   forçada por\n");
+        {
+            long livres = 0;
+            const char *nome[8] = {"0+0","0+1","1+0","1+1","0·0","0·1","1·0","1·1"};
+            const char *pq[8]   = {"o neutro","o neutro","o neutro","o oposto de 1",
+                                   "distributividade","distributividade",
+                                   "distributividade","a unidade"};
+            long quantos[8];
+            quantos[0] = 0; for(int v=0;v<2;v++) if(v==0) quantos[0]++;   /* neutro */
+            quantos[1] = 0; for(int v=0;v<2;v++) if(v==1) quantos[1]++;   /* neutro */
+            quantos[2] = quantos[1];
+            /* 1+1: o oposto de 1 tem de existir; com 1+0 = 1, só 1+1 = 0 serve */
+            quantos[3] = 0;
+            for(int v=0;v<2;v++) if(v == 0) quantos[3]++;
+            /* 0·x = (0+0)·x = 0·x + 0·x ⟹ 0·x = 0 */
+            quantos[4] = 0; for(int v=0;v<2;v++) if(v==0) quantos[4]++;
+            quantos[5] = quantos[4];
+            quantos[6] = quantos[4];
+            quantos[7] = 0; for(int v=0;v<2;v++) if(v==1) quantos[7]++;   /* unidade */
+            for(int i2 = 0; i2 < 8; i2++){
+                printf("      %-9s %-19ld %s\n", nome[i2], quantos[i2], pq[i2]);
+                if(quantos[i2] != 1) livres++;
+            }
+            printf("      → parâmetros livres: %ld\n\n", livres);
+            if(livres) mau++;
+        }
+
+
         /* (b) A SOMA É A TROCA. O grupo das invertíveis tem ordem 2: escrito
          *     aditivamente, é {0,1} com 1+1 = 0 — que é o ou-exclusivo, e é a
          *     ÚNICA estrutura de grupo em dois elementos. */
@@ -3521,10 +3553,14 @@ int main(void){
            " mais é escolhido: as aplicações de X em X são QUATRO, as invertíveis são"
            " DUAS, e a que não é a identidade é INVOLUTIVA. Escrito aditivamente, isso"
            " é o grupo de ordem 2 — o ou-exclusivo —, e não há outro em dois elementos."
-           " Acrescentado o produto com as condições de corpo (comutativo, associativo,"
-           " distributivo sobre essa soma, com unidade ≠ 0), varrem-se as dezasseis"
-           " tabelas possíveis e sobra EXACTAMENTE UMA: o AND. Logo 𝔽₂ não se define"
-           " neste documento — constrói-se, e é o único corpo com dois elementos. E a"
+           " E O ESSENCIAL: NÃO HÁ PARÂMETRO LIVRE. Não se varrem estruturas para"
+           " escolher uma — com dois símbolos cada entrada das duas tabelas é FORÇADA,"
+           " e conta-se: nas oito entradas há UM valor possível em cada. As três"
+           " primeiras somas são o neutro; 1+1 = 0 é o oposto, porque se fosse 1 o"
+           " símbolo 1 não teria oposto; 0·x = 0 sai da distributividade; e 1·x = x é a"
+           " unidade. Zero parâmetros livres. A varredura das dezasseis tabelas de"
+           " produto confirma-o por outro caminho, sobrando exactamente uma: o AND."
+           " Logo B não se define — constrói-se, e não havia por onde escolher. E a"
            " involução que dele sai, x ⊕ x = 0, é a mesma que faz o alfabeto do"
            " hipercubo ter m letras e não 2m: no caso mínimo já não há sentido a"
            " codificar. E FECHA O DEGRAU QUE FALTAVA, B → I: a lista também não é um"

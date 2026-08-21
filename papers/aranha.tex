@@ -42,12 +42,14 @@
 \maketitle
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} De um só dado: uma \emph{lista de símbolos} $I$ e a sua
-realização $\pi\colon I\to X$ num conjunto $X$ com igualdade decidível.
-Não se supõe métrica, nem dimensão, nem estrutura algébrica em $X$. A realização
-identifica índices distintos na mesma célula, e essa identificação \emph{é} a
-dobra da trajetória; a \textbf{multiplicidade} $G(x)=\lvert\pi^{-1}(x)\rvert$
-conta-a.
+\textbf{De onde parte.} De \textbf{dois símbolos}. A estrutura que eles admitem é
+única --- soma e produto ficam determinados, não escolhidos ---, e dela sai a
+soma com transporte; a \textbf{lista} $I$ é o objeto finito que daí se obtém. Só
+então entra uma \textbf{realização} $\pi\colon I\to X$ num conjunto $X$ com
+igualdade decidível, e não se supõe métrica, nem dimensão, nem estrutura
+algébrica em $X$. A realização identifica índices distintos na mesma célula;
+essa identificação \emph{é} a dobra, e a \textbf{multiplicidade}
+$G(x)=\lvert\pi^{-1}(x)\rvert$ conta-a.
 
 \medskip\noindent\textbf{Para onde vai.} Para o par de operações que a aranha
 executa, e que são uma inversa da outra. Escrever o campo é a
@@ -78,8 +80,8 @@ não contém, em etapa nenhuma, a identidade de quem construiu --- e é por isso
 que uma \emph{aranha} que passa quatro vezes e quatro \emph{abelhas} que passam
 uma vez deixam o mesmo campo.
 
-\medskip\noindent\textbf{O alcance.} De um só dado --- uma aplicação e a
-igualdade no contradomínio --- saem, com demonstração, o percurso, a memória, a
+\medskip\noindent\textbf{O alcance.} De dois símbolos e de uma aplicação com
+igualdade no contradomínio saem, com demonstração, o percurso, a memória, a
 multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
 E o mesmo mecanismo percorre a escada aritmética que a obra constrói noutros
 documentos --- $B$, depois $I$, depois $I^{2}/{\sim}$, depois as frações, depois
@@ -107,6 +109,7 @@ Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{sec:ge
 Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{thm:multiplicidade}(3) \\
 O que acontece quando volta? & a dobra: $G>1$ & Def.~\ref{def:dobra} \\
 Como se representam os passos? & por uma palavra no alfabeto das arestas & Teor.~\ref{thm:palavra} \\
+O que é o ponto de partida? & uma distinção: dois símbolos & Def.~\ref{def:B} \\
 Como se codifica um finito qualquer? & em $\lceil\log_2 n\rceil$ bits, e não em menos & Teor.~\ref{thm:B},~\ref{thm:BI} \\
 Como se continua sem terminar? & caminhando: cada decisão é finita & §\ref{sec:objeto} \\
 Como se constroem os degraus? & por quociente da caminhada & Teor.~\ref{thm:escada} \\
@@ -120,31 +123,7 @@ E se forem muitos construtores? & o campo não os distingue & Teor.~\ref{thm:age
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O objeto}\label{sec:objeto}
 
-\begin{definicao}[trajetória, realização, multiplicidade]\label{def:objeto}
-Seja $I$ uma \textbf{lista de símbolos}: uma sucessão finita e ordenada
-$I=(i_0\prec i_1\prec\cdots\prec i_N)$ de elementos distinguíveis --- letras,
-pedras, frutos, o que sejam. É a \textbf{parametrização}, e é tudo o que se supõe
-do lado de partida.
-Seja $X$ um conjunto com igualdade decidível. Uma \textbf{realização} é uma
-aplicação
-\[
-\pi\colon I\longrightarrow X ,
-\]
-lida como ``o índice $i$ ocupa a célula $\pi(i)$''. A \textbf{multiplicidade
-geométrica} de $\pi$ é o cardinal da fibra,
-\[
-G(x)=\bigl\lvert\pi^{-1}(x)\bigr\rvert
-=\bigl\lvert\{i\in I:\pi(i)=x\}\bigr\rvert ,
-\]
-finito por $I$ o ser. O \textbf{suporte} de $G$ é
-$\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
-\end{definicao}
-
-\medskip\noindent\textbf{Uma lista enumera-se por ser lista.} Não é preciso
-mais: os símbolos distinguem-se e sucedem-se, e é disso, e só disso, que a
-construção se serve.
-
-\subsection*{De onde vem a lista}
+\subsection*{O ponto de partida: uma distinção}
 
 \noindent Em quatro frases, e cada uma é um resultado abaixo:
 \[
@@ -157,41 +136,69 @@ construção se serve.
 \end{array}}
 \]
 
-\medskip\noindent Nem a lista é um dado. Ela constrói-se a partir de uma só
-distinção, e o percurso é curto.
+\medskip\noindent Define-se \emph{uma distinção}, e constrói-se a lista. É esse
+o percurso, e é curto.
 
-\begin{teorema}[o binário, e é único]\label{thm:B}
-Seja $X$ o menor contradomínio que ainda distingue: $\lvert X\rvert=2$. Então as
-aplicações $X\to X$ são quatro, as invertíveis são duas, e a que não é a
-identidade é \textbf{involutiva}. Escrita aditivamente, essa estrutura é o grupo
-de ordem $2$ --- o ou-exclusivo ---, e é o único em dois elementos.
-Acrescentando um produto comutativo, associativo, distributivo sobre essa soma e
-com unidade $\neq0$, resta \textbf{exatamente uma} tabela: a conjunção. O corpo
-com dois elementos, $B$, é assim construído e é único.
+\begin{definicao}[o binário]\label{def:B}
+$B$ é o conjunto de \textbf{dois símbolos distinguíveis}. É o único dado deste
+documento: uma distinção.
+\end{definicao}
+
+\begin{teorema}[em $B$ não há parâmetro livre]\label{thm:B}
+Em dois símbolos nada fica por decidir. Nomeando $0$ o neutro da soma e $1$ o
+outro símbolo:
+\[
+0+0=0,\qquad 0+1=1+0=1,\qquad 1+1=0,
+\qquad
+0\cdot x=0,\qquad 1\cdot x=x .
+\]
+Cada uma destas igualdades é \textbf{forçada}, e não escolhida --- em particular
+$1+1=0$, donde $x+x=0$ e cada símbolo é o seu próprio oposto. As duas operações
+são as que o cálculo posição a posição usa, e não há outras.
 \end{teorema}
 
 \begin{proof}
-As quatro aplicações são $\{00,01,10,11\}$; as bijetivas são as duas em que as
-imagens diferem, e a não identidade troca os dois elementos, logo tem quadrado
-igual à identidade. Um grupo de ordem $2$ é determinado pela sua tabela, que a
-existência de neutro e inversos fixa. Para o produto, as dezasseis tabelas
-possíveis reduzem-se a uma pelas condições enunciadas.
+As três primeiras somas são a definição de neutro. Para $1+1$: o oposto de $1$
+existe e é um dos dois símbolos; se fosse $0$, viria $1+0=0$, contra $0$ ser
+neutro; logo é $1$, e $1+1=0$. No produto, $0\cdot x=0$ sai da distributividade
+--- $0\cdot x=(0+0)\cdot x=0\cdot x+0\cdot x$ --- e $1\cdot x=x$ é a definição de
+unidade. Ficam determinadas as quatro entradas de cada tabela, sem nenhuma
+escolha por fazer.
 \end{proof}
 
-\begin{teorema}[da distinção à lista]\label{thm:BI}
-As palavras de largura $w$ sobre $B$ são $2^{w}$, a dobra duplica a largura ---
-$\lvert B^{2w}\rvert=\lvert B^{w}\rvert^{2}$ --- e o \textbf{encaixe por
-prefixos} ordena-as totalmente, com cada andar a ser prefixo do seguinte:
+\medskip\noindent Não é que entre as estruturas possíveis se escolha uma: é que
+com dois símbolos \emph{não há mais do que uma}. Toda a construção seguinte
+herda esta ausência de liberdade.
+
+\medskip\noindent\textbf{Construção da lista.} Com $B$ definido e a sua estrutura
+fixada, a lista não precisa de ser dada: constrói-se, e o núcleo mínimo da
+construção é o \emph{transporte} --- a obra fá-lo assim, e aqui só muda a
+simbologia.
+
+\begin{teorema}[a lista, do binário]\label{thm:BI}
+Sobre palavras em $B$, com $\oplus$ e $\wedge$ as duas operações do
+Teor.~\ref{thm:B} aplicadas posição a posição, vale
 \[
-\{0,1\}\subset\{0,\dots,3\}\subset\{0,\dots,15\}\subset\{0,\dots,255\}.
+\boxed{\;a+b=(a\oplus b)+2\,(a\wedge b)\;}
 \]
-A lista $I$ é essa ordem.
+e a iteração $(a,b)\mapsto\bigl(a\oplus b,\,2(a\wedge b)\bigr)$ termina, porque a
+segunda componente sobe de posição a cada passo e a largura é finita. A soma
+assim obtida enumera as palavras, e o \textbf{encaixe por prefixos} ordena os
+andares uns dentro dos outros,
+\[
+\{0,1\}\subset\{0,\dots,3\}\subset\{0,\dots,15\}\subset\{0,\dots,255\},
+\]
+com as palavras de largura $w$ em número de $2^{w}$ e a dobra a duplicar a
+largura. A \textbf{lista} $I$ é essa ordem.
 \end{teorema}
 
 \begin{proof}
-A contagem das palavras é imediata, e a dobra multiplica-a por si própria. O
-encaixe é a restrição das operações de um andar ao anterior, e a ordem que dele
-resulta é total por o ser em cada andar e os andares encaixarem.
+Posição a posição, para $a_j,b_j\in B$ verifica-se nos quatro casos que
+$a_j+b_j=(a_j\oplus b_j)+2(a_j\wedge b_j)$; multiplicando por $2^{j}$ e somando
+vem a identidade. Na iteração, $a\wedge b$ multiplicado por $2$ desloca-se uma
+posição para cima, de modo que ao fim de tantos passos quantos os bits da
+largura a segunda componente é nula. O encaixe é a restrição das operações de um
+andar ao anterior, e a ordem resultante é total.
 \end{proof}
 
 \medskip\noindent Donde a cadeia inteira parte de \emph{uma} distinção:
@@ -270,6 +277,37 @@ aqui, no primeiro uso; onde houver risco, escreve-se ``o número $\pi$''.
 $X$, nem métrica, nem dimensão. Só igualdade. Esta economia não é elegância --- é
 o conteúdo do Teorema~\ref{thm:multiplicidade}, e é o que se paga no
 Teorema~\ref{thm:dimensao}, onde a dimensão finalmente aparece e se vê que
+aparece uma vez só.
+
+\subsection*{A realização, e o que ela perde}
+
+\begin{definicao}[trajetória, realização, multiplicidade]\label{def:objeto}
+Seja $I$ a lista do Teor.~\ref{thm:BI} --- ou qualquer restrição finita dela ---
+e $X$ um conjunto com igualdade decidível. Uma \textbf{realização} é uma
+aplicação
+\[
+\pi\colon I\longrightarrow X ,
+\]
+lida como ``o índice $i$ ocupa a célula $\pi(i)$''. A \textbf{multiplicidade
+geométrica} de $\pi$ é o cardinal da fibra,
+\[
+G(x)=\bigl\lvert\pi^{-1}(x)\bigr\rvert
+=\bigl\lvert\{i\in I:\pi(i)=x\}\bigr\rvert ,
+\]
+finito por $I$ o ser. O \textbf{suporte} de $G$ é
+$\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
+\end{definicao}
+
+\medskip\noindent\textbf{A letra.} $\pi$ é aqui a \textbf{projeção} --- a letra
+padrão do fibrado, e a mesma do $\pi_k$ com que o Maestro desce um andar da
+torre. O \emph{número} $\pi$ aparece na §\ref{sec:serie}, e aparece
+\textbf{construído}. São duas coisas com a mesma letra e a convenção fica dita
+aqui, no primeiro uso; onde houver risco, escreve-se ``o número $\pi$''.
+
+\medskip\noindent Note-se o que \emph{não} está na definição: nem estrutura
+algébrica em $X$, nem métrica, nem dimensão. Só igualdade. Esta economia não é
+elegância --- é o conteúdo do Teorema~\ref{thm:multiplicidade}, e é o que se paga
+no Teorema~\ref{thm:dimensao}, onde a dimensão finalmente aparece e se vê que
 aparece uma vez só.
 
 \begin{definicao}[dobra]\label{def:dobra}
@@ -518,9 +556,10 @@ pelo bit de $\sigma$ obtêm-se as duas cópias e o emparelhamento, como no
 Teor.~\ref{thm:hiper}.
 \end{proof}
 
-\medskip\noindent É a mesma dobra $T+T^{*}$ em três sítios --- a curva da
-§\ref{sec:dragao}, a torre, e o grafo em que a transformada da §\ref{sec:transf}
-vive. O espaço da aranha é o que a dobra constrói.
+\medskip\noindent O Teor.~\ref{thm:espaco} diz, então, que a mesma dobra
+$T+T^{*}$ está em três sítios --- a curva da §\ref{sec:dragao}, a torre, e o
+grafo em que a transformada da §\ref{sec:transf} vive. O espaço da aranha é o que
+a dobra constrói.
 
 \begin{teorema}[as direções de aresta são a base ortonormal]\label{thm:base8}
 As $m$ direções de aresta de $Q_m$ são os $e_k=2^{k}$, e para $m=8$ elas são a
@@ -2062,7 +2101,7 @@ Teor.~\ref{thm:viz-arvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
 passo, nem uma a mais --- o autómato não varre) (leitura a distinguir $G{=}0$ de
 $G{>}0$; gradiente a escolher o mínimo; fronteira $+\infty$ com controlo; e
 $0,1,3,6$ planos com $R^4=\mathrm{id}$);
-Teor.~\ref{thm:base8} §AN24 (Gram $=I$ pelos caracteres; as oito réguas cegas e
+Teor.~\ref{thm:espaco} e \ref{thm:base8} §AN19, §AN24 (Gram $=I$ pelos caracteres; as oito réguas cegas e
 compostas; os $256$ elementos a reconstruírem-se das coordenadas);
 Teor.~\ref{thm:euler} e Cor.~\ref{cor:pik} §AN25 ($b_1=D=335$ no dragão, a
 espiral a reusar arestas, a reta a ser árvore; e $\pi_k$ a truncar);
