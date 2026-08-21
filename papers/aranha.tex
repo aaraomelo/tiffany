@@ -82,7 +82,8 @@ uma vez deixam o mesmo campo.
 igualdade no contradomínio --- saem, com demonstração, o percurso, a memória, a
 multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
 E o mesmo mecanismo percorre a escada aritmética que a obra constrói noutros
-documentos --- $I$, depois $I^{2}/{\sim}$, depois as frações, depois os cortes:
+documentos --- $B$, depois $I$, depois $I^{2}/{\sim}$, depois as frações, depois
+os cortes:
 cada degrau tem a forma da Def.~\ref{def:objeto}, e nos que são construídos por
 quociente é $G$ que conta a classe de equivalência do andar
 (§\ref{sec:escada}).
@@ -117,6 +118,84 @@ $\operatorname{supp}G=\{x\in X: G(x)>0\}=\operatorname{im}\pi$.
 \medskip\noindent\textbf{Uma lista enumera-se por ser lista.} Não é preciso
 mais: os símbolos distinguem-se e sucedem-se, e é disso, e só disso, que a
 construção se serve.
+
+\subsection*{De onde vem a lista}
+
+\noindent Nem a lista é um dado. Ela constrói-se a partir de uma só distinção, e
+o percurso é curto.
+
+\begin{teorema}[o binário, e é único]\label{thm:B}
+Seja $X$ o menor contradomínio que ainda distingue: $\lvert X\rvert=2$. Então as
+aplicações $X\to X$ são quatro, as invertíveis são duas, e a que não é a
+identidade é \textbf{involutiva}. Escrita aditivamente, essa estrutura é o grupo
+de ordem $2$ --- o ou-exclusivo ---, e é o único em dois elementos.
+Acrescentando um produto comutativo, associativo, distributivo sobre essa soma e
+com unidade $\neq0$, resta \textbf{exatamente uma} tabela: a conjunção. O corpo
+com dois elementos, $B$, é assim construído e é único.
+\end{teorema}
+
+\begin{proof}
+As quatro aplicações são $\{00,01,10,11\}$; as bijetivas são as duas em que as
+imagens diferem, e a não identidade troca os dois elementos, logo tem quadrado
+igual à identidade. Um grupo de ordem $2$ é determinado pela sua tabela, que a
+existência de neutro e inversos fixa. Para o produto, as dezasseis tabelas
+possíveis reduzem-se a uma pelas condições enunciadas.
+\end{proof}
+
+\begin{teorema}[da distinção à lista]\label{thm:BI}
+As palavras de largura $w$ sobre $B$ são $2^{w}$, a dobra duplica a largura ---
+$\lvert B^{2w}\rvert=\lvert B^{w}\rvert^{2}$ --- e o \textbf{encaixe por
+prefixos} ordena-as totalmente, com cada andar a ser prefixo do seguinte:
+\[
+\{0,1\}\subset\{0,\dots,3\}\subset\{0,\dots,15\}\subset\{0,\dots,255\}.
+\]
+A lista $I$ é essa ordem.
+\end{teorema}
+
+\begin{proof}
+A contagem das palavras é imediata, e a dobra multiplica-a por si própria. O
+encaixe é a restrição das operações de um andar ao anterior, e a ordem que dele
+resulta é total por o ser em cada andar e os andares encaixarem.
+\end{proof}
+
+\medskip\noindent Donde a cadeia inteira parte de \emph{uma} distinção:
+\[
+\boxed{\;B\;\longrightarrow\;I\;\longrightarrow\;I^{2}/{\sim}\;\longrightarrow\;
+\text{as frações}\;\longrightarrow\;\text{os cortes}\;}
+\]
+e o resto deste documento corre sobre ela.
+
+\medskip\noindent\textbf{Codificar o finito, e subir.} Com $B$ construído,
+\emph{qualquer} objeto finito se representa: um conjunto de $n$ elementos entra
+em $\lceil\log_2 n\rceil$ bits injetivamente, e não entra em menos. A lista não é
+uma codificação escolhida --- é a largura que chega, e é a única.
+
+\medskip\noindent\textbf{E não se começa infinito.} A subida não termina num
+objeto: cada nível parte cada cilindro em dois, o seguinte refina o anterior, e
+cada decisão é \emph{finita}. O infinito é a \textbf{caminhada}, e o rastro dela
+é a dinâmica --- não há fim onde chegar. O que se ganha com esta formulação é
+concreto: duas caminhadas distintas separam-se num passo \emph{finito}, o
+primeiro em que divergem, de modo que nunca é preciso completá-las para as
+distinguir.
+
+\medskip\noindent\textbf{E o que acontece a quem insiste em representar.} Numa
+largura \emph{finita}, o topo liga-se ao fundo: $\max+1=\min$. Realizar mais
+elementos do que a largura comporta identifica-os dois a dois, e o campo lê
+$G=2$ em todas as células. Isto não é defeito da aritmética nem escolha de
+convenção --- é a \textbf{dobra a acontecer na representação}, e não tem jeito.
+Pôr o infinito numa representação finita é o caso extremo: pela Möbius que o traz
+para a aritmética aditiva obtém-se $\infty+1=-1$, e pela mediante
+$\infty\oplus(-1)=0$; ambas demonstradas na obra, e ambas leituras da mesma
+dobra.
+
+\medskip\noindent\textbf{O caso clássico.} $0{,}999\ldots=1$ é o mesmo problema,
+e é sério. Em binário são $0{,}0111\ldots$ e $0{,}1000\ldots$: duas caminhadas
+que \emph{divergem no primeiro passo} e não coincidem em bit nenhum --- nunca se
+encontram, em passo finito algum. Que se declarem iguais é uma identificação da
+\emph{régua}, e as réguas discordam: na ultramétrica estão à distância
+\textbf{máxima}, por terem divergido no topo; na euclidiana, a diferença das
+somas parciais encolhe. A dobra está na representação, e o campo é o que a
+conta.
 
 \medskip\noindent\textbf{Dois alfabetos, que não se confundem.} O de $I$ --- os
 símbolos que se percorrem --- e o das \emph{direções de aresta}
@@ -371,18 +450,28 @@ um emparelhamento perfeito com $2^{m-1}$ arestas. A contagem $m\,2^{m-1}$ sai de
 cada um dos $2^m$ vértices ter grau $m$.
 \end{proof}
 
-\medskip\noindent\textbf{E o espaço não foi escolhido.} Segue-se aqui a
-convenção da construção dos naturais, em que o índice é a \emph{largura em
-bits}: $F_w$ denota $\mathrm{GF}(2^{w})$, e não um corpo de cardinalidade $w$.
-Com ela, o andar seguinte é $F_{2w}=F_w\oplus\sigma F_w$, com
-$\sigma^2=\sigma+\lambda$. Em característica $2$ a soma é o ou-exclusivo
-coordenada a coordenada, logo $(F_{2w},+)\cong\mathbb{F}_2^{\,2w}$ --- isto é,
-$\mathrm{GF}(2^{2w})$ como grupo aditivo é o espaço binário de dimensão $2w$ ---
-e o seu grafo com os geradores canónicos \textbf{é} $Q_{2w}$:
-duas cópias de $F_w$ ligadas pelo emparelhamento $\sigma$. É a mesma dobra
-$T+T^{*}$ em três sítios --- a curva da §\ref{sec:dragao}, a torre, e o grafo em
-que a transformada da §\ref{sec:transf} vive. O espaço da aranha é o que a
-dobra constrói.
+\begin{teorema}[o espaço não é escolhido: a dobra dá o hipercubo]\label{thm:espaco}
+Seja $F_w$ o andar de largura $w$ da construção dos naturais --- $F_w$ denota
+$\mathrm{GF}(2^{w})$, e não um corpo de cardinalidade $w$ ---, com
+$F_{2w}=F_w\oplus\sigma F_w$ e $\sigma^2=\sigma+\lambda$. Então
+\[
+(F_{2w},+)\;\cong\;\mathbb{F}_2^{\,2w},
+\]
+e o grafo de $F_{2w}$ com os geradores canónicos \textbf{é} $Q_{2w}$: duas
+cópias do grafo de $F_w$ ligadas pelo emparelhamento $\sigma$.
+\end{teorema}
+
+\begin{proof}
+Em característica $2$ a soma é o ou-exclusivo coordenada a coordenada, o que dá
+o isomorfismo de grupos aditivos. Os geradores canónicos são os $e_k$, e trocar
+um bit é somar um deles --- que são exatamente as arestas de $Q_{2w}$. Separando
+pelo bit de $\sigma$ obtêm-se as duas cópias e o emparelhamento, como no
+Teor.~\ref{thm:hiper}.
+\end{proof}
+
+\medskip\noindent É a mesma dobra $T+T^{*}$ em três sítios --- a curva da
+§\ref{sec:dragao}, a torre, e o grafo em que a transformada da §\ref{sec:transf}
+vive. O espaço da aranha é o que a dobra constrói.
 
 \begin{teorema}[as direções de aresta são a base ortonormal]\label{thm:base8}
 As $m$ direções de aresta de $Q_m$ são os $e_k=2^{k}$, e para $m=8$ elas são a
@@ -1956,6 +2045,12 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
+Teor.~\ref{thm:B} e \ref{thm:BI} §AN33 (as quatro aplicações, as duas
+invertíveis e involutivas, a única tabela de produto em dezasseis, e o encaixe
+por prefixos);
+a codificação e a subida §AN34 ($\lceil\log_2 n\rceil$ bits para $n$ de $1$ a
+$64$ e nenhum a menos; os cilindros a refinarem; e duas caminhadas a separarem-se
+num passo finito);
 Teor.~\ref{thm:escada} §AN32 (os quatro andares, com $\sum G=\abs{I}$, a fibra a
 ser a classe e o $k=1$ a ser o canónico);
 Teor.~\ref{thm:agentes} §AN31 (um agente com $4$ voltas e $4$ agentes com uma:
@@ -1997,7 +2092,7 @@ Teor.~\ref{thm:periodo} ($\mu$ e $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          postos $1$ a $4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN32;
+        {\code{tests/aranha\_n.c} §AN1--§AN34;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 

@@ -2656,3 +2656,57 @@ O QUE FICA DE ℤ, e é legítimo: o ANEL DOS COEFICIENTES — ℤ[X] (o anel de
 
   bateria   529 : 529, 0 falhas
   paper     25 páginas
+
+§59 — A FUNDAÇÃO FECHOU: B → I, e o infinito é a caminhada
+===========================================================
+Sequência de ordens, cada uma a apertar mais: «falta construir 𝔽₂, ele é o
+binário, precisa derivar da definição 1» · «não é definição, precisa CONSTRUIR do
+binário» · «é justamente a construção dos naturais — falta B → I» · «com o
+binário você constrói qualquer objecto finito que representa por I» · «essa é a
+ideia: CODIFICAR O FINITO E SUBIR AO INFINITO» · «não começa infinito, o infinito
+é sempre uma CAMINHADA, o rastro é a dinâmica, NUNCA CHEGA» · «não é aberração, é
+problema de REPRESENTAÇÃO, e é a DOBRA que tem de acontecer — não tem jeito» · «o
+clássico 0.999… = 1 é um problema de representação, e é sério».
+
+E antes disso: «entre o teo 9 e 10 tem outro na observação» — tinha razão, havia
+um teorema enfiado numa nota («o espaço não foi escolhido»): (F_2w,+) ≅ 𝔽₂^2w e o
+grafo É Q_2w. Promovido, com prova.
+
+𝔽₂ CONSTRUÍDO, NÃO DEFINIDO (§AN33). No menor contradomínio que ainda distingue,
+|X| = 2, nada mais é escolhido: as aplicações X→X são QUATRO, as invertíveis
+DUAS, e a que não é a identidade é INVOLUTIVA. Aditivamente é o grupo de ordem 2
+— o XOR — e não há outro. Com o produto (comutativo, associativo, distributivo,
+unidade ≠ 0), varrem-se as DEZASSEIS tabelas e sobra EXACTAMENTE UMA: o AND.
+
+E O DEGRAU B → I, que faltava: a lista também não é um dado. As palavras de
+largura w sobre B são 2^w, a dobra duplica — |B^2w| = |B^w|² — e o ENCAIXE POR
+PREFIXOS ordena-as totalmente: {0,1} ⊂ {0..3} ⊂ {0..15} ⊂ {0..255}. A LISTA É
+ESSA ORDEM. A cadeia parte de UMA distinção:
+     B → I → I²/∼ → as fracções → os cortes
+
+CODIFICAR O FINITO (§AN34): qualquer conjunto de n elementos entra em ⌈log₂ n⌉
+bits injectivamente, varrido n de 1 a 64, e NÃO ENTRA EM MENOS. A lista não é uma
+codificação escolhida — é a única largura que chega.
+
+E SUBIR — com a formulação corrigida por ele, que é a que importa:
+     NÃO SE COMEÇA INFINITO, E NÃO SE CHEGA LÁ.
+     O infinito é uma CAMINHADA que não termina; o rastro é a dinâmica.
+Eu tinha escrito «o objecto do limite é a sucessão» — o que pressupõe o limite
+atingido. Não há objecto no fim porque não há fim. O que se mede é o mensurável:
+cada nível parte o cilindro em dois, o seguinte refina o anterior, cada decisão é
+FINITA. E duas caminhadas separam-se num passo FINITO — nunca é preciso chegar.
+
+E A DOBRA DA REPRESENTAÇÃO, que não tem jeito: numa largura finita max+1 = min, e
+realizar mais elementos do que a largura comporta identifica-os — G = 2 em todas
+as células (w de 2 a 5). ∞+1 = −1 é o caso extremo, e as duas leituras da casa
+(Möbius: −1; mediante: 0) são duas leituras da MESMA dobra.
+
+O CLÁSSICO, MEDIDO: 0.0111… contra 0.1000… — o 0.999… = 1 em binário. As duas
+caminhadas DIVERGEM NO PRIMEIRO PASSO e não coincidem em NENHUM dos vinte bits.
+Nunca se encontram. Que se declarem iguais é identificação da RÉGUA, e as réguas
+discordam: na ULTRAMÉTRICA estão à distância MÁXIMA (divergiram no topo); na
+euclidiana a diferença encolhe. A dobra está na representação, e o campo conta-a.
+
+  gume      65 mutações, 65 mordem
+  bateria   529 : 529, 0 falhas · 33 unidades passaram, 0 falharam
+  paper     26 páginas

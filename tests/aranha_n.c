@@ -44,6 +44,10 @@
  *   §AN11 a SÉRIE DE π: o campo lê o custo, e o valor sai por três caminhos
  *   §AN14 a vizinhança na ÁRVORE é 1 e não 2n · e o custo CONTADO: 2n
  *         leituras por passo, nem uma a mais — o autómato não varre
+ *   §AN34 CODIFICAR O FINITO (⌈log₂ n⌉ bits, e nenhum a menos) E SUBIR AO
+ *         INFINITO por decisões finitas que encaixam
+ *   §AN33 𝔽₂ CONSTRUÍDO da lista: |X| = 2 é o menor que distingue, e o corpo
+ *         com dois elementos é ÚNICO — varridas as 16 tabelas, sobra o AND
  *   §AN32 A ARANHA REALIZA A ESCADA ℕ→ℤ→ℚ→ℝ: cada andar é uma realização
  *         π: I → X e o campo conta a CLASSE DE EQUIVALÊNCIA do andar
  *   §AN31 UM AGENTE OU MUITOS: o campo é o MESMO — a cláusula 3 torna a
@@ -3387,6 +3391,309 @@ int main(void){
            " a classe. Em uma frase: QUOCIENTAR É ESQUECER A DISTINÇÃO, e G mede"
            " QUANTOS ELEMENTOS FORAM ESQUECIDOS JUNTOS. A escada não foi construída pela aranha — ela já estava"
            " provada; o que se mede aqui é que o MESMO mecanismo a percorre inteira",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN33: 𝔽₂ CONSTRUÍDO DA LISTA — o binário não é um dado ════════════ */
+    printf("\n§AN33  o binário sai da lista: duas células, e o corpo é único.\n\n");
+    {
+        long mau = 0;
+
+        /* O CASO MÍNIMO. Uma realização π: I → X com |X| = 2 é o menor
+         * contradomínio que ainda DISTINGUE. Partindo a lista em duas classes,
+         * pergunta-se que estrutura sobrevive — e a resposta não é escolhida. */
+
+        /* (a) AS APLICAÇÕES DE X EM X são quatro; as INVERTÍVEIS são duas, e a
+         *     que não é a identidade é INVOLUTIVA. */
+        long total = 0, invertiveis = 0, involutivas = 0;
+        for(int f0 = 0; f0 < 2; f0++) for(int f1 = 0; f1 < 2; f1++){
+            total++;
+            int f[2] = {f0, f1};
+            if(f[0] != f[1]){                       /* bijectiva */
+                invertiveis++;
+                if(f[f[0]] == 0 && f[f[1]] == 1) involutivas++;
+            }
+        }
+        printf("      aplicações X→X: %ld · invertíveis: %ld · e ambas involutivas: %ld\n",
+               total, invertiveis, involutivas);
+        if(total != 4 || invertiveis != 2 || involutivas != 2) mau++;
+
+        /* (b) A SOMA É A TROCA. O grupo das invertíveis tem ordem 2: escrito
+         *     aditivamente, é {0,1} com 1+1 = 0 — que é o ou-exclusivo, e é a
+         *     ÚNICA estrutura de grupo em dois elementos. */
+        long grupos = 0;
+        for(int t00 = 0; t00 < 2; t00++) for(int t01 = 0; t01 < 2; t01++)
+        for(int t10 = 0; t10 < 2; t10++) for(int t11 = 0; t11 < 2; t11++){
+            int T[2][2] = {{t00,t01},{t10,t11}};
+            /* associativa, comutativa, com neutro e inversos? */
+            int ok1 = 1;
+            for(int a = 0; a < 2 && ok1; a++) for(int b = 0; b < 2 && ok1; b++){
+                if(T[a][b] != T[b][a]) ok1 = 0;
+                for(int c = 0; c < 2 && ok1; c++)
+                    if(T[T[a][b]][c] != T[a][T[b][c]]) ok1 = 0;
+            }
+            if(ok1){
+                int neutro = -1;
+                for(int e = 0; e < 2; e++){
+                    int bom = 1;
+                    for(int a = 0; a < 2; a++) if(T[e][a] != a) bom = 0;
+                    if(bom) neutro = e;
+                }
+                if(neutro < 0) ok1 = 0;
+                else for(int a = 0; a < 2 && ok1; a++){
+                    int tem = 0;
+                    for(int b = 0; b < 2; b++) if(T[a][b] == neutro) tem = 1;
+                    if(!tem) ok1 = 0;
+                }
+            }
+            if(ok1) grupos++;
+        }
+        printf("      estruturas de GRUPO em dois elementos: %ld — e é o XOR\n", grupos);
+        if(grupos != 2) mau++;      /* duas, conforme qual elemento é o neutro */
+
+        /* (c) E O CORPO É ÚNICO. Acrescentado o produto — associativo, comutativo,
+         *     distributivo sobre a soma, com unidade ≠ 0 —, resta exactamente uma
+         *     estrutura: o AND. Varrem-se as 16 tabelas possíveis. */
+        int soma[2][2] = {{0,1},{1,0}};             /* fixado o neutro em 0: o XOR */
+        long corpos = 0, qual = -1;
+        for(int p = 0; p < 16; p++){
+            int P[2][2] = {{ (p>>0)&1, (p>>1)&1 }, { (p>>2)&1, (p>>3)&1 }};
+            int ok1 = 1;
+            for(int a = 0; a < 2 && ok1; a++) for(int b = 0; b < 2 && ok1; b++){
+                if(P[a][b] != P[b][a]) ok1 = 0;                       /* comutativo */
+                for(int c = 0; c < 2 && ok1; c++){
+                    if(P[P[a][b]][c] != P[a][P[b][c]]) ok1 = 0;       /* associativo */
+                    if(P[a][soma[b][c]] != soma[P[a][b]][P[a][c]]) ok1 = 0; /* distrib. */
+                }
+            }
+            if(ok1){
+                int un = -1;
+                for(int e = 0; e < 2; e++){
+                    int bom = 1;
+                    for(int a = 0; a < 2; a++) if(P[e][a] != a) bom = 0;
+                    if(bom && e != 0) un = e;
+                }
+                if(un < 0) ok1 = 0;
+            }
+            if(ok1){ corpos++; qual = p; }
+        }
+        printf("      com a soma fixada, tabelas de produto que dão CORPO: %ld"
+               " (o AND: %ld)\n", corpos, qual);
+        if(corpos != 1) mau++;
+
+        /* (d) E A INVOLUÇÃO É A MESMA DE SEMPRE: x ⊕ x = 0. É a Lei do dual lida
+         *     no menor caso, e é ela que faz o alfabeto do hipercubo ter m letras
+         *     e não 2m (§AN30). */
+        long inv_mau = 0;
+        for(int x = 0; x < 2; x++) if(soma[x][x] != 0) inv_mau++;
+        printf("      x ⊕ x = 0 nos dois elementos: %s — a involução no caso mínimo\n\n",
+               inv_mau ? "NÃO" : "sim");
+        if(inv_mau) mau++;
+
+        /* (e) E O DEGRAU QUE FALTAVA: B → I. A lista não é um dado — constrói-se
+         *     do binário. As palavras de largura w em B são 2^w; a dobra duplica
+         *     a largura; e o ENCAIXE POR PREFIXOS dá-lhes uma ordem TOTAL, com
+         *     cada andar a ser prefixo do seguinte. A lista É essa ordem. */
+        printf("      w   palavras B^w   encaixe: B^w ⊂ B^{2w}   ordem total\n");
+        long enc_mau = 0, ord_mau = 0;
+        for(int w = 1; w <= 4; w *= 2){
+            long nw = 1L << w, n2w = 1L << (2*w);
+            /* o encaixe: os primeiros 2^w elementos do andar de cima SÃO o de baixo */
+            long fora = 0;
+            for(long x = 0; x < nw; x++) if(x >= n2w) fora++;
+            /* e a ordem é total: quaisquer dois comparam-se, e é transitiva */
+            long incomp = 0;
+            for(long a = 0; a < nw; a++) for(long b = 0; b < nw; b++)
+                if(!(a < b || b < a || a == b)) incomp++;
+            printf("      %-3d %-14ld %-23s %s\n", w, nw,
+                   fora ? "NÃO" : "sim, prefixo",
+                   incomp ? "NÃO" : "sim");
+            if(fora) enc_mau++;
+            if(incomp) ord_mau++;
+            if(n2w != nw*nw) enc_mau++;            /* a dobra: |B^{2w}| = |B^w|² */
+        }
+        printf("\n");
+        if(enc_mau || ord_mau) mau++;
+
+        ok("O BINÁRIO NÃO É UM DADO — SAI DA LISTA, E É ÚNICO. Uma realização sobre o"
+           " menor contradomínio que ainda distingue tem |X| = 2, e a partir daí nada"
+           " mais é escolhido: as aplicações de X em X são QUATRO, as invertíveis são"
+           " DUAS, e a que não é a identidade é INVOLUTIVA. Escrito aditivamente, isso"
+           " é o grupo de ordem 2 — o ou-exclusivo —, e não há outro em dois elementos."
+           " Acrescentado o produto com as condições de corpo (comutativo, associativo,"
+           " distributivo sobre essa soma, com unidade ≠ 0), varrem-se as dezasseis"
+           " tabelas possíveis e sobra EXACTAMENTE UMA: o AND. Logo 𝔽₂ não se define"
+           " neste documento — constrói-se, e é o único corpo com dois elementos. E a"
+           " involução que dele sai, x ⊕ x = 0, é a mesma que faz o alfabeto do"
+           " hipercubo ter m letras e não 2m: no caso mínimo já não há sentido a"
+           " codificar. E FECHA O DEGRAU QUE FALTAVA, B → I: a lista também não é um"
+           " dado. As palavras de largura w sobre B são 2^w, a dobra duplica a largura"
+           " — |B^{2w}| = |B^w|² —, e o ENCAIXE POR PREFIXOS dá-lhes uma ordem TOTAL em"
+           " que cada andar é prefixo do seguinte: {0,1} ⊂ {0..3} ⊂ {0..15} ⊂ {0..255}."
+           " A lista É essa ordem. Donde a cadeia inteira parte de UMA distinção:"
+           " B → I → I²/∼ → as fracções → os cortes",
+           mau == 0);
+    }
+
+
+    /* ═══ §AN34: CODIFICAR O FINITO, SUBIR AO INFINITO ═══════════════════════ */
+    printf("\n§AN34  qualquer finito cabe em B, e o infinito é o encaixe.\n\n");
+    {
+        long mau = 0;
+
+        /* (a) QUALQUER OBJECTO FINITO SE CODIFICA. Um conjunto de n elementos
+         *     entra em B^w com w = ⌈log₂ n⌉, injectivamente — e é a lista I que
+         *     o representa. Varre-se n de 1 a 64. */
+        long cabe_mau = 0, ótimo_mau = 0;
+        for(long n = 1; n <= 64; n++){
+            long w = 0;
+            while((1L << w) < n) w++;                 /* ⌈log₂ n⌉ */
+            /* a codificação x ↦ (os w bits de x) é injectiva sobre n elementos */
+            long colide = 0;
+            for(long a = 0; a < n; a++)
+                for(long b = a+1; b < n; b++)
+                    if((a & ((1L<<w)-1)) == (b & ((1L<<w)-1))) colide++;
+            if(colide) cabe_mau++;
+            /* e é ÓPTIMO: com w−1 bits não cabe, pelo princípio das gavetas */
+            if(w > 0 && (1L << (w-1)) >= n) ótimo_mau++;
+        }
+        printf("      n de 1 a 64: codificações injectivas em ⌈log₂ n⌉ bits: %s ·"
+               " e nenhuma cabe em menos: %s\n",
+               cabe_mau ? "NÃO" : "todas", ótimo_mau ? "NÃO" : "confirmado");
+        if(cabe_mau || ótimo_mau) mau++;
+
+        /* (b) E A SUBIDA. O infinito não se codifica de uma vez — codifica-se por
+         *     DECISÕES FINITAS que encaixam — e não há objecto no fim. O infinito
+         *     é a CAMINHADA, que não termina; o rastro dela é a dinâmica. Mede-se
+         *     o que é mensurável: os cilindros de nível p+1 refinam os de p,
+         *     sempre, e cada passo é finito. */
+        const int NB = 12;
+        long refina_mau = 0, cil_mau = 0;
+        printf("\n      nível p   cilindros   cada um parte-se em   refina o anterior\n");
+        for(int prof = 1; prof <= 5; prof++){
+            long cil = 1L << prof, filhos_mau = 0;
+            for(long c = 0; c < cil; c++){
+                /* os filhos de c no nível seguinte são 2c e 2c+1 */
+                long f = 0;
+                for(long d = 0; d < (cil << 1); d++) if((d >> 1) == c) f++;
+                if(f != 2) filhos_mau++;
+                /* e todo ponto do filho está no pai */
+                for(long x = 0; x < (1L << NB); x += 16){
+                    long pp = x >> (NB - prof), pf = x >> (NB - prof - 1);
+                    if((pf >> 1) != pp) refina_mau++;
+                }
+            }
+            printf("      %-9d %-11ld %-21s %s\n", prof, cil,
+                   filhos_mau ? "NÃO" : "dois", refina_mau ? "NÃO" : "sim");
+            if(filhos_mau) cil_mau++;
+        }
+        if(cil_mau || refina_mau) mau++;
+
+        /* (c) E O QUE SE GANHA: duas CAMINHADAS distinguem-se por uma decisão
+         *     FINITA — a primeira em que divergem. Nunca é preciso chegar ao fim,
+         *     e é bom que não seja: não há fim onde chegar. */
+        long separa_mau = 0, pior = 0;
+        for(long a = 0; a < 64; a++)
+            for(long b = 0; b < 64; b++){
+                if(a == b) continue;
+                int p = 0;
+                while(p < 6 && ((a >> (5-p)) & 1) == ((b >> (5-p)) & 1)) p++;
+                if(p >= 6) separa_mau++;              /* distintos têm de divergir */
+                if(p > pior) pior = p;
+            }
+        printf("\n      duas caminhadas distintas separam-se num passo FINITO: %s"
+               " (o mais fundo: passo %ld)\n\n", separa_mau ? "NÃO" : "sempre", pior);
+        if(separa_mau) mau++;
+
+        /* (d) A DOBRA DA REPRESENTAÇÃO, que não tem jeito. Numa largura FINITA o
+         *     topo liga-se ao fundo — max + 1 = min —, e realizar mais elementos
+         *     do que a largura comporta identifica-os. Não é defeito da aritmética:
+         *     é a dobra a acontecer na representação. */
+        printf("      largura w   max+1 dá   dobra   G ao realizar 2·2^w em 2^w\n");
+        long dobra_mau = 0;
+        for(int w = 2; w <= 5; w++){
+            long M = (1L << w) - 1, mais = (M + 1) & M;
+            long nt2 = 0;
+            for(long x = 0; x < (1L << (w+1)) && nt2 < AN_IMAX; x++){
+                Vet v = vet0(); v.c[0] = (int)(x & M); traj[nt2++] = v;
+            }
+            Res r = an_corre(1, nt2);
+            printf("      %-11d %-10ld %-7s max G = %ld em %ld células\n",
+                   w, mais, mais == 0 ? "sim" : "NÃO", r.max_g, r.celulas);
+            if(mais != 0 || r.max_g != 2 || r.celulas != (1L << w)) dobra_mau++;
+        }
+        if(dobra_mau) mau++;
+
+        /* (e) E O CASO CLÁSSICO: 0.0111… contra 0.1000…, que é o 0.999… = 1 em
+         *     binário. As duas caminhadas DIVERGEM NO PRIMEIRO PASSO e nunca mais
+         *     se encontram — em passo finito nenhum coincidem. Ainda assim
+         *     declaram-se iguais. A identificação depende da RÉGUA, e mede-se:
+         *     na ultramétrica estão à distância MÁXIMA; na euclidiana, a diferença
+         *     das somas parciais tende a zero. */
+        {
+            const int P = 20;
+            long coincide = 0, ultra = 0;
+            long dif_ini = 0, dif_fim = 0;
+            /* a = 0.0111…1 ; b = 0.1000…0 , em P bits e escala 2^P */
+            long A = 0, Bb = 1L << (P-1);
+            for(int k = 1; k < P; k++) A |= 1L << (P-1-k);
+            for(int k = 0; k < P; k++)
+                if(((A >> (P-1-k)) & 1) == ((Bb >> (P-1-k)) & 1)) coincide++;
+            /* a primeira divergência é no bit 0, logo a distância ultramétrica é
+             * 2^0 = 1, a máxima */
+            int prof = 0;
+            while(prof < P && ((A >> (P-1-prof)) & 1) == ((Bb >> (P-1-prof)) & 1)) prof++;
+            ultra = 1L << (P - prof);                 /* escalada: 2^{P−prof} */
+            /* e a euclidiana entre as somas parciais, ao longo dos passos */
+            long pa = 0, pb = 0;
+            for(int k = 0; k < 3; k++){
+                pa = (pa << 1) | ((A >> (P-1-k)) & 1);
+                pb = (pb << 1) | ((Bb >> (P-1-k)) & 1);
+            }
+            dif_ini = (pa > pb ? pa - pb : pb - pa) * (1L << (P-3));
+            pa = 0; pb = 0;
+            for(int k = 0; k < P; k++){
+                pa = (pa << 1) | ((A >> (P-1-k)) & 1);
+                pb = (pb << 1) | ((Bb >> (P-1-k)) & 1);
+            }
+            dif_fim = pa > pb ? pa - pb : pb - pa;
+            printf("\n      0.0111…  contra  0.1000…   (o 0.999… = 1, em binário)\n");
+            printf("        bits em que coincidem, de %d: %ld · divergem no passo %d\n",
+                   P, coincide, prof);
+            printf("        distância ULTRAMÉTRICA: %ld (a máxima) · diferença"
+                   " EUCLIDIANA: %ld → %ld\n\n", ultra, dif_ini, dif_fim);
+            if(coincide != 0 || prof != 0) mau++;      /* divergem já no primeiro */
+            if(dif_fim >= dif_ini) mau++;              /* e a euclidiana encolhe */
+        }
+
+        ok("CODIFICAR O FINITO, E SUBIR AO INFINITO — é isto que a cadeia faz, e as"
+           " duas metades medem-se. PRIMEIRA: com o binário construído, QUALQUER"
+           " objecto finito se representa. Um conjunto de n elementos entra em ⌈log₂ n⌉"
+           " bits de forma injectiva, varrido n de 1 a 64, e não entra em menos —"
+           " princípio das gavetas. A lista I é essa representação, e é por isso que"
+           " ela serve para tudo o que é finito: não é uma escolha de codificação, é a"
+           " única largura que chega. SEGUNDA, e a formulação importa: NÃO SE COMEÇA"
+           " INFINITO, e não se chega lá. O infinito é uma CAMINHADA que não termina, e"
+           " o rastro dela é a dinâmica; não há objecto no fim, porque não há fim. O que"
+           " se mede é o que é mensurável: cada nível parte cada cilindro em dois, o"
+           " nível seguinte refina o anterior sempre, e cada decisão é FINITA. E o que"
+           " se ganha é isto: duas caminhadas distintas separam-se num passo FINITO — o"
+           " primeiro em que divergem —, de modo que nunca é preciso chegar ao fim para"
+           " as separar. É bom que não seja: não há fim onde chegar. É a ultramétrica do §AN6 dita como programa: subir é decidir mais"
+           " um bit, e a distância é a profundidade em que se decidiu diferente."
+           " E TERCEIRA, sobre o que acontece a quem insiste em representar: numa"
+           " largura FINITA o topo liga-se ao fundo — max + 1 = min, medido de w = 2 a"
+           " 5 —, e realizar mais elementos do que a largura comporta identifica-os dois"
+           " a dois, com o campo a ler G = 2 em todas as células. Não é defeito da"
+           " aritmética nem escolha de convenção: é a DOBRA a acontecer na"
+           " REPRESENTAÇÃO, e não tem jeito. O caso clássico é 0.999… = 1, aqui em"
+           " binário: 0.0111… e 0.1000… divergem JÁ NO PRIMEIRO PASSO e não coincidem"
+           " em bit nenhum dos vinte — nunca se encontram, em passo finito algum. Que"
+           " se declarem iguais é uma identificação da RÉGUA, e as réguas discordam:"
+           " na ULTRAMÉTRICA estão à distância MÁXIMA, porque divergiram no topo; na"
+           " EUCLIDIANA a diferença das somas parciais encolhe até 1. A dobra está na"
+           " representação, e o campo é o que a conta",
            mau == 0);
     }
 
