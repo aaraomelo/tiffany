@@ -560,8 +560,17 @@ static long   undo_n = 0;
 static int    undo_em_tx = 0;
 static int    undo_cheio = 0;
 static void mem_grava(unsigned slot, Word w){
-    if(slot >= S_CANAL){ canal_grava(slot, w); return; }
+    /* A ORDEM É A DO `mem_le`, E TEM DE SER.
+     *
+     * S_POOL = S_CANAL + 100000, logo o pool está ACIMA do canal. O `mem_le`
+     * pergunta primeiro pelo pool e só depois pelo canal; aqui perguntava-se ao
+     * contrário, de modo que um slot do pool satisfazia `slot >= S_CANAL` e ia
+     * para o canal — ESCREVIA-SE NUM SÍTIO E LIA-SE DE OUTRO. A ida não guardava
+     * a volta, que é a segunda equação do operador (∂x · x = 1): as duas metades
+     * de um par têm de decidir pelo mesmo critério, e a maneira de o garantir é
+     * a ordem ser a mesma nas duas. */
     if(slot >= S_POOL){ pool_grava(slot, w); return; }
+    if(slot >= S_CANAL){ canal_grava(slot, w); return; }
     /* dentro de uma transacção, o que se vai colar por cima fica guardado */
     if(undo_em_tx){
         if(undo_n < UNDO_MAX){
