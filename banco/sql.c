@@ -175,6 +175,22 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_COND    24         /* 24..39 o resultado de cada condição (0 ou 1)            */
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
 #define S_UME     48         /* o "um" no campo .e — para incrementar nrows              */
+/* O nrows SUBIU A TORRE: dezasseis bits, num slot próprio.
+ *
+ * Vivia no campo `.e` do S_CAT, que é UM BYTE — e o `nrows++` somava 1 a esse
+ * campo pela ISA. Ao chegar a 255 dava a volta: uma tabela com 300 linhas
+ * respondia 44 (300 mod 256) ao SELECT, ao ORDER BY e ao count. O banco PERDIA
+ * dados sem uma queixa. Não se pode usar o ADD16 no S_CAT porque o transporte
+ * atravessaria do nrows para o ncols, que é precisamente o que o comentário do
+ * enum avisa; então o coeficiente que cresce SOBE, como manda o `word_isa.h`
+ * («coef. que crescem sobem a torre»): sai do par do catálogo e passa a ocupar
+ * os dois componentes de um slot só seu, somado com OP_ADD16. */
+#define S_NR      69         /* nrows em 16 bits (baixo, alto) — o par inteiro. 69..71
+                              * é a folga entre S_VA (68) e S_EXPR (72); pus isto em 9 à
+                              * primeira e 9 é S_K[1], a constante da segunda condição —
+                              * o nrows nascia em 258. O mapa está declarado por
+                              * INTERVALOS logo acima, e é preciso lê-los.              */
+#define S_UM16    70         /* a constante 1 para o OP_ADD16 do nrows                   */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
 /* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver docs/TOOLKIT.md).
  *
@@ -533,6 +549,52 @@ static void mem_grava(unsigned slot, Word w){
     }
     slot_mem_grava(fmem, slot * 2u,     w.total);
     slot_mem_grava(fmem, slot * 2u + 1u, w.e);
+}
+
+/* O NROWS, LIDO E ESCRITO NO PAR.
+ *
+ * `S_NR` guarda-o nos dois componentes — baixo e alto —, o que dá 65535. O
+ * tecto real é outro e menor: o bitmap de vivos ocupa S_VIVO..S_VIVO+511, logo
+ * uma tabela comporta 512 linhas e é isso que se declara. Cheia, o INSERT
+ * RECUSA; antes, passar de 255 não recusava nada — dava a volta e a tabela
+ * respondia com o resto.
+ *
+ * MIGRAÇÃO: uma base gravada antes tem o nrows no `.e` do catálogo e o S_NR a
+ * zero. Nesse caso adopta-se o valor antigo, uma vez. É a volta: o formato novo
+ * lê o que o velho escreveu, em vez de o dar por perdido. */
+/* O TECTO É O MENOR DOS DOIS: o bitmap do resultado (S_MATCH..S_MATCH+255) tem
+ * 256 slots e o de vivos (S_VIVO..S_VIVO+511) tem 512. Manda o menor, senão a
+ * linha 257 escreve o seu match por cima do primeiro vivo. */
+/* O PAR, LIDO E ESCRITO COMO UM NÚMERO DE DEZASSEIS BITS.
+ *
+ * `Word` é {Word8 total, e} — DOIS bytes. Ler `.total` é ler METADE. Estas duas
+ * funções existem porque o mesmo defeito apareceu em cinco sítios deste
+ * ficheiro (o valor da célula, o ponteiro da zona de texto, o contador de nós
+ * da cifra, o contador de nós da ordem e o do count): todo o slot que guarde um
+ * ENDEREÇO, um CONTADOR ou um ÍNDICE passa por aqui. */
+static unsigned par_le(unsigned slot){
+    Word w = mem_le(slot);
+    return (unsigned)((unsigned long)w.total | ((unsigned long)w.e << 8));
+}
+static void par_grava(unsigned slot, unsigned v){
+    Word w = { (Word8)(v & 255u), (Word8)((v >> 8) & 255u) };
+    mem_grava(slot, w);
+}
+
+#define NR_MAX 256u
+
+static long cat_nrows(void){
+    Word w = mem_le(S_NR);
+    long n = (long)((unsigned long)w.total | ((unsigned long)w.e << 8));
+    if(n == 0){
+        long velho = mem_le(S_CAT).e;          /* base gravada antes do par */
+        if(velho > 0) return velho;
+    }
+    return n;
+}
+static void cat_poe_nrows(long n){
+    Word w = { (Word8)((unsigned long)n & 255u), (Word8)(((unsigned long)n >> 8) & 255u) };
+    mem_grava(S_NR, w);
 }
 
 /* a transacção: abrir, desfazer, confirmar */
@@ -1358,6 +1420,7 @@ static int cria(const char *resto){
     emit1(OP_HALT);
     rodar(pc_emit);
     Word cat = mem_le(S_CAT); cat.e = 0; mem_grava(S_CAT, cat); /* nrows = 0 */
+    cat_poe_nrows(0);                                           /* e no par, que é onde vive */
     for(long j = 0; j < ncols && j < 8; j++){
         Word wc; wc.total = corpo[j]; wc.e = parm[j];
         mem_grava(S_CORPO + (unsigned)j, wc);
@@ -1387,11 +1450,27 @@ static int insere(const char *resto){
     if(!ident(&p, nome, sizeof nome)) return 0;
     if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
     if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
+    /* O TECTO DA TABELA, DECLARADO E VERIFICADO.
+     *
+     * O bitmap do resultado ocupa S_MATCH..S_MATCH+255 e o slot seguinte é o
+     * S_VIVO: com a linha 257, `mem_grava(S_MATCH + 256)` escrevia no bitmap
+     * de VIVOS e corrompia-o. Antes disto nada recusava — o nrows dava a volta
+     * aos 256 e a tabela respondia com o resto, de modo que 300 linhas
+     * inseridas devolviam 44 ao SELECT. Perder dados em silêncio é o pior
+     * desfecho; recusar é honesto, e o tecto fica dito em vez de descoberto. */
+    if(cat_nrows() >= (long)NR_MAX){
+        printf("erro: a tabela «%s» tem o máximo de %u linhas — RECUSADO.\n", nome, NR_MAX);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "tabela cheia: %u linhas e o bitmap do resultado nao comporta mais",
+                     NR_MAX); }
+        return 0;
+    }
     if(!palavra(&p, "VALUES")) return 0;
     pula(&p); if(*p != '(') return 0; p++;
 
     Word cat = mem_le(S_CAT);
-    long ncols = cat.total, nrows = cat.e;
+    long ncols = cat.total, nrows = cat_nrows();
     long v[64], nv = 0;
     /* o PADRÃO do segundo componente vem do CORPO: no racional é denominador (1), no áureo é
      * o coeficiente de σ (0 — "5" é o inteiro 5, não 5+σ). O par é o mesmo; o que muda é o que
@@ -1515,21 +1594,27 @@ static int insere(const char *resto){
     barreira();                          /* o dado está no prato antes de existir o ponteiro */
     trava_se_pedido(1);                  /* e é aqui que o teste derruba, para ver o que sobra */
 
-    /* FASE 2: só então o ponteiro. nrows vive no campo .e, e a ULA soma componente a
-     * componente — por isso o incremento é uma constante com .e = 1. */
+    /* FASE 2: só então o ponteiro. E o nrows SOBE DE ANDAR.
+     *
+     * Somava-se 1 ao campo `.e` do catálogo com OP_ADD, componente a componente
+     * — e esse campo é UM BYTE: à linha 256 dava a volta, e uma tabela de 300
+     * linhas respondia 44 a tudo. O ADD16 não serve no S_CAT, porque o
+     * transporte atravessaria do nrows para o ncols (é o que o comentário do
+     * enum avisa); então o coeficiente que cresce sobe para um slot só seu, e
+     * aí sim os dois componentes são UM número de dezasseis bits. */
     pc_emit = 0;                         /* fase 2 é um programa PRÓPRIO: rodar() parte de 0 */
-    w.total = 0; w.e = 1; mem_grava(S_UME, w);
-    MOVE(S_CAT, +1);
-    MOVE(S_UME, +1);
-    emit1(OP_ADD);
-    MOVE(S_CAT, -1);
+    w.total = 1; w.e = 0; mem_grava(S_UM16, w);
+    MOVE(S_NR, +1);
+    MOVE(S_UM16, +1);
+    emit1(OP_ADD16);
+    MOVE(S_NR, -1);
     emit1(OP_HALT);
     passos += rodar(pc_emit);
     barreira();
 
     cat = mem_le(S_CAT);
     printf("1 linha inserida (%ld colunas) — %u bytes de ISA, %ld passos; agora %d linhas\n",
-           ncols, pc_emit, passos, cat.e);
+           ncols, pc_emit, passos, cat_nrows());
     if(sql_cap){
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "INSERT 0 1");
         sql_cap->ncols = 0; sql_cap->nrows = 0;
@@ -2406,7 +2491,7 @@ static void emit_transporte(long t, unsigned s){
 }
 
 static void emit_atomos(const struct arvore *a, long linha, long ncols){
-    long nrows_atual = mem_le(S_CAT).e;
+    long nrows_atual = cat_nrows();
     for(int j = 0; j < a->natomo; j++){
         unsigned dest = S_COND + (unsigned)j;
         unsigned acc  = S_LIN + (unsigned)(j*ATOMO_SLOTS);
@@ -2634,9 +2719,14 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
      * meio da varredura não deixa metade das linhas mudadas. */
     (void)col_set;
     emit_copia(S_UM, S_MATCH + (unsigned)i);
+    /* O CONTADOR SOBE DE ANDAR. Somava-se 1 com OP_ADD, componente a
+     * componente, e o `.total` é UM BYTE: à 256.ª linha que casa o count dava a
+     * volta e respondia 0. Com ADD16 o par é UM número de dezasseis bits, e o
+     * transporte atravessa como deve — aqui pode, porque o slot é só do
+     * contador e não guarda um par de coisas distintas como o catálogo. */
     MOVE(S_CONTA, +1);
-    MOVE(S_UM, +1);
-    emit1(OP_ADD);
+    MOVE(S_UM16, +1);
+    emit1(OP_ADD16);
     MOVE(S_CONTA, -1);
     unsigned char rel = (unsigned char)(pc_emit - ini);
     pwrite(fprog, &rel, 1, (off_t)pos);
@@ -2648,6 +2738,7 @@ static void prepara(long v, long col_do_set){
     mem_grava(S_ZERO, w);
     mem_grava(S_CONTA, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
+    w.total = 1; w.e = 0;                 mem_grava(S_UM16, w);   /* o um do ADD16 */
     /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA. Escrever
      * só o baixo deixava o átomo alto do valor ANTERIOR na célula — um
      * `SET saldo = 30000` sobre um saldo de 20000 dava 20016, e nada o dizia. */
@@ -2693,7 +2784,7 @@ static void refaz_diario(void){
     if(d.total == 0) return;
     Word cat = mem_le(S_CAT);
     printf("-- diário aberto: refazendo %s\n", d.total == ACAO_SET+1 ? "um UPDATE" : "um DELETE");
-    aplica_diario(cat.total, cat.e, (int)d.total - 1, (int)d.e);
+    aplica_diario(cat.total, cat_nrows(), (int)d.total - 1, (int)d.e);
     barreira();
     Word z = {0,0}; mem_grava(S_DIA, z);
     barreira();
@@ -2798,20 +2889,24 @@ static int  ord_desc = 0;
 #define ORD_MAXNO  600u
 
 static unsigned ord_novo(void){
-    long n = mem_le(S_ORDCAB).total; if(n < 1) n = 1;      /* 0 é a raiz */
-    if((unsigned)n >= ORD_MAXNO) return 0;                 /* tecto: sem nó, sem ordem */
-    { Word c = { n + 1, 0 }; mem_grava(S_ORDCAB, c); }
+    /* O CONTADOR NO PAR. Vivia em `.total`, um byte, e ORD_MAXNO é 600: ao
+     * chegar a 255 dava a volta e a árvore RECICLAVA nós — o tecto declarado
+     * era ficção, porque a árvore partia muito antes de lá chegar. É o mesmo
+     * defeito do `no_novo` da cifra, na árvore que ordena e junta. */
+    unsigned n = par_le(S_ORDCAB); if(n < 1) n = 1;        /* 0 é a raiz */
+    if(n >= ORD_MAXNO) return 0;                           /* tecto: sem nó, sem ordem */
+    par_grava(S_ORDCAB, n + 1);
     for(unsigned k = 0; k < ORD_LARG; k++){
-        Word z = {0,0}; mem_grava(S_ORD + (unsigned)n*ORD_LARG + k, z);
+        Word z = {0,0}; mem_grava(S_ORD + n*ORD_LARG + k, z);
     }
-    return (unsigned)n;
+    return n;
 }
 static unsigned ord_filho(unsigned no, unsigned sim, int abrir){
-    unsigned f = (unsigned)mem_le(S_ORD + no*ORD_LARG + sim).total;
+    unsigned f = par_le(S_ORD + no*ORD_LARG + sim);
     if(f || !abrir) return f;
     f = ord_novo();
     if(!f) return 0;
-    { Word w = { (Word8)f, 0 }; mem_grava(S_ORD + no*ORD_LARG + sim, w); }
+    par_grava(S_ORD + no*ORD_LARG + sim, f);   /* o índice do nó no PAR, não num byte */
     return f;
 }
 static void ord_limpa(void){
@@ -2840,7 +2935,7 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
     }
     for(unsigned k = 0; k < ORD_LARG; k++){
         unsigned sim = desc ? (ORD_LARG - 1 - k) : k;
-        unsigned f = (unsigned)mem_le(S_ORD + no*ORD_LARG + sim).total;
+        unsigned f = par_le(S_ORD + no*ORD_LARG + sim);
         if(!f && !(nivel == 0 && 0)) { if(!f) continue; }
         ord_percorre(f, nivel + 1, (ch << 4) | sim, saida, n, cap, desc);
     }
@@ -2901,7 +2996,7 @@ static int j_carrega_direita(long *ncols_dir){
     if(!cat_nome_bate(j_tab_dir)) return -1;
     oc = col_indice(j_col_dir);
     if(oc < 0) return -2;                         /* a coluna não existe lá */
-    cat = mem_le(S_CAT); nc = cat.total; nr = cat.e;
+    cat = mem_le(S_CAT); nc = cat.total; nr = cat_nrows();
     if(nc > J_MAXCOL) return -1;
     ord_limpa();
     for(long i = 0; i < nr; i++){
@@ -2928,15 +3023,15 @@ static int j_casam(long v, int *saida, int cap){
     /* desce os 8 nibbles do VALOR; os 2 do índice ficam para o percurso */
     for(int d = ORD_NIV - 1; d >= 2; d--){
         unsigned sim = (unsigned)((ch >> (4*d)) & 15u);
-        no = (unsigned)mem_le(S_ORD + no*ORD_LARG + sim).total;
+        no = par_le(S_ORD + no*ORD_LARG + sim);
         if(!no) return 0;                          /* nenhuma linha com este valor */
     }
     /* os dois últimos níveis são o índice: percorre-os e recolhe */
     for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
-        unsigned n1 = (unsigned)mem_le(S_ORD + no*ORD_LARG + a1).total;
+        unsigned n1 = par_le(S_ORD + no*ORD_LARG + a1);
         if(!n1) continue;
         for(unsigned a2 = 0; a2 < ORD_LARG; a2++){
-            unsigned n2 = (unsigned)mem_le(S_ORD + n1*ORD_LARG + a2).total;
+            unsigned n2 = par_le(S_ORD + n1*ORD_LARG + a2);
             if(!n2) continue;
             if(n < cap) saida[n++] = (int)((a1 << 4) | a2);
         }
@@ -3113,7 +3208,7 @@ static int varre(const char *resto, int acao){
     }
 
     Word cat = mem_le(S_CAT);
-    long ncols = cat.total, nrows = cat.e;
+    long ncols = cat.total, nrows = cat_nrows();
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
     /* E A LARGURA: o avaliador é de oito bits, e uma coluna que guarde acima de
@@ -3190,7 +3285,7 @@ static int varre(const char *resto, int acao){
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
 
-    long achou = mem_le(S_CONTA).total;
+    long achou = (long)par_le(S_CONTA);   /* o PAR: o count passa de 255 */
     ultima_conta = achou;
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
@@ -3599,7 +3694,10 @@ static int distancia_texto(const char *p){
 #define LARG      256u
 #define MAXT      4096
 static long n_leituras = 0;      /* o contador honesto: quantos nos o caminho tocou */
-static long txt_n(void){ return mem_le(S_TXCAB).total; }
+/* O contador de textos no PAR: `.total` é um byte, e a tabela passa dos 255.
+ * Pior, `txt_n() <= 0` é o teste de «tabela vazia» na busca — ao dar a volta,
+ * uma tabela CHEIA respondia vazia. */
+static long txt_n(void){ return (long)par_le(S_TXCAB); }
 /* O ÍNDICE DE NÓ VIVE NO PAR, COMO TUDO O RESTO NESTE MOTOR.
  *
  * `no_novo` guardava o contador em `.total`, que é UM BYTE: ao chegar a 255,
@@ -3611,14 +3709,6 @@ static long txt_n(void){ return mem_le(S_TXCAB).total; }
  * `S_TXLIVRE` acima — o valor vive no PAR (baixo, alto), e ler só o baixo é ler
  * metade do número. Com dezasseis bits cabem 65535 nós, e a zona vai até
  * S_CANAL, que dá folga para ~38000. */
-static unsigned par_le(unsigned slot){
-    Word w = mem_le(slot);
-    return (unsigned)((unsigned long)w.total | ((unsigned long)w.e << 8));
-}
-static void par_grava(unsigned slot, unsigned v){
-    Word w = { (Word8)(v & 255u), (Word8)((v >> 8) & 255u) };
-    mem_grava(slot, w);
-}
 static unsigned no_filho(unsigned no, long d){
     n_leituras++;
     return par_le(S_NO + no*LARG + (unsigned)d);
@@ -3687,16 +3777,25 @@ static unsigned reg_grava(const long *a, size_t n){
     unsigned base = tx_livre();
     unsigned fim  = (unsigned)(base + 1 + n);
     if(fim - S_TEXTO >= TX_SLOTS) return 0;      /* cheio: RECUSA, não escreve por cima */
-    Word w; memset(&w, 0, sizeof w);
-    w.total = (long)n; mem_grava(base, w);
-    for(size_t k = 0; k < n; k++){ w.total = a[k]; mem_grava(base + 1 + (unsigned)k, w); }
+    /* O COMPRIMENTO NO PAR: MAXT é 4096 e o `.total` é um byte, logo uma cifra
+     * de mais de 255 termos dizia ter o resto — e `reg_prox` saltava para o
+     * meio do registo seguinte, desalinhando a tabela toda a partir dali.
+     *
+     * E OS TERMOS VERIFICAM-SE. Cada termo vai num par de dezasseis bits sem
+     * sinal; o que não couber é RECUSADO, porque um termo truncado dá uma cifra
+     * que não é a de ninguém e a busca passa a mentir em silêncio. */
+    par_grava(base, (unsigned)n);
+    for(size_t k = 0; k < n; k++){
+        if(a[k] < 0 || a[k] > 65535) return 0;             /* nao cabe: RECUSA */
+        par_grava(base + 1 + (unsigned)k, (unsigned)a[k]);
+    }
     { unsigned off = fim - S_TEXTO;
       Word p2 = { (Word8)(off & 255u), (Word8)((off >> 8) & 255u) };
       mem_grava(S_TXLIVRE, p2); }
     return base;
 }
-static size_t reg_n(unsigned base){ return (size_t)mem_le(base).total; }
-static long   reg_termo(unsigned base, size_t k){ return mem_le(base + 1 + (unsigned)k).total; }
+static size_t reg_n(unsigned base){ return (size_t)par_le(base); }
+static long   reg_termo(unsigned base, size_t k){ return (long)par_le(base + 1 + (unsigned)k); }
 static unsigned reg_prox(unsigned base){ return base + 1 + (unsigned)reg_n(base); }
 /* A ROUPA, RECUPERADA. Nao esta guardada: deriva-se da assinatura. O ultimo par de termos da o
  * corte (np, nd); os np termos a seguir a seta de Wick sao o lado proprio. Se todos couberem no
@@ -3750,7 +3849,7 @@ static int cif_poe(const long *a, size_t n){
     unsigned base = reg_grava(a, n);
     if(!base) return 0;                                   /* zona de texto cheia */
     par_grava(S_NO + no*LARG, base - S_TEXTO);
-    Word wi = { txt_n() + 1, 0 }; mem_grava(S_TXCAB, wi);
+    par_grava(S_TXCAB, (unsigned)(txt_n() + 1));
     barreira();
     return 1;
 }
@@ -4489,7 +4588,7 @@ static int executa(const char *sql){
                     snprintf(resto, sizeof resto, "*%s", fim + 1);
                     ok = varre(resto, ACAO_MARCA);
                     if(sql_cap){
-                        long n = mem_le(S_CONTA).total;
+                        long n = (long)par_le(S_CONTA);
                         memset(sql_cap, 0, sizeof *sql_cap);
                         sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
                         sql_cap->tipo[0] = SQL_TIPO_INT8;
@@ -4525,6 +4624,15 @@ static int abrir_base(const char *base){
     if(fmem < 0 || fprog < 0) return 0;
     ftruncate(fmem, (off_t)(S_CB + 65536u) * (off_t)SLOTSZ);  /* Words=16 átomos + blobs */
     refaz_diario();          /* antes de qualquer comando: fechar o que ficou aberto */
+    /* O NROWS VELHO SOBE PARA O PAR, uma vez. Uma base gravada antes tem-no no
+     * `.e` do catálogo e o S_NR a zero; sem esta subida, o primeiro INSERT
+     * punha o par a 1 e a tabela encolhia para uma linha. A ida guarda a volta:
+     * o formato novo lê o que o velho escreveu. */
+    { Word nr = mem_le(S_NR);
+      if(nr.total == 0 && nr.e == 0){
+          long velho = mem_le(S_CAT).e;
+          if(velho > 0) cat_poe_nrows(velho);
+      } }
     return 1;
 }
 
@@ -4648,7 +4756,7 @@ int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
     if(!usa_tabela(tabela, 0)) return -1;
     oc = col_indice(coluna);
     if(oc < 0){ if(antes[0]) usa_tabela(antes, 0); return -1; }
-    cat = mem_le(S_CAT); nc = cat.total; nr = cat.e;
+    cat = mem_le(S_CAT); nc = cat.total; nr = cat_nrows();
     for(long i = 0; i < nr; i++){
         if(mem_le(S_VIVO + (unsigned)i).total == 0) continue;
         { long v = celula_valor(i, oc, nc);
@@ -4783,7 +4891,7 @@ int main(int argc, char **argv){
         printf("   com ele. O passo sai da faixa do slot, sem tocar em lugar de chamada nenhum.\n\n");
         printf("   linhas na tabela   bytes de ISA da consulta\n");
         {
-            long antes = mem_le(S_CAT).e;
+            long antes = cat_nrows();
             printf("   %-18ld ", antes);
             executa("SELECT * FROM t WHERE a = 7");
         }
@@ -4818,9 +4926,9 @@ int main(int argc, char **argv){
                 if(f == 0){ trava_em = pontos[q]; varre(" t SET c = 42 WHERE a >= 7", ACAO_SET); _exit(0); }
                 int st = 0; waitpid(f, &st, 0);
                 fechar_base(); abrir_base(base);
-                long ncols = mem_le(S_CAT).total, nrows = mem_le(S_CAT).e, mudadas = 0;
+                long ncols = mem_le(S_CAT).total, nrows = cat_nrows(), mudadas = 0;
                 for(long i = 0; i < nrows; i++)
-                    if(mem_le(S_LINHAS + (unsigned)(i*ncols + 2)).total == 42) mudadas++;
+                    if(celula_valor(i, 2, ncols) == 42) mudadas++;   /* o PAR, não o byte */
                 printf("   queda %-22s saiu %d   linhas com o valor novo: %ld   (%s)\n",
                        quando[q], WIFEXITED(st) ? WEXITSTATUS(st) : -1, mudadas, espera[q]);
                 fechar_base();
@@ -5379,7 +5487,7 @@ int main(int argc, char **argv){
                 unsigned long v4 = (unsigned long)m4.total | ((unsigned long)m4.e << 8);
                 /* (c) a base antiga: apaga-se a marca com linhas lá dentro */
                 { Word z = {0,0}; mem_grava(S_COLMAX + 0, z); }
-                unsigned long v5 = col_max(0, mem_le(S_CAT).total, mem_le(S_CAT).e);
+                unsigned long v5 = col_max(0, mem_le(S_CAT).total, cat_nrows());
                 Word m6 = mem_le(S_COLMAX + 0);
                 unsigned long v6 = (unsigned long)m6.total | ((unsigned long)m6.e << 8);
                 printf("\n     marca: %lu → %lu (INSERT 300) → %lu (INSERT 7) → %lu"
@@ -5968,10 +6076,10 @@ int main(int argc, char **argv){
             executa("ACHA TEXTO 22/7");
             ok("e o racional acha-se pela MESMA porta, e pelo mesmo caminho", n_leituras == 7);
             {
-                long n0 = mem_le(S_NOCAB).total;
+                long n0 = (long)par_le(S_NOCAB);   /* o PAR: o `no_novo` conta nele */
                 printf("\n");
                 executa("INSERT TEXTO 'ourivesaria'");
-                long n1 = mem_le(S_NOCAB).total;
+                long n1 = (long)par_le(S_NOCAB);
                 printf("      abriu %ld no(s) novo(s) — os 7 primeiros ja existiam, partilhados\n", n1-n0);
                 printf("      com 'ourives'.\n");
                 ok("o prefixo comum e o CAMINHO PARTILHADO, nao copia", n1 - n0 == 8);

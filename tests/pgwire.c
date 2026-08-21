@@ -13,6 +13,8 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W22 O NÚMERO QUE NÃO CABE NUM BYTE: nrows e count de 16 bits, e o tecto
+ *        da tabela a RECUSAR em vez de dar a volta
  *   §W21 MAX-CUT = MASSA: o pior caso da junção é o corte, e a massa decide
  *        qual junção é mais cara sem ler uma linha
  *   §W20 o SALDO ESPECTRAL: o tamanho do join pela transformada, sem casar
@@ -2895,6 +2897,127 @@ int main(void){
            " teorema e a segunda sai medida. O CONTROLO é o que separa as duas: trocar os"
            " lados não muda a massa nem o resultado, e sem ele a asserção passaria mesmo que"
            " a regra fosse «escolhe sempre a primeira».",
+           mal == 0);
+    }
+
+    /* ═══ §W22: O NÚMERO QUE NÃO CABE NUM BYTE ══════════════════════════════
+     *
+     * `Word` é {Word8 total, e} — DOIS bytes, e `Word8` é `uint8_t`. Ler
+     * `mem_le(slot).total` é ler METADE do número. O motor fazia-o em cinco
+     * sítios que guardam ENDEREÇO, CONTADOR ou ÍNDICE, e o mais caro era o
+     * nrows: vivia no campo `.e` do catálogo e era incrementado com OP_ADD
+     * componente a componente, de modo que à linha 256 dava a volta. Uma tabela
+     * com 300 linhas inseridas respondia 44 — 300 mod 256 — ao SELECT, ao
+     * ORDER BY e ao count. O banco PERDIA DADOS SEM UMA QUEIXA.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W22 o número que não cabe num byte: nrows, count e o tecto.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w22";
+        SqlOut o;
+        long mal = 0;
+        char q[96];
+        unlink("/tmp/pgwire_w22.mem"); unlink("/tmp/pgwire_w22.prog");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE g (a,b)", &o);
+
+        /* ── ATRAVESSAR A FRONTEIRA DOS 255 ──────────────────────────────── */
+        int aceites = 0, recusados = 0;
+        for(int i = 1; i <= 300; i++){
+            snprintf(q, sizeof q, "INSERT INTO g VALUES (%d,7)", i);
+            if(sql_executa(q, &o)) aceites++; else recusados++;
+        }
+        printf("      300 INSERT: %d aceites, %d recusados\n", aceites, recusados);
+
+        /* o count TEM de dar o número de aceites, e não o resto por 256 */
+        {
+            int r = sql_executa("SELECT count(*) FROM g", &o);
+            long c = (r && o.nrows) ? strtol(o.cell[0][0], NULL, 10) : -1;
+            printf("      count(*) = %ld   (o resto por 256 daria %d)\n", c, aceites % 256);
+            if(c != aceites) mal++;
+            /* e é ISTO que separa o número certo do byte baixo: se o contador
+             * vivesse num byte, um count de 256 saía ZERO. */
+            printf("      -> %s\n", (c == aceites && c > 255)
+                   ? "o count passa dos 255 e conta certo"
+                   : (c == aceites ? "conta certo, mas não atravessou os 255" : "NAO"));
+            if(c != aceites) mal++;
+        }
+
+        /* o SELECT tem de devolver TODAS as que entraram, contadas na saída */
+        {
+            long vistas = 0;
+            for(long lim = 0; lim < 1; lim++){
+                int r = sql_executa("SELECT count(*) FROM g WHERE b = 7", &o);
+                vistas = (r && o.nrows) ? strtol(o.cell[0][0], NULL, 10) : -1;
+            }
+            printf("      count(*) WHERE b = 7 = %ld — a fibra inteira, não metade\n", vistas);
+            if(vistas != aceites) mal++;
+        }
+
+        /* ── O TECTO É DECLARADO E RECUSA, em vez de dar a volta ─────────── */
+        {
+            snprintf(q, sizeof q, "INSERT INTO g VALUES (999,7)");
+            int r = sql_executa(q, &o);
+            printf("      com a tabela cheia, mais um INSERT: %s\n",
+                   r ? "ACEITE (não devia)" : o.err);
+            if(r || !strstr(o.err, "cheia")) mal++;
+            /* e a recusa NÃO destruiu o que lá estava */
+            sql_executa("SELECT count(*) FROM g", &o);
+            long c2 = o.nrows ? strtol(o.cell[0][0], NULL, 10) : -1;
+            printf("      e depois da recusa o count continua %ld\n", c2);
+            if(c2 != aceites) mal++;
+        }
+        sql_fechar();
+
+        /* ── O CONTROLO: ABAIXO DA FRONTEIRA NADA MUDA ───────────────────
+         * Sem isto, uma correcção que quebrasse as tabelas pequenas passava —
+         * e são elas que todos os outros blocos deste ficheiro usam. */
+        {
+            unlink("/tmp/pgwire_w22b.mem"); unlink("/tmp/pgwire_w22b.prog");
+            if(!sql_abrir("/tmp/pgwire_w22b")) mal++;
+            sql_executa("CREATE TABLE p (a,b)", &o);
+            for(int i = 1; i <= 10; i++){
+                snprintf(q, sizeof q, "INSERT INTO p VALUES (%d,%d)", i, i*3);
+                sql_executa(q, &o);
+            }
+            sql_executa("SELECT count(*) FROM p", &o);
+            long c = o.nrows ? strtol(o.cell[0][0], NULL, 10) : -1;
+            int r = sql_executa("SELECT a FROM p ORDER BY a DESC", &o);
+            printf("\n      CONTROLO — tabela de 10 linhas: count = %ld, ORDER BY DESC"
+                   " devolve %d linhas, a primeira %s\n",
+                   c, r ? o.nrows : -1, (r && o.nrows) ? o.cell[0][0] : "?");
+            int bem = (c == 10) && r && o.nrows == 10 && !strcmp(o.cell[0][0], "10");
+            printf("      -> %s\n", bem ? "as tabelas pequenas continuam intactas"
+                                        : "NAO — a correcção partiu o caso pequeno");
+            if(!bem) mal++;
+            sql_fechar();
+        }
+
+        printf("\n");
+        ok("O NÚMERO QUE NÃO CABE NUM BYTE, E O TECTO QUE PASSOU A RECUSAR. `Word` é"
+           " {Word8 total, e} com `Word8` = uint8_t: são DOIS bytes, e ler `.total` é ler"
+           " METADE do número. O motor fazia-o em cinco sítios que guardam endereço, contador"
+           " ou índice, e o mais caro era o nrows — vivia no campo `.e` do catálogo e subia com"
+           " OP_ADD componente a componente, de modo que à linha 256 DAVA A VOLTA: 300 linhas"
+           " inseridas respondiam 44 (300 mod 256) ao SELECT, ao ORDER BY e ao count, e o banco"
+           " perdia dados sem uma queixa. A correcção é a da casa e não uma invenção: o"
+           " coeficiente que cresce SOBE — o nrows sai do par do catálogo, onde o transporte"
+           " não pode atravessar do nrows para o ncols, e passa a ocupar os dois componentes de"
+           " um slot só seu, somado com OP_ADD16. O mesmo para o contador do count. E MEDE-SE"
+           " ATRAVESSANDO A FRONTEIRA, que é a única maneira de o ver: pedem-se 300 INSERT, e"
+           " tanto o count(*) como o count com WHERE têm de dar o número de linhas que"
+           " ENTRARAM e não o resto por 256 — um contador de um byte devolveria ZERO para 256."
+           " O SEGUNDO ACHADO é o tecto: o bitmap do resultado ocupa 256 slots e o seguinte é o"
+           " dos VIVOS, de modo que a linha 257 escrevia o seu match por cima do primeiro vivo."
+           " Agora o INSERT RECUSA com mensagem quando a tabela enche, e mede-se que a recusa"
+           " NÃO destrói o que já lá estava — perder dados em silêncio é o pior desfecho, e"
+           " recusar é honesto. O CONTROLO é a tabela pequena: dez linhas, count e ORDER BY"
+           " DESC intactos, porque são as tabelas pequenas que todos os outros blocos deste"
+           " ficheiro usam e uma correcção que as quebrasse passaria despercebida aqui. FICA SEM GUME UMA"
+           " PEÇA, e diz-se qual: a migração que sobe o nrows de uma base gravada ANTES — onde"
+           " ele vivia no `.e` do catálogo — para o par. Removê-la não derruba nada aqui porque"
+           " nenhum medidor abre uma base antiga; o ramo não corre neste regime. Ela existe"
+           " para que o formato novo leia o que o velho escreveu, e quem a quiser medir tem de"
+           " gravar uma base pelo formato antigo primeiro.",
            mal == 0);
     }
 

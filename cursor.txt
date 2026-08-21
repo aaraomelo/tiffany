@@ -87,7 +87,7 @@ estão na arquitetura.tex.
 
 4. ESTADO ACTUAL (21/08/2026)
 ─────────────────────────────
-     bateria      529 : 529 verdes, 0 falhas · 5089 unidades (--refaz, tudo re-derivado)
+     bateria      529 : 529 verdes, 0 falhas · 5090 unidades (--refaz, tudo re-derivado)
      aranha.tex   29 pág · 0 erros · 0 refs mortas · thm:escada = Teorema 64
      arquitetura  27 pág · 0 provas locais · 0 enunciados sem remissão
 
@@ -112,6 +112,8 @@ FEBE escrito do zero, sem libpq. Medido em tests/pgwire.c (23 asserções, 0 fal
               SEM casar uma linha, e tem de bater com §W19 (passo 2 da §7)
      §W21     MAX-CUT = MASSA: C = |A||B| são as arestas do corte E os pares
               candidatos; M·n = n²−δ² decide qual junção é mais cara (passo 3)
+     §W22     O NÚMERO QUE NÃO CABE NUM BYTE: nrows e count de 16 bits, e o
+              tecto da tabela a RECUSAR em vez de dar a volta
 
 O psql REAL (16.14, via `docker run --rm --network host postgres:16 psql`)
 liga-se e faz o ciclo todo: \l, \dt, \d, CREATE, INSERT, UPDATE, DELETE,
@@ -321,3 +323,47 @@ próprio texto — outro .c, um .tex, /tmp, o ambiente — fica verde para sempr
 depois do primeiro atestado. Há já uma excepção À MÃO para o pgwire.c (soma o
 sql.c e o pgwire.c à assinatura), no mesmo ficheiro que diz «nada de listas à
 mão, que envelhecem caladas». POR RESOLVER.
+
+
+9. A VARREDURA DO `mem_le(...).total`  (21/08, FEITA)
+────────────────────────────────────────────────────
+`Word` é {Word8 total, e} e `Word8` é **uint8_t**: DOIS bytes. Ler `.total` é
+ler METADE do número. Eram 42 ocorrências no `sql.c`; a regra de triagem é:
+
+     valor pequeno por construção      SEGURO   (ncols ≤ 16, bitmaps 0/1, corpo < 8)
+     ENDEREÇO, CONTADOR ou ÍNDICE      SUSPEITO — tem de ir no par
+
+O QUE FOI CONSERTADO, e cada um perdia dados ou mentia:
+
+· **nrows** — vivia no campo `.e` do CATÁLOGO e subia com OP_ADD componente a
+  componente. À linha 256 dava a volta: 300 linhas inseridas respondiam **44**
+  (300 mod 256) ao SELECT, ao ORDER BY e ao count. Não se pode usar ADD16 no
+  S_CAT (o transporte atravessaria do nrows para o ncols, que é o que o
+  comentário do enum avisa), então **o coeficiente que cresce SOBE**: sai do par
+  do catálogo para o slot S_NR (69), só seu, e soma com OP_ADD16. Migração na
+  abertura para bases gravadas antes.
+· **o contador do count** (S_CONTA) — o mesmo, com OP_ADD16 e S_UM16 (70).
+· **a árvore da ORDEM** (S_ORDCAB, ord_filho, e a ESCRITA do filho) — ORD_MAXNO
+  é 600 e o contador vivia num byte: reciclava nós aos 255, e o tecto declarado
+  era ficção.
+· **txt_n / S_TXCAB** — e o pior: `txt_n() <= 0` é o teste de «tabela vazia» da
+  busca, logo ao dar a volta uma tabela CHEIA respondia vazia.
+· **o comprimento do registo** (reg_n) — MAXT é 4096 e cabia num byte; uma cifra
+  de mais de 255 termos dizia ter o resto e o `reg_prox` saltava para o meio do
+  registo seguinte, desalinhando a tabela toda a partir dali.
+· **os termos** (reg_termo) — passam a ir no par, e o que não couber é RECUSADO.
+· **S_NOCAB** nas duas leituras que tinham ficado dessincronizadas do `no_novo`.
+
+E UM TECTO QUE NÃO ERA VERIFICADO: o bitmap do resultado ocupa S_MATCH..+255 e
+o slot seguinte é o S_VIVO — a linha 257 escrevia o seu match POR CIMA do
+primeiro vivo. O INSERT passa a RECUSAR com mensagem quando a tabela enche.
+**O TECTO REAL DE UMA TABELA É 256 LINHAS**, e agora está dito.
+
+O QUE NÃO SE MEXEU, E PORQUÊ: em `banco/sql.c` linhas ~5414-5435 o byte baixo é
+lido DE PROPÓSITO — é a demonstração do levantamento, onde o baixo é π (que
+dobra) e o par (b,a) é π̃ (injectivo). O comentário no sítio di-lo.
+
+MEDIDO em `tests/pgwire.c` §W22, atravessando a fronteira dos 255 — que é a
+única maneira de ver isto. Gume: seis mutações mordem. A migração de bases
+antigas fica SEM gume, e está dito no medidor: nenhum medidor abre uma base
+gravada pelo formato velho.
