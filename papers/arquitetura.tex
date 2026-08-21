@@ -48,9 +48,41 @@
        {do bit à query --- a máquina no metal e a porta comercial}
 \maketitle
 
+\section*{O princípio: um operador}
+
+\noindent Antes das camadas, o que as gera. O dado é um \textbf{operador} e as
+duas equações que ele cumpre:
+\[
+\boxed{\;
+\partial x + x = 0
+\qquad\qquad
+\partial x \cdot x = 1
+\;}
+\]
+--- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra, e é
+nelas que $0$ e $1$ nascem: são o que o operador devolve em cada uma. As duas
+operações são duais uma da outra, e por isso não são dois operadores: são as
+duas faces do mesmo.
+
+\medskip\noindent\textbf{E o \code{MOVE} é este operador no metal.} Ler e
+escrever não são duas instruções que se implementam juntas por economia: são
+\emph{uma} operação e o seu dual, e o que as separa é um \textbf{sinal} ---
+$+1$ para ler, $-1$ para escrever (\S\ref{sec:isa}). Todo este documento é a
+consequência de a máquina ter uma instrução e um sinal, em vez de duas
+instruções.
+
+\medskip\noindent As duas primeiras leis da numeração canónica são estas mesmas
+equações lidas no alfabeto: o \emph{split} (\textbf{Lei 0}) parte-o em dois
+lados iguais --- $128$ e $128$ --- com um só ponto fixo, e a \emph{estaca}
+(\textbf{Lei 1}) $x\dg=2c-x$ é a involução que os troca, fixando o centro
+(\S\ref{sec:pecas}). O apagamento ser \textbf{zero} --- o critério desta
+arquitectura --- é a exigência de que a segunda guarde tudo o que a primeira
+separou.
+
 \section*{Três camadas, uma máquina}
 
-\noindent Esta arquitectura apresenta-se em \textbf{três camadas} que não se confundem:
+\noindent As três camadas são \emph{andares} de $\partial$, e não peças
+independentes:
 
 \begin{center}\small
 \begin{tabular}{@{}llp{0.42\textwidth}@{}}
@@ -94,6 +126,8 @@ fecha. A posição não se escolhe: \textbf{lê-se pelo que ele consome}.
 construção aritmética está feita em cinco papers, e lê-se num sentido só:
 \[
 \boxed{\;
+\underbrace{\partial}_{\text{o operador}}
+\;\xrightarrow[\text{as duas equações}]{}\;
 \underbrace{\mathbb{F}_2}_{\text{um bit}}
 \;\xrightarrow[\text{3 dobras}]{\ \code{naturais}\ }\;
 \underbrace{F_8\equiv\Word_8}_{\{0,\ldots,255\}}
@@ -291,7 +325,7 @@ não uma condição imposta por fora. A \emph{terminação do ordenar}, essa, n�
 período $4$ \emph{repete}, não termina): sai da \textbf{estaca} --- cada passagem tira a fronteira e
 reduz \emph{estritamente} os dois lados (adiante, e é o que a mutação confirma).
 
-\section{O algoritmo}
+\section{O algoritmo}\label{sec:algoritmo-ordena}
 
 Seja $A$ uma lista finita. Se $|A|\leq 1$, ela já está ordenada. Caso contrário, tome-se
 $c=\min A+\lfloor(\max A-\min A)/2\rfloor$ e classifique-se cada elemento pelo \textbf{sinal da
@@ -813,7 +847,7 @@ memória Hopfield; código \code{app/src/rede\_dual.js}, medidor
 \code{tests/rede\_dual.js}. Hopfield $=$ memória da volta; $\lambda^{+}+\lambda^{-}=0$
 segue da dualidade reversível (Metrónomo), não do atrator sozinho.
 
-\section{A permutação é o dual, e a reversibilidade é o teste}
+\section{A permutação é o dual, e a reversibilidade é o teste}\label{sec:permuta}
 
 O objeto não é a ordenação. \textbf{Uma sequência \emph{é} uma régua}, e ordená-la é levá-la ao
 \textbf{ponto fixo} --- a forma canónica. Daí converte-se para qualquer outra: é isso a conversão

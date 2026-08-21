@@ -42,9 +42,11 @@
 \maketitle
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} De \textbf{dois símbolos}. A estrutura que eles admitem é
-única --- soma e produto ficam determinados, não escolhidos ---, e dela sai a
-soma com transporte; a \textbf{lista} $I$ é o objeto finito que daí se obtém. Só
+\textbf{De onde parte.} De \textbf{um operador} e das duas equações que ele
+cumpre --- $\partial x+x=0$ e $\partial x\cdot x=1$ ---, e é nelas que $0$ e $1$
+nascem: são o que ele devolve em cada face. As duas operações saem daí,
+determinadas e não escolhidas, e delas a soma com transporte; a \textbf{lista}
+$I$ é o objeto finito que daí se obtém. Só
 então entra uma \textbf{realização} $\pi\colon I\to X$ num conjunto $X$ com
 igualdade decidível, e não se supõe métrica, nem dimensão, nem estrutura
 algébrica em $X$. A realização identifica índices distintos na mesma célula;
@@ -80,7 +82,7 @@ não contém, em etapa nenhuma, a identidade de quem construiu --- e é por isso
 que uma \emph{aranha} que passa quatro vezes e quatro \emph{abelhas} que passam
 uma vez deixam o mesmo campo.
 
-\medskip\noindent\textbf{O alcance.} De dois símbolos e de uma aplicação com
+\medskip\noindent\textbf{O alcance.} De um operador com duas equações e de uma aplicação com
 igualdade no contradomínio saem, com demonstração, o percurso, a memória, a
 multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
 E o mesmo mecanismo percorre a escada aritmética que a obra constrói noutros
@@ -109,8 +111,8 @@ Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{sec:ge
 Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{thm:multiplicidade}(3) \\
 O que acontece quando volta? & a dobra: $G>1$ & Def.~\ref{def:dobra} \\
 Como se representam os passos? & por uma palavra no alfabeto das arestas & Teor.~\ref{thm:palavra} \\
-O que é o ponto de partida? & um bloco bruto, e o operador que o divide & Def.~\ref{def:bloco},~\ref{def:op} \\
-Donde vêm os dois dígitos? & de uma divisão --- e são duais & Teor.~\ref{thm:op} \\
+O que é o ponto de partida? & o operador, e as suas duas equações & Def.~\ref{def:op} \\
+Donde vêm as operações e os dois dígitos? & das duas equações do operador & Def.~\ref{def:op}, Teor.~\ref{thm:B} \\
 E as coordenadas? & são a tupla ordenada: a \emph{representação} & Teor.~\ref{thm:coord} \\
 Como se codifica um finito qualquer? & em $\lceil\log_2 c\rceil$ bits, e não em menos & Teor.~\ref{thm:B},~\ref{thm:BI} \\
 Como se continua sem terminar? & caminhando: cada decisão é finita & §\ref{sec:objeto} \\
@@ -129,7 +131,7 @@ abaixo é um enunciado deste documento --- nenhuma é analogia:
 \boxed{\;
 \underset{\text{Def.~\ref{def:op}}}{\text{operador}}
 \;\to\;
-\underset{\text{Teor.~\ref{thm:op}}}{\text{binário}}
+\underset{\text{Teor.~\ref{thm:B}}}{\text{binário}}
 \;\to\;
 \underset{\text{Teor.~\ref{thm:coord}}}{\text{tupla}}
 \;\to\;
@@ -146,11 +148,10 @@ abaixo é um enunciado deste documento --- nenhuma é analogia:
 G \;}
 \]
 \noindent\textbf{E o primeiro elo é o operador, não um conjunto.} O documento
-não parte do binário: parte de \emph{um símbolo bruto} --- um bloco, sem partes
---- e de uma operação que o \emph{divide em dois}. O binário é o que essa
-operação produz ao correr uma vez (Teor.~\ref{thm:op}); a tupla é o que ela
-produz ao correr $w$ vezes, e é a \emph{representação} do objeto e não o objeto
-(Teor.~\ref{thm:coord}). Daí que o índice não seja tempo posto de fora: é a
+não parte do binário: parte de \emph{um operador} e das duas equações que ele
+cumpre sobre o seu argumento. O binário é o que elas dão
+(Teor.~\ref{thm:B}); a tupla é o que o operador produz ao correr $w$ vezes, e é
+a \emph{representação} do objeto e não o objeto (Teor.~\ref{thm:coord}). Daí que o índice não seja tempo posto de fora: é a
 contagem das aplicações do operador, e o que ele gera --- acumular, e a
 diferença que o desfaz --- é o Teor.~\ref{thm:shift}.
 
@@ -165,7 +166,7 @@ célula a célula.
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O objeto}\label{sec:objeto}
 
-\subsection*{O ponto de partida: o bloco, e o operador que o divide}
+\subsection*{O ponto de partida: o operador}
 
 \noindent Em quatro frases, e cada uma é um resultado abaixo:
 \[
@@ -182,64 +183,127 @@ célula a célula.
 \textbf{bruto}, sem partes --- e de \emph{uma} operação sobre ele. O binário não
 é o ponto de partida: é o que se obtém quando a operação corre uma vez.
 
-\begin{definicao}[o bloco]\label{def:bloco}
-Um \textbf{bloco} é um símbolo \emph{indiviso}: um objeto do qual ainda se não
-disse nada, e em particular nem se disse que tem partes. Não é ``$0$'' nem
-``$1$'' --- não é ainda um dígito, porque não há dois.
-\end{definicao}
-
 \begin{definicao}[o operador]\label{def:op}
-O \textbf{operador} $\partial$ \emph{divide um bloco em dois}, e marca cada
-metade pela outra:
+O \textbf{operador} $\partial$ é uma acção que \textbf{conserva}: existe uma
+composição associativa $\circ$ tal que
 \[
-\boxed{\;\partial\colon\ \text{bloco}\ \longmapsto\ (\,\text{parte},\ \text{co-parte}\,)\;}
+\boxed{\;x\circ\partial x \;=\; \text{o mesmo, qualquer que seja }x\;}
 \]
-com a \textbf{troca} $\tau$ que permuta as duas metades. É este --- e não um
-conjunto --- o dado do documento.
+Esse valor comum chama-se o \textbf{invariante} da composição. Pede-se ainda que
+$\partial$ seja uma acção \emph{efetiva} --- $\partial\neq\mathrm{id}$ ---, ou
+não haveria nada a conservar.
 \end{definicao}
 
-\begin{teorema}[o operador dá o binário, e a nomeação não é dado]\label{thm:op}
-Aplicado a um bloco, $\partial$ produz duas metades, e:
+\medskip\noindent É o único dado. Nem símbolos, nem operações, nem números: uma
+acção que não altera aquilo que a composição mede. Tudo o que segue --- que as
+operações são \emph{duas}, que os símbolos são \emph{dois}, e quais --- é
+consequência, e demonstra-se.
+
+\begin{teorema}[uma composição não chega]\label{thm:duas}
+Com $\partial$ da Def.~\ref{def:op}:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{A troca é uma involução:} $\tau^{2}=\mathrm{id}$, e $\tau$
-não fixa nenhuma das duas --- é o que ``distintas'' quer dizer.
-\item[(2)] \textbf{As duas metades são duais:} cada uma é determinada pela
-outra, $\tau$ leva uma na outra, e não há terceira.
-\item[(3)] \textbf{A nomeação é livre e não é um parâmetro:} chamar $0$ a uma e
-$1$ à outra, ou o contrário, dá estruturas \emph{isomorfas} --- o isomorfismo é
-$\tau$. Partir do $0$ e construir o $1$, ou partir do $1$ e construir o $0$, é
-o mesmo percurso lido nos dois sentidos.
+\item[(1)] \textbf{O invariante é o neutro.} O valor comum $e$ cumpre
+$e\circ x=x\circ e=x$.
+\item[(2)] \textbf{$\partial$ é involutivo.} $\partial\partial x=x$.
+\item[(3)] \textbf{O neutro é ponto fixo.} $\partial e=e$.
+\item[(4)] \textbf{Logo uma composição não chega.} Se $\partial$ não fixa
+elemento nenhum --- que é o caso quando há exatamente \emph{dois} objetos e
+$\partial$ os troca ---, então (3) é impossível numa composição só: é preciso
+uma \textbf{segunda}, e o seu invariante é o \emph{outro} objeto.
 \end{enumerate}
-Ao conjunto das duas metades chama-se $B$, e $\tau(x)$ escreve-se $x+1$.
 \end{teorema}
 
 \begin{proof}
-(1) e (2) são o que a divisão em \emph{duas} partes marcadas uma pela outra
-diz: $\tau$ troca-as, e trocá-las duas vezes repõe-nas. Se $\tau$ fixasse uma,
-as duas não estariam marcadas uma pela outra, e a divisão não teria produzido
-duas coisas. (3) Um isomorfismo entre as duas nomeações é uma bijeção que
-respeite tudo o que há --- e o que há é $\tau$; ora $\tau$ é ela própria essa
-bijeção, e é involutiva, de modo que a leitura contrária existe e é a mesma. A
-prova não usa nome nenhum, o que é exatamente a afirmação.
+(1) Aplicando a definição a $x$ e a $\partial x$ vem
+$x\circ\partial x=e=\partial x\circ\partial\partial x$. Compondo
+$e\circ x=(x\circ\partial x)\circ x$ e usando a associatividade, o valor não
+depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
+
+(2) De $x\circ\partial x=e$ e $\partial x\circ\partial\partial x=e$, o elemento
+$\partial x$ tem $x$ e $\partial\partial x$ como inversos; numa composição
+associativa o inverso é único, logo $\partial\partial x=x$.
+
+(3) $e\circ\partial e=e$ por definição, e $e\circ\partial e=\partial e$ por (1);
+donde $\partial e=e$.
+
+(4) Se $\partial$ não tem ponto fixo, (3) não pode valer, e a composição não
+existe --- não há uma. Com dois objetos e $\partial$ a trocá-los, o invariante de
+uma composição teria de ser fixo por $\partial$, e nenhum dos dois o é. Resta que
+haja \emph{duas} composições, cada uma com o seu invariante, e que os dois
+invariantes sejam os dois objetos: um é o neutro de uma, o outro é o neutro da
+outra. Chamando-lhes $0$ e $1$, e escrevendo $+$ e $\cdot$ para as duas
+composições, a Def.~\ref{def:op} lê-se
+\[
+\boxed{\;\partial x + x = 0\qquad\qquad \partial x\cdot x = 1\;}
+\]
+--- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra.
 \end{proof}
 
-\medskip\noindent\textbf{E é por isso que não há parâmetro livre.} O que o
-teorema seguinte mostra --- que as tabelas de $B$ estão determinadas --- não é
-um facto sobre \emph{dois símbolos}: é um facto sobre \emph{uma divisão}. Não se
-escolheu $B$ entre estruturas possíveis; correu-se $\partial$ uma vez.
+\medskip\noindent\textbf{E a verificação é por varredura.} Sobre \emph{três}
+objetos, das $81$ soluções com uma composição \emph{todas} têm o neutro fixo por
+$\partial$, e \textbf{nenhuma} o tem não fixo --- que é (3) medido; sobre
+\emph{dois}, com $\partial$ a trocá-los, não há solução nenhuma com uma
+composição só, que é (4).
+
+\begin{teorema}[as soluções são únicas]\label{thm:B}
+Com as duas composições do Teor.~\ref{thm:duas}, os seus invariantes $0$ e $1$, e
+as duas a formarem uma só estrutura (distributividade), as tabelas ficam
+\textbf{forçadas}:
+\[
+0+0=0,\qquad 0+1=1+0=1,\qquad 1+1=0,
+\qquad
+0\cdot x=0,\qquad 1\cdot x=x .
+\]
+Em particular $1+1=0$, donde $x+x=0$: cada símbolo é o seu próprio oposto --- a
+primeira equação lida sobre os dois.
+\end{teorema}
+
+\begin{proof}
+Da primeira equação: o oposto de $1$ existe e é um dos dois símbolos; se fosse
+$0$, viria $1+0=0$, contra $0$ ser o neutro; logo é $1$, e $1+1=0$. As restantes
+somas são o neutro. Da segunda: $1\cdot x=x$ é o neutro, e $0\cdot x=0$ sai de
+$0\cdot x=(0+0)\cdot x=0\cdot x+0\cdot x$. Ficam determinadas as quatro entradas
+de cada tabela, sem escolha por fazer.
+
+Varrendo os pares de tabelas sobre dois símbolos com invariantes distintos,
+sobrevivem exatamente \textbf{duas} soluções, e a segunda é a primeira com $0$ e
+$1$ trocados: a mesma estrutura noutra nomeação. Partir do $0$ e construir o $1$,
+ou o contrário, é o mesmo percurso lido nos dois sentidos.
+\end{proof}
 
 \begin{definicao}[o binário]\label{def:B}
-$B$ é o conjunto das duas metades do Teor.~\ref{thm:op}: o resultado de uma
-aplicação do operador.
+$B$ é o conjunto dos dois símbolos do Teor.~\ref{thm:B}.
 \end{definicao}
 
-\medskip\noindent\textbf{E o operador não corre uma vez.} Cada metade é ela
-própria um bloco, e $\partial$ volta a aplicar-se. O que daí sai não é um
-conjunto maior: é uma \emph{sucessão de decisões}, e é ela que interessa.
+\begin{teorema}[a lista, do binário]\label{thm:BI}
+Sobre palavras em $B$, com $\oplus$ e $\wedge$ as duas operações do
+Teor.~\ref{thm:B} aplicadas posição a posição, vale
+\[
+\boxed{\;a+b=(a\oplus b)+2\,(a\wedge b)\;}
+\]
+e a iteração $(a,b)\mapsto\bigl(a\oplus b,\,2(a\wedge b)\bigr)$ termina, porque a
+segunda componente sobe de posição a cada passo e a largura é finita. A soma
+assim obtida enumera as palavras, e o \textbf{encaixe por prefixos} ordena os
+andares uns dentro dos outros,
+\[
+\{0,1\}\subset\{0,\dots,3\}\subset\{0,\dots,15\}\subset\{0,\dots,255\},
+\]
+com as palavras de largura $w$ em número de $2^{w}$ e a dobra a duplicar a
+largura. A \textbf{lista} $I$ é essa ordem.
+\end{teorema}
+
+\begin{proof}
+Posição a posição, para $a_j,b_j\in B$ verifica-se nos quatro casos que
+$a_j+b_j=(a_j\oplus b_j)+2(a_j\wedge b_j)$; multiplicando por $2^{j}$ e somando
+vem a identidade. Na iteração, $a\wedge b$ multiplicado por $2$ desloca-se uma
+posição para cima, de modo que ao fim de tantos passos quantos os bits da
+largura a segunda componente é nula. O encaixe é a restrição das operações de um
+andar ao anterior, e a ordem resultante é total.
+\end{proof}
 
 \begin{teorema}[o processo dá as coordenadas, e elas são a representação]\label{thm:coord}
-Aplicando $\partial$ sucessivamente --- ao bloco, depois à metade escolhida,
-depois à metade dessa --- fica registada, por ordem, qual metade se tomou em
+Aplicando $\partial$ sucessivamente --- ao argumento, depois ao que dele saiu,
+depois ao que daí saiu --- fica registada, por ordem, qual metade se tomou em
 cada passo. Essa sucessão é a \textbf{tupla}
 \[
 \boxed{\;x=(x_1,x_2,\dots,x_w)\in B^{w}\;}
@@ -276,205 +340,9 @@ Teor.~\ref{thm:multiplicidade}.
 presentes.} O \emph{operador} decide; a \emph{tupla} regista as decisões, por
 ordem; e o \emph{objeto} é onde elas caem. A tupla ordenada de $w$ decisões é o
 que adiante se chama a \textbf{palavra} (Teor.~\ref{thm:palavra}) --- lá o
-alfabeto é o das direções de aresta, e a divisão que $\partial$ faz num bloco é
-a que o vértice faz nas suas saídas; a \textbf{aresta é a memória dessa
+alfabeto é o das direções de aresta, e a divisão que $\partial$ faz no seu
+argumento é a que o vértice faz nas suas saídas; a \textbf{aresta é a memória dessa
 divisão}. E $G$ conta o que a passagem da tupla ao objeto deitou fora.
-
-\subsection*{E é sempre o mesmo operador}
-
-\noindent Um documento que introduzisse $\partial$ no princípio e depois
-trouxesse, andar a andar, um mecanismo novo para cada secção, teria posto o
-operador no sítio errado. Não é o caso: o que se segue são \emph{aplicações do
-mesmo} $\partial$, e o que as identifica é a involução do Teor.~\ref{thm:op}(1).
-
-\begin{teorema}[um operador, e a involução é a assinatura]\label{thm:umop}
-Em cada linha da tabela abaixo há um objeto, uma partição dele em \emph{duas}
-partes, e uma \textbf{involução} $\tau$ que as troca --- $\tau^{2}=\mathrm{id}$,
-e $\tau$ não fixa nenhuma das duas. Nenhuma das linhas é analogia: cada uma é
-um enunciado deste documento, e a coluna da direita diz qual.
-\begin{center}\footnotesize
-\begin{tabular}{@{}llll@{}}
-\toprule
-o que se divide & as duas partes & a troca $\tau$ & onde \\
-\midrule
-o bloco & as duas metades & $x\mapsto x+1$ & Teor.~\ref{thm:op} \\
-a largura $2w$ & $F_w$ e $\sigma F_w$ & trocar o bit de $\sigma$ & Teor.~\ref{thm:espaco} \\
-o vértice & $+e_i$ e $-e_i$ & inverter o sentido & Def.~\ref{def:grade} \\
-a bola de raio $2^{-p}$ & as duas irmãs & trocar o bit $p$ & Teor.~\ref{thm:viz-arvore} \\
-a curva $\mathcal{D}_{k+1}$ & $\mathcal{D}_k$ e $\mathcal{D}_k^{*}$ & a dobra do papel & Def.~\ref{def:dobrar} \\
-o campo, no corte $k$ & $\chi_k=+1$ e $\chi_k=-1$ & somar $e_j$ com $k_j=1$ & Def.~\ref{def:dual} \\
-o passo & o que já foi e o que falta & $\zeta\leftrightarrow\mu$ & Teor.~\ref{thm:shift} \\
-a realização & a fibra e a base & $\pi\leftrightarrow\tilde\pi$ & Teor.~\ref{thm:levantamento} \\
-\bottomrule
-\end{tabular}
-\end{center}
-\end{teorema}
-
-\begin{proof}
-Linha a linha, e cada uma remete para o resultado que a prova. $x\mapsto x+1$ é
-involutiva porque $1+1=0$ (Teor.~\ref{thm:B}) e não fixa nada porque $1\neq0$.
-Trocar um bit é involutivo pela mesma razão, e é o que dá as duas cópias em
-$F_{2w}=F_w\oplus\sigma F_w$ (Teor.~\ref{thm:espaco}), as duas irmãs da árvore
-(Teor.~\ref{thm:viz-arvore}) e as duas metades do corte de $\chi_k$
-(Lema~\ref{lem:orto}: $\chi_k(j\oplus e_j)=-\chi_k(j)$). Inverter o sentido de
-uma direção é involutivo e $+e_i\neq-e_i$ na grade (Def.~\ref{def:palavra}).
-Na curva, $\mathcal{D}^{*}$ é a mesma curva lida ao contrário e rodada, e
-lê-la duas vezes ao contrário repõe-na (Def.~\ref{def:dobrar}). Os dois
-últimos pares são retrações e não involuções, e é por isso que aparecem em
-último: $\mu\zeta=\mathrm{id}$ fecha dos dois lados por nilpotência
-(Lema~\ref{lem:nilp}), mas $\operatorname{pr}_1\tilde\pi=\pi$ fecha de um só
-(Teor.~\ref{thm:levantamento}) --- \emph{a dobra é justamente onde a involução
-deixa de fechar}, e é ela que $G$ conta.
-\end{proof}
-
-\medskip\noindent Em uma linha, e é o resumo do documento inteiro:
-\[
-\boxed{\ \partial\ \text{divide};\quad \tau\ \text{lembra a divisão};\quad
-G\ \text{conta onde }\tau\ \text{já não chega.}\ }
-\]
-A dualidade é a \textbf{memória da divisão} --- é isso que a involução é ---, e
-a multiplicidade é o que sobra quando a memória não cabe na largura.
-
-\begin{teorema}[em $B$ não há parâmetro livre]\label{thm:B}
-Em dois símbolos nada fica por decidir. Nomeando $0$ o neutro da soma e $1$ o
-outro símbolo:
-\[
-0+0=0,\qquad 0+1=1+0=1,\qquad 1+1=0,
-\qquad
-0\cdot x=0,\qquad 1\cdot x=x .
-\]
-Cada uma destas igualdades é \textbf{forçada}, e não escolhida --- em particular
-$1+1=0$, donde $x+x=0$ e cada símbolo é o seu próprio oposto. As duas operações
-são as que o cálculo posição a posição usa, e não há outras.
-\end{teorema}
-
-\begin{proof}
-As três primeiras somas são a definição de neutro. Para $1+1$: o oposto de $1$
-existe e é um dos dois símbolos; se fosse $0$, viria $1+0=0$, contra $0$ ser
-neutro; logo é $1$, e $1+1=0$. No produto, $0\cdot x=0$ sai da distributividade
---- $0\cdot x=(0+0)\cdot x=0\cdot x+0\cdot x$ --- e $1\cdot x=x$ é a definição de
-unidade. Ficam determinadas as quatro entradas de cada tabela, sem nenhuma
-escolha por fazer.
-\end{proof}
-
-\medskip\noindent Não é que entre as estruturas possíveis se escolha uma: é que
-com dois símbolos \emph{não há mais do que uma}. Toda a construção seguinte
-herda esta ausência de liberdade. É esta a estrutura que correntemente se
-escreve $B$; aqui escreve-se $B$, e a diferença não é de notação: lá
-é um objeto que se dá, aqui é o que o teorema acabou de \emph{obter}. O nome
-clássico não volta a aparecer no documento.
-
-\medskip\noindent\textbf{Construção da lista.} Com $B$ definido e a sua estrutura
-fixada, a lista não precisa de ser dada: constrói-se, e o núcleo mínimo da
-construção é o \emph{transporte} --- a obra fá-lo assim, e aqui só muda a
-simbologia.
-
-\begin{teorema}[a lista, do binário]\label{thm:BI}
-Sobre palavras em $B$, com $\oplus$ e $\wedge$ as duas operações do
-Teor.~\ref{thm:B} aplicadas posição a posição, vale
-\[
-\boxed{\;a+b=(a\oplus b)+2\,(a\wedge b)\;}
-\]
-e a iteração $(a,b)\mapsto\bigl(a\oplus b,\,2(a\wedge b)\bigr)$ termina, porque a
-segunda componente sobe de posição a cada passo e a largura é finita. A soma
-assim obtida enumera as palavras, e o \textbf{encaixe por prefixos} ordena os
-andares uns dentro dos outros,
-\[
-\{0,1\}\subset\{0,\dots,3\}\subset\{0,\dots,15\}\subset\{0,\dots,255\},
-\]
-com as palavras de largura $w$ em número de $2^{w}$ e a dobra a duplicar a
-largura. A \textbf{lista} $I$ é essa ordem.
-\end{teorema}
-
-\begin{proof}
-Posição a posição, para $a_j,b_j\in B$ verifica-se nos quatro casos que
-$a_j+b_j=(a_j\oplus b_j)+2(a_j\wedge b_j)$; multiplicando por $2^{j}$ e somando
-vem a identidade. Na iteração, $a\wedge b$ multiplicado por $2$ desloca-se uma
-posição para cima, de modo que ao fim de tantos passos quantos os bits da
-largura a segunda componente é nula. O encaixe é a restrição das operações de um
-andar ao anterior, e a ordem resultante é total.
-\end{proof}
-
-\medskip\noindent Donde a cadeia inteira parte de \emph{uma} distinção:
-\[
-\boxed{\;B\;\longrightarrow\;I\;\longrightarrow\;I^{2}/{\sim}\;\longrightarrow\;
-\text{as frações}\;\longrightarrow\;\text{os cortes}\;}
-\]
-e o resto deste documento corre sobre ela. Ao segundo andar $I^{2}/{\sim}$ ---
-construído na §\ref{sec:escada} --- chama-se \Z\ quando ele aparecer como anel
-de coeficientes (§\ref{sec:zeta}, §\ref{sec:transf}): é o nome corrente de um
-andar \emph{desta} cadeia, e não um símbolo trazido de fora.
-
-\medskip\noindent\textbf{Codificar o finito, e subir.} Com $B$ construído,
-\emph{qualquer} objeto finito se representa: um conjunto de $c$ elementos entra
-em $\lceil\log_2 c\rceil$ bits injetivamente, e não entra em menos. A lista não é
-uma codificação escolhida --- é a largura que chega, e é a única.
-
-\medskip\noindent\textbf{E não se começa infinito.} A subida não termina num
-objeto: cada nível parte cada cilindro em dois, o seguinte refina o anterior, e
-cada decisão é \emph{finita}. O infinito é a \textbf{caminhada}, e o rastro dela
-é a dinâmica --- não há fim onde chegar. Convém separar duas afirmações que se
-confundem: \emph{há infinitos passos} e \emph{existe um objeto chamado
-$\infty$}. A primeira é sobre o processo e é a que se usa aqui; a segunda põe no
-espaço o que pertencia à dinâmica. O que se ganha com esta formulação é
-concreto: duas caminhadas distintas separam-se num passo \emph{finito}, o
-primeiro em que divergem, de modo que nunca é preciso completá-las para as
-distinguir.
-
-\medskip\noindent\textbf{E o que acontece a quem insiste em representar.} Numa
-largura \emph{finita}, o topo liga-se ao fundo: $\max+1=\min$. Realizar mais
-elementos do que a largura comporta identifica-os dois a dois, e o campo lê
-$G=2$ em todas as células. Isto não é defeito da aritmética nem escolha de
-convenção --- é a \textbf{dobra a acontecer na representação}, e não tem jeito.
-Pôr o infinito numa representação finita é o caso extremo: pela Möbius que o traz
-para a aritmética aditiva obtém-se $\infty+1=-1$, e pela mediante
-$\infty\oplus(-1)=0$; ambas demonstradas na obra, e ambas leituras da mesma
-dobra.
-
-\medskip\noindent\textbf{O caso clássico.} $0{,}999\ldots=1$ é o mesmo problema,
-e é sério. Em binário são $0{,}0111\ldots$ e $0{,}1000\ldots$: duas caminhadas
-que \emph{divergem no primeiro passo} e não coincidem em bit nenhum --- nunca se
-encontram, em passo finito algum. Que se declarem iguais é uma identificação da
-\emph{régua}, e as réguas discordam: na ultramétrica estão à distância
-\textbf{máxima}, por terem divergido no topo; na euclidiana, a diferença das
-somas parciais encolhe. Não é preciso dizer que as caminhadas ``se encontram'':
-elas não se encontram --- é a representação que as identifica. A dobra está na
-representação, e o campo é o que a conta.
-
-\medskip\noindent E isto generaliza o teorema central deste documento, que se
-pode enunciar assim:
-\[
-\boxed{\ \text{a dobra é o preço de representar uma \emph{dinâmica} por um
-\emph{estado}}\ }
-\]
---- a trajetória é a dinâmica, a posição é o estado, e $G$ mede exatamente o que
-a passagem de uma à outra deitou fora.
-
-\medskip\noindent\textbf{Dois alfabetos, que não se confundem.} O de $I$ --- os
-símbolos que se percorrem --- e o das \emph{direções de aresta}
-(§\ref{sec:geo}), no qual se escreve o passo. O primeiro é a fita; o segundo é o
-que a máquina faz a cada símbolo dela. Porque a aranha é um \textbf{autómato}:
-percorre a lista e, em cada símbolo, escreve no espaço, lê a vizinhança e
-move-se --- o ciclo da §\ref{sec:algoritmo}, cujos quatro passos são as quatro
-cláusulas do Teor.~\ref{thm:multiplicidade}.
-
-\medskip\noindent\textbf{E a construção é geométrica.} O que se constrói são
-vértices, arestas, graus, percursos, cortes e uma métrica --- e cada resultado
-adiante é uma afirmação sobre esses objetos. Os símbolos entram como o que se
-percorre; a geometria é o que a percorrência produz.
-
-\medskip\noindent\textbf{A letra.} $\pi$ é aqui a \textbf{projeção} --- a letra
-padrão do fibrado, e a mesma do $\pi_k$ com que o Maestro desce um andar da
-torre. O \emph{número} $\pi$ aparece na §\ref{sec:serie}, e aparece
-\textbf{construído}: três somas alternadas independentes em aritmética inteira,
-sem um dígito citado. São duas coisas com a mesma letra e a convenção fica dita
-aqui, no primeiro uso; onde houver risco, escreve-se ``o número $\pi$''.
-
-\medskip\noindent Note-se o que \emph{não} está na definição: nem estrutura algébrica em
-$X$, nem métrica, nem dimensão. Só igualdade. Esta economia não é elegância --- é
-o conteúdo do Teorema~\ref{thm:multiplicidade}, e é o que se paga no
-Teorema~\ref{thm:dimensao}, onde a dimensão finalmente aparece e se vê que
-aparece uma vez só.
 
 \subsection*{A realização, e o que ela perde}
 
@@ -1246,7 +1114,7 @@ isto é, a \emph{diferença finita}: $(b*\mu)(t)=b(t)-b(t-1)$.
 \begin{proof}
 $(\zeta*\mu)(u,t)=\sum_{u\le v\le t}\mu(v,t)$. Se $u=t$ a soma tem um termo,
 $\mu(t,t)=1$. Se $u<t$, os únicos termos não nulos são $v=t-1$ e $v=t$, ambos no
-intervalo, e somam $-1+1=0$. Logo $\zeta*\mu=\delta$, e $\mu=\zeta^{-1}$.
+intervalo, e somam $-1+1=0$. Logo $\zeta*\mu=\delta_0$, e $\mu=\zeta^{-1}$.
 \end{proof}
 
 \begin{teorema}[o ciclo é $\zeta$; o Algoritmo B é $\mu$]\label{thm:zeta-mu}
@@ -1310,14 +1178,15 @@ soma sobre o \emph{contradomínio} $X$.
 tem uma, a relação entre $G$ e as bolas diz o que a métrica é.
 
 \begin{definicao}[a árvore do encaixe]\label{def:arvore}
-Para $a\neq b$ inteiros de $p$ bits, seja $\delta(a,b)$ a profundidade da
+Para $a\neq b$ inteiros de $p$ bits, seja $\operatorname{prof}(a,b)$ --- e não
+$\delta$, que aqui é a base canónica e o Kronecker --- a profundidade da
 primeira divergência: o menor $q\ge0$ tal que os bits de peso $p-1,\dots,p-q$ de
 $a$ e $b$ coincidem e o de peso $p-1-q$ difere. Ponha-se
 \[
-d(a,b)=\begin{cases}0,&a=b,\\[2pt] 2^{-\delta(a,b)},&a\neq b.\end{cases}
+d(a,b)=\begin{cases}0,&a=b,\\[2pt] 2^{-\operatorname{prof}(a,b)},&a\neq b.\end{cases}
 \]
 A separação --- $d(a,b)=0$ se e só se $a=b$ --- é parte da definição, e não uma
-consequência a verificar: com $\delta(a,a)=p$ viria $d(a,a)=2^{-p}\neq0$, e não
+consequência a verificar: com $\operatorname{prof}(a,a)=p$ viria $d(a,a)=2^{-p}\neq0$, e não
 seria métrica.
 \end{definicao}
 
@@ -1327,10 +1196,10 @@ quaisquer $a,b,c$.
 \end{lema}
 
 \begin{proof}
-Se $a$ e $b$ concordam nos $\delta(a,b)$ bits mais altos e $b$ e $c$ nos
-$\delta(b,c)$, então $a$ e $c$ concordam nos primeiros
-$\min\{\delta(a,b),\delta(b,c)\}$, logo
-$\delta(a,c)\ge\min\{\delta(a,b),\delta(b,c)\}$. Aplicando $t\mapsto2^{-t}$, que
+Se $a$ e $b$ concordam nos $\operatorname{prof}(a,b)$ bits mais altos e $b$ e $c$ nos
+$\operatorname{prof}(b,c)$, então $a$ e $c$ concordam nos primeiros
+$\min\{\operatorname{prof}(a,b),\operatorname{prof}(b,c)\}$, logo
+$\operatorname{prof}(a,c)\ge\min\{\operatorname{prof}(a,b),\operatorname{prof}(b,c)\}$. Aplicando $t\mapsto2^{-t}$, que
 inverte a ordem, vem $d(a,c)\le\max\{d(a,b),d(b,c)\}$.
 \end{proof}
 
@@ -1799,9 +1668,11 @@ constrói, $F_{2w}=F_w\oplus\sigma F_w$, cujo grafo aditivo é $Q_{2w}$. Falta o
 \noindent Opera-se um sistema \textbf{variando-o}: se nada varia, nada se vê. A
 variação mais barata é um parâmetro numa \emph{reta} --- e chega, porque a
 aranha sobe sozinha e não há mais nada a controlar. O operador dessa variação é
-o deslocamento $S$ da Def.~\ref{def:ops}, e a sua diferença $\mu=1-S$ é a
-\textbf{derivada} discreta, com $\zeta=(1-S)^{-1}$ a integrar de volta
-(Teor.~\ref{thm:shift}).
+o deslocamento $S$ da Def.~\ref{def:ops}, e $\mu=1-S$ é o \textbf{operador} da
+Def.~\ref{def:op} aplicado a $\zeta$: $\mu*\zeta=\zeta*\mu=\delta_0$, que é a
+segunda equação --- $\partial x\cdot x=1$ --- com a convolução no lugar do
+produto e $\delta_0$ no lugar do $1$ (Teor.~\ref{thm:shift}). A primeira equação
+não se aplica a $\zeta$, e não se finge que sim.
 
 \begin{definicao}[o tempo, e as duas grandezas que o acompanham]\label{def:tempo}
 Três coisas distintas, cada uma com o seu nome:
@@ -1811,16 +1682,18 @@ Três coisas distintas, cada uma com o seu nome:
       contar a lista --- de modo que dizer ``o tempo'' e dizer ``a contagem dos
       símbolos percorridos'' é dizer a mesma coisa.
 \item[(ii)] O \textbf{tempo próprio} $\tau$ é o mesmo percurso \emph{medido por
-      uma régua}: $d\tau^{2}=g_{uv}dx^udx^v$. Coincide com $t$ exatamente quando
+      uma régua}: $(\partial\tau)^{2}=g_{uv}\,\partial x^{u}\,\partial x^{v}$. Coincide com $t$ exatamente quando
       a diagonal de $g$ usada vale $1$ --- ver a subsecção seguinte; com outra
       $g$, não.
 \item[(iii)] A \textbf{dobra acumulada} $D=\theta*\zeta$, com
       $\theta(t)=[\,G_{t}(\pi(t))>1\,]$, e $\mu D=\theta$. Esta \emph{não} é um
-      tempo: é memória. O que dela se lê é a \textbf{taxa de dobras} $dD/d\tau$,
+      tempo: é memória. O que dela se lê é a \textbf{taxa de dobras} $\partial D/\partial\tau$,
       que muda com a régua. No fim do percurso $D(N)=\abs{I}-v$ --- o mesmo $D$
       do Teor.~\ref{thm:euler}, e não outra grandeza com a mesma letra.
 \end{enumerate}
-(A letra $d$ fica reservada à distância da §\ref{sec:ultra}.)
+(A letra $d$ fica reservada à distância da §\ref{sec:ultra}; o \emph{incremento}
+escreve-se $\partial$, que é o operador da Def.~\ref{def:op} --- não há aqui um
+diferencial importado do contínuo.)
 \end{definicao}
 
 \medskip\noindent A distinção não é de estilo. Chamar ``tempo'' a (iii) --- como
@@ -1832,7 +1705,7 @@ pergunta de onde vem o tempo: dos passos do operador, e de mais nada.
 não é dado pelo percurso --- é dado pela métrica com que se mede. O mesmo
 percurso, medido na grade, tem todos os saltos iguais a $1$; medido na
 ultramétrica da árvore (§\ref{sec:ultra}) sobre o parâmetro, tem saltos de
-comprimento $2^{-\delta(t,t+1)}$, que varia com a profundidade em que os índices
+comprimento $2^{-\operatorname{prof}(t,t+1)}$, que varia com a profundidade em que os índices
 divergem --- e diverge no topo sempre que se atravessa uma potência de $2$. Logo
 a \emph{taxa de dobras por unidade de comprimento} é uma na grade e outra na
 árvore, com o mesmo numerador. As duas são réguas do mesmo objeto: dão a mesma
@@ -1842,33 +1715,40 @@ réguas, e não entre os números que elas produzem.
 \subsection*{A métrica}
 
 \noindent O comprimento de um salto vem de uma \textbf{forma quadrática} no seu
-incremento:
+incremento --- e o incremento é o que o operador dá, $\partial x$, não um
+diferencial:
 \[
-\boxed{\;d\tau^{2}=g_{uv}\,dx^{u}dx^{v}\;}
+\boxed{\;(\partial\tau)^{2}=g_{uv}\,\partial x^{u}\,\partial x^{v}\;}
 \]
 com $g$ simétrica e não degenerada. Sobre uma aresta o valor é \emph{inteiro}:
 só o comprimento total precisaria de raiz.
 
 \medskip\noindent\textbf{E o percurso só sonda a diagonal de $g$.} Uma aresta é
-$dx=\pm e_i$, com uma componente só, logo $dx^udx^v=0$ fora da diagonal e
-$d\tau^{2}=g_{ii}$: os termos cruzados não são medidos por passo nenhum de um
+$\partial x=\pm e_i$, com uma componente só, logo $\partial x^{u}\partial x^{v}=0$ fora
+da diagonal e $(\partial\tau)^{2}=g_{ii}$: os termos cruzados não são medidos por passo nenhum de um
 percurso da grade. Para os medir seria preciso um salto diagonal --- que, pela
 Def.~\ref{def:percurso}, não é aresta.
 
 \begin{teorema}[a régua canónica]\label{thm:gcanon}
-Uma aresta na direção $i$ dá $d\tau^{2}=g_{ii}$. Logo $\tau=N$ --- o
+Uma aresta na direção $i$ dá $(\partial\tau)^{2}=g_{ii}$. Logo $\tau=N$ --- o
 \textbf{tempo próprio coincide com o parâmetro} --- se e só se $g_{ii}=1$ para
 toda direção usada; e isso \emph{não} exige $g=\mathrm{id}$: os termos fora da
 diagonal permanecem invisíveis a um percurso de arestas.
 \end{teorema}
 
 \begin{proof}
-Uma aresta é $dx=\pm e_i$, logo $g_{uv}dx^udx^v=g_{ii}$: só a diagonal é
-sondada. Somando sobre os $N$ saltos vem $\tau=\sum_t g_{i(t)i(t)}$, que é $N$
-exatamente quando cada $g_{ii}$ usado vale $1$. Em particular
-$g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$ dá o mesmo $\tau$
-que a identidade, e $\operatorname{diag}(1,4)$ não.
+Uma aresta é $\partial x=\pm e_i$, logo
+$g_{uv}\,\partial x^{u}\partial x^{v}=g_{ii}$: só a diagonal é sondada. Somando
+sobre os $N$ saltos vem $\tau=\sum_t g_{i(t)i(t)}$, que é $N$ exatamente quando
+cada $g_{ii}$ usado vale $1$.
 \end{proof}
+
+\medskip\noindent\textbf{E as duas metades da afirmação exibem-se.} Uma $g$ com
+a diagonal a $1$ e os termos cruzados a $3$ dá o \emph{mesmo} $\tau$ que a
+identidade --- os cruzados nunca são sondados ---, ao passo que uma $g$ diagonal
+com uma entrada a $4$ já o afasta. As duas correm no §AN28: a primeira é a
+testemunha de que $g=\mathrm{id}$ não é preciso, a segunda o controlo sem o qual
+a primeira não diria nada.
 
 \medskip\noindent É esta a razão de a grade ser a régua barata: nela, variar o
 parâmetro e andar no espaço são a mesma conta. É a variação \emph{mais fácil},
@@ -1879,7 +1759,7 @@ depender do ponto, e deixando que o que a faça variar seja o próprio campo,
 \[
 g_{uv}(x)=G(x)\,h_{uv}
 \qquad\Longrightarrow\qquad
-d\tau^{2}=G(x)\,h_{uv}dx^udx^v ,
+(\partial\tau)^{2}=G(x)\,h_{uv}\,\partial x^{u}\,\partial x^{v} ,
 \]
 que numa aresta na direção $i$ vale $G(x)\,h_{ii}$: \textbf{o tempo próprio de um
 salto é a multiplicidade da célula de chegada}. Onde a trajetória já passou, o
@@ -1889,7 +1769,7 @@ $G\equiv1$ a métrica é plana e $\tau=N$; onde há dobra, $\tau$ afasta-se do
 parâmetro.
 
 \begin{teorema}[o passo é o mínimo métrico local]\label{thm:geodesica}
-Se $h=\mathrm{id}$, o vizinho de menor $G$ é o vizinho de menor $d\tau^{2}$, e
+Se $h=\mathrm{id}$, o vizinho de menor $G$ é o vizinho de menor $(\partial\tau)^{2}$, e
 portanto o passo~3 do ciclo (§\ref{sec:algoritmo}) move-se, a cada salto, por
 onde o tempo próprio é mínimo. (Isto é minimização \emph{local}, salto a salto;
 não se afirma minimização do comprimento total.) A hipótese é necessária: para $h$ anisotrópica as duas escolhas
@@ -1897,9 +1777,9 @@ divergem.
 \end{teorema}
 
 \begin{proof}
-Com $h=\mathrm{id}$, $d\tau^{2}=G(y)$ para todo vizinho $y$, e minimizar um é
-minimizar o outro. Com $h_{ii}$ não constante, $d\tau^{2}=G(y)h_{ii}$ e um
-vizinho de $G$ maior pode ter $d\tau^{2}$ menor; exibe-se um.
+Com $h=\mathrm{id}$, $(\partial\tau)^{2}=G(y)$ para todo vizinho $y$, e minimizar um é
+minimizar o outro. Com $h_{ii}$ não constante, $(\partial\tau)^{2}=G(y)h_{ii}$ e um
+vizinho de $G$ maior pode ter $(\partial\tau)^{2}$ menor; exibe-se um.
 \end{proof}
 
 \medskip\noindent Fica assim dito o que o passo~3 é: não uma heurística de
@@ -2315,7 +2195,7 @@ Teor.~\ref{thm:euler} e Cor.~\ref{cor:pik} §AN25 ($b_1=D=335$ no dragão, a
 espiral a reusar arestas, a reta a ser árvore; e $\pi_k$ a truncar);
 a tabela desta §\ref{sec:realizacoes} §AN23 (medida, não escrita: os nove
 $\max G$, as células e a coluna \emph{percurso});
-Teor.~\ref{thm:gcanon} e \ref{thm:geodesica} §AN21--§AN22 ($d\tau^2$ inteiro por
+Teor.~\ref{thm:gcanon} e \ref{thm:geodesica} §AN21--§AN22 ($(\partial\tau)^2$ inteiro por
 aresta com três $g$; $\tau=N$ só com $g=\mathrm{id}$; $g_{uv}(x)=G(x)\delta_{uv}$
 curva onde há dobra e é plana com $G\equiv1$; e a geodésica a divergir do
 gradiente quando $h$ é anisotrópica);
@@ -2341,14 +2221,17 @@ Def.~\ref{def:doisandares}, Teor.~\ref{thm:dobra-norma} e \ref{thm:conv} §AN12
 (as coordenadas do campo na base canónica; a dobra na norma por três caminhos,
 com o percurso injetivo a dar excesso zero; convolução diagonalizada e
 deconvolução com resíduo $0$; e a degenerescência exibida);
-Def.~\ref{def:bloco}, Def.~\ref{def:op}, Teor.~\ref{thm:op},
-\ref{thm:coord} e \ref{thm:umop} §AN35 (as duas nomeações a darem tabelas
-isomorfas por $\tau$, com a identidade a NÃO servir como controlo; permutar a
-tupla a mudar o objeto em $32$ das $64$, e as outras $32$ a serem exatamente as
-de componentes iguais; a involução com $\tau^2=\mathrm{id}$ e sem ponto fixo nos
-seis andares --- bloco, largura $2w$, sentido da aresta, bola irmã, dobra da
-curva e corte de $\chi_k$, $68\,156$ casos; e a volta a NÃO fechar em $256$ de
-$512$, que é onde $G$ tem trabalho);
+Def.~\ref{def:op} e Teor.~\ref{thm:duas} §AN36 (o invariante a ser ponto fixo de
+$\partial$: varrendo \emph{todas} as composições e \emph{todos} os $\partial$
+sobre três símbolos, as $81$ soluções têm $\partial e=e$ e nenhuma tem
+$\partial e\neq e$; e sobre dois símbolos, onde um $\partial$ efetivo os troca,
+\emph{zero} soluções com uma composição só --- que é de onde saem as duas
+operações; e com duas composições de invariantes distintos, exatamente $2$
+soluções, com as entradas forçadas);
+Teor.~\ref{thm:coord} §AN35 (as duas nomeações a darem tabelas isomorfas pela
+troca, com a identidade a NÃO servir como controlo, $6$ discordâncias; e
+permutar a tupla a mudar o objeto em $32$ das $64$, com as outras $32$ a serem
+exatamente as de componentes iguais);
 Teor.~\ref{thm:B} e \ref{thm:BI} §AN33 (as quatro aplicações, as duas
 invertíveis e involutivas, a única tabela de produto em dezasseis, e o encaixe
 por prefixos);
@@ -2396,7 +2279,7 @@ Teor.~\ref{thm:periodo} (a cauda $\ell$ e o período $p$ no campo);
 Teor.~\ref{thm:leitura} (dobrar sem período obriga a ler o índice)}
         {campo esparso, $\Theta(n)$/passo, memória $\Theta(|I|)$, sem alocação dinâmica;
          postos $1$ a $4$, árvore, $\Z[i]$}
-        {\code{tests/aranha\_n.c} §AN1--§AN35;
+        {\code{tests/aranha\_n.c} §AN1--§AN36;
          \code{tests/aranha\_g.c} §AG1--§AG11;
          \code{tests/aranha\_inversa.c} §AI1--§AI7}
 

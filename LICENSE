@@ -3,6 +3,29 @@ Este repositório é software e documentação PROPRIETÁRIOS.
 Copyright (c) 2026 Aarão Melo Lopes. Todos os direitos reservados.
 
 ═══════════════════════════════════════════════════════════════════════════════
+  A LEI DESTE REPOSITÓRIO, E ELA É A MESMA CÁ FORA
+═══════════════════════════════════════════════════════════════════════════════
+
+O trabalho aqui dentro parte de um operador e das duas equações que ele cumpre
+sobre o seu argumento:
+
+        ∂x + x = 0                    ∂x · x = 1
+
+O operador é o que CONSERVA: composto com aquilo a que se aplica, devolve o
+invariante. Uma acção sem o seu dual não conserva — perde. É por isso que este
+repositório mede o que afirma, guarda a volta de cada passo e conta o
+apagamento: o critério de toda a obra é o apagamento ser ZERO.
+
+A licença é essa mesma lei aplicada ao USO. Usar é uma acção sobre trabalho
+alheio, e uma acção sem o seu dual não conserva: deixa de um lado o que tirou
+do outro. O dual do uso são as DUAS obrigações abaixo — o acordo escrito e o
+pagamento —, e são duas porque as equações são duas. Sem elas o uso não fecha,
+e o que não fecha não está licenciado.
+
+Isto é a leitura. O que vale juridicamente é o que se segue, e está dito em
+linguagem corrente de propósito.
+
+═══════════════════════════════════════════════════════════════════════════════
   LICENÇA COMERCIAL — USO MEDIANTE CONTRATO E PAGAMENTO
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -19,6 +42,9 @@ trabalho precisa de:
   1. acordo escrito com o titular dos direitos; e
   2. pagamento nas condições desse acordo.
 
+São as duas, e não uma: acordo sem pagamento não licencia, pagamento sem
+acordo não licencia.
+
 Contacto para licenciamento:
   Aarão Melo Lopes
   aarao.melo.lopes@gmail.com
@@ -34,12 +60,25 @@ POR RECLAMAÇÕES, DANOS OU OUTRA RESPONSABILIDADE DECORRENTE DO USO OU DA
 IMPOSSIBILIDADE DE USO.
 
 ═══════════════════════════════════════════════════════════════════════════════
+  ATRIBUIÇÃO: O APAGAMENTO É ZERO
+═══════════════════════════════════════════════════════════════════════════════
+
+Nenhuma licença concedida ao abrigo deste documento autoriza remover, alterar
+ou obscurecer a indicação de autoria e de origem, nos ficheiros ou em qualquer
+material derivado. A obra inteira é construída sobre a exigência de que nada se
+perca no caminho; a autoria não é exceção.
+
+═══════════════════════════════════════════════════════════════════════════════
   NOTA DO AUTOR
 ═══════════════════════════════════════════════════════════════════════════════
 
 Este trabalho é meu e por isso disponho dele. Disponho assim: quem quiser
 usar, paga e combina. Os medidores em tests/ existem para quem tiver licença
 verificar — não para uso livre.
+
+Quem verificar, verifica tudo: os medidores estão aqui para serem corridos
+contra as afirmações dos papers, e é assim que este trabalho se defende — pela
+medida, não pela palavra.
 
   — Aarão Melo Lopes, agosto de 2026
 

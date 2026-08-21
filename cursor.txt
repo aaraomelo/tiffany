@@ -2956,3 +2956,74 @@ A CONCENTRAÇÃO (thm:umop, §AN35c) — o operador estava em oito sítios e é 
   gume  8 mutações no §AN35, 8 mordem (e uma sobreviveu à primeira: mutei METADE
         de um controlo de duas linhas — mutação parcial, outra vez)
   bateria 529 : 529, 34 unidades, 0 falhas · aranha.tex 30 páginas
+
+§65 — O OPERADOR COMO PRINCÍPIO, E O QUE EU TINHA POSTO DE MINHA CABEÇA
+========================================================================
+«o operador está espalhado pra todo lado, é pra CONCENTRAR ele como princípio
+inicial» · «da onde veio essa merda?» (três vezes, e as três tinha razão) ·
+«define o operador e diz que ele não modifica o objeto e DEPOIS MOSTRA que
+precisa de duas operações e dois símbolos» · «tira bloco, deixa argumento».
+
+A ORDEM QUE FICOU
+     Def. 1   o operador     ∂ é uma acção que CONSERVA: existe uma composição
+                             associativa com x ∘ ∂x igual para todo x — o
+                             INVARIANTE. E ∂ ≠ id, ou não havia o que conservar.
+     Teor. 2  uma composição NÃO CHEGA
+                (1) o invariante é o neutro   (2) ∂ é involutivo
+                (3) o neutro é PONTO FIXO de ∂
+                (4) logo, com ∂ a trocar dois objectos, uma composição é
+                    IMPOSSÍVEL: é precisa uma SEGUNDA, e o seu invariante é o
+                    outro objecto. Chamando-lhes 0 e 1:
+                         ∂x + x = 0        ∂x · x = 1
+     Teor. 3  as soluções são únicas — as cinco entradas
+     Def. 4   o binário        Teor. 5  a lista, pelo transporte
+
+  As equações deixaram de ser DADAS: saem do (4). E o «dois» deixou de ser
+  posto — sai de o invariante ter de ser ponto fixo.
+
+MEDIDO (§AN36), e é o que fecha a derivação:
+     n    soluções   ∂e = e   ∂e ≠ e
+     2    0          0        0      ← com dois símbolos, uma composição não existe
+     3    81         81       0      ← o invariante é SEMPRE fixo
+  e com DUAS composições de invariantes distintos: 2 soluções, a mesma a menos
+  do nome, com as entradas forçadas.
+
+O QUE EU TINHA POSTO DE MINHA CABEÇA, e saiu tudo
+  · ν² = id como HIPÓTESE — é consequência, não dado
+  · as potências e a soma de potências (∂^a·∂^b = ∂^{a+b}, «série e paralelo»)
+  · «a iteração tem de fechar», o grau n, a recorrência com memória de um andar
+  · x² = nx + 1, o determinante, a matriz companheira, a fracção contínua, o
+    trial, o rotor J⁴ = id — nada disto foi pedido
+  · a tabela dos oito andares com a involução — «tirado do rabo», e era
+  · «∂ parte um bloco», que punha o 2 à mão com 0 e 1 ainda por construir
+
+O ALINHAMENTO DO PAPER COM O OPERADOR
+  · O `d` DIFERENCIAL, e era contradição do próprio texto: a def:tempo declara
+    «a letra d fica reservada à distância» e a métrica usava dτ², dx^u, dD/dτ —
+    TREZE vezes. O incremento é o que o operador dá:
+         (∂τ)² = g_uv ∂x^u ∂x^v        ∂D/∂τ        ∂x = ±e_i
+  · μ = 1−S chamava-se «a derivada discreta» — outro nome para o operador.
+    VERIFICADO antes de escrever: μ*ζ = ζ*μ = δ₀, que é ∂x·x = 1 com a
+    convolução no lugar do produto. E a face ADITIVA não se aplica a ζ
+    (−ζ*ζ ≠ δ₀): o texto diz isso, em vez de fingir simetria.
+  · A MATRIZ dentro da PROVA do thm:gcanon — uma 2×2 explícita num teorema de
+    posto n, com a prova a acabar num exemplo. Saiu; o exemplo virou observação,
+    com a testemunha e o controlo nomeados (§AN28).
+  · δ fazia QUATRO papéis (profundidade, neutro da convolução, base, Kronecker).
+    A profundidade passou a prof(a,b), 11 ocorrências.
+  · O §MEDIDO AFIRMAVA O QUE JÁ NÃO SE MEDIA: a entrada do §AN35 descrevia a
+    involução nos seis andares e os 68 156 casos, removidos do medidor. E o
+    §AN36 não estava lá de todo. É o «medido sem medidor», e desta vez do lado
+    de dentro.
+  · thm:BI (a lista, pelo transporte) foi ARRASTADA num corte meu e três sítios
+    continuavam a citá-la — o `Teor. 3, ??` na página 2. Reposta do git.
+
+E O LICENSE alinhado com a mesma lei: usar é uma acção sobre trabalho alheio, e
+uma acção sem o seu dual não conserva; o dual do uso são as DUAS obrigações, e
+são duas porque as equações são duas. Acrescentei «ATRIBUIÇÃO: O APAGAMENTO É
+ZERO» — o critério da obra aplicado ao seu próprio caso. Trinta e nove linhas
+acrescentadas, NENHUMA removida: a redacção jurídica que lá estava não se toca.
+
+  aranha.tex 29 páginas · 64 enunciados, 0 sem prova · 0 refs mortas · 0 ℕℚℝ𝔽
+  arquitetura.tex 26 páginas, com a §0 reduzida ao operador e às duas equações
+  bateria 529 : 529, 35 unidades, 0 falhas

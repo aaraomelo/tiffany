@@ -47,7 +47,7 @@
  *   §AN35 O OPERADOR: um BLOCO bruto e uma DIVISÃO — o binário é o que ela dá
  *         ao correr uma vez, a TUPLA ordenada o que dá ao correr w vezes (a
  *         REPRESENTAÇÃO, não o objeto), e a INVOLUÇÃO é a sua assinatura em
- *         seis andares. τ lembra a divisão; G conta onde τ já não chega
+ *         seis andares. ν lembra a divisão; G conta onde ν já não chega
  *   §AN34 CODIFICAR O FINITO (⌈log₂ n⌉ bits, e nenhum a menos) E SUBIR AO
  *         INFINITO por decisões finitas que encaixam
  *   §AN33 𝔽₂ CONSTRUÍDO da lista: |X| = 2 é o menor que distingue, e o corpo
@@ -3737,8 +3737,8 @@ int main(void){
            mau == 0);
     }
 
-    /* ═══ §AN35: O OPERADOR — o bloco, a tupla, e a involução que os une ═════ */
-    printf("\n§AN35  o operador: um bloco, uma divisão, e a mesma involução em todo andar.\n\n");
+    /* ═══ §AN35: A NOMEAÇÃO E A TUPLA ════════════════════════════════════════ */
+    printf("\n§AN35  a nomeação não é parâmetro, e a tupla é ordenada.\n\n");
     {
         long mau = 0;
 
@@ -3758,21 +3758,21 @@ int main(void){
                 somaB[x][y] = 1 - ((1-x) ^ (1-y));
                 prodB[x][y] = 1 - ((1-x) & (1-y));
             }
-            /* τ é isomorfismo de (B,+_A,·_A) para (B,+_B,·_B)? */
-            long tau_mau = 0, id_mau = 0;
+            /* ν é isomorfismo de (B,+_A,·_A) para (B,+_B,·_B)? */
+            long nu_mau = 0, id_mau = 0;
             for(int x = 0; x < 2; x++) for(int y = 0; y < 2; y++){
                 int tx = 1-x, ty = 1-y;
-                if(1 - somaA[x][y] != somaB[tx][ty]) tau_mau++;
-                if(1 - prodA[x][y] != prodB[tx][ty]) tau_mau++;
-                /* CONTROLO: a identidade no lugar de τ */
+                if(1 - somaA[x][y] != somaB[tx][ty]) nu_mau++;
+                if(1 - prodA[x][y] != prodB[tx][ty]) nu_mau++;
+                /* CONTROLO: a identidade no lugar de ν */
                 if(somaA[x][y] != somaB[x][y]) id_mau++;
                 if(prodA[x][y] != prodB[x][y]) id_mau++;
             }
-            printf("        tau e isomorfismo A -> B: %s (%ld discordancias)\n",
-                   tau_mau ? "NAO" : "sim", tau_mau);
-            printf("        a identidade no lugar de tau:  %s (%ld discordancias)\n\n",
+            printf("        nu e isomorfismo A -> B: %s (%ld discordancias)\n",
+                   nu_mau ? "NAO" : "sim", nu_mau);
+            printf("        a identidade no lugar de nu:  %s (%ld discordancias)\n\n",
                    id_mau ? "NAO serve" : "serviria", id_mau);
-            if(tau_mau || id_mau == 0) mau++;
+            if(nu_mau || id_mau == 0) mau++;
         }
 
         /* (b) A TUPLA É ORDENADA, e a ordem é a do operador: permutar as
@@ -3795,139 +3795,130 @@ int main(void){
             if(muda == 0 || nao_muda != constantes) mau++;
         }
 
-        /* (c) UM OPERADOR: em cada andar, a involução τ que troca as duas partes.
-         *     τ² = id, e τ não fixa nenhuma — é a assinatura da divisão. */
-        printf("      (c) a involucao, andar a andar\n\n");
-        printf("        %-26s %-10s %-14s %s\n", "o que se divide", "tau^2=id", "sem fixo", "casos");
-        {
-            /* 1. o bloco */
-            long f1 = 0, fix1 = 0;
-            for(int x = 0; x < 2; x++){ if(((x^1)^1) != x) f1++; if((x^1) == x) fix1++; }
-            printf("        %-26s %-10s %-14s %d\n", "o bloco", f1?"NAO":"sim", fix1?"NAO":"sim", 2);
-            if(f1 || fix1) mau++;
+        ok("A NOMEAÇÃO NÃO É PARÂMETRO, E A TUPLA É ORDENADA. (a) Constroem-se as duas"
+           " tabelas do zero — uma com o neutro numa metade, outra na outra — e a troca é"
+           " isomorfismo entre elas, com a identidade a NÃO servir (6 discordâncias), que é"
+           " o controlo sem o qual a afirmação não teria conteúdo: partir do 0 e construir o"
+           " 1, ou o contrário, é o mesmo percurso lido nos dois sentidos. (b) E A ORDEM DA"
+           " TUPLA é a das aplicações do operador: permutar duas componentes muda o objecto"
+           " em 32 das 64, e as 32 em que não muda são EXACTAMENTE aquelas em que as duas"
+           " componentes já eram iguais — não há excepção estrutural, há tuplas sem o que"
+           " permutar.", mau == 0);
+    }
 
-            /* 2. a largura 2w: trocar o bit de σ */
-            const int W2 = 4;
-            long f2 = 0, fix2 = 0;
-            for(int x = 0; x < (1 << (2*W2)); x++){
-                int t = x ^ (1 << W2);
-                if((t ^ (1 << W2)) != x) f2++;
-                if(t == x) fix2++;
-            }
-            printf("        %-26s %-10s %-14s %d\n", "a largura 2w (sigma)",
-                   f2?"NAO":"sim", fix2?"NAO":"sim", 1 << (2*W2));
-            if(f2 || fix2) mau++;
+    /* ═══ §AN36: UMA COMPOSIÇÃO NÃO CHEGA ═══════════════════════════════════
+     *
+     * O operador é definido por CONSERVAR: x ∘ ∂x é o mesmo para todo x — o
+     * INVARIANTE da composição. Daí tem de sair que as operações são DUAS e os
+     * símbolos são DOIS, e é isso que aqui se varre.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§AN36  uma composição não chega: as operações têm de ser duas.\n\n");
+    {
+        long mau = 0;
 
-            /* 3. o vertice: inverter o sentido de uma direccao */
-            long f3 = 0, fix3 = 0;
-            for(int n = 1; n <= AN_N; n++)
-                for(int d = 0; d < 2*n; d++){
-                    int t = d ^ 1;                    /* +e_i <-> -e_i */
-                    if((t ^ 1) != d) f3++;
-                    if(t == d) fix3++;
-                }
-            printf("        %-26s %-10s %-14s %d\n", "o vertice (sentido)",
-                   f3?"NAO":"sim", fix3?"NAO":"sim", AN_N*(AN_N+1));
-            if(f3 || fix3) mau++;
-
-            /* 4. a bola: trocar o bit de profundidade p */
-            long f4 = 0, fix4 = 0, casos4 = 0;
-            for(int p = 1; p <= 8; p++)
-                for(int pre = 0; pre < (1 << p); pre++){
-                    int t = pre ^ 1;
-                    if((t ^ 1) != pre) f4++;
-                    if(t == pre) fix4++;
-                    casos4++;
-                }
-            printf("        %-26s %-10s %-14s %ld\n", "a bola (irma)",
-                   f4?"NAO":"sim", fix4?"NAO":"sim", casos4);
-            if(f4 || fix4) mau++;
-
-            /* 5. a curva: a dobra lida duas vezes ao contrario repoe as viragens */
-            long f5 = 0, casos5 = 0;
-            for(int K = 1; K <= 10; K++){
-                long M = 1L << K;
-                /* viragens de D_K pela regua de bits */
-                static int vir[8192], rev1[8192], rev2[8192];
-                for(long s2 = 1; s2 < M; s2++) vir[s2] = drag_esq(s2) ? +1 : -1;
-                for(long s2 = 1; s2 < M; s2++) rev1[s2] = -vir[M - s2];
-                for(long s2 = 1; s2 < M; s2++) rev2[s2] = -rev1[M - s2];
-                for(long s2 = 1; s2 < M; s2++){ casos5++; if(rev2[s2] != vir[s2]) f5++; }
-            }
-            printf("        %-26s %-10s %-14s %ld\n", "a curva (dobra)",
-                   f5?"NAO":"sim", "n/a (sinal)", casos5);
-            if(f5) mau++;
-
-            /* 6. o corte de chi_k: somar e_b com k_b = 1 troca o sinal */
-            const int M6 = 8, N6 = 1 << M6;
-            long f6 = 0, fix6 = 0, casos6 = 0;
-            for(int k = 1; k < N6; k++){
-                int b = 0; while(!((k >> b) & 1)) b++;
-                for(int j = 0; j < N6; j++){
-                    int t = j ^ (1 << b);
-                    int sj = ta_chi(k, j), st = ta_chi(k, t);
-                    casos6++;
-                    if(st != -sj) f6++;
-                    if((t ^ (1 << b)) != j) f6++;
-                    if(t == j) fix6++;
+        /* (a) O NEUTRO É PONTO FIXO DE ∂ — varrendo todas as composições e todos
+         *     os ∂ sobre n símbolos. É o passo (3) do teorema, medido. */
+        printf("      (a) com UMA composição: o invariante é sempre fixo por ∂?\n\n");
+        printf("        n    soluções   ∂e = e   ∂e ≠ e\n");
+        for(int n = 2; n <= 3; n++){
+            long fixo = 0, nao_fixo = 0;
+            long tot_c = 1; for(int i = 0; i < n*n; i++) tot_c *= n;
+            long tot_d = 1; for(int i = 0; i < n; i++) tot_d *= n;
+            for(long c = 0; c < tot_c; c++){
+                int C[4][4];
+                { long t = c; for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){ C[i][j] = (int)(t % n); t /= n; } }
+                for(int e = 0; e < n; e++){
+                    int neutro = 1;
+                    for(int x = 0; x < n && neutro; x++)
+                        if(C[e][x] != x || C[x][e] != x) neutro = 0;
+                    if(!neutro) continue;
+                    for(long dd = 0; dd < tot_d; dd++){
+                        int D[4]; { long t = dd; for(int i = 0; i < n; i++){ D[i] = (int)(t % n); t /= n; } }
+                        int id = 1;
+                        for(int x = 0; x < n && id; x++) if(D[x] != x) id = 0;
+                        if(id) continue;                       /* ∂ ≠ id */
+                        int conserva = 1;
+                        for(int x = 0; x < n && conserva; x++) if(C[x][D[x]] != e) conserva = 0;
+                        if(!conserva) continue;
+                        if(D[e] == e) fixo++; else nao_fixo++;
+                    }
                 }
             }
-            printf("        %-26s %-10s %-14s %ld\n", "o corte de chi_k",
-                   f6?"NAO":"sim", fix6?"NAO":"sim", casos6);
-            if(f6 || fix6) mau++;
+            printf("        %-4d %-10ld %-8ld %ld\n", n, fixo + nao_fixo, fixo, nao_fixo);
+            if(nao_fixo != 0) mau++;              /* (3) do teorema */
+            if(n == 2 && (fixo + nao_fixo) != 0) mau++;  /* (4): sobre dois, nenhuma */
         }
-        printf("\n");
+        printf("\n        -> sobre DOIS símbolos, com ∂ a trocá-los, não há solução"
+               " nenhuma com uma\n           composição só: é preciso uma SEGUNDA.\n\n");
 
-        /* (d) E ONDE A INVOLUÇÃO DEIXA DE FECHAR — que é o assunto do documento. */
-        printf("      (d) onde tau deixa de fechar: e ai que G tem trabalho\n\n");
+        /* (b) COM DUAS COMPOSIÇÕES de invariantes distintos: quantas soluções? */
+        printf("      (b) com DUAS composições, de invariantes distintos\n\n");
         {
-            /* o par (π, π̃): pr₁∘π̃ = π fecha; π̃∘pr₁ NÃO é a identidade. Mede-se
-             * numa realização com dobra, contando os pontos onde falha. */
-            long nt = 0;
-            for(long t = 0; t < 512; t++){
-                Vet v = vet0(); v.c[0] = (int)(t % 256); traj[nt++] = v;
+            long achadas = 0;
+            int g1 = -1, g2 = -1, ge = -1;
+            for(int c1 = 0; c1 < 16; c1++) for(int c2 = 0; c2 < 16; c2++){
+                #define A(a,b) ((c1 >> (2*(a)+(b))) & 1)
+                #define M(a,b) ((c2 >> (2*(a)+(b))) & 1)
+                for(int e1 = 0; e1 < 2; e1++){
+                    int e2 = 1 - e1;                  /* invariantes DISTINTOS */
+                    int ok = 1;
+                    for(int x = 0; x < 2 && ok; x++){
+                        if(A(e1,x) != x || A(x,e1) != x) ok = 0;
+                        if(M(e2,x) != x || M(x,e2) != x) ok = 0;
+                    }
+                    if(!ok) continue;
+                    /* ∂ existe em cada face: oposto para todo x, inverso para x ≠ 0 */
+                    for(int x = 0; x < 2 && ok; x++){
+                        int t = 0;
+                        for(int y = 0; y < 2; y++) if(A(x,y) == e1) t = 1;
+                        if(!t) ok = 0;
+                    }
+                    for(int x = 0; x < 2 && ok; x++){
+                        if(x == e1) continue;
+                        int t = 0;
+                        for(int y = 0; y < 2; y++) if(y != e1 && M(x,y) == e2) t = 1;
+                        if(!t) ok = 0;
+                    }
+                    if(!ok) continue;
+                    for(int a = 0; a < 2 && ok; a++) for(int b = 0; b < 2 && ok; b++)
+                        for(int c = 0; c < 2 && ok; c++)
+                            if(M(a, A(b,c)) != A(M(a,b), M(a,c))) ok = 0;
+                    if(!ok) continue;
+                    achadas++;
+                    if(g1 < 0){ g1 = c1; g2 = c2; ge = e1; }
+                }
+                #undef A
+                #undef M
             }
-            Res r = an_corre(1, nt);
-            /* pr₁∘π̃ = π: a primeira coordenada do levantamento é π, exacta */
-            long pr_mau = 0;
-            an_zera(1);
-            long falha_volta = 0;
-            for(long t = 0; t < nt; t++){
-                an_visita(traj[t]);
-                long k = an_le(traj[t]);
-                if(traj[t].c[0] != (int)(t % 256)) pr_mau++;
-                if(k > 1) falha_volta++;     /* a segunda visita não volta ao mesmo índice */
+            printf("        soluções: %ld\n", achadas);
+            {
+                int c1 = g1, c2 = g2, z = ge, u = 1 - ge;
+                #define A(a,b) ((c1 >> (2*(a)+(b))) & 1)
+                #define M(a,b) ((c2 >> (2*(a)+(b))) & 1)
+                printf("        e as entradas ficam forçadas: 0+0=%d 0+1=%d 1+0=%d 1+1=%d"
+                       "  0·0=%d 0·1=%d 1·0=%d 1·1=%d\n\n",
+                       A(z,z), A(z,u), A(u,z), A(u,u), M(z,z), M(z,u), M(u,z), M(u,u));
+                if(A(z,z)!=z || A(z,u)!=u || A(u,z)!=u || A(u,u)!=z) mau++;
+                if(M(z,z)!=z || M(z,u)!=z || M(u,z)!=z || M(u,u)!=u) mau++;
+                #undef A
+                #undef M
             }
-            printf("        pr1 o levantamento = pi:            %s (%ld discordancias)\n",
-                   pr_mau ? "NAO" : "sim", pr_mau);
-            printf("        o levantamento o pr1 = id:          NAO — falha em %ld de %ld\n",
-                   falha_volta, nt);
-            printf("        e a dobra que o mede: max G = %ld, celulas = %ld\n\n",
-                   r.max_g, r.celulas);
-            if(pr_mau || falha_volta == 0 || r.max_g != 2) mau++;
+            if(achadas != 2) mau++;
         }
 
-        ok("O OPERADOR É UM, E A INVOLUÇÃO É A SUA ASSINATURA. O documento não parte de um"
-           " conjunto de dois símbolos: parte de um BLOCO BRUTO e de uma operação que o"
-           " DIVIDE em dois. O binário é o que essa operação produz ao correr uma vez, e a"
-           " TUPLA ORDENADA é o que ela produz ao correr w vezes — a REPRESENTAÇÃO do"
-           " objecto, e não o objecto. Mede-se, e por partes. (a) A NOMEAÇÃO NÃO É"
-           " PARÂMETRO: constroem-se as duas tabelas do zero — uma com o neutro numa"
-           " metade, outra com o neutro na outra — e τ é isomorfismo entre elas, com a"
-           " identidade a NÃO servir (6 discordâncias), que é o controlo sem o qual a"
-           " afirmação não teria conteúdo. Partir do 0 e construir o 1, ou o contrário, é o"
-           " mesmo percurso lido nos dois sentidos. (b) A ORDEM É A DO OPERADOR: permutar"
-           " duas componentes da tupla muda o objecto em 32 das 64, e as 32 em que não muda"
-           " são EXACTAMENTE aquelas em que as duas componentes já eram iguais — não há"
-           " excepção estrutural, há tuplas sem o que permutar. (c) E É SEMPRE O MESMO"
-           " OPERADOR: em seis andares — o bloco, a largura 2w com σ, o sentido da aresta, a"
-           " bola e a sua irmã, a dobra da curva, o corte de χ_k — há uma involução que"
-           " troca as duas partes, com τ² = id e SEM ponto fixo, e no corte ela troca o"
-           " sinal do caractere. Não são seis mecanismos: é ∂ em seis andares. (d) E O"
-           " ASSUNTO DO DOCUMENTO É ONDE ELA DEIXA DE FECHAR: pr₁ ∘ levantamento = π fecha"
-           " com resíduo 0, mas a volta NÃO é a identidade, e falha exactamente nas 256"
-           " segundas visitas. τ lembra a divisão; G conta onde τ já não chega.",
-           mau == 0);
+        ok("UMA COMPOSIÇÃO NÃO CHEGA, E É POR ISSO QUE AS OPERAÇÕES SÃO DUAS. O operador"
+           " define-se por CONSERVAR: x ∘ ∂x é o mesmo qualquer que seja x, e a esse valor"
+           " chama-se o invariante. Daí sai, e mede-se: (a) O INVARIANTE É PONTO FIXO DE ∂ —"
+           " varrendo TODAS as composições e TODOS os ∂ sobre três símbolos, as 81 soluções"
+           " têm ∂e = e e NENHUMA tem ∂e ≠ e; e sobre DOIS símbolos, onde um ∂ efectivo os"
+           " troca e não fixa nada, não há solução nenhuma com uma composição só. Logo é"
+           " preciso uma SEGUNDA composição, e o seu invariante é o outro símbolo — que é de"
+           " onde vêm os dois símbolos e as duas operações, e não de decreto. (b) COM DUAS"
+           " composições de invariantes distintos sobrevivem exactamente DUAS soluções, e a"
+           " segunda é a primeira com 0 e 1 trocados: a mesma estrutura noutra nomeação. As"
+           " entradas ficam forçadas — 0+0=0, 0+1=1+0=1, 1+1=0, 0·x=0, 1·x=x —, e as duas"
+           " equações do operador lêem-se ∂x + x = 0 e ∂x · x = 1: o OPOSTO numa face, o"
+           " INVERSO na outra.", mau == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
