@@ -13,6 +13,7 @@
  *   §W6  Describe statement + Close + Sync
  *   §W7  fachada pqlike (Trio PG5): PQconnectdb/PQexec/PQntuples/PQgetvalue sobre o
  *        NOSSO wire — sem -lpq — e a MESMA consulta pelos dois caminhos
+ *   §W15 o ROLLBACK que NÃO desfazia — recusar em vez de mentir
  *   §W14 count(*), que conta ALÉM do que o SqlOut comporta; e o \l
  *   §W13 o `\d <tabela>`: cinco consultas, o oid estável, as colunas do motor
  *   §W12 o tipo `vector` no catálogo, e os scripts do repo como FUNÇÕES —
@@ -927,16 +928,22 @@ int main(void){
             if(!bate) mal++;
         }
 
-        /* as transacções, que os drivers mandam antes de tudo */
+        /* as transacções que os drivers mandam antes de tudo — e são DUAS, não
+         * três: o §W15 mostrou que o ROLLBACK não desfazia nada, e ele passou a
+         * ser recusado. Esta lista teve de encolher por causa disso. */
         {
-            const char *tx[3] = { "BEGIN", "COMMIT", "ROLLBACK" };
+            const char *tx[2] = { "BEGIN", "COMMIT" };
             int bate = 1;
-            for(int i = 0; i < 3; i++){
+            for(int i = 0; i < 2; i++){
                 int r = sql_executa(tx[i], &o);
                 if(!r || strcmp(o.tag, tx[i]) || o.ncols) bate = 0;
             }
-            printf("      BEGIN/COMMIT/ROLLBACK -> tags próprias, sem colunas: %s\n",
+            printf("      BEGIN/COMMIT -> tags próprias, sem colunas: %s\n",
                    bate ? "sim" : "NAO");
+            { int r = sql_executa("ROLLBACK", &o);
+              printf("      e o ROLLBACK -> %s (§W15: não desfazia)\n",
+                     r ? "devolveu tag (mau)" : "recusado com a razão");
+              if(r) bate = 0; }
             if(!bate) mal++;
         }
 
@@ -1045,8 +1052,9 @@ int main(void){
            " está, e essas perguntas não tocam no .mem nem na ISA. Por isso o catálogo é uma"
            " FACHADA ANTES do motor, e não mais um comando dentro dele. Respondem"
            " `SELECT version()`, `current_schema()`, `current_user`, `SHOW <par>`,"
-           " `SHOW ALL`, `SET`, e as tags BEGIN/COMMIT/ROLLBACK que os drivers mandam antes"
-           " de tudo. A IDA GUARDA A VOLTA: o que o SET escreve o SHOW lê — incluindo um"
+           " `SHOW ALL`, `SET`, e as tags BEGIN e COMMIT que os drivers mandam antes de"
+           " tudo — o ROLLBACK saiu desta lista quando o §W15 mostrou que ele não desfazia"
+           " nada, e passou a ser recusado. A IDA GUARDA A VOLTA: o que o SET escreve o SHOW lê — incluindo um"
            " parâmetro NOVO, que não estava na tabela inicial —, e um catálogo que aceitasse"
            " o SET sem o devolver era um sorvedouro. O DESCONHECIDO É ERRO com mensagem, e"
            " não uma linha vazia: quem chama tem de distinguir «vale isto» de «não existe»."
@@ -1851,6 +1859,109 @@ int main(void){
            " primeira tabela a sério. O tipo é int8 e não int4, porque é o que o Postgres"
            " diz e quem lê o OID conta com isso. E o \\l devolve UMA base — a que o servidor"
            " abriu —, porque inventar uma lista seria descrever um servidor que não somos.",
+           mal == 0);
+    }
+
+    /* ═══ §W15: O ROLLBACK QUE NÃO DESFAZIA ══════════════════════════════════
+     *
+     * Isto veio de uma sondagem e é o pior tipo de defeito: o servidor DIZIA que
+     * fazia o que não fazia. BEGIN, INSERT, ROLLBACK — e a linha continuava lá,
+     * com a tag «ROLLBACK» devolvida ao cliente como se tivesse desfeito.
+     *
+     * BEGIN e COMMIT são verdade aqui: o primeiro não promete nada por si, e o
+     * segundo diz que as escritas ficam — e ficam. Só o ROLLBACK promete
+     * desfazer, e este motor escreve directo no disco.
+     *
+     * A asserção não se contenta com «o ROLLBACK recusa». Prova que a recusa é
+     * VERDADEIRA: conta as linhas antes e depois e mostra que a escrita ficou
+     * mesmo. Uma recusa que fosse desnecessária seria um defeito ao contrário.
+     * ───────────────────────────────────────────────────────────────────────── */
+    printf("\n§W15 o ROLLBACK que não desfazia: recusar em vez de mentir.\n\n");
+    {
+        const char *base = "/tmp/pgwire_w15";
+        SqlOut o;
+        long mal = 0;
+        int antes = 0, depois = 0;
+        unlink("/tmp/pgwire_w15.mem");
+        unlink("/tmp/pgwire_w15.prog");
+        unlink("/tmp/pgwire_w15__tx.mem");
+        if(!sql_abrir(base)) mal++;
+        sql_executa("CREATE TABLE tx (a,b)", &o);
+        sql_executa("INSERT INTO tx VALUES (1,10)", &o);
+
+        /* BEGIN e COMMIT dizem a verdade: devolvem tag */
+        {
+            int rb = sql_executa("BEGIN", &o);
+            int tb = rb && !strcmp(o.tag, "BEGIN");
+            int rc = sql_executa("COMMIT", &o);
+            int tc = rc && !strcmp(o.tag, "COMMIT");
+            printf("      BEGIN  -> tag \"%s\"   COMMIT -> tag \"%s\"   %s\n",
+                   tb ? "BEGIN" : "?", tc ? "COMMIT" : "?",
+                   (tb && tc) ? "(os dois são verdade aqui)" : "NAO");
+            if(!tb || !tc) mal++;
+        }
+
+        /* ── o ROLLBACK: recusa, E a recusa tem de ser VERDADEIRA ──────────── */
+        {
+            sql_executa("SELECT count(*) FROM tx", &o);
+            antes = o.nrows ? atoi(o.cell[0][0]) : -1;
+
+            sql_executa("BEGIN", &o);
+            sql_executa("INSERT INTO tx VALUES (2,20)", &o);
+            int r = sql_executa("ROLLBACK", &o);
+            int recusou = !r && o.err[0];
+            /* GUARDAR a mensagem AGORA: o SELECT seguinte sobrescreve o `o`, e
+             * medir-lhe o comprimento depois dava zero — foi o que deu à
+             * primeira, e uma medição feita sobre o objecto já substituído mede
+             * o objecto errado. */
+            char msg[sizeof o.err];
+            size_t msg_n;
+            snprintf(msg, sizeof msg, "%s", o.err);
+            msg_n = strlen(msg);
+            int cabe = msg_n > 0 && msg_n < sizeof o.err - 1;
+
+            sql_executa("SELECT count(*) FROM tx", &o);
+            depois = o.nrows ? atoi(o.cell[0][0]) : -1;
+
+            printf("\n      antes do BEGIN: %d linhas · INSERT · ROLLBACK -> %s\n",
+                   antes, recusou ? "RECUSADO" : "devolveu tag (mau)");
+            printf("      depois: %d linhas  ->  a escrita %s\n", depois,
+                   (depois == antes + 1) ? "FICOU, e é por isso que a recusa é honesta"
+                                         : "sumiu — então a recusa era desnecessária");
+            printf("      e a mensagem cabe inteira no campo (%zu de %zu): %s\n",
+                   msg_n, sizeof o.err, cabe ? "sim" : "NAO");
+            /* as três condições, e a do meio é a que dá conteúdo às outras */
+            if(!recusou) mal++;
+            if(depois != antes + 1) mal++;
+            if(!cabe) mal++;
+        }
+
+        /* e a razão TEM de estar na mensagem, não só o facto da recusa */
+        {
+            sql_executa("ROLLBACK", &o);
+            int tem_razao = o.err[0] && (strstr(o.err, "desfazer") || strstr(o.err, "disco"));
+            printf("      a mensagem diz a RAZÃO: %s\n", tem_razao ? "sim" : "NAO");
+            printf("        \"%s\"\n", o.err);
+            if(!tem_razao) mal++;
+        }
+        sql_fechar();
+
+        printf("\n");
+        ok("O ROLLBACK RECUSA, PORQUE NÃO DESFAZIA. Isto veio de uma sondagem no psql e é o"
+           " pior tipo de defeito: o servidor DIZIA que fazia o que não fazia. BEGIN,"
+           " INSERT, ROLLBACK — e a linha continuava lá, com a tag «ROLLBACK» devolvida ao"
+           " cliente como se tivesse desfeito, que é a maneira de alguém perder dados sem"
+           " nunca ver um erro. BEGIN e COMMIT ficam: o primeiro não promete nada por si, e"
+           " o segundo diz que as escritas ficam — e ficam, porque foram directas ao disco."
+           " Só o ROLLBACK promete DESFAZER, e este motor não tem registo de desfazer. Passa"
+           " a ser recusado com a razão à frente, e a recusa quebra o cliente que contava"
+           " com ele: é bom que quebre, porque parar é melhor do que perder em silêncio. E A"
+           " ASSERÇÃO NÃO SE CONTENTA COM «o ROLLBACK recusa» — isso mediria a existência de"
+           " uma recusa, não a sua verdade. Conta as linhas ANTES e DEPOIS e exige que a"
+           " escrita TENHA FICADO: se ela sumisse, a recusa seria desnecessária e o defeito"
+           " estaria do outro lado. Mede-se ainda que a mensagem CABE inteira no campo, que"
+           " tem cento e sessenta bytes — a primeira versão era cortada a meio, e meia razão"
+           " não é uma razão —, e que ela diz PORQUÊ e não apenas que não pode.",
            mal == 0);
     }
 

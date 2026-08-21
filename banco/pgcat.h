@@ -574,10 +574,37 @@ static int pgcat_responde(const char *sql, SqlOut *out){
         return 1;
     }
 
-    /* ── as transacções: os drivers mandam-nas antes de tudo ────────────── */
-    if(pgcat_pal(sql, "BEGIN"))    { pgcat_so_tag(out, "BEGIN");    return 1; }
-    if(pgcat_pal(sql, "COMMIT"))   { pgcat_so_tag(out, "COMMIT");   return 1; }
-    if(pgcat_pal(sql, "ROLLBACK")) { pgcat_so_tag(out, "ROLLBACK"); return 1; }
+    /* ── as transacções, e aqui há uma linha que NÃO se pode devolver ─────
+     *
+     * BEGIN e COMMIT são verdade neste servidor: BEGIN não promete nada por si,
+     * e COMMIT diz que as escritas ficam — e ficam, porque foram directas ao
+     * disco. Devolver-lhes a tag não engana ninguém.
+     *
+     * O ROLLBACK é outra coisa. Ele PROMETE DESFAZER, e este motor escreve no
+     * .mem à medida que executa: não há registo de desfazer, e o que foi escrito
+     * está escrito. Devolver «ROLLBACK» seria dizer ao cliente que os seus
+     * INSERT foram anulados quando estão no disco — e ele seguiria em frente
+     * convencido de que a base está num estado que não está.
+     *
+     * Foi medido, e era exactamente isso que acontecia: BEGIN, INSERT, ROLLBACK,
+     * e a linha continuava lá. Por isso o ROLLBACK é RECUSADO com a razão à
+     * frente. Quebra o cliente que conta com ele — e é bom que quebre: perder
+     * dados em silêncio é pior do que parar. */
+    if(pgcat_pal(sql, "BEGIN"))  { pgcat_so_tag(out, "BEGIN");  return 1; }
+    if(pgcat_pal(sql, "COMMIT")) { pgcat_so_tag(out, "COMMIT"); return 1; }
+    if(pgcat_pal(sql, "ROLLBACK")){
+        if(out){
+            memset(out, 0, sizeof *out);
+            out->ok = 0;
+            /* a mensagem cabe no campo: se fosse cortada, o cliente ficava com
+             * meia razao, e a razao e' o que aqui interessa. */
+            snprintf(out->err, sizeof out->err,
+                     "ROLLBACK nao suportado: as escritas ja estao no disco e nao ha"
+                     " registo de desfazer. Recusa-se em vez de dizer que foram"
+                     " anuladas.");
+        }
+        return 1;
+    }
 
     /* ── a procura de UMA tabela pelo nome (1.ª consulta do \d) ─────────── */
     {

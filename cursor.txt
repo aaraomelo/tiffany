@@ -3386,3 +3386,47 @@ NO psql REAL:
 
   pgwire.c 16 asserções, 0 falhas
   bateria 529 : 529, 114 unidades, 0 falhas
+
+§74 — O ROLLBACK QUE NÃO DESFAZIA, E A RECUSA QUE TEM DE SER VERDADEIRA
+========================================================================
+Sondei outra vez no psql — o método que funcionou no §73 —, e desta vez o que
+apareceu não foi um buraco: foi uma MENTIRA.
+
+     BEGIN;  INSERT INTO tx VALUES (2,20);  ROLLBACK;  SELECT count(*);
+     BEGIN
+     INSERT 0 1
+     ROLLBACK          ← a tag devolvida como se tivesse desfeito
+     count = 2         ← e a linha continuava lá
+
+O servidor DIZIA que fazia o que não fazia. É a maneira de alguém perder dados
+sem nunca ver um erro — pior do que não suportar.
+
+A DECISÃO, e é de desenho:
+  · BEGIN e COMMIT FICAM. São verdade aqui: o primeiro não promete nada por si,
+    e o segundo diz que as escritas ficam — e ficam, porque foram directas ao
+    disco. Devolver-lhes a tag não engana ninguém.
+  · O ROLLBACK é RECUSADO com a razão à frente. Ele é o único que promete
+    DESFAZER, e este motor não tem registo de desfazer.
+
+  Isto QUEBRA o cliente que conta com o rollback, e é bom que quebre: parar é
+  melhor do que perder em silêncio.
+
+E A ASSERÇÃO NÃO SE CONTENTA COM «o ROLLBACK recusa» — isso mediria a existência
+da recusa, não a sua VERDADE. Conta as linhas antes e depois e exige que a
+escrita TENHA FICADO:
+     antes 1 · INSERT · ROLLBACK recusado · depois 2 → a escrita ficou
+  Se ela sumisse, a recusa era desnecessária e o defeito estava do outro lado.
+
+DOIS DEFEITOS MEUS NO CAMINHO
+  · A mensagem era CORTADA aos 160 bytes do campo. Meia razão não é uma razão.
+    Encurtei-a e passei a MEDIR que cabe inteira.
+  · E a própria medição do comprimento estava errada: eu media `strlen(o.err)`
+    DEPOIS de correr o `SELECT count(*)`, que sobrescreve o `o`. Dava ZERO e eu
+    escrevi «cabe: sim». Medir sobre o objecto já substituído mede o objecto
+    errado. Guardo agora a mensagem no momento em que ela existe.
+
+E O MEDIDOR APANHOU A CONTRADIÇÃO, pela terceira vez nesta série: o §W8 exigia
+que BEGIN, COMMIT e ROLLBACK devolvessem tag. A lista teve de encolher para dois.
+
+  pgwire.c 17 asserções, 0 falhas
+  bateria 529 : 529, 115 unidades, 0 falhas
