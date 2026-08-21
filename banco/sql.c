@@ -127,6 +127,26 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
 typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 
 /* ---------------- os slots ---------------- */
+/* O ESPAÇO É O HIPERCUBO, E A ISA DIZ ONDE ELE ACABA.
+ *
+ * `aranha.tex thm:espaco`: «o espaço NÃO É ESCOLHIDO: a dobra dá o hipercubo»;
+ * `thm:hiper`: «separando pelo ÚLTIMO BIT obtêm-se duas cópias». Separar zonas é
+ * separar POR BIT — cada uma é um bloco alinhado e o seu endereço é um PREFIXO,
+ * e prefixos distintos são disjuntos POR CONSTRUÇÃO (Lei 7, ligar sem fundir).
+ * Não há conta nenhuma a fazer para garantir que não se pisam.
+ *
+ * E O TECTO NÃO É ESCOLHIDO TAMBÉM: o `emit_slot` escreve o endereço em DOIS
+ * BYTES, logo a instrução alcança 2^16 slots. Quem o bytecode endereça vive
+ * abaixo disso; quem só o C toca — a árvore da cifra, os textos, a ordem, a
+ * junção — vive acima, e não paga nada por isso. Foi ignorar esta fronteira que
+ * me custou uma tarde: pus uma zona em 65536, o endereço truncou para ZERO, que
+ * é o S_CAT, e o catálogo passou a dizer que a tabela tinha uma coluna. */
+#define ISA_BITS  16u                    /* o endereço cabe na instrução */
+#define ISA_TECTO (1u << ISA_BITS)
+#define ZBITS     14u                    /* 2^14 = 16384 slots por zona grande */
+#define ZONA(k)   ((unsigned)(k) << ZBITS)
+
+/* ── abaixo do tecto da ISA: o que o bytecode endereça ─────────────────── */
 #define S_CAT     0
 #define S_ZERO    1
 #define S_UM      2
@@ -145,7 +165,9 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 /* ACIMA DE TUDO O RESTO. Eu pus isto em S_LINHAS+50000 e enterrei o S_NO da cifra (que mora em
  * S_LINHAS+240000): os nos do indice passaram a ir para a rede em vez do disco, e a bateria
  * apanhou-o em tres asserçoes. A fronteira de um backend tem de ficar onde nao pisa ninguem. */
-#define S_CANAL   (S_LINHAS + 10000000u)
+#define S_CANAL   (ISA_TECTO + ZONA(600))
+/* as três zonas da célula têm de caber no que a instrução alcança */
+typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 /* O POOL, O MESMO DESENHO. Acima de S_POOL, LOAD devolve um campo do job corrente e STORE no
  * slot da share emite o mining.submit. O protocolo fica atras de duas funcoes — e e por isso que
  * ele e indistinguivel do canal, e o canal do disco: o banco le um slot e escreve um slot.
@@ -264,9 +286,9 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define MAXCOND   4          /* condições por termo                                     */
 #define MAXTERMO  4          /* termos ligados por OR                                   */
 #define S_VIVO    512        /* a linha existe? BIT por linha (512..1023)               */
-#define S_DEN     33792      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
+#define S_DEN     ZONA(2)      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
                               * move e→total, e a conta precisa de q como número. */
-#define S_LINHAS  1024
+#define S_LINHAS  ZONA(1)
 /* ── O NOME DE CADA COLUNA — 36864.., 16 Words (32 caracteres) por coluna ─────
  * O `CREATE TABLE cliente (nome,idade,saldo)` lia os três identificadores e
  * DEITAVA-OS FORA: só o corpo de cada coluna era guardado. A consequência não é
@@ -339,7 +361,7 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * A marca NÃO DESCE quando uma linha é apagada, e isso é a estigmergia e não um
  * descuido: o traço não se desescreve. O efeito é ser CONSERVADOR — pode recusar
  * uma consulta que hoje já caberia —, nunca aceitar uma que não cabe. */
-#define S_COLMAX    45056u
+#define S_COLMAX    (ISA_TECTO + ZONA(7))
 /* O S_ALTO GUARDA UMA CÉLULA POR LINHA×COLUNA, tal como o S_LINHAS — e tinha
  * SESSENTA E DOIS slots antes do S_TXLIVRE, quando precisa de tantos quantos o
  * S_LINHAS tem. Uma tabela com mais de 31 linhas de dois campos escrevia o byte
@@ -347,9 +369,9 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * depois do S_COLMAX (que usa dezasseis slots e tem cento e noventa mil até ao
  * S_NO), com o MESMO tamanho do S_LINHAS — que é o que a simetria exige: as
  * duas metades da mesma célula, o baixo e o alto, têm de caber igual. */
-#define S_ALTO      45072u
+#define S_ALTO      ZONA(3)
 #define S_ALTO_N    (S_LIN - S_LINHAS)      /* tantos quantos o S_LINHAS: as duas metades */
-#define S_COLNOME   36864u
+#define S_COLNOME   (ISA_TECTO + ZONA(6))
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
 #define S_COLNOME_N 8u         /* tantas quantas o S_CORPO segura */
 /* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
@@ -1314,8 +1336,10 @@ static int modo_prox = REL_PASSO;   /* posto antes de um MOVE, consumido por emi
 
 static long passo_do_slot(unsigned s){
     if(!rel_ncols) return 0;
-    if(s >= S_DEN)    return rel_ncols;
-    if(s >= S_LINHAS) return rel_ncols;      /* a linha inteira: passo = ncols */
+    /* O PREFIXO DIZ A ZONA. Perguntar `s >= S_DEN` só vale enquanto essas
+     * forem as de endereço mais alto; com zonas por prefixo, a zona LÊ-SE. */
+    switch(s >> ZBITS){ case 1: case 2: case 3: return rel_ncols; default: break; }
+    if(0)
     /* os dois bitmaps não têm passo: andam por MODO (um slot por 16 linhas) */
     return 0;                                /* constantes e rascunho: parados  */
 }
@@ -3001,7 +3025,7 @@ static int  ord_desc = 0;
  * 32 bits do valor mais 8 do índice. O TECTO É VERIFICADO: se os nós acabarem,
  * a consulta é RECUSADA — ordenar metade seria devolver uma ordem que não é a
  * pedida. */
-#define S_ORD      (S_LINHAS + 25000u)   /* zona livre entre as linhas e os nomes */
+#define S_ORD      (ISA_TECTO + ZONA(0))     /* acima do tecto: só o C endereça */
 #define S_ORDCAB   (S_ORD - 1)
 /* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
  * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
@@ -3083,7 +3107,7 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
  * A DIREITA VIVE NO .mem, não em RAM: as suas linhas são copiadas para a zona
  * S_JDIR antes de a tabela ser trocada, porque o motor tem UMA tabela aberta de
  * cada vez. O tecto é declarado e verificado. */
-#define S_JDIR     (S_LINHAS + 30000u)   /* as linhas da direita, no banco */
+#define S_JDIR     (ISA_TECTO + ZONA(1))
 #define S_JCAB     (S_JDIR - 1)
 #define J_MAXLIN   64
 #define J_MAXCOL   16
@@ -3810,10 +3834,10 @@ static int distancia_texto(const char *p){
  * cliente; quem indexa, quem mede e quem compara e sempre a cifra.
  * Um no ocupa a largura do alfabeto; o filho pelo termo d mora no slot d, e o slot 0 guarda a
  * entrada que termina ali. O ficheiro e esparso: so os nos tocados custam disco. */
-#define S_TEXTO   (S_LINHAS + 40000)
+#define S_TEXTO   (ISA_TECTO + ZONA(2))
 #define S_TXCAB   (S_TEXTO - 1)
 #define S_TXLIVRE (S_TEXTO - 2)
-#define S_NO      (S_TEXTO + 200000)
+#define S_NO      (ISA_TECTO + ZONA(8))
 #define S_NOCAB   (S_NO - 1)
 #define LARG      256u
 #define MAXT      4096
@@ -4746,7 +4770,7 @@ static int abrir_base(const char *base){
     fmem  = open(m, O_RDWR|O_CREAT, 0644);
     fprog = open(g, O_RDWR|O_CREAT|O_TRUNC, 0644);
     if(fmem < 0 || fprog < 0) return 0;
-    ftruncate(fmem, (off_t)(S_CB + 65536u) * (off_t)SLOTSZ);  /* Words=16 átomos + blobs */
+    ftruncate(fmem, (off_t)(S_CANAL + 65536u) * (off_t)SLOTSZ);  /* Words=16 átomos + blobs */
     refaz_diario();          /* antes de qualquer comando: fechar o que ficou aberto */
     /* O NROWS VELHO SOBE PARA O PAR, uma vez. Uma base gravada antes tem-no no
      * `.e` do catálogo e o S_NR a zero; sem esta subida, o primeiro INSERT
@@ -4805,7 +4829,7 @@ static int usa_tabela_z(const char *nome, int cria_se_falta, int zera){
     if(fmem >= 0){ fsync(fmem); close(fmem); }
     fmem = open(alvo, O_RDWR | (cria_se_falta ? O_CREAT : 0) | (zera ? O_TRUNC : 0), 0644);
     if(fmem < 0) return 0;
-    ftruncate(fmem, (off_t)(S_CB + 65536u) * (off_t)SLOTSZ);
+    ftruncate(fmem, (off_t)(S_CANAL + 65536u) * (off_t)SLOTSZ);
     snprintf(g_tabela, sizeof g_tabela, "%s", baixo);
     refaz_diario();                       /* cada tabela tem o seu diário */
     return 1;
