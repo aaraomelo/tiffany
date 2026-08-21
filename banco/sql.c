@@ -243,10 +243,27 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  * nome — é a mesma compatibilidade que o CORPO_INTEIRO tem por ser o código 0. */
 #define S_NOME    224        /* 224..239: 16 Words = 32 caracteres (folga até S_MATCH) */
 #define S_NOME_N  16
-#define S_MATCH   256        /* bitmap do resultado, uma linha por slot (256..511)      */
+/* A BASE ORTONORMAL, EM SLOTS: e_k = 2^k, k = 0..15.
+ *
+ * `naturais.tex thm:base`: os produtos dos geradores dão e_k = 2^k, e essa base
+ * é ORTONORMAL para ⟨a,b⟩ = paridade(a∧b) — ⟨e_i,e_j⟩ = δ_ij. E o `cor:w8`: «a
+ * identificação é a IDENTIDADE — o bit j do inteiro é a COORDENADA j na base».
+ * Por isso um bitmap não gasta um slot por linha: a linha i É a coordenada i, e
+ * lê-se como o bit i. Uma Word são dezasseis bits, logo dezasseis linhas por
+ * slot. São só dezasseis máscaras distintas, e ficam aqui em constantes porque
+ * as constantes escrevem-se ao COMPILAR e o programa corre depois. */
+#define S_BITM    200        /* SLOT_BITS coordenadas: e_k = 2^k                        */
+#define S_BITN    240        /* SLOT_BITS complementares, para desligar a coordenada    */
+/* O MAPA comporta 24 slots em 200..223 e 16 em 240..255: com a Word actual são
+ * dezasseis coordenadas e sobra. Se o andar dobrar, é o MAPA que tem de abrir
+ * espaço — e isso é da máquina, não da teoria. O compilador avisa em vez de
+ * escrever por cima do vizinho. */
+typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
+                       && S_BITN + WORD_ISA_ATOMS*8u <= 256u) ? 1 : -1];
+#define S_MATCH   256        /* bitmap do resultado, BIT por linha (256..511)           */
 #define MAXCOND   4          /* condições por termo                                     */
 #define MAXTERMO  4          /* termos ligados por OR                                   */
-#define S_VIVO    512        /* a linha existe? o DELETE zera aqui (512..1023)          */
+#define S_VIVO    512        /* a linha existe? BIT por linha (512..1023)               */
 #define S_DEN     33792      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
                               * move e→total, e a conta precisa de q como número. */
 #define S_LINHAS  1024
@@ -584,6 +601,44 @@ static void par_grava(unsigned slot, unsigned v){
     mem_grava(slot, w);
 }
 
+
+/* A PALAVRA É UM BIT, E A LARGURA É ARGUMENTO.
+ *
+ * `lib/largura.h`: «UMA LEI PARA TODA A ESCADA, com w PARÂMETRO — seis andares,
+ * um corpo», e «o tipo da máquina é o VEÍCULO; w é o PARÂMETRO». Aqui estava
+ * escrito `i >> 4`, `i & 15` e `k < 8`: três palavras fixas, que é especializar
+ * por andar — exactamente o que a lei diz para não fazer.
+ *
+ * Nada abaixo escreve 8 nem 16. O átomo diz quantos bits tem, a Word diz
+ * quantos átomos tem (`WORD_ISA_ATOMS`, do `word_isa.h`), e o resto deriva. Se
+ * o andar dobrar, dobra sozinho.
+ *
+ * A LINHA i É A COORDENADA i (naturais `cor:w8`: «o bit j do inteiro é a
+ * coordenada j na base»), e lê-se como o bit i. */
+#define ATOMO_BITS  ((unsigned)(sizeof(Word8) * 8u))
+#define SLOT_BITS   (WORD_ISA_ATOMS * ATOMO_BITS)
+
+static unsigned atomo_le(Word w, unsigned a){
+    return a ? (unsigned)w.e : (unsigned)w.total;      /* WORD_ISA_ATOMS = 2 */
+}
+static void atomo_poe(Word *w, unsigned a, unsigned v){
+    if(a) w->e = (Word8)v; else w->total = (Word8)v;
+}
+static int bit_le(unsigned base, long i){
+    unsigned long u = (unsigned long)i;
+    Word w = mem_le(base + (unsigned)(u / SLOT_BITS));
+    unsigned k = (unsigned)(u % SLOT_BITS);
+    return (int)((atomo_le(w, k / ATOMO_BITS) >> (k % ATOMO_BITS)) & 1u);
+}
+static void bit_poe(unsigned base, long i, int liga){
+    unsigned long u = (unsigned long)i;
+    unsigned sl = base + (unsigned)(u / SLOT_BITS), k = (unsigned)(u % SLOT_BITS);
+    unsigned a = k / ATOMO_BITS, m = 1u << (k % ATOMO_BITS);
+    Word w = mem_le(sl);
+    unsigned v = atomo_le(w, a);
+    atomo_poe(&w, a, liga ? (v | m) : (v & ~m));
+    mem_grava(sl, w);
+}
 
 static long cat_nrows(void){
     Word w = mem_le(S_NR);
@@ -1229,12 +1284,22 @@ static Rel *const rel = DISCO_FIXO(Rel, 25);
 static int nrel = 0;
 static long rel_ncols = 0;            /* > 0 só enquanto se emite o MOLDE */
 
+/* OS MODOS DO RELOCADOR. O molde é emitido para a linha 0 e o `rel_anda(i)`
+ * reescreve os endereços para a linha i. Com o bitmap a BIT, o endereço avança
+ * um slot a cada DEZASSEIS linhas e a máscara roda pelas dezasseis coordenadas
+ * da base — nenhum dos dois é um passo constante, e por isso são modos e não
+ * passos. */
+enum { REL_PASSO = 0, REL_BITMAP = 1, REL_MASC = 2, REL_MASCN = 3 };
+static int modo_prox = REL_PASSO;   /* posto antes de um MOVE, consumido por emit_slot */
+/* O modo viaja no campo `passo`, em NEGATIVO: o `Rel` vive no DISCO com tamanho
+ * fixo, e acrescentar-lhe um campo mudava o mapeamento. Os passos verdadeiros
+ * são sempre ≥ 0, logo o sinal chega para os separar. */
+
 static long passo_do_slot(unsigned s){
     if(!rel_ncols) return 0;
     if(s >= S_DEN)    return rel_ncols;
     if(s >= S_LINHAS) return rel_ncols;      /* a linha inteira: passo = ncols */
-    if(s >= S_VIVO)   return 1;              /* o vivo: uma por linha           */
-    if(s >= S_MATCH && s < S_VIVO) return 1; /* o bitmap: uma por linha         */
+    /* os dois bitmaps não têm passo: andam por MODO (um slot por 16 linhas) */
     return 0;                                /* constantes e rascunho: parados  */
 }
 /* ── MOVE: A OPERACAO, E E' UMA SO' ──────────────────────────────────────────────────
@@ -1255,9 +1320,15 @@ static void emit_slot(unsigned char op, unsigned slot);
 static void MOVE(unsigned slot, int sentido){
     emit_slot(sentido > 0 ? OP_LOAD : OP_STORE, slot);
 }
+/* o mesmo MOVE, dizendo em que modo o endereço anda com a linha */
+static void MOVE_M(unsigned slot, int sentido, int modo){
+    modo_prox = modo;
+    emit_slot(sentido > 0 ? OP_LOAD : OP_STORE, slot);
+}
 
 static void emit_slot(unsigned char op, unsigned slot){
-    long p = passo_do_slot(slot);
+    long p = modo_prox ? -(long)modo_prox : passo_do_slot(slot);
+    modo_prox = REL_PASSO;                       /* vale para UM MOVE, e só */
     emit1(op);
     if(p && nrel < NREL){ rel[nrel].off = pc_emit; rel[nrel].base = slot; rel[nrel].passo = p; nrel++; }
     emit1((unsigned char)(slot & 0xFF)); emit1((unsigned char)(slot >> 8));
@@ -1330,7 +1401,11 @@ static void merkle_pelo_fold(void){
 /* anda o molde uma linha: cada sítio de realocação avança o seu passo */
 static void rel_anda(long i){
     for(int t = 0; t < nrel; t++){
-        unsigned v = (unsigned)(rel[t].base + i * rel[t].passo);
+        unsigned v;
+        if(rel[t].passo == -REL_BITMAP)     v = rel[t].base + (unsigned)((unsigned long)i / SLOT_BITS);
+        else if(rel[t].passo == -REL_MASC)  v = S_BITM + (unsigned)((unsigned long)i % SLOT_BITS);
+        else if(rel[t].passo == -REL_MASCN) v = S_BITN + (unsigned)((unsigned long)i % SLOT_BITS);
+        else                                v = (unsigned)(rel[t].base + i * rel[t].passo);
         unsigned char lo = (unsigned char)(v & 0xFF), hi = (unsigned char)(v >> 8);
         pwrite(fprog, &lo, 1, (off_t)rel[t].off);
         pwrite(fprog, &hi, 1, (off_t)rel[t].off + 1);
@@ -1573,7 +1648,7 @@ static int insere(const char *resto){
      * exatamente o que aconteceu aqui quando S_UM servia às duas coisas. Cada constante
      * tem o seu slot. */
     w.total = 1; w.e = 0; mem_grava(S_UM, w);
-    emit_copia(S_UM, S_VIVO + (unsigned)nrows);
+    bit_poe(S_VIVO, nrows, 1);        /* a linha nasce VIVA: liga a coordenada */
     emit1(OP_HALT);
     long passos = rodar(pc_emit);        /* FASE 1: só o dado */
 
@@ -2689,10 +2764,22 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
         emit_copia(S_UM, S_ACC);
     }
 
-    MOVE(S_ACC, +1);
-    MOVE(S_VIVO + (unsigned)i, +1);
+    /* O VIVO É UM BIT, E ISOLA-SE COM A COORDENADA.
+     *
+     * Era `ACC & vivo` com o vivo a valer 0 ou 1 num slot inteiro. Agora o vivo
+     * é o bit i, e o AND com e_k dá 0 ou e_k — que não se pode cruzar com um
+     * ACC de 0 ou 1, porque a base é ortonormal e ⟨e_i,e_j⟩ = δ_ij: só a
+     * coordenada 0 sobreviveria. Testa-se por isso à parte, com salto próprio
+     * para o mesmo fim. */
+    MOVE_M(S_VIVO, +1, REL_BITMAP);
+    MOVE_M(S_BITM, +1, REL_MASC);
     emit1(OP_AND);
-    MOVE(S_ACC, -1);
+    MOVE(S_TMP, -1);
+    MOVE(S_TMP, +1);
+    MOVE(S_ZERO, +1);
+    emit1(OP_CMP);
+    emit1(OP_JZ);
+    unsigned pos_v = pc_emit; emit1(0);
 
     MOVE(S_ACC, +1);
     MOVE(S_ZERO, +1);
@@ -2704,7 +2791,11 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
      * diário de intenção, e quem aplica é a fase 3, depois do compromisso. Assim a queda no
      * meio da varredura não deixa metade das linhas mudadas. */
     (void)col_set;
-    emit_copia(S_UM, S_MATCH + (unsigned)i);
+    /* marcar é LIGAR A COORDENADA: slot |= e_k */
+    MOVE_M(S_MATCH, +1, REL_BITMAP);
+    MOVE_M(S_BITM,  +1, REL_MASC);
+    emit1(OP_OR);
+    MOVE_M(S_MATCH, -1, REL_BITMAP);
     /* O CONTADOR SOBE DE ANDAR. Somava-se 1 com OP_ADD, componente a
      * componente, e o `.total` é UM BYTE: à 256.ª linha que casa o count dava a
      * volta e respondia 0. Com ADD16 o par é UM número de dezasseis bits, e o
@@ -2714,8 +2805,11 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
     MOVE(S_UM16, +1);
     emit1(OP_ADD16);
     MOVE(S_CONTA, -1);
-    unsigned char rel = (unsigned char)(pc_emit - ini);
-    pwrite(fprog, &rel, 1, (off_t)pos);
+    { unsigned char d = (unsigned char)(pc_emit - ini);
+      pwrite(fprog, &d, 1, (off_t)pos);
+      /* o salto do vivo é mais longo: salta também o teste do ACC */
+      unsigned char dv = (unsigned char)(pc_emit - (pos_v + 1));
+      pwrite(fprog, &dv, 1, (off_t)pos_v); }
 }
 
 /* prepara as constantes e devolve o catálogo */
@@ -2732,6 +2826,19 @@ static void prepara(long v, long col_do_set){
     w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0;         mem_grava(S_VA, w);
     /* o UPDATE também é escrita, e também deixa a marca */
     if(v >= 0) col_marca(col_do_set, (unsigned long)v);
+    /* A BASE, e_k = 2^k (naturais thm:base): dezasseis coordenadas, e a
+     * complementar de cada uma para limpar. A Word tem dois átomos de oito, e
+     * por isso a coordenada k mora no átomo k/ATOMO_BITS — é a Lei 7 outra vez,
+     * ligar sem fundir, e sem escrever a largura em lado nenhum. */
+    for(unsigned k = 0; k < SLOT_BITS; k++){
+        Word m = {0,0}, n = {0,0};
+        unsigned a = k / ATOMO_BITS, bit = 1u << (k % ATOMO_BITS);
+        for(unsigned t = 0; t < WORD_ISA_ATOMS; t++) atomo_poe(&n, t, ~0u);
+        atomo_poe(&m, a, bit);
+        atomo_poe(&n, a, ~bit);
+        mem_grava(S_BITM + k, m);
+        mem_grava(S_BITN + k, n);
+    }
     w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
     w.total = 0; w.e = 0x80; mem_grava(S_MASK16, w); /* bit 15 do par — o sinal um andar acima */
 }
@@ -2745,7 +2852,11 @@ static void prepara(long v, long col_do_set){
 static long aplica_diario(long ncols, long nrows, int acao, int col_set){
     pc_emit = 0;
     for(long i = 0; i < nrows; i++){
-        MOVE(S_MATCH + (unsigned)i, +1);
+        MOVE(S_MATCH + (unsigned)((unsigned long)i / SLOT_BITS), +1);
+        MOVE(S_BITM  + (unsigned)((unsigned long)i % SLOT_BITS), +1);
+        emit1(OP_AND);
+        MOVE(S_TMP, -1);
+        MOVE(S_TMP, +1);
         MOVE(S_ZERO, +1);
         emit1(OP_CMP);
         emit1(OP_JZ);
@@ -2755,7 +2866,12 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
             emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
             emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));   /* o par inteiro */
         }
-        else                 emit_copia(S_ZERO, S_VIVO  + (unsigned)i);
+        else {                          /* apagar é DESLIGAR a coordenada */
+            MOVE(S_VIVO + (unsigned)((unsigned long)i / SLOT_BITS), +1);
+            MOVE(S_BITN + (unsigned)((unsigned long)i % SLOT_BITS), +1);
+            emit1(OP_AND);
+            MOVE(S_VIVO + (unsigned)((unsigned long)i / SLOT_BITS), -1);
+        }
         unsigned char rel = (unsigned char)(pc_emit - ini);
         pwrite(fprog, &rel, 1, (off_t)pos);
     }
@@ -2870,7 +2986,12 @@ static int  ord_desc = 0;
  * pedida. */
 #define S_ORD      (S_LINHAS + 25000u)   /* zona livre entre as linhas e os nomes */
 #define S_ORDCAB   (S_ORD - 1)
-#define ORD_LARG   16u                   /* um nibble por nível */
+/* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
+ * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
+ * número que o 16, ditos de três maneiras. Declara-se o expoente e o resto sai
+ * dele — `largura.h`: «a lei escreve-se UMA vez e o andar é argumento». */
+#define ORD_BITS   4u                    /* símbolos por nível: 2^ORD_BITS */
+#define ORD_LARG   (1u << ORD_BITS)      /* um símbolo por nível */
 #define ORD_NIV    10                    /* 8 do valor + 2 do índice */
 #define ORD_MAXNO  600u
 
@@ -2906,7 +3027,7 @@ static int ord_insere(long valor, int idx){
     unsigned long ch = ((unsigned long)(valor + 2147483648L) << 8) | (unsigned long)(idx & 255);
     unsigned no = 0;
     for(int d = ORD_NIV - 1; d >= 0; d--){
-        unsigned sim = (unsigned)((ch >> (4*d)) & 15u);
+        unsigned sim = (unsigned)((ch >> (ORD_BITS*d)) & (ORD_LARG - 1u));
         no = ord_filho(no, sim, 1);
         if(!no && d > 0) return 0;
     }
@@ -2986,7 +3107,7 @@ static int j_carrega_direita(long *ncols_dir){
     if(nc > J_MAXCOL) return -1;
     ord_limpa();
     for(long i = 0; i < nr; i++){
-        if(mem_le(S_VIVO + (unsigned)i).total == 0) continue;
+        if(!bit_le(S_VIVO, i)) continue;
         if(postos >= J_MAXLIN) return -1;
         for(long j = 0; j < nc; j++){
             long v = celula_valor(i, j, nc);
@@ -3008,7 +3129,7 @@ static int j_casam(long v, int *saida, int cap){
     int n = 0;
     /* desce os 8 nibbles do VALOR; os 2 do índice ficam para o percurso */
     for(int d = ORD_NIV - 1; d >= 2; d--){
-        unsigned sim = (unsigned)((ch >> (4*d)) & 15u);
+        unsigned sim = (unsigned)((ch >> (ORD_BITS*d)) & (ORD_LARG - 1u));
         no = par_le(S_ORD + no*ORD_LARG + sim);
         if(!no) return 0;                          /* nenhuma linha com este valor */
     }
@@ -3258,7 +3379,7 @@ static int varre(const char *resto, int acao){
      * era recusa honesta virou conta feita — inclusive com mais de uma coluna racional. */
     prepara(v, acao == ACAO_SET ? col_set : -1);
     Word z = {0,0};
-    for(long i = 0; i < nrows; i++) mem_grava(S_MATCH + (unsigned)i, z);
+    for(long i = 0; i <= nrows / (long)SLOT_BITS; i++) mem_grava(S_MATCH + (unsigned)i, z);
 
     /* UM molde só, o da linha 0 — e depois a PA anda com ele por todas as linhas. */
     pc_emit = 0; nrel = 0; rel_ncols = ncols;
@@ -3340,7 +3461,7 @@ static int varre(const char *resto, int acao){
             return 0;
         }
         for(long i = 0; i < nr_esq && ne < J_MAXLIN; i++){
-            if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
+            if(!bit_le(S_MATCH, i)) continue;
             for(long j = 0; j < nc_esq && j < J_MAXCOL; j++){
                 long v = celula_valor(i, j, nc_esq);
                 Word par = { (Word8)(v & 255), (Word8)((v >> 8) & 255) };
@@ -3436,7 +3557,7 @@ static int varre(const char *resto, int acao){
         int postos = 0;
         ord_limpa();
         for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
-            if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
+            if(!bit_le(S_MATCH, i)) continue;
             { long v = celula_valor(i, oc, ncols);     /* o PAR, não o byte baixo */
               if(!ord_insere(v, (int)i)){
                   printf("erro: a árvore de ordenação não coube — RECUSADA.\n");
@@ -3456,7 +3577,7 @@ static int varre(const char *resto, int acao){
 
     for(long ii = 0; ii < (ord_usa ? ord_n : nrows); ii++){
         long i = ord_usa ? ord_seq[ii] : ii;
-        if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
+        if(!bit_le(S_MATCH, i)) continue;
         printf("   ");
         int row_i = sql_cap ? sql_cap->nrows : -1;
         if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
@@ -4744,7 +4865,7 @@ int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
     if(oc < 0){ if(antes[0]) usa_tabela(antes, 0); return -1; }
     cat = mem_le(S_CAT); nc = cat.total; nr = cat_nrows();
     for(long i = 0; i < nr; i++){
-        if(mem_le(S_VIVO + (unsigned)i).total == 0) continue;
+        if(!bit_le(S_VIVO, i)) continue;
         { long v = celula_valor(i, oc, nc);
           if(v >= 0 && v < n){ hist[v]++; dentro++; }
           else if(fora) (*fora)++; }

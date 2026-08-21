@@ -2922,12 +2922,12 @@ int main(void){
      * de um slot só seu, somado com OP_ADD16. O mesmo para o contador do
      * count. Não se pôs tecto nenhum: quem não cabe promove.
      * ───────────────────────────────────────────────────────────────────────── */
-    printf("\n§W22 o contador sobe de andar: nrows e count atravessam os 255.\n\n");
+    printf("\n§W22 a palavra é UM BIT: a linha é a coordenada, e a largura é argumento.\n\n");
     {
         SqlOut o;
         long mal = 0;
         char q[96];
-        const int N = 256;                 /* atravessa a fronteira do byte */
+        const int N = 1000;                /* MUITO acima do byte, e do falso tecto */
         unlink("/tmp/pgwire_w22.mem"); unlink("/tmp/pgwire_w22.prog");
         if(!sql_abrir("/tmp/pgwire_w22")) mal++;
         sql_executa("CREATE TABLE g (a,b)", &o);
@@ -2976,29 +2976,29 @@ int main(void){
         }
 
         printf("\n");
-        ok("O CONTADOR SOBE DE ANDAR, EM VEZ DE DAR A VOLTA. `Word` é {Word8 total, e} com"
-           " `Word8` = uint8_t — são DOIS bytes, e ler `.total` é ler METADE do número. O motor"
-           " fazia-o em cinco sítios que guardam endereço, contador ou índice, e o mais caro era"
-           " o nrows: vivia no campo `.e` do catálogo e subia com OP_ADD componente a"
-           " componente, pelo que à linha 256 dava a volta — trezentas linhas inseridas"
-           " respondiam quarenta e quatro, que é trezentos módulo 256, ao SELECT, ao ORDER BY e"
-           " ao count, e o banco perdia dados sem uma queixa. A CORRECÇÃO É A LEI E NÃO UM"
-           " TECTO: o §sec:torre da arquitectura fixa a subida, T_{k+1} = T_k + T_k* com a"
-           " dimensão a dobrar, e diz que O QUE CRESCE É O OBJECTO, NÃO A MÁQUINA; o thm:BI da"
-           " aranha mostra a cadeia dos andares com «a dobra a duplicar a largura», que é uma"
-           " enumeração e não um fim; e o word_isa.h manda os coeficientes que crescem SUBIR A"
-           " TORRE. Por isso o nrows sai do par do catálogo — onde o transporte não pode"
-           " atravessar do nrows para o ncols — e passa a ocupar os dois componentes de um slot"
-           " só seu, somado com OP_ADD16, e o contador do count faz o mesmo. MEDE-SE"
-           " ATRAVESSANDO A FRONTEIRA, que é a única maneira de o ver: num contador de um byte"
-           " o count de 256 daria ZERO, e aqui dá 256, com e sem WHERE. O CONTROLO é a tabela"
-           " de dez linhas, porque são as pequenas que todos os outros blocos deste ficheiro"
-           " usam e uma subida de andar que as quebrasse passaria despercebida acima. FICA POR"
-           " FAZER, e é da MÁQUINA e não da teoria: o mapa de slots deste motor tem zonas"
-           " indexadas por linha com capacidades diferentes umas das outras — o bitmap do"
-           " resultado comporta 256 linhas, o dos vivos 512, e a zona dos bytes altos apenas"
-           " 62 slots antes da tabela de textos. A teoria não põe tecto nenhum; esse mapa é que"
-           " está por endireitar, e endireitá-lo é dobrar as larguras, não amputar a tabela.",
+        ok("A PALAVRA É UM BIT, E A LINHA É A COORDENADA. `naturais.tex thm:base`: os produtos'
+           " dos geradores dão e_k = 2^k, e essa base é ORTONORMAL para ⟨a,b⟩ = paridade(a∧b),"
+           " com ⟨e_i,e_j⟩ = δ_ij; e o `cor:w8`: «a identificação é a IDENTIDADE — o bit j do"
+           " inteiro é a COORDENADA j na base». Um bitmap não gasta por isso um slot por linha:"
+           " a linha i É a coordenada i, e lê-se como o bit i. Era um slot inteiro por linha —"
+           " dezasseis vezes o espaço necessário — e foi daí que saiu o falso tecto que eu"
+           " cheguei a escrever como lei. Marcar passou a ser LIGAR a coordenada (slot |= e_k),"
+           " apagar a DESLIGÁ-LA (slot &= ¬e_k), e o vivo isola-se com AND e_k e testa-se com"
+           " salto próprio — porque a base é ortonormal e cruzar e_k com um acumulador de zero"
+           " ou um só sobreviveria na coordenada zero. E A LARGURA É ARGUMENTO, que é a outra"
+           " metade: o `lib/largura.h` escreve «UMA LEI PARA TODA A ESCADA, com w PARÂMETRO —"
+           " seis andares, um corpo» e separa «o VEÍCULO» do «PARÂMETRO». Aqui estavam `i >> 4`,"
+           " `i & 15` e `k < 8`, três palavras fixas a dizer o mesmo número de três maneiras;"
+           " agora o átomo diz quantos bits tem, a Word diz quantos átomos tem, e tudo o resto"
+           " deriva — se o andar dobrar, dobra sozinho. O mesmo na árvore que ordena, onde"
+           " `ORD_LARG 16` convivia com um `4` e um `15` escritos à mão. MEDE-SE COM MIL LINHAS,"
+           " que é quatro vezes o tecto que eu tinha inventado e dezasseis vezes o que um slot"
+           " por linha daria no mesmo espaço: o count(*) dá mil, com e sem WHERE. O CONTROLO é a"
+           " tabela de dez linhas, porque são as pequenas que todos os outros blocos deste"
+           " ficheiro usam. E fica dito o que é da MÁQUINA e não da teoria: o mapa de slots"
+           " ainda tem zonas com capacidades diferentes entre si, e o compilador passa a"
+           " recusar se a base não couber no espaço que o mapa lhe deu, em vez de escrever por"
+           " cima do vizinho.",
            mal == 0);
     }
 
