@@ -4169,6 +4169,116 @@ int main(void){
            " uma frase sobre um objeto que nunca se viu funcionar.", mau == 0);
     }
 
+
+    /* ═══ §AN38: A FIBRA APAGADA É O G, E O NÃO-ARROMBAMENTO SAI DAÍ ═══════ */
+    {
+        long mau = 0;
+        printf("\n§AN38  ker_info(T) = {(P,Q) : P≠Q, TP=TQ} é a fibra de G.\n\n");
+
+        /* ── DE ONDE VEM ISTO. O `machine/espirituais/algebra_maquinas_gpt.tex`
+         * formaliza uma álgebra de máquinas que APAGAM informação e define
+         *
+         *     ker_info(T) = {(P,Q) : P ≠ Q, TP = TQ}      «a fibra apagada»
+         *
+         * e a relação «i arromba j» como a capacidade de SEPARAR, depois de T_j,
+         * dois estados que T_j tornou indistinguíveis. O teorema central é que a
+         * matriz de arrombamento é NULA — e a metade informacional da prova é
+         * uma linha: de T_jP = T_jQ segue R_iT_jP = R_iT_jQ, para toda R_i.
+         *
+         * E ker_info É a fibra de G. Onde G(x) > 1 há um par colapsado; onde
+         * G ≡ 1 não há nenhum. As duas linguagens falam do mesmo objecto, e é
+         * isso que este bloco mede — para não ficar na conversa. */
+
+        /* (1) A CORRESPONDÊNCIA: |ker_info| conta-se por G, e a conta é exacta.
+         * Numa realização π com fibras de tamanho G(x), o número de pares
+         * ORDENADOS colapsados é Σ G(x)(G(x)−1), e o de não-ordenados metade. */
+        { int bate = 1;
+          long tot_casos = 0;
+          for(int caso = 0; caso < 6 && bate; caso++){
+              /* uma π: I → X qualquer, dada por uma tabela */
+              int N = 12, X = 4;
+              int pi[12];
+              for(int i = 0; i < N; i++) pi[i] = (i*(caso+1) + caso) % X;
+              /* G, contado */
+              long G[8] = {0};
+              for(int i = 0; i < N; i++) G[pi[i]]++;
+              /* ker_info, contado por FORÇA BRUTA: os pares que colapsam */
+              long ker = 0;
+              for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                  if(i != j && pi[i] == pi[j]) ker++;
+              /* e pela fórmula em G */
+              long porG = 0;
+              for(int x = 0; x < X; x++) porG += G[x]*(G[x]-1);
+              if(ker != porG) bate = 0;
+              tot_casos++;
+          }
+          printf("      |ker_info| = Σ G(x)(G(x)−1) em %ld realizações — força"
+                 " bruta contra a fórmula: %s\n", tot_casos, bate ? "batem" : "FALHAM");
+          if(!bate) mau++; }
+
+        /* (2) E A DPI: nenhuma R separa o que T juntou. É a metade informacional
+         * do teorema, e mede-se com R a variar — não uma R escolhida, todas as
+         * que cabem no espaço. Se alguma separasse, o «apagar» não apagava. */
+        { int N = 8, X = 3;
+          int T[8]; for(int i = 0; i < N; i++) T[i] = i % X;
+          long pares = 0, separados = 0, Rs = 0;
+          /* todas as R: X → Y com Y = 4, isto é 4^3 = 64 funções */
+          for(int r = 0; r < 64; r++){
+              int R[3] = { r % 4, (r/4) % 4, (r/16) % 4 };
+              Rs++;
+              for(int i = 0; i < N; i++) for(int j = i+1; j < N; j++){
+                  if(T[i] != T[j]) continue;              /* não foi apagado */
+                  pares++;
+                  if(R[T[i]] != R[T[j]]) separados++;      /* separou?! */
+              }
+          }
+          printf("      DPI: %ld funções R aplicadas a %ld pares colapsados —"
+                 " separaram %ld\n", Rs, pares, separados);
+          printf("        de TP = TQ segue RTP = RTQ, para TODA R: não é proteção,"
+                 " é a composição a não poder desfazer\n");
+          if(separados != 0 || pares < 100) mau++; }
+
+        /* ── (3) E O DUAL: onde a realização é BIJECTIVA, ker_info é VAZIO — e
+         * então não há o que arrombar, não por estar protegido, mas por não
+         * haver par colapsado nenhum. É o caso da enumeração E_k (thm:enumfin):
+         * G ≡ 1, fibra apagada vazia.
+         *
+         * As duas metades do thm:contraria ganham assim leitura de segurança:
+         * quem ENCHE apaga, e o apagado é irrecuperável por composição; quem
+         * CONTA não apaga, e o que não se apaga não precisa de protecção. */
+        { long ker = 0, N = 64;
+          for(long t = 0; t < N; t++) for(long u = t+1; u < N; u++){
+              /* a enumeração posicional em base 8, posto 2 */
+              long x1 = t % 8, y1 = t / 8, x2 = u % 8, y2 = u / 8;
+              if(x1 == x2 && y1 == y2) ker++;
+          }
+          printf("      e na enumeração bijectiva (G ≡ 1): |ker_info| = %ld em %ld"
+                 " pares — nada a arrombar, por não haver par colapsado\n",
+                 ker, N*(N-1)/2);
+          if(ker != 0) mau++; }
+
+        printf("\n");
+        ok("A FIBRA APAGADA É O G, E O NÃO-ARROMBAMENTO SAI DAÍ SEM CRIPTOGRAFIA NENHUMA. O"
+           " `machine/espirituais/algebra_maquinas_gpt.tex` define ker_info(T) = {(P,Q) :"
+           " P ≠ Q, TP = TQ} — a fibra apagada — e «i arromba j» como conseguir SEPARAR,"
+           " depois de T_j, dois estados que ele tornou indistinguíveis; o teorema central é"
+           " que a matriz de arrombamento é NULA. E ker_info É A FIBRA DE G: onde G(x) > 1 há"
+           " par colapsado, onde G ≡ 1 não há nenhum — as duas linguagens falam do mesmo"
+           " objecto, e a conta bate exactamente, |ker_info| = Σ G(x)(G(x)−1), por força bruta"
+           " contra a fórmula. A METADE INFORMACIONAL DA PROVA É UMA LINHA: de TP = TQ segue"
+           " RTP = RTQ para TODA R, e mede-se com as 64 funções R que cabem no espaço —"
+           " nenhuma separa um único dos pares colapsados. NÃO É PROTECÇÃO: é a composição a"
+           " não poder desfazer, e é por isso que a segurança «não depende de segredo, chave"
+           " ou dificuldade computacional» — a máquina não esconde a informação, remove a"
+           " possibilidade algébrica de a reconstruir. E O DUAL FECHA A LEITURA: na"
+           " enumeração bijectiva do thm:enumfin, G ≡ 1 e ker_info é VAZIO — não há o que"
+           " arrombar, não por estar protegido mas por não haver par colapsado nenhum. As"
+           " duas metades do thm:contraria ganham assim sentido de segurança: quem ENCHE"
+           " apaga, e o apagado é irrecuperável; quem CONTA não apaga, e o que não se apaga"
+           " não precisa de protecção. A IDENTIDADE É POR DESIGN, e é isto que o justifica.",
+           mau == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

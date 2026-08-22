@@ -14,7 +14,7 @@ antissimetrico e48993492f8aa75d 0
 app_arranca ab17cde0c17eb0aa 0
 aranha_g 448e1f5e4400277c 0
 aranha_inversa ac86462a26ec984e 0
-aranha_n 75c250be7c0539ec 0
+aranha_n 16a6292c14c10bc5 0
 aritmetica bed8e054171e6849 0
 arquimedes_area 3fb4925bc7f62b48 0
 arraytermico d700a92b448f7ffd 0
@@ -241,7 +241,7 @@ guarda 04646324c7df6ab7 0
 gume_calculo 348575017af86b56 0
 hawking 5934d4dacd48fc67 0
 headjack 2d6f3da50f8a74ca 0
-hilbert_bidual f8c8159a1e1e3878 0
+hilbert_bidual 2a8bb57419a1d773 0
 hiper 939b2dbfa4a37a11 0
 hipercubo32 6f71340587320316 0
 hipociclo 0f614988c674fdcc 0

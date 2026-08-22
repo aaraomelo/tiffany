@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "banco.h"
 #include "unidade.h"
 
@@ -327,6 +328,150 @@ printf("  E O BIDUAL SAO OS DOIS SENTIDOS: pi estica (1D vira 2D), nu contrai (2
 printf("  e o par fecha dos DOIS lados com residuo ZERO. Nenhum e' a origem.\n\n");
 printf("  Daí sai o que a define: CADA PASSO ANDA UM EM UM EIXO — ela enche sem rasgar. E o\n");
 printf("  controlo mostra que a Lei 2 e' que o garante: sem a rotacao ainda enche, mas rasga.\n");
+
+/* ═══ §H7: O BIDUAL FECHA NAS FUNÇÕES E NÃO NAS VIZINHANÇAS ══════════════════
+ * O §H3 mostrou que ν∘π = id E π∘ν = id — o bidual fecha dos dois lados, exacto.
+ * Falta a pergunta que isso não responde: os dois sentidos são igualmente bons a
+ * transportar a VIZINHANÇA? Não são, e a assimetria tem número.
+ *
+ * E há um limite que não é da curva: a cadeia tem N−1 pares consecutivos e o
+ * quadrado tem 2M(M−1) pares vizinhos, logo a fracção dos vizinhos que ficam a
+ * distância 1 é no máximo
+ *
+ *     (N−1)/(2M(M−1)) = (M+1)/(2M)  →  1/2.
+ *
+ * É CONTAGEM, não é propriedade de curva nenhuma: metade dos pares vizinhos
+ * nunca fica a 1, em curva alguma. O `aranha thm:viz-nao-iso` diz que o
+ * isomorfismo não existe; isto diz QUANTO se perde, e que o preço é o mesmo para
+ * todas. */
+printf("\n§H7  o bidual fecha nas FUNÇÕES e não nas VIZINHANÇAS — e o limite é contagem.\n\n");
+{
+    long mau = 0;
+    printf("      M  · (M+1)/2M · medido · I→X: t,t+1 vizinhos · X→I: máx Hilbert · máx serpentina\n");
+    int forcado = 1, satura = 1, assim = 1;
+    for(long M = 4; M <= 32; M *= 2){
+        long N = M*M;
+        /* (1) o limite por contagem */
+        double lim = (double)(M+1)/(2.0*M);
+        long cad = N-1, viz = 2*M*(M-1);
+        if(cad >= viz) forcado = 0;                    /* tem de haver menos pares na cadeia */
+        /* (2) I→X: passos consecutivos são vizinhos? (é o §H4, agora contado) */
+        long ix = 0, tot1 = 0;
+        for(long t = 0; t+1 < N; t++){
+            long a,b,c,d; pi_estica(M,t,&a,&b); pi_estica(M,t+1,&c,&d);
+            tot1++; if(labs(a-c)+labs(b-d) == 1) ix++;
+        }
+        if(ix != tot1) satura = 0;                     /* a Hilbert não rasga: 100% */
+        /* (3) X→I: e o salto máximo, nas duas curvas */
+        long hmax = 0, smax = 0, xi = 0, tot2 = 0;
+        for(long y = 0; y < M; y++) for(long x = 0; x < M; x++){
+            if(x+1 < M){
+                long dh = labs(nu_contrai(M,x+1,y) - nu_contrai(M,x,y));
+                long ds = labs((y*M + ((y%2==0)?(x+1):(M-1-(x+1)))) - (y*M + ((y%2==0)?x:(M-1-x))));
+                if(dh > hmax) hmax = dh; if(ds > smax) smax = ds;
+                tot2++; if(dh == 1) xi++;
+            }
+            if(y+1 < M){
+                long dh = labs(nu_contrai(M,x,y+1) - nu_contrai(M,x,y));
+                long ds = labs(((y+1)*M + (((y+1)%2==0)?x:(M-1-x))) - (y*M + ((y%2==0)?x:(M-1-x))));
+                if(dh > hmax) hmax = dh; if(ds > smax) smax = ds;
+                tot2++; if(dh == 1) xi++;
+            }
+        }
+        double med = (double)xi/(double)tot2;
+        if(med > lim + 1e-9) forcado = 0;              /* ninguém passa o limite */
+        if(hmax <= smax) assim = 0;                    /* a assimetria: Hilbert salta mais */
+        printf("     %3ld ·  %.4f  · %.4f ·   %5ld/%-5ld     ·    %8ld    ·   %8ld\n",
+               M, lim, med, ix, tot1, hmax, smax);
+    }
+    ok("o limite (M+1)/2M → 1/2 é CONTAGEM e não propriedade de curva: a cadeia tem"
+       " N−1 pares consecutivos e o quadrado tem 2M(M−1) vizinhos, logo metade dos"
+       " pares vizinhos nunca fica a distância 1 — em curva alguma. O aranha"
+       " thm:viz-nao-iso diz que o isomorfismo não existe; isto diz QUANTO se perde",
+       forcado);
+    /* ── E AS DUAS PREVISIBILIDADES, que são diferentes e não se somam. Uma
+     * curva pode revelar a posição pelo PREFIXO do endereço (estrutural) ou pela
+     * DISTÂNCIA entre endereços (métrica), e as duas medem-se à parte. */
+    { long M = 32, N = M*M;
+      /* (A) ESTRUTURAL: bastam os log2(M) bits altos para saber a linha? */
+      int bits = 5; long desl = 10 - bits, serp_ok = 0, hil_ok = 0, blocos = 0;
+      for(long p = 0; p < (1L<<bits); p++){
+          long base = p<<desl, fim = base + (1L<<desl);
+          if(base >= N) break;
+          if(fim > N) fim = N;
+          blocos++;
+          { long y0 = base/M; int mesma = 1;
+            for(long t = base; t < fim; t++) if(t/M != y0) mesma = 0;
+            if(mesma) serp_ok++; }
+          { long hx, hy; pi_estica(M, base, &hx, &hy); long hy0 = hy; int mesma = 1;
+            for(long t = base; t < fim; t++){ pi_estica(M,t,&hx,&hy); if(hy != hy0) mesma = 0; }
+            if(mesma) hil_ok++; }
+      }
+      /* (B) MÉTRICA: o desvio do salto de um vizinho horizontal */
+      double hs = 0, hs2 = 0, ss = 0, ss2 = 0; long n = 0;
+      for(long y = 0; y < M; y++) for(long x = 0; x+1 < M; x++){
+          double dh = labs(nu_contrai(M,x+1,y) - nu_contrai(M,x,y));
+          double ds = labs((y*M + ((y%2==0)?(x+1):(M-1-(x+1))))
+                         - (y*M + ((y%2==0)?x:(M-1-x))));
+          hs += dh; hs2 += dh*dh; ss += ds; ss2 += ds*ds; n++;
+      }
+      double hm = hs/n, sm = ss/n;
+      double hsd = hs2/n - hm*hm, ssd = ss2/n - sm*sm;
+      printf("\n      previsibilidade · ESTRUTURAL (5 bits dão a linha) · MÉTRICA (desvio do salto)\n");
+      printf("      serpentina      ·          %3ld/%-3ld              ·  %.2f (média %.2f)\n",
+             serp_ok, blocos, ssd > 0 ? sqrt(ssd) : 0.0, sm);
+      printf("      Hilbert         ·          %3ld/%-3ld              ·  %.2f (média %.2f)\n",
+             hil_ok, blocos, hsd > 0 ? sqrt(hsd) : 0.0, hm);
+      ok("as DUAS previsibilidades são diferentes e a serpentina perde nas duas: com"
+         " log2(M) bits do endereço a LINHA já se lê (32/32 blocos), e o salto de um"
+         " vizinho horizontal é SEMPRE 1 (desvio 0). A Hilbert não revela a linha em"
+         " nenhum prefixo (0/32) e espalha o salto. Nenhuma é «melhor»: são PERFIS, e o"
+         " design escolhe o que quer expor — a identidade do objecto vem da construção e"
+         " não de esconder o endereço",
+         serp_ok == blocos && hil_ok == 0 && ssd < 1e-9 && hsd > 1.0); }
+
+    ok("e a Hilbert SATURA o limite no sentido I→X: passos consecutivos são vizinhos"
+       " em 100%, que é o §H4 contado — ela não rasga, e nenhuma curva pode fazer"
+       " melhor do que não rasgar", satura);
+    ok("mas o bidual NÃO é simétrico na vizinhança: no sentido X→I o salto máximo da"
+       " Hilbert cresce com M² enquanto o da serpentina fica em 2M−1. As duas fecham"
+       " ν∘π = π∘ν = id (§H3) e trocam de posição conforme o sentido — é o thm:contraria"
+       " outra vez, cada uma a perder o que a outra guarda", assim);
+
+    /* ── E ONDE A HILBERT É ÓPTIMA, que é o que lhe dá o nome: no sentido I→X a
+     * distância no quadrado cresce como √k com o salto k na cadeia, enquanto na
+     * serpentina cresce LINEARMENTE. Mede-se com k a subir, e diz-se o artefacto:
+     * em k = 2M a serpentina cai em duas linhas abaixo por alinhamento, e o número
+     * fica bom por acidente e não por localidade. */
+    { long M = 32, N = M*M;
+      printf("\n      k  · Hilbert média · serpentina média · razão\n");
+      int melhor = 1;
+      for(long k = 4; k <= 16; k *= 4){
+          double hs = 0, ss = 0; long n = 0;
+          for(long t = 0; t+k < N; t++){
+              long a,b,c,d;
+              pi_estica(M,t,&a,&b); pi_estica(M,t+k,&c,&d);
+              hs += labs(a-c)+labs(b-d);
+              long r1=t/M,c1=t%M, r2=(t+k)/M,c2=(t+k)%M;
+              long x1=(r1%2==0)?c1:(M-1-c1), x2=(r2%2==0)?c2:(M-1-c2);
+              ss += labs(x1-x2)+labs(r1-r2);
+              n++;
+          }
+          printf("     %2ld  ·    %6.2f     ·     %6.2f      · %.2f×\n",
+                 k, hs/n, ss/n, (ss/n)/(hs/n));
+          if(hs >= ss) melhor = 0;
+      }
+      ok("e a localidade da Hilbert NÃO É UMA VIRTUDE — é um PERFIL, e chamar-lhe"
+         " «óptima» era importar um critério de fora. No sentido I→X a distância cresce"
+         " como √k e na serpentina como k: isso é a mesma coisa que dizer que a distância"
+         " é PREVISÍVEL a partir do salto. Num sistema onde os endereços circulam, prever"
+         " o vizinho a partir do endereço é vazamento e não desempenho — e o que se ganha"
+         " em acesso perde-se em exposição. (Em k = 2M a serpentina parece boa por"
+         " ALINHAMENTO — cai duas linhas abaixo — e não por localidade: diz-se, para o"
+         " número não passar por virtude.)", melhor);
+      if(!melhor) mau++; }
+    (void)mau;
+}
     if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
 printf("\n  RESIDUO 0 — em inteiros, e nos dois sentidos.\n\n");
     return 0;

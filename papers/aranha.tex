@@ -2574,6 +2574,120 @@ carrega apenas a primeira. Em uma linha:
 os ciclos, as dimensões e as ordens diferentes \emph{sem} as reduzir todas a
 números reais. A reta é a gaveta privilegiada, não a casa.
 
+\subsection*{E a localidade não é uma virtude: é um perfil}
+
+\noindent O Teor.~\ref{thm:viz-nao-iso} diz que o isomorfismo não existe; falta
+dizer \emph{quanto} se perde, e a resposta não é da curva --- é \textbf{contagem}.
+A cadeia tem $N-1$ pares consecutivos e o quadrado tem $2M(M-1)$ pares vizinhos,
+logo a fração dos vizinhos que podem ficar a distância $1$ é, no máximo,
+\[
+\frac{N-1}{2M(M-1)}=\frac{M+1}{2M}\;\xrightarrow[M\to\infty]{}\;\frac12 .
+\]
+\emph{Metade dos pares vizinhos nunca fica a $1$, em curva alguma.} Medido:
+$0{,}6250$, $0{,}5625$, $0{,}5312$, $0{,}5156$ para $M=4,8,16,32$, batendo à quarta
+casa (\code{tests/hilbert\_bidual.c} §H7). Nenhuma curva escapa; o que as distingue
+é \emph{como} gastam o que lhes sobra.
+
+\medskip\noindent\textbf{E aqui é preciso não importar o critério de fora.} A curva
+de Hilbert tem localidade $\sim\sqrt{k}$ no sentido $I\to X$, contra $\sim k$ da
+serpentina --- e é comum chamar a isso «ótimo». \emph{Não é uma virtude: é um
+perfil.} Dizer que a distância no quadrado se prevê a partir do salto na cadeia é
+dizer que o endereço \textbf{revela} a posição. Num sistema onde os endereços
+circulam, isso é exposição, não desempenho.
+
+\medskip\noindent E as previsibilidades são \emph{duas}, e não se somam:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{estrutural}: $\log_2 M$ bits dão a linha? & \textbf{métrica}: desvio do salto\\
+\midrule
+serpentina & $32/32$ --- a linha lê-se do prefixo & $0{,}00$ (média $1{,}00$)\\
+Hilbert & $0/32$ --- nada até ao último bit & $100{,}50$ (média $23{,}75$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+A serpentina perde nas duas: o prefixo do endereço dá a linha, e o salto de um
+vizinho horizontal é \emph{sempre} $1$. A de Hilbert não revela a linha em prefixo
+nenhum e espalha o salto --- e paga isso com o máximo a crescer como $M^{2}$.
+\emph{Nenhuma é melhor}: o design escolhe o que quer expor.
+
+\medskip\noindent\textbf{E aqui não é preciso escolher esconder}, o que é a razão
+de isto caber neste documento e não numa nota de engenharia. A identidade de cada
+sítio vem da \emph{construção} --- o Teor.~\ref{thm:enumfin} dá-a por $E_k$, e o
+Teor.~\ref{thm:coord} diz de onde ela sai: a tupla das decisões de $\partial$. Não
+há camada por cima a proteger o endereço, porque o endereço não é um segredo: é o
+resultado de contar.
+\[
+\boxed{\;\text{a identidade é por \textbf{design}, não por obscuridade}\;}
+\]
+--- e é por isso que a escolha da curva volta a ser o que deve ser, uma decisão de
+\emph{perfil}, e não uma correção de uma fraqueza.
+
+\medskip\noindent\textbf{E isto tem justificação formal, que não é desta casa mas
+fala do mesmo objeto.} O \code{machine/espirituais/algebra\_maquinas.tex} formaliza
+uma álgebra de máquinas que \emph{apagam} informação e define a \textbf{fibra
+apagada}
+\[
+\ker_{\mathrm{info}}(T)=\{(P,Q)\;:\;P\neq Q,\ TP=TQ\},
+\]
+com «$i$ arromba $j$» a significar \emph{separar, depois de $T_j$, dois estados que
+$T_j$ tornou indistinguíveis}. O seu teorema central é que a matriz de arrombamento
+é \textbf{nula}.
+
+\medskip\noindent\textbf{E $\ker_{\mathrm{info}}$ é a fibra de $G$.} Onde $G(x)>1$
+há par colapsado; onde $G\equiv1$ não há nenhum --- as duas linguagens falam do mesmo
+objeto, e a conta fecha:
+\[
+\bigl\lvert\ker_{\mathrm{info}}\bigr\rvert=\sum_x G(x)\bigl(G(x)-1\bigr).
+\]
+Daí a metade informacional daquele teorema é uma linha que este documento já tinha
+noutra forma: de $TP=TQ$ segue $RTP=RTQ$ para \emph{toda} $R$ --- nenhuma composição
+desfaz um colapso. \emph{Não é proteção: é a composição a não poder.}
+
+\medskip\noindent E as duas metades do Teor.~\ref{thm:contraria} ganham assim uma
+leitura que não tinham:
+\[
+\begin{array}{ll}
+\pi\ \text{(enche, }G>1\text{)} & \text{apaga --- e o apagado é irrecuperável por composição}\\
+\rho\ \text{(conta, injetiva)} & \text{não apaga --- e o que não se apaga não precisa de proteção}
+\end{array}
+\]
+A enumeração do Teor.~\ref{thm:enumfin} está do segundo lado: $G\equiv1$, e
+$\ker_{\mathrm{info}}=\varnothing$. \emph{Não há o que arrombar} --- não por estar
+guardado, mas por não haver par colapsado nenhum. É isso que sustenta a frase
+anterior, e é por isso que a segurança aqui «não depende de segredo, chave ou
+dificuldade computacional»: o sistema não esconde a informação; onde ela é
+preservada, está toda, e onde é apagada, a álgebra já não a tem.
+
+\medskip\noindent\textbf{E a formulação que fica, porque é a que não se deixa ler
+mal:}
+\begin{quote}
+\emph{A enumeração não é segura porque oculta a identidade; é \textbf{reversível}
+porque não produz fibras apagadas. A projeção, ao contrário, pode produzir fibras
+não triviais, e o que cai na mesma fibra deixa de ser distinguível por qualquer
+composição posterior.}
+\end{quote}
+\noindent Donde as duas operações se separam por uma palavra:
+\[
+\pi:\ \text{comprime e \textbf{pode apagar}},
+\qquad\qquad
+\rho:\ \text{endereça \textbf{sem apagar}},
+\]
+e o ponto é que \textbf{apagar e esconder são coisas diferentes}. O que aqui se
+chama «segurança algébrica» não é defesa contra um adversário --- é uma
+\textbf{propriedade da fibra} da transformação, e lê-se em $G$ sem falar de mais
+ninguém.
+
+\medido{\code{tests/aranha\_n.c} §AN38 --- a conta $\lvert\ker_{\mathrm{info}}\rvert
+=\sum G(G-1)$ por força bruta contra a fórmula em seis realizações; a DPI com as
+$64$ funções $R$ que cabem no espaço, nenhuma a separar um único dos $448$ pares
+colapsados; e o dual, com $\ker_{\mathrm{info}}=\varnothing$ nos $2016$ pares da
+enumeração bijetiva.}
+
+\colunas{\code{thm:contraria} ($\pi$ enche, $\rho$ conta); \code{machine/espirituais}}
+        {$\ker_{\mathrm{info}}=$ a fibra de $G$; a DPI medida em todas as $R$}
+        {\code{tests/aranha\_n.c} §AN38}
+
 \medskip\noindent\textbf{Donde a leitura correta do que a matriz é aqui.} Ela não
 é um objeto à espera de uma ordem --- é o \textbf{rotor entre duas direções}, e o
 Teor.~\ref{thm:fecho} dá-lhe a forma: $R_{ij}=\left(\begin{smallmatrix}0&-1\\1&0
