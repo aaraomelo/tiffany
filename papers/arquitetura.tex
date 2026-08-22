@@ -2961,6 +2961,23 @@ mede-se que a soma das duas também resolve, que é o que «infinitas» quer diz
 O gume, aqui como lá, é \emph{aplicar} em vez de comparar. E a solução é exata
 em $\mathbb{Q}$: $2x=1$ dá $1/2$ (\code{tests/pgwire.c} §W54).
 
+\medskip\noindent\textbf{E o mesmo sistema tem um segundo caminho.}
+\code{cramer} não é uma alternativa por gosto: é uma \textbf{segunda
+testemunha}. Um escalona, o outro expande determinantes
+($x_i=\det(A_i)/\det(A)$, com a coluna $i$ trocada pelo lado direito) --- não se
+apoiam um no outro, e por isso concordarem é uma verificação e não uma
+repetição. Varre-se em vez de se experimentar um caso: \textbf{$512$ sistemas}
+$2\times2$ de determinante não nulo, e os dois dão o mesmo em todos, também
+em $\mathbb{Q}$ --- que é onde um arredondamento de um dos lados apareceria.
+
+\medskip\noindent\textbf{E Cramer sabe menos, que é o que se ganha em ter dois.}
+Onde o determinante é zero ele recusa, e recusa da \emph{mesma} maneira nos dois
+casos que a eliminação distingue --- o sistema sem solução e o de infinitas. Com
+um caminho só, essa diferença ficava escondida; com dois, vê-se que um deles
+responde a uma pergunta mais fina. O controlo é a matriz não quadrada, onde
+Cramer recusa e a eliminação responde: é o que impede a concordância de vir de
+os dois serem o mesmo caminho com dois nomes (\code{tests/pgwire.c} §W55).
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as

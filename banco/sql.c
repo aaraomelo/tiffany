@@ -4423,7 +4423,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"NUCLEO") ? 6
                        : !strcasecmp(nome,"IMAGEM") ? 7
                        : !strcasecmp(nome,"PRODUTO") ? 8
-                       : !strcasecmp(nome,"RESOLVE") ? 9 : 0;
+                       : !strcasecmp(nome,"RESOLVE") ? 9
+                       : !strcasecmp(nome,"CRAMER") ? 10 : 0;
                 if(qm == 8){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -6915,6 +6916,76 @@ static int varre(const char *resto, int acao){
                   snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%s", cel);
                   snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
               } }
+            return 1;
+        }
+
+        if(mat_op == 10){                        /* Cramer: o OUTRO caminho */
+            /* ── O MESMO SISTEMA, POR OUTRO CAMINHO ──────────────────────────
+             * `resolve` faz eliminação; Cramer faz determinantes:
+             *
+             *     x_i = det(A com a coluna i trocada por b) / det(A)
+             *
+             * Não é uma alternativa por gosto — é uma SEGUNDA TESTEMUNHA. Os
+             * dois algoritmos não se apoiam um no outro (um escalona, o outro
+             * expande), e por isso concordarem é uma verificação e não uma
+             * repetição. É a régua desta casa: o que mais defeitos apanhou foi
+             * a COMPARAÇÃO entre dois caminhos, não a asserção sobre um.
+             *
+             * Cramer pede o que a eliminação não pede: a matriz tem de ser
+             * QUADRADA e o determinante não nulo. Onde ele não se aplica,
+             * recusa-se — e é aí que os dois caminhos deixam de poder ser
+             * comparados, o que também se diz. */
+            int nA = A.n - 1;
+            MatQz S;
+            Qz dA;
+            if(nA < 1 || nA != A.m){
+                printf("erro: Cramer pede [A|b] com A QUADRADA, e aqui A é"
+                       " %d×%d — RECUSADO.\n", A.m, nA);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "Cramer: A is %d×%d, not square", A.m, nA); }
+                return 0;
+            }
+            S = A; S.n = nA;
+            dA = mat_det(S);
+            if(dA.p == 0){
+                printf("erro: o determinante é ZERO — Cramer não se aplica"
+                       " (o sistema não tem solução única). RECUSADO.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "Cramer: determinant is zero"); }
+                return 0;
+            }
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->ncols = nA > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : nA;
+                sql_cap->nrows = 1;
+                for(int j = 0; j < sql_cap->ncols; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "x%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+            }
+            printf("   ");
+            for(int j = 0; j < nA; j++){
+                MatQz T = S;
+                Qz dT, xj;
+                for(int i2 = 0; i2 < A.m; i2++) T.a[i2][j] = A.a[i2][A.n - 1];
+                dT = mat_det(T);
+                if(!qz_divide(dT, dA, &xj)) xj = qz(0,1);
+                { Par cls = ra_classe((Par){ (long)xj.p, (long)xj.q });
+                  char cel[SQL_OUT_CELL];
+                  if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                  else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                  printf("%s%s", cel, j + 1 < nA ? " | " : "");
+                  if(sql_cap && j < sql_cap->ncols)
+                      snprintf(sql_cap->cell[0][j], SQL_OUT_CELL, "%s", cel); }
+            }
+            printf("\n");
+            { Par cd = ra_classe((Par){ (long)dA.p, (long)dA.q });
+              printf("-- por Cramer: det(A) = %ld, e cada x_i é o quociente de"
+                     " dois determinantes\n", cd.a); }
             return 1;
         }
 

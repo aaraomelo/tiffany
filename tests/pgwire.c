@@ -7337,6 +7337,135 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W55: O MESMO SISTEMA POR DOIS CAMINHOS ══════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w55.mem", "/tmp/pgwire_w55.prog",
+            "/tmp/pgwire_w55__k.mem", "/tmp/pgwire_w55__k.prog",
+            "/tmp/pgwire_w55__z.mem", "/tmp/pgwire_w55__z.prog",
+            "/tmp/pgwire_w55__nn.mem", "/tmp/pgwire_w55__nn.prog",
+            "/tmp/pgwire_w55__rr.mem", "/tmp/pgwire_w55__rr.prog" };
+        for(int k = 0; k < 10; k++) unlink(lixo[k]);
+        printf("\n§W55 eliminação contra Cramer: duas testemunhas.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w55")) mal++;
+
+        /* ── (1) OS DOIS CAMINHOS CONCORDAM, e é isso que os torna uma
+         * verificação. `resolve` escalona; `cramer` expande determinantes —
+         * não se apoiam um no outro, e por isso o acordo entre eles não é uma
+         * repetição. Varre-se, em vez de se experimentar um caso: todos os
+         * sistemas 2×2 com coeficientes pequenos e determinante não nulo. */
+        /* os coeficientes varrem 0..4 e não os negativos: a célula é um
+         * Word_8 SEM SINAL, e um `-2` é recusado pelo envelope — varrer com ele
+         * era contar como «saltado» o que a régua da casa nunca aceitou, e
+         * quase toda a varredura ficava por fazer sem se dar por isso. */
+        { long pares = 0, iguais = 0, saltados = 0;
+          for(long a = 0; a <= 4; a++)
+          for(long b = 0; b <= 4; b++)
+          for(long c = 0; c <= 4; c++)
+          for(long d = 0; d <= 4; d++){
+              if(a*d - b*c == 0) continue;              /* Cramer não se aplica */
+              { char q1[160];
+                char v1[2][32], v2[2][32];
+                int ok1, ok2;
+                sql_executa("DROP TABLE IF EXISTS k", &o);
+                sql_executa("CREATE TABLE k (p,q,r)", &o);
+                snprintf(q1, sizeof q1, "INSERT INTO k VALUES (%ld,%ld,%ld),"
+                         " (%ld,%ld,%ld)", a, b, 5L, c, d, 11L);
+                sql_executa(q1, &o);
+                ok1 = sql_executa("SELECT resolve(*) FROM k", &o);
+                if(ok1 && o.nrows == 1){
+                    snprintf(v1[0], 32, "%s", o.cell[0][0]);
+                    snprintf(v1[1], 32, "%s", o.cell[0][1]);
+                } else { saltados++; continue; }
+                ok2 = sql_executa("SELECT cramer(*) FROM k", &o);
+                if(ok2 && o.nrows == 1){
+                    snprintf(v2[0], 32, "%s", o.cell[0][0]);
+                    snprintf(v2[1], 32, "%s", o.cell[0][1]);
+                } else { saltados++; continue; }
+                pares++;
+                if(!strcmp(v1[0], v2[0]) && !strcmp(v1[1], v2[1])) iguais++; }
+          }
+          printf("      varridos %ld sistemas 2×2 de determinante não nulo:"
+                 " os dois caminhos deram o MESMO em %ld (saltados %ld)  %s\n",
+                 pares, iguais, saltados,
+                 (pares > 300 && iguais == pares && saltados == 0) ? "" : "NAO BATE");
+          if(pares < 300 || iguais != pares || saltados) mal++; }
+
+        /* ── (2) E CONCORDAM EM ℚ, não só nos inteiros: um sistema cuja solução
+         * é fraccionária tem de dar a MESMA fracção pelos dois caminhos — e é
+         * onde um arredondamento de um dos lados apareceria. */
+        sql_executa("CREATE TABLE z (p,q,r)", &o);
+        sql_executa("INSERT INTO z VALUES (2,0,1), (0,3,1)", &o);
+        sql_executa("SELECT resolve(*) FROM z", &o);
+        char e1[32], e2[32];
+        snprintf(e1, sizeof e1, "%s", o.nrows ? o.cell[0][0] : "?");
+        snprintf(e2, sizeof e2, "%s", o.nrows ? o.cell[0][1] : "?");
+        sql_executa("SELECT cramer(*) FROM z", &o);
+        int racional = (o.nrows == 1 && !strcmp(e1, o.cell[0][0])
+                        && !strcmp(e2, o.cell[0][1])
+                        && !strcmp(e1, "1/2") && !strcmp(e2, "1/3"));
+        printf("      2x=1, 3y=1: eliminação (%s,%s) e Cramer (%s,%s) — esp"
+               " (1/2,1/3)  %s\n", e1, e2, o.nrows ? o.cell[0][0] : "?",
+               o.nrows ? o.cell[0][1] : "?", racional ? "" : "NAO BATE");
+        if(!racional) mal++;
+
+        /* ── (3) E CRAMER SABE MENOS, que é o que se ganha em ter DOIS. Onde o
+         * determinante é zero ele recusa — e recusa da MESMA maneira nos dois
+         * casos que a eliminação distingue: o sistema sem solução e o de
+         * infinitas. Um caminho só teria escondido essa diferença. */
+        sql_executa("CREATE TABLE nn (p,q,r)", &o);
+        sql_executa("INSERT INTO nn VALUES (1,2,1), (2,4,3)", &o);   /* nenhuma */
+        sql_executa("CREATE TABLE rr (p,q,r)", &o);
+        sql_executa("INSERT INTO rr VALUES (1,2,3), (2,4,6)", &o);   /* infinitas */
+        int cn = sql_executa("SELECT cramer(*) FROM nn", &o);
+        int cr = sql_executa("SELECT cramer(*) FROM rr", &o);
+        int rn = sql_executa("SELECT resolve(*) FROM nn", &o);
+        int rr = sql_executa("SELECT resolve(*) FROM rr", &o);
+        int sabe = (!cn && !cr && !rn && rr);
+        printf("      onde det = 0: Cramer recusa os dois (%d,%d) sem os"
+               " distinguir · a eliminação recusa o SEM SOLUÇÃO (%d) e resolve"
+               " o de INFINITAS (%d)  %s\n", cn, cr, rn, rr,
+               sabe ? "" : "NAO BATE");
+        if(!sabe) mal++;
+
+        /* ── O CONTROLO: Cramer pede uma matriz QUADRADA e recusa-a numa 2×3
+         * (isto é, [A|b] com A de 2×2 é o caso bom; com três incógnitas e duas
+         * equações não é). É o que impede a concordância de cima de vir de os
+         * dois caminhos serem o mesmo caminho com dois nomes. */
+        sql_executa("CREATE TABLE w (p,q,r,s)", &o);
+        sql_executa("INSERT INTO w VALUES (1,2,3,4), (5,6,7,8)", &o);
+        int c1 = sql_executa("SELECT cramer(*) FROM w", &o);
+        int c2 = sql_executa("SELECT resolve(*) FROM w", &o);
+        printf("\n      CONTROLO — A de 2×3: Cramer %s · a eliminação %s (são"
+               " caminhos DIFERENTES)  %s\n",
+               c1 ? "PASSOU (mau)" : "recusa",
+               c2 ? "responde" : "RECUSA (mau)",
+               (!c1 && c2) ? "" : "NAO BATE");
+        if(c1 || !c2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O MESMO SISTEMA POR DOIS CAMINHOS, E É O ACORDO ENTRE ELES QUE VERIFICA. `resolve`"
+           " escalona; `cramer` expande determinantes — x_i é o quociente de dois deles, com"
+           " a coluna i trocada pelo lado direito. Não se apoiam um no outro, e por isso"
+           " concordarem não é uma repetição: é a régua desta casa, onde o que mais defeitos"
+           " apanhou foi a COMPARAÇÃO entre dois caminhos e não a asserção sobre um. Varre-se"
+           " em vez de se experimentar um caso — todos os sistemas 2×2 com coeficientes"
+           " pequenos e determinante não nulo — e os dois dão o mesmo em todos. E CONCORDAM"
+           " EM ℚ, não só nos inteiros: um sistema de solução fraccionária tem de dar a MESMA"
+           " fracção pelos dois lados, que é onde um arredondamento de um deles apareceria. E"
+           " CRAMER SABE MENOS, que é o que se ganha em ter dois: onde o determinante é zero"
+           " ele recusa, e recusa da MESMA maneira nos dois casos que a eliminação distingue"
+           " — o sistema sem solução e o de infinitas soluções. Com um caminho só, essa"
+           " diferença ficava escondida; com dois, vê-se que um deles responde a uma pergunta"
+           " mais fina. O CONTROLO é a matriz não quadrada, onde Cramer recusa e a eliminação"
+           " responde: é o que impede a concordância de cima de vir de os dois serem o mesmo"
+           " caminho com dois nomes.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
