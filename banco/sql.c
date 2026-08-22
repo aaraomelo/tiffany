@@ -2763,6 +2763,49 @@ static int ten_mul(struct tensor *r, const struct tensor *a, const struct tensor
     ten_reduz(r);
     return 1;
 }
+/* ── AVALIAR O TENSOR NUMA LINHA ─────────────────────────────────────────────
+ *
+ * O mesmo objecto que o `WHERE` usa para DECIDIR serve para PRODUZIR: um
+ * tensor é $c_0 + \sum c_i x_i + \dots$, e avaliá-lo é percorrer os monómios
+ * não-nulos, decodificar o multi-índice e multiplicar as células que ele nomeia
+ * (o símbolo $0$ é a constante $1$, e por isso salta-se). Não há avaliador novo
+ * — há o mesmo lido noutra direcção, que é a dualidade que este ficheiro
+ * persegue em toda a parte: o WHERE selecciona com a expressão, o SELECT
+ * escreve-a.
+ *
+ * O denominador é um só para o tensor inteiro (é a classe racional), e sai no
+ * fim: quem chama recebe o par (numerador, denominador) e decide como o
+ * imprime. */
+static long celula_valor(long i, long j, long nc);
+/* o tensor cita a coluna j? — o símbolo j+1 aparece nalgum monómio não-nulo */
+static int ten_cita(struct tensor t, long j){
+    for(int cod = 0; cod < NMON; cod++){
+        if(!t.c[cod]) continue;
+        { int d[KGRAU];
+          mi_de(cod, d);
+          for(int k = 0; k < KGRAU; k++) if(d[k] == j + 1) return 1; }
+    }
+    return 0;
+}
+static long ten_avalia(struct tensor t, long i, long ncols, long *den){
+    long num = 0;
+    for(int cod = 0; cod < NMON; cod++){
+        if(!t.c[cod]) continue;
+        { int d[KGRAU];
+          long termo = t.c[cod];
+          mi_de(cod, d);
+          for(int k = 0; k < KGRAU; k++){
+              if(d[k] == 0) continue;                  /* o símbolo 0 é o 1 */
+              { long j2 = d[k] - 1;
+                if(j2 < 0 || j2 >= ncols){ termo = 0; break; }
+                termo *= celula_valor(i, j2, ncols); }
+          }
+          num += termo; }
+    }
+    if(den) *den = t.den ? t.den : 1;
+    return num;
+}
+
 static int ten_constante(struct tensor t){
     for(int i = 1; i < NMON; i++) if(t.c[i]) return 0;
     return t.c[0] == t.c[0];
@@ -4324,6 +4367,39 @@ static int lista_colunas(const char **pp, char *out, int cap){
                   break;
               }
           } }
+        /* ── E O ITEM PODE SER UMA EXPRESSÃO, e não só um nome ──────────────
+         * Se depois do identificador vier um operador, o item não acabou: é
+         * `a+1`, `a*b`, `a*a`. Recolhe-se o TEXTO todo até à vírgula ou ao
+         * FROM, e quem o compila é a resolução da projecção — lá a tabela já
+         * está aberta e os nomes resolvem-se, que é a mesma razão de a
+         * projecção inteira ser resolvida lá e não aqui. */
+        { const char *q = p; pula(&q);
+          if(*q == '+' || *q == '-' || *q == '*' || *q == '/' || *q == '('){
+              char tx[64]; int t = 0;
+              /* o texto começa no nome e vai até à vírgula de topo ou ao FROM */
+              t = snprintf(tx, sizeof tx, "%s", nome);
+              { int nivel = 0;
+                const char *r = p;
+                while(*r && t + 1 < (int)sizeof tx){
+                    const char *v = r, *v2 = r;
+                    pula(&r);
+                    /* pára na vírgula de topo, no FROM e no AS — o alias é do
+                     * item e não parte da expressão */
+                    if(nivel == 0 && (*r == ',' || palavra(&v, "FROM")
+                                      || palavra(&v2, "AS"))) break;
+                    if(*r == '(') nivel++;
+                    else if(*r == ')'){ if(nivel == 0) break; nivel--; }
+                    if(!*r) break;
+                    tx[t++] = *r++;
+                }
+                tx[t] = 0;
+                p = r; }
+              /* o texto passa a ser o «nome» do item, e o fluxo segue igual:
+               * assim o `AS` e a vírgula são lidos por quem já os sabia ler, em
+               * vez de este ramo os contornar — que era o defeito, com o alias
+               * a ser engolido para dentro da expressão */
+              snprintf(nome, sizeof nome, "%s", tx);
+          } }
         n += snprintf(out + n, (size_t)(cap - n), "%s%s", n ? "," : "", nome);
         /* O `AS` É SÓ UM NOME, e o Teor. 3 diz porquê: as duas soluções são «a
          * mesma estrutura noutra nomeação». O alias não muda a coluna nem o
@@ -4937,6 +5013,12 @@ static int varre(const char *resto, int acao){
      * psql. Agora a lista é guardada e a projecção aplica-se ao resultado; o que
      * não se souber resolver é RECUSADO com mensagem, nunca ignorado. */
     int proj_n = 0, proj[SQL_OUT_MAX_COLS];
+    /* a projecção pode trazer EXPRESSÕES e não só colunas: guarda-se o tensor
+     * de cada uma, e o texto para o cabeçalho */
+    static int proj_ex[SQL_OUT_MAX_COLS];
+    static struct tensor proj_ten[SQL_OUT_MAX_COLS];
+    static char proj_nome[SQL_OUT_MAX_COLS][64];
+    for(int k = 0; k < SQL_OUT_MAX_COLS; k++) proj_ex[k] = 0;
     if(acao == ACAO_MARCA){
         char cols[256];
         /* DISTINCT vem antes da lista, e diz-se já o que ele exige: UMA coluna.
@@ -5025,15 +5107,33 @@ static int varre(const char *resto, int acao){
             nome_c[i] = 0;
             if(*q == ',') q++;
             { int c = col_indice(nome_c);
-              if(c < 0){
-                  printf("erro: a coluna «%s» não existe na tabela «%s» — RECUSADA.\n",
-                         nome_c, nome);
-                  if(sql_cap){ sql_cap->ok = 0;
-                      snprintf(sql_cap->err, sizeof sql_cap->err,
-                               "column \"%s\" does not exist", nome_c); }
-                  return 0;
+              if(c >= 0){ proj[proj_n] = c; proj_ex[proj_n] = 0; proj_n++; continue; }
+              /* ── NÃO É UMA COLUNA: TENTA-SE COMO EXPRESSÃO ──────────────
+               * O mesmo `le_num` do WHERE, agora a produzir em vez de a
+               * decidir. Compila-se aqui, depois de a tabela abrir, porque é
+               * só aqui que os nomes de coluna se resolvem — a mesma razão de
+               * a projecção inteira ser resolvida neste sítio. */
+              { const char *e = nome_c;
+                struct tensor t;
+                citadas_where = 0;
+                if(le_num(&e, &t)){
+                    pula(&e);
+                    if(*e == 0){
+                        proj[proj_n] = -1;
+                        proj_ex[proj_n] = 1;
+                        proj_ten[proj_n] = t;
+                        snprintf(proj_nome[proj_n], sizeof proj_nome[0], "%s", nome_c);
+                        proj_n++;
+                        continue;
+                    }
+                }
               }
-              proj[proj_n++] = c; }
+              printf("erro: «%s» não é coluna desta tabela nem expressão que eu"
+                     " saiba ler — RECUSADA.\n", nome_c);
+              if(sql_cap){ sql_cap->ok = 0;
+                  snprintf(sql_cap->err, sizeof sql_cap->err,
+                           "column \"%s\" does not exist", nome_c); }
+              return 0; }
         }
     }
 
@@ -6006,9 +6106,15 @@ static int varre(const char *resto, int acao){
         for(int j = 0; j < nsaida; j++)
             { char cn[S_COLNOME_W * 2 + 2];
               int src = proj_n ? proj[j] : j;
-              col_nome_le(src, cn, (int)sizeof cn);
+              cn[0] = 0;
+              if(src >= 0) col_nome_le(src, cn, (int)sizeof cn);
               if(j < n_alias && alias[j][0])
                         snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", alias[j]);
+              /* a expressão traz o seu próprio nome: o TEXTO dela. Sem isto o
+               * cabeçalho saía do `col_nome_le` de uma coluna que não existe —
+               * lixo com cara de nome. */
+              else if(proj_n && proj_ex[j])
+                        snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", proj_nome[j]);
               else if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
               else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + src);
               sql_cap->tipo[j] = SQL_TIPO_INT4; }
@@ -6796,7 +6902,7 @@ static int varre(const char *resto, int acao){
             /* a mesma coluna pode ser pedida mais do que uma vez */
             if(proj_n){
                 for(int k = 0; k < proj_n; k++)
-                    if(proj[k] == (int)j){
+                    if(!proj_ex[k] && proj[k] == (int)j){
                         snprintf(saida[k], SQL_OUT_CELL, "%s", cel);
                         sai_nulo[k] = (unsigned char)ausente;
                     }
@@ -6805,6 +6911,29 @@ static int varre(const char *resto, int acao){
                 sai_nulo[j] = (unsigned char)ausente;
             }
         }
+        /* ── E AS EXPRESSÕES AVALIAM-SE DEPOIS DAS CÉLULAS ───────────────────
+         * O tensor lê as células desta linha, e o resultado é um par
+         * (numerador, denominador) — a mesma classe racional do `avg`, porque a
+         * divisão pode não fechar. E não se pronuncia sobre o que não está: se
+         * alguma coluna que a expressão CITA está ausente, o resultado é
+         * ausente — é a regra do CHECK e do WHERE, dita na produção. */
+        for(int k = 0; k < proj_n && k < nsai; k++){
+            if(!proj_ex[k]) continue;
+            { long den = 1, num;
+              int falta = 0;
+              for(long j = 0; j < ncols && j < 16 && !falta; j++)
+                  if(ten_cita(proj_ten[k], j) && !bit_le(S_PRES, i*ncols + j))
+                      falta = 1;
+              if(falta){ saida[k][0] = 0; sai_nulo[k] = 1; continue; }
+              num = ten_avalia(proj_ten[k], i, ncols, &den);
+              sai_nulo[k] = 0;
+              if(den > 1){
+                  Par cls = ra_classe((Par){ num, den });
+                  if(cls.b > 1) snprintf(saida[k], SQL_OUT_CELL, "%ld/%ld", cls.a, cls.b);
+                  else          snprintf(saida[k], SQL_OUT_CELL, "%ld", cls.a);
+              } else snprintf(saida[k], SQL_OUT_CELL, "%ld", num); }
+        }
+
         for(int k = 0; k < nsai; k++){
             printf("%s", saida[k]);
             if(k + 1 < nsai) printf(" | ");

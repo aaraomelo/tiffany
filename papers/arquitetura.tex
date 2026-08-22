@@ -2813,6 +2813,18 @@ programa emitido --- e exige-se que ela \textbf{coincida}:
 byte a byte, e não linha a linha. As duas últimas são as duas metades da lei ---
 medir uma só era meia lei.
 
+\medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
+o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
+\code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as
+células que o multi-índice nomeia --- e o grau vem de graça, porque o tensor já
+o tinha ($\code{a*a}$ não custa uma linha a mais do que $\code{a+1}$). É a
+dualidade desta casa entre dois \textbf{usos} do mesmo objeto: o \code{WHERE}
+selecciona com a expressão, o \code{SELECT} escreve-a. E mede-se pelo programa:
+\code{a+1} nos dois sítios compila para o mesmo bytecode. A expressão também
+\textbf{não se pronuncia sobre o que não está} --- \code{a+b} numa linha sem
+\code{b} dá ausente, e não \code{a} ---, que é a regra do \code{CHECK} dita na
+produção (\code{tests/pgwire.c} §W47).
+
 \medskip\noindent Daí saem duas coisas \emph{de graça}, que é o sinal de se ter
 escrito no sítio certo: \code{NOT (x IN (…))} é a conjunção das desigualdades
 sem uma linha de código a mais, e \code{IN (1,1,3)} é o \emph{mesmo programa}

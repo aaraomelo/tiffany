@@ -6346,6 +6346,129 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W47: A MESMA EXPRESSÃO DECIDE E PRODUZ ═══════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w47.mem");     unlink("/tmp/pgwire_w47.prog");
+        unlink("/tmp/pgwire_w47__t.mem");  unlink("/tmp/pgwire_w47__t.prog");
+        printf("\n§W47 SELECT a+1: o avaliador do WHERE, lido na outra direcção.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w47")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,10), (2,20), (3,NULL)", &o);
+
+        /* ── (1) NÃO HÁ AVALIADOR NOVO. O tensor que o WHERE usa para DECIDIR
+         * serve para PRODUZIR: avaliá-lo é percorrer os monómios não-nulos e
+         * multiplicar as células que o multi-índice nomeia. O grau vem de
+         * graça, porque o tensor já o tinha. */
+        sql_executa("SELECT a+1 FROM t", &o);
+        int soma = (o.nrows == 3 && !strcmp(o.cell[0][0], "2")
+                                 && !strcmp(o.cell[2][0], "4"));
+        char s0[8], s2[8];
+        snprintf(s0, sizeof s0, "%s", o.nrows ? o.cell[0][0] : "?");
+        snprintf(s2, sizeof s2, "%s", o.nrows > 2 ? o.cell[2][0] : "?");
+        sql_executa("SELECT a*a FROM t", &o);
+        int quad = (o.nrows == 3 && !strcmp(o.cell[0][0], "1")
+                                 && !strcmp(o.cell[2][0], "9"));
+        /* os valores da PRIMEIRA consulta guardam-se antes da segunda: o `o` é
+         * o mesmo objecto, e imprimir dele depois seria mostrar a segunda a
+         * dizer-se a primeira */
+        printf("      a+1 → %s,…,%s (esp 2,…,4) · a*a → %s,…,%s (esp 1,…,9)"
+               "  %s\n", s0, s2, o.nrows ? o.cell[0][0] : "?",
+               o.nrows > 2 ? o.cell[2][0] : "?", (soma && quad) ? "" : "NAO BATE");
+        if(!soma || !quad) mal++;
+
+        /* ── (2) E O GUME É QUE É MESMO O MESMO: a expressão `a+1` no SELECT e
+         * no WHERE compila para o MESMO programa. Duas escritas podem dar a
+         * mesma resposta por acaso; o mesmo bytecode não é acaso — é a medida
+         * do §W42 aplicada agora a dois USOS da mesma expressão em vez de a
+         * duas escritas da mesma condição. */
+        sql_executa("SELECT a+1 FROM t WHERE a+1 > 3", &o);
+        long p1 = sql_ultimo_prog, n1 = o.nrows;
+        char v1[16]; snprintf(v1, sizeof v1, "%s", o.nrows ? o.cell[0][0] : "?");
+        sql_executa("SELECT a FROM t WHERE a+1 > 3", &o);
+        long p2 = sql_ultimo_prog;
+        char v2[16]; snprintf(v2, sizeof v2, "%s", o.nrows ? o.cell[0][0] : "?");
+        int mesmo = (p1 == p2 && p1 != 0 && n1 == 1
+                     && !strcmp(v1, "4") && !strcmp(v2, "3"));
+        printf("      a decidir e a produzir, o MESMO programa: %08lx vs %08lx"
+               " · e a linha é a mesma (a+1=%s, a=%s)  %s\n", p1, p2, v1, v2,
+               mesmo ? "" : "NAO BATE");
+        if(!mesmo) mal++;
+
+        /* ── (3) E NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ. `a+b` na linha cuja
+         * célula `b` está ausente dá AUSENTE, e não `a`: uma expressão que cita
+         * o que não existe não tem valor. É a regra do CHECK e do WHERE, agora
+         * dita na produção — e é o que separa somar do que lá está de somar
+         * zero. */
+        sql_executa("SELECT a+b FROM t", &o);
+        int dual = (o.nrows == 3 && !strcmp(o.cell[0][0], "11")
+                    && o.nulo[2][0] && !o.cell[2][0][0]);
+        printf("      a+b → %s, %s, ausente(%d) — a que cita o que não está não"
+               " tem valor  %s\n", o.nrows ? o.cell[0][0] : "?",
+               o.nrows > 1 ? o.cell[1][0] : "?", o.nrows > 2 ? o.nulo[2][0] : -1,
+               dual ? "" : "NAO BATE");
+        if(!dual) mal++;
+
+        /* ── (4) A EXPRESSÃO TRAZ O SEU NOME, e o `AS` continua a valer: o
+         * cabeçalho é o TEXTO dela, e um alias substitui-o. Sem isso o
+         * cabeçalho vinha do nome de uma coluna que não existe — lixo com cara
+         * de nome, que é o defeito que a primeira escrita tinha. */
+        sql_executa("SELECT a+1 FROM t", &o);
+        int cab = !strcmp(o.col[0], "a+1");
+        sql_executa("SELECT a+1 AS mais FROM t", &o);
+        int ali = !strcmp(o.col[0], "mais") && o.nrows == 3;
+        printf("      o cabeçalho é o texto («%s») e o AS substitui-o («%s»)"
+               "  %s\n", cab ? "a+1" : "?", ali ? "mais" : "?",
+               (cab && ali) ? "" : "NAO BATE");
+        if(!cab || !ali) mal++;
+
+        /* ── (5) E MISTURA-SE COM COLUNAS CRUAS na mesma lista, porque o item
+         * da projecção passou a ser «coluna OU expressão» e não dois caminhos
+         * separados. */
+        sql_executa("SELECT a, a+1 FROM t", &o);
+        int mistura = (o.ncols == 2 && o.nrows == 3
+                       && !strcmp(o.cell[1][0], "2") && !strcmp(o.cell[1][1], "3"));
+        printf("      `a, a+1` na mesma lista: (%s,%s) na 2.ª linha (esp 2,3)"
+               "  %s\n", o.nrows > 1 ? o.cell[1][0] : "?",
+               o.nrows > 1 ? o.cell[1][1] : "?", mistura ? "" : "NAO BATE");
+        if(!mistura) mal++;
+
+        /* ── O CONTROLO: uma expressão sobre coluna que não existe é RECUSADA,
+         * e não avaliada como zero. Sem ele, o motor podia estar a tratar todo
+         * o nome desconhecido como $0$ e a devolver contas erradas caladas. */
+        int c1 = sql_executa("SELECT z+1 FROM t", &o);
+        int c2 = sql_executa("SELECT zz FROM t", &o);
+        printf("\n      CONTROLO — `z+1` %s · `zz` %s  %s\n",
+               c1 ? "RESPONDEU (mau)" : "recusada",
+               c2 ? "RESPONDEU (mau)" : "recusada",
+               (!c1 && !c2) ? "" : "NAO BATE");
+        if(c1 || c2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A MESMA EXPRESSÃO DECIDE E PRODUZ, E NÃO HÁ AVALIADOR NOVO. O tensor que o WHERE"
+           " usa para escolher linhas serve para escrever valores: avaliá-lo é percorrer os"
+           " monómios não-nulos e multiplicar as células que o multi-índice nomeia, e o grau"
+           " vem de graça porque o tensor já o tinha — `a*a` sai sem uma linha a mais do que"
+           " `a+1`. É a dualidade que este motor persegue em toda a parte, agora entre dois"
+           " USOS do mesmo objeto: o WHERE selecciona com a expressão, o SELECT escreve-a. E"
+           " o gume é que é MESMO o mesmo: `a+1` no SELECT e no WHERE compila para o MESMO"
+           " programa, byte a byte — duas escritas podem dar a mesma resposta por acaso, o"
+           " mesmo bytecode não. A expressão NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ: `a+b` na"
+           " linha cuja célula b está ausente dá AUSENTE e não `a`, porque uma expressão que"
+           " cita o que não existe não tem valor — a regra do CHECK dita na produção, e é o"
+           " que separa somar o que lá está de somar zero. A expressão traz o SEU nome, que"
+           " é o texto dela, e o `AS` continua a substituí-lo: sem isso o cabeçalho vinha do"
+           " nome de uma coluna que não existe, lixo com cara de nome, que foi o defeito da"
+           " primeira escrita. E mistura-se com colunas cruas na mesma lista, porque o item"
+           " da projecção passou a ser «coluna OU expressão» e não dois caminhos separados."
+           " O CONTROLO é a expressão sobre coluna que não existe, RECUSADA e não avaliada"
+           " como zero: sem ele, o motor podia estar a tratar todo o nome desconhecido como"
+           " $0$ e a devolver contas erradas caladas.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
