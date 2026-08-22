@@ -5856,6 +5856,32 @@ nula nos oito; e o gume da raiz racional.}
         {\code{traco}/\code{det} sobre a matriz do metal; a expansão em coeficientes inteiros}
         {\code{tests/pgwire.c} §W124}
 
+\subsection*{O regime que não tem inverso é o que tem derivada}
+
+\noindent O catálogo põe o corpo exterior na fronteira $\Delta=0$ --- «o regime
+nilpotente, há um elemento não nulo cujo quadrado é zero, e não há inverso». Escrito
+o dual $a+b\varepsilon$ como $\binom{a\ b}{0\ a}$, o traço e o determinante do motor
+dão $\Delta=4a^2-4a^2$, zero em \emph{todos} os pares: o corpo exterior não toca a
+fronteira, \textbf{é} a fronteira. E ela é rara --- $5\%$ das matrizes $2\times2$ de
+$-3$ a $3$.
+
+\medskip\noindent\textbf{E a derivada sai daí, não de um limite.} O determinante é o
+critério do inverso e o $b$ nunca o mexe: a parte nilpotente é \emph{invisível} ao
+determinante, e é por isso que sobrevive à divisão. Avaliando $p(x)=x^3-2x+5$ na
+matriz de $a+\varepsilon$ --- com as potências pedidas ao motor ---, a diagonal devolve
+$p(a)$ e o canto devolve $p'(a)$. O $\varepsilon^2=0$ é o que trunca na primeira ordem.
+Isto é a mesma afirmação que o \code{calculo1 thm:deriv} faz por outro caminho: a
+derivada é uma \emph{avaliação}.
+
+\medido{\code{tests/pgwire.c} §W125 --- $\Delta=0$ em $169/169$ duais pelo traço e det
+do motor, com o gume de $127/2401$ na vizinhança; $\varepsilon^2$ nulo com
+$\varepsilon\neq0$; o $b$ invisível ao determinante em todos os casos; e
+$p(a+\varepsilon)=p(a)+p'(a)\varepsilon$ em $11/11$.}
+
+\colunas{\code{catalogo} §5 ($\Delta=0$), \code{aranha thm:leidisc}}
+        {\code{traco}/\code{det}/\code{produto} sobre $\binom{a\ b}{0\ a}$}
+        {\code{tests/pgwire.c} §W125}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

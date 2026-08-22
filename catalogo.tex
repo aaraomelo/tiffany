@@ -1129,6 +1129,17 @@ E o teste diz mais: diz \emph{de que tipo} é cada álgebra. O determinante, com
 \begin{itemize}
 \item $\Delta<0$ --- o regime \textbf{elíptico}, o da torção: o grupo é o \textbf{círculo}, e a álgebra \textbf{é corpo}. É o único dos três que fecha, e o único cujo movimento a um parâmetro é compacto: a órbita volta.
 \item $\Delta=0$ --- o regime \textbf{nilpotente}: o grupo é a \textbf{reta}, há um elemento não nulo cujo quadrado é zero, e não há inverso. É o \textbf{glacial} --- e é exatamente onde mora o corpo exterior, com o seu $e^2=0$.
+
+\medido{e o corpo exterior está \emph{toda} a fronteira, não um ponto dela: escrito o dual
+$a+b\varepsilon$ como $\binom{a\ b}{0\ a}$, o traço e o determinante que o motor devolve dão
+$\Delta=4a^2-4a^2=0$ nos $169$ pares de $-6$ a $6$, $168$ deles não nulos, sem que o $\Delta$ distinga
+nenhum $(a,b)$ --- e o gume é que a fronteira seja \textbf{rara}: das $2401$ matrizes $2\times2$ de $-3$
+a $3$ só $127$ ($5\%$) a alcançam. O $\varepsilon^2$ sai do motor como matriz nula com
+$\varepsilon\neq0$, e o determinante é o critério do inverso ($8$ dos $9$ valores de $a$), com o $b$ a
+\emph{nunca} o mexer: a parte nilpotente é invisível ao determinante, e é ela que carrega a derivada
+--- para $p(x)=x^3-2x+5$, avaliar $p$ na matriz de $a+\varepsilon$ dá $p(a)$ na diagonal e
+$p'(a)=3a^2-2$ no canto, $11/11$, com as potências vindas do motor. \emph{O regime que não tem
+inverso é o que tem derivada} (\code{tests/pgwire.c} §W125).}
 \item $\Delta>0$ --- o regime \textbf{idempotente}: o grupo é a \textbf{hipérbole}, e a álgebra parte-se em duas retas independentes. É o \textbf{tropical} --- o mundo do $\max$, onde nada se desfaz.
 \end{itemize}
 

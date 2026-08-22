@@ -18151,6 +18151,167 @@ int main(void){
            " transcendente a ficar onde está.", mal == 0);
     }
 
+    /* ═══ §W125: O CORPO EXTERIOR É Δ=0 — E A DERIVADA SAI COMO AVALIAÇÃO ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W125 e² = 0 é o regime Δ = 0, e p(a+ε) devolve p'(a) sem um limite.\n\n");
+        unlink("/tmp/pgwire_w125__D.mem"); unlink("/tmp/pgwire_w125__D.prog");
+        unlink("/tmp/pgwire_w125__E.mem"); unlink("/tmp/pgwire_w125__E.prog");
+        unlink("/tmp/pgwire_w125__R.mem"); unlink("/tmp/pgwire_w125__R.prog");
+        unlink("/tmp/pgwire_w125.mem");    unlink("/tmp/pgwire_w125.prog");
+        if(!sql_abrir("/tmp/pgwire_w125")) mal++;
+
+        #define POE3(t,M) do { char q3[220]; \
+            snprintf(q3, sizeof q3, "DROP TABLE IF EXISTS %s", t); sql_executa(q3,&o2); \
+            snprintf(q3, sizeof q3, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q3,&o2); \
+            for(int i3 = 0; i3 < 2; i3++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i3][0], (M)[i3][1]); sql_executa(v,&o2); } } while(0)
+        /* o produto no motor: SELECT produto(D) FROM E  ==  E · D */
+        #define MUL3(dst, esq, dir) do { \
+            long _m[2][2]; POE3("E", esq); POE3("D", dir); \
+            sql_executa("SELECT produto(D) FROM E", &o); \
+            if(!o.ok){ mal++; } else { \
+                for(int r3=0;r3<2;r3++) for(int c3=0;c3<2;c3++) \
+                    _m[r3][c3] = atol(o.cell[r3][c3]); \
+                for(int r3=0;r3<2;r3++) for(int c3=0;c3<2;c3++) \
+                    (dst)[r3][c3] = _m[r3][c3]; } } while(0)
+
+        /* ── (1) Δ = 0 EM TODO O CORPO EXTERIOR, e NÃO por escolha de a e b:
+         * a matriz do dual a+bε é [[a,b],[0,a]], e Δ = tr² − 4det = 4a² − 4a².
+         * O motor devolve traço e det, e a conta fecha em inteiros. */
+        {
+            long zero = 0, tot = 0, nao_nulos = 0;
+            for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
+                long M[2][2] = {{a,b},{0,a}};
+                POE3("D", M);
+                sql_executa("SELECT traco(*) FROM D", &o);
+                if(!o.ok) continue;
+                long tr = atol(o.cell[0][0]);
+                sql_executa("SELECT det(*) FROM D", &o);
+                if(!o.ok) continue;
+                long dt = atol(o.cell[0][0]);
+                long D = tr*tr - 4*dt;
+                tot++;
+                if(D == 0) zero++;
+                if(a != 0 || b != 0) nao_nulos++;
+            }
+            printf("      Δ = tr² − 4det = 0 em %ld/%ld duais (traço e det do motor),"
+                   " e %ld deles são não nulos\n", zero, tot, nao_nulos);
+            printf("        o Δ não distingue NENHUM par (a,b): o corpo exterior inteiro"
+                   " vive na fronteira, que é onde o catálogo o põe\n");
+            if(zero != tot || tot != 169) mal++;
+        }
+
+        /* ── (2) O GUME: Δ = 0 NÃO É PROPRIEDADE DE TODA A MATRIZ 2×2. Se fosse,
+         * a medida acima não separava nada. Varre-se a vizinhança e conta-se. */
+        {
+            long zero = 0, tot = 0;
+            for(long p = -3; p <= 3; p++) for(long q = -3; q <= 3; q++)
+            for(long r = -3; r <= 3; r++) for(long s = -3; s <= 3; s++){
+                long M[2][2] = {{p,q},{r,s}};
+                long tr = p + s, dt = p*s - q*r;
+                tot++;
+                if(tr*tr - 4*dt == 0) zero++;
+                (void)M;
+            }
+            printf("      GUME — nas %ld matrizes 2×2 de −3..3 só %ld têm Δ = 0 (%ld%%):"
+                   " a fronteira é RARA, e o corpo exterior está toda ela\n",
+                   tot, zero, 100*zero/tot);
+            if(zero == tot || zero == 0) mal++;
+        }
+
+        /* ── (3) ε² = 0 EXACTO, PELO MOTOR — e ε ≠ 0. É o «elemento não nulo cujo
+         * quadrado é zero» da fronteira, e não um zero por arredondamento. */
+        {
+            long E[2][2] = {{0,1},{0,0}}, E2[2][2];
+            MUL3(E2, E, E);
+            long nulo = (E2[0][0]==0 && E2[0][1]==0 && E2[1][0]==0 && E2[1][1]==0);
+            long eps_nao_nulo = (E[0][1] != 0);
+            printf("      ε² pelo motor = [[%ld,%ld],[%ld,%ld]] — nulo: %s · e ε ≠ 0: %s\n",
+                   E2[0][0], E2[0][1], E2[1][0], E2[1][1],
+                   nulo ? "sim" : "NÃO", eps_nao_nulo ? "sim" : "NÃO");
+            if(!nulo || !eps_nao_nulo) mal++;
+        }
+
+        /* ── (4) INVERTÍVEL SSE a ≠ 0, e o det do motor É o critério. O b não
+         * entra: dois duais com o mesmo a têm o mesmo destino. */
+        {
+            long inv = 0, nao = 0, b_influiu = 0;
+            for(long a = -4; a <= 4; a++){
+                long det_a[9]; int n = 0;
+                for(long b = -4; b <= 4; b++){
+                    long M[2][2] = {{a,b},{0,a}};
+                    POE3("D", M);
+                    sql_executa("SELECT det(*) FROM D", &o);
+                    if(!o.ok) continue;
+                    det_a[n++] = atol(o.cell[0][0]);
+                }
+                for(int j = 1; j < n; j++) if(det_a[j] != det_a[0]) b_influiu++;
+                if(n && det_a[0] != 0) inv++; else if(n) nao++;
+            }
+            printf("      invertível sse a ≠ 0: %ld dos 9 valores de a com det ≠ 0,"
+                   " %ld sem — e o b nunca mexeu no det (%ld casos)\n",
+                   inv, nao, b_influiu);
+            printf("        a parte nilpotente é INVISÍVEL ao determinante: é ela que"
+                   " sobrevive à divisão e carrega a derivada\n");
+            if(inv != 8 || nao != 1 || b_influiu != 0) mal++;
+        }
+
+        /* ── (5) E A DERIVADA É UMA AVALIAÇÃO. Para p(x) = x³ − 2x + 5, avaliar
+         * p na matriz de a+ε e ler o canto superior direito dá p'(a) — exacto,
+         * em inteiros, sem um h a tender para zero. As potências vêm do motor. */
+        {
+            long ok = 0, tot = 0;
+            for(long a = -5; a <= 5; a++){
+                long A[2][2] = {{a,1},{0,a}};       /* a + ε */
+                long A2[2][2], A3[2][2];
+                MUL3(A2, A, A);
+                MUL3(A3, A2, A);
+                /* p(A) = A³ − 2A + 5I, combinado em inteiros */
+                long p00 = A3[0][0] - 2*A[0][0] + 5;
+                long p01 = A3[0][1] - 2*A[0][1];
+                /* o esperado: p(a) na diagonal, p'(a) = 3a² − 2 no canto */
+                long pa = a*a*a - 2*a + 5, dpa = 3*a*a - 2;
+                tot++;
+                if(p00 == pa && p01 == dpa) ok++;
+                if(a >= -1 && a <= 1)
+                    printf("        a=%2ld: p(a+ε) = %ld %+ldε · p(a) = %ld · p'(a) = %ld\n",
+                           a, p00, p01, pa, dpa);
+            }
+            printf("      p(a+ε) = p(a) + p'(a)ε em %ld/%ld pontos, com A² e A³ vindos"
+                   " do motor e a soma em inteiros\n", ok, tot);
+            printf("        a derivada não é um limite aqui: é o que a parte nilpotente"
+                   " CARREGA, e ε² = 0 é o que a trunca na primeira ordem\n");
+            if(ok != tot || tot != 11) mal++;
+        }
+
+        #undef MUL3
+        #undef POE3
+        sql_fechar();
+
+        printf("\n");
+        ok("O CORPO EXTERIOR É O REGIME Δ = 0, E É POR ISSO QUE A DERIVADA LHE SAI COMO"
+           " AVALIAÇÃO. O catálogo põe o corpo exterior exactamente na fronteira — «Δ=0, o"
+           " regime nilpotente, há um elemento não nulo cujo quadrado é zero, e não há"
+           " inverso» — e o motor confirma-o sem escolher o caso: escrevendo o dual a+bε como"
+           " [[a,b],[0,a]] e pedindo traço e det, vem Δ = 4a² − 4a² = 0 nos 169 pares de −6 a"
+           " 6, com 168 deles não nulos. E o GUME é que Δ = 0 não seja propriedade de toda a"
+           " matriz: nas 2401 matrizes 2×2 de −3 a 3 apenas 127 estão na fronteira, 5%. A"
+           " fronteira é rara e o corpo exterior é toda ela. O ε² = 0 vem do motor como"
+           " matriz nula com ε ≠ 0 — o «elemento não nulo cujo quadrado é zero», exacto e não"
+           " por arredondamento. O det diz quem tem inverso: 8 dos 9 valores de a, e o b"
+           " NUNCA o mexeu em nenhum caso, o que é a afirmação de que a parte nilpotente é"
+           " invisível ao determinante. É ela que sobrevive à divisão, e daí o fecho: para"
+           " p(x) = x³ − 2x + 5, avaliar p na matriz de a+ε dá p(a) na diagonal e p'(a) ="
+           " 3a² − 2 no canto, em 11/11 pontos, com A² e A³ pedidos ao motor e a combinação"
+           " feita em inteiros. A derivada não é um limite aqui: é o que a parte nilpotente"
+           " CARREGA, e o ε² = 0 é exactamente o que a trunca na primeira ordem. O regime que"
+           " não tem inverso é o que tem derivada.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
