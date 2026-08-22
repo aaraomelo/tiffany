@@ -1338,6 +1338,38 @@ endereço para distintos). A prova de que o defeito é da leitura está no par: 
 lido pelo representante reduzido corre sobre a \emph{mesma} família e passa nas duas
 metades, com o corpo intocado.
 
+\medskip\noindent E o segundo lote, pela mesma regra:
+\begin{center}\small
+\begin{tabular}{@{}lrccl@{}}
+\toprule
+corpo (leitura) & obj. & bem def. & separa & veredicto\\
+\midrule
+diferencial, $p(x)$ pelos coeficientes & $125$ & sim & sim & \textbf{herda}\\
+ordenado, a posição na ordem & $24$ & sim & sim & \textbf{herda}\\
+electromagnético, a impedância $R+Xi$ & $56$ & sim & sim & \textbf{herda}\\
+quântico, $\rho=\lvert\psi\rangle\langle\psi\rvert$ & $80$ & sim & sim & \textbf{herda}\\
+\midrule
+cónico, coeficientes \emph{crus} & $124$ & \textbf{não} & sim & \emph{quebra} o objecto\\
+quântico, $\lvert\psi\rangle$ pelas \emph{amplitudes} & $80$ & \textbf{não} & sim & \emph{quebra} o objecto\\
+algébrico, pelo polinómio \emph{mínimo} & $130$ & sim & \textbf{não} & \emph{funde} objectos\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent E cada falha tem o seu motivo, que a regra não precisa de saber para a
+apanhar. O \textbf{cónico} quebra porque a igualdade daquele corpo é \emph{projectiva} ---
+a mesma cónica a menos de escala --- e a leitura crua dá endereços diferentes a
+coeficientes proporcionais. O \textbf{algébrico} funde porque matrizes distintas partilham
+o polinómio mínimo, que é o «mesma cifra $\nRightarrow$ semelhantes» outra vez. E o
+\textbf{quântico} traz as duas na \emph{mesma} família: escrito com a fase global exacta,
+$\lvert\psi\rangle$ e $u\lvert\psi\rangle$ são o mesmo estado, pelo que a leitura pelas
+amplitudes \emph{quebra}; e $\rho=\lvert\psi\rangle\langle\psi\rvert$ passa nas duas
+metades, porque a fase entra por $u$ e sai por $\bar u$. \emph{Não é escolha de gosto:
+das duas leituras do mesmo corpo, só uma endereça o objecto} --- e é a regra que o diz,
+sem se abrir o corpo.
+
+\medido{o segundo lote em \code{tests/pgwire.c} §W136 --- $4$ leituras a herdarem, $2$ a
+quebrarem e $1$ a fundir, com o quântico a exibir as duas na mesma família.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias

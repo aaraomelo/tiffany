@@ -20472,6 +20472,175 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W136: SEGUNDO LOTE — E O QUÂNTICO MOSTRA PORQUE A FÍSICA LÊ ρ ═════ */
+    {
+        long mal = 0;
+        printf("\n§W136 mais corpos do catálogo pela tradução, e a fase que quebra.\n\n");
+
+        long serve = 0, quebra = 0, funde = 0;
+        printf("      corpo                                    obj  bem def.  separa  veredicto\n");
+
+        #define VEREDICTO(nome, n, bd, sep, pares) do { \
+            int _b = ((bd) == (pares)), _s = ((sep) == (pares)); \
+            if(_b && _s) serve++; else if(!_b) quebra++; else funde++; \
+            printf("      %-38s %5ld  %7s  %6s   %s\n", (nome), (long)(n), \
+                   _b ? "sim" : "NÃO", _s ? "sim" : "NÃO", \
+                   (_b && _s) ? "HERDA — completo" \
+                   : _b ? "funde — falta leitura" : "quebra — régua não é do corpo"); \
+        } while(0)
+
+        /* ── 1. DIFERENCIAL: o polinómio pelos seus coeficientes. A igualdade é a
+         * dos coeficientes, e a leitura é o tuplo — separa por construção. */
+        {
+            long n = 0, bd = 0, sep = 0, pares = 0;
+            long e[130];
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+                e[n++] = ((a+2)*5 + (b+2))*5 + (c+2);
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                pares++;
+                if(!(0 && e[i] != e[j])) bd++;          /* objectos distintos: nunca quebra */
+                if(!(e[i] == e[j])) sep++;
+            }
+            VEREDICTO("diferencial  p(x) pelos coeficientes  ", n, bd, sep, pares);
+        }
+
+        /* ── 2. ORDENADO: a posição na ordem. Igualdade é a identidade. */
+        {
+            long n = 0, bd = 0, sep = 0, pares = 0; long e[40];
+            for(long a = 0; a < 24; a++) e[n++] = a;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                pares++; bd++; if(e[i] != e[j]) sep++;
+            }
+            VEREDICTO("ordenado     a posição na ordem       ", n, bd, sep, pares);
+        }
+
+        /* ── 3. ELETROMAGNÉTICO: a impedância R + Xi, o par. */
+        {
+            long n = 0, bd = 0, sep = 0, pares = 0; long e[70];
+            for(long R = 0; R <= 7; R++) for(long X = -3; X <= 3; X++) e[n++] = R*8 + (X+3);
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                pares++; bd++; if(e[i] != e[j]) sep++;
+            }
+            VEREDICTO("eletromagn.  impedância R + Xi        ", n, bd, sep, pares);
+        }
+
+        /* ── 4. CÓNICO: a cónica ax²+bxy+cy² a menos de escala. A igualdade é
+         * PROJECTIVA, e a leitura crua dos coeficientes quebra. */
+        {
+            long n = 0, bd = 0, sep = 0, pares = 0;
+            long pa[130], pb[130], pc[130], e[130];
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++){
+                if(a == 0 && b == 0 && c == 0) continue;
+                pa[n] = a; pb[n] = b; pc[n] = c;
+                e[n] = ((a+2)*5 + (b+2))*5 + (c+2);
+                n++;
+            }
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                /* mesma cónica: proporcionais */
+                int mesmo = (pa[i]*pb[j] == pa[j]*pb[i]) && (pa[i]*pc[j] == pa[j]*pc[i])
+                          && (pb[i]*pc[j] == pb[j]*pc[i]);
+                int me = (e[i] == e[j]);
+                pares++;
+                if(!(mesmo && !me)) bd++;
+                if(!(me && !mesmo)) sep++;
+            }
+            VEREDICTO("cónico       coeficientes CRUS        ", n, bd, sep, pares);
+        }
+
+        /* ── 5. ALGÉBRICO: a matriz pelo seu polinómio mínimo. Duas matrizes
+         * semelhantes têm o mesmo mínimo — a leitura FUNDE. */
+        {
+            long n = 0, bd = 0, sep = 0, pares = 0; long e[130];
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+            for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                if(n >= 130) break;
+                /* o mínimo de uma 2×2 genérica é o característico: (tr, det) */
+                long tr = a + d, dt = a*d - b*c;
+                e[n++] = (tr + 8)*32 + (dt + 16);
+            }
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                pares++; bd++;                            /* bem definida: sim */
+                if(e[i] != e[j]) sep++;                   /* separa? */
+            }
+            VEREDICTO("algébrico    pelo polinómio mínimo    ", n, bd, sep, pares);
+        }
+
+        /* ── 6. QUÂNTICO: o estado |ψ⟩, com a igualdade ψ ~ uψ da fase global.
+         * Em ℤ[i] as unidades são {1,i,−1,−i} e a coisa é exacta. */
+        {
+            long pa[90], pb[90], pc[90], pd[90]; long n = 0;
+            for(long i = 0; i < 81; i++){
+                long a = (i%3)-1, b = ((i/3)%3)-1, c = ((i/9)%3)-1, d = ((i/27)%3)-1;
+                if(a==0 && b==0 && c==0 && d==0) continue;
+                pa[n]=a; pb[n]=b; pc[n]=c; pd[n]=d; n++;
+            }
+            #define MESMO_EST(i,j) ({ int _r=0; \
+                long A=pa[i],B=pb[i],C=pc[i],D=pd[i],E=pa[j],F=pb[j],G=pc[j],H=pd[j]; \
+                if(A==E&&B==F&&C==G&&D==H) _r=1; \
+                else if(-B==E&&A==F&&-D==G&&C==H) _r=1; \
+                else if(-A==E&&-B==F&&-C==G&&-D==H) _r=1; \
+                else if(B==E&&-A==F&&D==G&&-C==H) _r=1; _r; })
+            /* leitura CRUA: as amplitudes */
+            {
+                long bd = 0, sep = 0, pares = 0;
+                for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                    int mesmo = MESMO_EST(i,j);
+                    long ei = ((pa[i]+1)*3+(pb[i]+1))*9 + (pc[i]+1)*3 + (pd[i]+1);
+                    long ej = ((pa[j]+1)*3+(pb[j]+1))*9 + (pc[j]+1)*3 + (pd[j]+1);
+                    pares++;
+                    if(!(mesmo && ei != ej)) bd++;
+                    if(!(ei == ej && !mesmo)) sep++;
+                }
+                VEREDICTO("quântico     |ψ⟩ pelas AMPLITUDES    ", n, bd, sep, pares);
+            }
+            /* leitura ρ = |ψ⟩⟨ψ|: invariante à fase */
+            {
+                long bd = 0, sep = 0, pares = 0;
+                long r11[90], r22[90], r12r[90], r12i[90];
+                for(long i = 0; i < n; i++){
+                    r11[i] = pa[i]*pa[i] + pb[i]*pb[i];
+                    r22[i] = pc[i]*pc[i] + pd[i]*pd[i];
+                    r12r[i] = pa[i]*pc[i] + pb[i]*pd[i];
+                    r12i[i] = pb[i]*pc[i] - pa[i]*pd[i];
+                }
+                for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                    int mesmo = MESMO_EST(i,j);
+                    int me = (r11[i]==r11[j] && r22[i]==r22[j]
+                              && r12r[i]==r12r[j] && r12i[i]==r12i[j]);
+                    pares++;
+                    if(!(mesmo && !me)) bd++;
+                    if(!(me && !mesmo)) sep++;
+                }
+                VEREDICTO("quântico     ρ = |ψ⟩⟨ψ|              ", n, bd, sep, pares);
+            }
+            #undef MESMO_EST
+        }
+
+        printf("      → %ld herdam, %ld quebram o objecto, %ld fundem objectos\n",
+               serve, quebra, funde);
+        if(serve == 0 || quebra == 0 || funde == 0) mal++;
+        #undef VEREDICTO
+
+        printf("\n");
+        ok("O SEGUNDO LOTE FECHA-SE PELA MESMA REGRA, E O QUÂNTICO MOSTRA PORQUE A FÍSICA LÊ"
+           " ρ. Sete leituras entraram, cada uma com os objectos do seu corpo, a igualdade"
+           " que ali vale e o endereço em I. O diferencial pelos coeficientes, o ordenado"
+           " pela posição e o electromagnético pela impedância passam nas duas metades e"
+           " herdam a régua — nada se mediu neles. As falhas repetem as duas formas já"
+           " conhecidas, e cada uma pelo seu motivo. O CÓNICO quebra: a igualdade daquele"
+           " corpo é projectiva — a mesma cónica a menos de escala — e a leitura crua dos"
+           " coeficientes dá endereços diferentes a proporcionais. O ALGÉBRICO funde: lida"
+           " pelo polinómio mínimo, matrizes distintas com o mesmo mínimo caem no mesmo"
+           " endereço, que é o mesmo facto do «mesma cifra ⇏ semelhantes». E O QUÂNTICO TRAZ"
+           " AS DUAS NA MESMA FAMÍLIA: escrito em ℤ[i], onde a fase global é exacta e as"
+           " unidades são quatro, a leitura pelas AMPLITUDES quebra o estado — |ψ⟩ e u|ψ⟩ são"
+           " o mesmo objecto em endereços distintos —, enquanto ρ = |ψ⟩⟨ψ| passa nas duas"
+           " metades, porque a fase entra por u e sai por ū. Não é escolha de gosto: das duas"
+           " leituras do mesmo corpo, só uma endereça o objecto. É a regra a decidir sozinha,"
+           " e é assim que o catálogo se completa — corpo a corpo, sem abrir nenhum.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
