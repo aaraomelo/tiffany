@@ -16674,6 +16674,202 @@ int main(void){
            " continua unitária com outro metal.", mal == 0);
     }
 
+    /* ═══ §W116: A LEI DO TRAÇO — TRÊS CLASSES, E O CORTE É A DO MEIO ══════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W116 |tr| < 2, = 2, > 2: a tríade, o CORTE e a família metálica.\n\n");
+        unlink("/tmp/pgwire_w116__A.mem"); unlink("/tmp/pgwire_w116__A.prog");
+        unlink("/tmp/pgwire_w116__P.mem"); unlink("/tmp/pgwire_w116__P.prog");
+        unlink("/tmp/pgwire_w116.mem");    unlink("/tmp/pgwire_w116.prog");
+        if(!sql_abrir("/tmp/pgwire_w116")) mal++;
+
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); sql_executa(v,&o2); } } while(0)
+
+        /* ── (1) A TRICOTOMIA ESGOTA. Em GL₂(ℤ) o traço é inteiro, logo
+         * |tr| < 2, = 2 ou > 2 — e não há quarta. As três classes são as três
+         * realizações desta casa, e o gume é que TODAS apareçam. */
+        {
+            long eli = 0, par = 0, hip = 0, tot = 0, fora = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+            for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+                long M[2][2] = {{a,b},{c,d}};
+                POE2("A", M);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long dt = atol(o.cell[0][0]);
+                if(dt != 1 && dt != -1){ fora++; continue; }   /* fora de GL₂(ℤ) */
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok) continue;
+                long t = atol(o.cell[0][0]);
+                /* o classificador é o DISCRIMINANTE e não o traço sozinho:
+                 * Δ = tr² − 4det. Com det = +1 isso é |tr| contra 2; com
+                 * det = −1 vale Δ = tr² + 4 > 0 SEMPRE, e a matriz é
+                 * hiperbólica qualquer que seja o traço. A primeira escrita
+                 * aplicou |tr| < 2 sem separar por det e deu 16 «elípticas»
+                 * sem ordem finita — que é o que uma asserção tem de apanhar. */
+                long D = t*t - 4*dt;
+                tot++;
+                if(D < 0) eli++; else if(D == 0) par++; else hip++;
+                if(dt == -1 && D <= 0) mal++;      /* det −1 ⟹ Δ > 0 sempre */
+            }
+            printf("      em GL₂(ℤ) com entradas em −4..4: %ld matrizes, e o"
+                   " DISCRIMINANTE Δ = tr² − 4det parte-as em TRÊS — elíptico %ld ·"
+                   " parabólico %ld · hiperbólico %ld\n", tot, eli, par, hip);
+            printf("        soma %ld = %ld: a tricotomia ESGOTA. E o traço sozinho"
+                   " NÃO classifica: só o faz dentro de SL₂, onde det = +1 e Δ < 0"
+                   " é |tr| < 2 — com det = −1 vale Δ = tr²+4 > 0 e é sempre"
+                   " hiperbólica\n", eli+par+hip, tot);
+            if(eli + par + hip != tot) mal++;
+            if(!eli || !par || !hip) mal++;      /* as três têm de aparecer */
+        }
+
+        /* ── (2) O ELÍPTICO É A TRÍADE, e as ordens são as que a rede admite.
+         * O `aranha` Lema~\ref{lem:cristal} prova {1,2,3,4,6}; aqui conta-se
+         * qual ordem cada elíptico tem, e a tríade ocupa 2, 3 e 4. */
+        {
+            long ordens[8]; memset(ordens, 0, sizeof ordens);
+            long tot = 0, infinita = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long dt = a*d - b*c;
+                if(dt != 1 && dt != -1) continue;
+                long t = a + d, D = t*t - 4*dt;
+                if(D >= 0) continue;                   /* só o elíptico: Δ < 0 */
+                /* a ordem: aplica-se até voltar à identidade */
+                long M[2][2] = {{a,b},{c,d}}, A[2][2] = {{a,b},{c,d}};
+                int k = 1;
+                while(k <= 12 && !(A[0][0]==1 && A[0][1]==0 && A[1][0]==0 && A[1][1]==1)){
+                    long Z[2][2] = {{A[0][0]*M[0][0]+A[0][1]*M[1][0], A[0][0]*M[0][1]+A[0][1]*M[1][1]},
+                                    {A[1][0]*M[0][0]+A[1][1]*M[1][0], A[1][0]*M[0][1]+A[1][1]*M[1][1]}};
+                    memcpy(A, Z, sizeof A); k++;
+                }
+                tot++;
+                if(k <= 12 && k <= 7) ordens[k]++; else infinita++;
+            }
+            printf("      o ELÍPTICO tem ordem FINITA, e as ordens são:");
+            for(int k = 1; k <= 7; k++) if(ordens[k]) printf(" %d×%ld", k, ordens[k]);
+            printf("  (de %ld matrizes, %ld sem ordem ≤ 12)\n", tot, infinita);
+            printf("        e a ordem 2 NÃO aparece: o espelho ν tem Δ ≥ 0 e vive"
+                   " FORA do elíptico — ele não roda, REFLECTE\n");
+            printf("        as elípticas são {3,4,6}, subconjunto do {1,2,3,4,6} que"
+                   " o Lema da restrição cristalográfica admite; a TRÍADE atravessa"
+                   " duas classes, com o 2 no outro lado\n");
+            if(ordens[5] != 0) mal++;             /* a ordem 5 não pode existir */
+            if(ordens[2] != 0) mal++;             /* e a 2 não é elíptica */
+            if(!ordens[3] || !ordens[4] || !ordens[6]) mal++;
+            if(infinita != 0) mal++;
+            { long tS = 0, dS = -1, DS = tS*tS - 4*dS;
+              printf("        testemunha: S = (0,1;1,0) tem ordem 2, tr = %ld,"
+                     " det = %ld, Δ = %ld > 0 — HIPERBÓLICA\n", tS, dS, DS);
+              if(DS <= 0) mal++; }
+        }
+
+        /* ── (3) O PARABÓLICO É O CORTE TERMINADO. O `aranha thm:corte`(3)
+         * diz que o processo «acaba, e acaba numa IGUALDADE»: m_N = g_N. Em
+         * termos do espectro isso é δ = 0, isto é Δ = tr² − 4det = 0 — a raiz
+         * DUPLA. Verifica-se que |tr| = 2 e Δ = 0 são a MESMA condição em
+         * GL₂(ℤ) com det = +1. */
+        {
+            long bate = 0, tot = 0, delta0 = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+            for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+                long dt = a*d - b*c;
+                if(dt != 1) continue;                  /* det = +1 */
+                long t = a + d, at = t < 0 ? -t : t;
+                long D = t*t - 4*dt;
+                tot++;
+                if((at == 2) == (D == 0)) bate++;
+                if(D == 0) delta0++;
+            }
+            printf("      o PARABÓLICO é |tr| = 2, e isso É Δ = 0: as duas condições"
+                   " coincidem em %ld/%ld matrizes de det +1 (%ld com Δ = 0)\n",
+                   bate, tot, delta0);
+            printf("        e Δ = 0 é o CORTE TERMINADO do `aranha thm:corte`(3):"
+                   " «acaba, e acaba numa IGUALDADE», m_N = g_N, que no espectro"
+                   " é a raiz DUPLA — δ = 0\n");
+            if(bate != tot || delta0 == 0) mal++;
+        }
+
+        /* ── (4) O HIPERBÓLICO É A FAMÍLIA METÁLICA, e a prop:selberg diz
+         * porquê: A_m tem det = −1, logo NÃO está em SL₂(ℤ); a menor potência
+         * com det +1 é A_m², de traço m²+2. Mede-se pelo motor. */
+        {
+            long ok_det = 0, ok_tr = 0, ok_hip = 0, tot = 0;
+            for(long m = 1; m <= 8; m++){
+                long A[2][2] = {{m,1},{1,0}};
+                POE2("A", A);
+                sql_executa("SELECT det(*) FROM A", &o);
+                long d1 = o.ok ? atol(o.cell[0][0]) : 0;
+                POE2("P", A); POE2("A", A);
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != 2) continue;
+                long A2[2][2];
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    A2[i][j] = atol(o.cell[i][j]);
+                POE2("A", A2);
+                sql_executa("SELECT det(*) FROM A", &o);
+                long d2 = o.ok ? atol(o.cell[0][0]) : 0;
+                sql_executa("SELECT traco(*) FROM A", &o);
+                long t2 = o.ok ? atol(o.cell[0][0]) : 0;
+                tot++;
+                if(d1 == -1 && d2 == 1) ok_det++;
+                if(t2 == m*m + 2) ok_tr++;
+                if((t2 < 0 ? -t2 : t2) > 2) ok_hip++;
+                if(m <= 3) printf("        m=%ld: det A = %ld (fora de SL₂) ·"
+                                  " det A² = %ld · tr A² = %ld = m²+2 · |tr| > 2\n",
+                                  m, d1, d2, t2);
+            }
+            printf("      o HIPERBÓLICO: det A_m = −1 e det A_m² = +1 em %ld/%ld —"
+                   " a MENOR potência em SL₂(ℤ), porque det A^k = (−1)^k · e"
+                   " tr A_m² = m²+2 em %ld/%ld, sempre > 2: %ld/%ld hiperbólicas\n",
+                   ok_det, tot, ok_tr, tot, ok_hip, tot);
+            if(ok_det != tot || ok_tr != tot || ok_hip != tot || tot < 6) mal++;
+        }
+
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("O TRAÇO PARTE GL₂(ℤ) EM TRÊS, E AS TRÊS REALIZAÇÕES DESTA CASA SÃO ESSAS TRÊS —"
+           " COM O CORTE NO MEIO. Como |det| = 1 é a forma do operador (§W109) e o traço é"
+           " inteiro, o discriminante Δ = tr² − 4det também é inteiro e só há três casos: Δ < 0,"
+           " Δ = 0, Δ > 0. Medido em GL₂(ℤ) com entradas em −4..4, a soma das três classes dá"
+           " exactamente o total,"
+           " e as três aparecem — a tricotomia ESGOTA. E O CLASSIFICADOR É O DISCRIMINANTE E"
+           " NÃO O TRAÇO SOZINHO: só dentro de SL₂, onde det = +1, é que Δ < 0 coincide com"
+           " |tr| < 2; com det = −1 vale Δ = tr² + 4 > 0 e a matriz é hiperbólica qualquer que"
+           " seja o traço. A primeira escrita aplicou |tr| < 2 sem separar por determinante e"
+           " produziu 16 «elípticas» sem ordem finita — a asserção apanhou-as, e a correcção"
+           " é o próprio resultado. O ELÍPTICO TEM ORDEM FINITA, e as ordens"
+           " que saem são {3, 4, 6} — a ordem 5 não aparece em matriz nenhuma, como o Lema da"
+           " restrição cristalográfica do `aranha` obriga. MAS A ORDEM 2 TAMBÉM NÃO APARECE, e"
+           " isso não estava previsto: o espelho ν tem Δ ≥ 0 e vive FORA do elíptico. A"
+           " testemunha é o S = (0,1;1,0), de ordem 2, traço 0 e det −1, logo Δ = 4 > 0 —"
+           " hiperbólica. Donde a TRÍADE ATRAVESSA DUAS CLASSES: o trial (3) e Viviani (4)"
+           " rodam e são elípticos; o espelho (2) não roda, REFLECTE, e está no outro lado. As"
+           " elípticas são o subconjunto {3,4,6} do {1,2,3,4,6} que a rede admite, e a"
+           " diferença entre os dois conjuntos é exactamente o que reflecte em vez de rodar. O PARABÓLICO É O CORTE TERMINADO: |tr| = 2 e Δ = tr² − 4det = 0 são a MESMA"
+           " condição, medida em todas as matrizes de det +1, e Δ = 0 é o que o"
+           " `aranha thm:corte`(3) chama «acaba, e acaba numa IGUALDADE» — m_N = g_N, que no"
+           " espectro é a raiz DUPLA, δ = 0. O corte não converge para o ponto: CHEGA a ele,"
+           " porque a régua tem grão, e o ponto é o ponto fixo que as duas faces passam a"
+           " partilhar. O HIPERBÓLICO É A FAMÍLIA METÁLICA, e a prop:selberg diz porquê: A_m"
+           " tem det = −1, logo NÃO está em SL₂(ℤ) — vive em GL₂(ℤ) —, e a menor potência com"
+           " det +1 é A_m², porque det A^k = (−1)^k. O motor confirma: det A_m² = +1 e"
+           " tr A_m² = m²+2, sempre maior que 2, logo toda a família é hiperbólica. É o mesmo"
+           " m²+4 outra vez, agora pela quinta porta: (m²+2)² − 4 = m²(m²+4). E DAÍ A LEI, que"
+           " é uma frase: O TRAÇO É QUEM CLASSIFICA, e as três classes são a tríade, o corte e"
+           " a família — o elíptico roda e volta, o parabólico chega e para, o hiperbólico"
+           " expande e não volta.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

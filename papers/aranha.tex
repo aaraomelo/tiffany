@@ -2194,6 +2194,54 @@ extremos a raiz é dupla e a diagonalização força $A=\pm I$. A ordem $5$ exig
 $t=2\cos(2\pi/5)=\tfrac{\sqrt5-1}{2}$, que \textbf{não é inteiro}.
 \end{proof}
 
+\begin{teorema}[a lei do discriminante: três classes, e o corte é a do meio]\label{thm:leidisc}
+Seja $A$ inteira $2\times2$ com $\lvert\det A\rvert=1$, e
+$\Delta=\operatorname{tr}^{2}A-4\det A$. Então $\Delta$ é inteiro e as três
+possibilidades esgotam:
+\[
+\begin{array}{lll}
+\Delta<0 & \textbf{elíptico} & \text{ordem finita, e ela está em }\{3,4,6\}\\[2pt]
+\Delta=0 & \textbf{parabólico} & \text{raiz \textbf{dupla}: o corte do Teor.~\ref{thm:corte} \emph{terminado}}\\[2pt]
+\Delta>0 & \textbf{hiperbólico} & \text{duas direções reais: uma expande, a outra contrai}
+\end{array}
+\]
+\end{teorema}
+
+\begin{proof}
+$\Delta$ é inteiro porque $\operatorname{tr}$ e $\det$ o são, e a tricotomia dos
+inteiros esgota. Se $\Delta<0$ as raízes são conjugadas de módulo
+$\sqrt{\lvert\det\rvert}=1$, logo raízes da unidade, e o Lema~\ref{lem:cristal}
+dá a ordem em $\{1,2,3,4,6\}$; as ordens $1$ e $2$ ficam de fora porque $A=\pm I$
+tem $\Delta=0$ e uma involução com $A\neq\pm I$ tem $\operatorname{tr}=0$ e
+$\det=-1$, donde $\Delta=4>0$. Se $\Delta=0$ há raiz dupla, isto é $\delta=0$ no
+Teor.~\ref{thm:corte}(3), que é onde o processo \textbf{chega} --- e o
+Teor.~\ref{thm:corte}(5) diz que aí as duas faces partilham o ponto fixo. Se
+$\Delta>0$ as raízes são reais e distintas, com produto $\pm1$: uma de módulo
+maior que $1$ e outra menor.
+\end{proof}
+
+\noindent\textbf{E o traço sozinho não classifica.} Dentro de
+$\mathrm{SL}_2(\mathbb{Z})$, onde $\det=+1$, a condição $\Delta<0$ é $\lvert\operatorname{tr}\rvert<2$;
+mas com $\det=-1$ vale $\Delta=\operatorname{tr}^{2}+4>0$ \emph{sempre}, e a matriz
+é hiperbólica qualquer que seja o traço. \emph{Quem classifica é $\Delta$}, e é o
+mesmo $\Delta$ da cifra.
+
+\medskip\noindent\textbf{E a tríade atravessa duas classes.} O trial (ordem $3$) e
+Viviani (ordem $4$) \emph{rodam}, e são elípticos. O espelho $\nu$ (ordem $2$)
+\textbf{não roda: reflete} --- a sua testemunha é
+$S=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, de traço $0$ e
+$\det=-1$, logo $\Delta=4>0$, hiperbólica. \emph{A diferença entre $\{1,2,3,4,6\}$
+e $\{3,4,6\}$ é exatamente o que reflete em vez de rodar.}
+
+\medido{\code{tests/pgwire.c} §W116 --- as três classes esgotam $360$ matrizes de
+$\mathrm{GL}_2(\mathbb{Z})$ com entradas em $-4..4$; as elípticas têm todas ordem finita e
+dão $\{3,4,6\}$, com a $5$ ausente e a $2$ também; $\lvert\operatorname{tr}\rvert=2$
+e $\Delta=0$ coincidem nas $180$ de $\det+1$; e a família metálica é toda
+hiperbólica, com $\det A_m=-1$, $\det A_m^{2}=+1$ e $\operatorname{tr}A_m^{2}=m^{2}+2$
+pelo motor. A primeira escrita classificou pelo traço sem separar por determinante e
+produziu $16$ «elípticas» sem ordem finita --- a asserção apanhou-as, e a correção é
+o próprio resultado.}
+
 \noindent \emph{É o traço que fecha a lista}: a inteireza da rede passa para
 $t$, e um intervalo de comprimento $4$ só tem cinco inteiros. A tríade ocupa
 $2,3,4$, com o $6$ a ser onde as duas primeiras voltam juntas,
