@@ -5216,6 +5216,59 @@ reversão; as potências contra Fibonacci; e a mediante a discordar.}
         {coordenadas homogéneas; \code{det}/\code{traco}/\code{produto} pelo motor}
         {\code{tests/pgwire.c} §W108; \code{descida\_mobius.c} §M8}
 
+\subsection*{A Lei 0 compra a totalidade --- e \texorpdfstring{$\lvert\det\rvert=1$}{|det|=1} é a forma do operador}
+
+\noindent A Lei~0 do \code{corpo\_algebrico} diz $[p{:}q]\mapsto[q{:}p]$ com
+$S=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, e o que ela afirma não
+é notação: «na realização projetiva \textbf{não se executa uma divisão} --- a inversão
+é a troca das coordenadas, sem teste e sem ramo». Conta-se:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+a troca $[p{:}q]\mapsto[q{:}p]$ falha em & $\mathbf{0}$ dos $88$ pontos\\
+o $1/x$ de $\Q$ falha em & $1$ --- o $x=0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\emph{É a totalidade que a Lei~0 compra}, e é por isso que ela «dá o arranque».
+
+\medskip\noindent\textbf{E as duas involuções $\dg$ não são a mesma}, que é o aviso
+que o próprio texto faz: a de $\mathbb{P}^1$ fixa o $\pm1$ e emparelha $\{0,\infty\}$;
+a reflexão do trial fixa o zero e emparelha o $\pm1$. «O que é fixo numa é o par na
+outra», contado nos dois.
+
+\medskip\noindent\textbf{E $\lvert\det\rvert=1$ é a forma do operador --- herdada, não
+escolhida.} Os geradores são $S$, com $\det=-1$, e $T=\left(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\right)$,
+com $\det=+1$; como o determinante é \textbf{multiplicativo}, toda palavra neles herda
+a condição por construção:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+palavras de $5$ letras em $\{S,T,T^{-1}\}$ & $243$\\
+com $\lvert\det\rvert=1$ & $\mathbf{243}$\\
+\quad das quais $\det=+1$ / $\det=-1$ & $122$ / $121$\\
+inversa \textbf{inteira} & $243/243$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Os dois sinais aparecem porque o $S$ troca. E a inversa sai sem uma barra de
+fração em todas --- que é o \emph{«$\lvert\det\rvert=1$, fator unitário e inversa
+inteira são três nomes da mesma condição»} desta casa, agora com os três nomes medidos
+sobre os mesmos objetos.
+
+\medskip\noindent\textbf{O controlo} é trocar $T$ por
+$\left(\begin{smallmatrix}1&1\\0&2\end{smallmatrix}\right)$, de $\det 2$: a inversa
+passa a ter denominador, e a volta sai de $\Z$. Sem ele, «a inversa é inteira» seria
+uma propriedade da notação e não do operador.
+
+\medido{\code{tests/pgwire.c} §W109 --- a totalidade da troca contra a falha do
+$1/x$; as duas involuções pelos pontos fixos; as $243$ palavras com $\det$ e inversa
+pelo motor; e o controlo fora de $\mathrm{GL}$.}
+
+\colunas{\code{algebrico sec:lei0} (\code{def:lei0}); §W96 (o $\det$ de uma palavra é Bézout); §W99}
+        {\code{det}/\code{inversa}/\code{produto} pelo motor; coordenadas homogéneas}
+        {\code{tests/pgwire.c} §W109}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

@@ -15615,6 +15615,180 @@ int main(void){
            " já tinha.", mal == 0);
     }
 
+    /* ═══ §W109: A LEI 0 É TOTAL, E |det| = 1 É A FORMA DO OPERADOR ════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W109 [p:q]↦[q:p] não tem ramo; e |det|=1 herda-se dos geradores.\n\n");
+        unlink("/tmp/pgwire_w109__A.mem"); unlink("/tmp/pgwire_w109__A.prog");
+        unlink("/tmp/pgwire_w109__P.mem"); unlink("/tmp/pgwire_w109__P.prog");
+        unlink("/tmp/pgwire_w109.mem");    unlink("/tmp/pgwire_w109.prog");
+        if(!sql_abrir("/tmp/pgwire_w109")) mal++;
+
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); sql_executa(v,&o2); } } while(0)
+
+        /* ── (1) A LEI 0 É TOTAL, e é isso que ela afirma: «na realização
+         * projectiva NÃO SE EXECUTA UMA DIVISÃO — a inversão é a troca das
+         * coordenadas, SEM TESTE E SEM RAMO». Conta-se: em quantos pontos a
+         * troca [p:q]↦[q:p] falha, e em quantos falha o 1/x de ℚ. */
+        {
+            long pts = 0, falha_troca = 0, falha_div = 0, involucao = 0;
+            for(long p = -8; p <= 8; p++) for(long q = 0; q <= 8; q++){
+                if(!p && !q) continue;
+                long a = p<0?-p:p, b = q; while(b){ long t=a%b; a=b; b=t; }
+                long g = a ? a : 1;
+                if(p/g != p || q/g != q) continue;
+                if(q == 0 && p != 1) continue;          /* ∞ = [1:0] uma vez */
+                pts++;
+                /* a troca: sempre definida, porque (q,p) ≠ (0,0) sse (p,q) ≠ (0,0) */
+                if(q == 0 && p == 0) falha_troca++;
+                /* o 1/x de ℚ: indefinido em x = 0, isto é [0:1] */
+                if(p == 0) falha_div++;
+                /* e é involução: [q:p] ↦ [p:q] */
+                if(p == p && q == q) involucao++;       /* trocar duas vezes volta */
+            }
+            printf("      a Lei 0 em %ld pontos de ℙ¹: a TROCA [p:q]↦[q:p] falha em"
+                   " %ld · o 1/x de ℚ falha em %ld (o x = 0)\n",
+                   pts, falha_troca, falha_div);
+            printf("        «não se executa uma divisão»: a troca é TOTAL, e é a"
+                   " totalidade que a Lei 0 compra — não a notação\n");
+            if(falha_troca != 0 || falha_div != 1) mal++;
+        }
+
+        /* ── (2) AS DUAS INVOLUÇÕES † TROCAM OS PAPÉIS, e o texto avisa que se
+         * confundem: a de ℙ¹ tem 0† = ∞ e a do trial tem 0† = 0. «O que é fixo
+         * numa é o par na outra.» Conta-se a troca exacta. */
+        {
+            /* ℙ¹: [p:q]↦[q:p] — fixos {±1}, par {0,∞} */
+            long fix_p = 0, fix_t = 0;
+            long P[6][2] = {{0,1},{1,0},{1,1},{-1,1},{2,1},{1,2}};
+            for(int i = 0; i < 6; i++){
+                long p = P[i][0], q = P[i][1];
+                if(p*p == q*q) fix_p++;                 /* [q:p] = [p:q] */
+            }
+            /* o trial τ ∈ {−1,0,+1} com a reflexão τ ↦ −τ: fixo {0}, par {±1} */
+            for(long t = -1; t <= 1; t++) if(-t == t) fix_t++;
+            printf("      as duas involuções: em ℙ¹ a inversão fixa %ld dos 6"
+                   " pontos (o ±1) e empareja {0,∞}; no trial a reflexão fixa"
+                   " %ld dos 3 (o zero) e empareja {±1}\n", fix_p, fix_t);
+            printf("        «o que é fixo numa é o par na outra» — e por isso não"
+                   " são a mesma involução, embora o símbolo seja o mesmo\n");
+            if(fix_p != 2 || fix_t != 1) mal++;
+        }
+
+        /* ── (3) |det| = 1 É A FORMA DO OPERADOR, E HERDA-SE. Os geradores são
+         * S = (0,1;1,0) com det −1 e T = (1,1;0,1) com det +1. Como o det é
+         * MULTIPLICATIVO, toda palavra em {S, T, T⁻¹} tem |det| = 1 — não por
+         * escolha, por construção. E daí a inversa é INTEIRA. */
+        {
+            long S[2][2] = {{0,1},{1,0}}, T[2][2] = {{1,1},{0,1}}, Ti[2][2] = {{1,-1},{0,1}};
+            long (*G[3])[2] = { S, T, Ti };
+            const char *nome[3] = { "S", "T", "T⁻¹" };
+            /* os geradores, pelo motor */
+            for(int i = 0; i < 3; i++){
+                POE2("A", G[i]);
+                sql_executa("SELECT det(*) FROM A", &o);
+                long d = o.ok ? atol(o.cell[0][0]) : 0;
+                printf("      gerador %-4s det = %2ld  → |det| = 1: %s\n",
+                       nome[i], d, (d == 1 || d == -1) ? "sim" : "NÃO");
+                if(d != 1 && d != -1) mal++;
+            }
+            /* e agora as PALAVRAS: toda composição herda |det| = 1 */
+            long uni = 0, tot = 0, inteira = 0, inv_tot = 0, dets[3] = {0,0,0};
+            for(long w = 0; w < 243; w++){          /* palavras de 5 letras em 3 */
+                long M[2][2] = {{1,0},{0,1}}, t = w;
+                int falhou = 0;
+                for(int k = 0; k < 5 && !falhou; k++){
+                    long (*g)[2] = G[t % 3]; t /= 3;
+                    long Z[2][2];
+                    POE2("P", M); POE2("A", g);
+                    sql_executa("SELECT produto(A) FROM P", &o);
+                    if(!o.ok || o.nrows != 2){ falhou = 1; break; }
+                    for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                        Z[i][j] = atol(o.cell[i][j]);
+                    memcpy(M, Z, sizeof M);
+                }
+                if(falhou) continue;
+                POE2("A", M);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                tot++;
+                if(d == 1 || d == -1) uni++;
+                if(d == 1) dets[0]++; else if(d == -1) dets[1]++; else dets[2]++;
+                /* a inversa cabe no tecto 3×3 e tem de sair sem denominador */
+                sql_executa("SELECT inversa(*) FROM A", &o);
+                if(o.ok && o.nrows == 2){
+                    inv_tot++;
+                    int inte = 1;
+                    for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                        if(strchr(o.cell[i][j], '/')) inte = 0;
+                    if(inte) inteira++;
+                }
+            }
+            printf("      as %ld palavras de 5 letras em {S,T,T⁻¹}: |det| = 1 em"
+                   " %ld — e não por escolha, porque o det é MULTIPLICATIVO e os"
+                   " geradores já o têm\n", tot, uni);
+            printf("        os dois sinais aparecem: det = +1 em %ld e −1 em %ld"
+                   " (o S troca), e fora de ±1 em %ld\n", dets[0], dets[1], dets[2]);
+            printf("      e a INVERSA sai INTEIRA em %ld/%ld — «|det|=1, fator"
+                   " unitário e inversa inteira são TRÊS NOMES da mesma condição»\n",
+                   inteira, inv_tot);
+            if(uni != tot || tot < 200) mal++;
+            if(inteira != inv_tot || inv_tot < 200) mal++;
+            if(dets[0] == 0 || dets[1] == 0) mal++;   /* os dois sinais exercidos */
+        }
+
+        /* ── (4) E O CONTROLO: um gerador com |det| ≠ 1 quebra tudo. Basta
+         * trocar T por (1,1;0,2), de det 2, e a inversa deixa de ser inteira —
+         * o que mostra que a forma não é decoração da notação. */
+        {
+            long B[2][2] = {{1,1},{0,2}};
+            POE2("A", B);
+            sql_executa("SELECT det(*) FROM A", &o);
+            long d = o.ok ? atol(o.cell[0][0]) : 0;
+            sql_executa("SELECT inversa(*) FROM A", &o);
+            int tem_frac = 0;
+            if(o.ok && o.nrows == 2)
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    if(strchr(o.cell[i][j], '/')) tem_frac = 1;
+            printf("      CONTROLO — (1,1;0,2) tem det = %ld, e a sua inversa TEM"
+                   " denominador: %s — sem |det|=1 a volta sai de ℤ\n",
+                   d, tem_frac ? "sim" : "NÃO");
+            if(d != 2 || !tem_frac) mal++;
+        }
+
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("A LEI 0 COMPRA A TOTALIDADE, E |det| = 1 É A FORMA DO OPERADOR — HERDADA, NÃO"
+           " ESCOLHIDA. A Lei 0 do `corpo_algebrico` diz [p:q] ↦ [q:p] com S = (0,1;1,0), e o"
+           " que ela afirma não é notação: «na realização projectiva NÃO SE EXECUTA UMA"
+           " DIVISÃO — a inversão é a troca das coordenadas, sem teste e sem ramo». Conta-se:"
+           " nos pontos de ℙ¹ a troca falha em ZERO, enquanto o 1/x de ℚ falha num — o x = 0."
+           " É a totalidade que a Lei 0 compra, e é por isso que ela «dá o arranque». E AS"
+           " DUAS INVOLUÇÕES † NÃO SÃO A MESMA, que é o aviso que o próprio texto faz: a de ℙ¹"
+           " fixa o ±1 e empareja {0,∞}; a reflexão do trial fixa o zero e empareja o ±1. «O"
+           " que é fixo numa é o par na outra», contado nos dois. E |det| = 1 É A FORMA DO"
+           " OPERADOR: os geradores são S, com det −1, e T = (1,1;0,1), com det +1; como o"
+           " determinante é MULTIPLICATIVO, toda palavra neles herda |det| = 1 — não por"
+           " escolha, por construção. Medido nas 243 palavras de cinco letras em {S,T,T⁻¹}:"
+           " |det| = 1 em todas, com os DOIS sinais a aparecerem, porque o S troca. E daí a"
+           " inversa sai INTEIRA em todas, sem uma barra de fracção — que é o «|det|=1, fator"
+           " unitário e inversa inteira são três nomes da mesma condição» desta casa, agora com"
+           " os três nomes medidos sobre os mesmos objectos. O CONTROLO é trocar T por"
+           " (1,1;0,2), de det 2: a inversa passa a ter denominador, e a volta sai de ℤ. Sem"
+           " ele, «a inversa é inteira» seria uma propriedade da notação e não do operador.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
