@@ -15038,6 +15038,112 @@ int main(void){
            " que impede de ler o bloco como se tudo passasse pelo banco.", mal == 0);
     }
 
+    /* ═══ §W105: A ORDEM ALTERNADA — E A LEXICOGRÁFICA QUE ERRA ════════════ */
+    {
+        long mal = 0;
+        printf("\n§W105 «para operar corpos é preciso ordem»: a alternada acerta, a lexicográfica não.\n\n");
+
+        /* ── A §«A ferramenta» diz: «o corpo de corpos é TOTALMENTE ORDENADO, e
+         * Σ é um isomorfismo de ordem. É isso que faz do dicionário ferramenta
+         * central e não reescrita elegante — para operar corpos é preciso
+         * ordem». E dá o número: «a ordem alternada foi mostrada: 72
+         * comparações, todas certas, e o controlo de que a lexicográfica sem
+         * alternar erra 24». Aqui a ordem VERDADEIRA é a do valor, comparada
+         * em inteiros: p₁q₂ contra p₂q₁, sem uma divisão. */
+        /* o contador chama-se k9 e não k: com `k`, uma chamada VAL(W[k],…)
+         * fica com o índice SOMBREADO pelo do macro e lê W[k][k]. Aconteceu:
+         * a ordem total deu 702 empates e zero pares comparáveis. */
+        #define VAL(W,L,P,Q) do { long p1=1,q1=0,p2=0,q2=1; \
+            for(int k9=0;k9<(L);k9++){ long p=(W)[k9]*p1+p2, q=(W)[k9]*q1+q2; \
+                p2=p1; q2=q1; p1=p; q1=q; } (P)=p1; (Q)=q1; } while(0)
+
+        for(int L = 3; L <= 4; L++){
+            long alt_ok = 0, lex_ok = 0, tot = 0, discordam = 0;
+            long lo = 1, hi = 3, n = hi - lo + 1, N = 1;
+            for(int k = 0; k < L; k++) N *= n;
+            for(long i = 0; i < N; i++) for(long j = i + 1; j < N; j++){
+                long A[6], B[6], t;
+                t = i; for(int k = 0; k < L; k++){ A[k] = lo + t % n; t /= n; }
+                t = j; for(int k = 0; k < L; k++){ B[k] = lo + t % n; t /= n; }
+                long pa, qa, pb, qb;
+                VAL(A, L, pa, qa); VAL(B, L, pb, qb);
+                /* a ordem VERDADEIRA, em inteiros e sem divisão */
+                long lhs = pa*qb, rhs = pb*qa;
+                int verd = (lhs < rhs) ? -1 : (lhs > rhs) ? 1 : 0;
+                if(verd == 0) continue;         /* valores iguais: fora */
+                /* a ALTERNADA: o sentido inverte a cada posição */
+                int alt = 0;
+                for(int k = 0; k < L && !alt; k++)
+                    if(A[k] != B[k]) alt = ((A[k] < B[k]) ? -1 : 1) * ((k % 2) ? -1 : 1);
+                /* a LEXICOGRÁFICA: sempre o mesmo sentido */
+                int lex = 0;
+                for(int k = 0; k < L && !lex; k++)
+                    if(A[k] != B[k]) lex = (A[k] < B[k]) ? -1 : 1;
+                tot++;
+                if(alt == verd) alt_ok++;
+                if(lex == verd) lex_ok++;
+                if(alt != lex) discordam++;
+            }
+            printf("      palavras de %d letras (a_i ∈ 1..3), %ld comparações:\n", L, tot);
+            printf("        ordem ALTERNADA acerta %ld/%ld · LEXICOGRÁFICA acerta"
+                   " %ld/%ld (erra %ld)\n", alt_ok, tot, lex_ok, tot, tot - lex_ok);
+            printf("        e as duas DISCORDAM entre si em %ld — sem isso não"
+                   " haveria nada a separar\n", discordam);
+            if(alt_ok != tot) mal++;
+            if(lex_ok == tot) mal++;      /* se a lex acertasse, a alternância era decoração */
+            if(discordam == 0) mal++;
+        }
+
+        /* ── E A ORDEM É TOTAL, que é o que o texto afirma: a comparação por
+         * valor é uma ordem total nas palavras distintas — antissimétrica e
+         * TRANSITIVA. A transitividade é a que se pode perder sem se notar. */
+        {
+            const int L = 3;
+            long W[27][3]; int m = 0;
+            for(long a = 1; a <= 3; a++) for(long b = 1; b <= 3; b++)
+            for(long c = 1; c <= 3; c++){ W[m][0]=a; W[m][1]=b; W[m][2]=c; m++; }
+            long P[27], Q[27];
+            for(int k = 0; k < m; k++) VAL(W[k], L, P[k], Q[k]);
+            long trans_ok = 0, trans_n = 0, anti_ok = 0, anti_n = 0, empates = 0;
+            for(int a = 0; a < m; a++) for(int b = 0; b < m; b++){
+                if(a == b) continue;
+                long ab = P[a]*Q[b] - P[b]*Q[a];
+                if(ab == 0){ empates++; continue; }
+                anti_n++;
+                if((ab > 0) == (P[b]*Q[a] - P[a]*Q[b] < 0)) anti_ok++;
+                for(int c = 0; c < m; c++){
+                    if(c == a || c == b) continue;
+                    long bc = P[b]*Q[c] - P[c]*Q[b], ac = P[a]*Q[c] - P[c]*Q[a];
+                    if(ab < 0 && bc < 0){ trans_n++; if(ac < 0) trans_ok++; }
+                }
+            }
+            printf("      a ordem é TOTAL nas 27 palavras de 3 letras:"
+                   " antissimétrica %ld/%ld · transitiva %ld/%ld · empates %ld\n",
+                   anti_ok, anti_n, trans_ok, trans_n, empates);
+            if(anti_ok != anti_n || trans_ok != trans_n || trans_n < 100) mal++;
+        }
+
+        #undef VAL
+        printf("\n");
+        ok("PARA OPERAR CORPOS É PRECISO ORDEM, E A ORDEM DAS PALAVRAS ALTERNA. A §«A"
+           " ferramenta» diz que «o corpo de corpos é totalmente ordenado, e Σ é um"
+           " isomorfismo de ordem — é isso que faz do dicionário ferramenta central e não"
+           " reescrita elegante», e dá o número da ordem alternada com o seu controlo. Aqui a"
+           " ordem VERDADEIRA é a do valor, comparada em inteiros e sem uma divisão: p₁q₂"
+           " contra p₂q₁, com os convergentes vindos da recorrência. A ORDEM ALTERNADA — a que"
+           " inverte o sentido a cada posição da palavra — acerta em TODAS as comparações, nas"
+           " palavras de três e de quatro letras com a_i ∈ 1..3. A LEXICOGRÁFICA, que compara"
+           " sempre no mesmo sentido, ERRA — e é esse erro que dá conteúdo à alternância: se"
+           " acertasse, alternar seria decoração. As duas discordam entre si num número"
+           " grande de pares, que é o CONTROLO sem o qual não haveria nada a separar. E A"
+           " ORDEM É TOTAL, que é a outra metade do que o texto afirma: nas 27 palavras de"
+           " três letras a comparação é antissimétrica em todos os pares e TRANSITIVA em todos"
+           " os triplos — e a transitividade é a que se pode perder sem se notar, porque uma"
+           " comparação errada aos pares ainda parece uma ordem. É isto que sustenta o «Σ é"
+           " isomorfismo de ordem»: sem ordem total do lado das palavras, não há isomorfismo"
+           " de ordem para lado nenhum.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

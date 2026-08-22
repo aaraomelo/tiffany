@@ -5027,6 +5027,51 @@ aviso; e a paridade do encaixe.}
         {\code{produto} pelo motor; exponenciação modular e busca do menor gerador em inteiros longos}
         {\code{tests/pgwire.c} §W104}
 
+\subsection*{Para operar corpos é preciso ordem --- e a ordem das palavras alterna}
+
+\noindent A §«A ferramenta» do \code{catalogo} diz que «o corpo de corpos é
+\textbf{totalmente ordenado}, e $\Sigma$ é um isomorfismo de ordem --- é isso que faz
+do dicionário ferramenta central e não reescrita elegante». Aqui a ordem
+\emph{verdadeira} é a do valor, comparada \textbf{em inteiros e sem uma divisão}:
+$p_1q_2$ contra $p_2q_1$, com os convergentes vindos da recorrência.
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & $3$ letras & $4$ letras\\
+\midrule
+comparações & $351$ & $3240$\\
+ordem \textbf{alternada} & $351$ & $3240$\\
+ordem lexicográfica & $270$ & $2430$\\
+\emph{erros da lexicográfica} & $\mathbf{81}$ & $\mathbf{810}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent A alternada --- a que \textbf{inverte o sentido a cada posição} ---
+acerta em todas. A lexicográfica erra, e é esse erro que dá conteúdo à alternância:
+\emph{se acertasse, alternar seria decoração}. As duas discordam exatamente nesses
+pares, que é o controlo sem o qual não haveria nada a separar.
+
+\medskip\noindent\textbf{E a ordem é total}, que é a outra metade do que o texto
+afirma: nas $27$ palavras de três letras a comparação é antissimétrica em $702/702$
+pares e \textbf{transitiva} em $2925/2925$ triplos. A transitividade é a que se pode
+perder sem se notar --- uma comparação errada aos pares ainda parece uma ordem. Sem
+ordem total do lado das palavras, não há isomorfismo de ordem para lado nenhum.
+
+\medskip\noindent\textbf{E um erro de macro no caminho, do tipo que não dá aviso.} O
+\code{VAL} que calcula o convergente usava \code{k} como contador; chamado com
+\code{VAL(W[k],\ldots)}, o índice de fora fica \textbf{sombreado} pelo de dentro e o
+macro lê \code{W[k][k]}. Resultado: $702$ empates e \emph{zero} pares comparáveis ---
+a ordem total dava vazia, e uma asserção mais frouxa teria passado. Renomeado o
+contador, os $702$ passam a ser os pares.
+
+\medido{\code{tests/pgwire.c} §W105 --- as duas ordens contra o valor exato, nos dois
+comprimentos; e a totalidade nos pares e nos triplos.}
+
+\colunas{\code{catalogo} «A ferramenta: a forma matricial»; §W96 (os convergentes como colunas)}
+        {a comparação por $p_1q_2$ contra $p_2q_1$, sem divisão}
+        {\code{tests/pgwire.c} §W105}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

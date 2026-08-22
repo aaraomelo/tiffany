@@ -5036,6 +5036,8 @@ elegante --- para operar corpos é preciso ordem, e a ordem existe porque a deco
 ordem alternada foi \emph{mostrada}: $72$ comparações, todas certas, e o controlo de que a
 lexicográfica sem alternar erra $24$.
 
+\medido{\code{tests/pgwire.c} §W105 --- e refeito com a ordem verdadeira tomada \emph{em inteiros}, $p_1q_2$ contra $p_2q_1$, sem uma divisão. A alternada acerta em $351/351$ nas palavras de três letras e $3240/3240$ nas de quatro (com $a_i\in1..3$); a lexicográfica erra $81$ e $810$, e é esse erro que dá conteúdo à alternância. As duas discordam exactamente nesses pares --- o controlo sem o qual não haveria nada a separar. E a ordem é \textbf{total}: antissimétrica em $702/702$ pares e transitiva em $2925/2925$ triplos, que é o que sustenta o «$\Sigma$ é isomorfismo de ordem».}
+
 \emph{E a construção subiu de dimensão --- com uma condição, e uma revisão que me corrigiu.}
 $\Mat{a}$ generaliza-se para a \textbf{companheira} de $x^n = m x^{n-1} + 1$, e o caso $n=2$ é o
 gato. Duas propriedades valem sempre: $|\det| = 1$ e a conservação
@@ -21637,6 +21639,8 @@ O determinante de uma companheira é $(-1)^n$ vezes o termo constante do polinó
 \noindent É o Corolário~\ref{cor:det} sem a hipótese $n=2$: a identidade fundamental não era um
 acidente do caso plano. Verificado simbolicamente para $2\leq n\leq 6$, $m\in\{1,2\}$, junto com
 $\chi_{\Comp{n}{m}} = \beta_{n,m}$.
+
+\medido{\code{tests/pgwire.c} §W94 e §W95 --- e agora \emph{executado}, no mesmo regime: $\det=(-1)^{n+1}$ em $10/10$; a inversa \textbf{inteira}, sem uma barra de fracção, em $4/4$ dos casos onde cabe (nos outros seis o motor recusa pelo tecto $3\times3$ da aumentada $n\times2n$ --- tecto dele, não da lei); e $\chi=\beta_{n,m}$ obtido por \textbf{Newton} dos traços das potências, com os $20$ coeficientes do meio a anularem-se, que é o que diz que aquela matriz é a companheira de $\beta$ e não de outra coisa. O §W95 acrescenta a Prop.~\ref{prop:tracos} em $77$ instâncias e o sinal da zeta.}
 
 \subsection{O que daria a ordem: a condição de Pisot, e onde ela falha}
 
