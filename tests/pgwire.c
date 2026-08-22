@@ -16518,6 +16518,162 @@ int main(void){
            " fabricado».", mal == 0);
     }
 
+    /* ═══ §W115: A ALTERNÂNCIA É O DETERMINANTE, E HURWITZ É m²+4 ══════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W115 «o sinal do determinante é a orientação da Möbius» — e o pior aproximável é o Δ mínimo.\n\n");
+        unlink("/tmp/pgwire_w115__A.mem"); unlink("/tmp/pgwire_w115__A.prog");
+        unlink("/tmp/pgwire_w115__P.mem"); unlink("/tmp/pgwire_w115__P.prog");
+        unlink("/tmp/pgwire_w115.mem");    unlink("/tmp/pgwire_w115.prog");
+        if(!sql_abrir("/tmp/pgwire_w115")) mal++;
+
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); sql_executa(v,&o2); } } while(0)
+
+        /* ── (1) A ALTERNÂNCIA NÃO É CONVENÇÃO: É O DETERMINANTE. A §«Ordem»
+         * diz que «M_n age em ℙ(ℝ) com det M_n = (−1)^{n+1}, e o sinal do
+         * determinante é EXACTAMENTE a orientação da Möbius». §W105 mediu que
+         * a ordem alternada acerta; aqui mede-se PORQUÊ — o sinal (−1)^k da
+         * definição e o det do prefixo, pedido ao motor, andam juntos. */
+        {
+            long bate = 0, tot = 0;
+            for(long a0 = 1; a0 <= 3; a0++) for(long a1 = 1; a1 <= 3; a1++)
+            for(long a2 = 1; a2 <= 3; a2++) for(long a3 = 1; a3 <= 3; a3++){
+                long W[4] = {a0,a1,a2,a3};
+                long M[2][2] = {{1,0},{0,1}};
+                int falhou = 0;
+                for(int k = 0; k < 4 && !falhou; k++){
+                    long L[2][2] = {{W[k],1},{1,0}}, Z[2][2];
+                    POE2("P", M); POE2("A", L);
+                    sql_executa("SELECT produto(A) FROM P", &o);
+                    if(!o.ok || o.nrows != 2){ falhou = 1; break; }
+                    for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                        Z[i][j] = atol(o.cell[i][j]);
+                    memcpy(M, Z, sizeof M);
+                    /* det do prefixo de k+1 letras, pelo motor */
+                    POE2("A", M);
+                    sql_executa("SELECT det(*) FROM A", &o);
+                    if(!o.ok){ falhou = 1; break; }
+                    long d = atol(o.cell[0][0]);
+                    /* a definição usa (−1)^k no índice k; o det do prefixo que
+                     * termina em k é (−1)^{k+1}. Andam juntos, com sinal fixo. */
+                    long sinal_def = (k % 2) ? -1 : 1;
+                    tot++;
+                    if(d == -sinal_def) bate++;
+                }
+            }
+            printf("      a alternância É o determinante: o sinal (−1)^k da"
+                   " definição e o det do prefixo pelo motor andam juntos em"
+                   " %ld/%ld posições\n", bate, tot);
+            printf("        «cada nível de encaixe inverte a orientação» porque"
+                   " z ↦ a + 1/z é crescente em a e DECRESCENTE em z — e o det"
+                   " conta essa inversão\n");
+            if(bate != tot || tot < 200) mal++;
+        }
+
+        /* ── (2) O LIMITE DE HURWITZ É 1/√(m²+4), E É O MESMO Δ. Para o metal
+         * σ_m, N(p − qσ) = p² − mpq − q² é INTEIRO, e |p−qσ|·|p−qσ'| = |N| ≥ 1.
+         * Como |p−qσ'| ≲ q√(m²+4), vem q|p−qσ| ≳ 1/√(m²+4). Em m=1 isso é
+         * 1/√5 — o extremo de Hurwitz. Mede-se a norma, que é o que decide. */
+        {
+            printf("      o limite de Hurwitz por metal, com Δ = m²+4:\n");
+            long unidades_tot = 0;
+            for(long m = 1; m <= 4; m++){
+                long D = m*m + 4, un = 0, tot = 0, minabs = 1 << 30;
+                for(long p = -12; p <= 12; p++) for(long q = 1; q <= 12; q++){
+                    long g = p<0?-p:p, h = q; while(h){ long t=g%h; g=h; h=t; }
+                    if((g?g:1) != 1) continue;
+                    long N = p*p - m*p*q - q*q;
+                    if(N == 0) continue;              /* não acontece: σ irracional */
+                    tot++;
+                    long an = N < 0 ? -N : N;
+                    if(an < minabs) minabs = an;
+                    if(an == 1) un++;
+                }
+                unidades_tot += un;
+                printf("        m=%ld: Δ = %ld · |N| mínimo = %ld · %ld unidades"
+                       " (|N| = 1) em %ld pares\n", m, D, minabs, un, tot);
+                if(minabs != 1 || un == 0) mal++;
+            }
+            printf("        → |N| ≥ 1 SEMPRE, e o mínimo 1 é atingido: é ele que"
+                   " dá q|p−qσ| ≳ 1/√Δ, e em m=1 isso é 1/√5 — Hurwitz\n");
+            if(unidades_tot == 0) mal++;
+        }
+
+        /* ── (3) E φ É O PIOR APROXIMÁVEL PORQUE Δ É MÍNIMO. O limite 1/√Δ
+         * DESCE quando m sobe, logo os metais maiores admitem aproximações
+         * melhores; o m=1 tem o Δ mais pequeno e por isso o limite mais alto.
+         * Compara-se Δ entre metais — inteiros, sem uma raiz. */
+        {
+            long D1 = 1 + 4, cresce = 1;
+            for(long m = 2; m <= 8; m++) if(m*m + 4 <= D1) cresce = 0;
+            printf("      φ é o PIOR aproximável porque Δ = m²+4 é MÍNIMO em m=1:"
+                   " Δ₁ = %ld, e Δ_m > Δ₁ para todo m ≥ 2: %s\n",
+                   D1, cresce ? "sim" : "NÃO");
+            printf("        o limite 1/√Δ é o mais ALTO no áureo — «os"
+                   " denominadores crescem o mais devagar que podem»\n");
+            if(!cresce || D1 != 5) mal++;
+        }
+
+        /* ── (4) E CASSINI É A MEDIDA EXACTA DISSO, em inteiros: para os
+         * convergentes do áureo, F_{n+1}F_{n−1} − F_n² = (−1)^n, com módulo
+         * SEMPRE 1 — a menor discrepância possível, e é a unidade do (2). */
+        {
+            long F[24] = {0,1}, ok = 0, tot = 0;
+            for(int n = 2; n < 22; n++) F[n] = F[n-1] + F[n-2];
+            for(int n = 2; n < 20; n++){
+                long c = F[n+1]*F[n-1] - F[n]*F[n];
+                tot++;
+                if(c == ((n % 2) ? -1 : 1)) ok++;
+            }
+            printf("      CASSINI — F_{n+1}F_{n−1} − F_n² = (−1)^n em %ld/%ld:"
+                   " módulo SEMPRE 1, que é a unidade do ponto (2)\n", ok, tot);
+            printf("        a aproximação do áureo é medida por um inteiro de"
+                   " módulo 1, e não por um erro que se estima\n");
+            if(ok != tot || tot < 15) mal++;
+            /* e o controlo: noutro metal a identidade análoga dá OUTRO valor */
+            long P[24] = {0,1};
+            for(int n = 2; n < 22; n++) P[n] = 2*P[n-1] + P[n-2];   /* prata */
+            long c1 = P[6]*P[4] - P[5]*P[5];
+            printf("        CONTROLO na prata (m=2): P₆P₄ − P₅² = %ld — a mesma"
+                   " forma, outro metal, e continua unitário\n", c1);
+            if(c1 != 1 && c1 != -1) mal++;
+        }
+
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("A ALTERNÂNCIA DA ORDEM É O DETERMINANTE, E O PIOR APROXIMÁVEL É O DISCRIMINANTE"
+           " MÍNIMO. A §«Construção de ℝ» define a ordem alternada e dá logo a razão"
+           " estrutural: «a alternância é forçada por z ↦ a + 1/z, crescente em a e DECRESCENTE"
+           " em z, então cada nível de encaixe inverte a orientação — formalmente, M_n age em"
+           " ℙ(ℝ) com det M_n = (−1)^{n+1}, e o sinal do determinante é EXACTAMENTE a"
+           " orientação da Möbius». §W105 mediu que a ordem alternada acerta e a lexicográfica"
+           " erra; aqui mede-se PORQUÊ: o sinal (−1)^k da definição e o det do prefixo, pedido"
+           " ao motor letra a letra, andam juntos em todas as posições. A alternância não é uma"
+           " convenção que funciona — é o determinante a contar inversões. E O LIMITE DE"
+           " HURWITZ É O MESMO Δ QUE JÁ APARECEU DUAS VEZES: para o metal σ_m, N(p−qσ) ="
+           " p² − mpq − q² é INTEIRO e nunca nulo, logo |p−qσ|·|p−qσ'| = |N| ≥ 1; como"
+           " |p−qσ'| ≲ q√(m²+4), vem q|p−qσ| ≳ 1/√(m²+4). Mede-se a norma, que é quem decide:"
+           " o mínimo de |N| é 1 em todos os metais, e é atingido. Em m=1 o limite é 1/√5 — o"
+           " extremo de Hurwitz da obs:hurwitz. E φ É O PIOR APROXIMÁVEL PORQUE Δ = m²+4 É"
+           " MÍNIMO EM m=1: Δ₁ = 5, e Δ_m > 5 para todo m ≥ 2, logo o limite 1/√Δ é o mais"
+           " ALTO no áureo — «os denominadores crescem o mais devagar que podem». É a QUARTA"
+           " lei do mesmo número: §W70 usou m²+4 para dizer que o ponto fixo sai de ℚ, §W110"
+           " para dizer que a ordem existe, a cifra chama-lhe Δ, e aqui ele é o limite de"
+           " aproximação. POR FIM CASSINI dá a medida em inteiros: F_{n+1}F_{n−1} − F_n² ="
+           " (−1)^n, de módulo SEMPRE 1 — a aproximação do áureo é medida por um inteiro"
+           " unitário e não por um erro que se estima. O controlo é a prata, onde a mesma forma"
+           " continua unitária com outro metal.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
