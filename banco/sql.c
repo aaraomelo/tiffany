@@ -2838,8 +2838,38 @@ static int le_soma(const char **p, struct tensor *t){
 }
 static int le_num(const char **p, struct tensor *v){ return le_soma(p, v); }
 
+/* ── A NEGAÇÃO EMPURRA-SE PARA AS FOLHAS ─────────────────────────────────────
+ *
+ * `NOT (A OR B)` não precisa de um nó novo na árvore: precisa de De Morgan.
+ * Trocam-se os conectivos e nega-se cada folha, e o que sai é uma árvore da
+ * mesma forma que o emissor já sabe percorrer — com o `nega` que a comparação
+ * já tinha para o `<>`, o `<=` e o `>=`. É a mesma escolha da CONTRAÇÃO: o
+ * equivalente vira o MESMO objeto, em vez de duas coisas que uma regra depois
+ * iguala. E a lei fica medível de fora: `NOT (a = 1 OR a = 2)` tem de devolver
+ * exactamente o que `a <> 1 AND a <> 2` devolve, pelo mesmo bytecode. */
+static void nega_arvore(struct arvore *a, int i){
+    if(i < 0 || i >= a->n) return;
+    { struct no *n = &a->no[i];
+      if(n->tipo == NO_COND){
+          n->nega = !n->nega;
+          if(n->decidido) n->valor = !n->valor;
+          return;
+      }
+      n->tipo = (n->tipo == NO_AND) ? NO_OR : NO_AND;
+      nega_arvore(a, n->esq);
+      nega_arvore(a, n->dir); }
+}
+
 static int le_fator(const char **p, struct arvore *a){
     pula(p);
+    /* `NOT <fator>`: lê-se o que vem a seguir e nega-se por De Morgan */
+    { const char *vn = *p;
+      if(palavra(p, "NOT")){
+          int e = le_fator(p, a);
+          if(e < 0){ *p = vn; return -1; }
+          nega_arvore(a, e);
+          return e;
+      } }
     /* O '(' é AMBÍGUO: pode abrir um grupo booleano — (a=3 OR b>5) — ou um fator numérico —
      * (a+b)*(a-b) > 0. Tenta-se primeiro a COMPARAÇÃO; se não fechar, volta-se ao ponto de
      * partida e lê-se como grupo. Sem este retrocesso, `(a+b)*(a-b) > 0` era lido como grupo,
@@ -2850,6 +2880,49 @@ static int le_fator(const char **p, struct arvore *a){
     if(le_num(p, &L)){
         pula(p);
         if(**p=='!' || **p=='<' || **p=='>' || **p=='=') goto tem_comparacao;
+        /* ── `x IN (v1, v2, …)` É A DISJUNÇÃO DAS IGUALDADES ─────────────
+         * Não é um operador novo: é `x = v1 OR x = v2 OR …`, e escrevê-lo
+         * assim na árvore faz com que tudo o que já lá está valha para ele —
+         * a contração, a ordenação dos ramos, a idempotência (`x IN (3,3)`
+         * tem UM átomo) e o De Morgan, que leva o `NOT IN` a uma conjunção de
+         * desigualdades sem uma linha a mais. */
+        { const char *vi = *p;
+          if(palavra(p, "IN")){
+              pula(p);
+              if(**p == '('){
+                  const char *dentro = *p + 1;
+                  int e = -1, algum = 0;
+                  pula(&dentro);
+                  /* uma subconsulta não é uma lista: esse caminho é outro */
+                  if(!strncasecmp(dentro, "SELECT", 6)){ *p = vi; }
+                  else{
+                      (*p)++;
+                      while(1){
+                          struct tensor K;
+                          pula(p);
+                          if(!le_num(p, &K)) break;
+                          { int i = novo_no(a); if(i < 0) return -1;
+                            { struct no *n = &a->no[i];
+                              n->tipo = NO_COND; n->op = '='; n->nega = 0;
+                              n->v = ten_soma(L, K, -1);
+                              if(ten_constante(n->v)){
+                                  n->decidido = 1; n->valor = (n->v.c[0] == 0);
+                              } }
+                            if(e < 0) e = i;
+                            else { int j = novo_no(a); if(j < 0) return -1;
+                                   a->no[j].tipo = NO_OR; a->no[j].esq = e;
+                                   a->no[j].dir = i; e = j; } }
+                          algum = 1;
+                          pula(p);
+                          if(**p == ','){ (*p)++; continue; }
+                          break;
+                      }
+                      pula(p);
+                      if(algum && **p == ')'){ (*p)++; return e; }
+                      *p = vi;              /* não fechou: não era uma lista */
+                  }
+              } else *p = vi;
+          } }
     }
     *p = salvo; a->n = nsalvo;
     if(**p == '('){
@@ -4034,6 +4107,12 @@ long sql_ultimos_passos = 0;
  * número diz o trabalho que a árvore fez — a PROFUNDIDADE, que não cresce com
  * o tamanho da tabela. */
 long sql_ultimos_nos = 0;
+/* A IMPRESSÃO DIGITAL DO ÚLTIMO PROGRAMA. É o FNV do bytecode emitido, e serve
+ * para uma medida que nenhuma contagem de linhas dá: duas consultas escritas de
+ * maneiras diferentes podem devolver a mesma resposta por acaso, mas se
+ * COMPILAREM PARA O MESMO PROGRAMA é porque são o mesmo objecto — que é o que a
+ * contração diz fazer e até agora só se via no ecrã. */
+long sql_ultimo_prog = 0;
 
 
 /* ---------------- A DISTÂNCIA NO WHERE: só se compara dentro da classe ----------------
@@ -5376,6 +5455,7 @@ static int varre(const char *resto, int acao){
 
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
+    sql_ultimo_prog = (long)(soma & 0xFFFFFFFFUL);
 
     /* ∑G SOBRE O CAMPO, que é o Lema da conservação: ∑_x G(x) = |I|.
      *

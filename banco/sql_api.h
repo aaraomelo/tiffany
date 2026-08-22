@@ -66,6 +66,9 @@ extern long sql_ultimos_passos;
  * não cresce com o tamanho da tabela. É esta a medida do índice, e não os
  * passos, que com ele são zero: zero não distingue não-correr de não-fazer. */
 extern long sql_ultimos_nos;
+/* o FNV do bytecode da última varredura: duas escritas que compilam para o
+ * MESMO programa são o mesmo objecto, e não duas coisas com a mesma resposta */
+extern long sql_ultimo_prog;
 int  sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
                     long *fora);
 

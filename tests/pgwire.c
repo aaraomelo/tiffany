@@ -5766,6 +5766,134 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W42: A NEGAÇÃO E A LISTA, PELO MESMO PROGRAMA ════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w42.mem");     unlink("/tmp/pgwire_w42.prog");
+        unlink("/tmp/pgwire_w42__t.mem");  unlink("/tmp/pgwire_w42__t.prog");
+        printf("\n§W42 De Morgan e a lista: não é a mesma resposta, é o mesmo objecto.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w42")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,10), (2,20), (3,30), (4,40)", &o);
+
+        /* ── (1) A LISTA É A DISJUNÇÃO DAS IGUALDADES, e não um operador novo:
+         * `x IN (v1, v2)` escreve-se na árvore como `x = v1 OR x = v2`, e por
+         * isso tudo o que já lá estava vale para ela sem uma linha a mais. */
+        sql_executa("SELECT a FROM t WHERE a IN (1,3)", &o);
+        long lista = o.nrows;
+        char l0[8], l1[8];
+        snprintf(l0, sizeof l0, "%s", o.nrows > 0 ? o.cell[0][0] : "?");
+        snprintf(l1, sizeof l1, "%s", o.nrows > 1 ? o.cell[1][0] : "?");
+        sql_executa("SELECT a FROM t WHERE a IN (9)", &o);
+        long vazia = o.nrows;
+        int lst = (lista == 2 && !strcmp(l0, "1") && !strcmp(l1, "3") && vazia == 0);
+        printf("      a lista: IN (1,3) dá %ld (%s,%s) · IN (9) dá %ld  %s\n",
+               lista, l0, l1, vazia, lst ? "" : "NAO BATE");
+        if(!lst) mal++;
+
+        /* ── (2) E É MESMO A DISJUNÇÃO — o que se mede não é a resposta, é o
+         * PROGRAMA. `a IN (1,3)` e `a = 1 OR a = 3` compilam para o mesmo
+         * bytecode, byte a byte; duas escritas que dão a mesma resposta podem
+         * dá-la por acaso, mas o mesmo programa não é acaso. */
+        sql_executa("SELECT a FROM t WHERE a IN (1,3)", &o);
+        long p_in = sql_ultimo_prog;
+        sql_executa("SELECT a FROM t WHERE a = 1 OR a = 3", &o);
+        long p_or = sql_ultimo_prog;
+        int mesmo = (p_in == p_or && p_in != 0);
+        printf("      IN (1,3) e `= 1 OR = 3` compilam para o MESMO programa:"
+               " %08lx vs %08lx  %s\n", p_in, p_or, mesmo ? "" : "NAO BATE");
+        if(!mesmo) mal++;
+
+        /* ── (3) A NEGAÇÃO EMPURRA-SE PARA AS FOLHAS, e De Morgan também é
+         * medível pelo programa: `NOT (a = 1 OR a = 2)` e `a <> 1 AND a <> 2`
+         * são a mesma árvore depois da normalização, logo o mesmo bytecode. É
+         * a lei, e não uma coincidência de contagem. */
+        sql_executa("SELECT a FROM t WHERE NOT (a = 1 OR a = 2)", &o);
+        long n1 = o.nrows, pn1 = sql_ultimo_prog;
+        sql_executa("SELECT a FROM t WHERE a <> 1 AND a <> 2", &o);
+        long n2 = o.nrows, pn2 = sql_ultimo_prog;
+        int morgan1 = (n1 == 2 && n1 == n2 && pn1 == pn2 && pn1 != 0);
+        printf("      NOT(A OR B) = ¬A AND ¬B: %ld e %ld linhas, programa"
+               " %08lx vs %08lx  %s\n", n1, n2, pn1, pn2,
+               morgan1 ? "" : "NAO BATE");
+        if(!morgan1) mal++;
+
+        /* ── (4) E A OUTRA METADE DA LEI, que é a que faltaria se só se
+         * medisse uma: `NOT (A AND B)` = `¬A OR ¬B`. As duas juntas são De
+         * Morgan; uma só é meia lei. */
+        sql_executa("SELECT a FROM t WHERE NOT (a = 1 AND b = 10)", &o);
+        long m1 = o.nrows, pm1 = sql_ultimo_prog;
+        sql_executa("SELECT a FROM t WHERE a <> 1 OR b <> 10", &o);
+        long m2 = o.nrows, pm2 = sql_ultimo_prog;
+        int morgan2 = (m1 == 3 && m1 == m2 && pm1 == pm2 && pm1 != 0);
+        printf("      NOT(A AND B) = ¬A OR ¬B: %ld e %ld linhas, programa"
+               " %08lx vs %08lx  %s\n", m1, m2, pm1, pm2,
+               morgan2 ? "" : "NAO BATE");
+        if(!morgan2) mal++;
+
+        /* ── (5) E AS DUAS COMPÕEM-SE: `NOT (x IN (…))` é a conjunção das
+         * desigualdades, sem uma linha de código a mais — a lista fez-se
+         * disjunção na leitura, e o De Morgan operou sobre ela como sobre
+         * qualquer outra. É o que se ganha em escrever na árvore em vez de no
+         * avaliador. */
+        sql_executa("SELECT a FROM t WHERE NOT (a IN (1,3))", &o);
+        long c = o.nrows;
+        char c0[8], c1[8];
+        snprintf(c0, sizeof c0, "%s", o.nrows > 0 ? o.cell[0][0] : "?");
+        snprintf(c1, sizeof c1, "%s", o.nrows > 1 ? o.cell[1][0] : "?");
+        int comp = (c == 2 && !strcmp(c0, "2") && !strcmp(c1, "4"));
+        printf("      NOT (a IN (1,3)) dá %ld (%s,%s), esp 2 (2,4)  %s\n",
+               c, c0, c1, comp ? "" : "NAO BATE");
+        if(!comp) mal++;
+
+        /* ── (6) E A IDEMPOTÊNCIA CAI DE GRAÇA: `IN (1,1,3)` é o MESMO
+         * programa que `IN (1,3)`, porque a contração já tratava o átomo
+         * repetido. Um motor que avaliasse a lista item a item teria dois
+         * testes onde há um. */
+        sql_executa("SELECT a FROM t WHERE a IN (1,1,3)", &o);
+        long pr = sql_ultimo_prog, nr2 = o.nrows;
+        sql_executa("SELECT a FROM t WHERE a IN (1,3)", &o);
+        int idem = (pr == sql_ultimo_prog && nr2 == o.nrows);
+        printf("      IN (1,1,3) é o MESMO programa que IN (1,3): %08lx  %s\n",
+               pr, idem ? "" : "NAO BATE");
+        if(!idem) mal++;
+
+        /* ── O CONTROLO: dois programas que TÊM de ser diferentes. Sem ele, um
+         * motor que devolvesse sempre a mesma impressão digital — ou zero —
+         * passava em tudo o que está acima. */
+        sql_executa("SELECT a FROM t WHERE a IN (1,3)", &o);
+        long pa = sql_ultimo_prog;
+        sql_executa("SELECT a FROM t WHERE a IN (2,4)", &o);
+        long pb = sql_ultimo_prog;
+        printf("\n      CONTROLO — listas diferentes, programas diferentes:"
+               " %08lx vs %08lx  %s\n", pa, pb, (pa != pb) ? "" : "NAO BATE");
+        if(pa == pb) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A NEGAÇÃO E A LISTA ESCREVEM-SE NA ÁRVORE, NÃO NO AVALIADOR — E ISSO MEDE-SE PELO"
+           " PROGRAMA. `x IN (v1, v2)` não é um operador novo: é `x = v1 OR x = v2`, e"
+           " escrevê-lo assim na leitura faz com que tudo o que já lá estava valha para ele"
+           " sem uma linha a mais. `NOT (…)` também não precisa de um nó: precisa de DE"
+           " MORGAN — trocam-se os conectivos e nega-se cada folha, com o `nega` que a"
+           " comparação já tinha para o `<>`, o `<=` e o `>=`. É a mesma escolha da"
+           " CONTRAÇÃO: o equivalente vira o MESMO objeto, em vez de duas coisas que uma"
+           " regra depois iguala. E é aí que está a medida que interessa, porque duas"
+           " escritas podem devolver a mesma resposta por acaso: expõe-se a impressão"
+           " digital do bytecode e exige-se que ela COINCIDA. `a IN (1,3)` e `a = 1 OR"
+           " a = 3` compilam para o mesmo programa; `NOT (A OR B)` e `¬A AND ¬B` também, e"
+           " `NOT (A AND B)` e `¬A OR ¬B` também — as duas metades da lei, porque uma só é"
+           " meia lei. Daí saem duas coisas de graça, que é o sinal de se ter escrito no"
+           " sítio certo: `NOT (x IN (…))` é a conjunção das desigualdades sem uma linha de"
+           " código a mais, e `IN (1,1,3)` é o MESMO programa que `IN (1,3)` porque a"
+           " contração já tratava o átomo repetido — um motor que avaliasse a lista item a"
+           " item teria dois testes onde há um. O CONTROLO são duas listas diferentes a dar"
+           " programas diferentes: sem ele, uma impressão digital constante — ou zero —"
+           " passava em tudo o que está acima.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
