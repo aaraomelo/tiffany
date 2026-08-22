@@ -16,9 +16,27 @@
  *   §M2  associatividade e distributividade são DUAS leis, e não recortam o mesmo
  *   §M3  a decomposição a = m+δ, b = m−δ: resíduo 0 — e o módulo perde METADE
  *   §M4  a conservação da norma SAI daqui, e não foi pedida
+ *   §M8  as DUAS faces batendo alternadas encaixam: o CORTE, e sem escolher lado
  */
 #include "unidade.h"
 #include <stdio.h>
+
+/* piso de √x, exacto — a raiz da face multiplicativa (§M8) */
+static long raiz_piso_local(long x){
+    if(x < 2) return x < 0 ? -1 : x;
+    { long lo = 1, hi = 3037000499L;
+      while(lo < hi){ long m = lo + (hi - lo + 1)/2;
+          if(m <= x / m) lo = m; else hi = m - 1; }
+      return lo; }
+}
+/* a média geométrica de a e b, por piso, sem estourar o produto */
+static long geo_local(long a, long b){
+    __int128 p = (__int128)a * b;
+    __int128 lo = 1, hi = (__int128)4000000000LL;
+    while(lo < hi){ __int128 m = lo + (hi - lo + 1)/2;
+        if(m*m <= p) lo = m; else hi = m - 1; }
+    return (long)lo;
+}
 
 /* os três símbolos: 0, o meio, 1 */
 enum { Z = 0, M = 1, U = 2, N = 3 };
@@ -538,6 +556,144 @@ int main(void){
            " dizer «período 3» sem o escopo seria falso. E O CONTROLO exige que a lei SEPARE:"
            " as duas de norma nula têm de falhar em ter volta, e falham as duas — se passassem,"
            " |∂²| = 1 não estaria a decidir nada.",
+           mal == 0);
+    }
+
+    /* ── §M8 ─────────────────────────────────────────────────────────────────
+     * O CORTE, PELAS DUAS FACES DA DOBRA.
+     *
+     * O Teor. 2(4) do aranha obriga a DUAS composições, e diz o que ∂ é em cada
+     * uma: «o oposto numa face e o inverso na outra». A face aditiva foi a que
+     * o documento desenvolveu — o meio m = (a+b)/2, e daí os diádicos k/2ⁿ. A
+     * outra tem o seu próprio meio, e ele não é novo: a dobra que troca os
+     * extremos na face multiplicativa é ∂ˣx = ab/x, e o seu ponto fixo é a
+     * MÉDIA GEOMÉTRICA g = √(ab).
+     *
+     * E a desigualdade entre as duas não é uma desigualdade nova: é o §M4 lido
+     * como comparação. De a = m+δ e b = m−δ vem ab = m²−δ², logo g² = m²−δ² ≤ m²
+     * e portanto g ≤ m, com igualdade exactamente quando δ = 0. A conservação da
+     * norma É a desigualdade das médias.
+     *
+     * Batendo as duas alternadamente — (a,b) ↦ (m, g) — os intervalos ENCAIXAM
+     * e a largura COLAPSA:
+     *
+     *     m − g = δ²/(m+g)   ⟹   δ₁ ≤ δ²/(2m)   e   δ₁ ≤ δ/2
+     *
+     * Duas classes, uma de cada lado, com a largura a ir a zero: é um CORTE, e
+     * é PRODUZIDO em vez de postulado.
+     *
+     * E O GUME É A ESCOLHA. Com uma face só, o par colapsa num passo — (a,b)
+     * ↦ (m,m) — e nada mais se produz: para continuar é preciso ESCOLHER um
+     * lado em cada nível, e é isso a bissecção, com o real a ficar ENDEREÇADO
+     * por um caminho de um bit por nível (`analitico thm:central-continuo`:
+     * ℝ ≅ {caminhos}/∼). Com as duas faces não se escolhe nada: o corte é
+     * DETERMINADO pelos dois extremos. Uma face endereça; duas produzem.
+     *
+     * Tudo em inteiros: a escala é E, e a raiz é o PISO — pelo que as
+     * desigualdades levam a folga do piso, dita onde é usada. */
+    {
+        long mal = 0;
+        const long E = 1000000000L;
+        printf("\n§M8  as duas faces: ∂⁺x = a+b−x fixa m = (a+b)/2;"
+               " ∂ˣx = ab/x fixa g = √(ab)\n");
+
+        /* (1) a face multiplicativa TROCA os extremos e FIXA a geométrica */
+        { long a = 4, b = 9, inv = a*b;
+          long g = raiz_piso_local(inv);
+          int troca = (inv/a == b && inv/b == a);
+          int fixa  = (g*g == inv && inv/g == g);
+          printf("     ∂ˣ(4)=%ld ∂ˣ(9)=%ld (esp 9 e 4) · ponto fixo %ld com"
+                 " ∂ˣ(%ld)=%ld  %s\n", inv/a, inv/b, g, g, inv/g,
+                 (troca && fixa) ? "" : "← REVER");
+          if(!troca || !fixa) mal++; }
+
+        /* (2) a desigualdade das médias É a conservação da norma (§M4) */
+        { long falhou = 0, casos = 0;
+          for(long m = 1; m <= 60; m++) for(long d = 0; d <= m; d++){
+              long a = m+d, b = m-d;
+              casos++;
+              if(a*b != m*m - d*d) falhou++;          /* §M4 */
+              if(m*m - d*d > m*m) falhou++;           /* g² ≤ m² */
+              if(d == 0 && a*b != m*m) falhou++;      /* igualdade sse δ = 0 */
+              if(d > 0 && a*b >= m*m) falhou++;       /* e ESTRITA se δ > 0 */
+          }
+          printf("     g² = ab = m²−δ² ≤ m², com igualdade SÓ em δ=0:"
+                 " %ld falhas em %ld pares\n", falhou, casos);
+          if(falhou) mal++; }
+
+        /* (3) o encaixe e o colapso, batendo alternadas */
+        { long pares[][2] = {{1,2},{1,3},{2,7},{3,5},{1,100}};
+          long falhou = 0;
+          for(int t = 0; t < 5; t++){
+              long g = pares[t][0]*E, m = pares[t][1]*E;
+              if(g > m){ long q=g; g=m; m=q; }
+              int n = 0;
+              while(m - g > 1 && n < 80){
+                  long m1 = g/2 + m/2 + ((g%2 + m%2)/2);
+                  long g1 = geo_local(g, m);
+                  if(!(g <= g1 && g1 <= m1 && m1 <= m)) falhou++;   /* encaixa */
+                  if(!((m1 - g1)*2 <= m - g)) falhou++;             /* halva */
+                  g = g1; m = m1; n++;
+              }
+              printf("     (%ld,%ld): %d batidas até largura %ld\n",
+                     pares[t][0], pares[t][1], n, m - g);
+              if(m - g > 1) falhou++;
+          }
+          printf("     encaixa e halva sempre: %ld falhas\n", falhou);
+          if(falhou) mal++; }
+
+        /* (4) e o colapso é QUADRÁTICO: δ₁ ≤ δ²/(2m), na forma inteira
+         *     (m−g)·m ≤ δ² + m — o «+m» é a folga do piso da raiz */
+        { long falhou = 0, casos = 0;
+          for(long m = 10; m <= 200; m += 7) for(long d = 1; d < m; d += 3){
+              long a = m+d, b = m-d;
+              long m1 = (a+b)/2, g1 = geo_local(a, b);
+              casos++;
+              if((m1 - g1)*m > d*d + m) falhou++;
+          }
+          printf("     (m−g)·m ≤ δ² + m  [δ₁ ≤ δ²/(2m)]: %ld falhas em %ld\n",
+                 falhou, casos);
+          if(falhou) mal++; }
+
+        /* (5) O CONTROLO: uma face SÓ colapsa num passo e não produz mais nada.
+         * É o que separa produzir de endereçar — sem isto, «as duas faces
+         * encaixam» não diria que a segunda faz falta. */
+        { long a = 1*E, b = 3*E;
+          long m1 = (a+b)/2, m2 = (m1+m1)/2;          /* só ⊕, duas vezes */
+          long g1 = geo_local(a,b), g2 = geo_local(g1,g1);
+          int parado = (m2 == m1 && g2 == g1);
+          long p1 = (a+b)/2, q1 = geo_local(a,b);      /* as duas juntas */
+          int anda = (q1 < p1);
+          printf("\n     CONTROLO — só ⊕: (a,b)→(m,m) e a segunda batida não"
+                 " move (%d) · só ⊗: (g,g) idem · as DUAS: g=%ld < m=%ld,"
+                 " intervalo NOVO (%d)  %s\n", parado, q1/(E/1000), p1/(E/1000),
+                 anda, (parado && anda) ? "" : "← REVER");
+          if(!parado || !anda) mal++; }
+
+        printf("\n");
+        ok("O CORTE SAI DAS DUAS FACES DA DOBRA, E SAI SEM ESCOLHER LADO. O Teor. 2(4) obriga a"
+           " DUAS composições e diz o que ∂ é em cada uma — «o oposto numa face e o inverso na"
+           " outra» —, mas o documento desenvolve só a aditiva: o meio m = (a+b)/2, e daí os"
+           " diádicos k/2ⁿ. A outra face tem o seu próprio meio, e ele não é matéria nova: a"
+           " dobra que troca os extremos na face multiplicativa é ∂ˣx = ab/x, ela troca-os de"
+           " facto, e o seu ponto fixo é a MÉDIA GEOMÉTRICA g = √(ab) — a mesma frase do"
+           " Teor. 2(2) lida na face que o Teor. 2(4) obriga a existir. E A DESIGUALDADE ENTRE"
+           " AS DUAS MÉDIAS NÃO É UMA DESIGUALDADE NOVA: é o §M4 lido como comparação. De"
+           " a = m+δ e b = m−δ vem ab = m²−δ², logo g² = m²−δ² ≤ m² e g ≤ m, com igualdade"
+           " exactamente onde δ = 0 — a conservação da norma É a desigualdade das médias, e"
+           " mede-se que a desigualdade é ESTRITA fora do ponto fixo, senão «≤» passaria sem"
+           " dizer nada. Batendo as duas alternadamente, (a,b) ↦ (m,g), os intervalos"
+           " ENCAIXAM (g ≤ g' ≤ m' ≤ m) e a largura COLAPSA — m−g = δ²/(m+g), donde"
+           " δ₁ ≤ δ²/(2m) e em particular δ₁ ≤ δ/2. Duas classes, uma de cada lado, com a"
+           " largura a ir a zero: é um CORTE, e é PRODUZIDO em vez de postulado. O GUME É A"
+           " ESCOLHA, e é ele que diz porque é que a segunda face faz falta: com uma face só o"
+           " par colapsa num passo — (a,b) ↦ (m,m) — e a batida seguinte não move nada, pelo"
+           " que para continuar é preciso ESCOLHER um lado em cada nível; isso é a bissecção, e"
+           " nela o real fica ENDEREÇADO por um caminho de um bit por nível (`analitico"
+           " thm:central-continuo`: ℝ ≅ {caminhos}/∼). Com as duas faces não se escolhe nada: o"
+           " corte é DETERMINADO pelos dois extremos, e o par (a,b) — dois inteiros — chega"
+           " para o fixar. UMA FACE ENDEREÇA; DUAS PRODUZEM. Tudo em inteiros, com a raiz por"
+           " PISO e a folga do piso dita onde é usada (o «+m» da forma inteira).",
            mal == 0);
     }
 
