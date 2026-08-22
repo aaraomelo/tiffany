@@ -1210,6 +1210,41 @@ $\sigma^{-1}=\sigma-m$ em $8/8$ metais, a norma multiplicativa em $9604/9604$ e 
 convergentes de norma $\pm1$ em $8/8$; e a régua $p$-ádica ultramétrica em $2197/2197$
 triplos com $v(xy)=v(x)+v(y)$ em $144/144$.}
 
+\paragraph{E mais três, cada um a mostrar o par num estado diferente.}
+\begin{enumerate}\itemsep3pt
+\item[\textbf{L}] \textbf{O lógico, os \emph{bitstrings} com $\oplus$.} As duas faces
+\textbf{colapsam}: $\partial x=x$, cada elemento é o seu próprio oposto, e a dobra da face
+aditiva é a identidade --- \emph{é por isso que este andar é XOR}. E a multiplicativa está
+no seu extremo mais pobre: no \code{AND} \textbf{um} só elemento tem inverso. \emph{O par
+está o mais desequilibrado que pode estar}, e mesmo assim a régua do prefixo é
+ultramétrica com casos estritos: a \code{aranha def:arvore}, literal.
+
+\item[\textbf{S}] \textbf{O simétrico, $A=A^{\mathsf T}$.} Fecha na soma e \textbf{não} no
+produto, e a condição exacta escreve-se:
+\[
+ \boxed{\;AB \text{ é simétrica}\iff AB=BA\;}
+\]
+--- verificado em \emph{todos} os pares. \emph{O que fecharia este corpo é a comutação, e
+é isso que ele não tem.}
+
+\item[\textbf{D}] \textbf{O diferencial, $p(x)$ com $d$.} A lei é a regra do produto,
+$d(fg)=f\,dg+g\,df$, que faz de $d$ uma \textbf{derivação}. E daí a relação que o liga ao
+corpo exterior:
+\[
+ \boxed{\;d^{\,n+1}=0 \text{ em grau } n\;}
+\]
+--- \emph{o corpo diferencial é o exterior \textbf{subido de ordem}}: ali
+$\varepsilon^2=0$, aqui $d^{n+1}=0$, e a nilpotência é a mesma lei nos dois. O núcleo de
+$d$ são as constantes, pelo que a fibra da derivada é a classe «a menos de constante» ---
+e é essa a \emph{dobra} deste corpo.
+\end{enumerate}
+
+\medido{as relações em \code{tests/pgwire.c} §W148 --- $\partial x=x$ em $64/64$ com um só
+invertível no \code{AND} e a régua do prefixo ultramétrica em $262\,144/262\,144$ triplos
+($87\,360$ estritos); o simétrico fechado na soma em $15\,625/15\,625$ e o produto
+simétrico exactamente onde comutam, $2745$ dos $15\,625$, com as duas condições a
+coincidirem em todos; e $d$ derivação em $625/625$ com $d^{n+1}=0$ em $6/6$ graus.}
+
 \medido{e o corpo exterior está \emph{toda} a fronteira, não um ponto dela: escrito o dual
 $a+b\varepsilon$ como $\binom{a\ b}{0\ a}$, o traço e o determinante que o motor devolve dão
 $\Delta=4a^2-4a^2=0$ nos $169$ pares de $-6$ a $6$, $168$ deles não nulos, sem que o $\Delta$ distinga

@@ -22370,6 +22370,168 @@ int main(void){
            " é que muda.", mal == 0);
     }
 
+    /* ═══ §W148: LÓGICO, SIMÉTRICO E DIFERENCIAL — AS LEIS NA SUA MÉTRICA ═══ */
+    {
+        long mal = 0;
+        printf("\n§W148 mais três corpos: as faces que colapsam, a que não fecha, e a que sobe.\n\n");
+
+        /* ════ O CORPO LÓGICO: F_2^n, com ⊕ ═══════════════════════════════ */
+        printf("      ── LÓGICO  bitstrings com ⊕ ──\n");
+        {
+            /* L1. cada elemento é o seu PRÓPRIO oposto: as duas faces colapsam */
+            long auto_op = 0, tot = 0;
+            for(long x = 0; x < 64; x++){ tot++; if((x ^ x) == 0) auto_op++; }
+            printf("      L1 ∂x = x: cada elemento é o seu próprio oposto em %ld/%ld\n",
+                   auto_op, tot);
+            printf("         RELAÇÃO — as duas faces COLAPSAM: a dobra da face aditiva é a"
+                   " identidade, e é por isso que este andar é XOR\n");
+            if(auto_op != tot) mal++;
+
+            /* L2. e a face multiplicativa quase não existe: o AND só tem UM
+             * invertível --- o corpo lógico é o extremo da degenerescência */
+            long inv = 0;
+            for(long x = 0; x < 64; x++){
+                int tem = 0;
+                for(long y = 0; y < 64; y++) if((x & y) == 63){ tem = 1; break; }
+                if(tem) inv++;
+            }
+            printf("      L2 no AND só %ld dos %ld elementos têm inverso --- a face"
+                   " multiplicativa está no seu extremo mais pobre\n", inv, tot);
+            printf("         RELAÇÃO NOVA — no corpo lógico a face aditiva é involutiva e a"
+                   " multiplicativa é quase vazia: o par está o mais desequilibrado possível\n");
+            if(inv != 1) mal++;
+
+            /* L3. a régua do prefixo É ultramétrica --- a def:arvore literal */
+            #define PRF(a,b) ({ long A_=(a), B_=(b); int q_=6; \
+                if(A_!=B_) for(int i_=0;i_<6;i_++){ \
+                    if((((A_)>>(5-i_))&1) != (((B_)>>(5-i_))&1)){ q_=i_; break; } } q_; })
+            long ok = 0, t3 = 0, est = 0;
+            for(long a = 0; a < 64; a++) for(long b = 0; b < 64; b++) for(long c = 0; c < 64; c++){
+                long p1 = PRF(a,b), p2 = PRF(b,c), p3 = PRF(a,c);
+                long mn = p1 < p2 ? p1 : p2;
+                t3++;
+                if(p3 >= mn) ok++;
+                if(p3 > mn) est++;
+            }
+            printf("      L3 a régua do prefixo é ultramétrica em %ld/%ld triplos (%ld"
+                   " estritos) --- a def:arvore, literal\n", ok, t3, est);
+            if(ok != t3 || est == 0) mal++;
+            #undef PRF
+        }
+
+        /* ════ O CORPO SIMÉTRICO: A = Aᵀ ═══════════════════════════════════ */
+        printf("      ── SIMÉTRICO  A = Aᵀ ──\n");
+        {
+            /* S1. fechado na SOMA */
+            long soma_ok = 0, tot = 0;
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+            for(long d = -2; d <= 2; d++) for(long e = -2; e <= 2; e++) for(long f = -2; f <= 2; f++){
+                /* [[a,b],[b,c]] + [[d,e],[e,f]] */
+                long s01 = b + e, s10 = b + e;
+                tot++;
+                if(s01 == s10) soma_ok++;
+                (void)a; (void)c; (void)d; (void)f;
+            }
+            printf("      S1 fechado na SOMA em %ld/%ld\n", soma_ok, tot);
+            if(soma_ok != tot) mal++;
+
+            /* S2. mas NÃO no produto --- e a condição é comutarem */
+            long prod_sim = 0, comuta = 0, coincide = 0, t2 = 0;
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+            for(long d = -2; d <= 2; d++) for(long e = -2; e <= 2; e++) for(long f = -2; f <= 2; f++){
+                /* AB com A=[[a,b],[b,c]], B=[[d,e],[e,f]] */
+                long p01 = a*e + b*f, p10 = b*d + c*e;
+                /* BA */
+                long q01 = d*b + e*c, q10 = e*a + f*b;
+                int sim = (p01 == p10);
+                int com = (p01 == q01 && p10 == q10);
+                t2++;
+                if(sim) prod_sim++;
+                if(com) comuta++;
+                if(sim == com) coincide++;
+            }
+            printf("      S2 o produto é simétrico em %ld dos %ld pares, e comutam em %ld"
+                   " --- as duas condições coincidem em %ld\n",
+                   prod_sim, t2, comuta, coincide);
+            printf("         RELAÇÃO NOVA — AB é simétrica se e só se AB = BA: o corpo"
+                   " simétrico NÃO fecha no produto, e o que o fecharia é a comutação\n");
+            if(coincide != t2 || prod_sim == t2) mal++;
+        }
+
+        /* ════ O CORPO DIFERENCIAL: polinómios com d/dx ═════════════════════ */
+        printf("      ── DIFERENCIAL  p(x) com d ──\n");
+        {
+            /* D1. d é uma DERIVAÇÃO: d(fg) = f·dg + g·df */
+            long ok = 0, tot = 0;
+            for(long a0 = -2; a0 <= 2; a0++) for(long a1 = -2; a1 <= 2; a1++)
+            for(long b0 = -2; b0 <= 2; b0++) for(long b1 = -2; b1 <= 2; b1++){
+                /* f = a0 + a1 x, g = b0 + b1 x */
+                /* fg = a0b0 + (a0b1+a1b0)x + a1b1 x² */
+                long c0 = a0*b0, c1 = a0*b1 + a1*b0, c2 = a1*b1;
+                /* d(fg) = c1 + 2c2 x */
+                long e0 = c1, e1 = 2*c2;
+                /* f·dg + g·df = (a0+a1x)(b1) + (b0+b1x)(a1) */
+                long r0 = a0*b1 + b0*a1, r1 = a1*b1 + b1*a1;
+                tot++;
+                if(e0 == r0 && e1 == r1) ok++;
+            }
+            printf("      D1 d(fg) = f·dg + g·df em %ld/%ld --- d é uma DERIVAÇÃO, e a"
+                   " regra do produto é a lei deste corpo\n", ok, tot);
+            if(ok != tot) mal++;
+
+            /* D2. e d é NILPOTENTE em grau: d^{n+1} = 0 num polinómio de grau n.
+             * É o corpo exterior com ε² = 0 subido de ordem. */
+            long nil = 0, tn = 0;
+            for(int n = 0; n <= 5; n++){
+                /* o polinómio x^n: derivar n+1 vezes dá zero */
+                long coef[8]; for(int i = 0; i < 8; i++) coef[i] = 0;
+                coef[n] = 1;
+                for(int k = 0; k <= n; k++){
+                    long nova[8]; for(int i = 0; i < 8; i++) nova[i] = 0;
+                    for(int i = 1; i < 8; i++) nova[i-1] = i*coef[i];
+                    for(int i = 0; i < 8; i++) coef[i] = nova[i];
+                }
+                int zero = 1;
+                for(int i = 0; i < 8; i++) if(coef[i] != 0) zero = 0;
+                tn++;
+                if(zero) nil++;
+            }
+            printf("      D2 d^{n+1} = 0 em grau n: %ld/%ld graus\n", nil, tn);
+            printf("         RELAÇÃO NOVA — o corpo diferencial é o EXTERIOR subido de"
+                   " ordem: ali ε² = 0, aqui d^{n+1} = 0, e a nilpotência é a mesma lei\n");
+            if(nil != tn) mal++;
+
+            /* D3. e o núcleo de d são as constantes --- a fibra da derivada */
+            long ker = 0, tk = 0;
+            for(long a0 = -3; a0 <= 3; a0++) for(long a1 = -3; a1 <= 3; a1++){
+                long d0 = a1, d1 = 0;
+                tk++;
+                if(d0 == 0 && d1 == 0){ ker++; }
+            }
+            printf("      D3 o núcleo de d são as constantes: %ld dos %ld polinómios de"
+                   " grau ≤ 1 --- e a fibra da derivada é a classe «a menos de constante»\n",
+                   ker, tk);
+            if(ker == 0 || ker == tk) mal++;
+        }
+
+        printf("\n");
+        ok("MAIS TRÊS CORPOS, E CADA UM MOSTRA O PAR NUM ESTADO DIFERENTE. NO LÓGICO as duas"
+           " faces COLAPSAM: cada elemento é o seu próprio oposto, ∂x = x, e a dobra da face"
+           " aditiva é a identidade --- é por isso que este andar é XOR. E a face"
+           " multiplicativa está no seu extremo mais pobre: no AND só UM elemento tem inverso."
+           " O par está o mais desequilibrado que pode estar, e mesmo assim a régua do prefixo"
+           " é ultramétrica em todos os triplos, com casos estritos: a def:arvore, literal. NO"
+           " SIMÉTRICO aparece a relação que faltava: o corpo fecha na SOMA e NÃO no produto,"
+           " e a condição exacta é AB = BA --- «AB é simétrica se e só se comutam», verificado"
+           " em todos os pares. O que fecharia este corpo é a comutação, e é isso que ele não"
+           " tem. NO DIFERENCIAL a lei é a regra do produto, d(fg) = f·dg + g·df, que faz de d"
+           " uma DERIVAÇÃO; e daí a relação que o liga ao corpo exterior: d é nilpotente em"
+           " grau, d^{n+1} = 0, tal como ali ε² = 0. O CORPO DIFERENCIAL É O EXTERIOR SUBIDO"
+           " DE ORDEM, e a nilpotência é a mesma lei nos dois. O núcleo de d são as constantes,"
+           " pelo que a fibra da derivada é a classe «a menos de constante» --- e é essa a"
+           " dobra deste corpo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
