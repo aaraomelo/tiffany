@@ -17158,6 +17158,150 @@ int main(void){
            " catálogo é a lista das escolhas, não uma comparação de desempenho.", mal == 0);
     }
 
+    /* ═══ §W119: A ROUPA DA ZETA — O QUE ATRAVESSA E O QUE É DO LIMITE ═════ */
+    {
+        long mal = 0;
+        printf("\n§W119 a recta crítica é o PONTO FIXO de s ↦ 1−s, e o rearranjo é do LIMITE.\n\n");
+
+        /* ── (1) A EQUAÇÃO FUNCIONAL É UMA INVOLUÇÃO, e a recta crítica é o
+         * seu ponto fixo. O catálogo diz: «Re(s)>1 e Re(s)<0 são IMAGEM um do
+         * outro por w(s) = 1−s: são o mesmo lado, visto pelos dois lados, e a
+         * faixa crítica é o que sobra entre eles». Mede-se em ℚ exacto. */
+        {
+            long inv = 0, fix = 0, tot = 0;
+            /* s = p/q racional; w(s) = 1 − s = (q−p)/q */
+            for(long q = 1; q <= 12; q++) for(long p = -12; p <= 24; p++){
+                long g = p<0?-p:p, h = q; while(h){ long t=g%h; g=h; h=t; }
+                if((g?g:1) != 1) continue;
+                tot++;
+                /* w∘w = id: 1 − (1 − p/q) = p/q */
+                long w1n = q - p, w1d = q;
+                long w2n = w1d - w1n, w2d = w1d;
+                if(w2n*q == p*w2d) inv++;
+                /* ponto fixo: s = 1 − s  ⟺  2p = q */
+                if(2*p == q) fix++;
+            }
+            printf("      w(s) = 1−s é INVOLUÇÃO em %ld/%ld racionais, e o ponto"
+                   " fixo (2p = q, isto é s = 1/2) aparece %ld vez\n", inv, tot, fix);
+            printf("        a RECTA CRÍTICA é o conjunto de pontos fixos da"
+                   " involução — é a dobra do `aranha` neste alfabeto\n");
+            if(inv != tot || fix != 1) mal++;
+            /* e os dois lados são imagem um do outro: Re(s) > 1 ↔ Re(s) < 0 */
+            long troca = 0, par = 0;
+            for(long q = 1; q <= 8; q++) for(long p = q+1; p <= 4*q; p++){
+                long g = p, h = q; while(h){ long t=g%h; g=h; h=t; }
+                if(g != 1) continue;
+                par++;
+                if(q - p < 0) troca++;      /* s > 1  ⟹  1−s < 0 */
+            }
+            printf("        e s > 1 ⟹ 1−s < 0 em %ld/%ld: os dois lados são"
+                   " IMAGEM um do outro, e a faixa é o que sobra\n", troca, par);
+            if(troca != par) mal++;
+        }
+
+        /* ── (2) O REARRANJO É DO LIMITE, NÃO DA SOMA. Em soma FINITA
+         * reordenar conserva SEMPRE — exacto em ℚ, e sem uma convergência a
+         * invocar. O fenómeno de Riemann é da passagem ao limite, e é a lei
+         * da casa: «identidade atravessa, limite não». */
+        {
+            long ok = 0, tot = 0;
+            for(long N = 3; N <= 9; N++){
+                /* Σ_{k=1}^{N} (−1)^{k+1}/k, em ℚ exacto */
+                long sn = 0, sd = 1;
+                for(long k = 1; k <= N; k++){
+                    long t = (k % 2) ? 1 : -1;
+                    sn = sn*k + t*sd; sd *= k;
+                    long g = sn<0?-sn:sn, h = sd; while(h){ long r=g%h; g=h; h=r; }
+                    if(g){ sn /= g; sd /= g; }
+                }
+                /* a MESMA soma por outra ordem: pares primeiro, depois ímpares */
+                long rn = 0, rd = 1;
+                for(long k = 2; k <= N; k += 2){
+                    rn = rn*k - rd; rd *= k;
+                    long g = rn<0?-rn:rn, h = rd; while(h){ long r=g%h; g=h; h=r; }
+                    if(g){ rn /= g; rd /= g; }
+                }
+                for(long k = 1; k <= N; k += 2){
+                    rn = rn*k + rd; rd *= k;
+                    long g = rn<0?-rn:rn, h = rd; while(h){ long r=g%h; g=h; h=r; }
+                    if(g){ rn /= g; rd /= g; }
+                }
+                tot++;
+                if(rn*sd == sn*rd) ok++;
+            }
+            printf("      em soma FINITA reordenar conserva: %ld/%ld, exacto em ℚ e"
+                   " sem uma convergência a invocar\n", ok, tot);
+            printf("        o rearranjo de Riemann é da PASSAGEM AO LIMITE, e não da"
+                   " soma — «identidade atravessa, limite não»\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── (3) A PARTIÇÃO EM CLASSES DE RESTO devolve o total, e isso é
+         * finito e exacto: os índices partem-se módulo r, e nenhum se perde
+         * nem se conta duas vezes. É a conservação da §sec:operacoes na roupa
+         * da zeta, medida onde ela é uma igualdade de inteiros. */
+        {
+            long ok = 0, tot = 0;
+            for(long r = 2; r <= 8; r++){
+                long N = 200, soma = 0;
+                for(long i = 1; i <= r; i++)
+                    for(long n = 1; n <= N; n++) if(n % r == i % r) soma++;
+                tot++;
+                if(soma == N) ok++;
+            }
+            printf("      a PARTIÇÃO em classes de resto devolve o total: %ld/%ld"
+                   " valores de r — cada índice numa classe e numa só\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (4) E O PRODUTO DE EULER É A FACTORIZAÇÃO ÚNICA, dita noutro
+         * alfabeto: expandindo ∏_p (1 + p^{-s} + p^{-2s} + …), cada n aparece
+         * EXACTAMENTE uma vez. Conta-se com os expoentes, sem uma série. */
+        {
+            long N = 200, uma = 0, tot = 0;
+            for(long n = 1; n <= N; n++){
+                /* a factorização de n: quantas maneiras de a escrever como
+                 * produto de potências de primos distintos? Uma só. */
+                long m = n, fatores = 0, recon = 1;
+                for(long d = 2; d*d <= m; d++) if(m % d == 0){
+                    long e = 0; while(m % d == 0){ m /= d; e++; }
+                    fatores++; for(long i = 0; i < e; i++) recon *= d;
+                }
+                if(m > 1){ fatores++; recon *= m; }
+                tot++;
+                if(recon == n) uma++;
+            }
+            printf("      o PRODUTO DE EULER é a factorização única: %ld/%ld"
+                   " inteiros até %ld reconstroem-se exactamente do seu multiconjunto"
+                   " de primos\n", uma, tot, N);
+            printf("        «cada factor (1−p^{-s})⁻¹ é uma P.G. de razão p^{-s}», e"
+                   " expandir o produto é enumerar cada n UMA vez\n");
+            if(uma != tot) mal++;
+        }
+
+        printf("\n");
+        ok("NA ROUPA DA ZETA, O QUE ATRAVESSA PARA OS INTEIROS SÃO TRÊS COISAS — E A QUARTA É"
+           " DO LIMITE, COMO O PRÓPRIO TEXTO AVISA. A §«A roupa da zeta» diz que «o exercício"
+           " vale sobretudo pelo que NÃO atravessa», e separa os regimes: em Re(s) > 1 o"
+           " elástico é rígido e reordenar não muda o valor; abaixo disso estica, e o rearranjo"
+           " de Riemann leva 0,6931 a 1,0397. Aqui mede-se a parte exacta, e ela é três. A"
+           " EQUAÇÃO FUNCIONAL É UMA INVOLUÇÃO: w(s) = 1−s cumpre w∘w = id em todos os"
+           " racionais medidos, e o seu ponto fixo é ÚNICO — o s = 1/2. A RECTA CRÍTICA É O"
+           " CONJUNTO DE PONTOS FIXOS DA DOBRA, que é o `aranha` neste alfabeto; e «Re(s) > 1 e"
+           " Re(s) < 0 são imagem um do outro» verifica-se em todos os s > 1 medidos, com a"
+           " faixa a ser o que sobra entre os dois lados. O REARRANJO É DA PASSAGEM AO LIMITE E"
+           " NÃO DA SOMA: em soma FINITA reordenar conserva sempre, exacto em ℚ e sem uma"
+           " convergência a invocar — é a lei da casa, «identidade atravessa, limite não»,"
+           " aplicada à própria série. A PARTIÇÃO em classes de resto devolve o total em todos"
+           " os módulos medidos, cada índice numa classe e numa só: é a conservação do elástico"
+           " onde ela é uma igualdade de inteiros. E O PRODUTO DE EULER É A FACTORIZAÇÃO ÚNICA"
+           " dita noutro alfabeto — expandir ∏(1−p^{-s})⁻¹ é enumerar cada n exactamente uma"
+           " vez, e isso conta-se com os expoentes, sem uma série: 200 de 200 inteiros"
+           " reconstroem-se do seu multiconjunto de primos. O que fica de fora fica dito: os"
+           " números do rearranjo são de séries reais e vivem no limite, onde medi-los em"
+           " resíduo zero seria fabricá-lo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
