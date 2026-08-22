@@ -4088,6 +4088,31 @@ static void refaz_diario(void){
     barreira();
 }
 
+/* ── A PROJECÇÃO DA JUNÇÃO APLICA-SE UMA VEZ POR LINHA ───────────────────────
+ * A linha é escrita inteira — esquerda seguida de direita — pelos quatro
+ * caminhos que a junção tem (o casamento, o LEFT sem par, o RIGHT sem par, o
+ * segundo corte). Aplicar o mapa dentro de cada um seria escrever a mesma frase
+ * quatro vezes, que é como quatro cópias deixam de concordar; aplica-se aqui,
+ * no sítio onde a linha FECHA, e uma só vez. */
+static void jproj_linha(int *mapa, int n, int total){
+    if(!sql_cap || !n || sql_cap->nrows >= SQL_OUT_MAX_ROWS) return;
+    { char tmp[SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+      unsigned char tn[SQL_OUT_MAX_COLS];
+      long r = sql_cap->nrows;
+      int k;
+      for(k = 0; k < n && k < SQL_OUT_MAX_COLS; k++){
+          int j = mapa[k];
+          if(j < 0 || j >= total || j >= SQL_OUT_MAX_COLS){ tmp[k][0] = 0; tn[k] = 1; continue; }
+          snprintf(tmp[k], SQL_OUT_CELL, "%s", sql_cap->cell[r][j]);
+          tn[k] = sql_cap->nulo[r][j];
+      }
+      for(k = 0; k < n && k < SQL_OUT_MAX_COLS; k++){
+          snprintf(sql_cap->cell[r][k], SQL_OUT_CELL, "%s", tmp[k]);
+          sql_cap->nulo[r][k] = tn[k];
+      }
+      for(; k < SQL_OUT_MAX_COLS; k++){ sql_cap->cell[r][k][0] = 0; sql_cap->nulo[r][k] = 0; } }
+}
+
 /* a última contagem, para o modo teste poder AFIRMAR em vez de só imprimir. Sem isto o
  * sql.c não afirmava nada, e por isso estava fora da bateria — mudei-o uma dúzia de vezes
  * hoje e só o verifiquei à mão. */
@@ -4373,6 +4398,20 @@ static int lista_colunas(const char **pp, char *out, int cap){
          * FROM, e quem o compila é a resolução da projecção — lá a tabela já
          * está aberta e os nomes resolvem-se, que é a mesma razão de a
          * projecção inteira ser resolvida lá e não aqui. */
+        /* ── O ITEM PODE VIR QUALIFICADO: `t.a` ─────────────────────────────
+         * Numa junção há duas tabelas e os nomes podem repetir-se; o ponto diz
+         * de qual delas se fala. Guarda-se o texto inteiro — quem o resolve é a
+         * projecção, que sabe quais são os dois lados. */
+        if(*p == '.'){
+            char sufixo[64];
+            const char *r = p + 1;
+            if(ident(&r, sufixo, sizeof sufixo)){
+                char q2[130];
+                snprintf(q2, sizeof q2, "%s.%s", nome, sufixo);
+                snprintf(nome, sizeof nome, "%s", q2);
+                p = r;
+            }
+        }
         { const char *q = p; pula(&q);
           if(*q == '+' || *q == '-' || *q == '*' || *q == '/' || *q == '('){
               char tx[64]; int t = 0;
@@ -5097,8 +5136,13 @@ static int varre(const char *resto, int acao){
         }
     }
     /* resolver a projecção agora que a tabela está aberta: cada nome tem de ser
-     * uma coluna DESTA tabela, ou a consulta é recusada. */
-    if(acao == ACAO_MARCA && proj_n < 0){
+     * uma coluna DESTA tabela, ou a consulta é recusada.
+     *
+     * COM JUNÇÃO, ADIA-SE. A tabela contra a qual a projecção se resolve não é
+     * a da esquerda: é a que a junção PRODUZ — as colunas de uma seguidas das
+     * da outra. Resolver aqui recusaria toda a coluna da direita, que foi
+     * exactamente o que aconteceu enquanto isto correu cedo demais. */
+    if(acao == ACAO_MARCA && proj_n < 0 && !j_tab_dir[0]){
         const char *q = proj_cols;
         proj_n = 0;
         while(*q && proj_n < SQL_OUT_MAX_COLS){
@@ -6230,28 +6274,88 @@ static int varre(const char *resto, int acao){
                          " metade"); }
             return 0;
         }
-        /* emitir: as colunas da esquerda seguidas das da direita */
+        /* ── A PROJECÇÃO DA JUNÇÃO: resolver contra os DOIS lados ────────────
+         * A junção produz uma tabela nova — as colunas da esquerda seguidas das
+         * da direita —, e é contra ELA que a projecção se resolve. Um nome sem
+         * qualificador procura-se nos dois, e um nome que aparece nos dois é
+         * AMBÍGUO: recusa-se, porque escolher um deles seria responder outra
+         * coisa. Com o ponto não há dúvida — `t.a` é da esquerda, `u.a` da
+         * direita.
+         *
+         * O que sai daqui é um MAPA: para cada coluna pedida, o índice na
+         * concatenação. Sem lista, o mapa é a identidade e tudo sai, que é o
+         * que já acontecia. */
+        int jmapa[SQL_OUT_MAX_COLS], jn = 0;
+        { char cnd[J_MAXCOL][S_COLNOME_W * 2 + 2];
+          for(long j = 0; j < ncols_dir && j < J_MAXCOL; j++)
+              col_nome_le((int)j, cnd[j], (int)sizeof cnd[0]);
+          if(proj_n != 0 && strcmp(proj_cols, "*") != 0){
+              const char *q = proj_cols;
+              while(*q && jn < SQL_OUT_MAX_COLS){
+                  char item[130]; int i = 0;
+                  const char *ponto;
+                  while(*q && *q != ',' && i + 1 < (int)sizeof item) item[i++] = *q++;
+                  item[i] = 0;
+                  if(*q == ',') q++;
+                  ponto = strchr(item, '.');
+                  { int achou = -1, quantos = 0;
+                    const char *alvo = ponto ? ponto + 1 : item;
+                    char qual[64];
+                    qual[0] = 0;
+                    if(ponto){ size_t n = (size_t)(ponto - item);
+                               if(n < sizeof qual){ memcpy(qual, item, n); qual[n] = 0; } }
+                    /* a esquerda */
+                    if(!qual[0] || !strcmp(qual, nome))
+                        for(long j = 0; j < nc_esq && j < J_MAXCOL; j++)
+                            if(!strcmp(nome_esq[j], alvo)){ achou = (int)j; quantos++; }
+                    /* a direita */
+                    if(!qual[0] || !strcmp(qual, j_tab_dir))
+                        for(long j = 0; j < ncols_dir && j < J_MAXCOL; j++)
+                            if(!strcmp(cnd[j], alvo)){ achou = (int)(nc_esq + j); quantos++; }
+                    if(quantos > 1 && !qual[0]){
+                        printf("erro: a coluna «%s» está nas DUAS tabelas — diga"
+                               " de qual (`%s.%s` ou `%s.%s`). RECUSADA.\n",
+                               alvo, nome, alvo, j_tab_dir, alvo);
+                        if(sql_cap){ sql_cap->ok = 0;
+                            snprintf(sql_cap->err, sizeof sql_cap->err,
+                                     "column reference \"%s\" is ambiguous", alvo); }
+                        return 0;
+                    }
+                    if(achou < 0){
+                        printf("erro: «%s» não é coluna de «%s» nem de «%s» —"
+                               " RECUSADA.\n", item, nome, j_tab_dir);
+                        if(sql_cap){ sql_cap->ok = 0;
+                            snprintf(sql_cap->err, sizeof sql_cap->err,
+                                     "column \"%s\" does not exist", item); }
+                        return 0;
+                    }
+                    jmapa[jn++] = achou; }
+              }
+          } }
+
+        /* emitir: as colunas pedidas — ou, sem lista, a esquerda e a direita */
         if(sql_cap){
-            int nsai = (int)(nc_esq + ncols_dir);
+            int nsai = jn ? jn : (int)(nc_esq + ncols_dir);
             if(nsai > SQL_OUT_MAX_COLS) nsai = SQL_OUT_MAX_COLS;
             memset(sql_cap->col, 0, sizeof sql_cap->col);
             sql_cap->ncols = nsai;
             sql_cap->nrows = 0;
-            for(int j = 0; j < nsai; j++){
+            for(int k = 0; k < nsai; k++){
                 char cn[S_COLNOME_W * 2 + 2];
+                int j = jn ? jmapa[k] : k;         /* o mapa, ou a identidade */
                 if(j < nc_esq){
                     /* lidos acima, enquanto a esquerda ainda estava aberta */
                     if(j < J_MAXCOL && nome_esq[j][0])
-                        snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", nome_esq[j]);
+                        snprintf(sql_cap->col[k], sizeof sql_cap->col[k], "%s", nome_esq[j]);
                     else
-                        snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + (int)j);
+                        snprintf(sql_cap->col[k], sizeof sql_cap->col[k], "%c", 'a' + j);
                 }else{
-                    col_nome_le((int)(j - nc_esq), cn, (int)sizeof cn);
-                    if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
-                    else snprintf(sql_cap->col[j], sizeof sql_cap->col[j],
-                                  "%c", 'a' + (int)(j - nc_esq));
+                    col_nome_le(j - (int)nc_esq, cn, (int)sizeof cn);
+                    if(cn[0]) snprintf(sql_cap->col[k], sizeof sql_cap->col[k], "%s", cn);
+                    else snprintf(sql_cap->col[k], sizeof sql_cap->col[k],
+                                  "%c", 'a' + (j - (int)nc_esq));
                 }
-                sql_cap->tipo[j] = SQL_TIPO_INT4;
+                sql_cap->tipo[k] = SQL_TIPO_INT4;
             }
         }
         /* A DIREITA POR ORDEM — para a desigualdade, que é o dual do corte.
@@ -6303,6 +6407,7 @@ static int varre(const char *resto, int acao){
                           snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "0"); }
                 }
                 printf("\n");
+                jproj_linha(jmapa, jn, (int)(nc_esq + ncols_dir));
                 if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
                 saiu++;
             }
@@ -6341,6 +6446,7 @@ static int varre(const char *resto, int acao){
                           snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "%ld", v); }
                 }
                 printf("\n");
+                jproj_linha(jmapa, jn, (int)(nc_esq + ncols_dir));
                 if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
                 saiu++;
             }
@@ -6367,7 +6473,8 @@ static int varre(const char *resto, int acao){
                             snprintf(sql_cap->cell[sql_cap->nrows][col], SQL_OUT_CELL, "%ld", v); }
                   }
                   printf("\n");
-                  if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
+                  jproj_linha(jmapa, jn, (int)(nc_esq + ncols_dir));
+                 if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
                   saiu++;
               }
           }
@@ -6433,6 +6540,7 @@ static int varre(const char *resto, int acao){
                           }
                           printf("\n");
                           if(sql_cap){
+                              jproj_linha(jmapa, jn, (int)(nc_esq + ncols_dir));
                               if(sql_cap->nrows < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
                               sql_cap->ncols = (int)(nc2 + nd2c) > SQL_OUT_MAX_COLS
                                              ? SQL_OUT_MAX_COLS : (int)(nc2 + nd2c);

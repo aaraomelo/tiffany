@@ -6524,11 +6524,17 @@ int main(void){
          * há duas tabelas, a condição diz por onde casam. Reescreve-se na
          * leitura, como o BETWEEN, e tudo o que a junção sabe fazer passa a
          * valer para esta escrita sem uma linha a mais. */
-        sql_executa("SELECT a FROM t, u WHERE t.a = u.a", &a);
-        sql_executa("SELECT a FROM t JOIN u ON t.a = u.a", &b);
-        int vir = IGUAIS(a, b) && a.nrows == 2;
-        printf("      a vírgula ≡ o JOIN: %d linhas iguais célula a célula"
-               "  %s\n", a.nrows, vir ? "" : "NAO BATE");
+        /* a coluna pedida é `b`, que só existe de um lado: `a` está nas DUAS
+         * tabelas e é ambíguo — o §W49 mede essa recusa, e pedi-lo aqui seria
+         * comparar duas consultas inválidas e chamar-lhes iguais */
+        sql_executa("SELECT b, z FROM t, u WHERE t.a = u.a", &a);
+        sql_executa("SELECT b, z FROM t JOIN u ON t.a = u.a", &b);
+        int vir = IGUAIS(a, b) && a.nrows == 2 && a.ncols == 2
+                  && !strcmp(a.cell[0][0], "10") && !strcmp(a.cell[0][1], "100");
+        printf("      a vírgula ≡ o JOIN: %d linhas × %d colunas iguais célula a"
+               " célula, a começar em (%s,%s)  %s\n", a.nrows, a.ncols,
+               a.nrows ? a.cell[0][0] : "?", a.nrows ? a.cell[0][1] : "?",
+               vir ? "" : "NAO BATE");
         if(!vir) mal++;
 
         /* ── (4) A CONSULTA SEM CORPO. Sem `FROM` não há tabela, e sem tabela
@@ -6593,6 +6599,114 @@ int main(void){
            " dois desses estaria a comparar duas cópias do mesmo lixo. Zera-se à entrada, e"
            " mede-se que zera. O CONTROLO é o ordinal fora da lista, RECUSADO e não tomado"
            " pela última coluna nem ignorado em silêncio.",
+           mal == 0);
+    }
+
+    /* ═══ §W49: A PROJECÇÃO DA JUNÇÃO ══════════════════════════════════════ */
+    {
+        SqlOut a, b;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w49.mem", "/tmp/pgwire_w49.prog",
+            "/tmp/pgwire_w49__t.mem", "/tmp/pgwire_w49__t.prog",
+            "/tmp/pgwire_w49__u.mem", "/tmp/pgwire_w49__u.prog" };
+        for(int k = 0; k < 6; k++) unlink(lixo[k]);
+        printf("\n§W49 SELECT t.a, u.z: a junção produz uma tabela, e é contra ela.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w49")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &a);
+        sql_executa("INSERT INTO t VALUES (1,10), (2,20), (3,30)", &a);
+        sql_executa("CREATE TABLE u (a,z)", &a);
+        sql_executa("INSERT INTO u VALUES (1,100), (2,200)", &a);
+
+        /* ── (1) A JUNÇÃO PRODUZ UMA TABELA, e é contra ELA que a projecção se
+         * resolve — as colunas da esquerda seguidas das da direita. Resolvê-la
+         * contra a tabela da esquerda, que era o que acontecia, recusava toda a
+         * coluna do outro lado: a junção devolvia sempre tudo, e pedir uma
+         * coluna era «column does not exist». */
+        sql_executa("SELECT t.a, u.z FROM t JOIN u ON t.a = u.a", &a);
+        int qual = (a.ncols == 2 && a.nrows == 2
+                    && !strcmp(a.cell[0][0], "1") && !strcmp(a.cell[0][1], "100")
+                    && !strcmp(a.col[0], "a") && !strcmp(a.col[1], "z"));
+        printf("      `t.a, u.z`: %d colunas, (%s,%s) na 1.ª linha, cabeçalhos"
+               " «%s»«%s»  %s\n", a.ncols, a.nrows ? a.cell[0][0] : "?",
+               a.nrows ? a.cell[0][1] : "?", a.col[0], a.col[1],
+               qual ? "" : "NAO BATE");
+        if(!qual) mal++;
+
+        /* ── (2) A ORDEM PEDIDA É A ORDEM DADA, e não a da concatenação:
+         * `u.z, t.b` põe a coluna da DIREITA primeiro. Sem isto o mapa podia
+         * estar a ser ignorado e a saída a sair na ordem natural — que
+         * coincidiria com a pedida em metade dos casos. */
+        sql_executa("SELECT u.z, t.b FROM t JOIN u ON t.a = u.a", &b);
+        int ordem = (b.ncols == 2 && b.nrows == 2
+                     && !strcmp(b.cell[0][0], "100") && !strcmp(b.cell[0][1], "10"));
+        printf("      `u.z, t.b`: a direita primeiro — (%s,%s) (esp 100,10)"
+               "  %s\n", b.nrows ? b.cell[0][0] : "?",
+               b.nrows ? b.cell[0][1] : "?", ordem ? "" : "NAO BATE");
+        if(!ordem) mal++;
+
+        /* ── (3) SEM QUALIFICADOR TAMBÉM VALE, quando não há dúvida: `b` só
+         * existe à esquerda e `z` só à direita, e o nome basta. O ponto é para
+         * desfazer ambiguidade, não uma obrigação. */
+        sql_executa("SELECT b, z FROM t JOIN u ON t.a = u.a", &a);
+        int cru = (a.ncols == 2 && a.nrows == 2
+                   && !strcmp(a.cell[0][0], "10") && !strcmp(a.cell[0][1], "100"));
+        printf("      `b, z` sem ponto: (%s,%s) (esp 10,100)  %s\n",
+               a.nrows ? a.cell[0][0] : "?", a.nrows ? a.cell[0][1] : "?",
+               cru ? "" : "NAO BATE");
+        if(!cru) mal++;
+
+        /* ── (4) E VALE PELAS DUAS ESCRITAS: com `JOIN … ON` e com a vírgula,
+         * que o §W48 mostrou serem a mesma consulta. Se a projecção só
+         * funcionasse numa delas, a reescrita não seria uma reescrita. */
+        sql_executa("SELECT t.a, u.z FROM t JOIN u ON t.a = u.a", &a);
+        sql_executa("SELECT t.a, u.z FROM t, u WHERE t.a = u.a", &b);
+        int duas = (a.nrows == b.nrows && a.ncols == b.ncols && a.nrows == 2);
+        for(int i = 0; duas && i < a.nrows; i++)
+            for(int j = 0; duas && j < a.ncols; j++)
+                if(strcmp(a.cell[i][j], b.cell[i][j])) duas = 0;
+        printf("      e pelas DUAS escritas (JOIN e vírgula): iguais célula a"
+               " célula  %s\n", duas ? "" : "NAO BATE");
+        if(!duas) mal++;
+
+        /* ── O CONTROLO, e são dois. O nome que está nas DUAS tabelas é
+         * AMBÍGUO e recusa-se — escolher um deles seria responder outra coisa,
+         * e é o caso em que um motor descuidado devolve a primeira que
+         * encontra. E o nome qualificado que não existe também é recusado, não
+         * tomado pelo outro lado. */
+        int c1 = sql_executa("SELECT a, z FROM t JOIN u ON t.a = u.a", &a);
+        int c2 = sql_executa("SELECT t.q FROM t JOIN u ON t.a = u.a", &a);
+        sql_executa("SELECT * FROM t JOIN u ON t.a = u.a", &b);
+        int estrela = (b.ncols == 4);
+        printf("\n      CONTROLO — `a` nas duas tabelas: %s · `t.q` que não"
+               " existe: %s · e `*` continua a dar as %d colunas  %s\n",
+               c1 ? "RESPONDEU (mau)" : "ambíguo, recusado",
+               c2 ? "RESPONDEU (mau)" : "recusado", b.ncols,
+               (!c1 && !c2 && estrela) ? "" : "NAO BATE");
+        if(c1 || c2 || !estrela) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A JUNÇÃO PRODUZ UMA TABELA, E É CONTRA ELA QUE A PROJECÇÃO SE RESOLVE. As colunas"
+           " da esquerda seguidas das da direita são uma tabela nova, e pedir uma delas é"
+           " pedir a essa — não à da esquerda, que era contra quem os nomes estavam a ser"
+           " resolvidos: a projecção corria ANTES de a junção existir, pelo que toda a coluna"
+           " do outro lado era «column does not exist», e a junção devolvia sempre tudo."
+           " Adia-se para depois, e o que sai é um MAPA: para cada coluna pedida, o índice na"
+           " concatenação. A ORDEM PEDIDA É A ORDEM DADA — `u.z, t.b` põe a coluna da"
+           " direita primeiro —, o que é preciso medir porque um mapa ignorado daria a ordem"
+           " natural, e essa coincide com a pedida em metade dos casos. SEM QUALIFICADOR"
+           " TAMBÉM VALE quando não há dúvida: o ponto serve para desfazer ambiguidade, não é"
+           " uma obrigação. E vale pelas DUAS escritas — `JOIN … ON` e a vírgula do §W48 —,"
+           " porque se a projecção só funcionasse numa delas a reescrita não seria uma"
+           " reescrita. O que torna isto uma implementação e não quatro é o mapa aplicar-se"
+           " UMA vez por linha, no sítio onde ela fecha: a junção escreve a linha inteira por"
+           " quatro caminhos (o casamento, o LEFT sem par, o RIGHT sem par, o segundo corte),"
+           " e pôr a projecção dentro de cada um seria escrever a mesma frase quatro vezes."
+           " O CONTROLO tem duas metades: o nome que está nas DUAS tabelas é AMBÍGUO e"
+           " recusa-se — escolher um seria responder outra coisa, e é aqui que um motor"
+           " descuidado devolve a primeira que encontra —, e o nome qualificado que não"
+           " existe é recusado em vez de procurado do outro lado.",
            mal == 0);
     }
 

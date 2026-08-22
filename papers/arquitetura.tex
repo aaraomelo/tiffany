@@ -2825,6 +2825,20 @@ selecciona com a expressão, o \code{SELECT} escreve-a. E mede-se pelo programa:
 \code{b} dá ausente, e não \code{a} ---, que é a regra do \code{CHECK} dita na
 produção (\code{tests/pgwire.c} §W47).
 
+\medskip\noindent\textbf{E a junção produz uma tabela, contra a qual a
+projecção se resolve.} As colunas da esquerda seguidas das da direita são uma
+tabela nova, e pedir uma delas é pedir a \emph{essa} --- não à da esquerda, que
+era contra quem os nomes estavam a ser resolvidos, porque a projecção corria
+\emph{antes} de a junção existir: toda a coluna do outro lado dava «column does
+not exist», e a junção devolvia sempre tudo. Adia-se, e o que sai é um
+\textbf{mapa}: para cada coluna pedida, o índice na concatenação. O ponto
+(\code{t.a}) serve para desfazer ambiguidade e não é obrigatório; um nome que
+está nas \emph{duas} tabelas é recusado, porque escolher um seria responder
+outra coisa. E o mapa aplica-se \textbf{uma vez por linha}, no sítio onde ela
+fecha --- a junção escreve-a por quatro caminhos (o casamento, o \code{LEFT} sem
+par, o \code{RIGHT} sem par, o segundo corte), e pôr a projecção dentro de cada
+um seria escrever a mesma frase quatro vezes (\code{tests/pgwire.c} §W49).
+
 \medskip\noindent\textbf{E a mesma consulta noutra escrita tem de dar a mesma
 coisa.} \code{ORDER BY 1} é o nome dito pela \emph{posição} --- a primeira
 coluna da lista pedida ---, e \code{FROM t, u WHERE t.a = u.a} é o \code{JOIN}
