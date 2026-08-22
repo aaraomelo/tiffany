@@ -43,3 +43,11 @@ E a excepção declarada precisa de controlo próprio: o `xr` resolve travessias
 legítimas, e uma porta que aceita tudo é um buraco. Mede-se **desligando** —
 as referências que ela cobre têm de voltar a ser órfãs — e com um nome de
 prefixo certo mas ausente do alvo, que tem de continuar órfão.
+
+**Aplicado na hora, e valeu logo:** trocar a lista escrita à mão pela derivada
+(`.tex` com `\documentclass`, isto é, que compila sozinho) fez o medidor achar
+**13** documentos e não os 12 que eu tinha contado — o `livro.tex` estava-me
+invisível. A derivação vê o que quem escreve a lista não vê. E ela traz um
+risco novo que precisa de gume próprio: se os alvos passarem do tecto do array,
+os últimos saem *em silêncio* — o mesmo defeito com outra causa. Conta-se por
+FORA do mecanismo e exige-se que todos tenham entrado.

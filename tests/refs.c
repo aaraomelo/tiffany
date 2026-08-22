@@ -65,6 +65,7 @@
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 
 #define MAXN 4096
 #define MAXL 256
@@ -86,15 +87,81 @@ typedef struct { char nome[MAXL]; int doc; long linha; } Marca;
  *
  * Só entram os que têm `\documentclass` — `estilo.tex` e `gkcapa.tex` são
  * incluídos por outros e não compilam sozinhos, logo não são documentos. */
-static const char *DOCS[] = {
-    "teoria.tex", "catalogo.tex", "enredo.tex",
-    "papers/aranha.tex", "papers/arquitetura.tex",
-    "papers/corpo_algebrico.tex", "papers/corpo_analitico.tex",
-    "papers/corpo_topologico.tex",
-    "papers/inteiros.tex", "papers/naturais.tex",
-    "papers/racionais.tex", "papers/reais.tex",
-};
-static const int NDOC = 12;
+/* ── E A LISTA DERIVA-SE, EM VEZ DE SE ESCREVER ──────────────────────────────
+ * Esta lista esteve escrita à mão com três nomes enquanto o repositório tinha
+ * doze documentos, e o medidor dava verde sobre um terço da obra. Escrevê-la
+ * outra vez à mão — agora com doze — seria repor exactamente a mesma armadilha
+ * para o próximo paper que nascer.
+ *
+ * O critério é DIZÍVEL, e por isso deriva-se: um documento é um `.tex` que tem
+ * `\documentclass`, isto é, que compila SOZINHO. O `estilo.tex` e o `gkcapa.tex`
+ * são incluídos por outros e não passam nesse crivo — não por estarem numa lista
+ * de excepções, mas por não cumprirem a definição. Um paper novo entra na
+ * vigilância no dia em que nasce, sem ninguém se lembrar de o acrescentar. */
+#define MAXDOC 64
+static char DOCSBUF[MAXDOC][256];
+static const char *DOCS[MAXDOC];
+static int NDOC = 0;
+
+static int tem_documentclass(const char *caminho)
+{
+    FILE *f = fopen(caminho, "r");
+    if (!f) return 0;
+    char l[8192]; int achou = 0;
+    while (!achou && fgets(l, sizeof l, f)) {
+        /* ignora comentado: `%\documentclass` não conta */
+        const char *p = l;
+        while (*p == ' ' || *p == '\t') p++;
+        if (*p == '%') continue;
+        if (strstr(p, "\\documentclass")) achou = 1;
+    }
+    fclose(f);
+    return achou;
+}
+
+/* junta os `.tex` de um directório que compilam sozinhos, por ordem */
+static void junta_dir(const char *dir, const char *prefixo)
+{
+    DIR *d = opendir(dir);
+    if (!d) return;
+    char achados[MAXDOC][256]; int n = 0;
+    struct dirent *e;
+    while ((e = readdir(d)) && n < MAXDOC) {
+        const char *nome = e->d_name;
+        size_t L = strlen(nome);
+        if (L < 5 || strcmp(nome + L - 4, ".tex")) continue;
+        char caminho[512];
+        snprintf(caminho, sizeof caminho, "%s%s", dir, nome);
+        if (!tem_documentclass(caminho)) continue;
+        snprintf(achados[n], sizeof achados[0], "%s%s", prefixo, nome);
+        n++;
+    }
+    closedir(d);
+    /* ordem estável: o relatório não pode mudar por causa do sistema de ficheiros */
+    for (int i = 0; i < n; i++)
+        for (int j = i + 1; j < n; j++)
+            if (strcmp(achados[i], achados[j]) > 0) {
+                char t[256]; snprintf(t, sizeof t, "%s", achados[i]);
+                snprintf(achados[i], sizeof achados[0], "%s", achados[j]);
+                snprintf(achados[j], sizeof achados[0], "%s", t);
+            }
+    for (int i = 0; i < n && NDOC < MAXDOC; i++) {
+        snprintf(DOCSBUF[NDOC], sizeof DOCSBUF[0], "%s", achados[i]);
+        DOCS[NDOC] = DOCSBUF[NDOC]; NDOC++;
+    }
+}
+
+/* monta a lista a partir de um prefixo de caminho (o medidor corre da raiz ou
+ * de tools/, e a bateria faz `cd` — a mesma razão do PREFIXOS mais abaixo) */
+static void monta_docs(const char *base)
+{
+    char raiz[512], pap[512];
+    NDOC = 0;
+    snprintf(raiz, sizeof raiz, "%s", base[0] ? base : "./");
+    snprintf(pap,  sizeof pap,  "%spapers/", base);
+    junta_dir(raiz, "");
+    junta_dir(pap, "papers/");
+}
 
 /* ── E O `xr` É A EXCEPÇÃO DECLARADA ─────────────────────────────────────────
  * Uma \ref que atravessa documentos é um defeito — EXCEPTO quando o documento
@@ -235,7 +302,9 @@ int main(void)
     static const char *PREFIXOS[] = { "", "../", "./" };
     int lidos = 0; const char *prefixo = NULL;
     for (size_t k = 0; k < sizeof PREFIXOS / sizeof *PREFIXOS && !prefixo; k++) {
-        nlab = nref = 0; lidos = 0;
+        monta_docs(PREFIXOS[k]);          /* a lista deriva-se, e do sítio certo */
+        if (NDOC == 0) continue;
+        nlab = nref = 0; nex = 0; lidos = 0;
         for (int d = 0; d < NDOC; d++) {
             char caminho[512];
             snprintf(caminho, sizeof caminho, "%s%s", PREFIXOS[k], DOCS[d]);
@@ -323,6 +392,44 @@ int main(void)
         refs_[nref].doc = 2; refs_[nref].linha = -1; nref++;   /* citada do enredo (doc 2) */
         int d = onde(refs_[nref-1].nome);
         ok("com uma cruzada injetada, §R3 apanha-a", d >= 0 && d != 2);
+    }
+
+    /* ── (c2) E A LISTA DERIVADA TEM O SEU PRÓPRIO TECTO ─────────────────────
+     * Derivar a lista resolve o «esqueci-me de acrescentar», e traz um risco
+     * novo: se os documentos passarem de MAXDOC, os últimos ficam de fora e o
+     * medidor continua verde sobre menos obra — exactamente o defeito que a
+     * derivação veio corrigir, com outra causa. Conta-se por FORA do
+     * mecanismo: quantos `.tex` com `\documentclass` existem nos dois
+     * directórios, e exige-se que TODOS tenham entrado.
+     *
+     * E exige-se que os `papers/` estejam LÁ: uma derivação que só apanhasse a
+     * raiz daria 4 documentos e passaria em tudo o resto. */
+    {
+        int quantos = 0, com_papers = 0;
+        const char *dirs[2] = { "", "papers/" };
+        for (int k = 0; k < 2; k++) {
+            char d[512];
+            snprintf(d, sizeof d, "%s%s", prefixo, dirs[k][0] ? dirs[k] : "./");
+            DIR *dd = opendir(d);
+            if (!dd) continue;
+            struct dirent *e;
+            while ((e = readdir(dd))) {
+                size_t L = strlen(e->d_name);
+                if (L < 5 || strcmp(e->d_name + L - 4, ".tex")) continue;
+                char c[600];
+                snprintf(c, sizeof c, "%s%s", d, e->d_name);
+                if (tem_documentclass(c)) quantos++;
+            }
+            closedir(dd);
+        }
+        for (int i = 0; i < NDOC; i++)
+            if (!strncmp(DOCS[i], "papers/", 7)) com_papers++;
+        printf("      %d documentos existem, %d entraram na lista (%d de papers/)\n",
+               quantos, NDOC, com_papers);
+        ok("a lista DERIVA-SE e não fica nenhum de fora — escrever os nomes à mão"
+           " foi o que deixou nove papers sem vigilância, e o tecto MAXDOC repõe"
+           " esse defeito em silêncio se ninguém o contar",
+           quantos == NDOC && NDOC < MAXDOC && com_papers >= 9);
     }
 
     /* ── (d) E O CONTROLO DO PRÓPRIO `xr` ────────────────────────────────────

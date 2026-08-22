@@ -51,6 +51,10 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <ctype.h>
+/* o `edo.h` entra para §W73 ser DOIS CAMINHOS e não um: ele decide a ressonância
+ * pela aritmética dos coeficientes — p(a) e p'(a) —, o motor decide-a pelo
+ * espectro. Se viessem do mesmo sítio, concordarem não diria nada. */
+#include "../lib/edo.h"
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -9675,6 +9679,130 @@ int main(void){
            " par (traço,determinante) da matriz e o par (soma,produto) das duas faces são o"
            " MESMO par. O controlo é δ ≠ 0, onde as duas faces ainda são duas — sem ele, as"
            " identidades passavam num motor que devolvesse sempre zero.", mal == 0);
+    }
+
+
+    /* ═══ §W73: A RESSONÂNCIA É A MULTIPLICIDADE, POR DOIS CAMINHOS ════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W73 a ordem da ressonância É a multiplicidade do autovalor.\n\n");
+        { char m[80], p2[80];
+          snprintf(m, sizeof m, "/tmp/pgwire_w73__m.mem");
+          snprintf(p2, sizeof p2, "/tmp/pgwire_w73__m.prog");
+          unlink(m); unlink(p2);
+          unlink("/tmp/pgwire_w73.mem"); unlink("/tmp/pgwire_w73.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w73")) mal++;
+
+        /* ── O CATÁLOGO JÁ DIZIA QUE ERA A MESMA COISA, e faltava medi-lo: «a
+         * ressonância é a raiz dupla outra vez. Substituindo y = A·e^{at} sai
+         * A·p(a)·e^{at}, com p(a) = a² + Ba + C — o PRÓPRIO polinómio
+         * característico. Se p(a) ≠ 0, A = k/p(a) e acabou; se p(a) = 0, a fonte
+         * cai SOBRE o espectro e entra um t.» Logo a ordem que o `edo.h`
+         * devolve — 0, 1 ou 2 — é a MULTIPLICIDADE de a como raiz:
+         *
+         *   p(a) ≠ 0                  → 0   a não está no espectro
+         *   p(a) = 0, p'(a) ≠ 0       → 1   autovalor SIMPLES
+         *   p(a) = 0, p'(a) = 0       → 2   raiz DUPLA — o Δ = 0 de §W72
+         *
+         * E SÃO DOIS CAMINHOS QUE NÃO SE APOIAM: o `edo.h` decide pela
+         * aritmética dos coeficientes, sem saber o que é uma matriz; o motor
+         * decide pelo ESPECTRO da companheira — `autovalores` diz se a lá está,
+         * `regime` dá o Δ. Nenhum usa o outro, e por isso concordarem é uma
+         * verificação e não uma repetição.
+         *
+         * O sinal diz-se onde é usado: o `edo.h` escreve y'' + By' + Cy, logo a
+         * companheira é (0,1;−C,−B), com traço −B e determinante C — e
+         * λ² − tr·λ + det = λ² + Bλ + C é o mesmo polinómio. */
+        long n = 0, bate = 0, viu[3] = {0,0,0};
+        for(int B = -4; B <= 4; B++)
+        for(int C = -4; C <= 4; C++)
+        for(int a = -3; a <= 3; a++){
+            Fonte f; f.tipo = F_EXP; f.k = 1; f.a = a; f.w = 0;
+            char buf[256];
+            int ord = edo_particular(B, 1, C, 1, f, buf, sizeof buf);
+
+            char q2[200];
+            sql_executa("DROP TABLE IF EXISTS m", &o);
+            sql_executa("CREATE TABLE m (p RACIONAL, q RACIONAL)", &o);
+            snprintf(q2, sizeof q2, "INSERT INTO m VALUES (0,1), (%d,%d)", -C, -B);
+            sql_executa(q2, &o);
+            sql_executa("SELECT regime(*) FROM m", &o);
+            long D = o.ok ? atol(o.cell[0][3]) : 999999;
+            sql_executa("SELECT autovalores(*) FROM m", &o);
+            int no_espectro = 0;
+            if(o.ok) for(int i = 0; i < o.nrows; i++)
+                if(atol(o.cell[i][0]) == a) no_espectro = 1;
+            int pelo_motor = !no_espectro ? 0 : (D == 0 ? 2 : 1);
+
+            n++;
+            if(pelo_motor == ord) bate++;
+            if(ord >= 0 && ord <= 2) viu[ord]++;
+        }
+        printf("      %ld casos (B,C,a) · os dois caminhos concordam em %ld\n", n, bate);
+        printf("        ordem 0 (fora do espectro) .. %ld\n", viu[0]);
+        printf("        ordem 1 (autovalor simples) . %ld\n", viu[1]);
+        printf("        ordem 2 (raiz dupla, Δ = 0) . %ld\n", viu[2]);
+        if(bate != n) mal++;
+
+        /* ── E AS TRÊS ORDENS TÊM DE APARECER, senão a concordância é vazia: se
+         * todos os casos fossem ordem 0, os dois caminhos concordariam por nunca
+         * chegarem a decidir nada. É o mesmo controlo do §W69 — sem as três
+         * classes, a classificação não classifica. */
+        printf("      as três ordens aparecem: %s\n",
+               (viu[0] && viu[1] && viu[2]) ? "sim" : "NÃO — a concordância seria vazia");
+        if(!viu[0] || !viu[1] || !viu[2]) mal++;
+
+        /* ── E O CASO NOMEADO NO CATÁLOGO, para o número não ser anónimo:
+         * y'' + 2y' + y = e^{−t} tem raiz dupla EM −1 e a fonte cai nela, pelo
+         * que entram os DOIS t — a ordem é 2. É o único sítio onde as duas
+         * coisas coincidem, e o catálogo aponta-o como tal. */
+        { Fonte f; f.tipo = F_EXP; f.k = 1; f.a = -1; f.w = 0;
+          char buf[256];
+          int ord = edo_particular(2, 1, 1, 1, f, buf, sizeof buf);
+          sql_executa("DROP TABLE IF EXISTS m", &o);
+          sql_executa("CREATE TABLE m (p RACIONAL, q RACIONAL)", &o);
+          sql_executa("INSERT INTO m VALUES (0,1), (-1,-2)", &o);
+          sql_executa("SELECT regime(*) FROM m", &o);
+          int d0 = o.ok && !strcmp(o.cell[0][3], "0");
+          sql_executa("SELECT autovalores(*) FROM m", &o);
+          int menos1 = o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "-1");
+          printf("      y'' + 2y' + y = e^{−t}: ordem %d · a particular é «%s»\n",
+                 ord, buf);
+          printf("        e o motor: Δ = %s · espectro %s\n",
+                 d0 ? "0 (raiz dupla)" : "MAU", menos1 ? "{−1}" : "MAU");
+          if(ord != 2 || !d0 || !menos1) mal++; }
+
+        /* ── E O CONTROLO É A MESMA EQUAÇÃO COM OUTRA FONTE: com e^{+t} a fonte
+         * NÃO cai no espectro, não há t nenhum, e a particular é uma constante
+         * vezes a exponencial. Sem isto, um `edo_particular` que devolvesse
+         * sempre 2 passava em cima. */
+        { Fonte f; f.tipo = F_EXP; f.k = 1; f.a = 1; f.w = 0;
+          char buf[256];
+          int ord = edo_particular(2, 1, 1, 1, f, buf, sizeof buf);
+          printf("      controlo — a MESMA equação com e^{+t}: ordem %d, «%s»\n",
+                 ord, buf);
+          if(ord != 0) mal++; }
+        sql_fechar();
+
+        printf("\n");
+        ok("A ORDEM DA RESSONÂNCIA É A MULTIPLICIDADE DO AUTOVALOR, E ISSO MEDE-SE POR DOIS"
+           " CAMINHOS QUE NÃO SE APOIAM. O catálogo já dizia que «a ressonância é a raiz"
+           " dupla outra vez»: substituindo y = A·e^{at} sai A·p(a)·e^{at}, com"
+           " p(a) = a² + Ba + C, que É o polinómio característico — se p(a) ≠ 0 acabou, e se"
+           " p(a) = 0 a fonte cai SOBRE o espectro e entra um t. Faltava medi-lo. A ordem que"
+           " o `lib/edo.h` devolve é 0 quando a não está no espectro, 1 quando é autovalor"
+           " simples e 2 quando é raiz DUPLA — e essa raiz dupla é o Δ = 0 de §W72, o corte"
+           " terminado. OS DOIS CAMINHOS: o `edo.h` decide pela aritmética dos coeficientes,"
+           " sem saber o que é uma matriz; o motor decide pelo ESPECTRO da companheira, com"
+           " `autovalores` e `regime`. Nenhum usa o outro. 567 casos (B,C,a), e concordam em"
+           " todos. O CONTROLO É DUPLO: as três ordens têm de aparecer — se todas fossem 0,"
+           " os dois caminhos concordariam por nunca decidirem nada —, e a mesma equação com"
+           " outra fonte tem de dar ordem 0, sem o que um `edo_particular` que devolvesse"
+           " sempre 2 passava. E o caso nomeado fecha-o: y'' + 2y' + y = e^{−t} é onde a raiz"
+           " é dupla E a fonte cai nela, e entram os dois t. O sinal diz-se onde é usado — o"
+           " `edo.h` escreve y'' + By' + Cy, a companheira tem traço −B e determinante C, e"
+           " λ² − tr·λ + det é o mesmo polinómio.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

@@ -3552,6 +3552,42 @@ devolvesse sempre zero.}
         {$(\operatorname{tr},\det)=(\text{soma},\text{produto})$; $\Delta=4\delta^{2}$}
         {\code{tests/pgwire.c} §W72}
 
+\medskip\noindent\textbf{E a ressonância é a multiplicidade --- por dois caminhos
+que não se apoiam.} O catálogo já dizia que «a ressonância é a raiz dupla outra
+vez»: substituindo $y=A\,e^{at}$ sai $A\,p(a)\,e^{at}$ com $p(a)=a^{2}+Ba+C$, que
+\emph{é} o polinómio característico; se $p(a)\neq0$ acabou, e se $p(a)=0$ a fonte
+cai \emph{sobre} o espectro e entra um $t$. Faltava medi-lo. A ordem que o
+\code{lib/edo.h} devolve é
+\[
+\begin{array}{lll}
+p(a)\neq0 & \to 0 & a \text{ fora do espectro}\\
+p(a)=0,\ p'(a)\neq0 & \to 1 & \text{autovalor simples}\\
+p(a)=0,\ p'(a)=0 & \to 2 & \text{raiz dupla --- o } \Delta=0 \text{ de §W72}
+\end{array}
+\]
+--- isto é, a \textbf{multiplicidade} de $a$ como raiz.
+
+\medskip\noindent Os dois caminhos: o \code{edo.h} decide pela aritmética dos
+coeficientes, \emph{sem saber o que é uma matriz}; o motor decide pelo
+\textbf{espectro} da companheira, com \code{autovalores} e \code{regime}. Nenhum
+usa o outro, e por isso concordarem é uma verificação e não uma repetição:
+\textbf{567} casos $(B,C,a)$, concordância total. O sinal diz-se onde é usado ---
+o \code{edo.h} escreve $y''+By'+Cy$, a companheira tem $\operatorname{tr}=-B$ e
+$\det=C$, e $\lambda^{2}-\operatorname{tr}\lambda+\det$ é o mesmo polinómio.
+
+\medskip\noindent E o caso nomeado fecha-o: $y''+2y'+y=e^{-t}$ é onde a raiz é
+dupla \emph{e} a fonte cai nela, e entram os dois $t$ ---
+$\tfrac12 t^{2}e^{-t}$.
+
+\medido{\code{tests/pgwire.c} §W73, com controlo duplo: as três ordens têm de
+aparecer (se todas fossem $0$, os dois caminhos concordariam por nunca decidirem
+nada) e a \emph{mesma} equação com $e^{+t}$ tem de dar ordem $0$ --- sem o que um
+\code{edo\_particular} que devolvesse sempre $2$ passava.}
+
+\colunas{\code{catalogo} (\code{lib/edo.h}: a ressonância)}
+        {\code{edo\_particular} contra \code{autovalores}/\code{regime}}
+        {\code{tests/pgwire.c} §W73}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

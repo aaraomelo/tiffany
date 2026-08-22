@@ -368,7 +368,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 187d2f4edd1aa04e 0
+pgwire 238a28978f576d6d 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -415,7 +415,7 @@ recursao 268dd5df56bb546b 0
 rede_dual 441d23a4e0824dce 0
 reducao a55c5836822c89da 0
 refracao 7a6fe4d08af5aa96 0
-refs d8dd0037a251d16a 0
+refs ee683f808b97e9f6 0
 refuta feefc6499e4d89e0 0
 regua 273501d5d2f33deb 0
 regua_continua 02efe28cd3eea5d0 0
