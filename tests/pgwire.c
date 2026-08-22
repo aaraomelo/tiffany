@@ -14030,6 +14030,188 @@ int main(void){
            " quadrado perfeito. Três caminhos para a mesma cláusula.", mal == 0);
     }
 
+    /* ═══ §W99: O OMNITRIX — ⊕ SOMA OS GRAUS, ⊗ COMPÕE, E O det CONSERVA ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W99 ⊕ e ⊗ sobre as companheiras: as duas leis do det, e o fecho em GL(ℤ).\n\n");
+        { const char *tabs[] = { "A","B","K" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w99__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w99__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w99.mem"); unlink("/tmp/pgwire_w99.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w99")) mal++;
+
+        long rec99 = 0;
+        #define POE(t,M,N) do { char q2[420]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[320]; cols[0] = 0; \
+              for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (N); i2++){ char vs[320]; vs[0] = 0; \
+                for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); if(!o2.ok) rec99++; } } while(0)
+
+        /* ── O `catalogo` fecha assim: «reunidas sob ⊕ (que soma os graus) e ⊗
+         * (La Hire, que compõe), com a torção por invariante e a NORMA
+         * MULTIPLICATIVA por lei de conservação, essas matrizes formam de novo
+         * um único corpo — o Omnitrix». Aqui as duas operações correm sobre as
+         * companheiras e o det do motor diz as suas leis, que NÃO são a mesma. */
+        long som_ok = 0, som_n = 0, kro_ok = 0, kro_n = 0, gl_ok = 0, gl_n = 0,
+             confunde = 0, fora = 0;
+        for(long m1 = 1; m1 <= 3; m1++) for(long m2 = 1; m2 <= 3; m2++)
+        for(int n1 = 2; n1 <= 3; n1++) for(int n2 = 2; n2 <= 3; n2++){
+            if(n1 * n2 > 6) continue;              /* o tecto do motor */
+            long A[6][6], B[6][6];
+            memset(A, 0, sizeof A); memset(B, 0, sizeof B);
+            A[0][0] = m1; A[0][n1-1] = 1;
+            for(int i = 1; i < n1; i++) A[i][i-1] = 1;
+            B[0][0] = m2; B[0][n2-1] = 1;
+            for(int i = 1; i < n2; i++) B[i][i-1] = 1;
+
+            POE("A", A, n1); sql_executa("SELECT det(*) FROM A", &o);
+            if(!o.ok) continue; long dA = atol(o.cell[0][0]);
+            POE("B", B, n2); sql_executa("SELECT det(*) FROM B", &o);
+            if(!o.ok) continue; long dB = atol(o.cell[0][0]);
+
+            /* ⊕ : bloco diagonal, grau n1+n2 */
+            if(n1 + n2 <= 6){
+                long S[6][6]; memset(S, 0, sizeof S);
+                for(int i = 0; i < n1; i++) for(int j = 0; j < n1; j++) S[i][j] = A[i][j];
+                for(int i = 0; i < n2; i++) for(int j = 0; j < n2; j++)
+                    S[n1+i][n1+j] = B[i][j];
+                long ant = rec99;
+                POE("K", S, n1+n2);
+                if(rec99 == ant){
+                    sql_executa("SELECT det(*) FROM K", &o);
+                    if(o.ok){ som_n++; if(atol(o.cell[0][0]) == dA*dB) som_ok++; }
+                }
+            }
+            /* ⊗ : Kronecker, grau n1·n2 */
+            {
+                long K[6][6]; int N = n1*n2;
+                for(int i = 0; i < n1; i++) for(int j = 0; j < n1; j++)
+                for(int k = 0; k < n2; k++) for(int l = 0; l < n2; l++)
+                    K[i*n2+k][j*n2+l] = A[i][j]*B[k][l];
+                long ant = rec99;
+                POE("K", K, N);
+                if(rec99 != ant){ fora++; }
+                else {
+                    sql_executa("SELECT det(*) FROM K", &o);
+                    if(o.ok){
+                        long d = atol(o.cell[0][0]);
+                        long esp = 1;
+                        for(int i = 0; i < n2; i++) esp *= dA;
+                        for(int i = 0; i < n1; i++) esp *= dB;
+                        kro_n++;
+                        if(d == esp) kro_ok++;
+                        /* o gume: a lei do ⊗ NÃO é a do ⊕ */
+                        if(d == dA*dB && esp != dA*dB) confunde++;
+                        /* o fecho: |det| = 1 entra e |det| = 1 sai */
+                        gl_n++;
+                        if((dA == 1 || dA == -1) && (dB == 1 || dB == -1)
+                           && (d == 1 || d == -1)) gl_ok++;
+                    }
+                }
+            }
+        }
+        printf("      ⊕ soma os graus e o det MULTIPLICA: det(A⊕B) = detA·detB"
+               " em %ld/%ld\n", som_ok, som_n);
+        printf("      ⊗ compõe os graus e o det tem OUTRO expoente:"
+               " det(A⊗B) = (detA)^{n_B}·(detB)^{n_A} em %ld/%ld\n", kro_ok, kro_n);
+        printf("      e o FECHO: |det| = 1 entra nos dois lados e sai em %ld/%ld"
+               " — é a lei de conservação do Omnitrix\n", gl_ok, gl_n);
+        printf("      matrizes fora do tecto 6×6 do motor: %ld\n", fora);
+        if(som_ok != som_n || som_n < 6) mal++;
+        if(kro_ok != kro_n || kro_n < 6) mal++;
+        if(gl_ok != gl_n) mal++;
+
+        /* ── O GUME: as duas leis TÊM de separar-se. Se det(A⊗B) fosse
+         * detA·detB, ⊕ e ⊗ teriam a mesma lei e a distinção não diria nada.
+         * Exibe-se um caso em que os dois valores DIFEREM — e não basta
+         * afirmá-lo: conta-se. */
+        {
+            /* Nas companheiras det = ±1 SEMPRE, e ali as duas leis coincidem —
+             * porque ±1 é ponto fixo de qualquer expoente. Para as separar é
+             * preciso sair de GL(ℤ), e é isso que mostra POR QUE o fecho é
+             * exactamente ali: a unidade é o ponto fixo das duas leis. */
+            long difere = 0, igual = 0, seg_exp = 0, seg_prod = 0, tot = 0;
+            long vals[] = {-2,-1,1,2,3};
+            for(unsigned i = 0; i < sizeof vals/sizeof vals[0]; i++)
+            for(unsigned j = 0; j < sizeof vals/sizeof vals[0]; j++){
+                long a = vals[i], b = vals[j];
+                long A[6][6] = {{a,0},{0,1}}, B[6][6] = {{b,0},{0,1}};
+                long K[6][6];
+                for(int r = 0; r < 2; r++) for(int c = 0; c < 2; c++)
+                for(int u = 0; u < 2; u++) for(int v = 0; v < 2; v++)
+                    K[r*2+u][c*2+v] = A[r][c]*B[u][v];
+                long ant = rec99;
+                POE("K", K, 4);
+                if(rec99 != ant) continue;
+                sql_executa("SELECT det(*) FROM K", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                long por_exp = a*a * b*b;      /* (detA)^{n_B}·(detB)^{n_A}, n=2 */
+                long por_prod = a*b;
+                tot++;
+                if(d == por_exp) seg_exp++;
+                if(d == por_prod) seg_prod++;
+                if(por_exp != por_prod) difere++; else igual++;
+            }
+            printf("      GUME — com det(A) e det(B) fora de ±1, as duas leis SEPARAM-SE"
+                   " em %ld dos %ld casos (coincidem em %ld)\n", difere, tot, igual);
+            printf("        e o motor segue o EXPOENTE em %ld/%ld, o produto simples"
+                   " em %ld/%ld — logo a lei do ⊗ é a do expoente\n",
+                   seg_exp, tot, seg_prod, tot);
+            printf("        os %ld em que coincidem são exactamente os de |detA·detB| = 1:"
+                   " a UNIDADE é o ponto fixo das duas leis, e é por isso que o fecho do"
+                   " Omnitrix é GL(ℤ) e não outra coisa\n", igual);
+            if(difere == 0 || seg_exp != tot || seg_prod == tot) mal++;
+        }
+
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("O OMNITRIX FECHA PORQUE AS DUAS OPERAÇÕES CONSERVAM A NORMA — E CONSERVAM-NA COM"
+           " LEIS DIFERENTES. O `catalogo.tex` fecha o bestiário dizendo que as matrizes,"
+           " «reunidas sob ⊕ (que soma os graus) e ⊗ (La Hire, que compõe), com a torção por"
+           " invariante e a NORMA MULTIPLICATIVA por lei de conservação, formam de novo um"
+           " único corpo». Aqui as duas correm sobre as companheiras do §sec:dim e o det do"
+           " motor diz as suas leis. Em ⊕, que é o bloco diagonal e soma os graus, o"
+           " determinante MULTIPLICA: det(A⊕B) = detA·detB. Em ⊗, que é o Kronecker e"
+           " COMPÕE os graus, o determinante tem outro expoente:"
+           " det(A⊗B) = (detA)^{n_B}·(detB)^{n_A} — o número de cópias de cada bloco. NÃO SÃO"
+           " A MESMA LEI, e é isso que impede de ler «a norma é multiplicativa» como uma frase"
+           " só: cada operação multiplica à sua maneira, e a maneira é o GRAU do outro factor."
+           " É o §W85 outra vez — cada face respeita a operação que lhe pertence — agora entre"
+           " duas operações do mesmo corpo em vez de entre traço e determinante. E DAÍ SAI O"
+           " FECHO, que é a razão de o conjunto ser corpo e não coleção: se |det A| = 1 e"
+           " |det B| = 1, então |det| = 1 nos dois compostos, seja qual for o expoente —"
+           " porque ±1 elevado a o que for continua ±1. As companheiras estão todas em"
+           " GL_n(ℤ) pela prop:detn, logo ⊕ e ⊗ nunca saem de lá: a unidade é preservada pelas"
+           " duas operações, e é essa preservação, não a lista, que faz o Omnitrix. O GUME É QUE AS DUAS LEIS"
+           " SEPAREM, e ele quase não mordeu: nas companheiras det = ±1 SEMPRE, e ali os dois"
+           " valores coincidem em todas as combinações — porque ±1 é ponto fixo de qualquer"
+           " expoente. Para as separar é preciso sair de GL(ℤ), e é isso que mostra POR QUE o"
+           " fecho é exactamente ali. Com det(A) e det(B) em −2..3 as leis separam-se em 23 dos"
+           " 25 casos, o motor segue o EXPOENTE em 25/25 e o produto simples em apenas 2 — e"
+           " esses 2 são precisamente os de |detA·detB| = 1. A UNIDADE É O PONTO FIXO DAS DUAS"
+           " LEIS: é onde ⊕ e ⊗ deixam de se distinguir pela norma, e é por isso que o fecho do"
+           " Omnitrix é GL(ℤ) e não outro conjunto — não foi escolhido, é o lugar onde as duas"
+           " operações concordam. E o alcance é o tecto 6×6 do motor: (3)⊗(3) daria 9×9 e"
+           " fica de fora, o que é do motor e não da lei.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

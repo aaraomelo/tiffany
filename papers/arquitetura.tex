@@ -4699,6 +4699,58 @@ próprio texto, com as três identidades e o \code{\textbackslash medido}.}
         {\code{det}/\code{produto} pelo motor; a adjunta como conjugado}
         {\code{tests/pgwire.c} §W98}
 
+\subsection*{O Omnitrix: \texorpdfstring{$\oplus$}{+} e \texorpdfstring{$\otimes$}{x} conservam a norma --- com leis diferentes}
+
+\noindent O \code{catalogo} fecha o bestiário dizendo que as matrizes, «reunidas sob
+$\oplus$ (que soma os graus) e $\otimes$ (La Hire, que compõe), com a torção por
+invariante e a \textbf{norma multiplicativa} por lei de conservação, formam de novo
+um único corpo». As duas correm agora sobre as companheiras, e o \code{det} do motor
+diz as suas leis --- que \emph{não} são a mesma:
+\[
+\det(A\oplus B)=\det A\cdot\det B,
+\qquad
+\boxed{\;\det(A\otimes B)=(\det A)^{\,n_B}(\det B)^{\,n_A}\;}
+\]
+$27/27$ cada. Em $\otimes$ o expoente é o \textbf{grau do outro fator} --- o número
+de cópias de cada bloco. É o §W85 outra vez, «cada face respeita a operação que lhe
+pertence», agora entre duas operações do mesmo corpo em vez de entre traço e
+determinante.
+
+\medskip\noindent\textbf{E o fecho tem um lugar, não é uma escolha.} Se
+$\lvert\det A\rvert=\lvert\det B\rvert=1$, então $\lvert\det\rvert=1$ nos dois
+compostos \emph{seja qual for o expoente} --- porque $\pm1$ elevado ao que for
+continua $\pm1$. As companheiras estão todas em $\mathrm{GL}_n(\Z)$, logo nem
+$\oplus$ nem $\otimes$ saem de lá: $27/27$.
+
+\medskip\noindent\textbf{O gume quase não mordeu, e a razão é o resultado.} Nas
+companheiras $\det=\pm1$ \emph{sempre}, e ali os dois valores coincidem em todas as
+combinações. Para separar as leis é preciso sair de $\mathrm{GL}(\Z)$:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+as duas leis separam-se (com $\det$ em $-2..3$) & $23/25$\\
+o motor segue o \textbf{expoente} & $25/25$\\
+o motor segue o produto simples & $2/25$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent e esses $2$ são precisamente os de $\lvert\det A\cdot\det B\rvert=1$.
+\[
+\boxed{\;\text{a \textbf{unidade} é o ponto fixo das duas leis}\;}
+\]
+É onde $\oplus$ e $\otimes$ deixam de se distinguir pela norma --- e é por isso que o
+fecho do Omnitrix é $\mathrm{GL}_n(\Z)$ e não outro conjunto. \emph{Não foi
+escolhido: é o lugar onde as duas operações concordam.}
+
+\medido{\code{tests/pgwire.c} §W99 --- as duas leis em $27/27$ cada, o fecho nos
+mesmos $27$, e o controlo fora de $\mathrm{GL}$ com $23/25$ a separar. O
+\code{catalogo} passa a trazer o parágrafo e o \code{\textbackslash medido} no
+próprio fecho.}
+
+\colunas{\code{catalogo} «O fecho --- por que o conjunto é um corpo», \code{prop:detn}; §W85}
+        {\code{det} pelo motor sobre $\oplus$ e $\otimes$; o controlo fora de $\mathrm{GL}$}
+        {\code{tests/pgwire.c} §W99}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
