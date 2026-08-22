@@ -16236,6 +16236,146 @@ int main(void){
            " só — e é a Lei 0 do §W109 que lhe dá lugar, mandando-o para o ∞.", mal == 0);
     }
 
+    /* ═══ §W113: ℤ[φ] É DENSO NA RECTA E RETICULADO EM ℝ² — SEM UM FLOAT ═══ */
+    {
+        long mal = 0;
+        printf("\n§W113 «a álgebra é o discreto» é FALSO na recta — e a distância de Minkowski é √2 exacto.\n\n");
+
+        /* sinal de u + v√5, exacto em inteiros */
+        #define SIG5(u,v) ( (v)==0 ? ((u)>0?1:((u)<0?-1:0)) \
+                          : ((v)>0 ? ((u)>=0 ? 1 : (5*(v)*(v) > (u)*(u) ? 1 : -1)) \
+                                   : ((u)<=0 ? -1 : ((u)*(u) > 5*(v)*(v) ? 1 : -1))) )
+        /* a+bφ > c+dφ  ⟺  sinal de (2Δa+Δb) + Δb√5 > 0 */
+        #define MAIOR(a,b,c,d) (SIG5(2*((a)-(c)) + ((b)-(d)), (b)-(d)) > 0)
+
+        /* ── (1) A NORMA É INTEIRA E NÃO NULA, e é ela que sustenta tudo:
+         * N(a+bφ) = a² + ab − b², e N = 0 com (a,b) ≠ 0 exigiria φ racional. */
+        {
+            long nulos = 0, tot = 0;
+            for(long a = -8; a <= 8; a++) for(long b = -8; b <= 8; b++){
+                if(!a && !b) continue;
+                tot++;
+                if(a*a + a*b - b*b == 0) nulos++;
+            }
+            printf("      N(a+bφ) = a²+ab−b² anula-se em %ld dos %ld elementos não"
+                   " nulos — e é isso que faz de ℤ[φ] um ANEL sem divisores de zero\n",
+                   nulos, tot);
+            if(nulos != 0) mal++;
+        }
+
+        /* ── (2) MAS NA RECTA ℤ[φ] É DENSO, NÃO DISCRETO — que é o que a
+         * obs:densoDiscreto desmente. O menor |a+bφ| não nulo DESCE quando o
+         * tecto dos coeficientes sobe, e mede-se por ENQUADRAMENTO inteiro:
+         * |a+bφ| < 1/n  ⟺  n·(a+bφ) está entre −1 e 1. */
+        {
+            /* o que o catálogo mede é o menor INTERVALO ENTRE VIZINHOS, e não
+             * o menor elemento: a diferença de dois elementos de tecto K tem
+             * coeficientes até 2K, e é aí que o 0,090 aparece. A primeira
+             * escrita mediu o menor elemento e procurou o MENOR n com n·x < 1,
+             * quando o que enquadra é o MAIOR — dois erros no mesmo sítio. */
+            printf("      na RECTA, o menor INTERVALO entre vizinhos aperta com o"
+                   " tecto (a diferença tem coeficientes até 2K):\n");
+            long ant = 0, prim = 0;
+            int desce = 1;
+            for(long K = 2; K <= 8; K += 2){
+                long ba = 0, bb = 0; int tem = 0;
+                for(long a = -2*K; a <= 2*K; a++) for(long b = -2*K; b <= 2*K; b++){
+                    if(!a && !b) continue;
+                    long sa = MAIOR(a,b,0,0) ? a : -a, sb = MAIOR(a,b,0,0) ? b : -b;
+                    if(!tem){ ba = sa; bb = sb; tem = 1; continue; }
+                    if(MAIOR(ba,bb,sa,sb)){ ba = sa; bb = sb; }
+                }
+                /* o MAIOR n com n·x < 1: então x < 1/n, e n grande é x pequeno */
+                long n = 1;
+                while(n < 100000 && MAIOR(1,0,n*ba,n*bb)) n++;
+                n--;
+                printf("        coeficientes ≤ %ld: o menor intervalo é %ld%+ldφ,"
+                       " e é < 1/%ld\n", K, ba, bb, n);
+                /* a sucessão é NÃO CRESCENTE em x, não estritamente: dois
+                 * tectos seguidos podem dar o mesmo intervalo (o 4 e o 6 dão
+                 * ambos −8+5φ). O que se exige é que nunca recue e que no fim
+                 * seja estritamente melhor que no início. */
+                if(ant && n < ant) desce = 0;
+                if(!prim) prim = n;
+                ant = n;
+            }
+            printf("        → o limite 1/n nunca recua e APERTA do primeiro tecto ao"
+                   " último (1/%ld → 1/%ld): %s — logo ℤ[φ] é DENSO em ℝ, e «a"
+                   " álgebra é o lado discreto» é falso\n", prim, ant,
+                   (desce && ant > prim) ? "sim" : "NÃO");
+            if(!desce || ant <= prim) mal++;
+        }
+
+        /* ── (3) E O QUE É DISCRETO É A IMAGEM POR MINKOWSKI EM ℝ². O par
+         * (a+bφ, a+bφ') tem distância ao quadrado
+         *     d² = 2Δa² + 2ΔaΔb + 3Δb²,
+         * porque φ+φ' = 1 e φ²+φ'² = 3 — um INTEIRO. O mínimo mede-se sem
+         * uma raiz, e o catálogo diz 1,414: é √2, logo d² = 2. */
+        {
+            long minq = 1 << 30, quantos = 0, pontos = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++) pontos++;
+            for(long da = -8; da <= 8; da++) for(long db = -8; db <= 8; db++){
+                if(!da && !db) continue;
+                long d2 = 2*da*da + 2*da*db + 3*db*db;
+                if(d2 < minq){ minq = d2; quantos = 1; }
+                else if(d2 == minq) quantos++;
+            }
+            printf("      em ℝ² por MINKOWSKI: d² = 2Δa² + 2ΔaΔb + 3Δb² é INTEIRO,"
+                   " e o mínimo sobre os %ld pontos é d² = %ld, atingido %ld vezes\n",
+                   pontos, minq, quantos);
+            printf("        logo d = √%ld = 1,414… — o número do catálogo, obtido"
+                   " sem uma raiz: a raiz está no ENUNCIADO, o quadrado é que se mede\n",
+                   minq);
+            if(minq != 2) mal++;
+            /* e o mínimo NÃO desce com o tecto — é o contrário da recta */
+            long min16 = 1 << 30;
+            for(long da = -16; da <= 16; da++) for(long db = -16; db <= 16; db++){
+                if(!da && !db) continue;
+                long d2 = 2*da*da + 2*da*db + 3*db*db;
+                if(d2 < min16) min16 = d2;
+            }
+            printf("        e com o tecto a dobrar o mínimo NÃO muda: %ld contra %ld"
+                   " — na recta aperta, no plano é RETICULADO\n", min16, minq);
+            if(min16 != minq) mal++;
+        }
+
+        /* ── (4) O GUME: o MESMO conjunto, duas imagens. Se o mínimo no plano
+         * também descesse, «reticulado» não diria nada; se o da recta não
+         * descesse, «denso» seria falso. As duas contas correm sobre os
+         * mesmos (a,b), e é isso que torna a comparação legítima. */
+        {
+            printf("      GUME — o mesmo ℤ[φ]: na RECTA o menor intervalo aperta"
+                   " sem fim; no PLANO por Minkowski ele é constante e vale √2.\n");
+            printf("        «álgebra e topologia partilham, em ℝ, o mesmo conjunto"
+                   " denso» — o que separa não é o conjunto, é o MERGULHO\n");
+        }
+
+        #undef MAIOR
+        #undef SIG5
+        printf("\n");
+        ok("«A ÁLGEBRA É O LADO DISCRETO» É FALSO NA RECTA, E O CATÁLOGO JÁ O DESMENTIA — AQUI"
+           " MEDE-SE SEM UM FLOAT. A obs:densoDiscreto diz que é tentador ler a álgebra como o"
+           " discreto e a topologia como o contínuo, e que «na recta isso é falso: ℤ[φ] é DENSO"
+           " em ℝ, não discreto». Mede-se em inteiros, com o sinal de u + v√5 decidido por"
+           " comparação de quadrados e nunca por avaliação: o menor INTERVALO ENTRE VIZINHOS aperta a"
+           " cada subida do tecto, e o enquadramento 1/n que o limita cresce com ele — com"
+           " coeficientes até 6 o intervalo é o −8+5φ, abaixo de 1/11, que é o 0,090 do texto."
+           " O que se mede é o INTERVALO e não o menor elemento: a diferença de dois elementos"
+           " de tecto K tem coeficientes até 2K, e a primeira escrita confundiu os dois — e"
+           " ainda procurou o MENOR n com n·x < 1 quando o que enquadra é o MAIOR. A base disto é que N(a+bφ) = a²+ab−b² NUNCA se anula fora do zero — 0 em"
+           " 288 elementos —, que é o que faz de ℤ[φ] um anel sem divisores de zero e ao mesmo"
+           " tempo permite que os seus elementos sejam arbitrariamente pequenos: a norma é"
+           " inteira, mas reparte-se entre o elemento e o seu conjugado. E O QUE É DISCRETO É A"
+           " IMAGEM POR MINKOWSKI, com o número do catálogo obtido sem uma raiz: o par"
+           " (a+bφ, a+bφ') tem d² = 2Δa² + 2ΔaΔb + 3Δb², um INTEIRO, porque φ+φ' = 1 e"
+           " φ²+φ'² = 3. O mínimo é d² = 2, logo d = √2 = 1,414… — a raiz está no enunciado, e"
+           " o que se mede é o quadrado. E O GUME É QUE O MÍNIMO NÃO DESÇA: dobrando o tecto"
+           " dos coeficientes ele fica em 2, enquanto na recta o intervalo aperta sem fim. As"
+           " duas contas correm sobre os MESMOS (a,b), e é isso que torna a comparação"
+           " legítima: «álgebra e topologia partilham, em ℝ, o mesmo conjunto denso» — o que"
+           " separa os dois lados não é o conjunto, é o MERGULHO.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

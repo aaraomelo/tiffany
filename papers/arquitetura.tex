@@ -5409,6 +5409,59 @@ andar contados e localizados; a separação linear/logarítmico; e o zero.}
         {decomposição $q^{k}r$ em $\N$; contagem de saltos de andar}
         {\code{tests/pgwire.c} §W112}
 
+\subsection*{\texorpdfstring{$\Z[\varphi]$}{Z[phi]} é denso na recta e reticulado no plano --- sem um \texttt{float}}
+
+\noindent A \code{obs:densoDiscreto} desmente a leitura fácil: «é tentador dizer que a
+álgebra é o lado discreto e a topologia o contínuo. \textbf{Na recta isso é falso}:
+$\Z[\varphi]$ é \emph{denso} em $\R$.» Mede-se em inteiros, com o sinal de
+$u+v\sqrt5$ decidido por \textbf{comparação de quadrados} e nunca por avaliação.
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+coeficientes $\le$ & menor intervalo & limite\\
+\midrule
+$2$ & $-3+2\varphi$ & $<1/4$\\
+$4$ e $6$ & $-8+5\varphi$ & $<1/11$ \quad{\small(o $0{,}090$ do texto)}\\
+$8$ & $13-8\varphi$ & $<1/17$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent A base é $N(a+b\varphi)=a^{2}+ab-b^{2}$ \textbf{nunca} se anular fora
+do zero --- $0$ em $288$ elementos. A norma é inteira, mas \emph{reparte-se} entre o
+elemento e o seu conjugado: é isso que permite ao elemento ser arbitrariamente pequeno
+\emph{sem} o anel ganhar divisores de zero.
+
+\medskip\noindent\textbf{E no plano o número do catálogo obtém-se sem uma raiz.} Como
+$\varphi+\varphi'=1$ e $\varphi^{2}+\varphi'^{2}=3$, a distância ao quadrado no
+mergulho de Minkowski é
+\[
+d^{2}=2\Delta a^{2}+2\Delta a\Delta b+3\Delta b^{2},
+\]
+um \textbf{inteiro}, cujo mínimo é $\mathbf{2}$ --- logo $d=\sqrt2=1{,}414\ldots$
+\emph{A raiz está no enunciado; o que se mede é o quadrado.}
+
+\medskip\noindent\textbf{O gume é o mínimo \emph{não} descer}: dobrando o tecto dos
+coeficientes ele fica em $2$, enquanto na recta o intervalo aperta sem fim. As duas
+contas correm sobre os \emph{mesmos} $(a,b)$, e é isso que torna a comparação legítima.
+\[
+\boxed{\;\text{o que separa os dois lados não é o conjunto --- é o \textbf{mergulho}}\;}
+\]
+
+\medskip\noindent\textbf{Dois erros meus no caminho, no mesmo sítio.} Medi o menor
+\emph{elemento} quando o texto fala do menor \emph{intervalo entre vizinhos} --- e a
+diferença de dois elementos de tecto $K$ tem coeficientes até $2K$, que é onde o
+$0{,}090$ aparece. E procurei o \emph{menor} $n$ com $n\,x<1$ quando o que enquadra é o
+\emph{maior}. Corrigidos os dois, o $0{,}090$ do catálogo sai exato.
+
+\medido{\code{tests/pgwire.c} §W113 --- a norma nos $288$; os intervalos com
+enquadramento inteiro; e o mínimo de Minkowski com o tecto dobrado.}
+
+\colunas{\code{catalogo} «O eixo: Pontryagin» (\code{obs:densoDiscreto})}
+        {sinal de $u+v\sqrt5$ por quadrados; $d^{2}$ inteiro no mergulho}
+        {\code{tests/pgwire.c} §W113}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

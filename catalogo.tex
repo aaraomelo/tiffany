@@ -23105,6 +23105,8 @@ conjunto denso.
 
 O que é discreto é a \textbf{imagem por Minkowski} em $\R^n$: os $81$ pontos de $\Z[\varphi]$ com
 coeficientes até $4$ têm, em $\R^2$, distância mínima $1{,}414$ entre pares --- aí sim, reticulado.
+
+\medido{\code{tests/pgwire.c} §W113 --- e \textbf{sem um float}, com o sinal de $u+v\sqrt5$ decidido por comparação de quadrados. Na recta: o menor \emph{intervalo entre vizinhos} aperta com o tecto --- $-3+2\varphi<1/4$, depois $-8+5\varphi<1/11$ (que é o $0{,}090$ deste parágrafo, com coeficientes até $6$), depois $13-8\varphi<1/17$ ---, e nunca recua. A base é $N(a+b\varphi)=a^2+ab-b^2$ nunca se anular fora do zero, medido em $288$ elementos: a norma é inteira, mas \emph{reparte-se} entre o elemento e o conjugado, e é isso que permite ao elemento ser arbitrariamente pequeno sem o anel ganhar divisores de zero. E no plano o número obtém-se \textbf{sem uma raiz}: como $\varphi+\varphi'=1$ e $\varphi^2+\varphi'^2=3$, a distância ao quadrado é $d^2=2\Delta a^2+2\Delta a\Delta b+3\Delta b^2$, um \emph{inteiro}, cujo mínimo é $\mathbf{2}$ --- logo $d=\sqrt2=1{,}414\ldots$ A raiz está no enunciado; o que se mede é o quadrado. O gume é o mínimo \emph{não} descer: dobrando o tecto ele fica em $2$, enquanto na recta o intervalo aperta sem fim. As duas contas correm sobre os mesmos $(a,b)$ --- o que separa os dois lados não é o conjunto, é o \textbf{mergulho}.}
 E o par reticulado\,/\,dual com $\operatorname{covol}(L)\operatorname{covol}(L^*) = 1$ (verificado:
 $2{,}236068 \times 0{,}447214$) é o caso concreto de compacto $\leftrightarrow$ discreto: o toro
 $\R^2/L$ é compacto e $L^*$ é discreto.
