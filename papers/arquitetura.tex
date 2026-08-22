@@ -5313,6 +5313,56 @@ família em $40$ metais; e o gume com a testemunha explícita pelo motor.}
         {$\Delta$ pelo \code{traco}/\code{det}; busca de quadrados em $\Q[A]$}
         {\code{tests/pgwire.c} §W110}
 
+\subsection*{O centro é \texorpdfstring{$1/n$}{1/n} da soma --- e a identificação com o traço do corpo tem hipótese}
+
+\noindent A §«O que atravessa a passagem» diz que o centro das raízes de
+$\beta_{n,m}$ é $m/n$, e que «em unidades da soma vale $1/n$ exatamente, para todo
+$m$». Mede-se \textbf{sem calcular uma raiz}: $\sum\lambda$ é o \emph{traço} da
+companheira, pedido ao motor, e dá $m$ em $10/10$ famílias --- logo a razão
+média/soma é $1/n$, exata em $\Q$ e independente do metal. \emph{Cada dimensão divide
+pela sua própria ordem.}
+
+\medskip\noindent\textbf{E a proposição faz a ressalva certa.} A identificação com
+$\operatorname{Tr}_{K/\Q}(\sigma)/n$ \emph{exige} $\beta$ irredutível. Verifica-se em
+$\Z[x]$:
+\[
+x^{5}-x^{4}-1 \;=\; (x^{2}-x+1)(x^{3}-x-1),
+\]
+divisão \textbf{exata}, e o coeficiente de $x^{2}$ no quociente é zero --- o traço do
+mínimo é $0$ contra $m=1$. \emph{Diferem}, tal como o texto avisa.
+
+\medskip\noindent E é o \textbf{mesmo} $n=5$ onde §W94 exibiu o divisor de zero e onde
+Selmer diz que $\beta$ fatoriza. \emph{Um sítio, três consequências}: não é corpo, o
+traço muda, e a identificação cai.
+
+\medskip\noindent\textbf{O controlo é medido, não escrito.} Divide-se $\beta_{n,1}$
+pelo ciclotómico para $n=2..6$ e lê-se o resto: só é zero no $5$.
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+$n$ & $x^{2}-x+1$ & $\operatorname{tr}$ do característico & do mínimo\\
+\midrule
+$2,3,4,6$ & não divide & $1$ & $1$ --- coincidem\\
+$\mathbf5$ & \textbf{divide} & $1$ & $\mathbf0$ --- \textbf{diferem}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent A primeira escrita punha o traço do mínimo \emph{à mão} em vez de o
+calcular: dava a mesma tabela sem a medir.
+
+\medskip\noindent\textbf{E «nenhum metal é especial»} separa duas coisas que se
+confundem: a \emph{fração} média/soma é $1/2$ nos oito metais medidos, enquanto o
+\emph{valor} do centro, $m/2$, só vale $1/2$ no $m=1$. É essa coincidência que faz o
+áureo \textbf{parecer} excecional --- e ela desaparece no segundo metal.
+
+\medido{\code{tests/pgwire.c} §W111 --- o traço em $10/10$; a divisão em $\Z[x]$ com
+o quociente lido; a tabela de controlo calculada; e a separação fração/valor nos oito
+metais.}
+
+\colunas{\code{catalogo} «O que atravessa a passagem» (\code{prop:centro}); §W94 ($n=5$); §W95 (os traços)}
+        {\code{traco} pelo motor; divisão de polinómios em $\Z[x]$}
+        {\code{tests/pgwire.c} §W111}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

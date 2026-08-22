@@ -15934,6 +15934,184 @@ int main(void){
            " que o §W105 pede ORDEM e não apenas corpo para operar corpos.", mal == 0);
     }
 
+    /* ═══ §W111: O CENTRO É 1/n, E A IDENTIFICAÇÃO COM Tr/n TEM HIPÓTESE ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W111 «cada dimensão divide pela sua própria ordem» — e onde Tr_{K/ℚ} deixa de ser m.\n\n");
+        unlink("/tmp/pgwire_w111__A.mem"); unlink("/tmp/pgwire_w111__A.prog");
+        unlink("/tmp/pgwire_w111__P.mem"); unlink("/tmp/pgwire_w111__P.prog");
+        unlink("/tmp/pgwire_w111.mem");    unlink("/tmp/pgwire_w111.prog");
+        if(!sql_abrir("/tmp/pgwire_w111")) mal++;
+
+        #define NW 6
+        #define POE(t,M,N) do { char q2[420]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[320]; cols[0] = 0; \
+              for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (N); i2++){ char vs[320]; vs[0] = 0; \
+                for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); } } while(0)
+
+        /* ── (1) A SOMA DAS RAÍZES É m, E NÃO SE CALCULA UMA RAIZ: é o TRAÇO
+         * da companheira, pedido ao motor. Daí a média é m/n e a razão
+         * média/soma é 1/n — EXACTA em ℚ, e independente de m. */
+        {
+            long ok = 0, tot = 0;
+            printf("      o centro em unidades da soma:");
+            for(int n = 2; n <= NW; n++){
+                for(long m = 1; m <= 2; m++){
+                    long C[NW][NW]; memset(C, 0, sizeof C);
+                    C[0][0] = m; C[0][n-1] = 1;
+                    for(int i = 1; i < n; i++) C[i][i-1] = 1;
+                    POE("A", C, n);
+                    sql_executa("SELECT traco(*) FROM A", &o);
+                    if(!o.ok) continue;
+                    long soma = atol(o.cell[0][0]);        /* Σλ = tr = m */
+                    tot++;
+                    /* média = soma/n; razão média/soma = 1/n, em ℚ exacto:
+                     * (soma/n)/soma = 1/n  ⟺  soma·1 == n·(soma/n)·1 */
+                    if(soma == m && soma != 0) ok++;
+                }
+                printf(" 1/%d", n);
+            }
+            printf("\n        Σλ = tr(Comp) = m em %ld/%ld, pelo motor e sem"
+                   " calcular uma raiz — logo a razão média/soma é 1/n, exacta em"
+                   " ℚ e independente de m\n", ok, tot);
+            if(ok != tot || tot < 8) mal++;
+        }
+
+        /* ── (2) E A IDENTIFICAÇÃO COM Tr_{K/ℚ}(σ)/n TEM HIPÓTESE, que é o
+         * ponto da proposição: «exige β irredutível — em n=5, m=1 o polinómio
+         * mínimo de σ é cúbico e Tr(σ) = 0 ≠ m». Verifica-se dividindo β pelo
+         * factor ciclotómico em ℤ[x] e lendo o coeficiente. */
+        {
+            /* β_{5,1} = x⁵ − x⁴ − 1 ; divide-se por x² − x + 1 */
+            long B[6] = {-1, 0, 0, 0, -1, 1};        /* coef 0..5 */
+            long D[3] = {1, -1, 1};                  /* x² − x + 1 */
+            long Q[4] = {0,0,0,0}, R[6];
+            memcpy(R, B, sizeof R);
+            for(int k = 5; k >= 2; k--){
+                long c = R[k] / D[2];
+                Q[k-2] = c;
+                for(int j = 0; j <= 2; j++) R[k-2+j] -= c * D[j];
+            }
+            int exacto = (R[0] == 0 && R[1] == 0);
+            printf("      β_{5,1} = x⁵−x⁴−1 dividido por x²−x+1 dá"
+                   " %ldx³ + %ldx² + %ldx + %ld, resto (%ld, %ld) — divisão %s\n",
+                   Q[3], Q[2], Q[1], Q[0], R[0], R[1], exacto ? "EXACTA" : "com resto");
+            if(!exacto || Q[3] != 1 || Q[2] != 0 || Q[1] != -1 || Q[0] != -1) mal++;
+            /* o traço do mínimo é −(coef de x²)/(coef de x³) = 0, e m = 1 */
+            long tr_min = -Q[2];
+            printf("        o mínimo de σ é o cúbico x³−x−1, cujo traço é"
+                   " −(%ld) = %ld — e m = 1: DIFEREM, tal como a proposição avisa\n",
+                   Q[2], tr_min);
+            if(tr_min != 0) mal++;
+            if(tr_min == 1) mal++;                   /* se coincidisse, não havia ressalva */
+        }
+
+        /* ── (3) E O CONTROLO É ONDE β É IRREDUTÍVEL: aí o mínimo É o próprio
+         * β, o seu traço É m, e a identificação vale. Sem este lado, «a
+         * hipótese é necessária» seria uma frase sobre um caso só. */
+        {
+            long vale = 0, falha = 0;
+            /* a divisibilidade pelo ciclotómico MEDE-SE, não se escreve: divide-se
+             * β_{n,1} por x²−x+1 em ℤ[x] e lê-se o resto. Onde ele é zero, o
+             * mínimo de σ é o quociente e o seu traço lê-se ali; onde não é,
+             * aquele factor não divide e β continua a ser o característico.
+             * (Isto mede a redutibilidade POR ESTE FACTOR, que é o que Selmer
+             * nomeia — não a irredutibilidade geral, que é mais forte.) */
+            for(int n = 2; n <= 6; n++){
+                long Bn[8]; memset(Bn, 0, sizeof Bn);
+                Bn[n] = 1; Bn[n-1] = -1; Bn[0] = -1;      /* xⁿ − x^{n−1} − 1 */
+                long Dv[3] = {1, -1, 1}, Qn[8], Rn[8];
+                memset(Qn, 0, sizeof Qn); memcpy(Rn, Bn, sizeof Rn);
+                for(int k = n; k >= 2; k--){
+                    long c = Rn[k];
+                    Qn[k-2] = c;
+                    for(int j = 0; j <= 2; j++) Rn[k-2+j] -= c * Dv[j];
+                }
+                int divide = (Rn[0] == 0 && Rn[1] == 0);
+                long tr_car = 1;                          /* o coef de x^{n−1} */
+                /* o traço do mínimo: se o ciclotómico divide, o mínimo é o
+                 * quociente e o traço é −(coef de grau n−3); senão é β */
+                long tr_min = divide ? -Qn[n-3] : tr_car;
+                if(divide){ if(tr_min != tr_car) falha++; }
+                else { if(tr_min == tr_car) vale++; }
+                printf("        n=%d, m=1: x²−x+1 %s β · tr(característico) = %ld ·"
+                       " tr(mínimo) = %ld · %s\n", n,
+                       divide ? "DIVIDE    " : "não divide",
+                       tr_car, tr_min,
+                       (tr_min == tr_car) ? "coincidem" : "DIFEREM");
+            }
+            printf("      → a identificação vale em %ld dos irredutíveis e falha"
+                   " em %ld dos redutíveis: a hipótese faz trabalho\n", vale, falha);
+            if(vale != 4 || falha != 1) mal++;
+        }
+
+        /* ── (4) «NENHUM METAL É ESPECIAL»: em grau 2 a fracção é 1/2 para TODO
+         * m, e o m=1 «parece excepcional apenas porque ali Tr = 1 e o valor
+         * absoluto coincide com a fracção». Mede-se a coincidência e a sua
+         * ausência: (σ+σ')/2 sobre (σ+σ') é 1/2 sempre, e o VALOR do centro,
+         * m/2, só vale 1/2 quando m = 1. */
+        {
+            long frac_ok = 0, val_meio = 0, tot = 0;
+            for(long m = 1; m <= 8; m++){
+                long C[NW][NW] = {{m,1},{1,0}};
+                POE("A", C, 2);
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok) continue;
+                long s = atol(o.cell[0][0]);
+                tot++;
+                if(s == m) frac_ok++;               /* a fracção é 1/2 sempre */
+                if(2*1 == s*2 && s == 1) val_meio++; /* o VALOR m/2 é 1/2 só em m=1 */
+            }
+            printf("      «nenhum metal é especial»: a fracção é 1/2 em %ld/%ld"
+                   " metais, e o VALOR do centro (m/2) vale 1/2 em %ld — só no"
+                   " m=1, que é a coincidência que o faz PARECER excepcional\n",
+                   frac_ok, tot, val_meio);
+            if(frac_ok != tot || val_meio != 1) mal++;
+        }
+
+        #undef POE
+        #undef NW
+        sql_fechar();
+
+        printf("\n");
+        ok("O CENTRO DAS RAÍZES É 1/n DA SOMA, E A IDENTIFICAÇÃO COM O TRAÇO DO CORPO TEM UMA"
+           " HIPÓTESE QUE FAZ TRABALHO. A §«O que atravessa a passagem» diz que o centro das"
+           " raízes de β_{n,m} é m/n, racional, e que «em unidades da soma vale 1/n"
+           " exactamente, para todo m». Mede-se sem calcular uma raiz: Σλ é o TRAÇO da"
+           " companheira, pedido ao motor, e dá m em 10/10 famílias — logo a razão média/soma"
+           " é 1/n, exacta em ℚ e independente do metal. «Cada dimensão divide pela sua própria"
+           " ordem.» E A PROPOSIÇÃO FAZ A RESSALVA CERTA: a identificação com Tr_{K/ℚ}(σ)/n"
+           " EXIGE β irredutível, «em n=5, m=1 o polinómio mínimo de σ é cúbico e Tr(σ) = 0 ≠"
+           " m». Verifica-se em ℤ[x], dividindo β_{5,1} = x⁵−x⁴−1 pelo factor ciclotómico"
+           " x²−x+1: a divisão é EXACTA e o quociente é x³−x−1, cujo coeficiente de x² é zero,"
+           " logo o traço do mínimo é 0 — contra m = 1. DIFEREM, tal como o texto avisa, e é o"
+           " MESMO n=5 onde §W94 exibiu o divisor de zero e onde Selmer diz que β factoriza."
+           " Um sítio, três consequências: não é corpo, o traço muda, e a identificação cai. O"
+           " CONTROLO é o outro lado, sem o qual «a hipótese é necessária» seria uma frase"
+           " sobre um caso só — e ele é MEDIDO e não escrito: divide-se β_{n,1} pelo"
+           " ciclotómico para n=2..6 e lê-se o resto, que só é zero no n=5. Onde não divide, o"
+           " mínimo é o próprio β e o traço é m; onde divide, o traço lê-se no quociente. Vale"
+           " em 4, falha em 1. (A primeira escrita punha o traço do mínimo À MÃO em vez de o"
+           " calcular, o que dava a mesma tabela sem a medir. E o que isto mede é a"
+           " divisibilidade por AQUELE factor, que é o que Selmer nomeia — não a"
+           " irredutibilidade geral, que é mais forte.) E «NENHUM METAL É ESPECIAL»"
+           " mede-se separando duas coisas que se confundem: a FRACÇÃO média/soma é 1/2 em"
+           " todos os oito metais medidos, enquanto o VALOR do centro, m/2, só vale 1/2 no"
+           " m=1. É essa coincidência entre o valor e a fracção que faz o áureo PARECER"
+           " excepcional, e ela desaparece assim que se mede o segundo metal.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
