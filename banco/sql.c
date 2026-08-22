@@ -3481,6 +3481,113 @@ static int j_carrega_direita(long *ncols_dir){
     return postos;
 }
 
+/* ── A FAIXA: descer e percorrer o que fica do lado certo ────────────────────
+ *
+ * A árvore guarda o valor em oito símbolos, do mais significativo para o menos,
+ * com o deslocamento que põe os negativos antes dos positivos — logo a ordem
+ * dos caminhos É a ordem dos números. Uma desigualdade é por isso um PREFIXO
+ * comum seguido de todos os ramos de um lado, e nada mais: desce-se pelo
+ * caminho de `v`, e em cada nível levam-se inteiros os ramos que já ficaram
+ * do lado certo. É o corte outra vez, agora com o percurso do ORDER BY a
+ * seguir-se-lhe: cortar dá o dígito, percorrer dá o resto.
+ *
+ * O que isto NÃO faz é varrer: os nós visitados são a profundidade vezes a
+ * largura, mais os que têm resultado. O tamanho da tabela não entra. */
+static void faixa_tudo(unsigned no, int d, int *saida, int *n, int cap);
+
+/* recolhe os índices de um nó que já está no nível do índice (dois símbolos) */
+static void faixa_folhas(unsigned no, int *saida, int *n, int cap){
+    for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
+        unsigned n1 = par_le(ord_raiz + no*ORD_LARG + a1);
+        sql_ultimos_nos++;
+        if(!n1) continue;
+        for(unsigned a2 = 0; a2 < ORD_LARG; a2++){
+            unsigned n2 = par_le(ord_raiz + n1*ORD_LARG + a2);
+            sql_ultimos_nos++;
+            if(!n2) continue;
+            if(*n < cap) saida[(*n)++] = (int)((a1 << 4) | a2);
+        }
+    }
+}
+
+/* percorre uma subárvore inteira, do nível `d` até às folhas */
+static void faixa_tudo(unsigned no, int d, int *saida, int *n, int cap){
+    if(d < 2){ faixa_folhas(no, saida, n, cap); return; }
+    for(unsigned sim = 0; sim < ORD_LARG; sim++){
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + sim);
+        sql_ultimos_nos++;
+        if(f) faixa_tudo(f, d - 1, saida, n, cap);
+    }
+}
+
+/* os índices das linhas cujo valor está em [vmin, vmax] */
+static int j_faixa(long vmin, long vmax, int *saida, int cap){
+    int n = 0;
+    sql_ultimos_nos = 0;
+    if(vmin > vmax) return 0;
+    unsigned long lo = ((unsigned long)(vmin + 2147483648L)) & 0xFFFFFFFFUL;
+    unsigned long hi = ((unsigned long)(vmax + 2147483648L)) & 0xFFFFFFFFUL;
+
+    /* desce-se pelos dois extremos ao mesmo tempo enquanto o símbolo é igual:
+     * esse é o prefixo comum, e dentro dele ainda não se decide nada. */
+    unsigned no = 0;
+    int d = ORD_NIV - 1;                       /* os níveis do valor: 9..2 */
+    for(; d >= 2; d--){
+        unsigned sl = (unsigned)((lo >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
+        unsigned sh = (unsigned)((hi >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
+        if(sl != sh) break;
+        no = par_le(ord_raiz + no*ORD_LARG + sl);
+        sql_ultimos_nos++;
+        if(!no) return 0;                      /* nem sequer o prefixo existe */
+    }
+    if(d < 2){ faixa_folhas(no, saida, &n, cap); return n; }
+
+    /* aqui os caminhos separam-se. O ramo do símbolo baixo leva tudo o que for
+     * >= vmin dentro dele; o do símbolo alto leva tudo o que for <= vmax; e os
+     * ramos DO MEIO levam-se inteiros, sem mais perguntas. */
+    unsigned sl = (unsigned)((lo >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
+    unsigned sh = (unsigned)((hi >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
+
+    for(unsigned m = sl + 1; m < sh; m++){
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + m);
+        sql_ultimos_nos++;
+        if(f) faixa_tudo(f, d - 1, saida, &n, cap);
+    }
+
+    /* o lado de baixo: segue o caminho de vmin e leva os ramos ACIMA dele */
+    { unsigned b = par_le(ord_raiz + no*ORD_LARG + sl);
+      sql_ultimos_nos++;
+      for(int e = d - 1; b && e >= 2; e--){
+          unsigned s = (unsigned)((lo >> (ORD_BITS*(e-2))) & (ORD_LARG - 1u));
+          for(unsigned m = s + 1; m < ORD_LARG; m++){
+              unsigned f = par_le(ord_raiz + b*ORD_LARG + m);
+              sql_ultimos_nos++;
+              if(f) faixa_tudo(f, e - 1, saida, &n, cap);
+          }
+          b = par_le(ord_raiz + b*ORD_LARG + s);
+          sql_ultimos_nos++;
+      }
+      if(b) faixa_folhas(b, saida, &n, cap);   /* o próprio vmin */
+    }
+
+    /* e o lado de cima: segue o caminho de vmax e leva os ramos ABAIXO dele */
+    { unsigned t = par_le(ord_raiz + no*ORD_LARG + sh);
+      sql_ultimos_nos++;
+      for(int e = d - 1; t && e >= 2; e--){
+          unsigned s = (unsigned)((hi >> (ORD_BITS*(e-2))) & (ORD_LARG - 1u));
+          for(unsigned m = 0; m < s; m++){
+              unsigned f = par_le(ord_raiz + t*ORD_LARG + m);
+              sql_ultimos_nos++;
+              if(f) faixa_tudo(f, e - 1, saida, &n, cap);
+          }
+          t = par_le(ord_raiz + t*ORD_LARG + s);
+          sql_ultimos_nos++;
+      }
+      if(t) faixa_folhas(t, saida, &n, cap);   /* o próprio vmax */
+    }
+    return n;
+}
+
 /* ── CONSTRUIR E LER O ÍNDICE ────────────────────────────────────────────────
  *
  * Construir é uma varredura — Θ(|X|), uma vez. LER é uma descida — Θ(log|X|),
@@ -3814,24 +3921,40 @@ static int varre(const char *resto, int acao){
      *
      * O índice é ignorado se estiver velho (a tabela mudou de tamanho desde que
      * ele foi feito): aí varre-se. Um índice velho custa tempo, nunca correcção. */
-    int idx_usa = 0; long idx_k = 0;
+    int idx_usa = 0; long idx_lo = 0, idx_hi = 0;
     if(acao == ACAO_MARCA && !in_sub){
         const char *q = p;
         char c_esq[64];
         if(palavra(&q, "WHERE") && ident(&q, c_esq, sizeof c_esq)){
             pula(&q);
-            if(*q == '='){
-                q++; pula(&q);
+            /* os cinco que a árvore responde: = < <= > >= . A ordem dos
+             * caminhos é a ordem dos números, pelo que uma desigualdade é uma
+             * FAIXA — e a faixa é o mesmo corte com o percurso a seguir-se-lhe. */
+            int op = 0;
+            if(*q == '='){ op = '='; q++; }
+            else if(*q == '<'){ q++; if(*q == '='){ op = 'l'; q++; } else op = '<'; }
+            else if(*q == '>'){ q++; if(*q == '='){ op = 'g'; q++; } else op = '>'; }
+            if(op){
+                pula(&q);
                 int sinal = 1;
                 if(*q == '-'){ sinal = -1; q++; pula(&q); }
                 if(isdigit((unsigned char)*q)){
                     long v = 0;
                     while(isdigit((unsigned char)*q)) v = v*10 + (*q++ - '0');
+                    v *= sinal;
                     pula(&q);
                     if(*q == 0 || *q == ';'){
                         long col = col_indice(c_esq);
                         if(col >= 0 && idx_coluna(cat_nrows()) == col){
-                            idx_usa = 1; idx_k = sinal * v; p = q;
+                            const long INF = 2147483647L;
+                            switch(op){
+                              case '=': idx_lo = v;     idx_hi = v;     break;
+                              case '<': idx_lo = -INF;  idx_hi = v - 1; break;
+                              case 'l': idx_lo = -INF;  idx_hi = v;     break;
+                              case '>': idx_lo = v + 1; idx_hi = INF;   break;
+                              case 'g': idx_lo = v;     idx_hi = INF;   break;
+                            }
+                            idx_usa = 1; p = q;
                         }
                     }
                 }
@@ -4090,8 +4213,8 @@ static int varre(const char *resto, int acao){
           for(long q = 0; q <= nrows / (long)SLOT_BITS; q++)
               mem_grava(S_MATCH + (unsigned)q, z); }
         ord_usa_indice();
-        int achados[J_MAXLIN];
-        int n = j_casam(idx_k, achados, J_MAXLIN);
+        static int achados[J_MAXLIN];
+        int n = j_faixa(idx_lo, idx_hi, achados, J_MAXLIN);
         ord_usa_rascunho();
         /* SÓ AS VIVAS. Um DELETE não muda o número de linhas — muda o bit do
          * vivo —, pelo que o cabeçalho continua a bater e o índice continua a

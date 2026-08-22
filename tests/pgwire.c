@@ -3602,6 +3602,74 @@ int main(void){
                lei ? "sim" : "NAO", nos[0], nos[1], nos[2]);
         if(!lei) mal++;
 
+        /* ── E AS DESIGUALDADES DESCEM TAMBÉM. A ordem dos caminhos É a ordem
+         * dos números, pelo que `a > k` é um prefixo comum seguido dos ramos de
+         * um lado. Mede-se com resultado FIXO e tabela a crescer: os nós crescem
+         * com o que SAI, e o que não pode crescer é a BUSCA. */
+        {
+            long nos_d[3];
+            printf("\n      as DESIGUALDADES, com resultado fixo e tabela a crescer:\n");
+            for(int k = 0; k < 3; k++){
+                char base[64], m[80], pr[80], q[80];
+                snprintf(base, sizeof base, "/tmp/pgwire_w27d_%d", k);
+                snprintf(m, sizeof m, "%s.mem", base);
+                snprintf(pr, sizeof pr, "%s.prog", base);
+                unlink(m); unlink(pr);
+                if(!sql_abrir(base)) mal++;
+                sql_executa("CREATE TABLE t (a,b)", &o);
+                for(int i = 1; i <= tam[k]; i++){
+                    snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                    sql_executa(q, &o);
+                }
+                sql_executa("SELECT * FROM t WHERE a <= 3", &o);
+                long p_sem = sql_ultimos_passos; int n_sem = o.nrows;
+                sql_executa("CREATE INDEX ON t (a)", &o);
+                sql_executa("SELECT * FROM t WHERE a <= 3", &o);
+                nos_d[k] = sql_ultimos_nos;
+                int n_com = o.nrows;
+                printf("        %2d linhas · sem índice %4ld passos · com índice %3ld nós"
+                       " · %d = %d resultados  %s\n", tam[k], p_sem, nos_d[k],
+                       n_sem, n_com, (n_sem == 3 && n_com == 3) ? "" : "NAO BATE");
+                if(n_sem != 3 || n_com != 3) mal++;
+                sql_fechar();
+            }
+            int lei_d = (nos_d[0] == nos_d[1] && nos_d[1] == nos_d[2] && nos_d[0] > 0);
+            printf("        -> também não crescem com |X|: %s  (%ld, %ld, %ld)\n",
+                   lei_d ? "sim" : "NAO", nos_d[0], nos_d[1], nos_d[2]);
+            if(!lei_d) mal++;
+        }
+
+        /* os QUATRO operadores contra o molde — dois caminhos que concordam */
+        {
+            unlink("/tmp/pgwire_w27q.mem"); unlink("/tmp/pgwire_w27q.prog");
+            if(!sql_abrir("/tmp/pgwire_w27q")) mal++;
+            sql_executa("CREATE TABLE t (a,b)", &o);
+            for(int i = 1; i <= 10; i++){
+                char q[64];
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                sql_executa(q, &o);
+            }
+            const char *ops[6] = { "a > 6", "a < 4", "a >= 6", "a <= 4", "a > 100", "a < 0" };
+            int esperado[6] = { 4, 3, 5, 4, 0, 0 };
+            int sem[6];
+            for(int k = 0; k < 6; k++){
+                char q[80]; snprintf(q, sizeof q, "SELECT * FROM t WHERE %s", ops[k]);
+                sql_executa(q, &o); sem[k] = o.nrows;
+            }
+            sql_executa("CREATE INDEX ON t (a)", &o);
+            printf("\n      os seis casos, molde contra árvore:\n");
+            for(int k = 0; k < 6; k++){
+                char q[80]; snprintf(q, sizeof q, "SELECT * FROM t WHERE %s", ops[k]);
+                sql_executa(q, &o);
+                int bate = (o.nrows == sem[k] && o.nrows == esperado[k]
+                            && sql_ultimos_passos == 0);
+                printf("        %-8s molde %d · árvore %d · esperado %d  %s\n",
+                       ops[k], sem[k], o.nrows, esperado[k], bate ? "" : "NAO BATE");
+                if(!bate) mal++;
+            }
+            sql_fechar();
+        }
+
         /* ── O CONTROLO DA CORRECÇÃO: o índice VELHO não pode mentir. */
         {
             unlink("/tmp/pgwire_w27v.mem"); unlink("/tmp/pgwire_w27v.prog");
@@ -3696,7 +3764,14 @@ int main(void){
            " dentro. Quem decide é o campo do VIVO, consultado à saída da árvore: ela diz onde"
            " a linha estava, e ele diz se ela ainda está. Mede-se com a apagada a não sair e a"
            " vizinha a sair. Fica dito o que o índice NÃO serve: só a forma `col = k` simples"
-           " desce pela árvore; `a > 5` continua pelo molde, e mede-se que continua.",
+           " desce pela árvore. E AS DESIGUALDADES DESCEM TAMBÉM, porque a ordem dos"
+           " caminhos É a ordem dos números: `a > k` é um prefixo comum seguido de todos os"
+           " ramos de um lado, e nada mais — cortar dá o dígito, percorrer dá o resto, que são"
+           " as duas operações que a casa já tinha. Os seis casos medidos dão o MESMO que o"
+           " molde, incluindo os dois em que a faixa é VAZIA; e com resultado FIXO e tabela a"
+           " crescer os nós ficam constantes, ao passo que os passos sem índice dobram. O"
+           " resultado é fixo de propósito: os nós crescem com o que SAI, porque têm de listar"
+           " as linhas, e o que não pode crescer é a BUSCA.",
            mal == 0);
     }
 
