@@ -5703,6 +5703,53 @@ reordenada; a partição; e a fatoração única.}
         {aritmética de racionais exatos; contagem de fatorações}
         {\code{tests/pgwire.c} §W119}
 
+\subsection*{O cálculo no toro discreto --- e as duas faces do zero}
+
+\noindent A §«O cálculo no toro» mede $\langle\nabla f,A\rangle=-\langle f,\operatorname{div}A\rangle$
+em $\mathbb T^2$ e faz a \code{obs:degenerado}, que é exemplar: «a primeira verificação
+usou $f$ e $A$ \emph{ortogonais} e deu zero dos dois lados --- \textbf{zero $=$ zero
+não distingue adjunção de coisa nenhuma}». No toro \emph{discreto} tudo isso é exato:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+$\langle\nabla f,A\rangle=-\langle f,\operatorname{div}A\rangle$ em $\Z/N$ & $42/42$, em inteiros\\
+com valor não nulo ($=\lVert\nabla f\rVert^{2}$) & $42/42$\\
+com o sinal trocado, difere por $2\times$ o valor & $5/5$\\
+$HLH=n\operatorname{diag}(H\kappa)$ em $(\Z/2)^{e}$ & exato, val.\ próprios inteiros\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent A adjunção é a \textbf{soma por partes}, e o laplaciano é a convolução do
+núcleo $(-e,1,\dots,1)$ --- que §W101 já mostrou ser diagonalizada por Hadamard. Aqui
+não há os $0{,}08\%$ a $0{,}6\%$ de discretização: o grupo é finito e os caracteres
+são $\pm1$.
+
+\medskip\noindent\textbf{E esta observação tem nome na casa: $+0=-0$.} Em $\Z$ o zero
+não tem sinal, pelo que toda antissimetria $f(x)=-f(y)$ passa \emph{por vacuidade}
+onde os dois lados se anulam --- o cruzado escalar «cumpre» a antissimetria em $81/81$
+pares sem dizer nada. É o controlo que \code{operacao.c} §O2, \code{hopfield.c} e
+\code{matricial.c} já exigem à letra. \emph{Não é uma precaução: é a forma que a
+asserção vazia toma sempre que a lei é uma troca de sinal.}
+
+\medskip\noindent\textbf{E a outra face é a Lei~0: $0=1/\infty$.}
+\[
+\begin{array}{lll}
+\nu_+(r)=-r & \text{fixa } \{0,\infty\} & \text{donde } +0=-0\\
+\nu_\times[p{:}q]=[q{:}p] & \text{fixa } \{+1,-1\} & \text{e o zero \textbf{emparelha} com } \infty
+\end{array}
+\]
+\emph{O que é fixo numa é o par na outra.} É por o zero ser fixo no \textbf{aditivo}
+que a antissimetria morre nele; é por ter par no \textbf{multiplicativo} que a Lei~0
+lhe devolve a volta. §W108 mediu esses números e §W109 mediu que a Lei~0 compra a
+totalidade --- o que faltava era dizer que são a mesma frase vista das duas faces.
+
+\medido{\code{tests/pgwire.c} §W120 --- a adjunção e o laplaciano em inteiros; o
+$+0=-0$ contado; e as duas involuções nos quatro pontos.}
+
+\colunas{\code{catalogo} «O cálculo no toro» (\code{obs:degenerado}); §W101, §W108, §W109; \code{operacao.c} §O2}
+        {soma por partes em $\Z/N$; convolução diagonalizada; contagem de pontos fixos}
+        {\code{tests/pgwire.c} §W120}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

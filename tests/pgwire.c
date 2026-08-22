@@ -17302,6 +17302,205 @@ int main(void){
            " resíduo zero seria fabricá-lo.", mal == 0);
     }
 
+    /* ═══ §W120: O CÁLCULO NO TORO DISCRETO — ADJUNÇÃO E LAPLACIANO EXACTOS ═ */
+    {
+        long mal = 0;
+        printf("\n§W120 ∇ e div são adjuntos por SOMA POR PARTES, e o laplaciano diagonaliza em inteiros.\n\n");
+
+        /* ── (1) A ADJUNÇÃO É EXACTA NO TORO DISCRETO. O catálogo mede
+         * ⟨∇f, A⟩ = −⟨f, div A⟩ em 𝕋² com N=128 e resíduo nulo; em ℤ/N com
+         * diferenças finitas a mesma identidade é a SOMA POR PARTES, e vale
+         * como igualdade de INTEIROS — sem uma discretização a estimar. */
+        {
+            long ok = 0, tot = 0, degen = 0, naonulo = 0;
+            for(long N = 3; N <= 9; N++){
+                for(long seed = 1; seed <= 6; seed++){
+                    long f[16], A[16];
+                    for(long i = 0; i < N; i++) f[i] = (seed*i*i + 3*i + seed) % 7 - 3;
+                    /* A = ∇f, para o valor NÃO ser zero — é a obs:degenerado */
+                    for(long i = 0; i < N; i++) A[i] = f[(i+1)%N] - f[i];
+                    long L = 0, R = 0;
+                    for(long i = 0; i < N; i++){
+                        long grad = f[(i+1)%N] - f[i];        /* ∇ para a frente */
+                        long dvg  = A[i] - A[(i+N-1)%N];      /* div para trás   */
+                        L += grad * A[i];
+                        R += f[i] * dvg;
+                    }
+                    tot++;
+                    if(L == -R) ok++;
+                    if(L == 0) degen++; else naonulo++;
+                }
+            }
+            printf("      ⟨∇f, A⟩ = −⟨f, div A⟩ em ℤ/N: %ld/%ld, EXACTO em inteiros"
+                   " — é a soma por partes, e não há discretização a estimar\n",
+                   ok, tot);
+            printf("        e o valor é NÃO NULO em %ld dos %ld casos (com A = ∇f"
+                   " ele é ‖∇f‖² > 0): a obs:degenerado avisa que «zero = zero não"
+                   " distingue adjunção de coisa nenhuma»\n", naonulo, tot);
+            if(ok != tot || naonulo == 0) mal++;
+        }
+
+        /* ── (2) E O TESTE DISTINGUE: com o SINAL TROCADO os dois lados
+         * separam-se, e a separação é o dobro do valor. O catálogo diz
+         * «difere por 78,8», que é 2×39,4 — aqui a mesma conta em inteiros. */
+        {
+            long separa = 0, tot = 0;
+            for(long N = 4; N <= 8; N++){
+                long f[16], A[16], L = 0, R = 0;
+                for(long i = 0; i < N; i++) f[i] = (i*i + 2*i + 1) % 5 - 2;
+                for(long i = 0; i < N; i++) A[i] = f[(i+1)%N] - f[i];
+                for(long i = 0; i < N; i++){
+                    L += (f[(i+1)%N] - f[i]) * A[i];
+                    R += f[i] * (A[i] - A[(i+N-1)%N]);
+                }
+                tot++;
+                /* com o sinal certo L = −R; com o trocado L ≠ +R, e a
+                 * diferença é 2|L| */
+                if(L != R && (L - R) == 2*L) separa++;
+            }
+            printf("      o teste DISTINGUE: com o sinal trocado os dois lados"
+                   " diferem por 2×o valor, em %ld/%ld — «difere por 78,8», que é"
+                   " o dobro de 39,4\n", separa, tot);
+            if(separa != tot) mal++;
+        }
+
+        /* ── (3) E O LAPLACIANO DIAGONALIZA NO DUAL, em inteiros. O catálogo
+         * mede-o em 𝕋² com erros de 0,08% a 0,6% («que é a discretização»);
+         * em (ℤ/2)^e o mesmo enunciado é EXACTO: o laplaciano é a matriz de
+         * convolução do núcleo (−e nos zeros, 1 nos geradores), e §W101 já
+         * mediu que Hadamard diagonaliza qualquer convolução. */
+        {
+            const int e = 2, N = 4;
+            long H[4][4];
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+                int b = (i & j), par = 0;
+                while(b){ par ^= (b & 1); b >>= 1; }
+                H[i][j] = par ? -1 : 1;
+            }
+            /* o núcleo do laplaciano em (ℤ/2)²: κ[0] = −2, κ[1] = κ[2] = 1 */
+            long k[4] = {-2, 1, 1, 0};
+            long C[4][4];
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++) C[i][j] = k[i ^ j];
+            /* H C H = n·diag(Hκ) */
+            long Hk[4] = {0,0,0,0};
+            for(int a = 0; a < N; a++) for(int j = 0; j < N; j++) Hk[a] += H[a][j]*k[j];
+            long T[4][4], D[4][4];
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+                long s = 0; for(int u = 0; u < N; u++) s += H[i][u]*C[u][j]; T[i][j] = s;
+            }
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+                long s = 0; for(int u = 0; u < N; u++) s += T[i][u]*H[u][j]; D[i][j] = s;
+            }
+            int diag = 1;
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                if(D[i][j] != (i == j ? (long)N*Hk[i] : 0)) diag = 0;
+            printf("      o LAPLACIANO diagonaliza no dual, em INTEIROS: H·L·H ="
+                   " n·diag(Hκ) → %s\n", diag ? "sim" : "NÃO");
+            printf("        e os valores próprios são inteiros:");
+            for(int i = 0; i < N; i++) printf(" %ld", Hk[i]);
+            printf("  — os caracteres SÃO as funções próprias, e aqui sem um erro"
+                   " de discretização a reportar\n");
+            if(!diag) mal++;
+            /* o gume: os valores próprios não são todos iguais — se fossem, a
+             * diagonalização não diria nada */
+            int distintos = 0;
+            for(int i = 0; i < N; i++){ int novo = 1;
+                for(int j = 0; j < i; j++) if(Hk[j] == Hk[i]) novo = 0;
+                distintos += novo; }
+            printf("        e há %d valores próprios distintos: se fossem todos"
+                   " iguais, a matriz já era diagonal e nada se media\n", distintos);
+            if(distintos < 2) mal++;
+        }
+
+        /* ── (4) E A RAZÃO DE TUDO ISTO TEM NOME NA CASA: +0 = −0. Uma
+         * antissimetria f(x) = −f(y) passa TRIVIALMENTE onde os dois lados
+         * são zero, porque em ℤ o zero não tem sinal. Conta-se quantos pares
+         * de uma antissimetria são vazios por essa razão — e é por isso que
+         * `operacao.c` §O2, `hopfield.c` e `matricial.c` exigem todos, à
+         * letra, «o cruzado NÃO é sempre nulo: senão valia por 0 == −0». */
+        {
+            long vazios = 0, vivos = 0, tot = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                long cr = a*b - b*a;              /* o cruzado escalar: SEMPRE 0 */
+                long cr2 = a*(b+1) - b*(a+1);     /* = a − b: não sempre 0 */
+                tot++;
+                if(cr == -cr) vazios++;           /* passa por 0 == −0 */
+                if(cr2 != 0) vivos++;
+            }
+            printf("      +0 = −0 NÃO DISTINGUE: a antissimetria do cruzado escalar"
+                   " passa em %ld/%ld pares — e passa por VACUIDADE, porque ele é"
+                   " sempre zero\n", vazios, tot);
+            printf("        com um cruzado que não se anula, %ld dos %ld pares têm"
+                   " valor vivo, e só aí a antissimetria mede\n", vivos, tot);
+            printf("        é o mesmo controlo que `operacao.c` §O2, `hopfield.c` e"
+                   " `matricial.c` já exigem à letra: «senão valia por 0 == −0»\n");
+            if(vazios != tot) mal++;       /* em ℤ o zero não tem sinal */
+            if(vivos == 0) mal++;
+
+            /* ── E A OUTRA FACE DISTO É A LEI 0: 0 = 1/∞. O zero é FIXO pela
+             * reflexão aditiva ν₊(r) = −r — e é por isso que +0 = −0 e que a
+             * antissimetria morre ali — mas NÃO é fixo pela inversão
+             * ν×[p:q] = [q:p]: ali ele EMPARELHA com o ∞. As duas faces do
+             * mesmo ponto, e §W108 mediu-as sem que a ligação fosse dita. */
+            long fix_mais = 0, fix_vezes = 0;
+            long P[4][2] = {{0,1},{1,0},{1,1},{-1,1}};
+            for(int i = 0; i < 4; i++){
+                long pp = P[i][0], qq = P[i][1];
+                if(-pp*qq == pp*qq) fix_mais++;      /* ν₊ fixa? */
+                if(pp*pp == qq*qq)  fix_vezes++;     /* ν× fixa? */
+            }
+            printf("      E A OUTRA FACE É A LEI 0: o zero [0:1] é FIXO por"
+                   " ν₊ (donde +0 = −0) e NÃO é fixo por ν× — ali emparelha com"
+                   " o ∞, que é 0 = 1/∞\n");
+            printf("        nos quatro pontos {0, ∞, +1, −1}: ν₊ fixa %ld (o 0 e o"
+                   " ∞) e ν× fixa %ld (o ±1) — o que é fixo numa é o PAR na outra\n",
+                   fix_mais, fix_vezes);
+            printf("        é por o zero ser fixo no ADITIVO que a antissimetria"
+                   " morre nele; e é por ter par no MULTIPLICATIVO que a Lei 0 lhe"
+                   " devolve a volta\n");
+            if(fix_mais != 2 || fix_vezes != 2) mal++;
+        }
+
+        printf("\n");
+        ok("O CÁLCULO NO TORO É EXACTO NO DISCRETO, E A SECÇÃO JÁ TINHA APANHADO O SEU PRÓPRIO"
+           " TESTE VAZIO. A §«O cálculo no toro» mede ⟨∇f, A⟩ = −⟨f, div A⟩ em 𝕋² com N=128 e"
+           " resíduo nulo, e faz a obs:degenerado, que é exemplar: «a primeira verificação que"
+           " corri usou f e A ORTOGONAIS, e deu zero dos dois lados — zero = zero não distingue"
+           " adjunção de coisa nenhuma; era o caso degenerado a igualar os dois lados». Aqui a"
+           " mesma identidade corre em ℤ/N com diferenças finitas, onde ela é a SOMA POR PARTES"
+           " e vale como igualdade de INTEIROS, sem uma discretização a estimar — e com A = ∇f,"
+           " para o valor ser ‖∇f‖² > 0 e o teste medir alguma coisa. O TESTE DISTINGUE: com o"
+           " sinal trocado os dois lados diferem por DUAS vezes o valor, que é o «difere por"
+           " 78,8» do texto lido como o dobro de 39,4. E O LAPLACIANO DIAGONALIZA NO DUAL,"
+           " também em inteiros: em (ℤ/2)^e o laplaciano é a matriz de convolução do núcleo"
+           " (−e nos zeros, 1 nos geradores), e §W101 já tinha medido que Hadamard diagonaliza"
+           " QUALQUER convolução — logo H·L·H = n·diag(Hκ) sai exacto, com valores próprios"
+           " INTEIROS e sem um erro de discretização a reportar. O catálogo mede-o em 𝕋² com"
+           " erros de 0,08% a 0,6%, «que é a discretização»; aqui não há nenhum, porque o grupo"
+           " é finito e os caracteres são ±1. O GUME é os valores próprios não serem todos"
+           " iguais: se fossem, a matriz já era diagonal e a diagonalização não diria nada."
+           " «O dual não é só onde se testa a equidistribuição: é onde o laplaciano é"
+           " diagonal» — e no grupo finito isso deixa de ser uma aproximação. E A RAZÃO DE"
+           " TUDO ISTO TEM NOME NA CASA: +0 = −0. Em ℤ o zero não tem sinal, pelo que uma"
+           " antissimetria f(x) = −f(y) passa TRIVIALMENTE onde os dois lados se anulam —"
+           " medido no cruzado escalar, que é sempre zero e por isso «cumpre» a antissimetria"
+           " em todos os pares, por vacuidade. É o mesmo controlo que `tests/operacao.c` §O2,"
+           " `tests/hopfield.c` e `tests/matricial.c` já exigem à letra, cada um com a sua"
+           " frase: «o cruzado NÃO é sempre nulo — senão valia por 0 == −0». A obs:degenerado"
+           " do catálogo é esse controlo dito para a adjunção, e a casa tem-no em quatro"
+           " medidores antes deste. NÃO É UMA PRECAUÇÃO: é a forma que a asserção vazia toma"
+           " sempre que a lei é uma troca de sinal. E A OUTRA FACE DISTO É A LEI 0: 0 = 1/∞. O"
+           " zero é FIXO pela reflexão aditiva ν₊(r) = −r — e é exactamente por isso que"
+           " +0 = −0 e que a antissimetria morre ali — mas NÃO é fixo pela inversão"
+           " ν×[p:q] = [q:p], onde ele EMPARELHA com o ∞. Nos quatro pontos {0, ∞, +1, −1},"
+           " ν₊ fixa dois (o zero e o infinito) e ν× fixa dois (o ±1): o que é fixo numa é o"
+           " PAR na outra, que é o aviso que o `corpo_algebrico` faz sobre os dois †. §W108"
+           " mediu esses números e §W109 mediu que a Lei 0 compra a totalidade; o que faltava"
+           " era dizer que são a mesma frase vista das duas faces — é por o zero ser fixo no"
+           " ADITIVO que a antissimetria morre nele, e é por ter par no MULTIPLICATIVO que a"
+           " Lei 0 lhe devolve a volta.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
