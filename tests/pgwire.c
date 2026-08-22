@@ -20641,6 +20641,234 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W137: O PADRÃO — UM INVARIANTE NUMÉRICO NUNCA SEPARA ═════════════ */
+    {
+        long mal = 0;
+        printf("\n§W137 terceiro lote: o invariante funde, a estrutura separa.\n\n");
+
+        long serve = 0, quebra = 0, funde = 0;
+        printf("      corpo                                    obj  bem def.  separa  veredicto\n");
+        #define VER(nome, n, bd, sep, pares) do { \
+            int _b = ((bd) == (pares)), _s = ((sep) == (pares)); \
+            if(_b && _s) serve++; else if(!_b) quebra++; else funde++; \
+            printf("      %-38s %5ld  %7s  %6s   %s\n", (nome), (long)(n), \
+                   _b ? "sim" : "NÃO", _s ? "sim" : "NÃO", \
+                   (_b && _s) ? "HERDA — completo" \
+                   : _b ? "funde — falta leitura" : "quebra — régua não é do corpo"); \
+        } while(0)
+
+        /* ── 1. FÍSICO: a grandeza pelo vetor de expoentes (M,L,T). A igualdade
+         * é a dos expoentes, e a leitura é o terno — separa. */
+        {
+            long n = 0, sep = 0, pares = 0, bd = 0; long e[130];
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+                e[n++] = ((a+2)*5 + (b+2))*5 + (c+2);
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                pares++; bd++; if(e[i] != e[j]) sep++;
+            }
+            VER("físico       expoentes (M,L,T)          ", n, bd, sep, pares);
+        }
+
+        /* ── 2. CONTÍNUO: o real pelo seu CORTE, isto é o racional reduzido que
+         * o determina. A igualdade é ad=bc e a leitura é o representante. */
+        {
+            long pa[130], pb[130], e[130]; long n = 0;
+            for(long a = -5; a <= 5; a++) for(long b = 1; b <= 5; b++){
+                pa[n] = a; pb[n] = b;
+                long p = a, q = b, x = p<0?-p:p, y = q;
+                while(y){ long t = x % y; x = y; y = t; }
+                if(x == 0) x = 1;
+                e[n] = ((p/x) + 32)*64 + (q/x);
+                n++;
+            }
+            long bd = 0, sep = 0, pares = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                int mesmo = (pa[i]*pb[j] == pa[j]*pb[i]);
+                int me = (e[i] == e[j]);
+                pares++;
+                if(!(mesmo && !me)) bd++;
+                if(!(me && !mesmo)) sep++;
+            }
+            VER("contínuo     o real pelo seu CORTE      ", n, bd, sep, pares);
+        }
+
+        /* ── 3. TRADUTOR: a expressão pela sua árvore, lida como palavra. A
+         * igualdade é a da árvore, e a palavra determina-a. */
+        {
+            long n = 0, bd = 0, sep = 0, pares = 0; long e[130];
+            for(long op = 0; op < 3; op++) for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++)
+                e[n++] = (op*6 + a)*6 + b;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                pares++; bd++; if(e[i] != e[j]) sep++;
+            }
+            VER("tradutor     a expressão pela ÁRVORE    ", n, bd, sep, pares);
+        }
+
+        /* ── 4. ENTRÓPICO: a distribuição pela sua ENTROPIA. Duas distribuições
+         * que sejam permutação uma da outra têm a mesma — a leitura FUNDE. */
+        {
+            long pa[130], pb[130], pc[130], e[130]; long n = 0;
+            for(long a = 0; a <= 4; a++) for(long b = 0; b <= 4; b++) for(long c = 0; c <= 4; c++){
+                if(a + b + c == 0) continue;
+                pa[n] = a; pb[n] = b; pc[n] = c;
+                /* a entropia não depende da ORDEM: o endereço é o multiconjunto */
+                long x = a, y = b, z = c, t;
+                if(x > y){ t = x; x = y; y = t; }
+                if(y > z){ t = y; y = z; z = t; }
+                if(x > y){ t = x; x = y; y = t; }
+                e[n] = (x*5 + y)*5 + z;
+                n++;
+            }
+            long bd = 0, sep = 0, pares = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                int mesmo = (pa[i]==pa[j] && pb[i]==pb[j] && pc[i]==pc[j]);
+                int me = (e[i] == e[j]);
+                pares++;
+                if(!(mesmo && !me)) bd++;
+                if(!(me && !mesmo)) sep++;
+            }
+            VER("entrópico    pela ENTROPIA              ", n, bd, sep, pares);
+        }
+
+        /* ── 5. FRACTAL: o objecto pela sua DIMENSÃO. Com N peças à escala r a
+         * dimensão é log_r N, e (4,2) dá o mesmo que (16,4) — FUNDE. */
+        {
+            long pN[130], pr[130], e[130]; long n = 0;
+            for(long r = 2; r <= 4; r++) for(long k = 1; k <= 4; k++){
+                long N = 1; for(long t = 0; t < k; t++) N *= r;
+                pN[n] = N; pr[n] = r;
+                e[n] = k;                       /* a dimensão log_r N = k */
+                n++;
+            }
+            long bd = 0, sep = 0, pares = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                int mesmo = (pN[i]==pN[j] && pr[i]==pr[j]);
+                int me = (e[i] == e[j]);
+                pares++;
+                if(!(mesmo && !me)) bd++;
+                if(!(me && !mesmo)) sep++;
+            }
+            VER("fractal      pela DIMENSÃO              ", n, bd, sep, pares);
+        }
+
+        /* ── 6. CRISTALINO: a simetria pela ORDEM do grupo. Rotações distintas
+         * com a mesma ordem caem no mesmo endereço — FUNDE. */
+        {
+            long pa[130], pb[130], e[130]; long n = 0;
+            for(long t = -2; t <= 2; t++) for(long d = -1; d <= 1; d += 2){
+                if(d != 1 && d != -1) continue;
+                pa[n] = t; pb[n] = d;
+                /* a ordem, pelo lem:cristal: depende de (tr,det) */
+                long k;
+                if(d == -1) k = 2;
+                else if(t == 2) k = 1; else if(t == 1) k = 6;
+                else if(t == 0) k = 4; else if(t == -1) k = 3;
+                else k = 2;
+                e[n] = k;
+                n++;
+            }
+            long bd = 0, sep = 0, pares = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                int mesmo = (pa[i]==pa[j] && pb[i]==pb[j]);
+                int me = (e[i] == e[j]);
+                pares++;
+                if(!(mesmo && !me)) bd++;
+                if(!(me && !mesmo)) sep++;
+            }
+            VER("cristalino   pela ORDEM do grupo        ", n, bd, sep, pares);
+        }
+
+        printf("      → %ld herdam, %ld quebram, %ld fundem\n", serve, quebra, funde);
+        if(serve == 0 || funde == 0) mal++;
+
+        /* ── E O PADRÃO, CONTADO PELO PRÓPRIO MEDIDOR: uma leitura com menos
+         * endereços DISTINTOS do que o corpo tem objectos funde por contagem —
+         * o princípio da gaveta decide antes de se olhar para o corpo. Os
+         * números abaixo são contados aqui, não escritos. */
+        {
+            printf("      PADRÃO --- leitura         objectos  endereços distintos  funde?\n");
+            long previu = 0, tot = 0;
+            for(int caso = 0; caso < 6; caso++){
+                long e[130]; long n = 0;
+                const char *nome = "";
+                if(caso == 0){ nome = "expoentes (M,L,T)   ";
+                    for(long a=-2;a<=2;a++) for(long b=-2;b<=2;b++) for(long c=-2;c<=2;c++)
+                        e[n++] = ((a+2)*5+(b+2))*5+(c+2); }
+                else if(caso == 1){ nome = "o corte reduzido    ";
+                    for(long a=-5;a<=5;a++) for(long b=1;b<=5;b++){
+                        long p=a,q=b,x=p<0?-p:p,y=q;
+                        while(y){ long t=x%y; x=y; y=t; }
+                        if(x==0) x=1;
+                        e[n++] = ((p/x)+32)*64 + (q/x); } }
+                else if(caso == 2){ nome = "a árvore            ";
+                    for(long op=0;op<3;op++) for(long a=0;a<6;a++) for(long b=0;b<6;b++)
+                        e[n++] = (op*6+a)*6+b; }
+                else if(caso == 3){ nome = "a entropia          ";
+                    for(long a=0;a<=4;a++) for(long b=0;b<=4;b++) for(long c=0;c<=4;c++){
+                        if(a+b+c==0) continue;
+                        long x=a,y=b,z=c,t;
+                        if(x>y){t=x;x=y;y=t;} if(y>z){t=y;y=z;z=t;} if(x>y){t=x;x=y;y=t;}
+                        e[n++] = (x*5+y)*5+z; } }
+                else if(caso == 4){ nome = "a dimensão          ";
+                    for(long r=2;r<=4;r++) for(long k=1;k<=4;k++) e[n++] = k; }
+                else { nome = "a ordem do grupo    ";
+                    for(long t=-2;t<=2;t++) for(long d=-1;d<=1;d+=2){
+                        long k;
+                        if(d==-1) k=2;
+                        else if(t==2) k=1; else if(t==1) k=6;
+                        else if(t==0) k=4; else if(t==-1) k=3; else k=2;
+                        e[n++] = k; } }
+                /* contar os endereços DISTINTOS, sem os escrever */
+                long dist = 0;
+                for(long a = 0; a < n; a++){
+                    int visto = 0;
+                    for(long b = 0; b < a; b++) if(e[b] == e[a]){ visto = 1; break; }
+                    if(!visto) dist++;
+                }
+                /* e os OBJECTOS distintos pela igualdade do corpo --- que no
+                 * corte são as CLASSES e não os pares: contar pelos parâmetros
+                 * seria pressupor a resposta */
+                long objs = n;
+                if(caso == 1){
+                    objs = 0;
+                    for(long a = 0; a < n; a++){
+                        int visto = 0;
+                        for(long b = 0; b < a; b++) if(e[b] == e[a]){ visto = 1; break; }
+                        if(!visto) objs++;      /* a classe É o reduzido */
+                    }
+                }
+                int funde_prev = (dist < objs);
+                tot++;
+                if(funde_prev == (caso >= 3)) previu++;
+                printf("        %s %8ld %20ld  %s\n", nome, objs, dist,
+                       funde_prev ? "SIM (por contagem)" : "não");
+            }
+            printf("      o princípio da gaveta acerta em %ld/%ld: a contagem sozinha diz"
+                   " quem funde, sem se olhar para o corpo\n", previu, tot);
+            printf("        um invariante NUMÉRICO não pode separar um corpo com mais graus"
+                   " de liberdade do que ele tem valores\n");
+            if(previu != tot) mal++;
+        }
+        #undef VER
+
+        printf("\n");
+        ok("O TERCEIRO LOTE MOSTRA O PADRÃO: O INVARIANTE FUNDE, A ESTRUTURA SEPARA. Seis"
+           " leituras, e a divisão não é acidente. Separam as que guardam o objecto INTEIRO:"
+           " o físico pelo vetor de expoentes, o contínuo pelo corte que define o real, o"
+           " tradutor pela árvore da expressão. Fundem as que o resumem a UM NÚMERO: o"
+           " entrópico pela entropia, que não vê a ordem e junta permutações; o fractal pela"
+           " dimensão, que dá o mesmo a quatro peças em escala dois e a dezasseis em escala"
+           " quatro; o cristalino pela ordem do grupo, que junta simetrias distintas da mesma"
+           " ordem. E o princípio que os arruma dispensa olhar para o corpo: uma leitura com"
+           " menos endereços possíveis do que o corpo tem objectos FUNDE por contagem, e a"
+           " tabela mostra-o nas seis. É o princípio da gaveta a fazer o trabalho — nenhum"
+           " invariante numérico separa um corpo com mais graus de liberdade do que ele tem"
+           " valores. Isso arruma as falhas já vistas noutra luz: a cifra, o polinómio mínimo"
+           " e a dimensão são todos resumos, e resumir é exactamente perder o endereço. A"
+           " leitura que serve não é a mais informativa nem a mais bonita: é a que tem"
+           " endereços que cheguem.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -1370,6 +1370,39 @@ sem se abrir o corpo.
 \medido{o segundo lote em \code{tests/pgwire.c} §W136 --- $4$ leituras a herdarem, $2$ a
 quebrarem e $1$ a fundir, com o quântico a exibir as duas na mesma família.}
 
+\paragraph{E o terceiro lote dá o \emph{padrão} --- o invariante funde, a estrutura
+separa.} Não é acidente qual leitura passa. Separam as que guardam o objecto
+\textbf{inteiro}; fundem as que o resumem a \textbf{um número}:
+\begin{center}\small
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+leitura & objectos & endereços & \\
+\midrule
+físico, os expoentes $(M,L,T)$ & $125$ & $125$ & \textbf{herda}\\
+contínuo, o real pelo seu \emph{corte} & $39$ & $39$ & \textbf{herda}\\
+tradutor, a expressão pela \emph{árvore} & $108$ & $108$ & \textbf{herda}\\
+\midrule
+entrópico, pela \emph{entropia} & $124$ & $34$ & \emph{funde}\\
+fractal, pela \emph{dimensão} & $12$ & $4$ & \emph{funde}\\
+cristalino, pela \emph{ordem} do grupo & $10$ & $5$ & \emph{funde}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent E o critério que os arruma \textbf{dispensa olhar para o corpo}: uma leitura
+com menos endereços distintos do que o corpo tem objectos funde \emph{por contagem}. É
+o princípio da gaveta a fazer o trabalho, e acerta nos seis --- \emph{nenhum invariante
+numérico separa um corpo com mais graus de liberdade do que ele tem valores}.
+
+\medskip\noindent Isso arruma sob a mesma luz as falhas já vistas: a cifra
+$(\operatorname{tr},\det)$, o polinómio mínimo e a dimensão são todos \textbf{resumos},
+e resumir é exactamente perder o endereço. \emph{A leitura que serve não é a mais
+informativa nem a mais bonita: é a que tem endereços que cheguem.}
+
+\medido{o terceiro lote em \code{tests/pgwire.c} §W137 --- $3$ leituras a herdarem e $3$
+a fundirem, com a contagem a prever as seis; \emph{e os objectos contados pela igualdade
+do corpo}, não pelos parâmetros --- no corte são as $39$ classes e não os $55$ pares, e
+a primeira escrita errou-o.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias
