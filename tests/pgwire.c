@@ -10720,6 +10720,155 @@ int main(void){
            " CICLA, que não é o que a lei pede.", mal == 0);
     }
 
+
+    /* ═══ §W81: D DESCE O GRAU E ∫ SOBE — E AQUI ELES SÃO μ E ζ ════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W81 ζ acumula, μ diferencia: o par adjunto, em matrizes.\n\n");
+        { const char *tabs[] = { "Z","M","Z3","M3" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w81__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w81__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w81.mem"); unlink("/tmp/pgwire_w81.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w81")) mal++;
+
+        /* ── A PARTE V DO PAPER DIZ: «o operador D = d/dt DESCE o grau
+         * (tⁿ ↦ n·tⁿ⁻¹) — é o gato que MEDE; o integral SOBE o grau — acumula;
+         * D e ∫ são o par ADJUNTO do corpo diferencial». E esta casa já tem esse
+         * par, com outro nome e no discreto: o `aranha` §sec:zeta diz que
+         * «escrever é a convolução com ζ, que ACUMULA; recuperar é a
+         * deconvolução com μ», e que na base canónica os dois são MATRIZES
+         * triangulares inferiores.
+         *
+         * Então não há nada a construir: põe-se ζ como tabela — a triangular
+         * inferior de uns — e pergunta-se ao motor. */
+        sql_executa("CREATE TABLE Z (a RACIONAL, b RACIONAL, c RACIONAL, d RACIONAL)", &o);
+        sql_executa("INSERT INTO Z VALUES (1,0,0,0), (1,1,0,0), (1,1,1,0), (1,1,1,1)", &o);
+        sql_executa("CREATE TABLE M (a RACIONAL, b RACIONAL, c RACIONAL, d RACIONAL)", &o);
+        sql_executa("INSERT INTO M VALUES (1,0,0,0), (-1,1,0,0), (0,-1,1,0), (0,0,-1,1)", &o);
+
+        /* (1) são inversas NOS DOIS SENTIDOS — e pedir os dois produtos, em vez
+         * de um, é o que distingue «inversa» de «inversa à esquerda» */
+        sql_executa("SELECT produto(M) FROM Z", &o);
+        int zm = o.ok && o.nrows == 4;
+        if(zm) for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+            if(atol(o.cell[i][j]) != (i == j)) zm = 0;
+        sql_executa("SELECT produto(Z) FROM M", &o);
+        int mz = o.ok && o.nrows == 4;
+        if(mz) for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+            if(atol(o.cell[i][j]) != (i == j)) mz = 0;
+        printf("      ζ·μ = I: %s · μ·ζ = I: %s — inversa dos DOIS lados\n",
+               zm ? "sim" : "MAU", mz ? "sim" : "MAU");
+        if(!zm || !mz) mal++;
+
+        /* (2) E μ EXISTE NOS INTEIROS PORQUE det ζ = 1. Não é um acidente da
+         * escolha: é o FACTOR UNITÁRIO desta casa — «|det| = 1, factor unitário
+         * e inversa inteira são três nomes da mesma condição». A deconvolução
+         * não sai do andar dos inteiros porque a convolução não perdeu volume. */
+        sql_executa("SELECT det(*) FROM Z", &o);
+        int d1 = o.ok && !strcmp(o.cell[0][0], "1");
+        printf("      det ζ = %s → a inversa é INTEIRA: é o factor unitário, e é"
+               " por isso que μ não sai de ℤ\n", d1 ? "1" : "MAU");
+        if(!d1) mal++;
+
+        /* (3) E O MOTOR CONSTRÓI μ SOZINHO, em 3×3 — o tecto da inversa é
+         * metade, pela matriz aumentada, e diz-se em vez de se contornar. O que
+         * ele devolve tem de ser a diferença: 1 na diagonal, −1 na subdiagonal,
+         * zero em todo o resto. */
+        sql_executa("CREATE TABLE Z3 (a RACIONAL, b RACIONAL, c RACIONAL)", &o);
+        sql_executa("INSERT INTO Z3 VALUES (1,0,0), (1,1,0), (1,1,1)", &o);
+        sql_executa("SELECT inversa(*) FROM Z3", &o);
+        int inv = o.ok && o.nrows == 3;
+        if(inv) for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+            long e = (i == j) ? 1 : (i == j + 1) ? -1 : 0;
+            if(atol(o.cell[i][j]) != e) inv = 0;
+        }
+        printf("      o motor inverte ζ e sai a DIFERENÇA (1 na diagonal, −1 na"
+               " subdiagonal): %s\n", inv ? "sim" : "FALHOU");
+        if(!inv) mal++;
+        sql_executa("SELECT inversa(*) FROM Z", &o);
+        int tecto = !o.ok && strstr(o.err, "too large") != NULL;
+        printf("        e em 4×4 recusa pelo tecto próprio da inversa: %s\n",
+               tecto ? "sim, e diz porquê" : "MAU");
+        if(!tecto) mal++;
+
+        /* ── (4) E AGORA O GRAU, que é o que a Parte V afirma. ζ aplicado a uma
+         * constante dá 1,2,3,4 — a recta; outra vez, dá as triangulares. SOBE o
+         * grau, uma unidade de cada vez. E μ desce-o: aplicado d+1 vezes a um
+         * polinómio de grau d, ANULA — que é a forma discreta e exacta de «a
+         * derivada de ordem d+1 de um polinómio de grau d é zero».
+         *
+         * Isto não precisa de limite nenhum: é o `project-calculo-exacto` desta
+         * casa — «a derivada é uma AVALIAÇÃO e não um limite» — no andar em que
+         * a diferença é a derivada. */
+        long v[8];
+        int sobe = 1, desce = 1;
+        for(int g = 0; g <= 3 && sobe; g++){
+            /* o polinómio de grau g avaliado em 0..7 */
+            for(int n = 0; n < 8; n++){
+                long t = 1;
+                for(int e = 0; e < g; e++) t *= n;
+                v[n] = t;
+            }
+            /* μ aplicado g+1 vezes tem de anular; g vezes, NÃO */
+            long w[8]; memcpy(w, v, sizeof v);
+            for(int r = 0; r <= g; r++){
+                long z2[8]; z2[0] = w[0];
+                for(int n = 1; n < 8; n++) z2[n] = w[n] - w[n-1];
+                memcpy(w, z2, sizeof z2);
+                if(r < g){                       /* ainda não devia anular */
+                    int tudo0 = 1;
+                    for(int n = g + 1; n < 8; n++) if(w[n]) tudo0 = 0;
+                    if(tudo0 && g > 0) desce = 0;
+                }
+            }
+            for(int n = g + 1; n < 8; n++) if(w[n] != 0) sobe = 0;
+        }
+        printf("      μ aplicado d+1 vezes a um polinómio de grau d anula, para"
+               " d = 0..3: %s\n", sobe ? "sim — DESCE o grau" : "FALHOU");
+        printf("        e antes disso NÃO anula (senão «desce» não diria nada): %s\n",
+               desce ? "confirmado" : "FALHOU");
+        if(!sobe || !desce) mal++;
+
+        /* e ζ sobe: as somas parciais de (1,1,1,1,…) são 1,2,3,4,… */
+        long u[8], ac = 0;
+        for(int n = 0; n < 8; n++){ ac += 1; u[n] = ac; }
+        int recta = 1;
+        for(int n = 0; n < 8; n++) if(u[n] != n + 1) recta = 0;
+        long tri[8]; ac = 0;
+        for(int n = 0; n < 8; n++){ ac += u[n]; tri[n] = ac; }
+        int triang = (tri[0] == 1 && tri[1] == 3 && tri[2] == 6 && tri[3] == 10);
+        printf("      ζ sobe: a constante vira a RECTA (%s) e a recta vira as"
+               " TRIANGULARES 1,3,6,10 (%s)\n",
+               recta ? "sim" : "MAU", triang ? "sim" : "MAU");
+        if(!recta || !triang) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("D DESCE O GRAU E ∫ SOBE — E NESTA CASA ELES JÁ EXISTIAM COMO μ E ζ, quando ninguém"
+           " os tinha posto lado a lado. A Parte V do paper diz «o operador D desce o grau, é"
+           " o gato que MEDE; o integral sobe o grau, acumula; e D e ∫ são o par ADJUNTO do"
+           " corpo diferencial»; o `aranha` §sec:zeta diz «escrever é a convolução com ζ, que"
+           " ACUMULA; recuperar é a deconvolução com μ», e que na base canónica os dois são"
+           " MATRIZES triangulares. Não houve nada a construir: pôs-se ζ como tabela — a"
+           " triangular inferior de uns — e perguntou-se ao motor. SÃO INVERSAS DOS DOIS"
+           " LADOS, e pedir os dois produtos em vez de um é o que distingue «inversa» de"
+           " «inversa à esquerda». E μ EXISTE NOS INTEIROS PORQUE det ζ = 1: não é um"
+           " acidente da escolha, é o FACTOR UNITÁRIO desta casa — «|det| = 1, factor unitário"
+           " e inversa inteira são três nomes da mesma condição» —, e a deconvolução não sai"
+           " do andar porque a convolução não perdeu volume. O motor constrói μ sozinho em"
+           " 3×3 e sai a DIFERENÇA; em 4×4 recusa pelo tecto próprio da inversa, que diz"
+           " porquê. E O GRAU FECHA A AFIRMAÇÃO: μ aplicado d+1 vezes a um polinómio de grau"
+           " d ANULA — a forma discreta e exacta de «a derivada de ordem d+1 de um polinómio"
+           " de grau d é zero» —, e antes disso NÃO anula, sem o que «desce o grau» não diria"
+           " nada. Do outro lado ζ sobe: a constante vira a recta, e a recta vira as"
+           " triangulares 1,3,6,10. Nenhum limite entra em parte nenhuma.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

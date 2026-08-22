@@ -3809,6 +3809,39 @@ ficava medido só onde a órbita \emph{cicla}, que não é o que a lei pede.
         {o núcleo como subespaço; $A^{s+t}=A^{s}A^{t}$ pelo \code{produto}}
         {\code{tests/pgwire.c} §W80}
 
+\medskip\noindent\textbf{E $D$ e $\int$ já existiam aqui como $\mu$ e $\zeta$ ---
+faltava pô-los lado a lado.} O paper: «$D$ \emph{desce} o grau, é o gato que mede;
+$\int$ \emph{sobe} o grau, acumula; e são o par \textbf{adjunto} do corpo
+diferencial». O \code{aranha} §\code{sec:zeta}: «escrever é a convolução com
+$\zeta$, que \emph{acumula}; recuperar é a deconvolução com $\mu$» --- e na base
+canónica os dois são \textbf{matrizes} triangulares. Não houve nada a construir:
+põe-se $\zeta$ como tabela (a triangular inferior de uns) e pergunta-se ao motor.
+
+\medskip\noindent São inversas \textbf{dos dois lados} --- e pedir os dois produtos
+em vez de um é o que distingue «inversa» de «inversa à esquerda». E
+\[
+\det\zeta=1\;\Longrightarrow\;\zeta^{-1}\ \text{inteira},
+\]
+que não é acidente da escolha: é o \textbf{fator unitário} desta casa --- «$\lvert\det\rvert=1$,
+fator unitário e inversa inteira são três nomes da mesma condição» ---, e a
+deconvolução não sai do andar dos inteiros porque a convolução não perdeu volume. O
+motor inverte $\zeta$ sozinho em $3\times3$ e sai a \emph{diferença}; em $4\times4$
+recusa pelo teto próprio da inversa, dizendo porquê.
+
+\medskip\noindent\textbf{E o grau fecha a afirmação.} $\mu$ aplicado $d+1$ vezes a
+um polinómio de grau $d$ \textbf{anula} --- a forma discreta e exata de «a derivada
+de ordem $d+1$ de um polinómio de grau $d$ é zero» --- e antes disso \emph{não}
+anula, sem o que «desce o grau» não diria nada. Do outro lado $\zeta$ sobe: a
+constante vira a reta, a reta vira as triangulares $1,3,6,10$. Nenhum limite entra
+em parte nenhuma, que é o \code{calculo-exacto} desta casa no andar em que a
+diferença \emph{é} a derivada.
+
+\medido{\code{tests/pgwire.c} §W81.}
+
+\colunas{\code{aranha sec:zeta}, \code{thm:zeta-mu}; \code{broca-so} (Parte V)}
+        {$\zeta$ e $\mu$ como tabelas; \code{inversa}/\code{produto}/\code{det} pelo motor}
+        {\code{tests/pgwire.c} §W81}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
