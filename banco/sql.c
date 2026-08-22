@@ -358,6 +358,36 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define R_NOTNULL 1
 #define R_UNICO   2
 
+/* ── A SETA ENTRE DUAS TABELAS ────────────────────────────────────────────────
+ *
+ * `REFERENCES mae(col)` declara uma SETA: cada linha desta tabela aponta para
+ * uma linha daquela. É o mesmo caminho que o JOIN percorre a cada consulta,
+ * dito UMA vez na tabela em vez de escrito a cada pergunta — e por ser dito,
+ * pode ser EXIGIDO.
+ *
+ * O que a exigência diz é que a seta está BEM DEFINIDA, e isso tem duas metades
+ * que são uma o dual da outra:
+ *
+ *   à ENTRADA  — escrever um valor que não está do outro lado é criar uma seta
+ *                para lado nenhum. Recusa-se no INSERT e no UPDATE.
+ *   à SAÍDA    — apagar a linha apontada é cortar a seta por baixo, deixando o
+ *                que aponta a apontar para nada. Recusa-se no DELETE.
+ *
+ * Medir só a primeira era o defeito clássico desta casa: metade do par. E a
+ * segunda precisa de uma coisa que a primeira não precisa — saber QUEM aponta
+ * para mim —, pelo que a declaração escreve nos DOIS lados: a filha guarda para
+ * onde aponta, e a mãe guarda quem a aponta. É a mesma dualidade da árvore, que
+ * guarda a chave e o sítio.
+ *
+ * A ausência não é uma seta: uma célula NULL não aponta para nada e nada exige.
+ * (`thm:bitunico` outra vez — o dual não é um valor.) */
+#define S_FK      (ISA_TECTO + ZONA(11))  /* por coluna: .total = col_alvo+1, 0 = sem seta */
+#define S_FKNOME  (ISA_TECTO + ZONA(12))  /* por coluna: 16 Words = 32 chars, a tabela alvo */
+#define S_FILHOS  (ISA_TECTO + ZONA(13))  /* na MÃE: {quantos,0} e depois blocos de 17 */
+#define FK_NOME_W 16u
+#define FK_BLOCO  17u                     /* 16 Words de nome + 1 Word com a coluna */
+#define FK_MAXFIL 16
+
 /* ── UM ÍNDICE POR COLUNA, e cada um na sua zona ─────────────────────────────
  *
  * Havia um só, e por isso uma condição composta só podia descer de um lado.
@@ -999,6 +1029,119 @@ static void col_nome_le(int j, char *out, int cap){
         out[k++] = (char)w.e;
     }
     if(k < cap) out[k] = 0; else out[cap - 1] = 0;
+}
+
+/* ── a seta: escrita e leitura, nos dois lados ───────────────────────────── */
+/* texto curto em Words: dois caracteres por Word, terminado a zero */
+static void txt_grava(unsigned base, unsigned nw, const char *t){
+    for(unsigned k = 0; k < nw; k++){
+        Word w;
+        w.total = (Word8)(t[2*k] ? (unsigned char)t[2*k] : 0);
+        w.e     = (Word8)(t[2*k] && t[2*k+1] ? (unsigned char)t[2*k+1] : 0);
+        mem_grava(base + k, w);
+        if(!t[2*k] || !t[2*k+1]) { for(unsigned j = k+1; j < nw; j++){ Word z={0,0}; mem_grava(base+j, z);} break; }
+    }
+}
+static void txt_le(unsigned base, unsigned nw, char *out, size_t cap){
+    size_t o = 0;
+    for(unsigned k = 0; k < nw && o + 2 < cap; k++){
+        Word w = mem_le(base + k);
+        if(!w.total) break;
+        out[o++] = (char)w.total;
+        if(!w.e) break;
+        out[o++] = (char)w.e;
+    }
+    out[o] = 0;
+}
+
+/* e o nome da tabela normaliza-se como o das colunas: a letra é a mesma */
+static void fk_txt_grava(unsigned base, const char *nome){
+    char n[FK_NOME_W * 2 + 2];
+    unsigned i;
+    snprintf(n, sizeof n, "%s", nome ? nome : "");
+    for(i = 0; n[i]; i++) n[i] = baixa1(n[i]);
+    txt_grava(base, FK_NOME_W, n);
+}
+/* na FILHA: a coluna j aponta para tab(col). Devolve a coluna alvo, ou −1. */
+static void fk_grava(int j, const char *tab, int col){
+    if(j < 0 || j >= 16) return;
+    { Word w; w.total = (Word8)(col + 1); w.e = 0; mem_grava(S_FK + (unsigned)j, w); }
+    fk_txt_grava(S_FKNOME + (unsigned)j * FK_NOME_W, tab);
+}
+static int fk_le(int j, char *tab, int cap){
+    if(j < 0 || j >= 16) return -1;
+    { long t = mem_le(S_FK + (unsigned)j).total;
+      if(!t) return -1;
+      if(tab) txt_le(S_FKNOME + (unsigned)j * FK_NOME_W, FK_NOME_W, tab, (size_t)cap);
+      return (int)t - 1; }
+}
+/* na MÃE: quem aponta para mim. A lista não repete — declarar duas vezes a
+ * mesma seta não a torna duas setas. */
+static void filho_regista(const char *tab, int col){
+    long n = mem_le(S_FILHOS).total, k;
+    char q[64];
+    for(k = 0; k < n && k < FK_MAXFIL; k++){
+        unsigned b = S_FILHOS + 1 + (unsigned)k * FK_BLOCO;
+        txt_le(b, FK_NOME_W, q, sizeof q);
+        if(!strcmp(q, tab) && mem_le(b + FK_NOME_W).total == (Word8)col) return;
+    }
+    if(n >= FK_MAXFIL) return;                 /* cheio: a mãe deixa de vigiar */
+    { unsigned b = S_FILHOS + 1 + (unsigned)n * FK_BLOCO;
+      fk_txt_grava(b, tab);
+      { Word w; w.total = (Word8)col; w.e = 0; mem_grava(b + FK_NOME_W, w); }
+      { Word c; c.total = (Word8)(n + 1); c.e = 0; mem_grava(S_FILHOS, c); } }
+}
+static int filho_le(int k, char *tab, int cap){
+    long n = mem_le(S_FILHOS).total;
+    if(k < 0 || k >= n || k >= FK_MAXFIL) return -1;
+    { unsigned b = S_FILHOS + 1 + (unsigned)k * FK_BLOCO;
+      txt_le(b, FK_NOME_W, tab, (size_t)cap);
+      return (int)mem_le(b + FK_NOME_W).total; }
+}
+static int filho_quantos(void){
+    long n = mem_le(S_FILHOS).total;
+    return (int)(n > FK_MAXFIL ? FK_MAXFIL : n);
+}
+
+/* a árvore vive mais abaixo; o CREATE precisa dela para o UNIQUE nascer com a
+ * sua testemunha, e o INSERT precisa da descida para saber se a chave já lá está */
+static int idx_constroi(long col, long ncols, long nrows);
+static int idx_valido(long col, long nrows);
+static int j_casam(long v, int *saida, int cap);
+static void ord_usa_indice(long col);
+static void ord_usa_rascunho(void);
+static long celula_valor(long i, long j, long ncols);
+
+/* ── ATRAVESSAR A SETA, E VOLTAR ─────────────────────────────────────────────
+ * Vai à tabela apontada, procura o valor na coluna apontada, e VOLTA. O voltar
+ * não é cortesia: abrir outra tabela relê o `.mem`, pelo que a decisão tem de
+ * ser tomada com ela aberta e trazida em memória local — foi assim que a
+ * subconsulta teve de ser escrita, e é a mesma razão.
+ *
+ * Devolve 1 se o valor está lá, 0 se não está, −1 se a tabela ou a coluna não
+ * puderam ser lidas (que é diferente de «não está» e não pode ser confundido
+ * com ele). */
+static int fk_existe(const char *tab, int col, long valor, const char *guarda){
+    int achou = 0;
+    if(!usa_tabela(tab, 0) || !cat_nome_bate(tab)){ usa_tabela(guarda, 0); return -1; }
+    { long nc = mem_le(S_CAT).total, nr = cat_nrows();
+      if(col < 0 || col >= nc){ usa_tabela(guarda, 0); return -1; }
+      /* a árvore, se a houver — e numa coluna UNIQUE há sempre */
+      if(col < IDX_MAXCOL && idx_valido(col, nr)){
+          int saida[4], q;
+          ord_usa_indice(col);
+          q = j_casam(valor, saida, 4);
+          ord_usa_rascunho();
+          /* a árvore diz onde a linha ESTAVA; o vivo diz se ela ainda está */
+          for(int t = 0; t < q && !achou; t++)
+              if(saida[t] >= 0 && saida[t] < nr && bit_le(S_VIVO, saida[t])) achou = 1;
+      } else {
+          for(long i = 0; i < nr && !achou; i++)
+              if(bit_le(S_VIVO, i) && bit_le(S_PRES, i*nc + col)
+                 && celula_valor(i, col, nc) == valor) achou = 1;
+      } }
+    usa_tabela(guarda, 0);
+    return achou;
 }
 
 /* a tabela tem nomes guardados? (base antiga: não) */
@@ -1720,14 +1863,6 @@ static int ident(const char **p, char *out, size_t cap){
 }
 
 /* ---------------- os comandos ---------------- */
-/* a árvore vive mais abaixo; o CREATE precisa dela para o UNIQUE nascer com a
- * sua testemunha, e o INSERT precisa da descida para saber se a chave já lá está */
-static int idx_constroi(long col, long ncols, long nrows);
-static int idx_valido(long col, long nrows);
-static int j_casam(long v, int *saida, int cap);
-static void ord_usa_indice(long col);
-static void ord_usa_rascunho(void);
-static long celula_valor(long i, long j, long ncols);
 
 static int cria(const char *resto){
     const char *p = resto;
@@ -1743,7 +1878,8 @@ static int cria(const char *resto){
     pula(&p); if(*p != '(') return 0; p++;
     long ncols = 0; char c[64];
     long corpo[16], parm[16], restr[16];
-    for(int q = 0; q < 16; q++) restr[q] = 0;
+    char fk_tab[16][64], fk_alvo[16][64]; long fk_col[16];
+    for(int q = 0; q < 16; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0; fk_col[q] = -1; }
     while(1){
         if(!ident(&p, c, sizeof c)) break;
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
@@ -1780,6 +1916,22 @@ static int cria(const char *resto){
                 else { p = v2; break; }
             }
             else if(!strcasecmp(r, "UNIQUE")) restr[ncols] |= R_UNICO;
+            else if(!strcasecmp(r, "REFERENCES")){
+                /* `REFERENCES mae(col)` — e a coluna alvo diz-se: sem ela o
+                 * motor teria de adivinhar qual das colunas da mãe é a chave. */
+                char mt[64], mc[64];
+                pula(&p);
+                if(!ident(&p, mt, sizeof mt)){ p = v2; break; }
+                pula(&p);
+                if(*p != '('){ p = v2; break; }
+                p++;
+                if(!ident(&p, mc, sizeof mc)){ p = v2; break; }
+                pula(&p);
+                if(*p != ')'){ p = v2; break; }
+                p++;
+                snprintf(fk_tab[ncols], 64, "%s", mt);
+                snprintf(fk_alvo[ncols], 64, "%s", mc);
+            }
             else if(!strcasecmp(r, "PRIMARY")){
                 pula(&p);
                 if(palavra(&p, "KEY")) restr[ncols] |= R_UNICO | R_NOTNULL;
@@ -1815,6 +1967,44 @@ static int cria(const char *resto){
     }
     for(long j = 0; j < ncols && j < IDX_MAXCOL; j++)
         if(restr[j] & R_UNICO) idx_constroi(j, ncols, 0);
+
+    /* ── E A SETA ESCREVE-SE NOS DOIS LADOS ──────────────────────────────────
+     * A filha guarda para onde aponta; a mãe guarda quem a aponta. Sem o
+     * segundo lado, o DELETE na mãe não teria como saber que está a cortar uma
+     * seta por baixo — e uma restrição com metade não é uma restrição.
+     *
+     * A ida à mãe faz-se AQUI, com a filha já escrita, e volta-se: abrir outra
+     * tabela relê o .mem, e o que se escreveu antes de sair fica. */
+    { int alguma = 0;
+      for(long j = 0; j < ncols && j < 16; j++) if(fk_tab[j][0]) alguma = 1;
+      if(alguma){
+        char guarda[64]; snprintf(guarda, sizeof guarda, "%s", nome);
+        for(long j = 0; j < ncols && j < 16; j++){
+            if(!fk_tab[j][0]) continue;
+            if(!usa_tabela(fk_tab[j], 0) || !cat_nome_bate(fk_tab[j])){
+                usa_tabela(guarda, 0);
+                printf("erro: a tabela «%s» da seta não existe — a coluna %ld fica"
+                       " SEM seta (a tabela foi criada).\n", fk_tab[j], j);
+                fk_tab[j][0] = 0;
+                continue;
+            }
+            { int mc = col_indice(fk_alvo[j]);
+              if(mc < 0){
+                usa_tabela(guarda, 0);
+                printf("erro: a coluna «%s» não existe em «%s» — a coluna %ld fica"
+                       " SEM seta.\n", fk_alvo[j], fk_tab[j], j);
+                fk_tab[j][0] = 0;
+                continue;
+              }
+              /* a mãe regista quem a aponta, e só depois se volta */
+              filho_regista(guarda, (int)j);
+              fk_col[j] = mc;
+            }
+            usa_tabela(guarda, 0);
+        }
+        for(long j = 0; j < ncols && j < 16; j++)
+            if(fk_tab[j][0] && fk_col[j] >= 0) fk_grava((int)j, fk_tab[j], (int)fk_col[j]);
+      } }
     {
         static const char *nm[8] = {"INTEIRO","RACIONAL","AUREO","MORFICO","CRISTALINO",
                                     "INTEIRO","INTEIRO","INTEIRO"};
@@ -1863,28 +2053,6 @@ static void vista_entra(char *guarda, size_t cap){
 }
 static void vista_sai(const char *guarda){
     usa_tabela(guarda, 0);
-}
-
-/* texto curto em Words: dois caracteres por Word, terminado a zero */
-static void txt_grava(unsigned base, unsigned nw, const char *t){
-    for(unsigned k = 0; k < nw; k++){
-        Word w;
-        w.total = (Word8)(t[2*k] ? (unsigned char)t[2*k] : 0);
-        w.e     = (Word8)(t[2*k] && t[2*k+1] ? (unsigned char)t[2*k+1] : 0);
-        mem_grava(base + k, w);
-        if(!t[2*k] || !t[2*k+1]) { for(unsigned j = k+1; j < nw; j++){ Word z={0,0}; mem_grava(base+j, z);} break; }
-    }
-}
-static void txt_le(unsigned base, unsigned nw, char *out, size_t cap){
-    size_t o = 0;
-    for(unsigned k = 0; k < nw && o + 2 < cap; k++){
-        Word w = mem_le(base + k);
-        if(!w.total) break;
-        out[o++] = (char)w.total;
-        if(!w.e) break;
-        out[o++] = (char)w.e;
-    }
-    out[o] = 0;
 }
 
 static int idx_valido(long col, long nrows);
@@ -2020,6 +2188,26 @@ static int insere(const char *resto){
      * recusada — não meia linha. `NOT NULL` recusa o suporte; `UNIQUE` recusa a
      * segunda folha da fibra, e quem responde é a ÁRVORE: uma descida, não uma
      * varredura, pelo que o custo é a profundidade e não o tamanho. */
+    /* ── A SETA TEM DE APONTAR PARA ALGUMA COISA ─────────────────────────────
+     * Escrever um valor que não está do outro lado é criar uma seta para lado
+     * nenhum. A ausência não é uma seta: uma célula NULL não aponta e nada
+     * exige. Corre ANTES de a ISA escrever, e a linha inteira é recusada. */
+    for(long j = 0; j < ncols && j < 16; j++){
+        char mt[64];
+        int mc = fk_le((int)j, mt, sizeof mt);
+        if(mc < 0 || j >= nv || nulo[j]) continue;
+        { int e = fk_existe(mt, mc, v[j], nome);
+          if(e == 1) continue;
+          printf("erro: a coluna %ld aponta para «%s» e o valor %ld %s —"
+                 " RECUSADA.\n", j, mt, v[j],
+                 e == 0 ? "não está lá" : "não pôde ser procurado");
+          if(sql_cap){ sql_cap->ok = 0;
+              snprintf(sql_cap->err, sizeof sql_cap->err,
+                       "insert or update violates foreign key constraint on"
+                       " column %ld", j); }
+          return 0; }
+    }
+
     for(long j = 0; j < ncols && j < 16; j++){
         long r = mem_le(S_RESTR + (unsigned)j).total;
         if(!r) continue;
@@ -2035,9 +2223,18 @@ static int insere(const char *resto){
             int achados[4], quantos;
             if(!idx_valido(j, nrows)) idx_constroi(j, ncols, nrows);
             if(idx_valido(j, nrows)){
+                int q;
                 ord_usa_indice(j);
-                quantos = j_casam(v[j], achados, 4);
+                q = j_casam(v[j], achados, 4);
                 ord_usa_rascunho();
+                /* A ÁRVORE DIZ ONDE A LINHA ESTAVA; O VIVO DIZ SE ELA AINDA
+                 * ESTÁ. O DELETE não tira a chave — só apaga o bit —, pelo que
+                 * sem este filtro o valor de uma linha apagada ficava reservado
+                 * para sempre e o UNIQUE recusava a sua própria reutilização. */
+                quantos = 0;
+                for(int t = 0; t < q && !quantos; t++)
+                    if(achados[t] >= 0 && achados[t] < nrows
+                       && bit_le(S_VIVO, achados[t])) quantos = 1;
             } else {
                 /* a árvore não coube: a rede é a varredura, e recusar por não
                  * saber seria pior do que responder devagar */
@@ -4903,6 +5100,78 @@ static int varre(const char *resto, int acao){
      * UNIQUE é a segunda folha da fibra a entrar pela outra porta. Recusa-se
      * ANTES do compromisso, com o diário ainda fechado — a linha inteira fica
      * como estava. */
+    /* ── A SETA, NAS DUAS DIRECÇÕES ──────────────────────────────────────────
+     * À ENTRADA (UPDATE): escrever nesta coluna um valor que não está do outro
+     * lado é apontar para lado nenhum.
+     * À SAÍDA (DELETE): apagar uma linha que alguém aponta é cortar a seta por
+     * baixo. Quem responde a esta é a lista que a MÃE guarda — sem ela, o
+     * DELETE não teria como saber que existe alguém a apontar, e a restrição
+     * teria só metade. */
+    if(acao == ACAO_SET && col_set >= 0 && col_set < 16 && achou > 0 && !set_anula){
+        char mt[64];
+        int mc = fk_le(col_set, mt, sizeof mt);
+        if(mc >= 0){
+            int e = fk_existe(mt, mc, v, nome);
+            if(e != 1){
+                printf("erro: a coluna %d aponta para «%s» e o valor %ld %s —"
+                       " RECUSADO.\n", col_set, mt, v,
+                       e == 0 ? "não está lá" : "não pôde ser procurado");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "insert or update violates foreign key constraint on"
+                             " column %d", col_set); }
+                return 0;
+            }
+        }
+    }
+    if(acao == ACAO_APAGA && achou > 0 && filho_quantos() > 0){
+        int nf = filho_quantos(), preso = 0;
+        char ft[64], guarda[64];
+        snprintf(guarda, sizeof guarda, "%s", nome);
+        for(int k = 0; k < nf && !preso; k++){
+            int fc = filho_le(k, ft, sizeof ft);
+            if(fc < 0) continue;
+            /* os valores que vão desaparecer, recolhidos ANTES de trocar de
+             * tabela — a decisão toma-se com a filha aberta e traz-se em
+             * memória local, que é a mesma regra da subconsulta */
+            { long alvos[MAXLIN]; int na = 0;
+              for(long i = 0; i < nrows && na < MAXLIN; i++){
+                  if(!bit_le(S_MATCH, i)) continue;
+                  alvos[na++] = i;    /* qual coluna é a apontada di-lo a filha */
+              }
+              if(!usa_tabela(ft, 0) || !cat_nome_bate(ft)){ usa_tabela(guarda, 0); continue; }
+              { long fnc = mem_le(S_CAT).total, fnr = cat_nrows();
+                char mt2[64];
+                int mcol = fk_le(fc, mt2, sizeof mt2);
+                /* a filha aponta para esta tabela? (pode apontar para outra) */
+                if(mcol >= 0 && !strcmp(mt2, guarda)){
+                    /* recolhe os valores que a filha usa */
+                    long usados[MAXLIN]; int nu = 0;
+                    for(long i = 0; i < fnr && nu < MAXLIN; i++)
+                        if(bit_le(S_VIVO, i) && bit_le(S_PRES, i*fnc + fc))
+                            usados[nu++] = celula_valor(i, fc, fnc);
+                    usa_tabela(guarda, 0);
+                    for(int t = 0; t < na && !preso; t++)
+                        for(int u = 0; u < nu && !preso; u++)
+                            if(celula_valor(alvos[t], mcol, ncols) == usados[u]
+                               && bit_le(S_PRES, alvos[t]*ncols + mcol)){
+                                preso = 1;
+                                printf("erro: a linha com %ld é apontada por «%s» —"
+                                       " apagá-la cortava a seta por baixo. RECUSADO.\n",
+                                       usados[u], ft);
+                            }
+                } else usa_tabela(guarda, 0);
+              } }
+        }
+        if(preso){
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "update or delete violates foreign key constraint on"
+                         " referencing table"); }
+            return 0;
+        }
+    }
+
     if(acao == ACAO_SET && col_set >= 0 && col_set < 16 && achou > 0){
         long r = mem_le(S_RESTR + (unsigned)col_set).total;
         if((r & R_NOTNULL) && set_anula){
@@ -6748,6 +7017,37 @@ static int executa(const char *sql){
                          "table \"%s\" does not exist", nome); }
             return 0;
         }
+        /* ── E UMA MÃE APONTADA NÃO SE LARGA ─────────────────────────────
+         * Largar o ficheiro deixaria as setas da filha a apontar para um sítio
+         * que já não existe, e o motor a responder «não pôde ser procurado» a
+         * cada escrita — um estado que ninguém declarou e do qual não se sai.
+         * É a mesma exigência do DELETE, um andar acima: lá a linha, aqui a
+         * tabela inteira. Larga-se primeiro quem aponta. */
+        { char guarda[64];
+          snprintf(guarda, sizeof guarda, "%s", g_tabela);
+          if(usa_tabela(nome, 0) && cat_nome_bate(nome)){
+              int nf = filho_quantos(), preso = 0;
+              char ft[64], presa[64];
+              presa[0] = 0;
+              for(int k = 0; k < nf; k++){
+                  int fc = filho_le(k, ft, sizeof ft);
+                  if(fc < 0) continue;
+                  if(!tabela_existe(ft)) continue;    /* a filha já foi largada */
+                  preso = 1; snprintf(presa, sizeof presa, "%s", ft);
+                  break;
+              }
+              usa_tabela(guarda, 0);
+              if(preso){
+                  printf("erro: «%s» é apontada por «%s» — largá-la deixava as setas"
+                         " no vazio. RECUSADA (larga-se primeiro quem aponta).\n",
+                         nome, presa);
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "cannot drop table \"%s\" because other objects"
+                               " depend on it", nome); }
+                  return 0;
+              }
+          } else usa_tabela(guarda, 0); }
         if(!strcmp(g_tabela, nome)) usa_tabela("", 0);   /* larga o descritor primeiro */
         { char m[600], pr[600];
           caminho_tabela(nome, m, sizeof m, ".mem");

@@ -4749,6 +4749,24 @@ int main(void){
                p_uni, n_uni, p_var, desce ? "" : "NAO BATE");
         if(!desce) mal++;
 
+        /* ── (5b) O VALOR APAGADO TEM DE PODER VOLTAR. A árvore diz onde a
+         * linha ESTAVA e o DELETE não tira a chave — só apaga o bit do vivo —,
+         * pelo que sem o filtro do vivo o UNIQUE recusava a reutilização do
+         * valor de uma linha que já não existe, e reservava-o para sempre. É a
+         * mesma frase que o índice já dizia à leitura, aplicada à recusa. */
+        sql_executa("CREATE TABLE q (id UNIQUE, y)", &o);
+        sql_executa("INSERT INTO q VALUES (1,10)", &o);
+        sql_executa("INSERT INTO q VALUES (2,20)", &o);
+        int b1 = sql_executa("INSERT INTO q VALUES (2,30)", &o);   /* vivo: recusa */
+        sql_executa("DELETE FROM q WHERE id = 2", &o);
+        int b2 = sql_executa("INSERT INTO q VALUES (2,99)", &o);   /* morto: entra */
+        sql_executa("SELECT * FROM q WHERE id = 2", &o);
+        int volta = (!b1 && b2 && o.nrows == 1 && !strcmp(o.cell[0][1], "99"));
+        printf("      o valor apagado volta: com a linha viva %d · depois de"
+               " apagada %d → id=2 vale %s (esp 99)  %s\n", b1, b2,
+               o.nrows ? o.cell[0][1] : "?", volta ? "" : "NAO BATE");
+        if(!volta) mal++;
+
         /* ── (6) E `PRIMARY KEY` É A CONJUNÇÃO, não uma terceira coisa: UMA
          * declaração recusa as DUAS quebras, e não recusa o que nenhuma das
          * duas recusaria. Se fosse um sinónimo de UNIQUE, o nulo passava; se
@@ -4802,7 +4820,152 @@ int main(void){
            " `id = 7` custa zero passos de ISA e nós contados, contra uma varredura na"
            " coluna sem restrição. O CONTROLO é a tabela sem restrição nenhuma, onde as"
            " MESMAS linhas entram todas: sem ele, uma recusa por qualquer outro motivo"
-           " passava por restrição.",
+           " passava por restrição. E há uma metade que só a árvore explica: o valor de uma"
+           " linha APAGADA tem de poder voltar. O DELETE não tira a chave — só apaga o bit"
+           " do vivo —, pelo que a descida acha a chave de quem já não está; sem o filtro"
+           " do vivo o UNIQUE reservava para sempre o valor de uma linha que não existe. É a"
+           " mesma frase que o índice já dizia à LEITURA («a árvore diz onde a linha estava,"
+           " o vivo diz se ela ainda está»), aplicada agora à RECUSA.",
+           mal == 0);
+    }
+
+    /* ═══ §W35: A SETA ENTRE DUAS TABELAS, E AS SUAS DUAS PONTAS ════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w35.mem", "/tmp/pgwire_w35.prog",
+            "/tmp/pgwire_w35__cliente.mem", "/tmp/pgwire_w35__cliente.prog",
+            "/tmp/pgwire_w35__item.mem", "/tmp/pgwire_w35__item.prog" };
+        for(int k = 0; k < 6; k++) unlink(lixo[k]);
+        printf("\n§W35 a seta: declarada uma vez, exigida nas duas pontas.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w35")) mal++;
+        sql_executa("CREATE TABLE cliente (id UNIQUE, nome)", &o);
+        sql_executa("INSERT INTO cliente VALUES (1,10)", &o);
+        sql_executa("INSERT INTO cliente VALUES (2,20)", &o);
+        int cr = sql_executa("CREATE TABLE item (cod, dono REFERENCES cliente(id))", &o);
+
+        /* ── (1) À ENTRADA: escrever um valor que não está do outro lado é
+         * criar uma seta para lado nenhum. E a AUSÊNCIA não é uma seta — uma
+         * célula NULL não aponta e nada exige, que é o `thm:bitunico` outra
+         * vez: o dual não é um valor, logo não é um destino. */
+        int i1 = sql_executa("INSERT INTO item VALUES (100,1)", &o);
+        int i2 = sql_executa("INSERT INTO item VALUES (101,9)", &o);
+        int i3 = sql_executa("INSERT INTO item VALUES (102,NULL)", &o);
+        sql_executa("SELECT * FROM item", &o);
+        int entrada = (cr && i1 && !i2 && i3 && o.nrows == 2);
+        printf("      à entrada: o que aponta %d · o que não aponta %d · o"
+               " AUSENTE %d → %d linhas (esp 2)  %s\n", i1, i2, i3, o.nrows,
+               entrada ? "" : "NAO BATE");
+        if(!entrada) mal++;
+
+        /* ── (2) E VALE NA OUTRA PORTA: o UPDATE reescreve a mesma célula. */
+        int u1 = sql_executa("UPDATE item SET dono = 9 WHERE cod = 100", &o);
+        int u2 = sql_executa("UPDATE item SET dono = 2 WHERE cod = 100", &o);
+        printf("      pelo UPDATE: para fora %d · para dentro %d  %s\n",
+               u1, u2, (!u1 && u2) ? "" : "NAO BATE");
+        if(u1 || !u2) mal++;
+
+        /* ── (3) À SAÍDA, QUE É A METADE QUE FALTA A QUEM SÓ MEDE UMA: apagar
+         * a linha apontada corta a seta por baixo. Quem responde é a lista que
+         * a MÃE guarda — a filha sabe para onde aponta, a mãe sabe quem a
+         * aponta, e sem o segundo lado o DELETE não teria como saber. */
+        int d1 = sql_executa("DELETE FROM cliente WHERE id = 2", &o);   /* apontada */
+        int d2 = sql_executa("DELETE FROM cliente WHERE id = 1", &o);   /* livre    */
+        sql_executa("SELECT * FROM cliente", &o);
+        int saida = (!d1 && d2 && o.nrows == 1);
+        printf("      à saída: a apontada %d · a LIVRE %d → restam %d (esp 1)"
+               "  %s\n", d1, d2, o.nrows, saida ? "" : "NAO BATE");
+        if(!saida) mal++;
+
+        /* ── (4) E A PRISÃO SOLTA-SE PELO LADO CERTO. Não é a mãe que está
+         * bloqueada para sempre: é a seta que existe. Apaga-se quem aponta, e
+         * a mãe fica livre — o que mostra que o motor está a ler a seta e não
+         * a recusar a tabela inteira. */
+        int liberta = sql_executa("DELETE FROM item WHERE cod = 100", &o);
+        int d3 = sql_executa("DELETE FROM cliente WHERE id = 2", &o);
+        sql_executa("SELECT * FROM cliente", &o);
+        int solta = (liberta && d3 && o.nrows == 0);
+        printf("      e solta-se pelo lado certo: apagado quem apontava %d,"
+               " a mãe sai %d → restam %d (esp 0)  %s\n",
+               liberta, d3, o.nrows, solta ? "" : "NAO BATE");
+        if(!solta) mal++;
+
+        /* ── (5) A DECLARAÇÃO PERSISTE. A seta vive no disco, dos dois lados:
+         * fecha-se e reabre-se, e as duas pontas continuam a exigir. */
+        sql_fechar();
+        if(!sql_abrir("/tmp/pgwire_w35")) mal++;
+        sql_executa("INSERT INTO cliente VALUES (5,50)", &o);
+        int p1 = sql_executa("INSERT INTO item VALUES (200,5)", &o);
+        int p2 = sql_executa("INSERT INTO item VALUES (201,7)", &o);
+        int p3 = sql_executa("DELETE FROM cliente WHERE id = 5", &o);
+        printf("      depois de fechar e reabrir: entra %d · não entra %d ·"
+               " a mãe presa %d  %s\n", p1, p2, p3,
+               (p1 && !p2 && !p3) ? "" : "NAO BATE");
+        if(!p1 || p2 || p3) mal++;
+
+        /* ── (6) E UM ANDAR ACIMA: A MÃE APONTADA NÃO SE LARGA. Largar o
+         * ficheiro deixaria as setas da filha a apontar para um sítio que já
+         * não existe, e o motor a responder «não pôde ser procurado» a cada
+         * escrita — um estado que ninguém declarou e do qual não se sai. É a
+         * mesma exigência do DELETE com a tabela inteira no lugar da linha, e
+         * solta-se pelo mesmo lado: larga-se primeiro quem aponta. */
+        sql_executa("INSERT INTO cliente VALUES (8,80)", &o);
+        sql_executa("INSERT INTO item VALUES (300,8)", &o);
+        int dr1 = sql_executa("DROP TABLE cliente", &o);
+        sql_executa("SELECT * FROM item", &o);
+        long viva = o.nrows;
+        int dr2 = sql_executa("DROP TABLE item", &o);
+        int dr3 = sql_executa("DROP TABLE cliente", &o);
+        int andar = (!dr1 && viva > 0 && dr2 && dr3);
+        printf("      a mãe apontada não se larga: %d · a filha continua lá"
+               " (%ld linhas) · largada a filha, a mãe sai %d  %s\n",
+               dr1, viva, dr3, andar ? "" : "NAO BATE");
+        if(!andar) mal++;
+
+        /* ── O CONTROLO, e são dois. Primeiro: uma tabela SEM seta aceita os
+         * mesmos valores que a de cima recusou — senão a recusa podia vir de
+         * qualquer outra coisa. Segundo: a mãe de OUTRA tabela não fica presa
+         * pela filha desta — a lista da mãe guarda o nome, e um motor que
+         * recusasse por haver «alguma» seta na base passava no resto. */
+        sql_executa("CREATE TABLE solto (cod, dono)", &o);
+        int s1 = sql_executa("INSERT INTO solto VALUES (300,9)", &o);
+        sql_executa("CREATE TABLE outra (id UNIQUE, z)", &o);
+        sql_executa("INSERT INTO outra VALUES (7,70)", &o);
+        int s2 = sql_executa("DELETE FROM outra WHERE id = 7", &o);
+        printf("\n      CONTROLO — sem seta o valor 9 entra: %d · e a mãe de"
+               " OUTRA tabela não fica presa: %d  %s\n", s1, s2,
+               (s1 && s2) ? "" : "NAO BATE");
+        if(!s1 || !s2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A SETA ENTRE DUAS TABELAS: DECLARADA UMA VEZ, EXIGIDA NAS DUAS PONTAS."
+           " `REFERENCES mae(col)` diz que cada linha desta tabela aponta para uma linha"
+           " daquela — é o mesmo caminho que o JOIN percorre a cada consulta, dito UMA vez"
+           " na tabela em vez de escrito a cada pergunta, e é por ser dito que pode ser"
+           " EXIGIDO. O que se exige é que a seta esteja BEM DEFINIDA, e isso tem duas"
+           " metades que são uma o dual da outra: à ENTRADA, escrever um valor que não está"
+           " do outro lado é apontar para lado nenhum; à SAÍDA, apagar a linha apontada é"
+           " cortar a seta por baixo. Medir só a primeira era metade do par, e a segunda"
+           " precisa de uma coisa que a primeira não precisa — saber QUEM aponta para mim"
+           " —, pelo que a declaração escreve nos DOIS lados: a filha guarda para onde"
+           " aponta, a mãe guarda quem a aponta. É a mesma dualidade da árvore, que guarda a"
+           " chave e o sítio. A AUSÊNCIA NÃO É UMA SETA: uma célula NULL não aponta e nada"
+           " exige, que é o `thm:bitunico` outra vez — o dual não é um valor, logo não é um"
+           " destino. E a exigência não é um bloqueio da tabela: a mãe LIVRE apaga-se, e a"
+           " presa solta-se apagando quem apontava, o que é o que mostra que o motor lê a"
+           " seta e não recusa por hábito. A travessia é uma DESCIDA quando a coluna alvo"
+           " tem árvore — e numa coluna UNIQUE tem sempre —, e a decisão toma-se com a"
+           " outra tabela ABERTA e traz-se em memória local, porque abrir uma tabela relê o"
+           " .mem: é a mesma regra que a subconsulta teve de aprender. O CONTROLO tem duas"
+           " metades: sem seta os mesmos valores entram, e a mãe de OUTRA tabela não fica"
+           " presa pela filha desta — a lista guarda o NOME, e um motor que recusasse por"
+           " haver «alguma» seta na base passava em tudo o resto. E a exigência tem um andar"
+           " acima: largar a TABELA apontada deixaria as setas a apontar para um ficheiro"
+           " que já não existe — um estado que ninguém declarou e do qual não se sai —,"
+           " pelo que o DROP da mãe é recusado enquanto houver quem aponte, e solta-se pelo"
+           " mesmo lado: larga-se primeiro a filha.",
            mal == 0);
     }
 

@@ -2435,9 +2435,61 @@ dois ausentes contra os dois zeros; as quatro portas do \code{UPDATE}; a descida
 contra a varredura; e o \code{PRIMARY KEY} a recusar as duas quebras com uma
 declaração), com o controlo na tabela sem restrição nenhuma.}
 
+\medskip\noindent\textbf{E há uma metade que só a árvore explica:} o valor de
+uma linha \emph{apagada} tem de poder voltar. O \code{DELETE} não tira a chave
+--- apaga o bit do vivo ---, pelo que a descida acha a chave de quem já não
+está; sem o filtro do vivo o \code{UNIQUE} reservava para sempre o valor de uma
+linha que não existe. É a mesma frase que o índice já dizia à \emph{leitura}
+--- a árvore diz onde a linha estava, o vivo diz se ela ainda está ---, agora
+aplicada à \emph{recusa}.
+
 \colunas{\code{aranha thm:levantamento}; \code{aranha thm:bitunico}}
         {\code{UNIQUE}; \code{NOT NULL}; \code{PRIMARY KEY}; árvore por coluna}
         {\code{tests/pgwire.c} §W34}
+
+\subsection*{A seta entre duas tabelas}
+
+\noindent \code{REFERENCES mae(col)} declara que cada linha desta tabela aponta
+para uma linha daquela. É o \textbf{mesmo caminho que o \code{JOIN} percorre},
+dito uma vez na tabela em vez de escrito a cada pergunta --- e é por ser dito
+que pode ser \emph{exigido}. O que se exige é que a seta esteja bem definida, e
+isso tem duas metades que são uma o dual da outra:
+\[
+\begin{array}{ll}
+\text{à \textbf{entrada}} & \text{escrever um valor que não está do outro lado
+  é apontar para lado nenhum}\\
+\text{à \textbf{saída}}   & \text{apagar a linha apontada é cortar a seta por
+  baixo}
+\end{array}
+\]
+
+\medskip\noindent\textbf{A segunda metade precisa de uma coisa que a primeira
+não precisa:} saber \emph{quem aponta para mim}. Por isso a declaração escreve
+nos \textbf{dois lados} --- a filha guarda para onde aponta, a mãe guarda quem a
+aponta ---, que é a mesma dualidade da árvore, guardando a chave e o sítio.
+Medir só a entrada seria metade do par.
+
+\medskip\noindent A travessia é uma \textbf{descida} quando a coluna alvo tem
+árvore, e numa coluna \code{UNIQUE} tem sempre; a decisão toma-se com a outra
+tabela \emph{aberta} e traz-se em memória local, porque abrir uma tabela relê o
+\code{.mem} --- a mesma regra que a subconsulta teve de aprender. E \textbf{a
+ausência não é uma seta}: uma célula \code{NULL} não aponta e nada exige.
+
+\medskip\noindent\textbf{A exigência não é um bloqueio, e tem um andar acima.} A
+mãe \emph{livre} apaga-se; a presa solta-se apagando quem apontava. E largar a
+\emph{tabela} apontada deixaria as setas a apontar para um ficheiro que já não
+existe --- um estado que ninguém declarou e do qual não se sai ---, pelo que o
+\code{DROP} da mãe é recusado enquanto houver quem aponte, e solta-se pelo mesmo
+lado.
+
+\medido{\code{tests/pgwire.c} §W35 (as duas pontas; o \code{NULL} que não
+aponta; a mãe livre contra a presa; a soltura pelo lado certo; a persistência
+das duas pontas; o \code{DROP} recusado), com o controlo em duas metades --- sem
+seta os mesmos valores entram, e a mãe de \emph{outra} tabela não fica presa.}
+
+\colunas{\code{aranha thm:multiplicidade}; \code{aranha thm:bitunico}}
+        {\code{REFERENCES}; lista de filhos na mãe; travessia por descida}
+        {\code{tests/pgwire.c} §W35}
 
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
