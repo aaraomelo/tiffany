@@ -3749,10 +3749,51 @@ int main(void){
 
             sql_executa("SELECT * FROM t WHERE a > 5 AND b < 30", &o);
             int comp = (sql_ultimos_passos > 0);
-            printf("      e a composta sobre OUTRA coluna fica com o molde:"
+            printf("      a composta sobre OUTRA coluna ainda corre o molde:"
                    " %d linha(s), %ld passos  %s\n",
                    o.nrows, sql_ultimos_passos, comp ? "" : "NAO BATE");
             if(!comp) mal++;
+            sql_fechar();
+        }
+
+        /* ── O CORTE PRIMEIRO, O MOLDE SÓ SOBRE O QUE SOBROU ─────────────────
+         * A árvore não responde à composta sobre outra coluna, mas responde a
+         * METADE dela — e essa metade RESTRINGE, porque a ligação é um AND.
+         * Serve de pré-filtro: o molde corre só nas candidatas. */
+        {
+            unlink("/tmp/pgwire_w27p.mem"); unlink("/tmp/pgwire_w27p.prog");
+            if(!sql_abrir("/tmp/pgwire_w27p")) mal++;
+            sql_executa("CREATE TABLE t (a,b)", &o);
+            for(int i = 1; i <= 40; i++){
+                char q[64];
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                sql_executa(q, &o);
+            }
+            sql_executa("SELECT * FROM t WHERE a > 30 AND b < 70", &o);
+            long p_and_sem = sql_ultimos_passos; int n_and_sem = o.nrows;
+            sql_executa("SELECT * FROM t WHERE a > 30 OR b < 6", &o);
+            long p_or_sem = sql_ultimos_passos; int n_or_sem = o.nrows;
+
+            sql_executa("CREATE INDEX ON t (a)", &o);
+
+            sql_executa("SELECT * FROM t WHERE a > 30 AND b < 70", &o);
+            long p_and_com = sql_ultimos_passos; int n_and_com = o.nrows;
+            int and_ok = (n_and_sem == 4 && n_and_com == 4 && p_and_com < p_and_sem);
+            printf("\n      o AND: 10 candidatas de 40 · %ld passos -> %ld  ·"
+                   " %d = %d linhas  %s\n", p_and_sem, p_and_com,
+                   n_and_sem, n_and_com, and_ok ? "" : "NAO BATE");
+            if(!and_ok) mal++;
+
+            /* O GUME: com OR o pré-filtro NÃO pode correr. O outro lado traz
+             * linhas de FORA da faixa, e cortá-las responderia menos do que a
+             * pergunta — pior do que responder devagar. */
+            sql_executa("SELECT * FROM t WHERE a > 30 OR b < 6", &o);
+            long p_or_com = sql_ultimos_passos; int n_or_com = o.nrows;
+            int or_ok = (n_or_sem == 12 && n_or_com == 12 && p_or_com == p_or_sem);
+            printf("      o OR: NÃO pré-filtra (%ld = %ld passos) e traz as de fora"
+                   " da faixa: %d = %d linhas  %s\n",
+                   p_or_sem, p_or_com, n_or_sem, n_or_com, or_ok ? "" : "NAO BATE");
+            if(!or_ok) mal++;
             sql_fechar();
         }
 
@@ -3839,7 +3880,13 @@ int main(void){
            " resultado é fixo de propósito: os nós crescem com o que SAI, porque têm de listar"
            " as linhas, e o que não pode crescer é a BUSCA. E fica dito o que continua a NÃO"
            " descer: a forma composta — `a > 5 AND b < 30` —, que a árvore não responde de um"
-           " caminho só quando é sobre OUTRA coluna; aí o molde corre, e mede-se que corre. MAS"
+           " caminho só quando é sobre OUTRA coluna. MAS ELA AINDA SERVE PARA METADE: essa"
+           " metade RESTRINGE, porque a ligação é um AND, pelo que a árvore corta primeiro e o"
+           " molde corre só nas candidatas — dez de quarenta, e os passos caem de 13200 para"
+           " 3300 com a mesma resposta. O GUME É O `OR`: aí o pré-filtro NÃO pode correr,"
+           " porque o outro lado traz linhas de FORA da faixa e cortá-las responderia MENOS do"
+           " que a pergunta, o que é pior do que responder devagar. Mede-se que o OR custa o"
+           " mesmo com e sem índice, e que traz as tais linhas de fora. MAS"
            " DUAS CONDIÇÕES SOBRE A MESMA COLUNA DESCEM: cada uma dá um lado e o AND"
            " intersecta-os, o que é a faixa FECHADA — e o BETWEEN é isso dito numa palavra. Os"
            " quatro casos medidos dão o mesmo que o molde, incluindo aquele em que os lados se"

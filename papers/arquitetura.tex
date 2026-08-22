@@ -2190,11 +2190,23 @@ enche, a inserção falha e o índice é largado. E um índice largado, como um
 cabeçalho guarda a coluna e quantas linhas havia, e se o número não bate ele é
 \emph{ignorado}. É a única troca que um índice pode fazer sem deixar de ser um.
 
-\medskip\noindent E fica dito o que \emph{não} desce: a forma composta ---
-\code{a > 5 AND b < 30} --- que a árvore não responde de um caminho só, e o
-\code{DELETE}, que não tira a chave: ele não muda o número de linhas, pelo que
-o índice continua válido, e quem decide à saída é o campo do \textbf{vivo}. A
-árvore diz onde a linha estava; ele diz se ela ainda está.
+\medskip\noindent\textbf{E quando a árvore só responde a metade, ela corta
+primeiro.} Numa composta sobre outra coluna --- \code{a > 30 AND b < 70} --- a
+árvore não dá a resposta, mas a parte que dá \emph{restringe}, porque a ligação
+é um \code{AND}. Desce-se, e o molde corre só nas \textbf{candidatas}: dez de
+quarenta, com os passos a caírem de $13200$ para $3300$ e a mesma resposta. O
+corte primeiro, o filtro depois --- que são as duas metades de sempre.
+
+\medskip\noindent Com \code{OR} isso não se pode fazer, e a diferença é de
+\emph{correção} e não de tempo: o outro lado traz linhas de \textbf{fora} da
+faixa, e cortá-las responderia menos do que a pergunta. Responder devagar é
+aceitável; responder menos não é. Verifica-se a palavra, e só o \code{AND} abre
+esta porta.
+
+\medskip\noindent E fica dito o que continua a não descer: o \code{DELETE}, que
+não tira a chave --- ele não muda o número de linhas, pelo que o índice
+continua válido, e quem decide à saída é o campo do \textbf{vivo}. A árvore diz
+onde a linha estava; ele diz se ela ainda está.
 
 \medskip\noindent\textbf{E há uma instrução que não opera sobre os dados: serve
 para NÃO RAMIFICAR.} Ela chama-se \code{ESPALHA}, e devolve a máscara

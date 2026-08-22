@@ -4021,7 +4021,7 @@ static int varre(const char *resto, int acao){
      *
      * O índice é ignorado se estiver velho; aí varre-se. Um índice velho custa
      * tempo, nunca correcção. */
-    int idx_usa = 0; long idx_lo = 0, idx_hi = 0;
+    int idx_usa = 0, idx_pre = 0; long idx_lo = 0, idx_hi = 0;
     if(acao == ACAO_MARCA && !in_sub){
         const long INF = 2147483647L;
         const char *q = p;
@@ -4061,9 +4061,29 @@ static int varre(const char *resto, int acao){
                 }
             }
             pula(&q);
-            if(lados >= 1 && (*q == 0 || *q == ';')
-               && col >= 0 && idx_coluna(cat_nrows()) == col){
-                idx_lo = lo; idx_hi = hi; idx_usa = 1; p = q;
+            if(lados >= 1 && col >= 0 && idx_coluna(cat_nrows()) == col){
+                if(*q == 0 || *q == ';'){
+                    /* a faixa É a resposta toda: o molde não corre */
+                    idx_lo = lo; idx_hi = hi; idx_usa = 1; p = q;
+                }else{
+                    /* ── O CORTE PRIMEIRO, O MOLDE SÓ SOBRE O QUE SOBROU ────
+                     *
+                     * Sobra condição, e ela é sobre outra coluna: a árvore não
+                     * responde à pergunta inteira, mas responde a METADE dela —
+                     * e a metade que responde RESTRINGE, porque a ligação é um
+                     * AND. Serve por isso de PRÉ-FILTRO: desce-se, e o molde
+                     * corre só nas linhas que a faixa deixou, em vez de correr
+                     * em todas.
+                     *
+                     * Tem de ser AND. Com um OR o outro lado pode trazer linhas
+                     * de fora da faixa, e um pré-filtro que as corte responde
+                     * menos do que a pergunta — que é pior do que responder
+                     * devagar. Verifica-se a palavra, e só ela abre esta porta. */
+                    const char *r = q;
+                    if(palavra(&r, "AND")){
+                        idx_lo = lo; idx_hi = hi; idx_pre = 1;
+                    }
+                }
             }
         }
     }
@@ -4286,7 +4306,21 @@ static int varre(const char *resto, int acao){
         return 0;
     }
     long passos = 0;
-    if(!idx_usa)
+    if(idx_pre){
+        /* as candidatas saem da árvore, e o molde só passa por elas. As de fora
+         * da faixa não podem satisfazer a conjunção, pelo que não há resposta a
+         * perder — há trabalho a poupar. */
+        static int cand[J_MAXLIN];
+        ord_usa_indice();
+        int nc = j_faixa(idx_lo, idx_hi, cand, J_MAXLIN);
+        ord_usa_rascunho();
+        for(int t = 0; t < nc; t++){
+            long i = cand[t];
+            if(i < 0 || i >= nrows || !bit_le(S_VIVO, i)) continue;
+            rel_anda(i);
+            passos += rodar(pc_emit);
+        }
+    }else if(!idx_usa)
         for(long i = 0; i < nrows; i++){ rel_anda(i); passos += rodar(pc_emit); }
 
     unsigned long soma = 1469598103934665603UL;
