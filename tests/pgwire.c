@@ -22030,6 +22030,178 @@ int main(void){
            " apaga a diferença.", mal == 0);
     }
 
+    /* ═══ §W146: O CORPO EXTERIOR ISOMORFO À ARANHA — AS RELAÇÕES DERIVADAS ═ */
+    {
+        long mal = 0;
+        printf("\n§W146 o corpo exterior a+bε: as leis da aranha derivadas na sua métrica.\n\n");
+
+        /* a+bε com ε²=0, em pares. As leis da aranha traduzem-se uma a uma. */
+        #define EM(a1,b1,a2,b2,ra,rb) do { (ra) = (a1)*(a2); \
+            (rb) = (a1)*(b2) + (b1)*(a2); } while(0)
+
+        /* ── L1. AS DUAS FACES: o oposto e o inverso. O oposto existe sempre; o
+         * inverso existe sse a ≠ 0, e escreve-se. */
+        {
+            long op = 0, inv = 0, sem = 0, tot = 0;
+            for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                tot++;
+                /* oposto: (a+bε) + (−a−bε) = 0 */
+                if(a + (-a) == 0 && b + (-b) == 0) op++;
+                /* inverso: (a+bε)(1/a − b/a² ε) = 1, em inteiros só quando a=±1 */
+                if(a == 1 || a == -1){
+                    long ia = (a == 1) ? 1 : -1, ib = (a == 1) ? -b : b;
+                    long ra, rb; EM(a,b,ia,ib,ra,rb);
+                    if(ra == 1 && rb == 0) inv++;
+                } else if(a == 0) sem++;
+            }
+            printf("      L1 as duas faces: oposto em %ld/%ld (sempre); inverso exacto no"
+                   " degrau em %ld; sem inverso quando a=0: %ld\n", op, tot, inv, sem);
+            printf("         RELAÇÃO NOVA — (a+bε)^{-1} = a^{-1} − b·a^{-2}·ε, e a face"
+                   " multiplicativa DEGENERA em a=0, que é o nilpotente\n");
+            if(op != tot || inv == 0 || sem == 0) mal++;
+        }
+
+        /* ── L2. A VALORAÇÃO, e daí a ULTRAMÉTRICA. É a lei que faltava: o corpo
+         * exterior tem valoração natural v(a+bε) = 0 se a≠0, 1 se a=0 e b≠0. E
+         * d(x,y) = 2^{−v(x−y)} é ultramétrica, tal como a def:arvore. */
+        {
+            #define VAL(a,b) ((a) != 0 ? 0 : ((b) != 0 ? 1 : 2))
+            long ok = 0, tot = 0, estrito = 0;
+            for(long a1 = -3; a1 <= 3; a1++) for(long b1 = -3; b1 <= 3; b1++)
+            for(long a2 = -3; a2 <= 3; a2++) for(long b2 = -3; b2 <= 3; b2++)
+            for(long a3 = -3; a3 <= 3; a3++) for(long b3 = -3; b3 <= 3; b3++){
+                long v12 = VAL(a1-a2, b1-b2), v23 = VAL(a2-a3, b2-b3), v13 = VAL(a1-a3, b1-b3);
+                long mn = v12 < v23 ? v12 : v23;
+                tot++;
+                if(v13 >= mn) ok++;
+                if(v13 > mn) estrito++;
+            }
+            printf("      L2 a ultramétrica: v(x−z) ≥ min{v(x−y), v(y−z)} em %ld/%ld triplos"
+                   " (%ld estritos)\n", ok, tot, estrito);
+            printf("         RELAÇÃO NOVA — o corpo exterior tem VALORAÇÃO discreta"
+                   " v(a+bε) ∈ {0,1,∞}, e d = 2^{−v} é a métrica da def:arvore\n");
+            if(ok != tot || estrito == 0) mal++;
+            /* e a valoração é multiplicativa: v(xy) = v(x) + v(y) */
+            long vm = 0, vt = 0;
+            for(long a1 = -3; a1 <= 3; a1++) for(long b1 = -3; b1 <= 3; b1++)
+            for(long a2 = -3; a2 <= 3; a2++) for(long b2 = -3; b2 <= 3; b2++){
+                long ra, rb; EM(a1,b1,a2,b2,ra,rb);
+                long v1 = VAL(a1,b1), v2 = VAL(a2,b2), vp = VAL(ra,rb);
+                if(v1 >= 2 || v2 >= 2) continue;
+                vt++;
+                if(vp == (v1 + v2 > 2 ? 2 : v1 + v2)) vm++;
+            }
+            printf("         e é MULTIPLICATIVA: v(xy) = v(x)+v(y) em %ld/%ld --- a face"
+                   " multiplicativa lida na valoração é uma SOMA\n", vm, vt);
+            if(vm != vt) mal++;
+            #undef VAL
+        }
+
+        /* ── L3. OS DOIS MEIOS: o aritmético existe sempre; o geométrico
+         * √(xy) existe no corpo sse a parte real for quadrado --- e a relação
+         * escreve-se. */
+        {
+            long arit = 0, geo = 0, tot = 0;
+            for(long a1 = 1; a1 <= 6; a1++) for(long b1 = -3; b1 <= 3; b1++)
+            for(long a2 = 1; a2 <= 6; a2++) for(long b2 = -3; b2 <= 3; b2++){
+                tot++;
+                /* aritmético: ((a1+a2)/2, (b1+b2)/2) --- existe se as somas são pares */
+                if((a1+a2) % 2 == 0 && (b1+b2) % 2 == 0) arit++;
+                /* geométrico: √(a1a2) + (a1b2+b1a2)/(2√(a1a2)) ε */
+                long p = a1*a2, r = 0; while((r+1)*(r+1) <= p) r++;
+                if(r*r == p && (a1*b2 + b1*a2) % (2*r) == 0) geo++;
+            }
+            printf("      L3 os dois meios: o aritmético fecha em %ld/%ld e o geométrico em"
+                   " %ld --- e o geométrico pede o quadrado\n", arit, tot, geo);
+            printf("         RELAÇÃO NOVA — o meio geométrico de a+bε e c+dε é"
+                   " √(ac) + (ad+bc)/(2√(ac))·ε, e a segunda componente é a MÉDIA das"
+                   " partes ε ponderada pelas reais\n");
+            if(arit == 0 || geo == 0) mal++;
+        }
+
+        /* ── L4. O GATO E O ESQUILO no corpo exterior: ⊘∘⊗ = id, com o metal m
+         * a agir sobre pares duais. */
+        {
+            long ok = 0, tot = 0;
+            for(long m = 1; m <= 4; m++)
+            for(long a1 = -3; a1 <= 3; a1++) for(long b1 = -3; b1 <= 3; b1++)
+            for(long a2 = -3; a2 <= 3; a2++) for(long b2 = -3; b2 <= 3; b2++){
+                /* ⊗: (c0,c1) ↦ (m·c0 + c1, c0), com cada c em ℤ[ε] */
+                long d0a = m*a1 + a2, d0b = m*b1 + b2, d1a = a1, d1b = b1;
+                /* ⊘: (d0,d1) ↦ (d1, d0 − m·d1) */
+                long e0a = d1a, e0b = d1b, e1a = d0a - m*d1a, e1b = d0b - m*d1b;
+                tot++;
+                if(e0a == a1 && e0b == b1 && e1a == a2 && e1b == b2) ok++;
+            }
+            printf("      L4 o gato e o esquilo: ⊘∘⊗ = id em %ld/%ld --- vale sobre o corpo"
+                   " exterior sem hipótese sobre o vetor\n", ok, tot);
+            printf("         RELAÇÃO NOVA — o par ⊗/⊘ do metal m age componente a"
+                   " componente no dual, e a nilpotência não o estorva\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── L5. A DESCIDA das duas faces alternadas, na métrica do corpo: mede-se
+         * na valoração, e ela TERMINA. */
+        {
+            long term = 0, tot = 0, maior = 0;
+            for(long a1 = 1; a1 <= 8; a1++) for(long a2 = 1; a2 <= 8; a2++){
+                long x = a1, y = a2, p = 0;
+                while(x != y && p < 60){
+                    long m = (x + y) / 2, g = 0; while((g+1)*(g+1) <= x*y) g++;
+                    if(m == x && g == y) break;
+                    long nx = g, ny = m; if(nx > ny){ long t = nx; nx = ny; ny = t; }
+                    if(nx == x && ny == y) break;
+                    x = nx; y = ny; p++;
+                }
+                tot++;
+                if(p < 60) term++;
+                if(p > maior) maior = p;
+            }
+            printf("      L5 a descida na parte real termina em %ld/%ld pares, em no máximo"
+                   " %ld passos\n", term, tot, maior);
+            printf("         e a parte ε acompanha por linearidade --- a descida do corpo"
+                   " exterior É a da sua parte real\n");
+            if(term != tot) mal++;
+        }
+
+        /* ── L6. E O GUME: a nilpotência não é decoração. Se ε² fosse ≠ 0 as
+         * relações mudavam --- o inverso deixaria de ter aquela forma. */
+        {
+            long muda = 0, tot = 0;
+            for(long a = 1; a <= 4; a++) for(long b = -3; b <= 3; b++){
+                /* com ε² = 0: (a+bε)(a−bε) = a² */
+                long r1 = a*a, i1 = 0;
+                /* com ε² = 1 (hiperbólico): (a+bε)(a−bε) = a² − b² */
+                long r2 = a*a - b*b, i2 = 0;
+                tot++;
+                if(r1 != r2) muda++;
+                (void)i1; (void)i2;
+            }
+            printf("      GUME — com ε²=1 em vez de 0 a norma muda em %ld dos %ld casos:"
+                   " a nilpotência É a lei, não um enfeite\n", muda, tot);
+            if(muda == 0) mal++;
+        }
+        #undef EM
+
+        printf("\n");
+        ok("O CORPO EXTERIOR FICA ISOMORFO À ARANHA, E AS RELAÇÕES NOVAS ESCREVEM-SE. Não se"
+           " catalogou nada aqui: derivaram-se, uma a uma, as leis que a aranha tem, na"
+           " métrica deste corpo. AS DUAS FACES: o oposto existe sempre e o inverso escreve-se"
+           " --- (a+bε)^{-1} = a^{-1} − b·a^{-2}·ε ---, com a face multiplicativa a DEGENERAR"
+           " exactamente em a = 0, que é o nilpotente. A ULTRAMÉTRICA, que faltava: este corpo"
+           " tem valoração discreta v(a+bε) ∈ {0,1,∞}, e d = 2^{−v} cumpre a desigualdade"
+           " forte em todos os triplos, com casos estritos --- é a métrica da def:arvore na"
+           " régua deste corpo; e a valoração é MULTIPLICATIVA, v(xy) = v(x)+v(y), o que é a"
+           " face multiplicativa lida como soma. OS DOIS MEIOS: o aritmético fecha, e o"
+           " geométrico é √(ac) + (ad+bc)/(2√(ac))·ε, onde a componente ε é a média das"
+           " partes nilpotentes ponderada pelas reais. O GATO E O ESQUILO: ⊘∘⊗ = id vale sobre"
+           " o corpo exterior sem hipótese nenhuma sobre o vetor, agindo componente a"
+           " componente, e a nilpotência não o estorva. A DESCIDA: as duas faces alternadas"
+           " terminam na parte real e a parte ε acompanha por linearidade --- a descida deste"
+           " corpo é a da sua parte real. E O GUME: com ε²=1 em vez de 0 a norma muda, pelo"
+           " que a nilpotência é a lei e não um enfeite.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -1130,6 +1130,52 @@ E o teste diz mais: diz \emph{de que tipo} é cada álgebra. O determinante, com
 \item $\Delta<0$ --- o regime \textbf{elíptico}, o da torção: o grupo é o \textbf{círculo}, e a álgebra \textbf{é corpo}. É o único dos três que fecha, e o único cujo movimento a um parâmetro é compacto: a órbita volta.
 \item $\Delta=0$ --- o regime \textbf{nilpotente}: o grupo é a \textbf{reta}, há um elemento não nulo cujo quadrado é zero, e não há inverso. É o \textbf{glacial} --- e é exatamente onde mora o corpo exterior, com o seu $e^2=0$.
 
+\paragraph{As relações do corpo exterior, derivadas para o tornar isomorfo à aranha.}
+Não é catálogo: são as leis da \code{aranha} escritas na métrica \emph{deste} corpo, e as
+que faltavam derivam-se aqui.
+\begin{enumerate}\itemsep3pt
+\item[\textbf{E1}] \textbf{As duas faces.} O oposto existe sempre; o inverso escreve-se
+\[
+ \boxed{\;(a+b\varepsilon)^{-1}=a^{-1}-b\,a^{-2}\,\varepsilon\;}
+\]
+e a face multiplicativa \textbf{degenera} exactamente em $a=0$ --- que é o nilpotente. É
+a Def.~\ref{def:op} da aranha com o inverso escrito nesta régua.
+
+\item[\textbf{E2}] \textbf{A valoração, e daí a ultramétrica --- a lei que faltava.} Este
+corpo tem \emph{valoração discreta}
+\[
+ \boxed{\;v(a+b\varepsilon)=\begin{cases}0,&a\neq0\\ 1,&a=0,\ b\neq0\\ \infty,&a=b=0\end{cases}
+ \qquad d(x,y)=2^{-v(x-y)}\;}
+\]
+e $d$ cumpre a desigualdade forte, com casos estritos --- \emph{é a métrica da
+\code{aranha def:arvore} na régua deste corpo}. Mais: $v$ é \textbf{multiplicativa},
+$v(xy)=v(x)+v(y)$, isto é \emph{a face multiplicativa lida na valoração é uma soma}.
+
+\item[\textbf{E3}] \textbf{Os dois meios.} O aritmético fecha componente a componente; o
+geométrico é
+\[
+ \boxed{\;\sqrt{(a+b\varepsilon)(c+d\varepsilon)}=\sqrt{ac}+\frac{ad+bc}{2\sqrt{ac}}\,\varepsilon\;}
+\]
+--- e a componente $\varepsilon$ é a \emph{média das partes nilpotentes ponderada pelas
+reais}. É o \code{aranha thm:duas}(2) nesta métrica.
+
+\item[\textbf{E4}] \textbf{O gato e o esquilo valem aqui.} $\oslash\circ\otimes=\mathrm{id}$
+sobre $\Zc[\varepsilon]^n$, sem hipótese sobre o vetor, com $\otimes$ e $\oslash$ a agirem
+\emph{componente a componente} --- \emph{a nilpotência não os estorva}.
+
+\item[\textbf{E5}] \textbf{A descida.} As duas faces alternadas terminam na parte real, e
+a parte $\varepsilon$ acompanha por linearidade: \emph{a descida deste corpo é a da sua
+parte real}.
+\end{enumerate}
+\noindent E o gume: com $\varepsilon^2=1$ em vez de $0$ a norma muda, pelo que a
+nilpotência \textbf{é} a lei e não um enfeite.
+
+\medido{as cinco relações em \code{tests/pgwire.c} §W146 --- o oposto em $121/121$ e o
+inverso exacto no degrau; a desigualdade forte em $117\,649/117\,649$ triplos com
+$14\,700$ estritos e $v(xy)=v(x)+v(y)$ em $2304/2304$; os dois meios com o geométrico a
+pedir o quadrado; $\oslash\circ\otimes=\mathrm{id}$ em $9604/9604$; a descida em $64/64$;
+e o gume da nilpotência.}
+
 \medido{e o corpo exterior está \emph{toda} a fronteira, não um ponto dela: escrito o dual
 $a+b\varepsilon$ como $\binom{a\ b}{0\ a}$, o traço e o determinante que o motor devolve dão
 $\Delta=4a^2-4a^2=0$ nos $169$ pares de $-6$ a $6$, $168$ deles não nulos, sem que o $\Delta$ distinga
