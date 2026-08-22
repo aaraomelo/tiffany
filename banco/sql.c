@@ -334,6 +334,24 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * escrito por cima: a coluna indexada lia-se como 5 numa tabela de duas
  * colunas. Uma zona começa onde começa; pedir emprestado ao vizinho é escrever
  * na casa dele. */
+/* ── AS VISTAS: uma composição com nome ──────────────────────────────────────
+ *
+ * Uma condição é uma FUNÇÃO do campo no campo, e o `AND` compõe duas. Uma
+ * vista é essa composição com NOME: guarda a tabela e a condição, e usá-la num
+ * `FROM` compõe a condição dela com a de quem a usa. Não traz operação nova —
+ * traz o direito de dar nome a uma que já existia.
+ *
+ * Mora na zona 5, dentro do .mem, e o cabeçalho mora DENTRO dela: pedir
+ * emprestado ao vizinho é escrever na casa dele, e isso já custou dois defeitos
+ * a este ficheiro. */
+#define VIEW_MAX      8
+#define VIEW_W       64u                     /* Words por vista */
+#define S_VIEWCAB   (ISA_TECTO + ZONA(5))    /* {quantas, 0} */
+#define S_VIEW      (S_VIEWCAB + 1)
+#define VIEW_NOME(i)  (S_VIEW + (unsigned)(i)*VIEW_W)         /* 8 Words: 16 chars */
+#define VIEW_TAB(i)   (S_VIEW + (unsigned)(i)*VIEW_W + 8u)    /* 8 Words: 16 chars */
+#define VIEW_COND(i)  (S_VIEW + (unsigned)(i)*VIEW_W + 16u)   /* 48 Words: 96 chars */
+
 #define IDX_MAXCOL     8
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA(16 + (k)))
 #define S_IDXCAB(k)    (S_IDXBASE(k))        /* {coluna+1, 0}                    */
@@ -436,7 +454,8 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 /* ---------------- a memória É o disco ---------------- */
 static int fmem = -1, fprog = -1;
 static char g_base[512];          /* caminho da base aberta — blobs em <base>_corpo/ */
-static char g_tabela[64];         /* a tabela cujo .mem está aberto ("" = a sem nome) */
+/* g_tabela declarada acima, junto às vistas: a tabela cujo .mem está aberto
+ * ("" = a sem nome, que é o ficheiro da base) */
 static long cel_recusadas = 0;    /* células que não couberam no envelope — contadas À PARTE */
 static long cmp_recusadas = 0;    /* comparações recusadas por a coluna ser larga */
 static int usa_tabela(const char *nome, int cria_se_falta);   /* definida com abrir_base */
@@ -1741,6 +1760,46 @@ static int le_int_simples(const char **pp, long *out){
     *out = sinal * v;
     *pp = q;
     return 1;
+}
+
+/* AS VISTAS VIVEM NA TABELA SEM NOME, que é o `<base>.mem`.
+ *
+ * O .mem é POR TABELA, e uma vista tem de ser encontrada ANTES de se saber que
+ * tabela abrir — a reescrita é que o diz. Guardá-la no .mem de uma tabela seria
+ * pedir para a procurar onde ela só existe depois de resolvida, que é circular.
+ * Fica na tabela sem nome, que é o ficheiro da base, e as duas funções abaixo
+ * guardam e restauram a que estava aberta: uma consulta não pode trocar a
+ * tabela da sessão por baixo de quem a fez. */
+static char g_tabela[64];
+static int usa_tabela(const char *nome, int cria_se_falta);
+static void vista_entra(char *guarda, size_t cap){
+    snprintf(guarda, cap, "%s", g_tabela);
+    usa_tabela("", 0);
+}
+static void vista_sai(const char *guarda){
+    usa_tabela(guarda, 0);
+}
+
+/* texto curto em Words: dois caracteres por Word, terminado a zero */
+static void txt_grava(unsigned base, unsigned nw, const char *t){
+    for(unsigned k = 0; k < nw; k++){
+        Word w;
+        w.total = (Word8)(t[2*k] ? (unsigned char)t[2*k] : 0);
+        w.e     = (Word8)(t[2*k] && t[2*k+1] ? (unsigned char)t[2*k+1] : 0);
+        mem_grava(base + k, w);
+        if(!t[2*k] || !t[2*k+1]) { for(unsigned j = k+1; j < nw; j++){ Word z={0,0}; mem_grava(base+j, z);} break; }
+    }
+}
+static void txt_le(unsigned base, unsigned nw, char *out, size_t cap){
+    size_t o = 0;
+    for(unsigned k = 0; k < nw && o + 2 < cap; k++){
+        Word w = mem_le(base + k);
+        if(!w.total) break;
+        out[o++] = (char)w.total;
+        if(!w.e) break;
+        out[o++] = (char)w.e;
+    }
+    out[o] = 0;
 }
 
 static int idx_valido(long col, long nrows);
@@ -6113,6 +6172,62 @@ static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){
         { const char *q = p;
+          if(palavra(&q, "VIEW")){
+            /* CREATE VIEW <nome> AS SELECT * FROM <tabela> WHERE <condição> */
+            char nv[32], tv[32];
+            if(!ident(&q, nv, sizeof nv)) return 0;
+            if(!palavra(&q, "AS") || !palavra(&q, "SELECT")) return 0;
+            { char cols[64]; if(!lista_colunas(&q, cols, sizeof cols)) return 0;
+              if(strcmp(cols, "*")){
+                  printf("erro: a vista só guarda `SELECT *` — RECUSADA.\n");
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "view: only SELECT * is supported"); }
+                  return 0; } }
+            if(!palavra(&q, "FROM") || !ident(&q, tv, sizeof tv)) return 0;
+            pula(&q);
+            if(!palavra(&q, "WHERE")){
+                printf("erro: a vista sem WHERE não compõe nada — RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "view: a WHERE clause is required"); }
+                return 0;
+            }
+            pula(&q);
+            char cond[128];
+            snprintf(cond, sizeof cond, "%s", q);
+            { size_t L = strlen(cond);
+              while(L && (cond[L-1]==';' || cond[L-1]==' ')) cond[--L] = 0; }
+            if(!*cond) return 0;
+            if(!usa_tabela(tv, 0)){ printf("erro: a tabela «%s» não existe.\n", tv); return 0; }
+            char guarda[64];
+            vista_entra(guarda, sizeof guarda);
+            Word cab = mem_le(S_VIEWCAB);
+            long n = cab.total;
+            /* uma vista com o mesmo nome substitui-se, não se duplica */
+            long onde = -1;
+            for(long i = 0; i < n && i < VIEW_MAX; i++){
+                char nn[32]; txt_le(VIEW_NOME(i), 8u, nn, sizeof nn);
+                if(!strcmp(nn, nv)){ onde = i; break; }
+            }
+            if(onde < 0){
+                if(n >= VIEW_MAX){
+                    printf("erro: já há %d vistas — RECUSADA.\n", VIEW_MAX);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err, "too many views"); }
+                    return 0;
+                }
+                onde = n; n++;
+                Word c2; c2.total = (Word8)n; c2.e = 0; mem_grava(S_VIEWCAB, c2);
+            }
+            txt_grava(VIEW_NOME((unsigned)onde), 8u,  nv);
+            txt_grava(VIEW_TAB((unsigned)onde),  8u,  tv);
+            txt_grava(VIEW_COND((unsigned)onde), 48u, cond);
+            vista_sai(guarda);
+            printf("vista «%s» = %s WHERE %s\n", nv, tv, cond);
+            if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE VIEW");
+            return 1;
+          }
           if(palavra(&q, "INDEX")){
             /* CREATE INDEX ON <tabela> (<coluna>) — o ON é obrigatório porque o
              * índice é DA tabela, e o nome do índice não se guarda: há um por
@@ -6539,9 +6654,87 @@ static int between_reescreve(const char *sql, char *out, size_t cap){
     return mudou;
 }
 
+/* ── USAR UMA VISTA É COMPOR AS DUAS CONDIÇÕES ───────────────────────────────
+ *
+ * `SELECT * FROM v WHERE c2` com `v = t WHERE c1` é `SELECT * FROM t WHERE
+ * (c1) AND (c2)`. A composição é o AND, que no campo é o ∧ das coordenadas — a
+ * mesma operação do §W28, agora com um nome pelo meio. Reescreve-se à entrada,
+ * como o BETWEEN: assim a vista não existe para o resto do motor, e o que corre
+ * é a condição composta. */
+static int vista_reescreve(const char *sql, char *out, size_t cap){
+    const char *q = sql;
+    pula(&q);
+    if(!palavra(&q, "SELECT")) return 0;
+    /* O FROM ACHA-SE NO TEXTO, e não pelo `lista_colunas`.
+     *
+     * Ele devolve FALSO quando a lista é só uma agregação — `count(*)` não
+     * entra na lista que ele produz, porque quem a produz é o bloco da fibra —,
+     * e a vista nem chegava a ser reescrita: `SELECT count(*) FROM v` caía no
+     * caminho do count com o nome da VISTA por tabela. Procura-se por isso o
+     * `FROM` de topo, fora de parênteses, que é o que separa o que se pede de
+     * onde se pede. */
+    const char *ini_cols = q, *fim_cols = NULL;
+    { int prof = 0;
+      for(const char *r = q; *r; r++){
+          if(*r == '(') prof++;
+          else if(*r == ')') prof--;
+          else if(prof == 0 && (*r == 'F' || *r == 'f')
+                  && !strncasecmp(r, "FROM", 4)
+                  && (r == q || !isalnum((unsigned char)r[-1]))
+                  && !isalnum((unsigned char)r[4])){ fim_cols = r; break; }
+      } }
+    if(!fim_cols || fim_cols == ini_cols) return 0;
+    q = fim_cols;
+    if(!palavra(&q, "FROM")) return 0;
+    char nome[32];
+    if(!ident(&q, nome, sizeof nome)) return 0;
+
+    char guarda[64];
+    vista_entra(guarda, sizeof guarda);
+    Word cab = mem_le(S_VIEWCAB);
+    long n = cab.total, achou = -1;
+    for(long i = 0; i < n && i < VIEW_MAX; i++){
+        char nn[32]; txt_le(VIEW_NOME((unsigned)i), 8u, nn, sizeof nn);
+        if(!strcmp(nn, nome)){ achou = i; break; }
+    }
+    char tv[32], cond[128];
+    if(achou >= 0){
+        txt_le(VIEW_TAB((unsigned)achou),  8u,  tv,   sizeof tv);
+        txt_le(VIEW_COND((unsigned)achou), 48u, cond, sizeof cond);
+    }
+    vista_sai(guarda);
+    if(achou < 0) return 0;                       /* não é vista: segue */
+
+    pula(&q);
+    const char *resto = q;
+    int tem_where = 0;
+    { const char *r = q; if(palavra(&r, "WHERE")){ tem_where = 1; resto = r; } }
+
+    /* AS COLUNAS COPIAM-SE COMO ESTAVAM, do texto entre o SELECT e o FROM.
+     *
+     * O `lista_colunas` normaliza — e a agregação não entra na lista que ele
+     * devolve, porque quem a produz é o bloco da fibra. Reescrever a partir
+     * dela deixava `SELECT  FROM t` num `count(*)`. Copia-se por isso o pedaço
+     * original: a vista troca a TABELA e acrescenta a condição, e não tem nada
+     * que dizer sobre o que se pede. */
+    int n_sel = (int)(fim_cols - ini_cols);
+    while(n_sel > 0 && (ini_cols[n_sel-1] == ' ' || ini_cols[n_sel-1] == '\t')) n_sel--;
+    int k;
+    if(tem_where)
+        k = snprintf(out, cap, "SELECT %.*s FROM %s WHERE %s AND %s",
+                     n_sel, ini_cols, tv, cond, resto);
+    else
+        k = snprintf(out, cap, "SELECT %.*s FROM %s WHERE %s",
+                     n_sel, ini_cols, tv, cond);
+    return (k > 0 && (size_t)k < cap);
+}
+
 static int sql_executa_1(const char *sql, SqlOut *out){
     { char reescrito[600];
       if(between_reescreve(sql, reescrito, sizeof reescrito))
+          return sql_executa_1(reescrito, out); }
+    { char reescrito[600];
+      if(vista_reescreve(sql, reescrito, sizeof reescrito))
           return sql_executa_1(reescrito, out); }
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;

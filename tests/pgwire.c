@@ -4014,6 +4014,93 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W29: A VISTA É UMA COMPOSIÇÃO COM NOME ════════════════════════════
+     *
+     * Uma condição é uma FUNÇÃO do campo no campo, e o AND compõe duas — que no
+     * campo é o ∧ das coordenadas (§W28). Uma vista é essa composição com nome:
+     * guarda a tabela e a condição, e usá-la num FROM compõe a condição dela
+     * com a de quem a usa. Não traz operação nova; traz o direito de dar nome a
+     * uma que já existia. */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w29.mem"); unlink("/tmp/pgwire_w29.prog");
+        unlink("/tmp/pgwire_w29__t.mem"); unlink("/tmp/pgwire_w29__t.prog");
+        printf("\n§W29 a vista: compor funções, e a composição tem nome.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w29")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        for(int i = 1; i <= 20; i++){
+            char q[64];
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+            sql_executa(q, &o);
+        }
+        int rc = sql_executa("CREATE VIEW altos AS SELECT * FROM t WHERE a > 15", &o);
+        printf("      CREATE VIEW altos = t WHERE a > 15: %s\n", rc ? "ok" : "NAO");
+        if(!rc) mal++;
+
+        /* OS DOIS CAMINHOS TÊM DE CONCORDAR: a vista composta com uma segunda
+         * condição dá o mesmo que as duas escritas à mão. */
+        sql_executa("SELECT * FROM altos", &o);
+        int n1 = o.nrows;
+        sql_executa("SELECT * FROM altos WHERE a < 19", &o);
+        int n2 = o.nrows;
+        char c1[32] = "", c2[32] = "";
+        if(o.nrows) snprintf(c1, sizeof c1, "%s", o.cell[0][0]);
+        sql_executa("SELECT * FROM t WHERE a > 15 AND a < 19", &o);
+        int n3 = o.nrows;
+        if(o.nrows) snprintf(c2, sizeof c2, "%s", o.cell[0][0]);
+        int bate = (n1 == 5 && n2 == 3 && n3 == 3 && !strcmp(c1, c2));
+        printf("      a vista: %d linhas · composta com `a < 19`: %d · à mão: %d"
+               "  (primeira célula %s = %s)  %s\n",
+               n1, n2, n3, c1, c2, bate ? "" : "NAO BATE");
+        if(!bate) mal++;
+
+        /* e a agregação atravessa a vista — foi o que quase ficou de fora,
+         * porque `count(*)` não entra na lista de colunas que o parser produz */
+        int rk = sql_executa("SELECT count(*) FROM altos", &o);
+        int ck = (rk && o.nrows == 1 && !strcmp(o.cell[0][0], "5"));
+        printf("      count(*) FROM altos = %s  %s\n",
+               o.nrows ? o.cell[0][0] : "?", ck ? "" : "NAO BATE");
+        if(!ck) mal++;
+
+        /* ── O CONTROLO: a vista NÃO pode trocar a tabela da sessão, e o que
+         * ela não é tem de ser recusado com a razão. */
+        sql_executa("SELECT * FROM t", &o);
+        int sessao = (o.nrows == 20);
+        printf("\n      CONTROLO — a sessão ficou intacta: %d linhas  %s\n",
+               o.nrows, sessao ? "" : "NAO");
+        if(!sessao) mal++;
+
+        int e1 = sql_executa("CREATE VIEW v2 AS SELECT a FROM t WHERE a > 1", &o);
+        int e2 = sql_executa("CREATE VIEW v3 AS SELECT * FROM t", &o);
+        printf("      projecção na vista: %s  ·  vista sem WHERE: %s\n",
+               e1 ? "RESPONDEU (mau)" : "recusada", e2 ? "RESPONDEU (mau)" : "recusada");
+        if(e1 || e2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A VISTA É UMA COMPOSIÇÃO COM NOME, E NÃO TRAZ OPERAÇÃO NOVA. Uma condição é uma"
+           " FUNÇÃO do campo no campo, e o AND compõe duas — que no campo é o ∧ das"
+           " coordenadas, medido no §W28. Uma vista guarda a tabela e a condição, e usá-la num"
+           " FROM compõe a condição dela com a de quem a usa: o que ela traz é o direito de dar"
+           " NOME a uma composição que já existia. O QUE SE MEDE SÃO OS DOIS CAMINHOS A"
+           " CONCORDAR: a vista composta com uma segunda condição dá as mesmas linhas e a mesma"
+           " primeira célula que as duas condições escritas à mão, e sem isso a vista podia"
+           " estar a devolver a tabela inteira em qualquer caso que não fosse olhado. E A"
+           " AGREGAÇÃO TEM DE ATRAVESSAR, que é onde ela quase ficou de fora: `count(*)` não"
+           " entra na lista de colunas que o parser produz — quem o produz é o bloco da fibra —,"
+           " pelo que reescrever a partir dessa lista deixava a consulta sem colunas, e"
+           " procurar o FROM por ela devolvia falso e nem reescrevia. Acha-se por isso o FROM"
+           " de topo no próprio texto, e copiam-se as colunas como estavam: a vista troca a"
+           " TABELA e acrescenta a condição, e não tem nada que dizer sobre o que se pede. O"
+           " CONTROLO é a sessão, porque a vista vive na tabela SEM NOME — o .mem é por tabela,"
+           " e uma vista tem de ser encontrada antes de se saber que tabela abrir, o que seria"
+           " circular se ela morasse numa delas. Guarda-se e restaura-se a que estava aberta, e"
+           " exige-se que fique. E o que a vista não é fica recusado com a razão: projecção"
+           " dentro dela e vista sem WHERE, que não comporia nada.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

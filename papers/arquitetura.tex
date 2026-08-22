@@ -2208,6 +2208,42 @@ não tira a chave --- ele não muda o número de linhas, pelo que o índice
 continua válido, e quem decide à saída é o campo do \textbf{vivo}. A árvore diz
 onde a linha estava; ele diz se ela ainda está.
 
+\subsection*{O espaço das métricas: compor funções é compor réguas}
+
+\noindent Nada do que a máquina faz ao campo é uma operação nova: é uma
+\textbf{régua} ou uma composição delas. O \code{aranha.tex} define régua como
+um peso por direção --- $g^{(k)}$ medindo só $e_k$, cega às outras sete --- e
+diz o que as liga: \emph{como a base é ortonormal, medir e ler o bit são a
+mesma operação}. O campo é um vetor nessa base, e daí as quatro linhas que o
+motor executa:
+\[
+\begin{array}{ll}
+\text{marcar a linha }i & \text{pôr a coordenada } e_i\\
+\text{o \code{AND} de condições} & \wedge\ \text{coordenada a coordenada}\\
+\text{o \code{OR}, e a união} & \vee\ \text{coordenada a coordenada}\\
+\text{o \code{count}} & \textstyle\sum\ \text{das oito réguas --- o \emph{popcount}}
+\end{array}
+\]
+
+\medskip\noindent\textbf{E compor é o que faz delas um espaço.} Uma condição é
+uma função do campo no campo; duas condições compõem-se por $\wedge$ ou por
+$\vee$, e as duas composições são \emph{duais}. O que prende isto --- e o que se
+mede --- não é cada operação isolada, mas a lei que só vale se elas forem mesmo
+as coordenadas: contar é somar réguas, a soma é \emph{linear}, e portanto
+\[
+\boxed{\;\lvert A\vee B\rvert+\lvert A\wedge B\rvert=\lvert A\rvert+\lvert B\rvert\;}
+\]
+sem exceção. Um motor que fizesse o \code{AND} por um caminho que não as
+coordenadas quebraria esta identidade \emph{sem quebrar nenhuma contagem
+isolada} --- e é por isso que é ela que se atesta (\code{tests/pgwire.c} §W28,
+com o controlo a exigir que os conjuntos se cruzem de facto).
+
+\medskip\noindent E fica dito o que ainda \emph{não} se lê como medida: a
+comparação $<$ e $>$ usa o \textbf{bit de sinal} de uma subtração, que é uma
+convenção sobre o envelope e não uma régua; e a descida da árvore usa a
+\textbf{ordem} dos símbolos, que é a métrica linear. As duas funcionam e estão
+medidas; o que falta é lê-las na mesma base que as outras.
+
 \medskip\noindent\textbf{E há uma instrução que não opera sobre os dados: serve
 para NÃO RAMIFICAR.} Ela chama-se \code{ESPALHA}, e devolve a máscara
 \emph{inteira} se o argumento é não-nulo e zero se é nulo --- leva o booleano da
