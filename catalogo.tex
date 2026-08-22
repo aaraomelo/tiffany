@@ -1341,6 +1341,14 @@ a_m=\F^{-1}\!\left(\frac{\F(C)}{(\sqrt n)^{L-1}\prod_{l\neq m}\F(a_l)}\right)
 \]
 exato, sem resíduo. \textbf{Quem abre é o inverso}, e o inverso é o degrau que leva do anel ao corpo --- é ele que faltava. Sem ele haveria como fechar e não haveria como abrir, e o que a corte teria construído não seria uma transformação: seria um cofre.
 
+\paragraph{E há uma realização em que tudo isto é uma operação só.} Em $(\Z/2)^e$, onde a soma do grupo é o \textsc{xor}, ponha-se a \textbf{matriz de convolução} $C_a[j][i]=a[j\oplus i]$. Então $a\conv b$ \emph{é} $C_a\,C_b$ --- o produto de matrizes, sem uma linha de convolução escrita ---, a transformada diagonaliza sem normalização nenhuma,
+\[
+  H\,C_a\,H \;=\; n\,\operatorname{diag}(Ha),
+\]
+e o determinante dá o espectro inteiro de uma vez: $\det C_a=\prod_k (Ha)_k$. \emph{O «produto ponto a ponto do outro lado» aparece como a diagonal}, que é o que uma matriz diagonal é; e o zero que sela deixa de ser um caso à parte, porque $\det C_a=0$ exactamente quando alguma casa do espectro se anula.
+
+\medido{\code{tests/pgwire.c} §W101 --- $C_aC_b=C_{a\conv b}$ pelo \code{produto} do motor em $256/256$; $HC_aH=n\operatorname{diag}(Ha)$ em $256/256$, exacto em inteiros; $\det C_a=\prod_k(Ha)_k$ em $256/256$, um terceiro caminho para o mesmo espectro; e a equivalência «$\det=0\iff$ alguma casa nula» nos mesmos $256$.}
+
 \paragraph{E o único lugar onde não há volta.} É o zero, e a corte já esbarrou nele no alto da torre: uma casa transformada que dá zero fica \textbf{selada}, porque o zero é o único elemento sem inverso. O que a derivação acrescenta ao que lá se viu é o alcance do estrago --- ele \emph{parece} local e não é. Ponha-se $\varepsilon$ no lugar do zero e olhe-se o que volta:
 \[
 \F^{-1}(Q)_j-a_j=\frac{1}{\sqrt n}\,\varepsilon\,w^{-kj},

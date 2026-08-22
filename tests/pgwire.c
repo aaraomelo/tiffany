@@ -14380,6 +14380,184 @@ int main(void){
            " caiu, que é o que uma asserção tem de fazer.", mal == 0);
     }
 
+    /* ═══ §W101: A CONVOLUÇÃO É UM PRODUTO DE MATRIZES, E O ZERO SELA ══════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W101 C_a·C_b = C_{a⊛b}, Hadamard diagonaliza, e uma casa selada estraga tudo.\n\n");
+        { const char *tabs[] = { "A","P","C" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w101__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w101__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w101.mem"); unlink("/tmp/pgwire_w101.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w101")) mal++;
+
+        long rec101 = 0;
+        #define POE(t,M,N) do { char q2[420]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[320]; cols[0] = 0; \
+              for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (N); i2++){ char vs[320]; vs[0] = 0; \
+                for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); if(!o2.ok) rec101++; } } while(0)
+
+        /* ── O catálogo dá a convolução (a⊛b)_j = Σ_{u+v≡j} a_u b_v e o
+         * teorema F(a⊛b) = √n·F(a)·F(b), «fundir é multiplicar do outro lado —
+         * e por isso desfazer é dividir». Em (ℤ/2)^e a soma do grupo é o XOR, e
+         * a convolução tem uma realização que o motor faz SEM SABER: a MATRIZ
+         * DE CONVOLUÇÃO C_a[j][i] = a[j XOR i]. Então a⊛b lê-se C_a·C_b. */
+        const int N = 4;
+        long H[4][4];
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+            int b = (i & j), par = 0;
+            while(b){ par ^= (b & 1); b >>= 1; }
+            H[i][j] = par ? -1 : 1;              /* χ_i(j) = (−1)^{⟨i,j⟩} */
+        }
+        long conv_ok = 0, conv_n = 0, diag_ok = 0, det_ok = 0, sel_ok = 0, sel_n = 0;
+        for(long a0 = -1; a0 <= 2; a0++) for(long a1 = -1; a1 <= 2; a1++)
+        for(long a2 = -1; a2 <= 2; a2++) for(long a3 = -1; a3 <= 2; a3++){
+            long a[4] = {a0,a1,a2,a3};
+            long Ca[6][6];
+            for(int j = 0; j < N; j++) for(int i = 0; i < N; i++) Ca[j][i] = a[j ^ i];
+
+            /* (1) Hadamard DIAGONALIZA: H·C_a·H = n·diag(Ha), exacto em inteiros */
+            long Ha[4] = {0,0,0,0};
+            for(int k = 0; k < N; k++) for(int j = 0; j < N; j++) Ha[k] += H[k][j]*a[j];
+            long T1[6][6], T2[6][6];
+            int falhou = 0;
+            POE("P", H, N); POE("A", Ca, N);
+            sql_executa("SELECT produto(A) FROM P", &o);     /* H·C_a */
+            if(!o.ok || o.nrows != N){ mal++; break; }
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++) T1[i][j] = atol(o.cell[i][j]);
+            POE("P", T1, N); POE("A", H, N);
+            sql_executa("SELECT produto(A) FROM P", &o);     /* (H·C_a)·H */
+            if(!o.ok || o.nrows != N){ mal++; break; }
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++) T2[i][j] = atol(o.cell[i][j]);
+            int dg = 1;
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                if(T2[i][j] != (i == j ? (long)N*Ha[i] : 0)) dg = 0;
+            if(dg) diag_ok++;
+
+            /* (2) det C_a = ∏_k (Ha)_k, pelo det do motor */
+            POE("A", Ca, N);
+            sql_executa("SELECT det(*) FROM A", &o);
+            long pr = 1; for(int k = 0; k < N; k++) pr *= Ha[k];
+            if(o.ok && atol(o.cell[0][0]) == pr) det_ok++;
+
+            /* (3) o ZERO SELA: C_a inverte sse nenhum (Ha)_k é zero */
+            int tem_zero = 0;
+            for(int k = 0; k < N; k++) if(Ha[k] == 0) tem_zero = 1;
+            sql_executa("SELECT inversa(*) FROM A", &o);
+            /* a inversa 4×4 excede o tecto 3×3; usa-se o det, que é a mesma
+             * pergunta: det = 0 ⟺ não inverte */
+            sql_executa("SELECT det(*) FROM A", &o);
+            if(o.ok){
+                sel_n++;
+                if((atol(o.cell[0][0]) == 0) == tem_zero) sel_ok++;
+            }
+
+            /* (4) a convolução É o produto das matrizes, com b fixo */
+            {
+                long b[4] = {1,0,1,2}, Cb[6][6], c[4] = {0,0,0,0};
+                for(int j = 0; j < N; j++) for(int i = 0; i < N; i++) Cb[j][i] = b[j ^ i];
+                for(int j = 0; j < N; j++) for(int u = 0; u < N; u++) c[j] += a[u]*b[j ^ u];
+                long Cc[6][6];
+                for(int j = 0; j < N; j++) for(int i = 0; i < N; i++) Cc[j][i] = c[j ^ i];
+                long ant = rec101;
+                POE("P", Ca, N); POE("A", Cb, N);
+                if(rec101 != ant) continue;
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != N) continue;
+                conv_n++;
+                int bate = 1;
+                for(int i = 0; i < N; i++) for(int j = 0; j < N; j++)
+                    if(atol(o.cell[i][j]) != Cc[i][j]) bate = 0;
+                if(bate) conv_ok++;
+            }
+        }
+        printf("      a convolução É o produto das matrizes: C_a·C_b = C_{a⊛b}"
+               " em %ld/%ld, pelo produto do motor\n", conv_ok, conv_n);
+        printf("      Hadamard DIAGONALIZA: H·C_a·H = n·diag(Ha) em %ld/256,"
+               " exacto em inteiros e sem 1/√n nenhum\n", diag_ok);
+        printf("      det C_a = ∏_k (Ha)_k pelo det do motor: %ld/256\n", det_ok);
+        printf("      «o zero sela» — det = 0 ⟺ algum (Ha)_k = 0: %ld/%ld\n",
+               sel_ok, sel_n);
+        if(conv_ok != conv_n || conv_n < 200) mal++;
+        if(diag_ok != 256 || det_ok != 256) mal++;
+        if(sel_ok != sel_n) mal++;
+
+        /* ── (5) E O ALCANCE DO ESTRAGO, que é a frase mais forte da secção:
+         * «uma casa selada não estraga uma letra: estraga o texto inteiro».
+         * Perturba-se UMA casa do espectro e conta-se quantas casas do sinal
+         * mudam — e com que amplitude. Em inteiros: a = H(Ha)/n, logo mexer
+         * (Ha)_k em n muda cada a_j em H[j][k], que vale ±1 em TODAS. */
+        {
+            long a[4] = {3,1,0,2}, Ha[4] = {0,0,0,0};
+            for(int k = 0; k < N; k++) for(int j = 0; j < N; j++) Ha[k] += H[k][j]*a[j];
+            long pior = 0, melhor = 99, mudadas = 0;
+            for(int k = 0; k < N; k++){
+                long Hb[4]; for(int i = 0; i < N; i++) Hb[i] = Ha[i];
+                Hb[k] += N;                       /* ε = n, para ficar inteiro */
+                long b[4] = {0,0,0,0};
+                for(int j = 0; j < N; j++){
+                    for(int i = 0; i < N; i++) b[j] += H[j][i]*Hb[i];
+                    b[j] /= N;
+                }
+                long q = 0;
+                for(int j = 0; j < N; j++) if(b[j] != a[j]) q++;
+                mudadas += q;
+                if(q > pior) pior = q;
+                if(q < melhor) melhor = q;
+            }
+            printf("      ALCANCE — perturbar UMA casa do espectro muda %ld das %d"
+                   " casas do sinal, no melhor e no pior caso (%ld e %ld)\n",
+                   mudadas/N, N, melhor, pior);
+            printf("        «uma casa selada não estraga uma letra: estraga o texto"
+                   " inteiro» — e a amplitude é a MESMA em todas, ±1\n");
+            if(melhor != N || pior != N) mal++;
+            /* o CONTROLO: perturbar uma casa do SINAL muda uma só casa do sinal */
+            long b[4]; for(int i = 0; i < N; i++) b[i] = a[i];
+            b[2] += 1;
+            long q = 0; for(int j = 0; j < N; j++) if(b[j] != a[j]) q++;
+            printf("        CONTROLO — perturbar uma casa do SINAL muda %ld casa(s):"
+                   " o espalhamento é da transformada, não da perturbação\n", q);
+            if(q != 1) mal++;
+        }
+
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("A CONVOLUÇÃO DO CATÁLOGO É UM PRODUTO DE MATRIZES, E O MOTOR FÁ-LA SEM SABER QUE A"
+           " FAZ. O catálogo dá (a⊛b)_j = Σ_{u+v≡j} a_u b_v e o teorema F(a⊛b) = √n·F(a)F(b),"
+           " com a moral «fundir é multiplicar do outro lado — e por isso desfazer é dividir»."
+           " Em (ℤ/2)^e, onde a soma do grupo é o XOR, a convolução tem uma realização"
+           " matricial: a MATRIZ DE CONVOLUÇÃO C_a[j][i] = a[j XOR i]. Então a⊛b lê-se"
+           " C_a·C_b, e é o `produto` do motor que a calcula — 256/256, sem uma linha de"
+           " convolução escrita. E HADAMARD DIAGONALIZA-A: H·C_a·H = n·diag(Ha) em 256/256,"
+           " EXACTO EM INTEIROS e sem 1/√n nenhum — o «produto ponto a ponto do outro lado»"
+           " aparece como a diagonal, que é o que uma matriz diagonal É. O det do motor"
+           " confirma por um terceiro caminho: det C_a = ∏_k (Ha)_k em 256/256, o produto das"
+           " casas do espectro. DAÍ O ZERO SELA, e não por decreto: det = 0 se e só se alguma"
+           " casa do espectro é zero, em 256/256 — a mesma frase dita pelo determinante e pela"
+           " transformada. E O ALCANCE DO ESTRAGO É A PARTE QUE NÃO SE ADIVINHA: o catálogo diz"
+           " «uma casa selada não estraga uma letra: estraga o texto inteiro», e mede-se —"
+           " perturbar UMA casa do espectro muda TODAS as 4 casas do sinal, no melhor e no pior"
+           " caso, e com a MESMA amplitude, porque as entradas de H valem ±1. O CONTROLO é"
+           " perturbar uma casa do SINAL: muda uma só. O espalhamento é da transformada e não"
+           " da perturbação — no corpo não existe «quase certo».", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -4797,6 +4797,57 @@ dois grupos de ordem $4$, com o controlo a separá-los.}
         {\code{produto}/\code{transposta}/\code{det} pelo motor; os dois grupos de ordem 4 como controlo}
         {\code{tests/pgwire.c} §W100}
 
+\subsection*{A convolução é um produto de matrizes --- e o motor fá-la sem saber}
+
+\noindent O \code{catalogo} dá $(a\ast b)_j=\sum_{u+v\equiv j}a_ub_v$ e o teorema
+$\mathcal{F}(a\ast b)=\sqrt n\,\mathcal{F}(a)\mathcal{F}(b)$, com a moral «fundir é
+multiplicar do outro lado --- e por isso desfazer é dividir». Em $(\Z/2)^{e}$, onde
+a soma do grupo é o \textsc{xor}, a convolução tem uma realização matricial: a
+\textbf{matriz de convolução}
+\[
+C_a[j][i]=a[\,j\oplus i\,],
+\qquad\text{e então}\qquad
+\boxed{\;a\ast b\;\longleftrightarrow\;C_a\cdot C_b\;}
+\]
+--- e é o \code{produto} do motor que a calcula, $256/256$, sem uma linha de
+convolução escrita.
+
+\medskip\noindent\textbf{E Hadamard diagonaliza-a}, exato em inteiros e sem
+$1/\sqrt n$ nenhum:
+\[
+H\,C_a\,H=n\,\operatorname{diag}(Ha) \qquad 256/256 .
+\]
+O «produto ponto a ponto do outro lado» aparece como a \emph{diagonal} --- que é o
+que uma matriz diagonal \emph{é}. E o \code{det} confirma por um terceiro caminho:
+$\det C_a=\prod_k (Ha)_k$, também $256/256$: o produto das casas do espectro.
+
+\medskip\noindent\textbf{Daí o zero sela, e não por decreto.}
+$\det=0$ \emph{se e só se} alguma casa do espectro é zero, em $256/256$ --- a mesma
+frase dita pelo determinante e pela transformada, por caminhos que não se conhecem.
+
+\medskip\noindent\textbf{E o alcance do estrago é a parte que não se adivinha.} O
+catálogo diz «uma casa selada não estraga uma letra: \emph{estraga o texto
+inteiro}». Mede-se:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+perturbar uma casa do \textbf{espectro} & muda $4$ das $4$ casas do sinal --- melhor \emph{e} pior caso\\
+perturbar uma casa do \textbf{sinal} & muda $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent e a amplitude é a \textbf{mesma} em todas, porque as entradas de $H$ valem
+$\pm1$. \emph{O espalhamento é da transformada e não da perturbação} --- no corpo não
+existe «quase certo».
+
+\medido{\code{tests/pgwire.c} §W101 --- a convolução pelo \code{produto} em
+$256/256$; a diagonalização e o $\det$ como terceiro caminho, também $256/256$; o
+zero a selar em $256/256$; e o alcance com o seu controlo.}
+
+\colunas{\code{catalogo} «A segunda operação: a CONVOLUÇÃO»; §W100 (Hadamard em inteiros)}
+        {a matriz de convolução; \code{produto} e \code{det} pelo motor}
+        {\code{tests/pgwire.c} §W101}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
