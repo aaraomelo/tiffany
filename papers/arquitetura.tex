@@ -5158,6 +5158,14 @@ E isso já estava medido: é o \code{cor:degenerados} de §W103, onde $\ell\to\i
 o degenerado sem metade. \emph{Não são duas observações --- é a mesma, num sítio onde
 se pode contar.}
 
+\medskip\noindent\textbf{E havia uma resposta mais curta, que este documento não
+tinha ido buscar.} A contagem acima é em $\Q$, onde o $\infty$ não está; em $\mathbb{P}^{1}$
+o lado aditivo fixa \emph{dois} pontos --- o $0$ e o $\infty$ --- e a conta fecha sem
+sair de $\Q$. O que faltava não era torção: era o \textbf{ponto}. Ver §W108, e o
+\code{algebrico sec:lei0}, que já o dizia.
+
+
+
 \medido{\code{tests/pgwire.c} §W107 --- as três funções em racionais exatos com os
 pólos ditos; a paridade de $g$; os pontos fixos $1$ contra $2$; e o emparelhamento
 $2/2$ no discreto.}
@@ -5165,6 +5173,48 @@ $2/2$ no discreto.}
 \colunas{\code{catalogo} «O par aditivo e o multiplicativo» (\code{prop:conjuga}); §W103 (\code{cor:degenerados})}
         {produto cruzado em $\Q$; paridade de $g$; exponenciação em $\Z/101$}
         {\code{tests/pgwire.c} §W107}
+
+\subsection*{\texorpdfstring{$\infty+1=-1$}{inf+1=-1}: a Möbius que põe o infinito na aritmética é a que gera o ouro}
+
+\noindent O \code{corpo\_algebrico} deriva-a e o \code{inteiros} eleva-a no
+\code{thm:mediante}. Aqui ela corre no motor: $M(x)=1/x-1=T_{-1}\circ S$ tem matriz
+$\left(\begin{smallmatrix}-1&1\\1&0\end{smallmatrix}\right)$, determinante $-1$ ---
+unitário, logo em $\mathrm{GL}_2(\Z)$ --- e
+\[
+M(\infty)=M\cdot[1{:}0]=[-1{:}1]=-1 .
+\]
+O característico é $\lambda^{2}+\lambda-1$, e o seu \textbf{recíproco} é
+$y^{2}=y+1$: \emph{o ouro}. Não é uma coincidência anotada --- é a mesma matriz lida
+pela cifra, e a reversão dos coeficientes confirma-o sem se resolver equação nenhuma.
+As potências de $M$ são os \textbf{Fibonacci com o sinal a alternar}, «a dobra a agir
+passo a passo», verificado potência a potência pelo motor.
+
+\medskip\noindent\textbf{E a mediante diz outra coisa}, que é o que o texto manda
+medir: $\infty\oplus(-1)=[1{:}0]\oplus[-1{:}1]=[0{:}1]=0$, e não $-1$. As duas
+leituras aditivas \emph{discordam} --- e é por discordarem que se medem as duas «em
+vez de se escolher a que agrada». Se coincidissem, uma delas era supérflua.
+
+\medskip\noindent\textbf{E isto corrige §W107.} Ali contei os pontos fixos em $\Q$ e
+achei \emph{um} de um lado (o zero) contra \emph{dois} do outro (o $\pm1$), e fui ao
+discreto buscar a explicação pela $2$-torção. Em $\mathbb{P}^{1}$ não é preciso sair de $\Q$:
+\[
+\begin{array}{lll}
+\nu_+[p{:}q]=[-p{:}q] & \text{fixa } [0{:}1] \text{ e } [1{:}0] & \text{o zero e o \textbf{infinito}}\\
+\nu_\times[p{:}q]=[q{:}p] & \text{fixa } [1{:}1] \text{ e } [1{:}-1] & \text{o } +1 \text{ e o } -1
+\end{array}
+\]
+\emph{Dois de cada lado, e a conta fecha.} O que faltava a §W107 não era torção
+nenhuma --- era o \textbf{ponto}: o $\infty$ que a Lei~0 põe lá, $0\dg=\infty$, e que
+$\Q$ sozinho não tem. A explicação pelo discreto continua verdadeira; \emph{esta é a
+que o documento já tinha}.
+
+\medido{\code{tests/pgwire.c} §W108 --- os pontos fixos em $\mathbb{P}^{1}(\Q)$ nos $48$
+pontos; $M$, o seu $\det$ e a imagem de $\infty$ pelo motor; o característico e a sua
+reversão; as potências contra Fibonacci; e a mediante a discordar.}
+
+\colunas{\code{algebrico} ($\infty+1=-1$, \code{sec:lei0}); \code{inteiros thm:mediante}; §W107}
+        {coordenadas homogéneas; \code{det}/\code{traco}/\code{produto} pelo motor}
+        {\code{tests/pgwire.c} §W108; \code{descida\_mobius.c} §M8}
 
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}

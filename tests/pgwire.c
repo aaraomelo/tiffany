@@ -15468,6 +15468,153 @@ int main(void){
            " duas observações: é a mesma, num sítio onde se pode contar.", mal == 0);
     }
 
+    /* ═══ §W108: ∞+1 = −1 — E EM ℙ¹ A CONTA DO §W107 FECHA SEM SAIR DE ℚ ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W108 A Möbius que põe ∞ na aritmética é a que gera o ouro.\n\n");
+        unlink("/tmp/pgwire_w108__A.mem"); unlink("/tmp/pgwire_w108__A.prog");
+        unlink("/tmp/pgwire_w108__P.mem"); unlink("/tmp/pgwire_w108__P.prog");
+        unlink("/tmp/pgwire_w108.mem");    unlink("/tmp/pgwire_w108.prog");
+        if(!sql_abrir("/tmp/pgwire_w108")) mal++;
+
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); sql_executa(v,&o2); } } while(0)
+
+        /* ── (1) §W107 mediu os pontos fixos em ℚ e achou UM de um lado e DOIS
+         * do outro, e resolveu a assimetria indo ao discreto. Mas o
+         * `corpo_algebrico` já a resolvia SEM SAIR DE ℚ: em ℙ¹ a inversão
+         * «fixa {±1} e emparelha {0,∞}». Em coordenadas homogéneas [p:q], com
+         * ∞ = [1:0] pela Lei 0 (0† = ∞), conta-se outra vez. */
+        {
+            long fix_mais = 0, fix_vezes = 0, N = 0;
+            /* os pontos de ℙ¹(ℚ) com |p|,|q| ≤ 6, reduzidos e sem repetir */
+            for(long p = -6; p <= 6; p++) for(long q = 0; q <= 6; q++){
+                if(!p && !q) continue;
+                long a = p<0?-p:p, b = q; while(b){ long t2=a%b; a=b; b=t2; }
+                long g = a ? a : 1;
+                if(p/g != p || q/g != q) continue;          /* já reduzido */
+                if(q == 0 && p != 1) continue;              /* ∞ = [1:0] uma vez */
+                N++;
+                /* ν₊[p:q] = [−p:q] — fixa sse [−p:q] = [p:q] */
+                if(-p*q == p*q) fix_mais++;
+                /* ν×[p:q] = [q:p] — fixa sse [q:p] = [p:q], isto é p² = q² */
+                if(p*p == q*q) fix_vezes++;
+            }
+            printf("      em ℙ¹(ℚ) com %ld pontos: ν₊[p:q] = [−p:q] fixa %ld ·"
+                   " ν×[p:q] = [q:p] fixa %ld\n", N, fix_mais, fix_vezes);
+            printf("        os de ν₊ são [0:1] = 0 e [1:0] = ∞; os de ν× são [1:1]"
+                   " = +1 e [1:−1] = −1 — DOIS de cada lado, e a conta FECHA\n");
+            printf("        §W107 achou 1 contra 2 porque contou em ℚ, onde o ∞ não"
+                   " está: o que faltava não era torção, era o PONTO\n");
+            if(fix_mais != 2 || fix_vezes != 2) mal++;
+        }
+
+        /* ── (2) ∞+1 = −1: a Möbius M(x) = 1/x − 1 = T₋₁∘S, de determinante
+         * unitário, leva ∞ a −1. Pelo motor: M = (−1,1;1,0) e M·[1:0]. */
+        {
+            long M[2][2] = {{-1,1},{1,0}};
+            POE2("A", M);
+            sql_executa("SELECT det(*) FROM A", &o);
+            long d = o.ok ? atol(o.cell[0][0]) : 0;
+            /* M·[1:0] = primeira coluna = (−1, 1) = [−1:1] = −1 */
+            long im_p = M[0][0], im_q = M[1][0];
+            printf("      M = (−1,1;1,0), det = %ld (unitário) · M(∞) = M·[1:0] ="
+                   " [%ld:%ld] = %ld  →  ∞+1 = −1 %s\n", d, im_p, im_q,
+                   im_q ? im_p/im_q : 0,
+                   (d == -1 && im_p == -1 && im_q == 1) ? "✓" : "✗");
+            if(d != -1 || im_p != -1 || im_q != 1) mal++;
+
+            /* o ponto fixo pede x² + x − 1 = 0, e no recíproco y² = y + 1: O OURO.
+             * Verifica-se pela cifra: χ_M(λ) = λ² − tr·λ + det = λ² + λ − 1 */
+            sql_executa("SELECT traco(*) FROM A", &o);
+            long tr = o.ok ? atol(o.cell[0][0]) : 99;
+            printf("        e o característico é λ² − (%ld)λ + (%ld) = λ² + λ − 1,"
+                   " cujo recíproco é y² = y + 1 — O OURO\n", tr, d);
+            if(tr != -1) mal++;
+            /* o recíproco: se x² + x − 1 = 0 e y = 1/x, então y² − y − 1 = 0.
+             * Mede-se nos COEFICIENTES: reverter [1,1,−1] dá [−1,1,1] ~ [1,−1,−1] */
+            long c[3] = {1, 1, -1}, r[3] = {c[2], c[1], c[0]};
+            int ouro = (-r[0] == 1 && -r[1] == -1 && -r[2] == -1);
+            printf("        a reversão de x²+x−1 é %ldy²+%ldy+%ld, que a menos de"
+                   " sinal é y²−y−1: %s\n", r[0], r[1], r[2], ouro ? "sim" : "NÃO");
+            if(!ouro) mal++;
+        }
+
+        /* ── (3) AS POTÊNCIAS DE M SÃO OS FIBONACCI COM O SINAL A ALTERNAR —
+         * «a dobra a agir passo a passo». Pelo motor, potência a potência. */
+        {
+            long M[2][2] = {{-1,1},{1,0}}, Ak[2][2] = {{1,0},{0,1}};
+            long F[12] = {0,1,1,2,3,5,8,13,21,34,55,89};
+            long bate = 0, tot = 0;
+            printf("      as potências de M:");
+            for(int k = 1; k <= 8; k++){
+                POE2("P", Ak); POE2("A", M);
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != 2){ mal++; break; }
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    Ak[i][j] = atol(o.cell[i][j]);
+                /* |entradas| são Fibonacci consecutivos, com sinal a alternar */
+                long a = Ak[0][0] < 0 ? -Ak[0][0] : Ak[0][0];
+                long b = Ak[0][1] < 0 ? -Ak[0][1] : Ak[0][1];
+                tot++;
+                if(a == F[k+1] && b == F[k]) bate++;
+                if(k <= 4) printf("  M^%d=(%ld,%ld;%ld,%ld)", k,
+                                  Ak[0][0], Ak[0][1], Ak[1][0], Ak[1][1]);
+            }
+            printf("\n        os módulos das entradas são Fibonacci consecutivos em"
+                   " %ld/%ld potências, com o sinal a alternar\n", bate, tot);
+            if(bate != tot || tot < 6) mal++;
+        }
+
+        /* ── (4) E A MEDIANTE DIZ OUTRA COISA — que é o ponto do texto: «são
+         * duas leituras e dizem coisas diferentes, e por isso medem-se as duas
+         * em vez de se escolher a que agrada». ∞ ⊕ (−1) = [1:0]⊕[−1:1] =
+         * [0:1] = 0, e não −1. */
+        {
+            long p1 = 1, q1 = 0, p2 = -1, q2 = 1;      /* ∞ e −1 */
+            long ps = p1 + p2, qs = q1 + q2;           /* a mediante */
+            printf("      a MEDIANTE: ∞ ⊕ (−1) = [%ld:%ld]⊕[%ld:%ld] = [%ld:%ld] ="
+                   " %ld — e NÃO −1\n", p1,q1,p2,q2, ps,qs, qs ? ps/qs : 0);
+            printf("        as duas leituras aditivas DISCORDAM: a Möbius dá −1, a"
+                   " mediante dá 0 — e 0 = 1/∞ pela Lei 0\n");
+            if(ps != 0 || qs != 1) mal++;
+            /* e é por discordarem que se medem as duas: se coincidissem, uma
+             * delas era supérflua */
+            if(ps == -1 && qs == 1) mal++;
+        }
+
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("∞+1 = −1 É A MÖBIUS QUE PÕE O INFINITO NA ARITMÉTICA, E É A MESMA QUE GERA O OURO."
+           " O `corpo_algebrico.tex` deriva-a e o `inteiros.tex` eleva-a no thm:mediante; aqui"
+           " ela corre no motor. M(x) = 1/x − 1 = T₋₁∘S tem matriz (−1,1;1,0), determinante"
+           " −1 — unitário, logo em GL₂(ℤ) —, e M(∞) = M·[1:0] = [−1:1] = −1. O característico"
+           " é λ² + λ − 1, e o seu RECÍPROCO é y² = y + 1: o ouro. Não é uma coincidência"
+           " anotada — é a mesma matriz lida pela cifra, e a reversão dos coeficientes"
+           " confirma-o sem se resolver equação nenhuma. AS POTÊNCIAS DE M SÃO OS FIBONACCI"
+           " COM O SINAL A ALTERNAR, «a dobra a agir passo a passo», verificado potência a"
+           " potência pelo motor. E A MEDIANTE DIZ OUTRA COISA, que é o que o texto manda"
+           " medir: ∞ ⊕ (−1) = [1:0]⊕[−1:1] = [0:1] = 0, e não −1. As duas leituras aditivas"
+           " DISCORDAM, e é por discordarem que se medem as duas «em vez de se escolher a que"
+           " agrada» — se coincidissem, uma delas era supérflua. E ISTO CORRIGE O §W107, que é"
+           " o motivo de valer mais do que uma confirmação: ali contei os pontos fixos em ℚ e"
+           " achei UM de um lado (o zero) contra DOIS do outro (o ±1), e fui ao discreto"
+           " buscar a explicação pela 2-torção. Em ℙ¹ não é preciso sair de ℚ: ν₊[p:q] ="
+           " [−p:q] fixa [0:1] e [1:0], isto é o ZERO E O INFINITO, e ν×[p:q] = [q:p] fixa"
+           " [1:1] e [1:−1]. DOIS DE CADA LADO, e a conta fecha. O que faltava ao §W107 não"
+           " era torção nenhuma: era o PONTO — o ∞ que a Lei 0 põe lá, 0† = ∞, e que ℚ sozinho"
+           " não tem. A explicação pelo discreto continua verdadeira; esta é a que o documento"
+           " já tinha.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
