@@ -5587,6 +5587,52 @@ uma álgebra onde nada associasse não seria esta.
         {tábua de Cayley--Dickson em inteiros; o associador contado}
         {\code{tests/pgwire.c} §W117}
 
+\subsection*{A alternância é o determinante, e Hurwitz é o mesmo \texorpdfstring{$m^2+4$}{m2+4}}
+
+\noindent A §«Construção de $\R$» define a ordem alternada e dá logo a razão
+estrutural: «$M_n$ age em $\mathbb{P}(\R)$ com $\det M_n=(-1)^{n+1}$, e o sinal do
+determinante é \textbf{exatamente} a orientação da Möbius». §W105 mediu que a
+alternada acerta e a lexicográfica erra; aqui mede-se \emph{porquê} --- o sinal
+$(-1)^k$ da definição e o $\det$ do prefixo, pedido ao motor letra a letra, andam
+juntos em $324/324$ posições. \emph{Não é uma convenção que funciona: é o
+determinante a contar inversões.}
+
+\medskip\noindent\textbf{E o limite de Hurwitz é o mesmo $\Delta$.} Para $\sigma_m$,
+$N(p-q\sigma)=p^{2}-mpq-q^{2}$ é inteiro e nunca nulo, logo
+$\lvert p-q\sigma\rvert\cdot\lvert p-q\sigma'\rvert=\lvert N\rvert\ge1$, e daí
+$q\lvert p-q\sigma\rvert\gtrsim1/\sqrt{m^{2}+4}$.
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ & $\Delta$ & $\lvert N\rvert$ mín. & unidades\\
+\midrule
+$m=1$ & $5$ & $1$ & $11$\\
+$m=2$ & $8$ & $1$ & $7$\\
+$m=3$ & $13$ & $1$ & $5$\\
+$m=4$ & $20$ & $1$ & $3$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent $\varphi$ é o \textbf{pior} aproximável porque $\Delta$ é \emph{mínimo} em
+$m=1$: o limite $1/\sqrt\Delta$ é o mais \textbf{alto} no áureo --- «os denominadores
+crescem o mais devagar que podem».
+
+\medskip\noindent É a \textbf{quarta} lei do mesmo número: §W70 usou $m^{2}+4$ para
+dizer que o ponto fixo sai de $\Q$, §W110 para dizer que a ordem existe, a cifra
+chama-lhe $\Delta$, e aqui é o limite de aproximação.
+
+\medskip\noindent E \textbf{Cassini} dá a medida em inteiros:
+$F_{n+1}F_{n-1}-F_n^{2}=(-1)^{n}$, de módulo \emph{sempre} $1$ --- a aproximação do
+áureo é um inteiro unitário, e não um erro que se estima. O controlo é a prata, onde
+a mesma forma continua unitária com outro metal.
+
+\medido{\code{tests/pgwire.c} §W115 --- a alternância contra o $\det$ do prefixo; a
+norma nos quatro metais; e Cassini em $18/18$ com o seu controlo.}
+
+\colunas{\code{catalogo} «Construção de $\R$» (\code{prop:ordem}, \code{obs:hurwitz}); §W105; §W96}
+        {\code{det} do prefixo pelo motor; $N(p-q\sigma)$ em inteiros}
+        {\code{tests/pgwire.c} §W115}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

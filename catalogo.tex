@@ -23204,11 +23204,15 @@ decrescente em $z$, então cada nível de encaixe inverte a orientação. Formal
 $\Pj(\R)$ com $\det M_n = (-1)^{n+1}$, e o sinal do determinante é exatamente a orientação da
 Möbius correspondente.
 
+\medido{\code{tests/pgwire.c} §W115 --- a alternância \textbf{não é convenção}: o sinal $(-1)^k$ da definição e o $\det$ do prefixo, pedido ao motor letra a letra, andam juntos em $324/324$ posições. É o determinante a contar as inversões que $z\mapsto a+1/z$ produz por ser \emph{decrescente} em $z$.}
+
 \begin{obs}[quem o algoritmo aproxima pior]\label{obs:hurwitz}
 $\varphi = \cf{1}{\overline{1}}$ tem todos os quocientes no mínimo possível, logo os denominadores
 crescem o mais devagar que podem: é o número pior aproximável por racionais (Hurwitz~\cite{hurwitz1891}),
 e o extremo da desigualdade $|x-p/q| < 1/(\sqrt5\,q^2)$.
 \end{obs}
+
+\medido{\code{tests/pgwire.c} §W115 --- e o $\sqrt5$ desta desigualdade é o \emph{mesmo} $\Delta=m^2+4$ que já apareceu três vezes. Para o metal $\sigma_m$, $N(p-q\sigma)=p^2-mpq-q^2$ é \textbf{inteiro} e nunca nulo, logo $\lvert p-q\sigma\rvert\cdot\lvert p-q\sigma'\rvert=\lvert N\rvert\ge1$, e daí $q\lvert p-q\sigma\rvert\gtrsim1/\sqrt{m^2+4}$. Mede-se a \emph{norma}, que é quem decide: o mínimo de $\lvert N\rvert$ é $1$ em todos os metais e é atingido. E $\varphi$ é o pior aproximável porque $\Delta$ é \textbf{mínimo} em $m=1$ --- $\Delta_1=5$, e $\Delta_m>5$ para todo $m\ge2$ ---, logo o limite $1/\sqrt\Delta$ é o mais \emph{alto} no áureo. Cassini dá a medida em inteiros: $F_{n+1}F_{n-1}-F_n^2=(-1)^n$, de módulo sempre $1$ em $18/18$ --- a aproximação do áureo é um inteiro unitário, e não um erro que se estima. O controlo é a prata, onde a mesma forma continua unitária.}
 
 \subsection{Os intervalos encaixados}
 
