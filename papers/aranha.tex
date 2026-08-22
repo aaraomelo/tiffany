@@ -616,8 +616,9 @@ depressa.
 face só, o par colapsa num passo --- $(a,b)\mapsto(m,m)$ --- e a batida seguinte
 não move nada: para continuar é preciso \textbf{escolher} um lado em cada nível,
 que é a bissecção do Teor.~\ref{thm:duas}(6). Aí o ponto fica
-\emph{endereçado} por um caminho, a um bit por nível
-(\code{analitico thm:central-continuo}: $\mathbb{R}\cong\{\text{caminhos}\}/\!\sim$).
+\emph{endereçado} por um caminho, a um bit por nível: o ponto \emph{é} a classe
+do caminho, e dois caminhos dizem o mesmo ponto exatamente quando os seus
+encaixes têm a mesma intersecção.
 Com as \emph{duas} faces não se escolhe nada: o corte é \textbf{determinado}
 pelos dois extremos, e o par $(a,b)$ chega para o fixar.
 \[
@@ -642,8 +643,8 @@ garante a paragem e que não depende da raiz ---, e com ela as duas que a
 sustentam (a geométrica nunca desce, o encaixe nunca quebra), porque qualquer
 delas a falhar tirava o sentido às outras. O CONTROLO diz porque a segunda face
 faz falta --- com uma só, a segunda batida não move. Tudo em inteiros, com a raiz por piso e a
-folga do piso dita onde é usada. E o encaixotamento certificado está em
-\code{algebrico thm:agm-analitico} e \code{tests/agm.c} §A1--§A3.}
+folga do piso dita onde é usada. O encaixotamento certificado está em
+\code{tests/agm.c} §A1--§A3.}
 
 \colunas{\code{thm:duas}(2) e (4); \code{lem:conserva}}
         {$\partial^{\times}x=ab/x$; as duas classes; o par $(a,b)$ basta}
@@ -708,9 +709,9 @@ se sabe quanto ficou de fora. \emph{A memória existe onde a trajetória passou}
 \medskip\noindent\textbf{Nada disto invoca o ponto.} O processo não recebe o
 ponto como ingrediente e não o consulta: ele constrói o caminho, e o caminho
 determina o ponto. Se esse ponto tem nome noutro sítio --- e o encaixe da
-duplicação de Arquimedes determina aquele a que a obra chama $\pi$
-(\code{algebrico thm:metronomo-pi}, onde ele é \emph{o buraco do seu próprio
-encaixe}) --- isso é uma \textbf{identificação}, feita depois e fora daqui. A
+duplicação de Arquimedes determina aquele a que a obra chama $\pi$ --- o
+\emph{buraco do seu próprio encaixe}, o ponto que nenhuma das duas sucessões
+alcança --- isso é uma \textbf{identificação}, feita depois e fora daqui. A
 transcendência é propriedade do objeto obtido, não coisa posta na máquina antes
 de a construção começar:
 \[
@@ -747,7 +748,7 @@ com o ponto cercado ---, e o centro contra as suas fronteiras em três grades
 externo ao ficheiro e não entra em conta nenhuma: serve para \emph{conferir}, e
 o processo corre sem ele.}
 
-\colunas{\code{thm:corte}; \code{lem:conserva}; \code{algebrico thm:metronomo-pi}}
+\colunas{\code{thm:corte}; \code{lem:conserva}}
         {o par $(m,\delta)$; o centro como leitura; as duas fronteiras}
         {\code{tests/meio.c} §M8; \code{tests/metronomo\_pi.js}}
 
@@ -1058,8 +1059,8 @@ $T_{n+1}=T_n\oplus T_n^{*}$, lido como contagem --- ou o eixo novo entra, ou nã
 entra, dois casos exaustivos e disjuntos. A simetria
 $\binom{n}{k}=\binom{n}{n-k}$ é a \textbf{involução} que troca todos os sinais, e
 o \textbf{máximo de $G$ cai no seu ponto fixo}, $k=n/2$: \emph{a dobra é maior no
-meio}, que é onde mais caminhos se sobrepõem. \code{teoria} demonstra-o e
-\code{tests/pascal.c} mede-o; aqui ele aparece como o que é --- a contagem da
+meio}, que é onde mais caminhos se sobrepõem, e \code{tests/pascal.c} mede-o;
+aqui ele aparece como o que é --- a contagem da
 fibra no espaço que o Teor.~\ref{thm:espaco} construiu.
 
 \begin{teorema}[as direções de aresta são a base ortonormal]\label{thm:base8}
@@ -2112,14 +2113,15 @@ cursor basta: $\ell$ e $p$ lêem-se no campo, sem segunda passagem e sem compara
 posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 
 \medskip\noindent\textbf{E o exemplo acima tem nome: é JULIA.} A $f(z)=z^{2}-1$
-usada no contra-exemplo é uma órbita de Julia, e a construção dela não é deste
-documento --- está feita, e lê-se em duas cartas. O \code{corpo\_algebrico
-thm:cantor-julia} põe o par: \textbf{Julia} é o lado multiplicativo,
-$z\mapsto z^{2}$, e \textbf{Cantor} é o aditivo, o \emph{shift}
+usada no contra-exemplo é uma órbita de Julia, e o par que ela forma lê-se
+inteiro na dobra deste documento. \textbf{Julia} é o lado \emph{multiplicativo},
+$z\mapsto z^{2}$; \textbf{Cantor} é o \emph{aditivo}, o \emph{shift}
 $\theta\mapsto2\theta$; e o que os conjuga é a \textbf{forma polar}
-$z=e^{2\pi i\theta}$, cuja derivação é o \code{teoria \S sec:euler} --- ali
-$J^{2}=-1$ faz as potências ciclarem, $1,J,-1,-J$, e a exponencial parte-se no
-par $(\cos,\sin)$ com $\cos^{2}+\sin^{2}\equiv1$. \emph{Elevar ao quadrado no
+$z=e^{2\pi i\theta}$, que precisa apenas de $J^{2}=-1$: as potências de $J$
+ciclam, $1,J,-1,-J$, a exponencial parte-se pela paridade do índice no par
+$(\cos,\sin)$, e $\cos^{2}+\sin^{2}\equiv1$ é a conservação do
+Lema~\ref{lem:conserva} nessa base. A conjugação é então a identidade
+$\bigl(e^{2\pi i\theta}\bigr)^{2}=e^{2\pi i(2\theta)}$ e nada mais. \emph{Elevar ao quadrado no
 multiplicativo é dobrar o ângulo no aditivo}, e é só isso que a conjugação diz.
 
 \medskip\noindent\textbf{Daí que o período seja LEGÍVEL, e de dois lados.} Do
@@ -2134,14 +2136,14 @@ segundo não precisa do ângulo.
 operador.} Com $q$ ímpar o $2$ é invertível módulo $q$: o shift não tem o que
 gastar, e a palavra \textbf{cicla}. Com $q$ par ele \emph{divide} o denominador
 a cada passo --- $1/12\to1/6\to1/3$ --- e só passa a ciclar quando chega ao
-ímpar. Nas palavras do \code{corpo\_algebrico thm:cantor-julia}: \emph{ciclar
-não é uma propriedade do operador, é o que sobra quando o orçamento deixa de
-poder ser gasto}. É o mesmo que aqui se diz da cauda e do período --- $\ell$ é o
+ímpar. Donde a formulação que fica: \emph{ciclar não é uma propriedade do
+operador, é o que sobra quando o orçamento deixa de poder ser gasto}. É o mesmo
+que aqui se diz da cauda e do período --- $\ell$ é o
 que se gastou, $p$ é o que sobrou.
 
 \medskip\noindent\textbf{E a dobra deste documento é o primeiro membro de uma
-TRÍADE.} O \code{algebrico thm:unificacao} identifica os operadores pela
-\emph{ordem}, e a ordem mede-se aplicando cada um até voltar:
+TRÍADE.} Os três operadores separam-se pela \emph{ordem} --- o menor $k$ com
+$f^{k}=\mathrm{id}$ ---, que se mede aplicando cada um até voltar:
 \[
 \begin{array}{llcl}
 \text{Cantor / Julia} & \text{o espelho da dobra} & 2 & \nu^{2}=\mathrm{id}\\
@@ -2156,16 +2158,57 @@ vezes um quarto de volta é espelhar. Daí o nome, \emph{meio-ângulo}: a dobra
 leva o extremo ao outro extremo de uma vez; Viviani fá-lo em duas.
 
 \medskip\noindent E as ordens não são uma lista escolhida: são as que uma
-\textbf{rede} admite. O \code{topologico thm:toro} mostra que um automorfismo
-inteiro do toro com $\lvert\det\rvert=1$ só pode ter ordem em
-$\{1,2,3,4,6\}$ --- a restrição cristalográfica --- e a tríade ocupa
+\textbf{rede} admite, e isso prova-se com o que esta secção já tem --- o traço.
+
+\begin{lema}[a rede só admite cinco ordens]\label{lem:cristal}
+Se $A$ é uma matriz $2\times2$ de entradas \emph{inteiras} com
+$\lvert\det A\rvert=1$ e $A^{k}=I$ para algum $k\ge1$, então
+$k\in\{1,2,3,4,6\}$. Em particular \textbf{não há ordem $5$}.
+\end{lema}
+
+\begin{proof}
+O polinómio característico é $\lambda^{2}-t\lambda+d$ com $t=\operatorname{tr}A$
+e $d=\det A=\pm1$, ambos \textbf{inteiros} por $A$ o ser. De $A^{k}=I$ segue
+$\lambda^{k}=1$ para cada valor próprio, logo $\lvert\lambda\rvert=1$ e
+$\lambda_{1}\lambda_{2}=d$; e o polinómio mínimo divide $\lambda^{k}-1$, que não
+tem raiz múltipla, portanto $A$ \textbf{diagonaliza}.
+
+Se $d=-1$, duas raízes de módulo $1$ com produto $-1$ não podem ser conjugadas
+--- o produto daria $\lvert\lambda\rvert^{2}=+1$ ---, logo são reais, $\{+1,-1\}$,
+e $A^{2}=I$: ordem $2$.
+
+Se $d=+1$, as raízes são conjugadas ou ambas reais, e em qualquer caso
+$t=\lambda_{1}+\lambda_{2}$ é real com $\lvert t\rvert\le2$. Um inteiro nesse
+intervalo só tem cinco valores, e cada um fixa o polinómio:
+\[
+\begin{array}{ccl}
+t=\phantom{-}2 & (\lambda-1)^{2} & A=I, & k=1\\
+t=\phantom{-}1 & \lambda^{2}-\lambda+1 & \lambda=e^{\pm i\pi/3}, & k=6\\
+t=\phantom{-}0 & \lambda^{2}+1 & \lambda=\pm i, & k=4\\
+t=-1 & \lambda^{2}+\lambda+1 & \lambda=e^{\pm2i\pi/3}, & k=3\\
+t=-2 & (\lambda+1)^{2} & A=-I, & k=2
+\end{array}
+\]
+--- nos três do meio as raízes são primitivas das ordens $6,4,3$; nos dois
+extremos a raiz é dupla e a diagonalização força $A=\pm I$. A ordem $5$ exigiria
+$t=2\cos(2\pi/5)=\tfrac{\sqrt5-1}{2}$, que \textbf{não é inteiro}.
+\end{proof}
+
+\noindent \emph{É o traço que fecha a lista}: a inteireza da rede passa para
+$t$, e um intervalo de comprimento $4$ só tem cinco inteiros. A tríade ocupa
 $2,3,4$, com o $6$ a ser onde as duas primeiras voltam juntas,
 $\operatorname{lcm}(2,3)$. \emph{O toro é o sítio onde elas vivem juntas},
 e é o mesmo grafo em que o campo $G$ desta secção é lido.
 
 \medskip\noindent\textbf{E Viviani tem o mesmo ponto fixo que a dobra.} A curva
-sai por subtracção da esfera e do cilindro, sem uma trigonometria
-(\code{algebrico thm:viviani}): $z^{2}=2a(2a-x)$, com os dois ramos $\pm z$ a
+sai por \textbf{subtracção} da esfera e do cilindro, sem uma trigonometria: da
+esfera $x^{2}+y^{2}+z^{2}=4a^{2}$ e do cilindro $(x-a)^{2}+y^{2}=a^{2}$ tira-se
+$y^{2}=2ax-x^{2}$, e substituindo,
+\[
+z^{2}=4a^{2}-x^{2}-(2ax-x^{2})=\boxed{\;2a(2a-x)\;}
+\]
+--- o $x^{2}$ \textbf{cancela}, que é a razão de não aparecer ângulo nenhum. Com
+os dois ramos $\pm z$ a
 formarem o \emph{par dual} --- soma $0$, produto $-z^{2}$. O ponto onde $z=0$ é
 o \textbf{nó}, e ele é o ponto fixo da involução $z\mapsto-z$ --- \emph{que é a
 dobra}. O meio da Def.~\ref{def:op} e o nó de Viviani são a mesma coisa vista em
@@ -2623,26 +2666,57 @@ resultado de contar.
 --- e é por isso que a escolha da curva volta a ser o que deve ser, uma decisão de
 \emph{perfil}, e não uma correção de uma fraqueza.
 
-\medskip\noindent\textbf{E isto tem justificação formal, que não é desta casa mas
-fala do mesmo objeto.} O \code{machine/espirituais/algebra\_maquinas.tex} formaliza
-uma álgebra de máquinas que \emph{apagam} informação e define a \textbf{fibra
-apagada}
-\[
-\ker_{\mathrm{info}}(T)=\{(P,Q)\;:\;P\neq Q,\ TP=TQ\},
-\]
-com «$i$ arromba $j$» a significar \emph{separar, depois de $T_j$, dois estados que
-$T_j$ tornou indistinguíveis}. O seu teorema central é que a matriz de arrombamento
-é \textbf{nula}.
+\medskip\noindent\textbf{E o que sustenta essa frase deriva-se aqui, da
+multiplicidade que este documento já tem.} A Def.~\ref{def:objeto} dá
+$G(x)=\lvert\pi^{-1}(x)\rvert$: falta só ler $G$ em \emph{pares}, e o resto sai
+por contagem.
 
-\medskip\noindent\textbf{E $\ker_{\mathrm{info}}$ é a fibra de $G$.} Onde $G(x)>1$
-há par colapsado; onde $G\equiv1$ não há nenhum --- as duas linguagens falam do mesmo
-objeto, e a conta fecha:
+\begin{definicao}[fibra apagada]\label{def:kerinfo}
+Para $T$ definida no espaço das realizações,
 \[
-\bigl\lvert\ker_{\mathrm{info}}\bigr\rvert=\sum_x G(x)\bigl(G(x)-1\bigr).
+\ker_{\mathrm{info}}(T)=\bigl\{(P,Q)\;:\;P\neq Q,\ TP=TQ\bigr\}
 \]
-Daí a metade informacional daquele teorema é uma linha que este documento já tinha
-noutra forma: de $TP=TQ$ segue $RTP=RTQ$ para \emph{toda} $R$ --- nenhuma composição
-desfaz um colapso. \emph{Não é proteção: é a composição a não poder.}
+é o conjunto dos pares que $T$ torna \textbf{indistinguíveis}.
+\end{definicao}
+
+\begin{lema}[a fibra apagada conta-se em $G$]\label{lem:kerinfo}
+$\displaystyle\bigl\lvert\ker_{\mathrm{info}}(T)\bigr\rvert
+=\sum_{x}G(x)\bigl(G(x)-1\bigr)$, e
+$\ker_{\mathrm{info}}(T)=\varnothing$ se e só se $G\equiv1$.
+\end{lema}
+
+\begin{proof}
+Um par de $\ker_{\mathrm{info}}$ tem $TP=TQ=x$ para \emph{um} $x$, logo vive
+inteiro dentro da fibra $T^{-1}(x)$; e reciprocamente todo par ordenado de
+elementos distintos dessa fibra lá está. A fibra tem $G(x)$ elementos, donde
+$G(x)(G(x)-1)$ pares ordenados distintos. As fibras \textbf{particionam} o
+domínio, portanto cada par é contado numa e numa só, e a soma sobre $x$ dá o
+total. Cada parcela é $\ge0$, logo a soma anula-se exatamente quando toda parcela
+se anula, isto é quando nenhum $G(x)$ excede $1$.
+\end{proof}
+
+\noindent \emph{A fibra apagada não é um objeto novo: é $G$ lida em pares} --- e o
+Teor.~\ref{thm:multiplicidade} já dizia onde ela vive.
+
+\begin{lema}[nenhuma composição desfaz um colapso]\label{lem:dpi}
+Se $TP=TQ$ então $(RT)P=(RT)Q$ para \emph{toda} $R$; equivalentemente
+$\ker_{\mathrm{info}}(T)\subseteq\ker_{\mathrm{info}}(RT)$.
+\end{lema}
+
+\begin{proof}
+$R$ é uma função: argumentos iguais têm imagens iguais. Aplicá-la aos dois membros
+de $TP=TQ$ dá a igualdade, e $P\neq Q$ mantém-se por hipótese.
+\end{proof}
+
+\noindent A inclusão é \textbf{monótona e sem recíproca}: compor só pode
+\emph{acrescentar} pares colapsados, nunca retirar. Daí sai a forma matricial sem
+mais nenhuma hipótese --- escrevendo $\mathbf{A}_{ij}=1$ para «alguma composição
+depois de $T_j$ separa um par que $T_j$ colapsou»,
+\[
+\boxed{\;\mathbf{A}=0\;}
+\]
+em \textbf{toda} a entrada, porque o Lema~\ref{lem:dpi} não deixa nenhuma $R$ ser a
+testemunha. \emph{Não é proteção: é a composição a não poder.}
 
 \medskip\noindent E as duas metades do Teor.~\ref{thm:contraria} ganham assim uma
 leitura que não tinham:
@@ -2684,7 +2758,7 @@ $64$ funções $R$ que cabem no espaço, nenhuma a separar um único dos $448$ p
 colapsados; e o dual, com $\ker_{\mathrm{info}}=\varnothing$ nos $2016$ pares da
 enumeração bijetiva.}
 
-\colunas{\code{thm:contraria} ($\pi$ enche, $\rho$ conta); \code{machine/espirituais}}
+\colunas{\code{thm:contraria} ($\pi$ enche, $\rho$ conta); \code{def:kerinfo}}
         {$\ker_{\mathrm{info}}=$ a fibra de $G$; a DPI medida em todas as $R$}
         {\code{tests/aranha\_n.c} §AN38}
 
@@ -2937,8 +3011,7 @@ enunciado). Donde $\lvert\{G>1\}\rvert=p=1$ e $\lvert\{G=1\}\rvert=\ell=T$.
 \end{proof}
 
 \medskip\noindent\textbf{E a série de $\pi$ em $k$ SAI DA CISÃO POR PARIDADE
---- que é a deste documento.} A construção não é daqui: está no
-\code{teoria \S sec:pi}, e o que ela usa é só $J^{2}=-1$. Com isso as potências
+--- que é a deste documento.} A única hipótese é $J^{2}=-1$. Com isso as potências
 de $J$ ciclam com período quatro,
 \[
 J^{0}=1,\quad J^{1}=J,\quad J^{2}=-1,\quad J^{3}=-J,\quad J^{4}=1,\ \dots
@@ -3107,10 +3180,10 @@ comprimento (Teor.~\ref{thm:medida}).
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A escada, andar a andar}\label{sec:escada}
 
-\noindent A construção da escada aritmética está feita e demonstrada noutros
-documentos desta obra. O que se verifica aqui é outra coisa: que os
-degraus construídos por \emph{quociente} são realizações no sentido da
-Def.~\ref{def:objeto}, com $G$ a contar a classe de equivalência que os define.
+\noindent A escada aritmética constrói-se aqui a partir de $B$ e de mais nada, e
+o que se verifica dela é uma coisa só: que os degraus construídos por
+\emph{quociente} são realizações no sentido da Def.~\ref{def:objeto}, com $G$ a
+contar a classe de equivalência que os define.
 
 \subsection*{A cadeia canónica, a partir de $B$}
 
