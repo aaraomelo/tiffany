@@ -4341,6 +4341,7 @@ static char agr_col[64] = "";        /* a coluna que a agregação lê */
 /* o pedido matricial é escrito pela leitura da lista e recolhido pelo `varre`,
  * pela mesma ponte do `count(DISTINCT)`: quem lê corre antes de quem usa */
 static int mat_op_pedido = 0;
+static char mat_tab2_pedido[64] = "";   /* a segunda tabela, para o produto */
 /* a coluna do `count(DISTINCT c)`, "" se não houver. São DUAS: o `pedido` é
  * escrito pelo despacho do `SELECT count(...)`, que corre ANTES do `varre` e
  * cujo interior era deitado fora; o outro é o que o `varre` usa, e ele
@@ -4352,6 +4353,7 @@ static char cnt_dis_pedido[64] = "";
  * São sobre a TABELA INTEIRA — não por linha nem por fibra —, e por isso vivem
  * ao lado do `agr_op` e não dentro da projecção. */
 static int mat_op = 0;
+static char mat_tab2[64] = "";
 
 /* os aliases do `AS`, por posição na lista; vazio = sem alias */
 static char alias[SQL_OUT_MAX_COLS][32];
@@ -4419,7 +4421,28 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"TRANSPOSTA") ? 4
                        : !strcasecmp(nome,"INVERSA") ? 5
                        : !strcasecmp(nome,"NUCLEO") ? 6
-                       : !strcasecmp(nome,"IMAGEM") ? 7 : 0;
+                       : !strcasecmp(nome,"IMAGEM") ? 7
+                       : !strcasecmp(nome,"PRODUTO") ? 8 : 0;
+                if(qm == 8){
+                    /* o produto pede a OUTRA tabela pelo nome: é a composição,
+                     * e uma composição tem dois lados */
+                    const char *r = q + 1;
+                    char t2[64];
+                    pula(&r);
+                    if(ident(&r, t2, sizeof t2)){
+                        pula(&r);
+                        if(*r == ')'){
+                            mat_op_pedido = 8;
+                            snprintf(mat_tab2_pedido, sizeof mat_tab2_pedido, "%s", t2);
+                            p = r + 1;
+                            n += snprintf(out + n, (size_t)(cap - n), "%s*",
+                                          n ? "," : "");
+                            pula(&p);
+                            if(*p == ','){ p++; continue; }
+                            break;
+                        }
+                    }
+                }
                 if(qm){
                     const char *r = q + 1;
                     pula(&r);
@@ -5630,6 +5653,8 @@ static int varre(const char *resto, int acao){
     snprintf(cnt_dis, sizeof cnt_dis, "%s", cnt_dis_pedido);
     cnt_dis_pedido[0] = 0;
     mat_op = mat_op_pedido; mat_op_pedido = 0;
+    snprintf(mat_tab2, sizeof mat_tab2, "%s", mat_tab2_pedido);
+    mat_tab2_pedido[0] = 0;
     grp_col[0] = 0; grp_col2[0] = 0; lim_n = -1; off_n = 0;
     hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
@@ -6890,6 +6915,98 @@ static int varre(const char *resto, int acao){
                   snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
               } }
             return 1;
+        }
+
+        if(mat_op == 8){                         /* o produto: a COMPOSIÇÃO */
+            /* ── O PRODUTO É A COMPOSIÇÃO, e por isso pede dois lados ────────
+             * `A·B` é aplicar B e depois A, e a condição para existir é a que
+             * a composição sempre teve: a saída de um tem de ser a entrada do
+             * outro — as colunas de A contra as linhas de B. Quando não bate,
+             * recusa-se com os dois números, porque dizer só «não dá» esconde
+             * qual dos lados está errado.
+             *
+             * A outra tabela lê-se com ela ABERTA e traz-se em memória local —
+             * a mesma regra da subconsulta, da seta e do EXISTS. */
+            MatQz B;
+            char guarda[64];
+            int nB = 0, mB = 0;
+            snprintf(guarda, sizeof guarda, "%s", nome);
+            if(!usa_tabela(mat_tab2, 0) || !cat_nome_bate(mat_tab2)){
+                usa_tabela(guarda, 0);
+                printf("erro: a tabela «%s» do produto não existe — RECUSADO.\n",
+                       mat_tab2);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "relation \"%s\" does not exist", mat_tab2); }
+                return 0;
+            }
+            { long nc2 = mem_le(S_CAT).total, nr2 = cat_nrows();
+              int falta = 0;
+              if(nc2 > LN_MAX || nr2 > LN_MAX){
+                  usa_tabela(guarda, 0);
+                  printf("erro: «%s» é %ld×%ld e o alcance é %d×%d — RECUSADO.\n",
+                         mat_tab2, nr2, nc2, LN_MAX, LN_MAX);
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "matrix too large"); }
+                  return 0;
+              }
+              mB = (int)nr2; nB = (int)nc2;
+              B = mat0(mB, nB);
+              for(int i2 = 0; i2 < mB; i2++)
+                  for(int j2 = 0; j2 < nB; j2++){
+                      if(!bit_le(S_VIVO, i2) || !bit_le(S_PRES, i2*nc2 + j2)){
+                          falta = 1; continue; }
+                      B.a[i2][j2] = qz_de_inteiro(celula_valor(i2, j2, nc2));
+                  }
+              usa_tabela(guarda, 0);
+              if(falta){
+                  printf("erro: «%s» tem células ausentes ou linhas apagadas —"
+                         " a matriz não está completa. RECUSADO.\n", mat_tab2);
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "matrix has absent cells"); }
+                  return 0;
+              } }
+            if(A.n != B.m){
+                printf("erro: o produto pede que as COLUNAS da primeira (%d)"
+                       " sejam as LINHAS da segunda (%d) — é a condição da"
+                       " composição, e não bate. RECUSADO.\n", A.n, B.m);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "matrix product: %d columns against %d rows",
+                             A.n, B.m); }
+                return 0;
+            }
+            { MatQz R = mat_mult(A, B);
+              if(sql_cap){
+                  memset(sql_cap, 0, sizeof *sql_cap);
+                  sql_cap->ok = 1;
+                  sql_cap->ncols = R.n > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : R.n;
+                  sql_cap->nrows = R.m > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : R.m;
+                  for(int j = 0; j < sql_cap->ncols; j++){
+                      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                      sql_cap->tipo[j] = SQL_TIPO_INT4;
+                  }
+                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+              }
+              for(int i2 = 0; i2 < R.m; i2++){
+                  printf("   ");
+                  for(int j2 = 0; j2 < R.n; j2++){
+                      Par cls = ra_classe((Par){ (long)R.a[i2][j2].p,
+                                                 (long)R.a[i2][j2].q });
+                      char cel[SQL_OUT_CELL];
+                      if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                      else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                      printf("%s%s", cel, j2 + 1 < R.n ? " | " : "");
+                      if(sql_cap && i2 < sql_cap->nrows && j2 < sql_cap->ncols)
+                          snprintf(sql_cap->cell[i2][j2], SQL_OUT_CELL, "%s", cel);
+                  }
+                  printf("\n");
+              }
+              printf("-- o produto %d×%d · %d×%d = %d×%d\n",
+                     A.m, A.n, B.m, B.n, R.m, R.n);
+              return 1; }
         }
 
         if(mat_op == 6 || mat_op == 7){          /* núcleo e imagem: o PAR */

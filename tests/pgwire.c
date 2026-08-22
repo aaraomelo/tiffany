@@ -7091,6 +7091,129 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W53: O PRODUTO É A COMPOSIÇÃO, E O DUAL FECHA O PAR ═════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w53.mem", "/tmp/pgwire_w53.prog",
+            "/tmp/pgwire_w53__a.mem", "/tmp/pgwire_w53__a.prog",
+            "/tmp/pgwire_w53__b.mem", "/tmp/pgwire_w53__b.prog",
+            "/tmp/pgwire_w53__i.mem", "/tmp/pgwire_w53__i.prog",
+            "/tmp/pgwire_w53__tt.mem", "/tmp/pgwire_w53__tt.prog" };
+        for(int k = 0; k < 10; k++) unlink(lixo[k]);
+        printf("\n§W53 o produto, o neutro, e ker Tᵀ ⊥ im T.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w53")) mal++;
+        sql_executa("CREATE TABLE a (p,q)", &o);
+        sql_executa("INSERT INTO a VALUES (1,2), (3,4)", &o);
+        sql_executa("CREATE TABLE b (p,q)", &o);
+        sql_executa("INSERT INTO b VALUES (5,6), (7,8)", &o);
+        sql_executa("CREATE TABLE i (p,q)", &o);
+        sql_executa("INSERT INTO i VALUES (1,0), (0,1)", &o);
+
+        /* ── (1) O PRODUTO É A COMPOSIÇÃO, e a condição para existir é a que a
+         * composição sempre teve: a saída de um é a entrada do outro. */
+        sql_executa("SELECT produto(b) FROM a", &o);
+        int pr = (o.nrows == 2 && o.ncols == 2
+                  && !strcmp(o.cell[0][0], "19") && !strcmp(o.cell[0][1], "22")
+                  && !strcmp(o.cell[1][0], "43") && !strcmp(o.cell[1][1], "50"));
+        printf("      (1,2;3,4)·(5,6;7,8) = (%s %s ; %s %s) — esp (19 22 ; 43 50)"
+               "  %s\n", o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+               o.nrows > 1 ? o.cell[1][0] : "?", o.nrows > 1 ? o.cell[1][1] : "?",
+               pr ? "" : "NAO BATE");
+        if(!pr) mal++;
+
+        /* ── (2) E A IDENTIDADE É O NEUTRO — que é a maneira de verificar o
+         * produto sem o comparar com uma conta feita à mão: se `A·I` devolvesse
+         * outra coisa, o produto estaria errado sem se saber onde. */
+        sql_executa("SELECT produto(i) FROM a", &o);
+        int nt = (o.nrows == 2 && !strcmp(o.cell[0][0], "1")
+                  && !strcmp(o.cell[0][1], "2") && !strcmp(o.cell[1][0], "3")
+                  && !strcmp(o.cell[1][1], "4"));
+        printf("      A·I = A: (%s %s ; %s %s)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+               o.nrows > 1 ? o.cell[1][0] : "?", o.nrows > 1 ? o.cell[1][1] : "?",
+               nt ? "" : "NAO BATE");
+        if(!nt) mal++;
+
+        /* ── (3) E O DUAL FECHA O PAR: o núcleo da TRANSPOSTA é o anulador da
+         * IMAGEM — `ker Tᵀ = (im T)°`. Mede-se fazendo o motor produzir a
+         * transposta, guardando-a como tabela, e pedindo-lhe o núcleo: os
+         * vectores que saem têm de ser ortogonais às COLUNAS da tabela
+         * original, que são a imagem. É o motor usado de duas maneiras contra
+         * si próprio, e é isso que faz da medida uma verificação. */
+        sql_executa("CREATE TABLE t2 (p,q)", &o);
+        sql_executa("INSERT INTO t2 VALUES (1,2), (2,4)", &o);   /* posto 1 */
+        sql_executa("SELECT transposta(*) FROM t2", &o);
+        { long tr[4][4]; int m = o.nrows, n = o.ncols;
+          for(int i = 0; i < m && i < 4; i++)
+              for(int j = 0; j < n && j < 4; j++) tr[i][j] = atol(o.cell[i][j]);
+          sql_executa("CREATE TABLE tt (p,q)", &o);
+          { char q2[128];
+            for(int i = 0; i < m; i++){
+                snprintf(q2, sizeof q2, "INSERT INTO tt VALUES (%ld,%ld)",
+                         tr[i][0], tr[i][1]);
+                sql_executa(q2, &o);
+            } }
+          sql_executa("SELECT nucleo(*) FROM tt", &o);
+          { long v0 = o.nrows ? atol(o.cell[0][0]) : 0;
+            long v1 = o.nrows ? atol(o.cell[0][1]) : 0;
+            /* as COLUNAS da original são (1,2) e (2,4) — a imagem.
+             * ⟨v, coluna⟩ tem de ser zero nas duas. */
+            long e1 = v0*1 + v1*2, e2 = v0*2 + v1*4;
+            int orto = (o.nrows == 1 && e1 == 0 && e2 == 0 && !(v0 == 0 && v1 == 0));
+            printf("      ker Tᵀ = (im T)°: v = (%ld,%ld) e ⟨v,col⟩ = (%ld,%ld)"
+                   "  %s\n", v0, v1, e1, e2, orto ? "" : "NAO BATE");
+            if(!orto) mal++; } }
+
+        /* ── (4) E AS DIMENSÕES BATEM DOS DOIS LADOS, que é a mesma conservação
+         * outra vez: numa 2×2 de posto 1, tanto o núcleo como o núcleo da
+         * transposta têm dimensão 1 — e é assim porque o posto de uma matriz e
+         * o da sua transposta são o mesmo. */
+        sql_executa("SELECT posto(*) FROM t2", &o);
+        long p1 = o.nrows ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT posto(*) FROM tt", &o);
+        long p2 = o.nrows ? atol(o.cell[0][0]) : -1;
+        printf("      o posto é o mesmo dos dois lados: %ld e %ld  %s\n",
+               p1, p2, (p1 == p2 && p1 == 1) ? "" : "NAO BATE");
+        if(p1 != p2 || p1 != 1) mal++;
+
+        /* ── O CONTROLO, e são dois. A composição RECUSA-SE quando as
+         * dimensões não encaixam, e diz os DOIS números — dizer só «não dá»
+         * esconderia qual dos lados está errado. E a tabela que não existe
+         * também é recusada, em vez de tomada por vazia. */
+        sql_executa("CREATE TABLE c (p,q,r)", &o);
+        sql_executa("INSERT INTO c VALUES (1,2,3), (4,5,6)", &o);
+        int c1 = sql_executa("SELECT produto(a) FROM c", &o);
+        int c2 = sql_executa("SELECT produto(zz) FROM a", &o);
+        printf("\n      CONTROLO — 2×3 · 2×2 (não encaixa): %s · tabela"
+               " inexistente: %s  %s\n", c1 ? "PASSOU (mau)" : "recusado",
+               c2 ? "PASSOU (mau)" : "recusado", (!c1 && !c2) ? "" : "NAO BATE");
+        if(c1 || c2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O PRODUTO É A COMPOSIÇÃO, E O DUAL FECHA O PAR. `A·B` é aplicar B e depois A, e a"
+           " condição para existir é a que a composição sempre teve — a saída de um tem de"
+           " ser a entrada do outro, as colunas de um contra as linhas do outro. Quando não"
+           " bate, a recusa diz os DOIS números, porque dizer só «não dá» esconderia qual dos"
+           " lados está errado. A segunda tabela lê-se com ela ABERTA e traz-se em memória"
+           " local, que é a mesma regra da subconsulta, da seta e do EXISTS. E A IDENTIDADE É"
+           " O NEUTRO: `A·I = A` verifica o produto sem o comparar com uma conta feita à mão"
+           " — se devolvesse outra coisa, o produto estaria errado sem se saber onde. O DUAL"
+           " FECHA O PAR que o §W52 abriu: o núcleo da TRANSPOSTA é o anulador da IMAGEM,"
+           " `ker Tᵀ = (im T)°`, e mede-se fazendo o motor produzir a transposta, guardá-la"
+           " como tabela e pedir-lhe o núcleo — os vectores que saem têm de ser ortogonais às"
+           " COLUNAS da original, que são a imagem. É o motor usado de duas maneiras contra"
+           " si próprio, e é isso que faz da medida uma verificação em vez de uma repetição."
+           " E as dimensões batem dos dois lados, que é a conservação outra vez: numa 2×2 de"
+           " posto um, o núcleo e o núcleo da transposta têm ambos dimensão um, porque o"
+           " posto de uma matriz e o da sua transposta são o mesmo. O CONTROLO tem duas"
+           " metades: a composição que não encaixa e a tabela que não existe, ambas recusadas"
+           " em vez de tomadas por vazias.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

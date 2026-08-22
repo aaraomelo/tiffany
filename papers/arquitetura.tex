@@ -2915,6 +2915,28 @@ juntas, porque é o que faz destas peças um só objeto:
 Três objetos, uma lei --- e em nenhum dos três ela foi posta como requisito:
 sai, das três vezes, de a construção não deitar nada fora.
 
+\medskip\noindent\textbf{E o produto é a composição, com a condição de sempre.}
+\code{produto(u)} aplica $u$ e depois a tabela corrente, e existe exatamente
+quando a saída de um é a entrada do outro --- as colunas contra as linhas.
+Quando não bate, a recusa diz os \emph{dois} números: dizer só «não dá»
+esconderia qual dos lados está errado. A segunda tabela lê-se com ela
+\textbf{aberta} e traz-se em memória local, que é a mesma regra da subconsulta,
+da seta e do \code{EXISTS}. E a identidade é o \textbf{neutro}: $A\cdot I = A$
+verifica o produto sem o comparar com uma conta feita à mão.
+
+\medskip\noindent\textbf{O dual fecha o par.} O núcleo da transposta é o
+anulador da imagem,
+\[
+\ker T^{\!\top}=(\operatorname{im}T)^{\circ},
+\]
+e mede-se \emph{com o motor contra si próprio}: pede-se-lhe a transposta,
+guarda-se como tabela, pede-se-lhe o núcleo --- e os vectores que saem têm de
+ser ortogonais às colunas da original, que são a imagem. É o que faz da medida
+uma verificação em vez de uma repetição. As dimensões batem dos dois lados, pela
+mesma conservação: numa $2\times2$ de posto um, o núcleo e o núcleo da
+transposta têm ambos dimensão um, porque o posto de uma matriz e o da sua
+transposta são o mesmo (\code{tests/pgwire.c} §W53).
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as
