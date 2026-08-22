@@ -3613,21 +3613,51 @@ int main(void){
                 sql_executa(q, &o);
             }
             sql_executa("CREATE INDEX ON t (a)", &o);
+
+            /* O ζ: escrever é ACUMULAR, e acumular numa árvore é uma descida.
+             * O INSERT acrescenta a chave e o índice ACOMPANHA — não invalida. */
             sql_executa("INSERT INTO t VALUES (99,198)", &o);
             sql_executa("SELECT * FROM t WHERE a = 5", &o);
             int velho_ok = (o.nrows == 1 && !strcmp(o.cell[0][1], "10"));
-            long p_velho = sql_ultimos_passos;
+            long p_ins = sql_ultimos_passos;
             sql_executa("SELECT * FROM t WHERE a = 99", &o);
             int nova_ok = (o.nrows == 1 && !strcmp(o.cell[0][1], "198"));
-            printf("\n      CONTROLO — depois de um INSERT o índice está VELHO:"
-                   " volta a varrer (%ld passos), a resposta continua certa: %s,"
-                   " e a linha NOVA aparece: %s\n",
-                   p_velho, velho_ok ? "sim" : "NAO", nova_ok ? "sim" : "NAO");
-            if(!velho_ok || !nova_ok || p_velho == 0) mal++;
+            long p_nova = sql_ultimos_passos;
+            printf("\n      ζ — o INSERT: o índice ACOMPANHA (%ld e %ld passos),"
+                   " a antiga continua certa: %s, e a NOVA aparece: %s\n",
+                   p_ins, p_nova, velho_ok ? "sim" : "NAO", nova_ok ? "sim" : "NAO");
+            if(!velho_ok || !nova_ok || p_ins != 0 || p_nova != 0) mal++;
+
+            /* O DELETE não muda o número de linhas: o cabeçalho continua a bater
+             * e a chave apagada ficou na árvore. Quem decide é o campo do vivo. */
+            sql_executa("DELETE FROM t WHERE a = 7", &o);
+            sql_executa("SELECT * FROM t WHERE a = 7", &o);
+            int del_ok = (o.nrows == 0);
+            sql_executa("SELECT * FROM t WHERE a = 8", &o);
+            int viz_ok = (o.nrows == 1 && !strcmp(o.cell[0][1], "16"));
+            printf("      o DELETE: a apagada NÃO sai (%s) e a vizinha sai (%s)"
+                   "  — quem decide é o campo do vivo\n",
+                   del_ok ? "sim" : "NAO", viz_ok ? "sim" : "NAO");
+            if(!del_ok || !viz_ok) mal++;
+
+            /* O µ: TIRAR uma chave não é uma descida. O UPDATE da coluna
+             * indexada larga o índice — custa a varredura, não a correcção. */
+            sql_executa("UPDATE t SET a = 77 WHERE a = 8", &o);
+            sql_executa("SELECT * FROM t WHERE a = 77", &o);
+            int upd_ok = (o.nrows == 1);
+            long p_upd = sql_ultimos_passos;
+            sql_executa("SELECT * FROM t WHERE a = 8", &o);
+            int foi_ok = (o.nrows == 0);
+            printf("      µ — o UPDATE da coluna indexada LARGA o índice (%ld passos):"
+                   " o valor novo aparece (%s) e o velho já não (%s)\n",
+                   p_upd, upd_ok ? "sim" : "NAO", foi_ok ? "sim" : "NAO");
+            if(!upd_ok || !foi_ok || p_upd == 0) mal++;
 
             /* e o que o índice não serve continua pelo molde */
             sql_executa("SELECT * FROM t WHERE a > 5", &o);
-            int molde = (o.nrows == 16 && sql_ultimos_passos > 0);
+            /* 20 linhas + a nova (99), menos a apagada (7), e o 8 virou 77:
+             * maiores que 5 são o 6, o 9..20, o 77 e o 99 — quinze. */
+            int molde = (o.nrows == 15 && sql_ultimos_passos > 0);
             printf("      e `a > 5` continua pelo molde: %d linha(s), %ld passos  %s\n",
                    o.nrows, sql_ultimos_passos, molde ? "" : "NAO BATE");
             if(!molde) mal++;
@@ -3654,11 +3684,19 @@ int main(void){
            " —, ao passo que sem índice os passos crescem com o tamanho, e é esse o CONTROLO"
            " que impede «constante» de passar por trivial. OS DOIS CAMINHOS TÊM DE CONCORDAR:"
            " a mesma consulta com e sem índice dá a mesma linha, nas três tabelas. E O ÍNDICE"
-           " VELHO NÃO PODE MENTIR, que é a parte que mais importa: depois de um INSERT o"
-           " cabeçalho já não bate com o número de linhas, o índice é IGNORADO e a varredura"
-           " corre — a resposta continua certa e a linha nova aparece. Um índice velho custa"
-           " tempo, nunca correcção. Fica dito o que ele NÃO serve: só a forma `col = k`"
-           " simples desce pela árvore; `a > 5` continua pelo molde, e mede-se que continua.",
+           " ACOMPANHA A ESCRITA PELO LADO EM QUE ISSO É FÁCIL, e o `thm:zeta-mu` diz qual é:"
+           " escrever é a convolução com ζ, que ACUMULA, e acumular numa árvore é uma descida"
+           " — o INSERT acrescenta a chave e o índice fica válido, medido a zero passos tanto"
+           " para a linha antiga como para a nova. TIRAR uma chave seria o µ, e numa árvore de"
+           " prefixos isso não é uma descida: o UPDATE da coluna indexada LARGA o índice, e"
+           " mede-se que larga, com o valor novo a aparecer e o velho a desaparecer. Um índice"
+           " largado custa a varredura seguinte; nunca custa a resposta. E O DELETE É O TERCEIRO"
+           " CASO, e o mais traiçoeiro: não muda o NÚMERO de linhas, pelo que o cabeçalho"
+           " continua a bater e o índice continua a ser usado — mas a chave apagada ficou lá"
+           " dentro. Quem decide é o campo do VIVO, consultado à saída da árvore: ela diz onde"
+           " a linha estava, e ele diz se ela ainda está. Mede-se com a apagada a não sair e a"
+           " vizinha a sair. Fica dito o que o índice NÃO serve: só a forma `col = k` simples"
+           " desce pela árvore; `a > 5` continua pelo molde, e mede-se que continua.",
            mal == 0);
     }
 

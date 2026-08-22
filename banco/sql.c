@@ -313,6 +313,19 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define MAXCOND   4          /* condições por termo                                     */
 #define MAXTERMO  4          /* termos ligados por OR                                   */
 #define S_VIVO    512        /* a linha existe? BIT por linha (512..1023)               */
+
+/* o índice: a árvore que NÃO se limpa, na zona 4, acima do tecto da ISA e
+ * dentro do .mem da tabela. O cabeçalho diz qual a coluna e quantas linhas
+ * havia quando ele foi feito — se o número mudou sem ele acompanhar, é velho. */
+/* O CABEÇALHO MORA DENTRO DA ZONA, e não um slot antes dela. Estava em
+ * `S_IDX - 1`, que é o ÚLTIMO slot da zona 2 — a do texto —, e por isso era
+ * escrito por cima: a coluna indexada lia-se como 5 numa tabela de duas
+ * colunas. Uma zona começa onde começa; pedir emprestado ao vizinho é escrever
+ * na casa dele. */
+#define S_IDXCAB   (ISA_TECTO + ZONA(4))     /* {coluna+1, 0}                    */
+#define S_IDXCAB2  (S_IDXCAB + 1)            /* as linhas indexadas, no par      */
+#define S_IDXNOS   (S_IDXCAB + 2)            /* o contador de NÓS da árvore      */
+#define S_IDX      (S_IDXCAB + 3)            /* e a árvore começa depois deles   */
 #define S_DEN     ZONA(2)      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
                               * move e→total, e a conta precisa de q como número. */
 #define S_LINHAS  ZONA(1)
@@ -1702,6 +1715,12 @@ static int cria(const char *resto){
     return 1;
 }
 
+static long idx_coluna(long nrows);
+static void ord_usa_indice(void);
+static void ord_usa_rascunho(void);
+static int  ord_insere(long valor, int idx);
+static long celula_valor(long i, long j, long nc);
+
 static int insere(const char *resto){
     const char *p = resto;
     char nome[64];
@@ -1856,6 +1875,34 @@ static int insere(const char *resto){
     barreira();
 
     cat = mem_le(S_CAT);
+
+    /* ── O ÍNDICE ACOMPANHA A ESCRITA, e é o ζ ────────────────────────────
+     *
+     * `thm:zeta-mu`: escrever é a convolução com ζ, que ACUMULA; recuperar é a
+     * deconvolução com μ. Acrescentar uma chave à árvore é acumular — desce-se
+     * uma vez e escreve-se —, e por isso um INSERT não tem de invalidar o
+     * índice: mantém-no. Tirar uma chave seria o μ, e essa não é a mesma
+     * facilidade numa árvore de prefixos; o UPDATE e o DELETE continuam por
+     * isso a invalidar, e fica dito que continuam.
+     *
+     * O cabeçalho sobe com a tabela, senão a linha nova ficaria indexada e o
+     * índice na mesma marcado como velho. */
+    { long nr_agora = cat_nrows();
+      long icol = idx_coluna(nr_agora - 1);        /* válido ANTES desta linha? */
+      if(icol >= 0 && icol < ncols){
+          long i = nr_agora - 1;                   /* a linha que acabou de entrar */
+          ord_usa_indice();
+          int coube = ord_insere(celula_valor(i, icol, ncols), (int)i);
+          ord_usa_rascunho();
+          if(coube){
+              Word n; n.total = (Word8)(nr_agora & 255);
+              n.e = (Word8)((nr_agora >> 8) & 255);
+              mem_grava(S_IDXCAB2, n);             /* o índice acompanhou */
+          }else{
+              Word z = {0,0}; mem_grava(S_IDXCAB, z);   /* não coube: fica sem índice */
+          }
+      } }
+
     printf("1 linha inserida (%ld colunas) — %u bytes de ISA, %ld passos; agora %d linhas\n",
            ncols, pc_emit, passos, cat_nrows());
     if(sql_cap){
@@ -3036,6 +3083,19 @@ static void prepara(long v, long col_do_set){
  * É IDEMPOTENTE de propósito: escreve valores absolutos, nunca incrementos. Por isso pode ser
  * repetida na abertura sem estragar nada, que é o que faz o redo funcionar. */
 static long aplica_diario(long ncols, long nrows, int acao, int col_set){
+    /* O UPDATE DA COLUNA INDEXADA INVALIDA O ÍNDICE, e tem de invalidar aqui.
+     *
+     * Um UPDATE não muda o NÚMERO de linhas — muda um valor —, pelo que o
+     * cabeçalho continua a bater e o índice continuaria a ser usado, agora a
+     * apontar para o valor VELHO. É o µ do `thm:zeta-mu`: acrescentar uma chave
+     * é acumular e faz-se de uma descida (é o que o INSERT faz); TIRAR uma é
+     * desacumular, e numa árvore de prefixos isso não é uma descida. Enquanto
+     * não for, o honesto é largar o índice — custa a varredura seguinte, e não
+     * custa uma resposta errada. */
+    if(acao == ACAO_SET && col_set >= 0 && idx_coluna(cat_nrows()) == col_set){
+        Word z = {0,0};
+        mem_grava(S_IDXCAB, z);
+    }
     pc_emit = 0;
     for(long i = 0; i < nrows; i++){
         MOVE(S_MATCH + (unsigned)((unsigned long)i / SLOT_BITS), +1);
@@ -3272,16 +3332,17 @@ static long hav_n  = 0;
  * ele foi construído. Se o número mudou, o índice está velho e IGNORA-SE — a
  * varredura corre como antes. Um índice velho nunca dá resposta errada; dá
  * apenas a resposta lenta. */
-#define S_IDX      (ISA_TECTO + ZONA(3))
-#define S_IDXCAB   (S_IDX - 1)               /* {coluna+1, 0} */
-#define S_IDXCAB2  (S_IDX - 2)               /* as linhas na construção, no par */
-
 /* qual árvore está a ser usada: a de rascunho ou a do índice. As funções
  * abaixo servem as duas — a árvore é a mesma lei, e a base é o parâmetro. */
 static unsigned ord_raiz = S_ORD;
 static unsigned ord_cab  = S_ORDCAB;
 static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB; }
-static void ord_usa_indice(void){   ord_raiz = S_IDX; ord_cab = S_IDXCAB; }
+/* O CONTADOR DE NÓS TEM O SEU SLOT, e não o do cabeçalho. `ord_novo` escreve
+ * em `ord_cab` a cada nó criado; apontá-lo ao cabeçalho do índice fazia o
+ * número de nós escrever-se por cima da coluna indexada — lia-se «coluna 5»
+ * numa tabela de duas colunas, e o índice era dado por velho para sempre. Dois
+ * dados diferentes, dois slots. */
+static void ord_usa_indice(void){   ord_raiz = S_IDX; ord_cab = S_IDXNOS; }
 /* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
  * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
  * número que o 16, ditos de três maneiras. Declara-se o expoente e o resto sai
@@ -4032,8 +4093,14 @@ static int varre(const char *resto, int acao){
         int achados[J_MAXLIN];
         int n = j_casam(idx_k, achados, J_MAXLIN);
         ord_usa_rascunho();
+        /* SÓ AS VIVAS. Um DELETE não muda o número de linhas — muda o bit do
+         * vivo —, pelo que o cabeçalho continua a bater e o índice continua a
+         * ser usado; mas a chave apagada ficou lá dentro. Filtra-se aqui, que é
+         * onde a verdade está: a árvore diz onde a linha estava, e o campo do
+         * vivo diz se ela ainda está. */
         for(int t = 0; t < n; t++)
-            if(achados[t] >= 0 && achados[t] < nrows) bit_poe(S_MATCH, achados[t], 1);
+            if(achados[t] >= 0 && achados[t] < nrows && bit_le(S_VIVO, achados[t]))
+                bit_poe(S_MATCH, achados[t], 1);
     }
 
     if(in_sub){
