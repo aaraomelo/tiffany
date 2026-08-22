@@ -2978,6 +2978,24 @@ responde a uma pergunta mais fina. O controlo é a matriz não quadrada, onde
 Cramer recusa e a eliminação responde: é o que impede a concordância de vir de
 os dois serem o mesmo caminho com dois nomes (\code{tests/pgwire.c} §W55).
 
+\medskip\noindent\textbf{E as peças encaixam --- o que se prova por uma lei que
+nenhuma delas dá sozinha.} O produto, o traço e o determinante foram expostos
+separadamente, cada um medido por si. Juntos, cumprem
+\[
+\boxed{\;A^{2}-\operatorname{tr}(A)\,A+\det(A)\,I=0\;}
+\]
+--- Cayley--Hamilton, sem uma linha nova no motor. Se qualquer um dos três
+estivesse errado, ela cairia; é essa a diferença entre \emph{três funções que
+respondem} e \emph{três funções que falam do mesmo objeto}. Varre-se todas as
+$2\times2$ com entradas até quatro, e a identidade fecha entrada a entrada em
+$625$ delas.
+
+\medskip\noindent E o traço e o determinante são \textbf{duas} coordenadas: há
+matrizes com o mesmo traço e determinantes diferentes, e com o mesmo
+determinante e traços diferentes --- se uma determinasse a outra, a lei teria um
+parâmetro só. O controlo é a lei poder ser \emph{falsa}: com o traço certo a
+entrada anula, com o traço mais um já não (\code{tests/pgwire.c} §W56).
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as

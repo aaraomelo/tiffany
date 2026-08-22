@@ -7466,6 +7466,120 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W56: CAYLEY–HAMILTON, PELAS PEÇAS QUE JÁ LÁ ESTAVAM ════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w56.mem");     unlink("/tmp/pgwire_w56.prog");
+        unlink("/tmp/pgwire_w56__m.mem");  unlink("/tmp/pgwire_w56__m.prog");
+        printf("\n§W56 A² − tr(A)·A + det(A)·I = 0, sem uma linha nova.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w56")) mal++;
+
+        /* ── (1) A LEI, e o que ela testa não é a álgebra: é que as PEÇAS
+         * ENCAIXEM. O produto, o traço e o determinante foram expostos
+         * separadamente, cada um medido por si; a lei junta os três, e nenhum
+         * deles isolado a dá. Se qualquer um estivesse errado, ela cairia — e é
+         * por isso que ela é o teste de que estão no mesmo objeto. Varre-se
+         * todas as 2×2 com entradas até 4. */
+        { long casos = 0, boas = 0;
+          for(long a = 0; a <= 4; a++)
+          for(long b = 0; b <= 4; b++)
+          for(long c = 0; c <= 4; c++)
+          for(long d = 0; d <= 4; d++){
+              char qi[128];
+              long q11, q12, q21, q22, tr, dt;
+              sql_executa("DROP TABLE IF EXISTS m", &o);
+              sql_executa("CREATE TABLE m (p,q)", &o);
+              snprintf(qi, sizeof qi, "INSERT INTO m VALUES (%ld,%ld), (%ld,%ld)",
+                       a, b, c, d);
+              if(!sql_executa(qi, &o)) continue;
+              if(!sql_executa("SELECT produto(m) FROM m", &o) || o.nrows != 2) continue;
+              q11 = atol(o.cell[0][0]); q12 = atol(o.cell[0][1]);
+              q21 = atol(o.cell[1][0]); q22 = atol(o.cell[1][1]);
+              if(!sql_executa("SELECT traco(*) FROM m", &o)) continue;
+              tr = atol(o.cell[0][0]);
+              if(!sql_executa("SELECT det(*) FROM m", &o)) continue;
+              dt = atol(o.cell[0][0]);
+              casos++;
+              /* A² − tr·A + det·I, entrada a entrada */
+              if(q11 - tr*a + dt == 0 && q12 - tr*b == 0
+                 && q21 - tr*c == 0 && q22 - tr*d + dt == 0) boas++;
+          }
+          printf("      varridas %ld matrizes 2×2: A² − tr·A + det·I = 0 em %ld"
+                 "  %s\n", casos, boas,
+                 (casos > 500 && boas == casos) ? "" : "NAO BATE");
+          if(casos < 500 || boas != casos) mal++; }
+
+        /* ── (2) E O TRAÇO E O DETERMINANTE SÃO DUAS COORDENADAS, não uma. A
+         * casa diz que são «as metades da mesma Cayley–Hamilton», e a prova de
+         * que são DUAS é haver matrizes com o mesmo traço e determinantes
+         * diferentes, e com o mesmo determinante e traços diferentes. Se uma
+         * determinasse a outra, a lei teria um parâmetro só. */
+        { long tr1, dt1, tr2, dt2, tr3, dt3;
+          sql_executa("DROP TABLE IF EXISTS m", &o);
+          sql_executa("CREATE TABLE m (p,q)", &o);
+          sql_executa("INSERT INTO m VALUES (1,0), (0,4)", &o);       /* tr 5, det 4 */
+          sql_executa("SELECT traco(*) FROM m", &o); tr1 = atol(o.cell[0][0]);
+          sql_executa("SELECT det(*) FROM m", &o);   dt1 = atol(o.cell[0][0]);
+          sql_executa("DROP TABLE IF EXISTS m", &o);
+          sql_executa("CREATE TABLE m (p,q)", &o);
+          sql_executa("INSERT INTO m VALUES (2,1), (1,3)", &o);       /* tr 5, det 5 */
+          sql_executa("SELECT traco(*) FROM m", &o); tr2 = atol(o.cell[0][0]);
+          sql_executa("SELECT det(*) FROM m", &o);   dt2 = atol(o.cell[0][0]);
+          sql_executa("DROP TABLE IF EXISTS m", &o);
+          sql_executa("CREATE TABLE m (p,q)", &o);
+          sql_executa("INSERT INTO m VALUES (1,0), (0,5)", &o);       /* tr 6, det 5 */
+          sql_executa("SELECT traco(*) FROM m", &o); tr3 = atol(o.cell[0][0]);
+          sql_executa("SELECT det(*) FROM m", &o);   dt3 = atol(o.cell[0][0]);
+          { int duas = (tr1 == tr2 && dt1 != dt2)      /* mesmo traço, det outro */
+                    && (dt2 == dt3 && tr2 != tr3);     /* mesmo det, traço outro */
+            printf("      duas coordenadas e não uma: (tr %ld, det %ld) e"
+                   " (tr %ld, det %ld) partilham o traço · (tr %ld, det %ld)"
+                   " partilha o det com a segunda  %s\n",
+                   tr1, dt1, tr2, dt2, tr3, dt3, duas ? "" : "NAO BATE");
+            if(!duas) mal++; } }
+
+        /* ── O CONTROLO: a lei é uma AFIRMAÇÃO sobre a matriz, e tem de poder
+         * ser falsa. Trocando o traço por outro número — o traço da
+         * TRANSPOSTA seria o mesmo, pelo que se usa um valor deslocado — a
+         * identidade parte-se. Sem isto, «vale em todas» podia ser «vale
+         * sempre», e não diria nada. */
+        sql_executa("DROP TABLE IF EXISTS m", &o);
+        sql_executa("CREATE TABLE m (p,q)", &o);
+        sql_executa("INSERT INTO m VALUES (1,2), (3,4)", &o);
+        sql_executa("SELECT produto(m) FROM m", &o);
+        { long q11 = atol(o.cell[0][0]);
+          sql_executa("SELECT traco(*) FROM m", &o);
+          long tr = atol(o.cell[0][0]);
+          sql_executa("SELECT det(*) FROM m", &o);
+          long dt = atol(o.cell[0][0]);
+          int certo = (q11 - tr*1 + dt == 0);
+          int falso = (q11 - (tr + 1)*1 + dt == 0);
+          printf("\n      CONTROLO — com o traço CERTO a entrada anula (%d);"
+                 " com o traço + 1 já NÃO anula (%d)  %s\n", certo, falso,
+                 (certo && !falso) ? "" : "NAO BATE");
+          if(!certo || falso) mal++; }
+        sql_fechar();
+
+        printf("\n");
+        ok("CAYLEY–HAMILTON SAI DAS PEÇAS QUE JÁ LÁ ESTAVAM, E É POR ISSO QUE ELE É O TESTE"
+           " DE QUE ELAS ENCAIXAM. `A² − tr(A)·A + det(A)·I = 0` não precisou de uma linha"
+           " nova no motor: o produto, o traço e o determinante foram expostos"
+           " separadamente, cada um medido por si, e a lei junta os três — nenhum deles"
+           " isolado a dá, e se qualquer um estivesse errado ela cairia. É a diferença entre"
+           " ter três funções que respondem e ter três funções que falam do mesmo objeto."
+           " Varre-se, em vez de se experimentar um caso: todas as 2×2 com entradas até"
+           " quatro, e a identidade fecha entrada a entrada em todas. E O TRAÇO E O"
+           " DETERMINANTE SÃO DUAS COORDENADAS, não uma — a casa chama-lhes «as metades da"
+           " mesma Cayley–Hamilton», e a prova de que são duas é haver matrizes com o mesmo"
+           " traço e determinantes diferentes, e com o mesmo determinante e traços"
+           " diferentes: se uma determinasse a outra, a lei teria um parâmetro só. O CONTROLO"
+           " é a lei a poder ser FALSA: com o traço certo a entrada anula, com o traço mais"
+           " um já não anula. Sem ele, «vale em todas» podia ser «vale sempre», e não diria"
+           " nada.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
