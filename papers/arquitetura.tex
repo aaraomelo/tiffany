@@ -630,10 +630,36 @@ multiplicam e as fases somam, e com módulo $1$ sobra só a segunda parte --- so
 $2\pi$ é o \textbf{ou-exclusivo}. \emph{O teorema da convolução, lido na fase, é a lei do grupo.}
 Uma consequência operacional fecha o quadro: como $\oplus$ é involutivo, nesta ordem
 \textbf{$\mu$ coincide com $\zeta$} --- desfazer e fazer são a mesma passagem, e a transformada é o
-seu próprio inverso a menos da escala. É o contrário do que se passa no \emph{índice}
-(\S\ref{sec:isa}), onde a ordem é linear e as duas metades custam trabalho diferente: acrescentar
-uma chave é uma descida, tirá-la é a descida com a volta por cima. \emph{A álgebra é a mesma; o que
-muda é a ordem sobre a qual se acumula.}
+seu próprio inverso a menos da escala.
+
+\smallskip
+\noindent\textbf{E o que muda é a ORDEM, não a álgebra} --- a distinção é o resultado, e não uma
+precaução de redação. A álgebra é a mesma nos dois sítios: a de incidência, com a sua convolução.
+O que se troca é o conjunto ordenado sobre o qual ela corre, e daí
+\[
+\boxed{\;\text{o par }(\zeta,\mu)\text{ não é propriedade da álgebra: é da \textbf{ordem}.}\;}
+\]
+Esta máquina tem as \emph{duas} realizações a correr ao lado uma da outra --- o \textbf{índice}
+(\S\ref{sec:isa}) e o \textbf{espectro} --- e é por isso que o contraste aqui não é teórico:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o índice} (ordem linear) & \textbf{o espectro} (expoente $2$)\\
+\midrule
+$\zeta$ & acrescentar a chave: uma descida & a projeção espectral\\
+$\mu$ & tirá-la: a descida com a volta por cima & a \emph{mesma} projeção\\
+o par & $\zeta\neq\mu$ --- custam trabalho diferente & $\zeta=\mu$\\
+a escala & unitária: a volta fecha exata & $\lvert X\rvert$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A última linha é onde se paga: no índice a volta fecha \emph{sem factor} --- o valor
+velho sai e o novo entra, e o campo fica como se nada tivesse acontecido ---, e no espectro fecha
+a menos de $\lvert X\rvert$. \emph{Fazer e desfazer tornarem-se a mesma operação não sai de graça:
+sai com uma norma pendurada.} O enunciado fica no corpo (\code{papers/aranha.tex}, §~da
+transformada); aqui regista-se que a máquina executa os dois lados e paga cada um no seu.
 
 \smallskip
 \noindent Os números desta máquina, e os seus limites declarados:
