@@ -5750,6 +5750,80 @@ $+0=-0$ contado; e as duas involuções nos quatro pontos.}
         {soma por partes em $\Z/N$; convolução diagonalizada; contagem de pontos fixos}
         {\code{tests/pgwire.c} §W120}
 
+\subsection*{O global: endereçar, atravessar, e o custo dominado pelo pior salto}
+
+\noindent O \code{aranha} fecha com um teorema que o motor realiza:
+\begin{quote}
+\emph{Todo objeto que admite decomposição finita nas coordenadas da escada herda um
+endereçamento reversível; quaisquer duas representações reversíveis desse objeto são
+ligadas por travessia efetiva; e, sob a ultramétrica dos endereços, o custo de
+qualquer composição é dominado pelo maior custo entre os seus passos.}
+\end{quote}
+
+\medskip\noindent\textbf{As palavras finitas fecham sobre a lista, e o comprimento é
+o que as separa.} O \code{aranha thm:enumfin} dá $E_k\colon I^{k}\to I$ para cada $k$
+\emph{fixo}; juntar os $E_k$ \emph{não} sai daí, e a razão mede-se:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+sem o comprimento, os $E_k$ colidem & $21$ em $85$ --- \textbf{todas} entre $k$'s diferentes\\
+dentro do mesmo $k$ & $\mathbf{0}$\\
+com ele, $\Phi(w)=C(\lambda_k,E_k(w))$ é injetiva & $0$ colisões em $121$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Uma família de bijeções cuja união não é injetiva} --- a testemunha é
+$E_0()=E_1(0)=E_2(0,0)$. É isso que o coproduto disjunto diz: o índice das cópias é
+\textbf{estrutura}, e aqui esse índice é o comprimento.
+
+\medskip\noindent\textbf{E a ultramétrica sobe de $d_x$ para $D$.} Com
+$d(a,b)=2^{-\operatorname{prof}(a,b)}$ do \code{aranha def:arvore}:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+$d(a,c)\le\max\{d(a,b),d(b,c)\}$ sobre os endereços & $262\,144/262\,144$\\
+\quad dos quais \textbf{estritos} & $87\,360$\\
+$D(\sigma,\rho)\le\max\{D(\sigma,\tau),D(\tau,\rho)\}$ em $\mathcal{R}(X)$ & $64/64$\\
+$D$ separa: profundidade máxima só na diagonal & $4$ contra $12$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Os casos \textbf{estritos} são o que impede a desigualdade de ser apenas
+triangular. E é a passagem para $D$ que faz das representações \emph{objetos
+geométricos}: sem ela a afirmação seria ponto a ponto.
+
+\medskip\noindent\textbf{E a cadeia não acumula.} Compor três travessias sobre a
+mesma grade dá custo dominado pelo pior passo --- $17\,386$ somando contra $10$
+maximizando. \emph{Mas a consequência tem de ser a certa}: $\max_i D$ é simétrico, e
+por isso «executar o pior primeiro» \textbf{não} sai do teorema. O que sai é que,
+pago um salto de escala $\delta$, toda travessia posterior de custo $\le\delta$
+permanece na mesma bola e não aumenta o custo global.
+
+\medskip\noindent\textbf{E a interface não é uma metáfora.}
+\[
+\text{interface}=\{x:\sigma(x)=\sigma^{\dagger}(x)\}=\operatorname{Fix}(\dagger)
+\]
+$d_x(\sigma,\sigma^{\dagger})=0$ em $32/32$ pontos da diagonal e em $\mathbf{0}$ dos
+$992$ fora dela. A auto-dualidade global é \textbf{impossível} --- $\sigma^{\dagger}=\sigma$
+colapsaria dois pontos num endereço ---, e o mínimo é estrutural: a enumeração por
+antidiagonais chega a $\lvert h-v\rvert=M(M-1)=992$, contra $30\,752$ na ordem por
+linhas alternadas. \emph{Perto do zero, e nunca zero.}
+
+\medskip\noindent\textbf{E daí a operação, que é o que a máquina executa.} Não se
+procura a melhor representação: a tarefa fixa o destino e a máquina aplica
+$\textsc{travessia}_{R\to S}=S\circ R^{-1}$, com $D(R,S)=\sup_x d(R(x),S(x))$ a
+\emph{certificar o preço} e não a escolher o destino.
+
+\medido{\code{tests/pgwire.c} §W121, §W122 e §W123 --- as colisões e a sua ausência;
+o $\dagger$ a trocar $h$ por $v$ sem sobra nos dois pares; o \code{lem:ultra} com os
+casos estritos contados; $D$ ultramétrica e separada em $\mathcal{R}(X)$; a cadeia
+somada contra maximizada; e a interface na diagonal com o mínimo estrutural fora
+dela.}
+
+\colunas{\code{aranha thm:palavras}, \code{thm:localdual}, \code{thm:navega}, \code{cor:global}, \code{lem:interface}}
+        {aritmética de endereços na escada; $\operatorname{prof}$ como profundidade da primeira divergência}
+        {\code{tests/pgwire.c} §W121--§W123}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
