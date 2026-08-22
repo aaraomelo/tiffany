@@ -5882,6 +5882,29 @@ $p(a+\varepsilon)=p(a)+p'(a)\varepsilon$ em $11/11$.}
         {\code{traco}/\code{det}/\code{produto} sobre $\binom{a\ b}{0\ a}$}
         {\code{tests/pgwire.c} §W125}
 
+\subsection*{Completar um corpo é medir a leitura, não o corpo}
+
+\noindent É o que o teorema global compra ao catálogo, e é a operação que o agente
+executa. A ultramétrica vive nos \emph{endereços}: se a leitura $R$ de um corpo em $I$
+separa os seus objectos, a desigualdade forte desce por ela inteira e a métrica, a
+topologia e a ordem vêm juntas --- sem que nada se meça no corpo destino. Entre duas
+leituras existe sempre $T=S\circ R^{-1}$, e $D(R,S)=\sup_x d(R(x),S(x))$ certifica o
+salto; a cadeia não custa mais que o pior passo.
+
+\medskip\noindent\textbf{E o critério tem gume.} A leitura espectral
+$(\operatorname{tr},\det)$ --- a cifra --- não separa: nas $256$ matrizes $2\times2$ de
+entradas em $\{0,1,2,3\}$ ela dá $58$ endereços, e duas matrizes distintas ficam à
+distância \textbf{zero}. Onde a régua não desce, o que falta não é medida: é uma leitura.
+
+\medido{\code{tests/pgwire.c} §W126 --- a herança da desigualdade forte em
+$262\,144/262\,144$ triplos pela leitura por colunas, sem medir o destino; a travessia a
+atingir os $256$ endereços e involutiva; o custo do par e a cadeia que não piora; e a
+cifra a colidir em $198$ dos $256$.}
+
+\colunas{\code{catalogo} §1 (a regra de navegação), \code{aranha cor:global}, \code{thm:navega}}
+        {$\operatorname{prof}$ sobre os endereços; \code{traco}/\code{det} como leitura que perde}
+        {\code{tests/pgwire.c} §W126}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

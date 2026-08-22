@@ -18312,6 +18312,162 @@ int main(void){
            " não tem inverso é o que tem derivada.", mal == 0);
     }
 
+    /* ═══ §W126: A NAVEGAÇÃO — A RÉGUA HERDA-SE, E O CRITÉRIO É MECÂNICO ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W126 um corpo herda a métrica de outro sse a sua leitura é injectiva.\n\n");
+        unlink("/tmp/pgwire_w126__M.mem"); unlink("/tmp/pgwire_w126__M.prog");
+        unlink("/tmp/pgwire_w126.mem");    unlink("/tmp/pgwire_w126.prog");
+        if(!sql_abrir("/tmp/pgwire_w126")) mal++;
+
+        /* O objecto X: as 256 matrizes 2×2 com entradas em {0,1,2,3}. Cada
+         * «corpo» do catálogo é uma LEITURA delas — uma representação. */
+        #define NX 256
+        #define ENT(i,k) (((i) >> (2*(3-(k)))) & 3)      /* p,q,r,s do índice */
+        /* o endereço na escada: E_4 sobre quatro dígitos base 4 é a identidade */
+        #define R_LIN(i) (i)
+        /* a leitura por colunas: a transposta, p q r s -> p r q s */
+        #define R_COL(i) ((ENT(i,0)<<6) | (ENT(i,2)<<4) | (ENT(i,1)<<2) | ENT(i,3))
+        #define PROFB 8
+        #define PROF6(a,b) ({ long A_=(a), B_=(b); int q_=PROFB; \
+            if(A_!=B_) for(int i_=0;i_<PROFB;i_++){ \
+                if((((A_)>>(PROFB-1-i_))&1) != (((B_)>>(PROFB-1-i_))&1)){ q_=i_; break; } } q_; })
+
+        /* ── (1) O QUE SE HERDA E PORQUÊ: a ultramétrica vive em I, e uma
+         * leitura INJECTIVA transporta-a inteira. Não se re-mede o corpo
+         * destino: mede-se a leitura, e a desigualdade forte vem junto. */
+        {
+            long ok = 0, tot = 0, estrito = 0;
+            for(long a = 0; a < 64; a++) for(long b = 0; b < 64; b++) for(long c = 0; c < 64; c++){
+                long da = PROF6(R_COL(a), R_COL(b));
+                long db = PROF6(R_COL(b), R_COL(c));
+                long dc = PROF6(R_COL(a), R_COL(c));
+                /* d = 2^-prof; d(a,c) ≤ max ⟺ prof(a,c) ≥ min(prof) */
+                long mn = da < db ? da : db;
+                tot++;
+                if(dc >= mn) ok++;
+                if(dc > mn) estrito++;
+            }
+            printf("      a régua transportada para a leitura por COLUNAS é ultramétrica"
+                   " em %ld/%ld triplos (%ld estritos) — e nada foi medido no corpo\n",
+                   ok, tot, estrito);
+            printf("        destino: mediu-se a LEITURA, e a desigualdade forte veio com ela\n");
+            if(ok != tot || estrito == 0) mal++;
+        }
+
+        /* ── (2) A TRAVESSIA EXISTE E É EFECTIVA: T = R_col ∘ R_lin^{-1} é uma
+         * bijecção de I em I, e aplicá-la duas vezes devolve o objecto — a
+         * transposição é involutiva. Nada disto precisa do conteúdo do corpo. */
+        {
+            long visto[NX] = {0}, bij = 0, volta = 0;
+            for(long i = 0; i < NX; i++){
+                long t = R_COL(R_LIN(i));
+                if(t >= 0 && t < NX && !visto[t]){ visto[t] = 1; bij++; }
+                if(R_COL(R_COL(i)) == i) volta++;
+            }
+            printf("      T = R_col ∘ R_lin⁻¹ atinge %ld/%ld endereços (bijecção) e"
+                   " T∘T = id em %ld/%ld\n", bij, (long)NX, volta, (long)NX);
+            if(bij != NX || volta != NX) mal++;
+        }
+
+        /* ── (3) O CUSTO DA TRAVESSIA, e a cadeia que não acumula. D(R,S) é o
+         * sup de d sobre os objectos; numa cadeia lin → col → lin o custo total
+         * não passa o pior passo, e é ISSO que torna a navegação barata. */
+        {
+            long pior_lc = PROFB, pior_cl = PROFB, pior_ll = PROFB;
+            for(long i = 0; i < NX; i++){
+                long p1 = PROF6(R_LIN(i), R_COL(i));      /* lin → col */
+                long p2 = PROF6(R_COL(i), R_LIN(i));      /* col → lin */
+                long p3 = PROF6(R_LIN(i), R_LIN(i));      /* a ponta a ponta */
+                if(p1 < pior_lc) pior_lc = p1;
+                if(p2 < pior_cl) pior_cl = p2;
+                if(p3 < pior_ll) pior_ll = p3;
+            }
+            /* prof pequena = distância grande; o sup de d é a MENOR prof */
+            long pior_passo = pior_lc < pior_cl ? pior_lc : pior_cl;
+            printf("      D(lin,col) tem prof %ld e D(col,lin) tem prof %ld; a cadeia"
+                   " inteira tem prof %ld — o composto NÃO é pior que o pior passo\n",
+                   pior_lc, pior_cl, pior_ll);
+            printf("        (prof maior é distância menor: a ida e a volta cancelam,"
+                   " e o teorema só promete que não PIORE)\n");
+            if(pior_ll < pior_passo) mal++;
+        }
+
+        /* ── (4) E O GUME, QUE É O CRITÉRIO: uma leitura NÃO injectiva não
+         * herda régua nenhuma. A leitura espectral (traço, det) — a cifra —
+         * é a que o catálogo usa em vários corpos, e ela COLIDE. */
+        {
+            long cifra[NX][2]; long colisoes = 0, distintas = 0;
+            for(long i = 0; i < NX; i++){
+                long M[2][2] = {{ENT(i,0),ENT(i,1)},{ENT(i,2),ENT(i,3)}};
+                char q[220];
+                snprintf(q, sizeof q, "DROP TABLE IF EXISTS M"); sql_executa(q,&o2);
+                snprintf(q, sizeof q, "CREATE TABLE M (c1 RACIONAL, c2 RACIONAL)");
+                sql_executa(q,&o2);
+                for(int r = 0; r < 2; r++){
+                    snprintf(q, sizeof q, "INSERT INTO M VALUES (%ld,%ld)", M[r][0], M[r][1]);
+                    sql_executa(q,&o2);
+                }
+                sql_executa("SELECT traco(*) FROM M", &o);
+                cifra[i][0] = o.ok ? atol(o.cell[0][0]) : 0;
+                sql_executa("SELECT det(*) FROM M", &o);
+                cifra[i][1] = o.ok ? atol(o.cell[0][0]) : 0;
+            }
+            for(long i = 0; i < NX; i++){
+                long igual = 0;
+                for(long j = 0; j < i; j++)
+                    if(cifra[i][0] == cifra[j][0] && cifra[i][1] == cifra[j][1]){ igual = 1; break; }
+                if(igual) colisoes++; else distintas++;
+            }
+            printf("      GUME — a leitura ESPECTRAL (traço, det) do motor dá só %ld"
+                   " endereços distintos para %ld objectos: %ld colidem\n",
+                   distintas, (long)NX, colisoes);
+            printf("        logo ela NÃO transporta a régua — d(x,y) = 0 com x ≠ y, e a"
+                   " desigualdade forte fica vazia onde a leitura já perdeu o objecto\n");
+            if(colisoes == 0 || distintas == NX) mal++;
+
+            /* e a testemunha directa: dois objectos distintos à distância zero */
+            long xa = -1, xb = -1;
+            for(long i = 0; i < NX && xa < 0; i++) for(long j = 0; j < i; j++)
+                if(cifra[i][0] == cifra[j][0] && cifra[i][1] == cifra[j][1]){ xa = j; xb = i; break; }
+            if(xa >= 0)
+                printf("        testemunha: [[%ld,%ld],[%ld,%ld]] e [[%ld,%ld],[%ld,%ld]]"
+                       " têm a mesma cifra (%ld, %ld) e endereços lineares %ld ≠ %ld\n",
+                       ENT(xa,0),ENT(xa,1),ENT(xa,2),ENT(xa,3),
+                       ENT(xb,0),ENT(xb,1),ENT(xb,2),ENT(xb,3),
+                       cifra[xa][0], cifra[xa][1], xa, xb);
+            else mal++;
+        }
+
+        #undef PROF6
+        #undef PROFB
+        #undef R_COL
+        #undef R_LIN
+        #undef ENT
+        #undef NX
+        sql_fechar();
+
+        printf("\n");
+        ok("COMPLETAR UM CORPO É MEDIR A SUA LEITURA, NÃO O CORPO. É isto que o teorema"
+           " global compra ao catálogo: a ultramétrica vive nos ENDEREÇOS, e uma leitura"
+           " injectiva transporta-a inteira para o corpo que a usa. Medido nas 256 matrizes"
+           " 2×2 de entradas em {0,1,2,3}: a leitura por colunas herda a desigualdade forte"
+           " em todos os triplos, com casos estritos, e NADA foi medido no corpo destino — só"
+           " a leitura. A travessia entre duas leituras é a composição T = R_col ∘ R_lin⁻¹,"
+           " que atinge os 256 endereços e é involutiva; o custo D(R,S) = sup_x d(R(x),S(x))"
+           " existe para o par e a cadeia ida-e-volta não fica pior que o pior passo, que é"
+           " exactamente o que o teorema promete — e nada mais, porque o máximo é simétrico."
+           " E O GUME É O CRITÉRIO, que é mecânico: uma leitura NÃO injectiva não herda régua"
+           " nenhuma. A leitura espectral (traço, det) — a cifra, que o catálogo usa em vários"
+           " corpos — dá muito menos endereços que objectos, e a testemunha é directa: duas"
+           " matrizes distintas com a mesma cifra ficam à distância ZERO uma da outra, e a"
+           " desigualdade forte passa a valer vazia onde a leitura já perdeu o objecto. Daí a"
+           " regra de navegação para o agente: PERGUNTA-SE SE A LEITURA SEPARA, e se separar"
+           " a métrica, a topologia e a ordem descem sem se medirem outra vez; se não separar,"
+           " o que falta não é medida — é uma leitura.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

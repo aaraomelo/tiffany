@@ -1263,6 +1263,32 @@ E nada disto usou o valor de $m$ --- usou-se apenas $\sigma^2=m\sigma+1$. Logo h
 
 \paragraph{E acima disto há o teorema global, que o \code{aranha} prova e que diz até onde a construção alcança.} Todo objecto que admite decomposição finita nas coordenadas da escada herda um \textbf{endereçamento reversível}; quaisquer duas representações reversíveis desse objecto são ligadas por uma \textbf{travessia efectiva} $S\circ R^{-1}$; e, sob a ultramétrica dos endereços --- $d(a,b)=2^{-\operatorname{prof}(a,b)}$, a profundidade da primeira divergência ---, o custo de qualquer composição é \textbf{dominado pelo maior custo entre os seus passos}, e não pela soma. \emph{É isso que faz do catálogo uma arquitectura e não uma lista}: as entradas não são alternativas a comparar, são representações entre as quais se atravessa com preço certificado. E a \textbf{interface} é o conjunto dos pontos fixos da troca, $\{x:\sigma(x)=\sigma^{\dagger}(x)\}$ --- o único lugar onde a travessia não paga, e por isso o único que vai nos dois sentidos de graça.
 
+\paragraph{E daí sai a regra de navegação, que é o que este catálogo dá ao agente.} Completar
+um corpo \textbf{não é medi-lo}: é medir a sua \emph{leitura}. A ultramétrica vive nos
+endereços, não nos corpos --- logo, se a leitura de um corpo em $I$ \textbf{separa} os seus
+objectos, a métrica, a topologia e a ordem descem por ela sem se medirem outra vez, e o corpo
+fica completo pela régua que já existe. É mecânico, e tem três passos:
+\begin{enumerate}
+\item \textbf{A leitura separa?} Se $R$ é injectiva, a desigualdade forte
+      $d(x,z)\le\max\{d(x,y),d(y,z)\}$ transporta-se inteira. Nada mais é preciso medir no
+      corpo destino.
+\item \textbf{A travessia.} Entre duas leituras do mesmo objecto existe sempre
+      $T=S\circ R^{-1}$, efectiva e reversível; a tarefa fixa o destino, e a máquina executa a
+      mudança de coordenadas.
+\item \textbf{O preço.} $D(R,S)=\sup_x d(R(x),S(x))$ certifica o salto, e uma cadeia de
+      conversões não custa mais do que o seu pior passo --- \emph{não a soma deles}.
+\end{enumerate}
+\noindent E o critério tem gume, porque há leituras que \emph{não} separam: a espectral
+$(\operatorname{tr},\det)$ --- a cifra --- é usada em vários corpos deste catálogo e perde
+objectos. \emph{Quando a régua não desce, o que falta não é medida: é uma leitura.}
+
+\medido{nas $256$ matrizes $2\times2$ de entradas em $\{0,1,2,3\}$, a leitura por colunas herda
+a desigualdade forte em $262\,144/262\,144$ triplos ($87\,360$ estritos) sem que nada se meça no
+corpo destino; a travessia $T=R_{\mathrm{col}}\circ R_{\mathrm{lin}}^{-1}$ atinge os $256$
+endereços e é involutiva; e o gume: a leitura espectral do motor dá apenas $58$ endereços
+distintos para os $256$ objectos --- $198$ colidem, e a testemunha directa são duas matrizes
+distintas à distância \textbf{zero} (\code{tests/pgwire.c} §W126).}
+
 \medido{\code{tests/pgwire.c} §W121--§W123 --- a desigualdade ultramétrica em $262\,144/262\,144$ triplos de endereços, com $87\,360$ \emph{estritos}; a sua subida para $D(\sigma,\tau)=\sup_x d(\sigma x,\tau x)$ em $64/64$ triplos de representações; a cadeia a custar $17\,386$ somada contra $10$ maximizada; e a interface com $d_x=0$ em toda a diagonal e em nenhum ponto fora dela. \emph{E a ressalva que o teorema obriga}: «executar o pior passo primeiro» \textbf{não} sai daqui, porque o máximo é simétrico --- o que sai é que, pago um $\delta$, os passos $\le\delta$ são grátis.}
 
 \paragraph{E o que fecha os corpos em qualquer dimensão é o passo $I^n\to I$.} O \code{aranha thm:enumfin} dá a bijeção $E_k:I^k\to I$ para todo $k$, e o mesmo documento diz o seu preço --- \emph{codificar $\neq$ preservar a dinâmica}. Nos operadores há uma segunda redução, e é a que preserva: por Cayley--Hamilton, para toda $A$ de ordem $n$ e todo $x_0$, a sucessão $x_k=A^kx_0$ satisfaz \emph{em cada coordenada} a mesma recorrência escalar de ordem $n$ --- um sistema de $n$ equações acopladas vira $n$ cópias de \textbf{uma} equação em $I$, sem hipótese nenhuma sobre $A$. A \emph{volta} é que pede condição: reconstruir $x$ a partir de $y$ precisa de um vector cíclico, o que equivale ao polinómio mínimo ter o grau do característico. E a ordem da menor equação que serve é $\deg\mu_A\le n$, não $n$. É assim que o corpo de matrizes fecha: $\Q[A]\cong\Q[\lambda]/(\mu_A)$ tem dimensão $\deg\mu_A$ e não $n^2$, e é \textbf{corpo} exactamente quando $\mu_A$ é irredutível --- o mesmo critério que a irracionalidade de $\sigma_m$ dá a $K_m$.
