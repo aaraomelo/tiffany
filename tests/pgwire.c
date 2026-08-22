@@ -16376,6 +16376,148 @@ int main(void){
            " separa os dois lados não é o conjunto, é o MERGULHO.", mal == 0);
     }
 
+    /* ═══ §W114: A EXTENSÃO NATURAL É A TRANSPOSIÇÃO — EM ℚ EXACTO ═════════ */
+    {
+        long mal = 0;
+        printf("\n§W114 T̂ guarda o passado, e o que ela guarda é a palavra AO CONTRÁRIO.\n\n");
+
+        /* ── A §«A extensão natural» diz: «esta é a mesma reversão que a
+         * Parte I mede na álgebra — a extensão natural é, do lado dinâmico, o
+         * que a TRANSPOSIÇÃO da matriz é do lado algébrico: M_nᵀ lê a palavra
+         * ao contrário, e T̂⁻¹ recua no tempo. As três reversibilidades são
+         * uma só». Aqui isso corre em ℚ EXACTO, sem uma medida.
+         *
+         * A parte da medida invariante — dν = dx dy/(1+xy)², e os 120 000
+         * pontos com L¹ a cair de 0,2486 para 0,0136 — é medida CONTÍNUA e
+         * fica onde está: medi-la aqui seria fabricar um resíduo zero. */
+
+        /* racionais como pares (n,d) reduzidos */
+        #define RED(n,d) do { long a_=(n)<0?-(n):(n), b_=(d)<0?-(d):(d); \
+            while(b_){ long t_=a_%b_; a_=b_; b_=t_; } if(a_){ (n)/=a_; (d)/=a_; } \
+            if((d)<0){ (n)=-(n); (d)=-(d); } } while(0)
+
+        /* ── (1) A SEGUNDA COORDENADA É A PALAVRA AO CONTRÁRIO. Partindo de
+         * x₀ = p/q e y₀ = 0, cada passo faz y ← 1/(a+y) com a = ⌊1/x⌋; logo
+         * y_k = [0; a_k, a_{k−1}, …, a₁]. Compara-se com a fracção contínua
+         * da palavra invertida, montada à parte. */
+        {
+            long bate = 0, tot = 0, passos_tot = 0;
+            for(long q = 2; q <= 30; q++) for(long p = 1; p < q; p++){
+                long g = p, h = q; while(h){ long t=g%h; g=h; h=t; }
+                if(g != 1) continue;
+                long xn = p, xd = q, yn = 0, yd = 1;
+                long W[24]; int L = 0;
+                int falhou = 0;
+                while(xn != 0 && L < 20){
+                    long a = xd / xn;                 /* ⌊1/x⌋ */
+                    W[L++] = a;
+                    /* x ← 1/x − a = (xd − a·xn)/xn */
+                    long nx = xd - a*xn, nd = xn;
+                    xn = nx; xd = nd; RED(xn, xd);
+                    /* y ← 1/(a+y) = yd/(a·yd + yn) */
+                    long ny = yd, nyd = a*yd + yn;
+                    yn = ny; yd = nyd; RED(yn, yd);
+                    if(yd > 1000000){ falhou = 1; break; }
+                }
+                if(falhou || L < 2) continue;
+                /* a palavra AO CONTRÁRIO, avaliada como fracção contínua */
+                long rn = 0, rd = 1;
+                for(int k = 0; k < L; k++){          /* [0; a_L, …, a_1] */
+                    long a = W[k];
+                    long nn = rd, nd2 = a*rd + rn;
+                    rn = nn; rd = nd2; RED(rn, rd);
+                }
+                tot++; passos_tot += L;
+                if(rn == yn && rd == yd) bate++;
+            }
+            printf("      a segunda coordenada É a palavra ao contrário:"
+                   " %ld/%ld racionais p/q (q até 30), com %ld passos ao todo\n",
+                   bate, tot, passos_tot);
+            printf("        y_k = [0; a_k, a_{k−1}, …, a₁] — o mesmo que o M_nᵀ do"
+                   " §W96 diz do lado algébrico, agora do lado dinâmico\n");
+            if(bate != tot || tot < 100) mal++;
+        }
+
+        /* ── (2) E T̂ É INVERTÍVEL, que é a razão de ela existir: «T não é
+         * invertível — apagar a primeira letra perde informação; a extensão
+         * natural recupera-a». Verifica-se compondo T̂⁻¹∘T̂ e exigindo o par
+         * de volta, EXACTO em ℚ. */
+        {
+            long volta = 0, tot = 0;
+            for(long q = 2; q <= 20; q++) for(long p = 1; p < q; p++){
+                long g = p, h = q; while(h){ long t=g%h; g=h; h=t; }
+                if(g != 1) continue;
+                for(long yq = 1; yq <= 5; yq++){
+                    long xn = p, xd = q, yn = 1, yd = yq + 1;   /* y ∈ (0,1) */
+                    long x0n = xn, x0d = xd, y0n = yn, y0d = yd;
+                    if(xn == 0) continue;
+                    long a = xd / xn;
+                    long ax = xd - a*xn, axd = xn; RED(ax, axd);
+                    long ay = yd, ayd = a*yd + yn;  RED(ay, ayd);
+                    /* T̂⁻¹(x,y) = (1/(b+x), 1/y − b) com b = ⌊1/y⌋ */
+                    if(ay == 0) continue;
+                    long b = ayd / ay;
+                    long bx = axd, bxd = b*axd + ax;  RED(bx, bxd);
+                    long by = ayd - b*ay, byd = ay;   RED(by, byd);
+                    tot++;
+                    if(bx == x0n && bxd == x0d && by == y0n && byd == y0d) volta++;
+                }
+            }
+            printf("      T̂⁻¹∘T̂ = id em ℚ exacto: %ld/%ld pares (x,y) — «T não é"
+                   " invertível; a extensão natural recupera a informação»\n",
+                   volta, tot);
+            if(volta != tot || tot < 100) mal++;
+        }
+
+        /* ── (3) E O CONTROLO É A APLICAÇÃO SEM EXTENSÃO: T sozinha PERDE, e
+         * isso conta-se — dois x diferentes com a mesma imagem. Sem este lado,
+         * «a extensão recupera» seria uma frase sobre nada. */
+        {
+            long colide = 0, tot = 0;
+            for(long q = 2; q <= 25; q++) for(long p = 1; p < q; p++){
+                long g = p, h = q; while(h){ long t=g%h; g=h; h=t; }
+                if(g != 1) continue;
+                long a = q / p, n1 = q - a*p, d1 = p; RED(n1, d1);
+                for(long q2 = 2; q2 <= 25; q2++) for(long p2 = 1; p2 < q2; p2++){
+                    if(p2*q == p*q2) continue;          /* mesmo x */
+                    long g2 = p2, h2 = q2; while(h2){ long t=g2%h2; g2=h2; h2=t; }
+                    if(g2 != 1) continue;
+                    long a2 = q2 / p2, n2 = q2 - a2*p2, d2 = p2; RED(n2, d2);
+                    tot++;
+                    if(n1 == n2 && d1 == d2) colide++;
+                }
+            }
+            printf("      CONTROLO — T sozinha COLIDE: %ld pares distintos com a"
+                   " mesma imagem, em %ld comparados (a informação que se perde é"
+                   " a primeira letra)\n", colide, tot);
+            if(colide == 0) mal++;
+        }
+
+        #undef RED
+        printf("\n");
+        ok("A EXTENSÃO NATURAL É A TRANSPOSIÇÃO DA MATRIZ, E ISSO MEDE-SE EM ℚ EXACTO. A §«A"
+           " extensão natural» diz que «esta é a mesma reversão que a Parte I mede na álgebra:"
+           " a extensão natural é, do lado dinâmico, o que a TRANSPOSIÇÃO da matriz é do lado"
+           " algébrico — M_nᵀ lê a palavra ao contrário, e T̂⁻¹ recua no tempo; as três"
+           " reversibilidades são uma só». Aqui a afirmação corre sem uma medida: partindo de"
+           " x₀ = p/q e y₀ = 0, cada passo faz y ← 1/(a+y), e a segunda coordenada resulta"
+           " EXACTAMENTE em [0; a_k, a_{k−1}, …, a₁] — a palavra ao contrário, comparada com a"
+           " fracção contínua invertida montada à parte, em racionais reduzidos e sem uma"
+           " divisão inexacta. É o mesmo objecto que §W96 mediu do lado algébrico com a"
+           " `transposta` do motor: duas encarnações, uma reversão. E T̂ É INVERTÍVEL, que é a"
+           " razão de ela existir — «T não é invertível: apagar a primeira letra perde"
+           " informação; a extensão natural recupera-a». Compõe-se T̂⁻¹∘T̂ e exige-se o par de"
+           " volta, exacto em ℚ. O CONTROLO é a aplicação SEM extensão, sem o qual «a extensão"
+           " recupera» seria uma frase sobre nada: T sozinha COLIDE, e contam-se os pares"
+           " distintos que caem no mesmo sítio — a informação que se perde é a primeira letra,"
+           " e é ela que a segunda coordenada guarda. E O QUE NÃO SE MEDE AQUI FICA DITO: a"
+           " medida invariante dν = dx dy/(1+xy)², e os 120 000 pontos com a distância L¹ a"
+           " cair de 0,2486 para 0,0136, são medida CONTÍNUA e ficam onde estão. Medi-las aqui"
+           " seria fabricar um resíduo zero, que é precisamente o que o próprio catálogo"
+           " proíbe: «se for um limite, o resíduo zero ou não existe ou está a ser"
+           " fabricado».", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -5462,6 +5462,52 @@ enquadramento inteiro; e o mínimo de Minkowski com o tecto dobrado.}
         {sinal de $u+v\sqrt5$ por quadrados; $d^{2}$ inteiro no mergulho}
         {\code{tests/pgwire.c} §W113}
 
+\subsection*{A extensão natural é a transposição da matriz --- medida em \texorpdfstring{$\Q$}{Q} exato}
+
+\noindent A §«A extensão natural» diz que «esta é a mesma reversão que a Parte~I mede
+na álgebra: a extensão natural é, do lado dinâmico, o que a \textbf{transposição} da
+matriz é do lado algébrico --- $M_n^{\!\top}$ lê a palavra ao contrário, e
+$\widehat T^{-1}$ recua no tempo. \emph{As três reversibilidades são uma só.}»
+
+\medskip\noindent Aqui a afirmação corre \textbf{sem uma medida}. Partindo de
+$x_0=p/q$ e $y_0=0$, cada passo faz $y\leftarrow 1/(a+y)$, e a segunda coordenada
+resulta exatamente em
+\[
+y_k=[0;a_k,a_{k-1},\dots,a_1]
+\]
+--- \textbf{a palavra ao contrário} ---, comparada com a fração contínua invertida
+montada à parte, em racionais reduzidos e sem uma divisão inexata:
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+$y_k$ é a palavra invertida & $248/248$ racionais ($q\le30$), $784$ passos\\
+$\widehat T^{-1}\!\circ\widehat T=\mathrm{id}$ em $\Q$ & $635/635$ pares\\
+\textsc{controlo}: $T$ sozinha colide & $960$ pares em $39\,402$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent É o \emph{mesmo} objeto que §W96 mediu do lado algébrico com a
+\code{transposta} do motor. \textbf{Duas encarnações, uma reversão.}
+
+\medskip\noindent O controlo é o que impede «a extensão recupera» de ser uma frase
+sobre nada: $T$ sozinha \textbf{colide}, e o que se perde é a primeira letra --- que é
+precisamente o que a segunda coordenada guarda.
+
+\medskip\noindent\textbf{E o que não se mede aqui fica dito.} A medida invariante
+$d\nu=\frac{1}{\log2}\frac{dx\,dy}{(1+xy)^2}$, e os $120\,000$ pontos com a distância
+$L^1$ a cair de $0{,}2486$ para $0{,}0136$, são medida \emph{contínua} e ficam onde
+estão. Medi-las aqui em resíduo zero seria fabricá-lo --- que é o que o próprio
+catálogo proíbe: «se for um limite, o resíduo zero ou não existe ou está a ser
+fabricado».
+
+\medido{\code{tests/pgwire.c} §W114 --- a segunda coordenada contra a palavra
+invertida; a invertibilidade composta; e o controlo da colisão.}
+
+\colunas{\code{catalogo} «A extensão natural»; §W96 (a transposta lê ao contrário); §W97}
+        {aritmética de racionais reduzidos; composição de $\widehat T$ e da sua inversa}
+        {\code{tests/pgwire.c} §W114}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
