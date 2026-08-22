@@ -57,6 +57,19 @@
 #include "../lib/word_isa.h"
 #include "../lib/slot_map.h"
 #include "../lib/reta.h"
+/* ── AS FUNÇÕES ANALÍTICAS VÊM DA CASA, NÃO SE ESCREVEM AQUI ─────────────────
+ * O `aranha §sec:serie` deriva-as todas de uma só: com J² = −1 as potências de J
+ * ciclam com período quatro, a série da exponencial PARTE-SE PELA PARIDADE do
+ * índice, e o que sai é exp(tJ) = c(t)·1 + s(t)·J — o cosseno nos pares, o seno
+ * nos ímpares, e o (−1)^k a contar as voltas do ciclo módulo dois. O logaritmo é
+ * a inversa, do lado da série.
+ *
+ * E isso já está construído em `lib/calculo2.h`, com os coeficientes EXACTOS em
+ * ℚ: `sr_exp`, `sr_sin`, `sr_cos`, `sr_log1p`, e o `sr_parcial` que avalia. Não
+ * há aqui matemática nova — há a ligação ao motor: o banco passa a poder
+ * perguntar por elas, sobre as suas células, sem um único double. */
+#include "../lib/racionais.h"
+#include "../lib/serie.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -4373,6 +4386,26 @@ static int lista_colunas(const char **pp, char *out, int cap){
                   if(*p == ','){ p++; continue; }
                   break;
               }
+              /* ── AS ANALÍTICAS SÃO POR LINHA, e não sobre a fibra ─────────
+               * `exp(a)` não é uma agregação: é uma função do valor da célula,
+               * como `a+1`. Guarda-se o texto inteiro — `exp(a)` — e quem o
+               * resolve é a projecção, depois de a tabela abrir. */
+              if(!strcasecmp(nome,"EXP") || !strcasecmp(nome,"SIN")
+                 || !strcasecmp(nome,"COS") || !strcasecmp(nome,"LOG")){
+                  const char *r = q + 1;
+                  char arg[64];
+                  pula(&r);
+                  if(ident(&r, arg, sizeof arg)){
+                      pula(&r);
+                      if(*r == ')'){
+                          char tx[80];
+                          snprintf(tx, sizeof tx, "%s(%s)", nome, arg);
+                          snprintf(nome, sizeof nome, "%s", tx);
+                          p = r + 1;
+                          goto item_pronto;
+                      }
+                  }
+              }
               int qual = !strcasecmp(nome,"SUM") ? 1 : !strcasecmp(nome,"MAX") ? 2
                        : !strcasecmp(nome,"MIN") ? 3 : !strcasecmp(nome,"AVG") ? 4 : 0;
               if(qual){
@@ -4398,6 +4431,7 @@ static int lista_colunas(const char **pp, char *out, int cap){
          * FROM, e quem o compila é a resolução da projecção — lá a tabela já
          * está aberta e os nomes resolvem-se, que é a mesma razão de a
          * projecção inteira ser resolvida lá e não aqui. */
+        item_pronto:
         /* ── O ITEM PODE VIR QUALIFICADO: `t.a` ─────────────────────────────
          * Numa junção há duas tabelas e os nomes podem repetir-se; o ponto diz
          * de qual delas se fala. Guarda-se o texto inteiro — quem o resolve é a
@@ -5057,6 +5091,7 @@ static int varre(const char *resto, int acao){
     static int proj_ex[SQL_OUT_MAX_COLS];
     static struct tensor proj_ten[SQL_OUT_MAX_COLS];
     static char proj_nome[SQL_OUT_MAX_COLS][64];
+    static int proj_fn[SQL_OUT_MAX_COLS];        /* 1 exp, 2 sin, 3 cos, 4 log */
     for(int k = 0; k < SQL_OUT_MAX_COLS; k++) proj_ex[k] = 0;
     if(acao == ACAO_MARCA){
         char cols[256];
@@ -5152,6 +5187,51 @@ static int varre(const char *resto, int acao){
             if(*q == ',') q++;
             { int c = col_indice(nome_c);
               if(c >= 0){ proj[proj_n] = c; proj_ex[proj_n] = 0; proj_n++; continue; }
+              /* ── É UMA ANALÍTICA? `exp(a)`, `sin(a)`, `cos(a)`, `log(a)` ──
+               * A série vem da casa (`lib/serie.h`, extraída do `calculo2.h`) e
+               * os coeficientes são exactos em ℚ. O que aqui se decide é só
+               * QUAL e SOBRE QUE COLUNA. */
+              { const char *ab = strchr(nome_c, '(');
+                if(ab){
+                    char fn[16], col[64];
+                    size_t nf = (size_t)(ab - nome_c);
+                    int qual = 0;
+                    if(nf < sizeof fn){
+                        memcpy(fn, nome_c, nf); fn[nf] = 0;
+                        { const char *r = ab + 1;
+                          /* e depois do parêntese não pode vir NADA: `exp(x)+1`
+                           * tem o fecho a meio, e aceitar isso era ler `exp(x)`
+                           * e deitar fora o resto — responder certo sobre outra
+                           * coisa. Não sendo a forma pura, o item segue para o
+                           * caminho das expressões, e lá é recusado com a razão
+                           * (o tensor não sabe o que `exp` é). */
+                          if(ident(&r, col, sizeof col) && *r == ')' && r[1] == 0){
+                              qual = !strcasecmp(fn,"EXP") ? 1
+                                   : !strcasecmp(fn,"SIN") ? 2
+                                   : !strcasecmp(fn,"COS") ? 3
+                                   : !strcasecmp(fn,"LOG") ? 4 : 0;
+                              if(qual){
+                                  int ci2 = col_indice(col);
+                                  if(ci2 < 0){
+                                      printf("erro: a coluna «%s» não existe —"
+                                             " RECUSADA.\n", col);
+                                      if(sql_cap){ sql_cap->ok = 0;
+                                          snprintf(sql_cap->err, sizeof sql_cap->err,
+                                                   "column \"%s\" does not exist", col); }
+                                      return 0;
+                                  }
+                                  proj[proj_n] = ci2;
+                                  proj_ex[proj_n] = 2;          /* analítica */
+                                  proj_fn[proj_n] = qual;
+                                  snprintf(proj_nome[proj_n], sizeof proj_nome[0],
+                                           "%s", nome_c);
+                                  proj_n++;
+                                  continue;
+                              }
+                          } }
+                    }
+                } }
+
               /* ── NÃO É UMA COLUNA: TENTA-SE COMO EXPRESSÃO ──────────────
                * O mesmo `le_num` do WHERE, agora a produzir em vez de a
                * decidir. Compila-se aqui, depois de a tabela abrir, porque é
@@ -7060,8 +7140,106 @@ static int varre(const char *resto, int acao){
          * divisão pode não fechar. E não se pronuncia sobre o que não está: se
          * alguma coluna que a expressão CITA está ausente, o resultado é
          * ausente — é a regra do CHECK e do WHERE, dita na produção. */
+        /* ── AS ANALÍTICAS: A SÉRIE AVALIADA NA CÉLULA ───────────────────────
+         * A série vem da casa e os coeficientes são exactos em ℚ; o que sai é a
+         * SOMA PARCIAL de ordem declarada, que é um valor exacto de um objecto
+         * declarado — não uma aproximação anónima. E onde a série não representa
+         * nada, RECUSA-SE: se o último termo somado não for menor que o
+         * anterior, a soma parcial não está a convergir naquele ponto, e
+         * devolver o número seria dar por resposta o próprio lixo. É a régua da
+         * casa: o que não cabe conta-se e recusa-se. */
         for(int k = 0; k < proj_n && k < nsai; k++){
-            if(!proj_ex[k]) continue;
+            if(proj_ex[k] != 2) continue;
+            { long j = proj[k];
+              if(j < 0 || j >= ncols || !bit_le(S_PRES, i*ncols + j)){
+                  saida[k][0] = 0; sai_nulo[k] = 1; continue; }
+              { long xv = celula_valor(i, j, ncols);
+                Sr ser;
+                Qz x, v;
+                /* A ORDEM É O QUE O INTEIRO PERMITE, e não um número
+                 * escolhido: os coeficientes têm factoriais no denominador, e
+                 * 20! = 2,4·10¹⁸ é o último que cabe no inteiro de 64 bits (21!
+                 * passa dos 9,2·10¹⁸). Devolve-se a soma até 18 e testa-se com
+                 * 20 — os dois termos a mais são o que a resposta ainda não
+                 * sabe, e é isso que decide se ela pode sair. A régua é a do
+                 * corpo, e diz-se antes de se usar. */
+                int ordem = 18;
+                /* a série constrói-se com DOIS TERMOS A MAIS do que se
+                 * devolve: sem eles os coeficientes extra são zero, a diferença
+                 * dá zero, e o teste passava sempre — uma comparação entre a
+                 * soma e ela própria.
+                 *
+                 * E o contador de estouros lê-se ANTES da construção, não depois:
+                 * é lá que o factorial deixa de caber no inteiro (22! passa dos
+                 * 9,2·10¹⁸), e ler depois deixava esse estouro invisível — a
+                 * série ficava truncada em silêncio e o teste comparava-a
+                 * consigo própria. */
+                long antes_c2 = c2_estouros, antes_qz = qz_perdeu;
+                switch(proj_fn[k]){
+                    case 1: ser = sr_exp(ordem + 2);   x = qz_de_inteiro(xv); break;
+                    case 2: ser = sr_sin(ordem + 2);   x = qz_de_inteiro(xv); break;
+                    case 3: ser = sr_cos(ordem + 2);   x = qz_de_inteiro(xv); break;
+                    default: ser = sr_log1p(ordem + 2);
+                             x = qz_de_inteiro(xv - 1); break;   /* log(1+u) */
+                }
+                { long antes = antes_c2;
+                  /* e a PERDA na avaliação também se lê: o `qz_mult` da casa já
+                   * conta o que não coube no inteiro (`qz_perdeu`), e sem o ler
+                   * o estouro de 20²⁰ passava calado — a resposta saía com um
+                   * décimo do valor certo. Não é o guarda que faltava: era eu a
+                   * não olhar para o que a casa já dizia. */
+                  /* dois termos A MAIS do que se devolve: o que eles acrescentam
+                   * é o que a resposta ainda não sabe, e é isso que decide se ela
+                   * pode sair. Um só termo não chegava — em exp(9) o próximo é
+                   * pequeno e a CAUDA inteira ainda vale três unidades num
+                   * resultado de oito mil. */
+                  Qz t1 = sr_parcial(ser, x, ordem);
+                  Qz t0 = sr_parcial(ser, x, ordem + 2);
+                  /* o último passo tem de ser MENOR que o penúltimo: é o sinal
+                   * de que a soma parcial ainda está a apertar naquele ponto */
+                  /* a diferença é a soma com o oposto — o `racionais.h` tem a
+                   * soma e o produto, e o oposto é multiplicar por −1: não se
+                   * escreve aqui uma subtracção que a casa não tem */
+                  Qz d1 = qz_soma(t1, qz_oposto(t0));
+                  /* O ÚLTIMO PASSO TEM DE SER PEQUENO FACE À SOMA, e a
+                   * comparação é entre FRACÇÕES — não entre numeradores. A
+                   * primeira escrita comparava `d1.p` com `t1.p` directamente,
+                   * que é medir dois racionais por réguas diferentes: os
+                   * denominadores não são o mesmo. Com isso passaram exp(9),
+                   * exp(20) e log(5), que a série de vinte termos não
+                   * representa — o motor devolveu lixo com cara de valor.
+                   * Compara-se em produto cruzado, em 128 bits para não
+                   * estourar, e o limiar é APERTADO (10⁻⁹ da soma): mais vale
+                   * recusar de mais do que responder um número errado — o que
+                   * sai daqui tem de estar certo até onde diz. */
+                  int cabe = (c2_estouros == antes) && (qz_perdeu == antes_qz)
+                             && (d1.q != 0) && (t1.q != 0);
+                  if(cabe && d1.p != 0){
+                      __int128 e1 = (__int128)1000000000 * (d1.p < 0 ? -(__int128)d1.p : (__int128)d1.p)
+                                                 * (t1.q < 0 ? -(__int128)t1.q : (__int128)t1.q);
+                      __int128 g1 = (t1.p < 0 ? -(__int128)t1.p : (__int128)t1.p)
+                                                 * (d1.q < 0 ? -(__int128)d1.q : (__int128)d1.q);
+                      if(e1 > g1) cabe = 0;
+                  }
+                  if(!cabe){
+                      printf("erro: a série de «%s» não aperta em x = %ld —"
+                             " a soma parcial não representa o valor. RECUSADA.\n",
+                             proj_nome[k], xv);
+                      if(sql_cap){ sql_cap->ok = 0;
+                          snprintf(sql_cap->err, sizeof sql_cap->err,
+                                   "analytic %s: series does not converge at %ld",
+                                   proj_nome[k], xv); }
+                      return 0;
+                  }
+                  v = t1; }
+                sai_nulo[k] = 0;
+                { Par cls = ra_classe((Par){ (long)v.p, (long)v.q });
+                  if(cls.b > 1) snprintf(saida[k], SQL_OUT_CELL, "%ld/%ld", cls.a, cls.b);
+                  else          snprintf(saida[k], SQL_OUT_CELL, "%ld", cls.a); } } }
+        }
+
+        for(int k = 0; k < proj_n && k < nsai; k++){
+            if(proj_ex[k] != 1) continue;
             { long den = 1, num;
               int falta = 0;
               for(long j = 0; j < ncols && j < 16 && !falta; j++)

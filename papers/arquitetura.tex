@@ -2813,6 +2813,46 @@ programa emitido --- e exige-se que ela \textbf{coincida}:
 byte a byte, e não linha a linha. As duas últimas são as duas metades da lei ---
 medir uma só era meia lei.
 
+\subsection*{As funções analíticas no núcleo}
+
+\noindent \code{exp}, \code{sin}, \code{cos} e \code{log} entram no motor, e não
+se escreve matemática nova para isso. O \code{aranha §sec:serie} deriva-as todas
+de \emph{uma}: com $J^{2}=-1$ as potências de $J$ ciclam com período quatro, a
+série da exponencial parte-se pela \textbf{paridade} do índice, e o que sai é
+\[
+\exp(tJ)=c(t)\cdot 1+s(t)\cdot J
+\]
+--- o cosseno nos pares, o seno nos ímpares, com o $(-1)^{k}$ a contar as voltas
+módulo dois; o logaritmo é a inversa, do lado da série. E isso já estava
+construído em $\mathbb{Q}$ \emph{exato} no \code{calculo2.h}.
+
+\medskip\noindent\textbf{O que se fez foi a ligação.} As séries saíram para
+\code{lib/serie.h} --- \emph{extraídas}, não copiadas: a parte de várias
+variáveis do \code{calculo2.h} depende de um \code{Mat} que choca com o de
+\code{corpos.h} (2×2 de longos contra $m\times n$ de racionais, com o mesmo
+nome), e duas cópias da mesma frase é como elas deixam de concordar. O motor
+passou a avaliá-las nas suas células, sem um único double, e o que sai é um
+\textbf{racional exato}.
+
+\medskip\noindent\textbf{A ordem é a que o inteiro permite}, e não um número
+escolhido: os coeficientes têm factoriais no denominador, e $20!$ é o último que
+cabe em $64$ bits. Devolve-se a soma até $18$ e testa-se com $20$ --- os dois
+termos a mais são o que a resposta ainda não sabe, e é isso que decide se ela
+pode sair. \textbf{Fora do alcance recusa-se}: a soma parcial deixa de
+representar o valor, e devolvê-la seria dar por resposta o próprio lixo. É a
+mesma régua do envelope da célula, um andar acima --- o que não cabe conta-se e
+recusa-se.
+
+\medido{\code{tests/pgwire.c} §W50: os pontos de partida exactos; os valores
+conferidos contra referências \emph{externas} ao ficheiro e comparados em
+INTEIROS, porque comparar decimais era trazer a vírgula que esta casa não tem; a
+recusa fora do alcance; o silêncio sobre a célula ausente; e as algébricas, que
+já lá estavam pelo tensor de grau três da §W47.}
+
+\colunas{\code{aranha §sec:serie}; \code{teoria thm:euler}}
+        {\code{lib/serie.h} extraída; avaliação em $\mathbb{Q}$; recusa por alcance}
+        {\code{tests/pgwire.c} §W50}
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as

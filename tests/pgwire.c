@@ -6710,6 +6710,137 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W50: AS FUNÇÕES ANALÍTICAS NO NÚCLEO ════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w50.mem");     unlink("/tmp/pgwire_w50.prog");
+        unlink("/tmp/pgwire_w50__t.mem");  unlink("/tmp/pgwire_w50__t.prog");
+        printf("\n§W50 exp, sin, cos, log: a série da casa, avaliada na célula.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w50")) mal++;
+        sql_executa("CREATE TABLE t (x)", &o);
+        sql_executa("INSERT INTO t VALUES (0), (1), (2), (3), (9), (20), (NULL)", &o);
+
+        /* ── (1) OS VALORES DE PARTIDA, que a série tem de dar EXACTOS: as
+         * quatro funções nos pontos onde se sabem de cor. Não é uma conta
+         * aproximada — é um racional, e ou é aquele ou não é. */
+        sql_executa("SELECT exp(x) FROM t WHERE x = 0", &o);
+        int e0 = (o.nrows == 1 && !strcmp(o.cell[0][0], "1"));
+        sql_executa("SELECT sin(x) FROM t WHERE x = 0", &o);
+        int s0 = (o.nrows == 1 && !strcmp(o.cell[0][0], "0"));
+        sql_executa("SELECT cos(x) FROM t WHERE x = 0", &o);
+        int c0 = (o.nrows == 1 && !strcmp(o.cell[0][0], "1"));
+        sql_executa("SELECT log(x) FROM t WHERE x = 1", &o);
+        int l1 = (o.nrows == 1 && !strcmp(o.cell[0][0], "0"));
+        printf("      os pontos de partida: exp(0)=1 %d · sin(0)=0 %d ·"
+               " cos(0)=1 %d · log(1)=0 %d\n", e0, s0, c0, l1);
+        if(!e0 || !s0 || !c0 || !l1) mal++;
+
+        /* ── (2) E OS VALORES SÃO RACIONAIS EXACTOS, conferidos contra o que se
+         * sabe fora deste ficheiro. A comparação faz-se em INTEIROS — p·10¹⁰
+         * contra q·⌊v·10¹⁰⌋ — porque comparar decimais era trazer a vírgula que
+         * esta casa não tem. */
+        { struct { const char *q; const char *nome; long v10; } casos[] = {
+              { "SELECT exp(x) FROM t WHERE x = 1", "exp(1)", 27182818284L },
+              { "SELECT exp(x) FROM t WHERE x = 2", "exp(2)", 73890560989L },
+              { "SELECT sin(x) FROM t WHERE x = 1", "sin(1)",  8414709848L },
+              { "SELECT cos(x) FROM t WHERE x = 1", "cos(1)",  5403023058L } };
+          int bons = 0;
+          for(int t = 0; t < 4; t++){
+              sql_executa(casos[t].q, &o);
+              if(o.nrows != 1) continue;
+              { const char *barra = strchr(o.cell[0][0], '/');
+                long long p = atoll(o.cell[0][0]), qd = barra ? atoll(barra+1) : 1;
+                /* |p/q − v| ≤ 10⁻⁹ ⟺ |p·10¹⁰ − v10·q| ≤ 10·q */
+                __int128 esq = (__int128)p * 10000000000LL
+                             - (__int128)casos[t].v10 * qd;
+                if(esq < 0) esq = -esq;
+                if(esq <= (__int128)10 * qd) bons++;
+                printf("      %s = %s  (bate com %ld·10⁻¹⁰: %s)\n",
+                       casos[t].nome, o.cell[0][0], casos[t].v10,
+                       (esq <= (__int128)10 * qd) ? "sim" : "NAO"); }
+          }
+          if(bons != 4) mal++; }
+
+        /* ── (3) E O QUE A SÉRIE NÃO REPRESENTA É RECUSADO. A ordem é a que o
+         * inteiro permite — 20! é o último factorial que cabe em 64 bits —, e
+         * fora do alcance dela a soma parcial não diz o valor. Recusa-se em vez
+         * de devolver: `exp(20)` chegou a sair como 5·10⁷ quando e²⁰ é 4,8·10⁸,
+         * e isso é responder outra coisa. */
+        int r9 = sql_executa("SELECT exp(x) FROM t WHERE x = 9", &o);
+        int r20 = sql_executa("SELECT exp(x) FROM t WHERE x = 20", &o);
+        int rl = sql_executa("SELECT log(x) FROM t WHERE x = 2", &o);
+        printf("      fora do alcance: exp(9) %s · exp(20) %s · log(2) %s  %s\n",
+               r9 ? "PASSOU (mau)" : "recusado", r20 ? "PASSOU (mau)" : "recusado",
+               rl ? "PASSOU (mau)" : "recusado",
+               (!r9 && !r20 && !rl) ? "" : "NAO BATE");
+        if(r9 || r20 || rl) mal++;
+
+        /* ── (4) A ANALÍTICA NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ, pela mesma
+         * regra das expressões e do CHECK: sem valor não há onde avaliar. */
+        sql_executa("SELECT exp(x) FROM t WHERE x IS NULL", &o);
+        int dual = (o.nrows == 1 && o.nulo[0][0]);
+        printf("      sobre a célula ausente: ausente (%d)  %s\n", dual,
+               dual ? "" : "NAO BATE");
+        if(!dual) mal++;
+
+        /* ── (5) E AS ALGÉBRICAS JÁ LÁ ESTAVAM: o tensor da §W47 tem grau três,
+         * pelo que os polinómios saem sem uma linha a mais — é a mesma
+         * expressão que decide no WHERE e escreve no SELECT. */
+        sql_executa("SELECT x*x FROM t WHERE x = 3", &o);
+        int p2 = (o.nrows == 1 && !strcmp(o.cell[0][0], "9"));
+        sql_executa("SELECT x*x*x FROM t WHERE x = 3", &o);
+        int p3 = (o.nrows == 1 && !strcmp(o.cell[0][0], "27"));
+        sql_executa("SELECT x*x+2*x+1 FROM t WHERE x = 3", &o);
+        int pp = (o.nrows == 1 && !strcmp(o.cell[0][0], "16"));
+        printf("      as algébricas pelo tensor: x² = %s · x³ = %s ·"
+               " x²+2x+1 = %s (esp 9, 27, 16)  %s\n",
+               p2 ? "9" : "?", p3 ? "27" : "?", pp ? "16" : "?",
+               (p2 && p3 && pp) ? "" : "NAO BATE");
+        if(!p2 || !p3 || !pp) mal++;
+
+        /* ── O CONTROLO, e são dois. A forma IMPURA é recusada: `exp(x)+1` tem
+         * o parêntese a fechar a meio, e aceitá-la era ler `exp(x)` e deitar
+         * fora o resto — responder certo sobre outra coisa, que foi exactamente
+         * o que a primeira escrita fazia. E a coluna que não existe também. */
+        int i1 = sql_executa("SELECT exp(x)+1 FROM t WHERE x = 1", &o);
+        int i2 = sql_executa("SELECT exp(z) FROM t", &o);
+        printf("\n      CONTROLO — `exp(x)+1` %s · `exp(z)` %s  %s\n",
+               i1 ? "PASSOU (mau)" : "recusado", i2 ? "PASSOU (mau)" : "recusado",
+               (!i1 && !i2) ? "" : "NAO BATE");
+        if(i1 || i2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("AS FUNÇÕES ANALÍTICAS ENTRAM NO NÚCLEO, E NÃO SE ESCREVE MATEMÁTICA NOVA PARA"
+           " ISSO. O `aranha §sec:serie` deriva-as todas de uma: com J² = −1 as potências de"
+           " J ciclam com período quatro, a série da exponencial parte-se pela PARIDADE do"
+           " índice, e o que sai é exp(tJ) = c(t)·1 + s(t)·J — o cosseno nos pares, o seno"
+           " nos ímpares, com o (−1)^k a contar as voltas módulo dois; o logaritmo é a"
+           " inversa, do lado da série. E isso já estava construído em ℚ EXACTO no"
+           " `calculo2.h`. O que se fez aqui foi a LIGAÇÃO: as séries saíram para `serie.h` —"
+           " extraídas, não copiadas, porque a parte de várias variáveis do `calculo2.h`"
+           " depende de um `Mat` que choca com o de `corpos.h`, e duas cópias da mesma frase"
+           " é como elas deixam de concordar — e o motor passou a poder avaliá-las nas suas"
+           " células, sem um único double. O que sai é um RACIONAL EXACTO, conferido contra"
+           " valores que vêm de fora deste ficheiro e comparado em INTEIROS, porque comparar"
+           " decimais era trazer a vírgula que esta casa não tem. A ORDEM É A QUE O INTEIRO"
+           " PERMITE e não um número escolhido: os coeficientes têm factoriais no"
+           " denominador, e 20! é o último que cabe em 64 bits — devolve-se a soma até 18 e"
+           " testa-se com 20, sendo os dois termos a mais o que a resposta ainda não sabe. E"
+           " FORA DO ALCANCE RECUSA-SE: `exp(20)` chegou a sair como 5·10⁷ quando e²⁰ é"
+           " 4,8·10⁸, e três defeitos meus tiveram de cair antes disto parar de mentir —"
+           " comparar numeradores de fracções com denominadores diferentes, ler o contador de"
+           " estouros DEPOIS da construção da série, e não ler de todo o `qz_perdeu` que a"
+           " casa já mantinha para a avaliação. Não era o guarda que faltava: era eu a não"
+           " olhar para o que já estava dito. AS ALGÉBRICAS JÁ LÁ ESTAVAM — o tensor da §W47"
+           " tem grau três, pelo que os polinómios saem sem uma linha a mais. O CONTROLO tem"
+           " duas metades: a forma IMPURA é recusada, porque `exp(x)+1` fecha o parêntese a"
+           " meio e aceitá-la seria ler `exp(x)` e deitar fora o resto; e a coluna que não"
+           " existe também.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

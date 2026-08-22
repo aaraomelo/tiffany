@@ -44,7 +44,7 @@ bit_metropolis cf253e5784f3dd06 0
 borda_sem_teto d44177745d1d4f8d 0
 buracos d80eae4b72a7e693 0
 cadeia 23aae5b832cd1d3b 0
-calculo2 2d1b2825a5f242a2 0
+calculo2 5ae7bc60ae4d3256 0
 caminho b30bb4976e4ee877 0
 canal a3948d75be9f5dc1 0
 cantor a61f8c800549ce95 0
@@ -85,12 +85,12 @@ constantes e84f7e2fc17f94fb 0
 constroi c85b8230866a958f 0
 conta c5bef5b671d30055 0
 contagem_cifra 348a621823e00ed7 0
-continua e236ee97cc64202a 0
+continua 2c19637a0dd36d18 0
 continuo c67c826d23cf83bb 0
 contorno_riemann f675c33725a349a3 0
 contrato 2fb51b9eb064e925 0
 controlo_front e94ce67fbef877c1 0
-conversa 842c1b8b2257ba7f 0
+conversa d8735a0443a685ad 0
 converte aed943df396fe8b2 0
 convolucao_universal fc0e5813ad42301b 0
 coroa b7ee5ecba9494c3f 0
@@ -368,7 +368,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire fbb16c5ea2060b72 0
+pgwire 3d173d57bcfcdc46 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -458,7 +458,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql ce9ecdea0a26b8f2 0
+sql d3924baf916ba944 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
