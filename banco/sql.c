@@ -5614,6 +5614,13 @@ static int varre(const char *resto, int acao){
         for(int j = 0; j < J_MAXCOL; j++) nome_esq[j][0] = 0;
         for(long i = 0; i < nr_esq && ne < J_MAXLIN; i++){
             if(!bit_le(S_MATCH, i)) continue;
+            /* ── E A CHAVE AUSENTE NÃO JUNTA ────────────────────────────
+             * Juntar é perguntar «onde é que este valor está do outro lado», e
+             * a célula ausente não tem valor para levar: lê-la dava o neutro, e
+             * a linha sem chave casava com todos os zeros da direita. É a mesma
+             * frase do `IN`, e o JOIN é a mesma travessia — a árvore indexa o
+             * corpo, o dual vive no bitmap. */
+            if(!bit_le(S_PRES, i*nc_esq + oce)) continue;
             for(long j = 0; j < nc_esq && j < J_MAXCOL; j++){
                 long v = celula_valor(i, j, nc_esq);
                 Word par = { (Word8)(v & 255), (Word8)((v >> 8) & 255) };
@@ -5885,9 +5892,20 @@ static int varre(const char *resto, int acao){
     if(acao == ACAO_MARCA && ord_col[0]){
         int oc = col_indice(ord_col);
         int postos = 0;
+        /* ── E O QUE NÃO TEM VALOR NÃO TEM LUGAR NA ORDEM ────────────────
+         * Ordenar é comparar, e a célula ausente não tem com que comparar:
+         * lê-la dava o neutro e punha-a entre os zeros escritos, no meio da
+         * ordem, como se fosse o menor dos valores. Vai para o FIM, em bloco —
+         * é a convenção que o SQL chama NULLS LAST, e aqui é a única que não
+         * mente: o dual não é pequeno, é de outro nível. */
+        long aus[SQL_OUT_MAX_ROWS]; int na = 0;
         ord_limpa();
         for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
             if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols + oc)){
+                if(na < SQL_OUT_MAX_ROWS) aus[na++] = i;
+                continue;
+            }
             { long v = celula_valor(i, oc, ncols);     /* o PAR, não o byte baixo */
               if(!ord_insere(v, (int)i)){
                   printf("erro: a árvore de ordenação não coube — RECUSADA.\n");
@@ -5902,6 +5920,7 @@ static int varre(const char *resto, int acao){
         { int n = 0, tmp[SQL_OUT_MAX_ROWS];
           ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
           for(int k = 0; k < n; k++) ord_seq[k] = tmp[k];
+          for(int k = 0; k < na && n < SQL_OUT_MAX_ROWS; k++) ord_seq[n++] = (int)aus[k];
           ord_n = n; ord_usa = 1; }
     }
 
@@ -5916,6 +5935,54 @@ static int varre(const char *resto, int acao){
      *
      * E a conservação vale, e é o Lema da conservação: ∑ G(x) = |I| — a soma
      * dos grupos é o número de linhas que casaram. */
+    /* ── AGREGAR SEM QUOCIENTAR É QUOCIENTAR PELO MAPA CONSTANTE ────────────
+     * `SELECT sum(v) FROM t` não tem GROUP BY, e por isso não tinha fibra
+     * nenhuma: a coluna saía CRUA, uma linha por linha, com o nome de uma
+     * função que ninguém aplicou. Mas agregar sem quocientar não é um caso
+     * especial — é o quociente pelo mapa CONSTANTE, cuja única fibra é a
+     * tabela inteira. Uma fibra, uma linha.
+     *
+     * E O AGREGADO NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ: soma-se o corpo, não
+     * o suporte. Daí sai o par que separa as duas contagens — a soma de NADA é
+     * AUSENTE, não zero, porque zero é um valor e aqui não houve nenhum; o
+     * count de nada é zero, porque contar o vazio é zero e não uma ausência.
+     * As duas respostas são de níveis diferentes, e é isso que elas dizem. */
+    if(acao == ACAO_MARCA && agr_op && !grp_col[0]){
+        int ac = col_indice(agr_col);
+        if(ac < 0){
+            printf("erro: a coluna «%s» não existe — a agregação é RECUSADA.\n", agr_col);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" does not exist", agr_col); }
+            return 0;
+        }
+        { long ag = 0, quantas = 0; int viu = 0;
+          for(long i = 0; i < nrows; i++){
+              if(!bit_le(S_MATCH, i)) continue;
+              if(!bit_le(S_PRES, i*ncols + ac)) continue;   /* o corpo, não o suporte */
+              { long w = celula_valor(i, ac, ncols);
+                if(!viu){ ag = w; viu = 1; }
+                else if(agr_op == 1) ag += w;
+                else if(agr_op == 2){ if(w > ag) ag = w; }
+                else if(agr_op == 3){ if(w < ag) ag = w; }
+                quantas++; }
+          }
+          if(viu) printf("   %ld\n", ag);
+          else    printf("   (ausente — nenhum valor para agregar)\n");
+          printf("-- %ld linha(s) agregada(s) em 1\n", quantas);
+          if(sql_cap){
+              memset(sql_cap->col, 0, sizeof sql_cap->col);
+              sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
+              snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s",
+                       agr_op == 1 ? "sum" : agr_op == 2 ? "max" : "min");
+              sql_cap->tipo[0] = SQL_TIPO_INT4;
+              if(viu) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ag);
+              else { sql_cap->cell[0][0][0] = 0; sql_cap->nulo[0][0] = 1; }
+              snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+          }
+          return 1; }
+    }
+
     if(acao == ACAO_MARCA && grp_col[0]){
         int gc = col_indice(grp_col);
         if(agr_op && col_indice(agr_col) < 0){
@@ -5927,9 +5994,20 @@ static int varre(const char *resto, int acao){
         }
         int postos = 0;
         long seq[SQL_OUT_MAX_ROWS]; int n = 0;
+        /* ── O DUAL É UM GRUPO, E NÃO O GRUPO DO ZERO ────────────────────
+         * Quocientar é juntar o que tem a mesma chave, e a célula ausente não
+         * tem chave nenhuma: metê-la na árvore era dar-lhe o neutro e juntá-la
+         * às linhas que têm um zero ESCRITO — duas coisas de níveis diferentes
+         * no mesmo grupo. Ficam de fora da árvore e formam a sua própria fibra,
+         * no fim, que é onde o SQL as põe e onde a ordem as deixa. */
+        long aus[SQL_OUT_MAX_ROWS]; int na = 0;
         ord_limpa();
         for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
             if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols + gc)){
+                if(na < SQL_OUT_MAX_ROWS) aus[na++] = i;
+                continue;
+            }
             if(!ord_insere(celula_valor(i, gc, ncols), (int)i)){
                 printf("erro: a árvore do GROUP BY não coube — RECUSADA.\n");
                 if(sql_cap){ sql_cap->ok = 0;
@@ -5942,7 +6020,8 @@ static int varre(const char *resto, int acao){
         }
         { int tmp[SQL_OUT_MAX_ROWS];
           ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
-          for(int k = 0; k < n; k++) seq[k] = tmp[k]; }
+          for(int k = 0; k < n; k++) seq[k] = tmp[k];
+          for(int k = 0; k < na && n < SQL_OUT_MAX_ROWS; k++) seq[n++] = aus[k]; }
         if(sql_cap){
             memset(sql_cap->col, 0, sizeof sql_cap->col);
             sql_cap->ncols = 2; sql_cap->nrows = 0;
@@ -5958,10 +6037,14 @@ static int varre(const char *resto, int acao){
         }
         { long grupos = 0, soma = 0, k = 0;
           while(k < n){
-              long v = celula_valor(seq[k], gc, ncols), g = 0;
+              int tem = bit_le(S_PRES, seq[k]*ncols + gc);
+              long v = tem ? celula_valor(seq[k], gc, ncols) : 0, g = 0;
               long ag = 0; int ag_viu = 0;
               int ac = agr_op ? col_indice(agr_col) : -1;
-              while(k < n && celula_valor(seq[k], gc, ncols) == v){
+              /* a fibra do dual junta-se por NÃO TER chave, não por ter a
+               * mesma; as duas condições estão na mesma linha e são disjuntas */
+              while(k < n && bit_le(S_PRES, seq[k]*ncols + gc) == tem
+                          && (!tem || celula_valor(seq[k], gc, ncols) == v)){
                   if(ac >= 0){                       /* lê a fibra de passagem */
                       long w = celula_valor(seq[k], ac, ncols);
                       if(!ag_viu){ ag = w; ag_viu = 1; }
@@ -5977,10 +6060,16 @@ static int varre(const char *resto, int acao){
               if(hav_op == 2 && !(g <  hav_n)) continue;
               if(hav_op == 3 && !(g == hav_n)) continue;
               if(lim_n >= 0 && grupos >= lim_n) break;      /* o prefixo */
-              if(ac >= 0) printf("   %ld | %ld | %ld\n", v, g, ag);
-              else        printf("   %ld | %ld\n", v, g);
+              if(ac >= 0) printf("   %s%ld | %ld | %ld\n", tem ? "" : "(ausente) ",
+                                 tem ? v : 0, g, ag);
+              else        printf("   %s%ld | %ld\n", tem ? "" : "(ausente) ",
+                                 tem ? v : 0, g);
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
-                  snprintf(sql_cap->cell[sql_cap->nrows][0], SQL_OUT_CELL, "%ld", v);
+                  /* e a chave do grupo do dual sai AUSENTE, não a zero: o
+                   * cliente tem de ver a mesma distinção que o motor faz */
+                  if(tem) snprintf(sql_cap->cell[sql_cap->nrows][0], SQL_OUT_CELL, "%ld", v);
+                  else { sql_cap->cell[sql_cap->nrows][0][0] = 0;
+                         sql_cap->nulo[sql_cap->nrows][0] = 1; }
                   snprintf(sql_cap->cell[sql_cap->nrows][1], SQL_OUT_CELL, "%ld", g);
                   if(ac >= 0)
                       snprintf(sql_cap->cell[sql_cap->nrows][2], SQL_OUT_CELL, "%ld", ag);
@@ -6018,9 +6107,20 @@ static int varre(const char *resto, int acao){
         }
         int dc = proj[0];
         int seq[SQL_OUT_MAX_ROWS], n = 0, postos = 0;
+        /* ── E A AUSÊNCIA É UM VALOR DISTINTO, UM SÓ ─────────────────────
+         * O DISTINCT fica com a folha 1 de cada fibra, e o dual é uma fibra:
+         * das linhas sem valor sobra UMA, e ela não se junta às que têm um
+         * zero escrito. Fora da árvore, com o primeiro a ficar — que é o mesmo
+         * representante canónico, lido pela mesma regra. */
+        int viu_aus = 0;
         ord_limpa();
         for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
             if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols + dc)){
+                if(viu_aus) bit_poe(S_MATCH, i, 0);    /* k>1 da fibra do dual */
+                viu_aus = 1;
+                continue;
+            }
             if(!ord_insere(celula_valor(i, dc, ncols), (int)i)){
                 printf("erro: a árvore do DISTINCT não coube — RECUSADA.\n");
                 if(sql_cap){ sql_cap->ok = 0;

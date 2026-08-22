@@ -5414,6 +5414,140 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W39: A MESMA REGRA EM TODOS OS CAMINHOS ══════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w39.mem", "/tmp/pgwire_w39.prog",
+            "/tmp/pgwire_w39__a.mem", "/tmp/pgwire_w39__a.prog",
+            "/tmp/pgwire_w39__b.mem", "/tmp/pgwire_w39__b.prog" };
+        for(int k = 0; k < 6; k++) unlink(lixo[k]);
+        printf("\n§W39 a árvore indexa o corpo: os cinco caminhos que a liam mal.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w39")) mal++;
+        sql_executa("CREATE TABLE a (g, v)", &o);
+        sql_executa("INSERT INTO a VALUES (0,10)", &o);     /* zero ESCRITO */
+        sql_executa("INSERT INTO a VALUES (0,20)", &o);     /* zero ESCRITO */
+        sql_executa("INSERT INTO a VALUES (NULL,30)", &o);  /* ausente      */
+        sql_executa("INSERT INTO a VALUES (5,40)", &o);
+
+        /* O ARRANJO é o gume, e é um só para os cinco: DOIS zeros escritos e
+         * UMA ausência na mesma coluna. Um motor que leia a célula ausente como
+         * o neutro junta os três num sítio, e cada caminho mostra-o à sua
+         * maneira — o grupo com 3, o distinto a menos, a ordem no meio, a
+         * junção a mais, a soma a incluir o que não está. */
+
+        /* ── (1) QUOCIENTAR: o dual é UMA fibra, e não a fibra do zero. */
+        sql_executa("SELECT g, count(*) FROM a GROUP BY g", &o);
+        long ng = o.nrows;
+        long g0 = (o.nrows > 0) ? atol(o.cell[0][1]) : -1;
+        int dual_grupo = (o.nrows == 3) && o.nulo[2][0];
+        int grupo = (ng == 3 && g0 == 2 && dual_grupo);
+        printf("      GROUP BY: %ld grupos (esp 3) · o do zero tem %ld (esp 2) ·"
+               " e o terceiro é o DUAL, com a chave ausente %d  %s\n",
+               ng, g0, dual_grupo, grupo ? "" : "NAO BATE");
+        if(!grupo) mal++;
+
+        /* ── (2) O REPRESENTANTE: das linhas sem valor sobra UMA, e ela não se
+         * junta às que têm um zero escrito. */
+        sql_executa("SELECT DISTINCT g FROM a", &o);
+        int dist = (o.nrows == 3);
+        printf("      DISTINCT: %d valores (esp 3 — o 0, o 5 e o dual)  %s\n",
+               o.nrows, dist ? "" : "NAO BATE");
+        if(!dist) mal++;
+
+        /* ── (3) A ORDEM: o dual não é pequeno, é de outro nível — vai para o
+         * FIM. Lido como neutro ficava entre os zeros, no MEIO da ordem. */
+        sql_executa("SELECT v FROM a ORDER BY g", &o);
+        int ordem = (o.nrows == 4 && !strcmp(o.cell[3][0], "30"));
+        printf("      ORDER BY: o sem-chave fica em último (%s, esp 30)  %s\n",
+               o.nrows == 4 ? o.cell[3][0] : "?", ordem ? "" : "NAO BATE");
+        if(!ordem) mal++;
+
+        /* ── (4) JUNTAR é perguntar onde o valor está do outro lado, e quem
+         * não tem valor não pergunta. */
+        sql_executa("CREATE TABLE b (k, w)", &o);
+        sql_executa("INSERT INTO b VALUES (0,777)", &o);
+        sql_executa("SELECT v FROM a JOIN b ON a.g = b.k", &o);
+        int junta = (o.nrows == 2);
+        printf("      JOIN: %d linhas (esp 2 — só os zeros ESCRITOS)  %s\n",
+               o.nrows, junta ? "" : "NAO BATE");
+        if(!junta) mal++;
+
+        /* ── (5) AGREGAR SEM QUOCIENTAR é quocientar pelo mapa CONSTANTE: uma
+         * fibra, uma linha. Saía a coluna crua, uma linha por linha, com o nome
+         * de uma função que ninguém aplicou. E soma-se o CORPO: 0+0+5 = 5, sem
+         * o que não está. */
+        sql_executa("SELECT sum(g) FROM a", &o);
+        int soma = (o.nrows == 1 && !strcmp(o.cell[0][0], "5"));
+        char vsoma[8]; snprintf(vsoma, sizeof vsoma, "%s", o.nrows ? o.cell[0][0] : "?");
+        long nsoma = o.nrows;
+        sql_executa("SELECT max(g) FROM a", &o);
+        int maxi = (o.nrows == 1 && !strcmp(o.cell[0][0], "5"));
+        printf("      sum(g) = %s em %ld linha (esp 5 em 1) · max(g) = %s (esp 5)"
+               "  %s\n", vsoma, nsoma, o.nrows ? o.cell[0][0] : "?",
+               (soma && maxi) ? "" : "NAO BATE");
+        if(!soma || !maxi) mal++;
+
+        /* ── (6) E O PAR QUE SEPARA OS NÍVEIS: a soma de NADA é AUSENTE, não
+         * zero — zero é um valor e aqui não houve nenhum; a contagem de nada é
+         * ZERO, porque contar o vazio é zero e não uma ausência. Duas
+         * perguntas sobre o mesmo conjunto vazio, duas respostas de níveis
+         * diferentes: é a distinção inteira num sítio só. */
+        sql_executa("SELECT sum(g) FROM a WHERE v > 999", &o);
+        int s_vazio = (o.nrows == 1 && o.nulo[0][0] && !o.cell[0][0][0]);
+        sql_executa("SELECT count(*) FROM a WHERE v > 999", &o);
+        int c_vazio = (o.nrows == 1 && !strcmp(o.cell[0][0], "0"));
+        printf("      sobre o MESMO vazio: sum devolve ausente (%s) e count"
+               " devolve o valor «%s» — níveis diferentes  %s\n",
+               s_vazio ? "sim" : "NAO", o.nrows ? o.cell[0][0] : "?",
+               (s_vazio && c_vazio) ? "" : "NAO BATE");
+        if(!s_vazio || !c_vazio) mal++;
+
+        /* ── O CONTROLO: a MESMA tabela sem a linha ausente. Todos os cinco
+         * caminhos dão então o número «errado» de cima — 2 grupos, 2
+         * distintos, a ordem completa, e o mesmo JOIN —, o que mostra que o
+         * que muda as respostas é o DUAL e não o tamanho da tabela. */
+        sql_executa("DELETE FROM a WHERE v = 30", &o);
+        sql_executa("SELECT g, count(*) FROM a GROUP BY g", &o); long c1 = o.nrows;
+        sql_executa("SELECT DISTINCT g FROM a", &o);             long c2 = o.nrows;
+        sql_executa("SELECT sum(g) FROM a", &o);
+        int c3 = (o.nrows == 1 && !strcmp(o.cell[0][0], "5"));
+        printf("\n      CONTROLO — tirada a linha sem valor: %ld grupos (esp 2) ·"
+               " %ld distintos (esp 2) · sum ainda 5 %d  %s\n", c1, c2, c3,
+               (c1 == 2 && c2 == 2 && c3) ? "" : "NAO BATE");
+        if(c1 != 2 || c2 != 2 || !c3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A ÁRVORE INDEXA O CORPO, E O DUAL VIVE NO BITMAP — EM TODOS OS CAMINHOS. A regra"
+           " apareceu primeiro no índice, depois no UNIQUE, depois nos dois lados do IN; à"
+           " quarta vez procurou-se onde mais é que o motor lê uma célula sem perguntar se"
+           " ela existe, e havia CINCO caminhos por fechar. Todos falhavam da mesma maneira:"
+           " a célula ausente lida como o neutro passa a ser um zero, e junta-se às linhas"
+           " que têm um zero ESCRITO. QUOCIENTAR: o dual é uma fibra própria, não a fibra do"
+           " zero — as linhas sem chave não são «as linhas com a chave 0», e o grupo delas"
+           " sai com a chave AUSENTE, que é o que o cliente tem de ver. O REPRESENTANTE: das"
+           " linhas sem valor sobra uma, pela mesma regra da folha 1, e ela não se junta às"
+           " do zero. A ORDEM: o dual não é pequeno, é de outro nível — vai para o FIM em"
+           " bloco, e lido como neutro ficava no MEIO da ordem, entre os zeros, a fingir que"
+           " era o menor dos valores. JUNTAR: é perguntar onde este valor está do outro"
+           " lado, e quem não tem valor não pergunta — a mesma frase do IN, porque é a mesma"
+           " travessia. E AGREGAR SEM QUOCIENTAR não era um caso especial que faltasse: é o"
+           " quociente pelo mapa CONSTANTE, cuja única fibra é a tabela inteira — uma fibra,"
+           " uma linha —, e sem isso a coluna saía CRUA, uma linha por linha, com o nome de"
+           " uma função que ninguém aplicou. O agregado soma o CORPO e não o suporte, e daí"
+           " sai o par que separa os dois níveis num sítio só: a soma de NADA é AUSENTE"
+           " (zero é um valor, e aqui não houve nenhum) e a contagem de nada é ZERO (contar"
+           " o vazio é zero, não uma ausência) — duas perguntas sobre o mesmo conjunto"
+           " vazio, duas respostas que não são a mesma coisa. O ARRANJO é o gume e é um só"
+           " para os cinco: dois zeros escritos e uma ausência na mesma coluna, com o"
+           " CONTROLO a ser a mesma tabela sem a linha ausente — aí todos voltam aos números"
+           " de antes, o que mostra que o que muda as respostas é o DUAL e não o tamanho da"
+           " tabela.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

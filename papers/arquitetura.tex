@@ -2615,6 +2615,50 @@ de o motor perder linhas.}
         {\code{IN}/\code{NOT IN} pela mesma descida; a chave que o dual não dá}
         {\code{tests/pgwire.c} §W38}
 
+\subsection*{A árvore indexa o corpo --- em todos os caminhos}
+
+\noindent A regra apareceu no índice, depois no \code{UNIQUE}, depois nos dois
+lados do \code{IN}. À quarta vez a pergunta deixou de ser \emph{como corrigir
+este} e passou a ser \emph{onde mais é que o motor lê uma célula sem perguntar
+se ela existe} --- e havia \textbf{cinco} caminhos por fechar. Todos falhavam
+da mesma maneira: a célula ausente lida como o neutro passa a ser um zero, e
+junta-se às linhas que têm um zero \emph{escrito}.
+
+\medskip
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+caminho & o que fazia & o que faz \\
+\midrule
+\code{GROUP BY} & juntava ao grupo do $0$ & fibra própria, chave ausente \\
+\code{DISTINCT} & absorvia no $0$          & uma folha para o dual \\
+\code{ORDER BY} & punha no meio, como menor & no fim, em bloco \\
+\code{JOIN}     & casava com todos os zeros & sem chave não junta \\
+\code{sum/max/min} & devolvia a coluna crua & uma fibra, uma linha \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Agregar sem quocientar não era um caso especial que
+faltasse:} é o quociente pelo \textbf{mapa constante}, cuja única fibra é a
+tabela inteira --- uma fibra, uma linha. Sem isso a coluna saía crua, uma linha
+por linha, com o nome de uma função que ninguém aplicou.
+
+\medskip\noindent\textbf{E daí sai o par que separa os dois níveis num sítio
+só:} sobre o \emph{mesmo} conjunto vazio, a soma responde \textbf{ausente} ---
+zero é um valor, e aqui não houve nenhum --- e a contagem responde
+\textbf{zero} --- contar o vazio é zero, não uma ausência. Duas perguntas, duas
+respostas que não são a mesma coisa.
+
+\medido{\code{tests/pgwire.c} §W39, com um arranjo só para os cinco --- dois
+zeros escritos e uma ausência na mesma coluna --- e o controlo a ser a mesma
+tabela sem a linha ausente: aí todos voltam aos números de antes, o que mostra
+que o que muda as respostas é o dual e não o tamanho da tabela.}
+
+\colunas{\code{aranha thm:bitunico}; \code{aranha thm:escada}}
+        {quociente, representante, ordem, junção, agregado}
+        {\code{tests/pgwire.c} §W39}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}
