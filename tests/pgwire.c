@@ -729,8 +729,8 @@ int main(void){
                 msg[2] = 'R';
                 if(write(sv[1], msg, 3) != 3){ close(lfd); sql_fechar(); _exit(5); }
             }
-            /* três ligações: a boa, a das duas tabelas e a do gume */
-            for(n = 0; n < 3; n++){
+            /* quatro ligações: a boa, a das duas tabelas, a do dual e a do gume */
+            for(n = 0; n < 4; n++){
                 cfd = accept(lfd, NULL, NULL);
                 if(cfd < 0) break;
                 pgwire_serve_conn(cfd, 77, 88);
@@ -828,7 +828,49 @@ int main(void){
                 if(!seq_ok) mal++;
             }
 
-            /* (4) O GUME: o erro tem de CHEGAR como erro, e não como zero linhas */
+            /* (4) A AUSÊNCIA ATRAVESSA A FACHADA. O banco distingue a célula
+             * ausente da célula vazia, e a fachada tem de a devolver com a
+             * mesma distinção: `PQgetisnull` responde pela máscara que o
+             * comprimento −1 acendeu, não pelo strlen do texto. É o mesmo par
+             * dos dois caminhos, agora sobre o DUAL: o que o motor sabe tem de
+             * chegar ao cliente sem perder o nível. */
+            {
+                PGconn *c4 = PQconnectdb(conninfo);
+                int dual_ok = 0;
+                if(PQstatus(c4) == CONNECTION_OK){
+                    PGresult *r;
+                    r = PQexec(c4, "INSERT INTO t VALUES (5,NULL,50)");
+                    PQclear(r);
+                    r = PQexec(c4, "SELECT * FROM t WHERE a = 5");
+                    if(PQresultStatus(r) == PGRES_TUPLES_OK && PQntuples(r) == 1){
+                        int n0 = PQgetisnull(r, 0, 0);
+                        int n1 = PQgetisnull(r, 0, 1);
+                        int n2 = PQgetisnull(r, 0, 2);
+                        dual_ok = (!n0 && n1 && !n2
+                                   && !strcmp(PQgetvalue(r, 0, 0), "5")
+                                   && !strcmp(PQgetvalue(r, 0, 2), "50"));
+                        printf("      o dual pela fachada: isnull(a)=%d isnull(b)=%d"
+                               " isnull(c)=%d · valores (%s,·,%s)\n", n0, n1, n2,
+                               PQgetvalue(r, 0, 0), PQgetvalue(r, 0, 2));
+                    }
+                    PQclear(r);
+                    /* e a volta: `SET b = NULL` apaga a célula pela fachada */
+                    r = PQexec(c4, "UPDATE t SET c = NULL WHERE a = 5");
+                    PQclear(r);
+                    r = PQexec(c4, "SELECT * FROM t WHERE a = 5");
+                    if(PQresultStatus(r) == PGRES_TUPLES_OK && PQntuples(r) == 1){
+                        int n2 = PQgetisnull(r, 0, 2);
+                        printf("      e a volta pela fachada: isnull(c) %d -> %d\n",
+                               0, n2);
+                        if(!n2) dual_ok = 0;
+                    } else dual_ok = 0;
+                    PQclear(r);
+                    PQfinish(c4);
+                }
+                if(!dual_ok) mal++;
+            }
+
+            /* (5) O GUME: o erro tem de CHEGAR como erro, e não como zero linhas */
             {
                 PGconn *c2 = PQconnectdb(conninfo);
                 int erro_ok = 0;
@@ -867,7 +909,13 @@ int main(void){
            " lê-a, e a seguir faz UPDATE na `t` com uma coluna da `t`: foi essa sequência"
            " que mostrou que a coluna era resolvida ANTES de a tabela ser aberta, e"
            " nenhuma asserção o via porque nos testes a tabela do UPDATE era sempre a"
-           " que já estava aberta",
+           " que já estava aberta. E O DUAL ATRAVESSA A FACHADA INTEIRA: um INSERT com"
+           " NULL entra pelo socket, o `PQgetisnull` responde 1 na célula ausente e 0"
+           " nas presentes — pela máscara que o comprimento −1 acendeu, e não pelo"
+           " strlen, que juntava a cadeia vazia com a ausência num nível só —, e o"
+           " `SET c = NULL` faz a volta pela mesma ligação. É o par dos dois caminhos"
+           " aplicado ao que NÃO está lá: o que o motor distingue tem de chegar ao"
+           " cliente sem perder o nível",
            mal == 0 && nrows_ref == 2 && ncols_ref == 3);
     }
 
@@ -4305,12 +4353,29 @@ int main(void){
         for(int i = 0; i < n_antes && i < 8; i++){
             if(strcmp(o.cell[i][0], antes[i][0])) intacto = 0;
             if(strcmp(o.cell[i][1], antes[i][1])) intacto = 0;
-            if(strcmp(o.cell[i][2], "0")) intacto = 0;      /* a nova, a zero */
+            if(o.cell[i][2][0]) intacto = 0;               /* a nova, AUSENTE */
         }
         printf("      %d colunas -> %d, %d linhas · os valores velhos intactos e a"
-               " nova a zero: %s\n", c_antes, o.ncols, o.nrows,
+               " nova ausente: %s\n", c_antes, o.ncols, o.nrows,
                intacto ? "sim" : "NAO");
         if(!subiu || !intacto) mal++;
+
+        /* E a ausência é OPERACIONAL, não um espaço em branco na impressão: a
+         * coluna que ninguém escreveu é apanhada pelo dual em peso, e o zero
+         * — que é um valor escrito — não a apanha. Um levantamento que
+         * enchesse a coluna nova de zeros passaria na linha de cima se ela
+         * comparasse texto, mas cai aqui. */
+        sql_executa("SELECT * FROM t WHERE c IS NULL", &o);
+        long nul = o.nrows;
+        sql_executa("SELECT * FROM t WHERE c IS NOT NULL", &o);
+        long pres = o.nrows;
+        sql_executa("SELECT * FROM t WHERE c = 0", &o);
+        long zeros = o.nrows;
+        int dual = (nul == n_antes && pres == 0 && zeros == 0);
+        printf("      a coluna nova nasce no dual: IS NULL %ld (esp %d) · IS NOT"
+               " NULL %ld (esp 0) · = 0 %ld (esp 0)  %s\n",
+               nul, n_antes, pres, zeros, dual ? "" : "NAO BATE");
+        if(!dual) mal++;
 
         /* e a coluna nova é uma coluna a sério: escreve-se e lê-se */
         sql_executa("UPDATE t SET c = 7 WHERE a = 2", &o);
@@ -4322,6 +4387,18 @@ int main(void){
                o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
                o.nrows ? o.cell[0][2] : "?", usa ? "" : "NAO BATE");
         if(!usa) mal++;
+
+        /* escrever faz existir, e faz existir SÓ a célula escrita: o UPDATE
+         * de uma linha muda a contagem do dual de n para n-1, não para 0. */
+        sql_executa("SELECT * FROM t WHERE c IS NOT NULL", &o);
+        long pres2 = o.nrows;
+        sql_executa("SELECT * FROM t WHERE c IS NULL", &o);
+        long nul2 = o.nrows;
+        int passou = (pres2 == 1 && nul2 == n_antes - 1);
+        printf("      escrever faz existir, e só a célula escrita: IS NOT NULL"
+               " %ld (esp 1) · IS NULL %ld (esp %d)  %s\n",
+               pres2, nul2, n_antes - 1, passou ? "" : "NAO BATE");
+        if(!passou) mal++;
 
         /* e um INSERT com a largura nova entra inteiro */
         sql_executa("INSERT INTO t VALUES (9,90,99)", &o);
@@ -4360,7 +4437,9 @@ int main(void){
            " i·ncols + j, pelo que mexer no ncols move TODAS, e um levantamento mal feito"
            " MISTURA as linhas em vez de as mover — com o número de linhas e de colunas a"
            " continuar certo. Por isso o que se mede não é a largura: é que cada valor velho"
-           " esteja onde estava, célula a célula, e que a coluna nova valha zero. A ordem"
+           " esteja onde estava, célula a célula, e que a coluna nova NASÇA NO DUAL — não a"
+           " zero: zero é um valor escrito, e a coluna que ninguém escreveu está ausente, o"
+           " que se mede em peso (IS NULL apanha as cinco, `= 0` nenhuma). A ordem"
            " também está fixada: lê-se tudo com a régua velha, o catálogo sobe DEPOIS de ler e"
            " ANTES de escrever, e reescreve-se com a nova — ler com uma régua e escrever com a"
            " outra seria o defeito clássico desta casa. E A COLUNA NOVA É UMA COLUNA A SÉRIO:"
@@ -4370,6 +4449,220 @@ int main(void){
            " sobrevivesse ao levantamento responderia sobre um passo que já não existe. Mede-se"
            " que ele foi largado (os passos voltam a subir) e que a resposta continua certa:"
            " custa a varredura, nunca a correcção.",
+           mal == 0);
+    }
+
+    /* ═══ §W33: O NULO É O DUAL DO CORPO REPRESENTADO ═══════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w33.mem"); unlink("/tmp/pgwire_w33.prog");
+        unlink("/tmp/pgwire_w33__t.mem"); unlink("/tmp/pgwire_w33__t.prog");
+        printf("\n§W33 o nulo: o suporte que sempre existe, e o corpo que é o 1.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w33")) mal++;
+        sql_executa("CREATE TABLE t (a,b,c)", &o);
+        /* a linha 1 escreve tudo, com um ZERO explícito em b;
+         * a linha 2 escreve só a; b e c nascem ausentes;
+         * a linha 3 escreve a e b, e c fica ausente. */
+        sql_executa("INSERT INTO t VALUES (1,0,5)",       &o);
+        sql_executa("INSERT INTO t VALUES (2,NULL,NULL)", &o);
+        sql_executa("INSERT INTO t VALUES (3,0,NULL)",    &o);
+
+        /* ── (1) O ZERO ESCRITO NÃO É A AUSÊNCIA. É o gume da tese: se o dual
+         * fosse o valor 0 do corpo, `= 0` e `IS NULL` apanhariam as mesmas
+         * linhas. Apanham conjuntos DISJUNTOS sobre a mesma coluna. */
+        sql_executa("SELECT a FROM t WHERE b = 0", &o);
+        long z_n = o.nrows; char z1 = o.nrows ? o.cell[0][0][0] : '?';
+        sql_executa("SELECT a FROM t WHERE b IS NULL", &o);
+        long a_n = o.nrows; char a1 = o.nrows ? o.cell[0][0][0] : '?';
+        int disjunto = (z_n == 2 && a_n == 1 && a1 == '2' && z1 == '1');
+        printf("      o zero ESCRITO e a ausência são objectos diferentes:"
+               " b = 0 apanha %ld (1,3) · b IS NULL apanha %ld (2)  %s\n",
+               z_n, a_n, disjunto ? "" : "NAO BATE");
+        if(!disjunto) mal++;
+
+        /* ── (2) A AUSÊNCIA ESTÁ FORA DO CORPO. Sobre o corpo, `= v` e `<> v`
+         * são complementares: toda a linha cai num ou no outro. A ausência
+         * falha nos DOIS — não é um valor que se compare, é o suporte. É a
+         * medida que distingue «o nulo é o 0» de «o nulo é outro nível»: se
+         * fosse um valor qualquer do corpo, a soma fechava em 3. */
+        sql_executa("SELECT a FROM t WHERE b = 0", &o);   long ig = o.nrows;
+        sql_executa("SELECT a FROM t WHERE b <> 0", &o);  long di = o.nrows;
+        sql_executa("SELECT a FROM t WHERE b IS NOT NULL", &o); long pr = o.nrows;
+        int fora = (ig + di == pr && pr == 2 && ig + di < 3);
+        printf("      `= 0` %ld + `<> 0` %ld = %ld presentes (de 3 linhas):"
+               " a comparação vive no corpo, e o dual está FORA  %s\n",
+               ig, di, pr, fora ? "" : "NAO BATE");
+        if(!fora) mal++;
+
+        /* ── (3) O BIT: presença e ausência PARTICIONAM, coluna a coluna. É a
+         * conta do `thm:bitunico` lida em peso — |b=1| + |b=0| = |I| e a
+         * intersecção é vazia — e vale para as três colunas de uma vez, com
+         * pesos DIFERENTES (3+0, 2+1, 1+2): uma coluna que respondesse sempre
+         * o mesmo passaria numa e caía nas outras. */
+        const char *col[3] = { "a", "b", "c" };
+        long esp_pres[3] = { 3, 2, 1 };
+        int part = 1;
+        for(int k = 0; k < 3; k++){
+            char q[80];
+            snprintf(q, sizeof q, "SELECT a FROM t WHERE %s IS NOT NULL", col[k]);
+            sql_executa(q, &o); long p = o.nrows;
+            snprintf(q, sizeof q, "SELECT a FROM t WHERE %s IS NULL", col[k]);
+            sql_executa(q, &o); long n = o.nrows;
+            printf("      coluna %s: presentes %ld + ausentes %ld = %ld"
+                   " (esperado %ld + %ld)\n", col[k], p, n, p + n,
+                   esp_pres[k], 3 - esp_pres[k]);
+            if(p + n != 3 || p != esp_pres[k]) part = 0;
+        }
+        if(!part) mal++;
+
+        /* ── (4) O SUPORTE EXISTE ANTES DO CONTEÚDO. A coluna c nunca foi
+         * escrita em duas das três linhas, e mesmo assim é endereçável: o
+         * dual apanha-as. E escrever UMA célula move UMA unidade de peso de
+         * um lado para o outro — a topologia vazia é o sítio por onde a
+         * escrita entra, não um erro a corrigir. */
+        sql_executa("SELECT a FROM t WHERE c IS NULL", &o); long c0 = o.nrows;
+        sql_executa("UPDATE t SET c = 7 WHERE a = 3", &o);
+        sql_executa("SELECT a FROM t WHERE c IS NULL", &o); long c1 = o.nrows;
+        sql_executa("SELECT a FROM t WHERE c IS NOT NULL", &o); long c1p = o.nrows;
+        int passa = (c0 == 2 && c1 == 1 && c1p == 2);
+        printf("      escrever move UMA unidade de peso: ausentes %ld -> %ld,"
+               " presentes -> %ld  %s\n", c0, c1, c1p, passa ? "" : "NAO BATE");
+        if(!passa) mal++;
+
+        /* ── (5) O DUAL É DUAL, E É O MESMO OBJECTO DA LINHA. A ausência da
+         * célula e a morte da linha são o mesmo bitmap com o mesmo peso: um
+         * DELETE tira a linha inteira, e as contagens dos dois lados descem
+         * juntas. Aqui está a frase inteira: o corpo representado é o que
+         * está aceso, e o resto é o suporte por onde se anda. */
+        sql_executa("DELETE FROM t WHERE a = 2", &o);
+        sql_executa("SELECT a FROM t WHERE c IS NULL", &o);     long d0 = o.nrows;
+        sql_executa("SELECT a FROM t WHERE c IS NOT NULL", &o); long d1 = o.nrows;
+        sql_executa("SELECT a FROM t", &o);                     long tot = o.nrows;
+        int junto = (tot == 2 && d0 + d1 == tot && d0 == 0 && d1 == 2);
+        printf("      apagar a linha tira-a dos DOIS lados: total %ld ="
+               " ausentes %ld + presentes %ld  %s\n",
+               tot, d0, d1, junto ? "" : "NAO BATE");
+        if(!junto) mal++;
+
+        /* ── (6) E O DUAL PERSISTE: fecha-se e reabre-se, e a ausência
+         * continua lá. Se fosse um adorno da impressão, morria no disco. */
+        sql_fechar();
+        if(!sql_abrir("/tmp/pgwire_w33")) mal++;
+        sql_executa("SELECT a FROM t WHERE c IS NOT NULL", &o); long r1 = o.nrows;
+        sql_executa("SELECT a FROM t WHERE b IS NULL", &o);     long r2 = o.nrows;
+        int viveu = (r1 == 2 && r2 == 0);
+        printf("      depois de fechar e reabrir: c presente %ld (esp 2),"
+               " b ausente %ld (esp 0)  %s\n", r1, r2, viveu ? "" : "NAO BATE");
+        if(!viveu) mal++;
+
+        /* ── O CONTROLO: uma coluna SEM ausência nenhuma. Se o motor
+         * respondesse à pergunta pelo nome — se `IS NULL` fosse um adorno que
+         * devolve sempre o mesmo — este caso e o de cima seriam iguais. */
+        sql_executa("SELECT a FROM t WHERE a IS NULL", &o);     long q0 = o.nrows;
+        sql_executa("SELECT a FROM t WHERE a IS NOT NULL", &o); long q1 = o.nrows;
+        /* ── (7) A VOLTA. Escrever acende; `SET c = NULL` apaga. Sem esta
+         * metade a presença só sabia crescer, e um dual que não volta não é
+         * dual — é um contador. E o que volta é o BIT, não a linha: a linha
+         * continua viva e a contagem total não se mexe. */
+        sql_executa("UPDATE t SET c = NULL WHERE a = 3", &o);
+        sql_executa("SELECT a FROM t WHERE c IS NULL", &o);     long v0 = o.nrows;
+        sql_executa("SELECT a FROM t WHERE c IS NOT NULL", &o); long v1 = o.nrows;
+        sql_executa("SELECT a FROM t", &o);                     long vt = o.nrows;
+        int volta = (v0 == 1 && v1 == 1 && vt == 2);
+        printf("      e a VOLTA — `SET c = NULL` apaga a célula e não a linha:"
+               " ausentes %ld (esp 1) · presentes %ld (esp 1) · linhas %ld (esp 2)"
+               "  %s\n", v0, v1, vt, volta ? "" : "NAO BATE");
+        if(!volta) mal++;
+
+        /* ── (8) O ÍNDICE NÃO MENTE SOBRE O DUAL. A árvore devolve o SÍTIO e
+         * não sabe da presença; se o filtro do dual corresse antes da descida,
+         * a mesma pergunta responderia uma coisa com índice e outra sem. É a
+         * régua da casa: o índice muda o CUSTO, nunca a resposta. */
+        sql_executa("SELECT a FROM t WHERE c = 0", &o);  long sem = o.nrows;
+        sql_executa("CREATE INDEX ON t (c)", &o);
+        sql_executa("SELECT a FROM t WHERE c = 0", &o);  long com = o.nrows;
+        sql_executa("SELECT a FROM t WHERE c IS NULL", &o); long com_n = o.nrows;
+        int igual = (sem == 0 && com == 0 && com_n == 1);
+        printf("      com índice e sem índice, a MESMA resposta: `c = 0` sem %ld,"
+               " com %ld (esp 0 e 0) · IS NULL %ld (esp 1)  %s\n",
+               sem, com, com_n, igual ? "" : "NAO BATE");
+        if(!igual) mal++;
+
+        /* ── (9) E O FIO DIZ A AUSÊNCIA COM A LETRA DELA. No FEBE, o campo
+         * ausente escreve-se com comprimento −1; zero bytes é a CADEIA VAZIA,
+         * que é um valor. São dois níveis e o protocolo tem as duas letras —
+         * mandar 0 seria o motor saber distingui-los e o wire não, com o valor
+         * a ir certo e o NÍVEL a ir errado. Mede-se no DataRow, campo a campo:
+         * a coluna a (presente) traz L ≥ 0, a coluna c (ausente) traz −1. */
+        {
+            SqlOut wo;
+            PgBuf w;
+            const uint8_t *pay; int pn, off; char tipo;
+            int viu = 0, lc_aus = 0, la_pres = 0;
+            /* a linha pedida é a que TEM a e NÃO tem c: os dois campos do mesmo
+             * DataRow, um de cada nível */
+            sql_executa("SELECT a,c FROM t WHERE c IS NULL", &wo);
+            pg_buf_limpa(&w);
+            pg_reply_sql(&w, &wo);
+            if(w.erro) mal++;
+            off = 0;
+            while(off < w.n){
+                if(!pg_read_typed(w.b, w.n, &off, &tipo, &pay, &pn)) break;
+                if(tipo != PG_MSG_DATA_ROW || viu) continue;
+                { int nc = pg_get_i16(pay), p = 2, j;
+                  for(j = 0; j < nc && p + 4 <= pn; j++){
+                      int L = pg_get_i32(pay + p); p += 4;
+                      if(j == 0) la_pres = L; else lc_aus = L;
+                      if(L > 0) p += L;
+                  } }
+                viu = 1;
+            }
+            int fio = (la_pres > 0 && lc_aus == -1);
+            printf("      e o FIO diz a ausência com a letra dela: no DataRow o"
+                   " campo presente traz L=%d (>0) e o ausente traz L=%d (esp -1)"
+                   "  %s\n", la_pres, lc_aus, fio ? "" : "NAO BATE");
+            if(!fio) mal++;
+        }
+
+        printf("\n      CONTROLO — coluna cheia: IS NULL %ld (esp 0) ·"
+               " IS NOT NULL %ld (esp 2)  %s\n", q0, q1,
+               (q0 == 0 && q1 == 2) ? "" : "NAO BATE");
+        if(q0 != 0 || q1 != 2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O NULO É O DUAL DO CORPO REPRESENTADO, E É POR ELE QUE SE ANDA. O `thm:bitunico`"
+           " diz que a presença b=1 é o único operacional e que a ausência b=0 é o suporte"
+           " neutro — e que é ELA o dual. Uma tabela realiza a frase à letra: o corpo"
+           " representado é o que está escrito, e o que não foi escrito não é um valor errado"
+           " nem um zero: é o suporte, que existe antes do conteúdo e não deixa de existir"
+           " quando o conteúdo entra. O gume está em separá-lo do 0 DO CORPO, porque é aí que"
+           " a tese se decide: escreve-se um zero explícito numa célula e deixa-se outra por"
+           " escrever, e as duas perguntas apanham conjuntos DISJUNTOS. A segunda medida é"
+           " mais forte e é a que fixa o NÍVEL: sobre o corpo, `= v` e `<> v` são"
+           " complementares, e toda a linha cai num dos dois; a ausência falha nos DOIS, pelo"
+           " que a soma não fecha em |I| mas no peso dos presentes. Um valor do corpo não faz"
+           " isso — só um objecto de outro nível o faz. Daí sai a partição em peso, coluna a"
+           " coluna e com pesos diferentes (3+0, 2+1, 1+2), que é a conta do bit lida com a"
+           " MESMA régua que conta as linhas vivas: presença e ausência, vivo e morto, são o"
+           " mesmo bitmap e o mesmo popcount, o que é a razão de o DELETE tirar a linha dos"
+           " dois lados de uma vez. E escrever é o movimento: cada célula escrita passa UMA"
+           " unidade de peso do dual para o corpo, e nunca mais do que uma — a topologia"
+           " vazia é o sítio por onde a escrita entra, não uma lacuna a tapar. O CONTROLO é a"
+           " coluna cheia, onde o dual pesa zero: sem ele, um `IS NULL` que respondesse pelo"
+           " nome passaria em tudo o que está acima. Faltavam duas metades, e as duas são"
+           " leis desta casa. A VOLTA: `SET c = NULL` apaga a célula sem apagar a linha, e"
+           " sem ela a presença só sabia crescer — um dual que não volta é um contador. E A"
+           " RESPOSTA NÃO DEPENDE DA RÉGUA: o filtro do dual tem de correr DEPOIS da descida"
+           " pela árvore, porque a árvore devolve o sítio e não sabe da presença; estava"
+           " antes, e `c = 0` com índice apanhava as células ausentes que a mesma pergunta"
+           " sem índice recusava. Mede-se a coincidência das duas, que é a única forma de o"
+           " dizer: o índice muda o CUSTO, nunca a resposta. E A FRASE ATRAVESSA O FIO: no FEBE"
+           " a ausência escreve-se com comprimento −1 e a cadeia vazia com zero bytes, que são"
+           " as duas letras de dois níveis; mede-se no DataRow campo a campo, porque mandar 0"
+           " seria o motor saber distingui-los e o protocolo não — o valor a ir certo e o"
+           " NÍVEL a ir errado, que é o defeito que esta casa persegue desde o princípio.",
            mal == 0);
     }
 

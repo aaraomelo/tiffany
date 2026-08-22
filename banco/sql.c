@@ -314,6 +314,24 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define MAXTERMO  4          /* termos ligados por OR                                   */
 #define S_VIVO    512        /* a linha existe? BIT por linha (512..1023)               */
 
+/* ── O DUAL DA CÉLULA: A PRESENÇA ────────────────────────────────────────────
+ *
+ * `thm:bitunico`: «a PRESENÇA b=1 é o único operacional; a AUSÊNCIA b=0 é o
+ * suporte neutro, e é ela o dual». E o `thm:multiplicidade`(4): a leitura local
+ * distingue G=0 — célula ainda não realizada — de G>0.
+ *
+ * A LINHA já tinha esse dual: é o campo do vivo. A CÉLULA não tinha, e por isso
+ * uma que valia zero e uma que nunca foi escrita eram indistinguíveis — uma
+ * coluna acabada de acrescentar respondia a `= 0` em todas as linhas. O dual é
+ * do DADO, não só da linha.
+ *
+ * É o mesmo campo, com a mesma base ortonormal e_k = 2^k, indexado por célula
+ * em vez de por linha: o bit i·ncols + j. Zero é a ausência — o neutro — e por
+ * isso uma tabela antiga, cujo campo nunca foi escrito, leria tudo como
+ * ausente; a migração está no `prepara`, que acende o que já lá está. */
+#define S_PRESCAB (ISA_TECTO + ZONA(9))   /* {1,0} = o campo já foi escrito */
+#define S_PRES    (S_PRESCAB + 1)          /* presença: BIT por célula */
+
 /* ── UM ÍNDICE POR COLUNA, e cada um na sua zona ─────────────────────────────
  *
  * Havia um só, e por isso uma condição composta só podia descer de um lado.
@@ -1726,6 +1744,7 @@ static int cria(const char *resto){
     emit1(OP_HALT);
     rodar(pc_emit);
     Word cat = mem_le(S_CAT); cat.e = 0; mem_grava(S_CAT, cat); /* nrows = 0 */
+    { Word m = {1,0}; mem_grava(S_PRESCAB, m); }   /* tabela nova: campo já é dela */
     cat_poe_nrows(0);                                           /* e no par, que é onde vive */
     for(long j = 0; j < ncols && j < 8; j++){
         Word wc; wc.total = corpo[j]; wc.e = parm[j];
@@ -1831,7 +1850,19 @@ static int insere(const char *resto){
         long cq = (q < 8) ? mem_le(S_CORPO + (unsigned)q).total : CORPO_INTEIRO;
         den[q] = (cq == CORPO_AUREO || cq == CORPO_CRISTAL) ? 0 : 1;
     }
-    while(nv < ncols && numero(&p, &v[nv])){
+    /* O NOME DA AUSÊNCIA. Um INSERT pode dizer que uma célula não tem valor, e
+     * dizer NULL não é escrever zero: é deixar a célula no suporte. É a única
+     * forma de a ausência ser ESCOLHIDA em vez de herdada, e sem ela o dual só
+     * nascia por omissão (coluna nova, linha curta). */
+    int nulo[64];
+    for(int q = 0; q < 64; q++) nulo[q] = 0;
+    while(nv < ncols){
+        pula(&p);
+        if(palavra(&p, "NULL")){
+            v[nv] = 0; nulo[nv] = 1; nv++;
+            pula(&p); if(*p == ','){ p++; continue; } break;
+        }
+        if(!numero(&p, &v[nv])) break;
         /* O VALOR RACIONAL. A Word tem duas componentes e um racional é um par: o numerador
          * no total e o denominador no e. Guarda-se a CLASSE — reduzida pelo mdc, denominador
          * positivo —, que é o que racional_pg.c §Q1 mediu ser o representante único. */
@@ -1978,6 +2009,11 @@ static int insere(const char *resto){
      * índice na mesma marcado como velho. */
     { long nr_agora = cat_nrows();
       long i = nr_agora - 1;                       /* a linha que acabou de entrar */
+      /* A PRESENÇA ACENDE-SE AQUI: cada célula que recebeu valor passa a
+       * existir. As que a linha não trouxe ficam no neutro — ausentes —, que é
+       * o dual do `thm:bitunico`. */
+      for(long j = 0; j < ncols; j++)
+          bit_poe(S_PRES, i*ncols + j, (j < nv && !nulo[j]) ? 1 : 0);
       for(long c = 0; c < ncols && c < IDX_MAXCOL; c++){
           if(!idx_valido(c, nr_agora - 1)) continue;   /* válido ANTES desta linha? */
           ord_usa_indice(c);
@@ -2153,6 +2189,12 @@ struct arvore {
 static int le_expr(const char **p, struct arvore *a);
 /* as colunas que o WHERE cita — usada pela guarda que liga a DISTÂNCIA ao WHERE */
 static unsigned citadas_where = 0;
+/* O UPDATE QUE APAGA A CÉLULA. `SET c = NULL` escreve como qualquer outro
+ * UPDATE — o molde é o mesmo — mas em vez de ACENDER a presença, APAGA-a: é a
+ * volta da escrita, e sem ela o dual só sabia crescer. Vive numa bandeira
+ * porque a acção continua a ser um SET em todo o caminho; o que muda é o bit
+ * no fim, e o diário leva-a codificada para a recuperação a poder refazer. */
+static int set_anula = 0;
 
 static int novo_no(struct arvore *a){
     if(a->n >= MAXNO) return -1;
@@ -2294,6 +2336,7 @@ static int le_fator(const char **p, struct arvore *a){
 tem_comparacao:;
     int op = 0, nega = 0;
     if(**p == '!' && (*p)[1] == '=')        { op = '='; nega = 1; *p += 2; }
+    else if(**p == '<' && (*p)[1] == '>')   { op = '='; nega = 1; *p += 2; }   /* <> é não-= */
     else if(**p == '<' && (*p)[1] == '=')   { op = '>'; nega = 1; *p += 2; }   /* ≤ é não-> */
     else if(**p == '>' && (*p)[1] == '=')   { op = '<'; nega = 1; *p += 2; }   /* ≥ é não-< */
     else if(**p == '=')                     { op = '='; (*p)++; }
@@ -3120,7 +3163,10 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
 }
 
 /* prepara as constantes e devolve o catálogo */
+static void pres_migra(long ncols, long nrows);
+
 static void prepara(long v, long col_do_set){
+    { Word c = mem_le(S_CAT); pres_migra(c.total, cat_nrows()); }
     Word w = {0,0};
     mem_grava(S_ZERO, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
@@ -3231,8 +3277,19 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
     emit1(OP_HALT);
     long passos = rodar(pc_emit);
 
-    /* e o ζ: agora que a escrita correu, as chaves NOVAS entram */
-    if(mu_col >= 0){
+    /* ESCREVER FAZ EXISTIR. Um valor posto é uma presença: acendem-se os bits
+     * das células que a escrita tocou. Sem isto a célula ficava com o valor
+     * lá dentro e o dual a dizer que não estava — o UPDATE escrevia e o
+     * `IS NULL` continuava a apanhar a linha. */
+    if(acao == ACAO_SET && col_set >= 0)
+        for(long i = 0; i < nrows; i++)
+            if(bit_le(S_MATCH, i))
+                bit_poe(S_PRES, i*ncols + col_set, set_anula ? 0 : 1);
+
+    /* e o ζ: agora que a escrita correu, as chaves NOVAS entram — excepto se a
+     * escrita foi um `= NULL`, que não deixa valor nenhum para indexar: aí o µ
+     * tirou as chaves e nada volta. */
+    if(mu_col >= 0 && !set_anula){
         ord_usa_indice(mu_col);
         int falhou = 0;
         for(int k = 0; k < mu_n && !falhou; k++)
@@ -3250,8 +3307,12 @@ static void refaz_diario(void){
     Word d = mem_le(S_DIA);
     if(d.total == 0) return;
     Word cat = mem_le(S_CAT);
-    printf("-- diário aberto: refazendo %s\n", d.total == ACAO_SET+1 ? "um UPDATE" : "um DELETE");
-    aplica_diario(cat.total, cat_nrows(), (int)d.total - 1, (int)d.e);
+    int an = (d.total > 3), ac = an ? ACAO_SET : (int)d.total - 1;
+    printf("-- diário aberto: refazendo %s\n",
+           an ? "um UPDATE que APAGA a célula" : (ac == ACAO_SET ? "um UPDATE" : "um DELETE"));
+    set_anula = an;
+    aplica_diario(cat.total, cat_nrows(), ac, (int)d.e);
+    set_anula = 0;
     barreira();
     Word z = {0,0}; mem_grava(S_DIA, z);
     barreira();
@@ -3481,6 +3542,21 @@ static long hav_n  = 0;
  * abaixo servem as duas — a árvore é a mesma lei, e a base é o parâmetro. */
 static unsigned ord_raiz = S_ORD;
 static unsigned ord_cab  = S_ORDCAB;
+/* A MIGRAÇÃO DO CAMPO DE PRESENÇA.
+ *
+ * Zero é a ausência, e uma base gravada antes deste campo tem-no todo a zero:
+ * lida à letra, ela diria que TUDO está ausente. O marcador diz se o campo já
+ * foi escrito alguma vez; se não foi, acende-se o que lá está — numa tabela
+ * antiga o que existe, existe — e escreve-se o marcador. Faz-se uma vez por
+ * tabela, e não a cada consulta. */
+static void pres_migra(long ncols, long nrows){
+    if(mem_le(S_PRESCAB).total) return;             /* já migrada */
+    for(long i = 0; i < nrows; i++)
+        for(long j = 0; j < ncols; j++)
+            bit_poe(S_PRES, i*ncols + j, 1);
+    { Word m = {1,0}; mem_grava(S_PRESCAB, m); }
+}
+
 static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB; }
 /* O CONTADOR DE NÓS TEM O SEU SLOT, e não o do cabeçalho. `ord_novo` escreve
  * em `ord_cab` a cada nó criado; apontá-lo ao cabeçalho do índice fazia o
@@ -3796,6 +3872,10 @@ static int idx_constroi(long col, long ncols, long nrows){
     long postos = 0;
     for(long i = 0; i < nrows; i++){
         if(!bit_le(S_VIVO, i)) continue;
+        /* e a célula AUSENTE não tem chave. Indexar uma célula que não existe é
+         * pôr na árvore o neutro com cara de valor — e depois `= 0` desce e
+         * apanha-a. A árvore indexa o corpo; o dual vive no bitmap. */
+        if(!bit_le(S_PRES, i*ncols + col)) continue;
         if(!ord_insere(celula_valor(i, col, ncols), (int)i)){
             ord_usa_rascunho();
             return 0;                        /* não coube: sem índice, e sem mentira */
@@ -3931,6 +4011,7 @@ static int le_join(const char **pp, const char *tab_esq){
 
 
 static int varre(const char *resto, int acao){
+    set_anula = 0;                     /* antes do parse: é ele que a levanta */
     const char *p = resto;
     char nome[64], alvo[64];
     long v = 0;
@@ -4008,7 +4089,9 @@ static int varre(const char *resto, int acao){
     if(acao == ACAO_SET){
         if(!ident(&p, alvo, sizeof alvo)) return 0;
         pula(&p); if(*p != '=') return 0; p++;
-        if(!numero(&p, &v)) return 0;
+        pula(&p);
+        if(palavra(&p, "NULL")) { set_anula = 1; v = 0; }
+        else if(!numero(&p, &v)) return 0;
         col_set = col_indice(alvo);
         if(col_set < 0){
             printf("erro: a coluna «%s» não existe na tabela «%s» — o UPDATE é RECUSADO.\n",
@@ -4235,8 +4318,40 @@ static int varre(const char *resto, int acao){
         }
     }
 
+    /* ── WHERE <col> IS [NOT] NULL ────────────────────────────────────────
+     *
+     * A ausência não é um valor: é o dual dele. Não se compila para a ISA
+     * porque não há nada a comparar — lê-se o BIT de presença, que é o mesmo
+     * campo do vivo um andar abaixo, por célula em vez de por linha. */
+    int nul_usa = 0, nul_nega = 0; long nul_col = -1;
+    if(acao == ACAO_MARCA && !in_sub && !idx_usa && !idx_pre){
+        const char *q = p;
+        char c_esq[64];
+        if(palavra(&q, "WHERE") && ident(&q, c_esq, sizeof c_esq)){
+            pula(&q);
+            if(palavra(&q, "IS")){
+                { const char *r = q; if(palavra(&r, "NOT")){ nul_nega = 1; q = r; } }
+                if(palavra(&q, "NULL")){
+                    pula(&q);
+                    if(*q == 0 || *q == ';'){
+                        long c = col_indice(c_esq);
+                        if(c < 0){
+                            printf("erro: a coluna «%s» não existe na tabela «%s»"
+                                   " — RECUSADA.\n", c_esq, nome);
+                            if(sql_cap){ sql_cap->ok = 0;
+                                snprintf(sql_cap->err, sizeof sql_cap->err,
+                                         "column \"%s\" does not exist", c_esq); }
+                            return 0;
+                        }
+                        nul_col = c; nul_usa = 1; p = q;
+                    }
+                }
+            }
+        }
+    }
+
     citadas_where = 0;
-    tem_where = (in_sub || idx_usa) ? 0 : le_where(&p, &cl);
+    tem_where = (in_sub || idx_usa || nul_usa) ? 0 : le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
         return 0;
@@ -4506,6 +4621,16 @@ static int varre(const char *resto, int acao){
      * RESTAURA-SE a que estava aberta, porque uma consulta não pode trocar a
      * tabela da sessão por baixo de quem a fez. Para cada linha marcada,
      * desce-se a árvore pelo seu valor: fibra vazia, o bit desliga. */
+    /* A COMPARAÇÃO COM A AUSÊNCIA NÃO CASA, e é a regra do SQL lida pelo dual:
+     * comparar é pedir um valor, e a ausência não o tem. O molde já correu e
+     * comparou o que estava na célula — que num sítio ausente é o neutro, e o
+     * neutro é um valor como outro qualquer. Tira-se aqui: se alguma coluna que
+     * a condição CITA está ausente nessa linha, a linha não casa.
+     *
+     * É a mesma frase do `thm:bitunico` — a presença é o único operacional —
+     * aplicada à leitura em vez de à escrita. */
+    /* (a guarda do corpo e o `IS NULL` aplicam-se DEPOIS — ver mais abaixo) */
+
     if(idx_usa){
         /* A DESCIDA, e é aqui que |X| sai da conta. O molde correu sobre nada —
          * não há WHERE compilado —, pelo que o campo está com todas as vivas;
@@ -4617,13 +4742,44 @@ static int varre(const char *resto, int acao){
             if(passa[k]) bit_poe(S_MATCH, in_idx[k], 1);
     }
 
+    /* ── OS FILTROS DO DUAL, E É AQUI QUE ELES TÊM DE ESTAR ──────────────────
+     * Estes dois só APAGAM linhas, pelo que a sua posição correcta é depois de
+     * TODOS os caminhos que constroem o campo — e há três que o reescrevem do
+     * zero: a descida pelo índice, a subconsulta e o join. Estavam antes, logo
+     * a descida pelo índice desfazia-os: `WHERE c = 0` com índice na coluna c
+     * apanhava as células AUSENTES, porque a árvore devolve o sítio e não sabe
+     * do dual. Aqui valem para todos os caminhos, e a resposta deixa de
+     * depender de haver ou não índice — que é a régua da casa: o índice muda o
+     * CUSTO, nunca a resposta. */
+    /* e a condição é `citadas_where`, não `tem_where`: na descida pelo índice o
+     * molde NÃO corre — não há WHERE compilado — e a guarda ficava de fora
+     * exactamente no caminho onde é mais precisa. */
+    if(citadas_where){
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            for(long j = 0; j < ncols; j++){
+                if(!(citadas_where & (1u << j))) continue;
+                if(!bit_le(S_PRES, i*ncols + j)){ bit_poe(S_MATCH, i, 0); break; }
+            }
+        }
+    }
+
+    if(nul_usa){
+        /* o campo já está construído; fica quem tem (ou não tem) a célula */
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            int tem = bit_le(S_PRES, i*ncols + nul_col);
+            if(nul_nega ? !tem : tem) bit_poe(S_MATCH, i, 0);
+        }
+    }
+
     long achou = bits_conta(S_MATCH, nrows);
     ultima_conta = achou;
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
         barreira();
         trava_se_pedido(2);                       /* queda ANTES do compromisso: nada mudou */
-        Word d; d.total = acao + 1; d.e = col_set;
+        Word d; d.total = acao + 1 + (set_anula ? 3 : 0); d.e = col_set;
         mem_grava(S_DIA, d);
         barreira();                               /* ← o ponto de compromisso */
         trava_se_pedido(3);                       /* queda DEPOIS: a abertura refaz */
@@ -5144,7 +5300,8 @@ static int varre(const char *resto, int acao){
         char saida[SQL_OUT_MAX_COLS][SQL_OUT_CELL];
         int nsai = proj_n ? proj_n
                  : (int)(ncols < SQL_OUT_MAX_COLS ? ncols : SQL_OUT_MAX_COLS);
-        for(int k = 0; k < nsai; k++) saida[k][0] = 0;
+        unsigned char sai_nulo[SQL_OUT_MAX_COLS];
+        for(int k = 0; k < nsai; k++){ saida[k][0] = 0; sai_nulo[k] = 0; }
         for(long j = 0; j < ncols; j++){
             Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
             long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
@@ -5199,19 +5356,30 @@ static int varre(const char *resto, int acao){
              * socket. Metade do par corrigida é o defeito que este ficheiro
              * persegue desde o princípio — responder outra coisa é pior do que
              * recusar, e responder DUAS coisas diferentes é pior ainda. */
+            /* A AUSÊNCIA SAI VAZIA, e não como zero. Zero é um valor; a
+             * ausência é o dual dele, e imprimi-la como zero seria dizer que a
+             * célula vale o neutro em vez de dizer que ela não está lá. */
+            int ausente = !bit_le(S_PRES, i*ncols + j);
+            if(ausente) cel[0] = 0;
             /* a mesma coluna pode ser pedida mais do que uma vez */
             if(proj_n){
                 for(int k = 0; k < proj_n; k++)
-                    if(proj[k] == (int)j) snprintf(saida[k], SQL_OUT_CELL, "%s", cel);
+                    if(proj[k] == (int)j){
+                        snprintf(saida[k], SQL_OUT_CELL, "%s", cel);
+                        sai_nulo[k] = (unsigned char)ausente;
+                    }
             }else if(j < nsai){
                 snprintf(saida[j], SQL_OUT_CELL, "%s", cel);
+                sai_nulo[j] = (unsigned char)ausente;
             }
         }
         for(int k = 0; k < nsai; k++){
             printf("%s", saida[k]);
             if(k + 1 < nsai) printf(" | ");
-            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS)
+            if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS){
                 snprintf(sql_cap->cell[row_i][k], SQL_OUT_CELL, "%s", saida[k]);
+                sql_cap->nulo[row_i][k] = sai_nulo[k];
+            }
         }
         printf("\n");
     }
@@ -6354,10 +6522,12 @@ static int executa(const char *sql){
             return 0;
         }
         static Word velho[ALT_MAX], velho_alto[ALT_MAX];
+        static unsigned char pres_velho[ALT_MAX];
         for(long i = 0; i < nrows; i++)
             for(long j = 0; j < ncols; j++){
                 velho[i*ncols + j]      = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
                 velho_alto[i*ncols + j] = mem_le(S_ALTO   + (unsigned)(i*ncols + j));
+                pres_velho[i*ncols + j] = (unsigned char)bit_le(S_PRES, i*ncols + j);
             }
         /* o catálogo sobe: é aqui que o andar muda */
         long novo = ncols + 1;
@@ -6374,6 +6544,10 @@ static int executa(const char *sql){
                 if(j < ncols){ v = velho[i*ncols + j]; va = velho_alto[i*ncols + j]; }
                 mem_grava(S_LINHAS + (unsigned)(i*novo + j), v);
                 mem_grava(S_ALTO   + (unsigned)(i*novo + j), va);
+                /* a presença acompanha a célula para o sítio novo; a coluna
+                 * acrescentada nasce AUSENTE, que é o neutro — e não a zero,
+                 * que seria um valor. */
+                bit_poe(S_PRES, i*novo + j, j < ncols ? pres_velho[i*ncols + j] : 0);
                 mem_grava(S_DEN    + (unsigned)(i*novo + j),
                           j < ncols ? mem_le(S_DEN + (unsigned)(i*ncols + j)) : (Word){1,0});
             }
@@ -7487,7 +7661,7 @@ int main(int argc, char **argv){
              * a outra metade: multiplicar pelo gerador da dobra É deslocar. O `<<`
              * é `x + x` em ADD16, e o bit do multiplicador é um AND. */
             {
-                SqlOut p1, p2, p3, p4;
+                SqlOut p1, p2, p3, p4, p5;
                 executa("CREATE TABLE prod (a,b)");
                 executa("INSERT INTO prod VALUES (100,50)");
                 executa("INSERT INTO prod VALUES (3,7)");
@@ -7497,12 +7671,22 @@ int main(int argc, char **argv){
                 sql_cap = &p2; memset(&p2, 0, sizeof p2);
                 int w2 = executa("SELECT * FROM prod WHERE a * b = 5000");
                 sql_cap = &p3; memset(&p3, 0, sizeof p3);
+                /* 100² = 10000 e 150² = 22500, ambos acima de 5000: a resposta
+                 * são DUAS linhas. Estava escrito «uma», e a asserção passou a
+                 * ser o defeito — a terceira linha entrou na tabela para
+                 * exercitar o majorante e a conta à mão não a acompanhou. */
                 int w3 = executa("SELECT * FROM prod WHERE a * a > 5000");
+                sql_cap = &p5; memset(&p5, 0, sizeof p5);
+                /* e um limiar que SEPARA, com a resposta a ser a OUTRA linha:
+                 * 22500 > 12000 e 10000 não. Sem ele, um motor que devolvesse
+                 * sempre o (100,50) passava nas três de cima. */
+                int w5 = executa("SELECT * FROM prod WHERE a * a > 12000");
                 sql_cap = &p4; memset(&p4, 0, sizeof p4);
                 int w4 = executa("SELECT * FROM prod WHERE a > 50");   /* cabe em 8: o andar velho */
                 sql_cap = NULL;
-                printf("\n     a*b>1000 %d · a*b=5000 %d · a*a>5000 %d · a>50 %d (este cabe em 8)\n",
-                       p1.nrows, p2.nrows, p3.nrows, p4.nrows);
+                printf("\n     a*b>1000 %d · a*b=5000 %d · a*a>5000 %d (100 e 150)"
+                       " · a*a>12000 %d (só o 150) · a>50 %d (este cabe em 8)\n",
+                       p1.nrows, p2.nrows, p3.nrows, p5.nrows, p4.nrows);
                 ok("O PRODUTO CORRE NO ANDAR DE CIMA, E O ANDAR ESCOLHE-SE PELA FORMA — não"
                    " pelo que a coluna guarda. O avaliador de oito decide pelo bit 7 da"
                    " diferença, logo `c0 + Σ c_i·x_i` tem de caber em ±127; com a = 100 e"
@@ -7513,12 +7697,17 @@ int main(int argc, char **argv){
                    " recusado. E o produto de 16 é DESLOCAMENTO E SOMA — a última linha do"
                    " thm:transporte do naturais.tex —, com o `<<` a ser `x+x` em ADD16 e o"
                    " bit do multiplicador a ser um AND. As três consultas dão agora o único"
-                   " (100,50), e a quarta, que cabe em oito, continua a correr no andar"
-                   " velho: as duas metades medem-se",
-                   w1 && w2 && w3 && w4
+                   " (100,50); `a*a > 5000` dá DUAS — 100² e 150² estão ambos acima —, e"
+                   " é preciso um limiar que SEPARE para o gume morder: `a*a > 12000`"
+                   " devolve só o (150,2), que é a OUTRA linha, e sem ela um motor que"
+                   " respondesse sempre (100,50) passava em tudo o que está acima. E a"
+                   " última, que cabe em oito, continua a correr no andar velho: as duas"
+                   " metades medem-se",
+                   w1 && w2 && w3 && w4 && w5
                    && p1.nrows == 1 && !strcmp(p1.cell[0][0], "100")
                    && p2.nrows == 1 && !strcmp(p2.cell[0][0], "100")
-                   && p3.nrows == 1 && !strcmp(p3.cell[0][0], "100")
+                   && p3.nrows == 2
+                   && p5.nrows == 1 && !strcmp(p5.cell[0][0], "150")
                    && p4.nrows == 2);
             }
             /* ── O S_ALTO É A FOLHA: G̃ ≡ 1, e a projecção devolve a célula ──────

@@ -31,6 +31,12 @@ typedef struct {
      * o defeito que nenhuma comparação de strings apanha. */
     int tipo[SQL_OUT_MAX_COLS];   /* PG_OID_INT4 (23) ou PG_OID_TEXT (25) */
     char cell[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+    /* A AUSÊNCIA ATRAVESSA O FIO. Uma célula vazia e uma célula ausente são
+     * objectos diferentes — o `thm:bitunico` diz que a ausência é o dual, não
+     * um valor —, e no protocolo isso escreve-se com o comprimento −1, não com
+     * zero bytes. Sem esta máscara o motor sabia distingui-las e o wire não:
+     * o valor ia certo e o NÍVEL ia errado. */
+    unsigned char nulo[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS];
 } SqlOut;
 
 int  sql_abrir(const char *base);

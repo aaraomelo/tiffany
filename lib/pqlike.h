@@ -68,6 +68,7 @@ typedef struct {
     int  ftype[SQL_OUT_MAX_COLS];       /* typeOID */
     int  fsize[SQL_OUT_MAX_COLS];       /* typlen: 4 (int4) ou −1 (variável) */
     char cell[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+    unsigned char nulo[SQL_OUT_MAX_ROWS][SQL_OUT_MAX_COLS];  /* −1 no fio */
     char tag[80];                       /* CommandComplete: "SELECT 2", … */
     char err[200];
     int  vivo;                          /* 0 = slot livre (PQclear) */
@@ -325,7 +326,10 @@ static PGresult *PQexec(PGconn *c, const char *sql){
                 int32_t L = pg_get_i32(pay + i);
                 i += 4;
                 if(L < 0){                                  /* NULL do protocolo */
-                    if(k < SQL_OUT_MAX_COLS) r->cell[linha][k][0] = 0;
+                    if(k < SQL_OUT_MAX_COLS){
+                        r->cell[linha][k][0] = 0;
+                        r->nulo[linha][k] = 1;
+                    }
                     continue;
                 }
                 if(i + L > pn) break;
@@ -390,8 +394,12 @@ static const char *PQgetvalue(const PGresult *r, int lin, int col){
     return r->cell[lin][col];
 }
 static int PQgetisnull(const PGresult *r, int lin, int col){
-    const char *v = PQgetvalue(r, lin, col);
-    return v[0] == 0;
+    /* a AUSÊNCIA, não a cadeia vazia: quem responde é a máscara que o
+     * comprimento −1 acendeu, e não o strlen. Um campo de texto vazio é um
+     * valor presente, e dizê-lo nulo era juntar dois níveis num só. */
+    if(!r || lin < 0 || lin >= r->nrows || col < 0 || col >= r->ncols) return 1;
+    if(lin >= SQL_OUT_MAX_ROWS || col >= SQL_OUT_MAX_COLS) return 1;
+    return r->nulo[lin][col] != 0;
 }
 static const char *PQcmdStatus(const PGresult *r){ return r ? r->tag : ""; }
 static const char *PQresultErrorMessage(const PGresult *r){ return r ? r->err : ""; }

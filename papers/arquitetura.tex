@@ -2326,6 +2326,65 @@ o \code{ESPALHA} não é um corpo nem uma aritmética, é a supressão de um des
 o dobro das linhas), §W25--§W26 (a pertença e o join do reticulado) e §W27 (o
 índice: $40$ nós em $20$, $40$ e $80$ linhas, contra passos que crescem; e o
 índice velho a ser ignorado sem errar).}
+\subsection*{O nulo é o dual do corpo representado}
+
+\noindent A tabela representa um corpo, e o corpo é o que está \textbf{escrito}.
+O que não foi escrito não é um valor errado nem um zero: é o \textbf{suporte},
+que existe antes do conteúdo e continua a existir depois de ele entrar. É o
+\code{aranha thm:bitunico} à letra --- \emph{a presença $b=1$ é o único
+operacional; a ausência $b=0$ é o suporte neutro, e é ela o dual} --- e a
+realização é um segundo bitmap, um bit por \emph{célula}, ao lado do bitmap do
+vivo, que é um bit por \emph{linha}.
+
+\medskip\noindent\textbf{O nível separa-se do valor, e é nisso que a frase se
+decide.} Escreve-se um zero explícito numa célula e deixa-se outra por escrever:
+\code{= 0} apanha a primeira e \code{IS NULL} a segunda, e os conjuntos são
+disjuntos. A medida forte é a seguinte: sobre o corpo, $=v$ e $\neq v$ são
+complementares e toda a linha cai num dos dois; a ausência falha nos
+\textbf{dois}, pelo que
+\[
+\lvert{=}v\rvert+\lvert{\neq}v\rvert \;=\; \lvert\text{presentes}\rvert
+\;<\; \lvert I\rvert .
+\]
+Nenhum valor do corpo faz isto --- só um objeto de outro nível o faz. Daí sai a
+partição em peso, coluna a coluna,
+$\lvert\text{presentes}\rvert+\lvert\text{ausentes}\rvert=\lvert I\rvert$, lida
+com a \emph{mesma} régua que conta as linhas vivas: o popcount da subsecção
+anterior serve os dois duais, e é por isso que um \code{DELETE} tira a linha dos
+dois lados de uma vez.
+
+\medskip\noindent\textbf{E escrever é o movimento.} Cada célula escrita passa
+\emph{uma} unidade de peso do dual para o corpo, e nunca mais do que uma; o
+\code{SET x = NULL} faz a volta, apagando a célula sem apagar a linha. Sem essa
+metade a presença só sabia crescer, e um dual que não volta é um contador. Uma
+coluna acrescentada nasce inteira no dual, que é o \code{ADD COLUMN} lido pelo
+\code{thm:levantamento}: a folha nova é uma coordenada que ainda não foi
+visitada.
+
+\medskip\noindent\textbf{Três sítios onde o nível se perde, e os três estavam
+abertos.} Primeiro, a comparação: o molde corre sobre o octeto da célula, que
+num sítio ausente é o neutro, e o neutro é um valor como outro qualquer --- o
+filtro do dual tira-o depois. Segundo, a \textbf{árvore}: ela devolve o sítio e
+não sabe da presença, pelo que o filtro tem de correr \emph{depois} da descida e
+a chave de uma célula ausente não pode sequer entrar no índice; com o filtro
+antes, \code{= 0} respondia uma coisa com índice e outra sem --- e a régua desta
+casa é que o índice muda o \textbf{custo}, nunca a resposta. Terceiro, o
+\textbf{fio}: no FEBE a ausência escreve-se com comprimento $-1$ e a cadeia
+vazia com zero bytes, que são as duas letras de dois níveis; mandar $0$ seria o
+motor distingui-los e o protocolo não, com o valor a ir certo e o nível a ir
+errado.
+
+\medido{\code{tests/pgwire.c} §W33 (o zero escrito e a ausência disjuntos; a
+soma que não fecha em $|I|$; a partição com pesos $3{+}0$, $2{+}1$, $1{+}2$; a
+volta pelo \code{SET NULL}; a mesma resposta com e sem índice; e o $-1$ no
+\code{DataRow}), §W32 (a coluna nova nasce no dual) e §W7 (o
+\code{PQgetisnull} pela fachada, com o \code{INSERT ... NULL} e a volta pelo
+socket).}
+
+\colunas{\code{aranha thm:bitunico}; \code{aranha thm:levantamento}}
+        {bitmap de presença por célula; \code{IS NULL}; $-1$ no FEBE}
+        {\code{tests/pgwire.c} §W33; §W32; §W7}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}

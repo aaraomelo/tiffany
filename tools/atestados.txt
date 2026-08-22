@@ -301,6 +301,7 @@ mecanica_corpo e5dbd536f54669dc 0
 medicao_normativa 1d628d6930adb23b 0
 medida b2e764b5c837f1b0 0
 meia_passagem 6b342c0ab6c07925 0
+meio f91d575fb052ce39 0
 meio_aberto 7bc01bd33a5a8ed9 0
 metades 568c7914349302ec 0
 metalica a3d70d36d1230a33 0
@@ -367,7 +368,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire bde4c58598668f1a 0
+pgwire b0ddefb6a8c2f89f 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -457,7 +458,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 253c0daa2ad85d9d 0
+sql 29e37a8e783ee761 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0

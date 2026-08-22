@@ -148,17 +148,24 @@ static void pg_put_row_description(PgBuf *w, int ncols, char col[][32]){
 }
 
 /* ── Backend: DataRow (valores em texto) ───────────────────────────────────── */
-static void pg_put_data_row(PgBuf *w, int ncols, char cell[][SQL_OUT_CELL]){
+static void pg_put_data_row_n(PgBuf *w, int ncols, char cell[][SQL_OUT_CELL],
+                              const unsigned char *nulo){
     int off = pg_msg_begin(w, PG_MSG_DATA_ROW);
     int j;
     pg_buf_i16(w, (int16_t)ncols);
     for(j = 0; j < ncols; j++){
         const char *s = cell[j];
         int L = (int)strlen(s ? s : "");
+        /* −1 é a AUSÊNCIA e 0 é a cadeia vazia: níveis diferentes, e o
+         * protocolo tem as duas letras. */
+        if(nulo && nulo[j]){ pg_buf_i32(w, -1); continue; }
         pg_buf_i32(w, L);
         if(L) pg_buf_bytes(w, s, L);
     }
     pg_msg_end(w, off);
+}
+static void pg_put_data_row(PgBuf *w, int ncols, char cell[][SQL_OUT_CELL]){
+    pg_put_data_row_n(w, ncols, cell, NULL);
 }
 
 /* SqlOut → linhas (sem Ready) — Extended Query / Execute */
@@ -171,7 +178,8 @@ static void pg_reply_sql_rows(PgBuf *w, const SqlOut *o){
     if(o->ncols > 0){
         pg_put_row_description_t(w, o->ncols, (char (*)[32])o->col, o->tipo);
         for(i = 0; i < o->nrows; i++)
-            pg_put_data_row(w, o->ncols, (char (*)[SQL_OUT_CELL])o->cell[i]);
+            pg_put_data_row_n(w, o->ncols, (char (*)[SQL_OUT_CELL])o->cell[i],
+                              o->nulo[i]);
     }
     pg_put_command_complete(w, o->tag[0] ? o->tag : "SELECT 0");
 }
