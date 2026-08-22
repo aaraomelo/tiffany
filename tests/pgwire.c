@@ -12669,6 +12669,204 @@ int main(void){
            " dinâmica», com o §K8 do `cantor.c` a medir c(A+B) = c(A)+c(B) em 0 de 256.", mal == 0);
     }
 
+    /* ═══ §W92: A MENOR EQUAÇÃO QUE SERVE TEM A ORDEM DO MÍNIMO ════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W92 §W91 deu uma equação de ordem n. Nem sempre é a menor.\n\n");
+        { const char *tabs[] = { "A","B","V" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w92__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w92__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w92.mem"); unlink("/tmp/pgwire_w92.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w92")) mal++;
+
+        /* põe uma matriz L×C na tabela t, com nomes de coluna c1..c6 */
+        #define POE(t,M,L,C) do { char q2[300]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[220]; cols[0] = 0; \
+              for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (L); i2++){ char vs[220]; vs[0] = 0; \
+                for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); } } while(0)
+
+        /* ── §W91 deu, para toda A n×n, uma equação escalar de ORDEM n. Ela
+         * serve sempre — mas nem sempre é a MENOR. A menor tem a ordem do
+         * polinómio MÍNIMO, e para I₂ isso é 1: ẋ = x duas vezes chega, e a
+         * equação de ordem 2 é redundante. Mede-se por dois caminhos que não
+         * se conhecem, e a minimalidade tem de ser medida à parte da
+         * existência — senão «d serve» passa verde com d−1 a servir também. */
+
+        /* ── (1) DUAS RÉGUAS PARA d, em 2×2, exaustivo em −2..2.
+         * A: menor d com {I, A, …, A^d} dependente — posto do empilhado 4 colunas.
+         * B: max sobre v de dim span{v, Av} — posto de [v | Av].
+         * O teorema diz que são iguais, e nenhuma das duas sabe da outra. */
+        long dois_ok = 0, dois_n = 0, cont_d[3] = {0,0,0};
+        for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+        for(long c = -2; c <= 2; c++) for(long d0 = -2; d0 <= 2; d0++){
+            long A[2][2] = {{a,b},{c,d0}};
+            long A2[2][2] = {{a*a + b*c, a*b + b*d0},{c*a + d0*c, c*b + d0*d0}};
+
+            /* régua A: {I}, {I,A}, {I,A,A²} como vectores de dimensão 4 */
+            long V[3][4] = {{1,0,0,1},{a,b,c,d0},{A2[0][0],A2[0][1],A2[1][0],A2[1][1]}};
+            int dA = -1;
+            for(int k = 1; k <= 2 && dA < 0; k++){
+                POE("B", V, k+1, 4);
+                sql_executa("SELECT posto(*) FROM B", &o);
+                if(!o.ok){ mal++; break; }
+                if(atoi(o.cell[0][0]) < k + 1) dA = k;   /* {I..A^k} dependente */
+            }
+            if(dA < 0) dA = 2;
+
+            /* régua B: o maior subespaço cíclico */
+            int dB = 0;
+            for(long v0 = -2; v0 <= 2; v0++) for(long v1 = -2; v1 <= 2; v1++){
+                if(!v0 && !v1) continue;
+                long Av[2] = { a*v0 + b*v1, c*v0 + d0*v1 };
+                long W[2][2] = {{v0, Av[0]},{v1, Av[1]}};
+                POE("V", W, 2, 2);
+                sql_executa("SELECT posto(*) FROM V", &o);
+                if(o.ok && atoi(o.cell[0][0]) > dB) dB = atoi(o.cell[0][0]);
+            }
+            dois_n++;
+            if(dA == dB){ dois_ok++; if(dA >= 0 && dA <= 2) cont_d[dA]++; }
+            else if(dois_n < 4)
+                printf("      A=(%ld,%ld;%ld,%ld) régua A diz %d, régua B diz %d\n",
+                       a, b, c, d0, dA, dB);
+        }
+        printf("      as DUAS RÉGUAS para o grau do mínimo concordam: %ld/%ld"
+               " (2×2 exaustivo em −2..2)\n", dois_ok, dois_n);
+        printf("      e a distribuição EXERCE os dois lados: d=1 em %ld matrizes"
+               " (as escalares), d=2 em %ld\n", cont_d[1], cont_d[2]);
+        if(dois_ok != dois_n) mal++;
+        if(cont_d[1] == 0 || cont_d[2] == 0){
+            printf("      → sem os dois valores de d isto media uma constante\n"); mal++;
+        }
+
+        /* ── (2) E A MINIMALIDADE, que é outra pergunta que a existência.
+         * Onde d = 1 a matriz é escalar, A = cI, e a órbita cumpre
+         * x_{k+1} = c·x_k — uma equação de ORDEM 1 onde §W91 deu ordem 2.
+         * O CONTROLO é o bloco de Jordan: varre-se TODO c e NENHUM serve,
+         * o que é o que prova que ali o 2 não pode descer. */
+        {
+            long Id[2][2] = {{3,0},{0,3}}, J[2][2] = {{1,1},{0,1}};
+            /* A = cI verificado pelo motor: posto(A − cI) = 0 */
+            long AL[2][2] = {{Id[0][0]-3, Id[0][1]},{Id[1][0], Id[1][1]-3}};
+            POE("A", AL, 2, 2);
+            sql_executa("SELECT posto(*) FROM A", &o);
+            int escalar = (o.ok && atoi(o.cell[0][0]) == 0);
+            printf("      3·I₂: posto(A − 3I) = %s → é escalar, e a ordem 1 basta\n",
+                   o.ok ? o.cell[0][0] : "?");
+            if(!escalar) mal++;
+
+            long serve_id = 0, serve_j = 0, tent = 0;
+            for(long cc = -4; cc <= 4; cc++){
+                int okI = 1, okJ = 1;
+                for(long s = -2; s <= 2; s++) for(long u = -2; u <= 2; u++){
+                    long x[2] = {s,u}, y[2] = {s,u};
+                    for(int k = 0; k < 3; k++){
+                        long nx[2] = { Id[0][0]*x[0] + Id[0][1]*x[1],
+                                       Id[1][0]*x[0] + Id[1][1]*x[1] };
+                        long ny[2] = { J[0][0]*y[0] + J[0][1]*y[1],
+                                       J[1][0]*y[0] + J[1][1]*y[1] };
+                        for(int i = 0; i < 2; i++){
+                            if(nx[i] != cc*x[i]) okI = 0;
+                            if(ny[i] != cc*y[i]) okJ = 0;
+                        }
+                        x[0] = nx[0]; x[1] = nx[1]; y[0] = ny[0]; y[1] = ny[1];
+                    }
+                }
+                tent++;
+                if(okI) serve_id++;
+                if(okJ) serve_j++;
+            }
+            printf("      MINIMALIDADE — recorrência de ordem 1 (x_{k+1} = c·x_k),"
+                   " varrendo c em −4..4:\n");
+            printf("        3·I₂  : serve para %ld dos %ld valores de c  (o c = 3)\n",
+                   serve_id, tent);
+            printf("        Jordan: serve para %ld dos %ld — NENHUM, e é isso que"
+                   " prova que ali o 2 não desce\n", serve_j, tent);
+            if(serve_id != 1) mal++;
+            if(serve_j != 0) mal++;
+        }
+
+        /* ── (3) E EM 3×3 O MÍNIMO PODE SER MENOR QUE n SEM A MATRIZ SER
+         * ESCALAR — é o caso que separa «d < n» de «A = cI». diag(1,1,2) tem
+         * mínimo (λ−1)(λ−2) de grau 2 contra um característico de grau 3.
+         * Aqui a régua das potências não cabe: o motor recusa 3×9, tecto 6×6.
+         * Usa-se a dos subespaços cíclicos, que é uma 3×3. */
+        {
+            struct { const char *nome; long M[3][3]; int d; } TT[] = {
+                { "diag(1,1,2)  mínimo grau 2 < n=3", {{1,0,0},{0,1,0},{0,0,2}}, 2 },
+                { "diag(1,2,3)  mínimo grau 3 = n  ", {{1,0,0},{0,2,0},{0,0,3}}, 3 },
+                { "2·I₃         mínimo grau 1      ", {{2,0,0},{0,2,0},{0,0,2}}, 1 },
+                { "N₃           mínimo grau 3      ", {{0,1,0},{0,0,1},{0,0,0}}, 3 },
+            };
+            long bate = 0;
+            for(unsigned t = 0; t < sizeof TT/sizeof TT[0]; t++){
+                int dB = 0;
+                for(long v0 = -2; v0 <= 2; v0++) for(long v1 = -2; v1 <= 2; v1++)
+                for(long v2 = -2; v2 <= 2; v2++){
+                    if(!v0 && !v1 && !v2) continue;
+                    long v[3] = {v0,v1,v2}, Av[3], A2v[3];
+                    for(int i = 0; i < 3; i++){
+                        Av[i] = 0; for(int j = 0; j < 3; j++) Av[i] += TT[t].M[i][j]*v[j];
+                    }
+                    for(int i = 0; i < 3; i++){
+                        A2v[i] = 0; for(int j = 0; j < 3; j++) A2v[i] += TT[t].M[i][j]*Av[j];
+                    }
+                    long W[3][3] = {{v[0],Av[0],A2v[0]},{v[1],Av[1],A2v[1]},
+                                    {v[2],Av[2],A2v[2]}};
+                    POE("V", W, 3, 3);
+                    sql_executa("SELECT posto(*) FROM V", &o);
+                    if(o.ok && atoi(o.cell[0][0]) > dB) dB = atoi(o.cell[0][0]);
+                }
+                printf("   %s  maior subespaço cíclico: %d\n", TT[t].nome, dB);
+                if(dB == TT[t].d) bate++; else mal++;
+            }
+            printf("      → o maior subespaço cíclico dá o grau do mínimo: %ld/4,"
+                   " e diag(1,1,2) mostra d < n SEM ser escalar\n", bate);
+        }
+
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("A MENOR EQUAÇÃO QUE SERVE TEM A ORDEM DO MÍNIMO, NÃO DO CARACTERÍSTICO. §W91 deu,"
+           " para toda A n×n, uma equação escalar de ordem n, e ela serve sempre — mas nem"
+           " sempre é a menor: para 3·I₂ basta ORDEM 1, e a de ordem 2 é redundante. O grau"
+           " certo é o do polinómio MÍNIMO, e mede-se por dois caminhos que não se conhecem:"
+           " o menor d com {I, A, …, A^d} dependente, pelo posto das potências empilhadas, e"
+           " o MAIOR SUBESPAÇO CÍCLICO, max sobre v de dim span{v, Av, …}, pelo posto de"
+           " [v | Av | …]. Concordam em 625/625 nas 2×2 com entradas em −2..2, e a"
+           " distribuição exerce os dois lados — d=1 nas 5 escalares, d=2 nas outras 620 —,"
+           " sem o que isto media uma constante. A MINIMALIDADE É OUTRA PERGUNTA QUE A"
+           " EXISTÊNCIA, e mede-se à parte: dizer «a ordem d serve» passa verde com d−1 a"
+           " servir também. Varre-se então TODO c em −4..4 na recorrência de ordem um"
+           " x_{k+1} = c·x_k: para 3·I₂ serve exactamente UM valor, o c = 3; para o bloco de"
+           " Jordan NENHUM serve, e é esse zero que prova que ali o 2 não desce. E O CASO QUE"
+           " SEPARA está em 3×3: diag(1,1,2) tem mínimo de grau 2 contra um característico de"
+           " grau 3 SEM ser escalar — logo «d < n» não é o mesmo que «A = cI», e a redução"
+           " ganha uma ordem sem a matriz ser trivial. Aqui a régua das potências não cabe: o"
+           " motor recusa 3×9 pelo tecto 6×6 que ele próprio declara, e usa-se a dos"
+           " subespaços cíclicos, que é uma 3×3 — o tecto é do motor, não do teorema, e"
+           " dizê-lo é o que impede de o ler como limite do resultado. E EM 3×3 SÃO UMA"
+           " MEDIDA CONTRA UMA DERIVAÇÃO, não duas medidas: o grau previsto vem de uma linha"
+           " — o mínimo de uma diagonal é o produto dos (λ−λᵢ) sobre as entradas DISTINTAS,"
+           " logo 2 para diag(1,1,2), 3 para diag(1,2,3), 1 para 2·I₃, e λ³ para N₃ —, e o"
+           " medido é o subespaço cíclico. Só em 2×2 as duas réguas são ambas do motor.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

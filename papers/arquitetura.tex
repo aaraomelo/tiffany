@@ -4305,6 +4305,59 @@ duas matrizes de cifra igual.}
         {\code{traco}/\code{produto}/\code{det}/\code{posto} pelo motor; Newton como segundo caminho}
         {\code{tests/pgwire.c} §W91}
 
+\subsection*{A menor equação que serve tem a ordem do mínimo}
+
+\noindent §W91 deu, para toda $A$ de ordem $n$, uma equação escalar de
+\textbf{ordem $n$}. Ela serve sempre --- mas nem sempre é a menor: para $3I_2$
+basta \textbf{ordem $1$}, e a de ordem $2$ é redundante. O grau certo é o do
+polinómio \textbf{mínimo}.
+
+\medskip\noindent\textbf{Dois caminhos que não se conhecem.} O primeiro é o menor
+$d$ com $\{I,A,\dots,A^{d}\}$ dependente, pelo \code{posto} das potências
+empilhadas; o segundo é o \textbf{maior subespaço cíclico},
+$\max_{v}\dim\operatorname{span}\{v,Av,\dots\}$, pelo \code{posto} de
+$[\,v\mid Av\mid\cdots]$. Concordam em $625/625$ nas $2\times2$ com entradas em
+$-2..2$, e a distribuição exerce os dois lados: $d=1$ nas $5$ escalares, $d=2$ nas
+outras $620$ --- sem o que isto media uma constante.
+
+\medskip\noindent\textbf{E a minimalidade é outra pergunta que a existência.}
+Dizer «a ordem $d$ serve» passa verde com $d-1$ a servir também. Varre-se então
+\emph{todo} $c$ na recorrência de ordem um $x_{k+1}=c\,x_{k}$:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & $c$ que servem, em $-4..4$ & \\
+\midrule
+$3I_2$ & $1$ --- o $c=3$ & a ordem $1$ basta\\
+$\left(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\right)$ & $\mathbf{0}$ --- nenhum & e é esse zero que prova que o $2$ não desce\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E o caso que separa está em $3\times3$.}
+$\operatorname{diag}(1,1,2)$ tem mínimo $(\lambda-1)(\lambda-2)$, de grau $2$
+contra um característico de grau $3$, \emph{sem ser escalar}: logo «$d<n$» não é o
+mesmo que «$A=cI$», e a redução ganha uma ordem sem a matriz ser trivial.
+\[
+\boxed{\;\text{ordem da menor equação}=\deg\mu_{A}\;\le\;n\;}
+\]
+
+\medskip\noindent\textbf{O tecto é do motor, não do teorema.} Em $3\times3$ a
+régua das potências não cabe --- empilhar $\vec{A^{i}}$ pede $9$ colunas e o motor
+recusa $3\times9$ pelo tecto $6\times6$ que ele próprio declara. Usa-se a dos
+subespaços cíclicos, que é uma $3\times3$; e ali são \emph{uma medida contra uma
+derivação}, não duas medidas --- o grau previsto sai de uma linha (o mínimo de uma
+diagonal é o produto dos $(\lambda-\lambda_i)$ sobre as entradas \textbf{distintas}).
+Só em $2\times2$ as duas réguas são ambas do motor.
+
+\medido{\code{tests/pgwire.c} §W92 --- as duas réguas em $625/625$, com a
+distribuição contada; a minimalidade por varrimento de $c$, com o zero do bloco de
+Jordan como CONTROLO; e as quatro testemunhas $3\times3$.}
+
+\colunas{§W91 (a equação de ordem $n$, que serve sempre)}
+        {\code{posto} das potências empilhadas; \code{posto} de $[v\mid Av\mid\cdots]$}
+        {\code{tests/pgwire.c} §W92}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
