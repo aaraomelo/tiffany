@@ -13015,6 +13015,271 @@ int main(void){
            " dois tipos — se um lado fosse vazio, a dicotomia não separava nada.", mal == 0);
     }
 
+    /* ═══ §W94: A COMPANHEIRA DO CATÁLOGO, REALIZADA — E O DIVISOR DE ZERO ══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W94 Comp{n}{m} no motor: det, inversa inteira, χ por Newton, e n≡5 (mod 6).\n\n");
+        { const char *tabs[] = { "A","P","Q","R" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w94__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w94__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w94.mem"); unlink("/tmp/pgwire_w94.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w94")) mal++;
+
+        #define N94 6
+        long rec94 = 0;          /* INSERTs recusados pelo envelope da célula */
+        #define POE(t,M,L,C) do { char q2[400]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[300]; cols[0] = 0; \
+              for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (L); i2++){ char vs[300]; vs[0] = 0; \
+                for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); if(!o2.ok) rec94++; } } while(0)
+
+        /* multiplica X (n×n) por Y (n×n) pelo motor */
+        #define MUL(X,Y,Z,n) do { POE("A",(X),(n),(n)); POE("P",(Y),(n),(n)); \
+            sql_executa("SELECT produto(A) FROM P", &o); \
+            if(!o.ok || o.nrows != (n)){ mal++; } else \
+            for(int i3 = 0; i3 < (n); i3++) for(int j3 = 0; j3 < (n); j3++) \
+                (Z)[i3][j3] = atol(o.cell[i3][j3]); } while(0)
+
+        /* ── O `catalogo.tex` §sec:dim define Comp{n}{m}, a companheira de
+         * β_{n,m} = x^n − m·x^{n−1} − 1, e diz das suas leis «verificado
+         * SIMBOLICAMENTE para 2≤n≤6, m∈{1,2}». O motor nunca as executou. */
+
+        /* ── (1) det Comp = (−1)^{n+1}, e a INVERSA É INTEIRA — que é a metade
+         * sem a qual |det|=1 seria meia lei: é ela que põe Comp em GL_n(ℤ). */
+        long det_ok = 0, inv_ok = 0, casos = 0, inv_casos = 0, inv_tecto = 0;
+        for(int n = 2; n <= N94; n++) for(long m = 1; m <= 2; m++){
+            long C[N94][N94];
+            memset(C, 0, sizeof C);
+            C[0][0] = m; C[0][n-1] = 1;
+            for(int i = 1; i < n; i++) C[i][i-1] = 1;
+            POE("A", C, n, n);
+            sql_executa("SELECT det(*) FROM A", &o);
+            casos++;
+            long esp = ((n + 1) % 2 == 0) ? 1 : -1;      /* (−1)^{n+1} */
+            if(o.ok && atol(o.cell[0][0]) == esp) det_ok++;
+            else printf("      n=%d m=%ld: det = %s, esperado %ld\n",
+                        n, m, o.ok ? o.cell[0][0] : "?", esp);
+            /* a INVERSA tem tecto PRÓPRIO: trabalha na aumentada n×2n, logo o
+             * seu limite é METADE do geral — 3×3. Acima disso o motor recusa, e
+             * isso é o tecto dele e não uma falha da lei: conta-se à parte, e o
+             * det continua a valer nos casos que a inversa não alcança. */
+            sql_executa("SELECT inversa(*) FROM A", &o);
+            if(!o.ok) inv_tecto++;
+            else {
+                inv_casos++;
+                int inteira = (o.nrows == n);
+                for(int i = 0; i < n && inteira; i++) for(int j = 0; j < n; j++)
+                    if(strchr(o.cell[i][j], '/')) inteira = 0;
+                if(inteira) inv_ok++;
+            }
+        }
+        printf("      det Comp{n}{m} = (−1)^{n+1}: %ld/%ld  (n=2..6, m=1..2, que é"
+               " o regime do catálogo)\n", det_ok, casos);
+        printf("      inversa INTEIRA: %ld/%ld onde ela CABE; nos outros %ld o motor"
+               " recusa pelo tecto 3×3 da aumentada n×2n — tecto dele, não da lei\n",
+               inv_ok, inv_casos, inv_tecto);
+        if(det_ok != casos) mal++;
+        if(inv_ok != inv_casos || inv_casos < 4) mal++;
+        if(inv_tecto == 0){ printf("      → o tecto da inversa não foi exercido\n"); mal++; }
+
+        /* ── (2) O CARACTERÍSTICO É β_{n,m}, obtido pelo motor por NEWTON dos
+         * traços das potências. O conteúdo não é o e_1 = m nem o e_n = ±1: são
+         * os ZEROS do meio. Um polinómio com n coeficientes de que n−2 têm de
+         * se anular é uma afirmação forte, e é ela que diz que a companheira
+         * é a de β e não de outra coisa. */
+        long chi_ok = 0, chi_n = 0, zeros = 0;
+        for(int n = 2; n <= N94; n++) for(long m = 1; m <= 2; m++){
+            long C[N94][N94], Ak[N94][N94], p[N94+1];
+            memset(C, 0, sizeof C);
+            C[0][0] = m; C[0][n-1] = 1;
+            for(int i = 1; i < n; i++) C[i][i-1] = 1;
+            memset(Ak, 0, sizeof Ak);
+            for(int i = 0; i < n; i++) Ak[i][i] = 1;
+            int falhou = 0;
+            for(int k = 1; k <= n; k++){
+                long T[N94][N94];
+                MUL(C, Ak, T, n);
+                memcpy(Ak, T, sizeof Ak);
+                POE("A", Ak, n, n);
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok){ falhou = 1; break; }
+                p[k] = atol(o.cell[0][0]);
+            }
+            if(falhou){ mal++; continue; }
+            long e[N94+1]; e[0] = 1;
+            for(int k = 1; k <= n; k++){
+                long s = 0;
+                for(int i = 1; i <= k; i++)
+                    s += ((i % 2) ? 1 : -1) * e[k-i] * p[i];
+                e[k] = s / k;
+            }
+            /* β_{n,m}: e_1 = m, e_2..e_{n−1} = 0, e_n = (−1)^{n+1} */
+            int bom = (e[1] == m);
+            for(int k = 2; k <= n-1; k++){ if(e[k] != 0) bom = 0; else zeros++; }
+            if(e[n] != (((n+1) % 2 == 0) ? 1 : -1)) bom = 0;
+            chi_n++;
+            if(bom) chi_ok++;
+            else printf("      n=%d m=%ld: e₁ = %ld, e_n = %ld — não é β_{n,m}\n",
+                        n, m, e[1], e[n]);
+        }
+        printf("      χ(Comp{n}{m}) = β_{n,m} por Newton: %ld/%ld, com %ld"
+               " coeficientes do meio a ANULAREM-SE\n", chi_ok, chi_n, zeros);
+        if(chi_ok != chi_n) mal++;
+        if(zeros < 12){ printf("      → poucos zeros: a lei não foi exercida\n"); mal++; }
+
+        /* ── (3) E O CASO EM QUE «CORPO» NÃO SE PODE DIZER. O catálogo é
+         * explícito: «o enunciado certo, para m=1, continua CONDICIONAL —
+         * quando β é irredutível, K_{n,m} = ℚ[x]/(β) é corpo». A condição
+         * falha em n ≡ 5 (mod 6), onde o sexto ciclotómico divide β_{n,1}, e
+         * o primeiro caso é
+         *     β_{5,1} = x⁵ − x⁴ − 1 = (x² − x + 1)(x³ − x − 1).
+         * Pelo §W93, ℚ[A] ≅ ℚ[λ]/(μ) tem divisor de zero exactamente onde μ
+         * factoriza — e aqui ele não se argumenta: EXIBE-SE. Avaliam-se os
+         * dois factores na companheira, pelo motor, e o produto tem de ser a
+         * matriz NULA com os dois factores não nulos. */
+        {
+            const int n = 5;
+            long C[N94][N94], A2[N94][N94], A3[N94][N94], Id[N94][N94];
+            memset(C, 0, sizeof C); memset(Id, 0, sizeof Id);
+            C[0][0] = 1; C[0][4] = 1;
+            for(int i = 1; i < n; i++) C[i][i-1] = 1;
+            for(int i = 0; i < n; i++) Id[i][i] = 1;
+            MUL(C, C, A2, n);
+            MUL(C, A2, A3, n);
+            /* F = A² − A + I   e   G = A³ − A − I */
+            long F[N94][N94], G[N94][N94], H[N94][N94];
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+                F[i][j] = A2[i][j] - C[i][j] + Id[i][j];
+                G[i][j] = A3[i][j] - C[i][j] - Id[i][j];
+            }
+            int Fnulo = 1, Gnulo = 1, Hnulo = 1;
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+                if(F[i][j]) Fnulo = 0;
+                if(G[i][j]) Gnulo = 0;
+            }
+            MUL(F, G, H, n);
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+                if(H[i][j]) Hnulo = 0;
+            printf("      n=5, m=1 — β = (x²−x+1)(x³−x−1):\n");
+            printf("        F = A²−A+I  nula? %s   ·  G = A³−A−I  nula? %s\n",
+                   Fnulo ? "sim" : "NÃO", Gnulo ? "sim" : "NÃO");
+            printf("        F·G nula? %s  → dois elementos NÃO NULOS com produto"
+                   " ZERO: é um DIVISOR DE ZERO exibido\n", Hnulo ? "sim" : "NÃO");
+            if(Fnulo || Gnulo || !Hnulo) mal++;
+            /* e o CONTROLO: em n=4, m=1 o β é irredutível, e não há factor
+             * ciclotómico a exibir — o mesmo par de graus 2 e 3 não anula */
+            const int n4 = 4;
+            long C4[N94][N94], B2[N94][N94], B3[N94][N94], I4[N94][N94],
+                 F4[N94][N94], G4[N94][N94], H4[N94][N94];
+            memset(C4, 0, sizeof C4); memset(I4, 0, sizeof I4);
+            C4[0][0] = 1; C4[0][3] = 1;
+            for(int i = 1; i < n4; i++) C4[i][i-1] = 1;
+            for(int i = 0; i < n4; i++) I4[i][i] = 1;
+            MUL(C4, C4, B2, n4); MUL(C4, B2, B3, n4);
+            for(int i = 0; i < n4; i++) for(int j = 0; j < n4; j++){
+                F4[i][j] = B2[i][j] - C4[i][j] + I4[i][j];
+                G4[i][j] = B3[i][j] - C4[i][j] - I4[i][j];
+            }
+            MUL(F4, G4, H4, n4);
+            int H4nulo = 1;
+            for(int i = 0; i < n4; i++) for(int j = 0; j < n4; j++)
+                if(H4[i][j]) H4nulo = 0;
+            printf("        CONTROLO n=4 (β irredutível): o MESMO par de factores"
+                   " dá produto nulo? %s — e é isso que impede de ler o zero"
+                   " acima como um acidente da conta\n", H4nulo ? "sim" : "não");
+            if(H4nulo) mal++;
+        }
+
+        /* ── (4) E O ENVELOPE DA CÉLULA, que foi o que me travou e é uma lei
+         * desta casa, não um estorvo: `RACIONAL` vive em −128..127, e o motor
+         * diz «a linha é RECUSADA e nada é escrito — alargar a célula é subir a
+         * torre, e não truncar em silêncio». Com m=3 e n=5 a quinta potência
+         * chega a 244 e sai do envelope. O que se mede aqui é o EFEITO da
+         * recusa: a linha não entra, a tabela fica 4×5, e a operação seguinte
+         * falha com «not square» — um erro que NÃO nomeia a causa. */
+        {
+            long rec_antes = rec94;
+            long M5[N94][N94] = {{244,3,9,27,81},{81,1,3,9,27},{27,0,1,3,9},
+                                 {9,0,0,1,3},{3,0,0,0,1}};
+            POE("Q", M5, 5, 5);
+            long recusadas = rec94 - rec_antes;
+            sql_executa("SELECT COUNT(*) FROM Q", &o);
+            long linhas = (o.ok ? atol(o.cell[0][0]) : -1);
+            sql_executa("SELECT traco(*) FROM Q", &o);
+            printf("      ENVELOPE — 244 não cabe em −128..127: linhas recusadas %ld,"
+                   " a tabela fica com %ld de 5\n", recusadas, linhas);
+            printf("        e a operação seguinte diz «%s» — não nomeia a causa, e é por"
+                   " isso que o regime do catálogo (m ∈ {1,2}) é o regime certo\n",
+                   o.ok ? "(passou!)" : o.err);
+            if(recusadas != 1 || linhas != 4) mal++;
+            if(o.ok) mal++;              /* uma 4×5 NÃO pode dar traço */
+            /* o CONTROLO: 127 cabe, e a mesma tabela com 127 no lugar do 244
+             * entra inteira e responde — senão isto media a recusa constante */
+            long M5b[N94][N94] = {{127,3,9,27,81},{81,1,3,9,27},{27,0,1,3,9},
+                                  {9,0,0,1,3},{3,0,0,0,1}};
+            rec_antes = rec94;
+            POE("Q", M5b, 5, 5);
+            sql_executa("SELECT traco(*) FROM Q", &o);
+            printf("        CONTROLO com 127 no mesmo lugar: recusadas %ld, traço %s\n",
+                   rec94 - rec_antes, o.ok ? o.cell[0][0] : o.err);
+            if(rec94 - rec_antes != 0 || !o.ok) mal++;
+        }
+
+        #undef MUL
+        #undef POE
+        #undef N94
+        sql_fechar();
+
+        printf("\n");
+        ok("A COMPANHEIRA DO CATÁLOGO PASSA A SER EXECUTADA, E O CASO CONDICIONAL GANHA UM"
+           " OBJECTO. O `catalogo.tex` §sec:dim define Comp{n}{m}, a companheira de"
+           " β_{n,m} = xⁿ − m·x^{n−1} − 1, e diz das suas leis «verificado SIMBOLICAMENTE para"
+           " 2≤n≤6, m∈{1,2}» — o motor nunca as tinha executado. Executa, NO REGIME QUE O"
+           " CATÁLOGO ENUNCIA: det = (−1)^{n+1} em 10/10. A inversa é a metade sem a qual"
+           " |det|=1 seria meia lei — é ela que põe Comp em GL_n(ℤ) —, e sai INTEIRA, sem uma"
+           " barra de fracção, em 4/4 dos casos ONDE ELA CABE; nos outros 6 o motor recusa"
+           " pelo tecto 3×3 da matriz aumentada n×2n, que é metade do tecto geral. Esse tecto"
+           " é do motor e não da lei, conta-se à parte, e o det continua a valer nos casos"
+           " que a inversa não alcança. O CARACTERÍSTICO SAI POR NEWTON dos traços das"
+           " potências, todos pedidos ao motor, e o conteúdo não é o e₁ = m nem o e_n = ±1:"
+           " são os ZEROS DO MEIO — 20 coeficientes que têm de se anular, e anulam. Um"
+           " polinómio de n coeficientes com n−2 nulos é o que diz que aquela matriz é a"
+           " companheira de β e não de outra coisa. E O CASO CONDICIONAL DEIXA DE SER UMA"
+           " RESSALVA: o catálogo é explícito que «para m=1 o enunciado continua condicional —"
+           " QUANDO β é irredutível, K_{n,m} = ℚ[x]/(β) é corpo», e que a condição falha em"
+           " n ≡ 5 (mod 6), com β_{5,1} = (x²−x+1)(x³−x−1). Pelo §W93 isso obriga a haver"
+           " divisor de zero; aqui ele não se argumenta, EXIBE-SE: avaliam-se os dois factores"
+           " na companheira 5×5 pelo motor, F = A²−A+I e G = A³−A−I, ambos NÃO NULOS, e o"
+           " produto F·G é a matriz NULA. Dois elementos não nulos de ℚ[A] com produto zero —"
+           " logo ali K_{5,1} não é corpo, e a palavra do título é condicional por uma razão"
+           " que agora tem um objecto. O CONTROLO é n=4, onde β é irredutível: o MESMO par de"
+           " factores de graus 2 e 3 NÃO dá produto nulo, sem o que aquele zero se leria como"
+           " um acidente da conta em vez de uma propriedade do polinómio. E O REGIME NÃO FOI"
+           " ESCOLHIDO POR CONVENIÊNCIA: a primeira escrita estendeu a m=3 por conta própria e"
+           " bateu no ENVELOPE DA CÉLULA, que é lei desta casa — `RACIONAL` vive em −128..127,"
+           " e o motor diz «a linha é RECUSADA e nada é escrito: alargar a célula é subir a"
+           " torre, e não truncar em silêncio». Com m=3 e n=5 a quinta potência chega a 244 e"
+           " sai. Mede-se o EFEITO dessa recusa, que é o que interessa: a linha não entra, a"
+           " tabela fica com 4 de 5, e a operação seguinte falha com «matrix is not square» —"
+           " um erro verdadeiro que NÃO NOMEIA A CAUSA, e que apontaria o leitor para a forma"
+           " da tabela em vez do envelope. O controlo é 127 no mesmo lugar: entra sem recusa"
+           " e o traço responde 131. O catálogo já dizia m ∈ {1,2}, e era o regime certo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

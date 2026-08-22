@@ -4409,6 +4409,67 @@ span em todos os elementos invertíveis.}
         {\code{posto} do empilhado; \code{det} e \code{inversa} pelo motor}
         {\code{tests/pgwire.c} §W93}
 
+\subsection*{A companheira do catálogo, executada --- e o caso condicional com um objeto}
+
+\noindent O \code{catalogo} §\code{sec:dim} define $C_{n,m}$, a companheira de
+$\beta_{n,m}=x^{n}-m\,x^{n-1}-1$, e diz das suas leis «verificado
+\emph{simbolicamente} para $2\le n\le6$, $m\in\{1,2\}$». O motor nunca as tinha
+executado. Executa, no regime que o catálogo enuncia:
+\[
+\det C_{n,m}=(-1)^{n+1}\quad\text{em }10/10 .
+\]
+E a inversa é a metade sem a qual $\lvert\det\rvert=1$ seria meia lei --- é ela que
+põe $C_{n,m}$ em $\mathrm{GL}_n(\Z)$: sai \textbf{inteira}, sem uma barra de fração,
+em $4/4$ dos casos \emph{onde ela cabe}. Nos outros $6$ o motor recusa pelo tecto
+$3\times3$ da matriz aumentada $n\times2n$, que é metade do tecto geral --- e esse
+tecto é \textbf{do motor, não da lei}: conta-se à parte, e o $\det$ continua a
+valer nos casos que a inversa não alcança.
+
+\medskip\noindent\textbf{O característico sai por Newton}, dos traços das
+potências, todos pedidos ao motor. E o conteúdo não é o $e_1=m$ nem o
+$e_n=\pm1$: são os \textbf{zeros do meio} --- $20$ coeficientes que têm de se
+anular, e anulam. Um polinómio de $n$ coeficientes com $n-2$ nulos é o que diz que
+aquela matriz é a companheira de $\beta$ e não de outra coisa.
+
+\medskip\noindent\textbf{E o caso condicional deixa de ser uma ressalva.} O
+catálogo é explícito: «para $m=1$ o enunciado continua \emph{condicional} ---
+\emph{quando} $\beta$ é irredutível, $K_{n,m}=\Q[x]/(\beta)$ é corpo», e a condição
+falha em $n\equiv5\pmod 6$, onde o sexto ciclotómico divide $\beta_{n,1}$:
+\[
+\beta_{5,1}=x^{5}-x^{4}-1=(x^{2}-x+1)(x^{3}-x-1).
+\]
+Por §W93 isso \emph{obriga} a haver divisor de zero. Aqui ele não se argumenta ---
+\textbf{exibe-se}: avaliam-se os dois fatores na companheira $5\times5$ pelo motor,
+\[
+F=A^{2}-A+I\neq0,\qquad G=A^{3}-A-I\neq0,\qquad \boxed{\;F\cdot G=0\;}
+\]
+Dois elementos \emph{não nulos} de $\Q[A]$ com produto zero: ali $K_{5,1}$
+\textbf{não é corpo}, e a palavra do título é condicional por uma razão que agora
+tem um objeto. O \textsc{controlo} é $n=4$, onde $\beta$ é irredutível: o
+\emph{mesmo} par de fatores de graus $2$ e $3$ \textbf{não} dá produto nulo --- sem
+o que aquele zero se leria como um acidente da conta em vez de uma propriedade do
+polinómio.
+
+\medskip\noindent\textbf{E o regime não foi escolhido por conveniência.} A primeira
+escrita estendeu a $m=3$ por conta própria e bateu no \textbf{envelope da célula},
+que é lei desta casa: \code{RACIONAL} vive em $-128..127$, e o motor diz «a linha é
+\textsc{recusada} e nada é escrito --- alargar a célula é subir a torre, e não
+truncar em silêncio». Com $m=3$ e $n=5$ a quinta potência chega a $244$ e sai. O
+que se mede é o \emph{efeito} da recusa: a linha não entra, a tabela fica com $4$
+de $5$, e a operação seguinte falha com \code{matrix is not square} --- um erro
+verdadeiro que \textbf{não nomeia a causa}, e que apontaria o leitor para a forma
+da tabela em vez do envelope. O controlo é $127$ no mesmo lugar: entra sem recusa e
+o traço responde $131$. \emph{O catálogo já dizia $m\in\{1,2\}$, e era o regime
+certo.}
+
+\medido{\code{tests/pgwire.c} §W94 --- $\det$ em $10/10$; a inversa inteira onde
+cabe, com o tecto contado à parte; Newton com os $20$ zeros; o divisor de zero
+exibido em $n=5$ com o controlo em $n=4$; e o envelope com o seu controlo.}
+
+\colunas{\code{catalogo sec:dim} (\code{prop:detn}, \code{thm:constrn}); §W93 (corpo $\iff$ $\mu$ irredutível)}
+        {\code{det}/\code{inversa}/\code{traco}/\code{produto} pelo motor; Newton; o envelope da célula}
+        {\code{tests/pgwire.c} §W94}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
