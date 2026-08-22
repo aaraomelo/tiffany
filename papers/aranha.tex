@@ -1653,8 +1653,59 @@ fase é um bit e o $\oplus$ é \emph{involutivo}, pelo que desfazer e fazer são
 \emph{mesma} operação; e a transformada é o seu próprio inverso a menos da
 escala, $\mathcal{F}\mathcal{F}=\lvert X\rvert\cdot\mathrm{id}$. É o
 Cor.~\ref{cor:mobius} outra vez: \emph{a álgebra não muda, só muda a ordem sobre
-a qual se acumula} --- e quando a ordem é um grupo de expoente $2$, as duas
-metades do par colapsam numa.
+a qual se acumula}.
+
+\medskip\noindent\textbf{E é preciso dizer com todas as letras o que aqui muda,
+porque é nisso que está o resultado: muda a ORDEM, não a álgebra.} A álgebra é a
+mesma nos dois casos --- a de incidência da Def.~\ref{def:incid}, com a sua
+convolução ---, e o que se troca é o conjunto ordenado sobre o qual ela corre.
+Daí a formulação que fecha:
+\[
+\boxed{\;\text{o par }(\zeta,\mu)\text{ não é propriedade da álgebra: é da ORDEM.}\;}
+\]
+Na ordem total, $\zeta$ acumula e $\mu$ é a diferença finita, e são
+\emph{distintos} (Teor.~\ref{thm:mu}). Numa ordem de \textbf{expoente $2$} ---
+onde $x\oplus x=0$ para todo $x$ --- o operador é a sua própria inversa,
+$\oplus^{-1}=\oplus$, e a involução \textbf{identifica} os dois. Não é a álgebra
+a mudar de lei: é a mesma lei sobre uma ordem em que fazer e desfazer coincidem.
+
+\medskip\noindent E daí lê-se a cadeia inteira de uma vez:
+\[
+\text{polar}\;\longrightarrow\;\text{fase}\;\longrightarrow\;\text{paridade}
+\;\longrightarrow\;\oplus\;\longrightarrow\;\mu=\zeta
+\]
+com o $\mathcal{F}\mathcal{F}=\lvert X\rvert\cdot\mathrm{id}$ a fechar a volta:
+\emph{a transformada vai e vem pelo mesmo operador, a menos da normalização}.
+As duas metades do par colapsam numa --- e a §\ref{sec:zeta} continua a valer
+tal como está, porque lá a ordem é outra.
+
+\medskip\noindent\textbf{E as duas realizações põem-se lado a lado.} O
+\emph{índice} de um banco e o \emph{espectro} são o mesmo par sobre ordens
+diferentes, e o que muda em cada linha é consequência disso:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o índice} (ordem linear) & \textbf{o espectro} (expoente $2$)\\
+\midrule
+$\zeta$ & acumular & a projeção espectral\\
+$\mu$ & a diferença finita & a \emph{mesma} projeção\\
+o par & $\zeta\neq\mu$ & $\boxed{\zeta=\mu}$\\
+a trajetória & descer deixando rasto, subir a recolher & ir e vir pelo mesmo operador\\
+a escala & unitária & $\lvert X\rvert$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A última linha não é detalhe: é onde se paga a identificação. Na ordem
+linear a volta fecha \emph{exatamente} --- $\mu(\zeta(b))=b$, sem factor --- e na
+de expoente $2$ ela fecha a menos de $\lvert X\rvert$. \emph{Fazer e desfazer
+tornarem-se a mesma operação não sai de graça: sai com uma norma pendurada.}
+
+\medskip\noindent E o que colapsou foi o \textbf{módulo}. Com a fase restrita a
+$\{0,\pi\}$ o vetor complexo degenera num vetor de \emph{sinais}, e a informação
+passa a ser puramente \emph{topológica} --- orientação, e não tamanho. É a
+mesma frase do Teor.~\ref{thm:BI} levada ao extremo: o módulo é metade, e aqui
+essa metade vale sempre $1$.
 
 \medskip\noindent A degenerescência não é rara e tem agora nome próprio: é $C_f$
 ter núcleo. O campo de um percurso que visita $0$ e $1$ uma vez cada tem
