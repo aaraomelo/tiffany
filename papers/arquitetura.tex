@@ -5508,6 +5508,85 @@ invertida; a invertibilidade composta; e o controlo da colisão.}
         {aritmética de racionais reduzidos; composição de $\widehat T$ e da sua inversa}
         {\code{tests/pgwire.c} §W114}
 
+\subsection*{A lei do discriminante: três classes, e o corte é a do meio}
+
+\noindent Como $\lvert\det\rvert=1$ é a forma do operador (§W109) e
+$\Delta=\operatorname{tr}^{2}-4\det$ é inteiro, a tricotomia esgota --- e as três
+classes \emph{são} as três realizações desta casa:
+\[
+\begin{array}{lll}
+\Delta<0 & \textbf{elíptico} & \text{ordem finita, e ela está em }\{3,4,6\}\\
+\Delta=0 & \textbf{parabólico} & \text{raiz \textbf{dupla}: o \code{aranha thm:corte} \emph{terminado}}\\
+\Delta>0 & \textbf{hiperbólico} & \text{uma direção expande, a outra contrai}
+\end{array}
+\]
+Medido em $360$ matrizes de $\mathrm{GL}_2(\Z)$ com entradas em $-4..4$: $34$, $74$ e
+$252$, soma exata.
+
+\medskip\noindent\textbf{E duas coisas que não estavam previstas, ambas apanhadas
+por asserção.} \emph{O traço sozinho não classifica}: só dentro de
+$\mathrm{SL}_2(\Z)$ é que $\Delta<0$ é $\lvert\operatorname{tr}\rvert<2$; com
+$\det=-1$ vale $\Delta=\operatorname{tr}^{2}+4>0$ \emph{sempre}. A primeira escrita
+classificou pelo traço e produziu $16$ «elípticas» sem ordem finita. E \emph{a ordem
+$2$ não é elíptica}: as elípticas dão $\{3,4,6\}$, porque o espelho $\nu$ não
+\textbf{roda} --- \textbf{reflete}. A testemunha é
+$S=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, traço $0$, $\det=-1$,
+$\Delta=4>0$. \emph{A tríade atravessa duas classes}, e a diferença entre
+$\{1,2,3,4,6\}$ e $\{3,4,6\}$ é exatamente o que reflete em vez de rodar.
+
+\medskip\noindent O parabólico \textbf{é} o corte: $\Delta=0$ é o que o
+\code{thm:corte}(3) chama «acaba, e acaba numa \emph{igualdade}» --- $m_N=g_N$, a raiz
+dupla, $\delta=0$. \emph{O corte não converge para o ponto: chega a ele}, porque a
+régua tem grão. E o hiperbólico é a família metálica, pela \code{catalogo
+prop:selberg}: $A_m$ tem $\det=-1$ logo não está em $\mathrm{SL}_2(\Z)$, e a menor
+potência com $\det+1$ é $A_m^{2}$, de traço $m^{2}+2>2$ --- confirmado pelo motor.
+
+\medido{\code{tests/pgwire.c} §W116; a lei vai para o \code{aranha} como
+\code{thm:leidisc}, com prova, e para o \code{catalogo} antes do \code{thm:pisot-cat}.}
+
+\colunas{\code{aranha thm:corte}, \code{lem:cristal}; \code{catalogo prop:selberg}; §W109, §W110}
+        {\code{det}/\code{traco}/\code{produto} pelo motor; a ordem por iteração}
+        {\code{tests/pgwire.c} §W116}
+
+\subsection*{A Lei 8: ligar sem fundir}
+
+\noindent §W89 mediu o limite pela via matricial --- $\mathbb{O}$ não associa e toda
+a matriz associa, logo não existe representação matricial fiel dele. O que o catálogo
+põe no topo da torre é a saída: o \textbf{octonião dual} $\mathbb{H}\times\mathbb{H}^{*}$,
+«ligar sem fundir».
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+$\mathbb{H}$ associa & $64/64$\\
+$\mathbb{O}$ \textbf{não} associa & $168$ de $512$ ($344$ associam)\\
+$\mathbb{H}\times\mathbb{H}^{*}$ \textbf{associa} & $\mathbf{4096/4096}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{O grau é o mesmo, oito, por caminhos opostos}: em
+$\mathbb{O}$ é $2^{3}$, três dobras que \textbf{fundem}; no par é $4+4$, dois tecidos
+\textbf{ligados}. \emph{O dual é toda a diferença} --- e é isso que a expressão quer
+dizer, medido e não parafraseado. A norma compõe nos dois, mas no par são \emph{duas}
+normas, uma por tecido, e nada se mistura.
+
+\medskip\noindent\textbf{E a interface é o seis.} Entre $2$ e $200$, o $6$ é o
+\textbf{único} $n$ com a soma dos divisores próprios igual ao produto deles:
+$1+2+3=6=1\cdot2\cdot3$ --- «soma é produto», que é a forma áurea
+$\varphi\cdot\varphi=\varphi+1$ lida na aritmética. E $6=\mathrm{lcm}(2,3)$ é a
+\emph{mesma} ordem que o \code{thm:leidisc} dá às elípticas. \emph{Três leis, um
+número.}
+
+\medskip\noindent O \textsc{controlo} do $\mathbb{O}$ é que \emph{nem tudo} falhe:
+uma álgebra onde nada associasse não seria esta.
+
+\medido{\code{tests/pgwire.c} §W117; promovido no \code{catalogo} na
+\code{def:alonzo}.}
+
+\colunas{\code{catalogo cat:def:alonzo} (o octonião dual); §W89 (o limite da representação)}
+        {tábua de Cayley--Dickson em inteiros; o associador contado}
+        {\code{tests/pgwire.c} §W117}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
