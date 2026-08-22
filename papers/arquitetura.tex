@@ -2162,13 +2162,26 @@ são as duas operações que este documento já tinha, agora usadas juntas.
 Escreve-se como \textbf{faixa}, e daí os quatro operadores saírem de uma função
 só: $=$ é $[k,k]$, $>$ é $[k+1,\infty)$, $\le$ é $(-\infty,k]$.
 
-\medskip\noindent\textbf{E o par $\zeta$/$\mu$ mantém-no vivo.} Escrever é
-acumular, e acumular é uma descida: o \code{INSERT} acrescenta a chave e o
-índice acompanha. \emph{Tirar} é o $\mu$ --- e é a \textbf{mesma descida com a
-volta por cima}: guarda-se o caminho ao descer, corta-se a ligação da folha, e
-\emph{sobe-se} a apagar todo o nó que ficou sem filhos. Não há busca; há o
-caminho ao contrário. O \code{UPDATE} desacumula a chave velha e acumula a
-nova, por essa ordem, e o índice não se perde.
+\medskip\noindent\textbf{E o par $\zeta$/$\mu$ mantém-no vivo.} A $\zeta$ desce
+\emph{deixando migalhas}; a $\mu$ não precisa de descobrir nada --- \textbf{volta
+pelo mesmo caminho a recolhê-las}. Guarda-se o caminho ao descer, corta-se a
+ligação da folha, e \emph{sobe-se} a apagar todo o nó que ficou sem filhos. Não
+há busca; há o caminho ao contrário. Um \code{UPDATE} é as duas metades em
+sequência: o valor velho recolhe as suas migalhas, o novo deixa as suas.
+\[
+77 \;\overset{\mu}{\longleftarrow}\; \text{recolhe}
+\qquad\qquad
+9 \;\overset{\zeta}{\longrightarrow}\; \text{deixa}
+\]
+
+\medskip\noindent Daqui vem o que a árvore \emph{é}, e não é uma tabela à espera
+de ser varrida:
+\[
+\boxed{\;\text{a memória existe onde a trajetória passou.}\;}
+\]
+Ela é o \textbf{rastro} --- caminho e marcas ---, e é por isso que ler é descer
+e não percorrer. O \code{INSERT} acrescenta a chave e o índice acompanha sem
+ter de ser refeito.
 
 \medskip\noindent O que o $\mu$ não faz é devolver os nós ao contador: um nó
 apagado fica \textbf{órfão}. A fuga é declarada e tem tecto --- quando a árvore

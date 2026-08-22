@@ -3749,9 +3749,45 @@ int main(void){
 
             sql_executa("SELECT * FROM t WHERE a > 5 AND b < 30", &o);
             int comp = (sql_ultimos_passos > 0);
-            printf("      e a forma COMPOSTA fica com o molde: %d linha(s), %ld passos  %s\n",
+            printf("      e a composta sobre OUTRA coluna fica com o molde:"
+                   " %d linha(s), %ld passos  %s\n",
                    o.nrows, sql_ultimos_passos, comp ? "" : "NAO BATE");
             if(!comp) mal++;
+            sql_fechar();
+        }
+
+        /* ── A FAIXA COM OS DOIS EXTREMOS ────────────────────────────────────
+         * Duas condições sobre a MESMA coluna são a faixa fechada — cada uma
+         * dá um lado, e o AND intersecta-os. O BETWEEN é isso dito numa
+         * palavra. Compara-se sempre com o molde, que é a referência. */
+        {
+            unlink("/tmp/pgwire_w27f.mem"); unlink("/tmp/pgwire_w27f.prog");
+            if(!sql_abrir("/tmp/pgwire_w27f")) mal++;
+            sql_executa("CREATE TABLE t (a,b)", &o);
+            for(int i = 1; i <= 20; i++){
+                char q[64];
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                sql_executa(q, &o);
+            }
+            const char *fx[4] = {
+                "SELECT * FROM t WHERE a > 5 AND a < 10",
+                "SELECT * FROM t WHERE a >= 5 AND a <= 8",
+                "SELECT * FROM t WHERE a BETWEEN 5 AND 8",
+                "SELECT * FROM t WHERE a > 15 AND a < 5"       /* faixa VAZIA */
+            };
+            int esp[4] = { 4, 4, 4, 0 };
+            int sem[4];
+            for(int k = 0; k < 4; k++){ sql_executa(fx[k], &o); sem[k] = o.nrows; }
+            sql_executa("CREATE INDEX ON t (a)", &o);
+            printf("\n      a FAIXA com os dois extremos, molde contra árvore:\n");
+            for(int k = 0; k < 4; k++){
+                sql_executa(fx[k], &o);
+                int bate = (o.nrows == sem[k] && o.nrows == esp[k]
+                            && sql_ultimos_passos == 0);
+                printf("        %-42s molde %d · árvore %d · esperado %d  %s\n",
+                       fx[k] + 21, sem[k], o.nrows, esp[k], bate ? "" : "NAO BATE");
+                if(!bate) mal++;
+            }
 
             int rc = sql_executa("CREATE INDEX ON t (zzz)", &o);
             printf("      coluna inexistente no índice: %s\n",
@@ -3803,7 +3839,12 @@ int main(void){
            " resultado é fixo de propósito: os nós crescem com o que SAI, porque têm de listar"
            " as linhas, e o que não pode crescer é a BUSCA. E fica dito o que continua a NÃO"
            " descer: a forma composta — `a > 5 AND b < 30` —, que a árvore não responde de um"
-           " caminho só; aí o molde corre, e mede-se que corre.",
+           " caminho só quando é sobre OUTRA coluna; aí o molde corre, e mede-se que corre. MAS"
+           " DUAS CONDIÇÕES SOBRE A MESMA COLUNA DESCEM: cada uma dá um lado e o AND"
+           " intersecta-os, o que é a faixa FECHADA — e o BETWEEN é isso dito numa palavra. Os"
+           " quatro casos medidos dão o mesmo que o molde, incluindo aquele em que os lados se"
+           " cruzam e a faixa fica VAZIA, que é onde uma intersecção mal feita apareceria como"
+           " tabela inteira.",
            mal == 0);
     }
 

@@ -1715,6 +1715,20 @@ static int cria(const char *resto){
     return 1;
 }
 
+/* lê um inteiro com sinal; devolve 0 se não houver um ali */
+static int le_int_simples(const char **pp, long *out){
+    const char *q = *pp;
+    pula(&q);
+    int sinal = 1;
+    if(*q == '-'){ sinal = -1; q++; pula(&q); }
+    if(!isdigit((unsigned char)*q)) return 0;
+    long v = 0;
+    while(isdigit((unsigned char)*q)) v = v*10 + (*q++ - '0');
+    *out = sinal * v;
+    *pp = q;
+    return 1;
+}
+
 static long idx_coluna(long nrows);
 static int  idx_remove(long valor, int idx);
 static void ord_usa_indice(void);
@@ -3516,11 +3530,15 @@ static int j_carrega_direita(long *ncols_dir){
 /* ── O µ: TIRAR uma chave da árvore ──────────────────────────────────────────
  *
  * `thm:zeta-mu`: ζ acumula e µ desacumula, «e só muda a ordem sobre a qual se
- * acumula». Acumular é uma descida — o `ord_insere` acima. Desacumular é a
- * mesma descida com a volta por cima: guarda-se o caminho ao descer, apaga-se a
- * ligação da folha, e SOBE-SE a apagar todo o nó que ficou sem filhos. É a
- * diferença finita da árvore, e é por ela ser o caminho ao contrário que se
- * pode fazer — não é uma varredura à procura da chave.
+ * acumula». Aqui isso lê-se ao pé da letra: A ζ DESCE DEIXANDO MIGALHAS, e a µ
+ * NÃO PRECISA DE DESCOBRIR NADA — volta pelo mesmo caminho a recolhê-las.
+ * Guarda-se o caminho ao descer, corta-se a ligação da folha, e SOBE-SE a
+ * apagar todo o nó que ficou sem filhos.
+ *
+ * É por isso que a árvore não é uma tabela à espera de ser varrida: ela é o
+ * RASTRO DA TRAJECTÓRIA, e a memória existe onde a trajectória passou. Um
+ * UPDATE é as duas metades em sequência — o valor velho recolhe as suas
+ * migalhas, o novo deixa as suas. Desacumula, acumula.
  *
  * O que ela não faz é devolver os nós ao contador: um nó apagado fica órfão, e
  * o `ord_novo` não o reaproveita. Isso é uma fuga declarada, e tem tecto — o
@@ -3992,43 +4010,60 @@ static int varre(const char *resto, int acao){
      *
      * O índice é ignorado se estiver velho (a tabela mudou de tamanho desde que
      * ele foi feito): aí varre-se. Um índice velho custa tempo, nunca correcção. */
+    /* ── E SE HOUVER ÍNDICE, NÃO SE VARRE ─────────────────────────────────
+     *
+     * A árvore responde de uma descida a tudo o que seja uma FAIXA sobre a
+     * coluna indexada. Lê-se aqui, antes de compilar o molde, e o que se lê é
+     * uma comparação, ou DUAS ligadas por AND sobre a mesma coluna — que é a
+     * faixa com os dois extremos —, ou o `BETWEEN`, que é a mesma coisa dita
+     * numa palavra. As duas condições INTERSECTAM: cada uma é um lado, e o AND
+     * fecha-os. Com qualquer outra coisa, o molde corre como sempre.
+     *
+     * O índice é ignorado se estiver velho; aí varre-se. Um índice velho custa
+     * tempo, nunca correcção. */
     int idx_usa = 0; long idx_lo = 0, idx_hi = 0;
     if(acao == ACAO_MARCA && !in_sub){
+        const long INF = 2147483647L;
         const char *q = p;
-        char c_esq[64];
+        char c_esq[64], c2[64];
+        long lo = -INF, hi = INF;
+        int lados = 0, col = -1;
         if(palavra(&q, "WHERE") && ident(&q, c_esq, sizeof c_esq)){
+            col = col_indice(c_esq);
             pula(&q);
-            /* os cinco que a árvore responde: = < <= > >= . A ordem dos
-             * caminhos é a ordem dos números, pelo que uma desigualdade é uma
-             * FAIXA — e a faixa é o mesmo corte com o percurso a seguir-se-lhe. */
-            int op = 0;
-            if(*q == '='){ op = '='; q++; }
-            else if(*q == '<'){ q++; if(*q == '='){ op = 'l'; q++; } else op = '<'; }
-            else if(*q == '>'){ q++; if(*q == '='){ op = 'g'; q++; } else op = '>'; }
-            if(op){
-                pula(&q);
-                int sinal = 1;
-                if(*q == '-'){ sinal = -1; q++; pula(&q); }
-                if(isdigit((unsigned char)*q)){
-                    long v = 0;
-                    while(isdigit((unsigned char)*q)) v = v*10 + (*q++ - '0');
-                    v *= sinal;
-                    pula(&q);
-                    if(*q == 0 || *q == ';'){
-                        long col = col_indice(c_esq);
-                        if(col >= 0 && idx_coluna(cat_nrows()) == col){
-                            const long INF = 2147483647L;
-                            switch(op){
-                              case '=': idx_lo = v;     idx_hi = v;     break;
-                              case '<': idx_lo = -INF;  idx_hi = v - 1; break;
-                              case 'l': idx_lo = -INF;  idx_hi = v;     break;
-                              case '>': idx_lo = v + 1; idx_hi = INF;   break;
-                              case 'g': idx_lo = v;     idx_hi = INF;   break;
-                            }
-                            idx_usa = 1; p = q;
-                        }
+            /* o BETWEEN já não chega aqui: foi reescrito à entrada em duas
+             * condições, que é a forma que este laço lê. */
+            {
+                for(;;){
+                    int op = 0;
+                    if(*q == '='){ op = '='; q++; }
+                    else if(*q == '<'){ q++; if(*q == '='){ op = 'l'; q++; } else op = '<'; }
+                    else if(*q == '>'){ q++; if(*q == '='){ op = 'g'; q++; } else op = '>'; }
+                    if(!op) { lados = 0; break; }
+                    long v;
+                    if(!le_int_simples(&q, &v)) { lados = 0; break; }
+                    switch(op){
+                      case '=': if(v > lo) lo = v; if(v < hi) hi = v; break;
+                      case '<': if(v - 1 < hi) hi = v - 1; break;
+                      case 'l': if(v     < hi) hi = v;     break;
+                      case '>': if(v + 1 > lo) lo = v + 1; break;
+                      case 'g': if(v     > lo) lo = v;     break;
                     }
+                    lados++;
+                    pula(&q);
+                    /* uma segunda condição, sobre a MESMA coluna, ligada por AND */
+                    const char *r = q;
+                    if(lados < 2 && palavra(&r, "AND") && ident(&r, c2, sizeof c2)
+                       && col >= 0 && col_indice(c2) == col){
+                        q = r; pula(&q); continue;
+                    }
+                    break;
                 }
+            }
+            pula(&q);
+            if(lados >= 1 && (*q == 0 || *q == ';')
+               && col >= 0 && idx_coluna(cat_nrows()) == col){
+                idx_lo = lo; idx_hi = hi; idx_usa = 1; p = q;
             }
         }
     }
@@ -6333,7 +6368,60 @@ int sql_executa(const char *sql, SqlOut *out){
     return sql_executa_1(sql, out);
 }
 
+/* ── O BETWEEN É AÇÚCAR, E DESAPARECE AQUI ───────────────────────────────────
+ *
+ * `col BETWEEN a AND b` é `col >= a AND col <= b`, e nada mais. Reescreve-se à
+ * entrada, e assim ele não existe para o resto do motor: nem o molde tem de o
+ * conhecer, nem o índice tem de o reconhecer à parte — a forma reescrita é
+ * exactamente a que os dois já leem.
+ *
+ * Escrevê-lo só no caminho do índice foi o que quase passou: com índice a
+ * consulta respondia certo, e SEM índice devolvia zero linhas em silêncio, que
+ * é o desfecho que este ficheiro persegue desde o §W7. Foi o medidor a
+ * apanhá-lo, por comparar sempre os dois caminhos. */
+static int between_reescreve(const char *sql, char *out, size_t cap){
+    const char *q = sql;
+    size_t o = 0;
+    int mudou = 0;
+    while(*q && o + 1 < cap){
+        if((*q == 'B' || *q == 'b') && !strncasecmp(q, "BETWEEN", 7)
+           && (q == sql || !isalnum((unsigned char)q[-1]))
+           && !isalnum((unsigned char)q[7])){
+            /* o nome da coluna é a última palavra escrita — recupera-se dela */
+            size_t f = o;
+            while(f > 0 && (out[f-1] == ' ' || out[f-1] == '\t')) f--;
+            size_t ini = f;
+            while(ini > 0 && (isalnum((unsigned char)out[ini-1]) || out[ini-1] == '_')) ini--;
+            if(ini == f) break;                      /* não há coluna: deixa como está */
+            char col[64];
+            size_t n = f - ini; if(n >= sizeof col) break;
+            memcpy(col, out + ini, n); col[n] = 0;
+
+            const char *r = q + 7;
+            long a1, b1;
+            if(!le_int_simples(&r, &a1)) break;
+            pula(&r);
+            if(!palavra(&r, "AND")) break;
+            if(!le_int_simples(&r, &b1)) break;
+
+            o = ini;
+            int k = snprintf(out + o, cap - o, "%s >= %ld AND %s <= %ld", col, a1, col, b1);
+            if(k < 0 || (size_t)k >= cap - o) return 0;
+            o += (size_t)k;
+            q = r;
+            mudou = 1;
+            continue;
+        }
+        out[o++] = *q++;
+    }
+    out[o] = 0;
+    return mudou;
+}
+
 static int sql_executa_1(const char *sql, SqlOut *out){
+    { char reescrito[600];
+      if(between_reescreve(sql, reescrito, sizeof reescrito))
+          return sql_executa_1(reescrito, out); }
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;
     /* Trio PG6: o catálogo é da SESSÃO e responde ANTES do motor. Se não for
