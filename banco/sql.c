@@ -314,7 +314,19 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define MAXTERMO  4          /* termos ligados por OR                                   */
 #define S_VIVO    512        /* a linha existe? BIT por linha (512..1023)               */
 
-/* o índice: a árvore que NÃO se limpa, na zona 4, acima do tecto da ISA e
+/* ── UM ÍNDICE POR COLUNA, e cada um na sua zona ─────────────────────────────
+ *
+ * Havia um só, e por isso uma condição composta só podia descer de um lado.
+ * Com um por coluna, `A AND B` é a INTERSECÇÃO dos dois campos e `A OR B` a
+ * UNIÃO — o par ∧/∨ que o §W23 chama as duas operações duais, agora sobre os
+ * campos em vez de sobre as linhas. E o OR deixa de ficar de fora: estava fora
+ * porque METADE não chegava, não porque a árvore não soubesse responder.
+ *
+ * Cada índice mora na sua zona, acima do tecto da ISA e dentro do .mem da
+ * tabela; a zona 16+k é a da coluna k. Cabem oito — as que o S_CORPO segura —
+ * e cada uma ocupa 9603 slots dos 16384 da zona.
+ *
+ * o índice: a árvore que NÃO se limpa, acima do tecto da ISA e
  * dentro do .mem da tabela. O cabeçalho diz qual a coluna e quantas linhas
  * havia quando ele foi feito — se o número mudou sem ele acompanhar, é velho. */
 /* O CABEÇALHO MORA DENTRO DA ZONA, e não um slot antes dela. Estava em
@@ -322,10 +334,12 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * escrito por cima: a coluna indexada lia-se como 5 numa tabela de duas
  * colunas. Uma zona começa onde começa; pedir emprestado ao vizinho é escrever
  * na casa dele. */
-#define S_IDXCAB   (ISA_TECTO + ZONA(4))     /* {coluna+1, 0}                    */
-#define S_IDXCAB2  (S_IDXCAB + 1)            /* as linhas indexadas, no par      */
-#define S_IDXNOS   (S_IDXCAB + 2)            /* o contador de NÓS da árvore      */
-#define S_IDX      (S_IDXCAB + 3)            /* e a árvore começa depois deles   */
+#define IDX_MAXCOL     8
+#define S_IDXBASE(k)   (ISA_TECTO + ZONA(16 + (k)))
+#define S_IDXCAB(k)    (S_IDXBASE(k))        /* {coluna+1, 0}                    */
+#define S_IDXCAB2(k)   (S_IDXBASE(k) + 1)    /* as linhas indexadas, no par      */
+#define S_IDXNOS(k)    (S_IDXBASE(k) + 2)    /* o contador de NÓS da árvore      */
+#define S_IDX(k)       (S_IDXBASE(k) + 3)    /* e a árvore começa depois deles   */
 #define S_DEN     ZONA(2)      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
                               * move e→total, e a conta precisa de q como número. */
 #define S_LINHAS  ZONA(1)
@@ -1729,9 +1743,9 @@ static int le_int_simples(const char **pp, long *out){
     return 1;
 }
 
-static long idx_coluna(long nrows);
+static int idx_valido(long col, long nrows);
 static int  idx_remove(long valor, int idx);
-static void ord_usa_indice(void);
+static void ord_usa_indice(long k);
 static void ord_usa_rascunho(void);
 static int  ord_insere(long valor, int idx);
 static long celula_valor(long i, long j, long nc);
@@ -1903,18 +1917,18 @@ static int insere(const char *resto){
      * O cabeçalho sobe com a tabela, senão a linha nova ficaria indexada e o
      * índice na mesma marcado como velho. */
     { long nr_agora = cat_nrows();
-      long icol = idx_coluna(nr_agora - 1);        /* válido ANTES desta linha? */
-      if(icol >= 0 && icol < ncols){
-          long i = nr_agora - 1;                   /* a linha que acabou de entrar */
-          ord_usa_indice();
-          int coube = ord_insere(celula_valor(i, icol, ncols), (int)i);
+      long i = nr_agora - 1;                       /* a linha que acabou de entrar */
+      for(long c = 0; c < ncols && c < IDX_MAXCOL; c++){
+          if(!idx_valido(c, nr_agora - 1)) continue;   /* válido ANTES desta linha? */
+          ord_usa_indice(c);
+          int coube = ord_insere(celula_valor(i, c, ncols), (int)i);
           ord_usa_rascunho();
           if(coube){
               Word n; n.total = (Word8)(nr_agora & 255);
               n.e = (Word8)((nr_agora >> 8) & 255);
-              mem_grava(S_IDXCAB2, n);             /* o índice acompanhou */
+              mem_grava(S_IDXCAB2(c), n);          /* este índice acompanhou */
           }else{
-              Word z = {0,0}; mem_grava(S_IDXCAB, z);   /* não coube: fica sem índice */
+              Word z = {0,0}; mem_grava(S_IDXCAB(c), z);  /* não coube: fica sem ele */
           }
       } }
 
@@ -3114,7 +3128,7 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
     static long mu_idx[MU_MAX];
     static long mu_val[MU_MAX];
     int mu_n = 0, mu_estourou = 0;
-    if(acao == ACAO_SET && col_set >= 0 && idx_coluna(cat_nrows()) == col_set){
+    if(acao == ACAO_SET && col_set >= 0 && idx_valido(col_set, cat_nrows())){
         mu_col = col_set;
         for(long i = 0; i < nrows; i++){
             if(!bit_le(S_MATCH, i)) continue;
@@ -3123,9 +3137,9 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
             mu_val[mu_n] = celula_valor(i, mu_col, ncols);
             mu_n++;
         }
-        if(mu_estourou){ Word z = {0,0}; mem_grava(S_IDXCAB, z); mu_col = -1; }
+        if(mu_estourou){ Word z = {0,0}; mem_grava(S_IDXCAB(col_set), z); mu_col = -1; }
         else {
-            ord_usa_indice();
+            ord_usa_indice(mu_col);
             for(int k = 0; k < mu_n; k++) idx_remove(mu_val[k], (int)mu_idx[k]);
             ord_usa_rascunho();
         }
@@ -3159,13 +3173,13 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
 
     /* e o ζ: agora que a escrita correu, as chaves NOVAS entram */
     if(mu_col >= 0){
-        ord_usa_indice();
+        ord_usa_indice(mu_col);
         int falhou = 0;
         for(int k = 0; k < mu_n && !falhou; k++)
             if(!ord_insere(celula_valor(mu_idx[k], mu_col, ncols), (int)mu_idx[k]))
                 falhou = 1;
         ord_usa_rascunho();
-        if(falhou){ Word z = {0,0}; mem_grava(S_IDXCAB, z); }
+        if(falhou){ Word z = {0,0}; mem_grava(S_IDXCAB(mu_col), z); }
     }
     return passos;
 }
@@ -3388,7 +3402,8 @@ static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB; }
  * número de nós escrever-se por cima da coluna indexada — lia-se «coluna 5»
  * numa tabela de duas colunas, e o índice era dado por velho para sempre. Dois
  * dados diferentes, dois slots. */
-static void ord_usa_indice(void){   ord_raiz = S_IDX; ord_cab = S_IDXNOS; }
+static void ord_usa_indice(long k){ ord_raiz = S_IDX((unsigned)k);
+                                    ord_cab  = S_IDXNOS((unsigned)k); }
 /* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
  * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
  * número que o 16, ditos de três maneiras. Declara-se o expoente e o resto sai
@@ -3690,7 +3705,8 @@ static long cat_nrows(void);
 static long celula_valor(long i, long j, long nc);
 
 static int idx_constroi(long col, long ncols, long nrows){
-    ord_usa_indice();
+    if(col < 0 || col >= IDX_MAXCOL) return 0;
+    ord_usa_indice(col);
     ord_limpa();
     long postos = 0;
     for(long i = 0; i < nrows; i++){
@@ -3701,21 +3717,21 @@ static int idx_constroi(long col, long ncols, long nrows){
         }
         postos++;
     }
-    { Word c; c.total = (Word8)(col + 1); c.e = 0; mem_grava(S_IDXCAB, c); }
+    { Word c; c.total = (Word8)(col + 1); c.e = 0; mem_grava(S_IDXCAB(col), c); }
     { Word n; n.total = (Word8)(nrows & 255); n.e = (Word8)((nrows >> 8) & 255);
-      mem_grava(S_IDXCAB2, n); }
+      mem_grava(S_IDXCAB2(col), n); }
     ord_usa_rascunho();
     return 1;
 }
 
-/* a coluna indexada, ou −1 se não há índice ou se ele está velho */
-static long idx_coluna(long nrows){
-    Word c = mem_le(S_IDXCAB);
-    if(!c.total) return -1;
-    Word n = mem_le(S_IDXCAB2);
+/* a coluna `col` tem índice válido? — existe, é dela, e não está velho */
+static int idx_valido(long col, long nrows){
+    if(col < 0 || col >= IDX_MAXCOL) return 0;
+    Word c = mem_le(S_IDXCAB(col));
+    if((long)c.total != col + 1) return 0;
+    Word n = mem_le(S_IDXCAB2(col));
     long quando = (long)n.total | ((long)n.e << 8);
-    if(quando != nrows) return -1;           /* a tabela mudou: o índice é velho */
-    return (long)c.total - 1;
+    return quando == nrows;                  /* a tabela mudou: o índice é velho */
 }
 
 /* o valor da coluna de junção da linha `d` da direita, lido do S_JDIR */
@@ -4021,7 +4037,9 @@ static int varre(const char *resto, int acao){
      *
      * O índice é ignorado se estiver velho; aí varre-se. Um índice velho custa
      * tempo, nunca correcção. */
-    int idx_usa = 0, idx_pre = 0; long idx_lo = 0, idx_hi = 0;
+    int idx_usa = 0, idx_pre = 0, idx_liga = 0;
+    long idx_lo = 0, idx_hi = 0, idx_col = -1;
+    long idx_lo2 = 0, idx_hi2 = 0, idx_col2 = -1;
     if(acao == ACAO_MARCA && !in_sub){
         const long INF = 2147483647L;
         const char *q = p;
@@ -4061,10 +4079,10 @@ static int varre(const char *resto, int acao){
                 }
             }
             pula(&q);
-            if(lados >= 1 && col >= 0 && idx_coluna(cat_nrows()) == col){
+            if(lados >= 1 && col >= 0 && idx_valido(col, cat_nrows())){
                 if(*q == 0 || *q == ';'){
                     /* a faixa É a resposta toda: o molde não corre */
-                    idx_lo = lo; idx_hi = hi; idx_usa = 1; p = q;
+                    idx_lo = lo; idx_hi = hi; idx_usa = 1; idx_col = col; p = q;
                 }else{
                     /* ── O CORTE PRIMEIRO, O MOLDE SÓ SOBRE O QUE SOBROU ────
                      *
@@ -4080,8 +4098,52 @@ static int varre(const char *resto, int acao){
                      * menos do que a pergunta — que é pior do que responder
                      * devagar. Verifica-se a palavra, e só ela abre esta porta. */
                     const char *r = q;
-                    if(palavra(&r, "AND")){
-                        idx_lo = lo; idx_hi = hi; idx_pre = 1;
+                    int liga = 0;
+                    if(palavra(&r, "AND")) liga = 'A';
+                    else if(palavra(&r, "OR")) liga = 'O';
+                    if(liga){
+                        /* ── OS DOIS LADOS DESCEM, E OS CAMPOS COMBINAM-SE ────
+                         *
+                         * Se o outro lado também é uma faixa sobre uma coluna
+                         * INDEXADA, não é preciso molde nenhum: descem-se as
+                         * duas e o campo resultante é a INTERSECÇÃO (AND) ou a
+                         * UNIÃO (OR) — o par ∧/∨, agora sobre os campos.
+                         *
+                         * É isto que tira o OR da lista dos que não descem: ele
+                         * estava fora porque METADE não chegava, e agora não é
+                         * metade. Se o outro lado não for indexável, fica o que
+                         * já havia: o AND pré-filtra, o OR corre o molde. */
+                        char c3[64];
+                        const char *r2 = r;
+                        long lo2 = -INF, hi2 = INF, col2 = -1;
+                        int op2 = 0, ok2 = 0;
+                        if(ident(&r2, c3, sizeof c3)){
+                            col2 = col_indice(c3);
+                            pula(&r2);
+                            if(*r2 == '='){ op2 = '='; r2++; }
+                            else if(*r2 == '<'){ r2++; if(*r2 == '='){ op2='l'; r2++; } else op2='<'; }
+                            else if(*r2 == '>'){ r2++; if(*r2 == '='){ op2='g'; r2++; } else op2='>'; }
+                            long v2;
+                            if(op2 && le_int_simples(&r2, &v2)){
+                                switch(op2){
+                                  case '=': lo2 = v2;     hi2 = v2;     break;
+                                  case '<': hi2 = v2 - 1;               break;
+                                  case 'l': hi2 = v2;                   break;
+                                  case '>': lo2 = v2 + 1;               break;
+                                  case 'g': lo2 = v2;                   break;
+                                }
+                                pula(&r2);
+                                if((*r2 == 0 || *r2 == ';') && col2 >= 0
+                                   && col2 != col && idx_valido(col2, cat_nrows())) ok2 = 1;
+                            }
+                        }
+                        if(ok2){
+                            idx_lo = lo; idx_hi = hi; idx_col = col;
+                            idx_lo2 = lo2; idx_hi2 = hi2; idx_col2 = col2;
+                            idx_liga = liga; idx_usa = 1; p = r2;
+                        }else if(liga == 'A'){
+                            idx_lo = lo; idx_hi = hi; idx_pre = 1; idx_col = col;
+                        }
                     }
                 }
             }
@@ -4311,7 +4373,7 @@ static int varre(const char *resto, int acao){
          * da faixa não podem satisfazer a conjunção, pelo que não há resposta a
          * perder — há trabalho a poupar. */
         static int cand[J_MAXLIN];
-        ord_usa_indice();
+        ord_usa_indice(idx_col);
         int nc = j_faixa(idx_lo, idx_hi, cand, J_MAXLIN);
         ord_usa_rascunho();
         for(int t = 0; t < nc; t++){
@@ -4352,10 +4414,35 @@ static int varre(const char *resto, int acao){
         { Word z = {0,0};
           for(long q = 0; q <= nrows / (long)SLOT_BITS; q++)
               mem_grava(S_MATCH + (unsigned)q, z); }
-        ord_usa_indice();
+        ord_usa_indice(idx_col);
         static int achados[J_MAXLIN];
         int n = j_faixa(idx_lo, idx_hi, achados, J_MAXLIN);
         ord_usa_rascunho();
+
+        if(idx_col2 >= 0){
+            /* o segundo campo, e a combinação. ∧ guarda o que está nos dois,
+             * ∨ junta os dois — e a união não pode repetir, que é o mesmo
+             * representante único do DISTINCT e da UNION. */
+            static int outros[J_MAXLIN];
+            ord_usa_indice(idx_col2);
+            int n2 = j_faixa(idx_lo2, idx_hi2, outros, J_MAXLIN);
+            ord_usa_rascunho();
+            if(idx_liga == 'A'){
+                int m = 0;
+                for(int t = 0; t < n; t++){
+                    int esta = 0;
+                    for(int u = 0; u < n2 && !esta; u++) if(outros[u] == achados[t]) esta = 1;
+                    if(esta) achados[m++] = achados[t];
+                }
+                n = m;
+            }else{
+                for(int u = 0; u < n2 && n < J_MAXLIN; u++){
+                    int esta = 0;
+                    for(int t = 0; t < n && !esta; t++) if(achados[t] == outros[u]) esta = 1;
+                    if(!esta) achados[n++] = outros[u];
+                }
+            }
+        }
         /* SÓ AS VIVAS. Um DELETE não muda o número de linhas — muda o bit do
          * vivo —, pelo que o cabeçalho continua a bater e o índice continua a
          * ser usado; mas a chave apagada ficou lá dentro. Filtra-se aqui, que é
