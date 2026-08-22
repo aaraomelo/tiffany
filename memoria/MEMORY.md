@@ -93,10 +93,14 @@
 - **[NÃO rodar a bateria toda](feedback-nao-rodar-a-bateria-toda.md)** — torra o PC dele. Só o medidor afectado;
 - **[Ler a teoria ANTES de experimentar](feedback-ler-a-teoria-antes-de-experimentar.md)** — inventei «o tecto é 256 linhas» após dezenas de testes;
 - **[O filtro antes da reconstrução](feedback-o-filtro-antes-da-reconstrucao.md)** — TRÊS caminhos reescrevem o campo depois dele: a mesma pergunta com e sem índice divergiu.
+- **[Contar objectos pela parametrização](feedback-contar-objectos-pelos-parametros.md)** — decidi se a leitura era fiel contando
+  objectos pelo laço `for`: a pergunta pressuposta na resposta. «Objecto» é o que a IGUALDADE DO CORPO diz.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo:
 
 ## A teoria
 
+- **[A navegação herda a régua](project-a-navegacao-herda-a-regua.md)** — completar um corpo é medir a LEITURA, não o corpo:
+  a ultramétrica vive nos endereços, e o processo fica mecânico.
 - **[A dualidade é LEI: primeira e segunda](project-a-lei-em-dois-niveis.md)** — toda representação tem dual;
 - **[A dualidade é a memória da divisão](project-dualidade-memoria-da-divisao.md)** — dividir perde (169 → 37, **132 distinções**);
 - [A conjectura de Pisot caiu por Rouché no dual](project-pisot-rouche-dual.md) — β(n,m) Pisot para todo m≥2, e a prova pelo DUAL é mais curta.
