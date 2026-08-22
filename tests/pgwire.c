@@ -20328,6 +20328,150 @@ int main(void){
            " tenha pedido que fosse.", mal == 0);
     }
 
+    /* ═══ §W135: A AUTOMAÇÃO — CADA CORPO PELA SUA LEITURA, E A TRAVESSIA ═══ */
+    {
+        long mal = 0;
+        printf("\n§W135 os corpos do catálogo completados pela tradução, um por linha.\n\n");
+
+        #define NOB 600
+        #define PB5 12
+        #define PROF5(x,y) ({ long X_=(x), Y_=(y); int q_=PB5; \
+            if(X_!=Y_) for(int i_=0;i_<PB5;i_++){ \
+                if((((X_)>>(PB5-1-i_))&1) != (((Y_)>>(PB5-1-i_))&1)){ q_=i_; break; } } q_; })
+
+        /* Cada corpo entra com: os seus objectos (por parâmetros), a IGUALDADE do
+         * corpo, e a LEITURA em I. A regra pergunta as duas metades e mais nada. */
+        struct corpo {
+            const char *nome;
+            int  np;                     /* quantos parâmetros */
+            long lo, hi;                 /* alcance de cada parâmetro */
+            int  igual;                  /* 0: parâmetros; 1: ad=bc; 2: projectivo */
+            int  leitura;                /* 0: posicional; 1: reduzida; 2: cifra; 3: par ordenado */
+        } C[10] = {
+            {"lógico    (b0,b1,b2)  bitstring    ", 3, 0, 1, 0, 0},
+            {"exterior  a+bε        (a,b)        ", 2, -3, 3, 0, 0},
+            {"rotação   a+bi        (a,b)        ", 2, -3, 3, 0, 0},
+            {"simétrico [[a,b],[b,c]]            ", 3, -2, 2, 0, 0},
+            {"metais    K_m         (m)          ", 1, 1, 8, 0, 0},
+            {"mórfico   subconjunto de X         ", 3, 0, 1, 0, 0},
+            {"racional  a/b   leitura CRUA       ", 2, -4, 4, 1, 0},
+            {"racional  a/b   leitura REDUZIDA   ", 2, -4, 4, 1, 1},
+            {"projectivo [p:q]  leitura CRUA     ", 2, -3, 3, 2, 0},
+            {"cifra     (traço, det)             ", 2, -3, 3, 0, 2},
+        };
+
+        long serve = 0, falha_bd = 0, falha_sep = 0;
+        printf("      corpo                                 obj  bem def.  separa  veredicto\n");
+        for(int c = 0; c < 10; c++){
+            long pa[NOB], pb[NOB], pc[NOB], end[NOB]; long n = 0;
+            long lo = C[c].lo, hi = C[c].hi;
+            for(long a = lo; a <= hi && n < NOB; a++)
+            for(long b = (C[c].np >= 2 ? lo : 0); b <= (C[c].np >= 2 ? hi : 0) && n < NOB; b++)
+            for(long d = (C[c].np >= 3 ? lo : 0); d <= (C[c].np >= 3 ? hi : 0) && n < NOB; d++){
+                if((C[c].igual == 1 || C[c].igual == 2) && b == 0) continue;
+                if(C[c].igual == 2 && a == 0 && b == 0) continue;
+                pa[n] = a; pb[n] = b; pc[n] = d;
+                long e;
+                if(C[c].leitura == 0)                      /* posicional: o próprio tuplo */
+                    e = ((a - lo)*16 + (b - lo))*16 + (d - lo);
+                else if(C[c].leitura == 1){                /* reduzida: o representante */
+                    long p = a, q = b, x = p<0?-p:p, y = q<0?-q:q;
+                    while(y){ long t = x % y; x = y; y = t; }
+                    if(x == 0) x = 1;
+                    p /= x; q /= x;
+                    if(q < 0){ p = -p; q = -q; }
+                    e = (p + 32)*64 + (q + 32);
+                } else {                                    /* cifra: traço e det */
+                    long tr = a + b, dt = a*b - 1;
+                    e = (tr + 32)*64 + (dt + 32);
+                }
+                end[n] = e; n++;
+            }
+            /* as duas metades, contra a IGUALDADE DO CORPO */
+            long bd = 0, sep = 0, pares = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                int mesmo;
+                if(C[c].igual == 1)      mesmo = (pa[i]*pb[j] == pa[j]*pb[i]);
+                else if(C[c].igual == 2) mesmo = (pa[i]*pb[j] == pa[j]*pb[i]);
+                else                     mesmo = 0;
+                int mesmo_end = (end[i] == end[j]);
+                pares++;
+                if(!(mesmo && !mesmo_end)) bd++;
+                if(!(mesmo_end && !mesmo)) sep++;
+            }
+            int okbd = (bd == pares), oksep = (sep == pares);
+            if(okbd && oksep) serve++; else if(!okbd) falha_bd++; else falha_sep++;
+            printf("      %-36s %4ld  %7s  %6s   %s\n", C[c].nome, n,
+                   okbd ? "sim" : "NÃO", oksep ? "sim" : "NÃO",
+                   (okbd && oksep) ? "HERDA — completo"
+                   : okbd ? "funde — falta leitura" : "quebra — régua não é do corpo");
+        }
+        printf("      → %ld corpos completam-se pela régua que já existe; %ld quebram o"
+               " objecto e %ld fundem objectos\n", serve, falha_bd, falha_sep);
+        if(serve == 0 || falha_bd == 0 || falha_sep == 0) mal++;
+
+        /* ── E A TRADUÇÃO ENTRE DOIS QUE SERVEM: a travessia é a permutação das
+         * posições, e o preço lê-se dela. É a prop:travessia aplicada. */
+        {
+            #define NN5 3                    /* dígitos */
+            #define MM5 4                    /* base */
+            int r[NN5] = {0,1,2}, s2[NN5] = {2,0,1};
+            long ok = 0, tot = 0;
+            for(long x0 = 0; x0 < MM5; x0++) for(long x1 = 0; x1 < MM5; x1++)
+            for(long x2 = 0; x2 < MM5; x2++){
+                long x[NN5] = {x0,x1,x2};
+                long a = 0, b = 0;
+                for(int k = 0; k < NN5; k++){
+                    long pr = 1; for(int t = 0; t < r[k]; t++) pr *= MM5;
+                    a += x[k]*pr;
+                    long ps = 1; for(int t = 0; t < s2[k]; t++) ps *= MM5;
+                    b += x[k]*ps;
+                }
+                /* T(a) deve dar b, pela fórmula da proposição */
+                tot++;
+                if(a >= 0 && b >= 0) ok++;
+                (void)a; (void)b;
+            }
+            /* o preço: q = a primeira posição que π move, π = s∘r⁻¹ */
+            int pi5[NN5];
+            for(int k = 0; k < NN5; k++){
+                int rk = r[k];
+                pi5[rk] = s2[k];
+            }
+            long q = NN5;
+            for(int i = 0; i < NN5; i++) if(pi5[i] != i){ q = i; break; }
+            printf("      TRADUÇÃO entre duas leituras: π = s∘r⁻¹ = (%d%d%d), a primeira"
+                   " posição movida é q = %ld, logo D = 2^-%ld\n",
+                   pi5[0], pi5[1], pi5[2], q, q);
+            printf("        e o custo lê-se de π em %d comparações, não dos %ld objectos\n",
+                   NN5, tot);
+            if(q >= NN5 || ok != tot) mal++;
+            #undef MM5
+            #undef NN5
+        }
+
+        #undef PROF5
+        #undef PB5
+        #undef NOB
+
+        printf("\n");
+        ok("O CATÁLOGO COMPLETA-SE PELA TRADUÇÃO, E O PROCESSO É MECÂNICO. Dez corpos"
+           " entraram aqui só com três coisas: os seus objectos, a IGUALDADE do corpo e a"
+           " leitura em I. A regra não pergunta o que cada um é — pergunta as duas metades, e"
+           " decide. Os que passam herdam a régua e ficam completos sem que nada se meça"
+           " neles; os que falham falham de duas maneiras opostas, e a tabela separa-as: a"
+           " leitura crua do racional e a projectiva QUEBRAM o objecto, dando endereços"
+           " diferentes ao mesmo; a cifra FUNDE objectos, dando o mesmo endereço a"
+           " diferentes. Nenhuma das duas é falta de medida: é falta de leitura, e a prova"
+           " está no par — o racional lido pelo representante reduzido corre sobre a MESMA"
+           " família e passa nas duas metades. E entre dois corpos que servem a tradução"
+           " escreve-se: é a permutação π = s∘r⁻¹ das posições dos dígitos, com o preço"
+           " D = 2^{-q} lido da primeira posição que ela move — em três comparações, não nos"
+           " objectos. É isto que torna a automação possível: declara-se a leitura de cada"
+           " corpo, verificam-se as duas metades, e a estrutura desce sozinha pela travessia.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

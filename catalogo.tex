@@ -1297,7 +1297,50 @@ endereços e é involutiva; e o gume: a leitura espectral do motor dá apenas $5
 distintos para os $256$ objectos --- $198$ colidem, e a testemunha directa são duas matrizes
 distintas à distância \textbf{zero} (\code{tests/pgwire.c} §W126).}
 
-\medido{e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias
+\paragraph{E a tradução é a função que faz o trabalho --- escrita, não prometida.} O
+\code{aranha prop:travessia} dá-a: uma \textbf{leitura} de $X=I_M^{\,n}$ é
+$R_r(x)=\sum_k x_k M^{\,r(k)}$, e a tradução entre duas leituras é a permutação das
+\emph{posições dos dígitos},
+\[
+ \boxed{\;T\Bigl(\sum_k x_k M^{\,r(k)}\Bigr)=\sum_k x_k M^{\,\pi(r(k))},
+ \qquad \pi=s\circ r^{-1},\qquad D(R,S)=2^{-q},\quad q=\min\{i:\pi(i)\neq i\}.\;}
+\]
+\emph{Lê-se o dígito de uma posição e escreve-se noutra}, e o preço sai de $\pi$ em
+$O(n)$ comparações --- não do conjunto. É com esta função que um corpo se traduz noutro,
+e é por isso que completar o catálogo deixa de ser trabalho por corpo: \textbf{declara-se
+a leitura, verificam-se as duas metades, e a estrutura desce sozinha}.
+
+\medskip\noindent Corrida a regra sobre dez corpos, com os objectos, a igualdade e a
+leitura de cada um --- e mais nada:
+\begin{center}\small
+\begin{tabular}{@{}lrccl@{}}
+\toprule
+corpo (leitura) & obj. & bem def. & separa & veredicto\\
+\midrule
+lógico, o \emph{bitstring} & $8$ & sim & sim & \textbf{herda}\\
+exterior $a+b\varepsilon$, o par $(a,b)$ & $49$ & sim & sim & \textbf{herda}\\
+rotação $a+bi$, o par $(a,b)$ & $49$ & sim & sim & \textbf{herda}\\
+simétrico $\binom{a\ b}{b\ c}$, o terno & $125$ & sim & sim & \textbf{herda}\\
+metais $K_m$, o parâmetro $m$ & $8$ & sim & sim & \textbf{herda}\\
+mórfico, o subconjunto & $8$ & sim & sim & \textbf{herda}\\
+racional $a/b$, leitura \emph{reduzida} & $72$ & sim & sim & \textbf{herda}\\
+\midrule
+racional $a/b$, leitura \emph{crua} & $72$ & \textbf{não} & sim & \emph{quebra} o objecto\\
+projectivo $[p{:}q]$, leitura \emph{crua} & $42$ & \textbf{não} & sim & \emph{quebra} o objecto\\
+cifra $(\operatorname{tr},\det)$ & $49$ & sim & \textbf{não} & \emph{funde} objectos\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Sete completam-se pela régua que já existe.} As três falhas não são
+falta de medida --- são falta de leitura, e falham de maneiras \textbf{opostas}: duas
+quebram o objecto (endereços distintos para o mesmo) e uma funde objectos (o mesmo
+endereço para distintos). A prova de que o defeito é da leitura está no par: o racional
+lido pelo representante reduzido corre sobre a \emph{mesma} família e passa nas duas
+metades, com o corpo intocado.
+
+\medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
+leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
+comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias
 parametrizadas com a sua leitura, e cinco --- metais, exterior, rotação, simétrico e racional
 reduzido --- passam nas duas metades e herdam a régua, com a desigualdade forte a valer em
 $64\,000/64\,000$ triplos do corpo simétrico sem que nenhuma medida se faça sobre matrizes

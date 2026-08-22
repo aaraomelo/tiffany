@@ -5905,6 +5905,83 @@ cifra a colidir em $198$ dos $256$.}
         {$\operatorname{prof}$ sobre os endereços; \code{traco}/\code{det} como leitura que perde}
         {\code{tests/pgwire.c} §W126}
 
+\subsection*{A tradução: a função bijetiva, escrita e executada}
+
+\noindent O \code{aranha prop:travessia} deixou de prometer a travessia e passou a
+escrevê-la. Uma \textbf{leitura} de $X=I_M^{\,n}$ é $R_r=\varphi^{-1}\circ\rho_r$ ---
+a enumeração posicional do \code{thm:enumera} depois de reordenar as coordenadas ---,
+isto é
+\[
+ R_r(x)=\sum_{k=0}^{n-1}x_k\,M^{\,r(k)},
+\]
+e a tradução entre duas leituras é a \textbf{permutação das posições dos dígitos}:
+\[
+ \boxed{\;T=S\circ R^{-1}\colon I_N\to I_N,\qquad
+ T\Bigl(\sum_k x_k M^{r(k)}\Bigr)=\sum_k x_k M^{\,\pi(r(k))},\qquad
+ \pi=s\circ r^{-1}.\;}
+\]
+\emph{Não há nada a procurar}: lê-se o dígito de uma posição e escreve-se noutra. É
+esta a função que traduz um corpo noutro --- e é executável como está.
+
+\medskip\noindent\textbf{E o preço não pede o conjunto.} O custo é
+$D(R,S)=2^{-q}$ com $q=\min\{i:\pi(i)\neq i\}$ --- a primeira posição que $\pi$ move ---,
+e $D=0$ quando $\pi=\mathrm{id}$. Custa $O(n)$ comparações contra $O(N)$ da varredura,
+e é \emph{supremo atingido}, não estimativa. Para $M=2^{d}$ um dígito ocupa $d$ bits e
+vem $D=2^{-d\,q_{\mathrm{dig}}}$.
+
+\medskip\noindent\textbf{O que se conserva e o que se paga.} A medida vem da
+\emph{bijetividade} e de mais nada: $\mu(T(E))=\mu(E)$. O que a tradução move é a
+\textbf{localidade} --- os saltos entre vizinhos ---, que é o mesmo facto do
+\code{aranha thm:localdual}, onde $\dagger$ conserva $h+v$ e o redistribui. Em paralelo,
+a realização matricial $P_\pi$ sobre o vetor de dígitos tem $\lvert\det\rvert=1$: um
+resultado que \emph{acompanha} a conservação, sem a fundamentar.
+
+\medskip\noindent\textbf{E a mesma volta aparece no outro nível.} Espectralmente, a
+travessia é $C_{\delta_a}$: pelo \code{thm:proprios} os seus valores próprios são os
+caracteres, que a \code{def:dual} põe em $\{\pm1\}$ por contradomínio; nenhum se anula,
+pelo que o \code{thm:conv} dá a inversa sem cofatores --- e ela é o próprio operador,
+$C_{\delta_a}^{2}=\mathrm{id}$, porque $a\oplus a=0$. \emph{A reversibilidade aparece
+pela fase num nível e pela permutação dos dígitos no outro}, e cada uma prova-se onde
+vive.
+
+\medido{\code{tests/pgwire.c} §W128 --- a travessia entre a régua posicional e a de
+dígitos alternados atinge $256/256$ endereços; $\mu(T(E))=\mu(E)$ em $12/12$ conjuntos;
+os saltos passam de $(16,1)$ para $(86,43)$ --- a medida a ficar e a localidade a mudar;
+a fórmula do preço em $8$ comparações contra o supremo varrido sobre $256$ pontos, e
+batem; e o gume --- a leitura não bijetiva $a+b$ leva $256$ pontos em $31$, e a medida
+cai. §W134 --- $C_{\delta_a}\chi_k=\chi_k(a)\chi_k$ em $64/64$; os valores próprios em
+$\pm1$ e nenhum nulo; $C_{\delta_a}^{2}=\mathrm{id}$ em $64/64$; e o gume do
+\code{thm:conv} --- fora do delta, $\widehat f(k)=1+\chi_k(a)$ anula-se em $28$ dos $56$
+pares e todas as famílias ficam singulares.}
+
+\colunas{\code{aranha prop:travessia}, \code{thm:enumera}, \code{thm:proprios}, \code{def:dual}, \code{thm:conv}}
+        {$\varphi^{-1}$ e a reordenação; $\operatorname{prof}$ sobre os endereços; \code{traco}/\code{det} do motor}
+        {\code{tests/pgwire.c} §W128, §W134}
+
+\subsection*{A automação: dez corpos, uma regra, três falhas}
+
+\noindent Com a tradução escrita, completar o catálogo deixa de ser trabalho por corpo.
+Cada um entra com três coisas --- os seus \emph{objectos}, a \emph{igualdade} do corpo e
+a \emph{leitura} em $I$ --- e a regra pergunta as duas metades e mais nada. Sete dos dez
+passam e herdam a régua sem que se meça coisa alguma neles: o lógico, o exterior, a
+rotação, o simétrico, os metais, o mórfico e o racional lido pelo representante
+\emph{reduzido}.
+
+\medskip\noindent\textbf{E as três falhas separam-se por forma.} A leitura crua do
+racional e a projectiva \textbf{quebram} o objecto --- endereços distintos para o mesmo
+---; a cifra $(\operatorname{tr},\det)$ \textbf{funde} objectos --- o mesmo endereço para
+distintos. \emph{Nenhuma é falta de medida}: é falta de leitura, e a prova está no par,
+porque a mesma família racional lida pelo reduzido passa nas duas metades com o corpo
+intocado.
+
+\medido{\code{tests/pgwire.c} §W135 --- a tabela dos dez corpos, com $7$ a herdarem, $2$
+a quebrarem e $1$ a fundir; e a travessia entre duas leituras a dar $\pi=(201)$, com
+$q=0$ e o custo lido em três comparações contra os $64$ objectos.}
+
+\colunas{\code{catalogo} §1 (a tabela dos corpos)}
+        {a leitura de cada corpo; a igualdade do corpo como critério}
+        {\code{tests/pgwire.c} §W135}
+
 \subsection*{As duas metades do critério, e as duas falhas duais}
 
 \noindent A regra corre sobre os corpos \emph{sem os abrir}, e é isso que a torna
