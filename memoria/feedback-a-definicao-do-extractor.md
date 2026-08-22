@@ -40,3 +40,12 @@ precisa de leitura manual — o positivo já se explica sozinho.
 
 Ver [[feedback-assercoes-vazias]], [[feedback-o-medido-sem-medidor]],
 [[feedback-o-medidor-que-nunca-mediu]].
+
+**E há a variante de ESCALA, que é a mais traiçoeira** (22/08): o extractor
+estava *certo* e deixou de estar quando o universo cresceu. O `onde()` do
+`tests/refs.c` devolvia o primeiro `\label` com aquele nome em qualquer
+documento — com **três** documentos raramente havia colisão, com **doze**
+passou a resolver `sec:geo` do `aranha` para o `teoria.tex` e a acusar dezenas
+de «referências cruzadas» que são locais e perfeitas. Não houve erro de
+escrita: houve uma hipótese tácita («os nomes não colidem») que a escala
+partiu. Ver [[feedback-a-cobertura-que-nao-acompanhou]].

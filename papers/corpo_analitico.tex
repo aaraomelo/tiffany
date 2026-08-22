@@ -19,6 +19,20 @@
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
 
+% ── REFERÊNCIAS PARA O `corpo_algebrico` ────────────────────────────────────
+% Este documento cita 19 enunciados do irmão algébrico, e uma \ref que atravessa
+% documentos NÃO falha o pdflatex: emite Warning e imprime «??» no PDF. O `xr`
+% lê o .aux do outro e resolve-as.
+%
+% E com PREFIXO, que não é decoração: `sec:torre` existe nos DOIS documentos, e
+% sem prefixo o LaTeX diria «multiply defined» e um dos dois ganharia em
+% silêncio. Com `alg:` as duas famílias ficam separadas por construção — e o
+% leitor vê no próprio texto que a referência é externa.
+%
+% Requer que `corpo_algebrico.aux` exista: compilar o algébrico primeiro.
+\usepackage{xr}
+\externaldocument[alg:]{corpo_algebrico}
+
 \input{gkcapa}
 
 \begin{document}
@@ -2334,7 +2348,7 @@ completo, e que a álgebra opera sem alcançar. O que ele não guarda é o alcan
 
 \section{A completude}\label{sec:completude}
 
-\noindent\textbf{Primeiro, as duas caixas, que são duas.} O \S\ref{sec:corte}
+\noindent\textbf{Primeiro, as duas caixas, que são duas.} O \S\ref{alg:sec:corte}
 decidiu $a/b<\sigma_m$: é o corte de um metálico \emph{específico}. O mecanismo
 geral é outro, e enuncia-se agora:
 \[
@@ -2370,7 +2384,7 @@ perder.} É verdade que \emph{intervalos encaixados de comprimento a tender para
 zero não estabelecem, por si sós, a existência do ponto de intersecção}: em
 $\mathbb{Q}$ há cadeias assim sem habitante. \textbf{Mas o objecto construído não é
 o intervalo --- é o caminho}, e o caminho não espera por ponto nenhum. E o
-\S\ref{sec:pontofixo} já disse \emph{o que} é esse ponto: o \textbf{ponto fixo da
+\S\ref{alg:sec:pontofixo} já disse \emph{o que} é esse ponto: o \textbf{ponto fixo da
 Möbius}, que a órbita persegue e o andar de baixo não contém.
 \[
 \boxed{\;\begin{array}{ll}
@@ -2385,7 +2399,7 @@ $\mathbb{R}\simeq\{\text{caminhos}\}/\!\sim$, e a completude é lá \textbf{inte
 sucessão de Cauchy dos truncados estabiliza \emph{bit a bit} dentro do próprio
 objecto, sem sair dele. E o mecanismo deste paper diz \emph{porquê} ela aperta em
 vez de vaguear --- o vazamento é zero porque a família é de Pisot,
-$\abs{\sigma\dg}<1$ (\S\ref{sec:pisot}). \textbf{A completude não é aqui um
+$\abs{\sigma\dg}<1$ (\S\ref{alg:sec:pisot}). \textbf{A completude não é aqui um
 postulado acrescentado: é consequência do vazamento zero.} A identificação final
 com $\mathbb{R}$, essa sim, é o teorema clássico de unicidade a menos de
 isomorfismo, e cita-se como tal.
@@ -2398,13 +2412,13 @@ coisas.}
 Seja $(a_k)_{k\geq1}$ uma sucessão \textbf{infinita} de quocientes parciais --- o
 caso finito é o racional, e a sua representação termina (Def.~\ref{def:real}). A
 classe define-se \textbf{directamente pelos convergentes}, sem passar pelo
-\S\ref{sec:corte}, que é o caso metálico:
+\S\ref{alg:sec:corte}, que é o caso metálico:
 \[
 \boxed{\;A_{(a_k)}=\bigl\{r\in\mathbb{Q}:\ r<c_{2j}\ \text{para algum convergente
 de índice par}\bigr\}\;}
 \]
 --- os pares crescem e ficam todos abaixo, os ímpares descem e ficam todos acima
-(Teor.~\ref{thm:encaixe}). A cadeia é
+(Teor.~\ref{alg:thm:encaixe}). A cadeia é
 $(a_k)\to(p_k/q_k)\to I_k\to\text{corte}$, e o metálico fica como caso explícito. Então:
 
 \emph{(i) $A$ é um corte de Dedekind.} $A$ e o seu complementar são não vazios, e
@@ -2578,7 +2592,7 @@ uma peça que já está na fundação.
 
 \textbf{E não é a involução.} Em $x>0$, $\nu(x)=-1/x$ tem derivada $1/x^{2}>0$, logo é
 \emph{crescente}: leva supremo em \textbf{supremo}, e não em ínfimo. Quem inverte a ordem é
-o \textbf{swap} da Def.~\ref{def:lei0},
+o \textbf{swap} da Def.~\ref{alg:def:lei0},
 \[
 S=\begin{psmallmatrix}0&1\\1&0\end{psmallmatrix},\qquad [p:q]\mapsto[q:p],\qquad
 \det S=-1,
@@ -2620,7 +2634,7 @@ inteiras, e são precisas as duas:
 Juntas: quem está \emph{abaixo} sobe continuando abaixo --- fica em $S$, e é maior,
 logo $p/q$ não era majorante; quem está \emph{acima} desce continuando acima ---
 continua majorante, e é menor, logo $p/q$ não era o menor. E não há empate, pois
-$p^{2}=2q^{2}$ é a descida proibida (Cor.~\ref{cor:habitante}). $\square$
+$p^{2}=2q^{2}$ é a descida proibida (Cor.~\ref{alg:cor:habitante}). $\square$
 \end{proposicao}
 
 \begin{observacao}[e a mediante simples não serve]\label{obs:mediante}
@@ -2643,7 +2657,7 @@ testemunha e zero empates; e o supremo de $\{r^2<2\}$ dá $1\,482\,910/2^{20}$}
 \noindent\textbf{E é por isto que o sistema atravessa os andares com erro zero.} O
 habitante \textbf{é} o caminho --- não há valor por trás à espera de ser
 aproximado, logo não há erro a acumular: a ida e a volta são a involução, exacta
-por construção (\S\ref{sec:dual}). A continuidade clássica precisa do limite
+por construção (\S\ref{alg:sec:dual}). A continuidade clássica precisa do limite
 porque lá o ponto tem de \emph{aparecer} de fora; aqui o ponto \emph{é} a
 sucessão dos passos, e o supremo é apenas mais um caminho que se desce.
 
@@ -2677,7 +2691,7 @@ para a afirmação de ordem $6$ restringe-se às características em que $-I\neq
 em particular $p\neq2$ --- em característica $2$ a ordem colapsa. \textbf{Em geral},
 nos casos usados $p$ é escolhido \emph{fora das características que degeneram a
 relação algébrica relevante} --- em particular fora das que anulam o discriminante,
-onde as folhas colapsam (Cor.~\ref{cor:dourada-completa}).
+onde as folhas colapsam (Cor.~\ref{alg:cor:dourada-completa}).
 \end{definicao}
 
 \begin{definicao}[$t_n$, pela ordem --- sem $\pi$]\label{def:tn}
@@ -2741,7 +2755,7 @@ em $\mathbb{F}_{17}$, $4$ em $\mathbb{F}_{13}$); a construção fixa uma delas c
 representante do ramo escolhido.
 
 \emph{(ii) os hiperbólicos} são os metais, o motor dos
-\S\S\ref{sec:dual}--\ref{sec:todos}.
+\S\S\ref{alg:sec:dual}--\ref{sec:todos}.
 
 \emph{(iii) o parabólico.} Para $t=2$ o polinómio é $x^{2}-2x+1=(x-1)^{2}$, logo
 $C=I+N$ com $N^{2}=0$; em característica $p$ ímpar $C^{k}=I+kN\neq I$ para
@@ -2835,7 +2849,7 @@ aqui mostra-se que ela chega a toda a parte.
 
 \noindent\textbf{E o estatuto desta secção diz-se à entrada, porque ele mudou.} A
 tríade Hurwitz--Gentil--Lebesgue \emph{não} está na cadeia principal da construção ---
-essa é a do \S\ref{sec:operacao}, $L_0,\ldots,L_7\to\star\to\tau\to E_{+}\oplus E_{-}\to
+essa é a do \S\ref{alg:sec:operacao}, $L_0,\ldots,L_7\to\star\to\tau\to E_{+}\oplus E_{-}\to
 \operatorname{Dir},\operatorname{Cruz}\to B_8$, e nela não entra nenhum nome de fora.
 \[
 \boxed{\;\text{Hurwitz / Gentil / Lebesgue}\ \not\to\ \text{construção};
@@ -2847,7 +2861,7 @@ postos ao lado dele para dizer o que coincide e o que não, depois de a constru�
 feita e medida. \emph{Nenhuma peça do \code{analitico sec:supremo} ou do \code{analitico sec:completude}
 depende do que se diz aqui.}
 
-\begin{teorema}[contar pelo domínio e medir por níveis somam ao rectângulo]\label{thm:central}
+\begin{teorema}[contar pelo domínio e medir por níveis somam ao rectângulo]\label{thm:rectangulo}
 \[
 \boxed{
 \begin{array}{ll}
@@ -2949,7 +2963,7 @@ $N(xy)=N(x)N(y)$ com $N=\sum x_i^{2}$, polarizando em $y$, sai
 \]
 --- \emph{o produto preserva a ortogonalidade}. Numa base ortonormal $e_0=1,\ldots,
 e_{n-1}$ isso força $e_i^{2}=-1$ e $e_ie_j=-e_je_i$, que são as relações de Clifford:
-\textbf{é a base que as carrega}, e é ela que a base ortonormal do \S\ref{sec:orto}
+\textbf{é a base que as carrega}, e é ela que a base ortonormal do \S\ref{alg:sec:orto}
 realiza.
 
 \noindent\textbf{Mas a saturação não é o tecto --- e a torre não pára.} A tabela
@@ -2970,7 +2984,7 @@ caminho --- a ordem em $2$, a comutatividade em $4$, a associatividade em $8$ --
 com a norma de Gentil não há tecto nenhum.
 
 \noindent E o que aparece em $16$, $x,y\neq0$ com $xy=0$, é \textbf{a mesma factorização
-do zero} do Teor.~\ref{thm:divzero}: lá o polinómio a factorizar, aqui a álgebra a
+do zero} do Teor.~\ref{alg:thm:divzero}: lá o polinómio a factorizar, aqui a álgebra a
 passar dos oito, e nos dois casos a norma multiplicativa é a primeira exigência a cair.
 \colunas{a base ortonormal das oito leis (\code{teoria thm:ortonormal})}
         {a polarização, os andares completos, e o tecto como exigência}
@@ -3236,7 +3250,7 @@ $bm$ é inteiro não nulo.
 lados.} Para $p$ primo, $\sqrt p$ é irracional, e o que fecha a prova é o \textbf{lema de
 Euclides} --- $p\mid a^{2}\Rightarrow p\mid a$ ---, que vale \emph{porque} $p$ é primo. Daí
 sai a \textbf{descida}: de $a^{2}=p\,b^{2}$ vem $a=pk$, logo $b^{2}=pk^{2}$ com $b<a$, e em
-$\mathbb{N}$ não há descida infinita. \emph{É a mesma descida do Teor.~\ref{thm:corte-fixo},
+$\mathbb{N}$ não há descida infinita. \emph{É a mesma descida do Teor.~\ref{alg:thm:corte-fixo},
 e é prova e não varredura: mede-se o PASSO.} Donde:
 \[
 \underbrace{p\ \text{não factoriza em }\mathbb{Z}}_{\text{DISCRETO}}
@@ -3253,7 +3267,7 @@ $\operatorname{tr}$ e $\mathrm{N}$, ambas inteiras, e o que elas dizem do lado c
 que lado da recta o racional cai. \emph{A ponte não transporta valores: transporta ordem.}
 
 \textbf{(2b) E O DUAL TEM AS SUAS DUAS, que são a VOLTA.} A
-Def.~\ref{def:espaco} põe-nas: \textbf{(D1)} $\alpha=\alpha^{\ast}\iff\alpha\in\mathbb{Q}$
+Def.~\ref{alg:def:espaco} põe-nas: \textbf{(D1)} $\alpha=\alpha^{\ast}\iff\alpha\in\mathbb{Q}$
 --- o que a conjugação fixa é exactamente $\mathbb{Q}$, porque
 $\alpha-\alpha^{\ast}=2b\,m\sqrt D$ só se anula com $b=0$, e por (P2) não há outra maneira;
 \textbf{(D2)} $\alpha\alpha^{\ast}=a^{2}-b^{2}m^{2}D\in\mathbb{Q}$ \emph{sempre}, porque a
@@ -3294,7 +3308,7 @@ mesma --- que é o contraste que impede trocar suficiente por necessário}
 
 \begin{teorema}[A TRANSFORMADA UNIVERSAL EM $\mathbb{Q}(m\sqrt D)$: a convolução e a
 deconvolução]\label{thm:transformada-universal}
-Há \textbf{uma} transformada, e o Teor.~\ref{thm:espectro} já a nomeou: \textbf{avaliação
+Há \textbf{uma} transformada, e o Teor.~\ref{alg:thm:espectro} já a nomeou: \textbf{avaliação
 nas folhas} $\sigma,\sigma\dg$ --- as raízes do polinómio mínimo, \emph{não} raízes da
 unidade ---, realizada inteira pela companheira. Não há uma versão discreta e outra
 contínua, nem uma rápida e outra lenta: \emph{ela é discreta porque avalia em duas folhas,
@@ -3309,7 +3323,7 @@ nelas:
 E o que ela faz são \textbf{duas} operações, que são uma e a sua volta.
 
 \textbf{(1) A IDA é a CONVOLUÇÃO, e a transformada diagonaliza-a.} Pelo
-Cor.~\ref{cor:conv-desce} o produto é a convolução dos coeficientes seguida da redução ---
+Cor.~\ref{alg:cor:conv-desce} o produto é a convolução dos coeficientes seguida da redução ---
 aqui, cíclica de comprimento $2$ com peso $m^{2}D$ no termo que dá a volta:
 \[
 (a_1,b_1)\circledast(a_2,b_2)=(a_1a_2+m^{2}Db_1b_2,\;a_1b_2+a_2b_1),
@@ -3317,15 +3331,15 @@ aqui, cíclica de comprimento $2$ com peso $m^{2}D$ no termo que dá a volta:
 e em cada folha
 $\operatorname{eval}_\pm(\alpha\beta)=\operatorname{eval}_\pm(\alpha)\cdot
 \operatorname{eval}_\pm(\beta)$. \emph{A convolução vira produto ponto a ponto} --- é o
-Teor.~\ref{thm:espectro} lido neste corpo, e é a razão de a transformada existir.
+Teor.~\ref{alg:thm:espectro} lido neste corpo, e é a razão de a transformada existir.
 
-\textbf{(2) A VOLTA é a DECONVOLUÇÃO, e é a do Teor.~\ref{thm:decon-andar}.} Dividir na
+\textbf{(2) A VOLTA é a DECONVOLUÇÃO, e é a do Teor.~\ref{alg:thm:decon-andar}.} Dividir na
 transformada é dividir folha a folha, e o que decide se isso se pode fazer é aquele
 teorema: $w$ é invertível $\iff\gcd(w,D)=1$. Com $D$ livre de quadrados $x^{2}-m^{2}D$ é
 irredutível, o quociente é \textbf{corpo}, e a condição \emph{degenera} em «não nulo» ---
 por isso a norma sozinha decide. \emph{Não é uma condição forte: é o caso particular que
 aquele teorema nomeia.} Onde ela tem conteúdo é com $D$ quadrado --- o polinómio factoriza,
-o corpo parte-se, e aparecem os divisores de zero do Teor.~\ref{thm:divzero}, não nulos sem
+o corpo parte-se, e aparecem os divisores de zero do Teor.~\ref{alg:thm:divzero}, não nulos sem
 inversa. \textbf{É aí que a deconvolução deixa de ser sempre possível}, e é esse contraste
 que dá conteúdo ao caso irredutível.
 
@@ -3340,21 +3354,21 @@ passo a fazer --- \textbf{é o que a avaliação já fez}.
 
 \textbf{(3) E o traço e a norma são o registo inteiro das duas.} A soma das avaliações é
 $2a$ --- \textbf{racional, porque a parte com raiz cancela} --- e o produto é
-$a^{2}-b^{2}m^{2}D$. São as duas do Teor.~\ref{thm:fixo-dual}, agora com a razão à vista:
+$a^{2}-b^{2}m^{2}D$. São as duas do Teor.~\ref{alg:thm:fixo-dual}, agora com a razão à vista:
 \emph{são as únicas funções das folhas que não dependem de qual delas se chama $\sigma$}.
 A norma é multiplicativa, logo é o que a convolução preserva; e é ela que a deconvolução
 consulta. \textbf{A raiz nunca se forma}: guardam-se os coeficientes.
 
 \medskip
 \noindent Nada disto é um teorema novo, e nenhuma das peças precisa de nome próprio: a
-diagonalização é o Teor.~\ref{thm:espectro}, a volta é o Teor.~\ref{thm:decon-andar}, a
-série é o Teor.~\ref{thm:serie-quadratica}, o par traço/norma é o Teor.~\ref{thm:fixo-dual}.
+diagonalização é o Teor.~\ref{alg:thm:espectro}, a volta é o Teor.~\ref{alg:thm:decon-andar}, a
+série é o Teor.~\ref{thm:serie-quadratica}, o par traço/norma é o Teor.~\ref{alg:thm:fixo-dual}.
 \emph{O que este enunciado faz é dizer que são a mesma máquina}, e que a máquina tem duas
 operações e não quatro verificações. $\square$
 \end{teorema}
 \begin{corolario}[e é a mesma máquina em TODOS os objectos: as folhas são as raízes de
 $x^{n}=w$]\label{cor:folhas-do-polinomio}
-O Teor.~\ref{thm:espectro} diz \emph{«não em raízes da unidade»}, e no anel da Lei~8 a
+O Teor.~\ref{alg:thm:espectro} diz \emph{«não em raízes da unidade»}, e no anel da Lei~8 a
 avaliação é $F[x]_k=\sum_i x_i\,g^{ik}$ com $g$ de ordem $N$ --- que são raízes da unidade.
 As duas coisas não se contradizem, e a cláusula não é uma proibição: \textbf{é o que as
 folhas são num objecto e não noutro}. A máquina é a mesma.
@@ -3370,7 +3384,7 @@ de $(n,w)$:
 $(2,\;m^{2}D)$ --- o corpo quadrático, folhas $\pm m\sqrt D$ \qquad
 $(n,\;1)$ --- o anel da Lei~8, folhas as raízes de $x^{n}-1$
 \end{center}
-\emph{A cláusula do Teor.~\ref{thm:espectro} lê-se então sem excepção}: as folhas são
+\emph{A cláusula do Teor.~\ref{alg:thm:espectro} lê-se então sem excepção}: as folhas são
 raízes da unidade exactamente quando $w=1$, e não o são quando $w\neq1$. É a mesma
 avaliação, o mesmo código, a mesma companheira --- muda o objecto, não a máquina.
 
@@ -3378,7 +3392,7 @@ avaliação, o mesmo código, a mesma companheira --- muda o objecto, não a má
 \textbf{convolução} diagonaliza em \emph{qualquer} folha que exista --- não precisa de
 todas. Quem precisa das $n$ é a \textbf{deconvolução}: com as $n$ folhas o núcleo da
 avaliação é trivial e a volta existe; quando faltam folhas o núcleo é não trivial e a
-informação perde-se. É o Teor.~\ref{thm:decon-andar} dito na transformada. $\square$
+informação perde-se. É o Teor.~\ref{alg:thm:decon-andar} dito na transformada. $\square$
 \end{corolario}
 \colunas{uma máquina só: as folhas são do polinómio}
         {$x^{n}=w$ dá as folhas e a convolução; $w\neq1$ é o corpo quadrático e $w=1$ o
@@ -3402,7 +3416,7 @@ $\operatorname{Cruz}$.
 --- \textbf{sempre antissimétrica}, e \emph{proporcional à diferença dos traços}.
 
 \textbf{(2) Donde a leitura, em cadeia.} Com o determinante fixo, o traço determina as
-folhas (Teor.~\ref{thm:fixo-dual}), logo
+folhas (Teor.~\ref{alg:thm:fixo-dual}), logo
 \[
 \operatorname{Cruz}=0
 \iff \operatorname{tr}A_m=\operatorname{tr}A_n
@@ -3430,12 +3444,12 @@ antissimétrica em $64$ e proporcional a $m-n$ em $64$}
 
 \begin{teorema}[AS FOLHAS SÃO O CORTE: a transformada universal é o mecanismo que parte
 o objecto, e o corpo é o que sobra da partição]\label{thm:folhas-corte}
-\emph{A raiz disto é a propriedade} \textbf{(P1)} \emph{da Def.~\ref{def:espaco}}: só os
+\emph{A raiz disto é a propriedade} \textbf{(P1)} \emph{da Def.~\ref{alg:def:espaco}}: só os
 quadrados têm raiz racional, logo com $D$ não quadrado as folhas SEPARAM --- e é a
 separação que produz o corte.
 O Teor.~\ref{thm:transformada-universal} dá a máquina --- $\operatorname{eval}_\pm$, avaliação
 nas duas folhas, inteira. Aqui diz-se o que ela \emph{faz}: ela não lê o objecto, ela
-\textbf{corta-o}, e o corte que produz é o do Teor.~\ref{thm:corte}. As duas coisas são
+\textbf{corta-o}, e o corte que produz é o do Teor.~\ref{alg:thm:corte}. As duas coisas são
 uma.
 
 \textbf{(1) O corte de $\sigma_m$ é a avaliação de um elemento nas suas duas folhas.}
@@ -3447,7 +3461,7 @@ Para $a/b\in\mathbb{Q}$ com $b\geq1$ ponha-se
 que é o elemento $\xi+v\sqrt D$ de $\mathbb{Z}[\sqrt D]$ com $\xi=2a-mb$ e $v=-b$. As suas
 duas folhas são $\operatorname{eval}_\pm(\beta)=\xi\pm v\sqrt D$, e as duas funções
 simétricas delas --- as \emph{únicas} que não dependem de qual folha se chama $\sigma$
-(Teor.~\ref{thm:fixo-dual}) --- são \textbf{ambas inteiras}:
+(Teor.~\ref{alg:thm:fixo-dual}) --- são \textbf{ambas inteiras}:
 \[
 \operatorname{tr}\beta=2\xi ,\qquad \mathrm{N}\beta=\xi^{2}-b^{2}D .
 \]
@@ -3455,7 +3469,7 @@ E é só com elas que o lado se decide:
 \[
 \boxed{\;\frac ab<\sigma_m \iff \xi<0 \ \ \text{ou}\ \ \mathrm{N}\beta<0\;}
 \]
---- que é, letra por letra, a partição em dois casos do Teor.~\ref{thm:corte}. \emph{A raiz
+--- que é, letra por letra, a partição em dois casos do Teor.~\ref{alg:thm:corte}. \emph{A raiz
 nunca se forma}: a decisão inteira que ali aparecia como um artifício de cálculo é a
 transformada a fazer o seu trabalho.
 
@@ -3468,7 +3482,7 @@ duas simétricas sem sair de $\mathbb{Z}$:
 =\operatorname{tr}^{2}\alpha-4\,\mathrm{N}\alpha=4v^{2}D .
 \]
 Logo \textbf{as duas folhas coincidem exactamente quando $\alpha\in\mathbb{Q}$}, que é o
-Teor.~\ref{thm:descida} ($x=x\dg\iff x\in\mathbb{Q}$) dito na transformada. E daqui sai a
+Teor.~\ref{alg:thm:descida} ($x=x\dg\iff x\in\mathbb{Q}$) dito na transformada. E daqui sai a
 leitura que faltava:
 \begin{center}
 \emph{folha única $\Rightarrow$ o objecto é um \textbf{ponto}; folhas separadas
@@ -3480,7 +3494,7 @@ Um racional não corta nada --- está lá. É a separação que produz as duas c
 e $v\neq0$, $4v^{2}D$ não é quadrado; logo a folha $\operatorname{eval}_+$ não é racional e
 o par $(\operatorname{eval}_+,\operatorname{eval}_-)$ não colapsa por acidente aritmético.
 Em particular $\mathrm{N}\beta=\xi^{2}-b^{2}D\neq0$ para todo $b\geq1$: \textbf{nenhum
-racional cai em cima do corte}, que é a condição de corte do Teor.~\ref{thm:corte},
+racional cai em cima do corte}, que é a condição de corte do Teor.~\ref{alg:thm:corte},
 obtida aqui \emph{da transformada} e não de uma varredura.
 
 \textbf{(4) Donde: o corpo é a partição.} Juntando, a transformada universal
@@ -3491,7 +3505,7 @@ do corpo:
 \item a diferença --- o discriminante --- dá a \textbf{abertura} (parte 2), e distingue
 ponto de corte;
 \item a soma --- o traço --- dá a \textbf{classe} de equivalência, que é o
-Teor.~\ref{thm:descida}: $\mathbb{Q}$ são as classes dos pontos fixos sob o traço;
+Teor.~\ref{alg:thm:descida}: $\mathbb{Q}$ são as classes dos pontos fixos sob o traço;
 \item e a diagonalização simultânea (Cor.~\ref{cor:dir-cruz-folhas}) diz \emph{quando} dois
 objectos são cortados pela \textbf{mesma} partição: quando os traços coincidem.
 \end{itemize}
@@ -3527,7 +3541,7 @@ e a avaliação a diagonalizá-la em $6561$ de $6561$; traço racional e norma a
 fórmula fechada em $121$ de $121$; a inversão em $168$ de $168$ com o ÚNICO caso de norma
 zero a ser o elemento nulo --- a degenerescência do corpo; e o contraste com $D$ quadrado,
 onde aparecem $12$ não nulos de norma zero, que são os divisores de zero do
-Teor.~\ref{thm:divzero}}
+Teor.~\ref{alg:thm:divzero}}
 
 %======================================================================
 

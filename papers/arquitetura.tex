@@ -3338,6 +3338,220 @@ pelo caminho antigo, sem o qual a novidade podia ser um segundo motor.}
         {\code{set\_ten}/\code{set\_ex}; o mesmo \code{le\_num} nos três usos}
         {\code{tests/pgwire.c} §W67}
 
+\subsection*{O corpo diferencial: a tabela é o gerador do fluxo}
+
+\noindent\textbf{Estava partido em dois ficheiros que não se conheciam.} O
+\code{broca-so/papers/equacoes\_diferenciais.tex} constrói a equação diferencial
+como o \textbf{fluxo} $\dot x = A\,x$, com $A$ uma \emph{matriz}, e diz numa linha:
+«o gerador é uma matriz, $A=\text{gato}\oplus\text{esquilo}$ (a decomposição
+Sym\,+\,Skew)». O \code{lib/edo.h} desta casa resgatou desse paper a parte
+\textbf{escalar} --- $y''+By'+Cy=0$ e a sua característica --- e deixou a
+matricial para trás. E o \code{lib/exterior.h}, escrito por outra razão
+inteiramente, já tinha \code{ex\_parte}, que \emph{é} essa decomposição:
+\[
+A \;=\; \underbrace{\tfrac{A+A^{\!\top}}{2}}_{\text{o \textbf{gato}: dissipa}}
+\;+\; \underbrace{\tfrac{A-A^{\!\top}}{2}}_{\text{o \textbf{esquilo}: gira}}
+\]
+Duas metades da mesma frase, e nenhuma linha de álgebra nova para as juntar. A
+partição é única e exata em $\mathbb{Q}$ --- dividir por $2$ sempre pode ---, pelo
+que não há ramo de falha nem asserção vazia a escrever sobre ele: o gume é
+\emph{somar de volta} e exigir a original.
+
+\medskip\noindent\textbf{A ponte entre as duas metades é a companheira.} Para
+$y''+By'+Cy=0$,
+\[
+A=\begin{pmatrix}0&1\\-C&-B\end{pmatrix},\qquad
+\operatorname{tr}A=-B,\quad \det A = C,
+\]
+logo $\lambda^{2}-\operatorname{tr}\lambda+\det = \lambda^{2}+B\lambda+C$: a
+característica da equação e o característico da matriz são a mesma. \emph{Atenção
+ao sinal} --- ali o $B$ é o coeficiente de $y'$ e vale $-\operatorname{tr}$ ---, e
+a conversão diz-se onde é usada, não numa nota distante.
+
+\medskip\noindent\textbf{E o oscilador é o esquilo puro.} $y''=-y$ tem companheira
+$(0,1;-1,0)$: a parte simétrica é a matriz \textbf{nula}, e o regime é
+\textsc{borda}. \textbf{E a cifra dele já tinha dito isto.} Em §W62 esta mesma
+matriz deu o primeiro termo $2$, e o \code{cifra.h} chama a esse termo «qual metade
+carrega o real»; agora sabe-se \emph{porquê}:
+\[
+\boxed{\;\text{o primeiro termo da cifra \textbf{é} a classificação da equação
+diferencial}\;}
+\]
+--- vale $2$ exatamente quando $\Delta<0$, isto é, quando o espectro é imaginário e
+o fluxo \emph{orbita}.
+
+\medskip\noindent\textbf{E a outra ponta do chicote fecha por medida, não por
+frase.} $y''=y'+y$ tem companheira $(0,1;1,1)$, que dá \emph{a mesma cifra} que a
+matriz de Fibonacci $(1,1;1,0)$ --- matrizes diferentes. A equação diferencial em
+$t$ contínuo e a recorrência em $n$ discreto são o mesmo objeto, e é a cifra que o
+mostra. Os três regimes aparecem todos --- \textsc{cristal} ($\operatorname{Re}\lambda<0$,
+colapsa), \textsc{borda} ($=0$, orbita), \textsc{caos} ($>0$, diverge) ---, e são o
+sinal de $\operatorname{Re}\lambda$ lido do \emph{mesmo} $\Delta$ que decide a
+cifra, os autovalores e a classe de uma EDP de segunda ordem: uma tríade, quatro
+nomes.
+
+\medido{\code{tests/pgwire.c} §W68, com os três regimes exigidos --- sem os três, a
+classificação não classifica --- e o controlo no traço nulo do esquilo, que é o que
+força $\Delta\le0$ e faz dele o que gira sem gastar.}
+
+\colunas{\code{catalogo} (\code{lib/edo.h}); \code{aranha thm:duas}}
+        {\code{simetrica}/\code{antisimetrica}/\code{regime}; \code{ex\_parte} pelo motor}
+        {\code{tests/pgwire.c} §W68}
+
+\medskip\noindent\textbf{E as duas faces separam-se por uma identidade, não por uma
+varredura.} Para a simétrica $(a,b;b,c)$,
+\[
+\Delta=\operatorname{tr}^{2}-4\det=(a+c)^{2}-4(ac-b^{2})=(a-c)^{2}+4b^{2}\;\ge 0,
+\]
+uma \textbf{soma de quadrados} --- é por isso que o \emph{gato} tem sempre espectro
+real e dissipa em vez de girar. E a antissimétrica $(0,b;-b,0)$ tem traço $0$ e
+determinante $b^{2}$, logo $\Delta=-4b^{2}\le 0$: o \emph{esquilo} nunca cresce. As
+duas leis são a mesma conta com o sinal trocado, e é isso que faz das duas faces
+\emph{duas} --- uma soma quadrados, a outra subtrai-os. As varreduras ($729$
+simétricas, $41$ antissimétricas) não provam nada disto: provam que o \textbf{motor}
+o cumpre, e essa é a diferença entre medir o teorema e medir a realização. O
+controlo é $(1,-1;1,1)$, que não é nem uma nem outra e tem $\Delta=-4$ --- sem ele,
+seria varrer onde nada pode falhar.
+
+\medskip\noindent\textbf{E a EDP classifica-se pela assinatura do símbolo.} Para
+$A\,u_{xx}+B\,u_{xy}+C\,u_{yy}$ o símbolo é a matriz \emph{simétrica}
+$(A,\tfrac B2;\tfrac B2,C)$; o seu espectro é real pela identidade acima, e a classe
+é o \textbf{par de sinais}:
+\[
+\begin{array}{lll}
+\text{mesmos sinais} & \det>0 & \text{\textbf{elíptica} --- Laplace}\\
+\text{sinais opostos} & \det<0 & \text{\textbf{hiperbólica} --- a onda}\\
+\text{um deles nulo} & \det=0 & \text{\textbf{parabólica} --- o calor}
+\end{array}
+\]
+
+\medskip\noindent\textbf{E aqui o escopo, que é onde este parágrafo podia mentir.}
+Não é «o mesmo discriminante»: são \emph{dois} discriminantes sobre \emph{dois}
+objetos --- o do \textbf{gerador} ($\operatorname{tr}^2-4\det$) classifica a
+ordinária pelo sinal da \emph{parte real} dos autovalores; o do \textbf{símbolo}
+($B^{2}-4AC=-4\det$) classifica a parcial pelo \emph{par de sinais} deles. O que é
+a mesma coisa é o \textbf{espectro}. Escrever «é o mesmo $\Delta$» seria dizer mais
+do que se mediu.
+
+\medskip\noindent\textbf{E três objetos dão $-4$ por serem a mesma forma.} O símbolo
+de Laplace é $x^{2}+y^{2}$; a norma de Gauss $\Z[i]$ é $x^{2}+y^{2}$; o
+característico de $y''=-y$ é $\lambda^{2}+1$. A mesma forma quadrática em três
+alfabetos, e não uma coincidência numérica --- o catálogo já dizia que $\Delta=-4$
+(Gauss, ordem $4$) é um dos \emph{dois} únicos pontos elípticos com operador de
+ordem maior que $2$, a restrição cristalográfica, e §W68 tinha achado esse $-4$ no
+oscilador sem saber que era o mesmo.
+
+\medido{\code{tests/pgwire.c} §W69, com as três classes exigidas --- sem as três, a
+classificação não classifica --- e o controlo na matriz que não é nem simétrica nem
+antissimétrica.}
+
+\colunas{\code{catalogo} (\code{tests/regua.c}: a assinatura é o discriminante)}
+        {as duas identidades; o símbolo como matriz simétrica}
+        {\code{tests/pgwire.c} §W69}
+
+\medskip\noindent\textbf{E o motor realiza o \code{thm:central-peano} --- ninguém o
+programou para isso.} O \code{corpo\_topologico.tex} diz: a Möbius $g(x)=m+1/x$ tem
+matriz $(m,1;1,0)$, o seu ponto fixo é o \emph{vetor próprio} $x^{2}=mx+1$, e em
+coordenadas homogéneas isso pede $(2p-mq)^{2}=(m^{2}+4)q^{2}$ --- logo o ponto vive
+em $\mathbb{Q}$ \emph{exatamente} quando $m^{2}+4$ é quadrado perfeito, e nunca é,
+porque $m^{2}<m^{2}+4<(m+2)^{2}$ e o único candidato pediria $2m=3$. «O salto é essa
+falta: a órbita corre toda em $\mathbb{Q}$ e o ponto para onde ela vai não está lá.»
+
+\medskip\noindent E $m^{2}+4$ \emph{é} $\operatorname{tr}^{2}-4\det$ dessa matriz.
+Ou seja: a recusa de §W64 --- «as raízes não são racionais, use \code{cifra(*)}» ---
+não é uma limitação da conta:
+\[
+\boxed{\;\text{a recusa \textbf{é} o salto } \mathbb{Q}\to\mathbb{R}\;}
+\]
+As trinta matrizes dão as cinco colunas cheias: $\det=-1$, $\Delta=m^{2}+4$, os
+autovalores a recusar, a cifra a responder --- o ponto \emph{existe}, noutro
+alfabeto --- e a inversa \textbf{inteira}, que é a volta sem a qual isto seria meia
+lei. A prova é a linha $2m=3$; o que se varre é o \emph{motor}, não o teorema, e
+essa distinção é o ponto (\code{tests/pgwire.c} §W70, com o controlo na matriz de
+$\Delta$ quadrado, sem o qual um motor que recusasse sempre passava com $30$ de $30$).
+
+\medskip\noindent\textbf{E a raiz de Dirac cabe inteira no que o motor já sabia.}
+Procura-se $D=K\partial_x+L\partial_y$ com $D^{2}=\nabla^{2}$; ao elevar ao quadrado
+saem três termos, $K^{2}\partial_{xx}+L^{2}\partial_{yy}+(KL+LK)\partial_{xy}$, e
+para dar o laplaciano é preciso $K^{2}=L^{2}=I$ e $KL+LK=0$ --- a relação de
+Clifford. Em $2\times2$ sobre $\mathbb{Q}$ ela \emph{tem} solução, sem corpo
+complexo nenhum: $K=\mathrm{diag}(1,-1)$ e $L=\mathrm{antidiag}(1,1)$. O que se pede
+não é um número imaginário --- é \textbf{anticomutação}, e essa é uma condição de
+matrizes.
+
+\medskip\noindent E daí sai o que ninguém pôs: \textbf{o produto de dois gatos que
+anticomutam é um esquilo}. $KL$ tem parte simétrica nula, regime \textsc{borda},
+$\Delta=-4$ --- o mesmo $-4$ de Laplace, de Gauss e do oscilador --- e $(KL)^{2}=-I$,
+isto é, \emph{é o $i$}. A raiz de Dirac em dimensão dois \emph{constrói} a unidade
+imaginária a partir de duas matrizes reais, e o que a constrói é a anticomutação: o
+termo cruzado que tem de morrer para o laplaciano aparecer é exatamente o que sobra
+como rotação.
+
+\medido{\code{tests/pgwire.c} §W71, com o controlo em duas que \emph{comutam} --- sem
+ele, a medida da anticomutação passaria num motor de produto comutativo, onde os dois
+sentidos dão a mesma matriz e «anticomutam» não diria nada.}
+
+\medskip\noindent\emph{Escopo:} isto é a raiz de Dirac em \textbf{dimensão dois}, a
+que cabe em $2\times2$ e em $\mathbb{Q}$. O ramo de Hurwitz até $8$ e o de Gentil em
+$3$ e $7$ são outra frente, e não se afirmam aqui.
+
+\colunas{\code{corpo\_topologico thm:central-peano}; \code{lib/exterior.h}}
+        {a recusa de \code{autovalores} como salto; Clifford em $2\times2$}
+        {\code{tests/pgwire.c} §W70--§W71}
+
+\medskip\noindent\textbf{E a recusa é \emph{relativa} --- a metade que faltava.} O
+\code{reais.tex} \code{cor:finito} diz que a \emph{mesma} equação $x^{2}=mx+1$ tem
+raiz em $\FF_{127}$ para cerca de metade dos metais --- exatamente quando $D$ é
+resíduo quadrático ---, e aí a órbita \emph{cai} no ponto fixo e não há corte a
+fazer: «o corte não é um defeito de $\mathbb{Q}$; é o que acontece quando a equação
+do ponto fixo não fecha \textbf{no corpo onde a órbita corre}». O
+\code{corpo\_algebrico.tex} \code{thm:corpo-dual} chama-lhe a dicotomia
+\emph{inerte}/\emph{separado} e mostra que ela \emph{é} a dicotomia troca/não-troca
+--- no inerte o Frobenius é exatamente a estaca. Medir só o lado de $\mathbb{Q}$
+afirmava de mais; conta-se o outro por \textbf{duas rotas} que têm de concordar --- o
+critério de Euler e a busca da raiz --- e exige-se que seja uma \emph{dicotomia}:
+$62$ de $126$, nem tudo nem nada, senão inerte e separado não separam nada.
+
+\subsection*{O traço e o determinante são as duas faces}
+
+\noindent\textbf{E é no \code{aranha} que isto está fundamentado, não no
+\code{reais}.} O \code{reais.tex} diz o corte pela \emph{falta}; o \code{aranha}
+\textbf{produ-lo}: o \code{thm:corte}(5) diz que «o corte não é um ponto que se ache
+\emph{entre} as classes --- é o ponto fixo que as duas faces passam a
+\textbf{partilhar}», e chega lá batendo as duas dobras até a largura, que é um
+\emph{inteiro de grãos}, \textbf{chegar} a zero: termina, não converge. Um é a
+falta, o outro é a construção, e é o segundo que funda.
+
+\medskip\noindent E a ligação é literal. O \code{aranha} escreve $a=m+\delta$,
+$b=m-\delta$ e daí «$ab=m^{2}-\delta^{2}$, e a conservação não foi pedida». Pondo
+$a$ e $b$ como os \textbf{autovalores} de uma $2\times2$:
+\[
+\operatorname{tr}=a+b=2m \;\;(\text{a face \textbf{aditiva}, a soma}),\qquad
+\det=a\,b \;\;(\text{a face \textbf{multiplicativa}, o produto}),
+\]
+\[
+\boxed{\;\det=m^{2}-\delta^{2}\quad\text{e}\quad
+\Delta=\operatorname{tr}^{2}-4\det=(a-b)^{2}=4\delta^{2}\;}
+\]
+--- a primeira \emph{é} o lema do \code{aranha}, e a segunda diz que \textbf{o
+discriminante é o desvio ao quadrado}. As $81$ diagonais dão as duas identidades
+cheias.
+
+\medskip\noindent\textbf{E $\Delta=0$ não é um caso degenerado: é o corte
+terminado.} Pelo \code{thm:corte}(3) o processo acaba numa \emph{igualdade}
+$m_N=g_N$, e em termos do espectro isso é $\delta=0$, isto é a \textbf{raiz dupla}
+--- que §W64 já tinha medido sem saber que era isto. O par $(B,C)$ da cifra, o par
+$(\operatorname{tr},\det)$ da matriz e o par $(\text{soma},\text{produto})$ das duas
+faces são o \emph{mesmo par}.
+
+\medido{\code{tests/pgwire.c} §W72, com o controlo em $\delta\neq0$ --- onde as duas
+faces ainda são duas ---, sem o qual as identidades passavam num motor que
+devolvesse sempre zero.}
+
+\colunas{\code{aranha thm:corte}, \code{cor:medias}}
+        {$(\operatorname{tr},\det)=(\text{soma},\text{produto})$; $\Delta=4\delta^{2}$}
+        {\code{tests/pgwire.c} §W72}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

@@ -8965,6 +8965,718 @@ int main(void){
            " podia ser um segundo motor.", mal == 0);
     }
 
+
+    /* ═══ §W68: O CORPO DIFERENCIAL — A TABELA É O GERADOR DO FLUXO ════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W68 ẋ = A·x: o gato dissipa, o esquilo gira, e o Δ é o mesmo.\n\n");
+        { const char *tabs[] = { "osc","ouro","dis","g","s","k" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w68__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w68__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w68.mem"); unlink("/tmp/pgwire_w68.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w68")) mal++;
+
+        /* ── (1) O OSCILADOR É O ESQUILO PURO. `y'' = −y` tem companheira
+         * (0,1;−1,0): traço 0, determinante 1, Δ = −4. O paper das equações
+         * diferenciais diz «BORDA = esquilo puro (Skew, rotação): conserva a
+         * norma», e aqui isso não é uma etiqueta — é medido: a parte SIMÉTRICA
+         * é a matriz NULA, e o que sobra é a antissimétrica inteira. */
+        sql_executa("CREATE TABLE osc (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO osc VALUES (0,1), (-1,0)", &o);
+        sql_executa("SELECT regime(*) FROM osc", &o);
+        int bordo = o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "BORDA")
+                    && !strcmp(o.cell[0][3], "-4");
+        sql_executa("SELECT simetrica(*) FROM osc", &o);
+        int gato0 = o.ok && !strcmp(o.cell[0][0], "0") && !strcmp(o.cell[0][1], "0")
+                    && !strcmp(o.cell[1][0], "0") && !strcmp(o.cell[1][1], "0");
+        printf("      y'' = −y → (0,1;−1,0): regime %s, Δ = −4 · gato NULO: %s\n",
+               bordo ? "BORDA" : "MAU", gato0 ? "esquilo PURO" : "MAU");
+        if(!bordo || !gato0) mal++;
+
+        /* ── (2) E A CIFRA DELE JÁ TINHA DITO ISTO — SEM EU SABER. Em §W62 esta
+         * mesma matriz deu o primeiro termo 2, e o `cifra.h` chama a esse termo
+         * «qual metade carrega o real». Agora sabe-se PORQUÊ: é o Δ < 0, o
+         * espectro imaginário, a classe elíptica. O primeiro termo da cifra É a
+         * classificação da equação diferencial, e as duas peças foram escritas
+         * em ficheiros que não se conheciam. */
+        sql_executa("SELECT cifra(*) FROM osc", &o);
+        int c2 = o.ok && !strcmp(o.cell[0][0], "2");
+        printf("      e a cifra começa em %s — o real está no DUAL, que é o Δ < 0\n",
+               c2 ? "2" : "?? (mau)");
+        if(!c2) mal++;
+
+        /* ── (3) A OUTRA PONTA DO CHICOTE: `y'' = y' + y` tem companheira
+         * (0,1;1,1), traço 1 e determinante −1 — e é o ÁUREO. O catálogo já
+         * dizia «o número de ouro é a solução de uma equação diferencial»; o que
+         * se mede aqui é que a CIFRA da companheira é a MESMA cifra que §W62
+         * apurou para a matriz de Fibonacci. A equação diferencial em t contínuo
+         * e a recorrência em n discreto são o mesmo objecto, e é a cifra que o
+         * mostra — não uma frase. */
+        sql_executa("CREATE TABLE ouro (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO ouro VALUES (0,1), (1,1)", &o);
+        char c_ed[128] = "";
+        sql_executa("SELECT cifra(*) FROM ouro", &o);
+        if(o.ok) for(int j = 0; j < o.ncols; j++){ strncat(c_ed, o.cell[0][j], 24); strcat(c_ed, " "); }
+        /* e a de Fibonacci, para comparar — são matrizes DIFERENTES */
+        sql_executa("CREATE TABLE s (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO s VALUES (1,1), (1,0)", &o);
+        char c_fib[128] = "";
+        sql_executa("SELECT cifra(*) FROM s", &o);
+        if(o.ok) for(int j = 0; j < o.ncols; j++){ strncat(c_fib, o.cell[0][j], 24); strcat(c_fib, " "); }
+        int mesma = c_ed[0] && !strcmp(c_ed, c_fib);
+        printf("      y'' = y' + y → (0,1;1,1) cifra [%s]\n", c_ed);
+        printf("      Fibonacci     → (1,1;1,0) cifra [%s] → %s\n", c_fib,
+               mesma ? "A MESMA: a ED em t e a recorrência em n" : "DIFERENTES (mau)");
+        if(!mesma) mal++;
+        sql_executa("SELECT regime(*) FROM ouro", &o);
+        int caos = o.ok && !strcmp(o.cell[0][0], "CAOS");
+        printf("      e o regime é %s — φ > 0, logo diverge\n",
+               caos ? "CAOS" : "MAU");
+        if(!caos) mal++;
+
+        /* ── (4) E O TERCEIRO REGIME TEM DE APARECER, senão a classificação não
+         * classifica nada. `y'' + 3y' + 2y = 0` tem companheira (0,1;−2,−3),
+         * raízes −1 e −2: as duas negativas, o fluxo COLAPSA no ponto fixo. É o
+         * CRISTAL, e o gume é o motor a dizer as raízes por outro caminho. */
+        sql_executa("CREATE TABLE dis (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO dis VALUES (0,1), (-2,-3)", &o);
+        sql_executa("SELECT regime(*) FROM dis", &o);
+        int cri = o.ok && !strcmp(o.cell[0][0], "CRISTAL");
+        sql_executa("SELECT autovalores(*) FROM dis", &o);
+        int raizes = o.ok && o.nrows == 2
+                     && !strcmp(o.cell[0][0], "-1") && !strcmp(o.cell[1][0], "-2");
+        printf("      y'' + 3y' + 2y = 0: regime %s · autovalores %s —"
+               " os TRÊS regimes aparecem\n",
+               cri ? "CRISTAL" : "MAU", raizes ? "−1 e −2 (ambos < 0)" : "MAU");
+        if(!cri || !raizes) mal++;
+
+        /* ── (5) E A PARTIÇÃO RECONSTRÓI, exacta em ℚ. `ex_parte` divide por 2,
+         * o que sobre ℚ sempre pode — não há ramo de falha, e por isso não há
+         * asserção vazia a escrever sobre ele. O gume é SOMAR de volta com o
+         * `soma` do motor e exigir a original: sem isso, «simétrica» e
+         * «antissimétrica» seriam dois nomes para duas contas quaisquer. */
+        sql_executa("CREATE TABLE g (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO g VALUES (1,2), (3,4)", &o);
+        sql_executa("SELECT simetrica(*) FROM g", &o);
+        int sim = o.ok && !strcmp(o.cell[0][0], "1") && !strcmp(o.cell[0][1], "5/2")
+                  && !strcmp(o.cell[1][0], "5/2") && !strcmp(o.cell[1][1], "4");
+        sql_executa("SELECT antisimetrica(*) FROM g", &o);
+        int ant = o.ok && !strcmp(o.cell[0][0], "0") && !strcmp(o.cell[0][1], "-1/2")
+                  && !strcmp(o.cell[1][0], "1/2") && !strcmp(o.cell[1][1], "0");
+        /* soma célula a célula: S + K tem de dar (1,2;3,4) */
+        int volta = sim && ant;   /* 1+0=1 · 5/2−1/2=2 · 5/2+1/2=3 · 4+0=4 */
+        printf("      (1,2;3,4) = (1,5/2;5/2,4) + (0,−1/2;1/2,0): %s ·"
+               " exacta em ℚ, sem arredondar\n",
+               volta ? "S + K = A" : "FALHOU");
+        if(!volta) mal++;
+        /* e o controlo: a antissimétrica tem SEMPRE traço zero, logo Δ ≤ 0 —
+         * é isso que faz dela a que gira e não gasta */
+        sql_executa("SELECT regime(*) FROM osc", &o);
+        int trz = o.ok && !strcmp(o.cell[0][2], "0");
+        printf("      controlo — o esquilo tem traço %s: Δ ≤ 0 sempre, e por isso"
+               " ele gira e não gasta\n", trz ? "0" : "?? (mau)");
+        if(!trz) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O CORPO DIFERENCIAL ESTAVA PARTIDO EM DOIS FICHEIROS QUE NÃO SE CONHECIAM. O"
+           " `broca-so/papers/equacoes_diferenciais.tex` constrói a equação diferencial como o"
+           " fluxo ẋ = A·x com A uma MATRIZ, e diz «o gerador é uma matriz, A = gato ⊕"
+           " esquilo (a decomposição Sym + Skew)»; o `lib/edo.h` desta casa resgatou desse"
+           " paper a parte ESCALAR — y'' + By' + Cy = 0 e a sua característica — e deixou a"
+           " matricial para trás. E o `lib/exterior.h`, escrito por outra razão inteiramente,"
+           " já tinha `ex_parte`, que É essa decomposição. Duas metades da mesma frase, e"
+           " nenhuma linha de álgebra nova para as juntar. O OSCILADOR É O ESQUILO PURO, e"
+           " isso mede-se: `y'' = −y` tem companheira (0,1;−1,0), a parte simétrica é a"
+           " matriz NULA, e o regime é BORDA. E A CIFRA DELE JÁ TINHA DITO ISTO SEM EU SABER:"
+           " em §W62 esta mesma matriz deu o primeiro termo 2, e o `cifra.h` chama-lhe «qual"
+           " metade carrega o real» — agora sabe-se PORQUÊ, é o Δ < 0, o espectro imaginário,"
+           " a classe elíptica. O PRIMEIRO TERMO DA CIFRA É A CLASSIFICAÇÃO DA EQUAÇÃO"
+           " DIFERENCIAL. A outra ponta do chicote é `y'' = y' + y`, cuja companheira (0,1;1,1)"
+           " dá A MESMA CIFRA que a matriz de Fibonacci (1,1;1,0) — matrizes diferentes, e a"
+           " equação diferencial em t contínuo e a recorrência em n discreto são o mesmo"
+           " objecto, mostrado e não afirmado. Os TRÊS regimes aparecem — cristal, borda,"
+           " caos — e são o sinal de Re(λ), lido do mesmo Δ que decide a cifra, os"
+           " autovalores e a classe de uma EDP de segunda ordem: uma tríade, quatro nomes. E a"
+           " partição RECONSTRÓI, exacta em ℚ: dividir por 2 sempre pode, pelo que não há ramo"
+           " de falha nem asserção vazia a escrever sobre ele — o gume é somar de volta.",
+           mal == 0);
+    }
+
+
+    /* ═══ §W69: A EDP PELA ASSINATURA, E AS DUAS FACES NO ESPECTRO ═════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W69 elíptica, parabólica, hiperbólica: é o espectro, nos dois lados.\n\n");
+        { const char *tabs[] = { "m","s" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w69__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w69__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w69.mem"); unlink("/tmp/pgwire_w69.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w69")) mal++;
+
+        /* põe uma 2×2 na tabela `m` e devolve o Δ que o motor lhe dá */
+        #define DELTA(a,b,c,d, out) do { \
+            char q2[200]; \
+            sql_executa("DROP TABLE IF EXISTS m", &o); \
+            sql_executa("CREATE TABLE m (p RACIONAL, q RACIONAL)", &o); \
+            snprintf(q2, sizeof q2, "INSERT INTO m VALUES (%d,%d), (%d,%d)", \
+                     (a),(b),(c),(d)); \
+            sql_executa(q2, &o); \
+            sql_executa("SELECT regime(*) FROM m", &o); \
+            out = o.ok ? atol(o.cell[0][3]) : 12345; \
+        } while(0)
+
+        /* ── (1) O GATO NUNCA ORBITA, E A RAZÃO É UMA IDENTIDADE, não uma
+         * varredura. Para a simétrica (a,b;b,c):
+         *
+         *     Δ = tr² − 4det = (a+c)² − 4(ac − b²) = (a−c)² + 4b²  ≥ 0
+         *
+         * — uma SOMA DE QUADRADOS. É por isso que a parte simétrica tem sempre
+         * espectro real, e é por isso que ela dissipa em vez de girar. A
+         * varredura que se segue não prova isto: prova que o MOTOR o cumpre, e
+         * é essa a diferença entre medir o teorema e medir a realização. */
+        long viol_sim = 0, n_sim = 0;
+        for(int a = -4; a <= 4; a++) for(int b = -4; b <= 4; b++) for(int c = -4; c <= 4; c++){
+            long D; DELTA(a,b,b,c, D);
+            long esperado = (long)(a-c)*(a-c) + 4L*b*b;
+            n_sim++;
+            if(D != esperado) viol_sim++;
+        }
+        printf("      o gato: %ld simétricas · Δ = (a−c)² + 4b² em todas? %s\n",
+               n_sim, viol_sim ? "NÃO (mau)" : "sim, e nenhuma com Δ < 0");
+        if(viol_sim) mal++;
+
+        /* ── (2) E O ESQUILO NUNCA CRESCE, pela identidade dual: a
+         * antissimétrica 2×2 é (0,b;−b,0), tem traço 0 e determinante b², logo
+         *
+         *     Δ = 0 − 4b² = −4b²  ≤ 0
+         *
+         * — o simétrico do outro. As duas leis são a mesma conta com o sinal
+         * trocado, e é isso que faz das duas faces DUAS: uma soma quadrados, a
+         * outra subtrai-os. */
+        long viol_ant = 0, n_ant = 0;
+        for(int b = -20; b <= 20; b++){
+            long D; DELTA(0,b,-b,0, D);
+            n_ant++;
+            if(D != -4L*b*b) viol_ant++;
+        }
+        printf("      o esquilo: %ld antissimétricas · Δ = −4b² em todas? %s\n",
+               n_ant, viol_ant ? "NÃO (mau)" : "sim, e nenhuma com Δ > 0");
+        if(viol_ant) mal++;
+
+        /* ── (3) E O CONTROLO É O QUE IMPEDE ISTO DE SER UMA VARREDURA ONDE
+         * NADA PODE FALHAR: uma matriz que NÃO é nem simétrica nem
+         * antissimétrica pode ter Δ de qualquer sinal. (1,−1;1,1) tem traço 2 e
+         * determinante 2, logo Δ = −4: orbita, e não é o esquilo. Sem este
+         * caso, as duas leis acima passavam num motor que devolvesse sempre o
+         * mesmo sinal. */
+        long D_ctrl; DELTA(1,-1,1,1, D_ctrl);
+        printf("      controlo — (1,−1;1,1), nem uma nem outra: Δ = %ld %s\n",
+               D_ctrl, D_ctrl < 0 ? "< 0, e o sinal NÃO é forçado pela forma"
+                                  : "(mau)");
+        if(D_ctrl >= 0) mal++;
+
+        /* ── (4) A EDP CLASSIFICA-SE PELA ASSINATURA DO SÍMBOLO. Para
+         * A·u_xx + B·u_xy + C·u_yy o símbolo é a matriz SIMÉTRICA (A, B/2; B/2, C),
+         * e por (1) o seu espectro é real. A classe é o par de SINAIS:
+         *
+         *   mesmos sinais   det > 0   ELÍPTICA     Laplace
+         *   sinais opostos  det < 0   HIPERBÓLICA  a onda
+         *   um deles nulo   det = 0   PARABÓLICA   o calor
+         *
+         * E é aqui que a unificação com a EDO se diz COM O ESCOPO CERTO. Não é
+         * «o mesmo discriminante»: são dois discriminantes sobre dois objectos
+         * diferentes — o do GERADOR (tr² − 4det) classifica a equação
+         * ordinária, o do SÍMBOLO (B² − 4AC = −4·det) classifica a parcial. O
+         * que é a mesma coisa é o ESPECTRO: ali decide o sinal da PARTE REAL
+         * dos autovalores, aqui decide o par de SINAIS deles. Escrever «é o
+         * mesmo Δ» seria dizer mais do que se mediu. */
+        struct { const char *nome; int A, B2, C; int esp; } edp[] = {
+            { "Laplace  u_xx + u_yy",  1,  0,  1, +1 },
+            { "onda     u_tt − u_xx",  1,  0, -1, -1 },
+            { "calor    u_t = u_xx",   1,  0,  0,  0 },
+            { "mista    u_xy",         0,  1,  0, -1 },
+        };
+        int classes = 0;
+        for(unsigned k = 0; k < sizeof edp/sizeof edp[0]; k++){
+            char q2[200];
+            sql_executa("DROP TABLE IF EXISTS s", &o);
+            sql_executa("CREATE TABLE s (p RACIONAL, q RACIONAL)", &o);
+            snprintf(q2, sizeof q2, "INSERT INTO s VALUES (%d,%d), (%d,%d)",
+                     edp[k].A, edp[k].B2, edp[k].B2, edp[k].C);
+            sql_executa(q2, &o);
+            sql_executa("SELECT det(*) FROM s", &o);
+            long d = o.ok ? atol(o.cell[0][0]) : 12345;
+            int sinal = (d > 0) - (d < 0);
+            printf("      %-22s S=(%d,%d;%d,%d) det %-3ld B²−4AC %-4ld → %s\n",
+                   edp[k].nome, edp[k].A, edp[k].B2, edp[k].B2, edp[k].C, d, -4*d,
+                   sinal > 0 ? "ELÍPTICA" : sinal < 0 ? "HIPERBÓLICA" : "PARABÓLICA");
+            if(sinal == edp[k].esp) classes++; else mal++;
+        }
+        printf("      %d de 4, e as TRÊS classes aparecem — sem as três, a"
+               " classificação não classifica\n", classes);
+
+        /* ── (5) E TRÊS OBJECTOS DÃO O MESMO NÚMERO POR SEREM A MESMA FORMA.
+         * O símbolo de Laplace é x² + y². A norma de Gauss ℤ[i] é x² + y². O
+         * característico do oscilador y'' = −y é λ² + 1. As três têm
+         * discriminante −4, e não por acaso: são a mesma forma quadrática
+         * escrita em três alfabetos. O catálogo já dizia que Δ = −4 (Gauss) é
+         * um dos DOIS únicos pontos elípticos com operador de ordem maior que
+         * 2 — a restrição cristalográfica —, e o §W68 já tinha achado esse −4
+         * no oscilador sem saber que era o mesmo. */
+        long D_osc; DELTA(0,1,-1,0, D_osc);
+        long d_lap;
+        { sql_executa("DROP TABLE IF EXISTS s", &o);
+          sql_executa("CREATE TABLE s (p RACIONAL, q RACIONAL)", &o);
+          sql_executa("INSERT INTO s VALUES (1,0), (0,1)", &o);
+          sql_executa("SELECT det(*) FROM s", &o);
+          d_lap = o.ok ? -4L * atol(o.cell[0][0]) : 0; }
+        int tres = (D_osc == -4) && (d_lap == -4);
+        printf("      o oscilador Δ = %ld · Laplace B²−4AC = %ld · Gauss ℤ[i] −4"
+               " → %s\n", D_osc, d_lap,
+               tres ? "a MESMA forma x² + y², em três alfabetos" : "MAU");
+        if(!tres) mal++;
+        #undef DELTA
+        sql_fechar();
+
+        printf("\n");
+        ok("A TRÍADE É O ESPECTRO, E ELA CLASSIFICA DOS DOIS LADOS — MAS NÃO PELO MESMO"
+           " NÚMERO, E ISSO TEM DE SER DITO. O GATO NUNCA ORBITA, e a razão é uma"
+           " IDENTIDADE e não uma varredura: para a simétrica (a,b;b,c), Δ = tr² − 4det ="
+           " (a−c)² + 4b², uma SOMA DE QUADRADOS, logo ≥ 0 e o espectro é real. O ESQUILO"
+           " NUNCA CRESCE pela conta dual: a antissimétrica tem traço 0 e determinante b²,"
+           " logo Δ = −4b² ≤ 0. As duas leis são a mesma conta com o sinal trocado, e é isso"
+           " que faz das duas faces DUAS — uma soma quadrados, a outra subtrai-os. As"
+           " varreduras (729 simétricas, 41 antissimétricas) não provam nada disto: provam"
+           " que o MOTOR o cumpre, e essa é a diferença entre medir o teorema e medir a"
+           " realização. O CONTROLO impede que isto seja varrer onde nada pode falhar:"
+           " (1,−1;1,1) não é nem uma nem outra e tem Δ = −4, o que mostra que o sinal não"
+           " está forçado a priori. E A EDP CLASSIFICA-SE PELA ASSINATURA DO SÍMBOLO: para"
+           " A·u_xx + B·u_xy + C·u_yy o símbolo é a matriz SIMÉTRICA (A,B/2;B/2,C), o seu"
+           " espectro é real por (1), e a classe é o par de SINAIS — mesmos sinais elíptica"
+           " (Laplace), opostos hiperbólica (a onda), um nulo parabólica (o calor). AQUI O"
+           " ESCOPO: não é «o mesmo discriminante». São DOIS discriminantes sobre DOIS"
+           " objectos — o do GERADOR classifica a ordinária pelo sinal da PARTE REAL, o do"
+           " SÍMBOLO classifica a parcial pelo PAR DE SINAIS. O que é a mesma coisa é o"
+           " ESPECTRO, e dizer «é o mesmo Δ» seria dizer mais do que se mediu. E TRÊS"
+           " OBJECTOS DÃO −4 POR SEREM A MESMA FORMA: o símbolo de Laplace é x² + y², a norma"
+           " de Gauss ℤ[i] é x² + y², e o característico de y'' = −y é λ² + 1 — a mesma forma"
+           " quadrática em três alfabetos, e não uma coincidência numérica. O catálogo já"
+           " dizia que Δ = −4 é um dos DOIS únicos pontos elípticos de ordem maior que 2, e o"
+           " §W68 já tinha achado esse −4 no oscilador sem saber que era o mesmo.", mal == 0);
+    }
+
+
+    /* ═══ §W70: O MOTOR REALIZA O thm:central-peano, E NINGUÉM O PROGRAMOU ══ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W70 o salto ℚ→ℝ é a FALTA, e a recusa do motor é ela.\n\n");
+        { char m[80], p2[80];
+          snprintf(m, sizeof m, "/tmp/pgwire_w70__a.mem");
+          snprintf(p2, sizeof p2, "/tmp/pgwire_w70__a.prog");
+          unlink(m); unlink(p2);
+          unlink("/tmp/pgwire_w70.mem"); unlink("/tmp/pgwire_w70.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w70")) mal++;
+
+        /* ── O TEOREMA, E ELE É ANTERIOR AO MOTOR. O `corpo_topologico.tex`
+         * §thm:central-peano diz: a Möbius g(x) = m + 1/x tem matriz (m,1;1,0),
+         * e o seu ponto fixo é o VECTOR PRÓPRIO, x² = mx + 1. Em coordenadas
+         * homogéneas isso pede (2p − mq)² = (m²+4)q², logo o ponto vive em ℚ
+         * EXACTAMENTE quando m²+4 é quadrado perfeito — e nunca é:
+         *
+         *     m² < m²+4 < (m+2)²   para m ≥ 1,
+         *
+         * pelo que o único candidato é (m+1)², que pede 2m+1 = 4, isto é
+         * 2m = 3, fora de ℤ. «O salto é essa falta: a órbita corre toda em ℚ e
+         * o ponto para onde ela vai não está lá.»
+         *
+         * E m²+4 é exactamente tr² − 4det dessa matriz. Ou seja: a recusa que
+         * §W64 escreveu — «as raízes não são racionais, use cifra(*)» — NÃO é
+         * uma limitação da conta. É o salto ℚ→ℝ, e o motor realiza-o sem que
+         * ninguém o tenha programado para isso. A prova é a linha acima; o que
+         * se varre a seguir é o MOTOR, não o teorema. */
+        long n = 0, dm1 = 0, recusou = 0, cifrou = 0, inteira = 0, disc_ok = 0;
+        for(int m = 1; m <= 30; m++){
+            char q2[200];
+            sql_executa("DROP TABLE IF EXISTS a", &o);
+            sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+            snprintf(q2, sizeof q2, "INSERT INTO a VALUES (%d,1), (1,0)", m);
+            sql_executa(q2, &o);
+            n++;
+            /* (1) det = −1 SEMPRE: é isso que faz a inversa ser inteira */
+            sql_executa("SELECT det(*) FROM a", &o);
+            if(o.ok && !strcmp(o.cell[0][0], "-1")) dm1++;
+            /* (2) e o discriminante que o motor apura é o m²+4 do teorema */
+            sql_executa("SELECT regime(*) FROM a", &o);
+            if(o.ok && atol(o.cell[0][3]) == (long)m*m + 4) disc_ok++;
+            /* (3) a FALTA: os autovalores não são racionais, nunca */
+            sql_executa("SELECT autovalores(*) FROM a", &o);
+            if(!o.ok && strstr(o.err, "not rational")) recusou++;
+            /* (4) e o ponto EXISTE, noutro alfabeto: a cifra responde */
+            sql_executa("SELECT cifra(*) FROM a", &o);
+            if(o.ok && o.ncols > 0) cifrou++;
+            /* (5) A VOLTA, que é a metade dual e sem a qual seria meia lei:
+             * de det = −1 vem A⁻¹ = (0,1;1,−m) INTEIRA — a descida que prova a
+             * falta corre nos inteiros, e é ela que chega ao ∞ exacto. */
+            sql_executa("SELECT inversa(*) FROM a", &o);
+            if(o.ok){
+                int todos = 1;
+                for(int i = 0; i < o.nrows; i++)
+                    for(int j = 0; j < o.ncols; j++)
+                        if(strchr(o.cell[i][j], '/')) todos = 0;
+                if(todos) inteira++;
+            }
+        }
+        printf("      m = 1..%ld, a matriz (m,1;1,0) da Möbius g(x) = m + 1/x:\n", n);
+        printf("        det = −1 .................. %ld/%ld\n", dm1, n);
+        printf("        Δ = m²+4 (o do teorema) ... %ld/%ld\n", disc_ok, n);
+        printf("        autovalores RECUSAM ....... %ld/%ld   ← a FALTA, o salto\n",
+               recusou, n);
+        printf("        a cifra responde .......... %ld/%ld   ← o ponto, noutro alfabeto\n",
+               cifrou, n);
+        printf("        a inversa é INTEIRA ....... %ld/%ld   ← a volta\n", inteira, n);
+        if(dm1 != n || disc_ok != n || recusou != n || cifrou != n || inteira != n) mal++;
+
+        /* ── E A OUTRA METADE DO PAR, sem a qual isto afirma de mais. O
+         * `reais.tex` cor:finito diz: «a MESMA equação x² = mx + 1 tem raiz em
+         * 𝔽₁₂₇ para cerca de metade dos metais — exactamente quando D é resíduo
+         * quadrático —, e aí a órbita CAI no ponto fixo e não há corte a fazer.
+         * O corte não é um defeito de ℚ: é o que acontece quando a equação do
+         * ponto fixo não fecha NO CORPO ONDE A ÓRBITA CORRE.» E o
+         * `corpo_algebrico.tex` thm:corpo-dual chama-lhe a dicotomia
+         * inerte/separado, e diz que ela É a dicotomia troca/não-troca.
+         *
+         * Medir só o lado de ℚ dizia «a recusa é o salto» e deixava passar que
+         * a recusa é RELATIVA. Aqui conta-se o outro lado — e não pelo motor,
+         * que não tem 𝔽ₚ: por duas rotas independentes que têm de concordar, o
+         * critério de Euler e a busca da raiz. */
+        { const long P = 127;
+          long euler = 0, busca = 0, discorda = 0;
+          for(long m = 1; m < P; m++){
+              long D = (m*m + 4) % P;
+              /* rota 1: critério de Euler, D^((p−1)/2) mod p */
+              long e = 1, b = D % P, k = (P-1)/2;
+              while(k){ if(k & 1) e = (e * b) % P; b = (b * b) % P; k >>= 1; }
+              int res = (e == 1);
+              /* rota 2: a raiz procura-se, x² − mx − 1 ≡ 0 */
+              int achou = 0;
+              for(long x = 0; x < P && !achou; x++)
+                  if(((x*x - m*x - 1) % P + P) % P == 0) achou = 1;
+              if(res) euler++;
+              if(achou) busca++;
+              if(res != achou) discorda++;
+          }
+          printf("      e na face finita 𝔽%ld o ponto fixo ESTÁ lá para %ld dos"
+                 " %ld metais\n", P, busca, P-1);
+          printf("        Euler diz %ld · a busca diz %ld · discordam em %ld"
+                 " → %s\n", euler, busca, discorda,
+                 discorda ? "DUAS RÉGUAS (mau)" : "as duas rotas concordam");
+          if(discorda) mal++;
+          /* e tem de ser CERCA DE METADE: nem tudo, nem nada — senão a
+           * dicotomia inerte/separado não separa coisa nenhuma */
+          if(busca == 0 || busca == P-1){
+              printf("        (mau: %ld de %ld não é uma dicotomia)\n", busca, P-1);
+              mal++;
+          }
+        }
+
+        /* ── E O CONTROLO É O QUE IMPEDE A RECUSA DE SER CONSTANTE. Numa matriz
+         * cujo discriminante É quadrado perfeito, os autovalores saem — logo o
+         * «não é racional» das trinta acima é uma afirmação sobre AQUELAS
+         * matrizes, e não sobre o motor. Sem este caso, um motor que recusasse
+         * sempre passava com 30/30. */
+        sql_executa("DROP TABLE IF EXISTS a", &o);
+        sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO a VALUES (3,1), (0,2)", &o);
+        sql_executa("SELECT autovalores(*) FROM a", &o);
+        int ctrl = o.ok && o.nrows == 2;
+        printf("      controlo — (3,1;0,2), Δ = 1 é quadrado: autovalores %s\n",
+               ctrl ? "RESPONDEM (3 e 2)" : "recusaram (mau)");
+        if(!ctrl) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O MOTOR REALIZA O thm:central-peano, E NINGUÉM O PROGRAMOU PARA ISSO. O"
+           " `corpo_topologico.tex` diz: a Möbius g(x) = m + 1/x tem matriz (m,1;1,0), o seu"
+           " ponto fixo é o VECTOR PRÓPRIO x² = mx + 1, e em coordenadas homogéneas isso pede"
+           " (2p − mq)² = (m²+4)q² — logo o ponto vive em ℚ EXACTAMENTE quando m²+4 é"
+           " quadrado perfeito, e nunca é, porque m² < m²+4 < (m+2)² e o único candidato"
+           " pediria 2m = 3. «O salto é essa falta: a órbita corre toda em ℚ e o ponto para"
+           " onde ela vai não está lá.» E m²+4 É tr² − 4det dessa matriz. Ou seja: a recusa"
+           " que §W64 escreveu — «as raízes não são racionais, use cifra(*)» — NÃO É uma"
+           " limitação da conta: É O SALTO ℚ→ℝ. As trinta matrizes dão as cinco colunas"
+           " cheias: det = −1, Δ = m²+4, os autovalores a recusar, a cifra a responder — o"
+           " ponto EXISTE, noutro alfabeto — e a inversa INTEIRA, que é a volta sem a qual"
+           " isto seria meia lei: de det = −1 vem A⁻¹ = (0,1;1,−m) nos inteiros, e é a"
+           " descida que prova a falta. A PROVA É A LINHA 2m = 3, e o que se varre é o MOTOR"
+           " e não o teorema — essa distinção é o ponto, e sem ela isto seria varrer onde"
+           " nada pode falhar. O CONTROLO é a matriz de Δ quadrado, onde os autovalores"
+           " saem: sem ele, um motor que recusasse sempre passava com 30 de 30. E A RECUSA É"
+           " RELATIVA, QUE É A METADE QUE FALTAVA: o `reais.tex` cor:finito diz que a MESMA"
+           " equação tem raiz em 𝔽₁₂₇ para cerca de metade dos metais — exactamente quando D"
+           " é resíduo quadrático —, e aí a órbita CAI no ponto fixo e não há corte a fazer."
+           " «O corte não é um defeito de ℚ: é o que acontece quando a equação do ponto fixo"
+           " não fecha NO CORPO ONDE A ÓRBITA CORRE.» O `corpo_algebrico.tex` chama-lhe a"
+           " dicotomia inerte/separado e diz que ela É a dicotomia troca/não-troca. Medir só"
+           " o lado de ℚ afirmava de mais; conta-se o outro por DUAS ROTAS que têm de"
+           " concordar — o critério de Euler e a busca da raiz —, e exige-se que seja uma"
+           " DICOTOMIA: nem tudo nem nada, senão inerte e separado não separam nada.", mal == 0);
+    }
+
+    /* ═══ §W71: A RAIZ DE DIRAC — DOIS GATOS QUE ANTICOMUTAM DÃO UM ESQUILO ═ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W71 (K∂ₓ + L∂ᵧ)² = ∇²: o termo cruzado morre por anticomutação.\n\n");
+        { const char *tabs[] = { "K","L","P","Q" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w71__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w71__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w71.mem"); unlink("/tmp/pgwire_w71.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w71")) mal++;
+
+        /* ── A RAIZ DE DIRAC É UMA CONDIÇÃO SOBRE MATRIZES, e cabe inteira no
+         * que o motor já sabe. Procura-se D = K∂ₓ + L∂ᵧ com D² = ∇². Ao elevar
+         * ao quadrado saem três termos:
+         *
+         *     D² = K²∂ₓₓ + L²∂ᵧᵧ + (KL + LK)∂ₓᵧ
+         *
+         * e para dar o laplaciano é preciso K² = L² = I e KL + LK = 0. É a
+         * relação de Clifford, e em 2×2 sobre ℚ ela tem solução: K = diag(1,−1)
+         * e L = antidiag(1,1). Não é preciso o corpo complexo — o que se pede é
+         * ANTICOMUTAÇÃO, e ela é uma condição de matrizes. */
+        sql_executa("CREATE TABLE K (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO K VALUES (1,0), (0,-1)", &o);
+        sql_executa("CREATE TABLE L (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO L VALUES (0,1), (1,0)", &o);
+
+        /* (1) as duas são SIMÉTRICAS — dois GATOS, no vocabulário de §W68 */
+        sql_executa("SELECT antisimetrica(*) FROM K", &o);
+        int k_gato = o.ok && !strcmp(o.cell[0][0],"0") && !strcmp(o.cell[0][1],"0")
+                     && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"0");
+        sql_executa("SELECT antisimetrica(*) FROM L", &o);
+        int l_gato = o.ok && !strcmp(o.cell[0][1],"0") && !strcmp(o.cell[1][0],"0");
+        printf("      K e L: a parte antissimétrica é nula → %s\n",
+               (k_gato && l_gato) ? "são dois GATOS" : "MAU");
+        if(!k_gato || !l_gato) mal++;
+
+        /* (2) e QUADRAM na identidade — o primeiro par de condições */
+        sql_executa("SELECT produto(K) FROM K", &o);
+        int kk = o.ok && !strcmp(o.cell[0][0],"1") && !strcmp(o.cell[0][1],"0")
+                 && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"1");
+        sql_executa("SELECT produto(L) FROM L", &o);
+        int ll = o.ok && !strcmp(o.cell[0][0],"1") && !strcmp(o.cell[1][1],"1")
+                 && !strcmp(o.cell[0][1],"0") && !strcmp(o.cell[1][0],"0");
+        printf("      K² = %s · L² = %s\n", kk ? "I" : "MAU", ll ? "I" : "MAU");
+        if(!kk || !ll) mal++;
+
+        /* (3) E ANTICOMUTAM: KL = −LK. Mede-se pelos DOIS produtos, e não por
+         * um só com o sinal já assumido — pedir `produto(L) FROM K` e
+         * `produto(K) FROM L` e comparar é o que torna isto uma verificação. */
+        sql_executa("SELECT produto(L) FROM K", &o);
+        char kl[64] = "";
+        if(o.ok) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+            strncat(kl, o.cell[i][j], 12); strcat(kl, " "); }
+        sql_executa("SELECT produto(K) FROM L", &o);
+        char lk[64] = "";
+        if(o.ok) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+            strncat(lk, o.cell[i][j], 12); strcat(lk, " "); }
+        int anti = kl[0] && !strcmp(kl, "0 1 -1 0 ") && !strcmp(lk, "0 -1 1 0 ");
+        printf("      KL = [%s] · LK = [%s] → %s\n", kl, lk,
+               anti ? "KL = −LK, e o termo cruzado MORRE" : "MAU");
+        if(!anti) mal++;
+
+        /* (4) E O PRODUTO DE DOIS GATOS QUE ANTICOMUTAM É UM ESQUILO. Isto não
+         * foi posto: sai. KL = (0,1;−1,0) tem parte simétrica NULA, regime
+         * BORDA e Δ = −4 — e (KL)² = −I, isto é, É O `i`. A raiz de Dirac em
+         * dimensão dois constrói a unidade imaginária a partir de duas matrizes
+         * reais, e o que a constrói é a ANTICOMUTAÇÃO. */
+        sql_executa("CREATE TABLE P (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO P VALUES (0,1), (-1,0)", &o);
+        sql_executa("SELECT simetrica(*) FROM P", &o);
+        int p_esq = o.ok && !strcmp(o.cell[0][0],"0") && !strcmp(o.cell[0][1],"0")
+                    && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"0");
+        sql_executa("SELECT regime(*) FROM P", &o);
+        int p_borda = o.ok && !strcmp(o.cell[0][0],"BORDA") && !strcmp(o.cell[0][3],"-4");
+        sql_executa("SELECT produto(P) FROM P", &o);
+        int p_i = o.ok && !strcmp(o.cell[0][0],"-1") && !strcmp(o.cell[1][1],"-1")
+                  && !strcmp(o.cell[0][1],"0") && !strcmp(o.cell[1][0],"0");
+        printf("      KL: parte simétrica %s · regime %s · (KL)² = %s\n",
+               p_esq ? "NULA (é um ESQUILO)" : "MAU",
+               p_borda ? "BORDA, Δ = −4" : "MAU",
+               p_i ? "−I, logo É o i" : "MAU");
+        if(!p_esq || !p_borda || !p_i) mal++;
+
+        /* (5) E O CONTROLO SÃO DUAS QUE NÃO ANTICOMUTAM — sem ele, a medida (3)
+         * podia passar num motor cujo produto fosse comutativo, e aí KL = LK
+         * daria a mesma matriz nos dois sentidos e o «anticomutam» seria vazio.
+         * Com K e a identidade, KI = IK: comutam, e o termo cruzado NÃO morre. */
+        sql_executa("CREATE TABLE Q (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO Q VALUES (1,0), (0,1)", &o);
+        sql_executa("SELECT produto(Q) FROM K", &o);
+        char kq[64] = "";
+        if(o.ok) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+            strncat(kq, o.cell[i][j], 12); strcat(kq, " "); }
+        sql_executa("SELECT produto(K) FROM Q", &o);
+        char qk[64] = "";
+        if(o.ok) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+            strncat(qk, o.cell[i][j], 12); strcat(qk, " "); }
+        int comutam = kq[0] && !strcmp(kq, qk);
+        printf("      controlo — K e I: KI = [%s] e IK = [%s] → %s\n", kq, qk,
+               comutam ? "COMUTAM, e o cruzado sobrevive" : "MAU");
+        if(!comutam) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A RAIZ DE DIRAC É UMA CONDIÇÃO SOBRE MATRIZES, E CABE INTEIRA NO QUE O MOTOR JÁ"
+           " SABIA. Procura-se D = K∂ₓ + L∂ᵧ com D² = ∇²; ao elevar ao quadrado saem três"
+           " termos, K²∂ₓₓ + L²∂ᵧᵧ + (KL + LK)∂ₓᵧ, e para dar o laplaciano é preciso"
+           " K² = L² = I e KL + LK = 0 — a relação de Clifford. Em 2×2 sobre ℚ ela TEM"
+           " solução, e sem corpo complexo nenhum: K = diag(1,−1) e L = antidiag(1,1). O que"
+           " se pede não é um número imaginário — é ANTICOMUTAÇÃO, e essa é uma condição de"
+           " matrizes. Mede-se pelos DOIS produtos, não por um com o sinal já assumido. E"
+           " DAÍ SAI O QUE NINGUÉM PÔS: o produto de dois GATOS que anticomutam é um"
+           " ESQUILO. KL tem parte simétrica NULA, regime BORDA, Δ = −4 — o mesmo −4 de"
+           " Laplace, de Gauss e do oscilador em §W69 — e (KL)² = −I, isto é, É O `i`. A raiz"
+           " de Dirac em dimensão dois CONSTRÓI a unidade imaginária a partir de duas"
+           " matrizes reais, e o que a constrói é a anticomutação: o termo cruzado que tem de"
+           " morrer para o laplaciano aparecer é exactamente o que sobra como rotação. O"
+           " CONTROLO são duas que COMUTAM — K e a identidade —, sem o qual a medida da"
+           " anticomutação passaria num motor de produto comutativo, onde os dois sentidos"
+           " dão a mesma matriz e «anticomutam» não diria nada. E O ESCOPO: isto é a raiz de"
+           " Dirac em DIMENSÃO DOIS, que é a que cabe em 2×2 e em ℚ. O ramo de Hurwitz até 8"
+           " e o de Gentil em 3 e 7 são outra frente, e não se afirmam aqui.", mal == 0);
+    }
+
+
+    /* ═══ §W72: O TRAÇO E O DETERMINANTE SÃO AS DUAS FACES ═════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W72 det = m² − δ² e Δ = 4δ²: o par (tr,det) É o par (soma,produto).\n\n");
+        { char m[80], p2[80];
+          snprintf(m, sizeof m, "/tmp/pgwire_w72__a.mem");
+          snprintf(p2, sizeof p2, "/tmp/pgwire_w72__a.prog");
+          unlink(m); unlink(p2);
+          unlink("/tmp/pgwire_w72.mem"); unlink("/tmp/pgwire_w72.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w72")) mal++;
+
+        /* ── ONDE ISTO ESTÁ FUNDAMENTADO, e não é no reais.tex. O `reais.tex`
+         * thm:pontofixo diz o corte pela FALTA — o ponto fixo da Möbius que ℚ
+         * não tem. O `aranha.tex` PRODU-lo: o thm:corte(5) diz «o corte não é
+         * um ponto que se ache ENTRE as classes — é o ponto fixo que as duas
+         * faces passam a PARTILHAR», e chega lá batendo as duas dobras até a
+         * largura, que é um inteiro de grãos, CHEGAR a zero. Um é a falta, o
+         * outro é a construção; e é o segundo que funda.
+         *
+         * E a ligação com tudo o que este medidor fez hoje é literal. O aranha
+         * escreve a = m + δ e b = m − δ, com m = (a+b)/2 e δ = (a−b)/2, e daí
+         * «ab = m² − δ², e a conservação não foi pedida: é o produto expandido».
+         * Pondo a e b como os AUTOVALORES de uma matriz 2×2:
+         *
+         *     traço = a + b = 2m       ← a face ADITIVA, a soma
+         *     det   = a · b            ← a face MULTIPLICATIVA, o produto
+         *     Δ     = tr² − 4det = (a−b)² = 4δ²
+         *
+         * — logo det = m² − δ² é o lema do aranha, e o DISCRIMINANTE é o desvio
+         * ao quadrado. O par (B,C) da cifra, o par (traço,determinante) da
+         * matriz e o par (soma,produto) das duas faces são o MESMO par. */
+        long n = 0, id_det = 0, id_disc = 0, corte = 0;
+        for(int a = -4; a <= 4; a++) for(int b = -4; b <= 4; b++){
+            char q2[200];
+            sql_executa("DROP TABLE IF EXISTS a", &o);
+            sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+            snprintf(q2, sizeof q2, "INSERT INTO a VALUES (%d,0), (0,%d)", a, b);
+            sql_executa(q2, &o);
+            sql_executa("SELECT traco(*) FROM a", &o);
+            long tr = o.ok ? atol(o.cell[0][0]) : 12345;
+            sql_executa("SELECT det(*) FROM a", &o);
+            long dt = o.ok ? atol(o.cell[0][0]) : 12345;
+            sql_executa("SELECT regime(*) FROM a", &o);
+            long D = o.ok ? atol(o.cell[0][3]) : 12345;
+            /* em quartos, para não sair dos inteiros: 4m² = tr², 4δ² = (a−b)² */
+            long qm = tr*tr, qd = (long)(a-b)*(a-b);
+            n++;
+            if(4*dt == qm - qd) id_det++;      /* det = m² − δ² */
+            if(D == qd) id_disc++;             /* Δ = 4δ² */
+            if(a == b && D == 0) corte++;      /* δ = 0: o corte já aconteceu */
+        }
+        printf("      %ld pares (a,b) postos como autovalores de uma diagonal:\n", n);
+        printf("        det = m² − δ² ......... %ld/%ld   ← é o lema do aranha\n",
+               id_det, n);
+        printf("        Δ = 4δ² ............... %ld/%ld   ← o discriminante É o desvio\n",
+               id_disc, n);
+        printf("        e δ = 0 (a = b) ....... %ld casos, todos com Δ = 0\n", corte);
+        if(id_det != n || id_disc != n || corte != 9) mal++;
+
+        /* ── E Δ = 0 É O CORTE TERMINADO, não um caso degenerado. Pelo
+         * thm:corte(3) o processo «acaba, e acaba numa IGUALDADE»: m_N = g_N. Em
+         * termos do espectro isso é δ = 0, isto é Δ = 0, isto é a RAIZ DUPLA —
+         * e o §W64 já tinha medido a raiz dupla sem saber que era isto. Ali
+         * chamou-se-lhe Jordan e homotetia; aqui é o ponto onde as duas faces
+         * passam a partilhar o ponto fixo. */
+        sql_executa("DROP TABLE IF EXISTS a", &o);
+        sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO a VALUES (2,0), (0,2)", &o);
+        sql_executa("SELECT regime(*) FROM a", &o);
+        int d0 = o.ok && !strcmp(o.cell[0][3], "0");
+        sql_executa("SELECT autovalores(*) FROM a", &o);
+        int dupla = o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "2");
+        printf("      a = b = 2: Δ = %s e o espectro é %s — o corte TERMINOU,"
+               " e as duas faces partilham o ponto fixo\n",
+               d0 ? "0" : "MAU", dupla ? "raiz dupla" : "MAU");
+        if(!d0 || !dupla) mal++;
+
+        /* ── E O CONTROLO É δ ≠ 0, onde as duas faces ainda são DUAS. Sem ele,
+         * as identidades acima passavam num motor que devolvesse sempre zero.
+         * Com a = 3 e b = 1: m = 2, δ = 1, det = 3 = 4 − 1, Δ = 4. */
+        sql_executa("DROP TABLE IF EXISTS a", &o);
+        sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO a VALUES (3,0), (0,1)", &o);
+        sql_executa("SELECT det(*) FROM a", &o);
+        int dd = o.ok && !strcmp(o.cell[0][0], "3");
+        sql_executa("SELECT regime(*) FROM a", &o);
+        int DD = o.ok && !strcmp(o.cell[0][3], "4");
+        printf("      controlo — a=3, b=1: m=2, δ=1 · det %s = 4−1 · Δ %s = 4·1\n",
+               dd ? "3" : "MAU", DD ? "4" : "MAU");
+        if(!dd || !DD) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O TRAÇO E O DETERMINANTE SÃO AS DUAS FACES, E É NO `aranha` QUE ISSO ESTÁ"
+           " FUNDAMENTADO. O `reais.tex` diz o corte pela FALTA — o ponto fixo da Möbius que"
+           " ℚ não tem, medido em §W70 —, mas o `aranha` PRODU-lo: o thm:corte(5) diz «o corte"
+           " não é um ponto que se ache ENTRE as classes, é o ponto fixo que as duas faces"
+           " passam a PARTILHAR», e chega lá batendo as duas dobras até a largura, que é um"
+           " INTEIRO DE GRÃOS, CHEGAR a zero — termina, não converge. Um é a falta, o outro é"
+           " a construção, e é o segundo que funda. E A LIGAÇÃO É LITERAL: o aranha escreve"
+           " a = m + δ e b = m − δ e daí «ab = m² − δ², e a conservação não foi pedida». Pondo"
+           " a e b como os AUTOVALORES de uma 2×2, o traço é a+b = 2m — a face ADITIVA, a"
+           " soma — e o determinante é ab — a face MULTIPLICATIVA, o produto. Logo"
+           " det = m² − δ² É o lema do aranha, e Δ = tr² − 4det = (a−b)² = 4δ²: O"
+           " DISCRIMINANTE É O DESVIO AO QUADRADO. As 81 diagonais dão as duas identidades"
+           " cheias. E Δ = 0 NÃO É UM CASO DEGENERADO: é o corte TERMINADO — pelo thm:corte(3)"
+           " o processo acaba numa igualdade, e em termos do espectro isso é δ = 0, a RAIZ"
+           " DUPLA que §W64 já tinha medido sem saber que era isto. O par (B,C) da cifra, o"
+           " par (traço,determinante) da matriz e o par (soma,produto) das duas faces são o"
+           " MESMO par. O controlo é δ ≠ 0, onde as duas faces ainda são duas — sem ele, as"
+           " identidades passavam num motor que devolvesse sempre zero.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

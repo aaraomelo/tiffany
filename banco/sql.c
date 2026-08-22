@@ -97,6 +97,12 @@
  * leituras do MESMO discriminante e não duas contas parecidas. */
 #include "../lib/cifra.h"
 #include "../lib/forma.h"
+/* e o `exterior.h` pela mesma porta, porque traz a peça que faltava ao corpo
+ * diferencial: `ex_parte` parte QUALQUER matriz em simétrica ⊕ antissimétrica —
+ * que é o «A = gato ⊕ esquilo» do paper das equações diferenciais, escrito aqui
+ * há muito com outro nome. Sobre ℚ a partição é única e exata, e por isso não
+ * tem ramo de falha: dividir por 2 em ℚ sempre pode. */
+#include "../lib/exterior.h"
 #undef Mat
 #undef Vec
 #include <stdlib.h>
@@ -4600,7 +4606,10 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"CIFRA") ? 15
                        : !strcasecmp(nome,"AUTOVALORES") ? 16
                        : !strcasecmp(nome,"AUTOVETORES") ? 17
-                       : !strcasecmp(nome,"GRAM") ? 18 : 0;
+                       : !strcasecmp(nome,"GRAM") ? 18
+                       : !strcasecmp(nome,"SIMETRICA") ? 19
+                       : !strcasecmp(nome,"ANTISIMETRICA") ? 20
+                       : !strcasecmp(nome,"REGIME") ? 21 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7573,6 +7582,128 @@ static int varre(const char *resto, int acao){
          *
          * E a raiz nunca se tira: ⟨v,v⟩ é a norma AO QUADRADO, porque é a raiz
          * que traria o irracional para dentro de uma conta que é exacta. */
+        /* ═══ O CORPO DIFERENCIAL: A TABELA É O GERADOR DO FLUXO ═══════════
+         * `broca-so/papers/equacoes_diferenciais.tex` constrói a equação
+         * diferencial como o fluxo ẋ = A·x, com A uma MATRIZ, e diz o essencial
+         * numa linha: «o gerador é uma matriz, A = gato ⊕ esquilo (a
+         * decomposição Sym + Skew)». O `lib/edo.h` desta casa resgatou desse
+         * paper a parte ESCALAR — y'' + By' + Cy = 0 e a sua característica —
+         * e deixou a matricial para trás; e o `lib/exterior.h`, escrito por
+         * outra razão inteiramente, já tinha `ex_parte`, que é exactamente essa
+         * decomposição. Duas metades da mesma frase em ficheiros que não se
+         * conheciam.
+         *
+         *     A = (A + Aᵀ)/2  +  (A − Aᵀ)/2
+         *          o GATO           o ESQUILO
+         *          dissipa          gira
+         *          espectro real    espectro imaginário
+         *
+         * E o `regime` é o veredicto que o `chess/universe/tools/diferencial.c`
+         * media perturbando um bit — cristal, borda, caos —, aqui lido do
+         * discriminante, que é o MESMO Δ = tr² − 4det que decide a cifra e os
+         * autovalores. Uma classificação, escrita três vezes. */
+        if(mat_op == 19 || mat_op == 20){
+            MatQz S, K;
+            ex_parte(A, &S, &K);
+            MatQz R = (mat_op == 19) ? S : K;
+            const char *nm = (mat_op == 19) ? "simétrica (o GATO: dissipa)"
+                                            : "antissimétrica (o ESQUILO: gira)";
+            if(A.m != A.n){
+                printf("erro: a partição pede uma matriz QUADRADA — a"
+                       " transposta tem de caber no mesmo sítio. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "Sym/Skew needs a square matrix, got %d×%d",
+                             A.m, A.n); }
+                return 0;
+            }
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->nrows = R.m > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : R.m;
+                sql_cap->ncols = R.n > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : R.n;
+                for(int j = 0; j < sql_cap->ncols; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+            }
+            for(int i = 0; i < R.m; i++){
+                printf("   ");
+                for(int j = 0; j < R.n; j++){
+                    Par cls = ra_classe((Par){ (long)R.a[i][j].p, (long)R.a[i][j].q });
+                    char cel[SQL_OUT_CELL];
+                    if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                    else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                    printf("%s%s", cel, j + 1 < R.n ? " | " : "");
+                    if(sql_cap && i < sql_cap->nrows && j < sql_cap->ncols)
+                        snprintf(sql_cap->cell[i][j], SQL_OUT_CELL, "%s", cel);
+                }
+                printf("\n");
+            }
+            { Par tr = ra_classe((Par){ (long)qz_soma(R.a[0][0], R.a[R.n-1][R.n-1]).p,
+                                        (long)qz_soma(R.a[0][0], R.a[R.n-1][R.n-1]).q });
+              printf("-- a parte %s · traço %ld · A = simetrica + antisimetrica,"
+                     " e a partição é única e exacta em ℚ\n", nm, tr.a); }
+            return 1;
+        }
+
+        if(mat_op == 21){
+            if(A.m != 2 || A.n != 2){
+                printf("erro: o regime lê-se do discriminante de uma 2×2 — acima"
+                       " disso o espectro não sai de um Δ. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "regime needs a 2×2 matrix, got %d×%d", A.m, A.n); }
+                return 0;
+            }
+            long D = esp_disc(A);
+            Qz trq = qz_soma(A.a[0][0], A.a[1][1]);
+            Par tr = ra_classe((Par){ (long)trq.p, (long)trq.q });
+            Par dt = ra_classe((Par){ (long)mat_det(A).p, (long)mat_det(A).q });
+            /* ── O REGIME É O SINAL DE Re(λ), E ELE LÊ-SE DE (traço, Δ) ──────
+             * As raízes são (tr ± √Δ)/2. Com Δ < 0 elas são um par conjugado de
+             * parte real tr/2; com Δ ≥ 0 são reais. Então:
+             *
+             *   Re λ < 0  CRISTAL  colapsa no ponto fixo   (dissipa)
+             *   Re λ = 0  BORDA    orbita, conserva a norma (o esquilo)
+             *   Re λ > 0  CAOS     diverge, mistura         (o gato)
+             *
+             * e a classificação por Δ é a mesma do catálogo — hiperbólico,
+             * parabólico, elíptico — e a mesma que classifica uma EDP de 2ª
+             * ordem pelo seu símbolo. Uma tríade, três nomes. */
+            const char *classe = (D > 0) ? "hiperbólico (duas raízes reais)"
+                               : (D == 0) ? "parabólico (raiz dupla)"
+                                          : "elíptico (par conjugado)";
+            const char *reg;
+            if(D < 0) reg = (tr.a < 0) ? "CRISTAL" : (tr.a == 0) ? "BORDA" : "CAOS";
+            else {
+                /* reais: o maior é (tr + √Δ)/2, e o seu sinal decide */
+                long r = raizi(D);
+                reg = (tr.a + r < 0) ? "CRISTAL" : (tr.a + r == 0) ? "BORDA" : "CAOS";
+            }
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 4;
+                snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "regime");
+                snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "classe");
+                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "traco");
+                snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "disc");
+                sql_cap->tipo[0] = sql_cap->tipo[1] = SQL_TIPO_TEXT;
+                sql_cap->tipo[2] = sql_cap->tipo[3] = SQL_TIPO_INT4;
+                snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%s", reg);
+                snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%.9s", classe);
+                snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", tr.a);
+                snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", D);
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+            }
+            printf("   %s | %s | %ld | %ld\n", reg, classe, tr.a, D);
+            printf("-- o fluxo ẋ = A·x · λ² − %ldλ + %ld · Δ = %ld · %s ·"
+                   " o regime é o SINAL de Re(λ), e é o mesmo Δ da cifra\n",
+                   tr.a, dt.a, D, reg);
+            return 1;
+        }
+
         if(mat_op == 18){
             MatQz G = mat0((int)nr_v, (int)nr_v);
             for(int i = 0; i < (int)nr_v; i++)

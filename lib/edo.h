@@ -31,6 +31,38 @@
  * E dois casos fecham o círculo com o resto do sistema:
  *   y'' = -y      -> borda σ² = −1     -> é o i, e a solução é a rotação
  *   y'' = y' + y  -> borda σ² = σ + 1  -> é o OURO, e a solução é φ^t
+ *
+ * ── E A OUTRA METADE DO PAPER, QUE FICOU PARA TRÁS (22/08) ────────────────────
+ * O `broca-so/papers/equacoes_diferenciais.tex` não trata só do escalar: constrói
+ * a ED como o FLUXO
+ *
+ *     ẋ = A·x,   com A uma MATRIZ,   A = gato ⊕ esquilo
+ *
+ * — a decomposição Sym + Skew. O que este ficheiro resgatou foi a parte escalar; a
+ * matricial ficou lá, e entretanto o `lib/exterior.h`, escrito por outra razão
+ * inteiramente, já tinha `ex_parte`, que É essa decomposição. Duas metades da mesma
+ * frase em ficheiros que não se conheciam.
+ *
+ *     A = (A + Aᵀ)/2   +   (A − Aᵀ)/2
+ *          o GATO            o ESQUILO
+ *          dissipa           gira
+ *          espectro real     espectro imaginário
+ *
+ * A ponte entre as duas metades é a matriz COMPANHEIRA: y'' + By' + Cy = 0 tem
+ *
+ *     A = ( 0   1 )    com traço = −B  e  determinante = C,
+ *         (−C  −B )
+ *
+ * logo λ² − tr·λ + det = λ² + Bλ + C — a característica deste ficheiro, e o
+ * característico da matriz, são a mesma. ATENÇÃO AO SINAL: aqui o B é o
+ * coeficiente de y' e vale −traço. Duas convenções, e a conversão diz-se onde é
+ * usada, não numa nota distante.
+ *
+ * E daí sai a coisa que nenhum dos dois lados sabia sozinho: o PRIMEIRO TERMO DA
+ * CIFRA — que o `cifra.h` chama «qual metade carrega o real» — É a classificação
+ * da equação diferencial. Vale 2 exactamente quando Δ < 0, isto é, quando o
+ * espectro é imaginário e o fluxo ORBITA. Medido no motor do banco, onde a tabela
+ * é o gerador: `tests/pgwire.c` §W68, com `simetrica`, `antisimetrica` e `regime`.
  */
 #ifndef EDO_H
 #define EDO_H

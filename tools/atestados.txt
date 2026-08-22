@@ -90,7 +90,7 @@ continuo c67c826d23cf83bb 0
 contorno_riemann f675c33725a349a3 0
 contrato 2fb51b9eb064e925 0
 controlo_front e94ce67fbef877c1 0
-conversa d8735a0443a685ad 0
+conversa 063859b09d7ac318 0
 converte aed943df396fe8b2 0
 convolucao_universal fc0e5813ad42301b 0
 coroa b7ee5ecba9494c3f 0
@@ -168,7 +168,7 @@ dualrn 3de30a52a834335d 0
 dualsort 6ed810bbaae464a0 0
 dualsort_banco e829df2405ea94f6 0
 duas_pontes a50961f0657e4654 0
-edo 4925c4bede135846 0
+edo b845fe2c3a562bb8 0
 einstein 769166e44317809f 0
 eletrico f121b798467f33d9 0
 elipses 02a9cccff7029bc9 0
@@ -368,7 +368,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 35b0e4c9aebe0824 0
+pgwire 187d2f4edd1aa04e 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -415,7 +415,7 @@ recursao 268dd5df56bb546b 0
 rede_dual 441d23a4e0824dce 0
 reducao a55c5836822c89da 0
 refracao 7a6fe4d08af5aa96 0
-refs 1759d2ac34f83bd7 0
+refs d8dd0037a251d16a 0
 refuta feefc6499e4d89e0 0
 regua 273501d5d2f33deb 0
 regua_continua 02efe28cd3eea5d0 0
@@ -450,7 +450,7 @@ semente bdf47d333634825f 0
 serie_phi 5bd6af9a92aaa5a7 0
 significado aff35c553960fdcb 0
 simula 8d47ff0fbbdab6f3 0
-sistema a260aacee7067169 0
+sistema 6c04fecc64fdc48c 0
 smartcontract ff52509164a5bbd5 0
 solar f5ead35fc2cd5be2 0
 solucoes_primitivas a317586c48866d16 0
@@ -458,7 +458,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql dd36a28e02846398 0
+sql a140ff557ecf9d52 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0

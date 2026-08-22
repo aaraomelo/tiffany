@@ -14,18 +14,42 @@
  * remover", porque remover um label leva medidores. A segunda é esta: RENOMEAR OBRIGA A
  * SEGUIR AS REFERÊNCIAS, e é o que este medidor guarda.
  *
+ * ── E ELE OLHAVA PARA UM TERÇO DO REPOSITÓRIO (22/08) ────────────────────────
+ * Nasceu com os três documentos da raiz, que eram o repositório todo. Os
+ * `papers/` cresceram depois — nove documentos com \documentclass próprio, 590
+ * labels e 978 referências — e ficaram de fora: a lei existia e não olhava para
+ * onde ela é mais precisa, porque cada paper compila sozinho.
+ *
+ * Ao estender apareceram, de uma vez: 36 referências órfãs no
+ * `corpo_analitico.tex` (todas a apontar para o `corpo_algebrico.tex`, resolvidas
+ * agora por `xr`) e um `\label{thm:central}` DUPLICADO no mesmo ficheiro, em dois
+ * teoremas diferentes — o segundo ganhava em silêncio e desviava as oito citações
+ * do teorema central para o teorema errado.
+ *
+ * E a extensão teve o seu próprio defeito, que é a lição: `onde()` devolvia o
+ * PRIMEIRO label com aquele nome em QUALQUER documento, o que com três raramente
+ * colidia e com doze passou a acusar dezenas de «cruzadas» que são referências
+ * locais perfeitas — `sec:geo` existe no `aranha` E no `teoria`. Procura-se
+ * primeiro no documento que pergunta, que é o que o LaTeX faz.
+ *
  *   §R1  toda \ref tem \label, documento a documento
  *   §R2  todo \label é único DENTRO do documento (duplicado é "multiply defined")
- *   §R3  nenhuma \ref atravessa documentos — no livro.tex junta-se tudo e passaria,
- *        mas cada .tex compila SOZINHO e lá sairia "??"
- *   §R4  o CONTROLO NEGATIVO: injeta-se uma órfã e uma duplicada em memória, e o
- *        medidor TEM de as apanhar. Sem isto §R1–§R3 passariam num repositório vazio.
+ *   §R3  nenhuma \ref atravessa documentos SEM O DECLARAR — no livro.tex junta-se
+ *        tudo e passaria, mas cada .tex compila SOZINHO e lá sairia "??". A
+ *        excepção é o `xr`: `\externaldocument[pref]{outro}` faz o LaTeX ler o
+ *        .aux do outro e resolver, e o prefixo separa as duas famílias de labels.
+ *   §R4  o CONTROLO NEGATIVO: injeta-se uma órfã, uma duplicada e uma cruzada em
+ *        memória, e o medidor TEM de as apanhar. Sem isto §R1–§R3 passariam num
+ *        repositório vazio. E o `xr` tem controlo PRÓPRIO, nos dois sentidos:
+ *        desligando a declaração as referências que ela cobre voltam a ser órfãs
+ *        (senão não estava a fazer trabalho), e um nome com o prefixo certo mas
+ *        ausente do alvo continua órfão (senão o prefixo era passe-livre).
  *   §R5  A MESMA LEI NO ANDAR DE BAIXO: todo `#include "x.h"` de um ficheiro que o
  *        git RASTREIA aponta para um ficheiro que o git também tem. Um header fora
  *        do repositório é a referência órfã do C — aqui compila (o disco tem-no) e
  *        num clone limpo não existe, e nada falha DESTE lado.
- *        Foi assim que `banco/*.h` viveu fora do git: o `.gitignore` tinha
- *        `banco/*` com excepção só para `.c`, e o `banco/sql_api.h` — incluído pelo
+ *        Foi assim que `banco/` + `*.h` viveu fora do git: o `.gitignore` tinha
+ *        `banco/` + `*` com excepção só para `.c`, e o `banco/sql_api.h` — incluído pelo
  *        `banco/sql.c`, que está na bateria — nunca lá entrou. A bateria estava
  *        verde sobre uma árvore que o git não reproduzia.
  *        E o controlo negativo é o mesmo: injecta-se um include inexistente.
@@ -50,8 +74,41 @@ typedef struct { char nome[MAXL]; int doc; long linha; } Marca;
  static int nlab = 0;
   static int nref = 0;
 
-static const char *DOCS[] = { "teoria.tex", "catalogo.tex", "enredo.tex" };
-static const int NDOC = 3;
+/* ── OS DOCUMENTOS QUE SE VIGIAM, E PORQUE SÃO DOZE E NÃO TRÊS ───────────────
+ * Este medidor nasceu com os três da raiz, que eram o repositório todo. Os
+ * `papers/` nasceram depois — nove documentos, 590 labels e 978 referências —
+ * e ficaram FORA: a lei existia e não olhava para onde ela é mais precisa,
+ * porque cada paper compila SOZINHO e uma \ref que atravessa sai «??».
+ *
+ * Quando se estendeu, apareceram 36 órfãs no `corpo_analitico.tex`, todas a
+ * apontar para o `corpo_algebrico.tex`. A ausência de cobertura não era uma
+ * decisão: era a lista a não ter acompanhado o repositório.
+ *
+ * Só entram os que têm `\documentclass` — `estilo.tex` e `gkcapa.tex` são
+ * incluídos por outros e não compilam sozinhos, logo não são documentos. */
+static const char *DOCS[] = {
+    "teoria.tex", "catalogo.tex", "enredo.tex",
+    "papers/aranha.tex", "papers/arquitetura.tex",
+    "papers/corpo_algebrico.tex", "papers/corpo_analitico.tex",
+    "papers/corpo_topologico.tex",
+    "papers/inteiros.tex", "papers/naturais.tex",
+    "papers/racionais.tex", "papers/reais.tex",
+};
+static const int NDOC = 12;
+
+/* ── E O `xr` É A EXCEPÇÃO DECLARADA ─────────────────────────────────────────
+ * Uma \ref que atravessa documentos é um defeito — EXCEPTO quando o documento
+ * declara `\externaldocument{outro}`, que é o mecanismo do LaTeX para o fazer:
+ * o `xr` lê o `.aux` do outro e resolve. Com PREFIXO — `\externaldocument[alg:]`
+ * — as duas famílias de labels ficam separadas, o que não é decoração: sem ele,
+ * um label que exista nos dois (aqui `sec:torre`) dá «multiply defined» e um dos
+ * dois ganha em silêncio.
+ *
+ * Guarda-se a declaração para §R1 e §R3 a poderem honrar. */
+#define MAXX 32
+typedef struct { int doc; char pref[MAXL]; char alvo[MAXL]; } Externo;
+static Externo externos[MAXX];
+static int nex = 0;
 
 /* colhe \label{...} e \ref{...}/\eqref/\cref/\pageref de um ficheiro */
 static int colhe(const char *caminho, int doc)
@@ -63,6 +120,30 @@ static int colhe(const char *caminho, int doc)
         nl++;
         for (char *p = linha; (p = strchr(p, '\\')); p++) {
             const char *cmd = NULL; int elabel = 0;
+            if (!strncmp(p, "\\externaldocument", 17)) {
+                /* \externaldocument[pref]{alvo} — o prefixo é opcional */
+                const char *q = p + 17;
+                char pref[MAXL] = "";
+                if (*q == '[') {
+                    const char *fp = strchr(q, ']');
+                    if (fp && fp - q - 1 < MAXL) {
+                        memcpy(pref, q + 1, (size_t)(fp - q - 1));
+                        pref[fp - q - 1] = 0;
+                        q = fp + 1;
+                    }
+                }
+                if (*q == '{') {
+                    const char *fa = strchr(q, '}');
+                    if (fa && fa - q - 1 < MAXL && nex < MAXX) {
+                        externos[nex].doc = doc;
+                        snprintf(externos[nex].pref, MAXL, "%s", pref);
+                        memcpy(externos[nex].alvo, q + 1, (size_t)(fa - q - 1));
+                        externos[nex].alvo[fa - q - 1] = 0;
+                        nex++;
+                    }
+                }
+                continue;
+            }
             if      (!strncmp(p, "\\label{",    7)) { cmd = p +  7; elabel = 1; }
             else if (!strncmp(p, "\\ref{",      5)) { cmd = p +  5; }
             else if (!strncmp(p, "\\eqref{",    7)) { cmd = p +  7; }
@@ -82,11 +163,60 @@ static int colhe(const char *caminho, int doc)
     return 1;
 }
 
-/* o label existe? -1 se não; senão o índice do documento onde está */
+/* o label existe? -1 se não; senão o índice do documento onde está.
+ *
+ * ── E A ORDEM DA BUSCA IMPORTA, o que só se viu ao passar de 3 para 12
+ * documentos. Esta função devolvia o PRIMEIRO label com aquele nome, em
+ * qualquer documento — e com doze, um nome que existe no próprio documento E
+ * noutro (`sec:geo` está no `aranha` e no `teoria`) resolvia para o OUTRO. O
+ * §R3 acusava então dezenas de «cruzadas» que são referências locais perfeitas.
+ * Procura-se PRIMEIRO no documento que pergunta: uma \ref resolve sempre para
+ * o label do próprio ficheiro, que é o que o LaTeX faz. */
+static int onde_de(const char *nome, int doc)
+{
+    for (int i = 0; i < nlab; i++)
+        if (labels[i].doc == doc && !strcmp(labels[i].nome, nome)) return doc;
+    for (int i = 0; i < nlab; i++)
+        if (!strcmp(labels[i].nome, nome)) return labels[i].doc;
+    return -1;
+}
 static int onde(const char *nome)
 {
     for (int i = 0; i < nlab; i++)
         if (!strcmp(labels[i].nome, nome)) return labels[i].doc;
+    return -1;
+}
+
+/* o basename sem .tex, para casar `\externaldocument{corpo_algebrico}` com
+ * `papers/corpo_algebrico.tex` */
+static void raiz_do_doc(const char *caminho, char *out, size_t cap)
+{
+    const char *b = strrchr(caminho, '/');
+    b = b ? b + 1 : caminho;
+    snprintf(out, cap, "%s", b);
+    char *pt = strstr(out, ".tex");
+    if (pt) *pt = 0;
+}
+
+/* a referência `nome`, feita no documento `doc`, resolve por um
+ * \externaldocument declarado? Devolve o índice do documento alvo, ou -1.
+ * É a ÚNICA maneira legítima de uma \ref atravessar documentos. */
+static int onde_por_xr(const char *nome, int doc)
+{
+    for (int e = 0; e < nex; e++) {
+        if (externos[e].doc != doc) continue;
+        size_t lp = strlen(externos[e].pref);
+        if (lp && strncmp(nome, externos[e].pref, lp)) continue;
+        /* qual documento é o alvo? */
+        for (int d = 0; d < NDOC; d++) {
+            char r[MAXL]; raiz_do_doc(DOCS[d], r, sizeof r);
+            if (strcmp(r, externos[e].alvo)) continue;
+            /* o nome sem prefixo tem de ser label DESSE documento */
+            for (int i = 0; i < nlab; i++)
+                if (labels[i].doc == d && !strcmp(labels[i].nome, nome + lp))
+                    return d;
+        }
+    }
     return -1;
 }
 
@@ -121,13 +251,16 @@ int main(void)
 
     /* ---------------- §R1 — toda \ref tem \label ---------------- */
     printf("§R1 toda referência aponta para um label que existe\n");
-    int orfas = 0;
-    for (int i = 0; i < nref; i++)
-        if (onde(refs_[i].nome) < 0) {
-            orfas++;
-            printf("      ÓRFÃ  %s:%ld  \\ref{%s}\n",
-                   DOCS[refs_[i].doc], refs_[i].linha, refs_[i].nome);
-        }
+    int orfas = 0, por_xr = 0;
+    for (int i = 0; i < nref; i++) {
+        if (onde_de(refs_[i].nome, refs_[i].doc) >= 0) continue;
+        if (onde_por_xr(refs_[i].nome, refs_[i].doc) >= 0) { por_xr++; continue; }
+        orfas++;
+        printf("      ÓRFÃ  %s:%ld  \\ref{%s}\n",
+               DOCS[refs_[i].doc], refs_[i].linha, refs_[i].nome);
+    }
+    printf("      (%d resolvidas por \\externaldocument, em %d declaração(ões))\n",
+           por_xr, nex);
     ok("nenhuma referência órfã (a que imprime \"??\" no PDF)", orfas == 0);
 
     /* ---------------- §R2 — label único dentro do documento ---------------- */
@@ -146,16 +279,22 @@ int main(void)
     printf("\n§R3 nenhuma referência atravessa documentos\n");
     printf("      (no livro.tex os três juntam-se e uma \\ref cruzada resolveria;\n");
     printf("       mas cada .tex compila SOZINHO, e lá sairia \"??\")\n");
-    int cruzadas = 0;
+    printf("      (a EXCEPÇÃO é o `xr`: com \\externaldocument o LaTeX lê o .aux\n");
+    printf("       do outro e resolve — declarado, e não por acidente)\n");
+    int cruzadas = 0, declaradas = 0;
     for (int i = 0; i < nref; i++) {
-        int d = onde(refs_[i].nome);
+        int d = onde_de(refs_[i].nome, refs_[i].doc);
         if (d >= 0 && d != refs_[i].doc) {
             cruzadas++;
             printf("      CRUZADA  %s:%ld  \\ref{%s} → vive em %s\n",
                    DOCS[refs_[i].doc], refs_[i].linha, refs_[i].nome, DOCS[d]);
         }
+        if (d < 0 && onde_por_xr(refs_[i].nome, refs_[i].doc) >= 0) declaradas++;
+        (void)0;
     }
-    ok("nenhuma referência a label de outro documento", cruzadas == 0);
+    printf("      %d atravessam por declaração, %d por acidente\n",
+           declaradas, cruzadas);
+    ok("nenhuma referência atravessa documentos SEM o declarar", cruzadas == 0);
 
     /* ---------------- §R4 — o CONTROLO NEGATIVO ---------------- */
     printf("\n§R4 controlo negativo: o medidor apanha o defeito quando ele existe?\n");
@@ -184,6 +323,45 @@ int main(void)
         refs_[nref].doc = 2; refs_[nref].linha = -1; nref++;   /* citada do enredo (doc 2) */
         int d = onde(refs_[nref-1].nome);
         ok("com uma cruzada injetada, §R3 apanha-a", d >= 0 && d != 2);
+    }
+
+    /* ── (d) E O CONTROLO DO PRÓPRIO `xr` ────────────────────────────────────
+     * A excepção declarada é uma PORTA, e uma porta que aceita tudo não é uma
+     * excepção — é um buraco. Mede-se nos dois sentidos:
+     *
+     *   (i) DESLIGANDO a declaração, as referências que ela cobre têm de voltar
+     *       a ser órfãs. Se continuassem a resolver, o `xr` não estava a fazer
+     *       nada e o verde vinha de outro sítio.
+     *  (ii) e um nome que o alvo NÃO tem continua órfão MESMO com a declaração
+     *       ligada — senão o prefixo `alg:` viraria um passe-livre para
+     *       qualquer coisa.
+     *
+     * Sem isto, bastava declarar `\externaldocument` uma vez para o §R1 deixar
+     * de medir seja o que for. */
+    {
+        int nex0 = nex, cobertas = 0, orfas_sem_xr = 0, passe_livre = 0;
+        for (int i = 0; i < nref0; i++)
+            if (onde_de(refs_[i].nome, refs_[i].doc) < 0
+                && onde_por_xr(refs_[i].nome, refs_[i].doc) >= 0) cobertas++;
+        nex = 0;                                  /* desliga TODAS as declarações */
+        for (int i = 0; i < nref0; i++)
+            if (onde_de(refs_[i].nome, refs_[i].doc) < 0
+                && onde_por_xr(refs_[i].nome, refs_[i].doc) < 0) orfas_sem_xr++;
+        nex = nex0;                               /* volta a ligar */
+        printf("      com o xr ligado: %d cobertas · desligado: %d órfãs\n",
+               cobertas, orfas_sem_xr);
+        ok("desligando o \\externaldocument, as que ele cobre VOLTAM a ser órfãs"
+           " — a excepção está a fazer trabalho", cobertas > 0 && orfas_sem_xr == cobertas);
+
+        /* (ii) um nome inventado com o prefixo certo NÃO pode passar */
+        if (nex0 > 0) {
+            char falso[MAXL];
+            snprintf(falso, sizeof falso, "%sthm:este-nao-existe-no-alvo",
+                     externos[0].pref);
+            passe_livre = (onde_por_xr(falso, externos[0].doc) >= 0);
+            ok("um nome com o prefixo certo mas ausente do alvo continua órfão"
+               " — o prefixo não é passe-livre", !passe_livre);
+        }
     }
 
     nlab = nlab0; nref = nref0;   /* desfaz-se a injeção: o estado volta ao medido */
