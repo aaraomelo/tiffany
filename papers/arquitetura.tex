@@ -5117,6 +5117,55 @@ enquadramento, o ciclo nos quatro metais e a convolução com a sua varredura.}
         {aritmética de pares em $\Z[\sigma]$; enquadramento por sinal de polinómio inteiro}
         {\code{tests/pgwire.c} §W106}
 
+\subsection*{\texorpdfstring{$\exp$}{exp} conjuga as duas involuções, mas não empareja os pontos fixos}
+
+\noindent A §«O par aditivo e o multiplicativo» põe $\nu_+(r)=-r$ de um lado e
+$\nu_\times(q)=1/q$ do outro, conjugadas por $\exp$, e faz logo a ressalva certa: a
+relação $f(-r)=1/f(r)$ \textbf{não} caracteriza $\exp$. A lista do texto mede-se em
+\textbf{racionais exatos}, comparando $f(r)f(-r)$ com $1$ por produto cruzado e sem
+uma divisão:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Möbius $\frac{1+r}{1-r}$ & cumpre em todo o domínio & (nem exponencial é)\\
+$x+1$ & falha & \\
+$x^{2}+1$ & falha & \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Os pontos $r=\pm1$ ficam de fora --- são os \textbf{pólos} da Möbius, e
+contá-los como falha seria medir o meu descuido e não a função.
+
+\medskip\noindent E o critério para $f=e^{g}$ é sobre $g$ e não sobre $\exp$: $f$
+cumpre \emph{sse} $g$ é \textbf{ímpar}. Mede-se na paridade de $g$, sem uma
+exponencial entrar --- $r^{3}$ é ímpar em todos os pontos, $r^{2}$ em nenhum além do
+zero.
+
+\medskip\noindent\textbf{Os pontos fixos são o gume.} Em $\Q$, $\nu_+$ fixa
+\textbf{um} ponto (o zero) e $\nu_\times$ fixa \textbf{dois} (o $\pm1$). A conjugação
+leva $0\mapsto1$ e deixa o $-1$ sem origem, porque $\log(-1)$ está fora do eixo real
+--- que é exatamente a ressalva do catálogo, agora com os dois números lado a lado.
+
+\medskip\noindent\textbf{E no discreto a conta fecha}, o que \emph{explica} a
+ressalva em vez de a repetir. Em $\Z/101$ a exponencial é $r\mapsto g^{r}$ de
+$(\Z/100,+)$ para $((\Z/101)^*,\times)$, e ali o lado aditivo \emph{tem}
+$2$-torção --- o $50$ ---, logo fixa dois pontos, e a conjugação empareja-os com os
+$\pm1$: $2$ de $2$.
+\[
+\boxed{\;\text{o que falta em }\R\text{ é a $2$-torção que }\R\text{ não tem}\;}
+\]
+E isso já estava medido: é o \code{cor:degenerados} de §W103, onde $\ell\to\infty$ é
+o degenerado sem metade. \emph{Não são duas observações --- é a mesma, num sítio onde
+se pode contar.}
+
+\medido{\code{tests/pgwire.c} §W107 --- as três funções em racionais exatos com os
+pólos ditos; a paridade de $g$; os pontos fixos $1$ contra $2$; e o emparelhamento
+$2/2$ no discreto.}
+
+\colunas{\code{catalogo} «O par aditivo e o multiplicativo» (\code{prop:conjuga}); §W103 (\code{cor:degenerados})}
+        {produto cruzado em $\Q$; paridade de $g$; exponenciação em $\Z/101$}
+        {\code{tests/pgwire.c} §W107}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

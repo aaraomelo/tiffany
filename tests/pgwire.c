@@ -15327,6 +15327,147 @@ int main(void){
            " distinguir.", mal == 0);
     }
 
+    /* ═══ §W107: exp CONJUGA AS INVOLUÇÕES — E FALTA-LHE UM PONTO FIXO ═════ */
+    {
+        long mal = 0;
+        printf("\n§W107 f(−r) = 1/f(r) não caracteriza exp; e ν_× tem DOIS pontos fixos, ν_+ tem um.\n\n");
+
+        /* ── (1) A LISTA DO TEXTO, EM RACIONAIS EXACTOS. O catálogo diz que
+         * f(−r) = 1/f(r) «não caracteriza exp: vale para todo f = e^g com g
+         * ímpar, e até para a Möbius f(r) = (1+r)/(1−r), que nem exponencial
+         * é. Falha, isso sim, para f(x)=x+1, f(x)=x²+1 e f = e^{r²}». As que
+         * são racionais medem-se aqui, sem uma divisão: compara-se
+         * f(−r)·f(r) com 1 por produto cruzado. */
+        {
+            /* f dada por (num,den) em função de r = p/q */
+            struct { const char *nome; int esperado; } F[] = {
+                { "Möbius (1+r)/(1−r)", 1 },
+                { "x + 1            ", 0 },
+                { "x² + 1           ", 0 },
+            };
+            long ok[3] = {0,0,0}, tot = 0, tot_mob = 0, polos = 0;
+            for(long p = -4; p <= 4; p++) for(long q = 1; q <= 4; q++){
+                if(p == 0) continue;                 /* r = 0 é ponto fixo trivial */
+                long g = 1; { long a = p<0?-p:p, b = q; while(b){ long t=a%b; a=b; b=t; } g = a?a:1; }
+                if(g != 1) continue;                 /* só r reduzido */
+                /* Möbius: f(r) = (q+p)/(q−p), f(−r) = (q−p)/(q+p) */
+                /* r = ±1 são os PÓLOS da Möbius: f(1) não existe e f(−1) = 0.
+                 * Ficam fora do domínio, e contá-los como falha seria medir o
+                 * meu descuido e não a função. */
+                if(q - p != 0 && q + p != 0){
+                    long an = q+p, ad = q-p, bn = q-p, bd = q+p;
+                    tot_mob++;
+                    if(an*bn == ad*bd) ok[0]++;      /* f(r)·f(−r) = 1 */
+                } else polos++;
+                /* x+1: f(r) = (p+q)/q, f(−r) = (q−p)/q */
+                { long an = p+q, ad = q, bn = q-p, bd = q;
+                  if(an*bn == ad*bd) ok[1]++; }
+                /* x²+1: f(r) = (p²+q²)/q², e f(−r) é o MESMO */
+                { long an = p*p+q*q, ad = q*q;
+                  if(an*an == ad*ad) ok[2]++; }
+                tot++;
+            }
+            printf("      %s: f(r)·f(−r) = 1 em %ld/%ld  → %s (o texto diz que"
+                   " cumpre) — e %ld pontos ficam de fora por serem os PÓLOS, r = ±1\n",
+                   F[0].nome, ok[0], tot_mob,
+                   (ok[0] == tot_mob) ? "CUMPRE" : "falha", polos);
+            for(unsigned i = 1; i < 3; i++)
+                printf("      %s: f(r)·f(−r) = 1 em %ld/%ld  → %s (o texto diz que"
+                       " falha)\n", F[i].nome, ok[i], tot,
+                       (ok[i] == tot) ? "cumpre" : "FALHA");
+            if(ok[0] != tot_mob || tot_mob < 15) mal++;
+            if(ok[1] == tot || ok[2] == tot) mal++;
+            if(polos != 2) mal++;
+        }
+
+        /* ── (2) E O CRITÉRIO PARA f = e^g É SOBRE g, NÃO SOBRE exp: f cumpre
+         * sse g é ÍMPAR. Mede-se em g e nenhuma exponencial entra — o texto dá
+         * r³ (cumpre) e r² (falha), e é a paridade que decide. */
+        {
+            long imp3 = 0, imp2 = 0, n = 0;
+            for(long r = -6; r <= 6; r++){
+                n++;
+                if((-r)*(-r)*(-r) == -(r*r*r)) imp3++;
+                if((-r)*(-r) == -(r*r)) imp2++;
+            }
+            printf("      g(r) = r³ é ÍMPAR em %ld/%ld · g(r) = r² em %ld/%ld —"
+                   " logo e^{r³} cumpre e e^{r²} não, e a razão é da PARIDADE de g\n",
+                   imp3, n, imp2, n);
+            if(imp3 != n) mal++;
+            if(imp2 == n) mal++;
+        }
+
+        /* ── (3) OS PONTOS FIXOS NÃO SE EMPARELHAM, e é a ressalva do texto:
+         * «ν_× fixa também q = −1, e esse ponto fixo não tem imagem real por
+         * exp». Conta-se: ν_+(r) = −r fixa UM ponto; ν_×(q) = 1/q fixa DOIS. */
+        {
+            long fix_mais = 0, fix_vezes = 0, N = 0;
+            for(long p = -8; p <= 8; p++) for(long q = 1; q <= 8; q++){
+                long a = p<0?-p:p, b = q; while(b){ long t=a%b; a=b; b=t; }
+                if((a?a:1) != 1) continue;
+                N++;
+                if(-p*q == p*q) fix_mais++;               /* −r = r */
+                if(p != 0 && q*q == p*p) fix_vezes++;      /* 1/r = r */
+            }
+            printf("      pontos fixos em ℚ: ν_+(r) = −r fixa %ld · ν_×(q) = 1/q"
+                   " fixa %ld (são q = ±1)\n", fix_mais, fix_vezes);
+            printf("        a conjugação por exp leva 0 ↦ 1, mas o −1 fica SEM"
+                   " origem: log(−1) está fora do eixo real\n");
+            if(fix_mais != 1 || fix_vezes != 2) mal++;
+        }
+
+        /* ── (4) E NO DISCRETO A CONTA FECHA — que é o que explica a ressalva.
+         * Em ℤ/p a exponencial é r ↦ g^r de (ℤ/(p−1),+) para ((ℤ/p)*,×). Ali
+         * o lado aditivo TEM 2-torção — o (p−1)/2 —, logo tem DOIS pontos
+         * fixos, e a conjugação empareja-os com os ±1. O que falta em ℝ é a
+         * 2-torção que ℝ não tem: é o cor:degenerados do §W103. */
+        {
+            const long p = 101, n = p - 1;
+            long gg = 0;
+            for(long c = 2; c < p && !gg; c++){
+                long acc = 1; int ord = 0;
+                for(long k = 1; k <= n; k++){ acc = acc*c % p; if(acc == 1){ ord = k; break; } }
+                if(ord == n) gg = c;
+            }
+            long fa = 0, fm = 0;
+            for(long r = 0; r < n; r++) if((2*r) % n == 0) fa++;       /* −r ≡ r */
+            for(long x = 1; x < p; x++) if((x*x) % p == 1) fm++;       /* x⁻¹ = x */
+            /* e a conjugação empareja-os: g^r para cada r fixo dá um x fixo */
+            long emparelha = 0;
+            for(long r = 0; r < n; r++) if((2*r) % n == 0){
+                long acc = 1; for(long k = 0; k < r; k++) acc = acc*gg % p;
+                if((acc*acc) % p == 1) emparelha++;
+            }
+            printf("      no DISCRETO ℤ/%ld com gerador %ld: o lado aditivo fixa %ld"
+                   " e o multiplicativo %ld — e a conjugação empareja %ld/%ld\n",
+                   p, gg, fa, fm, emparelha, fa);
+            printf("        a conta FECHA porque ℤ/%ld tem 2-torção; em ℝ não há, e"
+                   " é por isso que ali falta um ponto fixo — o cor:degenerados\n", n);
+            if(fa != 2 || fm != 2 || emparelha != fa) mal++;
+        }
+
+        printf("\n");
+        ok("exp CONJUGA AS DUAS INVOLUÇÕES, MAS NÃO EMPARELHA OS PONTOS FIXOS — E O QUE FALTA"
+           " TEM NOME. A §«O par aditivo e o multiplicativo» põe ν₊(r) = −r de um lado e"
+           " ν×(q) = 1/q do outro, conjugadas por exp, e faz logo a ressalva certa: a relação"
+           " f(−r) = 1/f(r) NÃO caracteriza exp. A lista do texto mede-se em racionais"
+           " exactos, comparando f(r)·f(−r) com 1 por produto cruzado e sem uma divisão: a"
+           " Möbius (1+r)/(1−r), que nem exponencial é, CUMPRE em todos os racionais"
+           " reduzidos do seu domínio — com r = ±1 de fora, que são os seus PÓLOS, e contá-los"
+           " como falha seria medir o meu descuido e não a função; x+1 e x²+1 falham, como o texto diz. E o critério para f = e^g é sobre"
+           " g e não sobre exp — f cumpre sse g é ÍMPAR —, o que se mede na paridade de g sem"
+           " uma exponencial entrar: r³ é ímpar em todos os pontos, r² em nenhum além do zero."
+           " OS PONTOS FIXOS SÃO O GUME: em ℚ, ν₊ fixa UM ponto (o zero) e ν× fixa DOIS (o ±1)."
+           " A conjugação leva 0 ↦ 1 e deixa o −1 sem origem, porque log(−1) está fora do eixo"
+           " real — que é exactamente a ressalva do catálogo, agora com os dois números lado a"
+           " lado. E NO DISCRETO A CONTA FECHA, o que explica a ressalva em vez de a repetir:"
+           " em ℤ/101 a exponencial é r ↦ g^r de (ℤ/100,+) para ((ℤ/101)*,×), e ali o lado"
+           " aditivo TEM 2-torção — o 50 —, logo fixa DOIS pontos, e a conjugação empareja-os"
+           " com os ±1, 2 de 2. O que falta em ℝ é a 2-torção que ℝ não tem, e isso já estava"
+           " medido: é o cor:degenerados do §W103, onde ℓ→∞ é o degenerado sem metade. Não são"
+           " duas observações: é a mesma, num sítio onde se pode contar.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
