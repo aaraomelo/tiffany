@@ -3013,6 +3013,23 @@ medida uma verificação da composição inteira e não de uma operação de cad
 O controlo são as exigências de \emph{forma}, que diferem: a soma pede a mesma,
 o produto pede formas encaixáveis (\code{tests/pgwire.c} §W57).
 
+\medskip\noindent\textbf{E a volta pede o andar --- o banco mostrou-o.} A coluna
+inteira é um $\text{Word}_8$ \emph{sem sinal}, e o oposto de uma matriz de
+entradas positivas tem entradas negativas: ela \textbf{recusa-as}. Não é uma
+limitação a contornar --- é a escada $\mathbb{N}\to\mathbb{Z}$ dita pela régua,
+com o andar seguinte a ser exatamente \emph{o que acrescenta a volta da soma}.
+Numa coluna com sinal cabe, e a volta fecha: $A+(-A)=0$, verificado e não
+suposto.
+
+\medskip\noindent\textbf{E as duas voltas têm alcances diferentes.} O oposto
+existe para \emph{toda} a matriz; a inversa só quando o determinante não é zero.
+A face aditiva é um \textbf{grupo}; a multiplicativa tem neutro para todos e
+volta só para alguns --- é a Def.~1 do \code{aranha}, onde a volta é o que
+distingue uma dobra de um esmagamento, com as duas faces a responderem-lhe de
+maneiras diferentes. A diferença é de \emph{alcance} e não de método: as duas
+medem-se aplicando e comparando com o neutro. Com a associatividade, a face
+multiplicativa fecha como monóide (\code{tests/pgwire.c} §W58).
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as

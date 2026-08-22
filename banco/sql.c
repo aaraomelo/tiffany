@@ -4425,7 +4425,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"PRODUTO") ? 8
                        : !strcasecmp(nome,"RESOLVE") ? 9
                        : !strcasecmp(nome,"CRAMER") ? 10
-                       : !strcasecmp(nome,"SOMA") ? 11 : 0;
+                       : !strcasecmp(nome,"SOMA") ? 11
+                       : !strcasecmp(nome,"OPOSTO") ? 12 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -4788,6 +4789,27 @@ static long celula_valor(long i, long j, long nc){
  * só metade é o defeito que o `SET v = 30000` já mostrou uma vez (ficava 29952,
  * com o alto do valor anterior). O `.e` do baixo não se toca: é o denominador
  * (ou o coeficiente de σ), e quem o define é o corpo da coluna. */
+/* ── A CÉLULA LIDA COMO O SEU CORPO MANDA ────────────────────────────────────
+ * O `celula_valor` devolve o par (baixo, alto) lido como um número SEM SINAL, e
+ * é o que o motor quer para o inteiro de 0..65535. Mas quem pergunta pela
+ * matriz quer o VALOR, e num corpo assinado — racional, áureo, cristal — o
+ * primeiro átomo é um int8: sem isto, um −1 guardado lia-se 65535, e o traço de
+ * uma matriz de negativos saía 131067. A impressão já lia com o sinal certo;
+ * eram duas réguas para a mesma célula, e a matriz usava a que não sabe do
+ * corpo. Devolve-se o par (numerador, denominador), que é o que o racional é. */
+static void celula_qz(long i, long j, long nc, long *num, long *den){
+    Word c = mem_le(S_LINHAS + (unsigned)(i*nc + j));
+    long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+    if(cp == CORPO_RACIONAL || c.e > 1){
+        Par cls = ra_classe((Par){ (long)(int8_t)c.total, c.e ? (long)c.e : 1 });
+        *num = cls.a; *den = cls.b; return;
+    }
+    if(cp == CORPO_AUREO || cp == CORPO_CRISTAL){
+        *num = (long)(int8_t)c.total; *den = 1; return;   /* só a parte racional */
+    }
+    *num = celula_valor(i, j, nc); *den = 1;
+}
+
 static void celula_grava(long i, long j, long nc, long valor){
     unsigned pos = (unsigned)(i*nc + j);
     Word b = mem_le(S_LINHAS + pos);
@@ -6864,7 +6886,9 @@ static int varre(const char *resto, int acao){
           for(int i = 0; i < (int)nr_v; i++)
               for(long j = 0; j < ncols; j++){
                   if(!bit_le(S_PRES, lin[i]*ncols + j)){ falta = 1; continue; }
-                  A.a[i][j] = qz_de_inteiro(celula_valor(lin[i], j, ncols));
+                  { long nu, de;
+                    celula_qz(lin[i], j, ncols, &nu, &de);
+                    A.a[i][j] = qz(nu, de); }
               }
           /* uma matriz com um buraco não é uma matriz: o dual não é zero, e
            * fazer a conta com ele seria inventar a entrada que falta */
@@ -7111,7 +7135,9 @@ static int varre(const char *resto, int acao){
                   for(int j2 = 0; j2 < nB; j2++){
                       if(!bit_le(S_VIVO, i2) || !bit_le(S_PRES, i2*nc2 + j2)){
                           falta = 1; continue; }
-                      B.a[i2][j2] = qz_de_inteiro(celula_valor(i2, j2, nc2));
+                      { long nu, de;
+                        celula_qz(i2, j2, nc2, &nu, &de);
+                        B.a[i2][j2] = qz(nu, de); }
                   }
               usa_tabela(guarda, 0);
               if(falta){
@@ -7223,9 +7249,19 @@ static int varre(const char *resto, int acao){
             return 1;
         }
 
-        { MatQz R;                                   /* transposta e inversa */
-          const char *nm = mat_op == 4 ? "transposta" : "inversa";
+        { MatQz R;                        /* transposta, inversa e oposto */
+          const char *nm = mat_op == 4 ? "transposta"
+                         : mat_op == 12 ? "oposto" : "inversa";
           if(mat_op == 4) R = mat_transposta(A);
+          else if(mat_op == 12){
+              /* ── O OPOSTO É A VOLTA DA SOMA, E EXISTE SEMPRE ─────────────
+               * É aqui que as duas faces deixam de ser simétricas: −A existe
+               * para toda a matriz, enquanto A⁻¹ só existe quando o
+               * determinante não é zero. A face aditiva é um GRUPO; a
+               * multiplicativa não — e o que as separa é uma condição que só
+               * uma delas tem. */
+              R = mat_esc_neg(A);
+          }
           else {
               if(A.m != A.n){
                   printf("erro: a inversa pede uma matriz QUADRADA — RECUSADA.\n");
@@ -7267,7 +7303,8 @@ static int varre(const char *resto, int acao){
               }
               printf("\n");
           }
-          printf("-- a %s da tabela %d×%d\n", nm, A.m, A.n);
+          printf("-- %s %s da tabela %d×%d\n",
+                 mat_op == 12 ? "o" : "a", nm, A.m, A.n);
           return 1; }
     }
 

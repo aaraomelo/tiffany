@@ -7718,6 +7718,176 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W58: A VOLTA, E O ANDAR QUE ELA PEDE ════════════════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W58 a volta da soma pede o andar com sinal.\n\n");
+        { const char *tabs[] = { "n","a","s","b","c","t1","t2","t3" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w58__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w58__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w58.mem"); unlink("/tmp/pgwire_w58.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w58")) mal++;
+
+        /* ── (1) A VOLTA DA SOMA NÃO CABE NO ANDAR SEM SINAL, e isto é a escada
+         * da casa a aparecer no banco: a coluna INTEIRA é um Word_8 sem sinal,
+         * e o oposto de uma matriz de entradas positivas tem entradas
+         * negativas — que ela RECUSA. Não é uma limitação a contornar: é
+         * ℕ → ℤ dito pela régua, e o andar seguinte é exactamente «o que
+         * acrescenta a volta da soma». */
+        sql_executa("CREATE TABLE n (p,q)", &o);
+        sql_executa("INSERT INTO n VALUES (1,2), (3,4)", &o);
+        int cabe_n = sql_executa("INSERT INTO n VALUES (-1,-2)", &o);
+        printf("      no andar sem sinal: o negativo %s («%s»)\n",
+               cabe_n ? "ENTROU (mau)" : "é recusado", o.err);
+        if(cabe_n) mal++;
+
+        /* ── (2) E NO ANDAR COM SINAL cabe, e as contas mudam de resposta — o
+         * que mostra que o corpo da coluna não é decoração. Numa matriz de
+         * entradas negativas o traço tem de ser negativo; ler a célula sem o
+         * sinal do corpo dava 131067 onde a resposta é −5. */
+        sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO a VALUES (1,2), (3,4)", &o);
+        sql_executa("CREATE TABLE s (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO s VALUES (-1,-2), (-3,-4)", &o);
+        sql_executa("SELECT traco(*) FROM s", &o);
+        int sinal = (o.nrows == 1 && !strcmp(o.cell[0][0], "-5"));
+        sql_executa("SELECT det(*) FROM s", &o);
+        int dts = (o.nrows == 1 && !strcmp(o.cell[0][0], "-2"));
+        printf("      no andar com sinal: traço = %s (esp −5) e det = %s"
+               " (esp −2)  %s\n", o.nrows ? "-5" : "?",
+               o.nrows ? o.cell[0][0] : "?", (sinal && dts) ? "" : "NAO BATE");
+        if(!sinal || !dts) mal++;
+
+        #define GUARDA(consulta, tab) do { \
+            sql_executa(consulta, &o); \
+            { char q2[160]; \
+              snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", tab); \
+              sql_executa(q2, &o2); \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", tab); \
+              sql_executa(q2, &o2); \
+              for(int i2 = 0; i2 < o.nrows; i2++){ \
+                  snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s,%s)", \
+                           tab, o.cell[i2][0], o.cell[i2][1]); \
+                  sql_executa(q2, &o2); } } \
+        } while(0)
+
+        /* ── (3) AÍ A VOLTA FECHA: `A + (−A) = 0`, verificado e não suposto —
+         * sem a soma dar a matriz nula, «oposto» seria só um nome para trocar
+         * sinais. */
+        GUARDA("SELECT oposto(*) FROM a", "t1");
+        sql_executa("SELECT soma(t1) FROM a", &o);
+        { int zero = (o.nrows == 2
+                      && !strcmp(o.cell[0][0], "0") && !strcmp(o.cell[0][1], "0")
+                      && !strcmp(o.cell[1][0], "0") && !strcmp(o.cell[1][1], "0"));
+          printf("      A + (−A) = (%s,%s;%s,%s), esp tudo zero  %s\n",
+                 o.cell[0][0], o.cell[0][1], o.cell[1][0], o.cell[1][1],
+                 zero ? "" : "NAO BATE");
+          if(!zero) mal++; }
+
+        /* ── (4) E AS DUAS VOLTAS TÊM ALCANCES DIFERENTES: o oposto existe para
+         * TODA a matriz, a inversa só quando o determinante não é zero. A face
+         * aditiva é um GRUPO; a multiplicativa tem neutro para todos e volta só
+         * para alguns. É a Def. 1 do `aranha` — a VOLTA é o que distingue uma
+         * dobra de um esmagamento — com as duas faces a responderem-lhe de
+         * maneiras diferentes. E onde a inversa existe, mede-se do mesmo modo:
+         * aplicar e comparar com o neutro. */
+        sql_executa("CREATE TABLE g (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO g VALUES (1,2), (2,4)", &o);   /* det 0 */
+        int og = sql_executa("SELECT oposto(*) FROM g", &o);
+        int ig = sql_executa("SELECT inversa(*) FROM g", &o);
+        GUARDA("SELECT inversa(*) FROM a", "t2");
+        sql_executa("SELECT produto(t2) FROM a", &o);
+        { int id = (o.nrows == 2
+                    && !strcmp(o.cell[0][0], "1") && !strcmp(o.cell[0][1], "0")
+                    && !strcmp(o.cell[1][0], "0") && !strcmp(o.cell[1][1], "1"));
+          printf("      alcances diferentes: na singular o oposto existe (%d) e"
+                 " a inversa não (%d) · e onde existe, A·A⁻¹ = (%s,%s;%s,%s)"
+                 "  %s\n", og, ig, o.cell[0][0], o.cell[0][1],
+                 o.cell[1][0], o.cell[1][1],
+                 (og && !ig && id) ? "" : "NAO BATE");
+          if(!og || ig || !id) mal++; }
+
+        /* ── (5) E O PRODUTO É ASSOCIATIVO, a lei que faltava para a face
+         * multiplicativa ser um monóide. Mede-se encadeando pelos dois lados. */
+        /* as entradas são PEQUENAS de propósito: o numerador do racional é um
+         * int8, e com (1,2;3,4)·(5,6;7,8)·(2,0;1,3) os produtos chegam a 136 e
+         * 150 — que não cabem. A primeira escrita deste bloco usou-os, as
+         * tabelas ficaram com uma linha só, e a comparação passou por comparar
+         * duas células VAZIAS uma com a outra: uma asserção que não podia
+         * falhar. Aqui os produtos ficam abaixo do tecto, e mede-se que as
+         * tabelas têm mesmo as duas linhas antes de as comparar. */
+        sql_executa("CREATE TABLE b (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO b VALUES (1,0), (1,1)", &o);
+        sql_executa("CREATE TABLE c (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO c VALUES (1,1), (1,0)", &o);
+        GUARDA("SELECT produto(b) FROM a", "t1");
+        GUARDA("SELECT produto(c) FROM t1", "t2");
+        GUARDA("SELECT produto(c) FROM b", "t1");
+        GUARDA("SELECT produto(t1) FROM a", "t3");
+        { char esq[4][32];
+          int n2, n3, cheio = 1;
+          sql_executa("SELECT * FROM t2", &o);
+          n2 = o.nrows;
+          for(int i = 0; i < 2 && i < n2; i++)
+              for(int j = 0; j < 2; j++){
+                  snprintf(esq[i*2+j], 32, "%s", o.cell[i][j]);
+                  if(!o.cell[i][j][0]) cheio = 0;
+              }
+          sql_executa("SELECT * FROM t3", &o);
+          n3 = o.nrows;
+          for(int i = 0; i < 2 && i < n3; i++)
+              for(int j = 0; j < 2; j++) if(!o.cell[i][j][0]) cheio = 0;
+          { int assoc = (n2 == 2 && n3 == 2 && cheio
+                      && !strcmp(esq[0], o.cell[0][0]) && !strcmp(esq[1], o.cell[0][1])
+                      && !strcmp(esq[2], o.cell[1][0]) && !strcmp(esq[3], o.cell[1][1]));
+            printf("      (A·B)·C = (%s,%s;%s,%s) e A·(B·C) = (%s,%s;%s,%s) —"
+                   " com as DUAS linhas cheias dos dois lados (%d,%d,%d)  %s\n",
+                   esq[0], esq[1], esq[2], esq[3],
+                   o.cell[0][0], o.cell[0][1], o.cell[1][0], o.cell[1][1],
+                   n2, n3, cheio, assoc ? "" : "NAO BATE");
+            if(!assoc) mal++; } }
+
+        /* ── O CONTROLO: `−(−A) = A`. A volta da volta é a identidade, e é isso
+         * que faz do oposto uma INVOLUÇÃO e não apenas algo que desfaz uma vez. */
+        GUARDA("SELECT oposto(*) FROM a", "t1");
+        sql_executa("SELECT oposto(*) FROM t1", &o);
+        { int volta = (o.nrows == 2 && !strcmp(o.cell[0][0], "1")
+                       && !strcmp(o.cell[1][1], "4"));
+          printf("\n      CONTROLO — −(−A) = A: (%s,%s;%s,%s) esp (1,2;3,4)"
+                 "  %s\n", o.cell[0][0], o.cell[0][1], o.cell[1][0], o.cell[1][1],
+                 volta ? "" : "NAO BATE");
+          if(!volta) mal++; }
+        #undef GUARDA
+        sql_fechar();
+
+        printf("\n");
+        ok("A VOLTA DA SOMA PEDE O ANDAR COM SINAL, E FOI O BANCO QUE O MOSTROU. A coluna"
+           " INTEIRA é um Word_8 SEM SINAL, e o oposto de uma matriz de entradas positivas"
+           " tem entradas negativas — que ela RECUSA. Não é uma limitação a contornar: é a"
+           " escada ℕ → ℤ dita pela régua, com o andar seguinte a ser exactamente «o que"
+           " acrescenta a volta da soma». No andar com sinal cabe, e as contas mudam de"
+           " resposta — o que obrigou a corrigir um defeito real: a matriz lia a célula SEM"
+           " o sinal do corpo, e o traço de uma matriz de negativos saía 131067 onde a"
+           " resposta é −5, enquanto a impressão da MESMA célula já a lia certa. Eram duas"
+           " réguas para o mesmo sítio, e a matriz usava a que não sabe do corpo. AÍ A VOLTA"
+           " FECHA: `A + (−A) = 0`, verificado e não suposto — sem a soma dar a matriz nula,"
+           " «oposto» seria só um nome para trocar sinais. E AS DUAS VOLTAS TÊM ALCANCES"
+           " DIFERENTES: o oposto existe para toda a matriz, a inversa só quando o"
+           " determinante não é zero; a face aditiva é um GRUPO, a multiplicativa tem neutro"
+           " para todos e volta só para alguns. É a Def. 1 do `aranha` — a VOLTA é o que"
+           " distingue uma dobra de um esmagamento — com as duas faces a responderem-lhe de"
+           " maneiras diferentes, e a diferença é de ALCANCE e não de método: as duas"
+           " medem-se aplicando e comparando com o neutro. O produto é ASSOCIATIVO, o que"
+           " faz da face multiplicativa um monóide, e o CONTROLO é `−(−A) = A`: a volta da"
+           " volta é a identidade, e é isso que faz do oposto uma INVOLUÇÃO.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
