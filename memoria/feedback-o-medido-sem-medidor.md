@@ -89,3 +89,28 @@ nunca só o total — que é a mesma lição de [[feedback-o-exit-sombreado]] e
 [[feedback-dois-caminhos]], e o teste obrigatório de [[project-tres-documentos]].
 
 Relacionado: [[feedback-o-medidor-que-nunca-mediu]], [[feedback-procurar-na-bateria-antes]].
+
+## A TERCEIRA FACE (22/08): a afirmação que nem `\medido` tem
+
+As duas de cima são sobre o BLOCO — o `\medido` sem programa, e o programa sem
+citação. Falta a que não tem bloco nenhum: **a frase que afirma um facto e à
+volta da qual não há `\medido` a escrever**. Ela não aparece em contagem
+nenhuma, porque não há nada para contar.
+
+Três, achadas por leitura e medidas nesta sessão — todas de papers que a casa
+cita como fundamento:
+
+- «a ressonância é a raiz dupla outra vez» (catálogo) → a ordem que o
+  `edo_particular` devolve É a multiplicidade do autovalor. §W73.
+- «o zero invariante é o **ponto fixo** $x^*$, onde o fluxo PARA»
+  (`broca-so/papers/equacoes_diferenciais.tex`) → para $\dot x = Ax$ isso é o
+  NÚCLEO, e `posto + dim ker = n` passa a ser «o que se move + o que fica
+  parado». §W77.
+- «o conjunto das soluções não é um espaço vetorial, é um espaço vetorial
+  TRANSLADADO» (idem) → o particular mais $t$ vezes o núcleo, e o caso em que
+  não há equilíbrio nenhum. §W78.
+
+**How to apply:** ao ler um paper da casa para trabalhar nele, marcar as frases
+que **afirmam** e não trazem `\medido`. São candidatas a bloco novo, e as três
+de cima deram três — todas com gume, e uma delas (o sistema que nunca para)
+destapou um significado que a álgebra sozinha não mostrava.

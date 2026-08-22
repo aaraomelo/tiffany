@@ -10169,6 +10169,276 @@ int main(void){
            " limite, num laço anterior, que destapou o defeito de §W75.", mal == 0);
     }
 
+
+    /* ═══ §W77: SISTEMAS n×n — O PONTO FIXO É O NÚCLEO ═════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W77 ẋ = A·x: o fluxo para onde A·x = 0, e isso é o núcleo.\n\n");
+        { const char *tabs[] = { "S3","R3","S4","T4" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w77__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w77__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w77.mem"); unlink("/tmp/pgwire_w77.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w77")) mal++;
+
+        /* ── O QUE FALTAVA NÃO ERA O SISTEMA: ERA A DIMENSÃO. O `tests/sistema.c`
+         * já mede sistemas — a companheira, (B,C) = (−tr,det), Cayley–Hamilton,
+         * Kronecker — mas tudo em 2×2. E o paper das equações diferenciais diz
+         * uma coisa que nenhum medidor tinha verificado: «o zero invariante é o
+         * PONTO FIXO x*: o estado onde o fluxo PARA».
+         *
+         * Para ẋ = A·x isso escreve-se sozinho: o fluxo para onde ẋ = 0, isto é
+         * onde A·x = 0 — o ponto fixo do sistema linear É O NÚCLEO de A. E daí
+         *
+         *     posto + dim(ker) = n
+         *
+         * ganha uma leitura que §W52 não tinha: o POSTO conta as direcções em
+         * que o fluxo se move, e a DIMENSÃO DO NÚCLEO as direcções em que ele
+         * para. As duas somam n porque não há terceira coisa que uma direcção
+         * possa fazer. */
+        sql_executa("CREATE TABLE S3 (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO S3 VALUES (1,2,3), (2,4,6), (1,1,1)", &o);
+        sql_executa("SELECT det(*) FROM S3", &o);
+        int d0 = o.ok && !strcmp(o.cell[0][0], "0");
+        sql_executa("SELECT posto(*) FROM S3", &o);
+        int p2_ = o.ok && !strcmp(o.cell[0][0], "2");
+        sql_executa("SELECT nucleo(*) FROM S3", &o);
+        int k1 = o.ok && o.nrows == 1 && o.ncols == 3;
+        long v[3] = {0,0,0};
+        if(k1) for(int j = 0; j < 3; j++) v[j] = atol(o.cell[0][j]);
+        /* ── E O GUME É APLICAR: A·v tem de dar ZERO, senão «núcleo» é um nome.
+         * A matriz é (1,2,3;2,4,6;1,1,1) e o vector é o que o motor devolveu —
+         * não um escrito à mão. */
+        long A3[3][3] = {{1,2,3},{2,4,6},{1,1,1}};
+        int para = k1;
+        for(int i = 0; i < 3 && para; i++){
+            long s2 = 0;
+            for(int j = 0; j < 3; j++) s2 += A3[i][j]*v[j];
+            if(s2 != 0) para = 0;
+        }
+        printf("      3×3 singular: det %s · posto %s · núcleo (%ld,%ld,%ld)\n",
+               d0 ? "0" : "MAU", p2_ ? "2" : "MAU", v[0], v[1], v[2]);
+        printf("        A·v = 0 (o fluxo PARA lá): %s · 2 + 1 = 3\n",
+               para ? "verificado, aplicando" : "FALHOU");
+        if(!d0 || !p2_ || !k1 || !para) mal++;
+
+        /* ── E O CONTROLO É O POSTO CHEIO, onde só a origem para. Sem ele, um
+         * motor que devolvesse sempre um vector de núcleo passava acima — e a
+         * frase «há uma recta de pontos fixos» não distinguiria nada. */
+        sql_executa("CREATE TABLE R3 (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO R3 VALUES (1,0,0), (0,2,0), (0,0,3)", &o);
+        sql_executa("SELECT det(*) FROM R3", &o);
+        int d6 = o.ok && !strcmp(o.cell[0][0], "6");
+        sql_executa("SELECT posto(*) FROM R3", &o);
+        int p3 = o.ok && !strcmp(o.cell[0][0], "3");
+        sql_executa("SELECT nucleo(*) FROM R3", &o);
+        int k0 = o.ok && o.nrows == 0;
+        printf("      controlo — 3×3 de posto cheio: det %s · núcleo %s"
+               " → só a ORIGEM para\n",
+               d6 ? "6 ≠ 0" : "MAU", k0 ? "vazio" : "NÃO vazio (mau)");
+        if(!d6 || !p3 || !k0) mal++;
+
+        /* ── E A DIMENSÃO DO QUE PARA PODE SER MAIOR QUE UM: num 4×4 de posto 2
+         * o conjunto dos pontos fixos é um PLANO. Sem este caso, «o núcleo» e «a
+         * recta» seriam a mesma palavra, e a conservação nunca teria de repartir
+         * mais do que 2 e 1. */
+        sql_executa("CREATE TABLE S4 (p RACIONAL, q RACIONAL, r RACIONAL, s RACIONAL)", &o);
+        sql_executa("INSERT INTO S4 VALUES (1,0,1,0), (0,1,0,1), (2,0,2,0), (0,2,0,2)", &o);
+        sql_executa("SELECT posto(*) FROM S4", &o);
+        int q2 = o.ok && !strcmp(o.cell[0][0], "2");
+        sql_executa("SELECT nucleo(*) FROM S4", &o);
+        int k2 = o.ok && o.nrows == 2 && o.ncols == 4;
+        long A4[4][4] = {{1,0,1,0},{0,1,0,1},{2,0,2,0},{0,2,0,2}};
+        int para4 = k2;
+        for(int t = 0; t < o.nrows && para4; t++){
+            long w[4];
+            for(int j = 0; j < 4; j++) w[j] = atol(o.cell[t][j]);
+            for(int i = 0; i < 4 && para4; i++){
+                long s2 = 0;
+                for(int j = 0; j < 4; j++) s2 += A4[i][j]*w[j];
+                if(s2 != 0) para4 = 0;
+            }
+        }
+        printf("      4×4 de posto 2: núcleo de dimensão %d — um PLANO de pontos"
+               " fixos · A·v = 0 nos dois: %s · 2 + 2 = 4\n",
+               o.nrows, para4 ? "sim" : "FALHOU");
+        if(!q2 || !k2 || !para4) mal++;
+
+        /* ── E O REGIME DE UM SISTEMA TRIANGULAR LÊ-SE DA DIAGONAL. Acima de
+         * 2×2 o motor não dá autovalores — o característico deixa de sair de um
+         * discriminante, e ele recusa dizendo-o. Mas numa TRIANGULAR eles são a
+         * diagonal, e isso verifica-se sem os pedir: o determinante tem de ser
+         * o PRODUTO da diagonal e o traço a SOMA. Duas contas que o motor faz
+         * por caminhos que não sabem que a matriz é triangular. */
+        sql_executa("CREATE TABLE T4 (p RACIONAL, q RACIONAL, r RACIONAL, s RACIONAL)", &o);
+        sql_executa("INSERT INTO T4 VALUES (-1,5,7,2), (0,-2,3,1), (0,0,-3,4), (0,0,0,-4)", &o);
+        sql_executa("SELECT det(*) FROM T4", &o);
+        long dt = o.ok ? atol(o.cell[0][0]) : 0;
+        sql_executa("SELECT traco(*) FROM T4", &o);
+        long tr = o.ok ? atol(o.cell[0][0]) : 0;
+        long diag[4] = {-1,-2,-3,-4}, pr = 1, sm = 0;
+        for(int i = 0; i < 4; i++){ pr *= diag[i]; sm += diag[i]; }
+        int bate = (dt == pr) && (tr == sm);
+        /* todos os λ têm parte real negativa → o fluxo COLAPSA: é o CRISTAL */
+        int cristal = 1;
+        for(int i = 0; i < 4; i++) if(diag[i] >= 0) cristal = 0;
+        printf("      4×4 triangular, diagonal (−1,−2,−3,−4): det %ld = %ld ·"
+               " traço %ld = %ld → %s\n", dt, pr, tr, sm,
+               bate ? "os λ são a diagonal" : "FALHOU");
+        printf("        e todos com Re λ < 0 → o fluxo COLAPSA: %s, o regime de"
+               " §W68 num sistema de dimensão 4\n", cristal ? "CRISTAL" : "MAU");
+        if(!bate || !cristal) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O PONTO FIXO DE UM SISTEMA LINEAR É O NÚCLEO DO GERADOR, E O QUE FALTAVA NÃO ERA"
+           " O SISTEMA — ERA A DIMENSÃO. O `tests/sistema.c` já mede sistemas: a companheira,"
+           " (B,C) = (−traço, determinante), Cayley–Hamilton, Kronecker — tudo em 2×2. E o"
+           " paper das equações diferenciais afirma uma coisa que nenhum medidor tinha"
+           " verificado: «o zero invariante é o PONTO FIXO x*, o estado onde o fluxo PARA»."
+           " Para ẋ = A·x isso escreve-se sozinho — o fluxo para onde A·x = 0 —, e o ponto"
+           " fixo É O NÚCLEO. DAÍ posto + dim(ker) = n GANHA UMA LEITURA QUE §W52 NÃO TINHA:"
+           " o posto conta as direcções em que o fluxo se MOVE e a dimensão do núcleo as"
+           " direcções em que ele PARA, e somam n porque não há terceira coisa que uma"
+           " direcção possa fazer. O gume é APLICAR — A·v = 0 no vector que o motor devolveu,"
+           " não num escrito à mão —, e mede-se em três dimensões: numa 3×3 singular o"
+           " conjunto dos pontos fixos é uma RECTA, numa 4×4 de posto 2 é um PLANO, e no"
+           " CONTROLO de posto cheio é só a ORIGEM. Sem o controlo, um motor que devolvesse"
+           " sempre um vector passava; sem o plano, «núcleo» e «recta» seriam a mesma palavra"
+           " e a conservação nunca teria de repartir mais do que 2 e 1. E O REGIME DE UM"
+           " SISTEMA TRIANGULAR LÊ-SE DA DIAGONAL: acima de 2×2 o motor recusa os autovalores"
+           " — o característico deixa de sair de um discriminante, e ele di-lo —, mas numa"
+           " triangular eles são a diagonal, e isso verifica-se SEM os pedir, exigindo que o"
+           " determinante seja o produto e o traço a soma, por dois caminhos que não sabem"
+           " que a matriz é triangular. Com a diagonal toda negativa o fluxo colapsa: é o"
+           " CRISTAL de §W68, agora num sistema de dimensão quatro.", mal == 0);
+    }
+
+
+    /* ═══ §W78: ẋ = Ax + b — E O SISTEMA QUE NUNCA PARA ════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W78 o equilíbrio do não homogéneo, e o caso em que não há nenhum.\n\n");
+        { const char *tabs[] = { "U","M","N" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w78__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w78__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w78.mem"); unlink("/tmp/pgwire_w78.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w78")) mal++;
+
+        /* ── O PAPER DIZ ISTO E NINGUÉM O TINHA MEDIDO: «a solução é y = y_h +
+         * y_p, e isso diz algo sobre a ESTRUTURA — o conjunto das soluções não é
+         * um espaço vectorial, é um espaço vectorial TRANSLADADO». §W77 mostrou
+         * que no sistema homogéneo o ponto fixo é o núcleo; no não homogéneo
+         * ẋ = Ax + b o fluxo para onde Ax = −b, e aí os três desfechos de
+         * Rouché–Capelli deixam de ser aritmética e passam a ser dinâmica:
+         *
+         *   posto A = posto[A|b] = n   UM equilíbrio
+         *   posto A = posto[A|b] < n   uma VARIEDADE: o particular + o núcleo
+         *   posto A < posto[A|b]       NENHUM — e então o fluxo NUNCA PARA
+         *
+         * O terceiro é o que dá substância aos outros dois: um sistema linear
+         * pode não ter estado de equilíbrio nenhum, e nada na equação o anuncia
+         * senão a comparação dos dois postos. */
+
+        /* (1) UM: A invertível, e o gume é APLICAR — A·x tem de dar b */
+        sql_executa("CREATE TABLE U (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO U VALUES (1,0,3), (0,2,4)", &o);
+        sql_executa("SELECT resolve(*) FROM U", &o);
+        int um = o.ok && o.nrows == 1 && o.ncols == 2;
+        long x1 = um ? atol(o.cell[0][0]) : 0, x2 = um ? atol(o.cell[0][1]) : 0;
+        int aplica1 = um && (1*x1 + 0*x2 == 3) && (0*x1 + 2*x2 == 4);
+        printf("      UM equilíbrio: x = (%ld,%ld) · A·x = b? %s\n",
+               x1, x2, aplica1 ? "verificado, aplicando" : "FALHOU");
+        if(!um || !aplica1) mal++;
+
+        /* (2) MUITOS: o particular sai, e o que falta é o NÚCLEO — «um espaço
+         * vectorial transladado». Mede-se somando: particular + qualquer vector
+         * do núcleo tem de continuar a resolver, e é isso que «infinitas» quer
+         * dizer. O núcleo pede-se ao motor, não se escreve. */
+        sql_executa("CREATE TABLE M (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO M VALUES (1,2,3), (2,4,6)", &o);
+        sql_executa("SELECT resolve(*) FROM M", &o);
+        int mu = o.ok && o.nrows == 1;
+        long p1 = mu ? atol(o.cell[0][0]) : 0, p2 = mu ? atol(o.cell[0][1]) : 0;
+        /* o núcleo da PARTE A, que é a tabela sem a última coluna: pede-se numa
+         * tabela própria, porque `nucleo(*)` lê a tabela inteira */
+        sql_executa("DROP TABLE IF EXISTS N", &o);
+        sql_executa("CREATE TABLE N (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO N VALUES (1,2), (2,4)", &o);
+        sql_executa("SELECT nucleo(*) FROM N", &o);
+        int temk = o.ok && o.nrows == 1 && o.ncols == 2;
+        long k1 = temk ? atol(o.cell[0][0]) : 0, k2 = temk ? atol(o.cell[0][1]) : 0;
+        /* particular + t·núcleo resolve para todo t */
+        int transladado = mu && temk;
+        for(long t = -3; t <= 3 && transladado; t++){
+            long y1 = p1 + t*k1, y2 = p2 + t*k2;
+            if(1*y1 + 2*y2 != 3 || 2*y1 + 4*y2 != 6) transladado = 0;
+        }
+        printf("      MUITOS: particular (%ld,%ld) + t·(%ld,%ld) do núcleo\n",
+               p1, p2, k1, k2);
+        printf("        e resolve para t = −3..3: %s — é um espaço vectorial"
+               " TRANSLADADO, não um espaço vectorial\n",
+               transladado ? "sim" : "FALHOU");
+        if(!mu || !temk || !transladado) mal++;
+
+        /* (3) NENHUM: o fluxo nunca para. E aqui há DOIS CAMINHOS — o motor
+         * recusa comparando os dois postos, e a exaustão confirma-o percorrendo
+         * um cubo e não achando um único x. Nenhum usa o outro: um é álgebra, o
+         * outro é força bruta, e a recusa só vale se o segundo não achar nada. */
+        sql_executa("DROP TABLE IF EXISTS N", &o);
+        sql_executa("CREATE TABLE N (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO N VALUES (1,2,3), (2,4,7)", &o);
+        sql_executa("SELECT resolve(*) FROM N", &o);
+        int rec = !o.ok && strstr(o.err, "no solution") != NULL;
+        char errN[200]; snprintf(errN, sizeof errN, "%s", o.err);
+        long achou = 0;
+        for(long a = -40; a <= 40; a++) for(long b2 = -40; b2 <= 40; b2++)
+            if(1*a + 2*b2 == 3 && 2*a + 4*b2 == 7) achou++;
+        printf("      NENHUM: o motor %s\n        («%s»)\n",
+               rec ? "recusa pelos dois postos" : "ACEITOU (mau)", errN);
+        printf("        e a exaustão em 81×81 acha %ld soluções — o fluxo NUNCA"
+               " para\n", achou);
+        if(!rec || achou != 0) mal++;
+
+        /* ── E O CONTROLO DA EXAUSTÃO: no caso (2) ela TEM de achar, senão ela
+         * não sabe achar e o zero de cima não diz nada. É a mesma varredura,
+         * sobre o sistema que tem solução. */
+        long achou2 = 0;
+        for(long a = -40; a <= 40; a++) for(long b2 = -40; b2 <= 40; b2++)
+            if(1*a + 2*b2 == 3 && 2*a + 4*b2 == 6) achou2++;
+        printf("      controlo — a MESMA exaustão no sistema que resolve: %ld"
+               " soluções%s\n", achou2,
+               achou2 > 1 ? " (a recta inteira que cabe no cubo)" : "");
+        if(achou2 == 0) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O EQUILÍBRIO DE ẋ = Ax + b É A SOLUÇÃO DE Ax = −b, E OS TRÊS DESFECHOS DE"
+           " ROUCHÉ–CAPELLI DEIXAM DE SER ARITMÉTICA E PASSAM A SER DINÂMICA. §W77 mostrou"
+           " que no homogéneo o ponto fixo é o NÚCLEO; aqui o fluxo para onde Ax = −b, e"
+           " então: postos iguais e cheios dão UM equilíbrio, postos iguais e menores dão uma"
+           " VARIEDADE, e posto(A) < posto([A|b]) dá NENHUM — o sistema NUNCA PARA. O"
+           " terceiro é o que dá substância aos outros dois: um sistema linear pode não ter"
+           " estado de equilíbrio nenhum, e nada na equação o anuncia senão a comparação dos"
+           " dois postos. E O PAPER DIZIA ISTO SEM NINGUÉM O TER MEDIDO — «o conjunto das"
+           " soluções não é um espaço vectorial, é um espaço vectorial TRANSLADADO»: mede-se"
+           " somando o particular a t vezes o vector do núcleo, com o núcleo PEDIDO ao motor"
+           " e não escrito, e exigindo que resolva para todo t. NO CASO SEM SOLUÇÃO SÃO DOIS"
+           " CAMINHOS QUE NÃO SE APOIAM: o motor recusa comparando os dois postos, e a"
+           " exaustão percorre 81×81 pontos sem achar um único — álgebra contra força bruta."
+           " E A EXAUSTÃO PRECISA DO SEU CONTROLO: a MESMA varredura sobre o sistema que tem"
+           " solução tem de achar, senão ela não sabe achar e o zero não diz nada.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

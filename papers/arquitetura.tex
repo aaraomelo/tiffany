@@ -3673,6 +3673,78 @@ $127$ é o maior que lá cabe ---, e diz-se o teto em vez de se varrer até rebe
         {a porta da matriz vazia; \code{ultima\_conta} zerada na saída antecipada}
         {\code{tests/pgwire.c} §W75--§W76}
 
+\subsection*{Sistemas $n\times n$: o ponto fixo é o núcleo}
+
+\noindent\textbf{O que faltava não era o sistema --- era a dimensão.} O
+\code{tests/sistema.c} já mede sistemas: a companheira, $(B,C)=(-\operatorname{tr},\det)$,
+Cayley--Hamilton, Kronecker --- tudo em $2\times2$. E o paper das equações
+diferenciais afirma uma coisa que nenhum medidor tinha verificado: «o zero
+invariante é o \emph{ponto fixo} $x^{*}$, o estado onde o fluxo \textbf{para}».
+
+\medskip\noindent Para $\dot x = A\,x$ isso escreve-se sozinho: o fluxo para onde
+$\dot x=0$, isto é onde $A\,x=0$. \textbf{O ponto fixo do sistema linear é o
+núcleo do gerador.} E daí
+\[
+\operatorname{posto}+\dim(\ker)=n
+\]
+ganha uma leitura que §W52 não tinha: o \textbf{posto} conta as direções em que o
+fluxo se \emph{move}, e a \textbf{dimensão do núcleo} as direções em que ele
+\emph{para} --- e somam $n$ porque não há terceira coisa que uma direção possa
+fazer.
+
+\medskip\noindent Mede-se em três dimensões, com o gume a ser \emph{aplicar}
+($A\,v=0$ no vetor que o motor devolveu, não num escrito à mão): numa $3\times3$
+singular o conjunto dos pontos fixos é uma \textbf{reta}, numa $4\times4$ de posto
+$2$ é um \textbf{plano}, e no controlo de posto cheio é só a \textbf{origem}. Sem o
+controlo, um motor que devolvesse sempre um vetor passava; sem o plano, «núcleo» e
+«reta» seriam a mesma palavra.
+
+\medskip\noindent\textbf{E o regime de um sistema triangular lê-se da diagonal.}
+Acima de $2\times2$ o motor recusa os autovalores --- o característico deixa de sair
+de um discriminante, e ele di-lo. Mas numa triangular eles \emph{são} a diagonal, e
+isso verifica-se \emph{sem os pedir}: exige-se que o determinante seja o produto da
+diagonal e o traço a soma, por dois caminhos que não sabem que a matriz é
+triangular. Com a diagonal toda negativa o fluxo colapsa --- é o \textsc{cristal} de
+§W68, agora num sistema de dimensão quatro.
+
+\medido{\code{tests/pgwire.c} §W77.}
+
+\colunas{\code{aranha thm:multiplicidade}; \code{broca-so} (o ponto fixo do fluxo)}
+        {\code{nucleo(*)} como conjunto de pontos fixos; a diagonal da triangular}
+        {\code{tests/pgwire.c} §W77}
+
+\medskip\noindent\textbf{E no não homogéneo os três desfechos de Rouché--Capelli
+deixam de ser aritmética e passam a ser dinâmica.} Para $\dot x = A\,x+b$ o fluxo
+para onde $A\,x=-b$, e então
+\[
+\begin{array}{lll}
+\operatorname{posto}A=\operatorname{posto}[A|b]=n & \to & \textbf{um} equilíbrio\\
+\operatorname{posto}A=\operatorname{posto}[A|b]<n & \to & \text{uma \textbf{variedade}: o particular} + \ker A\\
+\operatorname{posto}A<\operatorname{posto}[A|b] & \to & \textbf{nenhum} \text{ --- o fluxo \emph{nunca para}}
+\end{array}
+\]
+O terceiro é o que dá substância aos outros dois: um sistema linear pode não ter
+estado de equilíbrio nenhum, e nada na equação o anuncia senão a comparação dos
+dois postos.
+
+\medskip\noindent\textbf{E o paper dizia isto sem ninguém o ter medido:} «o
+conjunto das soluções não é um espaço vetorial, é um espaço vetorial
+\emph{transladado}». Mede-se somando o particular a $t$ vezes o vetor do núcleo ---
+com o núcleo \emph{pedido ao motor}, não escrito --- e exigindo que resolva para
+todo $t$.
+
+\medskip\noindent No caso sem solução são \textbf{dois caminhos que não se apoiam}:
+o motor recusa comparando os dois postos, e a exaustão percorre $81\times81$ pontos
+sem achar um único. Álgebra contra força bruta. E a exaustão precisa do seu
+controlo --- a \emph{mesma} varredura sobre o sistema que tem solução acha $40$
+pontos da reta, sem o que o zero não diria nada.
+
+\medido{\code{tests/pgwire.c} §W78.}
+
+\colunas{\code{catalogo} (Rouché--Capelli); \code{broca-so} (o espaço transladado)}
+        {\code{resolve(*)} lido como equilíbrio; a exaustão como segundo caminho}
+        {\code{tests/pgwire.c} §W78}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
