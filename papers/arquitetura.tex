@@ -4160,6 +4160,76 @@ prova nova: é o $\det$ multiplicativo de §W85, com o quadrado dos dois lados.
         {$q\mapsto$ 4×4 real; \code{det}/\code{produto} pelo motor; o limite por associatividade}
         {\code{tests/pgwire.c} §W89}
 
+\subsection*{Onde o espaço se parte em dois regimes --- e a partir de que potência}
+
+\noindent §W77 achou o ponto fixo de $\dot x=A\,x$ no \textbf{núcleo}, e §W78 o
+equilíbrio de $\dot x=A\,x+b$ onde $A$ \textbf{inverte}. São os dois lados de uma
+só cisão, e ela tem nome: o espaço parte-se em onde $A$ é nilpotente e onde $A$ é
+invertível,
+\[
+\boxed{\;V=\ker A^{q}\;\oplus\;\operatorname{im}A^{q}\;}
+\]
+--- mas \emph{não para todo $q$}, e é aí que está tudo.
+
+\medskip\noindent\textbf{A asserção que não pode falhar, dita primeiro para não
+ser usada.} O posto-nulidade dá
+$\dim\ker A^{k}+\dim\operatorname{im}A^{k}=n$ para \emph{todo} $k$ e \emph{toda}
+$A$ --- medido em $16/16$ pares, e por isso a \textbf{não decidir nada}. Uma
+asserção sobre ele passa verde com a soma directa a ser falsa: as dimensões somam
+$n$ e os dois subespaços \emph{cruzam-se}. O que separa é a
+\textbf{intersecção}, e ela pede outro caminho --- empilhar a base do núcleo com
+a da imagem e pedir o \code{posto} ao motor: $n$ é soma directa, menos é
+cruzamento.
+
+\medskip\noindent\textbf{Daí aparece o índice, e ele é onde o posto pára de
+descer.} A cadeia $\operatorname{posto}A\ge\operatorname{posto}A^{2}\ge\cdots$
+estabiliza, e o $q$ onde estabiliza é exatamente o primeiro em que a soma fecha:
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & $\operatorname{posto}A^{k}$, $k=1..4$ & primeira soma directa & índice\\
+\midrule
+$\operatorname{diag}(1,2,3)$ & $3,3,3,3$ & $k=1$ & $0$\\
+$\operatorname{diag}(0,1,2)$ & $2,2,2,2$ & $k=1$ & $1$\\
+$N_2\oplus[3]$               & $2,1,1,1$ & $k=2$ & $2$\\
+$N_3$                        & $2,1,0,0$ & $k=3$ & $3$\\
+\bottomrule
+\end{tabular}
+\end{center}
+--- os quatro índices que uma $3\times3$ admite, e nenhum outro.
+
+\medskip\noindent\textbf{E o gume não é decorativo.} Três dos dezasseis pares
+$(k,A)$ têm $\ker\cap\operatorname{im}\neq0$, e todos vivem \emph{abaixo} do
+índice. O caso limpo é $N_2\oplus[3]$ com $k=1$: o vector $(1,0,0)$ está nos dois
+lados ao mesmo tempo, com $\dim\ker+\dim\operatorname{im}=1+2=3$ na mesma. \emph{A
+soma das dimensões estava certa e a decomposição estava errada} --- se o número de
+cruzamentos fosse zero, a medição não teria conteúdo.
+
+\medskip\noindent\textbf{E a cisão é dinâmica, que é o que a traz para os
+sistemas.} Do lado do núcleo $A^{q}=0$, logo a série
+$\exp(At)=\sum_j (At)^{j}/j!$ restrita ali \textbf{termina}: é um polinómio de
+grau menor que $q$, e não há convergência nenhuma a invocar. Do lado da imagem
+vale $\operatorname{posto}A^{q}=\operatorname{posto}A^{q+1}$, isto é $A$ leva
+$\operatorname{im}A^{q}$ \emph{sobre} si mesmo; em dimensão finita sobrejetiva é
+bijetiva, donde $A$ inverte ali e $\dot x=A\,x+b$ tem o equilíbrio único
+$x^{*}=-A^{-1}b$ de §W78.
+\[
+\begin{array}{lll}
+\ker A^{q} & A \text{ nilpotente} & \exp(At) \text{ é \textbf{polinómio}: a série termina}\\
+\operatorname{im}A^{q} & A \text{ invertível} & \text{\textbf{um} equilíbrio,}\ x^{*}=-A^{-1}b
+\end{array}
+\]
+\emph{O transitório e o regime não são uma metáfora: são dois subespaços, e o
+índice diz a partir de que potência eles se separam.}
+
+\medido{\code{tests/pgwire.c} §W90 --- os quatro índices de uma $3\times3$, com o
+posto-nulidade medido \emph{à parte} para se ver que passa verde onde a soma
+directa falha, e o CONTROLO em $3$ pares que cruzam.}
+
+\colunas{§W77 (o ponto fixo no núcleo); §W78 (o equilíbrio onde $A$ inverte)}
+        {\code{nucleo}/\code{imagem}/\code{posto} pelo motor; a soma directa pelo posto do empilhado}
+        {\code{tests/pgwire.c} §W90}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

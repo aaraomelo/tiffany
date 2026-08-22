@@ -12244,6 +12244,197 @@ int main(void){
            " com o quadrado dos dois lados.", mal == 0);
     }
 
+    /* ═══ §W90: A DECOMPOSIÇÃO DE FITTING, E ONDE ELA COMEÇA A VALER ═══════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W90 V = ker A^q ⊕ im A^q — e o que separa NÃO é a soma das dimensões.\n\n");
+        { const char *tabs[] = { "A","P","S" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w90__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w90__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w90.mem"); unlink("/tmp/pgwire_w90.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w90")) mal++;
+
+        #define POE3(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL," \
+                     " r RACIONAL)", t); sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 3; i2++){ \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1], (M)[i2][2]); \
+                sql_executa(q2,&o2); } } while(0)
+
+        /* ── O §W77 achou o ponto fixo de ẋ = Ax no NÚCLEO, e o §W78 o
+         * equilíbrio de ẋ = Ax + b onde A inverte. São os dois lados de UMA
+         * cisão, e ela tem nome: o espaço parte-se em onde A é NILPOTENTE e
+         * onde A é INVERTÍVEL. Aqui mede-se a cisão, e sobretudo O SÍTIO ONDE
+         * ELA COMEÇA — que é o que se perde se a asserção for a errada. */
+
+        /* ── (1) A ASSERÇÃO QUE NÃO PODE FALHAR, dita primeiro para não ser
+         * usada: dim ker A^k + dim im A^k = 3 vale para TODO k e toda A. É o
+         * posto-nulidade, e mede o teorema, não a decomposição. Medir só isto
+         * seria dar por provada a soma directa em todo k — e ela É FALSA em
+         * k pequeno. O que separa é a INTERSECÇÃO. */
+        struct { const char *nome; long M[3][3]; int idx; } TT[] = {
+            { "diag(1,2,3)   invertível", {{1,0,0},{0,2,0},{0,0,3}}, 0 },
+            { "diag(0,1,2)   um só zero", {{0,0,0},{0,1,0},{0,0,2}}, 1 },
+            { "N₂ ⊕ [3]      mista     ", {{0,1,0},{0,0,0},{0,0,3}}, 2 },
+            { "N₃            nilpotente", {{0,1,0},{0,0,1},{0,0,0}}, 3 },
+        };
+        long soma_ok = 0, soma_n = 0, dir_ok = 0, cruz = 0;
+
+        for(unsigned t = 0; t < sizeof TT/sizeof TT[0]; t++){
+            long Ak[3][3];
+            memcpy(Ak, TT[t].M, sizeof Ak);
+            int primeira_directa = -1, estabiliza = -1, posto_ant = -1;
+            printf("   %s  (índice esperado %d)\n", TT[t].nome, TT[t].idx);
+            for(int k = 1; k <= 4; k++){
+                if(k > 1){                       /* A^k = A · A^{k-1} */
+                    POE3("A", TT[t].M); POE3("P", Ak);
+                    sql_executa("SELECT produto(A) FROM P", &o);
+                    if(!o.ok || o.nrows != 3){ mal++; break; }
+                    for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                        Ak[i][j] = atol(o.cell[i][j]);
+                }
+                POE3("A", Ak);
+                sql_executa("SELECT posto(*) FROM A", &o);
+                if(!o.ok){ mal++; break; }
+                int posto = atoi(o.cell[0][0]);
+
+                long emp[3][3]; int ne = 0;      /* empilha ker e depois im */
+                sql_executa("SELECT nucleo(*) FROM A", &o);
+                int dk = (o.ok ? o.nrows : 0);
+                for(int i = 0; i < dk && ne < 3; i++, ne++)
+                    for(int j = 0; j < 3; j++) emp[ne][j] = atol(o.cell[i][j]);
+                sql_executa("SELECT imagem(*) FROM A", &o);
+                int di = (o.ok ? o.nrows : 0);
+                for(int i = 0; i < di && ne < 3; i++, ne++)
+                    for(int j = 0; j < 3; j++) emp[ne][j] = atol(o.cell[i][j]);
+
+                soma_n++;
+                if(dk + di == 3 && dk + posto == 3) soma_ok++;   /* posto-nulidade */
+                else printf("      k=%d: posto-nulidade FALHOU (dim ker %d + posto %d)\n",
+                            k, dk, posto);
+
+                /* o segundo caminho: a soma é DIRECTA sse as duas bases juntas
+                 * ainda geram 3 dimensões — posto do empilhado, pedido ao motor */
+                int pe = 0;
+                if(ne == 3){
+                    POE3("S", emp);
+                    sql_executa("SELECT posto(*) FROM S", &o);
+                    if(o.ok) pe = atoi(o.cell[0][0]);
+                }
+                int directa = (pe == 3);
+                if(directa && primeira_directa < 0) primeira_directa = k;
+                if(!directa) cruz++;
+                if(posto == posto_ant && estabiliza < 0) estabiliza = k - 1;
+                posto_ant = posto;
+                printf("      k=%d  posto %d · dim ker %d · dim im %d · posto[ker|im] %d"
+                       "  → soma %s\n", k, posto, dk, di, pe,
+                       directa ? "DIRECTA" : "cruza-se");
+            }
+            /* o índice 0 (A já invertível) dá soma directa desde k=1 */
+            int esperado = TT[t].idx < 1 ? 1 : TT[t].idx;
+            if(primeira_directa != esperado){
+                printf("      → primeira directa em k=%d, esperado %d\n",
+                       primeira_directa, esperado); mal++;
+            } else dir_ok++;
+            if(estabiliza != esperado){
+                printf("      → posto estabilizou em k=%d, esperado %d\n",
+                       estabiliza, esperado); mal++;
+            }
+            printf("\n");
+        }
+        printf("      posto-nulidade: %ld/%ld — vale em TODO k, e por isso não"
+               " decide nada\n", soma_ok, soma_n);
+        printf("      soma directa no índice certo: %ld/4 testemunhas\n", dir_ok);
+        printf("      e o GUME: %ld dos %ld pares (k, testemunha) têm ker ∩ im ≠ 0"
+               " — se a soma fosse directa em todo k, este número seria 0\n",
+               cruz, soma_n);
+        if(soma_ok != soma_n) mal++;
+        if(dir_ok != 4) mal++;
+        if(cruz == 0){ printf("      → o gume não mordeu: nenhuma testemunha cruza\n"); mal++; }
+
+        /* ── (2) E A CISÃO TEM CONTEÚDO DINÂMICO, que é o que a traz para os
+         * sistemas. Do lado ker: A^q = 0 ali, logo exp(At) restrita É UM
+         * POLINÓMIO de grau < q — a série TERMINA, sem convergência nenhuma.
+         * Do lado im: posto A^q = posto A^{q+1} diz que A leva im A^q SOBRE si
+         * mesmo; em dimensão finita sobrejectiva é bijectiva, logo A inverte
+         * ali e ẋ = Ax + b tem equilíbrio único x* = −A⁻¹b (o §W78). */
+        long pol = 0, inv = 0;
+        for(unsigned t = 0; t < sizeof TT/sizeof TT[0]; t++){
+            int q = TT[t].idx < 1 ? 1 : TT[t].idx;
+            long Ak[3][3]; memcpy(Ak, TT[t].M, sizeof Ak);
+            for(int k = 2; k <= q; k++){
+                POE3("A", TT[t].M); POE3("P", Ak);
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != 3){ mal++; goto fim90; }
+                for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                    Ak[i][j] = atol(o.cell[i][j]);
+            }
+            POE3("A", Ak);
+            sql_executa("SELECT nucleo(*) FROM A", &o);
+            int dk = (o.ok ? o.nrows : 0);
+            long base[3][3]; for(int i = 0; i < dk; i++)
+                for(int j = 0; j < 3; j++) base[i][j] = atol(o.cell[i][j]);
+            /* A^q anula cada vector do seu núcleo: é a definição, e serve de
+             * controlo ao que o motor devolveu */
+            int anula = 1;
+            for(int i = 0; i < dk; i++) for(int r = 0; r < 3; r++){
+                long s = 0; for(int c = 0; c < 3; c++) s += Ak[r][c]*base[i][c];
+                if(s != 0) anula = 0;
+            }
+            if(anula) pol++;
+
+            sql_executa("SELECT posto(*) FROM A", &o);
+            int pq = o.ok ? atoi(o.cell[0][0]) : -1;
+            POE3("A", TT[t].M); POE3("P", Ak);
+            sql_executa("SELECT produto(A) FROM P", &o);
+            long Aq1[3][3];
+            for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                Aq1[i][j] = atol(o.cell[i][j]);
+            POE3("A", Aq1);
+            sql_executa("SELECT posto(*) FROM A", &o);
+            int pq1 = o.ok ? atoi(o.cell[0][0]) : -2;
+            if(pq == pq1) inv++;
+            printf("   %s  q=%d · A^q anula o seu ker: %s · posto A^q = posto A^{q+1}:"
+                   " %d = %d %s\n", TT[t].nome, q, anula ? "sim" : "NÃO",
+                   pq, pq1, pq == pq1 ? "✓" : "✗");
+        }
+        printf("      → em ker A^q a série de exp(At) TERMINA (%ld/4);"
+               " em im A^q o A inverte e há equilíbrio (%ld/4)\n", pol, inv);
+        if(pol != 4 || inv != 4) mal++;
+
+    fim90:
+        #undef POE3
+        sql_fechar();
+
+        printf("\n");
+        ok("A DECOMPOSIÇÃO DE FITTING PARTE O ESPAÇO EM DOIS REGIMES, E O QUE A MEDE NÃO É"
+           " A SOMA DAS DIMENSÕES. dim ker A^k + dim im A^k = 3 vale para TODO k e toda"
+           " matriz — é o posto-nulidade, medido em 16/16 pares, e por isso NÃO decide nada:"
+           " uma asserção sobre ele passaria verde com a soma directa a ser falsa. O que"
+           " separa é a INTERSECÇÃO, e ela mede-se por outro caminho — empilhar a base do"
+           " núcleo com a do imagem e pedir o POSTO ao motor: 3 é soma directa, menos é"
+           " cruzamento. Assim aparece o ÍNDICE, o primeiro k onde a soma fecha, e ele é"
+           " exactamente onde o posto pára de descer: 1 para diag(1,2,3) e diag(0,1,2), 2"
+           " para N₂⊕[3], 3 para N₃ — os quatro índices que uma 3×3 admite. E o gume não é"
+           " decorativo: 3 dos 16 pares TÊM ker ∩ im ≠ 0, e todos vivem em k abaixo do"
+           " índice; em N₂⊕[3] com k=1 o vector (1,0,0) está nos dois lados ao mesmo tempo,"
+           " com as dimensões a somarem 3 na mesma. A CISÃO É DINÂMICA, e é o que a traz"
+           " para os sistemas: em ker A^q a matriz é NILPOTENTE, logo exp(At) restrita ali é"
+           " um POLINÓMIO de grau menor que q — a série termina e não há convergência"
+           " nenhuma a invocar; em im A^q vale posto A^q = posto A^{q+1}, isto é A leva o"
+           " subespaço SOBRE si mesmo, e em dimensão finita sobrejectiva é bijectiva, donde A"
+           " inverte ali e ẋ = Ax + b tem o equilíbrio único x* = −A⁻¹b do §W78. O ponto fixo"
+           " de §W77 estava no núcleo e o equilíbrio de §W78 na imagem: são os dois lados"
+           " desta mesma cisão, e agora sabe-se em que k ela passa a valer.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
