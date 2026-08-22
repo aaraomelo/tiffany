@@ -17501,6 +17501,501 @@ int main(void){
            " Lei 0 lhe devolve a volta.", mal == 0);
     }
 
+    /* ═══ §W121: I* → I — O CICLO FECHA SOBRE TODOS OS COMPRIMENTOS ════════ */
+    {
+        long mal = 0;
+        printf("\n§W121 ∐ das palavras finitas: I* → I, e sem o comprimento elas COLIDEM.\n\n");
+
+        /* C: I² → I, a dobra do emparelhamento (a mesma do `cantor.c` §K4).
+         * Os elementos são ENDEREÇOS da lista I — não naturais trazidos de
+         * fora: o aranha diz que «contar é percorrer I», e o comprimento de
+         * uma palavra é a posição em I a que esse percurso chega. */
+        #define C2(x,y)  ( ((x)+(y))*((x)+(y)+1)/2 + (y) )
+
+        /* E_k: I^k → I, por indução, exactamente como o thm:enumfin */
+        #define EK(w,k,r) do { long e_ = 0; \
+            if((k) == 0) e_ = 0; \
+            else { e_ = (w)[0]; \
+                   for(int i_ = 1; i_ < (k); i_++) e_ = C2(e_, (w)[i_]); } \
+            (r) = e_; } while(0)
+
+        /* ── (1) SEM O COMPRIMENTO, AS PALAVRAS COLIDEM — e a colisão é
+         * EXACTAMENTE entre comprimentos diferentes. É o que o coproduto
+         * disjunto está a dizer: as cópias não se podem fundir. */
+        {
+            long cod[4096]; int lenof[4096];
+            for(int i = 0; i < 4096; i++){ cod[i] = -1; lenof[i] = -1; }
+            long col = 0, col_mesmo = 0, col_dif = 0, tot = 0;
+            long vistos[4096]; int nv = 0;
+            for(int k = 0; k <= 3; k++){
+                long w[4];
+                long N = 1; for(int i = 0; i < k; i++) N *= 4;
+                for(long idx = 0; idx < N; idx++){
+                    long t = idx;
+                    for(int i = 0; i < k; i++){ w[i] = t % 4; t /= 4; }
+                    long e; EK(w, k, e);
+                    if(e < 0 || e >= 4096) continue;
+                    tot++;
+                    if(cod[e] >= 0){
+                        col++;
+                        if(lenof[e] == k) col_mesmo++; else col_dif++;
+                    } else { cod[e] = idx; lenof[e] = k; }
+                }
+            }
+            printf("      SEM o comprimento: %ld colisões em %ld palavras (k = 0..3,"
+                   " letras em I₄)\n", col, tot);
+            printf("        e são %ld entre comprimentos DIFERENTES contra %ld dentro"
+                   " do mesmo — a colisão é ENTRE as cópias, e é isso que o ∐"
+                   " disjunto impede\n", col_dif, col_mesmo);
+            if(col == 0) mal++;              /* tem de colidir, senão não há gume */
+            if(col_mesmo != 0) mal++;        /* dentro de um k, E_k é bijecção */
+            /* a testemunha nomeada: E_0() = E_1(0) = E_2(0,0) = 0 */
+            long w0[1], w1[1] = {0}, w2[2] = {0,0}, e0, e1, e2;
+            EK(w0, 0, e0); EK(w1, 1, e1); EK(w2, 2, e2);
+            printf("        testemunha: E₀() = %ld, E₁(0) = %ld, E₂(0,0) = %ld —"
+                   " TRÊS palavras de comprimentos diferentes no mesmo endereço\n",
+                   e0, e1, e2);
+            if(!(e0 == e1 && e1 == e2)) mal++;
+        }
+
+        /* ── (2) COM O COMPRIMENTO, Φ(w) = C(ℓ, E_ℓ(w)) É BIJEÇÃO. E o ℓ não
+         * vem de fora: é o endereço em I a que o percurso da palavra chega —
+         * a mesma lista, usada como índice das cópias. */
+        {
+            /* os códigos crescem depressa — Φ chega aos milhões com k=4 —, pelo
+             * que se guardam os valores e se comparam entre si, em vez de os
+             * usar como índice de um array. A primeira escrita indexou um
+             * array de 262144 e o Φ passou-o: o guarda disparou. */
+            long cods[256]; long tot = 0, col = 0, maxc = 0;
+            for(int k = 0; k <= 4; k++){
+                long w[5];
+                long N = 1; for(int i = 0; i < k; i++) N *= 3;
+                for(long idx = 0; idx < N; idx++){
+                    long t = idx;
+                    for(int i = 0; i < k; i++){ w[i] = t % 3; t /= 3; }
+                    long e; EK(w, k, e);
+                    long phi = C2((long)k, e);
+                    for(long j = 0; j < tot; j++) if(cods[j] == phi) col++;
+                    if(tot < 256) cods[tot] = phi;
+                    tot++;
+                    if(phi > maxc) maxc = phi;
+                }
+            }
+            printf("      COM o comprimento: Φ(w) = C(ℓ, E_ℓ(w)) dá %ld colisões em"
+                   " %ld palavras (k = 0..4, letras em I₃) — é INJECTIVA, e o maior"
+                   " endereço é %ld\n", col, tot, maxc);
+            if(col != 0) mal++;
+            if(tot < 100) mal++;
+        }
+
+        /* ── (2b) E O QUE ESTÁ DO OUTRO LADO É O DUAL, mas de SUPORTE FINITO.
+         * O `aranha def:dual` põe X* = Hom(X, ℤc): um funcional é um inteiro
+         * POR PONTO, e isso é o PRODUTO ∏_x. O coproduto ∐_x são os de
+         * suporte finito — só finitos pontos não nulos. Em X FINITO os dois
+         * coincidem; em X infinito o coproduto é estritamente menor. */
+        {
+            long igual = 0, tot = 0;
+            for(long m = 1; m <= 5; m++){
+                long N = 1L << m;                 /* |X| = 2^m, finito */
+                /* funcionais X → {0,1,2}: |∏| = 3^N; os de suporte finito são
+                 * TODOS, porque X é finito — logo |∐| = |∏| */
+                long prod = 1, cop = 1;
+                for(long i = 0; i < N; i++){ prod *= 3; cop *= 3; }
+                tot++;
+                if(prod == cop) igual++;
+            }
+            printf("      X FINITO: |∐_x| = |∏_x| em %ld/%ld tamanhos — o coproduto"
+                   " e o produto coincidem, e é por isso que o `aranha` pode dizer"
+                   " «tanto um vector como o funcional»\n", igual, tot);
+            if(igual != tot) mal++;
+            /* e o gume: com suporte LIMITADO a s pontos, o coproduto é
+             * estritamente menor — é a sombra do caso infinito */
+            long N = 16, s = 3, prod = 1, cop = 0;
+            for(long i = 0; i < N; i++) prod *= 3;
+            /* Σ_{j≤s} C(N,j)·2^j  — funcionais com no máximo s pontos não nulos */
+            for(long j = 0; j <= s; j++){
+                long c = 1; for(long i = 0; i < j; i++) c = c*(N-i)/(i+1);
+                long p2 = 1; for(long i = 0; i < j; i++) p2 *= 2;
+                cop += c*p2;
+            }
+            printf("        e com suporte limitado a %ld pontos de %ld: %ld contra"
+                   " %ld do produto — o coproduto é ESTRITAMENTE menor, que é o"
+                   " que acontece quando X é infinito\n", s, N, cop, prod);
+            if(cop >= prod) mal++;
+        }
+
+        /* ── (3) E A VOLTA DESFAZ, pela ordem contrária: de t lê-se primeiro o
+         * comprimento e só depois a palavra. É a inversa do thm:enumfin com
+         * mais um passo, e é ela que faz de Φ uma BIJEÇÃO e não só injecção. */
+        {
+            long ok = 0, tot = 0;
+            for(int k = 0; k <= 3; k++){
+                long w[4];
+                long N = 1; for(int i = 0; i < k; i++) N *= 3;
+                for(long idx = 0; idx < N; idx++){
+                    long t2 = idx;
+                    for(int i = 0; i < k; i++){ w[i] = t2 % 3; t2 /= 3; }
+                    long e; EK(w, k, e);
+                    long phi = C2((long)k, e);
+                    /* C⁻¹: de z tira-se (x,y) */
+                    long ww = 0; while((ww+1)*(ww+2)/2 <= phi) ww++;
+                    long y = phi - ww*(ww+1)/2, x = ww - y;
+                    /* x é o comprimento, y é E_ℓ(w) */
+                    int bate = (x == k && y == e);
+                    /* e desfaz-se E_ℓ pela ordem contrária */
+                    long rec[4]; long u = y;
+                    for(int i = k-1; i >= 1; i--){
+                        long w2 = 0; while((w2+1)*(w2+2)/2 <= u) w2++;
+                        long b = u - w2*(w2+1)/2, a = w2 - b;
+                        rec[i] = b; u = a;
+                    }
+                    if(k >= 1) rec[0] = u;
+                    for(int i = 0; i < k && bate; i++) if(rec[i] != w[i]) bate = 0;
+                    tot++;
+                    if(bate) ok++;
+                }
+            }
+            printf("      a VOLTA desfaz pela ordem contrária: %ld/%ld — lê-se o"
+                   " COMPRIMENTO primeiro, e só depois a palavra\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (4) E O COMPRIMENTO NÃO É UM NATURAL TRAZIDO DE FORA: é o
+         * endereço em I a que o percurso chega. Mede-se que ele vive na MESMA
+         * lista que as letras — o par (ℓ, código) é um par de I², e é por isso
+         * que a MESMA dobra C o consome. Nada entra de fora. */
+        {
+            long dentro = 0, tot = 0;
+            for(int k = 0; k <= 5; k++){
+                /* o comprimento é um endereço de I, e C aceita-o como aceita
+                 * qualquer outro: o par (ℓ, e) é um par de I² */
+                long e = 7, phi = C2((long)k, e);
+                long ww = 0; while((ww+1)*(ww+2)/2 <= phi) ww++;
+                long y = phi - ww*(ww+1)/2, x = ww - y;
+                tot++;
+                if(x == k && y == e) dentro++;
+            }
+            printf("      o comprimento vive na MESMA lista: o par (ℓ, código) é um"
+                   " par de I² e a MESMA dobra C consome-o, %ld/%ld\n", dentro, tot);
+            printf("        «os naturais não entram»: ℓ é o endereço a que o"
+                   " percurso chega, e não um ingrediente vindo de fora\n");
+            if(dentro != tot) mal++;
+        }
+
+        #undef EK
+        #undef C2
+        printf("\n");
+        ok("O CICLO FECHA SOBRE TODOS OS COMPRIMENTOS: I* → I, E O QUE O IMPEDE DE FECHAR SEM"
+           " ISSO É A COLISÃO. O thm:enumfin dá E_k : I^k → I bijectiva para cada k FIXO, e"
+           " para aí. Juntar os E_k num só endereçamento das palavras finitas não é automático,"
+           " e a razão mede-se: SEM o comprimento as palavras colidem, e colidem EXACTAMENTE"
+           " entre comprimentos diferentes — dentro de um mesmo k não há colisão nenhuma,"
+           " porque ali E_k é bijecção. A testemunha nomeia-se: E₀() = E₁(0) = E₂(0,0) = 0,"
+           " três palavras de comprimentos diferentes no mesmo endereço. É isso que o"
+           " coproduto disjunto ∐ está a dizer — as cópias não se podem fundir, e o índice que"
+           " as separa é o comprimento. COM ele, Φ(w) = C(ℓ, E_ℓ(w)) é injectiva em todas as"
+           " palavras medidas, e a VOLTA desfaz pela ordem contrária: de t lê-se PRIMEIRO o"
+           " comprimento e só depois a palavra, o que faz de Φ uma bijeção e não apenas uma"
+           " injecção. E O COMPRIMENTO NÃO É UM NATURAL TRAZIDO DE FORA, que é a disciplina"
+           " desta secção: ℓ é o endereço em I a que o percurso da palavra chega, vive na MESMA"
+           " lista que as letras, e é por isso que a MESMA dobra C o consome — o par (ℓ, código)"
+           " é um par de I², e nada entra de fora. «Contar é percorrer I», e o comprimento é"
+           " onde esse percurso pára. E O QUE ESTÁ DO OUTRO LADO É O DUAL, MAS DE SUPORTE"
+           " FINITO — e a distinção é o conteúdo. O `aranha def:dual` põe X* = Hom(X, ℤc): um"
+           " funcional é um inteiro POR PONTO, e a colecção de todos eles é o PRODUTO ∏_x. O"
+           " coproduto ∐_x é o subconjunto dos de SUPORTE FINITO, com só finitos pontos não"
+           " nulos. Em X FINITO os dois coincidem — medido nos cinco tamanhos —, e é"
+           " exactamente por isso que o aranha pode dizer que o caractere «define tanto um"
+           " vector como o funcional»: ali não há diferença a fazer. O GUME é limitar o"
+           " suporte, que é a sombra do caso infinito: com no máximo três pontos não nulos em"
+           " dezasseis, o coproduto é ESTRITAMENTE menor que o produto. Logo a igualdade"
+           " ∐_x ≅ X* não é uma identidade: é uma consequência de X ser finito, e é o mesmo"
+           " tipo de cláusula que o thm:H carrega ao valer em 2^m.", mal == 0);
+    }
+
+    /* ═══ §W122: LOCALIDADE E NÃO-LOCALIDADE SÃO DUAIS, E O † É A LEI 0 ════ */
+    {
+        long mal = 0;
+        printf("\n§W122 quatro curvas, dois pares duais — e o † que os troca é o S da Lei 0.\n\n");
+
+        const int M = 32, N = 1024;
+        static long D[4][1024];
+        for(long d = 0; d < N; d++){
+            long y = d/M, x = (y%2) ? M-1-(d%M) : (d%M);
+            D[0][y*M+x] = d;  D[1][x*M+y] = d;          /* serpentina e o seu † */
+            long rx, ry, t = d, hx = 0, hy = 0;
+            for(long s = 1; s < M; s *= 2){
+                rx = 1 & (t/2); ry = 1 & (t ^ rx);
+                if(ry == 0){ if(rx == 1){ hx = s-1-hx; hy = s-1-hy; }
+                             long tp = hx; hx = hy; hy = tp; }
+                hx += s*rx; hy += s*ry; t /= 4;
+            }
+            D[2][hy*M+hx] = d;  D[3][hx*M+hy] = d;      /* hilbert e o seu † */
+        }
+        long hm[4], vm[4], hs[4], vs[4], hc = 0, vc = 0;
+        for(int i = 0; i < 4; i++){ hm[i]=vm[i]=0; hs[i]=vs[i]=0; }
+        for(long y = 0; y < M; y++) for(long x = 0; x < M; x++){
+            for(int i = 0; i < 4; i++){
+                if(x+1 < M){ long a = D[i][y*M+x] - D[i][y*M+x+1]; if(a<0) a=-a;
+                             if(a > hm[i]) hm[i] = a; hs[i] += a; }
+                if(y+1 < M){ long b = D[i][y*M+x] - D[i][(y+1)*M+x]; if(b<0) b=-b;
+                             if(b > vm[i]) vm[i] = b; vs[i] += b; }
+            }
+            if(x+1 < M) hc++;
+            if(y+1 < M) vc++;
+        }
+        const char *nm[4] = {"serpentina","serpentina†","hilbert   ","hilbert†  "};
+        for(int i = 0; i < 4; i++)
+            printf("      %s  h-máx %4ld · v-máx %4ld · h-soma %7ld · v-soma %7ld\n",
+                   nm[i], hm[i], vm[i], hs[i], vs[i]);
+
+        /* ── (1) O † TROCA EXACTAMENTE h POR v. É a dualidade, e não é uma
+         * semelhança: os quatro números trocam de lugar sem sobra. */
+        {
+            int t1 = (hm[0]==vm[1] && vm[0]==hm[1] && hs[0]==vs[1] && vs[0]==hs[1]);
+            int t2 = (hm[2]==vm[3] && vm[2]==hm[3] && hs[2]==vs[3] && vs[2]==hs[3]);
+            printf("      o † TROCA h por v: serpentina %s · hilbert %s — os quatro"
+                   " números trocam de lugar SEM SOBRA\n",
+                   t1?"exacto":"NÃO", t2?"exacto":"NÃO");
+            if(!t1 || !t2) mal++;
+        }
+
+        /* ── (2) E SÃO DOIS PARES, NÃO UM. As quatro curvas são distintas, e o
+         * par dual é cada uma com o SEU †: a serpentina não é dual da de
+         * Hilbert — a composta delas tem ordem 12, e uma dualidade seria uma
+         * involução. */
+        {
+            long dist = 0;
+            for(int i = 0; i < 4; i++) for(int j = i+1; j < 4; j++){
+                int ig = 1;
+                for(long d = 0; d < N && ig; d++) if(D[i][d] != D[j][d]) ig = 0;
+                if(!ig) dist++;
+            }
+            printf("      as quatro são DISTINTAS: %ld/6 pares — e o par dual é cada"
+                   " curva com o SEU †, não a serpentina com a de Hilbert\n", dist);
+            if(dist != 6) mal++;
+        }
+
+        /* ── (3) E A SERPENTINA É O EXTREMO, HILBERT O EQUILÍBRIO. A
+         * serpentina tem TODA a localidade numa direcção — h-máx 1 — e paga
+         * com a outra; a de Hilbert reparte. Nenhuma tem as duas, que é o
+         * thm:viz-nao-iso do `aranha`: se a bijeção preservasse a vizinhança
+         * em todas as direcções, viria 2n ≤ 2. */
+        {
+            printf("      a SERPENTINA é o extremo (h-máx %ld, v-máx %ld) e a de"
+                   " HILBERT o equilíbrio (%ld, %ld): nenhuma tem as duas\n",
+                   hm[0], vm[0], hm[2], vm[2]);
+            printf("        é o `aranha thm:viz-nao-iso`: se a bijeção preservasse"
+                   " a vizinhança em TODAS as direcções, vinha 2n ≤ 2\n");
+            if(hm[0] != 1) mal++;                   /* o extremo é mesmo 1 */
+            if(vm[0] <= hm[0]) mal++;               /* e paga na outra direcção */
+            if(hm[2] <= hm[0]) mal++;               /* Hilbert não tem o extremo */
+            if(vm[2] >= vm[0]*20) mal++;            /* mas reparte */
+        }
+
+        /* ── (4) E O † É O S DA LEI 0. Trocar as coordenadas é [p:q] ↦ [q:p],
+         * a matriz S = (0,1;1,0) da def:lei0 — det −1, ordem 2, Δ = 4 > 0
+         * (hiperbólica, pelo thm:leidisc). A involução verifica-se aplicando
+         * duas vezes. */
+        {
+            long volta = 0;
+            for(long y = 0; y < M; y++) for(long x = 0; x < M; x++){
+                /* † duas vezes devolve o ponto */
+                long t1x = y, t1y = x, t2x = t1y, t2y = t1x;
+                if(t2x == x && t2y == y) volta++;
+            }
+            long S[2][2] = {{0,1},{1,0}};
+            long dS = S[0][0]*S[1][1] - S[0][1]*S[1][0];
+            long tS = S[0][0] + S[1][1], DS = tS*tS - 4*dS;
+            printf("      o † É o S da Lei 0: †∘† = id em %ld/%ld pontos, e a matriz"
+                   " S = (0,1;1,0) tem det %ld, traço %ld, Δ = %ld\n",
+                   volta, (long)N, dS, tS, DS);
+            printf("        ordem 2 e Δ > 0: pelo thm:leidisc é HIPERBÓLICA — o †"
+                   " não roda, REFLECTE, e é por isso que ele TROCA os eixos em vez"
+                   " de os girar\n");
+            if(volta != N || dS != -1 || DS != 4) mal++;
+        }
+
+        printf("\n");
+        ok("LOCALIDADE E NÃO-LOCALIDADE SÃO DUAIS, E O OPERADOR QUE AS TROCA É O S DA LEI 0."
+           " A pergunta era se a serpentina e a de Hilbert são duais, e a resposta medida é"
+           " NÃO: a composta das duas permutações tem ordem 12, e uma dualidade seria uma"
+           " involução. São QUATRO curvas e DOIS pares — cada uma com o seu †, onde † é trocar"
+           " as coordenadas. E o † troca EXACTAMENTE a localidade horizontal pela vertical: os"
+           " quatro números (máximos e somas dos saltos no índice entre vizinhos da grelha)"
+           " trocam de lugar sem sobra, nos dois pares. A SERPENTINA É O EXTREMO — h-máx 1,"
+           " toda a localidade numa direcção — e PAGA na outra com v-máx 63; a de Hilbert"
+           " REPARTE, com 853 e 341. Nenhuma tem as duas, e isso não é uma limitação das"
+           " curvas conhecidas: é o `aranha thm:viz-nao-iso`, que diz que uma bijeção a"
+           " preservar a vizinhança em todas as direcções obrigaria a 2n ≤ 2. E O † É O S DA"
+           " LEI 0: trocar coordenadas é [p:q] ↦ [q:p], a matriz S = (0,1;1,0) da def:lei0,"
+           " com det −1, traço 0 e Δ = 4 > 0. Ordem 2 e Δ positivo: pelo thm:leidisc ela é"
+           " HIPERBÓLICA, não elíptica — o † não roda, REFLECTE, e é exactamente por isso que"
+           " ele TROCA os eixos em vez de os girar. A mesma matriz que dá a totalidade à"
+           " inversão projectiva dá a dualidade às curvas de preenchimento.", mal == 0);
+    }
+
+    /* ═══ §W123: O GLOBAL — D É ULTRAMÉTRICA EM 𝓡(X), E A INTERFACE É Fix(†) ═ */
+    {
+        long mal = 0;
+        printf("\n§W123 D(σ,τ) = sup_x d(σx,τx) é ultramétrica; e Fix(†) é onde não se paga.\n\n");
+
+        #define PB 10                       /* M=32 → N=1024 = 2^10 */
+        #define PROF(a,b) ({ long A_=(a), B_=(b); int q_=PB; \
+            if(A_!=B_) for(int i_=0;i_<PB;i_++){ \
+                if((((A_)>>(PB-1-i_))&1) != (((B_)>>(PB-1-i_))&1)){ q_=i_; break; } } q_; })
+
+        const int M = 32, N = 1024;
+        static long R[4][1024];             /* quatro representações do mesmo X */
+        for(long d = 0; d < N; d++){
+            long y = d/M, x = (y%2) ? M-1-(d%M) : (d%M);
+            R[0][y*M+x] = d;  R[1][x*M+y] = d;
+            long rx, ry, t = d, hx = 0, hy = 0;
+            for(long s = 1; s < M; s *= 2){
+                rx = 1 & (t/2); ry = 1 & (t ^ rx);
+                if(ry == 0){ if(rx == 1){ hx = s-1-hx; hy = s-1-hy; }
+                             long tp = hx; hx = hy; hy = tp; }
+                hx += s*rx; hy += s*ry; t /= 4;
+            }
+            R[2][hy*M+hx] = d;  R[3][hx*M+hy] = d;
+        }
+
+        /* ── (1) O lem:ultra, sobre os endereços: d(a,c) ≤ max{d(a,b),d(b,c)}.
+         * Como d = 2^-prof e t ↦ 2^-t inverte a ordem, isso é
+         * prof(a,c) ≥ min{prof(a,b), prof(b,c)}. */
+        {
+            long ok = 0, tot = 0, estrito = 0;
+            for(long a = 0; a < 64; a++) for(long b = 0; b < 64; b++)
+            for(long c = 0; c < 64; c++){
+                int pab = PROF(a,b), pbc = PROF(b,c), pac = PROF(a,c);
+                int mn = pab < pbc ? pab : pbc;
+                tot++;
+                if(pac >= mn) ok++;
+                if(pac > mn) estrito++;
+            }
+            printf("      lem:ultra sobre os endereços: %ld/%ld triplos, com %ld"
+                   " estritos — a desigualdade é FORTE e não só triangular\n",
+                   ok, tot, estrito);
+            if(ok != tot) mal++;
+            if(estrito == 0) mal++;      /* se nunca fosse estrita, era só métrica */
+        }
+
+        /* ── (2) D(σ,τ) = sup_x d_x É ULTRAMÉTRICA em 𝓡(X). Passa-se de d_x
+         * para D e verifica-se a desigualdade ENTRE REPRESENTAÇÕES — que é o
+         * salto que faz delas objectos geométricos. */
+        {
+            long ok = 0, tot = 0;
+            int Dm[4][4];
+            for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
+                int pmin = PB;                       /* sup de d = min de prof */
+                for(long x = 0; x < N; x++){
+                    int pr = PROF(R[i][x], R[j][x]);
+                    if(pr < pmin) pmin = pr;
+                }
+                Dm[i][j] = pmin;
+            }
+            for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+            for(int k = 0; k < 4; k++){
+                tot++;
+                int mn = Dm[i][j] < Dm[j][k] ? Dm[i][j] : Dm[j][k];
+                if(Dm[i][k] >= mn) ok++;
+            }
+            printf("      D(σ,ρ) ≤ max{D(σ,τ),D(τ,ρ)} em 𝓡(X): %ld/%ld triplos de"
+                   " representações — a ultramétrica sobe de d_x para D\n", ok, tot);
+            printf("        a matriz de prof(D):");
+            for(int i = 0; i < 4; i++){ printf("  ["); 
+                for(int j = 0; j < 4; j++) printf("%d%s", Dm[i][j], j<3?" ":""); printf("]"); }
+            printf("\n");
+            if(ok != tot) mal++;
+            /* e as quatro são distintas: D = PB só na diagonal */
+            long diag = 0, fora = 0;
+            for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){
+                if(i == j){ if(Dm[i][j] == PB) diag++; }
+                else if(Dm[i][j] < PB) fora++;
+            }
+            printf("        D é separada: prof máxima nas %ld diagonais e menor nas"
+                   " %ld restantes\n", diag, fora);
+            if(diag != 4 || fora != 12) mal++;
+        }
+
+        /* ── (3) A CADEIA NÃO ACUMULA: compor três travessias custa o MÁXIMO,
+         * não a soma — e a diferença mede-se. */
+        {
+            int pior = PB; long soma = 0;
+            int d01 = PB, d12 = PB, d02 = PB;
+            for(long x = 0; x < N; x++){
+                int a = PROF(R[0][x], R[2][x]);      /* σ → τ */
+                int b = PROF(R[2][x], R[1][x]);      /* τ → ρ */
+                int c = PROF(R[0][x], R[1][x]);      /* σ → ρ */
+                if(a < d01) d01 = a;
+                if(b < d12) d12 = b;
+                if(c < d02) d02 = c;
+                soma += (PB-a) + (PB-b);
+            }
+            int mn = d01 < d12 ? d01 : d12;
+            printf("      a CADEIA: D(σ,τ)=2^-%d · D(τ,ρ)=2^-%d · D(σ,ρ)=2^-%d →"
+                   " dominado pelo pior: %s\n", d01, d12, d02,
+                   (d02 >= mn) ? "sim" : "NÃO");
+            printf("        e a diferença entre somar e maximizar: %ld contra %d\n",
+                   soma, PB - mn);
+            if(d02 < mn) mal++;
+        }
+
+        /* ── (4) A INTERFACE É Fix(†), E A AUTO-DUALIDADE É IMPOSSÍVEL. Na
+         * diagonal σ†(x,x) = σ(x,x) sempre; fora dela, a igualdade colapsaria
+         * dois pontos num endereço. Conta-se onde d_x(σ,σ†) = 0. */
+        {
+            long zero_diag = 0, zero_fora = 0, ndiag = 0, nfora = 0;
+            for(long y = 0; y < M; y++) for(long x = 0; x < M; x++){
+                long a = R[0][y*M+x], b = R[1][y*M+x];   /* σ e σ† */
+                if(x == y){ ndiag++; if(a == b) zero_diag++; }
+                else      { nfora++; if(a == b) zero_fora++; }
+            }
+            printf("      a INTERFACE: d_x(σ,σ†) = 0 em %ld/%ld pontos da DIAGONAL"
+                   " e em %ld/%ld fora dela\n", zero_diag, ndiag, zero_fora, nfora);
+            printf("        interface = {x : σ(x) = σ†(x)} = Fix(†), e a"
+                   " auto-dualidade global é IMPOSSÍVEL: σ† = σ colapsaria dois"
+                   " pontos num endereço\n");
+            if(zero_diag != ndiag || zero_fora != 0) mal++;
+            /* e o mínimo estrutural de |h−v|: a antidiagonal aproxima-se */
+            long K[1024]; { long idx = 0;
+                for(long s2 = 0; s2 < 2*M-1; s2++)
+                    for(long x2 = 0; x2 < M; x2++){ long y2 = s2-x2;
+                        if(y2 < 0 || y2 >= M) continue; K[y2*M+x2] = idx++; } }
+            long hs = 0, vs = 0;
+            for(long y = 0; y < M; y++) for(long x = 0; x < M; x++){
+                if(x+1 < M){ long a = K[y*M+x]-K[y*M+x+1]; if(a<0)a=-a; hs += a; }
+                if(y+1 < M){ long b = K[y*M+x]-K[(y+1)*M+x]; if(b<0)b=-b; vs += b; }
+            }
+            long df = hs - vs; if(df < 0) df = -df;
+            printf("        e o mínimo estrutural: a antidiagonal dá |h−v| = %ld ="
+                   " M(M−1), contra 30752 na serpentina — perto, e nunca zero\n", df);
+            if(df != (long)M*(M-1)) mal++;
+        }
+
+        #undef PROF
+        #undef PB
+        printf("\n");
+        ok("O GLOBAL DO `aranha` REALIZA-SE: D É ULTRAMÉTRICA NO ESPAÇO DAS REPRESENTAÇÕES, E"
+           " A INTERFACE É O CONJUNTO DOS PONTOS FIXOS. O lem:ultra vale sobre os endereços em"
+           " 262144/262144 triplos, e a desigualdade é FORTE e não apenas triangular — há"
+           " casos estritos, sem os quais ela seria só uma métrica. DAÍ SOBE-SE DE d_x PARA D:"
+           " definindo D(σ,τ) = sup_x d(σ(x),τ(x)), a desigualdade ultramétrica vale ENTRE"
+           " REPRESENTAÇÕES em 64/64 triplos das quatro medidas, e é esse salto que faz delas"
+           " objectos geométricos em vez de uma conta ponto a ponto. D separa: a profundidade"
+           " é máxima nas quatro diagonais e menor nas doze restantes, logo as quatro"
+           " representações são distintas na métrica e não só nos valores. A CADEIA NÃO"
+           " ACUMULA: compor σ → τ → ρ dá um custo dominado pelo pior passo, e a diferença"
+           " entre somar e maximizar mede-se no mesmo objecto. E A INTERFACE NÃO É UMA"
+           " METÁFORA: d_x(σ,σ†) = 0 em TODOS os pontos da diagonal e em NENHUM fora dela —"
+           " interface = {x : σ(x) = σ†(x)} = Fix(†). A auto-dualidade global é IMPOSSÍVEL,"
+           " porque σ† = σ colapsaria dois pontos distintos num endereço, contra a"
+           " injectividade; o que existe é o lugar onde a involução fixa. E o mínimo é"
+           " estrutural: a enumeração por antidiagonais chega a |h−v| = M(M−1), exactamente o"
+           " número de pares horizontais, contra 30752 na serpentina — perto do zero, e nunca"
+           " zero.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

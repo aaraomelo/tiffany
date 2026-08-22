@@ -2463,6 +2463,277 @@ e o emparelhamento apenas dá a cada gaveta um endereço único. O corpo matrici
 precisa de tratamento próprio --- herda a mesma escada que todo objeto finitamente
 coordenado herda.
 
+\begin{teorema}[as palavras finitas: $I^{*}\to I$, e o comprimento é o índice das cópias]\label{thm:palavras}
+\emph{$I$ é a ordem dos andares encaixados do Teor.~\ref{thm:BI}} --- $I_0\subset
+I_1\subset I_2\subset\cdots$, com as palavras de largura $w$ em número de $2^{w}$ ---
+e não uma caixa fixa. Separem-se \textbf{duas} camadas que se confundem: a
+\emph{aridade} $k=\lvert w\rvert$, que escolhe qual $E_k$ usar, e o \emph{endereço}
+$\lambda_k\in I$ a que o percurso chega ao fim de $k$ passos. Com
+$\operatorname{len}\colon I^{*}\to I$, $w\in I^{k}\Rightarrow\operatorname{len}(w)=\lambda_k$,
+\[
+\Phi(w)=C\bigl(\lambda_k,\,E_k(w)\bigr),\qquad w\in I^{k},
+\]
+é bijeção $I^{*}\to I$ que \textbf{sobe de andar}: $E_k$ leva $I_w^{\,k}$ em
+$I_{kw}$, e $\Phi$ leva $I_w^{\,k}$ num andar acima. A inversa faz
+$C^{-1}(a)=(\lambda_k,b)$, recupera $k$ pelo \emph{percurso} de $\lambda_k$, e só
+então aplica $E_k^{-1}(b)$. E o comprimento não pode ser omitido: sem ele, os $E_k$
+\textbf{colidem entre si}.
+\end{teorema}
+
+\noindent\textbf{E as duas camadas não são a mesma.} $k$ é um número de passos ---
+diz \emph{qual} codificação usar; $\lambda_k$ é um ponto da escada --- serve de
+\emph{coordenada} no par. Confundi-las faz a frase «$w\mapsto(\ell,E_\ell(w))$ é
+bijeção» parecer verdadeira sem o ser: ela só o é com $\ell$ a designar a aridade, e
+é o $\lambda_k$ que entra no par. \emph{A aridade escolhe a estante; o endereço é a
+posição nela.}
+
+\noindent\textbf{E não há contradição de cardinal, porque não há caixa.} Se $I$ fosse
+um conjunto finito fixo com $\lvert I\rvert=m>1$, então $\lvert I^{k}\rvert=m^{k}\neq m$
+e nada disto valeria. Mas o Teor.~\ref{thm:BI} não dá uma caixa: dá uma
+\textbf{ordem} de andares que se encaixam por prefixo, e cada $E_k$ é bijeção
+\emph{entre andares}, $I_w^{\,k}\to I_{kw}$, com a largura a crescer. \emph{O finito é
+cada estágio da caminhada, não o total} --- e é por isso que o §K4 do
+\code{tests/cantor.c} conta à parte os tuplos que passam dos $64$ bits, em vez de os
+esconder: eles não são um defeito da codificação, são o andar seguinte.
+
+\begin{proof}
+$C$ é bijeção $I^{2}\to I$ e $E_\ell$ é bijeção $I^{\ell}\to I$ para cada $\ell$
+(Teor.~\ref{thm:enumfin}), pelo que $w\mapsto(\ell,E_\ell(w))$ é bijeção
+$I^{*}\to I\times I$ e $\Phi$ é a composta com $C$. A inversa desfaz $C$ primeiro
+--- daí sai $\ell$ --- e só então aplica $E_\ell^{-1}$, que existe porque $\ell$ já
+é conhecido. Para a última afirmação basta a testemunha: $E_0()=E_1(0)=E_2(0,0)$,
+três palavras de comprimentos distintos no mesmo endereço.
+\end{proof}
+
+\noindent\textbf{Uma família de bijeções cuja união não é injetiva.} Cada $E_k$ é
+perfeita no seu andar e ao juntar os andares elas pisam-se --- \emph{a colisão é
+sempre entre comprimentos diferentes, e nunca dentro de um}. É por isso que a soma
+tem de ser \textbf{disjunta}: o $\coprod$ não é notação, é o índice que separa as
+cópias, e aqui esse índice é o comprimento.
+
+\medskip\noindent\textbf{E o comprimento não vem de fora.} Ele é o endereço em $I$ a
+que o percurso da palavra chega, vive na \emph{mesma} lista que as letras, e é por
+isso que a \emph{mesma} dobra $C$ o consome: o par $(\ell,\text{código})$ é um par de
+$I^{2}$. \emph{Contar é percorrer $I$}, e o comprimento é onde esse percurso pára ---
+nenhum $\mathbb{N}$ entra.
+
+\medido{\code{tests/pgwire.c} §W121 --- sem o comprimento, $21$ colisões em $85$
+palavras, \emph{todas} entre comprimentos diferentes e nenhuma dentro do mesmo; com
+ele, zero colisões em $121$ palavras e a volta a desfazer pela ordem contrária. E o
+outro lado da figura: $I^{*}$ e o \textbf{dual} coincidem porque $I$ é finito --- o
+$\coprod$ são os funcionais de suporte finito e o $\prod$ são todos, e limitar o
+suporte separa-os estritamente.}
+
+\begin{teorema}[localidade e não-localidade são duais, e a dobra que as troca é $S$]\label{thm:localdual}
+Numa grade $M\times M$, seja $\sigma$ uma curva de preenchimento e
+$h(\sigma)$, $v(\sigma)$ as somas dos saltos no índice entre vizinhos horizontais e
+verticais. Escrevendo $\sigma^{\dagger}$ para a curva com as coordenadas trocadas,
+$[p{:}q]\mapsto[q{:}p]$ --- \emph{a troca das duas coordenadas} ---, vale
+\[
+h(\sigma^{\dagger})=v(\sigma),\qquad v(\sigma^{\dagger})=h(\sigma),
+\qquad\text{e}\qquad
+\boxed{\;h+v\ \text{é invariante por }\dagger\;}
+\]
+\end{teorema}
+
+\begin{proof}
+$\dagger$ leva o vizinho horizontal $(x,y),(x{+}1,y)$ no vizinho vertical
+$(y,x),(y,x{+}1)$ e reciprocamente, sem alterar o índice de nenhum ponto; logo as
+duas somas trocam, e a soma total fica. $\dagger\circ\dagger=\mathrm{id}$ porque a
+troca de coordenadas é involução.
+\end{proof}
+
+\noindent\textbf{São quatro curvas e dois pares, não um par.} A serpentina não é dual
+da de Hilbert: a composta das duas permutações tem \textbf{ordem $12$}, e uma
+dualidade seria uma involução. O par é cada curva com o seu próprio $\dagger$.
+
+\medskip\noindent\emph{E fixe-se o termo, uma vez: aqui \textbf{localidade} é sempre
+medida pelo \emph{salto de índice} entre vizinhos da grade --- $h$ e $v$ do enunciado
+---, e nunca por distância espacial.} Todas as enumerações são espacialmente locais
+por construção; o que as separa é o custo no índice.
+
+\medskip\noindent\textbf{E a serpentina é o extremo, a de Hilbert o equilíbrio.} A
+serpentina põe \emph{toda} a localidade numa direção --- salto máximo $1$ --- e paga
+na outra; a de Hilbert reparte pelas duas. \emph{Nenhuma tem as duas}, e isso não é
+uma limitação das curvas conhecidas: é o Teor.~\ref{thm:viz-nao-iso}, que faz uma
+bijeção a preservar a vizinhança em todas as direções obrigar a $2n\le2$.
+
+\medskip\noindent\textbf{E a dobra que as troca classifica-se no próprio
+documento.} Trocar coordenadas é
+$S=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, de $\det=-1$, traço
+$0$ e $\Delta=4>0$: pelo Teor.~\ref{thm:leidisc} ela é \textbf{hiperbólica}, não
+elíptica --- \emph{o $\dagger$ não roda, reflete}, e é por isso que troca os eixos em
+vez de os girar. A ordem $2$ com $\Delta>0$ é a mesma combinação que o
+Lema~\ref{lem:cristal} deixa de fora das rotações.
+
+\medido{\code{tests/pgwire.c} §W122, em $M=32$ --- os quatro números trocam de lugar
+sem sobra nos dois pares; as quatro curvas são distintas nos $6$ pares; a serpentina
+dá $(1,63)$ e a de Hilbert $(853,341)$ nos máximos; e $h+v$ vale $32\,736$ no par da
+serpentina e $38\,936$ no da de Hilbert --- \emph{o $\dagger$ conserva o total e
+redistribui-o}.}
+
+\begin{teorema}[a travessia é uma operação, e compor não acumula]\label{thm:navega}
+Sejam $\sigma,\tau,\rho$ representações de $X$ ligadas por bijeções efetivas
+(Teor.~\ref{thm:enumfin}, \ref{thm:palavras}, \ref{thm:localdual}), e $d$ a
+ultramétrica da árvore (Def.~\ref{def:arvore}). Defina-se primeiro a distância
+\textbf{entre os endereços do mesmo ponto},
+\[
+d_x(\sigma,\tau)=d\bigl(\sigma(x),\tau(x)\bigr),
+\qquad\text{e depois}\qquad
+D(\sigma,\tau)=\sup_{x\in X} d_x(\sigma,\tau).
+\]
+\emph{O supremo é atingido sempre que $X$ vive dentro de um estágio finito
+$I_{n_1}\times\cdots\times I_{n_k}$}, que é o caso do finitamente coordenado; escreve-se
+$\sup$ para o enunciado não depender disso.
+Então $D$ é ultramétrica sobre as representações:
+\[
+\boxed{\;D(\sigma,\rho)\;\le\;\max\bigl\{D(\sigma,\tau),\,D(\tau,\rho)\bigr\}\;}
+\]
+\emph{Logo uma cadeia de $L$ travessias tem o custo do seu \textbf{pior passo}},
+qualquer que seja $L$.
+\end{teorema}
+
+\begin{proof}
+Para cada $x$, o Lema~\ref{lem:ultra} aplicado aos três endereços dá
+$d_x(\sigma,\rho)\le\max\{d_x(\sigma,\tau),d_x(\tau,\rho)\}$. Tomando o máximo em
+$x$ do lado esquerdo e majorando cada parcela do direito pelo seu próprio máximo vem
+a desigualdade para $D$. A indução em $L$ é imediata, porque o máximo é associativo.
+\end{proof}
+
+\noindent\textbf{E é a passagem de $d_x$ para $D$ que faz das representações objetos
+geométricos.} Sem ela a desigualdade seria «para cada ponto» e não diria nada sobre as
+representações como objetos; com ela, $\mathcal{R}(X)$ é um \textbf{espaço
+ultramétrico}, e a travessia passa a ser uma operação \emph{entre representações} e não
+uma conta ponto a ponto. \emph{Diz-se geometria e não álgebra de propósito}: aqui
+define-se uma \emph{distância}, e não uma operação em $\mathcal{R}(X)$.
+
+\noindent\textbf{E daí a navegação é uma operação, e não uma escolha.} Como as
+bolas \textbf{particionam} (Teor.~\ref{thm:bolas}), fixar um prefixo \emph{é} fixar
+uma bola: descer a árvore bit a bit é a operação, e cada bit decidido corta o espaço
+ao meio sem ambiguidade. Não há critério a aplicar --- há uma descida a executar.
+
+\medskip\noindent\textbf{E há uma representação em que o índice \emph{é} o endereço
+na árvore.} Na ordem por linhas alternadas o prefixo do índice dá a linha em
+\emph{todos} os pontos, e a profundidade da primeira divergência entre vizinhos
+horizontais nunca desce abaixo de $\tfrac{p}{2}$: eles partilham os bits de topo por
+construção. Nas outras, essa profundidade chega a $0$ --- vizinhos que divergem no
+\textbf{primeiro} bit, isto é $d=1$, o máximo possível.
+\[
+\boxed{\;\text{navegar} \;=\; \text{descer por prefixo onde o prefixo é a bola}\;}
+\]
+
+\medskip\noindent\textbf{E a diferença entre somar e maximizar é o ganho.} Numa
+cadeia de três travessias sobre a mesma grade, o custo somado dá $454$ e o custo
+ultramétrico dá $10$: \emph{a composição é grátis a partir do pior passo}. É por
+isso que a travessia não precisa de ser evitada --- precisa de ser \emph{ordenada},
+com o pior passo primeiro, porque depois dele nada mais se paga.
+
+\medido{\code{tests/pgwire.c} §W123 --- o Lema~\ref{lem:ultra} em $262\,144$ triplos;
+o prefixo a dar a linha em $1024/1024$ na ordem por linhas alternadas contra
+$32/1024$ nas outras duas; a profundidade mínima entre vizinhos horizontais, $5$
+contra $0$; e a cadeia de três travessias com $454$ na soma contra $10$ no máximo.}
+
+\begin{corolario}[o global: finitamente coordenado $\Rightarrow$ travessível com custo dominado]\label{cor:global}
+Seja $X$ \textbf{finitamente coordenado \emph{na escada}} --- isto é, com
+$X\hookrightarrow I_{n_1}\times\cdots\times I_{n_k}\hookrightarrow I^{k}$ para $k$
+finito \emph{e} com a família $\{E_k\}$ do Teor.~\ref{thm:enumfin} disponível como
+codificação reversível efetiva entre os andares --- e $\mathcal{R}(X)$ a família das
+suas representações efetivas e reversíveis. \emph{A hipótese é estrutural e herda-se
+daquele teorema}: «finitamente coordenado» sozinho, sobre um conjunto finito
+arbitrário e sem a escada, não bastaria. Então:
+\[
+\begin{array}{rcl}
+\text{finitamente coordenado} &\Longrightarrow& \text{endereçável reversivelmente}
+   \quad(\text{Teor.~\ref{thm:enumfin}, \ref{thm:palavras}})\\[3pt]
+&\Longrightarrow& \textbf{dadas} \text{ duas codificações reversíveis } R_0,R_1\colon X\to I,\\[1pt]
+&& \text{a travessia é } R_1\circ R_0^{-1}\quad(\text{composição de bijeções})\\[3pt]
+&\Longrightarrow& D(R_0,R_n)\le\max_{1\le i\le n} D(R_{i-1},R_i)
+   \quad(\text{Teor.~\ref{thm:navega}}).
+\end{array}
+\]
+E isto não depende do objeto ser matriz, palavra, configuração, tensor ou estado:
+só de haver identidade decidível, coordenadas em número finito, e a ultramétrica
+sobre o índice.
+\end{corolario}
+
+\begin{proof}
+A primeira implicação é o mergulho seguido de $E_k$; a segunda é que composição de
+bijeções é bijeção; a terceira é o Teor.~\ref{thm:navega}. Nenhuma usa a natureza de
+$X$ além do mergulho. \emph{Note-se o que \textbf{não} se afirma}: não que todo $X$
+produza automaticamente esta ou aquela enumeração --- o Teor.~\ref{thm:localdual}
+constrói o par $\dagger$ para as ordens de uma grade, e não para objeto qualquer.
+O que é universal é: \emph{quaisquer duas representações reversíveis do mesmo $X$
+são travessíveis}. Tirar a dependência das curvas particulares deixa o enunciado
+mais forte, não mais fraco.
+\end{proof}
+
+\medskip\noindent\textbf{E o global, dito de uma vez:}
+\begin{quote}
+\emph{Todo objeto que admite uma decomposição finita nas coordenadas da escada herda
+um endereçamento reversível. Quaisquer duas representações reversíveis desse mesmo
+objeto são ligadas por uma travessia efetiva; e, sob a ultramétrica dos endereços, o
+custo de qualquer composição é dominado pelo maior custo entre os seus passos.}
+\end{quote}
+
+\medskip\noindent\textbf{E o endereçamento é universal, a operação não é.} Todo objeto
+finitamente coordenado herda um endereço reversível --- isso é do índice. Mas a
+operação $\star_X$ \emph{não} desce: ela transporta-se por conjugação,
+$c(x)\boxplus c(y)=c\bigl(c^{-1}(cx)\star_X c^{-1}(cy)\bigr)$, e continua específica
+do objeto. \emph{Endereçar é geral; operar é particular.}
+
+\medskip\noindent\textbf{E daí a operação, que é o que se executa.} Dados $X$ e duas
+representações, \textsc{travessia}$(X,R_{\text{o}},R_{\text{d}})$ faz:
+\begin{enumerate}\itemsep2pt
+\item[(1)] \textbf{endereça} --- $a=E_k(x)$, pelo Teor.~\ref{thm:enumfin}; não se
+      pergunta qual representação é «melhor»;
+\item[(2)] \textbf{toma o destino da tarefa} --- a conservação que ela exige (ordem,
+      vizinhança numa direção, acesso por prefixo, estrutura algébrica), e não uma
+      preferência;
+\item[(3)] \textbf{aplica} $a'=R_{\text{d}}\circ R_{\text{o}}^{-1}(a)$;
+\item[(4)] \textbf{mede} $D$, o pior salto;
+\item[(5)] \textbf{absorve} os passos pequenos: uma vez pago um salto de escala
+      $\delta$, \emph{toda travessia posterior de custo $\le\delta$ fica dentro da
+      mesma bola e não aumenta o custo global}.
+\end{enumerate}
+\emph{Não se procura a melhor representação: executa-se a travessia que a operação
+exige.}
+
+\medskip\noindent\textbf{E o passo (5) precisa da hipótese certa, que não é a
+ultramétrica sozinha.} Numa cadeia \emph{já fixada}, $\max_i D(R_{i-1},R_i)$ não muda
+se os passos forem permutados --- o máximo é simétrico. O que a ultramétrica dá é
+outra coisa, e é forte: \emph{depois de pago um $\delta$, os passos $\le\delta$ são
+grátis}. Só \textbf{se os intermediários forem operacionalmente comutáveis} é que daí
+se tira «executar primeiro o de custo máximo»; sem essa hipótese, a ordem é imposta
+pela dependência entre as travessias e não pelo custo. \emph{Dizer o contrário seria
+atribuir ao teorema uma consequência que ele não tem.}
+
+\begin{lema}[a interface: onde a travessia não paga]\label{lem:interface}
+Para qualquer enumeração $\sigma$ de uma grade e o seu $\dagger$ do
+Teor.~\ref{thm:localdual}, vale $\sigma^{\dagger}(x,x)=\sigma(x,x)$ para todo $x$;
+logo $d_x(\sigma,\sigma^{\dagger})=0$ na \textbf{diagonal}, e só aí. E nenhuma
+enumeração é auto-dual: $\sigma^{\dagger}=\sigma$ obrigaria
+$\sigma(x,y)=\sigma(y,x)$, isto é dois pontos distintos no mesmo endereço --- o que
+uma bijeção não permite.
+\end{lema}
+
+\begin{proof}
+$\sigma^{\dagger}(x,y)=\sigma(y,x)$ dá a igualdade em $y=x$ imediatamente. Fora da
+diagonal, $\sigma^{\dagger}=\sigma$ diria $\sigma(x,y)=\sigma(y,x)$ com
+$(x,y)\neq(y,x)$, contra a injetividade.
+\end{proof}
+
+\[
+\boxed{\;\text{interface}=\{x:\sigma(x)=\sigma^{\dagger}(x)\}=\operatorname{Fix}(\dagger)\;}
+\]
+
+\noindent\textbf{É esta a interface, e é por isso que ela é o ponto fixo.} A troca
+$\dagger$ é uma involução; os seus pontos fixos são a diagonal, e ali --- e só ali ---
+os dois sentidos coincidem e a travessia \textbf{não paga}. Fora da diagonal ela paga
+sempre, e o mínimo é estrutural: entre as enumerações medidas, a das antidiagonais
+chega a $\lvert h-v\rvert=M(M-1)$, exatamente o número de pares horizontais, contra
+valores muito maiores nas outras. \emph{A auto-dualidade exata não é rara --- é
+impossível}, e o que existe é o lugar onde a involução fixa.
+
 \medskip\noindent\textbf{E a álgebra não desce --- transporta-se.} Vale a pena
 dizê-lo, porque é onde a leitura ingénua falharia: sendo $c=E_k$ a codificação, é
 \emph{falso} que $c(A+B)=c(A)+c(B)$ --- e tem de ser, senão a soma de matrizes seria
