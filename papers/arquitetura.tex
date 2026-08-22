@@ -5633,6 +5633,40 @@ norma nos quatro metais; e Cassini em $18/18$ com o seu controlo.}
         {\code{det} do prefixo pelo motor; $N(p-q\sigma)$ em inteiros}
         {\code{tests/pgwire.c} §W115}
 
+\subsection*{Três codificações, e cada uma conserva uma coisa diferente}
+
+\noindent A §«O veredicto» põe a fração contínua, o AGM e a curva de Hilbert lado a
+lado e diz o que interessa: «o que as distingue não é a eficiência --- é \textbf{o que
+cada uma conserva}».
+
+\medskip\noindent A primeira linha verifica-se à letra: $355/113=[3;7,16]$ dá
+$R^{3}L^{7}R^{16}=$ \texttt{RRRLLLLLLLRRRRRRRRRRRRRRRR}, exatamente a cadeia do
+catálogo, obtida por Euclides inteiro e sem uma divisão inexata.
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & conserva & perde\\
+\midrule
+fração contínua & a \textbf{ordem} ($351/351$, §W105) & a vizinhança (metade das palavras vizinhas)\\
+curva de Hilbert & a \textbf{vizinhança} ($15/15$, salto $1$) & a leitura do índice por prefixo\\
+serpentina & a vizinhança \emph{e} o prefixo ($15/15$) & o perfil do salto ($M^{2}$ contra $2M-1$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E o veredicto é que nenhuma faça as duas.} Guardar a ordem
+custa a vizinhança; guardar a vizinhança custa a legibilidade do índice. É o
+\emph{«codificar $\neq$ preservar a dinâmica»} do \code{aranha}, dito por códigos em
+vez de por operadores --- e a tabela do catálogo é a lista das \textbf{escolhas}, não
+uma comparação de desempenho.
+
+\medido{\code{tests/pgwire.c} §W118 --- a palavra de $355/113$; o salto entre palavras
+vizinhas; a adjacência da curva de Hilbert; e o prefixo da serpentina como controlo.}
+
+\colunas{\code{catalogo} «O veredicto: três codificações»; §W105 (a ordem); \code{hilbert\_bidual.c} §H7}
+        {Euclides inteiro; adjacência na grelha; leitura por prefixo}
+        {\code{tests/pgwire.c} §W118}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

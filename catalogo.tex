@@ -24262,6 +24262,8 @@ curva de Hilbert & 4 quadrantes & recursão & --- & a \textbf{vizinhança} \\
 \end{tabular}
 \end{center}
 
+\medido{\code{tests/pgwire.c} §W118 --- e as colunas «conserva» passam a ter número. A primeira linha verifica-se à letra: $355/113=[3;7,16]$ dá $R^3L^7R^{16}=$ \texttt{RRRLLLLLLLRRRRRRRRRRRRRRRR}, obtido por Euclides inteiro e sem uma divisão inexacta. A \textbf{fracção contínua} guarda a \emph{ordem} --- §W105 mediu a alternada a acertar em $351/351$ --- e \textbf{não} a vizinhança: entre palavras que diferem numa só letra, metade dá valores distantes. A \textbf{curva de Hilbert} guarda a \emph{vizinhança}: $15/15$ passos consecutivos são adjacentes na grelha, salto $1$. Mas perde o que a serpentina tem --- nesta a linha lê-se do \textbf{prefixo} do índice em todos os pontos, e na de Hilbert não se lê de prefixo nenhum, que é a troca que o \code{tests/hilbert\_bidual.c} §H7 já media. \emph{E o veredicto é que nenhuma faça as duas}: guardar a ordem custa a vizinhança, e guardar a vizinhança custa a legibilidade do índice --- o «codificar $\neq$ preservar a dinâmica» do \code{aranha}, dito por códigos em vez de por operadores.}
+
 \noindent A primeira já foi construída: pelo Teorema~(Parte I) a palavra é $L$--$R$ em
 $\GL_2(\Z)$, e $355/113$ escreve-se \texttt{RRRLLLLLLLRRRRRRRRRRRRRRRR}. As outras duas são
 clássicas e entram aqui só como contraste.

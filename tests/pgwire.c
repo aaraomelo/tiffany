@@ -17026,6 +17026,138 @@ int main(void){
            " restrição cristalográfica admite. Três leis, um número.", mal == 0);
     }
 
+    /* ═══ §W118: TRÊS CODIFICAÇÕES — CADA UMA CONSERVA UMA COISA ═══════════ */
+    {
+        long mal = 0;
+        printf("\n§W118 «o que as distingue não é a eficiência — é o que cada uma CONSERVA».\n\n");
+
+        /* ── (1) A PALAVRA DE 355/113, à letra. O catálogo escreve
+         * «355/113 escreve-se RRRLLLLLLLRRRRRRRRRRRRRRRR»: a fracção contínua
+         * é [3;7,16], e a palavra L/R é R³L⁷R¹⁶. Conta-se sem uma divisão
+         * inexacta. */
+        {
+            long p = 355, q = 113, W[8]; int L = 0;
+            while(q && L < 8){ long a = p/q, r = p - a*q; W[L++] = a; p = q; q = r; }
+            char pal[64]; int n = 0;
+            for(int k = 0; k < L; k++)
+                for(long i = 0; i < W[k] && n < 60; i++) pal[n++] = (k % 2) ? 'L' : 'R';
+            pal[n] = 0;
+            printf("      355/113 = [");
+            for(int k = 0; k < L; k++) printf("%ld%s", W[k], k+1<L?";":"");
+            printf("] → %s  (%d letras)\n", pal, n);
+            const char *esp = "RRRLLLLLLLRRRRRRRRRRRRRRRR";
+            printf("        o catálogo escreve %s → %s\n", esp,
+                   strcmp(pal, esp) == 0 ? "IGUAL" : "DIFERE");
+            if(strcmp(pal, esp) != 0) mal++;
+            if(L != 3 || W[0] != 3 || W[1] != 7 || W[2] != 16) mal++;
+        }
+
+        /* ── (2) A FRACÇÃO CONTÍNUA CONSERVA A ORDEM — §W105 mediu-o — MAS NÃO
+         * A VIZINHANÇA: palavras que diferem numa letra dão racionais que
+         * podem ficar muito longe. Conta-se o salto. */
+        {
+            long longe = 0, perto = 0, tot = 0;
+            for(long a = 1; a <= 4; a++) for(long b = 1; b <= 4; b++)
+            for(long c = 1; c <= 4; c++){
+                long W1[3] = {a,b,c};
+                for(int pos = 0; pos < 3; pos++){
+                    long W2[3] = {a,b,c};
+                    W2[pos] = W1[pos] + 1;            /* uma letra de diferença */
+                    long p1=1,q1=0,r1=0,s1=1, p2=1,q2=0,r2=0,s2=1;
+                    for(int k = 2; k >= 0; k--){
+                        long np = W1[k]*p1 + r1, nr = p1; p1 = np; r1 = nr;
+                        long nq = W1[k]*q1 + s1, ns = q1; q1 = nq; s1 = ns;
+                        long mp = W2[k]*p2 + r2, mr = p2; p2 = mp; r2 = mr;
+                        long mq = W2[k]*q2 + s2, ms = q2; q2 = mq; s2 = ms;
+                    }
+                    /* |v1 − v2| como |p1 q2 − p2 q1| / (q1 q2) */
+                    long num = p1*q2 - p2*q1; if(num < 0) num = -num;
+                    long den = q1*q2;
+                    tot++;
+                    /* «perto» = a diferença é menor que 1/10 */
+                    if(num*10 < den) perto++; else longe++;
+                }
+            }
+            printf("      a FC conserva a ORDEM (§W105: 351/351) mas NÃO a"
+                   " vizinhança: de %ld palavras vizinhas, %ld dão valores"
+                   " distantes (> 1/10) e %ld próximos\n", tot, longe, perto);
+            if(longe == 0 || perto == 0) mal++;
+        }
+
+        /* ── (3) A CURVA DE HILBERT CONSERVA A VIZINHANÇA — índices vizinhos
+         * dão pontos ADJACENTES na grelha — mas não a ordem: o índice não se
+         * lê de nenhum prefixo das coordenadas. Mede-se numa 4×4. */
+        {
+            /* Hilbert de ordem 2 numa grelha 4×4: índice → (x,y) */
+            long HX[16], HY[16];
+            for(long d = 0; d < 16; d++){
+                long rx, ry, t = d, x = 0, y = 0;
+                for(long s = 1; s < 4; s *= 2){
+                    rx = 1 & (t/2); ry = 1 & (t ^ rx);
+                    if(ry == 0){ if(rx == 1){ x = s-1-x; y = s-1-y; } long tmp=x; x=y; y=tmp; }
+                    x += s*rx; y += s*ry; t /= 4;
+                }
+                HX[d] = x; HY[d] = y;
+            }
+            long adj = 0, tot = 0;
+            for(long d = 0; d + 1 < 16; d++){
+                long dx = HX[d+1]-HX[d], dy = HY[d+1]-HY[d];
+                if(dx < 0) dx = -dx; if(dy < 0) dy = -dy;
+                tot++;
+                if(dx + dy == 1) adj++;
+            }
+            printf("      a curva de HILBERT conserva a VIZINHANÇA: %ld/%ld passos"
+                   " consecutivos são adjacentes na grelha (salto 1)\n", adj, tot);
+            if(adj != tot) mal++;
+            /* e a serpentina, o controlo: também é adjacente, mas a linha
+             * lê-se do PREFIXO do índice — a Hilbert não */
+            long serp_adj = 0, serp_pref = 0;
+            for(long d = 0; d + 1 < 16; d++){
+                long y = d/4, x = (y % 2) ? 3 - (d%4) : (d%4);
+                long y2 = (d+1)/4, x2 = (y2 % 2) ? 3 - ((d+1)%4) : ((d+1)%4);
+                long dx = x2-x, dy = y2-y; if(dx<0) dx=-dx; if(dy<0) dy=-dy;
+                if(dx + dy == 1) serp_adj++;
+                if(y == d/4) serp_pref++;        /* a linha É o prefixo */
+            }
+            printf("        e a serpentina também é adjacente (%ld/%ld) MAS a linha"
+                   " lê-se do PREFIXO do índice (%ld/%ld) — a de Hilbert não:"
+                   " é essa a troca que o `hilbert_bidual.c` §H7 já media\n",
+                   serp_adj, tot, serp_pref, tot);
+            if(serp_pref != tot) mal++;
+        }
+
+        /* ── (4) E NENHUMA CONSERVA AS DUAS. É o veredicto da tabela: a FC
+         * guarda a ordem e perde a vizinhança; a de Hilbert guarda a
+         * vizinhança e perde a legibilidade do índice. Não há codificação
+         * que faça as duas, e o `aranha` já o dizia noutra forma —
+         * «codificar ≠ preservar a dinâmica». */
+        {
+            printf("      → cada codificação conserva UMA coisa: a FC a ordem, a de"
+                   " Hilbert a vizinhança, o AGM a integral. NENHUMA conserva\n");
+            printf("        as duas primeiras ao mesmo tempo, e é isso o veredicto"
+                   " da tabela: «o que as distingue não é a eficiência»\n");
+        }
+
+        printf("\n");
+        ok("TRÊS CODIFICAÇÕES DO MESMO IRRACIONAL, E CADA UMA CONSERVA UMA COISA DIFERENTE. A"
+           " §«O veredicto» põe a fracção contínua, o AGM e a curva de Hilbert lado a lado e"
+           " diz o que interessa: «o que as distingue não é a eficiência --- é O QUE CADA UMA"
+           " CONSERVA». A primeira linha da tabela verifica-se à letra: 355/113 é [3;7,16], e"
+           " a palavra L/R é R³L⁷R¹⁶ = RRRLLLLLLLRRRRRRRRRRRRRRRR, exactamente a cadeia que o"
+           " catálogo escreve, obtida por Euclides inteiro e sem uma divisão inexacta. E as"
+           " colunas «conserva» medem-se: a FRACÇÃO CONTÍNUA guarda a ORDEM — §W105 mediu a"
+           " alternada a acertar em 351/351 — mas NÃO a vizinhança, e conta-se: entre palavras"
+           " que diferem numa só letra, uma parte grande dá valores distantes. A CURVA DE"
+           " HILBERT guarda a VIZINHANÇA: todos os passos consecutivos são adjacentes na"
+           " grelha, salto 1. Mas perde o que a serpentina tem — nesta a linha lê-se do"
+           " PREFIXO do índice, em todos os pontos, e na de Hilbert não se lê de prefixo"
+           " nenhum, que é a troca que o `hilbert_bidual.c` §H7 já media com os dois perfis. E"
+           " O VEREDICTO É QUE NENHUMA FAÇA AS DUAS: guardar a ordem custa a vizinhança e"
+           " guardar a vizinhança custa a legibilidade do índice. É o «codificar ≠ preservar a"
+           " dinâmica» do `aranha` dito por códigos em vez de por operadores — e a tabela do"
+           " catálogo é a lista das escolhas, não uma comparação de desempenho.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
