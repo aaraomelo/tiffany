@@ -21161,6 +21161,145 @@ int main(void){
            " uma tradução em três saltos custa o salto mais caro, não os três.", mal == 0);
     }
 
+    /* ═══ §W140: A FIBRA TEM FORMA — CONSTANTE NA EROSÃO, VARIÁVEL NO RESUMO ═ */
+    {
+        long mal = 0;
+        printf("\n§W140 sexto lote: e a perda distingue-se pela FORMA da fibra.\n\n");
+
+        #define NF 400
+        long serve = 0, funde = 0;
+        printf("      corpo                                 obj  bem def.  separa  veredicto\n");
+        #define VER6(nome, n, sep) do { \
+            if((sep) == (n)) serve++; else funde++; \
+            printf("      %-36s %5ld  %7s  %6s   %s\n", (nome), (long)(n), "sim", \
+                   ((sep)==(n)) ? "sim" : "NÃO", \
+                   ((sep)==(n)) ? "HERDA — completo" : "funde — falta leitura"); \
+        } while(0)
+        #define DISTINTOS(e, n) ({ long _d = 0; \
+            for(long _i = 0; _i < (n); _i++){ int _v = 0; \
+                for(long _j = 0; _j < _i; _j++) if((e)[_j] == (e)[_i]){ _v = 1; break; } \
+                if(!_v) _d++; } _d; })
+
+        /* ── 1. MÉTRICO pelas COORDENADAS: separa. */
+        {
+            long e[NF]; long n = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+                e[n++] = (a+4)*9 + (b+4);
+            VER6("métrico    pelas COORDENADAS         ", n, DISTINTOS(e,n));
+        }
+        /* ── 2. MÉTRICO pela DISTÂNCIA à origem: funde, e a fibra é a esfera. */
+        long fib_metrico[NF]; long nfm = 0;
+        {
+            long e[NF]; long n = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+                e[n++] = a*a + b*b;                    /* o quadrado da distância */
+            long d = DISTINTOS(e,n);
+            VER6("métrico    pela DISTÂNCIA à origem   ", n, d);
+            /* o tamanho de cada fibra */
+            long vistos[NF]; long nv = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0;
+                for(long j = 0; j < nv; j++) if(vistos[j] == e[i]){ v = 1; break; }
+                if(v) continue;
+                vistos[nv++] = e[i];
+                long tam = 0;
+                for(long j = 0; j < n; j++) if(e[j] == e[i]) tam++;
+                fib_metrico[nfm++] = tam;
+            }
+        }
+        /* ── 3. TELESCÓPICO pelos TERMOS: separa. */
+        {
+            long e[NF]; long n = 0;
+            for(long a = 0; a < 7; a++) for(long b = 0; b < 7; b++) for(long c = 0; c < 7; c++)
+                e[n++] = (a*7 + b)*7 + c;
+            VER6("telescópico pelos TERMOS             ", n, DISTINTOS(e,n));
+        }
+        /* ── 4. TELESCÓPICO pela SOMA: funde --- o par do anterior. */
+        long fib_tel[NF]; long nft = 0;
+        {
+            long e[NF]; long n = 0;
+            for(long a = 0; a < 7; a++) for(long b = 0; b < 7; b++) for(long c = 0; c < 7; c++)
+                e[n++] = a + b + c;
+            long d = DISTINTOS(e,n);
+            VER6("telescópico pela SOMA                ", n, d);
+            long vistos[NF]; long nv = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0;
+                for(long j = 0; j < nv; j++) if(vistos[j] == e[i]){ v = 1; break; }
+                if(v) continue;
+                vistos[nv++] = e[i];
+                long tam = 0;
+                for(long j = 0; j < n; j++) if(e[j] == e[i]) tam++;
+                fib_tel[nft++] = tam;
+            }
+        }
+        /* ── 5. TRANSISTOR pelos PARÂMETROS: separa. */
+        {
+            long e[NF]; long n = 0;
+            for(long g = 0; g < 8; g++) for(long r = 0; r < 8; r++) e[n++] = g*8 + r;
+            VER6("transistor  pelos PARÂMETROS         ", n, DISTINTOS(e,n));
+        }
+        /* ── 6. PRISMA pelo ÍNDICE: funde. */
+        {
+            long e[NF]; long n = 0;
+            for(long a = 1; a <= 8; a++) for(long b = 1; b <= 8; b++) e[n++] = a*b;
+            VER6("prisma      pelo ÍNDICE (o produto)  ", n, DISTINTOS(e,n));
+        }
+        printf("      → %ld herdam, %ld fundem\n", serve, funde);
+        if(serve == 0 || funde == 0) mal++;
+
+        /* ── E AQUI A DISTINÇÃO NOVA: as duas perdas não têm a mesma forma. A da
+         * erosão é um quociente e a sua fibra é CONSTANTE; a de um resumo não é
+         * quociente por nada, e a fibra VARIA com o valor. */
+        {
+            /* a fibra da erosão, do §W139: 625 → 125 */
+            long fib_er[NF]; long nfe = 0;
+            {
+                long marca[200]; for(long i = 0; i < 200; i++) marca[i] = 0;
+                for(long t = 0; t < 625; t++) marca[t % 125]++;
+                for(long i = 0; i < 125; i++) fib_er[nfe++] = marca[i];
+            }
+            long min_er = 1L<<30, max_er = 0;
+            for(long i = 0; i < nfe; i++){ if(fib_er[i]<min_er) min_er=fib_er[i]; if(fib_er[i]>max_er) max_er=fib_er[i]; }
+            long min_me = 1L<<30, max_me = 0;
+            for(long i = 0; i < nfm; i++){ if(fib_metrico[i]<min_me) min_me=fib_metrico[i]; if(fib_metrico[i]>max_me) max_me=fib_metrico[i]; }
+            long min_te = 1L<<30, max_te = 0;
+            for(long i = 0; i < nft; i++){ if(fib_tel[i]<min_te) min_te=fib_tel[i]; if(fib_tel[i]>max_te) max_te=fib_tel[i]; }
+            printf("      A FORMA DA PERDA --- tamanho das fibras\n");
+            printf("        erosão (625→125, o §W139)     : %ld fibras, de %ld a %ld  %s\n",
+                   nfe, min_er, max_er, min_er==max_er ? "→ CONSTANTE" : "→ varia");
+            printf("        métrico pela distância        : %ld fibras, de %ld a %ld  %s\n",
+                   nfm, min_me, max_me, min_me==max_me ? "→ constante" : "→ VARIA");
+            printf("        telescópico pela soma         : %ld fibras, de %ld a %ld  %s\n",
+                   nft, min_te, max_te, min_te==max_te ? "→ constante" : "→ VARIA");
+            printf("      a erosão é um QUOCIENTE e a fibra é sempre a mesma; um resumo não"
+                   " quocienta nada, e a fibra muda com o valor\n");
+            printf("        logo as duas perdas distinguem-se sem se saber de onde vieram:"
+                   " basta contar as fibras\n");
+            if(min_er != max_er || min_me == max_me || min_te == max_te) mal++;
+        }
+        #undef DISTINTOS
+        #undef VER6
+        #undef NF
+
+        printf("\n");
+        ok("A PERDA TEM FORMA, E A FORMA DISTINGUE AS DUAS MANEIRAS DE PERDER. O sexto lote"
+           " acrescenta seis leituras e um par novo: o métrico pelas coordenadas separa e pela"
+           " distância à origem funde; o telescópico pelos termos separa e pela soma funde; o"
+           " transistor pelos parâmetros separa e o prisma pelo índice funde. Nada de novo até"
+           " aqui --- é o padrão do terceiro lote, o resumo a perder o endereço. O que é novo"
+           " é a FORMA da perda. No quinto lote a erosão descia 625 para 125 e cada endereço"
+           " de baixo recebia exactamente o mesmo número de cima: a fibra era CONSTANTE,"
+           " porque a erosão é um quociente e a fibra é a classe. Já um resumo não quocienta"
+           " coisa nenhuma, e a fibra muda com o valor: pela distância à origem, as fibras vão"
+           " de uma a várias --- a fibra é a esfera daquele raio, e há raios com muitos pontos"
+           " e raios com um só; pela soma, o mesmo, com as somas do meio a receberem muito"
+           " mais que os extremos. Daí a consequência operacional: as duas perdas"
+           " distinguem-se SEM se saber de onde vieram --- basta contar as fibras. Fibra"
+           " constante é quociente e sabe-se o que se perdeu; fibra variável é resumo, e o que"
+           " se perdeu depende de onde se estava.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

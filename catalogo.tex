@@ -1472,6 +1472,38 @@ dois pares que sobem; a descida a perder $500$ de $625$ com fibra constante $5$;
 cadeia de três corpos com o composto a não exceder o pior passo, contra uma soma de
 custos muito maior.}
 
+\paragraph{E o sexto lote mostra que \emph{a perda tem forma} --- e que a forma
+distingue as duas maneiras de perder.} Três pares novos, cada um o mesmo corpo por duas
+leituras: o \textbf{métrico} pelas coordenadas separa e pela distância à origem funde; o
+\textbf{telescópico} pelos termos separa e pela soma funde; o \textbf{transistor} pelos
+parâmetros separa e o \textbf{prisma} pelo índice funde. Nisto não há novidade --- é o
+padrão do terceiro lote, o resumo a perder o endereço. \emph{O novo é o tamanho das
+fibras}:
+\begin{center}\small
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+a perda & fibras & tamanhos & \\
+\midrule
+erosão ($625\to125$, o lote anterior) & $125$ & $5$ a $5$ & \textbf{constante}\\
+métrico pela distância & $15$ & $1$ a $8$ & \emph{varia}\\
+telescópico pela soma & $19$ & $1$ a $37$ & \emph{varia}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent A erosão é um \textbf{quociente}, e a fibra \emph{é} a classe --- por isso tem
+sempre o mesmo tamanho. Um resumo não quocienta nada: a fibra muda com o valor. Pela
+distância à origem a fibra é a \emph{esfera} daquele raio, e há raios com muitos pontos e
+raios com um só; pela soma, as do meio recebem dezenas e as das pontas recebem uma.
+
+\medskip\noindent Daí a consequência operacional: \textbf{as duas perdas distinguem-se
+sem se saber de onde vieram --- basta contar as fibras}. \emph{Fibra constante é
+quociente, e sabe-se o que se perdeu; fibra variável é resumo, e o que se perdeu depende
+de onde se estava.}
+
+\medido{o sexto lote em \code{tests/pgwire.c} §W140 --- $3$ leituras a herdarem e $3$ a
+fundirem nos três pares; e os tamanhos das fibras contados, $5$ a $5$ na erosão contra
+$1$ a $8$ e $1$ a $37$ nos resumos.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias
