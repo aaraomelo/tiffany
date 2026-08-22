@@ -4954,6 +4954,19 @@ $w(x\wedge y\wedge z)=0$; \emph{a falha não é dispersa, é a lei}.
 \boxed{\;\text{a conclusão estava certa; a razão é que não se podia medir}\;}
 \]
 
+\medskip\noindent\textbf{E os marcadores saíram, porque estavam a mentir e a ser
+lidos.} Os oito \code{\textbackslash est\{N\}} do \code{catalogo} --- «estado: não
+medido» --- estavam \emph{todos} nesta seção, e §W102 e §W103 mediram-nos a todos.
+Além de passarem a estar errados, eles \textbf{apareciam no PDF}: o
+\code{papers/estilo.tex} tem
+\code{\textbackslash providecommand\{\textbackslash est\}\{\ldots\textbackslash mathrm\{est\}\}}
+como rede de segurança, que imprime o próprio nome e \emph{não consome o argumento}
+--- pelo que cada um saía como \code{estN} no corpo do texto, oito vezes num
+documento de $489$ páginas. Removidos: o PDF passa de $8$ para $\mathbf{0}$
+ocorrências. O irmão \code{\textbackslash dep} tem o mesmo \emph{fallback} mas é
+usado \emph{sem} argumento, como símbolo do quinteto $(\kappa,\mathrm{dep},\Phi,T,\Psi)$
+--- ali é o uso pretendido, e ficou.
+
 \medido{\code{tests/pgwire.c} §W103 --- e o \code{catalogo} passa a dar a razão pela
 polarização, com o \code{\textbackslash medido} na própria observação.}
 
