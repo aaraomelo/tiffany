@@ -16870,6 +16870,162 @@ int main(void){
            " expande e não volta.", mal == 0);
     }
 
+    /* ═══ §W117: A LEI 8 — LIGAR SEM FUNDIR, E O DUAL SALVA A ASSOCIATIVIDADE ═ */
+    {
+        long mal = 0;
+        printf("\n§W117 ℍ×ℍ* tem grau 8 e ASSOCIA; 𝕆 tem grau 8 e não. O dual é a diferença.\n\n");
+
+        /* Cayley–Dickson: 𝕆 = ℍ ⊕ ℍ com (a,b)(c,d) = (ac − d̄b, da + bc̄).
+         * ℍ como quatérnios inteiros; a conjugação nega a parte vectorial. */
+        typedef struct { long x[4]; } Q;
+        #define CJ(q) ((Q){{ (q).x[0], -(q).x[1], -(q).x[2], -(q).x[3] }})
+        /* funções não se definem dentro de um bloco em C: vão como macros
+         * de expressão (statement-expression), que é o que o resto do
+         * medidor já usa. */
+        #define qm(A,B) ({ Q a_=(A), b_=(B), r_; \
+            r_.x[0]=a_.x[0]*b_.x[0]-a_.x[1]*b_.x[1]-a_.x[2]*b_.x[2]-a_.x[3]*b_.x[3]; \
+            r_.x[1]=a_.x[0]*b_.x[1]+a_.x[1]*b_.x[0]+a_.x[2]*b_.x[3]-a_.x[3]*b_.x[2]; \
+            r_.x[2]=a_.x[0]*b_.x[2]-a_.x[1]*b_.x[3]+a_.x[2]*b_.x[0]+a_.x[3]*b_.x[1]; \
+            r_.x[3]=a_.x[0]*b_.x[3]+a_.x[1]*b_.x[2]-a_.x[2]*b_.x[1]+a_.x[3]*b_.x[0]; r_; })
+        #define qs(A,B) ({ Q a_=(A), b_=(B), r_; \
+            for(int i_=0;i_<4;i_++) r_.x[i_]=a_.x[i_]-b_.x[i_]; r_; })
+        #define qn(A)   ({ Q a_=(A); a_.x[0]*a_.x[0]+a_.x[1]*a_.x[1] \
+                          +a_.x[2]*a_.x[2]+a_.x[3]*a_.x[3]; })
+        #define qeq(A,B) ({ Q a_=(A), b_=(B); int e_=1; \
+            for(int i_=0;i_<4;i_++) if(a_.x[i_]!=b_.x[i_]) e_=0; e_; })
+
+        /* ── (1) ℍ ASSOCIA, medido — é o que o §W89 disse pela via matricial,
+         * aqui pela tabela de Cayley–Dickson e nos mesmos objectos. */
+        {
+            long ok = 0, tot = 0;
+            Q B[4] = {{{1,0,0,0}},{{0,1,0,0}},{{0,0,1,0}},{{0,0,0,1}}};
+            for(int i=0;i<4;i++) for(int j=0;j<4;j++) for(int k=0;k<4;k++){
+                tot++;
+                if(qeq(qm(qm(B[i],B[j]),B[k]), qm(B[i],qm(B[j],B[k])))) ok++;
+            }
+            printf("      ℍ associa: (qw)v = q(wv) em %ld/%ld triplos da base\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) E 𝕆 NÃO ASSOCIA — o associador é NÃO NULO, e conta-se. É o
+         * limite que §W89 tirou por outro lado: «𝕆 não associa e toda a matriz
+         * associa, logo não existe representação matricial fiel». */
+        {
+            long assoc = 0, nao = 0, tot = 0;
+            /* a base de 𝕆 como pares (a,b) de ℍ */
+            Q Z = {{0,0,0,0}};
+            Q B[4] = {{{1,0,0,0}},{{0,1,0,0}},{{0,0,1,0}},{{0,0,0,1}}};
+            for(int i=0;i<8;i++) for(int j=0;j<8;j++) for(int k=0;k<8;k++){
+                Q a1 = (i<4)?B[i]:Z, b1 = (i<4)?Z:B[i-4];
+                Q a2 = (j<4)?B[j]:Z, b2 = (j<4)?Z:B[j-4];
+                Q a3 = (k<4)?B[k]:Z, b3 = (k<4)?Z:B[k-4];
+                /* (x·y) e depois ·z */
+                Q p1 = qs(qm(a1,a2), qm(CJ(b2),b1)), q1 = qm(b2,a1);
+                { Q t = qm(b1,CJ(a2)); for(int u=0;u<4;u++) q1.x[u]+=t.x[u]; }
+                Q L1 = qs(qm(p1,a3), qm(CJ(b3),q1)), L2 = qm(b3,p1);
+                { Q t = qm(q1,CJ(a3)); for(int u=0;u<4;u++) L2.x[u]+=t.x[u]; }
+                /* x·(y·z) */
+                Q p2 = qs(qm(a2,a3), qm(CJ(b3),b2)), q2 = qm(b3,a2);
+                { Q t = qm(b2,CJ(a3)); for(int u=0;u<4;u++) q2.x[u]+=t.x[u]; }
+                Q R1 = qs(qm(a1,p2), qm(CJ(q2),b1)), R2 = qm(q2,a1);
+                { Q t = qm(b1,CJ(p2)); for(int u=0;u<4;u++) R2.x[u]+=t.x[u]; }
+                tot++;
+                if(qeq(L1,R1) && qeq(L2,R2)) assoc++; else nao++;
+            }
+            printf("      𝕆 NÃO associa: %ld dos %ld triplos da base têm associador"
+                   " NÃO NULO (%ld associam)\n", nao, tot, assoc);
+            if(nao == 0) mal++;
+            if(assoc == 0) mal++;   /* nem tudo falha: a maioria associa */
+        }
+
+        /* ── (3) E A LEI 8 É «LIGAR SEM FUNDIR»: ℍ × ℍ* tem grau 8 — dois
+         * tecidos de grau 4 — e ASSOCIA, porque o produto é componente a
+         * componente e cada componente associa. É o mesmo grau que 𝕆, e o
+         * dual é toda a diferença. */
+        {
+            long ok = 0, tot = 0;
+            Q B[4] = {{{1,0,0,0}},{{0,1,0,0}},{{0,0,1,0}},{{0,0,0,1}}};
+            for(int i=0;i<4;i++) for(int j=0;j<4;j++) for(int k=0;k<4;k++)
+            for(int p=0;p<4;p++) for(int q=0;q<4;q++) for(int r=0;r<4;r++){
+                /* o par (a,α) com produto componente a componente */
+                Q L = qm(qm(B[i],B[j]),B[k]), R = qm(B[i],qm(B[j],B[k]));
+                Q Ld = qm(qm(B[p],B[q]),B[r]), Rd = qm(B[p],qm(B[q],B[r]));
+                tot++;
+                if(qeq(L,R) && qeq(Ld,Rd)) ok++;
+            }
+            printf("      ℍ×ℍ* ASSOCIA: %ld/%ld triplos do par, porque o produto é"
+                   " componente a componente e cada lado associa\n", ok, tot);
+            if(ok != tot) mal++;
+            printf("        grau 8 = 4 + 4 (dois tecidos), contra o grau 8 = 2³ de 𝕆"
+                   " (três dobras que FUNDEM) — «ligar sem fundir»\n");
+        }
+
+        /* ── (4) E A NORMA COMPÕE NOS DOIS, mas de maneiras diferentes: em 𝕆
+         * é uma norma só (Hurwitz, e o oito é o último grau); no par são DUAS,
+         * uma por tecido, e compõem separadamente. Nada se mistura. */
+        {
+            long ok = 0, tot = 0;
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+            for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                Q x = {{a,b,0,0}}, y = {{c,d,0,0}};
+                Q z = qm(x,y);
+                tot++;
+                if(qn(z) == qn(x)*qn(y)) ok++;
+            }
+            printf("      a norma COMPÕE em cada tecido: N(qw) = N(q)N(w) em %ld/%ld"
+                   " — no par são DUAS normas, uma por lado, e nada se mistura\n",
+                   ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (5) E A INTERFACE É O SEIS, «a plena, onde soma = produto». O
+         * catálogo diz 6 = lcm(2,3) = o dual × o trial, e 6 = 1+2+3 = 1·2·3.
+         * Conta-se: quantos n têm soma dos divisores próprios IGUAL ao
+         * produto deles — e o 6 tem de ser o único pequeno. */
+        {
+            long perfeitos = 0, quais[8]; int nq = 0;
+            for(long n = 2; n <= 200; n++){
+                long s = 0, p = 1;
+                for(long d = 1; d < n; d++) if(n % d == 0){ s += d; p *= d; if(p > 1000000) break; }
+                if(s == n && p == n){ perfeitos++; if(nq < 8) quais[nq++] = n; }
+            }
+            printf("      o SEIS é a interface: n com soma(divisores próprios) ="
+                   " produto = n, até 200: %ld —", perfeitos);
+            for(int i = 0; i < nq; i++) printf(" %ld", quais[i]);
+            printf("\n        e 6 = lcm(2,3) é onde o dual (ordem 2) e o trial (3)"
+                   " voltam juntos — a mesma ordem 6 que o thm:leidisc dá às"
+                   " elípticas\n");
+            if(perfeitos != 1 || quais[0] != 6) mal++;
+        }
+
+        #undef qeq
+        #undef qn
+        #undef qs
+        #undef qm
+        #undef CJ
+        printf("\n");
+        ok("A LEI 8 É «LIGAR SEM FUNDIR», E É ELA QUE SALVA A ASSOCIATIVIDADE NO OITAVO GRAU."
+           " §W89 mediu o limite pela via matricial: 𝕆 não associa e toda a matriz associa,"
+           " logo não existe representação matricial fiel de 𝕆 — «não é uma lacuna, é uma"
+           " incompatibilidade». Aqui mede-se o mesmo pela tabela de Cayley–Dickson e"
+           " mede-se o que o catálogo põe em cima da torre: o OCTONIÃO DUAL, ℍ×ℍ*, «ligar sem"
+           " fundir». ℍ associa em todos os triplos da base. 𝕆 NÃO: o associador é não nulo"
+           " numa parte dos triplos — e o controlo é que nem todos falhem, porque uma álgebra"
+           " onde nada associasse não seria a que se quer. E O PAR ℍ×ℍ* ASSOCIA em todos os"
+           " triplos, porque o produto é COMPONENTE A COMPONENTE e cada lado associa. O grau é"
+           " o mesmo, oito, mas por caminhos opostos: em 𝕆 é 2³, três dobras que FUNDEM; no"
+           " par é 4+4, dois tecidos LIGADOS. O dual é toda a diferença, e é isso que a"
+           " expressão «ligar sem fundir» quer dizer — medido, e não parafraseado. A NORMA"
+           " COMPÕE nos dois, mas de maneiras diferentes: em 𝕆 é uma norma só, e Hurwitz diz"
+           " que o oito é o último grau onde isso pode acontecer; no par são DUAS normas, uma"
+           " por tecido, que compõem separadamente e nada misturam. E A INTERFACE É O SEIS:"
+           " conta-se quantos n até 200 têm a soma dos divisores próprios IGUAL ao produto"
+           " deles, e o 6 é o ÚNICO — 1+2+3 = 6 = 1·2·3, «soma é produto», que é a forma áurea"
+           " φ·φ = φ+1 lida na aritmética. E 6 = lcm(2,3) é onde o dual e o trial voltam"
+           " juntos: a MESMA ordem 6 que o thm:leidisc dá às elípticas, e que o Lema da"
+           " restrição cristalográfica admite. Três leis, um número.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

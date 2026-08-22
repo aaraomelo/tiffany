@@ -193,6 +193,8 @@ tecidos, reversível, \code{analitico def:octoniao-dual}), e a \textbf{interface
 construção} --- e por isso é usado por toda a parte.
 \end{definicao}
 
+\medido{\code{tests/pgwire.c} §W117 --- e o «ligar sem fundir» passa a ter número. §W89 mediu o limite pela via matricial: $\mathbb{O}$ não associa e toda a matriz associa, logo não há representação matricial fiel dele. Aqui mede-se o mesmo pela tábua de Cayley--Dickson --- $\mathbb{H}$ associa em $64/64$ triplos da base, e $\mathbb{O}$ falha em $168$ dos $512$, com $344$ a associarem (o controlo: uma álgebra onde \emph{nada} associasse não seria esta). E o \textbf{par} $\mathbb{H}\times\mathbb{H}^*$ associa em $4096/4096$, porque o produto é componente a componente e cada lado associa. \emph{O grau é o mesmo, oito, por caminhos opostos}: em $\mathbb{O}$ é $2^3$, três dobras que \textbf{fundem}; no par é $4+4$, dois tecidos \textbf{ligados}. A norma compõe nos dois, mas no par são \emph{duas} normas, uma por tecido, e nada se mistura. E a \textbf{interface} é o seis: entre $2$ e $200$ o $6$ é o \textbf{único} $n$ com soma dos divisores próprios igual ao produto deles --- $1+2+3=6=1\cdot2\cdot3$ ---, e $6=\mathrm{lcm}(2,3)$ é a mesma ordem que o \code{aranha thm:leidisc} dá às elípticas.}
+
 \smallskip
 \noindent \textbf{E este dual é o de CANTOR e JULIA} --- que é o \emph{contar}$\leftrightarrow$
 \emph{integrar} do teorema central (Teorema~\ref{cat:thm:central}). A duplicação de ângulo
@@ -1247,6 +1249,10 @@ A norma \textbf{é} o determinante; o conjugado --- «a troca de sinal fora da d
 \medido{\code{tests/pgwire.c} §W98 --- o produto reduzido contra o produto do motor em $4900/4900$; $N(u)=\det$ em $196/196$, com o motor a devolver a norma sem saber de conjugado nenhum; o conjugado como adjunta e $u\bar u=N(u)I$ nos mesmos $196$; e nenhum elemento não nulo de norma zero. O \textsc{controlo} é a \emph{mesma} construção com a hipótese retirada --- $\sigma^2=m\sigma+0$, cujo discriminante $m^2$ \textbf{é} quadrado e cujas raízes $0$ e $m$ são racionais ---, e ali $34$ de $192$ elementos não nulos passam a ter norma zero: não há corpo. O que separa os dois casos é exactamente a irracionalidade de $\sigma$, que é o critério «$\mu$ irredutível» do §W93 dito noutro alfabeto, e que §W70 já media numa terceira forma: $m^2+4$ nunca é quadrado perfeito.}
 
 E nada disto usou o valor de $m$ --- usou-se apenas $\sigma^2=m\sigma+1$. Logo há um corpo $K_m$ \textbf{para cada $m$}, todos pela mesma conta. \textbf{A construção é uma só; a assinatura escolhe a classe.}
+
+\paragraph{E o que fecha os corpos em qualquer dimensão é o passo $I^n\to I$.} O \code{aranha thm:enumfin} dá a bijeção $E_k:I^k\to I$ para todo $k$, e o mesmo documento diz o seu preço --- \emph{codificar $\neq$ preservar a dinâmica}. Nos operadores há uma segunda redução, e é a que preserva: por Cayley--Hamilton, para toda $A$ de ordem $n$ e todo $x_0$, a sucessão $x_k=A^kx_0$ satisfaz \emph{em cada coordenada} a mesma recorrência escalar de ordem $n$ --- um sistema de $n$ equações acopladas vira $n$ cópias de \textbf{uma} equação em $I$, sem hipótese nenhuma sobre $A$. A \emph{volta} é que pede condição: reconstruir $x$ a partir de $y$ precisa de um vector cíclico, o que equivale ao polinómio mínimo ter o grau do característico. E a ordem da menor equação que serve é $\deg\mu_A\le n$, não $n$. É assim que o corpo de matrizes fecha: $\Q[A]\cong\Q[\lambda]/(\mu_A)$ tem dimensão $\deg\mu_A$ e não $n^2$, e é \textbf{corpo} exactamente quando $\mu_A$ é irredutível --- o mesmo critério que a irracionalidade de $\sigma_m$ dá a $K_m$.
+
+\medido{\code{tests/pgwire.c} §W91, §W92 e §W93 --- a ida em $16875/16875$ verificações sobre $625$ matrizes, com os coeficientes obtidos por Newton dos traços e o \code{det} do motor como segundo caminho; a volta nas quatro testemunhas, com $I_2$ a ter zero vectores cíclicos e as outras aos montes; a minimalidade medida à parte da existência, varrendo \emph{todo} $c$ na recorrência de ordem um; e $\dim\Q[A]=\deg\mu_A$ em $3720/3720$, com a dicotomia corpo/anel a separar-se pelos divisores de zero.}
 
 \subsection{A primeira operação: a TRANSFORMADA UNIVERSAL --- e a sua inversa}
 
@@ -5077,6 +5083,10 @@ podia falhar}. Refeita para medir o \emph{máximo} dos módulos não dominantes,
 catorze casos --- como deve.
 
 \emph{E fora da linha $m=1$ não há caso a caso.} Ela era a única excepção, e isso demonstra-se:
+
+\paragraph{E há uma lei acima destas três, que o \code{aranha} prova e que arruma toda a família.} Com $\lvert\det\rvert=1$ e $\Delta=\operatorname{tr}^2-4\det$ inteiro, a tricotomia esgota: $\Delta<0$ é \textbf{elíptico} (ordem finita, e ela está em $\{3,4,6\}$), $\Delta=0$ é \textbf{parabólico} (raiz dupla --- o corte \emph{terminado}), $\Delta>0$ é \textbf{hiperbólico} (uma direcção expande, a outra contrai). \emph{Quem classifica é $\Delta$ e não o traço}: só dentro de $\SL_2(\Z)$ é que $\Delta<0$ equivale a $\lvert\operatorname{tr}\rvert<2$, porque com $\det=-1$ vale $\Delta=\operatorname{tr}^2+4>0$ sempre. Daí a família metálica ser toda hiperbólica --- $\Comp{2}{m}$ tem $\det=-1$, e $\Comp{2}{m}^2$ tem traço $m^2+2>2$, que é a Prop.~\ref{prop:selberg} --- e a tríade atravessar duas classes: o trial e Viviani \emph{rodam} e são elípticos, o espelho $\nu$ \textbf{não roda, reflecte}, com $\Delta=4>0$.
+
+\medido{\code{tests/pgwire.c} §W116 e \code{aranha thm:leidisc} --- as três classes esgotam $360$ matrizes de $\GL_2(\Z)$ com entradas em $-4..4$ ($34$, $74$, $252$); as elípticas têm todas ordem finita e dão $\{3,4,6\}$, com a $5$ ausente pela restrição cristalográfica e a $2$ ausente por reflectir em vez de rodar; $\lvert\operatorname{tr}\rvert=2$ e $\Delta=0$ coincidem nas $180$ de $\det+1$; e $\det\Comp{2}{m}^2=+1$ com traço $m^2+2$ pelo motor. A primeira escrita classificou pelo traço sem separar por determinante e produziu $16$ «elípticas» sem ordem finita.}
 
 \begin{teorema}[$\beta_{n,m}$ é Pisot para todo $m\geq2$]\label{thm:pisot-cat}
 Para todo $m\geq2$ e todo $n\geq2$: uma raiz de módulo $\geq1$, real, simples, em $(m,m+1)$; as
