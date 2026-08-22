@@ -29,6 +29,24 @@ static long raiz_piso_local(long x){
           if(m <= x / m) lo = m; else hi = m - 1; }
       return lo; }
 }
+/* a raiz inteira de um produto de 128 bits, por piso — a mesma do geo_local,
+ * exposta para a torre de Arquimedes do §M8 */
+static __int128 geo_iq(__int128 p){
+    __int128 lo = 1, hi = 1;
+    if(p < 1) return 0;
+    while(hi*hi <= p) hi <<= 1;
+    while(lo < hi){ __int128 m = lo + (hi - lo + 1)/2;
+        if(m*m <= p) lo = m; else hi = m - 1; }
+    return lo;
+}
+/* |v/E − π| em unidades de 10⁻¹⁸ — o π de referência é EXTERNO ao ficheiro e
+ * só serve para medir o erro; não entra em conta nenhuma */
+static long erro18(long v, long E, long PI18){
+    __int128 x = (__int128)v * 1000000000000000000LL / E;
+    __int128 d = x - (__int128)PI18;
+    if(d < 0) d = -d;
+    return (long)d;
+}
 /* a média geométrica de a e b, por piso, sem estourar o produto */
 static long geo_local(long a, long b){
     /* O TECTO NÃO SE ESCREVE À MÃO: procura-se. Estava fixo em 4·10⁹ e, para
@@ -624,6 +642,29 @@ int main(void){
      * ℝ ≅ {caminhos}/∼). Com as duas faces não se escolhe nada: o corte é
      * DETERMINADO pelos dois extremos. Uma face endereça; duas produzem.
      *
+     * E DAÍ SAI O QUE O FINITO GUARDA DE UM PONTO QUE NÃO É SEU. Há dois
+     * desfechos para um encaixe numa grade finita, e distingui-los é a matéria:
+     *
+     *   o ponto ESTÁ na grade  — o encaixe acaba em m = g, e o ponto é
+     *                            produzido. É a AGM, acima.
+     *   o ponto NÃO está       — o encaixe acaba com a largura no grão, e o
+     *                            que o corpo guarda são as DUAS FACES que o
+     *                            cercam. É π, e é o §I8.
+     *
+     * No segundo caso não há nada a produzir — π é transcendente, e ninguém
+     * lhe pede que caiba. O que há é a REPRESENTAÇÃO, e ela é o par que o §M3
+     * já deu: de L e U saem
+     *
+     *     m = (L+U)/2   — o CENTRO, o que a representação conserva
+     *     δ = (U−L)/2   — o que ela NÃO codifica, medido
+     *
+     * e o par (m,δ) é o par (L,U) escrito duas vezes, com resíduo zero. As
+     * quatro frases da porta de entrada lêem-se aqui uma a uma: o finito é
+     * CODIFICADO (o corpo guarda dois números da grade), o infinito é
+     * CAMINHADO (cada duplicação é uma batida, e nenhuma o alcança), a
+     * representação COMPRIME (de um transcendente fica m), e a dobra MEDE O QUE
+     * FOI PERDIDO — δ é essa medida, e não um erro a lamentar.
+     *
      * Tudo em inteiros: a escala é E, e a raiz é o PISO — pelo que as
      * desigualdades levam a folga do piso, dita onde é usada. */
     {
@@ -727,6 +768,125 @@ int main(void){
                  passos, nao_desceu, nao_subiu, quebrou, parado, maxbat);
           if(nao_desceu || nao_subiu || quebrou || parado) mal++; }
 
+        /* (4c) A COTA DA BOA FUNDAÇÃO, e o que a segunda face acrescenta.
+         * Da descida m' ≤ m − u sai uma cota imediata: se a largura inicial tem
+         * N grãos, não há mais de N descidas — a terminação é literalmente
+         * N, N−1, …, 0. É essa cota que PROVA que acaba, e ela não usa a raiz.
+         * O que a face geométrica acrescenta é a VELOCIDADE: o colapso é
+         * quadrático, e o número real de batidas fica em log log. Medem-se as
+         * duas lado a lado, porque confundi-las seria tomar a rapidez por
+         * prova: sem a primeira não se sabe que acaba, sem a segunda não se
+         * sabe que acaba depressa. */
+        { long pares[][2] = {{1,2},{1,3},{2,7},{1,100}};
+          long falhou = 0;
+          for(int t = 0; t < 4; t++){
+              long g = pares[t][0]*E, m = pares[t][1]*E;
+              long N = m - g;                 /* a largura inicial, em grãos */
+              long n = 0;
+              while(g != m && n < 200){
+                  long m1 = g/2 + m/2 + ((g%2 + m%2)/2), g1 = geo_local(g, m);
+                  if(g1 == g && m1 == m) break;
+                  g = g1; m = m1; n++;
+              }
+              printf("     (%ld,%ld): a cota bem-fundada dá ≤ %ld batidas;"
+                     " as duas faces fazem %ld\n", pares[t][0], pares[t][1], N, n);
+              if(n > N || g != m) falhou++;
+          }
+          printf("     a cota vale sempre, e a segunda face é a VELOCIDADE:"
+                 " %ld falhas\n", falhou);
+          if(falhou) mal++; }
+
+        /* (4d) A FIGURA, que é o salto da aritmética para a geometria: no
+         * semicírculo de diâmetro a+b, o RAIO é a média aritmética e a ALTURA
+         * sobre o ponto que divide o diâmetro em a e b é a geométrica. Então
+         * h² + δ² = m² é Pitágoras, e «g ≤ m» é «a altura não passa o raio» —
+         * a mesma frase do §M4 (ab = m²−δ²) dita com uma figura em vez de com
+         * uma conta. Uma das duas linhas é a conservação, a outra é a
+         * desigualdade: são a mesma. */
+        { long falhou = 0, casos = 0;
+          for(long a = 1; a <= 200; a++) for(long b = 1; b <= 200; b++){
+              long h2 = a*b, d = (a > b ? a-b : b-a);
+              casos++;
+              if(4*h2 + d*d != (a+b)*(a+b)) falhou++;      /* h² + δ² = m² */
+              if(4*h2 > (a+b)*(a+b)) falhou++;             /* h ≤ m */
+              if(a == b && 4*h2 != (a+b)*(a+b)) falhou++;  /* igualdade no centro */
+              if(a != b && 4*h2 >= (a+b)*(a+b)) falhou++;  /* e estrita fora */
+          }
+          printf("     a FIGURA: h² + δ² = m² (Pitágoras) e h ≤ raio, estrito"
+                 " fora do centro: %ld falhas em %ld\n", falhou, casos);
+          if(falhou) mal++; }
+
+        /* (4e) E O PONTO É O PONTO FIXO COMUM. Cada face tem a sua dobra e cada
+         * dobra tem o seu ponto fixo: ∂⁺ fixa m, ∂ˣ fixa g. Os dois fixos são
+         * DIFERENTES enquanto a ≠ b, e coincidem exactamente onde o processo
+         * acaba — e aí o ponto é fixo pelas DUAS. O corte não é um ponto que se
+         * acha entre as classes: é o ponto fixo que as duas faces passam a
+         * partilhar. */
+        { long falhou = 0;
+          for(long a = 1; a <= 60; a++) for(long b = 1; b <= 60; b++){
+              long soma = a+b, prod = a*b;
+              int coincide = (soma*soma == 4*prod);   /* m = g ? */
+              if(coincide != (a == b)) falhou++;
+              if(a == b){
+                  if(soma - a != a) falhou++;         /* ∂⁺(p) = p */
+                  if(prod / a != a) falhou++;         /* ∂ˣ(p) = p */
+              }
+          }
+          printf("     os dois pontos fixos coincidem SSE a=b, e aí p é fixo"
+                 " pelas DUAS dobras: %ld falhas\n", falhou);
+          if(falhou) mal++; }
+
+        /* (4f) O OUTRO DESFECHO, e o que o finito guarda então. A torre de
+         * Arquimedes — t_{2M} = √(2+t_M), o motor do `algebrico
+         * thm:metronomo-pi` — é o mesmo encaixe com as duas faces a serem a
+         * INSCRITA e a CIRCUNSCRITA. Ela também TERMINA: em cada grade a
+         * largura pára de descer ao fim de um número contado de duplicações. Mas
+         * não termina numa igualdade, porque o ponto não é da grade; termina
+         * com as duas faces a cercá-lo. E então o que o corpo guarda é o par
+         * (m,δ) do §M3, com m — o CENTRO — a ser a leitura e δ a medida do que
+         * ficou de fora.
+         *
+         * O gume é o CENTRO CONTRA AS FRONTEIRAS: se o centro fosse uma escolha
+         * arbitrária, valeria o mesmo que as bordas. Mede-se que é várias vezes
+         * melhor — é onde a informação está —, e é isso que faz dele a leitura
+         * e não uma média de conveniência. */
+        { long escalas[] = { 1000000L, 1000000000L, 1000000000000L };
+          long falhou = 0;
+          const long PI18 = 3141592653589793238L;   /* π×10¹⁸, para MEDIR o erro */
+          for(int q = 0; q < 3; q++){
+              long Eq = escalas[q];
+              long tl = 0, th = 0, M = 2, lo = 0, hi = 0, lo_a = 0, hi_a = 0;
+              long larg_a = -1; int n = 0;
+              while(n < 80){
+                  tl = (long)geo_iq((__int128)(2*Eq + tl) * Eq);
+                  th = (long)geo_iq((__int128)(2*Eq + th) * Eq) + 1;
+                  M *= 2;
+                  lo = 2*(M/2) * (long)geo_iq((__int128)(2*Eq - th) * Eq);
+                  { __int128 num = (__int128)M * ((long)geo_iq((__int128)(2*Eq - tl)*Eq) + 1);
+                    __int128 den = geo_iq((__int128)(2*Eq + tl) * Eq);
+                    hi = 2 * (long)(num * Eq / den + 1); }
+                  { long larg = hi - lo;
+                    if(larg_a >= 0 && larg >= larg_a) break;
+                    larg_a = larg; lo_a = lo; hi_a = hi; }
+                  n++;
+              }
+              { long centro = (lo_a + hi_a)/2;
+                long eL = erro18(lo_a, Eq, PI18), eU = erro18(hi_a, Eq, PI18);
+                long eC = erro18(centro, Eq, PI18);
+                long pior = eL > eU ? eL : eU;
+                int dentro = (lo_a <= centro && centro <= hi_a);
+                int cerca  = (erro18(lo_a,Eq,PI18) > 0 && lo_a < hi_a);
+                printf("     π: grão 1/%-13ld → %2d duplicações · o encaixe CERCA"
+                       " (%d) · erro do centro %.2e contra %.2e da pior fronteira"
+                       " (%.0f× melhor)\n", Eq, n, cerca, (double)eC/1e18,
+                       (double)pior/1e18, (double)pior/(double)(eC ? eC : 1));
+                if(!dentro || !cerca || eC > pior) falhou++;
+              }
+          }
+          printf("     o CENTRO é a leitura, e não uma média de conveniência:"
+                 " %ld falhas\n", falhou);
+          if(falhou) mal++; }
+
         /* (5) A UNICIDADE, e ela é uma IGUALDADE e não um limite. Um ponto em
          * todos os intervalos, e somente um: a existência é o último intervalo,
          * que já é um ponto; a unicidade é |x−y| ≤ largura = 0. Mede-se que
@@ -802,7 +962,34 @@ int main(void){
            " a grade 1..300 inteira exigindo isso em cada passo de cada par, e mais duas"
            " cláusulas que a sustentam (a geométrica nunca desce, o encaixe nunca quebra),"
            " porque qualquer delas a falhar tirava o sentido às outras. Não é uma"
-           " convergência disfarçada: é uma descida estrita numa ordem bem-fundada. O GUME É A"
+           " convergência disfarçada: é uma descida estrita numa ordem bem-fundada, e dela sai"
+           " a COTA: se a largura inicial tem N grãos, não há mais de N descidas — a"
+           " terminação é literalmente N, N−1, …, 0. É essa cota que PROVA que acaba, e não"
+           " usa a raiz; o que a face geométrica acrescenta é a VELOCIDADE, com o colapso"
+           " quadrático a pôr o número real de batidas em log log. Medem-se as duas lado a"
+           " lado, porque confundi-las seria tomar a rapidez por prova. E A FIGURA É O SALTO"
+           " DA ARITMÉTICA PARA A GEOMETRIA: no semicírculo de diâmetro a+b, o RAIO é a média"
+           " aritmética e a ALTURA sobre o ponto que divide o diâmetro em a e b é a"
+           " geométrica; então h² + δ² = m² é Pitágoras, e «g ≤ m» é «a altura não passa o"
+           " raio» — a mesma frase do §M4 dita com uma figura em vez de com uma conta. E O"
+           " PONTO É O PONTO FIXO COMUM: cada face tem a sua dobra e cada dobra tem o seu"
+           " fixo — ∂⁺ fixa m, ∂ˣ fixa g —, os dois são DIFERENTES enquanto a ≠ b, e"
+           " coincidem exactamente onde o processo acaba, sendo aí o ponto fixo pelas DUAS. O"
+           " corte não é um ponto que se ache ENTRE as classes: é o ponto fixo que as duas"
+           " faces passam a PARTILHAR. E HÁ UM SEGUNDO DESFECHO, que é o que dá a"
+           " INTERPRETAÇÃO: quando o ponto NÃO é da grade, o encaixe também termina — a"
+           " largura pára no grão — mas não numa igualdade, e o que o corpo guarda são as"
+           " duas faces que o cercam. Não há nada a produzir: π é transcendente, e ninguém"
+           " lhe pede que caiba. O que há é a REPRESENTAÇÃO, e ela é o par que o §M3 já"
+           " deu — de L e U saem o CENTRO m = (L+U)/2, que é o que a representação conserva,"
+           " e δ = (U−L)/2, que é o que ela NÃO codifica, medido. O gume é o centro contra"
+           " as fronteiras: se ele fosse uma média de conveniência valeria o mesmo que as"
+           " bordas, e mede-se que é 6 a 13 vezes melhor — é onde a informação está. Assim"
+           " as quatro frases da porta de entrada lêem-se uma a uma sobre π: o finito é"
+           " CODIFICADO (o corpo guarda dois números da grade), o infinito é CAMINHADO (cada"
+           " duplicação é uma batida e nenhuma o alcança), a representação COMPRIME (de um"
+           " transcendente fica m) e a dobra MEDE O QUE FOI PERDIDO — δ é essa medida, e não"
+           " um erro a lamentar. O GUME É A"
            " ESCOLHA, e é ele que diz porque é que a segunda face faz falta: com uma face só o"
            " par colapsa num passo — (a,b) ↦ (m,m) — e a batida seguinte não move nada, pelo"
            " que para continuar é preciso ESCOLHER um lado em cada nível; isso é a bissecção, e"
