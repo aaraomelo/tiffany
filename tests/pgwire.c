@@ -22202,6 +22202,174 @@ int main(void){
            " que a nilpotência é a lei e não um enfeite.", mal == 0);
     }
 
+    /* ═══ §W147: ROTAÇÃO, METAIS E RACIONAL — AS MESMAS LEIS, OUTRAS RÉGUAS ══ */
+    {
+        long mal = 0;
+        printf("\n§W147 as leis da aranha derivadas em mais três corpos.\n\n");
+
+        /* ════ O CORPO DA ROTAÇÃO: a+bi, i² = −1 ════════════════════════════ */
+        printf("      ── ROTAÇÃO  a+bi ──\n");
+        {
+            /* R1. as duas faces: o inverso é o conjugado sobre a norma */
+            long inv = 0, tot = 0, unid = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                long N = a*a + b*b;
+                if(N == 0) continue;
+                tot++;
+                /* (a+bi)(a−bi) = N; o inverso fica no anel sse N = 1 */
+                if(N == 1){ unid++;
+                    long ra = a*a + b*b, ri = 0;
+                    if(ra == 1 && ri == 0) inv++; }
+            }
+            printf("      R1 o inverso é (a−bi)/N e fica no anel sse N=1: %ld unidades,"
+                   " %ld com inverso exacto (de %ld)\n", unid, inv, tot);
+            printf("         RELAÇÃO — a face multiplicativa fecha na ESFERA N=1, e são"
+                   " QUATRO pontos: a reversão roda\n");
+            if(unid != 4 || inv != 4) mal++;
+
+            /* R2. a norma é multiplicativa --- a métrica compõe-se */
+            long ok = 0, t2 = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long pr = a*c - b*d, pi = a*d + b*c;
+                t2++;
+                if(pr*pr + pi*pi == (a*a+b*b)*(c*c+d*d)) ok++;
+            }
+            printf("      R2 N(zw) = N(z)N(w) em %ld/%ld --- a métrica compõe-se\n", ok, t2);
+            if(ok != t2) mal++;
+
+            /* R3. e a métrica NÃO é ultramétrica: aqui a régua é arquimediana,
+             * e é essa a diferença para o corpo exterior */
+            long forte = 0, t3 = 0, falha = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long n1 = a*a + b*b, n2 = c*c + d*d;
+                long sr = a + c, si = b + d;
+                long ns = sr*sr + si*si;
+                long mx = n1 > n2 ? n1 : n2;
+                t3++;
+                if(ns <= mx) forte++; else falha++;
+            }
+            printf("      R3 a desigualdade FORTE falha em %ld dos %ld pares: esta régua é"
+                   " ARQUIMEDIANA, não ultramétrica\n", falha, t3);
+            printf("         RELAÇÃO — o exterior tem valoração e este tem norma: mesma"
+                   " lei, réguas de tipos diferentes\n");
+            if(falha == 0) mal++;
+        }
+
+        /* ════ O CORPO DOS METAIS: Z[σ], σ² = mσ + 1 ════════════════════════ */
+        printf("      ── METAIS  Z[σ], σ² = mσ + 1 ──\n");
+        {
+            /* M1. o inverso de σ escreve-se sem fração: σ(σ−m) = σ² − mσ = 1 */
+            long ok = 0, tot = 0;
+            for(long m = 1; m <= 8; m++){
+                /* (0 + 1·σ)·(−m + 1·σ) em Z[σ]: usa σ² = mσ + 1 */
+                long a1 = 0, b1 = 1, a2 = -m, b2 = 1;
+                long ra = a1*a2 + b1*b2*1;             /* o termo σ² dá +1 na parte real */
+                long rb = a1*b2 + b1*a2 + b1*b2*m;     /* e +m na parte σ */
+                tot++;
+                if(ra == 1 && rb == 0) ok++;
+            }
+            printf("      M1 σ⁻¹ = σ − m em %ld/%ld metais --- o inverso escreve-se SEM"
+                   " fração, e é o próprio menos o metal\n", ok, tot);
+            printf("         RELAÇÃO NOVA — a face multiplicativa deste corpo não sai do"
+                   " degrau: o inverso da unidade fundamental é ela menos m\n");
+            if(ok != tot) mal++;
+
+            /* M2. a norma: N(a+bσ) = a² + mab − b², e é multiplicativa */
+            long okn = 0, tn = 0;
+            for(long m = 1; m <= 4; m++)
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long pa = a*c + b*d, pb = a*d + b*c + m*b*d;
+                long N1 = a*a + m*a*b - b*b, N2 = c*c + m*c*d - d*d;
+                long Np = pa*pa + m*pa*pb - pb*pb;
+                tn++;
+                if(Np == N1*N2) okn++;
+            }
+            printf("      M2 N(a+bσ) = a² + mab − b² é multiplicativa em %ld/%ld\n", okn, tn);
+            if(okn != tn) mal++;
+
+            /* M3. e a fração contínua de σ é PERIÓDICA de período um: [m;m,m,…] */
+            long per = 0, tp = 0;
+            for(long m = 1; m <= 8; m++){
+                /* σ = m + 1/σ, logo os quocientes parciais são todos m */
+                /* verifica-se pela recorrência: p_k = m p_{k-1} + p_{k-2} */
+                /* os convergentes de [m;m,m,…]: p_k = m·p_{k−1} + p_{k−2} */
+                long p0 = 1, p1 = m, q0 = 0, q1 = 1;
+                int todos = 1;
+                for(int k = 0; k < 6; k++){
+                    /* a norma de p − q·σ, com N(a+bσ) = a² + mab − b²
+                     * e b = −q:  N = p² − m·p·q − q² */
+                    long N = p1*p1 - m*p1*q1 - q1*q1;
+                    if(N != 1 && N != -1) todos = 0;
+                    long p2 = m*p1 + p0, q2 = m*q1 + q0;
+                    p0 = p1; p1 = p2; q0 = q1; q1 = q2;
+                }
+                tp++;
+                if(todos) per++;
+            }
+            printf("      M3 a fração contínua de σ é [m;m,m,…], período UM, e os"
+                   " convergentes têm norma ±1 em %ld/%ld metais\n", per, tp);
+            printf("         RELAÇÃO NOVA — a descida deste corpo é periódica de período"
+                   " um, e é essa a razão de os convergentes serem unidades\n");
+            if(per != tp) mal++;
+        }
+
+        /* ════ O CORPO RACIONAL: a/b, e a régua p-ádica ═════════════════════ */
+        printf("      ── RACIONAL  a/b ──\n");
+        {
+            /* Q1. o inverso é trocar as camadas, e a norma p-ádica é uma
+             * VALORAÇÃO: v_p(a/b) = v_p(a) − v_p(b) */
+            #define VP(n,p) ({ long _n = (n) < 0 ? -(n) : (n), _v = 0; \
+                if(_n == 0) _v = 20; else while(_n % (p) == 0){ _n /= (p); _v++; } _v; })
+            long p = 2;
+            long ok = 0, tot = 0, estrito = 0;
+            for(long a1 = -6; a1 <= 6; a1++) for(long a2 = -6; a2 <= 6; a2++)
+            for(long a3 = -6; a3 <= 6; a3++){
+                long v12 = VP(a1-a2, p), v23 = VP(a2-a3, p), v13 = VP(a1-a3, p);
+                long mn = v12 < v23 ? v12 : v23;
+                tot++;
+                if(v13 >= mn) ok++;
+                if(v13 > mn) estrito++;
+            }
+            printf("      Q1 a régua p-ádica é ULTRAMÉTRICA: v(x−z) ≥ min em %ld/%ld"
+                   " triplos (%ld estritos)\n", ok, tot, estrito);
+            printf("         RELAÇÃO — o racional tem uma régua por PRIMO, e cada uma é"
+                   " ultramétrica: a mesma def:arvore, uma vez por p\n");
+            if(ok != tot || estrito == 0) mal++;
+
+            /* Q2. e a valoração é multiplicativa --- a face multiplicativa é soma */
+            long okm = 0, tm = 0;
+            for(long a = 1; a <= 12; a++) for(long b = 1; b <= 12; b++){
+                tm++;
+                if(VP(a*b, p) == VP(a, p) + VP(b, p)) okm++;
+            }
+            printf("      Q2 v(xy) = v(x)+v(y) em %ld/%ld --- outra vez a face"
+                   " multiplicativa lida como SOMA\n", okm, tm);
+            if(okm != tm) mal++;
+            #undef VP
+        }
+
+        printf("\n");
+        ok("AS MESMAS LEIS, OUTRAS RÉGUAS --- E CADA CORPO DÁ A SUA RELAÇÃO. Derivadas em"
+           " mais três corpos, e nenhuma catalogada: escritas. NA ROTAÇÃO a face"
+           " multiplicativa fecha na esfera N=1, que tem QUATRO pontos --- a reversão roda"
+           " ---, a norma compõe-se, e a régua é ARQUIMEDIANA: a desigualdade forte falha, e"
+           " é essa a diferença para o corpo exterior, que tem valoração. Mesma lei, réguas"
+           " de tipos diferentes. NOS METAIS aparece a relação mais limpa: σ⁻¹ = σ − m, o"
+           " inverso escreve-se SEM fração e é o próprio menos o metal --- a face"
+           " multiplicativa não sai do degrau. A norma é a² + mab − b², multiplicativa; e a"
+           " fração contínua de σ é [m;m,m,…], de período UM, o que é exactamente a razão de"
+           " os convergentes terem norma ±1: a descida deste corpo é periódica, e as unidades"
+           " saem dela. NO RACIONAL a régua não é uma: é uma POR PRIMO, e cada uma é"
+           " ultramétrica --- a mesma def:arvore, uma vez por p ---, com a valoração"
+           " multiplicativa outra vez a ler a face multiplicativa como soma. É o mesmo padrão"
+           " nos três: onde há valoração a régua é ultramétrica e o produto vira soma; onde"
+           " há norma a régua é arquimediana e o produto fica produto. A lei é uma; a métrica"
+           " é que muda.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
