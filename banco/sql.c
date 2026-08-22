@@ -70,6 +70,22 @@
  * perguntar por elas, sobre as suas células, sem um único double. */
 #include "../lib/racionais.h"
 #include "../lib/serie.h"
+/* ── E A ÁLGEBRA LINEAR, COM O NOME MUDADO À ENTRADA ─────────────────────────
+ * O `linear.h` tem a matriz sobre ℚ e tudo o que ela faz — produto, soma,
+ * transposta, determinante, posto, núcleo, imagem, inversa —, e o motor precisa
+ * dela porque UMA TABELA É UMA MATRIZ: as suas linhas por colunas são as
+ * entradas, e as perguntas da álgebra linear são perguntas sobre a tabela.
+ *
+ * O obstáculo é um nome: `Mat` está tomado pelo `corpos.h`, que chama assim a
+ * matriz 2×2 de longos do transporte mecânico, e o `sql.c` já o traz pelo
+ * `reta.h`. São dois objectos diferentes com o mesmo nome, e 58 ficheiros
+ * dependem de um enquanto 21 dependem do outro — renomear num header tocaria em
+ * setenta e nove. Renomeia-se AQUI, à entrada, e nenhum dos dois muda. */
+#define Mat MatQz
+#define Vec VecQz
+#include "../lib/linear.h"
+#undef Mat
+#undef Vec
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -4322,6 +4338,9 @@ static int checa_corpos(unsigned citadas, long ncols){
 /* lê `*` ou `c1, c2, …` até ao FROM; devolve 0 se não reconhecer */
 static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min, 4 avg */
 static char agr_col[64] = "";        /* a coluna que a agregação lê */
+/* o pedido matricial é escrito pela leitura da lista e recolhido pelo `varre`,
+ * pela mesma ponte do `count(DISTINCT)`: quem lê corre antes de quem usa */
+static int mat_op_pedido = 0;
 /* a coluna do `count(DISTINCT c)`, "" se não houver. São DUAS: o `pedido` é
  * escrito pelo despacho do `SELECT count(...)`, que corre ANTES do `varre` e
  * cujo interior era deitado fora; o outro é o que o `varre` usa, e ele
@@ -4329,6 +4348,10 @@ static char agr_col[64] = "";        /* a coluna que a agregação lê */
  * era lida e perdida no caminho, e o motor respondia o count de tudo. */
 static char cnt_dis[64] = "";
 static char cnt_dis_pedido[64] = "";
+/* a operação matricial pedida: 1 det, 2 posto, 3 traço, 4 transposta, 5 inversa.
+ * São sobre a TABELA INTEIRA — não por linha nem por fibra —, e por isso vivem
+ * ao lado do `agr_op` e não dentro da projecção. */
+static int mat_op = 0;
 
 /* os aliases do `AS`, por posição na lista; vazio = sem alias */
 static char alias[SQL_OUT_MAX_COLS][32];
@@ -4386,6 +4409,32 @@ static int lista_colunas(const char **pp, char *out, int cap){
                   if(*p == ','){ p++; continue; }
                   break;
               }
+              /* ── AS MATRICIAIS SÃO SOBRE A TABELA INTEIRA ────────────────
+               * `det(*)` não é uma função da linha nem da fibra: é da tabela,
+               * lida como matriz. Reconhece-se aqui, com o `*` a dizer «toda
+               * ela» — a mesma palavra que o `count(*)` usa para o mesmo. */
+              { int qm = !strcasecmp(nome,"DET") ? 1
+                       : !strcasecmp(nome,"POSTO") ? 2
+                       : !strcasecmp(nome,"TRACO") ? 3
+                       : !strcasecmp(nome,"TRANSPOSTA") ? 4
+                       : !strcasecmp(nome,"INVERSA") ? 5 : 0;
+                if(qm){
+                    const char *r = q + 1;
+                    pula(&r);
+                    if(*r == '*'){
+                        r++; pula(&r);
+                        if(*r == ')'){
+                            mat_op_pedido = qm;
+                            p = r + 1;
+                            n += snprintf(out + n, (size_t)(cap - n), "%s*",
+                                          n ? "," : "");
+                            pula(&p);
+                            if(*p == ','){ p++; continue; }
+                            break;
+                        }
+                    }
+                } }
+
               /* ── AS ANALÍTICAS SÃO POR LINHA, e não sobre a fibra ─────────
                * `exp(a)` não é uma agregação: é uma função do valor da célula,
                * como `a+1`. Guarda-se o texto inteiro — `exp(a)` — e quem o
@@ -5578,6 +5627,7 @@ static int varre(const char *resto, int acao){
     ord_col[0] = 0; ord_desc = 0; ord_col2[0] = 0; ord_desc2 = 0;
     snprintf(cnt_dis, sizeof cnt_dis, "%s", cnt_dis_pedido);
     cnt_dis_pedido[0] = 0;
+    mat_op = mat_op_pedido; mat_op_pedido = 0;
     grp_col[0] = 0; grp_col2[0] = 0; lim_n = -1; off_n = 0;
     hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
@@ -6747,6 +6797,147 @@ static int varre(const char *resto, int acao){
      * AUSENTE, não zero, porque zero é um valor e aqui não houve nenhum; o
      * count de nada é zero, porque contar o vazio é zero e não uma ausência.
      * As duas respostas são de níveis diferentes, e é isso que elas dizem. */
+    /* ── A TABELA É UMA MATRIZ ───────────────────────────────────────────────
+     *
+     * As linhas por colunas de uma tabela são as entradas de uma matriz, e as
+     * perguntas da álgebra linear são perguntas sobre a tabela: qual o seu
+     * determinante, qual o seu posto, o que sobra quando ela se transpõe. Não é
+     * uma leitura forçada — é a mesma tabela vista pela outra face, e o
+     * `lib/linear.h` já tem tudo o que ela precisa, em ℚ exacto.
+     *
+     * O que se decide aqui é o ALCANCE, e ele não é escolhido: o `linear.h`
+     * trabalha até LN_MAX×LN_MAX, e o que passa disso RECUSA-SE — a régua
+     * diz-se antes de se usar, como em todo o resto desta casa.
+     *
+     * As que devolvem um NÚMERO (det, posto, traço) saem como o `count`: uma
+     * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
+     * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
+     * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op){
+        long nr_v = 0;
+        int lin[LN_MAX];
+        MatQz A;
+        /* só as linhas VIVAS e MARCADAS entram, e a ordem é a delas */
+        for(long i = 0; i < nrows && nr_v < LN_MAX; i++)
+            if(bit_le(S_MATCH, i)) lin[nr_v++] = (int)i;
+        if(ncols > LN_MAX || nr_v >= LN_MAX){
+            printf("erro: a matriz é %ld×%ld e o alcance é %d×%d — RECUSADA.\n",
+                   nr_v, ncols, LN_MAX, LN_MAX);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "matrix too large: %ld×%ld, limit is %d×%d",
+                         nr_v, ncols, LN_MAX, LN_MAX); }
+            return 0;
+        }
+        A = mat0((int)nr_v, (int)ncols);
+        { int falta = 0;
+          for(int i = 0; i < (int)nr_v; i++)
+              for(long j = 0; j < ncols; j++){
+                  if(!bit_le(S_PRES, lin[i]*ncols + j)){ falta = 1; continue; }
+                  A.a[i][j] = qz_de_inteiro(celula_valor(lin[i], j, ncols));
+              }
+          /* uma matriz com um buraco não é uma matriz: o dual não é zero, e
+           * fazer a conta com ele seria inventar a entrada que falta */
+          if(falta){
+              printf("erro: a tabela tem células ausentes — a matriz não está"
+                     " completa, e o dual não é zero. RECUSADA.\n");
+              if(sql_cap){ sql_cap->ok = 0;
+                  snprintf(sql_cap->err, sizeof sql_cap->err,
+                           "matrix has absent cells; the dual is not zero"); }
+              return 0;
+          } }
+
+        if(mat_op == 1 || mat_op == 2 || mat_op == 3){       /* det, posto, traço */
+            Qz v = qz(0,1);
+            long inteiro = 0;
+            const char *nm = mat_op == 1 ? "det" : mat_op == 2 ? "posto" : "traco";
+            if(mat_op == 1){
+                if(A.m != A.n){
+                    printf("erro: o determinante pede uma matriz QUADRADA, e"
+                           " esta é %d×%d — RECUSADO.\n", A.m, A.n);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "det: matrix is %d×%d, not square", A.m, A.n); }
+                    return 0;
+                }
+                v = mat_det(A);
+            } else if(mat_op == 2){
+                inteiro = mat_posto(A);
+            } else {
+                if(A.m != A.n){
+                    printf("erro: o traço pede uma matriz QUADRADA — RECUSADO.\n");
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "trace: matrix is not square"); }
+                    return 0;
+                }
+                for(int i = 0; i < A.n; i++) v = qz_soma(v, A.a[i][i]);
+            }
+            { char cel[SQL_OUT_CELL];
+              if(mat_op == 2) snprintf(cel, sizeof cel, "%ld", inteiro);
+              else { Par cls = ra_classe((Par){ (long)v.p, (long)v.q });
+                     if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                     else          snprintf(cel, sizeof cel, "%ld", cls.a); }
+              printf("   %s\n-- a tabela %d×%d lida como matriz\n", cel, A.m, A.n);
+              if(sql_cap){
+                  memset(sql_cap, 0, sizeof *sql_cap);
+                  sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
+                  sql_cap->tipo[0] = SQL_TIPO_INT4;
+                  snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s", nm);
+                  snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%s", cel);
+                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+              } }
+            return 1;
+        }
+
+        { MatQz R;                                   /* transposta e inversa */
+          const char *nm = mat_op == 4 ? "transposta" : "inversa";
+          if(mat_op == 4) R = mat_transposta(A);
+          else {
+              if(A.m != A.n){
+                  printf("erro: a inversa pede uma matriz QUADRADA — RECUSADA.\n");
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "inverse: matrix is not square"); }
+                  return 0;
+              }
+              if(!mat_inversa(A, &R)){
+                  printf("erro: a matriz não tem inversa (o determinante é zero)"
+                         " — RECUSADA.\n");
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "matrix is singular: no inverse"); }
+                  return 0;
+              }
+          }
+          if(sql_cap){
+              memset(sql_cap, 0, sizeof *sql_cap);
+              sql_cap->ok = 1;
+              sql_cap->ncols = R.n > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : R.n;
+              sql_cap->nrows = R.m > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : R.m;
+              for(int j = 0; j < sql_cap->ncols; j++){
+                  snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                  sql_cap->tipo[j] = SQL_TIPO_INT4;
+              }
+              snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+          }
+          for(int i = 0; i < R.m; i++){
+              printf("   ");
+              for(int j = 0; j < R.n; j++){
+                  Par cls = ra_classe((Par){ (long)R.a[i][j].p, (long)R.a[i][j].q });
+                  char cel[SQL_OUT_CELL];
+                  if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                  else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                  printf("%s%s", cel, j + 1 < R.n ? " | " : "");
+                  if(sql_cap && i < sql_cap->nrows && j < sql_cap->ncols)
+                      snprintf(sql_cap->cell[i][j], SQL_OUT_CELL, "%s", cel);
+              }
+              printf("\n");
+          }
+          printf("-- a %s da tabela %d×%d\n", nm, A.m, A.n);
+          return 1; }
+    }
+
     if(acao == ACAO_MARCA && agr_op && !grp_col[0]){
         int ac = col_indice(agr_col);
         if(ac < 0){

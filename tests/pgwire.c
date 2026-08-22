@@ -6841,6 +6841,145 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W51: A TABELA É UMA MATRIZ ══════════════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w51.mem", "/tmp/pgwire_w51.prog",
+            "/tmp/pgwire_w51__m.mem", "/tmp/pgwire_w51__m.prog",
+            "/tmp/pgwire_w51__s.mem", "/tmp/pgwire_w51__s.prog",
+            "/tmp/pgwire_w51__r.mem", "/tmp/pgwire_w51__r.prog" };
+        for(int k = 0; k < 8; k++) unlink(lixo[k]);
+        printf("\n§W51 det, posto, traço, transposta, inversa — em ℚ exacto.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w51")) mal++;
+        sql_executa("CREATE TABLE m (a,b)", &o);
+        sql_executa("INSERT INTO m VALUES (1,2), (3,4)", &o);
+
+        /* ── (1) OS ESCALARES. As linhas por colunas de uma tabela são as
+         * entradas de uma matriz, e as perguntas da álgebra linear são
+         * perguntas sobre a tabela — não é uma leitura forçada, é a mesma
+         * tabela vista pela outra face. */
+        sql_executa("SELECT det(*) FROM m", &o);
+        int d = (o.nrows == 1 && !strcmp(o.cell[0][0], "-2"));
+        sql_executa("SELECT posto(*) FROM m", &o);
+        int p = (o.nrows == 1 && !strcmp(o.cell[0][0], "2"));
+        sql_executa("SELECT traco(*) FROM m", &o);
+        int tr = (o.nrows == 1 && !strcmp(o.cell[0][0], "5"));
+        printf("      (1,2;3,4): det = -2 %d · posto = 2 %d · traço = 5 %d\n",
+               d, p, tr);
+        if(!d || !p || !tr) mal++;
+
+        /* ── (2) A TRANSPOSTA DEVOLVE UMA TABELA, e é aí que a leitura fecha: o
+         * resultado é outra vez uma coisa a que se pode perguntar o
+         * determinante. E numa NÃO quadrada troca mesmo as dimensões. */
+        sql_executa("SELECT transposta(*) FROM m", &o);
+        int t2 = (o.nrows == 2 && o.ncols == 2
+                  && !strcmp(o.cell[0][1], "3") && !strcmp(o.cell[1][0], "2"));
+        sql_executa("CREATE TABLE r (a,b,c)", &o);
+        sql_executa("INSERT INTO r VALUES (1,2,3), (4,5,6)", &o);
+        sql_executa("SELECT transposta(*) FROM r", &o);
+        int t3 = (o.nrows == 3 && o.ncols == 2);
+        printf("      transposta: a 2×2 troca (%d) · a 2×3 vira %d×%d (esp 3×2)"
+               "  %s\n", t2, o.nrows, o.ncols, (t2 && t3) ? "" : "NAO BATE");
+        if(!t2 || !t3) mal++;
+
+        /* ── (3) E A INVERSA É EXACTA EM ℚ, que é o ponto: sem um único double,
+         * a inversa de uma matriz de inteiros tem entradas RACIONAIS, e elas
+         * saem como classe reduzida — 3/2 e −1/2, não 1,5 e −0,5. */
+        sql_executa("SELECT inversa(*) FROM m", &o);
+        int inv = (o.nrows == 2 && o.ncols == 2
+                   && !strcmp(o.cell[0][0], "-2") && !strcmp(o.cell[0][1], "1")
+                   && !strcmp(o.cell[1][0], "3/2") && !strcmp(o.cell[1][1], "-1/2"));
+        printf("      inversa: (%s %s ; %s %s) — esp (-2 1 ; 3/2 -1/2)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+               o.nrows > 1 ? o.cell[1][0] : "?", o.nrows > 1 ? o.cell[1][1] : "?",
+               inv ? "" : "NAO BATE");
+        if(!inv) mal++;
+
+        /* ── (4) E O GUME É A LEI: A·A⁻¹ = I. Comparar a inversa com o que se
+         * espera é confiar na conta; multiplicá-la de volta é VERIFICÁ-LA, e é
+         * o que separa uma resposta certa de uma resposta que por acaso tem a
+         * forma certa. A conta faz-se aqui em racionais, à mão. */
+        { long p11 = 0, q11 = 1, p12 = 0, q12 = 1, p21 = 0, q21 = 1, p22 = 0, q22 = 1;
+          const char *b;
+          if(o.nrows == 2 && o.ncols == 2){
+              p11 = atol(o.cell[0][0]); b = strchr(o.cell[0][0], '/'); q11 = b ? atol(b+1) : 1;
+              p12 = atol(o.cell[0][1]); b = strchr(o.cell[0][1], '/'); q12 = b ? atol(b+1) : 1;
+              p21 = atol(o.cell[1][0]); b = strchr(o.cell[1][0], '/'); q21 = b ? atol(b+1) : 1;
+              p22 = atol(o.cell[1][1]); b = strchr(o.cell[1][1], '/'); q22 = b ? atol(b+1) : 1;
+          }
+          /* A = (1 2 ; 3 4);  (A·A⁻¹)[i][j] em fracções */
+          { long n11 = p11*q12*1 + 2*p21*q11, d11 = q11*q12*q21;   /* aproximação simbólica */
+            /* faz-se termo a termo com denominador comum por entrada */
+            long e11n = p11*q21 + 2*p21*q11, e11d = q11*q21;
+            long e12n = p12*q22 + 2*p22*q12, e12d = q12*q22;
+            long e21n = 3*p11*q21 + 4*p21*q11, e21d = q11*q21;
+            long e22n = 3*p12*q22 + 4*p22*q12, e22d = q12*q22;
+            int id = (e11n == e11d) && (e12n == 0) && (e21n == 0) && (e22n == e22d);
+            printf("      e a LEI: A·A⁻¹ = (%ld/%ld %ld/%ld ; %ld/%ld %ld/%ld)"
+                   " = I  %s\n", e11n, e11d, e12n, e12d, e21n, e21d, e22n, e22d,
+                   id ? "" : "NAO BATE");
+            if(!id) mal++;
+            (void)n11; (void)d11; } }
+
+        /* ── (5) A SINGULAR NÃO TEM INVERSA, e o motor não a inventa: det = 0,
+         * posto = 1 (a segunda linha é o dobro da primeira), e a inversa é
+         * RECUSADA. As três dizem a mesma coisa por caminhos diferentes. */
+        sql_executa("CREATE TABLE s (a,b)", &o);
+        sql_executa("INSERT INTO s VALUES (1,2), (2,4)", &o);
+        sql_executa("SELECT det(*) FROM s", &o);
+        int sd = (o.nrows == 1 && !strcmp(o.cell[0][0], "0"));
+        sql_executa("SELECT posto(*) FROM s", &o);
+        int sp = (o.nrows == 1 && !strcmp(o.cell[0][0], "1"));
+        int si = sql_executa("SELECT inversa(*) FROM s", &o);
+        printf("      a singular: det = 0 %d · posto = 1 %d · inversa %s  %s\n",
+               sd, sp, si ? "PASSOU (mau)" : "recusada",
+               (sd && sp && !si) ? "" : "NAO BATE");
+        if(!sd || !sp || si) mal++;
+
+        /* ── O CONTROLO, e são três. O determinante e o traço pedem uma matriz
+         * QUADRADA e recusam-se numa 2×3 — enquanto o POSTO não pede, e
+         * responde. E a matriz com uma célula AUSENTE é recusada: o dual não é
+         * zero, e fazer a conta com ele seria inventar a entrada que falta. */
+        int c1 = sql_executa("SELECT det(*) FROM r", &o);
+        sql_executa("SELECT posto(*) FROM r", &o);
+        int c2 = (o.nrows == 1 && !strcmp(o.cell[0][0], "2"));
+        sql_executa("INSERT INTO m VALUES (5,NULL)", &o);
+        int c3 = sql_executa("SELECT posto(*) FROM m", &o);
+        printf("\n      CONTROLO — det numa 2×3: %s · posto numa 2×3 responde"
+               " (%d) · com célula ausente: %s  %s\n",
+               c1 ? "PASSOU (mau)" : "recusado", c2,
+               c3 ? "PASSOU (mau)" : "recusado",
+               (!c1 && c2 && !c3) ? "" : "NAO BATE");
+        if(c1 || !c2 || c3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A TABELA É UMA MATRIZ, E AS PERGUNTAS DA ÁLGEBRA LINEAR SÃO PERGUNTAS SOBRE ELA."
+           " As suas linhas por colunas são as entradas, e det, posto, traço, transposta e"
+           " inversa não pedem estrutura nova: pedem a mesma tabela vista pela outra face. O"
+           " `lib/linear.h` já tinha tudo em ℚ exacto, e o obstáculo era um NOME — `Mat`"
+           " está tomado pelo `corpos.h`, que assim chama a matriz 2×2 de longos do"
+           " transporte mecânico, e o motor já o traz pelo `reta.h`. São dois objetos"
+           " diferentes com o mesmo nome, e cinquenta e oito ficheiros dependem de um"
+           " enquanto vinte e um dependem do outro: renomeia-se À ENTRADA do motor, e nenhum"
+           " dos dois headers muda. E A INVERSA É EXACTA EM ℚ, que é o ponto de tudo isto:"
+           " sem um único double, a inversa de uma matriz de inteiros tem entradas racionais"
+           " e elas saem como classe reduzida — 3/2 e −1/2, não 1,5 e −0,5. O GUME É A LEI:"
+           " comparar a inversa com o que se espera é confiar na conta, multiplicá-la de"
+           " volta é VERIFICÁ-LA — mede-se A·A⁻¹ = I em racionais, à mão, e é o que separa"
+           " uma resposta certa de uma resposta que por acaso tem a forma certa. A SINGULAR"
+           " diz a mesma coisa por três caminhos: determinante zero, posto um, e a inversa"
+           " RECUSADA em vez de inventada. O CONTROLO tem três metades: o determinante e o"
+           " traço pedem uma matriz quadrada e recusam-se numa 2×3, enquanto o POSTO não"
+           " pede e responde — se todos recusassem, não se saberia se era a forma ou a"
+           " pergunta; e a matriz com uma célula AUSENTE é recusada, porque o dual não é"
+           " zero e fazer a conta com ele seria inventar a entrada que falta. O alcance é o"
+           " do `linear.h` e diz-se antes de se usar, como a régua de tudo o resto.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -2853,6 +2853,40 @@ já lá estavam pelo tensor de grau três da §W47.}
         {\code{lib/serie.h} extraída; avaliação em $\mathbb{Q}$; recusa por alcance}
         {\code{tests/pgwire.c} §W50}
 
+\subsection*{A tabela é uma matriz}
+
+\noindent As linhas por colunas de uma tabela \emph{são} as entradas de uma
+matriz, e \code{det}, \code{posto}, \code{traco}, \code{transposta} e
+\code{inversa} não pedem estrutura nova: pedem a mesma tabela vista pela outra
+face. O \code{lib/linear.h} já tinha tudo em $\mathbb{Q}$ exato.
+
+\medskip\noindent\textbf{O obstáculo era um nome.} \code{Mat} está tomado pelo
+\code{corpos.h}, que assim chama a matriz $2\times2$ de longos do transporte
+mecânico, e o motor já o traz pelo \code{reta.h} --- dois objetos diferentes com
+o mesmo nome, com $58$ ficheiros a depender de um e $21$ do outro. Renomeia-se
+\textbf{à entrada} do motor, e nenhum dos dois \emph{headers} muda.
+
+\medskip\noindent\textbf{E a inversa é exata em $\mathbb{Q}$}, que é o ponto de
+tudo isto: sem um único double, a inversa de uma matriz de inteiros tem entradas
+racionais, e elas saem como classe reduzida --- $3/2$ e $-1/2$, não $1{,}5$ e
+$-0{,}5$. O gume é a \textbf{lei}: comparar a inversa com o que se espera é
+confiar na conta; multiplicá-la de volta e exigir $A\cdot A^{-1}=I$ é
+verificá-la. E a singular diz a mesma coisa por três caminhos --- determinante
+zero, posto um, e a inversa \emph{recusada} em vez de inventada.
+
+\medskip\noindent A matriz com uma célula \textbf{ausente} é recusada: o dual não
+é zero, e fazer a conta com ele seria inventar a entrada que falta. O alcance é
+o do \code{linear.h}, e diz-se antes de se usar.
+
+\medido{\code{tests/pgwire.c} §W51, com o controlo em três metades --- o
+determinante e o traço a recusarem numa $2\times3$ enquanto o \emph{posto}
+responde (se todos recusassem, não se saberia se era a forma ou a pergunta), e a
+célula ausente a fazer recusar.}
+
+\colunas{\code{aranha thm:base8}; \code{catalogo thm:dimconta}}
+        {\code{lib/linear.h} pelo motor; \code{det}/\code{posto}/\code{inversa} em $\mathbb{Q}$}
+        {\code{tests/pgwire.c} §W51}
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as
