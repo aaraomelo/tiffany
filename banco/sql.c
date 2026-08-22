@@ -4422,7 +4422,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"INVERSA") ? 5
                        : !strcasecmp(nome,"NUCLEO") ? 6
                        : !strcasecmp(nome,"IMAGEM") ? 7
-                       : !strcasecmp(nome,"PRODUTO") ? 8 : 0;
+                       : !strcasecmp(nome,"PRODUTO") ? 8
+                       : !strcasecmp(nome,"RESOLVE") ? 9 : 0;
                 if(qm == 8){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -6915,6 +6916,87 @@ static int varre(const char *resto, int acao){
                   snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
               } }
             return 1;
+        }
+
+        if(mat_op == 9){                         /* resolver: a VOLTA */
+            /* ── RESOLVER É A VOLTA DO PRODUTO ───────────────────────────────
+             * O produto COMPÕE — dá o que sai de aplicar; resolver DESCOMPÕE —
+             * dá o que teria de entrar. É o par de sempre, e é por isso que se
+             * verifica um com o outro: a solução aplicada tem de devolver o
+             * lado direito.
+             *
+             * A tabela é a matriz AUMENTADA [A | b]: as primeiras colunas são o
+             * sistema, a última é o que ele iguala. Não é uma convenção
+             * arbitrária — é a forma em que o sistema É uma tabela, e a única
+             * que não obriga a passar dois objectos onde há um.
+             *
+             * E os TRÊS desfechos decidem-se pelo POSTO, que é o teorema de
+             * Rouché–Capelli e já está todo aqui:
+             *
+             *   posto(A) < posto([A|b])            não há solução
+             *   posto(A) = posto([A|b]) < colunas  há infinitas
+             *   posto(A) = posto([A|b]) = colunas  há uma
+             *
+             * Não são três casos a tratar: é uma comparação de dois números. */
+            int nA = A.n - 1;
+            MatQz M = A, S;
+            int pivM[LN_MAX], pivS[LN_MAX], rM, rS;
+            if(nA < 1){
+                printf("erro: resolver pede pelo menos duas colunas — a matriz"
+                       " aumentada [A|b]. RECUSADO.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "solve: need at least 2 columns for [A|b]"); }
+                return 0;
+            }
+            S = A; S.n = nA;                        /* só o A, sem o b */
+            rS = mat_reduz(&S, pivS);
+            rM = mat_reduz(&M, pivM);
+            if(rM > rS){
+                printf("erro: posto(A) = %d e posto([A|b]) = %d — o sistema NÃO"
+                       " TEM SOLUÇÃO (Rouché–Capelli). RECUSADO.\n", rS, rM);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "system has no solution: rank(A)=%d < rank([A|b])=%d",
+                             rS, rM); }
+                return 0;
+            }
+            { VecQz x = vec0(nA);
+              int livres = nA - rS;
+              /* a solução PARTICULAR: as variáveis livres a zero, e as de pivô
+               * lidas da última coluna da reduzida */
+              for(int j = 0; j < nA; j++)
+                  if(pivM[j] >= 0) x.c[j] = M.a[pivM[j]][A.n - 1];
+              if(sql_cap){
+                  memset(sql_cap, 0, sizeof *sql_cap);
+                  sql_cap->ok = 1;
+                  sql_cap->ncols = nA > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : nA;
+                  sql_cap->nrows = 1;
+                  for(int j = 0; j < sql_cap->ncols; j++){
+                      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "x%d", j + 1);
+                      sql_cap->tipo[j] = SQL_TIPO_INT4;
+                  }
+                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+              }
+              printf("   ");
+              for(int j = 0; j < nA; j++){
+                  Par cls = ra_classe((Par){ (long)x.c[j].p, (long)x.c[j].q });
+                  char cel[SQL_OUT_CELL];
+                  if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                  else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                  printf("%s%s", cel, j + 1 < nA ? " | " : "");
+                  if(sql_cap && j < sql_cap->ncols)
+                      snprintf(sql_cap->cell[0][j], SQL_OUT_CELL, "%s", cel);
+              }
+              printf("\n");
+              if(livres > 0)
+                  printf("-- posto(A) = posto([A|b]) = %d < %d colunas: há INFINITAS"
+                         " soluções, e esta é a particular (as %d livres a zero;"
+                         " as outras somam-se-lhe pelo núcleo)\n", rS, nA, livres);
+              else
+                  printf("-- posto(A) = posto([A|b]) = %d = colunas: a solução é"
+                         " ÚNICA\n", rS);
+              return 1; }
         }
 
         if(mat_op == 8){                         /* o produto: a COMPOSIÇÃO */

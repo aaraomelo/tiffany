@@ -7214,6 +7214,129 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W54: RESOLVER É A VOLTA DO PRODUTO ══════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w54.mem", "/tmp/pgwire_w54.prog",
+            "/tmp/pgwire_w54__u.mem", "/tmp/pgwire_w54__u.prog",
+            "/tmp/pgwire_w54__n.mem", "/tmp/pgwire_w54__n.prog",
+            "/tmp/pgwire_w54__f.mem", "/tmp/pgwire_w54__f.prog",
+            "/tmp/pgwire_w54__q.mem", "/tmp/pgwire_w54__q.prog",
+            "/tmp/pgwire_w54__fa.mem", "/tmp/pgwire_w54__fa.prog",
+            "/tmp/pgwire_w54__s1.mem", "/tmp/pgwire_w54__s1.prog" };
+        for(int k = 0; k < 14; k++) unlink(lixo[k]);
+        printf("\n§W54 resolver: os três desfechos, decididos pelo posto.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w54")) mal++;
+
+        /* ── (1) A SOLUÇÃO ÚNICA, e o gume é APLICÁ-LA. Comparar o par (1,2)
+         * com o que se esperava é confiar na conta; pôr o x de volta no sistema
+         * e exigir que dê o lado direito é verificá-la. É a mesma escolha do
+         * §W52 com o núcleo — resolver é a VOLTA do produto, e um par
+         * verifica-se com o outro. */
+        sql_executa("CREATE TABLE u (a,b,d)", &o);
+        sql_executa("INSERT INTO u VALUES (1,2,5), (3,4,11)", &o);
+        sql_executa("SELECT resolve(*) FROM u", &o);
+        { long x = o.nrows ? atol(o.cell[0][0]) : 0;
+          long y = o.nrows ? atol(o.cell[0][1]) : 0;
+          long l1 = 1*x + 2*y, l2 = 3*x + 4*y;
+          int bate = (o.nrows == 1 && o.ncols == 2 && l1 == 5 && l2 == 11);
+          printf("      x+2y=5, 3x+4y=11 → (%ld,%ld) · A·x = (%ld,%ld), esp"
+                 " (5,11)  %s\n", x, y, l1, l2, bate ? "" : "NAO BATE");
+          if(!bate) mal++; }
+
+        /* ── (2) SEM SOLUÇÃO, e o motor diz PORQUÊ com os dois postos: é o
+         * teorema de Rouché–Capelli, e não são três casos a tratar — é uma
+         * comparação de dois números. Quando o lado direito acrescenta posto,
+         * ele saiu da imagem, e não há x que lá chegue. */
+        sql_executa("CREATE TABLE n (a,b,d)", &o);
+        sql_executa("INSERT INTO n VALUES (1,2,1), (2,4,3)", &o);
+        int sem = sql_executa("SELECT resolve(*) FROM n", &o);
+        int diz = (!sem && strstr(o.err, "rank") != NULL);
+        printf("      x+2y=1, 2x+4y=3: %s, e diz os postos («%s»)  %s\n",
+               sem ? "PASSOU (mau)" : "recusado", o.err,
+               (!sem && diz) ? "" : "NAO BATE");
+        if(sem || !diz) mal++;
+
+        /* ── (3) INFINITAS, e a que sai é a PARTICULAR — dito, não escondido.
+         * As variáveis livres ficam a zero, e as outras somam-se-lhe pelo
+         * núcleo, que é o objecto que o §W52 já sabe devolver: as duas peças
+         * encaixam sem se ter escrito uma linha para isso. E a particular tem
+         * de resolver o sistema na mesma. */
+        sql_executa("CREATE TABLE f (a,b,d)", &o);
+        sql_executa("INSERT INTO f VALUES (1,2,3), (2,4,6)", &o);
+        sql_executa("SELECT resolve(*) FROM f", &o);
+        { long x = o.nrows ? atol(o.cell[0][0]) : 0;
+          long y = o.nrows ? atol(o.cell[0][1]) : 0;
+          long l1 = 1*x + 2*y, l2 = 2*x + 4*y;
+          int bate = (o.nrows == 1 && l1 == 3 && l2 == 6);
+          /* o núcleo que falta é o de A, e não o da tabela AUMENTADA: esta
+           * é 2×3 e o seu núcleo tem dimensão 2, enquanto o do sistema tem 1.
+           * Pede-se numa tabela só com o A, que é o objecto de que se fala —
+           * confundir os dois seria medir outra coisa com o nome certo. */
+          sql_executa("CREATE TABLE fa (a,b)", &o);
+          sql_executa("INSERT INTO fa VALUES (1,2), (2,4)", &o);
+          sql_executa("SELECT nucleo(*) FROM fa", &o);
+          int tem_nucleo = (o.nrows == 1);
+          long k0 = o.nrows ? atol(o.cell[0][0]) : 0;
+          long k1 = o.nrows ? atol(o.cell[0][1]) : 0;
+          /* e a soma da particular com o do núcleo TAMBÉM resolve: é o que
+           * «infinitas» quer dizer, e mede-se em vez de se afirmar */
+          long s1 = 1*(x+k0) + 2*(y+k1), s2 = 2*(x+k0) + 4*(y+k1);
+          int soma = (s1 == 3 && s2 == 6);
+          printf("      x+2y=3, 2x+4y=6 → a particular (%ld,%ld) resolve"
+                 " (%ld,%ld) · o núcleo de A tem %d vector (%ld,%ld) · e a SOMA"
+                 " resolve também (%ld,%ld)  %s\n", x, y, l1, l2, o.nrows,
+                 k0, k1, s1, s2,
+                 (bate && tem_nucleo && soma) ? "" : "NAO BATE");
+          if(!bate || !tem_nucleo || !soma) mal++; }
+
+        /* ── (4) E A SOLUÇÃO É EXACTA EM ℚ: `2x = 1` dá 1/2, não 0 nem 0,5.
+         * É a mesma razão da inversa — o sistema de inteiros tem solução
+         * racional, e o motor não a arredonda nem a trunca. */
+        sql_executa("CREATE TABLE q (a,d)", &o);
+        sql_executa("INSERT INTO q VALUES (2,1)", &o);
+        sql_executa("SELECT resolve(*) FROM q", &o);
+        int rq = (o.nrows == 1 && !strcmp(o.cell[0][0], "1/2"));
+        printf("      2x = 1 → %s (esp 1/2, não 0 nem 0,5)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", rq ? "" : "NAO BATE");
+        if(!rq) mal++;
+
+        /* ── O CONTROLO: uma tabela de UMA coluna não é um sistema — não há
+         * onde separar o A do b —, e é recusada. Sem ele, o motor podia estar a
+         * ler a única coluna como o lado direito de um sistema vazio e a
+         * devolver alguma coisa. */
+        sql_executa("CREATE TABLE s1 (a)", &o);
+        sql_executa("INSERT INTO s1 VALUES (7)", &o);
+        int c1 = sql_executa("SELECT resolve(*) FROM s1", &o);
+        printf("\n      CONTROLO — uma coluna só (não há [A|b]): %s  %s\n",
+               c1 ? "PASSOU (mau)" : "recusado", c1 ? "NAO BATE" : "");
+        if(c1) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("RESOLVER É A VOLTA DO PRODUTO, E OS TRÊS DESFECHOS SÃO UMA COMPARAÇÃO DE DOIS"
+           " NÚMEROS. O produto COMPÕE — dá o que sai de aplicar; resolver DESCOMPÕE — dá o"
+           " que teria de entrar. É o par de sempre, e é por isso que um verifica o outro: o"
+           " gume não é comparar a solução com a que se esperava, é APLICÁ-LA e exigir o lado"
+           " direito. A tabela é a matriz AUMENTADA [A|b], que não é uma convenção arbitrária"
+           " — é a forma em que o sistema É uma tabela, e a única que não obriga a passar dois"
+           " objetos onde há um. E os três desfechos decidem-se pelo POSTO, que é"
+           " Rouché–Capelli e já estava todo aqui: se o lado direito ACRESCENTA posto, ele"
+           " saiu da imagem e não há x que lá chegue — o motor recusa e diz os dois números,"
+           " porque «não tem solução» sem eles é um veredicto sem prova. Se os postos batem"
+           " mas ficam abaixo do número de colunas, há infinitas, e a que sai é a PARTICULAR"
+           " — dito, e não escondido: as livres a zero, e as outras somam-se-lhe pelo NÚCLEO,"
+           " que é o objeto que o §W52 já sabe devolver. As duas peças encaixam sem se ter"
+           " escrito uma linha para isso, e é esse o sinal de as duas estarem no sítio certo."
+           " A solução é EXACTA em ℚ: `2x = 1` dá 1/2, não 0 nem 0,5 — a mesma razão da"
+           " inversa. O CONTROLO é a tabela de UMA coluna, que não é um sistema porque não há"
+           " onde separar o A do b: sem ele, o motor podia estar a ler essa coluna como o"
+           " lado direito de um sistema vazio e a devolver alguma coisa.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -2937,6 +2937,30 @@ mesma conservação: numa $2\times2$ de posto um, o núcleo e o núcleo da
 transposta têm ambos dimensão um, porque o posto de uma matriz e o da sua
 transposta são o mesmo (\code{tests/pgwire.c} §W53).
 
+\medskip\noindent\textbf{E resolver é a volta do produto.} O produto
+\emph{compõe} --- dá o que sai de aplicar; \code{resolve} \emph{descompõe} ---
+dá o que teria de entrar. A tabela é a matriz aumentada $[A\,|\,b]$, que não é
+convenção arbitrária: é a forma em que o sistema \emph{é} uma tabela, e a única
+que não obriga a passar dois objetos onde há um. E os três desfechos são uma
+comparação de dois números --- Rouché--Capelli, que já estava todo aqui:
+\[
+\begin{array}{ll}
+\operatorname{posto}(A)<\operatorname{posto}([A|b]) & \text{não há solução}\\
+\operatorname{posto}(A)=\operatorname{posto}([A|b])<n & \text{há infinitas}\\
+\operatorname{posto}(A)=\operatorname{posto}([A|b])=n & \text{há uma}
+\end{array}
+\]
+Quando o lado direito \emph{acrescenta} posto, ele saiu da imagem e não há $x$
+que lá chegue --- e a recusa diz os dois números, porque «não tem solução» sem
+eles é um veredicto sem prova.
+
+\medskip\noindent\textbf{As peças encaixam sem se ter escrito uma linha para
+isso.} No caso das infinitas, a que sai é a \emph{particular} --- dito, e não
+escondido --- e o que falta é o \textbf{núcleo}, que o §W52 já sabia devolver:
+mede-se que a soma das duas também resolve, que é o que «infinitas» quer dizer.
+O gume, aqui como lá, é \emph{aplicar} em vez de comparar. E a solução é exata
+em $\mathbb{Q}$: $2x=1$ dá $1/2$ (\code{tests/pgwire.c} §W54).
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as
