@@ -3419,6 +3419,11 @@ static int  ord_desc = 0;
  * para as operações do andar. Não é uma paragem antecipada da varredura — é a
  * restrição da lista, e por isso corre DEPOIS do WHERE e da ordem. */
 static long lim_n = -1;              /* -1 = sem LIMIT */
+/* O OFFSET É O DUAL DO LIMIT. Se o limite é o PREFIXO da lista, o offset é o
+ * que se salta antes dele — e os dois juntos são uma FAIXA na ordem, tal como
+ * a faixa do índice é uma faixa nos valores. Aqui a ordem é a das linhas; lá é
+ * a dos símbolos. É o mesmo corte, sobre outra ordem. */
+static long off_n = 0;               /* 0 = sem OFFSET */
 /* GROUP BY É A FIBRA. `thm:escada`: «quocientar é esquecer a distinção; G mede
  * quantos elementos foram esquecidos juntos.» Agrupar por uma coluna é a
  * realização π: linha ↦ valor dessa coluna, e o count de cada grupo É G(x) — o
@@ -4246,7 +4251,8 @@ static int varre(const char *resto, int acao){
     /* ── ORDER BY <coluna> [ASC|DESC] ─────────────────────────────────────
      * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
      * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
-    ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1; hav_op = 0; hav_n = 0;
+    ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1; off_n = 0;
+    hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
     if(acao == ACAO_MARCA){
         const char *q = p;
@@ -4342,6 +4348,21 @@ static int varre(const char *resto, int acao){
             }
             lim_n = v; p = q;
         }
+        /* e o OFFSET, que pode vir depois do LIMIT ou sozinho */
+        { const char *q = p;
+          if(palavra(&q, "OFFSET")){
+            pula(&q);
+            long v = 0; int viu = 0;
+            while(*q >= '0' && *q <= '9'){ v = v*10 + (*q - '0'); q++; viu = 1; }
+            if(!viu){
+                printf("erro: OFFSET sem número — RECUSADO.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "OFFSET: esperava um numero"); }
+                return 0;
+            }
+            off_n = v; p = q;
+          } }
     }
 
     pula(&p);
@@ -5097,10 +5118,13 @@ static int varre(const char *resto, int acao){
           } }
     }
 
-    long emitidas = 0;
+    long emitidas = 0, saltadas = 0;
     for(long ii = 0; ii < (ord_usa ? ord_n : nrows); ii++){
         long i = ord_usa ? ord_seq[ii] : ii;
         if(!bit_le(S_MATCH, i)) continue;
+        /* o OFFSET salta ANTES de o LIMIT contar: são os dois extremos da mesma
+         * faixa, e trocar a ordem deles daria outra fatia */
+        if(saltadas < off_n){ saltadas++; continue; }
         if(lim_n >= 0 && emitidas >= lim_n) break;   /* LIMIT: o prefixo da lista */
         emitidas++;
         printf("   ");

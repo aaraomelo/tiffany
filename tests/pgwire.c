@@ -4184,6 +4184,93 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W31: O OFFSET É O DUAL DO LIMIT, E JUNTOS SÃO UMA FAIXA ═══════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w31.mem"); unlink("/tmp/pgwire_w31.prog");
+        unlink("/tmp/pgwire_w31__t.mem"); unlink("/tmp/pgwire_w31__t.prog");
+        printf("\n§W31 o offset: o dual do limite, e a fatia que particiona.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w31")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        for(int i = 1; i <= 10; i++){
+            char q[64];
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+            sql_executa(q, &o);
+        }
+        struct { const char *q; int n; const char *primeiro; } cs[] = {
+            { "SELECT * FROM t LIMIT 3",                      3, "1"  },
+            { "SELECT * FROM t OFFSET 7",                     3, "8"  },
+            { "SELECT * FROM t LIMIT 3 OFFSET 4",             3, "5"  },
+            { "SELECT * FROM t ORDER BY a DESC LIMIT 3 OFFSET 2", 3, "8" },
+            { "SELECT * FROM t OFFSET 100",                   0, ""   },
+        };
+        for(unsigned k = 0; k < sizeof cs / sizeof cs[0]; k++){
+            int r = sql_executa(cs[k].q, &o);
+            int bate = r && o.nrows == cs[k].n
+                       && (!cs[k].n || !strcmp(o.cell[0][0], cs[k].primeiro));
+            printf("      %-46s %d linha(s), 1.ª = %-3s %s\n", cs[k].q + 21,
+                   o.nrows, o.nrows ? o.cell[0][0] : "-", bate ? "" : "NAO BATE");
+            if(!bate) mal++;
+        }
+
+        /* O GUME É A CONSERVAÇÃO: fatias consecutivas do mesmo tamanho têm de
+         * PARTICIONAR a lista — nem repetir nem perder. Um offset que contasse
+         * depois do limite, ou um limite que contasse as saltadas, quebraria
+         * isto sem quebrar nenhuma fatia isolada. */
+        {
+            int visto[16]; for(int k = 0; k < 16; k++) visto[k] = 0;
+            long total = 0;
+            for(int off = 0; off < 10; off += 3){
+                char q[80];
+                snprintf(q, sizeof q, "SELECT * FROM t LIMIT 3 OFFSET %d", off);
+                sql_executa(q, &o);
+                total += o.nrows;
+                for(int i = 0; i < o.nrows; i++){
+                    int v = atoi(o.cell[i][0]);
+                    if(v >= 1 && v <= 10) visto[v]++;
+                }
+            }
+            int cobre = 1;
+            for(int v = 1; v <= 10; v++) if(visto[v] != 1) cobre = 0;
+            printf("\n      as fatias de 3 em 3: %ld linhas ao todo, e cada uma"
+                   " das dez vista EXACTAMENTE uma vez: %s\n",
+                   total, (cobre && total == 10) ? "sim" : "NAO");
+            if(!cobre || total != 10) mal++;
+        }
+
+        /* e o CONTROLO: a fatia tem de depender do offset — sem isso,
+         * «particionam» passaria por o offset ser ignorado e as fatias serem
+         * todas iguais e sobrepostas. */
+        sql_executa("SELECT * FROM t LIMIT 3 OFFSET 0", &o);
+        char p0[16]; snprintf(p0, sizeof p0, "%s", o.nrows ? o.cell[0][0] : "?");
+        sql_executa("SELECT * FROM t LIMIT 3 OFFSET 3", &o);
+        char p3[16]; snprintf(p3, sizeof p3, "%s", o.nrows ? o.cell[0][0] : "?");
+        int move = strcmp(p0, p3) != 0;
+        printf("      CONTROLO — a fatia MOVE com o offset: %s vs %s  %s\n",
+               p0, p3, move ? "" : "NAO");
+        if(!move) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O OFFSET É O DUAL DO LIMITE, E JUNTOS SÃO UMA FAIXA. Se o limite é o PREFIXO da"
+           " lista, o offset é o que se salta antes dele — e os dois formam a fatia [k, k+n),"
+           " que é uma FAIXA NA ORDEM, tal como a do índice é uma faixa nos VALORES. É o mesmo"
+           " corte sobre outra ordem: lá a dos símbolos, aqui a das linhas. A ordem entre eles"
+           " importa e está no código: o offset salta ANTES de o limite contar, porque são os"
+           " dois extremos da mesma faixa e trocá-los daria outra fatia. O GUME É A"
+           " CONSERVAÇÃO, e não cada fatia isolada: fatias consecutivas do mesmo tamanho têm de"
+           " PARTICIONAR a lista — as dez linhas aparecem, e cada uma exactamente UMA vez, nem"
+           " repetida nem perdida. Um offset que contasse depois do limite, ou um limite que"
+           " contasse as linhas saltadas, quebraria essa partição sem quebrar nenhuma fatia"
+           " isolada, que é o que as tornaria invisíveis a um teste caso a caso. E O CONTROLO"
+           " impede que «particionam» passe por o offset ser ignorado: exige-se que a fatia"
+           " MOVA com ele, porque cinco fatias idênticas e sobrepostas também dariam trinta"
+           " linhas. Compõe com a ordem, e mede-se: com ORDER BY DESC a fatia é a do fim da"
+           " lista ordenada, não a do fim da tabela.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
