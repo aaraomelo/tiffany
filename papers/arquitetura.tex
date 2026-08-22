@@ -2488,8 +2488,14 @@ das duas pontas; o \code{DROP} recusado), com o controlo em duas metades --- sem
 seta os mesmos valores entram, e a mãe de \emph{outra} tabela não fica presa.}
 
 \medskip\noindent\textbf{E quando a seta perde o destino há três respostas, e
-são só três.} Não é uma lista de opções do dialecto: são as três coisas que se
-podem fazer a uma seta cujo destino desaparece.
+são só três.} Há \emph{duas portas} que tiram o destino debaixo de uma seta, e
+são o par de sempre: \textbf{apagar} a linha apontada faz o destino
+desaparecer, \textbf{mudar-lhe a chave} faz o destino sair do sítio --- e uma
+seta que aponta para onde já não há ninguém é o mesmo estado nos dois casos.
+Por isso a resposta é a \emph{mesma função} e não duas, que é como duas
+implementações da mesma frase deixam de concordar. O que fazer não é uma lista
+de opções do dialecto: são as três coisas que se podem fazer a uma seta cujo
+destino sai debaixo dela.
 \[
 \begin{array}{lll}
 \code{RESTRICT} & \text{recusar}     & \text{a seta não pode perder o destino; nada muda}\\
@@ -2498,12 +2504,15 @@ podem fazer a uma seta cujo destino desaparece.
 \end{array}
 \]
 \code{RESTRICT} é o modo por omissão porque é o único que não faz nada sem
-ordem; \code{CASCADE} é a imagem inversa do \code{thm:multiplicidade}, e é
-\emph{só} a fibra de $x$ --- o que se mede deixando na filha uma linha que
-aponta a outro valor e exigindo que fique; \code{SET NULL} manda a célula para
-onde uma coordenada sem valor mora, e mede-se pelo dual e não pela impressão
-(\code{IS NULL} apanha-a, \code{= 0} não). Quem diz qual é a \textbf{filha},
-porque a seta é dela.
+ordem; \code{CASCADE} é a imagem inversa do \code{thm:multiplicidade} --- no
+apagar leva $\pi^{-1}(x)$ junto, no mudar leva-o para $y$ ---, e é \emph{só} a
+fibra de $x$, o que se mede deixando na filha uma linha que aponta a outro valor
+e exigindo que fique; \code{SET NULL} manda a célula para onde uma coordenada
+sem valor mora, e mede-se pelo dual e não pela impressão (\code{IS NULL}
+apanha-a, \code{= 0} não). Quem diz qual é a \textbf{filha}, porque a seta é
+dela --- e os dois modos são \textbf{independentes}, nos dois pares de bits do
+mesmo octeto: nada obriga quem quer a fibra atrás numa mudança de chave a
+querê-la atrás num apagar.
 
 \medskip\noindent\textbf{O gume é a ordem:} pergunta-se a \emph{todas} antes de
 agir a \emph{qualquer uma}. Numa passagem só, a filha em \code{CASCADE}
@@ -2520,13 +2529,13 @@ o \code{varre} tem estado global.
 
 \medido{\code{tests/pgwire.c} §W35 (as duas pontas; o \code{NULL} que não
 aponta; a mãe livre contra a presa; o \code{DROP} recusado) e §W36 (as três
-respostas; a fibra e só a fibra; o dual em vez do zero; a atomicidade da
-recusa; a persistência do modo), com o controlo no ARRANJO: as três filhas
-apontam à mesma coluna da mesma mãe e reagem das três maneiras --- o modo é da
-seta, não da tabela.}
+respostas nas DUAS portas; a fibra e só a fibra; o dual em vez do zero; a
+atomicidade da recusa; a independência dos dois modos; a persistência), com o
+controlo no ARRANJO: as três filhas apontam à mesma coluna da mesma mãe e
+reagem das três maneiras --- o modo é da seta, não da tabela.}
 
 \colunas{\code{aranha thm:multiplicidade}; \code{aranha thm:bitunico}}
-        {\code{REFERENCES}; \code{ON DELETE}; lista de filhos na mãe}
+        {\code{REFERENCES}; \code{ON DELETE}/\code{ON UPDATE}; filhos na mãe}
         {\code{tests/pgwire.c} §W35; §W36}
 
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}

@@ -4978,8 +4978,9 @@ int main(void){
             "/tmp/pgwire_w36__m.mem", "/tmp/pgwire_w36__m.prog",
             "/tmp/pgwire_w36__fc.mem", "/tmp/pgwire_w36__fc.prog",
             "/tmp/pgwire_w36__fn.mem", "/tmp/pgwire_w36__fn.prog",
-            "/tmp/pgwire_w36__fr.mem", "/tmp/pgwire_w36__fr.prog" };
-        for(int k = 0; k < 10; k++) unlink(lixo[k]);
+            "/tmp/pgwire_w36__fr.mem", "/tmp/pgwire_w36__fr.prog",
+            "/tmp/pgwire_w36__fd.mem", "/tmp/pgwire_w36__fd.prog" };
+        for(int k = 0; k < 12; k++) unlink(lixo[k]);
         printf("\n§W36 a seta sem destino: recusar, levar junto, soltar.\n\n");
         if(!sql_abrir("/tmp/pgwire_w36")) mal++;
         sql_executa("CREATE TABLE m (id UNIQUE, z)", &o);
@@ -5074,6 +5075,62 @@ int main(void){
                persiste ? "" : "NAO BATE");
         if(!persiste) mal++;
 
+        /* ── (6) E HÁ UMA SEGUNDA PORTA, que é a outra metade do par: MUDAR
+         * a chave da mãe tira o destino debaixo da seta tal como apagar a
+         * linha. Sem esta metade, `UPDATE m SET id = 99` passava em silêncio e
+         * deixava a filha a apontar para um valor que já não existe — com o
+         * motor a recusar escrever a MESMA seta que já lá estava. As três
+         * respostas são as mesmas, e é a mesma função que as dá. */
+        sql_fechar();
+        for(int k = 0; k < 12; k++) unlink(lixo[k]);
+        if(!sql_abrir("/tmp/pgwire_w36")) mal++;
+        sql_executa("CREATE TABLE m (id UNIQUE, z)", &o);
+        sql_executa("INSERT INTO m VALUES (1,10)", &o);
+        sql_executa("INSERT INTO m VALUES (2,20)", &o);
+        sql_executa("INSERT INTO m VALUES (3,30)", &o);
+        sql_executa("CREATE TABLE fc (a, dono REFERENCES m(id) ON UPDATE CASCADE)", &o);
+        sql_executa("CREATE TABLE fn (a, dono REFERENCES m(id) ON UPDATE SET NULL)", &o);
+        sql_executa("CREATE TABLE fr (a, dono REFERENCES m(id))", &o);
+        sql_executa("INSERT INTO fc VALUES (11,1)", &o);
+        sql_executa("INSERT INTO fn VALUES (22,2)", &o);
+        sql_executa("INSERT INTO fr VALUES (33,3)", &o);
+
+        int m1 = sql_executa("UPDATE m SET id = 91 WHERE id = 1", &o);
+        sql_executa("SELECT * FROM fc", &o);
+        char segue[8]; snprintf(segue, sizeof segue, "%s", o.nrows ? o.cell[0][1] : "?");
+        int m2 = sql_executa("UPDATE m SET id = 92 WHERE id = 2", &o);
+        sql_executa("SELECT * FROM fn WHERE dono IS NULL", &o);
+        long soltou = o.nrows;
+        int m3 = sql_executa("UPDATE m SET id = 99 WHERE id = 3", &o);
+        sql_executa("SELECT * FROM m WHERE id = 3", &o);
+        long ficou = o.nrows;
+        int porta2 = (m1 && !strcmp(segue, "91") && m2 && soltou == 1
+                      && !m3 && ficou == 1);
+        printf("      a segunda porta — MUDAR a chave: CASCADE leva a fibra para"
+               " %s (esp 91) · SET NULL solta %ld (esp 1) · RESTRICT recusa %d e"
+               " a mãe fica %ld  %s\n", segue, soltou, m3, ficou,
+               porta2 ? "" : "NAO BATE");
+        if(!porta2) mal++;
+
+        /* ── (7) E OS DOIS MODOS SÃO INDEPENDENTES. Vivem nos dois pares de
+         * bits do mesmo octeto, e nada obriga quem quer a fibra atrás numa
+         * mudança de chave a querê-la atrás num apagar. Uma seta que leva no
+         * UPDATE e recusa no DELETE tem de fazer as duas coisas — se o motor
+         * guardasse um modo só, uma das duas metades respondia pela outra. */
+        sql_executa("CREATE TABLE fd (a, dono REFERENCES m(id)"
+                    " ON UPDATE CASCADE ON DELETE RESTRICT)", &o);
+        sql_executa("INSERT INTO m VALUES (5,50)", &o);
+        sql_executa("INSERT INTO fd VALUES (55,5)", &o);
+        int x1 = sql_executa("UPDATE m SET id = 95 WHERE id = 5", &o);
+        sql_executa("SELECT * FROM fd", &o);
+        char leva[8]; snprintf(leva, sizeof leva, "%s", o.nrows ? o.cell[0][1] : "?");
+        int x2 = sql_executa("DELETE FROM m WHERE id = 95", &o);
+        int indep = (x1 && !strcmp(leva, "95") && !x2);
+        printf("      e os dois modos são independentes: leva no UPDATE (%s, esp"
+               " 95) e recusa no DELETE (%d, esp 0)  %s\n", leva, x2,
+               indep ? "" : "NAO BATE");
+        if(!indep) mal++;
+
         /* ── O CONTROLO: o modo é da SETA e não da tabela. As três filhas
          * apontam para a mesma mãe e a mesma coluna, e reagiram das três
          * maneiras à mesma operação — um motor com um comportamento só teria
@@ -5106,7 +5163,17 @@ int main(void){
            " das três medidas isoladas. Fica dito o limite: a CADEIA NÃO DESCE — se a filha"
            " for mãe de outra, a cascata pára e a segunda seta é verificada como qualquer"
            " outra. É declarado, não esquecido: descer exigia reentrar no varre, que tem"
-           " estado global.",
+           " estado global. E HÁ DUAS PORTAS, não uma: apagar a linha apontada faz o destino"
+           " desaparecer, MUDAR-LHE a chave faz o destino sair do sítio, e uma seta que"
+           " aponta para onde já não há ninguém é o mesmo estado nos dois casos — pelo que a"
+           " resposta é a MESMA FUNÇÃO e não duas, que é como duas implementações da mesma"
+           " frase deixam de concordar. Sem a segunda metade, `UPDATE m SET id = 99` passava"
+           " em silêncio e deixava a filha a apontar para um valor que já não existe, com o"
+           " motor a recusar escrever a MESMA seta que já lá estava. E os dois modos são"
+           " INDEPENDENTES — vivem nos dois pares de bits do mesmo octeto —, porque nada"
+           " obriga quem quer a fibra atrás numa mudança de chave a querê-la atrás num"
+           " apagar: mede-se com uma seta que LEVA no UPDATE e RECUSA no DELETE, e um motor"
+           " que guardasse um modo só teria uma das metades a responder pela outra.",
            mal == 0);
     }
 
