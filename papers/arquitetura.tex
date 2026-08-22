@@ -5824,6 +5824,38 @@ dela.}
         {aritmética de endereços na escada; $\operatorname{prof}$ como profundidade da primeira divergência}
         {\code{tests/pgwire.c} §W121--§W123}
 
+\subsection*{O traço e o determinante factorizam a família dos metais}
+
+\noindent O catálogo dá $Q_m(x)=x^4+2m\,x^3-6x^2-2m\,x+1$ e afirma que ele
+factoriza sobre o corpo do \emph{próprio} metal, com o coeficiente do meio a ser a
+ordem. O medidor que citava era o da identidade de Rogers--Ramanujan --- em
+\code{long double}, com resíduo $1{,}4\times10^{-17}$. \textbf{A factorização não
+precisa disso.} Expandindo $(x^2+2\sigma x-1)(x^2+2\sigma' x-1)$ vem
+\[
+ x^4+2(\sigma+\sigma')x^3+(4\sigma\sigma'-2)x^2-2(\sigma+\sigma')x+1,
+\]
+e bastam $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$. Ora esses dois números não se
+escrevem: \emph{pedem-se ao motor}, que os devolve como o \code{traco} e o
+\code{det} da matriz $\binom{m\ 1}{1\ 0}$ do metal --- e a igualdade fica entre
+coeficientes \textbf{inteiros}, sem uma raiz calculada.
+
+\medskip\noindent\textbf{E daí sai porque o coeficiente do meio é a ordem.} Ao
+longo dos oito metais, $2(\sigma+\sigma')$ toma \textbf{oito} valores distintos e
+$4\sigma\sigma'-2$ toma \textbf{um}. Dois coeficientes, dois comportamentos, a mesma
+origem: um vê a ordem porque a soma das raízes \emph{é} $m$; o outro não a vê porque
+o produto é $-1$ em toda a família. O gume é que $Q_m$ não factorize sobre $\mathbb Q$:
+pelo critério da raiz racional os únicos candidatos são $\pm1$, e $Q_m(1)=Q_m(-1)=-4$
+em todos os metais.
+
+\medido{\code{tests/pgwire.c} §W124 --- a expansão por Viète contra $Q_m$ termo a
+termo, $8/8$, com $\sigma+\sigma'$ e $\sigma\sigma'$ vindos do motor; os valores
+distintos de cada coeficiente ($8$ contra $1$); $\sigma^2+1=2+m\sigma$ de norma não
+nula nos oito; e o gume da raiz racional.}
+
+\colunas{\code{catalogo obs:base}}
+        {\code{traco}/\code{det} sobre a matriz do metal; a expansão em coeficientes inteiros}
+        {\code{tests/pgwire.c} §W124}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

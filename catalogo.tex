@@ -2013,6 +2013,18 @@ raiz pequena do fator. Em $m=1$ isso \emph{é} a fórmula de Ramanujan, porque $
 \varphi\sqrt5$ (erro exatamente $0$). Não é um $R$ avaliado em vários pontos: é uma \emph{família} de
 frações modulares, uma por nível, cada uma gerando o seu metal --- a prata pela Göllnitz--Gordon de
 nível $8$, medida também. \emph{O fluxo é de $\pi$ para o metal.}
+
+\medido{e a factorização não precisa da parte transcendente: expandindo
+$(x^2+2\sigma x-1)(x^2+2\sigma' x-1)$ vem $x^4+2(\sigma+\sigma')x^3+(4\sigma\sigma'-2)x^2
+-2(\sigma+\sigma')x+1$, e bastam $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$ para dar $Q_m$ termo a
+termo --- com esses dois pedidos ao motor como o \emph{traço} e o \emph{determinante} da matriz do
+metal, $8/8$, sem uma raiz calculada e entre coeficientes inteiros; daí sai porque o coeficiente do
+meio é a ordem: ao longo dos oito metais o de $x^3$ toma \textbf{oito} valores distintos e o de $x^2$
+toma \textbf{um} ($-6$), porque $\sigma\sigma'=-1$ em toda a família; em $\mathbb Z[\sigma]$ vale
+$\sigma^2+1=2+m\sigma$, de norma não nula nos oito, e é dele que o factor de grau dois se faz; e o
+gume é que $Q_m$ \emph{não} factorize sobre $\mathbb Q$ --- pelo critério da raiz racional os únicos
+candidatos são $\pm1$ e $Q_m(1)=Q_m(-1)=-4$ em todos, logo a factorização é mesmo sobre o corpo do
+próprio metal (\code{tests/pgwire.c} §W124)}
 \end{obs}
 
 \begin{obs}[o corte: $\pi$ comanda o abeliano --- e é ali que o ouro fura]

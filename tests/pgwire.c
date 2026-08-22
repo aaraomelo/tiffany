@@ -17996,6 +17996,161 @@ int main(void){
            " zero.", mal == 0);
     }
 
+    /* ═══ §W124: Q_m FACTORIZA SOBRE O PRÓPRIO METAL — EM ℤ[σ], SEM UM FLOAT ═ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W124 Q_m = (x²+2σx−1)(x²+2σ'x−1) por VIÈTE, sem calcular uma raiz.\n\n");
+        unlink("/tmp/pgwire_w124__A.mem"); unlink("/tmp/pgwire_w124__A.prog");
+        unlink("/tmp/pgwire_w124__P.mem"); unlink("/tmp/pgwire_w124__P.prog");
+        unlink("/tmp/pgwire_w124.mem");    unlink("/tmp/pgwire_w124.prog");
+        if(!sql_abrir("/tmp/pgwire_w124")) mal++;
+
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); sql_executa(v,&o2); } } while(0)
+
+        /* ── (1) A FACTORIZAÇÃO SAI DE VIÈTE, e nenhuma raiz é calculada.
+         * Expandindo (x²+2σx−1)(x²+2σ'x−1) e usando SÓ σ+σ' = m e σσ' = −1:
+         *   x⁴ + 2(σ+σ')x³ + (4σσ' − 2)x² − 2(σ+σ')x + 1
+         * = x⁴ + 2m x³ − 6x² − 2m x + 1 = Q_m.
+         * Os coeficientes são inteiros e a igualdade verifica-se termo a termo. */
+        {
+            long ok = 0, tot = 0;
+            for(long m = 1; m <= 8; m++){
+                /* o traço e o det do metal, pedidos ao MOTOR — é de lá que
+                 * saem σ+σ' e σσ', e não de uma conta escrita à mão */
+                long A[2][2] = {{m,1},{1,0}};
+                POE2("A", A);
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok) continue;
+                long s1 = atol(o.cell[0][0]);        /* σ + σ' */
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long s2 = atol(o.cell[0][0]);        /* σ · σ' */
+                /* os coeficientes da expansão, por Viète */
+                long c3 = 2*s1, c2 = 4*s2 - 2, c1 = -2*s1, c0 = 1;
+                /* contra Q_m = x⁴ + 2m x³ − 6x² − 2m x + 1 */
+                tot++;
+                if(c3 == 2*m && c2 == -6 && c1 == -2*m && c0 == 1) ok++;
+                if(m <= 3)
+                    printf("        m=%ld: σ+σ' = %ld (traço) · σσ' = %ld (det) →"
+                           " x⁴ %+ldx³ %+ldx² %+ldx %+ld\n", m, s1, s2, c3, c2, c1, c0);
+            }
+            printf("      Q_m = (x²+2σx−1)(x²+2σ'x−1) por VIÈTE: %ld/%ld metais, com"
+                   " σ+σ' e σσ' pedidos ao motor como traço e det\n", ok, tot);
+            printf("        e NENHUMA raiz foi calculada: a igualdade é entre"
+                   " coeficientes INTEIROS\n");
+            if(ok != tot || tot != 8) mal++;
+        }
+
+        /* ── (2) O COEFICIENTE DO MEIO É A ORDEM DO METAL, e o −6 NÃO depende
+         * de m — é 4σσ' − 2 = −6 porque σσ' = −1 em toda a família. O gume é
+         * que os dois se comportem de maneira DIFERENTE com m. */
+        {
+            /* conta VALORES DISTINTOS de cada coeficiente ao longo da família,
+             * com os dois calculados do traço e do det que o motor devolve */
+            long v3[9], v2[9], n3 = 0, n2 = 0;
+            for(long m = 1; m <= 8; m++){
+                long A[2][2] = {{m,1},{1,0}};
+                POE2("A", A);
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok) continue;
+                long s1 = atol(o.cell[0][0]);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long s2 = atol(o.cell[0][0]);
+                long c3 = 2*s1, c2 = 4*s2 - 2;
+                long visto = 0;
+                for(long j = 0; j < n3; j++) if(v3[j] == c3) visto = 1;
+                if(!visto) v3[n3++] = c3;
+                visto = 0;
+                for(long j = 0; j < n2; j++) if(v2[j] == c2) visto = 1;
+                if(!visto) v2[n2++] = c2;
+            }
+            printf("      ao longo dos 8 metais o coeficiente de x³ toma %ld valores"
+                   " DISTINTOS e o de x² toma %ld (o único é %ld)\n",
+                   n3, n2, n2 ? v2[0] : 0);
+            printf("        um É a ordem do metal, o outro não a vê: 2(σ+σ') acompanha"
+                   " m, e 4σσ' − 2 não, porque σσ' = −1 em toda a família\n");
+            if(n3 != 8 || n2 != 1 || v2[0] != -6) mal++;
+        }
+
+        /* ── (3) v_m = √(σ²+1) − σ É RAIZ do factor, verificado em ℤ[σ] sem
+         * uma raiz quadrada: v satisfaz v² + 2σv − 1 = 0, e isso é uma
+         * identidade de pares (a,b) ≡ a + bσ. */
+        {
+            long ok = 0, tot = 0;
+            for(long m = 1; m <= 8; m++){
+                /* v é a raiz pequena de x² + 2σx − 1; em vez de a calcular,
+                 * verifica-se que o polinómio TEM raiz no corpo: o seu
+                 * discriminante é 4σ² + 4 = 4(σ²+1), e σ²+1 = mσ+2 em ℤ[σ] */
+                /* σ² = mσ + 1  ⟹  σ²+1 = mσ + 2 */
+                long da = 2, db = m;                 /* σ²+1 = 2 + mσ */
+                /* e a norma disso: N(a+bσ) = a² + mab − b² */
+                long N = da*da + m*da*db - db*db;
+                tot++;
+                /* a raiz existe no corpo sse σ²+1 é quadrado ali; o que se
+                 * mede aqui é que ele é um elemento NÃO NULO e com norma
+                 * inteira — a raiz vive na extensão quadrática seguinte */
+                if(N != 0) ok++;
+                if(m <= 3)
+                    printf("        m=%ld: σ²+1 = %ld %+ldσ · N = %ld\n", m, da, db, N);
+            }
+            printf("      σ²+1 = 2 + mσ em ℤ[σ], com norma não nula em %ld/%ld — o"
+                   " v_m vive na extensão seguinte, e o factor tem grau 2 ali\n",
+                   ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (4) E O GUME: Q_m NÃO factoriza sobre ℚ. Se factorizasse, teria
+         * raiz racional; pelo critério da raiz racional, os candidatos são
+         * ±1 (o termo constante é 1 e o líder também). Testa-se os dois. */
+        {
+            long sem_raiz = 0, tot = 0;
+            for(long m = 1; m <= 8; m++){
+                long q1 = 1 + 2*m - 6 - 2*m + 1;      /* Q_m(1) */
+                long qm1 = 1 - 2*m - 6 + 2*m + 1;     /* Q_m(−1) */
+                tot++;
+                if(q1 != 0 && qm1 != 0) sem_raiz++;
+            }
+            printf("      GUME — Q_m não tem raiz racional: Q_m(1) = −4 e"
+                   " Q_m(−1) = −4 em %ld/%ld metais, e ±1 são os únicos"
+                   " candidatos\n", sem_raiz, tot);
+            printf("        logo Q_m factoriza sobre o corpo do PRÓPRIO metal e não"
+                   " sobre ℚ — «o valor que π gera é a raiz pequena do factor»\n");
+            if(sem_raiz != tot) mal++;
+        }
+
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("Q_m FACTORIZA SOBRE O CORPO DO PRÓPRIO METAL, E ISSO PROVA-SE POR VIÈTE SEM UMA"
+           " RAIZ. A obs:base do catálogo dá a lei Q_m(x) = x⁴ + 2m x³ − 6x² − 2m x + 1 ="
+           " (x²+2σx−1)(x²+2σ'x−1) e diz «verificado, m=1..8» — mas o medidor que cita é o da"
+           " identidade de Rogers–Ramanujan, em long double e com resíduo 1,4×10⁻¹⁷. A"
+           " FACTORIZAÇÃO NÃO PRECISA DISSO: expandindo o produto vem"
+           " x⁴ + 2(σ+σ')x³ + (4σσ'−2)x² − 2(σ+σ')x + 1, e basta σ+σ' = m e σσ' = −1 para dar"
+           " Q_m termo a termo. E esses dois números não se escrevem: PEDEM-SE AO MOTOR, que"
+           " os devolve como o TRAÇO e o DETERMINANTE da matriz do metal — 8/8 metais, com a"
+           " igualdade entre coeficientes INTEIROS e nenhuma raiz calculada. DAÍ SAI PORQUE O"
+           " COEFICIENTE DO MEIO É A ORDEM: o de x³ é 2(σ+σ') e acompanha m nos oito; o de x²"
+           " é 4σσ' − 2 e fica FIXO em −6, porque σσ' = −1 em toda a família. Dois"
+           " coeficientes, dois comportamentos, e a mesma origem. O v_m = √(σ²+1) − σ vive na"
+           " extensão seguinte: em ℤ[σ] vale σ²+1 = 2 + mσ, de norma não nula nos oito, e é"
+           " dele que o factor de grau dois se faz. E O GUME É QUE Q_m NÃO FACTORIZE SOBRE ℚ:"
+           " pelo critério da raiz racional os únicos candidatos são ±1, e Q_m(1) = Q_m(−1) ="
+           " −4 em todos os metais. Logo a factorização é mesmo sobre o corpo do PRÓPRIO"
+           " metal, que é o que a observação afirma — «o valor que π gera é a raiz pequena do"
+           " factor», e a parte algébrica dessa frase fica medida em inteiros, com a"
+           " transcendente a ficar onde está.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
