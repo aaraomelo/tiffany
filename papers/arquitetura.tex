@@ -4470,6 +4470,63 @@ exibido em $n=5$ com o controlo em $n=4$; e o envelope com o seu controlo.}
         {\code{det}/\code{inversa}/\code{traco}/\code{produto} pelo motor; Newton; o envelope da célula}
         {\code{tests/pgwire.c} §W94}
 
+\subsection*{Os traços da companheira, e a zeta --- onde o motor discorda de uma linha}
+
+\noindent A \code{catalogo prop:tracos} (§\code{sec:sequencias}) diz que
+$t_k=\operatorname{Tr}(C_{n,m}^{\,k})$ é inteiro, com $t_0=n$, $t_1=m$ e
+\[
+t_k=m\,t_{k-1}+t_{k-n}\qquad(k\ge n).
+\]
+Realiza-se por \textbf{dois caminhos que não se conhecem}: o traço pedido ao motor
+a cada potência, com a matriz a alimentar-se a si própria, e a recorrência escrita
+sem ver matriz nenhuma. \emph{$77/77$ instâncias}, em $10/10$ famílias com
+$n=2..6$, $m=1..2$.
+
+\medskip\noindent\textbf{Conta-se a instância e não a família, de propósito.} O
+alcance em $k$ é do \textbf{envelope da célula} e não da lei: vai de $5$ a $20$
+conforme a família cresce, e em \emph{duas} o envelope trava antes de $k=n+2$.
+Dizer «$10/10$ famílias» esconderia que umas exercem a lei vinte vezes e outras uma.
+
+\medskip\noindent\textbf{E a zeta.} O catálogo escreve
+\[
+\zeta(x)=\exp\Bigl(\sum_{k\ge1}\tfrac{t_k}{k}x^{k}\Bigr)=\frac{1}{\det(I-x\,C_{n,m})},
+\]
+e a seguir «o denominador não é um objeto novo: $\det(I-xC_{n,m})$ \textbf{é}
+$\beta^{*}$», com $\beta^{*}(x)=-x^{n}\beta(1/x)=x^{n}+mx-1$ pela \code{def:nu}. As
+duas coisas não podem ser ambas verdadeiras, e não se decide por argumento:
+pede-se o $\det$ ao motor em $x$ inteiros e vê-se com qual ele concorda.
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+$\det(I-xC_{n,m})$ contra $\beta^{*}(x)=x^{n}+mx-1$ & $0/70$\\
+$\det(I-xC_{n,m})$ contra $-\beta^{*}(x)=1-mx-x^{n}$ & $\mathbf{70/70}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{O gume nem precisa de varredura.} Em $x=0$ a matriz é $I$,
+o $\det$ é $1$, e $\beta^{*}(0)=-1$. E o que decide sozinho é $\zeta(0)$: a série
+$\sum t_kx^k/k$ não tem termo constante, logo $\zeta(0)=e^{0}=1$, e o denominador
+\textbf{tem} de valer $1$ em $x=0$ --- o que $1/\beta^{*}$ não faz. Donde
+\[
+\boxed{\;\det(I-x\,C_{n,m})=-\beta^{*}(x),\qquad
+\zeta(x)=\frac{1}{1-mx-x^{n}}\;}
+\]
+
+\medskip\noindent\textbf{O teorema não muda; a linha muda.} O denominador continua
+a ser o reverso de $\beta$ \emph{a menos de sinal}, e é o mesmo polinómio com que
+se prova o \code{catalogo thm:pisot} --- ali o sinal é irrelevante, porque contar
+zeros não o vê. Aqui é relevante, porque $\zeta(0)=1$ é a normalização que faz dela
+uma zeta. \emph{É uma correção de uma linha do catálogo, não do resultado.}
+
+\medido{\code{tests/pgwire.c} §W95 --- a recorrência em $77/77$ instâncias com o
+alcance contado; e o $\det$ do motor contra as duas hipóteses de sinal em $70$
+pontos, a separar $70/70$ contra $0/70$.}
+
+\colunas{\code{catalogo prop:tracos}, \code{def:nu}, §\code{sec:sequencias}}
+        {\code{produto}/\code{traco}/\code{det} pelo motor; a identidade polinomial testada em mais pontos que o grau}
+        {\code{tests/pgwire.c} §W95}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

@@ -13280,6 +13280,182 @@ int main(void){
            " e o traço responde 131. O catálogo já dizia m ∈ {1,2}, e era o regime certo.", mal == 0);
     }
 
+    /* ═══ §W95: prop:tracos E A ZETA DINÂMICA, EM INTEIROS ═════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W95 t_k = m·t_{k−1} + t_{k−n}, e det(I − xA) contra β* — o motor decide.\n\n");
+        { const char *tabs[] = { "A","P","Z" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w95__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w95__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w95.mem"); unlink("/tmp/pgwire_w95.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w95")) mal++;
+
+        #define NZ 6
+        long rec95 = 0;
+        #define POE(t,M,L,C) do { char q2[400]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[300]; cols[0] = 0; \
+              for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (L); i2++){ char vs[300]; vs[0] = 0; \
+                for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); if(!o2.ok) rec95++; } } while(0)
+
+        /* ── (1) prop:tracos do catálogo: t_k = Tr(Comp^k) é INTEIRO, com
+         * t_0 = n, t_1 = m, e a recorrência t_k = m·t_{k−1} + t_{k−n} para
+         * k ≥ n. São DOIS CAMINHOS: o traço pedido ao motor a cada potência,
+         * e a recorrência escrita sem ver matriz nenhuma. */
+        long tr_ok = 0, tr_n = 0, kmin_glob = 99, kmax_glob = 0,
+             rec_test = 0, rec_ok = 0, curtas = 0;
+        for(int n = 2; n <= NZ; n++) for(long m = 1; m <= 2; m++){
+            long C[NZ][NZ], Ak[NZ][NZ], t[24];
+            memset(C, 0, sizeof C); memset(Ak, 0, sizeof Ak);
+            C[0][0] = m; C[0][n-1] = 1;
+            for(int i = 1; i < n; i++) C[i][i-1] = 1;
+            for(int i = 0; i < n; i++) Ak[i][i] = 1;
+            t[0] = n;
+            /* corre-se ATÉ ONDE CABE: as potências crescem e o envelope da
+             * célula é −128..127. Regista-se o k alcançado em vez de fixar um
+             * limite que a família não aguenta — e exige-se pelo menos n+2,
+             * senão a recorrência não chega a ser exercida. */
+            int kmax = 0;
+            for(int k = 1; k <= 20; k++){
+                long T[NZ][NZ], antes = rec95;
+                POE("A", C, n, n); POE("P", Ak, n, n);
+                if(rec95 != antes) break;
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != n) break;
+                for(int i = 0; i < n; i++) for(int j = 0; j < n; j++)
+                    T[i][j] = atol(o.cell[i][j]);
+                antes = rec95;
+                POE("A", T, n, n);
+                if(rec95 != antes) break;      /* A^k saiu do envelope */
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok) break;
+                memcpy(Ak, T, sizeof Ak);
+                t[k] = atol(o.cell[0][0]);
+                kmax = k;
+            }
+            tr_n++;
+            /* o que se conta é a INSTÂNCIA da recorrência, não a família: uma
+             * família que o envelope trava cedo exerce menos vezes, e dizer
+             * «10/10 famílias» esconderia isso. */
+            int bom = (kmax >= 1) && (t[1] == m);
+            for(int k = n; k <= kmax; k++){
+                rec_test++;
+                if(t[k] == m*t[k-1] + t[k-n]) rec_ok++; else bom = 0;
+            }
+            if(kmax < n + 2) curtas++;
+            if(bom) tr_ok++;
+            else printf("      n=%d m=%ld: kmax=%d, t₁=%ld (esperado %ld) — não fecha\n",
+                        n, m, kmax, t[1], m);
+            if(kmax < kmin_glob) kmin_glob = kmax;
+            if(kmax > kmax_glob) kmax_glob = kmax;
+        }
+        printf("      prop:tracos — t₀=n, t₁=m e t_k = m·t_{k−1} + t_{k−n}:"
+               " %ld/%ld instâncias da recorrência, em %ld/%ld famílias"
+               " (n=2..6, m=1..2)\n", rec_ok, rec_test, tr_ok, tr_n);
+        printf("      e o alcance é do ENVELOPE e não da lei: k vai de %ld a %ld"
+               " conforme a família cresce, e em %ld delas o envelope trava antes"
+               " de k = n+2\n", kmin_glob, kmax_glob, curtas);
+        if(tr_ok != tr_n || tr_n != 10) mal++;
+        if(rec_ok != rec_test || rec_test < 30) mal++;
+        if(curtas == 0){ printf("      → o envelope não travou nenhuma: o alcance"
+                                " não foi exercido\n"); mal++; }
+
+        /* ── (2) E A ZETA. O catálogo escreve
+         *     ζ(x) = exp(Σ t_k x^k / k) = 1/det(I − x·Comp),
+         * e a seguir «o denominador não é um objecto novo: det(I − x·Comp) É
+         * β*», com β*(x) = −xⁿβ(1/x) = xⁿ + mx − 1 (def:nu, e explícito na
+         * §sec:constr). Aqui não se argumenta: pede-se o det ao motor em vários
+         * x inteiros e vê-se com QUAL dos dois ele concorda. Uma identidade
+         * polinomial testada em mais pontos que o grau está provada. */
+        long bate_beta = 0, bate_menos = 0, pontos = 0;
+        for(int n = 2; n <= NZ; n++) for(long m = 1; m <= 2; m++)
+        for(long x = -3; x <= 3; x++){
+            long M[NZ][NZ];
+            memset(M, 0, sizeof M);
+            for(int i = 0; i < n; i++) M[i][i] = 1;
+            M[0][0] -= x*m; M[0][n-1] -= x;
+            for(int i = 1; i < n; i++) M[i][i-1] -= x;
+            long antes = rec95;
+            POE("Z", M, n, n);
+            if(rec95 != antes) continue;              /* saiu do envelope */
+            sql_executa("SELECT det(*) FROM Z", &o);
+            if(!o.ok) continue;
+            long d = atol(o.cell[0][0]);
+            long xn = 1; for(int i = 0; i < n; i++) xn *= x;
+            long beta_est = xn + m*x - 1;             /* β*(x) */
+            pontos++;
+            if(d == beta_est)  bate_beta++;
+            if(d == -beta_est) bate_menos++;
+        }
+        printf("      det(I − x·Comp) contra β*(x) = xⁿ+mx−1: bate em %ld/%ld\n",
+               bate_beta, pontos);
+        printf("      det(I − x·Comp) contra −β*(x) = 1−mx−xⁿ: bate em %ld/%ld\n",
+               bate_menos, pontos);
+        if(pontos < 40) mal++;
+        if(bate_menos != pontos) mal++;
+        if(bate_beta == pontos) mal++;   /* se batesse nos dois, não separava */
+
+        /* ── (3) O GUME é x = 0, e não precisa de varredura: I − 0·A = I, cujo
+         * determinante é 1, enquanto β*(0) = −1. E o teste que decide sozinho é
+         * ζ(0): a série Σ t_k x^k/k não tem termo constante, logo ζ(0) = e⁰ = 1
+         * — e 1/β*(0) daria −1. O sinal do catálogo está trocado nessa linha:
+         * det(I − x·Comp) = −β*(x), e ζ(x) = 1/(1 − mx − xⁿ). */
+        {
+            long Id[NZ][NZ]; memset(Id, 0, sizeof Id);
+            for(int i = 0; i < 2; i++) Id[i][i] = 1;
+            POE("Z", Id, 2, 2);
+            sql_executa("SELECT det(*) FROM Z", &o);
+            long d0 = o.ok ? atol(o.cell[0][0]) : -99;
+            printf("      GUME em x=0 — det(I) = %ld, e β*(0) = −1: %s\n",
+                   d0, d0 == 1 ? "diferem" : "?");
+            printf("        e ζ(0) = 1 obriga o denominador a valer 1 em x=0, o que"
+                   " 1/β* não faz — logo det(I − xA) = −β*(x)\n");
+            if(d0 != 1) mal++;
+        }
+
+        #undef POE
+        #undef NZ
+        sql_fechar();
+
+        printf("\n");
+        ok("A PROPOSIÇÃO DOS TRAÇOS REALIZA-SE, E A ZETA DO CATÁLOGO TEM UM SINAL TROCADO. A"
+           " prop:tracos do `catalogo.tex` §sec:sequencias diz que t_k = Tr(Comp^k) é inteiro,"
+           " com t₀ = n, t₁ = m e t_k = m·t_{k−1} + t_{k−n} para k ≥ n. Realiza-se por DOIS"
+           " CAMINHOS que não se conhecem: o traço pedido ao motor a cada potência, com a"
+           " matriz a alimentar-se a si própria, e a recorrência escrita sem ver matriz"
+           " nenhuma — 77/77 INSTÂNCIAS da recorrência, em 10/10 famílias com n=2..6 e"
+           " m=1..2. Conta-se a instância e não a família de propósito: o alcance em k é do"
+           " ENVELOPE da célula e não da lei, vai de 5 a 20 conforme a família cresce, e em"
+           " DUAS delas o envelope trava antes de k = n+2 — dizer «10/10 famílias» esconderia"
+           " que umas exercem a lei vinte vezes e outras uma. E A ZETA: o catálogo escreve"
+           " ζ(x) = exp(Σ t_k x^k/k) = 1/det(I − x·Comp) e a seguir «o denominador não é um"
+           " objecto novo: det(I − x·Comp) É β*», com β*(x) = −xⁿβ(1/x) = xⁿ + mx − 1 pela"
+           " def:nu. As duas coisas não podem ser ambas verdadeiras, e não se decide por"
+           " argumento: pede-se o det ao motor em x inteiros e vê-se com qual ele concorda."
+           " Concorda com −β*(x) = 1 − mx − xⁿ em TODOS os pontos, e com β*(x) em NENHUM."
+           " O gume nem precisa de varredura: em x = 0 a matriz é I, o det é 1, e β*(0) = −1."
+           " E o que decide sozinho é ζ(0): a série Σ t_k x^k/k não tem termo constante, logo"
+           " ζ(0) = e⁰ = 1, e o denominador TEM de valer 1 em x = 0 — o que 1/β* não faz."
+           " Portanto det(I − x·Comp) = −β*(x) e ζ(x) = 1/(1 − mx − xⁿ). O teorema do catálogo"
+           " não muda: o denominador continua a ser o reverso de β a menos de sinal, e é o"
+           " mesmo polinómio com que se prova o thm:pisot. O que muda é a linha da caixa, e o"
+           " sinal importa porque ζ(0) = 1 é a normalização que faz dela uma zeta.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
