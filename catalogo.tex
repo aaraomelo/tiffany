@@ -1504,6 +1504,38 @@ de onde se estava.}
 fundirem nos três pares; e os tamanhos das fibras contados, $5$ a $5$ na erosão contra
 $1$ a $8$ e $1$ a $37$ nos resumos.}
 
+\paragraph{E o sétimo lote dá o passo construtivo: \emph{uma leitura que funde
+completa-se}.} Até aqui a regra dizia quando uma leitura serve e quando falha. Falta o
+que se lhe \textbf{acrescenta} --- e a resposta é a fibra: juntar ao resumo o
+\textbf{índice dentro da fibra} devolve o endereço perdido. Medido em quatro corpos que
+fundem sozinhos --- o negro pela temperatura, o métrico pela distância, o solar pela
+luminosidade, o óptico pelo índice ---, \emph{nenhum funde depois de completado}. É a
+mesma coisa que esta casa já faz com o racional, onde a leitura reduzida é a classe e o
+par cru era a classe mais o representante.
+
+\medskip\noindent\textbf{Mas o preço não é o mesmo para todos, e é a forma da fibra que
+o decide.} Com o índice de tamanho fixo --- que é como se guarda ---, uma fibra constante
+gasta exactamente o que usa; uma fibra variável obriga a reservar o \emph{pior} caso em
+todas:
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+a leitura & fibras & menor & maior & gasto & usado & desperdício\\
+\midrule
+quociente ($a \bmod 4$) & $4$ & $36$ & $36$ & $144$ & $144$ & $\mathbf{0}$\\
+resumo pela distância & $71$ & $1$ & $4$ & $284$ & $144$ & $140$\\
+resumo pela soma & $23$ & $1$ & $12$ & $276$ & $144$ & $132$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Completar um quociente é barato; completar um resumo custa o pior caso}
+--- aqui, praticamente o dobro do que se usa. A forma da fibra deixa de ser uma
+observação sobre a perda e passa a ser \textbf{o preço de a desfazer}.
+
+\medido{o sétimo lote em \code{tests/pgwire.c} §W141 --- a completação a separar em
+$4/4$ corpos, e o desperdício do índice de tamanho fixo: $0$ no quociente contra $140$ e
+$132$ nos dois resumos, sobre $144$ usados.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias

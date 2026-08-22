@@ -21300,6 +21300,128 @@ int main(void){
            " se perdeu depende de onde se estava.", mal == 0);
     }
 
+    /* ═══ §W141: COMPLETAR A LEITURA QUE FUNDE — O ÍNDICE NA FIBRA ══════════ */
+    {
+        long mal = 0;
+        printf("\n§W141 sétimo lote: uma leitura que funde completa-se, e o preço mede-se.\n\n");
+
+        #define NG 400
+        /* Cada caso: os objectos, a leitura que RESUME, e a completação
+         * (resumo, índice dentro da fibra). A pergunta é se a segunda separa e
+         * quanto custa. */
+        struct { const char *nome; int caso; } CS[4] = {
+            {"negro      pela TEMPERATURA        ", 0},
+            {"métrico    pela DISTÂNCIA          ", 1},
+            {"solar      pela LUMINOSIDADE       ", 2},
+            {"óptico     pelo ÍNDICE (o produto) ", 3},
+        };
+        long serve_c = 0, tot_c = 0;
+        printf("      corpo                               obj  resumo  completa  maior fibra  bits\n");
+        for(int c = 0; c < 4; c++){
+            long e[NG]; long n = 0;
+            for(long a = 0; a < 12; a++) for(long b = 0; b < 12; b++){
+                long v;
+                if(CS[c].caso == 0)      v = a + b;              /* a temperatura: a soma */
+                else if(CS[c].caso == 1) v = a*a + b*b;          /* a distância ao quadrado */
+                else if(CS[c].caso == 2) v = (a+1)*(b+1);        /* a luminosidade: o produto */
+                else                     v = (a*b) % 13;         /* o índice, módulo */
+                e[n++] = v;
+            }
+            /* quantos endereços distintos dá o resumo */
+            long dist = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < i; j++) if(e[j]==e[i]){ v=1; break; }
+                if(!v) dist++;
+            }
+            /* a COMPLETAÇÃO: (resumo, índice dentro da fibra) */
+            long idx[NG]; long maior = 0;
+            for(long i = 0; i < n; i++){
+                long k = 0;
+                for(long j = 0; j < i; j++) if(e[j] == e[i]) k++;
+                idx[i] = k;
+                if(k + 1 > maior) maior = k + 1;
+            }
+            /* separa agora? */
+            long colide = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++)
+                if(e[i] == e[j] && idx[i] == idx[j]) colide++;
+            /* os bits que o índice custa, no pior caso */
+            long bits = 0; { long m = maior - 1; while(m){ bits++; m >>= 1; } }
+            tot_c++;
+            if(colide == 0) serve_c++;
+            printf("      %-34s %4ld %7ld %9s %12ld %5ld\n",
+                   CS[c].nome, n, dist, colide == 0 ? "SEPARA" : "colide", maior, bits);
+        }
+        printf("      → a completação separa em %ld/%ld: acrescentar o índice na fibra"
+               " devolve o endereço perdido\n", serve_c, tot_c);
+        if(serve_c != tot_c) mal++;
+
+        /* ── E O PREÇO DEPENDE DA FORMA DA FIBRA: se ela é constante, o índice
+         * tem tamanho fixo e a completação é barata; se varia, paga-se o PIOR
+         * caso em todas as fibras --- e o desperdício conta-se. */
+        {
+            printf("      O PREÇO DA COMPLETAÇÃO --- índice de tamanho fixo\n");
+            printf("        caso                  fibras  menor  maior  gasto  usado  desperdício\n");
+            long houve_desp = 0, houve_zero = 0;
+            for(int c = 0; c < 3; c++){
+                long e[NG]; long n = 0;
+                for(long a = 0; a < 12; a++) for(long b = 0; b < 12; b++){
+                    long v;
+                    if(c == 0)      v = a % 4;                    /* quociente: fibra constante */
+                    else if(c == 1) v = a*a + b*b;                /* resumo: fibra varia */
+                    else            v = a + b;                    /* resumo: fibra varia */
+                    e[n++] = v;
+                }
+                long vistos[NG], tam[NG]; long nv = 0;
+                for(long i = 0; i < n; i++){
+                    int v = 0;
+                    for(long j = 0; j < nv; j++) if(vistos[j]==e[i]){ v=1; break; }
+                    if(v) continue;
+                    vistos[nv] = e[i];
+                    long t = 0;
+                    for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                    tam[nv] = t; nv++;
+                }
+                long menor = 1L<<30, maior = 0, soma = 0;
+                for(long i = 0; i < nv; i++){
+                    if(tam[i] < menor) menor = tam[i];
+                    if(tam[i] > maior) maior = tam[i];
+                    soma += tam[i];
+                }
+                long gasto = nv * maior;              /* índice de tamanho fixo em todas */
+                long desp = gasto - soma;
+                if(desp > 0) houve_desp++; else houve_zero++;
+                printf("        %-20s %6ld %6ld %6ld %6ld %6ld %11ld\n",
+                       c==0 ? "quociente (a mod 4)" : (c==1 ? "distância" : "soma"),
+                       nv, menor, maior, gasto, soma, desp);
+            }
+            printf("      a fibra constante não desperdiça nada; a variável paga o pior caso"
+                   " em todas --- %ld casos com desperdício, %ld sem\n",
+                   houve_desp, houve_zero);
+            printf("        logo completar um QUOCIENTE é barato e completar um RESUMO custa"
+                   " o pior caso: a forma da fibra é o preço\n");
+            if(houve_desp == 0 || houve_zero == 0) mal++;
+        }
+        #undef NG
+
+        printf("\n");
+        ok("UMA LEITURA QUE FUNDE COMPLETA-SE, E O PREÇO É A FORMA DA FIBRA. Até aqui a regra"
+           " dizia quando uma leitura serve e quando falha. Falta o passo construtivo: o que"
+           " se lhe acrescenta. E a resposta é a fibra --- juntar ao resumo o ÍNDICE DENTRO DA"
+           " FIBRA devolve o endereço perdido, e separa em todos os casos medidos: o negro"
+           " pela temperatura, o métrico pela distância, o solar pela luminosidade e o óptico"
+           " pelo índice fundem sozinhos, e nenhum funde depois de completado. É a mesma coisa"
+           " que a casa já faz com o racional, onde a leitura reduzida é a classe e o par cru"
+           " era a classe mais o representante. MAS O PREÇO NÃO É O MESMO PARA TODOS, e é aqui"
+           " que a forma da fibra volta a decidir. Com o índice de tamanho fixo --- que é como"
+           " se guarda ---, uma fibra constante gasta exactamente o que usa e não desperdiça"
+           " nada; uma fibra variável obriga a reservar o PIOR caso em todas, e o que sobra"
+           " conta-se. Medido lado a lado: o quociente não desperdiça, e os dois resumos"
+           " desperdiçam. Logo completar um quociente é barato e completar um resumo custa o"
+           " pior caso. A forma da fibra deixa de ser uma observação sobre a perda e passa a"
+           " ser o preço de a desfazer.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
