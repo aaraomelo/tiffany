@@ -4666,6 +4666,146 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W34: A COLUNA AFIRMA, E A ÁRVORE É A TESTEMUNHA ══════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w34.mem"); unlink("/tmp/pgwire_w34.prog");
+        unlink("/tmp/pgwire_w34__u.mem"); unlink("/tmp/pgwire_w34__u.prog");
+        printf("\n§W34 as restrições: a fibra de uma folha, e a coluna sem dual.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w34")) mal++;
+        sql_executa("CREATE TABLE u (id UNIQUE, nome NOT NULL, x)", &o);
+        int e1 = sql_executa("INSERT INTO u VALUES (1,10,100)", &o);
+        int e2 = sql_executa("INSERT INTO u VALUES (2,20,200)", &o);
+
+        /* ── (1) O UNIQUE RECUSA A SEGUNDA FOLHA. É a frase do DISTINCT
+         * (`thm:levantamento`: a folha 1 de cada fibra) dita na ESCRITA: o
+         * DISTINCT escolhe o representante à saída, o UNIQUE recusa o segundo
+         * à entrada. E o NOT NULL é a outra: declara que o dual pesa zero
+         * nesta coluna, isto é, que ali não há suporte, só corpo. */
+        int r1 = sql_executa("INSERT INTO u VALUES (1,30,300)", &o);
+        int m1 = !r1 && !o.ok && o.err[0];
+        int r2 = sql_executa("INSERT INTO u VALUES (3,NULL,300)", &o);
+        int m2 = !r2 && !o.ok && o.err[0];
+        printf("      UNIQUE recusa a repetida: %s · NOT NULL recusa o suporte:"
+               " %s\n      «%s»\n", m1 ? "sim" : "NAO", m2 ? "sim" : "NAO", o.err);
+        if(!e1 || !e2 || !m1 || !m2) mal++;
+
+        /* ── (2) E A RECUSA NÃO ESCREVE NADA. Uma restrição que recusasse
+         * DEPOIS de escrever seria pior do que não a ter: a tabela ficava com
+         * a linha e o cliente com o erro. Conta-se. */
+        sql_executa("SELECT * FROM u", &o);
+        int intacto = (o.nrows == 2);
+        printf("      e a recusa não escreve: %d linhas (esp 2)  %s\n",
+               o.nrows, intacto ? "" : "NAO BATE");
+        if(!intacto) mal++;
+
+        /* ── (3) O GUME, E É O DUAL DE HOJE: numa coluna UNIQUE, DOIS
+         * AUSENTES ENTRAM. A ausência não é uma folha da fibra — não é um
+         * valor —, pelo que não pode repetir-se; dois zeros, esses, colidem.
+         * Um motor que tratasse o nulo como o valor 0 recusava o segundo, e
+         * esta é a única medida que os separa aqui. */
+        sql_executa("CREATE TABLE v (k UNIQUE, y)", &o);
+        int a1 = sql_executa("INSERT INTO v VALUES (NULL,1)", &o);
+        int a2 = sql_executa("INSERT INTO v VALUES (NULL,2)", &o);
+        int z1 = sql_executa("INSERT INTO v VALUES (0,3)", &o);
+        int z2 = sql_executa("INSERT INTO v VALUES (0,4)", &o);
+        sql_executa("SELECT * FROM v", &o);
+        int gume = (a1 && a2 && z1 && !z2 && o.nrows == 3);
+        printf("      dois AUSENTES entram (%d,%d) e dois ZEROS não (%d,%d):"
+               " %d linhas (esp 3)  %s\n", a1, a2, z1, z2, o.nrows,
+               gume ? "" : "NAO BATE");
+        if(!gume) mal++;
+
+        /* ── (4) A AFIRMAÇÃO VALE EM QUALQUER PORTA. Uma restrição que só o
+         * INSERT respeitasse não é uma restrição: o UPDATE reescreve a mesma
+         * célula. E há uma segunda maneira de a quebrar que só o UPDATE tem —
+         * marcar mais do que uma linha e escrever o mesmo valor em todas. */
+        sql_executa("SELECT * FROM u", &o);
+        int u1 = sql_executa("UPDATE u SET id = 2 WHERE id = 1", &o);
+        int u2 = sql_executa("UPDATE u SET nome = NULL WHERE id = 1", &o);
+        int u3 = sql_executa("UPDATE u SET id = 7 WHERE id > 0", &o); /* duas linhas */
+        int u4 = sql_executa("UPDATE u SET id = 7 WHERE id = 1", &o); /* uma: passa */
+        sql_executa("SELECT * FROM u WHERE id = 7", &o);
+        int porta = (!u1 && !u2 && !u3 && u4 && o.nrows == 1);
+        printf("      pela porta do UPDATE: repetido %d · SET NULL %d · duas"
+               " linhas de uma vez %d · a legítima %d → id=7 tem %d linha (esp 1)"
+               "  %s\n", u1, u2, u3, u4, o.nrows, porta ? "" : "NAO BATE");
+        if(!porta) mal++;
+
+        /* ── (5) A TESTEMUNHA É A ÁRVORE, E ELA NÃO É UM EXTRA. Declarar
+         * UNIQUE é afirmar que a chave leva a UM sítio, e isso é literalmente
+         * o que a árvore guarda; por isso a verificação é uma DESCIDA e não
+         * uma varredura, e a mesma árvore serve a leitura de graça. Mede-se
+         * nos dois lados: a coluna única desce (nós, zero passos de ISA) e a
+         * coluna sem restrição varre (passos que crescem com a tabela). */
+        sql_executa("SELECT * FROM u WHERE id = 7", &o);
+        long p_uni = sql_ultimos_passos, n_uni = sql_ultimos_nos;
+        sql_executa("SELECT * FROM u WHERE x = 100", &o);
+        long p_var = sql_ultimos_passos;
+        int desce = (p_uni == 0 && n_uni > 0 && p_var > 0);
+        printf("      a árvore que a afirmação criou serve a leitura: `id = 7`"
+               " %ld passos / %ld nós · `x = 100` %ld passos  %s\n",
+               p_uni, n_uni, p_var, desce ? "" : "NAO BATE");
+        if(!desce) mal++;
+
+        /* ── (6) E `PRIMARY KEY` É A CONJUNÇÃO, não uma terceira coisa: UMA
+         * declaração recusa as DUAS quebras, e não recusa o que nenhuma das
+         * duas recusaria. Se fosse um sinónimo de UNIQUE, o nulo passava; se
+         * fosse só NOT NULL, o repetido passava. */
+        sql_executa("CREATE TABLE p (id PRIMARY KEY, y)", &o);
+        int k1 = sql_executa("INSERT INTO p VALUES (1,10)", &o);
+        int k2 = sql_executa("INSERT INTO p VALUES (1,20)", &o);   /* repetido */
+        int k3 = sql_executa("INSERT INTO p VALUES (NULL,30)", &o);/* ausente  */
+        int k4 = sql_executa("INSERT INTO p VALUES (2,40)", &o);   /* legítimo */
+        sql_executa("SELECT * FROM p", &o);
+        int chave = (k1 && !k2 && !k3 && k4 && o.nrows == 2);
+        printf("      PRIMARY KEY é a conjunção: entra %d · repetido %d ·"
+               " ausente %d · outro %d → %d linhas (esp 2)  %s\n",
+               k1, k2, k3, k4, o.nrows, chave ? "" : "NAO BATE");
+        if(!chave) mal++;
+
+        /* ── O CONTROLO: uma tabela SEM restrição nenhuma aceita tudo o que a
+         * de cima recusou. Sem ele, um motor que recusasse por outro motivo
+         * qualquer — largura, envelope, tabela fechada — passava em tudo. */
+        sql_executa("CREATE TABLE w (id, nome)", &o);
+        int c1 = sql_executa("INSERT INTO w VALUES (1,10)", &o);
+        int c2 = sql_executa("INSERT INTO w VALUES (1,10)", &o);
+        int c3 = sql_executa("INSERT INTO w VALUES (2,NULL)", &o);
+        sql_executa("SELECT * FROM w", &o);
+        int livre = (c1 && c2 && c3 && o.nrows == 3);
+        printf("\n      CONTROLO — sem restrição, as MESMAS linhas entram:"
+               " %d %d %d → %d linhas (esp 3)  %s\n", c1, c2, c3, o.nrows,
+               livre ? "" : "NAO BATE");
+        if(!livre) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A COLUNA AFIRMA, E A ÁRVORE É A TESTEMUNHA. Uma restrição de coluna não é uma"
+           " comodidade de sintaxe: é uma asserção sobre a FIBRA, e as duas que existem são"
+           " as duas metades do que a tabela já tinha. `NOT NULL` diz que naquela direcção o"
+           " dual pesa zero — não há suporte, só corpo —, e é a negação do `thm:bitunico`"
+           " aplicada a uma coordenada. `UNIQUE` diz que a fibra tem UMA folha, que é"
+           " exactamente a frase do DISTINCT (`thm:levantamento`, a folha 1 de cada fibra)"
+           " dita na ESCRITA em vez de na leitura: o DISTINCT escolhe o representante à"
+           " saída, o UNIQUE recusa o segundo à entrada. `PRIMARY KEY` é a conjunção das"
+           " duas e não uma terceira coisa. O gume é o dual: numa coluna UNIQUE dois"
+           " AUSENTES entram e dois ZEROS não, porque a ausência não é uma folha — não é um"
+           " valor, logo não pode repetir-se —, e é a única medida aqui que separa o nulo do"
+           " 0 do corpo. A afirmação vale em QUALQUER porta, e o UPDATE tem uma maneira de a"
+           " quebrar que o INSERT não tem: marcar mais do que uma linha e escrever o mesmo"
+           " valor em todas. E a recusa não escreve nada — uma restrição que recusasse"
+           " DEPOIS de escrever seria pior do que não existir, com a tabela a ficar com a"
+           " linha e o cliente com o erro. Por fim, a testemunha não é um extra: declarar"
+           " que a chave leva a UM sítio é literalmente o que a árvore guarda, pelo que"
+           " verificar é DESCER e não varrer, e a mesma árvore serve a leitura de graça —"
+           " `id = 7` custa zero passos de ISA e nós contados, contra uma varredura na"
+           " coluna sem restrição. O CONTROLO é a tabela sem restrição nenhuma, onde as"
+           " MESMAS linhas entram todas: sem ele, uma recusa por qualquer outro motivo"
+           " passava por restrição.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

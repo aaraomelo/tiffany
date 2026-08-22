@@ -2385,6 +2385,60 @@ socket).}
         {bitmap de presença por célula; \code{IS NULL}; $-1$ no FEBE}
         {\code{tests/pgwire.c} §W33; §W32; §W7}
 
+\subsection*{A coluna afirma, e a árvore é a testemunha}
+
+\noindent Uma restrição de coluna não é uma comodidade de sintaxe: é uma
+\textbf{asserção sobre a fibra}, e as duas que existem são as duas metades do
+que a tabela já tinha.
+
+\medskip
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+declaração & o que afirma & de onde vem \\
+\midrule
+\code{NOT NULL} & o dual pesa zero nesta direção & \code{aranha thm:bitunico}, negado \\
+\code{UNIQUE}   & a fibra tem \emph{uma} folha   & \code{aranha thm:levantamento} \\
+\code{PRIMARY KEY} & a conjunção das duas       & --- não é uma terceira coisa \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{O \code{UNIQUE} é o \code{DISTINCT} dito na escrita.} A
+folha $1$ de cada fibra é o representante canónico; o \code{DISTINCT} escolhe-o
+\emph{à saída} e o \code{UNIQUE} recusa o segundo \emph{à entrada}. É a mesma
+frase nas duas direções da mesma seta, e por isso a realização é a mesma: a
+árvore. Declarar que a chave leva a \textbf{um} sítio é literalmente o que a
+árvore guarda, pelo que verificar é \textbf{descer} --- custo da profundidade,
+não do tamanho --- e a árvore que a afirmação criou serve a leitura de graça.
+Mede-se nos dois lados: na coluna única a consulta custa $0$ passos de ISA e nós
+contados; na coluna sem restrição, uma varredura.
+
+\medskip\noindent\textbf{O gume é o dual.} Numa coluna \code{UNIQUE}, dois
+\emph{ausentes} entram e dois \emph{zeros} não. A ausência não é uma folha ---
+não é um valor, logo não pode repetir-se ---, e esta é a única medida que separa
+aqui o nulo do $0$ do corpo. Daí sai também a regra da árvore: a célula ausente
+\textbf{não tem chave} e não entra no índice, nem na construção nem na
+manutenção; entrar punha o neutro na árvore com cara de valor, e o primeiro zero
+era recusado pela linha nula.
+
+\medskip\noindent\textbf{E a afirmação vale em qualquer porta.} Uma restrição que
+só o \code{INSERT} respeitasse não é uma restrição: o \code{UPDATE} reescreve a
+mesma célula, e tem uma maneira de a quebrar que o \code{INSERT} não tem ---
+marcar mais do que uma linha e escrever o mesmo valor em todas. A recusa corre
+\emph{antes} do compromisso, com o diário ainda fechado: recusar depois de
+escrever seria pior do que não existir, com a tabela a ficar com a linha e o
+cliente com o erro.
+
+\medido{\code{tests/pgwire.c} §W34 (as duas recusas; a recusa que não escreve; os
+dois ausentes contra os dois zeros; as quatro portas do \code{UPDATE}; a descida
+contra a varredura; e o \code{PRIMARY KEY} a recusar as duas quebras com uma
+declaração), com o controlo na tabela sem restrição nenhuma.}
+
+\colunas{\code{aranha thm:levantamento}; \code{aranha thm:bitunico}}
+        {\code{UNIQUE}; \code{NOT NULL}; \code{PRIMARY KEY}; árvore por coluna}
+        {\code{tests/pgwire.c} §W34}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}

@@ -332,6 +332,32 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define S_PRESCAB (ISA_TECTO + ZONA(9))   /* {1,0} = o campo já foi escrito */
 #define S_PRES    (S_PRESCAB + 1)          /* presença: BIT por célula */
 
+/* ── A COLUNA PODE RECUSAR ────────────────────────────────────────────────────
+ *
+ * Uma restrição de coluna não é uma comodidade: é uma AFIRMAÇÃO sobre a fibra,
+ * e as duas que aqui vivem são exactamente as duas metades do que se acabou de
+ * construir.
+ *
+ *   NOT NULL  — a coluna recusa o SUPORTE. Declara que toda a linha tem ali uma
+ *               coordenada do corpo, isto é, que o dual pesa zero nesta coluna.
+ *               É a negação directa do `thm:bitunico` aplicada a uma direcção.
+ *
+ *   UNIQUE    — a coluna declara que a FIBRA TEM UMA FOLHA SÓ. É a mesma frase
+ *               do DISTINCT (`thm:levantamento`: a folha 1 de cada fibra), mas
+ *               dita na ESCRITA em vez de na leitura: o DISTINCT escolhe o
+ *               representante à saída, o UNIQUE recusa o segundo à entrada. E a
+ *               testemunha é a ÁRVORE — uma chave, um sítio —, pelo que a
+ *               verificação é uma DESCIDA e não uma varredura.
+ *
+ * PRIMARY KEY é a conjunção das duas, e não uma terceira coisa.
+ *
+ * Uma Word por coluna: o .total leva as bandeiras. O cabeçalho diz se o campo
+ * já foi escrito, pela mesma razão do S_PRESCAB — uma tabela antiga leria zeros
+ * e zero aqui é «sem restrição», que por acaso é a resposta certa. */
+#define S_RESTR   (ISA_TECTO + ZONA(10))  /* uma Word por coluna: bandeiras */
+#define R_NOTNULL 1
+#define R_UNICO   2
+
 /* ── UM ÍNDICE POR COLUNA, e cada um na sua zona ─────────────────────────────
  *
  * Havia um só, e por isso uma condição composta só podia descer de um lado.
@@ -1694,6 +1720,15 @@ static int ident(const char **p, char *out, size_t cap){
 }
 
 /* ---------------- os comandos ---------------- */
+/* a árvore vive mais abaixo; o CREATE precisa dela para o UNIQUE nascer com a
+ * sua testemunha, e o INSERT precisa da descida para saber se a chave já lá está */
+static int idx_constroi(long col, long ncols, long nrows);
+static int idx_valido(long col, long nrows);
+static int j_casam(long v, int *saida, int cap);
+static void ord_usa_indice(long col);
+static void ord_usa_rascunho(void);
+static long celula_valor(long i, long j, long ncols);
+
 static int cria(const char *resto){
     const char *p = resto;
     char nome[64];
@@ -1707,7 +1742,8 @@ static int cria(const char *resto){
     }
     pula(&p); if(*p != '(') return 0; p++;
     long ncols = 0; char c[64];
-    long corpo[16], parm[16];
+    long corpo[16], parm[16], restr[16];
+    for(int q = 0; q < 16; q++) restr[q] = 0;
     while(1){
         if(!ident(&p, c, sizeof c)) break;
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
@@ -1731,6 +1767,27 @@ static int cria(const char *resto){
                                if(*p == ')') p++; }
             }
         }
+        /* ── E AS RESTRIÇÕES, que vêm depois do tipo e antes da vírgula ─────
+         * `PRIMARY KEY` é lido como a conjunção que ele é: único e não-nulo. */
+        pula(&p);
+        while(isalpha((unsigned char)*p)){
+            const char *v2 = p;
+            char r[64];
+            if(!ident(&p, r, sizeof r)){ p = v2; break; }
+            if(!strcasecmp(r, "NOT")){
+                pula(&p);
+                if(palavra(&p, "NULL")) restr[ncols] |= R_NOTNULL;
+                else { p = v2; break; }
+            }
+            else if(!strcasecmp(r, "UNIQUE")) restr[ncols] |= R_UNICO;
+            else if(!strcasecmp(r, "PRIMARY")){
+                pula(&p);
+                if(palavra(&p, "KEY")) restr[ncols] |= R_UNICO | R_NOTNULL;
+                else { p = v2; break; }
+            }
+            else { p = v2; break; }
+            pula(&p);
+        }
         ncols++; pula(&p);
         if(*p == ','){ p++; continue; } break;
     }
@@ -1750,6 +1807,14 @@ static int cria(const char *resto){
         Word wc; wc.total = corpo[j]; wc.e = parm[j];
         mem_grava(S_CORPO + (unsigned)j, wc);
     }
+    /* as restrições, e a árvore que testemunha o UNIQUE. Ela nasce aqui vazia:
+     * o índice de uma coluna única não é uma optimização — é a afirmação. */
+    for(long j = 0; j < ncols && j < 16; j++){
+        Word wr; wr.total = (Word8)restr[j]; wr.e = 0;
+        mem_grava(S_RESTR + (unsigned)j, wr);
+    }
+    for(long j = 0; j < ncols && j < IDX_MAXCOL; j++)
+        if(restr[j] & R_UNICO) idx_constroi(j, ncols, 0);
     {
         static const char *nm[8] = {"INTEIRO","RACIONAL","AUREO","MORFICO","CRISTALINO",
                                     "INTEIRO","INTEIRO","INTEIRO"};
@@ -1901,7 +1966,15 @@ static int insere(const char *resto){
         }
         nv++; pula(&p); if(*p == ','){ p++; continue; } break;
     }
-    if(nv != ncols){ printf("erro: a tabela tem %ld colunas, vieram %ld\n", ncols, nv); return 0; }
+    if(nv != ncols){
+        printf("erro: a tabela tem %ld colunas, vieram %ld — a linha é RECUSADA."
+               " Uma célula que se quer vazia diz-se NULL; deixá-la de fora seria"
+               " o motor adivinhar qual.\n", ncols, nv);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "INSERT has %ld expressions but table has %ld columns", nv, ncols); }
+        return 0;
+    }
 
     /* ── O ENVELOPE DA CÉLULA DIZ-SE, E O QUE NÃO CABE É RECUSADO ────────────────
      * A célula é uma Word_8² — um átomo para o numerador, outro para o denominador
@@ -1939,6 +2012,49 @@ static int insere(const char *resto){
             }
             cel_recusadas++;
             return 0;
+        }
+    }
+
+    /* ── E A COLUNA PODE RECUSAR ─────────────────────────────────────────────
+     * As duas restrições correm ANTES de a ISA escrever, e a linha inteira é
+     * recusada — não meia linha. `NOT NULL` recusa o suporte; `UNIQUE` recusa a
+     * segunda folha da fibra, e quem responde é a ÁRVORE: uma descida, não uma
+     * varredura, pelo que o custo é a profundidade e não o tamanho. */
+    for(long j = 0; j < ncols && j < 16; j++){
+        long r = mem_le(S_RESTR + (unsigned)j).total;
+        if(!r) continue;
+        if((r & R_NOTNULL) && (j >= nv || nulo[j])){
+            printf("erro: a coluna %ld é NOT NULL e a linha não lhe traz valor —"
+                   " RECUSADA.\n", j);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "null value in column %ld violates not-null constraint", j); }
+            return 0;
+        }
+        if((r & R_UNICO) && j < nv && !nulo[j] && j < IDX_MAXCOL){
+            int achados[4], quantos;
+            if(!idx_valido(j, nrows)) idx_constroi(j, ncols, nrows);
+            if(idx_valido(j, nrows)){
+                ord_usa_indice(j);
+                quantos = j_casam(v[j], achados, 4);
+                ord_usa_rascunho();
+            } else {
+                /* a árvore não coube: a rede é a varredura, e recusar por não
+                 * saber seria pior do que responder devagar */
+                quantos = 0;
+                for(long i = 0; i < nrows && !quantos; i++)
+                    if(bit_le(S_VIVO, i) && bit_le(S_PRES, i*ncols + j)
+                       && celula_valor(i, j, ncols) == v[j]) quantos = 1;
+            }
+            if(quantos > 0){
+                printf("erro: a coluna %ld é UNIQUE e o valor %ld já lá está —"
+                       " a fibra tem UMA folha. RECUSADA.\n", j, v[j]);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "duplicate key value violates unique constraint on"
+                             " column %ld", j); }
+                return 0;
+            }
         }
     }
 
@@ -2016,6 +2132,10 @@ static int insere(const char *resto){
           bit_poe(S_PRES, i*ncols + j, (j < nv && !nulo[j]) ? 1 : 0);
       for(long c = 0; c < ncols && c < IDX_MAXCOL; c++){
           if(!idx_valido(c, nr_agora - 1)) continue;   /* válido ANTES desta linha? */
+          /* e a célula AUSENTE não tem chave — a mesma regra do idx_constroi.
+           * Sem ela a linha nula entrava na árvore com o neutro à cara de
+           * valor, e o UNIQUE recusava o primeiro ZERO por causa dela. */
+          if(!bit_le(S_PRES, i*ncols + c)) continue;
           ord_usa_indice(c);
           int coube = ord_insere(celula_valor(i, c, ncols), (int)i);
           ord_usa_rascunho();
@@ -4775,6 +4895,46 @@ static int varre(const char *resto, int acao){
 
     long achou = bits_conta(S_MATCH, nrows);
     ultima_conta = achou;
+
+    /* ── A RESTRIÇÃO VALE EM QUALQUER PORTA ──────────────────────────────────
+     * Uma afirmação sobre a coluna que só o INSERT respeitasse não é uma
+     * afirmação: o UPDATE reescreve a mesma célula. `SET x = NULL` numa coluna
+     * NOT NULL é apagar o que ela garante; e um valor repetido numa coluna
+     * UNIQUE é a segunda folha da fibra a entrar pela outra porta. Recusa-se
+     * ANTES do compromisso, com o diário ainda fechado — a linha inteira fica
+     * como estava. */
+    if(acao == ACAO_SET && col_set >= 0 && col_set < 16 && achou > 0){
+        long r = mem_le(S_RESTR + (unsigned)col_set).total;
+        if((r & R_NOTNULL) && set_anula){
+            printf("erro: a coluna %d é NOT NULL — `SET = NULL` RECUSADO.\n", col_set);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "null value in column %d violates not-null constraint",
+                         col_set); }
+            return 0;
+        }
+        if((r & R_UNICO) && !set_anula){
+            /* duas maneiras de quebrar a unicidade, e as duas contam: o valor
+             * já existir NOUTRA linha, ou o próprio UPDATE marcar mais do que
+             * uma linha — nesse caso ele escreveria o mesmo valor em todas. */
+            long colide = 0;
+            for(long i = 0; i < nrows && !colide; i++){
+                if(!bit_le(S_VIVO, i) || bit_le(S_MATCH, i)) continue;
+                if(!bit_le(S_PRES, i*ncols + col_set)) continue;
+                if(celula_valor(i, col_set, ncols) == v) colide = 1;
+            }
+            if(colide || achou > 1){
+                printf("erro: a coluna %d é UNIQUE e o valor %ld %s — RECUSADO.\n",
+                       col_set, v, colide ? "já lá está" : "iria para mais de uma linha");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "duplicate key value violates unique constraint on"
+                             " column %d", col_set); }
+                return 0;
+            }
+        }
+    }
+
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
         barreira();
