@@ -1063,9 +1063,10 @@ static void fk_txt_grava(unsigned base, const char *nome){
     txt_grava(base, FK_NOME_W, n);
 }
 /* na FILHA: a coluna j aponta para tab(col). Devolve a coluna alvo, ou −1. */
-static void fk_grava(int j, const char *tab, int col){
+static void fk_grava(int j, const char *tab, int col, int modo){
     if(j < 0 || j >= 16) return;
-    { Word w; w.total = (Word8)(col + 1); w.e = 0; mem_grava(S_FK + (unsigned)j, w); }
+    { Word w; w.total = (Word8)(col + 1); w.e = (Word8)modo;
+      mem_grava(S_FK + (unsigned)j, w); }
     fk_txt_grava(S_FKNOME + (unsigned)j * FK_NOME_W, tab);
 }
 static int fk_le(int j, char *tab, int cap){
@@ -1878,8 +1879,9 @@ static int cria(const char *resto){
     pula(&p); if(*p != '(') return 0; p++;
     long ncols = 0; char c[64];
     long corpo[16], parm[16], restr[16];
-    char fk_tab[16][64], fk_alvo[16][64]; long fk_col[16];
-    for(int q = 0; q < 16; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0; fk_col[q] = -1; }
+    char fk_tab[16][64], fk_alvo[16][64]; long fk_col[16], fk_modo[16];
+    for(int q = 0; q < 16; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
+                                 fk_col[q] = -1; fk_modo[q] = 0; }
     while(1){
         if(!ident(&p, c, sizeof c)) break;
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
@@ -1931,6 +1933,21 @@ static int cria(const char *resto){
                 p++;
                 snprintf(fk_tab[ncols], 64, "%s", mt);
                 snprintf(fk_alvo[ncols], 64, "%s", mc);
+                /* e o que fazer quando o destino desaparecer. Sem cláusula, o
+                 * modo é RECUSAR — que é o único que não muda nada sem ordem. */
+                { const char *v3 = p;
+                  pula(&p);
+                  if(palavra(&p, "ON") && palavra(&p, "DELETE")){
+                      pula(&p);
+                      if(palavra(&p, "CASCADE"))       fk_modo[ncols] = 1;
+                      else if(palavra(&p, "SET")){
+                          pula(&p);
+                          if(palavra(&p, "NULL"))      fk_modo[ncols] = 2;
+                          else                         p = v3;
+                      }
+                      else if(palavra(&p, "RESTRICT")) fk_modo[ncols] = 0;
+                      else                             p = v3;
+                  } else p = v3; }
             }
             else if(!strcasecmp(r, "PRIMARY")){
                 pula(&p);
@@ -2003,7 +2020,8 @@ static int cria(const char *resto){
             usa_tabela(guarda, 0);
         }
         for(long j = 0; j < ncols && j < 16; j++)
-            if(fk_tab[j][0] && fk_col[j] >= 0) fk_grava((int)j, fk_tab[j], (int)fk_col[j]);
+            if(fk_tab[j][0] && fk_col[j] >= 0)
+                fk_grava((int)j, fk_tab[j], (int)fk_col[j], (int)fk_modo[j]);
       } }
     {
         static const char *nm[8] = {"INTEIRO","RACIONAL","AUREO","MORFICO","CRISTALINO",
@@ -5124,50 +5142,98 @@ static int varre(const char *resto, int acao){
             }
         }
     }
+    /* ── E QUANDO A SETA PERDE O DESTINO, HÁ TRÊS RESPOSTAS E SÃO SÓ TRÊS ────
+     * Apagar uma linha apontada deixa a seta sem chegada, e o que fazer com ela
+     * não é uma lista de opções do dialecto: são as três coisas que se podem
+     * fazer a uma seta cujo destino desaparece.
+     *
+     *   RESTRICT   recusar     — a seta não pode perder o destino; nada muda.
+     *   CASCADE    levar junto — a FIBRA vai atrás: apagar x na mãe é apagar
+     *                            π⁻¹(x) na filha, que é a imagem inversa e não
+     *                            uma regra de conveniência (`thm:multiplicidade`).
+     *   SET NULL   soltar      — a seta desaparece e a linha fica: a célula vai
+     *                            para o DUAL, que é onde uma coordenada sem
+     *                            valor mora (`thm:bitunico`).
+     *
+     * Quem diz qual é a FILHA, porque é dela a seta; a mãe só sabe quem a
+     * aponta. E a ordem é: age-se na filha PRIMEIRO e só depois se apaga a mãe
+     * — ao contrário, um erro a meio deixava a filha a apontar para o vazio,
+     * que é o estado que tudo isto existe para não haver.
+     *
+     * A CADEIA NÃO DESCE: se a filha for mãe de outra, a cascata pára aqui e a
+     * segunda seta é verificada como qualquer outra (isto é: pode recusar). É
+     * um limite declarado, não um esquecimento — descer exigia reentrar no
+     * varre, e o varre tem estado global. */
     if(acao == ACAO_APAGA && achou > 0 && filho_quantos() > 0){
         int nf = filho_quantos(), preso = 0;
-        char ft[64], guarda[64];
+        char ft[64], guarda[64], presa[64];
+        long morre[MAXLIN]; int nm = 0;
         snprintf(guarda, sizeof guarda, "%s", nome);
+        presa[0] = 0;
+    /* DUAS PASSAGENS, E A ORDEM É A LEI: primeiro pergunta-se a TODAS se
+     * alguma recusa, e só depois se age. Numa passagem só, a filha em CASCADE
+     * processada antes de uma filha em RESTRICT já tinha levado as suas linhas
+     * quando a recusa chegasse — a operação recusada e metade feita, que é o
+     * estado que este bloco existe para não haver. */
+    for(int passo = 0; passo < 2 && !preso; passo++){
         for(int k = 0; k < nf && !preso; k++){
             int fc = filho_le(k, ft, sizeof ft);
-            if(fc < 0) continue;
-            /* os valores que vão desaparecer, recolhidos ANTES de trocar de
-             * tabela — a decisão toma-se com a filha aberta e traz-se em
-             * memória local, que é a mesma regra da subconsulta */
-            { long alvos[MAXLIN]; int na = 0;
-              for(long i = 0; i < nrows && na < MAXLIN; i++){
-                  if(!bit_le(S_MATCH, i)) continue;
-                  alvos[na++] = i;    /* qual coluna é a apontada di-lo a filha */
+            if(fc < 0 || !tabela_existe(ft)) continue;
+
+            /* a coluna da MÃE que esta filha aponta, e o MODO, vivem na filha */
+            char mt2[64]; int mcol, modo;
+            if(!usa_tabela(ft, 0) || !cat_nome_bate(ft)){ usa_tabela(guarda, 0); continue; }
+            mcol = fk_le(fc, mt2, sizeof mt2);
+            modo = (mcol >= 0) ? (int)mem_le(S_FK + (unsigned)fc).e : 0;
+            if(mcol < 0 || strcmp(mt2, guarda)){ usa_tabela(guarda, 0); continue; }
+            usa_tabela(guarda, 0);
+
+            /* os valores que vão desaparecer — recolhidos com a MÃE aberta */
+            nm = 0;
+            for(long i = 0; i < nrows && nm < MAXLIN; i++){
+                if(!bit_le(S_MATCH, i)) continue;
+                if(!bit_le(S_PRES, i*ncols + mcol)) continue;
+                morre[nm++] = celula_valor(i, mcol, ncols);
+            }
+            if(!nm) continue;
+
+            /* e agora com a FILHA aberta, e a decisão já tomada */
+            if(!usa_tabela(ft, 0) || !cat_nome_bate(ft)){ usa_tabela(guarda, 0); continue; }
+            { long fnc = mem_le(S_CAT).total, fnr = cat_nrows();
+              long tocadas = 0;
+              for(long i = 0; i < fnr; i++){
+                  if(!bit_le(S_VIVO, i) || !bit_le(S_PRES, i*fnc + fc)) continue;
+                  { long val = celula_valor(i, fc, fnc);
+                    int bate = 0;
+                    for(int u = 0; u < nm && !bate; u++) if(morre[u] == val) bate = 1;
+                    if(!bate) continue;
+                    if(modo == 0){                                           /* RESTRICT */
+                        if(passo == 0){
+                            preso = 1; snprintf(presa, sizeof presa, "%s", ft);
+                            printf("erro: a linha com %ld é apontada por «%s» — apagá-la"
+                                   " cortava a seta por baixo. RECUSADO.\n", val, ft);
+                        }
+                        break;
+                    }
+                    if(passo == 0) continue;          /* a 1.ª passagem só pergunta */
+                    if(modo == 1){ bit_poe(S_VIVO, i, 0); tocadas++; }        /* CASCADE  */
+                    else if(modo == 2){ bit_poe(S_PRES, i*fnc + fc, 0); tocadas++; } }
               }
-              if(!usa_tabela(ft, 0) || !cat_nome_bate(ft)){ usa_tabela(guarda, 0); continue; }
-              { long fnc = mem_le(S_CAT).total, fnr = cat_nrows();
-                char mt2[64];
-                int mcol = fk_le(fc, mt2, sizeof mt2);
-                /* a filha aponta para esta tabela? (pode apontar para outra) */
-                if(mcol >= 0 && !strcmp(mt2, guarda)){
-                    /* recolhe os valores que a filha usa */
-                    long usados[MAXLIN]; int nu = 0;
-                    for(long i = 0; i < fnr && nu < MAXLIN; i++)
-                        if(bit_le(S_VIVO, i) && bit_le(S_PRES, i*fnc + fc))
-                            usados[nu++] = celula_valor(i, fc, fnc);
-                    usa_tabela(guarda, 0);
-                    for(int t = 0; t < na && !preso; t++)
-                        for(int u = 0; u < nu && !preso; u++)
-                            if(celula_valor(alvos[t], mcol, ncols) == usados[u]
-                               && bit_le(S_PRES, alvos[t]*ncols + mcol)){
-                                preso = 1;
-                                printf("erro: a linha com %ld é apontada por «%s» —"
-                                       " apagá-la cortava a seta por baixo. RECUSADO.\n",
-                                       usados[u], ft);
-                            }
-                } else usa_tabela(guarda, 0);
+              if(tocadas){
+                  /* a árvore da coluna deixou de bater com o que lá está */
+                  if(fc < IDX_MAXCOL){ Word z = {0,0}; mem_grava(S_IDXCAB(fc), z); }
+                  barreira();
+                  printf("-- a seta de «%s»: %ld linha(s) %s\n", ft, tocadas,
+                         modo == 1 ? "levadas junto (CASCADE)" : "soltas para o dual (SET NULL)");
               } }
+            usa_tabela(guarda, 0);
+        }
         }
         if(preso){
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
                          "update or delete violates foreign key constraint on"
-                         " referencing table"); }
+                         " referencing table \"%s\"", presa); }
             return 0;
         }
     }

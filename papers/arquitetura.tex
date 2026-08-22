@@ -2487,9 +2487,47 @@ aponta; a mãe livre contra a presa; a soltura pelo lado certo; a persistência
 das duas pontas; o \code{DROP} recusado), com o controlo em duas metades --- sem
 seta os mesmos valores entram, e a mãe de \emph{outra} tabela não fica presa.}
 
+\medskip\noindent\textbf{E quando a seta perde o destino há três respostas, e
+são só três.} Não é uma lista de opções do dialecto: são as três coisas que se
+podem fazer a uma seta cujo destino desaparece.
+\[
+\begin{array}{lll}
+\code{RESTRICT} & \text{recusar}     & \text{a seta não pode perder o destino; nada muda}\\
+\code{CASCADE}  & \text{levar junto} & \text{a \textbf{fibra} vai atrás: apagar }x\text{ é apagar }\pi^{-1}(x)\\
+\code{SET NULL} & \text{soltar}      & \text{a seta some e a linha fica: a célula vai para o \textbf{dual}}
+\end{array}
+\]
+\code{RESTRICT} é o modo por omissão porque é o único que não faz nada sem
+ordem; \code{CASCADE} é a imagem inversa do \code{thm:multiplicidade}, e é
+\emph{só} a fibra de $x$ --- o que se mede deixando na filha uma linha que
+aponta a outro valor e exigindo que fique; \code{SET NULL} manda a célula para
+onde uma coordenada sem valor mora, e mede-se pelo dual e não pela impressão
+(\code{IS NULL} apanha-a, \code{= 0} não). Quem diz qual é a \textbf{filha},
+porque a seta é dela.
+
+\medskip\noindent\textbf{O gume é a ordem:} pergunta-se a \emph{todas} antes de
+agir a \emph{qualquer uma}. Numa passagem só, a filha em \code{CASCADE}
+processada primeiro já tinha levado as suas linhas quando a recusa da filha em
+\code{RESTRICT} chegasse --- a operação recusada \emph{e} metade feita, que é o
+estado que tudo isto existe para não haver. Mede-se com o mesmo valor apontado
+pelas três de uma vez, contando os dois lados antes e depois; e mutar as duas
+passagens numa só derruba a medida.
+
+\medskip\noindent Fica dito o limite: \textbf{a cadeia não desce.} Se a filha
+for mãe de outra, a cascata pára e a segunda seta é verificada como qualquer
+outra. É declarado, não esquecido --- descer exigia reentrar no \code{varre}, e
+o \code{varre} tem estado global.
+
+\medido{\code{tests/pgwire.c} §W35 (as duas pontas; o \code{NULL} que não
+aponta; a mãe livre contra a presa; o \code{DROP} recusado) e §W36 (as três
+respostas; a fibra e só a fibra; o dual em vez do zero; a atomicidade da
+recusa; a persistência do modo), com o controlo no ARRANJO: as três filhas
+apontam à mesma coluna da mesma mãe e reagem das três maneiras --- o modo é da
+seta, não da tabela.}
+
 \colunas{\code{aranha thm:multiplicidade}; \code{aranha thm:bitunico}}
-        {\code{REFERENCES}; lista de filhos na mãe; travessia por descida}
-        {\code{tests/pgwire.c} §W35}
+        {\code{REFERENCES}; \code{ON DELETE}; lista de filhos na mãe}
+        {\code{tests/pgwire.c} §W35; §W36}
 
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}

@@ -4969,6 +4969,147 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W36: TRÊS RESPOSTAS QUANDO A SETA PERDE O DESTINO ════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w36.mem", "/tmp/pgwire_w36.prog",
+            "/tmp/pgwire_w36__m.mem", "/tmp/pgwire_w36__m.prog",
+            "/tmp/pgwire_w36__fc.mem", "/tmp/pgwire_w36__fc.prog",
+            "/tmp/pgwire_w36__fn.mem", "/tmp/pgwire_w36__fn.prog",
+            "/tmp/pgwire_w36__fr.mem", "/tmp/pgwire_w36__fr.prog" };
+        for(int k = 0; k < 10; k++) unlink(lixo[k]);
+        printf("\n§W36 a seta sem destino: recusar, levar junto, soltar.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w36")) mal++;
+        sql_executa("CREATE TABLE m (id UNIQUE, z)", &o);
+        for(int i = 1; i <= 4; i++){
+            char q[64]; snprintf(q, sizeof q, "INSERT INTO m VALUES (%d,%d)", i, i*10);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE TABLE fc (a, dono REFERENCES m(id) ON DELETE CASCADE)", &o);
+        sql_executa("CREATE TABLE fn (a, dono REFERENCES m(id) ON DELETE SET NULL)", &o);
+        sql_executa("CREATE TABLE fr (a, dono REFERENCES m(id))", &o);
+        /* cada filha com DUAS linhas: uma que aponta ao que vai morrer e outra
+         * que aponta a outro. É o gume — a fibra que vai atrás é a de x, não a
+         * tabela toda. */
+        sql_executa("INSERT INTO fc VALUES (11,1)", &o);
+        sql_executa("INSERT INTO fc VALUES (12,4)", &o);
+        sql_executa("INSERT INTO fn VALUES (21,2)", &o);
+        sql_executa("INSERT INTO fn VALUES (22,4)", &o);
+        sql_executa("INSERT INTO fr VALUES (31,3)", &o);
+
+        /* ── (1) CASCADE: a FIBRA vai atrás. Apagar x na mãe é apagar π⁻¹(x)
+         * na filha — a imagem inversa, não uma regra de conveniência. E é SÓ a
+         * fibra de x: a linha que aponta ao 4 fica. */
+        int c1 = sql_executa("DELETE FROM m WHERE id = 1", &o);
+        sql_executa("SELECT * FROM fc", &o);
+        long fc_n = o.nrows;
+        char fc_v[8]; snprintf(fc_v, sizeof fc_v, "%s", o.nrows ? o.cell[0][1] : "?");
+        int casc = (c1 && fc_n == 1 && !strcmp(fc_v, "4"));
+        printf("      CASCADE leva a fibra e SÓ a fibra: restam %ld em fc (esp 1)"
+               " e o que fica aponta a %s (esp 4)  %s\n", fc_n, fc_v,
+               casc ? "" : "NAO BATE");
+        if(!casc) mal++;
+
+        /* ── (2) SET NULL: a seta desaparece e a LINHA FICA. A célula vai para
+         * o dual, que é onde uma coordenada sem valor mora — e mede-se pelo
+         * dual, não pela impressão: `IS NULL` apanha-a e `= 0` não. */
+        int c2 = sql_executa("DELETE FROM m WHERE id = 2", &o);
+        sql_executa("SELECT * FROM fn", &o);
+        long fn_n = o.nrows;
+        sql_executa("SELECT * FROM fn WHERE dono IS NULL", &o);
+        long fn_nul = o.nrows;
+        sql_executa("SELECT * FROM fn WHERE dono = 0", &o);
+        long fn_zero = o.nrows;
+        sql_executa("SELECT * FROM fn WHERE dono = 4", &o);
+        long fn_out = o.nrows;
+        int solta = (c2 && fn_n == 2 && fn_nul == 1 && fn_zero == 0 && fn_out == 1);
+        printf("      SET NULL solta a seta e guarda a linha: %ld linhas (esp 2)"
+               " · IS NULL %ld (esp 1) · `= 0` %ld (esp 0) · a outra intacta %ld"
+               " (esp 1)  %s\n", fn_n, fn_nul, fn_zero, fn_out,
+               solta ? "" : "NAO BATE");
+        if(!solta) mal++;
+
+        /* ── (3) RESTRICT: nada muda. É o modo por omissão, e tem de ser: é o
+         * único que não faz nada sem ordem. */
+        int c3 = sql_executa("DELETE FROM m WHERE id = 3", &o);
+        sql_executa("SELECT * FROM fr", &o);
+        long fr_n = o.nrows;
+        sql_executa("SELECT * FROM m WHERE id = 3", &o);
+        int recusa = (!c3 && fr_n == 1 && o.nrows == 1);
+        printf("      RESTRICT recusa e nada muda: %d · fr tem %ld · a mãe fica"
+               " %d  %s\n", c3, fr_n, o.nrows, recusa ? "" : "NAO BATE");
+        if(!recusa) mal++;
+
+        /* ── (4) O GUME DA ORDEM: com uma filha em RESTRICT a recusar, as
+         * outras NÃO PODEM ter agido. Pergunta-se a todas antes de agir; numa
+         * passagem só, a filha em CASCADE processada primeiro já tinha levado
+         * as suas linhas quando a recusa chegasse — a operação recusada e
+         * metade feita. Aqui o 4 é apontado pelas três de uma vez. */
+        sql_executa("INSERT INTO fr VALUES (34,4)", &o);
+        long antes_fc, antes_fn;
+        sql_executa("SELECT * FROM fc", &o); antes_fc = o.nrows;
+        sql_executa("SELECT * FROM fn WHERE dono IS NULL", &o); antes_fn = o.nrows;
+        int c4 = sql_executa("DELETE FROM m WHERE id = 4", &o);
+        sql_executa("SELECT * FROM fc", &o); long depois_fc = o.nrows;
+        sql_executa("SELECT * FROM fn WHERE dono IS NULL", &o); long depois_fn = o.nrows;
+        int atomico = (!c4 && depois_fc == antes_fc && depois_fn == antes_fn);
+        printf("      e a recusa não deixa metade feita: recusado %d · fc %ld->%ld"
+               " · fn ausentes %ld->%ld  %s\n", c4, antes_fc, depois_fc,
+               antes_fn, depois_fn, atomico ? "" : "NAO BATE");
+        if(!atomico) mal++;
+
+        /* ── (5) E O MODO PERSISTE, porque vive na filha e no disco: fecha-se,
+         * reabre-se, e cada uma continua a responder à sua maneira. */
+        sql_fechar();
+        if(!sql_abrir("/tmp/pgwire_w36")) mal++;
+        sql_executa("DELETE FROM fr WHERE dono = 4", &o);      /* solta o RESTRICT */
+        int c5 = sql_executa("DELETE FROM m WHERE id = 4", &o);
+        sql_executa("SELECT * FROM fc", &o); long r_fc = o.nrows;
+        sql_executa("SELECT * FROM fn WHERE dono IS NULL", &o); long r_fn = o.nrows;
+        int persiste = (c5 && r_fc == 0 && r_fn == 2);
+        printf("      depois de reabrir, cada uma à sua maneira: fc %ld (esp 0)"
+               " · fn ausentes %ld (esp 2)  %s\n", r_fc, r_fn,
+               persiste ? "" : "NAO BATE");
+        if(!persiste) mal++;
+
+        /* ── O CONTROLO: o modo é da SETA e não da tabela. As três filhas
+         * apontam para a mesma mãe e a mesma coluna, e reagiram das três
+         * maneiras à mesma operação — um motor com um comportamento só teria
+         * passado em qualquer uma das três medidas isoladas. */
+        printf("\n      CONTROLO — as três apontam à MESMA coluna da MESMA mãe e"
+               " reagiram das três maneiras: é o modo da seta, não da tabela.\n");
+        sql_fechar();
+
+        printf("\n");
+        ok("QUANDO A SETA PERDE O DESTINO HÁ TRÊS RESPOSTAS, E SÃO SÓ TRÊS. Apagar uma linha"
+           " apontada deixa a seta sem chegada, e o que fazer com ela não é uma lista de"
+           " opções do dialecto: são as três coisas que se podem fazer a uma seta cujo"
+           " destino desaparece. RECUSAR (`RESTRICT`) — a seta não pode perder o destino, e"
+           " nada muda; é o modo por omissão porque é o único que não faz nada sem ordem."
+           " LEVAR JUNTO (`CASCADE`) — a FIBRA vai atrás: apagar x na mãe é apagar π⁻¹(x) na"
+           " filha, que é a imagem inversa do `thm:multiplicidade` e não uma regra de"
+           " conveniência; e é SÓ a fibra de x, o que se mede deixando na filha uma linha"
+           " que aponta a outro valor e exigindo que fique. SOLTAR (`SET NULL`) — a seta"
+           " desaparece e a linha fica, com a célula a ir para o DUAL, que é onde uma"
+           " coordenada sem valor mora; mede-se pelo dual e não pela impressão, porque"
+           " `IS NULL` apanha-a e `= 0` não. Quem diz qual é a FILHA, porque a seta é dela;"
+           " a mãe só sabe quem a aponta. O GUME É A ORDEM: pergunta-se a TODAS antes de"
+           " agir a QUALQUER uma, senão a filha em CASCADE processada primeiro já tinha"
+           " levado as suas linhas quando a recusa da filha em RESTRICT chegasse — a"
+           " operação recusada e metade feita, que é o estado que tudo isto existe para não"
+           " haver. Mede-se com o mesmo valor apontado pelas três de uma vez, contando os"
+           " dois lados antes e depois. E O CONTROLO ESTÁ NO ARRANJO: as três filhas apontam"
+           " à MESMA coluna da MESMA mãe e reagiram das três maneiras — o modo é da SETA e"
+           " não da tabela, e um motor com um comportamento só teria passado em qualquer uma"
+           " das três medidas isoladas. Fica dito o limite: a CADEIA NÃO DESCE — se a filha"
+           " for mãe de outra, a cascata pára e a segunda seta é verificada como qualquer"
+           " outra. É declarado, não esquecido: descer exigia reentrar no varre, que tem"
+           " estado global.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
