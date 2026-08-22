@@ -3842,6 +3842,76 @@ diferença \emph{é} a derivada.
         {$\zeta$ e $\mu$ como tabelas; \code{inversa}/\code{produto}/\code{det} pelo motor}
         {\code{tests/pgwire.c} §W81}
 
+\subsection*{Cayley: o esquilo vira rotação, e caem os triplos}
+
+\noindent A Parte VI do paper dá o Padé $[1/1]$ da exponencial ---
+$e^{A}\approx(I+\tfrac A2)(I-\tfrac A2)^{-1}$, «a Cayley/Möbius, o
+Crank--Nicolson». Multiplicando por $2$ em cima e em baixo fica
+$(2I+A)(2I-A)^{-1}$: o mesmo, sem frações na entrada. \textbf{E aqui isto deixa de
+ser uma aproximação e passa a ser uma identidade estrutural:} a Cayley de uma
+matriz \emph{antissimétrica} é \textbf{ortogonal}. O que o fluxo do esquilo faz em
+tempo contínuo --- conservar a norma, §W79 --- a Cayley faz num passo.
+
+\medskip\noindent Mede-se com o motor contra si próprio: pede-se a transposta,
+guarda-se, e exige-se $Q^{\!\top}Q=I$ --- comparar $Q$ com uma rotação escrita à mão
+seria confiar na conta, multiplicar de volta é verificá-la ---, com $\det Q=1$ a
+distinguir a rotação da simples isometria.
+
+\medskip\noindent\textbf{E daí sai o que ninguém pôs.} Para o esquilo $(0,a;-a,0)$
+a conta dá
+\[
+Q=\frac{1}{4+a^{2}}\begin{pmatrix}4-a^{2}&4a\\-4a&4-a^{2}\end{pmatrix},
+\qquad\text{e a ortogonalidade \textbf{obriga} a}\quad
+(4-a^{2})^{2}+(4a)^{2}=(4+a^{2})^{2}.
+\]
+É a parametrização racional do círculo, e portanto a fórmula dos \textbf{triplos
+pitagóricos}. Não se procurou nenhum: eles são o que a matriz \emph{tem de ter}
+para conservar a norma em $\mathbb{Q}$ --- e saem $(3,4,5)$, $(5,12,13)$,
+$(21,20,29)$, com o motor a reduzir a classe sozinho.
+
+\medido{\code{tests/pgwire.c} §W82, com o controlo numa matriz que \emph{não} é
+esquilo, cuja Cayley não é ortogonal --- sem ele, «leva o esquilo numa rotação»
+podia ser «leva tudo numa rotação», e a hipótese não faria trabalho nenhum.}
+
+\colunas{\code{broca-so} (Parte VI, o Padé); \code{aranha thm:duas}}
+        {\code{inversa}+\code{produto}+\code{transposta} pelo motor; $Q^{\!\top}Q=I$}
+        {\code{tests/pgwire.c} §W82}
+
+\medskip\noindent\textbf{E o selo é o traço --- que é inteiro sem os autovalores o
+serem.} A Parte VII diz $\operatorname{Tr}(e^{At})=\sum_i e^{\lambda_i t}$, a soma
+sobre o espectro; no discreto isso é
+\[
+\operatorname{tr}(A^{n})=\lambda_1^{n}+\lambda_2^{n},
+\]
+o que dá nome ao que §W63 mediu sem o nomear: \emph{a recorrência de Lucas é a soma
+das potências dos autovalores}. Com espectro racional verifica-se diretamente
+--- $\mathrm{diag}(3,2)$ dá $3^{n}+2^{n}$ ---, e pára em $n=4$ porque $3^{5}=243$ não
+cabe no $\text{Word}_8$: o teto diz-se, e foram as duas portas de §W75 que o
+apanharam quando a sonda passou por lá.
+
+\medskip\noindent\textbf{E agora o notável.} Na matriz de Fibonacci os autovalores
+\emph{não} estão em $\mathbb{Q}$ --- o motor recusa-os, e §W70 mostrou que essa
+recusa \emph{é} o salto $\mathbb{Q}\to\mathbb{R}$ --- e mesmo assim
+$\operatorname{tr}(A^{n})$ é \textbf{inteiro}, e são os números de Lucas. A razão é a
+\textbf{simetria}: $\lambda_1^{n}+\lambda_2^{n}$ é função simétrica dos dois, e as
+simétricas exprimem-se nos coeficientes por Viète, que são inteiros. O que não cabe
+em $\mathbb{Q}$ é cada \emph{parcela}; a \emph{soma} cabe, porque não distingue as
+parcelas --- a mesma figura de §W72, onde o traço é a face aditiva e não vê qual raiz
+é qual, pelo que não precisa que elas existam.
+
+\medskip\noindent O controlo é a parcela sozinha, sem o qual «a soma é inteira» não
+diria nada: $\varphi^{n}=F_n\varphi+F_{n-1}$ e $F_n\neq0$ para $n\ge1$, logo
+$\varphi^{n}$ nunca é inteiro --- a parcela carrega o $\varphi$ e a soma cancela-o,
+porque a outra traz $-1/\varphi$. E a \textbf{recorrência calcula a soma sem conhecer
+as parcelas}: é a identidade de Newton, e é ela que torna o selo operacional ---
+pede-se a soma sobre o espectro a um motor que não sabe dizer o espectro.
+
+\medido{\code{tests/pgwire.c} §W83.}
+
+\colunas{\code{broca-so} (Parte VII, o selo); \code{aranha thm:corte}}
+        {\code{traco} das potências contra $\sum\lambda^{n}$; a recorrência de Newton}
+        {\code{tests/pgwire.c} §W83}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

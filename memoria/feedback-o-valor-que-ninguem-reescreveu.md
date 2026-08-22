@@ -40,3 +40,11 @@ oportunidade de o deixar velho.
 Da família de [[feedback-o-medidor-que-nunca-mediu]] — o valor sai e não foi
 medido — e de [[feedback-a-recusa-que-deixa-rasto]]: as duas vezes o caminho
 curto deixou o estado a meio.
+
+**E o mesmo padrão do lado do CONSUMIDOR** (22/08): numa sonda li
+`o.cell[0][0]` sem verificar `o.ok`. O `INSERT` de 243 tinha sido recusado
+(não cabe no `Word_8`) e o `traco` recusou com «empty table» — as duas portas
+a funcionar —, mas a célula de um resultado recusado está VAZIA e `atol("")`
+dá **0**. Quase reportei «o motor devolveu 0» sobre uma recusa correcta.
+Ler o valor sem verificar que houve valor é a mesma doença: um estado que
+ninguém escreveu, lido como se tivesse sido.

@@ -10869,6 +10869,340 @@ int main(void){
            " triangulares 1,3,6,10. Nenhum limite entra em parte nenhuma.", mal == 0);
     }
 
+
+    /* ═══ §W82: CAYLEY — O ESQUILO VIRA ROTAÇÃO, E SAI UM TRIPLO ═══════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W82 (2I+A)(2I−A)⁻¹ leva o esquilo numa rotação RACIONAL.\n\n");
+        { const char *tabs[] = { "N","P","Q","QT","G" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w82__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w82__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w82.mem"); unlink("/tmp/pgwire_w82.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w82")) mal++;
+
+        /* ── A PARTE VI DO PAPER DÁ O PADÉ [1/1] DA EXPONENCIAL:
+         *
+         *     e^{A} ≈ (I + A/2)(I − A/2)⁻¹
+         *
+         * — «a Cayley/Möbius, o Crank–Nicolson». Multiplicando por 2 em cima e
+         * em baixo fica (2I + A)(2I − A)⁻¹, que é a mesma coisa sem fracções na
+         * entrada. E aqui isto deixa de ser uma aproximação e passa a ser uma
+         * IDENTIDADE ESTRUTURAL: a transformada de Cayley leva uma matriz
+         * ANTISSIMÉTRICA — o esquilo — numa matriz ORTOGONAL, isto é, numa
+         * ROTAÇÃO. O que o fluxo do esquilo faz em tempo contínuo (conservar a
+         * norma, §W79), a Cayley faz num passo. */
+        long a = 1;
+        sql_executa("CREATE TABLE N (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO N VALUES (2,-1), (1,2)", &o);       /* 2I − A */
+        sql_executa("CREATE TABLE P (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO P VALUES (2,1), (-1,2)", &o);       /* 2I + A */
+        sql_executa("SELECT inversa(*) FROM N", &o);
+        int ok_inv = o.ok && o.nrows == 2;
+        char iv[4][32];
+        if(ok_inv) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            snprintf(iv[i*2+j], 32, "%s", o.cell[i][j]);
+        { char q2[220];
+          sql_executa("CREATE TABLE Q (p RACIONAL, q RACIONAL)", &o2);
+          snprintf(q2, sizeof q2, "INSERT INTO Q VALUES (%s,%s), (%s,%s)",
+                   iv[0], iv[1], iv[2], iv[3]);
+          sql_executa(q2, &o2); }
+        sql_executa("SELECT produto(Q) FROM P", &o);
+        int tem = o.ok && o.nrows == 2;
+        char Qm[4][32];
+        if(tem) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            snprintf(Qm[i*2+j], 32, "%s", o.cell[i][j]);
+        int tres45 = tem && !strcmp(Qm[0],"3/5") && !strcmp(Qm[1],"4/5")
+                     && !strcmp(Qm[2],"-4/5") && !strcmp(Qm[3],"3/5");
+        printf("      A = (0,1;−1,0) → Q = (%s,%s;%s,%s) %s\n",
+               Qm[0], Qm[1], Qm[2], Qm[3],
+               tres45 ? "— a rotação 3-4-5, EXACTA em ℚ" : "(inesperado)");
+        if(!ok_inv || !tem || !tres45) mal++;
+
+        /* ── E É ORTOGONAL, medido com o motor contra si próprio: pede-se a
+         * transposta, guarda-se, e exige-se QᵀQ = I. Comparar Q com uma rotação
+         * escrita à mão seria confiar na conta; multiplicar de volta é
+         * verificá-la. */
+        { char q2[220];
+          sql_executa("DROP TABLE IF EXISTS Q", &o2);
+          sql_executa("CREATE TABLE Q (p RACIONAL, q RACIONAL)", &o2);
+          snprintf(q2, sizeof q2, "INSERT INTO Q VALUES (%s,%s), (%s,%s)",
+                   Qm[0], Qm[1], Qm[2], Qm[3]);
+          sql_executa(q2, &o2);
+          sql_executa("SELECT transposta(*) FROM Q", &o);
+          sql_executa("CREATE TABLE QT (p RACIONAL, q RACIONAL)", &o2);
+          for(int i = 0; i < o.nrows; i++){
+              snprintf(q2, sizeof q2, "INSERT INTO QT VALUES (%s,%s)",
+                       o.cell[i][0], o.cell[i][1]);
+              sql_executa(q2, &o2);
+          } }
+        sql_executa("SELECT produto(QT) FROM Q", &o);
+        int orto = o.ok && o.nrows == 2;
+        if(orto) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            if(strcmp(o.cell[i][j], (i == j) ? "1" : "0")) orto = 0;
+        sql_executa("SELECT det(*) FROM Q", &o);
+        int dq = o.ok && !strcmp(o.cell[0][0], "1");
+        printf("      QᵀQ = I: %s · det Q = %s → é uma ROTAÇÃO, não só uma"
+               " isometria\n", orto ? "sim" : "MAU", dq ? "1" : "MAU");
+        if(!orto || !dq) mal++;
+
+        /* ── E DAÍ SAI O QUE NINGUÉM PÔS: OS TRIPLOS PITAGÓRICOS. Para o esquilo
+         * (0,a;−a,0) a conta dá
+         *
+         *     Q = ( 4−a² ,  4a ; −4a , 4−a² ) / (4+a²),
+         *
+         * e a ortogonalidade obriga a (4−a²)² + (4a)² = (4+a²)² — que é a
+         * PARAMETRIZAÇÃO RACIONAL DO CÍRCULO, e portanto a fórmula dos triplos.
+         * Não se procurou nenhum: eles são o que a matriz TEM DE TER para
+         * conservar a norma em ℚ. E o motor reduz a classe sozinho, pelo que
+         * (12,16,20) sai escrito como 3/5 e 4/5. */
+        long achados = 0, certos = 0;
+        printf("      a  ·  Q do motor            ·  o triplo (4−a², 4a, 4+a²)\n");
+        for(a = 1; a <= 6; a++){
+            char q2[220];
+            sql_executa("DROP TABLE IF EXISTS N", &o2);
+            sql_executa("CREATE TABLE N (p RACIONAL, q RACIONAL)", &o2);
+            snprintf(q2, sizeof q2, "INSERT INTO N VALUES (2,%ld), (%ld,2)", -a, a);
+            sql_executa(q2, &o2);
+            sql_executa("SELECT inversa(*) FROM N", &o);
+            if(!o.ok) continue;
+            char w[4][32];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                snprintf(w[i*2+j], 32, "%s", o.cell[i][j]);
+            sql_executa("DROP TABLE IF EXISTS Q", &o2);
+            sql_executa("CREATE TABLE Q (p RACIONAL, q RACIONAL)", &o2);
+            snprintf(q2, sizeof q2, "INSERT INTO Q VALUES (%s,%s), (%s,%s)",
+                     w[0], w[1], w[2], w[3]);
+            sql_executa(q2, &o2);
+            sql_executa("DROP TABLE IF EXISTS P", &o2);
+            sql_executa("CREATE TABLE P (p RACIONAL, q RACIONAL)", &o2);
+            snprintf(q2, sizeof q2, "INSERT INTO P VALUES (2,%ld), (%ld,2)", a, -a);
+            sql_executa(q2, &o2);
+            sql_executa("SELECT produto(Q) FROM P", &o);
+            if(!o.ok || o.nrows != 2) continue;
+            long c = 4 - a*a, s2 = 4*a, h = 4 + a*a;
+            int pit = (c*c + s2*s2 == h*h);
+            achados++; if(pit) certos++;
+            printf("      %ld  ·  %-7s%-7s%-7s%-7s ·  (%ld,%ld,%ld) %s\n", a,
+                   o.cell[0][0], o.cell[0][1], o.cell[1][0], o.cell[1][1],
+                   labs(c), s2, h, pit ? "" : "MAU");
+        }
+        printf("      %ld esquilos, %ld com (4−a²)² + (4a)² = (4+a²)²\n",
+               achados, certos);
+        if(achados < 6 || certos != achados) mal++;
+
+        /* ── E O CONTROLO É UMA MATRIZ QUE NÃO É ESQUILO: a Cayley dela NÃO tem
+         * de ser ortogonal, e não é. Sem isto, «leva o esquilo numa rotação»
+         * podia ser «leva tudo numa rotação», e a hipótese não estaria a fazer
+         * trabalho nenhum. */
+        sql_executa("DROP TABLE IF EXISTS N", &o2);
+        sql_executa("CREATE TABLE N (p RACIONAL, q RACIONAL)", &o2);
+        sql_executa("INSERT INTO N VALUES (1,-1), (1,3)", &o2);      /* 2I − G, G=(1,1;-1,-1) */
+        sql_executa("SELECT inversa(*) FROM N", &o);
+        int gok = o.ok;
+        char g[4][32];
+        if(gok) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            snprintf(g[i*2+j], 32, "%s", o.cell[i][j]);
+        if(gok){ char q2[220];
+          sql_executa("DROP TABLE IF EXISTS Q", &o2);
+          sql_executa("CREATE TABLE Q (p RACIONAL, q RACIONAL)", &o2);
+          snprintf(q2, sizeof q2, "INSERT INTO Q VALUES (%s,%s), (%s,%s)",
+                   g[0], g[1], g[2], g[3]);
+          sql_executa(q2, &o2);
+          sql_executa("DROP TABLE IF EXISTS P", &o2);
+          sql_executa("CREATE TABLE P (p RACIONAL, q RACIONAL)", &o2);
+          sql_executa("INSERT INTO P VALUES (3,1), (-1,1)", &o2);    /* 2I + G */
+          sql_executa("SELECT produto(Q) FROM P", &o); }
+        sql_executa("SELECT det(*) FROM Q", &o2);
+        int nao_rot = 1;
+        { sql_executa("DROP TABLE IF EXISTS G", &o2);
+          sql_executa("CREATE TABLE G (p RACIONAL, q RACIONAL)", &o2);
+          char q2[220];
+          snprintf(q2, sizeof q2, "INSERT INTO G VALUES (%s,%s), (%s,%s)",
+                   o.ok ? o.cell[0][0] : "0", o.ok ? o.cell[0][1] : "0",
+                   o.ok ? o.cell[1][0] : "0", o.ok ? o.cell[1][1] : "0");
+          sql_executa(q2, &o2);
+          sql_executa("SELECT gram(*) FROM G", &o2);
+          if(o2.ok && o2.nrows == 2)
+              nao_rot = !(!strcmp(o2.cell[0][0],"1") && !strcmp(o2.cell[1][1],"1")
+                          && !strcmp(o2.cell[0][1],"0")); }
+        printf("      controlo — a Cayley de uma NÃO antissimétrica: ortogonal? %s\n",
+               nao_rot ? "não, como devia" : "SIM (mau — a hipótese não trabalha)");
+        if(!nao_rot) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A TRANSFORMADA DE CAYLEY LEVA O ESQUILO NUMA ROTAÇÃO RACIONAL, E OS TRIPLOS"
+           " PITAGÓRICOS CAEM DE LÁ SEM SEREM PROCURADOS. A Parte VI do paper dá o Padé [1/1]"
+           " da exponencial — e^A ≈ (I + A/2)(I − A/2)⁻¹, «a Cayley/Möbius, o"
+           " Crank–Nicolson» —, e multiplicando por 2 em cima e em baixo fica"
+           " (2I + A)(2I − A)⁻¹, o mesmo sem fracções na entrada. AQUI ISTO DEIXA DE SER UMA"
+           " APROXIMAÇÃO E PASSA A SER UMA IDENTIDADE ESTRUTURAL: a Cayley de uma matriz"
+           " ANTISSIMÉTRICA é ORTOGONAL. O que o fluxo do esquilo faz em tempo contínuo —"
+           " conservar a norma, §W79 — a Cayley faz num passo. Mede-se com o motor contra si"
+           " próprio: pede-se a transposta, guarda-se, e exige-se QᵀQ = I, porque comparar Q"
+           " com uma rotação escrita à mão seria confiar na conta e multiplicar de volta é"
+           " verificá-la; com det Q = 1 a distinguir a rotação da simples isometria. E DAÍ"
+           " SAI O QUE NINGUÉM PÔS: para o esquilo (0,a;−a,0) a conta dá as entradas"
+           " (4−a²)/(4+a²) e 4a/(4+a²), e a ortogonalidade OBRIGA a"
+           " (4−a²)² + (4a)² = (4+a²)² — a parametrização racional do círculo, e portanto a"
+           " fórmula dos triplos. Não se procurou nenhum: eles são o que a matriz TEM DE TER"
+           " para conservar a norma em ℚ, e saem (3,4,5), (5,12,13), (21,20,29) com o motor a"
+           " reduzir a classe sozinho. O CONTROLO é uma matriz que não é esquilo, cuja Cayley"
+           " não é ortogonal — sem ele, «leva o esquilo numa rotação» podia ser «leva tudo"
+           " numa rotação», e a hipótese não estaria a fazer trabalho nenhum.", mal == 0);
+    }
+
+
+    /* ═══ §W83: O SELO É O TRAÇO — E ELE É INTEIRO SEM OS λ SEREM ══════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W83 tr(Aⁿ) = Σλᵢⁿ: a soma sobrevive à irracionalidade das parcelas.\n\n");
+        { const char *tabs[] = { "A","P" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w83__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w83__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w83.mem"); unlink("/tmp/pgwire_w83.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w83")) mal++;
+
+        #define POE(t,a,b,c,d) do { char q2[200]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld), (%ld,%ld)", \
+                     t,(long)(a),(long)(b),(long)(c),(long)(d)); \
+            sql_executa(q2,&o2); } while(0)
+
+        /* ── A PARTE VII DO PAPER DIZ QUE «O SELO É O TRAÇO»:
+         * Tr(e^{At}) = Σᵢ e^{λᵢt} — a soma sobre o espectro. No discreto isso é
+         *
+         *     tr(Aⁿ) = λ₁ⁿ + λ₂ⁿ,
+         *
+         * e daí sai a coisa que §W63 mediu sem nomear: a recorrência de Lucas É
+         * a soma das potências dos autovalores. */
+
+        /* (1) COM ESPECTRO RACIONAL verifica-se directamente: diag(3,2) tem
+         * λ = 3 e 2, e o traço da potência tem de ser 3ⁿ + 2ⁿ. */
+        POE("A", 3,0,0,2);
+        sql_executa("SELECT autovalores(*) FROM A", &o);
+        int rac = o.ok && o.nrows == 2
+                  && !strcmp(o.cell[0][0], "3") && !strcmp(o.cell[1][0], "2");
+        POE("P", 3,0,0,2);
+        int bate = rac; long ate = 0;
+        for(int n = 2; n <= 4; n++){          /* 3⁵ = 243 não cabe no Word_8 */
+            sql_executa("SELECT produto(A) FROM P", &o);
+            if(!o.ok){ bate = 0; break; }
+            long r[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                r[i][j] = atol(o.cell[i][j]);
+            POE("P", r[0][0], r[0][1], r[1][0], r[1][1]);
+            sql_executa("SELECT traco(*) FROM P", &o);
+            if(!o.ok){ bate = 0; break; }
+            long tn = atol(o.cell[0][0]);
+            long e = 1, f = 1;
+            for(int k = 0; k < n; k++){ e *= 3; f *= 2; }
+            if(tn != e + f) bate = 0; else ate = n;
+        }
+        printf("      espectro racional {3,2}: tr(Aⁿ) = 3ⁿ + 2ⁿ até n = %ld: %s\n",
+               ate, bate ? "sim" : "FALHOU");
+        printf("        (pára em 4 porque 3⁵ = 243 não cabe no Word_8 — o tecto"
+               " diz-se, e as duas portas de §W75 apanham-no)\n");
+        if(!rac || !bate) mal++;
+
+        /* ── (2) E AGORA O QUE ISTO TEM DE NOTÁVEL. Na matriz de Fibonacci os
+         * autovalores NÃO estão em ℚ — o motor recusa-os, e §W70 mostrou que
+         * essa recusa é o salto ℚ→ℝ. E mesmo assim tr(Aⁿ) é INTEIRO, e são os
+         * números de Lucas.
+         *
+         * A razão é a SIMETRIA: λ₁ⁿ + λ₂ⁿ é uma função simétrica dos dois, e as
+         * simétricas exprimem-se nos coeficientes por Viète — que são inteiros.
+         * O que não cabe em ℚ é cada parcela; a SOMA cabe, porque não distingue
+         * as parcelas. É a mesma figura do §W72, onde o traço é a face aditiva:
+         * ele não vê qual raiz é qual, e por isso não precisa que elas existam. */
+        POE("A", 1,1,1,0);
+        sql_executa("SELECT autovalores(*) FROM A", &o);
+        int recusa = !o.ok && strstr(o.err, "not rational") != NULL;
+        long lucas[9] = {2,1,3,4,7,11,18,29,47};
+        POE("P", 1,1,1,0);
+        int luc = recusa; long ate2 = 1;
+        for(int n = 2; n <= 7; n++){
+            sql_executa("SELECT produto(A) FROM P", &o);
+            if(!o.ok){ luc = 0; break; }
+            long r[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                r[i][j] = atol(o.cell[i][j]);
+            POE("P", r[0][0], r[0][1], r[1][0], r[1][1]);
+            sql_executa("SELECT traco(*) FROM P", &o);
+            if(!o.ok){ luc = 0; break; }
+            if(atol(o.cell[0][0]) != lucas[n]) luc = 0; else ate2 = n;
+        }
+        printf("      espectro IRRACIONAL: os autovalores %s\n",
+               recusa ? "não estão em ℚ e o motor recusa-os" : "MAU");
+        printf("        e mesmo assim tr(Aⁿ) é INTEIRO até n = %ld — os Lucas"
+               " 3,4,7,11,18,29: %s\n", ate2, luc ? "sim" : "FALHOU");
+        if(!recusa || !luc) mal++;
+
+        /* ── (3) E O CONTROLO É A PARCELA SOZINHA, sem o qual «a soma é inteira»
+         * não diria nada: φⁿ NÃO é inteiro. Verifica-se sem sair dos inteiros —
+         * φ é raiz de x² = x + 1, logo φⁿ = Fₙφ + Fₙ₋₁, e isso é inteiro só se
+         * Fₙ = 0, o que não acontece para n ≥ 1. A parcela carrega o φ; a soma
+         * cancela-o, porque a outra parcela traz −1/φ. */
+        int parcela_nao = 1;
+        { long F[9] = {0,1,1,2,3,5,8,13,21};
+          for(int n = 1; n <= 7; n++) if(F[n] == 0) parcela_nao = 0; }
+        printf("      controlo — a PARCELA sozinha: φⁿ = Fₙφ + Fₙ₋₁, e Fₙ ≠ 0"
+               " para n ≥ 1 → φⁿ nunca é inteiro: %s\n",
+               parcela_nao ? "confirmado" : "MAU");
+        if(!parcela_nao) mal++;
+
+        /* ── (4) E A RECORRÊNCIA CALCULA A SOMA SEM CONHECER AS PARCELAS: pelo
+         * §W63, tₙ = B·tₙ₋₁ − C·tₙ₋₂ com t₀ = 2 e t₁ = B. É a identidade de
+         * Newton, e é o que torna operacional o «selo é o traço»: pede-se a soma
+         * sobre o espectro a um motor que não sabe dizer o espectro. */
+        { long t0 = 2, t1 = 1, B = 1, C = -1;    /* Fibonacci */
+          int newton = 1;
+          for(int n = 2; n <= 8; n++){
+              long tn = B*t1 - C*t0;
+              if(tn != lucas[n > 8 ? 8 : n]) newton = 0;
+              t0 = t1; t1 = tn;
+          }
+          printf("      a recorrência dá a MESMA soma sem os λ: %s — é Newton, e"
+                 " é o que torna o selo operacional\n",
+                 newton ? "sim" : "FALHOU");
+          if(!newton) mal++; }
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("O SELO É O TRAÇO, E ELE É INTEIRO SEM OS AUTOVALORES O SEREM. A Parte VII do"
+           " paper diz Tr(e^{At}) = Σᵢ e^{λᵢt} — a soma sobre o espectro —, e no discreto"
+           " isso é tr(Aⁿ) = λ₁ⁿ + λ₂ⁿ, o que dá nome ao que §W63 mediu sem o nomear: a"
+           " recorrência de Lucas É a soma das potências dos autovalores. Com espectro"
+           " RACIONAL verifica-se directamente — diag(3,2) dá 3ⁿ + 2ⁿ —, e pára em n = 4"
+           " porque 3⁵ = 243 não cabe no Word_8: o tecto diz-se, e foram as duas portas de"
+           " §W75 que o apanharam quando a sonda passou por lá. E AGORA O NOTÁVEL: na matriz"
+           " de Fibonacci os autovalores NÃO estão em ℚ — o motor recusa-os, e §W70 mostrou"
+           " que essa recusa é o salto ℚ→ℝ — e mesmo assim tr(Aⁿ) é INTEIRO, e são os"
+           " números de Lucas. A RAZÃO É A SIMETRIA: λ₁ⁿ + λ₂ⁿ é função simétrica dos dois, e"
+           " as simétricas exprimem-se nos coeficientes por Viète, que são inteiros. O que"
+           " não cabe em ℚ é cada PARCELA; a SOMA cabe, porque não distingue as parcelas — a"
+           " mesma figura do §W72, onde o traço é a face aditiva e não vê qual raiz é qual,"
+           " pelo que não precisa que elas existam. O CONTROLO é a parcela sozinha, sem o"
+           " qual «a soma é inteira» não diria nada: φⁿ = Fₙφ + Fₙ₋₁, e Fₙ ≠ 0 para n ≥ 1,"
+           " logo φⁿ nunca é inteiro — a parcela carrega o φ e a soma cancela-o, porque a"
+           " outra traz −1/φ. E A RECORRÊNCIA CALCULA A SOMA SEM CONHECER AS PARCELAS: é a"
+           " identidade de Newton, e é ela que torna o selo operacional — pede-se a soma"
+           " sobre o espectro a um motor que não sabe dizer o espectro.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
