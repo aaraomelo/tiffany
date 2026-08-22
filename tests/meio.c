@@ -31,8 +31,14 @@ static long raiz_piso_local(long x){
 }
 /* a média geométrica de a e b, por piso, sem estourar o produto */
 static long geo_local(long a, long b){
+    /* O TECTO NÃO SE ESCREVE À MÃO: procura-se. Estava fixo em 4·10⁹ e, para
+     * pares onde a raiz passa disso, a busca devolvia o TECTO — um número
+     * redondo com cara de resultado, que é saturação e não resposta. Aqui o
+     * limite superior duplica até passar o produto, e a busca é exacta. */
     __int128 p = (__int128)a * b;
-    __int128 lo = 1, hi = (__int128)4000000000LL;
+    __int128 lo = 1, hi = 1;
+    if(p < 1) return 0;
+    while(hi * hi <= p) hi <<= 1;
     while(lo < hi){ __int128 m = lo + (hi - lo + 1)/2;
         if(m*m <= p) lo = m; else hi = m - 1; }
     return (long)lo;
@@ -579,8 +585,18 @@ int main(void){
      *
      *     m − g = δ²/(m+g)   ⟹   δ₁ ≤ δ²/(2m)   e   δ₁ ≤ δ/2
      *
-     * Duas classes, uma de cada lado, com a largura a ir a zero: é um CORTE, e
-     * é PRODUZIDO em vez de postulado.
+     * E AQUI O PROCESSO NÃO «TENDE» A NADA: ACABA. O objecto é finito — a régua
+     * tem um grão —, pelo que a largura não se aproxima de zero, CHEGA a zero:
+     * ao fim de um número contado de batidas vale a IGUALDADE m = g, e o
+     * intervalo é um ponto. É o que o `agm.c` chama a ancoragem, e é o único
+     * desfecho possível num objecto finito: uma sucessão estritamente
+     * decrescente de inteiros não-negativos pára.
+     *
+     * DAÍ A UNICIDADE, E SEM AXIOMA NENHUM. Se x e y estão em todos os
+     * intervalos, então |x−y| ≤ mₙ − gₙ para todo n; sendo a largura ZERO no
+     * último, |x−y| ≤ 0 e portanto x = y. Um ponto em todos eles, e SOMENTE UM
+     * — a existência é o último intervalo, que é o ponto, e a unicidade é a
+     * igualdade. Nada disto é um limite: é uma conta que termina.
      *
      * E O GUME É A ESCOLHA. Com uma face só, o par colapsa num passo — (a,b)
      * ↦ (m,m) — e nada mais se produz: para continuar é preciso ESCOLHER um
@@ -621,25 +637,34 @@ int main(void){
                  " %ld falhas em %ld pares\n", falhou, casos);
           if(falhou) mal++; }
 
-        /* (3) o encaixe e o colapso, batendo alternadas */
+        /* (3) o encaixe, o colapso, e a IGUALDADE em que o processo acaba.
+         * Os valores conhecidos servem de referência EXTERNA: AGM(1,2) =
+         * 1,4567910310…, AGM(1,3) = 1,8636167832…, AGM(2,7) = 4,1120832…,
+         * AGM(1,100) = 26,2166887… — não são deste ficheiro, e é isso que os
+         * torna uma verificação em vez de uma repetição. */
         { long pares[][2] = {{1,2},{1,3},{2,7},{3,5},{1,100}};
+          long esperado[] = { 1456791031L, 1863616783L, 4112083300L,
+                              3936235502L, 26216688719L };
           long falhou = 0;
           for(int t = 0; t < 5; t++){
               long g = pares[t][0]*E, m = pares[t][1]*E;
               if(g > m){ long q=g; g=m; m=q; }
               int n = 0;
-              while(m - g > 1 && n < 80){
+              while(g != m && n < 200){
                   long m1 = g/2 + m/2 + ((g%2 + m%2)/2);
                   long g1 = geo_local(g, m);
                   if(!(g <= g1 && g1 <= m1 && m1 <= m)) falhou++;   /* encaixa */
                   if(!((m1 - g1)*2 <= m - g)) falhou++;             /* halva */
+                  if(g1 == g && m1 == m) break;                     /* parou */
                   g = g1; m = m1; n++;
               }
-              printf("     (%ld,%ld): %d batidas até largura %ld\n",
-                     pares[t][0], pares[t][1], n, m - g);
-              if(m - g > 1) falhou++;
+              { long dif = g - esperado[t]; if(dif < 0) dif = -dif;
+                printf("     (%ld,%ld): %d batidas · m = g = %ld (ref %ld,"
+                       " |dif| = %ld)  %s\n", pares[t][0], pares[t][1], n, g,
+                       esperado[t], dif, (g == m && dif <= 2) ? "" : "← REVER");
+                if(g != m || dif > 2) falhou++; }
           }
-          printf("     encaixa e halva sempre: %ld falhas\n", falhou);
+          printf("     encaixa, halva, e ACABA em m = g: %ld falhas\n", falhou);
           if(falhou) mal++; }
 
         /* (4) e o colapso é QUADRÁTICO: δ₁ ≤ δ²/(2m), na forma inteira
@@ -655,7 +680,30 @@ int main(void){
                  falhou, casos);
           if(falhou) mal++; }
 
-        /* (5) O CONTROLO: uma face SÓ colapsa num passo e não produz mais nada.
+        /* (5) A UNICIDADE, e ela é uma IGUALDADE e não um limite. Um ponto em
+         * todos os intervalos, e somente um: a existência é o último intervalo,
+         * que já é um ponto; a unicidade é |x−y| ≤ largura = 0. Mede-se que
+         * NENHUM outro ponto sobrevive — o que aqui quer dizer que o intervalo
+         * final tem exactamente um habitante, e que o penúltimo tinha mais. */
+        { long g = 1*E, m = 3*E;
+          long g_ant = g, m_ant = m;
+          int n = 0;
+          while(g != m && n < 200){
+              long m1 = g/2 + m/2 + ((g%2 + m%2)/2), g1 = geo_local(g, m);
+              if(g1 == g && m1 == m) break;
+              g_ant = g; m_ant = m;
+              g = g1; m = m1; n++;
+          }
+          { long hab_fim = m - g + 1;            /* habitantes do último */
+            long hab_ant = m_ant - g_ant + 1;    /* e do penúltimo */
+            int unico = (hab_fim == 1 && hab_ant > 1);
+            printf("\n     a UNICIDADE: o último intervalo tem %ld habitante"
+                   " (esp 1) e o penúltimo tinha %ld (esp > 1) — |x−y| ≤ 0"
+                   " força x = y, em %d batidas  %s\n",
+                   hab_fim, hab_ant, n, unico ? "" : "← REVER");
+            if(!unico) mal++; } }
+
+        /* (6) O CONTROLO: uma face SÓ colapsa num passo e não produz mais nada.
          * É o que separa produzir de endereçar — sem isto, «as duas faces
          * encaixam» não diria que a segunda faz falta. */
         { long a = 1*E, b = 3*E;
@@ -684,8 +732,18 @@ int main(void){
            " mede-se que a desigualdade é ESTRITA fora do ponto fixo, senão «≤» passaria sem"
            " dizer nada. Batendo as duas alternadamente, (a,b) ↦ (m,g), os intervalos"
            " ENCAIXAM (g ≤ g' ≤ m' ≤ m) e a largura COLAPSA — m−g = δ²/(m+g), donde"
-           " δ₁ ≤ δ²/(2m) e em particular δ₁ ≤ δ/2. Duas classes, uma de cada lado, com a"
-           " largura a ir a zero: é um CORTE, e é PRODUZIDO em vez de postulado. O GUME É A"
+           " δ₁ ≤ δ²/(2m) e em particular δ₁ ≤ δ/2. E O PROCESSO NÃO «TENDE» A NADA: ACABA."
+           " O objecto é FINITO — a régua tem grão —, pelo que a largura não se aproxima de"
+           " zero, CHEGA a zero: ao fim de um número CONTADO de batidas vale a IGUALDADE"
+           " m = g, e o intervalo é um ponto. Uma sucessão estritamente decrescente de"
+           " inteiros não-negativos pára, e é esse o único desfecho possível. DAÍ A"
+           " UNICIDADE, E SEM AXIOMA NENHUM: se x e y estão em TODOS os intervalos então"
+           " |x−y| ≤ mₙ − gₙ para todo n, e sendo a largura ZERO no último, |x−y| ≤ 0 e"
+           " x = y. Um ponto em todos eles, e SOMENTE UM — a existência é o último"
+           " intervalo, que já é o ponto, e a unicidade é a igualdade. Mede-se dos dois"
+           " lados, porque um só não dizia nada: o último intervalo tem UM habitante e o"
+           " penúltimo tinha mais. Não é um limite: é uma conta que TERMINA, e é isso o"
+           " CORTE — produzido, e não postulado. O GUME É A"
            " ESCOLHA, e é ele que diz porque é que a segunda face faz falta: com uma face só o"
            " par colapsa num passo — (a,b) ↦ (m,m) — e a batida seguinte não move nada, pelo"
            " que para continuar é preciso ESCOLHER um lado em cada nível; isso é a bissecção, e"
@@ -693,7 +751,14 @@ int main(void){
            " thm:central-continuo`: ℝ ≅ {caminhos}/∼). Com as duas faces não se escolhe nada: o"
            " corte é DETERMINADO pelos dois extremos, e o par (a,b) — dois inteiros — chega"
            " para o fixar. UMA FACE ENDEREÇA; DUAS PRODUZEM. Tudo em inteiros, com a raiz por"
-           " PISO e a folga do piso dita onde é usada (o «+m» da forma inteira).",
+           " PISO e a folga do piso dita onde é usada (o «+m» da forma inteira). E o TECTO"
+           " da raiz não se escreve à mão: estava fixo em 4·10⁹, e para os pares cuja raiz"
+           " passa disso a busca devolvia o TECTO — um número redondo com cara de resultado,"
+           " que travava a convergência e fazia contar 29 batidas onde há 5. Procura-se o"
+           " limite duplicando até passar o produto, e a prova de que agora é a raiz e não"
+           " o tecto está nos valores CONHECIDOS do processo, que são externos a este"
+           " ficheiro: AGM(1,2) = 1,4567910310…, AGM(1,3) = 1,8636167832…,"
+           " AGM(1,100) = 26,2166887…",
            mal == 0);
     }
 
