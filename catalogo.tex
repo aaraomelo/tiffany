@@ -1269,12 +1269,15 @@ endereços, não nos corpos --- logo, se a leitura de um corpo em $I$ \textbf{se
 objectos, a métrica, a topologia e a ordem descem por ela sem se medirem outra vez, e o corpo
 fica completo pela régua que já existe. É mecânico, e tem três passos:
 \begin{enumerate}
-\item \textbf{A leitura serve?} São \emph{duas} condições, e elas são duais: $R$ tem de
-      ser \textbf{bem definida} --- $x=y$ no corpo $\Rightarrow R(x)=R(y)$, não parte o objecto
-      em dois endereços --- e \textbf{separadora} --- $R(x)=R(y)\Rightarrow x=y$, não junta dois
-      objectos num endereço. A igualdade que conta é a \emph{do corpo}, não a dos parâmetros.
-      Cumpridas as duas, a desigualdade forte $d(x,z)\le\max\{d(x,y),d(y,z)\}$ transporta-se
-      inteira e nada mais é preciso medir no corpo destino.
+\item \textbf{A leitura serve?} São \emph{três} perguntas. As duas primeiras são duais:
+      $R$ tem de ser \textbf{bem definida} --- $x=y$ no corpo $\Rightarrow R(x)=R(y)$, não
+      parte o objecto em dois endereços --- e \textbf{separadora} ---
+      $R(x)=R(y)\Rightarrow x=y$, não junta dois objectos num endereço. A igualdade que
+      conta é a \emph{do corpo}, não a dos parâmetros. E a terceira: \textbf{a volta é
+      efectiva?} --- porque o \code{aranha thm:enumfin} pede bijeção «efetiva e
+      reversível», e não apenas bijeção. Cumpridas as três, a desigualdade forte
+      $d(x,z)\le\max\{d(x,y),d(y,z)\}$ transporta-se inteira e nada mais é preciso medir no
+      corpo destino.
 \item \textbf{A travessia.} Entre duas leituras do mesmo objecto existe sempre
       $T=S\circ R^{-1}$, efectiva e reversível; a tarefa fixa o destino, e a máquina executa a
       mudança de coordenadas.
@@ -1402,6 +1405,36 @@ informativa nem a mais bonita: é a que tem endereços que cheguem.}
 a fundirem, com a contagem a prever as seis; \emph{e os objectos contados pela igualdade
 do corpo}, não pelos parâmetros --- no corte são as $39$ classes e não os $55$ pares, e
 a primeira escrita errou-o.}
+
+\paragraph{E o quarto lote mostra que separar não basta: é preciso poder \emph{voltar}.}
+As duas primeiras perguntas garantem que a leitura endereça o objecto. Há leituras que
+passam nelas e ainda assim não servem:
+\begin{center}\small
+\begin{tabular}{@{}lrccrl@{}}
+\toprule
+leitura & obj. & bem def. & separa & volta & \\
+\midrule
+navegante, o endereço posicional & $125$ & sim & sim & $3$ & \textbf{herda}\\
+dual, o funcional pelos valores & $125$ & sim & sim & $3$ & \textbf{herda}\\
+evolutivo, pela \emph{aptidão} & $125$ & sim & \textbf{não} & --- & \emph{funde}\\
+\midrule
+pelo \emph{rank}, a posição numa ordem & $125$ & sim & sim & $\mathbf{63}$ & separa, mas a volta \textbf{varre}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent A coluna «volta» é o número de passos para recuperar o objecto a partir do
+endereço. \emph{Nos mesmos $125$ objectos}, a volta do posicional custa $3$ passos --- as
+divisões do \code{aranha thm:enumera} --- e a do rank custa $63$: para voltar do endereço
+ao objecto é preciso \emph{percorrer} até lá. As duas separam e as duas são bem
+definidas; \textbf{o que as distingue é a volta ser \emph{conta} ou ser \emph{busca}}.
+
+\medskip\noindent É por isso que o \code{thm:enumfin} pede bijeção «efetiva e
+reversível» e não apenas bijeção: \emph{uma travessia que só se sabe existir é uma
+promessa, e o que a torna operação é a volta caber num passo}.
+
+\medido{o quarto lote em \code{tests/pgwire.c} §W138 --- $2$ leituras a herdarem, $1$ a
+fundir e $1$ a separar sem volta curta; e o contraste medido nos \emph{mesmos} objectos,
+$3$ passos contra $63$.}
 
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três

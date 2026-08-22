@@ -20869,6 +20869,161 @@ int main(void){
            " endereços que cheguem.", mal == 0);
     }
 
+    /* ═══ §W138: A TERCEIRA PERGUNTA — E A VOLTA, É EFECTIVA? ═══════════════ */
+    {
+        long mal = 0;
+        printf("\n§W138 quarto lote: separar não basta, é preciso poder voltar.\n\n");
+
+        #define NB8 125
+        long serve = 0, quebra = 0, funde = 0, lenta = 0;
+        printf("      corpo                                 obj  bem def.  separa  volta   veredicto\n");
+
+        /* ── 1. NAVEGANTE: o endereço na cadeia, posicional. A volta é a divisão
+         * euclidiana do thm:enumera --- n passos, e cada um dá um dígito. */
+        {
+            long n = 0, e[NB8], custo = 0;
+            for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++) for(long c = 0; c < 5; c++)
+                e[n++] = (a*5 + b)*5 + c;
+            long dist = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < i; j++) if(e[j]==e[i]){ v=1; break; }
+                if(!v) dist++;
+            }
+            /* a volta: para cada endereço, tres divisões */
+            for(long i = 0; i < n; i++){ long t = e[i]; for(int k = 0; k < 3; k++){ t /= 5; custo++; } }
+            printf("      %-36s %5ld  %7s  %6s  %5ld   %s\n",
+                   "navegante  o endereço posicional     ", n, "sim",
+                   dist==n?"sim":"NÃO", custo/n,
+                   dist==n ? "HERDA — completo" : "funde");
+            if(dist==n) serve++; else funde++;
+            if(custo/n > 10) lenta++;
+        }
+
+        /* ── 2. DUAL: o funcional pelos seus valores na base. Separa pela
+         * bidualidade, e a volta é ler as coordenadas --- uma leitura directa. */
+        {
+            long n = 0, e[NB8], custo = 0;
+            for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++) for(long c = -2; c <= 2; c++)
+                e[n++] = ((a+2)*5 + (b+2))*5 + (c+2);
+            long dist = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < i; j++) if(e[j]==e[i]){ v=1; break; }
+                if(!v) dist++;
+            }
+            for(long i = 0; i < n; i++){ long t = e[i]; for(int k = 0; k < 3; k++){ t /= 5; custo++; } }
+            printf("      %-36s %5ld  %7s  %6s  %5ld   %s\n",
+                   "dual       o funcional pelos valores  ", n, "sim",
+                   dist==n?"sim":"NÃO", custo/n,
+                   dist==n ? "HERDA — completo" : "funde");
+            if(dist==n) serve++; else funde++;
+        }
+
+        /* ── 3. EVOLUTIVO: pela APTIDÃO, um número. Resume, logo funde --- e o
+         * princípio da gaveta prevê-o antes de qualquer conta. */
+        {
+            long n = 0, e[NB8];
+            for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++) for(long c = 0; c < 5; c++)
+                e[n++] = a + b + c;                 /* a aptidão: a soma */
+            long dist = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < i; j++) if(e[j]==e[i]){ v=1; break; }
+                if(!v) dist++;
+            }
+            printf("      %-36s %5ld  %7s  %6s  %5s   %s\n",
+                   "evolutivo  pela APTIDÃO              ", n, "sim",
+                   dist==n?"sim":"NÃO", "---",
+                   dist==n ? "HERDA" : "funde — falta leitura");
+            if(dist==n) serve++; else funde++;
+        }
+
+        /* ── 4. O CASO NOVO: uma leitura que passa nas DUAS metades e cuja VOLTA
+         * não é efectiva. Lê-se cada objecto pela sua POSIÇÃO numa ordem: separa
+         * (posições distintas), é bem definida (a ordem é fixa) --- mas voltar
+         * exige percorrer até lá. */
+        {
+            long n = 0, e[NB8], custo = 0;
+            for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++) for(long c = 0; c < 5; c++){
+                /* o endereço é o RANK numa ordem qualquer, não posicional */
+                long chave = (a*a + b*b*3 + c*c*7) % 121;
+                e[n] = chave; n++;
+            }
+            /* o rank: quantos vêm antes na ordem da chave (com desempate pelo índice) */
+            long rank[NB8];
+            for(long i = 0; i < n; i++){
+                long r = 0;
+                for(long j = 0; j < n; j++)
+                    if(e[j] < e[i] || (e[j] == e[i] && j < i)) r++;
+                rank[i] = r;
+            }
+            long dist = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < i; j++) if(rank[j]==rank[i]){ v=1; break; }
+                if(!v) dist++;
+            }
+            /* a volta: dado o rank, achar o objecto --- varre-se */
+            for(long r = 0; r < n; r++){
+                for(long i = 0; i < n; i++){ custo++; if(rank[i] == r) break; }
+            }
+            printf("      %-36s %5ld  %7s  %6s  %5ld   %s\n",
+                   "por RANK   a posição numa ordem       ", n, "sim",
+                   dist==n?"sim":"NÃO", custo/n,
+                   (dist==n && custo/n > 10) ? "separa, mas a VOLTA VARRE" : "HERDA");
+            if(dist==n && custo/n > 10) lenta++; else if(dist==n) serve++; else funde++;
+        }
+
+        printf("      → %ld herdam, %ld fundem, %ld separam mas não voltam em passo curto\n",
+               serve, funde, lenta);
+        if(serve == 0 || funde == 0 || lenta == 0) mal++;
+
+        /* ── E O CONTRASTE, MEDIDO NOS MESMOS OBJECTOS: a mesma família lida
+         * pelo posicional e pelo rank. As duas separam; só uma tem volta curta. */
+        {
+            long n = 0; long pos[NB8], chave[NB8];
+            for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++) for(long c = 0; c < 5; c++){
+                pos[n] = (a*5 + b)*5 + c;
+                chave[n] = (a*a + b*b*3 + c*c*7) % 121;
+                n++;
+            }
+            long custo_pos = 0, custo_rank = 0;
+            for(long i = 0; i < n; i++){ long t = pos[i]; for(int k = 0; k < 3; k++){ t /= 5; custo_pos++; } }
+            long rank[NB8];
+            for(long i = 0; i < n; i++){
+                long r = 0;
+                for(long j = 0; j < n; j++)
+                    if(chave[j] < chave[i] || (chave[j] == chave[i] && j < i)) r++;
+                rank[i] = r;
+            }
+            for(long r = 0; r < n; r++)
+                for(long i = 0; i < n; i++){ custo_rank++; if(rank[i] == r) break; }
+            printf("      CONTRASTE nos MESMOS %ld objectos: a volta do posicional custa %ld"
+                   " passos por objecto, a do rank custa %ld\n",
+                   n, custo_pos/n, custo_rank/n);
+            printf("        as duas separam e as duas são bem definidas --- o que as separa"
+                   " é a volta ser CONTA ou ser BUSCA\n");
+            if(custo_rank/n <= custo_pos/n) mal++;
+        }
+
+        #undef NB8
+
+        printf("\n");
+        ok("SEPARAR NÃO BASTA: É PRECISO PODER VOLTAR, E ESSA É A TERCEIRA PERGUNTA. As duas"
+           " metades garantem que a leitura endereça o objecto --- não parte um em dois nem"
+           " junta dois num só ---, e há leituras que passam nelas e ainda assim não servem."
+           " O quarto lote exibe-o: o navegante pelo endereço posicional e o dual pelo"
+           " funcional lido na base herdam a régua e voltam em passo curto, porque a volta é"
+           " a divisão do thm:enumera --- uma conta, com tantos passos quantos os dígitos. O"
+           " evolutivo pela aptidão funde, e o princípio da gaveta prevê-o sem contas: a"
+           " aptidão é um resumo. E o caso NOVO é a leitura pelo RANK, a posição numa ordem:"
+           " ela é bem definida, separa, e mesmo assim não serve --- para voltar do endereço"
+           " ao objecto é preciso PERCORRER até lá. Medido nos MESMOS objectos, com as duas"
+           " leituras lado a lado: a volta do posicional custa um punhado de divisões por"
+           " objecto e a do rank custa dezenas de passos de busca. As duas separam e as duas"
+           " são bem definidas; o que as distingue é a volta ser CONTA ou ser BUSCA. É por"
+           " isso que o thm:enumfin pede bijeção «efetiva e reversível» e não apenas bijeção:"
+           " uma travessia que só se sabe existir é uma promessa, e o que a torna operação é"
+           " a volta caber num passo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

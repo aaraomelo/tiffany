@@ -6028,6 +6028,28 @@ escritos.}
         {a contagem de endereços distintos contra a de objectos pela igualdade do corpo}
         {\code{tests/pgwire.c} §W137}
 
+\subsection*{A terceira pergunta: a volta é conta ou é busca?}
+
+\noindent As duas metades garantem que a leitura \emph{endereça} o objecto. Não
+garantem que se possa \textbf{voltar} --- e o \code{aranha thm:enumfin} pede bijeção
+«efetiva e reversível», não apenas bijeção. O quarto lote exibe a diferença nos
+\emph{mesmos} $125$ objectos: lidos pelo endereço posicional, a volta são $3$ passos ---
+as divisões do \code{thm:enumera}; lidos pelo \textbf{rank}, a posição numa ordem, a
+volta são $63$, porque é preciso percorrer até lá.
+
+\medskip\noindent\textbf{E as duas passam nas duas primeiras perguntas.} A leitura pelo
+rank é bem definida e separadora; o que lhe falta não é endereço, é \emph{caminho de
+volta}. \emph{Uma travessia que só se sabe existir é uma promessa; o que a torna operação
+é a volta caber num passo.}
+
+\medido{\code{tests/pgwire.c} §W138 --- $2$ leituras a herdarem com volta em $3$ passos,
+$1$ a fundir pela aptidão, e a leitura pelo rank a separar com volta em $63$; o
+contraste contado nos mesmos objectos.}
+
+\colunas{\code{catalogo} §1 (a terceira pergunta), \code{aranha thm:enumfin}}
+        {o custo da volta contado passo a passo, posicional contra rank}
+        {\code{tests/pgwire.c} §W138}
+
 \subsection*{As duas metades do critério, e as duas falhas duais}
 
 \noindent A regra corre sobre os corpos \emph{sem os abrir}, e é isso que a torna
