@@ -14558,6 +14558,182 @@ int main(void){
            " da perturbação — no corpo não existe «quase certo».", mal == 0);
     }
 
+    /* ═══ §W102: O CORPO MÓRFICO — A SECÇÃO QUE DIZIA «DESCREVE E NÃO MEDE» ═ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W102 (𝔽₂ⁿ,⊕,∧): corpo só em n=1, a adjunção, e a reflexão que colapsa.\n\n");
+        unlink("/tmp/pgwire_w102__M.mem"); unlink("/tmp/pgwire_w102__M.prog");
+        unlink("/tmp/pgwire_w102.mem");    unlink("/tmp/pgwire_w102.prog");
+        if(!sql_abrir("/tmp/pgwire_w102")) mal++;
+
+        /* ── O cabeçalho da §«O corpo mórfico» diz-se a si próprio:
+         * «EXPOSIÇÃO: descreve e não mede — nenhum medidor citado nesta
+         * secção». Tudo o que ela afirma é finito e cabe em bits. */
+
+        /* ── (1) teo:socorpon1 — anel booleano, e CORPO SSE n=1. */
+        long idem_ok = 0, idem_n = 0;
+        for(int n = 1; n <= 3; n++){
+            long N = 1L << n, TOP = N - 1;
+            long divzero = 0, seminv = 0, pares = 0;
+            for(long a = 0; a < N; a++){
+                idem_n++;
+                if((a & a) == a) idem_ok++;
+                /* sem inverso: não existe b com a∧b = ⊤ */
+                int tem = 0;
+                for(long b = 0; b < N; b++) if((a & b) == TOP) tem = 1;
+                if(!tem) seminv++;
+                for(long b = 0; b < N; b++){
+                    if(!a || !b) continue;
+                    pares++;
+                    if((a & b) == 0) divzero++;   /* divisores de zero */
+                }
+            }
+            printf("      n=%d (%ld elementos): divisores de zero %ld/%ld pares"
+                   " não nulos · sem inverso %ld/%ld · %s\n", n, N,
+                   divzero, pares, seminv, N,
+                   (divzero == 0 && seminv == 1) ? "CORPO" : "anel booleano");
+            if(n == 1 && !(divzero == 0 && seminv == 1)) mal++;
+            if(n  > 1 && (divzero == 0 || seminv == 1)) mal++;
+        }
+        printf("      todo elemento é idempotente, a∧a = a: %ld/%ld — e é isso que"
+               " «deixa o inverso sem lugar»\n", idem_ok, idem_n);
+        if(idem_ok != idem_n) mal++;
+        /* os dois exemplos que o catálogo nomeia, verificados à letra */
+        printf("      os exemplos do texto: 001∧010 = %03lo (é 000?) · e existe b"
+               " com 011∧b = 111? %s\n", (long)(1 & 2),
+               ((3 & 7) == 7) ? "sim" : "não");
+        if((1 & 2) != 0) mal++;
+        { int tem = 0; for(long b = 0; b < 8; b++) if((3 & b) == 7) tem = 1;
+          if(tem) mal++; }
+
+        /* ── (2) A ADJUNÇÃO δ ⊣ ε, com ε(b) = b∧s e δ(a) = a∨¬s. */
+        long adj_ok = 0, adj_n = 0, ide_ok = 0, pres_ok = 0, troca_ok = 0, pn = 0;
+        for(int n = 3, N = 8; n == 3; n++)
+        for(long s = 0; s < N; s++){
+            long ns = (~s) & (N-1);
+            for(long a = 0; a < N; a++){
+                long e_a = a & s, d_a = a | ns;
+                adj_n++;
+                /* δεδ = δ  e  εδε = ε */
+                long ded = ((a | ns) & s) | ns, ede = ((a & s) | ns) & s;
+                if(ded == d_a && ede == e_a) adj_ok++;
+                /* φ = εδ e γ = δε idempotentes */
+                long phi = (a | ns) & s, gam = (a & s) | ns;
+                if((((phi | ns) & s) == phi) && ((((gam & s) | ns)) == gam)) ide_ok++;
+                for(long b = 0; b < N; b++){
+                    pn++;
+                    /* a erosão preserva ∧, a dilatação preserva ∨ */
+                    if((((a & b) & s) == ((a & s) & (b & s)))
+                       && (((a | b) | ns) == ((a | ns) | (b | ns)))) pres_ok++;
+                }
+                /* a complementação TROCA-OS: ¬ε(¬a) = δ(a) */
+                if(((~(((~a) & (N-1)) & s)) & (N-1)) == d_a) troca_ok++;
+            }
+        }
+        printf("      adjunção — δεδ = δ e εδε = ε: %ld/%ld · φ=εδ e γ=δε"
+               " idempotentes: %ld/%ld\n", adj_ok, adj_n, ide_ok, adj_n);
+        printf("      a erosão preserva ∧ e a dilatação preserva ∨: %ld/%ld ·"
+               " e a COMPLEMENTAÇÃO troca-os, ¬ε(¬a) = δ(a): %ld/%ld\n",
+               pres_ok, pn, troca_ok, adj_n);
+        if(adj_ok != adj_n || ide_ok != adj_n || pres_ok != pn || troca_ok != adj_n) mal++;
+
+        /* ── (3) O CONTEÚDO DO CAPÍTULO: em característica 2 a REFLEXÃO
+         * colapsa na identidade, e a involução que sobra — a complementação —
+         * NÃO é endomorfismo. Conta-se pelos PONTOS FIXOS, que é onde as duas
+         * se separam de forma que não se pode ler mal. */
+        {
+            long N = 8, fix_nu = 0, fix_neg = 0, endo_nu = 0, endo_neg = 0, pares = 0;
+            /* ν é o inverso ADITIVO, e não se escreve: PROCURA-SE. Para cada x,
+             * o único y com x ⊕ y = ⊥. A primeira escrita punha `if(x == x)`,
+             * que é uma tautologia e passaria verde com ν a ser qualquer coisa. */
+            long nu[8];
+            for(long x = 0; x < N; x++){
+                long achados = 0;
+                nu[x] = -1;
+                for(long y = 0; y < N; y++) if((x ^ y) == 0){ nu[x] = y; achados++; }
+                if(achados != 1) mal++;      /* o inverso aditivo é único */
+            }
+            for(long x = 0; x < N; x++){
+                if(nu[x] == x) fix_nu++;                      /* ν tem x por ponto fixo? */
+                if((x ^ (N-1)) == x) fix_neg++;               /* ¬x = x nunca */
+                for(long y = 0; y < N; y++){
+                    pares++;
+                    if(nu[x ^ y] == (nu[x] ^ nu[y])) endo_nu++;
+                    if(((x ^ y) ^ (N-1)) == (((x ^ (N-1)) ^ (y ^ (N-1))))) endo_neg++;
+                }
+            }
+            printf("      A SEPARAÇÃO — ν = −1 tem %ld/%ld pontos fixos (em 𝔽₂,"
+                   " −1 ≡ +1, logo ν É a identidade) e ¬ tem %ld/%ld\n",
+                   fix_nu, N, fix_neg, N);
+            printf("        e ν é endomorfismo em %ld/%ld pares, ¬ em %ld/%ld —"
+                   " «a reflexão do contrato desaparece; a involução que sobra não"
+                   " é endomorfismo»\n", endo_nu, pares, endo_neg, pares);
+            if(fix_nu != N || fix_neg != 0 || endo_nu != pares || endo_neg != 0) mal++;
+        }
+
+        /* ── (4) E O WHERE DO MOTOR REALIZA A EROSÃO. A secção chama-se «o WHERE
+         * como par dual»; aqui o par corre no motor: a conjunção do WHERE
+         * selecciona {x : x ∧ m = m}, que é a erosão pelo estruturante, e a
+         * contagem tem de bater com a conta em bits. */
+        {
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (b1 RACIONAL, b2 RACIONAL, b3 RACIONAL)", &o2);
+            for(long x = 0; x < 8; x++){
+                char q[160];
+                snprintf(q, sizeof q, "INSERT INTO M VALUES (%ld,%ld,%ld)",
+                         (x>>2)&1, (x>>1)&1, x&1);
+                sql_executa(q, &o2);
+            }
+            long bate = 0, tot = 0;
+            const char *ws[] = { "b1=1", "b1=1 AND b2=1", "b1=1 AND b2=1 AND b3=1",
+                                 "b2=1", "b2=1 AND b3=1", "b3=1" };
+            long ms[] = { 4, 6, 7, 2, 3, 1 };
+            for(unsigned i = 0; i < sizeof ms/sizeof ms[0]; i++){
+                char q[220];
+                snprintf(q, sizeof q, "SELECT COUNT(*) FROM M WHERE %s", ws[i]);
+                sql_executa(q, &o);
+                long esp = 0;
+                for(long x = 0; x < 8; x++) if((x & ms[i]) == ms[i]) esp++;
+                tot++;
+                if(o.ok && atol(o.cell[0][0]) == esp) bate++;
+                else printf("        WHERE %s → %s, esperado %ld\n",
+                            ws[i], o.ok ? o.cell[0][0] : "erro", esp);
+            }
+            printf("      O WHERE REALIZA A EROSÃO — a conjunção selecciona"
+                   " {x : x ∧ m = m}, e a contagem do motor bate com a dos bits"
+                   " em %ld/%ld estruturantes\n", bate, tot);
+            if(bate != tot) mal++;
+        }
+
+        sql_fechar();
+
+        printf("\n");
+        ok("A SECÇÃO QUE DIZIA «DESCREVE E NÃO MEDE» PASSA A TER MEDIDOR, E TUDO O QUE ELA"
+           " AFIRMA É FINITO. O cabeçalho do «corpo mórfico» declara-se exposição, sem medidor"
+           " citado — e no entanto cada frase dela cabe em bits. O teo:socorpon1 diz que"
+           " (𝔽₂ⁿ,⊕,∧) é corpo SE E SÓ SE n=1: conta-se, e em n=1 não há divisor de zero nem"
+           " elemento sem inverso além do ⊥, enquanto em n=2 e n=3 há dos dois. Os dois"
+           " exemplos que o texto nomeia verificam-se à letra — 001∧010 = 000, e nenhum b"
+           " satisfaz 011∧b = 111. E a razão que o texto dá é ela própria medida: todo"
+           " elemento é idempotente, a∧a = a em 14/14, e é isso que «deixa o inverso sem"
+           " lugar». A ADJUNÇÃO CORRE INTEIRA: com ε(b) = b∧s e δ(a) = a∨¬s, valem δεδ = δ e"
+           " εδε = ε em 64/64, φ=εδ e γ=δε são idempotentes nos mesmos 64, a erosão preserva ∧"
+           " e a dilatação preserva ∨ em 512/512, e a COMPLEMENTAÇÃO TROCA-OS: ¬ε(¬a) = δ(a)"
+           " em 64/64 — «cada operador guarda uma das operações, e a complementação troca-os»"
+           " deixa de ser uma descrição. E O CONTEÚDO DO CAPÍTULO MEDE-SE PELOS PONTOS FIXOS,"
+           " que é onde as duas involuções se separam sem ambiguidade: em característica 2"
+           " vale −1 ≡ +1, logo ν É a identidade — e isso não se escreve, PROCURA-SE: para"
+           " cada x busca-se o único y com x ⊕ y = ⊥, e sai y = x, com 8 de 8 pontos fixos e"
+           " endomorfismo em todos os 64 pares. A primeira escrita punha `if(x == x)`, uma"
+           " tautologia que passaria verde com ν a ser qualquer coisa; a complementação tem ZERO pontos fixos e não é endomorfismo em"
+           " nenhum par. «A reflexão do contrato desaparece; a involução que sobra não é"
+           " endomorfismo» — e os dois números, 8 contra 0, são o que impede de as confundir."
+           " POR FIM O WHERE, que dá o nome à secção: a conjunção do motor selecciona"
+           " {x : x ∧ m = m}, que é a erosão pelo estruturante, e a contagem do motor bate com"
+           " a dos bits em 6/6 — o par dual da secção é uma operação do banco.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

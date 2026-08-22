@@ -4848,6 +4848,70 @@ zero a selar em $256/256$; e o alcance com o seu controlo.}
         {a matriz de convolução; \code{produto} e \code{det} pelo motor}
         {\code{tests/pgwire.c} §W101}
 
+\subsection*{O corpo mórfico: a seção que se dizia exposição, medida}
+
+\noindent O cabeçalho do «corpo mórfico» declara-se a si próprio
+\emph{«exposição: descreve e não mede --- nenhum medidor citado nesta seção»}. E no
+entanto cada frase dela é finita e cabe em bits.
+
+\medskip\noindent\textbf{\code{teo:socorpon1}: corpo se e só se $n=1$.}
+\begin{center}
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+ & div.\ de zero & sem inverso & \\
+\midrule
+$n=1$ & $0/1$ & $1/2$ & \textbf{corpo}\\
+$n=2$ & $2/9$ & $3/4$ & anel booleano\\
+$n=3$ & $12/49$ & $7/8$ & anel booleano\\
+\bottomrule
+\end{tabular}
+\end{center}
+Os dois exemplos que o texto nomeia verificam-se à letra: $001\wedge010=000$, e
+nenhum $b$ satisfaz $011\wedge b=111$. E a \emph{razão} que o texto dá é ela própria
+medida --- todo elemento é idempotente, $a\wedge a=a$ em $14/14$, e é isso que
+«deixa o inverso sem lugar».
+
+\medskip\noindent\textbf{A adjunção corre inteira.} Com $\varepsilon(b)=b\wedge s$ e
+$\delta(a)=a\vee\neg s$:
+\[
+\delta\varepsilon\delta=\delta,\quad \varepsilon\delta\varepsilon=\varepsilon
+\;\;(64/64),\qquad
+\varphi=\varepsilon\delta,\ \gamma=\delta\varepsilon \text{ idempotentes }(64/64),
+\]
+a erosão preserva $\wedge$ e a dilatação preserva $\vee$ em $512/512$, e a
+\textbf{complementação troca-os}: $\neg\varepsilon(\neg a)=\delta(a)$ em $64/64$.
+\emph{«Cada operador guarda uma das operações, e a complementação troca-os» deixa de
+ser uma descrição.}
+
+\medskip\noindent\textbf{E o conteúdo do capítulo mede-se pelos pontos fixos}, que é
+onde as duas involuções se separam sem ambiguidade:
+\[
+\begin{array}{lcc}
+ & \text{pontos fixos} & \text{endomorfismo}\\
+\nu=-1 & 8/8 & 64/64\\
+\neg & \mathbf{0}/8 & \mathbf{0}/64
+\end{array}
+\]
+Em característica $2$ vale $-1\equiv+1$, logo $\nu$ \emph{é} a identidade --- e isso
+não se escreve, \textbf{procura-se}: para cada $x$ busca-se o único $y$ com
+$x\oplus y=\bot$, e sai $y=x$. A primeira escrita punha \code{if(x == x)}, uma
+\emph{tautologia} que passaria verde com $\nu$ a ser qualquer coisa. «A reflexão do
+contrato desaparece; a involução que sobra não é endomorfismo» --- e os dois números,
+$8$ contra $0$, são o que impede de as confundir.
+
+\medskip\noindent\textbf{Por fim o \code{WHERE}, que dá o nome à seção.} A conjunção
+do motor seleciona $\{x : x\wedge m=m\}$, que é a erosão pelo estruturante, e a
+contagem do motor bate com a dos bits em $6/6$ estruturantes. \emph{O par dual da
+seção é uma operação do banco.}
+
+\medido{\code{tests/pgwire.c} §W102 --- os três $n$ com as duas contagens; a adjunção
+e as suas quatro leis; as duas involuções pelos pontos fixos; e o \code{WHERE} contra
+os bits.}
+
+\colunas{\code{catalogo} «O corpo mórfico» (\code{def:morfico}, \code{teo:socorpon1})}
+        {contagem em bits; \code{COUNT} e \code{WHERE} pelo motor}
+        {\code{tests/pgwire.c} §W102}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
