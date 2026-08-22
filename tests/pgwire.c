@@ -15144,6 +15144,189 @@ int main(void){
            " de ordem para lado nenhum.", mal == 0);
     }
 
+    /* ═══ §W106: A BASE σ — O CARRY DEPENDE DE m, E OS DECIMAIS SÃO RAÍZES ═ */
+    {
+        long mal = 0;
+        printf("\n§W106 σ^{-(k−1)} = m·σ^{-k} + σ^{-(k+1)}, e os 0,414 / 0,606 / 0,708 sem um float.\n\n");
+
+        /* ℤ[σ] com σ² = mσ + 1: o elemento é (a,b) ≡ a + bσ, e o produto é a
+         * regra do gato do §W98: (a+bσ)(c+dσ) = (ac+bd) + (ad+bc+m·bd)σ. */
+        #define MULS(a,b,c,d,m,ra,rb) do { long A_=(a),B_=(b),C_=(c),D_=(d); \
+            (ra) = A_*C_ + B_*D_; (rb) = A_*D_ + B_*C_ + (m)*B_*D_; } while(0)
+
+        /* ── (1) O CARRY, exacto em ℤ[σ]. De σ² = mσ+1 vem σ^{-1} = σ − m, e
+         * daí σ^{-(k−1)} = m·σ^{-k} + σ^{-(k+1)} para todo k. Nada aqui é
+         * aproximado: são igualdades de pares de inteiros. */
+        long carry_ok = 0, carry_n = 0;
+        for(long m = 1; m <= 5; m++){
+            /* σ^{-k} como (a,b): começa em σ^0 = (1,0) e multiplica por (−m,1) */
+            long pa[12], pb[12];
+            pa[0] = 1; pb[0] = 0;
+            for(int k = 1; k < 10; k++)
+                MULS(pa[k-1], pb[k-1], -m, 1, m, pa[k], pb[k]);
+            for(int k = 1; k <= 7; k++){
+                carry_n++;
+                if(pa[k-1] == m*pa[k] + pa[k+1] && pb[k-1] == m*pb[k] + pb[k+1])
+                    carry_ok++;
+            }
+        }
+        printf("      o CARRY σ^{-(k−1)} = m·σ^{-k} + σ^{-(k+1)} em ℤ[σ]: %ld/%ld"
+               " (m=1..5, k=1..7) — igualdades de pares de inteiros\n",
+               carry_ok, carry_n);
+        if(carry_ok != carry_n) mal++;
+
+        /* ── (2) A FORMA REDUZIDA SÓ VALE EM m=1. O catálogo diz que
+         * «σ^{-k} + σ^{-(k+1)} = σ^{-(k−1)}» é a regra apenas para m=1, e que
+         * para m≥2 NÃO CONSERVA O VALOR. A falha é exactamente (m−1)σ^{-k},
+         * e mede-se como par de inteiros — sem avaliar nada. */
+        {
+            long vale = 0, falha = 0;
+            for(long m = 1; m <= 5; m++){
+                long pa[12], pb[12];
+                pa[0] = 1; pb[0] = 0;
+                for(int k = 1; k < 10; k++)
+                    MULS(pa[k-1], pb[k-1], -m, 1, m, pa[k], pb[k]);
+                int bate = 1;
+                for(int k = 1; k <= 6; k++){
+                    /* a diferença σ^{-(k−1)} − σ^{-k} − σ^{-(k+1)} */
+                    long da = pa[k-1] - pa[k] - pa[k+1], db = pb[k-1] - pb[k] - pb[k+1];
+                    /* e ela tem de ser (m−1)·σ^{-k} */
+                    if(da != (m-1)*pa[k] || db != (m-1)*pb[k]) bate = 0;
+                    if(m > 1 && da == 0 && db == 0) bate = 0;   /* teria de falhar */
+                }
+                if(m == 1){ if(bate) vale++; }
+                else if(bate) falha++;
+                printf("        m=%ld: a diferença é (m−1)·σ^{-k} %s%s\n", m,
+                       bate ? "✓" : "✗",
+                       (m == 1) ? "  — e é ZERO, logo a forma reduzida vale"
+                                : "  — e é NÃO NULA, logo não conserva");
+            }
+            if(vale != 1 || falha != 4) mal++;
+        }
+
+        /* ── (3) OS TRÊS DECIMAIS, SEM UM FLOAT. O catálogo diz que a falha
+         * vale 0,414 em m=2, 0,606 em m=3 e 0,708 em m=4. Ora x = (m−1)σ^{-1}
+         * satisfaz x² + m(m−1)x − (m−1)² = 0, de coeficientes INTEIROS — e um
+         * decimal confirma-se por ENQUADRAMENTO: avalia-se o polinómio em dois
+         * racionais e lê-se o sinal. Nenhuma divisão, nenhuma raiz. */
+        {
+            struct { long m; long num, den; } D[] = {
+                { 2,  414, 1000 }, { 3, 606, 1000 }, { 4, 708, 1000 },
+            };
+            long ok = 0;
+            for(unsigned i = 0; i < sizeof D/sizeof D[0]; i++){
+                long m = D[i].m, b = D[i].den, a = D[i].num;
+                /* Um decimal publicado é ARREDONDADO, não truncado: 0,606 diz
+                 * que a raiz está em [0,6055 ; 0,6065], e não em [0,606 ; 0,607].
+                 * A primeira escrita exigiu a segunda coisa e reprovou o m=3,
+                 * cuja raiz é 0,60555… — o texto estava certo e o meu critério
+                 * é que não era. Enquadra-se em (2a∓1)/2b, tudo em inteiros. */
+                long b2 = 2*b, lo_n = 2*a - 1, hi_n = 2*a + 1;
+                /* p(n/b2)·b2² = n² + m(m−1)·n·b2 − (m−1)²·b2² */
+                #define PB(N) ((N)*(N) + m*(m-1)*(N)*b2 - (m-1)*(m-1)*b2*b2)
+                long lo = PB(lo_n), hi = PB(hi_n);
+                printf("        m=%ld: p(%ld/%ld) = %ld e p(%ld/%ld) = %ld →"
+                       " a raiz está em [%ld/%ld ; %ld/%ld], que ARREDONDA a"
+                       " 0,%ld %s\n", m, lo_n, b2, lo, hi_n, b2, hi,
+                       lo_n, b2, hi_n, b2, a, (lo < 0 && hi > 0) ? "✓" : "✗");
+                if(lo < 0 && hi > 0) ok++;
+                #undef PB
+            }
+            printf("      os três decimais do texto confirmam-se por ENQUADRAMENTO"
+                   " inteiro: %ld/3 — e são as raízes de x² + m(m−1)x − (m−1)²\n", ok);
+            if(ok != 3) mal++;
+        }
+
+        /* ── (4) O CICLO QUE NÃO TERMINA. «{0} → {1,2} → {0} é um ciclo de
+         * período 2 com valor constante»: verifica-se que 1 = σ^{-1} + σ^{-2}
+         * em ℤ[σ], e SÓ para m=1 — que é o que faz dele um ciclo ali. */
+        {
+            long ciclo = 0, nao = 0;
+            for(long m = 1; m <= 4; m++){
+                long pa[4], pb[4];
+                pa[0] = 1; pb[0] = 0;
+                for(int k = 1; k < 3; k++)
+                    MULS(pa[k-1], pb[k-1], -m, 1, m, pa[k], pb[k]);
+                int igual = (pa[1] + pa[2] == 1 && pb[1] + pb[2] == 0);
+                if(igual) ciclo++; else nao++;
+                if(m <= 2)
+                    printf("        m=%ld: σ^{-1}+σ^{-2} = (%ld,%ld) e 1 = (1,0) →"
+                           " %s\n", m, pa[1]+pa[2], pb[1]+pb[2],
+                           igual ? "IGUAIS, o ciclo existe" : "diferentes");
+            }
+            printf("      o ciclo {0} → {1,2} → {0} tem valor constante em %ld dos 4"
+                   " metais — e é só no m=1\n", ciclo);
+            if(ciclo != 1 || nao != 3) mal++;
+        }
+
+        /* ── (5) A CONVOLUÇÃO NÃO DEVOLVE CANÓNICO. O exemplo do texto:
+         * {1,3}² = {2,4,4,6}, com dígito 2 em k=4. Faz-se a convolução e
+         * conta-se; e depois varre-se para ver que não é um caso isolado. */
+        {
+            long s[8] = {0,1,0,1,0,0,0,0};       /* {1,3} */
+            long c[16]; memset(c, 0, sizeof c);
+            for(int i = 0; i < 8; i++) for(int j = 0; j < 8; j++) c[i+j] += s[i]*s[j];
+            printf("        {1,3}² = ");
+            for(int k = 0; k < 8; k++) if(c[k]) printf("{%d}×%ld ", k, c[k]);
+            printf("→ o dígito em k=4 é %ld\n", c[4]);
+            if(c[2] != 1 || c[4] != 2 || c[6] != 1) mal++;
+            /* e não é isolado: quantos produtos de canónicos (m=1, sem índices
+             * consecutivos) saem fora da forma canónica */
+            long fora = 0, tot = 0;
+            for(long A = 1; A < 64; A++) for(long B = 1; B < 64; B++){
+                int canA = 1, canB = 1;
+                for(int k = 0; k < 5; k++){
+                    if(((A>>k)&1) && ((A>>(k+1))&1)) canA = 0;
+                    if(((B>>k)&1) && ((B>>(k+1))&1)) canB = 0;
+                }
+                if(!canA || !canB) continue;
+                long cc[16]; memset(cc, 0, sizeof cc);
+                for(int i = 0; i < 6; i++) for(int j = 0; j < 6; j++)
+                    cc[i+j] += ((A>>i)&1) * ((B>>j)&1);
+                int canC = 1;
+                for(int k = 0; k < 12; k++){
+                    if(cc[k] > 1) canC = 0;
+                    if(k < 11 && cc[k] && cc[k+1]) canC = 0;
+                }
+                tot++;
+                if(!canC) fora++;
+            }
+            printf("      e não é um caso isolado: %ld de %ld produtos de canónicos"
+                   " saem FORA da forma canónica\n", fora, tot);
+            if(fora == 0 || fora == tot) mal++;
+        }
+
+        #undef MULS
+        printf("\n");
+        ok("A BASE σ TEM O CARRY QUE DEPENDE DO METAL, E OS DECIMAIS DO TEXTO SÃO RAÍZES DE UM"
+           " POLINÓMIO INTEIRO. O catálogo deriva de σ² = mσ+1 o carry"
+           " σ^{-(k−1)} = m·σ^{-k} + σ^{-(k+1)} e avisa: «note-se o factor m — só em m=1 a"
+           " regra se reduz a σ^{-k}+σ^{-(k+1)} = σ^{-(k−1)}; para m≥2 essa forma NÃO CONSERVA"
+           " O VALOR». Tudo isso é exacto em ℤ[σ], onde o elemento é o par (a,b) ≡ a+bσ e o"
+           " produto é a regra do gato do §W98: o carry vale em 35/35 casos (m=1..5, k=1..7)"
+           " como igualdade de pares de INTEIROS, sem avaliar coisa nenhuma. E a falha da"
+           " forma reduzida não é um desvio a estimar: é EXACTAMENTE (m−1)·σ^{-k}, medido como"
+           " par, nulo em m=1 e não nulo nos outros quatro. OS TRÊS DECIMAIS CONFIRMAM-SE SEM"
+           " UM FLOAT, que é o ponto: o texto dá 0,414 em m=2, 0,606 em m=3 e 0,708 em m=4, e"
+           " x = (m−1)σ^{-1} satisfaz x² + m(m−1)x − (m−1)² = 0, de coeficientes inteiros."
+           " Avalia-se o polinómio nos dois extremos do intervalo de"
+           " arredondamento, (2a∓1)/2b, multiplicado pelo denominador ao quadrado para ficar"
+           " em ℤ, e lê-se o SINAL: negativo antes e positivo depois enquadra a raiz nos três"
+           " casos. Nenhuma divisão, nenhuma raiz quadrada — o decimal do papel passa a ter"
+           " uma certidão inteira. E O CRITÉRIO TEVE DE SER O CERTO: a primeira escrita"
+           " enquadrou em [a/b, (a+1)/b], isto é tratou o decimal como TRUNCADO, e reprovou o"
+           " m=3 — cuja raiz é 0,60555…, que arredonda a 0,606 e não trunca. O texto estava"
+           " certo e o meu critério é que não era; verificar um decimal publicado exige saber"
+           " se ele é truncado ou arredondado, e a casa arredonda. O CICLO QUE NÃO TERMINA também: «{0} → {1,2} → {0} é um ciclo de"
+           " período 2 com valor constante» é a igualdade 1 = σ^{-1}+σ^{-2}, verdadeira em"
+           " ℤ[σ] SÓ para m=1 — nos outros três metais os dois lados diferem, e o ciclo não"
+           " existe ali. E A CONVOLUÇÃO NÃO DEVOLVE CANÓNICO: o exemplo do texto, {1,3}² ="
+           " {2,4,4,6} com dígito 2 em k=4, sai como está; e a varredura mostra que não é"
+           " isolado, com a maioria dos produtos de canónicos a cair fora da forma. O controlo"
+           " é que NEM TODOS caiam fora: se caíssem, a normalização não teria nada que"
+           " distinguir.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

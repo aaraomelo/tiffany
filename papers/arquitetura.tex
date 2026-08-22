@@ -5072,6 +5072,51 @@ comprimentos; e a totalidade nos pares e nos triplos.}
         {a comparação por $p_1q_2$ contra $p_2q_1$, sem divisão}
         {\code{tests/pgwire.c} §W105}
 
+\subsection*{A base \texorpdfstring{$\sigma$}{sigma}: o carry depende do metal, e os decimais são raízes de um polinómio inteiro}
+
+\noindent O \code{catalogo} deriva de $\sigma^{2}=m\sigma+1$ o carry
+$\sigma^{-(k-1)}=m\,\sigma^{-k}+\sigma^{-(k+1)}$ e avisa: «note-se o fator $m$ --- só
+em $m=1$ a regra se reduz a $\sigma^{-k}+\sigma^{-(k+1)}=\sigma^{-(k-1)}$; para
+$m\ge2$ essa forma \textbf{não conserva o valor}».
+
+\medskip\noindent Tudo isso é exato em $\Z[\sigma]$, onde o elemento é o par
+$(a,b)\equiv a+b\sigma$ e o produto é a regra do gato de §W98: o carry vale em
+$35/35$ casos como igualdade de \textbf{pares de inteiros}, sem avaliar coisa
+nenhuma. E a falha da forma reduzida não é um desvio a estimar --- é exatamente
+$(m-1)\sigma^{-k}$, nulo em $m=1$ e não nulo nos outros quatro.
+
+\medskip\noindent\textbf{Os três decimais confirmam-se sem um \texttt{float}}, que é
+o ponto. O texto dá $0{,}414$, $0{,}606$ e $0{,}708$; e $x=(m-1)\sigma^{-1}$ é raiz
+de
+\[
+x^{2}+m(m-1)x-(m-1)^{2}=0,
+\]
+de coeficientes inteiros. Avalia-se o polinómio nos extremos do intervalo de
+arredondamento, $(2a\mp1)/2b$, multiplicado pelo denominador ao quadrado para ficar
+em $\Z$, e lê-se o \textbf{sinal}: negativo antes, positivo depois. $3/3$, sem uma
+divisão e sem uma raiz quadrada.
+
+\medskip\noindent\textbf{E o critério teve de ser o certo.} A primeira escrita
+enquadrou em $[a/b,\,(a+1)/b]$ --- isto é, tratou o decimal como \emph{truncado} ---
+e reprovou o $m=3$, cuja raiz é $0{,}60555\ldots$: ela \emph{arredonda} a $0{,}606$ e
+não trunca. \emph{O texto estava certo e o meu critério é que não era.} Verificar um
+decimal publicado exige saber se ele é truncado ou arredondado.
+
+\medskip\noindent\textbf{O ciclo que não termina} --- «$\{0\}\to\{1,2\}\to\{0\}$, de
+período $2$ e valor constante» --- é a igualdade $1=\sigma^{-1}+\sigma^{-2}$,
+verdadeira em $\Z[\sigma]$ \emph{só} para $m=1$: nos outros metais os dois lados
+diferem e o ciclo não existe ali. E \textbf{a convolução não devolve canónico}:
+$\{1,3\}^{2}=\{2,4,4,6\}$ sai como o texto diz, com dígito $2$ em $k=4$, e $166$ de
+$400$ produtos de canónicos caem fora da forma --- o controlo é que \emph{nem todos}
+caiam, senão a normalização não teria o que distinguir.
+
+\medido{\code{tests/pgwire.c} §W106 --- o carry, a falha exata, os três decimais por
+enquadramento, o ciclo nos quatro metais e a convolução com a sua varredura.}
+
+\colunas{\code{catalogo} «As operações na base $\sigma$»; §W98 (a regra do gato em $\Z[\sigma]$)}
+        {aritmética de pares em $\Z[\sigma]$; enquadramento por sinal de polinómio inteiro}
+        {\code{tests/pgwire.c} §W106}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

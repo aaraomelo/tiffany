@@ -22549,7 +22549,9 @@ Note-se o factor $m$. Só em $m=1$ (o caso $\varphi$) a regra se reduz a
 ``$\sigma^{-k}+\sigma^{-(k+1)} = \sigma^{-(k-1)}$''; para $m\geq2$ essa forma \textbf{não conserva
 o valor} --- em $m=2$ falha por $0{,}414$, em $m=3$ por $0{,}606$, em $m=4$ por $0{,}708$.
 Consequentemente também a forma canónica depende de $m$: a condição ``sem índices consecutivos nem
-repetições'' é a de Parry apenas para $m=1$. Para $m\geq2$ o canónico é $d_k\leq m$, com
+repetições'' é a de Parry apenas para $m=1$.
+
+\medido{\code{tests/pgwire.c} §W106 --- e tudo isto \emph{em inteiros}, em $\Z[\sigma]$, onde o elemento é o par $(a,b)\equiv a+b\sigma$ e o produto é a regra do gato. O carry vale em $35/35$ casos ($m=1..5$, $k=1..7$) como igualdade de \textbf{pares de inteiros}, sem avaliar coisa nenhuma; e a falha da forma reduzida não é um desvio a estimar --- é exactamente $(m-1)\sigma^{-k}$, nulo em $m=1$ e não nulo nos outros quatro. \textbf{Os três decimais têm certidão inteira}: $x=(m-1)\sigma^{-1}$ é raiz de $x^2+m(m-1)x-(m-1)^2$, de coeficientes em $\Z$, e enquadra-se avaliando esse polinómio nos extremos do intervalo de arredondamento $(2a\mp1)/2b$ e lendo o \emph{sinal} --- $3/3$, sem uma divisão nem uma raiz quadrada. O ciclo $\{0\}\to\{1,2\}\to\{0\}$ é a igualdade $1=\sigma^{-1}+\sigma^{-2}$, verdadeira \emph{só} em $m=1$ --- nos outros metais os dois lados diferem e o ciclo não existe ali. E $\{1,3\}^2=\{2,4,4,6\}$ sai como está, com $166$ de $400$ produtos de canónicos a caírem fora da forma.} Para $m\geq2$ o canónico é $d_k\leq m$, com
 $d_k=m \Rightarrow d_{k+1}=0$ --- e aí índices consecutivos e dígitos repetidos são
 \emph{legítimos}.
 
