@@ -39,3 +39,14 @@ E duas vezes o extractor mentiu antes de eu publicar: `catalogo`/`teoria` usam
 positivos), e `\C` era o `\\` de quebra de linha seguido de `C` num
 `smallmatrix`. [[feedback-a-definicao-do-extractor]] — verificar SEMPRE antes
 de afirmar o número.
+
+**E depois de a medida existir, repeti-o CINCO vezes na mesma sessão** — `\sen`,
+`\FF`, `\N`, `\Q`, `\C` — mais dois ambientes (`\begin{observacao}`,
+`\begin{proposicao}`) e dois pacotes (`psmallmatrix` sem `mathtools`). A memória
+estava escrita e não me travou; o §R6 travou. É o argumento mais forte a favor de
+medir em vez de lembrar: **a lição não impede o gesto, a medida impede o commit.**
+
+E há uma família a mais que o §R6 não cobria e passou a ser varrida à mão: os
+AMBIENTES (`\begin{x}` sem `\newtheorem`) e os PACOTES (`\begin{psmallmatrix}`
+sem `\usepackage{mathtools}`). Mesma doença, três andares: macro, ambiente,
+pacote.

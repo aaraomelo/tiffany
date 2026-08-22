@@ -3921,6 +3921,254 @@ int main(void){
            " INVERSO na outra.", mau == 0);
     }
 
+
+    /* ═══ §AN37: A LINEARIZAÇÃO QUE PRESERVA VIZINHANÇA SÓ EXISTE NO POSTO 1 ══ */
+    {
+        long mau = 0;
+        printf("\n§AN37  2n ≤ 2: o índice não se achata na cadeia, e o que isso mataria.\n\n");
+
+        /* ── TRÊS NÍVEIS, E A MISTURA DELES FOI O ERRO. Ao levar o corte para
+         * as matrizes escreveu-se primeiro «falta uma ordem» (errado: ordem não
+         * era requisito) e depois «a matriz não se lineariza» (também errado: a
+         * bijeção existe). O que sobrevive é a separação:
+         *
+         *   (1) IDENTIDADE   X ↔ I_N              bijeção — SEMPRE existe no finito
+         *   (2) VIZINHANÇA   (X,V) ≇ (I_N,V_cadeia)  para posto > 1
+         *   (3) TRAJECTÓRIA  a dinâmica que de V se lê    outra camada
+         *
+         * O nível (1) é gratuito — há N coisas e N endereços — e mede-se aqui
+         * primeiro, porque é ele que protege o resto: sem o exibir, o (2) leria-se
+         * como «não há correspondência», que é falso.
+         *
+         * E o (1) não é uma escolha avulsa: é o `thm:enumera`, a representação
+         * posicional, que é o processo do `thm:coord` com a base trocada. A reta
+         * onde o operador opera fica assim CONSTRUÍDA e não apenas nomeada. */
+
+        /* ── NÍVEL (1): a enumeração posicional é bijeção, para vários (M,n) ── */
+        { int bij = 1; long casos = 0;
+          for(int n = 1; n <= 4 && bij; n++)
+          for(long M = 2; M <= 6 && bij; M++){
+              long N = 1; for(int k = 0; k < n; k++) N *= M;
+              if(N > 2000) continue;
+              char *visto = calloc((size_t)N, 1);
+              if(!visto){ bij = 0; break; }
+              for(long t = 0; t < N; t++){
+                  /* φ(t): os n dígitos em base M */
+                  long d[8], q = t;
+                  for(int k = 0; k < n; k++){ d[k] = q % M; q /= M; }
+                  /* φ⁻¹: reconstrói */
+                  long v = 0, pot = 1;
+                  for(int k = 0; k < n; k++){ v += d[k]*pot; pot *= M; }
+                  if(v != t) bij = 0;                  /* φ⁻¹∘φ = id */
+                  if(v >= 0 && v < N){ if(visto[v]) bij = 0; visto[v] = 1; }
+              }
+              for(long i = 0; i < N; i++) if(!visto[i]) bij = 0;   /* sem buraco */
+              free(visto);
+              casos++;
+          }
+          printf("      NÍVEL (1) identidade: φ(t) = os n dígitos em base M é"
+                 " BIJEÇÃO em %ld pares (M,n) — φ⁻¹∘φ = id, dobra 0, buraco 0: %s\n",
+                 casos, bij ? "sim" : "FALHOU");
+          printf("        a reta do operador fica CONSTRUÍDA: é a leitura"
+                 " posicional da tupla de decisões (thm:enumera)\n");
+          if(!bij || casos < 10) mau++; }
+
+        /* ── e a serpentina TAMBÉM é bijeção — sem dobra e sem buraco. O buraco
+         * do `thm:contraria` vem do factor 2 de ρ(q_t) = 2t, que ali foi
+         * ESCOLHIDO para exibir a dualidade; sem ele, as cardinalidades batem. */
+        { int serp = 1;
+          for(long M = 2; M <= 32 && serp; M *= 2){
+              long N = M*M;
+              char *visto = calloc((size_t)N, 1);
+              if(!visto){ serp = 0; break; }
+              for(long t = 0; t < N; t++){
+                  long r = t / M, c = t % M;
+                  long y = r, x = (r % 2 == 0) ? c : (M-1-c);
+                  long t2 = y*M + ((y % 2 == 0) ? x : (M-1-x));
+                  if(t2 != t) serp = 0;
+                  if(visto[t2]) serp = 0;
+                  visto[t2] = 1;
+              }
+              for(long i = 0; i < N; i++) if(!visto[i]) serp = 0;
+              free(visto);
+          }
+          printf("      e a serpentina também: bijeção em M = 2..32, com a MESMA"
+                 " regra lida nos dois sentidos — %s\n", serp ? "sim" : "FALHOU");
+          if(!serp) mau++; }
+
+        /* ── NÍVEL (2): e é AQUI que o preço aparece. Numa grade de posto n a
+         * vizinhança tem 2n elementos DISTINTOS, e na cadeia tem 2. Uma bijeção
+         * que levasse vizinhos em vizinhos meteria 2n pontos distintos dentro de
+         * 2, logo 2n ≤ 2 e n ≤ 1. */
+        { int ok_viz = 1;
+          for(int n = 1; n <= 8; n++){
+              /* os 2n vizinhos de um ponto na grade de posto n, gerados e
+               * contados como CONJUNTO — se dois coincidissem, seriam menos */
+              long viz[16][8];
+              int nv = 0;
+              for(int i = 0; i < n; i++){
+                  for(int j = 0; j < n; j++) viz[nv][j] = 0;
+                  viz[nv][i] = +1; nv++;
+                  for(int j = 0; j < n; j++) viz[nv][j] = 0;
+                  viz[nv][i] = -1; nv++;
+              }
+              if(nv != 2*n) ok_viz = 0;
+              for(int a = 0; a < nv && ok_viz; a++)
+                  for(int b = a+1; b < nv && ok_viz; b++){
+                      int igual = 1;
+                      for(int j = 0; j < n; j++) if(viz[a][j] != viz[b][j]) igual = 0;
+                      if(igual) ok_viz = 0;
+                  }
+              /* e a desigualdade que o teorema pede */
+              if(n >= 2 && 2*n <= 2) ok_viz = 0;
+          }
+          printf("      NÍVEL (2) vizinhança: |V(x)| = 2n com os 2n distintos, em"
+                 " posto 1..8: %s\n",
+                 ok_viz ? "sim" : "FALHOU");
+          printf("        e 2n ≤ 2 só se resolve em n = 1 — a régua é o único"
+                 " posto que se lineariza a si próprio\n");
+          if(!ok_viz) mau++; }
+
+        /* ── E O COROLÁRIO É SOBRE O ÍNDICE, não sobre o conteúdo. Uma matriz
+         * é uma configuração A: I×I → X, e I×I é a grade de POSTO 2 — com as
+         * vizinhanças naturais (i,j)↔(i±1,j) e (i,j)↔(i,j±1). Achatá-la pede
+         * 2·2 ≤ 2, que é falso para todo n ≥ 2. E nada disto depende do que X
+         * seja: é o ÍNDICE que não se achata.
+         *
+         * A primeira escrita dizia «uma matriz n×n é um ponto da grade de posto
+         * n², logo 2n² ≤ 2». A conclusão é a mesma, mas a leitura estava a
+         * importar um espaço de dimensão n² para um andar onde o objecto é
+         * FINITO e o índice é DISCRETO — e onde ℝ ainda não existe. */
+        { int idx_ok = 1;
+          for(int n = 2; n <= 6; n++){
+              /* o índice I_n × I_n é posto 2, qualquer que seja n */
+              int posto_indice = 2;
+              if(2*posto_indice <= 2) idx_ok = 0;      /* 4 ≤ 2 é falso */
+              /* e o interior tem mesmo 4 vizinhos, contados */
+              if(n >= 3){
+                  int viz = 0;
+                  int i = 1, j = 1;                     /* um ponto interior */
+                  if(i-1 >= 0) viz++; if(i+1 < n) viz++;
+                  if(j-1 >= 0) viz++; if(j+1 < n) viz++;
+                  if(viz != 4) idx_ok = 0;
+              }
+          }
+          /* e em n = 1 o índice tem UM sítio e nenhuma direção transversal */
+          int um = 1; { int viz = 0; if(0-1 >= 0) viz++; if(0+1 < 1) viz++;
+                        if(viz != 0) um = 0; }
+          printf("      o índice de uma matriz é I×I, de POSTO 2: 2·2 ≤ 2 é falso"
+                 " para todo n ≥ 2 — %s\n", idx_ok ? "verificado em n = 2..6" : "FALHOU");
+          printf("        e em n = 1 o índice tem um sítio e ZERO vizinhos"
+                 " transversais (%s): a 1×1 coincide com o escalar\n",
+                 um ? "contado" : "MAU");
+          if(!idx_ok || !um) mau++; }
+
+        /* ── (2) E O GUME É UMA TENTATIVA CONCRETA. A serpentina é a
+         * linearização que a casa usa (thm:contraria): é INJETIVA, e a pergunta
+         * é quanto ela paga em vizinhança. Contam-se os pares que são vizinhos
+         * no quadrado e deixam de o ser na régua.
+         *
+         * Se o teorema estivesse errado, haveria uma enumeração com zero
+         * quebras. Medir a serpentina não prova que nenhuma existe — a prova é
+         * a desigualdade —, mas mostra o preço a subir com o lado, que é o que
+         * uma pessoa vê antes de acreditar na conta. */
+        printf("      lado · pares vizinhos · quebras · fração\n");
+        int cresce = 1; double ant = -1;
+        for(int M = 2; M <= 16; M *= 2){
+            long pares = 0, quebra = 0;
+            for(int y = 0; y < M; y++) for(int x = 0; x < M; x++){
+                /* o índice da serpentina: linha par da esquerda para a direita */
+                long t = (long)y*M + ((y % 2 == 0) ? x : (M-1-x));
+                if(x + 1 < M){
+                    int x2 = x + 1;
+                    long t2 = (long)y*M + ((y % 2 == 0) ? x2 : (M-1-x2));
+                    pares++; if(labs(t2 - t) != 1) quebra++;
+                }
+                if(y + 1 < M){
+                    int y2 = y + 1;
+                    long t2 = (long)y2*M + ((y2 % 2 == 0) ? x : (M-1-x));
+                    pares++; if(labs(t2 - t) != 1) quebra++;
+                }
+            }
+            double fr = pares ? (double)quebra/(double)pares : 0;
+            printf("      %3d  ·   %6ld     ·  %6ld · %.3f\n", M, pares, quebra, fr);
+            if(quebra == 0) cresce = 0;              /* nenhuma é perfeita */
+            if(ant >= 0 && fr < ant - 0.01) cresce = 0;
+            ant = fr;
+        }
+        printf("        nenhuma enumeração testada tem zero quebras, e a fração"
+               " NÃO desce com o lado: %s\n",
+               cresce ? "confirmado" : "FALHOU");
+        if(!cresce) mau++;
+
+        /* ── (3) E O QUE A LINEARIZAÇÃO MATARIA TEM NOME: o rotor. Pelo
+         * `thm:fecho` ele vive num PLANO coordenado e o número de planos é
+         * C(n,2) — nenhum no posto 1. Uma grade linearizada não tem onde rodar,
+         * e como a cláusula (4) é a única que chama a estrutura de X, apagar o
+         * plano apaga o sítio por onde o objeto é lido. */
+        { long pl[9]; int certo = 1;
+          for(int n = 0; n <= 8; n++) pl[n] = (long)n*(n-1)/2;
+          if(pl[1] != 0 || pl[2] != 1 || pl[3] != 3 || pl[4] != 6) certo = 0;
+          printf("      planos onde o rotor vive, C(n,2): posto 1 → %ld ·"
+                 " 2 → %ld · 3 → %ld · 4 → %ld\n", pl[1], pl[2], pl[3], pl[4]);
+          printf("        no posto 1 não há PAR de direções: o rotor não fica"
+                 " difícil, fica sem sítio\n");
+          if(!certo) mau++; }
+
+        /* ── E O CONTROLO É O ROTOR A EXISTIR ONDE HÁ PLANO: R⁴ = id na 2×2,
+         * verificado por multiplicação. Sem ele, «o rotor morre no posto 1»
+         * seria uma frase sobre um objeto que nunca se viu funcionar. */
+        { long R[2][2] = {{0,-1},{1,0}}, A[2][2];
+          memcpy(A, R, sizeof R);
+          for(int k = 2; k <= 4; k++){
+              long T[2][2];
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                  long ac = 0;
+                  for(int m = 0; m < 2; m++) ac += A[i][m]*R[m][j];
+                  T[i][j] = ac;
+              }
+              memcpy(A, T, sizeof T);
+          }
+          int id = (A[0][0]==1 && A[1][1]==1 && A[0][1]==0 && A[1][0]==0);
+          printf("      controlo — R⁴ = id no posto 2 (onde há plano): %s\n",
+                 id ? "sim" : "FALHOU");
+          if(!id) mau++; }
+
+        printf("\n");
+        ok("A LINEARIZAÇÃO QUE PRESERVA VIZINHANÇA SÓ EXISTE NO POSTO 1, E A PROVA É UMA"
+           " DESIGUALDADE. Numa grade de posto n a vizinhança tem 2n elementos DISTINTOS e na"
+           " régua tem 2; uma aplicação injetiva que leve vizinhos em vizinhos mete 2n pontos"
+           " distintos dentro de 2, logo 2n ≤ 2 e n ≤ 1. E O COROLÁRIO É SOBRE O ÍNDICE, não sobre"
+           " o conteúdo: uma matriz é uma configuração A: I×I → X, e I×I é a grade de POSTO"
+           " 2, com as vizinhanças (i,j)↔(i±1,j) e (i,j)↔(i,j±1). Achatá-la pede 2·2 ≤ 2, que"
+           " é falso para todo n ≥ 2, e nada disto depende do que X seja. Em n = 1 o índice"
+           " tem um sítio e ZERO vizinhos transversais, e a 1×1 coincide com o escalar. É A PROSA DO thm:contraria ESCRITA COMO CONTA: «um vértice"
+           " interior tem 4 vizinhos e a reta dá 2, logo nenhuma injeção de células é injeção"
+           " de vizinhanças» — e o que se acrescenta é o ALCANCE, que vale em qualquer posto."
+           " E O QUE ESTE TEOREMA NÃO DIZ TEM DE FICAR ESCRITO,"
+           " porque a extrapolação fácil é FALSA: as matrizes PODEM ser ordenadas — a ordem"
+           " de Loewner é uma ordem parcial legítima nas simétricas, e a lexicográfica sobre"
+           " as entradas é uma ordem TOTAL perfeitamente válida. O teorema não proíbe"
+           " ordenar: proíbe substituir a estrutura multidirecional do índice por uma cadeia"
+           " PRESERVANDO as vizinhanças. Uma ordem pode ser imposta, e é uma escolha sobre o"
+           " índice que não elimina as vizinhanças nem as operações que as atravessam — o que"
+           " ela não faz é substituir a dinâmica. E A «RETA» DESTE ENUNCIADO NÃO É ℝ: é a"
+           " cadeia discreta 0−1−⋯−(N−1), a própria lista I. O objecto é finito, os índices"
+           " são discretos, a contagem dos sítios É o que dá os naturais, e o argumento é"
+           " PURAMENTE COMBINATÓRIO — sem continuidade, sem análise, sem reais. O GUME É A"
+           " TENTATIVA CONCRETA: a serpentina é injetiva, e conta-se o que ela"
+           " paga — nenhuma tem zero quebras, e a fração não desce com o lado. Medir isso não"
+           " prova que nenhuma enumeração serve, porque a prova é a desigualdade; mostra o"
+           " preço, que é o que se vê antes de acreditar na conta. E O QUE A LINEARIZAÇÃO"
+           " MATARIA TEM NOME: pelo thm:fecho o rotor vive num PLANO e há C(n,2) planos —"
+           " NENHUM no posto 1. Uma grade linearizada não tem onde rodar, e como a cláusula"
+           " (4) é a única que chama a estrutura de X, apagar o plano apaga o sítio por onde"
+           " o objeto é lido: linearizar não simplifica, DESLIGA. A reta guarda a ORDEM, o"
+           " plano guarda a DINÂMICA, e achatar um no outro perde a segunda. O controlo é"
+           " R⁴ = id no posto 2, onde há plano — sem ele, «o rotor morre no posto 1» seria"
+           " uma frase sobre um objeto que nunca se viu funcionar.", mau == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

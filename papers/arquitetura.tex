@@ -4053,8 +4053,24 @@ listas de números e a dobra atua em cada um sem ver os outros, pelo que o
 \[
 \boxed{\;\text{a dimensão não acrescenta nada onde o corte fecha --- são }n\text{ cópias de um problema resolvido}\;}
 \]
-O que a dimensão traz é o caso \emph{não} comutativo, e aí o que falta não é o corte:
-é a \textbf{ordem}.
+\medskip\noindent\textbf{E a leitura disto tem de ser a certa.} A primeira que
+escrevi dizia «o que a dimensão traz é o caso não comutativo, e aí falta a
+\emph{ordem}» --- e está errada. Procurar uma ordem para as matrizes é pô-las de
+volta numa reta depois de elas terem ganho várias direções.
+\[
+\boxed{\;\text{A matriz não ordena. Ela \textbf{compõe} ordens.}\;}
+\]
+As estruturas que ela recebe já trazem a sua --- a árvore tem a ordem de prefixo, o
+espectro a do expoente, a fase a do círculo --- e o que a matriz faz é transportar
+uma para outra face, acoplar, fundir, \emph{sem exigir que todas virem a mesma
+régua}. Esta casa já o tinha medido noutro sítio: o \code{tests/corpo\_viveiro.c}
+diz que «o índice é a \textbf{estante}, não o que está nela», com o retículo das
+dimensões ($\vee=\mathrm{lcm}$, $\wedge=\gcd$) de um lado e o corpo do outro.
+
+\medskip\noindent Tudo o que §W87 mede continua a valer letra por letra --- a ordem é
+parcial, $AB$ não é simétrica, o AGM fecha onde comutam. Mas isso diz \emph{onde o
+corte se aplica}, e não uma falta do objeto: o corte é a máquina da ordem linear, e
+a matriz é o andar de cima.
 
 \medido{\code{tests/pgwire.c} §W87, com o controlo na ordem total dos escalares ---
 $121$ pares, todos comparáveis ---, sem a qual «parcial» não distinguiria nada.}
@@ -4106,6 +4122,43 @@ os regimes por \emph{dentro} e não pela etiqueta: em $s=0$ há divisores de zer
 \colunas{\code{estelar/algebra\_estelar.tex} ($\mathcal{E}_s$, $e^2=1-s$)}
         {$e\mapsto(0,1;1-s,0)$; \code{produto}/\code{det}/\code{regime} pelo motor}
         {\code{tests/pgwire.c} §W88}
+
+\subsection*{A torre vestida de matriz, e onde a roupa rasga}
+
+\noindent O \code{corpo\_estelar.tex} diz $N(\sigma)=\det(A)$ e aponta o alcance: «a
+norma-que-compõe $N(xy)=N(x)N(y)$ é a lei que sustenta
+$\R\subset\mathbb{C}\subset\mathbb{H}\subset\mathbb{O}$». $\mathbb{C}$ já ficou vestido em §W88 ---
+é $\mathcal{E}_s$ com $s=2$, e o $\det$ \emph{é} a norma. Falta $\mathbb{H}$, numa
+$4\times4$ real com $q=a+bi+cj+dk$.
+
+\medskip\noindent\textbf{E o determinante é a norma ao \emph{quadrado}:} em $\mathbb{C}$ era
+$N$, aqui é $N^{2}$, porque a representação real conta cada modo duas vezes --- o
+expoente é a dimensão sobre dois, e dizê-lo é o que impede de escrever «o det é a
+norma» onde não é. A tabela de multiplicação sai do produto de matrizes sem ser
+posta: $ij=k$ e $ji=-k$, logo \textbf{não comuta} --- a primeira perda da torre.
+
+\medskip\noindent\textbf{Mas associa --- e é aqui que a roupa mostra o limite.} O
+produto de matrizes é associativo \emph{por construção}: $(AB)C=A(BC)$ vale para
+quaisquer matrizes, sempre, pelo que tudo o que se veste de matriz herda a
+associatividade quer a queira quer não. Daí o limite sai numa linha, sem varrer
+nada:
+\[
+\boxed{\;\mathbb{O}\text{ não associa e toda a matriz associa}\;\Longrightarrow\;
+\text{não existe representação matricial fiel de }\mathbb{O}\;}
+\]
+Não é que ainda não se tenha achado --- ela contradiria o produto de matrizes. \emph{Não
+é uma lacuna: é uma incompatibilidade.} E é outra pergunta que a do \code{lib/torre.h},
+que diz «o limite no grau oito é do lado \emph{discreto}/bilinear, não do objeto»:
+ali é o limite da \textbf{norma}, aqui o da \textbf{representação}.
+
+\medskip\noindent A norma continua a compor, $N(qw)=N(q)N(w)$ --- e outra vez sem
+prova nova: é o $\det$ multiplicativo de §W85, com o quadrado dos dois lados.
+
+\medido{\code{tests/pgwire.c} §W89.}
+
+\colunas{\code{broca-so corpo\_estelar.tex} (\code{prop:norma}, a torre); \code{lib/torre.h}}
+        {$q\mapsto$ 4×4 real; \code{det}/\code{produto} pelo motor; o limite por associatividade}
+        {\code{tests/pgwire.c} §W89}
 
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}

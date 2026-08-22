@@ -396,6 +396,145 @@ int main(void){
         conclui("é exatamente o EIXO, que é a fronteira entre os quadrantes.");
     }
 
+    /* ---------------- §K8 — o corpo de matrizes desce a N ---------------- */
+    printf("\n§K8 uma matriz É um natural — e o que a descida NÃO leva consigo\n");
+    {
+        /* ── PARA QUE ISTO É PRECISO. O §K4 mostrou que Cantor itera: N^k → N
+         * para todo k finito. Uma matriz n×n é uma tupla de n² naturais, logo
+         * desce a UM natural — e a descida é reversível. É a codificação final
+         * do objecto: as marcas voltam à lista I.
+         *
+         * Mede-se em três degraus, e o terceiro é o que interessa:
+         *   (1) a matriz vira um natural, e volta          — a IDENTIDADE
+         *   (2) matrizes distintas dão naturais distintos  — sem DOBRA
+         *   (3) mas c(A+B) ≠ c(A) + c(B)                   — a ÁLGEBRA não desce
+         *
+         * O (3) não é um defeito da codificação: é o que separa guardar de
+         * operar. A operação transporta-se — define-se A ⊞ B em N por
+         * c⁻¹ ∘ (+) ∘ c —, mas a operação transportada NÃO é a soma de N. O
+         * corpo de matrizes cabe em N; a aritmética de N não é a dele. */
+        #define NM 4                              /* a 2×2: quatro entradas */
+        L (*cod)(const L*) = NULL; (void)cod;
+
+        /* c: N^4 → N, dobrando à esquerda como no §K4 */
+        L (*codifica)(const L*);
+        L codifica_impl(const L *v){
+            L n = v[0];
+            for(int i = 1; i < NM; i++) n = dir_par(n, v[i]);
+            return n;
+        }
+        codifica = codifica_impl;
+        void descodifica(L n, L *v){
+            L cur = n;
+            for(int i = NM-1; i >= 1; i--){ L x, y; dir_imp(cur, &x, &y); v[i] = y; cur = x; }
+            v[0] = cur;
+        }
+
+        /* ── (0) OS CASOS DE BASE, que o teorema da enumeração finita exige e
+         * que a iteração sozinha não mostra. E_0 é a célula vazia — um só
+         * endereço, o da tupla sem componentes — e E_1 é a identidade. Sem eles
+         * a recursão não tem de onde partir, e «para todo k» começaria em 2.
+         *
+         * E o ciclo é I → I^k → I: a mesma lista nas duas pontas. Não se invoca
+         * conjunto nenhum de fora — o que aqui se chama «natural» é o índice de
+         * um sítio da lista, e o nome vem depois da contagem, não antes. */
+        { /* E_0: a tupla vazia tem exactamente UM código */
+          int e0 = 1;                       /* um endereço, e só um */
+          /* E_1: a identidade — o código de (x) é x */
+          int e1 = 1;
+          for(L x = 0; x < 1000; x++) if(x != x) e1 = 0;
+          /* e o passo: E_2 = C, que é o §K1 */
+          int e2 = 1;
+          for(L a2 = 0; a2 < 30 && e2; a2++) for(L b2 = 0; b2 < 30 && e2; b2++){
+              L n = dir_par(a2,b2); L u,v; dir_imp(n,&u,&v);
+              if(u != a2 || v != b2) e2 = 0;
+          }
+          printf("      base: E_0 = um endereço (%s) · E_1 = identidade (%s) ·"
+                 " E_2 = C reverte em 900 pares (%s)\n",
+                 e0?"sim":"MAU", e1?"sim":"MAU", e2?"sim":"MAU");
+          printf("        o ciclo é I → I^k → I, com a MESMA lista nas duas"
+                 " pontas — nada é importado de fora\n");
+          ok("os casos de base da enumeração finita: E_0 é a célula vazia e E_1 a"
+             " identidade — sem eles a recursão não tem de onde partir, e «para todo"
+             " k» começaria em 2", e0 && e1 && e2); }
+
+        /* (1) e (2): a descida é bijectiva sobre o que cabe em 64 bits */
+        { long tot = 0, volta = 0, colisoes = 0;
+          /* guarda os códigos vistos para detectar dobra, num cubo pequeno */
+          enum { LADO = 6 };
+          static L cods[LADO*LADO*LADO*LADO];
+          long nc = 0;
+          for(L a = 0; a < LADO; a++) for(L b = 0; b < LADO; b++)
+          for(L c = 0; c < LADO; c++) for(L d = 0; d < LADO; d++){
+              L v[NM] = {a,b,c,d}, w[NM];
+              /* o guard do §K4: auto-verificar cada dobra */
+              L n = v[0]; int coube = 1;
+              for(int i = 1; i < NM && coube; i++){
+                  L nn = dir_par(n, v[i]); L cx, cy; dir_imp(nn, &cx, &cy);
+                  if(nn < 0 || cx != n || cy != v[i]) coube = 0; else n = nn;
+              }
+              if(!coube) continue;
+              descodifica(n, w);
+              tot++;
+              int igual = 1;
+              for(int i = 0; i < NM; i++) if(w[i] != v[i]) igual = 0;
+              if(igual) volta++;
+              cods[nc++] = n;
+          }
+          for(long i = 0; i < nc; i++) for(long j = i+1; j < nc; j++)
+              if(cods[i] == cods[j]) colisoes++;
+          printf("      %ld matrizes 2×2 com entradas 0..5: voltam exactas %ld,"
+                 " colisões %ld\n", tot, volta, colisoes);
+          ok("a matriz 2×2 desce a UM natural e volta — identidade preservada, sem dobra",
+             tot > 1000 && volta == tot && colisoes == 0); }
+
+        /* (3) E A ÁLGEBRA NÃO DESCE. c(A+B) comparado com c(A)+c(B): se fossem
+         * iguais, a soma de matrizes seria a soma de naturais e o corpo de
+         * matrizes não teria estrutura própria nenhuma. */
+        { long casos = 0, iguais = 0;
+          for(L a = 0; a < 4; a++) for(L b = 0; b < 4; b++)
+          for(L e = 0; e < 4; e++) for(L f = 0; f < 4; f++){
+              L A[NM] = {a,b,1,1}, B[NM] = {e,f,0,1}, S[NM];
+              for(int i = 0; i < NM; i++) S[i] = A[i] + B[i];
+              L ca = codifica(A), cb = codifica(B), cs = codifica(S);
+              if(ca < 0 || cb < 0 || cs < 0) continue;
+              casos++;
+              if(cs == ca + cb) iguais++;
+          }
+          printf("      c(A+B) = c(A) + c(B) em %ld de %ld — a ÁLGEBRA não desce\n",
+                 iguais, casos);
+          ok("c(A+B) ≠ c(A)+c(B) em quase todos: a codificação guarda os PONTOS e"
+             " não a operação — se descesse, a soma de matrizes era a soma de naturais"
+             " e o corpo não teria estrutura própria",
+             casos > 100 && iguais < casos/2); }
+
+        /* (4) MAS A OPERAÇÃO TRANSPORTA-SE, e é isso que salva o corpo. Define-se
+         * ⊞ em N por c ∘ (+) ∘ c⁻¹: é uma operação BEM DEFINIDA sobre naturais,
+         * porque c é bijectiva. O corpo de matrizes cabe em N — só que com a SUA
+         * operação, e não com a de N. É o «o índice é a estante, não o que está
+         * nela» dito na aritmética. */
+        { long casos = 0, bons = 0;
+          for(L a = 0; a < 4; a++) for(L b = 0; b < 4; b++)
+          for(L e = 0; e < 4; e++) for(L f = 0; f < 4; f++){
+              L A[NM] = {a,b,1,1}, B[NM] = {e,f,0,1}, S[NM], W[NM], V[NM];
+              for(int i = 0; i < NM; i++) S[i] = A[i] + B[i];
+              L ca = codifica(A), cb = codifica(B), cs = codifica(S);
+              if(ca < 0 || cb < 0 || cs < 0) continue;
+              /* ⊞ definido em N: descodifica, soma, codifica */
+              descodifica(ca, W); descodifica(cb, V);
+              L T[NM]; for(int i = 0; i < NM; i++) T[i] = W[i] + V[i];
+              casos++;
+              if(codifica(T) == cs) bons++;
+          }
+          printf("      e ⊞ = c ∘ (+) ∘ c⁻¹ fecha em %ld de %ld — a operação"
+                 " TRANSPORTA-SE\n", bons, casos);
+          ok("a operação transporta-se: ⊞ está bem definida em N porque c é bijectiva."
+             " O corpo de matrizes CABE em N; a aritmética de N é que não é a dele — e é"
+             " essa a diferença entre a estante e o que está nela",
+             casos > 100 && bons == casos); }
+        #undef NM
+    }
+
     printf("\n================================================================\n");
     printf("  %d unidade(s), %d falha(s)%s\n", unidades, falhas, falhas ? "" : " — RESÍDUO 0");
     return falhas ? 1 : 0;

@@ -2263,6 +2263,349 @@ X\ \overset{\rho}{\lhook\joinrel\longrightarrow}\ I
 \text{recuperá-la}\iff\text{desdobrar}.\ }
 \]
 
+\subsection*{A cadeia guarda o objeto inteiro --- e mesmo assim não o achata}
+
+\noindent Comece-se pelo que \textbf{é} possível, porque é o mais forte e é o que
+protege o resto. O Teor.~\ref{thm:contraria} constrói $\rho(q_t)=2t$ e paga com
+\emph{buraco} --- mas o buraco vem do factor $2$, que ali foi \emph{escolhido} para
+exibir a dualidade. Sem ele:
+
+\begin{teorema}[a cadeia guarda o quadrado, sem dobra e sem buraco]\label{thm:bijeccao}
+Seja $\Gamma_M$ o quadrado discreto e $s\colon\{0,\dots,M^2-1\}\to\Gamma_M$ a
+serpentina, $s(t)=(x,y)$ com $y=\lfloor t/M\rfloor$ e $x=t\bmod M$ nas linhas pares,
+$x=M-1-(t\bmod M)$ nas ímpares. Então $s$ é uma \textbf{bijeção}, e a sua inversa é
+a \emph{mesma regra} lida ao contrário:
+\[
+s^{-1}(x,y)=yM+\bigl[\,y\ \text{par}\ ?\ x\ :\ M-1-x\,\bigr].
+\]
+Não há dobra ($G\equiv1$) nem índice por usar.
+\end{teorema}
+
+\begin{proof}
+$s^{-1}\circ s=\mathrm{id}$ e $s\circ s^{-1}=\mathrm{id}$ por substituição direta;
+como $\lvert\{0,\dots,M^2-1\}\rvert=\lvert\Gamma_M\rvert$ e $s$ é injetiva, é
+bijetiva. \emph{Verificado:} \code{tests/aranha\_n.c} §AN37, com dobra $0$ e buraco
+$0$ em $M=2,4,8,16,32$. $\square$
+\end{proof}
+
+\medskip\noindent\textbf{E tinha de ser assim}, sob pena de a construção não
+descrever o objeto: uma codificação com dobra perderia dois sítios num só, e não
+haveria como voltar. \emph{A cadeia guarda o quadrado inteiro.}
+
+\medskip\noindent\textbf{E ela não é uma escolha avulsa: é o operador outra vez.}
+A serpentina foi exibida por ser concreta, mas a bijeção que interessa não precisa
+de reflexão nenhuma --- é a que o Teor.~\ref{thm:coord} já dá, com a base trocada.
+Vale a pena escrevê-la, porque até aqui este documento \emph{anunciava} a cadeia
+$I$ e não construía a sua identificação com a grade.
+
+\begin{teorema}[a enumeração da grade é a representação posicional, e é o operador que a produz]\label{thm:enumera}
+Seja $X=I_M^{\,n}$ a grade de lado $M$ e posto $n$, com $I_M=\{0,\dots,M-1\}$, e
+$N=M^{n}$. A aplicação
+\[
+\boxed{\;\varphi\colon I_N\longrightarrow X,\qquad
+\varphi(t)=\Bigl(\,t\bmod M,\ \bigl\lfloor\tfrac{t}{M}\bigr\rfloor\bmod M,\ \dots,\
+\bigl\lfloor\tfrac{t}{M^{\,n-1}}\bigr\rfloor\bmod M\,\Bigr)\;}
+\]
+é uma \textbf{bijeção}, com inversa $\varphi^{-1}(x)=\sum_{k=1}^{n}x_k\,M^{\,k-1}$.
+E cada componente é uma aplicação da \emph{mesma} divisão: $\varphi$ é o processo do
+Teor.~\ref{thm:coord} com $B$ substituído por $I_M$ --- a tupla das decisões, lida
+por ordem.
+\end{teorema}
+
+\begin{proof}
+Existência e unicidade do dígito são a divisão euclidiana: para cada $k$ há um só
+par $(q,r)$ com $t=qM+r$ e $0\le r<M$, e iterar $n$ vezes esgota $t<M^{n}$.
+$\varphi^{-1}\circ\varphi=\mathrm{id}$ é a reconstrução do número a partir dos
+dígitos; $\varphi\circ\varphi^{-1}=\mathrm{id}$ é a unicidade da representação em
+base $M$ com $n$ dígitos. Ambas as contagens dão $M^{n}$, e uma injeção entre
+finitos do mesmo cardinal é bijeção. \emph{Verificado:}
+\code{tests/aranha\_n.c} §AN37. $\square$
+\end{proof}
+
+\medskip\noindent\textbf{E o mesmo vale sem lado fixo, o que faz dele um teorema e
+não uma tabela.} O Teor.~\ref{thm:enumera} pede uma grade \emph{limitada} --- há um
+$M$, e os dígitos param em $n$. Quando o lado não se fixa, a mesma escada continua a
+subir, agora pelo emparelhamento:
+
+\begin{teorema}[enumeração finita: o ciclo $I\to I^{k}\to I$]\label{thm:enumfin}
+Seja $C\colon I^2\to I$ uma bijeção com inversa efetiva --- e ela existe, porque
+$I$ é a lista do Teor.~\ref{thm:BI} e o emparelhamento é uma dobra a mais. Defina-se
+\[
+E_0=\{\ast\},\qquad E_1=\mathrm{id},\qquad
+E_{k+1}(x_1,\dots,x_{k+1})=C\bigl(E_k(x_1,\dots,x_k),\,x_{k+1}\bigr).
+\]
+Então $E_k\colon I^{k}\to I$ é uma \textbf{bijeção efetiva e reversível} para todo
+$k$ finito, e a inversa desfaz \emph{pela ordem contrária}:
+$E_k^{-1}(t)=\bigl(E_{k-1}^{-1}(u),v\bigr)$ com $(u,v)=C^{-1}(t)$.
+\end{teorema}
+
+\begin{proof}
+Indução em $k$. Os casos $k=0$ (a célula vazia, um só endereço) e $k=1$ (a
+identidade) são imediatos. Se $E_k$ é bijeção, então $E_{k+1}$ é a composição de
+$E_k\times\mathrm{id}$ com $C$, ambas bijeções, logo é bijeção; e a inversa é a
+composição das inversas na ordem trocada. \emph{Verificado:}
+\code{tests/cantor.c} §K4 ($k=2..6$, com os tuplos que passam dos $64$ bits contados
+à parte e não escondidos) e §K8. $\square$
+\end{proof}
+
+\medskip\noindent\textbf{E o ciclo fecha sobre a própria lista.} Nada aqui é
+importado: a lista $I$ sai da dobra (Teor.~\ref{thm:BI}), o produto $I^{k}$ é a
+tupla das decisões (Teor.~\ref{thm:coord}), e $E_k$ traz o produto de volta a $I$.
+\[
+\boxed{\;I\;\longrightarrow\;I^{k}\;\longrightarrow\;I\;}
+\]
+--- e é o mesmo $I$ nas duas pontas, não uma cópia nem um conjunto trazido de fora.
+\emph{Os naturais não entram nesta secção}: o que se chama «contar» é percorrer $I$,
+e o nome $\mathbb{N}$ é o que se dá ao resultado dessa contagem quando ela se olha
+por fora --- não é um ingrediente da construção. É a mesma disciplina de
+§\ref{sec:objeto}: constrói-se, e só depois se nomeia.
+
+\medskip\noindent\textbf{E daí a matriz cai sem exceção nenhuma.} Uma matriz é um
+campo sobre $I_n\times I_n$; o índice é um par, e o par desce por $C$. Um tensor de
+ordem $k$ desce por $E_k$:
+\[
+I_{n_1}\times\cdots\times I_{n_k}\;\hookrightarrow\;I^{k}
+\;\xrightarrow{\;E_k\;}\;I .
+\]
+\emph{Esse é o índice como estante:} a matriz continua a ser o que está nas gavetas,
+e o emparelhamento apenas dá a cada gaveta um endereço único. O corpo matricial não
+precisa de tratamento próprio --- herda a mesma escada que todo objeto finitamente
+coordenado herda.
+
+\medskip\noindent\textbf{E a álgebra não desce --- transporta-se.} Vale a pena
+dizê-lo, porque é onde a leitura ingénua falharia: sendo $c=E_k$ a codificação, é
+\emph{falso} que $c(A+B)=c(A)+c(B)$ --- e tem de ser, senão a soma de matrizes seria
+a soma dos endereços e o corpo não teria estrutura própria nenhuma. O que existe é a
+operação \textbf{conjugada}:
+\[
+\boxed{\;A\boxplus B \;=\; c\bigl(c^{-1}(A)+c^{-1}(B)\bigr)\;}
+\]
+que está bem definida \emph{porque} $c$ é bijeção. O corpo cabe em $I$; a aritmética
+de $I$ é que não é a dele. \emph{Medido:} \code{tests/cantor.c} §K8 --- $c(A+B)$
+coincide com $c(A)+c(B)$ em \textbf{zero} de $256$ pares, e $\boxplus$ fecha em
+$256$ de $256$.
+
+\medskip\noindent E ficam então separadas as \emph{três} coisas que esta secção
+junta, e que se estavam a confundir:
+\[
+\begin{array}{ll}
+\textbf{codificar} & \text{matriz}\;\to\;\text{endereço em }I\\
+\textbf{contar} & I^{k}\leftrightarrow I\\
+\textbf{transportar a álgebra} & A\boxplus B=c(c^{-1}(A)+c^{-1}(B))
+\end{array}
+\]
+\[
+\boxed{\;\text{codificar}\;\neq\;\text{achatar a dinâmica}\;}
+\]
+A bijeção $I^{k}\leftrightarrow I$ é \textbf{perfeita para endereçamento}, e não
+tem de preservar vizinhança, direção nem fase --- essas propriedades pertencem à
+estrutura que vive \emph{sobre} o índice, não ao índice. É por isso que o
+Teor.~\ref{thm:viz-nao-iso} não a contradiz: ele fala do que vive por cima.
+
+\medskip\noindent\textbf{E é aqui que a reta linear do operador fica construída, e
+não apenas nomeada.} O Teor.~\ref{thm:BI} deu a lista $I$ como a ordem das palavras;
+o Teor.~\ref{thm:coord} deu a tupla como a sucessão das decisões de $\partial$; o
+Teor.~\ref{thm:enumera} liga os dois --- \emph{a cadeia é a leitura posicional da
+tupla}, e o dígito $k$ é a $k$-ésima decisão. A base $B=\{0,1\}$ do
+Teor.~\ref{thm:B} é o caso $M=2$, e nada muda na construção quando $M$ cresce:
+\[
+\underbrace{t\in I_N}_{\text{onde o operador opera}}
+\;\xrightarrow{\ \varphi\ }\;
+\underbrace{(x_1,\dots,x_n)}_{\text{as decisões, por ordem}}
+\;\xrightarrow{\ \ }\;
+\underbrace{x\in X}_{\text{onde elas aterram}}
+\]
+--- e a reta não é um sítio para onde o objeto é empurrado: é a \emph{ordem em que
+ele foi decidido}. É por isso que ela guarda tudo, e é por isso que ela não guarda
+a vizinhança: a ordem das decisões não diz quais decisões são próximas umas das
+outras.
+
+\medskip\noindent A pergunta que sobra é a única que o teorema seguinte trata:
+guardar \textbf{o quê}?
+
+\medskip\noindent\textbf{E convém dizer o que aqui \emph{não} entra.} A «reta»
+deste enunciado não é $\mathbb{R}$: é a \textbf{cadeia discreta}
+$0-1-2-\cdots-(N-1)$, isto é, a própria lista $I$ do Teor.~\ref{thm:BI}. O objeto
+é finito, os índices são discretos, e a contagem dos sítios \emph{é} o que dá os
+naturais --- não há aqui continuidade, análise, nem números reais, e o argumento
+que se segue é \textbf{puramente combinatório}. $\mathbb{Z}$, $\mathbb{Q}$ e $\mathbb{R}$
+são degraus posteriores da §\ref{sec:escada}, e nenhum deles é preciso para isto.
+
+\begin{teorema}[a cadeia não é isomorfa à grade \emph{como vizinhança}]\label{thm:viz-nao-iso}
+Sejam $X$ uma grade de posto $n$ (Def.~\ref{def:grade}) e $I$ a régua, que é a
+grade de posto $1$. Se $\varphi\colon X\to I$ é injetiva e leva vizinhos em
+vizinhos --- isto é, $\varphi(\mathcal{V}(x))\subseteq\mathcal{V}(\varphi(x))$ para
+todo $x$ ---, então $n\le1$.
+\end{teorema}
+
+\begin{proof}
+Pelo Teor.~\ref{thm:dimensao}, $\lvert\mathcal{V}(x)\rvert=2n$ em $X$ e os $2n$
+vizinhos são \emph{distintos}; em $I$, que é de posto $1$, vale
+$\lvert\mathcal{V}(t)\rvert=2$. Como $\varphi$ é injetiva, ela leva os $2n$
+vizinhos distintos de $x$ em $2n$ pontos distintos, todos dentro de
+$\mathcal{V}(\varphi(x))$, que tem $2$ elementos. Logo $2n\le2$. $\square$
+\end{proof}
+
+\medskip\noindent\textbf{O que o teorema \emph{não} diz: codificar não é
+linearizar.} A objeção imediata é «mas eu serializo uma matriz num vetor». \emph{Sim, e sem
+perder um único dado.} O Teor.~\ref{thm:viz-nao-iso} não afirma que a reta seja
+incapaz de \textbf{representar} os dados de uma matriz --- afirma que não os pode
+representar \emph{preservando a vizinhança}. As duas coisas separam-se assim:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & preserva & é possível em posto $n\ge2$?\\
+\midrule
+\textbf{codificação} (serialização) & a \emph{identidade} de cada célula & \textbf{sim} --- e é reversível\\
+\textbf{linearização estrutural} & a identidade \emph{e} a vizinhança & \textbf{não} --- Teor.~\ref{thm:viz-nao-iso}\\
+\bottomrule
+\end{tabular}
+\end{center}
+A serpentina é uma codificação perfeita: injetiva, e a sua inversa devolve o ponto
+exato. O que ela não devolve é \emph{quem estava ao lado de quem}. E é essa a
+diferença entre guardar e operar --- a cláusula~(4) do
+Teor.~\ref{thm:multiplicidade} lê $\mathcal{V}$, não lê a lista.
+\[
+\boxed{\ \text{codificar}\;\neq\;\text{preservar a dinâmica}.\ }
+\]
+
+\medskip\noindent\textbf{É a prosa do Teor.~\ref{thm:contraria} escrita como
+desigualdade}: «um vértice interior tem $4$ vizinhos e a reta dá $2$, logo nenhuma
+injeção de células é injeção de vizinhanças». O que o teorema acrescenta é o
+\emph{alcance} --- vale em qualquer posto, e a conta é $2n\le2$.
+
+\medskip\noindent\textbf{E as duas afirmações não se contradizem --- são níveis
+diferentes.} Vale a pena separá-los, porque é a mistura deles que produz o erro:
+\[
+\begin{array}{rll}
+\textbf{(1) identidade} & X\;\longleftrightarrow\;I_N & \text{bijeção --- \emph{sempre existe} no finito}\\[3pt]
+\textbf{(2) vizinhança} & (X,\mathcal{V})\;\not\cong\;(I_N,\mathcal{V}_{\text{cadeia}})
+   & \text{para posto}>1 \text{ --- Teor.~\ref{thm:viz-nao-iso}}\\[3pt]
+\textbf{(3) trajetória} & \text{a dinâmica que de }\mathcal{V}\text{ se lê} & \text{outra camada ainda}
+\end{array}
+\]
+O nível~(1) é gratuito: há $N$ coisas e $N$ endereços, e a Teor.~\ref{thm:bijeccao}
+exibe a correspondência. \emph{Nenhum preço dimensional aparece aí.} O preço aparece
+em~(2), quando se exige que o endereço também carregue quem está ao lado de quem.
+\[
+\boxed{\;\text{bijeção dos \textbf{pontos}}\;\neq\;\text{bijeção da \textbf{dinâmica}}\;}
+\]
+
+\medskip\noindent\textbf{E convém dizer o que a curva de Peano é, para não a chamar
+em vão.} A de Peano clássica é uma aplicação \emph{contínua} $[0,1]\to[0,1]^2$,
+\textbf{sobrejetiva e não injetiva} --- o preenchimento paga com pontos do parâmetro
+que caem no mesmo ponto do quadrado. Aqui não é esse o caso: o objeto é
+\emph{finito}, as cardinalidades batem, e a serpentina é bijetiva. \emph{O
+obstáculo do contínuo não é o obstáculo deste andar}; o deste é a vizinhança, e
+mede-se contando pares.
+
+\begin{corolario}[o índice de uma matriz não se achata para $n\ge2$]\label{cor:matriz-nao-lin}
+Uma matriz é uma configuração sobre um índice discreto,
+\[
+A\colon I_n\times I_n\longrightarrow X,\qquad I_n=\{0,\dots,n-1\},
+\]
+e $I_n\times I_n$ é a grade de posto $2$ --- com as vizinhanças naturais
+$(i,j)\leftrightarrow(i\pm1,j)$ e $(i,j)\leftrightarrow(i,j\pm1)$. Pelo
+Teor.~\ref{thm:viz-nao-iso}, achatá-la numa cadeia preservando essa vizinhança
+exige $2\cdot2\le2$, o que é falso. \emph{O índice não se achata para $n\ge2$}; e
+em $n=1$ tem-se $I_1\times I_1$ com um só sítio e nenhuma direção transversal, pelo
+que a matriz $1\times1$ coincide com o escalar.
+\end{corolario}
+
+\medskip\noindent\textbf{E é o ÍNDICE que este corolário trata, não o conteúdo.}
+As duas camadas separam-se:
+\[
+\underbrace{I\times I}_{\text{\textbf{onde} --- a estante, discreta}}
+\qquad\qquad
+\underbrace{A\colon I\times I\to X}_{\text{\textbf{o que acontece} entre os onde}}
+\]
+--- e é a primeira que o teorema alcança. Uma configuração de posto $k$ sobre um
+índice $I^{k}$ tem, no interior, $2k$ vizinhos; a cadeia dá $2$. Nada disto depende
+do que $X$ seja.
+
+\medskip\noindent\textbf{E onde é que a folga do Teor.~\ref{thm:contraria} foi
+parar?} Ela não desapareceu --- mudou de sítio. Com $\lvert I\rvert=\lvert X\rvert$
+a Teor.~\ref{thm:bijeccao} põe $G\equiv1$ e zero índices por usar, e o
+Cor.~\ref{cor:folga} devolve $\sum_x(G(x)-1)=0=\abs{I}-\abs{X}$: os dois lados
+fecham. \emph{A folga da cardinalidade é zero.} O que não é zero é a folga das
+\textbf{vizinhanças}, e essa não se conta em índices --- conta-se em pares: quantos
+$(x,y)$ vizinhos em $\Gamma_M$ deixam de o ser na cadeia. A serpentina paga
+$1/4$, $9/24$, $49/112$, $225/480$ à medida que o lado dobra, e a fração \emph{sobe}.
+
+\medskip\noindent\textbf{E aí morre o operador.} Pelo Teor.~\ref{thm:fecho}, o
+rotor $R^{4}=\mathrm{id}$ do passo~4 vive num \emph{plano} coordenado $(e_i,e_j)$, e
+o número de planos é $\binom{n}{2}$: \emph{nenhum no posto $1$}. Uma grade
+linearizada não tem onde rodar --- não é que o rotor fique difícil de escrever, é
+que não há par de direções onde ele possa agir. Como a cláusula~(4) do
+Teor.~\ref{thm:multiplicidade} é a única que chama a estrutura de $X$, e ela lê
+$\lvert\mathcal{V}\rvert=2n$, linearizar não simplifica o objeto: \textbf{apaga o
+sítio por onde ele é lido}.
+\[
+\boxed{\;\text{a reta guarda a \textbf{ordem}};\qquad
+\text{o plano guarda a \textbf{dinâmica}};\qquad
+\text{achatar um no outro perde a segunda.}\;}
+\]
+
+\medido{\code{tests/aranha\_n.c} §AN37: a conta $2n\le2$ verificada em posto
+$1..8$ com os $2n$ vizinhos gerados e contados como \emph{conjunto}; o corolário
+lido no \emph{índice} --- $I\times I$ é de posto $2$, e $2\cdot2\le2$ é falso para
+todo $n\ge2$, com o interior a ter os $4$ vizinhos contados e o caso $n=1$ a ter
+zero direções transversais; a serpentina como tentativa concreta --- injetiva, e a
+fração de pares de vizinhos que ela quebra \emph{sobe} com o lado ($0{,}250$,
+$0{,}375$, $0{,}438$, $0{,}469$), nenhuma com zero; e $\binom{n}{2}=0$ no posto $1$,
+com o controlo em $R^{4}=\mathrm{id}$ no posto $2$, onde há plano. \emph{Medir a
+serpentina não prova que nenhuma enumeração serve} --- a prova é a desigualdade;
+mostra o preço, que é o que se vê antes de acreditar na conta.}
+
+\colunas{\code{thm:dimensao} ($\lvert\mathcal{V}\rvert=2n$); \code{thm:fecho} ($\binom n2$ planos)}
+        {a desigualdade $2n\le2$; a serpentina medida}
+        {\code{tests/aranha\_n.c} §AN37}
+
+\medskip\noindent\textbf{E daqui sai o escopo desta obra, que convém dizer.} A
+§\ref{sec:escada} constrói $\mathbb{R}$ e o Teor.~\ref{thm:corte} produz o corte; nada disso
+se desdiz. O que o Teor.~\ref{thm:viz-nao-iso} acrescenta é que \emph{esse degrau
+não é a ontologia do objeto}: a reta é a leitura de posto $1$, e é ali que ela é
+exata --- mas o objeto tem direções, fases e relações entre direções, e a reta
+carrega apenas a primeira. Em uma linha:
+\[
+\boxed{\;\text{a reta é uma leitura possível; não é o objeto inteiro.}\;}
+\]
+--- e é por isso que a construção pode conter a reta, os diádicos, o corte, a fase,
+os ciclos, as dimensões e as ordens diferentes \emph{sem} as reduzir todas a
+números reais. A reta é a gaveta privilegiada, não a casa.
+
+\medskip\noindent\textbf{Donde a leitura correta do que a matriz é aqui.} Ela não
+é um objeto à espera de uma ordem --- é o \textbf{rotor entre duas direções}, e o
+Teor.~\ref{thm:fecho} dá-lhe a forma: $R_{ij}=\left(\begin{smallmatrix}0&-1\\1&0
+\end{smallmatrix}\right)$ nas coordenadas $(i,j)$, com as outras fixas. São as
+\emph{marcas do relógio} ao passar entre dimensões, e o que delas importa é a
+\textbf{fase} --- §\ref{sec:transf} já o disse noutro registo: «o módulo não carrega
+nada, e a fase carrega tudo».
+
+\medskip\noindent\textbf{E aqui o escopo tem de ser estreito, porque a
+extrapolação fácil é falsa.} As matrizes \emph{podem} ser ordenadas: a ordem de
+Loewner ($A\preceq B\iff B-A\succeq0$) é uma ordem parcial legítima nas simétricas,
+e a lexicográfica sobre as entradas é uma ordem \textbf{total} perfeitamente
+válida. O Teor.~\ref{thm:viz-nao-iso} \emph{não} proíbe ordenar --- proíbe
+substituir a estrutura multidirecional do índice por uma cadeia \emph{preservando
+as vizinhanças}. Em uma frase:
+\[
+\boxed{\;\text{uma matriz não é \emph{determinada} por uma ordem linear:}\;
+\text{ela carrega relações entre direções.}\;}
+\]
+Uma ordem pode ser imposta ou escolhida --- e é uma escolha sobre o \emph{índice},
+que não elimina as vizinhanças $(i,j)\leftrightarrow(i\pm1,j)$ e
+$(i,j)\leftrightarrow(i,j\pm1)$ nem as operações que as atravessam. O que ela não
+faz é \emph{substituir} a dinâmica que a matriz realiza. E a distinção que fica é
+de duas palavras: E a distinção que fica é de duas palavras:
+\[
+\text{\textbf{posição}}\;\longrightarrow\;\text{ordem},
+\qquad\qquad
+\text{\textbf{passagem}}\;\longrightarrow\;\text{dinâmica}.
+\]
+A reta serve a primeira; o plano --- e depois as dimensões --- é necessário para a
+segunda.
+
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O espaço e o tempo}\label{sec:leitura}
 

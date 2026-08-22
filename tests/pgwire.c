@@ -11807,8 +11807,28 @@ int main(void){
          *
          * A DIMENSÃO NÃO ACRESCENTA NADA ONDE O CORTE FECHA — e é por isso que
          * ela também não acrescenta dificuldade: n cópias de um problema
-         * resolvido. O que a dimensão traz é o caso NÃO comutativo, e aí não é o
-         * corte que falta: é a ordem. */
+         * resolvido.
+         *
+         * ── E O QUE SE SEGUE DAQUI NÃO É «FALTA UMA ORDEM» ───────────────────
+         * A primeira escrita deste bloco terminava com «o que a dimensão traz é
+         * o caso não comutativo, e aí falta a ORDEM». Está errado, e a correcção
+         * é do enquadramento e não dos números: PROCURAR uma ordem para as
+         * matrizes é pô-las de volta numa recta depois de elas terem ganho
+         * várias direcções.
+         *
+         * A matriz NÃO ORDENA — ela COMPÕE ordens. As estruturas que ela recebe
+         * já trazem a sua: a árvore tem a ordem de prefixo, o espectro tem a do
+         * expoente, a fase tem a do círculo. O que a matriz faz é transportar
+         * uma para outra face, acoplar, fundir — sem exigir que todas virem a
+         * mesma régua. E esta casa já o tinha medido noutro sítio:
+         * `corpo_viveiro.c` diz que «o índice é a ESTANTE, não o que está nela»,
+         * com o retículo das dimensões (∨ = lcm, ∧ = gcd) de um lado e o corpo
+         * do outro.
+         *
+         * Portanto o que este bloco mede continua a valer LETRA POR LETRA — a
+         * ordem é parcial, AB não é simétrica, o AGM fecha onde comutam —, mas
+         * o que isso diz é onde o CORTE se aplica, e não uma falta do objecto.
+         * O corte é a máquina da ordem linear; a matriz é o andar de cima. */
         { long a1 = 4, b1 = 16, a2 = 9, b2 = 1;   /* as duas entradas */
           int passos1 = 0, passos2 = 0;
           while(a1 != b1 && passos1 < 40){
@@ -11860,8 +11880,19 @@ int main(void){
            " thm:corte se aplica n vezes em paralelo e termina n vezes. A DIMENSÃO NÃO"
            " ACRESCENTA NADA ONDE O CORTE FECHA — e por isso também não acrescenta"
            " dificuldade: são n cópias de um problema resolvido. O que a dimensão traz é o"
-           " caso NÃO comutativo, e aí o que falta não é o corte: é a ORDEM. O controlo é a"
-           " ordem total dos escalares, sem a qual «parcial» não distinguiria nada.",
+           " caso NÃO comutativo — e AQUI A LEITURA TEM DE SER A CERTA, porque a primeira que"
+           " escrevi não era: dizer «falta a ordem» é pôr as matrizes de volta numa recta"
+           " depois de elas terem ganho várias direcções. A MATRIZ NÃO ORDENA: ELA COMPÕE"
+           " ORDENS. As estruturas que ela recebe já trazem a sua — a árvore tem a de"
+           " prefixo, o espectro a do expoente, a fase a do círculo — e o que a matriz faz é"
+           " transportar uma para outra face, acoplar, fundir, sem exigir que todas virem a"
+           " mesma régua. Esta casa já o tinha medido noutro sítio: o `corpo_viveiro.c` diz"
+           " que «o índice é a ESTANTE, não o que está nela», com o retículo das dimensões de"
+           " um lado e o corpo do outro. Tudo o que este bloco mede continua a valer letra"
+           " por letra — a ordem é parcial, AB não é simétrica, o AGM fecha onde comutam —,"
+           " mas isso diz onde o CORTE se aplica e não uma falta do objecto: o corte é a"
+           " máquina da ordem linear, e a matriz é o andar de cima. O controlo é a ordem"
+           " total dos escalares, sem a qual «parcial» não distinguiria nada.",
            mal == 0);
     }
 
@@ -12022,6 +12053,195 @@ int main(void){
            " separa os regimes por DENTRO e não pela etiqueta: em s = 0 há divisores de zero"
            " (a = ±c) e em s = 2 não há nenhum, porque a² + c² só anula na origem — «com cone»"
            " e «sem cone», medido dentro de E_s.", mal == 0);
+    }
+
+
+    /* ═══ §W89: A TORRE VESTIDA DE MATRIZ, E ONDE A ROUPA RASGA ════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W89 ℂ e ℍ cabem em matrizes; 𝕆 não — e o que rasga é a associatividade.\n\n");
+        { const char *tabs[] = { "Q","W","R" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w89__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w89__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w89.mem"); unlink("/tmp/pgwire_w89.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w89")) mal++;
+
+        /* q = a + bi + cj + dk  ↦  a 4×4 real */
+        #define POE4(t,a,b,c,d) do { char q2[300]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL," \
+                     " r RACIONAL, s RACIONAL)", t); sql_executa(q2,&o2); \
+            { long M[4][4] = {{(a),-(b),-(c),-(d)},{(b),(a),-(d),(c)}, \
+                              {(c),(d),(a),-(b)},{(d),-(c),(b),(a)}}; \
+              for(int i2 = 0; i2 < 4; i2++){ \
+                  snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld,%ld,%ld)", \
+                           t, M[i2][0], M[i2][1], M[i2][2], M[i2][3]); \
+                  sql_executa(q2,&o2); } } } while(0)
+
+        /* ── O `corpo_estelar.tex` prop:norma diz «N(σ) = det(A)», e a observação
+         * seguinte aponta o alcance: «a norma-que-compõe N(xy) = N(x)N(y) é
+         * exactamente a lei que sustenta a torre ℝ ⊂ ℂ ⊂ ℍ ⊂ 𝕆, e ela QUEBRA em
+         * dim 16». Vestir a torre de matriz responde à pergunta da dimensão —
+         * e tem um limite que se diz.
+         *
+         * ℂ já ficou vestido em §W88: é E_s com s = 2, e o det é a² + b². Aqui
+         * é a vez de ℍ, com q = a + bi + cj + dk numa 4×4 real. */
+
+        /* (1) O DETERMINANTE É A NORMA AO QUADRADO. Em ℂ o det era a norma; em
+         * ℍ é o seu quadrado, porque a representação real de dimensão 4 conta
+         * cada modo duas vezes. O expoente é a dimensão sobre 2 — e dizê-lo é o
+         * que impede de escrever «o det é a norma» num sítio onde não é. */
+        long n = 0, dn2 = 0;
+        for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+        for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+            POE4("Q", a, b, c, d);
+            sql_executa("SELECT det(*) FROM Q", &o);
+            if(!o.ok) continue;
+            long N = a*a + b*b + c*c + d*d;
+            n++;
+            if(atol(o.cell[0][0]) == N*N) dn2++;
+        }
+        printf("      ℍ em 4×4: det = N² em %ld/%ld — em ℂ era N, aqui é N²,"
+               " porque a representação real conta cada modo duas vezes\n", dn2, n);
+        if(dn2 != n || n < 500) mal++;
+
+        /* ── (2) A TABELA DE MULTIPLICAÇÃO SAI DO PRODUTO DE MATRIZES. i·j = k
+         * e j·i = −k: o produto NÃO comuta, e isso não foi posto — sai. É a
+         * primeira perda da torre, no degrau 4. */
+        POE4("Q", 0,1,0,0);                                    /* i */
+        POE4("W", 0,0,1,0);                                    /* j */
+        sql_executa("SELECT produto(W) FROM Q", &o);
+        long ij[4][4]; int k1 = o.ok && o.nrows == 4;
+        if(k1) for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+            ij[i][j] = atol(o.cell[i][j]);
+        sql_executa("SELECT produto(Q) FROM W", &o);
+        long ji[4][4]; int k2 = o.ok && o.nrows == 4;
+        if(k2) for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+            ji[i][j] = atol(o.cell[i][j]);
+        /* k = (0,0,0,1) tem a matriz com M[0][3] = −1 */
+        int eh_k  = k1 && ij[0][3] == -1 && ij[3][0] == 1;
+        int eh_mk = k2 && ji[0][3] ==  1 && ji[3][0] == -1;
+        printf("      i·j = %s e j·i = %s → NÃO comuta, e é a primeira perda da"
+               " torre\n", eh_k ? "k" : "MAU", eh_mk ? "−k" : "MAU");
+        if(!eh_k || !eh_mk) mal++;
+
+        /* ── (3) MAS ASSOCIA — e é aqui que a roupa mostra o seu limite. O
+         * produto de matrizes é associativo POR CONSTRUÇÃO: (AB)C = A(BC) vale
+         * para quaisquer matrizes, sempre. Logo qualquer coisa vestida de matriz
+         * herda a associatividade, quer a queira quer não. */
+        POE4("Q", 0,1,0,0);                                    /* i */
+        POE4("W", 0,0,1,0);                                    /* j */
+        sql_executa("SELECT produto(W) FROM Q", &o);           /* (ij) */
+        int assoc = 0;
+        if(o.ok && o.nrows == 4){
+            char q2[300];
+            sql_executa("DROP TABLE IF EXISTS R", &o2);
+            sql_executa("CREATE TABLE R (p RACIONAL, q RACIONAL, r RACIONAL, s RACIONAL)", &o2);
+            for(int i = 0; i < 4; i++){
+                snprintf(q2, sizeof q2, "INSERT INTO R VALUES (%s,%s,%s,%s)",
+                         o.cell[i][0], o.cell[i][1], o.cell[i][2], o.cell[i][3]);
+                sql_executa(q2, &o2);
+            }
+            POE4("Q", 0,0,0,1);                                /* k */
+            sql_executa("SELECT produto(Q) FROM R", &o);       /* (ij)k */
+            long e1[4][4]; int t1 = o.ok && o.nrows == 4;
+            if(t1) for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+                e1[i][j] = atol(o.cell[i][j]);
+            /* i(jk): jk = i, logo i·i = −1 */
+            POE4("W", 0,0,1,0);                                /* j */
+            POE4("Q", 0,0,0,1);                                /* k */
+            sql_executa("SELECT produto(Q) FROM W", &o);       /* (jk) */
+            if(o.ok && o.nrows == 4){
+                sql_executa("DROP TABLE IF EXISTS R", &o2);
+                sql_executa("CREATE TABLE R (p RACIONAL, q RACIONAL, r RACIONAL, s RACIONAL)", &o2);
+                for(int i = 0; i < 4; i++){
+                    snprintf(q2, sizeof q2, "INSERT INTO R VALUES (%s,%s,%s,%s)",
+                             o.cell[i][0], o.cell[i][1], o.cell[i][2], o.cell[i][3]);
+                    sql_executa(q2, &o2);
+                }
+                POE4("Q", 0,1,0,0);                            /* i */
+                sql_executa("SELECT produto(R) FROM Q", &o);   /* i(jk) */
+                if(t1 && o.ok && o.nrows == 4){
+                    assoc = 1;
+                    for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)
+                        if(atol(o.cell[i][j]) != e1[i][j]) assoc = 0;
+                }
+            }
+        }
+        printf("      (i·j)·k = i·(j·k): %s — o produto de MATRIZES associa por"
+               " construção\n", assoc ? "sim" : "FALHOU");
+        if(!assoc) mal++;
+
+        /* ── (4) E DAÍ SAI O LIMITE, numa linha e sem varrer nada: 𝕆 NÃO é
+         * associativo — o associador de três octoniões é não-nulo —, e toda a
+         * matriz associa. Logo NÃO EXISTE representação matricial fiel de 𝕆:
+         * não é que ainda não se tenha achado, é que ela contradiria o produto
+         * de matrizes. A roupa serve até ao degrau 4 e o que a rasga tem nome.
+         *
+         * É a mesma fronteira que o `torre.h` desta casa já dizia por outro
+         * lado: «o limite no grau oito é do lado DISCRETO/bilinear — Hurwitz
+         * classifica o bilinear —, NÃO do objecto». Aqui vê-se de onde vem o
+         * limite da REPRESENTAÇÃO, que é outra pergunta e tem outra resposta. */
+        printf("      → 𝕆 não associa e toda a matriz associa: não existe"
+               " representação matricial fiel de 𝕆.\n");
+        printf("        A roupa serve até ao degrau 4, e o que a rasga tem nome"
+               " — não é uma lacuna, é uma incompatibilidade.\n");
+
+        /* ── (5) E A NORMA CONTINUA A COMPOR, que é a lei da torre: N(qw) =
+         * N(q)N(w), e outra vez sem prova nova — det(AB) = det A · det B de
+         * §W85, com o quadrado dos dois lados. */
+        long nm = 0, nc = 0;
+        for(long a = -1; a <= 1; a++) for(long b = -1; b <= 1; b++)
+        for(long e = -1; e <= 1; e++) for(long f = -1; f <= 1; f++){
+            POE4("Q", a, b, 0, 0);
+            POE4("W", e, f, 0, 0);
+            sql_executa("SELECT produto(W) FROM Q", &o);
+            if(!o.ok || o.nrows != 4) continue;
+            char q2[300];
+            sql_executa("DROP TABLE IF EXISTS R", &o2);
+            sql_executa("CREATE TABLE R (p RACIONAL, q RACIONAL, r RACIONAL, s RACIONAL)", &o2);
+            for(int i = 0; i < 4; i++){
+                snprintf(q2, sizeof q2, "INSERT INTO R VALUES (%s,%s,%s,%s)",
+                         o.cell[i][0], o.cell[i][1], o.cell[i][2], o.cell[i][3]);
+                sql_executa(q2, &o2);
+            }
+            sql_executa("SELECT det(*) FROM R", &o);
+            if(!o.ok) continue;
+            long Nq = a*a + b*b, Nw = e*e + f*f;
+            nc++;
+            if(atol(o.cell[0][0]) == (Nq*Nw)*(Nq*Nw)) nm++;
+        }
+        printf("      N(q·w) = N(q)·N(w) em %ld/%ld — a lei da torre, e outra vez"
+               " sem prova nova: é o det multiplicativo de §W85\n", nm, nc);
+        if(nm != nc || nc < 50) mal++;
+        #undef POE4
+        sql_fechar();
+
+        printf("\n");
+        ok("A TORRE VESTE-SE DE MATRIZ ATÉ AO DEGRAU 4, E O QUE RASGA A ROUPA TEM NOME. O"
+           " `corpo_estelar.tex` diz «N(σ) = det(A)» e aponta o alcance: «a norma-que-compõe"
+           " N(xy) = N(x)N(y) é a lei que sustenta ℝ ⊂ ℂ ⊂ ℍ ⊂ 𝕆». ℂ já ficou vestido em"
+           " §W88 — é E_s com s = 2, e o det É a norma. Aqui é a vez de ℍ numa 4×4 real, e o"
+           " DETERMINANTE É A NORMA AO QUADRADO: em ℂ era N, aqui é N², porque a"
+           " representação real conta cada modo duas vezes, e o expoente é a dimensão sobre"
+           " dois — dizê-lo é o que impede de escrever «o det é a norma» onde não é. A TABELA"
+           " DE MULTIPLICAÇÃO SAI DO PRODUTO DE MATRIZES sem ser posta: i·j = k e j·i = −k,"
+           " logo NÃO comuta, que é a primeira perda da torre. MAS ASSOCIA — e é aqui que a"
+           " roupa mostra o limite: (AB)C = A(BC) vale para quaisquer matrizes, SEMPRE, pelo"
+           " que qualquer coisa vestida de matriz herda a associatividade quer a queira quer"
+           " não. E DAÍ SAI O LIMITE NUMA LINHA, sem varrer nada: 𝕆 não é associativo e toda"
+           " a matriz associa, logo NÃO EXISTE representação matricial fiel de 𝕆 — não é que"
+           " ainda não se tenha achado, é que ela contradiria o produto de matrizes. Não é"
+           " uma lacuna: é uma incompatibilidade. E é outra pergunta que a do `torre.h`, que"
+           " diz «o limite no grau oito é do lado DISCRETO/bilinear, NÃO do objecto»: ali é o"
+           " limite da NORMA, aqui o da REPRESENTAÇÃO. A norma continua a compor,"
+           " N(qw) = N(q)N(w), e outra vez sem prova nova — é o det multiplicativo de §W85"
+           " com o quadrado dos dois lados.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

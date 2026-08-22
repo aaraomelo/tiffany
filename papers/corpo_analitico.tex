@@ -5,6 +5,7 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}   % psmallmatrix — usado no corpo do texto
 \usepackage[margin=2.3cm]{geometry}
 \usepackage{booktabs}\usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
@@ -16,6 +17,13 @@
 \newtheorem{definicao}[teorema]{Definição}
 \newtheorem{corolario}[teorema]{Corolário}
 \newtheorem{lei}{Lei}
+% ── OS AMBIENTES QUE ESTE DOCUMENTO USA E NÃO DECLARAVA ─────────────────────
+% `observacao` e `proposicao` aparecem no corpo do texto e não estavam
+% definidos: um `\begin{...}` sem `\newtheorem` é erro de compilação, não um
+% estilo por acertar. É a mesma doença da macro por definir, um andar ao lado —
+% e do mesmo tipo que o `\ref` órfão: o defeito está escrito e daqui não se vê.
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
 % ── AS MACROS DA CASA QUE ESTE DOCUMENTO USA E NÃO DEFINIA ──────────────────

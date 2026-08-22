@@ -14,7 +14,7 @@ antissimetrico e48993492f8aa75d 0
 app_arranca ab17cde0c17eb0aa 0
 aranha_g 448e1f5e4400277c 0
 aranha_inversa ac86462a26ec984e 0
-aranha_n a28a85de75e09be9 0
+aranha_n 75c250be7c0539ec 0
 aritmetica bed8e054171e6849 0
 arquimedes_area 3fb4925bc7f62b48 0
 arraytermico d700a92b448f7ffd 0
@@ -47,7 +47,7 @@ cadeia 23aae5b832cd1d3b 0
 calculo2 5ae7bc60ae4d3256 0
 caminho b30bb4976e4ee877 0
 canal a3948d75be9f5dc1 0
-cantor a61f8c800549ce95 0
+cantor f60254a17a9734ee 0
 cantor_julia_dual 6bff83a60f07952b 0
 canvas_front 76e5a0e283adc271 0
 cardinal 03e03627e20f28bd 0
@@ -368,7 +368,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 6e84e323a59f5296 0
+pgwire 34a57542bf7f2b69 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
