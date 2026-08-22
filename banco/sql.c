@@ -4424,8 +4424,9 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"IMAGEM") ? 7
                        : !strcasecmp(nome,"PRODUTO") ? 8
                        : !strcasecmp(nome,"RESOLVE") ? 9
-                       : !strcasecmp(nome,"CRAMER") ? 10 : 0;
-                if(qm == 8){
+                       : !strcasecmp(nome,"CRAMER") ? 10
+                       : !strcasecmp(nome,"SOMA") ? 11 : 0;
+                if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
                     const char *r = q + 1;
@@ -4434,7 +4435,7 @@ static int lista_colunas(const char **pp, char *out, int cap){
                     if(ident(&r, t2, sizeof t2)){
                         pula(&r);
                         if(*r == ')'){
-                            mat_op_pedido = 8;
+                            mat_op_pedido = qm;
                             snprintf(mat_tab2_pedido, sizeof mat_tab2_pedido, "%s", t2);
                             p = r + 1;
                             n += snprintf(out + n, (size_t)(cap - n), "%s*",
@@ -7070,7 +7071,7 @@ static int varre(const char *resto, int acao){
               return 1; }
         }
 
-        if(mat_op == 8){                         /* o produto: a COMPOSIÇÃO */
+        if(mat_op == 8 || mat_op == 11){         /* o produto e a soma: as DUAS FACES */
             /* ── O PRODUTO É A COMPOSIÇÃO, e por isso pede dois lados ────────
              * `A·B` é aplicar B e depois A, e a condição para existir é a que
              * a composição sempre teve: a saída de um tem de ser a entrada do
@@ -7121,7 +7122,7 @@ static int varre(const char *resto, int acao){
                                "matrix has absent cells"); }
                   return 0;
               } }
-            if(A.n != B.m){
+            if(mat_op == 8 && A.n != B.m){
                 printf("erro: o produto pede que as COLUNAS da primeira (%d)"
                        " sejam as LINHAS da segunda (%d) — é a condição da"
                        " composição, e não bate. RECUSADO.\n", A.n, B.m);
@@ -7131,7 +7132,15 @@ static int varre(const char *resto, int acao){
                              A.n, B.m); }
                 return 0;
             }
-            { MatQz R = mat_mult(A, B);
+            if(mat_op == 11 && (A.m != B.m || A.n != B.n)){
+                printf("erro: a soma pede a MESMA forma, e aqui são %d×%d e"
+                       " %d×%d — RECUSADA.\n", A.m, A.n, B.m, B.n);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "matrix sum: %d×%d against %d×%d", A.m, A.n, B.m, B.n); }
+                return 0;
+            }
+            { MatQz R = (mat_op == 11) ? mat_soma(A, B) : mat_mult(A, B);
               if(sql_cap){
                   memset(sql_cap, 0, sizeof *sql_cap);
                   sql_cap->ok = 1;
@@ -7157,8 +7166,12 @@ static int varre(const char *resto, int acao){
                   }
                   printf("\n");
               }
-              printf("-- o produto %d×%d · %d×%d = %d×%d\n",
-                     A.m, A.n, B.m, B.n, R.m, R.n);
+              if(mat_op == 11)
+                  printf("-- a soma %d×%d + %d×%d = %d×%d\n",
+                         A.m, A.n, B.m, B.n, R.m, R.n);
+              else
+                  printf("-- o produto %d×%d · %d×%d = %d×%d\n",
+                         A.m, A.n, B.m, B.n, R.m, R.n);
               return 1; }
         }
 

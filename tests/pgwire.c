@@ -7580,6 +7580,144 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W57: AS DUAS FACES NAS MATRIZES, E A LEI QUE AS LIGA ════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W57 soma e produto: leis diferentes, e a distributividade.\n\n");
+        { const char *tabs[] = { "a","b","c","z","i","s1","s2","p1","p2" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w57__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w57__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w57.mem"); unlink("/tmp/pgwire_w57.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w57")) mal++;
+        sql_executa("CREATE TABLE a (p,q)", &o);
+        sql_executa("INSERT INTO a VALUES (1,2), (3,4)", &o);
+        sql_executa("CREATE TABLE b (p,q)", &o);
+        sql_executa("INSERT INTO b VALUES (5,6), (7,8)", &o);
+        sql_executa("CREATE TABLE c (p,q)", &o);
+        sql_executa("INSERT INTO c VALUES (2,0), (1,3)", &o);
+        sql_executa("CREATE TABLE z (p,q)", &o);
+        sql_executa("INSERT INTO z VALUES (0,0), (0,0)", &o);
+        sql_executa("CREATE TABLE i (p,q)", &o);
+        sql_executa("INSERT INTO i VALUES (1,0), (0,1)", &o);
+
+        /* guarda o resultado de uma consulta numa tabela nova — é o que permite
+         * encadear as operações e medir as leis que ligam duas delas */
+        #define GUARDA(consulta, tab) do { \
+            sql_executa(consulta, &o); \
+            { char q2[160]; \
+              snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", tab); \
+              sql_executa(q2, &o2); \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (p,q)", tab); \
+              sql_executa(q2, &o2); \
+              for(int i2 = 0; i2 < o.nrows; i2++){ \
+                  snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s,%s)", \
+                           tab, o.cell[i2][0], o.cell[i2][1]); \
+                  sql_executa(q2, &o2); } } \
+        } while(0)
+        SqlOut o2;
+
+        /* ── (1) AS DUAS FACES TÊM LEIS DIFERENTES, e é isso que as separa. A
+         * soma COMUTA; o produto NÃO. Não é um detalhe de implementação — é a
+         * assimetria que faz das duas faces duas, e mede-se com o mesmo par de
+         * tabelas nos dois sentidos. */
+        sql_executa("SELECT soma(b) FROM a", &o);
+        char s1[4][32];
+        for(int i = 0; i < 2; i++)
+            for(int j = 0; j < 2; j++) snprintf(s1[i*2+j], 32, "%s", o.cell[i][j]);
+        sql_executa("SELECT soma(a) FROM b", &o);
+        int soma_comuta = (!strcmp(s1[0], o.cell[0][0]) && !strcmp(s1[1], o.cell[0][1])
+                        && !strcmp(s1[2], o.cell[1][0]) && !strcmp(s1[3], o.cell[1][1]));
+        sql_executa("SELECT produto(b) FROM a", &o);
+        char p1[4][32];
+        for(int i = 0; i < 2; i++)
+            for(int j = 0; j < 2; j++) snprintf(p1[i*2+j], 32, "%s", o.cell[i][j]);
+        sql_executa("SELECT produto(a) FROM b", &o);
+        int prod_comuta = (!strcmp(p1[0], o.cell[0][0]) && !strcmp(p1[1], o.cell[0][1])
+                        && !strcmp(p1[2], o.cell[1][0]) && !strcmp(p1[3], o.cell[1][1]));
+        printf("      a soma COMUTA (%d) e o produto NÃO (%d): (%s,%s;%s,%s)"
+               " contra (%s,%s;%s,%s)  %s\n", soma_comuta, prod_comuta,
+               p1[0], p1[1], p1[2], p1[3], o.cell[0][0], o.cell[0][1],
+               o.cell[1][0], o.cell[1][1],
+               (soma_comuta && !prod_comuta) ? "" : "NAO BATE");
+        if(!soma_comuta || prod_comuta) mal++;
+
+        /* ── (2) E CADA FACE TEM O SEU NEUTRO — que é a frase do Teor. 2(4) do
+         * aranha lida nas matrizes: o invariante de uma é o neutro da outra, e
+         * são objetos diferentes (a matriz nula e a identidade). */
+        sql_executa("SELECT soma(z) FROM a", &o);
+        int nz = (!strcmp(o.cell[0][0], "1") && !strcmp(o.cell[1][1], "4"));
+        sql_executa("SELECT produto(i) FROM a", &o);
+        int ni = (!strcmp(o.cell[0][0], "1") && !strcmp(o.cell[1][1], "4"));
+        printf("      cada face tem o seu neutro: A + 0 = A (%d) · A · I = A"
+               " (%d), e 0 ≠ I  %s\n", nz, ni, (nz && ni) ? "" : "NAO BATE");
+        if(!nz || !ni) mal++;
+
+        /* ── (3) E A DISTRIBUTIVIDADE LIGA-AS: `A·(B+C) = A·B + A·C`. É a lei
+         * ENTRE as duas faces, e é a mesma que o `meio.c` §M2 mede um andar
+         * abaixo, sobre os símbolos — ali ela força as tabelas de B, aqui ela
+         * é a única coisa que impede a soma e o produto de serem duas
+         * operações sem relação. Encadeia-se guardando cada resultado numa
+         * tabela, que é o motor a alimentar-se a si próprio. */
+        GUARDA("SELECT soma(c) FROM b", "s1");            /* B+C */
+        GUARDA("SELECT produto(s1) FROM a", "p1");        /* A·(B+C) */
+        GUARDA("SELECT produto(b) FROM a", "s2");         /* A·B */
+        GUARDA("SELECT produto(c) FROM a", "p2");         /* A·C */
+        GUARDA("SELECT soma(p2) FROM s2", "s1");          /* A·B + A·C */
+        { char esq[4][32];
+          sql_executa("SELECT * FROM p1", &o);
+          for(int i = 0; i < 2; i++)
+              for(int j = 0; j < 2; j++) snprintf(esq[i*2+j], 32, "%s", o.cell[i][j]);
+          sql_executa("SELECT * FROM s1", &o);
+          { int dist = (!strcmp(esq[0], o.cell[0][0]) && !strcmp(esq[1], o.cell[0][1])
+                     && !strcmp(esq[2], o.cell[1][0]) && !strcmp(esq[3], o.cell[1][1]));
+            printf("      A·(B+C) = (%s,%s;%s,%s) e A·B + A·C = (%s,%s;%s,%s)"
+                   "  %s\n", esq[0], esq[1], esq[2], esq[3],
+                   o.cell[0][0], o.cell[0][1], o.cell[1][0], o.cell[1][1],
+                   dist ? "" : "NAO BATE");
+            if(!dist) mal++; } }
+
+        /* ── O CONTROLO: a soma pede a MESMA forma e o produto pede formas
+         * ENCAIXÁVEIS — são exigências diferentes, e é isso que mostra que as
+         * duas faces não são a mesma operação com dois nomes. Uma 2×2 soma-se
+         * com uma 2×2 e não com uma 2×3; multiplica-se por uma 2×3 e não se
+         * soma com ela. */
+        sql_executa("CREATE TABLE w (p,q,r)", &o);
+        sql_executa("INSERT INTO w VALUES (1,2,3), (4,5,6)", &o);
+        int c1 = sql_executa("SELECT soma(w) FROM a", &o);
+        int c2 = sql_executa("SELECT produto(w) FROM a", &o);
+        printf("\n      CONTROLO — com uma 2×3: a soma %s e o produto %s"
+               " (exigências DIFERENTES)  %s\n",
+               c1 ? "PASSOU (mau)" : "recusa", c2 ? "responde" : "RECUSA (mau)",
+               (!c1 && c2) ? "" : "NAO BATE");
+        if(c1 || !c2) mal++;
+        #undef GUARDA
+        sql_fechar();
+
+        printf("\n");
+        ok("AS DUAS FACES APARECEM NAS MATRIZES COM AS MESMAS LEIS, E A DISTRIBUTIVIDADE"
+           " CONTINUA A SER A QUE AS LIGA. A soma COMUTA e o produto NÃO — não é um detalhe"
+           " de implementação: é a assimetria que faz das duas faces duas, e mede-se com o"
+           " mesmo par de tabelas nos dois sentidos, onde `A·B` e `B·A` dão matrizes"
+           " diferentes. Cada face tem o SEU neutro, e são objetos diferentes — a matriz nula"
+           " e a identidade —, que é a frase do Teor. 2(4) do aranha lida um andar acima. E A"
+           " DISTRIBUTIVIDADE LIGA-AS: `A·(B+C) = A·B + A·C` é a lei ENTRE as duas, a mesma"
+           " que o `meio.c` §M2 mede sobre os símbolos, onde ela força as tabelas de B; aqui"
+           " ela é a única coisa que impede a soma e o produto de serem duas operações sem"
+           " relação. Mede-se ENCADEANDO: cada resultado guarda-se numa tabela e volta a"
+           " entrar, que é o motor a alimentar-se a si próprio — e é isso que torna a medida"
+           " uma verificação da composição inteira e não de uma operação de cada vez. O"
+           " CONTROLO são as exigências de forma, que são DIFERENTES: a soma pede a mesma"
+           " forma, o produto pede formas encaixáveis, e uma 2×2 soma-se com uma 2×2 mas"
+           " multiplica-se por uma 2×3. Se as duas pedissem o mesmo, nada distinguiria as"
+           " faces senão o nome.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

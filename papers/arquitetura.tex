@@ -2996,6 +2996,23 @@ determinante e traços diferentes --- se uma determinasse a outra, a lei teria u
 parâmetro só. O controlo é a lei poder ser \emph{falsa}: com o traço certo a
 entrada anula, com o traço mais um já não (\code{tests/pgwire.c} §W56).
 
+\medskip\noindent\textbf{E as duas faces reaparecem aqui, com as mesmas leis.} A
+soma \textbf{comuta}, o produto \textbf{não} --- e isso não é um detalhe de
+implementação: é a assimetria que faz das duas faces \emph{duas}. Cada uma tem o
+seu neutro, e são objetos diferentes (a matriz nula e a identidade), que é o
+Teor.~2(4) do \code{aranha} lido um andar acima. E a
+\textbf{distributividade} é outra vez a lei \emph{entre} elas:
+\[
+A\,(B+C)=A\,B+A\,C
+\]
+--- a mesma que o \code{meio.c} §M2 mede sobre os \emph{símbolos}, onde força as
+tabelas de $B$; aqui é a única coisa que impede a soma e o produto de serem duas
+operações sem relação. Mede-se \textbf{encadeando}: cada resultado guarda-se numa
+tabela e volta a entrar --- o motor a alimentar-se a si próprio, o que torna a
+medida uma verificação da composição inteira e não de uma operação de cada vez.
+O controlo são as exigências de \emph{forma}, que diferem: a soma pede a mesma,
+o produto pede formas encaixáveis (\code{tests/pgwire.c} §W57).
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as
