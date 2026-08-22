@@ -737,6 +737,29 @@ $T+T^{*}$ está em três sítios --- a curva da §\ref{sec:dragao}, a torre, e o
 grafo em que a transformada da §\ref{sec:transf} vive. O espaço da aranha é o que
 a dobra constrói.
 
+\medskip\noindent\textbf{E neste grafo o campo $G$ É o triângulo de Pascal.} Um
+percurso de $n$ passos pelas direções de aresta chega à célula que a \emph{soma}
+dos passos indica; e a soma é comutativa, logo esquece a ordem por que foram
+dados. Quantos índices caem então na mesma célula? Os que usam os mesmos eixos
+por outra ordem --- e isso é $\binom{n}{k}$:
+\[
+G \;=\; \Bigl(\tbinom{n}{0},\tbinom{n}{1},\dots,\tbinom{n}{n}\Bigr),
+\qquad
+\sum G \;=\; 2^{n} \;=\; \lvert I\rvert .
+\]
+A segunda igualdade é o Lema~\ref{lem:conserva} lido no triângulo: cada linha
+soma o andar inteiro, porque nenhum índice se perde --- só se sobrepõe.
+
+\medskip\noindent E o triângulo também não vem de fora: a recorrência
+$\binom{n}{k}=\binom{n-1}{k-1}+\binom{n-1}{k}$ \emph{é} o passo da torre,
+$T_{n+1}=T_n\oplus T_n^{*}$, lido como contagem --- ou o eixo novo entra, ou não
+entra, dois casos exaustivos e disjuntos. A simetria
+$\binom{n}{k}=\binom{n}{n-k}$ é a \textbf{involução} que troca todos os sinais, e
+o \textbf{máximo de $G$ cai no seu ponto fixo}, $k=n/2$: \emph{a dobra é maior no
+meio}, que é onde mais caminhos se sobrepõem. \code{teoria} demonstra-o e
+\code{tests/pascal.c} mede-o; aqui ele aparece como o que é --- a contagem da
+fibra no espaço que o Teor.~\ref{thm:espaco} construiu.
+
 \begin{teorema}[as direções de aresta são a base ortonormal]\label{thm:base8}
 As $m$ direções de aresta de $Q_m$ são os $e_k=2^{k}$, e para $m=8$ elas são a
 base de $F_8$ sobre $B$ obtida como \emph{produtos} dos três
@@ -1682,6 +1705,66 @@ Teorema~\ref{thm:periodo} diz que, se a memória estiver \emph{no espaço}, um
 cursor basta: $\ell$ e $p$ lêem-se no campo, sem segunda passagem e sem comparar
 posições. É a cláusula (3) do Teorema~\ref{thm:multiplicidade} a pagar-se.
 
+\medskip\noindent\textbf{E o exemplo acima tem nome: é JULIA.} A $f(z)=z^{2}-1$
+usada no contra-exemplo é uma órbita de Julia, e a construção dela não é deste
+documento --- está feita, e lê-se em duas cartas. O \code{corpo\_algebrico
+thm:cantor-julia} põe o par: \textbf{Julia} é o lado multiplicativo,
+$z\mapsto z^{2}$, e \textbf{Cantor} é o aditivo, o \emph{shift}
+$\theta\mapsto2\theta$; e o que os conjuga é a \textbf{forma polar}
+$z=e^{2\pi i\theta}$, cuja derivação é o \code{teoria \S sec:euler} --- ali
+$J^{2}=-1$ faz as potências ciclarem, $1,J,-1,-J$, e a exponencial parte-se no
+par $(\cos,\sin)$ com $\cos^{2}+\sin^{2}\equiv1$. \emph{Elevar ao quadrado no
+multiplicativo é dobrar o ângulo no aditivo}, e é só isso que a conjugação diz.
+
+\medskip\noindent\textbf{Daí que o período seja LEGÍVEL, e de dois lados.} Do
+lado do ângulo, $\theta=p/q$ com $q$ ímpar tem órbita de comprimento
+$\operatorname{ord}_q(2)$ --- a ordem de $2$ módulo $q$ ---, porque duplicar é
+multiplicar por $2$ no denominador que não se gasta. Do lado do campo, o
+Teor.~\ref{thm:periodo} dá o mesmo número sem seguir a trajetória:
+$\lvert\{G>1\}\rvert=p$. \emph{São dois caminhos para a mesma contagem}, e o
+segundo não precisa do ângulo.
+
+\medskip\noindent\textbf{E o que decide se há período é a CONSERVAÇÃO, não o
+operador.} Com $q$ ímpar o $2$ é invertível módulo $q$: o shift não tem o que
+gastar, e a palavra \textbf{cicla}. Com $q$ par ele \emph{divide} o denominador
+a cada passo --- $1/12\to1/6\to1/3$ --- e só passa a ciclar quando chega ao
+ímpar. Nas palavras do \code{corpo\_algebrico thm:cantor-julia}: \emph{ciclar
+não é uma propriedade do operador, é o que sobra quando o orçamento deixa de
+poder ser gasto}. É o mesmo que aqui se diz da cauda e do período --- $\ell$ é o
+que se gastou, $p$ é o que sobrou.
+
+\medskip\noindent\textbf{E a dobra deste documento é o primeiro membro de uma
+TRÍADE.} O \code{algebrico thm:unificacao} identifica os operadores pela
+\emph{ordem}, e a ordem mede-se aplicando cada um até voltar:
+\[
+\begin{array}{llcl}
+\text{Cantor / Julia} & \text{o espelho da dobra} & 2 & \nu^{2}=\mathrm{id}\\
+\text{o trial} & \tau\in\{-1,0,+1\} & 3 & \tau^{3}=\mathrm{id}\\
+\text{Viviani} & i,\ \text{o meio-ângulo} & 4 & i^{4}=\mathrm{id}
+\end{array}
+\]
+A dobra da Def.~\ref{def:op} é a \textbf{primeira linha}: $\partial\partial=
+\mathrm{id}$, e é por isso que ela espelha. \emph{Viviani é a sua raiz} --- o
+que ao quadrado dá o espelho ---, e por isso tem o dobro da ordem: girar duas
+vezes um quarto de volta é espelhar. Daí o nome, \emph{meio-ângulo}: a dobra
+leva o extremo ao outro extremo de uma vez; Viviani fá-lo em duas.
+
+\medskip\noindent E as ordens não são uma lista escolhida: são as que uma
+\textbf{rede} admite. O \code{topologico thm:toro} mostra que um automorfismo
+inteiro do toro com $\lvert\det\rvert=1$ só pode ter ordem em
+$\{1,2,3,4,6\}$ --- a restrição cristalográfica --- e a tríade ocupa
+$2,3,4$, com o $6$ a ser onde as duas primeiras voltam juntas,
+$\operatorname{lcm}(2,3)$. \emph{O toro é o sítio onde elas vivem juntas},
+e é o mesmo grafo em que o campo $G$ desta secção é lido.
+
+\medskip\noindent\textbf{E Viviani tem o mesmo ponto fixo que a dobra.} A curva
+sai por subtracção da esfera e do cilindro, sem uma trigonometria
+(\code{algebrico thm:viviani}): $z^{2}=2a(2a-x)$, com os dois ramos $\pm z$ a
+formarem o \emph{par dual} --- soma $0$, produto $-z^{2}$. O ponto onde $z=0$ é
+o \textbf{nó}, e ele é o ponto fixo da involução $z\mapsto-z$ --- \emph{que é a
+dobra}. O meio da Def.~\ref{def:op} e o nó de Viviani são a mesma coisa vista em
+duas curvas: o que a involução não move.
+
 % ═══════════════════════════════════════════════════════════════════════════
 \section{A realização contrária: dobra contra buraco}\label{sec:dual}
 
@@ -1989,6 +2072,54 @@ Como $\pi(0),\dots,\pi(T)$ são distintos, o primeiro índice repetido é $\ell=
 Teor.~\ref{thm:periodo} aplica-se (a hipótese $N\ge\ell+2p-1=T+1$ é a do
 enunciado). Donde $\lvert\{G>1\}\rvert=p=1$ e $\lvert\{G=1\}\rvert=\ell=T$.
 \end{proof}
+
+\medskip\noindent\textbf{E a série de $\pi$ em $k$ SAI DA CISÃO POR PARIDADE
+--- que é a deste documento.} A construção não é daqui: está no
+\code{teoria \S sec:pi}, e o que ela usa é só $J^{2}=-1$. Com isso as potências
+de $J$ ciclam com período quatro,
+\[
+J^{0}=1,\quad J^{1}=J,\quad J^{2}=-1,\quad J^{3}=-J,\quad J^{4}=1,\ \dots
+\]
+e a série da exponencial \textbf{parte-se pela paridade do índice}: os $n$
+\emph{pares} caem em $\pm1$ e os \emph{ímpares} em $\pm J$. Recolhendo cada
+metade:
+\[
+\boxed{\;
+\exp(tJ)=c(t)\cdot 1+s(t)\cdot J,\qquad
+c(t)=\sum_{k}\frac{(-1)^{k}t^{2k}}{(2k)!},\qquad
+s(t)=\sum_{k}\frac{(-1)^{k}t^{2k+1}}{(2k+1)!}\;}
+\]
+--- e o índice $k$ é o que conta as \emph{voltas} do ciclo de quatro: o termo
+$n=2k$ deu $k$ voltas completas mais nada, o $n=2k+1$ deu $k$ voltas mais um
+quarto. \emph{O $(-1)^{k}$ é o número de voltas lido módulo dois.}
+
+\medskip\noindent\textbf{E essa cisão é a do algoritmo} (§\ref{sec:neuronio}):
+lá, $e=\mathrm{pop}(b\wedge\texttt{0xAA})$ toma as posições pares e
+$o=\mathrm{pop}(b\wedge\texttt{0x55})$ as ímpares, e as duas máscaras são
+complementares --- \emph{particionam} o byte. Aqui as mesmas duas classes
+particionam a série, e por isso as duas metades não se misturam: $c$ é a parte
+que fica no $1$ e $s$ a que fica no $J$. \textbf{A paridade é o mesmo corte nos
+dois sítios}, e é por isso que $\otimes$ e $\oslash$ do Teor.~\ref{thm:gato} e o
+par $(c,s)$ são a mesma decomposição.
+
+\medskip\noindent\textbf{E daí $\pi$ é OPERACIONAL: é um tempo, não uma
+figura.} A conservação sai por derivação --- $(c^{2}+s^{2})'=2cc'+2ss'=-2cs+2sc
+=0$, e o valor em $0$ é $1$ --- logo $c^{2}+s^{2}\equiv1$, e o par nunca sai do
+nível. Então
+\[
+\boxed{\;\pi=\min\{\,t>0:\ \exp(tJ)\cdot 1=-1\,\}\;}
+\]
+isto é, \emph{o tempo que o fluxo leva a realizar a Lei~$1$}. Nenhuma palavra
+disto é geométrica: não há arco, não há área, e o círculo aparece \emph{depois},
+como a figura que este fluxo desenha --- \emph{a figura não é o dado, é o rasto}.
+E é isto que faz de $\pi$ uma \textbf{saída} do relógio e não uma constante
+importada: cada dimensão tem o seu, e ele lê-se contando voltas.
+
+\medskip\noindent Postas as duas peças juntas, a secção fecha sobre si: a série
+é uma \emph{trajetória} (Def.~\ref{def:serie}), o índice $k$ conta as voltas do
+ciclo de quatro, e o campo $G$ lê o custo dela sem a seguir
+(Teor.~\ref{thm:serie}) --- $\ell$ é o que se gastou, e $p=1$ diz que a
+trajetória parou.
 
 \medskip\noindent\textbf{O valor, e por que não é citado.} Com
 $\arctan\frac1n=\sum_{k\ge0}\frac{(-1)^k}{(2k+1)n^{2k+1}}$ avaliado em escala
