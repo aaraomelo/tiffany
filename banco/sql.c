@@ -4303,6 +4303,14 @@ static long off_n = 0;               /* 0 = sem OFFSET */
  * campo que o motor já constrói. Não há estrutura nova: usa-se a MESMA árvore
  * que ordena, lida por classe em vez de por ordem. */
 static char grp_col[64] = "";        /* a coluna do GROUP BY, "" se não houver */
+/* ── A SEGUNDA COLUNA DO QUOCIENTE ───────────────────────────────────────────
+ * `GROUP BY b, c` é o par do `ORDER BY a, b`, e é a mesma composição: quocienta-
+ * se pela primeira, o que parte a saída em fibras, e dentro de cada fibra
+ * quocienta-se pela segunda. A árvore não muda — muda o número de vezes que é
+ * usada —, e a chave do grupo passa a ser o PAR. Deixar isto por fazer era ter
+ * a composição de um lado (a ordem) e não do outro (o quociente), quando são a
+ * mesma frase. */
+static char grp_col2[64] = "";
 /* DISTINCT É O REPRESENTANTE CANÓNICO k=1. O `thm:levantamento` dá a folha
  * k(i) = quantas vezes a célula já foi visitada até i, e a sua cláusula (3) diz
  * que na fibra de x os k são exactamente {1,…,G(x)}. O `thm:escada` fecha:
@@ -5202,7 +5210,7 @@ static int varre(const char *resto, int acao){
     ord_col[0] = 0; ord_desc = 0; ord_col2[0] = 0; ord_desc2 = 0;
     snprintf(cnt_dis, sizeof cnt_dis, "%s", cnt_dis_pedido);
     cnt_dis_pedido[0] = 0;
-    grp_col[0] = 0; lim_n = -1; off_n = 0;
+    grp_col[0] = 0; grp_col2[0] = 0; lim_n = -1; off_n = 0;
     hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
     if(acao == ACAO_MARCA){
@@ -5217,6 +5225,20 @@ static int varre(const char *resto, int acao){
                 return 0;
             }
             if(!ident(&q, grp_col, sizeof grp_col)) return 0;
+            { const char *v2 = q;
+              pula(&q);
+              if(*q == ','){
+                  q++; pula(&q);
+                  if(!ident(&q, grp_col2, sizeof grp_col2)){ q = v2; grp_col2[0] = 0; }
+                  else if(col_indice(grp_col2) < 0){
+                      printf("erro: a coluna «%s» não existe — o GROUP BY é"
+                             " RECUSADO.\n", grp_col2);
+                      if(sql_cap){ sql_cap->ok = 0;
+                          snprintf(sql_cap->err, sizeof sql_cap->err,
+                                   "column \"%s\" does not exist", grp_col2); }
+                      return 0;
+                  }
+              } else q = v2; }
             if(col_indice(grp_col) < 0){
                 printf("erro: a coluna «%s» não existe — o GROUP BY é RECUSADO.\n", grp_col);
                 if(sql_cap){ sql_cap->ok = 0;
@@ -6339,19 +6361,61 @@ static int varre(const char *resto, int acao){
           ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
           for(int k = 0; k < n; k++) seq[k] = tmp[k];
           for(int k = 0; k < na && n < SQL_OUT_MAX_ROWS; k++) seq[n++] = aus[k]; }
+
+        /* ── E A SEGUNDA RÉGUA, DENTRO DE CADA FIBRA ─────────────────────
+         * A mesma composição do `ORDER BY a, b`: a primeira coluna partiu a
+         * saída em corridas; dentro de cada uma corre-se a MESMA descida com a
+         * segunda, e as linhas do mesmo PAR ficam contíguas. É só isso que o
+         * agrupamento por duas colunas precisa — o resto (contar as corridas)
+         * não muda de todo. */
+        { int gc2 = grp_col2[0] ? col_indice(grp_col2) : -1;
+          long k = 0;
+          while(gc2 >= 0 && k < n){
+              int tem = bit_le(S_PRES, seq[k]*ncols + gc);
+              long v = tem ? celula_valor(seq[k], gc, ncols) : 0;
+              long j = k;
+              while(j < n && bit_le(S_PRES, seq[j]*ncols + gc) == tem
+                          && (!tem || celula_valor(seq[j], gc, ncols) == v)) j++;
+              if(j - k > 1){
+                  long a2[SQL_OUT_MAX_ROWS]; int n2 = 0, m2 = 0, coube = 1;
+                  int tmp2[SQL_OUT_MAX_ROWS];
+                  ord_limpa();
+                  for(long t = k; t < j && coube; t++){
+                      if(!bit_le(S_PRES, seq[t]*ncols + gc2)){
+                          if(n2 < SQL_OUT_MAX_ROWS) a2[n2++] = seq[t];
+                          continue;
+                      }
+                      if(!ord_insere(celula_valor(seq[t], gc2, ncols), (int)seq[t]))
+                          coube = 0;
+                  }
+                  if(coube){
+                      ord_percorre(0, 0, 0, tmp2, &m2, SQL_OUT_MAX_ROWS, 0);
+                      { long t = k;
+                        for(int q2 = 0; q2 < m2 && t < j; q2++) seq[t++] = tmp2[q2];
+                        for(int q2 = 0; q2 < n2 && t < j; q2++) seq[t++] = a2[q2]; }
+                  }
+              }
+              k = j;
+          } }
         if(sql_cap){
             memset(sql_cap->col, 0, sizeof sql_cap->col);
             sql_cap->ncols = 2; sql_cap->nrows = 0;
-            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s", grp_col);
-            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "count");
-            sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[1] = SQL_TIPO_INT8;
-            if(agr_op){
-                sql_cap->ncols = 3;
-                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "%s",
-                         agr_op == 1 ? "sum" : agr_op == 2 ? "max"
-                                     : agr_op == 3 ? "min" : "avg");
-                sql_cap->tipo[2] = (agr_op == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4;
-            }
+            { int c = 0;
+              snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "%s", grp_col);
+              sql_cap->tipo[c] = SQL_TIPO_INT4; c++;
+              if(grp_col2[0]){                     /* a chave é o PAR */
+                  snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "%s", grp_col2);
+                  sql_cap->tipo[c] = SQL_TIPO_INT4; c++;
+              }
+              snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "count");
+              sql_cap->tipo[c] = SQL_TIPO_INT8; c++;
+              if(agr_op){
+                  snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "%s",
+                           agr_op == 1 ? "sum" : agr_op == 2 ? "max"
+                                       : agr_op == 3 ? "min" : "avg");
+                  sql_cap->tipo[c] = (agr_op == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4; c++;
+              }
+              sql_cap->ncols = c; }
         }
         { long grupos = 0, soma = 0, k = 0;
           while(k < n){
@@ -6362,8 +6426,16 @@ static int varre(const char *resto, int acao){
               /* a fibra do dual junta-se por NÃO TER chave, não por ter a
                * mesma; as duas condições estão na mesma linha e são disjuntas */
               long ag_n = 0;                     /* quantos do CORPO entraram */
+              /* a chave do grupo é o PAR quando há segunda coluna: a corrida
+               * termina quando QUALQUER das duas muda */
+              int gc2 = grp_col2[0] ? col_indice(grp_col2) : -1;
+              int tem2 = (gc2 >= 0) ? bit_le(S_PRES, seq[k]*ncols + gc2) : 0;
+              long v2 = (gc2 >= 0 && tem2) ? celula_valor(seq[k], gc2, ncols) : 0;
               while(k < n && bit_le(S_PRES, seq[k]*ncols + gc) == tem
-                          && (!tem || celula_valor(seq[k], gc, ncols) == v)){
+                          && (!tem || celula_valor(seq[k], gc, ncols) == v)
+                          && (gc2 < 0
+                              || (bit_le(S_PRES, seq[k]*ncols + gc2) == tem2
+                                  && (!tem2 || celula_valor(seq[k], gc2, ncols) == v2)))){
                   if(ac >= 0 && bit_le(S_PRES, seq[k]*ncols + ac)){
                       long w = celula_valor(seq[k], ac, ncols);
                       if(!ag_viu){ ag = w; ag_viu = 1; }
@@ -6389,21 +6461,32 @@ static int varre(const char *resto, int acao){
                   else        snprintf(agtxt, sizeof agtxt, "%ld", m.a);
               } else if(ag_viu) snprintf(agtxt, sizeof agtxt, "%ld", ag);
               else              snprintf(agtxt, sizeof agtxt, "");
-              if(ac >= 0) printf("   %s%ld | %ld | %s\n", tem ? "" : "(ausente) ",
-                                 tem ? v : 0, g, agtxt);
-              else        printf("   %s%ld | %ld\n", tem ? "" : "(ausente) ",
-                                 tem ? v : 0, g);
+              { char ch[64];
+                if(gc2 >= 0) snprintf(ch, sizeof ch, "%s%ld | %s%ld",
+                                      tem ? "" : "(ausente) ", tem ? v : 0,
+                                      tem2 ? "" : "(ausente) ", tem2 ? v2 : 0);
+                else         snprintf(ch, sizeof ch, "%s%ld",
+                                      tem ? "" : "(ausente) ", tem ? v : 0);
+                if(ac >= 0) printf("   %s | %ld | %s\n", ch, g, agtxt);
+                else        printf("   %s | %ld\n", ch, g); }
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
                   /* e a chave do grupo do dual sai AUSENTE, não a zero: o
                    * cliente tem de ver a mesma distinção que o motor faz */
-                  if(tem) snprintf(sql_cap->cell[sql_cap->nrows][0], SQL_OUT_CELL, "%ld", v);
-                  else { sql_cap->cell[sql_cap->nrows][0][0] = 0;
-                         sql_cap->nulo[sql_cap->nrows][0] = 1; }
-                  snprintf(sql_cap->cell[sql_cap->nrows][1], SQL_OUT_CELL, "%ld", g);
-                  if(ac >= 0){
-                      snprintf(sql_cap->cell[sql_cap->nrows][2], SQL_OUT_CELL, "%s", agtxt);
-                      if(!agtxt[0]) sql_cap->nulo[sql_cap->nrows][2] = 1;
-                  }
+                  { int c = 0; long r = sql_cap->nrows;
+                    if(tem) snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", v);
+                    else { sql_cap->cell[r][c][0] = 0; sql_cap->nulo[r][c] = 1; }
+                    c++;
+                    if(gc2 >= 0){
+                        if(tem2) snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", v2);
+                        else { sql_cap->cell[r][c][0] = 0; sql_cap->nulo[r][c] = 1; }
+                        c++;
+                    }
+                    snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", g); c++;
+                    if(ac >= 0){
+                        snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%s", agtxt);
+                        if(!agtxt[0]) sql_cap->nulo[r][c] = 1;
+                        c++;
+                    } }
                   sql_cap->nrows++;
               }
               grupos++; soma += g;

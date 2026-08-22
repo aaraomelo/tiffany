@@ -6017,6 +6017,126 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W44: QUOCIENTAR POR DUAS COLUNAS, E O QUE ISSO NÃO É ═════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w44.mem");     unlink("/tmp/pgwire_w44.prog");
+        unlink("/tmp/pgwire_w44__t.mem");  unlink("/tmp/pgwire_w44__t.prog");
+        printf("\n§W44 GROUP BY a, b: a mesma composição, e uma diferença.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w44")) mal++;
+        sql_executa("CREATE TABLE t (a,b,v)", &o);
+        sql_executa("INSERT INTO t VALUES (1,1,10), (1,1,20), (1,2,30),"
+                    " (2,1,40), (2,1,50), (1,NULL,60)", &o);
+
+        /* ── (1) É A MESMA COMPOSIÇÃO DO `ORDER BY a, b`: quocienta-se pela
+         * primeira, o que parte a saída em fibras, e dentro de cada fibra
+         * corre-se a MESMA descida com a segunda. A árvore não muda; muda o
+         * número de vezes que é usada. */
+        sql_executa("SELECT a, count(*) FROM t GROUP BY a", &o);
+        long f1 = o.nrows;
+        long g1 = o.nrows ? atol(o.cell[0][1]) : -1;
+        sql_executa("SELECT a, b, count(*) FROM t GROUP BY a, b", &o);
+        long f2 = o.nrows;
+        int refina = (f1 == 2 && g1 == 4 && f2 == 4);
+        printf("      por a: %ld fibras (a primeira com %ld) · por (a,b): %ld"
+               " fibras  %s\n", f1, g1, f2, refina ? "" : "NAO BATE");
+        if(!refina) mal++;
+
+        /* ── (2) E A CONSERVAÇÃO NÃO DEPENDE DA GRANULARIDADE. ∑G = |I| com
+         * duas fibras e com quatro: quocientar mais fino reparte as mesmas
+         * linhas, não as perde nem as duplica. É o Lema da conservação a valer
+         * nos dois níveis, e é o que diz que a segunda régua REFINA em vez de
+         * refazer. */
+        sql_executa("SELECT a, count(*) FROM t GROUP BY a", &o);
+        long s1 = 0; for(int i = 0; i < o.nrows; i++) s1 += atol(o.cell[i][1]);
+        sql_executa("SELECT a, b, count(*) FROM t GROUP BY a, b", &o);
+        long s2 = 0; for(int i = 0; i < o.nrows; i++) s2 += atol(o.cell[i][2]);
+        sql_executa("SELECT count(*) FROM t", &o);
+        long tot = o.nrows ? atol(o.cell[0][0]) : -1;
+        int conserva = (s1 == tot && s2 == tot && tot == 6);
+        printf("      ∑G = |I| nos dois níveis: %ld e %ld, contra %ld linhas"
+               "  %s\n", s1, s2, tot, conserva ? "" : "NAO BATE");
+        if(!conserva) mal++;
+
+        /* ── (3) O DUAL TEM FIBRA PRÓPRIA EM CADA NÍVEL, e não só no primeiro:
+         * a linha sem `b` não se junta às que têm b escrito, e a sua chave sai
+         * AUSENTE na segunda coluna — dentro da fibra do a=1, que é onde ela
+         * pertence. Um motor que tratasse o dual só à cabeça perdia-o aqui. */
+        sql_executa("SELECT a, b, count(*) FROM t GROUP BY a, b", &o);
+        int dual = 0;
+        for(int i = 0; i < o.nrows; i++)
+            if(o.nulo[i][1] && !strcmp(o.cell[i][0], "1")
+               && !strcmp(o.cell[i][2], "1")) dual = 1;
+        printf("      o dual tem fibra própria na SEGUNDA coluna, dentro do"
+               " a=1: %s\n", dual ? "sim" : "NAO");
+        if(!dual) mal++;
+
+        /* ── (4) E O AGREGADO SEGUE A FIBRA FINA: sum(v) por par, não por a. */
+        sql_executa("SELECT a, b, count(*), sum(v) FROM t GROUP BY a, b", &o);
+        int agr = 0;
+        for(int i = 0; i < o.nrows; i++)
+            if(!strcmp(o.cell[i][0], "2") && !strcmp(o.cell[i][3], "90")) agr = 1;
+        printf("      sum(v) segue o par: a fibra (2,1) soma %s (esp 90)  %s\n",
+               agr ? "90" : "?", agr ? "" : "NAO BATE");
+        if(!agr) mal++;
+
+        /* ── (5) E AQUI ESTÁ A DIFERENÇA ENTRE AS DUAS COMPOSIÇÕES, que é a
+         * razão de este bloco não ser uma cópia do §W40. QUOCIENTAR COMUTA:
+         * `GROUP BY b, a` dá as MESMAS fibras com os MESMOS pesos, porque uma
+         * partição é um conjunto de classes e um conjunto não tem ordem.
+         * ORDENAR NÃO COMUTA: o §W40 mediu que `b, a` dá uma sequência
+         * diferente de `a, b`. A mecânica é a mesma — a mesma árvore, uma vez
+         * por fibra —, e o que difere é o objeto que cada uma produz. */
+        sql_executa("SELECT a, b, count(*) FROM t GROUP BY a, b", &o);
+        long pesos1[8]; int n1 = o.nrows;
+        for(int i = 0; i < n1 && i < 8; i++) pesos1[i] = atol(o.cell[i][2]);
+        sql_executa("SELECT b, a, count(*) FROM t GROUP BY b, a", &o);
+        long pesos2[8]; int n2 = o.nrows;
+        for(int i = 0; i < n2 && i < 8; i++) pesos2[i] = atol(o.cell[i][2]);
+        /* o multiconjunto dos pesos tem de ser o mesmo (a ordem pode mudar) */
+        int mesmo = (n1 == n2);
+        { long ss1 = 0, ss2 = 0, pp1 = 1, pp2 = 1;
+          for(int i = 0; i < n1; i++){ ss1 += pesos1[i]; pp1 *= pesos1[i]; }
+          for(int i = 0; i < n2; i++){ ss2 += pesos2[i]; pp2 *= pesos2[i]; }
+          if(ss1 != ss2 || pp1 != pp2) mesmo = 0; }
+        printf("      QUOCIENTAR COMUTA: (a,b) dá %d fibras e (b,a) dá %d, com"
+               " os mesmos pesos %s — ao contrário de ORDENAR (§W40)  %s\n",
+               n1, n2, mesmo ? "sim" : "NAO", mesmo ? "" : "NAO BATE");
+        if(!mesmo) mal++;
+
+        /* ── O CONTROLO: a segunda coluna tem de FAZER diferença. Se ela fosse
+         * ignorada — que era o estado anterior, com a consulta recusada — o
+         * número de fibras seria o mesmo com uma e com duas colunas. */
+        printf("\n      CONTROLO — a segunda régua refina de facto: %ld → %ld"
+               " fibras  %s\n", f1, f2, (f2 > f1) ? "" : "NAO BATE");
+        if(f2 <= f1) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("QUOCIENTAR POR DUAS COLUNAS É A MESMA COMPOSIÇÃO DA ORDEM, E TEM UMA PROPRIEDADE"
+           " QUE ELA NÃO TEM. A mecânica é a do §W40: quocienta-se pela primeira coluna, o"
+           " que parte a saída em FIBRAS, e dentro de cada fibra corre-se a MESMA descida com"
+           " a segunda — a árvore não muda, muda o número de vezes que é usada. A chave do"
+           " grupo passa a ser o PAR, e a corrida termina quando QUALQUER das duas colunas"
+           " muda. Deixar isto por fazer era ter a composição de um lado, a ordem, e não do"
+           " outro, o quociente, quando são a mesma frase. O que se mede não é o número de"
+           " grupos: é que a CONSERVAÇÃO não depende da granularidade — ∑G = |I| com duas"
+           " fibras e com quatro, porque quocientar mais fino REPARTE as mesmas linhas, não"
+           " as perde nem as duplica. E o dual tem fibra própria em CADA nível, não só no"
+           " primeiro: a linha sem `b` não se junta às que têm b escrito, e a sua chave sai"
+           " ausente na SEGUNDA coluna, dentro da fibra a que pertence — um motor que"
+           " tratasse o dual só à cabeça perdia-o aqui. E AQUI ESTÁ A DIFERENÇA ENTRE AS DUAS"
+           " COMPOSIÇÕES, que é a razão de este bloco não ser uma cópia do §W40:"
+           " QUOCIENTAR COMUTA — `(b,a)` dá as MESMAS fibras com os MESMOS pesos, porque uma"
+           " partição é um conjunto de classes e um conjunto não tem ordem — enquanto"
+           " ORDENAR NÃO COMUTA, e o §W40 mediu-o. A mesma mecânica produz dois objetos"
+           " diferentes, e é a natureza do objeto, não a do algoritmo, que decide se a troca"
+           " se nota. O CONTROLO é que a segunda régua refine de facto: se fosse ignorada, o"
+           " número de fibras seria o mesmo com uma e com duas colunas.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

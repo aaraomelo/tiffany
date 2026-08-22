@@ -2328,6 +2328,23 @@ controlo é trocar as réguas: \code{b, a} dá uma ordem diferente de
 \code{a, b}, o que não aconteceria com uma chave só nem com a segunda régua a
 correr sobre a tabela inteira (\code{tests/pgwire.c} §W40).
 
+\medskip\noindent\textbf{E o quociente compõe-se da mesma maneira --- com uma
+diferença que diz o que está a ser composto.} \code{GROUP BY a, b} corre a
+mesma mecânica: a primeira coluna parte a saída em fibras, e dentro de cada
+fibra corre-se a mesma descida com a segunda; a chave passa a ser o \emph{par},
+e a corrida termina quando \emph{qualquer} das duas muda. O que se mede não é o
+número de grupos, mas que a \textbf{conservação não depende da granularidade}
+--- $\sum G=\lvert I\rvert$ com duas fibras e com quatro, porque quocientar mais
+fino \emph{reparte} as mesmas linhas. E o dual tem fibra própria em \emph{cada}
+nível, não só no primeiro.
+
+\medskip\noindent Aí aparece a diferença: \textbf{quocientar comuta, ordenar
+não.} \code{GROUP BY b, a} dá as \emph{mesmas} fibras com os \emph{mesmos}
+pesos --- uma partição é um conjunto de classes, e um conjunto não tem ordem
+---, enquanto \code{ORDER BY b, a} dá outra sequência. A mesma mecânica produz
+dois objetos diferentes, e é a natureza do objeto, não a do algoritmo, que
+decide se a troca se nota (\code{tests/pgwire.c} §W44).
+
 \medskip\noindent E fica dito o que ainda \emph{não} se lê como medida: a
 comparação $<$ e $>$ usa o \textbf{bit de sinal} de uma subtração, que é uma
 convenção sobre o envelope e não uma régua; e a descida da árvore usa a
