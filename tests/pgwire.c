@@ -5645,6 +5645,127 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W41: ACEITAR E FAZER OUTRA COISA ═════════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w41.mem");     unlink("/tmp/pgwire_w41.prog");
+        unlink("/tmp/pgwire_w41__t.mem");  unlink("/tmp/pgwire_w41__t.prog");
+        printf("\n§W41 duas ordens que respondiam ok sobre outra coisa.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w41")) mal++;
+        sql_executa("CREATE TABLE t (a UNIQUE, b)", &o);
+
+        /* ── (1) UMA ORDEM, VÁRIAS LINHAS. `INSERT ... VALUES (…), (…), (…)`
+         * era ACEITE e escrevia só a primeira: as outras desapareciam sem uma
+         * palavra, com a resposta a dizer que tinha corrido bem. Não é
+         * responder errado — é responder certo sobre outra coisa, que é a pior
+         * forma de falhar desta casa. */
+        int m1 = sql_executa("INSERT INTO t VALUES (1,10), (2,20), (3,30)", &o);
+        sql_executa("SELECT count(*) FROM t", &o);
+        int todas = (m1 && o.nrows == 1 && !strcmp(o.cell[0][0], "3"));
+        printf("      três tuplos numa ordem: entraram %s (esp 3)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", todas ? "" : "NAO BATE");
+        if(!todas) mal++;
+
+        /* ── (2) E OU ENTRAM TODAS OU NENHUMA. Uma ordem é uma ordem, e metade
+         * dela feita não é resposta nenhuma: se um tuplo for recusado — aqui
+         * pelo UNIQUE, e é o do MEIO —, desfaz-se o que já entrou. O gume está
+         * em o primeiro tuplo ser legítimo: sem o desfazer, ele ficava lá. */
+        int m2 = sql_executa("INSERT INTO t VALUES (7,70), (2,99), (8,80)", &o);
+        sql_executa("SELECT count(*) FROM t", &o);
+        long depois = o.nrows ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT b FROM t WHERE a = 7", &o);
+        long sobrou = o.nrows;
+        int atomico = (!m2 && depois == 3 && sobrou == 0);
+        printf("      o tuplo do meio recusado: total %ld (esp 3) · o PRIMEIRO,"
+               " que era legítimo, não ficou (%ld linhas, esp 0)  %s\n",
+               depois, sobrou, atomico ? "" : "NAO BATE");
+        if(!atomico) mal++;
+
+        /* ── (3) E UMA LINHA SÓ continua a ser o caminho de sempre: a ordem
+         * com um tuplo não passa pelo desfazer, e o número não muda. */
+        int m3 = sql_executa("INSERT INTO t VALUES (9,90)", &o);
+        sql_executa("SELECT count(*) FROM t", &o);
+        int uma = (m3 && !strcmp(o.cell[0][0], "4"));
+        printf("      e uma linha só: %s (esp 4)  %s\n", o.cell[0][0],
+               uma ? "" : "NAO BATE");
+        if(!uma) mal++;
+
+        /* ── (4) `count(DISTINCT c)` NÃO É O COUNT COM UM ADORNO. É o número
+         * de CLASSES do quociente por c — o mesmo objecto do GROUP BY, lido em
+         * quantidade em vez de em extensão. Era aceite e respondia o count de
+         * TUDO: a palavra entrava como nome de coluna e ninguém a lia. */
+        sql_executa("CREATE TABLE u (a, b)", &o);
+        sql_executa("INSERT INTO u VALUES (1,10), (2,10), (3,20),"
+                    " (4,NULL), (5,NULL)", &o);
+        sql_executa("SELECT count(*) FROM u", &o);
+        long tot = o.nrows ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT count(DISTINCT b) FROM u", &o);
+        long cls = o.nrows ? atol(o.cell[0][0]) : -1;
+        int conta = (tot == 5 && cls == 3);
+        printf("      count(*) %ld (esp 5) · count(DISTINCT b) %ld (esp 3)  %s\n",
+               tot, cls, conta ? "" : "NAO BATE");
+        if(!conta) mal++;
+
+        /* ── (5) E O GUME É A CONCORDÂNCIA: contar as classes e listá-las são a
+         * MESMA pergunta, e têm de dar o mesmo número. O `GROUP BY` devolve as
+         * fibras uma a uma; o `count(DISTINCT)` devolve quantas são. Se
+         * divergissem, uma delas estaria a tratar o dual de outra maneira —
+         * que era exactamente o defeito, com o count a responder 5. */
+        sql_executa("SELECT b, count(*) FROM u GROUP BY b", &o);
+        long fibras = o.nrows;
+        int concorda = (fibras == cls);
+        printf("      GROUP BY dá %ld fibras e count(DISTINCT) conta %ld: a MESMA"
+               " pergunta  %s\n", fibras, cls, concorda ? "" : "NAO BATE");
+        if(!concorda) mal++;
+
+        /* ── (6) E A CONTA RESPEITA O FILTRO: com o WHERE a cortar as linhas
+         * sem valor, ficam duas classes. É o que mostra que a contagem é sobre
+         * o CAMPO que a varredura deixou, e não sobre a tabela. */
+        sql_executa("SELECT count(DISTINCT b) FROM u WHERE a < 4", &o);
+        int filtra = (o.nrows == 1 && !strcmp(o.cell[0][0], "2"));
+        printf("      com WHERE a < 4: %s classes (esp 2)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", filtra ? "" : "NAO BATE");
+        if(!filtra) mal++;
+
+        /* ── O CONTROLO: a coluna que não existe é RECUSADA, e não contada
+         * como se fosse `*`. Sem ele, um motor que ignorasse o interior do
+         * parêntese — que era o defeito — passava nas medidas de cima sempre
+         * que os números por acaso coincidissem. */
+        int z = sql_executa("SELECT count(DISTINCT z) FROM u", &o);
+        printf("\n      CONTROLO — count(DISTINCT z), coluna que não existe:"
+               " %s  %s\n", z ? "RESPONDEU (mau)" : "recusada",
+               z ? "NAO BATE" : "");
+        if(z) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("DUAS ORDENS RESPONDIAM `ok` SOBRE OUTRA COISA, QUE É A PIOR FORMA DE FALHAR"
+           " DESTA CASA. `INSERT INTO t VALUES (…), (…), (…)` era aceite e escrevia SÓ A"
+           " PRIMEIRA: as outras desapareciam sem uma palavra, e a resposta dizia que tinha"
+           " corrido bem — não é responder errado, é responder certo sobre outra coisa."
+           " Agora a ordem parte-se nos seus tuplos e escreve-se um a um, mas ATOMICAMENTE:"
+           " uma ordem é uma ordem, e metade dela feita não é resposta nenhuma. Se um tuplo"
+           " for recusado — pelo envelope, por uma restrição, pela seta —, desfaz-se o que já"
+           " entrou pelo mesmo mecanismo do ROLLBACK, e o gume está em o tuplo recusado ser"
+           " o do MEIO com o primeiro legítimo: sem o desfazer, ele ficava lá. Se o cliente"
+           " já tinha uma transacção aberta não se lhe toca — a dele é maior, e quem a fecha"
+           " é ele. A SEGUNDA: `count(DISTINCT c)` não é o count com um adorno, é o número"
+           " de CLASSES do quociente por c — o mesmo objecto do GROUP BY, lido em quantidade"
+           " em vez de em extensão —, e era aceite a responder o count de TUDO, porque a"
+           " palavra entrava como nome de coluna e o interior do parêntese era deitado fora"
+           " antes de chegar ao motor. O GUME É A CONCORDÂNCIA: contar as classes e"
+           " listá-las são a MESMA pergunta, pelo que o `GROUP BY` e o `count(DISTINCT)` têm"
+           " de dar o mesmo número — e se divergissem, uma delas estaria a tratar o dual de"
+           " outra maneira. Aqui o dual conta como UMA classe, o que DIVERGE do SQL padrão"
+           " (que o ignora): a escolha é a coerência interna, porque o GROUP BY desta casa"
+           " já lhe dá uma fibra própria, e duas perguntas sobre a mesma partição não podem"
+           " responder números diferentes. O CONTROLO é a coluna que não existe, que é"
+           " recusada em vez de contada como se fosse `*` — sem ele, um motor que ignorasse"
+           " o interior do parêntese passava sempre que os números coincidissem por acaso.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

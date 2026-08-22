@@ -2674,6 +2674,44 @@ que o que muda as respostas é o dual e não o tamanho da tabela.}
         {quociente, representante, ordem, junção, agregado}
         {\code{tests/pgwire.c} §W39}
 
+\subsection*{Aceitar e fazer outra coisa}
+
+\noindent Um inventário de consultas correntes deu dez recusas e --- pior ---
+duas \emph{aceitações}. Recusar é honesto: o cliente sabe. Aceitar e fazer
+outra coisa não é responder errado, é \textbf{responder certo sobre outra
+coisa}, e nenhuma asserção o apanha porque a resposta tem a forma certa.
+
+\medskip\noindent\textbf{Uma ordem, várias linhas.}
+\code{INSERT INTO t VALUES (…), (…), (…)} era aceite e escrevia só a primeira;
+as outras desapareciam sem uma palavra. Agora a ordem parte-se nos seus tuplos
+e escreve-se um a um, mas \textbf{atomicamente}: uma ordem é uma ordem, e
+metade dela feita não é resposta nenhuma. Se um tuplo for recusado, desfaz-se o
+que já entrou pelo mesmo mecanismo do \code{ROLLBACK} --- e o gume está em o
+recusado ser o do \emph{meio} com o primeiro legítimo. Se o cliente já tinha
+uma transação aberta não se lhe toca: a dele é maior, e quem a fecha é ele.
+
+\medskip\noindent\textbf{Contar classes não é contar linhas.}
+\code{count(DISTINCT c)} é o número de classes do quociente por $c$ --- o mesmo
+objeto do \code{GROUP BY}, lido em \emph{quantidade} em vez de em
+\emph{extensão} --- e respondia o \code{count} de tudo, porque o interior do
+parêntese era deitado fora antes de chegar ao motor. O gume é a
+\textbf{concordância}: listar as fibras e contá-las são a mesma pergunta, pelo
+que os dois têm de dar o mesmo número; se divergissem, um deles estaria a
+tratar o dual de outra maneira.
+
+\medskip\noindent Aqui o dual conta como \emph{uma} classe, o que diverge do
+SQL padrão --- que o ignora. A escolha é a coerência interna: o \code{GROUP BY}
+desta casa dá-lhe uma fibra própria, e duas perguntas sobre a mesma partição
+não podem responder números diferentes.
+
+\medido{\code{tests/pgwire.c} §W41, com o controlo na coluna que não existe ---
+recusada em vez de contada como \code{*}, sem o que um motor que ignorasse o
+interior do parêntese passava sempre que os números coincidissem por acaso.}
+
+\colunas{\code{aranha thm:escada}}
+        {\code{INSERT} multi-tuplo atómico; \code{count(DISTINCT)} = fibras}
+        {\code{tests/pgwire.c} §W41}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}

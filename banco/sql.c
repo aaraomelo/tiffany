@@ -1915,6 +1915,86 @@ static int le_check(const char **p, char *out, size_t cap){
     return 1;
 }
 
+/* ── UMA ORDEM, VÁRIAS LINHAS, E OU ENTRAM TODAS OU NENHUMA ──────────────────
+ *
+ * `INSERT INTO t VALUES (1,2), (3,4)` era aceite e escrevia SÓ A PRIMEIRA. As
+ * outras desapareciam sem uma palavra, com a resposta a dizer que tinha
+ * corrido bem — que é a pior forma de falhar desta casa: não é responder
+ * errado, é responder certo sobre outra coisa.
+ *
+ * Parte-se a ordem nos seus tuplos e escreve-se um a um, mas ATOMICAMENTE: uma
+ * ordem é uma ordem, e metade dela feita não é resposta nenhuma. Abre-se o
+ * desfazer, e se algum tuplo for recusado — pelo envelope, por uma restrição,
+ * pela seta — desfaz-se o que já entrou e devolve-se a recusa desse tuplo. Se o
+ * cliente já tinha uma transacção aberta, não se lhe toca: a dele é maior, e
+ * quem a fecha é ele. */
+static int insere(const char *resto);
+static int insere_muitas(const char *resto){
+    const char *p = resto;
+    const char *v = NULL;
+    char cab[128];
+    int n = 0, quantos = 0;
+    /* o cabeçalho é tudo até ao VALUES, e os tuplos vêm depois */
+    { const char *q = resto, *ini_v = NULL;
+      while(*q){
+          const char *r = q;
+          if(palavra(&r, "VALUES")){ v = r; ini_v = q; break; }
+          q++;
+      }
+      if(!v) return insere(resto);
+      /* o cabeçalho vai até ao INÍCIO do VALUES; ele é reposto ao montar cada
+       * tuplo, e apanhá-lo aqui dava «VALUES VALUES» */
+      { size_t nc = (size_t)(ini_v - resto);
+        if(nc >= sizeof cab) return insere(resto);
+        memcpy(cab, resto, nc); cab[nc] = 0; } }
+
+    /* contam-se os tuplos ANTES de escrever: com um só, nada muda */
+    { const char *q = v; int nivel = 0;
+      while(*q){
+          if(*q == '(' ){ if(!nivel) quantos++; nivel++; }
+          else if(*q == ')') nivel--;
+          q++;
+      } }
+    if(quantos <= 1) return insere(resto);
+
+    { int nossa = !undo_em_tx, falhou = 0;
+      const char *q = v;
+      if(nossa) sql_tx_abre();
+      while(*q && !falhou){
+          const char *ini;
+          int nivel = 0;
+          while(*q && *q != '(') q++;
+          if(!*q) break;
+          ini = q;
+          do {
+              if(*q == '(') nivel++;
+              else if(*q == ')') nivel--;
+              q++;
+          } while(*q && nivel > 0);
+          { char um[600];
+            size_t tam = (size_t)(q - ini);
+            if(tam + strlen(cab) + 10 >= sizeof um){ falhou = 1; break; }
+            snprintf(um, sizeof um, "%s VALUES %.*s", cab, (int)tam, ini);
+            if(!insere(um)) falhou = 1; else n++; }
+          pula(&q);
+          if(*q == ',') q++;
+      }
+      if(falhou){
+          if(nossa){ sql_tx_desfaz(); sql_tx_fecha(); }
+          printf("erro: a ordem tinha %d linha(s) e a %d.ª foi recusada — %s.\n",
+                 quantos, n + 1,
+                 nossa ? "as anteriores foram DESFEITAS" : "a transacção é sua e fica aberta");
+          if(sql_cap){ sql_cap->ok = 0;
+              snprintf(sql_cap->err, sizeof sql_cap->err,
+                       "multi-row INSERT: row %d rejected, none inserted", n + 1); }
+          return 0;
+      }
+      if(nossa) sql_tx_fecha();
+      printf("-- %d linhas numa ordem só\n", n);
+      if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "INSERT 0 %d", n);
+      return 1; }
+}
+
 static int cria(const char *resto){
     const char *p = resto;
     char nome[64];
@@ -3942,6 +4022,10 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
 }
 
 static long ultima_conta = 0;
+/* e o número de FIBRAS da última varredura, para o `count(DISTINCT c)`: é
+ * outra pergunta sobre o mesmo campo — quantas classes, em vez de quantos
+ * elementos —, e por isso apura-se no mesmo sítio e com a tabela ainda aberta. */
+static long ultima_fibras = 0;
 /* os passos da última varredura — a única maneira de AFIRMAR que o molde deixou
  * de ramificar, em vez de o supor: sem salto, o custo não depende do dado. */
 long sql_ultimos_passos = 0;
@@ -4003,6 +4087,13 @@ static int checa_corpos(unsigned citadas, long ncols){
 /* lê `*` ou `c1, c2, …` até ao FROM; devolve 0 se não reconhecer */
 static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min */
 static char agr_col[64] = "";        /* a coluna que a agregação lê */
+/* a coluna do `count(DISTINCT c)`, "" se não houver. São DUAS: o `pedido` é
+ * escrito pelo despacho do `SELECT count(...)`, que corre ANTES do `varre` e
+ * cujo interior era deitado fora; o outro é o que o `varre` usa, e ele
+ * recolhe-o no arranque em vez de o zerar. Sem esta ponte a palavra DISTINCT
+ * era lida e perdida no caminho, e o motor respondia o count de tudo. */
+static char cnt_dis[64] = "";
+static char cnt_dis_pedido[64] = "";
 
 /* os aliases do `AS`, por posição na lista; vazio = sem alias */
 static char alias[SQL_OUT_MAX_COLS][32];
@@ -4043,7 +4134,17 @@ static int lista_colunas(const char **pp, char *out, int cap){
               if(!strcasecmp(nome, "COUNT")){
                   const char *r = q + 1; pula(&r);
                   char arg[64];
-                  if(*r == '*') r++;
+                  /* ── `count(DISTINCT b)` É CONTAR AS FIBRAS ──────────────
+                   * Não é o count com um adorno: é o número de valores
+                   * distintos, isto é, quantas fibras tem o quociente por b —
+                   * o mesmo objecto do GROUP BY, lido em quantidade em vez de
+                   * em extensão. Era ACEITE e respondia o count de tudo: a
+                   * palavra entrava como nome de coluna e ninguém a lia. */
+                  if(palavra(&r, "DISTINCT")){
+                      if(!ident(&r, arg, sizeof arg)) return 0;
+                      snprintf(cnt_dis, sizeof cnt_dis, "%s", arg);
+                  }
+                  else if(*r == '*') r++;
                   else if(!ident(&r, arg, sizeof arg)) return 0;
                   pula(&r); if(*r != ')') return 0; r++;
                   p = r; pula(&p);
@@ -5020,6 +5121,8 @@ static int varre(const char *resto, int acao){
      * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
      * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
     ord_col[0] = 0; ord_desc = 0; ord_col2[0] = 0; ord_desc2 = 0;
+    snprintf(cnt_dis, sizeof cnt_dis, "%s", cnt_dis_pedido);
+    cnt_dis_pedido[0] = 0;
     grp_col[0] = 0; lim_n = -1; off_n = 0;
     hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
@@ -5457,6 +5560,49 @@ static int varre(const char *resto, int acao){
 
     long achou = bits_conta(S_MATCH, nrows);
     ultima_conta = achou;
+
+    /* ── E QUANTAS FIBRAS, se a pergunta foi essa ────────────────────────────
+     * `count(DISTINCT c)` não é o count com um adorno: é o número de valores
+     * distintos, isto é, quantas classes tem o quociente por c — o mesmo
+     * objecto do GROUP BY, lido em quantidade em vez de em extensão. Conta-se
+     * pela MESMA árvore, e a ausência é uma classe como as outras: uma, se
+     * houver alguma. */
+    ultima_fibras = 0;
+    if(cnt_dis[0]){
+        int cc = col_indice(cnt_dis);
+        if(cc < 0){
+            printf("erro: a coluna «%s» não existe — o count(DISTINCT) é"
+                   " RECUSADO.\n", cnt_dis);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" does not exist", cnt_dis); }
+            return 0;
+        }
+        { int seq[SQL_OUT_MAX_ROWS], n = 0, viu_aus = 0, coube = 1;
+          ord_limpa();
+          for(long i = 0; i < nrows && coube; i++){
+              if(!bit_le(S_MATCH, i)) continue;
+              if(!bit_le(S_PRES, i*ncols + cc)){ viu_aus = 1; continue; }
+              if(!ord_insere(celula_valor(i, cc, ncols), (int)i)) coube = 0;
+          }
+          if(!coube){
+              printf("erro: a árvore do count(DISTINCT) não coube — RECUSADO.\n");
+              if(sql_cap){ sql_cap->ok = 0;
+                  snprintf(sql_cap->err, sizeof sql_cap->err,
+                           "count(DISTINCT): a arvore nao coube; recusa em vez de"
+                           " contar metade"); }
+              return 0;
+          }
+          ord_percorre(0, 0, 0, seq, &n, SQL_OUT_MAX_ROWS, 0);
+          { long ant = 0; int primeiro = 1;
+            for(int k = 0; k < n; k++){
+                long v = celula_valor(seq[k], cc, ncols);
+                if(primeiro || v != ant) ultima_fibras++;
+                ant = v; primeiro = 0;
+            } }
+          if(viu_aus) ultima_fibras++;      /* o dual é uma classe, e é UMA */
+        }
+    }
 
     /* ── A RESTRIÇÃO VALE EM QUALQUER PORTA ──────────────────────────────────
      * Uma afirmação sobre a coluna que só o INSERT respeitasse não é uma
@@ -7568,7 +7714,7 @@ static int executa(const char *sql){
     if(palavra(&p, "INSERT")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return insere_texto(q+5);
-        return insere(p);
+        return insere_muitas(p);
     }
     if(palavra(&p, "IMPORT")){
         const char *q = p; pula(&q);
@@ -7616,6 +7762,15 @@ static int executa(const char *sql){
                 if(fim){
                     char resto[512];
                     int ok;
+                    /* o INTERIOR lê-se, em vez de se deitar fora: é lá que a
+                     * palavra DISTINCT vive, e é ela que muda a pergunta de
+                     * «quantas linhas» para «quantas classes» */
+                    { const char *d = r + 1;
+                      if(palavra(&d, "DISTINCT")){
+                          char c[64];
+                          if(ident(&d, c, sizeof c))
+                              snprintf(cnt_dis_pedido, sizeof cnt_dis_pedido, "%s", c);
+                      } }
                     snprintf(resto, sizeof resto, "*%s", fim + 1);
                     ok = varre(resto, ACAO_MARCA);
                     if(sql_cap){
@@ -7625,7 +7780,7 @@ static int executa(const char *sql){
                          * fazer, e pior: com `cat_nrows()` lido depois de a
                          * varredura poder ter trocado a tabela aberta, o campo
                          * era percorrido pelo tamanho de OUTRA. */
-                        long n = ultima_conta;
+                        long n = cnt_dis[0] ? ultima_fibras : ultima_conta;
                         memset(sql_cap, 0, sizeof *sql_cap);
                         sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
                         sql_cap->tipo[0] = SQL_TIPO_INT8;
