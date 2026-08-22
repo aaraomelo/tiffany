@@ -76,7 +76,21 @@ a álgebra de incidência de uma ordem --- a mesma de que a inversão de Möbius
 árvore dos divisores é o outro caso. E para a leitura espectral, os caracteres
 de $B^{\,m}$, que valem $\pm1$: tudo corre em inteiros, sem uma vírgula.
 
-\medskip\noindent\textbf{E o eixo é uma dualidade}, que se repete em cada
+\medskip\noindent\textbf{E o eixo é uma dualidade}, que não foi escolhida:
+\emph{deduziu-se}. Sobre dois extremos $\partial$ não fixa nada, e por isso uma
+composição não chega --- são precisas \textbf{duas}, com $\partial$ a ser o
+\emph{oposto} numa e o \emph{inverso} na outra. Cada face tem a sua dobra e cada
+dobra tem o seu meio: a \textbf{aritmética} $\frac{a+b}{2}$ de um lado, a
+\textbf{geométrica} $\sqrt{ab}$ do outro; a reta e o círculo; o cartesiano e o
+polar, onde as fases somam e os módulos multiplicam. E as duas \emph{fecham}:
+batendo alternadas, os intervalos encaixam e o processo \textbf{termina numa
+igualdade} --- o ponto onde para é o ponto fixo que as duas faces passam a
+partilhar, e é ele o \textbf{corte}. Não converge para o ponto: termina nele. E
+quando o ponto \emph{não} é da grade, o processo termina na mesma e as duas
+faces cercam-no: o que o finito guarda é então o par $(m,\delta)$ --- onde o
+ponto está, e quanto dele não cabe. É assim que um objeto finito carrega a
+assinatura de um ponto sem ter de o conter.
+Sobre esse eixo corre o outro, que se repete em cada
 andar: \emph{multiplicidade} é o que o campo vê, \emph{memória} é o que a
 construção preserva. A pipeline
 \[
@@ -89,7 +103,8 @@ uma vez deixam o mesmo campo.
 
 \medskip\noindent\textbf{O alcance.} De um operador com duas equações e de uma aplicação com
 igualdade no contradomínio saem, com demonstração, o percurso, a memória, a
-multiplicidade, o tempo, a métrica, a transformada e as dualidades que os ligam.
+multiplicidade, o tempo, a métrica, a transformada, o corte e as dualidades que
+os ligam.
 E o mesmo mecanismo percorre a escada aritmética que a obra constrói noutros
 documentos --- $B$, depois $I$, depois $I^{2}/{\sim}$, depois as frações, depois
 os cortes:
@@ -448,6 +463,293 @@ que adiante se chama a \textbf{palavra} (Teor.~\ref{thm:palavra}) --- lá o
 alfabeto é o das direções de aresta, e a divisão que $\partial$ faz no seu
 argumento é a que o vértice faz nas suas saídas; a \textbf{aresta é a memória dessa
 divisão}. E $G$ conta o que a passagem da tupla ao objeto deitou fora.
+
+\subsection*{A outra face, e o corte}
+
+\noindent O Teor.~\ref{thm:duas}(4) obriga a \emph{duas} composições e diz o
+que $\partial$ é em cada uma --- o \emph{oposto} numa face e o \emph{inverso} na
+outra. Até aqui desenvolveu-se só a primeira: o meio $m=\tfrac{a+b}{2}$ e, por
+indução, os diádicos $k/2^{n}$. A segunda tem o seu próprio meio, e ele não é
+matéria nova.
+
+\begin{lema}[a face multiplicativa tem o seu meio]\label{lem:geo}
+Na face onde $\partial$ é o inverso, a dobra que troca os extremos é
+\[
+\boxed{\;\partial^{\times}x=\frac{ab}{x}\;}
+\]
+--- de facto $\partial^{\times}a=b$ e $\partial^{\times}b=a$, e o invariante é
+$ab$. O seu único ponto fixo é
+\[
+g=\sqrt{ab},
+\]
+a \textbf{média geométrica}. É a mesma frase do Teor.~\ref{thm:duas}(2) lida na
+face que o Teor.~\ref{thm:duas}(4) obriga a existir: cada face tem uma dobra, e
+cada dobra tem um meio.
+\end{lema}
+
+\begin{proof}
+$\partial^{\times}$ troca porque $ab/a=b$; é involutiva porque $ab/(ab/x)=x$; e
+$ab/x=x$ tem a única solução positiva $x=\sqrt{ab}$, que existe sempre que a
+raiz se inverta --- a mesma condição que o $2$ era na face aditiva.
+\end{proof}
+
+\medskip\noindent\textbf{A grade, e porque ela tem de se dizer antes.} O
+Teor.~\ref{thm:duas}(6) já fixou o objeto onde tudo isto vive: ao fim de $n$
+dobras os pontos são os $k/2^{n}$, uma \textbf{grade} de grão $u=2^{-n}$. As duas
+dobras operam \emph{nela}: a aritmética cai-lhe dentro sozinha --- o meio de dois
+pontos da grade é um ponto da grade seguinte ---, mas a geométrica \textbf{não},
+porque $\sqrt{ab}$ não é diádico: $\sqrt2$ não está em grade nenhuma. Define-se
+então $g$ como o \emph{maior elemento da grade cujo quadrado não passa} $ab$ --- o
+piso --- e é isso que faz o processo permanecer no objeto que o constrói. Só com
+isto dito é que a largura $m-g$ é um \textbf{número inteiro de grãos}, e é
+literalmente esse inteiro que vai decrescer.
+
+\begin{corolario}[a desigualdade das médias é a conservação da norma]\label{cor:medias}
+Escrevendo $a=m+\delta$ e $b=m-\delta$, o Lema~\ref{lem:conserva} dá
+$ab=m^{2}-\delta^{2}$; logo
+\[
+g^{2}=m^{2}-\delta^{2}\;\le\;m^{2},\qquad\text{isto é}\qquad g\le m,
+\]
+com igualdade \emph{exatamente} quando $\delta=0$. Não é uma desigualdade nova
+--- é a norma conservada, lida como comparação.
+\end{corolario}
+
+\medskip\noindent\textbf{E aqui dá-se o salto da aritmética para a geometria,
+numa figura só.} No semicírculo de diâmetro $a+b$, seja $P$ o ponto do diâmetro
+que o divide em $a$ e $b$. Então
+\[
+\text{o \textbf{raio} é }m=\frac{a+b}{2},
+\qquad
+\text{a \textbf{altura} sobre }P\text{ é }h=\sqrt{ab}=g,
+\]
+e Pitágoras no raio dá $h^{2}+\delta^{2}=m^{2}$ --- que é o Lema~\ref{lem:conserva}
+outra vez, $ab=m^{2}-\delta^{2}$, dito com uma figura em vez de com uma conta. A
+desigualdade $g\le m$ passa então a ler-se \emph{a altura não passa o raio}, com
+igualdade só quando $P$ é o centro. \textbf{A média aritmética é a reta; a média
+geométrica é o círculo}, e as duas são a mesma conservação vista de cada lado ---
+é o primeiro sítio deste documento onde uma face se lê como comprimento e a
+outra como área.
+
+\begin{teorema}[as duas faces acabam numa igualdade: o corte]\label{thm:corte}
+Batendo as duas faces alternadamente, $(a,b)\mapsto(m,g)$ com $m$ e $g$ os dois
+meios:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{encaixa}: $g\le g'\le m'\le m$, pelo Cor.~\ref{cor:medias}
+aplicado em cada passo --- os intervalos $[g_{n},m_{n}]$ são encaixantes;
+\item[(2)] \textbf{colapsa}: $m-g=\dfrac{\delta^{2}}{m+g}$, donde
+$\delta'\le\dfrac{\delta^{2}}{2m}$ e, em particular, $\delta'\le\delta/2$;
+\item[(3)] \textbf{acaba, e acaba numa IGUALDADE}: sendo o objeto \emph{finito}
+--- a régua tem grão ---, a largura não se aproxima de zero, \textbf{chega} a
+zero. Ao fim de um número \emph{contado} $N$ de batidas vale
+\[
+\boxed{\;m_{N}=g_{N}\;}
+\]
+e o intervalo $[g_{N},m_{N}]$ é um \textbf{ponto};
+\item[(4)] \textbf{um ponto em todos eles, e somente um}: esse ponto está em
+todos os intervalos, porque encaixam; e se $x$ e $y$ estão em todos, então
+$\lvert x-y\rvert\le m_{n}-g_{n}$ para todo $n$, logo
+$\lvert x-y\rvert\le m_{N}-g_{N}=0$ e $x=y$;
+\item[(5)] \textbf{e esse ponto é o ponto fixo comum às duas faces.} Cada face
+tem a sua dobra e cada dobra tem o seu ponto fixo --- $\partial^{+}$ fixa $m$,
+$\partial^{\times}$ fixa $g$ (Teor.~\ref{thm:duas}(2) e Lema~\ref{lem:geo}). Os
+dois são \emph{diferentes} enquanto $a\neq b$, e coincidem exatamente onde o
+processo acaba: em $p$ vale $\partial^{+}p=\partial^{\times}p=p$. O corte não é
+um ponto que se ache \emph{entre} as classes --- é o ponto fixo que as duas
+faces passam a \textbf{partilhar}.
+\end{enumerate}
+Isto é um \textbf{corte}, e é \emph{produzido} em vez de postulado --- e
+produzido por uma conta que \emph{termina}, não por um limite:
+\[
+\boxed{\;\text{grade}\;\to\;\text{duas faces}\;\to\;\text{encaixe}\;\to\;
+\text{descida bem-fundada}\;\to\;\text{colapso}\;\to\;a=b\;}
+\]
+e daí $\bigcap_{n}[g_{n},m_{n}]=\{p\}$, com a existência e a unicidade a saírem
+\emph{ambas} da última igualdade --- nenhuma delas de um axioma externo.
+\emph{Não converge para o ponto: termina nele.}
+\end{teorema}
+
+\begin{proof}
+(1) $g\le m$ é o Cor.~\ref{cor:medias}; $m'\le m$ porque $m'=\tfrac{m+g}{2}$ com
+$g\le m$; e $g'\ge g$ porque $g'=\sqrt{mg}\ge\sqrt{g\cdot g}=g$. Daí
+$[g',m']\subseteq[g,m]$.
+
+(2) $m-g=\dfrac{m^{2}-g^{2}}{m+g}=\dfrac{\delta^{2}}{m+g}$, e $g\ge 0$ dá o
+majorante; $\delta'=\tfrac{m-g}{2}$.
+
+(3) A descida é \textbf{bem-fundada}, e prova-se sem olhar para a raiz: se
+$g<m$ então $\tfrac{g+m}{2}<m$, e o maior ponto da grade abaixo de algo menor que
+$m$ é no máximo $m-u$; logo
+\[
+g<m\;\Longrightarrow\;m'\le m-u .
+\]
+A largura desce pela ponta \emph{de cima}, um grão por batida no pior caso, faça
+o piso da geométrica o que fizer. Sendo a largura um inteiro de grãos e
+não-negativa, uma sucessão estritamente decrescente dela \textbf{pára} --- não
+pode descer para sempre. Onde pára, $\delta=0$, isto é $m=g$. Note-se o que a
+finitude faz aqui: ela é a \emph{hipótese}, e não uma limitação --- é por o
+objeto ser finito que há \textbf{igualdade} em vez de limite, e por a descida ser
+estrita numa ordem bem-fundada que isto é uma terminação e não uma convergência
+disfarçada.
+
+(4) A existência é (3): o último intervalo já é o ponto, e está contido em todos
+os anteriores por (1). A unicidade é a igualdade: qualquer $x,y$ comuns a todos
+distam no máximo a largura de cada um, e a do último é $0$. Nenhum axioma de
+completude é invocado --- o argumento é o do pombal com a folga já em zero.
+
+(5) Os dois pontos fixos são $\tfrac{a+b}{2}$ e $\sqrt{ab}$, e coincidem sse
+$(a+b)^{2}=4ab$, isto é sse $a=b$ --- que é (3). Aí, com $a=b=p$, vem
+$\partial^{+}p=p+p-p=p$ e $\partial^{\times}p=p^{2}/p=p$.
+\end{proof}
+
+\medskip\noindent\textbf{A cota, e o que a segunda face acrescenta.} De
+$m'\le m-u$ sai imediatamente que, se a largura inicial tem $N$ grãos, não há
+mais de $N$ descidas: a terminação é literalmente $N,\,N-1,\,\ldots,\,0$. É
+\emph{essa} cota que prova que acaba, e ela não usa a raiz. O que a face
+geométrica acrescenta é a \textbf{velocidade}: por (2) o colapso é quadrático, e
+o número real de batidas cai em $\log\log$. Nos pares medidos a cota
+bem-fundada dá $10^{9}$ e as duas faces fazem \textbf{cinco} --- e as duas
+lêem-se lado a lado de propósito, porque confundi-las seria tomar a rapidez por
+prova: sem a primeira não se sabe que acaba, sem a segunda não se sabe que acaba
+depressa.
+
+\medskip\noindent\textbf{E é aqui que a segunda face se paga.} Com \emph{uma}
+face só, o par colapsa num passo --- $(a,b)\mapsto(m,m)$ --- e a batida seguinte
+não move nada: para continuar é preciso \textbf{escolher} um lado em cada nível,
+que é a bissecção do Teor.~\ref{thm:duas}(6). Aí o ponto fica
+\emph{endereçado} por um caminho, a um bit por nível
+(\code{analitico thm:central-continuo}: $\mathbb{R}\cong\{\text{caminhos}\}/\!\sim$).
+Com as \emph{duas} faces não se escolhe nada: o corte é \textbf{determinado}
+pelos dois extremos, e o par $(a,b)$ chega para o fixar.
+\[
+\boxed{\;\text{uma face \textbf{endereça}; duas \textbf{produzem}}\;}
+\]
+É a frase do Teor.~\ref{thm:duas}(4) --- \emph{uma composição não chega} --- dita
+um andar acima, e o nome clássico do processo é a média
+\textbf{aritmético-geométrica}.
+
+\medido{\code{tests/meio.c} §M8: $\partial^{\times}$ troca e fixa $\sqrt{ab}$;
+$g^{2}=ab=m^{2}-\delta^{2}\le m^{2}$ com igualdade só em $\delta=0$ e
+desigualdade \emph{estrita} fora dele ($1890$ pares); encaixa e halva em todas
+as batidas; $\delta'\le\delta^{2}/(2m)$ na forma inteira ($975$ pares); e o
+processo \textbf{acaba} --- $m=g$ em $5$ a $6$ batidas, com o valor a bater nos
+valores \emph{conhecidos} do processo, que são externos ao ficheiro
+($\mathrm{AGM}(1,2)=1{,}4567910310\ldots$, $\mathrm{AGM}(1,3)=1{,}8636167832\ldots$,
+$\mathrm{AGM}(1,100)=26{,}2166887\ldots$). A unicidade mede-se dos dois lados,
+porque um só não dizia nada: o último intervalo tem \emph{um} habitante e o
+penúltimo tinha mais. E a \textbf{boa fundação} varre-se: na grade $1..300$
+inteira, $116\,241$ passos, exige-se em cada um que $m'<m$ --- a cláusula que
+garante a paragem e que não depende da raiz ---, e com ela as duas que a
+sustentam (a geométrica nunca desce, o encaixe nunca quebra), porque qualquer
+delas a falhar tirava o sentido às outras. O CONTROLO diz porque a segunda face
+faz falta --- com uma só, a segunda batida não move. Tudo em inteiros, com a raiz por piso e a
+folga do piso dita onde é usada. E o encaixotamento certificado está em
+\code{algebrico thm:agm-analitico} e \code{tests/agm.c} §A1--§A3.}
+
+\colunas{\code{thm:duas}(2) e (4); \code{lem:conserva}}
+        {$\partial^{\times}x=ab/x$; as duas classes; o par $(a,b)$ basta}
+        {\code{tests/meio.c} §M8; \code{tests/agm.c} §A1--§A3}
+
+\subsection*{O que o finito guarda de um ponto que não é seu}
+
+\noindent O Teor.~\ref{thm:corte} tem uma hipótese que é preciso ler: o ponto
+onde o processo pára é um ponto \emph{da grade}. Quando o par $(a,b)$ é da
+grade, o encaixe acaba em $m=g$ e o ponto é \textbf{produzido}. Mas há um
+segundo desfecho, e é ele que dá a interpretação.
+
+\medskip\noindent\textbf{Os dois desfechos.} Um encaixe numa grade finita
+termina sempre --- é a boa fundação ---, mas pode terminar de duas maneiras:
+\[
+\begin{array}{ll}
+\text{o ponto \textbf{está} na grade} & \text{acaba em }m=g\text{; o ponto é produzido}\\
+\text{o ponto \textbf{não está}} & \text{acaba com a largura no grão; as duas faces \emph{cercam-no}}
+\end{array}
+\]
+No segundo caso não há nada a produzir, e nada se pede: um ponto pode não caber
+em grade nenhuma. O que há é a \textbf{representação}, e ela é o par que o
+Lema~\ref{lem:conserva} já deu. De $L$ e $U$ --- as duas faces --- saem
+\[
+\boxed{\;
+\underbrace{(m,\delta)}_{\text{o \textbf{rastro}}}
+\qquad
+\underbrace{m=\frac{L+U}{2}}_{\text{a representação \textbf{comprimida}}}
+\qquad
+\underbrace{\delta=\frac{U-L}{2}}_{\text{a \textbf{perda}, medida}}
+\;}
+\]
+Três coisas distintas, e vale a pena não as juntar. O \textbf{rastro} é o
+\emph{par}: $(m,\delta)$ é $(L,U)$ escrito duas vezes, com resíduo zero
+(Lema~\ref{lem:conserva}) --- nada se perdeu ao mudar de escrita. A
+\textbf{compressão} é ficar só com $m$; e o que ela deita fora não é
+desconhecido, é $\delta$ --- \emph{medido}. Dizer que $m$ é o que a
+representação conserva quer dizer que $m$ é o seu \textbf{invariante}, e não que
+$m$ contenha tudo: o que $m$ não contém tem nome, tamanho e sinal de aviso.
+
+\medskip\noindent\textbf{O centro é a leitura, e não uma média de conveniência.}
+Se fosse arbitrário, valeria o mesmo que as bordas. Mede-se que não: no encaixe
+da torre de duplicação o centro erra $6$ a $13$ vezes menos do que qualquer das
+duas fronteiras, em três grades diferentes. É onde a informação está --- as
+fronteiras são o que se \emph{certifica}, o centro é o que se \emph{sabe}.
+
+\medskip\noindent\textbf{E é aqui que as quatro frases da porta de entrada se
+lêem uma a uma.} O \emph{rastro} de uma caminhada é a sua representação finita:
+cada batida deixa marca, e o que fica é $(m,\delta)$.
+\[
+\begin{array}{ll}
+\text{o finito é \textbf{codificado}} & \text{o corpo guarda dois números da grade}\\
+\text{o infinito é \textbf{caminhado}} & \text{cada batida é um passo, e nenhuma o alcança}\\
+\text{a representação \textbf{comprime}} & \text{do ponto fica }m\\
+\text{a dobra \textbf{mede o que foi perdido}} & \delta\ \text{é essa medida}
+\end{array}
+\]
+$\delta$ não é um erro a lamentar: é o que a dobra devolve, e é por existir que
+se sabe quanto ficou de fora. \emph{A memória existe onde a trajetória passou}
+--- e o rastro é essa memória.
+
+\medskip\noindent\textbf{Nada disto invoca o ponto.} O processo não recebe o
+ponto como ingrediente e não o consulta: ele constrói o caminho, e o caminho
+determina o ponto. Se esse ponto tem nome noutro sítio --- e o encaixe da
+duplicação de Arquimedes determina aquele a que a obra chama $\pi$
+(\code{algebrico thm:metronomo-pi}, onde ele é \emph{o buraco do seu próprio
+encaixe}) --- isso é uma \textbf{identificação}, feita depois e fora daqui. A
+transcendência é propriedade do objeto obtido, não coisa posta na máquina antes
+de a construção começar:
+\[
+\boxed{\;\text{não se postula o ponto; constrói-se o caminho que o determina}\;}
+\]
+
+\medskip\noindent\textbf{E daí uma leitura, dita como leitura.} As realizações
+que este documento constrói --- a bissecção, a trie, o índice, a órbita, a
+forma polar, a métrica, o espectro --- têm todas a forma da
+Def.~\ref{def:objeto}: são \emph{caminhadas}, e cada uma deixa o seu rastro
+finito. Que os pontos que elas determinam sejam o mesmo ponto é o que a obra
+tenta mostrar noutros documentos, e não se demonstra aqui; o que \emph{aqui}
+está demonstrado é mais estreito e é o que sustenta a leitura: uma caminhada
+com duas faces termina, o que ela termina é um ponto ou um par que o cerca, e o
+que o finito guarda é sempre o mesmo par $(m,\delta)$.
+
+\medskip\noindent A cadeia inteira, e cada seta é um enunciado deste documento
+menos a última, que é uma identificação feita noutro:
+\[
+\boxed{\;
+\text{dobra}\to\text{caminho}\to\text{rastro}\to\text{encaixe}\to
+\text{ponto}\;\;\big|\;\;\text{identificação}
+\;}
+\]
+E é isto que a dobra acabou por explicar, e que era a promessa da primeira
+página: \emph{como um objeto finito carrega a assinatura de um ponto sem ter de
+o conter}. Ele não o contém --- contém $(m,\delta)$: onde está, e quanto disso
+não cabe.
+
+\medido{\code{tests/meio.c} §M8: os dois desfechos medidos lado a lado --- a
+AGM a acabar em $m=g$ com o ponto na grade, e a torre de duplicação a acabar
+com o ponto cercado ---, e o centro contra as suas fronteiras em três grades
+($6$ a $13$ vezes melhor). O $\pi$ de referência usado para medir o erro é
+externo ao ficheiro e não entra em conta nenhuma: serve para \emph{conferir}, e
+o processo corre sem ele.}
+
+\colunas{\code{thm:corte}; \code{lem:conserva}; \code{algebrico thm:metronomo-pi}}
+        {o par $(m,\delta)$; o centro como leitura; as duas fronteiras}
+        {\code{tests/meio.c} §M8; \code{tests/metronomo\_pi.js}}
 
 \subsection*{A realização, e o que ela perde}
 
@@ -1630,10 +1932,27 @@ $\chi_k(j)=r\,e^{\partial\theta}$, o módulo é \emph{constante}:
 \theta_k(j)=\pi\cdot\langle k,j\rangle .
 \]
 Ou seja: \emph{o módulo não carrega nada, e a fase carrega tudo} --- e a fase é
-\textbf{um bit}, a paridade $\langle k,j\rangle$ em unidades de $\pi$. É o caso
+\textbf{um bit}, a paridade $\langle k,j\rangle$ em unidades de $\pi$. Lido pela
+tabela das duas faces (§\ref{sec:dualidades}): aqui a face multiplicativa está
+\emph{degenerada} --- todos os módulos valem $1$ --- e resta a aditiva sozinha,
+que é a razão de tudo neste andar ser XOR. É o caso
 extremo da divisão do Teor.~\ref{thm:BI} entre a intensidade e o sinal: aqui a
 intensidade é sempre a mesma, e o que distingue dois caracteres é só \emph{para
 onde apontam}.
+
+\medskip\noindent\textbf{E a forma polar é a SEPARAÇÃO DAS DUAS FACES.} Não é
+uma notação conveniente: é o Teor.~\ref{thm:duas}(4) escrito num sítio onde as
+duas faces convivem. O \emph{módulo} vive na face multiplicativa --- multiplica
+--- e a \emph{fase} vive na aditiva --- soma:
+\[
+r_{1}e^{i\theta_{1}}\cdot r_{2}e^{i\theta_{2}}
+=\underbrace{(r_{1}r_{2})}_{\text{face }\cdot}\;
+ e^{\,i\overbrace{(\theta_{1}+\theta_{2})}^{\text{face }+}} ,
+\]
+e a exponencial é o \textbf{dicionário} entre elas: leva a soma no produto, que
+é exatamente levar uma face na outra. É por isso que este é o andar onde o salto
+da aritmética para a geometria se vê a funcionar --- o mesmo salto que o
+Cor.~\ref{cor:medias} deu com uma figura, aqui dado com uma identidade.
 
 \medskip\noindent\textbf{Daí o produto do Teor.~\ref{thm:conv} ser uma SOMA.} Em
 forma polar os módulos multiplicam-se e as fases somam-se; com módulo $1$ sobra
@@ -2442,7 +2761,49 @@ canónico, e no degrau das frações isso dá literalmente a fração irredutív
 % ═══════════════════════════════════════════════════════════════════════════
 \section{As dualidades, reunidas}\label{sec:dualidades}
 
-\noindent Uma mesma figura repetiu-se em cada andar: um lado \emph{comprime} e
+\subsection*{A primeira, de que as outras saem: as duas faces}
+
+\noindent Antes da tabela, a dualidade que este documento não escolheu ---
+\emph{deduziu}. O Teor.~\ref{thm:duas}(4) mostra que uma composição não chega e
+obriga a \textbf{duas}, com $\partial$ a ser o \emph{oposto} numa e o
+\emph{inverso} na outra. Tudo o que se segue vive nessa divisão, e ela tem um
+nome clássico em cada andar:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+face \textbf{aditiva} & face \textbf{multiplicativa} & onde \\
+\midrule
+$\partial x+x=0$: o oposto & $\partial x\cdot x=1$: o inverso & Teor.~\ref{thm:duas}(4) \\
+meio $m=\frac{a+b}{2}$ & meio $g=\sqrt{ab}$ & Teor.~\ref{thm:duas}(2), Lema~\ref{lem:geo} \\
+o \textbf{comprimento}: o raio & a \textbf{área}: a altura & Cor.~\ref{cor:medias} \\
+a \textbf{reta}: os diádicos $k/2^{n}$ & o \textbf{círculo}: as raízes & Teor.~\ref{thm:duas}(6) \\
+as fases \textbf{somam-se} & os módulos \textbf{multiplicam-se} & §\ref{sec:transf} \\
+cartesiano & polar & §\ref{sec:transf} \\
+$\oplus$: a cisão & $\otimes$: o gato & Def.~\ref{def:gato} \\
+\emph{endereça} (um bit por nível) & \emph{produz} (o par $(a,b)$ basta) & Teor.~\ref{thm:corte} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent Duas coisas a reter, e são o eixo do documento.
+\textbf{Primeira:} as duas faces não são simétricas no que \emph{fazem} --- uma
+endereça e a outra produz ---, mas são-no no que \emph{são}: cada uma é uma
+dobra, com o seu invariante e o seu ponto fixo, e o invariante de cada uma é o
+neutro da outra. \textbf{Segunda:} juntas elas \emph{fecham}. O
+Teor.~\ref{thm:corte} mostra que bater as duas alternadamente termina numa
+igualdade, e que o ponto onde termina é justamente o ponto fixo que as duas
+passam a partilhar:
+\[
+\boxed{\;\text{o corte é o \textbf{ponto fixo comum} às duas faces}\;}
+\]
+--- não um limite entre elas, nem um habitante trazido de fora. O nome clássico
+do processo é a média \textbf{aritmético-geométrica}, e é ele que faz a ponte
+entre os dois primeiros andares desta tabela: o salto da aritmética para a
+geometria não é uma mudança de assunto, é a \emph{outra face da mesma dobra}.
+
+\medskip\noindent\textbf{E a tabela que segue é a mesma figura noutro registo.}
+Uma mesma figura repetiu-se em cada andar: um lado \emph{comprime} e
 perde uma distinção; o outro \emph{repõe-na} noutro sítio, e paga por isso.
 Nenhuma linha da tabela é analogia --- cada uma é um enunciado deste documento,
 com a sua prova.
@@ -2481,6 +2842,25 @@ outro, lugar por preencher, e o número é $\abs{I}-\abs{X}$ nos dois.
 \boxed{\ \textbf{multiplicidade} \text{ é o que o campo vê};\qquad
 \textbf{memória} \text{ é o que a construção preserva.}\ }
 \]
+
+\medskip\noindent\textbf{E onde tudo isto se junta.} As duas tabelas desta
+secção não são duas listas: são a mesma figura em dois registos. A de cima diz
+que \emph{há duas faces}; a de baixo diz \emph{o que cada par de faces custa}.
+Postas juntas, o documento fica com uma leitura só, e ela liga o primeiro
+teorema ao último:
+\[
+\text{caminhar é \textbf{realizar}};\qquad
+\text{codificar é \textbf{conservar}};\qquad
+\text{a dobra \textbf{mede} a diferença.}
+\]
+Cada realização deste documento --- a bissecção, a trie, o índice, a órbita, a
+polar, a métrica, o espectro --- é uma caminhada com duas faces, e o que dela
+fica é sempre o mesmo par: o \textbf{centro} que ela conserva e o
+\textbf{desvio} que ela mede. Que os centros de realizações diferentes sejam o
+mesmo centro é o que a obra persegue nos outros documentos; \emph{aqui} o que
+está demonstrado é a forma comum --- e é ela que faz das peças um só objeto e
+não uma coleção. \emph{Não se postula o ponto: constrói-se o caminho que o
+determina.}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Realizações}\label{sec:realizacoes}
