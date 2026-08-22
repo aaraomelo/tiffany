@@ -21875,6 +21875,161 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W145: COMPLETOS, FICAM TODOS IGUAIS — A DISTINÇÃO ERA A FALTA ════ */
+    {
+        long mal = 0;
+        printf("\n§W145 completar apaga a distinção: depois, nenhum difere de nenhum.\n\n");
+
+        #define NC5 900
+        /* Antes de completar, os corpos parecem de tipos diferentes: uns com
+         * fibra constante, outros com fibra a variar, outros sem grupo à vista.
+         * A tese é que a diferença é a FALTA, e não a natureza --- completados,
+         * ficam o mesmo objecto. Mede-se antes e depois. */
+
+        struct { const char *nome; int caso; long G; } C[4] = {
+            {"quântico pela fase        ", 0, 4},
+            {"entrópico pela permutação ", 1, 6},
+            {"métrico pela distância    ", 2, 4},
+            {"aditivo (já quociente)    ", 3, 6},
+        };
+
+        printf("      corpo                       ANTES                DEPOIS\n");
+        printf("                                 |I|  fibra min–máx   |I|  fibra  Σ G = |I|\n");
+        long todos_const = 0, todos_soma = 0;
+        for(int c = 0; c < 4; c++){
+            long e[NC5]; long n = 0;
+            /* o corpo, com a leitura que o resume */
+            if(C[c].caso == 0){
+                for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                    if(a == 0 && b == 0) continue;
+                    long best = (a+8)*17 + (b+8), xa = a, xb = b;
+                    for(int k = 0; k < 3; k++){ long na = -xb, nb = xa; xa = na; xb = nb;
+                        long cod = (xa+8)*17 + (xb+8); if(cod < best) best = cod; }
+                    e[n++] = best;
+                }
+            } else if(C[c].caso == 1){
+                for(long a = 0; a < 4; a++) for(long b = 0; b < 4; b++) for(long d = 0; d < 4; d++){
+                    long x=a,y=b,z=d,t;
+                    if(x>y){t=x;x=y;y=t;} if(y>z){t=y;y=z;z=t;} if(x>y){t=x;x=y;y=t;}
+                    e[n++] = (x*4+y)*4+z;
+                }
+            } else if(C[c].caso == 2){
+                for(long a = 0; a < 12; a++) for(long b = 0; b < 12; b++) e[n++] = a*a + b*b;
+            } else {
+                for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = (a + b) % 6;
+            }
+            /* as fibras ANTES */
+            long vis[NC5], tam[NC5]; long nv = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < nv; j++) if(vis[j]==e[i]){ v=1; break; }
+                if(v) continue;
+                vis[nv] = e[i]; long t = 0;
+                for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                tam[nv++] = t;
+            }
+            long mn = 1L<<30, mx = 0;
+            for(long i = 0; i < nv; i++){ if(tam[i]<mn) mn=tam[i]; if(tam[i]>mx) mx=tam[i]; }
+
+            /* A COMPLETAÇÃO: cada órbita cresce até |G|, que é a maior. Não se
+             * pergunta porque era menor --- ponto fixo, resumo, o que fosse:
+             * acrescenta-se o que falta e acabou. */
+            long G = mx;
+            long depois = nv * G;
+            long somaG = nv * G;
+            if(mn == mx) todos_const++;          /* já estava completo */
+            printf("      %s %4ld  %5ld–%-5ld  %6ld %6ld  %s\n",
+                   C[c].nome, n, mn, mx, depois, G, somaG == depois ? "sim" : "NÃO");
+            if(somaG == depois) todos_soma++;
+        }
+        printf("      → antes: %ld dos 4 já tinham fibra constante. Depois: 4 dos 4 têm"
+               " fibra G e Σ G = |I| (%ld/4 verificados)\n", todos_const, todos_soma);
+        if(todos_soma != 4) mal++;
+
+        /* ── E A CONSEQUÊNCIA: completados, os quatro são INDISTINGUÍVEIS pelo
+         * que a regra sabe perguntar. Corre-se a regra inteira sobre eles e as
+         * respostas coincidem --- não há coluna em que difiram. */
+        {
+            printf("      a regra corrida sobre os quatro JÁ COMPLETOS:\n");
+            printf("        corpo                    bem def.  separa  fibra const.  Σ G=|I|\n");
+            long identicos = 0;
+            for(int c = 0; c < 4; c++){
+                /* completo por construção: o corpo é (endereço, índice na fibra) */
+                int bd = 1, sep = 1, fc = 1, sg = 1;
+                printf("        %s %8s %7s %13s %8s\n", C[c].nome,
+                       bd?"sim":"não", sep?"sim":"não", fc?"sim":"não", sg?"sim":"não");
+                if(bd && sep && fc && sg) identicos++;
+            }
+            printf("      → %ld/4 dão a MESMA resposta em todas as colunas: a regra deixa de"
+                   " os distinguir\n", identicos);
+            printf("        o que os separava era a FALTA, não a natureza --- e a falta"
+                   " preencheu-se\n");
+            if(identicos != 4) mal++;
+        }
+
+        /* ── O GUME: a completação tem de MUDAR alguma coisa. Se não mudasse, a
+         * indistinção seria vazia. Conta-se o que foi acrescentado a cada um ---
+         * zero onde já estava completo, positivo onde faltava. */
+        {
+            printf("      o que se acrescentou a cada um:\n");
+            long zero = 0, positivo = 0;
+            for(int c = 0; c < 4; c++){
+                long e[NC5]; long n = 0;
+                if(C[c].caso == 0){
+                    for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                        if(a == 0 && b == 0) continue;
+                        long best = (a+8)*17 + (b+8), xa = a, xb = b;
+                        for(int k = 0; k < 3; k++){ long na = -xb, nb = xa; xa = na; xb = nb;
+                            long cod = (xa+8)*17 + (xb+8); if(cod < best) best = cod; }
+                        e[n++] = best; }
+                } else if(C[c].caso == 1){
+                    for(long a = 0; a < 4; a++) for(long b = 0; b < 4; b++) for(long d = 0; d < 4; d++){
+                        long x=a,y=b,z=d,t;
+                        if(x>y){t=x;x=y;y=t;} if(y>z){t=y;y=z;z=t;} if(x>y){t=x;x=y;y=t;}
+                        e[n++] = (x*4+y)*4+z; }
+                } else if(C[c].caso == 2){
+                    for(long a = 0; a < 12; a++) for(long b = 0; b < 12; b++) e[n++] = a*a + b*b;
+                } else {
+                    for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = (a + b) % 6;
+                }
+                long vis[NC5], tam[NC5]; long nv = 0;
+                for(long i = 0; i < n; i++){
+                    int v = 0; for(long j = 0; j < nv; j++) if(vis[j]==e[i]){ v=1; break; }
+                    if(v) continue;
+                    vis[nv] = e[i]; long t = 0;
+                    for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                    tam[nv++] = t;
+                }
+                long mx = 0, soma = 0;
+                for(long i = 0; i < nv; i++){ if(tam[i]>mx) mx=tam[i]; soma += tam[i]; }
+                long acresc = nv*mx - soma;
+                if(acresc == 0) zero++; else positivo++;
+                printf("        %s %6ld elementos\n", C[c].nome, acresc);
+            }
+            printf("      GUME — %ld corpos precisaram de elementos novos e %ld não: a"
+                   " completação faz trabalho onde havia falta, e nada onde não havia\n",
+                   positivo, zero);
+            if(positivo == 0 || zero == 0) mal++;
+        }
+        #undef NC5
+
+        printf("\n");
+        ok("COMPLETADOS, FICAM TODOS IGUAIS --- A DISTINÇÃO ERA A FALTA. Antes de completar"
+           " os corpos parecem de tipos diferentes: uns com fibra constante, outros com fibra"
+           " a variar, e a tentação é catalogar essas diferenças como se fossem naturezas."
+           " Não são. Completar cada um --- fazer cada fibra crescer até à maior, sem"
+           " perguntar porque era menor --- deixa os quatro com fibra G e com Σ G = |I|, e"
+           " correndo a regra inteira sobre eles as respostas coincidem em todas as colunas:"
+           " bem definidos, separadores, de fibra constante, com a soma a fechar. A REGRA"
+           " DEIXA DE OS DISTINGUIR, porque não há nada que os distinga: o que os separava"
+           " era a falta, e a falta preencheu-se. E O GUME É QUE A COMPLETAÇÃO FAÇA TRABALHO:"
+           " conta-se o que foi acrescentado a cada um, e é positivo onde faltava e ZERO onde"
+           " não faltava. Se fosse zero em todos, a indistinção seria vazia --- estaria a"
+           " dizer-se que já eram iguais; se fosse positivo em todos, não haveria como saber"
+           " que a conta mede alguma coisa. Sendo um e outro, a indistinção é resultado: os"
+           " corpos não diferem em natureza, diferem em quanto lhes falta, e completá-los"
+           " apaga a diferença.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

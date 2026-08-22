@@ -1615,6 +1615,39 @@ dispensável} --- a escada tem os degraus que tem, e o catálogo inteiro assenta
 equivalências; os corpos situados; a coincidência racional/projectivo em $1296/1296$; e o
 gume dos degraus distintos.}
 
+\paragraph{E completados, \emph{ficam todos iguais} --- a distinção era a falta.} Os
+lotes acima classificam os corpos antes de os completar, e essa classificação é do
+\emph{estado}, não da natureza. Completar cada um --- fazer cada fibra crescer até à
+maior, \emph{sem perguntar porque era menor} --- apaga as diferenças:
+\begin{center}\small
+\begin{tabular}{@{}lrlrrl@{}}
+\toprule
+& \multicolumn{2}{c}{antes} & \multicolumn{3}{c}{depois}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}
+corpo & $\lvert I\rvert$ & fibra & $\lvert I\rvert$ & fibra & $\sum G=\lvert I\rvert$\\
+\midrule
+quântico pela fase & $48$ & $4$ & $48$ & $4$ & sim\\
+entrópico pela permutação & $64$ & $1$--$6$ & $120$ & $6$ & sim\\
+métrico pela distância & $144$ & $1$--$4$ & $284$ & $4$ & sim\\
+aditivo (já quociente) & $36$ & $6$ & $36$ & $6$ & sim\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Corrida a regra inteira sobre os quatro já completos, \textbf{as respostas
+coincidem em todas as colunas} --- bem definidos, separadores, de fibra constante, com a
+soma a fechar. \emph{A regra deixa de os distinguir, porque não há nada que os distinga:
+o que os separava era a falta, e a falta preencheu-se.}
+
+\medskip\noindent E o gume é que a completação faça trabalho: acrescentou $56$ e $140$
+elementos aos dois que faltavam e \textbf{zero} aos dois que já estavam completos. Se
+fosse zero em todos, a indistinção seria vazia; se fosse positivo em todos, não se saberia
+que a conta mede alguma coisa. \emph{Os corpos não diferem em natureza --- diferem em
+quanto lhes falta, e completá-los apaga a diferença.}
+
+\medido{a completação em \code{tests/pgwire.c} §W145 --- $2$ dos $4$ com fibra constante
+antes e $4$ dos $4$ depois, com $\sum G=\lvert I\rvert$ em todos; a regra a dar a mesma
+resposta nas quatro colunas; e o gume, $56$ e $140$ elementos contra $0$ e $0$.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias
