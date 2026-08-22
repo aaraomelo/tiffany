@@ -5266,8 +5266,77 @@ static int varre(const char *resto, int acao){
         }
     }
 
+    /* ── `EXISTS (SELECT … FROM tab)`: O QUANTIFICADOR ───────────────────────
+     *
+     * O `IN` pergunta sobre a LINHA — «este valor está do outro lado?» — e por
+     * isso a sua resposta muda de linha para linha. O `EXISTS` não olha para a
+     * linha nenhuma: pergunta se a subconsulta devolve ALGUMA, e a resposta é a
+     * mesma para todas. É um quantificador, não uma comparação.
+     *
+     * Daí duas consequências que o distinguem, e as duas se medem. A primeira é
+     * o CUSTO: decide-se UMA vez, com a tabela do outro lado aberta, e depois a
+     * condição é uma constante — não há molde a correr por linha. A segunda é a
+     * DUALIDADE: `EXISTS` e `NOT EXISTS` são complementares sobre |I| INTEIRO,
+     * porque nenhum deles olha para a célula; ao contrário do `IN`, cuja soma
+     * fecha no peso dos PRESENTES, porque esse olha (§W38).
+     *
+     * `NOT EXISTS` é o ∀ escrito com o ∃ — a mesma De Morgan do §W42, agora
+     * sobre um conjunto em vez de sobre uma proposição. */
+    int ex_usa = 0, ex_vale = 0;
+    if(acao == ACAO_MARCA && !in_sub && !idx_usa && !idx_pre && !nul_usa){
+        const char *q = p;
+        int nega = 0;
+        pula(&q);
+        if(palavra(&q, "WHERE")){
+            { const char *r = q; if(palavra(&r, "NOT")){ nega = 1; q = r; } }
+            if(palavra(&q, "EXISTS")){
+                pula(&q);
+                if(*q == '('){
+                    const char *r = q + 1;
+                    char c_sub[64], t_sub[64];
+                    pula(&r);
+                    if(palavra(&r, "SELECT")
+                       && (*r == '*' ? (r++, 1) : ident(&r, c_sub, sizeof c_sub))
+                       && (pula(&r), palavra(&r, "FROM"))
+                       && ident(&r, t_sub, sizeof t_sub)){
+                        pula(&r);
+                        if(*r == ')'){
+                            r++; pula(&r);
+                            if(*r == 0 || *r == ';'){
+                                /* a decisão toma-se com a outra tabela ABERTA e
+                                 * traz-se em memória local — a mesma regra da
+                                 * subconsulta e da seta */
+                                char guarda[64];
+                                int ha = -1;
+                                snprintf(guarda, sizeof guarda, "%s", nome);
+                                if(usa_tabela(t_sub, 0) && cat_nome_bate(t_sub)){
+                                    long nr2 = cat_nrows();
+                                    ha = 0;
+                                    for(long i2 = 0; i2 < nr2 && !ha; i2++)
+                                        if(bit_le(S_VIVO, i2)) ha = 1;
+                                }
+                                usa_tabela(guarda, 0);
+                                if(ha < 0){
+                                    printf("erro: a tabela «%s» do EXISTS não pôde"
+                                           " ser lida — RECUSADA.\n", t_sub);
+                                    if(sql_cap){ sql_cap->ok = 0;
+                                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                                 "relation \"%s\" does not exist", t_sub); }
+                                    return 0;
+                                }
+                                ex_usa = 1;
+                                ex_vale = nega ? !ha : ha;
+                                p = r;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     citadas_where = 0;
-    tem_where = (in_sub || idx_usa || nul_usa) ? 0 : le_where(&p, &cl);
+    tem_where = (in_sub || idx_usa || nul_usa || ex_usa) ? 0 : le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
         return 0;
@@ -5724,6 +5793,14 @@ static int varre(const char *resto, int acao){
                 if(!bit_le(S_PRES, i*ncols + j)){ bit_poe(S_MATCH, i, 0); break; }
             }
         }
+    }
+
+    if(ex_usa && !ex_vale){
+        /* o quantificador é uma CONSTANTE: falso apaga o campo inteiro, e
+         * verdadeiro deixa-o como está — nenhuma linha é olhada */
+        Word z = {0,0};
+        for(long q2 = 0; q2 <= nrows / (long)SLOT_BITS; q2++)
+            mem_grava(S_MATCH + (unsigned)q2, z);
     }
 
     if(nul_usa){

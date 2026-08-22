@@ -6233,6 +6233,119 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W46: O QUANTIFICADOR, E A DUALIDADE QUE ELE TEM E O `IN` NÃO ═════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w46.mem", "/tmp/pgwire_w46.prog",
+            "/tmp/pgwire_w46__t.mem", "/tmp/pgwire_w46__t.prog",
+            "/tmp/pgwire_w46__u.mem", "/tmp/pgwire_w46__u.prog",
+            "/tmp/pgwire_w46__vaz.mem", "/tmp/pgwire_w46__vaz.prog" };
+        for(int k = 0; k < 8; k++) unlink(lixo[k]);
+        printf("\n§W46 EXISTS: pergunta sobre a subconsulta, não sobre a linha.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w46")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,10), (2,20), (3,NULL)", &o);
+        sql_executa("CREATE TABLE u (k)", &o);
+        sql_executa("INSERT INTO u VALUES (7)", &o);
+        sql_executa("CREATE TABLE vaz (k)", &o);
+
+        /* ── (1) É UM QUANTIFICADOR, E NÃO UMA COMPARAÇÃO. O `IN` pergunta
+         * sobre a LINHA — «este valor está do outro lado?» — e a resposta muda
+         * de linha para linha. O `EXISTS` não olha para linha nenhuma: pergunta
+         * se a subconsulta devolve ALGUMA, e a resposta é a mesma para todas.
+         * Ou saem todas, ou não sai nenhuma. */
+        sql_executa("SELECT a FROM t WHERE EXISTS (SELECT k FROM u)", &o);
+        long cheia = o.nrows;
+        sql_executa("SELECT a FROM t WHERE EXISTS (SELECT k FROM vaz)", &o);
+        long vazia = o.nrows;
+        int quant = (cheia == 3 && vazia == 0);
+        printf("      todas ou nenhuma: com a tabela cheia %ld (esp 3) · com a"
+               " vazia %ld (esp 0)  %s\n", cheia, vazia, quant ? "" : "NAO BATE");
+        if(!quant) mal++;
+
+        /* ── (2) `NOT EXISTS` É O ∀ ESCRITO COM O ∃, e é a mesma De Morgan do
+         * §W42 aplicada a um conjunto em vez de a uma proposição: as duas
+         * respostas trocam exactamente. */
+        sql_executa("SELECT a FROM t WHERE NOT EXISTS (SELECT k FROM u)", &o);
+        long n_cheia = o.nrows;
+        sql_executa("SELECT a FROM t WHERE NOT EXISTS (SELECT k FROM vaz)", &o);
+        long n_vazia = o.nrows;
+        int morgan = (n_cheia == 0 && n_vazia == 3);
+        printf("      NOT EXISTS troca as duas: %ld e %ld (esp 0 e 3)  %s\n",
+               n_cheia, n_vazia, morgan ? "" : "NAO BATE");
+        if(!morgan) mal++;
+
+        /* ── (3) E AQUI ESTÁ A DUALIDADE QUE ELE TEM E O `IN` NÃO. A soma de
+         * `EXISTS` com `NOT EXISTS` fecha em |I| INTEIRO, porque nenhum dos
+         * dois olha para a célula — não há dual a ficar de fora. O `IN`, que
+         * olha, tem a sua soma a fechar no peso dos PRESENTES (§W38). São duas
+         * dualidades de NÍVEIS diferentes, e a tabela tem de propósito uma
+         * linha com célula ausente para que a diferença apareça. */
+        sql_executa("SELECT a FROM t", &o);
+        long todas = o.nrows;
+        int nivel = (cheia + n_cheia == todas && vazia + n_vazia == todas
+                     && todas == 3);
+        sql_executa("SELECT a FROM t WHERE b IS NULL", &o);
+        long tem_dual = o.nrows;
+        printf("      EXISTS + NOT EXISTS = %ld = |I| nas DUAS tabelas, e a"
+               " tabela TEM um dual (%ld linha) — ao contrário do IN, que fecha"
+               " nos presentes  %s\n", todas, tem_dual,
+               (nivel && tem_dual == 1) ? "" : "NAO BATE");
+        if(!nivel || tem_dual != 1) mal++;
+
+        /* ── (4) E RESPEITA O VIVO: apagar a última linha da subconsulta vira
+         * as duas respostas. É o que mostra que a pergunta é sobre o que ESTÁ
+         * lá, e não sobre a tabela existir. */
+        sql_executa("DELETE FROM u WHERE k = 7", &o);
+        sql_executa("SELECT a FROM t WHERE EXISTS (SELECT k FROM u)", &o);
+        long dep = o.nrows;
+        sql_executa("SELECT a FROM t WHERE NOT EXISTS (SELECT k FROM u)", &o);
+        long ndep = o.nrows;
+        int vivo = (dep == 0 && ndep == 3);
+        printf("      apagada a última linha de u: EXISTS %ld (esp 0) · NOT"
+               " EXISTS %ld (esp 3)  %s\n", dep, ndep, vivo ? "" : "NAO BATE");
+        if(!vivo) mal++;
+
+        /* ── O CONTROLO, e são dois. A tabela que não existe é RECUSADA — e
+         * não tomada por vazia, que seria responder «não há» a uma pergunta que
+         * não se pôde fazer. E o `*` também se aceita, porque o que se pergunta
+         * não é qual coluna: é se há linha. */
+        int c1 = sql_executa("SELECT a FROM t WHERE EXISTS"
+                             " (SELECT k FROM naoexiste)", &o);
+        sql_executa("INSERT INTO u VALUES (9)", &o);
+        int c2 = sql_executa("SELECT a FROM t WHERE EXISTS (SELECT * FROM u)", &o);
+        long c2n = o.nrows;
+        printf("\n      CONTROLO — tabela inexistente %s · e o `*` vale (%ld"
+               " linhas)  %s\n", c1 ? "RESPONDEU (mau)" : "recusada", c2n,
+               (!c1 && c2 && c2n == 3) ? "" : "NAO BATE");
+        if(c1 || !c2 || c2n != 3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("`EXISTS` PERGUNTA SOBRE A SUBCONSULTA, NÃO SOBRE A LINHA — E DAÍ TEM UMA"
+           " DUALIDADE QUE O `IN` NÃO TEM. O `IN` é uma comparação: pergunta «este valor"
+           " está do outro lado?», e a resposta muda de linha para linha. O `EXISTS` é um"
+           " QUANTIFICADOR: pergunta se a subconsulta devolve alguma linha, e a resposta é a"
+           " mesma para todas — ou saem todas, ou não sai nenhuma. Isso decide-se UMA vez,"
+           " com a tabela do outro lado aberta, e a condição passa a ser uma CONSTANTE: não"
+           " há molde a correr por linha, e o custo é o da varredura sem WHERE. `NOT EXISTS`"
+           " é o ∀ escrito com o ∃, que é a De Morgan do §W42 aplicada a um conjunto em vez"
+           " de a uma proposição. E A DIFERENÇA MEDE-SE NA SOMA: `EXISTS` + `NOT EXISTS`"
+           " fecha em |I| INTEIRO, porque nenhum dos dois olha para a célula e não há dual a"
+           " ficar de fora — ao passo que a soma do `IN` fecha no peso dos PRESENTES (§W38),"
+           " porque esse olha. São duas dualidades de NÍVEIS diferentes, e a tabela deste"
+           " bloco tem de propósito uma linha com célula ausente, para que a diferença"
+           " apareça em vez de se supor. E o quantificador RESPEITA O VIVO: apagar a última"
+           " linha da subconsulta vira as duas respostas, o que mostra que a pergunta é sobre"
+           " o que ESTÁ lá e não sobre a tabela existir. O CONTROLO tem duas metades: a"
+           " tabela que não existe é RECUSADA e não tomada por vazia — responder «não há» a"
+           " uma pergunta que não se pôde fazer seria dar por resposta o próprio erro —, e o"
+           " `*` vale, porque o que se pergunta não é qual coluna: é se há linha.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

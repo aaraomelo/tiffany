@@ -2672,6 +2672,26 @@ fica de fora das \emph{duas}: não se pode negar uma resposta que não foi dada.
 com igualdade exatamente quando o dual pesa zero. Um motor que tratasse a
 ausência como um valor fechava sempre em $|I|$, e uma das duas apanhava-a.
 
+\medskip\noindent\textbf{E há uma pergunta de outro nível, com outra
+dualidade.} \code{EXISTS (SELECT … FROM u)} não é uma comparação: é um
+\textbf{quantificador}. O \code{IN} pergunta sobre a \emph{linha} --- «este
+valor está do outro lado?» ---, e a resposta muda de linha para linha; o
+\code{EXISTS} pergunta se a subconsulta devolve \emph{alguma}, e a resposta é a
+mesma para todas. Decide-se uma vez, com a outra tabela aberta, e a condição
+passa a ser uma \textbf{constante}: não há molde a correr por linha, e o custo
+é o da varredura sem \code{WHERE}. \code{NOT EXISTS} é o $\forall$ escrito com o
+$\exists$ --- a De Morgan de §W42 sobre um conjunto em vez de sobre uma
+proposição. E a diferença mede-se na \emph{soma}:
+\[
+\lvert\code{EXISTS}\rvert+\lvert\code{NOT EXISTS}\rvert=\lvert I\rvert
+\qquad\text{contra}\qquad
+\lvert\code{IN}\rvert+\lvert\code{NOT IN}\rvert=\lvert\text{presentes}\rvert .
+\]
+Duas dualidades de \textbf{níveis} diferentes: a primeira fecha em $|I|$ porque
+nenhum dos lados olha para a célula; a segunda não, porque olha
+(\code{tests/pgwire.c} §W46, com a tabela a ter de propósito uma célula
+ausente para que a diferença apareça em vez de se supor).
+
 \medskip\noindent\textbf{E o dual vale nos dois lados}, que era onde estava o
 defeito: a célula ausente da coluna da \emph{subconsulta} entrava na árvore, e
 o neutro com cara de valor fazia um \code{x IN (…)} com $x=0$ casar com uma
