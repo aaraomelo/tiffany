@@ -4164,7 +4164,7 @@ static int checa_corpos(unsigned citadas, long ncols){
 }
 
 /* lê `*` ou `c1, c2, …` até ao FROM; devolve 0 se não reconhecer */
-static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min */
+static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min, 4 avg */
 static char agr_col[64] = "";        /* a coluna que a agregação lê */
 /* a coluna do `count(DISTINCT c)`, "" se não houver. São DUAS: o `pedido` é
  * escrito pelo despacho do `SELECT count(...)`, que corre ANTES do `varre` e
@@ -4231,7 +4231,7 @@ static int lista_colunas(const char **pp, char *out, int cap){
                   break;
               }
               int qual = !strcasecmp(nome,"SUM") ? 1 : !strcasecmp(nome,"MAX") ? 2
-                       : !strcasecmp(nome,"MIN") ? 3 : 0;
+                       : !strcasecmp(nome,"MIN") ? 3 : !strcasecmp(nome,"AVG") ? 4 : 0;
               if(qual){
                   q++; pula(&q);
                   char arg[64];
@@ -6259,21 +6259,41 @@ static int varre(const char *resto, int acao){
               if(!bit_le(S_PRES, i*ncols + ac)) continue;   /* o corpo, não o suporte */
               { long w = celula_valor(i, ac, ncols);
                 if(!viu){ ag = w; viu = 1; }
-                else if(agr_op == 1) ag += w;
+                else if(agr_op == 1 || agr_op == 4) ag += w;
                 else if(agr_op == 2){ if(w > ag) ag = w; }
                 else if(agr_op == 3){ if(w < ag) ag = w; }
                 quantas++; }
           }
-          if(viu) printf("   %ld\n", ag);
+          /* ── A MÉDIA É UM RACIONAL, E NÃO UM DECIMAL ARREDONDADO ────────
+           * `avg` é a soma sobre a contagem, e a divisão de inteiros SAI DO
+           * ANDAR: o resultado vive em ℚ, que é o andar seguinte da escada e
+           * já está construído nesta casa. Devolvê-lo como um decimal era
+           * escolher um representante que não é o objecto — e a lei que se
+           * segue não valeria: `avg × count = sum` exactamente, sem resto.
+           * Guarda-se a CLASSE reduzida, que é o representante único do
+           * `ra_classe`, e imprime-se `a/b` ou o inteiro quando b = 1. */
+          if(viu && agr_op == 4){
+              Par m = ra_classe((Par){ ag, quantas });
+              if(m.b > 1) printf("   %ld/%ld\n", m.a, m.b);
+              else        printf("   %ld\n", m.a);
+          }
+          else if(viu) printf("   %ld\n", ag);
           else    printf("   (ausente — nenhum valor para agregar)\n");
           printf("-- %ld linha(s) agregada(s) em 1\n", quantas);
           if(sql_cap){
               memset(sql_cap->col, 0, sizeof sql_cap->col);
               sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
               snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s",
-                       agr_op == 1 ? "sum" : agr_op == 2 ? "max" : "min");
-              sql_cap->tipo[0] = SQL_TIPO_INT4;
-              if(viu) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ag);
+                       agr_op == 1 ? "sum" : agr_op == 2 ? "max"
+                                   : agr_op == 3 ? "min" : "avg");
+              sql_cap->tipo[0] = (agr_op == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4;
+              if(viu && agr_op == 4){
+                  Par m = ra_classe((Par){ ag, quantas });
+                  if(m.b > 1) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
+                                       "%ld/%ld", m.a, m.b);
+                  else        snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", m.a);
+              }
+              else if(viu) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ag);
               else { sql_cap->cell[0][0][0] = 0; sql_cap->nulo[0][0] = 1; }
               snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
           }
@@ -6328,8 +6348,9 @@ static int varre(const char *resto, int acao){
             if(agr_op){
                 sql_cap->ncols = 3;
                 snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "%s",
-                         agr_op == 1 ? "sum" : agr_op == 2 ? "max" : "min");
-                sql_cap->tipo[2] = SQL_TIPO_INT4;
+                         agr_op == 1 ? "sum" : agr_op == 2 ? "max"
+                                     : agr_op == 3 ? "min" : "avg");
+                sql_cap->tipo[2] = (agr_op == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4;
             }
         }
         { long grupos = 0, soma = 0, k = 0;
@@ -6340,14 +6361,16 @@ static int varre(const char *resto, int acao){
               int ac = agr_op ? col_indice(agr_col) : -1;
               /* a fibra do dual junta-se por NÃO TER chave, não por ter a
                * mesma; as duas condições estão na mesma linha e são disjuntas */
+              long ag_n = 0;                     /* quantos do CORPO entraram */
               while(k < n && bit_le(S_PRES, seq[k]*ncols + gc) == tem
                           && (!tem || celula_valor(seq[k], gc, ncols) == v)){
-                  if(ac >= 0){                       /* lê a fibra de passagem */
+                  if(ac >= 0 && bit_le(S_PRES, seq[k]*ncols + ac)){
                       long w = celula_valor(seq[k], ac, ncols);
                       if(!ag_viu){ ag = w; ag_viu = 1; }
-                      else if(agr_op == 1) ag += w;
+                      else if(agr_op == 1 || agr_op == 4) ag += w;
                       else if(agr_op == 2){ if(w > ag) ag = w; }
                       else if(agr_op == 3){ if(w < ag) ag = w; }
+                      ag_n++;
                   }
                   g++; k++;
               }
@@ -6357,8 +6380,17 @@ static int varre(const char *resto, int acao){
               if(hav_op == 2 && !(g <  hav_n)) continue;
               if(hav_op == 3 && !(g == hav_n)) continue;
               if(lim_n >= 0 && grupos >= lim_n) break;      /* o prefixo */
-              if(ac >= 0) printf("   %s%ld | %ld | %ld\n", tem ? "" : "(ausente) ",
-                                 tem ? v : 0, g, ag);
+              /* a média de cada fibra também é um RACIONAL: a divisão sai do
+               * andar, e o representante único é a classe reduzida */
+              char agtxt[32];
+              if(agr_op == 4 && ag_viu){
+                  Par m = ra_classe((Par){ ag, ag_n });
+                  if(m.b > 1) snprintf(agtxt, sizeof agtxt, "%ld/%ld", m.a, m.b);
+                  else        snprintf(agtxt, sizeof agtxt, "%ld", m.a);
+              } else if(ag_viu) snprintf(agtxt, sizeof agtxt, "%ld", ag);
+              else              snprintf(agtxt, sizeof agtxt, "");
+              if(ac >= 0) printf("   %s%ld | %ld | %s\n", tem ? "" : "(ausente) ",
+                                 tem ? v : 0, g, agtxt);
               else        printf("   %s%ld | %ld\n", tem ? "" : "(ausente) ",
                                  tem ? v : 0, g);
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
@@ -6368,8 +6400,10 @@ static int varre(const char *resto, int acao){
                   else { sql_cap->cell[sql_cap->nrows][0][0] = 0;
                          sql_cap->nulo[sql_cap->nrows][0] = 1; }
                   snprintf(sql_cap->cell[sql_cap->nrows][1], SQL_OUT_CELL, "%ld", g);
-                  if(ac >= 0)
-                      snprintf(sql_cap->cell[sql_cap->nrows][2], SQL_OUT_CELL, "%ld", ag);
+                  if(ac >= 0){
+                      snprintf(sql_cap->cell[sql_cap->nrows][2], SQL_OUT_CELL, "%s", agtxt);
+                      if(!agtxt[0]) sql_cap->nulo[sql_cap->nrows][2] = 1;
+                  }
                   sql_cap->nrows++;
               }
               grupos++; soma += g;

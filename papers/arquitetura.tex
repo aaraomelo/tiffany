@@ -2749,6 +2749,39 @@ dar programas diferentes: sem ele, uma impressão digital constante --- ou zero
         {\code{IN} como disjunção; \code{NOT} por De Morgan; \code{sql\_ultimo\_prog}}
         {\code{tests/pgwire.c} §W42}
 
+\subsection*{A média é um racional}
+
+\noindent \code{avg} é a soma sobre a contagem, e a divisão de inteiros
+\textbf{sai do andar}: o resultado vive em $\mathbb{Q}$, que é o andar seguinte
+da escada e já está construído nesta casa --- o \code{racionais thm:q} constrói
+$\mathbb{Q}$ como o quociente dos pares $(a,b)$ por $ad=bc$, e a média é
+exatamente um desses pares. A classe reduzida é o representante da classe, pelo
+que $12/4$ se imprime \code{3} e $7/3$ se imprime \code{7/3}.
+Devolver um decimal era escolher um representante que \emph{não é} o objeto ---
+e então a lei seguinte não valeria:
+\[
+\boxed{\;\text{avg}\times n \;=\; \text{sum}\quad\text{sem resto}\;}
+\]
+É a identidade que distingue o objeto do seu impresso, e que um arredondamento
+quebra.
+
+\medskip\noindent\textbf{A média é do corpo, e o divisor também.} Acrescentar
+uma linha sem valor faz o \code{count(*)} subir e a média \emph{não} se mexer:
+o divisor é quantos \textbf{valores} entraram, não quantas linhas havia. Vê-se
+melhor por fibra, onde os dois números saem lado a lado na mesma linha da
+resposta --- na fibra do $g=2$ há três linhas ($G=3$, e a conservação conta
+linhas) com o divisor da média a ser dois. E a média de nada é \textbf{ausente},
+pela mesma razão que a soma.
+
+\medido{\code{tests/pgwire.c} §W43, com o controlo em duas médias da MESMA
+tabela --- uma que fecha e outra que não ---, sem o que um motor que
+imprimisse sempre $a/b$, ou que arredondasse sempre, passava numa das duas por
+acaso.}
+
+\colunas{\code{racionais thm:q}; \code{aranha thm:escada}}
+        {\code{avg} em $\mathbb{Q}$; \code{ra\_classe} como representante}
+        {\code{tests/pgwire.c} §W43}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}

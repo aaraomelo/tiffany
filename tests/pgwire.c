@@ -5894,6 +5894,129 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W43: A MÉDIA É UM RACIONAL ═══════════════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w43.mem");     unlink("/tmp/pgwire_w43.prog");
+        unlink("/tmp/pgwire_w43__t.mem");  unlink("/tmp/pgwire_w43__t.prog");
+        unlink("/tmp/pgwire_w43__u.mem");  unlink("/tmp/pgwire_w43__u.prog");
+        printf("\n§W43 avg: a divisão sai do andar, e o resultado vive em ℚ.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w43")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,1), (2,1), (4,1)", &o);
+
+        /* ── (1) A MÉDIA DE 1, 2 e 4 É 7/3 — não 2 (o inteiro truncado) nem
+         * um decimal arredondado. A divisão de inteiros SAI DO ANDAR: o
+         * resultado vive em ℚ, que é o andar seguinte da escada e já está
+         * construído nesta casa. */
+        sql_executa("SELECT avg(a) FROM t", &o);
+        char m[32]; snprintf(m, sizeof m, "%s", o.nrows ? o.cell[0][0] : "?");
+        int exacta = !strcmp(m, "7/3");
+        printf("      avg(1,2,4) = %s (esp 7/3, e não 2 nem 2.33)  %s\n",
+               m, exacta ? "" : "NAO BATE");
+        if(!exacta) mal++;
+
+        /* ── (2) E A LEI QUE SÓ VALE SE FOR EXACTA: avg × n = sum, sem resto.
+         * Um decimal truncado ou arredondado quebra-a; é a identidade que
+         * distingue o objecto do seu representante impresso. */
+        sql_executa("SELECT sum(a) FROM t", &o);
+        long soma = o.nrows ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT count(*) FROM t", &o);
+        long n = o.nrows ? atol(o.cell[0][0]) : -1;
+        { long p = 0, q = 1;
+          const char *barra = strchr(m, '/');
+          p = atol(m);
+          if(barra) q = atol(barra + 1);
+          /* avg = p/q, e a lei é p·n = soma·q */
+          int lei = (q > 0 && p * n == soma * q);
+          printf("      avg × n = sum, sem resto: %ld/%ld × %ld = %ld  %s\n",
+                 p, q, n, soma, lei ? "" : "NAO BATE");
+          if(!lei) mal++; }
+
+        /* ── (3) E QUANDO A DIVISÃO FECHA, o resultado é o INTEIRO: a classe
+         * reduzida é o representante único, e 12/4 não se imprime como 12/4. */
+        sql_executa("INSERT INTO t VALUES (5,1)", &o);
+        sql_executa("SELECT avg(a) FROM t", &o);
+        int inteiro = (o.nrows == 1 && !strcmp(o.cell[0][0], "3"));
+        printf("      avg(1,2,4,5) = %s (esp 3, e não 12/4)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", inteiro ? "" : "NAO BATE");
+        if(!inteiro) mal++;
+
+        /* ── (4) A MÉDIA É DO CORPO, E O DIVISOR TAMBÉM. Acrescenta-se uma
+         * linha SEM valor: o `count(*)` sobe para 5 e a média não se mexe,
+         * porque o divisor é quantos VALORES entraram e não quantas linhas
+         * havia. É o mesmo par de níveis do §W39, agora dentro de uma conta. */
+        sql_executa("INSERT INTO t VALUES (NULL,1)", &o);
+        sql_executa("SELECT avg(a) FROM t", &o);
+        char m2[32]; snprintf(m2, sizeof m2, "%s", o.nrows ? o.cell[0][0] : "?");
+        sql_executa("SELECT count(*) FROM t", &o);
+        long n2 = o.nrows ? atol(o.cell[0][0]) : -1;
+        int corpo = (!strcmp(m2, "3") && n2 == 5);
+        printf("      com uma linha sem valor: count(*) %ld (esp 5) e avg %s"
+               " (esp 3 — o divisor é 4)  %s\n", n2, m2, corpo ? "" : "NAO BATE");
+        if(!corpo) mal++;
+
+        /* ── (5) E A MÉDIA DE NADA É AUSENTE, pela mesma razão que a soma:
+         * não há valor nenhum, e zero seria um valor. */
+        sql_executa("SELECT avg(a) FROM t WHERE b > 9", &o);
+        int vazia = (o.nrows == 1 && o.nulo[0][0]);
+        printf("      avg do conjunto vazio: ausente %d  %s\n", vazia,
+               vazia ? "" : "NAO BATE");
+        if(!vazia) mal++;
+
+        /* ── (6) POR FIBRA, E OS DOIS NÚMEROS SÃO DE NÍVEIS DIFERENTES. Na
+         * fibra do g=2 há TRÊS linhas (G = 3, a conservação conta linhas) e o
+         * divisor da média é DOIS (o corpo). Ver os dois lado a lado na mesma
+         * linha da resposta é a distinção inteira num sítio só. */
+        sql_executa("CREATE TABLE u (g,v)", &o);
+        sql_executa("INSERT INTO u VALUES (1,1), (1,2), (2,10), (2,11),"
+                    " (2,NULL)", &o);
+        sql_executa("SELECT g, count(*), avg(v) FROM u GROUP BY g", &o);
+        int fibra = (o.nrows == 2
+                     && !strcmp(o.cell[0][1], "2") && !strcmp(o.cell[0][2], "3/2")
+                     && !strcmp(o.cell[1][1], "3") && !strcmp(o.cell[1][2], "21/2"));
+        printf("      por fibra: g=1 G=%s avg=%s (esp 2, 3/2) · g=2 G=%s avg=%s"
+               " (esp 3, 21/2 — G conta linhas, a média conta corpo)  %s\n",
+               o.nrows > 0 ? o.cell[0][1] : "?", o.nrows > 0 ? o.cell[0][2] : "?",
+               o.nrows > 1 ? o.cell[1][1] : "?", o.nrows > 1 ? o.cell[1][2] : "?",
+               fibra ? "" : "NAO BATE");
+        if(!fibra) mal++;
+
+        /* ── O CONTROLO: uma média que FECHA e outra que não fecham na mesma
+         * tabela. Sem isso, um motor que imprimisse sempre `a/b` — ou que
+         * arredondasse sempre — passava numa das duas por acaso. */
+        sql_executa("SELECT avg(v) FROM u WHERE g = 1", &o);
+        char c1[32]; snprintf(c1, sizeof c1, "%s", o.nrows ? o.cell[0][0] : "?");
+        sql_executa("SELECT avg(v) FROM u WHERE g = 2 AND v > 10", &o);
+        char c2[32]; snprintf(c2, sizeof c2, "%s", o.nrows ? o.cell[0][0] : "?");
+        printf("\n      CONTROLO — na MESMA tabela: avg = %s (não fecha) e"
+               " avg = %s (fecha)  %s\n", c1, c2,
+               (!strcmp(c1, "3/2") && !strcmp(c2, "11")) ? "" : "NAO BATE");
+        if(strcmp(c1, "3/2") || strcmp(c2, "11")) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A MÉDIA É UM RACIONAL, E ISSO NÃO É UMA ESCOLHA DE FORMATO. `avg` é a soma sobre"
+           " a contagem, e a divisão de inteiros SAI DO ANDAR: o resultado vive em ℚ, que é"
+           " o andar seguinte da escada e já está construído nesta casa — com a classe"
+           " reduzida do `ra_classe` a ser o representante único, pelo que 12/4 se imprime"
+           " `3` e 7/3 se imprime `7/3`. Devolver um decimal era escolher um representante"
+           " que NÃO É o objecto, e a lei que se segue não valeria: mede-se `avg × n = sum`"
+           " sem resto, que é a identidade que distingue o objecto do seu impresso e que um"
+           " arredondamento quebra. A MÉDIA É DO CORPO, E O DIVISOR TAMBÉM: acrescentar uma"
+           " linha sem valor faz o `count(*)` subir e a média NÃO se mexer, porque o divisor"
+           " é quantos VALORES entraram e não quantas linhas havia — o mesmo par de níveis"
+           " do dual, agora dentro de uma conta. E vê-se melhor por fibra, onde os dois"
+           " números saem lado a lado na mesma linha da resposta: na fibra do g=2 há TRÊS"
+           " linhas (G = 3, e a conservação conta linhas) com o divisor da média a ser DOIS."
+           " A média de nada é AUSENTE, pela mesma razão que a soma: não há valor nenhum, e"
+           " zero seria um valor. O CONTROLO são duas médias na MESMA tabela, uma que fecha"
+           " e outra que não — sem isso, um motor que imprimisse sempre `a/b`, ou que"
+           " arredondasse sempre, passava numa das duas por acaso.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
