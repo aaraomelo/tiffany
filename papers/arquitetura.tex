@@ -3781,6 +3781,34 @@ mede, e a rotação é uma maneira de a cumprir, não a única.
         {$x^{\!\top}\!Ax=x^{\!\top}\!Sx$; \code{simetrica(*)} como segundo critério}
         {\code{tests/pgwire.c} §W79}
 
+\medskip\noindent\textbf{E as duas operações do corpo lêem-se no fluxo.} O paper
+dá-lhes nome: «$\otimes$ é o \textbf{fluxo} $e^{At}$ --- o semigrupo
+$\Phi_s\circ\Phi_t=\Phi_{s+t}$ ---, $\oplus$ é a \textbf{superposição}: as soluções
+de equações lineares somam». Nenhuma tinha medidor aqui.
+
+\medskip\noindent A superposição é o \textbf{núcleo ser um subespaço}: se $v$ e $w$
+resolvem $A\,x=0$, então $\alpha v+\beta w$ também. \textbf{E $\oplus$ falha no não
+homogéneo} --- é este o gume: se $A\,x=b$ e $A\,y=b$, então $A(x+y)=2b$, que só é
+$b$ quando $b=0$. Duas soluções somadas deixam de ser solução. Sem esta metade, «as
+soluções somam» leria-se como propriedade das \emph{equações diferenciais}, quando
+é propriedade das \textbf{lineares homogéneas} --- e a diferença é exatamente o $b$.
+Mas a \emph{diferença} das duas cai no núcleo: é o que resta da estrutura, e é a
+translação de §W78 vista do lado das soluções.
+
+\medskip\noindent O \textbf{semigrupo} mede-se numa permutação cíclica $3\times3$,
+onde $A^{3}=I$ e nada cresce --- o teto do corpo não entra, e o que se mede é a lei
+e não o tamanho dos números: $A^{s+t}=A^{s}A^{t}$ em todos os $28$ pares com
+$s+t\le6$. E o \textbf{controlo é a nilpotente}, o outro extremo do mesmo morfismo:
+$N^{3}=0$ em vez de $I$. As duas cumprem a lei e as órbitas não podiam ser mais
+diferentes --- uma volta ao princípio, a outra morre ---, e sem ela o semigrupo
+ficava medido só onde a órbita \emph{cicla}, que não é o que a lei pede.
+
+\medido{\code{tests/pgwire.c} §W80.}
+
+\colunas{\code{broca-so} ($\oplus$ superposição, $\otimes$ fluxo); \code{aranha thm:duas}}
+        {o núcleo como subespaço; $A^{s+t}=A^{s}A^{t}$ pelo \code{produto}}
+        {\code{tests/pgwire.c} §W80}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

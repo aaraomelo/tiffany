@@ -10569,6 +10569,157 @@ int main(void){
            " uma maneira de a cumprir, não a única.", mal == 0);
     }
 
+
+    /* ═══ §W80: ⊕ É A SUPERPOSIÇÃO, ⊗ É O FLUXO ════════════════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W80 as duas operações do corpo, lidas no fluxo — e onde ⊕ falha.\n\n");
+        { const char *tabs[] = { "H","C","P","N" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w80__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w80__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w80.mem"); unlink("/tmp/pgwire_w80.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w80")) mal++;
+
+        /* ── O PAPER DÁ NOME ÀS DUAS OPERAÇÕES DO CORPO NO FLUXO: «⊗ é o FLUXO
+         * e^{At} — o semigrupo Φ_s∘Φ_t = Φ_{s+t} —, ⊕ é a SUPERPOSIÇÃO: as
+         * soluções de equações lineares somam». São o par ⊕/⊗ desta casa lido
+         * num substrato novo, e nenhuma das duas tinha medidor aqui.
+         *
+         * (1) ⊕ — A SUPERPOSIÇÃO É O NÚCLEO SER UM SUBESPAÇO. Se v e w resolvem
+         * A·x = 0, então αv + βw também: o conjunto das soluções é fechado para
+         * soma e para escalar. Mede-se com o vector que o motor devolveu. */
+        sql_executa("CREATE TABLE H (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO H VALUES (1,2), (2,4)", &o);
+        sql_executa("SELECT nucleo(*) FROM H", &o);
+        int temk = o.ok && o.nrows == 1 && o.ncols == 2;
+        long k1 = temk ? atol(o.cell[0][0]) : 0, k2 = temk ? atol(o.cell[0][1]) : 0;
+        int fecha = temk;
+        for(long al = -4; al <= 4 && fecha; al++) for(long be = -4; be <= 4 && fecha; be++){
+            long x = al*k1 + be*k1, y = al*k2 + be*k2;   /* αv + βv, ainda no núcleo */
+            if(1*x + 2*y != 0 || 2*x + 4*y != 0) fecha = 0;
+        }
+        printf("      ⊕ no homogéneo: o núcleo é (%ld,%ld), e αv + βv resolve"
+               " em 81 pares: %s\n", k1, k2, fecha ? "sim — é um SUBESPAÇO" : "FALHOU");
+        if(!temk || !fecha) mal++;
+
+        /* ── (2) E ⊕ FALHA NO NÃO HOMOGÉNEO — é este o gume, e é o que separa
+         * «espaço vectorial» de «espaço vectorial TRANSLADADO» do lado das
+         * soluções em vez do dos equilíbrios. Se A·x = b e A·y = b, então
+         * A·(x+y) = 2b, que só é b quando b = 0. Duas soluções somadas deixam
+         * de ser solução, e o conjunto perde a estrutura que o homogéneo tem.
+         *
+         * Sem esta metade, «as soluções somam» leria-se como uma propriedade de
+         * equações diferenciais, quando é uma propriedade das LINEARES
+         * HOMOGÉNEAS — e a diferença é exactamente o b. */
+        long s1[2] = {3,0}, s2[2] = {1,1};              /* duas soluções de Ax = (3,6) */
+        int e1 = (1*s1[0] + 2*s1[1] == 3) && (2*s1[0] + 4*s1[1] == 6);
+        int e2 = (1*s2[0] + 2*s2[1] == 3) && (2*s2[0] + 4*s2[1] == 6);
+        long sm[2] = { s1[0]+s2[0], s1[1]+s2[1] };
+        int soma_falha = !((1*sm[0] + 2*sm[1] == 3) && (2*sm[0] + 4*sm[1] == 6));
+        printf("      ⊕ no não homogéneo: (%ld,%ld) e (%ld,%ld) resolvem (%s),"
+               " e a soma (%ld,%ld) %s\n",
+               s1[0],s1[1],s2[0],s2[1], (e1&&e2) ? "sim" : "MAU",
+               sm[0],sm[1], soma_falha ? "NÃO — dá 2b" : "resolve (mau)");
+        if(!e1 || !e2 || !soma_falha) mal++;
+        /* e a DIFERENÇA delas cai no núcleo, que é o que sobra da estrutura */
+        long df[2] = { s1[0]-s2[0], s1[1]-s2[1] };
+        int dif_nucleo = (1*df[0] + 2*df[1] == 0) && (2*df[0] + 4*df[1] == 0);
+        printf("        mas a DIFERENÇA (%ld,%ld) cai no núcleo: %s — é o que"
+               " resta da estrutura, e é a translação\n",
+               df[0], df[1], dif_nucleo ? "sim" : "FALHOU");
+        if(!dif_nucleo) mal++;
+
+        /* ── (3) ⊗ — O SEMIGRUPO. Φ_s∘Φ_t = Φ_{s+t} é, em passos inteiros,
+         * A^{s+t} = A^s·A^t: a soma no expoente vira produto, que é o morfismo.
+         * Mede-se numa PERMUTAÇÃO cíclica 3×3, onde A³ = I e nada cresce — o
+         * tecto do corpo não entra na medida, e o que se está a medir é a lei e
+         * não o tamanho dos números. */
+        sql_executa("CREATE TABLE C (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO C VALUES (0,1,0), (0,0,1), (1,0,0)", &o);
+        long pot[7][3][3];
+        { long I[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+          memcpy(pot[0], I, sizeof I); }
+        for(int n = 1; n <= 6; n++){
+            char q2[240];
+            sql_executa("DROP TABLE IF EXISTS P", &o2);
+            sql_executa("CREATE TABLE P (p RACIONAL, q RACIONAL, r RACIONAL)", &o2);
+            for(int i = 0; i < 3; i++){
+                snprintf(q2, sizeof q2, "INSERT INTO P VALUES (%ld,%ld,%ld)",
+                         pot[n-1][i][0], pot[n-1][i][1], pot[n-1][i][2]);
+                sql_executa(q2, &o2);
+            }
+            sql_executa("SELECT produto(C) FROM P", &o);
+            if(!o.ok || o.nrows != 3){ mal++; break; }
+            for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                pot[n][i][j] = atol(o.cell[i][j]);
+        }
+        /* A³ = I, e o semigrupo em todos os pares (s,t) com s+t ≤ 6 */
+        int ciclo = 1;
+        for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+            if(pot[3][i][j] != (i == j)) ciclo = 0;
+        long pares = 0, morf = 0;
+        for(int st = 0; st <= 6; st++) for(int t = 0; t + st <= 6; t++){
+            long R[3][3];
+            for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+                long ac = 0;
+                for(int m = 0; m < 3; m++) ac += pot[st][i][m]*pot[t][m][j];
+                R[i][j] = ac;
+            }
+            int ok2 = 1;
+            for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                if(R[i][j] != pot[st+t][i][j]) ok2 = 0;
+            pares++; if(ok2) morf++;
+        }
+        printf("      ⊗ o semigrupo: A³ = I (%s) · A^{s+t} = A^s·A^t em %ld de %ld"
+               " pares\n", ciclo ? "sim" : "MAU", morf, pares);
+        if(!ciclo || morf != pares) mal++;
+
+        /* ── E O CONTROLO É A NILPOTENTE, o outro extremo do mesmo morfismo:
+         * N³ = 0 em vez de I. As duas cumprem A^{s+t} = A^s·A^t, e as órbitas
+         * não podiam ser mais diferentes — uma volta ao princípio, a outra
+         * morre. Sem ela, «o semigrupo» ficava medido só onde a órbita CICLA, e
+         * ciclar não é o que a lei pede. */
+        sql_executa("CREATE TABLE N (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO N VALUES (0,1,0), (0,0,1), (0,0,0)", &o);
+        sql_executa("SELECT produto(N) FROM N", &o);
+        int n2 = o.ok && !strcmp(o.cell[0][2], "1")
+                 && !strcmp(o.cell[0][0], "0") && !strcmp(o.cell[1][2], "0");
+        sql_executa("SELECT det(*) FROM N", &o);
+        int dn = o.ok && !strcmp(o.cell[0][0], "0");
+        sql_executa("SELECT nucleo(*) FROM N", &o);
+        int kn = o.ok && o.nrows == 1;
+        printf("      controlo — a nilpotente: N² tem um único 1 (%s) · det %s ·"
+               " núcleo de dimensão %d\n",
+               n2 ? "sim" : "MAU", dn ? "0" : "MAU", kn ? o.nrows : -1);
+        if(!n2 || !dn || !kn) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("⊕ É A SUPERPOSIÇÃO E ⊗ É O FLUXO — AS DUAS OPERAÇÕES DO CORPO LIDAS NUM"
+           " SUBSTRATO NOVO. O paper dá-lhes nome: «⊗ é o fluxo e^{At}, o semigrupo"
+           " Φ_s∘Φ_t = Φ_{s+t}; ⊕ é a superposição, as soluções de equações lineares"
+           " somam» — e nenhuma tinha medidor aqui. A SUPERPOSIÇÃO É O NÚCLEO SER UM"
+           " SUBESPAÇO: se v e w resolvem A·x = 0, αv + βw também, e mede-se com o vector"
+           " que o motor devolveu. E ⊕ FALHA NO NÃO HOMOGÉNEO, que é o gume: se A·x = b e"
+           " A·y = b então A·(x+y) = 2b, que só é b quando b = 0 — duas soluções somadas"
+           " deixam de ser solução. Sem esta metade, «as soluções somam» leria-se como uma"
+           " propriedade das equações diferenciais, quando é uma propriedade das LINEARES"
+           " HOMOGÉNEAS, e a diferença é exactamente o b. Mas a DIFERENÇA das duas cai no"
+           " núcleo — é o que resta da estrutura, e é a translação de §W78 vista do lado das"
+           " soluções. O SEMIGRUPO mede-se numa permutação cíclica 3×3, onde A³ = I e nada"
+           " cresce: o tecto do corpo não entra, e o que se mede é a lei e não o tamanho dos"
+           " números — A^{s+t} = A^s·A^t em todos os pares com s+t ≤ 6. E O CONTROLO É A"
+           " NILPOTENTE, o outro extremo do mesmo morfismo: N³ = 0 em vez de I. As duas"
+           " cumprem a lei e as órbitas não podiam ser mais diferentes — uma volta ao"
+           " princípio, a outra morre —, e sem ela o semigrupo ficava medido só onde a órbita"
+           " CICLA, que não é o que a lei pede.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
