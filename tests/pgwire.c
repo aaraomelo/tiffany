@@ -21579,6 +21579,127 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W143: OS CORPOS BASE SÃO OS EUCLIDIANOS, E A NORMA É A MÉTRICA ═══ */
+    {
+        long mal = 0;
+        printf("\n§W143 as métricas base: a carta existe sse o anel é euclidiano.\n\n");
+
+        /* ── (1) A MÉTRICA BASE É A NORMA, e o que ela tem de dar é a DIVISÃO
+         * COM RESTO MENOR --- é isso que faz a carta Φ existir. Mede-se nos dois
+         * anéis que o catálogo nomeia: Z, com duas unidades, e Z[i], com quatro. */
+        {
+            /* Z: N(n) = |n| */
+            long ok = 0, tot = 0;
+            for(long a = -20; a <= 20; a++) for(long b = 1; b <= 12; b++){
+                long q = a / b, r = a - q*b;
+                if(r < 0){ r += b; q -= 1; }
+                tot++;
+                if(a == q*b + r && r >= 0 && r < b) ok++;
+            }
+            printf("      Z    : divisão com resto de norma menor em %ld/%ld --- a carta"
+                   " existe, e as unidades são 2 (a reversão ESPELHA)\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+        {
+            /* Z[i]: N(a+bi) = a²+b², e a divisão faz-se arredondando o quociente */
+            long ok = 0, tot = 0, pior = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long Nd = c*c + d*d;
+                if(Nd == 0) continue;
+                /* (a+bi)/(c+di) = ((a+bi)(c-di))/Nd */
+                long pr = a*c + b*d, pi = b*c - a*d;
+                /* arredondar ao inteiro mais próximo */
+                long qr = (pr >= 0 ? (2*pr + Nd) : (2*pr - Nd)) / (2*Nd);
+                long qi = (pi >= 0 ? (2*pi + Nd) : (2*pi - Nd)) / (2*Nd);
+                /* o resto */
+                long rr = a - (qr*c - qi*d), ri = b - (qr*d + qi*c);
+                long Nr = rr*rr + ri*ri;
+                tot++;
+                if(Nr < Nd) ok++;
+                if(Nr > pior) pior = Nr;
+            }
+            printf("      Z[i] : resto de norma MENOR que o divisor em %ld/%ld --- a carta"
+                   " existe, e as unidades são 4 (a reversão RODA)\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) E A NORMA COMPÕE-SE: N(zw) = N(z)N(w). É a fusão das métricas,
+         * e é ela que faz a métrica do produto sair das dos factores. */
+        {
+            long ok = 0, tot = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+            for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
+                long pr = a*c - b*d, pi = a*d + b*c;
+                long Nz = a*a + b*b, Nw = c*c + d*d, Np = pr*pr + pi*pi;
+                tot++;
+                if(Np == Nz*Nw) ok++;
+            }
+            printf("      a norma COMPÕE-SE: N(zw) = N(z)·N(w) em %ld/%ld pares --- é a"
+                   " fusão, e a métrica do produto sai das dos factores\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (3) O GUME: sem a divisão euclidiana a carta NÃO existe. Em
+         * Z[√−5] a norma é a²+5b², e há elementos cujo resto nunca desce. */
+        {
+            long falhou = 0, tot = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long Nd = c*c + 5*d*d;
+                if(Nd == 0) continue;
+                long pr = a*c + 5*b*d, pi = b*c - a*d;
+                long qr = (pr >= 0 ? (2*pr + Nd) : (2*pr - Nd)) / (2*Nd);
+                long qi = (pi >= 0 ? (2*pi + Nd) : (2*pi - Nd)) / (2*Nd);
+                long rr = a - (qr*c - 5*qi*d), ri = b - (qr*d + qi*c);
+                long Nr = rr*rr + 5*ri*ri;
+                tot++;
+                if(Nr >= Nd) falhou++;
+            }
+            printf("      GUME — em Z[√−5] o resto NÃO desce em %ld dos %ld casos: a norma"
+                   " não é euclidiana e a carta não existe ali\n", falhou, tot);
+            printf("        a exigência é do ANEL, não da leitura --- e é por isso que o"
+                   " catálogo pergunta «de que precisa o anel»\n");
+            if(falhou == 0) mal++;
+        }
+
+        /* ── (4) E AS UNIDADES DIZEM COMO A REVERSÃO SE PORTA: em Z são duas e
+         * ela espelha (ordem 2); em Z[i] são quatro e ela roda (ordem 4). */
+        {
+            long u2 = 0, u4 = 0;
+            for(long n = -3; n <= 3; n++) if(n*n == 1) u2++;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+                if(a*a + b*b == 1) u4++;
+            /* a ordem da reversão: em Z, n ↦ −n tem ordem 2; em Z[i], z ↦ iz tem 4 */
+            long ordZ = 0; { long x = 1; for(int k = 1; k <= 8; k++){ x = -x; if(x == 1){ ordZ = k; break; } } }
+            long ordG = 0; { long a = 1, b = 0;
+                for(int k = 1; k <= 8; k++){ long na = -b, nb = a; a = na; b = nb;
+                    if(a == 1 && b == 0){ ordG = k; break; } } }
+            printf("      unidades de Z: %ld, e a reversão tem ordem %ld (ESPELHA);"
+                   " unidades de Z[i]: %ld, e ordem %ld (RODA)\n", u2, ordZ, u4, ordG);
+            printf("        é a mesma fase de um bit contra a de dois --- as unidades são o"
+                   " grupo que a carta traz consigo\n");
+            if(u2 != 2 || u4 != 4 || ordZ != 2 || ordG != 4) mal++;
+        }
+
+        printf("\n");
+        ok("OS CORPOS BASE SÃO OS EUCLIDIANOS, E A MÉTRICA BASE É A NORMA. O catálogo já o"
+           " diz sem o medir: a bijeção não é teorema avulso, é um SISTEMA DE COORDENADAS ---"
+           " Φ é a carta, Φ⁻¹ a leitura dela ---, e a pergunta certa é de que precisa o anel."
+           " A resposta é ser euclidiano, e é isso que aqui se mede. Em Z a divisão com resto"
+           " menor existe sempre; em Z[i], com a norma a²+b², o resto tem norma estritamente"
+           " menor que a do divisor em todos os casos varridos --- e é por isso que ali há"
+           " carta. A norma é a métrica, e ela COMPÕE-SE: N(zw) = N(z)N(w) em todos os pares,"
+           " o que é a fusão das métricas e faz a do produto sair das dos factores sem se"
+           " medir nada de novo. O GUME é o anel que não serve: em Z[√−5] a norma é a²+5b² e o"
+           " resto não desce numa parte dos casos, pelo que a carta não existe ali. A"
+           " exigência é do ANEL e não da leitura, e é essa a pergunta que o catálogo faz. E"
+           " as unidades dizem como a reversão se porta: em Z são duas e ela ESPELHA, com"
+           " ordem dois; em Z[i] são quatro e ela RODA, com ordem quatro. É a mesma diferença"
+           " entre uma fase de um bit e uma de dois --- as unidades são o grupo que a carta"
+           " traz consigo, e é dele que sai a forma da fibra.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
