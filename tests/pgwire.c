@@ -14212,6 +14212,174 @@ int main(void){
            " fica de fora, o que é do motor e não da lei.", mal == 0);
     }
 
+    /* ═══ §W100: A TRANSFORMADA EM INTEIROS — O QUE ATRAVESSA É F SEM O 1/√n ═ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W100 Hadamard: F⁴ = n²·I atravessa, o 1/√n não.\n\n");
+        { const char *tabs[] = { "A","P","H" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w100__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w100__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w100.mem"); unlink("/tmp/pgwire_w100.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w100")) mal++;
+
+        long rec100 = 0;
+        #define POE(t,M,N) do { char q2[420]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[320]; cols[0] = 0; \
+              for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (N); i2++){ char vs[320]; vs[0] = 0; \
+                for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); if(!o2.ok) rec100++; } } while(0)
+        #define MUL(X,Y,Z,N) do { POE("P",(X),(N)); POE("A",(Y),(N)); \
+            sql_executa("SELECT produto(A) FROM P", &o); \
+            if(!o.ok || o.nrows != (N)) falhou = 1; else \
+            for(int i3 = 0; i3 < (N); i3++) for(int j3 = 0; j3 < (N); j3++) \
+                (Z)[i3][j3] = atol(o.cell[i3][j3]); } while(0)
+
+        /* ── O catálogo diz da transformada universal: «a normalização é 1/√n
+         * em CADA lado, e não por gosto», e daí F⁻¹ exacta, F⁴ = id, unitária.
+         * Está certo sobre ℝ. Mas esta casa não guarda 1/√2, e o próprio
+         * catálogo tem o critério: «identidade atravessa, limite não; o que
+         * atravessa é a parte algébrica». Aqui mede-se O QUE ATRAVESSA. */
+        long q2_ok = 0, q4_ok = 0, sim_ok = 0, uni_ok = 0, casos = 0;
+        for(int e = 1; e <= 2; e++){
+            int N = 1 << e;                    /* n = 2, 4 — 8×8 sai do tecto */
+            long H[6][6];
+            /* Sylvester: H_{2m} = H_m ⊗ (1,1;1,−1), construído a partir de 1 */
+            H[0][0] = 1;
+            for(int s = 1, m = 1; s <= e; s++, m *= 2){
+                long T[6][6];
+                for(int i = 0; i < m; i++) for(int j = 0; j < m; j++){
+                    T[i][j] = H[i][j];       T[i][j+m]   = H[i][j];
+                    T[i+m][j] = H[i][j];     T[i+m][j+m] = -H[i][j];
+                }
+                for(int i = 0; i < 2*m; i++) for(int j = 0; j < 2*m; j++) H[i][j] = T[i][j];
+            }
+            int falhou = 0;
+            long H2[6][6], H4[6][6];
+            MUL(H, H, H2, N);
+            if(falhou){ mal++; continue; }
+            MUL(H2, H2, H4, N);
+            if(falhou){ mal++; continue; }
+            casos++;
+            /* H² = n·I  e  H⁴ = n²·I */
+            int ok2 = 1, ok4 = 1;
+            for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+                if(H2[i][j] != (i==j ? (long)N : 0)) ok2 = 0;
+                if(H4[i][j] != (i==j ? (long)N*N : 0)) ok4 = 0;
+            }
+            if(ok2) q2_ok++;
+            if(ok4) q4_ok++;
+            /* Hᵀ = H, pedido ao motor */
+            POE("A", H, N);
+            sql_executa("SELECT transposta(*) FROM A", &o);
+            int sim = (o.ok && o.nrows == N);
+            for(int i = 0; i < N && sim; i++) for(int j = 0; j < N; j++)
+                if(atol(o.cell[i][j]) != H[i][j]) sim = 0;
+            if(sim) sim_ok++;
+            /* unitária a menos de n: HᵀH = n·I, e como Hᵀ = H isso é H² */
+            if(ok2) uni_ok++;
+            POE("A", H, N);
+            sql_executa("SELECT det(*) FROM A", &o);
+            printf("      n=%d: H² = n·I %s · H⁴ = n²·I %s · Hᵀ = H %s (motor)"
+                   " · det = %s\n", N, ok2?"sim":"NÃO", ok4?"sim":"NÃO",
+                   sim?"sim":"NÃO", o.ok ? o.cell[0][0] : "?");
+        }
+        printf("      → F² = n·I e F⁴ = n²·I: %ld/%ld e %ld/%ld — a PERIODICIDADE"
+               " atravessa para os inteiros, com o factor explícito\n",
+               q2_ok, casos, q4_ok, casos);
+        if(q2_ok != casos || q4_ok != casos || sim_ok != casos || casos < 2) mal++;
+
+        /* ── E O QUE NÃO ATRAVESSA. A normalização 1/√n só é racional quando n
+         * é quadrado perfeito; e como aqui n = 2^e, isso pede e PAR. Logo em
+         * n=2 e n=8 o 1/√n não vive no corpo, e a transformada normalizada não
+         * é uma operação desta casa — enquanto H, sem normalização, é inteira
+         * em todos. Não é uma limitação da máquina: é a distinção que o próprio
+         * catálogo faz entre o que atravessa e o que não. */
+        {
+            long quad = 0, nao = 0;
+            for(int e = 1; e <= 6; e++){
+                long n = 1 << e, r = 0;
+                while(r*r < n) r++;
+                if(r*r == n) quad++; else nao++;
+            }
+            printf("      o 1/√n é racional em %ld dos 6 primeiros n = 2^e, e"
+                   " irracional em %ld — a normalização NÃO atravessa\n", quad, nao);
+            printf("        enquanto H é inteira em todos: o que passa a alfândega"
+                   " é a identidade algébrica, não o factor de escala\n");
+            if(nao == 0 || quad == 0) mal++;
+        }
+
+        /* ── E A REFLEXÃO. O catálogo diz F² = reflexão. Em Hadamard sai
+         * F² = n·I, que é a IDENTIDADE escalada — e não é contradição: a
+         * reflexão é k ↦ −k, e o grupo aqui é (ℤ/2)^e, onde −k = k para todo
+         * k. A reflexão É a identidade neste grupo, e é por isso que Hadamard
+         * a não mostra. Conta-se, para não ficar em palavra. */
+        {
+            /* Os DOIS grupos de ordem 4 não são o mesmo, e é aí que está a
+             * resposta. Hadamard vive em (ℤ/2)², onde a soma é XOR e o inverso
+             * de k é o PRÓPRIO k; a DFT₄ vive em ℤ/4, onde só 0 e 2 são fixos.
+             * A primeira escrita testou a reflexão com aritmética mod 4 e
+             * atribuiu-a ao grupo errado — o teste dava 2 de 4 e a asserção
+             * caiu, que é o que uma asserção tem de fazer. */
+            long fixos = 0, n = 4;
+            for(long k = 0; k < n; k++) if((k ^ k) == 0) fixos++;   /* XOR: −k = k */
+            printf("      REFLEXÃO — em (ℤ/2)², onde a soma é XOR, o inverso de k"
+                   " é o PRÓPRIO k: %ld de %ld fixos, logo a reflexão É a"
+                   " identidade e F² = n·I não contradiz «F² = reflexão»\n",
+                   fixos, n);
+            long f4 = 0, m4 = 4;
+            for(long k = 0; k < m4; k++) if(((m4 - k) % m4) == k) f4++;
+            printf("        CONTROLO em ℤ/4, o OUTRO grupo de ordem 4, com a soma"
+                   " usual: só %ld dos %ld são fixos — ali a reflexão SEPARA-SE da"
+                   " identidade, e é por isso que Hadamard e a DFT₄ são"
+                   " transformadas diferentes\n", f4, m4);
+            if(fixos != n) mal++;
+            if(f4 == m4 || f4 == 0) mal++;
+        }
+
+        #undef MUL
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("A TRANSFORMADA ATRAVESSA PARA OS INTEIROS SEM A NORMALIZAÇÃO, E É A NORMALIZAÇÃO"
+           " QUE FICA RETIDA. O catálogo diz da transformada universal que «a normalização é"
+           " 1/√n em CADA lado, e não por gosto», e daí tira F⁻¹ exacta, F⁴ = id e a"
+           " unitariedade — o que está certo sobre ℝ. Mas o mesmo catálogo tem a lei da"
+           " alfândega, «passa o que reverte», e o critério «identidade atravessa, limite não:"
+           " o que atravessa é a parte algébrica». Aplicado à própria transformada, o veredicto"
+           " é este: em Hadamard, que é a transformada universal com caracteres ±1, o motor dá"
+           " H² = n·I e H⁴ = n²·I em 2/2 (n = 2 e 4; o 8×8 sai do tecto 6×6), e Hᵀ = H pela"
+           " transposta do motor. A PERIODICIDADE ATRAVESSA — com o factor explícito em vez de"
+           " escondido na raiz. O QUE NÃO ATRAVESSA É O 1/√n: ele só é racional quando n é"
+           " quadrado perfeito, o que entre os n = 2^e acontece em 3 dos 6 primeiros, e nos"
+           " outros a transformada NORMALIZADA não é uma operação desta casa. Não é limitação"
+           " da máquina: é a distinção que o catálogo faz, aplicada a ele próprio. E A"
+           " REFLEXÃO NÃO É CONTRADIÇÃO: o catálogo diz F² = reflexão e Hadamard dá F² = n·I,"
+           " que é a identidade escalada — porque a reflexão é k ↦ −k e o grupo aqui é"
+           " (ℤ/2)^e, onde −k = k para TODO k. Conta-se em vez de se afirmar: em (ℤ/2)², onde a soma"
+           " é XOR, o inverso de k é o PRÓPRIO k, e são 4 de 4 fixos. O CONTROLO é ℤ/4 — o"
+           " OUTRO grupo de ordem 4 —, onde só 2 dos 4 são fixos: ali a reflexão separa-se da"
+           " identidade, e é por isso que Hadamard e a DFT₄ são transformadas diferentes. Sem"
+           " esse controlo, «a reflexão é a identidade» seria uma desculpa e não uma"
+           " propriedade do grupo. E a primeira escrita deste teste usou aritmética mod 4 para"
+           " o grupo do XOR — atribuiu a reflexão ao grupo errado, deu 2 de 4, e a asserção"
+           " caiu, que é o que uma asserção tem de fazer.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

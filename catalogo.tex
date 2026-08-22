@@ -1262,6 +1262,10 @@ Vai assim, e volta assim:
 \]
 A normalização é $1/\sqrt n$ em \emph{cada} lado, e não por gosto: somar a órbita inteira dá $\sum_k\chi_k(j)\chi_{-k}(j')=n\,\delta_{j,j'}$ --- o ponto ---, e esse $n$ tem de ser cancelado por duas metades, uma de cada aplicação. É a \textbf{ida e a volta}, e a volta é exata: nenhuma das duas é aproximação de coisa nenhuma.
 
+\paragraph{E o que dela atravessa para os inteiros é a periodicidade, não a normalização.} O $1/\sqrt n$ só é racional quando $n$ é quadrado perfeito --- entre os $n=2^e$, em metade dos casos ---, pelo que a transformada \emph{normalizada} não é uma operação desta casa. A não normalizada é, e carrega o fator à vista: em Hadamard, que é esta transformada com caracteres $\pm1$, vale $H^2=n\,I$ e $H^4=n^2\,I$, com $H^{\mathsf T}=H$. É a própria lei da alfândega aplicada aqui: \emph{passa a identidade algébrica, fica retido o fator de escala}. E a reflexão não é exceção --- $H^2=n\,I$ é a identidade escalada porque o grupo é $(\Z/2)^e$, onde a soma é XOR e $-k=k$ para todo $k$; em $\Z/4$, o \emph{outro} grupo de ordem quatro, só dois pontos são fixos e a reflexão separa-se. \textbf{É a estrutura do grupo, não a sua ordem, que decide a transformada.}
+
+\medido{\code{tests/pgwire.c} §W100 --- $H^2$, $H^4$ e $H^{\mathsf T}$ pelo motor em $2/2$ ($n=2,4$; o $8\times8$ sai do tecto); a contagem dos $n=2^e$ com $1/\sqrt n$ racional; e a reflexão nos dois grupos de ordem quatro, $4/4$ fixos no do XOR contra $2/4$ em $\Z/4$.}
+
 E há mais do que a inversa: a transformada universal é \textbf{periódica}. Aplicada quatro vezes devolve o que entrou; aplicada duas, devolve a reflexão:
 \[
 \F^2=\text{reflexão},\qquad \F^4=\mathrm{id}.

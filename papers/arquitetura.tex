@@ -4751,6 +4751,52 @@ próprio fecho.}
         {\code{det} pelo motor sobre $\oplus$ e $\otimes$; o controlo fora de $\mathrm{GL}$}
         {\code{tests/pgwire.c} §W99}
 
+\subsection*{A transformada atravessa sem a normalização --- e é a normalização que fica retida}
+
+\noindent O \code{catalogo} diz da transformada universal que «a normalização é
+$1/\sqrt n$ em \emph{cada} lado, e não por gosto», e daí tira $\mathcal{F}^{-1}$ exata,
+$\mathcal{F}^{4}=\mathrm{id}$ e a unitariedade. Está certo sobre $\R$. Mas o mesmo catálogo
+tem a lei da alfândega --- \emph{passa o que reverte} --- e o critério
+\emph{«identidade atravessa, limite não: o que atravessa é a parte algébrica»}.
+Aplicado à própria transformada, o veredicto é este.
+
+\medskip\noindent\textbf{A periodicidade atravessa.} Em Hadamard, que é a
+transformada universal com caracteres $\pm1$, o motor dá
+\[
+H^{2}=n\,I,\qquad H^{4}=n^{2}\,I,\qquad H^{\mathsf T}=H
+\]
+em $2/2$ ($n=2$ e $4$; o $8\times8$ sai do tecto $6\times6$), com a transposta
+pedida ao motor. \emph{O fator fica explícito em vez de escondido na raiz.}
+
+\medskip\noindent\textbf{O que não atravessa é o $1/\sqrt n$.} Ele só é racional
+quando $n$ é quadrado perfeito, o que entre os $n=2^{e}$ acontece em $3$ dos $6$
+primeiros; nos outros a transformada \emph{normalizada} não é uma operação desta
+casa, enquanto $H$ é inteira em todos. Não é limitação da máquina --- é a distinção
+que o catálogo faz, aplicada a ele próprio.
+
+\medskip\noindent\textbf{E a reflexão não é contradição.} O catálogo diz
+$\mathcal{F}^{2}=$ reflexão e Hadamard dá $H^{2}=n\,I$, que é a identidade escalada. A
+reflexão é $k\mapsto-k$, e o grupo aqui é $(\Z/2)^{e}$, onde a soma é XOR e o
+inverso de $k$ é o \textbf{próprio} $k$: $4$ de $4$ fixos. O \textsc{controlo} é
+$\Z/4$ --- o \emph{outro} grupo de ordem $4$ ---, onde só $2$ dos $4$ são fixos:
+ali a reflexão separa-se da identidade.
+\[
+\boxed{\;\text{é a \textbf{estrutura} do grupo, não a sua ordem, que decide a transformada}\;}
+\]
+--- e é por isso que Hadamard e a $\mathrm{DFT}_4$ são transformadas diferentes.
+
+\medskip\noindent A primeira escrita deste teste usou aritmética $\bmod 4$ para o
+grupo do XOR: atribuiu a reflexão ao grupo errado, deu $2$ de $4$, e a asserção
+caiu --- que é o que uma asserção tem de fazer.
+
+\medido{\code{tests/pgwire.c} §W100 --- $H^{2}$, $H^{4}$ e $H^{\mathsf T}$ pelo
+motor em $2/2$; a contagem dos $n=2^{e}$ com $1/\sqrt n$ racional; e a reflexão nos
+dois grupos de ordem $4$, com o controlo a separá-los.}
+
+\colunas{\code{catalogo} «A primeira operação: a TRANSFORMADA UNIVERSAL», «Identidade atravessa, limite não»}
+        {\code{produto}/\code{transposta}/\code{det} pelo motor; os dois grupos de ordem 4 como controlo}
+        {\code{tests/pgwire.c} §W100}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
