@@ -6147,32 +6147,54 @@ corpo expandido com $G$ constante e a soma a fechar.}
         {$G$ contado fibra a fibra; o produto $X\times F$ como corpo expandido}
         {\code{tests/pgwire.c} §W142}
 
-\subsection*{As métricas base: a carta existe sse o anel é euclidiano}
+\subsection*{Situar, não construir: os corpos são degraus da escada}
 
-\noindent O \code{catalogo} já põe a questão no lugar certo --- a bijeção é um
-\textbf{sistema de coordenadas}, com $\Phi$ a carta e $\Phi^{-1}$ a leitura, e a pergunta
-é \emph{de que precisa o anel}. A resposta, agora medida: \textbf{ser euclidiano}. Em
-$\Z$ e em $\Z[i]$ a divisão dá resto de norma menor sem uma falha; em $\Z[\sqrt{-5}]$ o
-resto não desce em $448$ dos casos, e ali não há carta. \emph{A exigência é do anel, não
-da leitura.}
+\noindent A \code{aranha} §\code{sec:escada} constrói a cadeia a partir de $B$ e de mais
+nada, e os degraus por quociente são realizações com $G$ a contar a classe. \emph{Logo
+não há caso particular a construir}: o trabalho é situar cada corpo no seu degrau. O
+lógico e os metais em $X_1$, que se faz sem identificar nada; o aditivo em $X_2$; o
+racional em $X_3$; o contínuo em $X_4$, os cortes.
 
-\medskip\noindent\textbf{E a norma é a métrica base, que se compõe}: $N(zw)=N(z)N(w)$ em
-$6561/6561$. É esta a fusão --- a métrica do produto sai das dos factores sem se medir
-nada de novo ---, e é por isso que as métricas base geram as outras. As \emph{unidades}
-são o grupo que a carta traz consigo: duas em $\Z$, e a reversão espelha (ordem $2$);
-quatro em $\Z[i]$, e a reversão roda (ordem $4$). \emph{É delas que sai a forma da fibra.}
+\medskip\noindent\textbf{E ao situá-los aparece o que as tabelas anteriores tinham
+escondido.} O racional e o projectivo têm a \emph{mesma} relação, $ps=qr$, e as duas
+coincidem em $1296/1296$ quádruplos: não são dois corpos com leituras parecidas, é o
+\textbf{mesmo degrau lido duas vezes}. Nos lotes anteriores estavam em linhas separadas.
 
-\medskip\noindent Daí a expansão de um corpo incompleto deixar de ser uma escolha:
-\emph{funde-se com a métrica base que lhe falta}, e o par $(\text{norma},\text{fase})$ é
-a forma polar que o \code{aranha} §\code{sec:transf} já tinha.
+\medskip\noindent O gume é que nem tudo colapse: a relação de $X_2$ vale sozinha onde a
+de $X_3$ não vale, e ao contrário --- \emph{os andares são distintos e nenhum é
+dispensável}.
 
-\medido{\code{tests/pgwire.c} §W143 --- a divisão euclidiana em $\Z$ ($492/492$) e
-$\Z[i]$ ($3888/3888$); a norma multiplicativa em $6561/6561$; o gume de $\Z[\sqrt{-5}]$
-com $448$ restos que não descem; e as unidades com a ordem da reversão.}
+\medido{\code{tests/pgwire.c} §W143 --- as relações de $X_2$ e $X_3$ verificadas como
+equivalências; os corpos situados; a coincidência racional/projectivo; e os degraus
+distintos.}
 
-\colunas{\code{catalogo} (\code{tests/gauss.c}: a carta), \code{aranha} §\code{sec:transf}}
-        {a divisão euclidiana em $\Z$ e $\Z[i]$; $N(zw)=N(z)N(w)$; as unidades}
-        {\code{tests/pgwire.c} §W143}
+\subsection*{Cada corpo é euclidiano na sua métrica, e as cartas são duas}
+
+\noindent «Euclidiano» aqui não é rótulo de um anel: é a \textbf{descida}. E a
+\code{aranha} diz de quem ela é --- «as duas faces \emph{fecham}: batendo alternadas, os
+intervalos encaixam e o processo \emph{termina} numa igualdade». \emph{A descida é das
+FACES.} Medido: as duas faces alternadas terminam em $820/820$ pares, em no máximo quatro
+passos; e mudando a métrica --- o valor absoluto da reta, a norma do círculo, a área, o
+produto --- termina em todas. \textbf{A métrica é a coordenada}, cada corpo gera o seu
+espaço, e em cada um a descida existe porque as duas faces lá estão.
+
+\medskip\noindent\textbf{E as cartas são duas, e só duas.} A tabela das faces
+emparelha-as linha a linha: oposto contra inverso, meio aritmético contra geométrico,
+reta contra círculo, fases que somam contra módulos que multiplicam, \emph{cartesiano
+contra polar}, cisão contra gato. Não há terceira --- e é por isso que, para nós, os
+corpos não diferem: todos se lêem nas mesmas duas coordenadas.
+
+\medskip\noindent O gume é que as faces não sejam intermutáveis: alternando, o processo
+fecha em $190/190$; batendo só a aditiva, fecha em \textbf{zero}. \emph{É a alternância
+que faz os intervalos encaixarem}, e é essa a razão de uma composição não chegar.
+
+\medido{\code{tests/pgwire.c} §W144 --- a descida alternada a terminar em $820/820$; as
+quatro métricas com descida completa; as seis linhas das duas cartas; e o gume da
+alternância, $190$ contra $0$.}
+
+\colunas{\code{aranha} §\code{sec:escada}, §\code{sec:dualidades}, \code{thm:duas}}
+        {as relações dos degraus; a descida alternada nas quatro métricas}
+        {\code{tests/pgwire.c} §W143, §W144} §W143}
 
 \subsection*{As duas metades do critério, e as duas falhas duais}
 

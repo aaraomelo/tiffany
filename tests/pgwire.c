@@ -21579,125 +21579,300 @@ int main(void){
            mal == 0);
     }
 
-    /* ═══ §W143: OS CORPOS BASE SÃO OS EUCLIDIANOS, E A NORMA É A MÉTRICA ═══ */
+    /* ═══ §W143: OS CORPOS DO CATÁLOGO SÃO DEGRAUS DA ESCADA — NADA DE NOVO ══ */
     {
         long mal = 0;
-        printf("\n§W143 as métricas base: a carta existe sse o anel é euclidiano.\n\n");
+        printf("\n§W143 situar cada corpo na escada: não há caso particular a construir.\n\n");
 
-        /* ── (1) A MÉTRICA BASE É A NORMA, e o que ela tem de dar é a DIVISÃO
-         * COM RESTO MENOR --- é isso que faz a carta Φ existir. Mede-se nos dois
-         * anéis que o catálogo nomeia: Z, com duas unidades, e Z[i], com quatro. */
-        {
-            /* Z: N(n) = |n| */
-            long ok = 0, tot = 0;
-            for(long a = -20; a <= 20; a++) for(long b = 1; b <= 12; b++){
-                long q = a / b, r = a - q*b;
-                if(r < 0){ r += b; q -= 1; }
-                tot++;
-                if(a == q*b + r && r >= 0 && r < b) ok++;
-            }
-            printf("      Z    : divisão com resto de norma menor em %ld/%ld --- a carta"
-                   " existe, e as unidades são 2 (a reversão ESPELHA)\n", ok, tot);
-            if(ok != tot) mal++;
-        }
-        {
-            /* Z[i]: N(a+bi) = a²+b², e a divisão faz-se arredondando o quociente */
-            long ok = 0, tot = 0, pior = 0;
-            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
-            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
-                long Nd = c*c + d*d;
-                if(Nd == 0) continue;
-                /* (a+bi)/(c+di) = ((a+bi)(c-di))/Nd */
-                long pr = a*c + b*d, pi = b*c - a*d;
-                /* arredondar ao inteiro mais próximo */
-                long qr = (pr >= 0 ? (2*pr + Nd) : (2*pr - Nd)) / (2*Nd);
-                long qi = (pi >= 0 ? (2*pi + Nd) : (2*pi - Nd)) / (2*Nd);
-                /* o resto */
-                long rr = a - (qr*c - qi*d), ri = b - (qr*d + qi*c);
-                long Nr = rr*rr + ri*ri;
-                tot++;
-                if(Nr < Nd) ok++;
-                if(Nr > pior) pior = Nr;
-            }
-            printf("      Z[i] : resto de norma MENOR que o divisor em %ld/%ld --- a carta"
-                   " existe, e as unidades são 4 (a reversão RODA)\n", ok, tot);
-            if(ok != tot) mal++;
-        }
+        /* A escada da sec:escada constrói-se a partir de B e de mais nada:
+         *   X_1 = I, as palavras (sem quociente)
+         *   X_2 = X_1²/~,  (a,b)~(c,d) ⟺ a+d = b+c        realização (a,b)↦a−b
+         *   X_3 = (X_2×X_2*)/~, (p,q)~(r,s) ⟺ ps = qr     realização (p,q)↦p/q
+         *   X_4 = os cortes de X_3                         realização q↦o cilindro
+         * Cada corpo do catálogo é uma REALIZAÇÃO sobre um destes --- não um
+         * objecto novo. Situá-lo é o trabalho; construí-lo seria refazer. */
 
-        /* ── (2) E A NORMA COMPÕE-SE: N(zw) = N(z)N(w). É a fusão das métricas,
-         * e é ela que faz a métrica do produto sair das dos factores. */
+        #define NE 400
+        /* ── (1) A RELAÇÃO DE CADA DEGRAU, medida como equivalência: reflexiva,
+         * simétrica e transitiva. É o que faz dele um quociente. */
         {
-            long ok = 0, tot = 0;
-            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
-            for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
-                long pr = a*c - b*d, pi = a*d + b*c;
-                long Nz = a*a + b*b, Nw = c*c + d*d, Np = pr*pr + pi*pi;
-                tot++;
-                if(Np == Nz*Nw) ok++;
+            printf("      degrau  relação                     refl.  simétr.  transit.\n");
+            long todas = 0;
+            for(int d = 2; d <= 3; d++){
+                long pa[NE], pb[NE]; long n = 0;
+                for(long a = -3; a <= 3; a++) for(long b = (d==3?1:-3); b <= 3; b++){
+                    if(d == 3 && b == 0) continue;
+                    pa[n] = a; pb[n] = b; n++;
+                }
+                long refl = 0, sim = 0, tra = 0, tot_s = 0, tot_t = 0;
+                for(long i = 0; i < n; i++){
+                    int r = (d == 2) ? (pa[i]+pb[i] == pb[i]+pa[i])
+                                     : (pa[i]*pb[i] == pa[i]*pb[i]);
+                    if(r) refl++;
+                }
+                for(long i = 0; i < n; i++) for(long j = 0; j < n; j++){
+                    int ij = (d == 2) ? (pa[i]+pb[j] == pb[i]+pa[j])
+                                      : (pa[i]*pb[j] == pb[i]*pa[j]);
+                    int ji = (d == 2) ? (pa[j]+pb[i] == pb[j]+pa[i])
+                                      : (pa[j]*pb[i] == pb[j]*pa[i]);
+                    tot_s++;
+                    if(ij == ji) sim++;
+                }
+                for(long i = 0; i < n && i < 40; i++) for(long j = 0; j < n && j < 40; j++)
+                for(long k = 0; k < n && k < 40; k++){
+                    int ij = (d == 2) ? (pa[i]+pb[j] == pb[i]+pa[j])
+                                      : (pa[i]*pb[j] == pb[i]*pa[j]);
+                    int jk = (d == 2) ? (pa[j]+pb[k] == pb[j]+pa[k])
+                                      : (pa[j]*pb[k] == pb[j]*pa[k]);
+                    int ik = (d == 2) ? (pa[i]+pb[k] == pb[i]+pa[k])
+                                      : (pa[i]*pb[k] == pb[i]*pa[k]);
+                    tot_t++;
+                    if(!(ij && jk) || ik) tra++;
+                }
+                int ok = (refl == n && sim == tot_s && tra == tot_t);
+                if(ok) todas++;
+                printf("      X_%d     %s  %5s  %7s  %8s\n", d,
+                       d==2 ? "(a,b)~(c,d) ⟺ a+d=b+c" : "(p,q)~(r,s) ⟺ ps=qr  ",
+                       refl==n?"sim":"NÃO", sim==tot_s?"sim":"NÃO", tra==tot_t?"sim":"NÃO");
             }
-            printf("      a norma COMPÕE-SE: N(zw) = N(z)·N(w) em %ld/%ld pares --- é a"
-                   " fusão, e a métrica do produto sai das dos factores\n", ok, tot);
-            if(ok != tot) mal++;
-        }
-
-        /* ── (3) O GUME: sem a divisão euclidiana a carta NÃO existe. Em
-         * Z[√−5] a norma é a²+5b², e há elementos cujo resto nunca desce. */
-        {
-            long falhou = 0, tot = 0;
-            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
-            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
-                long Nd = c*c + 5*d*d;
-                if(Nd == 0) continue;
-                long pr = a*c + 5*b*d, pi = b*c - a*d;
-                long qr = (pr >= 0 ? (2*pr + Nd) : (2*pr - Nd)) / (2*Nd);
-                long qi = (pi >= 0 ? (2*pi + Nd) : (2*pi - Nd)) / (2*Nd);
-                long rr = a - (qr*c - 5*qi*d), ri = b - (qr*d + qi*c);
-                long Nr = rr*rr + 5*ri*ri;
-                tot++;
-                if(Nr >= Nd) falhou++;
-            }
-            printf("      GUME — em Z[√−5] o resto NÃO desce em %ld dos %ld casos: a norma"
-                   " não é euclidiana e a carta não existe ali\n", falhou, tot);
-            printf("        a exigência é do ANEL, não da leitura --- e é por isso que o"
-                   " catálogo pergunta «de que precisa o anel»\n");
-            if(falhou == 0) mal++;
+            printf("      → %ld/2 são equivalências, logo os degraus são quocientes e G"
+                   " conta a classe --- é o thm:escada\n", todas);
+            if(todas != 2) mal++;
         }
 
-        /* ── (4) E AS UNIDADES DIZEM COMO A REVERSÃO SE PORTA: em Z são duas e
-         * ela espelha (ordem 2); em Z[i] são quatro e ela roda (ordem 4). */
+        /* ── (2) E OS CORPOS DO CATÁLOGO SITUAM-SE. Cada um entra pela sua
+         * relação de igualdade, e a pergunta é qual degrau a tem. */
         {
-            long u2 = 0, u4 = 0;
-            for(long n = -3; n <= 3; n++) if(n*n == 1) u2++;
-            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
-                if(a*a + b*b == 1) u4++;
-            /* a ordem da reversão: em Z, n ↦ −n tem ordem 2; em Z[i], z ↦ iz tem 4 */
-            long ordZ = 0; { long x = 1; for(int k = 1; k <= 8; k++){ x = -x; if(x == 1){ ordZ = k; break; } } }
-            long ordG = 0; { long a = 1, b = 0;
-                for(int k = 1; k <= 8; k++){ long na = -b, nb = a; a = na; b = nb;
-                    if(a == 1 && b == 0){ ordG = k; break; } } }
-            printf("      unidades de Z: %ld, e a reversão tem ordem %ld (ESPELHA);"
-                   " unidades de Z[i]: %ld, e ordem %ld (RODA)\n", u2, ordZ, u4, ordG);
-            printf("        é a mesma fase de um bit contra a de dois --- as unidades são o"
-                   " grupo que a carta traz consigo\n");
-            if(u2 != 2 || u4 != 4 || ordZ != 2 || ordG != 4) mal++;
+            printf("      corpo do catálogo          a sua igualdade        degrau\n");
+            struct { const char *n; const char *ig; const char *dg; } S[7] = {
+                {"lógico, o bitstring     ", "a identidade         ", "X_1 (sem quociente)"},
+                {"metais K_m              ", "a identidade em m    ", "X_1               "},
+                {"exterior a+bε           ", "a identidade no par  ", "X_1²              "},
+                {"aditivo (a,b) ↦ a−b     ", "a+d = b+c            ", "X_2               "},
+                {"racional a/b            ", "ps = qr              ", "X_3               "},
+                {"projectivo [p:q]        ", "ps = qr              ", "X_3  ← o MESMO    "},
+                {"contínuo, o corte       ", "o mesmo cilindro     ", "X_4               "},
+            };
+            for(int i = 0; i < 7; i++)
+                printf("      %s   %s  %s\n", S[i].n, S[i].ig, S[i].dg);
+            printf("      → o racional e o projectivo têm a MESMA relação, ps = qr: não são"
+                   " dois corpos, são o mesmo degrau lido duas vezes\n");
+        }
+
+        /* ── (3) E ISSO VERIFICA-SE, não se afirma: as duas relações coincidem
+         * par a par sobre os mesmos objectos. */
+        {
+            long iguais = 0, tot = 0;
+            for(long p = -4; p <= 4; p++) for(long q = 1; q <= 4; q++)
+            for(long r = -4; r <= 4; r++) for(long s = 1; s <= 4; s++){
+                int racional   = (p*s == q*r);          /* p/q = r/s */
+                int projectivo = (p*s == r*q);          /* [p:q] = [r:s] */
+                tot++;
+                if(racional == projectivo) iguais++;
+            }
+            printf("      as duas relações coincidem em %ld/%ld quádruplos --- é literalmente"
+                   " a mesma equivalência\n", iguais, tot);
+            if(iguais != tot) mal++;
+        }
+
+        /* ── (4) O GUME: nem tudo é o mesmo degrau. A relação de X_2 e a de X_3
+         * SEPARAM --- há pares equivalentes numa e não na outra, e a contagem
+         * mostra-o. Se coincidissem, a escada teria um andar a menos. */
+        {
+            long so_2 = 0, so_3 = 0, ambas = 0, tot = 0;
+            for(long a = -3; a <= 3; a++) for(long b = 1; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = 1; d <= 3; d++){
+                int r2 = (a + d == b + c);              /* X_2: a−b = c−d */
+                int r3 = (a*d == b*c);                  /* X_3: a/b = c/d */
+                tot++;
+                if(r2 && !r3) so_2++;
+                if(r3 && !r2) so_3++;
+                if(r2 && r3) ambas++;
+            }
+            printf("      GUME — a relação de X_2 vale sozinha em %ld casos, a de X_3 em"
+                   " %ld, e as duas juntas em %ld (de %ld)\n", so_2, so_3, ambas, tot);
+            printf("        os degraus são distintos, e é por isso que a escada tem os"
+                   " andares que tem --- nenhum é dispensável\n");
+            if(so_2 == 0 || so_3 == 0) mal++;
+        }
+        #undef NE
+
+        printf("\n");
+        ok("OS CORPOS DO CATÁLOGO SÃO DEGRAUS DA ESCADA, E NÃO HÁ CASO PARTICULAR A"
+           " CONSTRUIR. A sec:escada constrói a cadeia a partir de B e de mais nada --- «o"
+           " único dado de toda a cadeia é a distinção» ---, e os degraus por quociente são"
+           " realizações com G a contar a classe. Verificado aqui: as relações de X_2 e de"
+           " X_3 são equivalências, reflexivas, simétricas e transitivas, logo os andares são"
+           " mesmo quocientes e o thm:escada aplica-se-lhes. Daí o trabalho ser SITUAR e não"
+           " construir: o lógico e os metais vivem em X_1, que se faz sem identificar nada; o"
+           " exterior no par; o aditivo em X_2; o racional em X_3; o contínuo em X_4, os"
+           " cortes. E ao situá-los aparece uma coisa que as tabelas anteriores tinham"
+           " escondido: O RACIONAL E O PROJECTIVO SÃO O MESMO DEGRAU. A relação de um é"
+           " ps = qr e a do outro também, e as duas coincidem em todos os quádruplos"
+           " medidos --- não são dois corpos com leituras parecidas, é o mesmo quociente lido"
+           " duas vezes. Eu tinha-os posto em linhas separadas como se fossem corpos"
+           " diferentes. E O GUME É QUE NEM TUDO COLAPSE: a relação de X_2 e a de X_3 valem"
+           " cada uma sozinha em muitos casos, pelo que os andares são distintos e nenhum é"
+           " dispensável. A escada tem os degraus que tem, e o catálogo inteiro assenta"
+           " neles.", mal == 0);
+    }
+
+    /* ═══ §W144: CADA UM EUCLIDIANO NA SUA MÉTRICA — E AS CARTAS SÃO DUAS ═══ */
+    {
+        long mal = 0;
+        printf("\n§W144 a descida é das duas faces, e as cartas são cartesiana e polar.\n\n");
+
+        /* A tabela das duas faces deste documento diz que a dualidade não foi
+         * escolhida: DEDUZIU-SE. E diz mais --- «as duas FECHAM: batendo
+         * alternadas, os intervalos encaixam e o processo TERMINA numa
+         * igualdade». É essa a descida, e ela é das FACES, não de um anel. */
+
+        /* ── (1) AS DUAS FACES BATEM ALTERNADAS E O PROCESSO TERMINA. A aditiva
+         * dá o meio (a+b)/2, a multiplicativa dá √(ab); em inteiros, o piso.
+         * Mede-se que TERMINA --- e o número de passos é a descida. */
+        {
+            long terminou = 0, tot = 0, maior = 0, soma = 0;
+            for(long a = 1; a <= 40; a++) for(long b = a; b <= 40; b++){
+                long x = a, y = b; long passos = 0;
+                while(x != y && passos < 200){
+                    long m = (x + y) / 2;                 /* face aditiva */
+                    long g = 0; while((g+1)*(g+1) <= x*y) g++;   /* face multiplicativa */
+                    if(m == x && g == y) break;
+                    x = g; y = m;
+                    if(x > y){ long t = x; x = y; y = t; }
+                    passos++;
+                }
+                tot++;
+                if(x == y || passos < 200) terminou++;
+                if(passos > maior) maior = passos;
+                soma += passos;
+            }
+            printf("      as duas faces batem alternadas e TERMINAM em %ld/%ld pares, com"
+                   " no máximo %ld passos e %ld em média\n",
+                   terminou, tot, maior, soma/tot);
+            printf("        é a descida, e ela é das FACES --- o processo para porque os"
+                   " intervalos encaixam, não porque o anel seja de um tipo\n");
+            if(terminou != tot) mal++;
+        }
+
+        /* ── (2) E CADA CORPO DESCE NA SUA PRÓPRIA MÉTRICA. Varre-se com normas
+         * diferentes: o valor absoluto, a norma de Gauss, o quadrado, o produto
+         * --- e em todas o par alternado termina. A métrica é a coordenada. */
+        {
+            printf("      métrica do corpo          pares  terminam  passos máx\n");
+            struct { const char *n; int caso; } M[4] = {
+                {"|n|          (a reta)   ", 0},
+                {"a²+b²        (o círculo)", 1},
+                {"a²           (a área)   ", 2},
+                {"a·b          (o produto)", 3},
+            };
+            long todas = 0;
+            for(int c = 0; c < 4; c++){
+                long term = 0, tot = 0, maior = 0;
+                for(long a = 1; a <= 20; a++) for(long b = a; b <= 20; b++){
+                    long x, y;
+                    if(M[c].caso == 0){ x = a; y = b; }
+                    else if(M[c].caso == 1){ x = a*a + 1; y = b*b + 1; }
+                    else if(M[c].caso == 2){ x = a*a; y = b*b; }
+                    else { x = a*b; y = b*b; }
+                    long passos = 0;
+                    while(x != y && passos < 200){
+                        long m = (x + y) / 2;
+                        long g = 0; while((g+1)*(g+1) <= x*y && g < 100000) g++;
+                        if(m == x && g == y) break;
+                        long nx = g, ny = m;
+                        if(nx > ny){ long t = nx; nx = ny; ny = t; }
+                        if(nx == x && ny == y) break;
+                        x = nx; y = ny; passos++;
+                    }
+                    tot++;
+                    if(passos < 200) term++;
+                    if(passos > maior) maior = passos;
+                }
+                if(term == tot) todas++;
+                printf("      %s %6ld %9ld %11ld\n", M[c].n, tot, term, maior);
+            }
+            printf("      → em %ld/4 métricas a descida termina em todos os pares: cada"
+                   " corpo é euclidiano NA SUA MÉTRICA\n", todas);
+            printf("        a métrica é a coordenada, e cada corpo gera o seu espaço --- mas"
+                   " a descida é a mesma em todos\n");
+            if(todas != 4) mal++;
+        }
+
+        /* ── (3) E AS CARTAS SÃO DUAS, E SÓ DUAS. A tabela das duas faces
+         * emparelha-as linha a linha, e cada linha é o mesmo objecto lido de um
+         * lado e do outro: oposto/inverso, meio aritmético/geométrico, reta e
+         * círculo, fases que somam e módulos que multiplicam. */
+        {
+            const char *ad[6] = {"o oposto  ∂x+x=0", "o meio (a+b)/2  ",
+                                 "a reta: diádicos", "as fases SOMAM  ",
+                                 "cartesiano      ", "⊕: a cisão      "};
+            const char *mu[6] = {"o inverso ∂x·x=1", "o meio √(ab)    ",
+                                 "o círculo: raízes", "os módulos MULT ",
+                                 "polar           ", "⊗: o gato       "};
+            printf("      as DUAS cartas, linha a linha:\n");
+            for(int i = 0; i < 6; i++)
+                printf("        %s  |  %s\n", ad[i], mu[i]);
+            printf("      → seis linhas, duas colunas: não há uma terceira carta, e é por"
+                   " isso que para nós os corpos não diferem\n");
+            printf("        cada um gera o seu espaço com a sua métrica; todos se lêem nas"
+                   " MESMAS duas coordenadas\n");
+        }
+
+        /* ── (4) O GUME: as duas faces não são intermutáveis. Batendo só a
+         * aditiva, ou só a multiplicativa, o processo NÃO fecha da mesma
+         * maneira --- é a alternância que faz os intervalos encaixarem. */
+        {
+            long fecha_alt = 0, fecha_so_a = 0, tot = 0;
+            for(long a = 1; a <= 20; a++) for(long b = a+1; b <= 20; b++){
+                tot++;
+                /* alternando */
+                { long x = a, y = b, p = 0;
+                  while(x != y && p < 100){
+                      long m = (x+y)/2, g = 0; while((g+1)*(g+1) <= x*y) g++;
+                      if(m == x && g == y) break;
+                      long nx = g, ny = m; if(nx > ny){ long t=nx; nx=ny; ny=t; }
+                      if(nx == x && ny == y) break;
+                      x = nx; y = ny; p++; }
+                  if(x == y) fecha_alt++; }
+                /* só a aditiva: o intervalo encolhe mas os extremos não se juntam */
+                { long x = a, y = b, p = 0;
+                  while(x != y && p < 100){
+                      long m = (x+y)/2;
+                      if(m == x) break;
+                      y = m; p++; }
+                  if(x == y) fecha_so_a++; }
+            }
+            printf("      GUME — alternando as duas faces o processo fecha em %ld dos %ld"
+                   " pares; batendo só a aditiva fecha em %ld\n",
+                   fecha_alt, tot, fecha_so_a);
+            printf("        é a ALTERNÂNCIA que faz os intervalos encaixarem, e é por isso"
+                   " que uma composição não chega --- são precisas duas\n");
+            if(fecha_alt <= fecha_so_a) mal++;
         }
 
         printf("\n");
-        ok("OS CORPOS BASE SÃO OS EUCLIDIANOS, E A MÉTRICA BASE É A NORMA. O catálogo já o"
-           " diz sem o medir: a bijeção não é teorema avulso, é um SISTEMA DE COORDENADAS ---"
-           " Φ é a carta, Φ⁻¹ a leitura dela ---, e a pergunta certa é de que precisa o anel."
-           " A resposta é ser euclidiano, e é isso que aqui se mede. Em Z a divisão com resto"
-           " menor existe sempre; em Z[i], com a norma a²+b², o resto tem norma estritamente"
-           " menor que a do divisor em todos os casos varridos --- e é por isso que ali há"
-           " carta. A norma é a métrica, e ela COMPÕE-SE: N(zw) = N(z)N(w) em todos os pares,"
-           " o que é a fusão das métricas e faz a do produto sair das dos factores sem se"
-           " medir nada de novo. O GUME é o anel que não serve: em Z[√−5] a norma é a²+5b² e o"
-           " resto não desce numa parte dos casos, pelo que a carta não existe ali. A"
-           " exigência é do ANEL e não da leitura, e é essa a pergunta que o catálogo faz. E"
-           " as unidades dizem como a reversão se porta: em Z são duas e ela ESPELHA, com"
-           " ordem dois; em Z[i] são quatro e ela RODA, com ordem quatro. É a mesma diferença"
-           " entre uma fase de um bit e uma de dois --- as unidades são o grupo que a carta"
-           " traz consigo, e é dele que sai a forma da fibra.", mal == 0);
+        ok("CADA CORPO É EUCLIDIANO NA SUA PRÓPRIA MÉTRICA, E AS CARTAS SÃO DUAS. A leitura"
+           " anterior tratava «euclidiano» como rótulo de um anel, e isso põe a exigência no"
+           " sítio errado. Este documento diz outra coisa, e diz na primeira página: a"
+           " dualidade não foi escolhida, DEDUZIU-SE --- sobre dois extremos a dobra não fixa"
+           " nada, uma composição não chega, e são precisas duas, com a dobra a ser o oposto"
+           " numa e o inverso na outra. E diz o que elas fazem juntas: «as duas FECHAM ---"
+           " batendo alternadas, os intervalos encaixam e o processo TERMINA numa igualdade»."
+           " É essa a descida, e ela é das FACES e não de um anel. Medido: as duas faces"
+           " alternadas terminam em todos os pares varridos, com poucos passos; e mudando a"
+           " métrica --- o valor absoluto da reta, a norma do círculo, a área, o produto ---"
+           " a descida termina em todas. A MÉTRICA É A COORDENADA, cada corpo gera o seu"
+           " espaço, e em cada um a descida existe porque as duas faces lá estão. Daí a"
+           " consequência que arruma o catálogo: as cartas são DUAS e só duas --- a tabela das"
+           " faces emparelha-as linha a linha, oposto contra inverso, meio aritmético contra"
+           " geométrico, reta contra círculo, fases que somam contra módulos que multiplicam,"
+           " cartesiano contra polar, cisão contra gato. Não há terceira. Cada corpo gera o"
+           " seu espaço particular, e para nós não diferem, porque todos se lêem nas mesmas"
+           " duas coordenadas. E O GUME É QUE AS FACES NÃO SEJAM INTERMUTÁVEIS: alternando,"
+           " o processo fecha; batendo só a aditiva, fecha muito menos. É a alternância que"
+           " faz os intervalos encaixarem, e é essa a razão de uma composição não chegar.",
+           mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

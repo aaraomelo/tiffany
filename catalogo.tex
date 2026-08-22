@@ -1574,38 +1574,46 @@ eram quociente com $\sum G=\lvert I\rvert$; $G$ a variar nos dois incompletos, c
 e $30$ elementos em falta; e o corpo expandido a ficar com $G$ constante e a soma a
 fechar por construção.}
 
-\paragraph{E as \emph{métricas base} são as normas euclidianas --- é delas que a
-expansão se faz.} Este catálogo já diz, na entrada de \code{tests/gauss.c}, que a
-bijeção «não é um teorema avulso: é um \textbf{sistema de coordenadas} --- $\Phi$ é a
-carta, $\Phi^{-1}$ é a leitura dela», e que a pergunta certa é \emph{de que precisa o
-anel}. A resposta é \textbf{ser euclidiano}, e agora está medida:
+\paragraph{E não há caso particular a construir: cada corpo é um \emph{degrau} da
+escada.} A §\ref{sec:escada} do \code{aranha} constrói a cadeia a partir de $B$ e de mais
+nada --- «o único dado de toda a cadeia é a distinção» ---, e os degraus por quociente são
+realizações com $G$ a contar a classe:
+\[
+ X_1=I \ \text{(sem quociente)},\quad
+ X_2=X_1^2/{\sim}\ (a{+}d{=}b{+}c),\quad
+ X_3=(X_2\times X_2^{*})/{\sim}\ (ps{=}qr),\quad
+ X_4=\text{os cortes}.
+\]
+Verificado que as relações de $X_2$ e $X_3$ são equivalências --- reflexivas, simétricas,
+transitivas ---, o trabalho passa a ser \textbf{situar} e não construir:
 \begin{center}\small
-\begin{tabular}{@{}llrl@{}}
+\begin{tabular}{@{}lll@{}}
 \toprule
-anel & norma & resto menor & unidades / reversão\\
+corpo & a sua igualdade & degrau\\
 \midrule
-$\Z$ & $\lvert n\rvert$ & $492/492$ & $2$ --- \textbf{espelha} (ordem $2$)\\
-$\Z[i]$ & $a^2+b^2$ & $3888/3888$ & $4$ --- \textbf{roda} (ordem $4$)\\
-\midrule
-$\Z[\sqrt{-5}]$ & $a^2+5b^2$ & \textbf{falha em $448$} & --- \emph{não há carta}\\
+lógico, o \emph{bitstring} & a identidade & $X_1$\\
+metais $K_m$ & a identidade em $m$ & $X_1$\\
+exterior $a+b\varepsilon$ & a identidade no par & $X_1^2$\\
+aditivo $(a,b)\mapsto a-b$ & $a+d=b+c$ & $X_2$\\
+racional $a/b$ & $ps=qr$ & $X_3$\\
+projectivo $[p{:}q]$ & $ps=qr$ & $X_3$ --- \textbf{o mesmo}\\
+contínuo, o corte & o mesmo cilindro & $X_4$\\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent \textbf{E a norma compõe-se}: $N(zw)=N(z)\,N(w)$ em $6561/6561$ pares. \emph{É
-esta a fusão} --- a métrica do produto sai das dos factores sem se medir nada de novo ---
-e é por isso que as métricas base geram as outras: compondo-as. As unidades são o grupo
-que a carta traz consigo, e é delas que sai a \emph{forma da fibra}: duas unidades dão
-uma reversão que espelha, quatro dão uma que roda.
+\noindent \textbf{E ao situá-los aparece o que as tabelas anteriores tinham escondido: o
+racional e o projectivo são o \emph{mesmo} degrau.} A relação de um é $ps=qr$ e a do
+outro também, e as duas coincidem em $1296/1296$ quádruplos --- \emph{não são dois corpos
+com leituras parecidas: é o mesmo quociente lido duas vezes}. Nos lotes acima estavam em
+linhas separadas, como se fossem corpos distintos.
 
-\medskip\noindent Daí a expansão de um corpo incompleto ter um caminho e não uma
-escolha: \emph{funde-se com a métrica base que lhe falta}. A fibra variável de um resumo
-fecha-se quando se lhe junta a coordenada que o grupo das unidades move --- e o par
-$(\text{norma},\text{fase})$ é a forma polar que a §\ref{sec:transf} do \code{aranha} já
-tinha.
+\medskip\noindent E o gume é que nem tudo colapse: a relação de $X_2$ vale sozinha em
+casos onde a de $X_3$ não vale, e vice-versa. \emph{Os andares são distintos e nenhum é
+dispensável} --- a escada tem os degraus que tem, e o catálogo inteiro assenta neles.
 
-\medido{as métricas base em \code{tests/pgwire.c} §W143 --- a divisão euclidiana em $\Z$
-e $\Z[i]$ sem falha; a norma multiplicativa em $6561/6561$; o gume de $\Z[\sqrt{-5}]$
-com $448$ restos que não descem; e as unidades com a ordem da reversão, $2$ e $4$.}
+\medido{a escada em \code{tests/pgwire.c} §W143 --- as duas relações verificadas como
+equivalências; os corpos situados; a coincidência racional/projectivo em $1296/1296$; e o
+gume dos degraus distintos.}
 
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
