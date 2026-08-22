@@ -2153,10 +2153,35 @@ não-ter-corrido de não-ter-feito-nada. São $40$ nós em tabelas de $20$, $40$
 $80$ linhas --- o mesmo número --- contra $2280$, $4560$ e $9120$ passos sem
 ele. O crescimento do segundo é que dá conteúdo à constância do primeiro.
 
-\medskip\noindent\textbf{E um índice velho não mente.} O cabeçalho guarda a
-coluna e quantas linhas havia quando ele foi feito; se o número mudou, é
-\emph{ignorado} e a varredura corre. Custa tempo, nunca correção --- que é a
-única troca que um índice pode fazer sem deixar de ser um.
+\medskip\noindent\textbf{E as desigualdades descem também.} A árvore guarda o
+valor do símbolo mais significativo para o menos, com o deslocamento que põe os
+negativos antes: \emph{a ordem dos caminhos é a ordem dos números}. Uma
+desigualdade é por isso um \textbf{prefixo comum} seguido de todos os ramos de
+um lado, e nada mais --- \emph{cortar dá o dígito, percorrer dá o resto}, que
+são as duas operações que este documento já tinha, agora usadas juntas.
+Escreve-se como \textbf{faixa}, e daí os quatro operadores saírem de uma função
+só: $=$ é $[k,k]$, $>$ é $[k+1,\infty)$, $\le$ é $(-\infty,k]$.
+
+\medskip\noindent\textbf{E o par $\zeta$/$\mu$ mantém-no vivo.} Escrever é
+acumular, e acumular é uma descida: o \code{INSERT} acrescenta a chave e o
+índice acompanha. \emph{Tirar} é o $\mu$ --- e é a \textbf{mesma descida com a
+volta por cima}: guarda-se o caminho ao descer, corta-se a ligação da folha, e
+\emph{sobe-se} a apagar todo o nó que ficou sem filhos. Não há busca; há o
+caminho ao contrário. O \code{UPDATE} desacumula a chave velha e acumula a
+nova, por essa ordem, e o índice não se perde.
+
+\medskip\noindent O que o $\mu$ não faz é devolver os nós ao contador: um nó
+apagado fica \textbf{órfão}. A fuga é declarada e tem tecto --- quando a árvore
+enche, a inserção falha e o índice é largado. E um índice largado, como um
+índice velho, custa a varredura seguinte e \textbf{nunca a resposta}: o
+cabeçalho guarda a coluna e quantas linhas havia, e se o número não bate ele é
+\emph{ignorado}. É a única troca que um índice pode fazer sem deixar de ser um.
+
+\medskip\noindent E fica dito o que \emph{não} desce: a forma composta ---
+\code{a > 5 AND b < 30} --- que a árvore não responde de um caminho só, e o
+\code{DELETE}, que não tira a chave: ele não muda o número de linhas, pelo que
+o índice continua válido, e quem decide à saída é o campo do \textbf{vivo}. A
+árvore diz onde a linha estava; ele diz se ela ainda está.
 
 \medskip\noindent\textbf{E há uma instrução que não opera sobre os dados: serve
 para NÃO RAMIFICAR.} Ela chama-se \code{ESPALHA}, e devolve a máscara
