@@ -9941,6 +9941,234 @@ int main(void){
            " seno dá o par: a ressonância é do SISTEMA, não da fase da fonte.", mal == 0);
     }
 
+
+    /* ═══ §W75: A MATRIZ VAZIA NÃO É UMA MATRIZ, E SÃO DUAS PORTAS ═════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W75 zero linhas não é «a conta deu vazio»: é não haver conta.\n\n");
+        { const char *tabs[] = { "V","A","C" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w75__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w75__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w75.mem"); unlink("/tmp/pgwire_w75.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w75")) mal++;
+
+        /* ── COMO ISTO APARECEU, que é metade da lição. Media-se `Aⁿ` num laço,
+         * a potência cresceu, e um `INSERT` foi RECUSADO por o valor não caber
+         * no `Word_8` — o corpo declarado, e a recusa está certa. A tabela ficou
+         * vazia. E o `produto` que se seguiu respondeu `ok` com zero linhas.
+         *
+         * A recusa a montante estava boa; era o silêncio a jusante que fazia de
+         * uma tabela vazia um operando legítimo — e a jusante «zero linhas»
+         * lê-se como «a conta deu vazio», quando o que houve foi NÃO HAVER
+         * conta. Todas as doze operações matriciais o faziam. */
+        sql_executa("CREATE TABLE V (p RACIONAL, q RACIONAL)", &o);
+        { const char *ops[] = { "det(*)","posto(*)","traco(*)","inversa(*)",
+                                "regime(*)","cifra(*)","gram(*)","autovalores(*)",
+                                "simetrica(*)","antisimetrica(*)","nucleo(*)","imagem(*)" };
+          int recusam = 0;
+          for(unsigned k = 0; k < sizeof ops/sizeof ops[0]; k++){
+              char q2[120];
+              snprintf(q2, sizeof q2, "SELECT %s FROM V", ops[k]);
+              sql_executa(q2, &o);
+              if(!o.ok && strstr(o.err, "empty table")) recusam++;
+          }
+          printf("      as %u operações matriciais sobre a tabela vazia: %d recusam\n",
+                 (unsigned)(sizeof ops/sizeof ops[0]), recusam);
+          if(recusam != (int)(sizeof ops/sizeof ops[0])) mal++; }
+
+        /* ── E O CONTROLO É O `SELECT` NORMAL, que TEM de continuar a dar
+         * «SELECT 0» com a descrição das colunas. A saída antecipada existe
+         * exactamente para isso — uma consulta sem linhas devolve a forma da
+         * resposta — e essa parte está certa; o que estava errado era ela
+         * apanhar também o pedido matricial. Estragar o `SELECT` para arranjar
+         * o `det` seria trocar um defeito por outro. */
+        sql_executa("SELECT * FROM V", &o);
+        int sel = o.ok && o.nrows == 0 && o.ncols == 2 && !strcmp(o.tag, "SELECT 0");
+        /* ── E O `COUNT(*)` DA TABELA VAZIA, que só mente depois de outra
+         * contagem. Ele não reconta: corre a varredura e lê o `ultima_conta`,
+         * que é o ∑ sobre o campo — «não é uma segunda contagem, é a leitura da
+         * que já ficou escrita». Só que essa escrita fica NO FIM da varredura, e
+         * a saída antecipada da tabela vazia nunca lá chegava: o contador ficava
+         * com o valor da consulta ANTERIOR.
+         *
+         * O GUME TEM DE SER DELIBERADO: conta-se primeiro uma tabela com linhas,
+         * para o contador ficar NÃO-NULO, e só depois se conta a vazia. Contar a
+         * vazia à cabeça dá zero por acaso — o contador ainda está a zero — e o
+         * defeito passa. Foi assim que ele apareceu aqui: por a ordem dos blocos
+         * ter deixado um 2 lá dentro, e a asserção acusou. */
+        sql_executa("CREATE TABLE C (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO C VALUES (1,1), (2,2), (3,3)", &o);
+        sql_executa("SELECT COUNT(*) FROM C", &o);
+        int antes = o.ok && !strcmp(o.cell[0][0], "3");
+        sql_executa("SELECT COUNT(*) FROM V", &o);
+        int cnt = o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "0");
+        printf("      controlo — `SELECT *` na vazia: %s\n",
+               sel ? "SELECT 0 com 2 colunas" : "MAU");
+        printf("      e o `COUNT(*)`: conta 3 numa cheia (%s) e depois %s na vazia\n",
+               antes ? "sim" : "MAU", cnt ? "0" : "O VALOR ANTERIOR (mau)");
+        if(!sel || !cnt || !antes) mal++;
+
+        /* ── E SÃO DUAS PORTAS, PORQUE SÃO DOIS ESTADOS. Uma tabela SEM linhas e
+         * uma tabela COM linhas de que o `WHERE` não deixou nenhuma são coisas
+         * diferentes, e chegam ao motor por caminhos diferentes: a primeira sai
+         * cedo, a segunda percorre o campo e conta zero marcadas. Escrever só
+         * uma delas deixava a outra a responder «ok» com silêncio, e é por isso
+         * que nenhuma das duas é código morto. */
+        sql_executa("CREATE TABLE A (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO A VALUES (1,2), (3,4)", &o);
+        sql_executa("SELECT det(*) FROM A WHERE p = 99", &o);
+        int porta2 = !o.ok && strstr(o.err, "empty table") != NULL;
+        sql_executa("SELECT * FROM A WHERE p = 99", &o);
+        int sel2 = o.ok && o.nrows == 0;
+        sql_executa("SELECT det(*) FROM A", &o);
+        int normal = o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "-2");
+        printf("      a segunda porta — `det(*) … WHERE p = 99`: %s\n",
+               porta2 ? "recusa" : "MAU");
+        printf("      e o mesmo WHERE num `SELECT *`: %s · e sem WHERE, det = %s\n",
+               sel2 ? "SELECT 0" : "MAU", normal ? "−2" : "MAU");
+        if(!porta2 || !sel2 || !normal) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("ZERO LINHAS NÃO É «A CONTA DEU VAZIO»: É NÃO HAVER CONTA. Todas as doze"
+           " operações matriciais respondiam `ok` com zero linhas sobre uma tabela sem"
+           " linhas — `det(*)` de uma 0×2 devolvia «SELECT 0» e ninguém dizia que não se"
+           " mediu nada. A JUSANTE isso lê-se como um resultado vazio, e o que houve foi a"
+           " pergunta não ter objecto. E APARECEU POR UM CAMINHO QUE É METADE DA LIÇÃO:"
+           " media-se Aⁿ num laço, a potência cresceu, e um `INSERT` foi recusado por o valor"
+           " não caber no `Word_8` — o corpo DECLARADO, e a recusa está certa —, a tabela"
+           " ficou vazia, e o `produto` seguinte respondeu `ok`. A recusa a montante estava"
+           " boa; era o silêncio a jusante que fazia de uma tabela vazia um operando"
+           " legítimo. SÃO DUAS PORTAS PORQUE SÃO DOIS ESTADOS: a tabela SEM linhas sai cedo,"
+           " e a tabela COM linhas de que o WHERE não deixou nenhuma percorre o campo e conta"
+           " zero marcadas — escrever só uma deixava a outra em silêncio, e por isso nenhuma"
+           " é código morto. O CONTROLO é o `SELECT` normal, que tem de continuar a dar"
+           " «SELECT 0» com a descrição das colunas: a saída antecipada existe para isso e"
+           " essa parte estava certa, e estragar o `SELECT` para arranjar o `det` seria"
+           " trocar um defeito por outro.", mal == 0);
+    }
+
+    /* ═══ §W76: A POTÊNCIA É DE GRAU UM — Aⁿ = βₙA + αₙI ═══════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W76 Cayley–Hamilton reduz toda potência a grau 1, e β é a sequência.\n\n");
+        { const char *tabs[] = { "A","P" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w76__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w76__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w76.mem"); unlink("/tmp/pgwire_w76.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w76")) mal++;
+
+        #define POE(t,a,b,c,d) do { char q2[200]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld), (%ld,%ld)", \
+                     t,(long)(a),(long)(b),(long)(c),(long)(d)); \
+            sql_executa(q2,&o2); } while(0)
+
+        /* ── CAYLEY–HAMILTON DIZ A² = BA − CI, e daí TODA potência desce a grau
+         * um: multiplicando por A e substituindo, Aⁿ = βₙA + αₙI para todo n. E
+         * os coeficientes não são quaisquer — obedecem à MESMA recorrência do
+         * corpo, βₙ₊₁ = Bβₙ − Cβₙ₋₁, com β₁ = 1, β₀ = 0.
+         *
+         * Para a matriz de Fibonacci isso dá Aⁿ = Fₙ·A + Fₙ₋₁·I, que é a
+         * identidade clássica — e ela não foi posta aqui: sai de a potência
+         * descer de grau. §W63 mediu o TRAÇO destas potências; aqui é a matriz
+         * INTEIRA, e o traço de cima é uma consequência desta.
+         *
+         * Os expoentes param onde o corpo para: a coluna é um Word_8 com sinal
+         * e o maior que lá cabe é 127, pelo que Fibonacci vai a n = 7 e a prata
+         * a n = 4. Diz-se, em vez de se varrer até rebentar. */
+        struct { long a,b,c,d; int ate; const char *nome; } M[] = {
+            { 1, 1, 1, 0, 7, "Fibonacci" },
+            { 2, 1, 1, 0, 4, "prata"     },
+            { 0,-1, 1, 0, 7, "rotação"   },
+        };
+        long casos = 0, bate = 0;
+        for(unsigned k = 0; k < sizeof M/sizeof M[0]; k++){
+            POE("A", M[k].a, M[k].b, M[k].c, M[k].d);
+            sql_executa("SELECT traco(*) FROM A", &o);
+            long B = o.ok ? atol(o.cell[0][0]) : 0;
+            sql_executa("SELECT det(*) FROM A", &o);
+            long C = o.ok ? atol(o.cell[0][0]) : 0;
+            long b1 = 1, b0 = 0, a1 = 0, a0 = 1;   /* A¹ = 1·A + 0·I ; A⁰ = 0·A + 1·I */
+            POE("P", M[k].a, M[k].b, M[k].c, M[k].d);
+            printf("      %-10s (B,C) = (%2ld,%2ld):", M[k].nome, B, C);
+            for(int n = 2; n <= M[k].ate; n++){
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != 2){ mal++; break; }
+                long r[2][2];
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    r[i][j] = atol(o.cell[i][j]);
+                POE("P", r[0][0], r[0][1], r[1][0], r[1][1]);
+                long bn = B*b1 - C*b0, an = B*a1 - C*a0;
+                long p[2][2];
+                p[0][0] = bn*M[k].a + an;  p[0][1] = bn*M[k].b;
+                p[1][0] = bn*M[k].c;       p[1][1] = bn*M[k].d + an;
+                int certo = 1;
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    if(p[i][j] != r[i][j]) certo = 0;
+                casos++; if(certo) bate++; else mal++;
+                if(n <= 4) printf("  A^%d = %ldA%+ldI", n, bn, an);
+                b0 = b1; b1 = bn; a0 = a1; a1 = an;
+            }
+            printf("\n");
+        }
+        printf("      %ld potências · Aⁿ = βₙA + αₙI em %ld\n", casos, bate);
+        if(bate != casos) mal++;
+
+        /* ── E O CONTROLO É A IDENTIDADE CLÁSSICA COM O NOME: para Fibonacci os
+         * β são 1,1,2,3,5,8,13 — os próprios Fₙ —, e o α é o anterior. Se a
+         * recorrência não estivesse a usar (B,C), os números seriam outros. */
+        { long f[9] = {0,1,1,2,3,5,8,13,21};
+          POE("A", 1,1,1,0);
+          POE("P", 1,1,1,0);
+          int fib = 1;
+          for(int n = 2; n <= 7 && fib; n++){
+              sql_executa("SELECT produto(A) FROM P", &o);
+              if(!o.ok){ fib = 0; break; }
+              long r[2][2];
+              for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                  r[i][j] = atol(o.cell[i][j]);
+              POE("P", r[0][0], r[0][1], r[1][0], r[1][1]);
+              /* Aⁿ = Fₙ·A + Fₙ₋₁·I, e A = (1,1;1,0), logo Aⁿ = (Fₙ₊₁,Fₙ;Fₙ,Fₙ₋₁) */
+              if(r[0][0] != f[n+1] || r[0][1] != f[n]
+                 || r[1][0] != f[n]  || r[1][1] != f[n-1]) fib = 0;
+          }
+          printf("      controlo — Aⁿ de Fibonacci é (F_{n+1},F_n;F_n,F_{n−1}): %s\n",
+                 fib ? "sim, e os F saem da recorrência, não de uma tabela" : "FALHOU");
+          if(!fib) mal++; }
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("CAYLEY–HAMILTON REDUZ TODA POTÊNCIA A GRAU UM, E OS COEFICIENTES SÃO A SEQUÊNCIA"
+           " DO CORPO. De A² = BA − CI sai, multiplicando por A e substituindo, Aⁿ = βₙA +"
+           " αₙI para todo n — a potência de uma 2×2 nunca precisa de mais do que a própria"
+           " matriz e a identidade. E os coeficientes não são quaisquer: obedecem à MESMA"
+           " recorrência βₙ₊₁ = Bβₙ − Cβₙ₋₁ que define o corpo, com β₁ = 1 e β₀ = 0. Para a"
+           " matriz de Fibonacci isso dá Aⁿ = Fₙ·A + Fₙ₋₁·I — a identidade clássica —, e ela"
+           " NÃO foi posta: sai de a potência descer de grau. §W63 mediu o TRAÇO destas"
+           " potências e viu os números de Lucas; aqui mede-se a matriz INTEIRA, e o traço de"
+           " lá é uma consequência desta. O CONTROLO é a forma fechada com nome: Aⁿ de"
+           " Fibonacci é (F_{n+1},F_n;F_n,F_{n−1}), e os F saem da recorrência do par (B,C) e"
+           " não de uma tabela escrita à mão — se ela não estivesse a usar o par, os números"
+           " seriam outros. E OS EXPOENTES PARAM ONDE O CORPO PARA: a coluna é um Word_8 com"
+           " sinal e o maior que lá cabe é 127, pelo que Fibonacci vai a n = 7 e a prata a"
+           " n = 4. Diz-se o tecto em vez de se varrer até rebentar — foi a recusa desse"
+           " limite, num laço anterior, que destapou o defeito de §W75.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

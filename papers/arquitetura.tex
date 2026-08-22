@@ -3628,6 +3628,51 @@ estaria a ser medida.}
         {\code{F\_COS}/\code{F\_SEN} contra \code{regime}+\code{det}}
         {\code{tests/pgwire.c} §W74}
 
+\subsection*{Zero linhas não é «a conta deu vazio»}
+
+\noindent As doze operações matriciais respondiam \code{ok} com zero linhas sobre
+uma tabela sem linhas: \code{det(*)} de uma $0\times2$ devolvia «\code{SELECT 0}» e
+ninguém dizia que não se mediu nada. A jusante isso lê-se como um \emph{resultado
+vazio}, e o que houve foi a pergunta \textbf{não ter objeto}.
+
+\medskip\noindent\textbf{E apareceu por um caminho que é metade da lição.} Media-se
+$A^{n}$ num laço, a potência cresceu, e um \code{INSERT} foi recusado por o valor
+não caber no $\text{Word}_8$ --- o corpo \emph{declarado}, e a recusa está certa ---,
+a tabela ficou vazia, e o \code{produto} seguinte respondeu \code{ok}. A recusa a
+montante estava boa; era o silêncio a jusante que fazia de uma tabela vazia um
+operando legítimo. \textbf{São duas portas} porque são dois estados: a tabela sem
+linhas sai cedo, e a tabela com linhas de que o \code{WHERE} não deixou nenhuma
+percorre o campo e conta zero marcadas.
+
+\medskip\noindent\textbf{E a mesma saída escondia um segundo defeito.} O
+\code{COUNT(*)} não reconta: corre a varredura e lê o contador que ela deixa
+escrito --- «não é uma segunda contagem, é a leitura da que já ficou». Só que essa
+escrita fica \emph{no fim} da varredura, e a saída antecipada nunca lá chega: numa
+tabela vazia o \code{COUNT(*)} devolvia a contagem da consulta \textbf{anterior}
+(aqui, $2$). E o gume tem de ser \emph{deliberado} --- conta-se primeiro uma tabela
+com linhas, para o contador ficar não-nulo, e só depois a vazia; contar a vazia à
+cabeça dá zero por acaso e o defeito passa.
+
+\medido{\code{tests/pgwire.c} §W75, com o controlo no \code{SELECT} normal, que tem
+de continuar a dar «\code{SELECT 0}» com a descrição das colunas --- estragá-lo para
+arranjar o \code{det} seria trocar um defeito por outro.}
+
+\medskip\noindent\textbf{E a potência é de grau um.} De $A^{2}=BA-CI$ sai, por
+indução, $A^{n}=\beta_n A+\alpha_n I$ para todo $n$: a potência de uma $2\times2$
+nunca precisa de mais do que a própria matriz e a identidade. E os coeficientes
+obedecem à \emph{mesma} recorrência que define o corpo,
+$\beta_{n+1}=B\beta_n-C\beta_{n-1}$ com $\beta_1=1$, $\beta_0=0$ --- para Fibonacci
+isso dá $A^{n}=F_n A+F_{n-1} I$, a identidade clássica, e ela não foi posta: sai de
+a potência descer de grau. §W63 mediu o \emph{traço} destas potências (os números
+de Lucas); aqui mede-se a matriz inteira, e o traço de lá é consequência desta. Os
+expoentes param onde o corpo para --- a coluna é um $\text{Word}_8$ com sinal, e
+$127$ é o maior que lá cabe ---, e diz-se o teto em vez de se varrer até rebentar
+(\code{tests/pgwire.c} §W76).
+
+\colunas{\code{aranha thm:duas}; Cayley--Hamilton}
+        {a porta da matriz vazia; \code{ultima\_conta} zerada na saída antecipada}
+        {\code{tests/pgwire.c} §W75--§W76}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

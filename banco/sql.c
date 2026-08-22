@@ -6140,7 +6140,42 @@ static int varre(const char *resto, int acao){
             return 0;
         }
     }
+    if(nrows <= 0 && acao == ACAO_MARCA && mat_op){
+        /* ── MAS A MATRIZ VAZIA NÃO É UMA MATRIZ ─────────────────────────────
+         * A saída de baixo devolve a descrição das colunas e «SELECT 0», que é
+         * a resposta CERTA a um `SELECT` sobre uma tabela sem linhas. Só que ela
+         * apanhava também o pedido matricial, e aí a resposta certa é outra:
+         * `det(*)` de uma 0×2 não tem valor vazio — não tem objecto. Devolver
+         * «SELECT 0» faz «zero linhas» ler-se a jusante como «a conta deu
+         * vazio», quando o que houve foi não haver conta.
+         *
+         * Apareceu por um caminho instrutivo: um `INSERT` foi recusado por o
+         * valor não caber no `Word_8` — o corpo declarado, e a recusa está certa
+         * —, a tabela ficou vazia, e o `produto` que se seguiu respondeu `ok`. A
+         * recusa a montante estava boa; era o silêncio a jusante que fazia de
+         * uma tabela vazia um operando legítimo. */
+        printf("erro: a tabela não tem linhas — uma matriz 0×%ld não é uma matriz."
+               " RECUSADA.\n", ncols);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "empty table: a 0×%ld matrix has no entries", ncols); }
+        return 0;
+    }
     if(nrows <= 0){
+        /* ── E A CONTAGEM TEM DE SER ZERADA AQUI, senão fica a ANTERIOR ──────
+         * O `count(*)` não reconta: corre esta mesma varredura e lê depois o
+         * `ultima_conta`, que é o ∑ sobre o campo — «não é uma segunda
+         * contagem, é a leitura da que já ficou escrita». Mas essa escrita
+         * acontece LÁ EM BAIXO, e esta saída antecipada nunca lá chega: numa
+         * tabela vazia o contador ficava com o valor da consulta ANTERIOR, e o
+         * `count(*)` respondia com ele.
+         *
+         * Medido: `SELECT COUNT(*)` numa tabela sem linhas devolveu 2, que era
+         * a contagem de uma consulta feita antes noutra tabela. Não é um erro
+         * de aritmética — é a leitura de um valor que ninguém voltou a escrever,
+         * e por isso não aparece em quem correr a consulta sozinha. */
+        ultima_conta = 0;
+        ultima_fibras = 0;
         /* A TABELA VAZIA TAMBÉM TEM COLUNAS, e uma consulta que não devolve linhas
          * tem de devolver a DESCRIÇÃO delas e o `CommandComplete`. Esta saída
          * antecipada devolvia `ncols = 0` e tag vazia: pela porta FEBE o driver
@@ -7106,6 +7141,23 @@ static int varre(const char *resto, int acao){
         /* só as linhas VIVAS e MARCADAS entram, e a ordem é a delas */
         for(long i = 0; i < nrows && nr_v < LN_MAX; i++)
             if(bit_le(S_MATCH, i)) lin[nr_v++] = (int)i;
+        /* ── E A SEGUNDA PORTA, QUE NÃO É A MESMA ────────────────────────────
+         * A de cima apanha a tabela SEM LINHAS; esta apanha a tabela COM linhas
+         * de que o `WHERE` não deixou nenhuma — `SELECT det(*) FROM t WHERE
+         * a = 999`. São dois estados diferentes com a mesma consequência: não há
+         * matriz. Escrever só uma delas deixaria a outra a responder «ok» com
+         * silêncio, e é por isso que as duas existem e nenhuma é código morto. */
+        if(nr_v == 0){
+            printf("erro: a tabela não tem linhas — uma matriz %ld×%ld não é uma"
+                   " matriz, e «zero linhas» na resposta leria-se como a conta a"
+                   " dar vazio em vez de não haver conta. RECUSADA.\n",
+                   nr_v, ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "empty table: a %ld×%ld matrix has no entries",
+                         nr_v, ncols); }
+            return 0;
+        }
         /* ── O TECTO DE CADA OPERAÇÃO, E ELE NÃO É UM SÓ ─────────────────────
          * O `linear.h` guarda uma matriz até LN_MAX×LN_MAX, e é esse o tecto
          * geral. Mas a INVERSA trabalha numa matriz AUMENTADA de n×2n — o
