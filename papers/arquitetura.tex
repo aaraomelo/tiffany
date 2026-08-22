@@ -4230,6 +4230,81 @@ directa falha, e o CONTROLO em $3$ pares que cruzam.}
         {\code{nucleo}/\code{imagem}/\code{posto} pelo motor; a soma directa pelo posto do empilhado}
         {\code{tests/pgwire.c} §W90}
 
+\subsection*{\texorpdfstring{$I^{n}\to I$}{In para I} nos sistemas: a ida é sempre, a volta tem condição}
+
+\noindent O \code{aranha thm:enumfin} dá a bijeção $I^{k}\to I$ para todo $k$, e o
+mesmo documento diz o que ela custa: \emph{codificar $\neq$ preservar a dinâmica}
+--- o §K8 do \code{tests/cantor.c} mede $c(A+B)=c(A)+c(B)$ em \textbf{0 de 256}. A
+pergunta aqui é a outra: existe uma redução $I^{n}\to I$ que \emph{preserve o
+operador}? Existe, e não é a enumeração; e os dois sentidos têm preços
+diferentes.
+
+\medskip\noindent\textbf{A ida não tem condição nenhuma.} Por Cayley--Hamilton,
+$A^{n}=e_{1}A^{n-1}-e_{2}A^{n-2}+\cdots$, logo para \emph{toda} $A$ e \emph{todo}
+$x_{0}$ a sucessão $x_{k}=A^{k}x_{0}$ satisfaz, \textbf{em cada coordenada}, a
+mesma recorrência escalar de ordem $n$:
+\[
+\boxed{\;x_{k+n}=e_{1}x_{k+n-1}-e_{2}x_{k+n-2}+\cdots+(-1)^{n+1}e_{n}x_{k}\;}
+\]
+Um sistema de $n$ equações \emph{acopladas} vira $n$ cópias de \textbf{uma}
+equação em $I$, e nenhuma hipótese sobre $A$ foi usada. Os coeficientes saem pelo
+motor por \textbf{Newton}, dos traços de $A$, $A^{2}$, $A^{3}$ --- e o \code{det}
+do motor é o controlo independente do terceiro, por um caminho que não sabe de
+traços.
+
+\medskip\noindent\textbf{A volta é que pede condição.} Reconstruir $x$ a partir
+de $y$ precisa de um \textbf{vector cíclico}: um $v$ com
+$\det[\,v\mid Av\mid\cdots\mid A^{n-1}v\,]\neq0$. E o critério não é uma
+preferência: é o \textbf{polinómio mínimo} ter o grau do característico, isto é
+$\{I,A,\dots,A^{n-1}\}$ ser independente --- medido empilhando $\vec I$ e $\vec A$
+e pedindo o \code{posto} ao motor.
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & grau do mínimo & $G=\dim\ker(A-\lambda I)$ & vectores cíclicos\\
+\midrule
+$I_2$ (homotetia)                  & $1$ & $2$ & $\mathbf{0}/48$\\
+$\left(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\right)$ (Jordan) & $2$ & $1$ & $42/48$\\
+$\operatorname{diag}(2,3)$         & $2$ & $1$ & $36/48$\\
+$\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$ (gambá) & $2$ & $\lambda\notin\Q$ & $48/48$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E a régua tem de transportar.} A primeira escrita punha
+$G$ numa tabela à mão, e o motor desmentiu-a no gambá: $\lambda^{2}+1$ não tem
+raiz em $\Q$, pelo que ali $\dim\ker(A-\lambda I)$ \textbf{não é sequer uma
+pergunta legítima} --- e a asserção passava verde porque o número escrito nunca
+era confrontado. O mínimo não tem esse defeito: define-se sem sair do corpo. Onde
+$\lambda$ vive em $\Q$ as duas coincidem, e aí o critério lê-se
+\[
+\text{a volta existe}\iff G\equiv1,
+\]
+que é a \textbf{multiplicidade geométrica} --- a letra do \code{aranha}.
+
+\medskip\noindent\textbf{O gume é §W64 por outro lado.} $I_2$ e o bloco de Jordan
+têm a \textbf{mesma cifra} $(2,1)$, logo o mesmo característico $(\lambda-1)^{2}$,
+logo a ida dá-lhes a \textbf{mesma} equação escalar $y_{k+2}=2y_{k+1}-y_{k}$ ---
+verificada nas duas ---, e elas \emph{não} são semelhantes. Portanto a ida
+\textbf{apaga}, e o que ela apaga é exatamente $G$.
+\[
+\begin{array}{lll}
+\text{ida } I^{n}\to I & \text{sempre} & \text{pode apagar --- e apaga } G\\
+\text{volta } I\to I^{n} & G\equiv1 & \text{sem fibra, sem perda}
+\end{array}
+\]
+\emph{É a fibra do aranha a decidir uma pergunta de equações diferenciais:} a
+redução que preserva a dinâmica é reversível onde a fibra é trivial, e só aí.
+
+\medido{\code{tests/pgwire.c} §W91 --- a ida em $16875$ verificações sobre $625$
+matrizes; Newton contra o \code{det} em $625/625$; a volta nas quatro testemunhas
+com as três leituras a concordarem; e o gume com a mesma recorrência a servir as
+duas matrizes de cifra igual.}
+
+\colunas{\code{aranha thm:enumfin} (a bijeção que não preserva); §W64 (mesma cifra, não semelhantes)}
+        {\code{traco}/\code{produto}/\code{det}/\code{posto} pelo motor; Newton como segundo caminho}
+        {\code{tests/pgwire.c} §W91}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

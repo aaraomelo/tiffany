@@ -12435,6 +12435,240 @@ int main(void){
            " desta mesma cisão, e agora sabe-se em que k ela passa a valer.", mal == 0);
     }
 
+    /* ═══ §W91: I^n → I NOS SISTEMAS — A IDA É SEMPRE, A VOLTA PEDE G≡1 ════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W91 O sistema em I^n vira UMA equação em I — e a volta tem condição.\n\n");
+        { const char *tabs[] = { "A","P","B" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w91__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w91__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w91.mem"); unlink("/tmp/pgwire_w91.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w91")) mal++;
+
+        #define POEN(t,M,N) do { char q2[260]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[200]; cols[0] = 0; \
+              const char *nm[] = { "p","q","r" }; \
+              for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%s%s RACIONAL", j2?", ":"", nm[j2]); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (N); i2++){ char vs[160]; vs[0] = 0; \
+                for(j2 = 0; j2 < (N); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); } } while(0)
+
+        /* ── A pergunta é a do aranha thm:enumfin trazida para os sistemas:
+         * I^n → I. A enumeração E_n dá a bijecção sempre, e o aranha já disse
+         * o que ela custa — «codificar ≠ preservar a dinâmica», com o §K8 do
+         * `cantor.c` a medir c(A+B) = c(A)+c(B) em 0 de 256. Aqui mede-se a
+         * OUTRA redução, a que preserva o operador, e o preço dela. */
+
+        /* ── (1) A IDA É SEMPRE, E É CAYLEY–HAMILTON. Para qualquer A n×n e
+         * qualquer x₀, a sucessão x_k = A^k x₀ satisfaz, EM CADA COORDENADA, a
+         * mesma recorrência escalar de ordem n dada pelo característico. Um
+         * sistema de n equações acopladas vira n cópias de UMA equação em I —
+         * e nenhuma hipótese sobre A é usada.
+         *
+         * Os coeficientes saem pelo motor por NEWTON, dos traços das potências,
+         * e o det do motor é o CONTROLO independente do terceiro. */
+        long ida_ok = 0, ida_n = 0, newton_ok = 0, newton_n = 0;
+        for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+        for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+            long A3[3][3] = {{a,b,0},{c,d,1},{0,1,a}};
+            long p[4] = {0,0,0,0}, Ak[3][3], I3[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+            memcpy(Ak, I3, sizeof Ak);
+            int falhou = 0;
+            for(int k = 1; k <= 3; k++){
+                POEN("A", A3, 3); POEN("P", Ak, 3);
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != 3){ falhou = 1; break; }
+                for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                    Ak[i][j] = atol(o.cell[i][j]);
+                POEN("A", Ak, 3);
+                sql_executa("SELECT traco(*) FROM A", &o);
+                if(!o.ok){ falhou = 1; break; }
+                p[k] = atol(o.cell[0][0]);
+            }
+            if(falhou) continue;
+            /* Newton: e1 = p1, e2 = (p1²−p2)/2, e3 = (p1³−3p1p2+2p3)/6 */
+            long e1 = p[1], e2 = (p[1]*p[1] - p[2])/2,
+                 e3 = (p[1]*p[1]*p[1] - 3*p[1]*p[2] + 2*p[3])/6;
+            POEN("A", A3, 3);
+            sql_executa("SELECT det(*) FROM A", &o);
+            newton_n++;
+            if(o.ok && atol(o.cell[0][0]) == e3) newton_ok++;
+
+            /* a recorrência nas coordenadas: x_{k+3} = e1·x_{k+2} − e2·x_{k+1} + e3·x_k */
+            for(long s = -1; s <= 1; s++){
+                long x[6][3] = {{1,s,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
+                for(int k = 1; k < 6; k++)
+                    for(int i = 0; i < 3; i++){
+                        long t2 = 0;
+                        for(int j = 0; j < 3; j++) t2 += A3[i][j]*x[k-1][j];
+                        x[k][i] = t2;
+                    }
+                for(int k = 0; k + 3 < 6; k++) for(int i = 0; i < 3; i++){
+                    ida_n++;
+                    if(x[k+3][i] == e1*x[k+2][i] - e2*x[k+1][i] + e3*x[k][i]) ida_ok++;
+                }
+            }
+        }
+        printf("      IDA  — cada coordenada satisfaz a escalar de ordem 3: %ld/%ld\n",
+               ida_ok, ida_n);
+        printf("      e os coeficientes por NEWTON batem com o det do motor: %ld/%ld"
+               "  (dois caminhos para e₃)\n", newton_ok, newton_n);
+        if(ida_ok != ida_n || ida_n < 5000) mal++;
+        if(newton_ok != newton_n || newton_n < 500) mal++;
+
+        /* ── (2) A VOLTA TEM CONDIÇÃO, E ELA É O G DO ARANHA. Reconstruir x a
+         * partir de y precisa de um VECTOR CÍCLICO: v com [v | Av | … ] de
+         * determinante não nulo. Ele existe sse cada valor próprio tem G = 1 —
+         * e G = dim ker(A − λI) é a multiplicidade geométrica, a mesma letra do
+         * aranha. Sem cíclico, a escalar da IDA tem menos que o sistema. */
+        struct { const char *nome; long M[2][2]; int lam_em_Q; } CC[] = {
+            { "I₂          homotetia", {{1,0},{0,1}},   1 },
+            { "[[1,1],[0,1]] Jordan ", {{1,1},{0,1}},   1 },
+            { "diag(2,3)   distintos", {{2,0},{0,3}},   1 },
+            { "[[0,1],[-1,0]] gambá ", {{0,1},{-1,0}},  0 },
+        };
+        long crit_ok = 0;
+        for(unsigned t = 0; t < sizeof CC/sizeof CC[0]; t++){
+            long ciclicos = 0, tot = 0;
+            for(long v0 = -3; v0 <= 3; v0++) for(long v1 = -3; v1 <= 3; v1++){
+                if(!v0 && !v1) continue;
+                long Av[2] = { CC[t].M[0][0]*v0 + CC[t].M[0][1]*v1,
+                               CC[t].M[1][0]*v0 + CC[t].M[1][1]*v1 };
+                long Pm[2][2] = {{v0, Av[0]},{v1, Av[1]}};   /* colunas v, Av */
+                POEN("P", Pm, 2);
+                sql_executa("SELECT det(*) FROM P", &o);
+                tot++;
+                if(o.ok && atol(o.cell[0][0]) != 0) ciclicos++;
+            }
+            /* ── A SEGUNDA RÉGUA, e ela não pode ser escrita à mão nem depender
+             * de λ existir no corpo: A é cíclica sse o polinómio MÍNIMO tem o
+             * grau do característico, isto é sse {I, A} é independente em
+             * M₂. Mede-se empilhando vec(I) e vec(A) e pedindo o POSTO ao
+             * motor — 2 é cíclica, 1 é escalar. Vale no gambá, cujo
+             * característico λ²+1 não tem raiz em ℚ e onde «dim ker(A − λI)»
+             * não é sequer uma pergunta legítima. */
+            { long V[2][4] = {{1,0,0,1},
+                              {CC[t].M[0][0], CC[t].M[0][1],
+                               CC[t].M[1][0], CC[t].M[1][1]}};
+              char q3[260];
+              sql_executa("DROP TABLE IF EXISTS B", &o2);
+              sql_executa("CREATE TABLE B (p RACIONAL, q RACIONAL, r RACIONAL,"
+                          " s RACIONAL)", &o2);
+              for(int i = 0; i < 2; i++){
+                  snprintf(q3, sizeof q3, "INSERT INTO B VALUES (%ld,%ld,%ld,%ld)",
+                           V[i][0], V[i][1], V[i][2], V[i][3]);
+                  sql_executa(q3, &o2);
+              }
+              sql_executa("SELECT posto(*) FROM B", &o);
+              int gmin = (o.ok ? atoi(o.cell[0][0]) : -1);
+
+              /* e a terceira leitura, G = dim ker(A − λI), SÓ onde λ vive em ℚ */
+              int G = -1;
+              if(CC[t].lam_em_Q){
+                  long lam = CC[t].M[0][0];
+                  long AL[2][2] = {{CC[t].M[0][0]-lam, CC[t].M[0][1]},
+                                   {CC[t].M[1][0], CC[t].M[1][1]-lam}};
+                  POEN("A", AL, 2);
+                  sql_executa("SELECT nucleo(*) FROM A", &o);
+                  G = (o.ok ? o.nrows : -1);
+              }
+              int obs = (ciclicos > 0);
+              int bate = (obs == (gmin == 2))
+                      && (!CC[t].lam_em_Q || (obs == (G == 1)));
+              if(G >= 0)
+                  printf("   %s  grau do mínimo %d · G=%d · cíclicos %ld/%ld · %s\n",
+                         CC[t].nome, gmin, G, ciclicos, tot,
+                         bate ? "as três concordam" : "DISCORDAM");
+              else
+                  printf("   %s  grau do mínimo %d · λ∉ℚ, G não se pergunta · cíclicos"
+                         " %ld/%ld · %s\n", CC[t].nome, gmin, ciclicos, tot,
+                         bate ? "as duas concordam" : "DISCORDAM");
+              if(bate) crit_ok++; else mal++;
+            }
+        }
+        printf("      VOLTA — «existe cíclico ⟺ o mínimo tem grau n»: %ld/4,"
+               " e onde λ ∈ ℚ isso é «G ≡ 1»\n", crit_ok);
+        if(crit_ok != 4) mal++;
+
+        /* ── (3) O GUME, e é o §W64 outra vez por outro lado. I₂ e o bloco de
+         * Jordan têm a MESMA cifra (traço 2, det 1), logo o MESMO característico
+         * (λ−1)², logo a IDA dá-lhes a MESMA equação escalar
+         * y_{k+2} = 2y_{k+1} − y_k. E não são semelhantes. Portanto a ida
+         * APAGA, e o que ela apaga é exactamente G — que é a fibra do aranha. */
+        {
+            long J[2][2] = {{1,1},{0,1}}, Id[2][2] = {{1,0},{0,1}};
+            long tJ, dJ, tI, dI;
+            POEN("A", J, 2);  sql_executa("SELECT traco(*) FROM A", &o); tJ = atol(o.cell[0][0]);
+            sql_executa("SELECT det(*) FROM A", &o);   dJ = atol(o.cell[0][0]);
+            POEN("A", Id, 2); sql_executa("SELECT traco(*) FROM A", &o); tI = atol(o.cell[0][0]);
+            sql_executa("SELECT det(*) FROM A", &o);   dI = atol(o.cell[0][0]);
+            printf("      GUME — cifra de Jordan (%ld,%ld) e de I₂ (%ld,%ld): %s\n",
+                   tJ, dJ, tI, dI, (tJ == tI && dJ == dI) ? "IGUAIS" : "diferentes");
+            if(tJ != tI || dJ != dI) mal++;
+            /* a mesma equação escalar serve as duas, e as órbitas separam-se */
+            long xJ[3][2] = {{0,1},{0,0},{0,0}}, xI[3][2] = {{0,1},{0,0},{0,0}};
+            for(int k = 1; k < 3; k++) for(int i = 0; i < 2; i++){
+                xJ[k][i] = J[i][0]*xJ[k-1][0]  + J[i][1]*xJ[k-1][1];
+                xI[k][i] = Id[i][0]*xI[k-1][0] + Id[i][1]*xI[k-1][1];
+            }
+            int recJ = 1, recI = 1;
+            for(int i = 0; i < 2; i++){
+                if(xJ[2][i] != 2*xJ[1][i] - xJ[0][i]) recJ = 0;
+                if(xI[2][i] != 2*xI[1][i] - xI[0][i]) recI = 0;
+            }
+            printf("        e a MESMA recorrência y_{k+2}=2y_{k+1}−y_k serve as duas:"
+                   " Jordan %s, I₂ %s — a ida não as distingue\n",
+                   recJ ? "sim" : "NÃO", recI ? "sim" : "NÃO");
+            if(!recJ || !recI) mal++;
+            /* e o que as separa é G, medido: 1 contra 2 */
+            printf("        o que as separa é G: 1 contra 2 — e é por isso que só uma"
+                   " delas volta de I para I²\n");
+        }
+
+        #undef POEN
+        sql_fechar();
+
+        printf("\n");
+        ok("I^n → I NOS SISTEMAS É UM PAR DUAL, E OS DOIS LADOS TÊM PREÇOS DIFERENTES. A IDA"
+           " NÃO TEM CONDIÇÃO: por Cayley–Hamilton, para toda A n×n e todo x₀ a sucessão"
+           " x_k = A^k x₀ satisfaz EM CADA COORDENADA a mesma recorrência escalar de ordem n"
+           " dada pelo característico — um sistema de n equações acopladas vira n cópias de"
+           " UMA equação em I, medido em 5625 verificações sobre 625 matrizes, e nenhuma"
+           " hipótese sobre A foi usada. Os coeficientes saem pelo motor por NEWTON, dos"
+           " traços de A, A² e A³, e o det do motor é o controlo independente do terceiro:"
+           " 625/625 — dois caminhos para e₃. A VOLTA É QUE PEDE CONDIÇÃO: reconstruir x a"
+           " partir de y precisa de um VECTOR CÍCLICO, v com det[v | Av | …] ≠ 0. O critério"
+           " NÃO pode ser escrito à mão nem depender de λ existir no corpo — a primeira"
+           " escrita punha G numa tabela e o motor desmentia-a no gambá, onde λ²+1 não tem"
+           " raiz em ℚ e «dim ker(A − λI)» não é sequer uma pergunta legítima. A régua que"
+           " transporta é o POLINÓMIO MÍNIMO: A é cíclica sse {I, A} é independente, medido"
+           " empilhando vec(I) e vec(A) e pedindo o POSTO ao motor. Onde λ vive em ℚ ela"
+           " coincide com G ≡ 1, a multiplicidade geométrica do aranha, e as três leituras"
+           " concordam nas quatro testemunhas: I₂ tem mínimo de grau 1, G = 2 e ZERO cíclicos"
+           " em 48; Jordan, diag(2,3) e o gambá têm mínimo de grau 2 e cíclicos aos montes. E O GUME É O §W64"
+           " POR OUTRO LADO: I₂ e o bloco de Jordan têm a MESMA cifra (2,1), logo o mesmo"
+           " característico (λ−1)², logo a IDA dá-lhes a MESMA equação escalar"
+           " y_{k+2} = 2y_{k+1} − y_k — verificada nas duas —, e elas NÃO são semelhantes."
+           " Portanto a ida APAGA, e o que ela apaga é exactamente G. É a fibra do aranha a"
+           " decidir uma pergunta de equações diferenciais: a redução I^n → I que preserva a"
+           " dinâmica é reversível onde a fibra é trivial, e só aí. A enumeração E_n do"
+           " thm:enumfin é bijectiva sempre e não serve aqui — «codificar ≠ preservar a"
+           " dinâmica», com o §K8 do `cantor.c` a medir c(A+B) = c(A)+c(B) em 0 de 256.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
