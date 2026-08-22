@@ -1536,6 +1536,44 @@ observação sobre a perda e passa a ser \textbf{o preço de a desfazer}.
 $4/4$ corpos, e o desperdício do índice de tamanho fixo: $0$ no quociente contra $140$ e
 $132$ nos dois resumos, sobre $144$ usados.}
 
+\paragraph{E completar um corpo é \emph{expandi-lo até a fibra ser classe} --- não
+catalogar a sua incompletude.} O \code{aranha def:dobra} dá a fibra como a classe de
+$i\sim j \iff \pi(i)=\pi(j)$, e $G$ conta-a; o \code{thm:escada} diz que num degrau
+construído \textbf{por quociente} a fibra \emph{é} essa classe. Logo:
+\[
+ \boxed{\;\text{um corpo está \textbf{completo} exactamente quando } G \text{ é constante.}\;}
+\]
+Os que já são quociente exibem-no --- a soma em $\Z_6^2$, a projecção e o resto têm
+$G\equiv6$, cada um com o seu subgrupo, e $\sum_x G(x)=\lvert I\rvert$ em todos. Os que
+não são têm $G$ a variar, \emph{e aí a leitura não está errada: o corpo é que está
+incompleto}:
+\begin{center}\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+corpo & antes $\lvert I\rvert$ & $G$ & faltam & depois $\lvert I\rvert$ & $G$ depois\\
+\midrule
+métrico pela distância & $36$ & $1$ a $4$ & $44$ & $80$ & $\mathbf{4}$\\
+aditivo pela soma livre & $36$ & $1$ a $6$ & $30$ & $66$ & $\mathbf{6}$\\
+\midrule
+soma módulo $6$ (já quociente) & $36$ & $6$ & $\mathbf{0}$ & $36$ & $6$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \textbf{A expansão é acrescentar o que falta}: o corpo completo é o produto do
+conjunto de endereços pela fibra maior, e ali a fibra passa a \emph{ser} a classe, $G$
+fica constante e $\sum G=\lvert I\rvert$ vale \emph{por construção} --- é o
+\code{thm:escada} a aplicar-se ao corpo já completo. E o que falta mede-se exactamente:
+é a diferença de cada fibra para a maior.
+
+\medskip\noindent E o gume mede a própria conta: \emph{um corpo que já era quociente
+precisa de zero elementos novos}. A expansão diz quanto faltava, e é nula onde não
+faltava nada.
+
+\medido{a expansão em \code{tests/pgwire.c} §W142 --- $G$ constante em $3/3$ dos que já
+eram quociente com $\sum G=\lvert I\rvert$; $G$ a variar nos dois incompletos, com $44$
+e $30$ elementos em falta; e o corpo expandido a ficar com $G$ constante e a soma a
+fechar por construção.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias

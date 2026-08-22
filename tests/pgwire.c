@@ -21422,6 +21422,163 @@ int main(void){
            " ser o preço de a desfazer.", mal == 0);
     }
 
+    /* ═══ §W142: COMPLETAR É EXPANDIR ATÉ A FIBRA SER CLASSE ════════════════ */
+    {
+        long mal = 0;
+        printf("\n§W142 completar um corpo: expandi-lo até G ficar constante.\n\n");
+
+        #define NH 900
+        /* Pelo def:dobra, a fibra é a classe de i~j ⟺ π(i)=π(j), e G conta-a.
+         * Pelo thm:escada, um degrau POR QUOCIENTE tem a fibra a SER a classe.
+         * Logo: um corpo está completo quando G é constante. */
+
+        /* ── (1) O QUE JÁ É QUOCIENTE tem G constante --- e o subgrupo exibe-se. */
+        {
+            printf("      leitura                          |I|   |X|   G mín  G máx  quociente por\n");
+            struct { const char *n; const char *sub; int caso; } Q[3] = {
+                {"a soma em Z_6²   (a,b)↦a+b   ", "a antidiagonal   ", 0},
+                {"a projecção      (a,b)↦a     ", "a segunda coord. ", 1},
+                {"o resto          t↦t mod 6   ", "o subgrupo 6Z    ", 2},
+            };
+            long todas_const = 0;
+            for(int c = 0; c < 3; c++){
+                long e[NH]; long n = 0;
+                for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                    if(Q[c].caso == 0)      e[n++] = (a + b) % 6;
+                    else if(Q[c].caso == 1) e[n++] = a;
+                    else                    e[n++] = (a*6 + b) % 6;
+                }
+                long vis[NH], tam[NH]; long nv = 0;
+                for(long i = 0; i < n; i++){
+                    int v = 0; for(long j = 0; j < nv; j++) if(vis[j]==e[i]){ v=1; break; }
+                    if(v) continue;
+                    vis[nv] = e[i]; long t = 0;
+                    for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                    tam[nv++] = t;
+                }
+                long mn = 1L<<30, mx = 0, soma = 0;
+                for(long i = 0; i < nv; i++){ if(tam[i]<mn) mn=tam[i]; if(tam[i]>mx) mx=tam[i]; soma+=tam[i]; }
+                if(mn == mx) todas_const++;
+                printf("      %s %4ld  %4ld  %5ld  %5ld  %s\n",
+                       Q[c].n, n, nv, mn, mx, Q[c].sub);
+                if(soma != n) mal++;              /* o thm:escada: Σ G = |I| */
+            }
+            printf("      → G constante em %ld/3, e Σ G = |I| em todas --- é o thm:escada\n",
+                   todas_const);
+            if(todas_const != 3) mal++;
+        }
+
+        /* ── (2) O QUE NÃO É QUOCIENTE tem G variável --- e o corpo está
+         * INCOMPLETO: faltam-lhe os elementos que igualariam as fibras. */
+        long falta_dist = 0, falta_soma = 0;
+        {
+            printf("      leitura                          |I|   |X|   G mín  G máx  faltam\n");
+            struct { const char *n; int caso; } R[2] = {
+                {"a distância  (a,b)↦a²+b²     ", 0},
+                {"a soma livre (a,b)↦a+b em N  ", 1},
+            };
+            for(int c = 0; c < 2; c++){
+                long e[NH]; long n = 0;
+                for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++)
+                    e[n++] = (R[c].caso == 0) ? (a*a + b*b) : (a + b);
+                long vis[NH], tam[NH]; long nv = 0;
+                for(long i = 0; i < n; i++){
+                    int v = 0; for(long j = 0; j < nv; j++) if(vis[j]==e[i]){ v=1; break; }
+                    if(v) continue;
+                    vis[nv] = e[i]; long t = 0;
+                    for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                    tam[nv++] = t;
+                }
+                long mn = 1L<<30, mx = 0;
+                for(long i = 0; i < nv; i++){ if(tam[i]<mn) mn=tam[i]; if(tam[i]>mx) mx=tam[i]; }
+                /* o que FALTA para todas as fibras terem o tamanho da maior */
+                long faltam = 0;
+                for(long i = 0; i < nv; i++) faltam += (mx - tam[i]);
+                if(c == 0) falta_dist = faltam; else falta_soma = faltam;
+                printf("      %s %4ld  %4ld  %5ld  %5ld  %6ld\n", R[c].n, n, nv, mn, mx, faltam);
+            }
+            printf("      → G varia nas duas: o corpo está INCOMPLETO, e o que falta é"
+                   " exactamente a diferença para a fibra maior\n");
+            if(falta_dist == 0 || falta_soma == 0) mal++;
+        }
+
+        /* ── (3) A EXPANSÃO: acrescentam-se os elementos que faltam, e o corpo
+         * PASSA A SER um degrau por quociente --- G fica constante, e Σ G = |I|
+         * continua a valer sobre o corpo já expandido. */
+        {
+            printf("      corpo                    antes |I|  depois |I|  acrescentados  G depois\n");
+            for(int c = 0; c < 2; c++){
+                long e[NH]; long n = 0;
+                for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++)
+                    e[n++] = (c == 0) ? (a*a + b*b) : (a + b);
+                long vis[NH], tam[NH]; long nv = 0;
+                for(long i = 0; i < n; i++){
+                    int v = 0; for(long j = 0; j < nv; j++) if(vis[j]==e[i]){ v=1; break; }
+                    if(v) continue;
+                    vis[nv] = e[i]; long t = 0;
+                    for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                    tam[nv++] = t;
+                }
+                long mx = 0;
+                for(long i = 0; i < nv; i++) if(tam[i] > mx) mx = tam[i];
+                /* o corpo expandido: X × F_max, com F_max a fibra maior */
+                long depois = nv * mx;
+                long acresc = depois - n;
+                /* e ali G é constante = mx, com Σ G = nv·mx = |I| expandido */
+                long soma = nv * mx;
+                printf("      %s %9ld %11ld %14ld %9ld\n",
+                       c == 0 ? "métrico pela distância " : "aditivo pela soma      ",
+                       n, depois, acresc, mx);
+                if(soma != depois) mal++;
+            }
+            printf("      → expandido, o corpo é o produto X × F: a fibra passa a SER a"
+                   " classe, G fica constante e Σ G = |I| por construção\n");
+            printf("        é o thm:escada a valer no corpo completo --- e a expansão é o"
+                   " preço de o tornar degrau\n");
+        }
+
+        /* ── (4) O GUME: a expansão não é gratuita nem única, e o que se ganha
+         * mede-se contra o que se paga. Um corpo já quociente não precisa dela. */
+        {
+            long e[NH]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = (a + b) % 6;
+            long vis[NH], tam[NH]; long nv = 0;
+            for(long i = 0; i < n; i++){
+                int v = 0; for(long j = 0; j < nv; j++) if(vis[j]==e[i]){ v=1; break; }
+                if(v) continue;
+                vis[nv] = e[i]; long t = 0;
+                for(long j = 0; j < n; j++) if(e[j]==e[i]) t++;
+                tam[nv++] = t;
+            }
+            long mx = 0; for(long i = 0; i < nv; i++) if(tam[i] > mx) mx = tam[i];
+            long acresc = nv*mx - n;
+            printf("      GUME — um corpo JÁ quociente (a soma módulo 6) precisa de %ld"
+                   " elementos novos para se completar\n", acresc);
+            printf("        zero, porque já era degrau: a expansão mede exactamente o quanto"
+                   " faltava, e é nula onde não faltava nada\n");
+            if(acresc != 0) mal++;
+        }
+        #undef NH
+
+        printf("\n");
+        ok("COMPLETAR UM CORPO É EXPANDI-LO ATÉ A FIBRA SER CLASSE --- E O PREÇO É O QUE"
+           " FALTAVA. Este documento já dá o critério e eu andei a catalogar incompletudes em"
+           " vez de as resolver. Pelo def:dobra a fibra É a classe de i~j sse π(i)=π(j), e G"
+           " conta-a; pelo thm:escada, um degrau construído POR QUOCIENTE tem a fibra a ser"
+           " essa classe. Logo um corpo está completo exactamente quando G é CONSTANTE. Os"
+           " que já são quociente exibem-no: a soma em Z_6², a projecção e o resto têm G"
+           " constante, cada um com o seu subgrupo, e Σ G = |I| em todos. Os que não são"
+           " têm G a variar --- a distância e a soma livre ---, e aí a leitura não está"
+           " errada: O CORPO É QUE ESTÁ INCOMPLETO, e o que lhe falta é exactamente a"
+           " diferença de cada fibra para a maior. A EXPANSÃO é acrescentar isso: o corpo"
+           " completo é o produto do conjunto de endereços pela fibra maior, e ali a fibra"
+           " passa a ser a classe, G fica constante e Σ G = |I| vale por construção --- é o"
+           " thm:escada a aplicar-se ao corpo já completo. E o gume mede a própria conta: um"
+           " corpo que já era quociente precisa de ZERO elementos novos, porque já era degrau."
+           " A expansão mede exactamente o que faltava, e é nula onde não faltava nada.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

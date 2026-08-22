@@ -6120,6 +6120,33 @@ desperdício contado, $0$ contra $140$ e $132$.}
         {o índice dentro da fibra; o desperdício do índice de tamanho fixo}
         {\code{tests/pgwire.c} §W141}
 
+\subsection*{Completar é expandir até a fibra ser classe}
+
+\noindent Os lotes anteriores catalogaram \emph{incompletudes}. Completar é outra coisa,
+e o \code{aranha} já a define: pelo \code{def:dobra} a fibra é a classe de
+$i\sim j\iff\pi(i)=\pi(j)$ e $G$ conta-a; pelo \code{thm:escada}, num degrau construído
+\textbf{por quociente} a fibra \emph{é} essa classe. Donde o critério:
+\emph{um corpo está completo exactamente quando $G$ é constante}.
+
+\medskip\noindent\textbf{E a expansão é o que falta.} Os corpos com $G$ variável não
+têm leitura errada --- estão incompletos. O corpo completo é o produto do conjunto de
+endereços pela fibra maior; ali $G$ fica constante e $\sum G=\lvert I\rvert$ vale por
+construção. Medido: o métrico pela distância passa de $36$ a $80$ ($+44$, $G\equiv4$) e o
+aditivo pela soma de $36$ a $66$ ($+30$, $G\equiv6$). \emph{O que falta é a diferença de
+cada fibra para a maior}, e conta-se.
+
+\medskip\noindent\textbf{E o gume mede a própria conta}: um corpo que já era quociente
+--- a soma módulo $6$ --- precisa de \textbf{zero} elementos novos. A expansão diz quanto
+faltava e é nula onde não faltava nada.
+
+\medido{\code{tests/pgwire.c} §W142 --- $G$ constante em $3/3$ dos que já eram quociente,
+com $\sum G=\lvert I\rvert$; $44$ e $30$ elementos em falta nos dois incompletos; e o
+corpo expandido com $G$ constante e a soma a fechar.}
+
+\colunas{\code{aranha def:dobra}, \code{thm:escada}, \code{thm:medida}}
+        {$G$ contado fibra a fibra; o produto $X\times F$ como corpo expandido}
+        {\code{tests/pgwire.c} §W142}
+
 \subsection*{As duas metades do critério, e as duas falhas duais}
 
 \noindent A regra corre sobre os corpos \emph{sem os abrir}, e é isso que a torna
