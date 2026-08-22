@@ -6980,6 +6980,117 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W52: O NÚCLEO E A IMAGEM SÃO O PAR, E A LEI É A CONSERVAÇÃO ══════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w52.mem", "/tmp/pgwire_w52.prog",
+            "/tmp/pgwire_w52__s.mem", "/tmp/pgwire_w52__s.prog",
+            "/tmp/pgwire_w52__r.mem", "/tmp/pgwire_w52__r.prog" };
+        for(int k = 0; k < 6; k++) unlink(lixo[k]);
+        printf("\n§W52 núcleo e imagem: posto + nulidade = colunas.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w52")) mal++;
+        /* a singular 2×2: a segunda linha é o dobro da primeira */
+        sql_executa("CREATE TABLE s (a,b)", &o);
+        sql_executa("INSERT INTO s VALUES (1,2), (2,4)", &o);
+        /* e uma 2×3, para a lei ser medida com números diferentes */
+        sql_executa("CREATE TABLE r (a,b,c)", &o);
+        sql_executa("INSERT INTO r VALUES (1,2,3), (4,5,6)", &o);
+
+        /* ── (1) SAEM DA MESMA REDUÇÃO. As colunas com pivô geram a imagem, as
+         * sem pivô dão as variáveis livres do núcleo — não são dois cálculos, é
+         * um lido dos dois lados. É a mesma economia do `zeta`/`mu`. */
+        sql_executa("SELECT nucleo(*) FROM s", &o);
+        long kn = o.nrows;
+        char n0[8], n1[8];
+        snprintf(n0, sizeof n0, "%s", o.nrows ? o.cell[0][0] : "?");
+        snprintf(n1, sizeof n1, "%s", o.nrows ? o.cell[0][1] : "?");
+        sql_executa("SELECT imagem(*) FROM s", &o);
+        long ki = o.nrows;
+        printf("      a singular (1,2;2,4): núcleo com %ld vector (%s,%s) ·"
+               " imagem com %ld\n", kn, n0, n1, ki);
+        if(kn != 1 || ki != 1) mal++;
+
+        /* ── (2) E O GUME É VERIFICAR, NÃO CONFERIR: cada vector do núcleo tem
+         * de dar ZERO quando a matriz o aplica. Comparar com o que se espera é
+         * confiar na conta; aplicá-la é medi-la. A conta faz-se aqui, sobre as
+         * linhas que a tabela tem. */
+        { long v0 = atol(n0), v1 = atol(n1);
+          long l1 = 1*v0 + 2*v1, l2 = 2*v0 + 4*v1;
+          int anula = (l1 == 0 && l2 == 0 && !(v0 == 0 && v1 == 0));
+          printf("      A·v = (%ld, %ld) e v ≠ 0: o núcleo ANULA  %s\n",
+                 l1, l2, anula ? "" : "NAO BATE");
+          if(!anula) mal++; }
+
+        /* ── (3) A LEI, e é a mesma conservação de sempre: o que se perde mais
+         * o que sobrevive é o que havia. `posto + dim(núcleo) = colunas` é o
+         * teorema do núcleo-imagem, e é a MESMA frase do ∑G = |I| que o
+         * quociente cumpre (§W44) — ali as fibras repartem as linhas, aqui as
+         * dimensões repartem as colunas. Mede-se nas DUAS tabelas, porque com
+         * uma só os números podiam coincidir por acaso. */
+        { long ps, nu, nc;
+          int leis = 0;
+          sql_executa("SELECT posto(*) FROM s", &o);  ps = atol(o.cell[0][0]);
+          sql_executa("SELECT nucleo(*) FROM s", &o); nu = o.nrows;
+          nc = 2;
+          printf("      lei na 2×2: posto %ld + nulidade %ld = %ld colunas  %s\n",
+                 ps, nu, nc, (ps + nu == nc) ? "" : "NAO BATE");
+          if(ps + nu == nc) leis++;
+          sql_executa("SELECT posto(*) FROM r", &o);  ps = atol(o.cell[0][0]);
+          sql_executa("SELECT nucleo(*) FROM r", &o); nu = o.nrows;
+          nc = 3;
+          printf("      lei na 2×3: posto %ld + nulidade %ld = %ld colunas  %s\n",
+                 ps, nu, nc, (ps + nu == nc) ? "" : "NAO BATE");
+          if(ps + nu == nc) leis++;
+          if(leis != 2) mal++; }
+
+        /* ── (4) E O NÚCLEO DA 2×3 TAMBÉM ANULA — com três coordenadas, o que
+         * mostra que a lei não é um acidente do quadrado. */
+        sql_executa("SELECT nucleo(*) FROM r", &o);
+        { long w0 = o.nrows ? atol(o.cell[0][0]) : 0;
+          long w1 = o.nrows ? atol(o.cell[0][1]) : 0;
+          long w2 = o.nrows ? atol(o.cell[0][2]) : 0;
+          long l1 = 1*w0 + 2*w1 + 3*w2, l2 = 4*w0 + 5*w1 + 6*w2;
+          int anula = (l1 == 0 && l2 == 0 && !(w0 == 0 && w1 == 0 && w2 == 0));
+          printf("      na 2×3: v = (%ld,%ld,%ld) e A·v = (%ld,%ld)  %s\n",
+                 w0, w1, w2, l1, l2, anula ? "" : "NAO BATE");
+          if(!anula) mal++; }
+
+        /* ── O CONTROLO: numa matriz de posto CHEIO o núcleo é VAZIO, e é isso
+         * que impede a medida de cima de passar por o motor devolver sempre
+         * alguma coisa. A lei continua a fechar, agora com a nulidade a zero. */
+        sql_executa("CREATE TABLE m (a,b)", &o);
+        sql_executa("INSERT INTO m VALUES (1,2), (3,4)", &o);
+        sql_executa("SELECT nucleo(*) FROM m", &o);
+        long vaz = o.nrows;
+        sql_executa("SELECT posto(*) FROM m", &o);
+        long pc = atol(o.cell[0][0]);
+        printf("\n      CONTROLO — posto cheio: núcleo com %ld vectores (esp 0)"
+               " e a lei fecha na mesma: %ld + %ld = 2  %s\n", vaz, pc, vaz,
+               (vaz == 0 && pc == 2) ? "" : "NAO BATE");
+        if(vaz != 0 || pc != 2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O NÚCLEO E A IMAGEM SÃO O PAR, E A LEI QUE OS LIGA É A CONSERVAÇÃO QUE ESTA CASA"
+           " JÁ TINHA. Saem da MESMA redução: as colunas com pivô geram a imagem, as sem pivô"
+           " dão as variáveis livres do núcleo — não são dois cálculos, é um lido dos dois"
+           " lados, com a mesma economia do par ζ/µ. E daí"
+           " `posto + dim(núcleo) = número de colunas`, que é o teorema do núcleo-imagem e é"
+           " a MESMA frase do ∑G = |I| do quociente (§W44): ali as fibras repartem as"
+           " LINHAS, aqui as dimensões repartem as COLUNAS, e nos dois casos o que se perde"
+           " mais o que sobrevive é o que havia. Mede-se em DUAS tabelas de formas"
+           " diferentes, porque com uma só os números podiam coincidir por acaso. O GUME É"
+           " VERIFICAR E NÃO CONFERIR: comparar o vector do núcleo com o que se espera é"
+           " confiar na conta, aplicá-lo à matriz e exigir ZERO é medi-lo — e faz-se nas"
+           " duas, incluindo a 2×3, onde o vector tem três coordenadas e mostra que a lei não"
+           " é um acidente do quadrado. O CONTROLO é a matriz de posto CHEIO, onde o núcleo"
+           " é VAZIO: sem ele, um motor que devolvesse sempre algum vector passava nas"
+           " medidas de cima, e a lei continua a fechar com a nulidade a zero.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

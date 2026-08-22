@@ -4417,7 +4417,9 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"POSTO") ? 2
                        : !strcasecmp(nome,"TRACO") ? 3
                        : !strcasecmp(nome,"TRANSPOSTA") ? 4
-                       : !strcasecmp(nome,"INVERSA") ? 5 : 0;
+                       : !strcasecmp(nome,"INVERSA") ? 5
+                       : !strcasecmp(nome,"NUCLEO") ? 6
+                       : !strcasecmp(nome,"IMAGEM") ? 7 : 0;
                 if(qm){
                     const char *r = q + 1;
                     pula(&r);
@@ -6887,6 +6889,54 @@ static int varre(const char *resto, int acao){
                   snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%s", cel);
                   snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
               } }
+            return 1;
+        }
+
+        if(mat_op == 6 || mat_op == 7){          /* núcleo e imagem: o PAR */
+            /* ── O NÚCLEO E A IMAGEM SÃO O PAR, e a lei que os liga é a mesma
+             * conservação de sempre. O `mat_reduz` corre UMA vez e as duas
+             * saem dela: as colunas com pivô geram a imagem, as sem pivô dão as
+             * variáveis livres do núcleo — não são dois cálculos, é um lido dos
+             * dois lados. Daí
+             *
+             *     dim(núcleo) + posto = número de colunas
+             *
+             * que é o teorema do núcleo-imagem, e é a MESMA frase do ∑G = |I|
+             * do quociente: o que se perde mais o que sobrevive é o que havia. */
+            VecQz base[LN_MAX];
+            int k = (mat_op == 6) ? mat_nucleo(A, base) : mat_imagem(A, base);
+            const char *nm = (mat_op == 6) ? "nucleo" : "imagem";
+            int dim = (k > 0) ? base[0].n : 0;
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->ncols = dim > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : dim;
+                sql_cap->nrows = k > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : k;
+                for(int j = 0; j < sql_cap->ncols; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+            }
+            if(!k) printf("   (vazio — a base tem zero vectores)\n");
+            for(int i = 0; i < k; i++){
+                printf("   ");
+                for(int j = 0; j < base[i].n; j++){
+                    Par cls = ra_classe((Par){ (long)base[i].c[j].p,
+                                               (long)base[i].c[j].q });
+                    char cel[SQL_OUT_CELL];
+                    if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                    else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                    printf("%s%s", cel, j + 1 < base[i].n ? " | " : "");
+                    if(sql_cap && i < sql_cap->nrows && j < sql_cap->ncols)
+                        snprintf(sql_cap->cell[i][j], SQL_OUT_CELL, "%s", cel);
+                }
+                printf("\n");
+            }
+            printf("-- a base do %s: %d vector(es) de dimensão %d"
+                   " · posto %d + dim(núcleo) %d = %d colunas\n",
+                   nm, k, dim, mat_posto(A),
+                   A.n - mat_posto(A), A.n);
             return 1;
         }
 

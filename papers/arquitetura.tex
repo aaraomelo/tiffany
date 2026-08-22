@@ -2887,6 +2887,34 @@ célula ausente a fazer recusar.}
         {\code{lib/linear.h} pelo motor; \code{det}/\code{posto}/\code{inversa} em $\mathbb{Q}$}
         {\code{tests/pgwire.c} §W51}
 
+\medskip\noindent\textbf{E o núcleo e a imagem são o par --- com a lei que esta
+casa já tinha.} Saem da \emph{mesma} redução: as colunas com pivô geram a
+imagem, as sem pivô dão as variáveis livres do núcleo. Não são dois cálculos: é
+um lido dos dois lados, com a mesma economia do par $\zeta/\mu$. E daí
+\[
+\boxed{\;\text{posto}\;+\;\dim(\text{núcleo})\;=\;\text{número de colunas}\;}
+\]
+que é o teorema do núcleo-imagem --- e é a \emph{mesma frase} do
+$\sum G=\lvert I\rvert$ do quociente: ali as fibras repartem as \textbf{linhas},
+aqui as dimensões repartem as \textbf{colunas}, e nos dois casos o que se perde
+mais o que sobrevive é o que havia. O gume é \emph{verificar} e não conferir:
+aplicar o vector do núcleo à matriz e exigir zero, em vez de o comparar com o
+que se esperava (\code{tests/pgwire.c} §W52, com o controlo na matriz de posto
+cheio, onde o núcleo é vazio e a lei fecha com a nulidade a zero).
+
+\medskip\noindent\textbf{A mesma conservação, três vezes.} Vale a pena vê-las
+juntas, porque é o que faz destas peças um só objeto:
+\[
+\begin{array}{lll}
+\text{o quociente} & \sum_{x}G(x)=\lvert I\rvert & \text{as fibras repartem as linhas}\\
+\text{o dual} & \lvert\text{presentes}\rvert+\lvert\text{ausentes}\rvert=\lvert I\rvert
+  & \text{o bit reparte as células}\\
+\text{a matriz} & \text{posto}+\dim(\ker)=n & \text{as dimensões repartem as colunas}
+\end{array}
+\]
+Três objetos, uma lei --- e em nenhum dos três ela foi posta como requisito:
+sai, das três vezes, de a construção não deitar nada fora.
+
 \medskip\noindent\textbf{E o mesmo objeto serve os dois sentidos.} O tensor que
 o \code{WHERE} usa para \emph{decidir} serve para \emph{produzir}:
 \code{SELECT a+1} avalia-o percorrendo os monómios não-nulos e multiplicando as
