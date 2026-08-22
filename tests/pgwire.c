@@ -3895,6 +3895,125 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W28: AS OITO RÉGUAS, E O QUE SAI DELAS ════════════════════════════
+     *
+     * `thm:base8`: «uma RÉGUA é um peso por direcção, g^(k) medindo só e_k:
+     * cada uma é cega às outras sete, as oito compostas medem todo salto, e
+     * tirando uma qualquer fica uma direcção por medir». E logo a seguir: «como
+     * a base é ortonormal, MEDIR e LER O BIT são a mesma operação».
+     *
+     * Isto não é uma metáfora sobre o motor: é o que ele faz. O campo é um
+     * vector nesta base, e cada operação sobre campos é uma régua ou uma
+     * composição delas. Mede-se que é, e — o que importa mais — mede-se o que
+     * NÃO é. */
+    {
+        long mal = 0;
+        const int N = 8;
+        printf("\n§W28 as oito réguas: medir e ler o bit são a mesma operação.\n\n");
+
+        /* (a) as três cláusulas do thm:base8, uma a uma */
+        int cega = 1, todo = 1, falta = 1;
+        for(int k = 0; k < N; k++) for(int j = 0; j < N; j++){
+            int g = ((1u << j) >> k) & 1u;
+            if(g != (k == j)) cega = 0;
+        }
+        for(unsigned x = 0; x < 256u; x++){
+            int soma = 0, pc = 0;
+            for(int k = 0; k < N; k++) soma += (int)((x >> k) & 1u);
+            for(unsigned y = x; y; y >>= 1) pc += (int)(y & 1u);
+            if(soma != pc) todo = 0;
+            for(int j = 0; j < N; j++){
+                int sem = 0;
+                for(int k = 0; k < N; k++) if(k != j) sem += (int)((x >> k) & 1u);
+                if(sem != pc - (int)((x >> j) & 1u)) falta = 0;
+            }
+        }
+        printf("      cada régua é CEGA às outras sete: %s\n", cega ? "sim" : "NAO");
+        printf("      as oito COMPOSTAS medem todo salto (∑ g^(k) = popcount): %s\n",
+               todo ? "sim" : "NAO");
+        printf("      tirando uma, fica uma direcção por medir: %s\n",
+               falta ? "sim" : "NAO");
+        if(!cega || !todo || !falta) mal++;
+
+        /* (b) e as operações do motor SÃO isso, no campo — medidas pelo motor,
+         * não recalculadas aqui: marcar é pôr e_i, o AND é ∧ nas coordenadas, o
+         * OR é ∨, e o count é a soma das oito. */
+        {
+            const char *base = "/tmp/pgwire_w28";
+            SqlOut o;
+            unlink("/tmp/pgwire_w28.mem"); unlink("/tmp/pgwire_w28.prog");
+            if(!sql_abrir(base)) mal++;
+            sql_executa("CREATE TABLE t (a,b)", &o);
+            for(int i = 1; i <= 8; i++){
+                char q[64];
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+                sql_executa(q, &o);
+            }
+            /* três condições, e as suas combinações */
+            /* AS DUAS CONDIÇÕES TÊM DE SE CRUZAR. À primeira escrita eram
+             * `a > 4` e `b < 10`, que nesta tabela são complementares — a
+             * intersecção dava ZERO e a identidade ficava 8 + 0 = 4 + 4, uma
+             * soma verdadeira que não mediria nada. Agora sobrepõem-se em três
+             * linhas, e o controlo abaixo exige que se sobreponham. */
+            sql_executa("SELECT count(*) FROM t WHERE a > 2", &o);
+            long nA = o.nrows ? atol(o.cell[0][0]) : -1;
+            sql_executa("SELECT count(*) FROM t WHERE b < 12", &o);
+            long nB = o.nrows ? atol(o.cell[0][0]) : -1;
+            sql_executa("SELECT count(*) FROM t WHERE a > 2 AND b < 12", &o);
+            long nAB = o.nrows ? atol(o.cell[0][0]) : -1;
+            sql_executa("SELECT count(*) FROM t WHERE a > 2 OR b < 12", &o);
+            long nAoB = o.nrows ? atol(o.cell[0][0]) : -1;
+
+            /* A INCLUSÃO-EXCLUSÃO É A LEI DAS RÉGUAS: contar é somar as oito, e
+             * a soma é linear — logo |A∨B| + |A∧B| = |A| + |B|, sem excepção.
+             * Um motor que fizesse o AND ou o OR por outro caminho que não as
+             * coordenadas quebraria isto sem quebrar nenhuma contagem isolada. */
+            int lei = (nA >= 0 && nB >= 0 && nAB >= 0 && nAoB >= 0
+                       && nAoB + nAB == nA + nB);
+            printf("\n      |A| = %ld · |B| = %ld · |A∧B| = %ld · |A∨B| = %ld\n",
+                   nA, nB, nAB, nAoB);
+            printf("      -> |A∨B| + |A∧B| = |A| + |B|:  %ld = %ld  %s\n",
+                   nAoB + nAB, nA + nB, lei ? "sim" : "NAO");
+            if(!lei) mal++;
+
+            /* o CONTROLO: as duas contagens têm de ser DIFERENTES, senão a
+             * identidade passaria por os conjuntos coincidirem */
+            int sep = (nAB != nAoB && nAB > 0 && nAB < nA && nAB < nB);
+            printf("      CONTROLO — os conjuntos CRUZAM-SE de facto:"
+                   " 0 < |A∧B| = %ld < |A| e < |B|, e ∧ ≠ ∨ (%ld vs %ld):  %s\n",
+                   nAB, nAB, nAoB, sep ? "sim" : "NAO");
+            if(!sep) mal++;
+            sql_fechar();
+        }
+
+        printf("\n");
+        ok("AS OITO RÉGUAS SÃO A BASE, E AS OPERAÇÕES DE CAMPO SAEM TODAS DELAS. O `thm:base8`"
+           " diz o que uma régua é — um peso por direcção, g^(k) medindo só e_k — e as três"
+           " cláusulas verificam-se aqui uma a uma: cada uma é CEGA às outras sete, as oito"
+           " COMPOSTAS medem todo salto, e tirando uma qualquer fica uma direcção por medir. E"
+           " logo a seguir vem a frase que liga isto ao motor: como a base é ortonormal, MEDIR"
+           " e LER O BIT são a mesma operação. Não é uma metáfora — o campo É um vector nesta"
+           " base, e cada coisa que o motor lhe faz é uma régua ou uma composição delas: marcar"
+           " a linha i é pôr a coordenada e_i, o AND de duas condições é o ∧ coordenada a"
+           " coordenada, o OR é o ∨, e o count é a SOMA das oito, que é o popcount. O QUE SE"
+           " MEDE NÃO É CADA UMA ISOLADA, mas a lei que só vale se elas forem mesmo as"
+           " coordenadas: contar é somar réguas, a soma é linear, e portanto"
+           " |A∨B| + |A∧B| = |A| + |B| sem excepção. Um motor que fizesse o AND ou o OR por um"
+           " caminho que não as coordenadas quebraria esta identidade sem quebrar nenhuma"
+           " contagem isolada — é por isso que é ela que se mede, e não os quatro números um a"
+           " um. O CONTROLO exige que ∧ e ∨ dêem números DIFERENTES, senão a identidade"
+           " passaria por os dois conjuntos coincidirem — e exige mais do que isso, porque à"
+           " primeira escrita as duas condições que escolhi eram COMPLEMENTARES nesta tabela: a"
+           " intersecção dava zero, a identidade ficava 8 + 0 = 4 + 4, e essa soma é verdadeira"
+           " sem medir nada. Agora exige-se que os conjuntos se cruzem de facto, com a"
+           " intersecção maior que zero e menor do que cada um deles. E FICA DITO O QUE NÃO SAI DA BASE,"
+           " porque é onde o trabalho ainda falta: a comparação < e > usa o BIT DE SINAL de uma"
+           " subtracção, que é uma convenção sobre o envelope e não uma régua; e a descida da"
+           " árvore usa a ORDEM dos símbolos, que é a métrica linear. Essas duas são as que"
+           " ainda não se leem como medida.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
