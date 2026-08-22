@@ -585,6 +585,25 @@ int main(void){
      *
      *     m − g = δ²/(m+g)   ⟹   δ₁ ≤ δ²/(2m)   e   δ₁ ≤ δ/2
      *
+     * E A QUANTIZAÇÃO DIZ-SE ANTES DE SE USAR, porque é dela que a terminação
+     * depende. O objecto é a GRADE de grão u: ao fim de n dobras os pontos são
+     * os k/2ⁿ (Teor. 2(6)), e aqui representam-se por inteiros na escala E. As
+     * duas dobras operam NA GRADE — a aritmética cai nela sozinha, e a
+     * geométrica devolve o maior elemento da grade cujo quadrado não passa ab,
+     * isto é o PISO. Isto é preciso dizer porque √(ab) não é diádico: √2 não
+     * está na grade, e sem o piso o processo saía do objecto que o constrói.
+     * Com o piso, a largura é um número INTEIRO DE GRÃOS, e é literalmente isso
+     * que decresce.
+     *
+     * E A DESCIDA É BEM-FUNDADA, o que se prova sem olhar para a raiz: se g < m
+     * então (g+m)/2 < m, e o piso de algo menor que m é ≤ m−1, pelo que
+     *
+     *     g < m  ⟹  m' ≤ m − 1
+     *
+     * A largura desce pela ponta de CIMA, garantidamente, faça o piso da raiz o
+     * que fizer. Não é uma convergência disfarçada: é uma descida estrita numa
+     * ordem bem-fundada, e por isso PÁRA.
+     *
      * E AQUI O PROCESSO NÃO «TENDE» A NADA: ACABA. O objecto é finito — a régua
      * tem um grão —, pelo que a largura não se aproxima de zero, CHEGA a zero:
      * ao fim de um número contado de batidas vale a IGUALDADE m = g, e o
@@ -680,6 +699,34 @@ int main(void){
                  falhou, casos);
           if(falhou) mal++; }
 
+        /* (4b) A DESCIDA É BEM-FUNDADA, e é isto que separa uma terminação de
+         * uma convergência disfarçada. Varre-se a grade toda e exige-se, em
+         * CADA passo de CADA par, que a média aritmética desça de facto — é a
+         * cláusula que garante a paragem, e ela não depende da raiz. Mede-se
+         * também que a geométrica nunca desce e que o encaixe nunca quebra,
+         * porque uma delas a falhar tiraria o sentido às outras duas. */
+        { long parado = 0, nao_desceu = 0, nao_subiu = 0, quebrou = 0;
+          long passos = 0, maxbat = 0;
+          for(long a = 1; a <= 300; a++) for(long b = a+1; b <= 300; b++){
+              long g = a, m = b; long n = 0;
+              while(g != m && n < 10000){
+                  long m1 = (g+m)/2, g1 = geo_local(g, m);
+                  passos++;
+                  if(!(m1 < m))  nao_desceu++;        /* g<m ⟹ m' ≤ m−1 */
+                  if(!(g1 >= g)) nao_subiu++;
+                  if(!(g <= g1 && g1 <= m1 && m1 <= m)) quebrou++;
+                  if(g1 == g && m1 == m){ parado++; break; }
+                  g = g1; m = m1; n++;
+              }
+              if(g != m) parado++;
+              if(n > maxbat) maxbat = n;
+          }
+          printf("     bem-fundada, na grade 1..300 (%ld passos): m' < m falhou"
+                 " %ld · g' ≥ g falhou %ld · encaixe quebrou %ld · parou sem"
+                 " igualar %ld · máx %ld batidas\n",
+                 passos, nao_desceu, nao_subiu, quebrou, parado, maxbat);
+          if(nao_desceu || nao_subiu || quebrou || parado) mal++; }
+
         /* (5) A UNICIDADE, e ela é uma IGUALDADE e não um limite. Um ponto em
          * todos os intervalos, e somente um: a existência é o último intervalo,
          * que já é um ponto; a unicidade é |x−y| ≤ largura = 0. Mede-se que
@@ -743,7 +790,19 @@ int main(void){
            " intervalo, que já é o ponto, e a unicidade é a igualdade. Mede-se dos dois"
            " lados, porque um só não dizia nada: o último intervalo tem UM habitante e o"
            " penúltimo tinha mais. Não é um limite: é uma conta que TERMINA, e é isso o"
-           " CORTE — produzido, e não postulado. O GUME É A"
+           " CORTE — produzido, e não postulado. E A QUANTIZAÇÃO DIZ-SE ANTES DE SE USAR,"
+           " porque é dela que a terminação depende: o objecto é a GRADE de grão u, as duas"
+           " dobras operam NELA, e a geométrica devolve o maior elemento da grade cujo"
+           " quadrado não passa ab — o PISO. Isto tem de ser dito porque √(ab) NÃO é"
+           " diádico: √2 não está na grade, e sem o piso o processo saía do objecto que o"
+           " constrói. Com ele, a largura é um número INTEIRO DE GRÃOS, e é literalmente"
+           " isso que decresce. E A DESCIDA É BEM-FUNDADA SEM OLHAR PARA A RAIZ: se g < m"
+           " então (g+m)/2 < m, e o piso de algo menor que m é ≤ m−1, pelo que g < m obriga"
+           " m' ≤ m−1 — a largura desce pela ponta de CIMA, faça o piso o que fizer. Varre-se"
+           " a grade 1..300 inteira exigindo isso em cada passo de cada par, e mais duas"
+           " cláusulas que a sustentam (a geométrica nunca desce, o encaixe nunca quebra),"
+           " porque qualquer delas a falhar tirava o sentido às outras. Não é uma"
+           " convergência disfarçada: é uma descida estrita numa ordem bem-fundada. O GUME É A"
            " ESCOLHA, e é ele que diz porque é que a segunda face faz falta: com uma face só o"
            " par colapsa num passo — (a,b) ↦ (m,m) — e a batida seguinte não move nada, pelo"
            " que para continuar é preciso ESCOLHER um lado em cada nível; isso é a bissecção, e"
