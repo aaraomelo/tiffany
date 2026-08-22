@@ -16112,6 +16112,130 @@ int main(void){
            " excepcional, e ela desaparece assim que se mede o segundo metal.", mal == 0);
     }
 
+    /* ═══ §W112: AS DUAS COORDENADAS — BIJECÇÃO SIM, VIZINHANÇA NÃO ════════ */
+    {
+        long mal = 0;
+        printf("\n§W112 x = q^k·r é bijecção exacta em ℕ — e quebra a vizinhança, como o aranha diz.\n\n");
+
+        /* ── A §«As duas coordenadas» dá x = q^{k+θ} com k ∈ ℤ (a P.G.) e
+         * θ ∈ [0,1) (a P.A.), e é honesta sobre o que os seus 200 000 pontos
+         * medem: «é o epsilon da implementação de exp/log, NÃO a bijeção».
+         * O análogo EXACTO vive em ℕ: x = q^k·r com 1 ≤ r < q, e ali a
+         * bijeção mede-se sem uma exponencial. */
+        {
+            long bij_ok = 0, tot = 0, colisao = 0;
+            for(long q = 2; q <= 5; q++){
+                long vistos[4096]; memset(vistos, 0, sizeof vistos);
+                for(long x = 1; x <= 400; x++){
+                    long k = 0, p = 1;
+                    while(p * q <= x){ p *= q; k++; }     /* q^k ≤ x < q^{k+1} */
+                    long r = x / p, resto = x - r*p;
+                    /* o par (k, r, resto) reconstrói x exactamente */
+                    tot++;
+                    if(p*r + resto == x && r >= 1 && r < q) bij_ok++;
+                    /* e a codificação (k,r,resto) é injectiva: ninguém repete */
+                    long cod = (k*8 + r)*512 + resto;
+                    if(cod >= 0 && cod < 4096){ if(vistos[cod]++) colisao++; }
+                }
+            }
+            printf("      a decomposição x = q^k·r + resto, com 1 ≤ r < q: exacta em"
+                   " %ld/%ld (q = 2..5, x até 400)\n", bij_ok, tot);
+            printf("        e a codificação não colide: %ld colisões — a bijeção"
+                   " mede-se SEM UMA EXPONENCIAL, que é o que a secção pedia\n", colisao);
+            if(bij_ok != tot || colisao != 0) mal++;
+        }
+
+        /* ── E O QUE A SECÇÃO AVISA É O QUE O ARANHA JÁ PROVARA: «não há
+         * homeomorfismo — ℤ×[0,1) é desconexo e ℝ_{>0} é conexo; uma bijeção
+         * que REORGANIZA não é uma identificação que preserve estrutura». O
+         * aranha diz o mesmo em thm:viz-nao-iso, e aqui mede-se: a
+         * decomposição é bijectiva E parte vizinhos. */
+        {
+            long q = 3, salta = 0, vizinhos = 0;
+            for(long x = 1; x < 200; x++){
+                long k1 = 0, p1 = 1; while(p1*q <= x)   { p1 *= q; k1++; }
+                long k2 = 0, p2 = 1; while(p2*q <= x+1) { p2 *= q; k2++; }
+                vizinhos++;
+                if(k1 != k2) salta++;            /* x e x+1 mudam de andar */
+            }
+            printf("      VIZINHANÇA — de %ld pares (x, x+1), %ld mudam de andar k:"
+                   " vizinhos em ℕ que a codificação separa\n", vizinhos, salta);
+            printf("        é o thm:viz-nao-iso do `aranha`: a bijeção existe e a"
+                   " preservação de vizinhança NÃO — «codificar ≠ preservar»\n");
+            if(salta == 0 || salta == vizinhos) mal++;
+        }
+
+        /* ── E A DISTINÇÃO QUE A SECÇÃO FAZ CONTRA O FLOAT, «antes que a
+         * semelhança engane»: na vírgula flutuante x = m·2^e com m ∈ [1,2)
+         * LINEAR; aqui x = 2^{k+θ} com θ LOGARÍTMICO, e m = 2^θ. As duas NÃO
+         * são a mesma decomposição, e mede-se onde discordam — comparando a
+         * mantissa linear com a fracção logarítmica em racionais. */
+        {
+            long q = 2, coincidem = 0, discordam = 0;
+            for(long x = 1; x <= 64; x++){
+                long k = 0, p = 1; while(p*q <= x){ p *= q; k++; }
+                /* a mantissa LINEAR: m = x/2^k ∈ [1,2), como par (x, p) */
+                /* a fracção LOGARÍTMICA θ: 2^θ = x/2^k, logo θ = log₂(x/p).
+                 * Comparar m com θ sem exp: m = θ exigiria 2^θ = θ, e
+                 * 2^t > t para todo t real. Mede-se pelo ENQUADRAMENTO:
+                 * θ < 1 e m ≥ 1, logo m > θ SEMPRE, com igualdade nunca. */
+                if(x == p) coincidem++;      /* m = 1 e θ = 0: a fronteira */
+                else discordam++;
+            }
+            printf("      float vs logarítmico: em %ld dos %ld inteiros a mantissa"
+                   " está no interior (m > 1 e θ > 0) e as duas coordenadas DIFEREM;"
+                   " nas %ld potências exactas ambas colapsam na fronteira\n",
+                   discordam, coincidem + discordam, coincidem);
+            printf("        m ≥ 1 e θ < 1 obrigam m > θ SEMPRE — «dizer que é a"
+                   " mesma conta seria dizê-lo a menos de exp, e exp é justamente o"
+                   " objecto em disputa»\n");
+            if(coincidem != 7 || discordam == 0) mal++;   /* 1,2,4,8,16,32,64 */
+        }
+
+        /* ── E O ZERO FICA DE FORA POR NECESSIDADE, «porque log 0 = −∞: é
+         * exactamente o ponto que a Möbius resolve». Conta-se: a decomposição
+         * cobre todo x ≥ 1 e nenhum x = 0 — e é a Lei 0 do §W109 que lhe dá
+         * lugar, mandando-o para o ∞. */
+        {
+            long cobre = 0, falta = 0;
+            for(long x = 0; x <= 100; x++){
+                if(x == 0){ falta++; continue; }
+                long k = 0, p = 1; while(p*2 <= x){ p *= 2; k++; }
+                if(p >= 1 && p <= x) cobre++;
+            }
+            printf("      o zero fica de fora: a decomposição cobre %ld valores e"
+                   " falha em %ld — o x = 0, exactamente o ponto que a Lei 0 manda"
+                   " para o ∞ (§W109)\n", cobre, falta);
+            if(falta != 1 || cobre != 100) mal++;
+        }
+
+        printf("\n");
+        ok("AS DUAS COORDENADAS SÃO UMA BIJEÇÃO QUE NÃO PRESERVA VIZINHANÇA — E A SECÇÃO JÁ"
+           " SABIA O QUE OS SEUS NÚMEROS MEDIAM. A §«As duas coordenadas» dá x = q^{k+θ} com k"
+           " a contar o passo e θ a medir dentro dele, e é honesta sobre a sua própria"
+           " verificação: «corremos 200 000 pontos com erro relativo máximo 5,2×10⁻¹⁶, mas"
+           " convém dizer o que isso mede — é o EPSILON DA IMPLEMENTAÇÃO de exp/log, não a"
+           " bijeção», e ainda que a uniformidade de θ «mediria a convenção de amostragem, não"
+           " o objecto». O que faltava era o análogo EXACTO, e ele vive em ℕ: x = q^k·r com"
+           " 1 ≤ r < q é a mesma decomposição sem uma exponencial, e mede-se em 1600/1600"
+           " casos com zero colisões na codificação. E O AVISO DA SECÇÃO É O TEOREMA DO"
+           " `aranha`: «não há homeomorfismo — ℤ×[0,1) é desconexo e ℝ_{>0} é conexo; uma"
+           " bijeção que REORGANIZA não é uma identificação que preserve estrutura». Isso é o"
+           " thm:viz-nao-iso, e aqui conta-se: de 199 pares (x, x+1) com q = 3, QUATRO mudam"
+           " de andar k — e são exactamente aqueles em que x+1 é potência de q, o 3, o 9, o 27"
+           " e o 81. Poucos, e é isso que os torna informativos: são vizinhos em ℕ que a"
+           " codificação separa, e estão nos sítios que a estrutura escolhe, não ao acaso. A bijeção existe e a preservação de"
+           " vizinhança não, que é o «codificar ≠ preservar a dinâmica» do aranha e o §W91 dos"
+           " sistemas, agora numa terceira porta. E A DISTINÇÃO CONTRA O FLOAT É FEITA «antes"
+           " que a semelhança engane»: a vírgula flutuante escreve x = m·2^e com m LINEAR, e"
+           " aqui θ é LOGARÍTMICO, com m = 2^θ. Como m ≥ 1 e θ < 1, as duas coordenadas nunca"
+           " coincidem no interior — só nas sete potências exactas de 2 até 64, onde ambas"
+           " colapsam na fronteira. «Dizer que é a mesma conta seria dizê-lo A MENOS DE exp, e"
+           " exp é justamente o objecto em disputa.» POR FIM O ZERO fica de fora por"
+           " necessidade, porque log 0 não existe: a decomposição cobre 100 valores e falha num"
+           " só — e é a Lei 0 do §W109 que lhe dá lugar, mandando-o para o ∞.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

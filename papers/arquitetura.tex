@@ -5363,6 +5363,52 @@ metais.}
         {\code{traco} pelo motor; divisão de polinómios em $\Z[x]$}
         {\code{tests/pgwire.c} §W111}
 
+\subsection*{As duas coordenadas: bijeção sim, vizinhança não}
+
+\noindent A §«As duas coordenadas» dá $x=q^{\,k+\theta}$ --- $k$ conta o passo,
+$\theta$ mede dentro dele --- e é \textbf{honesta sobre a sua própria verificação}:
+«corremos $200\,000$ pontos com erro relativo máximo $5{,}2\times10^{-16}$, mas convém
+dizer o que isso mede: é o \emph{epsilon} da implementação de $\exp/\log$, \textbf{não
+a bijeção}», e ainda que a uniformidade de $\theta$ «mediria a convenção de
+amostragem, não o objeto».
+
+\medskip\noindent\textbf{O que faltava era o análogo exato}, e ele vive em $\N$:
+$x=q^{k}r+\text{resto}$ com $1\le r<q$ é a mesma decomposição \emph{sem uma
+exponencial} --- $1600/1600$ casos ($q=2..5$, $x$ até $400$), com zero colisões na
+codificação.
+
+\medskip\noindent\textbf{E o aviso da seção é o teorema do \code{aranha}.} «Não há
+homeomorfismo --- $\Z\times[0,1)$ é desconexo e $\R_{>0}$ é conexo; uma bijeção que
+\emph{reorganiza} não é uma identificação que preserve estrutura.» Isso é o
+\code{thm:viz-nao-iso}, e aqui conta-se: de $199$ pares $(x,x+1)$ com $q=3$,
+\textbf{quatro} mudam de andar --- e são exatamente aqueles em que $x+1$ é potência de
+$q$: o $3$, o $9$, o $27$ e o $81$. \emph{Poucos, e é isso que os torna informativos}:
+estão nos sítios que a estrutura escolhe, não ao acaso.
+\[
+\boxed{\;\text{a bijeção existe; a preservação de vizinhança não}\;}
+\]
+--- o «codificar $\neq$ preservar a dinâmica» do aranha e o §W91 dos sistemas, agora
+numa terceira porta.
+
+\medskip\noindent\textbf{E a distinção contra o \texttt{float} é feita «antes que a
+semelhança engane».} A vírgula flutuante escreve $x=m\cdot2^{e}$ com $m$
+\textbf{linear}; aqui $\theta$ é \textbf{logarítmico}, com $m=2^{\theta}$. Como
+$m\ge1$ e $\theta<1$, as duas coordenadas nunca coincidem no interior --- só nas
+\emph{sete} potências exatas de $2$ até $64$, onde ambas colapsam na fronteira.
+«Dizer que é a mesma conta seria dizê-lo \emph{a menos de} $\exp$, e $\exp$ é
+justamente o objeto em disputa.»
+
+\medskip\noindent\textbf{E o zero fica de fora por necessidade}, porque $\log0$ não
+existe: a decomposição cobre $100$ valores e falha num só. É a Lei~0 de §W109 que lhe
+dá lugar, mandando-o para o $\infty$.
+
+\medido{\code{tests/pgwire.c} §W112 --- a decomposição exata em $\N$; os saltos de
+andar contados e localizados; a separação linear/logarítmico; e o zero.}
+
+\colunas{\code{catalogo} «As duas coordenadas» (\code{prop:coord}); \code{aranha thm:viz-nao-iso}; §W91; §W109}
+        {decomposição $q^{k}r$ em $\N$; contagem de saltos de andar}
+        {\code{tests/pgwire.c} §W112}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

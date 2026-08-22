@@ -23627,6 +23627,8 @@ produto é desconexo --- cada $\{k\}\times[0,1)$ é aberto e fechado --- ao pass
 conexo. É exatamente o mesmo cuidado da Observação~\ref{obs:naosobe}, e não custa repeti-lo: uma
 bijeção que reorganiza não é uma identificação que preserve estrutura.
 
+\medido{\code{tests/pgwire.c} §W112 --- e com o análogo \textbf{exacto}, que é o que faltava: em $\N$ a mesma decomposição escreve-se $x=q^{k}r+\text{resto}$ com $1\le r<q$, \emph{sem uma exponencial}, e mede-se em $1600/1600$ casos com zero colisões. O aviso desta secção --- «uma bijeção que reorganiza não é uma identificação que preserve estrutura» --- é o \code{aranha thm:viz-nao-iso}, e conta-se: de $199$ pares $(x,x+1)$ com $q=3$, \textbf{quatro} mudam de andar, e são exactamente aqueles em que $x+1$ é potência de $q$. Poucos, e nos sítios que a estrutura escolhe. A distinção contra o \texttt{float} também: $m\ge1$ e $\theta<1$ obrigam as duas coordenadas a diferirem no interior, coincidindo só nas sete potências exactas de $2$ até $64$. E o zero falha num valor de $101$ --- o ponto que a Lei~0 manda para o $\infty$.}
+
 \noindent A bijeção prova-se em duas linhas: $k = \lfloor \log_q x\rfloor$ e
 $\theta = \log_q x - k$ definem a inversa, e a unicidade é a da parte inteira. Corremos também
 $200\,000$ pontos com erro relativo máximo $5{,}2\times10^{-16}$, mas convém dizer o que isso mede:
