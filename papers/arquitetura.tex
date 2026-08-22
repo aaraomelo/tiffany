@@ -4581,6 +4581,71 @@ em $104/104$; e o controlo dos palíndromos.}
         {\code{produto}/\code{det}/\code{transposta} pelo motor; a recorrência dos convergentes como segundo caminho}
         {\code{tests/pgwire.c} §W96}
 
+\subsection*{Euclides desfaz a palavra sem sair do anel --- e o \texttt{double} não consegue}
+
+\noindent A \code{catalogo} §\code{sec:revI} diz que cada letra tem inversa
+\emph{sobre os inteiros}, $M(a)^{-1}=\left(\begin{smallmatrix}0&1\\1&-a\end{smallmatrix}\right)$,
+porque $\det M(a)=-1$ é unidade em $\Z$. Pede-se ao motor e sai certa em $9/9$ ---
+mas o que importa não é o valor: é \textbf{não haver denominador}, medido célula a
+célula, porque é isso que põe a letra em $\mathrm{GL}_2(\Z)$ e faz o algoritmo
+desfazer-se \emph{sem mudar de anel}.
+
+\medskip\noindent\textbf{E fecha-se a consequência do \code{thm:rev}}, que §W96
+tinha deixado por medir: ali mediu-se que transpor é reverter, e o teorema tira daí
+que $p_n/p_{n-1}$ \emph{expande} na palavra ao contrário. A palavra é gerada, o
+produto das letras é do motor, e a expansão de $p_n/p_{n-1}$ é feita por Euclides
+inteiro --- que não sabe de matriz nenhuma: $\mathbf{54/54}$.
+
+\medskip\noindent Em $18$ delas $a_0=1$, e aí a forma canónica \textbf{funde} o
+último par, $\langle\dots,a_1,1\rangle\equiv\langle\dots,a_1+1\rangle$. Não é
+exceção --- é a ambiguidade que a própria proposição de injetividade declara, e
+ignorá-la fazia o número cair para $36/54$: exatamente os dois terços em que
+$a_0\neq1$.
+
+\medskip\noindent\textbf{E a \code{obs:float} deixa de ser um aviso e passa a ser um
+número.} O catálogo diz que «o algoritmo não pode correr em vírgula flutuante» e dá
+o caso: $8/5$ produz $\langle1;1,1,1,1\rangle$ em vez da canónica
+$\langle1;1,1,1,2\rangle$. Reproduz-se, com o \texttt{double} como \emph{objeto
+medido} e Euclides inteiro como régua --- nunca ao contrário:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+$8/5$ em inteiros & $[1,1,1,2]$\\
+$8/5$ em \texttt{double} & $[1,1,1,1,\dots]$\\
+o quarto passo & resto $>0{,}5$, inverso $<2$, piso $\mathbf{1}$ --- tem de ser $2$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{O que \emph{não} se reproduz são os dígitos.} O catálogo
+escreve $1/0{,}5000000000000002=1{,}9999999999999991$; aqui sai
+$1/0{,}50000000000000044=1{,}9999999999999982$. O último bit depende da \textbf{ordem
+das operações} do laço, e dizê-lo é o que impede de anunciar uma reprodução exata que
+não há. \emph{O piso é que se reproduz, e é ele que a observação afirma.}
+
+\medskip\noindent\textbf{E mede-se a frequência}, que é o que separa uma curiosidade
+de um «não pode»: o \texttt{double} erra algum dos dígitos da palavra verdadeira em
+$\mathbf{1301}$ dos $3339$ racionais com $p,q\le60$.
+
+\medskip\noindent\textbf{Comparam-se os primeiros dígitos, não o comprimento.} O laço
+em \texttt{double} nunca chega a resto zero e continuaria a cuspir lixo --- em $8/5$
+sai um sexto termo de $562\,949\,953\,421\,312$ ---, pelo que exigir o mesmo
+comprimento mediria o \emph{meu critério de paragem} e não a representação. Na
+primeira escrita media, e dava $2786$ de $3339$. O \textsc{controlo} é que nos outros
+$2038$ acerte todos: se errasse em tudo, o defeito seria do laço; se não errasse em
+nenhum, a observação do catálogo era falsa.
+
+\medskip\noindent\emph{É a razão pela qual esta casa não guarda um \texttt{float} ---
+dita como quantidade.}
+
+\medido{\code{tests/pgwire.c} §W97 --- a inversa inteira em $9/9$ com o teste no
+denominador; a reversão em $54/54$ com as $18$ fusões canónicas contadas; o caso
+$8/5$ passo a passo; e a frequência com o seu controlo.}
+
+\colunas{\code{catalogo sec:revI}, \code{obs:float}, \code{thm:rev}; §W96}
+        {\code{inversa} pelo motor; Euclides inteiro como régua; o \texttt{double} como objeto medido}
+        {\code{tests/pgwire.c} §W97}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

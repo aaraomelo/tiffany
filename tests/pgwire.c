@@ -13654,6 +13654,235 @@ int main(void){
            " que não comutam e o motor respondeu.", mal == 0);
     }
 
+    /* ═══ §W97: EUCLIDES DESFAZ A PALAVRA — E O double NÃO ═════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W97 M(a)⁻¹ é inteira, p_n/p_{n−1} é a palavra AO CONTRÁRIO, e o double erra.\n\n");
+        { const char *tabs[] = { "A","P" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w97__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w97__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w97.mem"); unlink("/tmp/pgwire_w97.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w97")) mal++;
+
+        long rec97 = 0;
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); \
+                sql_executa(q2,&o2); if(!o2.ok) rec97++; } } while(0)
+
+        /* Euclides inteiro: a palavra de p/q, forma canónica (último ≥ 2) */
+        #define EUC(p0,q0,W,L) do { long P = (p0), Q = (q0); (L) = 0; \
+            while(Q != 0 && (L) < 24){ long a = P / Q, r = P - a*Q; \
+                if(r < 0){ a--; r += Q; } \
+                (W)[(L)++] = a; P = Q; Q = r; } } while(0)
+
+        /* ── (1) REVERSIBILIDADE I: cada letra tem inversa SOBRE OS INTEIROS,
+         * M(a)⁻¹ = (0,1;1,−a), porque det M(a) = −1 é unidade em ℤ. A inversa
+         * é pedida ao motor — e o que importa não é o valor, é NÃO HAVER
+         * DENOMINADOR: é isso que põe a letra em GL₂(ℤ) e faz o algoritmo
+         * desfazer-se sem sair do anel. */
+        long inv_ok = 0, inv_int = 0, inv_n = 0;
+        for(long a = -4; a <= 4; a++){
+            long M[2][2] = {{a,1},{1,0}};
+            POE2("A", M);
+            sql_executa("SELECT inversa(*) FROM A", &o);
+            if(!o.ok || o.nrows != 2) continue;
+            inv_n++;
+            int inteira = 1;
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                if(strchr(o.cell[i][j], '/')) inteira = 0;
+            if(inteira) inv_int++;
+            if(atol(o.cell[0][0]) == 0 && atol(o.cell[0][1]) == 1
+               && atol(o.cell[1][0]) == 1 && atol(o.cell[1][1]) == -a) inv_ok++;
+        }
+        printf("      M(a)⁻¹ = (0,1;1,−a) pelo motor: %ld/%ld · e SEM denominador"
+               " (logo em GL₂(ℤ)): %ld/%ld\n", inv_ok, inv_n, inv_int, inv_n);
+        if(inv_ok != inv_n || inv_int != inv_n || inv_n < 8) mal++;
+
+        /* ── (2) A CONSEQUÊNCIA DO thm:rev QUE FALTAVA. §W96 mediu que
+         * transpor é reverter; o teorema tira daí que p_n/p_{n−1} EXPANDE na
+         * palavra AO CONTRÁRIO. Aqui a palavra é gerada, o produto é do motor,
+         * e a expansão de p_n/p_{n−1} é feita por Euclides INTEIRO — que não
+         * sabe de matriz nenhuma. */
+        long rev_ok = 0, rev_n = 0, fora = 0, fundidas = 0;
+        for(long a0 = 1; a0 <= 3; a0++) for(long a1 = 1; a1 <= 3; a1++)
+        for(long a2 = 1; a2 <= 3; a2++) for(long a3 = 2; a3 <= 3; a3++){
+            long W[4] = {a0,a1,a2,a3};
+            long M[2][2] = {{1,0},{0,1}};
+            int falhou = 0;
+            for(int k = 0; k < 4 && !falhou; k++){
+                long L[2][2] = {{W[k],1},{1,0}}, Z[2][2];
+                POE2("P", M); POE2("A", L);
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(!o.ok || o.nrows != 2){ falhou = 1; break; }
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    Z[i][j] = atol(o.cell[i][j]);
+                memcpy(M, Z, sizeof M);
+            }
+            if(falhou){ fora++; continue; }
+            long pn = M[0][0], pn1 = M[0][1];
+            long E[24]; int LE;
+            EUC(pn, pn1, E, LE);
+            rev_n++;
+            /* a palavra esperada é a invertida — mas Euclides devolve a forma
+             * CANÓNICA, cujo último termo é ≥ 2. Quando a₀ = 1 a invertida
+             * acaba em 1, e a canónica funde: […, a₁, 1] ≡ […, a₁+1]. Não é
+             * uma excepção: é a ambiguidade que a própria prop:injectividade
+             * do catálogo declara, «a menos de ⟨…,a_n⟩ = ⟨…,a_n−1,1⟩». */
+            long R[8]; int LR = 0;
+            for(int k = 3; k >= 0; k--) R[LR++] = W[k];
+            if(LR > 1 && R[LR-1] == 1){ LR--; R[LR-1] += 1; }
+            int bate = (LE == LR);
+            for(int k = 0; k < LE && bate; k++)
+                if(E[k] != R[k]) bate = 0;
+            if(bate) rev_ok++;
+            else if(rev_n - rev_ok < 3){
+                printf("      palavra (%ld,%ld,%ld,%ld) → p/p' = %ld/%ld → [",
+                       a0,a1,a2,a3,pn,pn1);
+                for(int k = 0; k < LE; k++) printf("%ld%s", E[k], k+1<LE?",":"");
+                printf("] esperado [");
+                for(int k = 0; k < LR; k++) printf("%ld%s", R[k], k+1<LR?",":"");
+                printf("]\n");
+            }
+            if(W[0] == 1) fundidas++;
+        }
+        printf("      thm:rev (consequência) — p_n/p_{n−1} expande na palavra AO"
+               " CONTRÁRIO: %ld/%ld, com Euclides inteiro a não saber de matriz\n",
+               rev_ok, rev_n);
+        printf("        e em %ld delas a₀ = 1, onde a forma canónica FUNDE o último"
+               " par — a ambiguidade que a prop:injectividade já declara\n", fundidas);
+        if(rev_ok != rev_n || rev_n < 40) mal++;
+        if(fundidas == 0){ printf("        → a fusão não foi exercida\n"); mal++; }
+
+        /* ── (3) obs:float — «o algoritmo não pode correr em vírgula
+         * flutuante». O catálogo dá o caso: em double, 8/5 produz [1;1,1,1,1]
+         * em vez da canónica [1;1,1,1,2], porque 1/0,5000000000000002 vale
+         * 1,9999999999999991 e o piso disso é 1. Aqui o double é o OBJECTO
+         * MEDIDO e não a régua: a régua é Euclides em inteiros. */
+        {
+            long W8[24]; int L8;
+            EUC(8, 5, W8, L8);
+            printf("      obs:float — 8/5 em INTEIROS dá [");
+            for(int k = 0; k < L8; k++) printf("%ld%s", W8[k], k+1<L8?",":"");
+            printf("]\n");
+            /* o mesmo laço em double */
+            double x = 8.0/5.0; long Wd[24]; int Ld = 0;
+            while(Ld < 8){
+                double fl = (x >= 0) ? (double)(long)x : (double)(long)x - 1;
+                Wd[Ld++] = (long)fl;
+                double f = x - fl;
+                if(f == 0.0) break;
+                x = 1.0/f;
+            }
+            printf("        e em double dá [");
+            for(int k = 0; k < Ld; k++) printf("%ld%s", Wd[k], k+1<Ld?",":"");
+            printf("]  — o resto do primeiro passo é %.17g\n", 8.0/5.0 - 1.0);
+            int igual = (Ld == L8);
+            for(int k = 0; k < L8 && igual; k++) if(Wd[k] != W8[k]) igual = 0;
+            printf("        as duas palavras coincidem? %s\n", igual ? "SIM" : "NÃO");
+            /* o passo em que o piso cai do lado errado é o QUARTO. O catálogo
+             * nomeia-o com os dígitos 1/0,5000000000000002 = 1,9999999999999991;
+             * aqui saem outros. O último bit depende da ORDEM das operações do
+             * laço e não se reproduz sem reproduzir o laço — o que se reproduz,
+             * e é o que a observação afirma, é o PISO: 1 onde tem de ser 2. */
+            { double r = 8.0/5.0, resto = 0;
+              for(int k = 0; k < 3; k++){ double fl = (double)(long)r;
+                  resto = r - fl; r = 1.0/resto; }
+              printf("        o quarto passo: resto %.17g, inverso %.17g, piso %ld"
+                     " — tem de ser 2\n", resto, r, (long)r);
+              printf("        (o catálogo escreve 1/0,5000000000000002 ="
+                     " 1,9999999999999991; o último bit depende da ordem das"
+                     " operações, o PISO não)\n");
+              if((long)r != 1) mal++; }
+            if(igual) mal++;      /* se coincidissem, a observação era falsa */
+            if(L8 != 4 || W8[0] != 1 || W8[3] != 2) mal++;
+        }
+
+        /* ── (4) E QUANTO É QUE ISSO ACONTECE, que é o que separa «uma
+         * curiosidade» de «não pode correr»: varrem-se os p/q e conta-se em
+         * quantos o double diverge do inteiro. O CONTROLO é que a maioria
+         * COINCIDA — se divergisse em tudo, o defeito seria do meu laço e não
+         * da representação. */
+        {
+            long div = 0, tot = 0;
+            for(long q = 2; q <= 60; q++) for(long p = 1; p <= 60; p++){
+                if(p % q == 0) continue;
+                long Wi[24]; int Li;
+                EUC(p, q, Wi, Li);
+                double x = (double)p/(double)q; long Wd[24]; int Ld = 0;
+                while(Ld < 24){
+                    double fl = (double)(long)x;
+                    if(x < 0 && x != fl) fl -= 1;
+                    Wd[Ld++] = (long)fl;
+                    double f = x - fl;
+                    if(f == 0.0) break;
+                    x = 1.0/f;
+                }
+                tot++;
+                /* compara-se só os PRIMEIROS Li termos: o laço em double nunca
+                 * chega a resto zero e continuaria a cuspir lixo, pelo que
+                 * exigir o mesmo COMPRIMENTO mediria o meu critério de paragem
+                 * e não a representação. O que se pergunta é se os dígitos que
+                 * a palavra verdadeira tem saem certos. */
+                int igual = (Ld >= Li);
+                for(int k = 0; k < Li && igual; k++) if(Wd[k] != Wi[k]) igual = 0;
+                if(!igual) div++;
+            }
+            printf("      e a frequência: o double erra algum dos dígitos da palavra"
+                   " verdadeira em %ld dos %ld racionais p/q com p,q ≤ 60\n", div, tot);
+            printf("        CONTROLO — nos outros %ld acerta-os todos, logo o defeito"
+                   " é da REPRESENTAÇÃO e não do laço\n", tot - div);
+            if(div == 0 || div == tot) mal++;
+        }
+
+        #undef EUC
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("EUCLIDES DESFAZ A PALAVRA SEM SAIR DO ANEL, E O double NÃO CONSEGUE CORRER O MESMO"
+           " ALGORITMO. A §sec:revI do catálogo diz que cada letra tem inversa SOBRE OS"
+           " INTEIROS, M(a)⁻¹ = (0,1;1,−a), porque det M(a) = −1 é unidade em ℤ. Pede-se ao"
+           " motor e sai certa em 9/9 — mas o que importa não é o valor: é NÃO HAVER"
+           " DENOMINADOR, medido célula a célula, porque é isso que põe a letra em GL₂(ℤ) e"
+           " faz o algoritmo desfazer-se sem mudar de anel. DEPOIS FECHA-SE O thm:rev, cuja"
+           " consequência §W96 tinha deixado por medir: ali mediu-se que transpor é reverter,"
+           " e o teorema tira daí que p_n/p_{n−1} EXPANDE na palavra ao contrário. A palavra é"
+           " gerada, o produto das letras é do motor, e a expansão de p_n/p_{n−1} é feita por"
+           " Euclides inteiro — que não sabe de matriz nenhuma: 54/54. E em 18 delas a₀ = 1,"
+           " onde a forma canónica FUNDE o último par, […, a₁, 1] ≡ […, a₁+1]: não é excepção,"
+           " é a ambiguidade que a própria prop:injectividade declara, e ignorá-la fazia o"
+           " número cair para 36/54 — exactamente os dois terços em que a₀ ≠ 1. E A obs:float DEIXA DE"
+           " SER UM AVISO E PASSA A SER UM NÚMERO. O catálogo diz que «o algoritmo não pode"
+           " correr em vírgula flutuante» e dá o caso: 8/5 produz [1;1,1,1,1] em vez da"
+           " canónica [1;1,1,1,2]. Reproduz-se, com o double como OBJECTO MEDIDO e Euclides"
+           " inteiro como régua — nunca ao contrário: em inteiros sai [1,1,1,2] e em double"
+           " [1,1,1,1,…], e o erro entra no QUARTO passo, onde o resto fica ligeiramente acima"
+           " de 0,5, o inverso ligeiramente abaixo de 2, e o piso dá 1. O que NÃO se reproduz"
+           " são os dígitos: o catálogo escreve 1/0,5000000000000002 = 1,9999999999999991 e"
+           " aqui sai 1/0,50000000000000044 = 1,9999999999999982 — o último bit depende da"
+           " ordem das operações do laço, e dizê-lo é o que impede de anunciar uma reprodução"
+           " exacta que não há. O PISO é que se reproduz, e é ele que a observação afirma. E mede-se"
+           " a FREQUÊNCIA, que é o que separa uma curiosidade de um «não pode»: o double erra"
+           " algum dos dígitos da palavra verdadeira em 1301 dos 3339 racionais com p,q ≤ 60."
+           " O que se compara são os PRIMEIROS dígitos e não o comprimento: o laço em double"
+           " nunca chega a resto zero e continuaria a cuspir lixo — em 8/5 sai um sexto termo"
+           " de 562949953421312 —, pelo que exigir o mesmo comprimento mediria o meu critério"
+           " de paragem e não a representação. Na primeira escrita media, e dava 2786 de 3339."
+           " O CONTROLO é que nos outros 2038 acerte todos: se errasse em tudo, o defeito seria"
+           " do meu laço; se não errasse em nenhum, a observação do catálogo era falsa. É a"
+           " razão pela qual esta casa não guarda um float — dita como quantidade.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
