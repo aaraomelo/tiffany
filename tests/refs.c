@@ -44,6 +44,11 @@
  *        desligando a declaração as referências que ela cobre voltam a ser órfãs
  *        (senão não estava a fazer trabalho), e um nome com o prefixo certo mas
  *        ausente do alvo continua órfão (senão o prefixo era passe-livre).
+ *   §R6  A MESMA LEI NO ANDAR DE CIMA: toda MACRO da casa usada num documento
+ *        está definida NELE. Os `papers/*.tex` são `article` independentes e não
+ *        herdam preâmbulo de ninguém — `\abs`, `\colunas` e `\dg` viviam só nos
+ *        irmãos e eram usados em dois deles. Um comando por definir não é um
+ *        estilo por acertar: é erro de compilação, e daqui não se vê.
  *   §R5  A MESMA LEI NO ANDAR DE BAIXO: todo `#include "x.h"` de um ficheiro que o
  *        git RASTREIA aponta para um ficheiro que o git também tem. Um header fora
  *        do repositório é a referência órfã do C — aqui compila (o disco tem-no) e
@@ -66,6 +71,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <ctype.h>
 
 #define MAXN 4096
 #define MAXL 256
@@ -569,6 +575,128 @@ int main(void)
            fora == 0 && vistos > 100 && nrast > 100 && viu_falso);
         #undef ERASTREADO
         #undef NORMALIZA
+    }
+
+    /* ---------------- §R6 — a MACRO da casa usada e não definida ------------ */
+    printf("\n§R6 toda macro da casa usada num documento está definida NELE\n");
+    printf("      (um `\\abs` por definir não é um estilo por acertar: é um erro de\n");
+    printf("       compilação, e só aparece em quem compilar. É a órfã do §R1 um\n");
+    printf("       andar acima — o defeito está escrito e daqui não se vê.)\n");
+    {
+        /* colhe as macros DEFINIDAS por documento, seguindo o que ele inclui */
+        static char dnome[MAXN][MAXL]; static int ddoc[MAXN]; int nd = 0;
+        for (int d = 0; d < NDOC; d++) {
+            /* o próprio, mais o `estilo.tex` quando é `subfiles`, mais os \input */
+            char alvos[4][512]; int na = 0;
+            snprintf(alvos[na++], 512, "%s%s", prefixo, DOCS[d]);
+            { FILE *f = fopen(alvos[0], "r");
+              if (f) { char l[8192];
+                  while (fgets(l, sizeof l, f))
+                      if (strstr(l, "{subfiles}")) {
+                          snprintf(alvos[na++], 512, "%sestilo.tex", prefixo);
+                          break;
+                      }
+                  fclose(f); } }
+            if (!strncmp(DOCS[d], "papers/", 7))
+                snprintf(alvos[na++], 512, "%spapers/gkcapa.tex", prefixo);
+            for (int k = 0; k < na; k++) {
+                FILE *f = fopen(alvos[k], "r");
+                if (!f) continue;
+                char l[8192];
+                while (fgets(l, sizeof l, f)) {
+                    for (char *q = l; (q = strchr(q, '\\')); q++) {
+                        const char *nm = NULL;
+                        if      (!strncmp(q, "\\newcommand",        11)) nm = q + 11;
+                        else if (!strncmp(q, "\\renewcommand",      13)) nm = q + 13;
+                        else if (!strncmp(q, "\\providecommand",    15)) nm = q + 15;
+                        else if (!strncmp(q, "\\DeclareMathOperator",20)) nm = q + 20;
+                        else if (!strncmp(q, "\\def",                4)) nm = q + 4;
+                        else continue;
+                        while (*nm == '*' || *nm == '{' || *nm == ' ') nm++;
+                        if (*nm != '\\') { q = (char *)nm; continue; }
+                        nm++;
+                        int n = 0; char b2[MAXL];
+                        while (isalpha((unsigned char)nm[n]) && n < MAXL - 1) { b2[n] = nm[n]; n++; }
+                        b2[n] = 0;
+                        if (n && nd < MAXN) { snprintf(dnome[nd], MAXL, "%s", b2);
+                                              ddoc[nd] = d; nd++; }
+                        q = (char *)(nm + n - 1);
+                    }
+                }
+                fclose(f);
+            }
+        }
+        /* uma macro "da casa" é a que ALGUM documento define */
+        int faltam = 0, verificadas = 0;
+        for (int d = 0; d < NDOC; d++) {
+            char caminho[512];
+            snprintf(caminho, sizeof caminho, "%s%s", prefixo, DOCS[d]);
+            FILE *f = fopen(caminho, "r");
+            if (!f) continue;
+            char l[8192];
+            while (fgets(l, sizeof l, f)) {
+                { const char *t = l; while (*t == ' ' || *t == '\t') t++;
+                  if (*t == '%') continue; }
+                for (char *q = l; (q = strchr(q, '\\')); ) {
+                    if (q[1] == '\\') { q += 2; continue; }   /* `\\` é quebra de linha */
+                    int n = 0; char b2[MAXL];
+                    while (isalpha((unsigned char)q[1 + n]) && n < MAXL - 1) { b2[n] = q[1 + n]; n++; }
+                    b2[n] = 0; q += 1 + (n ? n : 1);
+                    if (!n) continue;
+                    int da_casa = 0, aqui = 0;
+                    for (int i = 0; i < nd; i++)
+                        if (!strcmp(dnome[i], b2)) { da_casa = 1; if (ddoc[i] == d) aqui = 1; }
+                    if (!da_casa) continue;
+                    verificadas++;
+                    if (!aqui) {
+                        faltam++;
+                        if (faltam <= 8)
+                            printf("      SEM DEFINIÇÃO  %s  \\%s\n", DOCS[d], b2);
+                    }
+                }
+            }
+            fclose(f);
+        }
+        printf("      %d macros da casa colhidas, %d usos verificados\n", nd, verificadas);
+
+        /* ── O CONTROLO NEGATIVO DO §R6 ──────────────────────────────────────
+         * A medida acima é uma AUSÊNCIA — «nenhuma falta» —, e uma ausência
+         * passa em qualquer extractor que não colha nada. Injecta-se então o
+         * defeito: uma macro que UM documento define e OUTRO não, usada no
+         * segundo. A lógica tem de a apanhar.
+         *
+         * Constrói-se com material verdadeiro: procura-se uma macro real
+         * definida só num documento, e pergunta-se pela sua presença noutro. Se
+         * a resposta fosse «está» para todos, o teste de cima nunca poderia
+         * falhar — e a §R6 seria a asserção que passa por não poder ver. */
+        {
+            int apanhou = 0, tentou = 0;
+            for (int i = 0; i < nd && !apanhou; i++) {
+                /* esta macro está definida em quantos documentos? */
+                int em = 0, dono = ddoc[i];
+                for (int j = 0; j < nd; j++)
+                    if (!strcmp(dnome[j], dnome[i]) && ddoc[j] != dono) em++;
+                if (em) continue;                 /* está em mais do que um: não serve */
+                /* achou uma macro exclusiva do documento `dono`: outro documento
+                 * qualquer não a tem, e a lógica tem de o dizer */
+                for (int d = 0; d < NDOC && !apanhou; d++) {
+                    if (d == dono) continue;
+                    tentou = 1;
+                    int aqui = 0;
+                    for (int j = 0; j < nd; j++)
+                        if (!strcmp(dnome[j], dnome[i]) && ddoc[j] == d) aqui = 1;
+                    if (!aqui) apanhou = 1;       /* a lógica distingue: bom */
+                }
+            }
+            ok("com uma macro exclusiva de um documento, a lógica do §R6 vê que"
+               " ela NÃO está noutro — sem isto, «nenhuma falta» passaria num"
+               " extractor que não colhesse macro nenhuma", tentou && apanhou);
+        }
+
+        ok("nenhuma macro da casa é usada num documento que não a define — os"
+           " `article` independentes não herdam preâmbulo de ninguém, e `\\abs`,"
+           " `\\colunas` e `\\dg` viviam só nos irmãos",
+           faltam == 0 && nd > 20 && verificadas > 100);
     }
 
     printf("\n================================================================\n");

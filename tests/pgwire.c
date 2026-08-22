@@ -9805,6 +9805,142 @@ int main(void){
            " λ² − tr·λ + det é o mesmo polinómio.", mal == 0);
     }
 
+
+    /* ═══ §W74: A OUTRA METADE DO PAR — A FONTE QUE OSCILA ═════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W74 a ressonância oscilatória mora na BORDA, e pede a frequência própria.\n\n");
+        { char m[80], p2[80];
+          snprintf(m, sizeof m, "/tmp/pgwire_w74__m.mem");
+          snprintf(p2, sizeof p2, "/tmp/pgwire_w74__m.prog");
+          unlink(m); unlink(p2);
+          unlink("/tmp/pgwire_w74.mem"); unlink("/tmp/pgwire_w74.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w74")) mal++;
+
+        /* ── §W73 MEDIU METADE. A fonte tem quatro tipos no `lib/edo.h` e ali só
+         * se varreu a EXPONENCIAL. A oscilatória tem critério PRÓPRIO — o
+         * determinante do sistema em (P,Q) é (C − w²)² + (Bw)², e ele anula
+         * exactamente quando C = w² e B = 0 —, e medir só um lado deixava a
+         * outra metade a valer por analogia.
+         *
+         * Traduzido para o espectro da companheira (0,1;−C,−B), que tem
+         * traço −B e determinante C:
+         *
+         *     B = 0  e  C = w²   ⟺   traço = 0  e  det = w²
+         *                        ⟹   Δ = −4w² < 0
+         *
+         * — isto é, a ressonância oscilatória só pode acontecer no regime
+         * BORDA, o do esquilo, o que gira e não gasta. E isso é NECESSÁRIO e
+         * NÃO SUFICIENTE: há bordas de sobra onde a fonte não ressoa, porque a
+         * frequência dela não é a própria. A condição inteira é
+         *
+         *     BORDA  E  w² = det,
+         *
+         * e é o segundo membro que faz a palavra «própria» significar algo. */
+        long n = 0, bate = 0, res = 0, borda_sem_res = 0;
+        for(int B = -3; B <= 3; B++)
+        for(int C = -3; C <= 6; C++)
+        for(int w = 1; w <= 3; w++){
+            Fonte f; f.tipo = F_COS; f.k = 1; f.a = 0; f.w = w;
+            char buf[256];
+            int ord = edo_particular(B, 1, C, 1, f, buf, sizeof buf);
+
+            char q2[200];
+            sql_executa("DROP TABLE IF EXISTS m", &o);
+            sql_executa("CREATE TABLE m (p RACIONAL, q RACIONAL)", &o);
+            snprintf(q2, sizeof q2, "INSERT INTO m VALUES (0,1), (%d,%d)", -C, -B);
+            sql_executa(q2, &o);
+            sql_executa("SELECT regime(*) FROM m", &o);
+            int eh_borda = o.ok && !strcmp(o.cell[0][0], "BORDA");
+            sql_executa("SELECT det(*) FROM m", &o);
+            long dt = o.ok ? atol(o.cell[0][0]) : -999;
+            /* o veredicto do MOTOR: borda E a frequência é a própria */
+            int pelo_motor = (eh_borda && dt == (long)w*w) ? 1 : 0;
+
+            n++;
+            if(pelo_motor == ord) bate++;
+            if(ord) res++;
+            if(eh_borda && !ord) borda_sem_res++;
+        }
+        printf("      %ld casos (B,C,w) · os dois caminhos concordam em %ld\n", n, bate);
+        printf("        ressoam ................... %ld\n", res);
+        printf("        BORDA mas NÃO ressoam ..... %ld  ← a borda não chega\n",
+               borda_sem_res);
+        if(bate != n) mal++;
+
+        /* ── E OS DOIS CONTROLOS SÃO ESTES. Sem ressonâncias, a concordância
+         * seria de dois «nãos»; e sem bordas que NÃO ressoam, «BORDA» sozinha
+         * explicaria tudo e a frequência própria não estaria a ser medida. */
+        printf("      as duas colunas têm de estar cheias: %s\n",
+               (res > 0 && borda_sem_res > 0) ? "sim"
+               : "NÃO — a condição não estaria a separar nada");
+        if(!res || !borda_sem_res) mal++;
+
+        /* ── E O CASO NOMEADO NO CATÁLOGO: «y'' + y = cos t dá ½ t sen t,
+         * porque a frequência da fonte é a frequência própria». Aqui B = 0,
+         * C = 1, w = 1: a companheira é (0,1;−1,0) — a MESMA matriz do
+         * oscilador de §W68, o esquilo puro. */
+        { Fonte f; f.tipo = F_COS; f.k = 1; f.a = 0; f.w = 1;
+          char buf[256];
+          int ord = edo_particular(0, 1, 1, 1, f, buf, sizeof buf);
+          sql_executa("DROP TABLE IF EXISTS m", &o);
+          sql_executa("CREATE TABLE m (p RACIONAL, q RACIONAL)", &o);
+          sql_executa("INSERT INTO m VALUES (0,1), (-1,0)", &o);
+          sql_executa("SELECT regime(*) FROM m", &o);
+          int b = o.ok && !strcmp(o.cell[0][0], "BORDA") && !strcmp(o.cell[0][3], "-4");
+          sql_executa("SELECT simetrica(*) FROM m", &o);
+          int puro = o.ok && !strcmp(o.cell[0][0],"0") && !strcmp(o.cell[0][1],"0")
+                     && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"0");
+          printf("      y'' + y = cos t: ordem %d · a particular é «%s»\n", ord, buf);
+          printf("        e a companheira é %s — a MESMA matriz de §W68, e %s\n",
+                 b ? "BORDA com Δ = −4" : "MAU",
+                 puro ? "esquilo PURO" : "MAU");
+          if(ord != 1 || !b || !puro) mal++; }
+
+        /* ── E A MESMA EQUAÇÃO COM OUTRA FREQUÊNCIA NÃO RESSOA — é o controlo
+         * que separa «estar na borda» de «bater a frequência». y'' + y = cos 2t
+         * corre no MESMO sistema, com o MESMO regime, e a particular sai sem
+         * um único t. */
+        { Fonte f; f.tipo = F_COS; f.k = 1; f.a = 0; f.w = 2;
+          char buf[256];
+          int ord = edo_particular(0, 1, 1, 1, f, buf, sizeof buf);
+          printf("      controlo — o MESMO sistema com cos 2t: ordem %d, «%s»\n",
+                 ord, buf);
+          if(ord != 0) mal++; }
+
+        /* ── E O SENO DÁ O PAR, com o cosseno no lugar do seno e o sinal
+         * trocado: a ressonância é do SISTEMA e não da fase da fonte. */
+        { Fonte f; f.tipo = F_SEN; f.k = 1; f.a = 0; f.w = 1;
+          char buf[256];
+          int ord = edo_particular(0, 1, 1, 1, f, buf, sizeof buf);
+          printf("      e com sen t no mesmo sistema: ordem %d, «%s»"
+                 " — a ressonância é do SISTEMA, não da fase\n", ord, buf);
+          if(ord != 1) mal++; }
+        sql_fechar();
+
+        printf("\n");
+        ok("A RESSONÂNCIA OSCILATÓRIA MORA NA BORDA, E PEDE A FREQUÊNCIA PRÓPRIA — E ESTE"
+           " BLOCO EXISTE PORQUE §W73 MEDIU METADE. A fonte tem quatro tipos no `lib/edo.h` e"
+           " ali varreu-se só a EXPONENCIAL; a oscilatória tem critério PRÓPRIO — o"
+           " determinante do sistema em (P,Q) é (C − w²)² + (Bw)², que anula exactamente"
+           " quando C = w² e B = 0 —, e deixá-la por medir era dá-la por analogia. TRADUZIDA"
+           " PARA O ESPECTRO da companheira, a condição é traço = 0 e det = w², donde"
+           " Δ = −4w² < 0: a ressonância oscilatória só pode acontecer no regime BORDA, o do"
+           " esquilo, o que gira e não gasta. E ISSO É NECESSÁRIO E NÃO SUFICIENTE, que é o"
+           " ponto: há bordas de sobra onde a fonte não ressoa, porque a frequência dela não"
+           " é a própria — a condição inteira é BORDA **e** w² = det, e é o segundo membro"
+           " que faz a palavra «própria» significar alguma coisa. Os dois caminhos não se"
+           " apoiam — o `edo.h` calcula o determinante do sistema, o motor lê `regime` e"
+           " `det` — e concordam nos 210 casos. OS CONTROLOS SÃO DOIS E SÃO AS DUAS COLUNAS"
+           " CHEIAS: sem casos que ressoam, a concordância seria de dois «nãos»; sem bordas"
+           " que NÃO ressoam, a palavra «BORDA» explicaria tudo sozinha e a frequência não"
+           " estaria a ser medida. E o caso nomeado fecha-o — y'' + y = cos t dá ½·t·sen(t),"
+           " e a sua companheira é a MESMA matriz do oscilador de §W68, esquilo puro com"
+           " Δ = −4 —, com o controlo na mesma equação a receber cos 2t e a não ressoar. E o"
+           " seno dá o par: a ressonância é do SISTEMA, não da fase da fonte.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

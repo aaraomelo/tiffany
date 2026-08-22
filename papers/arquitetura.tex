@@ -3501,7 +3501,7 @@ $3$ e $7$ são outra frente, e não se afirmam aqui.
 
 \medskip\noindent\textbf{E a recusa é \emph{relativa} --- a metade que faltava.} O
 \code{reais.tex} \code{cor:finito} diz que a \emph{mesma} equação $x^{2}=mx+1$ tem
-raiz em $\FF_{127}$ para cerca de metade dos metais --- exatamente quando $D$ é
+raiz em $\mathbb{F}_{127}$ para cerca de metade dos metais --- exatamente quando $D$ é
 resíduo quadrático ---, e aí a órbita \emph{cai} no ponto fixo e não há corte a
 fazer: «o corte não é um defeito de $\mathbb{Q}$; é o que acontece quando a equação
 do ponto fixo não fecha \textbf{no corpo onde a órbita corre}». O
@@ -3587,6 +3587,46 @@ nada) e a \emph{mesma} equação com $e^{+t}$ tem de dar ordem $0$ --- sem o que
 \colunas{\code{catalogo} (\code{lib/edo.h}: a ressonância)}
         {\code{edo\_particular} contra \code{autovalores}/\code{regime}}
         {\code{tests/pgwire.c} §W73}
+
+\medskip\noindent\textbf{E a outra metade do par: a fonte que oscila.} §W73 varreu
+só a \emph{exponencial}, e a fonte tem quatro tipos --- deixar a oscilatória por
+medir era dá-la por analogia. Ela tem critério próprio: o determinante do sistema
+em $(P,Q)$ é $(C-w^{2})^{2}+(Bw)^{2}$, que anula exatamente quando $C=w^{2}$ e
+$B=0$. Traduzido para o espectro da companheira,
+\[
+B=0 \text{ e } C=w^{2}
+\;\Longleftrightarrow\;
+\operatorname{tr}=0 \text{ e } \det=w^{2}
+\;\Longrightarrow\;
+\Delta=-4w^{2}<0,
+\]
+isto é: a ressonância oscilatória só pode acontecer no regime \textsc{borda} --- o
+do esquilo, o que gira e não gasta.
+
+\medskip\noindent\textbf{E isso é necessário e \emph{não} suficiente}, que é o
+ponto. Há bordas de sobra onde a fonte não ressoa, porque a frequência dela não é a
+própria: dos $210$ casos varridos, $34$ estão na borda e \emph{não} ressoam. A
+condição inteira é
+\[
+\textsc{borda}\quad\textbf{e}\quad w^{2}=\det,
+\]
+e é o segundo membro que faz a palavra «própria» significar alguma coisa. Os dois
+caminhos --- o \code{edo.h} pelo determinante do sistema, o motor por \code{regime}
+e \code{det} --- concordam nos $210$.
+
+\medskip\noindent O caso nomeado fecha-o: $y''+y=\cos t$ dá $\tfrac12\,t\sin t$, e a
+sua companheira é \emph{a mesma matriz} do oscilador de §W68 --- esquilo puro, com
+$\Delta=-4$. Com $\cos 2t$ na mesma equação não há um único $t$; e com $\sin t$ a
+ordem é a mesma, porque a ressonância é do \textbf{sistema} e não da fase da fonte.
+
+\medido{\code{tests/pgwire.c} §W74, com os dois controlos a serem as duas colunas
+cheias: sem casos que ressoam a concordância seria de dois «nãos», e sem bordas que
+\emph{não} ressoam a palavra «borda» explicaria tudo sozinha e a frequência não
+estaria a ser medida.}
+
+\colunas{\code{catalogo} (a frequência própria); \code{aranha thm:duas}}
+        {\code{F\_COS}/\code{F\_SEN} contra \code{regime}+\code{det}}
+        {\code{tests/pgwire.c} §W74}
 
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}

@@ -18,6 +18,19 @@
 \newtheorem{lei}{Lei}
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
+% ── AS MACROS DA CASA QUE ESTE DOCUMENTO USA E NÃO DEFINIA ──────────────────
+% `\abs` e `\colunas` são usadas no corpo do texto e viviam só nos irmãos. Este
+% documento é um `article` independente — não herda preâmbulo de ninguém —, pelo
+% que um comando por definir aqui é um erro de compilação, não um estilo por
+% acertar. É a mesma doença da referência órfã, um andar acima: o defeito está
+% escrito e só aparece em quem compilar.
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova} (Universal): #1\sepcol
+\textbf{realiza} (aqui): #2\sepcol
+\textbf{verifica}: #3\par}\smallskip}
 
 % ── REFERÊNCIAS PARA O `corpo_algebrico` ────────────────────────────────────
 % Este documento cita 19 enunciados do irmão algébrico, e uma \ref que atravessa

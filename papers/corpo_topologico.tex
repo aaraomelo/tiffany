@@ -11,6 +11,11 @@
 \usepackage{booktabs}
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
+% ── AS MACROS DA CASA QUE ESTE DOCUMENTO USA E NÃO DEFINIA ──────────────────
+% `\abs` e `\dg` são usadas no corpo do texto e viviam só nos irmãos; este é um
+% `article` independente e não herda preâmbulo de ninguém.
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\dg}{^{\dagger}}
 \newtheorem{definicao}{Definição}
 \newtheorem{teorema}{Teorema}
 \newtheorem{proposicao}{Proposição}

@@ -21,6 +21,8 @@
 - [Ceder contra a própria medição](feedback-ceder-contra-a-medicao.md) — medi certo, ele discordou, eu penitenciei-me e propaguei o erro a três
 - [Procurar na bateria antes de escrever](feedback-procurar-na-bateria-antes.md) — o que já é medido e eu não sei, escrevo pior.
 - [Destruir antes do inventário](feedback-destruir-antes-do-inventario.md) — substituí um ficheiro enquanto o agente que o inventariava ainda o lia.
+- **[A macro por definir](feedback-a-macro-por-definir.md)** — `\sen` e `\FF` num `article` que não os define: cada paper é um universo
+  fechado, e o erro só aparece em quem compilar. Medido em `refs.c` §R6.
 - **[A cobertura que não acompanhou](feedback-a-cobertura-que-nao-acompanhou.md)** — o `refs.c` vigiava 3 documentos e o repo tinha 12:
   36 órfãs e um `\label` duplicado a desviar 8 citações, nenhum novo. A lei existia e não ALCANÇAVA.
 - **[Decidir onde ainda não se sabe](feedback-decidir-onde-nao-se-sabe.md)** — pus a recusa no leitor da lista, que corre ANTES do GROUP BY:
