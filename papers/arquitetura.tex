@@ -4974,6 +4974,59 @@ polarização, com o \code{\textbackslash medido} na própria observação.}
         {contagem em $\Z/n$ e em $\mathbb{F}_2^{4}$; a polarização como critério}
         {\code{tests/pgwire.c} §W103}
 
+\subsection*{A Máquina de Oitenta Bits: os cinco dígitos da torção, verificados}
+
+\noindent A seção declarava-se «exposição: descreve e não mede», e no entanto tudo o
+que ela afirma é aritmética fechada.
+
+\medskip\noindent\textbf{«A leitura da memória não usa o gato --- ela \emph{é} o
+gato.»} Carregar um slot devolve $(e+o,\,e)$, que é
+$\left(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\right)$ aplicada ao par --- e é
+o \code{produto} do motor que o confirma, $49/49$, sem saber de memória nenhuma.
+
+\medskip\noindent\textbf{A torção tem cinco dígitos escritos, e nenhum se aceita por
+estar escrito:}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+$p=40961$ & primo\\
+$256 \mid p-1=40960$ & quociente $160$\\
+$g=3$ & o \textbf{menor} gerador --- \emph{procurado}, não lido\\
+$w=g^{160}\bmod p$ & $36043$\\
+$\operatorname{ord}(w)$ & $\mathbf{256}$ --- é isso que o faz torção e não um elemento qualquer\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E o aviso da máquina também tem número.} «Há dezasseis mil
+geradores possíveis» é $\varphi(p-1)=16384$, por \textbf{dois} caminhos: a fórmula
+sobre os fatores primos e a contagem exaustiva nos $40959$ candidatos. É por isso
+que o gerador vai escrito --- duas máquinas com geradores diferentes fundem e não
+abrem uma a obra da outra, e nenhum teste local acusa.
+
+\medskip\noindent\textbf{A raiz do meio é raiz \emph{no corpo}}, e o texto avisa que
+«para $n=256$ as duas coincidem em $16$, e o exemplo engana». Verde nos dois lados: a
+raiz de $256$ em $\Z/p$ é $16$, igual à inteira; e $n=2$ não é quadrado perfeito e
+tem raiz $6215$ no corpo, onde as duas se separam. \emph{Medir só o $256$ deixava
+passar a confusão que o próprio texto denuncia.}
+
+\medskip\noindent\textbf{E a régua é a igualdade.}
+$\mathrm{ov}(a,b)=256-2\operatorname{popcount}(a\oplus b)$ é \textbf{par} em
+$65536/65536$ pares, varia de $240$ a $256$, e o máximo só se atinge em $a=b$ --- a
+instrução é igualdade e nunca limiar.
+
+\medskip\noindent\emph{A aritmética modular vive fora da célula do motor}, cujo
+envelope é $-128..127$: o gato vai ao motor, os cinco dígitos correm em inteiros
+longos --- e dizê-lo é o que impede de ler o bloco como se tudo passasse pelo banco.
+
+\medido{\code{tests/pgwire.c} §W104 --- o gato pelo motor; os cinco dígitos um a um,
+com o gerador procurado; $\varphi(p-1)$ por dois caminhos; a raiz nos dois lados do
+aviso; e a paridade do encaixe.}
+
+\colunas{\code{catalogo} «A Máquina de Oitenta Bits»}
+        {\code{produto} pelo motor; exponenciação modular e busca do menor gerador em inteiros longos}
+        {\code{tests/pgwire.c} §W104}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

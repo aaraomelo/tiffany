@@ -14868,6 +14868,176 @@ int main(void){
            " está certa; a razão que ele dá é que não se podia medir.", mal == 0);
     }
 
+    /* ═══ §W104: A MÁQUINA DE OITENTA BITS — OS CINCO DÍGITOS DA TORÇÃO ════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W104 p=40961, g=3, w=36043: a torção com os seus dígitos, verificada.\n\n");
+        unlink("/tmp/pgwire_w104__A.mem"); unlink("/tmp/pgwire_w104__A.prog");
+        unlink("/tmp/pgwire_w104__P.mem"); unlink("/tmp/pgwire_w104__P.prog");
+        unlink("/tmp/pgwire_w104.mem");    unlink("/tmp/pgwire_w104.prog");
+        if(!sql_abrir("/tmp/pgwire_w104")) mal++;
+
+        #define PMOD(b,e,m) ({ long B_=(b)%(m), E_=(e), R_=1; \
+            while(E_){ if(E_&1) R_=R_*B_%(m); B_=B_*B_%(m); E_>>=1; } R_; })
+
+        /* ── (1) «A leitura da memória não usa o gato — ela É o gato.» Carregar
+         * um slot devolve (e+o, e), e isso é C₁(e,o) com a matriz do gato
+         * m=1. Verifica-se pelo motor, que multiplica sem saber de memória. */
+        {
+            long G[2][2] = {{1,1},{1,0}};
+            long bate = 0, tot = 0;
+            for(long e = -3; e <= 3; e++) for(long ov = -3; ov <= 3; ov++){
+                /* o par (e,o) como coluna: põe-se como matriz [e o; 0 0]?
+                 * o motor lê quadradas — usa-se [e, o; o, e−o] só para a 1ª
+                 * coluna importar? Não: multiplica-se G por diag para ler a
+                 * acção nas duas colunas de uma vez. */
+                long V[2][2] = {{e, 0},{ov, 0}};    /* 1ª coluna = (e,o) */
+                char q[220];
+                sql_executa("DROP TABLE IF EXISTS P", &o2);
+                sql_executa("CREATE TABLE P (c1 RACIONAL, c2 RACIONAL)", &o2);
+                for(int i = 0; i < 2; i++){
+                    snprintf(q, sizeof q, "INSERT INTO P VALUES (%ld,%ld)", G[i][0], G[i][1]);
+                    sql_executa(q, &o2);
+                }
+                sql_executa("DROP TABLE IF EXISTS A", &o2);
+                sql_executa("CREATE TABLE A (c1 RACIONAL, c2 RACIONAL)", &o2);
+                for(int i = 0; i < 2; i++){
+                    snprintf(q, sizeof q, "INSERT INTO A VALUES (%ld,%ld)", V[i][0], V[i][1]);
+                    sql_executa(q, &o2);
+                }
+                sql_executa("SELECT produto(A) FROM P", &o);   /* P·A = G·V */
+                if(!o.ok || o.nrows != 2) continue;
+                tot++;
+                if(atol(o.cell[0][0]) == e + ov && atol(o.cell[1][0]) == e) bate++;
+            }
+            printf("      «a leitura da memória É o gato» — C₁(e,o) = (e+o, e) pela"
+                   " matriz (1,1;1,0) do motor: %ld/%ld pares\n", bate, tot);
+            if(bate != tot || tot < 40) mal++;
+        }
+
+        /* ── (2) A TORÇÃO COM OS SEUS CINCO DÍGITOS. O catálogo escreve
+         * n=256, p=40961, g=3, w=36043 — e diz que g é o MENOR gerador. Cada
+         * um verifica-se, e nenhum se aceita por estar escrito. */
+        {
+            const long n = 256, p = 40961;
+            /* p é primo? */
+            int primo = (p > 1);
+            for(long d = 2; d*d <= p && primo; d++) if(p % d == 0) primo = 0;
+            /* n divide p−1? */
+            long pm1 = p - 1;
+            int divide = (pm1 % n == 0);
+            /* os factores primos de p−1, para o critério de gerador */
+            long fs[8]; int nf = 0, t = pm1;
+            for(long d = 2; d*d <= t; d++) if(t % d == 0){ fs[nf++] = d; while(t % d == 0) t /= d; }
+            if(t > 1) fs[nf++] = t;
+            /* o MENOR gerador */
+            long g = 0;
+            for(long c = 2; c < p && !g; c++){
+                int ger = 1;
+                for(int i = 0; i < nf && ger; i++)
+                    if(PMOD(c, pm1/fs[i], p) == 1) ger = 0;
+                if(ger) g = c;
+            }
+            long w = PMOD(g, pm1/n, p);
+            /* a ordem de w é EXACTAMENTE n */
+            long ordw = 0;
+            { long acc = 1;
+              for(long k = 1; k <= n; k++){ acc = acc*w % p; if(acc == 1){ ordw = k; break; } } }
+            printf("      p = %ld é primo: %s · %ld divide p−1 = %ld: %s (quociente %ld)\n",
+                   p, primo?"sim":"NÃO", n, pm1, divide?"sim":"NÃO", pm1/n);
+            printf("      o MENOR gerador de (ℤ/p)* é g = %ld · w = g^{(p−1)/n} = %ld"
+                   " · ord(w) = %ld\n", g, w, ordw);
+            if(!primo || !divide || g != 3 || w != 36043 || ordw != n) mal++;
+
+            /* «há dezasseis mil geradores possíveis» — φ(p−1), contado */
+            long phi = pm1;
+            for(int i = 0; i < nf; i++) phi = phi / fs[i] * (fs[i] - 1);
+            long conta = 0;
+            for(long c = 2; c < p; c++){
+                int ger = 1;
+                for(int i = 0; i < nf && ger; i++)
+                    if(PMOD(c, pm1/fs[i], p) == 1) ger = 0;
+                if(ger) conta++;
+            }
+            printf("      «há dezasseis mil geradores possíveis»: φ(p−1) = %ld, e a"
+                   " contagem por força bruta dá %ld — dois caminhos\n", phi, conta);
+            if(phi != conta || phi != 16384) mal++;
+
+            /* ── (3) A RAIZ DO MEIO É RAIZ NO CORPO, NÃO RAIZ INTEIRA. O texto
+             * avisa: «para n=256 as duas coincidem em 16, e o exemplo engana;
+             * noutro n elas separam-se». Verifica-se o aviso, que é a parte
+             * que interessa — sem ele, 16 passaria por raiz inteira. */
+            long r256 = 0;
+            for(long r = 0; r < p && !r256; r++) if(r*r % p == n) r256 = r;
+            printf("      a raiz de n=256 em ℤ/p é %ld, e a raiz INTEIRA de 256 é 16:"
+                   " %s\n", r256, (r256 == 16) ? "coincidem — e é o exemplo que engana"
+                                               : "diferem");
+            if(r256 != 16) mal++;
+            /* e noutro n elas separam-se: procura-se um n que seja resíduo
+             * quadrático em ℤ/p mas NÃO quadrado perfeito */
+            long achou_n = 0, achou_r = 0;
+            for(long m = 2; m < 200 && !achou_n; m++){
+                long q = 0; while(q*q < m) q++;
+                if(q*q == m) continue;              /* quadrado perfeito: salta */
+                for(long r = 0; r < p; r++) if(r*r % p == m){ achou_n = m; achou_r = r; break; }
+            }
+            printf("      e noutro n separam-se: n = %ld não é quadrado perfeito, e"
+                   " no corpo tem raiz %ld (%ld² mod p = %ld)\n",
+                   achou_n, achou_r, achou_r, achou_r*achou_r % p);
+            if(!achou_n || achou_r*achou_r % p != achou_n) mal++;
+        }
+
+        /* ── (4) A RÉGUA É A IGUALDADE: ov(a,b) = 256 − 2·popcount(a⊕b) anda
+         * de DOIS em dois, e é inteiro. A forma já entrega a paridade. */
+        {
+            long impar = 0, tot = 0, minv = 999, maxv = -999;
+            for(long a = 0; a < 256; a++) for(long b = 0; b < 256; b++){
+                long ov = 256 - 2*__builtin_popcountl((unsigned long)(a ^ b));
+                tot++;
+                if(ov % 2) impar++;
+                if(ov < minv) minv = ov;
+                if(ov > maxv) maxv = ov;
+            }
+            printf("      ov(a,b) = 256 − 2·popcount(a⊕b): %ld ímpares em %ld"
+                   " (anda de dois em dois) · varia de %ld a %ld\n",
+                   impar, tot, minv, maxv);
+            printf("        e o máximo %ld só se atinge em a = b, que é a igualdade"
+                   " e não um limiar\n", maxv);
+            if(impar != 0) mal++;
+            if(maxv != 256 || minv != 256 - 2*8) mal++;
+        }
+
+        #undef PMOD
+        sql_fechar();
+
+        printf("\n");
+        ok("A MÁQUINA DE OITENTA BITS DEIXA DE SER EXPOSIÇÃO, E OS SEUS CINCO DÍGITOS"
+           " VERIFICAM-SE UM A UM. A secção declarava-se «exposição: descreve e não mede», e"
+           " no entanto tudo o que ela afirma é aritmética fechada. «A leitura da memória não"
+           " usa o gato — ela É o gato»: carregar um slot devolve (e+o, e), que é a matriz"
+           " (1,1;1,0) aplicada ao par, e é o `produto` do motor que o confirma em 49/49"
+           " pares, sem saber de memória nenhuma. A TORÇÃO tem cinco dígitos escritos e"
+           " nenhum se aceita por estar escrito: p = 40961 é primo, 256 divide p−1 = 40960"
+           " com quociente 160, o MENOR gerador de (ℤ/p)* é de facto g = 3 — procurado, não"
+           " lido —, w = g^160 mod p dá 36043, e a ordem de w é EXACTAMENTE 256, que é o que"
+           " faz dele a torção e não um elemento qualquer. E o aviso que a máquina acrescenta"
+           " também tem número: «há dezasseis mil geradores possíveis» é φ(p−1) = 16384,"
+           " confirmado por DOIS caminhos — a fórmula sobre os factores primos e a contagem"
+           " por força bruta nos 40959 candidatos. É por isso que o gerador vai escrito: duas"
+           " máquinas com geradores diferentes fundem e não abrem uma a obra da outra, e"
+           " nenhum teste local acusa. A RAIZ DO MEIO É RAIZ NO CORPO E NÃO RAIZ INTEIRA, e o"
+           " texto avisa que «para n=256 as duas coincidem em 16, e o exemplo engana»: verde"
+           " nos dois lados — a raiz de 256 em ℤ/p é 16, igual à inteira, e existe n não"
+           " quadrado perfeito com raiz no corpo, onde as duas se separam. Medir só o 256"
+           " deixava passar a confusão que o próprio texto denuncia. E A RÉGUA É A IGUALDADE:"
+           " ov = 256 − 2·popcount é sempre PAR, em 65536 de 65536 pares, varia de 240 a 256,"
+           " e o máximo só se atinge em a = b — a instrução é igualdade e nunca limiar."
+           " A aritmética modular vive FORA da célula do motor, cujo envelope é −128..127:"
+           " o gato vai ao motor, os cinco dígitos correm em inteiros longos, e dizê-lo é o"
+           " que impede de ler o bloco como se tudo passasse pelo banco.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
