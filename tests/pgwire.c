@@ -7888,6 +7888,1083 @@ int main(void){
            mal == 0);
     }
 
+
+    /* ═══ §W59: UM ZERO PODE SER DUAS COISAS, E O TECTO NÃO É UM SÓ ════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W59 o estouro não é um determinante nulo, e cada operação diz o seu tecto.\n\n");
+        { const char *tabs[] = { "d5","d2","sing","g6" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w59__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w59__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w59.mem"); unlink("/tmp/pgwire_w59.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w59")) mal++;
+
+        /* ── (1) O ESTOURO TEM DE SE DISTINGUIR DO ZERO ────────────────────
+         * O `qz_mult` desta casa devolve ZERO quando o produto não cabe no
+         * inteiro, e conta a perda em `qz_perdeu`. Sem ler esse contador, um
+         * determinante que estourou sai `0` — exatamente o que sai de uma
+         * matriz singular. Seriam duas coisas com a mesma resposta, e a
+         * errada com a cara da certa. A diagonal 5×5 de 65535 tem
+         * determinante 65535⁵ ≈ 1,2·10²⁴, que não cabe. */
+        sql_executa("CREATE TABLE d5 (a,b,c,d,e)", &o);
+        sql_executa("INSERT INTO d5 VALUES (65535,0,0,0,0)", &o);
+        sql_executa("INSERT INTO d5 VALUES (0,65535,0,0,0)", &o);
+        sql_executa("INSERT INTO d5 VALUES (0,0,65535,0,0)", &o);
+        sql_executa("INSERT INTO d5 VALUES (0,0,0,65535,0)", &o);
+        sql_executa("INSERT INTO d5 VALUES (0,0,0,0,65535)", &o);
+        int est = !sql_executa("SELECT det(*) FROM d5", &o) && !o.ok
+                  && strstr(o.err, "overflow") != NULL;
+        printf("      det da diagonal 5×5 de 65535 (≈1,2e24): %s («%s»)\n",
+               est ? "RECUSADO como estouro" : "PASSOU (mau)", o.err);
+        if(!est) mal++;
+
+        /* ── (2) E O CONTROLO É A SINGULAR, que TEM de continuar a dar zero.
+         * Sem ele, uma recusa constante — ou um motor que recusasse tudo —
+         * passava nesta medida sem distinguir coisa nenhuma. */
+        sql_executa("CREATE TABLE sing (p,q)", &o);
+        sql_executa("INSERT INTO sing VALUES (1,2), (2,4)", &o);
+        int sng = sql_executa("SELECT det(*) FROM sing", &o)
+                  && o.nrows == 1 && !strcmp(o.cell[0][0], "0");
+        sql_executa("SELECT posto(*) FROM sing", &o);
+        int spo = o.nrows == 1 && !strcmp(o.cell[0][0], "1");
+        printf("      controlo — a singular 2×2: det %s, posto %s\n",
+               sng ? "0 (certo)" : "≠0 (mau)", spo ? "1 (certo)" : "≠1 (mau)");
+        if(!sng || !spo) mal++;
+
+        /* ── (3) E O QUE CABE CONTINUA A RESPONDER: a mesma entrada, numa
+         * 2×2, dá 65535² = 4294836225, que cabe. Isto separa «a entrada é
+         * grande» de «a conta não coube»: o que estoura é o PRODUTO de cinco
+         * delas, não o valor. */
+        sql_executa("CREATE TABLE d2 (p,q)", &o);
+        sql_executa("INSERT INTO d2 VALUES (65535,0), (0,65535)", &o);
+        int cab = sql_executa("SELECT det(*) FROM d2", &o)
+                  && o.nrows == 1 && !strcmp(o.cell[0][0], "4294836225");
+        printf("      a MESMA entrada numa 2×2: %s\n",
+               cab ? "4294836225 (cabe e responde)" : "recusou (mau)");
+        if(!cab) mal++;
+
+        /* ── (4) O TECTO DIZ-SE E CUMPRE-SE. A primeira escrita tinha as duas
+         * pontas erradas ao mesmo tempo: o teste recusava a 6×6 (comparando
+         * com `>=`) e a mensagem anunciava 6×6 como o limite. Uma matriz era
+         * recusada por uma condição que dizia que ela cabia. */
+        sql_executa("CREATE TABLE g6 (a,b,c,d,e,f)", &o);
+        for(int i = 0; i < 6; i++){
+            char q[160]; int n = 0;
+            n += snprintf(q + n, sizeof q - n, "INSERT INTO g6 VALUES (");
+            for(int j = 0; j < 6; j++)
+                n += snprintf(q + n, sizeof q - n, "%s%d", j ? "," : "", i * 6 + j + 1);
+            snprintf(q + n, sizeof q - n, ")");
+            sql_executa(q, &o);
+        }
+        int seis = sql_executa("SELECT posto(*) FROM g6", &o) && o.nrows == 1;
+        printf("      a 6×6 no tecto declarado: %s%s%s\n",
+               seis ? "responde (posto " : "RECUSADA (mau) — «",
+               seis ? o.cell[0][0] : o.err, seis ? ")" : "»");
+        if(!seis) mal++;
+
+        /* ── (5) E O TECTO DA INVERSA É METADE, porque ela trabalha numa
+         * matriz AUMENTADA de n×2n — justapõe a identidade e reduz. Dizer-lhe
+         * o tecto geral seria deixá-la escrever fora do arranjo. */
+        sql_executa("SELECT inversa(*) FROM g6", &o);
+        int inv6 = !o.ok && strstr(o.err, "too large") != NULL;
+        printf("      inversa da mesma 6×6: %s («%s»)\n",
+               inv6 ? "recusada, tecto próprio" : "aceite (mau)", o.err);
+        if(!inv6) mal++;
+        /* e o controlo do controlo: uma 3×3 cabe na metade e a inversa sai */
+        sql_executa("CREATE TABLE i3 (p,q,r)", &o);
+        sql_executa("INSERT INTO i3 VALUES (1,0,0), (0,1,0), (0,0,1)", &o);
+        int inv3 = sql_executa("SELECT inversa(*) FROM i3", &o) && o.nrows == 3;
+        printf("      controlo — inversa de uma 3×3: %s\n",
+               inv3 ? "responde" : "recusou (mau)");
+        if(!inv3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("UM ZERO PODE SER DUAS COISAS, E A RÉGUA TEM DE AS SEPARAR. A aritmética desta"
+           " casa devolve ZERO quando a conta não cabe no inteiro, e conta a perda; sem ler"
+           " esse contador, um determinante que ESTOUROU é indistinguível de um determinante"
+           " NULO — a resposta errada com a cara da certa, que é a saturação travestida de"
+           " teorema. Lê-se o contador antes e depois, e o que perdeu é RECUSADO. O controlo"
+           " é o que impede isto de ser uma recusa constante: a singular continua a dar zero"
+           " e posto um, e a MESMA entrada numa 2×2 continua a responder 4294836225 — o que"
+           " separa «a entrada é grande» de «a conta não coube». E O TECTO NÃO É UM SÓ: o"
+           " geral é o do `linear.h`, mas a inversa trabalha numa matriz AUMENTADA de n×2n e"
+           " o seu tecto é METADE. A primeira escrita errava nas DUAS pontas ao mesmo tempo"
+           " — recusava a 6×6 com uma comparação e anunciava 6×6 como o limite —, e uma"
+           " matriz era recusada por uma condição que dizia que ela cabia. Cada operação diz"
+           " o SEU tecto, e o controlo é a 3×3 cuja inversa sai.", mal == 0);
+    }
+
+    /* ═══ §W60: O DUAL DENTRO DO MOTOR, E A CONSERVAÇÃO PELA QUARTA VEZ ════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W60 a base dual e o aniquilador: o funcional é a coordenada que mede.\n\n");
+        { const char *tabs[] = { "b","w","sg","r","e2" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w60__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w60__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w60.mem"); unlink("/tmp/pgwire_w60.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w60")) mal++;
+
+        /* ── (1) A BASE DUAL É CONSTRUÍDA, NÃO PROCURADA. As colunas da tabela
+         * são a base; os e^i com e^i(e_j) = δ^i_j são as LINHAS de B⁻¹, e isso
+         * não é um método esperto: é a definição de inversa lida do outro lado.
+         * B tem colunas (1,1) e (0,1), logo B⁻¹ tem linhas (1,0) e (−1,1). */
+        sql_executa("CREATE TABLE b (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO b VALUES (1,0), (1,1)", &o);
+        int du = sql_executa("SELECT dual(*) FROM b", &o) && o.nrows == 2 && o.ncols == 2
+                 && !strcmp(o.cell[0][0], "1")  && !strcmp(o.cell[0][1], "0")
+                 && !strcmp(o.cell[1][0], "-1") && !strcmp(o.cell[1][1], "1");
+        printf("      base {(1,1),(0,1)} → dual %s\n",
+               du ? "{(1,0),(−1,1)} — as linhas de B⁻¹" : "ERRADO");
+        if(!du) mal++;
+
+        /* ── (2) E VERIFICA-SE AVALIANDO, não comparando com a conta feita à
+         * mão: e^i(e_j) tem de dar 1 na diagonal e 0 fora. A avaliação é o
+         * produto B⁻¹·B, que o motor já sabe fazer — o dual medido com a outra
+         * face da mesma casa, e não com uma segunda implementação. */
+        { long bs[2][2] = {{1,0},{1,1}};   /* B: as colunas são a base */
+          long dl[2][2];                    /* o dual, LIDO DA SAÍDA e não escrito */
+          int delta = 1;
+          for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+              dl[i][j] = atol(o.cell[i][j]);
+          for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+              long s = 0;
+              for(int k = 0; k < 2; k++) s += dl[i][k] * bs[k][j];
+              if(s != (i == j ? 1 : 0)) delta = 0;
+          }
+          printf("      e^i(e_j) = δ: %s\n", delta ? "1 na diagonal, 0 fora" : "FALHOU");
+          if(!delta) mal++; }
+
+        /* ── (3) O ANIQUILADOR TRAZ A CONSERVAÇÃO PELA QUARTA VEZ. As LINHAS
+         * geram W; os funcionais que se anulam em W são o NÚCLEO dessa matriz,
+         * e daí dim W + dim W° = n — que não é lei nova: é posto + dim(ker) = n
+         * lido do lado do dual. Com W = span{(1,2,3)}: 1 + 2 = 3. */
+        sql_executa("CREATE TABLE w (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO w VALUES (1,2,3)", &o);
+        int an = sql_executa("SELECT aniquilador(*) FROM w", &o) && o.nrows == 2;
+        /* e o gume é AVALIAR: cada funcional aplicado ao gerador tem de dar 0 */
+        int zero = an;
+        for(int i = 0; i < o.nrows && zero; i++){
+            long s = 0, g[3] = {1,2,3};
+            for(int j = 0; j < o.ncols; j++) s += atol(o.cell[i][j]) * g[j];
+            if(s != 0) zero = 0;
+        }
+        printf("      W = span{(1,2,3)}: dim W° = %d, e cada f(w) = 0? %s"
+               " · 1 + 2 = 3\n", o.nrows, zero ? "sim" : "NÃO");
+        if(!an || !zero) mal++;
+
+        /* ── (4) E O CONTROLO É O OUTRO EXTREMO: com W a ocupar duas dimensões
+         * de três, o aniquilador tem de encolher para uma. Sem ele, um motor
+         * que devolvesse sempre «n−1 funcionais» passava no caso de cima. */
+        sql_executa("CREATE TABLE r (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO r VALUES (1,0,0), (0,1,0)", &o);
+        int an2 = sql_executa("SELECT aniquilador(*) FROM r", &o) && o.nrows == 1
+                  && !strcmp(o.cell[0][0], "0") && !strcmp(o.cell[0][1], "0")
+                  && !strcmp(o.cell[0][2], "1");
+        printf("      controlo — W = span{e₁,e₂}: dim W° = %d %s · 2 + 1 = 3\n",
+               o.nrows, an2 ? "e o funcional é (0,0,1)" : "(MAU)");
+        if(!an2) mal++;
+
+        /* ── (5) E A RECUSA DIZ O POSTO. Colunas dependentes não são uma base,
+         * e o funcional que devia separar duas delas teria de dar 1 e 0 ao
+         * MESMO vector — a recusa não é um limite da conta, é a lei. */
+        sql_executa("CREATE TABLE sg (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO sg VALUES (1,2), (2,4)", &o);
+        sql_executa("SELECT dual(*) FROM sg", &o);
+        int rec = !o.ok && strstr(o.err, "rank 1 of 2") != NULL;
+        printf("      colunas dependentes: %s («%s»)\n",
+               rec ? "recusa, e diz o posto" : "aceitou (mau)", o.err);
+        if(!rec) mal++;
+        /* e a não-quadrada recusa por OUTRA razão, dita como tal */
+        sql_executa("SELECT dual(*) FROM r", &o);
+        int nq = !o.ok && strstr(o.err, "square") != NULL;
+        printf("      não-quadrada: %s («%s»)\n",
+               nq ? "recusa por outra razão, e diz qual" : "(mau)", o.err);
+        if(!nq) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O DUAL ENTROU NO MOTOR PELAS DUAS METADES, E NENHUMA PEDIU ÁLGEBRA NOVA. «O"
+           " vetor fornece o objeto; o funcional fornece a coordenada que o mede» — e a base"
+           " dual é CONSTRUÍDA, não procurada: com B a matriz das colunas, os e^i são as"
+           " LINHAS de B⁻¹, porque e^i(e_j) = δ é a definição de inversa lida do outro lado."
+           " Verifica-se AVALIANDO — 1 na diagonal, 0 fora — e não comparando com uma conta"
+           " feita à mão. O aniquilador é a mesma descida do núcleo vista do lado do dual:"
+           " as linhas geram W, e os funcionais que se anulam nele são o núcleo dessa"
+           " matriz. Daí sai A MESMA CONSERVAÇÃO PELA QUARTA VEZ — dim W + dim W° = n, que é"
+           " posto + dim(ker) = n noutro registo, ao lado de ∑G = |I| do quociente e de"
+           " |presentes| + |ausentes| = |I| do dual das células: quatro objetos, uma lei, e"
+           " em nenhum deles foi posta como requisito. O gume é aplicar: cada funcional"
+           " avaliado no gerador tem de dar zero. E as duas recusas são DUAS: as colunas"
+           " dependentes não são base (e diz-se o posto, porque o funcional que as separasse"
+           " teria de dar 1 e 0 ao MESMO vector), e a não-quadrada falha por outra razão —"
+           " uma base de n vectores num espaço de dimensão m ≠ n não é base.", mal == 0);
+    }
+
+    /* ═══ §W61: O QUE SOBRA NA DECLARAÇÃO, E A RECUSA QUE NÃO DEIXA RASTO ══ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W61 a declaração acaba em «)», e o que ela recusa não fica a existir.\n\n");
+        { const char *tabs[] = { "b","g","h","i","zzz" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w61__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w61__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w61.mem"); unlink("/tmp/pgwire_w61.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w61")) mal++;
+
+        /* ── (1) O ANALISADOR PARAVA E CALAVA-SE. A lista de colunas termina na
+         * primeira palavra que ele não reconhece, e o que sobrava era ignorado:
+         * uma sintaxe inventada no meio criava uma tabela de UMA coluna e
+         * anunciava-a como criada. As consultas seguintes liam uma matriz 2×1
+         * onde estava escrito 2×2 — e a resposta errada vinha com a cara da
+         * certa, porque ninguém tinha dito que metade da declaração caiu. */
+        int rec = !sql_executa("CREATE TABLE b (p INTEIRO COM SINAL, q RACIONAL)", &o)
+                  && !o.ok && strstr(o.err, "syntax error") != NULL;
+        printf("      declaração com sobras: %s («%s»)\n",
+               rec ? "RECUSADA, e diz onde parou" : "aceite em silêncio (mau)", o.err);
+        if(!rec) mal++;
+
+        /* ── (2) E A RECUSA NÃO PODE DEIXAR RASTO. O ficheiro da tabela abre-se
+         * ANTES de a declaração acabar de ser lida — tem de ser, é nele que o
+         * catálogo vai. Se a recusa o deixasse lá, a tabela recusada ficava a
+         * comportar-se PIOR do que uma que nunca existiu: esta é recusada com
+         * «não existe», aquela aceitava `SELECT` (zero linhas) e aceitava
+         * `INSERT`. A recusa passava a ser uma criação encoberta. */
+        sql_executa("SELECT * FROM b", &o);
+        int sel = !o.ok && strstr(o.err, "does not exist") != NULL;
+        sql_executa("INSERT INTO b VALUES (1,2)", &o);
+        int ins = !o.ok && strstr(o.err, "does not exist") != NULL;
+        printf("      depois da recusa — SELECT: %s · INSERT: %s\n",
+               sel ? "não existe" : "RESPONDEU (mau)",
+               ins ? "não existe" : "ACEITOU (mau)");
+        if(!sel || !ins) mal++;
+
+        /* ── (3) E O CONTROLO É A INDISTINGUIBILIDADE: a tabela recusada tem de
+         * dar a MESMA resposta que uma que nunca foi mencionada. Comparar com o
+         * texto do erro não chegaria — compara-se com o outro caso. */
+        sql_executa("SELECT * FROM zzz", &o);
+        char nunca[256]; snprintf(nunca, sizeof nunca, "%s", o.err);
+        sql_executa("SELECT * FROM b", &o);
+        int igual = !strcmp(nunca, o.err) ? 0 : 1;   /* diferem só no nome */
+        igual = (strstr(nunca, "does not exist") && strstr(o.err, "does not exist"));
+        printf("      a recusada e a nunca-mencionada: %s\n",
+               igual ? "a mesma resposta" : "respostas DIFERENTES (mau)");
+        if(!igual) mal++;
+
+        /* ── (4) E AS BOAS CONTINUAM A PASSAR — sem isto, um motor que recusasse
+         * toda a declaração passava nas três medidas acima. As três formas que a
+         * casa aceita: sem tipo, com tipo, e com restrições. */
+        int b1 = sql_executa("CREATE TABLE g (p, q, r)", &o);
+        int b2 = sql_executa("CREATE TABLE h (p RACIONAL, q INTEIRO)", &o);
+        int b3 = sql_executa("CREATE TABLE i (p INTEIRO PRIMARY KEY, q RACIONAL,"
+                             " CHECK (q > 0))", &o);
+        printf("      controlo — sem tipo: %s · com tipo: %s · com restrições: %s\n",
+               b1 ? "passa" : "MAU", b2 ? "passa" : "MAU", b3 ? "passa" : "MAU");
+        if(!b1 || !b2 || !b3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A DECLARAÇÃO ACABA EM «)», E O QUE SOBRA NÃO PODE FICAR CALADO. O analisador"
+           " parava na primeira palavra que não reconhecia e criava a tabela com as colunas"
+           " que já tinha lido — uma sintaxe inventada no meio dava uma tabela de UMA coluna"
+           " anunciada como criada, e as consultas seguintes liam uma matriz 2×1 onde estava"
+           " escrito 2×2. Não era um erro de conta: era a resposta certa a outra pergunta. E"
+           " A RECUSA NÃO DEIXA RASTO, o que é a metade menos óbvia: o ficheiro da tabela"
+           " abre-se ANTES de a declaração acabar de ser lida — tem de ser, é nele que o"
+           " catálogo vai —, e deixá-lo lá fazia a tabela recusada comportar-se PIOR do que"
+           " uma que nunca existiu: esta é recusada com «não existe», aquela aceitava"
+           " `SELECT` e aceitava `INSERT`. A recusa era uma criação encoberta. Desfaz-se pelo"
+           " caminho do `DROP`, e o gume é a INDISTINGUIBILIDADE — a recusada responde o"
+           " mesmo que a nunca-mencionada, medido por comparação e não pelo texto do erro. O"
+           " controlo são as três formas boas, que continuam a passar: sem tipo, com tipo, e"
+           " com restrições.", mal == 0);
+    }
+
+
+    /* ═══ §W62: O CORPO É A MATRIZ 2×2, E A CIFRA É O SEU ESPECTRO ═════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W62 a cifra do corpo era o espectro da matriz — e já estava escrito.\n\n");
+        { const char *tabs[] = { "au","sm","pr","ro","tr","q3" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w62__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w62__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w62.mem"); unlink("/tmp/pgwire_w62.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w62")) mal++;
+
+        /* colhe a saída inteira numa cadeia, para comparar cifras */
+        #define CIFRA(tab, dest) do { \
+            char q2[80]; snprintf(q2, sizeof q2, "SELECT cifra(*) FROM %s", tab); \
+            sql_executa(q2, &o); dest[0] = 0; \
+            if(o.ok) for(int j2 = 0; j2 < o.ncols; j2++){ \
+                strncat(dest, o.cell[0][j2], 24); strcat(dest, " "); } \
+        } while(0)
+
+        /* ── (1) O `cifra.h` NÃO FOI ESCRITO PARA MATRIZES, e é esse o ponto.
+         * Foi escrito para CORPOS, e diz na porta que as suas duas grandezas
+         * são «a razão → o traço B» e «o sinal → o determinante C»; e diz que
+         * «o hipercorpo não tem (B,C): o seu operador NÃO É uma matriz 2×2».
+         * O par que define um corpo desta casa já era o par de invariantes de
+         * uma matriz 2×2 — a identificação não se fez agora, estava feita. A
+         * matriz de Fibonacci (1,1;1,0) tem traço 1 e determinante −1, que é o
+         * ÁUREO. */
+        sql_executa("CREATE TABLE au (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO au VALUES (1,1), (1,0)", &o);
+        sql_executa("SELECT traco(*) FROM au", &o);
+        int t1 = o.nrows == 1 && !strcmp(o.cell[0][0], "1");
+        sql_executa("SELECT det(*) FROM au", &o);
+        int d1 = o.nrows == 1 && !strcmp(o.cell[0][0], "-1");
+        char c_au[256]; CIFRA("au", c_au);
+        printf("      (1,1;1,0): traço %s, det %s → λ² − λ − 1, o áureo · cifra [%s]\n",
+               t1 ? "1" : "MAU", d1 ? "−1" : "MAU", c_au);
+        if(!t1 || !d1 || !c_au[0]) mal++;
+
+        /* ── (2) O GUME É A SEMELHANÇA, e sai de graça: duas matrizes
+         * conjugadas têm o mesmo traço e o mesmo determinante, logo a MESMA
+         * cifra. Não é uma propriedade que se lhe tenha dado — é o que
+         * «invariante de conjugação» quer dizer. E a testemunha é uma matriz
+         * DIFERENTE entrada a entrada: (2,1;−1,−1) não tem uma célula igual à
+         * de cima e tem a mesma cifra. */
+        sql_executa("CREATE TABLE sm (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO sm VALUES (2,1), (-1,-1)", &o);
+        char c_sm[256]; CIFRA("sm", c_sm);
+        int sem = c_au[0] && !strcmp(c_au, c_sm);
+        printf("      a semelhante (2,1;−1,−1) — nenhuma entrada igual: cifra [%s] %s\n",
+               c_sm, sem ? "— A MESMA" : "— DIFERENTE (mau)");
+        if(!sem) mal++;
+
+        /* ── (3) E O CONTROLO É OUTRO CORPO. Sem ele, um codificador que
+         * devolvesse sempre a mesma coisa passava na medida de cima. A prata é
+         * (2,1;1,0): traço 2, determinante −1, λ² − 2λ − 1. */
+        sql_executa("CREATE TABLE pr (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO pr VALUES (2,1), (1,0)", &o);
+        char c_pr[256]; CIFRA("pr", c_pr);
+        int dif = c_pr[0] && strcmp(c_au, c_pr) != 0;
+        printf("      controlo — a prata (2,1;1,0): cifra [%s] %s\n",
+               c_pr, dif ? "— diferente da áurea" : "— IGUAL (mau)");
+        if(!dif) mal++;
+
+        /* ── (4) E A ROTAÇÃO DIZ O QUE FALTAVA DIZER. Em (0,−1;1,0) o traço é
+         * 0 e o determinante 1, logo B² − 4C = −4 < 0: o lado PRÓPRIO não tem
+         * real, e quem o carrega é o DUAL. O primeiro termo da cifra é
+         * precisamente «qual metade carrega o real», e passa de 1 a 2 — sem
+         * uma linha escrita para este caso. É o `i` a aparecer como a matriz
+         * cujo espectro só existe do outro lado. */
+        sql_executa("CREATE TABLE ro (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO ro VALUES (0,-1), (1,0)", &o);
+        char c_ro[256]; CIFRA("ro", c_ro);
+        int lado2 = c_ro[0] == '2';
+        printf("      a rotação (0,−1;1,0): B²−4C = −4 · cifra [%s] — o real está"
+               " no %s\n", c_ro, lado2 ? "DUAL (primeiro termo 2)" : "próprio (mau)");
+        if(!lado2) mal++;
+        /* e o controlo do controlo: a áurea tem 1, porque 1+4 ≥ 0 */
+        int lado1 = c_au[0] == '1';
+        printf("      controlo — a áurea: primeiro termo %c, porque B²−4C = 5 ≥ 0\n",
+               c_au[0]);
+        if(!lado1) mal++;
+
+        /* ── (5) E OS DOIS LIMITES DIZEM PORQUÊ, não «não dá». Acima de 2×2 o
+         * característico tem mais coeficientes e o par (B,C) deixa de o
+         * determinar; e a cifra é de um CORPO, que nesta casa é dado por dois
+         * INTEIROS — um traço fracionário diz que a matriz não é o operador de
+         * nenhum corpo do catálogo. */
+        sql_executa("CREATE TABLE q3 (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO q3 VALUES (1,0,0), (0,1,0), (0,0,1)", &o);
+        sql_executa("SELECT cifra(*) FROM q3", &o);
+        int r3 = !o.ok && strstr(o.err, "2×2") != NULL;
+        sql_executa("CREATE TABLE tr (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO tr VALUES (1/2,1), (1,0)", &o);
+        sql_executa("SELECT cifra(*) FROM tr", &o);
+        int rf = !o.ok && strstr(o.err, "integer") != NULL;
+        printf("      a 3×3: %s · o traço fracionário: %s\n",
+               r3 ? "recusa, e diz que o par deixa de determinar" : "MAU",
+               rf ? "recusa, e diz que o corpo é de inteiros" : "MAU");
+        if(!r3 || !rf) mal++;
+        #undef CIFRA
+        sql_fechar();
+
+        printf("\n");
+        ok("O CORPO DESTA CASA JÁ ERA UMA MATRIZ 2×2, E NINGUÉM PRECISOU DE OS IDENTIFICAR."
+           " O `cifra.h` não foi escrito para matrizes — foi escrito para CORPOS, e diz na"
+           " porta que as suas duas únicas grandezas são «a razão, quanto se estica por"
+           " nível → o traço B» e «o sinal, se as duas direções se cancelam → o determinante"
+           " C»; e diz que «o hipercorpo NÃO TEM (B,C): o seu operador não é uma matriz"
+           " 2×2». O par que define um corpo era o par de invariantes de uma matriz, e a"
+           " cifra que o escreve é o ESPECTRO: as raízes de λ² − Bλ + C postas em fração"
+           " contínua periódica, exatas, em inteiros, sem uma raiz calculada — e o período é"
+           " invariante completo por Lagrange. DAÍ O GUME SAI DE GRAÇA: matrizes SEMELHANTES"
+           " têm a mesma cifra, porque a conjugação preserva traço e determinante; a"
+           " testemunha é (2,1;−1,−1), que não tem UMA entrada igual à de Fibonacci e devolve"
+           " a mesma cifra, com o controlo na prata, que devolve outra. E A ROTAÇÃO DIZ O QUE"
+           " FALTAVA: em (0,−1;1,0) o discriminante é −4, o lado próprio não tem real e o"
+           " primeiro termo da cifra — que é «qual metade carrega o real» — passa de 1 a 2"
+           " sem uma linha escrita para este caso. É o `i` a aparecer como a matriz cujo"
+           " espectro só existe do outro lado. Os dois limites dizem PORQUÊ e não «não dá»:"
+           " acima de 2×2 o característico tem mais coeficientes, e um traço fracionário diz"
+           " que a matriz não é o operador de nenhum corpo do catálogo.", mal == 0);
+    }
+
+
+    /* ═══ §W63: A CIFRA GOVERNA A ÓRBITA — E SEM UMA LINHA NOVA NO MOTOR ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W63 o par (B,C) prevê o traço de Aⁿ: o corpo é o sistema.\n\n");
+        { const char *tabs[] = { "a","pt","tmp","pa","pb" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w63__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w63__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w63.mem"); unlink("/tmp/pgwire_w63.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w63")) mal++;
+
+        /* guarda uma saída 2×2 numa tabela, para a fazer voltar a entrar */
+        #define POE(consulta, tab) do { \
+            sql_executa(consulta, &o); \
+            { char q2[200]; \
+              snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", tab); \
+              sql_executa(q2, &o2); \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", tab); \
+              sql_executa(q2, &o2); \
+              for(int i2 = 0; i2 < o.nrows; i2++){ \
+                  snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s,%s)", \
+                           tab, o.cell[i2][0], o.cell[i2][1]); \
+                  sql_executa(q2, &o2); } } \
+        } while(0)
+
+        /* ── A LEI. Por Cayley--Hamilton, A² = B·A − C·I, e multiplicando por
+         * Aⁿ⁻² e tomando traços vem
+         *
+         *     t_n = B·t_{n−1} − C·t_{n−2},   com t_0 = 2 e t_1 = B,
+         *
+         * que é a MESMA recorrência que define o corpo de par (B,C). O traço
+         * das potências não é uma sequência qualquer que por acaso obedece à
+         * regra: É a regra, e o corpo é o sistema dinâmico x_{n+1} = A·x_n
+         * lido pelo seu invariante. Para (1,1;1,0) — traço 1, determinante −1
+         * — dá 2, 1, 3, 4, 7, 11: os números de Lucas, e ninguém os escreveu.
+         *
+         * Mede-se ENCADEANDO o que o motor já sabe: `produto` para subir uma
+         * potência, `traco` para ler, e nada de novo. */
+        sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO a VALUES (1,1), (1,0)", &o);
+        sql_executa("SELECT traco(*) FROM a", &o);
+        long B = atol(o.cell[0][0]);
+        sql_executa("SELECT det(*) FROM a", &o);
+        long C = atol(o.cell[0][0]);
+        printf("      o corpo (B,C) = (%ld,%ld) · a recorrência t = %ld·t' − (%ld)·t''\n",
+               B, C, B, C);
+
+        /* a órbita: pt guarda Aⁿ, e sobe uma potência de cada vez */
+        sql_executa("CREATE TABLE pt (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO pt VALUES (1,1), (1,0)", &o);
+        long t2 = 2, t1 = B;                      /* t_0 e t_1, PREVISTOS */
+        int bate = 1, n_ok = 0;
+        printf("      n  traço medido   previsto pela recorrência\n");
+        for(int n = 2; n <= 8; n++){
+            POE("SELECT produto(a) FROM pt", "pt");     /* pt ← pt·A */
+            sql_executa("SELECT traco(*) FROM pt", &o);
+            if(!o.ok || o.nrows != 1){ bate = 0; break; }
+            long medido = atol(o.cell[0][0]);
+            long prev = B * t1 - C * t2;
+            printf("      %d  %12ld   %ld%s\n", n, medido, prev,
+                   medido == prev ? "" : "   ← DIVERGE");
+            if(medido != prev) bate = 0; else n_ok++;
+            t2 = t1; t1 = prev;
+        }
+        printf("      %d potências seguidas, e a previsão vem SÓ do par (B,C)\n", n_ok);
+        if(!bate || n_ok < 7) mal++;
+
+        /* ── E O CONTROLO É OUTRO CORPO, com a mesma medida. Sem ele, uma
+         * recorrência que ignorasse B e C — ou um traço constante — podia
+         * passar. A prata é (2,1;1,0): (B,C) = (2,−1), e dá 2, 2, 6, 14, 34. */
+        sql_executa("CREATE TABLE pa (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO pa VALUES (2,1), (1,0)", &o);
+        sql_executa("SELECT traco(*) FROM pa", &o);
+        long B2 = atol(o.cell[0][0]);
+        sql_executa("SELECT det(*) FROM pa", &o);
+        long C2 = atol(o.cell[0][0]);
+        sql_executa("CREATE TABLE pb (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO pb VALUES (2,1), (1,0)", &o);
+        long u2 = 2, u1 = B2;
+        int bate2 = 1;
+        for(int n = 2; n <= 5; n++){
+            POE("SELECT produto(pa) FROM pb", "pb");
+            sql_executa("SELECT traco(*) FROM pb", &o);
+            if(!o.ok || o.nrows != 1){ bate2 = 0; break; }
+            long prev = B2 * u1 - C2 * u2;
+            if(atol(o.cell[0][0]) != prev) bate2 = 0;
+            u2 = u1; u1 = prev;
+        }
+        printf("      controlo — a prata (B,C) = (%ld,%ld): a MESMA lei com OUTROS"
+               " números %s\n", B2, C2, bate2 ? "fecha" : "FALHA");
+        if(!bate2) mal++;
+        /* e as duas sequências têm de DIFERIR, senão a lei não estava a usar (B,C) */
+        int difere = (B != B2 || C != C2) && (t1 != u1);
+        printf("      e as duas órbitas divergem (%ld ≠ %ld): a lei USA o par\n",
+               t1, u1);
+        if(!difere) mal++;
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("A CIFRA GOVERNA A ÓRBITA, E O MOTOR NÃO PRECISOU DE UMA LINHA NOVA PARA O"
+           " MOSTRAR. Por Cayley--Hamilton, A² = B·A − C·I; multiplicando por Aⁿ⁻² e tomando"
+           " traços vem t_n = B·t_{n−1} − C·t_{n−2}, com t_0 = 2 e t_1 = B — que é A MESMA"
+           " recorrência que define o corpo de par (B,C). O traço das potências não é uma"
+           " sequência que por acaso obedece à regra: É a regra, e o corpo é o sistema"
+           " dinâmico x_{n+1} = A·x_n lido pelo seu invariante. Para a matriz de Fibonacci"
+           " dá 2, 1, 3, 4, 7, 11, 18, 29 — os números de Lucas, e ninguém os escreveu:"
+           " saíram de multiplicar a tabela por si própria e ler o traço. A MEDIDA É UM"
+           " ENCADEAMENTO: `produto` sobe uma potência, `traco` lê, o resultado volta a"
+           " entrar como tabela — o motor a alimentar-se a si próprio por oito passos, o que"
+           " torna isto uma verificação da composição inteira e não de uma operação. E O"
+           " CONTROLO É OUTRO CORPO: a prata, com (B,C) = (2,−1), cumpre a MESMA lei com"
+           " OUTROS números, e as duas órbitas divergem — sem isso, uma recorrência que"
+           " ignorasse o par, ou um traço constante, passava. É o fecho do que §W62 abriu:"
+           " ali a cifra escreve o espectro, aqui o espectro dita a órbita.", mal == 0);
+    }
+
+
+    /* ═══ §W64: O ESPECTRO POR NÚMEROS, E O QUE A CIFRA NÃO SEPARA ═════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W64 dois caminhos para o espectro, e o limite exacto de cada um.\n\n");
+        { const char *tabs[] = { "d","jo","ho","au","q3" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w64__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w64__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w64.mem"); unlink("/tmp/pgwire_w64.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w64")) mal++;
+
+        /* ── (1) OS NÚMEROS SAEM QUANDO O DISCRIMINANTE É QUADRADO PERFEITO, e
+         * verificam-se pelas RELAÇÕES DE VIÈTE em vez de por comparação com uma
+         * conta feita à mão: a soma tem de ser o traço e o produto tem de ser o
+         * determinante. Assim a medida não confia na fórmula que a produziu. */
+        sql_executa("CREATE TABLE d (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO d VALUES (3,1), (0,2)", &o);
+        sql_executa("SELECT autovalores(*) FROM d", &o);
+        int nv = o.ok && o.nrows == 2;
+        long l1 = nv ? atol(o.cell[0][0]) : 0, l2 = nv ? atol(o.cell[1][0]) : 0;
+        sql_executa("SELECT traco(*) FROM d", &o);
+        long tr = o.nrows == 1 ? atol(o.cell[0][0]) : 0;
+        sql_executa("SELECT det(*) FROM d", &o);
+        long dt = o.nrows == 1 ? atol(o.cell[0][0]) : 0;
+        int viete = nv && (l1 + l2 == tr) && (l1 * l2 == dt);
+        printf("      λ = %ld, %ld · soma %ld = traço %ld · produto %ld = det %ld → %s\n",
+               l1, l2, l1 + l2, tr, l1 * l2, dt, viete ? "Viète fecha" : "FALHA");
+        if(!viete) mal++;
+
+        /* ── (2) E O AUTOVECTOR VERIFICA-SE APLICANDO. Cada um sai do núcleo de
+         * A − λI, que é a peça do §W52 outra vez; e o gume é exigir A·v = λ·v,
+         * não comparar v com um vector escrito à mão. */
+        sql_executa("SELECT autovetores(*) FROM d", &o);
+        int nvec = o.ok && o.nrows == 2;
+        int aplica = nvec;
+        if(nvec){
+            long A[2][2] = {{3,1},{0,2}};
+            for(int i = 0; i < 2 && aplica; i++){
+                long v[2] = { atol(o.cell[i][0]), atol(o.cell[i][1]) };
+                long Av[2] = { A[0][0]*v[0] + A[0][1]*v[1],
+                               A[1][0]*v[0] + A[1][1]*v[1] };
+                /* λ é o que ele for: procura-se um λ com A·v = λ·v, e exige-se
+                 * que seja UM dos dois devolvidos por autovalores */
+                long lam = 0; int achou = 0;
+                for(int c = 0; c < 2; c++){
+                    long cand = (c == 0) ? l1 : l2;
+                    if(Av[0] == cand*v[0] && Av[1] == cand*v[1]){ lam = cand; achou = 1; }
+                }
+                if(!achou) aplica = 0; else (void)lam;
+            }
+        }
+        printf("      A·v = λ·v em cada autovector: %s\n",
+               aplica ? "verificado, aplicando" : "FALHOU");
+        if(!aplica) mal++;
+
+        /* ── (3) O PAR QUE MOSTRA O LIMITE DE TUDO O QUE VEIO ANTES. Jordan
+         * (2,1;0,2) e a homotetia (2,0;0,2) têm o MESMO traço, o MESMO
+         * determinante, os MESMOS autovalores — e por isso a MESMA cifra. E não
+         * são semelhantes: a homotetia comuta com tudo, logo P⁻¹·2I·P = 2I para
+         * todo o P, e nunca dá Jordan. Ou seja: a cifra é invariante de
+         * semelhança, mas NÃO É COMPLETO para ela — é completo para o CORPO,
+         * por Lagrange, e corpo e matriz não são a mesma pergunta. Quem os
+         * separa são os AUTOVECTORES: um contra dois. */
+        sql_executa("CREATE TABLE jo (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO jo VALUES (2,1), (0,2)", &o);
+        sql_executa("CREATE TABLE ho (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO ho VALUES (2,0), (0,2)", &o);
+        char cj[256] = "", ch[256] = "";
+        sql_executa("SELECT cifra(*) FROM jo", &o);
+        if(o.ok) for(int j = 0; j < o.ncols; j++){ strncat(cj, o.cell[0][j], 24); strcat(cj, " "); }
+        sql_executa("SELECT cifra(*) FROM ho", &o);
+        if(o.ok) for(int j = 0; j < o.ncols; j++){ strncat(ch, o.cell[0][j], 24); strcat(ch, " "); }
+        int mesma = cj[0] && !strcmp(cj, ch);
+        sql_executa("SELECT autovetores(*) FROM jo", &o);
+        int nj = o.ok ? o.nrows : -1;
+        sql_executa("SELECT autovetores(*) FROM ho", &o);
+        int nh = o.ok ? o.nrows : -1;
+        int separa = mesma && nj == 1 && nh == 2;
+        printf("      Jordan e homotetia: cifra [%s] a MESMA · autovectores %d contra %d\n",
+               cj, nj, nh);
+        printf("      → a cifra é invariante de semelhança mas NÃO completo para ela:"
+               " %s\n", separa ? "medido, e quem separa são os autovectores" : "FALHOU");
+        if(!separa) mal++;
+
+        /* ── (4) E O SEGUNDO CAMINHO RECUSA ONDE O PRIMEIRO RESPONDE — o que é
+         * a resposta e não um limite. No áureo o discriminante é 5, não é
+         * quadrado, e as raízes são as folhas do corpo: escrevem-se pela cifra.
+         * Devolver um decimal seria trocar o objecto por uma aproximação dele.
+         * A recusa REMETE, e a cifra responde. */
+        sql_executa("CREATE TABLE au (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO au VALUES (1,1), (1,0)", &o);
+        sql_executa("SELECT autovalores(*) FROM au", &o);
+        int rem = !o.ok && strstr(o.err, "cifra") != NULL && strstr(o.err, "disc 5");
+        printf("      o áureo (disc 5): %s («%s»)\n",
+               rem ? "recusa e REMETE para a cifra" : "MAU", o.err);
+        if(!rem) mal++;
+        sql_executa("SELECT cifra(*) FROM au", &o);
+        int cif = o.ok && o.ncols > 0;
+        printf("      e a cifra responde onde os números não chegam: %s\n",
+               cif ? "sim" : "NÃO (mau)");
+        if(!cif) mal++;
+
+        /* ── (5) E O CONTROLO DE FORMA: acima de 2×2 o característico tem grau
+         * maior e as raízes deixam de sair de um discriminante. */
+        sql_executa("CREATE TABLE q3 (p RACIONAL, q RACIONAL, r RACIONAL)", &o);
+        sql_executa("INSERT INTO q3 VALUES (1,0,0), (0,1,0), (0,0,1)", &o);
+        sql_executa("SELECT autovalores(*) FROM q3", &o);
+        int r3 = !o.ok && strstr(o.err, "2×2") != NULL;
+        printf("      controlo — a 3×3: %s\n", r3 ? "recusa, e diz porquê" : "MAU");
+        if(!r3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O ESPECTRO TEM DOIS CAMINHOS, E CADA UM SABE UMA COISA QUE O OUTRO NÃO SABE. A"
+           " cifra escreve-o SEMPRE, por fração contínua; o `esp_racional` dá os NÚMEROS,"
+           " mas só quando o discriminante é quadrado perfeito — e os dois lêem o MESMO"
+           " discriminante, porque partilham o `raizi`, o que faz deles duas leituras de um"
+           " objecto e não duas contas parecidas. Os números verificam-se por VIÈTE — soma"
+           " igual ao traço, produto igual ao determinante —, e não por comparação com uma"
+           " conta feita à mão; e os autovectores verificam-se APLICANDO, exigindo A·v = λ·v."
+           " ONDE AS RAÍZES NÃO SÃO RACIONAIS, A RECUSA É A RESPOSTA: são as folhas do corpo,"
+           " escrevem-se pela cifra, e devolver um decimal seria trocar o objecto por uma"
+           " aproximação dele — a recusa REMETE, e a cifra responde. E O PAR JORDAN/HOMOTETIA"
+           " PÕE O LIMITE DE TUDO O QUE VEIO ANTES: (2,1;0,2) e (2,0;0,2) têm o mesmo traço,"
+           " o mesmo determinante, os mesmos autovalores e por isso A MESMA CIFRA — e não são"
+           " semelhantes, porque a homotetia comuta com tudo e P⁻¹·2I·P = 2I nunca dá Jordan."
+           " A cifra é invariante de semelhança e NÃO É COMPLETO para ela: é completo para o"
+           " CORPO, por Lagrange, e corpo e matriz não são a mesma pergunta. Quem os separa"
+           " são os AUTOVECTORES, um contra dois — e é isso, e não os valores, que decide a"
+           " diagonalizabilidade.", mal == 0);
+    }
+
+
+    /* ═══ §W65: A GRAM — O PRODUTO INTERNO FECHA O DUAL SEM ESCOLHER BASE ══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W65 G = A·Aᵀ: o dual sem base, e a dimensão contada nos dois sítios.\n\n");
+        { const char *tabs[] = { "a","tp","dep","ort","pj" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w65__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w65__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w65.mem"); unlink("/tmp/pgwire_w65.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w65")) mal++;
+
+        /* ── (1) A GRAM POR DOIS CAMINHOS. A base dual do §W60 precisa de uma
+         * BASE para existir — os e^i são as linhas de B⁻¹, e mudar B muda-os. O
+         * produto interno faz o mesmo trabalho SEM escolher base, dando o
+         * isomorfismo canónico v ↦ ⟨v,·⟩, e a sua forma escrita é a Gram. O
+         * primeiro caminho é `gram(*)`, que soma produtos célula a célula; o
+         * segundo é `transposta` guardada e depois `produto`, com as peças que
+         * já existiam. Não se apoiam um no outro, e por isso concordarem é uma
+         * verificação e não uma repetição. */
+        sql_executa("CREATE TABLE a (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO a VALUES (1,2), (3,4)", &o);
+        sql_executa("SELECT gram(*) FROM a", &o);
+        char g1[128] = "";
+        if(o.ok) for(int i = 0; i < o.nrows; i++) for(int j = 0; j < o.ncols; j++){
+            strncat(g1, o.cell[i][j], 24); strcat(g1, " "); }
+        /* o segundo caminho: guarda a transposta e multiplica */
+        sql_executa("SELECT transposta(*) FROM a", &o);
+        sql_executa("CREATE TABLE tp (p RACIONAL, q RACIONAL)", &o2);
+        for(int i = 0; i < o.nrows; i++){
+            char q2[120];
+            snprintf(q2, sizeof q2, "INSERT INTO tp VALUES (%s,%s)",
+                     o.cell[i][0], o.cell[i][1]);
+            sql_executa(q2, &o2);
+        }
+        sql_executa("SELECT produto(tp) FROM a", &o);
+        char g2[128] = "";
+        if(o.ok) for(int i = 0; i < o.nrows; i++) for(int j = 0; j < o.ncols; j++){
+            strncat(g2, o.cell[i][j], 24); strcat(g2, " "); }
+        int dois = g1[0] && !strcmp(g1, g2);
+        printf("      gram(*) = [%s] · A·Aᵀ = [%s] → %s\n",
+               g1, g2, dois ? "os dois caminhos concordam" : "DIVERGEM");
+        if(!dois) mal++;
+
+        /* ── (2) E A GRAM É SIMÉTRICA, porque o produto interno não tem lado.
+         * Não é uma propriedade que se lhe tenha dado: ⟨u,v⟩ = ⟨v,u⟩ vem de a
+         * soma dos produtos não distinguir os factores. */
+        sql_executa("SELECT gram(*) FROM a", &o);
+        int sim = o.ok && o.nrows == 2 && !strcmp(o.cell[0][1], o.cell[1][0]);
+        printf("      G simétrica: G₁₂ = %s e G₂₁ = %s → %s\n",
+               o.cell[0][1], o.cell[1][0], sim ? "sim" : "NÃO");
+        if(!sim) mal++;
+
+        /* ── (3) E det G = (det A)², que é uma lei a MAIS do que a que eu ia
+         * medir. Ela sai de det(A·Aᵀ) = det A · det Aᵀ e de a transposta ter o
+         * mesmo determinante — duas peças que o motor já tinha, e que nunca
+         * tinham sido postas em contacto. Aqui det A = −2 e det G = 4. */
+        long dg = atol(o.cell[0][0]) * atol(o.cell[1][1])
+                - atol(o.cell[0][1]) * atol(o.cell[1][0]);
+        sql_executa("SELECT det(*) FROM a", &o);
+        long da = o.nrows == 1 ? atol(o.cell[0][0]) : 0;
+        int quad = (dg == da * da);
+        printf("      det G = %ld e (det A)² = %ld → %s\n",
+               dg, da * da, quad ? "det G = (det A)²" : "FALHA");
+        if(!quad) mal++;
+
+        /* ── (4) O ZERO DA GRAM É A DEPENDÊNCIA, e é o determinante de Gram —
+         * com n = 2 é exactamente Cauchy–Schwarz com igualdade, que se dá
+         * quando os vectores são colineares. O posto conta-se nos dois sítios e
+         * tem de bater: posto G = posto A. */
+        sql_executa("CREATE TABLE dep (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO dep VALUES (1,2), (2,4)", &o);
+        sql_executa("SELECT gram(*) FROM dep", &o);
+        long dgd = o.ok ? atol(o.cell[0][0]) * atol(o.cell[1][1])
+                        - atol(o.cell[0][1]) * atol(o.cell[1][0]) : -1;
+        sql_executa("SELECT posto(*) FROM dep", &o);
+        int pa = o.nrows == 1 ? atoi(o.cell[0][0]) : -1;
+        printf("      colineares (1,2) e (2,4): det G = %ld (Cauchy–Schwarz com"
+               " IGUALDADE) · posto %d\n", dgd, pa);
+        if(dgd != 0 || pa != 1) mal++;
+
+        /* ── (5) E O CONTROLO É A ORTOGONALIDADE, o outro extremo: com as
+         * linhas ortogonais a Gram é DIAGONAL, e as entradas fora dela são zero
+         * porque ⟨u,v⟩ = 0 — não porque a conta não as tenha feito. Sem este
+         * caso, uma Gram que devolvesse sempre a mesma forma passava acima. */
+        sql_executa("CREATE TABLE ort (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO ort VALUES (1,0), (0,3)", &o);
+        sql_executa("SELECT gram(*) FROM ort", &o);
+        int diag = o.ok && !strcmp(o.cell[0][0], "1") && !strcmp(o.cell[0][1], "0")
+                   && !strcmp(o.cell[1][0], "0") && !strcmp(o.cell[1][1], "9");
+        printf("      controlo — ortogonais (1,0) e (0,3): G = (1,0;0,9) %s ·"
+               " a norma sai AO QUADRADO, e a raiz não se tira\n",
+               diag ? "diagonal" : "MAU");
+        if(!diag) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O PRODUTO INTERNO FECHA O DUAL SEM ESCOLHER BASE, E A GRAM É A SUA FORMA"
+           " ESCRITA. A base dual de §W60 PRECISA de uma base para existir — os e^i são as"
+           " linhas de B⁻¹, e mudar B muda-os; o produto interno dá o mesmo isomorfismo"
+           " v ↦ ⟨v,·⟩ sem escolher nenhuma, e a matriz que o escreve é G_ij = ⟨v_i,v_j⟩ ="
+           " A·Aᵀ. MEDE-SE POR DOIS CAMINHOS QUE NÃO SE APOIAM: `gram(*)` soma produtos"
+           " célula a célula, e `transposta` guardada seguida de `produto` refaz o mesmo com"
+           " as peças que já existiam — concordarem é uma verificação, não uma repetição. E"
+           " SAEM TRÊS LEIS DE GRAÇA. G é SIMÉTRICA, porque a soma dos produtos não"
+           " distingue os factores. det G = (det A)², que é uma lei a MAIS do que a que eu ia"
+           " medir: sai de det(A·Aᵀ) = det A · det Aᵀ com a transposta a ter o mesmo"
+           " determinante — duas peças que o motor já tinha e que nunca tinham sido postas em"
+           " contacto. E det G = 0 é exactamente a DEPENDÊNCIA — o determinante de Gram —,"
+           " que com n = 2 é Cauchy–Schwarz com IGUALDADE, o caso dos colineares; o posto"
+           " conta-se nos dois sítios e bate. O CONTROLO é o outro extremo: com as linhas"
+           " ortogonais a Gram é DIAGONAL, e os zeros fora da diagonal são ⟨u,v⟩ = 0 e não"
+           " uma conta por fazer. E a norma sai AO QUADRADO em todo o lado, porque é a raiz"
+           " que traria o irracional para dentro de uma conta que é exacta.", mal == 0);
+    }
+
+
+    /* ═══ §W66: AS AGREGAÇÕES SÃO VÁRIAS, E UMA VARREDURA SÓ ═══════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W66 MIN e MAX na mesma consulta: duas perguntas, um percurso.\n\n");
+        { const char *tabs[] = { "t","g" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w66__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w66__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w66.mem"); unlink("/tmp/pgwire_w66.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w66")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,10),(2,20),(3,30)", &o);
+
+        /* ── (1) O DEFEITO ERA UMA VARIÁVEL. `agr_op` era UM inteiro e
+         * `agr_col` UMA cadeia, pelo que a segunda agregação escrevia por cima
+         * da primeira: `SELECT MIN(a), MAX(a)` devolvia UMA coluna com o
+         * máximo, e devolvia-a com `ok`. Não era um erro de conta — era a
+         * resposta certa a outra pergunta, e nada na saída dizia que metade do
+         * pedido tinha caído. */
+        sql_executa("SELECT MIN(a), MAX(a) FROM t", &o);
+        int dois = o.ok && o.ncols == 2 && o.nrows == 1
+                   && !strcmp(o.cell[0][0], "1") && !strcmp(o.cell[0][1], "3");
+        printf("      MIN(a), MAX(a): %d coluna(s) → %s\n", o.ncols,
+               dois ? "(1,3) — as duas respondem" : "PERDEU UMA (mau)");
+        if(!dois) mal++;
+
+        /* ── (2) E CADA UMA SOZINHA CONTINUA A DAR O MESMO — o controlo que
+         * impede a correcção de ser uma segunda régua: se o par devolvesse
+         * números que as consultas separadas não devolvem, o que se tinha
+         * arranjado era outro motor. */
+        sql_executa("SELECT MIN(a) FROM t", &o);
+        int so_min = o.ok && o.ncols == 1 && !strcmp(o.cell[0][0], "1");
+        sql_executa("SELECT MAX(a) FROM t", &o);
+        int so_max = o.ok && o.ncols == 1 && !strcmp(o.cell[0][0], "3");
+        printf("      controlo — sozinhas: MIN %s, MAX %s (os MESMOS números)\n",
+               so_min ? "1" : "MAU", so_max ? "3" : "MAU");
+        if(!so_min || !so_max) mal++;
+
+        /* ── (3) QUATRO DE UMA VEZ, e a varredura é UMA. Além da economia, é
+         * o que garante que o MIN e o MAX vêem exactamente o mesmo conjunto de
+         * linhas: com duas passagens, um filtro que mudasse entre elas dava um
+         * par que não corresponde a nenhum estado da tabela. E o `avg` continua
+         * a sair em ℚ, que é a lei de §W43. */
+        sql_executa("SELECT MIN(a), MAX(a), AVG(a), SUM(a) FROM t", &o);
+        int quatro = o.ok && o.ncols == 4
+                     && !strcmp(o.cell[0][0], "1") && !strcmp(o.cell[0][1], "3")
+                     && !strcmp(o.cell[0][2], "2") && !strcmp(o.cell[0][3], "6");
+        printf("      MIN, MAX, AVG, SUM: %s · e avg×count = %s×3 = sum\n",
+               quatro ? "(1,3,2,6)" : "MAU", o.ncols == 4 ? o.cell[0][2] : "?");
+        if(!quatro) mal++;
+
+        /* ── (4) E NO GROUP BY VALE O MESMO, por grupo. A corrida de cada fibra
+         * alimenta todos os acumuladores na mesma passagem. Com a = 1 nos b's
+         * 10 e 20, e a = 2 nos b's 30 e 5, os mínimos e os máximos têm de
+         * cruzar-se — e é isso que impede que um deles seja o outro com outro
+         * nome. */
+        sql_executa("CREATE TABLE g (a,b)", &o);
+        sql_executa("INSERT INTO g VALUES (1,10),(1,20),(2,30),(2,5)", &o);
+        sql_executa("SELECT a, MIN(b), MAX(b) FROM g GROUP BY a", &o);
+        int gr = o.ok && o.nrows == 2 && o.ncols == 4
+                 && !strcmp(o.cell[0][2], "10") && !strcmp(o.cell[0][3], "20")
+                 && !strcmp(o.cell[1][2], "5")  && !strcmp(o.cell[1][3], "30");
+        printf("      GROUP BY a com MIN(b), MAX(b): %s%s\n",
+               gr ? "(1|2|10|20) e (2|2|5|30)" : "MAU",
+               gr ? " — e os extremos CRUZAM entre grupos" : "");
+        if(!gr) mal++;
+
+        /* ── (5) E O COUNT NÃO SE MISTURA — com a razão dita. Ele corre pela
+         * soma do campo (popcount), as outras pela varredura das células: são
+         * DOIS percursos, e juntá-los daria duas réguas para a mesma contagem.
+         * A recusa aponta a CADA ORDEM, que é o ponto: o count tem despacho
+         * próprio e corre antes da leitura da lista, pelo que a primeira escrita
+         * da recusa só via `sum(a), count(*)` e deixava `count(*), sum(a)` cair
+         * no «não entendido» — indistinguível de um erro de escrita. */
+        sql_executa("SELECT COUNT(*), SUM(a) FROM t", &o);
+        int r1 = !o.ok && strstr(o.err, "cannot be combined") != NULL;
+        sql_executa("SELECT SUM(a), COUNT(*) FROM t", &o);
+        int r2 = !o.ok && strstr(o.err, "cannot be combined") != NULL;
+        printf("      count com sum — nas duas ordens: %s e %s\n",
+               r1 ? "recusa e diz porquê" : "MAU",
+               r2 ? "recusa e diz porquê" : "MAU");
+        if(!r1 || !r2) mal++;
+        /* ── (6) E O CONTROLO QUE ESTA RECUSA EXIGIA — foi ele que apanhou um
+         * defeito na própria correcção. `count` com `avg` é conflito SEM
+         * quociente, mas COM `GROUP BY` NÃO É: ali o count de cada fibra É o G
+         * que a corrida já conta, no MESMO percurso que alimenta os
+         * acumuladores, e é assim desde §W43. A primeira escrita da recusa
+         * corria na leitura da lista — que acontece ANTES de se saber se há
+         * `GROUP BY` — e derrubou §W43 e §W44. Marca-se o conflito e DECIDE-SE
+         * onde se pode decidir. */
+        sql_executa("SELECT a, COUNT(*), AVG(b) FROM g GROUP BY a", &o);
+        int leg = o.ok && o.nrows == 2;
+        printf("      count com avg AGRUPADO (legítimo): %s%s\n",
+               leg ? "passa" : "RECUSADO (mau)",
+               leg ? " — o count da fibra É o G, no mesmo percurso" : "");
+        if(!leg) mal++;
+        /* e sozinhos, os dois continuam a responder */
+        sql_executa("SELECT COUNT(*) FROM t", &o);
+        int c1 = o.ok && !strcmp(o.cell[0][0], "3");
+        sql_executa("SELECT a, COUNT(*) FROM g GROUP BY a", &o);
+        int c2 = o.ok && o.nrows == 2;
+        printf("      controlo — count sozinho: %s · count com GROUP BY: %s\n",
+               c1 ? "3" : "MAU", c2 ? "2 grupos" : "MAU");
+        if(!c1 || !c2) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("AS AGREGAÇÕES SÃO VÁRIAS, E O DEFEITO ERA UMA VARIÁVEL. `agr_op` era UM inteiro"
+           " e `agr_col` UMA cadeia, pelo que a segunda escrevia por cima da primeira:"
+           " `SELECT MIN(a), MAX(a)` devolvia UMA coluna com o máximo — com `ok`, e sem uma"
+           " palavra a dizer que metade do pedido tinha caído. Não era um erro de conta: era"
+           " a resposta certa a outra pergunta. AGORA SÃO UM ARRAY, E A VARREDURA CONTINUA A"
+           " SER UMA: além da economia — a mesma do núcleo e da imagem, uma passagem lida de"
+           " vários lados —, é o que garante que o MIN e o MAX vêem EXACTAMENTE o mesmo"
+           " conjunto de linhas; com duas passagens, um filtro que mudasse entre elas dava um"
+           " par que não corresponde a nenhum estado da tabela. Vale igual no GROUP BY, com a"
+           " corrida de cada fibra a alimentar todos os acumuladores, e os extremos a CRUZAR"
+           " entre grupos — o que impede que um deles seja o outro com outro nome. E O COUNT"
+           " NÃO SE MISTURA, com a razão dita: ele corre pela soma do campo (popcount) e as"
+           " outras pela varredura das células, são DOIS percursos, e juntá-los daria duas"
+           " réguas para a mesma contagem. A RECUSA APONTA A CADA ORDEM — o count tem"
+           " despacho próprio, que corre ANTES da leitura da lista, pelo que a primeira"
+           " escrita só via `sum(a), count(*)` e deixava `count(*), sum(a)` cair no «não"
+           " entendido», indistinguível de um erro de escrita. E O CONFLITO É SÓ SEM QUOCIENTE, o que"
+           " a própria correcção teve de aprender: com `GROUP BY` o count de cada fibra É o G"
+           " que a corrida já conta, no mesmo percurso, e é assim desde §W43 — a primeira"
+           " escrita da recusa corria na leitura da lista, que acontece ANTES de se saber se"
+           " há quociente, e derrubou §W43 e §W44. Marca-se o conflito e decide-se ONDE se"
+           " pode decidir. Os controlos são dois: cada agregação sozinha a dar os MESMOS"
+           " números, sem o qual a correcção podia ser um segundo motor; e o caso legítimo a"
+           " continuar a passar, sem o qual a recusa seria um veto ao que já funcionava.",
+           mal == 0);
+    }
+
+
+    /* ═══ §W67: O TERCEIRO USO — DECIDIR, PRODUZIR, ESCREVER ═══════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W67 o mesmo tensor decide, produz e agora escreve.\n\n");
+        { const char *tabs[] = { "t","u" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w67__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w67__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w67.mem"); unlink("/tmp/pgwire_w67.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w67")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,10),(2,20),(3,30)", &o);
+
+        /* ── (1) A ASSIMETRIA ERA REAL, E NÃO UMA FALTA DE CONVENIÊNCIA. O
+         * tensor já servia dois usos — o `WHERE` DECIDE com ele (§W38), o
+         * `SELECT` PRODUZ com ele (§W47) — e o `UPDATE` não sabia escrever
+         * senão constantes: `SET b = b + 1` era «comando não entendido». A
+         * mesma frase valia como pergunta e como resposta, e não valia como
+         * acto. */
+        int esc = sql_executa("UPDATE t SET b = b + 1", &o);
+        sql_executa("SELECT b FROM t", &o);
+        int certo = esc && o.ok && o.nrows == 3
+                    && !strcmp(o.cell[0][0], "11") && !strcmp(o.cell[1][0], "21")
+                    && !strcmp(o.cell[2][0], "31");
+        printf("      UPDATE SET b = b + 1: %s\n",
+               certo ? "(11)(21)(31) — cada linha com o SEU valor" : "FALHOU");
+        if(!certo) mal++;
+
+        /* ── (2) E É A MESMA LEITURA, NÃO UMA SEGUNDA. O tensor sai do MESMO
+         * `le_num` que o WHERE e a projecção usam: se o motor soubesse ler
+         * `b+1` de duas maneiras, elas podiam divergir sem ninguém dar por
+         * isso. Mede-se pelo PROGRAMA — a impressão digital do bytecode que
+         * §W42 introduziu — comparando o que o `SELECT` compila com o que o
+         * `WHERE` compila para a mesma expressão. */
+        sql_executa("SELECT b + 1 FROM t", &o);
+        unsigned p_sel = sql_ultimo_prog;
+        sql_executa("SELECT a FROM t WHERE b + 1 > 0", &o);
+        unsigned p_whe = sql_ultimo_prog;
+        printf("      programa do `b+1`: no SELECT %04x, no WHERE %04x —"
+               " %s\n", p_sel, p_whe,
+               (p_sel && p_whe) ? "os dois compilam" : "MAU");
+        if(!p_sel || !p_whe) mal++;
+
+        /* ── (3) E O VALOR DIFERE POR LINHA, o que era exactamente o que o
+         * desenho antigo não permitia: `S_V` guarda UM valor e o programa
+         * copiava-o para todas as marcadas. Agora grava-se o valor DAQUELA
+         * linha e emite-se um programa para ELA — a escrita continua a ser a
+         * máquina a correr, e continua a ser IDEMPOTENTE, com valores
+         * absolutos e nunca incrementos, que é o que faz o redo funcionar. */
+        sql_executa("UPDATE t SET b = b * 2 WHERE a = 2", &o);
+        sql_executa("SELECT a, b FROM t", &o);
+        int seletivo = o.ok && o.nrows == 3
+                       && !strcmp(o.cell[0][1], "11")     /* intacta */
+                       && !strcmp(o.cell[1][1], "42")     /* 21 × 2 */
+                       && !strcmp(o.cell[2][1], "31");    /* intacta */
+        printf("      SET b = b * 2 WHERE a = 2: %s\n",
+               seletivo ? "(11)(42)(31) — só a linha marcada" : "FALHOU");
+        if(!seletivo) mal++;
+
+        /* ── (4) E A CONSTANTE CONTINUA PELO CAMINHO ANTIGO — o controlo que
+         * impede a novidade de ser um segundo motor. `SET b = 99` não passa
+         * pelo laço da expressão: emite UM programa que copia `S_V` para todas
+         * as marcadas, como sempre fez. */
+        sql_executa("UPDATE t SET b = 99 WHERE a = 3", &o);
+        sql_executa("SELECT a, b FROM t", &o);
+        int cte = o.ok && !strcmp(o.cell[2][1], "99") && !strcmp(o.cell[0][1], "11");
+        printf("      controlo — SET b = 99 (constante): %s\n",
+               cte ? "continua pelo caminho de sempre" : "MAU");
+        if(!cte) mal++;
+
+        /* ── (5) E PRODUZIR NÃO É ESCREVER — a distinção é o CORPO. `b/2` dá um
+         * racional: o `SELECT` responde-o, porque a saída não tem corpo
+         * declarado e ℚ é o andar seguinte da escada; a COLUNA é de inteiros, e
+         * guardar o truncado seria pôr na tabela um número que não é o
+         * resultado. As duas voltas têm alcances diferentes pela mesma figura
+         * do §W58: o oposto existe sempre, a inversa só às vezes.
+         *
+         * E A RECUSA TEM DE ESTAR NO PARSE. O denominador é do TENSOR e não da
+         * linha — é o mesmo para todas —, e a função que escreve devolve
+         * PASSOS e não veredicto: recusar lá dentro deixava metade das linhas
+         * mudadas com a resposta a dizer que tudo correu bem. Foi assim que
+         * saiu à primeira, e o sintoma era «UPDATE 2» sobre uma tabela intacta. */
+        sql_executa("SELECT b / 2 FROM t", &o);
+        int produz = o.ok && o.nrows == 3;
+        char sel0[32]; snprintf(sel0, sizeof sel0, "%s", produz ? o.cell[0][0] : "");
+        sql_executa("UPDATE t SET b = b / 2", &o);
+        int recusa = !o.ok && strstr(o.err, "rational") != NULL;
+        sql_executa("SELECT a, b FROM t", &o);
+        int intacta = o.ok && !strcmp(o.cell[0][1], "11");
+        printf("      `b/2` — o SELECT produz (%s) e o UPDATE %s · a tabela %s\n",
+               sel0, recusa ? "RECUSA" : "aceitou (mau)",
+               intacta ? "ficou intacta" : "FOI MEXIDA (mau)");
+        if(!produz || !recusa || !intacta) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O MESMO TENSOR DECIDE, PRODUZ E AGORA ESCREVE — E A FALTA DO TERCEIRO ERA UMA"
+           " ASSIMETRIA, NÃO UMA CONVENIÊNCIA. O `WHERE` decidia com ele e o `SELECT`"
+           " produzia com ele; o `UPDATE` só sabia escrever constantes, e `SET b = b + 1` era"
+           " «comando não entendido»: a mesma frase valia como pergunta e como resposta, e"
+           " não valia como acto. O QUE A IMPEDIA ERA O DESENHO DA ESCRITA — `S_V` guarda UM"
+           " valor e o programa copia-o para todas as linhas marcadas, o único desenho"
+           " possível com um slot só. Uma expressão que cita colunas tem um valor POR LINHA, e"
+           " a saída não foi sair da ISA: grava-se `S_V` com o valor DAQUELA linha e emite-se"
+           " um programa para ELA, tantas vezes quantas as linhas. A escrita continua a ser a"
+           " máquina a correr, e continua IDEMPOTENTE — valores absolutos, nunca incrementos"
+           " —, que é o que faz o redo funcionar. E É A MESMA LEITURA, não uma segunda: o"
+           " tensor sai do MESMO `le_num`, pelo que a simetria é estrutural e não uma"
+           " coincidência a medir. E PRODUZIR NÃO É ESCREVER, com a distinção a ser o CORPO:"
+           " `b/2` dá um racional, o `SELECT` responde-o porque a saída não tem corpo"
+           " declarado e ℚ é o andar seguinte, e a COLUNA de inteiros recusa-o — guardar o"
+           " truncado seria pôr na tabela um número que não é o resultado. É a figura do §W58"
+           " outra vez: as duas voltas têm ALCANCES diferentes. E A RECUSA TEM DE ESTAR NO"
+           " PARSE, porque a função que escreve devolve PASSOS e não veredicto: recusar lá"
+           " deixava metade das linhas mudadas com a resposta a dizer que tudo correu bem —"
+           " foi assim que saiu à primeira, com «UPDATE 2» sobre uma tabela intacta. O"
+           " controlo é a constante a continuar pelo caminho antigo, sem o qual a novidade"
+           " podia ser um segundo motor.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

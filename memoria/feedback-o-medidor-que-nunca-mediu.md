@@ -47,6 +47,37 @@ medir: o `colhe` escrevia o **padrão de bits** do float em hex e o `.c` lia com
 estavam **certas**: eram elas a dizer que o que entrava não eram embeddings. Ver
 [[feedback-o-numero-que-nao-cabe]].
 
+---
+
+## 21/08/2026 — a causa mecânica, e a regra que eu quebrei a tentar vê-la
+
+**A assinatura não segue as dependências.** O `banco/erg.c` LÊ o enum de opcodes do
+`banco/sql.c` e verifica que o montador concorda. O `sql.c` mudou (opcodes de 16 bits
+entraram); a assinatura do `erg.c` **não mudou**; o atestado ficou `0`; e a bateria
+nunca mais o correu. Resultado: *«o enum do sql.c tem 16 opcodes; este montador expõe 17
+ao piloto — DISCORDAM em 3, o primeiro é TROCA»*, invisível.
+
+Ao limpar e re-derivar tudo: **529 : 518 verdes, 11 falhas** — onde a corrida normal
+dizia `529 : 529, 0 falhas`. Os 11 têm a assinatura **inalterada** e o resultado mudou de
+`0` para `1`: `erg`, `fita`, `indexa_orbitas`, e oito `.js` (`avalia_macros`,
+`corpo_disco`, `corpo_front`, `design_no_pdf`, `dois_streams`, `escala`, `isa_dupla`,
+`sem_chute`).
+
+**Um medidor que lê OUTRO ficheiro tem a sua verdade fora da sua assinatura.** É a
+família toda: qualquer medidor cuja entrada não esteja no seu próprio texto — outro `.c`,
+um `.tex`, um ficheiro em `/tmp`, o ambiente — fica verde para sempre depois do primeiro
+atestado.
+
+**E a maneira certa de forçar a re-derivação é `./tools/bateria.sh --refaz`**, que reabre
+TODAS sem apagar atestado nenhum. Eu fiz `: > tools/atestados.txt`. O cabeçalho do
+próprio ficheiro proíbe isso em voz alta — *«o atestado NUNCA se apaga: apagar atestado é
+destruir fato, não refazer o teste»* — e regista que foi um flag `--tudo`, que truncava a
+tabela, que **destruiu os atestados de 30/07/2026**. Desta vez nada se perdeu (529 nomes
+antes e depois, só 11 resultados a mudar), mas isso foi sorte: um medidor que não
+corresse — falta de `node`, timeout — perdia a linha e o facto. **Ler o cabeçalho da
+ferramenta antes de a usar contra o seu próprio aviso.** Ver
+[[feedback-destruir-antes-do-inventario]] e [[feedback-o-disco-limpo]].
+
 Mesma família de [[feedback-assercoes-vazias]] e da bateria cega em
 [[project-checkpoint-2026-08-04-a-separacao]]: **o portão a dizer verde sobre uma coisa
 que já não existe.**

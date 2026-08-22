@@ -2902,18 +2902,22 @@ aplicar o vector do núcleo à matriz e exigir zero, em vez de o comparar com o
 que se esperava (\code{tests/pgwire.c} §W52, com o controlo na matriz de posto
 cheio, onde o núcleo é vazio e a lei fecha com a nulidade a zero).
 
-\medskip\noindent\textbf{A mesma conservação, três vezes.} Vale a pena vê-las
+\medskip\noindent\textbf{A mesma conservação, quatro vezes.} Vale a pena vê-las
 juntas, porque é o que faz destas peças um só objeto:
 \[
 \begin{array}{lll}
 \text{o quociente} & \sum_{x}G(x)=\lvert I\rvert & \text{as fibras repartem as linhas}\\
 \text{o dual} & \lvert\text{presentes}\rvert+\lvert\text{ausentes}\rvert=\lvert I\rvert
   & \text{o bit reparte as células}\\
-\text{a matriz} & \text{posto}+\dim(\ker)=n & \text{as dimensões repartem as colunas}
+\text{a matriz} & \text{posto}+\dim(\ker)=n & \text{as dimensões repartem as colunas}\\
+\text{o aniquilador} & \dim W+\dim W^{\circ}=n & \text{as dimensões repartem-se no dual}
 \end{array}
 \]
-Três objetos, uma lei --- e em nenhum dos três ela foi posta como requisito:
-sai, das três vezes, de a construção não deitar nada fora.
+Quatro objetos, uma lei --- e em nenhum dos quatro ela foi posta como
+requisito: sai, das quatro vezes, de a construção não deitar nada fora. A
+quarta é a terceira \emph{lida do outro lado}, o que não a torna menos um
+enunciado: é preciso que o núcleo da matriz das linhas \emph{seja} o
+aniquilador, e isso é uma identificação, não uma notação.
 
 \medskip\noindent\textbf{E o produto é a composição, com a condição de sempre.}
 \code{produto(u)} aplica $u$ e depois a tabela corrente, e existe exatamente
@@ -3082,6 +3086,261 @@ dar programas diferentes: sem ele, uma impressão digital constante --- ou zero
 \colunas{\code{catalogo thm:duasinvol}}
         {\code{IN} como disjunção; \code{NOT} por De Morgan; \code{sql\_ultimo\_prog}}
         {\code{tests/pgwire.c} §W42}
+
+\medskip\noindent\textbf{E o dual entra pelas duas metades, sem álgebra nova.}
+\emph{O vetor fornece o objeto; o funcional fornece a coordenada que o mede.} A
+\textbf{base dual} é \emph{construída} e não procurada: com $B$ a matriz das
+colunas, os $e^{i}$ são as \textbf{linhas} de $B^{-1}$, porque $e^{i}(e_j)=\delta^i_j$
+é a definição de inversa lida do outro lado. Verifica-se \emph{avaliando} --- $1$
+na diagonal, $0$ fora ---, não comparando com uma conta feita à mão. E o
+\textbf{aniquilador} é a descida do núcleo vista do lado do dual: as linhas geram
+$W$, e os funcionais que se anulam nele são o núcleo dessa matriz. As duas recusas
+são \emph{duas}, e cada uma diz o quê: colunas dependentes não são base --- e
+diz-se o \emph{posto}, porque o funcional que as separasse teria de dar $1$ e $0$
+ao mesmo vetor ---, e a não quadrada falha por outra razão. Com isto o
+\code{lib/linear.h} está inteiro no motor (\code{tests/pgwire.c} §W60).
+
+\medskip\noindent\textbf{E um zero pode ser duas coisas.} A aritmética desta casa
+devolve \emph{zero} quando a conta não cabe no inteiro, e conta a perda. Sem ler
+esse contador, um determinante que \textbf{estourou} é indistinguível de um
+determinante \textbf{nulo}: os dois saem $0$, e o primeiro é a resposta errada com
+a cara da certa --- a saturação travestida de teorema. Lê-se antes e depois, e o
+que perdeu é recusado. O controlo é o que impede isto de virar uma recusa
+constante: a singular continua a dar zero e posto um, e a \emph{mesma} entrada
+numa $2\times2$ continua a responder --- o que separa «a entrada é grande» de «a
+conta não coube».
+
+\medskip\noindent\textbf{E o tecto não é um só.} O geral é o do \code{linear.h};
+mas a \emph{inversa} trabalha numa matriz aumentada de $n\times 2n$ --- justapõe a
+identidade e reduz ---, e o seu tecto é \textbf{metade}. A primeira escrita errava
+nas duas pontas ao mesmo tempo: recusava a $6\times6$ por uma comparação e
+anunciava $6\times6$ como o limite, e uma matriz era recusada por uma condição que
+dizia que ela cabia. Cada operação diz o \emph{seu} tecto
+(\code{tests/pgwire.c} §W59).
+
+\medskip\noindent\textbf{E a declaração acaba em «\code{)}».} O analisador da
+lista de colunas parava na primeira palavra que não reconhecia e criava a tabela
+com o que já tinha lido: uma sintaxe inventada no meio dava uma tabela de
+\emph{uma} coluna anunciada como criada, e as consultas seguintes liam uma matriz
+$2\times1$ onde estava escrito $2\times2$. Não é um erro de conta --- é a resposta
+certa a outra pergunta. E a \textbf{recusa não deixa rasto}, que é a metade menos
+óbvia: o ficheiro da tabela abre-se \emph{antes} de a declaração acabar de ser
+lida --- tem de ser, é nele que o catálogo vai ---, e deixá-lo lá fazia a tabela
+recusada comportar-se \emph{pior} do que uma que nunca existiu: esta é recusada
+com «não existe», aquela aceitava \code{SELECT} e aceitava \code{INSERT}. A recusa
+era uma criação encoberta. Desfaz-se pelo caminho do \code{DROP}, e o gume é a
+\textbf{indistinguibilidade}: a recusada responde o mesmo que a nunca mencionada.
+
+\medido{\code{tests/pgwire.c} §W61, com o controlo nas três formas boas --- sem
+tipo, com tipo e com restrições ---, sem o qual um motor que recusasse toda a
+declaração passaria nas outras três medidas.}
+
+\medskip\noindent\textbf{E o corpo desta casa já era uma matriz $2\times2$ ---
+ninguém precisou de os identificar.} O \code{lib/cifra.h} não foi escrito para
+matrizes: foi escrito para \emph{corpos}, e diz na porta que as suas duas únicas
+grandezas são «a razão --- quanto se estica por nível --- $\to$ o \textbf{traço}
+$B$» e «o sinal --- se as duas direções se cancelam --- $\to$ o
+\textbf{determinante} $C$». E diz mais: «o hipercorpo \emph{não tem} $(B,C)$: o
+seu operador não é uma matriz $2\times2$». O par que define um corpo era, desde
+que aquilo foi escrito, o par de invariantes de uma matriz --- e a cifra que o
+escreve é o \textbf{espectro}: as raízes de
+\[
+\lambda^{2}-B\lambda+C=0,\qquad \lambda=\tfrac{B\pm\sqrt{B^{2}-4C}}{2},
+\]
+postas em fração contínua periódica, exatas, em inteiros, \emph{sem uma raiz
+calculada} --- e o período é invariante completo, por Lagrange. \code{cifra(*)}
+não acrescenta álgebra nenhuma ao motor: pega no traço e no determinante que ele
+já dá e chama o codificador que já lá estava.
+
+\medskip\noindent\textbf{E daí o gume sai de graça.} Matrizes \textbf{semelhantes}
+têm a mesma cifra, porque a conjugação preserva o traço e o determinante --- não é
+uma propriedade que se lhe tenha dado, é o que «invariante de conjugação» quer
+dizer. A testemunha é $(2,1;-1,-1)$, que não tem \emph{uma} entrada igual à de
+Fibonacci e devolve a mesma cifra, com o controlo na prata, que devolve outra.
+
+\medskip\noindent\textbf{E a rotação diz o que faltava dizer.} Em $(0,-1;1,0)$ o
+traço é $0$ e o determinante $1$, logo $B^{2}-4C=-4<0$: o lado \emph{próprio} não
+tem real, e quem o carrega é o \textbf{dual}. O primeiro termo da cifra --- que é
+justamente «qual metade carrega o real» --- passa de $1$ a $2$, sem uma linha
+escrita para este caso. É o $i$ a aparecer como a matriz cujo espectro só existe
+do outro lado, e é a mesma figura das duas torres: uma espelha, a outra roda. Os
+dois limites dizem \emph{porquê} e não «não dá»: acima de $2\times2$ o
+característico tem mais coeficientes e o par $(B,C)$ deixa de o determinar; e um
+traço fracionário diz que a matriz não é o operador de nenhum corpo do catálogo.
+
+\medido{\code{tests/pgwire.c} §W62, com o controlo na prata (outra cifra) e o
+controlo do controlo na áurea (primeiro termo $1$): sem os dois, um codificador
+constante --- ou um que ignorasse o discriminante --- passava.}
+
+\colunas{\code{aranha thm:duas}; \code{catalogo} (a cifra do rei)}
+        {\code{cifra(*)} sobre \code{traco}/\code{det}; \code{lib/cifra.h} sem uma linha nova}
+        {\code{tests/pgwire.c} §W62}
+
+\medskip\noindent\textbf{E a cifra governa a órbita --- o corpo \emph{é} o
+sistema.} Por Cayley--Hamilton $A^{2}=BA-CI$; multiplicando por $A^{n-2}$ e tomando
+traços vem
+\[
+\boxed{\;t_n=B\,t_{n-1}-C\,t_{n-2},\qquad t_0=2,\ t_1=B\;}
+\]
+--- que é a \emph{mesma} recorrência que define o corpo de par $(B,C)$. O traço das
+potências não é uma sequência que por acaso obedece à regra: \textbf{é} a regra, e
+o corpo é o sistema dinâmico $x_{n+1}=A\,x_n$ lido pelo seu invariante. Para a
+matriz de Fibonacci dá $2,1,3,4,7,11,18,29,47$ --- os números de Lucas, e ninguém
+os escreveu: saíram de multiplicar a tabela por si própria e ler o traço.
+
+\medskip\noindent A medida é um \textbf{encadeamento}, e não pede uma linha nova
+ao motor: \code{produto} sobe uma potência, \code{traco} lê, o resultado volta a
+entrar como tabela --- o motor a alimentar-se a si próprio por oito passos, o que
+faz disto uma verificação da composição inteira e não de uma operação de cada vez.
+O controlo é \emph{outro} corpo: a prata, com $(B,C)=(2,-1)$, cumpre a mesma lei
+com outros números, e as duas órbitas divergem --- sem isso, uma recorrência que
+ignorasse o par, ou um traço constante, passava. É o fecho do que §W62 abriu:
+ali a cifra \emph{escreve} o espectro, aqui o espectro \emph{dita} a órbita.
+
+\medido{\code{tests/pgwire.c} §W63, oito potências encadeadas e o controlo na
+prata, com a exigência de as duas órbitas divergirem.}
+
+\medskip\noindent\textbf{E o espectro tem dois caminhos, cada um sabendo o que o
+outro não sabe.} A cifra escreve-o \emph{sempre}; o \code{esp\_racional} do
+\code{lib/forma.h} dá os \textbf{números}, mas só quando o discriminante é
+quadrado perfeito. Os dois lêem o \emph{mesmo} discriminante --- partilham o
+\code{raizi} ---, o que faz deles duas leituras de um objeto e não duas contas
+parecidas. Os números verificam-se por \textbf{Viète} (soma $=$ traço, produto
+$=$ determinante), não por comparação com uma conta feita à mão; e os
+autovetores verificam-se \emph{aplicando}: $A\,v=\lambda\,v$.
+
+\medskip\noindent Onde as raízes não são racionais, a \textbf{recusa é a
+resposta}: são as folhas do corpo, escrevem-se pela cifra, e devolver um decimal
+seria trocar o objeto por uma aproximação dele. A recusa \emph{remete}, e a cifra
+responde --- o áureo tem discriminante $5$, e é ali que os dois caminhos se
+separam sem se contradizerem.
+
+\medskip\noindent\textbf{E um par põe o limite de tudo o que veio antes.} Jordan
+$(2,1;0,2)$ e a homotetia $(2,0;0,2)$ têm o mesmo traço, o mesmo determinante, os
+mesmos autovalores --- e por isso \emph{a mesma cifra}. E não são semelhantes: a
+homotetia comuta com tudo, logo $P^{-1}(2I)P=2I$ para todo $P$, e nunca dá Jordan.
+Escrito com o escopo certo:
+\[
+\text{semelhantes}\;\Longrightarrow\;\text{mesma cifra},\qquad
+\text{mesma cifra}\;\not\Longrightarrow\;\text{semelhantes.}
+\]
+A cifra é invariante de semelhança e \textbf{não é completo} para ela; é completo
+para o \textbf{corpo}, por Lagrange --- e corpo e matriz não são a mesma pergunta.
+Quem os separa são os \textbf{autovetores}, um contra dois, e é isso, e não os
+valores, que decide a diagonalizabilidade.
+
+\medido{\code{tests/pgwire.c} §W64, com Viète a verificar os valores, a aplicação
+a verificar os vetores, e o par Jordan/homotetia como testemunha de que a
+recíproca é falsa.}
+
+\colunas{\code{aranha thm:proprios}; \code{catalogo} (a cifra do rei)}
+        {\code{autovalores}/\code{autovetores}; \code{lib/forma.h} pelo motor}
+        {\code{tests/pgwire.c} §W64}
+
+\medskip\noindent\textbf{E o produto interno fecha o dual sem escolher base.} A
+base dual \emph{precisa} de uma base para existir --- os $e^{i}$ são as linhas de
+$B^{-1}$, e mudar $B$ muda-os. O produto interno dá o mesmo isomorfismo
+$v\mapsto\langle v,\cdot\rangle$ sem escolher nenhuma, e a matriz que o escreve é
+a \textbf{Gram}:
+\[
+G_{ij}=\langle v_i,v_j\rangle,\qquad G=A\,A^{\!\top}.
+\]
+Mede-se por \textbf{dois caminhos que não se apoiam}: \code{gram(*)} soma produtos
+célula a célula, e \code{transposta} guardada seguida de \code{produto} refaz o
+mesmo com as peças que já existiam --- concordarem é uma verificação, não uma
+repetição.
+
+\medskip\noindent E saem três leis \emph{de graça}. $G$ é \textbf{simétrica},
+porque a soma dos produtos não distingue os fatores. $\det G=(\det A)^{2}$, que é
+uma lei a \emph{mais} do que a que se ia medir: sai de
+$\det(AA^{\!\top})=\det A\cdot\det A^{\!\top}$ com a transposta a ter o mesmo
+determinante --- duas peças que o motor já tinha e que nunca tinham sido postas em
+contacto. E $\det G=0$ é exatamente a \textbf{dependência} --- o determinante de
+Gram ---, que com $n=2$ é Cauchy--Schwarz com \emph{igualdade}, o caso dos
+colineares; o posto conta-se nos dois sítios e bate. A norma sai sempre
+\textbf{ao quadrado}: é a raiz que traria o irracional para dentro de uma conta
+que é exata.
+
+\medido{\code{tests/pgwire.c} §W65, com o controlo na ortogonalidade --- $G$
+diagonal, e os zeros fora da diagonal são $\langle u,v\rangle=0$ e não uma conta
+por fazer.}
+
+\colunas{\code{aranha def:dual}; \code{catalogo} (Cauchy--Schwarz exato)}
+        {\code{gram(*)} contra \code{transposta}+\code{produto}}
+        {\code{tests/pgwire.c} §W65}
+
+\medskip\noindent\textbf{E as agregações são várias --- o defeito era uma
+variável.} \code{agr\_op} era \emph{um} inteiro e \code{agr\_col} \emph{uma}
+cadeia, pelo que a segunda escrevia por cima da primeira: \code{SELECT MIN(a),
+MAX(a)} devolvia \textbf{uma} coluna com o máximo, com \code{ok} e sem uma palavra
+a dizer que metade do pedido tinha caído. Não é um erro de conta --- é a resposta
+certa a outra pergunta.
+
+\medskip\noindent São um \emph{array}, e a varredura continua a ser \textbf{uma}.
+Além da economia --- a mesma do núcleo e da imagem, uma passagem lida de vários
+lados ---, é o que garante que o \code{MIN} e o \code{MAX} vêem \emph{exatamente}
+o mesmo conjunto de linhas: com duas passagens, um filtro que mudasse entre elas
+daria um par que não corresponde a nenhum estado da tabela. Vale igual sob
+\code{GROUP BY}, com a corrida de cada fibra a alimentar todos os acumuladores.
+
+\medskip\noindent\textbf{E o \code{count} não se mistura --- mas só sem
+quociente.} Ele corre pela soma do campo (\emph{popcount}) e as outras pela
+varredura das células: são dois percursos, e juntá-los daria duas réguas para a
+mesma contagem. A recusa tem de apontar a \emph{cada ordem}, porque o count tem
+despacho próprio que corre antes da leitura da lista --- sem isso,
+\code{count(*), sum(a)} caía no «não entendido», indistinguível de um erro de
+escrita. \textbf{E com \code{GROUP BY} não há conflito nenhum}: ali o count de
+cada fibra \emph{é} o $G$ que a corrida já conta, no mesmo percurso. A primeira
+escrita da recusa corria na leitura da lista --- que acontece antes de se saber se
+há quociente --- e derrubou §W43 e §W44; marca-se o conflito e decide-se
+\emph{onde} se pode decidir.
+
+\medido{\code{tests/pgwire.c} §W66, com dois controlos: cada agregação sozinha a
+dar os \emph{mesmos} números (senão a correção era um segundo motor), e o caso
+legítimo agrupado a continuar a passar (senão a recusa era um veto ao que já
+funcionava).}
+
+\colunas{\code{aranha thm:multiplicidade}}
+        {\code{agr\_ops[]}/\code{agr\_cols[]}; uma varredura, vários acumuladores}
+        {\code{tests/pgwire.c} §W66}
+
+\medskip\noindent\textbf{E o mesmo tensor passa a ter três usos: decidir, produzir
+e escrever.} O \code{WHERE} decidia com ele e o \code{SELECT} produzia com ele; o
+\code{UPDATE} só sabia escrever constantes, e \code{SET b = b + 1} era «comando
+não entendido». A falta era uma \emph{assimetria} e não uma conveniência: a mesma
+frase valia como pergunta e como resposta, e não valia como \textbf{ato}.
+
+\medskip\noindent O que a impedia era o desenho da escrita --- \code{S\_V} guarda
+\emph{um} valor e o programa copia-o para todas as linhas marcadas, o único
+desenho possível com um slot só. Uma expressão que cita colunas tem um valor
+\textbf{por linha}, e a saída não foi sair da ISA: grava-se \code{S\_V} com o valor
+\emph{daquela} linha e emite-se um programa para ela, tantas vezes quantas as
+linhas. A escrita continua a ser a máquina a correr, e continua \textbf{idempotente}
+--- valores absolutos, nunca incrementos ---, que é o que faz o \emph{redo}
+funcionar. E é a \emph{mesma} leitura, não uma segunda: o tensor sai do mesmo
+\code{le\_num}, pelo que a simetria é estrutural e não uma coincidência a medir.
+
+\medskip\noindent\textbf{E produzir não é escrever --- a distinção é o corpo.}
+\code{b/2} dá um racional: o \code{SELECT} responde-o, porque a saída não tem corpo
+declarado e $\mathbb{Q}$ é o andar seguinte da escada; a \emph{coluna} é de
+inteiros, e guardar o truncado seria pôr na tabela um número que não é o
+resultado. É a figura de §W58 outra vez --- as duas voltas têm \textbf{alcances}
+diferentes. E a recusa tem de estar no \emph{parse}: o denominador é do tensor e
+não da linha, e a função que escreve devolve \textbf{passos} e não veredicto ---
+recusar lá dentro deixava metade das linhas mudadas com a resposta a dizer que
+tudo correu bem, que foi como saiu à primeira, com «\code{UPDATE 2}» sobre uma
+tabela intacta.
+
+\medido{\code{tests/pgwire.c} §W67, com o controlo na constante --- que continua
+pelo caminho antigo, sem o qual a novidade podia ser um segundo motor.}
+
+\colunas{\code{aranha def:op}}
+        {\code{set\_ten}/\code{set\_ex}; o mesmo \code{le\_num} nos três usos}
+        {\code{tests/pgwire.c} §W67}
+
+\colunas{\code{aranha def:dual}, \code{thm:H}}
+        {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
+        {\code{tests/pgwire.c} §W59--§W61}
 
 \subsection*{A média é um racional}
 

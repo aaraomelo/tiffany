@@ -34,6 +34,16 @@ afirmação sobre o objecto.
    sobre inteiros já enrolados e a função devolvia 1 na mesma — uma saturação a sair como
    veredicto («o c é irracional»). Agora tem tecto e conta em `cl_saturou`.
 
+5. **E o pior caso é o valor de erro que COLIDE com um legítimo.** O `qz_mult`
+   devolve **zero** quando não cabe, e conta em `qz_perdeu`. Num determinante,
+   zero é uma resposta *válida* — a matriz singular. Sem ler o contador, «estourou»
+   e «é singular» saem com a MESMA cara, e não há como distingui-los a jusante: não
+   é um número errado, é dois significados no mesmo símbolo. Medido no banco: a
+   diagonal 5×5 de 65535 (det ≈ 1,2·10²⁴) dava `0`. A regra: **quando o canal de
+   erro reutiliza um valor do domínio, o contador é obrigatório** — e o gume é o
+   controlo que exige a singular a continuar a dar zero, senão a correcção vira
+   uma recusa constante.
+
 Instrumento permanente: `-DQZ_MEDE` no `racionais.h` regista a maior magnitude e o maior
 produto cruzado que passaram — a pergunta «cabe no tipo?» feita ao próprio código.
 Medido: a assistente chegava a **8,4×10¹⁸**, 91% do tecto do `long`; e só **4 de 362**

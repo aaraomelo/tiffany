@@ -65,3 +65,30 @@ ninguém a lê duas vezes.
 com o sítio onde a convenção é declarada. Se a declaração não é a primeira, ela não é convenção —
 é nota de rodapé. E o gume barato: se dois objectos distintos partilham símbolo, o compilador não
 se queixa e nenhum medidor apanha, porque **o texto não corre**.
+
+
+---
+
+## 21/08/2026 — o mesmo defeito QUATRO vezes no mesmo motor: ler só `.total`
+
+`Word` é `{Word8 total, e}` — **dois bytes**. Ler `mem_le(slot).total` é ler
+METADE do número. No `banco/sql.c`, em quatro sítios:
+
+| onde | o que guardava | o que acontecia |
+|---|---|---|
+| `celula_valor` (§W19) | o valor da célula | saldo 300 saía 44 (300 mod 256) |
+| `S_TXLIVRE` | um ENDEREÇO (S_TEXTO = 41024) | tudo gravado em cima de tudo, e o laço da busca nunca corria |
+| `no_novo` | o contador de nós | ao passar de 255 reciclava nós — dois caminhos no mesmo sítio |
+| `no_filho` | o índice do filho | idem |
+
+**O sintoma que engana:** as colisões da árvore pareciam DOBRA DA CIFRA — 64
+chaves distintas, 56 postas. Eu já ia aplicar o levantamento (π̃ = (π,k)) para
+as separar. Não era a cifra a dobrar: **era o contador a dar a volta.** Antes de
+tratar uma colisão como dobra, perguntar se o índice CABE.
+
+**How to apply:** varrer `mem_le(...).total` e classificar cada um — valor
+pequeno (ok), ou endereço / contador / índice (suspeito). Guardar o par:
+`total | (e << 8)`. E onde o par não chega, guardar o DESLOCAMENTO em vez do
+endereço absoluto — começa em zero e dá os 65535 inteiros.
+
+Ver [[feedback-o-numero-que-nao-cabe]] e [[feedback-o-teto-nao-verificado]].

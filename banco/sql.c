@@ -84,6 +84,19 @@
 #define Mat MatQz
 #define Vec VecQz
 #include "../lib/linear.h"
+/* e o `forma.h` entra no MESMO alívio de nome, porque é sobre os mesmos dois
+ * objectos: as formas, o produto interno e o espectro 2×2 exacto vivem em cima
+ * do `linear.h` e não têm tipos próprios. Traz o segundo caminho para o
+ * espectro — o `cifra.h` escreve-o SEMPRE por fração contínua, o `esp_racional`
+ * dá os números QUANDO o discriminante é quadrado perfeito, e os dois têm de
+ * concordar onde ambos respondem.
+ *
+ * O `cifra.h` entra ANTES porque é dele o `raizi` — a raiz inteira por baixo,
+ * que o `forma.h` usa para decidir se o discriminante é quadrado perfeito. As
+ * duas peças partilham a mesma raiz, e é isso que faz dos dois caminhos duas
+ * leituras do MESMO discriminante e não duas contas parecidas. */
+#include "../lib/cifra.h"
+#include "../lib/forma.h"
 #undef Mat
 #undef Vec
 #include <stdlib.h>
@@ -2024,6 +2037,26 @@ static int insere_muitas(const char *resto){
       return 1; }
 }
 
+/* ── UM `CREATE` QUE FALHA NÃO PODE DEIXAR RASTO ──────────────────────────────
+ * O ficheiro da tabela abre-se ANTES de a declaração acabar de ser lida — tem de
+ * ser, porque é nele que o catálogo vai ser escrito. Se a leitura recusar depois
+ * disso, o ficheiro fica: vazio, sem nome e sem colunas, mas EXISTE. E aí a
+ * tabela recusada comporta-se pior do que uma que nunca foi mencionada — esta é
+ * recusada com «não existe», aquela aceita `SELECT` (devolvendo zero linhas) e
+ * aceita `INSERT`. A recusa passava a ser uma criação encoberta.
+ *
+ * Desfaz-se pelo mesmo caminho do `DROP`: larga-se o descritor e apagam-se os
+ * dois ficheiros. É o que a transacção já faz por dentro — recusar é voltar ao
+ * estado anterior, não ficar a meio. */
+static void caminho_tabela(const char *nome, char *out, size_t cap, const char *ext);
+static char g_tabela[64];
+static void cria_desfaz(const char *nome){
+    if(!strcmp(g_tabela, nome)) usa_tabela("", 0);
+    { char m[600], pr[600];
+      caminho_tabela(nome, m, sizeof m, ".mem");
+      caminho_tabela(nome, pr, sizeof pr, ".prog");
+      unlink(m); unlink(pr); }
+}
 static int cria(const char *resto){
     const char *p = resto;
     char nome[64];
@@ -2035,7 +2068,9 @@ static int cria(const char *resto){
             snprintf(sql_cap->err, sizeof sql_cap->err, "cannot create relation \"%s\"", nome); }
         return 0;
     }
-    pula(&p); if(*p != '(') return 0; p++;
+    pula(&p);
+    if(*p != '('){ cria_desfaz(nome); return 0; }
+    p++;
     long ncols = 0; char c[64];
     long corpo[16], parm[16], restr[16];
     char chk[S_CHECK_W * 2 + 2]; chk[0] = 0;
@@ -2050,7 +2085,7 @@ static int cria(const char *resto){
           if(ident(&p, k, sizeof k) && !strcasecmp(k, "CHECK")){
               pula(&p);
               if(*p == '('){
-                  if(!le_check(&p, chk, sizeof chk)) return 0;
+                  if(!le_check(&p, chk, sizeof chk)){ cria_desfaz(nome); return 0; }
                   pula(&p);
                   if(*p == ','){ p++; continue; }
                   break;
@@ -2095,7 +2130,7 @@ static int cria(const char *resto){
             else if(!strcasecmp(r, "CHECK")){
                 pula(&p);
                 if(*p != '('){ p = v2; break; }
-                if(!le_check(&p, chk, sizeof chk)) return 0;
+                if(!le_check(&p, chk, sizeof chk)){ cria_desfaz(nome); return 0; }
             }
             else if(!strcasecmp(r, "REFERENCES")){
                 /* `REFERENCES mae(col)` — e a coluna alvo diz-se: sem ela o
@@ -2151,6 +2186,34 @@ static int cria(const char *resto){
         }
         ncols++; pula(&p);
         if(*p == ','){ p++; continue; } break;
+    }
+    /* ── O QUE SOBRA NA DECLARAÇÃO NÃO PODE FICAR CALADO ─────────────────────
+     * O laço acima PARA na primeira palavra que não reconhece e devolve o
+     * apontador ao sítio onde ela começa. Sem esta verificação, o que sobrava
+     * era simplesmente ignorado: `CREATE TABLE b (x INTEIRO COM SINAL, y
+     * RACIONAL)` — com uma sintaxe inventada no meio — criava uma tabela de UMA
+     * coluna e anunciava-a como criada, e o `y` desaparecia sem uma palavra. As
+     * consultas que se seguiam liam então uma matriz 2×1 onde estava escrito
+     * 2×2, e a resposta errada vinha com a cara da certa.
+     *
+     * A declaração acaba em `)`. Se o analisador parou noutro sítio, há texto
+     * que ele não soube ler, e há duas respostas possíveis: adivinhar o que o
+     * autor queria, ou dizer onde parou. Diz-se onde parou — e a tabela morre
+     * aqui, ANTES do catálogo, pelo que fica sem nome e sem colunas: nenhuma
+     * consulta lhe chega. É a regra desta casa dita na porta de entrada — «não
+     * se aceita e faz outra coisa». */
+    pula(&p);
+    if(*p != ')'){
+        printf("erro: não sei ler «%.24s» na declaração da tabela «%s» —"
+               " li %ld coluna(s) e parei aí. A tabela NÃO foi criada"
+               " (aceitá-la seria criar uma tabela que não é a pedida).\n",
+               p, nome, ncols);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "syntax error in column list near \"%.20s\" (read %ld columns)",
+                     p, ncols); }
+        cria_desfaz(nome);
+        return 0;
     }
     /* o catálogo é escrito PELA MÁQUINA: constantes + STORE, compilado e executado */
     pc_emit = 0;
@@ -2256,7 +2319,6 @@ static int le_int_simples(const char **pp, long *out){
  * Fica na tabela sem nome, que é o ficheiro da base, e as duas funções abaixo
  * guardam e restauram a que estava aberta: uma consulta não pode trocar a
  * tabela da sessão por baixo de quem a fez. */
-static char g_tabela[64];
 static int usa_tabela(const char *nome, int cria_se_falta);
 static void vista_entra(char *guarda, size_t cap){
     snprintf(guarda, cap, "%s", g_tabela);
@@ -2870,6 +2932,17 @@ static unsigned citadas_where = 0;
  * porque a acção continua a ser um SET em todo o caminho; o que muda é o bit
  * no fim, e o diário leva-a codificada para a recuperação a poder refazer. */
 static int set_anula = 0;
+/* ── O TERCEIRO USO DO MESMO OBJECTO: ESCREVER ───────────────────────────────
+ * O tensor já servia dois: o `WHERE` DECIDE com ele, o `SELECT` PRODUZ com ele.
+ * Faltava o terceiro — `UPDATE t SET b = b + 1` ESCREVE com ele —, e a falta era
+ * uma assimetria e não uma lacuna de conveniência: a mesma frase valia como
+ * pergunta e como resposta, e não valia como acto.
+ *
+ * O que a impedia era o desenho da escrita: `S_V` guarda UM valor e o programa
+ * copia-o para todas as linhas marcadas, pelo que só cabia lá uma constante. Uma
+ * expressão que cita colunas tem um valor POR LINHA. */
+static struct tensor set_ten;        /* o tensor do SET, quando é expressão */
+static int  set_ex = 0;              /* 1 quando o SET é expressão e não constante */
 
 static int novo_no(struct arvore *a){
     if(a->n >= MAXNO) return -1;
@@ -4049,6 +4122,60 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
             ord_usa_rascunho();
         }
     }
+    /* ── O SET COM EXPRESSÃO: UM VALOR POR LINHA, E CONTINUA A SER A MÁQUINA
+     * A ESCREVER ────────────────────────────────────────────────────────────
+     * O caminho de baixo emite UM programa que copia `S_V` para todas as linhas
+     * marcadas — desenho certo para uma constante, e o único possível com um
+     * slot só. Com expressão cada linha tem o seu valor, e a saída não é sair da
+     * ISA: é gravar `S_V` com o valor DAQUELA linha e emitir um programa de duas
+     * cópias para ELA, tantas vezes quantas as linhas. A escrita continua a ser
+     * a máquina a correr, e continua a ser IDEMPOTENTE — valores absolutos, nunca
+     * incrementos —, que é o que faz o redo funcionar.
+     *
+     * E a expressão avalia-se com o MESMO `ten_avalia` da projecção. É esse o
+     * ponto de tudo isto: um objecto, três usos — decidir, produzir, escrever —,
+     * e não três leituras da mesma frase que teriam de concordar por acaso. */
+    if(acao == ACAO_SET && set_ex && col_set >= 0){
+        long feitas = 0;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            { long den = 1;
+              long num = ten_avalia(set_ten, i, ncols, &den);
+              /* o denominador já foi recusado no parse: aqui ele é 1 por
+               * construção, e recusar A MEIO da escrita seria deixar metade
+               * das linhas mudadas — esta função devolve PASSOS, não veredicto */
+              (void)den;
+              { Word w;
+                w.total = (Word8)((unsigned long)num & 255u); w.e = 0;
+                mem_grava(S_V, w);
+                w.total = (Word8)(((unsigned long)num >> 8) & 255u); w.e = 0;
+                mem_grava(S_VA, w); }
+              pc_emit = 0;
+              emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
+              emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));
+              emit1(OP_HALT);
+              rodar(pc_emit);
+              feitas++; }
+        }
+        for(long i = 0; i < nrows; i++)
+            if(bit_le(S_MATCH, i))
+                bit_poe(S_PRES, i*ncols + col_set, 1);
+        printf("-- %ld linha(s) escritas pela expressão, uma a uma\n", feitas);
+        /* e o ζ pelo MESMO caminho do valor fixo: o µ já tirou as chaves
+         * velhas antes da escrita, e são as novas que entram agora. Escrever
+         * aqui uma segunda reposição do índice seria duas réguas para a mesma
+         * árvore. */
+        if(mu_col >= 0){
+            ord_usa_indice(mu_col);
+            int falhou = 0;
+            for(int k = 0; k < mu_n && !falhou; k++)
+                if(!ord_insere(celula_valor(mu_idx[k], mu_col, ncols), (int)mu_idx[k]))
+                    falhou = 1;
+            ord_usa_rascunho();
+            if(falhou){ Word z = {0,0}; mem_grava(S_IDXCAB(mu_col), z); }
+        }
+        return feitas * 4;
+    }
     pc_emit = 0;
     for(long i = 0; i < nrows; i++){
         MOVE(S_MATCH + (unsigned)((unsigned long)i / SLOT_BITS), +1);
@@ -4336,8 +4463,36 @@ static int checa_corpos(unsigned citadas, long ncols){
 }
 
 /* lê `*` ou `c1, c2, …` até ao FROM; devolve 0 se não reconhecer */
-static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min, 4 avg */
-static char agr_col[64] = "";        /* a coluna que a agregação lê */
+/* ── AS AGREGAÇÕES SÃO VÁRIAS, E ISSO NÃO É UM DETALHE ───────────────────────
+ * Isto era UM inteiro e UMA cadeia, e por isso `SELECT MIN(a), MAX(a)` guardava
+ * a segunda por cima da primeira e respondia SÓ o máximo — uma coluna onde foram
+ * pedidas duas, com `ok` e sem uma palavra. Não era um erro de conta: era a
+ * resposta certa a outra pergunta.
+ *
+ * São um ARRAY, e a varredura continua a ser UMA: as agregações partilham o
+ * percurso das linhas e cada uma tem o seu acumulador. É a mesma economia do
+ * núcleo e da imagem — uma passagem lida de vários lados —, e é também o que
+ * impede que `MIN` e `MAX` vejam conjuntos de linhas diferentes. */
+#define AGR_MAX 8
+static int  agr_n = 0;                       /* quantas foram pedidas */
+static int  agr_ops[AGR_MAX];                /* 1 sum, 2 max, 3 min, 4 avg */
+static char agr_cols[AGR_MAX][64];           /* a coluna que cada uma lê */
+static int  agr_viu_count = 0;               /* houve um count na mesma lista */
+/* ── O CONFLITO MARCA-SE, E DECIDE-SE ONDE SE PODE DECIDIR ───────────────────
+ * `count` com `sum` é conflito no caminho SEM quociente — ali o count tem
+ * despacho próprio, que corre a varredura e soma o campo por popcount, e as
+ * outras percorrem as células: são dois percursos. Mas COM `GROUP BY` não há
+ * conflito nenhum: o count de cada fibra É o G que a corrida já conta, no MESMO
+ * percurso que alimenta os acumuladores — e é assim desde §W43.
+ *
+ * A leitura da lista corre ANTES de se saber se há `GROUP BY`, pelo que recusar
+ * ali recusava também o caso legítimo. Marca-se, e decide-se depois. */
+static int  agr_conflito = 0;
+#define agr_op  (agr_n ? agr_ops[0] : 0)     /* a primeira, para quem só pergunta «há?» */
+#define agr_col (agr_cols[0])
+static const char *agr_nome(int op){
+    return op == 1 ? "sum" : op == 2 ? "max" : op == 3 ? "min" : "avg";
+}
 /* o pedido matricial é escrito pela leitura da lista e recolhido pelo `varre`,
  * pela mesma ponte do `count(DISTINCT)`: quem lê corre antes de quem usa */
 static int mat_op_pedido = 0;
@@ -4392,6 +4547,19 @@ static int lista_colunas(const char **pp, char *out, int cap){
                * coluna. Por isso reconhece-se e NÃO entra na lista de colunas —
                * e o argumento pode ser `*`, que não é coluna nenhuma. */
               if(!strcasecmp(nome, "COUNT")){
+                  /* ── O COUNT NÃO SE MISTURA, E A RECUSA DIZ PORQUÊ ───────
+                   * Ele tem caminho próprio: corre a MESMA varredura do WHERE
+                   * e depois soma o campo por popcount — não é uma segunda
+                   * contagem, é a leitura da que já ficou escrita, e por isso
+                   * não satura como a materialização das linhas. Pô-lo dentro
+                   * do laço das agregações seria criar uma segunda régua para
+                   * a mesma contagem, e duas réguas para o mesmo objecto é o
+                   * defeito que esta casa persegue. Então `count(*), sum(a)`
+                   * é RECUSADO — mas com a razão dita e o caminho apontado,
+                   * em vez do «não entendido» que não distingue isto de um
+                   * erro de escrita. */
+                  agr_viu_count = 1;
+                  if(agr_n) agr_conflito = 1;
                   const char *r = q + 1; pula(&r);
                   char arg[64];
                   /* ── `count(DISTINCT b)` É CONTAR AS FIBRAS ──────────────
@@ -4426,7 +4594,13 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"RESOLVE") ? 9
                        : !strcasecmp(nome,"CRAMER") ? 10
                        : !strcasecmp(nome,"SOMA") ? 11
-                       : !strcasecmp(nome,"OPOSTO") ? 12 : 0;
+                       : !strcasecmp(nome,"OPOSTO") ? 12
+                       : !strcasecmp(nome,"DUAL") ? 13
+                       : !strcasecmp(nome,"ANIQUILADOR") ? 14
+                       : !strcasecmp(nome,"CIFRA") ? 15
+                       : !strcasecmp(nome,"AUTOVALORES") ? 16
+                       : !strcasecmp(nome,"AUTOVETORES") ? 17
+                       : !strcasecmp(nome,"GRAM") ? 18 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -4491,7 +4665,20 @@ static int lista_colunas(const char **pp, char *out, int cap){
                   char arg[64];
                   if(!ident(&q, arg, sizeof arg)) return 0;
                   pula(&q); if(*q != ')') return 0; q++;
-                  agr_op = qual; snprintf(agr_col, sizeof agr_col, "%s", arg);
+                  /* e o mesmo teste no OUTRO sentido: a lista pode trazer o
+                   * count primeiro, e sem isto a recusa só apanhava metade dos
+                   * casos — «count(*), sum(a)» passava ao lado dela e caía no
+                   * «não entendido», que não distingue isto de um erro de
+                   * escrita. Um gume tem de apontar a CADA ordem. */
+                  if(agr_viu_count) agr_conflito = 1;
+                  if(agr_n >= AGR_MAX){
+                      printf("erro: mais de %d agregações numa consulta —"
+                             " RECUSADA.\n", AGR_MAX);
+                      return 0;
+                  }
+                  agr_ops[agr_n] = qual;
+                  snprintf(agr_cols[agr_n], sizeof agr_cols[0], "%s", arg);
+                  agr_n++;
                   /* a agregação conta como coluna pedida: sem isto a lista sai
                    * VAZIA e o SELECT era recusado por não ter colunas */
                   /* o que entra na lista é o ARGUMENTO — a coluna que existe —,
@@ -5172,6 +5359,7 @@ static int le_join(const char **pp, const char *tab_esq){
 
 static int varre(const char *resto, int acao){
     set_anula = 0;                     /* antes do parse: é ele que a levanta */
+        set_ex = 0;
     const char *p = resto;
     char nome[64], alvo[64];
     long v = 0;
@@ -5199,7 +5387,8 @@ static int varre(const char *resto, int acao){
          * indexa um valor — recusa-se em vez de devolver repetidos. */
         pula(&p);
         dis_usa = palavra(&p, "DISTINCT") ? 1 : 0;
-        agr_op = 0; agr_col[0] = 0;      /* zera-se ANTES de quem lê, não depois */
+        agr_n = 0; agr_ops[0] = 0; agr_cols[0][0] = 0;   /* zera-se ANTES de quem lê */
+        agr_viu_count = 0; agr_conflito = 0;
         if(!lista_colunas(&p, cols, sizeof cols)) return 0;
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
@@ -5258,7 +5447,43 @@ static int varre(const char *resto, int acao){
         pula(&p); if(*p != '=') return 0; p++;
         pula(&p);
         if(palavra(&p, "NULL")) { set_anula = 1; v = 0; }
-        else if(!numero(&p, &v)) return 0;
+        else if(!numero(&p, &v)){
+            /* ── NÃO É NÚMERO: TENTA-SE COMO EXPRESSÃO ──────────────────────
+             * O MESMO `le_num` do WHERE e da projecção — não uma segunda
+             * leitura. Se o motor soubesse ler `b+1` de duas maneiras, elas
+             * podiam divergir; sabendo de uma, a simetria é estrutural e não
+             * uma coincidência que se mede. */
+            const char *e = p;
+            struct tensor t;
+            citadas_where = 0;
+            if(!le_num(&e, &t)) return 0;
+            pula(&e);
+            if(*e && strncasecmp(e, "WHERE", 5)) return 0;
+            /* ── E O DENOMINADOR DECIDE-SE AQUI, QUE É ONDE SE PODE ─────────
+             * `b/2` numa coluna de inteiros não é um arredondamento a fazer: é
+             * uma escrita que o corpo não aceita, e guardar o truncado seria pôr
+             * na tabela um número que não é o resultado. O denominador é do
+             * TENSOR e não da linha — é o mesmo para todas —, pelo que se sabe
+             * já aqui; e tem de ser aqui, porque a função que escreve devolve
+             * PASSOS e não veredicto: recusar lá deixava metade das linhas
+             * mudadas e a resposta a dizer que tudo correu bem. Foi assim que
+             * saiu à primeira. */
+            if(t.den && t.den != 1){
+                printf("erro: `%.*s` dá um racional (denominador %ld) e a coluna"
+                       " «%s» é de INTEIROS — guardar o truncado seria pôr na"
+                       " tabela um número que não é o resultado. RECUSADA."
+                       " (`SELECT` responde-o, porque produzir não é escrever.)\n",
+                       (int)(e - p), p, (long)t.den, alvo);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "expression yields a rational (denominator %ld),"
+                             " column \"%s\" is integer", (long)t.den, alvo); }
+                return 0;
+            }
+            set_ten = t; set_ex = 1;
+            v = 0;
+            p = e;
+        }
         col_set = col_indice(alvo);
         if(col_set < 0){
             printf("erro: a coluna «%s» não existe na tabela «%s» — o UPDATE é RECUSADO.\n",
@@ -6872,15 +7097,28 @@ static int varre(const char *resto, int acao){
         /* só as linhas VIVAS e MARCADAS entram, e a ordem é a delas */
         for(long i = 0; i < nrows && nr_v < LN_MAX; i++)
             if(bit_le(S_MATCH, i)) lin[nr_v++] = (int)i;
-        if(ncols > LN_MAX || nr_v >= LN_MAX){
-            printf("erro: a matriz é %ld×%ld e o alcance é %d×%d — RECUSADA.\n",
-                   nr_v, ncols, LN_MAX, LN_MAX);
-            if(sql_cap){ sql_cap->ok = 0;
-                snprintf(sql_cap->err, sizeof sql_cap->err,
-                         "matrix too large: %ld×%ld, limit is %d×%d",
-                         nr_v, ncols, LN_MAX, LN_MAX); }
-            return 0;
-        }
+        /* ── O TECTO DE CADA OPERAÇÃO, E ELE NÃO É UM SÓ ─────────────────────
+         * O `linear.h` guarda uma matriz até LN_MAX×LN_MAX, e é esse o tecto
+         * geral. Mas a INVERSA trabalha numa matriz AUMENTADA de n×2n — o
+         * método é justapor a identidade e reduzir —, pelo que o seu tecto é
+         * METADE. Dizer um limite e aplicar outro é o defeito que a primeira
+         * escrita tinha nas duas pontas: o teste recusava 6×6 (com `>=`) e a
+         * mensagem anunciava 6×6 como aceitável, e a inversa de uma 4×4 teria
+         * escrito fora do arranjo sem ninguém dizer nada. Cada operação diz o
+         * SEU tecto. */
+        { long tecto = (mat_op == 5 || mat_op == 13) ? LN_MAX/2 : LN_MAX;
+          if(ncols > tecto || nr_v > tecto){
+              printf("erro: a matriz é %ld×%ld e o alcance %s é %ld×%ld —"
+                     " RECUSADA.\n", nr_v, ncols,
+                     (mat_op == 5 || mat_op == 13)
+                         ? "desta operação (metade, pela matriz aumentada)"
+                                   : "desta casa", tecto, tecto);
+              if(sql_cap){ sql_cap->ok = 0;
+                  snprintf(sql_cap->err, sizeof sql_cap->err,
+                           "matrix too large: %ld×%ld, limit is %ld×%ld",
+                           nr_v, ncols, tecto, tecto); }
+              return 0;
+          } }
         A = mat0((int)nr_v, (int)ncols);
         { int falta = 0;
           for(int i = 0; i < (int)nr_v; i++)
@@ -6902,6 +7140,15 @@ static int varre(const char *resto, int acao){
           } }
 
         if(mat_op == 1 || mat_op == 2 || mat_op == 3){       /* det, posto, traço */
+            /* ── UM ZERO PODE SER DUAS COISAS, E ISSO NÃO PODE FICAR ─────────
+             * O `qz_mult` e o `qz_soma` da casa devolvem ZERO quando o
+             * resultado não cabe no inteiro — e contam-no em `qz_perdeu`. Sem
+             * ler esse contador, um determinante que ESTOUROU é indistinguível
+             * de um determinante NULO: os dois saem `0`, e o primeiro é a
+             * resposta errada com a cara da certa. Lê-se antes e depois, e o
+             * que perdeu é RECUSADO — «singular» e «não coube» são coisas
+             * diferentes e têm de o dizer. */
+            long perdeu_antes = qz_perdeu;
             Qz v = qz(0,1);
             long inteiro = 0;
             const char *nm = mat_op == 1 ? "det" : mat_op == 2 ? "posto" : "traco";
@@ -6926,6 +7173,17 @@ static int varre(const char *resto, int acao){
                     return 0;
                 }
                 for(int i = 0; i < A.n; i++) v = qz_soma(v, A.a[i][i]);
+            }
+            if(qz_perdeu != perdeu_antes){
+                printf("erro: a conta não coube no inteiro (%ld perdas) — o"
+                       " resultado seria ZERO com cara de resposta, e um zero"
+                       " assim é indistinguível de um determinante nulo."
+                       " RECUSADA.\n", qz_perdeu - perdeu_antes);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "matrix arithmetic overflowed: %ld values lost",
+                             qz_perdeu - perdeu_antes); }
+                return 0;
             }
             { char cel[SQL_OUT_CELL];
               if(mat_op == 2) snprintf(cel, sizeof cel, "%ld", inteiro);
@@ -7249,6 +7507,327 @@ static int varre(const char *resto, int acao){
             return 1;
         }
 
+        /* ═══ O DUAL, DENTRO DO MOTOR ══════════════════════════════════════
+         * «o vetor fornece o objeto; o funcional fornece a coordenada que o
+         * mede». As duas peças que faltavam do `linear.h` são as duas metades
+         * disso, e nenhuma pede uma linha nova de álgebra:
+         *
+         *   dual(*)         as colunas da tabela são uma BASE, e a base dual
+         *                   são as LINHAS de B⁻¹ — construída, não procurada,
+         *                   porque e^i(e_j) = δ^i_j É a definição de inversa.
+         *   aniquilador(*)  as LINHAS da tabela geram W, e os funcionais que
+         *                   se anulam em W são o NÚCLEO dessa matriz. A mesma
+         *                   descida do §W52, lida do lado do dual.
+         *
+         * E o aniquilador traz a conservação uma QUARTA vez:
+         *
+         *     dim W + dim W° = n
+         *
+         * que não é uma lei nova — é `posto + dim(ker) = n` aplicado à matriz
+         * das linhas, com o posto a ser dim W. As dimensões repartem-se outra
+         * vez, e outra vez sem se ter pedido. */
+        /* ═══ A CIFRA: O ESPECTRO ESCRITO EM INTEIROS ══════════════════════
+         * O `cifra.h` desta casa não foi escrito para matrizes — foi escrito
+         * para CORPOS, e diz na porta que as suas duas grandezas são «a razão
+         * (quanto se estica por nível) → o traço B» e «o sinal (se as duas
+         * direções se cancelam) → o determinante C». E diz mais: «o hipercorpo
+         * não tem (B,C): o seu operador NÃO É uma matriz 2×2». Ou seja: o par
+         * que define um corpo desta casa JÁ ERA o par de invariantes de uma
+         * matriz 2×2, e ninguém precisou de os identificar — estavam
+         * identificados desde que aquilo foi escrito.
+         *
+         * Então `cifra(*)` não acrescenta álgebra nenhuma: pega no traço e no
+         * determinante que o motor já dá e chama o codificador. O que sai é o
+         * ESPECTRO — as raízes de λ² − Bλ + C, que são (B ± √(B²−4C))/2 —
+         * escrito como fração contínua periódica, em inteiros e sem uma raiz
+         * calculada: Lagrange garante que o período é invariante completo.
+         *
+         * E daí sai o gume de graça: matrizes SEMELHANTES têm a mesma cifra,
+         * porque têm o mesmo traço e o mesmo determinante. Não é uma
+         * propriedade que se lhe tenha dado — é o que «invariante de
+         * conjugação» quer dizer, e mede-se com o motor contra si próprio. */
+        /* ═══ O ESPECTRO POR NÚMEROS — O SEGUNDO CAMINHO ═══════════════════
+         * A `cifra` escreve o espectro SEMPRE, por fração contínua, e vale
+         * para todo o par (B,C) inteiro. O `esp_racional` do `forma.h` dá os
+         * NÚMEROS, mas só quando o discriminante é quadrado perfeito. Os dois
+         * lêem o MESMO discriminante — partilham o `raizi` —, o que faz deles
+         * duas leituras de um objecto e não duas contas parecidas.
+         *
+         * E onde as raízes NÃO são racionais, isto não é um limite da conta: é
+         * a resposta. As raízes são as folhas do corpo, e escrevem-se pela
+         * cifra — a recusa remete para lá em vez de devolver um decimal, que
+         * seria trocar o objecto por uma aproximação dele. */
+        /* ═══ A GRAM: O PRODUTO INTERNO É O QUE FECHA O DUAL ═══════════════
+         * A base dual do §W60 precisa de uma BASE para existir: os e^i são as
+         * linhas de B⁻¹, e mudar B muda-os. O produto interno faz o mesmo
+         * trabalho SEM escolher base — dá o isomorfismo canónico v ↦ ⟨v,·⟩ —, e
+         * a sua forma escrita é a matriz de Gram das linhas:
+         *
+         *     G_ij = ⟨v_i, v_j⟩,   e   G = A·Aᵀ
+         *
+         * Daí três coisas de graça, e nenhuma precisa de uma linha de álgebra
+         * nova: G é SIMÉTRICA (o produto interno não tem lado), det G = 0
+         * exactamente quando as linhas são DEPENDENTES (é o determinante de
+         * Gram, e é Cauchy–Schwarz quando n = 2), e posto G = posto A — a
+         * mesma dimensão contada nos dois sítios.
+         *
+         * E a raiz nunca se tira: ⟨v,v⟩ é a norma AO QUADRADO, porque é a raiz
+         * que traria o irracional para dentro de uma conta que é exacta. */
+        if(mat_op == 18){
+            MatQz G = mat0((int)nr_v, (int)nr_v);
+            for(int i = 0; i < (int)nr_v; i++)
+                for(int j = 0; j < (int)nr_v; j++){
+                    VecQz u, v; u.n = v.n = (int)ncols;
+                    for(int t = 0; t < (int)ncols; t++){ u.c[t] = A.a[i][t];
+                                                         v.c[t] = A.a[j][t]; }
+                    G.a[i][j] = pi(u, v);
+                }
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->nrows = (int)nr_v > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : (int)nr_v;
+                sql_cap->ncols = (int)nr_v > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : (int)nr_v;
+                for(int j = 0; j < sql_cap->ncols; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+            }
+            for(int i = 0; i < (int)nr_v; i++){
+                printf("   ");
+                for(int j = 0; j < (int)nr_v; j++){
+                    Par cls = ra_classe((Par){ (long)G.a[i][j].p, (long)G.a[i][j].q });
+                    char cel[SQL_OUT_CELL];
+                    if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                    else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                    printf("%s%s", cel, j + 1 < (int)nr_v ? " | " : "");
+                    if(sql_cap && i < sql_cap->nrows && j < sql_cap->ncols)
+                        snprintf(sql_cap->cell[i][j], SQL_OUT_CELL, "%s", cel);
+                }
+                printf("\n");
+            }
+            { Par dg = ra_classe((Par){ (long)mat_det(G).p, (long)mat_det(G).q });
+              printf("-- a Gram das %ld linhas: G = A·Aᵀ, simétrica · det %ld"
+                     " (zero ⟺ dependentes) · posto %d = posto de A %d\n",
+                     nr_v, dg.a, mat_posto(G), mat_posto(A)); }
+            return 1;
+        }
+
+        if(mat_op == 16 || mat_op == 17){
+            if(A.m != 2 || A.n != 2){
+                printf("erro: o espectro exacto desta casa é o de uma matriz"
+                       " 2×2 — acima disso o característico tem grau maior e as"
+                       " raízes deixam de sair de um discriminante. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "spectrum needs a 2×2 matrix, got %d×%d", A.m, A.n); }
+                return 0;
+            }
+            long l1, l2;
+            if(!esp_racional(A, &l1, &l2)){
+                long D = esp_disc(A);
+                printf("erro: o discriminante é %ld e não é quadrado perfeito —"
+                       " as raízes NÃO são racionais. Não é um limite da conta:"
+                       " são as folhas do corpo, e escrevem-se pela cifra."
+                       " Peça `SELECT cifra(*)`.\n", D);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "eigenvalues are not rational (disc %ld);"
+                             " use cifra(*)", D); }
+                return 0;
+            }
+            if(mat_op == 16){
+                if(sql_cap){
+                    memset(sql_cap, 0, sizeof *sql_cap);
+                    sql_cap->ok = 1; sql_cap->nrows = (l1 == l2) ? 1 : 2;
+                    sql_cap->ncols = 1;
+                    snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "lambda");
+                    sql_cap->tipo[0] = SQL_TIPO_INT4;
+                    snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", l1);
+                    if(l1 != l2)
+                        snprintf(sql_cap->cell[1][0], SQL_OUT_CELL, "%ld", l2);
+                    snprintf(sql_cap->tag, sizeof sql_cap->tag,
+                             "SELECT %d", sql_cap->nrows);
+                }
+                if(l1 == l2) printf("   %ld\n", l1);
+                else { printf("   %ld\n   %ld\n", l1, l2); }
+                printf("-- o espectro: λ² − %ldλ + %ld, discriminante %ld"
+                       " (quadrado perfeito) · soma %ld = traço · produto %ld ="
+                       " determinante%s\n",
+                       (long)qz_soma(A.a[0][0], A.a[1][1]).p,
+                       (long)mat_det(A).p, esp_disc(A), l1 + l2, l1 * l2,
+                       l1 == l2 ? " · raiz DUPLA" : "");
+                return 1;
+            }
+            /* ── OS AUTOVETORES, E O QUE ELES DECIDEM ────────────────────────
+             * Cada um sai do NÚCLEO de A − λI, que é a peça do §W52 outra vez.
+             * E quantos são INDEPENDENTES é o que decide a diagonalizabilidade:
+             * com raiz dupla, uma matriz pode ter dois (e é a homotetia) ou um
+             * só (e é o bloco de Jordan) — e a diferença não está nos valores,
+             * está aqui. */
+            VecQz vs[LN_MAX];
+            int k = esp_autovetores(A, vs);
+            int diag = (k == A.n) && vec_li(vs, k);
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->nrows = k > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : k;
+                sql_cap->ncols = 2;
+                for(int j = 0; j < 2; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+            }
+            if(!k) printf("   (vazio)\n");
+            for(int i = 0; i < k; i++){
+                printf("   ");
+                for(int j = 0; j < vs[i].n; j++){
+                    Par cls = ra_classe((Par){ (long)vs[i].c[j].p, (long)vs[i].c[j].q });
+                    char cel[SQL_OUT_CELL];
+                    if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                    else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                    printf("%s%s", cel, j + 1 < vs[i].n ? " | " : "");
+                    if(sql_cap && i < sql_cap->nrows && j < sql_cap->ncols)
+                        snprintf(sql_cap->cell[i][j], SQL_OUT_CELL, "%s", cel);
+                }
+                printf("\n");
+            }
+            printf("-- %d autovector(es) independente(s) para λ = %ld, %ld ·"
+                   " %s (precisa de %d)\n", k, l1, l2,
+                   diag ? "DIAGONALIZÁVEL" : "não diagonalizável", A.n);
+            return 1;
+        }
+
+        if(mat_op == 15){
+            if(A.m != 2 || A.n != 2){
+                printf("erro: a cifra pede uma matriz 2×2 — o par (traço,"
+                       " determinante) só é o par (B,C) de um corpo nesse"
+                       " tamanho, e acima dele o característico tem mais"
+                       " coeficientes. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "cifra needs a 2×2 matrix, got %d×%d", A.m, A.n); }
+                return 0;
+            }
+            Qz tr = qz_soma(A.a[0][0], A.a[1][1]);
+            Qz dt = qz_soma(qz_mult(A.a[0][0], A.a[1][1]),
+                            qz_oposto(qz_mult(A.a[0][1], A.a[1][0])));
+            Par ctr = ra_classe((Par){ (long)tr.p, (long)tr.q });
+            Par cdt = ra_classe((Par){ (long)dt.p, (long)dt.q });
+            if(ctr.b != 1 || cdt.b != 1){
+                /* ── E A CIFRA É DE INTEIROS, o que não é uma limitação da
+                 * conta: o codificador é o de um CORPO, e um corpo desta casa
+                 * é dado por dois inteiros. Um traço fracionário diz que a
+                 * matriz não é o operador de nenhum corpo do catálogo. */
+                printf("erro: traço %ld/%ld e determinante %ld/%ld — a cifra é"
+                       " de um corpo, e um corpo desta casa é dado por DOIS"
+                       " INTEIROS. RECUSADA.\n", ctr.a, ctr.b, cdt.a, cdt.b);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "cifra needs integer trace and determinant"); }
+                return 0;
+            }
+            long a[64];
+            size_t k = cifra_geral(NULL, 0, ctr.a, cdt.a, ctr.a, a, 64);
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->nrows = 1;
+                sql_cap->ncols = (int)k > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : (int)k;
+                for(int j = 0; j < sql_cap->ncols; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                    snprintf(sql_cap->cell[0][j], SQL_OUT_CELL, "%ld", a[j]);
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+            }
+            printf("   ");
+            for(size_t j = 0; j < k; j++)
+                printf("%ld%s", a[j], j + 1 < k ? " | " : "");
+            printf("\n-- a cifra do espectro: B = %ld (traço), C = %ld"
+                   " (determinante) · λ² − %ldλ + %ld · %zu termos\n",
+                   ctr.a, cdt.a, ctr.a, cdt.a, k);
+            return 1;
+        }
+
+        if(mat_op == 13 || mat_op == 14){
+            Fun d[LN_MAX];
+            int k, dim = (int)ncols;
+            if(mat_op == 13){
+                if(A.m != A.n){
+                    printf("erro: a base dual pede uma matriz QUADRADA (%d×%d) —"
+                           " uma base de %d vectores num espaço de dimensão %d"
+                           " não é base. RECUSADA.\n", A.m, A.n, A.n, A.m);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "dual needs a square matrix: %d×%d", A.m, A.n); }
+                    return 0;
+                }
+                VecQz col[LN_MAX];
+                for(int j = 0; j < A.n; j++){
+                    col[j].n = A.m;
+                    for(int i = 0; i < A.m; i++) col[j].c[i] = A.a[i][j];
+                }
+                k = fun_base_dual(col, A.n, d) ? A.n : -1;
+                if(k < 0){
+                    /* ── E A RECUSA É A LEI, não um acidente ────────────────
+                     * Sem inversa não há base dual porque as colunas não são
+                     * uma base: são dependentes, e o funcional que devia
+                     * separar duas delas teria de dar 1 e 0 ao MESMO vector.
+                     * Dizer «não deu» esconderia isso; diz-se o posto. */
+                    printf("erro: as colunas não são uma base — posto %d de %d,"
+                           " logo há dependência e nenhum funcional as separa."
+                           " RECUSADA.\n", mat_posto(A), A.n);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "columns are not a basis: rank %d of %d",
+                                 mat_posto(A), A.n); }
+                    return 0;
+                }
+            } else {
+                VecQz lin[LN_MAX];
+                for(int i = 0; i < A.m; i++){
+                    lin[i].n = A.n;
+                    for(int j = 0; j < A.n; j++) lin[i].c[j] = A.a[i][j];
+                }
+                k = fun_aniquilador(lin, A.m, A.n, d);
+            }
+            const char *nm = (mat_op == 13) ? "base dual" : "aniquilador";
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1;
+                sql_cap->ncols = dim > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : dim;
+                sql_cap->nrows = k > SQL_OUT_MAX_ROWS ? SQL_OUT_MAX_ROWS : k;
+                for(int j = 0; j < sql_cap->ncols; j++){
+                    snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "c%d", j + 1);
+                    sql_cap->tipo[j] = SQL_TIPO_INT4;
+                }
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", sql_cap->nrows);
+            }
+            if(!k) printf("   (vazio — nenhum funcional se anula em tudo)\n");
+            for(int i = 0; i < k; i++){
+                printf("   ");
+                for(int j = 0; j < d[i].n; j++){
+                    Par cls = ra_classe((Par){ (long)d[i].c[j].p, (long)d[i].c[j].q });
+                    char cel[SQL_OUT_CELL];
+                    if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                    else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                    printf("%s%s", cel, j + 1 < d[i].n ? " | " : "");
+                    if(sql_cap && i < sql_cap->nrows && j < sql_cap->ncols)
+                        snprintf(sql_cap->cell[i][j], SQL_OUT_CELL, "%s", cel);
+                }
+                printf("\n");
+            }
+            if(mat_op == 13)
+                printf("-- a %s: %d funcional(is), e e^i(e_j) = 1 se i=j, 0 senão\n",
+                       nm, k);
+            else
+                printf("-- o %s: %d funcional(is) · dim W %d + dim W° %d = %ld\n",
+                       nm, k, mat_posto(A), k, ncols);
+            return 1;
+        }
+
         { MatQz R;                        /* transposta, inversa e oposto */
           const char *nm = mat_op == 4 ? "transposta"
                          : mat_op == 12 ? "oposto" : "inversa";
@@ -7308,25 +7887,51 @@ static int varre(const char *resto, int acao){
           return 1; }
     }
 
-    if(acao == ACAO_MARCA && agr_op && !grp_col[0]){
-        int ac = col_indice(agr_col);
-        if(ac < 0){
-            printf("erro: a coluna «%s» não existe — a agregação é RECUSADA.\n", agr_col);
+    if(acao == ACAO_MARCA && agr_n && !grp_col[0]){
+        if(agr_conflito){
+            printf("erro: `count` e `%s` na mesma lista SEM quociente — o count"
+                   " corre pela soma do campo (popcount) e as outras pela"
+                   " varredura das células; são DOIS percursos, e juntá-los daria"
+                   " duas réguas para a mesma contagem. Com `GROUP BY` não há"
+                   " conflito, porque aí o count de cada fibra É o G que a corrida"
+                   " já conta.\n", agr_nome(agr_ops[0]));
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
-                         "column \"%s\" does not exist", agr_col); }
+                         "count() cannot be combined with %s() without GROUP BY;"
+                         " ask them separately", agr_nome(agr_ops[0])); }
             return 0;
         }
-        { long ag = 0, quantas = 0; int viu = 0;
+        int ac[AGR_MAX];
+        for(int k = 0; k < agr_n; k++){
+            ac[k] = col_indice(agr_cols[k]);
+            if(ac[k] < 0){
+                printf("erro: a coluna «%s» não existe — a agregação é"
+                       " RECUSADA.\n", agr_cols[k]);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "column \"%s\" does not exist", agr_cols[k]); }
+                return 0;
+            }
+        }
+        /* ── UMA VARREDURA, VÁRIOS ACUMULADORES ──────────────────────────
+         * As agregações partilham o percurso das linhas: além de ser a mesma
+         * economia do núcleo e da imagem, é o que garante que o `MIN` e o
+         * `MAX` de uma consulta vêem EXACTAMENTE o mesmo conjunto — com duas
+         * varreduras, um filtro que mudasse entre elas dava um par que não
+         * corresponde a nenhum estado da tabela. */
+        { long ag[AGR_MAX], quantas[AGR_MAX]; int viu[AGR_MAX];
+          for(int k = 0; k < agr_n; k++){ ag[k] = 0; quantas[k] = 0; viu[k] = 0; }
           for(long i = 0; i < nrows; i++){
               if(!bit_le(S_MATCH, i)) continue;
-              if(!bit_le(S_PRES, i*ncols + ac)) continue;   /* o corpo, não o suporte */
-              { long w = celula_valor(i, ac, ncols);
-                if(!viu){ ag = w; viu = 1; }
-                else if(agr_op == 1 || agr_op == 4) ag += w;
-                else if(agr_op == 2){ if(w > ag) ag = w; }
-                else if(agr_op == 3){ if(w < ag) ag = w; }
-                quantas++; }
+              for(int k = 0; k < agr_n; k++){
+                  if(!bit_le(S_PRES, i*ncols + ac[k])) continue;  /* o corpo, não o suporte */
+                  { long w = celula_valor(i, ac[k], ncols);
+                    if(!viu[k]){ ag[k] = w; viu[k] = 1; }
+                    else if(agr_ops[k] == 1 || agr_ops[k] == 4) ag[k] += w;
+                    else if(agr_ops[k] == 2){ if(w > ag[k]) ag[k] = w; }
+                    else if(agr_ops[k] == 3){ if(w < ag[k]) ag[k] = w; }
+                    quantas[k]++; }
+              }
           }
           /* ── A MÉDIA É UM RACIONAL, E NÃO UM DECIMAL ARREDONDADO ────────
            * `avg` é a soma sobre a contagem, e a divisão de inteiros SAI DO
@@ -7336,29 +7941,32 @@ static int varre(const char *resto, int acao){
            * segue não valeria: `avg × count = sum` exactamente, sem resto.
            * Guarda-se a CLASSE reduzida, que é o representante único do
            * `ra_classe`, e imprime-se `a/b` ou o inteiro quando b = 1. */
-          if(viu && agr_op == 4){
-              Par m = ra_classe((Par){ ag, quantas });
-              if(m.b > 1) printf("   %ld/%ld\n", m.a, m.b);
-              else        printf("   %ld\n", m.a);
+          char txt[AGR_MAX][40];
+          for(int k = 0; k < agr_n; k++){
+              if(viu[k] && agr_ops[k] == 4){
+                  Par m = ra_classe((Par){ ag[k], quantas[k] });
+                  if(m.b > 1) snprintf(txt[k], sizeof txt[0], "%ld/%ld", m.a, m.b);
+                  else        snprintf(txt[k], sizeof txt[0], "%ld", m.a);
+              }
+              else if(viu[k]) snprintf(txt[k], sizeof txt[0], "%ld", ag[k]);
+              else            txt[k][0] = 0;
           }
-          else if(viu) printf("   %ld\n", ag);
-          else    printf("   (ausente — nenhum valor para agregar)\n");
-          printf("-- %ld linha(s) agregada(s) em 1\n", quantas);
+          printf("   ");
+          for(int k = 0; k < agr_n; k++)
+              printf("%s%s", txt[k][0] ? txt[k] : "(ausente)",
+                     k + 1 < agr_n ? " | " : "");
+          printf("\n-- %ld linha(s) agregada(s) em 1, com %d agregação(ões)\n",
+                 quantas[0], agr_n);
           if(sql_cap){
               memset(sql_cap->col, 0, sizeof sql_cap->col);
-              sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
-              snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "%s",
-                       agr_op == 1 ? "sum" : agr_op == 2 ? "max"
-                                   : agr_op == 3 ? "min" : "avg");
-              sql_cap->tipo[0] = (agr_op == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4;
-              if(viu && agr_op == 4){
-                  Par m = ra_classe((Par){ ag, quantas });
-                  if(m.b > 1) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
-                                       "%ld/%ld", m.a, m.b);
-                  else        snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", m.a);
+              sql_cap->ok = 1; sql_cap->ncols = agr_n; sql_cap->nrows = 1;
+              for(int k = 0; k < agr_n; k++){
+                  snprintf(sql_cap->col[k], sizeof sql_cap->col[0], "%s",
+                           agr_nome(agr_ops[k]));
+                  sql_cap->tipo[k] = (agr_ops[k] == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4;
+                  if(txt[k][0]) snprintf(sql_cap->cell[0][k], SQL_OUT_CELL, "%s", txt[k]);
+                  else { sql_cap->cell[0][k][0] = 0; sql_cap->nulo[0][k] = 1; }
               }
-              else if(viu) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ag);
-              else { sql_cap->cell[0][0][0] = 0; sql_cap->nulo[0][0] = 1; }
               snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
           }
           return 1; }
@@ -7451,11 +8059,11 @@ static int varre(const char *resto, int acao){
               }
               snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "count");
               sql_cap->tipo[c] = SQL_TIPO_INT8; c++;
-              if(agr_op){
+              for(int k = 0; k < agr_n; k++){
                   snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "%s",
-                           agr_op == 1 ? "sum" : agr_op == 2 ? "max"
-                                       : agr_op == 3 ? "min" : "avg");
-                  sql_cap->tipo[c] = (agr_op == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4; c++;
+                           agr_nome(agr_ops[k]));
+                  sql_cap->tipo[c] = (agr_ops[k] == 4) ? SQL_TIPO_TEXT : SQL_TIPO_INT4;
+                  c++;
               }
               sql_cap->ncols = c; }
         }
@@ -7463,11 +8071,17 @@ static int varre(const char *resto, int acao){
           while(k < n){
               int tem = bit_le(S_PRES, seq[k]*ncols + gc);
               long v = tem ? celula_valor(seq[k], gc, ncols) : 0, g = 0;
-              long ag = 0; int ag_viu = 0;
-              int ac = agr_op ? col_indice(agr_col) : -1;
+              /* um acumulador POR agregação, e a corrida do grupo alimenta-os
+               * todos na mesma passagem — a mesma razão de sempre: com duas
+               * passagens, o MIN e o MAX de um grupo podiam ver conjuntos
+               * diferentes de linhas. */
+              long ag[AGR_MAX], ag_n[AGR_MAX]; int ag_viu[AGR_MAX], ac[AGR_MAX];
+              for(int k = 0; k < agr_n; k++){
+                  ag[k] = 0; ag_n[k] = 0; ag_viu[k] = 0;
+                  ac[k] = col_indice(agr_cols[k]);
+              }
               /* a fibra do dual junta-se por NÃO TER chave, não por ter a
                * mesma; as duas condições estão na mesma linha e são disjuntas */
-              long ag_n = 0;                     /* quantos do CORPO entraram */
               /* a chave do grupo é o PAR quando há segunda coluna: a corrida
                * termina quando QUALQUER das duas muda */
               int gc2 = grp_col2[0] ? col_indice(grp_col2) : -1;
@@ -7478,13 +8092,14 @@ static int varre(const char *resto, int acao){
                           && (gc2 < 0
                               || (bit_le(S_PRES, seq[k]*ncols + gc2) == tem2
                                   && (!tem2 || celula_valor(seq[k], gc2, ncols) == v2)))){
-                  if(ac >= 0 && bit_le(S_PRES, seq[k]*ncols + ac)){
-                      long w = celula_valor(seq[k], ac, ncols);
-                      if(!ag_viu){ ag = w; ag_viu = 1; }
-                      else if(agr_op == 1 || agr_op == 4) ag += w;
-                      else if(agr_op == 2){ if(w > ag) ag = w; }
-                      else if(agr_op == 3){ if(w < ag) ag = w; }
-                      ag_n++;
+                  for(int t = 0; t < agr_n; t++){
+                      if(ac[t] < 0 || !bit_le(S_PRES, seq[k]*ncols + ac[t])) continue;
+                      { long w = celula_valor(seq[k], ac[t], ncols);
+                        if(!ag_viu[t]){ ag[t] = w; ag_viu[t] = 1; }
+                        else if(agr_ops[t] == 1 || agr_ops[t] == 4) ag[t] += w;
+                        else if(agr_ops[t] == 2){ if(w > ag[t]) ag[t] = w; }
+                        else if(agr_ops[t] == 3){ if(w < ag[t]) ag[t] = w; }
+                        ag_n[t]++; }
                   }
                   g++; k++;
               }
@@ -7496,21 +8111,25 @@ static int varre(const char *resto, int acao){
               if(lim_n >= 0 && grupos >= lim_n) break;      /* o prefixo */
               /* a média de cada fibra também é um RACIONAL: a divisão sai do
                * andar, e o representante único é a classe reduzida */
-              char agtxt[32];
-              if(agr_op == 4 && ag_viu){
-                  Par m = ra_classe((Par){ ag, ag_n });
-                  if(m.b > 1) snprintf(agtxt, sizeof agtxt, "%ld/%ld", m.a, m.b);
-                  else        snprintf(agtxt, sizeof agtxt, "%ld", m.a);
-              } else if(ag_viu) snprintf(agtxt, sizeof agtxt, "%ld", ag);
-              else              snprintf(agtxt, sizeof agtxt, "");
+              char agtxt[AGR_MAX][40];
+              for(int t = 0; t < agr_n; t++){
+                  if(agr_ops[t] == 4 && ag_viu[t]){
+                      Par m = ra_classe((Par){ ag[t], ag_n[t] });
+                      if(m.b > 1) snprintf(agtxt[t], sizeof agtxt[0], "%ld/%ld", m.a, m.b);
+                      else        snprintf(agtxt[t], sizeof agtxt[0], "%ld", m.a);
+                  } else if(ag_viu[t]) snprintf(agtxt[t], sizeof agtxt[0], "%ld", ag[t]);
+                  else                 agtxt[t][0] = 0;
+              }
               { char ch[64];
                 if(gc2 >= 0) snprintf(ch, sizeof ch, "%s%ld | %s%ld",
                                       tem ? "" : "(ausente) ", tem ? v : 0,
                                       tem2 ? "" : "(ausente) ", tem2 ? v2 : 0);
                 else         snprintf(ch, sizeof ch, "%s%ld",
                                       tem ? "" : "(ausente) ", tem ? v : 0);
-                if(ac >= 0) printf("   %s | %ld | %s\n", ch, g, agtxt);
-                else        printf("   %s | %ld\n", ch, g); }
+                printf("   %s | %ld", ch, g);
+                for(int t = 0; t < agr_n; t++)
+                    printf(" | %s", agtxt[t][0] ? agtxt[t] : "(ausente)");
+                printf("\n"); }
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
                   /* e a chave do grupo do dual sai AUSENTE, não a zero: o
                    * cliente tem de ver a mesma distinção que o motor faz */
@@ -7524,9 +8143,9 @@ static int varre(const char *resto, int acao){
                         c++;
                     }
                     snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", g); c++;
-                    if(ac >= 0){
-                        snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%s", agtxt);
-                        if(!agtxt[0]) sql_cap->nulo[r][c] = 1;
+                    for(int t = 0; t < agr_n; t++){
+                        snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%s", agtxt[t]);
+                        if(!agtxt[t][0]) sql_cap->nulo[r][c] = 1;
                         c++;
                     } }
                   sql_cap->nrows++;
@@ -9159,6 +9778,48 @@ static int executa(const char *sql){
                           char c[64];
                           if(ident(&d, c, sizeof c))
                               snprintf(cnt_dis_pedido, sizeof cnt_dis_pedido, "%s", c);
+                      } }
+                    /* ── E A MISTURA APANHA-SE TAMBÉM AQUI ──────────────
+                     * Este despacho corre ANTES da leitura da lista e troca-a
+                     * por `*`, pelo que a recusa escrita lá nunca via o caso
+                     * em que o `count` vem PRIMEIRO: `count(*), sum(a)` caía
+                     * no «não entendido», que não distingue isto de um erro de
+                     * escrita. O gume tem de apontar a CADA ordem, e são duas.
+                     * Só se recusa quando o que segue traz OUTRA agregação —
+                     * uma coluna a seguir ao count não é a mesma coisa. */
+                    { const char *v = fim + 1; pula(&v);
+                      /* e só é conflito SEM quociente: com `GROUP BY` o count de
+                       * cada fibra é o G que a corrida já conta, no mesmo
+                       * percurso — recusar ali recusava o que §W43 mede. */
+                      int tem_grupo = 0;
+                      { const char *h = fim;
+                        while(*h){ if(!strncasecmp(h, "GROUP", 5)){ tem_grupo = 1; break; }
+                                   h++; } }
+                      if(*v == ',' && !tem_grupo){
+                          const char *ate = v;
+                          while(*ate && strncasecmp(ate, "FROM", 4)) ate++;
+                          static const char *nn[4] = { "SUM(", "MAX(", "MIN(", "AVG(" };
+                          for(int t = 0; t < 4; t++){
+                              const char *h = v;
+                              while(h < ate && strncasecmp(h, nn[t], 4)) h++;
+                              if(h < ate){
+                                  char nome[8];
+                                  snprintf(nome, sizeof nome, "%.3s", nn[t]);
+                                  for(char *z = nome; *z; z++) *z = (char)tolower((unsigned char)*z);
+                                  printf("erro: `count` e `%s` na mesma lista — o"
+                                         " count corre pela soma do campo"
+                                         " (popcount) e as outras pela varredura"
+                                         " das células; são DOIS percursos, e"
+                                         " juntá-los daria duas réguas para a"
+                                         " mesma contagem. Peça-os em duas"
+                                         " consultas.\n", nome);
+                                  if(sql_cap){ sql_cap->ok = 0;
+                                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                                               "count() cannot be combined with"
+                                               " %s(); ask them separately", nome); }
+                                  return 0;
+                              }
+                          }
                       } }
                     snprintf(resto, sizeof resto, "*%s", fim + 1);
                     ok = varre(resto, ACAO_MARCA);
