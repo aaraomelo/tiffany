@@ -1674,7 +1674,7 @@ Quem leu a construção já leu a máquina. \textbf{Falta ver os bytes.}
 
 \subsection{A zeta dinâmica e os problemas em aberto --- onde a analogia para}\label{sec:clay}
 
-A zeta deste texto, $\zeta(x) = 1/\beta^*(x)$, é do mesmo \emph{tipo} que as zetas para as quais a
+A zeta deste texto, $\zeta(x) = -1/\beta^*(x)$, é do mesmo \emph{tipo} que as zetas para as quais a
 Hipótese de Riemann está \textbf{provada} --- as de variedades sobre corpos finitos, conjecturadas
 por Weil e demonstradas por Deligne em 1974. Ambas são \emph{racionais}, ambas têm equação
 funcional. Vale a pena percorrer a analogia até ela parar, porque o sítio onde para é informativo.
@@ -22129,10 +22129,17 @@ isto é
 \[
   \zeta(x) \;=\; \exp\Big(\sum_{k\geq1}\tfrac{t_k}{k}x^k\Big) \;=\; \frac{1}{\det(I - x\Comp{n}{m})} .
 \]
-E o denominador não é um objeto novo: $\det(I-x\Comp{n}{m})$ \textbf{é} $\beta^*$, o reverso de
-$\beta_{n,m}$ --- o mesmo polinómio com que se provou o Teorema~\ref{thm:pisot}. Logo
+E o denominador não é um objeto novo: é o reverso de $\beta_{n,m}$ \emph{a menos de sinal},
 \[
-  \boxed{\;\zeta(x) \;=\; \frac{1}{\beta^*(x)} \;=\; \frac{1}{\nu(\beta_{n,m})(x)}\;}
+  \det(I-x\Comp{n}{m}) \;=\; -\beta^*(x) \;=\; 1-mx-x^{n},
+\]
+o mesmo polinómio com que se provou o Teorema~\ref{thm:pisot} --- onde o sinal é irrelevante,
+porque contar zeros não o vê. \emph{Aqui ele conta}, e quem o decide sozinha é a normalização
+$\zeta(0)=1$: a soma $\sum_k t_kx^k/k$ não tem termo constante, logo o denominador tem de valer
+$1$ em $x=0$; e $\beta^*(0) = -1$, enquanto $\det(I-0\cdot\Comp{n}{m}) = \det I = 1$. Logo
+\[
+  \boxed{\;\zeta(x) \;=\; \frac{-1}{\beta^*(x)} \;=\; \frac{-1}{\nu(\beta_{n,m})(x)}
+         \;=\; \frac{1}{1-mx-x^{n}}\;}
 \]
 Os \emph{polos} de $\zeta$ são portanto os inversos das raízes de $\beta$ --- a base vista por
 $\nu$ ---, e o mais próximo da origem é $1/\sigma$. \emph{O raio de convergência da soma é
@@ -22142,6 +22149,14 @@ raízes não dominantes têm módulo $<1$, logo os seus inversos têm módulo $>
 Verificado numericamente: para $\beta_{2,1}$ em $x=0{,}3$ a soma dá $0{,}494296321815$ e
 $-\log\det(I-x A)$ dá $0{,}494296321815$; para $\beta_{3,2}$ em $x=0{,}2$, ambos
 $0{,}524248644098$.
+
+\medido{\code{tests/pgwire.c} §W95 --- e o sinal foi decidido \emph{em inteiros}, pelo motor: pediu-se
+$\det(I-x\Comp{n}{m})$ em $70$ pontos ($n=2..6$, $m=1..2$, $x=-3..3$) e confrontou-se com as duas
+hipóteses. Bate com $-\beta^*$ em $70/70$ e com $\beta^*$ em $0/70$. Uma identidade polinomial
+testada em mais pontos que o grau está provada; e o caso $x=0$ decide-a sozinho. A mesma secção
+realiza a Prop.~\ref{prop:tracos} por dois caminhos --- o traço pedido ao motor a cada potência e a
+recorrência escrita sem ver matriz --- em $77$ instâncias, com o alcance em $k$ limitado pelo
+envelope da célula e não pela lei.}
 
 \begin{obs}[qual zeta, e qual não]
 Esta é a zeta \emph{dinâmica}, que conta pontos periódicos. O que se obtém é uma função
