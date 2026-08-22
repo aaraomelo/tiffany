@@ -14734,6 +14734,140 @@ int main(void){
            " a dos bits em 6/6 — o par dual da secção é uma operação do banco.", mal == 0);
     }
 
+    /* ═══ §W103: OS QUATRO \est{N} QUE SOBRAVAM NO CORPO MÓRFICO ═══════════ */
+    {
+        long mal = 0;
+        printf("\n§W103 A torção, a deflexão involutiva, os dois degenerados, e a assinatura que não há.\n\n");
+
+        /* ── (1) teo:antiroquemetade — «1 é o ÚNICO elemento não nulo com
+         * 2·1 ≡ 0», e D_1 é involução. Não se afirma: conta-se em ℤ/2. */
+        {
+            long tors = 0, N = 2;
+            for(long t = 1; t < N; t++) if((2*t) % N == 0) tors++;
+            int inv = 1;
+            for(long x = 0; x < N; x++) if(((x + 1) % N + 1) % N != x) inv = 0;
+            printf("      teo:antiroquemetade — em ℤ/2 há %ld elemento não nulo com"
+                   " 2θ ≡ 0 (a metade ℓ/2 = 1), e D₁ é involução: %s\n",
+                   tors, inv ? "sim" : "NÃO");
+            if(tors != 1 || !inv) mal++;
+            /* e D₁ É a complementação: x ⊕ 1 = ¬x, nos dois elementos */
+            long igual = 0;
+            for(long x = 0; x < 2; x++) if(((x + 1) % 2) == (x ^ 1)) igual++;
+            printf("        e D₁(x) = x+1 coincide com x⊕1 = ¬x em %ld/2\n", igual);
+            if(igual != 2) mal++;
+        }
+
+        /* ── (2) teo:dualmetrico — «D_θ∘D_θ = id ⟺ 2θ = 0». Varre-se ℤ/n para
+         * n até 12 e exige-se a EQUIVALÊNCIA, não uma das direcções. */
+        {
+            long ok = 0, tot = 0, invol_n = 0, tors_n = 0;
+            for(long n = 2; n <= 12; n++)
+            for(long t = 0; t < n; t++){
+                int invol = 1;
+                for(long x = 0; x < n; x++)
+                    if(((x + t) % n + t) % n != x) invol = 0;
+                int tors = ((2*t) % n == 0);
+                tot++;
+                if(invol == tors) ok++;
+                if(invol) invol_n++;
+                if(tors) tors_n++;
+            }
+            printf("      teo:dualmetrico — «D_θ∘D_θ = id ⟺ 2θ = 0» em %ld/%ld"
+                   " pares (n,θ) com n até 12\n", ok, tot);
+            printf("        e a EQUIVALÊNCIA é exercida dos dois lados: %ld"
+                   " involutivas e %ld com 2-torção, de %ld — nem tudo nem nada\n",
+                   invol_n, tors_n, tot);
+            if(ok != tot) mal++;
+            if(invol_n == 0 || invol_n == tot) mal++;
+        }
+
+        /* ── (3) cor:degenerados — «são os dois degenerados opostos do mesmo
+         * círculo»: ℤ/ℓ tem AMBOS (a 2-torção ℓ/2 e a reflexão ν = −1 ≠ id);
+         * em ℓ = 2 a reflexão colapsa e resta a metade; em ℓ ímpar não há
+         * metade e resta a reflexão. Conta-se em vez de se descrever. */
+        {
+            long ambos = 0, so_tors = 0, so_refl = 0, nenhum = 0;
+            printf("      cor:degenerados —\n");
+            for(long l = 2; l <= 9; l++){
+                int tem_tors = 0, refl_nao_trivial = 0;
+                for(long t = 1; t < l; t++) if((2*t) % l == 0) tem_tors = 1;
+                for(long x = 0; x < l; x++) if(((l - x) % l) != x) refl_nao_trivial = 1;
+                if(tem_tors && refl_nao_trivial) ambos++;
+                else if(tem_tors) so_tors++;
+                else if(refl_nao_trivial) so_refl++;
+                else nenhum++;
+                if(l <= 4 || l == 9)
+                    printf("        ℓ=%ld: 2-torção %s · ν = −1 ≠ id %s%s\n", l,
+                           tem_tors ? "sim" : "não",
+                           refl_nao_trivial ? "sim" : "NÃO",
+                           (l == 2) ? "   ← o MÓRFICO: a reflexão colapsa" : "");
+            }
+            printf("        de ℓ=2..9: %ld têm ambos, %ld só a torção, %ld só a"
+                   " reflexão, %ld nenhum\n", ambos, so_tors, so_refl, nenhum);
+            printf("        o ℓ=2 é o único com torção e SEM reflexão — o mórfico é"
+                   " um EXTREMO, e o métrico (ℓ→∞, sem torção) é o outro\n");
+            if(so_tors != 1 || ambos == 0 || so_refl == 0) mal++;
+        }
+
+        /* ── (4) obs:assinatura-2 — «não há assinatura: o peso de Hamming não é
+         * uma forma quadrática». O teste de «q(λx) = λ²q(x)» não serve em 𝔽₂,
+         * onde os únicos escalares são 0 e 1 e λ² = λ: ali a homogeneidade
+         * PASSA, e uma asserção sobre ela não podia falhar. O critério que
+         * separa é a POLARIZAÇÃO: B(x,y) = w(x⊕y) − w(x) − w(y) tem de ser
+         * bilinear, e não é. */
+        {
+            long N = 16, hom_ok = 0, hom_n = 0, bil_ok = 0, bil_n = 0, falha_com = 0;
+            #define W(v) __builtin_popcountl((unsigned long)(v))
+            for(long x = 0; x < N; x++) for(long l = 0; l <= 1; l++){
+                hom_n++;
+                if(W(l ? x : 0) == l*l*W(x)) hom_ok++;   /* λ² = λ em 𝔽₂ */
+            }
+            for(long x = 0; x < N; x++) for(long y = 0; y < N; y++)
+            for(long z = 0; z < N; z++){
+                long Bxy  = W(x^y) - W(x) - W(y);
+                long Bxz  = W(x^z) - W(x) - W(z);
+                long Bxyz = W(x^(y^z)) - W(x) - W(y^z);
+                bil_n++;
+                if(Bxyz == Bxy + Bxz) bil_ok++;
+                else if((x & y & z) != 0) falha_com++;
+            }
+            printf("      obs:assinatura-2 — a HOMOGENEIDADE q(λx) = λ²q(x) passa em"
+                   " %ld/%ld, e não podia falhar: em 𝔽₂ só há λ ∈ {0,1} e λ² = λ\n",
+                   hom_ok, hom_n);
+            printf("        o que separa é a POLARIZAÇÃO: B(x,y) = w(x⊕y) − w(x) − w(y)"
+                   " é bilinear em %ld/%ld triplos — falha em %ld\n",
+                   bil_ok, bil_n, bil_n - bil_ok);
+            printf("        e as falhas são EXACTAMENTE onde x∧y∧z ≠ 0: %ld das %ld"
+                   " — logo não é uma anomalia, é a lei\n", falha_com, bil_n - bil_ok);
+            if(hom_ok != hom_n) mal++;
+            if(bil_ok == bil_n) mal++;         /* se fosse bilinear, HAVIA assinatura */
+            if(falha_com != bil_n - bil_ok) mal++;
+            #undef W
+        }
+
+        printf("\n");
+        ok("OS QUATRO \\est{N} QUE SOBRAVAM NO CORPO MÓRFICO PASSAM A CONTAR-SE — E UM DELES"
+           " NÃO PODIA SER MEDIDO COMO ESTÁ ESCRITO. O teo:antiroquemetade diz que 1 é o único"
+           " elemento não nulo de ℤ/2 com 2θ ≡ 0, e que D₁ é involução: conta-se, é 1 de 1, e"
+           " D₁(x) = x+1 coincide com ¬x nos dois elementos. O teo:dualmetrico dá a"
+           " equivalência «D_θ∘D_θ = id ⟺ 2θ = 0», medida em 77/77 pares (n,θ) com n até 12"
+           " — e exercida dos DOIS lados, 17 deflexões involutivas em 77 casos, que é o que"
+           " impede a equivalência de passar por vacuidade. O cor:degenerados diz que o"
+           " mórfico e o métrico «são os dois degenerados opostos do mesmo círculo», e a"
+           " contagem mostra-o: entre ℓ=2..9, ℓ=2 é o ÚNICO com 2-torção e SEM reflexão"
+           " não trivial — os pares têm ambos, os ímpares só a reflexão. O mórfico é um"
+           " extremo e não um corpo qualquer da lista. E O QUARTO É O QUE ENSINA: a"
+           " obs:assinatura-2 justifica «não há assinatura» dizendo que q(λx) = λ²q(x) falha."
+           " ELA NÃO FALHA — em 𝔽₂ os únicos escalares são 0 e 1, onde λ² = λ, e a"
+           " homogeneidade passa em 32/32: uma asserção escrita sobre ela seria uma que não"
+           " pode falhar. O critério que de facto separa é a POLARIZAÇÃO — B(x,y) = w(x⊕y)"
+           " − w(x) − w(y) teria de ser bilinear, e é em 2401 dos 4096 triplos, falhando em"
+           " 1695. E as falhas são EXACTAMENTE os triplos com x∧y∧z ≠ 0, todas as 1695: não é"
+           " uma anomalia dispersa, é a lei — a polarização mede w(x∧y∧z), e é isso que"
+           " impede o peso de Hamming de vir de uma forma bilinear. A conclusão do catálogo"
+           " está certa; a razão que ele dá é que não se podia medir.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

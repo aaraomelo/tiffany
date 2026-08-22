@@ -14940,10 +14940,9 @@ metade partilham um ponto fixo, aqui separam-se: a torção migra para a máscar
 reticulado (a complementação).
 
 \begin{observacao}[a assinatura da régua]\label{obs:assinatura-2}
-\est{N} \textbf{Não há assinatura}: o peso de Hamming não é uma forma quadrática --- não é homogéneo de grau
-dois, e $q(\lambda x)=\lambda^2q(x)$ falha. Não há lei de inércia de Sylvester em característica $2$. A régua do
-corpo mórfico é o círculo com $\ell=2$, e a sua medida é o \emph{resíduo}, não uma norma.
-Medido em \code{elementares/assinaturas.py}.
+\textbf{Não há assinatura}: o peso de Hamming não vem de uma forma quadrática. \emph{Mas a razão não é a homogeneidade} --- em $\Fbb_2$ os únicos escalares são $0$ e $1$, onde $\lambda^2=\lambda$, e $q(\lambda x)=\lambda^2 q(x)$ \textbf{passa}: uma verificação sobre ela não podia falhar. O que separa é a \textbf{polarização}: se $w$ viesse de uma forma, $B(x,y)=w(x\oplus y)-w(x)-w(y)$ seria bilinear --- e não é. Como $B(x,y)=-2\,w(x\wedge y)$, a aditividade na segunda variável exige $w(x\wedge y\wedge z)=0$, pelo que ela falha \textbf{exactamente} nos triplos com $x\wedge y\wedge z\neq\bot$. Não há lei de inércia de Sylvester em característica $2$. A régua do corpo mórfico é o círculo com $\ell=2$, e a sua medida é o \emph{resíduo}, não uma norma.
+
+\medido{\code{tests/pgwire.c} §W103 --- a homogeneidade passa em $32/32$, como tinha de passar; a polarização é bilinear em $2401$ dos $4096$ triplos de $\Fbb_2^4$ e falha em $1695$, e as $1695$ são \emph{todas} as que têm $x\wedge y\wedge z\neq\bot$. Também aí: o \code{teo:antiroquemetade} com a metade única de $\Z/2$; o \code{teo:dualmetrico} com a equivalência $D_\theta^2=\mathrm{id}\iff2\theta=0$ em $77/77$ pares $(n,\theta)$, exercida dos dois lados; e o \code{cor:degenerados}, onde entre $\ell=2..9$ o $\ell=2$ é o \textbf{único} com $2$-torção e sem reflexão não trivial.}
 \end{observacao}
 
 \begin{observacao}[o fechamento energético: $\mathrm{FP}=1$]\label{obs:fp}

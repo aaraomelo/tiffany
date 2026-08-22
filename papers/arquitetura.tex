@@ -4912,6 +4912,55 @@ os bits.}
         {contagem em bits; \code{COUNT} e \code{WHERE} pelo motor}
         {\code{tests/pgwire.c} §W102}
 
+\subsection*{As quatro dívidas que sobravam no corpo mórfico --- e uma razão que não podia ser medida}
+
+\noindent §W102 deixou quatro enunciados do «corpo mórfico» ainda por contar. Três
+contam-se sem história; o quarto ensina alguma coisa.
+
+\medskip\noindent\textbf{\code{teo:antiroquemetade}}: $1$ é o único elemento não nulo
+de $\Z/2$ com $2\theta\equiv0$, e $D_1$ é involução --- $1$ de $1$, e
+$D_1(x)=x+1$ coincide com $\neg x$ nos dois elementos.
+
+\medskip\noindent\textbf{\code{teo:dualmetrico}}: a equivalência
+$D_\theta\circ D_\theta=\mathrm{id}\iff2\theta=0$, em $77/77$ pares $(n,\theta)$ com
+$n$ até $12$ --- e exercida dos \emph{dois} lados ($17$ deflexões involutivas em
+$77$ casos), que é o que impede uma equivalência de passar por vacuidade.
+
+\medskip\noindent\textbf{\code{cor:degenerados}}: entre $\ell=2..9$, o $\ell=2$ é o
+\textbf{único} com $2$-torção e \emph{sem} reflexão não trivial. Os pares têm ambos,
+os ímpares só a reflexão. \emph{O mórfico é um extremo, não um corpo qualquer da
+lista} --- e o métrico ($\ell\to\infty$, sem torção) é o outro.
+
+\medskip\noindent\textbf{E o quarto é o que ensina.} A \code{obs:assinatura-2}
+justifica «não há assinatura» dizendo que $q(\lambda x)=\lambda^{2}q(x)$ falha.
+\textbf{Ela não falha}: em $\mathbb{F}_2$ os únicos escalares são $0$ e $1$, onde
+$\lambda^{2}=\lambda$, e a homogeneidade passa em $32/32$. \emph{Uma asserção escrita
+sobre ela seria uma que não pode falhar.}
+
+\medskip\noindent O critério que de facto separa é a \textbf{polarização}: se $w$
+viesse de uma forma, $B(x,y)=w(x\oplus y)-w(x)-w(y)$ seria bilinear.
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+$B$ bilinear (triplos de $\mathbb{F}_2^{4}$) & $2401/4096$\\
+falha & $\mathbf{1695}$\\
+das quais com $x\wedge y\wedge z\neq\bot$ & $1695$ --- \emph{todas}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Como $B(x,y)=-2\,w(x\wedge y)$, a aditividade na segunda variável exige
+$w(x\wedge y\wedge z)=0$; \emph{a falha não é dispersa, é a lei}.
+\[
+\boxed{\;\text{a conclusão estava certa; a razão é que não se podia medir}\;}
+\]
+
+\medido{\code{tests/pgwire.c} §W103 --- e o \code{catalogo} passa a dar a razão pela
+polarização, com o \code{\textbackslash medido} na própria observação.}
+
+\colunas{\code{catalogo} «O corpo mórfico» (\code{teo:antiroquemetade}, \code{teo:dualmetrico}, \code{cor:degenerados}, \code{obs:assinatura-2}); §W102}
+        {contagem em $\Z/n$ e em $\mathbb{F}_2^{4}$; a polarização como critério}
+        {\code{tests/pgwire.c} §W103}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

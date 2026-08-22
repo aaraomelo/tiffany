@@ -41,6 +41,8 @@
 - [O que justifica a involução](feedback-justificar-o-que-so-e-coerente.md) — a conservação obriga, mas só onde é ADITIVA;
 - **[O número que não cabe](feedback-o-numero-que-nao-cabe.md)** — o teste mais barato contra um número à mão:
 - **[A base incompleta](feedback-a-base-incompleta.md)** — um ponto fora do campo NÃO pede régua nova:
+- **[O número no veredicto](feedback-o-numero-no-veredicto.md)** — escrevo o texto do `ok()` com os números ANTES
+  de correr: TRÊS vezes num dia, e a bateria passa verde porque o veredicto é uma string.
 - **[O grep que não conta](feedback-o-grep-que-nao-conta.md)** — `grep` é FUNÇÃO aqui e come o `-c`:
   li o vazio como zero e anunciei «0 erros» num log com CINCO. Contar com `| wc -l`.
 - **[O medidor que nunca mediu](feedback-o-medidor-que-nunca-mediu.md)** — QUATRO diziam «NÃO MEDIU» e a bateria contava-os VERDES:
