@@ -25,6 +25,8 @@
   ANTERIOR: a saída antecipada salta a linha que escreve o contador. O gume tem de ser DELIBERADO.
 - **[A macro por definir](feedback-a-macro-por-definir.md)** — `\sen` e `\FF` num `article` que não os define: cada paper é um universo
   fechado, e o erro só aparece em quem compilar. Medido em `refs.c` §R6.
+- **[A obra não está toda no tiffany](feedback-a-obra-nao-esta-toda-no-tiffany.md)** — 615 `.tex` fora do repo. `matrix.tex` nomeava as
+  minhas matrizes e `algebra_estelar.tex` já tinha a álgebra: varrer `broca-so/papers` e `estelar` ANTES de dizer «falta».
 - **[A cobertura que não acompanhou](feedback-a-cobertura-que-nao-acompanhou.md)** — o `refs.c` vigiava 3 documentos e o repo tinha 12:
   36 órfãs e um `\label` duplicado a desviar 8 citações, nenhum novo. A lei existia e não ALCANÇAVA.
 - **[Decidir onde ainda não se sabe](feedback-decidir-onde-nao-se-sabe.md)** — pus a recusa no leitor da lista, que corre ANTES do GROUP BY:

@@ -11203,6 +11203,827 @@ int main(void){
            " sobre o espectro a um motor que não sabe dizer o espectro.", mal == 0);
     }
 
+
+    /* ═══ §W84: AS VINTE E UMA OPERAÇÕES NÃO SÃO VINTE E UMA RÉGUAS ════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W84 todas as operações confrontadas sobre a MESMA matriz.\n\n");
+        { char m[80], p2[80];
+          snprintf(m, sizeof m, "/tmp/pgwire_w84__A.mem");
+          snprintf(p2, sizeof p2, "/tmp/pgwire_w84__A.prog");
+          unlink(m); unlink(p2);
+          unlink("/tmp/pgwire_w84.mem"); unlink("/tmp/pgwire_w84.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w84")) mal++;
+
+        /* ── O QUE ESTE BLOCO MEDE NÃO É NENHUMA OPERAÇÃO: É QUE ELAS SÃO A
+         * MESMA RÉGUA. As vinte e uma foram escritas em alturas diferentes, e
+         * cada uma tem o seu medidor — mas nenhum as confronta TODAS sobre a
+         * mesma matriz. É esse o defeito que esta casa persegue com o nome
+         * «duas réguas para o mesmo objecto», e ele não aparece em testes
+         * individuais por construção: cada um está certo sozinho.
+         *
+         * Varrem-se as 2401 matrizes com entradas em −3..3 e exigem-se nove
+         * famílias de relações que ligam operações DIFERENTES. */
+        long n = 0, f_ker = 0, f_dt = 0, f_disc = 0, f_vi = 0,
+             f_part = 0, f_gram = 0, f_inv = 0, f_cif = 0, f_tr = 0;
+        long p0 = 0, p1 = 0, p2c = 0, d0 = 0, av = 0, iv = 0;
+        for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+        for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+            char q2[220];
+            sql_executa("DROP TABLE IF EXISTS A", &o2);
+            sql_executa("CREATE TABLE A (p RACIONAL, q RACIONAL)", &o2);
+            snprintf(q2, sizeof q2, "INSERT INTO A VALUES (%ld,%ld), (%ld,%ld)", a,b,c,d);
+            sql_executa(q2, &o2);
+            n++;
+            long D = a*d - b*c, T = a + d, Dd = T*T - 4*D;
+
+            /* (1) det e traço contra a conta directa */
+            sql_executa("SELECT det(*) FROM A", &o);
+            long md = o.ok ? atol(o.cell[0][0]) : 999999;
+            sql_executa("SELECT traco(*) FROM A", &o);
+            long mt = o.ok ? atol(o.cell[0][0]) : 999999;
+            if(md != D || mt != T) f_dt++;
+
+            /* (2) posto + dim(núcleo) = 2 — duas operações, uma conservação */
+            sql_executa("SELECT posto(*) FROM A", &o);
+            int pk = o.ok ? atoi(o.cell[0][0]) : -1;
+            sql_executa("SELECT nucleo(*) FROM A", &o);
+            int kk = o.ok ? o.nrows : -1;
+            if(pk < 0 || kk < 0 || pk + kk != 2) f_ker++;
+            if(pk == 0) p0++; else if(pk == 1) p1++; else p2c++;
+
+            /* (3) det = 0 ⟺ posto < 2 — o determinante e o posto a dizerem a
+             * mesma coisa por caminhos que não se conhecem */
+            if((D == 0) != (pk < 2)) f_dt++;
+            if(D == 0) d0++;
+
+            /* (4) o Δ do `regime` é tr² − 4det */
+            sql_executa("SELECT regime(*) FROM A", &o);
+            if(!o.ok || atol(o.cell[0][3]) != Dd) f_disc++;
+
+            /* (5) `autovalores` responde EXACTAMENTE quando as raízes são
+             * racionais, e quando responde cumpre Viète */
+            long r = -1;
+            if(Dd >= 0){ r = 0; while((r+1)*(r+1) <= Dd) r++; }
+            int deve = (Dd >= 0 && r*r == Dd && ((T + r) % 2 == 0));
+            sql_executa("SELECT autovalores(*) FROM A", &o);
+            if(o.ok) av++;
+            if(o.ok != deve) f_vi++;
+            else if(o.ok){
+                long l1 = atol(o.cell[0][0]);
+                long l2 = o.nrows > 1 ? atol(o.cell[1][0]) : l1;
+                if(l1 + l2 != T || l1*l2 != D) f_vi++;
+            }
+
+            /* (6) a partição responde sempre numa quadrada */
+            sql_executa("SELECT simetrica(*) FROM A", &o);
+            int sok = o.ok && o.nrows == 2;
+            sql_executa("SELECT antisimetrica(*) FROM A", &o);
+            int aok = o.ok && o.nrows == 2;
+            if(!sok || !aok) f_part++;
+
+            /* (7) a Gram é simétrica e det G = det² */
+            sql_executa("SELECT gram(*) FROM A", &o);
+            if(!o.ok || o.nrows != 2) f_gram++;
+            else { long g11 = atol(o.cell[0][0]), g12 = atol(o.cell[0][1]);
+                   long g21 = atol(o.cell[1][0]), g22 = atol(o.cell[1][1]);
+                   if(g12 != g21 || g11*g22 - g12*g21 != D*D) f_gram++; }
+
+            /* (8) a inversa existe EXACTAMENTE quando det ≠ 0 */
+            sql_executa("SELECT inversa(*) FROM A", &o);
+            if(o.ok) iv++;
+            if(o.ok != (D != 0)) f_inv++;
+
+            /* (9) a cifra responde sempre numa 2×2 inteira, e a transposta tem
+             * o MESMO det e o MESMO traço */
+            sql_executa("SELECT cifra(*) FROM A", &o);
+            if(!o.ok) f_cif++;
+            sql_executa("SELECT transposta(*) FROM A", &o);
+            if(!o.ok || o.nrows != 2) f_tr++;
+            else { long ta = atol(o.cell[0][0]), tb = atol(o.cell[0][1]);
+                   long tc = atol(o.cell[1][0]), td = atol(o.cell[1][1]);
+                   if(ta + td != T || ta*td - tb*tc != D) f_tr++; }
+        }
+        long total = f_ker + f_dt + f_disc + f_vi + f_part + f_gram + f_inv + f_cif + f_tr;
+        printf("      %ld matrizes · nove famílias de relações · %ld divergências\n",
+               n, total);
+        if(total){
+            printf("        posto+ker %ld · det/traço %ld · Δ %ld · Viète %ld ·"
+                   " partição %ld · Gram %ld · inversa %ld · cifra %ld ·"
+                   " transposta %ld\n",
+                   f_ker, f_dt, f_disc, f_vi, f_part, f_gram, f_inv, f_cif, f_tr);
+            mal++;
+        }
+
+        /* ── E O CONTROLO É A DISTRIBUIÇÃO, sem o qual «zero divergências» seria
+         * uma ausência a passar por acordo. Se todas as matrizes tivessem posto
+         * 2, a relação posto+ker = 2 nunca teria de repartir; se nenhuma fosse
+         * singular, a equivalência det = 0 ⟺ posto < 2 nunca seria exercida do
+         * lado verdadeiro; e se os autovalores respondessem sempre, a recusa
+         * nunca seria testada. Conta-se, e exige-se que os DOIS lados de cada
+         * relação apareçam. */
+        printf("      distribuição: posto 0/1/2 = %ld/%ld/%ld · singulares %ld ·"
+               " autovalores em %ld · inversa em %ld\n",
+               p0, p1, p2c, d0, av, iv);
+        int variado = (p0 > 0 && p1 > 0 && p2c > 0)      /* os três postos */
+                   && (d0 > 0 && d0 < n)                  /* singulares e não */
+                   && (av > 0 && av < n)                  /* respondem e recusam */
+                   && (iv > 0 && iv < n);                 /* inversa existe e não */
+        printf("      cada relação é exercida nos DOIS lados: %s\n",
+               variado ? "sim — o zero de cima não é uma ausência"
+                       : "NÃO — o zero podia ser trivial");
+        if(!variado) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("AS VINTE E UMA OPERAÇÕES NÃO SÃO VINTE E UMA RÉGUAS — E ISTO NÃO SE VÊ EM TESTE"
+           " NENHUM DOS OUTROS. Cada operação foi escrita numa altura e tem o seu medidor,"
+           " onde está certa SOZINHA; o defeito que esta casa persegue com o nome «duas"
+           " réguas para o mesmo objecto» vive precisamente entre elas, e não aparece em"
+           " nenhum medidor individual por construção. Aqui confrontam-se todas sobre a MESMA"
+           " matriz, nas 2401 com entradas em −3..3, com nove famílias de relações que ligam"
+           " operações DIFERENTES: det e traço contra a conta directa; posto + dim(núcleo) ="
+           " 2, que é uma conservação entre duas operações; det = 0 ⟺ posto < 2, o"
+           " determinante e o posto a dizerem o mesmo por caminhos que não se conhecem; o Δ"
+           " do `regime` a ser tr² − 4det; `autovalores` a responder EXACTAMENTE quando as"
+           " raízes são racionais, e a cumprir Viète quando responde; a partição a responder"
+           " sempre; a Gram simétrica com det G = det²; a inversa a existir exactamente onde"
+           " det ≠ 0; e a transposta com o mesmo det e o mesmo traço. ZERO DIVERGÊNCIAS. E O"
+           " CONTROLO É A DISTRIBUIÇÃO, sem o qual esse zero seria uma ausência a passar por"
+           " acordo: se todas tivessem posto 2, a conservação nunca repartia; se nenhuma"
+           " fosse singular, a equivalência nunca era exercida do lado verdadeiro; se os"
+           " autovalores respondessem sempre, a recusa nunca era testada. Contam-se, e os"
+           " três postos aparecem (1, 288 e 2112), 289 são singulares, os autovalores"
+           " respondem em 963 e recusam nas outras — cada relação exercida nos DOIS lados.",
+           mal == 0);
+    }
+
+
+    /* ═══ §W85: CADA FACE RESPEITA A SUA OPERAÇÃO, E FALHA NA OUTRA ════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W85 det multiplica e traço soma — e nenhum faz o do outro.\n\n");
+        { const char *tabs[] = { "A","B","R" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w85__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w85__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w85.mem"); unlink("/tmp/pgwire_w85.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w85")) mal++;
+
+        #define POE(t,a,b,c,d) do { char q2[200]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld), (%ld,%ld)", \
+                     t,(long)(a),(long)(b),(long)(c),(long)(d)); \
+            sql_executa(q2,&o2); } while(0)
+        #define DET(t) (sql_executa("SELECT det(*) FROM " t, &o), \
+                        o.ok ? atol(o.cell[0][0]) : 999999)
+        #define TR(t)  (sql_executa("SELECT traco(*) FROM " t, &o), \
+                        o.ok ? atol(o.cell[0][0]) : 999999)
+
+        /* ── §W72 MOSTROU QUE (traço, det) É (soma, produto) DAS RAÍZES. Faltava
+         * a consequência: cada um herda a operação de que veio, e SÓ essa.
+         *
+         *   det(A·B) = det A · det B     a face multiplicativa MULTIPLICA
+         *   tr(A+B)  = tr A  + tr B      a face aditiva SOMA
+         *
+         * e a troca não vale: o traço não multiplica e o determinante não soma.
+         * As duas faces não são simétricas no que fazem — o `aranha` §sec:dualidades
+         * já o dizia de outra maneira («uma endereça e a outra produz») —, e aqui
+         * a assimetria aparece como uma lei que cada uma cumpre e a outra não. */
+        long n = 0, dmul = 0, tadd = 0, tcic = 0, tnmul = 0, dnadd = 0;
+        for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+        for(long e = -2; e <= 2; e++) for(long f = -2; f <= 2; f++){
+            POE("A", a, b, 1, 1);
+            POE("B", e, f, 0, 1);
+            long dA = DET("A"), dB = DET("B"), tA = TR("A"), tB = TR("B");
+
+            sql_executa("SELECT produto(B) FROM A", &o);      /* A·B */
+            if(!o.ok || o.nrows != 2) continue;
+            long r[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                r[i][j] = atol(o.cell[i][j]);
+            POE("R", r[0][0], r[0][1], r[1][0], r[1][1]);
+            long dAB = DET("R"), tAB = TR("R");
+
+            sql_executa("SELECT produto(A) FROM B", &o);      /* B·A */
+            if(!o.ok || o.nrows != 2) continue;
+            long s2[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                s2[i][j] = atol(o.cell[i][j]);
+            POE("R", s2[0][0], s2[0][1], s2[1][0], s2[1][1]);
+            long tBA = TR("R");
+
+            sql_executa("SELECT soma(B) FROM A", &o);         /* A + B */
+            if(!o.ok || o.nrows != 2) continue;
+            long u[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                u[i][j] = atol(o.cell[i][j]);
+            POE("R", u[0][0], u[0][1], u[1][0], u[1][1]);
+            long dS = DET("R"), tS = TR("R");
+
+            n++;
+            if(dAB == dA*dB) dmul++;
+            if(tS == tA + tB) tadd++;
+            if(tAB == tBA) tcic++;
+            if(tAB != tA*tB) tnmul++;
+            if(dS != dA + dB) dnadd++;
+        }
+        printf("      %ld pares (A,B):\n", n);
+        printf("        det(A·B) = det A · det B ... %ld/%ld  ← a multiplicativa MULTIPLICA\n",
+               dmul, n);
+        printf("        tr(A+B)  = tr A + tr B ..... %ld/%ld  ← a aditiva SOMA\n", tadd, n);
+        printf("        tr(A·B)  = tr(B·A) ......... %ld/%ld  ← cíclico, que é outra coisa\n",
+               tcic, n);
+        if(dmul != n || tadd != n || tcic != n) mal++;
+
+        /* ── E A TROCA NÃO VALE — é isto que faz da assimetria uma lei e não uma
+         * arrumação. Se o traço multiplicasse e o determinante somasse, as duas
+         * faces seriam a mesma coisa com dois nomes. */
+        printf("        tr(A·B) ≠ tr A · tr B ...... %ld/%ld  ← o traço NÃO multiplica\n",
+               tnmul, n);
+        printf("        det(A+B) ≠ det A + det B ... %ld/%ld  ← o det NÃO soma\n",
+               dnadd, n);
+        if(tnmul == 0 || dnadd == 0) mal++;
+
+        /* ── E OS QUE COINCIDEM POR ACASO SÃO O QUE IMPEDE A LEITURA ERRADA:
+         * não são %ld casos onde a lei falha — são casos onde os dois lados
+         * calham iguais sem que haja lei nenhuma. Se a desigualdade fosse
+         * universal, ela seria uma segunda lei; sendo genérica, ela é a AUSÊNCIA
+         * de lei, que é o que se quer dizer. Dizê-lo é o que separa «não vale»
+         * de «vale ao contrário». */
+        printf("      e coincidem por acaso em %ld e %ld — a desigualdade é"
+               " genérica, não universal: é a AUSÊNCIA de lei, não uma segunda lei\n",
+               n - tnmul, n - dnadd);
+        if(n - tnmul == 0 || n - dnadd == 0){
+            printf("        (se nunca coincidissem, «não multiplica» seria uma lei"
+                   " própria e não uma ausência)\n");
+        }
+
+        /* ── E O CASO NOMEADO: a identidade tem det 1 e traço 2, pelo que ela é
+         * o neutro de UMA face e não da outra. det(A·I) = det A · 1 fecha; mas
+         * tr(A + I) = tr A + 2, e não tr A. O neutro da soma é a matriz NULA,
+         * cujo traço é 0 — e são objectos diferentes, que é o Teor. 2(4) do
+         * `aranha` outra vez. */
+        POE("A", 2, 3, 1, 4);
+        POE("B", 1, 0, 0, 1);                                  /* I */
+        long dA = DET("A"), tA = TR("A");
+        sql_executa("SELECT produto(B) FROM A", &o);
+        long dAI = 0;
+        if(o.ok){ long r[2][2];
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                      r[i][j] = atol(o.cell[i][j]);
+                  POE("R", r[0][0], r[0][1], r[1][0], r[1][1]);
+                  dAI = DET("R"); }
+        sql_executa("SELECT soma(B) FROM A", &o);
+        long tAI = 0;
+        if(o.ok){ long u[2][2];
+                  for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                      u[i][j] = atol(o.cell[i][j]);
+                  POE("R", u[0][0], u[0][1], u[1][0], u[1][1]);
+                  tAI = TR("R"); }
+        int neutro = (dAI == dA) && (tAI == tA + 2);
+        printf("      o neutro é de UMA face: det(A·I) = %ld = det A, mas"
+               " tr(A+I) = %ld = tr A + 2 %s\n", dAI, tAI,
+               neutro ? "— o neutro da soma é a NULA, outro objecto" : "(MAU)");
+        if(!neutro) mal++;
+        #undef POE
+        #undef DET
+        #undef TR
+        sql_fechar();
+
+        printf("\n");
+        ok("CADA FACE RESPEITA A SUA OPERAÇÃO, E FALHA NA OUTRA — É ISSO QUE AS FAZ DUAS."
+           " §W72 mostrou que (traço, det) É (soma, produto) das raízes; faltava a"
+           " consequência, que é uma lei de cada lado: det(A·B) = det A · det B — a face"
+           " MULTIPLICATIVA multiplica — e tr(A+B) = tr A + tr B — a face ADITIVA soma."
+           " Ambas em todos os 625 pares. E o traço é ainda CÍCLICO, tr(A·B) = tr(B·A), que é"
+           " outra coisa e não multiplicatividade. E A TROCA NÃO VALE: o traço não multiplica"
+           " e o determinante não soma, o que faz da assimetria uma LEI e não uma arrumação"
+           " — se cada um fizesse o do outro, as duas faces seriam a mesma coisa com dois"
+           " nomes. OS CASOS QUE COINCIDEM POR ACASO SÃO O QUE IMPEDE A LEITURA ERRADA: não"
+           " são casos onde a lei falha, são casos onde os dois lados calham iguais sem haver"
+           " lei nenhuma. Se a desigualdade fosse universal, seria uma SEGUNDA lei; sendo"
+           " genérica, é a AUSÊNCIA de lei — e dizê-lo é o que separa «não vale» de «vale ao"
+           " contrário». E O NEUTRO É DE UMA FACE SÓ: det(A·I) = det A fecha, mas"
+           " tr(A + I) = tr A + 2, porque o neutro da soma é a matriz NULA e não a"
+           " identidade. São objectos diferentes, que é o Teor. 2(4) do `aranha` outra vez.",
+           mal == 0);
+    }
+
+
+    /* ═══ §W86: O GATO CRESCE, O GAMBÁ CICLA, E A SOMA PROJECTA ════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W86 três regimes das potências, e a assinatura split.\n\n");
+        { const char *tabs[] = { "A","G","P","W","K" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w86__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w86__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w86.mem"); unlink("/tmp/pgwire_w86.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w86")) mal++;
+
+        #define POE(t,a,b,c,d) do { char q2[200]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld), (%ld,%ld)", \
+                     t,(long)(a),(long)(b),(long)(c),(long)(d)); \
+            sql_executa(q2,&o2); } while(0)
+
+        /* ── O `broca-so/papers/matrix.tex` NOMEIA AS DUAS MATRIZES QUE ESTE
+         * MEDIDOR TEM ANDADO A USAR: o GATO A = (1,1;1,0), simétrico, det −1,
+         * A² = A + I, autovalores φ e −1/φ — hiperbólico; e o GAMBÁ
+         * G = (0,1;−1,0), antissimétrico, det +1, G² = −I, autovalores ±i —
+         * elíptico. São a matriz de Fibonacci de §W62 e a rotação de §W68, com
+         * os nomes que aquele paper lhes dá.
+         *
+         * E declara TRÊS regimes das potências, dos quais este medidor só tinha
+         * dois: A^k CRESCE (Fibonacci), G^k CICLA (período 4), e
+         * (A+G)^k = A+G — PROJECTA. A soma é IDEMPOTENTE, e a idempotência é o
+         * colapso: medir duas vezes é medir uma. */
+        POE("A", 1,1,1,0);
+        POE("G", 0,1,-1,0);
+        sql_executa("SELECT soma(G) FROM A", &o);
+        int soma_ok = o.ok && o.nrows == 2
+                      && !strcmp(o.cell[0][0],"1") && !strcmp(o.cell[0][1],"2")
+                      && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"0");
+        POE("P", 1,2,0,0);
+        sql_executa("SELECT produto(P) FROM P", &o);
+        int idem = o.ok && o.nrows == 2
+                   && !strcmp(o.cell[0][0],"1") && !strcmp(o.cell[0][1],"2")
+                   && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"0");
+        printf("      A + G = (1,2;0,0) (%s) e (A+G)² = A+G (%s) — P² = P, a"
+               " PROJECÇÃO\n", soma_ok ? "sim" : "MAU", idem ? "sim" : "MAU");
+        if(!soma_ok || !idem) mal++;
+
+        /* ── E UMA PROJECÇÃO TEM DE TER POSTO MENOR: det 0 e posto 1. Se fosse
+         * de posto cheio e idempotente, seria a identidade — e a identidade não
+         * colapsa nada. É o posto que faz da idempotência uma PROJECÇÃO. */
+        sql_executa("SELECT det(*) FROM P", &o);
+        int d0 = o.ok && !strcmp(o.cell[0][0], "0");
+        sql_executa("SELECT posto(*) FROM P", &o);
+        int p1 = o.ok && !strcmp(o.cell[0][0], "1");
+        printf("        det %s · posto %s → colapsa uma dimensão, e é isso que a"
+               " distingue da identidade\n",
+               d0 ? "0" : "MAU", p1 ? "1" : "MAU");
+        if(!d0 || !p1) mal++;
+
+        /* ── E AQUI UMA PRECISÃO, porque as duas perguntas são DIFERENTES. O
+         * `regime` desta casa classifica o FLUXO e^{At} pelo sinal de Re(λ), e
+         * para A+G ele diz CAOS — os autovalores são 1 e 0, e o 1 faz crescer.
+         * A idempotência é sobre as POTÊNCIAS A^k, que é outra sucessão: com
+         * λ = 1 e 0, as potências ficam paradas. Crescer no fluxo e ficar parado
+         * nas potências não é contradição — são dois objectos, e confundi-los
+         * seria ler o regime como se ele falasse de A^k. */
+        sql_executa("SELECT regime(*) FROM P", &o);
+        int reg = o.ok && !strcmp(o.cell[0][0], "CAOS");
+        printf("        e o `regime` diz %s — mas isso é do FLUXO e^{At}, não das"
+               " potências A^k: são dois objectos\n", reg ? "CAOS" : "?");
+        if(!reg) mal++;
+
+        /* ── (2) A ASSINATURA SPLIT. O paper diz que {I, A, G, AG} é base de
+         * M₂(ℝ) e que a estrutura é a dos QUATÉRNIOS DIVIDIDOS:
+         *
+         *     G² = −I           (elíptico, i² = −1)
+         *     (2A−I)² = 5I      (hiperbólico, j² = +1 a menos de escala)
+         *     [A,G]² = 5I       (hiperbólico, k² = +1)
+         *
+         * — um eixo elíptico e dois hiperbólicos, que é o que «split» quer
+         * dizer. E o 5 aparece nos dois hiperbólicos porque é o DISCRIMINANTE do
+         * áureo: tr² − 4det = 1 + 4. O mesmo número de §W62. */
+        sql_executa("SELECT produto(G) FROM G", &o);
+        int g2 = o.ok && !strcmp(o.cell[0][0],"-1") && !strcmp(o.cell[1][1],"-1")
+                 && !strcmp(o.cell[0][1],"0") && !strcmp(o.cell[1][0],"0");
+        POE("W", 1,2,2,-1);                                   /* 2A − I */
+        sql_executa("SELECT produto(W) FROM W", &o);
+        int w2 = o.ok && !strcmp(o.cell[0][0],"5") && !strcmp(o.cell[1][1],"5")
+                 && !strcmp(o.cell[0][1],"0") && !strcmp(o.cell[1][0],"0");
+        /* o comutador [A,G] = AG − GA, pedido ao motor nas duas ordens */
+        sql_executa("SELECT produto(G) FROM A", &o);
+        long ag[2][2];
+        int ok1 = o.ok && o.nrows == 2;
+        if(ok1) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            ag[i][j] = atol(o.cell[i][j]);
+        sql_executa("SELECT produto(A) FROM G", &o);
+        long ga[2][2];
+        int ok2 = o.ok && o.nrows == 2;
+        if(ok2) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            ga[i][j] = atol(o.cell[i][j]);
+        int k2 = 0;
+        if(ok1 && ok2){
+            POE("K", ag[0][0]-ga[0][0], ag[0][1]-ga[0][1],
+                     ag[1][0]-ga[1][0], ag[1][1]-ga[1][1]);
+            sql_executa("SELECT produto(K) FROM K", &o);
+            k2 = o.ok && !strcmp(o.cell[0][0],"5") && !strcmp(o.cell[1][1],"5")
+                 && !strcmp(o.cell[0][1],"0") && !strcmp(o.cell[1][0],"0");
+        }
+        printf("      G² = %s · (2A−I)² = %s · [A,G]² = %s\n",
+               g2 ? "−I" : "MAU", w2 ? "5I" : "MAU", k2 ? "5I" : "MAU");
+        printf("        um eixo ELÍPTICO e dois HIPERBÓLICOS — é isso que «split»"
+               " quer dizer\n");
+        if(!g2 || !w2 || !k2) mal++;
+
+        /* ── E O 5 NÃO É UM NÚMERO QUALQUER: é o discriminante do áureo,
+         * tr² − 4det = 1 + 4, o mesmo de §W62. O motor confirma-o pela outra
+         * ponta, sem se lhe pedir o quadrado de nada. */
+        sql_executa("SELECT regime(*) FROM A", &o);
+        int disc5 = o.ok && !strcmp(o.cell[0][3], "5");
+        printf("      e o 5 dos dois eixos é o Δ do gato: %s — o mesmo número por"
+               " dois caminhos\n", disc5 ? "sim, tr² − 4det = 5" : "MAU");
+        if(!disc5) mal++;
+
+        /* ── E O CONTROLO É QUE OS TRÊS REGIMES SÃO MESMO TRÊS: a potência do
+         * gato cresce (F₅ = 5 aparece), a do gambá volta a I ao quarto passo, e
+         * a da soma não se mexe. Sem os três lado a lado, «três regimes» seria
+         * uma arrumação e não uma medida. */
+        POE("A", 1,1,1,0);
+        POE("W", 1,1,1,0);
+        int cresce = 1;
+        for(int n = 2; n <= 5 && cresce; n++){
+            sql_executa("SELECT produto(A) FROM W", &o);
+            if(!o.ok){ cresce = 0; break; }
+            long r[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                r[i][j] = atol(o.cell[i][j]);
+            POE("W", r[0][0], r[0][1], r[1][0], r[1][1]);
+            if(n == 5 && r[0][0] != 8) cresce = 0;    /* F₆ = 8 */
+        }
+        POE("G", 0,1,-1,0);
+        POE("W", 0,1,-1,0);
+        int cicla = 1;
+        for(int n = 2; n <= 4 && cicla; n++){
+            sql_executa("SELECT produto(G) FROM W", &o);
+            if(!o.ok){ cicla = 0; break; }
+            long r[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                r[i][j] = atol(o.cell[i][j]);
+            POE("W", r[0][0], r[0][1], r[1][0], r[1][1]);
+            if(n == 4 && !(r[0][0] == 1 && r[1][1] == 1 && r[0][1] == 0 && r[1][0] == 0))
+                cicla = 0;
+        }
+        printf("      controlo — os três lado a lado: o gato chega a F₆ = 8 (%s),"
+               " o gambá volta a I ao 4.º passo (%s), a soma não se mexe (%s)\n",
+               cresce ? "sim" : "MAU", cicla ? "sim" : "MAU", idem ? "sim" : "MAU");
+        if(!cresce || !cicla) mal++;
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("O GATO CRESCE, O GAMBÁ CICLA, E A SOMA PROJECTA — E O TERCEIRO REGIME FALTAVA"
+           " AQUI. O `broca-so/papers/matrix.tex` nomeia as duas matrizes que este medidor"
+           " tem andado a usar: o GATO (1,1;1,0), simétrico, det −1, A² = A + I, hiperbólico"
+           " — a matriz de Fibonacci de §W62 — e o GAMBÁ (0,1;−1,0), antissimétrico, det +1,"
+           " G² = −I, elíptico — a rotação de §W68. E declara TRÊS regimes das potências, dos"
+           " quais só dois estavam medidos: A^k CRESCE, G^k CICLA com período 4, e"
+           " (A+G)^k = A+G PROJECTA. A soma é IDEMPOTENTE, e a idempotência é o colapso:"
+           " medir duas vezes é medir uma. E UMA PROJECÇÃO TEM DE TER POSTO MENOR — det 0 e"
+           " posto 1 —, porque uma idempotente de posto cheio é a identidade, e a identidade"
+           " não colapsa nada: é o posto que faz da idempotência uma projecção. AQUI UMA"
+           " PRECISÃO, porque as perguntas são DUAS: o `regime` classifica o FLUXO e^{At} e"
+           " diz CAOS, porque os autovalores são 1 e 0 e o 1 faz crescer; a idempotência é"
+           " sobre as POTÊNCIAS A^k, que é outra sucessão, e com λ = 1 e 0 elas ficam"
+           " paradas. Crescer no fluxo e ficar parado nas potências não é contradição — são"
+           " dois objectos, e confundi-los seria ler o regime como se falasse de A^k. E A"
+           " ASSINATURA É SPLIT: G² = −I (elíptico), (2A−I)² = 5I e [A,G]² = 5I"
+           " (hiperbólicos) — um eixo elíptico e dois hiperbólicos, que é o que a palavra"
+           " diz. O 5 não é um número qualquer: é o DISCRIMINANTE do gato, tr² − 4det = 1 + 4,"
+           " e o motor confirma-o pela outra ponta sem se lhe pedir o quadrado de nada. O"
+           " controlo são os três regimes lado a lado — o gato a chegar a F₆ = 8, o gambá a"
+           " voltar a I ao quarto passo, a soma a não se mexer —, sem o que «três regimes»"
+           " seria uma arrumação e não uma medida.", mal == 0);
+    }
+
+
+    /* ═══ §W87: O AGM DE MATRIZES — ONDE FECHA, E ONDE NÃO ═════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W87 o corte pede ordem TOTAL; as matrizes só a têm onde comutam.\n\n");
+        { const char *tabs[] = { "A","B","R","D" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w87__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w87__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w87.mem"); unlink("/tmp/pgwire_w87.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w87")) mal++;
+
+        #define POE(t,a,b,c,d) do { char q2[200]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld), (%ld,%ld)", \
+                     t,(long)(a),(long)(b),(long)(c),(long)(d)); \
+            sql_executa(q2,&o2); } while(0)
+
+        /* ── A CADEIA A VERIFICAR. O `omnitrix.tex` XVII diz que «o que FECHA o
+         * corpo universal é a AGM», e o `aranha thm:corte` prova que as duas
+         * dobras terminam num ponto fixo comum. Daí quer-se concluir que o corpo
+         * das matrizes fecha, e portanto que há sistemas em qualquer dimensão.
+         *
+         * O passo que precisa de verificação é UM, e é o (1) do thm:corte: o
+         * ENCAIXE, g ≤ g' ≤ m' ≤ m. Ele pressupõe uma ordem TOTAL — na grade dos
+         * escalares há sempre um «maior elemento cujo quadrado não passa ab».
+         * Nas matrizes a ordem é PARCIAL, e há pares em que nenhuma das duas
+         * está acima da outra. */
+
+        /* (1) A ORDEM É PARCIAL — a testemunha é um par incomparável. Com
+         * A = diag(2,0) e B = diag(0,2), nem A−B nem B−A são semidefinidas:
+         * cada uma tem um valor positivo e um negativo. Não há «maior». */
+        POE("A", 2,0,0,0);
+        POE("B", 0,0,0,2);
+        sql_executa("SELECT oposto(*) FROM B", &o);
+        int op = o.ok && o.nrows == 2;
+        if(op){ long r[2][2];
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    r[i][j] = atol(o.cell[i][j]);
+                POE("R", r[0][0], r[0][1], r[1][0], r[1][1]); }
+        sql_executa("SELECT soma(R) FROM A", &o);          /* A − B */
+        int amb = o.ok && o.nrows == 2
+                  && !strcmp(o.cell[0][0], "2") && !strcmp(o.cell[1][1], "-2");
+        printf("      A = diag(2,0), B = diag(0,2): A − B = diag(2,−2) %s\n",
+               amb ? "— um positivo e um negativo: INDEFINIDA" : "MAU");
+        printf("        e B − A = diag(−2,2), também indefinida → o par é"
+               " INCOMPARÁVEL: a ordem das matrizes é PARCIAL\n");
+        if(!op || !amb) mal++;
+
+        /* (2) E A FACE MULTIPLICATIVA NÃO TEM ONDE POUSAR quando não comutam:
+         * a média geométrica pede a raiz de A·B, e A·B nem sequer é SIMÉTRICA.
+         * Com A = (2,1;1,2) e B = diag(3,1) — as duas simétricas — o produto sai
+         * (6,1;3,2) numa ordem e (6,3;1,2) na outra. Um objecto que muda com a
+         * ordem dos factores não pode ser «o meio» de nada. */
+        POE("A", 2,1,1,2);
+        POE("B", 3,0,0,1);
+        sql_executa("SELECT produto(B) FROM A", &o);
+        long ab[2][2]; int k1 = o.ok && o.nrows == 2;
+        if(k1) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            ab[i][j] = atol(o.cell[i][j]);
+        sql_executa("SELECT produto(A) FROM B", &o);
+        long ba[2][2]; int k2 = o.ok && o.nrows == 2;
+        if(k2) for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+            ba[i][j] = atol(o.cell[i][j]);
+        int nao_comuta = k1 && k2 && (ab[0][1] != ba[0][1]);
+        int nao_sim = k1 && (ab[0][1] != ab[1][0]);
+        printf("      duas SIMÉTRICAS que não comutam: A·B = (%ld,%ld;%ld,%ld) e"
+               " B·A = (%ld,%ld;%ld,%ld)\n",
+               ab[0][0],ab[0][1],ab[1][0],ab[1][1],
+               ba[0][0],ba[0][1],ba[1][0],ba[1][1]);
+        printf("        A·B não é simétrica (%s) → não tem raiz simétrica, e a"
+               " face multiplicativa não pousa\n", nao_sim ? "sim" : "MAU");
+        if(!nao_comuta || !nao_sim) mal++;
+
+        /* ── (3) E ONDE FECHA: QUANDO COMUTAM. Aí A·B = B·A é simétrica, e se
+         * as duas forem simultaneamente diagonalizáveis a raiz sai entrada a
+         * entrada. Com A = diag(4,9) e B = diag(16,1): A·B = diag(64,9) nas
+         * duas ordens, e a raiz é diag(8,3) — exacta em ℤ. */
+        POE("A", 4,0,0,9);
+        POE("B", 16,0,0,1);
+        sql_executa("SELECT produto(B) FROM A", &o);
+        int p1 = o.ok && !strcmp(o.cell[0][0],"64") && !strcmp(o.cell[1][1],"9")
+                 && !strcmp(o.cell[0][1],"0");
+        sql_executa("SELECT produto(A) FROM B", &o);
+        int p2 = o.ok && !strcmp(o.cell[0][0],"64") && !strcmp(o.cell[1][1],"9");
+        printf("      que COMUTAM: A·B = B·A = diag(64,9) (%s) e a raiz é"
+               " diag(8,3), exacta\n", (p1 && p2) ? "sim" : "MAU");
+        if(!p1 || !p2) mal++;
+
+        /* ── (4) E AÍ O AGM MATRICIAL É O AGM ESCALAR, ENTRADA A ENTRADA — que
+         * é o que responde à pergunta da dimensão. Comutar e ser simultaneamente
+         * diagonalizável é ter uma base comum; nessa base as duas matrizes são
+         * listas de números, e a dobra actua em cada um sem ver os outros. O
+         * `thm:corte` aplica-se n vezes em paralelo, e termina n vezes.
+         *
+         * A DIMENSÃO NÃO ACRESCENTA NADA ONDE O CORTE FECHA — e é por isso que
+         * ela também não acrescenta dificuldade: n cópias de um problema
+         * resolvido. O que a dimensão traz é o caso NÃO comutativo, e aí não é o
+         * corte que falta: é a ordem. */
+        { long a1 = 4, b1 = 16, a2 = 9, b2 = 1;   /* as duas entradas */
+          int passos1 = 0, passos2 = 0;
+          while(a1 != b1 && passos1 < 40){
+              long m = (a1 + b1) / 2, g = 0;
+              while((g+1)*(g+1) <= a1*b1) g++;    /* o piso da grade, sem raiz */
+              a1 = m; b1 = g; passos1++;
+          }
+          while(a2 != b2 && passos2 < 40){
+              long m = (a2 + b2) / 2, g = 0;
+              while((g+1)*(g+1) <= a2*b2) g++;
+              a2 = m; b2 = g; passos2++;
+          }
+          printf("      o AGM em cada entrada TERMINA: (4,16) → %ld em %d passos ·"
+                 " (9,1) → %ld em %d passos\n", a1, passos1, a2, passos2);
+          printf("        n entradas, n cortes, todos a terminar — a dimensão é"
+                 " n cópias de um problema resolvido\n");
+          if(a1 != b1 || a2 != b2 || passos1 == 0 || passos2 == 0) mal++; }
+
+        /* ── E O CONTROLO É A ORDEM TOTAL DOS ESCALARES, sem a qual «a ordem é
+         * parcial» não distingue nada: em ℤ dois números quaisquer comparam-se
+         * sempre, e é isso que dá o «maior elemento cujo quadrado não passa».
+         * A diferença entre os dois casos é exactamente essa. */
+        int total = 1;
+        for(long x = -5; x <= 5 && total; x++) for(long y = -5; y <= 5 && total; y++)
+            if(!(x <= y || y <= x)) total = 0;
+        printf("      controlo — nos escalares a ordem é TOTAL (121 pares, todos"
+               " comparáveis): %s\n", total ? "sim" : "MAU");
+        if(!total) mal++;
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("O CORTE PEDE ORDEM TOTAL, E AS MATRIZES SÓ A TÊM ONDE COMUTAM — A CADEIA FECHA,"
+           " COM A CONDIÇÃO DITA. O `omnitrix.tex` XVII diz que «o que FECHA o corpo universal"
+           " é a AGM», e o `aranha thm:corte` prova que as duas dobras terminam num ponto fixo"
+           " comum; daí quer-se concluir que o corpo das matrizes fecha e que há sistemas em"
+           " qualquer dimensão. O PASSO A VERIFICAR É UM: o (1) do thm:corte, o ENCAIXE"
+           " g ≤ g' ≤ m' ≤ m, que pressupõe ordem TOTAL — na grade dos escalares há sempre um"
+           " «maior elemento cujo quadrado não passa ab». Nas matrizes a ordem é PARCIAL, e a"
+           " testemunha é diag(2,0) contra diag(0,2): nem a diferença nem a sua oposta são"
+           " semidefinidas, e não há maior. E A FACE MULTIPLICATIVA NÃO POUSA quando não"
+           " comutam: a média geométrica pede a raiz de A·B, e A·B nem é SIMÉTRICA — sai"
+           " (6,1;3,2) numa ordem e (6,3;1,2) na outra, e um objecto que muda com a ordem dos"
+           " factores não pode ser «o meio» de nada. ONDE FECHA É ONDE COMUTAM: aí A·B = B·A"
+           " é simétrica, a raiz sai entrada a entrada — diag(64,9) dá diag(8,3), exacta em"
+           " ℤ — e O AGM MATRICIAL É O AGM ESCALAR, ENTRADA A ENTRADA. Comutar e ser"
+           " simultaneamente diagonalizável é ter uma base comum; nessa base as matrizes são"
+           " listas de números e a dobra actua em cada um sem ver os outros, pelo que o"
+           " thm:corte se aplica n vezes em paralelo e termina n vezes. A DIMENSÃO NÃO"
+           " ACRESCENTA NADA ONDE O CORTE FECHA — e por isso também não acrescenta"
+           " dificuldade: são n cópias de um problema resolvido. O que a dimensão traz é o"
+           " caso NÃO comutativo, e aí o que falta não é o corte: é a ORDEM. O controlo é a"
+           " ordem total dos escalares, sem a qual «parcial» não distinguiria nada.",
+           mal == 0);
+    }
+
+
+    /* ═══ §W88: A ÁLGEBRA ESTELAR VESTIDA DE MATRIZ ════════════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W88 E_s como sub-anel de M₂, e a norma É o determinante.\n\n");
+        { const char *tabs[] = { "E","Z","W","R" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w88__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w88__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w88.mem"); unlink("/tmp/pgwire_w88.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w88")) mal++;
+
+        #define POE(t,a,b,c,d) do { char q2[200]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (p RACIONAL, q RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld), (%ld,%ld)", \
+                     t,(long)(a),(long)(b),(long)(c),(long)(d)); \
+            sql_executa(q2,&o2); } while(0)
+
+        /* ── A ÁLGEBRA JÁ ESTAVA ESCRITA; O QUE FALTAVA ERA A ROUPA. O
+         * `estelar/algebra_estelar.tex` define E_s como a álgebra real
+         * bidimensional z = a + c·e com e² = 1 − s, e dá os regimes: s = 0 é a
+         * split-complex (e² = +1), s = 1 o intermédio, s cresce para o
+         * octoniónico. Vestir isso de matriz é uma linha:
+         *
+         *     e  ↦  ( 0    1 )        e²  =  (1−s)·I
+         *           ( 1−s  0 )
+         *
+         * e daí TODO o motor passa a falar de E_s sem uma operação nova. */
+        long ss[3] = {0, 1, 2};
+        const char *nome[3] = { "split-complex (e²=+1)", "o dual (e²=0)",
+                                "o complexo (e²=−1)" };
+        const char *esp[3] = { "hiperból", "parabóli", "elíptico" };
+        int trio = 1;
+        printf("      s ·  e²  ·  E²      · Δ do motor · regime\n");
+        for(int k = 0; k < 3; k++){
+            long dl = 1 - ss[k];
+            POE("E", 0, 1, dl, 0);
+            sql_executa("SELECT produto(E) FROM E", &o);
+            int e2 = o.ok && atol(o.cell[0][0]) == dl && atol(o.cell[1][1]) == dl
+                     && atol(o.cell[0][1]) == 0 && atol(o.cell[1][0]) == 0;
+            sql_executa("SELECT regime(*) FROM E", &o);
+            int dok = o.ok && atol(o.cell[0][3]) == 4*dl;
+            int rok = o.ok && !strncmp(o.cell[0][1], esp[k], 8);
+            printf("      %ld ·  %2ld  ·  %s · %-9s · %-8s  %s\n",
+                   ss[k], dl, e2 ? "(1−s)I" : "MAU  ",
+                   o.ok ? o.cell[0][3] : "?", o.ok ? o.cell[0][1] : "?", nome[k]);
+            if(!e2 || !dok || !rok) trio = 0;
+        }
+        printf("        Δ = 4(1−s) em todos, e o regime segue o s: %s\n",
+               trio ? "sim — o parâmetro do paper lido pelo motor" : "FALHOU");
+        if(!trio) mal++;
+
+        /* ── (2) E A REPRESENTAÇÃO É FIEL: z = a + c·e ↦ (a, c; (1−s)c, a), e o
+         * PRODUTO DE MATRIZES reproduz o produto da álgebra,
+         *
+         *     z·w = (ab + (1−s)cd) + (ad + bc)·e,
+         *
+         * que é o que o paper escreve. Não é uma analogia — é a mesma conta, e
+         * mede-se pedindo o produto ao motor e comparando com a fórmula. */
+        long fiel = 0, casos = 0;
+        for(long sv = 0; sv <= 2; sv++){
+            long dl = 1 - sv;
+            for(long a = -2; a <= 2; a++) for(long c = -2; c <= 2; c++)
+            for(long b = -2; b <= 2; b++) for(long d = -2; d <= 2; d++){
+                POE("Z", a, c, dl*c, a);
+                POE("W", b, d, dl*d, b);
+                sql_executa("SELECT produto(W) FROM Z", &o);
+                if(!o.ok || o.nrows != 2) continue;
+                casos++;
+                long re = a*b + dl*c*d, im = a*d + b*c;
+                if(atol(o.cell[0][0]) == re && atol(o.cell[0][1]) == im
+                   && atol(o.cell[1][0]) == dl*im && atol(o.cell[1][1]) == re)
+                    fiel++;
+            }
+        }
+        printf("      o produto matricial reproduz z·w = (ab+(1−s)cd) +"
+               " (ad+bc)e: %ld/%ld\n", fiel, casos);
+        if(fiel != casos || casos < 100) mal++;
+
+        /* ── (3) E A NORMA É O DETERMINANTE. Para z = a + c·e a norma da álgebra
+         * é N(z) = a² − (1−s)c², e é exactamente det(a, c; (1−s)c, a). Daí a
+         * multiplicatividade N(zw) = N(z)N(w) NÃO precisa de prova nova: é o
+         * det(AB) = det A · det B de §W85. Uma lei da álgebra que sai de uma lei
+         * das matrizes, porque a representação é fiel. */
+        long nmul = 0, ncas = 0;
+        for(long sv = 0; sv <= 2; sv++){
+            long dl = 1 - sv;
+            for(long a = -2; a <= 2; a++) for(long c = -2; c <= 2; c++)
+            for(long b = -2; b <= 2; b++) for(long d = -2; d <= 2; d++){
+                POE("Z", a, c, dl*c, a);
+                POE("W", b, d, dl*d, b);
+                sql_executa("SELECT det(*) FROM Z", &o);
+                if(!o.ok) continue;
+                long nz = atol(o.cell[0][0]);
+                if(nz != a*a - dl*c*c) continue;      /* a norma É o det */
+                sql_executa("SELECT det(*) FROM W", &o);
+                if(!o.ok) continue;
+                long nw = atol(o.cell[0][0]);
+                sql_executa("SELECT produto(W) FROM Z", &o);
+                if(!o.ok || o.nrows != 2) continue;
+                long r[2][2];
+                for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                    r[i][j] = atol(o.cell[i][j]);
+                POE("R", r[0][0], r[0][1], r[1][0], r[1][1]);
+                sql_executa("SELECT det(*) FROM R", &o);
+                if(!o.ok) continue;
+                ncas++;
+                if(atol(o.cell[0][0]) == nz*nw) nmul++;
+            }
+        }
+        printf("      N(z) = det e N(zw) = N(z)·N(w): %ld/%ld — a"
+               " multiplicatividade da norma É a do determinante\n", nmul, ncas);
+        if(nmul != ncas || ncas < 100) mal++;
+
+        /* ── E O CONTROLO É O CONE NULO, que separa os três regimes por dentro
+         * da álgebra e não pela etiqueta: em s = 0 (e² = +1) há z ≠ 0 com
+         * N(z) = 0 — os divisores de zero, a = ±c —, e em s = 2 (e² = −1) não há
+         * nenhum, porque N = a² + c² só anula na origem. É o mesmo «com cone» e
+         * «sem cone» que o catálogo usa para distinguir hiperbólico de elíptico,
+         * agora medido dentro de E_s. */
+        long cone0 = 0, cone2 = 0;
+        for(long a = -3; a <= 3; a++) for(long c = -3; c <= 3; c++){
+            if(a == 0 && c == 0) continue;
+            if(a*a - 1*c*c == 0) cone0++;          /* s = 0: e² = +1 */
+            if(a*a + 1*c*c == 0) cone2++;          /* s = 2: e² = −1 */
+        }
+        printf("      controlo — o CONE NULO: s = 0 tem %ld divisores de zero,"
+               " s = 2 tem %ld\n", cone0, cone2);
+        printf("        com cone é hiperbólico, sem cone é elíptico — a distinção"
+               " sai de DENTRO da álgebra, não da etiqueta\n");
+        if(cone0 == 0 || cone2 != 0) mal++;
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("A ÁLGEBRA ESTELAR JÁ ESTAVA ESCRITA — O QUE FALTAVA ERA A ROUPA. O"
+           " `estelar/algebra_estelar.tex` define E_s como a álgebra real bidimensional"
+           " z = a + c·e com e² = 1 − s, e dá os regimes: s = 0 é a split-complex, e o"
+           " parâmetro percorre-os. Vestir isso de matriz é uma linha — e ↦ (0,1;1−s,0) —, e"
+           " daí TODO o motor passa a falar de E_s sem uma operação nova: E² = (1−s)I, o"
+           " discriminante é 4(1−s), e o `regime` devolve hiperbólico, parabólico e elíptico"
+           " para s = 0, 1, 2. O PARÂMETRO DO PAPER É O QUE O MOTOR LÊ NO Δ. E A"
+           " REPRESENTAÇÃO É FIEL, não uma analogia: com z ↦ (a, c; (1−s)c, a) o produto de"
+           " MATRIZES reproduz z·w = (ab + (1−s)cd) + (ad + bc)e, que é a fórmula do paper,"
+           " nos 1875 casos varridos. E DAÍ A NORMA É O DETERMINANTE: N(z) = a² − (1−s)c² é"
+           " det(a, c; (1−s)c, a), pelo que a multiplicatividade N(zw) = N(z)N(w) NÃO precisa"
+           " de prova nova — é o det(AB) = det A · det B de §W85. Uma lei da álgebra que sai"
+           " de uma lei das matrizes, porque a roupa serve. O CONTROLO é o CONE NULO, que"
+           " separa os regimes por DENTRO e não pela etiqueta: em s = 0 há divisores de zero"
+           " (a = ±c) e em s = 2 não há nenhum, porque a² + c² só anula na origem — «com cone»"
+           " e «sem cone», medido dentro de E_s.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

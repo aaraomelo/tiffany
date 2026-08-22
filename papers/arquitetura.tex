@@ -3912,6 +3912,201 @@ pede-se a soma sobre o espectro a um motor que não sabe dizer o espectro.
         {\code{traco} das potências contra $\sum\lambda^{n}$; a recorrência de Newton}
         {\code{tests/pgwire.c} §W83}
 
+\subsection*{As vinte e uma operações não são vinte e uma réguas}
+
+\noindent Cada operação matricial foi escrita numa altura e tem o seu medidor, onde
+está certa \emph{sozinha}. O defeito que esta casa persegue com o nome «duas réguas
+para o mesmo objeto» vive precisamente \textbf{entre} elas --- e não aparece em
+nenhum medidor individual, por construção.
+
+\medskip\noindent Confrontam-se todas sobre a \emph{mesma} matriz, nas $2401$ com
+entradas em $-3..3$, com nove famílias de relações que ligam operações
+\textbf{diferentes}:
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+relação & o que ela liga\\
+\midrule
+$\det$, $\operatorname{tr}$ contra a conta direta & o motor contra a aritmética\\
+$\operatorname{posto}+\dim\ker=2$ & duas operações, uma conservação\\
+$\det=0\Leftrightarrow\operatorname{posto}<2$ & dois caminhos que não se conhecem\\
+$\Delta$ do \code{regime} $=\operatorname{tr}^2-4\det$ & o regime contra o par\\
+\code{autovalores} responde $\Leftrightarrow$ raízes racionais & a recusa como lei\\
+Viète quando responde & soma $=$ traço, produto $=$ det\\
+Gram simétrica, $\det G=\det^2$ & a Gram contra o determinante\\
+inversa existe $\Leftrightarrow\det\neq0$ & a existência contra o valor\\
+transposta com o mesmo $\det$ e $\operatorname{tr}$ & a face dual\\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Zero divergências.}
+
+\medskip\noindent\textbf{E o controlo é a distribuição}, sem o qual esse zero seria
+uma ausência a passar por acordo: se todas tivessem posto $2$, a conservação nunca
+repartia; se nenhuma fosse singular, a equivalência nunca era exercida do lado
+verdadeiro; se os autovalores respondessem sempre, a recusa nunca era testada.
+Contam-se --- os três postos aparecem ($1$, $288$, $2112$), $289$ são singulares, os
+autovalores respondem em $963$ e recusam nas outras. Cada relação exercida nos
+\emph{dois} lados.
+
+\medido{\code{tests/pgwire.c} §W84.}
+
+\colunas{\code{feedback} «duas réguas para o mesmo objeto»}
+        {as nove famílias, varridas em $2401$; a distribuição como controlo}
+        {\code{tests/pgwire.c} §W84}
+
+\medskip\noindent\textbf{E cada face respeita a \emph{sua} operação --- é isso que as
+faz duas.} §W72 mostrou que $(\operatorname{tr},\det)$ \emph{é} (soma, produto) das
+raízes; a consequência é uma lei de cada lado:
+\[
+\det(AB)=\det A\cdot\det B,\qquad \operatorname{tr}(A+B)=\operatorname{tr}A+\operatorname{tr}B,
+\]
+ambas em todos os $625$ pares --- a multiplicativa multiplica, a aditiva soma. E o
+traço é ainda \textbf{cíclico}, $\operatorname{tr}(AB)=\operatorname{tr}(BA)$, que é
+outra coisa e não multiplicatividade.
+
+\medskip\noindent\textbf{E a troca não vale}: o traço não multiplica e o
+determinante não soma. É isso que faz da assimetria uma \emph{lei} e não uma
+arrumação --- se cada um fizesse o do outro, as duas faces seriam a mesma coisa com
+dois nomes. Os $95$ casos em que os dois lados calham iguais são o que impede a
+leitura errada: se a desigualdade fosse \emph{universal} seria uma segunda lei;
+sendo \emph{genérica}, é a \textbf{ausência} de lei --- e dizê-lo separa «não vale»
+de «vale ao contrário».
+
+\medskip\noindent E o \textbf{neutro é de uma face só}: $\det(A\cdot I)=\det A$
+fecha, mas $\operatorname{tr}(A+I)=\operatorname{tr}A+2$, porque o neutro da soma é
+a matriz \emph{nula} e não a identidade. São objetos diferentes --- o Teor.~2(4) do
+\code{aranha} outra vez.
+
+\medido{\code{tests/pgwire.c} §W85.}
+
+\colunas{\code{aranha thm:duas}(4); \code{broca-so matrix.tex} ($N=\det$ multiplicativa)}
+        {\code{det}/\code{traco} sobre \code{produto} e \code{soma}, varridos}
+        {\code{tests/pgwire.c} §W85}
+
+\subsection*{O gato, o gambá, e o terceiro regime}
+
+\noindent O \code{broca-so/papers/matrix.tex} nomeia as duas matrizes que este
+motor tem andado a usar: o \textbf{gato} $A=(1,1;1,0)$ --- simétrico, $\det=-1$,
+$A^{2}=A+I$, hiperbólico: a matriz de Fibonacci de §W62 --- e o \textbf{gambá}
+$G=(0,1;-1,0)$ --- antissimétrico, $\det=+1$, $G^{2}=-I$, elíptico: a rotação de
+§W68. E declara \textbf{três} regimes das potências, dos quais só dois estavam
+medidos:
+\[
+A^{k}\ \textbf{cresce}\ (\text{Fibonacci}),\qquad
+G^{k}\ \textbf{cicla}\ (\text{período }4),\qquad
+(A+G)^{k}=A+G\ \textbf{projeta}.
+\]
+A soma é \textbf{idempotente}, e a idempotência é o colapso: medir duas vezes é
+medir uma. E uma projeção tem de ter \emph{posto menor} --- $\det 0$, posto $1$ ---,
+porque uma idempotente de posto cheio é a identidade, e a identidade não colapsa
+nada.
+
+\medskip\noindent\textbf{E aqui uma precisão, porque as perguntas são duas.} O
+\code{regime} desta casa classifica o \emph{fluxo} $e^{At}$ pelo sinal de
+$\operatorname{Re}\lambda$, e para $A+G$ diz \textsc{caos}: os autovalores são $1$ e
+$0$, e o $1$ faz crescer. A idempotência é sobre as \emph{potências} $A^{k}$, que é
+outra sucessão --- com $\lambda=1$ e $0$ elas ficam paradas. Crescer no fluxo e ficar
+parado nas potências não é contradição: são \emph{dois objetos}, e confundi-los seria
+ler o regime como se falasse de $A^{k}$.
+
+\medskip\noindent\textbf{E a assinatura é \emph{split}.} Com $\{I,A,G,AG\}$ base de
+$M_2(\mathbb{R})$, a estrutura é a dos quatérnios divididos:
+\[
+G^{2}=-I\ (\text{elíptico}),\qquad (2A-I)^{2}=5I,\qquad [A,G]^{2}=5I\ (\text{hiperbólicos}),
+\]
+um eixo elíptico e dois hiperbólicos --- que é o que a palavra diz. E o $5$ não é um
+número qualquer: é o \textbf{discriminante do gato}, $\operatorname{tr}^{2}-4\det=1+4$,
+e o motor confirma-o pela outra ponta sem se lhe pedir o quadrado de nada.
+
+\medido{\code{tests/pgwire.c} §W86, com os três regimes lado a lado --- o gato a
+chegar a $F_6=8$, o gambá a voltar a $I$ ao quarto passo, a soma a não se mexer ---,
+sem o que «três regimes» seria uma arrumação e não uma medida.}
+
+\colunas{\code{broca-so matrix.tex} (as duas matrizes, os quatérnios divididos)}
+        {\code{soma}+\code{produto}+\code{posto} pelo motor; o comutador nas duas ordens}
+        {\code{tests/pgwire.c} §W86}
+
+\subsection*{O AGM de matrizes: onde fecha, e onde não}
+
+\noindent O \code{omnitrix.tex} XVII diz que «o que \textbf{fecha} o corpo universal
+é a AGM», e o \code{aranha thm:corte} prova que as duas dobras terminam num ponto
+fixo comum. Daí quer-se concluir que o corpo das matrizes fecha, e portanto que há
+sistemas em qualquer dimensão. \textbf{O passo que precisa de verificação é um:} o
+(1) do \code{thm:corte}, o \emph{encaixe} $g\le g'\le m'\le m$, que pressupõe ordem
+\textbf{total} --- na grade dos escalares há sempre um «maior elemento cujo quadrado
+não passa $ab$».
+
+\medskip\noindent Nas matrizes a ordem é \textbf{parcial}, e a testemunha é
+$\mathrm{diag}(2,0)$ contra $\mathrm{diag}(0,2)$: nem a diferença nem a sua oposta
+são semidefinidas. E a face multiplicativa não pousa quando não comutam --- a média
+geométrica pede a raiz de $AB$, e $AB$ nem é \emph{simétrica}: sai $(6,1;3,2)$ numa
+ordem e $(6,3;1,2)$ na outra, e um objeto que muda com a ordem dos fatores não pode
+ser «o meio» de nada.
+
+\medskip\noindent\textbf{Onde fecha é onde comutam.} Aí $AB=BA$ é simétrica, a raiz
+sai entrada a entrada --- $\mathrm{diag}(64,9)$ dá $\mathrm{diag}(8,3)$, exata em
+$\Z$ --- e o \textbf{AGM matricial é o AGM escalar, entrada a entrada}. Comutar e ser
+simultaneamente diagonalizável é ter uma base comum; nessa base as matrizes são
+listas de números e a dobra atua em cada um sem ver os outros, pelo que o
+\code{thm:corte} se aplica $n$ vezes em paralelo e termina $n$ vezes.
+\[
+\boxed{\;\text{a dimensão não acrescenta nada onde o corte fecha --- são }n\text{ cópias de um problema resolvido}\;}
+\]
+O que a dimensão traz é o caso \emph{não} comutativo, e aí o que falta não é o corte:
+é a \textbf{ordem}.
+
+\medido{\code{tests/pgwire.c} §W87, com o controlo na ordem total dos escalares ---
+$121$ pares, todos comparáveis ---, sem a qual «parcial» não distinguiria nada.}
+
+\colunas{\code{aranha thm:corte}(1); \code{omnitrix.tex} XVII (a costura AGM)}
+        {o par incomparável; $AB\neq BA$ pelo motor; o AGM entrada a entrada}
+        {\code{tests/pgwire.c} §W87}
+
+\subsection*{A álgebra estelar vestida de matriz}
+
+\noindent A álgebra já estava escrita --- o que faltava era a roupa. O
+\code{estelar/algebra\_estelar.tex} define $\mathcal{E}_s$ como a álgebra real
+bidimensional $z=a+c\,e$ com $e^{2}=1-s$, e o parâmetro percorre os regimes.
+Vesti-la de matriz é uma linha:
+\[
+e\;\longmapsto\;\begin{pmatrix}0&1\\1-s&0\end{pmatrix},
+\qquad e^{2}=(1-s)\,I,
+\]
+e daí \emph{todo} o motor passa a falar de $\mathcal{E}_s$ sem uma operação nova:
+$\Delta=4(1-s)$, e o \code{regime} devolve hiperbólico, parabólico e elíptico para
+$s=0,1,2$ --- \textbf{o parâmetro do paper é o que o motor lê no discriminante}.
+\begin{center}\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+$s$ & $e^{2}=1-s$ & $\Delta$ & regime & nome\\
+\midrule
+$0$ & $+1$ & $4$ & hiperbólico & split-complex\\
+$1$ & $0$ & $0$ & parabólico & o dual, nilpotente\\
+$2$ & $-1$ & $-4$ & elíptico & o $i$, o gambá\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E a representação é fiel}, não uma analogia: com
+$z\mapsto(a,c;(1-s)c,a)$ o produto de \emph{matrizes} reproduz
+$z\cdot w=(ab+(1-s)cd)+(ad+bc)\,e$, que é a fórmula do paper --- nos $1875$ casos
+varridos.
+
+\medskip\noindent\textbf{E daí a norma é o determinante:}
+$N(z)=a^{2}-(1-s)c^{2}=\det(a,c;(1-s)c,a)$, pelo que a multiplicatividade
+$N(zw)=N(z)N(w)$ \emph{não precisa de prova nova} --- é o
+$\det(AB)=\det A\cdot\det B$ de §W85. Uma lei da álgebra que sai de uma lei das
+matrizes, porque a roupa serve.
+
+\medido{\code{tests/pgwire.c} §W88, com o controlo no \textbf{cone nulo}, que separa
+os regimes por \emph{dentro} e não pela etiqueta: em $s=0$ há divisores de zero
+($a=\pm c$) e em $s=2$ não há nenhum, porque $a^{2}+c^{2}$ só anula na origem.}
+
+\colunas{\code{estelar/algebra\_estelar.tex} ($\mathcal{E}_s$, $e^2=1-s$)}
+        {$e\mapsto(0,1;1-s,0)$; \code{produto}/\code{det}/\code{regime} pelo motor}
+        {\code{tests/pgwire.c} §W88}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
