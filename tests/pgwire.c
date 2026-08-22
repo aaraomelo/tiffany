@@ -13456,6 +13456,204 @@ int main(void){
            " sinal importa porque ζ(0) = 1 é a normalização que faz dela uma zeta.", mal == 0);
     }
 
+    /* ═══ §W96: O DICIONÁRIO PALAVRA↔MATRIZ, E ν NAS DUAS ENCARNAÇÕES ══════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W96 M(a₀)···M(a_n): as colunas são os convergentes, e a palavra ao contrário é a TRANSPOSTA.\n\n");
+        { const char *tabs[] = { "A","P","T" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w96__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w96__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w96.mem"); unlink("/tmp/pgwire_w96.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w96")) mal++;
+
+        long rec96 = 0;
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); \
+                sql_executa(q2,&o2); if(!o2.ok) rec96++; } } while(0)
+
+        /* produto pelo motor: Z = X·Y.  A convenção do motor é
+         *   SELECT produto(A) FROM P   ==   P · A
+         * — a tabela do FROM é o factor da ESQUERDA. Nos blocos de potências
+         * isso não se nota, porque A^k comuta com A; aqui as letras NÃO
+         * comutam, e a ordem é a lei. */
+        #define MUL2(X,Y,Z) do { POE2("P",(X)); POE2("A",(Y)); \
+            sql_executa("SELECT produto(A) FROM P", &o); \
+            if(!o.ok || o.nrows != 2){ falhou = 1; } else \
+            for(int i3 = 0; i3 < 2; i3++) for(int j3 = 0; j3 < 2; j3++) \
+                (Z)[i3][j3] = atol(o.cell[i3][j3]); } while(0)
+
+        /* ── O `catalogo` §sec:dic põe M(a) = (a,1;1,0) e diz «a fração contínua
+         * É a palavra; a matriz é a mesma palavra escrita de outro jeito». A
+         * prop:conv diz que as colunas de M_n são os convergentes, e o thm:rev
+         * que ler a palavra ao contrário É TRANSPOR. Aqui as três correm no
+         * motor, e cada uma tem um segundo caminho que não sabe da primeira. */
+
+        long conv_ok = 0, conv_n = 0, det_ok = 0, rev_ok = 0, rev_n = 0,
+             bez_ok = 0, alc_max = 0, travadas = 0, fora_env = 0, det_n = 0;
+        long A_[8];
+        for(long a0 = 1; a0 <= 3; a0++) for(long a1 = 1; a1 <= 3; a1++)
+        for(long a2 = 1; a2 <= 3; a2++) for(long a3 = 1; a3 <= 2; a3++)
+        for(long a4 = 1; a4 <= 2; a4++){
+            A_[0] = a0; A_[1] = a1; A_[2] = a2; A_[3] = a3; A_[4] = a4;
+            const int N = 5;
+            /* (1) o produto das letras, pelo motor */
+            long M[2][2] = {{1,0},{0,1}};
+            int falhou = 0, alc = 0;
+            for(int k = 0; k < N && !falhou; k++){
+                long L[2][2] = {{A_[k],1},{1,0}}, Z[2][2];
+                long antes = rec96;
+                MUL2(M, L, Z);
+                if(falhou) break;
+                if(rec96 != antes){ falhou = 1; break; }   /* saiu do envelope */
+                memcpy(M, Z, sizeof M);
+                alc = k + 1;
+            }
+            if(alc > alc_max) alc_max = alc;
+            if(alc < N){ travadas++; continue; }
+
+            /* (2) os convergentes pela RECORRÊNCIA, sem ver matriz nenhuma */
+            long p1 = 1, q1 = 0, p2 = 0, q2 = 1, p = 0, q = 0;
+            for(int k = 0; k < N; k++){
+                p = A_[k]*p1 + p2; q = A_[k]*q1 + q2;
+                p2 = p1; q2 = q1; p1 = p; q1 = q;
+            }
+            conv_n++;
+            /* M_n = (p_n, p_{n−1}; q_n, q_{n−1}) */
+            if(M[0][0] == p && M[0][1] == p2 && M[1][0] == q && M[1][1] == q2)
+                conv_ok++;
+            else if(conv_n < 4)
+                printf("      palavra (%ld,%ld,%ld,%ld,%ld): motor (%ld,%ld;%ld,%ld)"
+                       " vs recorrência (%ld,%ld;%ld,%ld)\n", a0,a1,a2,a3,a4,
+                       M[0][0],M[0][1],M[1][0],M[1][1], p,p2,q,q2);
+
+            /* (3) det M_n = (−1)^{n+1}, que É a identidade de Bézout.
+             * O produto correu todo dentro do envelope, mas REPOR o M final
+             * numa tabela pode não caber — p_n cresce com a palavra. Quando
+             * não cabe, isto é alcance e não falha: conta-se à parte. */
+            long antes_det = rec96;
+            POE2("A", M);
+            if(rec96 != antes_det){ fora_env++; continue; }
+            sql_executa("SELECT det(*) FROM A", &o);
+            long d = o.ok ? atol(o.cell[0][0]) : 0;
+            /* com L letras o produto tem L factores de det −1, logo
+             * det M = (−1)^L. O catálogo indexa a_0..a_n, isto é n+1 letras,
+             * e escreve (−1)^{n+1}: é o MESMO expoente, o número de letras.
+             * Confundi n com a contagem na primeira escrita. */
+            long esp = (N % 2 == 0) ? 1 : -1;
+            det_n++;
+            if(d == esp) det_ok++;
+            if(p*q2 - p2*q == esp) bez_ok++;    /* a mesma conta, escrita à mão */
+
+            /* (4) thm:rev — a palavra AO CONTRÁRIO dá a TRANSPOSTA, e as duas
+             * encarnações de ν da def:nu (reverter a palavra, transpor a
+             * matriz) têm de coincidir. A transposta é pedida ao motor. */
+            long R[2][2] = {{1,0},{0,1}};
+            falhou = 0;
+            for(int k = N - 1; k >= 0 && !falhou; k--){
+                long L[2][2] = {{A_[k],1},{1,0}}, Z[2][2];
+                MUL2(R, L, Z);
+                if(!falhou) memcpy(R, Z, sizeof R);
+            }
+            if(falhou) continue;
+            POE2("A", M);
+            sql_executa("SELECT transposta(*) FROM A", &o);
+            rev_n++;
+            if(o.ok && o.nrows == 2
+               && atol(o.cell[0][0]) == R[0][0] && atol(o.cell[0][1]) == R[0][1]
+               && atol(o.cell[1][0]) == R[1][0] && atol(o.cell[1][1]) == R[1][1])
+                rev_ok++;
+        }
+        printf("      prop:conv — as colunas de M_n SÃO os convergentes: %ld/%ld"
+               " (produto do motor contra a recorrência escrita sem matriz)\n",
+               conv_ok, conv_n);
+        printf("      det M_n = (−1)^L pelo motor: %ld/%ld · e a MESMA conta como"
+               " Bézout p_nq_{n−1} − p_{n−1}q_n: %ld/%ld\n",
+               det_ok, det_n, bez_ok, det_n);
+        printf("      thm:rev — a palavra AO CONTRÁRIO é a TRANSPOSTA: %ld/%ld"
+               " (ν como reversão e ν como transposição, def:nu)\n", rev_ok, rev_n);
+        printf("      alcance: palavras de %ld letras; %ld combinações em que o M"
+               " final não CABE de volta na célula (p_n > 127) — alcance, não falha\n",
+               alc_max, fora_env);
+        if(conv_ok != conv_n || conv_n < 80) mal++;
+        if(det_ok != det_n || bez_ok != det_n || det_n < 80) mal++;
+        if(rev_ok != rev_n || rev_n < 80) mal++;
+        if(fora_env == 0){ printf("      → o envelope não travou nenhuma: o alcance"
+                                  " não foi exercido\n"); mal++; }
+
+        /* ── (5) O CONTROLO, sem o qual o thm:rev seria trivial: se a palavra
+         * já for um PALÍNDROMO, reverter não muda nada e a transposta é a
+         * própria matriz — a lei passaria sem dizer nada. Conta-se quantas
+         * palavras NÃO são palíndromos e nelas M_n ≠ M_nᵀ, senão «reverter é
+         * transpor» estaria a ser medido onde as duas são a identidade. */
+        {
+            long assim = 0, pal = 0;
+            for(long a0 = 1; a0 <= 3; a0++) for(long a1 = 1; a1 <= 3; a1++)
+            for(long a2 = 1; a2 <= 3; a2++){
+                long W[3] = {a0,a1,a2};
+                int palind = (W[0] == W[2]);
+                long M[2][2] = {{1,0},{0,1}};
+                int falhou = 0;
+                for(int k = 0; k < 3 && !falhou; k++){
+                    long L[2][2] = {{W[k],1},{1,0}}, Z[2][2];
+                    MUL2(M, L, Z);
+                    if(!falhou) memcpy(M, Z, sizeof M);
+                }
+                if(falhou) continue;
+                int simetrica = (M[0][1] == M[1][0]);
+                if(palind) pal++;
+                else if(!simetrica) assim++;
+            }
+            printf("      CONTROLO — nas 27 palavras de 3 letras: %ld palíndromos"
+                   " (onde M = Mᵀ e a lei nada diria) e %ld assimétricas onde"
+                   " M ≠ Mᵀ e a lei é exercida\n", pal, assim);
+            if(assim < 12 || pal < 6) mal++;
+        }
+
+        #undef MUL2
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("A PALAVRA E A MATRIZ SÃO O MESMO OBJECTO, E ν É A MESMA OPERAÇÃO NOS DOIS ALFABETOS."
+           " O `catalogo.tex` §sec:dic põe M(a) = (a,1;1,0) e diz «a fração contínua É a"
+           " palavra; a matriz é a mesma palavra escrita de outro jeito». Três enunciados dessa"
+           " secção passam a correr no motor, cada um com um segundo caminho que não sabe do"
+           " primeiro. A prop:conv diz que as colunas de M_n são os convergentes: o produto das"
+           " letras é feito pelo motor, letra a letra, e a recorrência p_n = a_np_{n−1}+p_{n−2}"
+           " é escrita sem ver matriz nenhuma — batem em 108/108 palavras de cinco letras. O"
+           " det M_n = (−1)^L sai pelo motor e a MESMA conta escrita como Bézout,"
+           " p_nq_{n−1} − p_{n−1}q_n, dá o mesmo em 104/104: não são duas leis, é uma lei lida"
+           " em dois alfabetos, e é por isso que o determinante de uma palavra é a sua"
+           " identidade de Bézout. As outras quatro não falham: o produto correu todo dentro"
+           " do envelope, mas REPOR o M final numa tabela pede p_n ≤ 127 e ali não cabe —"
+           " alcance, contado à parte, e sem ele o zero não seria exercido. E O thm:rev É O MAIS BONITO: ler a palavra AO CONTRÁRIO É"
+           " TRANSPOR a matriz, porque cada letra é simétrica. Isso põe DUAS das três"
+           " encarnações da ν da def:nu a coincidirem no mesmo objecto — ν(palavra) = palavra"
+           " ao contrário e ν(M) = Mᵀ —, e mede-se com a transposta pedida ao motor contra o"
+           " produto refeito de trás para a frente: 104/104. O CONTROLO é o que impede isto de"
+           " ser vazio: numa palavra PALÍNDROMA reverter não muda nada e M já é simétrica, pelo"
+           " que a lei passaria sem dizer nada. Contam-se as 27 palavras de três letras — 9 são"
+           " palíndromas e 18 assimétricas com M ≠ Mᵀ —, e é nessas que «reverter é transpor»"
+           " tem conteúdo. O alcance é do ENVELOPE e não da lei: as palavras param nas cinco"
+           " letras porque os convergentes crescem e a célula vive em −128..127. E A ORDEM DO"
+           " PRODUTO TEVE DE SER MEDIDA, não suposta: `SELECT produto(A) FROM P` é P·A, com a"
+           " tabela do FROM como factor da ESQUERDA. Nos blocos de potências isso não se nota,"
+           " porque A^k comuta com A, e a primeira escrita deste bloco herdou a suposição"
+           " errada de lá — deu 12/108 nos convergentes e 0/108 no determinante. As letras não"
+           " comutam, e é aqui que a convenção passa a ser lei: sondou-se com duas matrizes"
+           " que não comutam e o motor respondeu.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

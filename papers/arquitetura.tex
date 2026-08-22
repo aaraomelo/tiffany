@@ -4527,6 +4527,60 @@ pontos, a separar $70/70$ contra $0/70$.}
         {\code{produto}/\code{traco}/\code{det} pelo motor; a identidade polinomial testada em mais pontos que o grau}
         {\code{tests/pgwire.c} §W95}
 
+\subsection*{A palavra e a matriz são o mesmo objeto --- e $\nu$ é a mesma operação nos dois alfabetos}
+
+\noindent O \code{catalogo} §\code{sec:dic} põe $M(a)=\left(\begin{smallmatrix}a&1\\1&0\end{smallmatrix}\right)$
+e diz: «a fração contínua \emph{é} a palavra; a matriz é a mesma palavra escrita de
+outro jeito». Três enunciados dessa seção passam a correr no motor, cada um com um
+segundo caminho que não sabe do primeiro.
+
+\medskip\noindent\textbf{\code{prop:conv}: as colunas de $M_n$ são os convergentes.}
+O produto das letras é feito \emph{pelo motor}, letra a letra; a recorrência
+$p_n=a_np_{n-1}+p_{n-2}$ é escrita sem ver matriz nenhuma. Batem em
+$\mathbf{108/108}$ palavras de cinco letras.
+
+\medskip\noindent\textbf{E o determinante de uma palavra \emph{é} a sua identidade
+de Bézout.} $\det M_n=(-1)^{L}$ sai pelo motor, e a mesma conta escrita como
+$p_nq_{n-1}-p_{n-1}q_n$ dá o mesmo em $104/104$. Não são duas leis: é uma lei lida
+em dois alfabetos. As outras quatro não falham --- o produto correu todo dentro do
+envelope, mas \emph{repor} o $M$ final numa tabela pede $p_n\le127$ e ali não cabe.
+É alcance, contado à parte.
+
+\medskip\noindent\textbf{E o \code{thm:rev} é o mais bonito.} Ler a palavra
+\textbf{ao contrário} é \textbf{transpor} a matriz, porque cada letra é simétrica:
+\[
+\bigl(M(a_0)M(a_1)\cdots M(a_n)\bigr)^{\!\mathsf T}=M(a_n)\cdots M(a_1)M(a_0).
+\]
+Isso põe \textbf{duas} das três encarnações da $\nu$ da \code{def:nu} a coincidirem
+no mesmo objeto --- $\nu(\text{palavra})=$ palavra ao contrário e $\nu(M)=M^{\mathsf T}$
+---, e mede-se com a \code{transposta} pedida ao motor contra o produto refeito de
+trás para a frente: $104/104$.
+
+\medskip\noindent\textbf{O controlo é o que impede isto de ser vazio.} Numa palavra
+\textbf{palíndroma} reverter não muda nada e $M$ já é simétrica: a lei passaria sem
+dizer coisa alguma. Contam-se as $27$ palavras de três letras --- $9$ palíndromas e
+$18$ assimétricas com $M\neq M^{\mathsf T}$ ---, e é nessas que «reverter é
+transpor» tem conteúdo.
+
+\medskip\noindent\textbf{E a ordem do produto teve de ser \emph{medida}, não
+suposta.} A convenção do motor é
+\[
+\text{\code{SELECT produto(A) FROM P}}\;=\;P\cdot A,
+\]
+com a tabela do \code{FROM} como fator da \textbf{esquerda}. Nos blocos de potências
+isso não se nota, porque $A^{k}$ comuta com $A$; a primeira escrita deste bloco
+herdou a suposição errada de lá e deu $12/108$ nos convergentes e $\mathbf{0/108}$ no
+determinante. \emph{As letras não comutam}, e é aqui que a convenção passa a ser lei:
+sondou-se com duas matrizes que não comutam e o motor respondeu.
+
+\medido{\code{tests/pgwire.c} §W96 --- os convergentes em $108/108$; $\det$ e Bézout
+em $104/104$ com as quatro fora do envelope contadas; a reversão contra a transposta
+em $104/104$; e o controlo dos palíndromos.}
+
+\colunas{\code{catalogo sec:dic} (\code{prop:dic}, \code{prop:conv}, \code{thm:rev}, \code{def:nu})}
+        {\code{produto}/\code{det}/\code{transposta} pelo motor; a recorrência dos convergentes como segundo caminho}
+        {\code{tests/pgwire.c} §W96}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
