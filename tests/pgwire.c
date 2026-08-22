@@ -5177,6 +5177,142 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W37: O PREDICADO DITO NA ESCRITA ═════════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w37.mem", "/tmp/pgwire_w37.prog",
+            "/tmp/pgwire_w37__t.mem", "/tmp/pgwire_w37__t.prog",
+            "/tmp/pgwire_w37__u.mem", "/tmp/pgwire_w37__u.prog",
+            "/tmp/pgwire_w37__l.mem", "/tmp/pgwire_w37__l.prog" };
+        for(int k = 0; k < 8; k++) unlink(lixo[k]);
+        printf("\n§W37 o CHECK: o WHERE dito na escrita, na mesma ISA.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w37")) mal++;
+        int cr = sql_executa("CREATE TABLE t (a, b, CHECK (a > 10))", &o);
+
+        /* ── (1) À ENTRADA. É a mesma dualidade do UNIQUE contra o DISTINCT um
+         * andar acima: o WHERE escolhe à saída as linhas que satisfazem o
+         * predicado, o CHECK recusa à entrada as que não o satisfazem. */
+        int i1 = sql_executa("INSERT INTO t VALUES (20,1)", &o);
+        int i2 = sql_executa("INSERT INTO t VALUES (5,2)", &o);
+        int i3 = sql_executa("INSERT INTO t VALUES (11,3)", &o);   /* na fronteira */
+        int i4 = sql_executa("INSERT INTO t VALUES (10,4)", &o);   /* na fronteira */
+        sql_executa("SELECT * FROM t", &o);
+        int entrada = (cr && i1 && !i2 && i3 && !i4 && o.nrows == 2);
+        printf("      à entrada: 20 %d · 5 %d · 11 %d · 10 %d → %d linhas (esp 2)"
+               "  %s\n", i1, i2, i3, i4, o.nrows, entrada ? "" : "NAO BATE");
+        if(!entrada) mal++;
+
+        /* ── (2) E A RECUSA NÃO DEIXA A LINHA LÁ. As células já estão escritas
+         * quando o predicado corre — é a ordem que torna isto barato: o
+         * catálogo ainda não subiu, pelo que a linha está no disco e NÃO
+         * EXISTE, e o próximo INSERT escreve por cima. Mede-se contando, e
+         * exigindo que o INSERT seguinte caia no sítio certo. */
+        int i5 = sql_executa("INSERT INTO t VALUES (30,5)", &o);
+        sql_executa("SELECT * FROM t", &o);
+        int limpo = (i5 && o.nrows == 3 && !strcmp(o.cell[2][0], "30")
+                                        && !strcmp(o.cell[2][1], "5"));
+        printf("      a recusa não deixa lixo: %d linhas e a última é (%s,%s)"
+               " (esp 30,5)  %s\n", o.nrows,
+               o.nrows > 2 ? o.cell[2][0] : "?", o.nrows > 2 ? o.cell[2][1] : "?",
+               limpo ? "" : "NAO BATE");
+        if(!limpo) mal++;
+
+        /* ── (3) E VALE NA OUTRA PORTA, com a mecânica que a torna uma
+         * PERGUNTA: escreve-se o valor novo, corre-se o mesmo molde, e
+         * restaura-se SEMPRE. Se passar, o UPDATE a sério escreve a seguir; se
+         * não passar, nada ficou tocado — o que se mede exigindo que a célula
+         * continue com o valor velho depois da recusa. */
+        int u1 = sql_executa("UPDATE t SET a = 3 WHERE b = 1", &o);
+        sql_executa("SELECT * FROM t WHERE b = 1", &o);
+        char velho[8]; snprintf(velho, sizeof velho, "%s", o.nrows ? o.cell[0][0] : "?");
+        int u2 = sql_executa("UPDATE t SET a = 40 WHERE b = 1", &o);
+        sql_executa("SELECT * FROM t WHERE b = 1", &o);
+        char novo[8]; snprintf(novo, sizeof novo, "%s", o.nrows ? o.cell[0][0] : "?");
+        int porta = (!u1 && !strcmp(velho, "20") && u2 && !strcmp(novo, "40"));
+        printf("      pelo UPDATE: recusado %d e a célula fica %s (esp 20) ·"
+               " aceite %d e passa a %s (esp 40)  %s\n", u1, velho, u2, novo,
+               porta ? "" : "NAO BATE");
+        if(!porta) mal++;
+
+        /* ── (4) O PREDICADO NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ. A ausência
+         * está FORA do corpo: um predicado do corpo não a alcança, e o que não
+         * se pronuncia não recusa. Sem esta regra todo o CHECK seria um
+         * NOT NULL implícito — uma restrição que ninguém declarou. */
+        int n1 = sql_executa("INSERT INTO t VALUES (NULL,6)", &o);
+        sql_executa("SELECT * FROM t WHERE a IS NULL", &o);
+        int calado = (n1 && o.nrows == 1);
+        printf("      não se pronuncia sobre o ausente: entra %d · e está no dual"
+               " %d (esp 1)  %s\n", n1, o.nrows, calado ? "" : "NAO BATE");
+        if(!calado) mal++;
+
+        /* ── (5) É O MESMO AVALIADOR, e por isso o predicado composto sai de
+         * graça: a árvore do WHERE já sabe ler `AND`. Um CHECK que precisasse
+         * de avaliador próprio teria duas respostas possíveis para a mesma
+         * pergunta. */
+        sql_executa("CREATE TABLE u (x, y, CHECK (x > 0 AND y > 0))", &o);
+        int c1 = sql_executa("INSERT INTO u VALUES (5,5)", &o);
+        int c2 = sql_executa("INSERT INTO u VALUES (5,0)", &o);
+        int c3 = sql_executa("INSERT INTO u VALUES (0,5)", &o);
+        sql_executa("SELECT * FROM u", &o);
+        int composto = (c1 && !c2 && !c3 && o.nrows == 1);
+        printf("      o predicado composto sai do mesmo avaliador: (5,5) %d ·"
+               " (5,0) %d · (0,5) %d → %d (esp 1)  %s\n", c1, c2, c3, o.nrows,
+               composto ? "" : "NAO BATE");
+        if(!composto) mal++;
+
+        /* ── (6) E PERSISTE, porque é texto no disco: fecha-se, reabre-se, e
+         * continua a recusar. */
+        sql_fechar();
+        if(!sql_abrir("/tmp/pgwire_w37")) mal++;
+        int p1 = sql_executa("INSERT INTO t VALUES (7,7)", &o);
+        int p2 = sql_executa("INSERT INTO t VALUES (77,8)", &o);
+        printf("      depois de reabrir: recusa %d · aceita %d  %s\n", p1, p2,
+               (!p1 && p2) ? "" : "NAO BATE");
+        if(p1 || !p2) mal++;
+
+        /* ── O CONTROLO, e são dois. Primeiro: uma tabela SEM predicado aceita
+         * exactamente os valores que a de cima recusou — senão a recusa vinha
+         * de outra coisa qualquer. Segundo: DOIS `CHECK` são recusados em vez
+         * de calados, porque juntá-los com um AND implícito seria o motor a
+         * escrever predicado que ninguém escreveu. */
+        sql_executa("CREATE TABLE l (a, b)", &o);
+        int s1 = sql_executa("INSERT INTO l VALUES (5,1)", &o);
+        int s2 = sql_executa("INSERT INTO l VALUES (10,2)", &o);
+        int s3 = sql_executa("CREATE TABLE v (x CHECK (x > 0), y, CHECK (y > 0))", &o);
+        printf("\n      CONTROLO — sem predicado, 5 e 10 entram: %d %d · e dois"
+               " CHECK são recusados: %d  %s\n", s1, s2, s3,
+               (s1 && s2 && !s3) ? "" : "NAO BATE");
+        if(!s1 || !s2 || s3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O `CHECK` É O `WHERE` DITO NA ESCRITA, E CORRE NA MESMA ISA. É a mesma dualidade"
+           " do UNIQUE contra o DISTINCT, um andar acima: o WHERE escolhe à SAÍDA as linhas"
+           " que satisfazem o predicado, o CHECK recusa à ENTRADA as que não o satisfazem. E"
+           " é literalmente o mesmo objecto — a mesma árvore, o mesmo molde, a mesma máquina"
+           " —, corrido sobre a linha que quer entrar em vez de sobre as que já estão; por"
+           " isso não há avaliador novo, guarda-se o TEXTO do predicado e compila-se com o"
+           " mesmo `le_expr`. Um motor com um segundo avaliador teria duas respostas"
+           " possíveis para a mesma pergunta, e é por serem o mesmo que o predicado composto"
+           " sai de graça. A ORDEM é o que torna a recusa barata: as células já estão"
+           " escritas quando o predicado corre, mas o catálogo ainda não subiu — a linha"
+           " está no disco e NÃO EXISTE —, pelo que voltar sem incrementar não deixa nada"
+           " para desfazer, e o INSERT seguinte escreve por cima. No UPDATE não há essa"
+           " folga e a mecânica é outra: escreve-se o valor novo, pergunta-se, e"
+           " RESTAURA-SE SEMPRE — restaurar nos dois ramos é o que faz disto uma pergunta e"
+           " não uma escrita, o que se mede exigindo que a célula fique com o valor velho"
+           " depois da recusa. E O PREDICADO NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ: a"
+           " ausência está fora do corpo, um predicado do corpo não a alcança, e o que não"
+           " se pronuncia não recusa — sem esta regra todo o CHECK seria um NOT NULL"
+           " implícito, isto é, uma restrição que ninguém declarou. O CONTROLO tem duas"
+           " metades: sem predicado os MESMOS valores entram, e dois CHECK na mesma tabela"
+           " são recusados em vez de calados, porque juntá-los com um AND implícito seria o"
+           " motor a escrever predicado que ninguém escreveu.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

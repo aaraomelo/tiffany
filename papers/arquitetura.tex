@@ -2538,6 +2538,53 @@ reagem das três maneiras --- o modo é da seta, não da tabela.}
         {\code{REFERENCES}; \code{ON DELETE}/\code{ON UPDATE}; filhos na mãe}
         {\code{tests/pgwire.c} §W35; §W36}
 
+\subsection*{O predicado dito na escrita}
+
+\noindent \code{CHECK (a > 10)} é o \code{WHERE} dito na escrita. É a mesma
+dualidade do \code{UNIQUE} contra o \code{DISTINCT}, um andar acima: o
+\code{WHERE} escolhe \emph{à saída} as linhas que satisfazem o predicado, o
+\code{CHECK} recusa \emph{à entrada} as que não o satisfazem. E é literalmente
+o mesmo objeto --- a mesma árvore, o mesmo molde, a mesma máquina ---, corrido
+sobre a linha que quer entrar em vez de sobre as que já estão. Por isso não há
+avaliador novo: guarda-se o \textbf{texto} do predicado e compila-se com o
+mesmo \code{le\_expr}. Um motor com um segundo avaliador teria duas respostas
+possíveis para a mesma pergunta, e é por serem o mesmo que o predicado composto
+sai de graça.
+
+\medskip\noindent\textbf{A ordem é o que torna a recusa barata.} No
+\code{INSERT} as células já estão escritas quando o predicado corre, mas o
+catálogo ainda não subiu --- a linha está no disco e \emph{não existe} ---,
+pelo que voltar sem incrementar não deixa nada para desfazer e o
+\code{INSERT} seguinte escreve por cima. No \code{UPDATE} não há essa folga e a
+mecânica é outra: escreve-se o valor novo, pergunta-se, e \textbf{restaura-se
+sempre}. Restaurar nos dois ramos é o que faz disto uma pergunta e não uma
+escrita.
+
+\medskip\noindent\textbf{E o predicado não se pronuncia sobre o que não está.}
+A ausência está fora do corpo; um predicado do corpo não a alcança, e o que não
+se pronuncia não recusa. Sem esta regra todo o \code{CHECK} seria um
+\code{NOT NULL} implícito --- uma restrição que ninguém declarou. Daí saiu
+também a ordem no \code{INSERT}: o dual escreve-se \emph{com} a linha e não
+depois dela, senão o predicado via a linha inteira como ausente e deixava
+passar tudo.
+
+\medskip\noindent Isto obrigou a separar as \textbf{constantes da ISA} do
+\code{prepara}: elas não dependem da consulta, e estavam dentro da função que
+só a varredura chama --- pelo que o mesmo avaliador, chamado de outro sítio,
+corria sobre memória por escrever e recusava tudo. Uma preparação, não duas:
+dois sítios a escrever as mesmas constantes é como eles deixam de escrever as
+mesmas.
+
+\medido{\code{tests/pgwire.c} §W37 (as duas portas, com as fronteiras $10$ e
+$11$; a recusa sem lixo; a célula intacta depois da recusa no \code{UPDATE}; o
+silêncio sobre o ausente; o predicado composto; a persistência), com o controlo
+em duas metades --- sem predicado os mesmos valores entram, e dois \code{CHECK}
+são recusados em vez de calados.}
+
+\colunas{\code{aranha thm:multiplicidade}}
+        {\code{CHECK}; \code{le\_expr} partilhado; \code{constantes\_isa}}
+        {\code{tests/pgwire.c} §W37}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}

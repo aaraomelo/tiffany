@@ -381,6 +381,23 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  *
  * A ausência não é uma seta: uma célula NULL não aponta para nada e nada exige.
  * (`thm:bitunico` outra vez — o dual não é um valor.) */
+/* ── E A RESTRIÇÃO DE PREDICADO ──────────────────────────────────────────────
+ *
+ * `CHECK (a > 0)` é o `WHERE` dito na ESCRITA. É a mesma dualidade do UNIQUE
+ * contra o DISTINCT, um andar acima: o WHERE escolhe à saída as linhas que
+ * satisfazem o predicado, o CHECK recusa à entrada as que não o satisfazem. E
+ * é literalmente o mesmo objecto — a mesma árvore, o mesmo molde, a mesma ISA
+ * —, corrido sobre a linha que quer entrar em vez de sobre as que já estão.
+ *
+ * Por isso não há avaliador novo: guarda-se o TEXTO do predicado e compila-se
+ * com o mesmo `le_expr`. Um motor que escrevesse aqui uma segunda avaliação
+ * teria duas respostas possíveis para a mesma pergunta.
+ *
+ * UM por tabela, e o segundo é recusado em vez de calado — juntar dois com um
+ * AND implícito seria o motor a escrever predicado que ninguém escreveu. */
+#define S_CHECK   (ISA_TECTO + ZONA(14))  /* 64 Words = 128 caracteres */
+#define S_CHECK_W 64u
+
 #define S_FK      (ISA_TECTO + ZONA(11))  /* por coluna: .total = col_alvo+1, 0 = sem seta */
 #define S_FKNOME  (ISA_TECTO + ZONA(12))  /* por coluna: 16 Words = 32 chars, a tabela alvo */
 #define S_FILHOS  (ISA_TECTO + ZONA(13))  /* na MÃE: {quantos,0} e depois blocos de 17 */
@@ -1865,6 +1882,39 @@ static int ident(const char **p, char *out, size_t cap){
 
 /* ---------------- os comandos ---------------- */
 
+/* `CHECK (` já lido até ao parêntese: copia o texto de dentro, contando os
+ * parênteses para não parar no primeiro fecho de uma subexpressão. Um segundo
+ * CHECK é RECUSADO em vez de calado — juntar dois com um AND implícito seria o
+ * motor a escrever predicado que ninguém escreveu. */
+static int le_check(const char **p, char *out, size_t cap){
+    int nivel = 0;
+    size_t o = 0;
+    if(out[0]){
+        printf("erro: dois CHECK na mesma tabela — RECUSADO. Junte-os num só"
+               " predicado; o motor não escreve o AND que ninguém escreveu.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "only one CHECK constraint per table"); }
+        return 0;
+    }
+    if(**p != '(') return 0;
+    (*p)++; nivel = 1;
+    while(**p && nivel > 0){
+        if(**p == '(') nivel++;
+        else if(**p == ')'){ nivel--; if(!nivel){ (*p)++; break; } }
+        if(o + 1 < cap) out[o++] = **p;
+        (*p)++;
+    }
+    out[o] = 0;
+    if(nivel > 0 || !o){
+        printf("erro: CHECK sem predicado ou sem fechar — RECUSADO.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "malformed CHECK constraint"); }
+        return 0;
+    }
+    return 1;
+}
+
 static int cria(const char *resto){
     const char *p = resto;
     char nome[64];
@@ -1879,10 +1929,25 @@ static int cria(const char *resto){
     pula(&p); if(*p != '(') return 0; p++;
     long ncols = 0; char c[64];
     long corpo[16], parm[16], restr[16];
+    char chk[S_CHECK_W * 2 + 2]; chk[0] = 0;
     char fk_tab[16][64], fk_alvo[16][64]; long fk_col[16], fk_modo[16];
     for(int q = 0; q < 16; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
                                  fk_col[q] = -1; fk_modo[q] = 0; }
     while(1){
+        { /* `CHECK (...)` no meio da lista é restrição da TABELA e não uma
+           * coluna chamada «check»: quem decide é o parêntese a seguir. */
+          const char *vc = p;
+          char k[64];
+          if(ident(&p, k, sizeof k) && !strcasecmp(k, "CHECK")){
+              pula(&p);
+              if(*p == '('){
+                  if(!le_check(&p, chk, sizeof chk)) return 0;
+                  pula(&p);
+                  if(*p == ','){ p++; continue; }
+                  break;
+              }
+          }
+          p = vc; }
         if(!ident(&p, c, sizeof c)) break;
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
         corpo[ncols] = CORPO_INTEIRO; parm[ncols] = 0;   /* sem tipo = INTEIRO, como sempre foi */
@@ -1918,6 +1983,11 @@ static int cria(const char *resto){
                 else { p = v2; break; }
             }
             else if(!strcasecmp(r, "UNIQUE")) restr[ncols] |= R_UNICO;
+            else if(!strcasecmp(r, "CHECK")){
+                pula(&p);
+                if(*p != '('){ p = v2; break; }
+                if(!le_check(&p, chk, sizeof chk)) return 0;
+            }
             else if(!strcasecmp(r, "REFERENCES")){
                 /* `REFERENCES mae(col)` — e a coluna alvo diz-se: sem ela o
                  * motor teria de adivinhar qual das colunas da mãe é a chave. */
@@ -1995,6 +2065,7 @@ static int cria(const char *resto){
         Word wr; wr.total = (Word8)restr[j]; wr.e = 0;
         mem_grava(S_RESTR + (unsigned)j, wr);
     }
+    txt_grava(S_CHECK, S_CHECK_W, chk);
     for(long j = 0; j < ncols && j < IDX_MAXCOL; j++)
         if(restr[j] & R_UNICO) idx_constroi(j, ncols, 0);
 
@@ -2093,6 +2164,11 @@ static void ord_usa_rascunho(void);
 static int  ord_insere(long valor, int idx);
 static long celula_valor(long i, long j, long nc);
 static void celula_grava(long i, long j, long nc, long valor);
+/* o predicado compila-se com o mesmo `le_expr` e corre no mesmo molde; ambos
+ * vivem mais abaixo, e o INSERT precisa deles antes */
+static int  check_avalia(long i, long ncols, const char *texto);
+static void check_le(char *out, int cap);
+static void constantes_isa(void);
 
 static int insere(const char *resto){
     const char *p = resto;
@@ -2329,6 +2405,33 @@ static int insere(const char *resto){
      * transporte atravessaria do nrows para o ncols (é o que o comentário do
      * enum avisa); então o coeficiente que cresce sobe para um slot só seu, e
      * aí sim os dois componentes são UM número de dezasseis bits. */
+    /* ── E O PREDICADO, ANTES DE A LINHA CONTAR ──────────────────────────
+     * As células já estão escritas na posição `nrows`, mas o catálogo ainda
+     * não subiu: a linha está no disco e não existe. Se o predicado recusar,
+     * volta-se sem incrementar — e a linha fica invisível, para o próximo
+     * INSERT escrever por cima. Nada a desfazer, que é a razão de a ordem ser
+     * esta. */
+    /* A PRESENÇA ACENDE-SE ANTES DO PREDICADO, e tem de ser: o `CHECK` não se
+     * pronuncia sobre células ausentes, e sem os bits acesos ele via a linha
+     * inteira como ausente e deixava passar tudo. O dual escreve-se com a
+     * linha, não depois dela. */
+    for(long j = 0; j < ncols; j++)
+        bit_poe(S_PRES, nrows*ncols + j, (j < nv && !nulo[j]) ? 1 : 0);
+
+    { char ck[S_CHECK_W * 2 + 2];
+      check_le(ck, (int)sizeof ck);
+      if(ck[0]){
+          int r = check_avalia(nrows, ncols, ck);
+          if(r != 1){
+              printf("erro: a linha não satisfaz o CHECK (%s) — RECUSADA%s.\n",
+                     ck, r < 0 ? " (o predicado não compila)" : "");
+              if(sql_cap){ sql_cap->ok = 0;
+                  snprintf(sql_cap->err, sizeof sql_cap->err,
+                           "new row violates check constraint"); }
+              return 0;
+          }
+      } }
+
     pc_emit = 0;                         /* fase 2 é um programa PRÓPRIO: rodar() parte de 0 */
     w.total = 1; w.e = 0; mem_grava(S_UM16, w);
     MOVE(S_NR, +1);
@@ -2354,11 +2457,7 @@ static int insere(const char *resto){
      * índice na mesma marcado como velho. */
     { long nr_agora = cat_nrows();
       long i = nr_agora - 1;                       /* a linha que acabou de entrar */
-      /* A PRESENÇA ACENDE-SE AQUI: cada célula que recebeu valor passa a
-       * existir. As que a linha não trouxe ficam no neutro — ausentes —, que é
-       * o dual do `thm:bitunico`. */
-      for(long j = 0; j < ncols; j++)
-          bit_poe(S_PRES, i*ncols + j, (j < nv && !nulo[j]) ? 1 : 0);
+      /* (a presença já foi acesa antes do CHECK — ver acima) */
       for(long c = 0; c < ncols && c < IDX_MAXCOL; c++){
           if(!idx_valido(c, nr_agora - 1)) continue;   /* válido ANTES desta linha? */
           /* e a célula AUSENTE não tem chave — a mesma regra do idx_constroi.
@@ -3440,6 +3539,44 @@ static void emit_no(const struct arvore *a, int i, long linha, long ncols, unsig
     MOVE(dest, -1);
 }
 
+/* ── O PREDICADO CORRE NA MESMA ISA QUE O `WHERE` ────────────────────────────
+ * Compila-se o texto guardado com o MESMO `le_expr`, emite-se o MESMO molde
+ * sobre a linha `i`, e lê-se o `S_EXPR` — que o avaliador já deixa ESPALHADO,
+ * $0$ ou tudo. Não se toca no campo: o `CHECK` pergunta, não marca.
+ * Devolve 1 (passa), 0 (não passa) ou −1 (não compila). */
+static int check_avalia(long i, long ncols, const char *texto){
+    struct arvore a;
+    const char *p = texto;
+    unsigned salvo = citadas_where;
+    memset(&a, 0, sizeof a);
+    citadas_where = 0;
+    constantes_isa();            /* o avaliador não corre sobre memória por escrever */
+    a.raiz = le_expr(&p, &a);
+    if(a.raiz < 0){ citadas_where = salvo; return -1; }
+    /* ── E O PREDICADO NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ ─────────────
+     * Comparar com uma célula ausente não casa — é a regra do WHERE —, mas
+     * aqui isso tornaria todo o CHECK num NOT NULL implícito, que é uma
+     * restrição que ninguém declarou. A ausência está FORA do corpo: um
+     * predicado do corpo não a alcança, e o que não se pronuncia não recusa.
+     * Quem quiser exigir presença tem a palavra para isso. */
+    { unsigned cit = citadas_where;
+      citadas_where = salvo;
+      for(long j = 0; j < ncols && j < 16; j++)
+          if((cit & (1u << j)) && !bit_le(S_PRES, i*ncols + j)) return 1; }
+    contrai_arvore(&a);
+    pc_emit = 0;
+    emit_atomos(&a, i, ncols);
+    emit_no(&a, a.raiz, i, ncols, S_EXPR);
+    emit1(OP_HALT);
+    rodar(pc_emit);
+    return mem_le(S_EXPR).total != 0;
+}
+
+/* o predicado desta tabela, ou "" se não houver */
+static void check_le(char *out, int cap){
+    txt_le(S_CHECK, S_CHECK_W, out, (size_t)cap);
+}
+
 static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where,
                        int acao, int col_set)
 {
@@ -3514,19 +3651,21 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
 /* prepara as constantes e devolve o catálogo */
 static void pres_migra(long ncols, long nrows);
 
-static void prepara(long v, long col_do_set){
-    { Word c = mem_le(S_CAT); pres_migra(c.total, cat_nrows()); }
+/* AS CONSTANTES DA ISA, e elas não dependem da consulta. Estavam dentro do
+ * `prepara`, que só o `varre` chama — e por isso quem quisesse correr o mesmo
+ * avaliador de outro sítio (o `CHECK`, que é o WHERE dito na escrita) corria-o
+ * sobre memória por escrever e recusava tudo. Separam-se aqui para haver UMA
+ * preparação e não duas: dois sítios a escrever as mesmas constantes é como
+ * eles deixam de escrever as mesmas. */
+static void constantes_isa(void){
     Word w = {0,0};
     mem_grava(S_ZERO, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM, w);
     w.total = 1; w.e = 0;                 mem_grava(S_UM16, w);
-    /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA. Escrever
-     * só o baixo deixava o átomo alto do valor ANTERIOR na célula — um
-     * `SET saldo = 30000` sobre um saldo de 20000 dava 20016, e nada o dizia. */
-    w.total = (Word8)((unsigned long)v & 255u); w.e = 0;                mem_grava(S_V, w);
-    w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0;         mem_grava(S_VA, w);
-    /* o UPDATE também é escrita, e também deixa a marca */
-    if(v >= 0) col_marca(col_do_set, (unsigned long)v);
+    /* (o S_V/S_VA e a marca vivem no `prepara`, que chama isto: escrever
+     * dezasseis bits é do SET, não da ISA. Escrever só o baixo deixava o átomo
+     * alto do valor ANTERIOR na célula — um `SET saldo = 30000` sobre 20000
+     * dava 20016, e nada o dizia.) */
     /* A BASE, e_k = 2^k (naturais thm:base): dezasseis coordenadas, e a
      * complementar de cada uma para limpar. A Word tem dois átomos de oito, e
      * por isso a coordenada k mora no átomo k/ATOMO_BITS — é a Lei 7 outra vez,
@@ -3558,6 +3697,17 @@ static void prepara(long v, long col_do_set){
     w.total = 0xFF; w.e = 0xFF; mem_grava(S_CHEIO, w); /* o verdadeiro, em todos os bits */
     w.total = 0x80; w.e = 0; mem_grava(S_MASK, w);   /* bit 7 do Word_8 — sinal no envelope */
     w.total = 0; w.e = 0x80; mem_grava(S_MASK16, w); /* bit 15 do par — o sinal um andar acima */
+}
+
+static void prepara(long v, long col_do_set){
+    { Word c = mem_le(S_CAT); pres_migra(c.total, cat_nrows()); }
+    constantes_isa();
+    { Word w;
+      /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA */
+      w.total = (Word8)((unsigned long)v & 255u); w.e = 0;        mem_grava(S_V, w);
+      w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0; mem_grava(S_VA, w); }
+    /* o UPDATE também é escrita, e também deixa a marca */
+    if(v >= 0) col_marca(col_do_set, (unsigned long)v);
 }
 
 
@@ -5299,6 +5449,42 @@ static int varre(const char *resto, int acao){
             if(!fk_propaga(nome, nrows, ncols, 0, 0)) return 0;
         } else if(acao == ACAO_SET && col_set >= 0 && !set_anula){
             if(!fk_propaga(nome, nrows, ncols, 1, v)) return 0;
+        }
+    }
+
+    /* ── O PREDICADO NA OUTRA PORTA: escreve-se, pergunta-se, DESFAZ-SE ──────
+     * O UPDATE muda uma célula, e o predicado é sobre a LINHA — pelo que a
+     * pergunta só se pode fazer com o valor novo lá dentro. Escreve-se, corre o
+     * mesmo molde, e restaura-se SEMPRE: se passar, o UPDATE a sério corre a
+     * seguir e escreve outra vez; se não passar, nada ficou tocado. Restaurar
+     * nos dois ramos é o que faz isto ser uma pergunta e não uma escrita. */
+    if(acao == ACAO_SET && col_set >= 0 && achou > 0){
+        char ck[S_CHECK_W * 2 + 2];
+        check_le(ck, (int)sizeof ck);
+        if(ck[0]){
+            int falhou = 0;
+            long linha_ma = -1;
+            for(long i = 0; i < nrows && !falhou; i++){
+                if(!bit_le(S_MATCH, i)) continue;
+                { long antigo = celula_valor(i, col_set, ncols);
+                  int tinha = bit_le(S_PRES, i*ncols + col_set);
+                  int r;
+                  if(set_anula) bit_poe(S_PRES, i*ncols + col_set, 0);
+                  else { celula_grava(i, col_set, ncols, v);
+                         bit_poe(S_PRES, i*ncols + col_set, 1); }
+                  r = check_avalia(i, ncols, ck);
+                  celula_grava(i, col_set, ncols, antigo);
+                  bit_poe(S_PRES, i*ncols + col_set, tinha);
+                  if(r != 1){ falhou = 1; linha_ma = i; } }
+            }
+            if(falhou){
+                printf("erro: a linha %ld deixaria de satisfazer o CHECK (%s) —"
+                       " RECUSADO.\n", linha_ma, ck);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "new row violates check constraint"); }
+                return 0;
+            }
         }
     }
 
