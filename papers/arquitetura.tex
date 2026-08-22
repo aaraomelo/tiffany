@@ -86,6 +86,36 @@ um \textbf{sinal}: $+1$ para ler, $-1$ para escrever (\S\ref{sec:isa}). O sinal
 consequência de a máquina ter uma instrução e um sinal, em vez de duas
 instruções.
 
+\medskip\noindent\textbf{E as duas faces têm cada uma o seu meio, o que fecha o
+princípio.} A face aditiva fixa a média \emph{aritmética} $\tfrac{a+b}{2}$; a
+multiplicativa fixa a \emph{geométrica} $\sqrt{ab}$ --- e a desigualdade entre
+elas não é lei nova, é a conservação da norma lida como comparação
+($ab=m^{2}-\delta^{2}$, logo $g\le m$). Batendo as duas alternadamente os
+intervalos encaixam e o processo \textbf{termina numa igualdade}: a largura é um
+número inteiro de \emph{grãos} da régua e decresce estritamente, pelo que pára,
+e o ponto onde pára é o ponto fixo que as duas faces passam a partilhar
+(\code{aranha thm:corte}). \emph{Não converge para o ponto: termina nele.}
+
+\medskip\noindent Isto tem três consequências diretas para esta máquina, e as
+três já lá estavam sem terem nome:
+
+\begin{itemize}\itemsep3pt
+\item[$\cdot$] \textbf{A régua tem grão, e diz-se antes.} A célula é uma
+$\text{Word}_8^{2}$, e é por a régua ser finita que os processos desta casa
+\emph{acabam} em vez de convergirem. Por isso o que não cabe é \textbf{recusado}
+e não truncado (\S\ref{sec:isa}): truncar seria mudar de régua a meio, e nenhuma
+terminação sobrevive a isso.
+\item[$\cdot$] \textbf{A descida da árvore é o encaixe.} Cada nível corta o
+intervalo dos possíveis; a profundidade é finita porque a régua é finita, e a
+resposta é o que sobra quando não há mais o que cortar --- é a razão de o índice
+custar a \emph{profundidade} e não o tamanho (\S\ref{sec:isa}).
+\item[$\cdot$] \textbf{O que não cabe tem nome e tamanho.} Quando o ponto não é
+da grade, o que a representação guarda é o par $(m,\delta)$: o \emph{centro},
+que é o seu invariante, e o \emph{desvio}, que é a perda \textbf{medida}. É a
+forma geral do que esta máquina faz em toda a parte --- guardar o representante
+e saber quanto dele ficou de fora.
+\end{itemize}
+
 \medskip\noindent As duas primeiras leis da numeração canónica são estas mesmas
 equações lidas no alfabeto: o \emph{split} (\textbf{Lei 0}) parte-o em dois
 lados iguais --- $128$ e $128$ --- com um só ponto fixo, e a \emph{estaca}
