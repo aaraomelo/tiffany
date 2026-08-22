@@ -2585,6 +2585,36 @@ são recusados em vez de calados.}
         {\code{CHECK}; \code{le\_expr} partilhado; \code{constantes\_isa}}
         {\code{tests/pgwire.c} §W37}
 
+\subsection*{A pertença e a sua negação}
+
+\noindent \code{NOT IN} é a \emph{mesma} descida com a resposta virada --- uma
+implementação, não duas ---, e por isso a única coisa que precisa de ser dita é
+o que fazer com quem não tem valor. A linha cuja célula está \textbf{ausente}
+fica de fora das \emph{duas}: não se pode negar uma resposta que não foi dada.
+É a frase que o dual já tinha dito com $=v$ e $\neq v$, e mede-se pela soma:
+\[
+\lvert\code{IN}\rvert + \lvert\code{NOT IN}\rvert \;=\;
+\lvert\text{presentes}\rvert \;\le\; \lvert I\rvert ,
+\]
+com igualdade exatamente quando o dual pesa zero. Um motor que tratasse a
+ausência como um valor fechava sempre em $|I|$, e uma das duas apanhava-a.
+
+\medskip\noindent\textbf{E o dual vale nos dois lados}, que era onde estava o
+defeito: a célula ausente da coluna da \emph{subconsulta} entrava na árvore, e
+o neutro com cara de valor fazia um \code{x IN (…)} com $x=0$ casar com uma
+linha que não tem valor nenhum. A árvore indexa o corpo; o dual vive no bitmap
+--- a mesma regra que o índice e o \code{UNIQUE} já seguiam, no terceiro sítio
+onde ela era precisa.
+
+\medido{\code{tests/pgwire.c} §W38 (a soma que fecha no corpo; o \code{NULL} do
+outro lado a não virar chave), com o controlo numa tabela sem ausências, onde a
+soma fecha em $|I|$ exatamente --- é o que mostra que a folga vem do dual e não
+de o motor perder linhas.}
+
+\colunas{\code{aranha thm:bitunico}; \code{catalogo thm:duasinvol}}
+        {\code{IN}/\code{NOT IN} pela mesma descida; a chave que o dual não dá}
+        {\code{tests/pgwire.c} §W38}
+
 \colunas{\code{catalogo thm:dimconta}; \code{catalogo thm:duasinvol}}
         {\code{MOVE}; slots \code{.mem}; árvore oito slots}
         {\code{tests/move.c}; \code{tests/dualsort\_banco.c}}

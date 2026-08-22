@@ -4327,7 +4327,12 @@ static int j_carrega_direita(long *ncols_dir){
             Word par = { (Word8)(v & 255), (Word8)((v >> 8) & 255) };
             mem_grava(S_JDIR + (unsigned)(postos*J_MAXCOL + j), par);   /* o PAR */
         }
-        if(!ord_insere(celula_valor(i, oc, nc), postos)) return -1;
+        /* e a célula AUSENTE não é chave: pô-la na árvore era pôr o neutro
+         * com cara de valor, e depois um `x IN (…)` com x = 0 casava com uma
+         * linha que não tem valor nenhum. A linha copia-se — pode ser precisa
+         * para as outras colunas —, mas não se indexa. */
+        if(bit_le(S_PRES, i*nc + oc))
+            if(!ord_insere(celula_valor(i, oc, nc), postos)) return -1;
         postos++;
     }
     { Word c = { postos, nc }; mem_grava(S_JCAB, c); }
@@ -4776,14 +4781,17 @@ static int varre(const char *resto, int acao){
      * estado partilhado é que ligava dois caminhos que nada têm um com o
      * outro; a árvore é que é comum, e essa empresta-se na hora. */
     char in_tab[64] = "", in_col[64] = "";
-    int in_sub = 0, in_col_esq = -1;
+    int in_sub = 0, in_col_esq = -1, in_nega = 0;
     {
         const char *q = p;
         pula(&q);
         char c_esq[64];
         if(palavra(&q, "WHERE") && ident(&q, c_esq, sizeof c_esq)){
             pula(&q);
-            if(palavra(&q, "IN")){
+            { const char *vn = q;
+              if(palavra(&q, "NOT")){ in_nega = 1; pula(&q); }
+              if(!palavra(&q, "IN")){ q = vn; in_nega = 0; goto sem_in; } }
+            {
                 pula(&q);
                 if(*q == '('){
                     const char *r = q + 1;
@@ -4815,6 +4823,7 @@ static int varre(const char *resto, int acao){
                 }
             }
         }
+        sem_in: ;
     }
 
     /* ── E SE HOUVER ÍNDICE, NÃO SE VARRE ─────────────────────────────────
@@ -5325,6 +5334,14 @@ static int varre(const char *resto, int acao){
         int ne = 0, estourou = 0;
         for(long i = 0; i < nrows; i++){
             if(!bit_le(S_MATCH, i)) continue;
+            /* ── E A AUSÊNCIA NÃO PERTENCE NEM DEIXA DE PERTENCER ────────
+             * A pertença é uma pergunta sobre o CORPO, e a célula ausente não
+             * tem valor para levar à outra tabela: lê-la dava o neutro, e um
+             * `x IN (…)` com um zero do outro lado casava com uma linha que
+             * não tem x nenhum. Desliga-se aqui, e desliga-se nos DOIS
+             * sentidos — o `NOT IN` também não a apanha, porque não se pode
+             * negar uma resposta que não foi dada. */
+            if(!bit_le(S_PRES, i*ncols + in_col_esq)){ bit_poe(S_MATCH, i, 0); continue; }
             if(ne >= J_MAXLIN){ estourou = 1; break; }
             in_idx[ne] = i;
             in_val[ne] = celula_valor(i, in_col_esq, ncols);
@@ -5360,7 +5377,11 @@ static int varre(const char *resto, int acao){
         static unsigned char passa[J_MAXLIN];
         for(int k = 0; k < ne; k++){
             int achados[4];
-            passa[k] = (unsigned char)(j_casam(in_val[k], achados, 4) > 0);
+            int esta = j_casam(in_val[k], achados, 4) > 0;
+            /* o NOT é a mesma descida com a resposta virada: a pertença e a
+             * não-pertença são complementares SOBRE O CORPO, e é por isso que
+             * a ausência teve de sair das duas antes de aqui chegar. */
+            passa[k] = (unsigned char)(in_nega ? !esta : esta);
         }
 
         if(!usa_tabela(guarda, 0)) return 0;

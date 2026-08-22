@@ -5313,6 +5313,107 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W38: A PERTENÇA E A SUA NEGAÇÃO ══════════════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w38.mem", "/tmp/pgwire_w38.prog",
+            "/tmp/pgwire_w38__a.mem", "/tmp/pgwire_w38__a.prog",
+            "/tmp/pgwire_w38__b.mem", "/tmp/pgwire_w38__b.prog" };
+        for(int k = 0; k < 6; k++) unlink(lixo[k]);
+        printf("\n§W38 a pertença e a negação: complementares sobre o CORPO.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w38")) mal++;
+        sql_executa("CREATE TABLE b (k, w)", &o);
+        sql_executa("INSERT INTO b VALUES (0,1)", &o);
+        sql_executa("INSERT INTO b VALUES (7,2)", &o);
+        sql_executa("CREATE TABLE a (x, y)", &o);
+        sql_executa("INSERT INTO a VALUES (7,1)", &o);      /* pertence   */
+        sql_executa("INSERT INTO a VALUES (9,2)", &o);      /* não        */
+        sql_executa("INSERT INTO a VALUES (NULL,3)", &o);   /* nem, nem   */
+
+        /* ── (1) A NEGAÇÃO É A MESMA DESCIDA COM A RESPOSTA VIRADA, e as duas
+         * são complementares SOBRE O CORPO — não sobre |I|. A linha sem `x`
+         * fica de FORA das duas: não se pode negar uma resposta que não foi
+         * dada, e é a mesma frase do dual (`= v` e `<> v` também não a
+         * apanham). Se o motor tratasse a ausência como um valor, a soma
+         * fechava em 3 e uma das duas apanhava-a. */
+        sql_executa("SELECT y FROM a WHERE x IN (SELECT k FROM b)", &o);
+        long dentro = o.nrows;
+        char d1[8]; snprintf(d1, sizeof d1, "%s", o.nrows ? o.cell[0][0] : "?");
+        sql_executa("SELECT y FROM a WHERE x NOT IN (SELECT k FROM b)", &o);
+        long fora = o.nrows;
+        char f1[8]; snprintf(f1, sizeof f1, "%s", o.nrows ? o.cell[0][0] : "?");
+        sql_executa("SELECT y FROM a WHERE x IS NOT NULL", &o);
+        long corpo = o.nrows;
+        sql_executa("SELECT y FROM a", &o);
+        long todas = o.nrows;
+        int part = (dentro == 1 && !strcmp(d1, "1") && fora == 1 && !strcmp(f1, "2")
+                    && dentro + fora == corpo && corpo < todas);
+        printf("      IN %ld (y=%s) + NOT IN %ld (y=%s) = %ld presentes, de %ld"
+               " linhas: a ausente fica fora das DUAS  %s\n",
+               dentro, d1, fora, f1, corpo, todas, part ? "" : "NAO BATE");
+        if(!part) mal++;
+
+        /* ── (2) E O DUAL VALE NOS DOIS LADOS. Uma célula ausente na coluna da
+         * SUBCONSULTA não é uma chave: pô-la na árvore era pôr o neutro com
+         * cara de valor, e depois um `x IN (…)` com x = 0 casava com uma linha
+         * que não tem valor nenhum. Mede-se pondo um NULL do lado de lá e um
+         * zero do lado de cá — e o zero só casa se houver um zero ESCRITO. */
+        sql_executa("CREATE TABLE c (k, w)", &o);
+        sql_executa("INSERT INTO c VALUES (NULL,1)", &o);
+        sql_executa("INSERT INTO c VALUES (5,2)", &o);
+        sql_executa("INSERT INTO a VALUES (0,4)", &o);
+        sql_executa("SELECT y FROM a WHERE x IN (SELECT k FROM c)", &o);
+        long falso = o.nrows;
+        sql_executa("SELECT y FROM a WHERE x IN (SELECT k FROM b)", &o);
+        long certo = o.nrows;
+        int lado = (falso == 0 && certo == 2);
+        printf("      o NULL do outro lado não vira chave: `IN c` %ld (esp 0) ·"
+               " `IN b`, que TEM um zero escrito, %ld (esp 2)  %s\n",
+               falso, certo, lado ? "" : "NAO BATE");
+        if(!lado) mal++;
+
+        /* ── O CONTROLO: sem ausência nenhuma, a soma fecha em |I| exactamente.
+         * É o que mostra que a folga de cima vem do DUAL e não de o motor
+         * perder linhas — as duas metades continuam a ser complementares, e é
+         * o corpo que mudou de tamanho, não a lei. */
+        sql_executa("CREATE TABLE d (x, y)", &o);
+        sql_executa("INSERT INTO d VALUES (7,1)", &o);
+        sql_executa("INSERT INTO d VALUES (9,2)", &o);
+        sql_executa("INSERT INTO d VALUES (0,3)", &o);
+        sql_executa("SELECT y FROM d WHERE x IN (SELECT k FROM b)", &o);
+        long cd = o.nrows;
+        sql_executa("SELECT y FROM d WHERE x NOT IN (SELECT k FROM b)", &o);
+        long cf = o.nrows;
+        sql_executa("SELECT y FROM d", &o);
+        long ct = o.nrows;
+        printf("\n      CONTROLO — sem ausências: %ld + %ld = %ld (esp 3 = 3)"
+               "  %s\n", cd, cf, ct, (cd + cf == ct && ct == 3) ? "" : "NAO BATE");
+        if(cd + cf != ct || ct != 3) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A PERTENÇA E A SUA NEGAÇÃO SÃO COMPLEMENTARES SOBRE O CORPO, E NÃO SOBRE |I|."
+           " `NOT IN` é a MESMA descida com a resposta virada — uma implementação, não duas"
+           " —, e é por isso que a única coisa que precisa de ser dita é o que fazer com"
+           " quem não tem valor. A linha cuja célula está AUSENTE fica de fora das DUAS: não"
+           " se pode negar uma resposta que não foi dada, e é a mesma frase que o dual já"
+           " tinha dito com `= v` e `<> v`. Mede-se pela SOMA: `IN` + `NOT IN` fecha no peso"
+           " dos presentes e não no número de linhas, o que um motor que tratasse a ausência"
+           " como um valor não faria — nele a soma fechava em |I| e uma das duas apanhava-a."
+           " E O DUAL VALE NOS DOIS LADOS, que era onde estava o defeito: a célula ausente"
+           " da coluna da SUBCONSULTA entrava na árvore, e o neutro com cara de valor fazia"
+           " um `x IN (…)` com x = 0 casar com uma linha que não tem valor nenhum. Mede-se"
+           " com um NULL do lado de lá e um zero do lado de cá, exigindo que o zero só case"
+           " quando há um zero ESCRITO — a árvore indexa o corpo, o dual vive no bitmap. O"
+           " CONTROLO é a mesma pergunta numa tabela sem ausência nenhuma, onde a soma fecha"
+           " em |I| exactamente: é o que mostra que a folga vem do DUAL e não de o motor"
+           " perder linhas, com as duas metades a continuarem complementares e o CORPO a ser"
+           " o que mudou de tamanho, não a lei.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
