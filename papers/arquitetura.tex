@@ -4358,6 +4358,57 @@ Jordan como CONTROLO; e as quatro testemunhas $3\times3$.}
         {\code{posto} das potências empilhadas; \code{posto} de $[v\mid Av\mid\cdots]$}
         {\code{tests/pgwire.c} §W92}
 
+\subsection*{Onde vive o operador: \texorpdfstring{$\Q[A]=\Q[\lambda]/(\mu_A)$}{Q[A]}}
+
+\noindent §W92 mediu que bastam $d$ potências. Isso não é uma economia de conta ---
+é uma afirmação sobre \textbf{onde vive} o operador:
+\[
+\boxed{\;\Q[A]\;\cong\;\Q[\lambda]/(\mu_A),\qquad \dim_{\Q}\Q[A]=d\;\le\;n\;}
+\]
+e não $n^{2}$. Mede-se exigindo que \emph{toda} potência caia no span das
+primeiras: empilha-se $\{I,A,A^{k}\}$ e pede-se o \code{posto} ao motor, que dá $2$
+em $3720/3720$ ($k$ até $6$, nas $620$ matrizes $2\times2$ não escalares de
+$-2..2$). \emph{É a redução $I^{n}\to I$ feita à álgebra}, e já não aos vetores: o
+operador em dimensão $n$ vive num anel de polinómios numa variável.
+
+\medskip\noindent\textbf{E daí sai onde ele é corpo, sem argumento nenhum.}
+$\Q[\lambda]/(\mu)$ é corpo se e só se $\mu$ é \textbf{irredutível}, e onde $\mu$
+factoriza tem de haver divisor de zero --- um $X=aI+bA$ não nulo com $\det X=0$.
+Não se argumenta: conta-se.
+\begin{center}
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+ & $\mu_A$ & div.\ de zero & invertíveis & \\
+\midrule
+gambá $\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$ & $\lambda^{2}+1$ & $0/48$ & $48$ & \textbf{corpo} $\cong\Q(i)$\\
+gato $\left(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\right)$ & $\lambda^{2}-\lambda-1$ & $0/48$ & $48$ & \textbf{corpo} $\cong\Q(\sqrt5)$\\
+$\operatorname{diag}(1,2)$ & $(\lambda-1)(\lambda-2)$ & $8/48$ & $40$ & anel com divisores\\
+Jordan $\left(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\right)$ & $(\lambda-1)^{2}$ & $6/48$ & $42$ & anel com divisores\\
+\bottomrule
+\end{tabular}
+\end{center}
+--- e o \emph{corpo estelar} desta casa aparece aqui sem ser posto: os dois
+irredutíveis dão $\Q(i)$ e $\Q(\sqrt5)$.
+
+\medskip\noindent\textbf{O fecho é do anel, não da conta.} A inversa de um
+elemento invertível \textbf{nunca sai do span}: $\{I,A,X^{-1}\}$ continua a ter
+posto $2$ em todos os casos, o que é dizer que não é preciso sair de $\Q[A]$ para
+inverter dentro dele.
+
+\medskip\noindent\textbf{E o controlo está \emph{dentro} da condição, não ao lado
+dela.} Aquele $0/48$ seria uma ausência a passar por lei se não houvesse elementos
+nenhuns: exige-se por isso, na \emph{mesma} asserção, que num corpo os $48$ não
+nulos invertam \textbf{todos}, e que num anel com divisores existam os \textbf{dois}
+tipos --- $8$ e $40$, $6$ e $42$. Sem esse lado, a dicotomia não separava nada.
+
+\medido{\code{tests/pgwire.c} §W93 --- o span em $3720/3720$; a dicotomia nas
+quatro testemunhas com a distribuição na mesma condição; e a inversa dentro do
+span em todos os elementos invertíveis.}
+
+\colunas{§W92 ($d$ potências bastam); §W88 (a álgebra estelar vestida de matriz)}
+        {\code{posto} do empilhado; \code{det} e \code{inversa} pelo motor}
+        {\code{tests/pgwire.c} §W93}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

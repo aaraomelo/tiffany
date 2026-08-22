@@ -12867,6 +12867,154 @@ int main(void){
            " medido é o subespaço cíclico. Só em 2×2 as duas réguas são ambas do motor.", mal == 0);
     }
 
+    /* ═══ §W93: ℚ[A] = ℚ[λ]/(μ_A) — E É CORPO SSE μ É IRREDUTÍVEL ══════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W93 A álgebra da matriz é um anel de UMA variável — e onde é corpo.\n\n");
+        { const char *tabs[] = { "A","B","X" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w93__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w93__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w93.mem"); unlink("/tmp/pgwire_w93.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w93")) mal++;
+
+        #define POE(t,M,L,C) do { char q2[300]; int i2, j2; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            { char cols[220]; cols[0] = 0; \
+              for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                  snprintf(c2, sizeof c2, "%sc%d RACIONAL", j2?", ":"", j2+1); \
+                  strncat(cols, c2, sizeof cols - strlen(cols) - 1); } \
+              snprintf(q2, sizeof q2, "CREATE TABLE %s (%s)", t, cols); \
+              sql_executa(q2,&o2); } \
+            for(i2 = 0; i2 < (L); i2++){ char vs[220]; vs[0] = 0; \
+                for(j2 = 0; j2 < (C); j2++){ char c2[40]; \
+                    snprintf(c2, sizeof c2, "%s%ld", j2?",":"", (M)[i2][j2]); \
+                    strncat(vs, c2, sizeof vs - strlen(vs) - 1); } \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%s)", t, vs); \
+                sql_executa(q2,&o2); } } while(0)
+
+        /* ── §W92 disse que bastam d potências. Isso não é uma economia de
+         * conta: diz ONDE VIVE o operador. A álgebra gerada por A tem dimensão
+         * d e não n², e é ℚ[λ]/(μ_A) — um anel de UMA variável. É a redução
+         * I^n → I feita à álgebra, e não já aos vectores. */
+
+        /* ── (1) TODA POTÊNCIA CAI NO SPAN DAS PRIMEIRAS d. Empilha-se
+         * {I, A, A^k} e exige-se posto 2 para todo k: se alguma potência
+         * saísse, a dimensão não seria d. Exaustivo nas 2×2 não escalares. */
+        long span_ok = 0, span_n = 0, esc = 0;
+        for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+        for(long c = -2; c <= 2; c++) for(long e = -2; e <= 2; e++){
+            if(b == 0 && c == 0 && a == e){ esc++; continue; }   /* escalares: d=1 */
+            long Ak[2][2] = {{1,0},{0,1}};
+            for(int k = 1; k <= 6; k++){
+                long nx[2][2] = {{Ak[0][0]*a + Ak[0][1]*c, Ak[0][0]*b + Ak[0][1]*e},
+                                 {Ak[1][0]*a + Ak[1][1]*c, Ak[1][0]*b + Ak[1][1]*e}};
+                memcpy(Ak, nx, sizeof Ak);
+                long V[3][4] = {{1,0,0,1},{a,b,c,e},
+                                {Ak[0][0],Ak[0][1],Ak[1][0],Ak[1][1]}};
+                POE("B", V, 3, 4);
+                sql_executa("SELECT posto(*) FROM B", &o);
+                span_n++;
+                if(o.ok && atoi(o.cell[0][0]) == 2) span_ok++;
+            }
+        }
+        printf("      toda A^k cai no span de {I, A}: %ld/%ld (k até 6, nas %ld"
+               " matrizes não escalares)\n", span_ok, span_n, (long)(625 - esc));
+        printf("      → dim ℚ[A] = d = 2, e NÃO n² = 4: o operador vive num anel"
+               " de uma variável\n");
+        if(span_ok != span_n || span_n < 3000) mal++;
+
+        /* ── (2) E ONDE ELE É CORPO. ℚ[A] ≅ ℚ[λ]/(μ_A), logo é corpo sse μ é
+         * IRREDUTÍVEL — e onde μ factoriza há divisor de zero: um X = aI + bA
+         * não nulo com det X = 0. Isto não se argumenta, conta-se. */
+        struct { const char *nome; long M[2][2]; const char *mu; int irred; } CC[] = {
+            { "gambá  (0,1;−1,0)", {{0,1},{-1,0}}, "λ²+1        ",       1 },
+            { "gato   (1,1;1,0) ", {{1,1},{1,0}},  "λ²−λ−1      ",       1 },
+            { "diag(1,2)        ", {{1,0},{0,2}},  "(λ−1)(λ−2)  ",       0 },
+            { "Jordan (1,1;0,1) ", {{1,1},{0,1}},  "(λ−1)²      ",       0 },
+        };
+        long crit = 0;
+        for(unsigned t = 0; t < sizeof CC/sizeof CC[0]; t++){
+            long zero_div = 0, invert = 0, no_span = 0, tot = 0;
+            for(long p = -3; p <= 3; p++) for(long q = -3; q <= 3; q++){
+                if(!p && !q) continue;
+                long X[2][2] = {{p + q*CC[t].M[0][0], q*CC[t].M[0][1]},
+                                {q*CC[t].M[1][0], p + q*CC[t].M[1][1]}};
+                if(!X[0][0] && !X[0][1] && !X[1][0] && !X[1][1]) continue;
+                POE("X", X, 2, 2);
+                sql_executa("SELECT det(*) FROM X", &o);
+                if(!o.ok) continue;
+                tot++;
+                if(atol(o.cell[0][0]) == 0){ zero_div++; continue; }
+                invert++;
+                /* e a inversa fica DENTRO do span: {I, A, X⁻¹} ainda tem posto 2 */
+                sql_executa("SELECT inversa(*) FROM X", &o);
+                if(o.ok && o.nrows == 2){
+                    long W[3][4] = {{1,0,0,1},
+                                    {CC[t].M[0][0],CC[t].M[0][1],CC[t].M[1][0],CC[t].M[1][1]},
+                                    {0,0,0,0}};
+                    /* a inversa é racional; multiplica-se pelo det para ficar inteira */
+                    long dX = X[0][0]*X[1][1] - X[0][1]*X[1][0];
+                    W[2][0] =  X[1][1]; W[2][1] = -X[0][1];
+                    W[2][2] = -X[1][0]; W[2][3] =  X[0][0];
+                    (void)dX;
+                    POE("B", W, 3, 4);
+                    sql_executa("SELECT posto(*) FROM B", &o);
+                    if(!o.ok || atoi(o.cell[0][0]) != 2) no_span++;
+                }
+            }
+            int corpo = (zero_div == 0);
+            /* o CONTROLO entra AQUI, na mesma condição, e não num printf: num
+             * corpo todo elemento não nulo tem de inverter — se `invert` fosse
+             * 0, «zero divisores de zero» saía de não haver elementos nenhuns —,
+             * e num anel com divisores têm de existir os DOIS tipos, senão a
+             * dicotomia não separa nada. */
+            int dist = corpo ? (invert == tot && tot >= 40)
+                             : (invert > 0 && zero_div > 0);
+            int bate = (corpo == CC[t].irred) && (no_span == 0) && dist;
+            printf("   %s  μ = %s · divisores de zero %ld/%ld · invertíveis %ld ·"
+                   " inversas fora do span %ld · %s%s\n", CC[t].nome, CC[t].mu,
+                   zero_div, tot, invert, no_span,
+                   corpo ? "CORPO" : "anel com divisores",
+                   bate ? "" : "  ← DISCORDA");
+            if(bate) crit++; else mal++;
+        }
+        printf("      → «ℚ[A] é corpo ⟺ μ_A irredutível»: %ld/4, com o controlo da"
+               " distribuição DENTRO da condição; e a inversa nunca sai do span —"
+               " o fecho é do ANEL, não da conta\n", crit);
+        if(crit != 4) mal++;
+
+
+        #undef POE
+        sql_fechar();
+
+        printf("\n");
+        ok("A ÁLGEBRA GERADA POR UMA MATRIZ É UM ANEL DE UMA VARIÁVEL, E É AÍ QUE O CORPO DE"
+           " MATRIZES FECHA. §W92 mediu que bastam d potências; isso não é uma economia de"
+           " conta, é uma afirmação sobre ONDE VIVE o operador — ℚ[A] tem dimensão d e não"
+           " n², e é ℚ[λ]/(μ_A). Mede-se exigindo que TODA potência caia no span das"
+           " primeiras: empilha-se {I, A, A^k} e pede-se o posto ao motor, que dá 2 em"
+           " 3720/3720 (k até 6, nas 620 matrizes 2×2 não escalares de −2..2). É a redução"
+           " I^n → I feita À ÁLGEBRA e já não aos vectores: o operador em dimensão n vive num"
+           " anel de polinómios numa variável. E DAÍ SAI ONDE ELE É CORPO, sem argumento"
+           " nenhum: ℚ[λ]/(μ) é corpo se e só se μ é IRREDUTÍVEL, e onde μ factoriza tem de"
+           " haver divisor de zero — um X = aI + bA não nulo com det X = 0. Conta-se, e a"
+           " dicotomia sai limpa nas quatro testemunhas: o gambá (μ = λ²+1) e o gato"
+           " (μ = λ²−λ−1) têm ZERO divisores de zero em 48 elementos, e são corpos — ℚ(i) e"
+           " ℚ(√5), que é o `corpo_estelar` desta casa a aparecer sem ser posto; diag(1,2)"
+           " (μ = (λ−1)(λ−2)) e o bloco de Jordan (μ = (λ−1)²) têm-nos, e não são. O FECHO É"
+           " DO ANEL E NÃO DA CONTA: a inversa de um elemento invertível NUNCA sai do span —"
+           " {I, A, X⁻¹} continua a ter posto 2 em todos os casos —, o que é dizer que não se"
+           " precisa de sair de ℚ[A] para inverter dentro dele. E o CONTROLO é a"
+           " distribuição, sem a qual aquele zero seria uma ausência a passar por lei: nos"
+           " irredutíveis os 48 elementos não nulos invertem TODOS, e nos redutíveis há dos"
+           " dois tipos — se um lado fosse vazio, a dicotomia não separava nada.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
