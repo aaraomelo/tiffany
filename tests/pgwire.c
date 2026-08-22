@@ -15789,6 +15789,151 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W110: ARTIN–SCHREIER — CORPO NÃO BASTA, É PRECISO ORDENÁVEL ═════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W110 §W93 deu corpos; nem todos são ordenáveis, e quem decide é −1 ser soma de quadrados.\n\n");
+        unlink("/tmp/pgwire_w110__A.mem"); unlink("/tmp/pgwire_w110__A.prog");
+        unlink("/tmp/pgwire_w110__P.mem"); unlink("/tmp/pgwire_w110__P.prog");
+        unlink("/tmp/pgwire_w110.mem");    unlink("/tmp/pgwire_w110.prog");
+        if(!sql_abrir("/tmp/pgwire_w110")) mal++;
+
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ char v[120]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); sql_executa(v,&o2); } } while(0)
+        /* em ℚ[A] com A² = tA − d: (a+bA)² = (a² − b²d) + (2ab + b²t)A */
+        #define QUAD(a,b,t,d,ra,rb) do { (ra) = (a)*(a) - (b)*(b)*(d); \
+                                        (rb) = 2*(a)*(b) + (b)*(b)*(t); } while(0)
+
+        /* ── §W93 mediu que ℚ[gambá] ≅ ℚ(i) e ℚ[gato] ≅ ℚ(√5) são AMBOS
+         * corpos. A §«Quando existe ordem» diz o que os separa: por
+         * Artin–Schreier um corpo é ordenável sse −1 NÃO é soma de quadrados,
+         * e para um corpo de números isso é ter um mergulho real, r₁ ≥ 1. */
+        {
+            struct { const char *nome; long M[2][2]; int ordenavel; } C[] = {
+                { "gato  (1,1;1,0) ≅ ℚ(√5)", {{1,1},{1,0}},   1 },
+                { "gambá (0,1;−1,0) ≅ ℚ(i) ", {{0,1},{-1,0}}, 0 },
+                { "prata (2,1;1,0) ≅ ℚ(√2)", {{2,1},{1,0}},   1 },
+            };
+            long bate = 0;
+            for(unsigned k = 0; k < sizeof C/sizeof C[0]; k++){
+                POE2("A", C[k].M);
+                sql_executa("SELECT traco(*) FROM A", &o);
+                long t = o.ok ? atol(o.cell[0][0]) : 0;
+                sql_executa("SELECT det(*) FROM A", &o);
+                long d = o.ok ? atol(o.cell[0][0]) : 0;
+                long D = t*t - 4*d;                 /* o discriminante */
+                /* (1) o critério do DISCRIMINANTE: Δ > 0 ⟺ raízes reais ⟺ r₁ = 2 */
+                int r1 = (D > 0) ? 2 : 0;
+                /* (2) a busca de x com x² = −1, e de x²+y² = −1 */
+                long um = 0, dois = 0;
+                for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
+                    long ra, rb; QUAD(a, b, t, d, ra, rb);
+                    if(ra == -1 && rb == 0) um++;
+                    for(long c = -6; c <= 6; c++) for(long e = -6; e <= 6; e++){
+                        long sa, sb; QUAD(c, e, t, d, sa, sb);
+                        if(ra + sa == -1 && rb + sb == 0) dois++;
+                    }
+                }
+                int obs = (um == 0 && dois == 0);
+                if(obs == C[k].ordenavel && (r1 > 0) == C[k].ordenavel) bate++;
+                else mal++;
+                printf("      %s  Δ = %ld → r₁ = %d · x² = −1 tem %ld solução(ões) ·"
+                       " x²+y² = −1 tem %ld · %s\n", C[k].nome, D, r1, um, dois,
+                       obs ? "ORDENÁVEL" : "não ordenável");
+            }
+            printf("      → «ordenável ⟺ −1 não é soma de quadrados»: %ld/3, e os"
+                   " TRÊS caminhos concordam — o sinal de Δ, a busca de um quadrado"
+                   " e a de dois\n", bate);
+            if(bate != 3) mal++;
+        }
+
+        /* ── E A CONSEQUÊNCIA PARA A FAMÍLIA, que o texto diz ser positiva:
+         * K_{n,m} tem SEMPRE r₁ ≥ 1, «portanto a construção nunca falha aqui
+         * por falta de ordem». No caso n=2 isso é Δ = m²+4 > 0 para todo m —
+         * e é o MESMO m²+4 que §W70 mediu por outra razão. */
+        {
+            long pos = 0, tot = 0, quad = 0;
+            for(long m = 1; m <= 40; m++){
+                long D = m*m + 4;
+                tot++;
+                if(D > 0) pos++;
+                long r = 0; while(r*r < D) r++;
+                if(r*r == D) quad++;
+            }
+            printf("      K_{2,m}: Δ = m²+4 > 0 em %ld/%ld metais → r₁ = 2 sempre,"
+                   " logo ORDENÁVEL sempre\n", pos, tot);
+            printf("        e o mesmo m²+4 nunca é quadrado perfeito (%ld em %ld) —"
+                   " §W70 mediu-o para dizer que a raiz sai de ℚ; aqui diz que a"
+                   " ORDEM existe. Um número, duas leis\n", quad, tot);
+            if(pos != tot || quad != 0) mal++;
+        }
+
+        /* ── E O GUME: SER CORPO NÃO BASTA. §W93 mediu que ℚ[gambá] é corpo —
+         * zero divisores de zero em 48 elementos, todos invertem. E no
+         * entanto NÃO é ordenável. As duas propriedades são independentes, e
+         * medi-las no mesmo objecto é o que impede de as confundir. */
+        {
+            long G[2][2] = {{0,1},{-1,0}};
+            long inv = 0, div0 = 0, tot = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                if(!a && !b) continue;
+                long U[2][2] = {{a, b},{-b, a}};    /* a + b·gambá */
+                POE2("A", U);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                tot++;
+                if(atol(o.cell[0][0]) == 0) div0++; else inv++;
+            }
+            printf("      GUME — ℚ[gambá] é CORPO (%ld/%ld invertem, %ld divisores"
+                   " de zero, §W93) e NÃO é ordenável (−1 = gambá²)\n",
+                   inv, tot, div0);
+            printf("        ser corpo e ser ordenável são independentes, e é por"
+                   " isso que o §W105 pede ordem e não apenas corpo\n");
+            if(div0 != 0 || inv != tot) mal++;
+            /* e a testemunha explícita: gambá² = −I, pelo motor */
+            POE2("P", G); POE2("A", G);
+            sql_executa("SELECT produto(A) FROM P", &o);
+            int menos_um = (o.ok && o.nrows == 2
+                            && atol(o.cell[0][0]) == -1 && atol(o.cell[1][1]) == -1
+                            && atol(o.cell[0][1]) == 0  && atol(o.cell[1][0]) == 0);
+            printf("        e a testemunha é explícita: gambá² = %s pelo motor —"
+                   " UM quadrado basta para matar a ordem\n",
+                   menos_um ? "−I" : "NÃO é −I");
+            if(!menos_um) mal++;
+        }
+
+        #undef QUAD
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("SER CORPO NÃO BASTA: É PRECISO SER ORDENÁVEL, E QUEM DECIDE É −1 SER SOMA DE"
+           " QUADRADOS. §W93 mediu que ℚ[gambá] ≅ ℚ(i) e ℚ[gato] ≅ ℚ(√5) são AMBOS corpos —"
+           " zero divisores de zero, todos os elementos não nulos a inverterem. A §«Quando"
+           " existe ordem» diz o que ainda os separa, por Artin–Schreier: um corpo admite ordem"
+           " compatível com as operações se e só se −1 NÃO é soma de quadrados, o que num corpo"
+           " de números é ter um mergulho real, r₁ ≥ 1. Aqui isso mede-se por TRÊS caminhos que"
+           " concordam: o sinal do discriminante Δ = tr² − 4det, que dá r₁; a busca de um x com"
+           " x² = −1; e a busca de um par com x² + y² = −1. No gato (Δ = 5) e na prata (Δ = 8)"
+           " não há nenhum dos dois, e são ordenáveis; no gambá (Δ = −4) o próprio gerador"
+           " serve, gambá² = −I pelo motor, e não é. UM QUADRADO BASTA PARA MATAR A ORDEM. E A"
+           " CONSEQUÊNCIA PARA A FAMÍLIA É POSITIVA, como o texto diz: K_{2,m} tem Δ = m²+4 > 0"
+           " para todo m, logo r₁ = 2 e ordem SEMPRE — «a construção nunca falha aqui por falta"
+           " de ordem, o único obstáculo é a redutibilidade». E É O MESMO m²+4 QUE §W70 JÁ"
+           " TINHA MEDIDO por outra razão inteiramente: ali para dizer que o ponto fixo da"
+           " Möbius sai de ℚ, porque m²+4 nunca é quadrado perfeito; aqui para dizer que a"
+           " ordem existe, porque m²+4 é positivo. Um número, duas leis, e nenhuma delas"
+           " precisou da outra. O GUME é que ser corpo e ser ordenável sejam INDEPENDENTES,"
+           " medidos no mesmo objecto: o gambá inverte tudo e não ordena nada — e é por isso"
+           " que o §W105 pede ORDEM e não apenas corpo para operar corpos.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

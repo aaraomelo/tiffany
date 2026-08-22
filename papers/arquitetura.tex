@@ -5269,6 +5269,50 @@ pelo motor; e o controlo fora de $\mathrm{GL}$.}
         {\code{det}/\code{inversa}/\code{produto} pelo motor; coordenadas homogéneas}
         {\code{tests/pgwire.c} §W109}
 
+\subsection*{Ser corpo não basta: é preciso ser ordenável}
+
+\noindent §W93 mediu que $\Q[\text{gambá}]\cong\Q(i)$ e $\Q[\text{gato}]\cong\Q(\sqrt5)$
+são \textbf{ambos} corpos --- zero divisores de zero, todos os elementos não nulos a
+inverterem. A §«Quando existe ordem» diz o que ainda os separa, por
+\textbf{Artin--Schreier}: um corpo admite ordem compatível com as operações se e só se
+$-1$ \emph{não} é soma de quadrados, o que num corpo de números é ter um mergulho
+real, $r_1\ge1$.
+\begin{center}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+ & $\Delta$ & $r_1$ & $x^2=-1$ & \\
+\midrule
+gato $\cong\Q(\sqrt5)$ & $5$ & $2$ & $0$ & \textbf{ordenável}\\
+prata $\cong\Q(\sqrt2)$ & $8$ & $2$ & $0$ & \textbf{ordenável}\\
+gambá $\cong\Q(i)$ & $-4$ & $0$ & $2$ & não\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Três caminhos que concordam: o sinal de $\Delta=\operatorname{tr}^2-4\det$;
+a busca de um quadrado; a busca de dois. No gambá o próprio gerador serve ---
+$\text{gambá}^{2}=-I$ pelo motor. \emph{Um quadrado basta para matar a ordem.}
+
+\medskip\noindent\textbf{E a consequência para a família é positiva}, como o texto
+diz: $K_{2,m}$ tem $\Delta=m^{2}+4>0$ para todo $m$, logo $r_1=2$ e ordem
+\emph{sempre}. E é o \textbf{mesmo} $m^{2}+4$ que §W70 já tinha medido por outra razão
+inteiramente --- ali para dizer que o ponto fixo da Möbius sai de $\Q$, porque nunca é
+quadrado perfeito; aqui para dizer que a ordem existe, porque é positivo.
+\emph{Um número, duas leis, e nenhuma precisou da outra.}
+
+\medskip\noindent\textbf{O gume é a independência}, medida no mesmo objeto: o gambá
+inverte tudo e não ordena nada.
+\[
+\boxed{\;\text{corpo}\;\not\Rightarrow\;\text{ordenável}\;}
+\]
+--- e é por isso que §W105 pede \textbf{ordem} e não apenas corpo para operar corpos.
+
+\medido{\code{tests/pgwire.c} §W110 --- os três critérios nas três testemunhas; a
+família em $40$ metais; e o gume com a testemunha explícita pelo motor.}
+
+\colunas{\code{catalogo} «Quando existe ordem» (Artin--Schreier); §W93 (é corpo); §W70 ($m^2+4$); §W105 (a ordem)}
+        {$\Delta$ pelo \code{traco}/\code{det}; busca de quadrados em $\Q[A]$}
+        {\code{tests/pgwire.c} §W110}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

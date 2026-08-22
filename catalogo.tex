@@ -21301,6 +21301,8 @@ dimensão, e não dois casos de um catálogo.}
 \section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}\label{sec:dic}
 \hfill \emph{\small[ferramenta \,|\, realiza a Lei~2 (a dualidade é dual)]}
 
+\medido{\code{tests/pgwire.c} §W96 --- a \code{prop:conv} pelo motor, com o produto das letras feito operação a operação e a recorrência dos convergentes escrita sem ver matriz: batem em $108/108$ palavras de cinco letras. O $\det M_n=(-1)^{L}$ e a \emph{mesma} conta escrita como Bézout, $p_nq_{n-1}-p_{n-1}q_n$, dão o mesmo em $104/104$ --- não são duas leis, é uma lida em dois alfabetos. E o \code{thm:rev} mede-se com a \code{transposta} do motor contra o produto refeito de trás para a frente, $104/104$, pondo \textbf{duas} das três encarnações da $\nu$ a coincidirem no mesmo objecto. O controlo são as palavras palíndromas, onde $M=M^{\mathsf T}$ e a lei nada diria: das $27$ de três letras, $9$ são palíndromas e $18$ assimétricas.}
+
 Seja $A$ um anel comutativo e $K$ seu corpo de frações. Para $a \in A$ ponha
 \[
   \Mat{a} \;=\; \begin{pmatrix} a & 1 \\ 1 & 0 \end{pmatrix},
@@ -21353,6 +21355,8 @@ razões metálicas é a expansão de período mínimo.
 
 \section{Convergentes e o determinante}\label{sec:conv}
 \hfill \emph{\small[ferramenta \,|\, realiza a Lei~2 (a dualidade é dual)]}
+
+\medido{\code{tests/pgwire.c} §W96 e §W105 --- as colunas de $M_n$ contra a recorrência em $108/108$; o determinante e a identidade de Bézout como a \emph{mesma} conta em $104/104$; e a \textbf{ordem} que os convergentes induzem: comparada em inteiros por $p_1q_2$ contra $p_2q_1$, sem uma divisão, a ordem \emph{alternada} acerta em $351/351$ e $3240/3240$, enquanto a lexicográfica erra $81$ e $810$. A ordem é total --- antissimétrica em $702/702$ pares e transitiva em $2925/2925$ triplos.}
 
 
 \begin{proposicao}[os convergentes são as colunas]\label{prop:conv}
@@ -21412,6 +21416,8 @@ apenas registra a paridade (troca as colunas). Os $a_i$ são os \emph{expoentes}
 
 \section{Reversibilidade}\label{sec:rev}
 \hfill \emph{\small[consequência do enunciado]}
+
+\medido{\code{tests/pgwire.c} §W97 --- a Reversibilidade~I com $M(a)^{-1}=(0,1;1,-a)$ pedida ao motor em $9/9$, e o que importa medido célula a célula: \textbf{não há denominador}, que é o que põe a letra em $\mathrm{GL}_2(\Z)$ e faz o algoritmo desfazer-se sem mudar de anel. A Reversibilidade~II fecha a consequência do \code{thm:rev}: $p_n/p_{n-1}$ expande na palavra ao contrário, $54/54$, com a expansão feita por Euclides inteiro que não sabe de matriz --- e em $18$ delas $a_0=1$, onde a forma canónica funde o último par, que é a ambiguidade declarada na injectividade. E a \code{obs:float} deixa de ser aviso: $8/5$ dá $[1,1,1,2]$ em inteiros e $[1,1,1,1,\dots]$ em \texttt{double}, com o erro a entrar no quarto passo; o \texttt{double} erra algum dígito da palavra verdadeira em $1301$ dos $3339$ racionais com $p,q\le60$.}
 
 
 A palavra ``reversível'' se aplica aqui em três níveis, e vale separá-los.
@@ -22438,6 +22444,8 @@ $K_{n,m}$ tem \textbf{sempre} $r_1\geq1$, pela Proposição~\ref{prop:dominante}
 construção \emph{nunca} falha aqui por falta de ordem --- o único obstáculo é a redutibilidade, que
 é aritmética e está resolvida pelo teorema de Selmer. A fronteira que interessa a esta família não
 é a de $\C$.
+
+\medido{\code{tests/pgwire.c} §W110 --- e por \textbf{três} caminhos que concordam: o sinal do discriminante $\Delta=\operatorname{tr}^2-4\det$, que dá $r_1$; a busca de um $x$ com $x^2=-1$; e a de um par com $x^2+y^2=-1$. No gato ($\Delta=5$) e na prata ($\Delta=8$) não há nenhum, e são ordenáveis; no gambá ($\Delta=-4$) o próprio gerador serve --- $\text{gambá}^2=-I$ pelo motor ---, e não é. \emph{Um quadrado basta para matar a ordem.} Para a família, $\Delta=m^2+4>0$ em $40/40$ metais, logo $r_1=2$ e ordem sempre; e é o \textbf{mesmo} $m^2+4$ que §W70 mediu para dizer que a raiz sai de $\Q$ --- um número, duas leis. O gume é que ser corpo e ser ordenável sejam \textbf{independentes}, medidos no mesmo objecto: §W93 mostrou que $\Q[\text{gambá}]$ inverte tudo, e este mostra que não ordena nada.}
 \end{obs}
 
 \begin{obs}[e $\C$ raramente aparece sozinho]
