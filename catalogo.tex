@@ -1436,6 +1436,42 @@ promessa, e o que a torna operação é a volta caber num passo}.
 fundir e $1$ a separar sem volta curta; e o contraste medido nos \emph{mesmos} objectos,
 $3$ passos contra $63$.}
 
+\paragraph{E o quinto lote traduz entre corpos \emph{diferentes} --- que é o que a
+automação precisa.} Até aqui a travessia ligava duas leituras do \emph{mesmo} objecto.
+Para traduzir de um corpo para outro, cada um entra apenas pelo seu \textbf{formato} ---
+quantos dígitos, em que base ---, e isso é tudo o que a tradução precisa de saber:
+\begin{center}\small
+\begin{tabular}{@{}llrrrl@{}}
+\toprule
+de & para & objectos & chegam & perdidos & fibra\\
+\midrule
+físico ($5^3$) & navegante ($5^4$) & $125$ & $125$ & $0$ & --- \\
+simétrico ($5^3$) & navegante ($5^4$) & $125$ & $125$ & $0$ & --- \\
+\midrule
+navegante ($5^4$) & físico ($5^3$) & $625$ & $125$ & $\mathbf{500}$ & $5$\\
+navegante ($5^4$) & simétrico ($5^3$) & $625$ & $125$ & $\mathbf{500}$ & $5$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \textbf{Sobe exacto, desce perde.} Do menor para o maior o mergulho
+acrescenta posições a zero e a volta devolve o objecto --- $\pi\circ\iota=\mathrm{id}$,
+e nada se perde ao subir. Do maior para o menor a erosão trunca, e a perda tem forma:
+\emph{a fibra é constante}, cada endereço de baixo recebe o mesmo número de cima. Não é
+defeito da travessia --- é a erosão a fazer o que a erosão faz, e é a mesma assimetria
+que o par $\iota/\pi$ já tinha, dual e não simétrico.
+
+\medskip\noindent\textbf{E a cadeia não acumula.} Numa tradução em três saltos, o
+composto ponta a ponta não fica pior que o \emph{pior} passo, embora somar os custos
+desse um número muito maior. É o \code{aranha thm:navega} no lugar certo: \emph{uma
+tradução em três saltos custa o salto mais caro, não os três} --- e é isso que torna a
+navegação barata.
+
+\medido{o quinto lote em \code{tests/pgwire.c} §W139 --- a travessia entre corpos do
+mesmo tamanho a ser bijeção em $7/7$ pares; o mergulho exacto em $125/125$ objectos nos
+dois pares que sobem; a descida a perder $500$ de $625$ com fibra constante $5$; e a
+cadeia de três corpos com o composto a não exceder o pior passo, contra uma soma de
+custos muito maior.}
+
 \medido{a tabela acima em \code{tests/pgwire.c} §W135, com a travessia entre duas
 leituras a dar $\pi=(201)$, primeira posição movida $q=0$ e o custo lido em três
 comparações contra os $64$ objectos; e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias

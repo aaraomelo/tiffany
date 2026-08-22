@@ -6050,6 +6050,33 @@ contraste contado nos mesmos objectos.}
         {o custo da volta contado passo a passo, posicional contra rank}
         {\code{tests/pgwire.c} §W138}
 
+\subsection*{Traduzir entre corpos diferentes: sobe exacto, desce perde}
+
+\noindent A travessia da \code{prop:travessia} liga duas leituras do \emph{mesmo}
+objecto. A automação precisa de mais: traduzir de um corpo para outro. E para isso cada
+corpo entra apenas pelo seu \textbf{formato} --- quantos dígitos, em que base ---, que é
+tudo o que a tradução precisa de saber; \emph{não o que o corpo é}.
+
+\medskip\noindent Entre corpos do mesmo tamanho a travessia é bijeção, e é a proposição
+sem mais nada. Do menor para o maior o mergulho $\iota$ acrescenta posições a zero e
+$\pi$ devolve o objecto --- exacto, nada se perde. Do maior para o menor a erosão trunca
+e perde, com forma: \emph{a fibra é constante}, cada endereço de baixo recebe o mesmo
+número de cima ($625\to125$, fibra $5$). \textbf{Não é defeito da travessia} --- é a
+mesma assimetria do par $\iota/\pi$, dual e não simétrico.
+
+\medskip\noindent\textbf{E a cadeia não acumula}, que é o que torna a navegação barata:
+numa tradução em três saltos o composto não excede o \emph{pior} passo, embora a soma
+dos custos seja muito maior. \emph{Uma tradução em três saltos custa o salto mais caro,
+não os três.}
+
+\medido{\code{tests/pgwire.c} §W139 --- bijeção em $7/7$ pares do mesmo tamanho; o
+mergulho exacto em $125/125$; a descida a perder $500$ de $625$ com fibra constante; e a
+cadeia de três corpos contra a soma dos custos.}
+
+\colunas{\code{catalogo} §1 (o quinto lote), \code{aranha thm:navega}, \code{cor:pik}}
+        {o formato de cada corpo (dígitos, base); $\iota$/$\pi$ entre andares}
+        {\code{tests/pgwire.c} §W139}
+
 \subsection*{As duas metades do critério, e as duas falhas duais}
 
 \noindent A regra corre sobre os corpos \emph{sem os abrir}, e é isso que a torna

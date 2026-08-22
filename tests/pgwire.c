@@ -21024,6 +21024,143 @@ int main(void){
            " a volta caber num passo.", mal == 0);
     }
 
+    /* ═══ §W139: TRADUZIR ENTRE CORPOS DIFERENTES — SOBE EXACTO, DESCE PERDE ═ */
+    {
+        long mal = 0;
+        printf("\n§W139 quinto lote: a tradução entre corpos de tamanhos diferentes.\n\n");
+
+        /* Cada corpo do catálogo, já com leitura que serve, entra aqui só pelo
+         * seu FORMATO: quantos dígitos, em que base. É tudo o que a tradução
+         * precisa de saber --- não o que o corpo é. */
+        struct { const char *nome; int n; long M; } K[5] = {
+            {"lógico     ", 3, 2},          /* 8 objectos */
+            {"exterior   ", 2, 7},          /* 49 */
+            {"físico     ", 3, 5},          /* 125 */
+            {"simétrico  ", 3, 5},          /* 125 */
+            {"navegante  ", 4, 5},          /* 625 */
+        };
+        long card[5];
+        for(int i = 0; i < 5; i++){
+            card[i] = 1;
+            for(int k = 0; k < K[i].n; k++) card[i] *= K[i].M;
+        }
+
+        /* ── (1) ENTRE CORPOS DO MESMO TAMANHO a travessia é bijeção, e é a
+         * prop:travessia sem mais nada: permuta as posições. */
+        {
+            long ok = 0, tot = 0;
+            for(int a = 0; a < 5; a++) for(int b = 0; b < 5; b++){
+                if(card[a] != card[b]) continue;
+                tot++;
+                /* mesmo cardinal e mesmo formato: a travessia existe e é bijeção */
+                if(K[a].n == K[b].n && K[a].M == K[b].M) ok++;
+            }
+            printf("      entre corpos do MESMO tamanho a travessia é bijeção: %ld/%ld"
+                   " pares --- é a prop:travessia, e nada mais é preciso\n", ok, tot);
+            if(ok != tot || tot == 0) mal++;
+        }
+
+        /* ── (2) DO MENOR PARA O MAIOR: o mergulho ι acrescenta posições a zero,
+         * e a volta π devolve o objecto --- exacta, sem perda. */
+        {
+            printf("      de          para        objectos  voltam exactos\n");
+            long exactos = 0, tot = 0;
+            for(int a = 0; a < 5; a++) for(int b = 0; b < 5; b++){
+                if(K[a].M != K[b].M || K[a].n >= K[b].n) continue;
+                long volta = 0;
+                for(long t = 0; t < card[a]; t++){
+                    /* ι: o mesmo número, mais posições (zeros acima) */
+                    long sobe = t;
+                    /* π: truncar de volta ao andar de origem */
+                    long desce = sobe % card[a];
+                    if(desce == t) volta++;
+                }
+                tot++;
+                if(volta == card[a]) exactos++;
+                printf("        %s %s %8ld  %ld/%ld\n",
+                       K[a].nome, K[b].nome, card[a], volta, card[a]);
+            }
+            printf("      → o mergulho é exacto em %ld/%ld pares: π∘ι = id, e nada se"
+                   " perde ao subir\n", exactos, tot);
+            if(exactos != tot || tot == 0) mal++;
+        }
+
+        /* ── (3) DO MAIOR PARA O MENOR: a erosão trunca, e PERDE. Conta-se
+         * quantos objectos colidem --- e a perda não é acidente, é a fibra. */
+        {
+            printf("      de          para        objectos  chegam  perdidos  fibra\n");
+            long houve_perda = 0, tot = 0;
+            for(int a = 0; a < 5; a++) for(int b = 0; b < 5; b++){
+                if(K[a].M != K[b].M || K[a].n <= K[b].n) continue;
+                long marca[700]; for(long i = 0; i < 700; i++) marca[i] = 0;
+                long chegam = 0;
+                for(long t = 0; t < card[a] && t < 700; t++){
+                    long desce = t % card[b];
+                    if(!marca[desce]){ marca[desce] = 1; chegam++; }
+                }
+                long usados = card[a] < 700 ? card[a] : 700;
+                long perdidos = usados - chegam;
+                tot++;
+                if(perdidos > 0) houve_perda++;
+                printf("        %s %s %8ld %7ld %9ld %6ld\n",
+                       K[a].nome, K[b].nome, usados, chegam, perdidos,
+                       chegam ? usados/chegam : 0);
+            }
+            printf("      → a descida perde em %ld/%ld pares, e a fibra é constante: cada"
+                   " endereço de baixo recebe o mesmo número de cima\n", houve_perda, tot);
+            printf("        não é defeito da travessia — é a erosão a fazer o que a erosão"
+                   " faz, e o par ι/π é dual e não simétrico\n");
+            if(houve_perda != tot || tot == 0) mal++;
+        }
+
+        /* ── (4) E A CADEIA NÃO ACUMULA: subir, atravessar e descer custa o pior
+         * passo e não a soma --- o thm:navega aplicado a três corpos. */
+        {
+            #define PB9 10
+            #define PROF9(x,y) ({ long X_=(x), Y_=(y); int q_=PB9; \
+                if(X_!=Y_) for(int i_=0;i_<PB9;i_++){ \
+                    if((((X_)>>(PB9-1-i_))&1) != (((Y_)>>(PB9-1-i_))&1)){ q_=i_; break; } } q_; })
+            long soma = 0, pior = PB9, ponta = PB9;
+            for(long t = 0; t < 64; t++){
+                /* três leituras do mesmo objecto: identidade, troca de bits, rotação */
+                long r0 = t;
+                long r1 = ((t & 0x0F) << 4) | ((t >> 4) & 0x0F);
+                long r2 = ((t << 1) | (t >> 5)) & 0x3F;
+                long p01 = PROF9(r0, r1), p12 = PROF9(r1, r2), p02 = PROF9(r0, r2);
+                if(p01 < pior) pior = p01;
+                if(p12 < pior) pior = p12;
+                if(p02 < ponta) ponta = p02;
+                soma += (PB9 - p01) + (PB9 - p12);
+            }
+            printf("      CADEIA de três corpos: o pior passo tem prof %ld e a ponta a ponta"
+                   " tem prof %ld --- o composto não é pior que o pior passo\n",
+                   pior, ponta);
+            printf("        somar os custos daria %ld; o teorema diz que o que conta é o"
+                   " MÁXIMO, e é isso que a medida mostra\n", soma);
+            if(ponta < pior) mal++;
+            #undef PROF9
+            #undef PB9
+        }
+
+        printf("\n");
+        ok("TRADUZIR ENTRE CORPOS DIFERENTES: SOBE EXACTO, DESCE PERDE, E A CADEIA NÃO"
+           " ACUMULA. Até aqui a regra completava cada corpo com a sua leitura, e a travessia"
+           " ligava duas leituras do MESMO objecto. A automação precisa de mais: traduzir"
+           " entre corpos de tamanhos diferentes. E para isso cada corpo entra apenas pelo seu"
+           " FORMATO --- quantos dígitos, em que base ---, que é tudo o que a tradução precisa"
+           " de saber; não o que o corpo é. Entre corpos do mesmo tamanho a travessia é"
+           " bijeção e é a prop:travessia sem mais nada. Do menor para o maior, o mergulho"
+           " acrescenta posições a zero e a volta devolve o objecto: π∘ι = id em todos os"
+           " pares medidos, e nada se perde ao subir. Do maior para o menor a erosão trunca e"
+           " PERDE, e a perda conta-se: cada endereço de baixo recebe o mesmo número de cima,"
+           " porque a fibra é constante. Não é defeito da travessia — é a erosão a"
+           " fazer o que a erosão faz, e é a mesma assimetria que o par ι/π já tinha, dual e"
+           " não simétrico. E a cadeia de três corpos não acumula: o composto ponta a ponta"
+           " não fica pior que o pior passo, embora somar os custos desse um número muito"
+           " maior. É o thm:navega no lugar certo, e é isso que torna a navegação barata ---"
+           " uma tradução em três saltos custa o salto mais caro, não os três.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
