@@ -6137,6 +6137,102 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W45: NOMEAR AS COLUNAS É PODER DEIXAR UMA DE FORA ════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w45.mem");     unlink("/tmp/pgwire_w45.prog");
+        unlink("/tmp/pgwire_w45__t.mem");  unlink("/tmp/pgwire_w45__t.prog");
+        printf("\n§W45 INSERT INTO t (a,c): o que não se nomeia nasce no dual.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w45")) mal++;
+        sql_executa("CREATE TABLE t (a,b,c)", &o);
+
+        /* ── (1) A LISTA DIZ ONDE OS VALORES VÃO, e o que ela acrescenta não é
+         * comodidade de escrita: é poder deixar uma coluna DE FORA sem lhe dar
+         * valor nenhum. O que essa coluna recebe não é zero — é o DUAL. */
+        int e1 = sql_executa("INSERT INTO t VALUES (1,2,3)", &o);
+        int e2 = sql_executa("INSERT INTO t (a,c) VALUES (7,9)", &o);
+        sql_executa("SELECT * FROM t WHERE a = 7", &o);
+        int fora = (e1 && e2 && o.nrows == 1 && o.nulo[0][1]
+                    && !strcmp(o.cell[0][0], "7") && !strcmp(o.cell[0][2], "9"));
+        printf("      (a,c) VALUES (7,9): a linha é (%s, ausente=%d, %s)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", o.nrows ? o.nulo[0][1] : -1,
+               o.nrows ? o.cell[0][2] : "?", fora ? "" : "NAO BATE");
+        if(!fora) mal++;
+
+        /* ── (2) E O GUME É O DUAL, outra vez: a coluna deixada de fora não
+         * vale zero. Mede-se com as duas perguntas sobre a mesma célula —
+         * `IS NULL` apanha-a e `= 0` não. Sem isto, «deixar de fora» seria
+         * apenas outra maneira de escrever `0`, e a lista não acrescentaria
+         * nada que a posição já não fizesse. */
+        sql_executa("SELECT a FROM t WHERE b IS NULL", &o);
+        long nul = o.nrows;
+        sql_executa("SELECT a FROM t WHERE b = 0", &o);
+        long zero = o.nrows;
+        int dual = (nul == 1 && zero == 0);
+        printf("      o que ficou de fora não vale zero: IS NULL %ld (esp 1) ·"
+               " `= 0` %ld (esp 0)  %s\n", nul, zero, dual ? "" : "NAO BATE");
+        if(!dual) mal++;
+
+        /* ── (3) A ORDEM DOS NOMES É LIVRE, porque quem decide onde o valor cai
+         * passa a ser a LISTA e não a posição. É o que distingue nomear de
+         * contar: `(c,a)` põe o primeiro valor na terceira coluna. */
+        int e3 = sql_executa("INSERT INTO t (c,a) VALUES (30,10)", &o);
+        sql_executa("SELECT * FROM t WHERE a = 10", &o);
+        int livre = (e3 && o.nrows == 1 && !strcmp(o.cell[0][2], "30")
+                     && o.nulo[0][1]);
+        printf("      (c,a) VALUES (30,10) → (%s,·,%s): a lista decide, não a"
+               " posição  %s\n", o.nrows ? o.cell[0][0] : "?",
+               o.nrows ? o.cell[0][2] : "?", livre ? "" : "NAO BATE");
+        if(!livre) mal++;
+
+        /* ── (4) E UMA COLUNA SÓ TAMBÉM SE NOMEIA: as outras DUAS nascem
+         * ausentes, o que é a forma mais curta de dizer que o dual não é um
+         * caso limite mas o estado por omissão de tudo o que não se escreveu. */
+        int e4 = sql_executa("INSERT INTO t (b) VALUES (5)", &o);
+        sql_executa("SELECT * FROM t WHERE b = 5", &o);
+        int uma = (e4 && o.nrows == 1 && o.nulo[0][0] && o.nulo[0][2]);
+        printf("      (b) VALUES (5): as outras duas nascem ausentes (%d,%d)"
+               "  %s\n", o.nrows ? o.nulo[0][0] : -1, o.nrows ? o.nulo[0][2] : -1,
+               uma ? "" : "NAO BATE");
+        if(!uma) mal++;
+
+        /* ── O CONTROLO, e são dois. Um nome que não é coluna é RECUSADO e não
+         * ignorado — ignorá-lo faria a linha entrar noutro sítio em silêncio.
+         * E a contagem tem de bater: nomear duas e trazer um valor é recusado,
+         * porque o motor não adivinha qual das duas ficou por preencher. */
+        int c1 = sql_executa("INSERT INTO t (z) VALUES (1)", &o);
+        int c2 = sql_executa("INSERT INTO t (a,b) VALUES (1)", &o);
+        sql_executa("SELECT count(*) FROM t", &o);
+        long tot = o.nrows ? atol(o.cell[0][0]) : -1;
+        printf("\n      CONTROLO — nome inexistente %d · contagem errada %d ·"
+               " e a tabela ficou com %ld linhas (esp 4)  %s\n", c1, c2, tot,
+               (!c1 && !c2 && tot == 4) ? "" : "NAO BATE");
+        if(c1 || c2 || tot != 4) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("NOMEAR AS COLUNAS É PODER DEIXAR UMA DE FORA, E O QUE FICA DE FORA É O DUAL."
+           " `INSERT INTO t (a,c) VALUES (1,2)` parece comodidade de escrita e não é: sem a"
+           " lista, a única maneira de deixar uma célula sem valor era escrever NULL na"
+           " posição dela — o que obriga a saber a ordem —, e com a lista a ausência é"
+           " simplesmente o que sobra. As colunas que ninguém nomeou não recebem zero:"
+           " recebem o suporte, e mede-se com as duas perguntas sobre a mesma célula —"
+           " `IS NULL` apanha-a, `= 0` não. Sem esse gume, «deixar de fora» seria só outra"
+           " maneira de escrever `0`, e a lista não acrescentaria nada que a posição já não"
+           " fizesse. A ORDEM DOS NOMES É LIVRE, porque quem decide onde o valor cai passa a"
+           " ser a lista e não a posição: `(c,a) VALUES (30,10)` põe o primeiro valor na"
+           " terceira coluna, e é isso que distingue nomear de contar. E uma coluna só"
+           " também se nomeia, com as outras duas a nascerem ausentes — que é a forma mais"
+           " curta de dizer que o dual não é um caso limite, é o estado por omissão de tudo"
+           " o que não se escreveu. O CONTROLO tem duas metades: um nome que não é coluna é"
+           " RECUSADO e não ignorado, porque ignorá-lo faria a linha entrar noutro sítio em"
+           " silêncio; e a contagem tem de bater, porque nomear duas colunas e trazer um"
+           " valor deixaria o motor a adivinhar qual delas ficou por preencher — e adivinhar"
+           " é exactamente o que a lista existe para não ser preciso.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

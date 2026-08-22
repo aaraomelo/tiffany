@@ -2484,6 +2484,17 @@ aqui o nulo do $0$ do corpo. Daí sai também a regra da árvore: a célula ause
 manutenção; entrar punha o neutro na árvore com cara de valor, e o primeiro zero
 era recusado pela linha nula.
 
+\medskip\noindent\textbf{E nomear as colunas é poder deixar uma de fora.}
+\code{INSERT INTO t (a,c) VALUES (1,2)} parece comodidade de escrita e não é:
+sem a lista, a única maneira de deixar uma célula sem valor era escrever
+\code{NULL} na posição dela --- o que obriga a saber a ordem ---, e com a lista
+a ausência é simplesmente \emph{o que sobra}. As colunas que ninguém nomeou não
+recebem zero: recebem o \textbf{suporte}. Mede-se com as duas perguntas sobre a
+mesma célula --- \code{IS NULL} apanha-a, \code{= 0} não ---, sem o que «deixar
+de fora» seria só outra maneira de escrever $0$. E a ordem dos nomes é livre,
+porque quem decide onde o valor cai passa a ser a \emph{lista} e não a posição:
+é isso que distingue nomear de contar (\code{tests/pgwire.c} §W45).
+
 \medskip\noindent\textbf{E a afirmação vale em qualquer porta.} Uma restrição que
 só o \code{INSERT} respeitasse não é uma restrição: o \code{UPDATE} reescreve a
 mesma célula, e tem uma maneira de a quebrar que o \code{INSERT} não tem ---

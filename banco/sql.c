@@ -2257,6 +2257,45 @@ static int insere(const char *resto){
     if(!ident(&p, nome, sizeof nome)) return 0;
     if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
     if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
+
+    /* ── AS COLUNAS PODEM DIZER-SE, E AS QUE NÃO SE DIZEM NASCEM AUSENTES ────
+     * `INSERT INTO t (a,c) VALUES (1,2)` nomeia onde os valores vão. O que isto
+     * acrescenta não é comodidade de escrita: é poder deixar uma coluna DE FORA
+     * sem lhe dar valor nenhum — e o que ela recebe não é zero, é o DUAL. Sem
+     * a lista, a única maneira de o fazer era escrever NULL na posição dela, o
+     * que obriga a saber a ordem; com a lista, a ausência é o que sobra.
+     *
+     * A lista lê-se ANTES do VALUES, e cada nome resolve-se contra o catálogo:
+     * um nome que não é coluna é RECUSADO, e não ignorado. */
+    long mapa[64]; int n_mapa = 0;
+    { const char *v0 = p;
+      pula(&p);
+      if(*p == '('){
+          p++;
+          while(1){
+              char c[64];
+              pula(&p);
+              if(!ident(&p, c, sizeof c)) break;
+              { int ci = col_indice(c);
+                if(ci < 0){
+                    printf("erro: a coluna «%s» não existe na tabela «%s» —"
+                           " o INSERT é RECUSADO.\n", c, nome);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "column \"%s\" of relation \"%s\" does not exist",
+                                 c, nome); }
+                    return 0;
+                }
+                if(n_mapa < 64) mapa[n_mapa++] = ci; }
+              pula(&p);
+              if(*p == ','){ p++; continue; }
+              break;
+          }
+          pula(&p);
+          if(*p == ')') p++;
+          else { p = v0; n_mapa = 0; }     /* não fechou: não era uma lista */
+      } else p = v0; }
+
     if(!palavra(&p, "VALUES")) return 0;
     pula(&p); if(*p != '(') return 0; p++;
 
@@ -2322,6 +2361,42 @@ static int insere(const char *resto){
         }
         nv++; pula(&p); if(*p == ','){ p++; continue; } break;
     }
+    /* ── E COM A LISTA, A LINHA MONTA-SE PELO MAPA ───────────────────────────
+     * Os valores vieram na ordem dos NOMES; espalham-se pelas posições que eles
+     * apontam, e as posições que ninguém nomeou ficam ausentes. É a mesma
+     * escrita de sempre a partir daqui — o que muda é quem decide onde cada
+     * valor cai, e agora é a lista e não a posição. */
+    if(n_mapa > 0){
+        if(nv != n_mapa){
+            printf("erro: nomeou %d colunas e trouxe %ld valores — RECUSADA.\n",
+                   n_mapa, nv);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "INSERT has %ld expressions but %d target columns",
+                         nv, n_mapa); }
+            return 0;
+        }
+        { long v2[64], d2[64]; int n2[64];
+          /* o padrão do segundo componente é do CORPO da coluna, e não 1: no
+           * áureo e no cristal ele é 0, e esmagá-lo aqui trocava o significado
+           * do par nas colunas que ninguém nomeou */
+          for(long j = 0; j < ncols && j < 64; j++){
+              long cq = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+              v2[j] = 0;
+              d2[j] = (cq == CORPO_AUREO || cq == CORPO_CRISTAL) ? 0 : 1;
+              n2[j] = 1;                      /* e nascem AUSENTES */
+          }
+          for(int k = 0; k < n_mapa; k++){
+              long j = mapa[k];
+              if(j < 0 || j >= ncols) continue;
+              v2[j] = v[k]; d2[j] = den[k]; n2[j] = nulo[k];
+          }
+          for(long j = 0; j < ncols && j < 64; j++){
+              v[j] = v2[j]; den[j] = d2[j]; nulo[j] = n2[j];
+          }
+          nv = ncols; }
+    }
+
     if(nv != ncols){
         printf("erro: a tabela tem %ld colunas, vieram %ld — a linha é RECUSADA."
                " Uma célula que se quer vazia diz-se NULL; deixá-la de fora seria"
