@@ -5905,6 +5905,32 @@ cifra a colidir em $198$ dos $256$.}
         {$\operatorname{prof}$ sobre os endereços; \code{traco}/\code{det} como leitura que perde}
         {\code{tests/pgwire.c} §W126}
 
+\subsection*{As duas metades do critério, e as duas falhas duais}
+
+\noindent A regra corre sobre os corpos \emph{sem os abrir}, e é isso que a torna
+mecânica. A cada corpo pergunta-se só se a sua leitura \textbf{serve} --- duas
+condições, e elas são duais: bem definida ($x=y$ no corpo $\Rightarrow R(x)=R(y)$) e
+separadora ($R(x)=R(y)\Rightarrow x=y$). A igualdade que conta é a \emph{do corpo},
+não a dos parâmetros; é por isso que o racional entra duas vezes, com $x=y$ a ser
+$ad=bc$.
+
+\medskip\noindent\textbf{E as duas falhas aparecem, uma de cada lado.} A leitura
+espectral é bem definida e não separa: \emph{funde} objectos --- duas matrizes
+distintas no mesmo endereço, e o corpo perde-se antes de ser medido. A leitura crua do
+racional é o inverso: separa e não é bem definida --- \emph{quebra} o objecto, dando
+endereços distintos a $-4/-4$ e $-3/-3$, e a régua que dela desce não é a do corpo. A
+prova de que o defeito é da leitura e não do corpo está no par: a mesma família lida
+pelo representante reduzido não quebra nem funde nada.
+
+\medido{\code{tests/pgwire.c} §W127 --- sete corpos como famílias parametrizadas, cinco
+a passarem nas duas metades; a desigualdade forte em $64\,000/64\,000$ triplos do corpo
+simétrico sem uma medida sobre matrizes simétricas; e as duas testemunhas de forma
+oposta, com a reduzida a dar zero quebras e zero fusões sobre a mesma família.}
+
+\colunas{\code{catalogo} §1 (os três passos da navegação)}
+        {a leitura de cada corpo em $I$; \code{traco}/\code{det} do motor como a leitura que funde}
+        {\code{tests/pgwire.c} §W127}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

@@ -18468,6 +18468,206 @@ int main(void){
            " o que falta não é medida — é uma leitura.", mal == 0);
     }
 
+    /* ═══ §W127: A REGRA CORRIDA SOBRE OS CORPOS — A TABELA DA COMPLETUDE ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W127 a regra de navegação aplicada corpo a corpo, mecanicamente.\n\n");
+        unlink("/tmp/pgwire_w127__M.mem"); unlink("/tmp/pgwire_w127__M.prog");
+        unlink("/tmp/pgwire_w127.mem");    unlink("/tmp/pgwire_w127.prog");
+        if(!sql_abrir("/tmp/pgwire_w127")) mal++;
+
+        #define NC 8                       /* pontos por coordenada: −4..3 */
+        #define NO 512                      /* tecto de objectos por corpo */
+        #define PRF 12
+        #define PROF7(a,b) ({ long A_=(a), B_=(b); int q_=PRF; \
+            if(A_!=B_) for(int i_=0;i_<PRF;i_++){ \
+                if((((A_)>>(PRF-1-i_))&1) != (((B_)>>(PRF-1-i_))&1)){ q_=i_; break; } } q_; })
+
+        /* Cada corpo do catálogo entra aqui como uma família parametrizada e uma
+         * LEITURA em I. A regra não pergunta o que o corpo é: pergunta se a
+         * leitura separa. */
+        struct { const char *nome; int nobj; } corpo[7] = {
+            {"metais K_m           (parâmetro m)",            NC},
+            {"exterior  a+bε       (a,b)",                    NC*NC},
+            {"rotação   a+bi       (a,b)",                    NC*NC},
+            {"simétrico [[a,b],[b,c]]  (a,b,c)",              NC*NC*NC},
+            {"racional  a/b   leitura CRUA (a,b)",            NC*NC},
+            {"racional  a/b   leitura REDUZIDA",              NC*NC},
+            {"cifra     (traço, det)  sobre 2×2",             NC*NC},
+        };
+        long ender[7][NO], par_a[7][NO], par_b[7][NO];
+        long nobj_real[7] = {0};
+
+        /* ── (1) A LEITURA DE CADA CORPO, e nada mais. As matrizes vão ao motor
+         * e o traço e o det saem de lá — é a leitura espectral que se mede, não
+         * uma conta minha. */
+        for(int c = 0; c < 7; c++){
+            long n = 0;
+            for(long i = 0; i < corpo[c].nobj && n < NO; i++){
+                long a = (i % NC) - 4, b = ((i / NC) % NC) - 4, d = ((i / (NC*NC)) % NC) - 4;
+                long e = 0;
+                if(c == 0)      e = a + 4;                              /* m */
+                else if(c == 1) e = (a + 4) * NC + (b + 4);             /* (a,b) */
+                else if(c == 2) e = (a + 4) * NC + (b + 4);
+                else if(c == 3) e = ((a + 4) * NC + (b + 4)) * NC + (d + 4);
+                else if(c == 4){ if(b == 0) continue; e = (a + 4) * NC + (b + 4); }
+                else if(c == 5){
+                    if(b == 0) continue;
+                    long p = a, q = b, x = p < 0 ? -p : p, y = q < 0 ? -q : q;
+                    while(y){ long t = x % y; x = y; y = t; }            /* mdc */
+                    if(x == 0) x = 1;
+                    p /= x; q /= x;
+                    if(q < 0){ p = -p; q = -q; }
+                    e = (p + 32) * 64 + (q + 32);                        /* o reduzido */
+                } else {
+                    long M[2][2] = {{a,b},{b,a}};
+                    char q[220];
+                    sql_executa("DROP TABLE IF EXISTS M", &o2);
+                    sql_executa("CREATE TABLE M (c1 RACIONAL, c2 RACIONAL)", &o2);
+                    for(int r = 0; r < 2; r++){
+                        snprintf(q, sizeof q, "INSERT INTO M VALUES (%ld,%ld)", M[r][0], M[r][1]);
+                        sql_executa(q, &o2);
+                    }
+                    sql_executa("SELECT traco(*) FROM M", &o);
+                    long tr = o.ok ? atol(o.cell[0][0]) : 0;
+                    sql_executa("SELECT det(*) FROM M", &o);
+                    long dt = o.ok ? atol(o.cell[0][0]) : 0;
+                    e = (tr + 64) * 256 + (dt + 64);
+                }
+                par_a[c][n] = a; par_b[c][n] = b;
+                ender[c][n++] = e;
+            }
+            nobj_real[c] = n;
+        }
+
+        /* ── (2) A TABELA, com as DUAS metades do critério, que são duais.
+         * Uma leitura serve o corpo quando é ao mesmo tempo:
+         *   BEM DEFINIDA: x = y no corpo  ⟹  R(x) = R(y)   (não quebra o objecto)
+         *   SEPARADORA:   R(x) = R(y)     ⟹  x = y         (não funde objectos)
+         * A igualdade é a DO CORPO, não a dos parâmetros — e é por isso que o
+         * racional entra duas vezes: ali x = y é ad = bc, e não (a,b) = (c,d). */
+        {
+            long serve = 0, falha = 0;
+            printf("      corpo                                  pares  bem def.  separa  veredicto\n");
+            for(int c = 0; c < 7; c++){
+                long bd = 0, sep = 0, pares = 0;
+                for(long i = 0; i < nobj_real[c]; i++) for(long j = 0; j < i; j++){
+                    long ia = par_a[c][i], ib = par_b[c][i];
+                    long ja = par_a[c][j], jb = par_b[c][j];
+                    /* a igualdade DO CORPO */
+                    int mesmo_obj;
+                    if(c == 4 || c == 5) mesmo_obj = (ia*jb == ja*ib);   /* ad = bc */
+                    else                 mesmo_obj = 0;                  /* parâmetros distintos */
+                    int mesmo_end = (ender[c][i] == ender[c][j]);
+                    pares++;
+                    if(!(mesmo_obj && !mesmo_end)) bd++;      /* bem definida */
+                    if(!(mesmo_end && !mesmo_obj)) sep++;     /* separadora */
+                }
+                int okbd = (bd == pares), oksep = (sep == pares);
+                if(okbd && oksep) serve++; else falha++;
+                printf("      %-38s %6ld  %7s  %6s   %s\n", corpo[c].nome, pares,
+                       okbd ? "sim" : "NÃO", oksep ? "sim" : "NÃO",
+                       (okbd && oksep) ? "HERDA a régua"
+                       : okbd ? "funde objectos — falta LEITURA"
+                              : "quebra o objecto — a régua não é do corpo");
+            }
+            printf("      → %ld leituras servem o seu corpo, %ld não\n", serve, falha);
+            if(serve == 0 || falha == 0) mal++;
+        }
+
+        /* ── (3) E A HERANÇA NÃO SE MEDE DE NOVO: para os que separam, a
+         * desigualdade forte já vale — verifica-se num deles para exibir, e o
+         * argumento é que ela vale em TODOS pela mesma razão. */
+        {
+            int c = 3;                                   /* o simétrico, o maior */
+            long ok = 0, tot = 0;
+            long n = nobj_real[c] < 40 ? nobj_real[c] : 40;
+            for(long i = 0; i < n; i++) for(long j = 0; j < n; j++) for(long k = 0; k < n; k++){
+                long da = PROF7(ender[c][i], ender[c][j]);
+                long db = PROF7(ender[c][j], ender[c][k]);
+                long dc = PROF7(ender[c][i], ender[c][k]);
+                long mn = da < db ? da : db;
+                tot++;
+                if(dc >= mn) ok++;
+            }
+            printf("      a desigualdade forte no corpo simétrico: %ld/%ld triplos, e"
+                   " nenhuma medida foi feita sobre matrizes simétricas\n", ok, tot);
+            printf("        ela desce porque a LEITURA separa — a mesma razão nos outros\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── (4) O GUME: AS DUAS FALHAS SÃO DUAIS, e cada uma tem a sua
+         * testemunha. Uma quebra o objecto, a outra funde objectos — e não há
+         * como confundi-las, porque as testemunhas têm formas opostas. */
+        {
+            /* a crua QUEBRA: mesmo objecto, endereços diferentes */
+            long qa = -1, qb = -1;
+            for(long i = 0; i < nobj_real[4] && qa < 0; i++) for(long j = 0; j < i; j++)
+                if(par_a[4][i]*par_b[4][j] == par_a[4][j]*par_b[4][i]
+                   && ender[4][i] != ender[4][j]){ qa = j; qb = i; break; }
+            /* a cifra FUNDE: endereços iguais, objectos diferentes */
+            long fa = -1, fb = -1;
+            for(long i = 0; i < nobj_real[6] && fa < 0; i++) for(long j = 0; j < i; j++)
+                if(ender[6][i] == ender[6][j]){ fa = j; fb = i; break; }
+            printf("      GUME — as duas falhas são DUAIS e as testemunhas têm forma oposta:\n");
+            if(qa >= 0)
+                printf("        QUEBRA (crua): %ld/%ld e %ld/%ld são o MESMO racional"
+                       " (%ld·%ld = %ld·%ld) e recebem endereços %ld ≠ %ld\n",
+                       par_a[4][qa], par_b[4][qa], par_a[4][qb], par_b[4][qb],
+                       par_a[4][qa], par_b[4][qb], par_a[4][qb], par_b[4][qa],
+                       ender[4][qa], ender[4][qb]);
+            else mal++;
+            if(fa >= 0)
+                printf("        FUNDE (cifra): [[%ld,%ld],[%ld,%ld]] e [[%ld,%ld],[%ld,%ld]]"
+                       " são matrizes DISTINTAS no mesmo endereço %ld\n",
+                       par_a[6][fa], par_b[6][fa], par_b[6][fa], par_a[6][fa],
+                       par_a[6][fb], par_b[6][fb], par_b[6][fb], par_a[6][fb],
+                       ender[6][fa]);
+            else mal++;
+            /* e a reduzida não faz nem uma nem outra: é o mesmo corpo do caso
+             * que quebra, com a leitura trocada e o corpo intocado */
+            long q2 = 0, f2 = 0;
+            for(long i = 0; i < nobj_real[5]; i++) for(long j = 0; j < i; j++){
+                int mesmo = (par_a[5][i]*par_b[5][j] == par_a[5][j]*par_b[5][i]);
+                if(mesmo && ender[5][i] != ender[5][j]) q2++;
+                if(!mesmo && ender[5][i] == ender[5][j]) f2++;
+            }
+            printf("        e a REDUZIDA não faz nem uma nem outra (%ld quebras, %ld fusões)"
+                   " — mesmo corpo, mesma família, só a leitura mudou\n", q2, f2);
+            if(q2 != 0 || f2 != 0) mal++;
+        }
+
+        #undef PROF7
+        #undef PRF
+        #undef NO
+        #undef NC
+        sql_fechar();
+
+        printf("\n");
+        ok("O CRITÉRIO TEM DUAS METADES E ELAS SÃO DUAIS: UMA LEITURA PODE QUEBRAR O"
+           " OBJECTO OU FUNDIR OBJECTOS. Sete corpos do catálogo entraram aqui como famílias"
+           " parametrizadas com a sua leitura em I, e a cada um perguntou-se só isto — nunca o"
+           " que o corpo é. Serve quando é BEM DEFINIDA (x = y no corpo implica R(x) = R(y):"
+           " não parte o objecto em dois endereços) e SEPARADORA (R(x) = R(y) implica x = y:"
+           " não junta dois objectos num endereço). A igualdade que conta é a DO CORPO e não a"
+           " dos parâmetros, e é por isso que o racional entra duas vezes: ali x = y é ad = bc."
+           " Os metais, o exterior, a rotação, o simétrico e o racional reduzido passam nas"
+           " duas metades e HERDAM a régua — a desigualdade forte, exibida no simétrico, vale"
+           " em todos os triplos sem que uma única medida tenha sido feita sobre matrizes"
+           " simétricas; ela desce porque a leitura serve, e é a mesma razão nos outros. E as"
+           " DUAS FALHAS aparecem, uma de cada lado, com testemunhas de forma oposta: a"
+           " leitura crua do racional é separadora mas não bem definida — dois pares que são o"
+           " MESMO racional recebem endereços diferentes, e ela quebra o objecto; a leitura"
+           " espectral é bem definida mas não separadora — duas matrizes distintas caem no"
+           " mesmo endereço, e ela funde objectos. A primeira dá uma régua que não é do corpo;"
+           " a segunda perde o corpo antes de o medir. E a prova de que o defeito é da leitura"
+           " e não do corpo está no par: a reduzida corre sobre a MESMA família, não quebra"
+           " nada e não funde nada, e o corpo nunca foi tocado. É assim que se completa o"
+           " catálogo — escolhe-se a leitura, verificam-se as duas metades, e a estrutura"
+           " desce sozinha.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

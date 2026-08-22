@@ -1269,18 +1269,26 @@ endereços, não nos corpos --- logo, se a leitura de um corpo em $I$ \textbf{se
 objectos, a métrica, a topologia e a ordem descem por ela sem se medirem outra vez, e o corpo
 fica completo pela régua que já existe. É mecânico, e tem três passos:
 \begin{enumerate}
-\item \textbf{A leitura separa?} Se $R$ é injectiva, a desigualdade forte
-      $d(x,z)\le\max\{d(x,y),d(y,z)\}$ transporta-se inteira. Nada mais é preciso medir no
-      corpo destino.
+\item \textbf{A leitura serve?} São \emph{duas} condições, e elas são duais: $R$ tem de
+      ser \textbf{bem definida} --- $x=y$ no corpo $\Rightarrow R(x)=R(y)$, não parte o objecto
+      em dois endereços --- e \textbf{separadora} --- $R(x)=R(y)\Rightarrow x=y$, não junta dois
+      objectos num endereço. A igualdade que conta é a \emph{do corpo}, não a dos parâmetros.
+      Cumpridas as duas, a desigualdade forte $d(x,z)\le\max\{d(x,y),d(y,z)\}$ transporta-se
+      inteira e nada mais é preciso medir no corpo destino.
 \item \textbf{A travessia.} Entre duas leituras do mesmo objecto existe sempre
       $T=S\circ R^{-1}$, efectiva e reversível; a tarefa fixa o destino, e a máquina executa a
       mudança de coordenadas.
 \item \textbf{O preço.} $D(R,S)=\sup_x d(R(x),S(x))$ certifica o salto, e uma cadeia de
       conversões não custa mais do que o seu pior passo --- \emph{não a soma deles}.
 \end{enumerate}
-\noindent E o critério tem gume, porque há leituras que \emph{não} separam: a espectral
-$(\operatorname{tr},\det)$ --- a cifra --- é usada em vários corpos deste catálogo e perde
-objectos. \emph{Quando a régua não desce, o que falta não é medida: é uma leitura.}
+\noindent E o critério tem gume dos \emph{dois} lados, com falhas de forma oposta. A
+leitura espectral $(\operatorname{tr},\det)$ --- a cifra, usada em vários corpos deste
+catálogo --- é bem definida e não separa: \textbf{funde} objectos, e perde o corpo antes de o
+medir. A leitura crua $(a,b)$ de um racional é o inverso: separa e não é bem definida ---
+\textbf{quebra} o objecto, dando endereços diferentes a $-4/-4$ e $-3/-3$, e a régua que dela
+desce não é a do corpo. \emph{Quando a régua não desce, o que falta não é medida: é uma
+leitura} --- e a prova de que o defeito é da leitura está no par, porque a mesma família lida
+pelo representante reduzido não quebra nem funde nada, com o corpo intocado.
 
 \medido{nas $256$ matrizes $2\times2$ de entradas em $\{0,1,2,3\}$, a leitura por colunas herda
 a desigualdade forte em $262\,144/262\,144$ triplos ($87\,360$ estritos) sem que nada se meça no
@@ -1288,6 +1296,16 @@ corpo destino; a travessia $T=R_{\mathrm{col}}\circ R_{\mathrm{lin}}^{-1}$ ating
 endereços e é involutiva; e o gume: a leitura espectral do motor dá apenas $58$ endereços
 distintos para os $256$ objectos --- $198$ colidem, e a testemunha directa são duas matrizes
 distintas à distância \textbf{zero} (\code{tests/pgwire.c} §W126).}
+
+\medido{e a regra corre sobre os corpos sem os abrir: sete deles entram como famílias
+parametrizadas com a sua leitura, e cinco --- metais, exterior, rotação, simétrico e racional
+reduzido --- passam nas duas metades e herdam a régua, com a desigualdade forte a valer em
+$64\,000/64\,000$ triplos do corpo simétrico sem que nenhuma medida se faça sobre matrizes
+simétricas. As duas falhas aparecem uma de cada lado, e as testemunhas têm forma oposta: a
+leitura crua do racional \emph{quebra} ($-4/-4$ e $-3/-3$ são o mesmo objecto em endereços
+distintos) e a espectral \emph{funde} ($\binom{-4\ -1}{-1\ -4}$ e $\binom{-4\ 1}{1\ -4}$ no
+mesmo endereço). A reduzida corre sobre a mesma família com zero quebras e zero fusões
+(\code{tests/pgwire.c} §W127).}
 
 \medido{\code{tests/pgwire.c} §W121--§W123 --- a desigualdade ultramétrica em $262\,144/262\,144$ triplos de endereços, com $87\,360$ \emph{estritos}; a sua subida para $D(\sigma,\tau)=\sup_x d(\sigma x,\tau x)$ em $64/64$ triplos de representações; a cadeia a custar $17\,386$ somada contra $10$ maximizada; e a interface com $d_x=0$ em toda a diagonal e em nenhum ponto fora dela. \emph{E a ressalva que o teorema obriga}: «executar o pior passo primeiro» \textbf{não} sai daqui, porque o máximo é simétrico --- o que sai é que, pago um $\delta$, os passos $\le\delta$ são grátis.}
 
