@@ -6469,6 +6469,133 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W48: A MESMA CONSULTA NOUTRA ESCRITA ═════════════════════════════ */
+    {
+        SqlOut a, b;
+        long mal = 0;
+        const char *lixo[] = {
+            "/tmp/pgwire_w48.mem", "/tmp/pgwire_w48.prog",
+            "/tmp/pgwire_w48__t.mem", "/tmp/pgwire_w48__t.prog",
+            "/tmp/pgwire_w48__u.mem", "/tmp/pgwire_w48__u.prog" };
+        for(int k = 0; k < 6; k++) unlink(lixo[k]);
+        printf("\n§W48 o ordinal, a vírgula, e a consulta sem corpo.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w48")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &a);
+        sql_executa("INSERT INTO t VALUES (3,30), (1,10), (2,20)", &a);
+        sql_executa("CREATE TABLE u (a,z)", &a);
+        sql_executa("INSERT INTO u VALUES (1,100), (2,200)", &a);
+
+        /* o par de saídas compara-se célula a célula: é o «dois caminhos que
+         * têm de concordar», e aqui é a medida certa — as duas escritas
+         * compilam o mesmo molde (a varredura sem WHERE), pelo que a impressão
+         * digital do programa não as distinguiria de nada. */
+        #define IGUAIS(x,y) ({ int _i, _j, _r = ((x).nrows == (y).nrows \
+                                                 && (x).ncols == (y).ncols); \
+            for(_i = 0; _r && _i < (x).nrows; _i++) \
+                for(_j = 0; _r && _j < (x).ncols; _j++) \
+                    if(strcmp((x).cell[_i][_j], (y).cell[_i][_j])) _r = 0; \
+            _r; })
+
+        /* ── (1) O ORDINAL É O NOME, dito pela posição. `ORDER BY 1` não é uma
+         * coluna chamada «1»: é a primeira da lista PEDIDA, e resolve-se contra
+         * essa lista — pelo que daqui para a frente não há caminho novo. As
+         * duas escritas têm de dar a mesma saída, linha a linha. */
+        sql_executa("SELECT a, b FROM t ORDER BY 1", &a);
+        sql_executa("SELECT a, b FROM t ORDER BY a", &b);
+        int ord = IGUAIS(a, b) && a.nrows == 3 && !strcmp(a.cell[0][0], "1");
+        printf("      `ORDER BY 1` ≡ `ORDER BY a`: %d linhas iguais célula a"
+               " célula, a começar em %s  %s\n", a.nrows,
+               a.nrows ? a.cell[0][0] : "?", ord ? "" : "NAO BATE");
+        if(!ord) mal++;
+
+        /* ── (2) E O SEGUNDO ORDINAL É MESMO O SEGUNDO: `ORDER BY 2 DESC`
+         * ordena pela outra coluna, e ao contrário — se o número fosse
+         * ignorado, esta saída seria igual à de cima. */
+        sql_executa("SELECT a, b FROM t ORDER BY 2 DESC", &b);
+        int seg = (b.nrows == 3 && !strcmp(b.cell[0][1], "30")
+                                && !strcmp(b.cell[2][1], "10"));
+        printf("      `ORDER BY 2 DESC` ordena pela SEGUNDA e ao contrário:"
+               " %s…%s (esp 30…10)  %s\n", b.nrows ? b.cell[0][1] : "?",
+               b.nrows > 2 ? b.cell[2][1] : "?", seg ? "" : "NAO BATE");
+        if(!seg) mal++;
+
+        /* ── (3) A VÍRGULA É O `JOIN`. `FROM t, u WHERE t.a = u.a` e
+         * `FROM t JOIN u ON t.a = u.a` são a MESMA consulta: a vírgula diz que
+         * há duas tabelas, a condição diz por onde casam. Reescreve-se na
+         * leitura, como o BETWEEN, e tudo o que a junção sabe fazer passa a
+         * valer para esta escrita sem uma linha a mais. */
+        sql_executa("SELECT a FROM t, u WHERE t.a = u.a", &a);
+        sql_executa("SELECT a FROM t JOIN u ON t.a = u.a", &b);
+        int vir = IGUAIS(a, b) && a.nrows == 2;
+        printf("      a vírgula ≡ o JOIN: %d linhas iguais célula a célula"
+               "  %s\n", a.nrows, vir ? "" : "NAO BATE");
+        if(!vir) mal++;
+
+        /* ── (4) A CONSULTA SEM CORPO. Sem `FROM` não há tabela, e sem tabela
+         * não há campo a marcar: o que se pede não depende de linha nenhuma, e
+         * a resposta é UMA linha com o valor. É o caso degenerado da projecção
+         * — a expressão sem variáveis. */
+        sql_executa("SELECT 1", &a);
+        sql_executa("SELECT 42", &b);
+        int semc = (a.nrows == 1 && !strcmp(a.cell[0][0], "1")
+                    && b.nrows == 1 && !strcmp(b.cell[0][0], "42")
+                    && !strcmp(a.col[0], "?column?"));
+        printf("      sem FROM: `SELECT 1` → %s e `SELECT 42` → %s, coluna"
+               " «%s»  %s\n", a.nrows ? a.cell[0][0] : "?",
+               b.nrows ? b.cell[0][0] : "?", a.col[0], semc ? "" : "NAO BATE");
+        if(!semc) mal++;
+
+        /* ── (5) E A PRÓPRIA MEDIDA TEM DE PODER FALHAR. A impressão digital do
+         * programa é do ÚLTIMO emitido, e os caminhos que não emitem nenhum —
+         * a constante sem tabela, uma recusa no parse — deixavam lá o valor da
+         * consulta ANTERIOR: quem comparasse dois desses estaria a comparar
+         * duas cópias do mesmo lixo, e a igualdade passava sem poder falhar.
+         * Zera-se à entrada, e mede-se que zera. */
+        sql_executa("SELECT a FROM t", &a);
+        long com = sql_ultimo_prog;
+        sql_executa("SELECT 1", &a);
+        long sem = sql_ultimo_prog;
+        int honesta = (com != 0 && sem == 0);
+        printf("      a impressão digital zera onde não há programa: com molde"
+               " %08lx, sem molde %08lx  %s\n", com, sem,
+               honesta ? "" : "NAO BATE");
+        if(!honesta) mal++;
+
+        /* ── O CONTROLO: um ordinal fora da lista é RECUSADO, e não tomado
+         * pela última coluna nem ignorado. Sem ele, `ORDER BY 9` podia estar a
+         * cair em silêncio na ordem natural, e as medidas de cima não o veriam. */
+        int c1 = sql_executa("SELECT a FROM t ORDER BY 9", &a);
+        printf("\n      CONTROLO — `ORDER BY 9` numa lista de uma coluna: %s"
+               "  %s\n", c1 ? "RESPONDEU (mau)" : "recusada",
+               c1 ? "NAO BATE" : "");
+        if(c1) mal++;
+        #undef IGUAIS
+        sql_fechar();
+
+        printf("\n");
+        ok("A MESMA CONSULTA NOUTRA ESCRITA TEM DE DAR A MESMA COISA, E DUAS DAS TRÊS PEÇAS"
+           " DESTE BLOCO SÃO ISSO. O ORDINAL é o nome dito pela posição: `ORDER BY 1` não é"
+           " uma coluna chamada «1», é a primeira da lista PEDIDA, e resolve-se contra essa"
+           " lista — pelo que daqui para a frente não há caminho novo nenhum. A VÍRGULA é o"
+           " `JOIN`: `FROM t, u WHERE t.a = u.a` diz com outra pontuação o que"
+           " `t JOIN u ON t.a = u.a` diz com uma palavra, e reescreve-se na leitura como o"
+           " BETWEEN já era — assim tudo o que a junção sabe fazer passa a valer para esta"
+           " escrita sem uma linha a mais. As duas medem-se por COMPARAÇÃO DAS SAÍDAS, célula"
+           " a célula, e não pela impressão digital do programa: as escritas em causa"
+           " compilam o mesmo molde (a varredura sem WHERE), pelo que o programa não as"
+           " distinguiria de nada — usar aqui a medida do §W42 seria uma igualdade que passa"
+           " por não poder ver a diferença. A terceira peça é outra coisa: a CONSULTA SEM"
+           " CORPO. Sem FROM não há tabela, e sem tabela não há campo a marcar — o que se"
+           " pede não depende de linha nenhuma, e a resposta é uma linha com o valor: é o"
+           " caso degenerado da projecção, a expressão sem variáveis. E A PRÓPRIA MEDIDA TEM"
+           " DE PODER FALHAR: a impressão digital é do ÚLTIMO programa emitido, e os caminhos"
+           " que não emitem nenhum deixavam lá o valor da consulta anterior — quem comparasse"
+           " dois desses estaria a comparar duas cópias do mesmo lixo. Zera-se à entrada, e"
+           " mede-se que zera. O CONTROLO é o ordinal fora da lista, RECUSADO e não tomado"
+           " pela última coluna nem ignorado em silêncio.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

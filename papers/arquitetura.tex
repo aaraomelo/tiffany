@@ -2825,6 +2825,19 @@ selecciona com a expressão, o \code{SELECT} escreve-a. E mede-se pelo programa:
 \code{b} dá ausente, e não \code{a} ---, que é a regra do \code{CHECK} dita na
 produção (\code{tests/pgwire.c} §W47).
 
+\medskip\noindent\textbf{E a mesma consulta noutra escrita tem de dar a mesma
+coisa.} \code{ORDER BY 1} é o nome dito pela \emph{posição} --- a primeira
+coluna da lista pedida ---, e \code{FROM t, u WHERE t.a = u.a} é o \code{JOIN}
+dito com pontuação em vez de com uma palavra. As duas reescrevem-se na leitura,
+como o \code{BETWEEN} já era, e por isso tudo o que a junção e a ordem sabem
+fazer passa a valer para elas sem uma linha a mais. Medem-se por
+\textbf{comparação das saídas}, célula a célula --- e não pela impressão digital
+do programa, porque estas escritas compilam o mesmo molde e o programa não as
+distinguiria de nada: usar ali a medida de §W42 seria uma igualdade que passa
+por não poder ver a diferença. E \code{SELECT 1}, sem \code{FROM}, é o caso
+degenerado da projecção --- a expressão sem variáveis (\code{tests/pgwire.c}
+§W48).
+
 \medskip\noindent Daí saem duas coisas \emph{de graça}, que é o sinal de se ter
 escrito no sítio certo: \code{NOT (x IN (…))} é a conjunção das desigualdades
 sem uma linha de código a mais, e \code{IN (1,1,3)} é o \emph{mesmo programa}

@@ -5537,7 +5537,42 @@ static int varre(const char *resto, int acao){
                              "esperava BY depois de ORDER"); }
                 return 0;
             }
-            if(!ident(&q, ord_col, sizeof ord_col)) return 0;
+            /* ── O ORDINAL: `ORDER BY 1` refere a PRIMEIRA coluna pedida ────
+             * Não é uma coluna chamada «1»: é a posição na lista da projecção.
+             * Resolve-se aqui contra `proj_cols`, que é o texto dessa lista, e
+             * o resultado é o mesmo nome que o cliente teria escrito — pelo que
+             * daqui para a frente não há caminho novo nenhum. */
+            { const char *v0 = q;
+              pula(&q);
+              if(*q >= '1' && *q <= '9'){
+                  long k = 0;
+                  while(*q >= '0' && *q <= '9'){ k = k*10 + (*q - '0'); q++; }
+                  { const char *c = proj_cols; long t = 1;
+                    ord_col[0] = 0;
+                    if(strcmp(proj_cols, "*") == 0){
+                        /* com `*` a n-ésima pedida é a n-ésima da tabela */
+                        col_nome_le((int)k - 1, ord_col, (int)sizeof ord_col);
+                    } else {
+                        while(*c && t <= k){
+                            int i = 0;
+                            while(*c && *c != ',' && i + 1 < (int)sizeof ord_col)
+                                ord_col[i++] = *c++;
+                            ord_col[i] = 0;
+                            if(*c == ',') c++;
+                            if(t == k) break;
+                            t++;
+                        }
+                        if(t < k) ord_col[0] = 0;
+                    }
+                    if(!ord_col[0]){
+                        printf("erro: `ORDER BY %ld` — a consulta não pede tantas"
+                               " colunas. RECUSADA.\n", k);
+                        if(sql_cap){ sql_cap->ok = 0;
+                            snprintf(sql_cap->err, sizeof sql_cap->err,
+                                     "ORDER BY position %ld is not in select list", k); }
+                        return 0;
+                    } }
+              } else { q = v0; if(!ident(&q, ord_col, sizeof ord_col)) return 0; } }
             if(col_indice(ord_col) < 0){
                 printf("erro: a coluna «%s» não existe — o ORDER BY é RECUSADO.\n", ord_col);
                 if(sql_cap){ sql_cap->ok = 0;
@@ -8223,6 +8258,35 @@ static int executa(const char *sql){
         return 0;
     }
     if(palavra(&p, "SELECT")){
+        /* ── `SELECT <constante>`: A CONSULTA SEM CORPO ──────────────────────
+         * Sem `FROM` não há tabela, e sem tabela não há campo a marcar: o que
+         * se pede não depende de linha nenhuma, e a resposta é UMA linha com o
+         * valor. É o caso degenerado da projecção — a expressão sem variáveis —
+         * e vale a pena tê-lo porque é o que um cliente escreve para saber se a
+         * ligação está viva.
+         *
+         * Reconhece-se aqui e não mais abaixo porque não há nada a abrir: o
+         * caminho normal começa por procurar a tabela. */
+        { const char *q = p;
+          long k = 0; int viu = 0, neg = 0;
+          pula(&q);
+          if(*q == '-'){ neg = 1; q++; }
+          while(*q >= '0' && *q <= '9'){ k = k*10 + (*q - '0'); q++; viu = 1; }
+          pula(&q);
+          if(viu && (*q == 0 || *q == ';')){
+              if(neg) k = -k;
+              printf("   %ld\n-- 1 linha, sem tabela\n", k);
+              if(sql_cap){
+                  memset(sql_cap, 0, sizeof *sql_cap);
+                  sql_cap->ok = 1; sql_cap->ncols = 1; sql_cap->nrows = 1;
+                  sql_cap->tipo[0] = SQL_TIPO_INT4;
+                  snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "?column?");
+                  snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", k);
+                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+              }
+              return 1;
+          } }
+
         /* COUNT(*) — E NÃO SE CONTA: LÊ-SE O CAMPO.
          *
          * O bitmap tem uma coordenada por linha, e quantas casaram é quantos
@@ -8563,6 +8627,71 @@ int sql_executa(const char *sql, SqlOut *out){
  * consulta respondia certo, e SEM índice devolvia zero linhas em silêncio, que
  * é o desfecho que este ficheiro persegue desde o §W7. Foi o medidor a
  * apanhá-lo, por comparar sempre os dois caminhos. */
+/* ── A VÍRGULA É O `JOIN`, ESCRITO DE OUTRA MANEIRA ──────────────────────────
+ *
+ * `FROM t, u WHERE t.a = u.a` e `FROM t JOIN u ON t.a = u.a` são a MESMA
+ * consulta: a vírgula diz que há duas tabelas, e a condição diz por onde elas
+ * se casam. Não há caminho novo a construir — há uma reescrita na leitura, tal
+ * como o `BETWEEN` já é reescrito em duas comparações. O que se ganha em
+ * escrever assim é o que se ganhou lá: tudo o que a junção sabe fazer passa a
+ * valer para esta escrita sem uma linha a mais, e mede-se pelo PROGRAMA, que
+ * tem de ser o mesmo.
+ *
+ * Reescreve-se a forma pura --- duas tabelas e uma igualdade --- e só ela. Com
+ * mais condições ao lado, a consulta segue como estava e é recusada com a
+ * razão, que é o que este motor faz com tudo o que ainda não sabe ler. */
+static int virgula_reescreve(const char *sql, char *out, size_t cap){
+    const char *q = sql, *f, *w;
+    char t1[64], t2[64], e1[64], e2[64];
+    { const char *r = q;
+      f = NULL;
+      while(*r){ const char *v = r; if(palavra(&v, "FROM")){ f = v; break; } r++; }
+      if(!f) return 0; }
+    { const char *r = f;
+      pula(&r);
+      if(!ident(&r, t1, sizeof t1)) return 0;
+      pula(&r);
+      if(*r != ',') return 0;                 /* não é a forma da vírgula */
+      r++; pula(&r);
+      if(!ident(&r, t2, sizeof t2)) return 0;
+      pula(&r);
+      { const char *v = r;
+        if(!palavra(&v, "WHERE")) return 0;   /* sem condição não há por onde casar */
+        w = v; } }
+    /* a condição tem de ser exactamente `x.a = y.b`, e nada mais */
+    { const char *r = w;
+      char q1[64], q2[64];
+      pula(&r);
+      if(!ident(&r, q1, sizeof q1)) return 0;
+      if(*r != '.') return 0;
+      r++;
+      if(!ident(&r, e1, sizeof e1)) return 0;
+      pula(&r);
+      if(*r != '=') return 0;
+      r++; pula(&r);
+      if(!ident(&r, q2, sizeof q2)) return 0;
+      if(*r != '.') return 0;
+      r++;
+      if(!ident(&r, e2, sizeof e2)) return 0;
+      pula(&r);
+      if(*r != 0 && *r != ';') return 0;      /* mais alguma coisa: não é a forma */
+      /* os qualificadores têm de ser as duas tabelas, em qualquer ordem */
+      if(!(!strcmp(q1, t1) && !strcmp(q2, t2))){
+          if(!strcmp(q1, t2) && !strcmp(q2, t1)){
+              char tmp[64];
+              snprintf(tmp, sizeof tmp, "%s", e1);
+              snprintf(e1, sizeof e1, "%s", e2);
+              snprintf(e2, sizeof e2, "%s", tmp);
+          } else return 0;
+      } }
+    { size_t n = (size_t)(f - sql);
+      if(n + 200 >= cap) return 0;
+      memcpy(out, sql, n); out[n] = 0;
+      snprintf(out + n, cap - n, " %s JOIN %s ON %s.%s = %s.%s",
+               t1, t2, t1, e1, t2, e2); }
+    return 1;
+}
+
 static int between_reescreve(const char *sql, char *out, size_t cap){
     const char *q = sql;
     size_t o = 0;
@@ -8682,8 +8811,17 @@ static int sql_executa_1(const char *sql, SqlOut *out){
       if(between_reescreve(sql, reescrito, sizeof reescrito))
           return sql_executa_1(reescrito, out); }
     { char reescrito[600];
+      if(virgula_reescreve(sql, reescrito, sizeof reescrito))
+          return sql_executa_1(reescrito, out); }
+    { char reescrito[600];
       if(vista_reescreve(sql, reescrito, sizeof reescrito))
           return sql_executa_1(reescrito, out); }
+    /* A IMPRESSÃO DIGITAL ZERA-SE À ENTRADA. Ela é do ÚLTIMO programa emitido,
+     * e os caminhos que não emitem nenhum — a constante sem tabela, uma recusa
+     * no parse — deixavam lá o valor da consulta ANTERIOR. Quem comparasse dois
+     * desses estaria a comparar duas cópias do mesmo lixo, e a medida passava
+     * sem poder falhar. */
+    sql_ultimo_prog = 0;
     if(out){ memset(out, 0, sizeof *out); sql_cap = out; }
     else sql_cap = NULL;
     /* Trio PG6: o catálogo é da SESSÃO e responde ANTES do motor. Se não for
