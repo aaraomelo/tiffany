@@ -2283,6 +2283,21 @@ coordenadas quebraria esta identidade \emph{sem quebrar nenhuma contagem
 isolada} --- e é por isso que é ela que se atesta (\code{tests/pgwire.c} §W28,
 com o controlo a exigir que os conjuntos se cruzem de facto).
 
+\medskip\noindent\textbf{E o desempate é o caso mais limpo de composição.}
+\code{ORDER BY a, b} não é uma chave maior a fabricar: ordena-se pela primeira
+régua, o que parte a saída em \textbf{fibras} --- as corridas de mesmo valor
+---, e dentro de cada fibra corre-se a \emph{mesma} descida com a segunda
+coluna. A árvore não muda; muda o número de vezes que ela é usada. O que se
+mede não é a ordem final mas isso mesmo: com uma régua só a fibra fica por
+ordem de \emph{chegada}, com duas ela ordena-se, e a fibra que já estava
+ordenada \textbf{não se mexe}. Cada régua tem o seu sentido --- \code{a} a
+subir e \code{b} a descer inverte a fibra e deixa a ordem das fibras como
+estava ---, e o dual entra pela mesma porta nos dois níveis: quem não tem valor
+vai para o fim, do bloco todo na primeira régua e da sua fibra na segunda. O
+controlo é trocar as réguas: \code{b, a} dá uma ordem diferente de
+\code{a, b}, o que não aconteceria com uma chave só nem com a segunda régua a
+correr sobre a tabela inteira (\code{tests/pgwire.c} §W40).
+
 \medskip\noindent E fica dito o que ainda \emph{não} se lê como medida: a
 comparação $<$ e $>$ usa o \textbf{bit de sinal} de uma subtração, que é uma
 convenção sobre o envelope e não uma régua; e a descida da árvore usa a

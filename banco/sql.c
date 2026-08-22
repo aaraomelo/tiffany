@@ -4094,6 +4094,18 @@ static int lista_colunas(const char **pp, char *out, int cap){
 static char proj_cols[256] = "*";
 static char ord_col[64] = "";        /* a coluna do ORDER BY, "" se não houver */
 static int  ord_desc = 0;
+/* ── A SEGUNDA RÉGUA ─────────────────────────────────────────────────────────
+ * `ORDER BY a, b` não é uma chave maior: é a COMPOSIÇÃO de duas réguas. Ordena-se
+ * pela primeira, o que parte a saída em FIBRAS — as corridas de mesmo valor —, e
+ * dentro de cada fibra ordena-se pela segunda. É a mesma frase do «espaço das
+ * métricas» do `arquitetura.tex`: compor funções é compor réguas, e o desempate é
+ * a régua seguinte aplicada onde a anterior não distinguiu.
+ *
+ * Feito assim, a árvore não muda: é a MESMA descida, corrida uma vez por fibra. E
+ * o dual entra pela mesma porta nos dois níveis — quem não tem valor vai para o
+ * fim, do bloco todo na primeira régua, e da sua fibra na segunda. */
+static char ord_col2[64] = "";
+static int  ord_desc2 = 0;
 /* LIMIT n É O PREFIXO DA LISTA. O `thm:BI` do `aranha.tex` constrói I como uma
  * ORDEM, com «o encaixe por prefixos a ordenar os andares uns dentro dos
  * outros»: tomar as primeiras n é ficar com um prefixo, e um prefixo é fechado
@@ -5007,7 +5019,8 @@ static int varre(const char *resto, int acao){
     /* ── ORDER BY <coluna> [ASC|DESC] ─────────────────────────────────────
      * Lê-se aqui, depois do WHERE, e é a ORDEM do arquitetura.tex: descer a
      * árvore pelos símbolos do valor. O que NÃO for isto continua recusado. */
-    ord_col[0] = 0; ord_desc = 0; grp_col[0] = 0; lim_n = -1; off_n = 0;
+    ord_col[0] = 0; ord_desc = 0; ord_col2[0] = 0; ord_desc2 = 0;
+    grp_col[0] = 0; lim_n = -1; off_n = 0;
     hav_op = 0; hav_n = 0;
     /* o dis_usa é lido acima, com a lista de colunas */
     if(acao == ACAO_MARCA){
@@ -5087,6 +5100,22 @@ static int varre(const char *resto, int acao){
             pula(&q);
             if(palavra(&q, "DESC")) ord_desc = 1;
             else if(palavra(&q, "ASC")) ord_desc = 0;
+            pula(&q);
+            if(*q == ','){                       /* a segunda régua */
+                q++; pula(&q);
+                if(!ident(&q, ord_col2, sizeof ord_col2)) return 0;
+                if(col_indice(ord_col2) < 0){
+                    printf("erro: a coluna «%s» não existe — o ORDER BY é RECUSADO.\n",
+                           ord_col2);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "column \"%s\" does not exist", ord_col2); }
+                    return 0;
+                }
+                pula(&q);
+                if(palavra(&q, "DESC")) ord_desc2 = 1;
+                else if(palavra(&q, "ASC")) ord_desc2 = 0;
+            }
             p = q;
         }
         /* ── LIMIT <n> ── o prefixo da lista ─────────────────────────────── */
@@ -5922,6 +5951,48 @@ static int varre(const char *resto, int acao){
           for(int k = 0; k < n; k++) ord_seq[k] = tmp[k];
           for(int k = 0; k < na && n < SQL_OUT_MAX_ROWS; k++) ord_seq[n++] = (int)aus[k];
           ord_n = n; ord_usa = 1; }
+
+        /* ── E A SEGUNDA RÉGUA, ONDE A PRIMEIRA NÃO DISTINGUIU ───────────
+         * A saída está partida em FIBRAS — as corridas de mesmo valor da
+         * primeira coluna, e o bloco final dos que não têm valor nenhum. Dentro
+         * de cada uma, a ordem ainda é a de chegada; aplica-se-lhe a segunda
+         * régua, que é a MESMA descida corrida outra vez. Compor funções é
+         * compor réguas, e o desempate é a régua seguinte no sítio onde a
+         * anterior calou. */
+        if(ord_col2[0]){
+            int oc2 = col_indice(ord_col2);
+            long k = 0;
+            while(oc2 >= 0 && k < ord_n){
+                int tem = bit_le(S_PRES, ord_seq[k]*ncols + oc);
+                long v = tem ? celula_valor(ord_seq[k], oc, ncols) : 0;
+                long j = k;
+                /* a corrida: mesma chave, ou ambos sem chave */
+                while(j < ord_n && bit_le(S_PRES, ord_seq[j]*ncols + oc) == tem
+                                && (!tem || celula_valor(ord_seq[j], oc, ncols) == v)) j++;
+                if(j - k > 1){
+                    long a2[SQL_OUT_MAX_ROWS]; int n2 = 0, m = 0, coube = 1;
+                    int tmp2[SQL_OUT_MAX_ROWS];
+                    ord_limpa();
+                    for(long t = k; t < j && coube; t++){
+                        if(!bit_le(S_PRES, ord_seq[t]*ncols + oc2)){
+                            if(n2 < SQL_OUT_MAX_ROWS) a2[n2++] = ord_seq[t];
+                            continue;
+                        }
+                        if(!ord_insere(celula_valor(ord_seq[t], oc2, ncols),
+                                       (int)ord_seq[t])) coube = 0;
+                    }
+                    if(coube){
+                        ord_percorre(0, 0, 0, tmp2, &m, SQL_OUT_MAX_ROWS, ord_desc2);
+                        { long t = k;
+                          for(int q = 0; q < m && t < j; q++) ord_seq[t++] = tmp2[q];
+                          for(int q = 0; q < n2 && t < j; q++) ord_seq[t++] = (int)a2[q]; }
+                    }
+                    /* se não coube, a fibra fica na ordem de chegada: a primeira
+                     * régua continua certa, e é ela que a pergunta pediu primeiro */
+                }
+                k = j;
+            }
+        }
     }
 
     /* ── GROUP BY: A FIBRA, E O SEU TAMANHO É G ─────────────────────────

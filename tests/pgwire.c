@@ -5548,6 +5548,103 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W40: DUAS RÉGUAS, E A SEGUNDA ONDE A PRIMEIRA CALOU ══════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w40.mem");     unlink("/tmp/pgwire_w40.prog");
+        unlink("/tmp/pgwire_w40__t.mem");  unlink("/tmp/pgwire_w40__t.prog");
+        printf("\n§W40 ORDER BY a, b: compor réguas, não fabricar chave.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w40")) mal++;
+        sql_executa("CREATE TABLE t (a, b, c)", &o);
+        sql_executa("INSERT INTO t VALUES (2,9,1)", &o);
+        sql_executa("INSERT INTO t VALUES (1,5,2)", &o);
+        sql_executa("INSERT INTO t VALUES (2,3,3)", &o);
+        sql_executa("INSERT INTO t VALUES (1,7,4)", &o);
+        sql_executa("INSERT INTO t VALUES (2,NULL,5)", &o);
+        sql_executa("INSERT INTO t VALUES (NULL,4,6)", &o);
+        /* a coluna c é a ETIQUETA: diz que linha é, e nunca entra na ordem —
+         * sem ela a saída não se lê, e comparar valores repetidos não provaria
+         * qual das linhas veio primeiro */
+
+        /* ── (1) UMA RÉGUA SÓ deixa a fibra por ordenar: dentro de cada corrida
+         * a ordem é a de chegada. É a base contra a qual a segunda se mede. */
+        sql_executa("SELECT c FROM t ORDER BY a", &o);
+        char u[16] = ""; 
+        for(int i = 0; i < o.nrows && i < 8; i++) strcat(u, o.cell[i][0]);
+        int uma = !strcmp(u, "241356");
+        printf("      uma régua (a):    %s (esp 241356)  %s\n", u, uma ? "" : "NAO BATE");
+        if(!uma) mal++;
+
+        /* ── (2) DUAS RÉGUAS: a segunda entra SÓ onde a primeira não
+         * distinguiu. A fibra do a=2 tinha (9,3,ausente) por ordem de chegada e
+         * passa a (3,9,ausente); a do a=1 já estava ordenada e NÃO SE MEXE — é
+         * o que separa compor réguas de reordenar tudo. */
+        sql_executa("SELECT c FROM t ORDER BY a, b", &o);
+        char d[16] = "";
+        for(int i = 0; i < o.nrows && i < 8; i++) strcat(d, o.cell[i][0]);
+        int duas = !strcmp(d, "243156");
+        printf("      duas réguas (a,b): %s (esp 243156)  %s\n", d, duas ? "" : "NAO BATE");
+        if(!duas) mal++;
+
+        /* ── (3) E CADA RÉGUA TEM O SEU SENTIDO. `a` sobe e `b` desce: a fibra
+         * do a=1 inverte-se e a ordem das fibras fica na mesma. Um motor que
+         * guardasse um só sentido para as duas não faria isto. */
+        sql_executa("SELECT c FROM t ORDER BY a, b DESC", &o);
+        char e[16] = "";
+        for(int i = 0; i < o.nrows && i < 8; i++) strcat(e, o.cell[i][0]);
+        int sentido = !strcmp(e, "421356");
+        printf("      a sobe, b desce:   %s (esp 421356)  %s\n", e,
+               sentido ? "" : "NAO BATE");
+        if(!sentido) mal++;
+
+        /* ── (4) O DUAL ENTRA PELA MESMA PORTA NOS DOIS NÍVEIS: quem não tem
+         * valor vai para o fim — do bloco todo na primeira régua (a linha 6), e
+         * da sua fibra na segunda (a linha 5, dentro do a=2). As duas coisas
+         * estão nas cadeias de cima e lêem-se nelas: o `6` é sempre o último, e
+         * o `5` é sempre o último do seu grupo, em qualquer dos sentidos. */
+        int dual = (u[5] == '6' && d[5] == '6' && e[5] == '6'
+                    && d[4] == '5' && e[4] == '5');
+        printf("      o dual no fim dos DOIS níveis: o sem-a é último sempre, e"
+               " o sem-b é último da sua fibra  %s\n", dual ? "" : "NAO BATE");
+        if(!dual) mal++;
+
+        /* ── O CONTROLO: a segunda régua não pode reordenar o que a primeira já
+         * decidiu. `ORDER BY b, a` sobre os mesmos dados dá uma ordem DIFERENTE
+         * — se as duas fossem juntas numa chave só, ou se a segunda corresse
+         * sobre a tabela inteira em vez de sobre cada fibra, a troca não teria
+         * este efeito. */
+        sql_executa("SELECT c FROM t ORDER BY b, a", &o);
+        char f[16] = "";
+        for(int i = 0; i < o.nrows && i < 8; i++) strcat(f, o.cell[i][0]);
+        printf("\n      CONTROLO — trocada a ordem das réguas (b,a): %s, e é"
+               " diferente de %s  %s\n", f, d,
+               strcmp(f, d) ? "" : "NAO BATE");
+        if(!strcmp(f, d)) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("`ORDER BY a, b` É A COMPOSIÇÃO DE DUAS RÉGUAS, E NÃO UMA CHAVE MAIOR. O"
+           " `arquitetura.tex` já dizia que nada do que a máquina faz ao campo é uma"
+           " operação nova — é uma régua ou uma composição delas —, e o desempate é o caso"
+           " mais limpo disso: ordena-se pela primeira, o que parte a saída em FIBRAS (as"
+           " corridas de mesmo valor), e dentro de cada fibra corre-se a MESMA descida com a"
+           " segunda coluna. A árvore não muda e não há chave composta a fabricar: há a"
+           " mesma árvore usada uma vez por fibra, que é o que «compor» quer dizer aqui. O"
+           " que se mede é isso e não a ordem final: com uma régua só, a fibra do a=2 fica"
+           " por ordem de CHEGADA (9,3,ausente); com duas, passa a (3,9,ausente) — e a fibra"
+           " do a=1, que já estava ordenada, NÃO SE MEXE. Cada régua tem o seu sentido: `a`"
+           " a subir e `b` a descer inverte a fibra e deixa a ordem das fibras como estava,"
+           " o que um motor com um sentido só para as duas não faria. E O DUAL ENTRA PELA"
+           " MESMA PORTA NOS DOIS NÍVEIS: quem não tem valor vai para o fim — do bloco todo"
+           " na primeira régua, da sua fibra na segunda —, porque o dual não é pequeno, é de"
+           " outro nível, e isso não muda por ser a segunda régua a perguntar. O CONTROLO é"
+           " trocar a ordem das réguas: `b, a` dá uma ordem diferente de `a, b` sobre os"
+           " mesmos dados, o que não aconteceria se as duas fossem juntas numa chave só nem"
+           " se a segunda corresse sobre a tabela inteira em vez de sobre cada fibra.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
