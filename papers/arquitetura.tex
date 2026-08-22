@@ -617,6 +617,25 @@ que o outro está errado. \emph{O enunciado da convolução e o do carácter fic
 máquina os executa.
 
 \smallskip
+\noindent\textbf{E é a FORMA POLAR que explica por que isto corre em inteiros.} Um caractere
+escreve-se $r\,e^{\partial\theta}$, e aqui o módulo é \emph{constante} --- $\lvert\chi_k(j)\rvert=1$
+para todos --- ao passo que a fase só toma dois valores, $\theta_k(j)=\pi\cdot\langle k,j\rangle$.
+\emph{O módulo não carrega nada e a fase carrega tudo}, e a fase é \textbf{um bit}: é o caso extremo
+da divisão entre a intensidade e o sinal. Não há vírgula a guardar porque não há módulo a guardar,
+e é por isso que a máquina soma e multiplica $\pm1$ e não números com parte fraccionária.
+
+\smallskip
+\noindent E daí o produto do teorema da convolução ser uma \textbf{soma}: em polar os módulos
+multiplicam e as fases somam, e com módulo $1$ sobra só a segunda parte --- somar um bit módulo
+$2\pi$ é o \textbf{ou-exclusivo}. \emph{O teorema da convolução, lido na fase, é a lei do grupo.}
+Uma consequência operacional fecha o quadro: como $\oplus$ é involutivo, nesta ordem
+\textbf{$\mu$ coincide com $\zeta$} --- desfazer e fazer são a mesma passagem, e a transformada é o
+seu próprio inverso a menos da escala. É o contrário do que se passa no \emph{índice}
+(\S\ref{sec:isa}), onde a ordem é linear e as duas metades custam trabalho diferente: acrescentar
+uma chave é uma descida, tirá-la é a descida com a volta por cima. \emph{A álgebra é a mesma; o que
+muda é a ordem sobre a qual se acumula.}
+
+\smallskip
 \noindent Os números desta máquina, e os seus limites declarados:
 
 \begin{center}\small

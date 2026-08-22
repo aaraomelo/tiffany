@@ -1620,6 +1620,42 @@ inversão é diagonal, e existe exatamente quando nenhum valor próprio é nulo.
 núcleo é gerado pelos $\chi_k$ com $\widehat{f}(k)=0$.
 \end{proof}
 
+\medskip\noindent\textbf{E na FORMA POLAR isto lê-se de outra maneira --- que
+diz o que aqui é degenerado e o que carrega.} Escrevendo cada caractere como
+$\chi_k(j)=r\,e^{\partial\theta}$, o módulo é \emph{constante}:
+\[
+\lvert\chi_k(j)\rvert=1\ \text{para todos os }k,j,
+\qquad
+\theta_k(j)\in\{0,\pi\},\qquad
+\theta_k(j)=\pi\cdot\langle k,j\rangle .
+\]
+Ou seja: \emph{o módulo não carrega nada, e a fase carrega tudo} --- e a fase é
+\textbf{um bit}, a paridade $\langle k,j\rangle$ em unidades de $\pi$. É o caso
+extremo da divisão do Teor.~\ref{thm:BI} entre a intensidade e o sinal: aqui a
+intensidade é sempre a mesma, e o que distingue dois caracteres é só \emph{para
+onde apontam}.
+
+\medskip\noindent\textbf{Daí o produto do Teor.~\ref{thm:conv} ser uma SOMA.} Em
+forma polar os módulos multiplicam-se e as fases somam-se; com módulo $1$ sobra
+só a segunda parte, e somar fases de um bit módulo $2\pi$ é o
+\textbf{ou-exclusivo}:
+\[
+\chi_k(a)\,\chi_k(b)=\chi_k(a\oplus b)
+\qquad\Longleftrightarrow\qquad
+\theta_k(a)+\theta_k(b)\equiv\theta_k(a\oplus b)\ (\mathrm{mod}\ 2\pi).
+\]
+\emph{O teorema da convolução, lido na fase, é a lei do grupo.}
+
+\medskip\noindent\textbf{E aqui $\mu$ COINCIDE com $\zeta$.} Na
+§\ref{sec:zeta} eles são operações distintas --- acumular e a diferença
+finita (Teor.~\ref{thm:mu}) ---, mas isso é na ordem $(I,\le)$. Nesta ordem a
+fase é um bit e o $\oplus$ é \emph{involutivo}, pelo que desfazer e fazer são a
+\emph{mesma} operação; e a transformada é o seu próprio inverso a menos da
+escala, $\mathcal{F}\mathcal{F}=\lvert X\rvert\cdot\mathrm{id}$. É o
+Cor.~\ref{cor:mobius} outra vez: \emph{a álgebra não muda, só muda a ordem sobre
+a qual se acumula} --- e quando a ordem é um grupo de expoente $2$, as duas
+metades do par colapsam numa.
+
 \medskip\noindent A degenerescência não é rara e tem agora nome próprio: é $C_f$
 ter núcleo. O campo de um percurso que visita $0$ e $1$ uma vez cada tem
 $\widehat{f}(k)=1+\chi_k(1)$, nulo em \emph{metade} dos $k$ --- o núcleo tem
