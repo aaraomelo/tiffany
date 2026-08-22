@@ -461,6 +461,7 @@ static long cmp_recusadas = 0;    /* comparações recusadas por a coluna ser la
 static int usa_tabela(const char *nome, int cria_se_falta);   /* definida com abrir_base */
 static int usa_tabela_z(const char *nome, int cria_se_falta, int zera);
 static int tabela_existe(const char *nome);
+static void caminho_tabela(const char *nome, char *out, size_t cap, const char *ext);
 
 /* O backend do canal. Trocar isto por STOMP ou por TCP é trocar estas duas funções — o banco
  * não distingue, porque o que ele faz é sempre ler um slot e escrever um slot. */
@@ -3322,9 +3323,15 @@ static int checa_corpos(unsigned citadas, long ncols){
 static int  agr_op = 0;              /* 0 nenhuma; 1 sum, 2 max, 3 min */
 static char agr_col[64] = "";        /* a coluna que a agregação lê */
 
+/* os aliases do `AS`, por posição na lista; vazio = sem alias */
+static char alias[SQL_OUT_MAX_COLS][32];
+static int  n_alias = 0;
+
 static int lista_colunas(const char **pp, char *out, int cap){
     const char *p = *pp;
     int n = 0;
+    for(int k = 0; k < SQL_OUT_MAX_COLS; k++) alias[k][0] = 0;
+    n_alias = 0;
     pula(&p);
     if(*p == '*'){ snprintf(out, (size_t)cap, "*"); *pp = p + 1; return 1; }
     for(;;){
@@ -3382,6 +3389,20 @@ static int lista_colunas(const char **pp, char *out, int cap){
               }
           } }
         n += snprintf(out + n, (size_t)(cap - n), "%s%s", n ? "," : "", nome);
+        /* O `AS` É SÓ UM NOME, e o Teor. 3 diz porquê: as duas soluções são «a
+         * mesma estrutura noutra nomeação». O alias não muda a coluna nem o
+         * valor — muda a etiqueta com que a resposta sai —, e por isso lê-se
+         * aqui e guarda-se ao lado, sem tocar na lista que a projecção usa. */
+        { const char *r = p; pula(&r);
+          char al[32];
+          int explicito = palavra(&r, "AS");
+          const char *r2 = r;
+          if(explicito && ident(&r2, al, sizeof al) && strcasecmp(al, "FROM")){
+              if(n_alias < SQL_OUT_MAX_COLS)
+                  snprintf(alias[n_alias], sizeof alias[0], "%s", al);
+              p = r2;
+          }
+          if(n_alias < SQL_OUT_MAX_COLS) n_alias++; }
         pula(&p);
         if(*p == ','){ p++; continue; }
         break;
@@ -4614,7 +4635,9 @@ static int varre(const char *resto, int acao){
             { char cn[S_COLNOME_W * 2 + 2];
               int src = proj_n ? proj[j] : j;
               col_nome_le(src, cn, (int)sizeof cn);
-              if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
+              if(j < n_alias && alias[j][0])
+                        snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", alias[j]);
+              else if(cn[0]) snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%s", cn);
               else      snprintf(sql_cap->col[j], sizeof sql_cap->col[j], "%c", 'a' + src);
               sql_cap->tipo[j] = SQL_TIPO_INT4; }
         snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", achou);
@@ -6259,6 +6282,42 @@ static int executa(const char *sql){
             return 1;
           } }
         if(!palavra(&p, "TABLE")) return 0; return cria(p); }
+    if(palavra(&p, "DROP")){
+        /* APAGAR É O DUAL DE CRIAR, e aqui isso é literal: uma tabela é um
+         * ficheiro `<base>__<nome>.mem`, e largá-la é largar o ficheiro. Não há
+         * catálogo a corrigir — o catálogo da base É a listagem do directório,
+         * e por isso a operação não pode deixar metade feita.
+         *
+         * Se a tabela largada for a que está aberta, a sessão fica sem tabela:
+         * volta-se à sem nome, que é o ficheiro da base. Deixar o descritor
+         * apontado a um ficheiro que já não existe seria pior do que recusar. */
+        if(!palavra(&p, "TABLE")) return 0;
+        int se_existir = 0;
+        { const char *q = p;
+          if(palavra(&q, "IF") && palavra(&q, "EXISTS")){ se_existir = 1; p = q; } }
+        char nome[64];
+        if(!ident(&p, nome, sizeof nome)) return 0;
+        if(!tabela_existe(nome)){
+            if(se_existir){
+                printf("a tabela «%s» não existe — nada a largar\n", nome);
+                if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "DROP TABLE");
+                return 1;
+            }
+            printf("erro: a tabela «%s» não existe — RECUSADA.\n", nome);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "table \"%s\" does not exist", nome); }
+            return 0;
+        }
+        if(!strcmp(g_tabela, nome)) usa_tabela("", 0);   /* larga o descritor primeiro */
+        { char m[600], pr[600];
+          caminho_tabela(nome, m, sizeof m, ".mem");
+          caminho_tabela(nome, pr, sizeof pr, ".prog");
+          unlink(m); unlink(pr); }
+        printf("tabela «%s» largada\n", nome);
+        if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "DROP TABLE");
+        return 1;
+    }
     if(palavra(&p, "INSERT")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return insere_texto(q+5);
@@ -6405,8 +6464,17 @@ static int usa_tabela_z(const char *nome, int cria_se_falta, int zera){
     if(!cria_se_falta && access(alvo, F_OK) != 0){
         /* COMPATIBILIDADE: uma base antiga tem tudo em <base>.mem, sem ficheiro
          * por tabela. Se o nome bate com o que lá está guardado (ou se ela é tão
-         * antiga que nem nome tem), é essa a tabela — e nada se recusa. */
-        if(!g_tabela[0] && cat_nome_bate(baixo)) return 1;
+         * antiga que nem nome tem), é essa a tabela — e nada se recusa.
+         *
+         * MAS A BASE TEM DE TER CONTEÚDO, e essa cláusula faltava. O
+         * `cat_nome_bate` devolve verdadeiro quando o nome guardado é VAZIO, o
+         * que numa base moderna — onde o `<base>.mem` é só o sítio das vistas e
+         * não tem colunas nenhumas — aceitava QUALQUER nome: uma tabela largada
+         * continuava a responder, com zero linhas e sem erro. Apareceu com o
+         * DROP, que deixa a sessão na tabela sem nome, e é o erro disfarçado de
+         * resultado vazio outra vez. Exige-se agora que a base sem nome tenha
+         * mesmo um catálogo — se não tem colunas, não é tabela nenhuma. */
+        if(!g_tabela[0] && cat_nome_bate(baixo) && mem_le(S_CAT).total > 0) return 1;
         return 0;
     }
     if(fmem >= 0){ fsync(fmem); close(fmem); }

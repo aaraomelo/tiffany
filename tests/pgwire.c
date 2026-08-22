@@ -4101,6 +4101,89 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W30: O NOME NÃO É PARÂMETRO, E LARGAR É O DUAL DE CRIAR ═══════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w30.mem");     unlink("/tmp/pgwire_w30.prog");
+        unlink("/tmp/pgwire_w30__t.mem");  unlink("/tmp/pgwire_w30__t.prog");
+        unlink("/tmp/pgwire_w30__u.mem");  unlink("/tmp/pgwire_w30__u.prog");
+        printf("\n§W30 o alias e o DROP: a nomeação, e o dual de criar.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w30")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        sql_executa("INSERT INTO t VALUES (1,2)", &o);
+        sql_executa("INSERT INTO t VALUES (3,4)", &o);
+
+        /* O ALIAS muda a ETIQUETA e não o valor — o Teor. 3 diz que a nomeação
+         * não é parâmetro, e é isso que se exige: as células têm de ser as
+         * mesmas com e sem `AS`. */
+        sql_executa("SELECT a, b FROM t", &o);
+        char s0[32], s1[32];
+        snprintf(s0, sizeof s0, "%s", o.nrows ? o.cell[0][0] : "?");
+        snprintf(s1, sizeof s1, "%s", o.nrows ? o.cell[0][1] : "?");
+        int nome_sem = (!strcmp(o.col[0], "a") && !strcmp(o.col[1], "b"));
+        int r = sql_executa("SELECT a AS x, b AS y FROM t", &o);
+        int nome_com = (r && !strcmp(o.col[0], "x") && !strcmp(o.col[1], "y"));
+        int val_igual = (o.nrows == 2 && !strcmp(o.cell[0][0], s0)
+                                      && !strcmp(o.cell[0][1], s1));
+        printf("      sem AS: [%s,%s] · com AS: [%s,%s] · as células não mudam: %s\n",
+               nome_sem ? "a" : "?", nome_sem ? "b" : "?", o.col[0], o.col[1],
+               val_igual ? "sim" : "NAO");
+        if(!nome_sem || !nome_com || !val_igual) mal++;
+
+        /* LARGAR É O DUAL DE CRIAR, e o gume é o que vem DEPOIS: a tabela
+         * largada tem de deixar de responder — com mensagem, não com zero
+         * linhas. */
+        sql_executa("CREATE TABLE u (c)", &o);
+        sql_executa("INSERT INTO u VALUES (9)", &o);
+        int rd = sql_executa("DROP TABLE u", &o);
+        int r1 = sql_executa("SELECT * FROM u", &o);
+        int sem_msg = (!r1 && !o.err[0]);
+        printf("      DROP TABLE u: %s · depois dela: %s%s\n",
+               rd ? "ok" : "NAO", r1 ? "RESPONDEU (mau)" : "recusada",
+               sem_msg ? " SEM MENSAGEM (mau)" : "");
+        if(!rd || r1 || sem_msg) mal++;
+
+        int r2 = sql_executa("DROP TABLE u", &o);
+        int r3 = sql_executa("DROP TABLE IF EXISTS u", &o);
+        printf("      largar outra vez: %s · com IF EXISTS: %s\n",
+               r2 ? "RESPONDEU (mau)" : "recusado", r3 ? "ok" : "NAO");
+        if(r2 || !r3) mal++;
+
+        /* ── O CONTROLO: largar uma NÃO pode levar a outra, e largar a que está
+         * ABERTA não pode deixar a sessão a apontar para o que já não existe. */
+        sql_executa("SELECT * FROM t", &o);
+        int outra = (o.nrows == 2);
+        sql_executa("DROP TABLE t", &o);
+        int r4 = sql_executa("SELECT * FROM t", &o);
+        printf("      CONTROLO — a outra tabela ficou: %s · e largar a ABERTA:"
+               " depois dela %s\n", outra ? "sim" : "NAO",
+               r4 ? "RESPONDEU (mau)" : "recusada");
+        if(!outra || r4) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("O ALIAS MUDA A ETIQUETA E NÃO O VALOR, E LARGAR É O DUAL DE CRIAR. O `AS` tem"
+           " fundamento no Teor. 3, que diz que as duas soluções são «a mesma estrutura noutra"
+           " nomeação»: a nomeação não é parâmetro. É isso que se exige aqui — os nomes das"
+           " colunas mudam para os pedidos e as CÉLULAS ficam as mesmas, porque um alias que"
+           " mudasse o valor não seria um alias. E LARGAR é o dual de criar, e aqui é literal:"
+           " uma tabela é um ficheiro, e largá-la é largar o ficheiro — não há catálogo a"
+           " corrigir, porque o catálogo da base É a listagem do directório. O GUME É O QUE VEM"
+           " DEPOIS: a tabela largada tem de deixar de responder COM MENSAGEM, e não com zero"
+           " linhas em silêncio. E foi exactamente aí que ele apanhou um defeito que já lá"
+           " estava e que o DROP tornou alcançável: a cláusula de compatibilidade com bases"
+           " antigas aceitava QUALQUER nome quando a sessão estava na tabela sem nome e ela não"
+           " tinha nome guardado — o `cat_nome_bate` devolve verdadeiro no vazio. Numa base"
+           " moderna, onde o ficheiro sem nome é só o sítio das vistas e não tem colunas"
+           " nenhumas, isso fazia a tabela largada responder com zero linhas e sem erro. Exige-se"
+           " agora que a base sem nome tenha mesmo um catálogo: se não tem colunas, não é tabela"
+           " nenhuma. O CONTROLO fecha os dois lados: largar uma não pode levar a outra à"
+           " frente, e largar a que está ABERTA não pode deixar a sessão a apontar para o que já"
+           " não existe — o descritor larga-se ANTES de o ficheiro desaparecer.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
