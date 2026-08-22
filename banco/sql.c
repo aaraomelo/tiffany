@@ -1716,6 +1716,7 @@ static int cria(const char *resto){
 }
 
 static long idx_coluna(long nrows);
+static int  idx_remove(long valor, int idx);
 static void ord_usa_indice(void);
 static void ord_usa_rascunho(void);
 static int  ord_insere(long valor, int idx);
@@ -3083,18 +3084,37 @@ static void prepara(long v, long col_do_set){
  * É IDEMPOTENTE de propósito: escreve valores absolutos, nunca incrementos. Por isso pode ser
  * repetida na abertura sem estragar nada, que é o que faz o redo funcionar. */
 static long aplica_diario(long ncols, long nrows, int acao, int col_set){
-    /* O UPDATE DA COLUNA INDEXADA INVALIDA O ÍNDICE, e tem de invalidar aqui.
+    /* O µ, E ELE É A DESCIDA COM A VOLTA POR CIMA.
      *
      * Um UPDATE não muda o NÚMERO de linhas — muda um valor —, pelo que o
-     * cabeçalho continua a bater e o índice continuaria a ser usado, agora a
-     * apontar para o valor VELHO. É o µ do `thm:zeta-mu`: acrescentar uma chave
-     * é acumular e faz-se de uma descida (é o que o INSERT faz); TIRAR uma é
-     * desacumular, e numa árvore de prefixos isso não é uma descida. Enquanto
-     * não for, o honesto é largar o índice — custa a varredura seguinte, e não
-     * custa uma resposta errada. */
+     * cabeçalho continua a bater e o índice continuaria a apontar para o valor
+     * VELHO. Até aqui largava-se o índice; agora desacumula-se: recolhe-se o
+     * valor antigo de cada linha marcada ANTES de a escrita correr, tira-se a
+     * chave da árvore, e depois de a escrita correr acrescenta-se a nova. µ e
+     * depois ζ — a mesma ordem do `thm:zeta-mu`, com o par completo.
+     *
+     * Se qualquer das duas falhar (a árvore encheu), larga-se o índice como
+     * antes: custa a varredura seguinte, nunca a resposta. */
+    long mu_col = -1;
+    enum { MU_MAX = 64 };            /* o mesmo tecto do lado da junção */
+    static long mu_idx[MU_MAX];
+    static long mu_val[MU_MAX];
+    int mu_n = 0, mu_estourou = 0;
     if(acao == ACAO_SET && col_set >= 0 && idx_coluna(cat_nrows()) == col_set){
-        Word z = {0,0};
-        mem_grava(S_IDXCAB, z);
+        mu_col = col_set;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(mu_n >= MU_MAX){ mu_estourou = 1; break; }
+            mu_idx[mu_n] = i;
+            mu_val[mu_n] = celula_valor(i, mu_col, ncols);
+            mu_n++;
+        }
+        if(mu_estourou){ Word z = {0,0}; mem_grava(S_IDXCAB, z); mu_col = -1; }
+        else {
+            ord_usa_indice();
+            for(int k = 0; k < mu_n; k++) idx_remove(mu_val[k], (int)mu_idx[k]);
+            ord_usa_rascunho();
+        }
     }
     pc_emit = 0;
     for(long i = 0; i < nrows; i++){
@@ -3121,7 +3141,19 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
         salto_poe(pos, ini);
     }
     emit1(OP_HALT);
-    return rodar(pc_emit);
+    long passos = rodar(pc_emit);
+
+    /* e o ζ: agora que a escrita correu, as chaves NOVAS entram */
+    if(mu_col >= 0){
+        ord_usa_indice();
+        int falhou = 0;
+        for(int k = 0; k < mu_n && !falhou; k++)
+            if(!ord_insere(celula_valor(mu_idx[k], mu_col, ncols), (int)mu_idx[k]))
+                falhou = 1;
+        ord_usa_rascunho();
+        if(falhou){ Word z = {0,0}; mem_grava(S_IDXCAB, z); }
+    }
+    return passos;
 }
 
 /* Na abertura: se o diário ficou aberto, uma queda apanhou a base entre o compromisso e o
@@ -3479,6 +3511,45 @@ static int j_carrega_direita(long *ncols_dir){
     { Word c = { postos, nc }; mem_grava(S_JCAB, c); }
     *ncols_dir = nc;
     return postos;
+}
+
+/* ── O µ: TIRAR uma chave da árvore ──────────────────────────────────────────
+ *
+ * `thm:zeta-mu`: ζ acumula e µ desacumula, «e só muda a ordem sobre a qual se
+ * acumula». Acumular é uma descida — o `ord_insere` acima. Desacumular é a
+ * mesma descida com a volta por cima: guarda-se o caminho ao descer, apaga-se a
+ * ligação da folha, e SOBE-SE a apagar todo o nó que ficou sem filhos. É a
+ * diferença finita da árvore, e é por ela ser o caminho ao contrário que se
+ * pode fazer — não é uma varredura à procura da chave.
+ *
+ * O que ela não faz é devolver os nós ao contador: um nó apagado fica órfão, e
+ * o `ord_novo` não o reaproveita. Isso é uma fuga declarada, e tem tecto — o
+ * `ORD_MAXNO`. Quando ele chega, `ord_insere` devolve zero e quem chamou LARGA
+ * o índice, que é o que já fazia. Um índice largado custa a varredura seguinte;
+ * nunca custa a resposta. */
+static int idx_remove(long valor, int idx){
+    unsigned long ch = ((unsigned long)(valor + 2147483648L) << 8)
+                     | (unsigned long)(idx & 255);
+    unsigned pai[ORD_NIV], sim[ORD_NIV];
+    unsigned no = 0;
+    int nc = 0;
+    for(int d = ORD_NIV - 1; d >= 0; d--){
+        unsigned sm = (unsigned)((ch >> (ORD_BITS*d)) & (ORD_LARG - 1u));
+        pai[nc] = no; sim[nc] = sm; nc++;
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + sm);
+        if(!f) return 0;                       /* a chave não está lá */
+        no = f;
+    }
+    /* de baixo para cima: corta-se a ligação, e sobe-se enquanto o nó que
+     * ficou para trás não tiver mais nenhum filho */
+    for(int k = nc - 1; k >= 0; k--){
+        par_grava(ord_raiz + pai[k]*ORD_LARG + sim[k], 0);
+        int tem = 0;
+        for(unsigned m = 0; m < ORD_LARG && !tem; m++)
+            if(par_le(ord_raiz + pai[k]*ORD_LARG + m)) tem = 1;
+        if(tem) break;                         /* o pai ainda serve: pára */
+    }
+    return 1;
 }
 
 /* ── A FAIXA: descer e percorrer o que fica do lado certo ────────────────────

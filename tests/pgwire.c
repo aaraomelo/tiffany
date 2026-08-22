@@ -3708,27 +3708,50 @@ int main(void){
                    del_ok ? "sim" : "NAO", viz_ok ? "sim" : "NAO");
             if(!del_ok || !viz_ok) mal++;
 
-            /* O µ: TIRAR uma chave não é uma descida. O UPDATE da coluna
-             * indexada larga o índice — custa a varredura, não a correcção. */
+            /* O µ: a mesma descida com a volta por cima — guarda-se o caminho,
+             * corta-se a folha, e sobe-se a apagar todo o nó que ficou vazio.
+             * O UPDATE desacumula a velha e acumula a nova; o índice FICA. */
             sql_executa("UPDATE t SET a = 77 WHERE a = 8", &o);
             sql_executa("SELECT * FROM t WHERE a = 77", &o);
             int upd_ok = (o.nrows == 1);
             long p_upd = sql_ultimos_passos;
             sql_executa("SELECT * FROM t WHERE a = 8", &o);
             int foi_ok = (o.nrows == 0);
-            printf("      µ — o UPDATE da coluna indexada LARGA o índice (%ld passos):"
-                   " o valor novo aparece (%s) e o velho já não (%s)\n",
-                   p_upd, upd_ok ? "sim" : "NAO", foi_ok ? "sim" : "NAO");
-            if(!upd_ok || !foi_ok || p_upd == 0) mal++;
+            long p_foi = sql_ultimos_passos;
+            printf("      µ — o UPDATE desacumula e reacumula (%ld e %ld passos):"
+                   " o novo aparece (%s) e o velho já não (%s)\n",
+                   p_upd, p_foi, upd_ok ? "sim" : "NAO", foi_ok ? "sim" : "NAO");
+            if(!upd_ok || !foi_ok || p_upd != 0 || p_foi != 0) mal++;
 
-            /* e o que o índice não serve continua pelo molde */
+            /* O GUME DO µ É A FIBRA: mover um valor PARA CIMA de outro que já
+             * existe tem de dar DOIS na mesma chave. Um µ que apagasse o ramo
+             * todo em vez da folha levaria o vizinho à frente — e isso não se vê
+             * em caso nenhum de valor único. */
+            sql_executa("UPDATE t SET a = 9 WHERE a = 77", &o);
+            sql_executa("SELECT * FROM t WHERE a = 9", &o);
+            int fibra_ok = (o.nrows == 2);
+            int nf = o.nrows;
+            sql_executa("SELECT * FROM t WHERE a = 77", &o);
+            int limpo_ok = (o.nrows == 0);
+            printf("      e a FIBRA: mover o 77 para o 9, onde já havia um -> %d na chave"
+                   " (%s), e o 77 ficou vazio (%s)\n", nf,
+                   fibra_ok ? "sim" : "NAO", limpo_ok ? "sim" : "NAO");
+            if(!fibra_ok || !limpo_ok) mal++;
+
+            /* a desigualdade também desce agora — e o que fica fora é a forma
+             * COMPOSTA, que a árvore não responde de um caminho só: aí o molde
+             * corre, e mede-se que corre. */
             sql_executa("SELECT * FROM t WHERE a > 5", &o);
-            /* 20 linhas + a nova (99), menos a apagada (7), e o 8 virou 77:
-             * maiores que 5 são o 6, o 9..20, o 77 e o 99 — quinze. */
-            int molde = (o.nrows == 15 && sql_ultimos_passos > 0);
-            printf("      e `a > 5` continua pelo molde: %d linha(s), %ld passos  %s\n",
-                   o.nrows, sql_ultimos_passos, molde ? "" : "NAO BATE");
-            if(!molde) mal++;
+            int desce = (o.nrows == 15 && sql_ultimos_passos == 0);
+            printf("      `a > 5` também desce: %d linha(s), %ld passos  %s\n",
+                   o.nrows, sql_ultimos_passos, desce ? "" : "NAO BATE");
+            if(!desce) mal++;
+
+            sql_executa("SELECT * FROM t WHERE a > 5 AND b < 30", &o);
+            int comp = (sql_ultimos_passos > 0);
+            printf("      e a forma COMPOSTA fica com o molde: %d linha(s), %ld passos  %s\n",
+                   o.nrows, sql_ultimos_passos, comp ? "" : "NAO BATE");
+            if(!comp) mal++;
 
             int rc = sql_executa("CREATE INDEX ON t (zzz)", &o);
             printf("      coluna inexistente no índice: %s\n",
@@ -3756,9 +3779,16 @@ int main(void){
            " escrever é a convolução com ζ, que ACUMULA, e acumular numa árvore é uma descida"
            " — o INSERT acrescenta a chave e o índice fica válido, medido a zero passos tanto"
            " para a linha antiga como para a nova. TIRAR uma chave seria o µ, e numa árvore de"
-           " prefixos isso não é uma descida: o UPDATE da coluna indexada LARGA o índice, e"
-           " mede-se que larga, com o valor novo a aparecer e o velho a desaparecer. Um índice"
-           " largado custa a varredura seguinte; nunca custa a resposta. E O DELETE É O TERCEIRO"
+           " prefixos é a MESMA descida com a volta por cima: guarda-se o caminho ao descer,"
+           " corta-se a ligação da folha, e SOBE-SE a apagar todo o nó que ficou sem filhos. O"
+           " UPDATE desacumula a chave velha e acumula a nova — µ e depois ζ, o par completo —"
+           " e o índice NÃO é largado, medido a zero passos dos dois lados. O GUME DO µ É A"
+           " FIBRA: mover um valor para cima de outro que já existe tem de deixar DOIS na mesma"
+           " chave, e um µ que apagasse o ramo inteiro em vez da folha levaria o vizinho à"
+           " frente — coisa que nenhum caso de valor único mostraria. O que o µ NÃO faz é"
+           " devolver os nós ao contador: um nó apagado fica órfão, e essa fuga fica DECLARADA,"
+           " com tecto — quando a árvore enche, a inserção falha e o índice é largado, que é o"
+           " comportamento que já lá estava. E O DELETE É O TERCEIRO"
            " CASO, e o mais traiçoeiro: não muda o NÚMERO de linhas, pelo que o cabeçalho"
            " continua a bater e o índice continua a ser usado — mas a chave apagada ficou lá"
            " dentro. Quem decide é o campo do VIVO, consultado à saída da árvore: ela diz onde"
@@ -3771,7 +3801,9 @@ int main(void){
            " molde, incluindo os dois em que a faixa é VAZIA; e com resultado FIXO e tabela a"
            " crescer os nós ficam constantes, ao passo que os passos sem índice dobram. O"
            " resultado é fixo de propósito: os nós crescem com o que SAI, porque têm de listar"
-           " as linhas, e o que não pode crescer é a BUSCA.",
+           " as linhas, e o que não pode crescer é a BUSCA. E fica dito o que continua a NÃO"
+           " descer: a forma composta — `a > 5 AND b < 30` —, que a árvore não responde de um"
+           " caminho só; aí o molde corre, e mede-se que corre.",
            mal == 0);
     }
 
