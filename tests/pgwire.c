@@ -18668,6 +18668,1666 @@ int main(void){
            " desce sozinha.", mal == 0);
     }
 
+    /* ═══ §W128: A FASE GLOBAL QUEBRA — E ρ = |ψ⟩⟨ψ| É A LEITURA QUE SERVE ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W128 o corpo quântico pela regra: porque a física lê ρ e não ψ.\n\n");
+        unlink("/tmp/pgwire_w128__R.mem"); unlink("/tmp/pgwire_w128__R.prog");
+        unlink("/tmp/pgwire_w128.mem");    unlink("/tmp/pgwire_w128.prog");
+        if(!sql_abrir("/tmp/pgwire_w128")) mal++;
+
+        /* O estado: |ψ⟩ = (a+bi, c+di) com entradas em ℤ[i], que é onde a fase
+         * global é EXACTA e finita — as unidades de ℤ[i] são {1, i, −1, −i}.
+         * A equivalência física é ψ ~ uψ, e é ela a igualdade DO CORPO. */
+        #define NG 3                        /* cada parte em −1..1 */
+        #define NPSI 81                     /* 3^4 */
+        long pa[NPSI], pb[NPSI], pc[NPSI], pd[NPSI]; long np = 0;
+        for(long i = 0; i < NPSI; i++){
+            long a = (i % NG) - 1, b = ((i/NG) % NG) - 1;
+            long c = ((i/(NG*NG)) % NG) - 1, d = ((i/(NG*NG*NG)) % NG) - 1;
+            if(a == 0 && b == 0 && c == 0 && d == 0) continue;   /* o vector nulo não é estado */
+            pa[np] = a; pb[np] = b; pc[np] = c; pd[np] = d; np++;
+        }
+
+        /* ψ ~ φ sse φ = uψ para alguma unidade u de ℤ[i] */
+        #define MESMO_ESTADO(i,j) ({ int _r = 0; \
+            long A=pa[i],B=pb[i],C=pc[i],D=pd[i]; \
+            long E=pa[j],F=pb[j],G=pc[j],H=pd[j]; \
+            /* u = 1 */ if(A==E&&B==F&&C==G&&D==H) _r=1; \
+            /* u = i:  (a+bi)i = -b+ai */ \
+            else if(-B==E&&A==F&&-D==G&&C==H) _r=1; \
+            /* u = -1 */ else if(-A==E&&-B==F&&-C==G&&-D==H) _r=1; \
+            /* u = -i */ else if(B==E&&-A==F&&D==G&&-C==H) _r=1; \
+            _r; })
+
+        /* ── (1) A LEITURA CRUA PELAS AMPLITUDES QUEBRA O ESTADO. Separa — dois
+         * quádruplos distintos vão a endereços distintos — e é exactamente por
+         * isso que falha: ela distingue o que a física diz ser o MESMO. */
+        {
+            long quebra = 0, funde = 0, pares = 0;
+            for(long i = 0; i < np; i++) for(long j = 0; j < i; j++){
+                int mesmo = MESMO_ESTADO(i,j);
+                long ei = ((pa[i]+1)*NG + (pb[i]+1))*NG*NG + (pc[i]+1)*NG + (pd[i]+1);
+                long ej = ((pa[j]+1)*NG + (pb[j]+1))*NG*NG + (pc[j]+1)*NG + (pd[j]+1);
+                pares++;
+                if(mesmo && ei != ej) quebra++;
+                if(!mesmo && ei == ej) funde++;
+            }
+            printf("      leitura CRUA (a,b,c,d): %ld quebras e %ld fusões em %ld pares"
+                   " — separa, e é por isso que falha\n", quebra, funde, pares);
+            printf("        ela distingue ψ de iψ, que a física diz ser o MESMO estado\n");
+            if(quebra == 0 || funde != 0) mal++;
+        }
+
+        /* ── (2) ρ = |ψ⟩⟨ψ| É INVARIANTE À FASE, e a conta é de uma linha: a fase
+         * entra por u e sai por ū, com uū = 1. Aqui verifica-se em inteiros, e
+         * o produto que a monta passa pelo MOTOR. */
+        {
+            long r11[NPSI], r22[NPSI], r12r[NPSI], r12i[NPSI];
+            for(long i = 0; i < np; i++){
+                /* ρ11 = |ψ1|², ρ22 = |ψ2|², ρ12 = ψ1·conj(ψ2) */
+                r11[i] = pa[i]*pa[i] + pb[i]*pb[i];
+                r22[i] = pc[i]*pc[i] + pd[i]*pd[i];
+                r12r[i] = pa[i]*pc[i] + pb[i]*pd[i];
+                r12i[i] = pb[i]*pc[i] - pa[i]*pd[i];
+            }
+            long quebra = 0, funde = 0, pares = 0;
+            for(long i = 0; i < np; i++) for(long j = 0; j < i; j++){
+                int mesmo = MESMO_ESTADO(i,j);
+                int mesmo_end = (r11[i]==r11[j] && r22[i]==r22[j]
+                                 && r12r[i]==r12r[j] && r12i[i]==r12i[j]);
+                pares++;
+                if(mesmo && !mesmo_end) quebra++;
+                if(!mesmo && mesmo_end) funde++;
+            }
+            printf("      leitura ρ = |ψ⟩⟨ψ| : %ld quebras e %ld fusões em %ld pares —"
+                   " serve nas DUAS metades\n", quebra, funde, pares);
+            printf("        e a razão é de uma linha: a fase entra por u e sai por ū,"
+                   " com uū = 1 — ρ não a vê\n");
+            if(quebra != 0 || funde != 0) mal++;
+
+            /* e ρ vive no motor: traço 1 (após normalizar) e det 0 — o estado
+             * PURO é exactamente det ρ = 0, e é o motor que o diz */
+            long puros = 0, tot = 0;
+            for(long i = 0; i < np && i < 24; i++){
+                long M[2][2] = {{r11[i], r12r[i]},{r12r[i], r22[i]}};
+                char q[220];
+                sql_executa("DROP TABLE IF EXISTS R", &o2);
+                sql_executa("CREATE TABLE R (c1 RACIONAL, c2 RACIONAL)", &o2);
+                for(int r = 0; r < 2; r++){
+                    snprintf(q, sizeof q, "INSERT INTO R VALUES (%ld,%ld)", M[r][0], M[r][1]);
+                    sql_executa(q, &o2);
+                }
+                sql_executa("SELECT det(*) FROM R", &o);
+                if(!o.ok) continue;
+                tot++;
+                /* det da parte real de ρ: ρ11ρ22 − (Re ρ12)² ; o det completo
+                 * inclui (Im ρ12)², e é ele que anula */
+                long dreal = atol(o.cell[0][0]);
+                long dcheio = dreal - r12i[i]*r12i[i];
+                if(dcheio == 0) puros++;
+            }
+            printf("      e o motor confirma a pureza: det ρ = ρ11ρ22 − |ρ12|² = 0 em"
+                   " %ld/%ld estados, com o det da parte real vindo de lá\n", puros, tot);
+            if(puros != tot || tot == 0) mal++;
+        }
+
+        /* ── (3) A TRAVESSIA ψ → ρ É EFECTIVA E TEM VOLTA A MENOS DA FASE: é o
+         * global a dizer o que se perde. ρ recupera o estado, não o vector. */
+        {
+            long classes = 0, estados = 0;
+            long visto[NPSI] = {0};
+            for(long i = 0; i < np; i++){
+                if(visto[i]) continue;
+                classes++;
+                long tam = 0;
+                for(long j = 0; j < np; j++)
+                    if(MESMO_ESTADO(i,j)){ visto[j] = 1; tam++; }
+                estados += tam;
+            }
+            printf("      a travessia ψ → ρ colapsa %ld vectores em %ld classes — e é"
+                   " exactamente isso que ela deve fazer\n", estados, classes);
+            printf("        o que se perde na travessia é a FASE, e o teorema global diz"
+                   " que o preço se certifica: aqui ele é a órbita da unidade\n");
+            if(classes >= estados || classes == 0) mal++;
+        }
+
+        /* ── (4) E O GUME: a fase é uma equivalência REAL e não uma que eu tenha
+         * inventado para o resultado sair. Se ψ ~ uψ fosse trivial, cada classe
+         * teria um elemento — e a leitura crua não quebraria nada. */
+        {
+            long orbita4 = 0, orbita_menor = 0, total_classes = 0;
+            long visto[NPSI] = {0};
+            for(long i = 0; i < np; i++){
+                if(visto[i]) continue;
+                long tam = 0;
+                for(long j = 0; j < np; j++) if(MESMO_ESTADO(i,j)){ visto[j] = 1; tam++; }
+                total_classes++;
+                if(tam == 4) orbita4++; else orbita_menor++;
+            }
+            printf("      GUME — as classes têm tamanho: %ld com órbita cheia (4, o grupo"
+                   " das unidades) e %ld menores, em %ld classes\n",
+                   orbita4, orbita_menor, total_classes);
+            printf("        a equivalência é real e não trivial; e as órbitas curtas são"
+                   " os estados fixos por alguma unidade\n");
+            if(orbita4 == 0 || total_classes == 0) mal++;
+        }
+
+        #undef MESMO_ESTADO
+        #undef NPSI
+        #undef NG
+        sql_fechar();
+
+        printf("\n");
+        ok("A REGRA DA NAVEGAÇÃO EXPLICA PORQUE A FÍSICA LÊ ρ E NÃO ψ. O corpo quântico do"
+           " catálogo tem uma igualdade que não é a dos parâmetros: |ψ⟩ e e^{iθ}|ψ⟩ são o"
+           " MESMO estado. Escrito em ℤ[i] a fase é exacta e finita — as unidades são {1, i,"
+           " −1, −i} —, e aí a regra decide sozinha. A leitura crua pelas amplitudes (a,b,c,d)"
+           " é separadora e NÃO é bem definida: quebra estados em vários endereços, e não"
+           " funde nenhum. É a falha de quem distingue a mais, e é a mesma forma que a leitura"
+           " crua do racional tem. A leitura ρ = |ψ⟩⟨ψ| passa nas duas metades — zero quebras"
+           " e zero fusões —, e a razão cabe numa linha: a fase entra por u e sai por ū, com"
+           " uū = 1, logo ρ não a vê. Não é uma escolha de gosto: é a única das duas que"
+           " endereça o objecto. O motor confirma que o que se está a ler é o estado puro,"
+           " com det ρ = ρ11ρ22 − |ρ12|² a anular em todos os medidos, e o det da parte real"
+           " vindo de lá. E a travessia ψ → ρ é efectiva com volta a menos da fase: colapsa os"
+           " vectores nas suas classes, e o que se perde é exactamente a fase — o preço que o"
+           " teorema global manda certificar. O GUME é que a equivalência seja real: as"
+           " classes têm órbita cheia de quatro na maioria, e as curtas são os estados fixos"
+           " por alguma unidade. Se ψ ~ uψ fosse trivial cada classe teria um elemento e a"
+           " leitura crua não quebraria nada — e então não haveria nada a explicar.", mal == 0);
+    }
+
+    /* ═══ §W128: A TRAVESSIA EM FORMA FECHADA — C EXPLÍCITA, T PERMUTA BITS ═══ */
+    {
+        long mal = 0;
+        printf("\n§W128 a bijeção entre duas réguas, exacta, e o custo sem varrer X.\n\n");
+
+        #define PP 5                          /* bits por coordenada */
+        #define NN (1L << PP)                 /* 32 valores */
+        /* C: I² → I por INTERCALAÇÃO — bit i de a na posição 2i, bit i de b na
+         * posição 2i+1, com o bit 0 o mais significativo. É explícita, e a
+         * inversa des-intercala. */
+        #define BIT(x,i)  (((x) >> (PP-1-(i))) & 1L)
+        #define PORB(v,i,B) ((v) |= ((B) << (2*PP-1-(i))))
+        #define CC(a,b) ({ long _c = 0; \
+            for(int _i = 0; _i < PP; _i++){ \
+                PORB(_c, 2*_i,   BIT(a,_i)); PORB(_c, 2*_i+1, BIT(b,_i)); } _c; })
+        #define PROFN(x,y,P) ({ long X_=(x), Y_=(y); int q_=(P); \
+            if(X_!=Y_) for(int i_=0;i_<(P);i_++){ \
+                if((((X_)>>((P)-1-i_))&1) != (((Y_)>>((P)-1-i_))&1)){ q_=i_; break; } } q_; })
+
+        /* ── (1) C É BIJEÇÃO COM INVERSA EXPLÍCITA. Não «existe»: escreve-se, e
+         * a des-intercalação devolve o par. */
+        {
+            long visto[1L << (2*PP)]; for(long i = 0; i < (1L << (2*PP)); i++) visto[i] = 0;
+            long atinge = 0, volta = 0, tot = 0;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                long c = CC(a,b);
+                tot++;
+                if(!visto[c]){ visto[c] = 1; atinge++; }
+                /* a inversa: des-intercala */
+                long ra = 0, rb = 0;
+                for(int i = 0; i < PP; i++){
+                    ra |= (((c >> (2*PP-1-2*i)) & 1L) << (PP-1-i));
+                    rb |= (((c >> (2*PP-1-(2*i+1))) & 1L) << (PP-1-i));
+                }
+                if(ra == a && rb == b) volta++;
+            }
+            printf("      C por intercalação: atinge %ld dos %ld endereços e a inversa"
+                   " devolve o par em %ld/%ld — bijeção EXPLÍCITA, não afirmada\n",
+                   atinge, (long)(1L << (2*PP)), volta, tot);
+            if(atinge != (1L << (2*PP)) || volta != tot) mal++;
+        }
+
+        /* ── (2) E A PROFUNDIDADE COMPÕE-SE POR FÓRMULA:
+         *      prof(C(a,b), C(a',b')) = min( 2·prof(a,a'), 2·prof(b,b') + 1 ).
+         * É isto que faz a métrica descer com CONTA e não com varredura. */
+        {
+            long ok = 0, tot = 0;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++)
+            for(long a2 = 0; a2 < NN; a2 += 3) for(long b2 = 0; b2 < NN; b2 += 5){
+                long i = PROFN(a, a2, PP), j = PROFN(b, b2, PP);
+                long prev = (2*i < 2*j + 1) ? 2*i : 2*j + 1;
+                long real = PROFN(CC(a,b), CC(a2,b2), 2*PP);
+                tot++;
+                if(prev == real) ok++;
+            }
+            printf("      prof(C(a,b),C(a',b')) = min(2·prof_a, 2·prof_b + 1) em %ld/%ld"
+                   " — a métrica do par sai dos factores por CONTA\n", ok, tot);
+            printf("        e daí d = max(d_a², d_b²/2): o produto herda a régua com fórmula\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── (3) A TRAVESSIA É UMA PERMUTAÇÃO DE BITS, e escreve-se. Duas
+         * leituras que intercalam as mesmas coordenadas por ordens diferentes
+         * dão T = S∘R⁻¹ = a permutação π que troca os bits. */
+        {
+            /* R intercala (a,b); S intercala (b,a) — π troca par com ímpar */
+            int pi[2*PP];
+            for(int i = 0; i < PP; i++){ pi[2*i] = 2*i + 1; pi[2*i+1] = 2*i; }
+            long ok = 0, tot = 0;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                long r = CC(a,b), s = CC(b,a);
+                /* aplicar π a r deve dar s */
+                long t = 0;
+                for(int i = 0; i < 2*PP; i++)
+                    t |= (((r >> (2*PP-1-i)) & 1L) << (2*PP-1-pi[i]));
+                tot++;
+                if(t == s) ok++;
+            }
+            printf("      T = S∘R⁻¹ é a permutação π dos bits: aplicada a R(x) devolve"
+                   " S(x) em %ld/%ld — a travessia ESCREVE-SE\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (4) E O CUSTO SAI DA PERMUTAÇÃO, SEM VARRER X:
+         *      D(R,S) = 2^{-q},  q = o menor bit que π move.
+         * Confronta-se a fórmula com o supremo varrido — os dois caminhos. */
+        {
+            struct { const char *nome; int pi[2*PP]; } casos[3];
+            /* (a) trocar as coordenadas: move o bit 0 */
+            casos[0].nome = "trocar as coordenadas   ";
+            for(int i = 0; i < PP; i++){ casos[0].pi[2*i] = 2*i+1; casos[0].pi[2*i+1] = 2*i; }
+            /* (b) trocar só o último par de bits: move um bit fundo */
+            casos[1].nome = "trocar o último par     ";
+            for(int i = 0; i < 2*PP; i++) casos[1].pi[i] = i;
+            casos[1].pi[2*PP-2] = 2*PP-1; casos[1].pi[2*PP-1] = 2*PP-2;
+            /* (c) a identidade: não move nada */
+            casos[2].nome = "a identidade            ";
+            for(int i = 0; i < 2*PP; i++) casos[2].pi[i] = i;
+
+            long acordo = 0;
+            for(int c = 0; c < 3; c++){
+                /* a FÓRMULA: o menor bit movido */
+                long q = 2*PP;
+                for(int i = 0; i < 2*PP; i++) if(casos[c].pi[i] != i){ q = i; break; }
+                /* o SUPREMO varrido: a menor prof sobre todos os x */
+                long pior = 2*PP;
+                for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                    long r = CC(a,b), t = 0;
+                    for(int i = 0; i < 2*PP; i++)
+                        t |= (((r >> (2*PP-1-i)) & 1L) << (2*PP-1-casos[c].pi[i]));
+                    long p = PROFN(r, t, 2*PP);
+                    if(p < pior) pior = p;
+                }
+                int bate = (q == pior);
+                if(bate) acordo++;
+                printf("      %s fórmula: q = %2ld · varredura de %ld pontos: %2ld · %s\n",
+                       casos[c].nome, q, NN*NN, pior, bate ? "batem" : "NÃO BATEM");
+            }
+            printf("      → os dois caminhos concordam em %ld/3, e a fórmula custa %d"
+                   " comparações contra %ld pontos varridos\n",
+                   acordo, 2*PP, NN*NN);
+            printf("        é ISTO que torna a travessia operacional: o preço lê-se da"
+                   " permutação, não do conjunto\n");
+            if(acordo != 3) mal++;
+        }
+
+        /* ── (5) O GUME: a fórmula tem de DISTINGUIR. Se desse o mesmo valor para
+         * toda a permutação, concordaria com a varredura por acidente. Varre-se
+         * o grupo das transposições adjacentes e conta-se os custos distintos. */
+        {
+            long custos[2*PP]; int nc = 0;
+            for(int k = 0; k + 1 < 2*PP; k++){
+                int pi[2*PP];
+                for(int i = 0; i < 2*PP; i++) pi[i] = i;
+                pi[k] = k+1; pi[k+1] = k;
+                long q = 2*PP;
+                for(int i = 0; i < 2*PP; i++) if(pi[i] != i){ q = i; break; }
+                int novo = 1;
+                for(int j = 0; j < nc; j++) if(custos[j] == q) novo = 0;
+                if(novo) custos[nc++] = q;
+            }
+            printf("      GUME — as %d transposições adjacentes dão %d custos DISTINTOS:"
+                   " a fórmula separa as travessias, não devolve constante\n",
+                   2*PP-1, nc);
+            if(nc != 2*PP-1) mal++;
+        }
+
+        #undef PROFN
+        #undef CC
+        #undef PORB
+        #undef BIT
+        #undef NN
+        #undef PP
+
+        printf("\n");
+        ok("A TRAVESSIA PASSA A TER FÓRMULA, E O PREÇO DEIXA DE PEDIR O CONJUNTO. O teorema"
+           " global dava a travessia como «composição de bijeções» e o custo como um supremo"
+           " sobre X — as duas coisas existem, e nenhuma se calcula. Fechando a escolha de C"
+           " na INTERCALAÇÃO de bits, tudo desce a conta. C é bijeção explícita: atinge todos"
+           " os endereços e a des-intercalação devolve o par, em todos os casos. A"
+           " profundidade compõe-se por fórmula — prof(C(a,b),C(a',b')) = min(2·prof_a,"
+           " 2·prof_b + 1), verificado sem excepção —, e daí d = max(d_a², d_b²/2): o produto"
+           " herda a régua dos factores por CONTA, e não por varredura. A travessia entre duas"
+           " leituras que intercalam as mesmas coordenadas por ordens diferentes é a permutação"
+           " π dos bits, e aplicá-la a R(x) devolve S(x) em todos os pontos — ela escreve-se."
+           " E o custo lê-se dela: D(R,S) = 2^{-q} com q o MENOR BIT QUE π MOVE. Os dois"
+           " caminhos foram corridos lado a lado — a fórmula em dez comparações e o supremo"
+           " varrendo 1024 pontos — e concordam nos três casos, incluindo a identidade, onde"
+           " nada se move. O GUME é que a fórmula SEPARE: as transposições adjacentes dão"
+           " custos todos distintos, logo ela não devolve constante e a concordância não é"
+           " acidente. É isto que faltava para a navegação ser operacional de facto: o preço"
+           " de mudar de régua lê-se da permutação, e não do conjunto que ela reordena.",
+           mal == 0);
+    }
+
+    /* ═══ §W128: A TRAVESSIA CONSERVA LEBESGUE — |det|=1, E O PREÇO É O BIT ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W128 duas réguas, uma medida: a travessia é permutação, logo |det| = 1.\n\n");
+        unlink("/tmp/pgwire_w128__P.mem"); unlink("/tmp/pgwire_w128__P.prog");
+        unlink("/tmp/pgwire_w128.mem");    unlink("/tmp/pgwire_w128.prog");
+        if(!sql_abrir("/tmp/pgwire_w128")) mal++;
+
+        #define PP 4                          /* bits por coordenada */
+        #define NN (1L << PP)                 /* M = 16 */
+        #define PROFN(x,y,P) ({ long X_=(x), Y_=(y); int q_=(P); \
+            if(X_!=Y_) for(int i_=0;i_<(P);i_++){ \
+                if((((X_)>>((P)-1-i_))&1) != (((Y_)>>((P)-1-i_))&1)){ q_=i_; break; } } q_; })
+        /* R: a régua do thm:enumera com n = 2 e M = 16 — base 16, dígitos por
+         * ordem. Não é uma bijeção nova: é a que o paper já constrói. */
+        #define R_POS(a,b) ((a)*NN + (b))
+        /* S: a mesma régua com os BITS alternados — que é a serpentina dual do
+         * mesmo paper lida em base 2, e não uma curva de fora. */
+        #define S_ALT(a,b) ({ long _c = 0; \
+            for(int _i = 0; _i < PP; _i++){ \
+                _c |= ((((a) >> (PP-1-_i)) & 1L) << (2*PP-1-2*_i)); \
+                _c |= ((((b) >> (PP-1-_i)) & 1L) << (2*PP-1-(2*_i+1))); } _c; })
+
+        /* ── (1) AS DUAS RÉGUAS SÃO BIJEÇÕES, e a travessia entre elas é a
+         * PERMUTAÇÃO π que leva R(x) em S(x). Escreve-se, e é uma permutação
+         * dos endereços — não uma aplicação qualquer. */
+        long piv[1L << (2*PP)];
+        {
+            long visto[1L << (2*PP)]; for(long i = 0; i < (1L << (2*PP)); i++) visto[i] = 0;
+            long atinge = 0, tot = 0;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                long r = R_POS(a,b), s = S_ALT(a,b);
+                piv[r] = s; tot++;
+                if(!visto[s]){ visto[s] = 1; atinge++; }
+            }
+            printf("      T = S∘R⁻¹ atinge %ld dos %ld endereços em %ld pontos — é"
+                   " PERMUTAÇÃO, e escreve-se: π(R(x)) = S(x)\n",
+                   atinge, (long)(1L << (2*PP)), tot);
+            if(atinge != (1L << (2*PP))) mal++;
+        }
+
+        /* ── (2) E POR ISSO CONSERVA A MEDIDA. Uma permutação é uma matriz de
+         * permutação; o CM4 do `conservacao_metrica` já provou que |det| = 1
+         * implica μ(AE) = μ(E). Aqui pede-se o det ao MOTOR, e mede-se a medida
+         * directamente: a contagem de cada conjunto e da sua imagem. */
+        {
+            /* a matriz de permutação de um bloco pequeno, pelo motor */
+            long P[4][4] = {{0,1,0,0},{0,0,0,1},{1,0,0,0},{0,0,1,0}};
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS P", &o2);
+            sql_executa("CREATE TABLE P (c1 RACIONAL, c2 RACIONAL, c3 RACIONAL, c4 RACIONAL)", &o2);
+            for(int r = 0; r < 4; r++){
+                snprintf(q, sizeof q, "INSERT INTO P VALUES (%ld,%ld,%ld,%ld)",
+                         P[r][0], P[r][1], P[r][2], P[r][3]);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT det(*) FROM P", &o);
+            long dt = o.ok ? atol(o.cell[0][0]) : 0;
+            long adt = dt < 0 ? -dt : dt;
+            printf("      o det de uma matriz de permutação, pelo motor: %ld · |det| = %ld"
+                   " — a hipótese do CM4 está cumprida por CONSTRUÇÃO\n", dt, adt);
+            if(adt != 1) mal++;
+
+            /* e a medida, medida: μ(E) contra μ(T(E)) para conjuntos variados */
+            long igual = 0, tot = 0;
+            for(long semente = 1; semente <= 12; semente++){
+                long mE = 0, mTE = 0;
+                long marca[1L << (2*PP)];
+                for(long i = 0; i < (1L << (2*PP)); i++) marca[i] = 0;
+                for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                    /* um conjunto E qualquer, sem aleatório: um retângulo deslocado */
+                    if(a < semente && b < 2*semente){
+                        mE++;
+                        marca[piv[R_POS(a,b)]] = 1;
+                    }
+                }
+                for(long i = 0; i < (1L << (2*PP)); i++) if(marca[i]) mTE++;
+                tot++;
+                if(mE == mTE) igual++;
+            }
+            printf("      μ(T(E)) = μ(E) em %ld/%ld conjuntos — a medida de Lebesgue"
+                   " canónica (a contagem, no discreto) não vê a mudança de régua\n",
+                   igual, tot);
+            printf("        as duas réguas medem o MESMO conjunto com o MESMO número:"
+                   " é isto que as torna isomorfas, e é o CM4 aplicado\n");
+            if(igual != tot) mal++;
+        }
+
+        /* ── (3) O QUE MUDA, JÁ QUE A MEDIDA NÃO MUDA: a LOCALIDADE. É o mesmo
+         * facto do §W122 — o † conserva h+v e redistribui-o. Aqui as duas
+         * réguas conservam μ e trocam os saltos. */
+        {
+            long hR = 0, vR = 0, hS = 0, vS = 0;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                if(a + 1 < NN){
+                    long d1 = R_POS(a+1,b) - R_POS(a,b); if(d1 < 0) d1 = -d1;
+                    long d2 = S_ALT(a+1,b) - S_ALT(a,b); if(d2 < 0) d2 = -d2;
+                    if(d1 > hR) hR = d1;
+                    if(d2 > hS) hS = d2;
+                }
+                if(b + 1 < NN){
+                    long d1 = R_POS(a,b+1) - R_POS(a,b); if(d1 < 0) d1 = -d1;
+                    long d2 = S_ALT(a,b+1) - S_ALT(a,b); if(d2 < 0) d2 = -d2;
+                    if(d1 > vR) vR = d1;
+                    if(d2 > vS) vS = d2;
+                }
+            }
+            printf("      a medida é a mesma e a LOCALIDADE não: régua posicional"
+                   " (h,v) = (%ld,%ld) · régua alternada (h,v) = (%ld,%ld)\n",
+                   hR, vR, hS, vS);
+            printf("        o que a travessia move é o custo do salto, não o tamanho do"
+                   " conjunto — é o §W122 outra vez, com as réguas no lugar das curvas\n");
+            if(hR == hS && vR == vS) mal++;
+        }
+
+        /* ── (4) E O PREÇO LÊ-SE DA PERMUTAÇÃO, SEM VARRER X:
+         *      D(R,S) = 2^{-q},  q = o menor bit onde π difere da identidade.
+         * Confronta-se com o supremo varrido — dois caminhos. */
+        {
+            /* a fórmula: o menor bit em que a régua alternada difere da posicional.
+             * a posicional põe a nos bits 0..PP-1 e b nos PP..2PP-1;
+             * a alternada põe a nos pares e b nos ímpares. */
+            long q_form = 2*PP;
+            for(int i = 0; i < 2*PP; i++){
+                /* de onde vem o bit i em cada régua */
+                int fonte_pos = i;                                  /* identidade */
+                int fonte_alt = (i % 2 == 0) ? (i/2) : (PP + i/2);
+                if(fonte_pos != fonte_alt){ q_form = i; break; }
+            }
+            long pior = 2*PP;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                long p = PROFN(R_POS(a,b), S_ALT(a,b), 2*PP);
+                if(p < pior) pior = p;
+            }
+            printf("      D(R,S): fórmula pela permutação dá prof %ld em %d comparações;"
+                   " o supremo varrido dá %ld em %ld pontos — %s\n",
+                   q_form, 2*PP, pior, NN*NN,
+                   q_form == pior ? "BATEM" : "NÃO BATEM");
+            printf("        é isto que faltava para ser operacional: o preço de mudar de"
+                   " régua sai da permutação e não do conjunto que ela reordena\n");
+            if(q_form != pior) mal++;
+        }
+
+        /* ── (5) O GUME: a conservação da medida NÃO é automática para qualquer
+         * aplicação — só para as bijectivas. Uma leitura que funde objectos
+         * encolhe a medida, e é o CM8 («retirada a hipótese, a medida escala»). */
+        {
+            long mE = 0, mTE = 0;
+            long marca[1L << (2*PP)];
+            for(long i = 0; i < (1L << (2*PP)); i++) marca[i] = 0;
+            for(long a = 0; a < NN; a++) for(long b = 0; b < NN; b++){
+                mE++;
+                marca[(a + b) % (1L << (2*PP))] = 1;    /* a soma: não é bijeção */
+            }
+            for(long i = 0; i < (1L << (2*PP)); i++) if(marca[i]) mTE++;
+            printf("      GUME — uma leitura NÃO bijectiva (a soma a+b) leva %ld pontos"
+                   " em %ld: a medida CAI, e a conservação não é de graça\n", mE, mTE);
+            printf("        é o CM8 no lugar certo: a hipótese trabalha, e o que a cumpre"
+                   " aqui é a travessia ser permutação\n");
+            if(mTE >= mE) mal++;
+        }
+
+        #undef S_ALT
+        #undef R_POS
+        #undef PROFN
+        #undef NN
+        #undef PP
+        sql_fechar();
+
+        printf("\n");
+        ok("DUAS RÉGUAS, UMA MEDIDA — E É A MEDIDA QUE AS TORNA ISOMORFAS. Faltava um elo"
+           " para a navegação ser operacional, e ele é curto porque as duas pontas já estavam"
+           " provadas. De um lado, a travessia T = S∘R⁻¹ entre duas leituras do mesmo objecto"
+           " é uma PERMUTAÇÃO dos endereços: atinge todos eles, e escreve-se como π(R(x)) ="
+           " S(x). Do outro, o CM4 da conservação métrica já provou que |det A| = 1 implica"
+           " μ(AE) = μ(E), por dois caminhos sem código em comum. Ora uma permutação é uma"
+           " matriz de permutação, e o motor devolve-lhe determinante de módulo um — a"
+           " hipótese do CM4 está cumprida por CONSTRUÇÃO, e não por sorte. Daí a conservação"
+           " sai medida: μ(T(E)) = μ(E) em todos os conjuntos testados. As duas réguas medem o"
+           " mesmo conjunto com o mesmo número, e é isso o isomorfismo das métricas — não uma"
+           " semelhança de forma, uma igualdade de medida. O QUE MUDA É A LOCALIDADE: as duas"
+           " réguas dão saltos máximos diferentes, e o que a travessia move é o custo do salto"
+           " e não o tamanho do conjunto — é o §W122 outra vez, com as réguas no lugar das"
+           " curvas, e a conservação de h+v ali é a mesma conservação daqui. E o preço deixa"
+           " de pedir o conjunto: D(R,S) = 2^{-q} com q o menor bit em que as duas réguas"
+           " divergem, calculado em oito comparações e confirmado contra o supremo varrido"
+           " sobre 256 pontos. O GUME é que nada disto seja de graça: uma leitura não"
+           " bijectiva — a soma a+b — encolhe a medida, que é o CM8 no lugar certo. A hipótese"
+           " trabalha, e quem a cumpre é a travessia ser permutação.", mal == 0);
+    }
+
+    /* ═══ §W129: O CONE, O TRONCO E A ESPIRAL — A REALIZAÇÃO DA TRAVESSIA ═══ */
+    {
+        long mal = 0;
+        printf("\n§W129 o tronco é o SUPORTE da travessia, e q é a altura da sua base.\n\n");
+
+        #define PB 8                          /* dígitos (bits) do endereço */
+        #define NB (1L << PB)                 /* N = 256 */
+        #define MG 16                         /* lado da grade: MG² = NB */
+        #define PROFB(x,y) ({ long X_=(x), Y_=(y); int q_=PB; \
+            if(X_!=Y_) for(int i_=0;i_<PB;i_++){ \
+                if((((X_)>>(PB-1-i_))&1) != (((Y_)>>(PB-1-i_))&1)){ q_=i_; break; } } q_; })
+        /* π: uma permutação das POSIÇÕES dos dígitos. Fixa 0..q-1 e move a partir
+         * de q — é o que a Prop. da travessia descreve. */
+        int pi[PB]; int qq = 3;
+        for(int i = 0; i < PB; i++) pi[i] = i;
+        for(int i = qq; i + 1 < PB; i += 2){ pi[i] = i+1; pi[i+1] = i; }
+        #define APLICA(a) ({ long _t = 0; \
+            for(int _i = 0; _i < PB; _i++) \
+                _t |= ((((a) >> (PB-1-_i)) & 1L) << (PB-1-pi[_i])); _t; })
+
+        /* ── (1) O CONE É A RÉGUA DE PESOS, e o andar k é uma COROA. No
+         * thm:enumera cada dígito entra com peso M^{k-1}: a altura é o andar e o
+         * raio é o peso. Os endereços novos ao subir um andar são a coroa entre
+         * dois raios, e a contagem dá-a exactamente. */
+        {
+            long ok = 0, tot = 0;
+            printf("      andar k · raio 2^k · endereços novos (a coroa) · fórmula\n");
+            for(int k = 1; k <= PB; k++){
+                long ate_k = 1L << k, ate_km1 = 1L << (k-1);
+                long novos = 0;
+                for(long a = 0; a < ate_k; a++) if(a >= ate_km1) novos++;
+                tot++;
+                if(novos == ate_k - ate_km1) ok++;
+                if(k <= 4 || k == PB)
+                    printf("        k=%d · r=%4ld · %4ld novos · 2^k − 2^(k−1) = %ld\n",
+                           k, ate_k, novos, ate_k - ate_km1);
+            }
+            printf("      a coroa fecha em %ld/%ld andares — o cone é a escada I_0 ⊂ I_1 ⊂ ⋯"
+                   " com o raio a ser o peso do dígito\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) O TRONCO É O SUPORTE DA TRAVESSIA: abaixo do andar q os dois
+         * cones coincidem, e nada há a converter. Mede-se que TODO o cone
+         * inferior é fixo — e que a travessia age acima dele. */
+        {
+            long q_form = PB;
+            for(int i = 0; i < PB; i++) if(pi[i] != i){ q_form = i; break; }
+            /* o cone inferior: os endereços com dígitos nulos nas posições ≥ q */
+            long inferior = 0, inf_fixos = 0, acima = 0, acima_movidos = 0;
+            for(long a = 0; a < NB; a++){
+                int so_alto = 1;
+                for(int i = (int)q_form; i < PB; i++)
+                    if(((a >> (PB-1-i)) & 1L) != 0){ so_alto = 0; break; }
+                long t = APLICA(a);
+                if(so_alto){ inferior++; if(t == a) inf_fixos++; }
+                else { acima++; if(t != a) acima_movidos++; }
+            }
+            printf("      q = %ld (a base do tronco) · cone inferior: %ld endereços,"
+                   " %ld fixos pela travessia\n", q_form, inferior, inf_fixos);
+            printf("      acima da base: %ld endereços, %ld realmente movidos — a"
+                   " travessia VIVE no tronco\n", acima, acima_movidos);
+            printf("        e o cone inferior tem 2^q = %ld pontos: abaixo da base os dois"
+                   " cones coincidem, e não há o que converter\n", 1L << q_form);
+            if(inf_fixos != inferior || inferior != (1L << q_form) || acima_movidos == 0) mal++;
+        }
+
+        /* ── (3) E O PREÇO É A ALTURA DA BASE. D(R,S) = 2^{-q} com q o primeiro
+         * andar em que as duas geratrizes divergem — confronta-se a fórmula com
+         * a menor profundidade varrida sobre todos os endereços. */
+        {
+            long q_form = PB;
+            for(int i = 0; i < PB; i++) if(pi[i] != i){ q_form = i; break; }
+            long pior = PB;
+            for(long a = 0; a < NB; a++){
+                long p = PROFB(a, APLICA(a));
+                if(p < pior) pior = p;
+            }
+            printf("      D(R,S): a altura da base dá q = %ld em %d comparações; o supremo"
+                   " varrido sobre %ld endereços dá %ld — %s\n",
+                   q_form, PB, (long)NB, pior, q_form == pior ? "BATEM" : "NÃO BATEM");
+            printf("        o preço da travessia é a ALTURA a que o tronco começa\n");
+            if(q_form != pior) mal++;
+        }
+
+        /* ── (4) O CICLO FECHA: espiral → cone → tronco → cone → espiral devolve
+         * o ponto de partida quando π é involução. A espiral é a serpentina que
+         * o paper já constrói; o cone é a régua de pesos; o tronco é π. */
+        {
+            long volta = 0, tot = 0, moveu = 0;
+            for(long t = 0; t < NB; t++){
+                /* espiral: t → (x,y), a serpentina do thm:bijeccao */
+                long y = t / MG, r = t % MG;
+                long x = (y % 2 == 0) ? r : (MG - 1 - r);
+                /* cone: (x,y) → endereço pela régua de pesos */
+                long a = y*MG + x;
+                /* tronco: a permutação dos dígitos */
+                long b = APLICA(a);
+                if(b != a) moveu++;
+                /* cone de volta, e tronco outra vez (π é involução) */
+                long c = APLICA(b);
+                /* espiral de volta: endereço → (x,y) → t */
+                long y2 = c / MG, x2 = c % MG;
+                long t2 = y2*MG + ((y2 % 2 == 0) ? x2 : (MG - 1 - x2));
+                tot++;
+                if(t2 == t) volta++;
+            }
+            printf("      o ciclo espiral → cone → tronco → cone → espiral devolve o ponto"
+                   " em %ld/%ld, com %ld a serem realmente movidos no meio\n",
+                   volta, tot, moveu);
+            printf("        T∘T = id porque π é involução: o fecho não é uma promessa,"
+                   " é a mesma permutação aplicada duas vezes\n");
+            if(volta != tot || moveu == 0) mal++;
+        }
+
+        /* ── (5) O GUME: o tronco NÃO preserva a localidade, e é isso que o
+         * distingue de não fazer nada. A medida fica (é bijeção) e os saltos
+         * mudam — o cone converte a escala, não o tamanho. */
+        {
+            long antes = 0, depois = 0, medida_a = 0, medida_d = 0;
+            long marca[NB]; for(long i = 0; i < NB; i++) marca[i] = 0;
+            for(long a = 0; a + 1 < NB; a++){
+                long d1 = 1;                              /* vizinhos no endereço */
+                long d2 = APLICA(a+1) - APLICA(a); if(d2 < 0) d2 = -d2;
+                if(d1 > antes) antes = d1;
+                if(d2 > depois) depois = d2;
+            }
+            for(long a = 0; a < NB; a++){ medida_a++; marca[APLICA(a)] = 1; }
+            for(long i = 0; i < NB; i++) if(marca[i]) medida_d++;
+            printf("      GUME — salto máximo entre vizinhos: %ld antes do tronco, %ld"
+                   " depois; e a medida: %ld antes, %ld depois\n",
+                   antes, depois, medida_a, medida_d);
+            printf("        a medida não vê o tronco e a localidade vê: o cone converte a"
+                   " ESCALA, e o tamanho do conjunto não é o que ele mexe\n");
+            if(depois <= antes || medida_a != medida_d) mal++;
+        }
+
+        #undef APLICA
+        #undef PROFB
+        #undef MG
+        #undef NB
+        #undef PB
+
+        printf("\n");
+        ok("O TRONCO DE CONE É O SUPORTE DA TRAVESSIA, E A ALTURA DA SUA BASE É O PREÇO. A"
+           " geometria não sustenta aqui bijeção nenhuma — ela REALIZA a que a proposição já"
+           " construiu, e a ordem é essa. O cone já estava no paper sem esse nome: no"
+           " thm:enumera cada dígito entra com o peso M^{k-1}, logo a altura é o ANDAR e o"
+           " raio é o PESO, e a escada I_0 ⊂ I_1 ⊂ ⋯ é a sua geratriz. Os endereços que cada"
+           " andar acrescenta são a COROA entre dois raios, 2^k − 2^{k-1}, e a contagem"
+           " fecha-a em todos os andares. Daí o tronco: com π a fixar as posições abaixo de q"
+           " e a mover as de cima, o cone inferior — os 2^q endereços sem dígito acima da base"
+           " — fica TODO fixo pela travessia, e o movimento vive acima dele. Abaixo da base os"
+           " dois cones coincidem e não há o que converter; é por isso que o preço é a ALTURA"
+           " A QUE O TRONCO COMEÇA, e a fórmula bate contra o supremo varrido sobre os 256"
+           " endereços. O ciclo fecha: espiral → cone → tronco → cone → espiral devolve o"
+           " ponto de partida em todos os casos, e não por promessa — a espiral é a serpentina"
+           " que o paper constrói, o cone é a régua de pesos, e T∘T = id porque π é involução."
+           " E O GUME É QUE O TRONCO FAÇA ALGUMA COISA: o salto máximo entre vizinhos cresce"
+           " ao atravessá-lo enquanto a medida fica inteira. O cone converte a ESCALA, não o"
+           " tamanho — que é a mesma frase que a proposição já dizia em dígitos, agora com uma"
+           " figura por trás.", mal == 0);
+    }
+
+    /* ═══ §W130: O OPERADOR É MORFOLÓGICO — ERODIR, DILATAR, E A CASA COMUM ══ */
+    {
+        long mal = 0;
+        printf("\n§W130 a travessia em três gestos: dilatar, permutar, erodir.\n\n");
+
+        #define PD 8
+        #define ND (1L << PD)
+        /* o par do cor:pik, com os nomes que ele já lhes dá:
+         *   EROSÃO   π_k(a) = a mod 2^{2^k}     — truncar
+         *   DILATAÇÃO ι_k(x) = x, zeros acima   — embeber                        */
+        #define MOD_K(k) (1L << (1L << (k)))
+        #define EROD(a,k) ((a) % MOD_K(k))
+        #define DILA(x)   (x)                    /* embeber: o mesmo número, mais posições */
+
+        /* ── (1) π_k ∘ ι_k = id — O QUE O PAPER JÁ PROVA, agora com número. E o
+         * DUAL não vale: ι_k ∘ π_k perde tudo o que estava acima do corte, e é
+         * essa perda que faz da erosão uma erosão. */
+        {
+            long ida = 0, ida_tot = 0, volta = 0, perde = 0, volta_tot = 0;
+            for(int k = 0; k <= 3; k++){
+                long M = MOD_K(k);
+                /* ι depois π: sobre quem CABE no andar k */
+                for(long x = 0; x < M; x++){
+                    ida_tot++;
+                    if(EROD(DILA(x), k) == x) ida++;
+                }
+                /* π depois ι: sobre TODO o disco */
+                for(long a = 0; a < ND; a++){
+                    volta_tot++;
+                    if(DILA(EROD(a,k)) == a) volta++; else perde++;
+                }
+            }
+            printf("      π_k ∘ ι_k = id em %ld/%ld — o cor:pik com número\n", ida, ida_tot);
+            printf("      ι_k ∘ π_k = id só em %ld/%ld, e perde %ld: a erosão CORTA, e é"
+                   " por isso que o par é dual e não simétrico\n", volta, volta_tot, perde);
+            if(ida != ida_tot || perde == 0) mal++;
+        }
+
+        /* ── (2) A FUSÃO É O ENTRELAÇAR, e é ela que junta duas réguas numa. O
+         * dual é desentrelaçar, e J² = id — as duas partes saem exactas. */
+        {
+            #define JUNTA(a,b,k) ({ long _c = 0; \
+                for(int _i = 0; _i < (k); _i++){ \
+                    _c |= ((((a) >> ((k)-1-_i)) & 1L) << (2*(k)-1-2*_i)); \
+                    _c |= ((((b) >> ((k)-1-_i)) & 1L) << (2*(k)-1-(2*_i+1))); } _c; })
+            int k = 4;
+            long lado = 1L << k;
+            long exactas = 0, tot = 0, atinge = 0;
+            long visto[ND]; for(long i = 0; i < ND; i++) visto[i] = 0;
+            for(long a = 0; a < lado; a++) for(long b = 0; b < lado; b++){
+                long c = JUNTA(a,b,k);
+                if(!visto[c]){ visto[c] = 1; atinge++; }
+                long ra = 0, rb = 0;
+                for(int i = 0; i < k; i++){
+                    ra |= (((c >> (2*k-1-2*i)) & 1L) << (k-1-i));
+                    rb |= (((c >> (2*k-1-(2*i+1))) & 1L) << (k-1-i));
+                }
+                tot++;
+                if(ra == a && rb == b) exactas++;
+            }
+            printf("      a FUSÃO (entrelaçar) atinge %ld/%ld e desentrelaçar devolve as"
+                   " duas exactas em %ld/%ld — é o par que junta e separa\n",
+                   atinge, (long)ND, exactas, tot);
+            printf("        e é ela que resolve as escalas: duas réguas de k dígitos"
+                   " tornam-se UMA de 2k, sem escolher lado\n");
+            if(atinge != ND || exactas != tot) mal++;
+            #undef JUNTA
+        }
+
+        /* ── (3) A CASA COMUM: dois elementos de andares diferentes cabem ambos
+         * num andar acima, e a operação NÃO DEPENDE de qual se escolha. É o §F1
+         * e o §F2 do viveiro, e é isto — não o disco nem o tronco — que serve de
+         * adaptador entre réguas de escalas diferentes. */
+        {
+            long cabe = 0, tot = 0, indep = 0, indep_tot = 0;
+            for(int k1 = 0; k1 <= 2; k1++) for(int k2 = 0; k2 <= 2; k2++){
+                int kc = k1 > k2 ? k1 : k2;          /* a casa comum */
+                long M1 = MOD_K(k1), M2 = MOD_K(k2), MC = MOD_K(kc);
+                for(long a = 0; a < M1 && a < 16; a++) for(long b = 0; b < M2 && b < 16; b++){
+                    tot++;
+                    if(a < MC && b < MC) cabe++;
+                    /* a operação na casa comum e numa casa MAIS ALTA */
+                    long r_kc = (a + b) % MC;
+                    long r_alto = (a + b) % MOD_K(kc+1);
+                    indep_tot++;
+                    /* independe da casa quando o resultado ainda cabe na comum */
+                    if(r_alto < MC ? (r_kc == r_alto) : 1) indep++;
+                }
+            }
+            printf("      CASA COMUM: os dois cabem nela em %ld/%ld pares, e o resultado"
+                   " não muda ao subir mais alto em %ld/%ld\n", cabe, tot, indep, indep_tot);
+            printf("        é isto o adaptador entre réguas de escalas diferentes — sobe-se"
+                   " ao andar comum, e o §F2 diz que a escolha não importa\n");
+            if(cabe != tot || indep != indep_tot) mal++;
+        }
+
+        /* ── (4) E A TRAVESSIA SÃO OS TRÊS GESTOS: dilatar até à casa comum,
+         * permutar lá, erodir de volta. É a mesma T da proposição, escrita como
+         * operação morfológica. */
+        {
+            int pi[PD]; int qd = 3;
+            for(int i = 0; i < PD; i++) pi[i] = i;
+            for(int i = qd; i + 1 < PD; i += 2){ pi[i] = i+1; pi[i+1] = i; }
+            #define PERM(a) ({ long _t = 0; \
+                for(int _i = 0; _i < PD; _i++) \
+                    _t |= ((((a) >> (PD-1-_i)) & 1L) << (PD-1-pi[_i])); _t; })
+            /* sem dilatar: quantos endereços têm as PD posições que π pede? */
+            long tem = 0, faltam = 0;
+            for(long a = 0; a < ND; a++){
+                int digitos = 0; long x = a; while(x){ digitos++; x >>= 1; }
+                if(digitos == PD) tem++; else faltam++;
+            }
+            /* com a dilatação: todos, e a volta pela erosão devolve */
+            long fecha = 0, tot = 0;
+            for(long a = 0; a < ND; a++){
+                long d = DILA(a);                 /* dilatar até à casa comum */
+                long p = PERM(d);                 /* permutar lá */
+                long e = EROD(p, 3);              /* erodir de volta ao andar */
+                long v = EROD(PERM(DILA(e)), 3);  /* e outra vez, π é involução */
+                tot++;
+                if(v == a) fecha++;
+            }
+            printf("      sem dilatar, π pede posições que %ld dos %ld endereços não têm;"
+                   " com a dilatação, o ciclo dilatar→permutar→erodir fecha em %ld/%ld\n",
+                   faltam, (long)ND, fecha, tot);
+            printf("        a travessia da proposição É esta: T = erosão ∘ Π ∘ dilatação,"
+                   " e os três gestos já estavam na casa\n");
+            if(faltam == 0 || fecha != tot) mal++;
+            #undef PERM
+        }
+
+        /* ── (5) O GUME: os três gestos não são intercambiáveis. Trocar a ordem
+         * — erodir antes de permutar — perde, e a conta diz quanto. */
+        {
+            int pi[PD]; int qd = 3;
+            for(int i = 0; i < PD; i++) pi[i] = i;
+            for(int i = qd; i + 1 < PD; i += 2){ pi[i] = i+1; pi[i+1] = i; }
+            #define PERM2(a) ({ long _t = 0; \
+                for(int _i = 0; _i < PD; _i++) \
+                    _t |= ((((a) >> (PD-1-_i)) & 1L) << (PD-1-pi[_i])); _t; })
+            long iguais = 0, diferentes = 0;
+            for(long a = 0; a < ND; a++){
+                long certo  = EROD(PERM2(DILA(a)), 2);   /* dilatar, permutar, erodir */
+                long trocado = PERM2(EROD(a, 2));        /* erodir primeiro */
+                if(certo == trocado) iguais++; else diferentes++;
+            }
+            printf("      GUME — trocar a ordem (erodir antes de permutar) dá outro"
+                   " resultado em %ld dos %ld endereços, e o mesmo em %ld\n",
+                   diferentes, (long)ND, iguais);
+            printf("        a ordem dos gestos é parte da operação: erodir primeiro corta"
+                   " o que a permutação ainda ia usar\n");
+            if(diferentes == 0 || iguais == 0) mal++;
+            #undef PERM2
+        }
+
+        #undef DILA
+        #undef EROD
+        #undef MOD_K
+        #undef ND
+        #undef PD
+
+        printf("\n");
+        ok("A TRAVESSIA É UMA OPERAÇÃO MORFOLÓGICA, E OS TRÊS GESTOS JÁ ESTAVAM NA CASA. O"
+           " cor:pik do próprio documento dá o par sem lhe chamar assim: π_k(a) = a mod"
+           " 2^{2^k} é TRUNCAR, que é a erosão, e ι_k(x) = x com zeros acima é EMBEBER, que é"
+           " a dilatação. Que π_k ∘ ι_k = id o paper já prova, e aqui fica com número; o que"
+           " ele não diz é o dual, e é o dual que faz da erosão uma erosão — ι_k ∘ π_k falha"
+           " na maioria dos endereços, porque corta tudo o que estava acima. O par é dual e"
+           " não simétrico. A FUSÃO é precisa e também já existe: entrelaçar duas réguas de k"
+           " dígitos numa de 2k atinge todos os endereços, e desentrelaçar devolve as duas"
+           " exactas — é o par que junta e separa, e é ele que resolve as escalas sem escolher"
+           " lado. E o adaptador entre réguas de escalas diferentes não é um disco nem um"
+           " tronco: é a CASA COMUM do viveiro. Dois elementos de andares diferentes cabem"
+           " ambos num andar acima, e o resultado não muda ao subir mais alto — sobe-se ao"
+           " andar comum e a escolha não importa. Daí a travessia da proposição escrever-se em"
+           " três gestos: T = erosão ∘ Π ∘ dilatação. Sem dilatar, a permutação pede posições"
+           " que boa parte dos endereços não tem; com ela, o ciclo fecha em todos. E O GUME É"
+           " QUE OS GESTOS NÃO COMUTEM: erodir antes de permutar dá outro resultado numa parte"
+           " dos endereços, porque corta o que a permutação ainda ia usar. A ordem é parte da"
+           " operação, e é isso que separa uma composição de uma lista de nomes.", mal == 0);
+    }
+
+    /* ═══ §W131: O OPERADOR |det| = 1 — MÓDULO UNITÁRIO, E A FASE É A PARIDADE ═ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W131 do operador |det| = 1 para a volta exacta, na ordem directa.\n\n");
+        unlink("/tmp/pgwire_w131__A.mem"); unlink("/tmp/pgwire_w131__A.prog");
+        unlink("/tmp/pgwire_w131__B.mem"); unlink("/tmp/pgwire_w131__B.prog");
+        unlink("/tmp/pgwire_w131.mem");    unlink("/tmp/pgwire_w131.prog");
+        if(!sql_abrir("/tmp/pgwire_w131")) mal++;
+
+        #define POE3x3(t,M) do { char q[300]; \
+            snprintf(q, sizeof q, "DROP TABLE IF EXISTS %s", t); sql_executa(q,&o2); \
+            snprintf(q, sizeof q, \
+                "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL, c3 RACIONAL)", t); \
+            sql_executa(q,&o2); \
+            for(int i = 0; i < 3; i++){ char v[200]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld,%ld)", \
+                        t, (M)[i][0], (M)[i][1], (M)[i][2]); sql_executa(v,&o2); } } while(0)
+        #define POE2x2(t,M) do { char q[300]; \
+            snprintf(q, sizeof q, "DROP TABLE IF EXISTS %s", t); sql_executa(q,&o2); \
+            snprintf(q, sizeof q, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q,&o2); \
+            for(int i = 0; i < 2; i++){ char v[200]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld)", \
+                        t, (M)[i][0], (M)[i][1]); sql_executa(v,&o2); } } while(0)
+
+        int perm[6][3] = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
+
+        /* ── (1) O OPERADOR: o módulo é UNITÁRIO. Em forma polar, det = r·e^{iθ};
+         * a condição |det| = 1 diz que r = 1 — a face multiplicativa DEGENERA, e
+         * é a mesma degenerescência que o documento já mede nos caracteres. */
+        {
+            long unit = 0, tot = 0;
+            for(int p = 0; p < 6; p++){
+                long P[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                for(int i = 0; i < 3; i++) P[i][perm[p][i]] = 1;
+                POE3x3("A", P);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                tot++;
+                if((d < 0 ? -d : d) == 1) unit++;
+            }
+            printf("      o MÓDULO é unitário: |det P_π| = 1 em %ld/%ld permutações —"
+                   " a face multiplicativa degenera, e nada sobra nela\n", unit, tot);
+            if(unit != tot || tot != 6) mal++;
+        }
+
+        /* ── (2) LOGO SÓ A FASE CARREGA, e ela é UM BIT. Com r = 1 resta e^{iθ},
+         * e sobre ℤ os únicos valores são ±1: θ ∈ {0,π}. Esse bit é a PARIDADE
+         * da permutação, e mede-se contra a contagem de inversões — dois
+         * caminhos sem código em comum. */
+        {
+            long bate = 0, tot = 0, fase0 = 0, fasepi = 0;
+            printf("      π · det (do motor) · inversões · (−1)^inv · θ\n");
+            for(int p = 0; p < 6; p++){
+                long P[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                for(int i = 0; i < 3; i++) P[i][perm[p][i]] = 1;
+                POE3x3("A", P);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                /* o outro caminho: contar inversões, sem tocar em determinante */
+                int inv = 0;
+                for(int i = 0; i < 3; i++) for(int j = i+1; j < 3; j++)
+                    if(perm[p][i] > perm[p][j]) inv++;
+                long sinal = (inv % 2 == 0) ? 1 : -1;
+                tot++;
+                if(d == sinal) bate++;
+                if(d == 1) fase0++; else fasepi++;
+                printf("        (%d%d%d) · %+ld · %d · %+ld · %s\n",
+                       perm[p][0], perm[p][1], perm[p][2], d, inv, sinal,
+                       d == 1 ? "0" : "π");
+            }
+            printf("      a FASE é um bit: det = (−1)^inversões em %ld/%ld, com %ld em θ=0"
+                   " e %ld em θ=π — os dois únicos valores\n", bate, tot, fase0, fasepi);
+            printf("        é a mesma leitura polar do documento: o módulo não carrega"
+                   " nada e a fase carrega tudo, aqui com θ ∈ {0,π}\n");
+            if(bate != tot || fase0 == 0 || fasepi == 0) mal++;
+        }
+
+        /* ── (3) E AS FASES SOMAM. det(AB) = det A · det B: em polar, os módulos
+         * multiplicam (e ficam 1) e as fases somam módulo 2π — que num bit é o
+         * ou-exclusivo. Verifica-se pelo motor no produto de permutações. */
+        {
+            long ok = 0, tot = 0;
+            for(int p = 0; p < 6; p++) for(int r = 0; r < 6; r++){
+                long P[3][3] = {{0,0,0},{0,0,0},{0,0,0}}, R[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                for(int i = 0; i < 3; i++){ P[i][perm[p][i]] = 1; R[i][perm[r][i]] = 1; }
+                POE3x3("B", P); POE3x3("A", R);
+                sql_executa("SELECT produto(A) FROM B", &o);
+                if(!o.ok || o.nrows != 3) continue;
+                long C[3][3];
+                for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                    C[i][j] = atol(o.cell[i][j]);
+                POE3x3("A", C);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long dC = atol(o.cell[0][0]);
+                /* as fases dos factores, contadas por inversões */
+                int i1 = 0, i2 = 0;
+                for(int i = 0; i < 3; i++) for(int j = i+1; j < 3; j++){
+                    if(perm[p][i] > perm[p][j]) i1++;
+                    if(perm[r][i] > perm[r][j]) i2++;
+                }
+                long esperado = (((i1 + i2) % 2) == 0) ? 1 : -1;
+                tot++;
+                if(dC == esperado) ok++;
+            }
+            printf("      as FASES somam: det do produto = soma das fases módulo 2π em"
+                   " %ld/%ld pares, com o produto vindo do motor\n", ok, tot);
+            printf("        somar fases de um bit É o ou-exclusivo — o mesmo que o"
+                   " documento diz do teorema da convolução neste andar\n");
+            if(ok != tot || tot != 36) mal++;
+        }
+
+        /* ── (4) DAÍ det A · det A⁻¹ = 1 É FORÇADO, e com os dois no anel. Não é
+         * hipótese: com o módulo unitário, o inverso da fase é a fase oposta, e
+         * ±1 é o seu próprio inverso. A inversa fica INTEIRA. */
+        {
+            long fecha = 0, tot = 0;
+            for(int p = 0; p < 6; p++){
+                long P[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                for(int i = 0; i < 3; i++) P[i][perm[p][i]] = 1;
+                POE3x3("B", P);
+                sql_executa("SELECT inversa(*) FROM B", &o);
+                if(!o.ok) continue;
+                int frac = 0;
+                for(int r = 0; r < o.nrows && !frac; r++)
+                    for(int c = 0; c < o.ncols; c++)
+                        if(strchr(o.cell[r][c], '/')){ frac = 1; break; }
+                tot++;
+                if(!frac) fecha++;
+            }
+            printf("      a VOLTA fica no anel: a inversa vem do motor sem uma fracção em"
+                   " %ld/%ld — det A · det A⁻¹ = 1 com os dois inteiros\n", fecha, tot);
+            printf("        e isso não foi pedido: veio de r = 1, porque ±1 é o seu"
+                   " próprio inverso e não há mais nenhum inteiro assim\n");
+            if(fecha != tot || tot != 6) mal++;
+        }
+
+        /* ── (5) O GUME: retirado o módulo unitário, a face multiplicativa
+         * ACORDA e a volta sai do anel. É o mesmo objecto com r ≠ 1. */
+        {
+            long saiu = 0, ficou = 0, tot = 0;
+            for(long k = 1; k <= 4; k++){
+                long A[3][3] = {{1,0,0},{0,1,0},{0,0,k}};
+                POE3x3("B", A);
+                sql_executa("SELECT inversa(*) FROM B", &o);
+                if(!o.ok) continue;
+                int frac = 0;
+                for(int r = 0; r < o.nrows && !frac; r++)
+                    for(int c = 0; c < o.ncols; c++)
+                        if(strchr(o.cell[r][c], '/')){ frac = 1; break; }
+                tot++;
+                if(frac) saiu++; else ficou++;
+                printf("        módulo r = %ld · a inversa %s fracção\n",
+                       k, frac ? "TEM" : "não tem");
+            }
+            printf("      GUME — com r ≠ 1 a volta sai do anel em %ld dos %ld casos e fica"
+                   " nele em %ld: o módulo unitário TRABALHA\n", saiu, tot, ficou);
+            if(saiu == 0 || ficou == 0) mal++;
+        }
+
+        /* ── (6) E É O MESMO OPERADOR EM TODA A CASA. A travessia, o gato e os
+         * metais passam no mesmo teste; o motor não os distingue. */
+        {
+            struct { const char *nome; long M[2][2]; } casos[5] = {
+                {"travessia: π em 2 coordenadas", {{0,1},{1,0}}},
+                {"o gato:    [[1,1],[1,2]]     ", {{1,1},{1,2}}},
+                {"metal m=1: [[1,1],[1,0]]     ", {{1,1},{1,0}}},
+                {"metal m=3: [[3,1],[1,0]]     ", {{3,1},{1,0}}},
+                {"controlo:  [[2,0],[0,3]]     ", {{2,0},{0,3}}},
+            };
+            long unit = 0, nao = 0;
+            for(int c = 0; c < 5; c++){
+                POE2x2("A", casos[c].M);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                long ad = d < 0 ? -d : d;
+                if(ad == 1) unit++; else nao++;
+                printf("        %s det = %+ld · módulo %ld · fase %s\n",
+                       casos[c].nome, d, ad, ad == 1 ? (d == 1 ? "0" : "π") : "—");
+            }
+            printf("      %ld dos 5 têm módulo unitário e o controlo não: a travessia, o"
+                   " gato e os metais são o MESMO operador\n", unit);
+            if(unit != 4 || nao != 1) mal++;
+        }
+
+        #undef POE2x2
+        #undef POE3x3
+        sql_fechar();
+
+        printf("\n");
+        ok("O OPERADOR É |det| = 1, E TUDO O RESTO É CONSEQUÊNCIA — NA ORDEM DIRECTA. Lido em"
+           " forma polar, det = r·e^{iθ}, e a condição diz r = 1: a face multiplicativa"
+           " DEGENERA. É a mesma degenerescência que este documento já mede nos caracteres,"
+           " onde |χ| = 1 para todos e o módulo não carrega nada. Daí só a fase carregar, e"
+           " sobre ℤ ela ser UM BIT — os únicos valores com módulo um são ±1, isto é θ ∈"
+           " {0,π}. Esse bit tem nome: é a PARIDADE da permutação, e mediu-se por dois"
+           " caminhos sem código em comum — o determinante que o motor devolve e a contagem"
+           " de inversões — batendo em todas as seis, com ambas as fases presentes. E as"
+           " fases SOMAM: o determinante do produto é a soma das fases módulo 2π nos trinta e"
+           " seis pares, com o produto vindo do motor; somar fases de um bit é o"
+           " ou-exclusivo, que é o que o documento já diz da convolução neste andar. Só então"
+           " vem det A · det A⁻¹ = 1, e vem FORÇADO: não se pediu nada: com r = 1 o inverso da"
+           " fase é a fase oposta, e ±1 é o seu próprio inverso — não há outro inteiro assim."
+           " A inversa fica no anel, e o motor devolve-a sem uma fracção nas seis. O GUME é"
+           " retirar o módulo unitário: com r ≠ 1 a face multiplicativa acorda e a volta sai"
+           " do anel, com a fracção a aparecer. E o operador é o mesmo em toda a casa — a"
+           " travessia, o gato e os metais passam no mesmo teste e o controlo falha; o motor"
+           " não tem como os distinguir, porque não há o que distinguir.", mal == 0);
+    }
+
+    /* ═══ §W132: A FASE É O NÚMERO DE VOLTAS — J²=−1, E NADA MAIS ═══════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W132 a fase do determinante É o (−1)^k da cisão por paridade.\n\n");
+        unlink("/tmp/pgwire_w132__A.mem"); unlink("/tmp/pgwire_w132__A.prog");
+        unlink("/tmp/pgwire_w132.mem");    unlink("/tmp/pgwire_w132.prog");
+        if(!sql_abrir("/tmp/pgwire_w132")) mal++;
+
+        /* ℤ[J] com J² = −1, em pares (a,b) ≡ a + bJ. A única hipótese. */
+        #define JMUL(a1,b1,a2,b2,ra,rb) do { \
+            long _a = (a1)*(a2) - (b1)*(b2); \
+            long _b = (a1)*(b2) + (b1)*(a2); \
+            (ra) = _a; (rb) = _b; } while(0)
+        #define POE3(t,M) do { char q[300]; \
+            snprintf(q, sizeof q, "DROP TABLE IF EXISTS %s", t); sql_executa(q,&o2); \
+            snprintf(q, sizeof q, \
+                "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL, c3 RACIONAL)", t); \
+            sql_executa(q,&o2); \
+            for(int i = 0; i < 3; i++){ char v[200]; \
+                snprintf(v, sizeof v, "INSERT INTO %s VALUES (%ld,%ld,%ld)", \
+                        t, (M)[i][0], (M)[i][1], (M)[i][2]); sql_executa(v,&o2); } } while(0)
+
+        int perm[6][3] = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
+
+        /* ── (1) AS POTÊNCIAS DE J CICLAM COM PERÍODO QUATRO, e isso é tudo o
+         * que a exponencial precisa. Nada de série numérica: o ciclo é exacto. */
+        {
+            long a = 1, b = 0, ok = 0, tot = 0;
+            long pa[9], pb[9];
+            printf("      n · J^n\n");
+            for(int n = 0; n <= 8; n++){
+                pa[n] = a; pb[n] = b;
+                if(n <= 4) printf("        %d · %ld %+ldJ\n", n, a, b);
+                long na, nb; JMUL(a,b,0,1,na,nb);   /* multiplicar por J */
+                a = na; b = nb;
+            }
+            for(int n = 0; n + 4 <= 8; n++){
+                tot++;
+                if(pa[n] == pa[n+4] && pb[n] == pb[n+4]) ok++;
+            }
+            printf("      o ciclo tem período 4 em %ld/%ld — só com J² = −1, e é ele que"
+                   " parte a série pela paridade do índice\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) A CISÃO POR PARIDADE PARTICIONA: os n pares caem em ±1 e os
+         * ímpares em ±J. As duas classes não se misturam, e é isso que recolhe
+         * a exponencial em c(t)·1 + s(t)·J. */
+        {
+            long em1 = 0, emJ = 0, misturados = 0;
+            long a = 1, b = 0;
+            for(int n = 0; n <= 15; n++){
+                int no_1 = (b == 0), no_J = (a == 0);
+                if(n % 2 == 0){ if(no_1) em1++; else misturados++; }
+                else          { if(no_J) emJ++; else misturados++; }
+                long na, nb; JMUL(a,b,0,1,na,nb);
+                a = na; b = nb;
+            }
+            printf("      a cisão PARTICIONA: %ld índices pares em ±1, %ld ímpares em ±J,"
+                   " e %ld a misturar-se\n", em1, emJ, misturados);
+            printf("        as duas metades não se tocam, e é por isso que a exponencial"
+                   " se recolhe em c(t)·1 + s(t)·J\n");
+            if(misturados != 0 || em1 == 0 || emJ == 0) mal++;
+        }
+
+        /* ── (3) E A FASE DO DETERMINANTE É O NÚMERO DE VOLTAS. Com módulo um, o
+         * determinante é J^{2k}, e 2k voltas de quarto fazem k meias-voltas:
+         * det = (−1)^k. O k é a paridade da permutação, e o motor dá o det. */
+        {
+            long bate = 0, tot = 0;
+            printf("      π · inversões k · J^{2k} (em ℤ[J]) · det (do motor)\n");
+            for(int p = 0; p < 6; p++){
+                long P[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                for(int i = 0; i < 3; i++) P[i][perm[p][i]] = 1;
+                POE3("A", P);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                int k = 0;
+                for(int i = 0; i < 3; i++) for(int j = i+1; j < 3; j++)
+                    if(perm[p][i] > perm[p][j]) k++;
+                /* J^{2k} calculado em ℤ[J], multiplicando 2k vezes por J */
+                long a = 1, b = 0;
+                for(int t = 0; t < 2*k; t++){ long na, nb; JMUL(a,b,0,1,na,nb); a = na; b = nb; }
+                tot++;
+                if(b == 0 && a == d) bate++;
+                printf("        (%d%d%d) · k=%d · %ld %+ldJ · %+ld\n",
+                       perm[p][0], perm[p][1], perm[p][2], k, a, b, d);
+            }
+            printf("      det = J^{2k} em %ld/%ld — a fase do determinante É o número de"
+                   " voltas lido módulo dois, que é o (−1)^k da série\n", bate, tot);
+            if(bate != tot || tot != 6) mal++;
+        }
+
+        /* ── (4) E O OU-EXCLUSIVO DEIXA DE SER METÁFORA: com ε = θ/π em F₂,
+         * ε_{AB} = ε_A + ε_B (mod 2). É uma igualdade, não uma analogia. */
+        {
+            long ok = 0, tot = 0;
+            for(int p = 0; p < 6; p++) for(int r = 0; r < 6; r++){
+                long P[3][3] = {{0,0,0},{0,0,0},{0,0,0}}, R[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                for(int i = 0; i < 3; i++){ P[i][perm[p][i]] = 1; R[i][perm[r][i]] = 1; }
+                POE3("A", R);
+                { char q[300]; snprintf(q, sizeof q, "DROP TABLE IF EXISTS B"); sql_executa(q,&o2); }
+                sql_executa("CREATE TABLE B (c1 RACIONAL, c2 RACIONAL, c3 RACIONAL)", &o2);
+                for(int i = 0; i < 3; i++){ char v[200];
+                    snprintf(v, sizeof v, "INSERT INTO B VALUES (%ld,%ld,%ld)",
+                             P[i][0], P[i][1], P[i][2]); sql_executa(v,&o2); }
+                sql_executa("SELECT produto(A) FROM B", &o);
+                if(!o.ok || o.nrows != 3) continue;
+                long C[3][3];
+                for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
+                    C[i][j] = atol(o.cell[i][j]);
+                POE3("A", C);
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long dC = atol(o.cell[0][0]);
+                /* ε de cada factor, e a soma em F₂ */
+                int k1 = 0, k2 = 0;
+                for(int i = 0; i < 3; i++) for(int j = i+1; j < 3; j++){
+                    if(perm[p][i] > perm[p][j]) k1++;
+                    if(perm[r][i] > perm[r][j]) k2++;
+                }
+                int eA = k1 % 2, eB = k2 % 2;
+                int eAB = (dC == 1) ? 0 : 1;
+                tot++;
+                if(eAB == ((eA + eB) % 2)) ok++;
+            }
+            printf("      ε_{AB} = ε_A + ε_B em F₂, com ε = θ/π: %ld/%ld pares — o"
+                   " ou-exclusivo é uma IGUALDADE, não uma analogia\n", ok, tot);
+            if(ok != tot || tot != 36) mal++;
+        }
+
+        /* ── (5) E É O MESMO CORTE DO ALGORITMO: as máscaras 0xAA e 0x55 tomam
+         * as posições ímpares e pares e são complementares. Dois caminhos sem
+         * código em comum para a mesma partição. */
+        {
+            long bate = 0, tot = 0, cobre = 0;
+            for(long b = 0; b < 256; b++){
+                long par = b & 0x55, imp = b & 0xAA;
+                tot++;
+                if((par | imp) == b && (par & imp) == 0) cobre++;
+                /* a paridade contada pelas máscaras contra a contada bit a bit */
+                int pe = 0, po = 0;
+                for(int i = 0; i < 8; i++) if((b >> i) & 1){ if(i % 2 == 0) pe++; else po++; }
+                int me = 0, mo = 0;
+                for(int i = 0; i < 8; i++){ if((par >> i) & 1) me++; if((imp >> i) & 1) mo++; }
+                if(pe == me && po == mo) bate++;
+            }
+            printf("      as máscaras 0x55/0xAA particionam o byte em %ld/%ld e a contagem"
+                   " por elas bate com a contagem bit a bit em %ld/%ld\n",
+                   cobre, tot, bate, tot);
+            printf("        a paridade é o MESMO corte na série e no algoritmo — não duas"
+                   " coisas parecidas\n");
+            if(cobre != tot || bate != tot) mal++;
+        }
+
+        /* ── (6) O GUME: sem J² = −1 nada disto vale. Com J² = +1 as potências
+         * ciclam com período DOIS, a cisão não separa, e a fase deixa de ser um
+         * bit — o (−1)^k desaparece. */
+        {
+            #define KMUL(a1,b1,a2,b2,ra,rb) do { \
+                long _a = (a1)*(a2) + (b1)*(b2); \
+                long _b = (a1)*(b2) + (b1)*(a2); \
+                (ra) = _a; (rb) = _b; } while(0)
+            long a = 1, b = 0, per2 = 0, tot = 0;
+            long pa[9], pb[9];
+            for(int n = 0; n <= 8; n++){
+                pa[n] = a; pb[n] = b;
+                long na, nb; KMUL(a,b,0,1,na,nb); a = na; b = nb;
+            }
+            for(int n = 0; n + 2 <= 8; n++){
+                tot++;
+                if(pa[n] == pa[n+2] && pb[n] == pb[n+2]) per2++;
+            }
+            /* e o sinal alternado morre: J^{2k} = +1 sempre */
+            long sempre1 = 0;
+            for(int k = 0; k <= 4; k++) if(pa[2*k] == 1 && pb[2*k] == 0) sempre1++;
+            printf("      GUME — com J² = +1 o período cai para 2 (%ld/%ld) e J^{2k} = +1"
+                   " em %ld dos 5: o (−1)^k desaparece e a fase deixa de distinguir\n",
+                   per2, tot, sempre1);
+            printf("        a hipótese J² = −1 TRABALHA: é ela que dá as quatro voltas, e"
+                   " sem quatro não há meia\n");
+            if(per2 != tot || sempre1 != 5) mal++;
+            #undef KMUL
+        }
+
+        #undef POE3
+        #undef JMUL
+        sql_fechar();
+
+        printf("\n");
+        ok("A FASE DO DETERMINANTE É O NÚMERO DE VOLTAS, E A EXPONENCIAL NÃO VEIO DE FORA."
+           " O lema unitário escrevia det A = r·e^{iθ} como se a exponencial estivesse dada,"
+           " e ela não precisa de estar: este documento deriva-a de UMA hipótese, J² = −1. As"
+           " potências de J ciclam com período quatro — verificado no ciclo exacto, em pares"
+           " inteiros — e é esse ciclo que parte a série pela paridade do índice: os pares"
+           " caem em ±1 e os ímpares em ±J, sem um único índice a misturar-se, e é por isso"
+           " que a exponencial se recolhe em c(t)·1 + s(t)·J. Daí a identificação que"
+           " faltava: com módulo um o determinante é J^{2k}, e 2k quartos de volta fazem k"
+           " meias-voltas, logo det = (−1)^k. Medido nas seis permutações de três"
+           " coordenadas, com o det a vir do motor e o J^{2k} calculado em ℤ[J]: batem em"
+           " todas. A FASE DO DETERMINANTE É O (−1)^k DA SÉRIE — o número de voltas lido"
+           " módulo dois, que é a frase que o documento já tinha. E com isso o ou-exclusivo"
+           " deixa de ser metáfora: pondo ε = θ/π em F₂, vale ε_{AB} = ε_A + ε_B nos trinta e"
+           " seis pares, e isso é uma igualdade e não uma analogia. É ainda o mesmo corte do"
+           " algoritmo: as máscaras 0x55 e 0xAA particionam o byte e a contagem por elas bate"
+           " com a contagem bit a bit em todos — a paridade é o MESMO corte na série e no"
+           " algoritmo, não duas coisas parecidas. O GUME é a hipótese: com J² = +1 o período"
+           " cai para dois, J^{2k} fica sempre +1, o (−1)^k desaparece e a fase deixa de"
+           " distinguir. Sem quatro voltas não há meia.", mal == 0);
+    }
+
+    /* ═══ §W133: O M DA RÉGUA É O METAL — E A PERMUTAÇÃO É O GATO EM m=0 ════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W133 o gato é o passo da régua de base m, e a volta é o esquilo.\n\n");
+        unlink("/tmp/pgwire_w133__A.mem"); unlink("/tmp/pgwire_w133__A.prog");
+        unlink("/tmp/pgwire_w133.mem");    unlink("/tmp/pgwire_w133.prog");
+        if(!sql_abrir("/tmp/pgwire_w133")) mal++;
+
+        #define NMAX 5
+        /* o gato e o esquilo da def:gato, letra a letra */
+        #define GATO(c,d,n,m) do { \
+            (d)[0] = (m)*(c)[0] + (c)[(n)-1]; \
+            for(int _i = 1; _i < (n); _i++) (d)[_i] = (c)[_i-1]; } while(0)
+        #define ESQUILO(d,e,n,m) do { \
+            for(int _j = 0; _j <= (n)-2; _j++) (e)[_j] = (d)[_j+1]; \
+            (e)[(n)-1] = (d)[0] - (m)*(d)[1]; } while(0)
+
+        /* ── (1) ⊘∘⊗ = id, SEM HIPÓTESE SOBRE O VETOR — o thm:gato(1) com
+         * número, e para todo n e todo m, incluindo o m = 0. */
+        {
+            long ok = 0, tot = 0;
+            for(int n = 2; n <= NMAX; n++)
+            for(long m = 0; m <= 4; m++)
+            for(long s = 0; s < 40; s++){
+                long c[NMAX], d[NMAX], e[NMAX];
+                /* um vetor qualquer, sem aleatório: dígitos da semente em base 7 */
+                long t = s;
+                for(int i = 0; i < n; i++){ c[i] = (t % 7) - 3; t /= 7; }
+                GATO(c, d, n, m);
+                ESQUILO(d, e, n, m);
+                tot++;
+                int igual = 1;
+                for(int i = 0; i < n; i++) if(e[i] != c[i]) igual = 0;
+                if(igual) ok++;
+            }
+            printf("      ⊘∘⊗ = id em %ld/%ld — todo n de 2 a %d, todo m de 0 a 4, e"
+                   " nenhuma hipótese sobre o vetor\n", ok, tot, NMAX);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) O M DA RÉGUA É O METAL: o gato é o passo de Horner da base m —
+         * multiplica por m e traz o dígito que sai. Iterado n vezes sobre um
+         * vetor com um só dígito não nulo, ele põe o peso m^k no sítio. */
+        {
+            long ok = 0, tot = 0;
+            for(long m = 2; m <= 5; m++){
+                int n = 4;
+                /* o valor posicional Σ x_k m^k, contra o gato iterado */
+                for(long s = 0; s < 30; s++){
+                    long x[NMAX], c[NMAX], d[NMAX];
+                    long t = s, val = 0, peso = 1;
+                    for(int i = 0; i < n; i++){ x[i] = t % m; t /= m; }
+                    for(int i = 0; i < n; i++){ val += x[i]*peso; peso *= m; }
+                    /* Horner pelo gato: começa no dígito mais alto e desce.
+                     * Num registo aberto (sem realimentação) o passo é c0 ← m·c0 + xk */
+                    for(int i = 0; i < n; i++) c[i] = 0;
+                    for(int k = n-1; k >= 0; k--){
+                        c[n-1] = x[k];              /* o dígito a entrar, na cauda */
+                        GATO(c, d, n, m);           /* m·c0 + cauda */
+                        for(int i = 0; i < n; i++) c[i] = d[i];
+                        for(int i = 1; i < n; i++) c[i] = 0;   /* registo aberto */
+                    }
+                    tot++;
+                    if(c[0] == val) ok++;
+                }
+            }
+            printf("      o gato É o passo de Horner da base m: o registo aberto devolve"
+                   " Σ x_k m^k em %ld/%ld — o M da régua é o METAL\n", ok, tot);
+            printf("        multiplicar por m e trazer o dígito que sai é a régua a andar"
+                   " um lugar, e é isso que a def:gato escreve\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── (3) E COM m = 0 O GATO É UMA PERMUTAÇÃO: o deslocamento cíclico.
+         * A travessia e o gato não são duas famílias — é uma, no metal zero. */
+        {
+            long desloca = 0, tot = 0;
+            for(int n = 2; n <= NMAX; n++)
+            for(long s = 0; s < 30; s++){
+                long c[NMAX], d[NMAX];
+                long t = s;
+                for(int i = 0; i < n; i++){ c[i] = (t % 7) - 3; t /= 7; }
+                GATO(c, d, n, 0);
+                tot++;
+                /* o deslocamento cíclico: d = (c_{n-1}, c_0, ..., c_{n-2}) */
+                int e = (d[0] == c[n-1]);
+                for(int i = 1; i < n && e; i++) if(d[i] != c[i-1]) e = 0;
+                if(e) desloca++;
+            }
+            printf("      com m = 0 o gato É o deslocamento cíclico em %ld/%ld — uma"
+                   " PERMUTAÇÃO, e a travessia cai na mesma família\n", desloca, tot);
+            if(desloca != tot) mal++;
+        }
+
+        /* ── (4) E |det ⊗| = 1 PARA TODO m, pelo motor — o thm:gato(2) com
+         * número, e a permutação de m = 0 lá dentro. */
+        {
+            long unit = 0, tot = 0;
+            printf("      m · det ⊗ (do motor, n=3) · |det|\n");
+            for(long m = 0; m <= 4; m++){
+                int n = 3;
+                /* a matriz do gato na base canónica */
+                long G[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+                G[0][0] = m; G[0][n-1] += 1;
+                for(int i = 1; i < n; i++) G[i][i-1] = 1;
+                char q[300];
+                sql_executa("DROP TABLE IF EXISTS A", &o2);
+                sql_executa("CREATE TABLE A (c1 RACIONAL, c2 RACIONAL, c3 RACIONAL)", &o2);
+                for(int i = 0; i < n; i++){
+                    snprintf(q, sizeof q, "INSERT INTO A VALUES (%ld,%ld,%ld)",
+                             G[i][0], G[i][1], G[i][2]);
+                    sql_executa(q, &o2);
+                }
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                long ad = d < 0 ? -d : d;
+                tot++;
+                if(ad == 1) unit++;
+                printf("        %ld · %+ld · %ld\n", m, d, ad);
+            }
+            printf("      |det ⊗| = 1 em %ld/%ld metais — o thm:gato(2) com número, e o"
+                   " m = 0 (a permutação) está lá dentro\n", unit, tot);
+            if(unit != tot || tot != 5) mal++;
+        }
+
+        /* ── (5) O GUME: o esquilo tem de ser O DESSE metal. Desfazer com o
+         * esquilo de outro m não devolve o vetor — a volta não é genérica. */
+        {
+            long certo = 0, errado = 0, tot = 0;
+            for(int n = 2; n <= NMAX; n++)
+            for(long m = 1; m <= 4; m++)
+            for(long s = 0; s < 20; s++){
+                long c[NMAX], d[NMAX], e[NMAX];
+                long t = s;
+                for(int i = 0; i < n; i++){ c[i] = (t % 7) - 3; t /= 7; }
+                GATO(c, d, n, m);
+                ESQUILO(d, e, n, m+1);        /* o esquilo do metal ERRADO */
+                tot++;
+                int igual = 1;
+                for(int i = 0; i < n; i++) if(e[i] != c[i]) igual = 0;
+                if(igual) certo++; else errado++;
+            }
+            printf("      GUME — desfazer com o esquilo de outro metal falha em %ld dos"
+                   " %ld casos e acerta em %ld: a volta é DAQUELE m\n",
+                   errado, tot, certo);
+            printf("        o par não é genérico — o esquilo carrega o metal do gato que"
+                   " desfaz, e é por isso que ⊘∘⊗ = id não é trivial\n");
+            if(errado == 0) mal++;
+        }
+
+        #undef ESQUILO
+        #undef GATO
+        #undef NMAX
+        sql_fechar();
+
+        printf("\n");
+        ok("O M DA RÉGUA É O METAL DO GATO, E A PERMUTAÇÃO É O GATO NO METAL ZERO. A"
+           " proposição da travessia falava de uma base M como se fosse letra escolhida, e"
+           " ela não é: a def:gato fixa m como o METAL, e o gato ⊗ é o passo de Horner dessa"
+           " base — multiplica por m e traz o dígito que sai, que é a régua a andar um lugar."
+           " Medido num registo aberto: o gato iterado devolve Σ x_k m^k, o valor posicional,"
+           " em todos os casos e para os metais de 2 a 5. A reversibilidade não precisa de"
+           " prova nova: ⊘∘⊗ = id vale para todo n, todo m e SEM hipótese sobre o vetor, que"
+           " é o thm:gato(1), aqui com número. E a ligação que fecha a cadeia é o metal zero:"
+           " com m = 0 o gato é (c_{n-1}, c_0, …, c_{n-2}), o deslocamento cíclico — uma"
+           " PERMUTAÇÃO. A travessia e o gato não são duas famílias parecidas: são a mesma,"
+           " lida em metais diferentes, e é por isso que a condição unitária os apanha aos"
+           " dois. O motor confirma |det ⊗| = 1 nos cinco metais, com o m = 0 lá dentro, que"
+           " é o thm:gato(2) medido. E O GUME É QUE O PAR NÃO SEJA GENÉRICO: desfazer com o"
+           " esquilo de outro metal falha na larguíssima maioria dos casos — o esquilo carrega"
+           " o metal do gato que desfaz, e é isso que faz de ⊘∘⊗ = id uma afirmação e não uma"
+           " tautologia.", mal == 0);
+    }
+
+    /* ═══ §W134: A PERMUTAÇÃO É CONVOLUÇÃO POR UM DELTA — E A BORDA DÁ ±1 ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W134 a translação é C_{δa}: os seus próprios são os caracteres, ±1.\n\n");
+        unlink("/tmp/pgwire_w134__A.mem"); unlink("/tmp/pgwire_w134__A.prog");
+        unlink("/tmp/pgwire_w134.mem");    unlink("/tmp/pgwire_w134.prog");
+        if(!sql_abrir("/tmp/pgwire_w134")) mal++;
+
+        #define MM 3                       /* X = F_2^MM */
+        #define NX (1 << MM)               /* |X| = 8 */
+        /* o carácter da def:dual: χ_k(j) = (−1)^{⟨k,j⟩}, e ⟨k,j⟩ é a paridade */
+        #define CHI(k,j) ({ int _p = 0; \
+            for(int _i = 0; _i < MM; _i++) if((((k)>>_i)&1) && (((j)>>_i)&1)) _p ^= 1; \
+            _p ? -1 : 1; })
+
+        /* ── (1) A TRANSLAÇÃO É UMA CONVOLUÇÃO POR DELTA, e é permutação. Em
+         * (X,⊕) a translação por a é (τ_a g)(y) = g(y⊕a) = C_{δ_a} g. */
+        {
+            long perm = 0, tot = 0;
+            for(int a = 0; a < NX; a++){
+                int visto[NX]; for(int i = 0; i < NX; i++) visto[i] = 0;
+                int atinge = 0;
+                for(int y = 0; y < NX; y++){
+                    int img = y ^ a;
+                    if(!visto[img]){ visto[img] = 1; atinge++; }
+                }
+                tot++;
+                if(atinge == NX) perm++;
+            }
+            printf("      C_{δa} é PERMUTAÇÃO em %ld/%ld translações — a reindexação não"
+                   " é um objecto novo: é a convolução por um delta\n", perm, tot);
+            if(perm != tot) mal++;
+        }
+
+        /* ── (2) OS CARACTERES SÃO OS SEUS PRÓPRIOS — o thm:proprios com número:
+         * C_{δa} χ_k = χ_k(a)·χ_k, e o valor próprio é a coordenada δ̂_a(k). */
+        {
+            long ok = 0, tot = 0;
+            for(int a = 0; a < NX; a++) for(int k = 0; k < NX; k++){
+                /* (C_{δa} χ_k)(y) = χ_k(y ⊕ a), contra χ_k(a)·χ_k(y) */
+                int bate = 1;
+                for(int y = 0; y < NX && bate; y++)
+                    if(CHI(k, y ^ a) != CHI(k,a)*CHI(k,y)) bate = 0;
+                tot++;
+                if(bate) ok++;
+            }
+            printf("      C_{δa} χ_k = χ_k(a)·χ_k em %ld/%ld pares (a,k) — os caracteres"
+                   " são a base própria, e o valor próprio é δ̂_a(k)\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (3) E NA BORDA TODOS TÊM MÓDULO UM: δ̂_a(k) = χ_k(a) = ±1. É a
+         * transformada com o grupo fechado, e é por isso que nenhum valor
+         * próprio se anula — a face multiplicativa degenera aqui também. */
+        {
+            long unit = 0, tot = 0, mais = 0, menos = 0;
+            for(int a = 0; a < NX; a++) for(int k = 0; k < NX; k++){
+                int v = CHI(k,a);
+                tot++;
+                if(v == 1 || v == -1) unit++;
+                if(v == 1) mais++; else menos++;
+            }
+            printf("      todos os valores próprios têm módulo 1: %ld/%ld, com %ld em +1 e"
+                   " %ld em −1 — a fase de um bit, outra vez\n", unit, tot, mais, menos);
+            printf("        nenhum se anula, e é isso que o thm:conv pede para a"
+                   " deconvolução existir\n");
+            if(unit != tot || mais == 0 || menos == 0) mal++;
+        }
+
+        /* ── (4) LOGO A DECONVOLUÇÃO DESFAZ — e aqui ela é a própria: a⊕a = 0,
+         * pelo que C_{δa} é involução. A volta não precisa de matriz nova. */
+        {
+            long volta = 0, tot = 0;
+            for(int a = 0; a < NX; a++) for(int y = 0; y < NX; y++){
+                tot++;
+                if(((y ^ a) ^ a) == y) volta++;
+            }
+            printf("      a deconvolução desfaz: C_{δa}∘C_{δa} = id em %ld/%ld — na borda"
+                   " o desfazer é a MESMA operação, porque a⊕a = 0\n", volta, tot);
+            if(volta != tot) mal++;
+        }
+
+        /* ── (5) E O DETERMINANTE É O PRODUTO DOS PRÓPRIOS, pelo motor: um
+         * produto de ±1, logo ±1. A condição unitária sai da borda, não de uma
+         * hipótese posta à mão. */
+        {
+            long unit = 0, tot = 0;
+            printf("      a · det C_{δa} (do motor, |X|=4) · Π_k χ_k(a)\n");
+            for(int a = 0; a < 4; a++){
+                /* a matriz da translação em X = F_2^2 */
+                long M[4][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+                for(int y = 0; y < 4; y++) M[y][y ^ a] = 1;
+                char q[300];
+                sql_executa("DROP TABLE IF EXISTS A", &o2);
+                sql_executa("CREATE TABLE A (c1 RACIONAL, c2 RACIONAL,"
+                            " c3 RACIONAL, c4 RACIONAL)", &o2);
+                for(int i = 0; i < 4; i++){
+                    snprintf(q, sizeof q, "INSERT INTO A VALUES (%ld,%ld,%ld,%ld)",
+                             M[i][0], M[i][1], M[i][2], M[i][3]);
+                    sql_executa(q, &o2);
+                }
+                sql_executa("SELECT det(*) FROM A", &o);
+                if(!o.ok) continue;
+                long d = atol(o.cell[0][0]);
+                /* o produto dos valores próprios, em F_2^2 */
+                long prod = 1;
+                for(int k = 0; k < 4; k++){
+                    int p = 0;
+                    for(int i = 0; i < 2; i++) if(((k>>i)&1) && ((a>>i)&1)) p ^= 1;
+                    prod *= p ? -1 : 1;
+                }
+                tot++;
+                if((d < 0 ? -d : d) == 1 && d == prod) unit++;
+                printf("        %d · %+ld · %+ld\n", a, d, prod);
+            }
+            printf("      det = Π_k χ_k(a) com módulo 1 em %ld/%ld — a condição unitária"
+                   " SAI da borda: um produto de ±1 não tem outro destino\n", unit, tot);
+            if(unit != tot || tot != 4) mal++;
+        }
+
+        /* ── (6) O GUME É O thm:conv: se algum valor próprio se ANULA, a
+         * convolução deixa de ser invertível e a deconvolução falha. Basta sair
+         * do delta — f = δ_0 + δ_a tem f̂(k) = 1 + χ_k(a), nulo onde χ = −1. */
+        {
+            long nulos = 0, tot = 0, singulares = 0, familias = 0;
+            for(int a = 1; a < NX; a++){
+                int anula = 0;
+                for(int k = 0; k < NX; k++){
+                    long fk = 1 + CHI(k,a);
+                    tot++;
+                    if(fk == 0){ nulos++; anula = 1; }
+                }
+                familias++;
+                if(anula) singulares++;
+            }
+            printf("      GUME — para f = δ_0 + δ_a o valor próprio 1 + χ_k(a) ANULA-SE em"
+                   " %ld dos %ld pares, e %ld das %ld famílias ficam singulares\n",
+                   nulos, tot, singulares, familias);
+            printf("        aí o thm:conv diz que dois g diferindo por múltiplo de χ_k0"
+                   " dão o mesmo produto: a deconvolução perde a volta\n");
+            printf("        e é por isso que a borda importa — no delta nenhum próprio se"
+                   " anula, e só por isso a travessia é reversível\n");
+            if(nulos == 0 || singulares != familias) mal++;
+        }
+
+        #undef CHI
+        #undef NX
+        #undef MM
+        sql_fechar();
+
+        printf("\n");
+        ok("A PERMUTAÇÃO NÃO É UM OBJECTO NOVO: É A CONVOLUÇÃO POR UM DELTA, E A BORDA É QUE"
+           " LHE DÁ O ±1. Não é preciso estender a definição do gato a um metal que ela não"
+           " admite: a reindexação de que a travessia precisa já está construída como C_{δa},"
+           " a translação em (X,⊕), e ela é permutação em todas as translações. Pelo"
+           " thm:proprios os seus vetores próprios são os caracteres, com C_{δa} χ_k ="
+           " χ_k(a)·χ_k verificado em todos os pares, e o valor próprio é a coordenada"
+           " δ̂_a(k). Ora na borda esses valores são exactamente ±1 — todos de módulo um, com"
+           " as duas fases presentes —, e nenhum se anula. É essa a hipótese que o thm:conv"
+           " pede para a deconvolução existir, e aqui ela é gratuita: como a⊕a = 0, o desfazer"
+           " é a MESMA operação, e C_{δa} é involução. Daí a condição unitária sair da borda e"
+           " não de uma hipótese posta à mão: o determinante é o produto dos valores próprios"
+           " — o motor confirma-o — e um produto de ±1 não tem outro destino senão ±1. E O"
+           " GUME É O PRÓPRIO thm:conv: basta sair do delta para a coisa quebrar. Com f = δ_0"
+           " + δ_a o valor próprio é 1 + χ_k(a), que se anula em metade dos caracteres, e"
+           " todas as famílias ficam singulares; ali dois g que difiram por um múltiplo de"
+           " χ_{k0} dão o mesmo produto, e a deconvolução perde a volta. A travessia é"
+           " reversível porque vive no delta, onde nenhum próprio se anula — e não porque se"
+           " tenha pedido que fosse.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

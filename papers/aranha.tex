@@ -32,6 +32,7 @@
 \newtheorem{lema}[teorema]{Lema}
 \newtheorem{definicao}[teorema]{Definição}
 \newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
 \renewcommand{\proofname}{Demonstração}
 
 \input{gkcapa}
@@ -2632,6 +2633,325 @@ com o pior passo primeiro, porque depois dele nada mais se paga.
 o prefixo a dar a linha em $1024/1024$ na ordem por linhas alternadas contra
 $32/1024$ nas outras duas; a profundidade mínima entre vizinhos horizontais, $5$
 contra $0$; e a cadeia de três travessias com $454$ na soma contra $10$ no máximo.}
+
+\medskip\noindent\textbf{Antes da travessia, o operador que a governa --- e ele já
+estava construído, na forma polar.} O Teor.~\ref{thm:duas}(4) separa as duas faces, e a
+forma polar é essa separação escrita: o \emph{módulo} vive na face multiplicativa e a
+\emph{fase} na aditiva. É nessa língua que a condição desta secção se lê.
+
+\medskip\noindent\textbf{Antes da travessia, a lei que os operadores desta família já
+satisfazem --- e que este documento não precisa reabrir.} $\lvert\det\rvert=1$ é o que o
+Lema~\ref{lem:cristal} pede às matrizes da rede e é a \emph{hipótese estrutural} sob a
+qual o Teor.~\ref{thm:leidisc} classifica as três classes. \emph{Não se afirma que todo
+operador deste documento a satisfaça}: afirma-se que, onde ela vale, a volta fica dentro
+do degrau.
+
+\medskip\noindent\textbf{E a travessia de que esta secção precisa não é operador novo:
+é $C_{\delta_a}$.} A convolução pelo delta (Def.~\ref{def:conv}) é a translação
+$(Ag)(x)=g(x\oplus a)$, e portanto uma \textbf{permutação} de $X$. Pelo
+Teor.~\ref{thm:proprios} os seus valores próprios são
+\[
+ \lambda_k=\widehat{\delta_a}(k)=\sum_j\delta_a(j)\chi_k(j)=\chi_k(a),
+\]
+na base ortogonal do Lema~\ref{lem:orto} --- \emph{são os próprios caracteres}.
+
+\medskip\noindent\textbf{E aqui a leitura polar diz o que decide --- e não é o módulo.}
+A §\ref{sec:transf} já o estabeleceu para os caracteres desta casa: o módulo é
+\emph{constante},
+\[
+ \lvert\chi_k(j)\rvert=1\ \text{ para todos os } k,j,
+ \qquad
+ \theta_k(j)\in\{0,\pi\},\qquad \theta_k(j)=\pi\cdot\langle k,j\rangle,
+\]
+e a leitura que ali se faz é que \emph{o módulo não carrega nada e a fase carrega tudo}
+--- a face multiplicativa está degenerada e resta a aditiva sozinha. \textbf{Logo o
+módulo não distingue coisa alguma}, e quem decide é a \textbf{fase}, que é um
+\textbf{bit}: a paridade $\langle k,j\rangle$ em unidades de $\pi$.
+
+\medskip\noindent Daí, sem hipótese nenhuma de tamanho: os valores próprios de
+$C_{\delta_a}$ são $\chi_k(a)$, e pela Def.~\ref{def:dual} o carácter é
+$\chi_k\colon X\to\{\pm1\}$ --- \emph{o contradomínio, não uma condição imposta}. Pondo
+$\varepsilon=\theta/\pi$, a fase vive no degrau de dois e as fases \textbf{somam}:
+\[
+ \boxed{\;\varepsilon_{AB}=\varepsilon_A+\varepsilon_B \pmod 2\;}
+\]
+--- o ou-exclusivo escrito como \emph{igualdade}, que é o Lema~\ref{lem:orto} lido na
+fase, $\chi_k(j\oplus j')=\chi_k(j)\chi_k(j')$.
+
+\medskip\noindent\textbf{E é por $f$ ser o delta que isto vale.} Para um $f$ qualquer,
+ter $\lvert\widehat{f}(k)\rvert=1$ não implicaria $\widehat{f}(k)=\pm1$ --- \emph{o
+módulo é o que não distingue}, e as fases fora de $\{0,\pi\}$ têm-no igual. É a
+Def.~\ref{def:dual}, e não uma condição de tamanho, que põe os valores próprios da
+translação em $\{\pm1\}$.
+
+\medskip\noindent\textbf{Daí o determinante, e a volta.} Na base dos caracteres
+$C_{\delta_a}$ é diagonal, pelo que o determinante é o produto da diagonal:
+\[
+ \det C_{\delta_a}=\prod_k\chi_k(a)\in\{+1,-1\},
+\]
+um produto de $\pm1$ --- \emph{a lei do operador cumpre-se por construção, sem se
+impor}. E a inversa não pede cofatores: pelo Teor.~\ref{thm:conv} ela existe exatamente
+quando nenhum $\widehat{f}(k)$ se anula, o que aqui vale porque todos são $\pm1$, e
+obtém-se na base própria dividindo por esses valores; como cada um é $\pm1$, a inversão
+não sai de \Zc. Mais: a inversa é o próprio operador,
+\[
+ \bigl(C_{\delta_a}^{\,2}g\bigr)(x)=g\bigl((x\oplus a)\oplus a\bigr)=g(x),
+\]
+pois $a\oplus a=0$.
+
+\medskip\noindent\textbf{E adiante o mesmo se verá noutro par --- o que é remissão, não
+fundamento.} O gato $\otimes$ da Def.~\ref{def:gato}, mais à frente, é o \emph{passo} de
+uma régua de base $m$, e o Teor.~\ref{thm:gato} mostra que $\oslash$ desfaz o que ele
+faz, com a volta a não sair do degrau. \emph{Nada aqui depende disso}: fica dito para o
+leitor reconhecer a mesma condição quando lá chegar, e \emph{não se afirma que $\otimes$
+seja $C_{\delta_a}$}. \emph{Para os operadores de travessia construídos aqui} essas propriedades aparecem juntas como três manifestações da
+reversibilidade da construção: a fase dos caracteres na face par, o determinante
+unitário da realização matricial, e a volta dentro do degrau. A conservação da medida é
+a manifestação discreta da bijetividade dessa travessia, e não uma quarta leitura da
+mesma coisa. \emph{Fora desta família não se afirma equivalência entre elas}: há
+operadores unimodulares que não são permutações, e uma matriz diagonal de entradas $2$ e
+$3$ nem sequer cumpre a lei.
+
+\medido{\code{tests/pgwire.c} §W134 --- $C_{\delta_a}$ permutação em $8/8$ translações; o Teor.~\ref{thm:proprios}
+com número, $C_{\delta_a}\chi_k=\chi_k(a)\chi_k$ em $64/64$ pares; todos os valores
+próprios a valerem $\pm1$ e nenhum nulo, com as duas fases presentes;
+$C_{\delta_a}\circ C_{\delta_a}=\mathrm{id}$ em $64/64$; $\det=\prod_k\chi_k(a)$ pelo
+motor; e o gume do Teor.~\ref{thm:conv} --- fora do delta, $\widehat{f}(k)=1+\chi_k(a)$
+anula-se em $28$ dos $56$ pares e \emph{todas} as famílias ficam singulares, perdendo a
+volta. E §W131 e §W132 --- $\lvert\det P_{\pi}\rvert=1$ nas seis
+permutações de três coordenadas, pelo motor; o ciclo de $J$ com período quatro e a
+cisão a particionar sem um índice a misturar-se; $\det=J^{2k}$ em $6/6$, com $k$ a ser
+o número de voltas e o determinante a vir do motor --- \emph{a mesma fase que a
+§\ref{sec:serie} adiante lê como o $(-1)^{k}$ do número de voltas}; $\varepsilon_{AB}=\varepsilon_A+\varepsilon_B$ em $36/36$ pares; a
+inversa a vir sem uma fração em $6/6$; as máscaras \texttt{0x55}/\texttt{0xAA} a darem
+a mesma partição em $256/256$; e o gume --- com $J^{2}=+1$ o período cai para dois, o
+$(-1)^{k}$ desaparece e a fase deixa de distinguir.}
+
+\medskip\noindent\textbf{E falta dizer \emph{qual} é a bijeção, sob pena de o teorema
+anterior prometer uma operação e entregar uma existência.} O Teor.~\ref{thm:navega}
+dá o custo de uma travessia, mas não a escreve; e o custo, tal como está enunciado, é
+um supremo sobre $X$ --- para o calcular, varre-se o objeto inteiro. As duas coisas
+resolvem-se de uma vez, e sem nada de fora: a régua já foi construída no
+Teor.~\ref{thm:enumera}.
+
+\begin{proposicao}[a travessia é uma permutação de dígitos: conserva a medida, e o preço lê-se da régua]\label{prop:travessia}
+Seja $X=I_M^{\,n}$ a grade do Teor.~\ref{thm:enumera}, com $M\ge2$ e $N=M^{n}$, e
+$\varphi\colon I_N\to X$ a bijeção que o teorema constrói, de inversa
+$\varphi^{-1}(x)=\sum_k x_k M^{\,k}$ \emph{(escrita aqui com as posições a contarem de
+zero, como os bits da Def.~\ref{def:arvore}; o teorema escreve-a com $k$ de $1$ a $n$ e
+o expoente $k-1$)}. Chame-se \textbf{leitura} a
+\[
+ R_r=\varphi^{-1}\circ\rho_r\colon X\to I_N,\qquad
+ \rho_r(x)=\bigl(x_{r^{-1}(0)},\dots,x_{r^{-1}(n-1)}\bigr),
+\]
+com $r$ uma bijeção de $\{0,\dots,n-1\}$ --- isto é, $\varphi^{-1}$ depois de reordenar
+as coordenadas. Em particular
+\[
+ R_r(x)=\sum_{k=0}^{n-1}x_k\,M^{\,r(k)} .
+\] \emph{Cada $R_r$ é bijeção por ser composição de bijeções}, que é o
+mesmo argumento com que o Teor.~\ref{thm:enumfin} constrói $E_{k+1}$ a partir de $E_k$
+e $C$. Sejam $R=R_r$ e $S=R_s$ duas leituras, que diferem apenas na \textbf{ordem por
+que lêem os dígitos}. Então:
+\begin{enumerate}\itemsep2pt
+\item[\textbf{(1)}] \textbf{A travessia escreve-se.} $T=S\circ R^{-1}\colon I_N\to I_N$
+  é a permutação
+  $\pi=s\circ r^{-1}$ \emph{aplicada às posições dos dígitos}: se
+  $a=\sum_k x_k M^{\,r(k)}$, então $T(a)=\sum_k x_k M^{\,\pi(r(k))}$. Não há nada a
+  procurar --- lê-se o dígito de uma posição e escreve-se noutra.
+\item[\textbf{(2)}] \textbf{Conserva a medida.} Para todo $E\subseteq X$,
+  $\mu(T(E))=\mu(E)$, onde $\mu$ é a contagem --- a medida canónica do discreto.
+  \emph{E convém não confundir dois objetos}: $T\colon I_N\to I_N$ permuta os
+  \textbf{endereços} de $I_N$ e não é aqui tratada como transformação linear, pelo que
+  não lhe cabe determinante. A sua ação sobre o \textbf{vetor de dígitos} é que é
+  linear,
+  \[
+   P_{\pi}(x_0,\dots,x_{n-1})=(x_{\pi^{-1}(0)},\dots,x_{\pi^{-1}(n-1)}),
+  \]
+  \emph{mas essa realização não entra na conservação}: ela sai da bijetividade e de mais
+  nada. \emph{As duas réguas medem o mesmo conjunto com o mesmo número}, e é isto --- e
+  não uma semelhança de forma --- que identifica as duas representações como o
+  \textbf{mesmo conjunto discreto}.
+\item[\textbf{(3)}] \textbf{O preço lê-se de $\pi$, não de $X$.} Aqui $q$ é índice
+  de \emph{dígito}, e a Def.~\ref{def:arvore} mede em \emph{bits}; os dois coincidem
+  exatamente na régua \textbf{binária}, e é a ela que esta alínea se restringe. Com
+  $M=2$,
+  \[
+   \boxed{\;D(R,S)=\begin{cases}0,&\pi=\mathrm{id},\\[2pt]
+                                2^{-q},&q=\min\{i:\pi(i)\neq i\},\end{cases}\;}
+  \]
+  --- e $q$ é o primeiro dígito em que as duas ordens divergem. \emph{O caso
+  $\pi=\mathrm{id}$ é $R=S$}, e aí não há travessia nem preço. Logo $D$ custa $O(n)$
+  comparações, e não $O(N)$. \emph{Para $M=2^{d}$ cada dígito ocupa $d$ bits}: se $q_{\mathrm{dig}}$ é o primeiro
+\textbf{dígito} em que as leituras divergem, a primeira divergência \textbf{binária}
+ocorre em $q_{\mathrm{bit}}=d\,q_{\mathrm{dig}}$, donde
+\[
+ D(R,S)=2^{-d\,q_{\mathrm{dig}}};
+\]
+reindexando diretamente por blocos de $d$ bits recupera-se a forma $2^{-q}$. Para as
+outras bases substitui-se o bloco binário pela unidade de dígito da própria régua.
+\end{enumerate}
+\end{proposicao}
+
+\begin{proof}
+\textbf{(1)} $R$ e $S$ são bijeções por composição das do Teor.~\ref{thm:enumera} com
+uma reordenação, logo $T$ existe e é bijeção. E a fórmula lê-se das duas escritas: se
+$a=R_r(x)=\sum_k x_k M^{r(k)}$, então $R_r^{-1}(a)=x$ e
+\[
+ T(a)=R_s(x)=\sum_k x_k M^{\,s(k)}=\sum_k x_k M^{\,\pi(r(k))},
+\]
+porque $\pi(r(k))=s\bigl(r^{-1}(r(k))\bigr)=s(k)$. \emph{Os dígitos ficam; mudam-lhes os
+destinos.}
+
+\textbf{(2)} Uma bijeção de um conjunto finito em si mesmo leva um subconjunto de $k$
+elementos num subconjunto de $k$ elementos --- é a definição de bijeção, e \emph{nada
+mais é preciso no discreto}: a conservação da medida sai da bijetividade e de mais nada.
+\emph{E a realização matricial fica de fora da prova, deliberadamente}: o
+Lema~\ref{lem:cristal} e o Teor.~\ref{thm:leidisc} tratam matrizes $2\times2$ e o
+Teor.~\ref{thm:gato}(2) trata $\otimes$; \emph{nenhum deles cobre $P_{\pi}$ em posto
+$n$}, e a conservação não precisa dele. Que $\lvert\det P_{\pi}\rvert=1$ é coisa que se
+\emph{mede} (§W131), não que aqui se demonstre. \emph{E a implicação seria de todo o
+modo numa direção}: $\lvert\det\rvert=1$ não obriga a ser permutação --- há matrizes
+unimodulares sobre \Zc\ que não o são.
+
+\textbf{(3)} Se $\pi=\mathrm{id}$ então $R=S$ e $D=0$. Caso contrário seja
+$q=\min\{i:\pi(i)\neq i\}$, que existe. Para $i<q$ vale $\pi(i)=i$ e portanto
+$\pi^{-1}(i)=i$, donde a posição $i$ recebe em ambas as leituras o mesmo dígito de $x$,
+seja qual for $x$; logo as representações de $R(x)$ e $S(x)$
+coincidem nas \emph{posições} $0,\dots,q-1$ e $\operatorname{prof}(R(x),S(x))\ge q$ para todo
+$x$, donde $D(R,S)\le2^{-q}$. E existe $x$ tal que os dígitos que $R$ coloca nas posições $q$ e $\pi^{-1}(q)$
+diferem --- \emph{e são dígitos, não posições}: basta tomar
+\[
+ x_{r^{-1}(q)}\neq x_{r^{-1}(\pi^{-1}(q))},
+\]
+o que é possível porque $M\ge2$ e $\pi^{-1}(q)\neq q$. Para esse
+$x$ a divergência é exatamente em $q$, e o supremo é atingido. $\square$
+\end{proof}
+
+\medskip\noindent\textbf{E daqui sai o que a travessia \emph{não} conserva.} A medida
+não distingue as réguas, mas a \textbf{localidade} sim --- que é o mesmo facto do
+Teor.~\ref{thm:localdual}, onde $\dagger$ conserva $h+v$ e o redistribui. \emph{O que
+uma mudança de régua move é o custo do salto, nunca o tamanho do conjunto}; e é por
+isso que a escolha de representação é uma questão de operação e não de medida.
+
+\medido{\code{tests/pgwire.c} §W128, com $M=16$ e $n=2$ --- a travessia entre a régua
+posicional e a de dígitos alternados atinge $256/256$ endereços; \emph{em paralelo}, a
+realização matricial correspondente tem determinante de módulo $1$ pelo motor
+--- resultado que acompanha a conservação sem a fundamentar; $\mu(T(E))=\mu(E)$ em $12/12$
+conjuntos; os saltos máximos passam de $(16,1)$ para $(86,43)$ --- a medida a ficar e
+a localidade a mudar; a fórmula de (3) dá $q=1$ em $8$ comparações e o supremo varrido
+sobre $256$ pontos dá o mesmo; e o gume: a leitura não bijetiva $a+b$ leva $256$
+pontos em $31$, e a medida \emph{cai} --- a hipótese de (2) trabalha.}
+
+\medskip\noindent\textbf{E a proposição tem uma realização geométrica, que se escreve
+depois dela e não antes.} A ordem importa: o que sustenta a travessia é a permutação
+de dígitos, já provada; a figura \emph{realiza} essa bijeção, não a funda. Dito isso,
+a figura é a do próprio documento --- o par $\Pi/\Sigma$, \emph{o cone que desce e a
+espiral que sobe} ---, e os seus três gestos já foram construídos atrás.
+
+\medskip\noindent\textbf{O cone realiza a régua de pesos.} No Teor.~\ref{thm:enumera}
+cada dígito entra com o peso $M^{\,k-1}$ --- \emph{na convenção 1-based daquele
+teorema; na convenção zero-based desta proposição o mesmo peso escreve-se $M^{k}$} ---, e
+esse peso é \emph{realizado} como raio, com o andar $k$ como altura --- não se afirma igualdade entre a figura e o endereço, afirma-se
+que a figura o representa. Com essa leitura a escada $I_0\subset I_1\subset\cdots$ do
+Teor.~\ref{thm:BI} é a geratriz. O que cada andar acrescenta é a \textbf{coroa} entre dois raios,
+$M^{k}-M^{k-1}$ para $k=1,\dots,n$ --- \emph{na indexação dos andares do
+Teor.~\ref{thm:enumera}, e não na dos dígitos da proposição} ---, e a espiral é o
+percurso que a enumera --- é a mesma serpentina do
+Teor.~\ref{thm:bijeccao}, agora lida como parametrização.
+
+\medskip\noindent\textbf{E os três gestos são morfológicos, com os nomes que o
+Cor.~\ref{cor:pik} já lhes deu.} Ali, $\pi_k(a)=a\bmod 2^{2^{k}}$ é \emph{truncar} ---
+a \textbf{erosão} --- e $\iota_k(x)=x$ com zeros acima é \emph{embeber} --- a
+\textbf{dilatação}, com $\pi_k\circ\iota_k=\mathrm{id}$. \emph{São duas escadas
+diferentes e convém não as colar}: a do Cor.~\ref{cor:pik} tem módulo $2^{2^{k}}$ e é a
+da torre; a desta proposição tem $M^{n}$ e é a da régua --- \emph{não são literalmente
+os mesmos mapas}. \textbf{A dupla realiza o mesmo padrão de operação} --- truncar aos
+dígitos de baixo, embeber com zeros acima ---, e é dele que a travessia se serve, na
+escada da régua:
+\[
+ \iota_k^{K}\colon X_k\hookrightarrow X_K,\qquad
+ P_K\colon X_K\to X_K,\qquad
+ \pi_k^{K}\colon X_K\to X_k,
+ \qquad\text{donde}\qquad
+ \boxed{\;T=\pi_k^{K}\circ P_K\circ\iota_k^{K}\colon X_k\to X_k\;}
+\]
+com $K\ge k$ e $\iota_k^{K}$ a \textbf{inclusão canónica} $X_k\hookrightarrow X_K$,
+que preenche com zeros as posições novas --- \emph{subir a escada, permutar lá, truncar
+de volta}. A
+composição é \textbf{tipada}, e $\pi_k^{K}\circ\iota_k^{K}=\mathrm{id}_{X_k}$.
+
+\medskip\noindent\textbf{E $P$ --- que se escreve assim para não colidir com o $\Pi$ do
+par $\Pi/\Sigma$ --- é a \emph{mesma} permutação de posições em cada andar, estendida com
+as posições que o andar acrescenta}; e é \emph{essa compatibilidade} --- não o
+$\pi\circ\iota=\mathrm{id}$ sozinho --- que faz $T$ não depender do andar escolhido.
+Escrito:
+para $K\le L$,
+\[
+ \boxed{\;\pi_K^{L}\circ P_L\circ\iota_K^{L}=P_K\;}
+\]
+--- \emph{a permutação do andar maior restringe à do menor}. Sem essa compatibilidade a
+identidade $\pi\circ\iota=\mathrm{id}$ não bastaria: ela diz que subir e descer devolve o
+elemento, não que permutar no meio dê o mesmo. Com ela, e para $k\le K\le L$,
+\[
+ \pi_k^{L}\,P_L\,\iota_k^{L}
+ =\pi_k^{K}\bigl(\pi_K^{L}\,P_L\,\iota_K^{L}\bigr)\iota_k^{K}
+ =\pi_k^{K}\,P_K\,\iota_k^{K},
+\]
+e a escolha do andar não pesa no resultado. A dilatação não é um
+enfeite: uma permutação de \emph{posições} só pode atuar depois de todos os endereços
+estarem no mesmo conjunto de posições de dígitos, e os andares baixos ainda não têm as
+que o andar maior acrescenta. É ela que torna $P$ definida.
+
+\medskip\noindent\textbf{O par é dual e não simétrico}, e é isso que faz da erosão uma
+erosão: $\pi_k\circ\iota_k=\mathrm{id}$ --- o que o Cor.~\ref{cor:pik} prova --- mas
+$\iota_k\circ\pi_k$ falha, porque corta o que estava acima do andar. \emph{Um lado
+volta e o outro perde}, e a perda conta-se.
+
+\medskip\noindent\textbf{E a fusão é precisa, para réguas de escalas diferentes.}
+Escreva-se $C_{\mathrm{ent}}(a,b)$ para o \textbf{entrelaçamento} --- os dígitos de $a$
+nas posições pares e os de $b$ nas ímpares, o que na régua binária é
+\[
+ C_{\mathrm{ent}}(a,b)=\sum_j a_j\,2^{2j}+\sum_j b_j\,2^{2j+1}.
+\] Ela \emph{junta} duas réguas de $k$ dígitos numa
+de $2k$ \emph{entrelaçando-as posição a posição}, e o desentrelaçar \emph{separa}
+devolvendo as duas exatas ---
+e é assim que $C_{\mathrm{ent}}$ \textbf{realiza} o papel estrutural da dobra $C$ do
+Teor.~\ref{thm:enumfin}, que ali é dada por existência. \emph{Não é o mesmo objeto pelo
+nome: é uma escolha concreta que serve para o mesmo}, e com ela a dobra deixa de ser
+uma bijeção que existe e passa a ser uma que se escreve. E o adaptador entre andares diferentes não é
+peça nova nenhuma: \emph{é a própria escada}. Pelo Teor.~\ref{thm:BI} os andares
+encaixam, $I_0\subset I_1\subset\cdots$, pelo que quaisquer dois cabem num terceiro,
+$I_k,I_\ell\subset I_K$ com $K\ge\max\{k,\ell\}$. \emph{Que a operação não dependa de
+qual se escolha não vem do encaixe}: vem da compatibilidade
+$\pi_K^{L}\circ P_L\circ\iota_K^{L}=P_K$ estabelecida acima --- o
+$\pi_k\circ\iota_k=\mathrm{id}$ do Cor.~\ref{cor:pik} diz apenas que subir e descer
+devolve o elemento, e sem ela a permutação do andar maior poderia mexer nos dígitos
+baixos de outra maneira.
+
+\medskip\noindent\textbf{Daí a leitura geométrica do preço.} Com $\pi$ a fixar as
+posições abaixo de $q$, ficam fixos \emph{todos os endereços cujos dígitos acima de $q$
+são nulos}; e, para um endereço qualquer, o que coincide são as posições
+$0,\dots,q-1$:
+abaixo de $q$ a \emph{ação} das duas leituras coincide --- e é essa região que a
+figura realiza como cone inferior fixo ---, pelo que não há o que converter. O
+\textbf{tronco} $q..p$ é o \emph{suporte} da travessia --- onde ela não é a identidade
+--- e $q$ é a \textbf{altura da sua base}. É esse o conteúdo de
+$D(R,S)=2^{-q}$: \emph{o preço é a altura a que o tronco começa}. E os gestos não
+comutam. \emph{Mais do que isso}: $P_K\circ\pi_k^{K}$ nem sequer é uma composição
+\textbf{tipada}, porque $P_K$ só existe em $X_K$ e $\pi_k^{K}$ já saiu de lá --- forçando
+uma identificação, o resultado ainda muda, mas o primeiro problema é anterior ao
+resultado. \emph{A ordem faz parte da operação}, e algumas ordens nem chegam a ser
+operações.
+
+\medido{\code{tests/pgwire.c} §W129 e §W130 --- a coroa $2^{k}-2^{k-1}$ a fechar nos
+oito andares; o cone inferior de $2^{q}$ endereços \emph{todo} fixo, com o movimento
+acima dele; a fórmula $q$ a bater contra o supremo varrido; o ciclo espiral $\to$ cone
+$\to$ tronco $\to$ cone $\to$ espiral a devolver o ponto em $256/256$; o
+Cor.~\ref{cor:pik} com número --- $\pi_k\circ\iota_k=\mathrm{id}$ em $278/278$ e
+$\iota_k\circ\pi_k$ só em $278/1024$; o entrelaçar a atingir $256/256$ com as duas
+partes exactas na volta; a independência do andar em $484/484$ pares, com o resultado a não mudar ao
+subir; a permutação a pedir posições que $128$ dos $256$ endereços não têm sem a
+dilatação; e o gume da ordem --- erodir primeiro muda o resultado em $192$ dos $256$.}
 
 \begin{corolario}[o global: finitamente coordenado $\Rightarrow$ travessível com custo dominado]\label{cor:global}
 Seja $X$ \textbf{finitamente coordenado \emph{na escada}} --- isto é, com
