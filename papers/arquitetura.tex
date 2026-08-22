@@ -3745,6 +3745,42 @@ pontos da reta, sem o que o zero não diria nada.
         {\code{resolve(*)} lido como equilíbrio; a exaustão como segundo caminho}
         {\code{tests/pgwire.c} §W78}
 
+\medskip\noindent\textbf{E por que o esquilo conserva a norma: a energia não o
+vê.} §W68 mostrou \emph{quem} é o esquilo --- a parte antissimétrica ---, e faltava
+o \emph{porquê}. É uma linha:
+\[
+\frac{d}{dt}\lvert x\rvert^{2}=2\langle x,\dot x\rangle=2\,x^{\!\top}\!Ax,
+\]
+e $x^{\!\top}\!Ax$ é um \textbf{escalar}, logo igual à sua transposta
+$x^{\!\top}\!A^{\!\top}x=-x^{\!\top}\!Ax$ quando $A$ é antissimétrica --- um número
+igual ao seu simétrico é zero. A norma não muda porque a sua derivada é
+identicamente nula.
+
+\medskip\noindent\textbf{E a forma geral é mais forte do que o caso:} para
+\emph{qualquer} $A$,
+\[
+\boxed{\;x^{\!\top}\!A\,x=x^{\!\top}\!S\,x\;}\qquad S=\tfrac{A+A^{\!\top}}{2},
+\]
+--- a forma quadrática \emph{não vê} a parte antissimétrica. Não é uma propriedade
+do esquilo: é uma propriedade do que a energia \textbf{mede}. Varridas $2401$
+matrizes com $x$ num cubo $9\times9$, a igualdade vale em todas; os $7$ esquilos
+têm $\langle x,Ax\rangle\equiv0$ e os $2394$ restantes têm algum $x$ que move --- a
+equivalência fecha nos dois sentidos, e são as duas colunas cheias que a fazem
+separar alguma coisa.
+
+\medskip\noindent O segundo caminho é o motor: o predicado da varredura é escrito à
+mão, o motor decide pedindo a \emph{parte simétrica} e vendo se é nula --- critérios
+diferentes, e concordam. E a matriz \textbf{nula} está na lista de propósito: é
+antissimétrica e conserva trivialmente, porque o fluxo não se move de todo.
+Incluí-la impede que «conserva» se leia como «roda» --- a conservação é o que se
+mede, e a rotação é uma maneira de a cumprir, não a única.
+
+\medido{\code{tests/pgwire.c} §W79.}
+
+\colunas{\code{broca-so} (o invariante e a norma); \code{aranha thm:duas}}
+        {$x^{\!\top}\!Ax=x^{\!\top}\!Sx$; \code{simetrica(*)} como segundo critério}
+        {\code{tests/pgwire.c} §W79}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}

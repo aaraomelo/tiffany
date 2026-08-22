@@ -110,7 +110,12 @@ cita como fundamento:
   TRANSLADADO» (idem) → o particular mais $t$ vezes o núcleo, e o caso em que
   não há equilíbrio nenhum. §W78.
 
+- «o invariante lê-se no fluxo como a **conservação da norma** pelo esquilo»
+  (idem) → e o porquê é uma linha: `xᵀAx` é escalar e igual ao seu simétrico
+  quando A é antissimétrica. A forma geral é mais forte — `xᵀAx = xᵀSx` para
+  QUALQUER A: a energia **não vê** a parte antissimétrica. §W79.
+
 **How to apply:** ao ler um paper da casa para trabalhar nele, marcar as frases
-que **afirmam** e não trazem `\medido`. São candidatas a bloco novo, e as três
-de cima deram três — todas com gume, e uma delas (o sistema que nunca para)
+que **afirmam** e não trazem `\medido`. São candidatas a bloco novo, e as quatro
+de cima deram quatro — todas com gume, e uma delas (o sistema que nunca para)
 destapou um significado que a álgebra sozinha não mostrava.

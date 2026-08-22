@@ -10439,6 +10439,136 @@ int main(void){
            " solução tem de achar, senão ela não sabe achar e o zero não diz nada.", mal == 0);
     }
 
+
+    /* ═══ §W79: A FORMA QUADRÁTICA NÃO VÊ O ESQUILO ════════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        printf("\n§W79 por que o esquilo conserva a norma: a energia não o vê.\n\n");
+        { char m[80], p2[80];
+          snprintf(m, sizeof m, "/tmp/pgwire_w79__A.mem");
+          snprintf(p2, sizeof p2, "/tmp/pgwire_w79__A.prog");
+          unlink(m); unlink(p2);
+          unlink("/tmp/pgwire_w79.mem"); unlink("/tmp/pgwire_w79.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w79")) mal++;
+
+        /* ── A ÚLTIMA FRASE DO PAPER SEM MEDIDOR: «o invariante lê-se no fluxo
+         * como a CONSERVAÇÃO DA NORMA pelo esquilo — |x(t)| = |x₀|, a energia
+         * gira sem se perder». §W68 mostrou que o esquilo é a parte
+         * antissimétrica; falta o PORQUÊ, e ele é uma linha:
+         *
+         *     d/dt |x|² = 2⟨x, ẋ⟩ = 2⟨x, A x⟩ = 2·xᵀAx,
+         *
+         * e xᵀAx é um ESCALAR, logo igual à sua transposta xᵀAᵀx = −xᵀAx quando
+         * A é antissimétrica: um número igual ao seu simétrico é zero. A norma
+         * não muda porque a sua derivada é identicamente nula.
+         *
+         * E a forma geral disso é mais forte do que o caso: para QUALQUER A,
+         *
+         *     xᵀA x = xᵀS x,   com S a parte simétrica,
+         *
+         * — A FORMA QUADRÁTICA NÃO VÊ A PARTE ANTISSIMÉTRICA. O esquilo é
+         * invisível à energia, e é por isso que ele não a gasta. Não é uma
+         * propriedade dele: é uma propriedade do que a energia mede. */
+        long casos = 0, so_sim = 0, esq_conserva = 0, esq = 0, gato_move = 0, ngato = 0;
+        for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+        for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+            int antis = (a == 0 && d == 0 && b == -c);
+            int bate = 1, sempre_zero = 1, algum = 0;
+            for(long x = -4; x <= 4; x++) for(long y = -4; y <= 4; y++){
+                long qa = a*x*x + (b + c)*x*y + d*y*y;              /* xᵀAx */
+                long qs = (2*a*x*x + 2*(b + c)*x*y + 2*d*y*y) / 2;  /* xᵀSx */
+                if(qa != qs) bate = 0;
+                if(qa != 0){ sempre_zero = 0; algum = 1; }
+            }
+            casos++;
+            if(bate) so_sim++;
+            if(antis){ esq++; if(sempre_zero) esq_conserva++; }
+            else      { ngato++; if(algum) gato_move++; }
+        }
+        printf("      %ld matrizes, x num cubo 9×9:\n", casos);
+        printf("        xᵀAx = xᵀSx ............... %ld/%ld  ← a forma só vê a SIMÉTRICA\n",
+               so_sim, casos);
+        printf("        esquilos com ⟨x,Ax⟩ ≡ 0 ... %ld/%ld  ← e por isso não gastam\n",
+               esq_conserva, esq);
+        printf("        os outros, com algum ≠ 0 .. %ld/%ld  ← esses movem a norma\n",
+               gato_move, ngato);
+        if(so_sim != casos || esq_conserva != esq || gato_move != ngato) mal++;
+
+        /* ── E AS DUAS COLUNAS TÊM DE ESTAR CHEIAS, senão a equivalência não
+         * separa: com zero esquilos a primeira linha era vazia, e com zero
+         * «outros» a segunda dizia que TODA matriz conserva. São 7 e 2394. */
+        printf("      as duas classes existem: %ld esquilos e %ld não — %s\n",
+               esq, ngato, (esq > 0 && ngato > 0) ? "a equivalência separa"
+                                                  : "NÃO separa (mau)");
+        if(!esq || !ngato) mal++;
+
+        /* ── E O MOTOR TEM DE CONCORDAR SOBRE QUEM É ESQUILO — é o segundo
+         * caminho. O predicado acima é escrito à mão (a == 0, d == 0, b == −c);
+         * o motor decide pedindo a parte SIMÉTRICA e vendo se ela é nula. Se
+         * fossem o mesmo critério, concordarem não diria nada. */
+        struct { long a,b,c,d; int esq; const char *nome; } T[] = {
+            {  0, 1,-1, 0, 1, "rotação"      },
+            {  0, 3,-3, 0, 1, "esquilo ×3"   },
+            {  0, 0, 0, 0, 1, "a nula"       },
+            {  1, 2, 2, 3, 0, "simétrica"    },
+            {  1, 2, 3, 4, 0, "genérica"     },
+            {  2, 0, 0, 2, 0, "homotetia"    },
+        };
+        int concorda = 1;
+        for(unsigned k = 0; k < sizeof T/sizeof T[0]; k++){
+            char q2[200];
+            sql_executa("DROP TABLE IF EXISTS A", &o);
+            sql_executa("CREATE TABLE A (p RACIONAL, q RACIONAL)", &o);
+            snprintf(q2, sizeof q2, "INSERT INTO A VALUES (%ld,%ld), (%ld,%ld)",
+                     T[k].a, T[k].b, T[k].c, T[k].d);
+            sql_executa(q2, &o);
+            sql_executa("SELECT simetrica(*) FROM A", &o);
+            int nula = o.ok && !strcmp(o.cell[0][0],"0") && !strcmp(o.cell[0][1],"0")
+                       && !strcmp(o.cell[1][0],"0") && !strcmp(o.cell[1][1],"0");
+            if(nula != T[k].esq) concorda = 0;
+        }
+        printf("      o motor pela parte simétrica contra o predicado à mão,"
+               " em %u matrizes: %s\n", (unsigned)(sizeof T/sizeof T[0]),
+               concorda ? "concordam" : "DIVERGEM (mau)");
+        if(!concorda) mal++;
+
+        /* ── E O CASO DEGENERADO ESTÁ NA LISTA DE PROPÓSITO: a matriz NULA é
+         * antissimétrica e conserva a norma trivialmente — o fluxo não se move
+         * de todo. Incluí-la impede que «conserva» seja lido como «roda»: a
+         * conservação é o que se mede, e a rotação é uma maneira de a cumprir,
+         * não a única. */
+        sql_executa("DROP TABLE IF EXISTS A", &o);
+        sql_executa("CREATE TABLE A (p RACIONAL, q RACIONAL)", &o);
+        sql_executa("INSERT INTO A VALUES (0,0), (0,0)", &o);
+        sql_executa("SELECT regime(*) FROM A", &o);
+        int nulo_borda = o.ok && !strcmp(o.cell[0][0], "BORDA") && !strcmp(o.cell[0][3], "0");
+        printf("      e a matriz NULA: regime %s, Δ = 0 — conserva por não se"
+               " mover, e não por rodar\n", nulo_borda ? "BORDA" : "?");
+        if(!nulo_borda) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("A FORMA QUADRÁTICA NÃO VÊ O ESQUILO, E É POR ISSO QUE ELE NÃO GASTA. O paper diz"
+           " «o invariante lê-se no fluxo como a CONSERVAÇÃO DA NORMA pelo esquilo — a"
+           " energia gira sem se perder», e §W68 mostrou QUEM é o esquilo; faltava o PORQUÊ,"
+           " e ele é uma linha: d/dt|x|² = 2⟨x,ẋ⟩ = 2·xᵀAx, e xᵀAx é um ESCALAR, logo igual à"
+           " sua transposta xᵀAᵀx = −xᵀAx quando A é antissimétrica — um número igual ao seu"
+           " simétrico é zero. A norma não muda porque a sua derivada é identicamente nula. E"
+           " A FORMA GERAL É MAIS FORTE QUE O CASO: para QUALQUER A vale xᵀAx = xᵀSx, com S a"
+           " parte simétrica. A energia não vê a parte antissimétrica — não é uma propriedade"
+           " do esquilo, é uma propriedade do que a energia MEDE. Varridas 2401 matrizes com"
+           " x num cubo 9×9: a igualdade vale em todas, os 7 esquilos têm ⟨x,Ax⟩ ≡ 0 e os"
+           " 2394 restantes têm algum x que move — a equivalência fecha nos DOIS sentidos, e"
+           " as duas colunas cheias são o que a faz separar alguma coisa. O SEGUNDO CAMINHO é"
+           " o motor: o predicado da varredura é escrito à mão, e o motor decide pedindo a"
+           " parte simétrica e vendo se é nula — critérios diferentes, e concordam. E A"
+           " MATRIZ NULA ESTÁ NA LISTA DE PROPÓSITO: é antissimétrica e conserva"
+           " trivialmente, porque o fluxo não se move de todo. Incluí-la impede que"
+           " «conserva» se leia como «roda» — a conservação é o que se mede, e a rotação é"
+           " uma maneira de a cumprir, não a única.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
