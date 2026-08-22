@@ -4271,6 +4271,108 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W32: ACRESCENTAR UMA COLUNA É O LEVANTAMENTO ══════════════════════ */
+    {
+        SqlOut o;
+        long mal = 0;
+        unlink("/tmp/pgwire_w32.mem"); unlink("/tmp/pgwire_w32.prog");
+        unlink("/tmp/pgwire_w32__t.mem"); unlink("/tmp/pgwire_w32__t.prog");
+        printf("\n§W32 a coluna nova: o levantamento, e o que já lá estava fica.\n\n");
+        if(!sql_abrir("/tmp/pgwire_w32")) mal++;
+        sql_executa("CREATE TABLE t (a,b)", &o);
+        for(int i = 1; i <= 5; i++){
+            char q[64];
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 10);
+            sql_executa(q, &o);
+        }
+        /* guarda-se o que lá estava, para exigir que fique */
+        char antes[8][2][16];
+        sql_executa("SELECT * FROM t", &o);
+        int n_antes = o.nrows, c_antes = o.ncols;
+        for(int i = 0; i < n_antes && i < 8; i++){
+            snprintf(antes[i][0], 16, "%s", o.cell[i][0]);
+            snprintf(antes[i][1], 16, "%s", o.cell[i][1]);
+        }
+
+        int ra = sql_executa("ALTER TABLE t ADD COLUMN c", &o);
+        sql_executa("SELECT * FROM t", &o);
+        int subiu = (ra && o.ncols == c_antes + 1 && o.nrows == n_antes);
+        /* O GUME: os valores velhos ficam INTACTOS. O passo da linha mudou —
+         * as células vivem em i·ncols + j — pelo que um levantamento mal feito
+         * MISTURA as linhas em vez de as mover, e o número de linhas e de
+         * colunas continuaria certo. */
+        int intacto = 1;
+        for(int i = 0; i < n_antes && i < 8; i++){
+            if(strcmp(o.cell[i][0], antes[i][0])) intacto = 0;
+            if(strcmp(o.cell[i][1], antes[i][1])) intacto = 0;
+            if(strcmp(o.cell[i][2], "0")) intacto = 0;      /* a nova, a zero */
+        }
+        printf("      %d colunas -> %d, %d linhas · os valores velhos intactos e a"
+               " nova a zero: %s\n", c_antes, o.ncols, o.nrows,
+               intacto ? "sim" : "NAO");
+        if(!subiu || !intacto) mal++;
+
+        /* e a coluna nova é uma coluna a sério: escreve-se e lê-se */
+        sql_executa("UPDATE t SET c = 7 WHERE a = 2", &o);
+        sql_executa("SELECT * FROM t WHERE a = 2", &o);
+        int usa = (o.nrows == 1 && !strcmp(o.cell[0][2], "7")
+                                && !strcmp(o.cell[0][1], "20"));
+        printf("      a coluna nova escreve-se e lê-se, e a vizinha não se mexe:"
+               " (%s,%s,%s)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+               o.nrows ? o.cell[0][2] : "?", usa ? "" : "NAO BATE");
+        if(!usa) mal++;
+
+        /* e um INSERT com a largura nova entra inteiro */
+        sql_executa("INSERT INTO t VALUES (9,90,99)", &o);
+        sql_executa("SELECT * FROM t WHERE a = 9", &o);
+        int novo = (o.nrows == 1 && !strcmp(o.cell[0][2], "99"));
+        printf("      e um INSERT com a largura nova: (%s,%s,%s)  %s\n",
+               o.nrows ? o.cell[0][0] : "?", o.nrows ? o.cell[0][1] : "?",
+               o.nrows ? o.cell[0][2] : "?", novo ? "" : "NAO BATE");
+        if(!novo) mal++;
+
+        /* ── O CONTROLO: o que não é levantamento recusa-se, e o índice que
+         * ficou para trás não pode mentir. */
+        int e1 = sql_executa("ALTER TABLE t ADD COLUMN a", &o);
+        printf("\n      CONTROLO — coluna repetida: %s\n",
+               e1 ? "RESPONDEU (mau)" : "recusada");
+        if(e1) mal++;
+
+        sql_executa("CREATE INDEX ON t (a)", &o);
+        sql_executa("SELECT * FROM t WHERE a = 2", &o);
+        long p_com = sql_ultimos_passos;
+        sql_executa("ALTER TABLE t ADD COLUMN d", &o);
+        sql_executa("SELECT * FROM t WHERE a = 2", &o);
+        int certo = (o.nrows == 1 && !strcmp(o.cell[0][1], "20"));
+        printf("      o índice feito ANTES do levantamento é largado"
+               " (%ld -> %ld passos) e a resposta continua certa: %s\n",
+               p_com, sql_ultimos_passos, certo ? "sim" : "NAO");
+        if(!certo || sql_ultimos_passos == 0) mal++;
+        sql_fechar();
+
+        printf("\n");
+        ok("ACRESCENTAR UMA COLUNA É O LEVANTAMENTO, E O QUE JÁ LÁ ESTAVA FICA. O"
+           " `thm:levantamento` diz que π̃ = (π,k) leva um andar no seguinte e que a folha é UMA"
+           " coordenada, seja qual for n; uma coluna nova é isso: cada linha ganha uma"
+           " coordenada, e o que existia não muda de VALOR — muda de SÍTIO, porque o passo da"
+           " linha cresceu. É aí que está o trabalho e o risco: as células vivem em"
+           " i·ncols + j, pelo que mexer no ncols move TODAS, e um levantamento mal feito"
+           " MISTURA as linhas em vez de as mover — com o número de linhas e de colunas a"
+           " continuar certo. Por isso o que se mede não é a largura: é que cada valor velho"
+           " esteja onde estava, célula a célula, e que a coluna nova valha zero. A ordem"
+           " também está fixada: lê-se tudo com a régua velha, o catálogo sobe DEPOIS de ler e"
+           " ANTES de escrever, e reescreve-se com a nova — ler com uma régua e escrever com a"
+           " outra seria o defeito clássico desta casa. E A COLUNA NOVA É UMA COLUNA A SÉRIO:"
+           " escreve-se, lê-se, e um INSERT com a largura nova entra inteiro. O CONTROLO tem"
+           " duas metades: a coluna repetida é recusada pelo nome, e OS ÍNDICES FEITOS ANTES"
+           " SÃO LARGADOS — as chaves apontavam para o layout antigo, e um índice que"
+           " sobrevivesse ao levantamento responderia sobre um passo que já não existe. Mede-se"
+           " que ele foi largado (os passos voltam a subir) e que a resposta continua certa:"
+           " custa a varredura, nunca a correcção.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

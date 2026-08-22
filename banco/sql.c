@@ -6306,6 +6306,87 @@ static int executa(const char *sql){
             return 1;
           } }
         if(!palavra(&p, "TABLE")) return 0; return cria(p); }
+    if(palavra(&p, "ALTER")){
+        /* ── ACRESCENTAR UMA COLUNA É O LEVANTAMENTO ──────────────────────
+         *
+         * `thm:levantamento`: π̃ = (π,k) leva um andar no seguinte, e a folha é
+         * UMA coordenada, seja qual for n. Uma coluna nova é isso mesmo: cada
+         * linha ganha uma coordenada, e o que existia não muda de valor — muda
+         * de SÍTIO, porque o passo da linha cresceu.
+         *
+         * E é aí que está o trabalho: as células vivem em `S_LINHAS + i·ncols +
+         * j`, pelo que mexer no ncols move TODAS. Lê-se tudo primeiro, sobe-se
+         * o catálogo, e reescreve-se com o passo novo — de trás para a frente
+         * não seria preciso, porque a leitura já está em mão, mas a ordem
+         * importa: o catálogo sobe DEPOIS de ler e ANTES de escrever, senão
+         * lê-se com uma régua e escreve-se com a outra. */
+        if(!palavra(&p, "TABLE")) return 0;
+        char nome[64], nc[64];
+        if(!ident(&p, nome, sizeof nome)) return 0;
+        if(!palavra(&p, "ADD")) return 0;
+        { const char *q = p; if(palavra(&q, "COLUMN")) p = q; }   /* COLUMN é opcional */
+        if(!ident(&p, nc, sizeof nc)) return 0;
+        if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
+        if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
+
+        Word cat = mem_le(S_CAT);
+        long ncols = cat.total, nrows = cat_nrows();
+        if(ncols >= NCOL || ncols >= 8){
+            printf("erro: a tabela já tem %ld colunas — RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "too many columns"); }
+            return 0;
+        }
+        if(col_indice(nc) >= 0){
+            printf("erro: a coluna «%s» já existe — RECUSADA.\n", nc);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column \"%s\" already exists", nc); }
+            return 0;
+        }
+        /* lê-se TUDO com a régua velha */
+        enum { ALT_MAX = 1024 };
+        if(nrows * ncols > ALT_MAX){
+            printf("erro: a tabela não cabe no levantamento (%ld células) — RECUSADA.\n",
+                   nrows * ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "table too large to alter"); }
+            return 0;
+        }
+        static Word velho[ALT_MAX], velho_alto[ALT_MAX];
+        for(long i = 0; i < nrows; i++)
+            for(long j = 0; j < ncols; j++){
+                velho[i*ncols + j]      = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
+                velho_alto[i*ncols + j] = mem_le(S_ALTO   + (unsigned)(i*ncols + j));
+            }
+        /* o catálogo sobe: é aqui que o andar muda */
+        long novo = ncols + 1;
+        { Word c = cat; c.total = (Word8)novo; mem_grava(S_CAT, c); }
+        col_nome_grava((int)ncols, nc);
+        { Word z = {0,0}; mem_grava(S_CORPO + (unsigned)ncols, z); }   /* INTEIRO */
+        /* e reescreve-se com a régua nova, do FIM para o princípio: as células
+         * novas ficam depois das velhas, e escrever de trás não pisa o que
+         * ainda falta ler — aqui já está tudo lido, mas a ordem fica escrita
+         * porque é ela que torna isto seguro se um dia se ler em vez de copiar */
+        for(long i = nrows - 1; i >= 0; i--){
+            for(long j = novo - 1; j >= 0; j--){
+                Word v = {0,0}, va = {0,0};
+                if(j < ncols){ v = velho[i*ncols + j]; va = velho_alto[i*ncols + j]; }
+                mem_grava(S_LINHAS + (unsigned)(i*novo + j), v);
+                mem_grava(S_ALTO   + (unsigned)(i*novo + j), va);
+                mem_grava(S_DEN    + (unsigned)(i*novo + j),
+                          j < ncols ? mem_le(S_DEN + (unsigned)(i*ncols + j)) : (Word){1,0});
+            }
+        }
+        /* os índices ficam velhos: o passo mudou, e as chaves apontam para o
+         * layout antigo. Largam-se todos — custa a varredura, nunca a resposta. */
+        for(long c = 0; c < IDX_MAXCOL; c++){ Word z = {0,0}; mem_grava(S_IDXCAB(c), z); }
+        barreira();
+        printf("coluna «%s» acrescentada: %ld -> %ld colunas, %ld linha(s) levantadas\n",
+               nc, ncols, novo, nrows);
+        if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "ALTER TABLE");
+        return 1;
+    }
     if(palavra(&p, "DROP")){
         /* APAGAR É O DUAL DE CRIAR, e aqui isso é literal: uma tabela é um
          * ficheiro `<base>__<nome>.mem`, e largá-la é largar o ficheiro. Não há
