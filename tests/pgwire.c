@@ -13883,6 +13883,153 @@ int main(void){
            " razão pela qual esta casa não guarda um float — dita como quantidade.", mal == 0);
     }
 
+    /* ═══ §W98: K_m = {a+bσ_m} — A NORMA É O det, O CONJUGADO É A ADJUNTA ══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W98 O corpo K_m do catálogo, com o det do motor por norma.\n\n");
+        { const char *tabs[] = { "A","P","U" };
+          for(unsigned k = 0; k < sizeof tabs/sizeof tabs[0]; k++){
+              char m[80], p2[80];
+              snprintf(m, sizeof m, "/tmp/pgwire_w98__%s.mem", tabs[k]);
+              snprintf(p2, sizeof p2, "/tmp/pgwire_w98__%s.prog", tabs[k]);
+              unlink(m); unlink(p2);
+          }
+          unlink("/tmp/pgwire_w98.mem"); unlink("/tmp/pgwire_w98.prog"); }
+        if(!sql_abrir("/tmp/pgwire_w98")) mal++;
+
+        long rec98 = 0;
+        #define POE2(t,M) do { char q2[220]; \
+            snprintf(q2, sizeof q2, "DROP TABLE IF EXISTS %s", t); sql_executa(q2,&o2); \
+            snprintf(q2, sizeof q2, "CREATE TABLE %s (c1 RACIONAL, c2 RACIONAL)", t); \
+            sql_executa(q2,&o2); \
+            for(int i2 = 0; i2 < 2; i2++){ \
+                snprintf(q2, sizeof q2, "INSERT INTO %s VALUES (%ld,%ld)", \
+                         t, (M)[i2][0], (M)[i2][1]); \
+                sql_executa(q2,&o2); if(!o2.ok) rec98++; } } while(0)
+
+        /* ── O catálogo (§«Quarto: as matrizes») constrói K_m = {a+bσ_m : a,b∈ℚ}
+         * com σ² = mσ + 1, dá o produto reduzido, o conjugado «a troca de sinal
+         * fora da diagonal, que é o esquilo», a norma N(u) = a²+mab−b² e o
+         * inverso ū/N(u). Aqui isso corre no motor — e a ponte que aparece é
+         * que a NORMA É O DETERMINANTE e o CONJUGADO É A ADJUNTA. */
+        long prod_ok = 0, prod_n = 0, norm_ok = 0, conj_ok = 0, uu_ok = 0,
+             zero_fora = 0, elems = 0, fora_env = 0;
+        for(long m = 1; m <= 4; m++){
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                /* u = a + bσ  ↦  aI + bA_m = (a+bm, b; b, a) */
+                long U[2][2] = {{a + b*m, b},{b, a}};
+                long ant = rec98;
+                POE2("U", U);
+                if(rec98 != ant){ fora_env++; continue; }
+                elems++;
+                /* (1) a NORMA do catálogo é o DETERMINANTE do motor */
+                sql_executa("SELECT det(*) FROM U", &o);
+                if(o.ok && atol(o.cell[0][0]) == a*a + m*a*b - b*b) norm_ok++;
+                if(a || b){ if(a*a + m*a*b - b*b == 0) zero_fora++; }
+
+                /* (2) o CONJUGADO é a ADJUNTA: ū = (a+bm) − bσ ↦ (a,−b;−b,a+bm),
+                 * que é adj(U) — e o motor confirma-o por u·ū = N(u)·I */
+                long Ub[2][2] = {{a, -b},{-b, a + b*m}};
+                POE2("P", U); POE2("A", Ub);
+                sql_executa("SELECT produto(A) FROM P", &o);
+                if(o.ok && o.nrows == 2){
+                    long N = a*a + m*a*b - b*b;
+                    if(atol(o.cell[0][0]) == N && atol(o.cell[1][1]) == N
+                       && atol(o.cell[0][1]) == 0 && atol(o.cell[1][0]) == 0)
+                        uu_ok++;
+                }
+                /* e o conjugado como troca de sinal fora da diagonal: a
+                 * adjunta de (x,y;z,w) é (w,−y;−z,x) */
+                if(Ub[0][0] == U[1][1] && Ub[0][1] == -U[0][1]
+                   && Ub[1][0] == -U[1][0] && Ub[1][1] == U[0][0]) conj_ok++;
+
+                /* (3) o produto reduzido do catálogo, contra o produto do motor */
+                for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+                    long V[2][2] = {{c + d*m, d},{d, c}};
+                    long ant2 = rec98;
+                    POE2("P", U); POE2("A", V);
+                    if(rec98 != ant2) continue;
+                    sql_executa("SELECT produto(A) FROM P", &o);
+                    if(!o.ok || o.nrows != 2) continue;
+                    long e1 = a*c + b*d, e2 = a*d + b*c + m*b*d;  /* a regra do gato */
+                    long W[2][2] = {{e1 + e2*m, e2},{e2, e1}};
+                    prod_n++;
+                    if(atol(o.cell[0][0]) == W[0][0] && atol(o.cell[0][1]) == W[0][1]
+                       && atol(o.cell[1][0]) == W[1][0] && atol(o.cell[1][1]) == W[1][1])
+                        prod_ok++;
+                }
+            }
+        }
+        printf("      o produto reduzido (ac+bd) + (ad+bc+m·bd)σ contra o produto"
+               " do motor: %ld/%ld\n", prod_ok, prod_n);
+        printf("      N(u) = a²+mab−b² É o det(aI+bA_m) do motor: %ld/%ld\n",
+               norm_ok, elems);
+        printf("      o conjugado É a ADJUNTA (troca de sinal fora da diagonal):"
+               " %ld/%ld · e u·ū = N(u)·I pelo motor: %ld/%ld\n",
+               conj_ok, elems, uu_ok, elems);
+        printf("      N(u) = 0 com u ≠ 0: %ld em %ld elementos — o corpo fecha\n",
+               zero_fora, elems);
+        if(prod_ok != prod_n || prod_n < 800) mal++;
+        if(norm_ok != elems || conj_ok != elems || uu_ok != elems) mal++;
+        if(zero_fora != 0) mal++;
+
+        /* ── (4) E O CONTROLO É A MESMA CONSTRUÇÃO COM A HIPÓTESE RETIRADA.
+         * O catálogo apoia-se em σ_m ser irracional — «a fração contínua não
+         * termina» —, e isso é o mesmo que dizer que λ²−mλ−1 é IRREDUTÍVEL,
+         * que é o critério do §W93. Troque-se +1 por 0: σ² = mσ, cujo
+         * discriminante m² É quadrado, as raízes são 0 e m, e o «corpo» passa a
+         * ter divisores de zero. A construção é letra por letra a mesma. */
+        {
+            long div_zero = 0, tot = 0;
+            for(long m = 1; m <= 4; m++)
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                if(!a && !b) continue;
+                /* B_m = (m,0;1,0): σ² = mσ + 0 */
+                long U[2][2] = {{a + b*m, 0},{b, a}};
+                long ant = rec98;
+                POE2("U", U);
+                if(rec98 != ant) continue;
+                sql_executa("SELECT det(*) FROM U", &o);
+                if(!o.ok) continue;
+                tot++;
+                if(atol(o.cell[0][0]) == 0) div_zero++;
+            }
+            printf("      CONTROLO — a MESMA construção com σ² = mσ + 0, onde"
+                   " Δ = m² É quadrado: %ld de %ld elementos não nulos têm norma"
+                   " ZERO\n", div_zero, tot);
+            printf("        logo ali não há corpo, e o que o separa de K_m é"
+                   " exactamente a irracionalidade de σ — o mesmo critério do §W93\n");
+            if(div_zero == 0) mal++;
+        }
+
+        #undef POE2
+        sql_fechar();
+
+        printf("\n");
+        ok("O CORPO K_m DO CATÁLOGO CORRE NO MOTOR, E A PONTE QUE APARECE É QUE A NORMA É O"
+           " DETERMINANTE. A subsecção «Quarto: as matrizes» constrói"
+           " K_m = {a + bσ_m : a,b ∈ ℚ} com σ² = mσ + 1, e diz que é a assinatura da órbita"
+           " que garante o fecho: N(u) = 0 com u ≠ 0 exigiria σ_m racional, e a fração"
+           " contínua [m;m,m,…] não termina. Vestindo u = a + bσ como aI + bA_m, tudo isso é"
+           " uma operação do motor. O produto reduzido do catálogo,"
+           " (ac+bd) + (ad+bc+m·bd)σ, bate com o produto de matrizes em 4900/4900 — «é a única"
+           " regra do corpo, e é o gato», e o motor não a conhece: ela cai da multiplicação."
+           " A NORMA N(u) = a² + mab − b² É o det(aI + bA_m), em 196/196: o catálogo define a"
+           " norma pela conjugação e o motor devolve-a pelo determinante, sem saber de"
+           " conjugado nenhum. E O CONJUGADO É A ADJUNTA: «a troca de sinal fora da diagonal,"
+           " que é o esquilo» é exactamente adj(U) = (w,−y;−z,x), verificado nos 196 e"
+           " confirmado pelo motor com u·ū = N(u)·I. Nenhum elemento não nulo tem norma zero,"
+           " pelo que o corpo fecha. E O CONTROLO É A MESMA CONSTRUÇÃO COM A HIPÓTESE"
+           " RETIRADA, que é o que dá conteúdo àquele zero: troca-se σ² = mσ + 1 por"
+           " σ² = mσ + 0, cujo discriminante m² É quadrado e cujas raízes são 0 e m — logo"
+           " racionais. A construção é letra por letra a mesma, e 34 dos 192 elementos não"
+           " nulos passam a ter norma ZERO: ali não há corpo, e um só bastava. O que separa os dois casos é"
+           " exactamente a irracionalidade de σ, que é o «μ irredutível» do §W93 dito noutro"
+           " alfabeto — e que o §W70 já tinha medido numa terceira forma, m²+4 nunca ser"
+           " quadrado perfeito. Três caminhos para a mesma cláusula.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

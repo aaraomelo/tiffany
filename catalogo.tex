@@ -1236,6 +1236,16 @@ N(u)=u\,\bar u=a^2+m\,ab-b^2,\qquad u^{-1}=\frac{\bar u}{N(u)} .
 \]
 E aqui as duas assinaturas deste livro encontram-se. Para o inverso existir, é preciso que $N(u)$ nunca se anule fora do zero. Ora, $N(u)=0$ com $u\neq0$ exigiria que $\sigma_m$ fosse racional --- e $\sigma_m$ é o limite da assinatura $[m;m,m,\dots]$, \textbf{que não termina}. \emph{É a assinatura da órbita que garante que o corpo fecha.} A fração contínua não é ornamento da construção do número: é a razão pela qual o corpo tem inverso.
 
+\paragraph{E tudo isto já são operações de matriz, o que dá o fecho de graça.} Vestindo $u=a+b\sigma_m$ como $a I+b A_m$, as três peças desta subsecção têm nome na álgebra linear e não precisam de definição própria:
+\[
+  N(u) \;=\; \det\!\left(aI+bA_m\right), \qquad
+  \bar u \;=\; \operatorname{adj}\!\left(aI+bA_m\right), \qquad
+  u\,\bar u \;=\; N(u)\,I .
+\]
+A norma \textbf{é} o determinante; o conjugado --- «a troca de sinal fora da diagonal» --- \textbf{é} a adjunta, $\operatorname{adj}\bigl(\begin{smallmatrix}x&y\\z&w\end{smallmatrix}\bigr)=\bigl(\begin{smallmatrix}w&-y\\-z&x\end{smallmatrix}\bigr)$; e $u^{-1}=\bar u/N(u)$ é a fórmula da inversa $2\times2$. Nada disto é uma segunda construção: é a \emph{mesma}, e é por isso que o produto reduzido acima cai da multiplicação de matrizes sem ser posto.
+
+\medido{\code{tests/pgwire.c} §W98 --- o produto reduzido contra o produto do motor em $4900/4900$; $N(u)=\det$ em $196/196$, com o motor a devolver a norma sem saber de conjugado nenhum; o conjugado como adjunta e $u\bar u=N(u)I$ nos mesmos $196$; e nenhum elemento não nulo de norma zero. O \textsc{controlo} é a \emph{mesma} construção com a hipótese retirada --- $\sigma^2=m\sigma+0$, cujo discriminante $m^2$ \textbf{é} quadrado e cujas raízes $0$ e $m$ são racionais ---, e ali $34$ de $192$ elementos não nulos passam a ter norma zero: não há corpo. O que separa os dois casos é exactamente a irracionalidade de $\sigma$, que é o critério «$\mu$ irredutível» do §W93 dito noutro alfabeto, e que §W70 já media numa terceira forma: $m^2+4$ nunca é quadrado perfeito.}
+
 E nada disto usou o valor de $m$ --- usou-se apenas $\sigma^2=m\sigma+1$. Logo há um corpo $K_m$ \textbf{para cada $m$}, todos pela mesma conta. \textbf{A construção é uma só; a assinatura escolhe a classe.}
 
 \subsection{A primeira operação: a TRANSFORMADA UNIVERSAL --- e a sua inversa}

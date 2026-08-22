@@ -4646,6 +4646,59 @@ $8/5$ passo a passo; e a frequência com o seu controlo.}
         {\code{inversa} pelo motor; Euclides inteiro como régua; o \texttt{double} como objeto medido}
         {\code{tests/pgwire.c} §W97}
 
+\subsection*{O corpo \texorpdfstring{$K_m$}{Km} do catálogo, com o \code{det} do motor por norma}
+
+\noindent A subseção \emph{«Quarto: as matrizes»} do \code{catalogo} constrói
+$K_m=\{a+b\sigma_m : a,b\in\Q\}$ com $\sigma^{2}=m\sigma+1$, e diz que é a
+\textbf{assinatura da órbita} que garante o fecho: $N(u)=0$ com $u\neq0$ exigiria
+$\sigma_m$ racional, e a fração contínua $[m;m,m,\dots]$ \emph{não termina}.
+Vestindo $u=a+b\sigma$ como $aI+bA_m$, tudo isso passa a ser uma operação do motor.
+\[
+\boxed{\;N(u)=\det\bigl(aI+bA_m\bigr),\qquad
+\bar u=\operatorname{adj}\bigl(aI+bA_m\bigr),\qquad
+u\,\bar u=N(u)\,I\;}
+\]
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+o produto reduzido $(ac+bd)+(ad+bc+m\,bd)\sigma$ contra o produto do motor & $4900/4900$\\
+$N(u)=a^{2}+mab-b^{2}$ contra o \code{det} & $196/196$\\
+o conjugado como \code{adj}, e $u\bar u=N(u)I$ pelo motor & $196/196$\\
+elementos não nulos de norma zero & $\mathbf{0}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{A regra do corpo cai da multiplicação, não é posta.} O
+catálogo diz do produto reduzido que «é a única regra do corpo, e é o gato» --- e o
+motor não a conhece: multiplica matrizes. Do mesmo modo, o catálogo define a norma
+\emph{pela conjugação} e o motor devolve-a pelo \textbf{determinante}, sem saber de
+conjugado nenhum. E «a troca de sinal fora da diagonal, que é o esquilo» é
+exatamente $\operatorname{adj}\left(\begin{smallmatrix}x&y\\z&w\end{smallmatrix}\right)
+=\left(\begin{smallmatrix}w&-y\\-z&x\end{smallmatrix}\right)$.
+
+\medskip\noindent\textbf{E o controlo é a mesma construção com a hipótese
+retirada.} Aquele zero na última linha só tem conteúdo se houver onde falhar:
+troca-se $\sigma^{2}=m\sigma+1$ por $\sigma^{2}=m\sigma+0$, cujo discriminante
+$m^{2}$ \textbf{é} quadrado e cujas raízes $0$ e $m$ são racionais. A construção é
+letra por letra a mesma, e ali $\mathbf{34}$ de $192$ elementos não nulos passam a
+ter norma zero --- um só bastava. \emph{Não há corpo.}
+
+\medskip\noindent\textbf{Três caminhos para a mesma cláusula.} O que separa os dois
+casos é a irracionalidade de $\sigma$, e esta casa já a tinha medido de outras duas
+maneiras: é o «$\mu_A$ irredutível» de §W93, e é o «$m^{2}+4$ nunca é quadrado
+perfeito» de §W70. \emph{São o mesmo enunciado em três alfabetos} --- fração
+contínua que não termina, polinómio mínimo que não fatoriza, discriminante que não
+é quadrado.
+
+\medido{\code{tests/pgwire.c} §W98 --- e o \code{catalogo} passa a trazer a ponte no
+próprio texto, com as três identidades e o \code{\textbackslash medido}.}
+
+\colunas{\code{catalogo} «Quarto: as matrizes»; §W93 ($\Q[A]$ corpo $\iff\mu$ irredutível); §W70}
+        {\code{det}/\code{produto} pelo motor; a adjunta como conjugado}
+        {\code{tests/pgwire.c} §W98}
+
 \colunas{\code{aranha def:dual}, \code{thm:H}}
         {\code{dual}/\code{aniquilador}; \code{qz\_perdeu} no caminho matricial; \code{cria\_desfaz}}
         {\code{tests/pgwire.c} §W59--§W61}
