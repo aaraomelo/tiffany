@@ -2141,6 +2141,46 @@ quiser o valor sobe a torre, porque é o corte e não uma divisão}.
 característica, $\lambda^2+B\lambda+C=0$, verificado em inteiros: uma raiz plausível e errada
 passaria por qualquer outra asserção.
 
+\subsection*{E o grau dois era do $\Delta$, não da casa}
+
+Há motivo para o grau dois, e ele tem \emph{limite}. As três classes esgotarem é resultado
+de grau dois --- o \emph{thm:leidisc} e o \emph{lem:cristal} da \emph{aranha} são sobre
+matrizes $2\times2$, e é ali que $\Delta=\operatorname{tr}^2-4\det$ classifica. Mas a
+companheira existe em $\mathbb{Z}^n$ pela \emph{def:gato}, com
+$\lvert\det\otimes\rvert=1$ para \textbf{todo} $n\ge2$: não havia razão para o motor parar.
+
+Agora ele aceita grau $n$ --- em dois devolve o $\Delta$ e a forma da solução; acima, as
+\textbf{raízes inteiras} por divisores do termo constante com deflação exacta, em inteiros e
+sem uma vírgula.
+
+\begin{center}\small
+\begin{tabular}{@{}lrll@{}}
+\toprule
+o polinómio & grau & raízes inteiras & o resto\\
+\midrule
+$(\lambda+1)(\lambda+2)(\lambda+3)$ & $3$ & $-1,-2,-3$ & todas inteiras\\
+$(\lambda-1)(\lambda-2)(\lambda-3)(\lambda-4)$ & $4$ & $1,2,3,4$ & todas inteiras\\
+$\lambda^3-\lambda-1$ (o metal) & $3$ & \emph{nenhuma} & sobra grau $3$\\
+$\lambda^4-1$ & $4$ & $1,-1$ & sobra grau $2$: $x^2+1$\\
+$\lambda^3$ & $3$ & $0,0,0$ & todas inteiras\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E o que sobra fica dito, não arredondado.} O $\lambda^3-\lambda-1$ --- que
+é o metal --- não tem raiz racional nenhuma, e o motor \emph{diz isso} em vez de inventar uma;
+o $\lambda^4-1$ dá $\pm1$ e devolve $x^2+1$ como o factor por resolver. \emph{Quem quiser o
+resto sobe a torre.}
+
+\medskip\noindent O gume é que cada raiz devolvida tem de \textbf{anular} o polinómio,
+verificado em inteiros --- uma lista plausível e errada passaria por qualquer outra asserção
+---, e a companheira confere-se \emph{linha a linha}: em grau nenhum se supõe que uma matriz
+o seja.
+
+\medido{\code{tests/pgwire.c} §W178 --- os cinco polinómios com o número de raízes inteiras
+esperado, as três de $\lambda^3+6\lambda^2+11\lambda+6$ a anularem-no, e a $3\times3$ que não
+é companheira recusada com a linha nomeada.}
+
 \subsection*{O mecânico é o mesmo corpo; o electromecânico é a FUSÃO dos dois}
 
 \paragraph{O mecânico não pede nada de novo.} A massa-mola-amortecedor

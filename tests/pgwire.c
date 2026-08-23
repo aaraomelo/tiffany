@@ -26098,6 +26098,112 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W178: O GRAU NÃO É DOIS POR NECESSIDADE ═════════════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W178 o grau dois era do Δ, não da casa: a companheira sobe a torre.\n\n");
+        unlink("/tmp/pgwire_w178__A.mem"); unlink("/tmp/pgwire_w178__A.prog");
+        unlink("/tmp/pgwire_w178.mem");    unlink("/tmp/pgwire_w178.prog");
+        if(!sql_abrir("/tmp/pgwire_w178")) mal++;
+
+        /* a companheira de grau n do polinómio mónico λⁿ + c[n-1]λ^{n-1}+…+c[0]:
+         * as n−1 primeiras linhas são a identidade deslocada, a última traz −c */
+        struct { const char *nome; int n; long c[6]; long nr; } E[5] = {
+          {"(λ+1)(λ+2)(λ+3)",        3, {6,11,6},        3},   /* λ³+6λ²+11λ+6 */
+          {"(λ−1)(λ−2)(λ−3)(λ−4)",   4, {24,-50,35,-10}, 4},   /* todas inteiras */
+          {"λ³ − λ − 1 (o metal)",   3, {-1,-1,0},       0},   /* nenhuma racional */
+          {"λ⁴ − 1",                 4, {-1,0,0,0},      2},   /* ±1, e sobra λ²+1 */
+          {"λ³ (triplo em zero)",    3, {0,0,0},         3},
+        };
+        printf("      o polinómio                grau  raízes inteiras   quantas  o resto\n");
+        long certos = 0;
+        for(int c = 0; c < 5; c++){
+            char q[240];
+            int n = E[c].n;
+            sql_executa("DROP TABLE IF EXISTS A", &o2);
+            if(n == 3) sql_executa("CREATE TABLE A (a RACIONAL, b RACIONAL, c RACIONAL)", &o2);
+            else       sql_executa("CREATE TABLE A (a RACIONAL, b RACIONAL, c RACIONAL,"
+                                   " d RACIONAL)", &o2);
+            for(int i = 0; i < n; i++){
+                char linha[200] = "INSERT INTO A VALUES (";
+                for(int j = 0; j < n; j++){
+                    long v = (i + 1 < n) ? ((j == i+1) ? 1 : 0) : -E[c].c[j];
+                    char t[32]; snprintf(t, sizeof t, "%s%ld", j ? "," : "", v);
+                    strncat(linha, t, sizeof linha - strlen(linha) - 1);
+                }
+                strncat(linha, ")", sizeof linha - strlen(linha) - 1);
+                sql_executa(linha, &o2);
+            }
+            sql_executa("SELECT edo(*) FROM A", &o);
+            if(!o.ok){ printf("      %-26s RECUSADA: %s\n", E[c].nome, o.err); mal++; continue; }
+            printf("      %-26s %4s  %-17s %5s   %s\n", E[c].nome,
+                   o.cell[0][1], o.cell[0][3], o.cell[0][4], o.cell[0][5]);
+            if(atol(o.cell[0][4]) == E[c].nr) certos++;
+            else printf("      ^^^ esperava %ld raízes inteiras\n", E[c].nr);
+        }
+        printf("      → %ld das 5 com o número de raízes inteiras esperado\n", certos);
+        if(certos != 5) mal++;
+
+        /* ── O GUME: cada raiz devolvida TEM de anular o polinómio. Uma lista
+         * plausível e errada passaria por qualquer outra asserção. */
+        {
+            char q[240];
+            sql_executa("DROP TABLE IF EXISTS B", &o2);
+            sql_executa("CREATE TABLE B (a RACIONAL, b RACIONAL, c RACIONAL)", &o2);
+            sql_executa("INSERT INTO B VALUES (0,1,0)", &o2);
+            sql_executa("INSERT INTO B VALUES (0,0,1)", &o2);
+            sql_executa("INSERT INTO B VALUES (-6,-11,-6)", &o2);   /* λ³+6λ²+11λ+6 */
+            sql_executa("SELECT edo(*) FROM B", &o);
+            long co[4] = {6, 11, 6, 1};
+            long anulam = 0, lidas = 0;
+            if(o.ok){
+                char *p2 = o.cell[0][3];
+                while(*p2){
+                    char *fim; long r = strtol(p2, &fim, 10);
+                    if(fim == p2) break;
+                    lidas++;
+                    long v = 0; for(int k = 3; k >= 0; k--) v = v*r + co[k];
+                    if(v == 0) anulam++;
+                    p2 = (*fim == ',') ? fim + 1 : fim;
+                    if(!*p2) break;
+                }
+            }
+            printf("      gume: das %ld raízes devolvidas, %ld anulam λ³+6λ²+11λ+6\n",
+                   lidas, anulam);
+            if(lidas == 0 || anulam != lidas) mal++;
+            (void)q;
+        }
+
+        /* ── E A RECUSA: o que não é companheira não resolve EDO nenhuma, em
+         * grau nenhum --- a forma confere-se linha a linha. */
+        {
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (a RACIONAL, b RACIONAL, c RACIONAL)", &o2);
+            sql_executa("INSERT INTO M VALUES (1,2,3)", &o2);
+            sql_executa("INSERT INTO M VALUES (4,5,6)", &o2);
+            sql_executa("INSERT INTO M VALUES (7,8,9)", &o2);
+            sql_executa("SELECT edo(*) FROM M", &o);
+            printf("      a 3×3 que não é companheira: o motor %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa e diz qual linha");
+            if(o.ok) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O GRAU DOIS ERA DO Δ, NÃO DA CASA. Três classes esgotarem é resultado de grau"
+           " dois --- o thm:leidisc e o lem:cristal da aranha são sobre matrizes 2×2 ---, mas"
+           " a companheira existe em Zⁿ pela def:gato, com |det| = 1 para todo n ≥ 2, e não"
+           " havia razão para o motor parar ali. Agora ele aceita grau n: em dois devolve o Δ"
+           " e a forma da solução; acima, as RAÍZES INTEIRAS por divisores do termo constante"
+           " com deflação exacta, em inteiros e sem uma vírgula. E o que sobra fica DITO ---"
+           " «sobra grau 2: x^2+1» --- em vez de arredondado: o λ³−λ−1, que é o metal, não tem"
+           " raiz racional nenhuma e o motor diz isso em vez de inventar uma. O gume é que"
+           " cada raiz devolvida TEM de anular o polinómio, verificado em inteiros: uma lista"
+           " plausível e errada passaria por qualquer outra asserção. E a companheira"
+           " confere-se linha a linha, em grau nenhum se supõe.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

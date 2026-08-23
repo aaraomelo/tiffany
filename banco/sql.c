@@ -7769,16 +7769,33 @@ static int varre(const char *resto, int acao){
          * numerador é par; quando não, diz-se a forma e NÃO se arredonda ---
          * um irracional escrito em decimal seria a casa a mentir sobre o que
          * tem. Quem quiser o valor sobe a torre: é o corte, não uma divisão. */
-        if(ncols != 2 || nrows < 2){
-            printf("erro: a EDO lê-se da matriz COMPANHEIRA 2×2 --- a tabela tem"
+        /* ── E O GRAU NÃO É DOIS POR NECESSIDADE: é onde o Δ classifica.
+         * O `thm:leidisc` e o `lem:cristal` da aranha são sobre 2×2 --- é ali
+         * que três classes esgotam. Mas a `def:gato` é em Zⁿ, com |det ⊗| = 1
+         * para TODO n ≥ 2, e a companheira de grau n existe do mesmo modo. Aqui
+         * aceita-se qualquer n: em grau 2 devolve-se o Δ e as três classes; em
+         * grau maior devolvem-se as RAÍZES INTEIRAS por divisores do termo
+         * constante --- exactas, sem uma vírgula --- e o que sobra fica dito
+         * como o factor por resolver, em vez de ser arredondado. */
+        if(ncols < 2 || nrows < 2 || ncols != nrows){
+            printf("erro: a EDO lê-se da matriz COMPANHEIRA n×n --- a tabela tem"
                    " %ld coluna(s) e %ld linha(s). RECUSADA.\n", ncols, nrows);
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
                          "edo needs the 2x2 companion matrix"); }
             return 0;
         }
-        long m[2][2];
-        for(long i = 0; i < 2; i++) for(long j = 0; j < 2; j++){
+        if(ncols > 8){
+            printf("erro: o motor resolve até grau 8 --- vieram %ld. RECUSADA, e não"
+                   " truncada.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "edo: degree %ld exceeds 8", ncols); }
+            return 0;
+        }
+        long ng = ncols;
+        long m[8][8];
+        for(long i = 0; i < ng; i++) for(long j = 0; j < ng; j++){
             if(!bit_le(S_PRES, i*ncols + j)){
                 printf("erro: a companheira tem célula ausente --- RECUSADA.\n");
                 if(sql_cap){ sql_cap->ok = 0;
@@ -7797,15 +7814,96 @@ static int varre(const char *resto, int acao){
             }
             m[i][j] = nu;
         }
-        /* a companheira tem a forma [[0,1],[-C,-B]]: confere-se, em vez de supor */
-        if(m[0][0] != 0 || m[0][1] != 1){
-            printf("erro: a primeira linha da companheira tem de ser (0,1) e é"
-                   " (%ld,%ld) --- isto não é uma companheira. RECUSADA.\n",
-                   m[0][0], m[0][1]);
-            if(sql_cap){ sql_cap->ok = 0;
-                snprintf(sql_cap->err, sizeof sql_cap->err,
-                         "edo: first row must be (0,1)"); }
-            return 0;
+        /* A COMPANHEIRA CONFERE-SE, em vez de se supor: as n−1 primeiras linhas
+         * são a identidade deslocada --- linha i tem 1 na coluna i+1 e zero no
+         * resto --- e a última traz os coeficientes. */
+        for(long i = 0; i + 1 < ng; i++) for(long j = 0; j < ng; j++){
+            long esperado = (j == i + 1) ? 1 : 0;
+            if(m[i][j] != esperado){
+                printf("erro: a linha %ld da companheira devia ter 1 na coluna %ld e"
+                       " zero no resto; tem %ld na coluna %ld. Isto não é uma"
+                       " companheira. RECUSADA.\n", i, i+1, m[i][j], j);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "edo: row %ld is not a companion row", i); }
+                return 0;
+            }
+        }
+        /* o polinómio mónico: λⁿ + c[n-1]λ^{n-1} + ... + c[0], com c[k] = −m[n-1][k] */
+        long co[9];
+        for(long k = 0; k < ng; k++) co[k] = -m[ng-1][k];
+        co[ng] = 1;
+
+        /* ── GRAU > 2: as raízes INTEIRAS por divisores do termo constante,
+         * com deflação exacta (Ruffini em inteiros). O que sobra fica dito. */
+        if(ng > 2){
+            char raizes[SQL_OUT_CELL] = ""; long nr = 0;
+            long p[9]; for(long k = 0; k <= ng; k++) p[k] = co[k];
+            long gr = ng;
+            for(int volta = 0; volta < 8 && gr > 0; volta++){
+                long a0 = p[0];
+                if(a0 == 0){                       /* λ = 0 é raiz: deflaciona */
+                    for(long k = 0; k < gr; k++) p[k] = p[k+1];
+                    gr--; nr++;
+                    { char t[24]; snprintf(t, sizeof t, "%s0", nr>1?",":""); 
+                      strncat(raizes, t, sizeof raizes - strlen(raizes) - 1); }
+                    continue;
+                }
+                long achou = 0, r = 0;
+                long lim = a0 < 0 ? -a0 : a0;
+                for(long d = 1; d <= lim && !achou; d++){
+                    if(lim % d) continue;
+                    for(int sg = 0; sg < 2 && !achou; sg++){
+                        long cand = sg ? -d : d, v = 0;
+                        for(long k = gr; k >= 0; k--) v = v*cand + p[k];
+                        if(v == 0){ achou = 1; r = cand; }
+                    }
+                }
+                if(!achou) break;
+                long q2[9]; q2[gr-1] = p[gr];
+                for(long k = gr-1; k >= 1; k--) q2[k-1] = p[k] + r*q2[k];
+                for(long k = 0; k < gr; k++) p[k] = q2[k];
+                gr--; nr++;
+                { char t[24]; snprintf(t, sizeof t, "%s%ld", nr>1?",":"", r);
+                  strncat(raizes, t, sizeof raizes - strlen(raizes) - 1); }
+            }
+            char resto[SQL_OUT_CELL];
+            if(gr == 0) snprintf(resto, sizeof resto, "todas inteiras");
+            else {
+                int off = snprintf(resto, sizeof resto, "sobra grau %ld: ", gr);
+                for(long k = gr; k >= 0 && off < (int)sizeof resto - 12; k--)
+                    if(p[k]) off += snprintf(resto+off, sizeof resto-off, "%s%ldx^%ld",
+                                             (k<gr && p[k]>0) ? "+" : "", p[k], k);
+            }
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+                snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "equacao");
+                snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "grau");
+                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "classe");
+                snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "raizes_inteiras");
+                snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "quantas");
+                snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "resto");
+                for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+                sql_cap->tipo[1] = SQL_TIPO_INT4; sql_cap->tipo[4] = SQL_TIPO_INT4;
+                int off = snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "y^(%ld)", ng);
+                for(long k = ng-1; k >= 0 && off < SQL_OUT_CELL - 16; k--)
+                    if(co[k]) off += snprintf(sql_cap->cell[0][0]+off, SQL_OUT_CELL-off,
+                                              " %c %ldy%s", co[k]<0?'-':'+',
+                                              co[k]<0?-co[k]:co[k],
+                                              k==0 ? "" : (k==1 ? "'" : "^(k)"));
+                snprintf(sql_cap->cell[0][0]+off, SQL_OUT_CELL-off, " = 0");
+                snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", ng);
+                snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%s",
+                         gr == 0 ? "cinde em raizes inteiras" : "cinde em parte");
+                snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", nr ? raizes : "nenhuma");
+                snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%ld", nr);
+                snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", resto);
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+            }
+            printf("edo: grau %ld · %ld raiz(es) inteira(s): %s · %s\n",
+                   ng, nr, nr ? raizes : "nenhuma", resto);
+            return 1;
         }
         long B = -m[1][1], C = -m[1][0];
         long D = B*B - 4*C;
