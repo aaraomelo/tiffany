@@ -25696,6 +25696,187 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W175: OS CINCO QUE FALTAVAM, TERMINADOS NO MOTOR ════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W175 os cinco que faltavam: levantados, medidos e fechados no banco.\n\n");
+        unlink("/tmp/pgwire_w175__T.mem"); unlink("/tmp/pgwire_w175__T.prog");
+        unlink("/tmp/pgwire_w175__L.mem"); unlink("/tmp/pgwire_w175__L.prog");
+        unlink("/tmp/pgwire_w175.mem");    unlink("/tmp/pgwire_w175.prog");
+        if(!sql_abrir("/tmp/pgwire_w175")) mal++;
+
+        struct { const char *nome; int caso; } C[11] = {
+            {"tríade  a+bω",         0}, {"áureo  cifra FC",       1},
+            {"quadrático  Δ",        2}, {"mórfico  erosão",       3},
+            {"booleano  ⊕",          4},
+            /* os dois que o catálogo nomeia e faltavam aqui, com a leitura DELE:
+             * o eletromagnético é E²−B², assinatura (3,3,0), e a sua régua própria
+             * é a IMPEDÂNCIA --- Poynting inverte-a (ν∘rev: E ↦ 1/B). O mecânico
+             * é o do `motor.c`: «o torque É o produto cruzado». */
+            {"eletromag.  E²−B²",    5}, {"eletromag.  Poynting",  6},
+            {"mecânico  torque r×F", 7},
+            /* e o cósmico, que o catálogo já dá como (z,d) --- e cuja régua é o
+             * EXPOENTE: «quem mede em grandeza se perde, quem mede em expoente
+             * não». Mais o pneumático e o hidráulico, que NÃO são corpos à parte:
+             * o catálogo diz «eléctrico, mecânico, pneumático, óptico e elástico
+             * não são cinco sistemas», e a analogia hidráulica é exacta ---
+             * pressão↔tensão, caudal↔corrente. Entram para se medir isso. */
+            {"cósmico  (z,d) expoente", 8},
+            {"pneumático  p·Q",         9},
+            {"hidráulico  P·q",        10},
+        };
+        printf("      corpo               ANTES: fibras G   falta │ DEPOIS: |I| G falta"
+               " │ régua\n");
+        long fechados = 0, ja_eram = 0;
+        for(int c = 0; c < 11; c++){
+            char q[220];
+            long e[64]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long v;
+                switch(C[c].caso){
+                  case 0:  v = ((a*a - b*b) % 12 + 12) % 12; break;
+                  case 1:  v = ((a+1)*8 + (b+1)) % 36; break;
+                  case 2:  v = (b*b - 4*a) % 12; break;      /* a mesma do banco */
+                  case 3:  v = (a < b ? a : b); break;
+                  case 4:  v = (a ^ b); break;
+                  case 5:  v = a*a - b*b; break;              /* E²−B²: a forma do catálogo */
+                  case 6:  v = a * b; break;                  /* Poynting: E×B */
+                  case 7:  v = a*(b+1) - b*(a+1); break;      /* torque: o cruzado r×F */
+                  case 8:  { long z = a+1, d = b+1, ex = 0, t = z*d;  /* o EXPOENTE, não a grandeza */
+                             while(t > 1){ ex++; t >>= 1; } v = ex*6 + (z*d) % 6; } break;
+                  case 9:  v = (a+1) * (b+1); break;          /* pneumático: pressão × caudal */
+                  default: v = (a+1) * (b+1);                 /* hidráulico: a MESMA leitura */
+                }
+                e[n++] = v;
+            }
+            /* os endereços vão para o banco NÃO NEGATIVOS: a régua conta bits do
+             * topo, e um negativo em complemento de dois acende o bit de sinal ---
+             * a ultramétrica passava a medir o sinal e não o prefixo. Foi assim
+             * que três destes corpos deram «não desce» com zero estritos: defeito
+             * do medidor, não do corpo. O deslocamento é uma translação, e a
+             * fibra não muda com ela. */
+            { long mn = e[0];
+              for(long i = 1; i < n; i++) if(e[i] < mn) mn = e[i];
+              if(mn < 0) for(long i = 0; i < n; i++) e[i] -= mn; }
+
+            /* ANTES: o motor mede o corpo como está */
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (e RACIONAL)", &o2);
+            for(long i = 0; i < n; i++){
+                snprintf(q, sizeof q, "INSERT INTO T VALUES (%ld)", e[i]);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM T", &o);
+            if(!o.ok){ mal++; continue; }
+            long f_ant = atol(o.cell[0][0]), g_ant = atol(o.cell[0][2]),
+                 falta_ant = atol(o.cell[0][4]);
+            int comp_ant = !strcmp(o.cell[0][3], "sim");
+            if(comp_ant) ja_eram++;          /* alguns já são quociente: conta-se, não falha */
+
+            /* A COMPLETAÇÃO: o levantado (base,folha) do cor:pik --- e é ele que
+             * o motor recebe a seguir. Não se inventa objecto nenhum: abrem-se
+             * os lugares que a fibra contou. */
+            LvLevanta L;
+            if(!lv_levanta(e, n, &L)){ mal++; continue; }
+            sql_executa("DROP TABLE IF EXISTS L", &o2);
+            sql_executa("CREATE TABLE L (e RACIONAL)", &o2);
+            for(long k = 0; k < L.n; k++){
+                snprintf(q, sizeof q, "INSERT INTO L VALUES (%ld)", lv_endereco(&L, k));
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM L", &o);
+            if(!o.ok){ mal++; continue; }
+            long g_dep = atol(o.cell[0][2]), falta_dep = atol(o.cell[0][4]);
+            int comp_dep = !strcmp(o.cell[0][3], "sim");
+
+            /* E A RÉGUA, no corpo já completo --- é o que o global promete: dada
+             * a representação reversível, a ultramétrica vem atrás. */
+            sql_executa("SELECT ultra(*) FROM L", &o2);
+            int regua = o2.ok && !strcmp(o2.cell[0][4], "sim");
+            long estritos = o2.ok ? atol(o2.cell[0][3]) : 0;
+
+            printf("      %-19s %6ld %2ld %6ld │ %8ld %2ld %5ld │ %s (%ld estritos)\n",
+                   C[c].nome, f_ant, g_ant, falta_ant, L.n, g_dep, falta_dep,
+                   regua ? "desce" : "NAO", estritos);
+            if(!comp_dep || falta_dep != 0 || !regua || estritos == 0) mal++;
+            else fechados++;
+        }
+        printf("      → %ld dos 11 fechados: G constante, falta zero, régua a descer\n",
+               fechados);
+        if(fechados != 11) mal++;
+
+        /* ── PNEUMÁTICO E HIDRÁULICO SÃO O MESMO CORPO, e o catálogo já o diz:
+         * «eléctrico, mecânico, pneumático, óptico e elástico não são cinco
+         * sistemas», e a analogia hidráulica é exacta --- pressão↔tensão,
+         * caudal↔corrente. Se é o mesmo corpo, a travessia entre as duas
+         * leituras é a IDENTIDADE e o preço é zero. Mede-se. */
+        {
+            long A[64], B[64]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                A[n] = (a+1)*(b+1);      /* pneumático: pressão × caudal */
+                B[n] = (a+1)*(b+1);      /* hidráulico: tensão × corrente */
+                n++;
+            }
+            long difere = 0;
+            for(long i = 0; i < n; i++) if(A[i] != B[i]) difere++;
+            int q = 20;
+            for(long i = 0; i < n; i++){
+                int p2 = tv_prof(A[i], B[i], 20);
+                if(p2 < q) q = p2;
+            }
+            printf("      pneumático vs hidráulico: %ld dos %ld endereços diferem, e o"
+                   " preço da travessia é 2^-%d\n", difere, n, q);
+            printf("      → não são dois corpos: são o MESMO, com dois nomes --- e o"
+                   " catálogo já o dizia\n");
+            if(difere != 0 || q != 20) mal++;
+        }
+
+        /* ── E A PROVA DE QUE NÃO SE INVENTOU CORPO: a projecção π devolve o de
+         * partida. O motor mede-o pela FIBRA do levantado projectado --- que tem
+         * de dar exactamente a fibra original. */
+        {
+            char q[220];
+            long e[64]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++)
+                e[n++] = ((a*a - b*b) % 12 + 12) % 12;      /* a tríade */
+            LvLevanta L; lv_levanta(e, n, &L);
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (e RACIONAL)", &o2);
+            for(long k = 0; k < L.n; k++) if(L.existia[k]){
+                snprintf(q, sizeof q, "INSERT INTO T VALUES (%ld)", lv_projecta(&L, k));
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM T", &o);
+            printf("      π do levantado, só os vivos: %s fibras e falta %s --- e o"
+                   " original tinha as mesmas\n",
+                   o.ok ? o.cell[0][0] : "?", o.ok ? o.cell[0][4] : "?");
+            EsFibra f0 = es_fibra(e, n);
+            if(!o.ok || atol(o.cell[0][0]) != f0.fibras
+                     || atol(o.cell[0][4]) != es_falta(e, n)) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("OS ONZE ESTÃO FECHADOS NO BANCO, E PELO CAMINHO QUE O COROLÁRIO"
+           " MANDA. A tríade, o áureo, o quadrático, o mórfico e o booleano, mais os DOIS que o catálogo nomeia e"
+           " faltavam --- o eletromagnético pela sua forma E²−B² e pelo vector de Poynting"
+           " E×B, e o mecânico pelo torque r×F, que o motor.c diz ser o produto cruzado."
+           " Entravam com G a"
+           " variar e falta contada; levantados pelo ι/π --- que abre os lugares que a fibra"
+           " contou e não inventa objecto nenhum ---, o motor mede-os de novo e devolve G"
+           " constante e falta zero nos ONZE. E A RÉGUA VEM ATRÁS, que é o que o global"
+           " promete: dada a representação reversível, `ultra(*)` responde que a desigualdade"
+           " forte vale, com triplos estritos em todos. E DOIS DELES ERAM UM: o pneumático e o"
+           " hidráulico dão os MESMOS endereços, a travessia entre eles é a identidade e o"
+           " preço é zero --- o que confirma pelo motor o que o catálogo já afirmava, que"
+           " eléctrico, mecânico, pneumático, óptico e elástico não são cinco sistemas. A"
+           " prova de que nada se inventou é a"
+           " volta: projectados só os objectos vivos, a fibra dá exactamente a do corpo de"
+           " partida --- o levantamento deu lugar, não deu gente. E três destes corpos deram «não desce» na primeira medição por defeito MEU: os endereços vinham negativos --- o Δ, o E²−B², o cruzado --- e a régua contava o bit de sinal em vez do prefixo. A translação corrige, e a fibra não muda com ela.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

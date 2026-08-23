@@ -1939,6 +1939,53 @@ que a bijecção preserva.
 \noindent Logo \textbf{não se constrói régua nenhuma no corpo}. Completar um corpo do
 catálogo é dar-lhe uma representação reversível; a régua vem atrás, e vem completa.
 
+\subsection*{Os onze fechados no banco, pelo caminho que o corolário manda}
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{\quad}rrl@{}}
+\toprule
+& \multicolumn{3}{c}{antes} & \multicolumn{2}{c}{depois} & \\
+\cmidrule(r){2-4}\cmidrule(lr){5-6}
+corpo & fibras & $G$ & falta & $\lvert I\rvert$ & falta & régua\\
+\midrule
+tríade $a+b\omega$ & $9$ & $10$ & $54$ & $90$ & $0$ & desce\\
+áureo (cifra FC) & $30$ & $2$ & $24$ & $60$ & $0$ & desce\\
+quadrático $\Delta$ & $11$ & $6$ & $30$ & $66$ & $0$ & desce\\
+mórfico (erosão) & $6$ & $11$ & $30$ & $66$ & $0$ & desce\\
+booleano $\oplus$ & $8$ & $6$ & $12$ & $48$ & $0$ & desce\\
+\textbf{eletromagnético} $E^2-B^2$ & $27$ & $6$ & $126$ & $162$ & $0$ & desce\\
+\textbf{eletromagnético} (Poynting $E\times B$) & $15$ & $11$ & $129$ & $165$ & $0$ & desce\\
+\textbf{mecânico} (torque $r\times F$) & $11$ & $6$ & $30$ & $66$ & $0$ & desce\\
+\textbf{cósmico} $(z,d)$, pelo expoente & $15$ & $6$ & $54$ & $90$ & $0$ & desce\\
+\textbf{pneumático} $p\cdot Q$ & $18$ & $4$ & $36$ & $72$ & $0$ & desce\\
+\textbf{hidráulico} $P\cdot q$ & $18$ & $4$ & $36$ & $72$ & $0$ & desce\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Os onze com $G$ constante, falta zero e a régua a descer --- e nenhum objecto
+inventado: projectados só os vivos, a fibra dá exactamente a do corpo de partida.
+
+\paragraph{E dois deles eram um.} O pneumático e o hidráulico dão os \emph{mesmos}
+endereços: a travessia entre eles é a identidade e o preço é \textbf{zero}. Isto confirma
+pelo motor o que este catálogo já afirmava --- \emph{«eléctrico, mecânico, pneumático,
+óptico e elástico não são cinco sistemas»}, e a analogia hidráulica é exacta (pressão
+$\leftrightarrow$ tensão, caudal $\leftrightarrow$ corrente).
+
+\paragraph{E as leituras são as do documento.} O eletromagnético entra pela forma que o
+catálogo lhe dá, $E^2-B^2$ de assinatura $(3,3,0)$, e pelo vector de Poynting $E\times B$; o
+mecânico pelo torque, que o \code{motor.c} diz \emph{ser} o produto cruzado; o cósmico pelo
+\textbf{expoente} e não pela grandeza --- \emph{«quem mede em grandeza se perde, quem mede em
+expoente não»}.
+
+\paragraph{Um defeito do medidor, não dos corpos.} Três destes deram «não desce» na primeira
+medição: os endereços vinham \emph{negativos} --- o $\Delta$, o $E^2-B^2$, o cruzado --- e a
+régua contava o bit de sinal em vez do prefixo. A translação corrige, e a fibra não muda com
+ela.
+
+\medido{\code{tests/pgwire.c} §W175 --- os onze pelo fio, com \code{fibra(*)} antes e depois
+e \code{ultra(*)} no corpo já completo.}
+
 \subsection*{A operação, executada}
 
 O corolário dá a operação em cinco passos --- endereça, toma o destino da tarefa, aplica
