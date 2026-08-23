@@ -6,12 +6,19 @@
 #ifndef SQL_API_H
 #define SQL_API_H
 
-/* DEZASSEIS, e não oito. O oito bastava para as tabelas desta casa e para tudo
- * o que os medidores pediam — e caiu no primeiro cliente real: o `\d` do psql
- * pede TREZE colunas de propriedades numa só linha, lê-as por POSIÇÃO, e
- * truncar não serve, porque a posição oito passa a ser outra coisa. O limite
- * era invisível enquanto quem perguntava éramos nós. */
-#define SQL_OUT_MAX_COLS 16
+/* SESSENTA E QUATRO, e já foi oito e dezasseis — o mesmo erro três vezes, com
+ * três números. O oito bastava para as tabelas desta casa; o dezasseis caiu no
+ * `\d` do psql, que pede TREZE colunas por linha e as lê por POSIÇÃO; e o
+ * dezasseis caiu outra vez no primeiro esquema de cliente a sério, onde onze
+ * tabelas passam das dezasseis colunas e a maior tem vinte e nove.
+ *
+ * Este número é do TRANSPORTE e não do objecto: a tabela não tem tecto nenhum
+ * (o catálogo guarda o número de colunas num par, e o corpo vai a COL_MAX), mas
+ * a struct que atravessa a fronteira C vive na pilha de quem a declara, e uma
+ * pilha tem tamanho. Por isso ele existe — e por isso o motor RECUSA quando não
+ * cabe, em vez de truncar: uma linha truncada não é uma linha curta, é uma
+ * linha em que a posição k passa a ser outra coisa. */
+#define SQL_OUT_MAX_COLS 64
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64
 #define SQL_TIPO_INT4    23

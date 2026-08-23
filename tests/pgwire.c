@@ -27106,6 +27106,121 @@ int main(void){
            " que se fez o que não se fez.", mal == 0);
     }
 
+    /* ═══ §W188: A DIMENSÃO É PARÂMETRO, E NÃO TECTO ══════════════════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W188 sem tecto dimensional: a largura é o que o ENDEREÇO segura.\n\n");
+        unlink("/tmp/pgwire_w188.mem"); unlink("/tmp/pgwire_w188.prog");
+        if(!sql_abrir("/tmp/pgwire_w188")) mal++;
+
+        /* (1) A LARGURA CRESCE E O QUE LÁ ESTAVA NÃO MUDA. O `aranha`
+         * §sec:dimensao diz que a dimensão entra num sítio só e entra como
+         * PARÂMETRO --- «as cláusulas valem palavra por palavra em qualquer
+         * posto n ≥ 1». Aqui a tabela é construída em quatro larguras, e a
+         * pergunta é sempre a mesma: o que se escreveu é o que se lê? */
+        static const long LARG[4] = { 8, 24, 64, 300 };
+        long certas = 0;
+        for(int k = 0; k < 4; k++){
+            long n = LARG[k];
+            char q[8192]; int qn = 0;
+            qn = snprintf(q, sizeof q, "CREATE TABLE t%d (", k);
+            for(long j = 0; j < n; j++)
+                qn += snprintf(q + qn, sizeof q - (size_t)qn, "%sc%ld INTEIRO", j ? "," : "", j);
+            snprintf(q + qn, sizeof q - (size_t)qn, ")");
+            sql_executa(q, &o);
+            int criou = o.ok;
+            qn = snprintf(q, sizeof q, "INSERT INTO t%d VALUES (", k);
+            for(long j = 0; j < n; j++)
+                qn += snprintf(q + qn, sizeof q - (size_t)qn, "%s%ld", j ? "," : "", j % 90);
+            snprintf(q + qn, sizeof q - (size_t)qn, ")");
+            sql_executa(q, &o);
+            int poe = o.ok;
+            /* lê-se a ÚLTIMA coluna, que é a que um tecto teria comido */
+            snprintf(q, sizeof q, "SELECT c%ld FROM t%d", n - 1, k);
+            sql_executa(q, &o);
+            long lida = (o.ok && o.nrows == 1) ? atol(o.cell[0][0]) : -1;
+            long espera = (n - 1) % 90;
+            printf("        %3ld colunas: cria %s · escreve %s · a última lê %ld"
+                   " (espera %ld)%s\n", n, criou ? "sim" : "NÃO", poe ? "sim" : "NÃO",
+                   lida, espera, (criou && poe && lida == espera) ? "" : "  ← NÃO BATE");
+            if(criou && poe && lida == espera) certas++;
+        }
+        printf("      → %ld de 4 larguras\n", certas);
+        if(certas != 4) mal++;
+
+        /* (2) E O `WHERE` NÃO OLHA PARA ONDE A COLUNA ESTÁ. O símbolo do tensor
+         * era o ÍNDICE da coluna, pelo que uma condição sobre a 99ª nem sequer
+         * parseava --- e o que falhava não era a expressão ser grande, era a
+         * coluna estar longe do princípio. O CONTROLO é a condição FALSA na
+         * mesma coluna: sem ele, um WHERE que deixasse passar tudo dava o mesmo
+         * «sim» e não estaria a decidir nada. */
+        sql_executa("SELECT c299 FROM t3 WHERE c299 = 29", &o);
+        long ach = (o.ok && o.nrows == 1) ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT c299 FROM t3 WHERE c299 = 7", &o);
+        long nao = o.ok ? o.nrows : -1;
+        sql_executa("SELECT c150 FROM t3 WHERE c299 = 29 AND c150 = 60", &o);
+        long duas = (o.ok && o.nrows == 1) ? atol(o.cell[0][0]) : -1;
+        printf("      WHERE na coluna 299: acha %ld (espera 29) · a condição falsa dá"
+               " %ld linha(s) · e duas colunas longe: %ld (espera 60)\n", ach, nao, duas);
+        if(ach != 29 || nao != 0 || duas != 60) mal++;
+
+        /* (3) O QUE NÃO CABE NO TRANSPORTE É RECUSADO, E NÃO TRUNCADO. Este
+         * tecto é REAL e é do fio, não do objecto: a struct que atravessa a
+         * fronteira C vive na pilha. A tabela de 300 colunas existe e escreve-se
+         * inteira --- o que não passa é a LINHA TODA de uma vez, e a resposta é
+         * uma recusa que diz o número, porque uma linha truncada tem a mesma
+         * cara de uma linha completa e a posição k passa a ser outra coisa. */
+        sql_executa("SELECT * FROM t3", &o);
+        int recusou = !o.ok;
+        printf("      SELECT * de 300 colunas no fio de %d: %s%s%s\n",
+               SQL_OUT_MAX_COLS, recusou ? "RECUSADO — " : "aceitou (NÃO)",
+               recusou ? o.err : "", "");
+        if(!recusou) mal++;
+        /* e o CONTROLO: a mesma tabela responde quando se nomeiam as colunas */
+        sql_executa("SELECT c299, c150, c0 FROM t3", &o);
+        int nomeadas = (o.ok && o.ncols == 3 && o.nrows == 1);
+        printf("      e as MESMAS colunas, nomeadas, atravessam: %s\n",
+               nomeadas ? "sim" : "NÃO");
+        if(!nomeadas) mal++;
+
+        /* (4) O ÍNDICE TAMBÉM NÃO TEM O TECTO DAS OITO ÁRVORES. */
+        sql_executa("CREATE INDEX ix188 ON t3 (c250)", &o);
+        int idx = o.ok;
+        sql_executa("SELECT c250 FROM t3 WHERE c250 = 70", &o);
+        long viu = (o.ok && o.nrows == 1) ? atol(o.cell[0][0]) : -1;
+        printf("      índice sobre a coluna 250: %s · e responde %ld (espera 70)\n",
+               idx ? "criado" : "RECUSADO", viu);
+        if(!idx || viu != 70) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("A DIMENSÃO É PARÂMETRO, E NÃO TECTO --- E OS TECTOS QUE HAVIA ESCREVIAM POR"
+           " CIMA EM VEZ DE RECUSAR. O `aranha` §sec:dimensao põe a dimensão num sítio"
+           " só e como PARÂMETRO: «as cláusulas valem palavra por palavra em qualquer"
+           " posto n ≥ 1», e a §sec:escada constrói a largura por DOBRA, com o encaixe"
+           " por prefixos a pôr cada andar dentro do seguinte. O motor tinha oito, doze,"
+           " dezasseis, trinta e dois --- números postos por quem escreveu a linha e não"
+           " voltou lá ---, e o pior não era recusarem: era ESCREVEREM POR CIMA. O"
+           " INSERT punha a constante de cada coluna em S_K, que tem dezasseis slots, e"
+           " a 52ª aterrava no S_CORPO: uma tabela de 56 colunas passava a ter a"
+           " primeira coluna «áurea» sem ninguém a ter declarado. O denominador vivia em"
+           " S_KZ, que tem OITO, e às duzentas colunas apagava o NOME da tabela, que"
+           " «deixava de existir» depois de o INSERT dizer que tinha inserido. E o"
+           " catálogo guardava o número de colunas num BYTE: 500 colunas eram lidas como"
+           " 244, e a partir daí o endereço i·ncols+j era o de outra tabela. Agora cada"
+           " um tem casa própria, o número de colunas é um PAR --- o mesmo thm:espaco"
+           " F_w ⊕ σF_w da célula ---, e o tecto de cada coisa é uma conta sobre o mapa"
+           " de zonas: COL_MAX é o que a zona dos nomes segura, e as árvores de índice"
+           " são as que cabem até ao S_CANAL. Medido em quatro larguras, de 8 a 300, com"
+           " a ÚLTIMA coluna a ser lida --- que é a que um tecto teria comido. E o WHERE"
+           " deixou de olhar para ONDE a coluna está: o símbolo do tensor atribui-se por"
+           " ordem de aparecimento, pelo que o tecto passou a ser o da EXPRESSÃO, que é"
+           " onde ele tem sentido. O único tecto que fica é o do FIO, e esse é real: a"
+           " struct que atravessa a fronteira C vive na pilha, e o que não cabe é"
+           " RECUSADO com o número dito --- as mesmas colunas, nomeadas, atravessam.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

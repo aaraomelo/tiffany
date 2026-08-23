@@ -206,6 +206,23 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define ISA_TECTO (1u << ISA_BITS)
 #define ZBITS     14u                    /* 2^14 = 16384 slots por zona grande */
 #define ZONA(k)   ((unsigned)(k) << ZBITS)
+#define ZONA_SLOTS (1u << ZBITS)          /* quantos slots uma zona segura */
+
+/* ── QUANTAS COLUNAS: O TECTO É O DO ENDEREÇO, E NÃO UM NÚMERO ESCOLHIDO ─────
+ *
+ * O `aranha` §sec:dimensao é explícito: a dimensão entra num sítio só e entra
+ * como PARÂMETRO --- «as cláusulas valem palavra por palavra em qualquer posto
+ * n ≥ 1» ---, e a §sec:escada constrói a largura por DOBRA, com o encaixe por
+ * prefixos a pôr cada andar dentro do seguinte. Um tecto em oito, em dezasseis
+ * ou em trinta e dois não vem de lado nenhum da teoria: vem de quem escreveu a
+ * linha e não voltou lá.
+ *
+ * O que existe de facto é o espaço de endereços: cada zona segura ZONA_SLOTS
+ * Words, e um nome de coluna ocupa S_COLNOME_W delas. Daí sai o número, e ele
+ * DIZ-SE quando uma recusa acontece --- «a tabela tem N colunas e o corpo vai a
+ * COL_MAX» é uma frase sobre a máquina; «já tem 8 colunas» era uma frase sobre
+ * um esquecimento. */
+#define COL_MAX   (ZONA_SLOTS / 16u)      /* = 1024, o que a zona dos nomes segura */
 
 /* ── abaixo do tecto da ISA: o que o bytecode endereça ─────────────────── */
 #define S_CAT     0
@@ -274,6 +291,27 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
                               * livre entre o S_CORPO (60..67) e o S_EXPR (72..199); o
                               * 56 que eu tinha posto é o S_KZ+7 */
 #define S_K       8          /* 8..23  a constante de cada condição                     */
+/* ── AS CONSTANTES DO INSERT TÊM CASA PRÓPRIA, E ANTES NÃO TINHAM ───────────
+ *
+ * O INSERT punha o valor de CADA COLUNA em `S_K + j`, e o S_K tem dezasseis
+ * slots --- são as constantes das CONDIÇÕES (MAXCOND × MAXTERMO). Com mais de
+ * dezasseis colunas a escrita saía da região e ia caindo, uma a uma, em cima do
+ * que estava a seguir: S_COND, S_TERMO, S_KZ, o S_DIA, e a 52ª coluna aterrava
+ * em S_CORPO --- o corpo da tabela. Uma tabela com 56 colunas passava a ter a
+ * primeira coluna «áurea» e a terceira «cristalina», sem ninguém as ter
+ * declarado, e nada falhava: os valores iam para o sítio certo e o CATÁLOGO é
+ * que mudava por baixo.
+ *
+ * Não era um tecto que recusasse --- era um tecto que ESCREVIA POR CIMA. A casa
+ * é a região livre entre o fim do S_VIVO e o S_LIN, e tem COL_MAX slots, que é
+ * o mesmo tecto derivado de todo o resto. */
+#define S_KINS    1024       /* 1024..2047: uma constante por COLUNA, no INSERT */
+#define S_KDEN    2048       /* 2048..3071: e o DENOMINADOR de cada coluna, o mesmo caso.
+                              * Este vivia em S_KZ, que tem OITO slots (49..56) --- com
+                              * duzentas colunas a escrita ia de 49 a 248 e apanhava o
+                              * S_CORPO, o S_EXPR inteiro, o S_NR e o S_NOME: a tabela
+                              * perdia o NOME e passava a «não existir», depois de o
+                              * INSERT dizer que tinha inserido. */
 #define S_COND    24         /* 24..39 o resultado de cada condição (0 ou 1)            */
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
 #define S_UME     48         /* o "um" no campo .e — para incrementar nrows              */
@@ -315,6 +353,18 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  * vez, cada um com medidor antes de entrar — que é o método que o Aarão pediu e que hoje
  * mostrou ser o único que fecha. */
 #define S_CORPO   60         /* 60..67: o corpo de cada coluna */
+/* ── QUANTAS COLUNAS: O NÚMERO É UM PAR, COMO A CÉLULA ──────────────────────
+ *
+ * O catálogo guardava a contagem de colunas em `cat.total`, que é um Word8 ---
+ * UM BYTE. Uma tabela de 500 colunas era criada com 500, anunciada com 500, e
+ * lida com 244: o resto da divisão por 256. Não recusava; DAVA OUTRO NÚMERO, e
+ * a partir daí o endereço de cada célula (i·ncols+j) era o de outra tabela.
+ *
+ * A saída é a mesma do thm:espaco que a célula já usa --- F_{2w} = F_w ⊕ σF_w,
+ * a segunda cópia multiplicada por σ ---: o byte alto num plano paralelo. Quem
+ * lê em baixo continua a ler o mesmo, e uma base gravada antes disto tem o
+ * plano alto a zero, que é exactamente o número que ela já tinha. */
+#define S_NCOLA   70         /* o byte ALTO do número de colunas */
 #define CORPO_INTEIRO  0     /* o de sempre — e continua a ser o omitido, sem quebrar base antiga */
 #define CORPO_RACIONAL 1
 #define CORPO_AUREO    2
@@ -528,8 +578,22 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define VIEW_TAB(i)   (S_VIEW + (unsigned)(i)*VIEW_W + 8u)    /* 8 Words: 16 chars */
 #define VIEW_COND(i)  (S_VIEW + (unsigned)(i)*VIEW_W + 16u)   /* 48 Words: 96 chars */
 
-#define IDX_MAXCOL     8
-#define S_IDXBASE(k)   (ISA_TECTO + ZONA(16 + (k)))
+/* QUANTAS ÁRVORES: AS QUE O ESPAÇO DE ZONAS SEGURA.
+ *
+ * Eram oito, «as que o S_CORPO segura» --- um tecto herdado de outro tecto, e
+ * esse já caiu. Custava caro: o esquema do cliente pede um índice na décima
+ * primeira coluna e o motor recusava, não por a árvore não caber, mas por o
+ * número de árvores ter sido escrito quando as colunas eram oito.
+ *
+ * As oito primeiras ficam onde estavam --- ZONA(16..23) ---, porque há `.mem`
+ * gravados com elas lá; as seguintes continuam em ZONA(32) e vão até ao pé do
+ * S_CANAL, que é a fronteira real. O tecto passa a ser uma CONTA sobre o mapa
+ * de zonas, e não um número. */
+#define IDX_ZONA0      16u                /* as oito primeiras, onde sempre estiveram */
+#define IDX_ZONA1      32u                /* e daí em diante, até ao S_CANAL */
+#define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
+#define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
+                                                 : IDX_ZONA1 + (unsigned)(k) - 8u))
 #define S_IDXCAB(k)    (S_IDXBASE(k))        /* {coluna+1, 0}                    */
 #define S_IDXCAB2(k)   (S_IDXBASE(k) + 1)    /* as linhas indexadas, no par      */
 #define S_IDXNOS(k)    (S_IDXBASE(k) + 2)    /* o contador de NÓS da árvore      */
@@ -666,19 +730,23 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define S_BYPASS    (S_RLS + 3)              /* {1,0} = a sessão passa por cima */
 
 #define S_CORPOX    (ISA_TECTO + ZONA(25))
-#define S_CORPOX_N  32u
+#define S_CORPOX_N  COL_MAX   /* o corpo de cada coluna: uma Word, e cabem ZONA_SLOTS */
 
 #define S_DEFAULT   (ISA_TECTO + ZONA(27))
-#define S_DEFAULT_N 32u
+#define S_DEFAULT_N COL_MAX   /* o DEFAULT de cada coluna, no mesmo passo */
 
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
-/* TANTAS QUANTAS O CORPO SEGURA --- e o corpo passou a segurar S_CORPOX_N.
- * O 8 ficou de quando as oito eram tudo: uma tabela com onze colunas era criada
- * com onze e só oito tinham NOME, logo a nona não se podia citar nem indexar. A
- * zona tem 16384 slots e cada nome ocupa S_COLNOME_W = 16: cabem 1024. */
-#define S_COLNOME_N 32u
+/* TANTAS QUANTAS A ZONA SEGURA. O 8 ficou de quando as oito eram tudo, e o 32
+ * foi o meu passo seguinte --- que é o mesmo erro com outro número. A zona tem
+ * ZONA_SLOTS Words e cada nome ocupa S_COLNOME_W: o tecto é o quociente, e nada
+ * mais. */
+#define S_COLNOME_N (ZONA_SLOTS / S_COLNOME_W)
 /* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
 #define MAXLIN    250
+/* quantas chaves uma propagação de seta pode olhar de uma vez --- é o tamanho
+ * de um lote de trabalho e não uma dimensão do objecto, e por isso RECUSA em
+ * vez de truncar quando é ultrapassado */
+#define FK_MORRE_MAX 4096
 #define MAXNO     64         /* nós da árvore do WHERE                                  */
 #define SLOTSZ    SLOT_WORD_BYTES
 
@@ -1016,6 +1084,15 @@ static long bits_conta(unsigned base, long n){
     return soma;
 }
 
+static long cat_ncols(void){
+    Word c = mem_le(S_CAT);
+    return (long)c.total | ((long)mem_le(S_NCOLA).total << 8);
+}
+static void cat_ncols_poe(long n){
+    Word c = mem_le(S_CAT); c.total = (Word8)(n & 255); mem_grava(S_CAT, c);
+    Word a; a.total = (Word8)((n >> 8) & 255); a.e = 0; mem_grava(S_NCOLA, a);
+}
+
 static long cat_nrows(void){
     Word w = mem_le(S_NR);
     long n = (long)((unsigned long)w.total | ((unsigned long)w.e << 8));
@@ -1338,7 +1415,7 @@ static long celula_valor(long i, long j, long ncols);
 static int fk_existe(const char *tab, int col, long valor, const char *guarda){
     int achou = 0;
     if(!usa_tabela(tab, 0) || !cat_nome_bate(tab)){ usa_tabela(guarda, 0); return -1; }
-    { long nc = mem_le(S_CAT).total, nr = cat_nrows();
+    { long nc = cat_ncols(), nr = cat_nrows();
       if(col < 0 || col >= nc){ usa_tabela(guarda, 0); return -1; }
       /* a árvore, se a houver — e numa coluna UNIQUE há sempre */
       if(col < IDX_MAXCOL && idx_valido(col, nr)){
@@ -1378,7 +1455,7 @@ static int col_indice(const char *nome){
     if(!nome || !nome[0]) return -1;
     for(i = 0; nome[i] && i < (int)sizeof alvo - 1; i++) alvo[i] = baixa1(nome[i]);
     alvo[i] = 0;
-    ncols = mem_le(S_CAT).total;
+    ncols = cat_ncols();
     for(j = 0; j < (int)S_COLNOME_N && j < ncols; j++){
         col_nome_le(j, guardado, (int)sizeof guardado);
         if(guardado[0] && !strcmp(guardado, alvo)) return j;
@@ -2248,12 +2325,15 @@ static int cria(const char *resto){
     if(*p != '('){ cria_desfaz(nome); return 0; }
     p++;
     long ncols = 0; char c[64];
-    long corpo[32], parm[32], restr[32], defv[32], deftem[32];
+    /* UM POR COLUNA, e o tecto é o COL_MAX derivado. Estáticos porque COL_MAX é
+     * grande de propósito: a pilha não é sítio para a dimensão do objecto. */
+    static long corpo[COL_MAX], parm[COL_MAX], restr[COL_MAX], defv[COL_MAX], deftem[COL_MAX];
     char chk[S_CHECK_W * 2 + 2]; chk[0] = 0;
-    char fk_tab[32][64], fk_alvo[32][64]; long fk_col[32], fk_modo[32];
-    for(int q = 0; q < 32; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
+    static char fk_tab[COL_MAX][64], fk_alvo[COL_MAX][64];
+    static long fk_col[COL_MAX], fk_modo[COL_MAX];
+    for(unsigned q = 0; q < COL_MAX; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
                                  fk_col[q] = -1; fk_modo[q] = 0;
-                                 defv[q] = 0; deftem[q] = 0; }
+                                 defv[q] = 0; deftem[q] = 0; parm[q] = 0; corpo[q] = 0; }
     while(1){
         { /* `CHECK (...)` no meio da lista é restrição da TABELA e não uma
            * coluna chamada «check»: quem decide é o parêntese a seguir. */
@@ -2560,9 +2640,10 @@ static int cria(const char *resto){
     w.total = 0; w.e = 0; mem_grava(S_ZERO, w);
     w.total = -1; w.e = 0; mem_grava(S_MT, w);      /* AND com isto zera o .e e guarda o total */
     w.total = 1; w.e = 0; mem_grava(S_UM, w);
-    emit_copia(S_K, S_CAT);                                     /* cat.total = ncols */
+    emit_copia(S_K, S_CAT);                                     /* o byte baixo, pela ISA */
     emit1(OP_HALT);
     rodar(pc_emit);
+    cat_ncols_poe(ncols);        /* e o par completo: o alto no plano paralelo */
     /* ── OS PLANOS ALTOS LIMPAM-SE COM A TABELA.
      *
      * Desde que a leitura passou a juntar os dois planos --- baixo | alto ---, o
@@ -2588,7 +2669,7 @@ static int cria(const char *resto){
     }
     /* as restrições, e a árvore que testemunha o UNIQUE. Ela nasce aqui vazia:
      * o índice de uma coluna única não é uma optimização — é a afirmação. */
-    for(long j = 0; j < ncols && j < 32; j++){
+    for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
         Word wr; wr.total = (Word8)restr[j]; wr.e = 0;
         mem_grava(S_RESTR + (unsigned)j, wr);
     }
@@ -2604,10 +2685,10 @@ static int cria(const char *resto){
      * A ida à mãe faz-se AQUI, com a filha já escrita, e volta-se: abrir outra
      * tabela relê o .mem, e o que se escreveu antes de sair fica. */
     { int alguma = 0;
-      for(long j = 0; j < ncols && j < 32; j++) if(fk_tab[j][0]) alguma = 1;
+      for(long j = 0; j < ncols && j < (long)COL_MAX; j++) if(fk_tab[j][0]) alguma = 1;
       if(alguma){
         char guarda[64]; snprintf(guarda, sizeof guarda, "%s", nome);
-        for(long j = 0; j < ncols && j < 32; j++){
+        for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
             if(!fk_tab[j][0]) continue;
             if(!usa_tabela(fk_tab[j], 0) || !cat_nome_bate(fk_tab[j])){
                 usa_tabela(guarda, 0);
@@ -2630,7 +2711,7 @@ static int cria(const char *resto){
             }
             usa_tabela(guarda, 0);
         }
-        for(long j = 0; j < ncols && j < 32; j++)
+        for(long j = 0; j < ncols && j < (long)COL_MAX; j++)
             if(fk_tab[j][0] && fk_col[j] >= 0)
                 fk_grava((int)j, fk_tab[j], (int)fk_col[j], (int)fk_modo[j]);
       } }
@@ -2717,7 +2798,7 @@ static int insere(const char *resto){
      *
      * A lista lê-se ANTES do VALUES, e cada nome resolve-se contra o catálogo:
      * um nome que não é coluna é RECUSADO, e não ignorado. */
-    long mapa[64]; int n_mapa = 0;
+    static long mapa[COL_MAX]; int n_mapa = 0;
     { const char *v0 = p;
       pula(&p);
       if(*p == '('){
@@ -2736,7 +2817,7 @@ static int insere(const char *resto){
                                  c, nome); }
                     return 0;
                 }
-                if(n_mapa < 64) mapa[n_mapa++] = ci; }
+                if(n_mapa < (int)COL_MAX) mapa[n_mapa++] = ci; }
               pula(&p);
               if(*p == ','){ p++; continue; }
               break;
@@ -2749,14 +2830,21 @@ static int insere(const char *resto){
     if(!palavra(&p, "VALUES")) return 0;
     pula(&p); if(*p != '(') return 0; p++;
 
-    Word cat = mem_le(S_CAT);
-    long ncols = cat.total, nrows = cat_nrows();
-    long v[64], nv = 0;
+    Word cat = mem_le(S_CAT); (void)cat;
+    long ncols = cat_ncols(), nrows = cat_nrows();
+    static long v[COL_MAX]; long nv = 0;
     /* o PADRÃO do segundo componente vem do CORPO: no racional é denominador (1), no áureo é
      * o coeficiente de σ (0 — "5" é o inteiro 5, não 5+σ). O par é o mesmo; o que muda é o que
      * ele significa, e quem diz é a coluna. */
-    long den[16];
-    for(int q = 0; q < 16; q++){
+    /* O DENOMINADOR POR COLUNA, e eram DEZASSEIS.
+     *
+     * Uma tabela com vinte colunas escrevia `den[16]` fora do array, e o que
+     * saía não era uma recusa: era «o valor da coluna 16 não cabe no envelope
+     * (segundo componente 4294967297)» --- um número que não vem de dado
+     * nenhum. O tecto não recusava, CORROMPIA, e a mensagem culpava a célula
+     * pelo que era a leitura a cair fora da sua casa. */
+    static long den[COL_MAX];
+    for(unsigned q = 0; q < COL_MAX; q++){
         long cq = corpo_de(q).total;
         den[q] = (cq == CORPO_AUREO || cq == CORPO_CRISTAL) ? 0 : 1;
     }
@@ -2764,8 +2852,8 @@ static int insere(const char *resto){
      * dizer NULL não é escrever zero: é deixar a célula no suporte. É a única
      * forma de a ausência ser ESCOLHIDA em vez de herdada, e sem ela o dual só
      * nascia por omissão (coluna nova, linha curta). */
-    int nulo[64];
-    for(int q = 0; q < 64; q++) nulo[q] = 0;
+    static int nulo[COL_MAX];
+    for(unsigned q = 0; q < COL_MAX; q++) nulo[q] = 0;
     while(nv < ncols){
         pula(&p);
         if(palavra(&p, "NULL")){
@@ -2988,7 +3076,7 @@ static int insere(const char *resto){
      * Escrever um valor que não está do outro lado é criar uma seta para lado
      * nenhum. A ausência não é uma seta: uma célula NULL não aponta e nada
      * exige. Corre ANTES de a ISA escrever, e a linha inteira é recusada. */
-    for(long j = 0; j < ncols && j < 32; j++){
+    for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
         char mt[64];
         int mc = fk_le((int)j, mt, sizeof mt);
         if(mc < 0 || j >= nv || nulo[j]) continue;
@@ -3004,7 +3092,7 @@ static int insere(const char *resto){
           return 0; }
     }
 
-    for(long j = 0; j < ncols && j < 32; j++){
+    for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
         long r = mem_le(S_RESTR + (unsigned)j).total;
         if(!r) continue;
         if((r & R_NOTNULL) && (j >= nv || nulo[j])){
@@ -3056,8 +3144,8 @@ static int insere(const char *resto){
     Word w = {0,0}; mem_grava(S_ZERO, w);
     for(long j = 0; j < ncols; j++){
         w.total = v[j]; w.e = den[j];      /* e = denominador; 1 para inteiro */
-        mem_grava(S_K + (unsigned)j, w);                        /* a constante, na memória */
-        emit_copia(S_K + (unsigned)j, S_LINHAS + (unsigned)(nrows*ncols + j));
+        mem_grava(S_KINS + (unsigned)j, w);                     /* a constante, na memória */
+        emit_copia(S_KINS + (unsigned)j, S_LINHAS + (unsigned)(nrows*ncols + j));
         /* o byte ALTO no plano paralelo — a Word da linha não muda, e por isso
          * toda a aritmética emitida continua a ler exactamente o que sempre leu */
         { Word wa; wa.total = (Word8)(((unsigned long)v[j] >> 8) & 255u); wa.e = 0;
@@ -3072,8 +3160,8 @@ static int insere(const char *resto){
          * agente a carregar o mapa. */
         if(v[j] >= 0) col_marca(j, (unsigned long)v[j]);
         Word wd; wd.total = den[j]; wd.e = 0;
-        mem_grava(S_KZ + (unsigned)j, wd);
-        emit_copia(S_KZ + (unsigned)j, S_DEN + (unsigned)(nrows*ncols + j));
+        mem_grava(S_KDEN + (unsigned)j, wd);
+        emit_copia(S_KDEN + (unsigned)j, S_DEN + (unsigned)(nrows*ncols + j));
     }
     /* nrows++ pela própria máquina: LOAD cat, LOAD um, ADD, STORE — mas nrows é o campo .e,
      * e a ULA soma componente a componente; então a constante um vai no campo .e. */
@@ -3204,7 +3292,22 @@ enum { ACAO_MARCA, ACAO_SET, ACAO_APAGA };
  * um slot que vale 0 ou 1 é XOR com 1 — opcode que a ISA já tem. Não se inventou comparação
  * nova: acrescentou-se um XOR.
  */
-#define NCOL 6                 /* colunas que uma expressão pode citar */
+/* ── SEIS COLUNAS NUMA EXPRESSÃO, E NÃO «AS SEIS PRIMEIRAS» ─────────────────
+ *
+ * O NCOL conta quantas colunas DISTINTAS um WHERE pode citar --- é a ordem do
+ * tensor a impor isso, e NMON = NI^KGRAU cresce ao cubo, pelo que o número é
+ * uma escolha de custo e não um esquecimento. O que ERA um esquecimento: o
+ * símbolo do tensor era o ÍNDICE da coluna (`d[0] = col + 1`), pelo que
+ * `WHERE c20 = 5` numa tabela de vinte e quatro colunas nem sequer parseava ---
+ * «o WHERE não foi entendido» ---, e o que falhava não era a expressão ser
+ * grande: era a coluna estar longe do princípio da tabela.
+ *
+ * Agora o símbolo atribui-se por ORDEM DE APARECIMENTO na expressão, e uma
+ * tabela pequena diz qual coluna cada símbolo é. `WHERE c99 = 5` usa o símbolo
+ * 1; `WHERE c99 = 5 AND c40 > 2` usa o 1 e o 2. O tecto passou a ser sobre a
+ * EXPRESSÃO, que é onde ele tem sentido --- e quando ela cita mais do que NCOL
+ * colunas distintas, a recusa DIZ isso, em vez de dizer que não entendeu. */
+#define NCOL 6                 /* colunas DISTINTAS que uma expressão pode citar */
 #define CMAX 8                 /* (histórico: era o teto da soma repetida — ver emit_mul_zeck) */
 
 #define NI    (NCOL+1)         /* símbolo 0 = a constante 1; 1..NCOL = as colunas */
@@ -3268,6 +3371,23 @@ static void ten_mon(struct tensor *t, int *d, long c){ t->c[mi_cod(d)] += c; }
 static void ten_const(struct tensor *t, long k){
     int d[KGRAU]; memset(d, 0, sizeof d); ten_mon(t, d, k);
 }
+/* ── O SÍMBOLO E A COLUNA ────────────────────────────────────────────────────
+ * `sim_col[k]` é a coluna que o símbolo k+1 nomeia nesta expressão. Zera-se a
+ * cada WHERE lido; `sim_de` devolve o símbolo de uma coluna, atribuindo-o se
+ * for a primeira vez, e −1 quando já não há símbolos. */
+static long sim_col[NCOL];
+static int  sim_n = 0;
+static void sim_zera(void){ sim_n = 0; for(int k = 0; k < NCOL; k++) sim_col[k] = -1; }
+static int  sim_de(long col){
+    for(int k = 0; k < sim_n; k++) if(sim_col[k] == col) return k;
+    if(sim_n >= NCOL) return -1;
+    sim_col[sim_n] = col; return sim_n++;
+}
+static long col_de_sim(int sim){          /* sim é 0-based; d[k]-1 dá-o */
+    if(sim < 0 || sim >= sim_n) return -1;
+    return sim_col[sim];
+}
+
 static void ten_var(struct tensor *t, int col){
     int d[KGRAU]; memset(d, 0, sizeof d); d[0] = col + 1; ten_mon(t, d, 1);
 }
@@ -3334,7 +3454,7 @@ static long ten_avalia(struct tensor t, long i, long ncols, long *den){
           mi_de(cod, d);
           for(int k = 0; k < KGRAU; k++){
               if(d[k] == 0) continue;                  /* o símbolo 0 é o 1 */
-              { long j2 = d[k] - 1;
+              { long j2 = col_de_sim(d[k] - 1);
                 if(j2 < 0 || j2 >= ncols){ termo = 0; break; }
                 termo *= celula_valor(i, j2, ncols); }
           }
@@ -3438,9 +3558,15 @@ static int le_fator_num(const char **p, struct tensor *t){
         char nome[64];
         if(!ident(p, nome, sizeof nome)) return 0;
         int col = col_indice(nome);          /* pelo NOME; a letra é o recurso das bases antigas */
-        if(col < 0 || col >= NCOL) return 0;
-        ten_var(t, col);                           /* o símbolo col+1 é a coluna */
-        citadas_where |= 1u << col;                /* para a guarda de corpo — ver checa_corpos */
+        if(col < 0) return 0;
+        int sim = sim_de(col);
+        if(sim < 0){
+            printf("erro: a expressão cita mais de %d colunas distintas — RECUSADA."
+                   " O tecto é da EXPRESSÃO (a ordem do tensor), e não da tabela.\n", NCOL);
+            return 0;
+        }
+        ten_var(t, sim);                           /* o símbolo sim+1 é ESTA coluna */
+        if(col < 32) citadas_where |= 1u << col;   /* a guarda de corpo — ver checa_corpos */
         return 1;
     }
     return 0;
@@ -4011,8 +4137,8 @@ static int atom_cabe(const struct arvore *a, int j, long ncols, long nrows, long
         long long mag = 1;
         for(int t = 0; t < KGRAU; t++){
             if(!d[t]) continue;
-            long cc = d[t] - 1;
-            if(cc >= ncols) return 0;
+            long cc = col_de_sim(d[t] - 1);
+            if(cc < 0 || cc >= ncols) return 0;
             unsigned long mx = col_max(cc, ncols, nrows);
             mag *= (long long)(mx ? mx : 1);
             if(mag > 0x7FFFFFFFLL) return 0;
@@ -4037,8 +4163,8 @@ static int cl_cabe16(const struct arvore *a, long ncols, long nrows){
             long long mag = 1;
             for(int t = 0; t < KGRAU; t++){
                 if(!d[t]) continue;
-                long cc = d[t] - 1;
-                if(cc >= ncols) return 0;
+                long cc = col_de_sim(d[t] - 1);
+                if(cc < 0 || cc >= ncols) return 0;
                 unsigned long mx = col_max(cc, ncols, nrows);
                 mag *= (long long)(mx ? mx : 1);
                 if(mag > 0x7FFFFFFFLL) return 0;
@@ -4188,8 +4314,14 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
         for(int cod = 1; cod < NMON; cod++){
             if(!a->av[j].c[cod]) continue;
             int dd[KGRAU]; mi_de(cod, dd);
-            for(int t = 0; t < KGRAU; t++) if(dd[t] && dd[t]-1 < ncols && !cit[dd[t]-1]){
-                cit[dd[t]-1] = 1; unica = dd[t]-1; ncit++;
+            /* conta-se por SÍMBOLO --- que é o que cabe no cit[NCOL] --- e o
+             * que se guarda em `unica` é a COLUNA, que é o que o resto usa */
+            for(int t = 0; t < KGRAU; t++){
+                int sm = dd[t] ? dd[t] - 1 : -1;
+                if(sm < 0 || sm >= NCOL || cit[sm]) continue;
+                long cc = col_de_sim(sm);
+                if(cc < 0 || cc >= ncols) continue;
+                cit[sm] = 1; unica = (int)cc; ncit++;
             }
         }
         Word w; w.total = a->av[j].c[0]; w.e = 0;
@@ -4240,12 +4372,14 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 int d1[KGRAU]; mi_de(cod, d1);
                 if(mi_cod(d1) != cod) continue;
                 int gr = mi_grau(cod), fora16 = 0;
-                for(int t = 0; t < KGRAU; t++)
-                    if(d1[t] && d1[t]-1 >= ncols) fora16 = 1;
+                for(int t = 0; t < KGRAU; t++){
+                    long cx = d1[t] ? col_de_sim(d1[t]-1) : -1;
+                    if(d1[t] && (cx < 0 || cx >= ncols)) fora16 = 1;
+                }
                 if(fora16) continue;
                 if(gr == 1){
                     int cc = -1;
-                    for(int t = 0; t < KGRAU; t++) if(d1[t]) cc = d1[t] - 1;
+                    for(int t = 0; t < KGRAU; t++) if(d1[t]) cc = (int)col_de_sim(d1[t] - 1);
                     emit_valor16(x16, linha, ncols, cc, tmp16);
                 }else{
                     /* GRAU >= 2: o monómio é um produto de colunas, e o produto de
@@ -4254,7 +4388,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                     int primeiro = 1;
                     for(int t = 0; t < KGRAU; t++){
                         if(!d1[t]) continue;
-                        emit_valor16(q16, linha, ncols, d1[t] - 1, tmp16);
+                        emit_valor16(q16, linha, ncols, (int)col_de_sim(d1[t] - 1), tmp16);
                         if(primeiro){ emit_copia(q16, x16); primeiro = 0; }
                         else { emit_mul16(p16, x16, q16, base16); emit_copia(p16, x16); }
                     }
@@ -4280,7 +4414,10 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             int d[KGRAU]; mi_de(cod, d);
             if(mi_cod(d) != cod) continue;                 /* só os representantes ordenados */
             int g = mi_grau(cod), fora = 0;
-            for(int t = 0; t < KGRAU; t++) if(d[t] && d[t]-1 >= ncols) fora = 1;
+            for(int t = 0; t < KGRAU; t++){
+                long cx = d[t] ? col_de_sim(d[t]-1) : -1;
+                if(d[t] && (cx < 0 || cx >= ncols)) fora = 1;
+            }
             if(fora) continue;
             long n = c < 0 ? -c : c;      /* nada de truncar: o coeficiente entra inteiro */
 
@@ -4304,12 +4441,18 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 if(corpo_tem_regua(cw.total)){ b_ref = corpo_B(cw.total, cw.e); b_ref_ok = 1; }
             }
             emit_copia(S_UM, prod);
+            /* `cc` percorre os SÍMBOLOS da expressão; a coluna que cada um
+             * nomeia vem do mapa. Antes eram a mesma coisa, e por isso o
+             * endereço da célula saía do símbolo --- certo enquanto a coluna
+             * citada fosse uma das seis primeiras, e errado a partir daí. */
             for(int cc = 0; cc < NCOL; cc++){
                 if(!cit[cc]) continue;
+                long ccol = col_de_sim(cc);
+                if(ccol < 0 || ccol >= ncols) continue;
                 int usa = 0;
                 for(int t = 0; t < KGRAU; t++) if(d[t] == cc+1) usa = 1;
-                unsigned fonte = usa ? (S_LINHAS + (unsigned)(linha*ncols + cc))
-                                     : (S_DEN    + (unsigned)(linha*ncols + cc));
+                unsigned fonte = usa ? (S_LINHAS + (unsigned)(linha*ncols + ccol))
+                                     : (S_DEN    + (unsigned)(linha*ncols + ccol));
                 /* O TRANSPORTE, LIGADO. Se a coluna vive noutra base da MESMA classe, o
                  * valor tem de ser levado à base de referência antes de entrar no produto —
                  * e isso é φ_t, o cisalhamento, palavra nos geradores.
@@ -4319,7 +4462,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                  * contrário, φ_t receberia b = 0 e seria a identidade. */
                 emit_copia(fonte, tmpm);
                 {
-                    Word cwc = corpo_de(cc);
+                    Word cwc = corpo_de(ccol);
                     if(usa && b_ref_ok && corpo_tem_regua(cwc.total)){
                         long t = (b_ref - corpo_B(cwc.total, cwc.e)) / 2;
                         if(t) emit_transporte(t, tmpm);
@@ -4370,6 +4513,7 @@ static int check_avalia(long i, long ncols, const char *texto){
     unsigned salvo = citadas_where;
     memset(&a, 0, sizeof a);
     citadas_where = 0;
+    sim_zera();          /* os símbolos são desta expressão, e de mais nenhuma */
     constantes_isa();            /* o avaliador não corre sobre memória por escrever */
     a.raiz = le_expr(&p, &a);
     if(a.raiz < 0){ citadas_where = salvo; return -1; }
@@ -4381,7 +4525,7 @@ static int check_avalia(long i, long ncols, const char *texto){
      * Quem quiser exigir presença tem a palavra para isso. */
     { unsigned cit = citadas_where;
       citadas_where = salvo;
-      for(long j = 0; j < ncols && j < 32; j++)
+      for(long j = 0; j < ncols && j < (long)COL_MAX; j++)
           if((cit & (1u << j)) && !bit_le(S_PRES, i*ncols + j)) return 1; }
     contrai_arvore(&a);
     pc_emit = 0;
@@ -4520,7 +4664,7 @@ static void constantes_isa(void){
 }
 
 static void prepara(long v, long col_do_set){
-    { Word c = mem_le(S_CAT); pres_migra(c.total, cat_nrows()); }
+    pres_migra(cat_ncols(), cat_nrows());
     constantes_isa();
     { Word w;
       /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA */
@@ -4684,7 +4828,7 @@ static void refaz_diario(void){
     printf("-- diário aberto: refazendo %s\n",
            an ? "um UPDATE que APAGA a célula" : (ac == ACAO_SET ? "um UPDATE" : "um DELETE"));
     set_anula = an;
-    aplica_diario(cat.total, cat_nrows(), ac, (int)d.e);
+    aplica_diario(cat_ncols(), cat_nrows(), ac, (int)d.e);
     set_anula = 0;
     barreira();
     Word z = {0,0}; mem_grava(S_DIA, z);
@@ -4763,7 +4907,12 @@ static void jproj_linha(int *mapa, int n, int total){
 static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long novo){
     int nf = filho_quantos(), preso = 0;
     char ft[64], guarda[64], presa[64];
-    long morre[MAXLIN]; int nm;
+    /* AS CHAVES QUE VÃO SAIR DEBAIXO DAS SETAS. Eram MAXLIN = 250 e o laço
+     * abaixo PARAVA aí --- num DELETE de trezentas linhas, as cinquenta últimas
+     * saíam sem que a propagação as visse, e as filhas ficavam com setas para
+     * chaves que já não existem. A recusa é a resposta certa quando não cabe;
+     * truncar é dizer que se propagou o que não se propagou. */
+    static long morre[FK_MORRE_MAX]; int nm;
     snprintf(guarda, sizeof guarda, "%s", mae);
     presa[0] = 0;
     for(int passo = 0; passo < 2 && !preso; passo++){
@@ -4782,7 +4931,17 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
 
             /* os valores que vão sair debaixo das setas — com a MÃE aberta */
             nm = 0;
-            for(long i = 0; i < nrows && nm < MAXLIN; i++){
+            for(long i = 0; i < nrows; i++){
+                if(nm >= FK_MORRE_MAX){
+                    printf("erro: a propagação das setas teria de olhar mais de %d chaves"
+                           " — RECUSADA. Nada foi tocado; corte em lotes menores.\n",
+                           FK_MORRE_MAX);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "foreign key cascade exceeds %d keys", FK_MORRE_MAX); }
+                    usa_tabela(guarda, 0);
+                    return 0;
+                }
                 if(!bit_le(S_MATCH, i)) continue;
                 if(!bit_le(S_PRES, i*ncols + mcol)) continue;
                 { long antigo = celula_valor(i, mcol, ncols);
@@ -4793,7 +4952,7 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
 
             /* e agora com a FILHA aberta, e a decisão já tomada */
             if(!usa_tabela(ft, 0) || !cat_nome_bate(ft)){ usa_tabela(guarda, 0); continue; }
-            { long fnc = mem_le(S_CAT).total, fnr = cat_nrows();
+            { long fnc = cat_ncols(), fnr = cat_nrows();
               long tocadas = 0;
               for(long i = 0; i < fnr; i++){
                   if(!bit_le(S_VIVO, i) || !bit_le(S_PRES, i*fnc + fc)) continue;
@@ -4883,7 +5042,7 @@ long sql_ultimo_prog = 0;
  * pergunta, e quem a quiser tem de a escrever. */
 static int checa_corpos(unsigned citadas, long ncols){
     int primeira = -1; long Dref = 0, Bref = 0;
-    for(long j = 0; j < ncols && j < 8; j++){
+    for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
         if(!(citadas & (1u << j))) continue;
         Word c = corpo_de(j);
         if(!corpo_tem_regua(c.total)) continue;
@@ -5494,7 +5653,7 @@ static int j_carrega_direita(long *ncols_dir){
     oc = col_indice(j_col_dir);
     if(oc < 0) return -2;                         /* a coluna não existe lá */
     j_col_dir_idx = oc;                           /* para a desigualdade a ler */
-    cat = mem_le(S_CAT); nc = cat.total; nr = cat_nrows();
+    cat = mem_le(S_CAT); nc = cat_ncols(); nr = cat_nrows();
     if(nc > J_MAXCOL) return -1;
     ord_limpa();
     for(long i = 0; i < nr; i++){
@@ -5933,6 +6092,7 @@ static int varre(const char *resto, int acao){
             const char *e = p;
             struct tensor t;
             citadas_where = 0;
+            sim_zera();
             if(!le_num(&e, &t)) return 0;
             pula(&e);
             if(*e && strncasecmp(e, "WHERE", 5)) return 0;
@@ -6576,8 +6736,8 @@ static int varre(const char *resto, int acao){
         return 0;
     }
 
-    Word cat = mem_le(S_CAT);
-    long ncols = cat.total, nrows = cat_nrows();
+    Word cat = mem_le(S_CAT); (void)cat;
+    long ncols = cat_ncols(), nrows = cat_nrows();
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
     /* E A LARGURA: o avaliador é de oito bits, e uma coluna que guarde acima de
@@ -7137,8 +7297,25 @@ static int varre(const char *resto, int acao){
     }
     if(sql_cap){
         /* A PROJECÇÃO: só as colunas pedidas, e por esta ordem. Com `*` são
-         * todas; com uma lista, são as dela — que é o que o cliente pediu. */
-        int nsaida = proj_n ? proj_n : (int)(ncols > SQL_OUT_MAX_COLS ? SQL_OUT_MAX_COLS : ncols);
+         * todas; com uma lista, são as dela — que é o que o cliente pediu.
+         *
+         * E O QUE NÃO CABE NO TRANSPORTE É RECUSADO, não truncado. Truncar
+         * devolvia uma linha com as primeiras colunas e a mesma cara de uma
+         * linha completa: quem lê por POSIÇÃO --- o psql, o driver, o cliente
+         * --- não tem como saber que a posição vinte é outra coisa. A tabela não
+         * tem tecto; a struct que atravessa a fronteira C tem, e diz qual. */
+        if(!proj_n && ncols > SQL_OUT_MAX_COLS){
+            printf("erro: a linha tem %ld colunas e a saída leva %d — RECUSADA."
+                   " Truncar daria uma linha com a mesma cara e outra posição;"
+                   " peça as colunas que quer, por nome.\n",
+                   ncols, SQL_OUT_MAX_COLS);
+            sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "row has %ld columns; the wire carries %d — name the columns you want",
+                     ncols, SQL_OUT_MAX_COLS);
+            return 0;
+        }
+        int nsaida = proj_n ? proj_n : (int)ncols;
         sql_cap->ncols = nsaida;
         for(int j = 0; j < nsaida; j++)
             { char cn[S_COLNOME_W * 2 + 2];
@@ -9490,7 +9667,7 @@ static int varre(const char *resto, int acao){
                              "relation \"%s\" does not exist", mat_tab2); }
                 return 0;
             }
-            { long nc2 = mem_le(S_CAT).total, nr2 = cat_nrows();
+            { long nc2 = cat_ncols(), nr2 = cat_nrows();
               int falta = 0;
               if(nc2 > LN_MAX || nr2 > LN_MAX){
                   usa_tabela(guarda, 0);
@@ -10702,7 +10879,7 @@ static int varre(const char *resto, int acao){
             if(proj_ex[k] != 1) continue;
             { long den = 1, num;
               int falta = 0;
-              for(long j = 0; j < ncols && j < 32 && !falta; j++)
+              for(long j = 0; j < ncols && j < (long)COL_MAX && !falta; j++)
                   if(ten_cita(proj_ten[k], j) && !bit_le(S_PRES, i*ncols + j))
                       falta = 1;
               if(falta){ saida[k][0] = 0; sai_nulo[k] = 1; continue; }
@@ -10747,7 +10924,7 @@ static int varre(const char *resto, int acao){
  * e a coluna sai marcada com "—". */
 
 static int distancia(void){
-    long ncols = mem_le(S_CAT).total;
+    long ncols = cat_ncols();
     if(ncols > 8) ncols = 8;
     printf("      coluna  corpo             régua (B,C)   Δ = B²−4C   classe\n");
     for(long j = 0; j < ncols; j++){
@@ -11770,7 +11947,7 @@ static int tab_enumera(char nomes[][64], int max){
 static int tab_tem_coluna(const char *t, const char *c){
     char guarda[64]; snprintf(guarda, sizeof guarda, "%s", g_tabela);
     if(!usa_tabela(t, 0)) return 0;
-    Word cat = mem_le(S_CAT); long nc = cat.total, achou = 0;
+    Word cat = mem_le(S_CAT); (void)cat; long nc = cat_ncols(), achou = 0;
     for(long z = 0; z < nc && z < (long)S_CORPOX_N && !achou; z++){
         char nz[64]; col_nome_le((int)z, nz, sizeof nz);
         if(!strcasecmp(nz, c)) achou = 1;
@@ -12123,8 +12300,8 @@ static int executa(const char *sql){
                * tabela corrente --- e se ela não existir, a política não liga:
                * uma política que não sabe o que isolar não isola nada. */
               long ci = -1;
-              { Word cat = mem_le(S_CAT); long nc = cat.total;
-                for(long z = 0; z < nc && z < 32; z++){
+              { long nc = cat_ncols();
+                for(long z = 0; z < nc && z < (long)COL_MAX; z++){
                     char nz[64]; col_nome_le((int)z, nz, sizeof nz);
                     if(!strcasecmp(nz, "tenantId")){ ci = z; break; } } }
               if(ci >= 0){
@@ -12400,8 +12577,7 @@ static int executa(const char *sql){
                              "column \"%s\" does not exist", c); }
                 return 0;
             }
-            Word cat = mem_le(S_CAT);
-            long nc = cat.total, nr = cat_nrows();
+            long nc = cat_ncols(), nr = cat_nrows();
             if(!idx_constroi(col, nc, nr)){
                 printf("erro: o índice não coube — RECUSADO (a tabela fica sem ele).\n");
                 if(sql_cap){ sql_cap->ok = 0;
@@ -12437,7 +12613,7 @@ static int executa(const char *sql){
         if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
 
         Word cat = mem_le(S_CAT);
-        long ncols = cat.total, nrows = cat_nrows();
+        long ncols = cat_ncols(), nrows = cat_nrows();
         /* O TECTO É O DO CORPO, e o corpo já vai a S_CORPOX_N. Estava em 8 de
          * quando as oito eram tudo o que havia: a zona larga entrou e o comando
          * não a alcançou. O NCOL não entra aqui --- ele conta as colunas que uma
@@ -12479,7 +12655,7 @@ static int executa(const char *sql){
             }
         /* o catálogo sobe: é aqui que o andar muda */
         long novo = ncols + 1;
-        { Word c = cat; c.total = (Word8)novo; mem_grava(S_CAT, c); }
+        cat_ncols_poe(novo);        /* o par, e não só o byte baixo */
         col_nome_grava((int)ncols, nc);
         { Word z = {0,0}; corpo_poe(ncols, z); }   /* INTEIRO, pelo acessor: a
                                                      * nona coluna vive no largo */
@@ -12826,7 +13002,7 @@ static int usa_tabela_z(const char *nome, int cria_se_falta, int zera){
          * DROP, que deixa a sessão na tabela sem nome, e é o erro disfarçado de
          * resultado vazio outra vez. Exige-se agora que a base sem nome tenha
          * mesmo um catálogo — se não tem colunas, não é tabela nenhuma. */
-        if(!g_tabela[0] && cat_nome_bate(baixo) && mem_le(S_CAT).total > 0) return 1;
+        if(!g_tabela[0] && cat_nome_bate(baixo) && cat_ncols() > 0) return 1;
         return 0;
     }
     if(fmem >= 0){ fsync(fmem); close(fmem); }
@@ -12873,7 +13049,7 @@ int sql_cols_de(const char *tabela, char nomes[][32], int cap){
     if(!tabela || !tabela[0]) return 0;
     snprintf(antes, sizeof antes, "%s", g_tabela);
     if(!usa_tabela(tabela, 0)) return 0;
-    n = mem_le(S_CAT).total;
+    n = cat_ncols();
     if(n < 0) n = 0;
     for(int j = 0; j < (int)n && j < cap; j++){
         char cn[S_COLNOME_W * 2 + 2];
@@ -12907,7 +13083,7 @@ int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
     if(!usa_tabela(tabela, 0)) return -1;
     oc = col_indice(coluna);
     if(oc < 0){ if(antes[0]) usa_tabela(antes, 0); return -1; }
-    cat = mem_le(S_CAT); nc = cat.total; nr = cat_nrows();
+    cat = mem_le(S_CAT); nc = cat_ncols(); nr = cat_nrows();
     for(long i = 0; i < nr; i++){
         if(!bit_le(S_VIVO, i)) continue;
         { long v = celula_valor(i, oc, nc);
@@ -13493,7 +13669,7 @@ int main(int argc, char **argv){
                 if(f == 0){ trava_em = pontos[q]; varre(" t SET c = 42 WHERE a >= 7", ACAO_SET); _exit(0); }
                 int st = 0; waitpid(f, &st, 0);
                 fechar_base(); abrir_base(base);
-                long ncols = mem_le(S_CAT).total, nrows = cat_nrows(), mudadas = 0;
+                long ncols = cat_ncols(), nrows = cat_nrows(), mudadas = 0;
                 for(long i = 0; i < nrows; i++)
                     if(celula_valor(i, 2, ncols) == 42) mudadas++;   /* o PAR, não o byte */
                 printf("   queda %-22s saiu %d   linhas com o valor novo: %ld   (%s)\n",
@@ -13989,7 +14165,7 @@ int main(int argc, char **argv){
                 sql_cap = &lv; memset(&lv, 0, sizeof lv);
                 executa("SELECT * FROM folha");
                 sql_cap = NULL;
-                long ncols_f = mem_le(S_CAT).total;
+                long ncols_f = cat_ncols();
                 long distintos = 0, proj_ok = 0, pares = 0;
                 for(int i = 0; i < 4; i++){
                     /* (2) pr₁ ∘ π̃ = π — o byte BAIXO é a célula velha, lida do .mem */
@@ -14069,7 +14245,7 @@ int main(int argc, char **argv){
                 unsigned long v4 = (unsigned long)m4.total | ((unsigned long)m4.e << 8);
                 /* (c) a base antiga: apaga-se a marca com linhas lá dentro */
                 { Word z = {0,0}; mem_grava(S_COLMAX + 0, z); }
-                unsigned long v5 = col_max(0, mem_le(S_CAT).total, cat_nrows());
+                unsigned long v5 = col_max(0, cat_ncols(), cat_nrows());
                 Word m6 = mem_le(S_COLMAX + 0);
                 unsigned long v6 = (unsigned long)m6.total | ((unsigned long)m6.e << 8);
                 printf("\n     marca: %lu → %lu (INSERT 300) → %lu (INSERT 7) → %lu"
