@@ -671,7 +671,11 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define S_DEFAULT_N 32u
 
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
-#define S_COLNOME_N 8u         /* tantas quantas o S_CORPO segura */
+/* TANTAS QUANTAS O CORPO SEGURA --- e o corpo passou a segurar S_CORPOX_N.
+ * O 8 ficou de quando as oito eram tudo: uma tabela com onze colunas era criada
+ * com onze e só oito tinham NOME, logo a nona não se podia citar nem indexar. A
+ * zona tem 16384 slots e cada nome ocupa S_COLNOME_W = 16: cabem 1024. */
+#define S_COLNOME_N 32u
 /* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
 #define MAXLIN    250
 #define MAXNO     64         /* nós da árvore do WHERE                                  */
@@ -2628,10 +2632,14 @@ static int cria(const char *resto){
                 fk_grava((int)j, fk_tab[j], (int)fk_col[j], (int)fk_modo[j]);
       } }
     {
+        /* OS TRÊS ÚLTIMOS NOMES FALTAVAM, e a mensagem dizia INTEIRO sobre um
+         * BOOLEANO, um TEXTO e uma DATA --- o corpo estava certo e o veredicto
+         * é que mentia, que é o pior sítio para um erro estar: quem lê o CREATE
+         * fica a saber a coisa errada e nada falha. */
         static const char *nm[8] = {"INTEIRO","RACIONAL","AUREO","MORFICO","CRISTALINO",
-                                    "INTEIRO","INTEIRO","INTEIRO"};
+                                    "BOOLEANO","TEXTO","DATA"};
         printf("tabela %s criada: %ld colunas —", nome, ncols);
-        for(long j = 0; j < ncols && j < 8; j++){
+        for(long j = 0; j < ncols && j < (long)S_CORPOX_N; j++){
             printf(" %s", nm[corpo[j] & 7]);
             if(parm[j]) printf("(%ld)", parm[j]);
         }
@@ -2765,7 +2773,10 @@ static int insere(const char *resto){
          * ENDEREÇO. O aspa dupla dentro escreve-se dobrando-a, como em toda a
          * parte --- e o que passa de TX_MAX é RECUSADO, não truncado. */
         if(*p == '\''){
-            long cq2 = (nv < 8) ? mem_le(S_CORPO + (unsigned)nv).total : CORPO_INTEIRO;
+            /* PELO ACESSOR: a nona coluna tem corpo como qualquer outra, e ler
+             * S_CORPO à mão dava-lhe INTEIRO --- uma coluna de TEXTO acima da
+             * oitava recusava a cadeia que é exactamente o que ela guarda. */
+            long cq2 = corpo_de(nv).total;
             if(cq2 != CORPO_TEXTO){
                 printf("erro: a coluna %ld não é de texto e veio uma cadeia --- RECUSADA."
                        " Um valor de outro corpo não se converte em silêncio.\n", nv);
@@ -2818,7 +2829,7 @@ static int insere(const char *resto){
             p = volta;
             /* PASSO 3: numa coluna AUREO, "a+bs" é o elemento a + bσ. O par já é o formato —
              * muda o que ele SIGNIFICA, e quem diz isso é o corpo declarado da coluna. */
-            long cpj = (nv < 8) ? mem_le(S_CORPO + (unsigned)nv).total : CORPO_INTEIRO;
+            long cpj = corpo_de(nv).total;   /* pelo acessor: o corpo vai a S_CORPOX_N */
             if(cpj == CORPO_AUREO || cpj == CORPO_CRISTAL){
                 pula(&p);
                 if(*p == '+' || *p == '-'){
@@ -4286,7 +4297,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             long b_ref = 0; int b_ref_ok = 0;
             for(int cc = 0; cc < NCOL && !b_ref_ok; cc++){
                 if(!cit[cc]) continue;
-                Word cw = (cc < 8) ? mem_le(S_CORPO + (unsigned)cc) : (Word){0,0};
+                Word cw = corpo_de(cc);
                 if(corpo_tem_regua(cw.total)){ b_ref = corpo_B(cw.total, cw.e); b_ref_ok = 1; }
             }
             emit_copia(S_UM, prod);
@@ -4305,7 +4316,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                  * contrário, φ_t receberia b = 0 e seria a identidade. */
                 emit_copia(fonte, tmpm);
                 {
-                    Word cwc = (cc < 8) ? mem_le(S_CORPO + (unsigned)cc) : (Word){0,0};
+                    Word cwc = corpo_de(cc);
                     if(usa && b_ref_ok && corpo_tem_regua(cwc.total)){
                         long t = (b_ref - corpo_B(cwc.total, cwc.e)) / 2;
                         if(t) emit_transporte(t, tmpm);
@@ -4871,7 +4882,7 @@ static int checa_corpos(unsigned citadas, long ncols){
     int primeira = -1; long Dref = 0, Bref = 0;
     for(long j = 0; j < ncols && j < 8; j++){
         if(!(citadas & (1u << j))) continue;
-        Word c = mem_le(S_CORPO + (unsigned)j);
+        Word c = corpo_de(j);
         if(!corpo_tem_regua(c.total)) continue;
         long D = corpo_delta(c.total, c.e), B = corpo_B(c.total, c.e);
         if(primeira < 0){ primeira = (int)j; Dref = D; Bref = B; continue; }
@@ -10471,7 +10482,7 @@ static int varre(const char *resto, int acao){
             char cel[SQL_OUT_CELL];
             cel[0] = 0;
             if(cp == CORPO_MORFICO){
-                long n = mem_le(S_CORPO + (unsigned)j).e; if(n < 1 || n > 62) n = 6;
+                long n = corpo_de(j).e; if(n < 1 || n > 62) n = 6;
                 unsigned long msk = (unsigned long)c.total;
                 size_t o = 0;
                 cel[o++] = '{';
@@ -10737,7 +10748,7 @@ static int distancia(void){
     if(ncols > 8) ncols = 8;
     printf("      coluna  corpo             régua (B,C)   Δ = B²−4C   classe\n");
     for(long j = 0; j < ncols; j++){
-        Word c = mem_le(S_CORPO + (unsigned)j);
+        Word c = corpo_de(j);
         if(!corpo_tem_regua(c.total)){
             printf("      %-7ld %-17s %-13s %-11s %s\n", j,
                    c.total == CORPO_RACIONAL ? "RACIONAL" :
@@ -10757,10 +10768,10 @@ static int distancia(void){
     for(long j = 0; j < ncols; j++) printf("%8ld", j);
     printf("\n");
     for(long i = 0; i < ncols; i++){
-        Word ci = mem_le(S_CORPO + (unsigned)i);
+        Word ci = corpo_de(i);
         printf("      %ld:", i);
         for(long j = 0; j < ncols; j++){
-            Word cj = mem_le(S_CORPO + (unsigned)j);
+            Word cj = corpo_de(j);
             if(!corpo_tem_regua(ci.total) || !corpo_tem_regua(cj.total)){ printf("%8s", "—"); continue; }
             long d = corpo_delta(ci.total,ci.e) - corpo_delta(cj.total,cj.e);
             printf("%8ld", d < 0 ? -d : d);
@@ -10770,7 +10781,7 @@ static int distancia(void){
     /* e onde a distância é zero, DIZ COMO ir: o transporte, e a palavra que o executa */
     int achou = 0;
     for(long i = 0; i < ncols; i++) for(long j = i+1; j < ncols; j++){
-        Word ci = mem_le(S_CORPO + (unsigned)i), cj = mem_le(S_CORPO + (unsigned)j);
+        Word ci = corpo_de(i), cj = corpo_de(j);
         if(!corpo_tem_regua(ci.total) || !corpo_tem_regua(cj.total)) continue;
         if(corpo_delta(ci.total,ci.e) != corpo_delta(cj.total,cj.e)) continue;
         if(!achou){ printf("\n      ISOMORFOS, e o transporte de cada par:\n\n");
@@ -12098,8 +12109,13 @@ static int executa(const char *sql){
 
         Word cat = mem_le(S_CAT);
         long ncols = cat.total, nrows = cat_nrows();
-        if(ncols >= NCOL || ncols >= 8){
-            printf("erro: a tabela já tem %ld colunas — RECUSADA.\n", ncols);
+        /* O TECTO É O DO CORPO, e o corpo já vai a S_CORPOX_N. Estava em 8 de
+         * quando as oito eram tudo o que havia: a zona larga entrou e o comando
+         * não a alcançou. O NCOL não entra aqui --- ele conta as colunas que uma
+         * EXPRESSÃO pode citar, que é outra pergunta. */
+        if(ncols >= (long)S_CORPOX_N){
+            printf("erro: a tabela já tem %ld colunas, e o corpo vai a %u — RECUSADA.\n",
+                   ncols, S_CORPOX_N);
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err, "too many columns"); }
             return 0;
@@ -12120,29 +12136,36 @@ static int executa(const char *sql){
                 snprintf(sql_cap->err, sizeof sql_cap->err, "table too large to alter"); }
             return 0;
         }
-        static Word velho[ALT_MAX], velho_alto[ALT_MAX];
+        /* OS TRÊS PLANOS VIAJAM JUNTOS. A célula não é o byte baixo: é
+         * baixo | alto<<8 | alto2<<16,24 --- e uma DATA usa os três. Transportar
+         * só dois no remapeamento seria mudar o instante ao acrescentar coluna. */
+        static Word velho[ALT_MAX], velho_alto[ALT_MAX], velho_alt2[ALT_MAX];
         static unsigned char pres_velho[ALT_MAX];
         for(long i = 0; i < nrows; i++)
             for(long j = 0; j < ncols; j++){
                 velho[i*ncols + j]      = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
                 velho_alto[i*ncols + j] = mem_le(S_ALTO   + (unsigned)(i*ncols + j));
+                velho_alt2[i*ncols + j] = mem_le(S_ALTO2  + (unsigned)(i*ncols + j));
                 pres_velho[i*ncols + j] = (unsigned char)bit_le(S_PRES, i*ncols + j);
             }
         /* o catálogo sobe: é aqui que o andar muda */
         long novo = ncols + 1;
         { Word c = cat; c.total = (Word8)novo; mem_grava(S_CAT, c); }
         col_nome_grava((int)ncols, nc);
-        { Word z = {0,0}; mem_grava(S_CORPO + (unsigned)ncols, z); }   /* INTEIRO */
+        { Word z = {0,0}; corpo_poe(ncols, z); }   /* INTEIRO, pelo acessor: a
+                                                     * nona coluna vive no largo */
         /* e reescreve-se com a régua nova, do FIM para o princípio: as células
          * novas ficam depois das velhas, e escrever de trás não pisa o que
          * ainda falta ler — aqui já está tudo lido, mas a ordem fica escrita
          * porque é ela que torna isto seguro se um dia se ler em vez de copiar */
         for(long i = nrows - 1; i >= 0; i--){
             for(long j = novo - 1; j >= 0; j--){
-                Word v = {0,0}, va = {0,0};
-                if(j < ncols){ v = velho[i*ncols + j]; va = velho_alto[i*ncols + j]; }
+                Word v = {0,0}, va = {0,0}, vb = {0,0};
+                if(j < ncols){ v  = velho[i*ncols + j]; va = velho_alto[i*ncols + j];
+                               vb = velho_alt2[i*ncols + j]; }
                 mem_grava(S_LINHAS + (unsigned)(i*novo + j), v);
                 mem_grava(S_ALTO   + (unsigned)(i*novo + j), va);
+                mem_grava(S_ALTO2  + (unsigned)(i*novo + j), vb);
                 /* a presença acompanha a célula para o sítio novo; a coluna
                  * acrescentada nasce AUSENTE, que é o neutro — e não a zero,
                  * que seria um valor. */
@@ -13050,7 +13073,7 @@ int main(int argc, char **argv){
               {3, CORPO_INTEIRO,  0, "sem tipo é INTEIRO — a base antiga não muda"},
             };
             for(unsigned q = 0; q < sizeof cs/sizeof cs[0]; q++){
-                Word w = mem_le(S_CORPO + (unsigned)cs[q].col);
+                Word w = corpo_de(cs[q].col);
                 ok(cs[q].rot, w.total == cs[q].corpo && w.e == cs[q].parm);
             }
             /* E O CORPO TEM DE SOBREVIVER A UMA CONSULTA — que é onde ele morria.

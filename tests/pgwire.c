@@ -26868,6 +26868,99 @@ int main(void){
            " iniciais, não os coeficientes.", mal == 0);
     }
 
+    /* ═══ §W186: A COLUNA NOVA NÃO MUDA O QUE JÁ LÁ ESTAVA ═════════════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W186 o ALTER carrega os TRÊS planos, e o corpo largo alcança-se pelo NOME.\n\n");
+        unlink("/tmp/pgwire_w186.mem"); unlink("/tmp/pgwire_w186.prog");
+        if(!sql_abrir("/tmp/pgwire_w186")) mal++;
+
+        /* (1) O TECTO DO ALTER É O DO CORPO, e não o oito de quando as oito
+         * eram tudo. Uma tabela nasce com quatro colunas e cresce até doze; a
+         * cada passo relê-se a primeira linha INTEIRA, porque acrescentar
+         * coluna REESCREVE todas as células de sítio. */
+        sql_executa("CREATE TABLE cresce (a,b,c,d)", &o);
+        sql_executa("INSERT INTO cresce VALUES (11,22,33,44)", &o);
+        long cresceu = 0, guardou = 0, passos = 0;
+        for(int k = 4; k < 12; k++){
+            char q[128]; snprintf(q, sizeof q, "ALTER TABLE cresce ADD COLUMN c%d", k);
+            sql_executa(q, &o); passos++;
+            if(!o.ok) continue;
+            cresceu++;
+            sql_executa("SELECT a,b,c,d FROM cresce", &o);
+            if(o.ok && o.nrows == 1 && atol(o.cell[0][0]) == 11 && atol(o.cell[0][1]) == 22
+               && atol(o.cell[0][2]) == 33 && atol(o.cell[0][3]) == 44) guardou++;
+        }
+        printf("      a tabela cresce de 4 a 12 colunas: %ld/%ld ALTER aceites, e em"
+               " %ld deles as quatro primeiras células continuam 11,22,33,44\n",
+               cresceu, passos, guardou);
+        if(cresceu != passos || guardou != passos) mal++;
+
+        /* (2) E A COLUNA ACRESCENTADA CITA-SE PELO NOME --- é isto que o oito
+         * dos NOMES tirava: a tabela tinha a coluna e ninguém lhe podia
+         * chamar. Escreve-se na décima e lê-se por lá. */
+        sql_executa("UPDATE cresce SET c10 = 99", &o);
+        sql_executa("SELECT c10 FROM cresce", &o);
+        long nome_ok = (o.ok && o.nrows == 1 && atol(o.cell[0][0]) == 99);
+        printf("      a décima coluna cita-se pelo NOME e responde 99: %s\n",
+               nome_ok ? "sim" : "NÃO");
+        if(!nome_ok) mal++;
+
+        /* (3) OS TRÊS PLANOS VIAJAM JUNTOS. Uma DATA é uma contagem de segundos
+         * que passa dos dezasseis bits: vive em baixo, S_ALTO e S_ALTO2. Se o
+         * remapeamento do ALTER carregasse só dois, o instante MUDAVA ao
+         * acrescentar coluna --- e mudava em silêncio, porque o byte baixo
+         * continua certo. O CONTROLO é a data ter mesmo de usar o terceiro
+         * plano: uma que coubesse em dezasseis bits não exerceria nada. E a
+         * data NÃO PODE SER A PRIMEIRA CÉLULA: em (0,0) o endereço i·ncols+j
+         * vale zero antes e depois, e a célula fica onde estava --- a asserção
+         * passava sem poder falhar. Ela vai na segunda coluna, com duas linhas,
+         * que é onde o remapeamento a desloca mesmo. */
+        /* A CÉLULA GUARDA A CONTAGEM E MAIS NADA --- o calendário é a LEITURA,
+         * feita na fronteira. Escreve-se o instante em segundos; quem lê recebe
+         * a data escrita. É por isso que ela precisa dos três planos: 1,787·10⁹
+         * não cabe em dezasseis bits. */
+        sql_executa("CREATE TABLE quando (x INTEIRO, t DATA)", &o);
+        sql_executa("INSERT INTO quando VALUES (7, 1787443200)", &o);
+        sql_executa("INSERT INTO quando VALUES (8, 1787529600)", &o);
+        sql_executa("SELECT t FROM quando", &o);
+        char antes[64]; antes[0] = 0;
+        if(o.ok && o.nrows == 2)
+            snprintf(antes, sizeof antes, "%s|%s", o.cell[0][0], o.cell[1][0]);
+        sql_executa("ALTER TABLE quando ADD COLUMN y", &o);
+        sql_executa("SELECT t FROM quando", &o);
+        char depois[64]; depois[0] = 0;
+        if(o.ok && o.nrows == 2)
+            snprintf(depois, sizeof depois, "%s|%s", o.cell[0][0], o.cell[1][0]);
+        printf("      a data antes do ALTER: %s · e depois: %s\n",
+               antes[0] ? antes : "(nada)", depois[0] ? depois : "(nada)");
+        if(!antes[0] || strcmp(antes, depois) != 0) mal++;
+        /* o controlo: 2026 em segundos passa dos 16 bits com folga --- sem isso
+         * a asserção acima não podia falhar */
+        printf("      CONTROLO — o instante passa dos dezasseis bits (2026 em segundos"
+               " está na ordem de 1,8·10⁹), logo os bytes 2 e 3 estão em uso\n");
+        if(!strstr(antes, "2026")) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("A COLUNA NOVA NÃO MUDA O QUE JÁ LÁ ESTAVA, E O NOME ALCANÇA O CORPO TODO."
+           " Acrescentar coluna não é escrever no fim: REESCREVE todas as células de"
+           " sítio, porque o endereço de (i,j) é i·ncols+j e o ncols mudou. Três tectos"
+           " tinham ficado atrás do corpo quando ele passou a S_CORPOX_N = 32: o ALTER"
+           " recusava à nona, o acessor do corpo era saltado por uma escrita directa em"
+           " S_CORPO, e os NOMES paravam nos oito --- a tabela ficava com onze colunas e"
+           " três sem forma de as citar, que é o mesmo que não as ter. Aqui a tabela vai"
+           " de quatro a doze colunas, oito ALTER aceites, e as quatro primeiras células"
+           " respondem 11,22,33,44 em TODOS os passos; a décima escreve-se e lê-se pelo"
+           " nome. E O TERCEIRO PLANO: a célula não é o byte baixo, é"
+           " baixo | alto<<8 | alto2<<16,24, e uma DATA usa os três. O remapeamento"
+           " carregava dois e deixava o terceiro para trás --- o instante mudava ao"
+           " acrescentar coluna, em silêncio, porque o byte baixo continuava certo. O"
+           " controlo é a data ter mesmo de o usar: 2026 em segundos é 1,8·10⁹ e não cabe"
+           " em dezasseis bits. A lei é a de sempre: o que a leitura devolve não pode"
+           " depender de quantas colunas a tabela ganhou depois.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
