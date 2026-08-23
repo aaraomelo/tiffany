@@ -452,6 +452,7 @@ sem_chute 942e5653474e3f91 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 458155145c6d26d3 0
 semente bdf47d333634825f 0
+serie 4a46489e22c3e3a8 0
 serie_phi 5bd6af9a92aaa5a7 0
 significado aff35c553960fdcb 0
 simula 8d47ff0fbbdab6f3 0
@@ -463,7 +464,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 3ac991491a96d58a 0
+sql 5235bc046ef86ab3 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0

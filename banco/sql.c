@@ -7912,6 +7912,9 @@ static int varre(const char *resto, int acao){
     }
 
     if(acao == ACAO_MARCA && mat_op == 31){
+        #define EDO_ANDAR 64
+        static long m[EDO_ANDAR][EDO_ANDAR];
+        long ng = ncols;
         /* ── EDO: RESOLVE a equação diferencial, e devolve as RAÍZES.
          *
          * A tabela traz a matriz COMPANHEIRA de y'' + By' + Cy = 0,
@@ -7928,6 +7931,68 @@ static int varre(const char *resto, int acao){
          * numerador é par; quando não, diz-se a forma e NÃO se arredonda ---
          * um irracional escrito em decimal seria a casa a mentir sobre o que
          * tem. Quem quiser o valor sobe a torre: é o corte, não uma divisão. */
+        /* ── A MATRIZ COMO ESTANTE: o índice é um PAR, e o par desce.
+         *
+         * O `thm:enumfin` da aranha: «uma matriz é um campo sobre I_n × I_n; o
+         * índice é um par, e o par desce por C. Esse é o ÍNDICE COMO ESTANTE: a
+         * matriz continua a ser o que está nas gavetas, e o emparelhamento
+         * apenas dá a cada gaveta um endereço único. O corpo matricial não
+         * precisa de tratamento próprio.»
+         *
+         * Daí a forma que não tem tecto de colunas: TRÊS colunas --- (i, j, v)
+         * ---, com o índice descido e o valor numa coluna só. O grau deixa de
+         * estar preso ao número de colunas da tabela, e o valor fica sempre na
+         * terceira, que é das oito que o registo de corpos guarda com sinal.
+         *
+         * As duas formas convivem: n×n para quem tem a matriz à mão, e (i,j,v)
+         * para quem precisa de grau maior. É a mesma matriz nas duas --- o que
+         * muda é a régua com que se a escreve, e isso é travessia. */
+        if(ncols == 3 && nrows > 3){
+            /* lê (i, j, v) e monta a companheira pelo endereço descido */
+            long gmax = 0;
+            for(long r = 0; r < nrows; r++){
+                if(!bit_le(S_MATCH, r)) continue;
+                long nu, de; celula_qz(r, 0, ncols, &nu, &de);
+                if(nu + 1 > gmax) gmax = nu + 1;
+                celula_qz(r, 1, ncols, &nu, &de);
+                if(nu + 1 > gmax) gmax = nu + 1;
+            }
+            if(gmax < 2 || gmax > EDO_ANDAR){
+                printf("erro: a estante (i,j,v) pede grau entre 2 e %d, e os índices"
+                       " dão %ld. RECUSADA.\n", EDO_ANDAR, gmax);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "edo: shelf degree %ld out of range", gmax); }
+                return 0;
+            }
+            static long M2[EDO_ANDAR][EDO_ANDAR];
+            for(long i = 0; i < gmax; i++) for(long j = 0; j < gmax; j++) M2[i][j] = 0;
+            for(long r = 0; r < nrows; r++){
+                if(!bit_le(S_MATCH, r)) continue;
+                long in, id, jn, jd, vn, vd;
+                celula_qz(r, 0, ncols, &in, &id);
+                celula_qz(r, 1, ncols, &jn, &jd);
+                celula_qz(r, 2, ncols, &vn, &vd);
+                if(id != 1 || jd != 1 || vd != 1 || in < 0 || jn < 0){
+                    printf("erro: a estante pede (i,j,v) com i,j naturais e v inteiro"
+                           " --- veio (%ld/%ld, %ld/%ld, %ld/%ld). RECUSADA.\n",
+                           in, id, jn, jd, vn, vd);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "edo: shelf entry not integral"); }
+                    return 0;
+                }
+                M2[in][jn] = vn;
+            }
+            /* daqui em diante é o mesmo caminho: confere-se a companheira e
+             * resolve-se. Copia-se para `m` e segue-se. */
+            ncols = nrows = gmax;
+            for(long i = 0; i < gmax; i++) for(long j = 0; j < gmax; j++)
+                m[i][j] = M2[i][j];
+            ng = gmax;
+            goto edo_tem_matriz;
+        }
+
         /* ── E O GRAU NÃO É DOIS POR NECESSIDADE: é onde o Δ classifica.
          * O `thm:leidisc` e o `lem:cristal` da aranha são sobre 2×2 --- é ali
          * que três classes esgotam. Mas a `def:gato` é em Zⁿ, com |det ⊗| = 1
@@ -7951,7 +8016,6 @@ static int varre(const char *resto, int acao){
          * é o andar da escada em que este motor corre, e ele diz-se em vez de
          * se fingir que não está lá --- «o finito é cada estágio da caminhada,
          * não o total». Subir é acrescentar largura, não mudar de teoria. */
-        #define EDO_ANDAR 64
         if(ncols > EDO_ANDAR){
             printf("erro: este ANDAR do motor segura grau %d e vieram %ld --- RECUSADA,"
                    " e não truncada. O grau não tem limite na teoria (thm:enumfin, E_k"
@@ -7963,8 +8027,6 @@ static int varre(const char *resto, int acao){
                          " not the theory", ncols, EDO_ANDAR); }
             return 0;
         }
-        long ng = ncols;
-        static long m[EDO_ANDAR][EDO_ANDAR];
         for(long i = 0; i < ng; i++) for(long j = 0; j < ng; j++){
             if(!bit_le(S_PRES, i*ncols + j)){
                 printf("erro: a companheira tem célula ausente --- RECUSADA.\n");
@@ -7984,6 +8046,7 @@ static int varre(const char *resto, int acao){
             }
             m[i][j] = nu;
         }
+        edo_tem_matriz:
         /* A COMPANHEIRA CONFERE-SE, em vez de se supor: as n−1 primeiras linhas
          * são a identidade deslocada --- linha i tem 1 na coluna i+1 e zero no
          * resto --- e a última traz os coeficientes. */
@@ -8064,61 +8127,82 @@ static int varre(const char *resto, int acao){
                   strncat(forma, t, sizeof forma - strlen(forma) - 1); }
                 primeiro = 0;
             }
-            /* ── (3) O QUE SOBRA, E AS RAÍZES IRRACIONAIS: pelo CORTE.
+            /* ── (3) O QUE SOBRA, E AS RAÍZES IRRACIONAIS: PELA SÉRIE.
              *
-             * A `aranha thm:corte` não aproxima --- PRODUZ o ponto por um
-             * processo que TERMINA numa grade, e o que o finito guarda é o par
+             * Não se bissecta e não se escreve decimal. O `thm:bitunico` dá a
+             * construção: iterar o GATO --- que é esta companheira --- sobre o
+             * bit único, e a razão de termos consecutivos É a raiz dominante,
              *
-             *     (m, δ)   onde o ponto está, e quanto dele não cabe.
+             *     (⊗^k c)_0 / (⊗^k c)_1  ⟶  σ,
              *
-             * Aqui a grade é a diádica de denominador 2^k. Para cada mudança de
-             * sinal do factor residual entre inteiros consecutivos há uma raiz
-             * real, e bisecta-se até ao grão --- tudo em INTEIROS, porque
-             * P(p/2^k)·2^{kn} = Σ c_j p^j 2^{k(n-j)} é inteiro e tem o mesmo
-             * sinal. Devolve-se o cerco, e não um decimal: o cliente recebe
-             * m/2^k com δ = 1/2^k, e sabe o que não cabe.
+             * porque a componente na raiz de módulo menor DECAI. Tudo em
+             * inteiros: a iteração é a recorrência
              *
-             * Isto é resolver o irracional na régua desta casa. Quem o quiser
-             * mais fino pede mais grão --- e o processo é o mesmo. */
-            char cerco[SQL_OUT_CELL] = ""; long nirr = 0;
-            if(gr >= 1){
-                int K = 10;                       /* o grão: 2^-10 */
-                int prim = 1;
-                for(long base = -12; base < 12 && nirr < 6; base++){
-                    /* sinal de P nos dois extremos inteiros */
-                    long v0 = 0, v1 = 0;
-                    for(long j = gr; j >= 0; j--){ v0 = v0*base + p[j]; }
-                    for(long j = gr; j >= 0; j--){ v1 = v1*(base+1) + p[j]; }
-                    if(v0 == 0 || v1 == 0) continue;         /* raiz inteira: já saiu */
-                    if((v0 > 0) == (v1 > 0)) continue;       /* sem mudança de sinal */
-                    /* bissecção diádica em inteiros: procura-se o m com
-                     * P(m/2^K) e P((m+1)/2^K) de sinais opostos */
-                    long lo = base << K, hi = (base + 1) << K;
-                    long slo = (v0 > 0) ? 1 : -1;
-                    while(hi - lo > 1){
-                        long mid = lo + (hi - lo)/2;
-                        /* P(mid/2^K)·2^{K·gr} = Σ p[j]·mid^j·2^{K(gr-j)} */
-                        long acc = 0; int estourou = 0;
-                        for(long j = gr; j >= 0; j--){
-                            /* Horner com escala: acc = acc*mid + p[j]*2^{K*(gr-j)} */
-                            long termo = p[j];
-                            for(long u = 0; u < K*(gr-j) && !estourou; u++){
-                                if(termo > (1L<<50) || termo < -(1L<<50)) estourou = 1;
-                                else termo <<= 1;
-                            }
-                            if(estourou) break;
-                            if(acc > (1L<<50) || acc < -(1L<<50)){ estourou = 1; break; }
-                            acc = acc*mid + termo;
-                        }
-                        if(estourou) break;       /* não cabe: pára onde está */
-                        long sm = acc > 0 ? 1 : (acc < 0 ? -1 : 0);
-                        if(sm == 0){ lo = mid; hi = mid + 1; break; }
-                        if(sm == slo) lo = mid; else hi = mid;
+             *     u_{k+n} = c_{n-1} u_{k+n-1} + ... + c_0 u_k
+             *
+             * lida do polinómio, e o que se devolve é a FRACÇÃO u_{k+1}/u_k ---
+             * não um decimal. Dois convergentes consecutivos CERCAM a raiz, e é
+             * esse par que o cliente recebe: onde está e entre que dois
+             * racionais, exactamente como o `pi_rei.c` certifica sem um float.
+             *
+             * E a paragem é a da casa: itera-se enquanto os termos couberem, e
+             * conta-se em que passo parou --- o custo da série, que o
+             * `thm:serie` lê no campo. Um número grande é sintoma de prova por
+             * crescimento, e por isso o tecto é dito. */
+            char serie[SQL_OUT_CELL] = ""; long nirr = 0;
+            if(gr >= 2){
+                /* a recorrência lê-se do factor residual mónico:
+                 * λ^gr = −p[gr-1]λ^{gr-1} − ... − p[0] */
+                long u[EDO_ANDAR+2];
+                for(long k = 0; k < gr; k++) u[k] = 0;
+                u[gr-1] = 1;                       /* o BIT ÚNICO do thm:bitunico */
+                long ant_p = 0, ant_q = 0, cur_p = 0, cur_q = 0, passos = 0;
+                /* O TECTO da iteração --- e ele é DELIBERADO, não o maior que
+                 * o `long` aguenta: o cliente que quiser conferir o cerco tem
+                 * de calcular q^n·P(p/q), que é inteiro e cresce como p^n. Com
+                 * p até 2^20 e grau até 4 isso cabe folgadamente; deixar a
+                 * iteração correr até 2^40 dava um convergente mais fino e
+                 * IMPOSSÍVEL de verificar sem sair do anel. Melhor um cerco
+                 * conferível do que um mais apertado que ninguém pode checar. */
+                const long TECTO = 1L << 20;
+                for(long it = 0; it < 200; it++){
+                    long prox = 0; int estourou = 0;
+                    for(long k = 0; k < gr; k++){
+                        long termo = -p[k] * u[k];
+                        if(u[k] > TECTO || u[k] < -TECTO){ estourou = 1; break; }
+                        prox += termo;
+                        if(prox > TECTO || prox < -TECTO){ estourou = 1; break; }
                     }
-                    { char t[80];
-                      snprintf(t, sizeof t, "%s%ld/%d±1/%d", prim?"":", ", lo, 1<<K, 1<<K);
-                      strncat(cerco, t, sizeof cerco - strlen(cerco) - 1); }
-                    prim = 0; nirr++;
+                    if(estourou) break;
+                    for(long k = 0; k + 1 < gr; k++) u[k] = u[k+1];
+                    u[gr-1] = prox;
+                    if(u[gr-2] != 0){
+                        ant_p = cur_p; ant_q = cur_q;
+                        cur_p = u[gr-1]; cur_q = u[gr-2];
+                        passos++;
+                    }
+                }
+                /* ── E A ITERAÇÃO SÓ DÁ A RAIZ QUANDO ELA É DOMINANTE.
+                 * O `thm:bitunico` prova a convergência «porque a componente em
+                 * σ' DECAI» --- e isso pede |σ'| < |σ|. Quando os módulos
+                 * EMPATAM não há para onde decair e a razão não estabiliza:
+                 * λ³−2 tem as três raízes com o mesmo módulo (∛2 vezes as
+                 * raízes cúbicas da unidade), e λ⁴−2λ²−1 tem o par simétrico.
+                 * O motor DIZ isso em vez de devolver um quociente que não é
+                 * raiz de nada --- devolver 0/N seria pior do que recusar. */
+                int dominante = (cur_q != 0 && cur_p != 0 && ant_q != 0 && ant_p != 0);
+                if(dominante && passos >= 2){
+                    /* os dois convergentes CERCAM: a razão sobe e desce em
+                     * volta da raiz, e o par diz entre que dois racionais ela
+                     * está. Sem vírgula, e sem um decimal escrito. */
+                    snprintf(serie, sizeof serie, "%ld/%ld .. %ld/%ld  (%ld passos)",
+                             ant_p, ant_q, cur_p, cur_q, passos);
+                    nirr = 1;
+                } else if(passos >= 2){
+                    snprintf(serie, sizeof serie,
+                             "sem raiz dominante: os modulos empatam, e a razao"
+                             " nao estabiliza (%ld passos)", passos);
+                    nirr = 2;
                 }
             }
             char resto[SQL_OUT_CELL];
@@ -8166,7 +8250,7 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "com_multiplicidade");
                 snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "resto");
                 snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
-                snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "cortes");
+                snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "serie");
                 for(int c = 0; c < 7; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
                 sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[2] = SQL_TIPO_INT4;
                 sql_cap->tipo[3] = SQL_TIPO_INT4;
@@ -8177,12 +8261,12 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", resto);
                 snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
                 snprintf(sql_cap->cell[0][6], SQL_OUT_CELL, "%s",
-                         nirr ? cerco : "sem raiz irracional real");
+                         nirr ? serie : "sem factor residual a iterar");
                 snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
             }
             printf("edo: grau %ld · %ld raiz(es) em %ld distinta(s): %s · %s · y = %s"
-                   " · cortes: %s\n", ng, nr, distintas, nr ? raizes : "nenhuma",
-                   resto, forma, nirr ? cerco : "nenhum");
+                   " · pela série: %s\n", ng, nr, distintas, nr ? raizes : "nenhuma",
+                   resto, forma, nirr ? serie : "nenhuma");
             return 1;
         }
         long B = -m[1][1], C = -m[1][0];

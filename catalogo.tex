@@ -2262,6 +2262,69 @@ verificada linha a linha antes de responder}: um endereço que não se sabe sepa
 fusão, e é recusado em vez de devolvido. E recusa também uma coluna só, e endereços
 negativos --- \emph{entrelaçam-se dígitos, não sinais}.
 
+\subsection*{O irracional: nem fracção nem vírgula --- a série em FATORIAL}
+
+Aqui não entra ponto flutuante, e a fracção não alcança o $\pi$. O que sobra é a
+representação em que a \emph{aranha} já escreve estas séries --- o \textbf{fatorial} --- e
+ela não é uma escolha de conveniência: é a definição.
+
+\begin{quote}
+Da única hipótese $J^2=-1$ as potências de $J$ ciclam com período quatro, a série da
+exponencial \textbf{parte-se pela paridade} do índice, e recolhendo cada metade
+\[
+  \exp(tJ)=c(t)\cdot1+s(t)\cdot J,\qquad
+  c(t)=\sum_k\frac{(-1)^kt^{2k}}{(2k)!},\qquad
+  s(t)=\sum_k\frac{(-1)^kt^{2k+1}}{(2k+1)!},
+\]
+donde, sem uma palavra de geometria,
+$\;\boxed{\pi=\min\{t>0:\exp(tJ)\cdot1=-1\}}$.
+\end{quote}
+
+\paragraph{E o processo TERMINA --- não se trunca.} É o \emph{thm:serie}: em escala inteira
+os termos \textbf{anulam-se} ao fim de finitas parcelas, porque o fatorial cresce mais
+depressa que a potência e a divisão inteira leva o termo a zero. O número de termos é o
+\emph{custo}, e conta-se. O termo calcula-se por recorrência, nunca formando $t^n$ nem $n!$
+--- os dois estouram e o quociente deles não.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$t$ & $c(t)$ & $s(t)$ & $c^2+s^2$ & termos\\
+\midrule
+$0$ & $1{,}000000$ & $0$ & $1{,}000000$ & $1$\\
+$1$ & $0{,}540302$ & $0{,}841471$ & $0{,}998881$ & $5$\\
+$2$ & $-0{,}416148$ & $0{,}909298$ & $0{,}999337$ & $7$\\
+$3$ & $-0{,}989999$ & $0{,}141123$ & $0{,}998002$ & $8$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A conservação \textbf{não se impõe} --- sai de $(c^2+s^2)'=2cc'+2ss'=-2cs+2sc=0$
+com valor $1$ em zero --- e fecha em todos os pontos, dentro do grão. E $e^x\cdot e^{-x}=1$
+é a segunda equação da \emph{def:op}, $\partial x\cdot x=1$, com a exponencial no lugar:
+também fecha, e também não foi imposta.
+
+\paragraph{E só UMA das duas faces se procura.} $\exp(\pi J)=-1$ quer dizer $c(\pi)=-1$
+\emph{e} $s(\pi)=0$, mas as duas não servem igualmente para procurar:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+procurar & é procurar & dá\\
+\midrule
+$c(t)=-1$ & um \textbf{mínimo}: $c\approx-1+\frac{(t-\pi)^2}{2}$, plana & $3{,}097$ \\
+$s(t)=0$ & um zero \textbf{simples}: $s'(\pi)=c(\pi)=-1\neq0$ & $\mathbf{3{,}1416}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{O erro é da condição, não da série} --- e custou-mo, porque a primeira
+escrita usou a face errada. A outra face \textbf{confere}: no ponto achado, $c(\pi)=-1$ em
+todos os grãos medidos.
+
+\medido{\code{lib/serie.h} com \code{tests/serie.c} §S1--§S3 --- a conservação a fechar em
+$7/7$ pontos com a série a PARAR em todos, o $\pi$ a estabilizar em $3{,}1416$ com $c(\pi)$
+a conferir em $3/3$ grãos, e o gume da face errada a dar $3{,}097$.}
+
 \subsection*{Um servomotor real, montado pelo cliente}
 
 O objecto é um servomotor DC de bancada, com os valores de catálogo:
