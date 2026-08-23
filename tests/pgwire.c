@@ -27164,15 +27164,19 @@ int main(void){
                " %ld linha(s) · e duas colunas longe: %ld (espera 60)\n", ach, nao, duas);
         if(ach != 29 || nao != 0 || duas != 60) mal++;
 
-        /* (3) O QUE NÃO CABE NO TRANSPORTE É RECUSADO, E NÃO TRUNCADO. Este
-         * tecto é REAL e é do fio, não do objecto: a struct que atravessa a
-         * fronteira C vive na pilha. A tabela de 300 colunas existe e escreve-se
-         * inteira --- o que não passa é a LINHA TODA de uma vez, e a resposta é
-         * uma recusa que diz o número, porque uma linha truncada tem a mesma
-         * cara de uma linha completa e a posição k passa a ser outra coisa. */
+        /* (3) O QUE NÃO CABE NA JANELA DA API C É RECUSADO, E NÃO TRUNCADO.
+         *
+         * E este tecto não é «do fio» --- eu escrevi isso e estava errado: aqui
+         * não há pilha nem RAM, a primeira linha do `sql.c` di-lo e a
+         * `arquitetura` §interface repete-o. É o tecto da struct `SqlOut`, que é
+         * uma JANELA que a porta C oferece a quem a chama; a resposta inteira
+         * vive no disco como tudo o resto. Enquanto a janela for o único
+         * caminho, o que não cabe nela recusa-se com o número dito --- uma linha
+         * truncada tem a mesma cara de uma completa e a posição k passa a ser
+         * outra coisa. */
         sql_executa("SELECT * FROM t3", &o);
         int recusou = !o.ok;
-        printf("      SELECT * de 300 colunas no fio de %d: %s%s%s\n",
+        printf("      SELECT * de 300 colunas na janela de %d: %s%s%s\n",
                SQL_OUT_MAX_COLS, recusou ? "RECUSADO — " : "aceitou (NÃO)",
                recusou ? o.err : "", "");
         if(!recusou) mal++;
@@ -27191,6 +27195,28 @@ int main(void){
         printf("      índice sobre a coluna 250: %s · e responde %ld (espera 70)\n",
                idx ? "criado" : "RECUSADO", viu);
         if(!idx || viu != 70) mal++;
+
+        /* (5) E A ORDEM DA SAÍDA VIVE NO DISCO. Estava num array de 64 na
+         * pilha --- que é o que esta casa NÃO tem: «a memória é o DISCO, sem
+         * RAM», primeira linha do `sql.c`. Uma tabela de 200 linhas ordenava 64.
+         * Agora é uma zona do `.mem`, uma Word por linha emitida, e o tecto é o
+         * que a zona segura. O CONTROLO é a ordem sair CERTA: se só o número de
+         * linhas subisse, uma ordem baralhada passava na mesma. */
+        sql_executa("CREATE TABLE ord188 (a INTEIRO, b INTEIRO)", &o);
+        for(long i = 1; i <= 200; i++){
+            char q[120];
+            snprintf(q, sizeof q, "INSERT INTO ord188 VALUES (%ld,%ld)", 201 - i, i);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT a FROM ord188 ORDER BY a LIMIT 3", &o);
+        long p1 = (o.ok && o.nrows == 3) ? atol(o.cell[0][0]) : -1;
+        long p3 = (o.ok && o.nrows == 3) ? atol(o.cell[2][0]) : -1;
+        sql_executa("SELECT a FROM ord188 ORDER BY a OFFSET 197", &o);
+        long u1 = (o.ok && o.nrows == 3) ? atol(o.cell[0][0]) : -1;
+        long u3 = (o.ok && o.nrows == 3) ? atol(o.cell[2][0]) : -1;
+        printf("      ORDER BY sobre 200 linhas: as três primeiras começam em %ld e"
+               " acabam em %ld; as três últimas, %ld a %ld\n", p1, p3, u1, u3);
+        if(p1 != 1 || p3 != 3 || u1 != 198 || u3 != 200) mal++;
 
         sql_fechar();
         printf("\n");
@@ -27217,7 +27243,16 @@ int main(void){
            " ordem de aparecimento, pelo que o tecto passou a ser o da EXPRESSÃO, que é"
            " onde ele tem sentido. O único tecto que fica é o do FIO, e esse é real: a"
            " struct que atravessa a fronteira C vive na pilha, e o que não cabe é"
-           " RECUSADO com o número dito --- as mesmas colunas, nomeadas, atravessam.",
+           " RECUSADO com o número dito --- as mesmas colunas, nomeadas, atravessam. E ele"
+           " NÃO É «do fio»: eu escrevi isso e estava errado, porque aqui não há pilha"
+           " nem RAM --- é a primeira linha do `sql.c` e a `arquitetura` §interface"
+           " repete-a. É a janela que a porta C oferece; a resposta vive no disco. Foi"
+           " essa invenção que deixou a ORDEM da saída num array de 64 da pilha, com uma"
+           " tabela de 200 linhas a ordenar 64 --- agora ela mora numa zona do `.mem`,"
+           " uma Word por linha emitida, e as 200 saem ordenadas de 1 a 200. E a árvore"
+           " que ordena deixou de pedir emprestado o tecto do ÍNDICE: o ORDER BY nem"
+           " sequer dizia qual árvore usava, ficava com a que a chamada anterior tivesse"
+           " deixado, e era recusado por não caber num sítio que não era o dele.",
            mal == 0);
     }
 

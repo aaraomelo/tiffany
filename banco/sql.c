@@ -733,6 +733,22 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define S_CORPOX_N  COL_MAX   /* o corpo de cada coluna: uma Word, e cabem ZONA_SLOTS */
 
 #define S_DEFAULT   (ISA_TECTO + ZONA(27))
+/* ── A SAÍDA VIVE NO DISCO, COMO TUDO O RESTO ────────────────────────────────
+ *
+ * «A memória é o DISCO. Sem RAM» --- é a primeira linha deste ficheiro, e a
+ * `arquitetura` §interface repete-a: «a query compila para bytecode da ISA e
+ * corre com a memória no disco, sem RAM para a tabela». Eu tinha a ORDEM da
+ * saída num array da pilha de 64 posições, e chamei-lhe «o tecto do fio, e esse
+ * é real» --- inventei uma pilha que esta casa não tem para justificar um
+ * limite que ela não impõe. Uma tabela de 300 linhas ordenava 64.
+ *
+ * A ordem é um objecto como outro qualquer: mora numa zona do `.mem`, uma Word
+ * por linha emitida, e quem lê pede a k-ésima. O tecto é o que a ZONA segura,
+ * que é uma conta e não uma escolha. */
+#define S_SAIDA     (ISA_TECTO + ZONA(28))
+#define S_SAIDA_N   (ZONA_SLOTS / 2u)          /* a ordem; a outra metade é dos ausentes */
+#define S_SAIDAUS   (S_SAIDA + S_SAIDA_N)
+
 #define S_DEFAULT_N COL_MAX   /* o DEFAULT de cada coluna, no mesmo passo */
 
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
@@ -1227,6 +1243,24 @@ static Word corpo_de(long j){
     if(j < (long)S_CORPOX_N) return mem_le(S_CORPOX + (unsigned)j);
     return (Word){0,0};
 }
+/* a k-ésima linha da saída, no disco --- e o par, porque uma linha passa de 255 */
+static long ordseq_le(long k){
+    Word w = mem_le(S_SAIDA + (unsigned)k);
+    return (long)w.total | ((long)w.e << 8);
+}
+static void ordseq_poe(long k, long v){
+    Word w; w.total = (Word8)(v & 255); w.e = (Word8)((v >> 8) & 255);
+    mem_grava(S_SAIDA + (unsigned)k, w);
+}
+static long ordaus_le(long k){
+    Word w = mem_le(S_SAIDAUS + (unsigned)k);
+    return (long)w.total | ((long)w.e << 8);
+}
+static void ordaus_poe(long k, long v){
+    Word w; w.total = (Word8)(v & 255); w.e = (Word8)((v >> 8) & 255);
+    mem_grava(S_SAIDAUS + (unsigned)k, w);
+}
+
 static void corpo_poe(long j, Word w){
     if(j < 8) mem_grava(S_CORPO + (unsigned)j, w);
     if(j < (long)S_CORPOX_N) mem_grava(S_CORPOX + (unsigned)j, w);
@@ -5452,7 +5486,20 @@ static long hav_n  = 0;
  * 32 bits do valor mais 8 do índice. O TECTO É VERIFICADO: se os nós acabarem,
  * a consulta é RECUSADA — ordenar metade seria devolver uma ordem que não é a
  * pedida. */
-#define S_ORD      (ISA_TECTO + ZONA(0))     /* acima do tecto: só o C endereça */
+/* A ÁRVORE QUE ORDENA TEM ESPAÇO PRÓPRIO, E NÃO O DO ÍNDICE.
+ *
+ * O `ORD_MAXNO 600` não é um número inventado: é o que a zona de um ÍNDICE
+ * segura (9603 slots / ORD_LARG). Só que a mesma árvore serve a ordenação, e
+ * essa vivia numa zona inteira e continuava presa ao 600 do vizinho --- um
+ * `ORDER BY` sobre duzentas linhas dava «a árvore de ordenação não coube», e a
+ * consulta era RECUSADA. Oito zonas contíguas dão-lhe 8192 nós, e o tecto de
+ * cada uso passa a ser o do espaço que ele TEM. */
+#define S_ORD      (ISA_TECTO + ZONA(29))    /* 29..36: oito zonas para a ordem */
+#define ORD_ZONAS  8u
+#define ORD_LARG_  16u                                  /* = ORD_LARG, declarado adiante */
+#define ORD_MAXNO_R ((ZONA_SLOTS * ORD_ZONAS) / ORD_LARG_)
+#define ORD_MAXNO_I 600u                  /* o que a zona de um ÍNDICE segura */
+static unsigned ord_tecto = 600u;    /* o do espaço que a árvore corrente TEM */
 #define S_ORDCAB   (S_ORD - 1)
 
 /* ── O ÍNDICE VIVE NOUTRA ZONA, E NO DISCO ───────────────────────────────────
@@ -5486,14 +5533,16 @@ static void pres_migra(long ncols, long nrows){
     { Word m = {1,0}; mem_grava(S_PRESCAB, m); }
 }
 
-static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB; }
+static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB;
+                                    ord_tecto = ORD_MAXNO_R; }
 /* O CONTADOR DE NÓS TEM O SEU SLOT, e não o do cabeçalho. `ord_novo` escreve
  * em `ord_cab` a cada nó criado; apontá-lo ao cabeçalho do índice fazia o
  * número de nós escrever-se por cima da coluna indexada — lia-se «coluna 5»
  * numa tabela de duas colunas, e o índice era dado por velho para sempre. Dois
  * dados diferentes, dois slots. */
 static void ord_usa_indice(long k){ ord_raiz = S_IDX((unsigned)k);
-                                    ord_cab  = S_IDXNOS((unsigned)k); }
+                                    ord_cab  = S_IDXNOS((unsigned)k);
+                                    ord_tecto = ORD_MAXNO_I; }
 /* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
  * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
  * número que o 16, ditos de três maneiras. Declara-se o expoente e o resto sai
@@ -5501,7 +5550,8 @@ static void ord_usa_indice(long k){ ord_raiz = S_IDX((unsigned)k);
 #define ORD_BITS   4u                    /* símbolos por nível: 2^ORD_BITS */
 #define ORD_LARG   (1u << ORD_BITS)      /* um símbolo por nível */
 #define ORD_NIV    10                    /* 8 do valor + 2 do índice */
-#define ORD_MAXNO  600u
+#define ORD_MAXNO  600u                  /* o que a zona de um ÍNDICE segura */
+typedef char ord_larg_bate[(ORD_LARG == ORD_LARG_) ? 1 : -1];   /* os dois têm de ser um */
 
 static unsigned ord_novo(void){
     /* O CONTADOR NO PAR. Vivia em `.total`, um byte, e ORD_MAXNO é 600: ao
@@ -5509,7 +5559,7 @@ static unsigned ord_novo(void){
      * era ficção, porque a árvore partia muito antes de lá chegar. É o mesmo
      * defeito do `no_novo` da cifra, na árvore que ordena e junta. */
     unsigned n = par_le(ord_cab); if(n < 1) n = 1;        /* 0 é a raiz */
-    if(n >= ORD_MAXNO) return 0;                           /* tecto: sem nó, sem ordem */
+    if(n >= ord_tecto) return 0;                  /* o tecto do espaço que esta árvore tem */
     par_grava(ord_cab, n + 1);
     for(unsigned k = 0; k < ORD_LARG; k++){
         Word z = {0,0}; mem_grava(ord_raiz + n*ORD_LARG + k, z);
@@ -7305,13 +7355,13 @@ static int varre(const char *resto, int acao){
          * --- não tem como saber que a posição vinte é outra coisa. A tabela não
          * tem tecto; a struct que atravessa a fronteira C tem, e diz qual. */
         if(!proj_n && ncols > SQL_OUT_MAX_COLS){
-            printf("erro: a linha tem %ld colunas e a saída leva %d — RECUSADA."
+            printf("erro: a linha tem %ld colunas e a JANELA da porta C leva %d — RECUSADA."
                    " Truncar daria uma linha com a mesma cara e outra posição;"
                    " peça as colunas que quer, por nome.\n",
                    ncols, SQL_OUT_MAX_COLS);
             sql_cap->ok = 0;
             snprintf(sql_cap->err, sizeof sql_cap->err,
-                     "row has %ld columns; the wire carries %d — name the columns you want",
+                     "row has %ld columns; the C window carries %d — name the columns you want",
                      ncols, SQL_OUT_MAX_COLS);
             return 0;
         }
@@ -7700,8 +7750,7 @@ static int varre(const char *resto, int acao){
      * percorre-se por símbolos. As linhas saem por essa ordem em vez da ordem
      * de inserção. Se a árvore não couber, a consulta é RECUSADA — ordenar
      * metade seria devolver uma ordem que ninguém pediu. */
-    long ord_seq[SQL_OUT_MAX_ROWS];
-    int  ord_n = 0, ord_usa = 0;
+    long ord_n = 0; int ord_usa = 0;   /* a ordem está no disco: ordseq_le/poe */
     if(acao == ACAO_MARCA && ord_col[0]){
         int oc = col_indice(ord_col);
         int postos = 0;
@@ -7711,12 +7760,17 @@ static int varre(const char *resto, int acao){
          * ordem, como se fosse o menor dos valores. Vai para o FIM, em bloco —
          * é a convenção que o SQL chama NULLS LAST, e aqui é a única que não
          * mente: o dual não é pequeno, é de outro nível. */
-        long aus[SQL_OUT_MAX_ROWS]; int na = 0;
+        long na = 0;      /* os ausentes também no disco --- ordaus_le/poe */
+        /* A ÁRVORE DESTA ORDENAÇÃO É A DO RASCUNHO, e é preciso DIZÊ-LO: sem
+         * isto ficava a que a chamada anterior tivesse deixado seleccionada ---
+         * a de um ÍNDICE, com a zona pequena e o tecto de 600 nós ---, e o
+         * ORDER BY era recusado por não caber num sítio que não era o dele. */
+        ord_usa_rascunho();
         ord_limpa();
-        for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
+        for(long i = 0; i < nrows && postos < (int)S_SAIDA_N; i++){
             if(!bit_le(S_MATCH, i)) continue;
             if(!bit_le(S_PRES, i*ncols + oc)){
-                if(na < SQL_OUT_MAX_ROWS) aus[na++] = i;
+                if(na < (long)S_SAIDA_N){ ordaus_poe(na, i); na++; }
                 continue;
             }
             { long v = celula_valor(i, oc, ncols);     /* o PAR, não o byte baixo */
@@ -7730,10 +7784,11 @@ static int varre(const char *resto, int acao){
               }
               postos++; }
         }
-        { int n = 0, tmp[SQL_OUT_MAX_ROWS];
-          ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
-          for(int k = 0; k < n; k++) ord_seq[k] = tmp[k];
-          for(int k = 0; k < na && n < SQL_OUT_MAX_ROWS; k++) ord_seq[n++] = (int)aus[k];
+        { int n = 0;
+          static int tmp[8192];
+          ord_percorre(0, 0, 0, tmp, &n, 8192, ord_desc);
+          for(int k = 0; k < n; k++) ordseq_poe(k, tmp[k]);
+          for(long k = 0; k < na && n < (int)S_SAIDA_N; k++){ ordseq_poe(n, ordaus_le(k)); n++; }
           ord_n = n; ord_usa = 1; }
 
         /* ── E A SEGUNDA RÉGUA, ONDE A PRIMEIRA NÃO DISTINGUIU ───────────
@@ -7747,29 +7802,29 @@ static int varre(const char *resto, int acao){
             int oc2 = col_indice(ord_col2);
             long k = 0;
             while(oc2 >= 0 && k < ord_n){
-                int tem = bit_le(S_PRES, ord_seq[k]*ncols + oc);
-                long v = tem ? celula_valor(ord_seq[k], oc, ncols) : 0;
+                int tem = bit_le(S_PRES, ordseq_le(k)*ncols + oc);
+                long v = tem ? celula_valor(ordseq_le(k), oc, ncols) : 0;
                 long j = k;
                 /* a corrida: mesma chave, ou ambos sem chave */
-                while(j < ord_n && bit_le(S_PRES, ord_seq[j]*ncols + oc) == tem
-                                && (!tem || celula_valor(ord_seq[j], oc, ncols) == v)) j++;
+                while(j < ord_n && bit_le(S_PRES, ordseq_le(j)*ncols + oc) == tem
+                                && (!tem || celula_valor(ordseq_le(j), oc, ncols) == v)) j++;
                 if(j - k > 1){
-                    long a2[SQL_OUT_MAX_ROWS]; int n2 = 0, m = 0, coube = 1;
+                    static long a2[8192]; int n2 = 0, m = 0, coube = 1;
                     int tmp2[SQL_OUT_MAX_ROWS];
                     ord_limpa();
                     for(long t = k; t < j && coube; t++){
-                        if(!bit_le(S_PRES, ord_seq[t]*ncols + oc2)){
-                            if(n2 < SQL_OUT_MAX_ROWS) a2[n2++] = ord_seq[t];
+                        if(!bit_le(S_PRES, ordseq_le(t)*ncols + oc2)){
+                            if(n2 < (int)S_SAIDA_N) a2[n2++] = ordseq_le(t);
                             continue;
                         }
-                        if(!ord_insere(celula_valor(ord_seq[t], oc2, ncols),
-                                       (int)ord_seq[t])) coube = 0;
+                        if(!ord_insere(celula_valor(ordseq_le(t), oc2, ncols),
+                                       (int)ordseq_le(t))) coube = 0;
                     }
                     if(coube){
                         ord_percorre(0, 0, 0, tmp2, &m, SQL_OUT_MAX_ROWS, ord_desc2);
                         { long t = k;
-                          for(int q = 0; q < m && t < j; q++) ord_seq[t++] = tmp2[q];
-                          for(int q = 0; q < n2 && t < j; q++) ord_seq[t++] = (int)a2[q]; }
+                          for(int q = 0; q < m && t < j; q++) ordseq_poe(t++, tmp2[q]);
+                          for(int q = 0; q < n2 && t < j; q++) ordseq_poe(t++, a2[q]); }
                     }
                     /* se não coube, a fibra fica na ordem de chegada: a primeira
                      * régua continua certa, e é ela que a pergunta pediu primeiro */
@@ -10630,7 +10685,7 @@ static int varre(const char *resto, int acao){
 
     long emitidas = 0, saltadas = 0;
     for(long ii = 0; ii < (ord_usa ? ord_n : nrows); ii++){
-        long i = ord_usa ? ord_seq[ii] : ii;
+        long i = ord_usa ? ordseq_le(ii) : ii;
         if(!bit_le(S_MATCH, i)) continue;
         /* o OFFSET salta ANTES de o LIMIT contar: são os dois extremos da mesma
          * faixa, e trocar a ordem deles daria outra fatia */

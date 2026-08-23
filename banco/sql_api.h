@@ -12,12 +12,15 @@
  * dezasseis caiu outra vez no primeiro esquema de cliente a sério, onde onze
  * tabelas passam das dezasseis colunas e a maior tem vinte e nove.
  *
- * Este número é do TRANSPORTE e não do objecto: a tabela não tem tecto nenhum
- * (o catálogo guarda o número de colunas num par, e o corpo vai a COL_MAX), mas
- * a struct que atravessa a fronteira C vive na pilha de quem a declara, e uma
- * pilha tem tamanho. Por isso ele existe — e por isso o motor RECUSA quando não
- * cabe, em vez de truncar: uma linha truncada não é uma linha curta, é uma
- * linha em que a posição k passa a ser outra coisa. */
+ * Este número é da JANELA que esta porta oferece, e não do objecto: a tabela
+ * não tem tecto nenhum (o catálogo guarda o número de colunas num par, o corpo
+ * vai a COL_MAX e a ordem da saída mora numa zona do .mem), e a resposta vive
+ * no DISCO como tudo nesta casa — «a memória é o DISCO. Sem RAM» é a primeira
+ * linha do sql.c. O que tem tamanho é esta struct, que é uma conveniência da
+ * fronteira C para quem quer a resposta de uma vez. Enquanto ela for o único
+ * caminho, o motor RECUSA o que não cabe em vez de truncar: uma linha truncada
+ * não é uma linha curta, é uma linha em que a posição k passa a ser outra
+ * coisa. Quem precisar de mais nomeia as colunas — e essas atravessam. */
 #define SQL_OUT_MAX_COLS 64
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64
