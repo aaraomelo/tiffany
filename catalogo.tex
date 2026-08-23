@@ -1456,6 +1456,27 @@ $\sum G=\lvert I\rvert$ em todos e a falta a dar $0$, $0$, $44$ e $30$; os degra
 oposto em $17/17$ e o reduzido em $78/78$; o invariante $p^2-2q^2$ em $287/287$ com a
 fração a crescer; e $\zeta$/$\mu$ com a volta exacta em $200/200$ vectores.}
 
+\medskip\noindent E os corpos que faltavam seguem no mesmo espírito. O
+\code{lib/metais.h} leva $\Z[\sigma]$ com $\sigma^2=m\sigma+1$: \code{met\_sigma\_inv} dá
+$\sigma^{-1}=\sigma-m$ \emph{sem uma fração}, \code{met\_norma} a norma
+$a^2+mab-b^2$, \code{met\_inverso} que recusa fora de $\pm1$, e \code{met\_conv} com
+\code{met\_conv\_norma} para a descida $[m;m,m,\dots]$ --- \emph{é dela que as unidades
+saem}. O \code{lib/reguas.h} leva as réguas: \code{rg\_prefixo}, \code{rg\_vp} (uma por
+primo), e \code{rg\_forte\_p}/\code{rg\_forte\_pref} para o cliente \emph{verificar} a
+desigualdade forte no seu caso --- com \code{rg\_norma\_forte\_falha} a mostrar o
+contraste, porque na norma ela falha. O \code{lib/derivacao.h} leva $d$: a regra do
+produto em \code{dv\_regra\_produto}, a nilpotência em \code{dv\_grau\_nilpotencia}, e o
+núcleo em \code{dv\_no\_nucleo}.
+
+\medskip\noindent \emph{As profundidades devolvem-se como inteiros e nunca como
+$2^{-q}$}: a potência sairia do degrau, e o cliente compara profundidades, não decimais.
+
+\medido{\code{tests/metais.c} --- $\sigma^{-1}=\sigma-m$ nos oito metais com o produto a
+dar $1$ exacto; a norma multiplicativa e o inverso recusado fora de $\pm1$; os convergentes
+de norma $\pm1$ nos oito; as réguas $p$-ádicas ultramétricas em $2197/2197$ com
+$v(xy)=v(x)+v(y)$ em $144/144$, contra a norma da rotação a falhar a forte em $1368/2401$;
+e $d$ como derivação em $300/300$, nilpotente em $6/6$ graus, com o núcleo em $49/49$.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
