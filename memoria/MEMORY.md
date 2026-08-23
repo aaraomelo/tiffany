@@ -95,6 +95,10 @@
 - **[O filtro antes da reconstrução](feedback-o-filtro-antes-da-reconstrucao.md)** — TRÊS caminhos reescrevem o campo depois dele: a mesma pergunta com e sem índice divergiu.
 - **[Contar objectos pela parametrização](feedback-contar-objectos-pelos-parametros.md)** — decidi se a leitura era fiel contando
   objectos pelo laço `for`: a pergunta pressuposta na resposta. «Objecto» é o que a IGUALDADE DO CORPO diz.
+- **[O gume que a melhoria desarma](feedback-o-gume-que-a-melhoria-desarma.md)** — alarguei o envelope e DOIS medidores verdes
+  caíram: exigiam ver o limite TRAVAR. A lei não mudou — mudou onde ela deixa de caber.
+- **[O endereço já tinha dono](feedback-o-endereco-ja-tinha-dono.md)** — zona nova por cima das árvores de índice (a macro com
+  parâmetro não aparece na busca pelo número), e comandos meus a interceptar os reais.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR. Os graves são todos do mesmo tipo:
 
 ## A teoria
@@ -161,6 +165,8 @@
 
 ## Checkpoints
 
+- **[23/08 — O ENVELOPE SOBE, e o alcance deixa de ser exercido](project-checkpoint-2026-08-23-o-envelope.md)** — a célula ganha o
+  plano alto (F_w ⊕ σF_w), o schema do ERP entra 395/431, o RLS é a EROSÃO do mórfico; e os tectos que ficaram atrás do corpo.
 - **[22/08 — O ESPECTRO, e o terceiro uso do tensor](project-checkpoint-2026-08-22-o-espectro.md)** — o `cifra.h` já dizia que B é o
   traço e C o determinante: o corpo desta casa É a matriz 2×2, e a cifra é o seu espectro. `mesma cifra ⇏ semelhantes`.
 - **[21/08 — O BANCO FALA POSTGRES, e o psql real liga-se](project-checkpoint-2026-08-21-pg.md)** — o ROLLBACK desfaz pelo levantamento;
