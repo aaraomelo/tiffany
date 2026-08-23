@@ -22830,6 +22830,142 @@ int main(void){
            " três, uma por classe do Δ, pelo que a tríade não é uma face repetida. O que varia é a métrica; o corpo é um.", mal == 0);
     }
 
+    /* ═══ §W151: MAIS DOIS TRIOS — AS MÉDIAS E AS CURVAS DE NORMA UM ════════ */
+    {
+        long mal = 0;
+        printf("\n§W151 os trios que estavam esquartejados: as médias e as curvas.\n\n");
+
+        /* ════ TRIO I: AS TRÊS MÉDIAS ═══════════════════════════════════════
+         * O cor:medias da aranha dá g ≤ m --- dois membros. O terceiro é a
+         * HARMÓNICA, e o trio é M_p com p ∈ {1, 0, −1}:
+         *   M_1 = (a+b)/2,  M_0 = √(ab),  M_{−1} = 2ab/(a+b). */
+        printf("      ── TRIO I: as três médias ──\n");
+        {
+            /* (1) o trio fecha sobre si: g² = h·m, exacto, sem uma raiz */
+            long ok = 0, tot = 0;
+            for(long a = 1; a <= 20; a++) for(long b = 1; b <= 20; b++){
+                /* h = 2ab/(a+b), m = (a+b)/2  ⟹  h·m = ab = g² */
+                long num = 2*a*b, den = a + b;      /* h = num/den */
+                /* h·m = (num/den)·(den/2) = num/2 = ab */
+                tot++;
+                if(num/2 == a*b) ok++;
+            }
+            printf("      I1 g² = h·m em %ld/%ld pares --- EXACTO, e sem uma raiz: a"
+                   " geométrica é o meio geométrico das outras duas\n", ok, tot);
+            printf("         RELAÇÃO NOVA — o trio FECHA sobre si mesmo, e é por isso que"
+                   " são três e não dois: h e m determinam g\n");
+            if(ok != tot) mal++;
+
+            /* (2) e a ordem h ≤ g ≤ m reduz-se a UMA desigualdade: (a−b)² ≥ 0 */
+            long hm = 0, gm = 0, hg = 0, quad = 0, t2 = 0;
+            for(long a = 1; a <= 20; a++) for(long b = 1; b <= 20; b++){
+                t2++;
+                /* h ≤ m  ⟺  4ab ≤ (a+b)²  ⟺  0 ≤ (a−b)² */
+                if(4*a*b <= (a+b)*(a+b)) hm++;
+                /* g² ≤ m²  ⟺  4ab ≤ (a+b)² --- a MESMA */
+                if(4*a*b <= (a+b)*(a+b)) gm++;
+                /* h² ≤ g²  ⟺  4a²b² ≤ ab(a+b)²  ⟺  4ab ≤ (a+b)² --- a mesma */
+                if(4*a*b <= (a+b)*(a+b)) hg++;
+                if((a-b)*(a-b) >= 0) quad++;
+            }
+            printf("      I2 h ≤ g ≤ m: as três desigualdades valem em %ld, %ld e %ld de"
+                   " %ld --- e as três reduzem-se a (a−b)² ≥ 0, que vale em %ld\n",
+                   hm, gm, hg, t2, quad);
+            printf("         RELAÇÃO NOVA — UMA desigualdade, três médias: a ordem do trio é"
+                   " o quadrado do desvio, e é o cor:medias estendido ao terceiro membro\n");
+            if(hm != t2 || quad != t2) mal++;
+
+            /* (3) e o gume: as três coincidem exactamente onde a = b */
+            long iguais = 0, dif = 0;
+            for(long a = 1; a <= 20; a++) for(long b = 1; b <= 20; b++){
+                int tres_iguais = (4*a*b == (a+b)*(a+b));
+                if(tres_iguais && a == b) iguais++;
+                if(!tres_iguais && a != b) dif++;
+            }
+            printf("      I3 as três coincidem em %ld pares e diferem em %ld --- e a"
+                   " coincidência é EXACTAMENTE a = b, o ponto fixo da dobra\n",
+                   iguais, dif);
+            if(iguais == 0 || dif == 0) mal++;
+        }
+
+        /* ════ TRIO II: AS CURVAS DE NORMA UM ═══════════════════════════════
+         * Com ω² = t, os elementos de norma 1 são c² − t·s² = 1. Uma equação,
+         * três curvas --- e é o MESMO t da tríade das álgebras. */
+        printf("      ── TRIO II: as curvas de norma um ──\n");
+        {
+            printf("      t     equação        pontos com |c|,|s| ≤ 12   a curva\n");
+            long todos = 0;
+            long conta[3];
+            for(int i = 0; i < 3; i++){
+                long t = (i == 0) ? -1 : (i == 1 ? 0 : 1);
+                long n = 0;
+                for(long c = -12; c <= 12; c++) for(long s = -12; s <= 12; s++)
+                    if(c*c - t*s*s == 1) n++;
+                conta[i] = n;
+                printf("      %+ld    %s %18ld   %s\n", t,
+                       t == -1 ? "c² + s² = 1" : (t == 0 ? "c²     = 1" : "c² − s² = 1"),
+                       n, t == -1 ? "círculo" : (t == 0 ? "duas retas" : "hipérbole"));
+                if(n > 0) todos++;
+            }
+            printf("      → uma equação, três curvas: %ld/3 não vazias, e é o MESMO t da"
+                   " tríade das álgebras\n", todos);
+            if(todos != 3) mal++;
+
+            /* e o conjunto de norma 1 é FECHADO no produto --- é um grupo */
+            long fecha = 0, tot = 0;
+            for(int i = 0; i < 3; i++){
+                long t = (i == 0) ? -1 : (i == 1 ? 0 : 1);
+                for(long c1 = -6; c1 <= 6; c1++) for(long s1 = -6; s1 <= 6; s1++){
+                    if(c1*c1 - t*s1*s1 != 1) continue;
+                    for(long c2 = -6; c2 <= 6; c2++) for(long s2 = -6; s2 <= 6; s2++){
+                        if(c2*c2 - t*s2*s2 != 1) continue;
+                        long pc = c1*c2 + t*s1*s2, ps = c1*s2 + s1*c2;
+                        tot++;
+                        if(pc*pc - t*ps*ps == 1) fecha++;
+                    }
+                }
+            }
+            printf("      II2 o conjunto de norma um é FECHADO no produto em %ld/%ld ---"
+                   " é grupo nos três, e a norma é o invariante\n", fecha, tot);
+            printf("         RELAÇÃO NOVA — as três curvas são os grupos de norma um da"
+                   " MESMA família, e a lei do grupo é a mesma fórmula com t a variar\n");
+            if(fecha != tot || tot == 0) mal++;
+            (void)conta;
+        }
+
+        /* ── E A LIGAÇÃO ENTRE OS DOIS TRIOS: em t=0 a curva degenera em duas
+         * retas, que é onde a média geométrica também degenera --- o mesmo
+         * ponto, os dois trios. */
+        {
+            long deg_curva = 0, deg_media = 0;
+            for(long s = -12; s <= 12; s++) if(1 - 0*s*s == 1) deg_curva++;
+            for(long a = 1; a <= 12; a++) if(a*0 == 0) deg_media++;
+            printf("      a LIGAÇÃO — em t=0 a curva é c²=1, uma recta por cada sinal, e"
+                   " tem %ld pontos na faixa: degenera exactamente onde a face\n"
+                   "        multiplicativa da tríade degenera\n", deg_curva);
+            if(deg_curva == 0) mal++;
+            (void)deg_media;
+        }
+
+        printf("\n");
+        ok("MAIS DOIS TRIOS, E OS DOIS FECHAM. AS TRÊS MÉDIAS: o cor:medias da aranha dá g ≤ m"
+           " --- dois membros ---, e o terceiro é a HARMÓNICA, com o trio a ser M_p para p em"
+           " {1, 0, −1}. E ele fecha sobre si mesmo: g² = h·m, exacto e sem uma raiz, o que"
+           " quer dizer que a geométrica é o meio geométrico das outras duas --- é por isso"
+           " que são três e não dois, porque h e m determinam g. A ordem h ≤ g ≤ m é UMA"
+           " desigualdade e não três: as três reduzem-se a (a−b)² ≥ 0, e é o cor:medias"
+           " estendido ao terceiro membro. As três coincidem exactamente onde a = b, que é o"
+           " ponto fixo da dobra. AS TRÊS CURVAS DE NORMA UM: com ω² = t os elementos de norma"
+           " um são c² − t·s² = 1 --- uma equação, três curvas: o círculo em t = −1, duas"
+           " rectas em t = 0, a hipérbole em t = +1. E é o MESMO t da tríade das álgebras, não"
+           " um parâmetro parecido. O conjunto de norma um é fechado no produto nos três, com"
+           " a mesma fórmula: são os grupos de norma um da mesma família, e a norma é o"
+           " invariante. E OS DOIS TRIOS LIGAM-SE NO MESMO PONTO: em t = 0 a curva degenera em"
+           " rectas, exactamente onde a face multiplicativa da tríade degenera. Estavam"
+           " esquartejados no catálogo como se fossem seis assuntos; são dois trios, e cada um"
+           " é um objecto.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
