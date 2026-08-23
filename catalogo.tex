@@ -1974,6 +1974,58 @@ $M(a)$ --- é \textbf{quociente exacto}, $G\equiv12$ e falta zero. Não é difer
 lei $\lvert\det\rvert=1$ do operador dobra o corpo de forma \emph{uniforme}, e as outras
 cinco dobram-no torto.
 
+\paragraph{As treze restantes, e uma terceira espécie.} Fechadas as $19$ com as quatro
+peças, as leituras que os próprios medidores nomeiam repartem-se assim:
+
+\begin{center}\small
+\begin{tabular}{@{}llrrrl@{}}
+\toprule
+entrada & a leitura que ele nomeia & fibras & $G$ & falta & espécie\\
+\midrule
+\code{analog.c} & a energia $u^2+w^2$ do estado & $6$ & $1..8$ & $23$ & resume\\
+\code{assinatura.c} & a \emph{contagem}, não a assinatura & $5$ & $1..9$ & $21$ & resume\\
+\code{bidual.c} & a face da dualidade (das sete) & $7$ & $4..4$ & $0$ & quociente\\
+\code{cadeia.c} & o degrau da descida & $4$ & $5..5$ & $0$ & quociente\\
+\code{cantor.c} & o par de Cantor $\pi(a,b)$ & $25$ & $1..1$ & $0$ & \textbf{separa}\\
+\code{corpo\_topologico.c} & a ordem no reticulado & $8$ & $1..8$ & $40$ & resume\\
+\code{fecha.c} & o lado da torre & $2$ & $8..8$ & $0$ & quociente\\
+\code{hopfield.c} & o atractor onde o estado cai & $2$ & $16..16$ & $0$ & quociente\\
+\code{microfluidica.c} & o vestido (dos seis) & $6$ & $3..3$ & $0$ & quociente\\
+\code{numerica.c} & o \emph{valor} da expressão & $9$ & $1..5$ & $20$ & resume\\
+\code{quebra.c} & o \emph{parâmetro}, não o corpo & $5$ & $5..5$ & $0$ & quociente\\
+\code{robo.c} & o sinal do diferencial & $3$ & $5..10$ & $5$ & resume\\
+\code{tex.c} & o formato de saída (dos nove) & $9$ & $3..3$ & $0$ & quociente\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Uma \textbf{separa} --- o par de Cantor, que é bijecção e por isso não tem nada a
+completar ---, e é ela que impede o medidor de ser uma máquina de dizer «falta».
+
+\subsection*{E o achado: $G$ constante NÃO certifica a leitura}
+
+O \code{quebra.c} existe porque o Aarão parou uma correcção minha com «\emph{você está a
+consertar --- falei pra QUEBRAR}», e o que ele quebrou foi eu ter ordenado o \emph{parâmetro}
+em vez do \emph{corpo}. Essa leitura tem
+\[
+  G\equiv5,\qquad \text{falta}=0,
+\]
+\emph{quociente perfeito} --- e é a leitura \textbf{errada}: junta $50$ pares de objectos
+diferentes e parte $30$ pares de objectos iguais, porque o parâmetro não é o objecto.
+
+\begin{quote}
+\textbf{A completude é uma condição sobre a fibra, e não diz que a leitura seja a do corpo.}
+As duas perguntas são independentes: $G$ constante responde à primeira, e o critério da
+leitura --- bem definida e separadora --- é que responde à segunda.
+\end{quote}
+
+\noindent Isto corrige o que o lote anterior deixava supor. Nada do que ficou registado
+antes cai --- os levantamentos continuam válidos ---, mas nenhum deles certifica, por si,
+que a leitura levantada seja a do objecto.
+
+\medido{\code{tests/pgwire.c} §W173 --- as treze com as três espécies separadas, e o
+\code{quebra.c} a exibir os $50$ e os $30$ pares que a leitura de $G$ constante trata mal.}
+
 \medido{\code{tests/pgwire.c} §W172 --- as seis com $\sum G=\lvert I\rvert$,
 $\pi\circ\iota=\mathrm{id}$, os objectos de partida todos vivos no levantado, e a régua a
 descer em $6/6$ com $12\,330$ triplos estritos.}

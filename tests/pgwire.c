@@ -25482,6 +25482,126 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W173: AS TREZE RESTANTES COM AS QUATRO PEÇAS ════════════════════ */
+    {
+        long mal = 0;
+        printf("\n§W173 as treze restantes --- e elas separam-se em TRÊS espécies, não duas.\n\n");
+
+        struct { const char *ent; const char *leitura; int caso; } E[13] = {
+            {"analog.c",           "a energia u²+w² do estado    ",  0},
+            {"assinatura.c",       "a CONTAGEM, não a assinatura ",  1},
+            {"bidual.c",           "a face da dualidade (das 7)  ",  2},
+            {"cadeia.c",           "o degrau da descida          ",  3},
+            {"cantor.c",           "o par de Cantor π(a,b)       ",  4},
+            {"corpo_topologico.c", "a ordem no reticulado        ",  5},
+            {"fecha.c",            "o lado da torre (branco/negro)", 6},
+            {"hopfield.c",         "o atractor onde o estado cai ",  7},
+            {"microfluidica.c",    "o vestido (dos seis)         ",  8},
+            {"numerica.c",         "o VALOR da expressão         ",  9},
+            {"quebra.c",           "o PARÂMETRO, não o corpo     ", 10},
+            {"robo.c",             "o sinal do diferencial       ", 11},
+            {"tex.c",              "o formato de saída (dos nove)", 12},
+        };
+        printf("      entrada              a leitura que ELE nomeia        |I| fibras   G   "
+               "falta  espécie\n");
+        long separa_n = 0, quociente_n = 0, resumo_n = 0, levantou = 0;
+        for(int c = 0; c < 13; c++){
+            long e[64]; long n = 0;
+            switch(E[c].caso){
+              case 0: for(long u = -2; u <= 2; u++) for(long w = -2; w <= 2; w++)
+                          e[n++] = u*u + w*w; break;                    /* a energia */
+              case 1: for(long k = 0; k < 24; k++){                     /* a contagem */
+                          long b = 0, t = k; while(t){ b += t & 1; t >>= 1; } e[n++] = b; }
+                      break;
+              case 2: for(long k = 0; k < 28; k++) e[n++] = k % 7; break;   /* a face */
+              case 3: for(long k = 0; k < 20; k++) e[n++] = k / 5; break;   /* o degrau */
+              case 4: for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++)
+                          e[n++] = (a+b)*(a+b+1)/2 + b; break;          /* Cantor: bijecção */
+              case 5: for(long k = 1; k <= 24; k++){                    /* a ordem */
+                          long g = k, m = 24; while(m){ long t = g % m; g = m; m = t; }
+                          e[n++] = 24 / g; }
+                      break;
+              case 6: for(long k = 0; k < 16; k++) e[n++] = k < 8; break;   /* o lado */
+              case 7: for(long k = 0; k < 32; k++){                     /* o atractor */
+                          long d0 = 0, d1 = 0, t = k;
+                          for(int i = 0; i < 5; i++){ long b = (t>>i)&1;
+                              d0 += b; d1 += (b ^ ((i&1)==0)); }
+                          e[n++] = (d0 <= d1) ? 0 : 1; }
+                      break;
+              case 8: for(long k = 0; k < 18; k++) e[n++] = k % 6; break;   /* o vestido */
+              case 9: for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++)
+                          e[n++] = a + b; break;                        /* o valor */
+              case 10: for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++)
+                          e[n++] = a; break;                            /* o parâmetro */
+              case 11: for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++)
+                          e[n++] = (a > b) - (a < b); break;            /* o diferencial */
+              default: for(long k = 0; k < 27; k++) e[n++] = k % 9;         /* o formato */
+            }
+            EsFibra f = es_fibra(e, n);
+            LvLevanta L;
+            if(!lv_levanta(e, n, &L)){ mal++; continue; }
+            const char *esp = (f.fibras == n) ? "SEPARA" : f.constante ? "quociente" : "resume";
+            printf("      %-20s %s %3ld %5ld %3ld..%-3ld %4ld  %s\n",
+                   E[c].ent, E[c].leitura, n, f.fibras, f.menor, f.maior,
+                   es_falta(e, n), esp);
+            if(f.soma != n) mal++;
+            if(!lv_pi_iota_id(e, n, &L)) mal++;
+            if(!lv_completo(&L)) mal++;
+            long viv = 0; for(long k = 0; k < L.n; k++) if(L.existia[k]) viv++;
+            if(viv != n) mal++;
+            levantou++;
+            if(f.fibras == n) separa_n++; else if(f.constante) quociente_n++; else resumo_n++;
+        }
+        printf("      → %ld SEPARAM · %ld são QUOCIENTE · %ld RESUMEM --- e as %ld levantam\n",
+               separa_n, quociente_n, resumo_n, levantou);
+        if(separa_n == 0 || quociente_n == 0 || resumo_n == 0 || levantou != 13) mal++;
+
+        /* ── O QUE ESTE LOTE MOSTRA E O ANTERIOR NÃO PODIA: G CONSTANTE NÃO
+         * BASTA. O `quebra.c` existe porque o Aarão disse «você está a consertar
+         * — falei pra QUEBRAR», e o que ele quebrou foi eu ter ordenado o
+         * PARÂMETRO em vez do CORPO. Essa leitura tem G constante --- é
+         * quociente perfeito --- e mesmo assim é a leitura ERRADA: o parâmetro
+         * não é o objecto. A completude é uma condição sobre a FIBRA, e não diz
+         * que a leitura seja a do corpo. Mede-se pondo o mesmo corpo com uma
+         * igualdade que o parâmetro não respeita. */
+        {
+            /* dois parâmetros (a,b) e a igualdade do CORPO: a+b (a soma é o
+             * objecto). A leitura pelo parâmetro `a` tem G constante e mesmo
+             * assim não é bem definida: junta objectos diferentes e separa
+             * iguais. */
+            long par[25], corpo[25]; long n = 0;
+            for(long a = 0; a < 5; a++) for(long b = 0; b < 5; b++){
+                par[n] = a; corpo[n] = a + b; n++;
+            }
+            EsFibra f = es_fibra(par, n);
+            long junta = 0, parte = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+                if(par[i] == par[j] && corpo[i] != corpo[j]) junta++;
+                if(par[i] != par[j] && corpo[i] == corpo[j]) parte++;
+            }
+            printf("\n      o quebra.c: a leitura pelo PARÂMETRO tem G = %ld..%ld"
+                   " (quociente perfeito, falta %ld)\n", f.menor, f.maior, es_falta(par, n));
+            printf("      e mesmo assim junta %ld pares de objectos DIFERENTES e parte"
+                   " %ld pares IGUAIS\n", junta, parte);
+            printf("      → G constante é condição sobre a FIBRA, não sobre a leitura ser"
+                   " a do corpo\n");
+            if(!f.constante || junta == 0 || parte == 0) mal++;
+        }
+
+        printf("\n");
+        ok("AS TREZE SEPARAM-SE EM TRÊS ESPÉCIES, E A TERCEIRA É NOVA. O lote anterior tinha"
+           " resumos e um quociente; aqui aparece uma leitura que SEPARA --- o par de Cantor,"
+           " que é bijecção e por isso não tem nada a completar ---, e é ela que impede o"
+           " medidor de ser uma máquina de dizer «falta». E O ACHADO É O `quebra.c`: a"
+           " leitura pelo PARÂMETRO tem G constante, é quociente perfeito, falta zero --- e é"
+           " a leitura ERRADA. Junta objectos diferentes e parte objectos iguais, porque o"
+           " parâmetro não é o corpo. Isto corrige o que o lote anterior deixava supor: G"
+           " constante é uma condição sobre a FIBRA e não certifica que a leitura seja a do"
+           " objecto. As duas perguntas são independentes, e o critério da leitura --- bem"
+           " definida e separadora --- é que responde à segunda.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
