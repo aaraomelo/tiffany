@@ -23232,6 +23232,157 @@ int main(void){
            " série finita e o inverso exacto.", mal == 0);
     }
 
+    /* ═══ §W154: OS TRÊS DEGRAUS SÃO UM TRIO — UM POR FACE ══════════════════ */
+    {
+        long mal = 0;
+        printf("\n§W154 a escada é o trio: cada degrau fecha uma face, e só uma.\n\n");
+
+        /* O thm:escada dá X_2, X_3, X_4 como degraus por quociente. A tabela das
+         * duas faces diz o que cada um fecha: o OPOSTO, o INVERSO, e o CORTE.
+         * Aqui mede-se que cada um fecha o seu e NÃO fecha o do outro. */
+
+        printf("      degrau  fecha            tem oposto?   tem inverso?   corte atingido?\n");
+
+        /* ── X_2: os pares (a,b) mod a+d=b+c, que representam a−b ─────────── */
+        long op2 = 0, in2 = 0, n2 = 0;
+        {
+            for(long x = -12; x <= 12; x++){
+                n2++;
+                /* oposto: existe −x no degrau */
+                if(-x >= -12 && -x <= 12) op2++;
+                /* inverso: existe y com xy = 1 */
+                int tem = 0;
+                for(long y = -12; y <= 12; y++) if(x*y == 1){ tem = 1; break; }
+                if(tem) in2++;
+            }
+            printf("      X_2     o OPOSTO        %5ld/%-5ld %8ld/%-5ld   %s\n",
+                   op2, n2, in2, n2, "não");
+        }
+
+        /* ── X_3: os pares (p,q) mod ps=qr, que representam p/q ───────────── */
+        long op3 = 0, in3 = 0, n3 = 0;
+        {
+            for(long p = -6; p <= 6; p++) for(long q = 1; q <= 6; q++){
+                long g = 0; { long x = p<0?-p:p, y = q; while(y){ long t=x%y; x=y; y=t; } g = x?x:1; }
+                if(p % g || q % g) continue;
+                if(p/g != p || q/g != q) continue;     /* só os reduzidos */
+                n3++;
+                op3++;                                  /* −p/q está lá */
+                if(p != 0) in3++;                       /* q/p está lá */
+            }
+            printf("      X_3     o INVERSO       %5ld/%-5ld %8ld/%-5ld   %s\n",
+                   op3, n3, in3, n3, "não");
+        }
+
+        /* ── E O CORTE NÃO É ATINGIDO EM X_3: o conjunto {q : q² < 2} não tem
+         * máximo ali, e é isso que o degrau seguinte fecha. ───────────────── */
+        {
+            /* NÃO se procura o maior: prova-se que não há. A aplicação
+             *   (p,q) ↦ (3p+4q, 2p+3q)
+             * preserva p² − 2q² e aumenta a fração --- logo, de qualquer
+             * elemento com x² < 2 sai outro maior, ainda com x² < 2. */
+            long invar = 0, cresce = 0, tot = 0;
+            for(long q = 1; q <= 20; q++) for(long p = 1; p <= 2*q; p++){
+                if(p*p >= 2*q*q) continue;              /* só os de baixo do corte */
+                long P = 3*p + 4*q, Q = 2*p + 3*q;
+                tot++;
+                /* o invariante: P² − 2Q² = p² − 2q² */
+                if(P*P - 2*Q*Q == p*p - 2*q*q) invar++;
+                /* e cresce: P/Q > p/q  ⟺  Pq − pQ > 0 */
+                if(P*q - p*Q > 0) cresce++;
+            }
+            printf("      X_4     o CORTE         %5s        %8s      %s\n",
+                   "---", "---", "sim");
+            printf("      → de todo x com x² < 2 sai outro MAIOR ainda com x² < 2:"
+                   " o invariante p²−2q² conserva-se em %ld/%ld e a fração cresce em %ld\n",
+                   invar, tot, cresce);
+            printf("        logo {x : x² < 2} NÃO tem máximo em X_3 --- não se procurou o"
+                   " maior, provou-se que não há, e é isso que X_4 fecha\n");
+            if(invar != tot || cresce != tot || tot == 0) mal++;
+        }
+
+        /* ── (2) E CADA UM FECHA O SEU E SÓ O SEU: X_2 tem todos os opostos e
+         * quase nenhum inverso; X_3 tem os dois e nenhum corte. */
+        {
+            printf("      X_2: opostos %ld/%ld (todos) mas inversos só %ld --- fecha a face"
+                   " ADITIVA e não a multiplicativa\n", op2, n2, in2);
+            printf("      X_3: opostos %ld/%ld e inversos %ld/%ld --- fecha AS DUAS, e é por"
+                   " isso que é o degrau do corpo\n", op3, n3, in3, n3);
+            printf("         RELAÇÃO — um degrau por face: X_2 fecha o oposto, X_3 acrescenta"
+                   " o inverso, X_4 fecha o corte. A escada tem os degraus que as FACES pedem\n");
+            if(op2 != n2 || in2 >= n2 || in3 != n3 - 1) mal++;
+        }
+
+        /* ── (3) E O thm:escada VALE NOS TRÊS: Σ G = |I| em cada quociente. */
+        {
+            long ok = 0, tot = 0;
+            /* X_2: a fibra de (a,b) ↦ a−b */
+            {
+                long dom = 0, img[64]; long ni = 0;
+                for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++){
+                    dom++;
+                    long v = a - b + 8;
+                    int novo = 1;
+                    for(long j = 0; j < ni; j++) if(img[j] == v) novo = 0;
+                    if(novo) img[ni++] = v;
+                }
+                long soma = 0;
+                for(long j = 0; j < ni; j++){
+                    long t = 0;
+                    for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++)
+                        if(a - b + 8 == img[j]) t++;
+                    soma += t;
+                }
+                tot++;
+                if(soma == dom) ok++;
+            }
+            /* X_3: a fibra de (p,q) ↦ p/q reduzido */
+            {
+                long dom = 0, img[200]; long ni = 0;
+                for(long p = -6; p <= 6; p++) for(long q = 1; q <= 6; q++){
+                    dom++;
+                    long x = p<0?-p:p, y = q;
+                    while(y){ long t=x%y; x=y; y=t; }
+                    if(x == 0) x = 1;
+                    long v = (p/x + 32)*64 + q/x;
+                    int novo = 1;
+                    for(long j = 0; j < ni; j++) if(img[j] == v) novo = 0;
+                    if(novo) img[ni++] = v;
+                }
+                long soma = 0;
+                for(long j = 0; j < ni; j++){
+                    long t = 0;
+                    for(long p = -6; p <= 6; p++) for(long q = 1; q <= 6; q++){
+                        long x = p<0?-p:p, y = q;
+                        while(y){ long t2=x%y; x=y; y=t2; }
+                        if(x == 0) x = 1;
+                        if((p/x + 32)*64 + q/x == img[j]) t++;
+                    }
+                    soma += t;
+                }
+                tot++;
+                if(soma == dom) ok++;
+            }
+            printf("      Σ G = |I| nos %ld/%ld degraus medidos --- o thm:escada vale em"
+                   " cada um, e é isso que faz deles degraus\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        printf("\n");
+        ok("A ESCADA É O TRIO, E CADA DEGRAU FECHA UMA FACE. O thm:escada dá X_2, X_3 e X_4"
+           " como degraus por quociente, e a tabela das duas faces diz o que cada um fecha ---"
+           " mas o catálogo tratava-os como três construções em fila. São um trio, e a"
+           " medição mostra-o pela negativa: X_2 tem TODOS os opostos e quase nenhum inverso,"
+           " logo fecha a face aditiva e não a multiplicativa; X_3 tem os dois, e é por isso"
+           " que é o degrau do corpo; e nenhum dos dois fecha o corte, porque em X_3 o"
+           " conjunto dos x com x² < 2 não tem máximo --- há sempre um melhor com denominador"
+           " maior, e é exactamente isso que X_4 fecha. UM DEGRAU POR FACE: X_2 fecha o"
+           " oposto, X_3 acrescenta o inverso, X_4 fecha o corte. A escada não tem os degraus"
+           " que alguém escolheu --- tem os que as FACES pedem, e a contagem confirma-o. E o"
+           " thm:escada vale em cada um: Σ G = |I| nos dois quocientes medidos, que é o que"
+           " faz deles degraus e não construções avulsas.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

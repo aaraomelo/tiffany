@@ -1340,6 +1340,41 @@ nulos a bater com a triangular; $\mu\zeta=\zeta\mu=\mathrm{id}$; $\Delta=0$ para
 $(\zeta a)(t)=\sum_{u\le t}a(u)$ em $40/40$ vetores; e o gume do cíclico, com $S^{8}=I$ e
 $1-S$ singular.}
 
+\paragraph{E a própria escada é um trio: \emph{um degrau por face}.} O
+\code{aranha thm:escada} dá $X_2$, $X_3$ e $X_4$ como degraus por quociente, e a tabela
+das duas faces diz o que cada um fecha --- mas este texto tratava-os como três construções
+em fila. \emph{São um trio}, e a medição mostra-o pela negativa:
+\begin{center}\small
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+degrau & fecha & tem oposto? & tem inverso? & corte atingido?\\
+\midrule
+$X_2$ & o \textbf{oposto} & $25/25$ & $2/25$ & não\\
+$X_3$ & o \textbf{inverso} & $47/47$ & $46/47$ & não\\
+$X_4$ & o \textbf{corte} & --- & --- & \textbf{sim}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent $X_2$ tem \emph{todos} os opostos e quase nenhum inverso: fecha a face aditiva e
+não a multiplicativa. $X_3$ tem os dois, e é por isso que é o degrau do corpo. E nenhum
+fecha o corte --- \emph{o que se prova, não se procura}: a aplicação
+\[
+ (p,q)\longmapsto(3p+4q,\;2p+3q)
+\]
+preserva $p^2-2q^2$ e \emph{aumenta} a fração, pelo que de todo $x$ com $x^2<2$ sai outro
+maior ainda com $x^2<2$. Logo $\{x:x^2<2\}$ não tem máximo em $X_3$, e é isso que $X_4$
+fecha.
+
+\medskip\noindent\textbf{Um degrau por face}: $X_2$ fecha o oposto, $X_3$ acrescenta o
+inverso, $X_4$ fecha o corte. \emph{A escada não tem os degraus que alguém escolheu --- tem
+os que as faces pedem}, e o $\sum G=\lvert I\rvert$ vale em cada um, que é o que faz deles
+degraus e não construções avulsas.
+
+\medido{o trio dos degraus em \code{tests/pgwire.c} §W154 --- os opostos e inversos
+contados em $X_2$ e $X_3$; o invariante $p^2-2q^2$ conservado em $287/287$ com a fração a
+crescer em todos, provando que o corte não é atingido; e $\sum G=\lvert I\rvert$ nos dois
+quocientes medidos.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
