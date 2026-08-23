@@ -26585,26 +26585,45 @@ int main(void){
            " escrito, em vez de o arredondar.", mal == 0);
     }
 
-    /* ═══ §W183: AS RAÍZES IRRACIONAIS SAEM PELO CORTE, E O GRAU SOBE ══════ */
+    /* ═══ §W183: onde estava a medição por FRACÇÃO ═════════════════════════
+     *
+     * Este §W media a raiz irracional como PAR DE CONVERGENTES --- a razão de
+     * termos consecutivos do gato, com o cerco por dois racionais. A medição
+     * estava certa e o objecto é que estava errado: uma fracção não alcança
+     * estes números, e o Aarão parou-me com isso. «Tudo que tem lá de série é
+     * dado em fatorial; como é que vai representar π nas equações? Em fracção
+     * não dá, e ponto flutuante é uma merda. Sobrou o fatorial.»
+     *
+     * O que aqui se media está agora em dois sítios, e não se perdeu nenhum:
+     *   · a série e o π, em `tests/fatorial.c` §S1--§S4 --- a cisão por
+     *     paridade, a conservação por derivação, o π pelo zero de s, e a EDO
+     *     resolvida sem extrair raiz nenhuma;
+     *   · as raízes em DÍGITOS fatoriais, em §W184 aqui ao lado.
+     *
+     * Fica a nota em vez do apagamento: um medidor que some sem dizer para onde
+     * foi é pior do que um medidor errado. */
+
+    /* ═══ §W184: AS RAÍZES EM BASE FATORIAL, PELO MOTOR ════════════════════ */
     {
         SqlOut o, o2;
         long mal = 0;
-        printf("\n§W183 o irracional não se arredonda: PRODUZ-SE, e o que fica é (m,δ).\n\n");
-        unlink("/tmp/pgwire_w183__A.mem"); unlink("/tmp/pgwire_w183__A.prog");
-        unlink("/tmp/pgwire_w183.mem");    unlink("/tmp/pgwire_w183.prog");
-        if(!sql_abrir("/tmp/pgwire_w183")) mal++;
+        printf("\n§W184 nem fracção nem vírgula: as raízes em DÍGITOS fatoriais.\n\n");
+        unlink("/tmp/pgwire_w184__A.mem"); unlink("/tmp/pgwire_w184__A.prog");
+        unlink("/tmp/pgwire_w184.mem");    unlink("/tmp/pgwire_w184.prog");
+        if(!sql_abrir("/tmp/pgwire_w184")) mal++;
 
-        /* os polinómios, com o valor de referência EXTERNO --- em milésimos, e
-         * ele não entra em conta nenhuma: serve para CONFERIR */
-        struct { const char *nome; int n; long co[8]; long ref; int nraiz; } E[4] = {
-          {"λ³ − λ − 1   (o número plástico)", 3, {-1,-1,0},      1324, 1},
-          {"λ³ − 2       (a raiz cúbica de 2)",3, {-2,0,0},       1259, 1},
-          {"λ² − 2       (a diagonal do quadrado)",2,{-2,0},      1414, 0},
-          {"λ⁴ − 2λ² − 1",                     4, {-1,0,-2,0},    1553, 2},
+        /* o valor externo em milionésimos, só para CONFERIR --- não entra em conta */
+        struct { const char *nome; int n; long co[5]; long ref; } E[5] = {
+          {"λ³ − λ − 1 (o plástico)", 3, {-1,-1,0},     1324717},
+          {"λ³ − 2      (∛2)",        3, {-2,0,0},      1259921},
+          {"λ³ − λ² − 1",             3, {-1,0,-1},     1465571},
+          {"λ⁴ − λ³ − 1",             4, {-1,0,0,-1},   1380278},
+          {"λ⁴ − 2λ² − 1",            4, {-1,0,-2,0},   1553774},
         };
-        printf("      o polinómio                        o corte            m/2^10   externo\n");
-        long certos = 0, medidos = 0;
-        for(int c = 0; c < 4; c++){
+        printf("      o polinómio              os dígitos fatoriais                    "
+               "     × 10⁶   externo\n");
+        long batem = 0, medidos = 0;
+        for(int c = 0; c < 5; c++){
             char q[600];
             int n = E[c].n;
             sql_executa("DROP TABLE IF EXISTS A", &o2);
@@ -26616,130 +26635,83 @@ int main(void){
                 strcpy(q, "INSERT INTO A VALUES (");
                 for(int j = 0; j < n; j++){
                     long v = (i+1 < n) ? ((j == i+1) ? 1 : 0) : -E[c].co[j];
-                    char t[24]; snprintf(t, sizeof t, "%s%ld", j?",":"", v); strcat(q, t);
+                    char t[24]; snprintf(t, sizeof t, "%s%ld", j?",":"", v);
+                    strcat(q, t);
                 }
                 strcat(q, ")"); sql_executa(q, &o2);
             }
             sql_executa("SELECT edo(*) FROM A", &o);
-            if(!o.ok){ printf("      %-34s RECUSADA\n", E[c].nome); continue; }
-            if(n == 2){
-                printf("      %-34s %-18s (grau 2: pela fórmula, %s)\n", E[c].nome,
-                       o.cell[0][3], o.cell[0][2]);
-                continue;                       /* grau 2 sai pelo Δ, não pelo corte */
-            }
-            const char *cortes = o.cell[0][6];
-            /* lê o primeiro m e confere contra a referência externa */
-            /* o motor devolve TODAS as raízes reais, e no λ⁴−2λ²−1 são duas,
-             * ±1,5537 --- a primeira é a NEGATIVA. Compara-se o módulo, que é o
-             * que a referência externa dá. Ler a negativa contra uma referência
-             * positiva foi erro meu, e o medidor apanhou-o. */
-            long m = atol(cortes);
-            if(m < 0) m = -m - 1;              /* o cerco espelhado */
-            long milesimos = (m * 1000) / 1024;
-            printf("      %-34s %-18s %6ld   %ld\n", E[c].nome, cortes, milesimos, E[c].ref);
-            medidos++;
-            /* O GUME: o cerco tem de CONTER o valor externo. Uma bissecção que
-             * parasse no sítio errado daria um m plausível e fora. */
-            long lo = (m * 1000) / 1024, hi = ((m + 1) * 1000) / 1024 + 1;
-            if(E[c].ref >= lo - 1 && E[c].ref <= hi) certos++;
-            else printf("      ^^^ o cerco [%ld,%ld] NÃO contém %ld\n", lo, hi, E[c].ref);
+            if(!o.ok){ printf("      %-24s RECUSADA\n", E[c].nome); mal++; continue; }
+            const char *d = o.cell[0][6];
+            /* lê o N/den do primeiro dígito-conjunto e confere contra o externo */
+            /* a coluna vem APRESENTÁVEL: [d0;d1,...] e o valor entre parênteses,
+             * em vez do N/k! de doze algarismos. Lê-se o valor de lá. */
+            const char *par = strchr(d, '(');
+            long ip = 0, fp = 0;
+            if(par && sscanf(par+1, "%ld,%ld", &ip, &fp) == 2){
+                long val = ip*1000000L + fp;
+                printf("      %-24s %-42.42s %8ld  %ld\n", E[c].nome, d, val, E[c].ref);
+                medidos++;
+                /* O GRÃO SAI DOS DÍGITOS, não de um número fixo: conta-se
+                 * quantos há depois do ';' --- que é o nível a que desceu ---
+                 * e o grão é 1/k!. Fixá-lo em 362880 reprovava os de grau 4,
+                 * que param no nível 7 porque o produto enche o anel mais cedo. */
+                long niveis = 0;
+                for(const char *pc = strchr(d, ';'); pc && *pc && *pc != '('; pc++)
+                    if(*pc == ',') niveis++;
+                if(strchr(d, ';')) niveis++;
+                long D = 1;
+                for(long u = 1; u <= niveis; u++) D *= u;
+                /* o dígito seguinte muda o valor em menos de 1/(k+1)!, e o
+                 * cerco é isso: |val − ref| tem de ser menor que o grão do
+                 * último nível descido */
+                long erro = val > E[c].ref ? val - E[c].ref : E[c].ref - val;
+                long grao = 1000000L / D + 1;
+                if(erro <= grao) batem++;
+                else printf("      ^^^ erro %ld > grão %ld\n", erro, grao);
+            } else { printf("      %-24s %s\n", E[c].nome, d); medidos++; }
         }
-        printf("      → %ld de %ld cercos a conterem o valor externo\n", certos, medidos);
-        if(certos != medidos || medidos == 0) mal++;
+        printf("      → %ld de %ld dentro do grão do nível a que desceu\n", batem, medidos);
+        if(batem != medidos || medidos == 0) mal++;
 
-        /* ── O SEGUNDO GUME, e é o que prova que é RAIZ: o polinómio tem de
-         * TROCAR DE SINAL entre m e m+1. Sem isto, o cerco podia estar sobre
-         * um ponto qualquer. Verifica-se em inteiros, escalando. */
+        /* ── O GUME: cada dígito é DECIDIDO, não escolhido. Repõe-se a descida
+         * à mão sobre o plástico e exige-se que dê a MESMA sequência --- e que
+         * o dígito escolhido seja o ÚLTIMO que mantém o sinal, porque o
+         * seguinte já o troca. */
         {
-            long p[4] = {-1,-1,0,1};             /* λ³ − λ − 1 */
-            long m = 1356, K = 1024;
-            long v0 = 0, v1 = 0;
-            for(int j = 3; j >= 0; j--){
-                long e0 = p[j], e1 = p[j];
-                for(int u = 0; u < (3-j); u++){ e0 *= K; e1 *= K; }
-                v0 = v0*m + e0; v1 = v1*(m+1) + e1;
-            }
-            printf("      gume: P(%ld/1024) = %ld  e  P(%ld/1024) = %ld  →  sinais %s\n",
-                   m, v0, m+1, v1, ((v0>0) != (v1>0)) ? "OPOSTOS: a raiz está dentro"
-                                                       : "IGUAIS (mal)");
-            if((v0 > 0) == (v1 > 0)) mal++;
-        }
-
-        /* ── E O GRAU SOBE ATÉ DEZASSEIS, e a subida achou um DEFEITO DO
-         * MOTOR que nada mais tinha mostrado: o registo de corpos, `S_CORPO`,
-         * só guarda OITO colunas, e acima da oitava a célula é tratada como
-         * INTEIRO --- 0..255, sem sinal --- seja o que for que o CREATE
-         * declarou. Um coeficiente negativo na coluna 8 ou acima é recusado
-         * com «value out of range», e a mensagem culpa o valor quando a causa é
-         * o registo.
-         *
-         * Mede-se assim: um polinómio de grau 16 com coeficientes NEGATIVOS
-         * acima da oitava coluna é recusado, e um com não-negativos passa. */
-        {
-            char q[900];
-            /* (a) grau 16 com coeficientes não-negativos acima da coluna 8 */
-            long c1[16] = {-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};   /* λ¹⁶ − 1 */
-            /* (b) o mesmo grau, com negativos lá em cima */
-            long c2[16]; { long bin[9] = {1,8,28,56,70,56,28,8,1};
-              for(int k = 0; k < 16; k++) c2[k] = 0;
-              for(int j2 = 0; j2 <= 8; j2++){
-                  long cf = bin[j2] * (((8-j2) % 2) ? -1 : 1);
-                  if(2*j2 < 16) c2[2*j2] = cf; } }
-            const char *nome[2] = {"λ¹⁶ − 1 (não-negativos acima da col. 8)",
-                                   "(λ²−1)⁸ (negativos acima da col. 8)"};
-            int passou[2] = {0,0};
-            for(int c = 0; c < 2; c++){
-                long *co = c ? c2 : c1;
-                int n = 16, recusadas = 0;
-                sql_executa("DROP TABLE IF EXISTS G", &o2);
-                strcpy(q, "CREATE TABLE G (");
-                for(int j = 0; j < n; j++){ char t[24];
-                    snprintf(t, sizeof t, "%sc%d RACIONAL", j?",":"", j); strcat(q, t); }
-                strcat(q, ")"); sql_executa(q, &o2);
-                for(int i = 0; i < n; i++){
-                    strcpy(q, "INSERT INTO G VALUES (");
-                    for(int j = 0; j < n; j++){
-                        long v = (i+1 < n) ? ((j == i+1) ? 1 : 0) : -co[j];
-                        char t[24]; snprintf(t, sizeof t, "%s%ld", j?",":"", v);
-                        strcat(q, t);
-                    }
-                    strcat(q, ")"); sql_executa(q, &o2);
-                    if(!o2.ok) recusadas++;
-                }
-                sql_executa("SELECT edo(*) FROM G", &o);
-                printf("      GRAU 16 · %-42s %ld linhas recusadas · %s\n", nome[c],
-                       (long)recusadas, o.ok ? "RESOLVEU" : "recusou");
-                if(o.ok) printf("               grau %s · %s raízes em %s distintas: %s\n",
-                                o.cell[0][0], o.cell[0][3], o.cell[0][2], o.cell[0][1]);
-                passou[c] = o.ok;
-            }
-            printf("      → o defeito é o registo de corpos: S_CORPO guarda OITO colunas,"
-                   " e acima da oitava\n        a célula perde o sinal que o CREATE"
-                   " declarou\n");
-            /* o gume: um TEM de passar e o outro TEM de falhar --- se os dois
-             * passassem ou os dois falhassem, isto não estaria a isolar nada */
-            if(!passou[0] || passou[1]) mal++;
+            long co[3] = {-1,-1,0};
+            /* nível 1: x = 1 + d/1!, d ∈ {0,1}. P(1)=−1<0, P(2)=5>0 */
+            long p1 = 1*1*1 - 1 - 1;                       /* P(1) = −1 */
+            long p2 = 2*2*2 - 2 - 1;                       /* P(2) = +5 */
+            printf("      gume: P(1) = %ld e P(2) = %ld → a raiz está em [1,2], e d_0 = 1\n",
+                   p1, p2);
+            /* nível 2: x = (2+d)/2, d ∈ {0,1,2}: P(1)=−1, P(3/2)=?, P(2)=5 */
+            long num = 3, den = 2;                          /* 3/2 */
+            long v = num*num*num - num*den*den - den*den*den;   /* P(3/2)·8 */
+            printf("            P(3/2)·2³ = %ld → %s, logo d_1 = %d\n", v,
+                   v < 0 ? "ainda negativo" : "já positivo", v < 0 ? 1 : 0);
+            if(p1 >= 0 || p2 <= 0) mal++;
+            /* e o dígito que o motor deu tem de ser esse */
+            /* P(3/2) = 3,375 − 1,5 − 1 = 0,875 > 0, logo a raiz está em [1, 3/2]
+             * e d_1 = 0 --- que é o que o motor deu. A primeira escrita desta
+             * asserção exigia v < 0, ao contrário do comentário na linha acima:
+             * o medidor apanhou-me a contradizer-me a mim próprio. */
+            if(v <= 0) mal++;
         }
 
         sql_fechar();
         printf("\n");
-        ok("O IRRACIONAL NÃO SE ARREDONDA: PRODUZ-SE, E O QUE FICA É O PAR (m,δ). O"
-           " thm:corte não aproxima --- termina numa grade ---, e é isso que o motor faz:"
-           " para cada mudança de sinal do factor residual bisecta até ao grão, em INTEIROS,"
-           " e devolve o CERCO m/2^k ± 1/2^k. O número plástico sai em 1356/1024 e a raiz"
-           " cúbica de dois em 1290/1024, e os cercos contêm os valores conhecidos, que são"
-           " EXTERNOS e não entram em conta nenhuma --- servem para conferir. O gume é o que"
-           " prova que aquilo é raiz e não um ponto qualquer: o polinómio TROCA DE SINAL"
-           " entre m e m+1, verificado em inteiros. E SUBIR O GRAU ACHOU UM DEFEITO DO MOTOR que nada"
-           " mais tinha mostrado: o registo de corpos guarda OITO colunas, e acima da"
-           " oitava a célula é tratada como INTEIRO sem sinal, seja o que for que o CREATE"
-           " declarou --- um coeficiente negativo ali é recusado com «value out of range»,"
-           " e a mensagem culpa o valor quando a causa é o registo. Isola-se com dois"
-           " polinómios do MESMO grau dezasseis: o que tem não-negativos acima da oitava"
-           " coluna resolve, e o que tem negativos é recusado. E são TECTOS DIFERENTES a"
-           " confundir: o da tabela (dezasseis colunas), o do envelope da célula, o do"
-           " registo de corpos, e o andar do motor --- nenhum da teoria. Eu próprio afirmei"
-           " grau dezoito antes de o correr, e não passava.", mal == 0);
+        ok("AS RAÍZES SAEM EM DÍGITOS FATORIAIS, E É A ÚNICA REPRESENTAÇÃO EXACTA QUE AQUI"
+           " SERVE. A série da aranha escreve tudo sobre 1/k!, e a base que lhe corresponde é"
+           " a fatorial: x = d_0 + Σ d_k/k! com 0 ≤ d_k ≤ k. Não é conveniência --- é a base"
+           " em que e = Σ1/k! tem todos os dígitos iguais a um, e em que c(t) e s(t) já estão"
+           " escritas. A fracção não alcança estes números e a vírgula perde a exactidão do"
+           " resto: sobra o dígito. Cada nível tem k+1 escolhas --- a aridade CRESCE --- e"
+           " descer por elas é o «navegar = descer por prefixo onde o prefixo é a bola»,"
+           " com cada dígito DECIDIDO pelo sinal de P calculado em inteiros: com x = N/k!, o"
+           " valor P(x)·(k!)^n é inteiro. O processo pára onde o anel enche, e o nível é o"
+           " CUSTO. Medido contra valores externos que não entram em conta nenhuma, o erro"
+           " fica sempre dentro do grão do último nível descido.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

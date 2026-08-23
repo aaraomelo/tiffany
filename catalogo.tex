@@ -2356,7 +2356,78 @@ derivada e o $t^k/k!$ \emph{separados} e multiplicava-os com duas divisões --- 
 onde a fechada dá $0{,}307$. Corrigida para o termo carregar já o fatorial, passou a dar o
 valor exacto. \emph{Sem o caso de raízes inteiras ao lado, o erro não aparecia.}
 
-\medido{\code{lib/serie.h} com \code{tests/serie.c} §S1--§S4 --- a conservação a fechar em
+\subsection*{As três faces saem da MESMA série, e a fase é contagem}
+
+O paper faz a cisão por paridade com $J^2=-1$. Com $\omega^2=t$ as potências ciclam do mesmo
+modo e $\omega^{2k}=t^k$, pelo que a exponencial se parte igual:
+\[
+  \exp(x\omega)=c_t(x)\cdot1+s_t(x)\cdot\omega,\qquad
+  c_t=\sum_k\frac{t^kx^{2k}}{(2k)!},\qquad s_t=\sum_k\frac{t^kx^{2k+1}}{(2k+1)!},
+\]
+e os três valores de $t$ \emph{são} as três classes --- não três teorias, três leituras:
+
+\begin{center}\small
+\begin{tabular}{@{}llllr@{}}
+\toprule
+$t$ & classe & $c_t,s_t$ & a órbita de $\omega$, contada & ordem\\
+\midrule
+$-1$ & elíptico & $\cos,\operatorname{sen}$ & $1\to\omega\to-1\to-\omega\to1$ & $\mathbf 4$ \emph{(roda)}\\
+$0$ & parabólico & $1,\;x$ & $1\to\omega\to0$ & --- \emph{(desliza)}\\
+$+1$ & hiperbólico & $\cosh,\operatorname{senh}$ & $1\to\omega\to1$ & $\mathbf 2$ \emph{(foge)}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A ordem não se tabela: aplica-se $\omega$ e conta-se.} Multiplicar por
+$\omega$ é $(a,b)\mapsto(t\,b,\,a)$ --- a companheira outra vez --- e parte-se de $1=(1,0)$
+até voltar. O nilpotente \emph{cai no zero} em vez de fechar, e isso também se vê contando.
+É o mesmo gesto com que o \emph{thm:periodo} lê $\lvert\{G>1\}\rvert=p$ no campo sem seguir a
+trajectória, e com que o $\pi$ se lê \emph{contando voltas}.
+
+\paragraph{E a conservação é uma só: a norma da tríade.}
+\[
+  c_t^2-t\,s_t^2=1\qquad\bigl(=N(c+s\omega),\ \text{com }N(a+b\omega)=a^2-t\,b^2\bigr)
+\]
+--- em $t=-1$ é $c^2+s^2=1$, em $t=0$ é $c^2=1$, em $t=+1$ é $c^2-s^2=1$. Fecha nas três
+faces e \emph{não se impõe}: sai de $(c^2-ts^2)'=2c(ts)-2t\,s\,c=0$. E o parabólico mostra-o
+de imediato --- com $\omega^2=0$ a série \textbf{termina em dois termos}, e a norma dá
+exactamente um. O gume: lida com o $t$ errado, a norma \textbf{quebra}.
+
+\medido{\code{tests/fatorial.c} §S5 --- a norma a fechar em $6/6$ pontos nas três faces, a
+série finita em $t=0$, as ordens obtidas por contagem com a órbita exibida, e o gume do $t$
+trocado.}
+
+\paragraph{E as raízes saem em DÍGITOS, que é a única forma exacta que aqui serve.} A
+fracção não alcança estes números e a vírgula perde a exactidão do resto: sobra o dígito
+fatorial. Cada nível $k$ tem $k+1$ escolhas --- \emph{a aridade cresce} --- e descer por elas
+é o «navegar = descer por prefixo onde o prefixo é a bola», com cada dígito \textbf{decidido}
+pelo sinal de $P$ em inteiros: com $x=N/k!$, o valor $P(x)\cdot(k!)^n$ é inteiro.
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrr@{}}
+\toprule
+o polinómio & os dígitos & o valor & externo\\
+\midrule
+$\lambda^3-\lambda-1$ (o plástico) & $[1;0,0,1,3,3,5,5,4,5]$ & $1{,}324716$ & $1{,}324717$\\
+$\lambda^3-2$ ($\sqrt[3]{2}$) & $[1;0,0,1,2,1,1,1,0,0]$ & $1{,}259920$ & $1{,}259921$\\
+$\lambda^3-\lambda^2-1$ & $[1;0,0,2,3,0,5,1,3,7]$ & $1{,}465569$ & $1{,}465571$\\
+$\lambda^4-\lambda^3-1$ & $[1;0,0,2,1,0,3,5]$ & $1{,}380158$ & $1{,}380278$\\
+$\lambda^4-2\lambda^2-1$ & $[1;0,1,0,1,1,2,5]$ & $1{,}553769$ & $1{,}553774$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{E a apresentação é a dos dígitos}, não do $N/k!$: o cliente lê
+$[1;0,0,1,3,3]$ e o valor de relance, e não um quociente de seis algarismos sobre outro de
+seis --- muda a escrita, não o número. O processo \textbf{pára} onde o anel enche, e o nível
+a que parou é o custo. Os valores externos não entram em conta nenhuma; servem para
+conferir, e o erro fica sempre dentro do grão do nível descido --- \emph{grão que se conta
+dos próprios dígitos}, e não de um número fixo.
+
+\medido{\code{tests/pgwire.c} §W184 --- as cinco raízes em dígitos pelo \code{SELECT edo(*)},
+com o gume a repor a descida à mão nos dois primeiros níveis.}
+
+\medido{\code{lib/fatorial.h} com \code{tests/fatorial.c} §S1--§S4 --- a conservação a fechar em
 $7/7$ pontos com a série a PARAR em todos, o $\pi$ a estabilizar em $3{,}1416$ com $c(\pi)$
 a conferir em $3/3$ grãos, o gume da face errada a dar $3{,}097$, e a EDO resolvida pela
 série nos dois regimes.}

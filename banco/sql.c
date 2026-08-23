@@ -70,6 +70,7 @@
  * perguntar por elas, sobre as suas células, sem um único double. */
 #include "../lib/racionais.h"
 #include "../lib/serie.h"
+#include "../lib/fatorial.h"
 /* ── E A ÁLGEBRA LINEAR, COM O NOME MUDADO À ENTRADA ─────────────────────────
  * O `linear.h` tem a matriz sobre ℚ e tudo o que ela faz — produto, soma,
  * transposta, determinante, posto, núcleo, imagem, inversa —, e o motor precisa
@@ -8127,82 +8128,36 @@ static int varre(const char *resto, int acao){
                   strncat(forma, t, sizeof forma - strlen(forma) - 1); }
                 primeiro = 0;
             }
-            /* ── (3) O QUE SOBRA, E AS RAÍZES IRRACIONAIS: PELA SÉRIE.
+            /* ── (3) O QUE SOBRA: AS RAÍZES EM BASE FATORIAL.
              *
-             * Não se bissecta e não se escreve decimal. O `thm:bitunico` dá a
-             * construção: iterar o GATO --- que é esta companheira --- sobre o
-             * bit único, e a razão de termos consecutivos É a raiz dominante,
+             * A série da aranha escreve tudo sobre 1/k!, e a representação que
+             * lhe corresponde é a BASE FATORIAL --- x = d_0 + Σ d_k/k! com
+             * 0 ≤ d_k ≤ k. Não é conveniência: é a base em que e = Σ1/k! tem
+             * todos os dígitos iguais a um, e em que c(t) e s(t) já estão
+             * escritas.
              *
-             *     (⊗^k c)_0 / (⊗^k c)_1  ⟶  σ,
+             * Nem fracção nem vírgula, então: DÍGITOS. Cada nível k tem k+1
+             * escolhas --- a aridade cresce ---, e descer por elas é o «navegar
+             * = descer por prefixo onde o prefixo é a bola». Cada dígito decide-se
+             * pelo SINAL de P, calculado em inteiros: com x = N/k!, o valor
+             * P(N/k!)·(k!)^n é inteiro e tem o mesmo sinal.
              *
-             * porque a componente na raiz de módulo menor DECAI. Tudo em
-             * inteiros: a iteração é a recorrência
-             *
-             *     u_{k+n} = c_{n-1} u_{k+n-1} + ... + c_0 u_k
-             *
-             * lida do polinómio, e o que se devolve é a FRACÇÃO u_{k+1}/u_k ---
-             * não um decimal. Dois convergentes consecutivos CERCAM a raiz, e é
-             * esse par que o cliente recebe: onde está e entre que dois
-             * racionais, exactamente como o `pi_rei.c` certifica sem um float.
-             *
-             * E a paragem é a da casa: itera-se enquanto os termos couberem, e
-             * conta-se em que passo parou --- o custo da série, que o
-             * `thm:serie` lê no campo. Um número grande é sintoma de prova por
-             * crescimento, e por isso o tecto é dito. */
-            char serie[SQL_OUT_CELL] = ""; long nirr = 0;
-            if(gr >= 2){
-                /* a recorrência lê-se do factor residual mónico:
-                 * λ^gr = −p[gr-1]λ^{gr-1} − ... − p[0] */
-                long u[EDO_ANDAR+2];
-                for(long k = 0; k < gr; k++) u[k] = 0;
-                u[gr-1] = 1;                       /* o BIT ÚNICO do thm:bitunico */
-                long ant_p = 0, ant_q = 0, cur_p = 0, cur_q = 0, passos = 0;
-                /* O TECTO da iteração --- e ele é DELIBERADO, não o maior que
-                 * o `long` aguenta: o cliente que quiser conferir o cerco tem
-                 * de calcular q^n·P(p/q), que é inteiro e cresce como p^n. Com
-                 * p até 2^20 e grau até 4 isso cabe folgadamente; deixar a
-                 * iteração correr até 2^40 dava um convergente mais fino e
-                 * IMPOSSÍVEL de verificar sem sair do anel. Melhor um cerco
-                 * conferível do que um mais apertado que ninguém pode checar. */
-                const long TECTO = 1L << 20;
-                for(long it = 0; it < 200; it++){
-                    long prox = 0; int estourou = 0;
-                    for(long k = 0; k < gr; k++){
-                        long termo = -p[k] * u[k];
-                        if(u[k] > TECTO || u[k] < -TECTO){ estourou = 1; break; }
-                        prox += termo;
-                        if(prox > TECTO || prox < -TECTO){ estourou = 1; break; }
-                    }
-                    if(estourou) break;
-                    for(long k = 0; k + 1 < gr; k++) u[k] = u[k+1];
-                    u[gr-1] = prox;
-                    if(u[gr-2] != 0){
-                        ant_p = cur_p; ant_q = cur_q;
-                        cur_p = u[gr-1]; cur_q = u[gr-2];
-                        passos++;
-                    }
-                }
-                /* ── E A ITERAÇÃO SÓ DÁ A RAIZ QUANDO ELA É DOMINANTE.
-                 * O `thm:bitunico` prova a convergência «porque a componente em
-                 * σ' DECAI» --- e isso pede |σ'| < |σ|. Quando os módulos
-                 * EMPATAM não há para onde decair e a razão não estabiliza:
-                 * λ³−2 tem as três raízes com o mesmo módulo (∛2 vezes as
-                 * raízes cúbicas da unidade), e λ⁴−2λ²−1 tem o par simétrico.
-                 * O motor DIZ isso em vez de devolver um quociente que não é
-                 * raiz de nada --- devolver 0/N seria pior do que recusar. */
-                int dominante = (cur_q != 0 && cur_p != 0 && ant_q != 0 && ant_p != 0);
-                if(dominante && passos >= 2){
-                    /* os dois convergentes CERCAM: a razão sobe e desce em
-                     * volta da raiz, e o par diz entre que dois racionais ela
-                     * está. Sem vírgula, e sem um decimal escrito. */
-                    snprintf(serie, sizeof serie, "%ld/%ld .. %ld/%ld  (%ld passos)",
-                             ant_p, ant_q, cur_p, cur_q, passos);
-                    nirr = 1;
-                } else if(passos >= 2){
-                    snprintf(serie, sizeof serie,
-                             "sem raiz dominante: os modulos empatam, e a razao"
-                             " nao estabiliza (%ld passos)", passos);
-                    nirr = 2;
+             * O processo pára onde o anel enche, e o nível a que parou é o
+             * CUSTO --- que se conta, como o thm:serie manda. */
+            char digitos[SQL_OUT_CELL] = ""; long nirr = 0;
+            if(gr >= 1){
+                int off = 0;
+                for(long a = -8; a <= 8 && nirr < 3; a++){
+                    FatRaiz fr = fat_raiz(p, (int)gr, a);
+                    if(!fr.achou || fr.niveis == 0) continue;
+                    /* A APRESENTAÇÃO é a dos DÍGITOS, não do N/k!: o cliente lê
+                     * [1;0,0,1,3,3] e o valor de relance, e não um quociente de
+                     * seis algarismos sobre outro de seis. O N/k! continua a ser
+                     * o que a conta usa --- muda a escrita, não o número. */
+                    { char apres[96]; ft_escreve(&fr, apres, sizeof apres);
+                      off += snprintf(digitos + off, sizeof digitos - off,
+                                      "%s[%s]", nirr ? " | " : "", apres); }
+                    nirr++;
                 }
             }
             char resto[SQL_OUT_CELL];
@@ -8250,7 +8205,7 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "com_multiplicidade");
                 snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "resto");
                 snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
-                snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "serie");
+                snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "raizes_em_fatorial");
                 for(int c = 0; c < 7; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
                 sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[2] = SQL_TIPO_INT4;
                 sql_cap->tipo[3] = SQL_TIPO_INT4;
@@ -8261,12 +8216,12 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", resto);
                 snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
                 snprintf(sql_cap->cell[0][6], SQL_OUT_CELL, "%s",
-                         nirr ? serie : "sem factor residual a iterar");
+                         nirr ? digitos : "sem raiz irracional real");
                 snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
             }
             printf("edo: grau %ld · %ld raiz(es) em %ld distinta(s): %s · %s · y = %s"
-                   " · pela série: %s\n", ng, nr, distintas, nr ? raizes : "nenhuma",
-                   resto, forma, nirr ? serie : "nenhuma");
+                   " · em fatorial: %s\n", ng, nr, distintas, nr ? raizes : "nenhuma",
+                   resto, forma, nirr ? digitos : "nenhuma");
             return 1;
         }
         long B = -m[1][1], C = -m[1][0];

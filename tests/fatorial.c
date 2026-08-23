@@ -1,9 +1,9 @@
-/* serie.c — A EXPONENCIAL E O π PELA DEFINIÇÃO DA ARANHA, em fatorial e inteiros.
+/* fatorial.c — A EXPONENCIAL E O π PELA DEFINIÇÃO DA ARANHA, em fatorial e inteiros.
  *
- *   cc -O2 -std=c99 -I lib -o /tmp/serie tests/serie.c && /tmp/serie
+ *   cc -O2 -std=c99 -I lib -o /tmp/fatorial tests/fatorial.c && /tmp/serie
  */
 #include "unidade.h"
-#include "serie.h"
+#include "fatorial.h"
 #include <stdio.h>
 
 int main(void){
@@ -195,6 +195,74 @@ int main(void){
            " EXACTO de 3e^{-2}−2e^{-3} --- mais exacta do que o próprio controlo. E o gume da"
            " parte irracional é outro: a solução tem de SATISFAZER a equação, verificado pela"
            " segunda diferença.", mal == 0);
+    }
+
+    /* ── §S5 AS TRÊS FACES SAEM DA MESMA SÉRIE, E A NORMA É UMA SÓ ──────── */
+    {
+        printf("§S5  ω² = t: as três classes são três leituras da MESMA série.\n\n");
+        long mal = 0;
+        const char *nome[3] = {"ELÍPTICO   t=−1", "PARABÓLICO t= 0", "HIPERBÓLICO t=+1"};
+        const char *faz[3]  = {"roda", "desliza", "foge"};
+        printf("      face               x    c_t(x)     s_t(x)   c²−t·s²  ordem  termos\n");
+        long fecha = 0, pontos = 0, finita = 0;
+        for(int i = 0; i < 3; i++){
+            int t = i - 1;
+            for(long j = 1; j <= 2; j++){
+                FtFace f = ft_face(j*S/2, t, S);
+                long nm = ft_norma(f, t, S);
+                printf("      %-18s %ld/2 %9ld %9ld %9ld %5d %6d\n",
+                       j == 1 ? nome[i] : "", j, f.c, f.s, nm, ft_ordem(t), f.termos);
+                pontos++;
+                /* A CONSERVAÇÃO É A NORMA DA TRÍADE, e vale nas três faces */
+                if(nm > S - 3000 && nm < S + 3000) fecha++;
+                if(!f.parou) mal++;
+            }
+            if(t == 0 && ft_face(S, 0, S).termos == 2) finita++;
+        }
+        printf("      → a norma c²−t·s² = 1 fecha em %ld de %ld pontos, nas TRÊS faces\n",
+               fecha, pontos);
+        if(fecha != pontos) mal++;
+        printf("      → e a face t=0 tem a série FINITA: %ld (ω²=0 mata o resto)\n", finita);
+        if(finita != 1) mal++;
+
+        /* ── AS ORDENS, que separam as faces sem olhar para o Δ ────────────── */
+        /* A ORDEM NÃO SE TABELA: aplica-se ω e CONTA-SE. E a órbita mostra-se,
+         * para o cliente ver de onde o número veio. */
+        printf("      a órbita de ω, aplicada até voltar --- e a ordem é a CONTAGEM:\n");
+        for(int i = 0; i < 3; i++){
+            char orb[80]; ft_orbita(i-1, orb, sizeof orb);
+            printf("        t=%+d  %-28s ordem %d  (%s)\n", i-1, orb, ft_ordem(i-1), faz[i]);
+        }
+        printf("      e o lem:cristal diz que numa rede só há {1,2,3,4,6} --- estas duas"
+               " estão lá, e o nilpotente CAI no zero em vez de fechar\n");
+        if(ft_ordem(-1) != 4 || ft_ordem(1) != 2 || ft_ordem(0) != 0) mal++;
+
+        /* ── O GUME: se a norma fosse a MESMA fórmula nas três, não estaria a
+         * distinguir nada. Com o t errado, ela QUEBRA. */
+        {
+            FtFace e = ft_face(S, -1, S), h = ft_face(S, +1, S);
+            long errada_e = ft_norma(e, +1, S);      /* elíptico lido como hiperbólico */
+            long errada_h = ft_norma(h, -1, S);      /* e ao contrário */
+            printf("      gume: a face elíptica lida com t=+1 dá %ld (devia ser %ld)\n",
+                   errada_e, S);
+            printf("            a hiperbólica lida com t=−1 dá %ld\n", errada_h);
+            if(errada_e > S - 3000 && errada_e < S + 3000) mal++;
+            if(errada_h > S - 3000 && errada_h < S + 3000) mal++;
+        }
+
+        printf("\n");
+        ok("AS TRÊS CLASSES SÃO TRÊS LEITURAS DA MESMA SÉRIE, E A CONSERVAÇÃO É UMA SÓ. O"
+           " paper faz a cisão por paridade com J²=−1; com ω²=t as potências ciclam do mesmo"
+           " modo e ω^{2k}=t^k, pelo que exp(xω) = c_t·1 + s_t·ω sai igual --- e os três"
+           " valores de t dão o elíptico (cos,sen), o parabólico (1,x) e o hiperbólico"
+           " (cosh,senh). Não são três teorias: são três leituras. E a conservação é a NORMA"
+           " DA TRÍADE, c²−t·s² = 1, que é N(c+sω) --- fecha nas três faces e não se impõe:"
+           " sai de (c²−ts²)' = 2c(ts) − 2t·s·c = 0. O PARABÓLICO mostra-o de imediato: com"
+           " ω²=0 a série TERMINA em dois termos, e a norma dá exactamente um. As ordens"
+           " separam as faces sem olhar para o Δ --- 4 para o que roda, 2 para o que reflecte,"
+           " e nenhuma para o nilpotente ---, e o lem:cristal diz que numa rede só há"
+           " {1,2,3,4,6}. O gume é que a norma NÃO é a mesma fórmula nas três: lida com o t"
+           " errado, quebra.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
