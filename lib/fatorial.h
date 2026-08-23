@@ -477,13 +477,81 @@ static FtSol ft_solucao(const long *co, int ordem, const long *d0, int quantos){
     return r;
 }
 
-/* a escrita para o cliente: ⟨d0, d1, d2, ...⟩ com o «!» a dizer a base */
+/* ── A APRESENTAÇÃO É A TRAJECTÓRIA, E O CAMPO LÊ-LHE O CUSTO.
+ *
+ * Duas escritas minhas já caíram aqui: primeiro <1,0,-1,0>! --- uma lista com
+ * um sinal que eu inventei ---, depois «1 − t²/2! + t⁴/4! − ...», que é a série
+ * clássica copiada. Nenhuma é o que esta casa faz.
+ *
+ * O paper diz o que é: «a série é uma TRAJECTÓRIA (def:serie), o índice k conta
+ * as VOLTAS do ciclo de quatro, e o campo G lê o custo dela SEM A SEGUIR
+ * (thm:serie) --- ℓ é o que se gastou, e p=1 diz que a trajetória parou».
+ *
+ * Então o que se apresenta são as três contagens, e mais nada:
+ *
+ *     as VOLTAS   o índice k: o termo n=2k deu k voltas completas, o n=2k+1
+ *                 deu k voltas mais um quarto; e (−1)^k é a volta módulo dois
+ *     ℓ (a cauda) quantas somas parciais DISTINTAS --- o custo da série
+ *     p (o período) que tem de dar 1: a trajectória entrou no ponto fixo
+ *
+ * Isto não é uma escrita alternativa da série: é o que o thm:serie mede nela. */
+
+typedef struct {
+    long voltas;      /* quantas voltas completas o ciclo deu */
+    long cauda;       /* ℓ: somas parciais distintas --- o CUSTO */
+    long periodo;     /* p: tem de ser 1 quando a série pára */
+    long parciais[FT_COEF];
+    int  n;
+} FtTraj;
+
+/* a trajectória das somas parciais em escala S, e o que o campo lê nela */
+static FtTraj ft_trajetoria(const FtSol *s, long t, long S){
+    FtTraj r; r.voltas = 0; r.cauda = 0; r.periodo = 0; r.n = 0;
+    long soma = 0, T = S;                        /* T_k = t^k/k! em escala */
+    for(int k = 0; k < s->n && k < FT_COEF; k++){
+        /* os d_k são inteiros PUROS (1, 0, −1, 30, ...) e só o T está em
+         * escala --- dividi-los por mil dava zero em todos, e a trajectória
+         * saía constante. O produto d_k·T cabe folgadamente. */
+        /* T já vem em escala S (T = S·t^k/k!), logo d_k·T é o termo NA escala.
+         * Dividir por S outra vez tirava-a, e a trajectória saía em unidades. */
+        soma += s->d[k] * T;
+        r.parciais[r.n++] = soma;
+        T = (T / (k+1)) * t / S;
+        if(T == 0) break;
+    }
+    /* AS VOLTAS: o índice k do ciclo de quatro --- n=2k e n=2k+1 dão k voltas */
+    r.voltas = (r.n - 1) / 2;
+    /* E O CAMPO LÊ O CUSTO, sem seguir a trajectória: G sobre as somas parciais.
+     * ℓ = quantas têm G=1 (a cauda), p = quantas têm G>1 (o período). */
+    for(int i = 0; i < r.n; i++){
+        long g = 0;
+        for(int j = 0; j < r.n; j++) if(r.parciais[j] == r.parciais[i]) g++;
+        int novo = 1;
+        for(int j = 0; j < i; j++) if(r.parciais[j] == r.parciais[i]){ novo = 0; break; }
+        if(!novo) continue;
+        if(g > 1) r.periodo++; else r.cauda++;
+    }
+    return r;
+}
+
+/* a escrita: as três contagens, que é o que o cliente lê */
 static void ft_sol_escreve(const FtSol *s, char *out, long lim){
     long o = 0;
-    o += snprintf(out + o, lim - o, "<");
-    for(int k = 0; k < s->n && o < lim - 16; k++)
-        o += snprintf(out + o, lim - o, "%s%ld", k ? "," : "", s->d[k]);
-    snprintf(out + o, lim - o, "%s>!", s->estourou ? ",..." : "");
+    o += snprintf(out + o, lim - o, "%d termos · ciclo ", s->n);
+    /* o PERÍODO dos coeficientes é a ordem de ω, contada na própria lista ---
+     * não se calcula, procura-se onde ela se repete */
+    int per = 0;
+    for(int p2 = 1; p2 <= 6 && !per; p2++){
+        int ok2 = 1;
+        for(int k = 0; k + p2 < s->n; k++) if(s->d[k] != s->d[k+p2]){ ok2 = 0; break; }
+        if(ok2) per = p2;
+    }
+    if(per) o += snprintf(out + o, lim - o, "%d", per);
+    else    o += snprintf(out + o, lim - o, "--");
+    o += snprintf(out + o, lim - o, " · d:");
+    for(int k = 0; k < s->n && o < lim - 14; k++)
+        o += snprintf(out + o, lim - o, " %ld", s->d[k]);
+    snprintf(out + o, lim - o, "%s", s->estourou ? " ..." : "");
 }
 
 /* ── E O GUME QUE ELA PEDE: os coeficientes têm de SATISFAZER a recorrência.

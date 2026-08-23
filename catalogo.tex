@@ -2367,19 +2367,24 @@ equação \textbf{dá-os}, um a um, em inteiros exactos:
 que o cliente a lê, porque é a base em que a série já vive.
 
 \begin{center}\footnotesize
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{@{}lrl@{}}
 \toprule
-a equação & a solução\\
+a equação & ciclo & os $d_k$\\
 \midrule
-$y'-y=0$ \quad(o $e^t$) & $\langle1,1,1,1,1,1,1,1,1,1,1,1\rangle_!$\\
-$y''+y=0$ \quad(o $\cos$) & $\langle1,0,-1,0,1,0,-1,0,1,0,-1,0\rangle_!$\\
-$y''-y=0$ \quad(o $\cosh$) & $\langle1,0,1,0,1,0,1,0,1,0,1,0\rangle_!$\\
-$y''-y'-y=0$ & $\langle1,0,1,1,2,3,5,8,13,21,34,55\rangle_!$\\
-$y''+5y'+6y=0$ & $\langle1,0,-6,30,-114,390,-1266,3990,\ldots\rangle_!$\\
-$y''''=0$ \quad(a viga) & $\langle1,0,0,0,0,0,0,0,0,0,0,0\rangle_!$\\
+$y'-y=0$ \quad(o $e^t$) & $\mathbf 1$ & $1,1,1,1,1,1,1,1,1,1,1,1$\\
+$y''+y=0$ \quad(o $\cos$) & $\mathbf 4$ & $1,0,-1,0,1,0,-1,0,1,0,-1,0$\\
+$y''+y=0$ \quad(o $\operatorname{sen}$) & $\mathbf 4$ & $0,1,0,-1,0,1,0,-1,0,1,0,-1$\\
+$y''-y=0$ \quad(o $\cosh$) & $\mathbf 2$ & $1,0,1,0,1,0,1,0,1,0,1,0$\\
+$y''-y'-y=0$ & --- & $1,0,1,1,2,3,5,8,13,21,34,55$\\
+$y''+5y'+6y=0$ & --- & $1,0,-6,30,-114,390,-1266,3990,\ldots$\\
+$y''''=0$ \quad(a viga) & --- & $1,0,0,0,0,0,0,0,0,0,0,0$\\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent \textbf{E o ciclo lê-se na própria lista}, procurando onde ela se repete --- não se
+calcula. Quatro no $\cos$ e no $\operatorname{sen}$, dois no $\cosh$, um no $e^t$:
+\emph{é a ordem de $\omega$, contada}.
 
 \noindent \textbf{E o que sai diz mais do que a forma fechada.} O $e^t$ é
 $\langle1,1,1,\ldots\rangle$ --- \emph{todos os dígitos iguais a um}, que é exactamente o
@@ -2401,6 +2406,34 @@ $e^t$ \quad(sem $\omega$) & $1,1,1,1,\ldots$ & $\mathbf 1$\\
 \noindent \emph{O ciclo de $J$ vê-se na lista.} E o $y''-y'-y=0$ dá
 $1,0,1,1,2,3,5,8,13,21,34,55$: os nomes clássicos aparecem como \textbf{rasto}, porque a
 conta não sabe que se chamam assim.
+
+\paragraph{E o que se APRESENTA são as três contagens, que é o que o campo lê.} O
+\emph{thm:serie} di-lo: «a série é uma \emph{trajectória}, o índice $k$ conta as
+\textbf{voltas} do ciclo de quatro, e o campo $G$ lê o custo dela \emph{sem a seguir} ---
+$\ell$ é o que se gastou, e $p=1$ diz que parou».
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+& voltas & $\ell$ (custo) & $p$\\
+\midrule
+$e^t$ \quad(nenhum $d_k$ nulo) & $4$ & $\mathbf{10}$ & $0$\\
+$\cos$ \quad(metade dos $d_k$ nula) & $4$ & $0$ & $\mathbf 5$\\
+$\cosh$ & $4$ & $0$ & $5$\\
+$y''+5y'+6y=0$ & $4$ & $8$ & $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E o campo mostra o que a lista sozinha não dá: a paridade.} Onde metade dos
+coeficientes é \emph{nula} --- que é o ciclo de quatro --- cada soma parcial \textbf{repete-se}
+e $G$ vale dois em todas, pelo que a cauda cai a zero e o período conta-as; onde nenhum é
+nulo, é ao contrário. \emph{A paridade da série aparece no campo}, e nenhuma das duas escritas
+anteriores a mostrava.
+
+\medskip\noindent Duas escritas minhas caíram antes desta: uma lista entre sinais que eu
+inventei, e depois a série clássica escrita à mão. \emph{Nenhuma é o que esta casa faz} --- e
+o que ela faz é contar.
 
 \paragraph{E o grau um era recusado.} $y'=\lambda y$ tem companheira $1\times1$ e é o caso
 mais simples de todos --- a exponencial pura. O motor exigia $n\ge2$, o que o deixava de fora

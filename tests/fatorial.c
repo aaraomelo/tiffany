@@ -265,6 +265,74 @@ int main(void){
            " errado, quebra.", mal == 0);
     }
 
+    /* ── §S6 A SOLUÇÃO É A TRAJECTÓRIA, E O CAMPO LÊ-LHE O CUSTO ────────── */
+    {
+        printf("§S6  a apresentação é a CONTAGEM: voltas, cauda e período.\n\n");
+        long mal = 0;
+        struct { const char *n; int o; long co[2]; long d0[2]; int ciclo; } E[5] = {
+          {"y'−y=0     (e^t)",  1, {-1,0}, {1,0}, 1},
+          {"y''+y=0    (cos)",  2, {1,0},  {1,0}, 4},
+          {"y''+y=0    (sen)",  2, {1,0},  {0,1}, 4},
+          {"y''−y=0    (cosh)", 2, {-1,0}, {1,0}, 2},
+          {"y''+5y'+6y=0",      2, {6,5},  {1,0}, 0},
+        };
+        printf("      a equação          ciclo  voltas  ℓ (custo)  p   confere\n");
+        long certos = 0, comp = 0;
+        for(int i = 0; i < 5; i++){
+            FtSol s2 = ft_solucao(E[i].co, E[i].o, E[i].d0, 12);
+            FtTraj tr = ft_trajetoria(&s2, S, S);
+            char b[220]; ft_sol_escreve(&s2, b, sizeof b);
+            /* o ciclo lê-se da lista, sem se calcular */
+            int per = 0;
+            for(int p2 = 1; p2 <= 6 && !per; p2++){
+                int ok2 = 1;
+                for(int k = 0; k + p2 < s2.n; k++) if(s2.d[k] != s2.d[k+p2]){ ok2 = 0; break; }
+                if(ok2) per = p2;
+            }
+            int conf = ft_sol_confere(&s2, E[i].co);
+            printf("      %-19s %4d %6ld %8ld %4ld %8d\n", E[i].n, per, tr.voltas,
+                   tr.cauda, tr.periodo, conf);
+            if(per == E[i].ciclo) certos++;
+            if(conf == s2.n - E[i].o) comp++;
+        }
+        printf("      → %ld de 5 com o ciclo esperado · %ld de 5 com TODOS os coeficientes"
+               " a conferirem a recorrência\n", certos, comp);
+        if(certos != 5 || comp != 5) mal++;
+
+        /* ── E O QUE O CAMPO LÊ, que a lista sozinha não mostra: a PARIDADE.
+         * Onde metade dos coeficientes é zero --- que é o ciclo de quatro do
+         * paper --- cada soma parcial REPETE-SE, e o campo dá G=2 em todas: a
+         * cauda vai a zero e o período conta-as. Onde nenhum é nulo, todas são
+         * distintas e é ao contrário. A paridade da série aparece no campo. */
+        {
+            FtSol ce = ft_solucao((long[]){1,0}, 2, (long[]){1,0}, 12);
+            FtSol ex = ft_solucao((long[]){-1,0}, 1, (long[]){1,0}, 12);
+            FtTraj tc = ft_trajetoria(&ce, S, S), tx = ft_trajetoria(&ex, S, S);
+            printf("      a paridade LIDA NO CAMPO --- e a lista sozinha não a mostra:\n");
+            printf("        cos  (metade dos d_k nula): cauda %ld · período %ld\n",
+                   tc.cauda, tc.periodo);
+            printf("        e^t  (nenhum d_k nulo):     cauda %ld · período %ld\n",
+                   tx.cauda, tx.periodo);
+            /* têm de ser opostos: um com cauda alta e período baixo, o outro
+             * ao contrário. Se fossem iguais, o campo não estaria a ler nada. */
+            if(!(tc.periodo > tc.cauda && tx.cauda > tx.periodo)) mal++;
+        }
+
+        printf("\n");
+        ok("A APRESENTAÇÃO É A CONTAGEM, E NÃO UMA SÉRIE COPIADA. Duas escritas minhas"
+           " caíram antes desta: uma lista entre sinais que eu inventei, e depois a série"
+           " clássica escrita à mão --- nenhuma é o que esta casa faz. O paper diz o que é:"
+           " «a série é uma TRAJECTÓRIA, o índice k conta as VOLTAS do ciclo de quatro, e o"
+           " campo G lê o custo dela SEM A SEGUIR --- ℓ é o que se gastou, e p=1 diz que"
+           " parou». São essas as três contagens que se apresentam. E o CICLO lê-se na"
+           " própria lista de coeficientes, procurando onde ela se repete: quatro no cos e no"
+           " sen, dois no cosh, um no e^t --- que é a ordem de ω, sem se calcular nada. O"
+           " campo mostra ainda o que a lista sozinha não dá: onde metade dos coeficientes é"
+           " NULA --- que é o ciclo de quatro --- cada soma parcial repete-se e G vale dois em"
+           " todas, pelo que a cauda cai a zero e o período conta-as; onde nenhum é nulo, é ao"
+           " contrário. A paridade da série aparece no campo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

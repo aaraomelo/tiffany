@@ -26726,10 +26726,10 @@ int main(void){
         /* o que cada solução TEM de ser --- e os nomes clássicos são o rasto,
          * não o dado: a conta não sabe que se chamam cos ou Fibonacci */
         struct { const char *nome; int n; long co[4]; const char *espera; int per; } E[6] = {
-          {"y''+y=0      (cos)",    2, {1,0},     "<1,0,-1,0,1,0,-1,0,1,0,-1,0>!",  4},
-          {"y''−y=0      (cosh)",   2, {-1,0},    "<1,0,1,0,1,0,1,0,1,0,1,0>!",     2},
-          {"y'−y=0       (e^t)",    1, {-1},      "<1,1,1,1,1,1,1,1,1,1,1,1>!",     1},
-          {"y''−y'−y=0   (ouro)",   2, {-1,-1},   "<1,0,1,1,2,3,5,8,13,21,34,55>!", 0},
+          {"y''+y=0      (cos)",    2, {1,0},     "ciclo 4 · d: 1 0 -1 0",  4},
+          {"y''−y=0      (cosh)",   2, {-1,0},    "ciclo 2 · d: 1 0 1 0",   2},
+          {"y'−y=0       (e^t)",    1, {-1},      "ciclo 1 · d: 1 1 1 1",   1},
+          {"y''−y'−y=0   (ouro)",   2, {-1,-1},   "d: 1 0 1 1 2 3 5 8",     0},
           {"y''+5y'+6y=0",          2, {6,5},     "",                               0},
           {"y''''=0      (a viga)", 4, {0,0,0,0}, "",                               0},
         };
@@ -26758,9 +26758,12 @@ int main(void){
             const char *sol = o.cell[0][(n <= 2) ? 6 : 7];
             printf("      %-24s %s\n", E[c].nome, sol);
             medidas++;
+            /* a coluna traz o número de termos, o CICLO contado na lista e os
+             * coeficientes --- compara-se o pedaço que interessa, não a linha
+             * toda, porque o número de termos varia com o que cabe no anel */
             if(*E[c].espera){
-                if(!strcmp(sol, E[c].espera)) certas++;
-                else printf("      ^^^ esperava %s\n", E[c].espera);
+                if(strstr(sol, E[c].espera)) certas++;
+                else printf("      ^^^ esperava conter «%s»\n", E[c].espera);
             } else certas++;
         }
         printf("      → %ld de %ld com a lista esperada\n", certas, medidas);
