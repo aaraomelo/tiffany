@@ -2405,15 +2405,33 @@ static int cria(const char *resto){
     if(*p != '('){ cria_desfaz(nome); return 0; }
     p++;
     long ncols = 0; char c[64];
-    /* UM POR COLUNA, e o tecto é o COL_MAX derivado. Estáticos porque COL_MAX é
-     * grande de propósito: a pilha não é sítio para a dimensão do objecto. */
-    static long corpo[COL_MAX], parm[COL_MAX], restr[COL_MAX], defv[COL_MAX], deftem[COL_MAX];
+    /* ── NADA SE ACUMULA: O QUE SE LÊ ESCREVE-SE ─────────────────────────────
+     *
+     * Eram cinco arrays de COL_MAX --- corpo, parm, restr, defv, deftem --- mais
+     * dois de nomes, a somar uns 200 KB de RAM, para depois um laço os despejar
+     * no disco. A tabela já está ABERTA quando o parse começa (o `usa_tabela`
+     * corre antes do parêntese), pelo que a coluna pode ser escrita no sítio
+     * dela assim que é lida. «A memória é o DISCO. Sem RAM»: aqui isso deixa de
+     * ser uma frase no cabeçalho e passa a ser o que o código faz --- e sai
+     * também o laço do despejo, que era a mesma informação escrita duas vezes.
+     *
+     * O que resta em RAM é UMA coluna de cada vez, que é o que o parse tem à
+     * mão --- o mesmo tamanho que o `aranha.c` usa para ler um ficheiro
+     * inteiro: um byte de cada vez. */
+    /* AS SETAS PENDENTES SÃO POUCAS, E SÃO UMA LISTA --- não um array por
+     * coluna. Uma seta só existe onde foi declarada; guardar um nome de tabela
+     * de 64 bytes por CADA coluna possível era reservar 128 KB para guardar
+     * três. A lista tem o número da coluna dentro, que é o que faltava para ela
+     * poder ser compacta. */
+    enum { FKP_MAX = 64 };
+    static struct { long col, modo; char tab[64], alvo[64]; } fkp[FKP_MAX];
+    static int fkp_n;
+    fkp_n = 0;
+    long corpo_j = 0, parm_j = 0, restr_j = 0, defv_j = 0, deftem_j = 0;
     char chk[S_CHECK_W * 2 + 2]; chk[0] = 0;
-    static char fk_tab[COL_MAX][64], fk_alvo[COL_MAX][64];
-    static long fk_col[COL_MAX], fk_modo[COL_MAX];
-    for(unsigned q = 0; q < COL_MAX; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
-                                 fk_col[q] = -1; fk_modo[q] = 0;
-                                 defv[q] = 0; deftem[q] = 0; parm[q] = 0; corpo[q] = 0; }
+    char fk_tab_j[64], fk_alvo_j[64]; long fk_col_j = -1, fk_modo_j = 0;
+    fk_tab_j[0] = 0; fk_alvo_j[0] = 0;
+    (void)fk_col_j;
     while(1){
         { /* `CHECK (...)` no meio da lista é restrição da TABELA e não uma
            * coluna chamada «check»: quem decide é o parêntese a seguir. */
@@ -2457,8 +2475,12 @@ static int cria(const char *resto){
                               for(long z = 0; z < ncols; z++){
                                   char nz[64]; col_nome_le((int)z, nz, sizeof nz);
                                   if(!strcasecmp(nz, cc2)){
-                                      if(e_pk) restr[z] |= (R_UNICO | R_NOTNULL);
-                                      else if(e_un) restr[z] |= R_UNICO;
+                                      /* a coluna já foi escrita: a restrição
+                                       * acrescenta-se ONDE ela está */
+                                      { Word wz = mem_le(S_RESTR + (unsigned)z);
+                                        if(e_pk) wz.total |= (R_UNICO | R_NOTNULL);
+                                        else if(e_un) wz.total |= R_UNICO;
+                                        mem_grava(S_RESTR + (unsigned)z, wz); }
                                       break; }
                               }
                               pula(&p);
@@ -2498,7 +2520,7 @@ static int cria(const char *resto){
           } }
         if(!ident(&p, c, sizeof c)) break;
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
-        corpo[ncols] = CORPO_INTEIRO; parm[ncols] = 0;   /* sem tipo = INTEIRO, como sempre foi */
+        corpo_j = CORPO_INTEIRO; parm_j = 0;   /* sem tipo = INTEIRO, como sempre foi */
         pula(&p);
         char tipo[64];
         const char *volta = p;
@@ -2508,28 +2530,28 @@ static int cria(const char *resto){
         if(*p == '"'){
             char tq[64];
             const char *v8 = p;
-            if(ident(&p, tq, sizeof tq)){ corpo[ncols] = CORPO_TEXTO; }
+            if(ident(&p, tq, sizeof tq)){ corpo_j = CORPO_TEXTO; }
             else p = v8;
         }
         else if(isalpha((unsigned char)*p) && ident(&p, tipo, sizeof tipo)){
             int achou = 1;
-            if(!strcasecmp(tipo,"RACIONAL"))      corpo[ncols] = CORPO_RACIONAL;
-            else if(!strcasecmp(tipo,"AUREO"))  { corpo[ncols] = CORPO_AUREO;   parm[ncols] = 1; }
-            else if(!strcasecmp(tipo,"MORFICO")){ corpo[ncols] = CORPO_MORFICO; parm[ncols] = 6; }
+            if(!strcasecmp(tipo,"RACIONAL"))      corpo_j = CORPO_RACIONAL;
+            else if(!strcasecmp(tipo,"AUREO"))  { corpo_j = CORPO_AUREO;   parm_j = 1; }
+            else if(!strcasecmp(tipo,"MORFICO")){ corpo_j = CORPO_MORFICO; parm_j = 6; }
             /* PASSO 6: o cristalino. O parâmetro é o t da borda ω² = tω − 1 — t=0 Gauss ℤ[i],
              * t=1 Eisenstein ℤ[ω]. Predefine 0, que é o cristal quadrado. */
-            else if(!strcasecmp(tipo,"CRISTALINO")){ corpo[ncols] = CORPO_CRISTAL; parm[ncols] = 0; }
-            else if(!strcasecmp(tipo,"INTEIRO"))  corpo[ncols] = CORPO_INTEIRO;
+            else if(!strcasecmp(tipo,"CRISTALINO")){ corpo_j = CORPO_CRISTAL; parm_j = 0; }
+            else if(!strcasecmp(tipo,"INTEIRO"))  corpo_j = CORPO_INTEIRO;
             else if(!strcasecmp(tipo,"BOOLEANO") || !strcasecmp(tipo,"BOOLEAN")
-                 || !strcasecmp(tipo,"BOOL"))     corpo[ncols] = CORPO_BOOLEANO;
+                 || !strcasecmp(tipo,"BOOL"))     corpo_j = CORPO_BOOLEANO;
             else if(!strcasecmp(tipo,"DATA") || !strcasecmp(tipo,"DATE")
                  || !strcasecmp(tipo,"TIMESTAMP") || !strcasecmp(tipo,"DATETIME"))
-                                                  corpo[ncols] = CORPO_DATA;
+                                                  corpo_j = CORPO_DATA;
             else if(!strcasecmp(tipo,"TEXTO") || !strcasecmp(tipo,"TEXT")
                  || !strcasecmp(tipo,"VARCHAR") || !strcasecmp(tipo,"CHAR")
                  || !strcasecmp(tipo,"STRING") || !strcasecmp(tipo,"UUID")
                  || !strcasecmp(tipo,"JSON") || !strcasecmp(tipo,"JSONB"))
-                                                  corpo[ncols] = CORPO_TEXTO;
+                                                  corpo_j = CORPO_TEXTO;
             /* ── DECIMAL e NUMERIC são o RACIONAL, e é aqui que a casa ganha:
              * o Decimal do cliente é exacto no banco, sem arredondamento. A
              * precisão (p,s) fica declarada e não muda o corpo --- porque o
@@ -2543,19 +2565,19 @@ static int cria(const char *resto){
             /* BYTEA: os bytes crus. Guardam-se no pool como qualquer cadeia --- o
              * pool é de bytes e não sabe de letras --- e o que muda é só o nome. */
             else if(!strcasecmp(tipo,"BYTEA") || !strcasecmp(tipo,"BLOB")
-                 || !strcasecmp(tipo,"BYTES"))    corpo[ncols] = CORPO_TEXTO;
+                 || !strcasecmp(tipo,"BYTES"))    corpo_j = CORPO_TEXTO;
             else if(!strcasecmp(tipo,"vector") || !strcasecmp(tipo,"halfvec")
                  || !strcasecmp(tipo,"tsvector")){
-                corpo[ncols] = CORPO_TEXTO;
+                corpo_j = CORPO_TEXTO;
                 printf("aviso: a coluna é `%s`, de uma extensão não carregada --- ela"
                        " GUARDA, e as operações dela não existem aqui\n", tipo);
             }
             else if(!strcasecmp(tipo,"DECIMAL") || !strcasecmp(tipo,"NUMERIC")
-                 || !strcasecmp(tipo,"MONEY"))    corpo[ncols] = CORPO_RACIONAL;
+                 || !strcasecmp(tipo,"MONEY"))    corpo_j = CORPO_RACIONAL;
             else if(!strcasecmp(tipo,"SERIAL") || !strcasecmp(tipo,"BIGSERIAL")
                  || !strcasecmp(tipo,"BIGINT") || !strcasecmp(tipo,"SMALLINT")
                  || !strcasecmp(tipo,"INT") || !strcasecmp(tipo,"INTEGER"))
-                                                  corpo[ncols] = CORPO_INTEIRO;
+                                                  corpo_j = CORPO_INTEIRO;
             else { p = volta; achou = 0; }               /* não era tipo: devolve ao analisador */
             if(achou){
                 pula(&p);
@@ -2565,11 +2587,11 @@ static int cria(const char *resto){
                  * dizê-lo é melhor do que perder a tabela. */
                 if(*p == '['){
                     p++; pula(&p); if(*p == ']') p++;
-                    corpo[ncols] = CORPO_TEXTO;
+                    corpo_j = CORPO_TEXTO;
                     printf("aviso: a coluna é um ARRAY --- ela guarda a cadeia, e as"
                            " operações de array não existem aqui\n");
                 }
-                if(*p == '('){ p++; long q; if(numero(&p, &q)) parm[ncols] = q; pula(&p);
+                if(*p == '('){ p++; long q; if(numero(&p, &q)) parm_j = q; pula(&p);
                                /* DECIMAL(18,2) e TIMESTAMP(3): a escala declara-se
                                 * e não muda o corpo --- o racional guarda a classe */
                                while(*p == ','){ p++; pula(&p); long q2;
@@ -2586,10 +2608,10 @@ static int cria(const char *resto){
             if(!ident(&p, r, sizeof r)){ p = v2; break; }
             if(!strcasecmp(r, "NOT")){
                 pula(&p);
-                if(palavra(&p, "NULL")) restr[ncols] |= R_NOTNULL;
+                if(palavra(&p, "NULL")) restr_j |= R_NOTNULL;
                 else { p = v2; break; }
             }
-            else if(!strcasecmp(r, "UNIQUE")) restr[ncols] |= R_UNICO;
+            else if(!strcasecmp(r, "UNIQUE")) restr_j |= R_UNICO;
             else if(!strcasecmp(r, "DEFAULT")){
                 /* o valor por omissão --- e ele fica GUARDADO, não interpretado
                  * de novo a cada INSERT: quem o quiser mudar altera a tabela */
@@ -2604,14 +2626,14 @@ static int cria(const char *resto){
                     while(*p && *p != '\''){ if(dn < TX_MAX) db[dn++] = *p; p++; }
                     if(*p == '\'') p++;
                     db[dn] = 0;
-                    defv[ncols] = (long)tx_guarda(db, dn); deftem[ncols] = 1;
+                    defv_j = (long)tx_guarda(db, dn); deftem_j = 1;
                     pula(&p); continue;
                 }
                 /* DEFAULT true / false --- o booleano diz-se por palavra */
                 { const char *vb = p;
-                  if(palavra(&p, "true")){ defv[ncols] = 1; deftem[ncols] = 1;
+                  if(palavra(&p, "true")){ defv_j = 1; deftem_j = 1;
                                            pula(&p); continue; }
-                  if(palavra(&p, "false")){ defv[ncols] = 0; deftem[ncols] = 1;
+                  if(palavra(&p, "false")){ defv_j = 0; deftem_j = 1;
                                             pula(&p); continue; }
                   p = vb; }
                 if(!numero(&p, &dv)){
@@ -2624,7 +2646,7 @@ static int cria(const char *resto){
                     dv = 0;
                 }
                 if(neg) dv = -dv;
-                defv[ncols] = dv; deftem[ncols] = 1;
+                defv_j = dv; deftem_j = 1;
             }
             else if(!strcasecmp(r, "CHECK")){
                 pula(&p);
@@ -2644,8 +2666,8 @@ static int cria(const char *resto){
                 pula(&p);
                 if(*p != ')'){ p = v2; break; }
                 p++;
-                snprintf(fk_tab[ncols], 64, "%s", mt);
-                snprintf(fk_alvo[ncols], 64, "%s", mc);
+                snprintf(fk_tab_j, 64, "%s", mt);
+                snprintf(fk_alvo_j, 64, "%s", mc);
                 /* e o que fazer quando o destino desaparecer. Sem cláusula, o
                  * modo é RECUSAR — que é o único que não muda nada sem ordem. */
                 { int mais = 1;
@@ -2670,20 +2692,39 @@ static int cria(const char *resto){
                       /* os dois modos são INDEPENDENTES e vivem nos dois pares
                        * de bits do mesmo octeto: nada obriga quem quer a fibra
                        * atrás numa mudança de chave a querê-la num apagar. */
-                      if(upd) fk_modo[ncols] = (fk_modo[ncols] & 3) | (m << 2);
-                      else    fk_modo[ncols] = (fk_modo[ncols] & ~3L) | m;
+                      if(upd) fk_modo_j = (fk_modo_j & 3) | (m << 2);
+                      else    fk_modo_j = (fk_modo_j & ~3L) | m;
                       mais = 1;                     /* pode vir a outra cláusula */
                   } }
             }
             else if(!strcasecmp(r, "PRIMARY")){
                 pula(&p);
-                if(palavra(&p, "KEY")) restr[ncols] |= R_UNICO | R_NOTNULL;
+                if(palavra(&p, "KEY")) restr_j |= R_UNICO | R_NOTNULL;
                 else { p = v2; break; }
             }
             else { p = v2; break; }
             pula(&p);
         }
+        /* ── A COLUNA FECHA E ESCREVE-SE. Nada fica à espera de um despejo no
+         * fim: o corpo, o parâmetro, o default e a restrição vão para o sítio
+         * deles agora, e a seta guarda-se na coluna (a mãe visita-se depois,
+         * porque ela pode ainda não existir quando a filha se declara). */
+        { Word wc; wc.total = (Word8)corpo_j; wc.e = (Word8)parm_j;
+          corpo_poe(ncols, wc); }
+        { Word wd; wd.total = (Word8)((unsigned long)defv_j & 255u);
+          wd.e = (Word8)(deftem_j ? 1 : 0);
+          if(ncols < (long)S_DEFAULT_N) mem_grava(S_DEFAULT + (unsigned)ncols, wd); }
+        { Word wr; wr.total = (Word8)restr_j; wr.e = 0;
+          mem_grava(S_RESTR + (unsigned)ncols, wr); }
+        if(fk_tab_j[0] && fkp_n < FKP_MAX){
+            fkp[fkp_n].col = ncols; fkp[fkp_n].modo = fk_modo_j;
+            snprintf(fkp[fkp_n].tab,  sizeof fkp[0].tab,  "%s", fk_tab_j);
+            snprintf(fkp[fkp_n].alvo, sizeof fkp[0].alvo, "%s", fk_alvo_j);
+            fkp_n++;
+        }
         ncols++; pula(&p);
+        corpo_j = parm_j = restr_j = defv_j = deftem_j = 0;
+        fk_tab_j[0] = 0; fk_alvo_j[0] = 0; fk_col_j = -1; fk_modo_j = 0;
         if(*p == ','){ p++; continue; } break;
     }
     /* ── O QUE SOBRA NA DECLARAÇÃO NÃO PODE FICAR CALADO ─────────────────────
@@ -2738,24 +2779,13 @@ static int cria(const char *resto){
     Word cat = mem_le(S_CAT); cat.e = 0; mem_grava(S_CAT, cat); /* nrows = 0 */
     { Word m = {1,0}; mem_grava(S_PRESCAB, m); }   /* tabela nova: campo já é dela */
     cat_poe_nrows(0);                                           /* e no par, que é onde vive */
-    for(long j = 0; j < ncols && j < (long)S_CORPOX_N; j++){
-        Word wc; wc.total = corpo[j]; wc.e = parm[j];
-        corpo_poe(j, wc);
-        /* e o DEFAULT ao lado, com a MARCA no .e --- é ela que decide, não o
-         * valor: um default de zero é um default */
-        { Word wd; wd.total = (Word8)((unsigned long)defv[j] & 255u);
-          wd.e = (Word8)(deftem[j] ? 1 : 0);
-          if(j < (long)S_DEFAULT_N) mem_grava(S_DEFAULT + (unsigned)j, wd); }
-    }
-    /* as restrições, e a árvore que testemunha o UNIQUE. Ela nasce aqui vazia:
-     * o índice de uma coluna única não é uma optimização — é a afirmação. */
-    for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
-        Word wr; wr.total = (Word8)restr[j]; wr.e = 0;
-        mem_grava(S_RESTR + (unsigned)j, wr);
-    }
+    /* o corpo, o parâmetro, o default e as restrições JÁ ESTÃO escritos --- cada
+     * coluna escreveu-se quando fechou. Aqui fica só o que depende da tabela
+     * inteira: o CHECK, que é da tabela, e a árvore do UNIQUE, que precisa de
+     * saber o ncols final para endereçar as células. */
     txt_grava(S_CHECK, S_CHECK_W, chk);
     for(long j = 0; j < ncols && j < IDX_MAXCOL; j++)
-        if(restr[j] & R_UNICO) idx_constroi(j, ncols, 0);
+        if(mem_le(S_RESTR + (unsigned)j).total & R_UNICO) idx_constroi(j, ncols, 0);
 
     /* ── E A SETA ESCREVE-SE NOS DOIS LADOS ──────────────────────────────────
      * A filha guarda para onde aponta; a mãe guarda quem a aponta. Sem o
@@ -2765,35 +2795,35 @@ static int cria(const char *resto){
      * A ida à mãe faz-se AQUI, com a filha já escrita, e volta-se: abrir outra
      * tabela relê o .mem, e o que se escreveu antes de sair fica. */
     { int alguma = 0;
-      for(long j = 0; j < ncols && j < (long)COL_MAX; j++) if(fk_tab[j][0]) alguma = 1;
+      alguma = (fkp_n > 0);
       if(alguma){
         char guarda[64]; snprintf(guarda, sizeof guarda, "%s", nome);
-        for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
-            if(!fk_tab[j][0]) continue;
-            if(!usa_tabela(fk_tab[j], 0) || !cat_nome_bate(fk_tab[j])){
+        for(int k = 0; k < fkp_n; k++){
+            if(!usa_tabela(fkp[k].tab, 0) || !cat_nome_bate(fkp[k].tab)){
                 usa_tabela(guarda, 0);
                 printf("erro: a tabela «%s» da seta não existe — a coluna %ld fica"
-                       " SEM seta (a tabela foi criada).\n", fk_tab[j], j);
-                fk_tab[j][0] = 0;
+                       " SEM seta (a tabela foi criada).\n", fkp[k].tab, fkp[k].col);
+                fkp[k].tab[0] = 0;
                 continue;
             }
-            { int mc = col_indice(fk_alvo[j]);
+            { int mc = col_indice(fkp[k].alvo);
               if(mc < 0){
                 usa_tabela(guarda, 0);
                 printf("erro: a coluna «%s» não existe em «%s» — a coluna %ld fica"
-                       " SEM seta.\n", fk_alvo[j], fk_tab[j], j);
-                fk_tab[j][0] = 0;
+                       " SEM seta.\n", fkp[k].alvo, fkp[k].tab, fkp[k].col);
+                fkp[k].tab[0] = 0;
                 continue;
               }
               /* a mãe regista quem a aponta, e só depois se volta */
-              filho_regista(guarda, (int)j);
-              fk_col[j] = mc;
+              filho_regista(guarda, (int)fkp[k].col);
+              fkp[k].modo |= (long)mc << 8;      /* a coluna da mãe viaja com o modo */
             }
             usa_tabela(guarda, 0);
         }
-        for(long j = 0; j < ncols && j < (long)COL_MAX; j++)
-            if(fk_tab[j][0] && fk_col[j] >= 0)
-                fk_grava((int)j, fk_tab[j], (int)fk_col[j], (int)fk_modo[j]);
+        for(int k = 0; k < fkp_n; k++)
+            if(fkp[k].tab[0])
+                fk_grava((int)fkp[k].col, fkp[k].tab,
+                         (int)(fkp[k].modo >> 8), (int)(fkp[k].modo & 255));
       } }
     {
         /* OS TRÊS ÚLTIMOS NOMES FALTAVAM, e a mensagem dizia INTEIRO sobre um
@@ -2804,8 +2834,12 @@ static int cria(const char *resto){
                                     "BOOLEANO","TEXTO","DATA"};
         printf("tabela %s criada: %ld colunas —", nome, ncols);
         for(long j = 0; j < ncols && j < (long)S_CORPOX_N; j++){
-            printf(" %s", nm[corpo[j] & 7]);
-            if(parm[j]) printf("(%ld)", parm[j]);
+            /* lê-se do DISCO, que é onde a coluna já está --- e assim a
+             * mensagem descreve o que ficou escrito, e não o que uma cópia em
+             * RAM dizia que ia ser escrito */
+            Word wj = corpo_de(j);
+            printf(" %s", nm[wj.total & 7]);
+            if(wj.e) printf("(%u)", (unsigned)wj.e);
         }
         printf("\n");
     }
