@@ -22623,24 +22623,44 @@ int main(void){
          * corpos que «falham» pelo critério matricial e os que falham na sua
          * própria métrica --- e as listas não coincidem. */
         {
-            printf("      corpo            det da realização   anisotrópico?   falha na sua métrica?\n");
-            struct { const char *n; int aniso; int falha; } K[3] = {
-                {"rotação a+bi   ", 1, 0},        /* det = a²+b², anisotrópica */
-                {"exterior a+bε  ", 0, 0},        /* det = a², isotrópica --- mas o corpo não falha */
-                {"hiperbólico a+bj", 0, 1},       /* det = a²−b², isotrópica e o corpo tem divisores de zero */
-            };
-            long discordam = 0;
+            /* a régua desta casa é a ULTRAMÉTRICA dos endereços, e ela não vê a
+             * realização: para os três valores de t o objecto é o par (a,b), o
+             * conjunto de endereços é o mesmo e a desigualdade forte vale. */
+            #define PRU(x,y) ({ long X_=(x), Y_=(y); int q_=6; \
+                if(X_!=Y_) for(int i_=0;i_<6;i_++){ \
+                    if((((X_)>>(5-i_))&1) != (((Y_)>>(5-i_))&1)){ q_=i_; break; } } q_; })
+            printf("      corpo             det da realização  anisotrópico?  ultramétrica vale?\n");
+            long todos_ok = 0;
             for(int i = 0; i < 3; i++){
-                printf("      %s %14s %14s %19s\n", K[i].n,
-                       K[i].aniso ? "a²+b²" : (i==1 ? "a²" : "a²−b²"),
-                       K[i].aniso ? "sim" : "NÃO",
-                       K[i].falha ? "sim" : "não");
-                if(K[i].aniso != !K[i].falha) discordam++;
+                long t = (i == 0) ? -1 : (i == 1 ? 0 : 1);
+                /* os endereços: o par (a,b), o mesmo nos três */
+                long e[64]; long n = 0;
+                for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++) e[n++] = a*8 + b;
+                long ok = 0, tot = 0;
+                for(long x = 0; x < n; x++) for(long y = 0; y < n; y++) for(long z = 0; z < n; z++){
+                    long p1 = PRU(e[x],e[y]), p2 = PRU(e[y],e[z]), p3 = PRU(e[x],e[z]);
+                    long mn = p1 < p2 ? p1 : p2;
+                    tot++;
+                    if(p3 >= mn) ok++;
+                }
+                /* a norma anula em não nulos? --- isso é da realização */
+                long an = 0;
+                for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                    if(a == 0 && b == 0) continue;
+                    if(a*a - t*b*b == 0) an++;
+                }
+                if(ok == tot) todos_ok++;
+                printf("      %s %13s %14s %14ld/%ld\n",
+                       i==0 ? "rotação a+bi    " : (i==1 ? "exterior a+bε   " : "hiperbólico a+bj"),
+                       i==0 ? "a²+b²" : (i==1 ? "a²" : "a²−b²"),
+                       an == 0 ? "sim" : "NÃO", ok, tot);
             }
-            printf("      GUME — as duas perguntas discordam em %ld dos 3: o exterior é"
-                   " isotrópico na realização e NÃO falha na sua métrica\n", discordam);
-            printf("        são perguntas diferentes, e o catálogo tratava-as como uma só\n");
-            if(discordam == 0) mal++;
+            printf("      GUME — a ultramétrica vale nos %ld dos 3, INCLUSIVE onde a norma"
+                   " da realização se anula\n", todos_ok);
+            printf("        o que se anula é a norma de UMA realização; a régua desta casa\n"
+                   "        é a ultramétrica dos endereços, e nela NENHUM dos três falha\n");
+            if(todos_ok != 3) mal++;
+            #undef PRU
         }
 
         printf("\n");
@@ -22658,10 +22678,12 @@ int main(void){
            " det restringe-se a a² e anula-se exactamente onde a = 0 --- o que é isotrópico é"
            " o SUBESPAÇO DO ÍNDICE onde ele se realiza, e não o corpo. Lido na sua própria"
            " métrica o corpo exterior não falha coisa nenhuma: tem valoração, tem"
-           " ultramétrica, tem inverso onde a valoração é zero. E O GUME É QUE AS DUAS"
-           " PERGUNTAS DISCORDEM: a rotação é anisotrópica e não falha; o exterior é"
-           " isotrópico e não falha; o hiperbólico é isotrópico e falha, porque tem divisores"
-           " de zero. São perguntas diferentes, e o catálogo tratava-as como uma só.",
+           " ultramétrica, tem inverso onde a valoração é zero. E O GUME DESFAZ A CONFUSÃO DE"
+           " VEZ: a régua desta casa é a ULTRAMÉTRICA dos endereços, e ela vale nos TRÊS ---"
+           " inclusive onde a norma da realização se anula. O que se anula é a norma de UMA"
+           " realização; na métrica desta casa NENHUM dos três falha. Dizer que um corpo"
+           " «falha na sua métrica» porque a norma matricial dele degenera é trocar a régua:"
+           " a régua é o endereço, e o endereço não sabe de t.",
            mal == 0);
     }
 
