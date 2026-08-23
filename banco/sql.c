@@ -2706,7 +2706,7 @@ static int cria(const char *resto){
                 pula(&p);
                 if(*p != ')'){ p = v2; break; }
                 p++;
-                snprintf(fk_tab_j, 64, "%s", mt);
+                snprintf(fk_tab_j, sizeof fk_tab_j, "%s", mt);
                 snprintf(fk_alvo_j, 64, "%s", mc);
                 /* e o que fazer quando o destino desaparecer. Sem cláusula, o
                  * modo é RECUSAR — que é o único que não muda nada sem ordem. */
@@ -3264,6 +3264,20 @@ static int insere(const char *resto){
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
                          "null value in column %ld violates not-null constraint", j); }
+            return 0;
+        }
+        /* ── E UM UNIQUE QUE NÃO CABE NÃO É UM UNIQUE ────────────────────────
+         * O `j < IDX_MAXCOL` calava-se: uma coluna declarada UNIQUE acima da
+         * última árvore era aceite no CREATE e nunca verificada, e a tabela
+         * ficava com repetidos numa coluna que diz não os ter. A recusa é a
+         * resposta: quem declarou a restrição conta com ela. */
+        if((r & R_UNICO) && j < nv && !nulo[j] && j >= IDX_MAXCOL){
+            printf("erro: a coluna %ld é UNIQUE e não há árvore para ela (o motor tem"
+                   " %u) — o INSERT é RECUSADO, porque uma restrição que não se"
+                   " verifica não é uma restrição.\n", j, IDX_MAXCOL);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "column %ld is UNIQUE but has no index tree", j); }
             return 0;
         }
         if((r & R_UNICO) && j < nv && !nulo[j] && j < IDX_MAXCOL){
@@ -7693,8 +7707,31 @@ static int varre(const char *resto, int acao){
                          "column \"%s\" does not exist", j_col_esq); }
             return 0;
         }
-        char nome_esq[J_MAXCOL][S_COLNOME_W * 2 + 2];
+        static char nome_esq[J_MAXCOL][S_COLNOME_W * 2 + 2];
         for(int j = 0; j < J_MAXCOL; j++) nome_esq[j][0] = 0;
+        /* ── O QUE NÃO CABE RECUSA-SE, E NÃO SE TRUNCA ───────────────────────
+         *
+         * Este laço parava em J_MAXLIN e seguia: com 600 linhas à esquerda, o
+         * motor dizia «512 linha(s) da esquerda» --- e não era falso, era o que
+         * ele tinha visto --- e devolvia o que casasse nessas. Medido: a linha
+         * que casava era a 595.ª, existia, e o JOIN devolveu ZERO sem uma
+         * palavra. Um resultado vazio e um resultado truncado têm a mesma cara.
+         *
+         * Contar antes é barato --- é o bitmap que a varredura já deixou --- e a
+         * recusa diz o número, que é o que permite a quem pergunta cortar em
+         * lotes ou pedir por outra ordem. */
+        { long cabem = 0;
+          for(long i = 0; i < nr_esq; i++) if(bit_le(S_MATCH, i)) cabem++;
+          if(cabem > J_MAXLIN){
+              printf("erro: o lado esquerdo do JOIN tem %ld linhas e a junção leva %d"
+                     " — RECUSADA. Truncar daria um resultado com a mesma cara de um"
+                     " completo.\n", cabem, J_MAXLIN);
+              if(sql_cap){ sql_cap->ok = 0;
+                  snprintf(sql_cap->err, sizeof sql_cap->err,
+                           "JOIN: left side has %ld rows; the join carries %d",
+                           cabem, J_MAXLIN); }
+              return 0;
+          } }
         for(long i = 0; i < nr_esq && ne < J_MAXLIN; i++){
             if(!bit_le(S_MATCH, i)) continue;
             /* ── E A CHAVE AUSENTE NÃO JUNTA ────────────────────────────
@@ -8249,7 +8286,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "n_hiperbole");
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "objetos");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "regua");
-            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[4] = SQL_TIPO_TEXT;
             snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", Nsoma[0]);
             snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", Nsoma[1]);
@@ -8437,7 +8474,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "fusoes");
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "bem_definida");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "separa");
-            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[3] = sql_cap->tipo[4] = SQL_TIPO_TEXT;
             snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", pares);
             snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", quebras);
@@ -8526,7 +8563,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "h_den");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "fecha");
             snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "ordem");
-            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[4] = sql_cap->tipo[5] = SQL_TIPO_TEXT;
             snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", dois_m);
             snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", g2);
@@ -8738,7 +8775,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "falha");
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "estrito");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "ultrametrica");
-            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[4] = SQL_TIPO_TEXT;
             snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", tot);
             snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", vale);
@@ -8836,7 +8873,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "fundido");
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "compacto");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "volta");
-            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[4] = SQL_TIPO_TEXT;
             long r = 0;
             static long vistos[SQL_OUT_MAX_ROWS];
@@ -9226,7 +9263,7 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->col[7], sizeof sql_cap->col[7], "contagem");
                 snprintf(sql_cap->col[8], sizeof sql_cap->col[8], "serie_de_potencias");
                 snprintf(sql_cap->col[9], sizeof sql_cap->col[9], "somatorio");
-                for(int c = 0; c < 10; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+                for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
                 sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[2] = SQL_TIPO_INT4;
                 sql_cap->tipo[3] = SQL_TIPO_INT4;
                 snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ng);
@@ -9269,7 +9306,7 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "contagem");
                 snprintf(sql_cap->col[7], sizeof sql_cap->col[7], "serie_de_potencias");
                 snprintf(sql_cap->col[8], sizeof sql_cap->col[8], "somatorio");
-                for(int c = 0; c < 9; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+                for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
                 snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "y' %c %ldy = 0",
                          lam > 0 ? '-' : '+', lam < 0 ? -lam : lam);
                 snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "--");
@@ -9348,7 +9385,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "contagem");
             snprintf(sql_cap->col[7], sizeof sql_cap->col[7], "serie_de_potencias");
             snprintf(sql_cap->col[8], sizeof sql_cap->col[8], "somatorio");
-            for(int c = 0; c < 9; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
             sql_cap->tipo[1] = SQL_TIPO_INT4;
             if(B && C) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
                                 "y'' %c %ldy' %c %ldy = 0", B<0?'-':'+', B<0?-B:B,
@@ -9479,7 +9516,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "domina");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "ultra_viola");
             snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "ultra_estrito");
-            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[3] = SQL_TIPO_TEXT;
             snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", rev);
             snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%d", pior);
@@ -9582,7 +9619,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "endereco");
             snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "folha");
             snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "g_alvo");
-            for(int c = 0; c < 3; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[0] = SQL_TIPO_TEXT;
             long r = 0;
             for(long j = 0; j < nf; j++)
@@ -9684,7 +9721,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "completo");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "falta");
             snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "expandido");
-            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            for(int c = 0; c < sql_cap->ncols; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
             sql_cap->tipo[3] = SQL_TIPO_TEXT;
             snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", fibras);
             snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", menor);
@@ -12876,7 +12913,7 @@ static int executa(const char *sql){
             char guarda[64];
             vista_entra(guarda, sizeof guarda);
             Word cab = mem_le(S_VIEWCAB);
-            long n = cab.total;
+            long n = (long)cab.total | ((long)cab.e << 8);
             /* uma vista com o mesmo nome substitui-se, não se duplica */
             long onde = -1;
             for(long i = 0; i < n && i < VIEW_MAX; i++){
@@ -12891,7 +12928,12 @@ static int executa(const char *sql){
                     return 0;
                 }
                 onde = n; n++;
-                Word c2; c2.total = (Word8)n; c2.e = 0; mem_grava(S_VIEWCAB, c2);
+                /* o contador no PAR. Ele batia com o VIEW_MAX por ACASO --- a
+                 * zona segura 255 vistas e o byte segura 255 ---, e um acaso
+                 * não é uma derivação: se a zona crescer, o byte cala-se e a
+                 * mãe das vistas recomeça do princípio. */
+                Word c2; c2.total = (Word8)(n & 255); c2.e = (Word8)((n >> 8) & 255);
+                mem_grava(S_VIEWCAB, c2);
             }
             txt_grava(VIEW_NOME((unsigned)onde), 8u,  nv);
             txt_grava(VIEW_TAB((unsigned)onde),  8u,  tv);
@@ -13806,7 +13848,7 @@ static int vista_reescreve(const char *sql, char *out, size_t cap){
     char guarda[64];
     vista_entra(guarda, sizeof guarda);
     Word cab = mem_le(S_VIEWCAB);
-    long n = cab.total, achou = -1;
+    long n = (long)cab.total | ((long)cab.e << 8), achou = -1;
     for(long i = 0; i < n && i < VIEW_MAX; i++){
         char nn[32]; txt_le(VIEW_NOME((unsigned)i), 8u, nn, sizeof nn);
         if(!strcmp(nn, nome)){ achou = i; break; }

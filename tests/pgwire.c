@@ -27262,6 +27262,33 @@ int main(void){
                o.ok ? "sim" : "NÃO (recusa constante)");
         if(!o.ok) mal++;
 
+        /* (3c) O QUE NÃO CABE RECUSA-SE, E NÃO SE TRUNCA — no JOIN.
+         *
+         * O laço da esquerda parava em J_MAXLIN e seguia: com 600 linhas o
+         * motor dizia «512 linha(s) da esquerda» --- e não era falso, era o que
+         * ele tinha visto --- e devolvia o que casasse nessas. Medido: a linha
+         * que casava era a 595.ª, existia, e o JOIN devolvia ZERO. Um resultado
+         * vazio e um truncado têm a mesma cara. O CONTROLO é o mesmo JOIN
+         * dentro do tecto: sem ele, uma recusa constante passava. */
+        sql_executa("CREATE TABLE je (k INTEIRO)", &o);
+        sql_executa("CREATE TABLE jd (k INTEIRO, v INTEIRO)", &o);
+        for(long i = 1; i <= 600; i++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO je VALUES (%ld)", i);
+            sql_executa(q, &o);
+        }
+        sql_executa("INSERT INTO jd VALUES (595, 5950)", &o);
+        sql_executa("SELECT * FROM je JOIN jd ON je.k = jd.k", &o);
+        int recusa_j = !o.ok;
+        printf("      JOIN com 600 linhas à esquerda (leva 512): %s\n",
+               recusa_j ? "RECUSADO, e diz o número" : "aceitou e TRUNCOU (NÃO)");
+        if(!recusa_j) mal++;
+        sql_executa("DELETE FROM je WHERE k > 500", &o);
+        sql_executa("SELECT * FROM je JOIN jd ON je.k = jd.k", &o);
+        int passa_j = o.ok;
+        printf("      e o CONTROLO — dentro do tecto, o mesmo JOIN corre: %s\n",
+               passa_j ? "sim" : "NÃO (recusa constante)");
+        if(!passa_j) mal++;
+
         /* (4) O ÍNDICE TAMBÉM NÃO TEM O TECTO DAS OITO ÁRVORES. */
         sql_executa("CREATE INDEX ix188 ON t3 (c250)", &o);
         int idx = o.ok;
