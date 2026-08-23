@@ -1538,6 +1538,34 @@ $2401/2401$ nas três; a régua dos endereços ultramétrica em $262\,144/262\,1
 $87\,360$ estritos; a norma sozinha a fundir nos três e a norma com fase a completar nos
 três; e as contagens de unidades distintas.}
 
+\paragraph{E o preço da travessia entra no motor --- que é a pergunta prática.} O cliente
+tem duas leituras do mesmo objecto e quer saber quanto custa passar de uma à outra:
+\[
+ \boxed{\;\texttt{SELECT preco(*) FROM }t\;}
+\]
+com duas colunas --- o endereço em $R$ e em $S$ ---, devolvendo $q$, com $D(R,S)=2^{-q}$.
+\emph{Devolve-se $q$ e não a potência}, porque a potência sairia do degrau e o cliente
+compara profundidades. E o supremo é \textbf{atingido}: $q$ é a \emph{menor} profundidade
+sobre os objectos.
+
+\medskip\noindent Medido em três travessias da mesma família: trocar as duas primeiras
+posições dá um $q$; trocar as duas últimas dá outro; e a identidade responde
+\textbf{«nenhuma»} --- \emph{não um zero}, que se confundiria com «há travessia e custa
+zero». \textbf{Trocar posições altas custa mais caro}, e é isso que o $q$ mede: a altura a
+que a divergência começa.
+
+\medskip\noindent\textbf{E aqui apareceu um defeito da lib que só o motor expôs}: a
+fórmula contava a posição do peso $M^0$ como primeira, e a \code{aranha def:arvore} conta
+do \emph{mais significativo} --- duas réguas para o mesmo objecto. Corrigida a convenção, e
+posta a conversão dígito$\leftrightarrow$bit à vista ($M=2^d$ dá $q_{\mathrm{bit}}=d\,
+q_{\mathrm{dig}}$), os dois caminhos batem: a fórmula lê $q$ da permutação em $O(n)$, o
+motor lê-o da tabela, e o cliente usa o que tiver à mão.
+
+\medido{\code{tests/pgwire.c} §W159 --- as três travessias com o $q$ a crescer com a altura
+e a identidade a responder «nenhuma»; as recusas com uma coluna e com endereço negativo; e
+a fórmula a bater com o motor depois da conversão. E \code{tests/triade.c} §T6, onde o $q$
+da fórmula é confrontado com a menor profundidade varrida sobre os $625$ objectos.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

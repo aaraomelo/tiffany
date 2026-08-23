@@ -151,16 +151,31 @@ int main(void){
         for(long a = 0; a < N; a++)
             if(tv_travessia(tv_travessia(a, M, n, r, s), M, n, s, r) == a) volta++;
         int q = tv_preco(n, r, s);
+        /* e o q tem de bater com a MENOR profundidade sobre os objectos, medida
+         * em dígitos --- é o supremo atingido, e é ele que valida a convenção */
+        int q_medido = n;
+        for(long a = 0; a < N; a++){
+            long b = tv_travessia(a, M, n, r, s);
+            if(a == b) continue;
+            long x = a, y = b; long dx[8], dy[8];
+            for(int i = 0; i < n; i++){ dx[i] = x % M; x /= M; dy[i] = y % M; y /= M; }
+            for(int j = 0; j < n; j++){
+                int i = n - 1 - j;
+                if(dx[i] != dy[i]){ if(j < q_medido) q_medido = j; break; }
+            }
+        }
         printf("      T atinge %ld/%ld endereços, e S∘R⁻¹ seguida de R∘S⁻¹ devolve em %ld/%ld\n",
                atinge, N, volta, N);
-        printf("      o preço: q = %d, logo D = 2^{−%d} --- lido de π em %d comparações,"
-               " não nos %ld objectos\n", q, q, n, N);
+        printf("      o preço: q = %d pela fórmula e %d pela varredura --- %s; lido de π em"
+               " %d comparações, não nos %ld objectos\n",
+               q, q_medido, q == q_medido ? "batem" : "NÃO BATEM", n, N);
+        if(q != q_medido) mal++;
         /* e π = id dá preço nulo */
         int id[4] = {0,1,2,3};
         int q0 = tv_preco(n, id, id);
         printf("      com π = id o preço é q = %d (= n): não há travessia nem preço\n", q0);
         ok("a travessia escreve-se, é bijeção com volta, e o preço lê-se da permutação",
-           mal == 0 && atinge == N && volta == N && q == 0 && q0 == n);
+           mal == 0 && atinge == N && volta == N && q0 == n);
     }
 
     /* ── §T7 O CRITÉRIO DA LEITURA, como o cliente o chama ──────────────── */

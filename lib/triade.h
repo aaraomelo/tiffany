@@ -128,13 +128,29 @@ static long tv_travessia(long a, long M, int n, const int *r, const int *s){
     tv_le(a, M, n, r, dig);
     return tv_escreve(dig, M, n, s);
 }
-/* o preço: q = a primeira posição que π = s∘r⁻¹ move; D = 2^{−q}, e D = 0 se π = id.
- * Devolve q, ou n quando π é a identidade (custo zero). */
+/* o preço: q é a primeira posição, CONTADA DO DÍGITO MAIS SIGNIFICATIVO, que
+ * π = s∘r⁻¹ move --- e D(R,S) = 2^{−q}. Devolve n quando π = id: não há
+ * travessia nem preço.
+ *
+ * A convenção importa e custou um erro: `r(k)` é o EXPOENTE do peso M^{r(k)},
+ * pelo que a posição 0 é a MENOS significativa; já `prof` (e a def:arvore) conta
+ * do topo. Ler as duas na mesma direcção dava q = 0 onde o motor mede q alto ---
+ * duas réguas para o mesmo objecto. Aqui converte-se: o dígito de peso M^{n-1}
+ * é o primeiro a contar do topo. */
 static int tv_preco(int n, const int *r, const int *s){
     int pi[TRI_NMAX];
     for(int k = 0; k < n; k++) pi[r[k]] = s[k];
-    for(int i = 0; i < n; i++) if(pi[i] != i) return i;
+    for(int j = 0; j < n; j++){
+        int i = n - 1 - j;                     /* do mais significativo para baixo */
+        if(pi[i] != i) return j;
+    }
     return n;                                  /* π = id: não há travessia nem preço */
+}
+/* e o mesmo em BITS, para bater com `prof` quando M = 2^d:
+ *   q_bit = d · q_dig */
+static int tv_preco_bits(int n, const int *r, const int *s, int d){
+    int q = tv_preco(n, r, s);
+    return q == n ? n * d : q * d;
 }
 
 /* ── A ULTRAMÉTRICA DOS ENDEREÇOS: prof = a primeira divergência ────────── */

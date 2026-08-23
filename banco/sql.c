@@ -4611,7 +4611,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"ANTISIMETRICA") ? 20
                        : !strcasecmp(nome,"REGIME") ? 21
                        : !strcasecmp(nome,"FIBRA") ? 22
-                       : !strcasecmp(nome,"ULTRA") ? 23 : 0;
+                       : !strcasecmp(nome,"ULTRA") ? 23
+                       : !strcasecmp(nome,"PRECO") ? 24 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7136,6 +7137,112 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 24){
+        /* ── O PREÇO DA TRAVESSIA: a tabela traz DUAS colunas --- o endereço do
+         * mesmo objecto em duas leituras ---, e o que sai é o custo
+         *
+         *     D(R,S) = 2^{−q},   q = a primeira posição em que divergem
+         *
+         * (aranha prop:travessia). O supremo é ATINGIDO, não estimado: q é a
+         * MENOR profundidade sobre os objectos, e devolve-se ela, não 2^{−q},
+         * porque a potência sairia do degrau.
+         *
+         * Se as duas colunas coincidem em todas as linhas, não há travessia
+         * nem preço --- e diz-se, em vez de devolver um zero que se confundiria
+         * com «custo nulo mas há travessia». */
+        if(ncols != 2){
+            printf("erro: o preço mede-se entre DUAS leituras --- a tabela tem %ld"
+                   " coluna(s). RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "preco needs two columns of addresses, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj == 0){
+            printf("erro: não há linhas --- RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "preco on empty selection"); }
+            return 0;
+        }
+        long mx = 0; int iguais = 1;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols) || !bit_le(S_PRES, i*ncols + 1)){
+                printf("erro: a linha %ld tem célula ausente --- um buraco não é um"
+                       " endereço. RECUSADA.\n", i);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "preco: missing cell at row %ld", i); }
+                return 0;
+            }
+            long n1, d1, n2, d2;
+            celula_qz(i, 0, ncols, &n1, &d1);
+            celula_qz(i, 1, ncols, &n2, &d2);
+            if(d1 != 1 || d2 != 1 || n1 < 0 || n2 < 0){
+                printf("erro: os endereços têm de ser inteiros não negativos --- a"
+                       " profundidade lê-se do prefixo. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "preco: addresses must be non-negative integers"); }
+                return 0;
+            }
+            if(n1 != n2) iguais = 0;
+            if(n1 > mx) mx = n1;
+            if(n2 > mx) mx = n2;
+        }
+        int bits = 1; { long t = mx; while(t){ bits++; t >>= 1; } }
+        if(iguais){
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 3;
+                snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "q");
+                snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "objetos");
+                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "travessia");
+                sql_cap->tipo[0] = sql_cap->tipo[1] = SQL_TIPO_INT4;
+                sql_cap->tipo[2] = SQL_TIPO_TEXT;
+                snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%d", bits);
+                snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", n_obj);
+                snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "nenhuma");
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+            }
+            printf("   %d | %ld | nenhuma\n", bits, n_obj);
+            printf("-- as duas leituras coincidem em todos os %ld objectos: R = S, não há"
+                   " travessia nem preço\n", n_obj);
+            return 1;
+        }
+        /* o supremo de d é a MENOR profundidade */
+        int q = bits;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            long n1, d1, n2, d2;
+            celula_qz(i, 0, ncols, &n1, &d1);
+            celula_qz(i, 1, ncols, &n2, &d2);
+            int p = bits;
+            if(n1 != n2) for(int b = 0; b < bits; b++)
+                if(((n1 >> (bits-1-b)) & 1L) != ((n2 >> (bits-1-b)) & 1L)){ p = b; break; }
+            if(p < q) q = p;
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 3;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "q");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "objetos");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "travessia");
+            sql_cap->tipo[0] = sql_cap->tipo[1] = SQL_TIPO_INT4;
+            sql_cap->tipo[2] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%d", q);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", n_obj);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "sim");
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %d | %ld | sim\n", q, n_obj);
+        printf("-- D(R,S) = 2^-%d sobre %ld objectos de %d bits · o supremo é ATINGIDO,"
+               " e o que se devolve é q e não a potência\n", q, n_obj, bits);
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 23){
         /* ── A RÉGUA: a coluna de endereços cumpre a desigualdade FORTE?
          * d(x,z) ≤ max{d(x,y), d(y,z)}, que na profundidade é

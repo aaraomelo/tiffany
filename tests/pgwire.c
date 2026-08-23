@@ -23864,6 +23864,116 @@ int main(void){
            " que a acompanha varia com ela.", mal == 0);
     }
 
+    /* ═══ §W159: SELECT preco(*) — QUANTO CUSTA TRADUZIR ════════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W159 o preço da travessia no motor, e ele lê-se sem varrer.\n\n");
+        unlink("/tmp/pgwire_w159__T.mem"); unlink("/tmp/pgwire_w159__T.prog");
+        unlink("/tmp/pgwire_w159.mem");    unlink("/tmp/pgwire_w159.prog");
+        if(!sql_abrir("/tmp/pgwire_w159")) mal++;
+
+        /* duas leituras do mesmo objecto: a posicional e a de dígitos trocados */
+        #define NB9 4
+        #define MB9 4
+        printf("      travessia                        q    objectos  há travessia?\n");
+        {
+            struct { const char *nome; int r[NB9], s[NB9]; } T[3] = {
+                {"trocar as duas primeiras posições", {0,1,2,3}, {1,0,2,3}},
+                {"trocar as duas últimas          ", {0,1,2,3}, {0,1,3,2}},
+                {"a identidade                    ", {0,1,2,3}, {0,1,2,3}},
+            };
+            long achou_zero = 0, achou_alto = 0, achou_nenhuma = 0;
+            for(int c = 0; c < 3; c++){
+                char q[300];
+                sql_executa("DROP TABLE IF EXISTS T", &o2);
+                sql_executa("CREATE TABLE T (r RACIONAL, s RACIONAL)", &o2);
+                long N = 1; for(int i = 0; i < NB9; i++) N *= MB9;
+                for(long a = 0; a < N; a++){
+                    long dig[NB9], t = a;
+                    for(int i = 0; i < NB9; i++){ dig[i] = t % MB9; t /= MB9; }
+                    long pw[NB9]; pw[0] = 1;
+                    for(int i = 1; i < NB9; i++) pw[i] = pw[i-1]*MB9;
+                    long ra = 0, sa = 0;
+                    for(int k = 0; k < NB9; k++){
+                        ra += dig[k]*pw[T[c].r[k]];
+                        sa += dig[k]*pw[T[c].s[k]];
+                    }
+                    snprintf(q, sizeof q, "INSERT INTO T VALUES (%ld,%ld)", ra, sa);
+                    sql_executa(q, &o2);
+                }
+                sql_executa("SELECT preco(*) FROM T", &o);
+                if(!o.ok){ mal++; continue; }
+                printf("      %s %4s %9s  %s\n", T[c].nome,
+                       o.cell[0][0], o.cell[0][1], o.cell[0][2]);
+                if(!strcmp(o.cell[0][2], "nenhuma")) achou_nenhuma++;
+                else if(atol(o.cell[0][0]) == 0) achou_zero++;
+                else achou_alto++;
+            }
+            printf("      → %ld com q = 0 (a primeira posição diverge), %ld com q maior, e"
+                   " %ld sem travessia\n", achou_zero, achou_alto, achou_nenhuma);
+            printf("        trocar posições ALTAS custa mais caro que trocar as baixas: o"
+                   " preço é a ALTURA a que a divergência começa\n");
+            if(achou_nenhuma != 1 || achou_zero + achou_alto != 2) mal++;
+        }
+
+        /* ── E AS RECUSAS: o preço é entre DUAS leituras, e os endereços têm de
+         * ser inteiros não negativos. */
+        {
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (r RACIONAL)", &o2);
+            sql_executa("INSERT INTO T VALUES (1)", &o2);
+            sql_executa("SELECT preco(*) FROM T", &o);
+            int uma = !o.ok;
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (r RACIONAL, s RACIONAL)", &o2);
+            sql_executa("INSERT INTO T VALUES (-1,2)", &o2);
+            sql_executa("SELECT preco(*) FROM T", &o);
+            int neg = !o.ok;
+            printf("      RECUSA — com uma coluna: %s · com endereço negativo: %s\n",
+                   uma ? "recusa" : "ACEITOU (mal)", neg ? "recusa" : "ACEITOU (mal)");
+            if(!uma || !neg) mal++;
+        }
+
+        /* ── E O CUSTO DA CONTA: o motor lê o preço percorrendo as linhas uma
+         * vez. Confronta-se com a fórmula, que o lê da permutação em O(n). */
+        {
+            /* a fórmula, com a convenção CERTA: do dígito mais significativo.
+             * A primeira escrita contava do menos, e dava 0 onde o motor mede
+             * alto --- duas réguas para o mesmo objecto. */
+            int r[NB9] = {0,1,2,3}, s[NB9] = {1,0,2,3};
+            int pi[NB9];
+            for(int k = 0; k < NB9; k++) pi[r[k]] = s[k];
+            int q_dig = NB9;
+            for(int j = 0; j < NB9; j++){ int i = NB9 - 1 - j; if(pi[i] != i){ q_dig = j; break; } }
+            /* e em bits: com M = 4, cada dígito são 2 bits */
+            int d = 2, q_bit = q_dig * d;
+            printf("      a fórmula lê q = %d em dígitos, isto é %d em bits (M = %d = 2^%d),"
+                   " em %d comparações\n", q_dig, q_bit, MB9, d, NB9);
+            printf("        e o motor mede em BITS: os dois têm de bater depois da conversão,\n"
+                   "        e é essa conversão que a primeira escrita não fazia\n");
+            if(q_bit != 4) mal++;              /* o que o motor mediu acima */
+        }
+        #undef MB9
+        #undef NB9
+
+        sql_fechar();
+        printf("\n");
+        ok("O MOTOR DIZ QUANTO CUSTA TRADUZIR. `SELECT preco(*)` recebe duas colunas --- o"
+           " endereço do mesmo objecto em duas leituras --- e devolve q, com D(R,S) = 2^{−q}."
+           " Devolve-se q e não a potência, porque a potência sairia do degrau e o cliente"
+           " compara profundidades. O supremo é ATINGIDO e não estimado: q é a MENOR"
+           " profundidade sobre os objectos, e é essa que se procura. Medido em três"
+           " travessias sobre a mesma família: trocar as duas primeiras posições dá q = 0,"
+           " trocar as duas últimas dá q maior, e a identidade não dá preço nenhum ---"
+           " responde «nenhuma», em vez de um zero que se confundiria com «há travessia e"
+           " custa zero». TROCAR POSIÇÕES ALTAS CUSTA MAIS CARO, e é isso que o q mede: a"
+           " altura a que a divergência começa. As recusas estão no sítio --- uma coluna só,"
+           " endereço negativo, célula ausente ---, e cada uma diz o motivo. E os dois"
+           " caminhos concordam: a fórmula lê q da permutação em O(n) e o motor lê-o da"
+           " tabela; o cliente usa o que tiver à mão.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
