@@ -26137,9 +26137,13 @@ int main(void){
             }
             sql_executa("SELECT edo(*) FROM A", &o);
             if(!o.ok){ printf("      %-26s RECUSADA: %s\n", E[c].nome, o.err); mal++; continue; }
+            /* as colunas em grau > 2 são: grau(0) raizes(1) distintas(2)
+             * com_multiplicidade(3) resto(4) solucao(5) --- mudaram quando o
+             * motor passou a devolver a multiplicidade, e ler as antigas dava
+             * campos trocados sem erro nenhum */
             printf("      %-26s %4s  %-17s %5s   %s\n", E[c].nome,
-                   o.cell[0][1], o.cell[0][3], o.cell[0][4], o.cell[0][5]);
-            if(atol(o.cell[0][4]) == E[c].nr) certos++;
+                   o.cell[0][0], o.cell[0][1], o.cell[0][3], o.cell[0][4]);
+            if(atol(o.cell[0][3]) == E[c].nr) certos++;
             else printf("      ^^^ esperava %ld raízes inteiras\n", E[c].nr);
         }
         printf("      → %ld das 5 com o número de raízes inteiras esperado\n", certos);
@@ -26158,7 +26162,7 @@ int main(void){
             long co[4] = {6, 11, 6, 1};
             long anulam = 0, lidas = 0;
             if(o.ok){
-                char *p2 = o.cell[0][3];
+                char *p2 = o.cell[0][1];
                 while(*p2){
                     char *fim; long r = strtol(p2, &fim, 10);
                     if(fim == p2) break;
@@ -26476,6 +26480,109 @@ int main(void){
            " is not a companion row» --- e não só que falhou: quem recebe «erro» e mais nada"
            " tem de adivinhar, e adivinhar sobre uma hipótese é o que esta casa evita em"
            " todo o lado.", mal == 0);
+    }
+
+    /* ═══ §W182: O GRAU SOBE, E RESOLVER É DAR A MULTIPLICIDADE ════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W182 grau alto: resolver é dar a MULTIPLICIDADE e a forma, não uma lista.\n\n");
+        unlink("/tmp/pgwire_w182__A.mem"); unlink("/tmp/pgwire_w182__A.prog");
+        unlink("/tmp/pgwire_w182.mem");    unlink("/tmp/pgwire_w182.prog");
+        if(!sql_abrir("/tmp/pgwire_w182")) mal++;
+
+        struct { const char *nome; int n; long co[8];
+                 long tot, dist; const char *tem; } E[6] = {
+          {"viga: λ⁴ = 0",            4, {0,0,0,0},              4, 1, "(c1+c2t"},
+          {"duas massas: −1,−2,−3,−4",4, {24,50,35,10},          4, 4, "e^(-1t)"},
+          {"cascata: (λ²−1)³",        6, {-1,0,3,0,-3,0},        6, 2, "(c1+c2t"},
+          {"(λ²−1)⁴",                 8, {1,0,-4,0,6,0,-4,0},    8, 2, "(c1+c2t"},
+          /* (λ²−1)(λ³−λ−1) = λ⁵ − 2λ³ − λ² + λ + 1. A primeira escrita destes
+           * coeficientes foi À MÃO e estava errada --- o medidor apanhou-a. */
+          {"(λ²−1)(λ³−λ−1)",          5, {1,1,-1,-2,0,0},        2, 2, "e^(1t)"},
+          {"λ³ + 6λ² + 11λ + 6",      3, {6,11,6},               3, 3, "e^(-1t)"},
+        };
+        printf("      o polinómio                grau  raízes         distintas  a solução\n");
+        long certos = 0;
+        for(int c = 0; c < 6; c++){
+            char q[600];
+            int n = E[c].n;
+            sql_executa("DROP TABLE IF EXISTS A", &o2);
+            strcpy(q, "CREATE TABLE A (");
+            for(int j = 0; j < n; j++){ char t[24];
+                snprintf(t, sizeof t, "%sc%d RACIONAL", j?",":"", j); strcat(q, t); }
+            strcat(q, ")"); sql_executa(q, &o2);
+            for(int i = 0; i < n; i++){
+                strcpy(q, "INSERT INTO A VALUES (");
+                for(int j = 0; j < n; j++){
+                    long v = (i+1 < n) ? ((j == i+1) ? 1 : 0) : -E[c].co[j];
+                    char t[24]; snprintf(t, sizeof t, "%s%ld", j?",":"", v); strcat(q, t);
+                }
+                strcat(q, ")"); sql_executa(q, &o2);
+            }
+            sql_executa("SELECT edo(*) FROM A", &o);
+            if(!o.ok){ printf("      %-26s RECUSADA: %s\n", E[c].nome, o.err); mal++; continue; }
+            printf("      %-26s %4s  %-14s %6s     %s\n", E[c].nome, o.cell[0][0],
+                   o.cell[0][1], o.cell[0][2], o.cell[0][5]);
+            int ok1 = atol(o.cell[0][3]) == E[c].tot;
+            int ok2 = atol(o.cell[0][2]) == E[c].dist;
+            int ok3 = strstr(o.cell[0][5], E[c].tem) != NULL;
+            if(ok1 && ok2 && ok3) certos++;
+            else printf("      ^^^ esperava %ld raízes em %ld distintas, com «%s» na forma\n",
+                        E[c].tot, E[c].dist, E[c].tem);
+        }
+        printf("      → %ld dos 6 com o total, as distintas e a forma certos\n", certos);
+        if(certos != 6) mal++;
+
+        /* ── O GUME QUE SEPARA «LISTA» DE «RESOLUÇÃO»: a multiplicidade.
+         * Um motor que só listasse raízes distintas daria a MESMA resposta para
+         * (λ−1)(λ+1) e para (λ−1)⁴(λ+1)⁴ --- e as soluções são diferentes:
+         * uma tem exponenciais puras, a outra tem t, t² e t³ multiplicando. */
+        {
+            char q[600];
+            long simples[2] = {-1, 0}, quadruplo[8] = {1,0,-4,0,6,0,-4,0};
+            const char *nome[2] = {"(λ²−1)", "(λ²−1)⁴"};
+            long ns[2] = {2, 8};
+            char forma[2][SQL_OUT_CELL];
+            for(int c = 0; c < 2; c++){
+                int n = (int)ns[c];
+                long *co = c ? quadruplo : simples;
+                sql_executa("DROP TABLE IF EXISTS B", &o2);
+                strcpy(q, "CREATE TABLE B (");
+                for(int j = 0; j < n; j++){ char t[24];
+                    snprintf(t, sizeof t, "%sc%d RACIONAL", j?",":"", j); strcat(q, t); }
+                strcat(q, ")"); sql_executa(q, &o2);
+                for(int i = 0; i < n; i++){
+                    strcpy(q, "INSERT INTO B VALUES (");
+                    for(int j = 0; j < n; j++){
+                        long v = (i+1 < n) ? ((j == i+1) ? 1 : 0) : -co[j];
+                        char t[24]; snprintf(t, sizeof t, "%s%ld", j?",":"", v); strcat(q, t);
+                    }
+                    strcat(q, ")"); sql_executa(q, &o2);
+                }
+                sql_executa("SELECT edo(*) FROM B", &o);
+                snprintf(forma[c], sizeof forma[c], "%s", o.ok ? o.cell[0][5] : "?");
+            }
+            printf("      gume: %s → %s\n", nome[0], forma[0]);
+            printf("            %s → %s\n", nome[1], forma[1]);
+            printf("      as MESMAS duas raízes distintas, e formas DIFERENTES --- é a"
+                   " multiplicidade a trabalhar\n");
+            if(!strcmp(forma[0], forma[1])) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O GRAU SOBE, E RESOLVER É DAR A MULTIPLICIDADE E A FORMA. Uma lista de raízes"
+           " não é uma resolução: (λ²−1) e (λ²−1)⁴ têm as MESMAS duas raízes distintas e"
+           " soluções diferentes --- uma tem exponenciais puras, a outra tem t, t² e t³ a"
+           " multiplicá-las. O motor devolve agora o total, as distintas, a multiplicidade"
+           " de cada uma e a forma montada dela, em graus 3 a 8. E os casos são sistemas"
+           " reais: a viga de Euler-Bernoulli é λ⁴=0 com raiz QUÁDRUPLA, e é a"
+           " multiplicidade --- não as raízes --- que produz o cúbico c1+c2x+c3x²+c4x³ que"
+           " se usa em estruturas; duas massas acopladas dão quatro modos distintos; três"
+           " estágios em cascata dão raízes triplas. E quando nem tudo é racional o motor"
+           " extrai o que é e DIZ o que sobra: (λ²−1)(λ³−λ−1) devolve ±1 e deixa o metal"
+           " escrito, em vez de o arredondar.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

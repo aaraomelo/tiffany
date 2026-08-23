@@ -7941,7 +7941,8 @@ static int varre(const char *resto, int acao){
                    " %ld coluna(s) e %ld linha(s). RECUSADA.\n", ncols, nrows);
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
-                         "edo needs the 2x2 companion matrix"); }
+                         "edo needs a square n x n companion matrix,"
+                         " got %ld x %ld", nrows, ncols); }
             return 0;
         }
         /* ── O GRAU NÃO TEM LIMITE NA TEORIA, e o tecto aqui é o ANDAR.
@@ -8003,75 +8004,125 @@ static int varre(const char *resto, int acao){
         for(long k = 0; k < ng; k++) co[k] = -m[ng-1][k];
         co[ng] = 1;
 
-        /* ── GRAU > 2: as raízes INTEIRAS por divisores do termo constante,
-         * com deflação exacta (Ruffini em inteiros). O que sobra fica dito. */
+        /* ── GRAU > 2: RESOLVE-SE, e resolver é dar as raízes COM
+         * multiplicidade e a forma da solução --- não uma lista.
+         *
+         * Três passos, todos exactos em inteiros:
+         *  (1) as raízes RACIONAIS p/q pelo teorema da raiz racional: p divide
+         *      o termo constante e q o coeficiente-líder. Aqui o polinómio é
+         *      mónico (é uma companheira), logo q = 1 e elas são inteiras --- mas
+         *      a busca faz-se pela regra e não pela suposição.
+         *  (2) a MULTIPLICIDADE de cada uma, deflacionando enquanto ela voltar.
+         *  (3) o que SOBRA: em grau 2 resolve-se pelo Δ (real ou complexo); em
+         *      grau 1 é raiz directa; acima, diz-se o factor por resolver.
+         *
+         * E a forma da solução monta-se do resultado: uma raiz λ de
+         * multiplicidade m contribui (c₁+c₂t+…+c_m t^{m-1})e^{λt}; um par a±bi
+         * contribui e^{at}(c cos bt + c' sen bt). É isto que resolver quer dizer. */
         if(ng > 2){
-            char raizes[SQL_OUT_CELL] = ""; long nr = 0;
+            char raizes[SQL_OUT_CELL] = ""; char forma[SQL_OUT_CELL] = "";
+            long nr = 0, distintas = 0;
             static long p[EDO_ANDAR+1]; for(long k = 0; k <= ng; k++) p[k] = co[k];
             long gr = ng;
+            int primeiro = 1;
             for(long volta = 0; volta < EDO_ANDAR && gr > 0; volta++){
-                long a0 = p[0];
-                if(a0 == 0){                       /* λ = 0 é raiz: deflaciona */
-                    for(long k = 0; k < gr; k++) p[k] = p[k+1];
-                    gr--; nr++;
-                    { char t[24]; snprintf(t, sizeof t, "%s0", nr>1?",":""); 
-                      strncat(raizes, t, sizeof raizes - strlen(raizes) - 1); }
-                    continue;
-                }
-                long achou = 0, r = 0;
-                long lim = a0 < 0 ? -a0 : a0;
-                for(long d = 1; d <= lim && !achou; d++){
-                    if(lim % d) continue;
-                    for(int sg = 0; sg < 2 && !achou; sg++){
-                        long cand = sg ? -d : d, v = 0;
-                        for(long k = gr; k >= 0; k--) v = v*cand + p[k];
-                        if(v == 0){ achou = 1; r = cand; }
+                long a0 = p[0], r = 0; int achou = 0;
+                if(a0 == 0){ achou = 1; r = 0; }
+                else {
+                    long lim = a0 < 0 ? -a0 : a0;
+                    for(long d = 1; d <= lim && !achou; d++){
+                        if(lim % d) continue;
+                        for(int sg = 0; sg < 2 && !achou; sg++){
+                            long cand = sg ? -d : d, v = 0;
+                            for(long k = gr; k >= 0; k--) v = v*cand + p[k];
+                            if(v == 0){ achou = 1; r = cand; }
+                        }
                     }
                 }
                 if(!achou) break;
-                static long q2[EDO_ANDAR+1]; q2[gr-1] = p[gr];
-                for(long k = gr-1; k >= 1; k--) q2[k-1] = p[k] + r*q2[k];
-                for(long k = 0; k < gr; k++) p[k] = q2[k];
-                gr--; nr++;
-                { char t[24]; snprintf(t, sizeof t, "%s%ld", nr>1?",":"", r);
+                /* A MULTIPLICIDADE: deflaciona enquanto a raiz voltar */
+                long mult = 0;
+                while(gr > 0){
+                    long v = 0;
+                    for(long k = gr; k >= 0; k--) v = v*r + p[k];
+                    if(v != 0) break;
+                    static long q2[EDO_ANDAR+1];
+                    q2[gr-1] = p[gr];
+                    for(long k = gr-1; k >= 1; k--) q2[k-1] = p[k] + r*q2[k];
+                    for(long k = 0; k < gr; k++) p[k] = q2[k];
+                    gr--; mult++; nr++;
+                }
+                distintas++;
+                { char t[64];
+                  if(mult > 1) snprintf(t, sizeof t, "%s%ld(x%ld)", primeiro?"":",", r, mult);
+                  else         snprintf(t, sizeof t, "%s%ld", primeiro?"":",", r);
                   strncat(raizes, t, sizeof raizes - strlen(raizes) - 1); }
+                { char t[96];
+                  if(mult == 1) snprintf(t, sizeof t, "%sc*e^(%ldt)", primeiro?"":" + ", r);
+                  else snprintf(t, sizeof t, "%s(c1%s)*e^(%ldt)", primeiro?"":" + ",
+                                mult == 2 ? "+c2t" : "+c2t+...", r);
+                  strncat(forma, t, sizeof forma - strlen(forma) - 1); }
+                primeiro = 0;
             }
+            /* (3) O QUE SOBRA --- e resolve-se se couber */
             char resto[SQL_OUT_CELL];
-            if(gr == 0) snprintf(resto, sizeof resto, "todas inteiras");
-            else {
+            if(gr == 0) snprintf(resto, sizeof resto, "todas achadas");
+            else if(gr == 1){
+                snprintf(resto, sizeof resto, "linear: raiz %ld/%ld", -p[0], p[1]);
+            } else if(gr == 2){
+                long BB = p[1], CC = p[0], DD = BB*BB - 4*CC;
+                long ad2 = DD < 0 ? -DD : DD, rr = 0;
+                while(rr*rr < ad2) rr++;
+                int quad = (rr*rr == ad2);
+                if(DD >= 0)
+                    snprintf(resto, sizeof resto, quad
+                        ? "quadrático D=%ld: raizes (%ld±%ld)/2"
+                        : "quadrático D=%ld: (%ld±sqrt(%ld))/2",
+                        DD, -BB, quad ? rr : DD);
+                else {
+                    snprintf(resto, sizeof resto, "quadrático D=%ld: par %s%ld/2±i*%s/2",
+                             DD, "", -BB, quad ? "r" : "sqrt|D|");
+                    char t[96];
+                    snprintf(t, sizeof t, "%se^(at)*(c*cos(wt)+c'*sen(wt))",
+                             primeiro ? "" : " + ");
+                    strncat(forma, t, sizeof forma - strlen(forma) - 1);
+                    primeiro = 0;
+                }
+                if(DD >= 0){
+                    char t[96];
+                    snprintf(t, sizeof t, "%sc*e^(l1*t) + c*e^(l2*t)", primeiro ? "" : " + ");
+                    strncat(forma, t, sizeof forma - strlen(forma) - 1);
+                    primeiro = 0;
+                }
+            } else {
                 int off = snprintf(resto, sizeof resto, "sobra grau %ld: ", gr);
                 for(long k = gr; k >= 0 && off < (int)sizeof resto - 12; k--)
                     if(p[k]) off += snprintf(resto+off, sizeof resto-off, "%s%ldx^%ld",
                                              (k<gr && p[k]>0) ? "+" : "", p[k], k);
             }
+            if(!*forma) snprintf(forma, sizeof forma, "sem parte elementar achada");
             if(sql_cap){
                 memset(sql_cap, 0, sizeof *sql_cap);
                 sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
-                snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "equacao");
-                snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "grau");
-                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "classe");
-                snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "raizes_inteiras");
-                snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "quantas");
-                snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "resto");
+                snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "grau");
+                snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "raizes");
+                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "distintas");
+                snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "com_multiplicidade");
+                snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "resto");
+                snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
                 for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
-                sql_cap->tipo[1] = SQL_TIPO_INT4; sql_cap->tipo[4] = SQL_TIPO_INT4;
-                int off = snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "y^(%ld)", ng);
-                for(long k = ng-1; k >= 0 && off < SQL_OUT_CELL - 16; k--)
-                    if(co[k]) off += snprintf(sql_cap->cell[0][0]+off, SQL_OUT_CELL-off,
-                                              " %c %ldy%s", co[k]<0?'-':'+',
-                                              co[k]<0?-co[k]:co[k],
-                                              k==0 ? "" : (k==1 ? "'" : "^(k)"));
-                snprintf(sql_cap->cell[0][0]+off, SQL_OUT_CELL-off, " = 0");
-                snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", ng);
-                snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%s",
-                         gr == 0 ? "cinde em raizes inteiras" : "cinde em parte");
-                snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", nr ? raizes : "nenhuma");
-                snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%ld", nr);
-                snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", resto);
+                sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[2] = SQL_TIPO_INT4;
+                sql_cap->tipo[3] = SQL_TIPO_INT4;
+                snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ng);
+                snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%s", nr ? raizes : "nenhuma");
+                snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", distintas);
+                snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", nr);
+                snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", resto);
+                snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
                 snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
             }
-            printf("edo: grau %ld · %ld raiz(es) inteira(s): %s · %s\n",
-                   ng, nr, nr ? raizes : "nenhuma", resto);
+            printf("edo: grau %ld · %ld raiz(es) em %ld distinta(s): %s · %s · y = %s\n",
+                   ng, nr, distintas, nr ? raizes : "nenhuma", resto, forma);
             return 1;
         }
         long B = -m[1][1], C = -m[1][0];

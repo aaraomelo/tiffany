@@ -2283,7 +2283,32 @@ E a fronteira entre os dois é \emph{um número} que o cliente acha perguntando 
 $1/IC=4$ dá $\Delta=0$, o crítico --- \emph{a mesma fronteira do RLC, porque é a mesma
 equação}.
 
-\paragraph{5. O cliente encadeia fusões.} O resultado de \code{funde(*)} entra na fusão
+\paragraph{5. Sistemas de grau alto --- e resolver é dar a \emph{multiplicidade}.} Grau dois
+é um sistema com \emph{um} elemento que armazena de cada tipo; havendo mais, o grau sobe. E
+aí uma lista de raízes deixa de ser uma resolução:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrll@{}}
+\toprule
+o sistema & o polinómio & grau & raízes & $y(t)$\\
+\midrule
+viga de Euler-Bernoulli & $\lambda^4=0$ & $4$ & $0^{(\times4)}$ & $c_1+c_2t+c_3t^2+c_4t^3$\\
+duas massas acopladas & $(\lambda^2{+}3\lambda{+}2)(\lambda^2{+}7\lambda{+}12)$ & $4$ & $-1,-2,-3,-4$ & $\sum c_ie^{\lambda_it}$\\
+três estágios em cascata & $(\lambda^2-1)^3$ & $6$ & $1^{(\times3)},-1^{(\times3)}$ & $(c_1{+}c_2t{+}c_3t^2)e^{\pm t}$\\
+& $(\lambda^2-1)^4$ & $8$ & $1^{(\times4)},-1^{(\times4)}$ & até $t^3$\\
+com parte irracional & $(\lambda^2-1)(\lambda^3-\lambda-1)$ & $5$ & $1,-1$ & e o metal fica \emph{dito}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A viga é o caso que explica porquê.} $EI\,y''''=0$ é $\lambda^4=0$ com raiz
+\emph{quádrupla}, e é a multiplicidade --- não as raízes --- que produz o cúbico
+$c_1+c_2x+c_3x^2+c_4x^3$ que se usa em estruturas. Um motor que listasse só as raízes
+distintas daria \emph{a mesma resposta} para $(\lambda^2-1)$ e $(\lambda^2-1)^4$, e as
+soluções são diferentes: uma tem exponenciais puras, a outra tem $t$, $t^2$ e $t^3$ a
+multiplicá-las. \emph{É esse o gume.}
+
+\paragraph{6. O cliente encadeia fusões.} O resultado de \code{funde(*)} entra na fusão
 seguinte sem adaptador. Quatro corpos, três fusões, e o que se distingue sobe estritamente:
 $11\to31\to34\to36$. \emph{Com um milhão de corpos é o mesmo SQL.}
 
