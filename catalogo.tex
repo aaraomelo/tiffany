@@ -1627,6 +1627,28 @@ não uma}.
 a quebrar e uma a fundir; as recusas com uma coluna e com uma linha só; e o encadeamento
 \code{leitura}$\to$\code{fibra}$\to$\code{ultra} sobre a leitura pela distância.}
 
+\paragraph{E o quântico entra na lib --- com uma correcção ao que ficara escrito acima.} O
+\code{lib/quantico.h} leva $|\psi\rangle$ em $\Z[i]$ com a igualdade do corpo
+$\psi\sim u\psi$, a leitura por $\rho=|\psi\rangle\langle\psi|$, a pureza exacta
+($\det\rho=0$ em todos), e o tamanho da órbita. Mas ao medi-lo com amplitudes maiores
+aparece o que a primeira medição não podia ver:
+\[
+ \boxed{\;\rho \text{ mata a fase \textbf{contínua}, e } \Z[i] \text{ só tem \textbf{quatro} unidades}\;}
+\]
+--- logo $\rho$ \emph{funde} estados que a igualdade do corpo não relaciona: eles diferem
+por uma fase de norma $1$ em $\Q(i)$, como $(3-4i)/5$, que \textbf{não é inteira}. Medido:
+das $96$ fusões, $96$ são exactamente dessas.
+
+\medskip\noindent \emph{A leitura por $\rho$ é bem definida sempre e separa a menos dessa
+fase maior} --- dizer que «serve» seria medir com o grupo errado. E a lição é a de sempre:
+a primeira medição varria amplitudes de $-1$ a $1$, \textbf{onde o defeito não vive}, e deu
+$\rho$ como separadora. O alcance da varredura faz parte da afirmação.
+
+\medido{\code{tests/quantico.c} --- a órbita da fase com os pontos livres e os fixos; as
+amplitudes a quebrarem em $936$ pares e $\rho$ a não quebrar nenhum; as $96$ fusões de
+$\rho$ todas por fase racional de norma $1$; e $\det\rho=0$ em $2400/2400$ estados, exacto
+e sem uma raiz --- a identidade de Lagrange nos quatro inteiros da amplitude.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

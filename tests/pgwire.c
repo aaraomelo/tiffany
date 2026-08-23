@@ -20612,6 +20612,12 @@ int main(void){
                     if(!(me && !mesmo)) sep++;
                 }
                 VEREDICTO("quântico     ρ = |ψ⟩⟨ψ|              ", n, bd, sep, pares);
+                printf("        NOTA — aqui as amplitudes vão de −1 a 1, e nessa faixa ρ"
+                       " separa. Com amplitudes maiores NÃO separa:\n"
+                       "        ela mata a fase CONTÍNUA, e ℤ[i] só tem quatro unidades,"
+                       " pelo que funde estados que\n"
+                       "        diferem por uma fase como (3−4i)/5 --- norma 1 e não"
+                       " inteira. Medido em tests/quantico.c §Q2.\n");
             }
             #undef MESMO_EST
         }
