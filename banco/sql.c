@@ -287,6 +287,16 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_CHEIO   69         /* {0xFF,0xFF}: o VERDADEIRO, espalhado por todos os
                               * bits. O booleano deixou de viver na coordenada 0 —
                               * vive na largura toda, e é isso que dispensa o salto */
+#define S_VB      71         /* os bytes 2,3 do valor do SET --- o andar de cima.
+                              * Sem ele o UPDATE escrevia dois planos de três, e
+                              * o terceiro ficava com o do valor ANTERIOR: numa
+                              * DATA, o instante mudava sem ninguém lhe tocar.
+                              * Eu tinha remendado isso a LIMPAR 8192 slots na
+                              * criação da tabela --- escrever zeros onde a
+                              * trajectória não passou, que é o contrário da
+                              * cláusula (3) («a memória existe onde a
+                              * trajectória passou»), e custava 44 KB por tabela
+                              * antes de existir uma linha. */
 #define S_VA      68         /* o átomo ALTO do valor do SET (o par, Lei 7) — 68 está
                               * livre entre o S_CORPO (60..67) e o S_EXPR (72..199); o
                               * 56 que eu tinha posto é o S_KZ+7 */
@@ -2772,10 +2782,9 @@ static int cria(const char *resto){
      * que só toca no plano baixo passa a ser lida com o byte alto de quem esteve
      * ali antes. Limpar na criação é o que garante que a tabela nova nasce no
      * andar inteiro, e não só na metade de baixo. */
-    { Word z = {0,0};
-      for(unsigned k = 0; k < 4096u; k++){
-          mem_grava(S_ALTO + k, z);
-          mem_grava(S_ALTO2 + k, z); } }
+    /* (não se limpa plano nenhum: quem escreve a célula escreve os TRÊS, e a
+     * presença diz se ela existe. Limpar 8192 slots era escrever onde a
+     * trajectória não passou --- 44 KB por tabela antes de haver uma linha.) */
     Word cat = mem_le(S_CAT); cat.e = 0; mem_grava(S_CAT, cat); /* nrows = 0 */
     { Word m = {1,0}; mem_grava(S_PRESCAB, m); }   /* tabela nova: campo já é dela */
     cat_poe_nrows(0);                                           /* e no par, que é onde vive */
@@ -4783,7 +4792,10 @@ static void prepara(long v, long col_do_set){
     { Word w;
       /* o valor do SET em DEZASSEIS bits: o baixo no S_V, o alto no S_VA */
       w.total = (Word8)((unsigned long)v & 255u); w.e = 0;        mem_grava(S_V, w);
-      w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0; mem_grava(S_VA, w); }
+      w.total = (Word8)(((unsigned long)v >> 8) & 255u); w.e = 0; mem_grava(S_VA, w);
+      /* e o andar de cima: os bytes 2 e 3, que é o que uma DATA usa */
+      w.total = (Word8)(((unsigned long)v >> 16) & 255u);
+      w.e     = (Word8)(((unsigned long)v >> 24) & 255u);          mem_grava(S_VB, w); }
     /* o UPDATE também é escrita, e também deixa a marca */
     if(v >= 0) col_marca(col_do_set, (unsigned long)v);
 }
@@ -4854,10 +4866,17 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
                 w.total = (Word8)((unsigned long)num & 255u); w.e = 0;
                 mem_grava(S_V, w);
                 w.total = (Word8)(((unsigned long)num >> 8) & 255u); w.e = 0;
-                mem_grava(S_VA, w); }
+                mem_grava(S_VA, w);
+                w.total = (Word8)(((unsigned long)num >> 16) & 255u);
+                w.e     = (Word8)(((unsigned long)num >> 24) & 255u);
+                mem_grava(S_VB, w); }
               pc_emit = 0;
               emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
               emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));
+              /* o S_ALTO2 vive ACIMA do tecto da ISA, e o endereço da
+               * instrução tem dezasseis bits: não se alcança por bytecode.
+               * Escreve-se em C, como o INSERT já fazia. */
+              mem_grava(S_ALTO2 + (unsigned)(i*ncols + col_set), mem_le(S_VB));
               emit1(OP_HALT);
               rodar(pc_emit);
               feitas++; }
@@ -4896,6 +4915,7 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
         if(acao == ACAO_SET){
             emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
             emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));   /* o par inteiro */
+            mem_grava(S_ALTO2 + (unsigned)(i*ncols + col_set), mem_le(S_VB)); /* o andar de cima, em C */
         }
         else {                          /* apagar é DESLIGAR a coordenada */
             MOVE(S_VIVO + (unsigned)((unsigned long)i / SLOT_BITS), +1);

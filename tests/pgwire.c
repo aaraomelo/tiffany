@@ -26939,6 +26939,28 @@ int main(void){
          * a asserção acima não podia falhar */
         printf("      CONTROLO — o instante passa dos dezasseis bits (2026 em segundos"
                " está na ordem de 1,8·10⁹), logo os bytes 2 e 3 estão em uso\n");
+
+        /* E O MESMO PELO UPDATE, que é onde a causa estava. O UPDATE escrevia
+         * DOIS planos de três, e o terceiro ficava com o do valor anterior; eu
+         * tinha remendado isso a LIMPAR 8192 slots na criação de cada tabela ---
+         * escrever zeros onde a trajectória não passou, contra a cláusula (3),
+         * e 44 KB por tabela antes de existir uma linha. Curada a causa, o
+         * remendo saiu: quem escreve a célula escreve os TRÊS planos.
+         * Aqui mexe-se numa coluna e pergunta-se pela OUTRA. */
+        sql_executa("UPDATE quando SET x = 99 WHERE x = 8", &o);
+        sql_executa("SELECT t FROM quando", &o);
+        char pos_upd[64]; pos_upd[0] = 0;
+        if(o.ok && o.nrows == 2)
+            snprintf(pos_upd, sizeof pos_upd, "%s|%s", o.cell[0][0], o.cell[1][0]);
+        /* e a própria data escrita por UPDATE tem de levar os 32 bits */
+        sql_executa("UPDATE quando SET t = 1800000000 WHERE x = 7", &o);
+        sql_executa("SELECT t FROM quando WHERE x = 7", &o);
+        const char *nova = (o.ok && o.nrows == 1) ? o.cell[0][0] : "";
+        printf("      depois de um UPDATE noutra coluna: %s\n", pos_upd[0] ? pos_upd : "(nada)");
+        printf("      e a data escrita POR UPDATE: %s (tem de ser de 2027)\n",
+               nova[0] ? nova : "(nada)");
+        if(strcmp(pos_upd, depois) != 0) mal++;
+        if(!strstr(nova, "2027")) mal++;
         if(!strstr(antes, "2026")) mal++;
 
         sql_fechar();
