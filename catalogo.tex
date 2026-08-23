@@ -1639,10 +1639,37 @@ aparece o que a primeira medição não podia ver:
 por uma fase de norma $1$ em $\Q(i)$, como $(3-4i)/5$, que \textbf{não é inteira}. Medido:
 das $96$ fusões, $96$ são exactamente dessas.
 
-\medskip\noindent \emph{A leitura por $\rho$ é bem definida sempre e separa a menos dessa
-fase maior} --- dizer que «serve» seria medir com o grupo errado. E a lição é a de sempre:
-a primeira medição varria amplitudes de $-1$ a $1$, \textbf{onde o defeito não vive}, e deu
-$\rho$ como separadora. O alcance da varredura faz parte da afirmação.
+\medskip\noindent\textbf{E o erro era anterior a isso: eu andava atrás da amplitude.} A
+§\ref{sec:transf} diz o contrário --- \emph{«o módulo não carrega nada, e a fase carrega
+tudo»} ---, e $\rho=|\psi\rangle\langle\psi|$ é amplitude ao quadrado. \textbf{A
+representação não depende da amplitude: depende só da fase}, e a fase de $(z,w)$ a menos de
+factor comum é o \emph{ponto de $\mathbf{P}^1$}. Posto o endereço aí:
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+igualdade & pares & quebras & fusões\\
+\midrule
+\textbf{projectiva} --- a do corpo & $44\,850$ & $\mathbf{0}$ & $\mathbf{0}$\\
+só as quatro unidades de $\Z[i]$ & $44\,850$ & $0$ & $428$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{As «fusões» da segunda linha não são defeito da leitura}: são a igualdade
+estreita a separar o que o corpo não separa. A igualdade do corpo quântico é
+$\psi\sim\lambda\psi$ para todo $\lambda\neq0$, e com ela a leitura pela fase \textbf{serve}
+--- zero quebras, zero fusões.
+
+\medskip\noindent\textbf{E a régua é a da casa}: sobre esses endereços a ultramétrica desce
+em $64\,000/64\,000$ triplos, com $21\,314$ estritos e nenhuma falha. \emph{O espaço de
+estados é $\mathbf{P}^1$, e a fase é a sua coordenada.}
+
+\medskip\noindent\textbf{E o zero fica de fora, dito e não escondido}: $(0,0)$ não tem fase,
+logo não é ponto de $\mathbf{P}^1$ e não tem endereço --- é o único dos estados varridos sem
+representação. \emph{A carta polar não alcança o zero}, e é preciso a cartesiana para o
+alcançar: mais uma razão de as cartas serem duas.
+
+\medskip\noindent E fica também a lição sobre o alcance: a primeira medição varria
+amplitudes de $-1$ a $1$, \textbf{onde o defeito não vive}, e deu $\rho$ como separadora.
 
 \medido{\code{tests/quantico.c} --- a órbita da fase com os pontos livres e os fixos; as
 amplitudes a quebrarem em $936$ pares e $\rho$ a não quebrar nenhum; as $96$ fusões de

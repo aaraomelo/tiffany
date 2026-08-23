@@ -97,6 +97,69 @@ int main(void){
         ok("todo estado é puro, e a conta é exacta em inteiros", puros == tot);
     }
 
+    /* ── §Q4 A RÉGUA DO QUÂNTICO: a ultramétrica dos ENDEREÇOS ─────────── */
+    {
+        printf("\n§Q4  a régua: o endereço é a FASE, e a ultramétrica desce sobre ela.\n\n");
+        Psi P[300]; long E[300]; long n = 0, sem = 0;
+        for(long a = -2; a <= 2; a++) for(long b = -2; b <= 2; b++)
+        for(long c = -2; c <= 2; c++) for(long d = -2; d <= 2; d++){
+            Psi p = psi(a,b,c,d);
+            long e;
+            if(!psi_endereco(p, 8, &e)){ sem++; continue; }
+            if(n < 300){ P[n] = p; E[n] = e; n++; }
+        }
+        printf("      %ld estados com endereço, %ld sem --- e o que não tem é o ZERO,\n"
+               "      que não tem fase: (0,0) não é ponto de P¹\n", n, sem);
+
+        /* a leitura pela fase: bem definida e separadora? */
+        long quebras = 0, fusoes = 0, pares = 0;
+        long q_estr = 0, f_estr = 0;
+        for(long i = 0; i < n; i++) for(long j = 0; j < i; j++){
+            /* a igualdade DO CORPO é a projectiva: psi ~ lambda·psi */
+            int mesmo = psi_mesma_fase(P[i], P[j]);
+            /* e a estreita, só com as quatro unidades de Z[i] */
+            int estreito = psi_mesmo_estado(P[i], P[j]);
+            int e_ig = (E[i] == E[j]);
+            pares++;
+            if(mesmo && !e_ig) quebras++;
+            if(e_ig && !mesmo) fusoes++;
+            if(estreito && !e_ig) q_estr++;
+            if(e_ig && !estreito) f_estr++;
+        }
+        printf("      igualdade                pares  quebras  fusões\n");
+        printf("      PROJECTIVA (do corpo) %8ld %8ld %7ld\n", pares, quebras, fusoes);
+        printf("      só as unidades        %8ld %8ld %7ld\n", pares, q_estr, f_estr);
+        printf("        e é aqui que se vê: as «fusões» da segunda linha não são defeito\n"
+               "        da leitura --- são a igualdade estreita a separar o que o corpo\n"
+               "        não separa. O espaço de estados é P¹, e a fase é a sua coordenada\n");
+
+        /* e a régua da casa sobre esses endereços */
+        long bits = 1; { long mx = 0;
+            for(long i = 0; i < n; i++) if(E[i] > mx) mx = E[i];
+            long t = mx; while(t){ bits++; t >>= 1; } }
+        long vale = 0, falha = 0, est = 0, tot = 0;
+        long m = n < 40 ? n : 40;
+        for(long i = 0; i < m; i++) for(long j = 0; j < m; j++) for(long k = 0; k < m; k++){
+            long a1 = bits, b1 = bits, c1 = bits;
+            if(E[i] != E[j]) for(int t = 0; t < bits; t++)
+                if(((E[i] >> (bits-1-t)) & 1L) != ((E[j] >> (bits-1-t)) & 1L)){ a1 = t; break; }
+            if(E[j] != E[k]) for(int t = 0; t < bits; t++)
+                if(((E[j] >> (bits-1-t)) & 1L) != ((E[k] >> (bits-1-t)) & 1L)){ b1 = t; break; }
+            if(E[i] != E[k]) for(int t = 0; t < bits; t++)
+                if(((E[i] >> (bits-1-t)) & 1L) != ((E[k] >> (bits-1-t)) & 1L)){ c1 = t; break; }
+            long mn = a1 < b1 ? a1 : b1;
+            tot++;
+            if(c1 >= mn){ vale++; if(c1 > mn) est++; } else falha++;
+        }
+        printf("      a ULTRAMÉTRICA sobre esses endereços: %ld/%ld triplos (%ld estritos),\n"
+               "      falha em %ld --- é a régua da casa, e desce aqui como em qualquer corpo\n",
+               vale, tot, est, falha);
+        printf("        a representação não depende da AMPLITUDE: depende só da FASE, e o\n"
+               "        endereço dela é a classe projectiva --- é P¹ o espaço dos estados\n");
+        ok("o endereço do quântico é a fase, o zero não o tem, e a ultramétrica desce",
+           sem == 1 && quebras == 0 && fusoes == 0 && falha == 0 && est > 0 && f_estr > 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

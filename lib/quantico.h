@@ -28,8 +28,26 @@ static int psi_nulo(Psi p){ return p.a == 0 && p.b == 0 && p.c == 0 && p.d == 0;
 /* multiplicar pela unidade i: (x+yi)·i = −y + xi, nas duas componentes */
 static Psi psi_roda(Psi p){ Psi r = {-p.b, p.a, -p.d, p.c}; return r; }
 
-/* ── A IGUALDADE DO CORPO: ψ ~ φ sse φ = u·ψ para alguma das quatro unidades.
- * É esta que o critério recebe --- e não a dos parâmetros. */
+/* ── A IGUALDADE DO CORPO É A PROJECTIVA, e não só as quatro unidades:
+ *
+ *     |ψ⟩ ~ λ|ψ⟩   para todo λ ≠ 0
+ *
+ * O espaço de estados é P¹, e é essa a igualdade que a física usa. A que só
+ * admite as unidades de Z[i] é PEQUENA DEMAIS --- foi o que a medição mostrou:
+ * a leitura pela fase «fundia» centenas de pares que, à luz da igualdade certa,
+ * são o MESMO estado. O defeito não era da leitura: era da igualdade.
+ *
+ * `psi_mesma_fase` é a igualdade do corpo; `psi_mesmo_estado` fica como a
+ * relação estreita (só as unidades), que é a que o degrau Z[i] realiza. */
+static int psi_mesma_fase(Psi x, Psi y){
+    /* λ existe sse os «produtos cruzados» se anulam: x1·y2 = x2·y1 em C */
+    long re = x.a*y.c - x.b*y.d - (x.c*y.a - x.d*y.b);
+    long im = x.a*y.d + x.b*y.c - (x.c*y.b + x.d*y.a);
+    return re == 0 && im == 0;
+}
+
+/* ── E A RELAÇÃO ESTREITA: ψ ~ u·ψ para alguma das quatro unidades. É a que o
+ * degrau Z[i] realiza, e é menor que a do corpo. */
 static int psi_mesmo_estado(Psi x, Psi y){
     Psi t = x;
     for(int k = 0; k < 4; k++){
@@ -92,6 +110,50 @@ static int psi_fase_racional(Psi x, Psi y){
     /* e a segunda componente tem de dar o MESMO λ: nx1·y2 = λ·nx1·x2 */
     long q_re = p_re*x.c - p_im*x.d, q_im = p_re*x.d + p_im*x.c;
     return q_re == nx1*y.c && q_im == nx1*y.d;
+}
+
+/* ── A REPRESENTAÇÃO É A FASE, E O ENDEREÇO É A CLASSE PROJECTIVA ────────
+ * «O módulo não carrega nada, e a fase carrega tudo» (aranha §transf). Logo o
+ * endereço de um estado não se lê da amplitude: lê-se da FASE, e a fase de
+ * (z,w) a menos de factor comum é o ponto de P¹.
+ *
+ * Reduz-se pelo mdc gaussiano e normaliza-se pela unidade: o resultado é o
+ * representante da classe, e é ELE o endereço. E daí a régua da casa desce
+ * sobre ele --- a ultramétrica da def:arvore, como em qualquer outro corpo.
+ *
+ * O ZERO NÃO TEM FASE, e por isso não tem endereço: (0,0) não é ponto de P¹.
+ * Devolve 0 e não toca em `out` --- a excepção fica dita, não escondida. */
+static long q_norma(long a, long b){ return a*a + b*b; }
+
+static int psi_endereco(Psi p, long base, long *out){
+    if(psi_nulo(p)) return 0;                  /* o zero não tem fase */
+    long a = p.a, b = p.b, c = p.c, d = p.d;
+    /* o mdc gaussiano de (a+bi) e (c+di), por divisões sucessivas na norma */
+    long ga = a, gb = b, ha = c, hb = d;
+    while(q_norma(ha, hb) != 0){
+        long N = q_norma(ha, hb);
+        long pr = ga*ha + gb*hb, pi = gb*ha - ga*hb;
+        long qr = (pr >= 0 ? (2*pr + N) : (2*pr - N)) / (2*N);
+        long qi = (pi >= 0 ? (2*pi + N) : (2*pi - N)) / (2*N);
+        long rr = ga - (qr*ha - qi*hb), ri = gb - (qr*hb + qi*ha);
+        ga = ha; gb = hb; ha = rr; hb = ri;
+    }
+    /* divide-se o par pelo mdc: (a+bi)/(g) */
+    long N = q_norma(ga, gb);
+    if(N == 0) return 0;
+    long ra = (a*ga + b*gb) / N, rb = (b*ga - a*gb) / N;
+    long rc = (c*ga + d*gb) / N, rd = (d*ga - c*gb) / N;
+    /* normaliza pela unidade: roda até a primeira componente não nula ficar
+     * no quadrante canónico (parte real > 0, ou real = 0 e imaginária > 0) */
+    for(int k = 0; k < 4; k++){
+        long pa = ra, pb = rb;
+        if(pa == 0 && pb == 0){ pa = rc; pb = rd; }
+        if(pa > 0 || (pa == 0 && pb > 0)) break;
+        long na = -rb, nb = ra, nc = -rd, nd = rc;
+        ra = na; rb = nb; rc = nc; rd = nd;
+    }
+    *out = (((ra + base)*2*base + (rb + base))*2*base + (rc + base))*2*base + (rd + base);
+    return 1;
 }
 
 /* ── E O TAMANHO DA ÓRBITA: quatro nos pontos livres, menos nos fixos ────── */
