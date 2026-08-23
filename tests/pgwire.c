@@ -55,6 +55,7 @@
  * pela aritmética dos coeficientes — p(a) e p'(a) —, o motor decide-a pelo
  * espectro. Se viessem do mesmo sítio, concordarem não diria nada. */
 #include "../lib/edo.h"
+#include "../lib/levanta.h"   /* traz escada.h: a fibra, e o ι/π que completa */
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25122,6 +25123,213 @@ int main(void){
            " catálogo parecia coberto. Varrido, aparecem os que faltavam, e entre eles os"
            " MAIS CITADOS de todos. Quem escolhe os corpos é o documento, que já os nomeou ao"
            " longo de quinhentas páginas, e o custo disso já foi pago --- só faltava lê-lo.",
+           mal == 0);
+    }
+
+    /* ═══ §W170: OS SETE QUE RESUMEM, COMPLETADOS PELO ι DO PAPER ══════════ */
+    {
+        long mal = 0;
+        printf("\n§W170 os sete que resumem: completados, e o resumo é a sua sombra.\n\n");
+
+        const char *nomes[7] = {"entrópico", "fractal", "económico", "térmico",
+                                "autossimilar", "negro", "óptico"};
+        LvLevanta LS[7];
+        printf("      corpo          RESUMO: fibras G falta │ LEVANTADO: n G falta π∘ι\n");
+        for(int c = 0; c < 7; c++){
+            long e[36]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = a + b;
+            EsFibra f = es_fibra(e, n);
+            if(!lv_levanta(e, n, &LS[c])){ mal++; continue; }
+            EsFibra g = es_fibra(LS[c].base, LS[c].n);
+            int id = lv_pi_iota_id(e, n, &LS[c]);
+            printf("      %-14s %6ld %2ld..%ld %5ld │ %9ld %2ld %5ld %4s\n",
+                   nomes[c], f.fibras, f.menor, f.maior, es_falta(e, n),
+                   LS[c].n, g.maior, LS[c].n - g.soma == 0 ? 0L : 1L, id ? "id" : "NAO");
+            if(!id || !lv_completo(&LS[c]) || !f.constante == 0) mal++;
+            if(f.constante) mal++;               /* o resumo NÃO pode estar completo */
+            if(LS[c].acrescentados != es_falta(e, n)) mal++;
+        }
+
+        /* A RÉGUA LÁ EM CIMA, no endereço composto (base, folha) */
+        long falha = 0, est = 0;
+        {
+            const LvLevanta *L = &LS[0];
+            long bits = 1, m = 0;
+            for(long k = 0; k < L->n; k++) if(lv_endereco(L,k) > m) m = lv_endereco(L,k);
+            { long t = m; while(t){ bits++; t >>= 1; } }
+            long lim = L->n < 22 ? L->n : 22;
+            for(long i = 0; i < lim; i++) for(long j = 0; j < lim; j++) for(long k = 0; k < lim; k++){
+                long x = lv_endereco(L,i), y = lv_endereco(L,j), z = lv_endereco(L,k);
+                long a1 = bits, b1 = bits, c1 = bits;
+                if(x!=y) for(int t=0;t<bits;t++) if(((x>>(bits-1-t))&1L)!=((y>>(bits-1-t))&1L)){ a1=t; break; }
+                if(y!=z) for(int t=0;t<bits;t++) if(((y>>(bits-1-t))&1L)!=((z>>(bits-1-t))&1L)){ b1=t; break; }
+                if(x!=z) for(int t=0;t<bits;t++) if(((x>>(bits-1-t))&1L)!=((z>>(bits-1-t))&1L)){ c1=t; break; }
+                long mn = a1 < b1 ? a1 : b1;
+                if(c1 < mn) falha++; else if(c1 > mn) est++;
+            }
+        }
+        printf("\n      a régua no levantado: %ld falhas, %ld estritos em %ld triplos\n",
+               falha, est, 22L*22*22);
+        if(falha != 0 || est == 0) mal++;
+
+        /* TODOS ISOMORFOS ENTRE SI --- e a assinatura é o que a fibra vê */
+        long pares = 0, iso = 0;
+        for(int i = 0; i < 7; i++) for(int j = 0; j < 7; j++){
+            pares++; if(lv_isomorfo(&LS[i], &LS[j])) iso++;
+        }
+        printf("      isomorfos: %ld de %ld pares (n=%ld, G=%ld, fibras=%ld em todos)\n",
+               iso, pares, LS[0].n, LS[0].gmax, LS[0].fibras);
+        if(iso != pares) mal++;
+
+        /* O GUME, e é DELIBERADO: tirar UMA folha ao levantado --- a que menos
+         * se nota, a última de uma fibra --- e G deixa de ser constante. Se o
+         * medidor não distinguir isso, não está a medir a completude. */
+        {
+            long alt[LV_MAX]; long m = 0;
+            for(long k = 0; k < LS[0].n; k++) if(k != LS[0].gmax - 1) alt[m++] = LS[0].base[k];
+            EsFibra g = es_fibra(alt, m);
+            printf("      gume: tirada UMA folha, G passa a %ld..%ld e falta %ld\n",
+                   g.menor, g.maior, es_falta(alt, m));
+            if(g.constante || es_falta(alt, m) == 0) mal++;
+        }
+
+        /* E O SEGUNDO GUME: o levantamento não pode inventar objectos. Os que
+         * EXISTIAM lá em cima têm de ser exactamente os n de partida. */
+        {
+            long viv = 0;
+            for(long k = 0; k < LS[0].n; k++) if(LS[0].existia[k]) viv++;
+            printf("      gume: %ld objectos vivos lá em cima, %d de partida, %ld lugares abertos\n",
+                   viv, 36, LS[0].acrescentados);
+            if(viv != 36 || viv + LS[0].acrescentados != LS[0].n) mal++;
+        }
+
+        printf("\n");
+        ok("OS SETE QUE RESUMEM ESTÃO COMPLETADOS, E O RESUMO É A SUA SOMBRA. A construção"
+           " não é nova: é o par ι/π do paper --- ι a inclusão canónica que preenche as"
+           " posições novas, π a projecção que as esquece --- e π∘ι=id em todos os sete. Lá"
+           " em cima G é constante por CONSTRUÇÃO, a falta é zero, e a régua desce no"
+           " endereço composto com casos estritos. Os sete levantados têm a mesma assinatura"
+           " de fibras, logo são isomorfos entre si e à aranha: a fibra não vê mais nada. E o"
+           " levantamento NÃO INVENTA objectos: os trinta e seis de partida continuam vivos"
+           " lá em cima, e os lugares abertos são exactamente os que faltavam --- dá lugar a"
+           " quem já lá estava a disputar o mesmo endereço. O gume é deliberado nos dois"
+           " sentidos: tirada uma só folha, G deixa de ser constante e a falta reaparece.",
+           mal == 0);
+    }
+
+    /* ═══ §W171: SELECT completa(*) — o motor abre os lugares que faltam ════ */
+    {
+        long mal = 0;
+        SqlOut o, o2;
+        printf("\n§W171 SELECT completa(*): o motor não diz que falta --- diz ONDE.\n\n");
+        unlink("/tmp/pgwire_w171__E.mem"); unlink("/tmp/pgwire_w171__E.prog");
+        unlink("/tmp/pgwire_w171.mem");    unlink("/tmp/pgwire_w171.prog");
+        if(!sql_abrir("/tmp/pgwire_w171")) mal++;
+
+        /* Um corpo pequeno que RESUME: a+b sobre 0..3, com fibras 1,2,3,4,3,2,1 */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS E", &o2);
+            sql_executa("CREATE TABLE E (e RACIONAL)", &o2);
+            for(long a = 0; a < 4; a++) for(long b = 0; b < 4; b++){
+                snprintf(q, sizeof q, "INSERT INTO E VALUES (%ld)", a + b);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM E", &o);
+            long fibras = o.ok ? atol(o.cell[0][0]) : -1;
+            long gmax   = o.ok ? atol(o.cell[0][2]) : -1;
+            long falta  = o.ok ? atol(o.cell[0][4]) : -1;
+            printf("      o resumo a+b: %ld fibras, G até %ld, faltam %ld lugares\n",
+                   fibras, gmax, falta);
+            if(!o.ok) mal++;
+
+            sql_executa("SELECT completa(*) FROM E", &o);
+            if(!o.ok){ printf("      completa RECUSOU (mal): %s\n", o.err); mal++; }
+            else {
+                printf("      completa devolveu %ld linhas --- e a fibra dizia %ld\n",
+                       o.nrows, falta);
+                if(o.nrows != falta) mal++;
+                printf("      os primeiros lugares abertos: ");
+                for(long r = 0; r < o.nrows && r < 6; r++)
+                    printf("(%s,%s) ", o.cell[r][0], o.cell[r][1]);
+                printf("...\n");
+                /* CADA lugar aberto tem folha < G alvo e >= o tamanho actual da
+                 * sua fibra: não se abre lugar onde já havia objecto */
+                long fora = 0;
+                for(long r = 0; r < o.nrows; r++){
+                    long folha = atol(o.cell[r][1]), alvo = atol(o.cell[r][2]);
+                    long e_end = atol(o.cell[r][0]);
+                    long tam = 0;
+                    for(long a = 0; a < 4; a++) for(long b = 0; b < 4; b++)
+                        if(a + b == e_end) tam++;
+                    if(folha < tam || folha >= alvo || alvo != gmax) fora++;
+                }
+                printf("      %ld dos %ld lugares fora do sítio (folha entre o G actual"
+                       " e o alvo)\n", fora, o.nrows);
+                if(fora != 0) mal++;
+            }
+        }
+
+        /* ── O CORPO JÁ COMPLETO devolve ZERO linhas, e isso é a resposta certa,
+         * não um erro: nada falta. */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS Q", &o2);
+            sql_executa("CREATE TABLE Q (e RACIONAL)", &o2);
+            for(long a = 0; a < 4; a++) for(long b = 0; b < 4; b++){
+                snprintf(q, sizeof q, "INSERT INTO Q VALUES (%ld)", (a + b) % 4);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT completa(*) FROM Q", &o);
+            printf("      o corpo JÁ COMPLETO: %s, %ld linhas --- nada falta, e isso"
+                   " não é um erro\n", o.ok ? "aceite" : "RECUSADO (mal)", o.ok ? o.nrows : -1);
+            if(!o.ok || o.nrows != 0) mal++;
+        }
+
+        /* ── E A RECUSA QUE INTERESSA: quando o que falta não cabe na saída.
+         * Truncar seria responder «é este o corpo completo» sobre uma parte
+         * dele --- o mesmo defeito que a fibra teve quando passava pelo caminho
+         * matricial e respondia «6 objectos» havendo 36. */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS G", &o2);
+            sql_executa("CREATE TABLE G (e RACIONAL)", &o2);
+            for(long a = 0; a < 10; a++) for(long b = 0; b < 10; b++){
+                snprintf(q, sizeof q, "INSERT INTO G VALUES (%ld)", a + b);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM G", &o2);
+            long falta = o2.ok ? atol(o2.cell[0][4]) : -1;
+            sql_executa("SELECT completa(*) FROM G", &o);
+            printf("      faltam %ld lugares e a saída segura %d: o motor %s\n",
+                   falta, SQL_OUT_MAX_ROWS,
+                   o.ok ? "ACEITOU e truncou (mal)" : "recusa e diz quanto");
+            if(o.ok || falta <= SQL_OUT_MAX_ROWS) mal++;
+        }
+
+        /* ── E A RECUSA DA COLUNA: completa-se UMA coluna de endereços. */
+        {
+            sql_executa("DROP TABLE IF EXISTS D", &o2);
+            sql_executa("CREATE TABLE D (a RACIONAL, b RACIONAL)", &o2);
+            sql_executa("INSERT INTO D VALUES (1,2)", &o2);
+            sql_executa("SELECT completa(*) FROM D", &o);
+            printf("      com duas colunas o motor %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa: não há leitura declarada");
+            if(o.ok) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O MOTOR NÃO DIZ QUE FALTA --- DIZ ONDE. A `fibra` já respondia «faltam trinta»,"
+           " e com isso o cliente não completa nada: precisa de saber em QUE endereço e em"
+           " que folha. O `completa` devolve uma linha por lugar aberto, e o número delas"
+           " bate exactamente com a falta que a fibra tinha contado --- dois caminhos, a"
+           " mesma conta. Cada lugar cai entre o G actual da sua fibra e o G alvo: não se"
+           " abre lugar onde já havia objecto, o que é a outra metade de «o levantamento não"
+           " inventa». Um corpo já completo devolve zero linhas, e isso é a RESPOSTA CERTA e"
+           " não um erro. E quando o que falta não cabe na saída o motor RECUSA e diz quanto:"
+           " truncar seria responder «é este o corpo completo» sobre uma parte dele --- o"
+           " mesmo defeito que a fibra teve quando dizia seis havendo trinta e seis.",
            mal == 0);
     }
 

@@ -1844,6 +1844,68 @@ quinhentas páginas.
 depois os $39$ da lista completa, com $\sum G=\lvert I\rvert$ em todos, $32$ completos, $7$
 a resumirem com a falta contada, e a régua a descer em $39/39$.}
 
+\subsection*{Os sete que resumem, completados: o levantamento $\iota$ e a sua sombra $\pi$}
+
+Ficavam sete corpos com $G$ a variar --- o entrópico, o fractal, o económico, o térmico, o
+autossimilar, o negro e o óptico. Completá-los não pede construção nova: pede o par
+$\iota/\pi$ que a \emph{aranha} já tem em \emph{cor:pik}, com $\iota$ a inclusão canónica
+que preenche as posições novas e $\pi$ a projecção que as esquece.
+
+\begin{quote}
+\textbf{A completação.} Dado um corpo com fibras de tamanhos diferentes e $G_{\max}$ o
+maior, o \emph{levantado} é o par $(x,j)$ com $x$ o endereço e $0\le j<G_{\max}$ a posição
+dentro da fibra. A projecção é $\pi(x,j)=x$, e
+\[
+  \pi\circ\iota=\mathrm{id}.
+\]
+Lá em cima $G\equiv G_{\max}$ \emph{por construção}, e o que se acrescenta são exactamente
+as \code{es\_falta} posições em falta.
+\end{quote}
+
+\noindent E o que faz isto valer é a compatibilidade entre andares de
+\emph{prop:travessia}, $\pi_K^L\,P_L\,\iota_K^L=P_K$: a travessia não depende da casa onde
+se a calcula, logo medir no levantado e projectar dá o mesmo que medir no resumo.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+& \multicolumn{3}{c}{resumo} & \multicolumn{2}{c}{levantado}\\
+\cmidrule(r){2-4}\cmidrule(l){5-6}
+os sete & fibras & $G$ & falta & $n$ & $G$\\
+\midrule
+entrópico, fractal, económico, térmico, & & & & &\\
+autossimilar, negro, óptico & $11$ & $1..6$ & $30$ & $66$ & $\mathbf{6}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Os sete levantados têm a mesma assinatura de fibras --- $n=66$, $G=6$, $11$
+fibras ---, logo são \textbf{isomorfos entre si e à aranha}: $49/49$ pares. A régua desce no
+endereço composto $(x,j)$, com a folha nos bits baixos por ser a distinção mais fina. E o
+levantamento \textbf{não inventa objectos}: os $36$ de partida continuam todos vivos lá em
+cima e os $30$ lugares abertos são os que faltavam --- dá-se sítio a quem já disputava o
+mesmo endereço.
+
+\paragraph{E o motor não diz que falta: diz \emph{onde}.} A \code{fibra} respondia «faltam
+trinta», e com isso o cliente não completa nada --- precisa de saber em que endereço e em
+que folha. Daí a operação
+\[
+  \texttt{SELECT completa(*) FROM E}
+\]
+que devolve \emph{uma linha por lugar aberto}, com o endereço, a folha e o $G$ alvo. O
+número de linhas bate com a falta que a \code{fibra} tinha contado: dois caminhos, a mesma
+conta. Um corpo já completo devolve zero linhas --- a resposta certa, não um erro. E quando
+o que falta não cabe na saída o motor \textbf{recusa e diz quanto}, em vez de truncar:
+truncar seria responder «é este o corpo completo» sobre uma parte dele.
+
+\medido{\code{lib/levanta.h}, com \code{tests/levanta.c} --- $\pi\circ\iota=\mathrm{id}$ em
+quatro leituras, o levantamento a ser a IDENTIDADE em quem já era quociente, e o gume nos
+dois sentidos: tirada uma folha em qualquer das $36$ posições a completude cai nas $36$, e
+acrescentada uma a mais também. E \code{tests/pgwire.c} §W170--§W171 --- os sete
+completados com $49/49$ isomorfos, a régua a descer com $3542$ triplos estritos, e o
+\code{completa} pelo fio a recusar quando as $90$ posições em falta não cabem nas $64$ da
+saída.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

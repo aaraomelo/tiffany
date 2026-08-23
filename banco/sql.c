@@ -4616,7 +4616,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"MEDIAS") ? 25
                        : !strcasecmp(nome,"LEITURA") ? 26
                        : !strcasecmp(nome,"VALORACAO") ? 27
-                       : !strcasecmp(nome,"TRIADE") ? 28 : 0;
+                       : !strcasecmp(nome,"TRIADE") ? 28
+                       : !strcasecmp(nome,"COMPLETA") ? 29 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7737,6 +7738,114 @@ static int varre(const char *resto, int acao){
                " endereços de %d bits · %s\n", vale, tot, estrito, nl, bits,
                falha == 0 ? "a régua DESCE: a leitura serve"
                           : "a régua NÃO desce: a leitura não serve");
+        return 1;
+    }
+
+    if(acao == ACAO_MARCA && mat_op == 29){
+        /* ── COMPLETA: OS LUGARES QUE FALTAM para o corpo ficar completo.
+         * A `lib/levanta.h` levanta o corpo pelo ι da `aranha cor:pik` --- a
+         * inclusão que preenche as posições novas ---, e a projecção π esquece
+         * a folha, com π∘ι = id. Lá em cima G é constante por construção.
+         *
+         * Aqui devolve-se o que INTERESSA A QUEM VAI COMPLETAR: uma linha por
+         * lugar aberto, com o endereço e a folha. O levantado inteiro pode não
+         * caber na saída --- 66 linhas contra as 64 do tecto ---, e enviar as
+         * primeiras 64 seria responder «este é o corpo completo» sobre dois
+         * terços dele. Por isso: se o que falta não couber, RECUSA e diz
+         * quanto. Um corpo já completo devolve zero linhas, que é a resposta
+         * certa e não um erro. */
+        if(ncols != 1){
+            printf("erro: completa-se uma coluna de endereços --- a tabela tem"
+                   " %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "completa needs one column of addresses, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj == 0){
+            printf("erro: não há linhas para completar --- RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "completa on empty selection"); }
+            return 0;
+        }
+        for(long i = 0; i < nrows; i++)
+            if(bit_le(S_MATCH, i) && !bit_le(S_PRES, i*ncols)){
+                printf("erro: a coluna tem células ausentes --- um buraco não é um"
+                       " endereço, e levantá-lo seria inventá-lo. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "completa: missing cell at row %ld", i); }
+                return 0;
+            }
+        /* os endereços distintos e o tamanho de cada fibra */
+        long vis_nu[SQL_OUT_MAX_ROWS*8], vis_de[SQL_OUT_MAX_ROWS*8], tam[SQL_OUT_MAX_ROWS*8];
+        long nf = 0, maior = 0;
+        int coube = 1;
+        for(long i = 0; i < nrows && coube; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            long nu_i, de_i; celula_qz(i, 0, ncols, &nu_i, &de_i);
+            Qz vi = qz(nu_i, de_i);
+            int novo = 1;
+            for(long j = 0; j < nf; j++)
+                if(qz_igual(qz(vis_nu[j], vis_de[j]), vi)){ novo = 0; break; }
+            if(!novo) continue;
+            if(nf >= (long)(sizeof vis_nu / sizeof vis_nu[0])){ coube = 0; break; }
+            long t = 0;
+            for(long j = 0; j < nrows; j++){
+                if(!bit_le(S_MATCH, j)) continue;
+                long nu, de; celula_qz(j, 0, ncols, &nu, &de);
+                if(qz_igual(qz(nu, de), vi)) t++;
+            }
+            vis_nu[nf] = (long)vi.p; vis_de[nf] = (long)vi.q; tam[nf] = t;
+            if(t > maior) maior = t;
+            nf++;
+        }
+        if(!coube){
+            printf("erro: mais endereços distintos do que o motor segura ---"
+                   " RECUSADA, e não truncada.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "completa: too many distinct addresses"); }
+            return 0;
+        }
+        long falta = nf * maior;
+        for(long j = 0; j < nf; j++) falta -= tam[j];
+        if(falta > SQL_OUT_MAX_ROWS){
+            printf("erro: faltam %ld lugares e a saída segura %d --- RECUSADA."
+                   " Truncar seria dizer «é este o corpo completo» sobre uma"
+                   " parte dele.\n", falta, SQL_OUT_MAX_ROWS);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "completa: %ld missing places exceed output cap %d",
+                         falta, SQL_OUT_MAX_ROWS); }
+            return 0;
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->ncols = 3;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "endereco");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "folha");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "g_alvo");
+            for(int c = 0; c < 3; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[0] = SQL_TIPO_TEXT;
+            long r = 0;
+            for(long j = 0; j < nf; j++)
+                for(long p = tam[j]; p < maior; p++){
+                    if(vis_de[j] == 1)
+                        snprintf(sql_cap->cell[r][0], SQL_OUT_CELL, "%ld", vis_nu[j]);
+                    else
+                        snprintf(sql_cap->cell[r][0], SQL_OUT_CELL, "%ld/%ld",
+                                 vis_nu[j], vis_de[j]);
+                    snprintf(sql_cap->cell[r][1], SQL_OUT_CELL, "%ld", p);
+                    snprintf(sql_cap->cell[r][2], SQL_OUT_CELL, "%ld", maior);
+                    r++;
+                }
+            sql_cap->nrows = r;
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", r);
+        }
+        printf("completa: %ld fibras, G alvo %ld, faltam %ld lugares\n", nf, maior, falta);
         return 1;
     }
 

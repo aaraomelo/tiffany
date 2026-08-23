@@ -183,7 +183,7 @@ entrega 5e7be49869d7d9b2 0
 entropia_dual 0e62dee11e3fc413 0
 equivalencia_universal db7d0dc65a704ccf 0
 erg 6cf6fc038a4448a1 0
-escada ae20f8b70c7d45e4 0
+escada 52dc73c081e6fbec 0
 escala b5c334f9d5c62319 0
 escala_dourada 5c990fc76f6f0948 0
 escala_espaco 26ed3534a655fc9d 0
@@ -204,6 +204,7 @@ estrutura_corpo 2f62a80aac5c3a03 0
 evolutivo 6b6a884bcd50a271 0
 exaustao 9841923fa1ee8bb1 0
 expressao 6bbe3fc82e445f37 0
+faces 385a6026e8ce9b8d 0
 fala bbd1762777848a68 0
 familia_real 0833f102c1037af8 0
 fase_regua 75d3e783bf75dad6 0
@@ -278,6 +279,7 @@ lei8_trial 035b10ea84459c74 0
 leis_no_tradutor 05208ef44030febb 0
 lemniscata 603129804a610dd9 0
 letra_assinatura d08fa2f63c002ec2 0
+levanta 5f708f80a27461d7 0
 libc_wasm fc834bc8eeefe10a 0
 liga 9abcd6491a88d267 0
 limiares 9e0b3363157cf810 0
@@ -304,6 +306,7 @@ meia_passagem 6b342c0ab6c07925 0
 meio 9b99634b1d6bee4a 0
 meio_aberto 7bc01bd33a5a8ed9 0
 metades 568c7914349302ec 0
+metais 7099ac6aff1c0e44 0
 metalica a3d70d36d1230a33 0
 metrica 868339321dcd1fba 0
 metronomo_autossimilar daf675c96c99ac84 0
@@ -368,7 +371,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 34a57542bf7f2b69 0
+pgwire 02b084d98adfa828 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -396,7 +399,7 @@ projetiva fae3ea2db0b600b9 0
 promocao 888e9118393f1610 0
 promocao_qz a93fb3a0e996a70f 0
 promove 91c74b926f1ba345 0
-quantico 1588b33ca6daabe4 0
+quantico 5f949f79bb04c299 0
 quantificador_histerese afd27f900a63173a 0
 quantizador_universal 5432c65b6546dfe0 0
 quasi cc471cd036554050 0
@@ -458,7 +461,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 55725fed9d365dd9 0
+sql 86121e201a3b2c4b 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
@@ -500,6 +503,7 @@ tres_caminhos a4f168db5e3ef341 0
 tres_pontos e1a1eaeaa9f3db92 0
 tres_reconstroi a5c6c39b856c8fe4 0
 tres_regimes b4e2bf6fca28994d 0
+triade c463a522292edbb0 0
 trialidade 641376c3e748e701 0
 trio 00f6d277e09c7bb0 0
 trono c76e02c6751d5f71 0
