@@ -12,7 +12,8 @@
  * NADA DA ISA É REINVENTADO AQUI, e há uma asserção que O MEDE: o §E1 lê o enum do próprio
  * `sql.c` e compara nome a nome, número a número. Se alguém acrescentar um opcode lá e não
  * aqui, esta medida cai — e cai com o nome do opcode em falta. É a regra dos dois caminhos:
- * duas transcrições da mesma ISA, e a única prova de que são a mesma é confrontá-las.
+ * a ISA numa fonte só, e o montador confrontado com ela --- eram duas transcrições, e
+ * foi este medidor que o apanhou: uma tinha 24 opcodes e a outra 18.
  *
  * SEM RAM, como o resto: o programa vive num ficheiro e lê-se byte a byte com `pread`; a
  * memória vive noutro ficheiro, um átomo Word_8 (1 B) por slot. Os únicos registos são A, B, R,
@@ -62,18 +63,7 @@
 #include "../lib/word_isa.h"
 /* Word ISA = word_isa.h (Word_8²). */
 
-/* ---------------- a ISA (transcrita do sql.c, e §E1 confronta-a com ele) ---------------- */
-enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
-       OP_GOLD, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
-       OP_FOLD, OP_LOADS,
-       /* saíram quatro nomes que estavam só neste enum: sem um único `case`, sem
-        * entrada no montador e sem uso. Reservados que nunca correram — e manter
-        * redundância custa mais do que a tirar. (Os nomes não se escrevem aqui: o
-        * erg.c LÊ este enum do ficheiro, e apanhá-los-ia como opcodes.) */
-       OP_NEGRO_OURO, OP_ESQUILO, OP_TROCA, OP_MARTELO };
-#define FL_ZERO 0x01
-#define FL_EQ   0x02
-#define FL_LT   0x04
+#include "../lib/isa.h"   /* a ISA, na fonte única --- e o §E1 confronta-a com ela */
 
 /* A FORMA de cada opcode: quantos bytes de operando, e de que espécie.
  *   0 = nenhum      2 = slot (u16, little endian)      1 = salto relativo (s8) */
@@ -96,6 +86,18 @@ static const Instr ISA[] = {
     { "NEGRO_OURO", OP_NEGRO_OURO, 0 },
     { "ESQUILO",    OP_ESQUILO,    0 },
     { "TROCA",      OP_TROCA,      0 },
+    /* ── O ANDAR DE CIMA TAMBÉM SE ESCREVE À MÃO ─────────────────────────────
+     * Estes cinco não dependem do catálogo do banco: são a ULA sobre os dois
+     * registadores, exactamente como o ADD e o SUB de oito. Ficaram de fora
+     * quando entraram no `sql.c`, e o §E1 contava-os entre «os que dependem do
+     * banco» --- o que era verdade para o FOLD e o MARTELO e falso para estes.
+     * A porta expunha 17 de 24 e a asserção dizia «são poucos»: subir o número
+     * teria sido ceder ao contador em vez de fechar a falta. */
+    { "ADD16",      OP_ADD16,      0 },
+    { "SUB16",      OP_SUB16,      0 },
+    { "CMP16",      OP_CMP16,      0 },
+    { "MUL16",      OP_MUL16,      0 },
+    { "ESPALHA",    OP_ESPALHA,    0 },
 };
 static const int NISA = (int)(sizeof ISA / sizeof ISA[0]);
 
@@ -493,11 +495,15 @@ static Word ve_slot(const char *caminho, unsigned slot){
  * minha cópia: abre o `sql.c`, extrai o enum dele, e confronta. Um opcode acrescentado lá e
  * esquecido aqui derruba a asserção com o nome dele na mão. */
 static void secao_E1(void){
-    printf("\n§E1  A ISA É A DO sql.c — e a medida lê-a de lá, não da minha memória\n\n");
+    printf("\n§E1  A ISA TEM UMA FONTE SÓ — e a medida lê-a de lá, não da minha memória\n\n");
 
-    FILE *f = fopen("sql.c", "r");
-    if(!f) f = fopen("banco/sql.c", "r");
-    if(!f) f = fopen("../banco/sql.c", "r");
+    /* A FONTE, e não uma cópia dela. Isto lia o `sql.c` porque a ISA estava
+     * escrita lá E aqui, e a medida servia para as manter iguais. Agora há uma
+     * fonte só --- `lib/isa.h` ---, e o que se confronta é o MONTADOR contra
+     * ela: os nomes que a porta expõe têm de existir e ter o mesmo número. */
+    FILE *f = fopen("lib/isa.h", "r");
+    if(!f) f = fopen("../lib/isa.h", "r");
+    if(!f) f = fopen("isa.h", "r");
     if(!f) f = fopen("tools/sql.c", "r");
     if(!f){ ok("o sql.c abre para o confronto dos opcodes", 0); return; }
 
@@ -539,7 +545,7 @@ static void secao_E1(void){
     }
     fclose(f);
 
-    printf("     o enum do sql.c tem %d opcodes; este montador expõe %d ao piloto\n", n, NISA);
+    printf("     o enum do lib/isa.h tem %d opcodes; este montador expõe %d ao piloto\n", n, NISA);
 
     /* A LEITURA É UMA REALIZAÇÃO, E TEM DE SER INJETIVA.
      *
@@ -573,16 +579,16 @@ static void secao_E1(void){
         if(achado != ISA[i].op){ discordam++; culpado = ISA[i].nome; }
     }
     if(discordam) printf("     DISCORDAM em %d, o primeiro é %s\n", discordam, culpado);
-    ok("todo opcode deste montador tem o MESMO número no sql.c", discordam == 0);
+    ok("todo opcode deste montador tem o MESMO número na fonte", discordam == 0);
 
     /* e o inverso: o que o sql.c tem e eu não exponho, para o piloto saber o que falta */
     int nao_expostos = 0;
     for(int j = 0; j < n; j++) if(!acha_nome(nomes[j])) nao_expostos++;
-    printf("     %d opcodes do sql.c não estão expostos aqui (FOLD, SPECT, MARTELO e afins:\n"
+    printf("     %d opcodes da ISA não estão expostos aqui (o FOLD e o MARTELO:\n"
            "     dependem do catálogo do banco e não de um programa solto)\n", nao_expostos);
     ok("os não expostos são poucos — a porta cobre a ISA básica inteira", nao_expostos <= 6);
 
-    conclui("duas transcrições da mesma ISA, e a única prova de que são a mesma é confrontá-las.");
+    conclui("A ISA TEM UMA FONTE SÓ, E O MONTADOR É CONFRONTADO COM ELA. Estava escrita DUAS vezes --- no `sql.c` e aqui ---, e este medidor existia para as manter iguais: um vigia sobre uma cópia, que é melhor do que nada e pior do que não haver cópia. Ele apanhou-o: a do `sql.c` tinha 24 opcodes e a daqui 18, e cinco dos que faltavam --- ADD16, SUB16, CMP16, MUL16, ESPALHA --- não dependiam do banco coisa nenhuma, eram a ULA sobre os dois registadores. A porta expunha 17 de 24 e a asserção dizia «são poucos»; subir o número teria sido ceder ao contador em vez de fechar a falta. Agora o enum vive em `lib/isa.h`, os dois incluem-no, e o que se mede é o MONTADOR contra a fonte: 22 dos 24 expostos, e os dois que faltam --- FOLD e MARTELO --- dependem mesmo do catálogo do banco e não de um programa solto.");
 }
 
 /* ================================================================================ */

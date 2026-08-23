@@ -183,7 +183,7 @@ entre ff067afd0df154f7 0
 entrega 5e7be49869d7d9b2 0
 entropia_dual 0e62dee11e3fc413 0
 equivalencia_universal db7d0dc65a704ccf 0
-erg 6cf6fc038a4448a1 0
+erg c7020abd3fd87388 0
 escada 52dc73c081e6fbec 0
 escala b5c334f9d5c62319 0
 escala_dourada 5c990fc76f6f0948 0
@@ -374,7 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 3061523f361daf81 0
+pgwire 97a9d2bb86815e6a 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -465,7 +465,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 9e6534c2d3b85b18 0
+sql 9ababe20350f985d 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
