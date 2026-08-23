@@ -26961,6 +26961,151 @@ int main(void){
            " depender de quantas colunas a tabela ganhou depois.", mal == 0);
     }
 
+    /* ═══ §W187: O BLOCO `DO` CORRE O LAÇO, E O `;` DO DÓLAR NÃO SEPARA ════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W187 o bloco DO: um laço sobre TABELAS, e o cifrão a fechar o comando.\n\n");
+        unlink("/tmp/pgwire_w187.mem"); unlink("/tmp/pgwire_w187.prog");
+        { /* as tabelas desta base ficam em ficheiros próprios --- largam-se */
+          static const char *tt[4] = {"Product","Order","assistant_log","Config"};
+          for(int k = 0; k < 4; k++){
+              char m[256], g[256];
+              snprintf(m, sizeof m, "/tmp/pgwire_w187__%s.mem", tt[k]);
+              snprintf(g, sizeof g, "/tmp/pgwire_w187__%s.prog", tt[k]);
+              unlink(m); unlink(g); } }
+        if(!sql_abrir("/tmp/pgwire_w187")) mal++;
+
+        /* (1) O LOTE, E O `;` QUE NÃO SEPARA. Três comandos numa cadeia só ---
+         * e o terceiro tem um `;` DENTRO de um literal. Se o divisor não
+         * soubesse onde está, partia-o ao meio e nenhuma das metades seria um
+         * comando. É a mesma lei que faz o bloco DO chegar inteiro. */
+        sql_executa("CREATE TABLE lote (a INTEIRO, t TEXTO); "
+                    "INSERT INTO lote VALUES (1,'sem ponto'); "
+                    "INSERT INTO lote VALUES (2,'com ; dentro')", &o);
+        sql_executa("SELECT count(*) FROM lote", &o);
+        long lote_ok = (o.ok && o.nrows == 1 && atol(o.cell[0][0]) == 2);
+        printf("      três comandos numa cadeia, um com «;» dentro de um literal:"
+               " %ld linha(s) --- %s\n",
+               o.ok && o.nrows == 1 ? atol(o.cell[0][0]) : -1, lote_ok ? "as duas" : "NÃO");
+        if(!lote_ok) mal++;
+
+        /* (2) A BASE: três tabelas com inquilino, uma sem. */
+        sql_executa("CREATE TABLE \"Product\" (\"id\" INTEIRO, \"tenantId\" TEXTO, \"preco\" INTEIRO)", &o);
+        sql_executa("CREATE TABLE \"assistant_log\" (\"id\" INTEIRO, \"tenantId\" TEXTO, \"n\" INTEIRO)", &o);
+        sql_executa("CREATE TABLE \"Config\" (\"id\" INTEIRO, \"chave\" TEXTO)", &o);
+        static const char *linhas[3] = { "1,'acme',100", "2,'acme',200", "3,'globex',450" };
+        for(int k = 0; k < 3; k++){
+            char q[160];
+            snprintf(q, sizeof q, "INSERT INTO \"Product\" VALUES (%s)", linhas[k]);
+            sql_executa(q, &o);
+            snprintf(q, sizeof q, "INSERT INTO \"assistant_log\" VALUES (%s)", linhas[k]);
+            sql_executa(q, &o);
+        }
+        sql_executa("INSERT INTO \"Config\" VALUES (9,'tema')", &o);
+
+        /* (3) O BLOCO DO ESQUEMA DO CLIENTE, tal como ele o escreve --- com o
+         * DECLARE, o FOR ... IN ... LOOP, os EXECUTE format() e o `;` a fechar
+         * cada um deles DENTRO do cifrão. O critério é «as tabelas que têm a
+         * coluna tenantId», e quem responde é o catálogo. */
+        sql_executa(
+            "DO $rls$\n"
+            "DECLARE t text;\n"
+            "BEGIN\n"
+            "  FOR t IN SELECT c.table_name FROM information_schema.columns c\n"
+            "            WHERE c.column_name = 'tenantId'\n"
+            "  LOOP\n"
+            "    EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);\n"
+            "    EXECUTE format('DROP POLICY IF EXISTS tenant_isolation ON %I', t);\n"
+            "    EXECUTE format('CREATE POLICY tenant_isolation ON %I'\n"
+            "      || ' USING (\"tenantId\" = current_setting(''app.tenant_id'', true))', t);\n"
+            "  END LOOP;\n"
+            "END\n"
+            "$rls$", &o);
+        int liga_ok = o.ok;
+
+        /* (4) E O SEGUNDO BLOCO TIRA-A das tabelas do assistente --- pelo MOLDE
+         * do nome. Sem o `NO FORCE`/`DISABLE` a lei só se ligava, e uma lei que
+         * não tem volta não é lei, é sentido único. */
+        sql_executa(
+            "DO $rls$\n"
+            "DECLARE t text;\n"
+            "BEGIN\n"
+            "  FOR t IN SELECT table_name FROM information_schema.tables\n"
+            "            WHERE table_name LIKE 'assistant_%'\n"
+            "  LOOP\n"
+            "    EXECUTE format('ALTER TABLE %I DISABLE ROW LEVEL SECURITY', t);\n"
+            "  END LOOP;\n"
+            "END\n"
+            "$rls$", &o);
+        int tira_ok = o.ok;
+        printf("      os dois blocos correram: %s\n",
+               (liga_ok && tira_ok) ? "sim" : "NÃO");
+        if(!liga_ok || !tira_ok) mal++;
+
+        /* (5) A EROSÃO. É aqui que se vê se o laço FEZ alguma coisa: quem só
+         * ligasse uma bandeira sem varrer tabela nenhuma dava os mesmos «ok» e
+         * as contagens seriam outras. */
+        struct { const char *quem; const char *tab; long espera; const char *porque; } E[5] = {
+          {"",       "Product",       3, "sem inquilino, a política não erode nada"},
+          {"acme",   "Product",       2, "o inquilino vê o que é seu"},
+          {"globex", "Product",       1, "e o outro vê o dele"},
+          {"acme",   "assistant_log", 3, "o segundo bloco TIROU a política daqui"},
+          {"acme",   "Config",        1, "sem a coluna, o laço nem a visitou"},
+        };
+        long certas = 0;
+        for(int k = 0; k < 5; k++){
+            char q[200];
+            if(E[k].quem[0]){
+                snprintf(q, sizeof q, "SET app.tenant_id = '%s'", E[k].quem);
+                sql_executa(q, &o);
+            } else sql_executa("SET app.tenant_id = ''", &o);
+            snprintf(q, sizeof q, "SELECT count(*) FROM \"%s\"", E[k].tab);
+            sql_executa(q, &o);
+            long v = (o.ok && o.nrows == 1) ? atol(o.cell[0][0]) : -1;
+            printf("        %-8s %-14s %ld (espera %ld)  %s%s\n",
+                   E[k].quem[0] ? E[k].quem : "(nenhum)", E[k].tab, v, E[k].espera,
+                   E[k].porque, v == E[k].espera ? "" : "  ← NÃO BATE");
+            if(v == E[k].espera) certas++;
+        }
+        printf("      → %ld de 5\n", certas);
+        if(certas != 5) mal++;
+
+        /* (6) O CRITÉRIO QUE NÃO SE RECONHECE É RECUSADO. Sem isto o medidor
+         * não distinguiria «corre o laço» de «diz que sim a tudo». */
+        sql_executa(
+            "DO $rls$ BEGIN\n"
+            "  FOR t IN SELECT nome FROM uma_coisa_qualquer LOOP\n"
+            "    EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);\n"
+            "  END LOOP;\n"
+            "END $rls$", &o);
+        printf("      o bloco cujo critério o motor não reconhece é RECUSADO: %s\n",
+               o.ok ? "NÃO (aceitou)" : "sim");
+        if(o.ok) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("O BLOCO `DO` CORRE O LAÇO, E O CIFRÃO É QUE DIZ ONDE O COMANDO ACABA. Um"
+           " esquema de cliente traz blocos `DO $rls$ ... $rls$` que ligam a política"
+           " de inquilino a cada tabela, e eles chegavam ao motor PARTIDOS: quem divide"
+           " por «;» sem saber onde está corta o bloco em pedaços que já não são"
+           " comandos --- 34 fragmentos recusados, e nem um deles era algo que alguém"
+           " tivesse escrito. O divisor passa a saber onde está: dentro de um literal,"
+           " de um identificador citado ou de uma região em cifrão, o «;» é um"
+           " caractere e mais nada. E O LAÇO CORRE MESMO. Não se interpreta PL/pgSQL:"
+           " interpreta-se a FORMA «para cada tabela, executar», e o critério da lista"
+           " lê-se em vez de se simular um information_schema --- «as que têm a coluna"
+           " X», «as que casam com o molde M», «as que a lista NOMEIA». Quem responde"
+           " é o catálogo, que é quem sabe. Cada comando gerado passa pelo motor um a"
+           " um, e a política grava na tabela NOMEADA --- gravar na que por acaso"
+           " estivesse aberta ligaria tudo à última do laço. A prova de que o laço fez"
+           " alguma coisa são as contagens, não os «ok»: acme vê 2, globex vê 1, e o"
+           " assistant_log vê 3 porque o SEGUNDO bloco lhe TIROU a política, pelo molde"
+           " do nome. A volta é metade da lei: sem o DISABLE só se ligava. E o CONTROLO"
+           " é a tabela sem a coluna de inquilino, que o laço nem visita --- e um bloco"
+           " cujo critério o motor não reconhece é RECUSADO, porque aceitar seria dizer"
+           " que se fez o que não se fez.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

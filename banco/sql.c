@@ -127,6 +127,7 @@
 #include <strings.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include "unidade.h"
 #include "contrato.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
 #include "sql_api.h"    /* porta C para pgwire — captura de resultado */
@@ -2094,6 +2095,8 @@ static int ident(const char **p, char *out, size_t cap){
 }
 
 static int sql_executa_1(const char *sql, SqlOut *out);
+static const char *cmd_fim(const char *p);          /* onde acaba UM comando */
+static int sql_executa_lote(const char *sql, SqlOut *out);
 
 /* ---------------- os comandos ---------------- */
 
@@ -11722,8 +11725,320 @@ static int import_idioma(const char *p){
     return postas > 0;
 }
 
+/* ── AS TABELAS DA BASE, ENUMERADAS ──────────────────────────────────────────
+ *
+ * Uma tabela é o ficheiro `<base>__<nome>.mem`: a lista delas lê-se onde ela
+ * está, no directório. Manter um catálogo central em paralelo seria ter duas
+ * cópias da mesma frase, e é assim que duas cópias deixam de concordar. */
+#define TAB_ENUM_MAX 256
+static int tab_enumera(char nomes[][64], int max){
+    char dir[600], pre[600];
+    snprintf(dir, sizeof dir, "%s", g_base);
+    char *barra = strrchr(dir, '/');
+    const char *base_nome;
+    if(barra){ *barra = 0; base_nome = barra + 1; }
+    else { base_nome = dir; snprintf(dir, sizeof dir, "."); }
+    snprintf(pre, sizeof pre, "%s__", base_nome);
+    size_t np = strlen(pre);
+    DIR *d = opendir(dir);
+    if(!d) return 0;
+    int n = 0;
+    struct dirent *e;
+    while((e = readdir(d)) && n < max){
+        size_t ln = strlen(e->d_name);
+        if(ln <= np + 4) continue;
+        if(strncmp(e->d_name, pre, np)) continue;
+        if(strcmp(e->d_name + ln - 4, ".mem")) continue;
+        size_t nn = ln - np - 4;
+        if(nn >= 64) continue;
+        memcpy(nomes[n], e->d_name + np, nn); nomes[n][nn] = 0;
+        n++;
+    }
+    closedir(d);
+    /* ordem estável: a mesma base tem de dar a mesma lista, senão o laço corre
+     * numa ordem que depende do sistema de ficheiros e nada é reprodutível */
+    for(int i = 1; i < n; i++){
+        char t[64]; snprintf(t, sizeof t, "%s", nomes[i]);
+        int j = i - 1;
+        while(j >= 0 && strcmp(nomes[j], t) > 0){ snprintf(nomes[j+1], 64, "%s", nomes[j]); j--; }
+        snprintf(nomes[j+1], 64, "%s", t);
+    }
+    return n;
+}
+
+/* a tabela `t` tem a coluna `c`? --- abre-a e pergunta ao catálogo dela */
+static int tab_tem_coluna(const char *t, const char *c){
+    char guarda[64]; snprintf(guarda, sizeof guarda, "%s", g_tabela);
+    if(!usa_tabela(t, 0)) return 0;
+    Word cat = mem_le(S_CAT); long nc = cat.total, achou = 0;
+    for(long z = 0; z < nc && z < (long)S_CORPOX_N && !achou; z++){
+        char nz[64]; col_nome_le((int)z, nz, sizeof nz);
+        if(!strcasecmp(nz, c)) achou = 1;
+    }
+    usa_tabela(guarda, 0);
+    return (int)achou;
+}
+
+/* o nome casa com o molde do LIKE? --- só `%` e `_`, que é o que o Postgres
+ * define e o que este esquema usa */
+static int nome_casa(const char *n, const char *molde){
+    if(!*molde) return !*n;
+    if(*molde == '%'){
+        for(const char *r = n; ; r++){ if(nome_casa(r, molde + 1)) return 1; if(!*r) return 0; }
+    }
+    if(!*n) return 0;
+    if(*molde == '_' || tolower((unsigned char)*molde) == tolower((unsigned char)*n))
+        return nome_casa(n + 1, molde + 1);
+    return 0;
+}
+
+/* ── O BLOCO `DO $tag$ ... $tag$` ────────────────────────────────────────────
+ *
+ * Não se interpreta PL/pgSQL: interpreta-se A FORMA que este esquema usa, que
+ * é um laço sobre TABELAS ---
+ *
+ *     FOR t IN <consulta que devolve nomes de tabela> LOOP
+ *        EXECUTE format('<comando com %I>', t);
+ *        ...
+ *     END LOOP;
+ *
+ * --- e cada comando gerado é EXECUTADO pelo motor, um a um. A diferença para
+ * o que aqui estava antes é toda: antes reconhecia-se a intenção por `strstr` e
+ * ligava-se uma bandeira, sem varrer tabela nenhuma; agora corre-se o laço, e
+ * as tabelas que ele visita são as que a base tem.
+ *
+ * A consulta não se resolve por JOIN sobre um `information_schema` inventado:
+ * lê-se o CRITÉRIO que ela exprime --- «as que têm a coluna X», «as que casam
+ * com o molde M» --- e pergunta-se ao catálogo, que é quem sabe. Um critério
+ * que não se reconheça faz o bloco ser RECUSADO, porque aceitar seria dizer que
+ * se fez o que não se fez. */
+static int do_bloco(const char *q){
+    /* o corpo entre $tag$ ... $tag$ */
+    pula(&q);
+    if(*q != '$'){
+        printf("erro: bloco DO sem corpo em cifrão --- RECUSADO.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "DO: missing dollar-quoted body"); }
+        return 0;
+    }
+    const char *ab = q + 1;
+    while(*ab && (isalnum((unsigned char)*ab) || *ab == '_')) ab++;
+    if(*ab != '$'){
+        printf("erro: bloco DO com abertura em cifrão mal formada --- RECUSADO.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "DO: malformed dollar tag"); }
+        return 0;
+    }
+    size_t nt = (size_t)(ab + 1 - q);
+    const char *corpo = ab + 1, *fim = corpo;
+    while(*fim && !(*fim == '$' && !strncmp(fim, q, nt))) fim++;
+    if(!*fim){
+        printf("erro: bloco DO por fechar --- RECUSADO.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "DO: unterminated dollar body"); }
+        return 0;
+    }
+
+    /* o laço: FOR <var> IN <consulta> LOOP <corpo> END LOOP */
+    const char *fr = corpo;
+    while(fr < fim && !(toupper((unsigned char)fr[0]) == 'F'
+                     && toupper((unsigned char)fr[1]) == 'O'
+                     && toupper((unsigned char)fr[2]) == 'R'
+                     && (fr[3] == ' ' || fr[3] == '\n' || fr[3] == '\t'))) fr++;
+    if(fr >= fim){
+        printf("erro: bloco DO sem laço FOR --- este motor corre a FORMA «para cada"
+               " tabela, executar», e não a linguagem. RECUSADO.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "DO: no FOR loop recognised"); }
+        return 0;
+    }
+    const char *lp = fr;
+    while(lp < fim && strncasecmp(lp, "LOOP", 4)) lp++;
+    if(lp >= fim){
+        printf("erro: laço FOR sem LOOP --- RECUSADO.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "DO: FOR without LOOP"); }
+        return 0;
+    }
+    /* a consulta é o que está entre o IN e o LOOP --- e dela lê-se o CRITÉRIO.
+     * São três, e a terceira é a mais simples de todas: a lista ESCRITA. */
+    char crit_col[64] = "", crit_like[64] = "";
+    static char crit_lista[TAB_ENUM_MAX][64]; int crit_nl = 0;
+    { const char *c = fr, *cf = lp;
+      const char *k = c;
+      while(k < cf - 12){
+          if(!strncasecmp(k, "column_name", 11)){
+              const char *r = k + 11;
+              while(r < cf && *r != '\'') r++;
+              if(r < cf){ r++; int n2 = 0;
+                  while(r < cf && *r != '\'' && n2 < 63) crit_col[n2++] = *r++;
+                  crit_col[n2] = 0; }
+              break;
+          }
+          k++;
+      }
+      /* ── A LISTA ESCRITA: `SELECT unnest(ARRAY['A','B',...])`. Aqui não há
+       * critério a interpretar --- as tabelas estão nomeadas uma a uma, e o
+       * laço percorre-as tal como estão escritas. */
+      k = c;
+      while(k < cf - 6){
+          if(!strncasecmp(k, "ARRAY", 5)){
+              const char *r = k + 5;
+              while(r < cf && *r != '[') r++;
+              while(r < cf && *r != ']' && crit_nl < TAB_ENUM_MAX){
+                  while(r < cf && *r != '\'' && *r != ']') r++;
+                  if(r >= cf || *r == ']') break;
+                  r++;
+                  int n2 = 0;
+                  while(r < cf && *r != '\'' && n2 < 63) crit_lista[crit_nl][n2++] = *r++;
+                  crit_lista[crit_nl][n2] = 0;
+                  if(crit_lista[crit_nl][0]) crit_nl++;
+                  if(r < cf) r++;
+              }
+              break;
+          }
+          k++;
+      }
+      k = c;
+      while(k < cf - 6){
+          if(!strncasecmp(k, "LIKE", 4)){
+              const char *r = k + 4;
+              while(r < cf && *r != '\'') r++;
+              if(r < cf){ r++; int n2 = 0;
+                  while(r < cf && *r != '\'' && n2 < 63) crit_like[n2++] = *r++;
+                  crit_like[n2] = 0; }
+              break;
+          }
+          k++;
+      }
+    }
+    if(!crit_col[0] && !crit_like[0] && !crit_nl){
+        printf("erro: o laço do bloco DO percorre uma lista cujo critério este motor"
+               " não reconhece --- RECUSADO. Reconhecem-se «as tabelas que têm a"
+               " coluna X» e «as tabelas cujo nome casa com o molde M».\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "DO: unrecognised table criterion"); }
+        return 0;
+    }
+
+    /* a lista: as tabelas que cumprem o critério */
+    static char nomes[TAB_ENUM_MAX][64];
+    int nt2 = tab_enumera(nomes, TAB_ENUM_MAX), alvo = 0;
+    static char lista[TAB_ENUM_MAX][64];
+    if(crit_nl){
+        /* a lista escrita não se filtra pela base: quem a escreveu nomeou-as, e
+         * uma que não exista faz o comando gerado RECUSAR --- que é a resposta
+         * certa e fica contada, em vez de a tabela sumir do laço em silêncio */
+        for(int i = 0; i < crit_nl; i++) snprintf(lista[alvo++], 64, "%s", crit_lista[i]);
+    } else {
+        for(int i = 0; i < nt2; i++){
+            int entra = 1;
+            if(crit_col[0]  && !tab_tem_coluna(nomes[i], crit_col)) entra = 0;
+            if(entra && crit_like[0] && !nome_casa(nomes[i], crit_like)) entra = 0;
+            if(entra) snprintf(lista[alvo++], 64, "%s", nomes[i]);
+        }
+    }
+
+    /* o corpo do laço: cada EXECUTE format(...) vira um comando por tabela */
+    const char *cb = lp + 4, *ce = cb;
+    while(ce < fim && strncasecmp(ce, "END LOOP", 8)) ce++;
+    if(ce >= fim) ce = fim;
+
+    long correu = 0, falhou = 0, comandos = 0;
+    for(int i = 0; i < alvo; i++){
+        const char *e = cb;
+        while(e < ce){
+            while(e < ce && strncasecmp(e, "EXECUTE", 7)) e++;
+            if(e >= ce) break;
+            e += 7;
+            /* junta os literais concatenados por || até ao `,` ou `)` de topo */
+            char cmd[2048]; int cn = 0; int nivel = 0, viu = 0;
+            while(e < ce){
+                if(*e == '('){ nivel++; e++; continue; }
+                if(*e == ')'){ if(nivel <= 1) break; nivel--; e++; continue; }
+                if(*e == '\''){
+                    e++; viu = 1;
+                    while(e < ce){
+                        if(*e == '\''){
+                            if(e[1] == '\''){ if(cn < (int)sizeof cmd - 1) cmd[cn++] = '\''; e += 2; continue; }
+                            e++; break;
+                        }
+                        if(cn < (int)sizeof cmd - 1) cmd[cn++] = *e;
+                        e++;
+                    }
+                    continue;
+                }
+                if(*e == ',') break;      /* acabaram os literais: segue o argumento */
+                if(*e == ';') break;
+                e++;
+            }
+            cmd[cn] = 0;
+            while(e < ce && *e != ';') e++;
+            if(e < ce) e++;
+            if(!viu || !cmd[0]) continue;
+            /* o %I é o nome da tabela --- e é a única substituição que se faz */
+            char real[2048]; int rn = 0;
+            for(int k = 0; cmd[k] && rn < (int)sizeof real - 1; k++){
+                if(cmd[k] == '%' && (cmd[k+1] == 'I' || cmd[k+1] == 's')){
+                    rn += snprintf(real + rn, sizeof real - (size_t)rn, "\"%s\"", lista[i]);
+                    k++;
+                } else real[rn++] = cmd[k];
+            }
+            real[rn] = 0;
+            comandos++;
+            SqlOut o2;
+            if(sql_executa_1(real, &o2)) correu++; else falhou++;
+        }
+    }
+
+    if(crit_nl)
+        printf("bloco DO: o laço percorre %d tabela(s) --- critério «lista escrita, %d"
+               " nome(s)» --- e emitiu %ld comando(s): %ld correram, %ld falharam\n",
+               alvo, crit_nl, comandos, correu, falhou);
+    else
+        printf("bloco DO: o laço percorre %d tabela(s) de %d --- critério «%s%s%s%s» --- e"
+               " emitiu %ld comando(s): %ld correram, %ld falharam\n",
+               alvo, nt2,
+               crit_col[0] ? "tem a coluna " : "", crit_col,
+               crit_like[0] ? (crit_col[0] ? " e nome como " : "nome como ") : "", crit_like,
+               comandos, correu, falhou);
+    if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+        snprintf(sql_cap->tag, sizeof sql_cap->tag, "DO"); }
+    return 1;
+}
+
+/* branco e comentários à frente de um comando: o `--` até ao fim da linha e o
+ * `/*` até ao fecho. O esquema do cliente vem cheio deles, e um comando com um
+ * comentário à frente é o mesmo comando. */
+static void salta_prosa(const char **pp){
+    const char *p = *pp;
+    for(;;){
+        while(*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') p++;
+        if(p[0] == '-' && p[1] == '-'){ while(*p && *p != '\n') p++; continue; }
+        if(p[0] == '/' && p[1] == '*'){
+            p += 2;
+            while(*p && !(p[0] == '*' && p[1] == '/')) p++;
+            if(*p) p += 2;
+            continue;
+        }
+        break;
+    }
+    *pp = p;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
+    salta_prosa(&p);
+    /* ── O LOTE VEM PRIMEIRO. Uma cadeia com mais de um comando parte-se com
+     * consciência do dólar (ver `cmd_fim`) e corre-se um a um. É por aqui que
+     * um bloco `DO $rls$ ... END LOOP; END $rls$` chega INTEIRO: o `;` que ele
+     * tem lá dentro não separa nada. Um comando só passa sem custo. */
+    { const char *f = cmd_fim(p);
+      if(*f == ';'){
+          const char *r = f + 1;
+          while(*r == ' ' || *r == '\t' || *r == '\n' || *r == '\r' || *r == ';') r++;
+          if(*r) return sql_executa_lote(p, sql_cap);
+      } }
     /* ── CREATE EXTENSION: o cliente declara uma extensão do Postgres. Aqui
      * não há extensões --- o motor é o que é ---, e aceita-se a frase DIZENDO
      * que nada se carregou, em vez de a recusar e travar o esquema por causa de
@@ -11756,13 +12071,29 @@ static int executa(const char *sql){
           char tb[64];
           if(ident(&q, tb, sizeof tb)){
               const char *vr = q;
-              int lig = palavra(&q, "ENABLE"), forca = 0;
-              if(!lig) forca = palavra(&q, "FORCE");
-              if((lig || forca) && palavra(&q, "ROW") && palavra(&q, "LEVEL")
+              /* NO FORCE e DISABLE são a volta: a mesma frase a desligar. Sem
+               * elas o segundo bloco do esquema --- o que TIRA a política das
+               * tabelas do assistente --- não teria como se exprimir, e uma lei
+               * que só se liga não é uma lei, é um sentido único. */
+              int nao = 0;
+              { const char *vn = q; if(palavra(&q, "NO")) nao = 1; else q = vn; }
+              int lig = palavra(&q, "ENABLE"), forca = 0, desl = 0;
+              if(!lig){ forca = palavra(&q, "FORCE"); }
+              if(!lig && !forca){ desl = palavra(&q, "DISABLE"); }
+              if((lig || forca || desl) && palavra(&q, "ROW") && palavra(&q, "LEVEL")
                  && palavra(&q, "SECURITY")){
-                  Word w = {1,0}; mem_grava(S_RLS, w);
-                  printf("politica ligada em %s --- a leitura passa a ser erodida pelo"
-                         " inquilino\n", tb);
+                  /* NA TABELA NOMEADA, e não na corrente. A frase diz qual é;
+                   * gravar na que por acaso estava aberta ligava a política a
+                   * quem não foi nomeado --- e num laço sobre tabelas isso é
+                   * ligar tudo à última. */
+                  char guarda[64]; snprintf(guarda, sizeof guarda, "%s", g_tabela);
+                  if(!usa_tabela(tb, 0)) return cat_nome_recusa(tb);
+                  int ligar = (desl || nao) ? 0 : 1;
+                  Word w; w.total = (Word8)ligar; w.e = 0; mem_grava(S_RLS, w);
+                  printf("politica %s em %s --- a leitura %s erodida pelo inquilino\n",
+                         ligar ? "ligada" : "desligada", tb,
+                         ligar ? "passa a ser" : "deixa de ser");
+                  usa_tabela(guarda, 0);
                   if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
                       snprintf(sql_cap->tag, sizeof sql_cap->tag, "ALTER TABLE"); }
                   return 1;
@@ -11779,6 +12110,10 @@ static int executa(const char *sql){
             if(palavra(&q, "IF")){ if(!palavra(&q, "EXISTS")) q = ve; } }
           if(!ident(&q, pn, sizeof pn)) return 0;
           if(palavra(&q, "ON")) ident(&q, tb, sizeof tb);
+          /* NA TABELA NOMEADA --- ver a nota do ENABLE acima. O `ON <tabela>` é
+           * parte da frase, e ignorá-lo é responder sobre outra coisa. */
+          char guarda[64]; snprintf(guarda, sizeof guarda, "%s", g_tabela);
+          if(tb[0] && !usa_tabela(tb, 0)) return cat_nome_recusa(tb);
           if(dropa){
               Word z = {0,0}; mem_grava(S_RLS, z);
               printf("politica %s largada de %s\n", pn, tb);
@@ -11802,11 +12137,21 @@ static int executa(const char *sql){
                          " que isolar nao isola nada\n", pn, tb);
               }
           }
+          usa_tabela(guarda, 0);
           if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
               snprintf(sql_cap->tag, sizeof sql_cap->tag, dropa ? "DROP POLICY" : "CREATE POLICY"); }
           return 1;
       } }
 
+    /* ── AS TABELAS DA BASE, ENUMERADAS ──────────────────────────────────────
+     *
+     * Uma tabela é o ficheiro `<base>__<nome>.mem`, e por isso a lista delas
+     * lê-se onde ela está: no directório. Não há catálogo central a manter em
+     * paralelo --- o que existiria seria uma segunda cópia da mesma frase, e é
+     * assim que duas cópias deixam de concordar. A memória É o disco, e a
+     * pergunta «que tabelas há?» responde-se ao disco.
+     * Devolve quantas encontrou. */
+    /* (definida fora de `executa` --- ver TAB_ENUM adiante) */
     /* ── O BLOCO `DO $tag$ ... $tag$`: aqui não se interpreta PL/pgSQL.
      *
      * O que se faz é RECONHECER O PADRÃO que o esquema deste cliente usa --- «para
@@ -11816,23 +12161,7 @@ static int executa(const char *sql){
      * fingir que fez. */
     { const char *q = p;
       if(palavra(&q, "DO")){
-          const char *tem_rls = strstr(p, "tenant_isolation");
-          const char *tem_ten = strstr(p, "tenantId");
-          if(tem_rls || tem_ten){
-              Word w = {1,0}; mem_grava(S_RLS, w);
-              printf("bloco DO: reconhecido o padrao do isolamento por inquilino, e"
-                     " EXECUTADO como tal --- este motor nao interpreta PL/pgSQL, e"
-                     " o que corre e o padrao, nao a linguagem\n");
-              if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
-                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "DO"); }
-              return 1;
-          }
-          printf("erro: bloco DO com codigo que este motor nao reconhece --- RECUSADO."
-                 " Aceitar seria dizer que se fez o que nao se fez.\n");
-          if(sql_cap){ sql_cap->ok = 0;
-              snprintf(sql_cap->err, sizeof sql_cap->err,
-                       "DO block: unrecognised procedural code"); }
-          return 0;
+          return do_bloco(q);
       } }
 
     /* ── ALTER TYPE ... ADD VALUE: um elemento novo no domínio do enum.
@@ -12383,6 +12712,17 @@ static int executa(const char *sql){
                       } }
                     snprintf(resto, sizeof resto, "*%s", fim + 1);
                     ok = varre(resto, ACAO_MARCA);
+                    /* E O NÚMERO DIZ-SE TAMBÉM SEM CAPTURA. Ele estava a ser
+                     * escrito só no `sql_cap` --- quem chama com captura (o
+                     * pgwire, o psql, o cliente) recebia a contagem certa, e
+                     * quem corre pela linha de comandos via a LISTA de linhas e
+                     * mais nada, sem nunca ver o número que tinha pedido. A
+                     * resposta é a mesma nos dois lados; o que faltava era
+                     * dizê-la de um deles. */
+                    if(ok && !sql_cap)
+                        printf("-- count = %ld%s\n",
+                               cnt_dis[0] ? ultima_fibras : ultima_conta,
+                               cnt_dis[0] ? " (classes distintas)" : "");
                     if(sql_cap){
                         /* o número é o que o `varre` ACABOU de apurar — ∑
                          * sobre o campo, guardado em `ultima_conta`. Recontá-lo
@@ -12614,6 +12954,111 @@ static int uniao_ha(const char *sql, const char **corte, int *todos){
 }
 
 static int sql_executa_1(const char *sql, SqlOut *out);
+
+/* ── ONDE ACABA UM COMANDO ────────────────────────────────────────────────────
+ *
+ * O ponto e vírgula separa comandos --- excepto onde não separa. Dentro de um
+ * literal `'...'`, de um identificador `"..."` ou de uma região em dólar
+ * `$tag$...$tag$` ele é UM CARACTERE e mais nada. Quem parte por `;` sem saber
+ * isto corta um bloco `DO $rls$ ... END LOOP; END $rls$` em pedaços que já não
+ * são comandos, e cada pedaço chega ao motor como lixo --- que foi exactamente
+ * o que aconteceu com o esquema deste cliente: 34 fragmentos recusados, e nem
+ * um deles era um comando que alguém tivesse escrito.
+ *
+ * A régua é a de sempre: quem lê tem de saber onde está. Devolve o ponteiro
+ * para o `;` que fecha o primeiro comando, ou para o fim da cadeia. */
+static const char *cmd_fim(const char *p){
+    while(*p){
+        /* comentários: `--` até ao fim da linha, `/*` até ao fecho. O `;` que
+         * lá dentro estiver não separa nada --- é texto. */
+        if(p[0] == '-' && p[1] == '-'){ while(*p && *p != '\n') p++; continue; }
+        if(p[0] == '/' && p[1] == '*'){
+            p += 2;
+            while(*p && !(p[0] == '*' && p[1] == '/')) p++;
+            if(*p) p += 2;
+            continue;
+        }
+        if(*p == '\''){                       /* literal: '' escapa a aspa */
+            p++;
+            while(*p){ if(*p == '\''){ if(p[1] == '\''){ p += 2; continue; } p++; break; } p++; }
+            continue;
+        }
+        if(*p == '"'){                        /* identificador citado */
+            p++;
+            while(*p){ if(*p == '"'){ if(p[1] == '"'){ p += 2; continue; } p++; break; } p++; }
+            continue;
+        }
+        if(*p == '$'){                        /* $tag$ ... $tag$ --- a tag pode ser vazia */
+            const char *q = p + 1;
+            while(*q && (isalnum((unsigned char)*q) || *q == '_')) q++;
+            if(*q == '$'){
+                size_t nt = (size_t)(q + 1 - p);      /* inclui os dois cifrões */
+                const char *r = q + 1;
+                while(*r){
+                    if(*r == '$' && !strncmp(r, p, nt)){ p = r + nt; break; }
+                    r++;
+                }
+                if(!*r) return r;             /* região aberta: o comando vai até ao fim */
+                continue;
+            }
+        }
+        if(*p == ';') return p;
+        p++;
+    }
+    return p;
+}
+
+/* ── O LOTE: vários comandos numa cadeia só ──────────────────────────────────
+ *
+ * É o que o `psql` envia quando lhe dão um ficheiro, e o que a Simple Query do
+ * protocolo permite. Corre-se um a um, com o divisor acima; a resposta é a do
+ * ÚLTIMO, que é a regra do Postgres.
+ *
+ * UM QUE FALHE NÃO PÁRA O LOTE --- e a primeira escrita disto parava. A razão
+ * de mudar veio da medida: um `CREATE INDEX` recusado por não haver árvore
+ * livre diz, ele próprio, «a tabela fica sem ele» --- a tabela continua lá, e
+ * matar as outras duzentas linhas do ficheiro por causa disso é decidir por
+ * quem escreveu o esquema. Corre-se tudo e CONTA-SE: o lote devolve falha se
+ * alguma houve, e diz quantas, que é o que permite distinguir «passou» de
+ * «passou com buracos». */
+static int sql_executa_lote(const char *sql, SqlOut *out){
+    const char *p = sql;
+    int correu = 0, ultimo = 1, recusados = 0;
+    while(*p){
+        /* o branco à frente do comando inclui os comentários: um comando que
+         * fosse SÓ comentário não é comando nenhum, e não conta para o lote */
+        for(;;){
+            while(*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r' || *p == ';') p++;
+            if(p[0] == '-' && p[1] == '-'){ while(*p && *p != '\n') p++; continue; }
+            if(p[0] == '/' && p[1] == '*'){
+                p += 2;
+                while(*p && !(p[0] == '*' && p[1] == '/')) p++;
+                if(*p) p += 2;
+                continue;
+            }
+            break;
+        }
+        if(!*p) break;
+        const char *f = cmd_fim(p);
+        size_t n = (size_t)(f - p);
+        while(n && (p[n-1] == ' ' || p[n-1] == '\n' || p[n-1] == '\t' || p[n-1] == '\r')) n--;
+        if(n){
+            char *um = (char*)malloc(n + 1);
+            if(!um) return 0;
+            memcpy(um, p, n); um[n] = 0;
+            if(!sql_executa_1(um, out)) recusados++;
+            free(um);
+            correu++;
+        }
+        p = (*f == ';') ? f + 1 : f;
+    }
+    if(!correu && out){ memset(out, 0, sizeof *out); out->ok = 1; }
+    if(recusados)
+        printf("-- lote: %d comando(s), %d recusado(s) --- o lote continuou, e é por"
+               " isto que se sabe quantos\n", correu, recusados);
+    (void)ultimo;
+    return recusados ? 0 : 1;
+}
 
 int sql_executa(const char *sql, SqlOut *out){
     const char *corte; int todos = 0;
