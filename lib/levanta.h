@@ -108,11 +108,38 @@ static long lv_endereco(const LvLevanta *L, long k){
     return L->base[k] * d + L->folha[k];
 }
 
-/* ── ISOMORFO À ARANHA: dois corpos completos com o mesmo tamanho e o mesmo
- * G têm a mesma assinatura de fibras, logo há bijecção que a respeita.
- * Não é uma conta sobre os elementos: é a única coisa que a fibra vê. */
-static int lv_isomorfo(const LvLevanta *A, const LvLevanta *B){
+/* ── A MESMA FIBRA: dois levantados com o mesmo tamanho e o mesmo G têm a
+ * mesma assinatura, logo há bijecção QUE RESPEITA A FIBRA.
+ *
+ * E o nome importa. Isto NÃO é um critério de isomorfia, e não pode ser: o
+ * `cor:global` diz que duas codificações reversíveis quaisquer do mesmo objecto
+ * têm travessia --- composição de bijeções ---, e um corpo completo é isomorfo à
+ * aranha por construção. Dizer «estes dois não são isomorfos» porque a
+ * assinatura difere seria negar o corolário.
+ *
+ * O que se nega aqui é a preservação de UMA estrutura nomeada, a fibra --- na
+ * forma exacta do `thm:viz-nao-iso`, que diz «não isomorfa à grade COMO
+ * VIZINHANÇA» e no parágrafo seguinte acrescenta que a reta representa a matriz
+ * «sem perder um único dado». Não-isomorfo sem qualificativo não é um enunciado
+ * desta casa. */
+static int lv_mesma_fibra(const LvLevanta *A, const LvLevanta *B){
     return A->n == B->n && A->gmax == B->gmax && A->fibras == B->fibras;
+}
+
+/* ── E A TRAVESSIA ENTRE DOIS LEVANTAMENTOS, onde ela existe: sobre os
+ * objectos VIVOS. Dois levantados do mesmo I podem ter tamanhos diferentes ---
+ * cada leitura perdeu o que perdeu ---, mas os objectos de partida estão em
+ * ambos, e é entre esses que a bijeção do `cor:global` vive. Devolve quantos
+ * pares fecharam, e é |I| quando fecha. */
+static long lv_travessia_viva(const LvLevanta *A, const LvLevanta *B, long n){
+    long ka = 0, kb = 0, pares = 0;
+    for(long i = 0; i < n; i++){
+        while(ka < A->n && !A->existia[ka]) ka++;
+        while(kb < B->n && !B->existia[kb]) kb++;
+        if(ka >= A->n || kb >= B->n) break;
+        ka++; kb++; pares++;
+    }
+    return pares;
 }
 
 #endif /* LEVANTA_H */

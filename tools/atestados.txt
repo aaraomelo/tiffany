@@ -279,7 +279,7 @@ lei8_trial 035b10ea84459c74 0
 leis_no_tradutor 05208ef44030febb 0
 lemniscata 603129804a610dd9 0
 letra_assinatura d08fa2f63c002ec2 0
-levanta 5f708f80a27461d7 0
+levanta 174bafaec6318ec0 0
 libc_wasm fc834bc8eeefe10a 0
 liga 9abcd6491a88d267 0
 limiares 9e0b3363157cf810 0
@@ -371,7 +371,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 02b084d98adfa828 0
+pgwire 44f4f3e73d7691cc 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0

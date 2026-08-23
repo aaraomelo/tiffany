@@ -25173,12 +25173,17 @@ int main(void){
         if(falha != 0 || est == 0) mal++;
 
         /* TODOS ISOMORFOS ENTRE SI --- e a assinatura é o que a fibra vê */
+        /* ATENÇÃO AO NOME: a assinatura NÃO é o critério de isomorfia. Estes
+         * sete são isomorfos à aranha por estarem COMPLETOS --- é o cor:global,
+         * que dá travessia entre quaisquer duas codificações reversíveis, e a
+         * função está escrita na prop:travessia. O que a assinatura acrescenta
+         * é que a bijeção pode ainda RESPEITAR A FIBRA, que é mais fino. */
         long pares = 0, iso = 0;
         for(int i = 0; i < 7; i++) for(int j = 0; j < 7; j++){
-            pares++; if(lv_isomorfo(&LS[i], &LS[j])) iso++;
+            pares++; if(lv_mesma_fibra(&LS[i], &LS[j])) iso++;
         }
-        printf("      isomorfos: %ld de %ld pares (n=%ld, G=%ld, fibras=%ld em todos)\n",
-               iso, pares, LS[0].n, LS[0].gmax, LS[0].fibras);
+        printf("      a mesma assinatura de fibra: %ld de %ld pares (n=%ld, G=%ld,"
+               " fibras=%ld em todos)\n", iso, pares, LS[0].n, LS[0].gmax, LS[0].fibras);
         if(iso != pares) mal++;
 
         /* O GUME, e é DELIBERADO: tirar UMA folha ao levantado --- a que menos
@@ -25209,7 +25214,7 @@ int main(void){
            " posições novas, π a projecção que as esquece --- e π∘ι=id em todos os sete. Lá"
            " em cima G é constante por CONSTRUÇÃO, a falta é zero, e a régua desce no"
            " endereço composto com casos estritos. Os sete levantados têm a mesma assinatura"
-           " de fibras, logo são isomorfos entre si e à aranha: a fibra não vê mais nada. E o"
+           " de fibras: são isomorfos à aranha por estarem COMPLETOS --- o cor:global dá a travessia e a prop:travessia escreve-a ---, e a assinatura acrescenta que a bijeção ainda respeita a fibra. E o"
            " levantamento NÃO INVENTA objectos: os trinta e seis de partida continuam vivos"
            " lá em cima, e os lugares abertos são exactamente os que faltavam --- dá lugar a"
            " quem já lá estava a disputar o mesmo endereço. O gume é deliberado nos dois"

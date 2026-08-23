@@ -1879,8 +1879,21 @@ autossimilar, negro, óptico & $11$ & $1..6$ & $30$ & $66$ & $\mathbf{6}$\\
 \end{tabular}
 \end{center}
 
-\noindent Os sete levantados têm a mesma assinatura de fibras --- $n=66$, $G=6$, $11$
-fibras ---, logo são \textbf{isomorfos entre si e à aranha}: $49/49$ pares. A régua desce no
+\noindent Os sete levantados são \textbf{isomorfos à aranha por estarem completos} --- é o
+\emph{cor:global}, que dá travessia entre quaisquer duas codificações reversíveis, e a
+função está escrita em \emph{prop:travessia}: $T=S\circ R^{-1}$, a permutação
+$\pi=s\circ r^{-1}$ aplicada às \emph{posições} dos dígitos. E têm ainda a mesma assinatura
+de fibras --- $n=66$, $G=6$, $11$ fibras, $49/49$ pares ---, o que é mais fino: diz que a
+bijeção pode respeitar também a fibra.
+
+\medskip\noindent\textbf{E convém dizer o que a assinatura NÃO é.} Ela compara três
+números, e não é um critério de isomorfia --- negar isomorfia por ela contradiria o
+corolário acima. O único não-isomorfismo desta teoria é o \emph{thm:viz-nao-iso}, e é
+\emph{qualificado}: «não isomorfa à grade \textbf{como vizinhança}», com o próprio texto a
+acrescentar que a reta representa a matriz «sem perder um único dado». Não-isomorfo sem
+nomear a estrutura não é um enunciado desta casa.
+
+\noindent A régua desce no
 endereço composto $(x,j)$, com a folha nos bits baixos por ser a distinção mais fina. E o
 levantamento \textbf{não inventa objectos}: os $36$ de partida continuam todos vivos lá em
 cima e os $30$ lugares abertos são os que faltavam --- dá-se sítio a quem já disputava o
@@ -1901,7 +1914,10 @@ truncar seria responder «é este o corpo completo» sobre uma parte dele.
 \medido{\code{lib/levanta.h}, com \code{tests/levanta.c} --- $\pi\circ\iota=\mathrm{id}$ em
 quatro leituras, o levantamento a ser a IDENTIDADE em quem já era quociente, e o gume nos
 dois sentidos: tirada uma folha em qualquer das $36$ posições a completude cai nas $36$, e
-acrescentada uma a mais também. E \code{tests/pgwire.c} §W170--§W171 --- os sete
+acrescentada uma a mais também. E §L3 exibe a travessia $T=S\circ R^{-1}$: bijeção nos $64$
+endereços, medida conservada em $8/8$ cortes, e o preço lido da fórmula a bater com o que a
+ultramétrica MEDE nas \emph{seis} permutações, com três preços distintos --- um $q$ constante
+passaria por acaso em qualquer fórmula. E \code{tests/pgwire.c} §W170--§W171 --- os sete
 completados com $49/49$ isomorfos, a régua a descer com $3542$ triplos estritos, e o
 \code{completa} pelo fio a recusar quando as $90$ posições em falta não cabem nas $64$ da
 saída.}

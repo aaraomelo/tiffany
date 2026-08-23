@@ -4,6 +4,7 @@
  */
 #include "unidade.h"
 #include "levanta.h"
+#include "triade.h"
 #include <stdio.h>
 
 int main(void){
@@ -96,35 +97,120 @@ int main(void){
            " bom não distinguia «G constante» de «contei mal».", mal == 0);
     }
 
-    /* ── §L3 ISOMORFIA: a fibra não vê mais nada ────────────────────────── */
+    /* ── §L3 A BIJEÇÃO ENTRE AS DUAS RÉGUAS, EXIBIDA ────────────────────── */
     {
-        printf("§L3  dois corpos completos com a mesma assinatura são o mesmo corpo.\n\n");
+        printf("§L3  a travessia entre duas leituras do corpo completado: a função exacta.\n\n");
         long mal = 0;
-        LvLevanta A, B, C;
-        { long e[36]; long n = 0;
-          for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = a + b;
-          if(!lv_levanta(e, n, &A)) mal++; }
-        { long e[36]; long n = 0;   /* leitura DIFERENTE, mesma forma de fibra */
-          for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = 10*(a+b) + 3;
-          if(!lv_levanta(e, n, &B)) mal++; }
-        { long e[36]; long n = 0;   /* e uma que resume de outra maneira */
-          for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[n++] = a*a + b*b;
-          if(!lv_levanta(e, n, &C)) mal++; }
-        printf("      A: n=%ld G=%ld fibras=%ld\n", A.n, A.gmax, A.fibras);
-        printf("      B: n=%ld G=%ld fibras=%ld   --- A≅B: %s\n", B.n, B.gmax, B.fibras,
-               lv_isomorfo(&A, &B) ? "sim" : "nao");
-        printf("      C: n=%ld G=%ld fibras=%ld   --- A≅C: %s\n", C.n, C.gmax, C.fibras,
-               lv_isomorfo(&A, &C) ? "sim" : "nao");
-        if(!lv_isomorfo(&A, &B)) mal++;
-        if(lv_isomorfo(&A, &C)) mal++;      /* e este é o gume: NEM TODOS são */
+
+        /* O corpo levantado tem 66 objectos; a régua que os endereça é a de
+         * M = 4, n = 3 (64 endereços) e mais os que sobram --- e para a
+         * travessia o que conta é a GRADE, que a `prop:travessia` fixa como
+         * I_M^n. Toma-se M = 4, n = 3: N = 64, que é onde o corpo vive. */
+        long M = 4; int n = 3, N = 64;
+        int r[3] = {0, 1, 2};          /* a leitura de partida: a identidade */
+        int s[3] = {2, 0, 1};          /* a outra: roda as posições */
+
+        /* (1) T = S∘R⁻¹ É BIJEÇÃO --- e não se procura: lê-se o dígito de uma
+         * posição e escreve-se noutra (prop:travessia (1)). */
+        long visto[64]; long fecha = 0;
+        for(long a = 0; a < N; a++) visto[a] = 0;
+        for(long a = 0; a < N; a++){
+            long t = tv_travessia(a, M, n, r, s);
+            if(t >= 0 && t < N) visto[t]++;
+        }
+        for(long a = 0; a < N; a++) if(visto[a] == 1) fecha++;
+        printf("      T = S∘R⁻¹ sobre %d endereços: %ld imagens únicas --- %s\n",
+               N, fecha, fecha == N ? "é bijeção" : "NÃO fecha");
+        if(fecha != N) mal++;
+
+        /* (2) CONSERVA A MEDIDA: μ(T(E)) = μ(E), e a medida é a contagem. */
+        long medida_ok = 0, testes = 0;
+        for(long corte = 1; corte <= 8; corte++){
+            long img[64]; long m = 0;
+            for(long a = 0; a < N; a++) if(a % corte == 0){
+                long t = tv_travessia(a, M, n, r, s);
+                int novo_ = 1;
+                for(long j2 = 0; j2 < m; j2++) if(img[j2] == t){ novo_ = 0; break; }
+                if(novo_) img[m++] = t;
+            }
+            long orig = 0;
+            for(long a = 0; a < N; a++) if(a % corte == 0) orig++;
+            testes++; if(m == orig) medida_ok++;
+        }
+        printf("      μ(T(E)) = μ(E) em %ld de %ld cortes --- a medida é a contagem\n",
+               medida_ok, testes);
+        if(medida_ok != testes) mal++;
+
+        /* (3) E O PREÇO LÊ-SE DA RÉGUA, sem correr nada: D(R,S) = 2^{−q}, com q
+         * a primeira posição que π move contada do dígito mais significativo. E
+         * o gume é por LEI: não uma permutação escolhida a jeito --- TODAS as
+         * seis ---, com a fórmula a ter de bater com a ultramétrica em cada uma
+         * E a dar preços DIFERENTES entre elas. Um q constante passaria por
+         * acaso em qualquer fórmula. */
+        {
+            int P[6][3] = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
+            long batem = 0; int vistos[8] = {0}; long distintos = 0;
+            printf("      π          q_dig  q_bit  a régua mede  bate\n");
+            for(int t2 = 0; t2 < 6; t2++){
+                int *sp = P[t2];
+                int qd = tv_preco(n, r, sp), qbb = tv_preco_bits(n, r, sp, 2);
+                int pior2 = 64, moveu = 0;
+                for(long a = 0; a < N; a++){
+                    long im = tv_travessia(a, M, n, r, sp);
+                    if(im == a) continue;
+                    moveu = 1;
+                    int pp = tv_prof(a, im, 6);
+                    if(pp < pior2) pior2 = pp;
+                }
+                if(!moveu) pior2 = qbb;         /* π = id: nada se move */
+                printf("      (%d,%d,%d) %6d %6d %12d  %s\n", sp[0], sp[1], sp[2],
+                       qd, qbb, pior2, pior2 == qbb ? "sim" : "NAO");
+                if(pior2 == qbb) batem++;
+                if(qbb < 8 && !vistos[qbb]){ vistos[qbb] = 1; distintos++; }
+            }
+            printf("      → %ld de 6 batem, e saem %ld preços DISTINTOS --- se fosse"
+                   " sempre o mesmo, a fórmula passava por acaso\n", batem, distintos);
+            if(batem != 6 || distintos < 3) mal++;
+        }
+
+        /* E A IDENTIDADE NÃO TEM PREÇO: π = id devolve n, e a travessia é a
+         * identidade --- a metade que tem de existir para o preço significar algo. */
+        int s_id[3] = {0, 1, 2};
+        long fixos = 0;
+        for(long a = 0; a < N; a++) if(tv_travessia(a, M, n, r, s_id) == a) fixos++;
+        printf("      π = id: %ld dos %d endereços fixos, e o preço devolve %d (= n)\n",
+               fixos, N, tv_preco(n, r, s_id));
+        if(fixos != N || tv_preco(n, r, s_id) != n) mal++;
+
+        /* ── E A ASSINATURA DE FIBRA NÃO É UM CRITÉRIO DE ISOMORFIA. ────────
+         * Ela compara três números; a isomorfia tem a travessia acima, que é
+         * uma FUNÇÃO exibida. Guardar as duas coisas com o mesmo nome era o
+         * erro: negar isomorfia por assinatura contradiz o `cor:global`. */
+        LvLevanta A, B;
+        { long e[36]; long m = 0;
+          for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[m++] = a + b;
+          if(!lv_levanta(e, m, &A)) mal++; }
+        { long e[36]; long m = 0;
+          for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++) e[m++] = a*a + b*b;
+          if(!lv_levanta(e, m, &B)) mal++; }
+        printf("      soma: n=%ld G=%ld · quadrados: n=%ld G=%ld · mesma fibra: %s\n",
+               A.n, A.gmax, B.n, B.gmax, lv_mesma_fibra(&A, &B) ? "sim" : "nao");
+        long viva = lv_travessia_viva(&A, &B, 36);
+        printf("      e os objectos VIVOS emparelham: %ld de 36 --- a travessia existe\n",
+               viva);
+        if(viva != 36) mal++;
+
         printf("\n");
-        ok("A ASSINATURA DECIDE, E NÃO DECIDE TUDO. Duas leituras diferentes --- a soma e a"
-           " soma esticada por dez e deslocada por três --- dão levantados com a mesma"
-           " assinatura, e são o mesmo corpo: a fibra não vê o nome dos endereços, só quantos"
-           " são e de que tamanho. MAS A SOMA DE QUADRADOS NÃO É ISOMORFA A NENHUMA DELAS, e"
-           " essa é a metade que interessa: se o critério aceitasse tudo não estaria a"
-           " decidir nada. É o mesmo gume de sempre --- uma condição que nunca falha não é"
-           " uma condição.", mal == 0);
+        ok("A BIJEÇÃO ENTRE AS DUAS RÉGUAS NÃO SE ARGUMENTA: ESCREVE-SE. É T = S∘R⁻¹ da"
+           " prop:travessia, a permutação π = s∘r⁻¹ aplicada às POSIÇÕES dos dígitos --- não"
+           " há nada a procurar, lê-se o dígito de uma posição e escreve-se noutra. Fecha nos"
+           " 64 endereços, conserva a medida em todos os cortes, e o preço lê-se da régua sem"
+           " correr nada: a fórmula dá q e a ultramétrica MEDE o mesmo q. A identidade não"
+           " tem preço, que é a metade sem a qual o preço não significaria nada. E o que a"
+           " assinatura de fibra compara são três números: NÃO é um critério de isomorfia, e"
+           " tratá-la como tal contradizia o cor:global, que dá travessia entre quaisquer"
+           " duas codificações reversíveis. Os objectos vivos emparelham nos dois"
+           " levantamentos: a travessia existe onde o corolário a promete.", mal == 0);
     }
 
     return falhas ? 1 : 0;
