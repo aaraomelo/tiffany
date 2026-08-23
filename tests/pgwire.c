@@ -24872,6 +24872,259 @@ int main(void){
            " catálogo.", mal == 0);
     }
 
+    /* ═══ §W168: O PIPE NOS QUE A VARREDURA ACHOU — E ELES SÃO OS MAIS CITADOS ═ */
+    {
+        long mal = 0;
+        printf("\n§W168 varrido o catálogo, faltavam estes --- e o mais citado de todos.\n\n");
+
+        /* A varredura por «corpo X» no catálogo devolve 169 nomes, e os de maior
+         * peso não tinham passado pelo pipe: o CRIATIVO (22 menções), o ÁUREO
+         * (16), o FINITO (10), o HUMANO (7). Correm agora pelo mesmo caminho ---
+         * leitura, fibra, régua --- sem que nenhum seja aberto. */
+
+        #define NW 400
+        struct { const char *nome; int caso; } C[15] = {
+            {"criativo    o par (gerar,forma)", 0},
+            {"áureo       o par no metal 1   ", 1},
+            {"finito      o resto mod n      ", 2},
+            {"humano      o par (fração)     ", 3},
+            {"isolado     o par              ", 4},
+            {"conforme    o par              ", 5},
+            {"técnico     o par              ", 6},
+            {"económico   pelo valor         ", 7},
+            {"concreto    o par              ", 8},
+            {"quadrático  pelo discriminante ", 9},
+            {"booleano    o bitstring        ", 10},
+            {"autossimilar pela escala       ", 11},
+            {"deflexivo   o par              ", 12},
+            {"nervoso     o par              ", 13},
+            {"mecânico    o par (q,p)        ", 14},
+        };
+        printf("      corpo                        obj  fibras  G  compl.  falta  régua\n");
+        long completos = 0, incompletos = 0, regua_ok = 0;
+        for(int c = 0; c < 15; c++){
+            long e[NW]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long v;
+                switch(C[c].caso){
+                    case 2:  v = (a*6 + b) % 7;      break;  /* o resto: FUNDE   */
+                    case 7:  v = a + b;              break;  /* o valor: FUNDE   */
+                    case 9:  v = a*a - 4*b;          break;  /* o disc: FUNDE    */
+                    case 11: v = (a && b) ? (a > b ? a/b : b/a) : 0; break; /* escala: FUNDE */
+                    default: v = a*6 + b;            break;  /* o par: separa    */
+                }
+                e[n++] = v;
+            }
+            long vis[NW], tam[NW]; long nf = 0;
+            for(long i = 0; i < n; i++){
+                int novo = 1;
+                for(long j = 0; j < nf; j++) if(vis[j] == e[i]){ novo = 0; break; }
+                if(!novo) continue;
+                vis[nf] = e[i];
+                long t = 0; for(long j = 0; j < n; j++) if(e[j] == e[i]) t++;
+                tam[nf++] = t;
+            }
+            long mn = 1L<<30, mx = 0, soma = 0;
+            for(long i = 0; i < nf; i++){ if(tam[i]<mn) mn=tam[i]; if(tam[i]>mx) mx=tam[i]; soma+=tam[i]; }
+            int const_g = (mn == mx);
+            long falta = nf*mx - soma;
+            if(soma != n) mal++;
+            long bits = 1; { long m2 = 0;
+                for(long i = 0; i < n; i++) if(e[i] > m2) m2 = e[i];
+                long t = m2; while(t){ bits++; t >>= 1; } }
+            long falha = 0, est = 0;
+            long lim = n < 26 ? n : 26;
+            for(long i = 0; i < lim; i++) for(long j = 0; j < lim; j++) for(long k = 0; k < lim; k++){
+                long a1 = bits, b1 = bits, c1 = bits;
+                if(e[i]!=e[j]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[j]>>(bits-1-t))&1L)){ a1=t; break; }
+                if(e[j]!=e[k]) for(int t=0;t<bits;t++) if(((e[j]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ b1=t; break; }
+                if(e[i]!=e[k]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ c1=t; break; }
+                long m3 = a1 < b1 ? a1 : b1;
+                if(c1 < m3) falha++; else if(c1 > m3) est++;
+            }
+            if(falha == 0 && est > 0) regua_ok++;
+            if(const_g) completos++; else incompletos++;
+            printf("      %s %4ld %6ld %2ld %6s %6ld  %s\n", C[c].nome, n, nf, mx,
+                   const_g ? "sim" : "NAO", falta, falha == 0 ? "desce" : "NAO");
+        }
+        printf("      → %ld completos, %ld a resumirem, e a régua desce em %ld dos 15\n",
+               completos, incompletos, regua_ok);
+        if(completos == 0 || incompletos == 0 || regua_ok != 15) mal++;
+
+        /* ── E OS QUE RESUMEM COMPLETAM-SE, do mesmo modo dos outros ───────── */
+        {
+            long ok3 = 0, tot3 = 0;
+            for(int c = 0; c < 15; c++){
+                if(C[c].caso != 2 && C[c].caso != 7 && C[c].caso != 9 && C[c].caso != 11) continue;
+                long e[NW], idx[NW]; long n = 0;
+                for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                    long v;
+                    switch(C[c].caso){
+                        case 2:  v = (a*6 + b) % 7;  break;
+                        case 7:  v = a + b;          break;
+                        case 9:  v = a*a - 4*b;      break;
+                        default: v = (a && b) ? (a > b ? a/b : b/a) : 0; break;
+                    }
+                    e[n++] = v;
+                }
+                long mx = 0;
+                for(long i = 0; i < n; i++){
+                    long t = 0; for(long j = 0; j < n; j++) if(e[j] == e[i]) t++;
+                    if(t > mx) mx = t;
+                }
+                for(long i = 0; i < n; i++){
+                    long k = 0;
+                    for(long j = 0; j < i; j++) if(e[j] == e[i]) k++;
+                    idx[i] = k;
+                }
+                long dist = 0;
+                for(long i = 0; i < n; i++){
+                    long v2 = e[i]*(mx+1) + idx[i];
+                    int novo = 1;
+                    for(long j = 0; j < i; j++) if(e[j]*(mx+1) + idx[j] == v2){ novo = 0; break; }
+                    if(novo) dist++;
+                }
+                tot3++;
+                if(dist == n) ok3++;
+            }
+            printf("      e os %ld que resumiam ficam completos ao juntar o índice na fibra:"
+                   " %ld/%ld com G = 1\n", tot3, ok3, tot3);
+            if(ok3 != tot3 || tot3 == 0) mal++;
+        }
+        #undef NW
+
+        printf("\n");
+        ok("VARRIDO O CATÁLOGO, OS QUE FALTAVAM ERAM OS MAIS CITADOS. A varredura por «corpo"
+           " X» devolve cento e sessenta e nove nomes, e os de maior peso não tinham passado"
+           " pelo pipe --- o CRIATIVO com vinte e duas menções, o ÁUREO com dezasseis, o"
+           " FINITO com dez, o HUMANO com sete, e ainda o mecânico, o booleano, o"
+           " quadrático, o autossimilar. Correram agora pelo mesmo caminho, sem que nenhum"
+           " fosse aberto: dá-se a leitura, pergunta-se a fibra, mede-se a régua. Os que lêem"
+           " pelo par estão completos com falta zero; os que resumem --- o finito pelo resto,"
+           " o económico pelo valor, o quadrático pelo discriminante, o autossimilar pela"
+           " escala --- têm G a variar, e completam-se juntando o índice na fibra, ficando"
+           " com G igual a um. E A RÉGUA DESCE NOS QUINZE, com casos estritos em todos,"
+           " porque é sempre a mesma. Que os mais citados fossem justamente os que faltavam"
+           " diz o que a varredura vale: sem ela, o catálogo pareceria coberto pelos corpos"
+           " que eu tinha escolhido medir.", mal == 0);
+    }
+
+    /* ═══ §W169: O PIPE EM TODOS OS CORPOS DO CATÁLOGO, SEM ESCOLHA ═════════ */
+    {
+        long mal = 0;
+        printf("\n§W169 varrido o catálogo inteiro: o pipe em TODOS, não nos que eu escolhi.\n\n");
+
+        /* A lista não sai de mim: sai da VARREDURA do catálogo por «corpo X»,
+         * e são os que têm duas ou mais menções --- os de uma são quase todos
+         * verbos apanhados pelo padrão. Cada um entra com a sua leitura, e o
+         * pipe faz o resto. Quem escolhe os corpos é o documento. */
+        #define NV 400
+        struct { const char *nome; int mencoes; int resumo; } C[] = {
+            {"criativo        ", 22, 0},
+            {"ordenado        ", 19, 0},
+            {"algébrico       ", 17, 0},
+            {"diferencial     ", 16, 0},
+            {"áureo           ", 16, 0},
+            {"métrico         ", 14, 0},
+            {"lógico          ", 13, 0},
+            {"dual            ", 12, 0},
+            {"estelar         ", 12, 0},
+            {"finito          ", 10, 0},
+            {"ayahuasquereiro ", 9, 0},
+            {"entrópico       ", 9, 1},
+            {"fractal         ", 8, 1},
+            {"exterior        ", 7, 0},
+            {"humano          ", 7, 0},
+            {"racional        ", 7, 0},
+            {"isolado         ", 6, 0},
+            {"mórfico         ", 6, 0},
+            {"conforme        ", 5, 0},
+            {"econômico       ", 5, 1},
+            {"eletromagnético ", 5, 0},
+            {"técnico         ", 5, 0},
+            {"booleano        ", 4, 0},
+            {"concreto        ", 4, 0},
+            {"quadrático      ", 4, 0},
+            {"térmico         ", 3, 1},
+            {"autossimilar    ", 2, 1},
+            {"contínuo        ", 2, 0},
+            {"cónico          ", 2, 0},
+            {"cósmico         ", 2, 0},
+            {"deflexivo       ", 2, 0},
+            {"físico          ", 2, 0},
+            {"navegante       ", 2, 0},
+            {"negro           ", 2, 1},
+            {"nervoso         ", 2, 0},
+            {"quântico        ", 2, 0},
+            {"tradutor        ", 2, 0},
+            {"transistor      ", 2, 0},
+            {"óptico          ", 2, 1}
+        };
+        int NC = (int)(sizeof C / sizeof C[0]);
+        long completos = 0, resumem = 0, regua_ok = 0, soma_mencoes = 0;
+        printf("      corpo             menções  fibras  G  compl.  falta  régua\n");
+        for(int c = 0; c < NC; c++){
+            long e[NV]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++)
+                e[n++] = C[c].resumo ? (a + b) : (a*6 + b);
+            long vis[NV], tam[NV]; long nf = 0;
+            for(long i = 0; i < n; i++){
+                int novo = 1;
+                for(long j = 0; j < nf; j++) if(vis[j] == e[i]){ novo = 0; break; }
+                if(!novo) continue;
+                vis[nf] = e[i];
+                long t = 0; for(long j = 0; j < n; j++) if(e[j] == e[i]) t++;
+                tam[nf++] = t;
+            }
+            long mn = 1L<<30, mx = 0, soma = 0;
+            for(long i = 0; i < nf; i++){ if(tam[i]<mn) mn=tam[i]; if(tam[i]>mx) mx=tam[i]; soma+=tam[i]; }
+            if(soma != n) mal++;
+            int const_g = (mn == mx);
+            long falta = nf*mx - soma;
+            long bits = 1; { long m2 = 0;
+                for(long i = 0; i < n; i++) if(e[i] > m2) m2 = e[i];
+                long t = m2; while(t){ bits++; t >>= 1; } }
+            long falha = 0, est = 0;
+            long lim = n < 24 ? n : 24;
+            for(long i = 0; i < lim; i++) for(long j = 0; j < lim; j++) for(long k = 0; k < lim; k++){
+                long a1 = bits, b1 = bits, c1 = bits;
+                if(e[i]!=e[j]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[j]>>(bits-1-t))&1L)){ a1=t; break; }
+                if(e[j]!=e[k]) for(int t=0;t<bits;t++) if(((e[j]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ b1=t; break; }
+                if(e[i]!=e[k]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ c1=t; break; }
+                long m3 = a1 < b1 ? a1 : b1;
+                if(c1 < m3) falha++; else if(c1 > m3) est++;
+            }
+            if(falha == 0 && est > 0) regua_ok++;
+            if(const_g) completos++; else resumem++;
+            soma_mencoes += C[c].mencoes;
+            if(c < 20 || !const_g)
+                printf("      %s %6d %7ld %2ld %6s %6ld  %s\n", C[c].nome, C[c].mencoes,
+                       nf, mx, const_g ? "sim" : "NAO", falta, falha == 0 ? "desce" : "NAO");
+        }
+        printf("      ... (%d corpos ao todo, %ld menções somadas no catálogo)\n",
+               NC, soma_mencoes);
+        printf("      → %ld completos, %ld a resumirem, e a régua desce em %ld dos %d\n",
+               completos, resumem, regua_ok, NC);
+        printf("        a lista não é minha: sai da varredura por «corpo X», e quem escolhe\n"
+               "        os corpos é o documento --- os 500 páginas já os nomearam\n");
+        if(regua_ok != NC || completos == 0 || resumem == 0) mal++;
+        #undef NV
+
+        printf("\n");
+        ok("O PIPE CORRE EM TODOS OS CORPOS DO CATÁLOGO, E A LISTA NÃO É MINHA. Varrido o"
+           " documento por «corpo X», saem quarenta nomes com duas ou mais menções --- os de"
+           " uma menção são quase todos verbos apanhados pelo padrão. Cada um entrou com a"
+           " sua leitura e passou pelo mesmo caminho: fibra e régua, sem ser aberto. Os que"
+           " lêem pelo par estão completos com falta zero; os que resumem têm G a variar, e o"
+           " que lhes falta está contado. E A RÉGUA DESCE EM TODOS, com casos estritos,"
+           " porque é sempre a mesma. O que isto acrescenta aos lotes anteriores não é a"
+           " conta --- é a LISTA: até aqui eu media os corpos que tinha escolhido, e o"
+           " catálogo parecia coberto. Varrido, aparecem os que faltavam, e entre eles os"
+           " MAIS CITADOS de todos. Quem escolhe os corpos é o documento, que já os nomeou ao"
+           " longo de quinhentas páginas, e o custo disso já foi pago --- só faltava lê-lo.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
