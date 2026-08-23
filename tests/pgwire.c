@@ -26204,6 +26204,171 @@ int main(void){
            " confere-se linha a linha, em grau nenhum se supõe.", mal == 0);
     }
 
+    /* ═══ §W179: SELECT funde(*) — a fusão passa a correr NO MOTOR ═════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W179 SELECT funde(*): o C_ent deixa de ser conta em C e passa ao motor.\n\n");
+        unlink("/tmp/pgwire_w179__F.mem"); unlink("/tmp/pgwire_w179__F.prog");
+        unlink("/tmp/pgwire_w179.mem");    unlink("/tmp/pgwire_w179.prog");
+        if(!sql_abrir("/tmp/pgwire_w179")) mal++;
+
+        /* os dois corpos do banco, mecânico e eletromagnético, deslocados para
+         * naturais --- a fusão entrelaça DÍGITOS e não conhece sinal */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS F", &o2);
+            sql_executa("CREATE TABLE F (mec RACIONAL, ele RACIONAL)", &o2);
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                snprintf(q, sizeof q, "INSERT INTO F VALUES (%ld,%ld)",
+                         a*(b+1) - b*(a+1) + 25, a*a - b*b + 25);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT funde(*) FROM F", &o);
+            if(!o.ok){ printf("      funde RECUSOU (mal): %s\n", o.err); mal++; }
+            else {
+                long exactas = 0, distintos = 0, vis[64]; long nv = 0;
+                for(long r = 0; r < o.nrows; r++){
+                    if(!strcmp(o.cell[r][4], "exacta")) exactas++;
+                    long e = atol(o.cell[r][2]); int novo = 1;
+                    for(long j = 0; j < nv; j++) if(vis[j] == e){ novo = 0; break; }
+                    if(novo && nv < 64){ vis[nv++] = e; distintos++; }
+                }
+                printf("      %ld objectos fundidos · %ld com a volta exacta · %ld"
+                       " endereços distintos\n", o.nrows, exactas, distintos);
+                if(exactas != o.nrows) mal++;
+
+                /* A FUSÃO SEPARA MAIS que qualquer dos dois --- é o que faz dela
+                 * fusão e não soma. Conta-se nos três. */
+                long dm = 0, de = 0, vm[64], ve[64]; long nm = 0, nee = 0;
+                for(long r = 0; r < o.nrows; r++){
+                    long a = atol(o.cell[r][0]), b = atol(o.cell[r][1]);
+                    int nv1 = 1, nv2 = 1;
+                    for(long j = 0; j < nm; j++) if(vm[j] == a){ nv1 = 0; break; }
+                    for(long j = 0; j < nee; j++) if(ve[j] == b){ nv2 = 0; break; }
+                    if(nv1 && nm < 64){ vm[nm++] = a; dm++; }
+                    if(nv2 && nee < 64){ ve[nee++] = b; de++; }
+                }
+                printf("      o mecânico distingue %ld · o eletromagnético %ld · a FUSÃO"
+                       " %ld\n", dm, de, distintos);
+                if(distintos < dm || distintos < de) mal++;
+                if(distintos == dm && distintos == de) mal++;   /* tem de separar MAIS */
+            }
+        }
+
+        /* ── AS RECUSAS, e cada uma protege uma hipótese ────────────────────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS U", &o2);
+            sql_executa("CREATE TABLE U (a RACIONAL)", &o2);
+            sql_executa("INSERT INTO U VALUES (1)", &o2);
+            sql_executa("SELECT funde(*) FROM U", &o);
+            printf("      com UMA coluna: %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa --- a fusão junta DOIS corpos");
+            if(o.ok) mal++;
+
+            sql_executa("DROP TABLE IF EXISTS N", &o2);
+            sql_executa("CREATE TABLE N (a RACIONAL, b RACIONAL)", &o2);
+            sql_executa("INSERT INTO N VALUES (5,-3)", &o2);
+            sql_executa("SELECT funde(*) FROM N", &o);
+            printf("      com endereço NEGATIVO: %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa --- entrelaça-se dígitos, não sinais");
+            if(o.ok) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("A FUSÃO DEIXA DE SER CONTA EM C E PASSA AO MOTOR. Até aqui o C_ent corria numa"
+           " ferramenta e só o RESULTADO entrava no banco --- o que é usar o banco como"
+           " depósito, não como motor. Agora `SELECT funde(*)` entrelaça as duas colunas de"
+           " endereços e devolve o corpo fundido, com a VOLTA verificada linha a linha ANTES"
+           " de responder: um endereço que não se sabe separar não é uma fusão, e é recusado"
+           " em vez de devolvido. E o número que interessa é que a fusão SEPARA MAIS do que"
+           " qualquer dos dois corpos --- dois endereços lado a lado distinguem o que cada um"
+           " sozinho confundia ---, com o gume a exigir que separe estritamente mais: se"
+           " igualasse o melhor dos dois, não estaria a juntar nada.",
+           mal == 0);
+    }
+
+    /* ═══ §W180: O CLIENTE ENCADEIA FUSÕES SEM CHAMAR NINGUÉM ══════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W180 a cadeia de fusões: o cliente monta o circuito que quiser, por SQL.\n\n");
+        unlink("/tmp/pgwire_w180__F.mem"); unlink("/tmp/pgwire_w180__F.prog");
+        unlink("/tmp/pgwire_w180.mem");    unlink("/tmp/pgwire_w180.prog");
+        if(!sql_abrir("/tmp/pgwire_w180")) mal++;
+
+        long corrente[64]; long nc = 0;
+        long ganho[5]; int ng = 0;
+        const char *nomes[4] = {"mecânico", "eletromagnético", "térmico", "óptico"};
+        for(int passo = 0; passo < 3; passo++){
+            char q[240];
+            sql_executa("DROP TABLE IF EXISTS F", &o2);
+            sql_executa("CREATE TABLE F (a RACIONAL, b RACIONAL)", &o2);
+            long i = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long x, y;
+                if(passo == 0){ x = a*(b+1) - b*(a+1) + 25; y = a*a - b*b + 25; }
+                else { x = (i < nc) ? corrente[i] : 0;
+                       y = (passo == 1) ? ((a+1)*(b+1) % 12) : ((a*3 + b) % 9); }
+                snprintf(q, sizeof q, "INSERT INTO F VALUES (%ld,%ld)", x, y);
+                sql_executa(q, &o2); i++;
+            }
+            sql_executa("SELECT funde(*) FROM F", &o);
+            if(!o.ok){ printf("      passo %d RECUSADO: %s\n", passo, o.err); mal++; break; }
+            /* quantos distingue, e o novo corrente pelo COMPACTO */
+            long v[64], nv = 0, w[64], nw = 0;
+            nc = 0;
+            for(long r = 0; r < o.nrows; r++){
+                long f = atol(o.cell[r][2]), c2 = atol(o.cell[r][3]);
+                int nf = 1, na = 1;
+                for(long j = 0; j < nv; j++) if(v[j] == f){ nf = 0; break; }
+                for(long j = 0; j < nw; j++) if(w[j] == atol(o.cell[r][0])){ na = 0; break; }
+                if(nf && nv < 64) v[nv++] = f;
+                if(na && nw < 64) w[nw++] = atol(o.cell[r][0]);
+                if(nc < 64) corrente[nc++] = c2;
+                if(strcmp(o.cell[r][4], "exacta")) mal++;
+            }
+            if(passo == 0) ganho[ng++] = nw;
+            ganho[ng++] = nv;
+            printf("      %-16s ⋈  %-16s  →  distingue %ld\n",
+                   passo ? "o acumulado" : nomes[0], nomes[passo+1], nv);
+            /* o COMPACTO tem de ser bijecção sobre os fundidos distintos */
+            long nd = 0, u[64];
+            for(long r = 0; r < o.nrows; r++){
+                long c2 = atol(o.cell[r][3]); int nn = 1;
+                for(long j = 0; j < nd; j++) if(u[j] == c2){ nn = 0; break; }
+                if(nn && nd < 64) u[nd++] = c2;
+            }
+            if(nd != nv){ printf("      ^^^ o compacto tem %ld classes e o fundido %ld"
+                                 " --- não é bijecção\n", nd, nv); mal++; }
+        }
+        printf("      → a cadeia sobe: ");
+        for(int i = 0; i < ng; i++) printf("%ld%s", ganho[i], i+1 < ng ? " → " : "\n");
+        /* tem de subir ESTRITAMENTE em cada passo: se não subisse, a fusão não
+         * estaria a juntar nada, e o cliente não ganhava com o corpo seguinte */
+        long sobe = 1;
+        for(int i = 1; i < ng; i++) if(ganho[i] <= ganho[i-1]) sobe = 0;
+        printf("      sobe estritamente em todos os passos: %s\n", sobe ? "sim" : "NAO");
+        if(!sobe) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("O CLIENTE MONTA O CIRCUITO QUE QUISER, E NÃO PRECISA DE CHAMAR NINGUÉM. O"
+           " resultado de `funde(*)` é uma coluna de endereços como qualquer outra e entra"
+           " na fusão seguinte SEM ADAPTADOR --- a cadeia escreve-se em SQL e nada mais. Com"
+           " quatro corpos e três fusões, o que se distingue sobe estritamente a cada passo:"
+           " se não subisse, o corpo acrescentado não estaria a trazer nada. E há uma coisa"
+           " que a cadeia obriga a dizer: A FUSÃO DOBRA A LARGURA a cada passo, e ao terceiro"
+           " o endereço cru já não cabe no envelope da célula --- foi assim que a primeira"
+           " cadeia parou. Por isso o `funde` devolve DUAS colunas: o `fundido`, que guarda a"
+           " RÉGUA (o prefixo entrelaçado, onde a ultramétrica vive), e o `compacto`, que é"
+           " bijecção sobre os fundidos distintos e serve para ENCADEAR. Quem encadeia pelo"
+           " cru pára; quem encadeia pelo compacto continua e perde a régua dos andares"
+           " anteriores. É o preço, e diz-se --- com um milhão de corpos é o mesmo SQL.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

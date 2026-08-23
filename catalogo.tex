@@ -2197,17 +2197,25 @@ os dígitos de um nas posições pares e os do outro nas ímpares.
 \begin{center}\small
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-& objectos & fibras & $G$ & falta\\
+\emph{a leitura crua}, antes de levantar & objectos & fibras & $G$ & falta\\
 \midrule
 mecânico (torque $r\times F$) & $36$ & $11$ & $6$ & $30$\\
 eletromagnético ($E^2-B^2$) & $36$ & $27$ & $6$ & $126$\\
+a fusão $C_{\mathrm{ent}}$ & $36$ & $\mathbf{31}$ & $6$ & $150$\\
 \midrule
-\textbf{a fusão} $C_{\mathrm{ent}}$ & $36$ & $\mathbf{31}$ & $6$ & $150$\\
+\emph{levantados}, como estão no banco & & & & \\
 \midrule
-\textbf{o corpo electromecânico}, completo no banco & $\mathbf{186}$ & $186$ & $\mathbf 1$ & $\mathbf 0$\\
+mecânico & $66$ & $66$ & $1$ & $\mathbf 0$\\
+eletromagnético & $162$ & $162$ & $1$ & $\mathbf 0$\\
+\textbf{o electromecânico} & $\mathbf{186}$ & $186$ & $\mathbf 1$ & $\mathbf 0$\\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent \emph{As duas metades da tabela são estados diferentes e convém não as ler
+juntas}: em cima está a leitura \textbf{crua}, que funde e por isso tem falta; em baixo o
+corpo \textbf{levantado}, que é o que está no banco e tem falta zero. Uma versão anterior
+desta página mostrava só a de cima e deixava a pergunta no ar.
 
 \noindent \textbf{A fusão não perde}: a volta separa e devolve os dois corpos exactos em
 $36/36$. E ela \emph{separa mais} do que qualquer dos dois --- $31$ fibras contra $11$ e
@@ -2242,6 +2250,83 @@ passa a \emph{oscilar}. E o controlo é o $K=0$, sem o qual isto não diria nada
 fusão \textbf{degenera} nos dois corpos separados, com as raízes a serem exactamente as
 taxas próprias $-R/L$ e $-b/J$. \emph{Sem esse caso, a fusão podia estar a inventar a
 oscilação em vez de a produzir.}
+
+\paragraph{E a fusão corre no motor, não numa ferramenta.} Até aqui o $C_{\mathrm{ent}}$ era
+conta em C e só o \emph{resultado} entrava no banco --- o que é usar o banco como depósito.
+Agora
+\[
+  \texttt{SELECT funde(*) FROM F}
+\]
+entrelaça as duas colunas de endereços e devolve o corpo fundido, com a \textbf{volta
+verificada linha a linha antes de responder}: um endereço que não se sabe separar não é uma
+fusão, e é recusado em vez de devolvido. E recusa também uma coluna só, e endereços
+negativos --- \emph{entrelaçam-se dígitos, não sinais}.
+
+\subsection*{E o cliente monta o circuito que quiser, sem chamar ninguém}
+
+A pergunta que isto obriga a responder: com um milhão de corpos no banco, como funde ele os
+que quer? \textbf{Encadeando} --- e o encadeamento é a própria fusão, porque o resultado de
+\code{funde(*)} é uma coluna de endereços como qualquer outra e entra na seguinte
+\emph{sem adaptador}:
+\[
+  \texttt{funde}(A,B)\to AB,\qquad \texttt{funde}(AB,C)\to ABC,\qquad
+  \texttt{funde}(ABC,D)\to ABCD .
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+a cadeia & distingue\\
+\midrule
+o mecânico sozinho & $11$\\
+$\;\;\bowtie$ eletromagnético & $31$\\
+$\;\;\bowtie$ térmico & $34$\\
+$\;\;\bowtie$ óptico & $\mathbf{36}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Sobe \emph{estritamente} a cada passo --- se não subisse, o corpo acrescentado não
+estaria a trazer nada --- e ao fim de quatro os trinta e seis objectos ficam todos
+distinguidos.
+
+\paragraph{E a cadeia obriga a dizer uma coisa: a fusão DOBRA a largura.} Ao terceiro
+encadeamento o endereço cru já não cabe no envelope da célula, e a primeira cadeia parou
+exactamente ali. Por isso o \code{funde} devolve \emph{duas} colunas:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\code{fundido} & guarda a \textbf{régua} --- o prefixo entrelaçado, onde a ultramétrica vive\\
+\code{compacto} & bijecção sobre os fundidos distintos: serve para \textbf{encadear}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Quem encadeia pelo cru pára; quem encadeia pelo compacto continua \emph{e perde a
+régua dos andares anteriores}. É o preço, e diz-se. \emph{Com um milhão de corpos é o mesmo
+SQL}, e quem escolhe quais fundir é o cliente.
+
+\paragraph{Os limites, ditos --- e qual deles é da teoria.} \textbf{Nenhum é.} O grau não tem
+limite: o \emph{thm:enumfin} dá $E_k$ bijecção para \emph{todo} $k$ finito e a
+\emph{def:gato} é em $\mathbb{Z}^n$ para todo $n\ge2$. O que existe é o \textbf{andar} em que
+este motor corre --- ele resolve até grau $64$ e funde até a largura entrelaçada caber na
+palavra ---, e o andar diz-se e recusa em vez de truncar, porque \emph{«o finito é cada
+estágio da caminhada, não o total»}. Subir é acrescentar largura, não mudar de teoria.
+
+\medskip\noindent E há um limite \emph{diferente} que é fácil confundir com o do grau: o
+\textbf{envelope da célula}. Um polinómio de grau seis com raízes $1..6$ é recusado --- mas
+por causa do coeficiente $-720$, que não cabe em $-128..127$, e não pelo grau: o mesmo grau
+seis com $(\lambda^2-1)^2(\lambda^2-4)$ resolve-se inteiro, com as seis raízes exactas.
+\emph{São duas limitações, e lê-las como uma só dava a conclusão errada.}
+
+\medido{\code{tests/pgwire.c} §W180 --- a cadeia de três fusões com o que se distingue a
+subir estritamente, o compacto a ser bijecção sobre os fundidos distintos, e a volta exacta
+em todas as linhas. E \code{tools/cliente\_monta\_circuito.c}, que escreve o SQL que o
+cliente escreveria.}
+
+\medido{\code{tests/pgwire.c} §W179 --- a fusão pelo fio, com a volta exacta em todas as
+linhas, a separar estritamente mais que qualquer dos dois corpos, e as duas recusas.}
 
 \medido{\code{lib/fusao.h} com \code{tests/pgwire.c} §W177 --- o mecânico pelas três classes,
 o $C_{\mathrm{ent}}$ com a volta exacta em $256/256$ e zero colisões, e o acoplamento a mudar

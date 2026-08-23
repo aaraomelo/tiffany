@@ -4619,7 +4619,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"TRIADE") ? 28
                        : !strcasecmp(nome,"COMPLETA") ? 29
                        : !strcasecmp(nome,"GLOBAL") ? 30
-                       : !strcasecmp(nome,"EDO") ? 31 : 0;
+                       : !strcasecmp(nome,"EDO") ? 31
+                       : !strcasecmp(nome,"FUNDE") ? 32 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7752,6 +7753,164 @@ static int varre(const char *resto, int acao){
         return 1;
     }
 
+    if(acao == ACAO_MARCA && mat_op == 32){
+        /* ── FUNDE: o C_ent da `aranha prop:travessia`, no motor.
+         *
+         *     C_ent(a,b) = Σ a_j 2^{2j} + Σ b_j 2^{2j+1}
+         *
+         * --- os dígitos de a nas posições pares e os de b nas ímpares. A tabela
+         * traz DUAS colunas, os endereços dos dois corpos, e o motor devolve o
+         * corpo fundido: uma linha por objecto, com o endereço entrelaçado.
+         *
+         * E o que faz dela uma FUSÃO e não uma soma é a volta: desentrelaçar
+         * SEPARA e devolve os dois exactos. Isso verifica-se aqui, linha a
+         * linha, antes de responder --- se algum par não voltar, RECUSA-SE, em
+         * vez de devolver um endereço que não se sabe desfazer. */
+        if(ncols != 2){
+            printf("erro: a fusão junta DOIS corpos --- são precisas duas colunas de"
+                   " endereços, e a tabela tem %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "funde needs two address columns, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj == 0){
+            printf("erro: não há linhas para fundir --- RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "funde on empty selection"); }
+            return 0;
+        }
+        if(n_obj > SQL_OUT_MAX_ROWS){
+            printf("erro: o fundido tem %ld linhas e a saída segura %d --- RECUSADA, e"
+                   " não truncada.\n", n_obj, SQL_OUT_MAX_ROWS);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "funde: %ld rows exceed output cap %d", n_obj, SQL_OUT_MAX_ROWS); }
+            return 0;
+        }
+        /* a largura: quantos bits precisa o maior dos dois --- e o entrelaçado
+         * ocupa o DOBRO, que é o que a fusão custa e se diz */
+        long maior = 0;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            for(long c = 0; c < 2; c++){
+                if(!bit_le(S_PRES, i*ncols + c)){
+                    printf("erro: célula ausente na linha %ld --- um buraco não é um"
+                           " endereço. RECUSADA.\n", i);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "funde: missing cell at row %ld", i); }
+                    return 0;
+                }
+                long nu, de; celula_qz(i, c, ncols, &nu, &de);
+                if(de != 1 || nu < 0){
+                    printf("erro: o endereço (%ld/%ld) não é um natural --- a fusão"
+                           " entrelaça DÍGITOS. RECUSADA.\n", nu, de);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "funde: address not a natural"); }
+                    return 0;
+                }
+                if(nu > maior) maior = nu;
+            }
+        }
+        int k = 1; { long t = maior; while(t){ k++; t >>= 1; } }
+        if(2*k > 62){
+            printf("erro: os endereços pedem %d bits cada e o entrelaçado pediria %d"
+                   " --- passa do que a palavra segura. RECUSADA.\n", k, 2*k);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "funde: interleaved width %d exceeds word", 2*k); }
+            return 0;
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->ncols = 5;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "a");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "b");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "fundido");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "compacto");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "volta");
+            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[4] = SQL_TIPO_TEXT;
+            long r = 0;
+            static long vistos[SQL_OUT_MAX_ROWS];
+            for(long i = 0; i < nrows; i++){
+                if(!bit_le(S_MATCH, i)) continue;
+                long an, ad, bn, bd;
+                celula_qz(i, 0, ncols, &an, &ad);
+                celula_qz(i, 1, ncols, &bn, &bd);
+                long e = 0;
+                for(int j = 0; j < k; j++){
+                    e |= ((an >> j) & 1L) << (2*j);
+                    e |= ((bn >> j) & 1L) << (2*j + 1);
+                }
+                /* A VOLTA, verificada antes de responder */
+                long x = 0, y = 0;
+                for(int j = 0; j < k; j++){
+                    x |= ((e >> (2*j))     & 1L) << j;
+                    y |= ((e >> (2*j + 1)) & 1L) << j;
+                }
+                if(x != an || y != bn){
+                    printf("erro: a fusão de (%ld,%ld) não desfaz --- devolveu (%ld,%ld)."
+                           " RECUSADA: um endereço que não se sabe separar não é uma"
+                           " fusão.\n", an, bn, x, y);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "funde: round trip failed at row %ld", i); }
+                    return 0;
+                }
+                snprintf(sql_cap->cell[r][0], SQL_OUT_CELL, "%ld", an);
+                snprintf(sql_cap->cell[r][1], SQL_OUT_CELL, "%ld", bn);
+                snprintf(sql_cap->cell[r][2], SQL_OUT_CELL, "%ld", e);
+                snprintf(sql_cap->cell[r][4], SQL_OUT_CELL, "exacta");
+                vistos[r] = e;
+                r++;
+            }
+            /* ── E O COMPACTO, que é o que faz a cadeia CONTINUAR.
+             * A fusão DOBRA a largura a cada passo: ao terceiro encadeamento o
+             * endereço já não cabe no envelope da célula, e a cadeia pára. O
+             * compacto é o RANK do fundido --- 0..m−1 na ordem em que aparecem
+             * ---, que é bijecção sobre os fundidos distintos, e por isso a
+             * fibra não muda: «a fibra não vê o nome do endereço».
+             *
+             * As duas colunas servem coisas diferentes e convém não as trocar:
+             * o `fundido` guarda a RÉGUA (o prefixo entrelaçado, que é onde a
+             * ultramétrica vive) e o `compacto` serve para ENCADEAR sem estourar.
+             * Quem encadeia pelo fundido cru pára ao terceiro passo; quem
+             * encadeia pelo compacto continua, e perde a régua dos andares
+             * anteriores --- que é o preço, e diz-se. */
+            for(long i2 = 0; i2 < r; i2++){
+                long rank = 0;
+                for(long j2 = 0; j2 < i2; j2++) if(vistos[j2] < vistos[i2]) rank++;
+                long iguais = 0;
+                for(long j2 = 0; j2 < i2; j2++) if(vistos[j2] == vistos[i2]) iguais = 1;
+                if(iguais){
+                    for(long j2 = 0; j2 < i2; j2++) if(vistos[j2] == vistos[i2]){
+                        snprintf(sql_cap->cell[i2][3], SQL_OUT_CELL, "%s",
+                                 sql_cap->cell[j2][3]);
+                        break; }
+                } else {
+                    long menores = 0;
+                    for(long j2 = 0; j2 < r; j2++){
+                        int ja = 0;
+                        for(long u = 0; u < j2; u++) if(vistos[u] == vistos[j2]){ ja = 1; break; }
+                        if(!ja && vistos[j2] < vistos[i2]) menores++;
+                    }
+                    snprintf(sql_cap->cell[i2][3], SQL_OUT_CELL, "%ld", menores);
+                }
+                (void)rank;
+            }
+            sql_cap->nrows = r;
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", r);
+        }
+        printf("funde: %ld objectos · %d bits por corpo, %d no entrelaçado ·"
+               " a volta separa e devolve os dois exactos em todos\n", n_obj, k, 2*k);
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 31){
         /* ── EDO: RESOLVE a equação diferencial, e devolve as RAÍZES.
          *
@@ -7785,16 +7944,26 @@ static int varre(const char *resto, int acao){
                          "edo needs the 2x2 companion matrix"); }
             return 0;
         }
-        if(ncols > 8){
-            printf("erro: o motor resolve até grau 8 --- vieram %ld. RECUSADA, e não"
-                   " truncada.\n", ncols);
+        /* ── O GRAU NÃO TEM LIMITE NA TEORIA, e o tecto aqui é o ANDAR.
+         * O `thm:enumfin` dá E_k bijecção para TODO k finito, e a `def:gato` é
+         * em Zⁿ para todo n ≥ 2: nada na construção pára num grau. O que existe
+         * é o andar da escada em que este motor corre, e ele diz-se em vez de
+         * se fingir que não está lá --- «o finito é cada estágio da caminhada,
+         * não o total». Subir é acrescentar largura, não mudar de teoria. */
+        #define EDO_ANDAR 64
+        if(ncols > EDO_ANDAR){
+            printf("erro: este ANDAR do motor segura grau %d e vieram %ld --- RECUSADA,"
+                   " e não truncada. O grau não tem limite na teoria (thm:enumfin, E_k"
+                   " para todo k): o que tem tecto é a largura deste andar, e subir é"
+                   " acrescentá-la.\n", EDO_ANDAR, ncols);
             if(sql_cap){ sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
-                         "edo: degree %ld exceeds 8", ncols); }
+                         "edo: degree %ld above this floor (%d); the bound is the floor,"
+                         " not the theory", ncols, EDO_ANDAR); }
             return 0;
         }
         long ng = ncols;
-        long m[8][8];
+        static long m[EDO_ANDAR][EDO_ANDAR];
         for(long i = 0; i < ng; i++) for(long j = 0; j < ng; j++){
             if(!bit_le(S_PRES, i*ncols + j)){
                 printf("erro: a companheira tem célula ausente --- RECUSADA.\n");
@@ -7830,7 +7999,7 @@ static int varre(const char *resto, int acao){
             }
         }
         /* o polinómio mónico: λⁿ + c[n-1]λ^{n-1} + ... + c[0], com c[k] = −m[n-1][k] */
-        long co[9];
+        static long co[EDO_ANDAR+1];
         for(long k = 0; k < ng; k++) co[k] = -m[ng-1][k];
         co[ng] = 1;
 
@@ -7838,9 +8007,9 @@ static int varre(const char *resto, int acao){
          * com deflação exacta (Ruffini em inteiros). O que sobra fica dito. */
         if(ng > 2){
             char raizes[SQL_OUT_CELL] = ""; long nr = 0;
-            long p[9]; for(long k = 0; k <= ng; k++) p[k] = co[k];
+            static long p[EDO_ANDAR+1]; for(long k = 0; k <= ng; k++) p[k] = co[k];
             long gr = ng;
-            for(int volta = 0; volta < 8 && gr > 0; volta++){
+            for(long volta = 0; volta < EDO_ANDAR && gr > 0; volta++){
                 long a0 = p[0];
                 if(a0 == 0){                       /* λ = 0 é raiz: deflaciona */
                     for(long k = 0; k < gr; k++) p[k] = p[k+1];
@@ -7860,7 +8029,7 @@ static int varre(const char *resto, int acao){
                     }
                 }
                 if(!achou) break;
-                long q2[9]; q2[gr-1] = p[gr];
+                static long q2[EDO_ANDAR+1]; q2[gr-1] = p[gr];
                 for(long k = gr-1; k >= 1; k--) q2[k-1] = p[k] + r*q2[k];
                 for(long k = 0; k < gr; k++) p[k] = q2[k];
                 gr--; nr++;
