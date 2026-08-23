@@ -23383,6 +23383,138 @@ int main(void){
            " faz deles degraus e não construções avulsas.", mal == 0);
     }
 
+    /* ═══ §W155: AS TRÊS DINÂMICAS — VOLTA, DESLIZA, FOGE ═══════════════════ */
+    {
+        long mal = 0;
+        printf("\n§W155 o que cada face faz ao tempo: a tríade lida como órbita.\n\n");
+
+        /* A tríade dá três faces. A cada uma corresponde uma dinâmica, e é ela
+         * que explica porque a face elíptica tem um trio de ordens e a
+         * hiperbólica não pode ter. */
+
+        #define IT 12
+        printf("      face        matriz            A^k volta?   crescimento de |A^k|\n");
+        {
+            struct { const char *n; long a,b,c,d; } F[3] = {
+                {"elíptica  (Δ<0)", 0,-1, 1, 0},      /* ordem 4 */
+                {"parabólica (Δ=0)", 1, 1, 0, 1},     /* o deslizamento */
+                {"hiperbólica(Δ>0)", 2, 1, 1, 1},     /* Δ = 9−4 = 5 > 0 */
+            };
+            long volta_n = 0, cresce_n = 0;
+            for(int f = 0; f < 3; f++){
+                long a = 1, b = 0, c = 0, d = 1;
+                long norma[IT+1]; long k_volta = 0;
+                for(int k = 1; k <= IT; k++){
+                    long na = a*F[f].a + b*F[f].c, nb = a*F[f].b + b*F[f].d;
+                    long nc = c*F[f].a + d*F[f].c, nd = c*F[f].b + d*F[f].d;
+                    a = na; b = nb; c = nc; d = nd;
+                    long m = 0;
+                    long v[4] = {a<0?-a:a, b<0?-b:b, c<0?-c:c, d<0?-d:d};
+                    for(int i = 0; i < 4; i++) if(v[i] > m) m = v[i];
+                    norma[k] = m;
+                    if(!k_volta && a == 1 && b == 0 && c == 0 && d == 1) k_volta = k;
+                }
+                /* o crescimento: constante, linear ou exponencial? */
+                const char *tipo;
+                if(k_volta) tipo = "constante (volta)";
+                else if(norma[IT] <= 2*IT) tipo = "LINEAR (desliza)";
+                else tipo = "EXPONENCIAL (foge)";
+                if(k_volta) volta_n++; else cresce_n++;
+                printf("      %s [[%ld,%ld],[%ld,%ld]] %10s   %s (|A^%d| = %ld)\n",
+                       F[f].n, F[f].a, F[f].b, F[f].c, F[f].d,
+                       k_volta ? "sim" : "NUNCA", tipo, IT, norma[IT]);
+            }
+            printf("      → %ld volta e %ld não: e é isto que explica os trios\n",
+                   volta_n, cresce_n);
+            if(volta_n != 1 || cresce_n != 2) mal++;
+        }
+
+        /* ── (2) E DAÍ A ASSIMETRIA DOS TRIOS: só a face que VOLTA pode ter um
+         * trio de ordens finitas. A parabólica termina em dois passos --- é o
+         * (A−I)² = 0 ---, e a hiperbólica nunca fecha. */
+        {
+            /* a parabólica: (A − I)² = 0 */
+            long A[2][2] = {{1,1},{0,1}};
+            long N[2][2] = {{A[0][0]-1, A[0][1]},{A[1][0], A[1][1]-1}};
+            long P[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++){
+                long s = 0;
+                for(int k = 0; k < 2; k++) s += N[i][k]*N[k][j];
+                P[i][j] = s;
+            }
+            int nulo = (P[0][0]==0 && P[0][1]==0 && P[1][0]==0 && P[1][1]==0);
+            printf("      a parabólica tem (A−I)² = 0: %s --- ela não volta, mas TERMINA em"
+                   " dois passos, e é a nilpotência do trio S,ζ,μ\n", nulo ? "sim" : "NÃO");
+            if(!nulo) mal++;
+
+            /* a hiperbólica: nenhuma potência volta, e a prova é o traço crescer */
+            long tr[IT+1]; long a = 2, b = 1, c = 1, d = 1;
+            long ma = 1, mb = 0, mc = 0, md = 1;
+            int voltou = 0;
+            for(int k = 1; k <= IT; k++){
+                long na = ma*a + mb*c, nb = ma*b + mb*d;
+                long nc = mc*a + md*c, nd = mc*b + md*d;
+                ma = na; mb = nb; mc = nc; md = nd;
+                tr[k] = ma + md;
+                if(ma == 1 && mb == 0 && mc == 0 && md == 1) voltou = 1;
+            }
+            printf("      a hiperbólica: traço a crescer %ld, %ld, %ld, … até %ld em %d"
+                   " passos, e volta: %s\n", tr[1], tr[2], tr[3], tr[IT], IT,
+                   voltou ? "SIM" : "nunca");
+            printf("         RELAÇÃO — só a face que VOLTA admite ordem finita, logo só ela"
+                   " pode ter um trio de ordens: a hiperbólica não tem, e não é falta\n");
+            if(voltou) mal++;
+        }
+
+        /* ── (3) E A TRÍADE FECHA COMO DINÂMICA: volta, desliza, foge --- três
+         * comportamentos, e o Δ diz qual, sem se iterar nada. */
+        {
+            printf("      Δ        dinâmica     o que a órbita faz\n");
+            printf("      Δ < 0    ELÍPTICA     volta ao ponto de partida (ordem finita)\n");
+            printf("      Δ = 0    PARABÓLICA   desliza, e (A−I)² = 0: termina em dois passos\n");
+            printf("      Δ > 0    HIPERBÓLICA  foge: uma direcção expande, a outra contrai\n");
+            long ok = 0, tot = 0;
+            /* o Δ decide sem iterar: verifica-se em matrizes com |det|=1 */
+            for(long t = -3; t <= 3; t++){
+                long D = t*t - 4;                     /* det = +1 */
+                tot++;
+                /* a previsão: |t| < 2 volta, |t| = 2 desliza, |t| > 2 foge */
+                int prev = (D < 0) ? 0 : (D == 0 ? 1 : 2);
+                /* a medida: iterar [[0,−1],[1,t]] */
+                long a = 1, b = 0, c = 0, d = 1;
+                int voltou = 0;
+                long mx = 1;
+                for(int k = 1; k <= 20; k++){
+                    long na = b, nb = -a + t*b, nc = d, nd = -c + t*d;
+                    a = na; b = nb; c = nc; d = nd;
+                    long v[4] = {a<0?-a:a,b<0?-b:b,c<0?-c:c,d<0?-d:d};
+                    for(int i = 0; i < 4; i++) if(v[i] > mx) mx = v[i];
+                    if(a == 1 && b == 0 && c == 0 && d == 1){ voltou = 1; break; }
+                }
+                int obs = voltou ? 0 : (mx <= 40 ? 1 : 2);
+                if(prev == obs) ok++;
+            }
+            printf("      → o Δ prevê a dinâmica em %ld/%ld traços, SEM se iterar: a lei do"
+                   " discriminante é uma lei sobre o tempo\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+        #undef IT
+
+        printf("\n");
+        ok("AS TRÊS FACES SÃO TRÊS DINÂMICAS: VOLTA, DESLIZA, FOGE. A tríade dá três faces, e"
+           " a cada uma corresponde o que ela faz ao TEMPO --- e é isso que explica a"
+           " assimetria dos trios anteriores. A elíptica VOLTA: a órbita fecha, e por isso"
+           " admite ordem finita. A parabólica DESLIZA: não volta, mas (A−I)² = 0 e ela"
+           " termina em dois passos --- é a mesma nilpotência do trio S, ζ, μ, que vive nessa"
+           " face. A hiperbólica FOGE: o traço cresce sem parar e nenhuma potência devolve a"
+           " identidade. DAÍ A ASSIMETRIA: só a face que volta admite ordem finita, logo só"
+           " ela pode ter um trio de ordens. A hiperbólica não tem, e isso NÃO É FALTA --- é o"
+           " que a sua dinâmica permite. E a lei do discriminante lê-se como lei sobre o"
+           " tempo: o Δ prevê a dinâmica em todos os traços varridos SEM se iterar nada, o que"
+           " quer dizer que o comportamento da órbita está escrito no polinómio antes de a"
+           " órbita começar.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

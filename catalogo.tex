@@ -1375,6 +1375,34 @@ contados em $X_2$ e $X_3$; o invariante $p^2-2q^2$ conservado em $287/287$ com a
 crescer em todos, provando que o corte não é atingido; e $\sum G=\lvert I\rvert$ nos dois
 quocientes medidos.}
 
+\paragraph{E as três faces são três \emph{dinâmicas} --- é isso que explica a assimetria
+dos trios.} A cada face corresponde o que ela faz ao \textbf{tempo}:
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+$\Delta$ & dinâmica & $A^k$ volta? & $\lvert A^{12}\rvert$\\
+\midrule
+$\Delta<0$ & \textbf{elíptica} --- volta & sim & $1$\\
+$\Delta=0$ & \textbf{parabólica} --- desliza & nunca & $12$ \emph{(linear)}\\
+$\Delta>0$ & \textbf{hiperbólica} --- foge & nunca & $75\,025$ \emph{(exponencial)}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent A parabólica não volta, mas $(A-I)^2=0$: \emph{termina em dois passos} --- é a
+mesma nilpotência do trio $S,\zeta,\mu$, que vive nessa face. A hiperbólica foge, com o
+traço a crescer sem parar.
+
+\medskip\noindent\textbf{Daí a assimetria}: só a face que \emph{volta} admite ordem finita,
+logo só ela pode ter um trio de ordens. \emph{A hiperbólica não tem, e isso não é falta} ---
+é o que a sua dinâmica permite. E a lei do discriminante lê-se como \textbf{lei sobre o
+tempo}: o $\Delta$ prevê a dinâmica sem se iterar nada, o que quer dizer que o
+comportamento da órbita está escrito no polinómio \emph{antes de a órbita começar}.
+
+\medido{as três dinâmicas em \code{tests/pgwire.c} §W155 --- a elíptica a voltar com
+$\lvert A^{12}\rvert=1$, a parabólica linear em $12$ e a hiperbólica exponencial em
+$75\,025$; $(A-I)^2=0$ na parabólica; e o $\Delta$ a prever a dinâmica em $7/7$ traços sem
+iteração.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
