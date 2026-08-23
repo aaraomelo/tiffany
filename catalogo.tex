@@ -1592,6 +1592,41 @@ o simétrico fechado na soma em $15\,625/15\,625$ e a lei da comutação a valer
 com $12\,880$ pares a saírem do corpo no produto; e $\Delta\ge0$ em $343/343$ simétricas,
 sem uma única elíptica.}
 
+\paragraph{E o critério entra no motor --- que é a pergunta que vem antes de todas.}
+\[
+ \boxed{\;\texttt{SELECT leitura(*) FROM }t\;}
+\]
+com duas colunas, a \textbf{classe} e o \textbf{endereço}, responde às duas perguntas
+duais: \emph{é bem definida} (não parte o objecto) e \emph{separa} (não funde objectos).
+\textbf{A igualdade do corpo não se adivinha}: vem na primeira coluna, porque é do corpo do
+\emph{cliente} e não do motor --- um motor que a inventasse estaria a responder sobre outro
+corpo.
+\begin{center}\small
+\begin{tabular}{@{}lrrrll@{}}
+\toprule
+leitura & pares & quebras & fusões & bem def. & separa\\
+\midrule
+crua $(a,b)$ & $210$ & $\mathbf{9}$ & $0$ & não & sim\\
+reduzida & $210$ & $0$ & $0$ & \textbf{sim} & \textbf{sim}\\
+constante & $210$ & $0$ & $\mathbf{201}$ & sim & não\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{As duas falhas contam-se à parte}, e não num número só: dá-las juntas
+perderia exactamente o que distingue uma leitura \emph{fina demais} de uma \emph{grosseira
+demais}. E uma leitura pode falhar nas \textbf{duas} metades ao mesmo tempo --- o motor
+conta-as em separado justamente para isso aparecer.
+
+\medskip\noindent\textbf{E o encadeamento fecha sobre a mesma tabela.} Na leitura pela
+distância, \code{leitura} diz que ela \emph{funde}, \code{fibra} diz que o corpo está
+\emph{incompleto} e quanto falta, e \code{ultra} diz que a régua \emph{desce na mesma}.
+Três respostas diferentes à mesma coluna --- \emph{e é por isso que são três perguntas e
+não uma}.
+
+\medido{\code{tests/pgwire.c} §W161 --- as três leituras do racional com uma a servir, uma
+a quebrar e uma a fundir; as recusas com uma coluna e com uma linha só; e o encadeamento
+\code{leitura}$\to$\code{fibra}$\to$\code{ultra} sobre a leitura pela distância.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

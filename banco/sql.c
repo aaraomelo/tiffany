@@ -4613,7 +4613,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"FIBRA") ? 22
                        : !strcasecmp(nome,"ULTRA") ? 23
                        : !strcasecmp(nome,"PRECO") ? 24
-                       : !strcasecmp(nome,"MEDIAS") ? 25 : 0;
+                       : !strcasecmp(nome,"MEDIAS") ? 25
+                       : !strcasecmp(nome,"LEITURA") ? 26 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7138,6 +7139,95 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 26){
+        /* ── A LEITURA SERVE? São duas perguntas, e elas são DUAIS:
+         *
+         *   BEM DEFINIDA  x = y no corpo  ⟹  R(x) = R(y)   não parte o objecto
+         *   SEPARADORA    R(x) = R(y)     ⟹  x = y         não funde objectos
+         *
+         * A tabela traz DUAS colunas: a CLASSE (o objecto, já identificado pela
+         * igualdade DO CORPO) e o ENDEREÇO que a leitura lhe dá. A igualdade não
+         * se adivinha aqui --- é o cliente que a traz na primeira coluna, porque
+         * ela é do corpo dele e não do motor.
+         *
+         * As duas falhas têm formas opostas, e contam-se em separado: QUEBRAS
+         * (mesma classe, endereços distintos) e FUSÕES (mesmo endereço, classes
+         * distintas). Dá-las num número só perderia exactamente o que distingue
+         * uma leitura fina demais de uma grosseira demais. */
+        if(ncols != 2){
+            printf("erro: a leitura mede-se com DUAS colunas --- a classe e o"
+                   " endereço. A tabela tem %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "leitura needs (class, address), got %ld columns", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj < 2){
+            printf("erro: com %ld linha(s) não há par que comparar --- RECUSADA.\n", n_obj);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "leitura needs at least 2 rows, got %ld", n_obj); }
+            return 0;
+        }
+        for(long i = 0; i < nrows; i++)
+            if(bit_le(S_MATCH, i) &&
+               (!bit_le(S_PRES, i*ncols) || !bit_le(S_PRES, i*ncols + 1))){
+                printf("erro: a linha %ld tem célula ausente --- sem classe ou sem"
+                       " endereço não há o que comparar. RECUSADA.\n", i);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "leitura: missing cell at row %ld", i); }
+                return 0;
+            }
+        long quebras = 0, fusoes = 0, pares = 0;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            long ci_n, ci_d, ei_n, ei_d;
+            celula_qz(i, 0, ncols, &ci_n, &ci_d);
+            celula_qz(i, 1, ncols, &ei_n, &ei_d);
+            Qz ci = qz(ci_n, ci_d), ei = qz(ei_n, ei_d);
+            for(long j = 0; j < i; j++){
+                if(!bit_le(S_MATCH, j)) continue;
+                long cj_n, cj_d, ej_n, ej_d;
+                celula_qz(j, 0, ncols, &cj_n, &cj_d);
+                celula_qz(j, 1, ncols, &ej_n, &ej_d);
+                int mesma_classe = qz_igual(ci, qz(cj_n, cj_d));
+                int mesmo_end    = qz_igual(ei, qz(ej_n, ej_d));
+                pares++;
+                if(mesma_classe && !mesmo_end) quebras++;
+                if(mesmo_end && !mesma_classe) fusoes++;
+            }
+        }
+        int bd = (quebras == 0), sep = (fusoes == 0);
+        const char *ver = (bd && sep) ? "serve"
+                        : bd ? "funde --- falta leitura"
+                             : "quebra --- a régua não é do corpo";
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 5;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "pares");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "quebras");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "fusoes");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "bem_definida");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "separa");
+            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[3] = sql_cap->tipo[4] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", pares);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", quebras);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", fusoes);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", bd ? "sim" : "nao");
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", sep ? "sim" : "nao");
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %ld | %ld | %ld | %s | %s\n", pares, quebras, fusoes,
+               bd ? "sim" : "nao", sep ? "sim" : "nao");
+        printf("-- %ld par(es) · %ld quebra(s) · %ld fusão(ões) · a leitura %s\n",
+               pares, quebras, fusoes, ver);
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 25){
         /* ── AS TRÊS MÉDIAS DE UM PAR, e o trio que fecha sobre si:
          *

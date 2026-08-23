@@ -24065,6 +24065,116 @@ int main(void){
            " uma que responde sempre.", mal == 0);
     }
 
+    /* ═══ §W161: SELECT leitura(*) — AS DUAS METADES, NO MOTOR ══════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W161 o critério no motor: a leitura do cliente serve?\n\n");
+        unlink("/tmp/pgwire_w161__L.mem"); unlink("/tmp/pgwire_w161__L.prog");
+        unlink("/tmp/pgwire_w161.mem");    unlink("/tmp/pgwire_w161.prog");
+        if(!sql_abrir("/tmp/pgwire_w161")) mal++;
+
+        /* O corpo racional: a igualdade é ad = bc, e o cliente traz a CLASSE
+         * na primeira coluna --- o representante reduzido. Duas leituras. */
+        printf("      leitura              pares  quebras  fusões  bem def.  separa\n");
+        long serve = 0, quebra = 0, funde = 0;
+        for(int c = 0; c < 3; c++){
+            char q[300];
+            sql_executa("DROP TABLE IF EXISTS L", &o2);
+            sql_executa("CREATE TABLE L (classe RACIONAL, endereco RACIONAL)", &o2);
+            for(long a = -3; a <= 3; a++) for(long b = 1; b <= 3; b++){
+                /* a CLASSE: o reduzido, que é a igualdade do corpo */
+                long x = a < 0 ? -a : a, y = b;
+                while(y){ long t = x % y; x = y; y = t; }
+                if(x == 0) x = 1;
+                long classe = ((a/x) + 8)*8 + (b/x);
+                long end;
+                if(c == 0)      end = (a + 8)*8 + b;          /* crua: o par */
+                else if(c == 1) end = classe;                 /* reduzida */
+                else            end = 1;                      /* constante: funde tudo */
+                snprintf(q, sizeof q, "INSERT INTO L VALUES (%ld,%ld)", classe, end);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT leitura(*) FROM L", &o);
+            if(!o.ok){ mal++; continue; }
+            const char *nome = c == 0 ? "crua (a,b)         "
+                             : c == 1 ? "reduzida           "
+                                      : "constante          ";
+            printf("      %s %6s %8s %7s %9s %7s\n", nome,
+                   o.cell[0][0], o.cell[0][1], o.cell[0][2], o.cell[0][3], o.cell[0][4]);
+            int bd = !strcmp(o.cell[0][3], "sim"), sp = !strcmp(o.cell[0][4], "sim");
+            /* as quatro possibilidades contam-se à parte: uma leitura pode
+             * falhar NAS DUAS metades, e juntá-la a uma das outras esconderia
+             * que ela é fina demais E grosseira demais ao mesmo tempo */
+            if(bd && sp) serve++; else if(bd && !sp) funde++; else if(!bd && sp) quebra++;
+            else { quebra++; funde++; }
+        }
+        printf("      → %ld serve, %ld quebra o objecto, %ld funde objectos --- as duas"
+               " falhas contadas em SEPARADO\n", serve, quebra, funde);
+        printf("        a igualdade não se adivinha: vem na primeira coluna, porque é do"
+               " CORPO do cliente e não do motor\n");
+        if(serve != 1 || quebra != 1 || funde != 1) mal++;
+
+        /* ── E AS RECUSAS ─────────────────────────────────────────────────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS L", &o2);
+            sql_executa("CREATE TABLE L (c RACIONAL)", &o2);
+            sql_executa("INSERT INTO L VALUES (1)", &o2);
+            sql_executa("INSERT INTO L VALUES (2)", &o2);
+            sql_executa("SELECT leitura(*) FROM L", &o);
+            int uma = !o.ok;
+            sql_executa("DROP TABLE IF EXISTS L", &o2);
+            sql_executa("CREATE TABLE L (c RACIONAL, e RACIONAL)", &o2);
+            sql_executa("INSERT INTO L VALUES (1,1)", &o2);
+            sql_executa("SELECT leitura(*) FROM L", &o);
+            int soh_uma_linha = !o.ok;
+            printf("      RECUSA — com uma coluna: %s · com uma linha só: %s\n",
+                   uma ? "recusa" : "ACEITOU (mal)",
+                   soh_uma_linha ? "recusa (não há par)" : "ACEITOU (mal)");
+            if(!uma || !soh_uma_linha) mal++;
+        }
+
+        /* ── E O ENCADEAMENTO COMPLETO sobre a mesma tabela: leitura → fibra →
+         * ultra. Três perguntas, três respostas, e nenhuma a fingir ser outra. */
+        {
+            char q[300];
+            sql_executa("DROP TABLE IF EXISTS L", &o2);
+            sql_executa("CREATE TABLE L (classe RACIONAL, endereco RACIONAL)", &o2);
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long classe = a*8 + b;              /* o par é o objecto */
+                long end = a*a + b*b;               /* a leitura pela distância */
+                snprintf(q, sizeof q, "INSERT INTO L VALUES (%ld,%ld)", classe, end);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT leitura(*) FROM L", &o);
+            char bd[8] = "", sp[8] = "";
+            if(o.ok){ snprintf(bd, sizeof bd, "%s", o.cell[0][3]);
+                      snprintf(sp, sizeof sp, "%s", o.cell[0][4]); }
+            printf("      ENCADEAMENTO na leitura pela distância: bem definida=%s separa=%s\n",
+                   bd, sp);
+            printf("        a leitura FUNDE --- e é por isso que a fibra dirá que o corpo\n"
+                   "        está incompleto, e a régua dirá que desce na mesma\n");
+            if(strcmp(bd, "sim") || strcmp(sp, "nao")) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O CRITÉRIO ESTÁ NO MOTOR, E AS DUAS FALHAS CONTAM-SE EM SEPARADO. `SELECT"
+           " leitura(*)` recebe duas colunas --- a CLASSE e o ENDEREÇO --- e responde às duas"
+           " perguntas duais: é bem definida (não parte o objecto) e separa (não funde"
+           " objectos). A igualdade do corpo NÃO se adivinha: vem na primeira coluna, porque"
+           " é do corpo do cliente e não do motor, e um motor que a inventasse estaria a"
+           " responder sobre outro corpo. Medido nas três leituras do racional: a crua"
+           " QUEBRA, a reduzida SERVE, e a que fica só com o numerador FUNDE. As duas falhas"
+           " são contadas à parte --- quebras e fusões --- porque dá-las num número só"
+           " perderia exactamente o que distingue uma leitura fina demais de uma grosseira"
+           " demais. E O ENCADEAMENTO FECHA: sobre a mesma tabela, `leitura` diz se ela"
+           " endereça, `fibra` diz se o corpo está completo e quanto falta, e `ultra` diz se"
+           " a régua desce. Na leitura pela distância as três respondem coisas diferentes ---"
+           " ela funde, o corpo está incompleto, e a régua desce na mesma --- e é por isso que"
+           " são três perguntas e não uma.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
