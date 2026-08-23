@@ -22563,7 +22563,7 @@ int main(void){
             if(ok != tot) mal++;
         }
 
-        /* ── (2) E A ANISOTROPIA É DA FORMA SOBRE O ÍNDICE, não do corpo. O det
+        /* ── (2) E O DETERMINANTE É FORMA SOBRE O ÍNDICE, não sobre o corpo. O det
          * de uma 2×2 é a forma quadrática ad − bc nas QUATRO coordenadas do
          * índice, e a sua assinatura conta-se ali. */
         {
@@ -22574,8 +22574,8 @@ int main(void){
                 if(a*d - b*c == 0 && !(a==0&&b==0&&c==0&&d==0)) zeros++;
             }
             printf("      a forma det = ad − bc anula-se em %ld pontos NÃO NULOS de %ld ---"
-                   " é ISOTRÓPICA, e isso é da FORMA sobre o índice\n", zeros, tot);
-            printf("         a assinatura (2,2) é do espaço das quatro coordenadas, e não"
+                   " e isso é da FORMA sobre o índice\n", zeros, tot);
+            printf("         o que dela se lê é do espaço das quatro coordenadas, e não"
                    " diz nada sobre o que está nas gavetas\n");
             if(zeros == 0) mal++;
         }
@@ -22593,14 +22593,14 @@ int main(void){
             }
             printf("      no subespaço [[a,b],[0,a]] o det restringe-se a a², e anula-se em"
                    " %ld pontos não nulos --- todos com a=0 (%ld)\n", anula, so_a0);
-            printf("         RELAÇÃO — o que é isotrópico é o SUBESPAÇO DO ÍNDICE onde o"
-                   " corpo exterior se realiza, não o corpo exterior\n");
+            printf("         RELAÇÃO — o det anula-se no SUBESPAÇO DO ÍNDICE onde o corpo"
+                   " exterior se realiza, e não no corpo exterior\n");
             if(anula == 0 || anula != so_a0) mal++;
         }
 
         /* ── (4) E O CORPO EXTERIOR, LIDO NA SUA PRÓPRIA MÉTRICA, NÃO FALHA
          * NADA: tem valoração, ultramétrica, inverso onde deve. É o §W146. O que
-         * a anisotropia mede é a realização matricial, e é outra pergunta. */
+         * o determinante mede é a realização matricial, e é outra pergunta. */
         {
             #define VAL2(a,b) ((a) != 0 ? 0 : ((b) != 0 ? 1 : 2))
             long inv = 0, tot = 0;
@@ -22613,8 +22613,8 @@ int main(void){
             }
             printf("      o corpo exterior na SUA métrica: %ld dos %ld não nulos têm"
                    " valoração 0 e inverso, e os restantes são o nilpotente\n", inv, tot);
-            printf("         a norma matricial anular-se ali não é defeito do corpo --- é o"
-                   " subespaço do índice a ser isotrópico\n");
+            printf("         a norma matricial anular-se ali não é defeito do corpo --- é do"
+                   " subespaço do índice onde ele se realiza\n");
             if(inv == 0 || inv == tot) mal++;
             #undef VAL2
         }
@@ -22629,7 +22629,7 @@ int main(void){
             #define PRU(x,y) ({ long X_=(x), Y_=(y); int q_=6; \
                 if(X_!=Y_) for(int i_=0;i_<6;i_++){ \
                     if((((X_)>>(5-i_))&1) != (((Y_)>>(5-i_))&1)){ q_=i_; break; } } q_; })
-            printf("      corpo             det da realização  anisotrópico?  ultramétrica vale?\n");
+            printf("      corpo             det da realização   Δ do thm:leidisc  ultramétrica vale?\n");
             long todos_ok = 0;
             for(int i = 0; i < 3; i++){
                 long t = (i == 0) ? -1 : (i == 1 ? 0 : 1);
@@ -22650,10 +22650,11 @@ int main(void){
                     if(a*a - t*b*b == 0) an++;
                 }
                 if(ok == tot) todos_ok++;
-                printf("      %s %13s %14s %14ld/%ld\n",
+                printf("      %s %13s %15s %14ld/%ld\n",
                        i==0 ? "rotação a+bi    " : (i==1 ? "exterior a+bε   " : "hiperbólico a+bj"),
                        i==0 ? "a²+b²" : (i==1 ? "a²" : "a²−b²"),
-                       an == 0 ? "sim" : "NÃO", ok, tot);
+                       i==0 ? "Δ<0" : (i==1 ? "Δ=0" : "Δ>0"), ok, tot);
+                (void)an;
             }
             printf("      GUME — a ultramétrica vale nos %ld dos 3, INCLUSIVE onde a norma"
                    " da realização se anula\n", todos_ok);
@@ -22671,12 +22672,12 @@ int main(void){
            " enumerável, e desce por C em todos os lados medidos --- e não depende do corpo,"
            " porque os pares são os mesmos quer as gavetas tenham inteiros, duais ou"
            " racionais. É ali que o discreto vive; o que está nas gavetas não é discreto por"
-           " causa disso. E ISSO ARRUMA A ANISOTROPIA, QUE ESTAVA NO SÍTIO ERRADO. O"
+           " causa disso. E ISSO ARRUMA O DETERMINANTE, QUE ESTAVA NO SÍTIO ERRADO. O"
            " determinante de uma 2×2 é a forma quadrática ad − bc nas QUATRO coordenadas do"
-           " índice, e anula-se em pontos não nulos: é isotrópica, e essa é uma propriedade da"
-           " FORMA SOBRE O ÍNDICE. Quando o corpo exterior se realiza como [[a,b],[0,a]], o"
-           " det restringe-se a a² e anula-se exactamente onde a = 0 --- o que é isotrópico é"
-           " o SUBESPAÇO DO ÍNDICE onde ele se realiza, e não o corpo. Lido na sua própria"
+           " índice, e anula-se em pontos não nulos: é uma propriedade da FORMA SOBRE O"
+           " ÍNDICE. Quando o corpo exterior se realiza como [[a,b],[0,a]], o"
+           " det restringe-se a a² e anula-se exactamente onde a = 0 --- é o SUBESPAÇO DO"
+           " ÍNDICE onde ele se realiza que o anula, e não o corpo. Lido na sua própria"
            " métrica o corpo exterior não falha coisa nenhuma: tem valoração, tem"
            " ultramétrica, tem inverso onde a valoração é zero. E O GUME DESFAZ A CONFUSÃO DE"
            " VEZ: a régua desta casa é a ULTRAMÉTRICA dos endereços, e ela vale nos TRÊS ---"
@@ -22791,7 +22792,7 @@ int main(void){
         /* ── (5) O GUME: t tem de fazer diferença na métrica, senão a tríade era
          * uma só face repetida. Conta-se onde a norma se anula em cada um. */
         {
-            printf("      t     norma        anula em não nulos   o que é\n");
+            printf("      t     norma        anula em não nulos   Δ\n");
             long diferentes = 0;
             long anteriores = -1;
             for(long t = -1; t <= 1; t++){
@@ -22802,7 +22803,7 @@ int main(void){
                 }
                 printf("      %+ld    %s %14ld        %s\n", t,
                        t == -1 ? "a²+b²" : (t == 0 ? "a²   " : "a²−b²"), an,
-                       t == -1 ? "anisotrópica" : (t == 0 ? "degenerada  " : "isotrópica  "));
+                       t == -1 ? "Δ<0" : (t == 0 ? "Δ=0" : "Δ>0"));
                 if(an != anteriores) diferentes++;
                 anteriores = an;
             }
@@ -22826,8 +22827,7 @@ int main(void){
            " são o mesmo. A tríade FECHA porque o sinal de t só tem três casos: não falta"
            " face nenhuma, e por isso os três juntos completam o corpo em vez de o dividirem."
            " E O GUME É QUE t FAÇA DIFERENÇA: as normas anulam-se em contagens distintas nos"
-           " três --- anisotrópica, degenerada, isotrópica ---, pelo que a tríade não é uma"
-           " face repetida. O que varia é a métrica; o corpo é um.", mal == 0);
+           " três, uma por classe do Δ, pelo que a tríade não é uma face repetida. O que varia é a métrica; o corpo é um.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
