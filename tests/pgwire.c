@@ -25602,6 +25602,100 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W174: SELECT global(*) — o corolário executado pelo motor ════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W174 SELECT global(*): completar um corpo é dar-lhe representação"
+               " reversível --- a régua vem atrás.\n\n");
+        unlink("/tmp/pgwire_w174__C.mem"); unlink("/tmp/pgwire_w174__C.prog");
+        unlink("/tmp/pgwire_w174.mem");    unlink("/tmp/pgwire_w174.prog");
+        if(!sql_abrir("/tmp/pgwire_w174")) mal++;
+
+        /* o corpo: racionais reduzidos, com TRÊS representações reversíveis do
+         * mesmo objecto --- o par (p,q), o par trocado, e a cifra contínua. */
+        {
+            char q[240];
+            sql_executa("DROP TABLE IF EXISTS C", &o2);
+            sql_executa("CREATE TABLE C (par RACIONAL, inv RACIONAL, cifra RACIONAL)", &o2);
+            long nobj = 0;
+            for(long b = 1; b <= 6 && nobj < 40; b++) for(long a = 1; a <= 6 && nobj < 40; a++){
+                long x = a, y = b; while(y){ long t = x % y; x = y; y = t; }
+                if(x != 1) continue;
+                /* a cifra: os quocientes parciais empilhados em base 8 */
+                long p = a, qq = b, cif = 0;
+                for(int t = 0; t < 4; t++){
+                    long d = qq ? p / qq : 0, r = qq ? p - d*qq : 0;
+                    if(d > 7) d = 7;
+                    cif = cif*8 + d; p = qq; qq = r;
+                }
+                snprintf(q, sizeof q, "INSERT INTO C VALUES (%ld,%ld,%ld)",
+                         a*8 + b, b*8 + a, cif);
+                sql_executa(q, &o2);
+                nobj++;
+            }
+            printf("      %ld racionais reduzidos, três representações cada\n", nobj);
+
+            sql_executa("SELECT global(*) FROM C", &o);
+            if(!o.ok){ printf("      global RECUSOU (mal): %s\n", o.err); mal++; }
+            else {
+                printf("      reversíveis: %s de 3 · pior passo 2^-%s · ponta 2^-%s ·"
+                       " domina: %s\n", o.cell[0][0], o.cell[0][1], o.cell[0][2],
+                       o.cell[0][3]);
+                printf("      a ultramétrica HERDADA: %s violam, %s estritos\n",
+                       o.cell[0][4], o.cell[0][5]);
+                if(strcmp(o.cell[0][0], "3")) mal++;
+                if(strcmp(o.cell[0][3], "sim")) mal++;
+                if(strcmp(o.cell[0][4], "0")) mal++;      /* zero violações */
+                if(!strcmp(o.cell[0][5], "0")) mal++;     /* e estritos a existir */
+            }
+        }
+
+        /* ── A HIPÓTESE NÃO SE SUPÕE: uma representação não reversível faz o
+         * motor RECUSAR. É o coração do corolário --- sem reversibilidade não
+         * há travessia, e responder na mesma seria dar por verificada a única
+         * hipótese que ele tem. */
+        {
+            char q[240];
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (bom RACIONAL, mau RACIONAL)", &o2);
+            for(long i = 0; i < 8; i++){
+                snprintf(q, sizeof q, "INSERT INTO M VALUES (%ld,%ld)", i, i / 2);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT global(*) FROM M", &o);
+            printf("      a coluna que funde pares: o motor %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa --- sem reversibilidade não há travessia");
+            if(o.ok) mal++;
+        }
+
+        /* ── E A RECUSA DE UMA COLUNA SÓ: o global compara REPRESENTAÇÕES. */
+        {
+            sql_executa("DROP TABLE IF EXISTS U", &o2);
+            sql_executa("CREATE TABLE U (a RACIONAL)", &o2);
+            sql_executa("INSERT INTO U VALUES (1)", &o2);
+            sql_executa("INSERT INTO U VALUES (2)", &o2);
+            sql_executa("SELECT global(*) FROM U", &o);
+            printf("      com UMA coluna: o motor %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa: não há duas representações a comparar");
+            if(o.ok) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O COROLÁRIO GLOBAL EXECUTA-SE NO MOTOR, E COMPLETAR UM CORPO É DAR-LHE"
+           " REPRESENTAÇÃO REVERSÍVEL --- A RÉGUA VEM ATRÁS. Três representações dos mesmos"
+           " racionais reduzidos entram como três colunas; o motor verifica a hipótese em vez"
+           " de a supor, mede o custo de cada passo e o da ponta, confirma que a ponta é"
+           " dominada pelo pior passo, e devolve a ULTRAMÉTRICA HERDADA: zero violações e"
+           " triplos estritos. É esta a peça que serve quem tem corpos por completar --- não"
+           " se constrói régua nenhuma no corpo, transporta-se a do índice pela bijeção. E o"
+           " motor RECUSA quando a hipótese falha: uma coluna que funde dois objectos não é"
+           " representação, e responder na mesma seria dar por verificada a única hipótese"
+           " que o corolário tem.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

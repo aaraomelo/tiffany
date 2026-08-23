@@ -4617,7 +4617,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"LEITURA") ? 26
                        : !strcasecmp(nome,"VALORACAO") ? 27
                        : !strcasecmp(nome,"TRIADE") ? 28
-                       : !strcasecmp(nome,"COMPLETA") ? 29 : 0;
+                       : !strcasecmp(nome,"COMPLETA") ? 29
+                       : !strcasecmp(nome,"GLOBAL") ? 30 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -5373,6 +5374,15 @@ static int le_join(const char **pp, const char *tab_esq){
     return 1;
 }
 
+
+/* a ultramétrica dos endereços, no banco: a profundidade da primeira divergência
+ * contada do bit MAIS significativo --- a def:arvore da aranha. */
+static int qz_prof_bits(long x, long y, int bits){
+    if(x == y) return bits;
+    for(int i = 0; i < bits; i++)
+        if(((x >> (bits-1-i)) & 1L) != ((y >> (bits-1-i)) & 1L)) return i;
+    return bits;
+}
 
 static int varre(const char *resto, int acao){
     set_anula = 0;                     /* antes do parse: é ele que a levanta */
@@ -7738,6 +7748,129 @@ static int varre(const char *resto, int acao){
                " endereços de %d bits · %s\n", vale, tot, estrito, nl, bits,
                falha == 0 ? "a régua DESCE: a leitura serve"
                           : "a régua NÃO desce: a leitura não serve");
+        return 1;
+    }
+
+    if(acao == ACAO_MARCA && mat_op == 30){
+        /* ── GLOBAL: o cor:global executado sobre uma tabela.
+         * Cada COLUNA é uma representação do mesmo objecto, cada LINHA um
+         * objecto. O corolário pede que cada representação seja reversível ---
+         * e essa hipótese verifica-se, não se supõe. Devolve, por passo da
+         * cadeia, o custo D = 2^{−q}; a ponta R_0→R_k; se a ponta é dominada
+         * pelo pior passo; e a ultramétrica HERDADA por cada representação, que
+         * é a peça que interessa a quem tem um corpo para completar: a régua não
+         * se constrói no corpo, herda-se pela bijeção. */
+        if(ncols < 2){
+            printf("erro: o global compara REPRESENTAÇÕES --- é preciso pelo menos"
+                   " duas colunas, e a tabela tem %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "global needs at least two representations, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj < 2){
+            printf("erro: o global precisa de pelo menos dois objectos --- RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "global needs two objects"); }
+            return 0;
+        }
+        if(ncols > 8 || n_obj > 64){
+            printf("erro: o global segura 8 representações e 64 objectos --- vieram"
+                   " %ld e %ld. RECUSADA, e não truncada.\n", ncols, n_obj);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "global: %ld reprs x %ld objects exceed 8x64", ncols, n_obj); }
+            return 0;
+        }
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i))
+            for(long c = 0; c < ncols; c++)
+                if(!bit_le(S_PRES, i*ncols + c)){
+                    printf("erro: célula ausente na linha %ld --- um buraco não é um"
+                           " endereço. RECUSADA.\n", i);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "global: missing cell at row %ld", i); }
+                    return 0;
+                }
+        /* lê as representações: coluna c, objecto k */
+        static long RG[8][64];
+        long k = 0;
+        for(long i = 0; i < nrows && k < 64; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            for(long c = 0; c < ncols; c++){
+                long nu, de; celula_qz(i, c, ncols, &nu, &de);
+                RG[c][k] = (de == 1) ? nu : (nu * 1000 + de);   /* endereço inteiro */
+            }
+            k++;
+        }
+        int bits = 40;
+        /* (1) a hipótese: cada representação é reversível? */
+        long rev = 0;
+        for(long c = 0; c < ncols; c++){
+            int ok_c = 1;
+            for(long i = 0; i < k && ok_c; i++) for(long j = 0; j < i; j++)
+                if(RG[c][i] == RG[c][j]){ ok_c = 0; break; }
+            if(ok_c) rev++;
+        }
+        if(rev != ncols){
+            printf("erro: %ld das %ld representações NÃO são reversíveis --- o corolário"
+                   " não se aplica, e supor a hipótese seria a fraude. RECUSADA.\n",
+                   ncols - rev, ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "global: %ld of %ld representations are not reversible",
+                         ncols - rev, ncols); }
+            return 0;
+        }
+        /* (4) o custo de cada passo, e a ponta */
+        int pior = bits;
+        for(long c = 1; c < ncols; c++){
+            int q = bits;
+            for(long i = 0; i < k; i++){
+                int p2 = qz_prof_bits(RG[c-1][i], RG[c][i], bits);
+                if(p2 < q) q = p2;
+            }
+            if(q < pior) pior = q;
+        }
+        int ponta = bits;
+        for(long i = 0; i < k; i++){
+            int p2 = qz_prof_bits(RG[0][i], RG[ncols-1][i], bits);
+            if(p2 < ponta) ponta = p2;
+        }
+        int domina = (ponta >= pior);
+        /* a ultramétrica HERDADA: violações e estritos na primeira representação */
+        long viola = 0, estrito = 0;
+        for(long i = 0; i < k; i++) for(long j = 0; j < k; j++) for(long m = 0; m < k; m++){
+            int a2 = qz_prof_bits(RG[0][i], RG[0][j], bits);
+            int b2 = qz_prof_bits(RG[0][j], RG[0][m], bits);
+            int c2 = qz_prof_bits(RG[0][i], RG[0][m], bits);
+            int mn = a2 < b2 ? a2 : b2;
+            if(c2 < mn) viola++; else if(c2 > mn) estrito++;
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "reversiveis");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "q_pior_passo");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "q_ponta");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "domina");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "ultra_viola");
+            snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "ultra_estrito");
+            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[3] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", rev);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%d", pior);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%d", ponta);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", domina ? "sim" : "nao");
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%ld", viola);
+            snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%ld", estrito);
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("global: %ld representações reversíveis · pior passo 2^-%d · ponta 2^-%d ·"
+               " domina %s · ultramétrica herdada: %ld violam, %ld estritos\n",
+               rev, pior, ponta, domina ? "sim" : "nao", viola, estrito);
         return 1;
     }
 

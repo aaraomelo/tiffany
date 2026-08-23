@@ -1911,6 +1911,81 @@ conta. Um corpo já completo devolve zero linhas --- a resposta certa, não um e
 o que falta não cabe na saída o motor \textbf{recusa e diz quanto}, em vez de truncar:
 truncar seria responder «é este o corpo completo» sobre uma parte dele.
 
+\section{Completar um corpo é dar-lhe representação reversível: a régua vem atrás}
+\label{sec:completa-global}
+
+Todo o trabalho de completar os corpos deste catálogo passa por \emph{um} enunciado, e é o
+\textbf{corolário global} da \emph{aranha}:
+
+\begin{quote}
+\emph{Todo objecto que admite decomposição finita nas coordenadas da escada herda um
+endereçamento reversível. Quaisquer duas representações reversíveis do mesmo objecto são
+ligadas por uma travessia efectiva; e, sob a ultramétrica dos endereços, o custo de qualquer
+composição é dominado pelo maior custo entre os seus passos.}
+\end{quote}
+
+\noindent E dele sai a peça que muda o trabalho de natureza:
+
+\begin{quote}
+\textbf{A ultramétrica vive no índice, e a bijeção transporta-a:}
+\[
+  d_X(x,y)\;:=\;d_I\bigl(R(x),R(y)\bigr).
+\]
+Como $R$ é bijecção, $d_X$ é métrica; como $d_I$ é ultramétrica, $d_X$ é ultramétrica --- a
+desigualdade forte atravessa sem se degradar porque só usa a \emph{igualdade} dos valores,
+que a bijecção preserva.
+\end{quote}
+
+\noindent Logo \textbf{não se constrói régua nenhuma no corpo}. Completar um corpo do
+catálogo é dar-lhe uma representação reversível; a régua vem atrás, e vem completa.
+
+\subsection*{A operação, executada}
+
+O corolário dá a operação em cinco passos --- endereça, toma o destino da tarefa, aplica
+$R_d\circ R_o^{-1}$, mede $D$, absorve os passos pequenos --- e ela está no motor:
+\[
+  \texttt{SELECT global(*) FROM C}
+\]
+com cada \emph{coluna} uma representação e cada \emph{linha} um objecto. Medido sobre os
+racionais reduzidos, com três representações (o par $(p,q)$, o par invertido, a cifra
+contínua):
+
+\begin{center}\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+representações reversíveis & $3$ de $3$\\
+pior passo & $2^{-33}$\\
+a ponta $R_0\to R_2$ & $2^{-33}$\\
+domina & \textbf{sim}\\
+\midrule
+ultramétrica herdada: violações & $\mathbf 0$\\
+\quad triplos estritos & $40$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{E a hipótese verifica-se, não se supõe.} Uma coluna que funda dois objectos não é
+representação, e o motor \textbf{recusa} --- responder na mesma seria dar por verificada a
+única hipótese que o corolário tem. Medido: a leitura que esquece o denominador põe $106$
+pares distintos à distância zero, e aí não há métrica, quanto mais ultramétrica.
+
+\paragraph{O que o corolário NÃO dá.} Duas coisas, e ambas medidas:
+\begin{itemize}\itemsep2pt
+\item \textbf{A absorção não manda reordenar.} Trocada a ordem dos intermediários, o pior
+passo não muda --- o máximo é simétrico ---, logo dele não sai «pagar primeiro o de custo
+máximo»: isso exigiria os passos serem operacionalmente comutáveis, e o paper di-lo em letra
+própria.
+\item \textbf{Endereçar é geral; operar é particular.} A operação transporta-se por
+conjugação e continua específica do objecto.
+\end{itemize}
+
+\medido{\code{lib/global.h}, com \code{tests/global.c} --- as duas representações
+reversíveis dos $43$ racionais reduzidos, a travessia a fechar em $43/43$, a régua do
+catálogo confirmada ($7/2$ e $7/3$ divergem no primeiro termo, $22/7$ partilha o $3$), a
+desigualdade da cadeia, e a ultramétrica herdada com $0$ violações e $26\,488$ triplos
+estritos em \emph{ambas} as representações. E \code{tests/pgwire.c} §W174 --- a mesma coisa
+pelo fio, com a recusa quando a hipótese falha.}
+
 \subsection*{E a entrada do catálogo não é um nome apanhado na prosa: é o par}
 
 Varrer a prosa por «corpo X» dava $187$ candidatos e nenhum critério limpo para os separar
