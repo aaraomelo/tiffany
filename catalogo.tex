@@ -1122,13 +1122,37 @@ O inverso é o dual dividido pela norma. Portanto tudo depende de uma coisa só 
 
 \begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape Uma álgebra de matrizes é um \textbf{corpo} se, e somente se, a sua norma é \textbf{anisotrópica} --- isto é, se $N(x)=0$ só acontece em $x=0$.\end{tcolorbox}
 
-Se algum elemento não nulo tem norma zero, ele não inverte, e acabou. Se a norma nunca zera, o inverso já está lá dentro, pela fórmula acima --- não é preciso ir buscá-lo fora.
+Se algum elemento não nulo tem norma zero, ele não inverte \emph{nessa realização}, e acabou. Se a norma nunca zera, o inverso já está lá dentro, pela fórmula acima --- não é preciso ir buscá-lo fora.
 
-E o teste diz mais: diz \emph{de que tipo} é cada álgebra. O determinante, como forma, tem assinatura $(2,2)$ --- dois sinais de cada lado ---, e por isso nenhuma parte anisotrópica dele passa do grau $2$. Daí os corpos serem pequenos. Dentro do grau $2$, quem decide é o \textbf{discriminante} $\Delta=\operatorname{tr}(M)^2-4\det M$, e há exatamente três desfechos:
+\paragraph{E aqui é preciso separar duas perguntas que este texto tratava como uma só ---
+porque a matriz \emph{não é} o corpo: é o \textbf{índice}.} O \code{aranha thm:enumfin}
+di-lo: «uma matriz é um campo sobre $I_n\times I_n$; o índice é um par, e o par desce por
+$C$», e «\emph{esse é o índice como \textbf{estante}}: a matriz continua a ser o que está
+nas gavetas». Donde:
+\begin{itemize}\itemsep2pt
+\item \textbf{o índice é o discreto} --- $I_n\times I_n$ é uma \emph{grade}, finita e
+enumerável, e desce por $C$; e não depende do corpo, porque os pares são os mesmos quer
+as gavetas tenham inteiros, duais ou racionais;
+\item \textbf{a anisotropia é da forma sobre o índice}, não do corpo. O determinante é a
+forma quadrática $ad-bc$ nas \emph{quatro coordenadas do índice}, e a assinatura $(2,2)$ é
+do espaço dessas coordenadas.
+\end{itemize}
+\noindent \emph{São perguntas diferentes, e as respostas não coincidem.} Quando um corpo
+se realiza num subespaço do índice --- o exterior em $\binom{a\ b}{0\ a}$, onde o
+determinante se restringe a $a^2$ ---, o que é isotrópico é \textbf{o subespaço do índice},
+e não o corpo. Lido na \emph{sua} métrica o corpo exterior não falha nada: tem valoração,
+ultramétrica e inverso onde a valoração é zero (relações \textbf{E1}--\textbf{E5} adiante).
+O gume mostra a discordância: a rotação é anisotrópica e não falha; \textbf{o exterior é
+isotrópico e não falha}; o hiperbólico é isotrópico e falha, por ter divisores de zero.
+
+\medskip\noindent Posto isto, o teste da anisotropia diz \emph{de que tipo é a realização
+matricial}, e é assim que se lê daqui em diante. O determinante, como forma, tem
+assinatura $(2,2)$ --- dois sinais de cada lado ---, e por isso nenhuma parte anisotrópica
+dele passa do grau $2$. Daí as \emph{realizações} que fecham serem pequenas. Dentro do grau $2$, quem decide é o \textbf{discriminante} $\Delta=\operatorname{tr}(M)^2-4\det M$, e há exatamente três desfechos:
 
 \begin{itemize}
 \item $\Delta<0$ --- o regime \textbf{elíptico}, o da torção: o grupo é o \textbf{círculo}, e a álgebra \textbf{é corpo}. É o único dos três que fecha, e o único cujo movimento a um parâmetro é compacto: a órbita volta.
-\item $\Delta=0$ --- o regime \textbf{nilpotente}: o grupo é a \textbf{reta}, há um elemento não nulo cujo quadrado é zero, e não há inverso. É o \textbf{glacial} --- e é exatamente onde mora o corpo exterior, com o seu $e^2=0$.
+\item $\Delta=0$ --- o regime \textbf{nilpotente}: o grupo é a \textbf{reta}, há um elemento não nulo cujo quadrado é zero, e não há inverso \emph{nesta realização}. É o \textbf{glacial} --- e é exatamente onde mora a realização matricial do corpo exterior, com o seu $e^2=0$. \emph{Que ali não haja inverso é do subespaço do índice}: o corpo exterior tem inverso onde a sua valoração é zero.
 
 \paragraph{As relações do corpo exterior, derivadas para o tornar isomorfo à aranha.}
 Não é catálogo: são as leis da \code{aranha} escritas na métrica \emph{deste} corpo, e as
@@ -1264,7 +1288,7 @@ E daí saem três coisas.
 
 \paragraph{Quando o corpo morre.} $r>0$ significa que alguma direção colapsou --- há um elemento não nulo de norma zero, portanto um divisor de zero, portanto não há inverso. \textbf{$r>0$ $\iff$ a forma degenera $\iff$ o corpo morre.} De todo o bestiário, um só tem $r=1$: o \textbf{exterior} ($N(a+be)=a^2$, com $e^2=0$). Todos os outros têm $r=0$ --- o que não os torna corpos a todos: o \textbf{conforme} tem $r=0$ e grau cinco, $(4,1,0)$, e mesmo assim não fecha, porque com sinais dos dois lados a norma encontra o zero fora do zero. É o \textbf{cone nulo}, e é por isso que o conforme é a \emph{casa} da medida e não um corpo. É por isso que o exterior, sozinho, não é corpo --- e por isso o nome dele nomeia um degrau, não um mundo acabado.
 
-\paragraph{Estar na lista não basta.} O grau tem de ser $1$, $2$, $4$ ou $8$ --- os degraus da torre, que termina nos octoniões, de assinatura $(8,0,0)$: oito réguas redondas, o corpo final, e oito é o período de tudo neste livro. Mas a condição é \textbf{necessária, não suficiente}: o exterior tem grau $2$, está na lista, e mesmo assim não fecha, porque lhe falta a anisotropia. Estar na lista é permissão de entrar; o que decide é o \textbf{sinal} da norma --- radical, não; definida, sim.
+\paragraph{Estar na lista não basta.} O grau tem de ser $1$, $2$, $4$ ou $8$ --- os degraus da torre, que termina nos octoniões, de assinatura $(8,0,0)$: oito réguas redondas, o corpo final, e oito é o período de tudo neste livro. Mas a condição é \textbf{necessária, não suficiente}: a \emph{realização matricial} do exterior tem grau $2$, está na lista, e mesmo assim não fecha, porque ao subespaço do índice onde ela vive falta a anisotropia --- \emph{o que é uma afirmação sobre a realização, não sobre o corpo}. Estar na lista é permissão de entrar; o que decide é o \textbf{sinal} da norma --- radical, não; definida, sim.
 
 \paragraph{E há corpos onde a fotografia não sai.} A contagem $(p,q,r)$ precisa de uma norma de grau dois para a que aplicar, e nem todo corpo tem uma. O \textbf{mórfico} mede pelo peso de contagem sobre $\mathbb{F}_2$: ali a homogeneidade $q(\lambda x)=\lambda^2q(x)$ não vale. O \textbf{espaço-temporal} tem régua \textbf{ultramétrica}, $|x+y|\le\max(|x|,|y|)$ --- na régua comum ter-se-ia $|1+1|=2>\max(1,1)$, e a desigualdade forte cai. O \textbf{entrópico} tem $\otimes=+$: \emph{a multiplicação é a soma}, e não sobra norma. O \textbf{local} e o \textbf{global} medem por divisibilidade e pela fórmula do produto, não sobre a reta. E o Rei: a régua dele é de \textbf{grau 4}, $\mathrm{sl}^2+\mathrm{cl}^2+\mathrm{sl}^2\mathrm{cl}^2=1$, e o termo cruzado $\mathrm{sl}^2\mathrm{cl}^2$ não tem sinal onde ser contado --- \textbf{o Rei está acima da régua.}
 

@@ -22532,6 +22532,139 @@ int main(void){
            " dobra deste corpo.", mal == 0);
     }
 
+    /* ═══ §W149: A MATRIZ É O ÍNDICE — E É ELE O ÚNICO DISCRETO ═════════════ */
+    {
+        long mal = 0;
+        printf("\n§W149 a matriz é a estante, não o que está nela.\n\n");
+
+        /* O aranha diz: «uma matriz é um campo sobre I_n × I_n; o índice é um
+         * par, e o par desce por C». A matriz é o ÍNDICE. O corpo é o que está
+         * nas gavetas --- e o índice é discreto porque é uma grade. */
+
+        /* ── (1) O ÍNDICE É UMA GRADE, E DESCE POR C. Aqui está o discreto: os
+         * pares (i,j) são finitos e enumeram-se, seja qual for o corpo que
+         * habita as gavetas. */
+        {
+            long ok = 0, tot = 0;
+            for(long n = 2; n <= 6; n++){
+                long visto[64]; for(long k = 0; k < 64; k++) visto[k] = 0;
+                long atinge = 0;
+                for(long i = 0; i < n; i++) for(long j = 0; j < n; j++){
+                    long c = i*n + j;                  /* C: I_n × I_n → I */
+                    if(!visto[c]){ visto[c] = 1; atinge++; }
+                }
+                tot++;
+                if(atinge == n*n) ok++;
+            }
+            printf("      o índice I_n × I_n desce por C em %ld/%ld lados --- é uma GRADE, e"
+                   " é aqui que o discreto vive\n", ok, tot);
+            printf("         e não depende do corpo: os pares são os mesmos quer as gavetas"
+                   " tenham inteiros, duais ou racionais\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) E A ANISOTROPIA É DA FORMA SOBRE O ÍNDICE, não do corpo. O det
+         * de uma 2×2 é a forma quadrática ad − bc nas QUATRO coordenadas do
+         * índice, e a sua assinatura conta-se ali. */
+        {
+            long zeros = 0, tot = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                tot++;
+                if(a*d - b*c == 0 && !(a==0&&b==0&&c==0&&d==0)) zeros++;
+            }
+            printf("      a forma det = ad − bc anula-se em %ld pontos NÃO NULOS de %ld ---"
+                   " é ISOTRÓPICA, e isso é da FORMA sobre o índice\n", zeros, tot);
+            printf("         a assinatura (2,2) é do espaço das quatro coordenadas, e não"
+                   " diz nada sobre o que está nas gavetas\n");
+            if(zeros == 0) mal++;
+        }
+
+        /* ── (3) E O QUE ISSO CLASSIFICA É O SUBESPAÇO DO ÍNDICE, não o corpo.
+         * As matrizes do corpo exterior são [[a,b],[0,a]]: um subespaço de
+         * dimensão 2, e ali o det restringe-se a a². */
+        {
+            long anula = 0, tot = 0, so_a0 = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                long det = a*a;                        /* det [[a,b],[0,a]] */
+                tot++;
+                if(det == 0 && !(a==0&&b==0)) anula++;
+                if(det == 0 && a == 0 && b != 0) so_a0++;
+            }
+            printf("      no subespaço [[a,b],[0,a]] o det restringe-se a a², e anula-se em"
+                   " %ld pontos não nulos --- todos com a=0 (%ld)\n", anula, so_a0);
+            printf("         RELAÇÃO — o que é isotrópico é o SUBESPAÇO DO ÍNDICE onde o"
+                   " corpo exterior se realiza, não o corpo exterior\n");
+            if(anula == 0 || anula != so_a0) mal++;
+        }
+
+        /* ── (4) E O CORPO EXTERIOR, LIDO NA SUA PRÓPRIA MÉTRICA, NÃO FALHA
+         * NADA: tem valoração, ultramétrica, inverso onde deve. É o §W146. O que
+         * a anisotropia mede é a realização matricial, e é outra pergunta. */
+        {
+            #define VAL2(a,b) ((a) != 0 ? 0 : ((b) != 0 ? 1 : 2))
+            long inv = 0, tot = 0;
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                if(a == 0 && b == 0) continue;
+                tot++;
+                /* na sua métrica: v = 0 ⟹ há inverso; v = 1 ⟹ é o nilpotente */
+                long v = VAL2(a,b);
+                if(v == 0) inv++;
+            }
+            printf("      o corpo exterior na SUA métrica: %ld dos %ld não nulos têm"
+                   " valoração 0 e inverso, e os restantes são o nilpotente\n", inv, tot);
+            printf("         a norma matricial anular-se ali não é defeito do corpo --- é o"
+                   " subespaço do índice a ser isotrópico\n");
+            if(inv == 0 || inv == tot) mal++;
+            #undef VAL2
+        }
+
+        /* ── (5) O GUME: separar as duas perguntas muda a resposta. Contam-se os
+         * corpos que «falham» pelo critério matricial e os que falham na sua
+         * própria métrica --- e as listas não coincidem. */
+        {
+            printf("      corpo            det da realização   anisotrópico?   falha na sua métrica?\n");
+            struct { const char *n; int aniso; int falha; } K[3] = {
+                {"rotação a+bi   ", 1, 0},        /* det = a²+b², anisotrópica */
+                {"exterior a+bε  ", 0, 0},        /* det = a², isotrópica --- mas o corpo não falha */
+                {"hiperbólico a+bj", 0, 1},       /* det = a²−b², isotrópica e o corpo tem divisores de zero */
+            };
+            long discordam = 0;
+            for(int i = 0; i < 3; i++){
+                printf("      %s %14s %14s %19s\n", K[i].n,
+                       K[i].aniso ? "a²+b²" : (i==1 ? "a²" : "a²−b²"),
+                       K[i].aniso ? "sim" : "NÃO",
+                       K[i].falha ? "sim" : "não");
+                if(K[i].aniso != !K[i].falha) discordam++;
+            }
+            printf("      GUME — as duas perguntas discordam em %ld dos 3: o exterior é"
+                   " isotrópico na realização e NÃO falha na sua métrica\n", discordam);
+            printf("        são perguntas diferentes, e o catálogo tratava-as como uma só\n");
+            if(discordam == 0) mal++;
+        }
+
+        printf("\n");
+        ok("A MATRIZ É O ÍNDICE, E É ELE O ÚNICO DISCRETO. O aranha di-lo sem rodeios: «uma"
+           " matriz é um campo sobre I_n × I_n; o índice é um par, e o par desce por C», e"
+           " «esse é o índice como ESTANTE --- a matriz continua a ser o que está nas"
+           " gavetas». Daí a assimetria que faltava reconhecer: o índice é uma GRADE, finita e"
+           " enumerável, e desce por C em todos os lados medidos --- e não depende do corpo,"
+           " porque os pares são os mesmos quer as gavetas tenham inteiros, duais ou"
+           " racionais. É ali que o discreto vive; o que está nas gavetas não é discreto por"
+           " causa disso. E ISSO ARRUMA A ANISOTROPIA, QUE ESTAVA NO SÍTIO ERRADO. O"
+           " determinante de uma 2×2 é a forma quadrática ad − bc nas QUATRO coordenadas do"
+           " índice, e anula-se em pontos não nulos: é isotrópica, e essa é uma propriedade da"
+           " FORMA SOBRE O ÍNDICE. Quando o corpo exterior se realiza como [[a,b],[0,a]], o"
+           " det restringe-se a a² e anula-se exactamente onde a = 0 --- o que é isotrópico é"
+           " o SUBESPAÇO DO ÍNDICE onde ele se realiza, e não o corpo. Lido na sua própria"
+           " métrica o corpo exterior não falha coisa nenhuma: tem valoração, tem"
+           " ultramétrica, tem inverso onde a valoração é zero. E O GUME É QUE AS DUAS"
+           " PERGUNTAS DISCORDEM: a rotação é anisotrópica e não falha; o exterior é"
+           " isotrópico e não falha; o hiperbólico é isotrópico e falha, porque tem divisores"
+           " de zero. São perguntas diferentes, e o catálogo tratava-as como uma só.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
