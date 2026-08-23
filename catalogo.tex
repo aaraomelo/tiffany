@@ -1403,6 +1403,40 @@ $\lvert A^{12}\rvert=1$, a parabólica linear em $12$ e a hiperbólica exponenci
 $75\,025$; $(A-I)^2=0$ na parabólica; e o $\Delta$ a prever a dinâmica em $7/7$ traços sem
 iteração.}
 
+\paragraph{E tudo isto está na \emph{lib} --- não no medidor.} O que precede é teoria e
+medição; para servir, tem de ser \textbf{chamável}. O \code{lib/triade.h} expõe-o como o
+cliente o usa, e em inteiros:
+\begin{itemize}\itemsep2pt
+\item \code{Tri} --- \emph{um} tipo para as três faces, com \code{tri\_rot},
+      \code{tri\_ext}, \code{tri\_hip}; a soma, o produto, o conjugado e a norma
+      $N=a^2-tb^2$;
+\item \code{tri\_disc} --- o $\Delta=4tb^2$, e \code{tri\_dinamica} a dizer se a órbita
+      \emph{volta}, \emph{desliza} ou \emph{foge}, \textbf{sem se iterar};
+\item \code{tri\_inverso} --- exacto onde $N=\pm1$, e que \textbf{recusa} onde não existe:
+      devolve $0$ e não toca no destino, \emph{o cliente sabe que não há em vez de receber
+      um número inventado};
+\item \code{tri\_val} --- a valoração do exterior, $v\in\{0,1,\infty\}$, que é a régua da
+      \code{aranha def:arvore} naquele corpo;
+\item \code{tri\_medias\_fecham} e \code{tri\_medias\_ordem} --- o trio $g^2=hm$ e a ordem,
+      exactos e \emph{sem uma raiz};
+\item \code{tv\_travessia} --- a bijeção $T=S\circ R^{-1}$ escrita, com \code{tv\_preco} a
+      dar $q$ em $O(n)$ comparações, e \code{tv\_prof} a profundidade;
+\item \code{tv\_criterio} --- as duas metades, recebendo a \emph{igualdade do corpo} como
+      argumento, porque é ela que decide e não a dos parâmetros.
+\end{itemize}
+
+\medskip\noindent E uma relação que só apareceu ao pôr a valoração na lib: \textbf{ela
+\emph{satura}}. Em $\mathbb{Z}[\varepsilon]$ vale $v(xy)=v(x)+v(y)$ enquanto a soma cabe no
+grau de nilpotência, e acima dele cai em $\infty$ --- \emph{$\varepsilon^2=0$ é exactamente
+o que faz $1+1$ dar $\infty$ em vez de $2$}. A primeira escrita do medidor escondia-o.
+
+\medido{\code{tests/triade.c} --- a lib medida como o cliente a chama: as três faces com
+$\Delta$ e dinâmica; $N(xy)=N(x)N(y)$ nas três; o inverso exacto em $26$ casos e recusado
+em $217$, sem inventar nenhum; a ultramétrica do exterior em $117\,649/117\,649$ triplos
+com a valoração a saturar em $36$; $g^2=hm$ em $900/900$; a travessia a atingir $625/625$
+com volta completa e o preço lido em $4$ comparações; e o critério a reprovar a leitura
+crua do racional e a aprovar a reduzida.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

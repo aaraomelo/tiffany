@@ -6219,6 +6219,35 @@ $56$ e $140$ elementos contra $0$ e $0$.}
         {as fibras contadas antes e depois; a regra corrida sobre os já completos}
         {\code{tests/pgwire.c} §W145}
 
+\subsection*{E vai para a lib, senão não serve}
+
+\noindent Medir prova; \emph{chamar} é o que serve. O \code{lib/triade.h} leva a tríade e a
+travessia para onde o cliente as usa, e em inteiros: \code{Tri} como \emph{um} tipo para as
+três faces, com $N=a^2-tb^2$ e $\Delta=4tb^2$; \code{tri\_dinamica} a dizer se a órbita
+\emph{volta}, \emph{desliza} ou \emph{foge} \textbf{sem se iterar}; \code{tri\_val} com a
+régua do exterior; as três médias sem uma raiz; \code{tv\_travessia} com \code{tv\_preco}
+em $O(n)$; e \code{tv\_criterio}, que recebe a \emph{igualdade do corpo} como argumento
+--- porque é ela que decide.
+
+\medskip\noindent\textbf{E a lei da recusa vale aqui como no motor}: \code{tri\_inverso}
+devolve $0$ e \emph{não toca no destino} quando a norma não é $\pm1$. O cliente fica a
+saber que não há, em vez de receber um número inventado --- é a mesma disciplina do
+\code{qz\_perdeu} e das consultas recusadas.
+
+\medskip\noindent E pôr a valoração na lib fez aparecer uma relação que o medidor
+escondia: \textbf{ela satura}. Vale $v(xy)=v(x)+v(y)$ enquanto a soma cabe no grau de
+nilpotência, e acima dele cai em $\infty$ --- \emph{$\varepsilon^2=0$ é o que faz $1+1$ dar
+$\infty$ e não $2$}.
+
+\medido{\code{tests/triade.c} --- $7$ unidades sobre a lib chamada como o cliente a chama:
+as três faces; a norma multiplicativa; o inverso exacto em $26$ e recusado em $217$; a
+ultramétrica em $117\,649/117\,649$ com $36$ a saturar; $g^2=hm$ em $900/900$; a travessia
+em $625/625$ com volta; e o critério a separar as duas leituras do racional.}
+
+\colunas{\code{catalogo} §1 (a lib), \code{aranha prop:travessia}, \code{thm:leidisc}}
+        {\code{lib/triade.h}: \code{Tri}, \code{tri\_disc}, \code{tv\_travessia}, \code{tv\_criterio}}
+        {\code{tests/triade.c}}
+
 \subsection*{As duas metades do critério, e as duas falhas duais}
 
 \noindent A regra corre sobre os corpos \emph{sem os abrir}, e é isso que a torna
