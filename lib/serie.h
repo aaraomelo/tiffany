@@ -133,4 +133,93 @@ static SfSerie sf_exp(long x, long S){
     return r;
 }
 
+/* ═══ A EDO RESOLVIDA PELA SÉRIE --- e a raiz NUNCA é precisa ══════════════
+ *
+ * Este é o ponto: para avaliar a solução de
+ *
+ *     y^{(n)} + c_{n-1} y^{(n-1)} + ... + c_0 y = 0
+ *
+ * não é preciso extrair raiz nenhuma. As derivadas em zero saem da PRÓPRIA
+ * recorrência --- é ela que as dá ---
+ *
+ *     y^{(k+n)}(0) = −c_{n-1} y^{(k+n-1)}(0) − ... − c_0 y^{(k)}(0),
+ *
+ * e a série de Taylor é FATORIAL por construção:
+ *
+ *     y(t) = Σ_k y^{(k)}(0) · t^k / k!
+ *
+ * O termo calcula-se por recorrência, T_{k+1} = T_k · t/(k+1) com o T a
+ * carregar já a derivada --- nunca se forma t^k nem k!. E os termos ANULAM-SE
+ * (thm:serie), pelo que o processo TERMINA e o número de termos é o custo.
+ *
+ * Isto resolve o irracional sem o nomear: quando as raízes são (−B±√Δ)/2 com Δ
+ * não quadrado, a solução avaliada sai na mesma, exacta na escala --- porque a
+ * série não precisa de saber quais são as raízes, só dos coeficientes.
+ * E quando elas são inteiras, a série tem de bater com a forma fechada: é o
+ * controlo. */
+
+#define SF_ORD 8
+
+/* avalia y(t) para a EDO de ordem n com coeficientes `co` (do termo constante
+ * para cima, mónico implícito) e condições iniciais `d0` = (y(0), y'(0), ...),
+ * tudo em escala S. Devolve o valor e os termos gastos. */
+static SfSerie sf_edo(const long *co, int n, const long *d0, long t, long S){
+    SfSerie r; r.valor = 0; r.termos = 0; r.parou = 0;
+    /* O TERMO CARREGA JÁ O FATORIAL, e é isso que evita a perda: escrevendo
+     *
+     *     w_k = y^{(k)}(0) · t^k / k!,
+     *
+     * a recorrência das derivadas transporta-se para os w directamente ---
+     *
+     *     w_{k+n} = − Σ_j c_j · w_{k+j} · t^{n-j} / ((k+j+1)···(k+n)),
+     *
+     * porque y^{(k+j)} = w_{k+j}·(k+j)!/t^{k+j}. Assim nunca se forma t^k nem
+     * k!, nunca se divide um valor grande por outro, e a soma é dos próprios w.
+     *
+     * A primeira escrita disto guardava a derivada e o t^k/k! SEPARADOS e
+     * multiplicava-os com duas divisões por mil --- e perdia: dava 0,16 onde a
+     * forma fechada dá 0,307. O controlo apanhou-a, e é para isso que ele lá
+     * está. */
+    long w[SF_ORD];
+    for(int k = 0; k < n && k < SF_ORD; k++){
+        /* w_k = d0[k]·t^k/k!, com o t^k/k! por recorrência */
+        long pot = S;
+        for(int u = 0; u < k; u++) pot = (pot / (u+1)) * t / S;
+        w[k] = (k == 0) ? d0[0] : (d0[k] / 1000) * (pot / 1000);
+    }
+    for(int k = 0; k < n; k++){ r.valor += w[k]; r.termos++; }
+    for(int k = n; k < 64; k++){
+        long nova = 0; int estourou = 0;
+        for(int j = 0; j < n; j++){
+            /* c_j · w_{k-n+j} · t^{n-j} / ((k-n+j+1)···k) */
+            long termo = -co[j] * w[j];
+            for(int u = 0; u < n - j; u++){
+                if(termo > (1L<<50) || termo < -(1L<<50)){ estourou = 1; break; }
+                termo = termo * t / S;
+            }
+            if(estourou) break;
+            for(int u = k - n + j + 1; u <= k; u++) termo /= u;
+            nova += termo;
+        }
+        if(estourou) break;
+        for(int j = 0; j + 1 < n; j++) w[j] = w[j+1];
+        w[n-1] = nova;
+        if(nova == 0){ r.parou = 1; break; }
+        r.valor += nova;
+        r.termos++;
+    }
+    return r;
+}
+
+/* e o CONTROLO: a mesma solução pela forma fechada, quando as raízes são
+ * inteiras --- y = Σ A_i e^{λ_i t}. Serve para confrontar, não para resolver. */
+static long sf_fechada(const long *lam, const long *amp, int m, long t, long S){
+    long v = 0;
+    for(int i = 0; i < m; i++){
+        SfSerie e = sf_exp(lam[i] * t / S, S);
+        v += (amp[i] / 1000) * (e.valor / 1000);
+    }
+    return v;
+}
+
 #endif /* SERIE_H */

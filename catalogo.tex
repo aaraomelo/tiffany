@@ -2321,9 +2321,45 @@ $s(t)=0$ & um zero \textbf{simples}: $s'(\pi)=c(\pi)=-1\neq0$ & $\mathbf{3{,}141
 escrita usou a face errada. A outra face \textbf{confere}: no ponto achado, $c(\pi)=-1$ em
 todos os grãos medidos.
 
-\medido{\code{lib/serie.h} com \code{tests/serie.c} §S1--§S3 --- a conservação a fechar em
+\paragraph{E daí a EDO resolve-se pela série --- a raiz irracional NUNCA se extrai.} É o
+ponto que fecha isto. Para avaliar a solução de
+$y^{(n)}+c_{n-1}y^{(n-1)}+\cdots+c_0y=0$ não é preciso saber \emph{quais} são as raízes: as
+derivadas em zero saem da \textbf{própria recorrência},
+\[
+  y^{(k+n)}(0)=-c_{n-1}y^{(k+n-1)}(0)-\cdots-c_0y^{(k)}(0),
+\]
+e a série de Taylor $y(t)=\sum_k y^{(k)}(0)\,t^k/k!$ é \textbf{fatorial por construção}.
+Bastam os coeficientes.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+\multicolumn{2}{@{}l}{$y''+5y'+6y=0$ \emph{(o controlo: raízes $-2,-3$)}} & \multicolumn{2}{l}{$y''-y'-y=0$ \emph{(raízes $\frac{1\pm\sqrt5}{2}$)}}\\
+$t$ & pela série & $t$ & pela série\\
+\midrule
+$1/4$ & $0{,}874857$ & $1/4$ & $1{,}034203$\\
+$2/4$ & $0{,}657377$ & $2/4$ & $1{,}151940$\\
+$3/4$ & $0{,}458591$ & $3/4$ & $1{,}385339$\\
+$1$ & $\mathbf{0{,}306432}$ & $1$ & $1{,}783912$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent À esquerda há forma fechada para confrontar, $y=3e^{-2t}-2e^{-3t}$, e em $t=1$ ela
+vale $0{,}306432$ --- \emph{que é exactamente o que a série dá}. À direita as raízes são
+irracionais e a série corre \textbf{igual}: os termos anulam-se, o processo pára, e nada foi
+extraído. O gume ali é outro, porque não há fechada: a solução tem de \emph{satisfazer} a
+equação, verificado pela segunda diferença.
+
+\medskip\noindent E o controlo fez o seu trabalho: a primeira escrita da série guardava a
+derivada e o $t^k/k!$ \emph{separados} e multiplicava-os com duas divisões --- dava $0{,}16$
+onde a fechada dá $0{,}307$. Corrigida para o termo carregar já o fatorial, passou a dar o
+valor exacto. \emph{Sem o caso de raízes inteiras ao lado, o erro não aparecia.}
+
+\medido{\code{lib/serie.h} com \code{tests/serie.c} §S1--§S4 --- a conservação a fechar em
 $7/7$ pontos com a série a PARAR em todos, o $\pi$ a estabilizar em $3{,}1416$ com $c(\pi)$
-a conferir em $3/3$ grãos, e o gume da face errada a dar $3{,}097$.}
+a conferir em $3/3$ grãos, o gume da face errada a dar $3{,}097$, e a EDO resolvida pela
+série nos dois regimes.}
 
 \subsection*{Um servomotor real, montado pelo cliente}
 

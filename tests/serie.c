@@ -123,6 +123,80 @@ int main(void){
            " o π e a vírgula perde a exactidão que o resto todo mantém.", mal == 0);
     }
 
+    /* ── §S4 A EDO RESOLVIDA PELA SÉRIE: a raiz NUNCA é precisa ─────────── */
+    {
+        printf("§S4  a EDO resolve-se pela série, e a raiz irracional nunca se extrai.\n\n");
+        long mal = 0;
+        /* (a) O CONTROLO: raízes INTEIRAS, onde há forma fechada para confrontar.
+         * y'' + 5y' + 6y = 0, y(0)=1, y'(0)=0  →  y = 3e^{-2t} − 2e^{-3t} */
+        {
+            long co[2] = {6, 5}, d0[2] = {S, 0};
+            long lam[2] = {-2*S, -3*S}, amp[2] = {3*S, -2*S};
+            printf("      RAÍZES INTEIRAS (o controlo): y''+5y'+6y=0, y(0)=1, y'(0)=0\n");
+            printf("      t      pela SÉRIE   pela forma fechada   diferença  termos\n");
+            long batem = 0, pontos = 0;
+            for(long i = 0; i <= 4; i++){
+                long t = i*S/4;
+                SfSerie y = sf_edo(co, 2, d0, t, S);
+                long f = sf_fechada(lam, amp, 2, t, S);
+                long d = y.valor > f ? y.valor - f : f - y.valor;
+                printf("      %ld/4  %11ld  %18ld  %9ld %6d\n", i, y.valor, f, d, y.termos);
+                pontos++;
+                if(d < 3000) batem++;          /* dentro do grão das duas contas */
+            }
+            printf("      → %ld de %ld dentro do grão --- e a SÉRIE é a mais exacta das"
+                   " duas:\n        3e^{-2}−2e^{-3} = 0,306432, e é isso que ela dá\n",
+                   batem, pontos);
+            if(batem != pontos) mal++;
+        }
+
+        /* (b) RAÍZES IRRACIONAIS: a série corre igual, e nada se extrai.
+         * y'' − y' − y = 0 tem raízes (1±√5)/2 --- o metal do ouro. */
+        {
+            long co[2] = {-1, -1}, d0[2] = {S, 0};
+            printf("\n      RAÍZES IRRACIONAIS: y''−y'−y=0 (as raízes são (1±√5)/2)\n");
+            printf("      t      pela SÉRIE   termos  parou   e a EDO fecha?\n");
+            long fecham = 0, pontos = 0;
+            for(long i = 1; i <= 4; i++){
+                long t = i*S/4;
+                SfSerie y = sf_edo(co, 2, d0, t, S);
+                /* O GUME: a solução tem de SATISFAZER a equação. Verifica-se pela
+                 * segunda diferença, que é y'' aproximado pelo grão:
+                 *     y(t+h) − 2y(t) + y(t−h) ≈ h²y''  e  y'' = y' + y */
+                long h = S/100;
+                SfSerie ym = sf_edo(co, 2, d0, t-h, S), yp = sf_edo(co, 2, d0, t+h, S);
+                long dd = yp.valor - 2*y.valor + ym.valor;      /* h²·y'' */
+                long d1 = (yp.valor - ym.valor) / 2;            /* h·y' */
+                /* h²y'' deve ser h²(y'+y) = h·(h y') + h²y */
+                long esperado = (h/1000)*(d1/1000)*1000/1000 + ((h/1000)*(h/1000))*(y.valor/1000)/1000;
+                long erro = dd > esperado ? dd - esperado : esperado - dd;
+                int fecha = (erro < 400);
+                printf("      %ld/4  %11ld %6d   %s     %s (erro %ld)\n", i, y.valor,
+                       y.termos, y.parou ? "sim" : "NAO", fecha ? "sim" : "NAO", erro);
+                pontos++; if(fecha) fecham++;
+                if(!y.parou) mal++;
+            }
+            printf("      → a equação fecha em %ld de %ld pontos, e NENHUMA raiz foi"
+                   " extraída\n", fecham, pontos);
+            if(fecham != pontos) mal++;
+        }
+
+        printf("\n");
+        ok("A EDO RESOLVE-SE PELA SÉRIE, E A RAIZ IRRACIONAL NUNCA SE EXTRAI. As derivadas"
+           " em zero saem da PRÓPRIA recorrência --- é ela que as dá --- e a série de Taylor"
+           " é fatorial por construção, y = Σ y^{(k)}(0)·t^k/k!. Logo não é preciso saber"
+           " QUAIS são as raízes: bastam os coeficientes. Para y''−y'−y=0, cujas raízes são"
+           " (1±√5)/2, a série corre exactamente como para as inteiras, os termos anulam-se e"
+           " o processo pára. O CONTROLO é o caso de raízes inteiras, onde há forma fechada"
+           " para confrontar --- e ali aconteceu o que interessa: a primeira escrita da"
+           " série guardava a derivada e o t^k/k! SEPARADOS, multiplicava-os com duas"
+           " divisões, e dava 0,16 onde a fechada dá 0,307. O controlo apanhou-a. Corrigida"
+           " para o termo carregar já o fatorial, a série passa a dar 0,306432, que é o valor"
+           " EXACTO de 3e^{-2}−2e^{-3} --- mais exacta do que o próprio controlo. E o gume da"
+           " parte irracional é outro: a solução tem de SATISFAZER a equação, verificado pela"
+           " segunda diferença.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -452,7 +452,7 @@ sem_chute 942e5653474e3f91 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 458155145c6d26d3 0
 semente bdf47d333634825f 0
-serie 4a46489e22c3e3a8 0
+serie 2c877e064f355543 0
 serie_phi 5bd6af9a92aaa5a7 0
 significado aff35c553960fdcb 0
 simula 8d47ff0fbbdab6f3 0
