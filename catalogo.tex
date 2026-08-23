@@ -1284,6 +1284,37 @@ três desigualdades a reduzirem-se a $(a-b)^2\ge0$ em $400/400$, com as médias 
 nos $20$ pares de $a=b$; as três curvas não vazias com a lei do grupo fechada em
 $696/696$; e a degenerescência em $t=0$ nos dois trios.}
 
+\paragraph{E há um trio \emph{dentro} de uma face --- as três ordens.} A tríade
+$t\in\{-1,0,+1\}$ dá as três \textbf{faces}. Dentro da face elíptica há outro trio, e o
+parâmetro é o \textbf{traço} --- \emph{duas letras que convém não confundir}: $t$ é
+$\omega^2$ e escolhe a face; $\tau$ é o traço e escolhe a ordem dentro dela.
+\begin{center}\small
+\begin{tabular}{@{}rlrr@{}}
+\toprule
+$\tau$ & polinómio & ordem $k$ & $\Delta=\tau^2-4$\\
+\midrule
+$-1$ & $\lambda^2+\lambda+1$ & $3$ & $-3$\\
+$0$ & $\lambda^2+1$ & $4$ & $-4$\\
+$+1$ & $\lambda^2-\lambda+1$ & $6$ & $-3$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent As três com $A^k=I$ e $\Delta<0$: \emph{vivem todas na face elíptica}. E
+\textbf{são três por contagem, não por escolha} --- são exactamente os $k>2$ com
+$\varphi(k)=2$, porque o grau do polinómio ciclotómico é $\varphi(k)$ e uma matriz
+$2\times2$ só aloja grau dois. O gume é o cinco: $\varphi(5)=4$ e não cabe; e o traço que
+a ordem cinco pediria satisfaz $\tau^2+\tau-1=0$, \emph{sem raiz inteira} --- é a
+restrição cristalográfica do \code{aranha lem:cristal} \textbf{contada} em vez de
+afirmada.
+
+\medskip\noindent\textbf{E os dois níveis encaixam}: o segundo trio vive \emph{dentro} do
+primeiro. Três faces, e três ordens dentro de uma delas --- cada nível com o seu
+parâmetro, e nenhum escolhido a dedo.
+
+\medido{o trio de dentro em \code{tests/pgwire.c} §W152 --- as três ordens com $A^k=I$ e
+$\Delta<0$ em $3/3$; $\varphi(k)=2$ a dar exactamente $\{3,4,6\}$ entre os $k>2$; e o gume
+do cinco, com $\varphi(5)=4$ e $\tau^2+\tau-1=0$ sem raiz inteira.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

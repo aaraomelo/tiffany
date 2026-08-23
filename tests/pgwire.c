@@ -22966,6 +22966,130 @@ int main(void){
            " é um objecto.", mal == 0);
     }
 
+    /* ═══ §W152: O TRIO DENTRO DA FACE — AS ORDENS {3,4,6} POR φ(k) = 2 ═════ */
+    {
+        long mal = 0;
+        printf("\n§W152 o trio de dentro: as três ordens da face elíptica.\n\n");
+
+        /* A tríade t ∈ {−1,0,+1} dá as três FACES. Dentro da face elíptica há
+         * outro trio, parametrizado pelo TRAÇO --- e convém não confundir as
+         * duas letras: t é ω², τ é o traço. */
+
+        /* ── (1) O TRIO {3,4,6} SAI DO TRAÇO τ ∈ {−1,0,+1}. Com det = +1, as
+         * raízes são e^{±iθ} com 2cos θ = τ, e a ordem é 2π/θ. */
+        {
+            printf("      τ (traço)  polinómio          ordem k   Δ = τ²−4\n");
+            long ok = 0, tot = 0;
+            struct { long tau, k; const char *pol; } T[3] = {
+                {-1, 3, "λ² + λ + 1"},
+                { 0, 4, "λ² + 1    "},
+                {+1, 6, "λ² − λ + 1"},
+            };
+            for(int i = 0; i < 3; i++){
+                long tau = T[i].tau, k = T[i].k;
+                long D = tau*tau - 4;
+                /* verifica-se a ordem: a matriz companheira [[0,−1],[1,τ]] elevada a k */
+                long a = 1, b = 0, c = 0, d = 1;        /* identidade */
+                for(long p = 0; p < k; p++){
+                    /* multiplicar por [[0,−1],[1,τ]] */
+                    long na = b, nb = -a + tau*b;
+                    long nc = d, nd = -c + tau*d;
+                    a = na; b = nb; c = nc; d = nd;
+                }
+                tot++;
+                int volta = (a == 1 && b == 0 && c == 0 && d == 1);
+                if(volta && D < 0) ok++;
+                printf("      %+ld        %s %8ld   %+ld  %s\n",
+                       tau, T[i].pol, k, D, volta ? "A^k = I" : "NÃO volta");
+            }
+            printf("      → %ld/3 com A^k = I e Δ < 0 --- as três ordens vivem TODAS na"
+                   " face elíptica, e o que as separa é o traço\n", ok, tot);
+            printf("         e as duas letras não se confundem: t é ω² e dá as FACES;"
+                   " τ é o traço e dá as ORDENS dentro de uma face\n");
+            if(ok != tot) mal++;
+        }
+
+        /* ── (2) E SÃO TRÊS POR UMA RAZÃO CONTÁVEL: são exactamente os k > 2 com
+         * φ(k) = 2 --- os únicos cujo polinómio ciclotómico tem grau dois, e por
+         * isso os únicos que cabem numa matriz 2×2. */
+        {
+            printf("      k    φ(k)   cabe em 2×2?\n");
+            long com2 = 0, tot = 0;
+            for(long k = 1; k <= 12; k++){
+                long phi = 0;
+                for(long j = 1; j <= k; j++){
+                    long x = j, y = k;
+                    while(y){ long t2 = x % y; x = y; y = t2; }
+                    if(x == 1) phi++;
+                }
+                tot++;
+                if(phi == 2 && k > 2){ com2++;
+                    printf("      %2ld   %4ld   sim  ← das três\n", k, phi); }
+                else if(k <= 6)
+                    printf("      %2ld   %4ld   %s\n", k, phi, phi <= 2 ? "sim" : "não");
+            }
+            printf("      → há exactamente %ld valores de k > 2 com φ(k) = 2, e são {3,4,6}"
+                   " --- o trio não é escolhido, é CONTADO\n", com2);
+            printf("         RELAÇÃO — o grau do ciclotómico é φ(k), e uma 2×2 só aloja"
+                   " grau dois: daí três ordens e não mais\n");
+            if(com2 != 3) mal++;
+        }
+
+        /* ── (3) E O GUME É O CINCO: φ(5) = 4, logo não cabe --- é a restrição
+         * cristalográfica do lem:cristal, contada em vez de afirmada. */
+        {
+            long phi5 = 0;
+            for(long j = 1; j <= 5; j++){
+                long x = j, y = 5;
+                while(y){ long t2 = x % y; x = y; y = t2; }
+                if(x == 1) phi5++;
+            }
+            /* e o traço que a ordem 5 pediria: 2cos(2π/5) não é inteiro.
+             * verifica-se sem trigonometria: τ teria de satisfazer τ²+τ−1 = 0 */
+            long tem_raiz = 0;
+            for(long tau = -4; tau <= 4; tau++) if(tau*tau + tau - 1 == 0) tem_raiz++;
+            printf("      GUME — φ(5) = %ld > 2, e o traço que a ordem 5 pediria satisfaz"
+                   " τ² + τ − 1 = 0, que não tem raiz inteira (%ld encontradas)\n",
+                   phi5, tem_raiz);
+            printf("        é a restrição cristalográfica CONTADA: a ordem cinco não cabe,"
+                   " e é por isso que o trio é {3,4,6}\n");
+            if(phi5 != 4 || tem_raiz != 0) mal++;
+        }
+
+        /* ── (4) E OS DOIS NÍVEIS ENCAIXAM: a tríade t dá as três faces; dentro
+         * da face elíptica, o traço τ dá as três ordens. Três por três, e cada
+         * nível com o seu parâmetro. */
+        {
+            printf("      os dois níveis:\n");
+            printf("        nível 1 --- t = ω²  ∈ {−1, 0, +1}   →  as três FACES\n");
+            printf("          t=−1 rotação (Δ<0) · t=0 exterior (Δ=0) · t=+1 hiperbólico (Δ>0)\n");
+            printf("        nível 2 --- τ = traço ∈ {−1, 0, +1}  →  as três ORDENS, dentro da face Δ<0\n");
+            printf("          τ=−1 ordem 3 · τ=0 ordem 4 · τ=+1 ordem 6\n");
+            /* e o encaixe: as três ordens estão todas na face t=−1 */
+            long dentro = 0;
+            for(long tau = -1; tau <= 1; tau++) if(tau*tau - 4 < 0) dentro++;
+            printf("      → as %ld ordens estão todas dentro da face elíptica: o segundo"
+                   " trio vive DENTRO do primeiro\n", dentro);
+            if(dentro != 3) mal++;
+        }
+
+        printf("\n");
+        ok("O TRIO DE DENTRO: AS TRÊS ORDENS, E SÃO TRÊS POR CONTAGEM. A tríade t ∈ {−1,0,+1}"
+           " dá as três FACES. Dentro da face elíptica há outro trio, e o parâmetro é o TRAÇO"
+           " --- duas letras que convém não confundir: t é ω² e escolhe a face, τ é o traço e"
+           " escolhe a ordem dentro dela. Com det = +1 e τ em {−1,0,+1} vêm os polinómios"
+           " λ²+λ+1, λ²+1 e λ²−λ+1, com A^k = I para k = 3, 4 e 6 e Δ < 0 nos três: as três"
+           " ordens vivem TODAS na face elíptica. E SÃO TRÊS POR UMA RAZÃO CONTÁVEL, não por"
+           " escolha: são exactamente os k > 2 com φ(k) = 2, porque o grau do polinómio"
+           " ciclotómico é φ(k) e uma matriz 2×2 só aloja grau dois. Contados de 1 a 12, há"
+           " exactamente três. O GUME É O CINCO: φ(5) = 4 e não cabe; e o traço que a ordem"
+           " cinco pediria satisfaz τ² + τ − 1 = 0, que não tem raiz inteira --- é a restrição"
+           " cristalográfica do lem:cristal CONTADA em vez de afirmada. E os dois níveis"
+           " encaixam: o segundo trio vive dentro do primeiro, com as três ordens todas na"
+           " face Δ < 0. Três faces, e três ordens dentro de uma delas --- cada nível com o"
+           " seu parâmetro, e nenhum deles escolhido a dedo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
