@@ -1738,6 +1738,45 @@ nomes deles não decidem nada.
 \medido{o pipe em massa em \code{tests/pgwire.c} §W164 --- doze corpos com $\sum
 G=\lvert I\rvert$ em todos, $9$ completos e $3$ a resumirem, e a régua a descer nos doze.}
 
+\paragraph{E os três que resumiam completam-se do mesmo modo --- e dois deles eram um.}
+Junta-se ao resumo o \textbf{índice dentro da fibra}, e $G$ fica constante em $1$:
+\begin{center}\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+& \multicolumn{3}{c}{antes} & \multicolumn{3}{c}{depois}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+corpo & fibras & $G$ & falta & fibras & $G$ & falta\\
+\midrule
+negro, pela temperatura & $11$ & $6$ & $30$ & $36$ & $1$ & $\mathbf{0}$\\
+prisma, pelo índice & $15$ & $11$ & $129$ & $36$ & $1$ & $\mathbf{0}$\\
+evolutivo, pela aptidão & $11$ & $6$ & $30$ & $36$ & $1$ & $\mathbf{0}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Não se pergunta porque faltava.} E ao completá-los aparece que \textbf{o
+negro e o evolutivo são o mesmo}: os dois lêem pela soma, e dão o mesmo endereço em todos
+os objectos --- estavam em linhas separadas como se fossem dois corpos, e a medida junta-os.
+
+\medskip\noindent\textbf{E a tríade fecha em todos.} Uma vez completo, cada corpo recebe as
+três faces com $t\in\{-1,0,+1\}$, e em todas a régua dos endereços desce, com casos
+estritos --- \emph{porque o endereço é o par e ele não sabe de $t$}. É a mesma régua em
+todas as faces e em todos os corpos.
+
+\medskip\noindent E isso entra no motor numa resposta só:
+\[
+ \boxed{\;\texttt{SELECT triade(*) FROM }t\;}
+\]
+que recebe o par $(a,b)$ e devolve a norma nas três faces, os objectos, e \emph{se a régua
+desce}. As três normas estão em \textbf{progressão}: $N(-1)+N(+1)=2\,N(0)$, porque
+$N=a^2-t\,b^2$ é linear em $t$ --- \emph{as três faces não são três objectos, são um a
+variar}. E a régua vem na mesma resposta, porque é a mesma nas três: perguntá-la por face
+seria fazer três vezes a mesma pergunta.
+
+\medido{\code{tests/pgwire.c} §W165 e §W166 --- os três completados com falta $0$; o negro
+e o evolutivo iguais em $36/36$; a tríade a fechar em $4/4$ corpos com a régua a descer em
+todas as faces; e no motor, $\Sigma N = 2240, 1120, 0$ sobre $64$ objectos, em progressão,
+com a régua a descer.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

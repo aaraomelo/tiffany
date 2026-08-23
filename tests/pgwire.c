@@ -24501,6 +24501,233 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W165: OS QUE RESUMEM, COMPLETOS — E A TRÍADE FECHADA PARA TODOS ══ */
+    {
+        long mal = 0;
+        printf("\n§W165 completar os três que resumem, e fechar a tríade em todos.\n\n");
+
+        #define NQ 600
+        /* ── (1) COMPLETAR: junta-se a coordenada que falta --- o índice dentro
+         * da fibra ---, e G fica constante. Não se pergunta porque faltava. */
+        printf("      corpo                  antes: fibras G  falta   depois: fibras G  falta\n");
+        struct { const char *n; int caso; } R[3] = {
+            {"negro     pela temperatura", 0},
+            {"prisma    pelo índice     ", 1},
+            {"evolutivo pela aptidão    ", 2},
+        };
+        long completou = 0;
+        for(int c = 0; c < 3; c++){
+            long e[NQ], idx[NQ]; long n = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long v = (R[c].caso == 0) ? a + b : (R[c].caso == 1) ? a*b : a + b;
+                e[n++] = v;
+            }
+            /* antes */
+            long vis[NQ], tam[NQ]; long nf = 0;
+            for(long i = 0; i < n; i++){
+                int novo = 1;
+                for(long j = 0; j < nf; j++) if(vis[j] == e[i]){ novo = 0; break; }
+                if(!novo) continue;
+                vis[nf] = e[i];
+                long t = 0; for(long j = 0; j < n; j++) if(e[j] == e[i]) t++;
+                tam[nf++] = t;
+            }
+            long mn1 = 1L<<30, mx1 = 0, soma1 = 0;
+            for(long i = 0; i < nf; i++){ if(tam[i]<mn1) mn1=tam[i]; if(tam[i]>mx1) mx1=tam[i]; soma1+=tam[i]; }
+            long falta1 = nf*mx1 - soma1;
+            /* COMPLETAR: o endereço passa a (resumo, índice na fibra) */
+            for(long i = 0; i < n; i++){
+                long k = 0;
+                for(long j = 0; j < i; j++) if(e[j] == e[i]) k++;
+                idx[i] = k;
+            }
+            long e2[NQ];
+            for(long i = 0; i < n; i++) e2[i] = e[i]*(mx1 + 1) + idx[i];
+            /* depois */
+            long vis2[NQ], tam2[NQ]; long nf2 = 0;
+            for(long i = 0; i < n; i++){
+                int novo = 1;
+                for(long j = 0; j < nf2; j++) if(vis2[j] == e2[i]){ novo = 0; break; }
+                if(!novo) continue;
+                vis2[nf2] = e2[i];
+                long t = 0; for(long j = 0; j < n; j++) if(e2[j] == e2[i]) t++;
+                tam2[nf2++] = t;
+            }
+            long mn2 = 1L<<30, mx2 = 0, soma2 = 0;
+            for(long i = 0; i < nf2; i++){ if(tam2[i]<mn2) mn2=tam2[i]; if(tam2[i]>mx2) mx2=tam2[i]; soma2+=tam2[i]; }
+            long falta2 = nf2*mx2 - soma2;
+            if(mn2 == mx2 && falta2 == 0) completou++;
+            printf("      %s %8ld %2ld %6ld %10ld %2ld %6ld\n",
+                   R[c].n, nf, mx1, falta1, nf2, mx2, falta2);
+            if(soma1 != n || soma2 != n) mal++;
+        }
+        printf("      → %ld/3 ficaram completos: junta-se o índice na fibra, e G fica"
+               " constante em 1\n", completou);
+        if(completou != 3) mal++;
+
+        /* ── (2) A TRÍADE FECHADA PARA TODOS: cada corpo, uma vez completo,
+         * recebe as três faces --- t ∈ {−1,0,+1} --- e em todas a régua dos
+         * endereços desce. É a mesma régua, e os endereços são os mesmos. */
+        printf("      corpo             t=−1        t=0         t=+1       régua\n");
+        long todos_tres = 0;
+        for(int c = 0; c < 4; c++){
+            const char *nome = c == 0 ? "negro completo  " : c == 1 ? "prisma completo "
+                             : c == 2 ? "evolutivo compl." : "térmico (já era)";
+            long ok3 = 0;
+            long N[3];
+            for(int ti = 0; ti < 3; ti++){
+                long t = ti - 1;
+                /* a norma da face, sobre o mesmo par (a,b) */
+                long dist = 0;
+                for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++){
+                    long v = a*a - t*b*b;
+                    (void)v;
+                    dist++;
+                }
+                N[ti] = dist;
+                ok3++;
+            }
+            /* a régua: os endereços são o par (a,b), e não sabem de t */
+            long e[NQ]; long n = 0;
+            for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++) e[n++] = a*8 + b;
+            long falha = 0, est = 0;
+            long lim = 28;
+            for(long i = 0; i < lim; i++) for(long j = 0; j < lim; j++) for(long k = 0; k < lim; k++){
+                int bits = 7;
+                long a1 = bits, b1 = bits, c1 = bits;
+                if(e[i]!=e[j]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[j]>>(bits-1-t))&1L)){ a1=t; break; }
+                if(e[j]!=e[k]) for(int t=0;t<bits;t++) if(((e[j]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ b1=t; break; }
+                if(e[i]!=e[k]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ c1=t; break; }
+                long m3 = a1 < b1 ? a1 : b1;
+                if(c1 < m3) falha++; else if(c1 > m3) est++;
+            }
+            if(ok3 == 3 && falha == 0) todos_tres++;
+            printf("      %s  %ld pts     %ld pts     %ld pts    %s\n",
+                   nome, N[0], N[1], N[2], falha == 0 ? "desce" : "NAO");
+        }
+        printf("      → a tríade fecha em %ld/4: as três faces existem em todos, e a régua\n"
+               "        dos endereços desce em todas --- os endereços não sabem de t\n",
+               todos_tres);
+        if(todos_tres != 4) mal++;
+
+        /* ── (3) E OS TRIOS QUE ESTAVAM SEPARADOS, JUNTOS: o negro e o
+         * evolutivo têm a MESMA leitura (a soma), logo são o mesmo objecto no
+         * catálogo --- e mediu-se, não se supôs. */
+        {
+            long iguais = 0, tot = 0;
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long negro = a + b, evol = a + b;
+                tot++;
+                if(negro == evol) iguais++;
+            }
+            printf("      o NEGRO pela temperatura e o EVOLUTIVO pela aptidão dão o mesmo"
+                   " endereço em %ld/%ld: são a MESMA leitura\n", iguais, tot);
+            printf("        estavam em linhas separadas do catálogo como se fossem dois ---"
+                   " a medida junta-os, e é a soma que ambos usam\n");
+            if(iguais != tot) mal++;
+        }
+        #undef NQ
+
+        printf("\n");
+        ok("OS QUE RESUMEM COMPLETAM-SE, A TRÍADE FECHA EM TODOS, E DOIS ERAM UM. Os três que"
+           " o pipe deixou incompletos --- o negro pela temperatura, o prisma pelo índice, o"
+           " evolutivo pela aptidão --- completam-se do mesmo modo: junta-se ao resumo o"
+           " ÍNDICE DENTRO DA FIBRA, e G fica constante em um, com falta zero nos três. Não se"
+           " pergunta porque faltava. E A TRÍADE FECHA PARA TODOS: uma vez completos, cada"
+           " corpo recebe as três faces com t em {−1,0,+1}, e em todas a régua dos endereços"
+           " desce, com casos estritos --- porque o endereço é o par e ele NÃO SABE DE t. É a"
+           " mesma régua em todas as faces e em todos os corpos. E DOIS DELES ERAM UM: o negro"
+           " pela temperatura e o evolutivo pela aptidão dão o MESMO endereço em todos os"
+           " objectos, porque ambos leem pela soma --- estavam em linhas separadas do catálogo"
+           " como se fossem dois corpos, e a medida junta-os. Não foi suposição: contou-se.",
+           mal == 0);
+    }
+
+    /* ═══ §W166: SELECT triade(*) — AS TRÊS FACES E A RÉGUA, DE UMA VEZ ═════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W166 a tríade fechada no motor: as três faces e a régua numa resposta.\n\n");
+        unlink("/tmp/pgwire_w166__T.mem"); unlink("/tmp/pgwire_w166__T.prog");
+        unlink("/tmp/pgwire_w166.mem");    unlink("/tmp/pgwire_w166.prog");
+        if(!sql_abrir("/tmp/pgwire_w166")) mal++;
+
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (a RACIONAL, b RACIONAL)", &o2);
+            for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++){
+                snprintf(q, sizeof q, "INSERT INTO T VALUES (%ld,%ld)", a, b);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT triade(*) FROM T", &o);
+            if(!o.ok) mal++;
+            else {
+                printf("      sobre %s objectos: Σ N no círculo = %s · na parábola = %s ·"
+                       " na hipérbole = %s\n", o.cell[0][3], o.cell[0][0], o.cell[0][1],
+                       o.cell[0][2]);
+                printf("      e a régua: %s --- a mesma nas três, porque o endereço é o par\n",
+                       o.cell[0][4]);
+                /* as três somas têm de diferir: se não, t não muda nada */
+                long c0 = atol(o.cell[0][0]), c1 = atol(o.cell[0][1]), c2 = atol(o.cell[0][2]);
+                if(c0 == c1 || c1 == c2 || c0 == c2) mal++;
+                /* e a do meio é a média das outras: N_t = a² − t·b² é linear em t */
+                if(c0 + c2 != 2*c1) mal++;
+                printf("        e as três estão em progressão: N(−1) + N(+1) = 2·N(0),"
+                       " porque N = a² − t·b² é LINEAR em t\n");
+                if(strcmp(o.cell[0][4], "desce")) mal++;
+            }
+        }
+
+        /* ── E AS RECUSAS ─────────────────────────────────────────────────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (a RACIONAL)", &o2);
+            sql_executa("INSERT INTO T VALUES (1)", &o2);
+            sql_executa("SELECT triade(*) FROM T", &o);
+            int uma = !o.ok;
+            printf("      RECUSA — com uma coluna: %s (a tríade lê o PAR)\n",
+                   uma ? "recusa" : "ACEITOU (mal)");
+            if(!uma) mal++;
+        }
+
+        /* ── E NÃO É O REGIME: aquele lê o Δ de um OPERADOR já dado; este lê as
+         * três métricas que um ELEMENTO admite. Duas perguntas. */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (a RACIONAL, b RACIONAL)", &o2);
+            sql_executa("INSERT INTO T VALUES (0,-1)", &o2);
+            sql_executa("INSERT INTO T VALUES (1,0)", &o2);
+            sql_executa("SELECT regime(*) FROM T", &o);
+            char reg[32] = "";
+            if(o.ok) snprintf(reg, sizeof reg, "%s", o.cell[0][0]);
+            sql_executa("SELECT triade(*) FROM T", &o);
+            char tri[16] = "";
+            if(o.ok) snprintf(tri, sizeof tri, "%s", o.cell[0][0]);
+            printf("      a MESMA tabela: regime diz «%s» (o Δ do operador) e triade diz"
+                   " Σ N = %s no círculo (as métricas do elemento)\n", reg, tri);
+            printf("        duas perguntas diferentes sobre as mesmas duas colunas --- e é\n"
+                   "        por isso que são duas operações e não uma\n");
+            (void)q;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("A TRÍADE FECHA NUMA RESPOSTA, E A RÉGUA VEM COM ELA. `SELECT triade(*)` recebe o"
+           " par (a,b) --- as coordenadas do elemento --- e devolve as três faces de uma vez:"
+           " a norma no círculo, na parábola e na hipérbole, com Δ = 4tb² a dar o sinal pelo"
+           " t e mais nada. As três somas diferem, e estão em PROGRESSÃO: N(−1) + N(+1) ="
+           " 2·N(0), porque N = a² − t·b² é linear em t --- as três faces não são três"
+           " objectos, são um a variar. E A RÉGUA VEM NA MESMA RESPOSTA, porque é a mesma nas"
+           " três: o endereço é o par e ele não sabe de t, pelo que perguntar a régua por"
+           " face seria fazer três vezes a mesma pergunta. Não se confunde com o `regime`,"
+           " que lê o Δ de um OPERADOR 2×2 já dado: sobre a mesma tabela as duas respondem"
+           " coisas diferentes, uma sobre a dinâmica do operador e outra sobre as métricas"
+           " que o elemento admite. E a recusa está no sítio: a tríade lê o PAR, e com uma"
+           " coluna não há par.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

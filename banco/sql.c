@@ -4615,7 +4615,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"PRECO") ? 24
                        : !strcasecmp(nome,"MEDIAS") ? 25
                        : !strcasecmp(nome,"LEITURA") ? 26
-                       : !strcasecmp(nome,"VALORACAO") ? 27 : 0;
+                       : !strcasecmp(nome,"VALORACAO") ? 27
+                       : !strcasecmp(nome,"TRIADE") ? 28 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7140,6 +7141,116 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 28){
+        /* ── A TRÍADE FECHADA: a tabela traz o par (a,b) --- as coordenadas do
+         * elemento --- e o motor devolve as TRÊS faces de uma vez:
+         *
+         *     t = −1  N = a²+b²  Δ < 0  volta       (rotação)
+         *     t =  0  N = a²     Δ = 0  desliza     (exterior)
+         *     t = +1  N = a²−b²  Δ > 0  foge        (hiperbólico)
+         *
+         * com Δ = 4·t·b² --- uma fórmula, três classes. E a RÉGUA é a mesma nas
+         * três, porque o endereço é o par e ele não sabe de t: devolve-se
+         * também se ela desce, para o cliente não ter de perguntar duas vezes.
+         *
+         * Não é o `regime`, que lê o Δ de um OPERADOR 2×2 já dado. Aqui o par
+         * é o ELEMENTO, e as três faces são as três métricas que ele admite. */
+        if(ncols != 2){
+            printf("erro: a tríade lê-se de DUAS colunas --- o par (a,b). A tabela"
+                   " tem %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "triade needs the pair (a,b), got %ld columns", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj == 0){
+            printf("erro: não há linhas --- RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "triade on empty selection"); }
+            return 0;
+        }
+        /* soma-se a norma de cada face sobre a selecção, e conta-se o Δ */
+        long Nsoma[3] = {0,0,0};
+        long neg = 0, zer = 0, pos = 0;
+        long ends[512]; long ne = 0;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols) || !bit_le(S_PRES, i*ncols + 1)){
+                printf("erro: a linha %ld tem célula ausente --- RECUSADA.\n", i);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "triade: missing cell at row %ld", i); }
+                return 0;
+            }
+            long an, ad, bn, bd;
+            celula_qz(i, 0, ncols, &an, &ad);
+            celula_qz(i, 1, ncols, &bn, &bd);
+            if(ad != 1 || bd != 1){
+                printf("erro: o par (%ld/%ld, %ld/%ld) não é inteiro --- as três normas"
+                       " saem exactas de inteiros. RECUSADA.\n", an, ad, bn, bd);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "triade: pair is not integral"); }
+                return 0;
+            }
+            for(int ti = 0; ti < 3; ti++){
+                long t = ti - 1;
+                Nsoma[ti] += an*an - t*bn*bn;
+            }
+            /* o Δ de cada face neste elemento: 4·t·b² */
+            if(bn != 0){ neg++; pos++; }
+            zer++;
+            if(ne < 512 && an >= 0 && bn >= 0) ends[ne++] = an*64 + bn;
+        }
+        /* a régua sobre os endereços do par --- a mesma nas três faces */
+        int desce = 1, houve_est = 0;
+        if(ne >= 3){
+            long lim = ne < 30 ? ne : 30;
+            int bits = 1; { long mx = 0;
+                for(long i = 0; i < ne; i++) if(ends[i] > mx) mx = ends[i];
+                long t = mx; while(t){ bits++; t >>= 1; } }
+            for(long i = 0; i < lim && desce; i++) for(long j = 0; j < lim; j++)
+            for(long k = 0; k < lim; k++){
+                long a1 = bits, b1 = bits, c1 = bits;
+                if(ends[i]!=ends[j]) for(int t=0;t<bits;t++)
+                    if(((ends[i]>>(bits-1-t))&1L)!=((ends[j]>>(bits-1-t))&1L)){ a1=t; break; }
+                if(ends[j]!=ends[k]) for(int t=0;t<bits;t++)
+                    if(((ends[j]>>(bits-1-t))&1L)!=((ends[k]>>(bits-1-t))&1L)){ b1=t; break; }
+                if(ends[i]!=ends[k]) for(int t=0;t<bits;t++)
+                    if(((ends[i]>>(bits-1-t))&1L)!=((ends[k]>>(bits-1-t))&1L)){ c1=t; break; }
+                long m3 = a1 < b1 ? a1 : b1;
+                if(c1 < m3){ desce = 0; break; }
+                if(c1 > m3) houve_est = 1;
+            }
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 5;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "n_circulo");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "n_parabola");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "n_hiperbole");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "objetos");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "regua");
+            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[4] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", Nsoma[0]);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", Nsoma[1]);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", Nsoma[2]);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", n_obj);
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s",
+                     (ne < 3) ? "sem triplo" : (desce && houve_est) ? "desce" : "NAO");
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %ld | %ld | %ld | %ld | %s\n", Nsoma[0], Nsoma[1], Nsoma[2], n_obj,
+               (ne < 3) ? "sem triplo" : (desce && houve_est) ? "desce" : "NAO");
+        printf("-- as três faces sobre %ld objecto(s): Δ = 4tb², e o sinal de Δ é o de t ·"
+               " a RÉGUA é a mesma nas três, porque o endereço é o par e não sabe de t\n",
+               n_obj);
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 27){
         /* ── AS RÉGUAS p-ÁDICAS: uma POR PRIMO, e cada uma é ultramétrica.
          *
