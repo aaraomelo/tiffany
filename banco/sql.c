@@ -1415,16 +1415,32 @@ static void fk_txt_grava(unsigned base, const char *nome){
     for(i = 0; n[i]; i++) n[i] = baixa1(n[i]);
     txt_grava(base, FK_NOME_W, n);
 }
-/* na FILHA: a coluna j aponta para tab(col). Devolve a coluna alvo, ou −1. */
+/* na FILHA: a coluna j aponta para tab(col). Devolve a coluna alvo, ou −1.
+ *
+ * DOIS NÚMEROS ESTAVAM ESCRITOS À MÃO AQUI, e os dois eram tectos:
+ *
+ *   · `j >= 16` --- a seta só se gravava nas primeiras DEZASSEIS colunas da
+ *     filha, e o 16 estava dito duas vezes (aqui e no `fk_le`). Numa tabela de
+ *     300 colunas, uma seta declarada na última não se escrevia sequer;
+ *   · `(Word8)(col + 1)` --- a coluna ALVO num byte. Acima de 255 ela dava a
+ *     volta, e a verificação passava a olhar para outra coluna da mãe. Medido:
+ *     seta na coluna 300, `DELETE` na mãe, e a linha apagou-se por baixo dela.
+ *
+ * O alvo passa ao par --- o byte alto na metade de cima da mesma zona ---, e o
+ * tecto de colunas é o COL_MAX de toda a casa. */
+#define S_FKA(j)  (S_FK + ZONA_SLOTS/2u + (unsigned)(j))   /* o byte ALTO do alvo */
 static void fk_grava(int j, const char *tab, int col, int modo){
-    if(j < 0 || j >= 16) return;
-    { Word w; w.total = (Word8)(col + 1); w.e = (Word8)modo;
+    if(j < 0 || j >= (int)COL_MAX) return;
+    { Word w; w.total = (Word8)((col + 1) & 255); w.e = (Word8)modo;
       mem_grava(S_FK + (unsigned)j, w); }
+    { Word a; a.total = (Word8)(((col + 1) >> 8) & 255); a.e = 0;
+      mem_grava(S_FKA(j), a); }
     fk_txt_grava(S_FKNOME + (unsigned)j * FK_NOME_W, tab);
 }
 static int fk_le(int j, char *tab, int cap){
-    if(j < 0 || j >= 16) return -1;
-    { long t = mem_le(S_FK + (unsigned)j).total;
+    if(j < 0 || j >= (int)COL_MAX) return -1;
+    { long t = (long)mem_le(S_FK + (unsigned)j).total
+             | ((long)mem_le(S_FKA(j)).total << 8);
       if(!t) return -1;
       if(tab) txt_le(S_FKNOME + (unsigned)j * FK_NOME_W, FK_NOME_W, tab, (size_t)cap);
       return (int)t - 1; }
@@ -1452,7 +1468,9 @@ static int filho_regista(const char *tab, int col){
     for(k = 0; k < n && k < FK_MAXFIL; k++){
         unsigned b = S_FILHOS + 1 + (unsigned)k * FK_BLOCO;
         txt_le(b, FK_NOME_W, q, sizeof q);
-        if(!strcmp(q, tab) && mem_le(b + FK_NOME_W).total == (Word8)col) return 1;
+        { Word cw = mem_le(b + FK_NOME_W);
+          long cq = (long)cw.total | ((long)cw.e << 8);
+          if(!strcmp(q, tab) && cq == (long)col) return 1; }
     }
     /* CHEIO NÃO É «A MÃE DEIXA DE VIGIAR».
      *
@@ -1465,7 +1483,8 @@ static int filho_regista(const char *tab, int col){
     if(n >= FK_MAXFIL) return 0;
     { unsigned b = S_FILHOS + 1 + (unsigned)n * FK_BLOCO;
       fk_txt_grava(b, tab);
-      { Word w; w.total = (Word8)col; w.e = 0; mem_grava(b + FK_NOME_W, w); }
+      { Word w; w.total = (Word8)(col & 255); w.e = (Word8)((col >> 8) & 255);
+        mem_grava(b + FK_NOME_W, w); }   /* a coluna no PAR, e não num byte */
       filho_quantas_poe(n + 1); }
     return 1;
 }
@@ -1474,7 +1493,8 @@ static int filho_le(int k, char *tab, int cap){
     if(k < 0 || k >= n || k >= FK_MAXFIL) return -1;
     { unsigned b = S_FILHOS + 1 + (unsigned)k * FK_BLOCO;
       txt_le(b, FK_NOME_W, tab, (size_t)cap);
-      return (int)mem_le(b + FK_NOME_W).total; }
+      { Word cw = mem_le(b + FK_NOME_W);
+        return (int)((long)cw.total | ((long)cw.e << 8)); } }
 }
 static int filho_quantos(void){
     long n = filho_quantas();
@@ -7360,7 +7380,7 @@ static int varre(const char *resto, int acao){
         const char *tv = pgcat_valor("app.tenant_id");
         const char *bv = pgcat_valor("app.bypass_rls");
         if(bv && !strcasecmp(bv, "on")) goto rls_fim;
-        long rc = (long)mem_le(S_RLSCOL).total;
+        long rc = (long)mem_le(S_RLSCOL).total | ((long)mem_le(S_RLSCOL).e << 8);
         unsigned tix = 0;
         if(tv && *tv) tix = tx_guarda(tv, (int)strlen(tv));
         if(tix && rc >= 0 && rc < ncols){
@@ -12598,7 +12618,10 @@ static int executa(const char *sql){
                     if(!strcasecmp(nz, "tenantId")){ ci = z; break; } } }
               if(ci >= 0){
                   Word w = {1,0}; mem_grava(S_RLS, w);
-                  Word c2; c2.total = (Word8)ci; c2.e = 0; mem_grava(S_RLSCOL, c2);
+                  /* a coluna que isola, no PAR: num byte ela dava a volta acima
+                   * de 255 e a política passava a erodir por outra coluna */
+                  Word c2; c2.total = (Word8)(ci & 255); c2.e = (Word8)((ci >> 8) & 255);
+                  mem_grava(S_RLSCOL, c2);
                   printf("politica %s em %s: isola pela coluna %ld\n", pn, tb, ci);
               } else {
                   printf("politica %s em %s: a coluna de isolamento nao existe nesta"
