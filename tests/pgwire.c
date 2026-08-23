@@ -24181,6 +24181,221 @@ int main(void){
            " são três perguntas e não uma.", mal == 0);
     }
 
+    /* ═══ §W162: SELECT valoracao(*) — UMA RÉGUA POR PRIMO, E TODAS DESCEM ══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W162 há mais de uma régua: uma por primo, e a do prefixo é outra.\n\n");
+        unlink("/tmp/pgwire_w162__V.mem"); unlink("/tmp/pgwire_w162__V.prog");
+        unlink("/tmp/pgwire_w162.mem");    unlink("/tmp/pgwire_w162.prog");
+        if(!sql_abrir("/tmp/pgwire_w162")) mal++;
+
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS V", &o2);
+            sql_executa("CREATE TABLE V (v RACIONAL)", &o2);
+            for(long a = 0; a < 12; a++){
+                snprintf(q, sizeof q, "INSERT INTO V VALUES (%ld)", a);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT valoracao(*) FROM V", &o);
+            if(!o.ok) mal++;
+            else {
+                printf("      sobre 0..11: %s primos com a régua a valer · %s valem, %s"
+                       " falham, %s estritos\n",
+                       o.cell[0][0], o.cell[0][1], o.cell[0][2], o.cell[0][3]);
+                if(atol(o.cell[0][2]) != 0) mal++;         /* nenhuma pode falhar */
+                if(atol(o.cell[0][3]) == 0) mal++;         /* e tem de haver estritos */
+                if(strcmp(o.cell[0][0], "4/4")) mal++;
+            }
+            /* e a do PREFIXO, sobre a MESMA coluna: é outra régua */
+            sql_executa("SELECT ultra(*) FROM V", &o);
+            if(o.ok)
+                printf("      e a do PREFIXO na mesma coluna: %s triplos, %s valem, %s"
+                       " estritos · ultramétrica: %s\n",
+                       o.cell[0][0], o.cell[0][1], o.cell[0][3], o.cell[0][4]);
+            else mal++;
+            printf("        duas famílias de régua sobre os mesmos endereços, e as duas\n"
+                   "        descem --- não é a mesma pergunta feita duas vezes\n");
+        }
+
+        /* ── E AS RECUSAS ─────────────────────────────────────────────────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS V", &o2);
+            sql_executa("CREATE TABLE V (v RACIONAL)", &o2);
+            sql_executa("INSERT INTO V VALUES (1)", &o2);
+            sql_executa("INSERT INTO V VALUES (2)", &o2);
+            sql_executa("SELECT valoracao(*) FROM V", &o);
+            int duas = !o.ok;
+            printf("      RECUSA — com duas linhas: %s (não há triplo)\n",
+                   duas ? "recusa" : "ACEITOU (mal)");
+            if(!duas) mal++;
+        }
+
+        /* ── E O QUE AS DUAS RÉGUAS NÃO SÃO: a norma. Sobre a mesma família, a
+         * norma da rotação falha a forte --- e é por isso que ela não é régua
+         * desta casa, mas uma medida arquimediana. */
+        {
+            long falha = 0, tot = 0;
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long n1 = a*a + b*b, n2 = c*c + d*d;
+                long sr = a + c, si = b + d, ns = sr*sr + si*si;
+                tot++;
+                if(ns > (n1 > n2 ? n1 : n2)) falha++;
+            }
+            printf("      e a NORMA a²+b² falha a forte em %ld/%ld --- é arquimediana, e\n"
+                   "      por isso não é régua desta casa: onde há valoração o produto vira\n"
+                   "      soma, onde há norma fica produto\n", falha, tot);
+            if(falha == 0) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("HÁ MAIS DE UMA RÉGUA, E O MOTOR RESPONDE POR CADA UMA. `SELECT valoracao(*)`"
+           " mede a família p-ádica --- uma régua POR PRIMO ---, e sobre a mesma coluna todas"
+           " cumprem a desigualdade forte, com casos estritos. Não é a mesma pergunta que o"
+           " `ultra`, que mede a régua do PREFIXO: são duas famílias sobre os mesmos"
+           " endereços, e as duas descem. Fazê-las numa operação só daria uma resposta que"
+           " não distinguiria qual régua desceu. A valoração devolve-se como INTEIRO e nunca"
+           " como p^{−v}: a potência sairia do degrau, e o que se compara são profundidades."
+           " As recusas guardam o alcance --- com menos de três linhas não há triplo, e uma"
+           " fração pede a valoração das duas partes, que é outra conta. E O CONTRASTE FECHA"
+           " A FAMÍLIA: sobre os mesmos pares, a norma a²+b² FALHA a desigualdade forte,"
+           " porque é arquimediana. Onde há valoração o produto vira soma; onde há norma fica"
+           " produto --- e é isso que separa uma régua desta casa de uma medida que apenas"
+           " mede.", mal == 0);
+    }
+
+    /* ═══ §W163: AS DUAS RÉGUAS SÃO UMA — E A TRAVESSIA É A INVERSÃO ════════ */
+    {
+        long mal = 0;
+        printf("\n§W163 o prefixo e a 2-ádica: a mesma régua, lida do topo e do fundo.\n\n");
+
+        #define REV(x,b) ({ long _r = 0, _x = (x); \
+            for(int _i = 0; _i < (b); _i++){ _r = (_r << 1) | (_x & 1L); _x >>= 1; } _r; })
+        #define PRF(x,y,b) ({ long X_=(x), Y_=(y); int q_=(b); \
+            if(X_!=Y_) for(int i_=0;i_<(b);i_++){ \
+                if((((X_)>>((b)-1-i_))&1) != (((Y_)>>((b)-1-i_))&1)){ q_=i_; break; } } q_; })
+        #define V2(n,b) ({ long _n = (n) < 0 ? -(n) : (n); int _v = (b); \
+            if(_n){ _v = 0; while(_n % 2 == 0 && _v < (b)){ _n /= 2; _v++; } } _v; })
+
+        /* ── (1) A CONTAGEM BATE, mas os triplos NÃO são os mesmos --- e é essa
+         * diferença que separa uma coincidência de uma identidade. */
+        {
+            printf("      bits  estritos: prefixo  2-ádica   iguais?  triplos que concordam\n");
+            long todas_iguais = 0, todas_concordam = 0;
+            for(int bits = 4; bits <= 6; bits++){
+                long N = 1L << bits;
+                long ep = 0, e2 = 0, conc = 0, tot = 0;
+                for(long x = 0; x < N; x++) for(long y = 0; y < N; y++) for(long z = 0; z < N; z++){
+                    long a = PRF(x,y,bits), b = PRF(y,z,bits), c = PRF(x,z,bits);
+                    long a2 = V2(x-y,bits), b2 = V2(y-z,bits), c2 = V2(x-z,bits);
+                    tot++;
+                    int sp = (c > (a < b ? a : b)), s2 = (c2 > (a2 < b2 ? a2 : b2));
+                    if(sp) ep++;
+                    if(s2) e2++;
+                    if(sp == s2) conc++;
+                }
+                if(ep == e2) todas_iguais++;
+                if(conc == tot) todas_concordam++;
+                printf("      %4d  %14ld %9ld  %7s  %ld/%ld\n", bits, ep, e2,
+                       ep == e2 ? "SIM" : "nao", conc, tot);
+            }
+            printf("      → as contagens batem em %ld/3 e os triplos concordam em %ld/3 ---"
+                   " logo NÃO é a mesma régua ponto a ponto\n",
+                   todas_iguais, todas_concordam);
+            printf("        um total que bate não é uma identidade: seria fácil publicar"
+                   " «são a mesma» só com a contagem\n");
+            if(todas_iguais != 3 || todas_concordam != 0) mal++;
+        }
+
+        /* ── (2) E A IDENTIDADE VERDADEIRA, que a contagem só sugeria:
+         *          prof(x,y) = v₂(rev x − rev y)
+         * As duas réguas são A MESMA, lida do topo e do fundo --- e o que as
+         * liga é a INVERSÃO DE BITS. */
+        {
+            printf("      bits  prof(x,y) = v₂(rev x − rev y)\n");
+            long todas = 0;
+            for(int bits = 3; bits <= 8; bits++){
+                long N = 1L << bits;
+                long ok = 0, tot = 0;
+                for(long x = 0; x < N; x++) for(long y = 0; y < N; y++){
+                    long rx = REV(x,bits), ry = REV(y,bits);
+                    tot++;
+                    if(PRF(x,y,bits) == V2(rx-ry,bits)) ok++;
+                }
+                if(ok == tot) todas++;
+                printf("      %4d  %ld/%ld\n", bits, ok, tot);
+            }
+            printf("      → vale em %ld/6 larguras, sem excepção\n", todas);
+            printf("         RELAÇÃO NOVA — a régua do PREFIXO e a 2-ÁDICA são a mesma"
+                   " régua: uma conta do topo, a outra do fundo, e a inversão de bits\n"
+                   "         leva uma na outra\n");
+            if(todas != 6) mal++;
+        }
+
+        /* ── (3) E A INVERSÃO É UMA TRAVESSIA: é a permutação que manda a posição
+         * i na posição b−1−i. Logo as duas réguas são duas LEITURAS do mesmo
+         * objecto, e o que as separa tem preço --- o da prop:travessia. */
+        {
+            int bits = 6;
+            /* rev é a permutação i ↦ bits−1−i das posições */
+            int pi[8];
+            for(int i = 0; i < bits; i++) pi[i] = bits - 1 - i;
+            int q = bits;
+            for(int i = 0; i < bits; i++) if(pi[i] != i){ q = i; break; }
+            /* e é involução */
+            long inv = 0, tot = 0;
+            long N = 1L << bits;
+            for(long x = 0; x < N; x++){ tot++; if(REV(REV(x,bits),bits) == x) inv++; }
+            printf("      a inversão é a permutação i ↦ %d−1−i: involução em %ld/%ld, e o"
+                   " seu preço é q = %d\n", bits, inv, tot, q);
+            printf("         logo as duas réguas são duas LEITURAS do mesmo objecto, e a"
+                   " travessia entre elas é a inversão --- com preço, como qualquer outra\n");
+            if(inv != tot || q != 0) mal++;
+        }
+
+        /* ── (4) O GUME: nem toda a permutação de bits leva uma régua na outra.
+         * Se levasse, a identidade acima não diria nada. */
+        {
+            int bits = 5;
+            long N = 1L << bits;
+            /* a rotação de um bit, em vez da inversão */
+            #define ROT(x,b) ((((x) << 1) | ((x) >> ((b)-1))) & ((1L << (b)) - 1))
+            long ok = 0, tot = 0;
+            for(long x = 0; x < N; x++) for(long y = 0; y < N; y++){
+                tot++;
+                if(PRF(x,y,bits) == V2(ROT(x,bits)-ROT(y,bits),bits)) ok++;
+            }
+            printf("      GUME — com a ROTAÇÃO em vez da inversão, a identidade vale só em"
+                   " %ld/%ld: a permutação que liga as réguas é a inversão e não outra\n",
+                   ok, tot);
+            #undef ROT
+            if(ok == tot) mal++;
+        }
+        #undef V2
+        #undef PRF
+        #undef REV
+
+        printf("\n");
+        ok("AS DUAS RÉGUAS SÃO UMA, E A TRAVESSIA ENTRE ELAS É A INVERSÃO DE BITS. Ao medir a"
+           " família p-ádica ao lado da do prefixo apareceu que o número de triplos estritos"
+           " BATE exactamente --- e a tentação era publicar «são a mesma régua». Não são,"
+           " ponto a ponto: os triplos NÃO concordam, e um total que coincide não é uma"
+           " identidade. A identidade verdadeira é outra, e verifica-se sem excepção em todas"
+           " as larguras medidas: prof(x,y) = v₂(rev x − rev y). AS DUAS RÉGUAS SÃO A MESMA,"
+           " uma contada do TOPO e a outra do FUNDO, e o que as liga é a inversão de bits."
+           " Isso explica a coincidência das contagens sem a confundir com identidade: uma"
+           " bijecção preserva os totais e reordena os triplos. E a inversão não é uma"
+           " aplicação qualquer --- é a permutação i ↦ b−1−i das posições, isto é uma"
+           " TRAVESSIA da prop:travessia: involutiva, com preço q = 0 porque mexe logo na"
+           " primeira posição. Logo o prefixo e a p-ádica são duas LEITURAS do mesmo objecto,"
+           " e passar de uma à outra custa como qualquer travessia. O GUME é que a permutação"
+           " seja a inversão e não outra: com a rotação de um bit a identidade cai, e se"
+           " qualquer permutação servisse, a relação não diria nada.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

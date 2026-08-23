@@ -1649,6 +1649,36 @@ amplitudes a quebrarem em $936$ pares e $\rho$ a não quebrar nenhum; as $96$ fu
 $\rho$ todas por fase racional de norma $1$; e $\det\rho=0$ em $2400/2400$ estados, exacto
 e sem uma raiz --- a identidade de Lagrange nos quatro inteiros da amplitude.}
 
+\paragraph{E ao pôr as duas famílias de régua no motor apareceu que \emph{elas são uma}.}
+O \code{SELECT valoracao(*)} mede a família $p$-ádica --- uma régua por primo, todas a
+cumprirem a forte --- e o \code{SELECT ultra(*)} mede a do prefixo. Postas lado a lado, o
+número de triplos estritos \textbf{bate exactamente}. \emph{E a tentação era publicar «são
+a mesma régua»}: não são, ponto a ponto --- os triplos \textbf{não} concordam, e um total
+que coincide não é uma identidade.
+
+\medskip\noindent A identidade verdadeira é outra, e vale sem excepção em todas as
+larguras medidas:
+\[
+ \boxed{\;\operatorname{prof}(x,y)=v_2\bigl(\operatorname{rev}x-\operatorname{rev}y\bigr)\;}
+\]
+--- \textbf{a régua do prefixo e a $2$-ádica são a mesma}, uma contada do \emph{topo} e a
+outra do \emph{fundo}, e o que as liga é a \textbf{inversão de bits}. Isso explica a
+coincidência das contagens sem a confundir com identidade: \emph{uma bijeção preserva os
+totais e reordena os triplos}.
+
+\medskip\noindent E a inversão não é aplicação qualquer: é a permutação $i\mapsto b-1-i$
+das posições, \emph{isto é uma travessia} da \code{aranha prop:travessia} --- involutiva, e
+com preço $q=0$ porque mexe logo na primeira posição. \textbf{O prefixo e a $p$-ádica são
+duas leituras do mesmo objecto}, e passar de uma à outra custa como qualquer travessia. O
+gume: com a \emph{rotação} de um bit em vez da inversão a identidade cai --- \emph{a
+permutação que liga as réguas é a inversão e não outra}.
+
+\medido{\code{tests/pgwire.c} §W162 e §W163 --- as quatro réguas $p$-ádicas a valerem sobre
+a mesma coluna com os estritos contados; a identidade $\operatorname{prof}=v_2\circ
+\operatorname{rev}$ em $6/6$ larguras sem excepção; as contagens a baterem em $3/3$ com os
+triplos a concordarem em $0/3$; a inversão involutiva com $q=0$; e o gume da rotação, que
+só acerta em $704$ de $1024$.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

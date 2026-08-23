@@ -4614,7 +4614,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"ULTRA") ? 23
                        : !strcasecmp(nome,"PRECO") ? 24
                        : !strcasecmp(nome,"MEDIAS") ? 25
-                       : !strcasecmp(nome,"LEITURA") ? 26 : 0;
+                       : !strcasecmp(nome,"LEITURA") ? 26
+                       : !strcasecmp(nome,"VALORACAO") ? 27 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7139,6 +7140,103 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 27){
+        /* ── AS RÉGUAS p-ÁDICAS: uma POR PRIMO, e cada uma é ultramétrica.
+         *
+         *     v_p(n) = quantas vezes p divide n
+         *     d_p(x,y) = p^{−v_p(x−y)}
+         *
+         * O `ultra` mede a régua do PREFIXO --- a def:arvore lida em bits. Esta
+         * mede outra família, e o ponto é que há mais de uma: o racional tem uma
+         * régua por primo, e todas cumprem a desigualdade forte. Duas perguntas
+         * distintas sobre a mesma coluna, e é por isso que são duas operações.
+         *
+         * Devolve-se a valoração como INTEIRO, nunca p^{−v}: a potência sairia
+         * do degrau, e o que se compara são profundidades. */
+        if(ncols != 1){
+            printf("erro: a valoração é de UMA coluna --- a tabela tem %ld."
+                   " RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "valoracao needs one column, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj < 3){
+            printf("erro: a desigualdade forte é sobre TRIPLOS --- há %ld linha(s)."
+                   " RECUSADA.\n", n_obj);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "valoracao needs at least 3 rows, got %ld", n_obj); }
+            return 0;
+        }
+        long v[512]; long nv = 0;
+        for(long i = 0; i < nrows && nv < 512; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols)){
+                printf("erro: célula ausente --- um buraco não tem valoração."
+                       " RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "valoracao: missing cell at row %ld", i); }
+                return 0;
+            }
+            long nu, de; celula_qz(i, 0, ncols, &nu, &de);
+            if(de != 1){
+                printf("erro: o valor %ld/%ld não é inteiro --- a valoração de uma"
+                       " fração é a diferença das duas, e aqui pede-se a coluna já"
+                       " inteira. RECUSADA.\n", nu, de);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "valoracao: value %ld/%ld is not an integer", nu, de); }
+                return 0;
+            }
+            v[nv++] = nu;
+        }
+        /* para cada primo pequeno: a régua vale? quantos triplos são estritos? */
+        long primos[4] = {2, 3, 5, 7};
+        long total_vale = 0, total_falha = 0, total_est = 0, todas_ok = 0;
+        char linha[SQL_OUT_CELL];
+        for(int pi = 0; pi < 4; pi++){
+            long p = primos[pi];
+            long vale = 0, falha = 0, est = 0;
+            for(long i = 0; i < nv; i++) for(long j = 0; j < nv; j++) for(long k = 0; k < nv; k++){
+                long dxy = v[i] - v[j], dyz = v[j] - v[k], dxz = v[i] - v[k];
+                int a1 = 62, b1 = 62, c1 = 62;
+                if(dxy){ long t = dxy < 0 ? -dxy : dxy; a1 = 0; while(t % p == 0){ t /= p; a1++; } }
+                if(dyz){ long t = dyz < 0 ? -dyz : dyz; b1 = 0; while(t % p == 0){ t /= p; b1++; } }
+                if(dxz){ long t = dxz < 0 ? -dxz : dxz; c1 = 0; while(t % p == 0){ t /= p; c1++; } }
+                int mn = a1 < b1 ? a1 : b1;
+                if(c1 >= mn){ vale++; if(c1 > mn) est++; } else falha++;
+            }
+            total_vale += vale; total_falha += falha; total_est += est;
+            if(falha == 0) todas_ok++;
+            printf("   p = %ld: %ld valem, %ld falham, %ld estritos\n", p, vale, falha, est);
+        }
+        snprintf(linha, sizeof linha, "%ld/4", todas_ok);
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 4;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "primos_ok");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "vale");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "falha");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "estrito");
+            sql_cap->tipo[0] = SQL_TIPO_TEXT;
+            for(int c = 1; c < 4; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%s", linha);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", total_vale);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", total_falha);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", total_est);
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %s | %ld | %ld | %ld\n", linha, total_vale, total_falha, total_est);
+        printf("-- %s primos com a régua a valer sobre %ld endereços · há uma régua POR"
+               " PRIMO, e todas são ultramétricas · a do `ultra` é a do prefixo, e é"
+               " outra\n", linha, nv);
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 26){
         /* ── A LEITURA SERVE? São duas perguntas, e elas são DUAIS:
          *
