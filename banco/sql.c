@@ -4220,6 +4220,46 @@ static void emit_teste16(unsigned sc, int cmp_op, unsigned destino, unsigned ksl
  * 0..32767 — `2·32767` já não cabe, e a resposta sairia ao contrário. O pior
  * caso calcula-se em compilação, com o maior valor que cada coluna guarda. */
 /* a forma de UM átomo cabe em ±limite? — o mesmo majorante, por átomo */
+/* ── O ANDAR DE CIMA SABE TRATAR ESTE ÁTOMO? ─────────────────────────────────
+ *
+ * O caminho de dezasseis bits soma e multiplica o PAR como número, e é isso que
+ * ele sabe: números. O de oito sabe mais --- carrega o denominador de cada
+ * célula e transporta φ_t nos corpos com régua ---, e por isso ele tem de
+ * continuar a existir onde essas coisas vivem.
+ *
+ * O que estava errado era a REGRA DE ESCOLHA: decidia-se pelo TAMANHO («cabe em
+ * ±127 usa o de oito»), e o de oito é justamente o que fica caro com valores
+ * pequenos --- o coeficiente vira soma repetida em base de Zeckendorf, e o
+ * custo cresce com o VALOR. Medido em quarenta linhas: `a = 0` custa 2800
+ * passos, `a = 7` custa 5280 e `a = 100` custa 8520, enquanto o de dezasseis
+ * custa 3440 SEMPRE. Escolhia-se o caminho lento exactamente onde ele é lento.
+ *
+ * A pergunta certa não é «cabe?» --- é «o andar de cima sabe tratar isto?». Se
+ * todas as colunas citadas são de corpo INTEIRO, sabe, e o custo passa a ser
+ * fixo. Se alguma tem régua ou denominador, não sabe, e desce-se ao de oito. */
+static int atom_so_inteiro(const struct arvore *a, int j, long ncols, long nrows){
+    /* A PERGUNTA É SOBRE AS CÉLULAS, e não sobre o corpo da coluna.
+     *
+     * Perguntar pelo corpo não chega: uma coluna declarada INTEIRO aceita `3/4`,
+     * e o denominador vive na CÉLULA (S_DEN), não no catálogo. Com a pergunta
+     * pelo corpo, `SELECT * FROM t WHERE a > 1` numa tabela com 3/4 e 7/2 subia
+     * ao andar de cima --- que soma o par como número e não sabe do
+     * denominador --- e a ordem saía errada em quatro asserções.
+     *
+     * A varredura corre UMA vez por compilação, não por linha: são nrows·ncols
+     * leituras contra os milhares de passos que o andar de baixo custa a cada
+     * linha. */
+    for(long cc = 0; cc < ncols; cc++)
+        if(corpo_de(cc).total != CORPO_INTEIRO) return 0;
+    if(a->av[j].den && a->av[j].den != 1) return 0;    /* a própria expressão tem denominador */
+    for(long i = 0; i < nrows; i++)
+        for(long cc = 0; cc < ncols; cc++){
+            long d = (long)mem_le(S_DEN + (unsigned)(i*ncols + cc)).total;
+            if(d != 1 && d != 0) return 0;      /* 0 = célula por escrever */
+        }
+    return 1;
+}
+
 static int atom_cabe(const struct arvore *a, int j, long ncols, long nrows, long long limite){
     long long alto = 0, baixo = 0;
     for(int cod = 0; cod < NMON; cod++){
@@ -4443,7 +4483,11 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
          * Agora o majorante da forma — calculado em compilação com o maior valor
          * que cada coluna guarda — escolhe o andar: cabe em ±127 usa o de oito,
          * cabe em ±32767 usa o de dezasseis, e o que não cabe é RECUSADO. */
-        int atom_largo = !atom_cabe(a, j, ncols, nrows_atual, 127);
+        /* o de cima quando ele SABE; o de baixo quando é preciso o que só ele
+         * tem. E se o de baixo for escolhido, ainda pode não caber em ±127 --- aí
+         * sobe-se na mesma, que é o que o `atom_cabe` decide. */
+        int atom_largo = atom_so_inteiro(a, j, ncols, nrows_atual)
+                       || !atom_cabe(a, j, ncols, nrows_atual, 127);
         if(atom_largo){
             /* o mapa do rascunho de 16: acc, x16, ga, gb, tmp16, o slot do teste,
              * o produto e a base do emit_mul16 (que consome 18 a partir dela) */

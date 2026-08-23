@@ -5872,16 +5872,39 @@ int main(void){
                pr, idem ? "" : "NAO BATE");
         if(!idem) mal++;
 
-        /* ── O CONTROLO: dois programas que TÊM de ser diferentes. Sem ele, um
+        /* ── O CONTROLO: duas listas que TÊM de se distinguir. Sem ele, um
          * motor que devolvesse sempre a mesma impressão digital — ou zero —
-         * passava em tudo o que está acima. */
+         * passava em tudo o que está acima.
+         *
+         * E ONDE ELAS SE DISTINGUEM MUDOU. Enquanto o átomo descia ao andar de
+         * oito bits, o valor entrava DESENROLADO no código e o programa mudava
+         * com a lista. Numa tabela de inteiros ele passa a subir ao andar de
+         * dezasseis, onde o valor entra por MEMÓRIA e o código é o mesmo — que é
+         * a separação entre programa e dados a aparecer sozinha, e é boa: um só
+         * programa serve todas as listas. O controlo mede-a onde ela agora vive:
+         * as listas têm de dar RESULTADOS diferentes, e o programa tem de ser o
+         * mesmo. Se ambos mudassem, ou se ambos ficassem iguais, o motor não
+         * estaria a distinguir nada. */
         sql_executa("SELECT a FROM t WHERE a IN (1,3)", &o);
-        long pa = sql_ultimo_prog;
+        long pa = sql_ultimo_prog, na = o.nrows;
+        char va[64]; va[0] = 0;
+        for(int r = 0; r < o.nrows && r < 4; r++)
+            snprintf(va + strlen(va), sizeof va - strlen(va), "%s%s",
+                     r ? "," : "", o.cell[r][0]);
         sql_executa("SELECT a FROM t WHERE a IN (2,4)", &o);
-        long pb = sql_ultimo_prog;
-        printf("\n      CONTROLO — listas diferentes, programas diferentes:"
-               " %08lx vs %08lx  %s\n", pa, pb, (pa != pb) ? "" : "NAO BATE");
-        if(pa == pb) mal++;
+        long pb = sql_ultimo_prog, nb = o.nrows;
+        char vb[64]; vb[0] = 0;
+        for(int r = 0; r < o.nrows && r < 4; r++)
+            snprintf(vb + strlen(vb), sizeof vb - strlen(vb), "%s%s",
+                     r ? "," : "", o.cell[r][0]);
+        int distingue = (strcmp(va, vb) != 0);
+        printf("\n      CONTROLO — listas diferentes, RESULTADOS diferentes:"
+               " [%s] vs [%s]  %s\n", va, vb, distingue ? "" : "NAO BATE");
+        printf("      e o PROGRAMA é o mesmo (%08lx vs %08lx): a lista passou para"
+               " os dados, e um só código serve as duas\n", pa, pb);
+        if(!distingue) mal++;
+        if(pa != pb) mal++;
+        (void)na; (void)nb;
         sql_fechar();
 
         printf("\n");
