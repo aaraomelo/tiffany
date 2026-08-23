@@ -91,6 +91,12 @@ static int cli_ate_ready(int fd, uint8_t *acc, int cap, int *nacc){
     return -1;
 }
 
+/* a série escrita tem de trazer os FATORIAIS --- «t^k/k!» --- e é isso que a
+ * distingue de uma lista de potências qualquer */
+static int s2_tem_fat(const char *s){
+    return s && (strstr(s, "/2!") || strstr(s, "/3!") || strstr(s, "!") != NULL);
+}
+
 int main(void){
     printf("\n=== pgwire FEBE (Trios PG1–PG4) — buffer + TCP + Extended ===\n");
 
@@ -26714,7 +26720,7 @@ int main(void){
            " fica sempre dentro do grão do último nível descido.", mal == 0);
     }
 
-    /* ═══ §W185: A SOLUÇÃO EM NOTAÇÃO FATORIAL — só contagem ═══════════════ */
+    /* ═══ §W185: A SOLUÇÃO — a contagem E a série de potências ═════════════ */
     {
         SqlOut o, o2;
         long mal = 0;
@@ -26734,7 +26740,7 @@ int main(void){
           {"y''''=0      (a viga)", 4, {0,0,0,0}, "",                               0},
         };
         printf("      a equação                a solução em fatorial\n");
-        long certas = 0, medidas = 0;
+        long certas = 0, medidas = 0, comfat = 0;
         for(int c = 0; c < 6; c++){
             char q[600];
             int n = E[c].n;
@@ -26755,9 +26761,22 @@ int main(void){
             sql_executa("SELECT edo(*) FROM A", &o);
             if(!o.ok){ printf("      %-24s RECUSADA\n", E[c].nome); mal++; continue; }
             /* grau 1 e 2 devolvem a solução fatorial na coluna 6; grau > 2 na 7 */
+            /* a coluna 6/7 é a CONTAGEM e a 7/8 é a SÉRIE escrita --- as duas
+             * convivem, porque são leituras do mesmo objecto: a contagem é o
+             * que a casa faz, a série é o que o cliente lê */
             const char *sol = o.cell[0][(n <= 2) ? 6 : 7];
+            const char *ser = o.cell[0][(n <= 2) ? 7 : 8];
             printf("      %-24s %s\n", E[c].nome, sol);
+            printf("      %-24s   %s\n", "", ser);
             medidas++;
+            /* a SÉRIE tem de conter os fatoriais: é o que a distingue de uma
+             * lista de potências qualquer */
+            /* a viga tem UM só coeficiente não-nulo (d = 1,0,0,...) e a série
+             * dela é «1 + ...» --- sem fatoriais, e correctamente: não há termo
+             * de grau ≥ 2 para os levar. Exigi-los de todas reprovava-a. */
+            int tem_mais = strchr(sol, ' ') && strstr(sol, "d:") &&
+                           strcmp(strstr(sol, "d:"), "d: 1 0 0 0 0 0 0 0 0 0 0 0");
+            if(!tem_mais || s2_tem_fat(ser)) comfat++;
             /* a coluna traz o número de termos, o CICLO contado na lista e os
              * coeficientes --- compara-se o pedaço que interessa, não a linha
              * toda, porque o número de termos varia com o que cabe no anel */
@@ -26766,8 +26785,9 @@ int main(void){
                 else printf("      ^^^ esperava conter «%s»\n", E[c].espera);
             } else certas++;
         }
-        printf("      → %ld de %ld com a lista esperada\n", certas, medidas);
-        if(certas != medidas || medidas == 0) mal++;
+        printf("      → %ld de %ld com a lista esperada · %ld com os fatoriais na"
+               " série escrita\n", certas, medidas, comfat);
+        if(certas != medidas || medidas == 0 || comfat != medidas) mal++;
 
         /* ── O QUE A CONTAGEM MOSTRA, e que a forma fechada esconde: o PERÍODO
          * dos coeficientes é a ordem de ω, lida directamente da lista. Não se

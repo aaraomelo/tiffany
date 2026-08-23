@@ -40,6 +40,15 @@
 
 #include <stdio.h>       /* snprintf, para a apresentação dos dígitos */
 
+/* a profundidade da primeira divergência, do bit mais significativo --- é a
+ * def:arvore da aranha, e escreve-se aqui para o header não depender de outro */
+static int tv_prof_local(long x, long y, int bits){
+    if(x == y) return bits;
+    for(int i = 0; i < bits; i++)
+        if(((x >> (bits-1-i)) & 1L) != ((y >> (bits-1-i)) & 1L)) return i;
+    return bits;
+}
+
 /* o resultado de uma série: o valor em escala, e o CUSTO --- quantos termos
  * até o termo ir a zero, que é o ℓ do thm:serie lido no campo */
 typedef struct { long valor; int termos; int parou; } SfSerie;
@@ -554,6 +563,86 @@ static void ft_sol_escreve(const FtSol *s, char *out, long lim){
     snprintf(out + o, lim - o, "%s", s->estourou ? " ..." : "");
 }
 
+/* ── O SOMATÓRIO SAI DA CISÃO ⊕, que é a primeira das quatro operações.
+ *
+ * O algoritmo da aranha tem QUATRO operações e nem uma a mais, e a primeira é a
+ * cisão: «as duas máscaras são complementares, logo PARTICIONAM o byte --- é a
+ * cisão ⊕ em duas fases, as posições de índice PAR e as de índice ÍMPAR».
+ *
+ * É isso que dá o somatório, e não uma tabela de casos. Cindem-se os d_k em
+ * duas fases; dentro de cada uma vê-se se são constantes ou se ALTERNAM --- e o
+ * alternar é o (−1)^k, «o número de voltas lido módulo dois». Cada fase
+ * não-nula dá um termo, e a soma das duas é a resposta:
+ *
+ *     fase par constante c   →   c · SOMA t^{2k}/(2k)!
+ *     fase par alternada     →   SOMA (−1)^k t^{2k}/(2k)!
+ *     idem para a ímpar, com 2k+1
+ *
+ * Quatro passos, e todos contagem: cindir, ver se alterna, escrever, somar. */
+static void ft_sol_somatorio(const FtSol *s, char *out, long lim){
+    long o = 0; int escreveu = 0;
+    for(int fase = 0; fase < 2; fase++){
+        /* a fase: os d_k com k ≡ fase (mod 2) */
+        long v[FT_COEF]; int nv = 0;
+        for(int k = fase; k < s->n; k += 2) v[nv++] = s->d[k];
+        if(nv == 0) continue;
+        /* nula? */
+        int nula = 1;
+        for(int i = 0; i < nv; i++) if(v[i]){ nula = 0; break; }
+        if(nula) continue;
+        /* constante ou alternada? --- as duas leituras que a cisão admite */
+        int constante = 1, alterna = 1;
+        for(int i = 1; i < nv; i++){
+            if(v[i] != v[0]) constante = 0;
+            if(v[i] != -v[i-1]) alterna = 0;
+        }
+        if(!constante && !alterna) continue;      /* esta fase não fecha */
+        long c = v[0], ac = c < 0 ? -c : c;
+        if(escreveu) o += snprintf(out + o, lim - o, " + ");
+        else         o += snprintf(out + o, lim - o, "y(t) = ");
+        if(c < 0) o += snprintf(out + o, lim - o, "-");
+        if(ac != 1) o += snprintf(out + o, lim - o, "%ld", ac);
+        o += snprintf(out + o, lim - o, "SOMA_k ");
+        if(alterna && !constante) o += snprintf(out + o, lim - o, "(-1)^k ");
+        if(fase == 0) o += snprintf(out + o, lim - o, "t^(2k)/(2k)!");
+        else          o += snprintf(out + o, lim - o, "t^(2k+1)/(2k+1)!");
+        escreveu = 1;
+    }
+    if(!escreveu)
+        snprintf(out, lim, "y(t) = SOMA_k d_k t^k/k!, com d pela recorrencia");
+}
+
+/* ── E A SÉRIE DE POTÊNCIAS RESULTANTE, escrita.
+ *
+ * A contagem é o que a casa FAZ; a série é o que o cliente LÊ. As duas saem do
+ * mesmo objecto --- os d_k --- e não se substituem uma à outra: só a contagem
+ * deixava o cliente sem a equação, e só a equação escondia o que o campo lê.
+ *
+ *     y(t) = Σ_k d_k t^k/k!   →   1 + t + t²/2! + t³/3! + ...
+ *
+ * Os termos nulos não se escrevem, o coeficiente um não se escreve, e o sinal
+ * entra no operador --- como se escreve à mão. */
+static void ft_sol_serie(const FtSol *s, char *out, long lim){
+    long o = 0; int primeiro = 1;
+    for(int k = 0; k < s->n && o < lim - 28; k++){
+        long d = s->d[k];
+        if(d == 0) continue;
+        long ad = d < 0 ? -d : d;
+        if(primeiro){ if(d < 0) o += snprintf(out + o, lim - o, "-"); }
+        else o += snprintf(out + o, lim - o, d < 0 ? " - " : " + ");
+        if(k == 0)      o += snprintf(out + o, lim - o, "%ld", ad);
+        else {
+            if(ad != 1) o += snprintf(out + o, lim - o, "%ld", ad);
+            if(k == 1)  o += snprintf(out + o, lim - o, "t");
+            else        o += snprintf(out + o, lim - o, "t^%d/%d!", k, k);
+        }
+        primeiro = 0;
+    }
+    if(primeiro) o += snprintf(out + o, lim - o, "0");
+    snprintf(out + o, lim - o, " + ...");
+}
+
+
 /* ── E O GUME QUE ELA PEDE: os coeficientes têm de SATISFAZER a recorrência.
  * Reconfere-se cada um a partir dos n anteriores --- se algum não bater, a
  * lista não é solução de equação nenhuma. Devolve quantos batem. */
@@ -565,6 +654,77 @@ static int ft_sol_confere(const FtSol *s, const long *co){
         if(v == s->d[k]) batem++;
     }
     return batem;
+}
+
+/* ═══ A SOLUÇÃO COM J: o par (c,s), e não um escalar ════════════════════════
+ *
+ * A equação da face é y'' = t·y --- com ω²=t --- e a sua solução vive em Z[ω]:
+ *
+ *     y(t) = c(t)·1 + s(t)·ω,
+ *
+ * que é o exp(tJ) do paper com J geral. As duas metades saem da MESMA
+ * recorrência com condições iniciais diferentes: (1,0) dá o c, (0,1) dá o s ---
+ * e é a cisão ⊕ outra vez, agora nas condições em vez dos índices.
+ *
+ * E o que as liga é a NORMA, que a exponencial preserva: c² − t·s² = 1. Isso
+ * verifica-se nos COEFICIENTES, sem avaliar em t nenhum --- a convolução dos
+ * dois pela regra da casa tem de dar a lista <1,0,0,0,...>. */
+
+typedef struct { FtSol c, s; int t; } FtPar;
+
+static FtPar ft_par(int t, int quantos){
+    FtPar r; r.t = t;
+    long co[2] = {-(long)t, 0};                  /* y'' − t·y = 0 */
+    long d1[2] = {1, 0}, d2[2] = {0, 1};
+    r.c = ft_solucao(co, 2, d1, quantos);
+    r.s = ft_solucao(co, 2, d2, quantos);
+    return r;
+}
+
+/* ── A NORMA NOS COEFICIENTES, pela CONVOLUÇÃO DESTA CASA.
+ *
+ * A operação é a do `def:conv` --- o produto que a bilinearidade estende da
+ * base --- e é a mesma que o `thm:zeta-mu` corre como ζ a acumular e μ a
+ * desacumular, com o gato ⊗ a subir e o esquilo ⊘ a descer. Na base fatorial
+ * ela escreve-se com os pesos que a base pede,
+ *
+ *     (f·g)_n = Σ_k C(n,k) f_k g_{n-k},
+ *
+ * porque t^k/k! · t^{n-k}/(n-k)! = C(n,k)·t^n/n!. Não é uma regra importada:
+ * é a mesma convolução, lida na base em que estes coeficientes vivem.
+ *
+ * Se o par está no nível, o produto dá 1 no termo 0 e zero em todos os outros. */
+static int ft_par_norma(const FtPar *p, int ate){
+    int batem = 0;
+    for(int n = 0; n < ate && n < FT_COEF; n++){
+        /* (fg)_n = Σ_k C(n,k) f_k g_{n-k}, que é o produto na base fatorial */
+        long acc = 0, bin = 1;
+        for(int k = 0; k <= n; k++){
+            if(k >= p->c.n || n-k >= p->c.n) break;
+            acc += bin * (p->c.d[k] * p->c.d[n-k] - (long)p->t * p->s.d[k] * p->s.d[n-k]);
+            bin = bin * (n - k) / (k + 1);
+        }
+        if(acc == (n == 0 ? 1 : 0)) batem++;
+    }
+    return batem;
+}
+
+/* ── A RÉGUA SOBRE OS COEFICIENTES: a ultramétrica dos endereços, aplicada à
+ * lista dos d_k. Ela desce sempre (lem:ultra), e o que a distingue entre as
+ * faces são os ESTRITOS --- onde a régua separa em vez de empatar. */
+typedef struct { long triplos, viola, estrito; } FtUltra;
+
+static FtUltra ft_ultra(const FtSol *s, int bits){
+    FtUltra u = {0,0,0};
+    for(int i = 0; i < s->n; i++) for(int j = 0; j < s->n; j++) for(int k = 0; k < s->n; k++){
+        long x = s->d[i] + 4096, y = s->d[j] + 4096, z = s->d[k] + 4096;
+        int a = tv_prof_local(x, y, bits), b = tv_prof_local(y, z, bits),
+            c = tv_prof_local(x, z, bits);
+        int m = a < b ? a : b;
+        u.triplos++;
+        if(c < m) u.viola++; else if(c > m) u.estrito++;
+    }
+    return u;
 }
 
 #endif /* FATORIAL_H */

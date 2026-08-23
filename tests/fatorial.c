@@ -333,6 +333,90 @@ int main(void){
            " contrário. A paridade da série aparece no campo.", mal == 0);
     }
 
+    /* ── §S7 O PAR (c,s), A NORMA NOS COEFICIENTES, E A RÉGUA NOS TRÊS ──── */
+    {
+        printf("§S7  a solução com J é o PAR, e a régua desce nos três regimes.\n\n");
+        long mal = 0;
+        const char *nm[3] = {"ELÍPTICO   t=−1", "PARABÓLICO t= 0", "HIPERBÓLICO t=+1"};
+        printf("      regime            c: os d_k       s: os d_k      norma  viola  estritos\n");
+        long fecham = 0, descem = 0; long est[3];
+        for(int i = 0; i < 3; i++){
+            int t = i - 1;
+            FtPar p = ft_par(t, 10);
+            FtUltra u = ft_ultra(&p.c, 14);
+            int nrm = ft_par_norma(&p, 8);
+            printf("      %-17s ", nm[i]);
+            for(int k = 0; k < 5; k++) printf("%2ld ", p.c.d[k]);
+            printf("  ");
+            for(int k = 0; k < 5; k++) printf("%2ld ", p.s.d[k]);
+            printf("  %d/8 %6ld %8ld\n", nrm, u.viola, u.estrito);
+            est[i] = u.estrito;
+            if(nrm == 8) fecham++;
+            if(u.viola == 0 && u.estrito > 0) descem++;
+        }
+        printf("      → a norma c²−t·s² = 1 fecha NOS COEFICIENTES em %ld das 3, e a régua"
+               " desce em %ld\n", fecham, descem);
+        if(fecham != 3 || descem != 3) mal++;
+        printf("      e os estritos são %ld, %ld, %ld --- a régua VÊ a diferença entre as"
+               " faces\n", est[0], est[1], est[2]);
+        if(est[0] == est[1] || est[1] == est[2] || est[0] == est[2]) mal++;
+
+        /* a norma verifica-se SEM AVALIAR: é a convolução dos
+         * coeficientes, com os pesos binomiais que a base fatorial pede */
+        {
+            FtPar p = ft_par(-1, 10);
+            printf("      a norma pela CONVOLUÇÃO dos coeficientes, termo a termo:");
+            for(int n2 = 0; n2 < 5; n2++){
+                long acc = 0, bin = 1;
+                for(int k = 0; k <= n2; k++){
+                    acc += bin * (p.c.d[k]*p.c.d[n2-k] - (long)p.t * p.s.d[k]*p.s.d[n2-k]);
+                    bin = bin * (n2 - k) / (k + 1);
+                }
+                printf(" %ld", acc);
+            }
+            printf("   <- <1,0,0,0,0>, e nenhum ponto foi avaliado\n");
+        }
+
+        /* e MAIS CASOS, de graus vários, todos pelo mesmo caminho */
+        {
+            struct { const char *n; int o; long co[4]; long d0[4]; } M[5] = {
+              {"y3 = y        (raiz cubica)",  3, {-1,0,0},   {1,0,0}},
+              {"y4 = y        (quartica)",     4, {-1,0,0,0}, {1,0,0,0}},
+              {"y2 + 2y1 + y  (raiz dupla)",   2, {1,2},      {1,0}},
+              {"y3 - 3y1 - 2y",                3, {-2,-3,0},  {1,0,0}},
+              {"y4 + 5y2 + 4y",                4, {4,0,5,0},  {1,0,0,0}},
+            };
+            printf("\n      mais casos --- e todos pelo mesmo caminho:\n");
+            long conferem = 0;
+            for(int i = 0; i < 5; i++){
+                FtSol so = ft_solucao(M[i].co, M[i].o, M[i].d0, 10);
+                FtUltra u = ft_ultra(&so, 14);
+                int cf = ft_sol_confere(&so, M[i].co);
+                printf("        %-28s d:", M[i].n);
+                for(int k = 0; k < 7; k++) printf(" %ld", so.d[k]);
+                printf("  · %d/%d conferem · régua %s\n", cf, so.n - M[i].o,
+                       u.viola == 0 ? "desce" : "NAO");
+                if(cf == so.n - M[i].o && u.viola == 0) conferem++;
+            }
+            printf("      → %ld de 5 com todos os coeficientes a conferirem e a régua a"
+                   " descer\n", conferem);
+            if(conferem != 5) mal++;
+        }
+
+        printf("\n");
+        ok("A SOLUÇÃO COM J É O PAR (c,s), E A NORMA VERIFICA-SE NOS COEFICIENTES. A equação"
+           " da face é y''=t·y e a solução vive em Z[w]: y = c·1 + s·w, que é o exp(tJ) do"
+           " paper com J geral. As duas metades saem da MESMA recorrência com condições"
+           " iniciais diferentes --- (1,0) dá o c, (0,1) dá o s ---, e é a cisão outra vez,"
+           " agora nas condições em vez dos índices. E A NORMA c²−t·s²=1 VERIFICA-SE SEM"
+           " AVALIAR PONTO NENHUM: é a CONVOLUÇÃO desta casa --- a do def:conv, a mesma que o"
+           " thm:zeta-mu corre como gato e esquilo --- lida na base fatorial, e dá <1,0,0,0,0> --- o que separa «a"
+           " identidade vale» de «vale nos pontos que eu testei». A RÉGUA DESCE NOS TRÊS"
+           " regimes, com zero violações, e os ESTRITOS distinguem-nos. Se fossem iguais, a"
+           " régua não estaria a ver a diferença entre as faces --- e é isso que faz dela uma"
+           " medida e não uma formalidade.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

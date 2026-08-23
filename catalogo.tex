@@ -2435,6 +2435,65 @@ anteriores a mostrava.
 inventei, e depois a série clássica escrita à mão. \emph{Nenhuma é o que esta casa faz} --- e
 o que ela faz é contar.
 
+\paragraph{E o somatório sai da CISÃO, que é a primeira das quatro operações.} O algoritmo
+tem quatro e nem uma a mais, e a primeira é a cisão $\oplus$: \emph{«as duas máscaras são
+complementares, logo PARTICIONAM o byte --- é a cisão em duas fases, as posições de índice
+par e as de índice ímpar»}. É dela que o somatório vem, e não de uma tabela de casos:
+cindem-se os $d_k$ em duas fases, e dentro de cada uma vê-se se são \emph{constantes} ou se
+\textbf{alternam} --- e o alternar é o $(-1)^k$, «o número de voltas lido módulo dois».
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+a equação & o somatório\\
+\midrule
+$y'-y=0$ & $\sum_k\frac{t^{2k}}{(2k)!}+\sum_k\frac{t^{2k+1}}{(2k+1)!}$\\[2pt]
+$y''+y=0$ & $\sum_k\frac{(-1)^kt^{2k}}{(2k)!}$\\[2pt]
+$y''-y=0$ & $\sum_k\frac{t^{2k}}{(2k)!}$\\[2pt]
+$y''+5y'+6y=0$ & $\sum_k d_k\frac{t^k}{k!}$, com $d$ pela recorrência\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Repare-se no $e^t$: sai como \textbf{as duas fases somadas}, e não colapsado ---
+\emph{as duas metades não se misturam}, que é o que o \emph{sec:serie} diz de $c$ e $s$. E
+onde a fase não é nem constante nem alternada não há somatório fechado: o motor \emph{diz
+isso} em vez de forçar um.
+
+\subsection*{A solução com $J$ é o PAR, e a norma verifica-se nos coeficientes}
+
+A equação da face é $y''=t\,y$ e a solução vive em $\mathbb{Z}[\omega]$:
+$y=c\cdot1+s\cdot\omega$, que é o $\exp(tJ)$ do paper com $J$ geral. As duas metades saem da
+\emph{mesma} recorrência com condições iniciais diferentes --- $(1,0)$ dá o $c$, $(0,1)$ dá o
+$s$ ---, e é a \textbf{cisão outra vez}, agora nas condições em vez dos índices.
+
+\begin{center}\small
+\begin{tabular}{@{}lllrr@{}}
+\toprule
+regime & $c$: os $d_k$ & $s$: os $d_k$ & viola & estritos\\
+\midrule
+elíptico $t=-1$ & $1,0,-1,0,1$ & $0,1,0,-1,0$ & $0$ & $280$\\
+parabólico $t=0$ & $1,0,0,0,0$ & $0,1,0,0,0$ & $0$ & $90$\\
+hiperbólico $t=+1$ & $1,0,1,0,1$ & $0,1,0,1,0$ & $0$ & $250$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E a norma $c^2-t\,s^2=1$ verifica-se SEM avaliar ponto nenhum}: é a
+\textbf{convolução} desta casa --- a do \emph{def:conv}, a mesma que o \emph{thm:zeta-mu}
+corre como gato e esquilo --- lida na base fatorial, onde ela pede os pesos $\binom{n}{k}$
+porque $\frac{t^k}{k!}\cdot\frac{t^{n-k}}{(n-k)!}=\binom{n}{k}\frac{t^n}{n!}$. O produto dá
+$\langle1,0,0,0,0\rangle$ nos três regimes. \emph{É o que separa «a identidade vale» de «vale
+nos pontos que eu testei».}
+
+\medskip\noindent A régua desce nos três com \textbf{zero violações}, e os estritos
+\emph{distinguem-nos} --- $280$, $90$, $250$. Se fossem iguais, ela não estaria a ver a
+diferença entre as faces, e isso é o que faz dela uma medida e não uma formalidade.
+
+\medido{\code{tests/fatorial.c} §S7 --- o par nos três regimes com a norma a fechar em $8/8$
+termos pela convolução, a régua a descer nos três, e mais cinco equações de graus dois a
+quatro com todos os coeficientes a conferirem a recorrência.}
+
 \paragraph{E o grau um era recusado.} $y'=\lambda y$ tem companheira $1\times1$ e é o caso
 mais simples de todos --- a exponencial pura. O motor exigia $n\ge2$, o que o deixava de fora
 sem razão nenhuma da teoria; agora resolve-o, e é ele que dá o $\langle1,1,1,\ldots\rangle$.
