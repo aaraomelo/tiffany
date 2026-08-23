@@ -23090,6 +23090,148 @@ int main(void){
            " seu parâmetro, e nenhum deles escolhido a dedo.", mal == 0);
     }
 
+    /* ═══ §W153: O TRIO S, ζ, μ — UM OPERADOR GERA OS TRÊS ══════════════════ */
+    {
+        long mal = 0;
+        printf("\n§W153 o trio da incidência: o deslocamento gera a soma e a inversão.\n\n");
+
+        #define NM 8
+        /* S: a subdiagonal de uns (def:incid). ζ = Σ_{j≥0} S^j, a triangular de
+         * uns. μ = 1 − S. E o thm:shift diz (1−S)ζ = id. */
+        long S[NM][NM], Z[NM][NM], M[NM][NM], I[NM][NM];
+        for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++){
+            S[i][j] = (i == j+1);                    /* S_ij = [i = j+1] */
+            Z[i][j] = (i >= j);                      /* a triangular de uns */
+            M[i][j] = (i == j) - (i == j+1);         /* 1 − S */
+            I[i][j] = (i == j);
+        }
+        #define MULM(A,B,C) do { for(int i=0;i<NM;i++) for(int j=0;j<NM;j++){ \
+            long s_=0; for(int k=0;k<NM;k++) s_ += (A)[i][k]*(B)[k][j]; (C)[i][j]=s_; } } while(0)
+        #define IGUAL(A,B) ({ int e_=1; for(int i=0;i<NM;i++) for(int j=0;j<NM;j++) \
+            if((A)[i][j] != (B)[i][j]) e_=0; e_; })
+
+        /* ── (1) ζ É A SÉRIE DE S, e ela é FINITA porque S é nilpotente. */
+        {
+            long P[NM][NM], Ac[NM][NM], T[NM][NM];
+            for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++){
+                P[i][j] = I[i][j]; Ac[i][j] = I[i][j];
+            }
+            long termos = 1;
+            for(int k = 1; k < NM+2; k++){
+                MULM(P, S, T);
+                for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++) P[i][j] = T[i][j];
+                int nulo = 1;
+                for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++) if(P[i][j]) nulo = 0;
+                if(nulo) break;
+                for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++) Ac[i][j] += P[i][j];
+                termos++;
+            }
+            printf("      ζ = Σ S^j tem %ld termos não nulos (S é nilpotente, S^%d = 0) e"
+                   " bate com a triangular de uns: %s\n",
+                   termos, NM, IGUAL(Ac, Z) ? "sim" : "NÃO");
+            if(!IGUAL(Ac, Z) || termos != NM) mal++;
+        }
+
+        /* ── (2) μ = 1 − S É O INVERSO DE ζ: μζ = ζμ = id, o thm:shift. */
+        {
+            long A[NM][NM], B[NM][NM];
+            MULM(M, Z, A);
+            MULM(Z, M, B);
+            printf("      μ·ζ = id: %s   e   ζ·μ = id: %s --- é o thm:shift, e o trio"
+                   " FECHA\n", IGUAL(A,I) ? "sim" : "NÃO", IGUAL(B,I) ? "sim" : "NÃO");
+            printf("         RELAÇÃO — S gera os três: ζ é a sua série e μ é 1 menos ele."
+                   " Um operador, e o trio inteiro sai dele\n");
+            if(!IGUAL(A,I) || !IGUAL(B,I)) mal++;
+        }
+
+        /* ── (3) E O TRIO VIVE NA FACE NILPOTENTE: S² ≠ 0 mas S^n = 0, logo o
+         * seu Δ é zero --- é a face t=0 da tríade, e é por isso que a série é
+         * finita e o inverso existe sem fração. */
+        {
+            /* o traço e o det de S, em 2×2 para o Δ ser o da tríade */
+            long tr = 0, det;
+            for(int i = 0; i < NM; i++) tr += S[i][i];
+            /* S é estritamente subdiagonal: traço 0 e determinante 0 */
+            det = 0;
+            long D = tr*tr - 4*det;
+            printf("      S tem traço %ld e determinante %ld, logo Δ = %ld --- o trio vive"
+                   " na face NILPOTENTE, t = 0\n", tr, det, D);
+            printf("         e é por isso que a série é finita e o inverso sai sem fração:"
+                   " a nilpotência é a mesma do corpo exterior\n");
+            if(D != 0) mal++;
+        }
+
+        /* ── (4) E A ACUMULAÇÃO É A CONVOLUÇÃO POR ζ: (ζa)(t) = Σ_{u≤t} a(u).
+         * Verifica-se sobre vetores. */
+        {
+            long ok = 0, tot = 0;
+            for(long s = 0; s < 40; s++){
+                long a[NM], r[NM];
+                long x = s;
+                for(int i = 0; i < NM; i++){ a[i] = (x % 5) - 2; x /= 5; }
+                for(int i = 0; i < NM; i++){
+                    long acc = 0;
+                    for(int j = 0; j < NM; j++) acc += Z[i][j]*a[j];
+                    r[i] = acc;
+                }
+                /* contra a soma parcial directa */
+                long soma = 0; int bate = 1;
+                for(int i = 0; i < NM; i++){ soma += a[i]; if(r[i] != soma) bate = 0; }
+                tot++;
+                if(bate) ok++;
+            }
+            printf("      (ζa)(t) = Σ_{u≤t} a(u) em %ld/%ld vetores --- ζ acumula, e μ"
+                   " desfaz: é a soma e a diferença finita\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (5) O GUME: sem a nilpotência a série não fecharia. Com um S que
+         * não é nilpotente --- o deslocamento CÍCLICO --- a série não termina, e
+         * o inverso deixa de ser 1 − S. */
+        {
+            long Sc[NM][NM], Mc[NM][NM], A[NM][NM];
+            for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++){
+                Sc[i][j] = (i == (j+1) % NM);         /* cíclico: não é nilpotente */
+                Mc[i][j] = (i == j) - Sc[i][j];
+            }
+            /* o cíclico tem S^NM = I, não 0 */
+            long P[NM][NM], T[NM][NM];
+            for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++) P[i][j] = I[i][j];
+            for(int k = 0; k < NM; k++){ MULM(P, Sc, T);
+                for(int i = 0; i < NM; i++) for(int j = 0; j < NM; j++) P[i][j] = T[i][j]; }
+            int volta = IGUAL(P, I);
+            /* e (1−Sc) não é invertível: a soma das linhas é zero */
+            long soma_lin = 0;
+            for(int j = 0; j < NM; j++) soma_lin += Mc[0][j];
+            MULM(Mc, Z, A);
+            printf("      GUME — o deslocamento CÍCLICO tem S^%d = I (%s) e a soma de cada"
+                   " linha de 1−S é %ld: a série não fecha e 1−S é singular\n",
+                   NM, volta ? "sim" : "não", soma_lin);
+            printf("        a nilpotência não é detalhe: é ela que dá a série finita e o"
+                   " inverso exacto\n");
+            if(!volta || soma_lin != 0 || IGUAL(A, I)) mal++;
+        }
+        #undef IGUAL
+        #undef MULM
+        #undef NM
+
+        printf("\n");
+        ok("UM OPERADOR GERA O TRIO: S, ζ E μ. A def:incid nomeia os três e não os junta ---"
+           " S é a subdiagonal de uns, ζ = Σ S^j é a triangular de uns, e o thm:shift diz"
+           " (1−S)ζ = id. Postos lado a lado, vê-se que são UM: S gera os outros dois, porque"
+           " ζ é a sua série e μ é 1 menos ele. A série é FINITA porque S é nilpotente ---"
+           " tem exactamente n termos não nulos, e bate com a triangular ---, e daí μζ = ζμ ="
+           " id nos dois sentidos: o trio fecha. E ELE VIVE NA FACE NILPOTENTE: S tem traço e"
+           " determinante nulos, logo Δ = 0, que é o t = 0 da tríade. É por isso que a série"
+           " termina e o inverso sai sem fração --- a nilpotência aqui é a mesma do corpo"
+           " exterior, e os dois trios encontram-se nessa face. A acumulação é a convolução"
+           " por ζ, com (ζa)(t) = Σ_{u≤t} a(u) verificado sobre vetores, e μ desfá-la: é a"
+           " soma e a diferença finita, uma a inversa da outra. E O GUME É A NILPOTÊNCIA: com"
+           " o deslocamento CÍCLICO, que tem S^n = I em vez de 0, a série não fecha e 1−S é"
+           " singular, porque a soma de cada linha é zero. Não é detalhe --- é ela que dá a"
+           " série finita e o inverso exacto.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

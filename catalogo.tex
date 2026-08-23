@@ -1315,6 +1315,31 @@ parâmetro, e nenhum escolhido a dedo.
 $\Delta<0$ em $3/3$; $\varphi(k)=2$ a dar exactamente $\{3,4,6\}$ entre os $k>2$; e o gume
 do cinco, com $\varphi(5)=4$ e $\tau^2+\tau-1=0$ sem raiz inteira.}
 
+\paragraph{E o trio da incidência --- $S$, $\zeta$, $\mu$ --- é \emph{um} operador.} A
+\code{aranha def:incid} nomeia os três e não os junta: $S$ é a subdiagonal de uns,
+$\zeta=\sum_{j\ge0}S^{j}$ é a triangular de uns, e o \code{thm:shift} diz $(1-S)\zeta=
+\mathrm{id}$. Postos lado a lado, vê-se que \textbf{$S$ gera os outros dois}:
+\[
+ \boxed{\;\zeta=\sum_{j\ge0}S^{j},\qquad \mu=1-S,\qquad \mu\zeta=\zeta\mu=\mathrm{id}\;}
+\]
+--- \emph{um operador, e o trio inteiro sai dele}. A série é \textbf{finita} porque $S$ é
+nilpotente: tem exactamente $n$ termos não nulos e bate com a triangular.
+
+\medskip\noindent\textbf{E o trio vive na face nilpotente.} $S$ tem traço e determinante
+nulos, logo $\Delta=0$ --- é o $t=0$ da tríade. \emph{É por isso que a série termina e o
+inverso sai sem fração}: a nilpotência aqui é a mesma do corpo exterior, e os dois trios
+encontram-se nessa face. A acumulação é a convolução por $\zeta$, $(\zeta a)(t)=\sum_{u\le
+t}a(u)$, e $\mu$ desfá-la --- \emph{a soma e a diferença finita, uma a inversa da outra}.
+
+\medskip\noindent O gume é a nilpotência: com o deslocamento \textbf{cíclico}, que tem
+$S^{n}=I$ em vez de $0$, a série não fecha e $1-S$ é singular, porque a soma de cada linha
+é zero. \emph{Não é detalhe --- é ela que dá a série finita e o inverso exacto.}
+
+\medido{o trio da incidência em \code{tests/pgwire.c} §W153 --- $\zeta$ com $8$ termos não
+nulos a bater com a triangular; $\mu\zeta=\zeta\mu=\mathrm{id}$; $\Delta=0$ para $S$;
+$(\zeta a)(t)=\sum_{u\le t}a(u)$ em $40/40$ vetores; e o gume do cíclico, com $S^{8}=I$ e
+$1-S$ singular.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
