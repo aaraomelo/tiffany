@@ -5647,8 +5647,34 @@ static void pres_migra(long ncols, long nrows){
     { Word m = {1,0}; mem_grava(S_PRESCAB, m); }
 }
 
+#define ORD_BITS   4u                    /* símbolos por nível: 2^ORD_BITS */
+#define ORD_LARG   (1u << ORD_BITS)      /* um símbolo por nível */
+#define ORD_NIV_VAL 8                    /* os 32 bits do valor, a 4 por nível */
+#define ORD_NIV_MAX 16                   /* o tecto do arranjo do caminho */
+/* ── A ALTURA É FUNÇÃO DA ÁRVORE, e não um estado ao lado dela ───────────────
+ *
+ * Escrevi-a primeiro como duas variáveis que `ord_usa_rascunho` e
+ * `ord_usa_indice` punham. Nove asserções caíram --- todas do JOIN e da
+ * subconsulta ---, e a razão era essa: há caminhos que LEEM a árvore sem passar
+ * por quem a escolhe, e herdavam a altura da última consulta. Estado ao lado do
+ * objecto dessincroniza; derivado DO objecto, não pode.
+ *
+ * A do rascunho é quatro níveis --- ela recebe as linhas que o WHERE deixou, e
+ * com dois o índice colidia acima de 256, o que fazia 300 linhas saírem a
+ * começar em 257. A do índice é dois: ela recusa nos seus 600 nós muito antes
+ * das 256 linhas, pelo que ali a colisão não chega a acontecer, e mudá-la
+ * mudaria a forma de uma árvore GRAVADA que três caminhos relêem. */
+#define ord_niv_idx   (ord_raiz == S_ORD ? 4 : 2)
+#define ord_bits_idx  ((int)ORD_BITS * ord_niv_idx)
+#define ORD_NIV    (ORD_NIV_VAL + ord_niv_idx)
+
+
 static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB;
-                                    ord_tecto = ORD_MAXNO_R; }
+                                    ord_tecto = ORD_MAXNO_R;
+                                    }
+/* o índice guarda TODAS as linhas da tabela, e por isso a altura dele é a da
+ * tabela --- a mesma conta, feita quando ele é escolhido */
+
 /* O CONTADOR DE NÓS TEM O SEU SLOT, e não o do cabeçalho. `ord_novo` escreve
  * em `ord_cab` a cada nó criado; apontá-lo ao cabeçalho do índice fazia o
  * número de nós escrever-se por cima da coluna indexada — lia-se «coluna 5»
@@ -5656,14 +5682,29 @@ static void ord_usa_rascunho(void){ ord_raiz = S_ORD; ord_cab = S_ORDCAB;
  * dados diferentes, dois slots. */
 static void ord_usa_indice(long k){ ord_raiz = S_IDX((unsigned)k);
                                     ord_cab  = S_IDXNOS((unsigned)k);
-                                    ord_tecto = ORD_MAXNO_I; }
+                                    ord_tecto = ORD_MAXNO_I;
+                                    }
 /* A LARGURA É O PARÂMETRO, A LARGURA DERIVA. Estava `ORD_LARG 16` e depois
  * `(ch >> (4*d)) & 15` escrito à mão em dois sítios: o 4 e o 15 são o mesmo
  * número que o 16, ditos de três maneiras. Declara-se o expoente e o resto sai
  * dele — `largura.h`: «a lei escreve-se UMA vez e o andar é argumento». */
-#define ORD_BITS   4u                    /* símbolos por nível: 2^ORD_BITS */
-#define ORD_LARG   (1u << ORD_BITS)      /* um símbolo por nível */
-#define ORD_NIV    10                    /* 8 do valor + 2 do índice */
+/* ── A PROFUNDIDADE CONSTRÓI-SE NA HORA ──────────────────────────────────────
+ *
+ * Eram DEZ níveis fixos: «8 do valor + 2 do índice», com a chave a levar o
+ * índice da linha em `idx & 255`. Acima de 256 linhas duas linhas diferentes
+ * davam a MESMA chave, e a ordem saía errada sem uma palavra --- medido: 300
+ * linhas de 1 a 300 saíam a começar em 257. Não recusava; ORDENAVA MAL.
+ *
+ * A árvore de prefixos não precisa de profundidade fixa: precisa de descer até
+ * DISTINGUIR, e quanto ela tem de descer sai do objecto. Os oito níveis do
+ * valor são os 32 bits que ele tem; os do índice são os que o número de linhas
+ * pede --- `ceil(log16(nrows))` ---, e para 300 linhas são três, não dois.
+ *
+ * É o §sec:zeta a operar: ζ = ∑ S^j é a série de Neumann FINITA porque S é
+ * nilpotente, e o expoente onde ela para não é escolhido --- é onde S^j se
+ * anula. A altura desta torre é o mesmo: não se fixa, calcula-se do que há para
+ * separar, e cada consulta constrói a sua. */
+
 #define ORD_MAXNO  600u                  /* o que a zona de um ÍNDICE segura */
 typedef char ord_larg_bate[(ORD_LARG == ORD_LARG_) ? 1 : -1];   /* os dois têm de ser um */
 
@@ -5689,6 +5730,8 @@ static unsigned ord_filho(unsigned no, unsigned sim, int abrir){
     return f;
 }
 static void ord_limpa(void){
+    /* (quem chama diz a altura com `ord_altura(nrows)` antes; sem isso fica a
+     * anterior, que é o que faria uma árvore de profundidade fixa) */
     Word z = {1,0}; mem_grava(ord_cab, z);
     for(unsigned k = 0; k < ORD_LARG; k++){
         Word q = {0,0}; mem_grava(ord_raiz + k, q);
@@ -5696,7 +5739,8 @@ static void ord_limpa(void){
 }
 /* insere a chave (valor, índice); devolve 0 se a árvore não coube */
 static int ord_insere(long valor, int idx){
-    unsigned long ch = ((unsigned long)(valor + 2147483648L) << 8) | (unsigned long)(idx & 255);
+    unsigned long ch = ((unsigned long)(valor + 2147483648L) << ord_bits_idx)
+                     | ((unsigned long)idx & ((1UL << ord_bits_idx) - 1UL));
     unsigned no = 0;
     for(int d = ORD_NIV - 1; d >= 0; d--){
         unsigned sim = (unsigned)((ch >> (ORD_BITS*d)) & (ORD_LARG - 1u));
@@ -5709,14 +5753,16 @@ static int ord_insere(long valor, int idx){
 static int ord_percorre(unsigned no, int nivel, unsigned long ch,
                         int *saida, int *n, int cap, int desc){
     if(nivel == ORD_NIV){
-        if(*n < cap) saida[(*n)++] = (int)(ch & 255u);
+        /* o índice são os níveis BAIXOS da chave, e quantos eles são vem da
+         * altura desta árvore --- não de um 255 escrito à mão */
+        if(*n < cap) saida[(*n)++] = (int)(ch & ((1UL << ord_bits_idx) - 1UL));
         return 1;
     }
     for(unsigned k = 0; k < ORD_LARG; k++){
         unsigned sim = desc ? (ORD_LARG - 1 - k) : k;
         unsigned f = par_le(ord_raiz + no*ORD_LARG + sim);
         if(!f && !(nivel == 0 && 0)) { if(!f) continue; }
-        ord_percorre(f, nivel + 1, (ch << 4) | sim, saida, n, cap, desc);
+        ord_percorre(f, nivel + 1, (ch << ORD_BITS) | sim, saida, n, cap, desc);
     }
     return 1;
 }
@@ -5869,9 +5915,9 @@ static int j_carrega_direita(long *ncols_dir){
  * o índice, que é o que já fazia. Um índice largado custa a varredura seguinte;
  * nunca custa a resposta. */
 static int idx_remove(long valor, int idx){
-    unsigned long ch = ((unsigned long)(valor + 2147483648L) << 8)
-                     | (unsigned long)(idx & 255);
-    unsigned pai[ORD_NIV], sim[ORD_NIV];
+    unsigned long ch = ((unsigned long)(valor + 2147483648L) << ord_bits_idx)
+                     | ((unsigned long)idx & ((1UL << ord_bits_idx) - 1UL));
+    unsigned pai[ORD_NIV_MAX], sim[ORD_NIV_MAX];
     unsigned no = 0;
     int nc = 0;
     for(int d = ORD_NIV - 1; d >= 0; d--){
@@ -5907,7 +5953,10 @@ static int idx_remove(long valor, int idx){
  * largura, mais os que têm resultado. O tamanho da tabela não entra. */
 static void faixa_tudo(unsigned no, int d, int *saida, int *n, int cap);
 
-/* recolhe os índices de um nó que já está no nível do índice (dois símbolos) */
+/* recolhe os índices de um nó que já está no nível do índice.
+ * A PROFUNDIDADE VEM DA ÁRVORE e não de dois laços encaixados: eram dois níveis
+ * escritos três vezes --- os dois `for`, o `<< 4` e o `d < 2` do chamador ---, e
+ * por isso mudar a altura partia isto em silêncio. */
 static void faixa_folhas(unsigned no, int *saida, int *n, int cap){
     for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
         unsigned n1 = par_le(ord_raiz + no*ORD_LARG + a1);
@@ -5917,14 +5966,14 @@ static void faixa_folhas(unsigned no, int *saida, int *n, int cap){
             unsigned n2 = par_le(ord_raiz + n1*ORD_LARG + a2);
             sql_ultimos_nos++;
             if(!n2) continue;
-            if(*n < cap) saida[(*n)++] = (int)((a1 << 4) | a2);
+            if(*n < cap) saida[(*n)++] = (int)((a1 << ORD_BITS) | a2);
         }
     }
 }
 
 /* percorre uma subárvore inteira, do nível `d` até às folhas */
 static void faixa_tudo(unsigned no, int d, int *saida, int *n, int cap){
-    if(d < 2){ faixa_folhas(no, saida, n, cap); return; }
+    if(d < ord_niv_idx){ faixa_folhas(no, saida, n, cap); return; }
     for(unsigned sim = 0; sim < ORD_LARG; sim++){
         unsigned f = par_le(ord_raiz + no*ORD_LARG + sim);
         sql_ultimos_nos++;
@@ -5943,10 +5992,10 @@ static int j_faixa(long vmin, long vmax, int *saida, int cap){
     /* desce-se pelos dois extremos ao mesmo tempo enquanto o símbolo é igual:
      * esse é o prefixo comum, e dentro dele ainda não se decide nada. */
     unsigned no = 0;
-    int d = ORD_NIV - 1;                       /* os níveis do valor: 9..2 */
-    for(; d >= 2; d--){
-        unsigned sl = (unsigned)((lo >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
-        unsigned sh = (unsigned)((hi >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
+    int d = ORD_NIV - 1;              /* os níveis do VALOR, acima dos do índice */
+    for(; d >= ord_niv_idx; d--){
+        unsigned sl = (unsigned)((lo >> (ORD_BITS*(d-ord_niv_idx))) & (ORD_LARG - 1u));
+        unsigned sh = (unsigned)((hi >> (ORD_BITS*(d-ord_niv_idx))) & (ORD_LARG - 1u));
         if(sl != sh) break;
         no = par_le(ord_raiz + no*ORD_LARG + sl);
         sql_ultimos_nos++;
@@ -5957,8 +6006,8 @@ static int j_faixa(long vmin, long vmax, int *saida, int cap){
     /* aqui os caminhos separam-se. O ramo do símbolo baixo leva tudo o que for
      * >= vmin dentro dele; o do símbolo alto leva tudo o que for <= vmax; e os
      * ramos DO MEIO levam-se inteiros, sem mais perguntas. */
-    unsigned sl = (unsigned)((lo >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
-    unsigned sh = (unsigned)((hi >> (ORD_BITS*(d-2))) & (ORD_LARG - 1u));
+    unsigned sl = (unsigned)((lo >> (ORD_BITS*(d-ord_niv_idx))) & (ORD_LARG - 1u));
+    unsigned sh = (unsigned)((hi >> (ORD_BITS*(d-ord_niv_idx))) & (ORD_LARG - 1u));
 
     for(unsigned m = sl + 1; m < sh; m++){
         unsigned f = par_le(ord_raiz + no*ORD_LARG + m);
@@ -6029,7 +6078,11 @@ static int idx_constroi(long col, long ncols, long nrows){
         }
         postos++;
     }
-    { Word c; c.total = (Word8)(col + 1); c.e = 0; mem_grava(S_IDXCAB(col), c); }
+    /* a altura vai no `.e` do cabeçalho: enquanto ela for a mesma para todas as
+     * árvores isto é redundante, e é o que torna a altura VIVA possível sem
+     * mudar o formato outra vez */
+    { Word c; c.total = (Word8)(col + 1); c.e = (Word8)ord_niv_idx;
+      mem_grava(S_IDXCAB(col), c); }
     { Word n; n.total = (Word8)(nrows & 255); n.e = (Word8)((nrows >> 8) & 255);
       mem_grava(S_IDXCAB2(col), n); }
     ord_usa_rascunho();
@@ -6055,29 +6108,44 @@ static long j_valor_dir(int d, long ncols_dir){
 }
 /* as linhas da direita cujo valor de junção é `v` — desce a árvore por ele */
 static int j_casam(long v, int *saida, int cap){
-    unsigned long ch = ((unsigned long)(v + 2147483648L) << 8);
+    /* o MESMO deslocamento com que a chave foi escrita --- este `<< 8` era o
+     * quarto sítio onde o número de níveis do índice estava dito, e o único que
+     * eu não tinha encontrado. O `papers/aranha.asm` faz o contrário e mostra
+     * como: um contador POR FASE, indexado, e a largura é parâmetro do laço.
+     * Aqui é o mesmo: `ord_bits_idx` diz-se uma vez e todos leem de lá. */
+    unsigned long ch = ((unsigned long)(v + 2147483648L) << ord_bits_idx);
     unsigned no = 0;
     int n = 0;
     sql_ultimos_nos = 0;
-    /* desce os 8 nibbles do VALOR; os 2 do índice ficam para o percurso */
-    for(int d = ORD_NIV - 1; d >= 2; d--){
+    /* desce os nibbles do VALOR; os do índice ficam para o percurso */
+    for(int d = ORD_NIV - 1; d >= ord_niv_idx; d--){
         unsigned sim = (unsigned)((ch >> (ORD_BITS*d)) & (ORD_LARG - 1u));
         no = par_le(ord_raiz + no*ORD_LARG + sim);
         sql_ultimos_nos++;
         if(!no) return 0;                          /* nenhuma linha com este valor */
     }
-    /* os dois últimos níveis são o índice: percorre-os e recolhe */
-    for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
-        unsigned n1 = par_le(ord_raiz + no*ORD_LARG + a1);
-        sql_ultimos_nos++;
-        if(!n1) continue;
-        for(unsigned a2 = 0; a2 < ORD_LARG; a2++){
-            unsigned n2 = par_le(ord_raiz + n1*ORD_LARG + a2);
-            sql_ultimos_nos++;
-            if(!n2) continue;
-            if(n < cap) saida[n++] = (int)((a1 << 4) | a2);
-        }
-    }
+    /* OS ÚLTIMOS NÍVEIS SÃO O ÍNDICE: percorre-os e recolhe. Eram DOIS, escritos
+     * como dois laços encaixados e um `(a1 << 4) | a2` --- o número de níveis
+     * dito três vezes, e por isso mudá-lo partia isto sem que ninguém o
+     * dissesse. Agora é UMA descida de `ord_niv_idx` níveis, e o índice
+     * remonta-se pelo mesmo deslocamento com que foi escrito. */
+    { unsigned pilha[ORD_NIV_MAX]; unsigned no_p[ORD_NIV_MAX];
+      int d2 = 0;
+      pilha[0] = 0; no_p[0] = no;
+      while(d2 >= 0){
+          if(pilha[d2] >= ORD_LARG){ d2--; if(d2 >= 0) pilha[d2]++; continue; }
+          unsigned f = par_le(ord_raiz + no_p[d2]*ORD_LARG + pilha[d2]);
+          sql_ultimos_nos++;
+          if(!f){ pilha[d2]++; continue; }
+          if(d2 == ord_niv_idx - 1){
+              unsigned idx = 0;
+              for(int t = 0; t <= d2; t++) idx = (idx << ORD_BITS) | pilha[t];
+              if(n < cap) saida[n++] = (int)idx;
+              pilha[d2]++;
+              continue;
+          }
+          d2++; no_p[d2] = f; pilha[d2] = 0;
+      } }
     return n;
 }
 

@@ -27241,6 +27241,35 @@ int main(void){
                idx ? "criado" : "RECUSADO", viu);
         if(!idx || viu != 70) mal++;
 
+        /* (5b) E A CHAVE DA ÁRVORE LEVA O ÍNDICE INTEIRO.
+         *
+         * A chave era `(valor << 8) | (idx & 255)`: acima de 256 linhas duas
+         * linhas DIFERENTES davam a mesma chave, e a ordem saía errada sem uma
+         * palavra --- 300 linhas de 1 a 300 saíam a começar em 257. Não
+         * recusava: ORDENAVA MAL, que é o pior desfecho.
+         *
+         * O número de níveis do índice estava escrito em QUATRO sítios --- dois
+         * laços encaixados, um `(a1 << 4) | a2`, um `d < 2` e um `<< 8` --- e
+         * mudá-lo partia o JOIN em silêncio. O `papers/aranha.asm` e o
+         * `papers/aranha.c` mostram a forma certa: quatro fases, um contador
+         * POR fase, indexado, e a largura como parâmetro do laço, nunca um
+         * número no código. Aqui passou a ser `ord_bits_idx`, dito uma vez e
+         * derivado da árvore corrente. */
+        sql_executa("CREATE TABLE g300 (a INTEIRO)", &o);
+        for(long i = 1; i <= 300; i++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO g300 VALUES (%ld)", 301 - i);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT a FROM g300 ORDER BY a LIMIT 3", &o);
+        long t1 = (o.ok && o.nrows == 3) ? atol(o.cell[0][0]) : -1;
+        long t3 = (o.ok && o.nrows == 3) ? atol(o.cell[2][0]) : -1;
+        sql_executa("SELECT a FROM g300 ORDER BY a OFFSET 297", &o);
+        long z1 = (o.ok && o.nrows == 3) ? atol(o.cell[0][0]) : -1;
+        long z3 = (o.ok && o.nrows == 3) ? atol(o.cell[2][0]) : -1;
+        printf("      300 linhas, ACIMA das 256 da chave velha: começa em %ld,%ld e"
+               " acaba em %ld,%ld\n", t1, t3, z1, z3);
+        if(t1 != 1 || t3 != 3 || z1 != 298 || z3 != 300) mal++;
+
         /* (5) E A ORDEM DA SAÍDA VIVE NO DISCO. Estava num array de 64 na
          * pilha --- que é o que esta casa NÃO tem: «a memória é o DISCO, sem
          * RAM», primeira linha do `sql.c`. Uma tabela de 200 linhas ordenava 64.
