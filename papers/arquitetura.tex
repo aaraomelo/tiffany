@@ -2188,6 +2188,117 @@ lê$\to$opera$\to$escreve no ambiente --- não um servidor à parte.
         {\code{interface\_padrao.js}; \code{backends\_wasm.js}; bateria \code{sql}}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{O estado do motor: as operações de teoria, e a API do cliente}
+\label{sec:motor-teoria}
+
+\noindent Ao lado das operações de dados (\code{SELECT}, \code{INSERT}, junções, agregações),
+o motor de \code{banco/sql.c} expõe as \textbf{operações de teoria} --- as que o cliente usa
+para trabalhar nos corpos. Cada uma verifica as suas hipóteses e \emph{recusa} quando elas
+falham, em vez de responder na mesma.
+
+\begin{center}\small
+\begin{tabular}{@{}llp{0.44\textwidth}@{}}
+\toprule
+operação & lê & devolve\\
+\midrule
+\code{regime(*)} & operador $2\times2$ & o sinal de $\operatorname{Re}\lambda$ e a classe\\
+\code{fibra(*)} & coluna de endereços & fibras, $G$, se está completo, quanto falta\\
+\code{completa(*)} & coluna de endereços & \emph{uma linha por lugar aberto}: onde falta\\
+\code{ultra(*)} & coluna de endereços & se a desigualdade forte vale, com os estritos\\
+\code{preco(*)} & duas leituras & $D=2^{-q}$, o custo da travessia\\
+\code{medias(*)} & par $(a,b)$ & as três médias, e se fecham\\
+\code{leitura(*)} & coluna & se é bem definida, se separa, se a volta é conta\\
+\code{valoracao(*)} & coluna & as réguas $p$-ádicas, uma por primo\\
+\code{triade(*)} & par $(a,b)$ & as três faces $t\in\{-1,0,+1\}$ e \emph{a} régua\\
+\code{global(*)} & $k$ representações & reversibilidade, custo por passo, dominação, ultramétrica herdada\\
+\code{funde(*)} & dois corpos & o entrelaçado $C_{\mathrm{ent}}$, o compacto, e a volta\\
+\code{edo(*)} & companheira $n\times n$ & o $\Delta$, a classe, as \textbf{raízes} e a forma da solução\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{O que está no banco}
+
+\begin{center}\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+corpos completos ($G\equiv1$, falta $0$, régua a descer) & $\mathbf{23}$\\
+\quad nomeados (tríade, áureo, mórfico, eletromagnético, mecânico, cósmico, …) & $16$\\
+\quad grupos de assinatura $(p,q,r)$ & $7$\\
+\midrule
+corpos que o catálogo cita com medidor & $344$\\
+operações de teoria no motor & $12$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Os exemplos validados --- e é isto que vai na API}
+
+\noindent Cada um destes corre inteiro no motor, com o cliente a escrever o SQL. Nenhum
+precisa de código do lado dele.
+
+\paragraph{1. Circuito RLC.} $L\,q''+R\,q'+q/C=0$. O cliente escreve a companheira
+$\bigl(\begin{smallmatrix}0&1\\-C&-B\end{smallmatrix}\bigr)$ e pergunta:
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrll@{}}
+\toprule
+o circuito & a equação & $\Delta$ & classe & $y(t)$\\
+\midrule
+sobreamortecido & $y''+5y'+6y=0$ & $1$ & hiperbólico & $c_1e^{-2t}+c_2e^{-3t}$\\
+crítico & $y''+4y'+4y=0$ & $0$ & parabólico & $(c_1+c_2t)e^{-2t}$\\
+subamortecido & $y''+2y'+5y=0$ & $-16$ & elíptico & $e^{-t}(c_1\cos2t+c_2\operatorname{sen}2t)$\\
+$LC$ puro & $y''+4y=0$ & $-16$ & elíptico (BORDA) & $c_1\cos2t+c_2\operatorname{sen}2t$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{2. Sistema mecânico.} $m\,x''+c\,x'+k\,x=0$ --- \emph{a mesma companheira}, com
+$m\leftrightarrow L$, $c\leftrightarrow R$, $k\leftrightarrow 1/C$. O motor não sabe que
+mudou de assunto, e não precisa.
+
+\paragraph{3. Servomotor DC (electromecânico).} $R=2\,\Omega$, $L=0{,}5\,$H,
+$J=0{,}02\,$kg\,m$^2$, $b=0{,}2\,$N\,m\,s, $K=0{,}1$. As duas malhas são os dois corpos, e o
+$K$ atravessa-os:
+\[
+  \texttt{funde(*)}\to\text{amperímetro }6,\ \text{tacómetro }6,\ \textbf{fundido }36;
+  \qquad
+  \texttt{edo(*)}\to y''+14y'+41y=0,\ \lambda=-7\pm2\sqrt2 .
+\]
+Constantes de tempo $0{,}24$ e $0{,}10\,$s, sem sobre-elongação. \emph{Com $K=0$ as raízes
+são $-4$ e $-10$: as taxas próprias separadas} --- é o controlo.
+
+\paragraph{4. Hidráulico e pneumático.} $I\,Q''+R\,Q'+Q/C=0$, com pressão\,$\leftrightarrow$\,tensão
+e caudal\,$\leftrightarrow$\,corrente. A estrutura é a mesma e muda \emph{um} parâmetro:
+\begin{center}\footnotesize
+\begin{tabular}{@{}lllrl@{}}
+\toprule
+& o fluido & a equação & $\Delta$ & o que faz\\
+\midrule
+hidráulico & óleo, quase incompressível & $y''+4y'+13y=0$ & $-36$ & \textbf{oscila}: é o golpe de aríete\\
+pneumático & ar, compressível & $y''+4y'+3y=0$ & $4$ & não oscila: a compressão absorve\\
+\bottomrule
+\end{tabular}
+\end{center}
+E a fronteira entre os dois é \emph{um número} que o cliente acha perguntando ao motor:
+$1/IC=4$ dá $\Delta=0$, o crítico --- \emph{a mesma fronteira do RLC, porque é a mesma
+equação}.
+
+\paragraph{5. O cliente encadeia fusões.} O resultado de \code{funde(*)} entra na fusão
+seguinte sem adaptador. Quatro corpos, três fusões, e o que se distingue sobe estritamente:
+$11\to31\to34\to36$. \emph{Com um milhão de corpos é o mesmo SQL.}
+
+\medskip\noindent\textbf{E os limites são ditos, com a origem.} O grau não tem limite na
+teoria (Teor.~\code{thm:enumfin}, $E_k$ para todo $k$; \code{def:gato} em $\mathbb{Z}^n$): o
+tecto é o \emph{andar} deste motor, e ele di-lo. O envelope da célula é \emph{outro} limite,
+e é fácil confundi-los --- um polinómio de grau seis com coeficiente $-720$ é recusado pelo
+envelope e não pelo grau. E a fusão \textbf{dobra} a largura a cada passo, pelo que o
+\code{funde} devolve duas colunas: o \code{fundido}, que guarda a régua, e o \code{compacto},
+que serve para encadear.
+
+\medido{\code{tools/edo\_circuito.c}, \code{tools/rlc\_sql.c}, \code{tools/servomotor.c},
+\code{tools/hidraulico\_pneumatico.c}, \code{tools/cliente\_monta\_circuito.c}, e
+\code{tests/pgwire.c} §W176--§W180.}
+
 \section{ISA: \code{MOVE} e o slot como operação}\label{sec:isa}
 
 \noindent O \emph{Catálogo} reduz a máquina a \textbf{uma} operação:
