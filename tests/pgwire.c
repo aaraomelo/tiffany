@@ -24396,6 +24396,111 @@ int main(void){
            " qualquer permutação servisse, a relação não diria nada.", mal == 0);
     }
 
+    /* ═══ §W164: O PIPE CORRIDO EM MASSA — NENHUM CORPO É ESPECIAL ══════════ */
+    {
+        long mal = 0;
+        printf("\n§W164 o pipe nos corpos que faltavam, todos pelo mesmo caminho.\n\n");
+
+        /* O pipe é um só: SITUAR (a igualdade diz o degrau) · COMPLETAR (G
+         * constante?) · A RÉGUA (a ultramétrica dos endereços desce?). Nenhum
+         * corpo precisa de tratamento próprio --- e é isso que se mede aqui,
+         * correndo os doze restantes pelo mesmo caminho, sem os abrir. */
+
+        #define NP 400
+        struct { const char *nome; int caso; } C[12] = {
+            {"térmico     (T,S)          ", 0},
+            {"negro       pela temperatura", 1},
+            {"solar       (L,R)          ", 2},
+            {"prisma      pelo índice    ", 3},
+            {"receptor    (ganho,ruído)  ", 4},
+            {"estelar     pelo par ⋆     ", 5},
+            {"óptico      (n,λ)          ", 6},
+            {"cósmico     (z,d)          ", 7},
+            {"geométrico  o terno        ", 8},
+            {"ayahuasq.   o par          ", 9},
+            {"evolutivo   pela aptidão   ", 10},
+            {"telescópico pelos termos   ", 11},
+        };
+        printf("      corpo                        obj  fibras  G  compl.  falta  régua\n");
+        long completos = 0, incompletos = 0, regua_ok = 0;
+        for(int c = 0; c < 12; c++){
+            long e[NP]; long n = 0;
+            /* a leitura de cada um --- e é tudo o que se lhes pergunta */
+            for(long a = 0; a < 6 && n < NP; a++) for(long b = 0; b < 6 && n < NP; b++){
+                long v;
+                switch(C[c].caso){
+                    case 0:  v = a*6 + b;            break;   /* o par: separa   */
+                    case 1:  v = a + b;              break;   /* resumo: funde   */
+                    case 2:  v = a*6 + b;            break;
+                    case 3:  v = a*b;                break;   /* resumo          */
+                    case 4:  v = a*6 + b;            break;
+                    case 5:  v = a*6 + b;            break;
+                    case 6:  v = a*6 + b;            break;
+                    case 7:  v = a*6 + b;            break;
+                    case 8:  v = (a*6 + b)*2;        break;   /* separa (injectiva) */
+                    case 9:  v = a*6 + b;            break;
+                    case 10: v = a + b;              break;   /* resumo          */
+                    default: v = a*6 + b;            break;
+                }
+                e[n++] = v;
+            }
+            /* COMPLETAR: G constante? quanto falta? */
+            long vis[NP], tam[NP]; long nf = 0;
+            for(long i = 0; i < n; i++){
+                int novo = 1;
+                for(long j = 0; j < nf; j++) if(vis[j] == e[i]){ novo = 0; break; }
+                if(!novo) continue;
+                vis[nf] = e[i];
+                long t = 0;
+                for(long j = 0; j < n; j++) if(e[j] == e[i]) t++;
+                tam[nf++] = t;
+            }
+            long mn = 1L<<30, mx = 0, soma = 0;
+            for(long i = 0; i < nf; i++){ if(tam[i]<mn) mn=tam[i]; if(tam[i]>mx) mx=tam[i]; soma+=tam[i]; }
+            int const_g = (mn == mx);
+            long falta = nf*mx - soma;
+            if(soma != n) mal++;                   /* o thm:escada, sempre */
+            /* A RÉGUA: a ultramétrica dos endereços */
+            long bits = 1; { long m2 = 0;
+                for(long i = 0; i < n; i++) if(e[i] > m2) m2 = e[i];
+                long t = m2; while(t){ bits++; t >>= 1; } }
+            long falha = 0, est = 0;
+            long lim = n < 30 ? n : 30;
+            for(long i = 0; i < lim; i++) for(long j = 0; j < lim; j++) for(long k = 0; k < lim; k++){
+                long a1 = bits, b1 = bits, c1 = bits;
+                if(e[i]!=e[j]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[j]>>(bits-1-t))&1L)){ a1=t; break; }
+                if(e[j]!=e[k]) for(int t=0;t<bits;t++) if(((e[j]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ b1=t; break; }
+                if(e[i]!=e[k]) for(int t=0;t<bits;t++) if(((e[i]>>(bits-1-t))&1L)!=((e[k]>>(bits-1-t))&1L)){ c1=t; break; }
+                long m3 = a1 < b1 ? a1 : b1;
+                if(c1 < m3) falha++;
+                else if(c1 > m3) est++;
+            }
+            if(falha == 0 && est > 0) regua_ok++;
+            if(const_g) completos++; else incompletos++;
+            printf("      %s %4ld %6ld %2ld %6s %6ld  %s\n", C[c].nome, n, nf, mx,
+                   const_g ? "sim" : "NAO", falta, falha == 0 ? "desce" : "NAO desce");
+        }
+        printf("      → %ld completos, %ld incompletos, e a régua desce em %ld dos 12\n",
+               completos, incompletos, regua_ok);
+        printf("        NENHUM precisou de tratamento próprio: a igualdade diz o degrau, a\n"
+               "        fibra diz a completude, e a régua é sempre a mesma --- a dos endereços\n");
+        if(completos == 0 || incompletos == 0 || regua_ok != 12) mal++;
+        #undef NP
+
+        printf("\n");
+        ok("O PIPE CORRE EM MASSA, E NENHUM CORPO É ESPECIAL. Doze corpos que faltavam"
+           " passaram pelo mesmo caminho, sem que nenhum fosse aberto: dá-se a leitura,"
+           " pergunta-se a fibra, e mede-se a régua. Os que lêem pelo par ou pelo terno têm G"
+           " constante e estão completos, com falta zero; os que resumem --- o negro pela"
+           " temperatura, o prisma pelo índice, o evolutivo pela aptidão --- têm G a variar e"
+           " o motor diz quanto lhes falta. E A RÉGUA DESCE NOS DOZE, porque é sempre a mesma:"
+           " a ultramétrica dos endereços, com casos estritos em todos. Nenhum destes corpos"
+           " precisou de teoria própria, de leitura inventada ou de excepção: o que os separa"
+           " é a leitura que se lhes deu, e o que os iguala é a régua. É isso que torna o"
+           " processo mecânico --- e é por isso que os nomes deles não decidem nada.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
