@@ -570,8 +570,11 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * Mora na zona 5, dentro do .mem, e o cabeçalho mora DENTRO dela: pedir
  * emprestado ao vizinho é escrever na casa dele, e isso já custou dois defeitos
  * a este ficheiro. */
-#define VIEW_MAX      8
 #define VIEW_W       64u                     /* Words por vista */
+/* QUANTAS VISTAS: as que a zona segura, menos o cabeçalho. Eram OITO, e o oito
+ * não vinha de lado nenhum --- a zona tem ZONA_SLOTS Words e cada vista ocupa
+ * VIEW_W: o resto é uma divisão. */
+#define VIEW_MAX      ((ZONA_SLOTS - 1u) / VIEW_W)
 #define S_VIEWCAB   (ISA_TECTO + ZONA(5))    /* {quantas, 0} */
 #define S_VIEW      (S_VIEWCAB + 1)
 #define VIEW_NOME(i)  (S_VIEW + (unsigned)(i)*VIEW_W)         /* 8 Words: 16 chars */
@@ -960,13 +963,56 @@ static Word mem_le(unsigned slot){
  * desfazer é μ = ζ⁻¹, e desfaz-se LENDO A PILHA DE TRÁS PARA A FRENTE, que é a
  * diferença finita aplicada à ordem das escritas.
  *
- * O TECTO É DECLARADO. A pilha é fixa — sem RAM em execução, como o resto da
- * casa — e, se encher, a transacção fica MARCADA e o ROLLBACK RECUSA. Desfazer
- * metade seria pior do que não desfazer: deixaria a base num estado que nunca
- * existiu. */
-#define UNDO_MAX 16384
-typedef struct { unsigned slot; Word antes; } Desfaz;
-static Desfaz undo_pilha[UNDO_MAX];
+ * O TECTO É DECLARADO, e se encher a transacção fica MARCADA e o ROLLBACK
+ * RECUSA: desfazer metade seria pior do que não desfazer, porque deixaria a
+ * base num estado que nunca existiu.
+ *
+ * E O DIÁRIO MORA NO DISCO. Estava num `Desfaz undo_pilha[16384]` --- 131 KB de
+ * RAM --- com o comentário ao lado a dizer «sem RAM em execução, como o resto
+ * da casa». Era falso, e era falso no sítio onde a casa é mais exigente: o
+ * desfazer É a trajectória (§W: «cada entrada é uma escrita, o índice é a ordem
+ * e o slot é a célula»), e uma trajectória guardada em RAM não sobrevive à
+ * queda que ela existe para cobrir. Agora é uma zona do `.mem`: três Words por
+ * entrada --- o slot no par de duas, o valor antes na terceira ---, e o tecto é
+ * o que as zonas seguram. */
+#define UNDO_ZONAS 8u
+#define S_UNDO     (ISA_TECTO + ZONA(37))       /* 37..44 */
+#define UNDO_W     3u
+#define UNDO_MAX   (long)((ZONA_SLOTS * UNDO_ZONAS) / UNDO_W)
+/* E O DIÁRIO TEM FICHEIRO PRÓPRIO, `<base>.undo`.
+ *
+ * A primeira escrita disto pôs o diário numa zona do `.mem` --- e o `.mem` é POR
+ * TABELA: uma transacção que toca duas tabelas escrevia metade da trajectória
+ * num ficheiro e metade noutro, com um contador só a numerá-las. A trajectória é
+ * do SISTEMA e não de uma tabela; por isso mora num ficheiro seu, aberto com a
+ * base e independente de qual tabela está aberta.
+ *
+ * Escreve-se e lê-se com `slot_mem_*` directo: passar pelo `mem_grava` seria o
+ * diário a registar-se a si próprio, sem fundo. */
+static int fundo = -1;
+static void undo_poe(long k, unsigned slot, Word antes){
+    if(fundo < 0) return;
+    unsigned b = S_UNDO + (unsigned)k * UNDO_W;
+    slot_mem_grava(fundo, b * 2u,       (Word8)(slot & 255u));
+    slot_mem_grava(fundo, b * 2u + 1u,  (Word8)((slot >> 8) & 255u));
+    slot_mem_grava(fundo, (b+1u) * 2u,      (Word8)((slot >> 16) & 255u));
+    slot_mem_grava(fundo, (b+1u) * 2u + 1u, (Word8)((slot >> 24) & 255u));
+    slot_mem_grava(fundo, (b+2u) * 2u,      antes.total);
+    slot_mem_grava(fundo, (b+2u) * 2u + 1u, antes.e);
+}
+static unsigned undo_slot(long k){
+    unsigned b = S_UNDO + (unsigned)k * UNDO_W;
+    return (unsigned)slot_mem_le(fundo, b * 2u)
+         | ((unsigned)slot_mem_le(fundo, b * 2u + 1u) << 8)
+         | ((unsigned)slot_mem_le(fundo, (b+1u) * 2u) << 16)
+         | ((unsigned)slot_mem_le(fundo, (b+1u) * 2u + 1u) << 24);
+}
+static Word undo_antes(long k){
+    unsigned b = S_UNDO + (unsigned)k * UNDO_W;
+    Word w; w.total = slot_mem_le(fundo, (b+2u) * 2u);
+            w.e     = slot_mem_le(fundo, (b+2u) * 2u + 1u);
+    return w;
+}
 static long   undo_n = 0;
 static int    undo_em_tx = 0;
 static int    undo_cheio = 0;
@@ -985,8 +1031,7 @@ static void mem_grava(unsigned slot, Word w){
     /* dentro de uma transacção, o que se vai colar por cima fica guardado */
     if(undo_em_tx){
         if(undo_n < UNDO_MAX){
-            undo_pilha[undo_n].slot  = slot;
-            undo_pilha[undo_n].antes = mem_le(slot);
+            undo_poe(undo_n, slot, mem_le(slot));
             undo_n++;
         }else{
             undo_cheio = 1;                 /* e o ROLLBACK vai recusar */
@@ -1149,10 +1194,11 @@ void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
     for(long i = 0; i < undo_n; i++){
         long g = 0;
         int primeiro = 1;
-        for(long j = 0; j < i; j++) if(undo_pilha[j].slot == undo_pilha[i].slot){ primeiro = 0; break; }
+        unsigned si = undo_slot(i);
+        for(long j = 0; j < i; j++) if(undo_slot(j) == si){ primeiro = 0; break; }
         if(!primeiro) continue;
         dist++;
-        for(long j = i; j < undo_n; j++) if(undo_pilha[j].slot == undo_pilha[i].slot) g++;
+        for(long j = i; j < undo_n; j++) if(undo_slot(j) == si) g++;
         if(g > maxg) maxg = g;
         soma += g;                       /* ∑G, somado de facto e não suposto */
     }
@@ -1167,8 +1213,8 @@ int  sql_tx_desfaz(void){
     if(undo_cheio) return 0;
     if(fmem < 0) return 0;
     for(long i = undo_n - 1; i >= 0; i--){
-        unsigned s = undo_pilha[i].slot;
-        Word v = undo_pilha[i].antes;
+        unsigned s = undo_slot(i);
+        Word v = undo_antes(i);
         slot_mem_grava(fmem, s * 2u,     v.total);
         slot_mem_grava(fmem, s * 2u + 1u, v.e);
     }
@@ -5624,10 +5670,19 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
  * A DIREITA VIVE NO .mem, não em RAM: as suas linhas são copiadas para a zona
  * S_JDIR antes de a tabela ser trocada, porque o motor tem UMA tabela aberta de
  * cada vez. O tecto é declarado e verificado. */
-#define S_JDIR     (ISA_TECTO + ZONA(1))
+/* A DIREITA DO JOIN, EM ZONAS PRÓPRIAS. Ela ocupava UMA zona, e enquanto uma
+ * linha eram 16 Words cabiam 1024 --- postas a COL_MAX, cabiam dezasseis. Ou o
+ * espaço acompanha a largura, ou alargar as colunas encurta as linhas: aqui
+ * acompanha, com 32 zonas. */
+#define J_ZONAS    32u
+#define S_JDIR     (ISA_TECTO + ZONA(45))      /* 45..76 */
 #define S_JCAB     (S_JDIR - 1)
-#define J_MAXLIN   64
-#define J_MAXCOL   16
+/* O JOIN GUARDA A DIREITA NUMA ZONA, e o que cabe é o que a zona segura: uma
+ * linha ocupa J_MAXCOL Words, logo há ZONA_SLOTS/J_MAXCOL linhas. O 64 estava
+ * escrito ao lado do 16 sem que um dependesse do outro --- e a zona inteira
+ * dava 1024. As colunas seguem o mesmo COL_MAX do resto da casa. */
+#define J_MAXCOL   ((unsigned)COL_MAX)
+#define J_MAXLIN   ((int)((ZONA_SLOTS * J_ZONAS) / J_MAXCOL))
 
 static char j_tab_dir[64] = "";   /* a tabela da direita, "" se não há JOIN */
 static char j_col_esq[64] = "";   /* a coluna da esquerda no ON            */
@@ -12994,6 +13049,12 @@ static int abrir_base(const char *base){
     snprintf(g, sizeof g, "%s.prog", base);
     fmem  = open(m, O_RDWR|O_CREAT, 0644);
     fprog = open(g, O_RDWR|O_CREAT|O_TRUNC, 0644);
+    { char u[512]; snprintf(u, sizeof u, "%s.undo", base);
+      if(fundo >= 0) close(fundo);
+      fundo = open(u, O_RDWR|O_CREAT, 0644);
+      if(fundo >= 0)
+          ftruncate(fundo, (off_t)(S_UNDO + (unsigned)UNDO_MAX * UNDO_W + 8u)
+                           * (off_t)SLOTSZ); }
     if(fmem < 0 || fprog < 0) return 0;
     ftruncate(fmem, (off_t)(S_CANAL + 65536u) * (off_t)SLOTSZ);  /* Words=16 átomos + blobs */
     refaz_diario();          /* antes de qualquer comando: fechar o que ficou aberto */
