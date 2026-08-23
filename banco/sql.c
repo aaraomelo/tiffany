@@ -4609,7 +4609,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"GRAM") ? 18
                        : !strcasecmp(nome,"SIMETRICA") ? 19
                        : !strcasecmp(nome,"ANTISIMETRICA") ? 20
-                       : !strcasecmp(nome,"REGIME") ? 21 : 0;
+                       : !strcasecmp(nome,"REGIME") ? 21
+                       : !strcasecmp(nome,"FIBRA") ? 22 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7134,6 +7135,106 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 22){
+        /* ── A FIBRA NÃO É OPERAÇÃO MATRICIAL, e por isso não passa pelo tecto
+         * de LN_MAX: ela conta a DOBRA de uma leitura (aranha def:dobra) sobre
+         * a coluna inteira. Pô-la no caminho da matriz truncava em silêncio ---
+         * respondia «6 objectos» havendo 36 ---, que é o pior defeito possível
+         * numa contagem: um número certo sobre a amostra errada.
+         *
+         * Devolve o que decide a completude: quantas fibras, o menor e o maior
+         * G, se ele é CONSTANTE, quanto FALTA, e o tamanho do corpo expandido. */
+        if(ncols != 1){
+            printf("erro: a fibra conta-se sobre UMA coluna de endereços --- a"
+                   " tabela tem %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "fibra needs one column of addresses, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj == 0){
+            printf("erro: não há linhas para contar a fibra --- RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "fibra on empty selection"); }
+            return 0;
+        }
+        /* uma célula ausente não é um endereço: a contagem recusaria com a
+         * soma torta, mas é melhor dizê-lo aqui, com o nome certo */
+        for(long i = 0; i < nrows; i++)
+            if(bit_le(S_MATCH, i) && !bit_le(S_PRES, i*ncols)){
+                printf("erro: a coluna tem células ausentes --- um buraco não é um"
+                       " endereço, e contá-lo seria inventá-lo. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "fibra: missing cell at row %ld", i); }
+                return 0;
+            }
+        long fibras = 0, menor = n_obj + 1, maior = 0, soma = 0;
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            long nu_i, de_i; celula_qz(i, 0, ncols, &nu_i, &de_i);
+            Qz vi = qz(nu_i, de_i);
+            int novo = 1;
+            for(long j = 0; j < i && novo; j++){
+                if(!bit_le(S_MATCH, j)) continue;
+                long nu, de; celula_qz(j, 0, ncols, &nu, &de);
+                if(qz_igual(qz(nu, de), vi)) novo = 0;
+            }
+            if(!novo) continue;
+            long t = 0;
+            for(long j = 0; j < nrows; j++){
+                if(!bit_le(S_MATCH, j)) continue;
+                long nu, de; celula_qz(j, 0, ncols, &nu, &de);
+                if(qz_igual(qz(nu, de), vi)) t++;
+            }
+            if(t < menor) menor = t;
+            if(t > maior) maior = t;
+            soma += t;
+            fibras++;
+        }
+        int constante = (fibras > 0 && menor == maior);
+        long falta = fibras * maior - soma;
+        long expandido = fibras * maior;
+        /* o thm:escada: Σ G tem de ser |I|. Se não for, é defeito da CONTAGEM
+         * e não do corpo --- e recusa-se em vez de publicar um número torto. */
+        if(soma != n_obj){
+            printf("erro: Σ G = %ld e |I| = %ld --- a contagem não fecha, e isso"
+                   " é do motor. RECUSADA.\n", soma, n_obj);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "fibre sum %ld != |I| %ld", soma, n_obj); }
+            return 0;
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "fibras");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "g_min");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "g_max");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "completo");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "falta");
+            snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "expandido");
+            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[3] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", fibras);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", menor);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", maior);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", constante ? "sim" : "nao");
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%ld", falta);
+            snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%ld", expandido);
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %ld | %ld | %ld | %s | %ld | %ld\n",
+               fibras, menor, maior, constante ? "sim" : "nao", falta, expandido);
+        printf("-- G em %ld fibra(s) sobre %ld objecto(s) · Σ G = |I| · %s\n",
+               fibras, n_obj,
+               constante ? "G é CONSTANTE: o corpo está completo"
+                         : "G VARIA: o corpo está incompleto, e falta o que a coluna diz");
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op){
         long nr_v = 0;
         int lin[LN_MAX];

@@ -23515,6 +23515,98 @@ int main(void){
            " órbita começar.", mal == 0);
     }
 
+    /* ═══ §W156: A FIBRA NO MOTOR — O CLIENTE PERGUNTA SE O CORPO ESTÁ COMPLETO ═ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W156 SELECT fibra(*): o motor diz se o corpo está completo.\n\n");
+        unlink("/tmp/pgwire_w156__E.mem"); unlink("/tmp/pgwire_w156__E.prog");
+        unlink("/tmp/pgwire_w156.mem");    unlink("/tmp/pgwire_w156.prog");
+        if(!sql_abrir("/tmp/pgwire_w156")) mal++;
+
+        struct { const char *nome; int caso; } C[3] = {
+            {"soma mod 6  (quociente)", 0},
+            {"distância   (resumo)   ", 1},
+            {"projecção   (quociente)", 2},
+        };
+        printf("      corpo                    fibras  g_min  g_max  completo  falta  expandido\n");
+        long completos = 0, incompletos = 0;
+        for(int c = 0; c < 3; c++){
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS E", &o2);
+            sql_executa("CREATE TABLE E (e RACIONAL)", &o2);
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                long v;
+                if(C[c].caso == 0)      v = (a + b) % 6;
+                else if(C[c].caso == 1) v = a*a + b*b;
+                else                    v = a;
+                snprintf(q, sizeof q, "INSERT INTO E VALUES (%ld)", v);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM E", &o);
+            if(!o.ok){ mal++; continue; }
+            printf("      %s %6s %6s %6s %9s %6s %10s\n", C[c].nome,
+                   o.cell[0][0], o.cell[0][1], o.cell[0][2],
+                   o.cell[0][3], o.cell[0][4], o.cell[0][5]);
+            if(!strcmp(o.cell[0][3], "sim")) completos++; else incompletos++;
+            /* o que já é quociente não pode ter falta, e o que não é tem de ter */
+            long falta = atol(o.cell[0][4]);
+            if(!strcmp(o.cell[0][3], "sim") && falta != 0) mal++;
+            if(!strcmp(o.cell[0][3], "nao") && falta == 0) mal++;
+        }
+        printf("      → %ld completos e %ld incompletos, e o motor diz QUANTO falta\n",
+               completos, incompletos);
+        if(completos == 0 || incompletos == 0) mal++;
+
+        /* ── E A RECUSA: a fibra é sobre UMA coluna de endereços. Com duas, o
+         * motor recusa em vez de inventar uma leitura. */
+        {
+            sql_executa("DROP TABLE IF EXISTS E", &o2);
+            sql_executa("CREATE TABLE E (a RACIONAL, b RACIONAL)", &o2);
+            sql_executa("INSERT INTO E VALUES (1,2)", &o2);
+            sql_executa("SELECT fibra(*) FROM E", &o);
+            printf("      RECUSA — com duas colunas o motor %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa e diz porquê");
+            if(o.ok) mal++;
+        }
+
+        /* ── E O CONTRASTE COM O REGIME: são perguntas diferentes sobre coisas
+         * diferentes --- o regime lê o Δ de um operador, a fibra conta a dobra
+         * de uma leitura. */
+        {
+            sql_executa("DROP TABLE IF EXISTS E", &o2);
+            sql_executa("CREATE TABLE E (a RACIONAL, b RACIONAL)", &o2);
+            sql_executa("INSERT INTO E VALUES (0,-1)", &o2);
+            sql_executa("INSERT INTO E VALUES (1,0)", &o2);
+            sql_executa("SELECT regime(*) FROM E", &o);
+            int reg_ok = o.ok;
+            char cls[32] = "";
+            if(o.ok) snprintf(cls, sizeof cls, "%s", o.cell[0][1]);
+            printf("      o REGIME sobre a mesma tabela 2×2: %s%s%s --- lê o Δ do"
+                   " operador, não a dobra da leitura\n",
+                   reg_ok ? "" : "(recusou) ", reg_ok ? cls : "",
+                   reg_ok ? "" : "");
+            if(!reg_ok) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O MOTOR RESPONDE SE O CORPO ESTÁ COMPLETO, E DIZ QUANTO FALTA. A completação"
+           " estava na lib e faltava no banco, que é onde o cliente pergunta. `SELECT"
+           " fibra(*)` conta a dobra de uma leitura --- o G do aranha def:dobra --- e devolve"
+           " seis coisas: quantas fibras, o menor e o maior G, se ele é CONSTANTE, quanto"
+           " FALTA para o ser, e o tamanho do corpo expandido. Medido em três corpos: os dois"
+           " que já são quociente dão G constante e falta ZERO; o resumo dá G a variar e a"
+           " falta que a coluna diz. E o motor verifica o thm:escada antes de responder --- se"
+           " Σ G não fosse |I| ele recusaria, porque isso seria defeito da contagem e não do"
+           " corpo. A RECUSA está no sítio: a fibra é sobre UMA coluna de endereços, e com"
+           " duas o motor recusa e explica, em vez de inventar uma leitura que o cliente não"
+           " pediu. E não se confunde com o REGIME, que já lá estava: aquele lê o Δ de um"
+           " operador 2×2 e classifica a dinâmica; este conta a dobra de uma leitura e diz se"
+           " ela endereça. Duas perguntas, duas respostas, e nenhuma a fingir ser a outra.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

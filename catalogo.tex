@@ -1477,6 +1477,30 @@ de norma $\pm1$ nos oito; as réguas $p$-ádicas ultramétricas em $2197/2197$ c
 $v(xy)=v(x)+v(y)$ em $144/144$, contra a norma da rotação a falhar a forte em $1368/2401$;
 e $d$ como derivação em $300/300$, nilpotente em $6/6$ graus, com o núcleo em $49/49$.}
 
+\paragraph{E o último passo do encadeamento: \emph{migrar para o banco}, que é onde o
+cliente pergunta.} A tríade já lá estava --- \code{SELECT regime(*)} lê o $\Delta$ de um
+operador $2\times2$ e classifica a dinâmica. Faltava a \textbf{completação}, e ela entra
+como
+\[
+ \boxed{\;\texttt{SELECT fibra(*) FROM }t\;}
+\]
+sobre uma coluna de endereços, devolvendo o que decide: \emph{quantas fibras}, o menor e o
+maior $G$, se ele é \textbf{constante}, \emph{quanto falta} para o ser, e o tamanho do
+corpo \emph{expandido}. Medido em três corpos: os dois que já são quociente dão $G$
+constante e falta zero; o resumo dá $G$ a variar de $1$ a $4$, falta $44$ e expandido $80$
+--- \emph{os mesmos números que a \code{lib/escada.h} dá}.
+
+\medskip\noindent\textbf{E a fibra não é operação matricial}, o que teve consequência: pô-la
+no caminho da matriz truncava em silêncio no tecto $6\times6$ --- respondia «$6$ objectos»
+havendo $36$, que é o pior defeito numa contagem, \emph{um número certo sobre a amostra
+errada}. Ela lê a coluna inteira, e as recusas estão no sítio: mais de uma coluna, selecção
+vazia, célula ausente (\emph{um buraco não é um endereço, e contá-lo seria inventá-lo}), e
+$\sum G\neq\lvert I\rvert$ --- que seria defeito da contagem e não do corpo.
+
+\medido{\code{tests/pgwire.c} §W156 --- a fibra sobre três corpos com $36$ objectos cada,
+dois completos com falta $0$ e um incompleto com falta $44$; a recusa com duas colunas; e o
+contraste com o \code{regime}, que responde sobre o mesmo tipo de tabela e é outra pergunta.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
