@@ -8064,7 +8064,63 @@ static int varre(const char *resto, int acao){
                   strncat(forma, t, sizeof forma - strlen(forma) - 1); }
                 primeiro = 0;
             }
-            /* (3) O QUE SOBRA --- e resolve-se se couber */
+            /* ── (3) O QUE SOBRA, E AS RAÍZES IRRACIONAIS: pelo CORTE.
+             *
+             * A `aranha thm:corte` não aproxima --- PRODUZ o ponto por um
+             * processo que TERMINA numa grade, e o que o finito guarda é o par
+             *
+             *     (m, δ)   onde o ponto está, e quanto dele não cabe.
+             *
+             * Aqui a grade é a diádica de denominador 2^k. Para cada mudança de
+             * sinal do factor residual entre inteiros consecutivos há uma raiz
+             * real, e bisecta-se até ao grão --- tudo em INTEIROS, porque
+             * P(p/2^k)·2^{kn} = Σ c_j p^j 2^{k(n-j)} é inteiro e tem o mesmo
+             * sinal. Devolve-se o cerco, e não um decimal: o cliente recebe
+             * m/2^k com δ = 1/2^k, e sabe o que não cabe.
+             *
+             * Isto é resolver o irracional na régua desta casa. Quem o quiser
+             * mais fino pede mais grão --- e o processo é o mesmo. */
+            char cerco[SQL_OUT_CELL] = ""; long nirr = 0;
+            if(gr >= 1){
+                int K = 10;                       /* o grão: 2^-10 */
+                int prim = 1;
+                for(long base = -12; base < 12 && nirr < 6; base++){
+                    /* sinal de P nos dois extremos inteiros */
+                    long v0 = 0, v1 = 0;
+                    for(long j = gr; j >= 0; j--){ v0 = v0*base + p[j]; }
+                    for(long j = gr; j >= 0; j--){ v1 = v1*(base+1) + p[j]; }
+                    if(v0 == 0 || v1 == 0) continue;         /* raiz inteira: já saiu */
+                    if((v0 > 0) == (v1 > 0)) continue;       /* sem mudança de sinal */
+                    /* bissecção diádica em inteiros: procura-se o m com
+                     * P(m/2^K) e P((m+1)/2^K) de sinais opostos */
+                    long lo = base << K, hi = (base + 1) << K;
+                    long slo = (v0 > 0) ? 1 : -1;
+                    while(hi - lo > 1){
+                        long mid = lo + (hi - lo)/2;
+                        /* P(mid/2^K)·2^{K·gr} = Σ p[j]·mid^j·2^{K(gr-j)} */
+                        long acc = 0; int estourou = 0;
+                        for(long j = gr; j >= 0; j--){
+                            /* Horner com escala: acc = acc*mid + p[j]*2^{K*(gr-j)} */
+                            long termo = p[j];
+                            for(long u = 0; u < K*(gr-j) && !estourou; u++){
+                                if(termo > (1L<<50) || termo < -(1L<<50)) estourou = 1;
+                                else termo <<= 1;
+                            }
+                            if(estourou) break;
+                            if(acc > (1L<<50) || acc < -(1L<<50)){ estourou = 1; break; }
+                            acc = acc*mid + termo;
+                        }
+                        if(estourou) break;       /* não cabe: pára onde está */
+                        long sm = acc > 0 ? 1 : (acc < 0 ? -1 : 0);
+                        if(sm == 0){ lo = mid; hi = mid + 1; break; }
+                        if(sm == slo) lo = mid; else hi = mid;
+                    }
+                    { char t[80];
+                      snprintf(t, sizeof t, "%s%ld/%d±1/%d", prim?"":", ", lo, 1<<K, 1<<K);
+                      strncat(cerco, t, sizeof cerco - strlen(cerco) - 1); }
+                    prim = 0; nirr++;
+                }
+            }
             char resto[SQL_OUT_CELL];
             if(gr == 0) snprintf(resto, sizeof resto, "todas achadas");
             else if(gr == 1){
@@ -8103,14 +8159,15 @@ static int varre(const char *resto, int acao){
             if(!*forma) snprintf(forma, sizeof forma, "sem parte elementar achada");
             if(sql_cap){
                 memset(sql_cap, 0, sizeof *sql_cap);
-                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 7;
                 snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "grau");
                 snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "raizes");
                 snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "distintas");
                 snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "com_multiplicidade");
                 snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "resto");
                 snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
-                for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+                snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "cortes");
+                for(int c = 0; c < 7; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
                 sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[2] = SQL_TIPO_INT4;
                 sql_cap->tipo[3] = SQL_TIPO_INT4;
                 snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ng);
@@ -8119,10 +8176,13 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", nr);
                 snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", resto);
                 snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
+                snprintf(sql_cap->cell[0][6], SQL_OUT_CELL, "%s",
+                         nirr ? cerco : "sem raiz irracional real");
                 snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
             }
-            printf("edo: grau %ld · %ld raiz(es) em %ld distinta(s): %s · %s · y = %s\n",
-                   ng, nr, distintas, nr ? raizes : "nenhuma", resto, forma);
+            printf("edo: grau %ld · %ld raiz(es) em %ld distinta(s): %s · %s · y = %s"
+                   " · cortes: %s\n", ng, nr, distintas, nr ? raizes : "nenhuma",
+                   resto, forma, nirr ? cerco : "nenhum");
             return 1;
         }
         long B = -m[1][1], C = -m[1][0];

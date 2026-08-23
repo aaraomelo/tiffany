@@ -2308,7 +2308,53 @@ distintas daria \emph{a mesma resposta} para $(\lambda^2-1)$ e $(\lambda^2-1)^4$
 soluções são diferentes: uma tem exponenciais puras, a outra tem $t$, $t^2$ e $t^3$ a
 multiplicá-las. \emph{É esse o gume.}
 
-\paragraph{6. O cliente encadeia fusões.} O resultado de \code{funde(*)} entra na fusão
+\paragraph{6. As raízes irracionais: pelo CORTE, e não por arredondamento.} O
+\emph{thm:corte} da \emph{aranha} não aproxima --- \textbf{produz} o ponto por um processo
+que termina numa grade ---, e o que o finito guarda é o par $(m,\delta)$: \emph{onde o ponto
+está, e quanto dele não cabe}. É isso que o motor devolve: para cada mudança de sinal do
+factor residual bisecta até ao grão, tudo em inteiros, e dá o cerco.
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrr@{}}
+\toprule
+o polinómio & o corte & $m/2^{10}$ & valor externo\\
+\midrule
+$\lambda^3-\lambda-1$ (o número plástico) & $1356/1024\pm1/1024$ & $1{,}324$ & $1{,}324$\\
+$\lambda^3-2$ (a raiz cúbica de dois) & $1290/1024\pm1/1024$ & $1{,}259$ & $1{,}259$\\
+$\lambda^4-2\lambda^2-1$ & $\pm1591/1024\pm1/1024$ & $1{,}553$ & $1{,}553$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Os valores externos \emph{não entram em conta nenhuma} --- servem para conferir. E o
+gume é o que prova que aquilo é raiz e não um ponto qualquer: o polinómio \textbf{troca de
+sinal} entre $m$ e $m+1$, verificado em inteiros.
+
+\paragraph{Os quatro tectos, e nenhum é da teoria.} Subir o grau obriga a distingui-los, e
+confundi-los dá a conclusão errada:
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+o tecto & quanto & recusa quando\\
+\midrule
+a \textbf{tabela} & $16$ colunas & o grau passa de $16$\\
+o \textbf{envelope} da célula & $-128..127$ & um coeficiente não cabe\\
+o \textbf{registo de corpos} & $8$ colunas & há coeficiente \emph{negativo} acima da oitava\\
+o \textbf{andar} do motor & $64$ & --- (nunca alcançado pelos outros)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O terceiro é um \textbf{defeito}, e só apareceu ao subir o grau: \code{S\_CORPO}
+guarda oito colunas, e acima da oitava a célula é tratada como \code{INTEIRO} sem sinal ---
+seja o que for que o \code{CREATE} declarou. A mensagem culpa o valor («\emph{value out of
+range}») quando a causa é o registo. Isola-se com dois polinómios do \emph{mesmo} grau
+dezasseis: $\lambda^{16}-1$ resolve, $(\lambda^2-1)^8$ é recusado.
+
+\medido{\code{tests/pgwire.c} §W183 --- os três cortes contra os valores externos, o gume do
+sinal, e os dois polinómios de grau dezasseis a separarem o defeito.}
+
+\paragraph{7. O cliente encadeia fusões.} O resultado de \code{funde(*)} entra na fusão
 seguinte sem adaptador. Quatro corpos, três fusões, e o que se distingue sobe estritamente:
 $11\to31\to34\to36$. \emph{Com um milhão de corpos é o mesmo SQL.}
 
