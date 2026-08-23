@@ -2141,6 +2141,73 @@ quiser o valor sobe a torre, porque é o corte e não uma divisão}.
 característica, $\lambda^2+B\lambda+C=0$, verificado em inteiros: uma raiz plausível e errada
 passaria por qualquer outra asserção.
 
+\subsection*{O mecânico é o mesmo corpo; o electromecânico é a FUSÃO dos dois}
+
+\paragraph{O mecânico não pede nada de novo.} A massa-mola-amortecedor
+$m\,x''+c\,x'+k\,x=0$ entra pela \emph{mesma} companheira do RLC, com o dicionário
+$m\leftrightarrow L$, $c\leftrightarrow R$, $k\leftrightarrow 1/C$ --- e o motor resolve as
+três sem saber que mudou de assunto. \emph{A analogia não é figura de estilo: é a mesma
+matriz.}
+
+\paragraph{E o electromecânico é a fusão dos dois corpos que já estão no banco.} Não se
+acoplam equações genéricas: fundem-se o \textbf{mecânico} (torque $r\times F$) e o
+\textbf{eletromagnético} ($E^2-B^2$) pelo $C_{\mathrm{ent}}$ da \emph{aranha}, que entrelaça
+os dígitos de um nas posições pares e os do outro nas ímpares.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& objectos & fibras & $G$ & falta\\
+\midrule
+mecânico (torque $r\times F$) & $36$ & $11$ & $6$ & $30$\\
+eletromagnético ($E^2-B^2$) & $36$ & $27$ & $6$ & $126$\\
+\midrule
+\textbf{a fusão} $C_{\mathrm{ent}}$ & $36$ & $\mathbf{31}$ & $6$ & $150$\\
+\midrule
+\textbf{o corpo electromecânico}, completo no banco & $\mathbf{186}$ & $186$ & $\mathbf 1$ & $\mathbf 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A fusão não perde}: a volta separa e devolve os dois corpos exactos em
+$36/36$. E ela \emph{separa mais} do que qualquer dos dois --- $31$ fibras contra $11$ e
+$27$ ---, o que era de esperar e é o que faz dela uma fusão e não uma soma: dois endereços
+lado a lado distinguem o que cada um sozinho confundia. Levantado, o electromecânico fica
+completo no banco com $G\equiv1$, falta zero e a régua a descer.
+
+\paragraph{E o circuito sai da fusão.} Cada corpo traz a sua taxa própria e o acoplamento $K$
+atravessa-os nos dois sentidos com sinais opostos --- é o que faz a energia \emph{passar} em
+vez de se somar:
+\[
+  L\,i'+R\,i+K\,\omega=0,\qquad J\,\omega'+b\,\omega-K\,i=0
+  \quad\Longrightarrow\quad
+  B=\tfrac{R}{L}+\tfrac{b}{J},\quad C=\tfrac{Rb+K^2}{LJ}.
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}rlrll@{}}
+\toprule
+$K$ & a equação do fundido & $\Delta$ & classe & o que faz\\
+\midrule
+$0$ & $y''+5y'+6y=0$ & $1$ & hiperbólico & decai sem oscilar\\
+$1$ & $y''+5y'+7y=0$ & $-3$ & \textbf{elíptico} & \textbf{oscila} a decair\\
+$2$ & $y''+5y'+10y=0$ & $-15$ & elíptico & oscila a decair\\
+$3$ & $y''+5y'+15y=0$ & $-35$ & elíptico & oscila a decair\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O acoplamento muda a classe}: o que eram dois decaimentos independentes
+passa a \emph{oscilar}. E o controlo é o $K=0$, sem o qual isto não diria nada --- ali a
+fusão \textbf{degenera} nos dois corpos separados, com as raízes a serem exactamente as
+taxas próprias $-R/L$ e $-b/J$. \emph{Sem esse caso, a fusão podia estar a inventar a
+oscilação em vez de a produzir.}
+
+\medido{\code{lib/fusao.h} com \code{tests/pgwire.c} §W177 --- o mecânico pelas três classes,
+o $C_{\mathrm{ent}}$ com a volta exacta em $256/256$ e zero colisões, e o acoplamento a mudar
+a classe com o $K=0$ a degenerar. E \code{tools/eletromecanico.c} --- a fusão dos dois corpos
+do banco, com a volta a devolver os dois exactos e o fundido completo em $186/186$.}
+
 \medido{\code{tests/pgwire.c} §W176 --- os cinco circuitos pelo fio com \code{SELECT edo(*)},
 cada raiz a anular a característica, a recusa da não-companheira, e o irracional a sair por
 extrair. E \code{tools/rlc\_sql.c}, onde nenhuma conta é feita fora do motor.}

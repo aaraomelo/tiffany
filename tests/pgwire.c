@@ -57,6 +57,7 @@
 #include "../lib/edo.h"
 #include "../lib/levanta.h"   /* traz escada.h: a fibra, e o ι/π que completa */
 #include "../lib/triade.h"    /* a travessia, o preço e a ultramétrica */
+#include "../lib/fusao.h"     /* o C_ent do paper, e a fusão das dinâmicas */
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25974,6 +25975,126 @@ int main(void){
            " RECUSADA. E o irracional não se arredonda: com Δ=5, que é o metal do ouro, o"
            " motor escreve a forma com a raiz por extrair em vez de mentir um decimal ---"
            " quem quiser o valor sobe a torre, porque é o corte e não uma divisão.",
+           mal == 0);
+    }
+
+    /* ═══ §W177: O MECÂNICO, A FUSÃO, E O ELECTROMECÂNICO ══════════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W177 o mecânico é o MESMO corpo; e a fusão dos dois é que muda a classe.\n\n");
+        unlink("/tmp/pgwire_w177__A.mem"); unlink("/tmp/pgwire_w177__A.prog");
+        unlink("/tmp/pgwire_w177.mem");    unlink("/tmp/pgwire_w177.prog");
+        if(!sql_abrir("/tmp/pgwire_w177")) mal++;
+
+        /* ── (1) O CIRCUITO MECÂNICO: massa-mola-amortecedor.
+         *      m x'' + c x' + k x = 0   ⟹   x'' + (c/m)x' + (k/m)x = 0
+         * É a MESMA companheira do RLC, com o dicionário m↔L, c↔R, k↔1/C ---
+         * e por isso o motor não precisa de saber que mudou de assunto. */
+        {
+            struct { const char *nome; long m, c, k; const char *cls; } M[3] = {
+                {"sobreamortecido  m=1 c=5 k=6", 1, 5, 6, "hiperbolico"},
+                {"crítico          m=1 c=4 k=4", 1, 4, 4, "parabolico"},
+                {"livre (sem atrito) m=1 c=0 k=4", 1, 0, 4, "eliptico"},
+            };
+            printf("      MECÂNICO: m x'' + c x' + k x = 0\n");
+            printf("      %-32s %-20s %5s  %-11s %s\n", "o sistema", "a equação",
+                   "Δ", "classe", "x(t)");
+            long certos = 0;
+            for(int i = 0; i < 3; i++){
+                char q[220];
+                sql_executa("DROP TABLE IF EXISTS A", &o2);
+                sql_executa("CREATE TABLE A (x RACIONAL, y RACIONAL)", &o2);
+                sql_executa("INSERT INTO A VALUES (0,1)", &o2);
+                snprintf(q, sizeof q, "INSERT INTO A VALUES (%ld,%ld)",
+                         -M[i].k / M[i].m, -M[i].c / M[i].m);
+                sql_executa(q, &o2);
+                sql_executa("SELECT edo(*) FROM A", &o);
+                if(!o.ok){ mal++; continue; }
+                printf("      %-32s %-20s %5s  %-11s %s\n", M[i].nome,
+                       o.cell[0][0], o.cell[0][1], o.cell[0][2], o.cell[0][5]);
+                if(!strcmp(o.cell[0][2], M[i].cls)) certos++;
+            }
+            printf("      → %ld das 3 com a classe esperada --- e o motor NÃO soube que"
+                   " mudou de assunto\n\n", certos);
+            if(certos != 3) mal++;
+        }
+
+        /* ── (2) A FUSÃO DO ENDEREÇO: o C_ent do paper, e a volta exacta ──── */
+        {
+            long pares = 0, fecha = 0, colide = 0;
+            long vis[256]; long nv = 0;
+            for(long a = 0; a < 16; a++) for(long b = 0; b < 16; b++){
+                pares++;
+                if(fu_volta(a, b, 4)) fecha++;
+                long e = fu_entrelaca(a, b, 4);
+                for(long j = 0; j < nv; j++) if(vis[j] == e){ colide++; break; }
+                if(nv < 256) vis[nv++] = e;
+            }
+            printf("      FUSÃO DO ENDEREÇO (C_ent do paper): %ld pares · a volta devolve"
+                   " as duas exactas em %ld · %ld colisões\n", pares, fecha, colide);
+            if(fecha != pares || colide != 0) mal++;
+        }
+
+        /* ── (3) O ELECTROMECÂNICO: o motor DC, que é a fusão dos DOIS corpos.
+         *      L i' + R i + K ω = 0        (o eléctrico)
+         *      J ω' + b ω − K i = 0        (o mecânico)
+         * O acoplamento K entra nos dois sentidos com sinais opostos --- é o que
+         * faz a energia ATRAVESSAR em vez de se somar --- e o fundido é de
+         * segunda ordem, com B = R/L + b/J e C = (Rb + K²)/(LJ). */
+        {
+            printf("\n      ELECTROMECÂNICO: L i' + R i + K ω = 0 · J ω' + b ω − K i = 0\n");
+            printf("      %-10s %-22s %5s  %-11s %s\n", "K", "a equação do fundido",
+                   "Δ", "classe", "o que faz");
+            long R = 3, L = 1, b = 2, J = 1;
+            long mudou = 0;
+            const char *antes = "";
+            for(long K = 0; K <= 3; K++){
+                char q[220];
+                FuFundido f = fu_acopla(R, L, b, J, K);
+                sql_executa("DROP TABLE IF EXISTS A", &o2);
+                sql_executa("CREATE TABLE A (x RACIONAL, y RACIONAL)", &o2);
+                sql_executa("INSERT INTO A VALUES (0,1)", &o2);
+                snprintf(q, sizeof q, "INSERT INTO A VALUES (%ld,%ld)", -f.C, -f.B);
+                sql_executa(q, &o2);
+                sql_executa("SELECT edo(*) FROM A", &o);
+                if(!o.ok){ mal++; continue; }
+                const char *faz = !strcmp(o.cell[0][2], "eliptico")
+                    ? "OSCILA a decair" : "decai sem oscilar";
+                printf("      K=%-8ld %-22s %5s  %-11s %s\n", K,
+                       o.cell[0][0], o.cell[0][1], o.cell[0][2], faz);
+                /* o Δ do motor tem de ser o da lib --- dois caminhos */
+                if(atol(o.cell[0][1]) != fu_disc(f)) mal++;
+                if(K == 0){
+                    /* DESACOPLADO: as raízes têm de ser as taxas próprias, −R/L e −b/J */
+                    if(strcmp(o.cell[0][3], "-2") && strcmp(o.cell[0][3], "-3")) mal++;
+                    printf("           ^ com K=0 a fusão DEGENERA: as raízes são −R/L e"
+                           " −b/J, os dois corpos separados\n");
+                }
+                if(*antes && strcmp(antes, o.cell[0][2])) mudou++;
+                antes = (K == 0) ? "hiperbolico" : (atol(o.cell[0][1]) < 0 ? "eliptico"
+                       : atol(o.cell[0][1]) ? "hiperbolico" : "parabolico");
+            }
+            printf("      → o acoplamento MUDA A CLASSE %ld vez(es): dois decaimentos"
+                   " independentes viram uma oscilação\n", mudou);
+            if(mudou == 0) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O MECÂNICO É O MESMO CORPO, E A FUSÃO É QUE TRAZ COISA NOVA. A massa-mola-"
+           "amortecedor entra pela mesma companheira do RLC --- m↔L, c↔R, k↔1/C --- e o"
+           " motor resolve as três sem saber que mudou de assunto: é a mesma equação, e a"
+           " analogia não é figura de estilo, é a mesma matriz. A FUSÃO DO ENDEREÇO é o"
+           " C_ent do paper: entrelaçar os dígitos de a nas posições pares e os de b nas"
+           " ímpares, com a volta a devolver as duas exactas em 256/256 e zero colisões ---"
+           " a dobra deixa de ser uma bijecção que existe e passa a ser uma que se escreve."
+           " E O ELECTROMECÂNICO É A FUSÃO DAS DINÂMICAS, que é outra coisa: dois corpos de"
+           " primeira ordem acoplados por K dão um de segunda, e o acoplamento MUDA A"
+           " CLASSE --- com K=0 a fusão degenera nos dois corpos separados, com as raízes a"
+           " serem exactamente as taxas próprias −R/L e −b/J, e a partir de K=1 o que eram"
+           " dois decaimentos independentes passa a OSCILAR. O controlo é o K=0: sem ele, a"
+           " fusão podia estar a inventar a oscilação em vez de a produzir.",
            mal == 0);
     }
 
