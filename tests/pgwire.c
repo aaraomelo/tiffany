@@ -25706,7 +25706,7 @@ int main(void){
         unlink("/tmp/pgwire_w175.mem");    unlink("/tmp/pgwire_w175.prog");
         if(!sql_abrir("/tmp/pgwire_w175")) mal++;
 
-        struct { const char *nome; int caso; } C[11] = {
+        struct { const char *nome; int caso; } C[10] = {
             {"tríade  a+bω",         0}, {"áureo  cifra FC",       1},
             {"quadrático  Δ",        2}, {"mórfico  erosão",       3},
             {"booleano  ⊕",          4},
@@ -25714,7 +25714,11 @@ int main(void){
              * o eletromagnético é E²−B², assinatura (3,3,0), e a sua régua própria
              * é a IMPEDÂNCIA --- Poynting inverte-a (ν∘rev: E ↦ 1/B). O mecânico
              * é o do `motor.c`: «o torque É o produto cruzado». */
-            {"eletromag.  E²−B²",    5}, {"eletromag.  Poynting",  6},
+            {"eletromag.  E²−B²",    5},
+            /* Poynting SAIU daqui: E×B não é corpo separado, é o OPERADOR do
+             * eletromagnético --- o `thm:fecho` diz que a matriz É o rotor entre
+             * duas direções, R_ij=[[0,-1],[1,0]], e o que dela importa é a FASE.
+             * O operador mede-se em §W176, pela sua ORDEM, e não como corpo. */
             {"mecânico  torque r×F", 7},
             /* e o cósmico, que o catálogo já dá como (z,d) --- e cuja régua é o
              * EXPOENTE: «quem mede em grandeza se perde, quem mede em expoente
@@ -25729,7 +25733,7 @@ int main(void){
         printf("      corpo               ANTES: fibras G   falta │ DEPOIS: |I| G falta"
                " │ régua\n");
         long fechados = 0, ja_eram = 0;
-        for(int c = 0; c < 11; c++){
+        for(int c = 0; c < 10; c++){
             char q[220];
             long e[64]; long n = 0;
             for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
@@ -25802,9 +25806,9 @@ int main(void){
             if(!comp_dep || falta_dep != 0 || !regua || estritos == 0) mal++;
             else fechados++;
         }
-        printf("      → %ld dos 11 fechados: G constante, falta zero, régua a descer\n",
+        printf("      → %ld dos 10 fechados: G constante, falta zero, régua a descer\n",
                fechados);
-        if(fechados != 11) mal++;
+        if(fechados != 10) mal++;
 
         /* ── PNEUMÁTICO E HIDRÁULICO SÃO O MESMO CORPO, e o catálogo já o diz:
          * «eléctrico, mecânico, pneumático, óptico e elástico não são cinco
@@ -25858,14 +25862,17 @@ int main(void){
 
         sql_fechar();
         printf("\n");
-        ok("OS ONZE ESTÃO FECHADOS NO BANCO, E PELO CAMINHO QUE O COROLÁRIO"
+        ok("OS DEZ ESTÃO FECHADOS NO BANCO, E PELO CAMINHO QUE O COROLÁRIO"
            " MANDA. A tríade, o áureo, o quadrático, o mórfico e o booleano, mais os DOIS que o catálogo nomeia e"
-           " faltavam --- o eletromagnético pela sua forma E²−B² e pelo vector de Poynting"
-           " E×B, e o mecânico pelo torque r×F, que o motor.c diz ser o produto cruzado."
+           " faltavam --- o eletromagnético pela sua forma E²−B², e o"
+           " mecânico pelo torque r×F, que o motor.c diz ser o produto cruzado. E o vector"
+           " de Poynting SAIU deste lote: E×B não é corpo separado --- é o OPERADOR do"
+           " eletromagnético, e o thm:fecho diz que a matriz É o rotor entre duas"
+           " direções. Mede-se pela sua ORDEM, em §W176, e não como corpo."
            " Entravam com G a"
            " variar e falta contada; levantados pelo ι/π --- que abre os lugares que a fibra"
            " contou e não inventa objecto nenhum ---, o motor mede-os de novo e devolve G"
-           " constante e falta zero nos ONZE. E A RÉGUA VEM ATRÁS, que é o que o global"
+           " constante e falta zero nos DEZ. E A RÉGUA VEM ATRÁS, que é o que o global"
            " promete: dada a representação reversível, `ultra(*)` responde que a desigualdade"
            " forte vale, com triplos estritos em todos. E DOIS DELES ERAM UM: o pneumático e o"
            " hidráulico dão os MESMOS endereços, a travessia entre eles é a identidade e o"

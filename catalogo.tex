@@ -1939,6 +1939,58 @@ que a bijecção preserva.
 \noindent Logo \textbf{não se constrói régua nenhuma no corpo}. Completar um corpo do
 catálogo é dar-lhe uma representação reversível; a régua vem atrás, e vem completa.
 
+\subsection*{Os dezasseis corpos COMPLETOS no banco, e o que o envelope ensinou}
+
+Executado o pipe sobre os corpos que estão no banco --- levantar pelo $\iota/\pi$, compactar
+os endereços pela enumeração (bijecção: \emph{a fibra não vê o nome do endereço}), inserir e
+medir com \code{fibra(*)} e \code{ultra(*)}:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}lrrcl@{}}
+\toprule
+corpo & $\lvert I\rvert$ & no banco & $G$ & régua\\
+\midrule
+tríade $a+b\omega$ & $150$ & $150$ & $1$ & desce\\
+escada $X_2$ (oposto) & $36$ & $36$ & $1$ & desce\\
+racional $p/q$ & $36$ & $36$ & $1$ & desce\\
+áureo (cifra FC) & $60$ & $60$ & $1$ & desce\\
+quadrático $\Delta$ & $66$ & $66$ & $1$ & desce\\
+mórfico (erosão) & $66$ & $66$ & $1$ & desce\\
+booleano $\oplus$ & $48$ & $48$ & $1$ & desce\\
+quântico (fase) & $36$ & $36$ & $1$ & desce\\
+métrico (prefixo) & $36$ & $36$ & $1$ & desce\\
+entrópico & $66$ & $66$ & $1$ & desce\\
+matricial $\det=\pm1$ & $36$ & $36$ & $1$ & desce\\
+cantor $\pi(a,b)$ & $36$ & $36$ & $1$ & desce\\
+eletromagnético $E^2-B^2$ & $162$ & $162$ & $1$ & desce\\
+mecânico (torque $r\times F$) & $66$ & $66$ & $1$ & desce\\
+cósmico $(z,d)$ & $90$ & $90$ & $1$ & desce\\
+pneumático $\equiv$ hidráulico & $72$ & $72$ & $1$ & desce\\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{16 de 16 completos}} & & \multicolumn{2}{l}{\textbf{16 de 16 com a régua a descer}}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{E o envelope apanhou-me duas vezes.} A primeira leitura desta tabela dizia «$16$
+de $16$» sobre tabelas onde as linhas nunca tinham entrado: o banco \textbf{recusa} o que
+não cabe no envelope da célula --- e recusa bem, dizendo-o, em vez de truncar em silêncio
+--- e eu li «completo» sobre a fatia que passou. Do eletromagnético entraram $36$ de $162$.
+
+\begin{quote}
+\emph{A asserção estava certa e o corpo não estava lá.} O que passa é completo; o que foi
+recusado não conta --- e é preciso ler as \textbf{duas} colunas, $\lvert I\rvert$ e
+\emph{no banco}, para a linha significar alguma coisa.
+\end{quote}
+
+\noindent A correcção é a que o próprio erro do motor indica: em corpo \code{RACIONAL} o
+componente é assinado, $-128..127$; em \code{INTEIRO} o envelope é $0..255$, e os endereços
+compactados são naturais. \emph{Alargar a célula é subir a torre}, e aqui bastou subir um
+degrau.
+
+\medido{\code{tools/completa\_corpos.c} --- o pipe pelo fio sobre os dezasseis, com
+\code{count(*)} a conferir que todas as linhas entraram antes de a completude ser lida.}
+
 \subsection*{Os onze fechados no banco, pelo caminho que o corolário manda}
 
 \begin{center}\small

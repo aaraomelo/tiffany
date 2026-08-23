@@ -228,6 +228,83 @@ int main(void){
            " distância zero, e aí não há métrica, quanto mais ultramétrica.", mal == 0);
     }
 
+    /* ── §G4 A BIJEÇÃO ENTRE AS DUAS MÉTRICAS, EXIBIDA E COM RESÍDUO ZERO ── */
+    {
+        printf("§G4  a bijeção entre as métricas: d_S(x,y) = d_I(T(R(x)), T(R(y))).\n\n");
+        long mal = 0;
+        int bits = 20;
+
+        /* Duas leituras do MESMO corpo, pela prop:travessia: R lê os dígitos por
+         * uma ordem, S por outra. Cada uma induz a sua métrica no corpo,
+         *      d_R(x,y) = d_I(R(x),R(y)),      d_S(x,y) = d_I(S(x),S(y)),
+         * e a BIJEÇÃO entre as duas é T = S∘R⁻¹ --- a permutação π = s∘r⁻¹
+         * aplicada às POSIÇÕES dos dígitos. Não é uma existência: escreve-se. */
+        long M = 4; int nd = 3, NN = 64;
+        int r[3] = {0,1,2}, sp[3] = {1,2,0};
+        long R[64], S[64], TR[64];
+        for(long a = 0; a < NN; a++){
+            R[a] = a;                                  /* R = a leitura de partida */
+            S[a] = tv_travessia(a, M, nd, r, sp);       /* S = a outra leitura */
+            TR[a] = tv_travessia(R[a], M, nd, r, sp);   /* T aplicada ao endereço R */
+        }
+
+        /* (a) T É bijeção --- e é a mesma que a §L3 já exibiu */
+        { long vis[64] = {0}, fecha = 0;
+          for(long a = 0; a < NN; a++) if(TR[a] >= 0 && TR[a] < NN) vis[TR[a]]++;
+          for(long a = 0; a < NN; a++) if(vis[a] == 1) fecha++;
+          printf("      T = S∘R⁻¹ é bijeção: %ld de %d endereços com imagem única\n",
+                 fecha, NN);
+          if(fecha != NN) mal++; }
+
+        /* (b) E A MÉTRICA TRANSPORTA-SE POR ELA, par a par, COM RESÍDUO ZERO:
+         *        d_S(x,y)  ==  d_I( T(R(x)), T(R(y)) )
+         * Isto é a bijeção entre as MÉTRICAS, e não entre os números: a
+         * igualdade é de profundidades, exacta, em todos os pares. */
+        {
+            long pares = 0, batem = 0, residuo = 0, distintos[24] = {0}, nd_ = 0;
+            for(long x = 0; x < NN; x++) for(long y = 0; y < NN; y++){
+                int dS = tv_prof(S[x], S[y], bits);
+                int dT = tv_prof(TR[x], TR[y], bits);
+                pares++;
+                if(dS == dT) batem++; else residuo += (dS > dT ? dS - dT : dT - dS);
+                if(dS < 24 && !distintos[dS]){ distintos[dS] = 1; nd_++; }
+            }
+            printf("      d_S(x,y) = d_I(T(R(x)),T(R(y))) em %ld de %ld pares · resíduo %ld\n",
+                   batem, pares, residuo);
+            printf("      e a régua toma %ld valores DISTINTOS --- se fosse constante,"
+                   " a igualdade passava por acaso\n", nd_);
+            if(batem != pares || residuo != 0 || nd_ < 3) mal++;
+        }
+
+        /* (c) O GUME: uma bijeção QUALQUER não transporta a métrica. Toma-se
+         * outra permutação dos endereços --- a inversão a ↦ N−1−a, que é
+         * bijeção perfeita --- e a igualdade cai. É isto que distingue «há uma
+         * bijeção» de «a bijeção é ESTA». */
+        {
+            long U[64]; long batem = 0, pares = 0;
+            for(long a = 0; a < NN; a++) U[a] = NN - 1 - a;
+            for(long x = 0; x < NN; x++) for(long y = 0; y < NN; y++){
+                int dS = tv_prof(S[x], S[y], bits);
+                int dU = tv_prof(U[R[x]], U[R[y]], bits);
+                pares++; if(dS == dU) batem++;
+            }
+            printf("      gume: com a inversão a↦N−1−a (bijeção perfeita) a igualdade"
+                   " cai para %ld de %ld\n", batem, pares);
+            if(batem == pares) mal++;
+        }
+
+        printf("\n");
+        ok("A BIJEÇÃO ENTRE AS MÉTRICAS ESTÁ EXIBIDA, E TRANSPORTA COM RESÍDUO ZERO. Cada"
+           " leitura induz a sua métrica no corpo, d_R(x,y)=d_I(R(x),R(y)); a bijeção entre"
+           " duas delas é T=S∘R⁻¹, a permutação das POSIÇÕES dos dígitos da prop:travessia"
+           " --- escrita, não postulada. E a igualdade d_S(x,y)=d_I(T(R(x)),T(R(y))) vale em"
+           " TODOS os pares com resíduo zero, com a régua a tomar vários valores distintos"
+           " --- se fosse constante, a igualdade passava por acaso. O GUME é o que separa"
+           " «existe bijeção» de «a bijeção é esta»: a inversão a↦N−1−a é bijeção perfeita e"
+           " NÃO transporta a métrica.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
