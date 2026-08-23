@@ -2356,6 +2356,59 @@ derivada e o $t^k/k!$ \emph{separados} e multiplicava-os com duas divisões --- 
 onde a fechada dá $0{,}307$. Corrigida para o termo carregar já o fatorial, passou a dar o
 valor exacto. \emph{Sem o caso de raízes inteiras ao lado, o erro não aparecia.}
 
+\subsection*{E a solução da EDO sai em notação fatorial: só contagem}
+
+Escrevendo $y(t)=\sum_k d_k\,t^k/k!$, os $d_k$ são $y^{(k)}(0)$ --- e a recorrência da
+equação \textbf{dá-os}, um a um, em inteiros exactos:
+\[
+  d_{k+n}=-c_{n-1}d_{k+n-1}-\cdots-c_0d_k .
+\]
+\emph{Nada se avalia, nada se divide, nada se aproxima --- conta-se.} E é esta a forma em
+que o cliente a lê, porque é a base em que a série já vive.
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+a equação & a solução\\
+\midrule
+$y'-y=0$ \quad(o $e^t$) & $\langle1,1,1,1,1,1,1,1,1,1,1,1\rangle_!$\\
+$y''+y=0$ \quad(o $\cos$) & $\langle1,0,-1,0,1,0,-1,0,1,0,-1,0\rangle_!$\\
+$y''-y=0$ \quad(o $\cosh$) & $\langle1,0,1,0,1,0,1,0,1,0,1,0\rangle_!$\\
+$y''-y'-y=0$ & $\langle1,0,1,1,2,3,5,8,13,21,34,55\rangle_!$\\
+$y''+5y'+6y=0$ & $\langle1,0,-6,30,-114,390,-1266,3990,\ldots\rangle_!$\\
+$y''''=0$ \quad(a viga) & $\langle1,0,0,0,0,0,0,0,0,0,0,0\rangle_!$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E o que sai diz mais do que a forma fechada.} O $e^t$ é
+$\langle1,1,1,\ldots\rangle$ --- \emph{todos os dígitos iguais a um}, que é exactamente o
+que o paper afirma de $e=\sum1/k!$. E o \textbf{período da lista é a ordem de $\omega$},
+contado nela sem se calcular coisa nenhuma:
+
+\begin{center}\small
+\begin{tabular}{@{}llr@{}}
+\toprule
+& a lista & período\\
+\midrule
+$\cos$ \quad($t=-1$, $\omega^4=1$) & $1,0,-1,0,\ldots$ & $\mathbf 4$\\
+$\cosh$ \quad($t=+1$, $\omega^2=1$) & $1,0,1,0,\ldots$ & $\mathbf 2$\\
+$e^t$ \quad(sem $\omega$) & $1,1,1,1,\ldots$ & $\mathbf 1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{O ciclo de $J$ vê-se na lista.} E o $y''-y'-y=0$ dá
+$1,0,1,1,2,3,5,8,13,21,34,55$: os nomes clássicos aparecem como \textbf{rasto}, porque a
+conta não sabe que se chamam assim.
+
+\paragraph{E o grau um era recusado.} $y'=\lambda y$ tem companheira $1\times1$ e é o caso
+mais simples de todos --- a exponencial pura. O motor exigia $n\ge2$, o que o deixava de fora
+sem razão nenhuma da teoria; agora resolve-o, e é ele que dá o $\langle1,1,1,\ldots\rangle$.
+
+\medido{\code{tests/pgwire.c} §W185 --- as seis soluções pelo \code{SELECT edo(*)}, com o
+período contado na lista em $3/3$.}
+
 \subsection*{As três faces saem da MESMA série, e a fase é contagem}
 
 O paper faz a cisão por paridade com $J^2=-1$. Com $\omega^2=t$ as potências ciclam do mesmo

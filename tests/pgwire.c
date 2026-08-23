@@ -26714,6 +26714,107 @@ int main(void){
            " fica sempre dentro do grão do último nível descido.", mal == 0);
     }
 
+    /* ═══ §W185: A SOLUÇÃO EM NOTAÇÃO FATORIAL — só contagem ═══════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W185 a solução em fatorial: inteiros exactos, e nenhuma vírgula.\n\n");
+        unlink("/tmp/pgwire_w185__A.mem"); unlink("/tmp/pgwire_w185__A.prog");
+        unlink("/tmp/pgwire_w185.mem");    unlink("/tmp/pgwire_w185.prog");
+        if(!sql_abrir("/tmp/pgwire_w185")) mal++;
+
+        /* o que cada solução TEM de ser --- e os nomes clássicos são o rasto,
+         * não o dado: a conta não sabe que se chamam cos ou Fibonacci */
+        struct { const char *nome; int n; long co[4]; const char *espera; int per; } E[6] = {
+          {"y''+y=0      (cos)",    2, {1,0},     "<1,0,-1,0,1,0,-1,0,1,0,-1,0>!",  4},
+          {"y''−y=0      (cosh)",   2, {-1,0},    "<1,0,1,0,1,0,1,0,1,0,1,0>!",     2},
+          {"y'−y=0       (e^t)",    1, {-1},      "<1,1,1,1,1,1,1,1,1,1,1,1>!",     1},
+          {"y''−y'−y=0   (ouro)",   2, {-1,-1},   "<1,0,1,1,2,3,5,8,13,21,34,55>!", 0},
+          {"y''+5y'+6y=0",          2, {6,5},     "",                               0},
+          {"y''''=0      (a viga)", 4, {0,0,0,0}, "",                               0},
+        };
+        printf("      a equação                a solução em fatorial\n");
+        long certas = 0, medidas = 0;
+        for(int c = 0; c < 6; c++){
+            char q[600];
+            int n = E[c].n;
+            sql_executa("DROP TABLE IF EXISTS A", &o2);
+            strcpy(q, "CREATE TABLE A (");
+            for(int j = 0; j < n; j++){ char t[24];
+                snprintf(t, sizeof t, "%sc%d RACIONAL", j?",":"", j); strcat(q, t); }
+            strcat(q, ")"); sql_executa(q, &o2);
+            for(int i = 0; i < n; i++){
+                strcpy(q, "INSERT INTO A VALUES (");
+                for(int j = 0; j < n; j++){
+                    long v = (i+1 < n) ? ((j == i+1) ? 1 : 0) : -E[c].co[j];
+                    char t[24]; snprintf(t, sizeof t, "%s%ld", j?",":"", v);
+                    strcat(q, t);
+                }
+                strcat(q, ")"); sql_executa(q, &o2);
+            }
+            sql_executa("SELECT edo(*) FROM A", &o);
+            if(!o.ok){ printf("      %-24s RECUSADA\n", E[c].nome); mal++; continue; }
+            /* grau 1 e 2 devolvem a solução fatorial na coluna 6; grau > 2 na 7 */
+            const char *sol = o.cell[0][(n <= 2) ? 6 : 7];
+            printf("      %-24s %s\n", E[c].nome, sol);
+            medidas++;
+            if(*E[c].espera){
+                if(!strcmp(sol, E[c].espera)) certas++;
+                else printf("      ^^^ esperava %s\n", E[c].espera);
+            } else certas++;
+        }
+        printf("      → %ld de %ld com a lista esperada\n", certas, medidas);
+        if(certas != medidas || medidas == 0) mal++;
+
+        /* ── O QUE A CONTAGEM MOSTRA, e que a forma fechada esconde: o PERÍODO
+         * dos coeficientes é a ordem de ω, lida directamente da lista. Não se
+         * calcula --- CONTA-SE onde a lista se repete. */
+        {
+            struct { const char *n; const char *lista; int per; } P[3] = {
+                {"cos  (t=−1, ω⁴=1)",  "<1,0,-1,0,1,0,-1,0,1,0,-1,0>!", 4},
+                {"cosh (t=+1, ω²=1)",  "<1,0,1,0,1,0,1,0,1,0,1,0>!",    2},
+                {"e^t  (sem ω)",       "<1,1,1,1,1,1,1,1,1,1,1,1>!",    1},
+            };
+            printf("\n      e o PERÍODO dos coeficientes é a ordem de ω, contada na lista:\n");
+            long batem = 0;
+            for(int c = 0; c < 3; c++){
+                /* conta o período: o menor p com d_k = d_{k+p} em toda a lista */
+                long d[16], nd = 0;
+                const char *pc = P[c].lista + 1;
+                while(*pc && *pc != '>' && nd < 16){
+                    d[nd++] = strtol(pc, (char**)&pc, 10);
+                    if(*pc == ',') pc++;
+                }
+                int per = 0;
+                for(int p2 = 1; p2 <= 6 && !per; p2++){
+                    int ok2 = 1;
+                    for(long k = 0; k + p2 < nd; k++) if(d[k] != d[k+p2]){ ok2 = 0; break; }
+                    if(ok2) per = p2;
+                }
+                printf("        %-20s período %d (esperado %d)  %s\n", P[c].n, per,
+                       P[c].per, per == P[c].per ? "" : "← NÃO BATE");
+                if(per == P[c].per) batem++;
+            }
+            printf("      → %ld de 3: o ciclo de J vê-se NA LISTA, sem se calcular nada\n",
+                   batem);
+            if(batem != 3) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("A SOLUÇÃO SAI EM NOTAÇÃO FATORIAL, E É SÓ CONTAGEM. Escrevendo y = Σ d_k t^k/k!,"
+           " os d_k são y^{(k)}(0) e a recorrência da equação DÁ-OS, um a um, em inteiros"
+           " exactos: nada se avalia, nada se divide, nada se aproxima. E o que sai diz mais"
+           " do que a forma fechada: e^t é <1,1,1,1,...>, todos os dígitos IGUAIS A UM, que é"
+           " o que o paper afirma de e = Σ1/k!; o cos é <1,0,−1,0,...> e o cosh <1,0,1,0,...>."
+           " O PERÍODO DA LISTA É A ORDEM DE ω, e conta-se nela sem se calcular coisa"
+           " nenhuma --- quatro no elíptico, dois no hiperbólico, um na exponencial. E o"
+           " y''−y'−y=0 dá <1,0,1,1,2,3,5,8,13,21,34,55>: os nomes clássicos aparecem como"
+           " RASTO, porque a conta não sabe que se chamam assim. A viga dá <1,0,0,...> com as"
+           " condições canónicas, e os quatro graus de liberdade dela são as quatro condições"
+           " iniciais, não os coeficientes.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

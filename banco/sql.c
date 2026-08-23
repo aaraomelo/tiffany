@@ -8002,7 +8002,11 @@ static int varre(const char *resto, int acao){
          * grau maior devolvem-se as RAÍZES INTEIRAS por divisores do termo
          * constante --- exactas, sem uma vírgula --- e o que sobra fica dito
          * como o factor por resolver, em vez de ser arredondado. */
-        if(ncols < 2 || nrows < 2 || ncols != nrows){
+        /* O GRAU UM É LEGÍTIMO e era recusado: y' = λy tem companheira 1×1, e é
+         * o caso mais simples de todos --- a exponencial pura, cuja solução em
+         * fatorial é <1,1,1,...> quando λ=1. Exigir n≥2 deixava-o de fora sem
+         * razão nenhuma da teoria. */
+        if(ncols < 1 || nrows < 1 || ncols != nrows){
             printf("erro: a EDO lê-se da matriz COMPANHEIRA n×n --- a tabela tem"
                    " %ld coluna(s) e %ld linha(s). RECUSADA.\n", ncols, nrows);
             if(sql_cap){ sql_cap->ok = 0;
@@ -8051,7 +8055,7 @@ static int varre(const char *resto, int acao){
         /* A COMPANHEIRA CONFERE-SE, em vez de se supor: as n−1 primeiras linhas
          * são a identidade deslocada --- linha i tem 1 na coluna i+1 e zero no
          * resto --- e a última traz os coeficientes. */
-        for(long i = 0; i + 1 < ng; i++) for(long j = 0; j < ng; j++){
+        for(long i = 0; i + 1 < ng; i++) for(long j = 0; j < ng; j++){   /* vazio em ng=1 */
             long esperado = (j == i + 1) ? 1 : 0;
             if(m[i][j] != esperado){
                 printf("erro: a linha %ld da companheira devia ter 1 na coluna %ld e"
@@ -8196,9 +8200,18 @@ static int varre(const char *resto, int acao){
                                              (k<gr && p[k]>0) ? "+" : "", p[k], k);
             }
             if(!*forma) snprintf(forma, sizeof forma, "sem parte elementar achada");
+            /* ── E A SOLUÇÃO EM NOTAÇÃO FATORIAL: só contagem, inteiros exactos.
+             * y(t) = Σ d_k t^k/k! com d_k = y^{(k)}(0), e a recorrência DÁ os
+             * d_k. Nada se avalia e nada se divide --- e é esta a forma em que
+             * o cliente a lê, porque é a base em que a série já vive. */
+            char emfat[SQL_OUT_CELL];
+            { long d0[FT_COEF];
+              for(int u = 0; u < (int)ng && u < FT_COEF; u++) d0[u] = (u == 0);
+              FtSol sol = ft_solucao(co, (int)ng, d0, 12);
+              ft_sol_escreve(&sol, emfat, sizeof emfat); }
             if(sql_cap){
                 memset(sql_cap, 0, sizeof *sql_cap);
-                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 7;
+                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 8;
                 snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "grau");
                 snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "raizes");
                 snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "distintas");
@@ -8206,7 +8219,8 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "resto");
                 snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
                 snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "raizes_em_fatorial");
-                for(int c = 0; c < 7; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+                snprintf(sql_cap->col[7], sizeof sql_cap->col[7], "solucao_fatorial");
+                for(int c = 0; c < 8; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
                 sql_cap->tipo[0] = SQL_TIPO_INT4; sql_cap->tipo[2] = SQL_TIPO_INT4;
                 sql_cap->tipo[3] = SQL_TIPO_INT4;
                 snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", ng);
@@ -8217,11 +8231,45 @@ static int varre(const char *resto, int acao){
                 snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
                 snprintf(sql_cap->cell[0][6], SQL_OUT_CELL, "%s",
                          nirr ? digitos : "sem raiz irracional real");
+                snprintf(sql_cap->cell[0][7], SQL_OUT_CELL, "%s", emfat);
                 snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
             }
             printf("edo: grau %ld · %ld raiz(es) em %ld distinta(s): %s · %s · y = %s"
                    " · em fatorial: %s\n", ng, nr, distintas, nr ? raizes : "nenhuma",
                    resto, forma, nirr ? digitos : "nenhuma");
+            return 1;
+        }
+        if(ng == 1){
+            /* y' = λy com λ = m[0][0]: a solução é e^{λt}, e em fatorial os
+             * coeficientes são as potências de λ --- que é a contagem pura. */
+            long lam = m[0][0];
+            char emfat1[SQL_OUT_CELL];
+            { long cc1[1] = {-lam}, d01[1] = {1};
+              FtSol sol = ft_solucao(cc1, 1, d01, 12);
+              ft_sol_escreve(&sol, emfat1, sizeof emfat1); }
+            if(sql_cap){
+                memset(sql_cap, 0, sizeof *sql_cap);
+                sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 7;
+                snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "equacao");
+                snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "disc");
+                snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "classe");
+                snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "lambda1");
+                snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "lambda2");
+                snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
+                snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "solucao_fatorial");
+                for(int c = 0; c < 7; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+                snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "y' %c %ldy = 0",
+                         lam > 0 ? '-' : '+', lam < 0 ? -lam : lam);
+                snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "--");
+                snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "primeira ordem");
+                snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", lam);
+                snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "--");
+                snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "c*e^(%ldt)", lam);
+                snprintf(sql_cap->cell[0][6], SQL_OUT_CELL, "%s", emfat1);
+                snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+            }
+            printf("edo: primeira ordem · λ = %ld · y = c·e^(%ldt) · em fatorial %s\n",
+                   lam, lam, emfat1);
             return 1;
         }
         long B = -m[1][1], C = -m[1][0];
@@ -8268,16 +8316,21 @@ static int varre(const char *resto, int acao){
                 snprintf(forma, sizeof forma, "e^(at)*(c1*cos(wt) + c2*sen(wt))");
             }
         }
+        char emfat2[SQL_OUT_CELL];
+        { long cc2[2] = {C, B}, d02[2] = {1, 0};
+          FtSol sol = ft_solucao(cc2, 2, d02, 12);
+          ft_sol_escreve(&sol, emfat2, sizeof emfat2); }
         if(sql_cap){
             memset(sql_cap, 0, sizeof *sql_cap);
-            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 7;
             snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "equacao");
             snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "disc");
             snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "classe");
             snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "lambda1");
             snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "lambda2");
             snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
-            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->col[6], sizeof sql_cap->col[6], "solucao_fatorial");
+            for(int c = 0; c < 7; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
             sql_cap->tipo[1] = SQL_TIPO_INT4;
             if(B && C) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
                                 "y'' %c %ldy' %c %ldy = 0", B<0?'-':'+', B<0?-B:B,
@@ -8291,6 +8344,7 @@ static int varre(const char *resto, int acao){
             snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", r1);
             snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", r2);
             snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
+            snprintf(sql_cap->cell[0][6], SQL_OUT_CELL, "%s", emfat2);
             snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
         }
         printf("edo: %s · Δ = %ld · %s · λ = %s, %s · y(t) = %s\n",

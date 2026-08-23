@@ -431,4 +431,72 @@ static void ft_escreve(const FatRaiz *r, char *out, long lim){
     }
 }
 
+/* ═══ A SOLUÇÃO DA EDO EM NOTAÇÃO FATORIAL: só CONTAGEM ═════════════════════
+ *
+ * Aqui não há operação em vírgula nenhuma, e não é preciso: os coeficientes da
+ * solução SÃO inteiros. Escrevendo
+ *
+ *     y(t) = Σ_k d_k · t^k / k!,     d_k = y^{(k)}(0),
+ *
+ * a recorrência da equação DÁ os d_k, um a um, em inteiros exactos:
+ *
+ *     d_{k+n} = −c_{n-1} d_{k+n-1} − ... − c_0 d_k .
+ *
+ * Nada se avalia, nada se divide, nada se aproxima --- CONTA-SE. E o que o
+ * cliente recebe é a lista dos d_k, que é a solução escrita na base em que a
+ * série já vive. Avaliar num t é outra pergunta, e faz-se depois se se quiser.
+ *
+ * É a mesma disciplina do resto: o valor é uma leitura tardia do objecto, e o
+ * objecto é a contagem. */
+
+#define FT_COEF 24
+
+typedef struct {
+    long d[FT_COEF];     /* os coeficientes fatoriais, inteiros e exactos */
+    int  n;              /* quantos cabem antes de o anel encher */
+    int  ordem;          /* a ordem da equação */
+    int  estourou;       /* 1 se parou por o coeficiente não caber */
+} FtSol;
+
+static FtSol ft_solucao(const long *co, int ordem, const long *d0, int quantos){
+    FtSol r; r.n = 0; r.ordem = ordem; r.estourou = 0;
+    if(quantos > FT_COEF) quantos = FT_COEF;
+    for(int k = 0; k < ordem && k < quantos; k++){ r.d[k] = d0[k]; r.n++; }
+    const long T = 1L << 55;
+    for(int k = ordem; k < quantos; k++){
+        long v = 0; int cabe = 1;
+        for(int j = 0; j < ordem; j++){
+            long termo = -co[j] * r.d[k - ordem + j];
+            if(termo > T || termo < -T){ cabe = 0; break; }
+            v += termo;
+            if(v > T || v < -T){ cabe = 0; break; }
+        }
+        if(!cabe){ r.estourou = 1; break; }
+        r.d[k] = v; r.n++;
+    }
+    return r;
+}
+
+/* a escrita para o cliente: ⟨d0, d1, d2, ...⟩ com o «!» a dizer a base */
+static void ft_sol_escreve(const FtSol *s, char *out, long lim){
+    long o = 0;
+    o += snprintf(out + o, lim - o, "<");
+    for(int k = 0; k < s->n && o < lim - 16; k++)
+        o += snprintf(out + o, lim - o, "%s%ld", k ? "," : "", s->d[k]);
+    snprintf(out + o, lim - o, "%s>!", s->estourou ? ",..." : "");
+}
+
+/* ── E O GUME QUE ELA PEDE: os coeficientes têm de SATISFAZER a recorrência.
+ * Reconfere-se cada um a partir dos n anteriores --- se algum não bater, a
+ * lista não é solução de equação nenhuma. Devolve quantos batem. */
+static int ft_sol_confere(const FtSol *s, const long *co){
+    int batem = 0;
+    for(int k = s->ordem; k < s->n; k++){
+        long v = 0;
+        for(int j = 0; j < s->ordem; j++) v -= co[j] * s->d[k - s->ordem + j];
+        if(v == s->d[k]) batem++;
+    }
+    return batem;
+}
+
 #endif /* FATORIAL_H */
