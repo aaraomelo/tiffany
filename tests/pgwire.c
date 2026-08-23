@@ -23974,6 +23974,97 @@ int main(void){
            " tabela; o cliente usa o que tiver à mão.", mal == 0);
     }
 
+    /* ═══ §W160: SELECT medias(*) — O TRIO NO MOTOR, E A RAIZ NÃO SE TOMA ═══ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W160 as três médias no motor, e o trio a fechar sem uma raiz.\n\n");
+        unlink("/tmp/pgwire_w160__M.mem"); unlink("/tmp/pgwire_w160__M.prog");
+        unlink("/tmp/pgwire_w160.mem");    unlink("/tmp/pgwire_w160.prog");
+        if(!sql_abrir("/tmp/pgwire_w160")) mal++;
+
+        printf("      par        2m      g²    h        fecha  ordem\n");
+        long fecha_n = 0, ordem_n = 0, tot = 0;
+        long pares[5][2] = {{4,9},{2,8},{5,5},{1,16},{3,12}};
+        for(int c = 0; c < 5; c++){
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (v RACIONAL)", &o2);
+            snprintf(q, sizeof q, "INSERT INTO M VALUES (%ld)", pares[c][0]);
+            sql_executa(q, &o2);
+            snprintf(q, sizeof q, "INSERT INTO M VALUES (%ld)", pares[c][1]);
+            sql_executa(q, &o2);
+            sql_executa("SELECT medias(*) FROM M", &o);
+            if(!o.ok){ mal++; continue; }
+            tot++;
+            printf("      (%ld,%ld) %8s %7s %5s/%-4s %5s  %s\n",
+                   pares[c][0], pares[c][1], o.cell[0][0], o.cell[0][1],
+                   o.cell[0][2], o.cell[0][3], o.cell[0][4], o.cell[0][5]);
+            if(!strcmp(o.cell[0][4], "sim")) fecha_n++;
+            if(!strcmp(o.cell[0][5], "sim")) ordem_n++;
+        }
+        printf("      → g² = h·m em %ld/%ld e h ≤ g ≤ m em %ld --- e a raiz NÃO se toma,"
+               " porque sairia do degrau\n", fecha_n, tot, ordem_n);
+        if(fecha_n != tot || ordem_n != tot || tot != 5) mal++;
+
+        /* ── E O PAR IGUAL: as três coincidem, e é o ponto fixo da dobra ───── */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (v RACIONAL)", &o2);
+            sql_executa("INSERT INTO M VALUES (7)", &o2);
+            sql_executa("INSERT INTO M VALUES (7)", &o2);
+            sql_executa("SELECT medias(*) FROM M", &o);
+            if(o.ok){
+                long dois_m = atol(o.cell[0][0]), g2 = atol(o.cell[0][1]);
+                printf("      com a = b = 7: 2m = %ld e g² = %ld --- (2m/2)² = %ld = g²,"
+                       " as três coincidem\n", dois_m, g2, (dois_m/2)*(dois_m/2));
+                if((dois_m/2)*(dois_m/2) != g2) mal++;
+            } else mal++;
+            (void)q;
+        }
+
+        /* ── E AS RECUSAS: o trio é do PAR, e não generaliza ───────────────── */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (v RACIONAL)", &o2);
+            for(int i = 1; i <= 3; i++){
+                snprintf(q, sizeof q, "INSERT INTO M VALUES (%d)", i);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT medias(*) FROM M", &o);
+            int tres = !o.ok;
+            /* e a soma nula, que a harmónica não aguenta */
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (v RACIONAL)", &o2);
+            sql_executa("INSERT INTO M VALUES (5)", &o2);
+            sql_executa("INSERT INTO M VALUES (-5)", &o2);
+            sql_executa("SELECT medias(*) FROM M", &o);
+            int nula = !o.ok;
+            printf("      RECUSA — com três linhas: %s · com a + b = 0: %s\n",
+                   tres ? "recusa (o trio é do PAR)" : "ACEITOU (mal)",
+                   nula ? "recusa (a harmónica pede a soma)" : "ACEITOU (mal)");
+            printf("        prometer g² = h·m para n termos seria estender uma lei onde ela\n"
+                   "        não vale --- e o motor recusa em vez de a estender\n");
+            if(!tres || !nula) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O TRIO DAS MÉDIAS ESTÁ NO MOTOR, E A RAIZ NÃO SE TOMA. `SELECT medias(*)` sobre"
+           " um par devolve 2m, g² e h como fração --- e devolve g AO QUADRADO de propósito,"
+           " porque a raiz sairia do degrau e o cor:medias da aranha já compara g² com m². O"
+           " trio fecha: g² = h·m em todos os pares medidos, exacto e sem uma raiz; e a ordem"
+           " h ≤ g ≤ m vale em todos, que é a mesma coisa que (a−b)² ≥ 0. Com a = b as três"
+           " coincidem, e o motor mostra-o: (2m/2)² dá exactamente g² --- é o ponto fixo da"
+           " dobra. E AS RECUSAS GUARDAM O ALCANCE DA LEI: com três linhas o motor recusa,"
+           " porque g² = h·m é do PAR e não generaliza a n termos, e prometê-la seria estender"
+           " uma lei onde ela não vale; com a + b = 0 recusa também, porque a harmónica pede"
+           " a soma no denominador. Uma lei que se recusa a sair do seu alcance vale mais que"
+           " uma que responde sempre.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

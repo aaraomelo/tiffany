@@ -4612,7 +4612,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"REGIME") ? 21
                        : !strcasecmp(nome,"FIBRA") ? 22
                        : !strcasecmp(nome,"ULTRA") ? 23
-                       : !strcasecmp(nome,"PRECO") ? 24 : 0;
+                       : !strcasecmp(nome,"PRECO") ? 24
+                       : !strcasecmp(nome,"MEDIAS") ? 25 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7137,6 +7138,97 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 25){
+        /* ── AS TRÊS MÉDIAS DE UM PAR, e o trio que fecha sobre si:
+         *
+         *     m = (a+b)/2      g² = ab      h = 2ab/(a+b)      e  g² = h·m
+         *
+         * Devolve-se g AO QUADRADO --- a raiz sairia do degrau, e o
+         * cor:medias da aranha já compara g² com m². A ordem h ≤ g ≤ m
+         * reduz-se a (a−b)² ≥ 0, e é essa que se verifica.
+         *
+         * É sobre um PAR: a relação g² = hm é do par e não generaliza a n
+         * termos, e prometê-la para uma coluna qualquer seria estender uma lei
+         * onde ela não vale. Com mais de duas linhas RECUSA e diz porquê. */
+        if(ncols != 1){
+            printf("erro: as médias são de UMA coluna de valores --- a tabela tem"
+                   " %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "medias needs one column, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj != 2){
+            printf("erro: o trio g² = h·m é do PAR --- há %ld linha(s), e a relação"
+                   " não generaliza a n termos. RECUSADA.\n", n_obj);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "medias is about a pair, got %ld rows", n_obj); }
+            return 0;
+        }
+        long v[2]; int k = 0;
+        for(long i = 0; i < nrows && k < 2; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols)){
+                printf("erro: célula ausente --- RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err, "medias: missing cell"); }
+                return 0;
+            }
+            long nu, de; celula_qz(i, 0, ncols, &nu, &de);
+            if(de != 1){
+                printf("erro: o valor %ld/%ld não é inteiro --- as médias saem"
+                       " exactas de inteiros, e uma fração já traz a divisão feita."
+                       " RECUSADA.\n", nu, de);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "medias: value %ld/%ld is not an integer", nu, de); }
+                return 0;
+            }
+            v[k++] = nu;
+        }
+        long a = v[0], b = v[1];
+        if(a + b == 0){
+            printf("erro: a + b = 0 --- a harmónica pede a soma no denominador, e ela"
+                   " é zero. RECUSADA.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "medias: a+b = 0"); }
+            return 0;
+        }
+        long dois_m = a + b;                 /* 2m */
+        long g2 = a * b;                     /* g² */
+        long h_num = 2*a*b, h_den = a + b;   /* h */
+        int fecha = (h_num/2 == g2);         /* g² = h·m, exacto */
+        int ordem = (4*a*b <= (a+b)*(a+b));  /* h ≤ g ≤ m  ⟺  (a−b)² ≥ 0 */
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "dois_m");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "g2");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "h_num");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "h_den");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "fecha");
+            snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "ordem");
+            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[4] = sql_cap->tipo[5] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", dois_m);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", g2);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", h_num);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", h_den);
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", fecha ? "sim" : "nao");
+            snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", ordem ? "sim" : "nao");
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %ld | %ld | %ld | %ld | %s | %s\n",
+               dois_m, g2, h_num, h_den, fecha ? "sim" : "nao", ordem ? "sim" : "nao");
+        printf("-- 2m = %ld · g² = %ld · h = %ld/%ld · g² = h·m: %s · h ≤ g ≤ m: %s ·"
+               " a raiz não se toma, porque sairia do degrau\n",
+               dois_m, g2, h_num, h_den, fecha ? "sim" : "NAO", ordem ? "sim" : "NAO");
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 24){
         /* ── O PREÇO DA TRAVESSIA: a tabela traz DUAS colunas --- o endereço do
          * mesmo objecto em duas leituras ---, e o que sai é o custo

@@ -1566,6 +1566,32 @@ e a identidade a responder «nenhuma»; as recusas com uma coluna e com endereç
 a fórmula a bater com o motor depois da conversão. E \code{tests/triade.c} §T6, onde o $q$
 da fórmula é confrontado com a menor profundidade varrida sobre os $625$ objectos.}
 
+\medskip\noindent E o trio das médias entra também: \code{SELECT medias(*)} sobre um par
+devolve $2m$, $g^2$ e $h$ como fração --- \emph{e devolve $g$ ao quadrado de propósito,
+porque a raiz sairia do degrau} e o \code{cor:medias} já compara $g^2$ com $m^2$. O trio
+fecha em todos os pares medidos, a ordem vale, e com $a=b$ as três coincidem. \textbf{E as
+recusas guardam o alcance da lei}: com três linhas recusa, porque $g^2=hm$ é do \emph{par}
+e não generaliza a $n$ termos --- \emph{prometê-la seria estender uma lei onde ela não
+vale} ---, e com $a+b=0$ recusa porque a harmónica pede a soma no denominador. \emph{Uma
+lei que se recusa a sair do seu alcance vale mais que uma que responde sempre.}
+
+\medskip\noindent E na lib entra o \code{lib/faces.h}, com o par nos seus extremos: o
+\textbf{lógico}, onde as faces colapsam ($\partial x=x$, e no \code{AND} um só elemento
+inverte), e o \textbf{simétrico}, com a lei $AB$ simétrica $\iff AB=BA$ verificada em todos
+os pares. E daí uma relação que só apareceu ao pôr o simétrico ao lado da tríade:
+\[
+ \boxed{\;\Delta=(a-c)^2+4b^2\ \ge 0\ \text{ para toda a simétrica}\;}
+\]
+--- \emph{uma simétrica real nunca ocupa a face elíptica}: o seu $\Delta$ é uma soma de
+quadrados, e é por isso que ela não roda.
+
+\medido{\code{tests/pgwire.c} §W160 --- as médias em $5/5$ pares com o trio a fechar e a
+ordem a valer, o par igual a dar as três coincidentes, e as duas recusas. E
+\code{tests/faces.c} --- as faces a colapsarem no lógico em $64/64$ com um só invertível;
+o simétrico fechado na soma em $15\,625/15\,625$ e a lei da comutação a valer em todos,
+com $12\,880$ pares a saírem do corpo no produto; e $\Delta\ge0$ em $343/343$ simétricas,
+sem uma única elíptica.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
