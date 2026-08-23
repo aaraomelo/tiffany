@@ -22,6 +22,7 @@ artefato 2abdf5f16b79fa76 0
 assinatura 15ed7d9ee13ee350 0
 assinatura_banal 80eb20648a0babdb 0
 assinatura_colisoes c2fdfeec9e23724d 0
+assinatura_corpos 2ce548819fda6ec4 0
 assinatura_tradutor 23c1bfad85d49ce7 0
 ataque 4c496a7d40308bc3 0
 aurea f4c540cb10500c79 0
@@ -235,7 +236,7 @@ gerador_primos dccf9257d62b61f2 0
 geral 45c106b3b16d9ff6 0
 gguf a01b08e6544f0b11 0
 gitb 75e4a67e0816bc8b 0
-global 2777c4605c72db55 0
+global 50616b0c2146e072 0
 graduacao_realiza cdcd5c056f280f78 0
 grau 4a07ac0eb16bfd8a 0
 grupo 25f98df966095cb5 0
@@ -372,7 +373,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 6f57acdafd177377 0
+pgwire 712b250cf5c005d9 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0

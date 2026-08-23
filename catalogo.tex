@@ -1939,6 +1939,47 @@ que a bijecção preserva.
 \noindent Logo \textbf{não se constrói régua nenhuma no corpo}. Completar um corpo do
 catálogo é dar-lhe uma representação reversível; a régua vem atrás, e vem completa.
 
+\subsection*{A assinatura $(p,q,r)$ junta os corpos que este catálogo lista separados}
+
+Está escrito aqui, e faltava trazê-lo: \emph{«um corpo é a raiz repetida $p+q+r$ vezes, cada
+cópia com o seu sinal»}, com
+\[
+  (p,q,r)=\bigl(\text{quantas réguas redondas},\ \text{quantas hiperbólicas},\ \text{quantas colapsadas}\bigr),
+\]
+e a lei que daí sai: \emph{«dois corpos com a mesma contagem são \textbf{congruentes} --- isto
+é, se um é o outro visto noutra base: qualquer troca de coordenadas $P$ invertível leva $A$
+em $P^{\!\top}\!AP$ e \textbf{preserva} $(p,q,r)$»}.
+
+\begin{center}\small
+\begin{tabular}{@{}llr@{}}
+\toprule
+$(p,q,r)$ & os corpos que este catálogo lista separados & quantos\\
+\midrule
+$(1,0,0)$ & algébrico (a raiz $a^2$), deflexivo & $2$\\
+$(2,0,0)$ & reflexivo $a^2+c^2$, celeste $r^2+C^2=1$, óptico, cristalino $a^2+\lvert D\rvert b^2$, individual & $\mathbf 5$\\
+$(1,1,0)$ & expansivo $a^2-Db^2$, relógio $1-s^2$, sensitivo, evolutivo & $\mathbf 4$\\
+$(2,2,0)$ & telescópico & $1$\\
+$(1,3,0)$ & geométrico $t^2-x^2-y^2-z^2$ & $1$\\
+$(4,1,0)$ & conforme, grau cinco & $1$\\
+$(3,3,0)$ & eletromagnético $E^2-B^2$ & $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Onze dos quinze caem em três grupos}, e quatro ficam sozinhos por
+assinatura própria --- se todos caíssem juntos, ou nenhum, a contagem não estaria a decidir
+nada. O grau é exactamente $p+q+r$ nos quinze.
+
+\paragraph{E a lei mede-se, não se cita.} Aplicado $P^{\!\top}\!AP$ com trocas de base
+inteiras --- cisalhamentos, permutações, uma com entrada dois ---, a contagem \emph{não se
+move} em $65$ de $65$. O gume é a hipótese a trabalhar: com $P$ de determinante zero a forma
+do expansivo colapsa inteira e $(1,1,0)$ passa a $(0,0,2)$; \emph{a invertibilidade não é
+decoração}. E a norma confirma-o do outro lado: o reflexivo e o celeste, ambos $(2,0,0)$,
+dão o mesmo valor em $49/49$ pontos da grade.
+
+\medido{\code{tests/assinatura\_corpos.c} §S1--§S3 --- as quinze formas tal como este
+catálogo as escreve, o agrupamento em sete assinaturas, e Sylvester medido com o seu gume.}
+
 \subsection*{Os dezasseis corpos COMPLETOS no banco, e o que o envelope ensinou}
 
 Executado o pipe sobre os corpos que estão no banco --- levantar pelo $\iota/\pi$, compactar
@@ -2006,7 +2047,6 @@ quadrático $\Delta$ & $11$ & $6$ & $30$ & $66$ & $0$ & desce\\
 mórfico (erosão) & $6$ & $11$ & $30$ & $66$ & $0$ & desce\\
 booleano $\oplus$ & $8$ & $6$ & $12$ & $48$ & $0$ & desce\\
 \textbf{eletromagnético} $E^2-B^2$ & $27$ & $6$ & $126$ & $162$ & $0$ & desce\\
-\textbf{eletromagnético} (Poynting $E\times B$) & $15$ & $11$ & $129$ & $165$ & $0$ & desce\\
 \textbf{mecânico} (torque $r\times F$) & $11$ & $6$ & $30$ & $66$ & $0$ & desce\\
 \textbf{cósmico} $(z,d)$, pelo expoente & $15$ & $6$ & $54$ & $90$ & $0$ & desce\\
 \textbf{pneumático} $p\cdot Q$ & $18$ & $4$ & $36$ & $72$ & $0$ & desce\\
@@ -2015,7 +2055,7 @@ booleano $\oplus$ & $8$ & $6$ & $12$ & $48$ & $0$ & desce\\
 \end{tabular}
 \end{center}
 
-\noindent Os onze com $G$ constante, falta zero e a régua a descer --- e nenhum objecto
+\noindent Os dez com $G$ constante, falta zero e a régua a descer --- e nenhum objecto
 inventado: projectados só os vivos, a fibra dá exactamente a do corpo de partida.
 
 \paragraph{E dois deles eram um.} O pneumático e o hidráulico dão os \emph{mesmos}
@@ -2025,7 +2065,9 @@ pelo motor o que este catálogo já afirmava --- \emph{«eléctrico, mecânico, 
 $\leftrightarrow$ tensão, caudal $\leftrightarrow$ corrente).
 
 \paragraph{E as leituras são as do documento.} O eletromagnético entra pela forma que o
-catálogo lhe dá, $E^2-B^2$ de assinatura $(3,3,0)$, e pelo vector de Poynting $E\times B$; o
+catálogo lhe dá, $E^2-B^2$ de assinatura $(3,3,0)$ --- e o vector de Poynting $E\times B$ NÃO entra
+como corpo: é o \emph{operador} do eletromagnético, e a \emph{aranha thm:fecho} diz que a
+matriz \textbf{é} o rotor entre duas direcções, $R_{ij}$; o
 mecânico pelo torque, que o \code{motor.c} diz \emph{ser} o produto cruzado; o cósmico pelo
 \textbf{expoente} e não pela grandeza --- \emph{«quem mede em grandeza se perde, quem mede em
 expoente não»}.
