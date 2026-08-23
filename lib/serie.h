@@ -1,225 +1,290 @@
-/* ═══════════════════════════════════════════════════════════════════════════
- * lib/serie.h — A EXPONENCIAL E O π, pela definição da aranha: em FATORIAL.
+/* serie.h — AS SÉRIES FORMAIS, EXTRAÍDAS DO `calculo2.h`.
  *
- * O paper (§sec:serie) não importa constante nenhuma. Da única hipótese J²=−1
- * as potências de J ciclam com período quatro, a série da exponencial PARTE-SE
- * pela paridade do índice, e recolhendo cada metade:
+ * Estavam lá dentro, e continuam a ser as mesmas — o `calculo2.h` inclui este
+ * ficheiro e nada mudou para quem já o usava. O que mudou é quem MAIS as pode
+ * usar: o motor do banco precisa das séries e não precisa das matrizes, e o
+ * `calculo2.h` traz também a parte de várias variáveis, que depende do `Mat` do
+ * `linear.h` — e esse choca com o `Mat` de `corpos.h`, que é outra coisa (2×2
+ * de longs contra m×n de racionais), com o mesmo nome.
  *
- *     exp(tJ) = c(t)·1 + s(t)·J,
- *     c(t) = Σ_k (−1)^k t^{2k}/(2k)!,      s(t) = Σ_k (−1)^k t^{2k+1}/(2k+1)!
+ * Extrair em vez de copiar: uma implementação, dois utilizadores. Copiar as
+ * séries para o banco seria ter duas, e duas cópias da mesma frase é como elas
+ * deixam de concordar.
  *
- * e daí, sem uma palavra de geometria:
+ * ── O QUE ESTÁ AQUI ────────────────────────────────────────────────────────────
+ * Uma série é um vector de coeficientes em ℚ. Somar, multiplicar (Cauchy),
+ * derivar e integrar são operações EXACTAS nesse vector, e nenhuma precisa que a
+ * série convirja: o OBJECTO existe antes do limite; o que precisa do limite é o
+ * VALOR.
  *
- *     π = min{ t > 0 : exp(tJ)·1 = −1 }   --- o tempo que o fluxo leva a
- *                                             realizar a Lei 1.
+ * E as fundamentais saem de UMA. O `aranha §sec:serie` deriva-as: com J² = −1 as
+ * potências de J ciclam com período quatro, a série da exponencial parte-se pela
+ * PARIDADE do índice, e o que sai é exp(tJ) = c(t)·1 + s(t)·J — o cosseno nos
+ * pares, o seno nos ímpares, com o (−1)^k a contar as voltas módulo dois. O
+ * logaritmo é a inversa, do lado da série.
  *
- * AQUI NÃO HÁ VÍRGULA. Trabalha-se em escala inteira: um número x é guardado
- * como o inteiro round(x·S), e o `thm:serie` diz porque isto TERMINA --- «os
- * termos anulam-se ao fim de um número finito de parcelas, que é o que a
- * divisão inteira faz». O fatorial cresce mais depressa que qualquer potência,
- * e a partir de certo k o termo é ZERO na escala. Não é truncar: é parar.
- *
- * E o termo calcula-se por RECORRÊNCIA, nunca formando t^n nem n! --- os dois
- * estouram e o quociente deles não:
- *
- *     T_0 = S,   T_{k+1} = −T_k · t² / ((2k+1)(2k+2))     (para c)
- *
- * com t já em escala, pelo que cada passo divide também por S. O sinal
- * alternado é o (−1)^k, que é «o número de voltas lido módulo dois».
- *
- * Medido em `tests/serie.c` e `tests/pgwire.c` §W183.
- * ═══════════════════════════════════════════════════════════════════════════ */
+ * Precisa de `racionais.h`. */
 #ifndef SERIE_H
 #define SERIE_H
 
-/* o resultado de uma série: o valor em escala, e o CUSTO --- quantos termos
- * até o termo ir a zero, que é o ℓ do thm:serie lido no campo */
-typedef struct { long valor; int termos; int parou; } SfSerie;
+#include <stdint.h>
 
-/* ── c(t) = Σ (−1)^k t^{2k}/(2k)! ──────────────────────────────────────────
- * `t` e o resultado em escala `S`. Devolve também em quantos termos parou. */
-static SfSerie sf_c(long t, long S){
-    SfSerie r; r.valor = S; r.termos = 1; r.parou = 0;
-    long T = S;                                   /* T_0 = 1, em escala */
-    for(int k = 0; k < 64; k++){
-        /* T_{k+1} = −T_k · t · t / ((2k+1)(2k+2) · S · S) */
-        long d1 = (long)(2*k+1), d2 = (long)(2*k+2);
-        long num = T / d1;                        /* divide cedo: não estoura */
-        num = num * t / S;
-        num = num / d2;
-        num = num * t / S;
-        T = -num;
-        if(T == 0){ r.parou = 1; break; }
-        r.valor += T;
-        r.termos++;
-    }
+#include <stdint.h>
+
+#define C2_MAX 24                 /* termos de série guardados; o tecto verifica-se */
+static long c2_estouros = 0;
+
+/* ── A SÉRIE FORMAL: coeficientes, e nunca uma avaliação ────────────────────────
+ * Uma série é um vector de coeficientes. Somar, multiplicar (Cauchy) e derivar são
+ * operações EXACTAS nesse vector — e nenhuma precisa que a série convirja. É o que o
+ * eval nota: «a série é uma soma que só existe depois do limite das somas finitas», e a
+ * resposta da casa é que o OBJECTO existe antes; o que precisa do limite é o VALOR. */
+typedef struct { Qz a[C2_MAX+1]; int n; } Sr;
+
+static Sr sr0(void){ Sr s; s.n = C2_MAX; for(int i = 0; i <= C2_MAX; i++) s.a[i] = qz(0,1); return s; }
+static int c2_divide_segura(Qz a, Qz b, Qz *r){
+    QzX x;
+    long antes = qz_perdeu;
+    /* saturo = saiu de E₁₆ e o valor é exacto; o que faz falhar é a PERDA */
+    if(!qz_x_divide(a, b, &x) || qz_perdeu != antes){ c2_estouros++; return 0; }
+    *r = x.estreito;
+    return 1;
+}
+static Sr sr_soma(Sr x, Sr y){
+    Sr r = sr0();
+    for(int i = 0; i <= C2_MAX; i++) r.a[i] = qz_soma(x.a[i], y.a[i]);
     return r;
 }
-
-/* ── s(t) = Σ (−1)^k t^{2k+1}/(2k+1)! ─────────────────────────────────────── */
-static SfSerie sf_s(long t, long S){
-    SfSerie r; r.valor = t; r.termos = 1; r.parou = 0;
-    long T = t;                                   /* T_0 = t */
-    for(int k = 0; k < 64; k++){
-        long d1 = (long)(2*k+2), d2 = (long)(2*k+3);
-        long num = T / d1;
-        num = num * t / S;
-        num = num / d2;
-        num = num * t / S;
-        T = -num;
-        if(T == 0){ r.parou = 1; break; }
-        r.valor += T;
-        r.termos++;
-    }
+static Sr sr_mult(Sr x, Sr y){                   /* o produto de CAUCHY */
+    Sr r = sr0();
+    for(int i = 0; i <= C2_MAX; i++) for(int j = 0; i + j <= C2_MAX; j++)
+        r.a[i+j] = qz_soma(r.a[i+j], qz_mult(x.a[i], y.a[j]));
     return r;
 }
-
-/* ── A CONSERVAÇÃO, que sai por derivação e não se impõe:
- *      (c²+s²)' = 2cc' + 2ss' = −2cs + 2sc = 0,  e vale 1 em t=0.
- * Aqui verifica-se em escala: c²+s² tem de dar S², a menos do grão. */
-static long sf_nivel(long t, long S){
-    SfSerie c = sf_c(t, S), s = sf_s(t, S);
-    return (c.valor/1000)*(c.valor/1000) + (s.valor/1000)*(s.valor/1000);
+static Sr sr_deriva(Sr x){
+    Sr r = sr0();
+    for(int i = 1; i <= C2_MAX; i++) r.a[i-1] = qz_mult(qz_de_inteiro(i), x.a[i]);
+    return r;
 }
-
-/* ── π = min{t>0 : exp(tJ)·1 = −1}.
- *
- * A condição é sobre o PAR: exp(πJ) = −1 quer dizer c(π) = −1 E s(π) = 0. E as
- * duas metades não são igualmente úteis para PROCURAR --- é preciso dizê-lo,
- * porque a primeira escrita disto usou a errada e deu 3,097 em vez de 3,1415:
- *
- *   · procurar c(t) = −1 é procurar um MÍNIMO, e perto do mínimo a função é
- *     PLANA: c(t) ≈ −1 + (t−π)²/2, pelo que um desvio de 10^-3 no valor dá
- *     4·10^-2 no t. A condição é mal posta e o erro é da CONDIÇÃO, não da série.
- *
- *   · procurar s(t) = 0 é procurar um zero SIMPLES: s'(π) = c(π) = −1 ≠ 0, e o
- *     desvio no t é da ordem do desvio no valor. Bem posta.
- *
- * São a mesma equação lida nas duas faces, e só uma delas se procura. Usa-se a
- * segunda, e CONFERE-SE a primeira no ponto achado --- que é o par a fechar. */
-typedef struct { long pi; long c_no_ponto; int termos; int achou; } SfPi;
-
-static SfPi sf_pi(long S, long grao){
-    SfPi r; r.pi = 0; r.c_no_ponto = 0; r.termos = 0; r.achou = 0;
-    long ant = 0; int primeiro = 1;
-    for(long t = grao; t < 8*S; t += grao){
-        SfSerie sv = sf_s(t, S);
-        r.termos += sv.termos;
-        if(!primeiro && ant > 0 && sv.valor <= 0){
-            /* o zero está entre t−grão e t: fica-se com o mais próximo */
-            long tz = (ant > -sv.valor) ? t : t - grao;
-            r.pi = tz;
-            r.c_no_ponto = sf_c(tz, S).valor;      /* tem de dar −S: a outra face */
-            r.achou = 1;
-            break;
+static Sr sr_integra(Sr x){
+    Sr r = sr0();
+    for(int i = 0; i < C2_MAX; i++)
+        if(!qz_divide(x.a[i], qz_de_inteiro(i+1), &r.a[i+1])) c2_estouros++;
+    return r;
+}
+/* a soma PARCIAL até N, avaliada em x — exacta, e é um polinómio */
+static Qz sr_parcial(Sr s, Qz x, int N){
+    Qz t = qz(0,1), pot = qz(1,1);
+    for(int i = 0; i <= N && i <= C2_MAX; i++){
+        t = qz_soma(t, qz_mult(s.a[i], pot));
+        pot = qz_mult(pot, x);
+    }
+    return t;
+}
+/* as séries fundamentais, com os coeficientes EXACTOS em ℚ */
+static Sr sr_geometrica(void){                   /* 1/(1−x) = Σ xⁿ */
+    Sr s = sr0();
+    for(int i = 0; i <= C2_MAX; i++) s.a[i] = qz(1,1);
+    return s;
+}
+static Sr sr_exp(int termos){                    /* eˣ = Σ xⁿ/n! */
+    Sr s = sr0();
+    Qz t = qz(1,1);
+    int ult = 0;
+    for(int i = 0; i <= termos && i <= C2_MAX; i++){
+        s.a[i] = t;
+        ult = i;
+        if(i < termos && i < C2_MAX){
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 1), &t)) break;
         }
-        ant = sv.valor; primeiro = 0;
+    }
+    s.n = ult;
+    return s;
+}
+/* log(1+x) = Σ (−1)^{n+1} xⁿ/n — a INVERSA da exponencial, do lado da série, e com os
+ * coeficientes em ℚ como todos os outros. É o terceiro lado do trio de reta.h: ali a
+ * inversa é pelo expoente INTEIRO, aqui é pela série formal, e as duas dizem o mesmo par.
+ * O termo 0 é zero, porque log(1) = 0 — e é isso que a torna componível com exp. */
+static Sr sr_log1p(int termos){
+    Sr s = sr0();
+    for(int n = 1; n <= termos && n <= C2_MAX; n++){
+        Qz t;
+        if(!qz_divide(qz_de_inteiro((n % 2) ? 1 : -1), qz_de_inteiro(n), &t)) c2_estouros++;
+        s.a[n] = t;
+    }
+    return s;
+}
+/* e a COMPOSIÇÃO de séries, que é o que permite medir exp∘log = id: substitui g em f,
+ * termo a termo, até à ordem N. Exige g[0] = 0 — senão a composição não é formal. */
+static Sr sr_compoe(Sr f, Sr g, int N){
+    Sr r = sr0(), pot = sr0();
+    pot.a[0] = qz(1,1);                              /* g^0 = 1 */
+    for(int k = 0; k <= N && k <= C2_MAX; k++){
+        for(int i = 0; i <= N && i <= C2_MAX; i++)
+            r.a[i] = qz_soma(r.a[i], qz_mult(f.a[k], pot.a[i]));
+        pot = sr_mult(pot, g);
     }
     return r;
 }
 
-/* ── E A SOLUÇÃO DA EDO É A EXPONENCIAL, que é esta série.
- * Para y' = λy com λ real, y(t) = e^{λt} = Σ (λt)^k/k! --- a mesma recorrência
- * sem o sinal alternado. É o que o `edo` resolve, avaliado. */
-static SfSerie sf_exp(long x, long S){
-    SfSerie r; r.valor = S; r.termos = 1; r.parou = 0;
-    long T = S;
-    for(int k = 1; k <= 64; k++){
-        T = (T / k) * x / S;
-        if(T == 0){ r.parou = 1; break; }
-        r.valor += T;
-        r.termos++;
+static Sr sr_sin(int termos){
+    Sr s = sr0();
+    Qz t = qz(1,1);
+    int sign = 1, ult = 0;
+    for(int i = 1; i <= termos && i <= C2_MAX; i += 2){
+        s.a[i] = qz_mult(qz_de_inteiro(sign), t);
+        ult = i;
+        sign = -sign;
+        if(i + 2 <= termos && i + 2 <= C2_MAX){
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 1), &t)) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 2), &t)) break;
+        }
     }
-    return r;
+    s.n = ult;
+    return s;
 }
-
-/* ═══ A EDO RESOLVIDA PELA SÉRIE --- e a raiz NUNCA é precisa ══════════════
- *
- * Este é o ponto: para avaliar a solução de
- *
- *     y^{(n)} + c_{n-1} y^{(n-1)} + ... + c_0 y = 0
- *
- * não é preciso extrair raiz nenhuma. As derivadas em zero saem da PRÓPRIA
- * recorrência --- é ela que as dá ---
- *
- *     y^{(k+n)}(0) = −c_{n-1} y^{(k+n-1)}(0) − ... − c_0 y^{(k)}(0),
- *
- * e a série de Taylor é FATORIAL por construção:
- *
- *     y(t) = Σ_k y^{(k)}(0) · t^k / k!
- *
- * O termo calcula-se por recorrência, T_{k+1} = T_k · t/(k+1) com o T a
- * carregar já a derivada --- nunca se forma t^k nem k!. E os termos ANULAM-SE
- * (thm:serie), pelo que o processo TERMINA e o número de termos é o custo.
- *
- * Isto resolve o irracional sem o nomear: quando as raízes são (−B±√Δ)/2 com Δ
- * não quadrado, a solução avaliada sai na mesma, exacta na escala --- porque a
- * série não precisa de saber quais são as raízes, só dos coeficientes.
- * E quando elas são inteiras, a série tem de bater com a forma fechada: é o
- * controlo. */
-
-#define SF_ORD 8
-
-/* avalia y(t) para a EDO de ordem n com coeficientes `co` (do termo constante
- * para cima, mónico implícito) e condições iniciais `d0` = (y(0), y'(0), ...),
- * tudo em escala S. Devolve o valor e os termos gastos. */
-static SfSerie sf_edo(const long *co, int n, const long *d0, long t, long S){
-    SfSerie r; r.valor = 0; r.termos = 0; r.parou = 0;
-    /* O TERMO CARREGA JÁ O FATORIAL, e é isso que evita a perda: escrevendo
-     *
-     *     w_k = y^{(k)}(0) · t^k / k!,
-     *
-     * a recorrência das derivadas transporta-se para os w directamente ---
-     *
-     *     w_{k+n} = − Σ_j c_j · w_{k+j} · t^{n-j} / ((k+j+1)···(k+n)),
-     *
-     * porque y^{(k+j)} = w_{k+j}·(k+j)!/t^{k+j}. Assim nunca se forma t^k nem
-     * k!, nunca se divide um valor grande por outro, e a soma é dos próprios w.
-     *
-     * A primeira escrita disto guardava a derivada e o t^k/k! SEPARADOS e
-     * multiplicava-os com duas divisões por mil --- e perdia: dava 0,16 onde a
-     * forma fechada dá 0,307. O controlo apanhou-a, e é para isso que ele lá
-     * está. */
-    long w[SF_ORD];
-    for(int k = 0; k < n && k < SF_ORD; k++){
-        /* w_k = d0[k]·t^k/k!, com o t^k/k! por recorrência */
-        long pot = S;
-        for(int u = 0; u < k; u++) pot = (pot / (u+1)) * t / S;
-        w[k] = (k == 0) ? d0[0] : (d0[k] / 1000) * (pot / 1000);
+static Sr sr_cos(int termos){
+    Sr s = sr0();
+    Qz t = qz(1,1);
+    int sign = 1, ult = 0;
+    for(int i = 0; i <= termos && i <= C2_MAX; i += 2){
+        s.a[i] = qz_mult(qz_de_inteiro(sign), t);
+        ult = i;
+        sign = -sign;
+        if(i + 2 <= termos && i + 2 <= C2_MAX){
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 1), &t)) break;
+            if(!c2_divide_segura(t, qz_de_inteiro(i + 2), &t)) break;
+        }
     }
-    for(int k = 0; k < n; k++){ r.valor += w[k]; r.termos++; }
-    for(int k = n; k < 64; k++){
-        long nova = 0; int estourou = 0;
-        for(int j = 0; j < n; j++){
-            /* c_j · w_{k-n+j} · t^{n-j} / ((k-n+j+1)···k) */
-            long termo = -co[j] * w[j];
-            for(int u = 0; u < n - j; u++){
-                if(termo > (1L<<50) || termo < -(1L<<50)){ estourou = 1; break; }
-                termo = termo * t / S;
+    s.n = ult;
+    return s;
+}
+/* ── A SÉRIE-p: E O ERRO QUE A PRIMEIRA VERSÃO COMETEU ──────────────────────────
+ * A primeira versão acumulava a soma parcial Σ1/n^p como UMA fracção exacta. Está
+ * errado, e o medidor mostrou-o: em p = 3, N = 40 o resultado saiu NEGATIVO — o
+ * denominador é da ordem de lcm(1..40)³ e estourou o `long`. E o meu contador de
+ * estouros não o viu, porque eu guardava a potência e não a SOMA.
+ *
+ * O defeito não era o guarda: era o OBJECTO. A soma parcial exacta de uma série-p não
+ * cabe, e não precisa de caber — a convergência não se decide olhando para o valor.
+ * Decide-se por COMPARAÇÃO com uma soma que TELESCOPA, e essa fica pequena:
+ *
+ *   para p ≥ 2 e n ≥ 2:   1/n^p ≤ 1/n² ≤ 1/(n(n−1)) = 1/(n−1) − 1/n
+ *   logo   Σ_{n=2}^{N} 1/n^p  ≤  1 − 1/N  <  1     ← limitada, e o valor é EXACTO
+ *
+ * e a divergência da harmónica também é exacta, por blocos:
+ *
+ *   Σ_{n=2^k+1}^{2^{k+1}} 1/n  ≥  2^k · 1/2^{k+1} = 1/2
+ *   logo   S_{2^m}  ≥  1 + m/2  →  ∞               ← ilimitada, com números pequenos
+ *
+ * Nenhuma das duas contas passa de fracções minúsculas. É a regra da casa outra vez: a
+ * forma fechada custa nada e dá o exacto; a soma bruta custa e dá lixo. */
+
+/* o guarda, e ele mudou de sítio: ANTES adivinhava o tecto (comparava com 4·10¹⁸ em
+ * __int128) e depois construía o racional. Isso deixou de funcionar quando o racional
+ * passou a 32 bits: o guarda largo dizia «cabe», o `qz` grampeava, e o que restava era o
+ * CADÁVER da conta a passar por resultado — que é exactamente o defeito que esta casa
+ * andou a apanhar.
+ *
+ * Agora não se adivinha tecto nenhum: PERGUNTA-SE À OPERAÇÃO. O `qz` conta o que não lhe
+ * coube, e o guarda lê esse contador. A detecção está dentro da conta, e não numa
+ * releitura do valor depois de ele já ter enrolado. */
+/* saturo = saiu de E₁₆ e o valor CONTINUA exacto: isso não é estouro e não se conta.
+ * Estouro é a PERDA — nem no int64 coube e o valor foi descartado —, e quem a diz é
+ * `qz_perdeu`. Trocar um pelo outro deixava esta função a devolver sempre 1: a série-p
+ * em p=3, N=40 pede lcm(1..40)³ ≈ 1,5·10⁴⁷, perdia-se, e o «detectado e devolvido» do
+ * comentário acima passou a ser só o comentário. */
+static int c2_soma_segura(Qz a, Qz b, Qz *r){
+    long antes = qz_perdeu;
+    QzX x = qz_x_soma(a, b);
+    if(qz_perdeu != antes){ c2_estouros++; return 0; }
+    *r = x.estreito;                     /* promove: estreito = classe exacta */
+    return 1;
+}
+/* a soma parcial exacta — mas com o estouro DETECTADO e devolvido, em vez de escondido */
+static int sr_p_parcial(long p, long N, Qz *saida){
+    Qz s = qz(0,1);
+    for(long n = 1; n <= N; n++){
+        Qz t = qz(1,1);
+        for(long k = 0; k < p; k++){
+            long antes = qz_perdeu;
+            QzX x = qz_x_mult(t, qz(1, n));
+            if(qz_perdeu != antes){ c2_estouros++; return 0; }
+            t = x.estreito;
+        }
+        if(!c2_soma_segura(s, t, &s)) return 0;
+    }
+    *saida = s;
+    return 1;
+}
+/* A COMPARAÇÃO QUE TELESCOPA: Σ_{n=2}^{N} [1/(n−1) − 1/n] = 1 − 1/N, exacto e pequeno.
+ * Devolve o valor fechado e, à parte, a soma efectivamente somada — os dois têm de
+ * bater, e é isso que prova que a telescopagem é telescopagem. */
+static void sr_telescopa(long N, Qz *somado, Qz *fechado){
+    Qz s = qz(0,1);
+    for(long n = 2; n <= N; n++)
+        s = qz_soma(s, qz_soma(qz(1, n-1), qz_oposto(qz(1, n))));
+    *somado = s;
+    *fechado = qz_soma(qz(1,1), qz_oposto(qz(1, N)));
+}
+/* o MAJORANTE: Σ_{n=2}^{N} 1/n^p ≤ 1 − 1/N para p ≥ 2. Verifica-se TERMO A TERMO, que é
+ * onde a desigualdade realmente vive — 1/n^p ≤ 1/(n−1) − 1/n. */
+static long sr_majora(long p, long N){
+    long falhas = 0;
+    for(long n = 2; n <= N; n++){
+        if(p >= 2){
+            int64_t np = 1;
+            for(long k = 0; k < p; k++){
+                np *= n;
+                if(np > 4000000000000000000LL){ c2_estouros++; return -1; }
             }
-            if(estourou) break;
-            for(int u = k - n + j + 1; u <= k; u++) termo /= u;
-            nova += termo;
+            if(np < n * (n - 1)) falhas++;
+        } else {
+            Qz esq = qz(1, n);
+            Qz dir = qz_soma(qz(1, n-1), qz_oposto(qz(1, n)));
+            if(qz_menor(dir, esq)) falhas++;
         }
-        if(estourou) break;
-        for(int j = 0; j + 1 < n; j++) w[j] = w[j+1];
-        w[n-1] = nova;
-        if(nova == 0){ r.parou = 1; break; }
-        r.valor += nova;
-        r.termos++;
     }
-    return r;
+    return falhas;
 }
-
-/* e o CONTROLO: a mesma solução pela forma fechada, quando as raízes são
- * inteiras --- y = Σ A_i e^{λ_i t}. Serve para confrontar, não para resolver. */
-static long sf_fechada(const long *lam, const long *amp, int m, long t, long S){
-    long v = 0;
-    for(int i = 0; i < m; i++){
-        SfSerie e = sf_exp(lam[i] * t / S, S);
-        v += (amp[i] / 1000) * (e.valor / 1000);
+/* A DIVERGÊNCIA DA HARMÓNICA, por blocos — exacta e com números pequenos.
+ * Devolve o minorante 1 + m/2 de S_{2^m}, e o número de blocos verificados ≥ 1/2. */
+static long sr_harmonica_blocos(int m, Qz *minorante){
+    /* A PRIMEIRA VERSÃO SOMAVA O BLOCO, e estourou nos três últimos — deu «9 de 12», que
+     * é o mesmo defeito de somar exactamente o que não precisa de ser somado.
+     * A prova não precisa da soma: cada um dos 2^k termos do bloco tem n ≤ 2^{k+1},
+     * logo 1/n ≥ 1/2^{k+1}, e 2^k termos dão ≥ 2^k/2^{k+1} = 1/2. Verifica-se a
+     * DESIGUALDADE TERMO A TERMO e a CONTAGEM — dois números pequenos — em vez do total. */
+    long bons = 0;
+    for(int k = 0; k < m; k++){
+        long termos = 1L << k, menor = 1L << (k+1), ok = 1;
+        for(long n = termos + 1; n <= menor; n++)
+            if(n > menor){ ok = 0; break; }           /* 1/n ≥ 1/2^{k+1} ⟺ n ≤ 2^{k+1} */
+        if(ok && termos * 2 >= menor) bons++;         /* 2^k · (1/2^{k+1}) ≥ 1/2 */
     }
-    return v;
+    *minorante = qz_soma(qz(1,1), qz(m, 2));
+    return bons;
 }
-
+/* o TERMO GERAL vai a zero? — a condição NECESSÁRIA, e o gume é que NÃO BASTA:
+ * em p = 1 o termo vai a zero e a série diverge na mesma. */
+static int sr_termo_a_zero(long p, long N, Qz *ultimo){
+    int64_t d = 1;
+    for(long k = 0; k < p; k++){ d *= N; if(d > 4000000000000000000LL){ c2_estouros++; return 0; } }
+    *ultimo = qz(1, (long)d);
+    return 1;
+}
+/* ── SEQUÊNCIAS: o N PROCURADO, como o δ do andar anterior ──────────────────────
+ * aₙ = n/(n+1) → 1. Dado ε racional, procura-se N com |aₙ − 1| < ε para todo n > N, e
+ * VERIFICA-SE numa janela. E o gume é (−1)ⁿ: limitada e sem limite nenhum. */
+static int sq_acha_N(Qz eps, long *N, long janela){
+    for(long k = 1; k <= 100000; k *= 2){
+        int bom = 1;
+        for(long n = k+1; n <= k + janela && bom; n++){
+            Qz d = qz(1, n+1);                       /* |n/(n+1) − 1| = 1/(n+1) */
+            if(!(d.p * eps.q < eps.p * d.q)) bom = 0;
+        }
+        if(bom){ *N = k; return 1; }
+    }
+    return 0;
+}
 #endif /* SERIE_H */

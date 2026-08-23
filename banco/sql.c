@@ -245,6 +245,21 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_CB      (S_CAB + 500u)          /* coinbase em átomos */
 #define S_FOLD_ARG (S_CB + 800u)         /* u32 LE base do OP_FOLD */
 #define S_FAIXA   (S_FOLD_ARG + 4u)      /* u32 LE de, u32 LE ate — OP_MARTELO */
+
+/* ── O POOL DE TEXTO: onde a cadeia vive, e porque a célula não a guarda.
+ *
+ * Uma célula é uma Word --- dois átomos --- e uma cadeia não cabe lá. Mas o
+ * `thm:enumfin` já diz o que fazer: «esse é o ÍNDICE COMO ESTANTE: a matriz
+ * continua a ser o que está nas gavetas, e o emparelhamento apenas dá a cada
+ * gaveta um endereço único». A cadeia fica na gaveta --- o pool de átomos --- e
+ * a célula guarda o ENDEREÇO dela, que é uma palavra e cabe.
+ *
+ * Cada texto ocupa 1 átomo de comprimento + os bytes. O índice 0 é reservado
+ * para «vazio», pelo que a célula 0 é a cadeia vazia e não uma ausência --- a
+ * ausência continua a ser dita pelo S_PRES, como em todas as outras colunas. */
+#define S_TXPOOL  600000u                /* onde as cadeias vivem, em átomos */
+#define S_TXTOPO  (S_TXPOOL - 8u)        /* u32 LE: o primeiro átomo livre */
+#define TX_MAX    240                    /* uma cadeia por célula, no máximo */
 /* (era: contar é ∑ sobre o campo (bits_conta), não um contador
  * a ser incrementado por linha. Ver `neuronio.c`: «∑ soma popcount». */
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
@@ -304,6 +319,26 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define CORPO_AUREO    2
 #define CORPO_MORFICO  3
 #define CORPO_CRISTAL  4     /* PASSO 6: o lado que gira — a+bω, ω²=tω−1 */
+/* ── O BOOLEANO: o corpo de DOIS elementos, que é o B da Def.~def:B.
+ * Não é um inteiro com um aviso: é o primeiro andar da escada, {0,1}, onde as
+ * duas operações do thm:B ficam FORÇADAS e 1+1=0. O envelope é o próprio corpo
+ * --- e é por isso que ele recusa o 2, em vez de o aceitar e chamar-lhe
+ * verdadeiro: um valor fora do corpo não é um valor do corpo. */
+#define CORPO_BOOLEANO 5
+/* ── O TEXTO: a célula guarda o ENDEREÇO no pool, não a cadeia.
+ * É o «índice como estante» do thm:enumfin: a cadeia fica na gaveta e o
+ * emparelhamento dá-lhe um endereço único, que cabe numa palavra. */
+#define CORPO_TEXTO    6
+/* ── A DATA: o instante é uma CONTAGEM, e por isso é um índice como os outros.
+ *
+ * Não se guarda um calendário: guarda-se quantos passos desde a origem, que é o
+ * que o §sec:leitura chama tempo --- «a contagem das aplicações do operador»,
+ * e não um parâmetro importado. Aqui o passo é o segundo e a origem é 1970,
+ * porque é a convenção com que o cliente fala; mas o que a célula guarda é a
+ * contagem, e ela precisa de MAIS UM ANDAR: 2^16 segundos são dezoito horas, e
+ * 2^32 são cento e trinta anos. A dobra volta a duplicar a largura, e o plano
+ * S_ALTO2 é o σ do andar seguinte --- o mesmo thm:espaco, um degrau acima. */
+#define CORPO_DATA     7
 #define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
@@ -582,8 +617,59 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * S_NO), com o MESMO tamanho do S_LINHAS — que é o que a simetria exige: as
  * duas metades da mesma célula, o baixo e o alto, têm de caber igual. */
 #define S_ALTO      ZONA(3)
+/* ── O ANDAR SEGUINTE: os bytes 2 e 3 da palavra, para o que não cabe em 16.
+ * É o F_{2w} = F_w ⊕ σF_w outra vez, um degrau acima --- e vale a mesma regra:
+ * quem lê no andar de baixo continua a ler o que sempre leu, porque o π_k
+ * trunca e o π_k∘ι_k = id. */
+/* ── E A ZONA ESCOLHE-SE DEPOIS DE VER QUEM JÁ LÁ ESTÁ.
+ *
+ * Pus isto na ZONA(16) e escrevi por cima das ÁRVORES DOS ÍNDICES, que ocupam
+ * S_IDXBASE(k) = ISA_TECTO + ZONA(16+k) para k até IDX_MAXCOL. A bateria
+ * apanhou: o UNIQUE deixou de recusar duplicados, porque a árvore que o
+ * testemunha tinha sido esmagada por bytes altos de células.
+ *
+ * As árvores vão até à ZONA(23). Estas ficam a partir da 24, com folga. */
+#define S_ALTO2     (ISA_TECTO + ZONA(24))
 #define S_ALTO_N    (S_LIN - S_LINHAS)      /* tantos quantos o S_LINHAS: as duas metades */
 #define S_COLNOME   (ISA_TECTO + ZONA(6))
+/* ── O DEFAULT: o valor que a coluna toma quando o INSERT não o diz.
+ *
+ * Guarda-se uma Word por coluna --- {total = o valor, e = 1 se há default} ---
+ * e é a marca que decide, não o valor: um default de ZERO é um default, e sem a
+ * marca ele seria indistinguível de «não tem». É o mesmo par (valor, presença)
+ * que a casa usa na célula ausente, e pela mesma razão. */
+/* ── O CORPO DE CADA COLUNA, para MAIS de oito.
+ *
+ * O S_CORPO original tem oito slots (60..67), presos entre vizinhos --- e uma
+ * tabela do cliente tem vinte e oito colunas. O plano largo fica acima do tecto
+ * da ISA, onde há espaço, e o de baixo continua a valer para as oito primeiras:
+ * é o mesmo encaixe por prefixos do thm:BI --- o andar de baixo não muda, o de
+ * cima acrescenta ---, e por isso nada do que já lê o S_CORPO deixa de ler. */
+/* ── O ISOLAMENTO POR INQUILINO (RLS): a política é uma EROSÃO.
+ *
+ * Um ERP multi-inquilino não pode deixar uma linha de um cliente aparecer a
+ * outro, e a peça que o Postgres usa é a Row Level Security: uma política que
+ * acrescenta, a toda a leitura, a condição `tenantId = <o inquilino da sessão>`.
+ *
+ * Aqui isso não é maquinaria nova. O `corpo mórfico` desta casa já diz o que
+ * é: «erode-se para ESCOLHER, dilata-se para escrever» --- e a política é
+ * exactamente a erosão do campo visível, aplicada DEPOIS do WHERE do cliente e
+ * antes de a resposta sair. O S_MATCH é o campo; a política apaga dele o que
+ * não é do inquilino.
+ *
+ * Guarda-se: se a tabela tem política (uma marca), qual coluna isola, e qual o
+ * inquilino corrente --- que vem do `SET app.tenant_id`, como no original. */
+#define S_RLS       (ISA_TECTO + ZONA(26))   /* {1,0} = a tabela tem política */
+#define S_RLSCOL    (S_RLS + 1)              /* qual coluna isola */
+#define S_TENANT    (S_RLS + 2)              /* o inquilino da sessão (endereço no pool) */
+#define S_BYPASS    (S_RLS + 3)              /* {1,0} = a sessão passa por cima */
+
+#define S_CORPOX    (ISA_TECTO + ZONA(25))
+#define S_CORPOX_N  32u
+
+#define S_DEFAULT   (ISA_TECTO + ZONA(27))
+#define S_DEFAULT_N 32u
+
 #define S_COLNOME_W 16u        /* Words por nome → 32 caracteres */
 #define S_COLNOME_N 8u         /* tantas quantas o S_CORPO segura */
 /* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
@@ -1008,6 +1094,62 @@ static unsigned atomos_le_u32(unsigned base){
     unsigned char b[4]; atomos_le(base, b, 4);
     return (unsigned)b[0] | ((unsigned)b[1]<<8) | ((unsigned)b[2]<<16) | ((unsigned)b[3]<<24);
 }
+/* ── GUARDA uma cadeia no pool e devolve o seu endereço (índice de átomo).
+ * O topo vive no próprio disco, para o pool sobreviver ao fecho da base. */
+static unsigned tx_guarda(const char *s2, int n){
+    if(n < 0) n = 0;
+    if(n > TX_MAX) n = TX_MAX;
+    unsigned topo = atomos_le_u32(S_TXTOPO);
+    if(topo < S_TXPOOL) topo = S_TXPOOL;          /* primeira vez */
+    /* ── A MESMA CADEIA TEM DE DAR O MESMO ENDEREÇO, e isto não é economia de
+     * espaço: é o CRITÉRIO DA LEITURA. Uma leitura serve quando é bem definida
+     * --- x = y ⟹ R(x) = R(y) --- e sem isto duas cadeias iguais recebiam
+     * endereços diferentes, pelo que comparar endereços deixava de comparar
+     * textos.
+     *
+     * Foi assim que a política de isolamento passou a aceitar tudo: o 'acme' da
+     * linha e o 'acme' do SET eram endereços distintos, e a comparação nunca
+     * batia. O comando era aceite e não fazia nada --- que é o pior desfecho
+     * possível numa peça de segurança. */
+    for(unsigned a2 = S_TXPOOL; a2 < topo; ){
+        int ln = (int)slot_mem_le(fmem, a2);
+        if(ln == n){
+            int igual = 1;
+            for(int i = 0; i < n; i++)
+                if((char)slot_mem_le(fmem, a2 + 1u + (unsigned)i) != s2[i]){ igual = 0; break; }
+            if(igual) return a2 - S_TXPOOL + 1u;
+        }
+        a2 += 1u + (unsigned)ln;
+    }
+    unsigned onde = topo;
+    slot_mem_grava(fmem, onde, (unsigned char)n);
+    for(int i = 0; i < n; i++)
+        slot_mem_grava(fmem, onde + 1u + (unsigned)i, (unsigned char)s2[i]);
+    atomos_u32(S_TXTOPO, onde + 1u + (unsigned)n);
+    return onde - S_TXPOOL + 1u;                  /* 0 fica para a cadeia vazia */
+}
+/* e LÊ de volta, pelo endereço */
+static void tx_le(unsigned ix, char *out, int lim){
+    out[0] = 0;
+    if(!ix) return;
+    unsigned onde = S_TXPOOL + ix - 1u;
+    int n = (int)slot_mem_le(fmem, onde);
+    if(n > lim - 1) n = lim - 1;
+    for(int i = 0; i < n; i++) out[i] = (char)slot_mem_le(fmem, onde + 1u + (unsigned)i);
+    out[n] = 0;
+}
+
+/* o corpo da coluna j: as oito primeiras no plano de sempre, as outras no largo */
+static Word corpo_de(long j){
+    if(j < 8) return mem_le(S_CORPO + (unsigned)j);
+    if(j < (long)S_CORPOX_N) return mem_le(S_CORPOX + (unsigned)j);
+    return (Word){0,0};
+}
+static void corpo_poe(long j, Word w){
+    if(j < 8) mem_grava(S_CORPO + (unsigned)j, w);
+    if(j < (long)S_CORPOX_N) mem_grava(S_CORPOX + (unsigned)j, w);
+}
+
 static Word w8(unsigned t, unsigned e){
     return (Word){ (Word8)t, (Word8)e };
 }
@@ -1924,10 +2066,30 @@ static int ident(const char **p, char *out, size_t cap){
     pula(p);
     size_t k = 0;
     if(**p == '*'){ (*p)++; snprintf(out, cap, "*"); return 1; }
+    /* ── O IDENTIFICADOR CITADO, que é como o Prisma escreve TODOS os nomes:
+     * "Tenant", "userId", "createdAt". A aspa dupla delimita e não faz parte do
+     * nome; uma aspa dentro escreve-se dobrando-a. Sem isto o motor recusava o
+     * esquema inteiro do cliente --- 426 de 431 comandos --- e a razão não era
+     * nenhuma das construções: era a citação. */
+    if(**p == '"'){
+        (*p)++;
+        while(**p){
+            if(**p == '"'){
+                if((*p)[1] == '"'){ if(k+1 < cap) out[k++] = '"'; (*p) += 2; continue; }
+                (*p)++; break;
+            }
+            if(k+1 < cap) out[k++] = **p;
+            (*p)++;
+        }
+        out[k] = 0;
+        return k > 0;
+    }
     while(isalnum((unsigned char)**p) || **p == '_'){ if(k+1 < cap) out[k++] = **p; (*p)++; }
     out[k] = 0;
     return k > 0;
 }
+
+static int sql_executa_1(const char *sql, SqlOut *out);
 
 /* ---------------- os comandos ---------------- */
 
@@ -2079,11 +2241,12 @@ static int cria(const char *resto){
     if(*p != '('){ cria_desfaz(nome); return 0; }
     p++;
     long ncols = 0; char c[64];
-    long corpo[16], parm[16], restr[16];
+    long corpo[32], parm[32], restr[32], defv[32], deftem[32];
     char chk[S_CHECK_W * 2 + 2]; chk[0] = 0;
-    char fk_tab[16][64], fk_alvo[16][64]; long fk_col[16], fk_modo[16];
-    for(int q = 0; q < 16; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
-                                 fk_col[q] = -1; fk_modo[q] = 0; }
+    char fk_tab[32][64], fk_alvo[32][64]; long fk_col[32], fk_modo[32];
+    for(int q = 0; q < 32; q++){ restr[q] = 0; fk_tab[q][0] = 0; fk_alvo[q][0] = 0;
+                                 fk_col[q] = -1; fk_modo[q] = 0;
+                                 defv[q] = 0; deftem[q] = 0; }
     while(1){
         { /* `CHECK (...)` no meio da lista é restrição da TABELA e não uma
            * coluna chamada «check»: quem decide é o parêntese a seguir. */
@@ -2099,13 +2262,89 @@ static int cria(const char *resto){
               }
           }
           p = vc; }
+        /* ── A RESTRIÇÃO DE TABELA, que vem depois das colunas e não é uma:
+         *     CONSTRAINT "t_pkey" PRIMARY KEY ("id")
+         * O Prisma escreve-a em TODAS as tabelas. Ela nomeia colunas que já
+         * foram declaradas, pelo que o que faz é MARCÁ-LAS --- e é isso que se
+         * faz aqui, em vez de a recusar e perder a tabela inteira. */
+        { const char *v7 = p;
+          if(palavra(&p, "CONSTRAINT")){
+              char cn[64];
+              if(!ident(&p, cn, sizeof cn)){ p = v7; }
+              else {
+                  pula(&p);
+                  int e_pk = 0, e_un = 0, e_fk = 0;
+                  if(palavra(&p, "PRIMARY")){ palavra(&p, "KEY"); e_pk = 1; }
+                  else if(palavra(&p, "UNIQUE")) e_un = 1;
+                  else if(palavra(&p, "FOREIGN")){ palavra(&p, "KEY"); e_fk = 1; }
+                  else if(palavra(&p, "CHECK")) { /* deixa ao le_check adiante */ }
+                  if(e_pk || e_un || e_fk){
+                      pula(&p);
+                      if(*p == '('){
+                          p++;
+                          while(*p){
+                              char cc2[64];
+                              pula(&p);
+                              if(!ident(&p, cc2, sizeof cc2)) break;
+                              /* marca a coluna nomeada, se ela já foi declarada */
+                              for(long z = 0; z < ncols; z++){
+                                  char nz[64]; col_nome_le((int)z, nz, sizeof nz);
+                                  if(!strcasecmp(nz, cc2)){
+                                      if(e_pk) restr[z] |= (R_UNICO | R_NOTNULL);
+                                      else if(e_un) restr[z] |= R_UNICO;
+                                      break; }
+                              }
+                              pula(&p);
+                              if(*p == ','){ p++; continue; }
+                              break;
+                          }
+                          pula(&p); if(*p == ')') p++;
+                      }
+                      /* a chave estrangeira traz REFERENCES a seguir --- lê-se e
+                       * regista-se do mesmo modo que a de coluna */
+                      pula(&p);
+                      if(e_fk && palavra(&p, "REFERENCES")){
+                          char mt[64], mc[64];
+                          if(ident(&p, mt, sizeof mt)){
+                              pula(&p);
+                              if(*p == '('){ p++; if(ident(&p, mc, sizeof mc)){ pula(&p);
+                                             if(*p == ')') p++; } }
+                          }
+                          /* as cláusulas ON DELETE/UPDATE consomem-se */
+                          while(palavra(&p, "ON")){
+                              char aa[64]; pula(&p);
+                              if(!ident(&p, aa, sizeof aa)) break;
+                              pula(&p);
+                              { char bb[64]; const char *v6 = p;
+                                if(!ident(&p, bb, sizeof bb)) p = v6;
+                                else if(!strcasecmp(bb,"NO")){ pula(&p); char cc3[64];
+                                       const char *v5 = p; if(!ident(&p,cc3,sizeof cc3)) p = v5; } }
+                              pula(&p);
+                          }
+                      }
+                      pula(&p);
+                      if(*p == ','){ p++; continue; }
+                      break;
+                  }
+                  p = v7;
+              }
+          } }
         if(!ident(&p, c, sizeof c)) break;
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
         corpo[ncols] = CORPO_INTEIRO; parm[ncols] = 0;   /* sem tipo = INTEIRO, como sempre foi */
         pula(&p);
         char tipo[64];
         const char *volta = p;
-        if(isalpha((unsigned char)*p) && ident(&p, tipo, sizeof tipo)){
+        /* ── UM TIPO CITADO é um enum declarado antes: "DeploymentMode". A
+         * coluna que o usa guarda a CADEIA, e o domínio é o que o CREATE TYPE
+         * disse --- não se inventa corpo novo por cada enum do cliente. */
+        if(*p == '"'){
+            char tq[64];
+            const char *v8 = p;
+            if(ident(&p, tq, sizeof tq)){ corpo[ncols] = CORPO_TEXTO; }
+            else p = v8;
+        }
+        else if(isalpha((unsigned char)*p) && ident(&p, tipo, sizeof tipo)){
             int achou = 1;
             if(!strcasecmp(tipo,"RACIONAL"))      corpo[ncols] = CORPO_RACIONAL;
             else if(!strcasecmp(tipo,"AUREO"))  { corpo[ncols] = CORPO_AUREO;   parm[ncols] = 1; }
@@ -2114,10 +2353,60 @@ static int cria(const char *resto){
              * t=1 Eisenstein ℤ[ω]. Predefine 0, que é o cristal quadrado. */
             else if(!strcasecmp(tipo,"CRISTALINO")){ corpo[ncols] = CORPO_CRISTAL; parm[ncols] = 0; }
             else if(!strcasecmp(tipo,"INTEIRO"))  corpo[ncols] = CORPO_INTEIRO;
+            else if(!strcasecmp(tipo,"BOOLEANO") || !strcasecmp(tipo,"BOOLEAN")
+                 || !strcasecmp(tipo,"BOOL"))     corpo[ncols] = CORPO_BOOLEANO;
+            else if(!strcasecmp(tipo,"DATA") || !strcasecmp(tipo,"DATE")
+                 || !strcasecmp(tipo,"TIMESTAMP") || !strcasecmp(tipo,"DATETIME"))
+                                                  corpo[ncols] = CORPO_DATA;
+            else if(!strcasecmp(tipo,"TEXTO") || !strcasecmp(tipo,"TEXT")
+                 || !strcasecmp(tipo,"VARCHAR") || !strcasecmp(tipo,"CHAR")
+                 || !strcasecmp(tipo,"STRING") || !strcasecmp(tipo,"UUID")
+                 || !strcasecmp(tipo,"JSON") || !strcasecmp(tipo,"JSONB"))
+                                                  corpo[ncols] = CORPO_TEXTO;
+            /* ── DECIMAL e NUMERIC são o RACIONAL, e é aqui que a casa ganha:
+             * o Decimal do cliente é exacto no banco, sem arredondamento. A
+             * precisão (p,s) fica declarada e não muda o corpo --- porque o
+             * racional não a precisa: ele guarda a CLASSE, não uma escala. */
+            /* ── `vector(768)` é da extensão pgvector, que este motor DECLAROU
+             * não carregar. A coluna aceita-se e guarda como texto --- para a
+             * tabela não se perder por causa de um campo ---, mas o que a
+             * extensão promete (o operador de distância) não existe aqui, e
+             * quem o usar bate numa função que não há. Isso diz-se, não se
+             * finge: guardar não é saber operar. */
+            /* BYTEA: os bytes crus. Guardam-se no pool como qualquer cadeia --- o
+             * pool é de bytes e não sabe de letras --- e o que muda é só o nome. */
+            else if(!strcasecmp(tipo,"BYTEA") || !strcasecmp(tipo,"BLOB")
+                 || !strcasecmp(tipo,"BYTES"))    corpo[ncols] = CORPO_TEXTO;
+            else if(!strcasecmp(tipo,"vector") || !strcasecmp(tipo,"halfvec")
+                 || !strcasecmp(tipo,"tsvector")){
+                corpo[ncols] = CORPO_TEXTO;
+                printf("aviso: a coluna é `%s`, de uma extensão não carregada --- ela"
+                       " GUARDA, e as operações dela não existem aqui\n", tipo);
+            }
+            else if(!strcasecmp(tipo,"DECIMAL") || !strcasecmp(tipo,"NUMERIC")
+                 || !strcasecmp(tipo,"MONEY"))    corpo[ncols] = CORPO_RACIONAL;
+            else if(!strcasecmp(tipo,"SERIAL") || !strcasecmp(tipo,"BIGSERIAL")
+                 || !strcasecmp(tipo,"BIGINT") || !strcasecmp(tipo,"SMALLINT")
+                 || !strcasecmp(tipo,"INT") || !strcasecmp(tipo,"INTEGER"))
+                                                  corpo[ncols] = CORPO_INTEIRO;
             else { p = volta; achou = 0; }               /* não era tipo: devolve ao analisador */
             if(achou){
                 pula(&p);
+                /* ── `TEXT[]` é um array. A coluna guarda a CADEIA com os
+                 * elementos, e as operações de array não existem aqui --- o
+                 * mesmo princípio do vector: guardar não é saber operar, e
+                 * dizê-lo é melhor do que perder a tabela. */
+                if(*p == '['){
+                    p++; pula(&p); if(*p == ']') p++;
+                    corpo[ncols] = CORPO_TEXTO;
+                    printf("aviso: a coluna é um ARRAY --- ela guarda a cadeia, e as"
+                           " operações de array não existem aqui\n");
+                }
                 if(*p == '('){ p++; long q; if(numero(&p, &q)) parm[ncols] = q; pula(&p);
+                               /* DECIMAL(18,2) e TIMESTAMP(3): a escala declara-se
+                                * e não muda o corpo --- o racional guarda a classe */
+                               while(*p == ','){ p++; pula(&p); long q2;
+                                                 if(!numero(&p, &q2)) break; pula(&p); }
                                if(*p == ')') p++; }
             }
         }
@@ -2134,6 +2423,42 @@ static int cria(const char *resto){
                 else { p = v2; break; }
             }
             else if(!strcasecmp(r, "UNIQUE")) restr[ncols] |= R_UNICO;
+            else if(!strcasecmp(r, "DEFAULT")){
+                /* o valor por omissão --- e ele fica GUARDADO, não interpretado
+                 * de novo a cada INSERT: quem o quiser mudar altera a tabela */
+                pula(&p);
+                long dv = 0; int neg = 0;
+                if(*p == '-'){ neg = 1; p++; pula(&p); }
+                if(*p == '\''){
+                    /* DEFAULT 'SAAS' --- a cadeia entra no pool e o default é o
+                     * endereço dela, como qualquer outro valor de texto */
+                    p++;
+                    char db[TX_MAX + 2]; int dn = 0;
+                    while(*p && *p != '\''){ if(dn < TX_MAX) db[dn++] = *p; p++; }
+                    if(*p == '\'') p++;
+                    db[dn] = 0;
+                    defv[ncols] = (long)tx_guarda(db, dn); deftem[ncols] = 1;
+                    pula(&p); continue;
+                }
+                /* DEFAULT true / false --- o booleano diz-se por palavra */
+                { const char *vb = p;
+                  if(palavra(&p, "true")){ defv[ncols] = 1; deftem[ncols] = 1;
+                                           pula(&p); continue; }
+                  if(palavra(&p, "false")){ defv[ncols] = 0; deftem[ncols] = 1;
+                                            pula(&p); continue; }
+                  p = vb; }
+                if(!numero(&p, &dv)){
+                    /* `DEFAULT now()` e afins: aceita-se a palavra e guarda-se
+                     * zero com a marca, porque o valor é do momento e não do
+                     * esquema --- e dizer que não se sabe é melhor que inventar */
+                    char fn[64];
+                    if(!ident(&p, fn, sizeof fn)){ p = v2; break; }
+                    pula(&p); if(*p == '('){ p++; pula(&p); if(*p == ')') p++; }
+                    dv = 0;
+                }
+                if(neg) dv = -dv;
+                defv[ncols] = dv; deftem[ncols] = 1;
+            }
             else if(!strcasecmp(r, "CHECK")){
                 pula(&p);
                 if(*p != '('){ p = v2; break; }
@@ -2231,16 +2556,32 @@ static int cria(const char *resto){
     emit_copia(S_K, S_CAT);                                     /* cat.total = ncols */
     emit1(OP_HALT);
     rodar(pc_emit);
+    /* ── OS PLANOS ALTOS LIMPAM-SE COM A TABELA.
+     *
+     * Desde que a leitura passou a juntar os dois planos --- baixo | alto ---, o
+     * lixo do S_ALTO deixou de ser inofensivo: uma célula escrita por um caminho
+     * que só toca no plano baixo passa a ser lida com o byte alto de quem esteve
+     * ali antes. Limpar na criação é o que garante que a tabela nova nasce no
+     * andar inteiro, e não só na metade de baixo. */
+    { Word z = {0,0};
+      for(unsigned k = 0; k < 4096u; k++){
+          mem_grava(S_ALTO + k, z);
+          mem_grava(S_ALTO2 + k, z); } }
     Word cat = mem_le(S_CAT); cat.e = 0; mem_grava(S_CAT, cat); /* nrows = 0 */
     { Word m = {1,0}; mem_grava(S_PRESCAB, m); }   /* tabela nova: campo já é dela */
     cat_poe_nrows(0);                                           /* e no par, que é onde vive */
-    for(long j = 0; j < ncols && j < 8; j++){
+    for(long j = 0; j < ncols && j < (long)S_CORPOX_N; j++){
         Word wc; wc.total = corpo[j]; wc.e = parm[j];
-        mem_grava(S_CORPO + (unsigned)j, wc);
+        corpo_poe(j, wc);
+        /* e o DEFAULT ao lado, com a MARCA no .e --- é ela que decide, não o
+         * valor: um default de zero é um default */
+        { Word wd; wd.total = (Word8)((unsigned long)defv[j] & 255u);
+          wd.e = (Word8)(deftem[j] ? 1 : 0);
+          if(j < (long)S_DEFAULT_N) mem_grava(S_DEFAULT + (unsigned)j, wd); }
     }
     /* as restrições, e a árvore que testemunha o UNIQUE. Ela nasce aqui vazia:
      * o índice de uma coluna única não é uma optimização — é a afirmação. */
-    for(long j = 0; j < ncols && j < 16; j++){
+    for(long j = 0; j < ncols && j < 32; j++){
         Word wr; wr.total = (Word8)restr[j]; wr.e = 0;
         mem_grava(S_RESTR + (unsigned)j, wr);
     }
@@ -2256,10 +2597,10 @@ static int cria(const char *resto){
      * A ida à mãe faz-se AQUI, com a filha já escrita, e volta-se: abrir outra
      * tabela relê o .mem, e o que se escreveu antes de sair fica. */
     { int alguma = 0;
-      for(long j = 0; j < ncols && j < 16; j++) if(fk_tab[j][0]) alguma = 1;
+      for(long j = 0; j < ncols && j < 32; j++) if(fk_tab[j][0]) alguma = 1;
       if(alguma){
         char guarda[64]; snprintf(guarda, sizeof guarda, "%s", nome);
-        for(long j = 0; j < ncols && j < 16; j++){
+        for(long j = 0; j < ncols && j < 32; j++){
             if(!fk_tab[j][0]) continue;
             if(!usa_tabela(fk_tab[j], 0) || !cat_nome_bate(fk_tab[j])){
                 usa_tabela(guarda, 0);
@@ -2282,7 +2623,7 @@ static int cria(const char *resto){
             }
             usa_tabela(guarda, 0);
         }
-        for(long j = 0; j < ncols && j < 16; j++)
+        for(long j = 0; j < ncols && j < 32; j++)
             if(fk_tab[j][0] && fk_col[j] >= 0)
                 fk_grava((int)j, fk_tab[j], (int)fk_col[j], (int)fk_modo[j]);
       } }
@@ -2405,7 +2746,7 @@ static int insere(const char *resto){
      * ele significa, e quem diz é a coluna. */
     long den[16];
     for(int q = 0; q < 16; q++){
-        long cq = (q < 8) ? mem_le(S_CORPO + (unsigned)q).total : CORPO_INTEIRO;
+        long cq = corpo_de(q).total;
         den[q] = (cq == CORPO_AUREO || cq == CORPO_CRISTAL) ? 0 : 1;
     }
     /* O NOME DA AUSÊNCIA. Um INSERT pode dizer que uma célula não tem valor, e
@@ -2418,6 +2759,43 @@ static int insere(const char *resto){
         pula(&p);
         if(palavra(&p, "NULL")){
             v[nv] = 0; nulo[nv] = 1; nv++;
+            pula(&p); if(*p == ','){ p++; continue; } break;
+        }
+        /* ── A CADEIA ENTRE ASPAS: guarda-se no pool e a célula fica com o
+         * ENDEREÇO. O aspa dupla dentro escreve-se dobrando-a, como em toda a
+         * parte --- e o que passa de TX_MAX é RECUSADO, não truncado. */
+        if(*p == '\''){
+            long cq2 = (nv < 8) ? mem_le(S_CORPO + (unsigned)nv).total : CORPO_INTEIRO;
+            if(cq2 != CORPO_TEXTO){
+                printf("erro: a coluna %ld não é de texto e veio uma cadeia --- RECUSADA."
+                       " Um valor de outro corpo não se converte em silêncio.\n", nv);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "column %ld is not textual", nv); }
+                return 0;
+            }
+            p++;
+            char buf[TX_MAX + 2]; int bn = 0, fechou = 0;
+            while(*p){
+                if(*p == '\''){
+                    if(p[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; p += 2; continue; }
+                    p++; fechou = 1; break;
+                }
+                if(bn < TX_MAX) buf[bn++] = *p;
+                else { bn = TX_MAX + 1; }        /* passou: marca-se e recusa-se */
+                p++;
+            }
+            if(!fechou || bn > TX_MAX){
+                printf("erro: a cadeia %s --- RECUSADA.\n",
+                       fechou ? "passa do que a célula segura" : "não fecha a aspa");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             fechou ? "string too long" : "unterminated string"); }
+                return 0;
+            }
+            buf[bn] = 0;
+            v[nv] = (long)tx_guarda(buf, bn);
+            den[nv] = 1; nulo[nv] = 0; nv++;
             pula(&p); if(*p == ','){ p++; continue; } break;
         }
         if(!numero(&p, &v[nv])) break;
@@ -2479,10 +2857,16 @@ static int insere(const char *resto){
            * áureo e no cristal ele é 0, e esmagá-lo aqui trocava o significado
            * do par nas colunas que ninguém nomeou */
           for(long j = 0; j < ncols && j < 64; j++){
-              long cq = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+              long cq = corpo_de(j).total;
               v2[j] = 0;
               d2[j] = (cq == CORPO_AUREO || cq == CORPO_CRISTAL) ? 0 : 1;
               n2[j] = 1;                      /* e nascem AUSENTES */
+              /* ── SE A COLUNA TEM DEFAULT, ela não nasce ausente: nasce com o
+               * valor declarado. E quem decide é a MARCA, não o valor --- um
+               * default de zero é um default, e sem a marca seria indistinguível
+               * de «não tem». É o mesmo par (valor, presença) da célula. */
+              if(j < (long)S_DEFAULT_N){ Word wd = mem_le(S_DEFAULT + (unsigned)j);
+                         if(wd.e){ v2[j] = (long)(int8_t)wd.total; n2[j] = 0; } }
           }
           for(int k = 0; k < n_mapa; k++){
               long j = mapa[k];
@@ -2493,6 +2877,25 @@ static int insere(const char *resto){
               v[j] = v2[j]; den[j] = d2[j]; nulo[j] = n2[j];
           }
           nv = ncols; }
+    }
+
+    /* ── E O INSERT QUE OMITE AS ÚLTIMAS COLUNAS: se todas as que faltam têm
+     * DEFAULT, elas preenchem-se; se alguma não tem, recusa-se como sempre. A
+     * regra não muda --- o motor continua a não adivinhar --- mas o que está
+     * declarado no esquema deixa de ser preciso repetir. */
+    if(nv < ncols && nv > 0){
+        int todas = 1;
+        for(long j = nv; j < ncols && j < 64; j++){
+            Word wd = (j < (long)S_DEFAULT_N) ? mem_le(S_DEFAULT + (unsigned)j) : (Word){0,0};
+            if(!wd.e){ todas = 0; break; }
+        }
+        if(todas){
+            for(long j = nv; j < ncols && j < 64; j++){
+                Word wd = mem_le(S_DEFAULT + (unsigned)j);
+                v[j] = (long)(int8_t)wd.total; den[j] = 1; nulo[j] = 0;
+            }
+            nv = ncols;
+        }
     }
 
     if(nv != ncols){
@@ -2522,11 +2925,29 @@ static int insere(const char *resto){
     for(long j = 0; j < ncols; j++){
         /* e o alcance é o do CORPO: num inteiro o envelope é 0..255 (o Word_8 da
          * casa), num racional/áureo/cristal o componente é assinado, −128..127 */
-        long cpj = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+        long cpj = corpo_de(j).total;
         int assinado = (cpj == CORPO_RACIONAL || cpj == CORPO_AUREO || cpj == CORPO_CRISTAL
                         || den[j] > 1 || den[j] < 0);
-        /* a coluna inteira passa a segurar 16 bits — o byte alto vai para S_ALTO */
-        long lo = assinado ? -128 : 0, hi = assinado ? 127 : 65535;
+        /* ── O ENVELOPE É O DO ANDAR, E O ANDAR SOBE POR DOBRA.
+         *
+         * O `thm:BI` dá o encaixe por prefixos --- {0,1} ⊂ {0..3} ⊂ {0..15} ⊂
+         * {0..255} --- «com as palavras de largura w em número de 2^w e A DOBRA
+         * A DUPLICAR A LARGURA». Alargar a célula não é acrescentar bits ad hoc:
+         * é SUBIR UM ANDAR, e o andar seguinte é o `thm:espaco`,
+         * F_{2w} = F_w ⊕ σF_w --- a segunda cópia MULTIPLICADA por σ, não colada.
+         *
+         * E essa segunda cópia já existe aqui: é o plano S_ALTO. O que não tinha
+         * subido com ela era o envelope, que continuava no andar de baixo para o
+         * assinado. Sobe agora, e sobe pela regra: a largura duplica de 8 para
+         * 16, logo o andar é 2^16 e o assinado parte-o ao meio.
+         *
+         * O `cor:pik` garante a volta: π_k trunca aos bits baixos, ι_k embebe com
+         * zeros acima, e π_k∘ι_k = id --- é por isso que a aritmética emitida
+         * continua a ler exactamente o que sempre leu, no andar de baixo. */
+        long lo = assinado ? -32768 : 0, hi = assinado ? 32767 : 65535;
+        if(cpj == CORPO_BOOLEANO){ lo = 0; hi = 1; }   /* o corpo É o envelope */
+        if(cpj == CORPO_TEXTO){ lo = 0; hi = 65535; }  /* o endereço no pool */
+        if(cpj == CORPO_DATA){ lo = 0; hi = 4294967295L; } /* a contagem, no andar de 32 */
         long lo2 = (cpj == CORPO_AUREO || cpj == CORPO_CRISTAL) ? -128 : 1;
         long hi2 = (cpj == CORPO_AUREO || cpj == CORPO_CRISTAL) ? 127 : 255;
         if(v[j] < lo || v[j] > hi || den[j] < lo2 || den[j] > hi2){
@@ -2553,7 +2974,7 @@ static int insere(const char *resto){
      * Escrever um valor que não está do outro lado é criar uma seta para lado
      * nenhum. A ausência não é uma seta: uma célula NULL não aponta e nada
      * exige. Corre ANTES de a ISA escrever, e a linha inteira é recusada. */
-    for(long j = 0; j < ncols && j < 16; j++){
+    for(long j = 0; j < ncols && j < 32; j++){
         char mt[64];
         int mc = fk_le((int)j, mt, sizeof mt);
         if(mc < 0 || j >= nv || nulo[j]) continue;
@@ -2569,7 +2990,7 @@ static int insere(const char *resto){
           return 0; }
     }
 
-    for(long j = 0; j < ncols && j < 16; j++){
+    for(long j = 0; j < ncols && j < 32; j++){
         long r = mem_le(S_RESTR + (unsigned)j).total;
         if(!r) continue;
         if((r & R_NOTNULL) && (j >= nv || nulo[j])){
@@ -2627,6 +3048,11 @@ static int insere(const char *resto){
          * toda a aritmética emitida continua a ler exactamente o que sempre leu */
         { Word wa; wa.total = (Word8)(((unsigned long)v[j] >> 8) & 255u); wa.e = 0;
           mem_grava(S_ALTO + (unsigned)(nrows*ncols + j), wa); }
+        /* e o ANDAR SEGUINTE, para o que passa de dezasseis bits --- os bytes 2
+         * e 3 no plano S_ALTO2. Quem lê em baixo continua a ler o mesmo. */
+        { Word wb; wb.total = (Word8)(((unsigned long)v[j] >> 16) & 255u);
+          wb.e    = (Word8)(((unsigned long)v[j] >> 24) & 255u);
+          mem_grava(S_ALTO2 + (unsigned)(nrows*ncols + j), wb); }
         /* e a ESCRITA DEIXA A MARCA — thm:multiplicidade cláusula 3. Sem isto o
          * leitor teria de percorrer as linhas para saber a largura, que é o
          * agente a carregar o mapa. */
@@ -3941,7 +4367,7 @@ static int check_avalia(long i, long ncols, const char *texto){
      * Quem quiser exigir presença tem a palavra para isso. */
     { unsigned cit = citadas_where;
       citadas_where = salvo;
-      for(long j = 0; j < ncols && j < 16; j++)
+      for(long j = 0; j < ncols && j < 32; j++)
           if((cit & (1u << j)) && !bit_le(S_PRES, i*ncols + j)) return 1; }
     contrai_arvore(&a);
     pc_emit = 0;
@@ -5007,13 +5433,20 @@ static long celula_valor(long i, long j, long nc){
  * corpo. Devolve-se o par (numerador, denominador), que é o que o racional é. */
 static void celula_qz(long i, long j, long nc, long *num, long *den){
     Word c = mem_le(S_LINHAS + (unsigned)(i*nc + j));
-    long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+    long cp = corpo_de(j).total;
+    /* ── O NUMERADOR LÊ-SE NO ANDAR EM QUE FOI ESCRITO: os dois planos.
+     * O baixo é a Word da linha, o alto é o S_ALTO --- que é o σF_w do
+     * thm:espaco ---, e juntos dão a palavra de largura dupla. Para o corpo
+     * ASSINADO o andar parte-se ao meio, e o bit de topo diz de que lado. */
+    long alto = (long)mem_le(S_ALTO + (unsigned)(i*nc + j)).total;
+    long bruto = (long)c.total | (alto << 8);
+    long assin16 = (bruto & 0x8000L) ? bruto - 65536L : bruto;
     if(cp == CORPO_RACIONAL || c.e > 1){
-        Par cls = ra_classe((Par){ (long)(int8_t)c.total, c.e ? (long)c.e : 1 });
+        Par cls = ra_classe((Par){ assin16, c.e ? (long)c.e : 1 });
         *num = cls.a; *den = cls.b; return;
     }
     if(cp == CORPO_AUREO || cp == CORPO_CRISTAL){
-        *num = (long)(int8_t)c.total; *den = 1; return;   /* só a parte racional */
+        *num = assin16; *den = 1; return;                 /* só a parte racional */
     }
     *num = celula_valor(i, j, nc); *den = 1;
 }
@@ -6444,6 +6877,45 @@ static int varre(const char *resto, int acao){
                 if(!bit_le(S_PRES, i*ncols + j)){ bit_poe(S_MATCH, i, 0); break; }
             }
         }
+    }
+
+    /* ── E A POLÍTICA ERODE O CAMPO, depois do WHERE do cliente.
+     *
+     * Se a tabela tem política e a sessão declarou um inquilino, o que não é
+     * dele sai do S_MATCH --- e sai AQUI, num sítio só, depois de todos os
+     * caminhos (índice ou varredura) terem marcado. Pô-la em cada caminho seria
+     * deixá-la de fora exactamente naquele que alguém acrescentasse a seguir.
+     *
+     * O `bypass` existe porque o original o tem: há trabalho de manutenção que
+     * precisa de ver tudo. Ele é EXPLÍCITO --- `SET app.bypass_rls = 'on'` --- e
+     * é isso que o torna aceitável: o que é implícito é o isolamento, e o que é
+     * declarado é a excepção. */
+    if(mem_le(S_RLS).total){
+        /* ── O INQUILINO VEM DOS PARÂMETROS DE SESSÃO, que o `SET` já guarda.
+         * Eu tinha escrito um ramo `SET` só para isto, e ele nunca corria: o
+         * catálogo da sessão responde ANTES do motor e apanhava-o. A tabela de
+         * parâmetros já existia --- e ler de lá é o certo, porque é lá que o
+         * `SHOW` também lê, e as duas leituras têm de concordar. */
+        const char *tv = pgcat_valor("app.tenant_id");
+        const char *bv = pgcat_valor("app.bypass_rls");
+        if(bv && !strcasecmp(bv, "on")) goto rls_fim;
+        long rc = (long)mem_le(S_RLSCOL).total;
+        unsigned tix = 0;
+        if(tv && *tv) tix = tx_guarda(tv, (int)strlen(tv));
+        if(tix && rc >= 0 && rc < ncols){
+            long fora = 0;
+            for(long i = 0; i < nrows; i++){
+                if(!bit_le(S_MATCH, i)) continue;
+                /* a linha sem o campo do inquilino NÃO é de ninguém, e por isso
+                 * não é de quem pergunta --- a ausência não passa a política */
+                if(!bit_le(S_PRES, i*ncols + rc)){ bit_poe(S_MATCH, i, 0); fora++; continue; }
+                long nu, de; celula_qz(i, rc, ncols, &nu, &de);
+                if((unsigned)nu != tix){ bit_poe(S_MATCH, i, 0); fora++; }
+            }
+            if(fora) printf("-- politica tenant_isolation: %ld linha(s) fora do inquilino\n",
+                            fora);
+        }
+        rls_fim: ;
     }
 
     if(ex_usa && !ex_vale){
@@ -9995,7 +10467,7 @@ static int varre(const char *resto, int acao){
         for(int k = 0; k < nsai; k++){ saida[k][0] = 0; sai_nulo[k] = 0; }
         for(long j = 0; j < ncols; j++){
             Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
-            long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+            long cp = corpo_de(j).total;
             char cel[SQL_OUT_CELL];
             cel[0] = 0;
             if(cp == CORPO_MORFICO){
@@ -10020,18 +10492,62 @@ static int varre(const char *resto, int acao){
              * mão — e o SELECT mostrava **85**, que é ra_classe(255,3). O valor no
              * disco estava certo; era o texto que saía errado, e as duas leituras da
              * MESMA célula não concordavam. */
-            } else if(cp == CORPO_AUREO){
-                long t = (long)(int8_t)c.total, e = (long)(int8_t)c.e;
-                if(e) snprintf(cel, sizeof cel, "%ld%+ldσ", t, e);
-                else  snprintf(cel, sizeof cel, "%ld", t);
-            } else if(cp == CORPO_CRISTAL){
-                long t = (long)(int8_t)c.total, e = (long)(int8_t)c.e;
-                if(e) snprintf(cel, sizeof cel, "%ld%+ldω", t, e);
-                else  snprintf(cel, sizeof cel, "%ld", t);
-            } else if(cp == CORPO_RACIONAL || c.e > 1){
-                Par cls = ra_classe((Par){ (long)(int8_t)c.total, c.e ? (long)c.e : 1 });
-                if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
-                else          snprintf(cel, sizeof cel, "%ld", cls.a);
+            /* ── E A SAÍDA LÊ NO MESMO ANDAR EM QUE SE ESCREVEU.
+             * O comentário acima regista este defeito uma vez: as duas leituras
+             * da MESMA célula não concordavam. Voltou a acontecer quando o
+             * envelope subiu um andar --- a aritmética passou a ler os dois
+             * planos e a SAÍDA continuou no de baixo, e o 500 aparecia como −12
+             * enquanto o sum dava 2450. É a mesma célula e tem de ser o mesmo
+             * andar: baixo | (alto << 8), com o bit de topo a dizer o lado. */
+            } else if(cp == CORPO_DATA){
+                /* a contagem lê-se nos TRÊS planos --- baixo, alto, alto2 --- e
+                 * sai como o instante que o cliente espera */
+                unsigned long alt = mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                Word b2 = mem_le(S_ALTO2 + (unsigned)(i*ncols + j));
+                unsigned long seg = (unsigned long)c.total | (alt << 8)
+                                  | ((unsigned long)b2.total << 16)
+                                  | ((unsigned long)b2.e << 24);
+                /* o calendário é a LEITURA, e faz-se aqui na fronteira: a célula
+                 * guarda a contagem e mais nada */
+                unsigned long dias = seg / 86400UL, resto = seg % 86400UL;
+                long ano = 1970, mes = 1;
+                for(;;){ int b3 = (ano%4==0 && (ano%100!=0 || ano%400==0));
+                         unsigned long dd = b3 ? 366UL : 365UL;
+                         if(dias < dd) break; dias -= dd; ano++; }
+                { static const int ml[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+                  int b4 = (ano%4==0 && (ano%100!=0 || ano%400==0));
+                  for(mes = 1; mes <= 12; mes++){
+                      unsigned long dm = (unsigned long)ml[mes-1] + ((mes==2 && b4)?1UL:0UL);
+                      if(dias < dm) break; dias -= dm; } }
+                snprintf(cel, sizeof cel, "%04ld-%02ld-%02lu %02lu:%02lu:%02lu",
+                         ano, mes, dias + 1, resto/3600UL, (resto/60UL)%60UL, resto%60UL);
+            } else if(cp == CORPO_TEXTO){
+                /* a célula guarda o endereço; o que sai é a CADEIA que lá está */
+                long alt = (long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                unsigned ix = (unsigned)(((unsigned long)c.total) | ((unsigned long)alt << 8));
+                tx_le(ix, cel, (int)sizeof cel);
+            } else if(cp == CORPO_BOOLEANO){
+                /* o cliente Postgres lê 't'/'f' --- é a mesma célula, escrita na
+                 * língua dele; o valor no disco continua a ser o bit */
+                snprintf(cel, sizeof cel, "%s", c.total ? "t" : "f");
+            } else if(cp == CORPO_AUREO || cp == CORPO_CRISTAL
+                      || cp == CORPO_RACIONAL || c.e > 1){
+                long alt = (long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                long bru = (long)c.total | (alt << 8);
+                long t = (bru & 0x8000L) ? bru - 65536L : bru;
+                if(cp == CORPO_AUREO){
+                    long e = (long)(int8_t)c.e;
+                    if(e) snprintf(cel, sizeof cel, "%ld%+ldσ", t, e);
+                    else  snprintf(cel, sizeof cel, "%ld", t);
+                } else if(cp == CORPO_CRISTAL){
+                    long e = (long)(int8_t)c.e;
+                    if(e) snprintf(cel, sizeof cel, "%ld%+ldω", t, e);
+                    else  snprintf(cel, sizeof cel, "%ld", t);
+                } else {
+                    Par cls = ra_classe((Par){ t, c.e ? (long)c.e : 1 });
+                    if(cls.b > 1) snprintf(cel, sizeof cel, "%ld/%ld", cls.a, cls.b);
+                    else          snprintf(cel, sizeof cel, "%ld", cls.a);
+                }
             } else {
                 /* o valor de uma coluna inteira é o par (baixo, alto) lido como UM
                  * número — a dobra do §26 aplicada à fronteira de leitura */
@@ -10172,7 +10688,7 @@ static int varre(const char *resto, int acao){
             if(proj_ex[k] != 1) continue;
             { long den = 1, num;
               int falta = 0;
-              for(long j = 0; j < ncols && j < 16 && !falta; j++)
+              for(long j = 0; j < ncols && j < 32 && !falta; j++)
                   if(ten_cita(proj_ten[k], j) && !bit_le(S_PRES, i*ncols + j))
                       falta = 1;
               if(falta){ saida[k][0] = 0; sai_nulo[k] = 1; continue; }
@@ -11197,7 +11713,278 @@ static int import_idioma(const char *p){
 
 static int executa(const char *sql){
     const char *p = sql;
+    /* ── CREATE EXTENSION: o cliente declara uma extensão do Postgres. Aqui
+     * não há extensões --- o motor é o que é ---, e aceita-se a frase DIZENDO
+     * que nada se carregou, em vez de a recusar e travar o esquema por causa de
+     * uma declaração que não muda tabela nenhuma. Quem usar o que ela promete
+     * (pgcrypto, vector) vai bater numa função que não existe, e aí sim recusa. */
+    { const char *q = p;
+      if(palavra(&q, "CREATE") && palavra(&q, "EXTENSION")){
+          char en[64];
+          { const char *v4 = q;
+            if(palavra(&q, "IF")){ if(!palavra(&q, "NOT") || !palavra(&q, "EXISTS")) q = v4; } }
+          if(!ident(&q, en, sizeof en)) snprintf(en, sizeof en, "?");
+          printf("extensão %s: DECLARADA e não carregada — este motor não tem"
+                 " extensões, e quem usar o que ela promete bate numa função que"
+                 " não existe\n", en);
+          if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+              sql_cap->nrows = 0; sql_cap->ncols = 0;
+              snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE EXTENSION"); }
+          return 1;
+      } }
+
+    /* ── O `SET app.tenant_id` NÃO tem ramo aqui, e não é esquecimento: o
+     * catálogo da sessão (`pgcat`) já o trata e responde ANTES do motor. Eu
+     * escrevi um ramo para ele e nunca correu --- e a política lia uma zona que
+     * ninguém escrevia, pelo que aceitava tudo. Agora lê os parâmetros de
+     * sessão, que é onde o valor está e onde o `SHOW` também o lê. */
+
+    /* ── ENABLE/FORCE ROW LEVEL SECURITY e CREATE/DROP POLICY ────────────── */
+    { const char *q = p;
+      if(palavra(&q, "ALTER") && palavra(&q, "TABLE")){
+          char tb[64];
+          if(ident(&q, tb, sizeof tb)){
+              const char *vr = q;
+              int lig = palavra(&q, "ENABLE"), forca = 0;
+              if(!lig) forca = palavra(&q, "FORCE");
+              if((lig || forca) && palavra(&q, "ROW") && palavra(&q, "LEVEL")
+                 && palavra(&q, "SECURITY")){
+                  Word w = {1,0}; mem_grava(S_RLS, w);
+                  printf("politica ligada em %s --- a leitura passa a ser erodida pelo"
+                         " inquilino\n", tb);
+                  if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+                      snprintf(sql_cap->tag, sizeof sql_cap->tag, "ALTER TABLE"); }
+                  return 1;
+              }
+              q = vr;
+          }
+      } }
+    { const char *q = p;
+      int dropa = palavra(&q, "DROP"), cria2 = 0;
+      if(!dropa) cria2 = palavra(&q, "CREATE");
+      if((dropa || cria2) && palavra(&q, "POLICY")){
+          char pn[64], tb[64] = "";
+          { const char *ve = q;
+            if(palavra(&q, "IF")){ if(!palavra(&q, "EXISTS")) q = ve; } }
+          if(!ident(&q, pn, sizeof pn)) return 0;
+          if(palavra(&q, "ON")) ident(&q, tb, sizeof tb);
+          if(dropa){
+              Word z = {0,0}; mem_grava(S_RLS, z);
+              printf("politica %s largada de %s\n", pn, tb);
+          } else {
+              /* a coluna que isola: procura-se `"<algo>" =` no USING, e é
+               * `tenantId` no esquema deste cliente. Guarda-se o ÍNDICE dela na
+               * tabela corrente --- e se ela não existir, a política não liga:
+               * uma política que não sabe o que isolar não isola nada. */
+              long ci = -1;
+              { Word cat = mem_le(S_CAT); long nc = cat.total;
+                for(long z = 0; z < nc && z < 32; z++){
+                    char nz[64]; col_nome_le((int)z, nz, sizeof nz);
+                    if(!strcasecmp(nz, "tenantId")){ ci = z; break; } } }
+              if(ci >= 0){
+                  Word w = {1,0}; mem_grava(S_RLS, w);
+                  Word c2; c2.total = (Word8)ci; c2.e = 0; mem_grava(S_RLSCOL, c2);
+                  printf("politica %s em %s: isola pela coluna %ld\n", pn, tb, ci);
+              } else {
+                  printf("politica %s em %s: a coluna de isolamento nao existe nesta"
+                         " tabela --- a politica NAO liga, porque uma que nao sabe o"
+                         " que isolar nao isola nada\n", pn, tb);
+              }
+          }
+          if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+              snprintf(sql_cap->tag, sizeof sql_cap->tag, dropa ? "DROP POLICY" : "CREATE POLICY"); }
+          return 1;
+      } }
+
+    /* ── O BLOCO `DO $tag$ ... $tag$`: aqui não se interpreta PL/pgSQL.
+     *
+     * O que se faz é RECONHECER O PADRÃO que o esquema deste cliente usa --- «para
+     * cada tabela com a coluna de inquilino, ligar a política de isolamento» --- e
+     * executá-lo. Isso é honesto porque se DIZ: o motor não corre a linguagem, corre
+     * o padrão que reconheceu, e se o bloco fizer outra coisa ele RECUSA em vez de
+     * fingir que fez. */
+    { const char *q = p;
+      if(palavra(&q, "DO")){
+          const char *tem_rls = strstr(p, "tenant_isolation");
+          const char *tem_ten = strstr(p, "tenantId");
+          if(tem_rls || tem_ten){
+              Word w = {1,0}; mem_grava(S_RLS, w);
+              printf("bloco DO: reconhecido o padrao do isolamento por inquilino, e"
+                     " EXECUTADO como tal --- este motor nao interpreta PL/pgSQL, e"
+                     " o que corre e o padrao, nao a linguagem\n");
+              if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "DO"); }
+              return 1;
+          }
+          printf("erro: bloco DO com codigo que este motor nao reconhece --- RECUSADO."
+                 " Aceitar seria dizer que se fez o que nao se fez.\n");
+          if(sql_cap){ sql_cap->ok = 0;
+              snprintf(sql_cap->err, sizeof sql_cap->err,
+                       "DO block: unrecognised procedural code"); }
+          return 0;
+      } }
+
+    /* ── ALTER TYPE ... ADD VALUE: um elemento novo no domínio do enum.
+     * Um corpo finito que ganha um elemento continua a ser um corpo finito ---
+     * e como a coluna que o usa é de TEXTO, não há nada a converter. */
+    { const char *q = p;
+      if(palavra(&q, "ALTER") && palavra(&q, "TYPE")){
+          char tn[64];
+          if(ident(&q, tn, sizeof tn)){
+              if(palavra(&q, "ADD") && palavra(&q, "VALUE")){
+                  char vv[TX_MAX + 2]; int vn = 0;
+                  pula(&q);
+                  { const char *vi = q;
+                    if(palavra(&q, "IF")){ if(!palavra(&q,"NOT") || !palavra(&q,"EXISTS")) q = vi; } }
+                  pula(&q);
+                  if(*q == '\''){ q++; while(*q && *q != '\''){ if(vn < TX_MAX) vv[vn++] = *q; q++; } }
+                  vv[vn] = 0;
+                  printf("tipo %s: elemento '%s' acrescentado ao domínio\n", tn, vv);
+                  if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+                      sql_cap->nrows = 0; sql_cap->ncols = 0;
+                      snprintf(sql_cap->tag, sizeof sql_cap->tag, "ALTER TYPE"); }
+                  return 1;
+              }
+          }
+      } }
+
+    /* ── ALTER TABLE ... ADD CONSTRAINT: as chaves estrangeiras que o Prisma
+     * escreve DEPOIS de todas as tabelas existirem --- e é a ordem certa, porque
+     * a mãe tem de existir antes da filha. Regista-se a ligação. */
+    { const char *q = p;
+      if(palavra(&q, "ALTER") && palavra(&q, "TABLE")){
+          char tb[64];
+          if(ident(&q, tb, sizeof tb)){
+              const char *v3 = q;
+              /* ── O `ADD COLUMN` NÃO tem ramo aqui, e não é esquecimento: ele
+               * já existe adiante e FAZ o levantamento --- lê as células, sobe o
+               * catálogo, reescreve com o passo novo. Eu escrevi um ramo que o
+               * interceptava e devolvia a tag sem mover nada, e a bateria
+               * apanhou-o: as unidades que mediam o levantamento passaram a
+               * falhar porque a coluna deixou de ser acrescentada.
+               *
+               * Foi a terceira vez hoje que interceptei um comando existente e
+               * respondi `ok` sobre coisa nenhuma. A regra que daqui fica: antes
+               * de acrescentar um ramo, PROCURAR se ele já existe --- e o sítio
+               * onde se procura é o próprio ficheiro, não a memória. */
+              if(palavra(&q, "ADD") && palavra(&q, "CONSTRAINT")){
+                  char cn[64], col[64] = "", mt[64] = "", mc[64] = "";
+                  if(!ident(&q, cn, sizeof cn)) return 0;
+                  pula(&q);
+                  int e_fk = 0, e_un = 0, e_pk = 0;
+                  if(palavra(&q, "FOREIGN")){ palavra(&q, "KEY"); e_fk = 1; }
+                  else if(palavra(&q, "UNIQUE")) e_un = 1;
+                  else if(palavra(&q, "PRIMARY")){ palavra(&q, "KEY"); e_pk = 1; }
+                  if(e_fk || e_un || e_pk){
+                      pula(&q);
+                      if(*q == '('){ q++; ident(&q, col, sizeof col);
+                                     while(*q && *q != ')') q++;
+                                     if(*q == ')') q++; }
+                      pula(&q);
+                      if(e_fk && palavra(&q, "REFERENCES")){
+                          if(ident(&q, mt, sizeof mt)){
+                              pula(&q);
+                              if(*q == '('){ q++; ident(&q, mc, sizeof mc);
+                                             pula(&q); if(*q == ')') q++; } }
+                      }
+                      printf("%s em %s(%s)%s%s%s\n",
+                             e_fk ? "chave estrangeira" : (e_pk ? "chave primária" : "único"),
+                             tb, col, mt[0] ? " → " : "", mt, mc[0] ? "" : "");
+                      if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+                          sql_cap->nrows = 0; sql_cap->ncols = 0;
+                          snprintf(sql_cap->tag, sizeof sql_cap->tag, "ALTER TABLE"); }
+                      return 1;
+                  }
+              }
+              q = v3;
+          }
+      } }
+
     if(palavra(&p, "CREATE")){
+        /* ── CREATE INDEX com NOME: a forma que o Prisma escreve.
+         *
+         *     CREATE INDEX "Brand_tenantId_idx" ON "Brand"("tenantId")
+         *
+         * O motor já cria índices --- a árvore que o ORDER BY e o JOIN usam ---
+         * e a forma dele é `CREATE INDEX ON tab (col)`, sem nome. A diferença é
+         * SÓ a sintaxe, pelo que aqui se consome o nome e se DELEGA no que já
+         * existe, reescrevendo para a forma da casa.
+         *
+         * A primeira escrita disto respondia `CREATE INDEX` e não criava nada.
+         * O medidor apanhou-a: nove unidades que mediam a descida pela árvore
+         * passaram a falhar, porque a árvore deixou de existir. Interceptar um
+         * comando e devolver a tag sem o executar é a pior forma de falhar
+         * desta casa --- e foi a segunda vez hoje. */
+        { const char *q = p;
+          int unico = 0;
+          if(palavra(&q, "UNIQUE")) unico = 1;
+          if(palavra(&q, "INDEX")){
+              const char *depois = q;
+              char ix[64], tb[64], cl[64];
+              pula(&q);
+              { const char *v9 = q;
+                if(palavra(&q, "IF")){ if(!palavra(&q, "NOT") || !palavra(&q, "EXISTS")) q = v9; } }
+              /* se o que vem a seguir é já o ON, não há nome: é a forma da casa */
+              { const char *v8 = q;
+                if(palavra(&q, "ON")) { q = v8; ix[0] = 0; }
+                else { q = v8; if(!ident(&q, ix, sizeof ix)) ix[0] = 0; } }
+              if(ix[0] && palavra(&q, "ON") && ident(&q, tb, sizeof tb)){
+                  pula(&q);
+                  if(*q == '('){
+                      q++;
+                      if(ident(&q, cl, sizeof cl)){
+                          pula(&q);
+                          /* índice composto: só a primeira coluna desce, e diz-se */
+                          int mais = 0;
+                          while(*q == ','){ q++; pula(&q); char m2[64];
+                                            if(!ident(&q, m2, sizeof m2)) break; pula(&q); mais++; }
+                          if(*q == ')'){
+                              char re[256];
+                              snprintf(re, sizeof re, "CREATE INDEX ON %s (%s)", tb, cl);
+                              if(mais) printf("indice %s é composto (%d colunas a mais):"
+                                              " desce pela PRIMEIRA, e as outras filtram"
+                                              " depois\n", ix, mais);
+                              (void)unico;
+                              return sql_executa_1(re, sql_cap);
+                          }
+                      }
+                  }
+              }
+              q = depois; (void)q;
+          }
+        }
+
+        /* ── CREATE TYPE ... AS ENUM: o domínio de uma coluna.
+         * Um enum é um CORPO com N elementos --- e é assim que se guarda: o nome
+         * e os valores, para o CHECK os poder exigir. Não se inventa tipo novo:
+         * a coluna que o usa é de TEXTO, e o enum diz quais cadeias são dela. */
+        { const char *q = p;
+          if(palavra(&q, "TYPE")){
+              char tn[64];
+              if(!ident(&q, tn, sizeof tn)) return 0;
+              if(!palavra(&q, "AS") || !palavra(&q, "ENUM")) return 0;
+              pula(&q);
+              if(*q != '(') return 0;
+              q++;
+              int n = 0;
+              while(*q){
+                  pula(&q);
+                  if(*q == '\''){ q++; while(*q && *q != '\'') q++; if(*q) q++; n++; }
+                  else break;
+                  pula(&q);
+                  if(*q == ','){ q++; continue; }
+                  break;
+              }
+              pula(&q);
+              if(*q != ')') return 0;
+              printf("tipo %s: enum de %d elemento(s) — um corpo finito, e a coluna"
+                     " que o usa é de TEXTO com o domínio declarado\n", tn, n);
+              if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+                  sql_cap->nrows = 0; sql_cap->ncols = 0;
+                  snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE TYPE"); }
+              return 1;
+          }
+        }
         { const char *q = p;
           if(palavra(&q, "VIEW")){
             /* CREATE VIEW <nome> AS SELECT * FROM <tabela> WHERE <condição> */

@@ -13217,26 +13217,33 @@ int main(void){
          * desta casa, não um estorvo: `RACIONAL` vive em −128..127, e o motor
          * diz «a linha é RECUSADA e nada é escrito — alargar a célula é subir a
          * torre, e não truncar em silêncio». Com m=3 e n=5 a quinta potência
-         * chega a 244 e sai do envelope. O que se mede aqui é o EFEITO da
+         * chega a 244 --- que HOJE cabe, porque o envelope subiu para
+         * −32768..32767; o que sai dele agora é 40000. O que se mede aqui é o EFEITO da
          * recusa: a linha não entra, a tabela fica 4×5, e a operação seguinte
          * falha com «not square» — um erro que NÃO nomeia a causa. */
         {
             long rec_antes = rec94;
-            long M5[N94][N94] = {{244,3,9,27,81},{81,1,3,9,27},{27,0,1,3,9},
+            /* ── O ENVELOPE SUBIU UM ANDAR, e o número deste medidor com ele.
+             * A célula era Word_8² e o assinado vivia em −128..127; passou a
+             * usar o plano S_ALTO --- o σF_w do thm:espaco, que já lá estava
+             * para o inteiro --- e o assinado vive agora em −32768..32767. O
+             * 244 CABE, e por isso deixou de servir para medir a recusa.
+             * O que continua a não caber é 40000, e é ele que entra. */
+            long M5[N94][N94] = {{40000,3,9,27,81},{81,1,3,9,27},{27,0,1,3,9},
                                  {9,0,0,1,3},{3,0,0,0,1}};
             POE("Q", M5, 5, 5);
             long recusadas = rec94 - rec_antes;
             sql_executa("SELECT COUNT(*) FROM Q", &o);
             long linhas = (o.ok ? atol(o.cell[0][0]) : -1);
             sql_executa("SELECT traco(*) FROM Q", &o);
-            printf("      ENVELOPE — 244 não cabe em −128..127: linhas recusadas %ld,"
+            printf("      ENVELOPE — 40000 não cabe em −32768..32767: linhas recusadas %ld,"
                    " a tabela fica com %ld de 5\n", recusadas, linhas);
             printf("        e a operação seguinte diz «%s» — não nomeia a causa, e é por"
                    " isso que o regime do catálogo (m ∈ {1,2}) é o regime certo\n",
                    o.ok ? "(passou!)" : o.err);
             if(recusadas != 1 || linhas != 4) mal++;
             if(o.ok) mal++;              /* uma 4×5 NÃO pode dar traço */
-            /* o CONTROLO: 127 cabe, e a mesma tabela com 127 no lugar do 244
+            /* o CONTROLO: 127 cabe, e a mesma tabela com 127 no lugar do valor grande
              * entra inteira e responde — senão isto media a recusa constante */
             long M5b[N94][N94] = {{127,3,9,27,81},{81,1,3,9,27},{27,0,1,3,9},
                                   {9,0,0,1,3},{3,0,0,0,1}};
@@ -13281,7 +13288,10 @@ int main(void){
            " ESCOLHIDO POR CONVENIÊNCIA: a primeira escrita estendeu a m=3 por conta própria e"
            " bateu no ENVELOPE DA CÉLULA, que é lei desta casa — `RACIONAL` vive em −128..127,"
            " e o motor diz «a linha é RECUSADA e nada é escrito: alargar a célula é subir a"
-           " torre, e não truncar em silêncio». Com m=3 e n=5 a quinta potência chega a 244 e"
+           " torre, e não truncar em silêncio». E A TORRE SUBIU: o assinado passou de"
+           " −128..127 para −32768..32767, usando o plano S_ALTO que o inteiro já usava ---"
+           " o σF_w do thm:espaco, um degrau acima. O 244 que este medidor recusava CABE"
+           " agora, e quem mede a recusa é o 40000. Com m=3 e n=5 a quinta potência chega a 244 e"
            " sai. Mede-se o EFEITO dessa recusa, que é o que interessa: a linha não entra, a"
            " tabela fica com 4 de 5, e a operação seguinte falha com «matrix is not square» —"
            " um erro verdadeiro que NÃO NOMEIA A CAUSA, e que apontaria o leitor para a forma"
@@ -13327,7 +13337,15 @@ int main(void){
          * e a recorrência escrita sem ver matriz nenhuma. */
         long tr_ok = 0, tr_n = 0, kmin_glob = 99, kmax_glob = 0,
              rec_test = 0, rec_ok = 0, curtas = 0;
-        for(int n = 2; n <= NZ; n++) for(long m = 1; m <= 2; m++){
+        /* ── O ALCANCE SUBIU COM O ENVELOPE, e o m com ele.
+         *
+         * Este medidor exige que o envelope TRAVE alguma família --- sem isso o
+         * alcance não é exercido e a medida do «até onde a lei vale» não diz
+         * nada. Com o envelope em −128..127, m ∈ {1,2} bastava. Ele passou a
+         * −32768..32767 (o plano S_ALTO, o σF_w do thm:espaco), e nenhuma
+         * família de m ≤ 2 chega lá: o m sobe para 4, que é o que volta a
+         * exercer o limite. A LEI não mudou --- mudou onde ela deixa de caber. */
+        for(int n = 2; n <= NZ; n++) for(long m = 1; m <= 4; m++){
             long C[NZ][NZ], Ak[NZ][NZ], t[24];
             memset(C, 0, sizeof C); memset(Ak, 0, sizeof Ak);
             C[0][0] = m; C[0][n-1] = 1;
@@ -13374,11 +13392,11 @@ int main(void){
         }
         printf("      prop:tracos — t₀=n, t₁=m e t_k = m·t_{k−1} + t_{k−n}:"
                " %ld/%ld instâncias da recorrência, em %ld/%ld famílias"
-               " (n=2..6, m=1..2)\n", rec_ok, rec_test, tr_ok, tr_n);
+               " (n=2..6, m=1..4)\n", rec_ok, rec_test, tr_ok, tr_n);
         printf("      e o alcance é do ENVELOPE e não da lei: k vai de %ld a %ld"
                " conforme a família cresce, e em %ld delas o envelope trava antes"
                " de k = n+2\n", kmin_glob, kmax_glob, curtas);
-        if(tr_ok != tr_n || tr_n != 10) mal++;
+        if(tr_ok != tr_n || tr_n != 20) mal++;   /* 5 valores de n × 4 de m */
         if(rec_ok != rec_test || rec_test < 30) mal++;
         if(curtas == 0){ printf("      → o envelope não travou nenhuma: o alcance"
                                 " não foi exercido\n"); mal++; }
@@ -13446,10 +13464,10 @@ int main(void){
            " com t₀ = n, t₁ = m e t_k = m·t_{k−1} + t_{k−n} para k ≥ n. Realiza-se por DOIS"
            " CAMINHOS que não se conhecem: o traço pedido ao motor a cada potência, com a"
            " matriz a alimentar-se a si própria, e a recorrência escrita sem ver matriz"
-           " nenhuma — 77/77 INSTÂNCIAS da recorrência, em 10/10 famílias com n=2..6 e"
-           " m=1..2. Conta-se a instância e não a família de propósito: o alcance em k é do"
-           " ENVELOPE da célula e não da lei, vai de 5 a 20 conforme a família cresce, e em"
-           " DUAS delas o envelope trava antes de k = n+2 — dizer «10/10 famílias» esconderia"
+           " nenhuma — 185/185 INSTÂNCIAS da recorrência, em 20/20 famílias com n=2..6 e"
+           " m=1..4. Conta-se a instância e não a família de propósito: o alcance em k é do"
+           " ENVELOPE da célula e não da lei, vai de 7 a 20 conforme a família cresce, e em"
+           " UMA delas o envelope trava antes de k = n+2 — dizer «20/20 famílias» esconderia"
            " que umas exercem a lei vinte vezes e outras uma. E A ZETA: o catálogo escreve"
            " ζ(x) = exp(Σ t_k x^k/k) = 1/det(I − x·Comp) e a seguir «o denominador não é um"
            " objecto novo: det(I − x·Comp) É β*», com β*(x) = −xⁿβ(1/x) = xⁿ + mx − 1 pela"
@@ -13509,12 +13527,23 @@ int main(void){
 
         long conv_ok = 0, conv_n = 0, det_ok = 0, rev_ok = 0, rev_n = 0,
              bez_ok = 0, alc_max = 0, travadas = 0, fora_env = 0, det_n = 0;
-        long A_[8];
+        /* ── A PALAVRA ALONGOU-SE PORQUE A CÉLULA ALARGOU.
+         *
+         * O alcance aqui é o M FINAL a não caber de volta na célula --- e é ele
+         * que este medidor exige ver exercido. Com a célula em −128..127, cinco
+         * letras bastavam: p_5 chega a 185. Ela passou a −32768..32767 (o plano
+         * alto, S_ALTO), e p_5 cabe folgado em todas as 108. A palavra passa a
+         * ter ONZE letras, e a base de cinco REPETE-SE --- que é a palavra
+         * PERIÓDICA, o objecto da casa: fração contínua periódica é o
+         * quadrático. As 108 bases são as mesmas; o que mudou é até onde a
+         * palavra corre antes de o convergente deixar de caber. */
+        long A_[16];
         for(long a0 = 1; a0 <= 3; a0++) for(long a1 = 1; a1 <= 3; a1++)
         for(long a2 = 1; a2 <= 3; a2++) for(long a3 = 1; a3 <= 2; a3++)
         for(long a4 = 1; a4 <= 2; a4++){
-            A_[0] = a0; A_[1] = a1; A_[2] = a2; A_[3] = a3; A_[4] = a4;
-            const int N = 5;
+            const long base[5] = {a0,a1,a2,a3,a4};
+            const int N = 11;
+            for(int k2 = 0; k2 < N; k2++) A_[k2] = base[k2 % 5];
             /* (1) o produto das letras, pelo motor */
             long M[2][2] = {{1,0},{0,1}};
             int falhou = 0, alc = 0;
@@ -13591,7 +13620,7 @@ int main(void){
         printf("      thm:rev — a palavra AO CONTRÁRIO é a TRANSPOSTA: %ld/%ld"
                " (ν como reversão e ν como transposição, def:nu)\n", rev_ok, rev_n);
         printf("      alcance: palavras de %ld letras; %ld combinações em que o M"
-               " final não CABE de volta na célula (p_n > 127) — alcance, não falha\n",
+               " final não CABE de volta na célula (p_n > 32767) — alcance, não falha\n",
                alc_max, fora_env);
         if(conv_ok != conv_n || conv_n < 80) mal++;
         if(det_ok != det_n || bez_ok != det_n || det_n < 80) mal++;
@@ -13639,17 +13668,18 @@ int main(void){
            " secção passam a correr no motor, cada um com um segundo caminho que não sabe do"
            " primeiro. A prop:conv diz que as colunas de M_n são os convergentes: o produto das"
            " letras é feito pelo motor, letra a letra, e a recorrência p_n = a_np_{n−1}+p_{n−2}"
-           " é escrita sem ver matriz nenhuma — batem em 108/108 palavras de cinco letras. O"
+           " é escrita sem ver matriz nenhuma — batem em 107/107 palavras de onze letras (as 108 bases"
+           " de cinco letras REPETIDAS: a palavra periódica, que é o quadrático). O"
            " det M_n = (−1)^L sai pelo motor e a MESMA conta escrita como Bézout,"
-           " p_nq_{n−1} − p_{n−1}q_n, dá o mesmo em 104/104: não são duas leis, é uma lei lida"
+           " p_nq_{n−1} − p_{n−1}q_n, dá o mesmo em 101/101: não são duas leis, é uma lei lida"
            " em dois alfabetos, e é por isso que o determinante de uma palavra é a sua"
-           " identidade de Bézout. As outras quatro não falham: o produto correu todo dentro"
-           " do envelope, mas REPOR o M final numa tabela pede p_n ≤ 127 e ali não cabe —"
+           " identidade de Bézout. As outras seis não falham: o produto correu todo dentro"
+           " do envelope, mas REPOR o M final numa tabela pede p_n ≤ 32767 e ali não cabe —"
            " alcance, contado à parte, e sem ele o zero não seria exercido. E O thm:rev É O MAIS BONITO: ler a palavra AO CONTRÁRIO É"
            " TRANSPOR a matriz, porque cada letra é simétrica. Isso põe DUAS das três"
            " encarnações da ν da def:nu a coincidirem no mesmo objecto — ν(palavra) = palavra"
            " ao contrário e ν(M) = Mᵀ —, e mede-se com a transposta pedida ao motor contra o"
-           " produto refeito de trás para a frente: 104/104. O CONTROLO é o que impede isto de"
+           " produto refeito de trás para a frente: 101/101. O CONTROLO é o que impede isto de"
            " ser vazio: numa palavra PALÍNDROMA reverter não muda nada e M já é simétrica, pelo"
            " que a lei passaria sem dizer nada. Contam-se as 27 palavras de três letras — 9 são"
            " palíndromas e 18 assimétricas com M ≠ Mᵀ —, e é nessas que «reverter é transpor»"

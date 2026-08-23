@@ -104,11 +104,21 @@ static void pgcat_limpa(char *v){
     }
 }
 
+/* o valor de um parâmetro de sessão, ou NULL --- para quem precisa de o LER e
+ * não de o mostrar. É a mesma tabela que o SHOW usa, e por isso as duas
+ * leituras não podem discordar. */
+static const char *pgcat_valor(const char *nome);
+
 static PgParam *pgcat_acha(const char *nome){
     for(int i = 0; i < pgcat_n; i++)
         if(pgcat_ieq(pgcat_par[i].nome, nome)) return &pgcat_par[i];
     return NULL;
 }
+static const char *pgcat_valor(const char *nome){
+    PgParam *r = pgcat_acha(nome);
+    return r ? r->valor : NULL;
+}
+
 
 /* ── as respostas, todas com a forma que o wire espera ─────────────────────── */
 static void pgcat_uma(SqlOut *o, const char *col, const char *val, const char *tag){
