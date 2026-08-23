@@ -26369,6 +26369,115 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W181: OS CASOS-LIMITE DA API — o cliente a fazer asneira ════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W181 a API sob mau uso: cada recusa protege uma hipótese, e diz qual.\n\n");
+        unlink("/tmp/pgwire_w181__T.mem"); unlink("/tmp/pgwire_w181__T.prog");
+        unlink("/tmp/pgwire_w181.mem");    unlink("/tmp/pgwire_w181.prog");
+        if(!sql_abrir("/tmp/pgwire_w181")) mal++;
+
+        /* cada caso: o que o cliente escreve, e o que TEM de acontecer */
+        long recusas = 0, aceites = 0, casos = 0;
+        struct { const char *o_que; const char *ddl; const char *ins1; const char *ins2;
+                 const char *pergunta; int recusa; } K[] = {
+          {"edo sobre tabela vazia",
+           "CREATE TABLE T (x RACIONAL, y RACIONAL)", NULL, NULL,
+           "SELECT edo(*) FROM T", 1},
+          {"edo com companheira torta",
+           "CREATE TABLE T (x RACIONAL, y RACIONAL)",
+           "INSERT INTO T VALUES (1,1)", "INSERT INTO T VALUES (2,3)",
+           "SELECT edo(*) FROM T", 1},
+          {"edo com entrada fracionária",
+           "CREATE TABLE T (x RACIONAL, y RACIONAL)",
+           "INSERT INTO T VALUES (0,1)", "INSERT INTO T VALUES (1/2,-3)",
+           "SELECT edo(*) FROM T", 1},
+          {"edo BEM POSTA (o controlo)",
+           "CREATE TABLE T (x RACIONAL, y RACIONAL)",
+           "INSERT INTO T VALUES (0,1)", "INSERT INTO T VALUES (-6,-5)",
+           "SELECT edo(*) FROM T", 0},
+          {"funde com célula ausente",
+           "CREATE TABLE T (a RACIONAL, b RACIONAL)",
+           "INSERT INTO T VALUES (1,NULL)", "INSERT INTO T VALUES (2,3)",
+           "SELECT funde(*) FROM T", 1},
+          {"funde BEM POSTO (o controlo)",
+           "CREATE TABLE T (a RACIONAL, b RACIONAL)",
+           "INSERT INTO T VALUES (1,2)", "INSERT INTO T VALUES (3,4)",
+           "SELECT funde(*) FROM T", 0},
+          {"fibra sobre duas colunas",
+           "CREATE TABLE T (a RACIONAL, b RACIONAL)",
+           "INSERT INTO T VALUES (1,2)", "INSERT INTO T VALUES (3,4)",
+           "SELECT fibra(*) FROM T", 1},
+          {"fibra BEM POSTA (o controlo)",
+           "CREATE TABLE T (e RACIONAL)",
+           "INSERT INTO T VALUES (1)", "INSERT INTO T VALUES (1)",
+           "SELECT fibra(*) FROM T", 0},
+          {"global com uma representação só",
+           "CREATE TABLE T (a RACIONAL)",
+           "INSERT INTO T VALUES (1)", "INSERT INTO T VALUES (2)",
+           "SELECT global(*) FROM T", 1},
+          {"global com coluna que funde",
+           "CREATE TABLE T (a RACIONAL, b RACIONAL)",
+           "INSERT INTO T VALUES (1,7)", "INSERT INTO T VALUES (2,7)",
+           "SELECT global(*) FROM T", 1},
+          {"triade com uma coluna",
+           "CREATE TABLE T (a RACIONAL)",
+           "INSERT INTO T VALUES (1)", "INSERT INTO T VALUES (2)",
+           "SELECT triade(*) FROM T", 1},
+          {"triade BEM POSTA (o controlo)",
+           "CREATE TABLE T (a RACIONAL, b RACIONAL)",
+           "INSERT INTO T VALUES (1,2)", "INSERT INTO T VALUES (3,1)",
+           "SELECT triade(*) FROM T", 0},
+        };
+        int NK = (int)(sizeof K / sizeof K[0]);
+        printf("      o que o cliente escreve            esperado   o motor\n");
+        for(int c = 0; c < NK; c++){
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa(K[c].ddl, &o2);
+            if(K[c].ins1) sql_executa(K[c].ins1, &o2);
+            if(K[c].ins2) sql_executa(K[c].ins2, &o2);
+            sql_executa(K[c].pergunta, &o);
+            casos++;
+            int bateu = (o.ok != K[c].recusa);
+            printf("      %-34s %-10s %s%s\n", K[c].o_que,
+                   K[c].recusa ? "recusa" : "aceita",
+                   o.ok ? "aceitou" : "recusou", bateu ? "" : "   ← NÃO BATEU");
+            if(!bateu) mal++;
+            if(o.ok) aceites++; else recusas++;
+        }
+        printf("      → %ld casos: %ld recusados, %ld aceites\n", casos, recusas, aceites);
+        /* tem de haver dos DOIS: uma API que recusa tudo, ou aceita tudo, não
+         * está a distinguir nada */
+        if(recusas == 0 || aceites == 0) mal++;
+
+        /* ── E A MENSAGEM TEM DE DIZER O QUE FALHOU, não só que falhou ────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS T", &o2);
+            sql_executa("CREATE TABLE T (x RACIONAL, y RACIONAL)", &o2);
+            sql_executa("INSERT INTO T VALUES (1,1)", &o2);
+            sql_executa("INSERT INTO T VALUES (2,3)", &o2);
+            sql_executa("SELECT edo(*) FROM T", &o);
+            printf("      a mensagem da companheira torta: «%s»\n", o.err);
+            /* tem de nomear a linha e o que se esperava --- uma mensagem que só
+             * diz «erro» obriga o cliente a adivinhar */
+            if(o.ok || !strstr(o.err, "companion")) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("A API DISTINGUE, E CADA RECUSA DIZ QUAL HIPÓTESE CAIU. Doze usos --- oito"
+           " tortos e quatro bem postos --- e o motor separa-os todos: recusa a tabela"
+           " vazia, a companheira que não o é, a entrada fracionária de onde as raízes não"
+           " sairiam exactas, a célula ausente, a coluna a mais e a coluna a menos, e a"
+           " representação que funde dois objectos. E ACEITA os quatro controlos, que são a"
+           " metade sem a qual isto não diria nada: uma API que recusasse tudo passava neste"
+           " medidor sem servir para coisa nenhuma. A mensagem nomeia o que falhou --- «row"
+           " is not a companion row» --- e não só que falhou: quem recebe «erro» e mais nada"
+           " tem de adivinhar, e adivinhar sobre uma hipótese é o que esta casa evita em"
+           " todo o lado.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

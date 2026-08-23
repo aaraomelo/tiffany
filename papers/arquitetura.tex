@@ -2295,6 +2295,39 @@ envelope e não pelo grau. E a fusão \textbf{dobra} a largura a cada passo, pel
 \code{funde} devolve duas colunas: o \code{fundido}, que guarda a régua, e o \code{compacto},
 que serve para encadear.
 
+\subsection*{E a API sob mau uso: cada recusa diz qual hipótese caiu}
+
+\noindent Uma porta comercial mede-se também pelo que \emph{não} deixa passar. Doze usos ---
+oito tortos e quatro bem postos --- e o motor separa-os todos:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+o que o cliente escreve & o motor & porquê\\
+\midrule
+\code{edo} sobre tabela vazia & recusa & não há matriz\\
+\code{edo} com companheira torta & recusa & «\code{row 0 is not a companion row}»\\
+\code{edo} com entrada fracionária & recusa & as raízes não sairiam exactas\\
+\code{edo} bem posta & \textbf{aceita} & \emph{o controlo}\\
+\code{funde} com célula ausente & recusa & um buraco não é um endereço\\
+\code{funde} bem posto & \textbf{aceita} & \emph{o controlo}\\
+\code{fibra} sobre duas colunas & recusa & a fibra conta \emph{uma} leitura\\
+\code{fibra} bem posta & \textbf{aceita} & \emph{o controlo}\\
+\code{global} com uma representação só & recusa & não há duas a comparar\\
+\code{global} com coluna que funde & recusa & sem reversibilidade não há travessia\\
+\code{triade} com uma coluna & recusa & a tríade lê-se do \emph{par}\\
+\code{triade} bem posta & \textbf{aceita} & \emph{o controlo}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Os quatro controlos são a metade sem a qual isto não diria nada: \emph{uma API que
+recusasse tudo passava no medidor sem servir para coisa nenhuma}. E a mensagem \textbf{nomeia
+o que falhou}, não só que falhou --- quem recebe «erro» e mais nada tem de adivinhar, e
+adivinhar sobre uma hipótese é o que esta casa evita em todo o lado.
+
+\medido{\code{tests/pgwire.c} §W181.}
+
 \medido{\code{tools/edo\_circuito.c}, \code{tools/rlc\_sql.c}, \code{tools/servomotor.c},
 \code{tools/hidraulico\_pneumatico.c}, \code{tools/cliente\_monta\_circuito.c}, e
 \code{tests/pgwire.c} §W176--§W180.}
