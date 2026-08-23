@@ -2262,6 +2262,59 @@ verificada linha a linha antes de responder}: um endereço que não se sabe sepa
 fusão, e é recusado em vez de devolvido. E recusa também uma coluna só, e endereços
 negativos --- \emph{entrelaçam-se dígitos, não sinais}.
 
+\subsection*{Um servomotor real, montado pelo cliente}
+
+O objecto é um servomotor DC de bancada, com os valores de catálogo:
+$R=2\,\Omega$, $L=0{,}5\,$H, $J=0{,}02\,$kg\,m$^2$, $b=0{,}2\,$N\,m\,s, $K=0{,}1$. As duas
+malhas \emph{são} os dois corpos:
+\[
+  \underbrace{L\tfrac{di}{dt}+R\,i+K\,\omega=V}_{\text{o eletromagnético}},
+  \qquad
+  \underbrace{J\tfrac{d\omega}{dt}+b\,\omega-K\,i=\tau}_{\text{o mecânico}},
+\]
+com o acoplamento $K$ nos dois com \emph{sinais opostos} --- é ele que faz a energia
+atravessar, e é a fusão em forma de física. Eliminando $i$,
+\[
+  \lambda^2+\Bigl(\tfrac{R}{L}+\tfrac{b}{J}\Bigr)\lambda+\tfrac{Rb+K^2}{LJ}=0
+  \quad\Longrightarrow\quad
+  \lambda^2+14\lambda+41=0 ,
+\]
+com coeficientes \textbf{inteiros}, que é o que deixa o motor resolver sem uma vírgula.
+
+\paragraph{O cliente faz três perguntas, todas por SQL.}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\texttt{SELECT funde(*) FROM M} & o amperímetro distingue $6$ estados, o tacómetro $6$, \textbf{o fundido $36$}\\
+\texttt{SELECT edo(*) FROM A} & $y''+14y'+41y=0$, $\Delta=32$, $\lambda=\frac{-14\pm\sqrt{32}}{2}$\\
+\texttt{SELECT regime(*) FROM A} & CRISTAL, hiperbólico, traço $-14$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Nenhum instrumento sozinho determina o estado do motor} --- o amperímetro no
+enrolamento não sabe a velocidade, o tacómetro no veio não sabe a corrente --- e os dois
+juntos determinam-no. \textbf{É isso que a fusão desfaz}, e é a mesma frase que a fibra diz
+noutro registo.
+
+\paragraph{E o que o cliente lê disto, em engenharia.}
+\begin{itemize}\itemsep2pt
+\item as duas raízes são reais e \textbf{negativas} $\Rightarrow$ o motor pára sozinho;
+\item $\lambda=-7\pm2\sqrt2\approx-4{,}17$ e $-9{,}83\,$s$^{-1}$ são as duas constantes de tempo;
+\item \textbf{a lenta manda}: $\tau=1/4{,}17\approx0{,}24\,$s é o tempo de resposta;
+\item $\Delta=32>0$, sem oscilação $\Rightarrow$ não há sobre-elongação;
+\item e o motor \textbf{não arredondou} o $\sqrt{32}$ --- quem quiser o número sobe a torre.
+\end{itemize}
+
+\paragraph{O gume: com $K=0$ o motor deixa de ser motor.} Sem acoplamento a característica
+passa a $y''+14y'+40y=0$ e as raízes são $-4$ e $-10$ --- \emph{exactamente} as taxas
+próprias $R/L$ e $b/J$, separadas. Com $K=0{,}1$ elas puxam-se uma para a outra, $-4{,}17$ e
+$-9{,}83$: \emph{é o acoplamento a mover as duas, e sem esse caso a conta podia estar a
+inventá-las em vez de as produzir.}
+
+\medido{\code{tools/servomotor.c} --- o servomotor com os valores de catálogo, as três
+perguntas por SQL, e o $K=0$ a devolver as taxas próprias separadas.}
+
 \subsection*{E o cliente monta o circuito que quiser, sem chamar ninguém}
 
 A pergunta que isto obriga a responder: com um milhão de corpos no banco, como funde ele os
