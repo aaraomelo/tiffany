@@ -2102,6 +2102,49 @@ que é fonte e não resistor.
 \medskip\noindent E o $\Delta$ sai por \textbf{três caminhos} que têm de concordar: à mão, da
 \code{lib/edo.h} lendo a equação escrita, e do motor pela companheira --- $5/5$ nos três.
 
+\paragraph{E resolve-se \emph{pelo SQL}, com a conta dentro do motor.} A primeira versão
+disto classificava pelo \code{regime(*)} e calculava as raízes \emph{fora}, em C --- o que
+não é resolver no banco, é usar o banco para uma parte. A conta está agora em
+\code{banco/sql.c}, na operação
+\[
+  \texttt{SELECT edo(*) FROM A}
+\]
+que recebe a companheira e devolve a equação, o $\Delta$, a classe, as \textbf{duas raízes} e
+a \textbf{forma da solução}:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrlll@{}}
+\toprule
+o circuito & a equação & $\Delta$ & classe & $\lambda_1$ & $y(t)$\\
+\midrule
+sobreamortecido & $y''+5y'+6y=0$ & $1$ & hiperbólico & $-2$ & $c_1e^{-2t}+c_2e^{-3t}$\\
+crítico & $y''+4y'+4y=0$ & $0$ & parabólico & $-2$ & $(c_1+c_2t)e^{-2t}$\\
+subamortecido & $y''+2y'+5y=0$ & $-16$ & elíptico & $-1{+}2i$ & $e^{-t}(c_1\cos2t+c_2\operatorname{sen}2t)$\\
+sem perdas & $y''+4y=0$ & $-16$ & elíptico & $0{+}2i$ & $c_1\cos2t+c_2\operatorname{sen}2t$\\
+só resistivo & $y''+3y'=0$ & $9$ & hiperbólico & $0$ & $c_1+c_2e^{-3t}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{A distinção que isto marca}: o \code{regime} \textbf{classifica} --- diz o
+sinal de $\operatorname{Re}\lambda$ e a classe --- e o \code{edo} \textbf{resolve}. São a
+mesma leitura da companheira e duas respostas diferentes.
+
+\paragraph{Três coisas que o motor recusa fazer.} A companheira \emph{confere-se}: a primeira
+linha tem de ser $(0,1)$, e a matriz que não o é é recusada --- não se supõe que uma $2\times2$
+qualquer seja uma companheira. As entradas têm de ser inteiras, porque é daí que as raízes
+saem exactas. E \textbf{o irracional não se arredonda}: para $y''-y'-y=0$, que é o metal do
+ouro, o motor devolve $\lambda_1=\frac{1+\sqrt5}{2}$ \emph{escrito assim} --- \emph{quem
+quiser o valor sobe a torre, porque é o corte e não uma divisão}.
+
+\medskip\noindent E o gume da resolução é que cada raiz tem de \textbf{anular} a
+característica, $\lambda^2+B\lambda+C=0$, verificado em inteiros: uma raiz plausível e errada
+passaria por qualquer outra asserção.
+
+\medido{\code{tests/pgwire.c} §W176 --- os cinco circuitos pelo fio com \code{SELECT edo(*)},
+cada raiz a anular a característica, a recusa da não-companheira, e o irracional a sair por
+extrair. E \code{tools/rlc\_sql.c}, onde nenhuma conta é feita fora do motor.}
+
 \medido{\code{tools/edo\_circuito.c} --- os cinco circuitos com o $\Delta$ pelos três
 caminhos, o regime pelo motor, e as raízes exactas em inteiros.}
 

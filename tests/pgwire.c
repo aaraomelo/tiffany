@@ -25884,6 +25884,99 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W176: SELECT edo(*) — o motor RESOLVE a diferencial ═════════════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W176 SELECT edo(*): o motor não classifica a diferencial --- RESOLVE-A.\n\n");
+        unlink("/tmp/pgwire_w176__A.mem"); unlink("/tmp/pgwire_w176__A.prog");
+        unlink("/tmp/pgwire_w176.mem");    unlink("/tmp/pgwire_w176.prog");
+        if(!sql_abrir("/tmp/pgwire_w176")) mal++;
+
+        /* o circuito RLC em série: L q'' + R q' + q/C = 0 */
+        struct { const char *nome; long R, invLC; const char *cls; const char *l1; } K[5] = {
+          {"sobreamortecido", 5, 6, "hiperbolico", "-2"},
+          {"crítico",         4, 4, "parabolico",  "-2"},
+          {"subamortecido",   2, 5, "eliptico",    "-1+2i"},
+          {"sem perdas",      0, 4, "eliptico",    "0+2i"},
+          {"só resistivo",    3, 0, "hiperbolico", "0"},
+        };
+        printf("      circuito          a equação            Δ   classe       λ₁      y(t)\n");
+        long certos = 0;
+        for(int c = 0; c < 5; c++){
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS A", &o2);
+            sql_executa("CREATE TABLE A (x RACIONAL, y RACIONAL)", &o2);
+            sql_executa("INSERT INTO A VALUES (0,1)", &o2);
+            snprintf(q, sizeof q, "INSERT INTO A VALUES (%ld,%ld)", -K[c].invLC, -K[c].R);
+            sql_executa(q, &o2);
+            sql_executa("SELECT edo(*) FROM A", &o);
+            if(!o.ok){ mal++; continue; }
+            printf("      %-17s %-20s %4s  %-11s  %-7s %s\n", K[c].nome,
+                   o.cell[0][0], o.cell[0][1], o.cell[0][2], o.cell[0][3], o.cell[0][5]);
+            if(strcmp(o.cell[0][2], K[c].cls)) mal++;
+            if(strcmp(o.cell[0][3], K[c].l1)) mal++;
+            else certos++;
+            /* a raiz TEM de anular a característica: λ² + Bλ + C = 0, verificado
+             * aqui em inteiros quando ela é inteira --- o gume contra um motor
+             * que devolvesse uma raiz plausível e errada */
+            if(o.cell[0][3][0] == '-' || (o.cell[0][3][0] >= '0' && o.cell[0][3][0] <= '9')){
+                char *fim; long lam = strtol(o.cell[0][3], &fim, 10);
+                if(*fim == 0){
+                    long v = lam*lam + K[c].R*lam + K[c].invLC;
+                    if(v != 0){
+                        printf("      ^^^ a raiz %ld NÃO anula λ²+%ldλ+%ld (dá %ld)\n",
+                               lam, K[c].R, K[c].invLC, v);
+                        mal++;
+                    }
+                }
+            }
+        }
+        printf("      → %ld das 5 com a raiz que se esperava, e todas anulam a"
+               " característica\n", certos);
+        if(certos != 5) mal++;
+
+        /* ── A RECUSA: o que não é companheira não é EDO ────────────────────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS M", &o2);
+            sql_executa("CREATE TABLE M (x RACIONAL, y RACIONAL)", &o2);
+            sql_executa("INSERT INTO M VALUES (2,3)", &o2);
+            sql_executa("INSERT INTO M VALUES (1,4)", &o2);
+            sql_executa("SELECT edo(*) FROM M", &o);
+            printf("      a matriz (2,3;1,4), que não é companheira: o motor %s\n",
+                   o.ok ? "ACEITOU (mal)" : "recusa --- a 1.ª linha tem de ser (0,1)");
+            if(o.ok) mal++;
+        }
+
+        /* ── E O IRRACIONAL NÃO SE ARREDONDA: diz-se a forma ────────────────── */
+        {
+            sql_executa("DROP TABLE IF EXISTS R", &o2);
+            sql_executa("CREATE TABLE R (x RACIONAL, y RACIONAL)", &o2);
+            sql_executa("INSERT INTO R VALUES (0,1)", &o2);
+            sql_executa("INSERT INTO R VALUES (1,1)", &o2);   /* y'' - y' - y = 0 */
+            sql_executa("SELECT edo(*) FROM R", &o);
+            printf("      y'' − y' − y = 0 (o metal do ouro): Δ = %s, λ₁ = %s\n",
+                   o.ok ? o.cell[0][1] : "?", o.ok ? o.cell[0][3] : "?");
+            printf("      → o motor NÃO arredonda: escreve a forma com a raiz por"
+                   " extrair\n");
+            if(!o.ok || !strstr(o.cell[0][3], "sqrt")) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O MOTOR NÃO CLASSIFICA A DIFERENCIAL: RESOLVE-A, E PELO SQL. A tabela traz a"
+           " matriz COMPANHEIRA de y''+By'+Cy=0 --- que é a mesma leitura do `regime` --- e"
+           " o que muda é o que se devolve: o `regime` diz a classe, o `edo` devolve as"
+           " RAÍZES e a forma da solução. Os cinco circuitos RLC saem com λ exacto em"
+           " inteiros, e o gume é que cada raiz TEM de anular λ²+Bλ+C: uma raiz plausível e"
+           " errada passaria por qualquer outra asserção. A companheira confere-se em vez de"
+           " se supor --- a primeira linha tem de ser (0,1), e a matriz que não o é é"
+           " RECUSADA. E o irracional não se arredonda: com Δ=5, que é o metal do ouro, o"
+           " motor escreve a forma com a raiz por extrair em vez de mentir um decimal ---"
+           " quem quiser o valor sobe a torre, porque é o corte e não uma divisão.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

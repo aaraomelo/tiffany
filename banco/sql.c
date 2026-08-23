@@ -4618,7 +4618,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"VALORACAO") ? 27
                        : !strcasecmp(nome,"TRIADE") ? 28
                        : !strcasecmp(nome,"COMPLETA") ? 29
-                       : !strcasecmp(nome,"GLOBAL") ? 30 : 0;
+                       : !strcasecmp(nome,"GLOBAL") ? 30
+                       : !strcasecmp(nome,"EDO") ? 31 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7748,6 +7749,135 @@ static int varre(const char *resto, int acao){
                " endereços de %d bits · %s\n", vale, tot, estrito, nl, bits,
                falha == 0 ? "a régua DESCE: a leitura serve"
                           : "a régua NÃO desce: a leitura não serve");
+        return 1;
+    }
+
+    if(acao == ACAO_MARCA && mat_op == 31){
+        /* ── EDO: RESOLVE a equação diferencial, e devolve as RAÍZES.
+         *
+         * A tabela traz a matriz COMPANHEIRA de y'' + By' + Cy = 0,
+         *
+         *     A = [  0   1 ]     tr A = −B,  det A = C,  Δ = tr² − 4det,
+         *         [ −C  −B ]
+         *
+         * que é a mesma leitura do `regime`. A diferença é o que se devolve: o
+         * regime CLASSIFICA e este RESOLVE --- dá as duas raízes de λ²+Bλ+C=0 e
+         * a forma da solução. E a `lib/edo.h` já dizia porquê: a característica
+         * É a borda do corpo, σ²=b₀+b₁σ, com B=−b₁ e C=−b₀.
+         *
+         * As raízes saem EXACTAS em inteiros quando Δ é quadrado perfeito e o
+         * numerador é par; quando não, diz-se a forma e NÃO se arredonda ---
+         * um irracional escrito em decimal seria a casa a mentir sobre o que
+         * tem. Quem quiser o valor sobe a torre: é o corte, não uma divisão. */
+        if(ncols != 2 || nrows < 2){
+            printf("erro: a EDO lê-se da matriz COMPANHEIRA 2×2 --- a tabela tem"
+                   " %ld coluna(s) e %ld linha(s). RECUSADA.\n", ncols, nrows);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "edo needs the 2x2 companion matrix"); }
+            return 0;
+        }
+        long m[2][2];
+        for(long i = 0; i < 2; i++) for(long j = 0; j < 2; j++){
+            if(!bit_le(S_PRES, i*ncols + j)){
+                printf("erro: a companheira tem célula ausente --- RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "edo: missing cell in companion matrix"); }
+                return 0;
+            }
+            long nu, de; celula_qz(i, j, ncols, &nu, &de);
+            if(de != 1){
+                printf("erro: a companheira tem entrada não inteira (%ld/%ld) --- as"
+                       " raízes saem exactas de inteiros. RECUSADA.\n", nu, de);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "edo: companion entry not integral"); }
+                return 0;
+            }
+            m[i][j] = nu;
+        }
+        /* a companheira tem a forma [[0,1],[-C,-B]]: confere-se, em vez de supor */
+        if(m[0][0] != 0 || m[0][1] != 1){
+            printf("erro: a primeira linha da companheira tem de ser (0,1) e é"
+                   " (%ld,%ld) --- isto não é uma companheira. RECUSADA.\n",
+                   m[0][0], m[0][1]);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "edo: first row must be (0,1)"); }
+            return 0;
+        }
+        long B = -m[1][1], C = -m[1][0];
+        long D = B*B - 4*C;
+        /* a raiz inteira de |Δ|, se houver */
+        long ad = D < 0 ? -D : D, r = 0;
+        while(r*r < ad) r++;
+        int quadrado = (r*r == ad);
+        char r1[SQL_OUT_CELL], r2[SQL_OUT_CELL], forma[SQL_OUT_CELL];
+        const char *classe;
+        if(D > 0){
+            classe = "hiperbolico";
+            if(quadrado && ((-B + r) % 2 == 0)){
+                snprintf(r1, sizeof r1, "%ld", (-B + r)/2);
+                snprintf(r2, sizeof r2, "%ld", (-B - r)/2);
+                snprintf(forma, sizeof forma, "c1*e^(%st) + c2*e^(%st)", r1, r2);
+            } else {
+                snprintf(r1, sizeof r1, "(%ld+sqrt(%ld))/2", -B, D);
+                snprintf(r2, sizeof r2, "(%ld-sqrt(%ld))/2", -B, D);
+                snprintf(forma, sizeof forma, "c1*e^(l1*t) + c2*e^(l2*t)");
+            }
+        } else if(D == 0){
+            classe = "parabolico";
+            if((-B) % 2 == 0){
+                snprintf(r1, sizeof r1, "%ld", -B/2);
+                snprintf(r2, sizeof r2, "%ld", -B/2);
+                snprintf(forma, sizeof forma, "(c1 + c2*t)*e^(%st)", r1);
+            } else {
+                snprintf(r1, sizeof r1, "%ld/2", -B);
+                snprintf(r2, sizeof r2, "%ld/2", -B);
+                snprintf(forma, sizeof forma, "(c1 + c2*t)*e^(%st)", r1);
+            }
+        } else {
+            classe = "eliptico";
+            /* λ = a ± bi com a = −B/2 e b = √|Δ|/2 */
+            if(quadrado && ((-B) % 2 == 0) && (r % 2 == 0)){
+                snprintf(r1, sizeof r1, "%ld+%ldi", -B/2, r/2);
+                snprintf(r2, sizeof r2, "%ld-%ldi", -B/2, r/2);
+                snprintf(forma, sizeof forma, "e^(%ldt)*(c1*cos(%ldt) + c2*sen(%ldt))",
+                         -B/2, r/2, r/2);
+            } else {
+                snprintf(r1, sizeof r1, "(%ld+i*sqrt(%ld))/2", -B, ad);
+                snprintf(r2, sizeof r2, "(%ld-i*sqrt(%ld))/2", -B, ad);
+                snprintf(forma, sizeof forma, "e^(at)*(c1*cos(wt) + c2*sen(wt))");
+            }
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 6;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "equacao");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "disc");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "classe");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "lambda1");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "lambda2");
+            snprintf(sql_cap->col[5], sizeof sql_cap->col[5], "solucao");
+            for(int c = 0; c < 6; c++) sql_cap->tipo[c] = SQL_TIPO_TEXT;
+            sql_cap->tipo[1] = SQL_TIPO_INT4;
+            if(B && C) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
+                                "y'' %c %ldy' %c %ldy = 0", B<0?'-':'+', B<0?-B:B,
+                                C<0?'-':'+', C<0?-C:C);
+            else if(B) snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
+                                "y'' %c %ldy' = 0", B<0?'-':'+', B<0?-B:B);
+            else       snprintf(sql_cap->cell[0][0], SQL_OUT_CELL,
+                                "y'' %c %ldy = 0", C<0?'-':'+', C<0?-C:C);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", D);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%s", classe);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%s", r1);
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", r2);
+            snprintf(sql_cap->cell[0][5], SQL_OUT_CELL, "%s", forma);
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("edo: %s · Δ = %ld · %s · λ = %s, %s · y(t) = %s\n",
+               (B&&C)?"y'' + By' + Cy = 0":"y'' + ... = 0", D, classe, r1, r2, forma);
         return 1;
     }
 
