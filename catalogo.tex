@@ -2012,6 +2012,42 @@ falta zero, e as duas colunas $\lvert I\rvert$ e \emph{no banco} coincidem nos s
 \medido{\code{tools/completa\_assinaturas.c} --- os sete grupos pelo fio, com
 \code{count(*)} a conferir que todas as linhas entraram antes de a completude ser lida.}
 
+\paragraph{E a tríade fecha nos sete grupos --- com \emph{uma} régua.} Elipse, parábola e
+hipérbole não são três réguas: são as três \textbf{faces} do mesmo par, e a régua é uma só,
+a ultramétrica dos endereços --- \emph{porque o endereço é o par e ele não sabe de $t$}.
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrrrrll@{}}
+\toprule
+$(p,q,r)$ & os corpos que junta & $\lvert I\rvert$ & $\Sigma N(-1)$ & $\Sigma N(0)$ & $\Sigma N(+1)$ & progressão & a régua\\
+\midrule
+$(1,0,0)$ & algébrico, deflexivo & $12$ & $506$ & $506$ & $506$ & fecha$^{*}$ & desce\\
+$(2,0,0)$ & reflexivo, celeste, óptico, … & $80$ & $1351$ & $744$ & $137$ & \textbf{fecha} & desce\\
+$(1,1,0)$ & expansivo, relógio, sensitivo, … & $162$ & $2929$ & $1514$ & $99$ & \textbf{fecha} & desce\\
+$(2,2,0)$ & telescópico & $255$ & $749$ & $369$ & $-11$ & \textbf{fecha} & desce\\
+$(1,3,0)$ & geométrico & $192$ & $547$ & $249$ & $-49$ & \textbf{fecha} & desce\\
+$(4,1,0)$ & conforme & $60$ & $46$ & $30$ & $14$ & \textbf{fecha} & desce\\
+$(3,3,0)$ & eletromagnético & $140$ & $116$ & $60$ & $4$ & \textbf{fecha} & desce\\
+\midrule
+\multicolumn{8}{@{}l}{\textbf{7 de 7 com $N(-1)+N(+1)=2N(0)$ · 7 de 7 com a régua a descer}}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent $^{*}$ O $(1,0,0)$ tem grau \emph{um}: não há $b$, as três faces coincidem, e a
+progressão fecha por \textbf{degenerescência} e não por tríade. Diz-se, em vez de a contar
+como se fosse.
+
+\paragraph{E o defeito era do leitor, não do motor.} A primeira medição deu «não desce» nos
+sete, com o motor a responder \emph{desce} em todos: a coluna da régua do \code{triade} diz
+\textbf{«desce»} e a do \code{ultra} diz \textbf{«sim»}, e eu comparava com a palavra errada.
+\emph{O motor estava certo e o leitor é que reprovava} --- e sete zeros seguidos deviam ter-me
+feito duvidar do lado de que os lia, porque a desigualdade forte não pode falhar sobre
+inteiros: é o \emph{lem:ultra}, e ele não tem excepção.
+
+\medido{\code{tools/triade\_grupos.c} --- as três faces pelo \code{SELECT triade(*)} sobre os
+sete grupos já completos, com \code{count(*)} a conferir as linhas.}
+
 \subsection*{Os dezasseis corpos COMPLETOS no banco, e o que o envelope ensinou}
 
 Executado o pipe sobre os corpos que estão no banco --- levantar pelo $\iota/\pi$, compactar
