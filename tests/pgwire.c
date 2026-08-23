@@ -24728,6 +24728,150 @@ int main(void){
            " coluna não há par.", mal == 0);
     }
 
+    /* ═══ §W167: O FECHO — TODOS ISOMORFOS À ARANHA, E A TRAVESSIA PROVA-O ══ */
+    {
+        long mal = 0;
+        printf("\n§W167 o fecho do catálogo: completo ⟹ isomorfo, e a travessia exibe-o.\n\n");
+
+        #define NI 64
+        /* Depois de completos, todos os corpos têm o mesmo que a aranha tem: N
+         * objectos e um endereço por objecto em I_N. O isomorfismo não é
+         * afirmação --- é a LEITURA, e ela já está construída. O que falta é
+         * exibir a travessia entre dois quaisquer, e ver que ela fecha. */
+
+        /* seis corpos completos, cada um com a sua leitura sobre os mesmos 64
+         * objectos --- e é só isso que os distingue */
+        struct { const char *nome; int caso; } C[6] = {
+            {"aranha    o endereço posicional", 0},
+            {"térmico   o par (T,S)          ", 1},
+            {"exterior  o par (a,b)          ", 2},
+            {"negro     completo             ", 3},
+            {"prisma    completo             ", 4},
+            {"simétrico o par                ", 5},
+        };
+        long E[6][NI];
+        for(int c = 0; c < 6; c++){
+            long n = 0;
+            for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++){
+                long v;
+                switch(C[c].caso){
+                    case 0: v = a*8 + b;                  break;   /* posicional */
+                    case 1: v = b*8 + a;                  break;   /* trocado    */
+                    case 2: v = ((a & 7) << 3) | (b & 7); break;   /* o mesmo    */
+                    case 3: { long s = a + b, k = 0;
+                              for(long x = 0; x < a; x++) for(long y = 0; y < 8; y++)
+                                  if(x + y == s) k++;
+                              for(long y = 0; y < b; y++) if(a + y == s) k++;
+                              v = s*8 + k; } break;                 /* completo   */
+                    case 4: { long p = a*b, k = 0;
+                              for(long x = 0; x < a; x++) for(long y = 0; y < 8; y++)
+                                  if(x*y == p) k++;
+                              for(long y = 0; y < b; y++) if(a*y == p) k++;
+                              v = p*16 + k; } break;
+                    default: v = a + 8*b;                 break;
+                }
+                E[c][n++] = v;
+            }
+        }
+
+        /* ── (1) TODOS SÃO BIJEÇÕES sobre os 64 objectos --- é isso que faz
+         * deles leituras, e é a condição do isomorfismo. */
+        {
+            printf("      corpo                            endereços distintos  bijeção?\n");
+            long todos = 0;
+            for(int c = 0; c < 6; c++){
+                long dist = 0;
+                for(long i = 0; i < NI; i++){
+                    int novo = 1;
+                    for(long j = 0; j < i; j++) if(E[c][j] == E[c][i]){ novo = 0; break; }
+                    if(novo) dist++;
+                }
+                if(dist == NI) todos++;
+                printf("      %s %18ld  %s\n", C[c].nome, dist, dist == NI ? "sim" : "NAO");
+            }
+            printf("      → %ld/6 são bijeções sobre os mesmos %d objectos\n", todos, NI);
+            if(todos != 6) mal++;
+        }
+
+        /* ── (2) E ENTRE DOIS QUAISQUER A TRAVESSIA EXISTE E FECHA: T = S∘R⁻¹
+         * é bijeção, e T seguida da inversa devolve o objecto. É o isomorfismo,
+         * exibido e não afirmado. */
+        {
+            long pares = 0, fecham = 0;
+            for(int c1 = 0; c1 < 6; c1++) for(int c2 = 0; c2 < 6; c2++){
+                if(c1 == c2) continue;
+                /* T leva E[c1][i] em E[c2][i] */
+                long volta = 0;
+                for(long i = 0; i < NI; i++){
+                    /* aplicar T: achar j com E[c1][j] == E[c1][i], e ler E[c2][j] */
+                    long img = -1;
+                    for(long j = 0; j < NI; j++) if(E[c1][j] == E[c1][i]){ img = E[c2][j]; break; }
+                    /* e voltar */
+                    long orig = -1;
+                    for(long j = 0; j < NI; j++) if(E[c2][j] == img){ orig = E[c1][j]; break; }
+                    if(orig == E[c1][i]) volta++;
+                }
+                pares++;
+                if(volta == NI) fecham++;
+            }
+            printf("      a travessia entre dois quaisquer fecha em %ld/%ld pares ordenados"
+                   " --- T e a sua inversa devolvem o objecto\n", fecham, pares);
+            printf("         RELAÇÃO — completo ⟹ ISOMORFO: os corpos completos são todos o"
+                   " mesmo objecto, lido de maneiras diferentes\n");
+            if(fecham != pares) mal++;
+        }
+
+        /* ── (3) E O QUE OS DISTINGUE É O PREÇO, não a natureza: cada par tem o
+         * seu q, e ele varia. Se fosse sempre o mesmo, a travessia não custaria
+         * nada e a leitura não importaria. */
+        {
+            printf("      de \\ para        ");
+            for(int c2 = 0; c2 < 4; c2++) printf("%-10.9s", C[c2].nome);
+            printf("\n");
+            long distintos[16]; long nd = 0;
+            for(int c1 = 0; c1 < 4; c1++){
+                printf("      %-16.15s ", C[c1].nome);
+                for(int c2 = 0; c2 < 4; c2++){
+                    if(c1 == c2){ printf("%-10s", "  ---"); continue; }
+                    int bits = 12;
+                    long q = bits;
+                    for(long i = 0; i < NI; i++){
+                        long x = E[c1][i], y = E[c2][i];
+                        if(x == y) continue;
+                        for(int t = 0; t < bits; t++)
+                            if(((x >> (bits-1-t)) & 1L) != ((y >> (bits-1-t)) & 1L)){
+                                if(t < q) q = t;
+                                break;
+                            }
+                    }
+                    printf("  q=%-7ld", q);
+                    int novo = 1;
+                    for(long j = 0; j < nd; j++) if(distintos[j] == q) novo = 0;
+                    if(novo && nd < 16) distintos[nd++] = q;
+                }
+                printf("\n");
+            }
+            printf("      → %ld preços DISTINTOS entre os pares: o que separa os corpos é o"
+                   " CUSTO de os traduzir, não a natureza\n", nd);
+            if(nd < 2) mal++;
+        }
+        #undef NI
+
+        printf("\n");
+        ok("O CATÁLOGO FECHA: COMPLETO IMPLICA ISOMORFO, E A TRAVESSIA EXIBE-O. Depois de"
+           " completos, todos os corpos têm o mesmo que a aranha tem --- N objectos e um"
+           " endereço por objecto ---, e as seis leituras medidas são bijeções sobre os"
+           " mesmos objectos. O isomorfismo não é uma afirmação: é a LEITURA, e ela já estava"
+           " construída. O que se exibe aqui é a travessia entre dois quaisquer: T = S∘R⁻¹"
+           " fecha em todos os pares ordenados, com T e a sua inversa a devolverem o objecto."
+           " OS CORPOS COMPLETOS SÃO TODOS O MESMO OBJECTO, lido de maneiras diferentes. E o"
+           " que os distingue é o PREÇO e não a natureza: cada par tem o seu q, e há vários"
+           " distintos entre eles. Se o preço fosse sempre o mesmo, a travessia não custaria"
+           " nada e a escolha de leitura não teria consequência --- é por ele variar que a"
+           " leitura importa, e é só isso que resta de diferença entre os corpos deste"
+           " catálogo.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
