@@ -1437,6 +1437,25 @@ com a valoração a saturar em $36$; $g^2=hm$ em $900/900$; a travessia a atingi
 com volta completa e o preço lido em $4$ comparações; e o critério a reprovar a leitura
 crua do racional e a aprovar a reduzida.}
 
+\medskip\noindent E o resto segue para lá também. O \code{lib/escada.h} leva os degraus e
+--- o que interessa a quem tem um corpo em mãos --- a \textbf{completação}:
+\code{es\_fibra} devolve as fibras com o mínimo, o máximo e $\sum G$, e diz se $G$ é
+constante; \code{es\_falta} conta \emph{quanto falta} (zero se já era quociente);
+\code{es\_expandido} dá o tamanho do corpo completo; \code{es\_soma\_fecha} verifica o
+$\sum G=\lvert I\rvert$ do \code{aranha thm:escada}. As relações dos degraus são
+chamáveis --- \code{es\_x2\_igual}/\code{es\_x2\_repr} para o oposto,
+\code{es\_x3\_igual}/\code{es\_x3\_repr} para o inverso (\emph{e é o mesmo do
+projectivo}), e \code{es\_x4\_sobe} para a subida que prova que o corte não é atingido.
+
+\medskip\noindent O \code{lib/incidencia.h} leva o trio $S$, $\zeta$, $\mu$: \code{in\_zeta}
+acumula, \code{in\_mu} diferencia, e \code{in\_volta\_exacta} verifica que uma desfaz a
+outra --- \emph{sem divisão e sem resto}, porque $S$ é nilpotente e a série termina.
+
+\medido{\code{tests/escada.c} --- a fibra a decidir a completude em quatro corpos, com
+$\sum G=\lvert I\rvert$ em todos e a falta a dar $0$, $0$, $44$ e $30$; os degraus com o
+oposto em $17/17$ e o reduzido em $78/78$; o invariante $p^2-2q^2$ em $287/287$ com a
+fração a crescer; e $\zeta$/$\mu$ com a volta exacta em $200/200$ vectores.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
