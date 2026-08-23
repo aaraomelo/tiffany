@@ -576,7 +576,20 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * S_CANAL, que é a fronteira real. O tecto passa a ser uma CONTA sobre o mapa
  * de zonas, e não um número. */
 #define IDX_ZONA0      16u                /* as oito primeiras, onde sempre estiveram */
-#define IDX_ZONA1      32u                /* e daí em diante, até ao S_CANAL */
+/* ── E O MAPA DE ZONAS VERIFICA-SE, PORQUE JÁ ME CUSTOU UMA TARDE ────────────
+ *
+ * As oito primeiras árvores ficam em 16..23 e as seguintes continuavam em 32 ---
+ * escrito por mim, e a seguir pus a ORDEM em 29..36, o DIÁRIO em 37..44 e a
+ * direita do JOIN em 45..76. A árvore da coluna 8 ia para a ZONA(32), que é o
+ * meio do S_ORD; a da coluna 13 para o diário; a da 21 para o JOIN. Nada
+ * falhava na bateria porque nenhum medidor indexa uma coluna acima da décima
+ * segunda --- e é exactamente assim que este defeito espera.
+ *
+ * A faixa das árvores começa DEPOIS de tudo o que está reservado, e o
+ * `typedef` abaixo obriga o compilador a verificá-lo: acrescentar uma zona por
+ * cima delas deixa de compilar, em vez de partir uma consulta longe daqui. */
+#define ZONA_LIVRE1    77u                /* a primeira zona depois do reservado */
+#define IDX_ZONA1      ZONA_LIVRE1
 #define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
                                                  : IDX_ZONA1 + (unsigned)(k) - 8u))
@@ -5854,6 +5867,20 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
  * dava 1024. As colunas seguem o mesmo COL_MAX do resto da casa. */
 #define J_MAXCOL   ((unsigned)COL_MAX)
 #define J_MAXLIN   ((int)((ZONA_SLOTS * J_ZONAS) / J_MAXCOL))
+
+/* ── O MAPA DE ZONAS, VERIFICADO PELO COMPILADOR ─────────────────────────────
+ *
+ * A última zona reservada é a do JOIN (45 + J_ZONAS − 1), e as árvores de
+ * índice começam em ZONA_LIVRE1. Se alguém acrescentar zonas e passar por cima
+ * delas, isto deixa de compilar --- que é onde um erro destes tem de aparecer,
+ * e não numa consulta a nove mil linhas de distância.
+ *
+ * Foi assim que o defeito se apanhou: uma varredura ao mapa, e não uma
+ * asserção, porque nenhum medidor indexa uma coluna alta o bastante para o
+ * pisar. O que não é verificado pelo compilador tem de ser verificado por
+ * alguém --- e ninguém estava. */
+typedef char zonas_nao_pisam_os_indices[(45u + J_ZONAS <= ZONA_LIVRE1) ? 1 : -1];
+typedef char indices_cabem_abaixo_do_canal[(IDX_ZONA1 + IDX_MAXCOL - 8u <= 600u) ? 1 : -1];
 
 static char j_tab_dir[64] = "";   /* a tabela da direita, "" se não há JOIN */
 static char j_col_esq[64] = "";   /* a coluna da esquerda no ON            */
