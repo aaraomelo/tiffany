@@ -22665,6 +22665,149 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W150: A TRÍADE É UM CORPO — Δ = 4tb², E OS ENDEREÇOS SÃO OS MESMOS ═ */
+    {
+        long mal = 0;
+        printf("\n§W150 rotação, exterior e hiperbólico: três faces de UM corpo.\n\n");
+
+        /* A família: a + bω com ω² = t. Não são três corpos --- é um, com t a
+         * variar em {−1, 0, +1}. O produto é
+         *   (a+bω)(c+dω) = (ac + t·bd) + (ad + bc)ω. */
+        #define MUL(t,a1,b1,a2,b2,ra,rb) do { \
+            (ra) = (a1)*(a2) + (t)*(b1)*(b2); \
+            (rb) = (a1)*(b2) + (b1)*(a2); } while(0)
+
+        /* ── (1) UMA SÓ FÓRMULA DÁ AS TRÊS CLASSES: com a realização matricial
+         * [[a, t·b],[b, a]], vem tr = 2a e det = a² − t·b², donde
+         *      Δ = tr² − 4det = 4·t·b².
+         * O sinal de Δ é o sinal de t --- e nada mais. */
+        {
+            long ok = 0, tot = 0;
+            long neg = 0, zero = 0, pos = 0;
+            for(long t = -1; t <= 1; t++)
+            for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                long tr = 2*a, det = a*a - t*b*b;
+                long D = tr*tr - 4*det;
+                tot++;
+                if(D == 4*t*b*b) ok++;
+                if(b != 0){
+                    if(D < 0) neg++; else if(D == 0) zero++; else pos++;
+                }
+            }
+            printf("      Δ = 4·t·b² em %ld/%ld --- UMA fórmula, e o sinal de Δ é o sinal"
+                   " de t\n", ok, tot);
+            printf("      com b ≠ 0: %ld elípticos (t=−1), %ld parabólicos (t=0), %ld"
+                   " hiperbólicos (t=+1)\n", neg, zero, pos);
+            printf("         RELAÇÃO — as três classes do thm:leidisc NÃO são três corpos:"
+                   " são um corpo com t a percorrer {−1,0,+1}\n");
+            if(ok != tot || neg == 0 || pos == 0) mal++;
+        }
+
+        /* ── (2) E A NORMA É UMA SÓ: N(a+bω) = a² − t·b², multiplicativa nos
+         * três valores de t. É a mesma lei, com t a mudar o sinal do segundo
+         * termo --- e nada mais muda. */
+        {
+            long ok = 0, tot = 0;
+            for(long t = -1; t <= 1; t++)
+            for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+            for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                long ra, rb; MUL(t,a,b,c,d,ra,rb);
+                long N1 = a*a - t*b*b, N2 = c*c - t*d*d, Np = ra*ra - t*rb*rb;
+                tot++;
+                if(Np == N1*N2) ok++;
+            }
+            printf("      N(a+bω) = a² − t·b² é multiplicativa em %ld/%ld nos três t ---"
+                   " uma lei, três sinais\n", ok, tot);
+            if(ok != tot) mal++;
+        }
+
+        /* ── (3) E OS ENDEREÇOS SÃO OS MESMOS. Na régua da aranha o objecto é o
+         * par (a,b), e ele não sabe de t: os três compartilham o MESMO conjunto
+         * de endereços e a MESMA ultramétrica. */
+        {
+            #define PR(x,y) ({ long X_=(x), Y_=(y); int q_=8; \
+                if(X_!=Y_) for(int i_=0;i_<8;i_++){ \
+                    if((((X_)>>(7-i_))&1) != (((Y_)>>(7-i_))&1)){ q_=i_; break; } } q_; })
+            /* o endereço do par, igual nos três */
+            long ende[200]; long n = 0;
+            for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++) ende[n++] = a*8 + b;
+            /* a ultramétrica sobre esses endereços */
+            long ok = 0, tot = 0, est = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < n; j++) for(long k = 0; k < n; k++){
+                long p1 = PR(ende[i],ende[j]), p2 = PR(ende[j],ende[k]), p3 = PR(ende[i],ende[k]);
+                long mn = p1 < p2 ? p1 : p2;
+                tot++;
+                if(p3 >= mn) ok++;
+                if(p3 > mn) est++;
+            }
+            printf("      os TRÊS partilham o mesmo conjunto de endereços, e a ultramétrica"
+                   " deles vale em %ld/%ld triplos (%ld estritos)\n", ok, tot, est);
+            printf("         RELAÇÃO — na régua da aranha o objecto é o par (a,b), e ele NÃO"
+                   " SABE DE t: os três são o mesmo em I\n");
+            if(ok != tot || est == 0) mal++;
+            #undef PR
+        }
+
+        /* ── (4) O QUE t MUDA É SÓ A MÉTRICA --- e a tríade completa o corpo:
+         * juntos, os três cobrem os três regimes e mais nenhum. Não falta face
+         * nenhuma, porque o sinal de um quadrado só tem três casos. */
+        {
+            long casos = 0;
+            long visto[3] = {0,0,0};
+            for(long t = -1; t <= 1; t++){
+                long b = 1, D = 4*t*b*b;
+                int idx = (D < 0) ? 0 : (D == 0 ? 1 : 2);
+                if(!visto[idx]){ visto[idx] = 1; casos++; }
+            }
+            printf("      os três t dão os três regimes e mais nenhum: %ld de 3 cobertos ---"
+                   " a tríade FECHA, porque o sinal de t só tem três casos\n", casos);
+            printf("         RELAÇÃO NOVA — a rotação, o exterior e o hiperbólico são as"
+                   " TRÊS FACES de um corpo, e juntas completam-no\n");
+            if(casos != 3) mal++;
+        }
+
+        /* ── (5) O GUME: t tem de fazer diferença na métrica, senão a tríade era
+         * uma só face repetida. Conta-se onde a norma se anula em cada um. */
+        {
+            printf("      t     norma        anula em não nulos   o que é\n");
+            long diferentes = 0;
+            long anteriores = -1;
+            for(long t = -1; t <= 1; t++){
+                long an = 0;
+                for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++){
+                    if(a == 0 && b == 0) continue;
+                    if(a*a - t*b*b == 0) an++;
+                }
+                printf("      %+ld    %s %14ld        %s\n", t,
+                       t == -1 ? "a²+b²" : (t == 0 ? "a²   " : "a²−b²"), an,
+                       t == -1 ? "anisotrópica" : (t == 0 ? "degenerada  " : "isotrópica  "));
+                if(an != anteriores) diferentes++;
+                anteriores = an;
+            }
+            printf("      GUME — os três dão contagens diferentes: t muda mesmo a métrica,"
+                   " e a tríade não é uma face repetida (%ld distintos)\n", diferentes);
+            if(diferentes < 3) mal++;
+        }
+        #undef MUL
+
+        printf("\n");
+        ok("A TRÍADE É UM CORPO, E AS TRÊS FACES COMPLETAM-NO. A rotação, o exterior e o"
+           " hiperbólico não são três corpos a comparar: são a + bω com ω² = t, um corpo só,"
+           " com t a percorrer {−1, 0, +1}. E UMA FÓRMULA DÁ AS TRÊS CLASSES: com a realização"
+           " [[a, t·b],[b, a]] vem tr = 2a e det = a² − t·b², donde Δ = 4·t·b² --- o sinal de"
+           " Δ é o sinal de t e mais nada, verificado sem excepção. As três classes do"
+           " thm:leidisc caem daí, e não de três construções separadas. A norma também é uma"
+           " só, N = a² − t·b², multiplicativa nos três valores: uma lei, três sinais. E O QUE"
+           " t MUDA É SÓ A MÉTRICA: na régua da aranha o objecto é o par (a,b), que NÃO SABE"
+           " DE t --- os três partilham o mesmo conjunto de endereços e a mesma ultramétrica,"
+           " com a desigualdade forte a valer em todos os triplos e com casos estritos. Em I"
+           " são o mesmo. A tríade FECHA porque o sinal de t só tem três casos: não falta"
+           " face nenhuma, e por isso os três juntos completam o corpo em vez de o dividirem."
+           " E O GUME É QUE t FAÇA DIFERENÇA: as normas anulam-se em contagens distintas nos"
+           " três --- anisotrópica, degenerada, isotrópica ---, pelo que a tríade não é uma"
+           " face repetida. O que varia é a métrica; o corpo é um.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -1200,6 +1200,43 @@ $14\,700$ estritos e $v(xy)=v(x)+v(y)$ em $2304/2304$; os dois meios com o geom�
 pedir o quadrado; $\oslash\circ\otimes=\mathrm{id}$ em $9604/9604$; a descida em $64/64$;
 e o gume da nilpotência.}
 
+\paragraph{E a tríade é \emph{um} corpo --- as três faces completam-no.} A rotação, o
+exterior e o hiperbólico não são três corpos a comparar: são $a+b\omega$ com
+$\omega^2=t$, um corpo só, com $t$ a percorrer $\{-1,0,+1\}$. E \textbf{uma fórmula dá as
+três classes}: com a realização $\binom{a\ \ tb}{b\ \ \ a}$ vem $\operatorname{tr}=2a$ e
+$\det=a^2-t\,b^2$, donde
+\[
+ \boxed{\;\Delta=\operatorname{tr}^2-4\det=4\,t\,b^2\;}
+\]
+--- \emph{o sinal de $\Delta$ é o sinal de $t$}, e mais nada. As três classes do
+\code{aranha thm:leidisc} caem daí, e não de três construções separadas. A norma também é
+uma só, $N=a^2-t\,b^2$, multiplicativa nos três valores: \emph{uma lei, três sinais}.
+
+\medskip\noindent\textbf{E o que $t$ muda é só a métrica.} Na régua da aranha o objecto é
+o par $(a,b)$, que \emph{não sabe de $t$}: os três partilham o mesmo conjunto de
+endereços e a mesma ultramétrica, com a desigualdade forte a valer em todos os triplos e
+com casos estritos. \emph{Em $I$ são o mesmo.} A tríade \textbf{fecha} porque o sinal de
+$t$ só tem três casos --- não falta face nenhuma, e por isso os três juntos completam o
+corpo em vez de o dividirem:
+\begin{center}\small
+\begin{tabular}{@{}rlrl@{}}
+\toprule
+$t$ & norma & anula em não nulos & a face\\
+\midrule
+$-1$ & $a^2+b^2$ & $0$ & anisotrópica --- a \emph{rotação}\\
+$0$ & $a^2$ & $8$ & degenerada --- o \emph{exterior}\\
+$+1$ & $a^2-b^2$ & $16$ & isotrópica --- o \emph{hiperbólico}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent O gume é que $t$ faça diferença: as três contagens são distintas, pelo que a
+tríade não é uma face repetida. \emph{O que varia é a métrica; o corpo é um.}
+
+\medido{a tríade em \code{tests/pgwire.c} §W150 --- $\Delta=4tb^2$ em $243/243$ com $72$
+de cada regime; $N=a^2-tb^2$ multiplicativa em $7203/7203$; os três a partilharem os
+endereços com a ultramétrica em $262\,144/262\,144$ triplos ($87\,360$ estritos); os três
+regimes cobertos e mais nenhum; e as três contagens distintas, $0$, $8$ e $16$.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt
