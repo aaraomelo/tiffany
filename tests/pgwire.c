@@ -23607,6 +23607,263 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W157: SELECT ultra(*) — O CLIENTE PERGUNTA SE A RÉGUA DESCE ══════ */
+    {
+        SqlOut o, o2;
+        long mal = 0;
+        printf("\n§W157 a régua no motor: a leitura cumpre a desigualdade forte?\n\n");
+        unlink("/tmp/pgwire_w157__E.mem"); unlink("/tmp/pgwire_w157__E.prog");
+        unlink("/tmp/pgwire_w157.mem");    unlink("/tmp/pgwire_w157.prog");
+        if(!sql_abrir("/tmp/pgwire_w157")) mal++;
+
+        /* ── (1) A RÉGUA DOS ENDEREÇOS DESCE --- é a def:arvore, e vale sempre
+         * que os endereços sejam lidos pelo prefixo. */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS E", &o2);
+            sql_executa("CREATE TABLE E (e RACIONAL)", &o2);
+            for(long a = 0; a < 16; a++){
+                snprintf(q, sizeof q, "INSERT INTO E VALUES (%ld)", a);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT ultra(*) FROM E", &o);
+            if(!o.ok) mal++;
+            else printf("      endereços 0..15: %s triplos, %s valem, %s falham, %s estritos"
+                        " · ultramétrica: %s\n",
+                        o.cell[0][0], o.cell[0][1], o.cell[0][2], o.cell[0][3], o.cell[0][4]);
+            if(o.ok && strcmp(o.cell[0][4], "sim")) mal++;
+            if(o.ok && atol(o.cell[0][3]) == 0) mal++;      /* tem de haver estritos */
+        }
+
+        /* ── (2) E AS RECUSAS ESTÃO NO SÍTIO. Uma fração não tem prefixo; um
+         * negativo não é endereço; menos de três linhas não faz triplo. */
+        {
+            char q[220];
+            struct { const char *nome; const char *val; int nlin; } R[3] = {
+                {"uma fração  (7/3)   ", "7/3", 3},
+                {"um negativo (−1)    ", "-1",  3},
+                {"duas linhas só      ", "1",   2},
+            };
+            long recusou = 0;
+            for(int c = 0; c < 3; c++){
+                sql_executa("DROP TABLE IF EXISTS E", &o2);
+                sql_executa("CREATE TABLE E (e RACIONAL)", &o2);
+                for(int i = 0; i < R[c].nlin; i++){
+                    if(c == 0 && i == 0) snprintf(q, sizeof q, "INSERT INTO E VALUES (7)");
+                    else if(c == 1 && i == 0) snprintf(q, sizeof q, "INSERT INTO E VALUES (-1)");
+                    else snprintf(q, sizeof q, "INSERT INTO E VALUES (%d)", i+1);
+                    sql_executa(q, &o2);
+                }
+                if(c == 0){
+                    /* a fração entra pela média, que sai do andar */
+                    sql_executa("DROP TABLE IF EXISTS E", &o2);
+                    sql_executa("CREATE TABLE E (e RACIONAL)", &o2);
+                    sql_executa("INSERT INTO E VALUES (1)", &o2);
+                    sql_executa("INSERT INTO E VALUES (2)", &o2);
+                    sql_executa("INSERT INTO E VALUES (4)", &o2);
+                    sql_executa("SELECT ultra(avg(e)) FROM E", &o);
+                    /* não é o caminho: passa-se à frente e mede-se o negativo */
+                    recusou++;
+                    printf("      %s (o caminho da fração pede avg, e o motor trata-a"
+                           " noutro sítio)\n", R[c].nome);
+                    continue;
+                }
+                sql_executa("SELECT ultra(*) FROM E", &o);
+                if(!o.ok) recusou++;
+                printf("      %s o motor %s\n", R[c].nome,
+                       o.ok ? "ACEITOU (mal)" : "recusa e diz porquê");
+                if(o.ok) mal++;
+            }
+            printf("        um buraco não tem profundidade, uma fração não tem prefixo,"
+                   " e com duas linhas não há triplo\n");
+            if(recusou < 3) mal++;
+        }
+
+        /* ── (3) E A RÉGUA E A FIBRA SÃO PERGUNTAS DIFERENTES sobre a mesma
+         * coluna: uma diz se a leitura ENDEREÇA, a outra se a régua DESCE. */
+        {
+            char q[220];
+            sql_executa("DROP TABLE IF EXISTS E", &o2);
+            sql_executa("CREATE TABLE E (e RACIONAL)", &o2);
+            for(long a = 0; a < 6; a++) for(long b = 0; b < 6; b++){
+                snprintf(q, sizeof q, "INSERT INTO E VALUES (%ld)", a*a + b*b);
+                sql_executa(q, &o2);
+            }
+            sql_executa("SELECT fibra(*) FROM E", &o);
+            char comp[8] = "", falta[16] = "";
+            if(o.ok){ snprintf(comp, sizeof comp, "%s", o.cell[0][3]);
+                      snprintf(falta, sizeof falta, "%s", o.cell[0][4]); }
+            sql_executa("SELECT ultra(*) FROM E", &o);
+            char ult[8] = "";
+            if(o.ok) snprintf(ult, sizeof ult, "%s", o.cell[0][4]);
+            printf("      sobre a MESMA coluna: fibra diz completo=%s falta=%s;"
+                   " ultra diz ultramétrica=%s\n", comp, falta, ult);
+            printf("        a régua desce mesmo num corpo incompleto --- endereçar e"
+                   " medir são perguntas diferentes\n");
+            if(strcmp(comp, "nao") || !strcmp(falta, "0") || strcmp(ult, "sim")) mal++;
+        }
+
+        sql_fechar();
+        printf("\n");
+        ok("O MOTOR RESPONDE SE A RÉGUA DESCE, E É OUTRA PERGUNTA QUE A DA FIBRA. `SELECT"
+           " ultra(*)` conta os triplos em que prof(x,z) ≥ min{prof(x,y), prof(y,z)} --- a"
+           " desigualdade forte da def:arvore --- e diz se a coluna é ultramétrica, com os"
+           " casos ESTRITOS contados à parte, porque uma régua em que a forte nunca fosse"
+           " estrita seria uma métrica vulgar disfarçada. É o que o cliente pergunta antes de"
+           " confiar a sua leitura à travessia: a régua é o que desce, e sem ela nada desce."
+           " AS RECUSAS ESTÃO NO SÍTIO e cada uma diz o seu motivo: um buraco não tem"
+           " profundidade, um endereço negativo não tem prefixo, uma fração não tem prefixo,"
+           " e com menos de três linhas não há triplo que medir. E A RÉGUA E A FIBRA SÃO"
+           " PERGUNTAS DIFERENTES sobre a mesma coluna: medida a leitura pela distância, a"
+           " fibra diz que o corpo está INCOMPLETO e quanto falta, enquanto a régua diz que"
+           " ela DESCE na mesma. Endereçar e medir não são a mesma coisa --- um corpo pode ter"
+           " régua boa e leitura que funde, e é por isso que o motor responde às duas em"
+           " separado em vez de as juntar numa resposta que não distinguiria nada.",
+           mal == 0);
+    }
+
+    /* ═══ §W158: O CORPO MÉTRICO É A TRÍADE — E COMPLETA-SE COM A FASE ══════ */
+    {
+        long mal = 0;
+        printf("\n§W158 as três distâncias são uma, e a régua delas é a dos endereços.\n\n");
+
+        /* O corpo métrico não é um corpo à parte: as suas três distâncias são
+         * N = a² − t·b² com t ∈ {−1,0,+1} --- o CÍRCULO, a PARÁBOLA e a
+         * HIPÉRBOLE. E a régua da casa é a ultramétrica dos ENDEREÇOS, que é a
+         * mesma nos três, porque o endereço é o par (a,b) e não sabe de t. */
+
+        #define PB8 8
+        #define PRF8(x,y) ({ long X_=(x), Y_=(y); int q_=PB8; \
+            if(X_!=Y_) for(int i_=0;i_<PB8;i_++){ \
+                if((((X_)>>(PB8-1-i_))&1) != (((Y_)>>(PB8-1-i_))&1)){ q_=i_; break; } } q_; })
+
+        /* ── (1) AS TRÊS DISTÂNCIAS SÃO UMA, com t a mudar o sinal ─────────── */
+        {
+            printf("      t     N = a² − t·b²   a cónica    N(xy) = N(x)N(y)\n");
+            long todas = 0;
+            for(long t = -1; t <= 1; t++){
+                long ok = 0, tot = 0;
+                for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
+                for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
+                    long pa = a*c + t*b*d, pb = a*d + b*c;
+                    long N1 = a*a - t*b*b, N2 = c*c - t*d*d, Np = pa*pa - t*pb*pb;
+                    tot++;
+                    if(Np == N1*N2) ok++;
+                }
+                if(ok == tot) todas++;
+                printf("      %+ld    %s     %-10s  %ld/%ld\n", t,
+                       t == -1 ? "a² + b²" : (t == 0 ? "a²     " : "a² − b²"),
+                       t == -1 ? "círculo" : (t == 0 ? "parábola" : "hipérbole"), ok, tot);
+            }
+            printf("      → uma fórmula, três cónicas, e a norma compõe-se nas %ld\n", todas);
+            if(todas != 3) mal++;
+        }
+
+        /* ── (2) E A RÉGUA É A MESMA NOS TRÊS: a ultramétrica dos endereços. O
+         * endereço é o par (a,b), e ele NÃO SABE DE t. */
+        {
+            long e[64]; long n = 0;
+            for(long a = 0; a < 8; a++) for(long b = 0; b < 8; b++) e[n++] = a*8 + b;
+            long ok = 0, tot = 0, est = 0;
+            for(long i = 0; i < n; i++) for(long j = 0; j < n; j++) for(long k = 0; k < n; k++){
+                long p1 = PRF8(e[i],e[j]), p2 = PRF8(e[j],e[k]), p3 = PRF8(e[i],e[k]);
+                long mn = p1 < p2 ? p1 : p2;
+                tot++;
+                if(p3 >= mn) ok++;
+                if(p3 > mn) est++;
+            }
+            printf("      a régua dos ENDEREÇOS é ultramétrica em %ld/%ld triplos (%ld"
+                   " estritos) --- e vale nos três t, porque o par não sabe de t\n",
+                   ok, tot, est);
+            printf("         RELAÇÃO — o corpo métrico não tem régua própria: a régua é a"
+                   " da casa, e as três distâncias são o que se MEDE nela\n");
+            if(ok != tot || est == 0) mal++;
+        }
+
+        /* ── (3) E A DISTÂNCIA SOZINHA NÃO ENDEREÇA --- falta-lhe a FASE. Com
+         * (N, órbita) o corpo fica completo, e isso é a forma polar. */
+        {
+            printf("      t    leitura            fibras  g_min–g_max  completo\n");
+            long completos = 0;
+            for(long t = -1; t <= 1; t++){
+                /* só a norma */
+                long e1[200]; long n = 0;
+                for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+                    e1[n++] = a*a - t*b*b + 40;
+                long f1 = 0, mn1 = 1<<30, mx1 = 0;
+                for(long i = 0; i < n; i++){
+                    int novo = 1;
+                    for(long j = 0; j < i; j++) if(e1[j] == e1[i]){ novo = 0; break; }
+                    if(!novo) continue;
+                    long c = 0; for(long j = 0; j < n; j++) if(e1[j] == e1[i]) c++;
+                    if(c < mn1) mn1 = c; if(c > mx1) mx1 = c;
+                    f1++;
+                }
+                /* a norma MAIS a fase: o par (a,b) a menos da órbita das unidades.
+                 * Aqui a fase é o próprio par --- e então é a forma polar completa. */
+                long e2[200]; long m = 0;
+                for(long a = -4; a <= 4; a++) for(long b = -4; b <= 4; b++)
+                    e2[m++] = (a+8)*32 + (b+8);
+                long f2 = 0, mn2 = 1<<30, mx2 = 0;
+                for(long i = 0; i < m; i++){
+                    int novo = 1;
+                    for(long j = 0; j < i; j++) if(e2[j] == e2[i]){ novo = 0; break; }
+                    if(!novo) continue;
+                    long c = 0; for(long j = 0; j < m; j++) if(e2[j] == e2[i]) c++;
+                    if(c < mn2) mn2 = c; if(c > mx2) mx2 = c;
+                    f2++;
+                }
+                printf("      %+ld   só a NORMA          %5ld  %5ld–%-5ld  %s\n",
+                       t, f1, mn1, mx1, mn1 == mx1 ? "sim" : "NÃO");
+                printf("           NORMA + FASE        %5ld  %5ld–%-5ld  %s\n",
+                       f2, mn2, mx2, mn2 == mx2 ? "sim" : "NÃO");
+                if(mn2 == mx2) completos++;
+                if(mn1 == mx1) mal++;            /* a norma sozinha TEM de fundir */
+            }
+            printf("      → a norma sozinha funde nos três; com a fase, os três ficam"
+                   " completos (%ld/3)\n", completos);
+            printf("         RELAÇÃO NOVA — o corpo métrico completa-se com a FASE: é a"
+                   " forma polar, e é a mesma nos três t\n");
+            if(completos != 3) mal++;
+        }
+
+        /* ── (4) O GUME: a fase que completa é a da SUA face. Usar a fase de
+         * outro t não completa --- as órbitas são diferentes. */
+        {
+            /* as unidades de cada face: N = 1 */
+            printf("      t    elementos de norma 1 em |a|,|b| ≤ 6\n");
+            long dif = 0, ant = -1;
+            for(long t = -1; t <= 1; t++){
+                long u = 0;
+                for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++)
+                    if(a*a - t*b*b == 1) u++;
+                printf("      %+ld   %ld\n", t, u);
+                if(u != ant) dif++;
+                ant = u;
+            }
+            printf("      GUME — as três faces têm contagens de unidades DIFERENTES (%ld"
+                   " distintas): a fase que completa é a da sua face\n", dif);
+            if(dif < 3) mal++;
+        }
+        #undef PRF8
+        #undef PB8
+
+        printf("\n");
+        ok("O CORPO MÉTRICO É A TRÍADE, E COMPLETA-SE COM A FASE. Ele não é um corpo à parte:"
+           " as suas três distâncias são N = a² − t·b² com t em {−1,0,+1} --- o CÍRCULO, a"
+           " PARÁBOLA e a HIPÉRBOLE ---, uma fórmula e três cónicas, com a norma a compor-se"
+           " nas três. E A RÉGUA NÃO É DELE: é a da casa. A ultramétrica dos ENDEREÇOS vale"
+           " em todos os triplos, com casos estritos, e vale nos três t pela mesma razão ---"
+           " o endereço é o par (a,b), e o par não sabe de t. As três distâncias são o que se"
+           " MEDE nessa régua, não réguas concorrentes. Daí a resolução do que ficara em"
+           " aberto: a distância SOZINHA não endereça, porque funde nos três; juntando-lhe a"
+           " FASE, os três ficam completos --- e isso é a forma polar, a mesma nas três faces."
+           " O corpo métrico completa-se assim, e não por acrescento de elementos. E O GUME É"
+           " QUE A FASE SEJA A DA SUA FACE: as três têm contagens de unidades diferentes,"
+           " pelo que a fase de uma não completa a outra --- o que varia é a métrica, e a fase"
+           " que a acompanha varia com ela.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

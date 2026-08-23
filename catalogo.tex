@@ -1501,6 +1501,43 @@ $\sum G\neq\lvert I\rvert$ --- que seria defeito da contagem e não do corpo.
 dois completos com falta $0$ e um incompleto com falta $44$; a recusa com duas colunas; e o
 contraste com o \code{regime}, que responde sobre o mesmo tipo de tabela e é outra pergunta.}
 
+\paragraph{E o corpo métrico resolve-se: \emph{ele é a tríade}.} Não é corpo à parte. As
+suas três distâncias são
+\[
+ \boxed{\;N(a+b\omega)=a^2-t\,b^2,\qquad t\in\{-1,0,+1\}\;}
+\]
+--- o \textbf{círculo}, a \textbf{parábola} e a \textbf{hipérbole} ---, uma fórmula e três
+cónicas, com a norma a compor-se nas três. \textbf{E a régua não é dele: é a da casa.} A
+ultramétrica dos \emph{endereços} vale em todos os triplos, com casos estritos, e vale nos
+três $t$ pela mesma razão --- \emph{o endereço é o par $(a,b)$, e o par não sabe de $t$}.
+As três distâncias são o que se \emph{mede} nessa régua, e não réguas concorrentes.
+
+\medskip\noindent Daí o que ficara em aberto nos lotes acima: a distância \emph{sozinha}
+não endereça, porque funde nos três. Juntando-lhe a \textbf{fase}, os três ficam completos:
+\begin{center}\small
+\begin{tabular}{@{}rlrrl@{}}
+\toprule
+$t$ & leitura & fibras & $g$ mín--máx & completo\\
+\midrule
+$-1$ & só a norma & $15$ & $1$--$8$ & não\\
+     & norma + \textbf{fase} & $81$ & $1$--$1$ & \textbf{sim}\\
+$0$ & só a norma & $5$ & $9$--$18$ & não\\
+     & norma + \textbf{fase} & $81$ & $1$--$1$ & \textbf{sim}\\
+$+1$ & só a norma & $21$ & $2$--$17$ & não\\
+     & norma + \textbf{fase} & $81$ & $1$--$1$ & \textbf{sim}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{E isso é a forma polar} --- a mesma nas três faces. O corpo métrico
+completa-se assim, e não por acrescento de elementos. O gume: as três faces têm contagens
+de unidades diferentes ($4$, $26$, $2$), pelo que \textbf{a fase que completa é a da sua
+face} --- o que varia é a métrica, e a fase que a acompanha varia com ela.
+
+\medido{o corpo métrico em \code{tests/pgwire.c} §W158 --- a norma multiplicativa em
+$2401/2401$ nas três; a régua dos endereços ultramétrica em $262\,144/262\,144$ triplos com
+$87\,360$ estritos; a norma sozinha a fundir nos três e a norma com fase a completar nos
+três; e as contagens de unidades distintas.}
+
 \paragraph{E as mesmas leis nos outros corpos --- cada um com a sua régua, e cada um a
 dar a sua relação.}
 \begin{enumerate}\itemsep3pt

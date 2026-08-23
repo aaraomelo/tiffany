@@ -4610,7 +4610,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"SIMETRICA") ? 19
                        : !strcasecmp(nome,"ANTISIMETRICA") ? 20
                        : !strcasecmp(nome,"REGIME") ? 21
-                       : !strcasecmp(nome,"FIBRA") ? 22 : 0;
+                       : !strcasecmp(nome,"FIBRA") ? 22
+                       : !strcasecmp(nome,"ULTRA") ? 23 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -7135,6 +7136,112 @@ static int varre(const char *resto, int acao){
      * linha, uma coluna. As que devolvem uma MATRIZ (transposta, inversa) saem
      * como tabela — e é aí que se vê que a leitura fecha, porque o resultado é
      * outra vez uma coisa a que se pode perguntar o determinante. */
+    if(acao == ACAO_MARCA && mat_op == 23){
+        /* ── A RÉGUA: a coluna de endereços cumpre a desigualdade FORTE?
+         * d(x,z) ≤ max{d(x,y), d(y,z)}, que na profundidade é
+         * prof(x,z) ≥ min{prof(x,y), prof(y,z)}  (aranha def:arvore, lem:ultra).
+         *
+         * O cliente pergunta isto antes de confiar a sua leitura à travessia:
+         * é a régua que desce, e sem ela nada desce. Conta-se sobre a coluna
+         * inteira --- não é operação matricial, e não tem tecto de LN_MAX. */
+        if(ncols != 1){
+            printf("erro: a régua mede-se sobre UMA coluna de endereços --- a"
+                   " tabela tem %ld. RECUSADA.\n", ncols);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "ultra needs one column of addresses, got %ld", ncols); }
+            return 0;
+        }
+        long n_obj = 0;
+        for(long i = 0; i < nrows; i++) if(bit_le(S_MATCH, i)) n_obj++;
+        if(n_obj < 3){
+            printf("erro: a desigualdade forte é sobre TRIPLOS --- há %ld linha(s),"
+                   " e com menos de três não há o que medir. RECUSADA.\n", n_obj);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "ultra needs at least 3 rows, got %ld", n_obj); }
+            return 0;
+        }
+        for(long i = 0; i < nrows; i++)
+            if(bit_le(S_MATCH, i) && !bit_le(S_PRES, i*ncols)){
+                printf("erro: a coluna tem células ausentes --- um buraco não tem"
+                       " profundidade. RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "ultra: missing cell at row %ld", i); }
+                return 0;
+            }
+        /* a profundidade é a primeira divergência de bits do numerador ---
+         * a régua da def:arvore. O denominador tem de ser 1: um endereço é
+         * um inteiro, e uma fração não tem prefixo. */
+        long lidos[4096]; long nl = 0;
+        for(long i = 0; i < nrows && nl < 4096; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            long nu, de; celula_qz(i, 0, ncols, &nu, &de);
+            if(de != 1){
+                printf("erro: o endereço %ld/%ld não é inteiro --- a profundidade"
+                       " lê-se do prefixo, e uma fração não tem prefixo."
+                       " RECUSADA.\n", nu, de);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "ultra: address %ld/%ld is not an integer", nu, de); }
+                return 0;
+            }
+            if(nu < 0){
+                printf("erro: o endereço %ld é negativo --- o prefixo conta-se de"
+                       " um endereço, e um endereço não tem sinal. RECUSADA.\n", nu);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "ultra: negative address %ld", nu); }
+                return 0;
+            }
+            lidos[nl++] = nu;
+        }
+        /* a largura: quantos bits o maior endereço pede */
+        long mx = 0;
+        for(long i = 0; i < nl; i++) if(lidos[i] > mx) mx = lidos[i];
+        int bits = 1; { long t = mx; while(t){ bits++; t >>= 1; } }
+        long vale = 0, falha = 0, estrito = 0, tot = 0;
+        for(long i = 0; i < nl; i++) for(long j = 0; j < nl; j++) for(long k = 0; k < nl; k++){
+            long x = lidos[i], y = lidos[j], z = lidos[k];
+            int pxy = bits, pyz = bits, pxz = bits;
+            if(x != y) for(int b = 0; b < bits; b++)
+                if(((x >> (bits-1-b)) & 1L) != ((y >> (bits-1-b)) & 1L)){ pxy = b; break; }
+            if(y != z) for(int b = 0; b < bits; b++)
+                if(((y >> (bits-1-b)) & 1L) != ((z >> (bits-1-b)) & 1L)){ pyz = b; break; }
+            if(x != z) for(int b = 0; b < bits; b++)
+                if(((x >> (bits-1-b)) & 1L) != ((z >> (bits-1-b)) & 1L)){ pxz = b; break; }
+            int mn = pxy < pyz ? pxy : pyz;
+            tot++;
+            if(pxz >= mn){ vale++; if(pxz > mn) estrito++; }
+            else falha++;
+        }
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 1; sql_cap->ncols = 5;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "triplos");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "vale");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "falha");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "estrito");
+            snprintf(sql_cap->col[4], sizeof sql_cap->col[4], "ultrametrica");
+            for(int c = 0; c < 5; c++) sql_cap->tipo[c] = SQL_TIPO_INT4;
+            sql_cap->tipo[4] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->cell[0][0], SQL_OUT_CELL, "%ld", tot);
+            snprintf(sql_cap->cell[0][1], SQL_OUT_CELL, "%ld", vale);
+            snprintf(sql_cap->cell[0][2], SQL_OUT_CELL, "%ld", falha);
+            snprintf(sql_cap->cell[0][3], SQL_OUT_CELL, "%ld", estrito);
+            snprintf(sql_cap->cell[0][4], SQL_OUT_CELL, "%s", falha == 0 ? "sim" : "nao");
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 1");
+        }
+        printf("   %ld | %ld | %ld | %ld | %s\n", tot, vale, falha, estrito,
+               falha == 0 ? "sim" : "nao");
+        printf("-- a forte vale em %ld de %ld triplos (%ld estritos) sobre %ld"
+               " endereços de %d bits · %s\n", vale, tot, estrito, nl, bits,
+               falha == 0 ? "a régua DESCE: a leitura serve"
+                          : "a régua NÃO desce: a leitura não serve");
+        return 1;
+    }
+
     if(acao == ACAO_MARCA && mat_op == 22){
         /* ── A FIBRA NÃO É OPERAÇÃO MATRICIAL, e por isso não passa pelo tecto
          * de LN_MAX: ela conta a DOBRA de uma leitura (aranha def:dobra) sobre
