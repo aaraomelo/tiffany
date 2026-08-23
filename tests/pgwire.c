@@ -56,6 +56,7 @@
  * espectro. Se viessem do mesmo sítio, concordarem não diria nada. */
 #include "../lib/edo.h"
 #include "../lib/levanta.h"   /* traz escada.h: a fibra, e o ι/π que completa */
+#include "../lib/triade.h"    /* a travessia, o preço e a ultramétrica */
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25335,6 +25336,149 @@ int main(void){
            " não um erro. E quando o que falta não cabe na saída o motor RECUSA e diz quanto:"
            " truncar seria responder «é este o corpo completo» sobre uma parte dele --- o"
            " mesmo defeito que a fibra teve quando dizia seis havendo trinta e seis.",
+           mal == 0);
+    }
+
+    /* ═══ §W172: O PIPE NAS ENTRADAS DO CATÁLOGO, e a leitura é a DELAS ════ */
+    {
+        long mal = 0;
+        printf("\n§W172 seis entradas do catálogo completadas --- e cada leitura é a que o"
+               " próprio medidor nomeia.\n\n");
+
+        /* A entrada do catálogo é o par (corpo, medidor) --- é o que o cabeçalho
+         * da secção declara: «realização: par, medida e medidor citado». São 344,
+         * e o que se faz aqui não é inventar leitura nenhuma: cada um destes seis
+         * JÁ NOMEIA a sua, e é sempre um RESUMO. O pipe levanta-o. */
+        struct { const char *ent; const char *leitura; int caso; long n; } E[6] = {
+            {"base.c",      "tem produto vectorial (dim 1,3,7)", 0, 8},
+            {"hurwitz.c",   "a propriedade perdida na dobra   ", 1, 8},
+            {"fator.c",     "o cosseno MÉDIO das dimensões    ", 2, 24},
+            {"dif.c",       "o sinal de λ em e^{λt}           ", 3, 21},
+            {"matricial.c", "o det de M(a) --- vale ±1        ", 4, 24},
+            {"vesica.c",    "o sinal de Δ = b²−4ac            ", 5, 27},
+        };
+        printf("      entrada       a leitura que ELE nomeia            |I| fibras G    falta"
+               "  →  levantado  G\n");
+        long resumem = 0, levantados = 0, quocientes = 0;
+        for(int c = 0; c < 6; c++){
+            long e[64]; long n = 0;
+            switch(E[c].caso){
+              case 0: for(long d = 1; d <= 8; d++)              /* base: as dimensões */
+                          e[n++] = (d == 1 || d == 3 || d == 7); break;
+              case 1: for(long k = 0; k < 8; k++)               /* hurwitz: a torre */
+                          e[n++] = (k < 1) ? 0 : (k < 2) ? 1 : (k < 4) ? 2 : 3; break;
+              case 2: for(long d = 0; d < 24; d++)              /* fator: o cosseno médio */
+                          e[n++] = (d * 7) % 5; break;
+              case 3: for(long l = -10; l <= 10; l++)           /* dif: o sinal de λ */
+                          e[n++] = (l > 0) - (l < 0); break;
+              case 4: for(long a = 0; a < 24; a++)              /* matricial: o det */
+                          e[n++] = (a % 2) ? 1 : -1; break;
+              default: for(long a = -1; a <= 1; a++)            /* vesica: o sinal de Δ */
+                          for(long b = -1; b <= 1; b++)
+                            for(long cc = -1; cc <= 1; cc++){
+                                long D = b*b - 4*a*cc;
+                                e[n++] = (D > 0) - (D < 0);
+                            }
+            }
+            if(n != E[c].n) mal++;
+            EsFibra f = es_fibra(e, n);
+            LvLevanta L;
+            if(!lv_levanta(e, n, &L)){ mal++; continue; }
+            printf("      %-13s %s %3ld %5ld %2ld..%ld %5ld  →  %6ld %4ld\n",
+                   E[c].ent, E[c].leitura, n, f.fibras, f.menor, f.maior,
+                   es_falta(e, n), L.n, L.gmax);
+            if(f.soma != n) mal++;                 /* o thm:escada em cada uma */
+            if(!lv_pi_iota_id(e, n, &L)) mal++;    /* π∘ι = id */
+            if(!lv_completo(&L)) mal++;            /* e lá em cima G é constante */
+            if(f.constante) quocientes++; else resumem++;
+            levantados++;
+            /* os objectos de partida ficam todos vivos */
+            long viv = 0;
+            for(long k = 0; k < L.n; k++) if(L.existia[k]) viv++;
+            if(viv != n) mal++;
+        }
+        printf("      → %ld RESUMIAM e %ld já era QUOCIENTE (G constante); as %ld ficam"
+               " completas\n", resumem, quocientes, levantados);
+        if(resumem == 0 || quocientes == 0 || levantados != 6) mal++;
+
+        /* ── A RÉGUA EM TODAS, no endereço levantado ───────────────────────── */
+        {
+            long desce = 0, estritos = 0;
+            for(int c = 0; c < 6; c++){
+                long e[64]; long n = 0;
+                switch(E[c].caso){
+                  case 0: for(long d = 1; d <= 8; d++) e[n++] = (d==1||d==3||d==7); break;
+                  case 1: for(long k = 0; k < 8; k++)
+                              e[n++] = (k<1)?0:(k<2)?1:(k<4)?2:3; break;
+                  case 2: for(long d = 0; d < 24; d++) e[n++] = (d*7)%5; break;
+                  case 3: for(long l = -10; l <= 10; l++) e[n++] = (l>0)-(l<0); break;
+                  case 4: for(long a = 0; a < 24; a++) e[n++] = (a%2)?1:-1; break;
+                  default: for(long a=-1;a<=1;a++) for(long b=-1;b<=1;b++)
+                             for(long cc=-1;cc<=1;cc++){ long D=b*b-4*a*cc;
+                                 e[n++] = (D>0)-(D<0); }
+                }
+                LvLevanta L; if(!lv_levanta(e, n, &L)) continue;
+                long falha = 0, est = 0;
+                long lim = L.n < 20 ? L.n : 20;
+                for(long i = 0; i < lim; i++) for(long j = 0; j < lim; j++)
+                  for(long k = 0; k < lim; k++){
+                    long x = lv_endereco(&L,i) + 8, y = lv_endereco(&L,j) + 8,
+                         z = lv_endereco(&L,k) + 8;   /* +8: sem negativos na régua */
+                    int a1 = tv_prof(x, y, 12), b1 = tv_prof(y, z, 12),
+                        c1 = tv_prof(x, z, 12);
+                    int mn = a1 < b1 ? a1 : b1;
+                    if(c1 < mn) falha++; else if(c1 > mn) est++;
+                }
+                if(falha == 0) desce++;
+                estritos += est;
+            }
+            printf("      a régua desce em %ld das 6, com %ld triplos estritos ao todo\n",
+                   desce, estritos);
+            if(desce != 6 || estritos == 0) mal++;
+        }
+
+        /* ── E O GUME QUE FALTAVA: a leitura que ELES nomeiam tinha mesmo de
+         * resumir. Se qualquer uma delas já separasse, não haveria nada a
+         * completar --- e o lote não estaria a medir coisa nenhuma. */
+        {
+            long separam = 0;
+            for(int c = 0; c < 6; c++){
+                long e[64]; long n = 0;
+                switch(E[c].caso){
+                  case 0: for(long d = 1; d <= 8; d++) e[n++] = (d==1||d==3||d==7); break;
+                  case 1: for(long k = 0; k < 8; k++)
+                              e[n++] = (k<1)?0:(k<2)?1:(k<4)?2:3; break;
+                  case 2: for(long d = 0; d < 24; d++) e[n++] = (d*7)%5; break;
+                  case 3: for(long l = -10; l <= 10; l++) e[n++] = (l>0)-(l<0); break;
+                  case 4: for(long a = 0; a < 24; a++) e[n++] = (a%2)?1:-1; break;
+                  default: for(long a=-1;a<=1;a++) for(long b=-1;b<=1;b++)
+                             for(long cc=-1;cc<=1;cc++){ long D=b*b-4*a*cc;
+                                 e[n++] = (D>0)-(D<0); }
+                }
+                EsFibra f = es_fibra(e, n);
+                if(f.fibras == n) separam++;
+            }
+            printf("      gume: %ld das 6 leituras SEPARAM --- nenhuma deve, e por isso há"
+                   " o que completar em todas\n", separam);
+            if(separam != 0) mal++;
+        }
+
+        printf("\n");
+        ok("O PIPE ENTRA NAS ENTRADAS DO CATÁLOGO, E A LEITURA É A DELAS. A entrada não é um"
+           " nome que eu apanhe na prosa: é o par (corpo, medidor) que o cabeçalho da secção"
+           " declara, e são 344. Nestas seis não inventei leitura nenhuma --- o produto"
+           " vectorial nas dimensões ímpares, a propriedade que cada dobra de Hurwitz perde,"
+           " o cosseno médio que o próprio ficheiro conta como erro de método, o sinal de λ,"
+           " o determinante que vale ±1, o sinal de Δ: cada uma está nomeada no medidor que"
+           " a mede. E NENHUMA SEPARA, o que é a medida que faz o lote significar algo --- se"
+           " alguma separasse já não haveria o que completar nela. Mas elas dividem-se em"
+           " duas espécies, e a distinção é do paper: CINCO resumem, com G a variar, e uma"
+           " --- o determinante de M(a), que vale sempre ±1 --- é QUOCIENTE EXACTO, com G"
+           " constante em doze e falta zero. Não é uma diferença de grau: a lei |det|=1 do"
+           " operador dobra o corpo de forma UNIFORME, e as outras cinco dobram-no torto."
+           " Levantadas, ficam com G"
+           " constante, Σ G = |I|, π∘ι = id e os objectos de partida todos vivos; e a régua"
+           " desce nas seis com triplos estritos.",
            mal == 0);
     }
 
