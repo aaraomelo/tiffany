@@ -518,7 +518,10 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define S_FILHOS  (ISA_TECTO + ZONA(13))  /* na MÃE: {quantos,0} e depois blocos de 17 */
 #define FK_NOME_W 16u
 #define FK_BLOCO  17u                     /* 16 Words de nome + 1 Word com a coluna */
-#define FK_MAXFIL 16
+/* QUANTAS FILHAS UMA MÃE VIGIA: as que a zona segura. Eram DEZASSEIS, e o
+ * dezasseis não vinha de lado nenhum --- a zona tem ZONA_SLOTS Words, o
+ * cabeçalho gasta uma e cada filha ocupa FK_BLOCO. */
+#define FK_MAXFIL ((int)((ZONA_SLOTS - 1u) / FK_BLOCO))
 
 /* ── UM ÍNDICE POR COLUNA, e cada um na sua zona ─────────────────────────────
  *
@@ -1428,29 +1431,53 @@ static int fk_le(int j, char *tab, int cap){
 }
 /* na MÃE: quem aponta para mim. A lista não repete — declarar duas vezes a
  * mesma seta não a torna duas setas. */
-static void filho_regista(const char *tab, int col){
-    long n = mem_le(S_FILHOS).total, k;
+/* ── E O CONTADOR É UM PAR, não um byte ──────────────────────────────────────
+ * `mem_le(S_FILHOS).total` é um Word8: com mais de 255 filhas ele dava a volta
+ * e a mãe passava a vigiar as primeiras outra vez. O par leva-o a 65535, que é
+ * mais do que a zona segura --- e assim o tecto que recusa é o do ESPAÇO. */
+static long filho_quantas(void){
+    Word w = mem_le(S_FILHOS);
+    return (long)w.total | ((long)w.e << 8);
+}
+static void filho_quantas_poe(long n){
+    Word w; w.total = (Word8)(n & 255); w.e = (Word8)((n >> 8) & 255);
+    mem_grava(S_FILHOS, w);
+}
+
+/* devolve 0 quando não coube --- e quem chama TEM de recusar a seta, porque uma
+ * mãe que não vigia é uma restrição que não existe */
+static int filho_regista(const char *tab, int col){
+    long n = filho_quantas(), k;
     char q[64];
     for(k = 0; k < n && k < FK_MAXFIL; k++){
         unsigned b = S_FILHOS + 1 + (unsigned)k * FK_BLOCO;
         txt_le(b, FK_NOME_W, q, sizeof q);
-        if(!strcmp(q, tab) && mem_le(b + FK_NOME_W).total == (Word8)col) return;
+        if(!strcmp(q, tab) && mem_le(b + FK_NOME_W).total == (Word8)col) return 1;
     }
-    if(n >= FK_MAXFIL) return;                 /* cheio: a mãe deixa de vigiar */
+    /* CHEIO NÃO É «A MÃE DEIXA DE VIGIAR».
+     *
+     * Era o que estava escrito, e era o que acontecia: a décima sétima filha
+     * era criada com a seta e a mãe não a registava, pelo que um DELETE na mãe
+     * apagava por baixo dela --- e a filha ficava com uma seta para uma linha
+     * que já não existe, em silêncio. Medido: com vinte filhas, a f20 ficou
+     * órfã e nada foi dito. Uma restrição que falha sem dizer é pior do que não
+     * a haver, porque quem a declarou conta com ela. */
+    if(n >= FK_MAXFIL) return 0;
     { unsigned b = S_FILHOS + 1 + (unsigned)n * FK_BLOCO;
       fk_txt_grava(b, tab);
       { Word w; w.total = (Word8)col; w.e = 0; mem_grava(b + FK_NOME_W, w); }
-      { Word c; c.total = (Word8)(n + 1); c.e = 0; mem_grava(S_FILHOS, c); } }
+      filho_quantas_poe(n + 1); }
+    return 1;
 }
 static int filho_le(int k, char *tab, int cap){
-    long n = mem_le(S_FILHOS).total;
+    long n = filho_quantas();
     if(k < 0 || k >= n || k >= FK_MAXFIL) return -1;
     { unsigned b = S_FILHOS + 1 + (unsigned)k * FK_BLOCO;
       txt_le(b, FK_NOME_W, tab, (size_t)cap);
       return (int)mem_le(b + FK_NOME_W).total; }
 }
 static int filho_quantos(void){
-    long n = mem_le(S_FILHOS).total;
+    long n = filho_quantas();
     return (int)(n > FK_MAXFIL ? FK_MAXFIL : n);
 }
 
@@ -2793,8 +2820,18 @@ static int cria(const char *resto){
                 fkp[k].tab[0] = 0;
                 continue;
               }
-              /* a mãe regista quem a aponta, e só depois se volta */
-              filho_regista(guarda, (int)fkp[k].col);
+              /* a mãe regista quem a aponta, e só depois se volta. SE NÃO
+               * COUBER, a seta não se escreve: uma filha com seta que a mãe não
+               * vigia fica órfã no primeiro DELETE, e em silêncio. */
+              if(!filho_regista(guarda, (int)fkp[k].col)){
+                  usa_tabela(guarda, 0);
+                  printf("erro: a tabela «%s» já vigia %d filhas e não cabe mais uma"
+                         " — a coluna %ld fica SEM seta, porque uma mãe que não vigia"
+                         " é uma restrição que não existe.\n",
+                         fkp[k].tab, FK_MAXFIL, fkp[k].col);
+                  fkp[k].tab[0] = 0;
+                  continue;
+              }
               fkp[k].modo |= (long)mc << 8;      /* a coluna da mãe viaja com o modo */
             }
             usa_tabela(guarda, 0);
@@ -5958,16 +5995,25 @@ static void faixa_tudo(unsigned no, int d, int *saida, int *n, int cap);
  * escritos três vezes --- os dois `for`, o `<< 4` e o `d < 2` do chamador ---, e
  * por isso mudar a altura partia isto em silêncio. */
 static void faixa_folhas(unsigned no, int *saida, int *n, int cap){
-    for(unsigned a1 = 0; a1 < ORD_LARG; a1++){
-        unsigned n1 = par_le(ord_raiz + no*ORD_LARG + a1);
+    unsigned sim[ORD_NIV_MAX], nos[ORD_NIV_MAX];
+    int d = 0;
+    sim[0] = 0; nos[0] = no;
+    while(d >= 0){
+        if(sim[d] >= ORD_LARG){ d--; if(d >= 0) sim[d]++; continue; }
+        unsigned f = par_le(ord_raiz + nos[d]*ORD_LARG + sim[d]);
         sql_ultimos_nos++;
-        if(!n1) continue;
-        for(unsigned a2 = 0; a2 < ORD_LARG; a2++){
-            unsigned n2 = par_le(ord_raiz + n1*ORD_LARG + a2);
-            sql_ultimos_nos++;
-            if(!n2) continue;
-            if(*n < cap) saida[(*n)++] = (int)((a1 << ORD_BITS) | a2);
+        if(!f){ sim[d]++; continue; }
+        if(d == ord_niv_idx - 1){
+            /* o índice remonta-se pelos símbolos do caminho, com o MESMO
+             * deslocamento com que foi escrito --- como o `.asm` monta a saída
+             * dos seus quatro contadores, e não com um `<< 4` à mão */
+            unsigned idx = 0;
+            for(int t = 0; t <= d; t++) idx = (idx << ORD_BITS) | sim[t];
+            if(*n < cap) saida[(*n)++] = (int)idx;
+            sim[d]++;
+            continue;
         }
+        d++; nos[d] = f; sim[d] = 0;
     }
 }
 

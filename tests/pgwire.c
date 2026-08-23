@@ -27232,6 +27232,36 @@ int main(void){
                nomeadas ? "sim" : "NÃO");
         if(!nomeadas) mal++;
 
+        /* (3b) A MÃE VIGIA TODAS AS FILHAS, OU RECUSA A SETA.
+         *
+         * `FK_MAXFIL` era DEZASSEIS, e a décima sétima filha era criada com a
+         * seta sem a mãe a registar --- «cheio: a mãe deixa de vigiar», dizia o
+         * comentário. Medido: com vinte filhas, o DELETE na mãe apagava a linha
+         * e a f20 ficava com uma seta para o que já não existe, em SILÊNCIO.
+         * Uma restrição que falha sem dizer é pior do que não a haver, porque
+         * quem a declarou conta com ela. O tecto passa a ser o que a zona segura
+         * e o que não couber RECUSA a seta, dizendo. */
+        sql_executa("CREATE TABLE mae188 (id INTEIRO PRIMARY KEY)", &o);
+        sql_executa("INSERT INTO mae188 VALUES (1)", &o);
+        for(int k = 1; k <= 20; k++){
+            char q[200];
+            snprintf(q, sizeof q, "CREATE TABLE fi%d (x INTEIRO,"
+                     " mid INTEIRO REFERENCES mae188(id))", k);
+            sql_executa(q, &o);
+        }
+        sql_executa("INSERT INTO fi20 VALUES (9,1)", &o);
+        sql_executa("DELETE FROM mae188 WHERE id = 1", &o);
+        int protege = !o.ok;
+        printf("      a VIGÉSIMA filha protege a mãe (era o 17.º que caía): %s\n",
+               protege ? "sim — DELETE recusado" : "NÃO — apagou por baixo dela");
+        if(!protege) mal++;
+        /* o CONTROLO: sem filha a apontar, a mãe apaga-se */
+        sql_executa("DELETE FROM fi20", &o);
+        sql_executa("DELETE FROM mae188 WHERE id = 1", &o);
+        printf("      e o CONTROLO — sem seta a apontar, a linha apaga-se: %s\n",
+               o.ok ? "sim" : "NÃO (recusa constante)");
+        if(!o.ok) mal++;
+
         /* (4) O ÍNDICE TAMBÉM NÃO TEM O TECTO DAS OITO ÁRVORES. */
         sql_executa("CREATE INDEX ix188 ON t3 (c250)", &o);
         int idx = o.ok;
