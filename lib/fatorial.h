@@ -658,7 +658,14 @@ static int ft_sol_confere(const FtSol *s, const long *co){
 
 /* ═══ A SOLUÇÃO COM J: o par (c,s), e não um escalar ════════════════════════
  *
- * A equação da face é y'' = t·y --- com ω²=t --- e a sua solução vive em Z[ω]:
+ * A equação da face é y'' = t·y --- com ω²=t --- e a sua solução vive no SEGUNDO
+ * DEGRAU com a face, X_2 + X_2·ω.
+ *
+ * E o degrau escreve-se assim porque NÃO HÁ Z nesta teoria. O paper define-o no
+ * preâmbulo e diz porquê: «o segundo degrau, e NÃO UM CONJUNTO IMPORTADO: este
+ * documento CONSTRÓI-O (§escada, X_2 = X_1²/~). Escrever Z seria usar o que se
+ * vai construir.» O X_2 é o quociente por (a,b)~(c,d) ⟺ a+d=b+c, que é o que
+ * fecha a face do OPOSTO --- e é dele que os coeficientes aqui são.
  *
  *     y(t) = c(t)·1 + s(t)·ω,
  *

@@ -405,7 +405,10 @@ int main(void){
 
         printf("\n");
         ok("A SOLUÇÃO COM J É O PAR (c,s), E A NORMA VERIFICA-SE NOS COEFICIENTES. A equação"
-           " da face é y''=t·y e a solução vive em Z[w]: y = c·1 + s·w, que é o exp(tJ) do"
+           " da face é y''=t·y e a solução vive no SEGUNDO DEGRAU com a face, X_2 + X_2·w"
+           " --- e escreve-se assim porque NÃO HÁ Z nesta teoria: o paper diz que"
+           " «escrever Z seria usar o que se vai construir», e o X_2 é o quociente por"
+           " (a,b)~(c,d) sse a+d=b+c, que fecha a face do oposto. É y = c·1 + s·w, o exp(tJ) do"
            " paper com J geral. As duas metades saem da MESMA recorrência com condições"
            " iniciais diferentes --- (1,0) dá o c, (0,1) dá o s ---, e é a cisão outra vez,"
            " agora nas condições em vez dos índices. E A NORMA c²−t·s²=1 VERIFICA-SE SEM"

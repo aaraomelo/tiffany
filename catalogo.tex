@@ -2460,10 +2460,43 @@ $y''+5y'+6y=0$ & $\sum_k d_k\frac{t^k}{k!}$, com $d$ pela recorrência\\
 onde a fase não é nem constante nem alternada não há somatório fechado: o motor \emph{diz
 isso} em vez de forçar um.
 
+\subsection*{Não há $\mathbb{Z}$ nesta teoria --- há o segundo degrau}
+
+Antes de prosseguir, uma correcção que vale por todo o texto. Escrevi «a solução vive em
+$\mathbb{Z}[\omega]$» e a pergunta veio: \emph{de onde saiu esse $\mathbb{Z}$?}
+
+\begin{quote}
+Do preâmbulo da \emph{aranha}, e ele diz exactamente o contrário: «\emph{o segundo degrau, e
+NÃO um conjunto importado: este documento CONSTRÓI-O ($\S$escada,
+$X_2=X_1^{2}/{\sim}$). Escrever $\mathbb{Z}$ seria usar o que se vai construir.}»
+\end{quote}
+
+\noindent O paper usa $\mathbb{Z}$ \textbf{três vezes em quatro mil linhas}, e uma delas é
+para dizer que \emph{«$\mathbb{Z}$, $\mathbb{Q}$ e $\mathbb{R}$ são degraus posteriores da
+§escada, e nenhum deles é preciso para isto»}. As outras duas são nomes de grupos citados de
+fora.
+
+\medskip\noindent O que existe é $X_2$, o quociente por $(a,b)\sim(c,d)\iff a+d=b+c$, que
+fecha a face do \textbf{oposto} --- e é dele que os coeficientes são. \emph{A diferença não é
+de notação}: um é construído aqui e o outro seria importado, e importá-lo dispensaria a
+escada inteira que o produz.
+
+\medskip\noindent\textbf{E este texto ainda tem $124$ ocorrências de $\mathbb{Z}$}, de
+secções anteriores --- as que dizem «a divisão não fecha em $\mathbb{Z}$» e as do
+$\mathbb{Z}[\varphi]$. Ficam contadas aqui em vez de substituídas em massa: \emph{um
+\code{replace} sem limite sobre cento e vinte e quatro sítios muda enunciados que ninguém
+releu}, e a conta é o primeiro passo para as corrigir uma a uma.
+
 \subsection*{A solução com $J$ é o PAR, e a norma verifica-se nos coeficientes}
 
-A equação da face é $y''=t\,y$ e a solução vive em $\mathbb{Z}[\omega]$:
-$y=c\cdot1+s\cdot\omega$, que é o $\exp(tJ)$ do paper com $J$ geral. As duas metades saem da
+A equação da face é $y''=t\,y$ e a solução vive no \textbf{segundo degrau com a face},
+$X_2+X_2\,\omega$: $y=c\cdot1+s\cdot\omega$, que é o $\exp(tJ)$ do paper com $J$ geral.
+
+\emph{E escreve-se assim porque não há $\mathbb{Z}$ nesta teoria.} O preâmbulo da
+\emph{aranha} define-o e diz porquê: «\emph{o segundo degrau, e NÃO um conjunto importado:
+este documento CONSTRÓI-O ($\S$escada, $X_2=X_1^2/{\sim}$). Escrever $\mathbb{Z}$ seria usar
+o que se vai construir}». O $X_2$ é o quociente por $(a,b)\sim(c,d)\iff a+d=b+c$, que fecha a
+face do \textbf{oposto} --- e é dele que estes coeficientes são. As duas metades saem da
 \emph{mesma} recorrência com condições iniciais diferentes --- $(1,0)$ dá o $c$, $(0,1)$ dá o
 $s$ ---, e é a \textbf{cisão outra vez}, agora nas condições em vez dos índices.
 

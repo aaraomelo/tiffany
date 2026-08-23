@@ -184,3 +184,4 @@
 - **31/07** — [verdade relativa ao CORPO](project-checkpoint-2026-07-31-noite.md) · [mineração no banco](project-checkpoint-2026-07-31-tarde.md) · [a
 - [29/07](project-checkpoint-2026-07-29.md) — onde parou: 49 medidores, 3 papers, 3 repos limpos.
 - [G constante não certifica a leitura](project-g-constante-nao-certifica-a-leitura.md) — quociente perfeito (falta 0) e leitura ERRADA: junta 50 pares diferentes, parte 30 iguais.
+- [Não há ℤ — há o segundo degrau](feedback-nao-ha-Z-ha-o-segundo-degrau.md) — «escrever Z seria usar o que se vai construir»: o paper usa-o 3× em 4374 linhas, e uma é para o dispensar.
