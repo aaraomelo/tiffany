@@ -2048,6 +2048,63 @@ inteiros: é o \emph{lem:ultra}, e ele não tem excepção.
 \medido{\code{tools/triade\_grupos.c} --- as três faces pelo \code{SELECT triade(*)} sobre os
 sete grupos já completos, com \code{count(*)} a conferir as linhas.}
 
+\subsection*{O circuito RLC resolvido no banco: a companheira é a borda do corpo}
+
+Resolver uma equação diferencial aqui não pede maquinaria nova, e a \code{lib/edo.h} já o
+dizia: a equação característica \emph{é} a borda da álgebra,
+\[
+  y''+B\,y'+C\,y=0 \;\Longleftrightarrow\; \lambda^2+B\lambda+C=0
+  \;\Longleftrightarrow\; \sigma^2=b_0+b_1\sigma,\qquad B=-b_1,\ C=-b_0,
+\]
+e o $\Delta=B^2-4C$ que classifica as soluções é o \textbf{mesmo} $\Delta$ que classifica os
+corpos deste catálogo. A ponte para o motor é a matriz \textbf{companheira}: com o estado
+$x=(q,q')$,
+\[
+  x'=Ax,\qquad A=\begin{pmatrix}0&1\\-C&-B\end{pmatrix},\qquad
+  \operatorname{tr}A=-B,\quad \det A=C,\quad \Delta=\operatorname{tr}^2-4\det,
+\]
+que é exactamente o que \code{SELECT regime(*)} lê --- \emph{e ele já existia}. Logo
+\textbf{resolver a EDO no banco é pôr a companheira numa tabela e perguntar}.
+
+\paragraph{O circuito.} Malha RLC em série, com $q$ a carga:
+\[
+  L\,q''+R\,q'+\tfrac{1}{C}q=0
+  \quad\Longrightarrow\quad
+  q''+\tfrac{R}{L}q'+\tfrac{1}{LC}q=0 .
+\]
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llrlll@{}}
+\toprule
+o circuito & a EDO & $\Delta$ & regime & classe & raízes\\
+\midrule
+sobreamortecido $R{=}5$, $\frac1{LC}{=}6$ & $y''+5y'+6y=0$ & $1$ & CRISTAL & hiperbólico & $-2,\,-3$\\
+crítico $R{=}4$, $\frac1{LC}{=}4$ & $y''+4y'+4y=0$ & $0$ & CRISTAL & parabólico & $-2$ (dupla)\\
+subamortecido $R{=}2$, $\frac1{LC}{=}5$ & $y''+2y'+5y=0$ & $-16$ & CRISTAL & elíptico & $-1\pm2i$\\
+sem perdas $R{=}0$, $\frac1{LC}{=}4$ & $y''+4y=0$ & $-16$ & \textbf{BORDA} & elíptico & $0\pm2i$\\
+só resistivo $R{=}3$, $\frac1{LC}{=}0$ & $y''+3y'=0$ & $9$ & \textbf{BORDA} & hiperbólico & $0,\,-3$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Os três nomes do electrotécnico são as três classes desta casa}, e não uma
+analogia: sobreamortecido é o \emph{hiperbólico} (o gato, duas exponenciais), crítico é o
+\emph{parabólico} (a fronteira, $t\,e^{\lambda t}$), subamortecido é o \emph{elíptico} (o
+esquilo, gira e decai).
+
+\paragraph{E o regime é outra pergunta: lê o sinal de $\operatorname{Re}\lambda$.} É ele que
+decide se o circuito \emph{morre}, e é independente da classe --- o subamortecido é elíptico
+\emph{e} CRISTAL, porque oscila enquanto decai. Com $R>0$ o traço é $-R/L<0$ e o estado
+colapsa no ponto fixo; com $R=0$ o traço é zero e o estado \textbf{orbita}, que é o $LC$ puro
+a conservar. \emph{Num RLC passivo não há terceiro caso}: um traço positivo pediria $R<0$, o
+que é fonte e não resistor.
+
+\medskip\noindent E o $\Delta$ sai por \textbf{três caminhos} que têm de concordar: à mão, da
+\code{lib/edo.h} lendo a equação escrita, e do motor pela companheira --- $5/5$ nos três.
+
+\medido{\code{tools/edo\_circuito.c} --- os cinco circuitos com o $\Delta$ pelos três
+caminhos, o regime pelo motor, e as raízes exactas em inteiros.}
+
 \subsection*{Os dezasseis corpos COMPLETOS no banco, e o que o envelope ensinou}
 
 Executado o pipe sobre os corpos que estão no banco --- levantar pelo $\iota/\pi$, compactar
