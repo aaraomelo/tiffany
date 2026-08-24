@@ -28463,6 +28463,112 @@ int main(void){
            " resposta seja a MESMA que a varredura daria.", mal == 0);
     }
 
+    /* ═══ §W196: O PREWHERE É A COMPOSIÇÃO DE EROSÕES, E ELAS COMUTAM ══════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W196 prewhere: erode-se para escolher, e a ordem não muda o que sai.\n\n");
+        unlink("/tmp/pgwire_w196.mem"); unlink("/tmp/pgwire_w196.prog");
+        unlink("/tmp/pgwire_w196.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w196__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w196__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w196")) mal++;
+
+        /* ── O QUE O PREWHERE É AQUI, E O QUE NÃO PODE SER ───────────────────
+         *
+         * No ClickHouse ele filtra por uma coluna barata ANTES de ler as caras.
+         * Nesta casa isso tem nome: é a EROSÃO antes da dilatação, do corpo
+         * mórfico --- «erode-se para ESCOLHER, dilata-se para escrever» ---, e a
+         * peça já existe: «uma condição é uma FUNÇÃO do campo no campo, e o AND
+         * compõe duas», que é o que o motor diz de si nas vistas.
+         *
+         * MAS A FORMA CLÁSSICA DELE NÃO CABE, e é o próprio motor que o explica:
+         * os saltos foram TIRADOS de propósito. «O par ⊗/⊘ do algoritmo não
+         * ramifica: OPERA» --- as quatro faces correm simultaneamente no espaço
+         * de fases, com `0 − ACC` a espalhar o booleano por todos os bits e a
+         * dispensar o salto. O short-circuit --- avaliar o átomo caro só onde o
+         * barato passou --- é ramificar por LINHA, isto é, executar no tempo; e
+         * o comentário que está lá conta que o defeito que ali viveu meses veio
+         * inteiro dos saltos.
+         *
+         * A forma que cabe é a PASSAGEM: erodir o campo com a primeira condição
+         * e correr a segunda só sobre o que sobrou --- ramificar por CONJUNTO e
+         * não por linha. Isso é trabalho e fica dito; o que se mede hoje é a LEI
+         * QUE ELE ASSUME e que ninguém verificava: as erosões COMUTAM, pelo que
+         * escolher a ordem é uma decisão sobre o custo e nunca sobre a resposta.
+         * Sem isto medido, qualquer reordenação futura seria uma aposta. */
+        sql_executa("CREATE TABLE t (a INTEIRO, b INTEIRO, c INTEIRO)", &o);
+        for(int i = 1; i <= 30; i++){
+            char q[100];
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d,%d)", i, i % 3, i * 2);
+            sql_executa(q, &o);
+        }
+        /* os mesmos três factores, nas seis ordens */
+        static const char *ORD[6] = {
+            "b = 1 AND a > 5 AND c < 50",
+            "b = 1 AND c < 50 AND a > 5",
+            "a > 5 AND b = 1 AND c < 50",
+            "a > 5 AND c < 50 AND b = 1",
+            "c < 50 AND b = 1 AND a > 5",
+            "c < 50 AND a > 5 AND b = 1",
+        };
+        char base[160]; base[0] = 0;
+        long iguais = 0;
+        for(int k = 0; k < 6; k++){
+            char q[220]; snprintf(q, sizeof q, "SELECT a FROM t WHERE %s", ORD[k]);
+            sql_executa(q, &o);
+            char saiu[160]; saiu[0] = 0;
+            if(o.ok) for(int r = 0; r < o.nrows; r++)
+                snprintf(saiu + strlen(saiu), sizeof saiu - strlen(saiu),
+                         "%s%s", r ? "," : "", o.cell[r][0]);
+            if(!k) snprintf(base, sizeof base, "%s", saiu);
+            if(!strcmp(saiu, base)) iguais++;
+            else printf("        a ordem %d dá [%s] e a primeira deu [%s]\n",
+                        k, saiu, base);
+        }
+        printf("      as SEIS ordens dos mesmos três factores: %ld/6 dão [%s]\n",
+               iguais, base);
+        if(iguais != 6) mal++;
+
+        /* ── E O CONTROLO: as três condições têm de ERODIR de facto. Se cada uma
+         * deixasse tudo passar, as seis ordens dariam o mesmo por não haver
+         * erosão nenhuma a comutar. */
+        sql_executa("SELECT a FROM t", &o);
+        long todas = o.ok ? o.nrows : -1;
+        sql_executa("SELECT a FROM t WHERE b = 1", &o);
+        long so_b = o.ok ? o.nrows : -1;
+        sql_executa("SELECT a FROM t WHERE b = 1 AND a > 5 AND c < 50", &o);
+        long tres = o.ok ? o.nrows : -1;
+        printf("      CONTROLO — cada erosão ENCOLHE: %ld linhas → %ld com uma → %ld"
+               " com as três\n", todas, so_b, tres);
+        if(!(todas > so_b && so_b > tres && tres > 0)) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("O PREWHERE É A COMPOSIÇÃO DE EROSÕES, E O QUE SE MEDE É ELAS COMUTAREM. No"
+           " ClickHouse ele filtra por uma coluna barata antes de ler as caras; nesta casa"
+           " isso tem nome --- é a EROSÃO antes da dilatação, do corpo mórfico, «erode-se"
+           " para ESCOLHER, dilata-se para escrever» --- e a peça já existe: «uma condição"
+           " é uma FUNÇÃO do campo no campo, e o AND compõe duas». MAS A FORMA CLÁSSICA"
+           " DELE NÃO CABE AQUI, e é o próprio motor que o explica: os saltos foram"
+           " TIRADOS de propósito, porque «o par ⊗/⊘ do algoritmo não ramifica: OPERA» ---"
+           " as quatro faces correm simultaneamente no espaço de fases, com `0 − ACC` a"
+           " espalhar o booleano por todos os bits e a dispensar o salto. O short-circuit"
+           " é ramificar por LINHA, isto é, executar no TEMPO, e o comentário que lá está"
+           " conta que o defeito que ali viveu meses veio inteiro dos saltos. A forma que"
+           " cabe é a PASSAGEM --- erodir o campo com a primeira condição e correr a"
+           " segunda só sobre o que sobrou, ramificando por CONJUNTO e não por linha ---,"
+           " e isso fica DITO como trabalho e não dado por feito. O que se mede hoje é a"
+           " lei que ele assume e que ninguém verificava: as erosões COMUTAM. Os mesmos"
+           " três factores nas SEIS ordens dão a mesma resposta, pelo que escolher a ordem"
+           " é uma decisão sobre o CUSTO e nunca sobre o resultado --- sem isto medido,"
+           " qualquer reordenação futura seria uma aposta. E o CONTROLO exige que cada"
+           " erosão ENCOLHA de facto: 30 linhas, 10 com uma condição, 6 com as três ---"
+           " se cada uma deixasse tudo passar, as seis ordens dariam o mesmo por não haver"
+           " erosão nenhuma a comutar.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
