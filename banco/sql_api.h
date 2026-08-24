@@ -46,6 +46,17 @@ int  sql_bit_fora_de_proposito(long i);   /* o gume do guarda: ver sql.c */
  * que é corromper de outra maneira. A recusa está a montante, no INSERT. */
 long sql_cels_fora(void);
 
+/* e quantas vezes um RESTAURO de tabela não conseguiu voltar. Vinte sítios do
+ * motor guardam o nome, mudam de tabela e voltam — e nos vinte o retorno era
+ * deitado fora. Quando o restauro falha o `fmem` não se move: a sessão fica na
+ * tabela errada e responde sobre outro objecto, sem erro nenhum. */
+long sql_restauros_falhados(void);
+
+/* e quantas chaves o percurso da árvore não pôde entregar. Onde o resultado são
+ * linhas isto é visível --- a janela da porta C recusa; onde é um AGREGADO não
+ * havia nada a cobri-lo, e o count(DISTINCT) respondia 64 a 65 classes. */
+long sql_ord_perdidos(void);
+
 #define SQL_OUT_MAX_COLS 64
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64

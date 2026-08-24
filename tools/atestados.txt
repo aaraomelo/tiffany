@@ -374,7 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 360f7b0fa6e0855f 0
+pgwire 957c70591b7082b0 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -453,7 +453,6 @@ sem_chute 942e5653474e3f91 0
 sem_ramo 81a20f7c9df8d1e2 0
 semantico 458155145c6d26d3 0
 semente bdf47d333634825f 0
-serie 2c877e064f355543 0
 serie_phi 5bd6af9a92aaa5a7 0
 significado aff35c553960fdcb 0
 simula 8d47ff0fbbdab6f3 0
@@ -465,7 +464,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql eb2913060d65117e 0
+sql 9b753b955d823558 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0

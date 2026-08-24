@@ -883,6 +883,23 @@ static char g_base[512];          /* caminho da base aberta — blobs em <base>_
 static long cel_recusadas = 0;    /* células que não couberam no envelope — contadas À PARTE */
 static long cmp_recusadas = 0;    /* comparações recusadas por a coluna ser larga */
 static int usa_tabela(const char *nome, int cria_se_falta);   /* definida com abrir_base */
+static int ord_valor_vivo_col(long col, long valor, long nr);  /* a existência sem arranjo */
+
+/* ── O RESTAURO QUE FALHA EM SILÊNCIO ────────────────────────────────────────
+ *
+ * Vinte sítios deste ficheiro seguem o mesmo padrão: guardar o nome da tabela
+ * corrente, mudar para outra, fazer o trabalho, e voltar com
+ * `usa_tabela(guarda, 0)`. Nos vinte o retorno é DEITADO FORA --- e quando o
+ * restauro falha o `fmem` não se move, pelo que a sessão fica na tabela ERRADA
+ * e tudo o que vier a seguir opera nela. Não há erro: há respostas sobre outro
+ * objecto.
+ *
+ * Antes de concluir seja o que for, MEDE-SE: este contador diz quantas vezes um
+ * restauro não conseguiu voltar. É instrumento, não correcção --- não muda uma
+ * vírgula do que o motor faz. Se for zero em toda a bateria, o padrão está a
+ * salvo hoje; se não for, sabe-se onde procurar em vez de se adivinhar. */
+static long restauros_falhados = 0;
+long sql_restauros_falhados(void){ return restauros_falhados; }
 static int usa_tabela_z(const char *nome, int cria_se_falta, int zera);
 static int tabela_existe(const char *nome);
 static void caminho_tabela(const char *nome, char *out, size_t cap, const char *ext);
@@ -1827,20 +1844,20 @@ static int fk_existe(const char *tab, int col, long valor, const char *guarda){
     { long nc = cat_ncols(), nr = cat_nrows();
       if(col < 0 || col >= nc){ usa_tabela(guarda, 0); return -1; }
       /* a árvore, se a houver — e numa coluna UNIQUE há sempre */
+      /* A EXISTÊNCIA DECIDE-SE NA DESCIDA. Estava `int saida[4]; j_casam(valor,
+       * saida, 4)` e depois o filtro pelo vivo --- e o QUATRO era do arranjo:
+       * com as quatro primeiras linhas do valor apagadas, isto concluía «não há
+       * nenhuma viva» sem ter visto a quinta. A primeira correcção que escrevi
+       * foi cair na varredura quando o arranjo enchia, o que é aceitar o tecto e
+       * pagá-lo em tempo. Não há arranjo: desce-se e pára-se no primeiro vivo. */
       if(col >= 0 && col < (long)IDX_MAXCOL && idx_valido(col, nr)){
-          int saida[4], q;
-          ord_usa_indice(col);
-          q = j_casam(valor, saida, 4);
-          ord_usa_rascunho();
-          /* a árvore diz onde a linha ESTAVA; o vivo diz se ela ainda está */
-          for(int t = 0; t < q && !achou; t++)
-              if(saida[t] >= 0 && saida[t] < nr && bit_le(S_VIVO, saida[t])) achou = 1;
+          achou = ord_valor_vivo_col(col, valor, nr);
       } else {
           for(long i = 0; i < nr && !achou; i++)
               if(bit_le(S_VIVO, i) && bit_le(S_PRES, i*nc + col)
                  && celula_valor(i, col, nc) == valor) achou = 1;
       } }
-    usa_tabela(guarda, 0);
+    if(!usa_tabela(guarda, 0)) restauros_falhados++;
     return achou;
 }
 
@@ -2683,13 +2700,27 @@ static int insere_muitas(const char *resto){
           if(*q == ',') q++;
       }
       if(falhou){
-          if(nossa){ sql_tx_desfaz(); sql_tx_fecha(); }
+          /* E O DESFAZER PODE RECUSAR --- a lei está escrita no diário («se
+           * encher, a transacção fica MARCADA e o ROLLBACK RECUSA: desfazer
+           * metade seria pior do que não desfazer»), e este chamador NÃO A
+           * ALCANÇAVA: deitava fora o retorno e anunciava «as anteriores foram
+           * DESFEITAS» de qualquer maneira. Com o diário cheio isso é o motor a
+           * afirmar que fez o que não fez --- o mesmo desfecho do SET que
+           * gravava 240 e dizia «1 linha atualizada». O que se diz agora é o
+           * que aconteceu, e as três saídas são distintas. */
+          int desfez = 1;
+          if(nossa){ desfez = sql_tx_desfaz(); sql_tx_fecha(); }
           printf("erro: a ordem tinha %d linha(s) e a %d.ª foi recusada — %s.\n",
                  quantos, n + 1,
-                 nossa ? "as anteriores foram DESFEITAS" : "a transacção é sua e fica aberta");
+                 !nossa ? "a transacção é sua e fica aberta"
+                        : desfez ? "as anteriores foram DESFEITAS"
+                                 : "o diário ENCHEU e as anteriores NÃO foram desfeitas"
+                                   " --- a base ficou com as linhas que passaram");
           if(sql_cap){ sql_cap->ok = 0;
               snprintf(sql_cap->err, sizeof sql_cap->err,
-                       "multi-row INSERT: row %d rejected, none inserted", n + 1); }
+                       desfez ? "multi-row INSERT: row %d rejected, none inserted"
+                              : "multi-row INSERT: row %d rejected, undo log full,"
+                                " earlier rows NOT rolled back", n + 1); }
           return 0;
       }
       if(nossa) sql_tx_fecha();
@@ -3139,7 +3170,7 @@ static int cria(const char *resto){
         char guarda[64]; snprintf(guarda, sizeof guarda, "%s", nome);
         for(int k = 0; k < fkp_n; k++){
             if(!usa_tabela(fkp[k].tab, 0) || !cat_nome_bate(fkp[k].tab)){
-                usa_tabela(guarda, 0);
+                if(!usa_tabela(guarda, 0)) restauros_falhados++;
                 printf("erro: a tabela «%s» da seta não existe — a coluna %ld fica"
                        " SEM seta (a tabela foi criada).\n", fkp[k].tab, fkp[k].col);
                 fkp[k].tab[0] = 0;
@@ -3147,7 +3178,7 @@ static int cria(const char *resto){
             }
             { int mc = col_indice(fkp[k].alvo);
               if(mc < 0){
-                usa_tabela(guarda, 0);
+                if(!usa_tabela(guarda, 0)) restauros_falhados++;
                 printf("erro: a coluna «%s» não existe em «%s» — a coluna %ld fica"
                        " SEM seta.\n", fkp[k].alvo, fkp[k].tab, fkp[k].col);
                 fkp[k].tab[0] = 0;
@@ -3157,7 +3188,7 @@ static int cria(const char *resto){
                * COUBER, a seta não se escreve: uma filha com seta que a mãe não
                * vigia fica órfã no primeiro DELETE, e em silêncio. */
               if(!filho_regista(guarda, (int)fkp[k].col)){
-                  usa_tabela(guarda, 0);
+                  if(!usa_tabela(guarda, 0)) restauros_falhados++;
                   printf("erro: a tabela «%s» já vigia %d filhas e não cabe mais uma"
                          " — a coluna %ld fica SEM seta, porque uma mãe que não vigia"
                          " é uma restrição que não existe.\n",
@@ -3167,7 +3198,7 @@ static int cria(const char *resto){
               }
               fkp[k].modo |= (long)mc << 8;      /* a coluna da mãe viaja com o modo */
             }
-            usa_tabela(guarda, 0);
+            if(!usa_tabela(guarda, 0)) restauros_falhados++;
         }
         for(int k = 0; k < fkp_n; k++)
             if(fkp[k].tab[0])
@@ -3225,10 +3256,10 @@ static int le_int_simples(const char **pp, long *out){
 static int usa_tabela(const char *nome, int cria_se_falta);
 static void vista_entra(char *guarda, size_t cap){
     snprintf(guarda, cap, "%s", g_tabela);
-    usa_tabela("", 0);
+    if(!usa_tabela("", 0)) restauros_falhados++;
 }
 static void vista_sai(const char *guarda){
-    usa_tabela(guarda, 0);
+    if(!usa_tabela(guarda, 0)) restauros_falhados++;
 }
 
 static int idx_valido(long col, long nrows);
@@ -3614,28 +3645,33 @@ static int insere(const char *resto){
             return 0;
         }
         if((r & R_UNICO) && j < nv && !nulo[j] && j < IDX_MAXCOL){
-            int achados[4], quantos;
+            int quantos;
             if(!idx_valido(j, nrows)) idx_constroi(j, ncols, nrows);
             if(idx_valido(j, nrows)){
-                int q;
-                ord_usa_indice(j);
-                q = j_casam(v[j], achados, 4);
-                ord_usa_rascunho();
-                /* A ÁRVORE DIZ ONDE A LINHA ESTAVA; O VIVO DIZ SE ELA AINDA
-                 * ESTÁ. O DELETE não tira a chave — só apaga o bit —, pelo que
-                 * sem este filtro o valor de uma linha apagada ficava reservado
-                 * para sempre e o UNIQUE recusava a sua própria reutilização. */
-                quantos = 0;
-                for(int t = 0; t < q && !quantos; t++)
-                    if(achados[t] >= 0 && achados[t] < nrows
-                       && bit_le(S_VIVO, achados[t])) quantos = 1;
+                /* A EXISTÊNCIA DECIDE-SE NA DESCIDA, e o arranjo saiu daqui.
+                 *
+                 * Estava `int achados[4]; q = j_casam(v[j], achados, 4);` e
+                 * depois um filtro pelo VIVO --- o filtro está certo, porque o
+                 * DELETE não tira a chave, só apaga o bit. O que estava errado
+                 * era o QUATRO: o `j_casam` entrega os quatro PRIMEIROS índices
+                 * por ordem de linha, e se esses quatro estivessem apagados o
+                 * filtro concluía «não há nenhuma viva» sem ter visto a quinta.
+                 * Medido: quatro apagadas e uma viva, e o UNIQUE ACEITAVA o
+                 * duplicado --- uma coluna declarada única com dois valores
+                 * iguais vivos, e nada a falhar.
+                 *
+                 * O quatro era do ARRANJO (`aranha §sec:dimensao`), e a minha
+                 * primeira correcção foi cair na varredura quando ele enchia,
+                 * que é aceitar o tecto e pagá-lo. Aqui não há arranjo: desce-se
+                 * à procura do valor e pára-se no primeiro vivo. */
+                quantos = ord_valor_vivo_col(j, v[j], nrows);
             } else {
                 /* a árvore não coube: a rede é a varredura, e recusar por não
                  * saber seria pior do que responder devagar */
                 quantos = 0;
-                for(long i = 0; i < nrows && !quantos; i++)
-                    if(bit_le(S_VIVO, i) && bit_le(S_PRES, i*ncols + j)
-                       && celula_valor(i, j, ncols) == v[j]) quantos = 1;
+                for(long i2 = 0; i2 < nrows && !quantos; i2++)
+                    if(bit_le(S_VIVO, i2) && bit_le(S_PRES, i2*ncols + j)
+                       && celula_valor(i2, j, ncols) == v[j]) quantos = 1;
             }
             if(quantos > 0){
                 printf("erro: a coluna %ld é UNIQUE e o valor %ld já lá está —"
@@ -5630,7 +5666,7 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
             { long e = mem_le(S_FK + (unsigned)fc).e;
               modo = mudar ? (int)((e >> 2) & 3) : (int)(e & 3); }
             if(mcol < 0 || strcmp(mt2, guarda)){ usa_tabela(guarda, 0); continue; }
-            usa_tabela(guarda, 0);
+            if(!usa_tabela(guarda, 0)) restauros_falhados++;
 
             /* os valores que vão sair debaixo das setas — com a MÃE aberta */
             nm = 0;
@@ -5642,7 +5678,7 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
                     if(sql_cap){ sql_cap->ok = 0;
                         snprintf(sql_cap->err, sizeof sql_cap->err,
                                  "foreign key cascade exceeds %d keys", FK_MORRE_MAX); }
-                    usa_tabela(guarda, 0);
+                    if(!usa_tabela(guarda, 0)) restauros_falhados++;
                     return 0;
                 }
                 if(!bit_le(S_MATCH, i)) continue;
@@ -5689,7 +5725,7 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
                                    : (mudar ? "levadas para a chave nova (CASCADE)"
                                             : "levadas junto (CASCADE)"));
               } }
-            usa_tabela(guarda, 0);
+            if(!usa_tabela(guarda, 0)) restauros_falhados++;
         }
     }
     if(preso){
@@ -6306,6 +6342,120 @@ static int ord_insere(long valor, int idx){
     }
     return 1;
 }
+/* ── O QUE O PERCURSO NÃO PÔDE ENTREGAR ──────────────────────────────────────
+ *
+ * `if(*n < cap) saida[(*n)++] = ...` --- e quando o arranjo enchia, a chave era
+ * DEITADA FORA em silêncio. Onde o resultado são linhas isso fica visível: a
+ * janela de 64 da porta C recusa a consulta e diz porquê. Mas onde o resultado é
+ * um AGREGADO não há nada a cobri-lo, e foi o que aconteceu ao count(DISTINCT):
+ * com 65 valores distintos respondia 64, com 100 respondia 64, sempre em
+ * silêncio --- e a 200 recusava honestamente, com a mensagem «recusa em vez de
+ * contar metade» escrita no próprio erro. A intenção estava lá; era a truncagem
+ * que acontecia ANTES de a guarda a alcançar.
+ *
+ * Agora conta-se. Quem calcula um agregado a partir do percurso lê o contador
+ * antes e depois, e recusa se ele mexeu --- que é o que a mensagem já prometia. */
+static long ord_perdidos = 0;
+long sql_ord_perdidos(void){ return ord_perdidos; }
+
+/* ── CONTAR AS FIBRAS SEM ARRANJO NENHUM ─────────────────────────────────────
+ *
+ * `aranha §sec:dimensao`: «o n aparece UMA vez, no tamanho da vizinhança --- e é
+ * aí, e só aí»; e «enunciar o teorema no posto 2 e realizá-lo num arranjo do
+ * plano dá a impressão de que o 2 é do teorema. Não é: é do EXEMPLO, e do
+ * ARRANJO.» Foi exactamente o que aqui aconteceu: o count(DISTINCT) percorria a
+ * árvore para um arranjo de 64 e contava as transições depois --- e o 64 era do
+ * ARRANJO, não da conta. Qualquer tabela com mais de 64 linhas respondia um
+ * número errado (50 linhas com 5 classes davam 5, 100 davam quatro, 300 davam
+ * dois), e a minha primeira correcção foi RECUSAR, que é aceitar o tecto.
+ *
+ * A cláusula (3) do `thm:multiplicidade` diz onde está o erro: «a memória não
+ * pertence ao agente [...] NENHUM passo consulta π(0),…,π(t)». Guardar os
+ * índices todos para depois os percorrer é o agente a carregar o mapa que o
+ * ESPAÇO já tem. As chaves saem da árvore por ordem de valor: contar as fibras
+ * é contar as VEZES EM QUE O VALOR MUDA, e isso decide-se durante a descida,
+ * com um valor anterior e mais nada.
+ *
+ * Sem arranjo não há tecto: o que limita passa a ser a árvore, que é do mapa e
+ * recusa dizendo-o. */
+static long ord_classes = 0;      /* fibras distintas vistas na descida */
+static long ord_ult_valor = 0;    /* o valor anterior --- um, não uma lista */
+static int  ord_tem_ult = 0;
+static void ord_conta_fibras(unsigned no, int nivel, unsigned long ch){
+    if(nivel == ORD_NIV){
+        long v = (long)(ch >> ord_bits_idx) - 2147483648L;
+        if(!ord_tem_ult || v != ord_ult_valor){ ord_classes++; ord_ult_valor = v; ord_tem_ult = 1; }
+        return;
+    }
+    for(unsigned k = 0; k < ORD_LARG; k++){
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + k);
+        if(!f) continue;
+        ord_conta_fibras(f, nivel + 1, (ch << ORD_BITS) | k);
+    }
+}
+/* e o DISTINCT desliga os repetidos na descida, pela mesma razão. Ele percorria
+ * para um arranjo de 64 e só depois apagava o match dos repetidos --- com 100
+ * linhas de 3 classes devolvia TRINTA E NOVE, e com 200 devolvia 139, quando a
+ * resposta é três. O erro ao lado já prometia «recusa em vez de devolver
+ * repetidos»: a lei estava escrita e o arranjo não a deixava chegar. O valor já
+ * vem na chave, pelo que nem é preciso reler a célula. */
+static long dis_ult = 0;
+static int  dis_tem = 0;
+static void ord_tira_repetidos(unsigned no, int nivel, unsigned long ch){
+    if(nivel == ORD_NIV){
+        long v   = (long)(ch >> ord_bits_idx) - 2147483648L;
+        long idx = (long)(ch & ((1UL << ord_bits_idx) - 1UL));
+        if(dis_tem && v == dis_ult) bit_poe(S_MATCH, idx, 0);   /* k>1: sai */
+        dis_ult = v; dis_tem = 1;
+        return;
+    }
+    for(unsigned k = 0; k < ORD_LARG; k++){
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + k);
+        if(!f) continue;
+        ord_tira_repetidos(f, nivel + 1, (ch << ORD_BITS) | k);
+    }
+}
+/* e a EXISTÊNCIA decide-se na descida também: não se recolhe para depois olhar,
+ * pára-se no primeiro vivo. O `j_casam(v, saida, 4)` que servia isto entregava
+ * os QUATRO primeiros índices por ordem de linha --- e se esses quatro
+ * estivessem apagados, quem filtrava pelo vivo concluía «não há nenhuma» sem
+ * ter visto a quinta. O 4 era do arranjo. Aqui não há arranjo. */
+static long viv_nr = 0;              /* quantas linhas a tabela tem, para o filtro */
+static int  viv_achou = 0;
+static void ord_ha_vivo(unsigned no, int nivel, unsigned long ch, unsigned long alvo){
+    if(viv_achou) return;
+    if(nivel == ORD_NIV){
+        unsigned long v = ch >> ord_bits_idx;
+        if(v != alvo) return;
+        long idx = (long)(ch & ((1UL << ord_bits_idx) - 1UL));
+        if(idx >= 0 && idx < viv_nr && bit_le(S_VIVO, idx)) viv_achou = 1;
+        return;
+    }
+    for(unsigned k = 0; k < ORD_LARG && !viv_achou; k++){
+        unsigned f = par_le(ord_raiz + no*ORD_LARG + k);
+        if(!f) continue;
+        ord_ha_vivo(f, nivel + 1, (ch << ORD_BITS) | k, alvo);
+    }
+}
+/* o valor tem UMA fibra viva NA ÁRVORE DA COLUNA? --- sem arranjo, sem tecto */
+static void ord_usa_indice(long k);
+static void ord_usa_rascunho(void);
+/* o valor tem UMA fibra viva? --- sem arranjo, sem tecto */
+static int ord_valor_vivo(long valor, long nr){
+    unsigned long alvo = (unsigned long)(valor + 2147483648L);
+    viv_nr = nr; viv_achou = 0;
+
+    ord_ha_vivo(0, 0, 0, alvo);
+    return viv_achou;
+}
+static int ord_valor_vivo_col(long col, long valor, long nr){
+    int r;
+    ord_usa_indice(col);
+    r = ord_valor_vivo(valor, nr);
+    ord_usa_rascunho();
+    return r;
+}
+
 /* percorre por ordem e devolve os índices; n é o tecto do arranjo de saída */
 static int ord_percorre(unsigned no, int nivel, unsigned long ch,
                         int *saida, int *n, int cap, int desc){
@@ -6313,12 +6463,15 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
         /* o índice são os níveis BAIXOS da chave, e quantos eles são vem da
          * altura desta árvore --- não de um 255 escrito à mão */
         if(*n < cap) saida[(*n)++] = (int)(ch & ((1UL << ord_bits_idx) - 1UL));
+        else ord_perdidos++;      /* e o que não coube CONTA-SE: ver abaixo */
         return 1;
     }
     for(unsigned k = 0; k < ORD_LARG; k++){
         unsigned sim = desc ? (ORD_LARG - 1 - k) : k;
         unsigned f = par_le(ord_raiz + no*ORD_LARG + sim);
-        if(!f && !(nivel == 0 && 0)) { if(!f) continue; }
+        if(!f) continue;          /* (era `if(!f && !(nivel==0 && 0)){ if(!f) continue; }`
+                                   * --- um `&& 0` residual desactivava um caso que já não
+                                   * existe, e a condição inteira dizia isto e mais nada) */
         ord_percorre(f, nivel + 1, (ch << ORD_BITS) | sim, saida, n, cap, desc);
     }
     return 1;
@@ -7387,7 +7540,7 @@ static int varre(const char *resto, int acao){
                                     for(long i2 = 0; i2 < nr2 && !ha; i2++)
                                         if(bit_le(S_VIVO, i2)) ha = 1;
                                 }
-                                usa_tabela(guarda, 0);
+                                if(!usa_tabela(guarda, 0)) restauros_falhados++;
                                 if(ha < 0){
                                     printf("erro: a tabela «%s» do EXISTS não pôde"
                                            " ser lida — RECUSADA.\n", t_sub);
@@ -7935,7 +8088,7 @@ static int varre(const char *resto, int acao){
         int postos = j_carrega_direita(&nc_sub);
         j_tab_dir[0] = 0; j_col_dir[0] = 0;      /* devolve-se logo */
         if(postos < 0){
-            usa_tabela(guarda, 0);
+            if(!usa_tabela(guarda, 0)) restauros_falhados++;
             printf("erro: a subconsulta não pôde ser lida (tabela «%s» ou coluna «%s»)"
                    " — RECUSADA.\n", in_tab, in_col);
             if(sql_cap){ sql_cap->ok = 0;
@@ -8078,13 +8231,17 @@ static int varre(const char *resto, int acao){
                            " contar metade"); }
               return 0;
           }
-          ord_percorre(0, 0, 0, seq, &n, SQL_OUT_MAX_ROWS, 0);
-          { long ant = 0; int primeiro = 1;
-            for(int k = 0; k < n; k++){
-                long v = celula_valor(seq[k], cc, ncols);
-                if(primeiro || v != ant) ultima_fibras++;
-                ant = v; primeiro = 0;
-            } }
+          /* AS FIBRAS CONTAM-SE NA DESCIDA. O arranjo saía daqui: ele era o
+           * tecto (`aranha §sec:dimensao`: o número é do ARRANJO, não da
+           * conta), e com ele qualquer tabela de mais de 64 linhas respondia
+           * um número errado --- 300 linhas com 5 classes davam DOIS. As
+           * chaves saem da árvore por ordem de valor, pelo que contar as
+           * fibras é contar as vezes em que o valor muda, e isso precisa do
+           * valor ANTERIOR e mais nada. Sem arranjo não há tecto. */
+          ord_classes = 0; ord_tem_ult = 0;
+          ord_conta_fibras(0, 0, 0);
+          ultima_fibras += ord_classes;
+          (void)seq; (void)n;
           if(viu_aus) ultima_fibras++;      /* o dual é uma classe, e é UMA */
         }
     }
@@ -8745,8 +8902,14 @@ static int varre(const char *resto, int acao){
                 while(j < ord_n && bit_le(S_PRES, ordseq_le(j)*ncols + oc) == tem
                                 && (!tem || celula_valor(ordseq_le(j), oc, ncols) == v)) j++;
                 if(j - k > 1){
-                    static long a2[8192]; int n2 = 0, m = 0, coube = 1;
-                    int tmp2[SQL_OUT_MAX_ROWS];
+                    /* o `a2` já tinha o tamanho da ORDEM e o `tmp2` ficara com
+                     * o da JANELA DA PORTA C --- dois números diferentes para o
+                     * mesmo objecto, e o menor mandava. Medido: `ORDER BY a,b`
+                     * com 200 linhas na mesma fibra saía ordenado até à posição
+                     * 64 e desordenado a partir daí, exactamente onde o arranjo
+                     * acabava. `aranha §sec:dimensao`: o número é do ARRANJO. */
+                    static long a2[8192]; static int tmp2[8192];
+                    int n2 = 0, m = 0, coube = 1;
                     ord_limpa();
                     for(long t = k; t < j && coube; t++){
                         if(!bit_le(S_PRES, ordseq_le(t)*ncols + oc2)){
@@ -8757,7 +8920,7 @@ static int varre(const char *resto, int acao){
                                        (int)ordseq_le(t))) coube = 0;
                     }
                     if(coube){
-                        ord_percorre(0, 0, 0, tmp2, &m, SQL_OUT_MAX_ROWS, ord_desc2);
+                        ord_percorre(0, 0, 0, tmp2, &m, 8192, ord_desc2);
                         { long t = k;
                           for(int q = 0; q < m && t < j; q++) ordseq_poe(t++, tmp2[q]);
                           for(int q = 0; q < n2 && t < j; q++) ordseq_poe(t++, a2[q]); }
@@ -10897,7 +11060,7 @@ static int varre(const char *resto, int acao){
             int nB = 0, mB = 0;
             snprintf(guarda, sizeof guarda, "%s", nome);
             if(!usa_tabela(mat_tab2, 0) || !cat_nome_bate(mat_tab2)){
-                usa_tabela(guarda, 0);
+                if(!usa_tabela(guarda, 0)) restauros_falhados++;
                 printf("erro: a tabela «%s» do produto não existe — RECUSADO.\n",
                        mat_tab2);
                 if(sql_cap){ sql_cap->ok = 0;
@@ -10908,7 +11071,7 @@ static int varre(const char *resto, int acao){
             { long nc2 = cat_ncols(), nr2 = cat_nrows();
               int falta = 0;
               if(nc2 > LN_MAX || nr2 > LN_MAX){
-                  usa_tabela(guarda, 0);
+                  if(!usa_tabela(guarda, 0)) restauros_falhados++;
                   printf("erro: «%s» é %ld×%ld e o alcance é %d×%d — RECUSADO.\n",
                          mat_tab2, nr2, nc2, LN_MAX, LN_MAX);
                   if(sql_cap){ sql_cap->ok = 0;
@@ -10926,7 +11089,7 @@ static int varre(const char *resto, int acao){
                         celula_qz(i2, j2, nc2, &nu, &de);
                         B.a[i2][j2] = qz(nu, de); }
                   }
-              usa_tabela(guarda, 0);
+              if(!usa_tabela(guarda, 0)) restauros_falhados++;
               if(falta){
                   printf("erro: «%s» tem células ausentes ou linhas apagadas —"
                          " a matriz não está completa. RECUSADO.\n", mat_tab2);
@@ -11861,7 +12024,7 @@ static int varre(const char *resto, int acao){
             return 0;
         }
         int dc = proj[0];
-        int seq[SQL_OUT_MAX_ROWS], n = 0, postos = 0;
+        long postos = 0;
         /* ── E A AUSÊNCIA É UM VALOR DISTINTO, UM SÓ ─────────────────────
          * O DISTINCT fica com a folha 1 de cada fibra, e o dual é uma fibra:
          * das linhas sem valor sobra UMA, e ela não se junta às que têm um
@@ -11869,7 +12032,21 @@ static int varre(const char *resto, int acao){
          * representante canónico, lido pela mesma regra. */
         int viu_aus = 0;
         ord_limpa();
-        for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
+        /* ── E O LAÇO NÃO PÁRA NA JANELA ────────────────────────────────
+         *
+         * Estava `postos < SQL_OUT_MAX_ROWS` --- e esse número é o tamanho da
+         * JANELA DA PORTA C, que não tem nada que ver com quantas linhas
+         * precisam de entrar na árvore para os repetidos serem desligados. Com
+         * ele, as linhas a partir da 65.ª nunca entravam, nunca eram desligadas,
+         * e o SELECT DISTINCT DEVOLVIA REPETIDOS: 100 linhas de 3 classes davam
+         * 39, e 200 davam 139. O erro logo abaixo já prometia «recusa em vez de
+         * devolver repetidos» --- a lei estava escrita e o número do arranjo não
+         * a deixava chegar.
+         *
+         * `aranha §sec:dimensao`: o número é do EXEMPLO e do ARRANJO, não da
+         * lei. Aqui sai, e o que limita passa a ser a ÁRVORE, que é do mapa e
+         * recusa dizendo-o --- que é a linha seguinte. */
+        for(long i = 0; i < nrows; i++){
             if(!bit_le(S_MATCH, i)) continue;
             if(!bit_le(S_PRES, i*ncols + dc)){
                 if(viu_aus) bit_poe(S_MATCH, i, 0);    /* k>1 da fibra do dual */
@@ -11886,13 +12063,11 @@ static int varre(const char *resto, int acao){
             }
             postos++;
         }
-        ord_percorre(0, 0, 0, seq, &n, SQL_OUT_MAX_ROWS, 0);
-        { long anterior = 0; int primeiro = 1;
-          for(int k = 0; k < n; k++){
-              long v = celula_valor(seq[k], dc, ncols);
-              if(!primeiro && v == anterior) bit_poe(S_MATCH, seq[k], 0);  /* k>1: sai */
-              anterior = v; primeiro = 0;
-          } }
+        /* na DESCIDA, sem arranjo: o de 64 fazia o DISTINCT devolver repetidos
+         * (100 linhas de 3 classes davam 39) --- ver `ord_tira_repetidos` */
+        dis_tem = 0;
+        ord_tira_repetidos(0, 0, 0);
+        (void)postos; (void)dc;
     }
 
     long emitidas = 0, saltadas = 0;
@@ -13352,7 +13527,7 @@ static int tab_tem_coluna(const char *t, const char *c){
         char nz[64]; col_nome_le((int)z, nz, sizeof nz);
         if(!strcasecmp(nz, c)) achou = 1;
     }
-    usa_tabela(guarda, 0);
+    if(!usa_tabela(guarda, 0)) restauros_falhados++;
     return (int)achou;
 }
 
@@ -13707,7 +13882,7 @@ static int executa(const char *sql){
                   printf("politica %s em %s --- a leitura %s erodida pelo inquilino\n",
                          ligar ? "ligada" : "desligada", tb,
                          ligar ? "passa a ser" : "deixa de ser");
-                  usa_tabela(guarda, 0);
+                  if(!usa_tabela(guarda, 0)) restauros_falhados++;
                   if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
                       snprintf(sql_cap->tag, sizeof sql_cap->tag, "ALTER TABLE"); }
                   return 1;
@@ -13754,7 +13929,7 @@ static int executa(const char *sql){
                          " que isolar nao isola nada\n", pn, tb);
               }
           }
-          usa_tabela(guarda, 0);
+          if(!usa_tabela(guarda, 0)) restauros_falhados++;
           if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
               snprintf(sql_cap->tag, sizeof sql_cap->tag, dropa ? "DROP POLICY" : "CREATE POLICY"); }
           return 1;
@@ -14180,7 +14355,7 @@ static int executa(const char *sql){
                   preso = 1; snprintf(presa, sizeof presa, "%s", ft);
                   break;
               }
-              usa_tabela(guarda, 0);
+              if(!usa_tabela(guarda, 0)) restauros_falhados++;
               if(preso){
                   printf("erro: «%s» é apontada por «%s» — largá-la deixava as setas"
                          " no vazio. RECUSADA (larga-se primeiro quem aponta).\n",
@@ -14497,6 +14672,7 @@ static int usa_tabela_z(const char *nome, int cria_se_falta, int zera){
     refaz_diario();                       /* cada tabela tem o seu diário */
     return 1;
 }
+
 
 /* CREATE TABLE começa a tabela LIMPA — é o que o motor sempre fez quando havia uma
  * só (o catálogo era reescrito com nrows = 0). Com uma tabela por ficheiro isso
@@ -15018,7 +15194,7 @@ static int subconsulta_reescreve(const char *sql, char *out, size_t cap){
     int ok = sql_executa_1(sub, &so);
     sql_calado = calado_antes;
     sql_cap = cap_antes;
-    usa_tabela(guarda, 0);
+    if(!usa_tabela(guarda, 0)) restauros_falhados++;
     if(!ok || !so.ok || so.ncols < 1) return 0;
 
     /* a lista, com os valores que a fibra deu. Sem nenhum, a pertença é vazia e

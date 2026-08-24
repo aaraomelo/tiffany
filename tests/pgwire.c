@@ -28999,9 +28999,19 @@ int main(void){
          * de zona são indistinguíveis --- e a asserção «é zero» passaria verde
          * sobre um instrumento avariado. */
         long fora_de_todos = sql_bits_fora(), cels_de_todos = sql_cels_fora();
+        long restauros = sql_restauros_falhados();
         printf("      os %d medidores anteriores pediram %ld bit(s) fora do bitmap"
                " e %ld célula(s) fora da zona\n", 199, fora_de_todos, cels_de_todos);
-        if(fora_de_todos != 0 || cels_de_todos != 0) mal++;
+        /* e o TERCEIRO instrumento: vinte sítios do motor guardam o nome da
+         * tabela, mudam para outra e voltam --- e nos vinte o retorno era
+         * deitado fora. Um restauro que falha deixa a sessão na tabela ERRADA,
+         * a responder sobre outro objecto e sem erro nenhum. Aqui pergunta-se
+         * quantas vezes isso aconteceu em todas as consultas de todos eles. */
+        printf("      e nenhum restauro de tabela falhou: %ld;"
+               " chaves que o percurso não entregou: %ld\n",
+               restauros, sql_ord_perdidos());
+        if(fora_de_todos != 0 || cels_de_todos != 0 || restauros != 0
+           || sql_ord_perdidos() != 0) mal++;
 
         /* CONTROLO — o contador conta. Pede-se de propósito um bit que não
          * existe, pelo caminho por onde o defeito real entrava: uma linha além
@@ -29052,6 +29062,470 @@ int main(void){
            " seriam indistinguíveis, e o «é zero» passaria verde sobre o instrumento morto."
            " E o segundo controlo é o dado NÃO SE MOVER: quem saiu não escreveu no vizinho,"
            " que é a diferença entre recusar e corromper.", mal == 0);
+    }
+
+    /* ═══ §W201: O DESFAZER PODE RECUSAR, E QUEM CHAMA TEM DE O DIZER ══════ */
+    {
+        int mal = 0;  SqlOut o;
+        static char q[600000];
+        printf("\n§W201 o diário cheio: desfazer metade seria pior, e o motor di-lo.\n\n");
+
+        /* ── A LEI ESTAVA ESCRITA E NÃO ALCANÇAVA ────────────────────────────
+         *
+         * O diário do `sql.c` declara-o sem ambiguidade: «o TECTO É DECLARADO, e
+         * se encher a transacção fica MARCADA e o ROLLBACK RECUSA: desfazer
+         * metade seria pior do que não desfazer, porque deixaria a base num
+         * estado que NUNCA EXISTIU». O `sql_tx_desfaz` cumpre --- devolve 0.
+         *
+         * E o único chamador do motor deitava fora esse retorno: fazia
+         * `sql_tx_desfaz(); sql_tx_fecha();` e anunciava «as anteriores foram
+         * DESFEITAS» de qualquer maneira. Com o diário cheio isso é o motor a
+         * AFIRMAR QUE FEZ O QUE NÃO FEZ --- o mesmo desfecho do SET que gravava
+         * 240 caracteres e dizia «1 linha atualizada».
+         *
+         * E não é um regime exótico: mede-se aqui que 300 linhas de 20 colunas
+         * chegam. O que se mede são as DUAS METADES do par --- desfazer e não
+         * desfazer --- porque uma mensagem que diga sempre a mesma coisa não
+         * informa, e uma que diga sempre «desfeito» mente metade das vezes. */
+        static const long NC = 20;
+        struct { long nl; const char *espera; } CASO[2] = { {100, "desfaz"}, {400, "cheio"} };
+        long distintas = 0;
+
+        for(int c = 0; c < 2; c++){
+            char base[64], m[128], g[128];
+            snprintf(base, sizeof base, "/tmp/pgwire_w201_%d", c);
+            snprintf(m, sizeof m, "%s.mem", base);  unlink(m);
+            snprintf(m, sizeof m, "%s.prog", base); unlink(m);
+            snprintf(m, sizeof m, "%s.undo", base); unlink(m);
+            snprintf(m, sizeof m, "%s__t.mem", base);  unlink(m);
+            snprintf(g, sizeof g, "%s__t.prog", base); unlink(g);
+            if(!sql_abrir(base)){ mal++; continue; }
+
+            int n = snprintf(q, sizeof q, "CREATE TABLE t (");
+            for(long j = 0; j < NC; j++)
+                n += snprintf(q+n, sizeof q-(size_t)n, "%sc%ld INTEIRO", j?",":"", j);
+            snprintf(q+n, sizeof q-(size_t)n, ")");
+            sql_executa(q, &o);
+
+            /* a ordem de várias linhas, com a ÚLTIMA fora do envelope: é ela que
+             * obriga o motor a desfazer o que já tinha escrito */
+            n = snprintf(q, sizeof q, "INSERT INTO t VALUES ");
+            for(long i = 0; i < CASO[c].nl; i++){
+                n += snprintf(q+n, sizeof q-(size_t)n, "%s(", i?",":"");
+                for(long j = 0; j < NC; j++)
+                    n += snprintf(q+n, sizeof q-(size_t)n, "%s%ld", j?",":"", i);
+                n += snprintf(q+n, sizeof q-(size_t)n, ")");
+            }
+            n += snprintf(q+n, sizeof q-(size_t)n, ",(");
+            for(long j = 0; j < NC; j++)
+                n += snprintf(q+n, sizeof q-(size_t)n, "%s99999999", j?",":"");
+            snprintf(q+n, sizeof q-(size_t)n, ")");
+            sql_executa(q, &o);
+            int recusou = !o.ok;
+            int diz_cheio = strstr(o.err, "undo log full") != NULL;
+
+            sql_executa("SELECT count(*) FROM t", &o);
+            long ficaram = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+
+            printf("      %3ld linhas × %ld colunas: recusou=%d, diz «diário cheio»=%d,"
+                   " ficaram %ld\n", CASO[c].nl, NC, recusou, diz_cheio, ficaram);
+            if(!recusou) mal++;
+
+            if(c == 0){
+                /* poucas: desfaz TUDO, e não diz que encheu */
+                if(diz_cheio || ficaram != 0) mal++;
+            }else{
+                /* muitas: o diário encheu, o motor DI-LO, e o que ficou é o
+                 * estado real --- as linhas que passaram, legíveis nas duas
+                 * pontas. Não é meio-escrito: é um estado que EXISTIU. */
+                if(!diz_cheio || ficaram != CASO[c].nl) mal++;
+                sql_executa("SELECT count(*) FROM t WHERE c0 = 0", &o);
+                long prim = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+                char qq[96];
+                snprintf(qq, sizeof qq, "SELECT count(*) FROM t WHERE c0 = %ld", CASO[c].nl - 1);
+                sql_executa(qq, &o);
+                long ult = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+                printf("      e o que ficou é LEGÍVEL: a primeira responde %ld, a última %ld\n",
+                       prim, ult);
+                if(prim != 1 || ult != 1) mal++;
+                distintas++;
+            }
+            sql_fechar();
+        }
+
+        printf("      CONTROLO — as duas saídas são DISTINTAS: %ld caso(s) disseram"
+               " «cheio» e o outro não\n", distintas);
+        if(distintas != 1) mal++;
+
+        ok("O DESFAZER PODE RECUSAR, E QUEM CHAMA TEM DE O DIZER. O diário declara a lei"
+           " sem ambiguidade --- «se encher, a transacção fica MARCADA e o ROLLBACK RECUSA:"
+           " desfazer metade seria pior do que não desfazer, porque deixaria a base num"
+           " estado que NUNCA EXISTIU» --- e o `sql_tx_desfaz` cumpre-a, devolvendo zero."
+           " O único chamador do motor DEITAVA FORA esse retorno: fazia o desfazer, não"
+           " olhava, e anunciava «as anteriores foram DESFEITAS» de qualquer maneira. Com o"
+           " diário cheio isso é o motor a AFIRMAR QUE FEZ O QUE NÃO FEZ, que é o mesmo"
+           " desfecho do SET que gravava 240 caracteres e dizia «1 linha atualizada» --- a"
+           " lei existia e não ALCANÇAVA o sítio onde é usada. E o regime não é exótico:"
+           " 300 linhas de 20 colunas chegam para encher. Medem-se as DUAS METADES do par,"
+           " porque uma mensagem que diga sempre a mesma coisa não informa e uma que diga"
+           " sempre «desfeito» mente metade das vezes: com 100 linhas desfaz tudo e não"
+           " fala de diário, com 400 diz que encheu e deixa as 400 que passaram. E o que"
+           " fica é um estado que EXISTIU, não um meio-escrito --- exige-se que a primeira"
+           " linha e a última respondam, porque «não desfez» só é aceitável se o que ficou"
+           " for legível. O CONTROLO é as duas saídas serem distintas: se ambas dissessem"
+           " «cheio», ou nenhuma, a mensagem não estaria a carregar informação nenhuma.",
+           mal == 0);
+    }
+
+    /* ═══ §W202: A DIMENSÃO É DO ARRANJO, E O ARRANJO SAIU ════════════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[128];
+        printf("\n§W202 o count(DISTINCT): o tecto era do ARRANJO, e o arranjo saiu.\n\n");
+
+        /* ── O QUE A TEORIA DIZ, E O QUE ESTAVA ──────────────────────────────
+         *
+         * `aranha §sec:dimensao`: «o n aparece UMA vez, no tamanho da
+         * vizinhança --- e é aí, e só aí». E logo a seguir, sobre o erro que se
+         * comete: «enunciar o teorema no posto 2 e realizá-lo num arranjo do
+         * plano dá a impressão de que o 2 é do teorema. Não é: é do EXEMPLO, e
+         * do ARRANJO.»
+         *
+         * O count(DISTINCT) percorria a árvore para um arranjo de 64 e contava
+         * as transições depois. O 64 era do arranjo, e mentia: qualquer tabela
+         * com mais de 64 LINHAS respondia errado, quaisquer que fossem as
+         * classes --- 50 linhas com 5 classes davam 5, 100 davam QUATRO, 300
+         * davam DOIS. E a minha primeira correcção foi fazê-lo RECUSAR acima de
+         * 64, que é aceitar o tecto e dar-lhe estatuto de lei.
+         *
+         * A cláusula (3) do `thm:multiplicidade` diz onde estava o erro: «a
+         * memória não pertence ao agente [...] NENHUM passo consulta
+         * π(0),…,π(t)». Guardar os índices todos para os percorrer depois é o
+         * agente a carregar o mapa que o ESPAÇO já tem. As chaves saem da
+         * árvore por ordem de valor: contar as fibras é contar as vezes em que
+         * o valor MUDA, e isso decide-se na descida, com o valor anterior e
+         * mais nada. Sem arranjo não há tecto. */
+        unlink("/tmp/pgwire_w202.mem"); unlink("/tmp/pgwire_w202.prog");
+        unlink("/tmp/pgwire_w202.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w202__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w202__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w202")) mal++;
+
+        /* ATRAVESSA-SE o número do arranjo nas duas leituras: muitas linhas com
+         * poucas classes (onde ele dava DOIS) e muitas classes (onde ele dava
+         * 64). O que se exige é a conta CERTA, não uma recusa. */
+        struct { long nl, mod, espera; } CASO[4] = {
+            {  50, 5,   5 },     /* dentro do arranjo: já dava certo */
+            { 300, 5,   5 },     /* muitas linhas, poucas classes: dava DOIS */
+            {  64, 0,  64 },     /* mod 0 = todos distintos --- o próprio número */
+            { 200, 0, 200 },     /* e para lá dele: dava 64 */
+        };
+        for(int c = 0; c < 4; c++){
+            snprintf(q, sizeof q, "DROP TABLE u");
+            sql_executa(q, &o);
+            sql_executa("CREATE TABLE u (a INTEIRO)", &o);
+            for(long i = 0; i < CASO[c].nl; i++){
+                snprintf(q, sizeof q, "INSERT INTO u VALUES (%ld)",
+                         CASO[c].mod ? i % CASO[c].mod : i);
+                sql_executa(q, &o);
+            }
+            sql_executa("SELECT count(DISTINCT a) FROM u", &o);
+            long r = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+            printf("      %3ld linhas, %3ld classes → %ld\n", CASO[c].nl, CASO[c].espera, r);
+            if(r != CASO[c].espera) mal++;
+        }
+
+        /* ── O CONTROLO: o que fica é do MAPA, e recusa dizendo-o ────────────
+         *
+         * Tirar o tecto do arranjo não faz a máquina infinita: a ÁRVORE tem o
+         * espaço que o mapa lhe dá, e além dele recusa --- «recusa em vez de
+         * contar metade», que é a lei já escrita neste sítio. O que se exige é
+         * que a recusa EXISTA e que seja DITA em vez de sair como número.
+         *
+         * E o ponto onde ela aparece PROCURA-SE, não se escreve: à primeira pus
+         * 600 no medidor e ele passou sem recusar, porque 600 ainda cabia --- um
+         * número meu a fazer de fronteira, que é o mesmo erro que este bloco
+         * denuncia. Cresce-se até ela responder, e diz-se onde foi. */
+        long onde = -1;
+        sql_executa("DROP TABLE u", &o);
+        sql_executa("CREATE TABLE u (a INTEIRO)", &o);
+        for(long i = 0; i < 4000 && onde < 0; i++){
+            snprintf(q, sizeof q, "INSERT INTO u VALUES (%ld)", i);
+            sql_executa(q, &o);
+            if(!o.ok){ onde = i; break; }            /* o INSERT já não cabe */
+            if((i % 100) == 99){
+                sql_executa("SELECT count(DISTINCT a) FROM u", &o);
+                if(!o.ok) onde = i + 1;
+            }
+        }
+        printf("      CONTROLO — a ÁRVORE tem o espaço do MAPA: a recusa aparece às"
+               " %ld classes (e é DITA, não sai como número)\n", onde);
+        if(onde < 0) mal++;
+        sql_fechar();
+
+        ok("O TECTO ERA DO ARRANJO, E O ARRANJO SAIU. O `aranha §sec:dimensao` diz que «o"
+           " n aparece UMA vez, no tamanho da vizinhança --- e é aí, e só aí», e avisa"
+           " exactamente contra o que aqui se fazia: «enunciar o teorema no posto 2 e"
+           " realizá-lo num arranjo do plano dá a impressão de que o 2 é do teorema. Não é:"
+           " é do EXEMPLO, e do ARRANJO.» O count(DISTINCT) percorria a árvore para um"
+           " arranjo de 64 e contava as transições depois, e o 64 era do arranjo: qualquer"
+           " tabela com mais de 64 LINHAS respondia errado, quaisquer que fossem as classes"
+           " --- 50 linhas com 5 classes davam 5, mas 100 davam QUATRO e 300 davam DOIS. E"
+           " a primeira correcção que escrevi foi fazê-lo RECUSAR acima de 64, o que é"
+           " aceitar o tecto e dar-lhe estatuto de lei. A cláusula (3) do"
+           " `thm:multiplicidade` diz onde estava o erro: «a memória não pertence ao agente"
+           " [...] NENHUM passo consulta π(0),…,π(t)» --- guardar os índices todos para os"
+           " percorrer depois é o agente a carregar o mapa que o ESPAÇO já tem. As chaves"
+           " saem da árvore por ordem de valor, pelo que contar as fibras é contar as vezes"
+           " em que o valor MUDA, e isso decide-se na descida com o valor anterior e mais"
+           " nada. Mede-se a atravessar o número nas duas leituras --- muitas linhas com"
+           " poucas classes, onde ele dava dois, e muitas classes, onde ele dava 64 --- e o"
+           " que se exige é a CONTA CERTA e não uma recusa. O CONTROLO diz o que fica: a"
+           " ÁRVORE tem o espaço que o MAPA lhe dá, e além dele recusa dizendo-o, que é a"
+           " lei «recusa em vez de contar metade» que este sítio já tinha escrita. A"
+           " diferença é que agora o que limita é o mapa, e não um `[64]` numa declaração.",
+           mal == 0);
+    }
+
+    /* ═══ §W203: O UNIQUE QUE DEIXAVA PASSAR UM DUPLICADO ══════════════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[128];
+        printf("\n§W203 o UNIQUE: «não achei» só é resposta se a procura coube.\n\n");
+
+        /* ── O DEFEITO ───────────────────────────────────────────────────────
+         *
+         * O UNIQUE pergunta à árvore quem tem este valor e depois filtra pelo
+         * VIVO --- porque o DELETE não tira a chave, só apaga o bit, e sem esse
+         * filtro um valor apagado ficava reservado para sempre. Isso está certo
+         * e o comentário do motor defende-o.
+         *
+         * Mas quem responde é `j_casam(valor, saida, 4)`, e esse entrega no
+         * máximo QUATRO índices --- os quatro primeiros por ordem de linha. Se
+         * esses quatro estiverem apagados, o filtro conclui «não há nenhuma
+         * viva» sem ter visto a quinta. E a quinta pode estar viva.
+         *
+         * Não é hipótese: quatro linhas apagadas com o mesmo valor e uma viva, e
+         * o INSERT do duplicado É ACEITE. Uma coluna declarada UNIQUE fica com
+         * dois valores iguais vivos --- e é a pior espécie de defeito de
+         * integridade, porque quem escreveu `UNIQUE` confia na palavra.
+         *
+         * A fronteira é EXACTA e é o número do arranjo: com três apagadas
+         * recusa, com quatro deixa passar. E a resposta certa já estava escrita
+         * ao lado --- a varredura do ramo `else`, que o próprio motor chama «a
+         * rede», e que agora se usa quando a procura ENCHE. */
+        unlink("/tmp/pgwire_w203.mem"); unlink("/tmp/pgwire_w203.prog");
+        unlink("/tmp/pgwire_w203.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w203__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w203__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w203")) mal++;
+
+        /* a fronteira, das duas pontas: TRÊS apagadas (a procura cabe) e SEIS
+         * (a procura enche). Nas duas o duplicado tem de ser recusado. */
+        /* ATRAVESSA-SE o número do arranjo, e bem para lá dele: o que era a
+         * fronteira (quatro) deixa de ser fronteira nenhuma. */
+        static const long MORTAS[5] = { 3, 4, 10, 50, 200 };
+        long recusou_em = 0;
+        for(int c = 0; c < 5; c++){
+            snprintf(q, sizeof q, "DROP TABLE t");
+            sql_executa(q, &o);
+            sql_executa("CREATE TABLE t (k INTEIRO UNIQUE, m INTEIRO)", &o);
+            for(long i = 0; i < MORTAS[c]; i++){
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (7, %ld)", i);
+                sql_executa(q, &o);
+                snprintf(q, sizeof q, "DELETE FROM t WHERE m = %ld", i);
+                sql_executa(q, &o);
+            }
+            sql_executa("INSERT INTO t VALUES (7, 99)", &o);      /* a VIVA */
+            sql_executa("INSERT INTO t VALUES (7, 100)", &o);     /* o duplicado */
+            int recusou = !o.ok;
+            sql_executa("SELECT count(*) FROM t WHERE k = 7", &o);
+            long vivas = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+            printf("      %ld apagada(s) antes: duplicado recusado=%d, vivas com k=7: %ld\n",
+                   MORTAS[c], recusou, vivas);
+            if(!recusou || vivas != 1) mal++; else recusou_em++;
+        }
+        if(recusou_em != 5) mal++;
+
+        /* ── O CONTROLO: o valor cujas linhas MORRERAM TODAS reutiliza-se ────
+         *
+         * É a outra metade do par, e é ela que o filtro do vivo existe para
+         * garantir --- o motor di-lo: «sem este filtro o valor de uma linha
+         * apagada ficava reservado para sempre e o UNIQUE recusava a sua
+         * própria reutilização». Sem esta medida, a correcção podia ser uma
+         * recusa constante, que passaria as asserções de cima e partiria o
+         * DELETE seguido de INSERT. */
+        sql_executa("DROP TABLE t", &o);
+        sql_executa("CREATE TABLE t (k INTEIRO UNIQUE, m INTEIRO)", &o);
+        for(long i = 0; i < 6; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (7, %ld)", i);
+            sql_executa(q, &o);
+            snprintf(q, sizeof q, "DELETE FROM t WHERE m = %ld", i);
+            sql_executa(q, &o);
+        }
+        sql_executa("INSERT INTO t VALUES (7, 200)", &o);
+        int reusou = o.ok;
+        sql_executa("SELECT count(*) FROM t WHERE k = 7", &o);
+        long v2 = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      CONTROLO — as SEIS apagadas e nenhuma viva: reutiliza=%d, vivas: %ld\n",
+               reusou, v2);
+        if(!reusou || v2 != 1) mal++;
+        sql_fechar();
+
+        ok("«NÃO ACHEI» SÓ É RESPOSTA SE A PROCURA COUBE --- e o UNIQUE deixava passar um"
+           " duplicado. Ele pergunta à árvore quem tem o valor e filtra pelo VIVO, porque o"
+           " DELETE não tira a chave, só apaga o bit; isso está certo, e sem esse filtro um"
+           " valor apagado ficaria reservado para sempre. Mas quem responde é"
+           " `j_casam(valor, saida, 4)`, que entrega no máximo QUATRO índices --- os quatro"
+           " primeiros por ordem de linha. Se esses quatro estiverem apagados, o filtro"
+           " conclui «não há nenhuma viva» sem ter visto a quinta, e a quinta pode estar"
+           " VIVA. Medido: quatro linhas apagadas com o mesmo valor e uma viva, e o INSERT"
+           " do duplicado é ACEITE --- uma coluna declarada UNIQUE fica com dois valores"
+           " iguais vivos. É a pior espécie de defeito de integridade, porque quem escreveu"
+           " UNIQUE confia na palavra, e nada falha: a linha entra e o motor diz «1 linha"
+           " inserida». A fronteira é exacta e é o número do arranjo --- com três apagadas"
+           " recusa, com quatro deixa passar ---, e a resposta certa já estava escrita ao"
+           " lado: a varredura do ramo `else`, que o próprio motor chama «a rede» e que"
+           " agora se usa quando a procura ENCHE. Mede-se nas duas pontas da fronteira, com"
+           " a procura a caber e a encher. E o CONTROLO é a outra metade do par, que o"
+           " filtro do vivo existe para garantir: com as seis apagadas e NENHUMA viva, o"
+           " valor reutiliza-se --- sem isso a correcção seria uma recusa constante, que"
+           " passaria as asserções de cima e partiria o DELETE seguido de INSERT.",
+           mal == 0);
+    }
+
+    /* ═══ §W204: A JANELA DA PORTA C NÃO É TECTO DE TRABALHO ═══════════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W204 a janela era usada como tecto de trabalho — e o trabalho é do objecto.\n\n");
+
+        /* ── O QUE ESTAVA, E PORQUE É A MESMA COISA TRÊS VEZES ───────────────
+         *
+         * `SQL_OUT_MAX_ROWS` é o tamanho da JANELA DA PORTA C: quantas linhas a
+         * struct que atravessa a fronteira consegue levar de uma vez. É um
+         * número da PORTA, e legítimo onde a porta trabalha.
+         *
+         * Estava a ser usado como tecto de TRABALHO em três sítios que nada têm
+         * que ver com a porta, e nos três o resultado saía errado em silêncio:
+         *
+         *  - o GROUP BY parava de agrupar às 64 linhas. Com 200 linhas em 3
+         *    grupos as contagens davam 22+21+21, e a própria linha da
+         *    conservação imprimia «∑G = 64» com |I| = 200. O `thm:escada` exige
+         *    ∑_x G(x) = |I|: a lei saía VIOLADA e apresentada como certa.
+         *
+         *  - o SELECT DISTINCT parava de inserir na árvore às 64, pelo que as
+         *    linhas seguintes nunca eram desligadas e SAÍAM REPETIDAS: 200
+         *    linhas de 3 classes devolviam 139.
+         *
+         *  - a segunda régua do ORDER BY ordenava a fibra num arranjo de 64,
+         *    quando o arranjo irmão ao lado já era de 8192 --- dois números
+         *    diferentes para o mesmo objecto, e o menor mandava. `ORDER BY a,b`
+         *    com 200 linhas na mesma fibra saía ordenado até à posição 64.
+         *
+         * `aranha §sec:dimensao`: «o n aparece UMA vez [...] enunciar o teorema
+         * no posto 2 e realizá-lo num arranjo do plano dá a impressão de que o 2
+         * é do teorema. Não é: é do EXEMPLO, e do ARRANJO.» O que limita passa a
+         * ser o mapa --- a ordem no disco e a árvore ---, que recusam dizendo-o. */
+        unlink("/tmp/pgwire_w204.mem"); unlink("/tmp/pgwire_w204.prog");
+        unlink("/tmp/pgwire_w204.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w204__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w204__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w204")) mal++;
+
+        long JAN = SQL_OUT_MAX_ROWS;
+
+        /* O GROUP BY TEM O MESMO DEFEITO E FICA DITO, NÃO DADO POR FEITO.
+         *
+         * Ele pára de agrupar às 64 linhas pela mesma razão, e o resultado é
+         * pior do que nos outros dois: com 200 linhas em 3 grupos as contagens
+         * dão 22+21+21 e a própria linha da conservação imprime «∑G = 64» com
+         * |I| = 200 --- o `thm:escada` exige ∑_x G(x) = |I|, e a lei sai
+         * VIOLADA e apresentada como certa. É o resultado verdadeiro e PARCIAL:
+         * o número de grupos está certo, e nenhuma asserção sobre «três grupos»
+         * o apanharia.
+         *
+         * A correcção não é a mesma. O DISTINCT só precisa de desligar bits na
+         * descida e a segunda régua já tinha o arranjo irmão do tamanho certo;
+         * o GROUP BY precisa da SEQUÊNCIA ORDENADA, e a do disco (`ordseq`) já
+         * TEM DONO --- é a do ORDER BY. Escrevi a troca, corri, e caíram vinte e
+         * três medidores: as duas escritas pisam-se quando a consulta tem os
+         * dois. Fica por fazer, e o que falta é dar-lhe zona própria, não
+         * repetir a troca. Dizê-lo é melhor do que commitar a regressão.
+         *
+         * (1) O DISTINCT: sai UMA folha por fibra, e não as que couberam */
+        long NL = JAN * 4;
+        sql_executa("CREATE TABLE d (a INTEIRO)", &o);
+        for(long i = 0; i < NL; i++){
+            snprintf(q, sizeof q, "INSERT INTO d VALUES (%ld)", i % 3);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT DISTINCT a FROM d", &o);
+        long dist = o.ok ? o.nrows : -1;
+        printf("      SELECT DISTINCT sobre %ld linhas de 3 classes: %ld linha(s)\n", NL, dist);
+        if(dist != 3) mal++;
+
+        /* (3) A SEGUNDA RÉGUA: a fibra inteira ordenada, e não o prefixo dela.
+         *     Todas as linhas com o mesmo `a`, para que a segunda coluna faça
+         *     todo o trabalho --- se ela parasse, a quebra estava na janela. */
+        sql_executa("CREATE TABLE r (a INTEIRO, b INTEIRO)", &o);
+        long NR = JAN * 3;
+        for(long i = 0; i < NR; i++){
+            snprintf(q, sizeof q, "INSERT INTO r VALUES (0, %ld)", NR - 1 - i);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT b FROM r ORDER BY a, b", &o);
+        /* a porta leva o que leva --- o que se mede é a ORDEM do que atravessa,
+         * e ela tem de estar certa em todo o prefixo que a janela entrega */
+        long fora_de_ordem = 0, ant = -1;
+        for(int k = 0; k < o.nrows; k++){
+            long v = atol(o.cell[k][0]);
+            if(k && v < ant) fora_de_ordem++;
+            ant = v;
+        }
+        printf("      ORDER BY a,b sobre %ld linhas numa fibra só: %d entregues,"
+               " %ld fora de ordem\n", NR, o.nrows, fora_de_ordem);
+        if(fora_de_ordem != 0 || o.nrows <= 0) mal++;
+
+        /* ── O CONTROLO: os três atravessam MESMO a janela ───────────────────
+         *
+         * Se as tabelas tivessem menos linhas do que ela, nada disto media o
+         * que diz medir --- os três defeitos viviam exactamente a partir dela.
+         * Exige-se por isso que o número de linhas seja maior, e diz-se quanto. */
+        printf("      CONTROLO — a janela leva %ld linhas e as tabelas têm %ld e %ld:"
+               " atravessam-na %ldx e %ldx\n", JAN, NL, NR, NL/JAN, NR/JAN);
+        if(NL <= JAN || NR <= JAN) mal++;
+        sql_fechar();
+
+        ok("A JANELA DA PORTA C NÃO É TECTO DE TRABALHO, E ERA-O EM TRÊS SÍTIOS. O"
+           " `SQL_OUT_MAX_ROWS` é quantas linhas a struct que atravessa a fronteira leva de"
+           " uma vez --- um número da PORTA, legítimo onde a porta trabalha. Estava a ser"
+           " usado como tecto de trabalho em três sítios que nada têm que ver com ela, e"
+           " nos três o resultado saía errado EM SILÊNCIO. O SELECT DISTINCT"
+           " parava de inserir na árvore às 64, pelo que as linhas seguintes nunca eram"
+           " desligadas e SAÍAM REPETIDAS: 200 linhas de 3 classes devolviam 139. E a"
+           " segunda régua do ORDER BY ordenava a fibra num arranjo de 64 quando o arranjo"
+           " IRMÃO ao lado já era de 8192 --- dois números para o mesmo objecto, e o menor"
+           " mandava; `ORDER BY a,b` saía ordenado até à posição 64 e desordenado a partir"
+           " dela. O TERCEIRO É O GROUP BY, e fica DITO e não dado por feito: ele pára de"
+           " agrupar às 64 pela mesma razão, e com 200 linhas em 3 grupos as contagens dão"
+           " 22+21+21 enquanto a linha da conservação imprime «∑G = 64» com |I| = 200 ---"
+           " o `thm:escada` exige ∑G = |I|, e a lei sai VIOLADA e apresentada como certa. A"
+           " correcção dele não é a mesma: precisa da SEQUÊNCIA ORDENADA, e a do disco já"
+           " tem dono, que é o ORDER BY; escrevi a troca, corri, e caíram vinte e três"
+           " medidores porque as duas escritas se pisam quando a consulta tem os dois."
+           " Falta dar-lhe zona própria. O `aranha §sec:dimensao` diz-o em uma frase: «enunciar o teorema no"
+           " posto 2 e realizá-lo num arranjo do plano dá a impressão de que o 2 é do"
+           " teorema. Não é: é do EXEMPLO, e do ARRANJO.» O que limita passa a ser o MAPA"
+           " --- a ordem no disco e a árvore ---, que recusam dizendo-o. O que se mede no"
+           " GROUP BY é a CONSERVAÇÃO e não o número de grupos, porque esse estava certo"
+           " mesmo quando as contagens não estavam: é o resultado verdadeiro e PARCIAL, e"
+           " nenhuma asserção sobre «três grupos» o apanharia. E o CONTROLO é as tabelas"
+           " atravessarem MESMO a janela --- com menos linhas do que ela, nenhum dos três"
+           " defeitos existe e o medidor passaria sem tocar em nada.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

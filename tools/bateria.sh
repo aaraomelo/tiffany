@@ -462,12 +462,20 @@ if [ "$mudos" -gt 0 ]; then
 fi
 
 orfas=0
+orfa_nomes=""
 while read -r _n _a _r; do
   [ -z "$_n" ] && continue
   [ -f "$RAIZ/tests/$_n.c" ] || [ -f "$RAIZ/banco/$_n.c" ] || \
-  [ -f "$RAIZ/tatoeba/$_n.c" ] || [ -f "$RAIZ/tests/$_n.py" ] || [ -f "$RAIZ/tests/$_n.js" ] || orfas=$((orfas+1))
+  [ -f "$RAIZ/tatoeba/$_n.c" ] || [ -f "$RAIZ/tests/$_n.py" ] || [ -f "$RAIZ/tests/$_n.js" ] || {
+    orfas=$((orfas+1)); orfa_nomes="$orfa_nomes $_n"; }
 done < "$TABELA"
-[ "$orfas" -gt 0 ] && printf 'ATENCAO: %d atestacoes ORFAS na tabela — medidores que ja nao existem\n' "$orfas"
+# E DIZ QUAIS. Contar sem nomear faz um aviso sobre o qual ninguem pode agir: o
+# «1 atestacao ORFA» apareceu em todas as corridas durante semanas, e era o
+# `serie`, renomeado para `fatorial` em 2ce10d69 — dois minutos de trabalho que
+# ninguem fez porque o aviso nao dizia por onde comecar. Pior: um aviso
+# permanente afoga o proximo. Se amanha outro medidor desaparecer, o numero
+# passa a 2 e ninguem repara qual e' o novo.
+[ "$orfas" -gt 0 ] && printf 'ATENCAO: %d atestacao(oes) ORFA(S) na tabela — medidores que ja nao existem:%s\n' "$orfas" "$orfa_nomes"
 
 printf 'total %d : %d verdes, %d negativos por projeto, %d falhas\n' "$total" "$verde" "$negativo" "$falha"
 
