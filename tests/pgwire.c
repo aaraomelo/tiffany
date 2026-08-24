@@ -27535,6 +27535,36 @@ int main(void){
                " ninguém escreveu %ld\n", ig_a, ig_g, ig_n);
         if(ig_a != 3 || ig_g != 1 || ig_n != 0) mal++;
 
+        /* ── E O NOME QUE NÃO CABE: a volta nos NOMES ───────────────────────
+         *
+         * O nome de uma tabela vive em S_NOME_N Words e o de uma coluna em
+         * S_COLNOME_W --- 32 caracteres cada. Um nome maior era GUARDADO
+         * truncado e depois não se encontrava: `CREATE TABLE` com 40 caracteres
+         * dizia «criada» e o `SELECT … FROM` dava «a tabela não existe». A volta
+         * não fechava, e a primeira metade dizia que sim.
+         *
+         * O CONTROLO é o limite exacto: com 32 tem de funcionar, senão a
+         * correcção seria «recusar nomes grandes» em vez de «recusar os que não
+         * cabem». */
+        { char t40[64], t32[64], q[200];
+          memset(t40, 'z', 40); t40[40] = 0;
+          memset(t32, 'y', 32); t32[32] = 0;
+          snprintf(q, sizeof q, "CREATE TABLE %s (a INTEIRO)", t40);
+          sql_executa(q, &o);
+          int rec40 = !o.ok;
+          snprintf(q, sizeof q, "CREATE TABLE %s (a INTEIRO)", t32);
+          sql_executa(q, &o);
+          int ok32 = o.ok;
+          snprintf(q, sizeof q, "INSERT INTO %s VALUES (7)", t32);
+          sql_executa(q, &o);
+          snprintf(q, sizeof q, "SELECT a FROM %s", t32);
+          sql_executa(q, &o);
+          int volta32 = (o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "7"));
+          printf("      o nome de 40 é recusado (%s), o de 32 é aceite (%s) e a volta"
+                 " nele fecha (%s)\n", rec40 ? "sim" : "NÃO", ok32 ? "sim" : "NÃO",
+                 volta32 ? "sim" : "NÃO");
+          if(!rec40 || !ok32 || !volta32) mal++; }
+
         /* ── E O UPDATE SOBRE TEXTO: ESCREVER CRIA A MARCA ──────────────────
          *
          * `UPDATE SET s = 'novo'` dizia «1 linha atualizada» e o valor

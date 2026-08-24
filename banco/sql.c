@@ -1372,6 +1372,29 @@ static void cf_grava(unsigned word_ix, unsigned rel, Word w){
  * `CREATE TABLE t` — que é uma recusa errada, e das que só aparecem em produção. */
 static char baixa1(char c){ return (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c; }
 
+/* ── O NOME QUE NÃO CABE NÃO SE TRUNCA ───────────────────────────────────────
+ *
+ * O nome de uma tabela vive em S_NOME_N Words (dois caracteres cada) e o de uma
+ * coluna em S_COLNOME_W. Um nome maior era GUARDADO truncado e depois não se
+ * encontrava: `CREATE TABLE ttt…t` (40 caracteres) dizia «criada» e
+ * `SELECT … FROM ttt…t` dava «a tabela não existe». A volta não fechava, e a
+ * primeira metade dizia que sim.
+ *
+ * Recusa-se com o número. É a mesma regra da linha larga e da cadeia grande: o
+ * que não cabe diz-se, e quem escreve escolhe outro nome. */
+static int nome_cabe(const char *nome, int tecto, const char *que){
+    if(!nome) return 1;
+    size_t n = strlen(nome);
+    if((int)n <= tecto) return 1;
+    printf("erro: o nome %s «%s» tem %zu caracteres e o motor guarda %d —"
+           " RECUSADO. Truncar guardaria um nome que depois não se encontra.\n",
+           que, nome, n, tecto);
+    if(sql_cap){ sql_cap->ok = 0;
+        snprintf(sql_cap->err, sizeof sql_cap->err,
+                 "%s name is %zu chars; the limit is %d", que, n, tecto); }
+    return 0;
+}
+
 static void cat_nome_grava(const char *nome){
     char n[S_NOME_N * 2 + 1];
     int i;
@@ -2482,6 +2505,7 @@ static int cria(const char *resto){
     char nome[64];
     if(!ident(&p, nome, sizeof nome)) return 0;
     /* a tabela é um ficheiro: abre-se (criando) ANTES de o catálogo lá ser escrito */
+    if(!nome_cabe(nome, S_NOME_N * 2, "da tabela")) return 0;
     if(!usa_tabela_z(nome, 1, 1)){          /* CREATE: limpa */
         printf("erro: não abri o ficheiro da tabela «%s»\n", nome);
         if(sql_cap){ sql_cap->ok = 0;
@@ -2606,6 +2630,7 @@ static int cria(const char *resto){
               }
           } }
         if(!ident(&p, c, sizeof c)) break;
+        if(!nome_cabe(c, (int)S_COLNOME_W * 2, "da coluna")){ cria_desfaz(nome); return 0; }
         col_nome_grava((int)ncols, c);       /* o nome da coluna passa a ficar guardado */
         corpo_j = CORPO_INTEIRO; parm_j = 0;   /* sem tipo = INTEIRO, como sempre foi */
         pula(&p);
