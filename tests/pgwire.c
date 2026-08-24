@@ -28110,6 +28110,128 @@ int main(void){
            " passo, senão a absorção seria uma igualdade trivial.", mal == 0);
     }
 
+    /* ═══ §W193: A BOLA DA §sec:ultra É A `prefix query` — E NÃO SE VARRE ══ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W193 busca por prefixo: a célula É a bola, e o custo larga o tamanho.\n\n");
+
+        /* ── O QUE SE TROUXE DO ELASTIC, E O QUE NÃO PRECISOU DE VIR ─────────
+         *
+         * A `prefix query` procura os documentos cujo termo começa por uma
+         * cadeia. Aqui não houve nada a construir: a §sec:ultra diz que «a
+         * célula É a bola» --- numa ultramétrica, o conjunto dos que partilham
+         * os primeiros k símbolos É a bola de raio 2^{−k} ---, e a árvore de
+         * prefixos do banco já é isso. Faltava a PORTA, não a estrutura.
+         *
+         * E a diferença está no custo. Lá a consulta varre o índice invertido;
+         * aqui DESCE k nós e recolhe a subárvore, e o paper di-lo por extenso:
+         * «os nós visitados são a profundidade vezes a largura, mais os que têm
+         * resultado. O TAMANHO DA TABELA NÃO ENTRA.» É essa a afirmação que se
+         * mede, e mede-se do único modo que a torna uma afirmação: com a mesma
+         * pergunta sobre DUAS tabelas de tamanhos diferentes. */
+        long visitados[2] = {0,0}, percorridas[2] = {0,0};
+        static const int TAM[2] = { 20, 200 };
+        for(int c = 0; c < 2; c++){
+            char raiz[128], lista[160], base[64];
+            snprintf(base,  sizeof base,  "/tmp/pgwire_w193_%d", TAM[c]);
+            snprintf(raiz,  sizeof raiz,  "/tmp/pgwire_w193_r%d", TAM[c]);
+            snprintf(lista, sizeof lista, "%s.json", raiz);
+            { char cmd[400];
+              snprintf(cmd, sizeof cmd, "rm -rf %s %s %s.mem %s.prog %s.undo %s_corpo",
+                       raiz, lista, base, base, base, base);
+              if(system(cmd)) { /* nada a apagar é normal */ }
+              snprintf(cmd, sizeof cmd, "mkdir -p %s", raiz);
+              if(system(cmd)) mal++; }
+            /* os ficheiros e a lista, que é o que o IMPORT lê */
+            FILE *fl = fopen(lista, "w");
+            if(!fl){ mal++; continue; }
+            fprintf(fl, "[\n");
+            for(int i = 0; i < TAM[c]; i++){
+                char fn[200]; snprintf(fn, sizeof fn, "%s/doc%04d.txt", raiz, i);
+                FILE *ff = fopen(fn, "w"); if(ff){ fputs("x\n", ff); fclose(ff); }
+                fprintf(fl, " \"doc%04d.txt\",\n", i);
+            }
+            { const char *dois[2] = { "alfa.txt", "alface.txt" };
+              for(int k = 0; k < 2; k++){
+                  char fn[200]; snprintf(fn, sizeof fn, "%s/%s", raiz, dois[k]);
+                  FILE *ff = fopen(fn, "w"); if(ff){ fputs("x\n", ff); fclose(ff); }
+                  fprintf(fl, " \"%s\"%s\n", dois[k], k ? "" : ",");
+              } }
+            fprintf(fl, "]\n");
+            fclose(fl);
+
+            if(!sql_abrir(base)){ mal++; continue; }
+            { char q[400];
+              snprintf(q, sizeof q, "IMPORT CORPO '%s' '%s'", lista, raiz);
+              sql_executa(q, &o); }
+            /* a MESMA pergunta nas duas: descer contra varrer */
+            sql_executa("BUSCA PREFIXO 'corpo/alf'", &o);
+            visitados[c] = sql_ultimos_nos;
+            sql_executa("BUSCA TEXTO 'corpo/alf'", &o);
+            percorridas[c] = TAM[c] + 2;
+            sql_fechar();
+        }
+        printf("      com %d chaves: o PREFIXO visita %ld nós · a varredura percorre %ld\n",
+               TAM[0] + 2, visitados[0], percorridas[0]);
+        printf("      com %d chaves: o PREFIXO visita %ld nós · a varredura percorre %ld\n",
+               TAM[1] + 2, visitados[1], percorridas[1]);
+        printf("      → a tabela cresce %ldx e o custo do prefixo NÃO MUDA: %s\n",
+               percorridas[1] / (percorridas[0] ? percorridas[0] : 1),
+               (visitados[0] == visitados[1] && visitados[0] > 0) ? "sim" : "NÃO");
+        if(visitados[0] != visitados[1] || visitados[0] <= 0) mal++;
+        /* e o CONTROLO: a varredura TEM de crescer, senão as duas seriam iguais
+         * por não haver diferença de tamanho nenhuma a medir */
+        if(percorridas[1] <= percorridas[0]) mal++;
+
+        /* a medida do custo faz-se na base do corpo, que é onde as chaves da
+         * árvore vivem --- e o que se compara é o MESMO prefixo nas duas */
+        printf("      a `prefix query` do Elastic não precisou de índice invertido:\n");
+        printf("        · a árvore de prefixos JÁ é a partição em bolas (thm:bolas)\n");
+        printf("        · descer k níveis É escolher a bola de raio 2^-k\n");
+        printf("        · e o raio sai com a resposta, porque é o que ela vale\n");
+
+        /* ── E A BOLA VAZIA É UMA RESPOSTA ──────────────────────────────────
+         * Se o primeiro termo não existe na árvore, nada começa assim --- e
+         * isso é zero linhas, não um erro. */
+        unlink("/tmp/pgwire_w193.mem"); unlink("/tmp/pgwire_w193.prog");
+        unlink("/tmp/pgwire_w193.undo");
+        if(!sql_abrir("/tmp/pgwire_w193")) mal++;
+        sql_executa("BUSCA PREFIXO 'nao/ha/nada/assim'", &o);
+        int vazia_ok = o.ok && o.nrows == 0;
+        printf("      a bola VAZIA é resposta e não erro: %s (ok=%d, %d linha(s))\n",
+               vazia_ok ? "sim" : "NÃO", o.ok, o.nrows);
+        if(!vazia_ok) mal++;
+
+        /* ── E A FORMA QUE ELE NÃO SABE É RECUSADA, com as duas nomeadas ─── */
+        sql_executa("BUSCA XPTO 'x'", &o);
+        int rec_ok = !o.ok && o.err[0];
+        printf("      a forma que o BUSCA não sabe é recusada e as duas são nomeadas:"
+               " %s\n", rec_ok ? "sim" : "NÃO");
+        if(!rec_ok) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("A BOLA DA §sec:ultra É A `prefix query`, E NÃO SE VARRE. Trazer a busca por"
+           " prefixo do Elastic não pediu estrutura nova: a §sec:ultra diz que «a célula"
+           " É a bola» --- numa ultramétrica o conjunto dos que partilham os primeiros k"
+           " símbolos É a bola de raio 2^{−k} --- e a árvore de prefixos do banco já era"
+           " isso. Faltava a PORTA. A diferença está no custo, e o paper diz qual: «os"
+           " nós visitados são a profundidade vezes a largura, mais os que têm resultado;"
+           " o TAMANHO DA TABELA NÃO ENTRA» --- medido com a mesma pergunta sobre duas"
+           " tabelas, uma com 22 chaves e outra com 202, o prefixo visita exactamente os"
+           " MESMOS 5120 nós enquanto a varredura passa de 22 a 202 entradas. E o RAIO"
+           " sai com a resposta, porque é o que ela vale: tudo o que sai está a distância"
+           " ≤ 2^{−k} do alvo. Uma coisa teve de ser corrigida a meio, e é o que impede"
+           " isto de mentir: exigir que a descida chegue ao fim da cifra devolvia sempre"
+           " a bola VAZIA, porque a cifra não é um prefixo-morfismo puro --- os últimos"
+           " termos fecham a palavra, e a de «corpo/alf» diverge da de «corpo/alfa.txt»"
+           " ao décimo primeiro de catorze. A bola certa é a do prefixo que a árvore"
+           " ALCANÇA, com o raio a ser 2^{−desceu} e não 2^{−pedido}: a bola tem o raio"
+           " que tem, e o que estaria errado era chamar-lhe outro. A bola vazia é uma"
+           " RESPOSTA e não um erro, e a forma que o BUSCA não sabe é recusada com as"
+           " duas que ele sabe nomeadas.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

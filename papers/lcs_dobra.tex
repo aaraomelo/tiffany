@@ -1,0 +1,302 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  lcs_dobra.tex — Longest Common Subsequence pela teoria da dobra
+%
+%  Compila: pdflatex lcs_dobra.tex
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm,amscd}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\renewcommand{\proofname}{Demonstração}
+
+\begin{document}
+
+\title{Longest Common Subsequence\\[0.4em]
+\large pela teoria da dobra e da multiplicidade geométrica}
+\author{Núcleo a partir de \texttt{aranha.tex} / \texttt{arquitetura.tex}}
+\date{}
+\maketitle
+
+\begin{abstract}
+\noindent Duas sequências finitas são duas \textbf{realizações}
+$\pi_A\colon I_A\to\Sigma$ e $\pi_B\colon I_B\to\Sigma$.
+Uma subsequência comum é um par de mapas estritamente crescentes
+que se compõem na mesma palavra. O comprimento máximo é o cardinal
+da maior cadeia de posições de coincidência que respeitam a ordem
+produto. A recorrência clássica de programação dinâmica é reescrita
+como \textbf{dobra} alternada das duas faces (avançar em $A$, avançar
+em $B$, ou avançar nas duas quando há match). Porque a régua é finita
+o processo \textbf{termina} numa igualdade; o valor $L(m,n)$ é o
+ponto fixo comum às duas faces no canto $(m,n)$ da grade.
+A recuperação da sequência é o levantamento da fibra (coordenada de
+folha) ao longo do caminho óptimo.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Objectos}
+
+\begin{definicao}[sequência como realização]
+Seja $\Sigma$ um alfabeto finito com igualdade decidível.
+Uma sequência $A=a_1\dots a_m$ é a realização
+\[
+\pi_A\colon I_A\to\Sigma,\qquad
+I_A=\{1,\dots,m\},\qquad
+\pi_A(i)=a_i.
+\]
+Analogamente $\pi_B\colon I_B\to\Sigma$ para $B=b_1\dots b_n$.
+A \textbf{multiplicidade} de um símbolo $\sigma\in\Sigma$ em $A$ é
+\[
+G_A(\sigma)=\bigl\lvert\pi_A^{-1}(\sigma)\bigr\rvert.
+\]
+\end{definicao}
+
+\begin{definicao}[subsequência comum]
+Uma \textbf{subsequência comum} de comprimento $k$ é um par de mapas
+estritamente crescentes
+\[
+\iota\colon\{1,\dots,k\}\hookrightarrow I_A,\qquad
+\kappa\colon\{1,\dots,k\}\hookrightarrow I_B
+\]
+tais que
+\[
+\pi_A\circ\iota \;=\; \pi_B\circ\kappa.
+\]
+O valor comum é a palavra $w=\pi_A(\iota(1))\dots\pi_A(\iota(k))$.
+O \textbf{LCS} é qualquer subsequência comum de comprimento máximo;
+denotamos esse comprimento por $L(A,B)$.
+\end{definicao}
+
+\noindent Em linguagem da aranha: $\iota$ e $\kappa$ são dois
+levantamentos parciais; a condição $\pi_A\circ\iota=\pi_B\circ\kappa$
+diz que as duas realizações coincidem sobre a imagem comum.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A grade e os matches}
+
+\begin{definicao}[poset dos matches]
+Seja
+\[
+M=\bigl\{(i,j)\in I_A\times I_B:\pi_A(i)=\pi_B(j)\bigr\}.
+\]
+Ordene $M$ pela ordem produto:
+\[
+(i,j)\;\le\;(i',j')\quad\iff\quad i\le i'\;\text{e}\;j\le j'.
+\]
+Uma cadeia em $M$ é exactamente uma subsequência comum.
+Logo
+\[
+\boxed{\;L(A,B)\;=\;\text{comprimento da maior cadeia em }(M,\le).\;}
+\]
+\end{definicao}
+
+\noindent Isto é Dilworth/Erdős–Szekeres no poset dos pontos de
+coincidência. A multiplicidade geométrica $G$ da realização
+conjunta $\pi(i,j)=(\pi_A(i),\pi_B(j))$ conta quantas vezes cada
+par de símbolos aparece; $M$ é o suporte onde a diagonal de $\Sigma$
+é atingida.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A dobra que calcula o comprimento}
+
+\begin{definicao}[função de estado]
+Para $0\le i\le m$, $0\le j\le n$ defina
+\[
+L(i,j)\;=\;L\bigl(a_1\dots a_i,\;b_1\dots b_j\bigr)
+\]
+(com $L(0,\cdot)=L(\cdot,0)=0$).
+\end{definicao}
+
+\begin{teorema}[recorrência como dobra]\label{thm:lcs-dobra}
+Vale a recorrência
+\[
+L(i,j)\;=\;
+\begin{cases}
+L(i-1,j-1)+1 & \text{se }\pi_A(i)=\pi_B(j),\\[4pt]
+\max\bigl(L(i-1,j),\,L(i,j-1)\bigr) & \text{caso contrário.}
+\end{cases}
+\]
+\end{teorema}
+
+\begin{proof}
+Caso match: qualquer cadeia óptima que use o match $(i,j)$ pode ser
+obtida de uma cadeia óptima em $M\cap([1..i-1]\times[1..j-1])$
+acrescentando esse ponto; e nenhuma cadeia pode usar dois matches
+com a mesma primeira ou segunda coordenada. Logo o óptimo com o
+match é $L(i-1,j-1)+1$. Sem o match o óptimo é o melhor dos dois
+prefixos.
+
+Caso sem match: nenhuma cadeia pode terminar em $(i,j)$, logo o
+óptimo é o máximo dos dois prefixos imediatos.
+\end{proof}
+
+\medskip\noindent\textbf{Leitura pela teoria da dobra.}
+Há três movimentos possíveis na grade:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+movimento & o que faz & face \\
+\midrule
+$(i-1,j)\to(i,j)$ & avança só em $A$ & face de $A$ \\
+$(i,j-1)\to(i,j)$ & avança só em $B$ & face de $B$ \\
+$(i-1,j-1)\to(i,j)$ & avança nas duas (match) & ponto fixo comum \\
+\bottomrule
+\end{tabular}
+\end{center}
+Quando há match as duas faces coincidem e o valor sobe de $1$
+(o ``meio'' produzido pela dobra). Quando não há match toma-se o
+máximo --- a face que ainda conserva o maior comprimento.
+O processo é exactamente o \textbf{corte} do \texttt{aranha}
+(Teor.~corte): batendo as duas faces alternadamente os intervalos
+de possíveis comprimentos encaixam e, porque a grade é finita,
+\textbf{terminam} numa igualdade $L(m,n)$.
+
+\begin{corolario}[terminação]
+O valor $L(m,n)$ é atingido após exactamente $mn$ passos de
+preenchimento da tabela (ou $O(mn)$ operações). Não há convergência
+assintótica: a régua tem grão e o processo pára.
+\end{corolario}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Recuperação da sequência --- o levantamento}
+
+Conhecer só $L(m,n)$ dá o comprimento. Para obter uma palavra
+óptima é preciso o \textbf{levantamento} (Teor.~levantamento da
+aranha): guardar, em cada célula, qual face produziu o valor.
+
+\begin{proposicao}[caminho óptimo]
+Defina o ponteiro
+\[
+P(i,j)\;=\;
+\begin{cases}
+\leftarrow & \text{se }L(i,j)=L(i,j-1),\\
+\uparrow   & \text{se }L(i,j)=L(i-1,j),\\
+\nwarrow  & \text{se }L(i,j)=L(i-1,j-1)+1\text{ e match}.
+\end{cases}
+\]
+(Em caso de empate qualquer escolha é válida.)
+Partindo de $(m,n)$ e seguindo $P$ até $(0,0)$, cada passo
+$\nwarrow$ contribui um símbolo $\pi_A(i)=\pi_B(j)$ para a
+subsequência. O caminho é uma cadeia máxima em $M$.
+\end{proposicao}
+
+\noindent Isto é o levantamento $\tilde\pi$ que acrescenta a
+coordenada de folha ``de onde vim''; a volta é exacta porque cada
+ponteiro é uma involução local (desfazer o passo devolve a célula
+anterior).
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Forma matricial e conservação}
+
+Escreva a tabela $L$ como matriz $(m+1)\times(n+1)$ de inteiros
+não-negativos. A recorrência é uma operação local
+\[
+L_{i,j}\;=\;f\bigl(L_{i-1,j},\,L_{i,j-1},\,L_{i-1,j-1},\,\mathbf{1}_{a_i=b_j}\bigr).
+\]
+Em particular, quando se percorre a tabela por diagonais
+$i+j=\mathrm{const}$, cada valor depende só de valores já
+computados --- a ordem de avaliação é uma realização da ordem
+produto.
+
+\begin{lema}[conservação de diferença]
+Para quaisquer $i,j$,
+\[
+0\;\le\;L(i,j)-L(i-1,j)\;\le\;1,\qquad
+0\;\le\;L(i,j)-L(i,j-1)\;\le\;1.
+\]
+\end{lema}
+
+\begin{proof}
+Segue por indução da recorrência: o valor sobe no máximo $1$ e nunca
+desce.
+\end{proof}
+
+\noindent Logo a ``derivada discreta'' (diferença finita) é $0$ ou
+$1$ --- exactamente o bit que a face decide. Isto é a versão
+discreta da conservação da norma: a variação total ao longo de
+qualquer caminho monótono de $(0,0)$ a $(m,n)$ é $L(m,n)$, e o
+número de passos diagonais óptimos é o mesmo.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Complexidade e régua}
+
+\begin{proposicao}
+Tempo $O(mn)$, espaço $O(\min(m,n))$ (duas linhas bastam, ou uma
+com cuidado). O resultado é exacto: não há aproximação nem
+truncamento.
+\end{proposicao}
+
+\noindent Se a máquina trabalha com $\mathrm{Word}_8$ e a tabela não
+cabe, a arquitectura dos papers \textbf{recusa} em vez de truncar
+(§ISA). O comprimento $L(m,n)$ cabe sempre num inteiro de
+$\lceil\log_2(\min(m,n)+1)\rceil$ bits.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Exemplo mínimo}
+
+Sejam $A=\texttt{ABCBDAB}$, $B=\texttt{BDCABA}$.
+\[
+\begin{array}{c|ccccccc}
+ & \varepsilon & B & D & C & A & B & A\\\hline
+\varepsilon & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+A & 0 & 0 & 0 & 0 & 1 & 1 & 1\\
+B & 0 & 1 & 1 & 1 & 1 & 2 & 2\\
+C & 0 & 1 & 1 & 2 & 2 & 2 & 2\\
+B & 0 & 1 & 1 & 2 & 2 & 3 & 3\\
+D & 0 & 1 & 2 & 2 & 2 & 3 & 3\\
+A & 0 & 1 & 2 & 2 & 3 & 3 & 4\\
+B & 0 & 1 & 2 & 2 & 3 & 4 & 4\\
+\end{array}
+\]
+$L(7,6)=4$. Um caminho óptimo recupera, por exemplo, $\texttt{BCBA}$
+ou $\texttt{BDAB}$.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Síntese na linguagem dos papers}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+conceito do paper & no LCS \\
+\midrule
+realização $\pi$ & as duas sequências \\
+multiplicidade $G$ & contagem de cada símbolo \\
+poset / ordem produto & matches ordenados \\
+maior cadeia & LCS \\
+dobra / duas faces & os três movimentos da grade \\
+corte que termina & $L(m,n)$ exacto \\
+levantamento (folha) & ponteiros $P(i,j)$ \\
+conservação & diferenças $0$ ou $1$ \\
+régua finita & terminação em $mn$ passos \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{Em uma frase:}
+o LCS é o comprimento da maior cadeia de coincidências no produto
+das duas realizações; a tabela dinâmica é a execução da dobra
+alternada das duas faces sobre a grade finita; a sequência em si é
+o levantamento dessa cadeia.
+
+\vfill
+{\footnotesize\color{cinza}
+Referências de estilo e enunciados: \texttt{papers/aranha.tex}
+(dobra, multiplicidade, levantamento, corte),
+\texttt{papers/arquitetura.tex} (régua, conservação, recusa).
+Números de verificação: qualquer implementação clássica de LCS
+com os mesmos exemplos.}
+
+\end{document}

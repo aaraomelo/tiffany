@@ -12578,9 +12578,11 @@ static int acha_texto(const char *p){
 static void pre_recolhe(unsigned no, long *saida, int *n, int cap){
     if(*n >= cap) return;
     { unsigned b = par_le(S_NO + no*LARG);
+      sql_ultimos_nos++;
       if(b) { if(*n < cap) saida[(*n)++] = (long)(S_TEXTO + b - 1u); } }
     for(unsigned k = 1; k < LARG; k++){
         unsigned f = par_le(S_NO + no*LARG + k);
+        sql_ultimos_nos++;
         if(f) pre_recolhe(f, saida, n, cap);
     }
 }
@@ -12589,6 +12591,7 @@ static int busca_prefixo(const char *p){
     if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
     if(txt_n() <= 0){ printf("(tabela vazia)\n"); return 1; }
     unsigned no = 0; size_t desceu = 0;
+    sql_ultimos_nos = 0;              /* o custo mede-se, e é ele a afirmação */
     for(size_t j = 0; j < n; j++){
         unsigned f = desce_termo(no, a[j], 0);
         if(!f) break;
@@ -12640,8 +12643,9 @@ static int busca_prefixo(const char *p){
             sql_cap->nrows++;
         }
     }
-    printf("      -> %d na bola de raio 1/2^%zu, com %zu no(s) descidos e NENHUMA"
-           " varredura\n", nd, n, desceu);
+    printf("      -> %d na bola de raio 1/2^%zu, com %zu no(s) descidos e %ld"
+           " visitados ao todo --- e NENHUMA varredura\n",
+           nd, n, desceu, sql_ultimos_nos);
     if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", nd);
     return 1;
 }
