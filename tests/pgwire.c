@@ -27840,6 +27840,124 @@ int main(void){
            " e «não depende de nada» seriam indistinguíveis.", mal == 0);
     }
 
+    /* ═══ §W191: O LCS É A DOBRA ALTERNADA, E A PALAVRA É O LEVANTAMENTO ═══ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W191 lcs: os três movimentos da grade, e a folha que devolve a palavra.\n\n");
+        unlink("/tmp/pgwire_w191.mem"); unlink("/tmp/pgwire_w191.prog");
+        unlink("/tmp/pgwire_w191.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w191__p.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w191__p.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w191")) mal++;
+
+        sql_executa("CREATE TABLE p (a TEXTO, b TEXTO)", &o);
+        static const char *PAR[5][2] = {
+            {"ABCBDAB","BDCABA"}, {"AGGTAB","GXTXAYB"},
+            {"abc","abc"}, {"abc","xyz"}, {"aaaa","aa"},
+        };
+        for(int k = 0; k < 5; k++){
+            char q[160];
+            snprintf(q, sizeof q, "INSERT INTO p VALUES ('%s','%s')", PAR[k][0], PAR[k][1]);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT lcs(*) FROM p", &o);
+
+        /* ── O GUME NÃO É O NÚMERO: É A PALAVRA ──────────────────────────────
+         *
+         * Um comprimento plausível e errado passa por qualquer asserção sobre o
+         * número sozinho. O que se exige é o par: a palavra devolvida TEM de ser
+         * subsequência das DUAS --- percorre-se cada uma uma vez, em ordem ---
+         * e o comprimento TEM de ser o dela. Assim um motor que devolvesse um
+         * número maior não teria palavra para o justificar, e um que devolvesse
+         * uma palavra qualquer não a veria passar nas duas.
+         *
+         * É o levantamento do `aranha` a ser verificado pela volta: os ponteiros
+         * dizem «de onde vim», e seguir por eles TEM de reconstruir uma cadeia
+         * que existe nas duas realizações. */
+        long boas = 0, medidas = 0;
+        for(int r = 0; r < o.nrows && r < 5; r++){
+            const char *A = o.cell[r][0], *B = o.cell[r][1];
+            long L = atol(o.cell[r][2]);
+            const char *sub = o.cell[r][3];
+            long ls = (long)strlen(sub);
+            /* subsequência de A? e de B? --- uma passagem por cada */
+            int ok_a = 1, ok_b = 1;
+            { const char *q = A; for(long k = 0; k < ls; k++){
+                  while(*q && *q != sub[k]) q++;
+                  if(!*q){ ok_a = 0; break; } q++; } }
+            { const char *q = B; for(long k = 0; k < ls; k++){
+                  while(*q && *q != sub[k]) q++;
+                  if(!*q){ ok_b = 0; break; } q++; } }
+            int bate = (ls == L) && ok_a && ok_b;
+            printf("        %-9s %-9s L=%-3ld [%s]  %s%s%s\n", A, B, L, sub,
+                   ok_a ? "" : "não é subsequência de A ",
+                   ok_b ? "" : "não é subsequência de B ",
+                   (ls == L) ? "" : "o comprimento não é o da palavra");
+            medidas++; if(bate) boas++;
+        }
+        printf("      → %ld de %ld: a palavra é subsequência das DUAS e mede o que diz\n",
+               boas, medidas);
+        if(boas != medidas || medidas != 5) mal++;
+
+        /* os dois exemplos clássicos, com a resposta conhecida --- e não é o
+         * número que se confere, é ele JUNTO com a palavra */
+        int classicos = 0;
+        for(int r = 0; r < o.nrows; r++){
+            if(!strcmp(o.cell[r][0], "ABCBDAB") && atol(o.cell[r][2]) == 4) classicos++;
+            if(!strcmp(o.cell[r][0], "AGGTAB")  && atol(o.cell[r][2]) == 4) classicos++;
+        }
+        printf("      os dois clássicos dão 4: %d/2\n", classicos);
+        if(classicos != 2) mal++;
+
+        /* ── O CONTROLO, sem o qual isto não distingue nada: duas palavras SEM
+         * símbolo comum têm de dar ZERO e palavra vazia. Um motor que devolvesse
+         * sempre algo passaria em tudo o que está acima. */
+        int zero_ok = 0;
+        for(int r = 0; r < o.nrows; r++)
+            if(!strcmp(o.cell[r][0], "abc") && !strcmp(o.cell[r][1], "xyz"))
+                zero_ok = (atol(o.cell[r][2]) == 0 && o.cell[r][3][0] == 0);
+        printf("      CONTROLO — sem símbolo comum, L = 0 e a palavra é vazia: %s\n",
+               zero_ok ? "sim" : "NÃO");
+        if(!zero_ok) mal++;
+
+        /* ── E A RECUSA QUANDO A GRADE NÃO CABE, que o paper manda: «se a tabela
+         * não cabe, a arquitectura RECUSA em vez de truncar». */
+        { char longa[200]; memset(longa, 'a', 199); longa[199] = 0;
+          char q[600];
+          snprintf(q, sizeof q, "INSERT INTO p VALUES ('%s','%s')", longa, longa);
+          sql_executa(q, &o);
+          sql_executa("SELECT lcs(*) FROM p", &o);
+          printf("      a grade de 200x200 não cabe na zona: %s\n",
+                 o.ok ? "aceitou (NÃO)" : "RECUSADA, e diz o tamanho");
+          if(o.ok) mal++; }
+
+        sql_fechar();
+        printf("\n");
+        ok("O LCS É A DOBRA ALTERNADA DAS DUAS FACES, E A PALAVRA É O LEVANTAMENTO. O"
+           " `lcs_dobra.tex` escreve-o na linguagem desta casa: duas sequências são duas"
+           " REALIZAÇÕES, uma subsequência comum é uma cadeia no produto das ordens, e a"
+           " recorrência da programação dinâmica É a dobra --- L(i,j) = L(i−1,j−1)+1 no"
+           " match, e o máximo das duas faces fora dele. Os três movimentos da grade são"
+           " as duas faces mais o PONTO FIXO COMUM: avançar só em A, avançar só em B, ou"
+           " avançar nas duas, que é onde elas coincidem e o valor sobe de um. E porque a"
+           " régua é finita o processo TERMINA numa igualdade --- não há convergência, há"
+           " paragem em mn passos. A grade vive no disco, como tudo nesta casa, e guarda"
+           " em cada célula QUAL FACE produziu o valor: o comprimento sozinho não devolve"
+           " a palavra, e isso é o levantamento --- a coordenada de folha «de onde vim»."
+           " O GUME NÃO É O NÚMERO, É A PALAVRA: um comprimento plausível e errado passa"
+           " por qualquer asserção sobre o número sozinho, pelo que se exige o par --- a"
+           " palavra tem de ser subsequência das DUAS, percorrendo cada uma UMA vez em"
+           " ordem, e o comprimento tem de ser o dela. Os dois exemplos clássicos dão"
+           " BCBA e GTAB. E há a CONSERVAÇÃO, que o paper faz lema: as diferenças"
+           " L(i,j)−L(i−1,j) e L(i,j)−L(i,j−1) são 0 ou 1 e mais nada --- a derivada"
+           " discreta a valer o bit que a face decide ---, verificada sobre a tabela"
+           " inteira. O CONTROLO é o par sem símbolo comum, que tem de dar ZERO e palavra"
+           " vazia; e a grade que não cabe na zona é RECUSADA com o tamanho dito, porque"
+           " truncar daria um comprimento que não é o de nenhum par.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -594,7 +594,23 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  * A faixa das árvores começa DEPOIS de tudo o que está reservado, e o
  * `typedef` abaixo obriga o compilador a verificá-lo: acrescentar uma zona por
  * cima delas deixa de compilar, em vez de partir uma consulta longe daqui. */
-#define ZONA_LIVRE1    77u                /* a primeira zona depois do reservado */
+/* ── A GRADE DO LCS, no disco como tudo ──────────────────────────────────────
+ *
+ * O `lcs_dobra.tex` põe a tabela L como uma matriz (m+1)×(n+1) de inteiros, e
+ * diz o que ela é: «a execução da dobra alternada das duas faces sobre a grade
+ * finita». Ela mora numa zona --- duas Words por célula, o valor e o PONTEIRO
+ * (a face que produziu o valor), porque o comprimento sozinho não devolve a
+ * palavra: isso é o levantamento, e ele pede a coordenada de folha «de onde
+ * vim».
+ *
+ * Duas zonas dão 32768 slots; com duas Words por célula são 16384, e a grade
+ * quadrada que cabe tem lado 127. O que não couber RECUSA-SE, que é o que o
+ * paper manda («se a tabela não cabe, a arquitectura recusa em vez de
+ * truncar»). */
+#define S_LCS          (ISA_TECTO + ZONA(77))
+#define LCS_ZONAS      2u
+#define LCS_CELULAS    ((ZONA_SLOTS * LCS_ZONAS) / 2u)
+#define ZONA_LIVRE1    79u                /* a primeira zona depois do reservado */
 #define IDX_ZONA1      ZONA_LIVRE1
 #define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
@@ -5604,7 +5620,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"COMPLETA") ? 29
                        : !strcasecmp(nome,"GLOBAL") ? 30
                        : !strcasecmp(nome,"EDO") ? 31
-                       : !strcasecmp(nome,"FUNDE") ? 32 : 0;
+                       : !strcasecmp(nome,"FUNDE") ? 32
+                       : !strcasecmp(nome,"LCS") ? 33 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -6045,7 +6062,8 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
  * asserção, porque nenhum medidor indexa uma coluna alta o bastante para o
  * pisar. O que não é verificado pelo compilador tem de ser verificado por
  * alguém --- e ninguém estava. */
-typedef char zonas_nao_pisam_os_indices[(45u + J_ZONAS <= ZONA_LIVRE1) ? 1 : -1];
+typedef char zonas_nao_pisam_os_indices[(45u + J_ZONAS <= 77u) ? 1 : -1];
+typedef char lcs_nao_pisa_os_indices[(77u + LCS_ZONAS <= ZONA_LIVRE1) ? 1 : -1];
 typedef char indices_cabem_abaixo_do_canal[(IDX_ZONA1 + IDX_MAXCOL - 8u <= 600u) ? 1 : -1];
 
 static char j_tab_dir[64] = "";   /* a tabela da direita, "" se não há JOIN */
@@ -9034,6 +9052,134 @@ static int varre(const char *resto, int acao){
                falha == 0 ? "a régua DESCE: a leitura serve"
                           : "a régua NÃO desce: a leitura não serve");
         return 1;
+    }
+
+    /* ══ LCS: A DOBRA ALTERNADA DAS DUAS FACES ══════════════════════════════
+     *
+     * O `lcs_dobra.tex` escreve o LCS na linguagem desta casa: duas sequências
+     * são duas REALIZAÇÕES, uma subsequência comum é uma cadeia no produto das
+     * ordens, e a recorrência da programação dinâmica É a dobra:
+     *
+     *     L(i,j) = L(i-1,j-1) + 1                  se π_A(i) = π_B(j)
+     *            = max(L(i-1,j), L(i,j-1))         caso contrário
+     *
+     * --- e os três movimentos da grade são as duas faces mais o ponto fixo
+     * comum: avançar só em A, avançar só em B, ou avançar nas duas, que é onde
+     * elas coincidem e o valor sobe de um. «Porque a régua é finita o processo
+     * TERMINA numa igualdade»: não há convergência, há paragem em mn passos.
+     *
+     * A tabela vive no disco --- é a grade, e a grade é o espaço. E guarda-se
+     * em cada célula QUAL FACE produziu o valor, porque o comprimento sozinho
+     * não devolve a palavra: isso é o levantamento do `aranha`, a coordenada de
+     * folha «de onde vim», e a volta é exacta porque cada ponteiro desfaz o seu
+     * passo.
+     *
+     * O gume é a CONSERVAÇÃO, e é dela que o paper faz lema: as diferenças
+     * L(i,j) − L(i−1,j) e L(i,j) − L(i,j−1) são 0 ou 1, nunca outra coisa. É a
+     * derivada discreta a valer o bit que a face decide, e verifica-se sobre a
+     * tabela inteira --- um preenchimento errado quebra-a. */
+    if(acao == ACAO_MARCA && mat_op == 33){
+        if(ncols != 2){
+            printf("erro: `lcs` pede DUAS colunas --- as duas sequências. RECUSADO.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "lcs needs exactly 2 columns"); }
+            return 0;
+        }
+        if(corpo_de(0).total != CORPO_TEXTO || corpo_de(1).total != CORPO_TEXTO){
+            printf("erro: `lcs` pede colunas de TEXTO --- uma sequência é uma palavra."
+                   " RECUSADO.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err, "lcs needs text columns"); }
+            return 0;
+        }
+        long feitas = 0, cons_ok = 0, cons_n = 0;
+        if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+            sql_cap->ncols = 4;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "a");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "b");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "comprimento");
+            snprintf(sql_cap->col[3], sizeof sql_cap->col[3], "subsequencia");
+            sql_cap->tipo[0] = SQL_TIPO_TEXT; sql_cap->tipo[1] = SQL_TIPO_TEXT;
+            sql_cap->tipo[2] = SQL_TIPO_INT4; sql_cap->tipo[3] = SQL_TIPO_TEXT; }
+        printf("      a          b          L    a subsequência\n");
+        for(long i = 0; i < nrows; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols) || !bit_le(S_PRES, i*ncols + 1)) continue;
+            char A[TX_MAX + 2], B[TX_MAX + 2];
+            tx_le((unsigned)celula_valor(i, 0, ncols), A, (int)sizeof A);
+            tx_le((unsigned)celula_valor(i, 1, ncols), B, (int)sizeof B);
+            long m = (long)strlen(A), n = (long)strlen(B);
+            /* a grade tem (m+1)(n+1) células; o que não cabe RECUSA-SE */
+            if((m + 1) * (n + 1) > (long)LCS_CELULAS){
+                printf("erro: a grade do lcs é %ldx%ld e a zona leva %u células —"
+                       " RECUSADO. Truncar daria um comprimento que não é o de"
+                       " nenhum par.\n", m + 1, n + 1, LCS_CELULAS);
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "lcs grid %ldx%ld exceeds %u cells", m+1, n+1, LCS_CELULAS); }
+                return 0;
+            }
+            #define LCS_V(ii,jj)  mem_le(S_LCS + (unsigned)(((ii)*(n+1) + (jj)) * 2))
+            #define LCS_P(ii,jj)  mem_le(S_LCS + (unsigned)(((ii)*(n+1) + (jj)) * 2 + 1))
+            #define LCS_POE(ii,jj,v,pp) do { \
+                Word wv; wv.total = (Word8)((v) & 255); wv.e = (Word8)(((v) >> 8) & 255); \
+                mem_grava(S_LCS + (unsigned)(((ii)*(n+1) + (jj)) * 2), wv); \
+                Word wp; wp.total = (Word8)(pp); wp.e = 0; \
+                mem_grava(S_LCS + (unsigned)(((ii)*(n+1) + (jj)) * 2 + 1), wp); \
+            } while(0)
+            #define LCS_LE(ii,jj) ((long)LCS_V(ii,jj).total | ((long)LCS_V(ii,jj).e << 8))
+
+            for(long jj = 0; jj <= n; jj++) LCS_POE(0, jj, 0, 0);
+            for(long ii = 0; ii <= m; ii++) LCS_POE(ii, 0, 0, 0);
+            for(long ii = 1; ii <= m; ii++)
+                for(long jj = 1; jj <= n; jj++){
+                    if(A[ii-1] == B[jj-1])
+                        LCS_POE(ii, jj, LCS_LE(ii-1, jj-1) + 1, 3);   /* ↖ o ponto fixo */
+                    else {
+                        long da = LCS_LE(ii-1, jj), db = LCS_LE(ii, jj-1);
+                        if(da >= db) LCS_POE(ii, jj, da, 1);          /* ↑ a face de A */
+                        else         LCS_POE(ii, jj, db, 2);          /* ← a face de B */
+                    }
+                }
+            /* A CONSERVAÇÃO: as diferenças são 0 ou 1, e mais nada */
+            for(long ii = 1; ii <= m; ii++)
+                for(long jj = 1; jj <= n; jj++){
+                    long v = LCS_LE(ii, jj), a1 = LCS_LE(ii-1, jj), b1 = LCS_LE(ii, jj-1);
+                    cons_n += 2;
+                    if(v - a1 >= 0 && v - a1 <= 1) cons_ok++;
+                    if(v - b1 >= 0 && v - b1 <= 1) cons_ok++;
+                }
+            /* O LEVANTAMENTO: a palavra sai dos ponteiros, de trás para a frente */
+            char sub[TX_MAX + 2]; long sn = 0;
+            { long ii = m, jj = n;
+              while(ii > 0 && jj > 0){
+                  long pp = (long)LCS_P(ii, jj).total;
+                  if(pp == 3){ if(sn < TX_MAX) sub[sn++] = A[ii-1]; ii--; jj--; }
+                  else if(pp == 1) ii--;
+                  else jj--;
+              } }
+            sub[sn] = 0;
+            for(long k = 0; k < sn/2; k++){ char t2 = sub[k]; sub[k] = sub[sn-1-k]; sub[sn-1-k] = t2; }
+            long L = LCS_LE(m, n);
+            printf("      %-10s %-10s %-4ld %s\n", A, B, L, sub);
+            if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
+                long r = sql_cap->nrows;
+                snprintf(sql_cap->cell[r][0], SQL_OUT_CELL, "%s", A);
+                snprintf(sql_cap->cell[r][1], SQL_OUT_CELL, "%s", B);
+                snprintf(sql_cap->cell[r][2], SQL_OUT_CELL, "%ld", L);
+                snprintf(sql_cap->cell[r][3], SQL_OUT_CELL, "%s", sub);
+                sql_cap->nrows++;
+            }
+            feitas++;
+            #undef LCS_V
+            #undef LCS_P
+            #undef LCS_POE
+            #undef LCS_LE
+        }
+        printf("      -> %ld par(es); a conservação (as diferenças são 0 ou 1):"
+               " %ld/%ld\n", feitas, cons_ok, cons_n);
+        if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", feitas);
+        return cons_ok == cons_n;
     }
 
     if(acao == ACAO_MARCA && mat_op == 32){
