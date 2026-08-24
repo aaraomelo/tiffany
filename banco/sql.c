@@ -647,7 +647,26 @@ long sql_lin_tecto(void){ return LIN_TECTO; }   /* quem define é quem responde 
 #define INV_ZONAS      2u
 #define INV_W          3u
 #define INV_MAX        ((ZONA_SLOTS * INV_ZONAS) / INV_W)
-#define ZONA_LIVRE1    81u                /* a primeira zona depois do reservado */
+/* ── A SEQUÊNCIA DO GROUP BY TEM ZONA PRÓPRIA ────────────────────────────────
+ *
+ * Ele precisa da sequência ORDENADA para contar as corridas, e usava um arranjo
+ * local de SQL_OUT_MAX_ROWS --- a janela da porta C. Com ele o laço parava às 64
+ * linhas e as contagens saíam ERRADAS: 200 linhas em 3 grupos davam 22+21+21, e
+ * a linha da conservação imprimia «∑G = 64» com |I| = 200, violando o
+ * `thm:escada` (∑_x G(x) = |I|) e apresentando-o como certo.
+ *
+ * A correcção óbvia era usar a sequência do disco --- e ela JÁ TEM DONO, que é o
+ * ORDER BY. Fi-lo, corri, e caíram vinte e três medidores: as duas escritas
+ * pisam-se quando a consulta tem os dois. O endereço tinha dono, e o que faltava
+ * era dar-lhe casa, não repetir a troca.
+ *
+ * Aqui está a casa: a mesma forma da saída --- metade para a ordem, metade para
+ * os ausentes ---, numa zona sua. */
+#define S_GRPSEQ    (ISA_TECTO + ZONA(81))
+#define S_GRPSEQ_N  (ZONA_SLOTS / 2u)
+#define S_GRPAUS    (S_GRPSEQ + S_GRPSEQ_N)
+
+#define ZONA_LIVRE1    82u                /* a primeira zona depois do reservado */
 #define IDX_ZONA1      ZONA_LIVRE1
 #define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
@@ -1576,6 +1595,24 @@ static long ordseq_le(long k){
 static void ordseq_poe(long k, long v){
     Word w; w.total = (Word8)(v & 255); w.e = (Word8)((v >> 8) & 255);
     mem_grava(S_SAIDA + (unsigned)k, w);
+}
+/* e as mesmas quatro portas para o GROUP BY, na zona dele: a sequência ordenada
+ * e os ausentes, que formam a sua própria fibra e vão no fim. */
+static long grpseq_le(long k){
+    Word w = mem_le(S_GRPSEQ + (unsigned)k);
+    return (long)w.total | ((long)w.e << 8);
+}
+static void grpseq_poe(long k, long v){
+    Word w; w.total = (Word8)(v & 255); w.e = (Word8)((v >> 8) & 255);
+    mem_grava(S_GRPSEQ + (unsigned)k, w);
+}
+static long grpaus_le(long k){
+    Word w = mem_le(S_GRPAUS + (unsigned)k);
+    return (long)w.total | ((long)w.e << 8);
+}
+static void grpaus_poe(long k, long v){
+    Word w; w.total = (Word8)(v & 255); w.e = (Word8)((v >> 8) & 255);
+    mem_grava(S_GRPAUS + (unsigned)k, w);
 }
 static long ordaus_le(long k){
     Word w = mem_le(S_SAIDAUS + (unsigned)k);
@@ -11848,19 +11885,24 @@ static int varre(const char *resto, int acao){
             return 0;
         }
         int postos = 0;
-        long seq[SQL_OUT_MAX_ROWS]; int n = 0;
+        /* A SEQUÊNCIA VIVE NA ZONA DO GROUP BY --- ver `S_GRPSEQ`. Estava num
+         * arranjo de SQL_OUT_MAX_ROWS, que é a JANELA DA PORTA C e não tem nada
+         * que ver com quantas linhas o agrupamento precisa de ordenar: o laço
+         * parava às 64 e as contagens saíam erradas, com a conservação a
+         * imprimir «∑G = 64» para |I| = 200. */
+        long n = 0;
         /* ── O DUAL É UM GRUPO, E NÃO O GRUPO DO ZERO ────────────────────
          * Quocientar é juntar o que tem a mesma chave, e a célula ausente não
          * tem chave nenhuma: metê-la na árvore era dar-lhe o neutro e juntá-la
          * às linhas que têm um zero ESCRITO — duas coisas de níveis diferentes
          * no mesmo grupo. Ficam de fora da árvore e formam a sua própria fibra,
          * no fim, que é onde o SQL as põe e onde a ordem as deixa. */
-        long aus[SQL_OUT_MAX_ROWS]; int na = 0;
+        long na = 0;
         ord_limpa();
-        for(long i = 0; i < nrows && postos < SQL_OUT_MAX_ROWS; i++){
+        for(long i = 0; i < nrows; i++){
             if(!bit_le(S_MATCH, i)) continue;
             if(!bit_le(S_PRES, i*ncols + gc)){
-                if(na < SQL_OUT_MAX_ROWS) aus[na++] = i;
+                if(na < (long)S_GRPSEQ_N){ grpaus_poe(na, i); na++; }
                 continue;
             }
             if(!ord_insere(celula_valor(i, gc, ncols), (int)i)){
@@ -11873,10 +11915,11 @@ static int varre(const char *resto, int acao){
             }
             postos++;
         }
-        { int tmp[SQL_OUT_MAX_ROWS];
-          ord_percorre(0, 0, 0, tmp, &n, SQL_OUT_MAX_ROWS, ord_desc);
-          for(int k = 0; k < n; k++) seq[k] = tmp[k];
-          for(int k = 0; k < na && n < SQL_OUT_MAX_ROWS; k++) seq[n++] = aus[k]; }
+        { static int tmp[8192]; int nn = 0;
+          ord_percorre(0, 0, 0, tmp, &nn, 8192, ord_desc);
+          for(int k = 0; k < nn; k++) grpseq_poe(k, tmp[k]);
+          n = nn;
+          for(long k = 0; k < na && n < (long)S_GRPSEQ_N; k++){ grpseq_poe(n, grpaus_le(k)); n++; } }
 
         /* ── E A SEGUNDA RÉGUA, DENTRO DE CADA FIBRA ─────────────────────
          * A mesma composição do `ORDER BY a, b`: a primeira coluna partiu a
@@ -11887,28 +11930,28 @@ static int varre(const char *resto, int acao){
         { int gc2 = grp_col2[0] ? col_indice(grp_col2) : -1;
           long k = 0;
           while(gc2 >= 0 && k < n){
-              int tem = bit_le(S_PRES, seq[k]*ncols + gc);
-              long v = tem ? celula_valor(seq[k], gc, ncols) : 0;
+              int tem = bit_le(S_PRES, grpseq_le(k)*ncols + gc);
+              long v = tem ? celula_valor(grpseq_le(k), gc, ncols) : 0;
               long j = k;
-              while(j < n && bit_le(S_PRES, seq[j]*ncols + gc) == tem
-                          && (!tem || celula_valor(seq[j], gc, ncols) == v)) j++;
+              while(j < n && bit_le(S_PRES, grpseq_le(j)*ncols + gc) == tem
+                          && (!tem || celula_valor(grpseq_le(j), gc, ncols) == v)) j++;
               if(j - k > 1){
-                  long a2[SQL_OUT_MAX_ROWS]; int n2 = 0, m2 = 0, coube = 1;
-                  int tmp2[SQL_OUT_MAX_ROWS];
+                  static long a2[8192]; static int tmp2[8192];
+                  int n2 = 0, m2 = 0, coube = 1;
                   ord_limpa();
                   for(long t = k; t < j && coube; t++){
-                      if(!bit_le(S_PRES, seq[t]*ncols + gc2)){
-                          if(n2 < SQL_OUT_MAX_ROWS) a2[n2++] = seq[t];
+                      if(!bit_le(S_PRES, grpseq_le(t)*ncols + gc2)){
+                          if(n2 < 8192) a2[n2++] = grpseq_le(t);
                           continue;
                       }
-                      if(!ord_insere(celula_valor(seq[t], gc2, ncols), (int)seq[t]))
+                      if(!ord_insere(celula_valor(grpseq_le(t), gc2, ncols), (int)grpseq_le(t)))
                           coube = 0;
                   }
                   if(coube){
-                      ord_percorre(0, 0, 0, tmp2, &m2, SQL_OUT_MAX_ROWS, 0);
+                      ord_percorre(0, 0, 0, tmp2, &m2, 8192, 0);
                       { long t = k;
-                        for(int q2 = 0; q2 < m2 && t < j; q2++) seq[t++] = tmp2[q2];
-                        for(int q2 = 0; q2 < n2 && t < j; q2++) seq[t++] = a2[q2]; }
+                        for(int q2 = 0; q2 < m2 && t < j; q2++){ grpseq_poe(t, tmp2[q2]); t++; }
+                        for(int q2 = 0; q2 < n2 && t < j; q2++){ grpseq_poe(t, a2[q2]); t++; } }
                   }
               }
               k = j;
@@ -11935,8 +11978,8 @@ static int varre(const char *resto, int acao){
         }
         { long grupos = 0, soma = 0, k = 0;
           while(k < n){
-              int tem = bit_le(S_PRES, seq[k]*ncols + gc);
-              long v = tem ? celula_valor(seq[k], gc, ncols) : 0, g = 0;
+              int tem = bit_le(S_PRES, grpseq_le(k)*ncols + gc);
+              long v = tem ? celula_valor(grpseq_le(k), gc, ncols) : 0, g = 0;
               /* um acumulador POR agregação, e a corrida do grupo alimenta-os
                * todos na mesma passagem — a mesma razão de sempre: com duas
                * passagens, o MIN e o MAX de um grupo podiam ver conjuntos
@@ -11951,16 +11994,16 @@ static int varre(const char *resto, int acao){
               /* a chave do grupo é o PAR quando há segunda coluna: a corrida
                * termina quando QUALQUER das duas muda */
               int gc2 = grp_col2[0] ? col_indice(grp_col2) : -1;
-              int tem2 = (gc2 >= 0) ? bit_le(S_PRES, seq[k]*ncols + gc2) : 0;
-              long v2 = (gc2 >= 0 && tem2) ? celula_valor(seq[k], gc2, ncols) : 0;
-              while(k < n && bit_le(S_PRES, seq[k]*ncols + gc) == tem
-                          && (!tem || celula_valor(seq[k], gc, ncols) == v)
+              int tem2 = (gc2 >= 0) ? bit_le(S_PRES, grpseq_le(k)*ncols + gc2) : 0;
+              long v2 = (gc2 >= 0 && tem2) ? celula_valor(grpseq_le(k), gc2, ncols) : 0;
+              while(k < n && bit_le(S_PRES, grpseq_le(k)*ncols + gc) == tem
+                          && (!tem || celula_valor(grpseq_le(k), gc, ncols) == v)
                           && (gc2 < 0
-                              || (bit_le(S_PRES, seq[k]*ncols + gc2) == tem2
-                                  && (!tem2 || celula_valor(seq[k], gc2, ncols) == v2)))){
+                              || (bit_le(S_PRES, grpseq_le(k)*ncols + gc2) == tem2
+                                  && (!tem2 || celula_valor(grpseq_le(k), gc2, ncols) == v2)))){
                   for(int t = 0; t < agr_n; t++){
-                      if(ac[t] < 0 || !bit_le(S_PRES, seq[k]*ncols + ac[t])) continue;
-                      { long w = celula_valor(seq[k], ac[t], ncols);
+                      if(ac[t] < 0 || !bit_le(S_PRES, grpseq_le(k)*ncols + ac[t])) continue;
+                      { long w = celula_valor(grpseq_le(k), ac[t], ncols);
                         if(!ag_viu[t]){ ag[t] = w; ag_viu[t] = 1; }
                         else if(agr_ops[t] == 1 || agr_ops[t] == 4) ag[t] += w;
                         else if(agr_ops[t] == 2){ if(w > ag[t]) ag[t] = w; }

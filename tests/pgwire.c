@@ -29438,26 +29438,49 @@ int main(void){
 
         long JAN = SQL_OUT_MAX_ROWS;
 
-        /* O GROUP BY TEM O MESMO DEFEITO E FICA DITO, NÃO DADO POR FEITO.
+        /* (1) O GROUP BY: A CONSERVAÇÃO É A LEI, E MEDE-SE ELA.
          *
-         * Ele pára de agrupar às 64 linhas pela mesma razão, e o resultado é
-         * pior do que nos outros dois: com 200 linhas em 3 grupos as contagens
-         * dão 22+21+21 e a própria linha da conservação imprime «∑G = 64» com
-         * |I| = 200 --- o `thm:escada` exige ∑_x G(x) = |I|, e a lei sai
+         * Ele parava de agrupar às 64 pela mesma razão, e o resultado era o
+         * pior dos três: com 200 linhas em 3 grupos as contagens davam
+         * 22+21+21, e a própria linha da conservação imprimia «∑G = 64» com
+         * |I| = 200 --- o `thm:escada` exige ∑_x G(x) = |I|, e a lei saía
          * VIOLADA e apresentada como certa. É o resultado verdadeiro e PARCIAL:
-         * o número de grupos está certo, e nenhuma asserção sobre «três grupos»
-         * o apanharia.
+         * o número de grupos estava CERTO, e nenhuma asserção sobre «três
+         * grupos» o apanharia. Por isso o que aqui se mede é a SOMA.
          *
-         * A correcção não é a mesma. O DISTINCT só precisa de desligar bits na
-         * descida e a segunda régua já tinha o arranjo irmão do tamanho certo;
-         * o GROUP BY precisa da SEQUÊNCIA ORDENADA, e a do disco (`ordseq`) já
-         * TEM DONO --- é a do ORDER BY. Escrevi a troca, corri, e caíram vinte e
-         * três medidores: as duas escritas pisam-se quando a consulta tem os
-         * dois. Fica por fazer, e o que falta é dar-lhe zona própria, não
-         * repetir a troca. Dizê-lo é melhor do que commitar a regressão.
-         *
-         * (1) O DISTINCT: sai UMA folha por fibra, e não as que couberam */
+         * E a correcção não foi a mesma dos outros dois. O DISTINCT só precisa
+         * de desligar bits na descida e a segunda régua já tinha o arranjo
+         * irmão do tamanho certo; o GROUP BY precisa da SEQUÊNCIA ORDENADA, e a
+         * do disco JÁ TINHA DONO --- é a do ORDER BY. Escrevi a troca, corri, e
+         * caíram vinte e três medidores: as duas escritas pisam-se quando a
+         * consulta tem os dois. O endereço tinha dono, e o que faltava era
+         * dar-lhe CASA. Tem-na agora --- uma zona sua, com a mesma forma da
+         * saída, metade para a ordem e metade para os ausentes ---, e o preço é
+         * o mapa a pagar: uma coluna indexável a menos, de 527 para 526. */
+        sql_executa("CREATE TABLE g (a INTEIRO, v INTEIRO)", &o);
         long NL = JAN * 4;
+        for(long i = 0; i < NL; i++){
+            snprintf(q, sizeof q, "INSERT INTO g VALUES (%ld, 1)", i % 3);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT a, count(*) FROM g GROUP BY a", &o);
+        long grupos = o.ok ? o.nrows : -1, soma = 0;
+        for(int r = 0; r < o.nrows; r++) soma += atol(o.cell[r][1]);
+        printf("      GROUP BY sobre %ld linhas: %ld grupos, ∑G = %ld  (a lei: ∑G = |I|)\n",
+               NL, grupos, soma);
+        if(grupos != 3 || soma != NL) mal++;
+
+        /* E COM O ORDER BY NA MESMA CONSULTA --- que é onde as duas escritas se
+         * pisavam. Sem esta linha, a zona nova podia estar a servir só o caso
+         * fácil, e o defeito que ela existe para resolver ficava por medir. */
+        sql_executa("SELECT a, count(*) FROM g GROUP BY a ORDER BY a", &o);
+        long soma2 = 0;
+        for(int r = 0; r < o.nrows; r++) soma2 += atol(o.cell[r][1]);
+        printf("      e com ORDER BY na MESMA consulta: %d grupos, ∑G = %ld\n",
+               o.nrows, soma2);
+        if(o.nrows != 3 || soma2 != NL) mal++;
+
+        /* (2) O DISTINCT: sai UMA folha por fibra, e não as que couberam */
         sql_executa("CREATE TABLE d (a INTEIRO)", &o);
         for(long i = 0; i < NL; i++){
             snprintf(q, sizeof q, "INSERT INTO d VALUES (%ld)", i % 3);
@@ -29504,20 +29527,29 @@ int main(void){
            " `SQL_OUT_MAX_ROWS` é quantas linhas a struct que atravessa a fronteira leva de"
            " uma vez --- um número da PORTA, legítimo onde a porta trabalha. Estava a ser"
            " usado como tecto de trabalho em três sítios que nada têm que ver com ela, e"
-           " nos três o resultado saía errado EM SILÊNCIO. O SELECT DISTINCT"
+           " nos três o resultado saía errado EM SILÊNCIO. O GROUP BY parava de agrupar"
+           " às 64 linhas: com 200 linhas em 3 grupos as contagens davam 22+21+21 e a"
+           " própria linha da conservação imprimia «∑G = 64» com |I| = 200 --- o"
+           " `thm:escada` exige ∑G = |I|, e a lei saía VIOLADA e apresentada como certa. É"
+           " o resultado verdadeiro e PARCIAL: o número de grupos estava CERTO, e nenhuma"
+           " asserção sobre «três grupos» o apanharia, pelo que o que aqui se mede é a"
+           " SOMA. O SELECT DISTINCT"
            " parava de inserir na árvore às 64, pelo que as linhas seguintes nunca eram"
            " desligadas e SAÍAM REPETIDAS: 200 linhas de 3 classes devolviam 139. E a"
            " segunda régua do ORDER BY ordenava a fibra num arranjo de 64 quando o arranjo"
            " IRMÃO ao lado já era de 8192 --- dois números para o mesmo objecto, e o menor"
            " mandava; `ORDER BY a,b` saía ordenado até à posição 64 e desordenado a partir"
-           " dela. O TERCEIRO É O GROUP BY, e fica DITO e não dado por feito: ele pára de"
-           " agrupar às 64 pela mesma razão, e com 200 linhas em 3 grupos as contagens dão"
-           " 22+21+21 enquanto a linha da conservação imprime «∑G = 64» com |I| = 200 ---"
-           " o `thm:escada` exige ∑G = |I|, e a lei sai VIOLADA e apresentada como certa. A"
-           " correcção dele não é a mesma: precisa da SEQUÊNCIA ORDENADA, e a do disco já"
-           " tem dono, que é o ORDER BY; escrevi a troca, corri, e caíram vinte e três"
-           " medidores porque as duas escritas se pisam quando a consulta tem os dois."
-           " Falta dar-lhe zona própria. O `aranha §sec:dimensao` diz-o em uma frase: «enunciar o teorema no"
+           " dela. E A CORRECÇÃO DO GROUP BY NÃO FOI A MESMA DOS OUTROS DOIS, que é o que"
+           " este bloco aprendeu a duras penas: os outros só precisavam de desligar bits na"
+           " descida ou de ter o arranjo do tamanho do irmão, mas o GROUP BY precisa da"
+           " SEQUÊNCIA ORDENADA, e a do disco JÁ TINHA DONO --- é a do ORDER BY. Escrevi a"
+           " troca, corri, e caíram VINTE E TRÊS medidores, porque as duas escritas se"
+           " pisam quando a consulta tem os dois. O endereço tinha dono, e o que faltava era"
+           " dar-lhe CASA e não repetir a troca: tem agora uma zona sua, com a mesma forma"
+           " da saída --- metade para a ordem, metade para os ausentes ---, e o preço é o"
+           " mapa a pagá-lo, uma coluna indexável a menos. Mede-se por isso o GROUP BY COM"
+           " O ORDER BY NA MESMA CONSULTA, que é onde as escritas se pisavam: sem essa"
+           " linha a zona nova podia estar a servir só o caso fácil. O `aranha §sec:dimensao` diz-o em uma frase: «enunciar o teorema no"
            " posto 2 e realizá-lo num arranjo do plano dá a impressão de que o 2 é do"
            " teorema. Não é: é do EXEMPLO, e do ARRANJO.» O que limita passa a ser o MAPA"
            " --- a ordem no disco e a árvore ---, que recusam dizendo-o. O que se mede no"
