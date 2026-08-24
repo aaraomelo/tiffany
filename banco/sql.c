@@ -10918,12 +10918,32 @@ static int varre(const char *resto, int acao){
                   } else if(ag_viu[t]) snprintf(agtxt[t], sizeof agtxt[0], "%ld", ag[t]);
                   else                 agtxt[t][0] = 0;
               }
-              { char ch[64];
-                if(gc2 >= 0) snprintf(ch, sizeof ch, "%s%ld | %s%ld",
-                                      tem ? "" : "(ausente) ", tem ? v : 0,
-                                      tem2 ? "" : "(ausente) ", tem2 ? v2 : 0);
-                else         snprintf(ch, sizeof ch, "%s%ld",
-                                      tem ? "" : "(ausente) ", tem ? v : 0);
+              /* ── A CHAVE DO GRUPO REPÕE-SE NO CORPO DELA ────────────────
+               *
+               * Numa coluna de TEXTO a célula guarda o ENDEREÇO no pool, e a
+               * fibra formava-se certa por isso mesmo --- endereços iguais são
+               * cadeias iguais, que é o critério da leitura. Mas a chave saía
+               * como o endereço: `GROUP BY s` devolvia «1 | 3» e «6 | 1» em vez
+               * de «acme | 3» e «globex | 1».
+               *
+               * É a face da compressão a aparecer na leitura. A §sec:dualidades:
+               * «um lado comprime e perde uma distinção; o outro REPÕE-NA», e
+               * aqui a reposição faltava --- o valor estava certo, a fibra
+               * estava certa, e o que se mostrava era a coordenada em vez do
+               * objecto. */
+              char k1[80], k2[80];
+              { char ch[160];
+                #define GRP_CHAVE(dst, col, temv, val) do { \
+                    Word cw_ = corpo_de(col); \
+                    if(!(temv)) snprintf((dst), 80, "(ausente)"); \
+                    else if(cw_.total == CORPO_TEXTO) tx_le((unsigned)(val), (dst), 80); \
+                    else snprintf((dst), 80, "%ld", (long)(val)); \
+                } while(0)
+                GRP_CHAVE(k1, gc, tem, v);
+                if(gc2 >= 0){ GRP_CHAVE(k2, gc2, tem2, v2);
+                              snprintf(ch, sizeof ch, "%s | %s", k1, k2); }
+                else          snprintf(ch, sizeof ch, "%s", k1);
+                #undef GRP_CHAVE
                 printf("   %s | %ld", ch, g);
                 for(int t = 0; t < agr_n; t++)
                     printf(" | %s", agtxt[t][0] ? agtxt[t] : "(ausente)");
@@ -10931,13 +10951,20 @@ static int varre(const char *resto, int acao){
               if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
                   /* e a chave do grupo do dual sai AUSENTE, não a zero: o
                    * cliente tem de ver a mesma distinção que o motor faz */
+                  /* o MESMO texto que a saída imprime --- o cliente e o
+                   * terminal não podem discordar sobre a chave que ambos
+                   * descrevem, e a reposição no corpo é da chave, não do canal */
                   { int c = 0; long r = sql_cap->nrows;
-                    if(tem) snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", v);
+                    if(tem) snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%s", k1);
                     else { sql_cap->cell[r][c][0] = 0; sql_cap->nulo[r][c] = 1; }
+                    if(tem && corpo_de(gc).total == CORPO_TEXTO)
+                        sql_cap->tipo[c] = SQL_TIPO_TEXT;
                     c++;
                     if(gc2 >= 0){
-                        if(tem2) snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", v2);
+                        if(tem2) snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%s", k2);
                         else { sql_cap->cell[r][c][0] = 0; sql_cap->nulo[r][c] = 1; }
+                        if(tem2 && corpo_de(gc2).total == CORPO_TEXTO)
+                            sql_cap->tipo[c] = SQL_TIPO_TEXT;
                         c++;
                     }
                     snprintf(sql_cap->cell[r][c], SQL_OUT_CELL, "%ld", g); c++;

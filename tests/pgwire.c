@@ -27448,6 +27448,39 @@ int main(void){
         printf("      → %ld de %ld: o que se escreveu é o que se lê\n", voltas, medidas);
         if(voltas != medidas) mal++;
 
+        /* ── E A VOLTA DO TEXTO, que é onde a compressão é mais funda.
+         *
+         * Numa coluna de TEXTO a célula guarda o ENDEREÇO no pool: a cadeia
+         * comprime-se num número, e é por isso que a fibra se forma certa ---
+         * endereços iguais são cadeias iguais, que é o critério da leitura,
+         * `x = y ⟹ R(x) = R(y)`. Mas a REPOSIÇÃO faltava na chave do grupo:
+         * `GROUP BY s` devolvia «1 | 3» e «6 | 1» em vez de «acme | 3» e
+         * «globex | 1». O valor certo, a fibra certa, e a COORDENADA mostrada
+         * no lugar do objecto --- que é a face da compressão a aparecer na
+         * leitura, e é exactamente o que uma varredura por caminho não apanha:
+         * eu não estava a varrer o GROUP BY. */
+        sql_executa("CREATE TABLE tx (s TEXTO, n INTEIRO)", &o);
+        sql_executa("INSERT INTO tx VALUES ('acme', 1)", &o);
+        sql_executa("INSERT INTO tx VALUES ('acme', 2)", &o);
+        sql_executa("INSERT INTO tx VALUES ('globex', 3)", &o);
+        sql_executa("INSERT INTO tx VALUES ('acme', 4)", &o);
+        sql_executa("SELECT s, count(*) FROM tx GROUP BY s", &o);
+        int cadeia = 0, fibra = 0;
+        if(o.ok && o.nrows == 2){
+            cadeia = (!strcmp(o.cell[0][0], "acme") && !strcmp(o.cell[1][0], "globex"));
+            fibra  = (!strcmp(o.cell[0][1], "3")    && !strcmp(o.cell[1][1], "1"));
+        }
+        printf("      GROUP BY sobre TEXTO devolve a CADEIA e não o endereço:");
+        if(o.ok) for(int r = 0; r < o.nrows; r++) printf(" %s|%s", o.cell[r][0], o.cell[r][1]);
+        printf("  %s\n", (cadeia && fibra) ? "" : "← NÃO VOLTA");
+        if(!cadeia || !fibra) mal++;
+        /* e o CONTROLO da compressão: cadeias IGUAIS caem na mesma fibra e
+         * cadeias diferentes em fibras diferentes --- sem isto, um pool que
+         * devolvesse sempre o mesmo endereço dava uma fibra só e passava */
+        printf("      CONTROLO — as três «acme» numa fibra e a «globex» noutra:"
+               " %d fibra(s)\n", o.ok ? o.nrows : -1);
+        if(!o.ok || o.nrows != 2) mal++;
+
         /* ── E A VOLTA DO ROLLBACK, que é o μ explícito: a trajectória inteira
          * repõe-se sem que nada dela tenha sido guardado além do diário. */
         sql_executa("BEGIN", &o);
