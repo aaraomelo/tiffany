@@ -28019,6 +28019,97 @@ int main(void){
            " truncar daria um comprimento que não é o de nenhum par.", mal == 0);
     }
 
+    /* ═══ §W192: A RÉGUA É UMA SÓ, E NUM PERCURSO ELA ABSORVE ══════════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W192 a ultramétrica sobre o percurso das escritas: o pior passo absorve.\n\n");
+        unlink("/tmp/pgwire_w192.mem"); unlink("/tmp/pgwire_w192.prog");
+        unlink("/tmp/pgwire_w192.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w192__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w192__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w192")) mal++;
+
+        /* ── A RÉGUA DESTA CASA É UMA, E NÃO É EUCLIDIANA ────────────────────
+         *
+         * A §sec:ultra dá-a: d(a,b) = 2^{−prof(a,b)}, com prof a profundidade da
+         * primeira divergência. E o que a define não é uma desigualdade
+         * triangular mais apertada de que se tire um número melhor --- é a
+         * PARTIÇÃO: «duas bolas de raio r ou coincidem ou são disjuntas», «todo
+         * ponto é centro». É por isso que ∑G = |I| não exige cuidado nenhum:
+         * não há sobreposição a haver.
+         *
+         * DAÍ SAI O QUE MUDA A CONTA: num percurso ultramétrico não se SOMA. O
+         * `cor:global` dá-o como lei --- D(R_0,R_n) ≤ max D(R_{i−1},R_i) --- e o
+         * pior passo ABSORVE os outros. É isso que faz o cone virar espiral: o
+         * custo não acumula linearmente, fica preso ao passo mais fundo.
+         *
+         * Mede-se sobre a trajectória REAL de escritas do motor, que é a
+         * realização π : I → X do paper com X o espaço de endereços. */
+        sql_executa("CREATE TABLE t (a INTEIRO, b INTEIRO)", &o);
+        sql_executa("BEGIN", &o);
+        for(int i = 1; i <= 8; i++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i*10);
+            sql_executa(q, &o);
+        }
+        sql_executa("UPDATE t SET b = 99 WHERE a = 3", &o);
+
+        long I = 0, sup = 0, mg = 0, sg = 0;
+        sql_tx_fibra(&I, &sup, &mg, &sg);
+        long pmin = 0, ppon = 0, absorve = 0, np = 0;
+        sql_tx_ultra(&pmin, &ppon, &absorve, &np);
+
+        printf("      |I| = %ld escritas em %ld slots distintos, com max G = %ld\n",
+               I, sup, mg);
+        printf("      a CONSERVAÇÃO ∑G = |I|: %ld = %ld  %s\n", sg, I,
+               (sg == I) ? "" : "← NÃO FECHA");
+        if(sg != I) mal++;
+        printf("      a régua: o pior passo do caminho está a 2^-%ld, e a PONTA A"
+               " PONTA a 2^-%ld\n", pmin, ppon);
+        printf("      a ABSORÇÃO do cor:global (a ponta não é mais longe que o pior"
+               " passo): %s\n", absorve ? "vale" : "FALHA");
+        if(!absorve) mal++;
+
+        /* ── E HÁ DOBRA, sem a qual isto não diria nada. Se cada slot fosse
+         * escrito uma vez só, max G = 1, a fibra seria trivial e a conservação
+         * passaria por não haver nada a conservar. */
+        printf("      CONTROLO — há DOBRA de facto: max G = %ld (> 1) e há %ld"
+               " escritas para %ld slots\n", mg, I, sup);
+        if(mg <= 1 || I <= sup) mal++;
+
+        /* ── E O CONTROLO DA RÉGUA: a ponta tem de ser ESTRITAMENTE mais funda
+         * que o pior passo neste percurso, senão «absorve» seria uma igualdade
+         * trivial e a lei não estaria a distinguir nada. */
+        printf("      CONTROLO — e a ponta é ESTRITAMENTE mais funda: %ld > %ld: %s\n",
+               ppon, pmin, (ppon > pmin) ? "sim" : "NÃO (a lei passa por trivial)");
+        if(ppon <= pmin) mal++;
+
+        sql_executa("ROLLBACK", &o);
+        sql_fechar();
+        printf("\n");
+        ok("A RÉGUA É UMA SÓ, E NUM PERCURSO ELA ABSORVE. Escrevi primeiro uma métrica"
+           " quadrática pesada pelo campo, τ = ∑ G(x_t) --- e isso é euclidiano, não é"
+           " esta casa. A régua desta obra é a ULTRAMÉTRICA da §sec:ultra,"
+           " d(a,b) = 2^{−prof(a,b)}, e o que a define não é uma desigualdade triangular"
+           " mais apertada de que se tire um número melhor: é a PARTIÇÃO --- «duas bolas"
+           " de raio r ou coincidem ou são disjuntas», «todo ponto é centro» ---, e é por"
+           " isso que ∑G = |I| não exige cuidado nenhum, porque não há sobreposição a"
+           " haver. DAÍ SAI O QUE MUDA A CONTA: num percurso ultramétrico não se SOMA. O"
+           " cor:global dá-o como lei, D(R_0,R_n) ≤ max D(R_{i−1},R_i), e o pior passo"
+           " ABSORVE os outros --- é isso que faz o cone virar espiral, com o custo preso"
+           " ao passo mais fundo em vez de acumular linearmente. E a magnitude não é"
+           " parâmetro livre em sítio nenhum disto: na transformada o módulo dos"
+           " caracteres é constante e igual a 1 («o módulo não carrega nada, e a fase"
+           " carrega tudo», com a fase a ser UM BIT, a paridade ⟨k,j⟩), o factor 2^m sai"
+           " da ortogonalidade e não de uma escolha, e aqui a escala de cada passo sai da"
+           " PROFUNDIDADE em que os dois endereços divergem. Mede-se sobre a trajectória"
+           " REAL de escritas do motor, com dois controlos: tem de haver DOBRA (max G > 1"
+           " e mais escritas do que slots, senão a conservação passaria por não haver"
+           " nada a conservar) e a ponta tem de ser ESTRITAMENTE mais funda que o pior"
+           " passo, senão a absorção seria uma igualdade trivial.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

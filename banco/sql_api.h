@@ -64,6 +64,10 @@ void sql_tx_fecha(void);
 int  sql_tx_cheia(void);
 long sql_tx_escritas(void);
 /* o campo G da transacção corrente, lido na pilha: |I|, |supp G| e max G */
+/* a régua do percurso das escritas, e ela é a ULTRAMÉTRICA: a menor profundidade
+ * do caminho (o maior salto), a profundidade de ponta a ponta, e se a absorção
+ * do `cor:global` se verifica --- ver a nota no sql.c */
+void sql_tx_ultra(long *prof_min, long *prof_ponta, long *absorve, long *passos);
 void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
                   long *soma_G);
 /* o histograma de uma coluna — o campo G dos seus valores, para o passo

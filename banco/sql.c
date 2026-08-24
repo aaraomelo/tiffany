@@ -1205,6 +1205,57 @@ void sql_tx_fecha(void){ undo_em_tx = 0; undo_n = 0; undo_cheio = 0; }
  * conservação, e o que ela diz é que nenhuma escrita se perde no caminho — só
  * se sobrepõe. Devolve-se aqui para o medidor a poder verificar no MOTOR, e não
  * só no papel. */
+/* ── A RÉGUA É UMA SÓ, E É A ULTRAMÉTRICA ────────────────────────────────────
+ *
+ * Escrevi primeiro uma métrica quadrática pesada pelo campo, τ = Σ G(x_t) --- e
+ * isso é euclidiano, não é esta casa. A régua desta obra é UMA: a ultramétrica
+ * da `§sec:ultra`,
+ *
+ *     d(a,b) = 2^{−prof(a,b)},   prof = a profundidade da primeira divergência
+ *
+ * e o que a define não é uma desigualdade triangular mais apertada de que se
+ * tire um número melhor: é a PARTIÇÃO. «Duas bolas de raio r ou coincidem ou são
+ * disjuntas», «todo ponto é centro», e é por isso que ΣG = |I| não exige cuidado
+ * nenhum --- não há sobreposição a haver.
+ *
+ * DAÍ SAI A CONSEQUÊNCIA QUE MUDA A CONTA: numa ultramétrica um percurso não
+ * SOMA. O `cor:global` dá-o como lei --- D(R_0,R_n) ≤ max D(R_{i−1},R_i) ---, o
+ * pior passo ABSORVE os outros, e é isso que faz o cone virar espiral: o custo
+ * não acumula linearmente, fica preso ao passo mais fundo. Somar seria medir com
+ * uma régua que esta casa não tem.
+ *
+ * Devolve-se então o que a régua diz do percurso das escritas: o MÁXIMO dos
+ * passos (a distância ultramétrica de ponta a ponta), a SOMA (só para se ver que
+ * ela não é a resposta), e quantos passos a absorção cobre --- que é a lei a
+ * verificar-se, e não a supor-se. */
+static long prof_slots(unsigned a, unsigned b){
+    /* a profundidade da primeira divergência, do bit mais alto para baixo */
+    if(a == b) return 32;                       /* iguais: distância zero */
+    long q = 0;
+    for(int k = 31; k >= 0; k--){
+        if(((a >> k) & 1u) != ((b >> k) & 1u)) break;
+        q++;
+    }
+    return q;
+}
+void sql_tx_ultra(long *prof_min, long *prof_ponta, long *absorve, long *passos){
+    long pmin = 32, n = 0, cobre = 0;
+    for(long i = 1; i < undo_n; i++){
+        long q = prof_slots(undo_slot(i-1), undo_slot(i));
+        if(q < pmin) pmin = q;                  /* o MENOR prefixo = o MAIOR salto */
+        n++;
+    }
+    /* a distância de ponta a ponta, e a lei: ela é ≤ ao maior salto, isto é, a
+     * profundidade da ponta é ≥ à menor profundidade do caminho */
+    long pponta = (undo_n >= 2)
+                ? prof_slots(undo_slot(0), undo_slot(undo_n - 1)) : 32;
+    cobre = (pponta >= pmin) ? 1 : 0;
+    if(prof_min)   *prof_min = pmin;
+    if(prof_ponta) *prof_ponta = pponta;
+    if(absorve)    *absorve = cobre;
+    if(passos)     *passos = n;
+}
+
 void sql_tx_fibra(long *escritas, long *slots_distintos, long *maior_G,
                   long *soma_G){
     long dist = 0, maxg = 0, soma = 0;
@@ -12509,6 +12560,92 @@ static int acha_texto(const char *p){
     return 1;
 }
 /* A varredura: compara CIFRA com CIFRA, e por isso um numero compara-se com uma palavra. */
+/* ══ BUSCA PREFIXO: A BOLA, E NÃO UMA VARREDURA ═════════════════════════════
+ *
+ * O `aranha` §sec:ultra diz que «a célula É a bola»: numa ultramétrica, o
+ * conjunto dos que partilham os primeiros k símbolos É a bola de raio 2^{−k},
+ * e descer k níveis na árvore de prefixos É escolhê-la. Não há nada a
+ * construir --- a árvore já é isso, e o que faltava era a porta.
+ *
+ * É a `prefix query` do Elastic, e a diferença é o custo: lá ela varre o índice
+ * invertido; aqui DESCE k nós e recolhe a subárvore. «O que isto NÃO faz é
+ * varrer: os nós visitados são a profundidade vezes a largura, mais os que têm
+ * resultado. O tamanho da tabela não entra» --- é o mesmo que o índice das
+ * colunas já diz de si.
+ *
+ * O raio devolve-se com a resposta, porque ele é o que a bola vale: com k
+ * termos descidos, tudo o que sai está a distância ≤ 2^{−k} do alvo. */
+static void pre_recolhe(unsigned no, long *saida, int *n, int cap){
+    if(*n >= cap) return;
+    { unsigned b = par_le(S_NO + no*LARG);
+      if(b) { if(*n < cap) saida[(*n)++] = (long)(S_TEXTO + b - 1u); } }
+    for(unsigned k = 1; k < LARG; k++){
+        unsigned f = par_le(S_NO + no*LARG + k);
+        if(f) pre_recolhe(f, saida, n, cap);
+    }
+}
+static int busca_prefixo(const char *p){
+    long a[MAXT]; size_t n; char rot[128];
+    if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
+    if(txt_n() <= 0){ printf("(tabela vazia)\n"); return 1; }
+    unsigned no = 0; size_t desceu = 0;
+    for(size_t j = 0; j < n; j++){
+        unsigned f = desce_termo(no, a[j], 0);
+        if(!f) break;
+        no = f; desceu++;
+    }
+    printf("      prefixo: %s   cifra de %zu termo(s)\n\n", rot, n);
+    /* ── A BOLA É A QUE A ÁRVORE ALCANÇA, E O RAIO DIZ-SE ────────────────────
+     *
+     * Exigir que a descida chegue aos `n` termos era pedir a cadeia INTEIRA, e
+     * a cifra não é um prefixo-morfismo puro: os últimos termos fecham a
+     * palavra, pelo que a cifra de «corpo/alf» diverge da de «corpo/alfa.txt»
+     * antes do fim. Medido: as duas partilham DEZ termos e a cifra do alvo tem
+     * catorze.
+     *
+     * A bola certa é a do prefixo que a árvore alcança --- desce-se o que
+     * houver, e o raio é 2^{−desceu}, dito com a resposta. Isso é a
+     * §sec:ultra sem a torcer: a bola tem o raio que tem, e o que estaria
+     * errado era chamar-lhe outro. Com desceu = 0 a bola é tudo, e isso
+     * também se diz. */
+    if(desceu == 0){
+        printf("      o primeiro termo não existe na árvore: a bola é VAZIA\n");
+        if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+            sql_cap->ncols = 2; sql_cap->nrows = 0;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "entrada");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "raio");
+            sql_cap->tipo[0] = SQL_TIPO_TEXT; sql_cap->tipo[1] = SQL_TIPO_TEXT;
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 0"); }
+        return 1;
+    }
+    n = desceu;      /* o raio é o que se desceu, e não o que se pediu */
+    static long dentro[512]; int nd = 0;
+    pre_recolhe(no, dentro, &nd, 512);
+    printf("      entrada            raio da bola\n");
+    if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+        sql_cap->ncols = 2;
+        snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "entrada");
+        snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "raio");
+        sql_cap->tipo[0] = SQL_TIPO_TEXT; sql_cap->tipo[1] = SQL_TIPO_TEXT; }
+    for(int k = 0; k < nd; k++){
+        char vis[64]; reg_mostra((unsigned)dentro[k], vis, sizeof vis);
+        char raio[32];
+        if(n < 62) snprintf(raio, sizeof raio, "1/%llu", 1ULL << n);
+        else       snprintf(raio, sizeof raio, "1/2^%zu", n);
+        printf("      %-18s <= %s\n", vis, raio);
+        if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
+            long r = sql_cap->nrows;
+            snprintf(sql_cap->cell[r][0], SQL_OUT_CELL, "%s", vis);
+            snprintf(sql_cap->cell[r][1], SQL_OUT_CELL, "%s", raio);
+            sql_cap->nrows++;
+        }
+    }
+    printf("      -> %d na bola de raio 1/2^%zu, com %zu no(s) descidos e NENHUMA"
+           " varredura\n", nd, n, desceu);
+    if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %d", nd);
+    return 1;
+}
+
 static int busca_texto(const char *p){
     long a[MAXT]; size_t na; char rot[128];
     if(!cifra_entrada(&p, a, MAXT, &na, rot, sizeof rot)) return 0;
@@ -13675,11 +13812,13 @@ static int executa(const char *sql){
     if(palavra(&p, "BUSCA")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return busca_texto(q+5);
-        printf("erro: `BUSCA` sabe uma forma só — `BUSCA TEXTO <cadeia>` — e veio"
+        if(!strncasecmp(q, "PREFIXO", 7)) return busca_prefixo(q+7);
+        printf("erro: `BUSCA` sabe duas formas — `BUSCA TEXTO <cadeia>` e"
+               " `BUSCA PREFIXO <cadeia>` — e veio"
                " «%.30s» — RECUSADO.\n", q);
         if(sql_cap){ sql_cap->ok = 0;
             snprintf(sql_cap->err, sizeof sql_cap->err,
-                     "BUSCA: only `BUSCA TEXTO <string>` is known"); }
+                     "BUSCA: known forms are TEXTO and PREFIXO"); }
         return 0;
     }
     if(palavra(&p, "CORPOS")) return insere_corpos();
