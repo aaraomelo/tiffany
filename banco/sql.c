@@ -2068,6 +2068,48 @@ static int col_e_inteira(long j, long ncols, long nrows){
     return 1;
 }
 
+/* ── A ORDEM É DO CORPO, E A CASA JÁ TINHA A RÉGUA ───────────────────────────
+ *
+ * O motor ordenava pela célula EMPACOTADA, e a árvore de prefixos ordena pelos
+ * BITS: numa coluna AUREO isso dá a lexicográfica de (a,b), que não é ordem
+ * nenhuma do corpo. Medido: `ORDER BY a` sobre {2+0σ, 1+1σ, 3−1σ} devolvia
+ * exactamente a ordem INVERTIDA. É a `aranha` caixa de Pandora na forma pura ---
+ * não um erro que se veja, uma resposta com a cara de certa.
+ *
+ * A PRIMEIRA correcção que escrevi foi RECUSAR, e ela derrubou dois medidores
+ * verdes que dizem a lei desta casa: «a consulta dentro de UMA coluna passa ---
+ * não há nada a atravessar» e «o sistema não RECUSA nem DESPACHA por classe ---
+ * corre nas duas». Recusar uma coluna sozinha descaracteriza as duas: o que se
+ * recusa é a TRAVESSIA entre corpos, e nunca o corpo.
+ *
+ * E a régua já estava escrita, no `contrato.h`: q(a,b) = a² + B·a·b + C·b² é a
+ * NORMA, `ct_assinatura` é exactamente o Δ, e ela COMPÕE as três classes ---
+ * definida, degenerada, indefinida --- sem despachar por nenhuma. É essa a chave
+ * da ordenação. O B e o C da coluna pedem-se ao `corpo_B` e ao `corpo_C`, que
+ * são quem os define. */
+static void celula_qz(long i, long j, long nc, long *num, long *den);
+static long corpo_B(long cp, long parm);
+static long corpo_C(long cp);
+static long col_regua_chave(long i, long j, long nc){
+    Word cq = corpo_de(j);
+    long num = 0, den = 0;
+    if(cq.total != CORPO_AUREO && cq.total != CORPO_CRISTAL)
+        return celula_valor(i, j, nc);
+    /* O NUMERADOR pelo `celula_qz`, que é quem sabe ler os dois planos com o
+     * sinal de dezasseis bits. O COEFICIENTE DE σ ele NÃO dá --- devolve
+     * `den = 1` e di-lo, «só a parte racional» ---, e está no S_DEN, onde o
+     * INSERT o escreveu. Lê-se de lá, e lê-se COM SINAL: o `Word8` é sem ele, e
+     * um σ de −1 chegava como 255. Medido antes de o corrigir: a chave de 3−1σ
+     * dava −64251 em vez de 5, e a ordenação saía por esse número. */
+    celula_qz(i, j, nc, &num, &den);
+    { long b = (long)mem_le(S_DEN + cel_ix(i*nc + j)).total;
+      if(b & 0x80L) b -= 256L;                 /* o sinal, que o Word8 não traz */
+      { Regua r; Par x;
+        r.B = corpo_B(cq.total, cq.e); r.C = corpo_C(cq.total);
+        x.a = num; x.b = b;
+        return ct_norma(r, x); } }
+}
+
 static unsigned long col_min(long j, long ncols, long nrows){
     if(j < 0 || j >= (long)S_COLNOME_N) return 0;
     Word cab = mem_le(S_COLMINCAB + (unsigned)j);
@@ -4210,6 +4252,11 @@ struct arvore {
 static int le_expr(const char **p, struct arvore *a);
 /* as colunas que o WHERE cita — usada pela guarda que liga a DISTÂNCIA ao WHERE */
 static unsigned citadas_where = 0;
+/* e as citadas numa DESIGUALDADE, que é um subconjunto próprio: `a = 1 AND b < 5`
+ * cita duas colunas e só uma delas é comparada por ordem. Recusar pela primeira
+ * máscara recusaria onde não há defeito --- é a diferença entre a lei alcançar e
+ * a lei varrer. Enche-se no `tem_comparacao`, pela diferença do que o fator leu. */
+static unsigned citadas_desig = 0;
 /* O UPDATE QUE APAGA A CÉLULA. `SET c = NULL` escreve como qualquer outro
  * UPDATE — o molde é o mesmo — mas em vez de ACENDER a presença, APAGA-a: é a
  * volta da escrita, e sem ela o dual só sabia crescer. Vive numa bandeira
@@ -4412,6 +4459,7 @@ static void nega_arvore(struct arvore *a, int i){
 }
 
 static int le_fator(const char **p, struct arvore *a){
+    unsigned cit_antes = citadas_where;   /* para a diferença no `tem_comparacao` */
     pula(p);
     /* `NOT <fator>`: lê-se o que vem a seguir e nega-se por De Morgan */
     { const char *vn = *p;
@@ -4500,7 +4548,13 @@ tem_comparacao:;
     int i = novo_no(a); if(i < 0) return -1;
     struct no *n = &a->no[i];
     n->tipo = NO_COND; n->op = op; n->nega = nega;
-    if(op == '<' || op == '>') cit_desig = 1;
+    if(op == '<' || op == '>'){
+        cit_desig = 1;
+        /* as colunas DESTE fator: as que a leitura de L e R acrescentou desde o
+         * início dele. É a diferença, e não o total, porque a lei é sobre a
+         * coluna que a ORDEM toca — não sobre a consulta inteira. */
+        citadas_desig |= (citadas_where & ~cit_antes);
+    }
     n->v = ten_soma(L, R, -1);                     /* L op R  ⟺  (L−R) op 0 */
 
     /* CANONIZAR o par (vetor, operador): sem isto, `b > 20` e `20 < b` são o mesmo fato
@@ -5163,6 +5217,19 @@ enum { CL_ELIPTICO = -1, CL_PARABOLICO = 0, CL_HIPERBOLICO = 1 };
  *
  * No que a recusa precisa as duas CONCORDAM, e é isso que torna legítimo usar a
  * aritmética para reportar: anulam exactamente no mesmo sítio, Δᵢ = Δⱼ. */
+/* ── A RÉGUA DO CORPO, PELA PORTA ────────────────────────────────────────────
+ * O medidor tem de comparar pelo comparador VERDADEIRO --- o do `corpos.h` --- e
+ * não por uma cópia dele escrita no teste, que seria medir a minha aritmética e
+ * não a da casa. Abre-se a porta em vez de duplicar a régua. */
+int sql_au_cmp(long ua, long ub, long va, long vb, long m){
+    Par u, v; u.a = ua; u.b = ub; v.a = va; v.b = vb;
+    return au_cmp(u, v, m);
+}
+int sql_cr_cmp(long ua, long ub, long va, long vb, long t){
+    Par u, v; u.a = ua; u.b = ub; v.a = va; v.b = vb;
+    return cr_cmp(u, v, t);
+}
+
 long sql_esp_dist(long Di, long Dj){ long d = Di - Dj; return d < 0 ? -d : d; }
 static long esp_dist(long Di, long Dj){ return sql_esp_dist(Di, Dj); }
 int sql_esp_prof(long Di, long Dj){
@@ -5457,13 +5524,13 @@ static void emit_no(const struct arvore *a, int i, long linha, long ncols, unsig
 static int check_avalia(long i, long ncols, const char *texto){
     struct arvore a;
     const char *p = texto;
-    unsigned salvo = citadas_where;
+    unsigned salvo = citadas_where, salvo_d = citadas_desig;
     memset(&a, 0, sizeof a);
-    citadas_where = 0;
+    citadas_where = 0; citadas_desig = 0;
     sim_zera();          /* os símbolos são desta expressão, e de mais nenhuma */
     constantes_isa();            /* o avaliador não corre sobre memória por escrever */
     a.raiz = le_expr(&p, &a);
-    if(a.raiz < 0){ citadas_where = salvo; return -1; }
+    if(a.raiz < 0){ citadas_where = salvo; citadas_desig = salvo_d; return -1; }
     /* ── E O PREDICADO NÃO SE PRONUNCIA SOBRE O QUE NÃO ESTÁ ─────────────
      * Comparar com uma célula ausente não casa — é a regra do WHERE —, mas
      * aqui isso tornaria todo o CHECK num NOT NULL implícito, que é uma
@@ -5471,7 +5538,7 @@ static int check_avalia(long i, long ncols, const char *texto){
      * predicado do corpo não a alcança, e o que não se pronuncia não recusa.
      * Quem quiser exigir presença tem a palavra para isso. */
     { unsigned cit = citadas_where;
-      citadas_where = salvo;
+      citadas_where = salvo; citadas_desig = salvo_d;   /* o par: quem salva RESTAURA */
       for(long j = 0; j < ncols && j < (long)COL_MAX; j++)
           if((cit & (1u << j)) && !bit_le(S_PRES, i*ncols + j)) return 1; }
     contrai_arvore(&a);
@@ -6846,12 +6913,25 @@ static void celula_qz(long i, long j, long nc, long *num, long *den){
     long alto = (long)mem_le(S_ALTO + cel_ix(i*nc + j)).total;
     long bruto = (long)c.total | (alto << 8);
     long assin16 = (bruto & 0x8000L) ? bruto - 65536L : bruto;
+    /* ── O CORPO DECIDE ANTES DA HEURÍSTICA, E NÃO DEPOIS ────────────────
+     *
+     * O `c.e > 1` é a heurística para quando o corpo não diz nada: um `.e`
+     * acima de um só pode ser denominador. Mas nos corpos quadráticos o `.e` é
+     * o COEFICIENTE DE σ, e ele pode ser negativo --- e o `Word8` não traz
+     * sinal, pelo que um σ de −1 chega como 255. Com o teste do racional
+     * primeiro, `3−1σ` satisfazia `c.e > 1`, entrava no ramo da fracção e saía
+     * como `ra_classe(3, 255)` = 1/85. O valor certo estava na célula e a
+     * leitura devolvia outro objecto.
+     *
+     * A ordem tem de ser esta: onde o corpo é DECLARADO, é ele que manda; a
+     * heurística é para o resto. Medido no `ORDER BY` de uma coluna AUREO, que
+     * lia num = 1 numa célula que vale 3 − σ. */
+    if(cp == CORPO_AUREO || cp == CORPO_CRISTAL){
+        *num = assin16; *den = 1; return;                 /* só a parte racional */
+    }
     if(cp == CORPO_RACIONAL || c.e > 1){
         Par cls = ra_classe((Par){ assin16, c.e ? (long)c.e : 1 });
         *num = cls.a; *den = cls.b; return;
-    }
-    if(cp == CORPO_AUREO || cp == CORPO_CRISTAL){
-        *num = assin16; *den = 1; return;                 /* só a parte racional */
     }
     *num = celula_valor(i, j, nc); *den = 1;
 }
@@ -7451,7 +7531,7 @@ static int varre(const char *resto, int acao){
              * uma coincidência que se mede. */
             const char *e = p;
             struct tensor t;
-            citadas_where = 0;
+            citadas_where = 0; citadas_desig = 0;
             sim_zera();
             if(!le_num(&e, &t)) return 0;
             pula(&e);
@@ -7560,7 +7640,7 @@ static int varre(const char *resto, int acao){
                * a projecção inteira ser resolvida neste sítio. */
               { const char *e = nome_c;
                 struct tensor t;
-                citadas_where = 0;
+                citadas_where = 0; citadas_desig = 0;
                 if(le_num(&e, &t)){
                     pula(&e);
                     if(*e == 0){
@@ -7880,7 +7960,7 @@ static int varre(const char *resto, int acao){
         }
     }
 
-    citadas_where = 0;
+    citadas_where = 0; citadas_desig = 0;
     tem_where = (in_sub || idx_usa || nul_usa || ex_usa) ? 0 : le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
@@ -9206,6 +9286,24 @@ static int varre(const char *resto, int acao){
          * isto ficava a que a chamada anterior tivesse deixado seleccionada ---
          * a de um ÍNDICE, com a zona pequena e o tecto de 600 nós ---, e o
          * ORDER BY era recusado por não caber num sítio que não era o dele. */
+        /* ── E DIZ-SE POR QUE RÉGUA SE ORDENOU ───────────────────────────
+         *
+         * Ordenar por uma régua e não dizer qual é o mesmo defeito de ordenar
+         * pelos bits: a saída sai com a cara de uma ordem que ninguém nomeou.
+         * Numa coluna quadrática a chave é a NORMA do `contrato.h` --- é ela
+         * que distingue os corpos, e compõe as três classes sem despachar por
+         * nenhuma. Não se recusa nada: diz-se, e devolve-se. */
+        if(oc >= 0){
+            Word cq = corpo_de(oc);
+            if(cq.total == CORPO_AUREO || cq.total == CORPO_CRISTAL){
+                long B = corpo_B(cq.total, cq.e), C = corpo_C(cq.total);
+                printf("nota: `ORDER BY %s` ordena pela RÉGUA do corpo — a norma"
+                       " q(a,b) = a² %+ld·a·b %+ld·b², de assinatura Δ = %ld (%s).\n",
+                       ord_col, B, C, B*B - 4*C, corpo_classe_nome(B*B - 4*C, 0));
+                printf("      NÃO é a ordem dos bits da célula, que seria a"
+                       " lexicográfica de (a,b) e não é ordem nenhuma do corpo.\n");
+            }
+        }
         ord_usa_rascunho();
         ord_limpa();
         for(long i = 0; i < nrows && postos < (int)S_SAIDA_N; i++){
@@ -9214,7 +9312,7 @@ static int varre(const char *resto, int acao){
                 if(na < (long)S_SAIDA_N){ ordaus_poe(na, i); na++; }
                 continue;
             }
-            { long v = celula_valor(i, oc, ncols);     /* o PAR, não o byte baixo */
+            { long v = col_regua_chave(i, oc, ncols);  /* a RÉGUA do corpo, não os bits */
               if(!ord_insere(v, (int)i)){
                   printf("erro: a árvore de ordenação não coube — RECUSADA.\n");
                   if(sql_cap){ sql_cap->ok = 0;
@@ -9244,11 +9342,14 @@ static int varre(const char *resto, int acao){
             long k = 0;
             while(oc2 >= 0 && k < ord_n){
                 int tem = bit_le(S_PRES, ordseq_le(k)*ncols + oc);
-                long v = tem ? celula_valor(ordseq_le(k), oc, ncols) : 0;
+                /* a MESMA chave que partiu a saída em fibras --- partir por um
+                 * critério e desempatar por outro daria fibras que não são as
+                 * da ordem que se devolveu */
+                long v = tem ? col_regua_chave(ordseq_le(k), oc, ncols) : 0;
                 long j = k;
                 /* a corrida: mesma chave, ou ambos sem chave */
                 while(j < ord_n && bit_le(S_PRES, ordseq_le(j)*ncols + oc) == tem
-                                && (!tem || celula_valor(ordseq_le(j), oc, ncols) == v)) j++;
+                                && (!tem || col_regua_chave(ordseq_le(j), oc, ncols) == v)) j++;
                 if(j - k > 1){
                     /* o `a2` já tinha o tamanho da ORDEM e o `tmp2` ficara com
                      * o da JANELA DA PORTA C --- dois números diferentes para o
@@ -9264,7 +9365,7 @@ static int varre(const char *resto, int acao){
                             if(n2 < (int)S_SAIDA_N) a2[n2++] = ordseq_le(t);
                             continue;
                         }
-                        if(!ord_insere(celula_valor(ordseq_le(t), oc2, ncols),
+                        if(!ord_insere(col_regua_chave(ordseq_le(t), oc2, ncols),
                                        (int)ordseq_le(t))) coube = 0;
                     }
                     if(coube){

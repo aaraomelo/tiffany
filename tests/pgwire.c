@@ -30388,6 +30388,145 @@ int main(void){
            " mesma.", mal == 0);
     }
 
+    /* ═══ §W212: A ORDEM É DO CORPO, E A CASA JÁ TINHA A RÉGUA ═════════════ */
+    {
+        int mal = 0;
+        const char *base = "/tmp/pgwire_w212";
+        SqlOut out;
+        printf("\n§W212 a ordem de um corpo quadrático é a da sua RÉGUA, não a dos bits.\n\n");
+
+        /* ── O QUE ESTE BLOCO MEDE, E O CAMINHO ATÉ AQUI ─────────────────────
+         *
+         * O motor ordenava pela célula EMPACOTADA, e a árvore de prefixos ordena
+         * pelos BITS: numa coluna AUREO isso dá a lexicográfica de (a,b), que
+         * não é ordem nenhuma do corpo. Sobre {2+0σ, 1+1σ, 3−1σ} saía a ordem
+         * exactamente INVERTIDA face ao valor. É a caixa de Pandora na forma
+         * pura: não um erro que se veja, uma resposta com a cara de certa.
+         *
+         * A PRIMEIRA correcção que escrevi foi RECUSAR, e ela derrubou dois
+         * medidores verdes que dizem a lei desta casa — «a consulta dentro de
+         * UMA coluna passa, não há nada a atravessar» e «o sistema não RECUSA
+         * nem DESPACHA por classe, corre nas duas». Recusar uma coluna sozinha
+         * descaracteriza as duas: o que se recusa é a TRAVESSIA entre corpos, e
+         * nunca o corpo. A régua já estava escrita no `contrato.h` e eu não a
+         * procurei.
+         *
+         * É essa a chave agora: q(a,b) = a² + B·a·b + C·b², a NORMA, cuja
+         * assinatura B²−4C É o Δ — ela COMPÕE as três classes sem despachar por
+         * nenhuma. E diz-se qual é, porque ordenar por uma régua sem a nomear
+         * é o mesmo defeito de ordenar pelos bits. */
+
+        /* (1) O GUME: sem isto, a ordem que saía estava INVERTIDA face ao valor.
+         *     Se a lexicográfica coincidisse com alguma régua do corpo, mudar a
+         *     chave seria gratuito — e a única forma de o excluir é EXIBIR a
+         *     discordância, com o comparador do próprio `corpos.h` de um lado. */
+        { static const long AA[3] = {2, 1, 3}, BB[3] = {0, 1, -1};
+          int posto_valor[3] = {0,0,0}, posto_lex[3] = {0,0,0};
+          long norma[3];
+          for(int i = 0; i < 3; i++) norma[i] = AA[i]*AA[i] + AA[i]*BB[i] - BB[i]*BB[i];
+          for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+              if(i == j) continue;
+              if(sql_au_cmp(AA[i], BB[i], AA[j], BB[j], 1) > 0) posto_valor[i]++;
+              if(AA[i] > AA[j] || (AA[i] == AA[j] && BB[i] > BB[j])) posto_lex[i]++;
+          }
+          printf("      os três valores, e as três leituras:\n");
+          for(int i = 0; i < 3; i++)
+              printf("        %ld%+ldσ : posto pelo VALOR (au_cmp) = %d, pelos BITS = %d,"
+                     " norma da régua = %ld\n",
+                     AA[i], BB[i], posto_valor[i], posto_lex[i], norma[i]);
+          { int discorda = 0, invertida = 1;
+            for(int i = 0; i < 3; i++){
+                if(posto_valor[i] != posto_lex[i]) discorda++;
+                if(posto_valor[i] + posto_lex[i] != 2) invertida = 0;
+            }
+            printf("      valor contra bits: discordam em %d dos 3 postos (o do meio fica —"
+                   " é uma inversão de três), e a ordem dos bits é a INVERSA: %s\n",
+                   discorda, invertida ? "sim" : "não");
+            if(discorda != 2) mal++;
+            if(!invertida) mal++;
+            /* e a norma é uma TERCEIRA leitura, distinta das duas: dizê-lo é o
+             * que impede este bloco de sugerir que régua e valor coincidem */
+            { int norma_bate_valor = 1;
+              for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+                  if(i == j) continue;
+                  { int pv = sql_au_cmp(AA[i], BB[i], AA[j], BB[j], 1) > 0;
+                    int pn = norma[i] > norma[j];
+                    if(pv != pn) norma_bate_valor = 0; }
+              }
+              printf("      e a NORMA não é o valor: as duas ordens %s\n",
+                     norma_bate_valor ? "COINCIDEM" : "diferem — a régua mede tamanho,"
+                     " não posição, e é isso que se devolve");
+              if(norma_bate_valor) mal++;   /* se coincidissem, não haveria escolha a nomear */
+            }
+          }
+        }
+
+        unlink("/tmp/pgwire_w212.mem");
+        unlink("/tmp/pgwire_w212.prog");
+        if(!sql_abrir(base)){ mal++; printf("      sql_abrir FALHOU\n"); }
+        else{
+            /* (2) O HIPERBÓLICO: a saída É a ordem da norma ------------------ */
+            sql_executa("CREATE TABLE g (a AUREO, k INTEIRO)", &out);
+            sql_executa("INSERT INTO g VALUES (2+0s, 1)", &out);
+            sql_executa("INSERT INTO g VALUES (1+1s, 2)", &out);
+            sql_executa("INSERT INTO g VALUES (3-1s, 3)", &out);
+            sql_executa("SELECT * FROM g ORDER BY a", &out);
+            printf("      AUREO  ORDER BY a: ok=%d nrows=%d → %s %s %s"
+                   "  (normas 4, 1, 5 ⟹ 1+1σ, 2, 3−1σ)\n", out.ok, out.nrows,
+                   out.nrows > 0 ? out.cell[0][0] : "-",
+                   out.nrows > 1 ? out.cell[1][0] : "-",
+                   out.nrows > 2 ? out.cell[2][0] : "-");
+            if(!out.ok || out.nrows != 3) mal++;
+            else if(strcmp(out.cell[0][0], "1+1σ") || strcmp(out.cell[1][0], "2")
+                 || strcmp(out.cell[2][0], "3-1σ")) mal++;
+
+            /* (3) O ELÍPTICO: a MESMA descida, sem uma linha diferente ------- */
+            sql_executa("CREATE TABLE c (a CRISTALINO, k INTEIRO)", &out);
+            sql_executa("INSERT INTO c VALUES (3+0s, 1)", &out);
+            sql_executa("INSERT INTO c VALUES (1+3s, 2)", &out);
+            sql_executa("INSERT INTO c VALUES (0+1s, 3)", &out);
+            sql_executa("SELECT * FROM c ORDER BY a", &out);
+            printf("      CRISTAL ORDER BY a: ok=%d nrows=%d → %s %s %s"
+                   "  (normas 9, 10, 1 ⟹ 0+1ω, 3, 1+3ω)\n", out.ok, out.nrows,
+                   out.nrows > 0 ? out.cell[0][0] : "-",
+                   out.nrows > 1 ? out.cell[1][0] : "-",
+                   out.nrows > 2 ? out.cell[2][0] : "-");
+            if(!out.ok || out.nrows != 3) mal++;
+            else if(strcmp(out.cell[0][0], "0+1ω") || strcmp(out.cell[1][0], "3")
+                 || strcmp(out.cell[2][0], "1+3ω")) mal++;
+
+            /* (4) E NÃO SE RECUSA NADA — a lei que a primeira correcção quebrou */
+            sql_executa("SELECT * FROM g WHERE a > 0", &out);
+            printf("      WHERE a > 0 (uma coluna só): ok=%d  ← não há travessia,"
+                   " logo não há o que recusar\n", out.ok);
+            if(!out.ok) mal++;
+            sql_executa("SELECT * FROM c WHERE a > 0", &out);
+            printf("      WHERE a > 0 no elíptico    : ok=%d  ← nem recusa nem despacha"
+                   " por classe: corre nas duas\n", out.ok);
+            if(!out.ok) mal++;
+
+            sql_fechar();
+        }
+
+        ok("A ORDEM É DO CORPO, E A CASA JÁ TINHA A RÉGUA. O motor ordenava pela célula"
+           " EMPACOTADA, e a árvore de prefixos ordena pelos BITS — numa coluna AUREO isso é"
+           " a lexicográfica de (a,b), que não é ordem nenhuma do corpo: sobre"
+           " {2+0σ, 1+1σ, 3−1σ} saía a INVERSA do valor (dois dos três postos discordam, e o"
+           " do meio fica porque uma inversão de três o fixa). A primeira correcção que"
+           " escrevi foi RECUSAR, e derrubou dois medidores verdes que dizem a lei desta"
+           " casa: «a consulta dentro de UMA coluna passa» e «o sistema não RECUSA nem"
+           " DESPACHA por classe». Recusar uma coluna sozinha descaracteriza as duas — o que"
+           " se recusa é a TRAVESSIA entre corpos, nunca o corpo. E a régua já estava"
+           " escrita no `contrato.h`, que eu não procurei: q(a,b) = a² + B·a·b + C·b² é a"
+           " NORMA, a sua assinatura B²−4C É o Δ, e ela COMPÕE as três classes sem despachar"
+           " por nenhuma. É essa a chave agora, e a MESMA descida serve o hiperbólico e o"
+           " elíptico sem uma linha diferente. A norma é uma TERCEIRA leitura — mede tamanho"
+           " e não posição, e o bloco exige que ela NÃO coincida com o valor, senão não"
+           " haveria escolha a nomear. E nomeia-se: a saída diz por que régua ordenou, com"
+           " o Δ e a classe, porque ordenar por uma régua sem a nomear é o mesmo defeito de"
+           " ordenar pelos bits.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
