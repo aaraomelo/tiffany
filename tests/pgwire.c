@@ -27542,6 +27542,119 @@ int main(void){
            " que é a folga contada do outro lado: o lugar por preencher.", mal == 0);
     }
 
+    /* ═══ §W190: A MEMÓRIA ESTÁ NO ESPAÇO — a cláusula (3) medida ═════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W190 estigmergia: a marca está no chão, e o agente não guarda nada.\n\n");
+        unlink("/tmp/pgwire_w190.mem"); unlink("/tmp/pgwire_w190.prog");
+        unlink("/tmp/pgwire_w190.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w190__a.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w190__a.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w190")) mal++;
+
+        /* ── O QUE O TEOREMA DIZ, E O QUE ISSO OBRIGA ────────────────────────
+         *
+         * thm:multiplicidade (3): «A memória não pertence ao agente. Cada passo
+         * altera G num único ponto, e esse ponto é a célula corrente. NENHUM
+         * passo consulta π(0),…,π(t).» E (4): «Sentir é ler G … a distinção é
+         * propriedade do ESPAÇO, e não propriedade cognitiva do agente.»
+         *
+         * O gato deixa a marca e o esquilo volta a recolhê-la --- e a marca está
+         * no chão. Daí sai uma consequência que se mede sem abrir o motor: se
+         * nenhum passo consulta a história, o resultado de uma consulta NÃO
+         * PODE depender de qual correu antes. Corre-se cada uma sozinha, depois
+         * as três em sequência, depois na ordem inversa, e as três leituras da
+         * mesma consulta têm de coincidir.
+         *
+         * Isto apanha o que uma varredura às variáveis não apanha: eu posso
+         * listar o estado global do motor e concluir que «é do passo corrente»,
+         * e enganar-me --- foi o que aconteceu com a altura da árvore, que era
+         * estado ao lado do objecto e dessincronizava. A ordem não me pergunta
+         * o que eu acho. */
+        sql_executa("CREATE TABLE a (k INTEIRO, v INTEIRO)", &o);
+        for(int i = 1; i <= 5; i++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO a VALUES (%d,%d)", i, i*10);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE INDEX ix190 ON a (k)", &o);
+
+        static const char *Q[3] = {
+            "SELECT k FROM a WHERE k = 3",          /* desce o índice   */
+            "SELECT k FROM a ORDER BY v DESC",      /* usa o rascunho   */
+            "SELECT v, count(*) FROM a GROUP BY v", /* parte em fibras  */
+        };
+        char base[3][160];
+        for(int q = 0; q < 3; q++){
+            sql_executa(Q[q], &o);
+            base[q][0] = 0;
+            if(o.ok) for(int r = 0; r < o.nrows; r++)
+                for(int c = 0; c < o.ncols; c++)
+                    snprintf(base[q] + strlen(base[q]), sizeof base[0] - strlen(base[q]),
+                             "%s;", o.cell[r][c]);
+        }
+        /* as mesmas, em duas ordens */
+        static const int ORDEM[2][3] = { {0,1,2}, {2,1,0} };
+        long iguais = 0, comparadas = 0;
+        for(int p = 0; p < 2; p++){
+            for(int t = 0; t < 3; t++){
+                int q = ORDEM[p][t];
+                sql_executa(Q[q], &o);
+                char agora[160]; agora[0] = 0;
+                if(o.ok) for(int r = 0; r < o.nrows; r++)
+                    for(int c = 0; c < o.ncols; c++)
+                        snprintf(agora + strlen(agora), sizeof agora - strlen(agora),
+                                 "%s;", o.cell[r][c]);
+                comparadas++;
+                if(!strcmp(agora, base[q])) iguais++;
+                else printf("        na ordem %d, a consulta %d muda: [%s] era [%s]\n",
+                            p, q, agora, base[q]);
+            }
+        }
+        printf("      as três consultas em duas ordens, contra a leitura isolada:"
+               " %ld/%ld\n", iguais, comparadas);
+        if(iguais != comparadas) mal++;
+
+        /* ── E O CONTROLO, que é a cláusula (3) ao contrário: o que MUDA o
+         * resultado é a marca no espaço, e só ela. Sem isto, um motor que
+         * devolvesse sempre a mesma coisa passava em tudo o que está acima ---
+         * «não depende da história» e «não depende de nada» seriam
+         * indistinguíveis. */
+        sql_executa("INSERT INTO a VALUES (3,10)", &o);
+        sql_executa(Q[0], &o);
+        char depois[160]; depois[0] = 0;
+        if(o.ok) for(int r = 0; r < o.nrows; r++)
+            for(int c = 0; c < o.ncols; c++)
+                snprintf(depois + strlen(depois), sizeof depois - strlen(depois),
+                         "%s;", o.cell[r][c]);
+        int mudou = strcmp(depois, base[0]) != 0;
+        printf("      CONTROLO — uma marca NOVA no espaço muda a leitura: [%s] era"
+               " [%s]  %s\n", depois, base[0], mudou ? "" : "← NÃO MUDOU");
+        if(!mudou) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("A MEMÓRIA ESTÁ NO ESPAÇO, E MEDE-SE PELA ORDEM. O thm:multiplicidade (3) diz"
+           " que a memória não pertence ao agente --- «cada passo altera G num único"
+           " ponto, e esse ponto é a célula corrente; NENHUM passo consulta"
+           " π(0),…,π(t)» ---, e a (4) que sentir é ler G, com a distinção a ser"
+           " propriedade do ESPAÇO e não cognição do agente. É o título do documento: o"
+           " gato deixa a marca, o esquilo volta a recolhê-la, e a marca está no chão."
+           " Daí sai uma consequência que se mede sem abrir o motor: se nenhum passo"
+           " consulta a história, o resultado de uma consulta não pode depender de qual"
+           " correu antes. Três consultas que usam três caminhos diferentes --- o índice"
+           " pela árvore, a ordem pelo rascunho, a fibra pelo GROUP BY --- correm"
+           " sozinhas, depois em sequência, depois na ordem inversa, e as três leituras"
+           " coincidem. Isto apanha o que uma varredura às variáveis não apanha: eu posso"
+           " listar o estado global do motor e concluir que «é tudo do passo corrente», e"
+           " enganar-me --- foi o que aconteceu com a altura da árvore, que era estado ao"
+           " lado do objecto e dessincronizava conforme a consulta anterior. A ordem não"
+           " me pergunta o que eu acho. E o CONTROLO é a mesma cláusula ao contrário: uma"
+           " marca NOVA no espaço TEM de mudar a leitura, senão «não depende da história»"
+           " e «não depende de nada» seriam indistinguíveis.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
