@@ -27535,6 +27535,32 @@ int main(void){
                " ninguém escreveu %ld\n", ig_a, ig_g, ig_n);
         if(ig_a != 3 || ig_g != 1 || ig_n != 0) mal++;
 
+        /* ── E O QUE A COMPRESSÃO NÃO PRESERVA: A ORDEM ─────────────────────
+         *
+         * Este é o par completo, e é ele que diz o que a leitura do texto vale.
+         * O endereço no pool preserva a IGUALDADE --- `x = y ⟺ R(x) = R(y)` ---
+         * e é por isso que o `=`, o GROUP BY e a fibra funcionam. Mas a ordem
+         * dos endereços é a de ESCRITA: com «zulu» inserido antes de «alfa»,
+         * `ORDER BY s` devolvia zulu, alfa, mike --- a ordem de inserção com a
+         * cara da ordem pedida --- e `s > 'mike'` devolvia vazio, porque o
+         * endereço de «mike» era o maior.
+         *
+         * As duas são RECUSADAS, e a razão é dita. Ordenar pelo prefixo daria
+         * uma ordem PARCIAL apresentada como total, que é o mesmo defeito com
+         * outra cara. O que se ganha em recusar é o que a §sec:dualidades já
+         * diz: cada face preserva o que preserva, e o preço conta-se. */
+        sql_executa("SELECT s FROM tx ORDER BY s", &o);
+        int rec_ord = !o.ok;
+        sql_executa("SELECT s FROM tx WHERE s > 'acme'", &o);
+        int rec_des = !o.ok;
+        sql_executa("SELECT s FROM tx WHERE s = 'acme'", &o);
+        int aceita_ig = (o.ok && o.nrows == 3);
+        printf("      a ORDEM sobre texto é recusada (%s) e a DESIGUALDADE também (%s);"
+               " a IGUALDADE é aceite (%s)\n",
+               rec_ord ? "sim" : "NÃO", rec_des ? "sim" : "NÃO",
+               aceita_ig ? "sim" : "NÃO");
+        if(!rec_ord || !rec_des || !aceita_ig) mal++;
+
         /* e o CONTROLO da compressão: cadeias IGUAIS caem na mesma fibra e
          * cadeias diferentes em fibras diferentes --- sem isto, um pool que
          * devolvesse sempre o mesmo endereço dava uma fibra só e passava */

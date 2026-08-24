@@ -3613,7 +3613,17 @@ static void ten_const(struct tensor *t, long k){
  * for a primeira vez, e −1 quando já não há símbolos. */
 static long sim_col[NCOL];
 static int  sim_n = 0;
-static void sim_zera(void){ sim_n = 0; for(int k = 0; k < NCOL; k++) sim_col[k] = -1; }
+/* ── A ORDEM DO TEXTO NÃO É A DOS ENDEREÇOS ─────────────────────────────────
+ * A célula guarda o endereço no pool: a leitura preserva a IGUALDADE e não a
+ * ORDEM. `s = 'acme'` decide-se pelo endereço e está certo; `s > 'mike'`
+ * comparava endereços e devolvia o que a ordem de ESCRITA desse --- uma
+ * resposta com a cara de certa. Marca-se ao ler, e recusa-se onde as duas
+ * coisas se sabem. */
+static int cit_texto = 0;      /* o WHERE cita alguma coluna de texto */
+static int cit_desig = 0;      /* e há nele uma desigualdade */
+
+static void sim_zera(void){ sim_n = 0; for(int k = 0; k < NCOL; k++) sim_col[k] = -1;
+                            cit_texto = 0; cit_desig = 0; }
 static int  sim_de(long col){
     for(int k = 0; k < sim_n; k++) if(sim_col[k] == col) return k;
     if(sim_n >= NCOL) return -1;
@@ -3834,6 +3844,7 @@ static int le_fator_num(const char **p, struct tensor *t){
             return 0;
         }
         ten_var(t, sim);                           /* o símbolo sim+1 é ESTA coluna */
+        if(corpo_de(col).total == CORPO_TEXTO) cit_texto = 1;
         if(col < 32) citadas_where |= 1u << col;   /* a guarda de corpo — ver checa_corpos */
         return 1;
     }
@@ -4010,6 +4021,7 @@ tem_comparacao:;
     int i = novo_no(a); if(i < 0) return -1;
     struct no *n = &a->no[i];
     n->tipo = NO_COND; n->op = op; n->nega = nega;
+    if(op == '<' || op == '>') cit_desig = 1;
     n->v = ten_soma(L, R, -1);                     /* L op R  ⟺  (L−R) op 0 */
 
     /* CANONIZAR o par (vetor, operador): sem isto, `b > 20` e `20 < b` são o mesmo fato
@@ -7213,6 +7225,17 @@ static int varre(const char *resto, int acao){
     long ncols = cat_ncols(), nrows = cat_nrows();
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
+    if(tem_where > 0 && cit_texto && cit_desig){
+        printf("erro: uma desigualdade sobre coluna de TEXTO — RECUSADA. A célula guarda"
+               " o ENDEREÇO no pool, e a leitura preserva a IGUALDADE (endereços iguais"
+               " são cadeias iguais) e NÃO a ordem: a dos endereços é a de escrita."
+               " Comparar por ela daria uma resposta com a cara de certa.\n");
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "inequality on a text column: the pool address preserves"
+                     " equality but not order"); }
+        return 0;
+    }
     /* E A LARGURA: o avaliador é de oito bits, e uma coluna que guarde acima de
      * 255 não cabe nele. Recusa-se, conta-se, e diz-se porquê — não se compara
      * meio valor. O SELECT sem WHERE continua a devolver o número inteiro. */
@@ -8201,6 +8224,34 @@ static int varre(const char *resto, int acao){
     if(acao == ACAO_MARCA && ord_col[0]){
         int oc = col_indice(ord_col);
         int postos = 0;
+        /* ── A LEITURA DO TEXTO PRESERVA A IGUALDADE E NÃO A ORDEM ───────────
+         *
+         * A célula de uma coluna de texto guarda o ENDEREÇO no pool, e o pool
+         * deduplica: `x = y ⟺ R(x) = R(y)`, que é o critério da leitura e o que
+         * faz a igualdade e a fibra funcionarem. Mas a ordem dos endereços é a
+         * de ESCRITA, não a das cadeias --- `zulu` escrito primeiro fica antes
+         * de `alfa`. `ORDER BY s` devolvia a ordem de inserção com a cara da
+         * ordem pedida, e ninguém dava por isso.
+         *
+         * Recusa-se, e diz-se porquê. Ordenar pelo prefixo dava uma ordem
+         * PARCIAL --- cadeias com os mesmos primeiros caracteres ficariam
+         * indistintas --- apresentada como total, que é o mesmo defeito com
+         * outra cara. A via é a SEGUNDA RÉGUA que o motor já tem para o
+         * `ORDER BY a, b`: ordenar pelo prefixo parte a saída em fibras, e
+         * dentro de cada uma compara-se a cadeia inteira. Fica escrito porque é
+         * trabalho e não um remendo. */
+        if(oc >= 0 && corpo_de(oc).total == CORPO_TEXTO){
+            printf("erro: `ORDER BY %s` é sobre TEXTO, e a célula guarda o ENDEREÇO no"
+                   " pool — RECUSADO. A leitura preserva a IGUALDADE (endereços iguais"
+                   " são cadeias iguais, e por isso o = e o GROUP BY funcionam) e NÃO a"
+                   " ordem: a dos endereços é a de escrita. Devolver essa seria dar uma"
+                   " ordem que ninguém pediu.\n", ord_col);
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "ORDER BY on a text column: the cell holds a pool address,"
+                         " which preserves equality but not order"); }
+            return 0;
+        }
         /* ── E O QUE NÃO TEM VALOR NÃO TEM LUGAR NA ORDEM ────────────────
          * Ordenar é comparar, e a célula ausente não tem com que comparar:
          * lê-la dava o neutro e punha-a entre os zeros escritos, no meio da
