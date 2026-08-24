@@ -2256,6 +2256,68 @@ d_{\mathcal{P}}(P,Q)=\bigl\lvert\Delta(P)-\Delta(Q)\bigr\rvert .
 \]
 \end{definicao}
 
+\medskip\noindent\textbf{E a caixa tem DUAS réguas, como a §\ref{sec:leitura} já
+dizia do percurso.} A $d_{\mathcal{P}}$ acima é a \emph{aritmética}, e é métrica
+--- mas \textbf{não é ultramétrica}: com $\Delta=20,13,8$ vem
+$d_{\mathcal{P}}(20,8)=12$ contra $\max\{7,5\}=7$. A ultramétrica da caixa é a da
+Def.~\ref{def:arvore} lida sobre os mesmos $\Delta$,
+\[
+d_{\mathrm{u}}(P,Q)=2^{-\operatorname{prof}(\Delta(P),\Delta(Q))},
+\]
+e essa cumpre o Lema~\ref{lem:ultra} --- no mesmo triplo,
+$d_{\mathrm{u}}(20,8)=\max\{d_{\mathrm{u}}(20,13),d_{\mathrm{u}}(13,8)\}$, com
+igualdade. \emph{As duas são réguas do mesmo objeto}, e a diferença entre elas
+não é de precisão: é de \textbf{alcance}.
+
+\medskip\noindent\textbf{A ultramétrica é GLOBAL; a aritmética é LOCAL, do
+corpo.} É esta a leitura das duas, e cada palavra tem conteúdo verificável:
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & $d_{\mathcal{P}}=\lvert\Delta_P-\Delta_Q\rvert$ & $d_{\mathrm{u}}=2^{-\operatorname{prof}}$ \\
+\midrule
+alcance & \textbf{local}: entre dois corpos & \textbf{global}: sobre a caixa toda \\
+num percurso & \textbf{acumula} (triangular) & \textbf{absorve} (Teor.~\ref{thm:navega}) \\
+o que dá & \emph{quanto} falta --- a recusa & a \textbf{partição} (Teor.~\ref{thm:bolas}) \\
+onde se usa & dentro de uma vizinhança & para navegar entre classes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A aritmética obedece à desigualdade \emph{triangular} e mais nada:
+somar os passos de um percurso pode dar muito mais do que a distância entre as
+pontas, e é por isso que ela não serve para medir uma travessia --- serve para
+medir um \emph{salto}. A ultramétrica obedece ao Lema~\ref{lem:ultra}, e o
+Teor.~\ref{thm:navega} tira daí a consequência global: \emph{uma cadeia de $L$
+travessias tem o custo do seu pior passo, qualquer que seja $L$}. Uma acumula ao
+longo do caminho; a outra não vê o caminho, só o pior degrau dele.
+
+\medskip\noindent\textbf{E é por isso que a recusa pode usar a local.} O que a
+recusa do Teor.~\ref{thm:pandora}(3) precisa é de um número que se anule
+exatamente quando há travessia --- e nisso as duas concordam,
+$d_{\mathcal{P}}=0\iff d_{\mathrm{u}}=0$, porque ambas anulam em
+$\Delta(P)=\Delta(Q)$. \emph{Reportar} a distância é um gesto local, entre as
+duas colunas que a consulta citou; \emph{navegar} pela caixa não é, e aí a régua
+tem de ser a outra.
+
+\medido{\code{tests/pgwire.c} \S W211, contra \code{sql\_esp\_dist} e
+\code{sql\_esp\_prof}. Sobre os $26^3=17576$ triplos dos espelhos de
+$\lvert m\rvert,\lvert t\rvert\le6$, a aritmética viola
+$d(x,z)\le\max\{d(x,y),d(y,z)\}$ em $\mathbf{4448}$ deles e a ultramétrica em
+$\mathbf{0}$ --- uma acumula, a outra absorve. E no percurso
+$\Delta=-4\to5\to0\to40\to-3$ a local soma $\mathbf{97}$ para uma distância
+directa de $\mathbf{1}$, enquanto a global mede $2^{-31}$ entre as pontas contra
+um pior passo de $2^{0}$: a cadeia inteira cabe folgadamente no seu pior degrau.
+Exige-se o \emph{par} --- que a soma exceda a directa e que a profundidade
+directa não desça abaixo da pior do caminho ---, porque só uma das duas metades
+não distinguiria as réguas.}
+
+\medido{Sobre os dezoito espelhos de $\lvert m\rvert,\lvert t\rvert\le4$ --- os
+$5832$ triplos ---, a aritmética viola $d(x,z)\le\max$ em $1264$ deles e a
+ultramétrica em \textbf{zero}. A primeira escrita desta subsecção chamou
+``distância'' à aritmética sem verificar qual das duas desigualdades ela cumpria;
+a medida separou-as.}
+
 \begin{teorema}[o que a caixa separa, e o que ela liga]\label{thm:pandora}
 Com a Def.~\ref{def:pandora}:
 \begin{enumerate}\itemsep3pt
@@ -2292,6 +2354,39 @@ as duas réguas.
 $\Delta$ --- polinómio simétrico em traço e determinante, ambos invariantes por
 conjugação --- teria de coincidir.
 \end{proof}
+
+\begin{corolario}[o primeiro corte da árvore é o elíptico, e só ele]\label{cor:pandbola}
+Na ultramétrica $d_{\mathrm{u}}$ da caixa, a bola de raio $1$ --- os espelhos que
+\emph{não} divergem no bit mais alto --- é exatamente $\{\Delta<0\}$ e o seu
+complemento. Logo o primeiro nível da árvore separa \textbf{elíptico} de
+\textbf{não-elíptico}, e mais nada: a distinção entre \emph{parabólico} e
+\emph{hiperbólico} vive \textbf{mais fundo}, e não a uma profundidade fixa.
+\end{corolario}
+
+\begin{proof}
+O bit mais alto da representação de $\Delta$ é o do sinal, pelo que
+$\operatorname{prof}(\Delta_P,\Delta_Q)=0$ se e só se os sinais diferem. Que
+$\Delta=0$ não forma bola vê-se por não haver raio que o isole dos positivos: ele
+partilha com cada um deles um prefixo próprio, e a profundidade depende do
+positivo escolhido.
+\end{proof}
+
+\medskip\noindent\textbf{A tricotomia não é uma partição por bolas.} É este o
+conteúdo do Cor.~\ref{cor:pandbola}, e vale a pena dizê-lo ao contrário: das três
+classes do Teor.~\ref{thm:leidisc}, \emph{só a elíptica é uma bola}. E o corte
+que a árvore faz primeiro é justamente o que a §\ref{sec:dualidades} separou ---
+\emph{o que roda} e \emph{o que não roda}: «a diferença entre $\{1,2,3,4,6\}$ e
+$\{3,4,6\}$ é exatamente o que reflete em vez de rodar». A régua ultramétrica
+encontra essa fronteira no \textbf{primeiro} bit, sem que ninguém lha tenha
+dito.
+
+\medido{Sobre os vinte e seis espelhos de $\lvert m\rvert,\lvert t\rvert\le6$ ---
+três elípticos e vinte e três não ---, as três condições verificam-se: dois
+elípticos nunca divergem no bit $0$; dois não-elípticos também não; e um de cada
+lado divergem \emph{sempre} nele. A recíproca ingénua --- «mesma bola $\iff$
+mesma classe» --- falha em $84$ dos $676$ pares, e as falhas são \textbf{todas}
+com $\Delta=0$: $\Delta=40$ e $\Delta=0$ estão na mesma bola de raio $1$ e são de
+classes diferentes. Foi a medida que separou a afirmação verdadeira da falsa.}
 
 \medskip\noindent\textbf{E é daqui que vem o nome.} Abrir a caixa é misturar os
 espelhos: comparar através de dois com $\Delta$ diferente devolve sempre

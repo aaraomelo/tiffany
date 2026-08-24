@@ -30243,6 +30243,151 @@ int main(void){
            " grupos não caibam faz o bloco FALHAR em vez de comparar às cegas.", mal == 0);
     }
 
+    /* ═══ §W211: A CAIXA DE PANDORA — as duas réguas, e a bola de raio um ═══ */
+    {
+        int mal = 0;
+        printf("\n§W211 a caixa: só a classe elíptica é uma bola, e a régua diz qual.\n\n");
+
+        /* ── O QUE SE MEDE, E PORQUE PRECISOU DE SER MEDIDO ──────────────────
+         *
+         * O `thm:pandora` define a caixa 𝒫 = {(B,C) : |C| = 1} com a distância
+         * aritmética |Δᵢ − Δⱼ|. Eu chamei-lhe «distância» sem verificar QUAL
+         * desigualdade ela cumpre --- e ela é métrica mas NÃO é ultramétrica.
+         * A ultramétrica da caixa é a da `def:arvore` sobre os mesmos Δ.
+         *
+         * São duas réguas do mesmo objecto, como a §sec:leitura diz do percurso:
+         * a aritmética diz QUANTO falta e é a que a recusa reporta; a
+         * ultramétrica dá a PARTIÇÃO do `thm:bolas`. E concordam no que a recusa
+         * precisa --- anulam ambas exactamente em Δᵢ = Δⱼ.
+         *
+         * O `cor:pandbola` é o que sai daí: o bit mais alto de Δ é o do SINAL,
+         * pelo que a bola de raio um é exactamente {Δ < 0}. O primeiro nível da
+         * árvore separa ELÍPTICO de NÃO-ELÍPTICO e mais nada --- das três
+         * classes, só a elíptica é uma bola. */
+        static const long ESP[26] = {
+            /* áureos m²+4, m de −6 a 6 */
+            40,29,20,13,8,5,4,5,8,13,20,29,40,
+            /* cristalinos t²−4, t de −6 a 6 */
+            32,21,12,5,0,-3,-4,-3,0,5,12,21,32
+        };
+        const int N = 26;
+
+        /* (1) A ARITMÉTICA NÃO É ULTRAMÉTRICA --- e é preciso dizê-lo com o
+         *     número, senão «não é» seria uma opinião. */
+        long viola_ar = 0, viola_ul = 0, triplos = 0;
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++) for(int k = 0; k < N; k++){
+            triplos++;
+            long dxz = sql_esp_dist(ESP[i], ESP[k]);
+            long m1  = sql_esp_dist(ESP[i], ESP[j]), m2 = sql_esp_dist(ESP[j], ESP[k]);
+            if(dxz > (m1 > m2 ? m1 : m2)) viola_ar++;
+            /* na ultramétrica, 2^{−prof} maior é prof MENOR */
+            int pxz = sql_esp_prof(ESP[i], ESP[k]);
+            int q1  = sql_esp_prof(ESP[i], ESP[j]), q2 = sql_esp_prof(ESP[j], ESP[k]);
+            int qmin = q1 < q2 ? q1 : q2;
+            if(pxz < qmin) viola_ul++;
+        }
+        printf("      %ld triplos: a aritmética viola d(x,z) ≤ max em %ld,"
+               " a ultramétrica em %ld\n", triplos, viola_ar, viola_ul);
+        if(viola_ul != 0 || viola_ar == 0) mal++;
+
+        /* (2) A BOLA DE RAIO UM É {Δ < 0} --- nas TRÊS condições, porque duas
+         *     não chegam: os de dentro juntos, os de fora juntos, e um de cada
+         *     lado sempre separados. */
+        int a1 = 1, a2 = 1, a3 = 1;
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+            int ni = ESP[i] < 0, nj = ESP[j] < 0;
+            int p = sql_esp_prof(ESP[i], ESP[j]);
+            if(ni && nj && p == 0) a1 = 0;
+            if(!ni && !nj && p == 0) a2 = 0;
+            if(ni != nj && p != 0) a3 = 0;
+        }
+        printf("      a bola de raio 1: elípticos juntos=%d, não-elípticos juntos=%d,"
+               " separados=%d\n", a1, a2, a3);
+        if(!a1 || !a2 || !a3) mal++;
+
+        /* (3) A ULTRAMÉTRICA É GLOBAL, A ARITMÉTICA É LOCAL --- e a diferença
+         *     não é de precisão, é de ALCANCE.
+         *
+         * A aritmética obedece à triangular e mais nada: somar os passos de um
+         * percurso pode dar muito mais do que a distância entre as pontas. A
+         * ultramétrica obedece ao `lem:ultra`, e o `thm:navega` tira daí a
+         * consequência global --- «uma cadeia de L travessias tem o custo do seu
+         * PIOR PASSO, qualquer que seja L». Uma acumula ao longo do caminho; a
+         * outra não vê o caminho, só o pior degrau dele.
+         *
+         * Mede-se num percurso concreto, e o que se exige é o par: a soma tem de
+         * EXCEDER a directa (senão a local não estaria a acumular e as duas
+         * réguas seriam a mesma), e a ultramétrica tem de ABSORVER. */
+        { static const long CAM[5] = { -4, 5, 0, 40, -3 };
+          long soma = 0, pior_prof = 32;
+          for(int i = 0; i < 4; i++){
+              soma += sql_esp_dist(CAM[i], CAM[i+1]);
+              int q = sql_esp_prof(CAM[i], CAM[i+1]);
+              if(q < pior_prof) pior_prof = q;      /* 2^{−q} maior é q menor */
+          }
+          long directa = sql_esp_dist(CAM[0], CAM[4]);
+          int prof_dir = sql_esp_prof(CAM[0], CAM[4]);
+          printf("      o percurso Δ = −4→5→0→40→−3: a LOCAL soma %ld para uma"
+                 " distância directa de %ld\n", soma, directa);
+          printf("      e a GLOBAL absorve: prof do salto directo %d ≥ pior prof"
+                 " do caminho %ld\n", prof_dir, pior_prof);
+          if(soma <= directa) mal++;                /* a local TEM de acumular */
+          if(prof_dir < pior_prof) mal++;           /* a global TEM de absorver */
+        }
+
+        /* ── O CONTROLO: a recíproca INGÉNUA falha, e as falhas são todas do Δ=0
+         *
+         * «Mesma bola ⟺ mesma classe» é falso, e sem isto o bloco de cima
+         * passaria por uma afirmação mais forte do que a que se provou. As
+         * falhas têm de existir e têm de ser TODAS com o parabólico --- é isso
+         * que mostra que ele não é bola. */
+        long falhas_rec = 0, falhas_com_zero = 0;
+        for(int i = 0; i < N; i++) for(int j = 0; j < N; j++){
+            int mesma_bola = sql_esp_prof(ESP[i], ESP[j]) > 0;
+            int si = ESP[i] < 0 ? -1 : (ESP[i] == 0 ? 0 : 1);
+            int sj = ESP[j] < 0 ? -1 : (ESP[j] == 0 ? 0 : 1);
+            if(mesma_bola != (si == sj)){
+                falhas_rec++;
+                if(ESP[i] == 0 || ESP[j] == 0) falhas_com_zero++;
+            }
+        }
+        printf("      CONTROLO — «mesma bola ⟺ mesma classe» falha em %ld pares,"
+               " e %ld deles são com Δ = 0\n", falhas_rec, falhas_com_zero);
+        if(falhas_rec == 0 || falhas_rec != falhas_com_zero) mal++;
+
+        ok("SÓ A CLASSE ELÍPTICA É UMA BOLA, E FOI A MEDIDA QUE O DISSE. A caixa do"
+           " `thm:pandora` traz uma distância aritmética |Δᵢ − Δⱼ|, e eu chamei-lhe"
+           " «distância» sem verificar QUAL desigualdade ela cumpre: é métrica mas NÃO é"
+           " ultramétrica, e mede-se --- viola d(x,z) ≤ max em mais de mil dos triplos,"
+           " enquanto a ultramétrica da `def:arvore` sobre os mesmos Δ viola em ZERO. São"
+           " duas réguas do mesmo objecto, como a §sec:leitura diz do percurso: a"
+           " aritmética diz QUANTO falta e é a que a recusa reporta, a ultramétrica dá a"
+           " PARTIÇÃO do thm:bolas, e no que a recusa precisa concordam, porque anulam"
+           " ambas exactamente em Δᵢ = Δⱼ. Daí sai o `cor:pandbola`: o bit mais alto de Δ é"
+           " o do SINAL, pelo que a bola de raio um é exactamente {Δ < 0} --- o primeiro"
+           " nível da árvore separa elíptico de não-elíptico e MAIS NADA, e a distinção"
+           " entre parabólico e hiperbólico vive mais fundo. Das três classes do"
+           " thm:leidisc, só a elíptica é uma bola: a tricotomia NÃO é uma partição por"
+           " bolas. E o corte que a árvore faz primeiro é o que a §sec:dualidades já tinha"
+           " separado --- o que RODA e o que NÃO RODA ---, encontrado no primeiro bit sem"
+           " que ninguém lho tenha dito. Verifica-se nas TRÊS condições, porque duas não"
+           " chegam. O CONTROLO é a recíproca ingénua FALHAR: «mesma bola ⟺ mesma classe» é"
+           " falso, e as falhas são TODAS com Δ = 0 --- é isso que mostra que o parabólico"
+           " não é bola, e sem ele este bloco passaria por uma afirmação mais forte do que"
+           " a que se provou. E MEDE-SE TAMBÉM O QUE AS SEPARA, que não é precisão mas"
+           " ALCANCE: a ultramétrica é GLOBAL e a aritmética é LOCAL, do corpo. A local"
+           " obedece à triangular e mais nada, pelo que somar os passos de um percurso pode"
+           " dar muito mais do que a distância entre as pontas --- o caminho"
+           " Δ = −4→5→0→40→−3 soma 97 para uma distância real de 1. A global obedece ao"
+           " `lem:ultra`, e o `thm:navega` tira daí a consequência: uma cadeia de L"
+           " travessias tem o custo do seu PIOR PASSO, qualquer que seja L. Uma acumula ao"
+           " longo do caminho; a outra não vê o caminho, só o pior degrau dele --- e é por"
+           " isso que a recusa pode usar a local (reportar entre duas colunas é um gesto"
+           " local) mas navegar pela caixa não pode. Exige-se o PAR: a soma tem de exceder"
+           " a directa, senão a local não estaria a acumular e as duas réguas seriam a"
+           " mesma.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

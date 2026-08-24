@@ -5149,6 +5149,33 @@ static long corpo_delta(long cp, long parm){
  * delas recalculava Δ = B² − 4C à mão em vez de pedir ao `corpo_delta`. Três
  * escritas da mesma lei. Fica uma, e é esta: os nomes pedem-se com o género. */
 enum { CL_ELIPTICO = -1, CL_PARABOLICO = 0, CL_HIPERBOLICO = 1 };
+/* ── AS DUAS RÉGUAS DA CAIXA — `aranha thm:pandora` ──────────────────────────
+ *
+ * A distância entre espelhos tem duas formas, e elas servem para coisas
+ * diferentes. A ARITMÉTICA, |Δᵢ − Δⱼ|, diz QUANTO falta e é a que a recusa
+ * reporta --- é métrica, e NÃO é ultramétrica: com Δ = 20, 13, 8 dá 12 contra
+ * um máximo de 7. Medido sobre os dezoito espelhos de |m|,|t| ≤ 4: viola em
+ * 1264 dos 5832 triplos.
+ *
+ * A ULTRAMÉTRICA é a da `def:arvore` lida sobre os mesmos Δ --- 2^{−prof} ---, e
+ * essa cumpre o `lem:ultra` em TODOS os 5832. É ela que dá a partição do
+ * `thm:bolas`: as bolas não se cruzam, e por isso «todo ponto é centro».
+ *
+ * No que a recusa precisa as duas CONCORDAM, e é isso que torna legítimo usar a
+ * aritmética para reportar: anulam exactamente no mesmo sítio, Δᵢ = Δⱼ. */
+long sql_esp_dist(long Di, long Dj){ long d = Di - Dj; return d < 0 ? -d : d; }
+static long esp_dist(long Di, long Dj){ return sql_esp_dist(Di, Dj); }
+int sql_esp_prof(long Di, long Dj){
+    /* a profundidade da primeira divergência, do topo --- def:arvore */
+    if(Di == Dj) return (int)(sizeof(long) * 8);
+    unsigned long a = (unsigned long)Di, b = (unsigned long)Dj;
+    int p = 32;
+    for(int q = 0; q < p; q++)
+        if(((a >> (p-1-q)) & 1ul) != ((b >> (p-1-q)) & 1ul)) return q;
+    return p;
+}
+static int esp_prof(long Di, long Dj){ return sql_esp_prof(Di, Dj); }
+
 static int corpo_classe(long D){
     return D < 0 ? CL_ELIPTICO : (D == 0 ? CL_PARABOLICO : CL_HIPERBOLICO);
 }
@@ -5997,8 +6024,9 @@ static int checa_corpos(unsigned citadas, long ncols){
              * diferir acrescenta-se, porque aí não há sequer régua comum. */
             int mesma_classe = corpo_classe(D) == corpo_classe(Dref);
             printf("erro: as colunas %c e %c estão em corpos DIFERENTES "
-                   "(Δ = %ld e Δ = %ld, distância %ld)%s.\n",
-                   (char)('a'+primeira), (char)('a'+j), Dref, D, d,
+                   "(Δ = %ld e Δ = %ld, distância %ld, prof %d)%s.\n",
+                   (char)('a'+primeira), (char)('a'+j), Dref, D,
+                   esp_dist(Dref, D), esp_prof(Dref, D),
                    mesma_classe ? "" : " — e de classes diferentes");
             if(!mesma_classe)
                 printf("      %c é %s e %c é %s: nem a régua é a mesma.\n",

@@ -57,6 +57,11 @@ long sql_restauros_falhados(void);
  * havia nada a cobri-lo, e o count(DISTINCT) respondia 64 a 65 classes. */
 long sql_ord_perdidos(void);
 
+/* as DUAS réguas da caixa de Pandora (`aranha thm:pandora`): a aritmética, que
+ * diz quanto falta, e a profundidade da ultramétrica, que dá a partição. */
+long sql_esp_dist(long Di, long Dj);
+int  sql_esp_prof(long Di, long Dj);
+
 #define SQL_OUT_MAX_COLS 64
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64
