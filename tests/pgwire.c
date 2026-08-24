@@ -27657,6 +27657,43 @@ int main(void){
                " %ld/%ld\n", iguais, comparadas);
         if(iguais != comparadas) mal++;
 
+        /* ── A SUBCONSULTA COM CONDIÇÃO É UMA CONSULTA, E DÁ O MESMO QUE A
+         * LISTA QUE ELA NOMEIA.
+         *
+         * `x IN (SELECT c FROM t)` já era lido; com uma condição lá dentro o
+         * leitor exigia o `)` logo a seguir ao nome da tabela e caía em «o WHERE
+         * não foi entendido». Só a fibra TRIVIAL era aceite --- e a subconsulta
+         * serve justamente para nomear uma fibra que não é a tabela inteira.
+         *
+         * Não precisou de caminho novo: a §sec:zeta diz que a álgebra não muda,
+         * «só muda a ORDEM sobre a qual se acumula». A subconsulta corre, os
+         * valores viram lista, e o que fica é o `IN (v1,…,vn)` que o motor já
+         * sabe ler --- a mesma reescrita do BETWEEN e da vírgula. E os DOIS
+         * caminhos têm de concordar, que é o que se mede. */
+        sql_executa("CREATE TABLE sb (k INTEIRO, w INTEIRO)", &o);
+        sql_executa("INSERT INTO sb VALUES (1,100)", &o);
+        sql_executa("INSERT INTO sb VALUES (2,200)", &o);
+        sql_executa("INSERT INTO sb VALUES (3,300)", &o);
+        sql_executa("SELECT k FROM a WHERE k IN (SELECT k FROM sb WHERE w > 150)", &o);
+        char por_sub[80]; por_sub[0] = 0;
+        if(o.ok) for(int r = 0; r < o.nrows; r++)
+            snprintf(por_sub + strlen(por_sub), sizeof por_sub - strlen(por_sub),
+                     "%s%s", r ? "," : "", o.cell[r][0]);
+        sql_executa("SELECT k FROM a WHERE k IN (2,3)", &o);
+        char por_lista[80]; por_lista[0] = 0;
+        if(o.ok) for(int r = 0; r < o.nrows; r++)
+            snprintf(por_lista + strlen(por_lista), sizeof por_lista - strlen(por_lista),
+                     "%s%s", r ? "," : "", o.cell[r][0]);
+        printf("      a subconsulta com condição [%s] contra a lista que ela nomeia"
+               " [%s]  %s\n", por_sub, por_lista,
+               !strcmp(por_sub, por_lista) ? "" : "← DISCORDAM");
+        if(strcmp(por_sub, por_lista) || !por_sub[0]) mal++;
+        /* e a fibra VAZIA: nenhuma linha casa, e isso é uma resposta */
+        sql_executa("SELECT k FROM a WHERE k IN (SELECT k FROM sb WHERE w > 999)", &o);
+        printf("      e a fibra vazia devolve %d linha(s), que é a resposta certa\n",
+               o.ok ? o.nrows : -1);
+        if(!o.ok || o.nrows != 0) mal++;
+
         /* ── E O CONTROLO, que é a cláusula (3) ao contrário: o que MUDA o
          * resultado é a marca no espaço, e só ela. Sem isto, um motor que
          * devolvesse sempre a mesma coisa passava em tudo o que está acima ---

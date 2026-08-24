@@ -148,6 +148,12 @@
 #include "sql_api.h"    /* porta C para pgwire — captura de resultado */
 #include "pgcat.h"      /* Trio PG6: o catálogo de SESSÃO, antes do motor */
 
+/* ── A CONSULTA DE DENTRO NÃO FALA ──────────────────────────────────────────
+ * Uma subconsulta é um passo de outra, e não uma resposta ao cliente: as linhas
+ * dela iam para o terminal junto com as da consulta que a pediu, e quem lia via
+ * duas respostas onde há uma. O que ela devolve é a LISTA, e essa entra na
+ * reescrita --- não na saída. */
+static int sql_calado = 0;
 static SqlOut *sql_cap = NULL;   /* preenchido por sql_executa quando out!=NULL */
 
 /* ---------------- a ISA (transcrita) ---------------- */
@@ -3238,6 +3244,17 @@ static int insere(const char *resto){
                    " (numerador %ld, segundo componente %ld; o envelope é %ld..%ld).\n"
                    " A linha é RECUSADA e nada é escrito — alargar a célula é subir a"
                    " torre, e não truncar em silêncio.\n", j, v[j], den[j], lo, hi);
+            /* ── E QUANDO O QUE FALTA É O DEGRAU, DIZ-SE QUAL ────────────────
+             * Um negativo numa coluna INTEIRA não é um valor grande de mais: é
+             * um valor de OUTRO ANDAR. A §sec:escada constrói X_2 = X_1²/∼ e é
+             * lá que a soma ganha a volta --- o oposto ---, e uma coluna do
+             * primeiro degrau não a tem. A recusa dizia só o envelope, e quem a
+             * lia ficava a pensar que o número era grande. */
+            if(v[j] < 0 && !assinado)
+                printf(" E o que falta não é largura: é o DEGRAU. O corpo INTEIRO é o"
+                       " primeiro (as palavras em B) e nele a soma não tem volta --- o"
+                       " oposto nasce no segundo, X_2 = X_1²/∼, que aqui se escreve"
+                       " RACIONAL. Declare a coluna RACIONAL e o −%ld cabe.\n", -v[j]);
             if(sql_cap){
                 sql_cap->ok = 0;
                 snprintf(sql_cap->err, sizeof sql_cap->err,
@@ -7683,6 +7700,7 @@ static int varre(const char *resto, int acao){
     }
     const char *nome_acao = acao == ACAO_MARCA ? "lida(s)" : (acao == ACAO_SET ? "atualizada(s)" : "apagada(s)");
     sql_ultimos_passos = passos;
+    if(!sql_calado)
     printf("-- %u bytes de ISA [%04lx], %d átomo(s), %ld passos, %ld linha(s) %s\n",
            pc_emit, soma & 0xFFFF, tem_where ? cl.natomo : 0, passos, achou, nome_acao);
     if(acao != ACAO_MARCA){
@@ -11094,7 +11112,7 @@ static int varre(const char *resto, int acao){
         if(saltadas < off_n){ saltadas++; continue; }
         if(lim_n >= 0 && emitidas >= lim_n) break;   /* LIMIT: o prefixo da lista */
         emitidas++;
-        printf("   ");
+        if(!sql_calado) printf("   ");
         int row_i = sql_cap ? sql_cap->nrows : -1;
         if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS) sql_cap->nrows++;
         /* A LINHA MONTA-SE PELA ORDEM PEDIDA, E DEPOIS IMPRIME-SE.
@@ -11341,14 +11359,16 @@ static int varre(const char *resto, int acao){
         }
 
         for(int k = 0; k < nsai; k++){
-            printf("%s", saida[k]);
-            if(k + 1 < nsai) printf(" | ");
+            if(!sql_calado){
+                printf("%s", saida[k]);
+                if(k + 1 < nsai) printf(" | ");
+            }
             if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS){
                 snprintf(sql_cap->cell[row_i][k], SQL_OUT_CELL, "%s", saida[k]);
                 sql_cap->nulo[row_i][k] = sai_nulo[k];
             }
         }
-        printf("\n");
+        if(!sql_calado) printf("\n");
     }
     return 1;
 }
@@ -12647,6 +12667,7 @@ static int do_bloco(const char *q){
 /* branco e comentários à frente de um comando: o `--` até ao fim da linha e o
  * `/*` até ao fecho. O esquema do cliente vem cheio deles, e um comando com um
  * comentário à frente é o mesmo comando. */
+static int subconsulta_reescreve(const char *sql, char *out, size_t cap);
 static void salta_prosa(const char **pp){
     const char *p = *pp;
     for(;;){
@@ -12678,6 +12699,18 @@ static int executa(const char *sql){
      * o passo é o comando. */
     sim_zera();
     salta_prosa(&p);
+    /* A REESCRITA DA SUBCONSULTA CORRE AQUI, e não no `sql_executa_1`: este é o
+     * sítio por onde todo o comando passa --- o cliente com captura e o
+     * terminal sem ela. Pô-la lá deixava o CLI de fora, e um caminho que só
+     * metade dos chamadores atravessa é meio caminho. */
+    { static int em_sub = 0;
+      if(!em_sub){
+          char reescrito[600];
+          em_sub = 1;
+          int fez = subconsulta_reescreve(p, reescrito, sizeof reescrito);
+          em_sub = 0;
+          if(fez) return executa(reescrito);
+      } }
     /* ── O LOTE VEM PRIMEIRO. Uma cadeia com mais de um comando parte-se com
      * consciência do dólar (ver `cmd_fim`) e corre-se um a um. É por aqui que
      * um bloco `DO $rls$ ... END LOOP; END $rls$` chega INTEIRO: o `;` que ele
@@ -13981,7 +14014,89 @@ static int vista_reescreve(const char *sql, char *out, size_t cap){
     return (k > 0 && (size_t)k < cap);
 }
 
+/* ── A SUBCONSULTA COM CONDIÇÃO É UMA CONSULTA, E CORRE COMO TAL ─────────────
+ *
+ * `x IN (SELECT c FROM t)` já era lido: carrega-se a coluna toda e pergunta-se
+ * a pertença. Mas com uma condição lá dentro --- `IN (SELECT c FROM t WHERE …)`
+ * --- o leitor exigia o `)` logo a seguir ao nome da tabela e caía em «o WHERE
+ * não foi entendido». Só a fibra TRIVIAL era aceite, e a subconsulta serve
+ * justamente para nomear uma fibra que não é a tabela inteira.
+ *
+ * Não é preciso caminho novo. A §sec:zeta diz que a álgebra não muda --- «só
+ * muda a ORDEM sobre a qual se acumula» ---, e aqui a subconsulta é uma
+ * consulta: corre-se, recolhem-se os valores, e o que fica é `IN (v1,…,vn)`,
+ * que o motor já sabe ler. É a mesma reescrita do BETWEEN e da vírgula, e o que
+ * se ganha é o que se ganhou lá: tudo o que a pertença sabe fazer passa a valer
+ * para esta escrita sem uma linha a mais.
+ *
+ * A subconsulta corre com a tabela dela aberta e VOLTA-SE depois --- abrir
+ * outra tabela relê o `.mem`, e por isso a lista tem de vir em memória local. */
+static int sql_executa_1(const char *sql, SqlOut *out);
+static int subconsulta_reescreve(const char *sql, char *out, size_t cap){
+    const char *ab = strstr(sql, "(SELECT ");
+    if(!ab) ab = strstr(sql, "(select ");
+    if(!ab) return 0;
+    /* só a forma com condição: sem WHERE dentro, o caminho antigo é melhor
+     * (não materializa a lista) e continua a ser o que corre */
+    const char *fe = strchr(ab, ')');
+    if(!fe) return 0;
+    { const char *w = ab; int tem = 0;
+      while(w < fe){ const char *v = w; if(palavra(&v, "WHERE")){ tem = 1; break; } w++; }
+      if(!tem) return 0; }
+    char sub[400]; size_t n = (size_t)(fe - ab - 1);
+    if(n >= sizeof sub) return 0;
+    memcpy(sub, ab + 1, n); sub[n] = 0;
+
+    char guarda[64]; snprintf(guarda, sizeof guarda, "%s", g_tabela);
+    SqlOut so; SqlOut *cap_antes = sql_cap;
+    int calado_antes = sql_calado; sql_calado = 1;
+    int ok = sql_executa_1(sub, &so);
+    sql_calado = calado_antes;
+    sql_cap = cap_antes;
+    usa_tabela(guarda, 0);
+    if(!ok || !so.ok || so.ncols < 1) return 0;
+
+    /* a lista, com os valores que a fibra deu. Sem nenhum, a pertença é vazia e
+     * escreve-se uma condição que não casa --- e não uma lista vazia, que o
+     * leitor não sabe ler. */
+    char lista[400]; size_t l = 0;
+    for(int r = 0; r < so.nrows && l + 24 < sizeof lista; r++){
+        if(so.nulo[r][0]) continue;      /* a ausência não pertence */
+        l += (size_t)snprintf(lista + l, sizeof lista - l, "%s%s",
+                              l ? "," : "", so.cell[r][0]);
+    }
+    lista[l] = 0;
+    size_t pre = (size_t)(ab - sql);
+    if(pre + l + 8 >= cap) return 0;
+    if(!l){
+        /* ── A FIBRA VAZIA É UMA RESPOSTA, E TEM DE SE PODER ESCREVER ────────
+         * Uma lista vazia não é escrevível --- `IN ()` não se lê --- e a
+         * primeira escrita pôs lá um valor que ninguém teria. Mas «um valor que
+         * ninguém tem» não existe: ou cabe no envelope e alguém pode tê-lo, ou
+         * não cabe e a consulta é RECUSADA, que foi o que aconteceu. A fibra
+         * vazia diz-se com a condição que nunca casa, e ela escreve-se com o
+         * que já existe: `k <> k`. Zero linhas é a resposta certa, e não um
+         * erro. */
+        const char *w = strstr(sql, "WHERE ");
+        if(!w) w = strstr(sql, "where ");
+        if(!w || (size_t)(w - sql) >= cap) return 0;
+        size_t n2 = (size_t)(w - sql) + 6;
+        char c_esq[64]; const char *r2 = sql + n2;
+        pula(&r2);
+        if(!ident(&r2, c_esq, sizeof c_esq)) return 0;
+        memcpy(out, sql, n2); out[n2] = 0;
+        snprintf(out + n2, cap - n2, "%s <> %s", c_esq, c_esq);
+        return 1;
+    }
+    memcpy(out, sql, pre); out[pre] = 0;
+    snprintf(out + pre, cap - pre, "(%s)%s", lista, fe + 1);
+    return 1;
+}
+
 static int sql_executa_1(const char *sql, SqlOut *out){
+    { char reescrito[600];
+      if(subconsulta_reescreve(sql, reescrito, sizeof reescrito))
+          return sql_executa_1(reescrito, out); }
     { char reescrito[600];
       if(between_reescreve(sql, reescrito, sizeof reescrito))
           return sql_executa_1(reescrito, out); }
