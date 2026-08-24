@@ -8,7 +8,11 @@ DBPASS=$(cat /root/.erp_homolog_db_pass)
 JWT=$(cat /root/.erp_homolog_jwt)
 # Conexões: DIRECT sempre no superusuário (migrate/DDL). Runtime no erp_app só
 # quando o arquivo de ativação da RLS nativa existir (senão fica no superusuário).
-DB_SUPER="postgresql://erp:${DBPASS}@erp-postgres-homolog:5432/erp?schema=public"
+# 21/08/2026: o postgres saiu do docker — cluster `erphomolog` do sistema, porta 5437.
+# E ISTO TEM DE ESTAR AQUI, no repositório: o deploy extrai o artefato POR CIMA de
+# deploy/, portanto uma correcção feita só no servidor é apagada no deploy seguinte.
+# Foi o que aconteceu, e deixou o homolog em ciclo de P1001.
+DB_SUPER="postgresql://erp:${DBPASS}@host.docker.internal:5437/erp?schema=public"
 DB_RUNTIME="$DB_SUPER"
 NATIVE_FLAG=""
 if [ -f /root/.erp_homolog_app_dburl ]; then
@@ -36,7 +40,7 @@ if [ -f /root/.erp_homolog_supplier_live ]; then
   LIVE_FLAG="-e SUPPLIER_INTEGRATION_LIVE=on"
 fi
 docker rm -f patria-erp-homolog 2>/dev/null || true
-docker run -d --name patria-erp-homolog --network erp-net --restart unless-stopped \
+docker run -d --name patria-erp-homolog --add-host=host.docker.internal:host-gateway --network erp-net --restart unless-stopped \
   -p 127.0.0.1:8091:8080 \
   -e PORT=8080 -e NODE_ENV=production \
   -e DATABASE_URL="$DB_RUNTIME" \

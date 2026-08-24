@@ -27,8 +27,13 @@ async function bootstrap() {
   );
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(8080);
-  console.log('patria-api running on port 8080');
-  console.log('Swagger: http://localhost:8080/api/docs');
+  // A porta esteve COZIDA em 8080 até 21/08/2026, e o docker é que a disfarçava: os três
+  // ambientes corriam a mesma imagem e o mapeamento (8080/8081/8082 -> 8080) fazia o resto.
+  // Sem docker não há tradução, e três processos não cabem na mesma porta. Agora vem do
+  // ambiente, com o 8080 a manter-se como omissão para nada mudar de dentro do container.
+  const port = Number(process.env.PORT ?? 8080);
+  await app.listen(port);
+  console.log(`patria-api running on port ${port}`);
+  console.log(`Swagger: http://localhost:${port}/api/docs`);
 }
 bootstrap();
