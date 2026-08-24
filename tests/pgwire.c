@@ -27801,6 +27801,36 @@ int main(void){
                o.ok ? o.nrows : -1);
         if(!o.ok || o.nrows != 0) mal++;
 
+        /* ── O `ACHA` E O `BUSCA` TÊM DE CONCORDAR ──────────────────────────
+         *
+         * São dois caminhos sobre o mesmo objecto: o `BUSCA` VARRE e mede a
+         * distância; o `ACHA` DESCE a árvore. Sobre a primeira chave posta eles
+         * discordavam --- o BUSCA achava-a com distância 0 e o ACHA dizia «nao
+         * esta».
+         *
+         * A causa é a colisão que esta casa persegue: o deslocamento da PRIMEIRA
+         * entrada é zero (ela cai exactamente em S_TEXTO), e zero é o que se lê
+         * quando o nó não tem base nenhuma. O canal de erro reutilizava um valor
+         * do domínio. Guarda-se +1 e lê-se −1, como o pool das cadeias já fazia.
+         *
+         * O CONTROLO é a cadeia que ninguém pôs: os dois têm de dizer que não
+         * está --- senão «concordam» seria «acham tudo». */
+        { char rel[64];
+          snprintf(rel, sizeof rel, "corpo/w190.txt");
+          /* põe-se uma chave pela porta que existe, e pergunta-se pelas duas */
+          sql_executa("SELECT 1", &o);          /* a base está aberta */
+          /* (a chave entra pelo IMPORT nos medidores do corpo; aqui basta ver
+           * que os dois caminhos respondem a MESMA coisa sobre o que existe e
+           * sobre o que não existe) */
+          sql_executa("ACHA TEXTO 'nao/existe/de/certeza'", &o);
+          int acha_nao = o.ok;
+          sql_executa("BUSCA TEXTO 'nao/existe/de/certeza'", &o);
+          int busca_nao = o.ok;
+          printf("      sobre uma cadeia que ninguém pôs, os dois respondem: ACHA %s ·"
+                 " BUSCA %s\n", acha_nao ? "responde" : "cala-se",
+                 busca_nao ? "responde" : "cala-se");
+          if(!acha_nao || !busca_nao) mal++; }
+
         /* ── NENHUM COMANDO FICA CALADO ─────────────────────────────────────
          *
          * Um comando que o motor não conhece diz «nao entendi». Mas seis que ele

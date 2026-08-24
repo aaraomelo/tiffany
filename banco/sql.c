@@ -12023,7 +12023,19 @@ static int cif_poe(const long *a, size_t n){
     if(par_le(S_NO + no*LARG)) return 0;                  /* ja la esta, no seu lugar */
     unsigned base = reg_grava(a, n);
     if(!base) return 0;                                   /* zona de texto cheia */
-    par_grava(S_NO + no*LARG, base - S_TEXTO);
+    /* ── E O DESLOCAMENTO GUARDA-SE MAIS UM, PORQUE O ZERO JÁ TEM DONO ──────
+     *
+     * O deslocamento da PRIMEIRA entrada é zero --- ela cai exactamente em
+     * S_TEXTO ---, e zero é o que `par_le` devolve quando o nó não tem base
+     * nenhuma. O canal de erro reutilizava um valor do domínio: a primeira
+     * chave posta ficava indistinguível de «não está», e o `ACHA` dizia que não
+     * estava enquanto o `BUSCA` a achava com distância 0. Dois caminhos sobre o
+     * mesmo objecto, e só um deles certo.
+     *
+     * Guarda-se +1 e lê-se −1: o zero fica a significar UMA coisa só. É o mesmo
+     * remédio que o pool das cadeias já usa --- lá o endereço também é «+1, e o
+     * 0 fica para a cadeia vazia». */
+    par_grava(S_NO + no*LARG, base - S_TEXTO + 1u);
     par_grava(S_TXCAB, (unsigned)(txt_n() + 1));
     barreira();
     return 1;
@@ -12036,7 +12048,9 @@ static long acha_cifra(const long *a, size_t n, size_t *desceu_out){
         no = f; desceu++;
     }
     *desceu_out = desceu;
-    return (desceu == n) ? (long)par_le(S_NO + no*LARG) : 0;
+    if(desceu != n) return 0;
+    { unsigned b = par_le(S_NO + no*LARG);
+      return b ? (long)(b - 1u) + 1 : 0; }   /* devolve não-zero quando HÁ base */
 }
 static void mostra_cifra(const long *a, size_t n){
     printf("[");
