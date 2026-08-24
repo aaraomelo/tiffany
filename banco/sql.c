@@ -1242,31 +1242,27 @@ static unsigned atomos_le_u32(unsigned base){
 }
 /* ── GUARDA uma cadeia no pool e devolve o seu endereço (índice de átomo).
  * O topo vive no próprio disco, para o pool sobreviver ao fecho da base. */
-/* ── PROCURAR SEM ESCREVER: a outra face do tx_guarda ────────────────────────
- * O `tx_guarda` procura e, não achando, ESCREVE. Uma condição não escreve: ela
- * pergunta. `WHERE s = 'acme'` com o 'acme' ausente do pool não pode criar o
- * 'acme' --- isso seria a leitura a mudar o espaço, e o campo é do espaço mas a
- * marca é de quem escreve. Devolve 0, que é a ausência, e nenhuma célula
- * presente a tem. */
-static unsigned tx_procura(const char *s2, int n){
-    if(n < 0) n = 0;
-    if(n > TX_MAX) n = TX_MAX;
-    unsigned topo = atomos_le_u32(S_TXTOPO);
-    if(topo < S_TXPOOL) return 0;
-    for(unsigned a2 = S_TXPOOL; a2 < topo; ){
-        int ln = (int)slot_mem_le(fmem, a2);
-        if(ln == n){
-            int igual = 1;
-            for(int i = 0; i < n; i++)
-                if((char)slot_mem_le(fmem, a2 + 1u + (unsigned)i) != s2[i]){ igual = 0; break; }
-            if(igual) return a2 - S_TXPOOL + 1u;
-        }
-        a2 += 1u + (unsigned)ln;
-    }
-    return 0;
-}
-
-static unsigned tx_guarda(const char *s2, int n){
+/* ── UMA OPERAÇÃO, DUAS FACES, E O SINAL DIZ QUAL ────────────────────────────
+ *
+ * O `papers/nucleo_sql/slot.h` escreve a instrução da casa em quatro linhas:
+ *
+ *     move(mem, addr, reg, sinal):  +1 lê, −1 escreve, 0 é o ponto fixo
+ *
+ * --- «MOVE = dobra (ler e escrever são a mesma operação + sinal)». O pool
+ * tinha as duas faces em funções SEPARADAS, e foi por isso que o defeito
+ * apareceu: o `SET` chamou a que lê, o endereço veio 0, e o UPDATE dizia «1
+ * linha atualizada» enquanto apagava. Com o sinal no argumento, quem chama TEM
+ * de dizer de que lado está --- e não há como escolher a face errada por
+ * distracção, porque não há duas para escolher.
+ *
+ * `tx(s, n, +1)` pergunta: devolve o endereço, ou 0 se ninguém escreveu a
+ * cadeia --- e 0 é a ausência, que nenhuma célula presente tem.
+ * `tx(s, n, -1)` escreve: procura primeiro (a mesma cadeia TEM de dar o mesmo
+ * endereço, que é o critério da leitura) e só grava se ela não estiver lá. */
+static unsigned tx(const char *s2, int n, int sinal);
+static unsigned tx_procura(const char *s2, int n){ return tx(s2, n, +1); }
+static unsigned tx_guarda (const char *s2, int n){ return tx(s2, n, -1); }
+static unsigned tx(const char *s2, int n, int sinal){
     if(n < 0) n = 0;
     if(n > TX_MAX) n = TX_MAX;
     unsigned topo = atomos_le_u32(S_TXTOPO);
@@ -1291,6 +1287,9 @@ static unsigned tx_guarda(const char *s2, int n){
         }
         a2 += 1u + (unsigned)ln;
     }
+    /* não está no pool: quem PERGUNTA fica por aqui --- criar a cadeia seria a
+     * leitura a mudar o espaço, e a marca é de quem escreve */
+    if(sinal >= 0) return 0;
     unsigned onde = topo;
     slot_mem_grava(fmem, onde, (unsigned char)n);
     for(int i = 0; i < n; i++)
