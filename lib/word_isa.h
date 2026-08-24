@@ -22,4 +22,8 @@ static inline Word word_isa_de_i(int t, int e){
 
 #define WORD_ISA_ATOMS 2u
 
+/* e a largura da Word deriva da do átomo: a Word diz quantos átomos tem, o
+ * `palavra8.h` diz quantos bits tem o átomo, e nenhum número se repete. */
+#define WORD_ISA_BITS  (WORD_ISA_ATOMS * W8_BITS)
+
 #endif

@@ -28689,6 +28689,291 @@ int main(void){
            " próprio e concordaria sempre.", mal == 0);
     }
 
+    /* ═══ §W198: A FRONTEIRA DO MAPA — recusar em vez de pisar o vizinho ═══ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W198 a fronteira: o tecto é do MAPA, e quem não cabe RECUSA.\n\n");
+        unlink("/tmp/pgwire_w198.mem"); unlink("/tmp/pgwire_w198.prog");
+        unlink("/tmp/pgwire_w198.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w198__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w198__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w198")) mal++;
+
+        /* ── O QUE ISTO MEDE, E PORQUE PRECISOU DE SER MEDIDO ────────────────
+         *
+         * `NÃO HÁ TECTO DE LINHAS NA TEORIA`: o que limita é o MAPA DE SLOTS,
+         * que é da máquina. Mas então o mapa tem de dizer onde acaba, e o que
+         * lá estava era um COMENTÁRIO --- «a linha 257 escreve o seu match por
+         * cima do primeiro vivo» --- com os dois números errados. Era verdade
+         * quando o bitmap gastava um SLOT por linha; passou a gastar um BIT e o
+         * número não acompanhou. Um comentário não é verificado por ninguém, e
+         * este sobreviveu à mudança que o invalidou.
+         *
+         * Por baixo dele havia um defeito REAL, e não era o que ele dizia. A
+         * limpeza do bitmap corria `q <= nrows / SLOT_BITS` em QUATRO sítios: a
+         * divisão arredonda para baixo, pelo que o `<=` só acerta quando nrows
+         * NÃO é múltiplo da largura do slot --- e quando é, escreve um slot além
+         * do bitmap. Na fronteira esse slot É o S_VIVO[0], e as dezasseis
+         * primeiras linhas da tabela DESAPARECIAM, sem erro nenhum, num SELECT
+         * que só queria limpar o seu rascunho.
+         *
+         * As três coisas a medir são as três faces disto: a fronteira ACEITA
+         * quem cabe, RECUSA quem não cabe, e a recusa é INDISTINGUÍVEL de um
+         * INSERT que nunca foi dito --- nada do que lá estava se move. */
+        sql_executa("CREATE TABLE t (a INTEIRO)", &o);
+        long tecto = sql_lin_tecto(), recusas = 0;
+        for(long i = 0; i < tecto + 4; i++){
+            char q[64]; snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld)", i);
+            sql_executa(q, &o);
+            if(!o.ok) recusas++;
+        }
+        printf("      o mapa comporta %ld linhas; %ld INSERT além dela, %ld recusa(s)\n",
+               tecto, 4L, recusas);
+        if(recusas != 4) mal++;
+
+        /* e as que couberam continuam TODAS lá --- é aqui que as 0..15 caíam */
+        sql_executa("SELECT count(*) FROM t", &o);
+        long quantas = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      linhas na tabela depois da fronteira: %ld (esperado %ld)\n",
+               quantas, tecto);
+        if(quantas != tecto) mal++;
+
+        /* A VOLTA, nas duas pontas: a primeira linha e a última respondem. A
+         * primeira é a que o slot excedente apagava; a última é a que faz nrows
+         * bater no múltiplo e dispara o defeito. As duas juntas, ou nenhuma. */
+        long pontas = 0;
+        { char q[64];
+          snprintf(q, sizeof q, "SELECT a FROM t WHERE a = 0");
+          sql_executa(q, &o); if(o.ok && o.nrows == 1) pontas++;
+          snprintf(q, sizeof q, "SELECT a FROM t WHERE a = %ld", tecto - 1);
+          sql_executa(q, &o); if(o.ok && o.nrows == 1) pontas++; }
+        printf("      a primeira linha e a última: %ld/2 respondem\n", pontas);
+        if(pontas != 2) mal++;
+
+        /* CONTROLO --- o defeito era do MÚLTIPLO, não do tamanho. Uma tabela
+         * com uma linha a menos que o tecto nunca o disparava, e é por isso que
+         * ele viveu tanto tempo: só a fronteira exacta o mostra. */
+        sql_executa("CREATE TABLE u (a INTEIRO)", &o);
+        for(long i = 0; i < tecto - 1; i++){
+            char q[64]; snprintf(q, sizeof q, "INSERT INTO u VALUES (%ld)", i);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT count(*) FROM u", &o);
+        long ctl = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      CONTROLO — com UMA linha a menos que o tecto: %ld (o defeito não"
+               " aparecia aqui)\n", ctl);
+        if(ctl != tecto - 1) mal++;
+
+        /* ── O OUTRO EIXO DA MESMA PAREDE ────────────────────────────────────
+         *
+         * A parede não é «tantas linhas»: uma célula ocupa um slot em TRÊS
+         * zonas e o endereço é `i·ncols + j`, pelo que o que o mapa limita é o
+         * PRODUTO. Com uma coluna aperta primeiro o bitmap; com oito, aperta
+         * esta — e é por isso que medir só um eixo não chega.
+         *
+         * Ninguém a verificava. Com 8 colunas a linha 2049 escrevia a sua
+         * primeira célula em S_DEN[0], que é o denominador da célula (0,0), e a
+         * linha 0 desaparecia da tabela sem erro nenhum — o mesmo desaparecer
+         * silencioso de antes, por outro caminho. A fronteira é EXACTA: 2048×8
+         * responde inteiro, 2049×8 já não. */
+        long cel = sql_cel_tecto(), nc = 8, cabem = cel / nc;
+        printf("      o mapa comporta %ld células: com %ld colunas são %ld linhas\n",
+               cel, nc, cabem);
+        { char q[256]; int n = snprintf(q, sizeof q, "CREATE TABLE c (");
+          for(long j = 0; j < nc; j++)
+              n += snprintf(q + n, sizeof q - (size_t)n, "%sc%ld INTEIRO", j ? "," : "", j);
+          snprintf(q + n, sizeof q - (size_t)n, ")");
+          sql_executa(q, &o); }
+        long rec_cel = 0;
+        for(long i = 0; i < cabem + 6; i++){
+            char q[256]; int n = snprintf(q, sizeof q, "INSERT INTO c VALUES (");
+            for(long j = 0; j < nc; j++)
+                n += snprintf(q + n, sizeof q - (size_t)n, "%s%ld", j ? "," : "", i);
+            snprintf(q + n, sizeof q - (size_t)n, ")");
+            sql_executa(q, &o);
+            if(!o.ok) rec_cel++;
+        }
+        printf("      %ld INSERT além do produto, %ld recusa(s)\n", 6L, rec_cel);
+        if(rec_cel != 6) mal++;
+
+        sql_executa("SELECT count(*) FROM c", &o);
+        long qc = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT count(*) FROM c WHERE c0 = 0", &o);
+        long z0 = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      linhas na tabela: %ld (esperado %ld); e a linha 0 responde: %ld\n",
+               qc, cabem, z0);
+        if(qc != cabem || z0 != 1) mal++;
+
+        /* CONTROLO — os DOIS eixos são mesmo dois. Se o tecto fosse só das
+         * linhas, esta tabela de 8 colunas teria parado nas mesmas 4096 da
+         * outra; parou muito antes, e é o produto que diz onde. */
+        printf("      CONTROLO — a de 1 coluna parou em %ld linhas e esta em %ld:"
+               " eixos distintos\n", tecto, cabem);
+        if(cabem >= tecto) mal++;
+
+        ok("O TECTO É DO MAPA, E QUEM NÃO CABE RECUSA EM VEZ DE PISAR O VIZINHO. A teoria"
+           " não tem tecto de linhas --- o `arquitetura.tex §sec:torre` diz que «o que"
+           " cresce é o OBJECTO, não a máquina» --- mas o MAPA DE SLOTS desta máquina tem,"
+           " e o que estava escrito no sítio dele era um COMENTÁRIO com os dois números"
+           " errados: dizia que a linha 257 pisava o primeiro vivo, o que era verdade"
+           " quando o bitmap gastava um SLOT por linha e deixou de ser quando passou a"
+           " gastar um BIT. Um comentário não é verificado por ninguém, e sobreviveu à"
+           " mudança que o invalidou. Por baixo havia um defeito real e outro: a limpeza"
+           " do bitmap corria `q <= nrows / SLOT_BITS` em QUATRO sítios, e como a divisão"
+           " arredonda para baixo o `<=` só acerta quando nrows NÃO é múltiplo da largura"
+           " do slot --- quando é, escreve um slot além do bitmap, e na fronteira esse"
+           " slot É o S_VIVO[0]: as dezasseis primeiras linhas desapareciam da tabela, sem"
+           " erro nenhum, num SELECT que só queria limpar o seu rascunho. Agora o tecto"
+           " SAI do mapa por derivação, dois typedef obrigam o compilador a confirmar que"
+           " os bitmaps não se pisam, a limpeza está escrita UMA vez com a forma sem casos"
+           " (um slot entra se o seu primeiro bit é uma linha), e o INSERT que não cabe"
+           " recusa ANTES de escrever, onde a base ainda está indistinguível de nunca ter"
+           " ouvido o comando. O CONTROLO diz porque isto viveu tanto: com uma linha a"
+           " menos que o tecto o defeito não aparece --- era do MÚLTIPLO, não do tamanho."
+           " E A PAREDE TEM DOIS EIXOS, que é o que faltava medir: a célula ocupa um slot"
+           " em TRÊS zonas e o endereço é `i·ncols + j`, pelo que o mapa limita o PRODUTO"
+           " e não o número de linhas. Com uma coluna aperta primeiro o bitmap; com oito,"
+           " aperta o produto, e ninguém o verificava --- a linha 2049 escrevia a sua"
+           " primeira célula em S_DEN[0], que é o denominador da célula (0,0), e a linha 0"
+           " desaparecia sem erro nenhum, o mesmo desaparecer silencioso por outro"
+           " caminho. A fronteira é exacta e está medida nas duas pontas: 2048×8 responde"
+           " inteiro, 2049×8 já não. O SEGUNDO CONTROLO é os dois eixos serem mesmo dois"
+           " --- a tabela de oito colunas pára muito antes das linhas da de uma, e se"
+           " parasse no mesmo sítio haveria um eixo só e esta medida seria a anterior"
+           " repetida.",
+           mal == 0);
+        sql_fechar();
+    }
+
+    /* ═══ §W199: AS DUAS FACES DA ESCRITA RECUSAM IGUAL ════════════════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W199 as duas faces: escrever é uma coisa só, e recusa nas duas.\n\n");
+        unlink("/tmp/pgwire_w199.mem"); unlink("/tmp/pgwire_w199.prog");
+        unlink("/tmp/pgwire_w199.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w199__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w199__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w199")) mal++;
+
+        /* ── O QUE ISTO MEDE ─────────────────────────────────────────────────
+         *
+         * `ler É escrever`: o INSERT e o UPDATE não são duas operações, são a
+         * mesma escrita com origens diferentes. Logo o que um recusa o outro tem
+         * de recusar, e pelo mesmo critério --- senão a lei não é da ESCRITA, é
+         * do comando, e vale só onde alguém se lembrou de a pôr.
+         *
+         * Foi o que estava: o INSERT marcava a cadeia longa e recusava-a; o
+         * UPDATE corria `if(bn < TX_MAX) buf[bn++]`, que DESCARTA em silêncio.
+         * Um SET de 300 caracteres gravava 240 e anunciava «1 linha
+         * atualizada». Não é um valor errado --- é o comando a dizer que fez o
+         * que não fez, que é o pior desfecho possível numa escrita.
+         *
+         * A prova não é as duas recusarem: é a CÉLULA ficar como estava. Uma
+         * recusa que já mexeu no dado é meia escrita, e essa é pior que ambas. */
+        sql_executa("CREATE TABLE t (s TEXTO)", &o);
+        char longa[600]; int L = 300;
+        for(int i = 0; i < L; i++) longa[i] = 'y';
+        longa[L] = 0;
+
+        char q[900];
+        snprintf(q, sizeof q, "INSERT INTO t VALUES ('%s')", longa);
+        sql_executa(q, &o);   int ins_recusou = !o.ok;
+        sql_executa("SELECT count(*) FROM t", &o);
+        long depois_ins = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      INSERT de %d caracteres: recusou=%d, e a tabela tem %ld linha(s)\n",
+               L, ins_recusou, depois_ins);
+        if(!ins_recusou || depois_ins != 0) mal++;
+
+        sql_executa("INSERT INTO t VALUES ('curto')", &o);
+        snprintf(q, sizeof q, "UPDATE t SET s = '%s'", longa);
+        sql_executa(q, &o);   int upd_recusou = !o.ok;
+        sql_executa("SELECT s FROM t", &o);
+        const char *ficou = (o.ok && o.nrows > 0) ? o.cell[0][0] : "?";
+        printf("      UPDATE de %d caracteres: recusou=%d, e a célula ficou «%s»\n",
+               L, upd_recusou, ficou);
+        if(!upd_recusou || strcmp(ficou, "curto") != 0) mal++;
+
+        /* CONTROLO --- a recusa tem de ser da MEDIDA e não do comando. Uma
+         * cadeia que cabe passa nas duas faces, senão isto mediria um UPDATE
+         * avariado em vez de um UPDATE que recusa o que não cabe. */
+        sql_executa("UPDATE t SET s = 'medio'", &o);
+        sql_executa("SELECT s FROM t", &o);
+        /* COPIA-SE: `o.cell` é o buffer da ÚLTIMA consulta, e guardar o ponteiro
+         * era ler o resultado de outra --- o mesmo defeito que o §W190 persegue
+         * no motor, aqui à minha escala. */
+        char ok2[SQL_OUT_CELL];
+        snprintf(ok2, sizeof ok2, "%s", (o.ok && o.nrows > 0) ? o.cell[0][0] : "?");
+        sql_executa("INSERT INTO t VALUES ('outro')", &o);
+        sql_executa("SELECT count(*) FROM t", &o);
+        long n2 = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      CONTROLO — o que CABE passa nas duas: a célula é «%s» e a"
+               " tabela tem %ld linhas\n", ok2, n2);
+        if(strcmp(ok2, "medio") != 0 || n2 != 2) mal++;
+
+        /* ── E A TERCEIRA FACE: A PERGUNTA ───────────────────────────────────
+         *
+         * `ler É escrever, não há leitura sem escrita`. Se a cadeia longa não
+         * pode ser escrita, então ela não está no pool --- e o endereço de quem
+         * não está no pool é o ZERO, que é o que o próprio bloco do WHERE diz de
+         * si. A lei existia e não ALCANÇAVA: a pergunta era truncada a TX_MAX e
+         * procurava o pedaço, pelo que perguntar por 300 caracteres encontrava a
+         * célula com os primeiros 240 e respondia «1 linha». Não é uma linha a
+         * mais --- é uma cadeia que ninguém escreveu a ser dada como escrita.
+         *
+         * As três faces medem-se juntas porque é UMA lei: o que não cabe numa
+         * célula não se escreve por INSERT, não se escreve por UPDATE, e não se
+         * encontra por pergunta nenhuma. */
+        /* numa tabela À PARTE, e devolvendo a coluna INTEIRA: uma célula de
+         * TX_MAX não atravessa a janela de 63 da porta C --- essa é outra lei,
+         * declarada, e pedi-la aqui mediria essa em vez desta. O que a pergunta
+         * precisa é do CASO, não da célula de volta. */
+        { char c240[300]; for(int i = 0; i < 240; i++) c240[i] = 'z'; c240[240] = 0;
+          char c300[400]; for(int i = 0; i < 300; i++) c300[i] = 'z'; c300[300] = 0;
+          char q2[900];
+          sql_executa("CREATE TABLE g (s TEXTO, k INTEIRO)", &o);
+          snprintf(q2, sizeof q2, "INSERT INTO g VALUES ('%s', 7)", c240);
+          sql_executa(q2, &o);
+          snprintf(q2, sizeof q2, "SELECT k FROM g WHERE s = '%s'", c240);
+          sql_executa(q2, &o);
+          long acha_240 = o.ok ? o.nrows : -1;
+          snprintf(q2, sizeof q2, "SELECT k FROM g WHERE s = '%s'", c300);
+          sql_executa(q2, &o);
+          long acha_300 = o.ok ? o.nrows : -1;
+          printf("      a célula tem 240; perguntar por 240 acha %ld, por 300 acha %ld\n",
+                 acha_240, acha_300);
+          if(acha_240 != 1 || acha_300 != 0) mal++; }
+
+        ok("O QUE UMA FACE DA ESCRITA RECUSA, A OUTRA TEM DE RECUSAR --- E PELO MESMO"
+           " CRITÉRIO. O INSERT e o UPDATE não são duas operações: são a MESMA escrita com"
+           " origens diferentes, e por isso uma lei sobre o que cabe numa célula é lei da"
+           " ESCRITA e não do comando. Se ficar só num deles, vale apenas onde alguém se"
+           " lembrou de a pôr --- e era exactamente o que estava. O INSERT marcava a cadeia"
+           " longa e recusava-a; o UPDATE corria `if(bn < TX_MAX) buf[bn++]`, que DESCARTA"
+           " em silêncio: um SET de 300 caracteres gravava 240 e anunciava «1 linha"
+           " atualizada». Não é um valor errado, é o comando a AFIRMAR que fez o que não"
+           " fez, e o próprio ficheiro já tinha pago por isso --- o comentário duas linhas"
+           " acima conta um SET que «aceitava e apagava». A prova não é as duas recusarem:"
+           " é a CÉLULA FICAR COMO ESTAVA, porque uma recusa que já mexeu no dado é meia"
+           " escrita, e essa é pior do que qualquer das duas. E o CONTROLO exige que a"
+           " recusa seja da MEDIDA e não do comando: o que cabe passa nas duas faces, senão"
+           " isto estaria a medir um UPDATE avariado em vez de um UPDATE que sabe dizer"
+           " não. E HÁ UMA TERCEIRA FACE, que é a PERGUNTA: `ler É escrever`, pelo que se a"
+           " cadeia longa não pode ser escrita ela não está no pool --- e o endereço de"
+           " quem não está no pool é o ZERO, que é o que o bloco do WHERE já diz de si."
+           " Também aí a lei existia e não ALCANÇAVA: a pergunta era truncada e procurava"
+           " o pedaço, pelo que perguntar por 300 caracteres encontrava a célula com os"
+           " primeiros 240 e respondia «1 linha». Não é uma linha a mais --- é uma cadeia"
+           " que ninguém escreveu a ser dada como escrita, e é a mesma truncagem silenciosa"
+           " a sair pelo lado da leitura. As três faces medem-se juntas porque são UMA lei:"
+           " o que não cabe numa célula não se escreve por INSERT, não se escreve por"
+           " UPDATE, e não se encontra por pergunta nenhuma.", mal == 0);
+        sql_fechar();
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

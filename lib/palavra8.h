@@ -22,6 +22,11 @@
 
 typedef uint8_t Word8;                 /* F_8 ≡ Word_8 ≡ V8 */
 
+/* QUANTOS BITS TEM O ÁTOMO --- e está aqui porque é aqui que ele é declarado.
+ * O oito não é escolha de quem usa a palavra: é o nome do tipo. Quem precisar da
+ * largura deriva daqui, e ninguém volta a escrevê-la. */
+#define W8_BITS  ((unsigned)(sizeof(Word8) * 8u))
+
 /* ── bit a bit (𝔽₂⁸): neuronio / umbit — qualquer par de palavras ───────────── */
 static Word8 w8_xor(Word8 a, Word8 b){ return v_som(a, b); }          /* ⊕ */
 static Word8 w8_and(Word8 a, Word8 b){ return (Word8)(a & b); }       /* ∧ */

@@ -422,18 +422,46 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  * lê-se como o bit i. Uma Word são dezasseis bits, logo dezasseis linhas por
  * slot. São só dezasseis máscaras distintas, e ficam aqui em constantes porque
  * as constantes escrevem-se ao COMPILAR e o programa corre depois. */
+#define ATOMO_BITS  W8_BITS          /* do `palavra8.h`: o 8 é o nome do tipo */
+#define SLOT_BITS   WORD_ISA_BITS    /* do `word_isa.h`:  átomos × bits do átomo */
+
 #define S_BITM    200        /* SLOT_BITS coordenadas: e_k = 2^k                        */
 #define S_BITN    240        /* SLOT_BITS complementares, para desligar a coordenada    */
 /* O MAPA comporta 24 slots em 200..223 e 16 em 240..255: com a Word actual são
  * dezasseis coordenadas e sobra. Se o andar dobrar, é o MAPA que tem de abrir
  * espaço — e isso é da máquina, não da teoria. O compilador avisa em vez de
  * escrever por cima do vizinho. */
-typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
-                       && S_BITN + WORD_ISA_ATOMS*8u <= 256u) ? 1 : -1];
+typedef char cabe_a_base[(S_BITM + WORD_ISA_BITS <= 224u
+                       && S_BITN + WORD_ISA_BITS <= 256u) ? 1 : -1];
 #define S_MATCH   256        /* bitmap do resultado, BIT por linha (256..511)           */
 #define MAXCOND   4          /* condições por termo                                     */
 #define MAXTERMO  4          /* termos ligados por OR                                   */
 #define S_VIVO    512        /* a linha existe? BIT por linha (512..1023)               */
+#define S_VIVO_FIM 1024u    /* e a seguir vem o S_KINS: a constante da coluna 0        */
+
+/* ── QUANTAS LINHAS CABEM: O NÚMERO SAI DO MAPA, NÃO DE UM COMENTÁRIO ────────
+ *
+ * `NÃO HÁ TECTO DE LINHAS NA TEORIA` (acima, no S_NR): o que limita é o MAPA DE
+ * SLOTS, que é da máquina. Mas então o tecto tem de SAIR do mapa — e estava
+ * escrito num comentário, à mão, com os dois números ERRADOS: dizia «a linha
+ * 257 escreve o seu match por cima do primeiro vivo», que era verdade quando o
+ * bitmap gastava um SLOT por linha. Passou a gastar um BIT e o número não
+ * acompanhou; a linha que transborda é a 4096, dezasseis vezes mais adiante.
+ * Um comentário não é verificado por ninguém, e este sobreviveu à mudança que o
+ * invalidou. Agora deriva, e o compilador confere.
+ *
+ * O TECTO É O MENOR DOS DOIS, porque um match é escrito para toda a linha que
+ * exista: se o do resultado for mais curto, a linha alta escreve o seu match
+ * por cima do primeiro vivo — não recusa, CORROMPE, que é o defeito que este
+ * mesmo ficheiro já documenta no `den[16]` do INSERT. */
+#define LIN_MATCH  ((long)((S_VIVO     - S_MATCH) * WORD_ISA_BITS))
+#define LIN_VIVO   ((long)((S_VIVO_FIM - S_VIVO ) * WORD_ISA_BITS))
+#define LIN_TECTO  (LIN_MATCH < LIN_VIVO ? LIN_MATCH : LIN_VIVO)
+typedef char match_nao_pisa_o_vivo[(S_MATCH + (unsigned)LIN_TECTO/WORD_ISA_BITS <= S_VIVO) ? 1 : -1];
+typedef char vivo_nao_pisa_a_constante[(S_VIVO_FIM <= S_KINS) ? 1 : -1];
+long sql_lin_tecto(void){ return LIN_TECTO; }   /* quem define é quem responde */
+
+/* (a lei de apagar o match está junto do `bit_poe`, que é onde o bitmap se escreve) */
 
 /* ── O DUAL DA CÉLULA: A PRESENÇA ────────────────────────────────────────────
  *
@@ -725,7 +753,29 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
  *
  * As árvores vão até à ZONA(23). Estas ficam a partir da 24, com folga. */
 #define S_ALTO2     (ISA_TECTO + ZONA(24))
-#define S_ALTO_N    (S_LIN - S_LINHAS)      /* tantos quantos o S_LINHAS: as duas metades */
+/* ── QUANTAS CÉLULAS CABEM: O TECTO É DO PRODUTO, NÃO DAS LINHAS ─────────────
+ *
+ * Uma célula ocupa um slot em TRÊS zonas — o valor (`S_LINHAS`), o denominador
+ * (`S_DEN`) e o plano alto (`S_ALTO`) — e o endereço é `i·ncols + j`. Logo o que
+ * o mapa limita é o PRODUTO, e não o número de linhas: com uma coluna cabem
+ * dezasseis mil linhas, com oito cabem duas mil.
+ *
+ * Isto não estava dito em sítio nenhum, e o INSERT não o verificava: com 8
+ * colunas a linha 2049 escrevia a sua primeira célula em S_DEN[0], que é o
+ * denominador da célula (0,0) — e a linha 0 desaparecia da tabela sem erro
+ * nenhum. A fronteira é EXACTA e foi medida: 2048×8 responde inteiro, 2049×8
+ * perde a primeira linha.
+ *
+ * Esta constante já existia com o nome certo e o corpo errado: dizia «tantos
+ * quantos o S_LINHAS» e escrevia `S_LIN - S_LINHAS`, que é −12288 — o `S_LIN`
+ * é o rascunho por átomo, não a zona das células. Nunca foi usada, e por isso
+ * nunca doeu; agora é ela o tecto, e o compilador confere as três zonas. */
+#define S_ALTO_N    ((long)(S_DEN - S_LINHAS))   /* a zona das células, em slots */
+#define CEL_TECTO   S_ALTO_N
+typedef char as_tres_zonas_da_celula_sao_iguais[
+    ((long)(S_ALTO - S_DEN)     >= CEL_TECTO &&
+     (long)(ISA_TECTO - S_ALTO) >= CEL_TECTO) ? 1 : -1];
+long sql_cel_tecto(void){ return CEL_TECTO; }   /* quem define é quem responde */
 #define S_COLNOME   (ISA_TECTO + ZONA(6))
 /* ── O DEFAULT: o valor que a coluna toma quando o INSERT não o diz.
  *
@@ -1082,9 +1132,6 @@ static void mem_grava(unsigned slot, Word w){
  * MIGRAÇÃO: uma base gravada antes tem o nrows no `.e` do catálogo e o S_NR a
  * zero. Nesse caso adopta-se o valor antigo, uma vez. É a volta: o formato novo
  * lê o que o velho escreveu, em vez de o dar por perdido. */
-/* O TECTO É O MENOR DOS DOIS: o bitmap do resultado (S_MATCH..S_MATCH+255) tem
- * 256 slots e o de vivos (S_VIVO..S_VIVO+511) tem 512. Manda o menor, senão a
- * linha 257 escreve o seu match por cima do primeiro vivo. */
 /* O PAR, LIDO E ESCRITO COMO UM NÚMERO DE DEZASSEIS BITS.
  *
  * `Word` é {Word8 total, e} — DOIS bytes. Ler `.total` é ler METADE. Estas duas
@@ -1115,8 +1162,7 @@ static void par_grava(unsigned slot, unsigned v){
  *
  * A LINHA i É A COORDENADA i (naturais `cor:w8`: «o bit j do inteiro é a
  * coordenada j na base»), e lê-se como o bit i. */
-#define ATOMO_BITS  ((unsigned)(sizeof(Word8) * 8u))
-#define SLOT_BITS   (WORD_ISA_ATOMS * ATOMO_BITS)
+/* (ATOMO_BITS e SLOT_BITS vivem junto do MAPA, que é quem precisa deles primeiro) */
 
 static unsigned atomo_le(Word w, unsigned a){
     return a ? (unsigned)w.e : (unsigned)w.total;      /* WORD_ISA_ATOMS = 2 */
@@ -1124,6 +1170,23 @@ static unsigned atomo_le(Word w, unsigned a){
 static void atomo_poe(Word *w, unsigned a, unsigned v){
     if(a) w->e = (Word8)v; else w->total = (Word8)v;
 }
+/* ── APAGAR O MATCH: OS SLOTS QUE O CONTÊM, E NEM UM A MAIS ──────────────────
+ *
+ * Estava escrito `q <= nrows / SLOT_BITS` em QUATRO sítios. O último bit a
+ * apagar é o da linha nrows-1, que vive no slot (nrows-1)/SLOT_BITS — e a
+ * divisão arredonda para baixo, pelo que o `<=` só acerta quando nrows NÃO é
+ * múltiplo da largura do slot. Quando é, o laço escreve um slot além do
+ * bitmap. Medido: com 4096 linhas o slot excedente É o S_VIVO[0], e as linhas
+ * 0..15 desapareciam da tabela — dezasseis linhas mortas por um `<=`, sem erro
+ * nenhum, num SELECT que só queria limpar o seu rascunho.
+ *
+ * A forma sem casos: um slot entra se o seu primeiro bit é uma linha. Com
+ * nrows=0 não entra nenhum, que é o certo — não há bit para apagar. */
+static void match_limpa(long nrows){
+    Word z = {0,0};
+    for(long q = 0; q * (long)SLOT_BITS < nrows; q++) mem_grava(S_MATCH + (unsigned)q, z);
+}
+
 static int bit_le(unsigned base, long i){
     unsigned long u = (unsigned long)i;
     Word w = mem_le(base + (unsigned)(u / SLOT_BITS));
@@ -1368,6 +1431,12 @@ static unsigned tx(const char *s2, int n, int sinal){
      * leitura a mudar o espaço, e a marca é de quem escreve */
     if(sinal >= 0) return 0;
     unsigned onde = topo;
+    /* e o POOL também tem parede: acima de S_CANAL o slot deixa de ser memória e
+     * passa a ser a banda do canal. O espaço é largo --- nove milhões de slots
+     * --- mas «largo» não é «verificado», e o que estava aqui era o topo a subir
+     * sem ninguém a olhar. Recusar devolve 0, que É a ausência: quem escreve vê
+     * a célula ficar sem texto em vez de a ver escrita noutro sítio. */
+    if(onde + 1u + (unsigned)n >= S_CANAL) return 0;
     slot_mem_grava(fmem, onde, (unsigned char)n);
     for(int i = 0; i < n; i++)
         slot_mem_grava(fmem, onde + 1u + (unsigned)i, (unsigned char)s2[i]);
@@ -2812,8 +2881,17 @@ static int cria(const char *resto){
                      * endereço dela, como qualquer outro valor de texto */
                     p++;
                     char db[TX_MAX + 2]; int dn = 0;
-                    while(*p && *p != '\''){ if(dn < TX_MAX) db[dn++] = *p; p++; }
+                    while(*p && *p != '\''){ if(dn < TX_MAX) db[dn++] = *p; else dn = TX_MAX + 1; p++; }
                     if(*p == '\'') p++;
+                    /* o DEFAULT é escrita como qualquer outra, e recusa como as
+                     * outras: truncá-lo daria uma coluna cujo valor por omissão
+                     * não é o que foi declarado, e ninguém saberia */
+                    if(dn > TX_MAX){
+                        printf("erro: o DEFAULT da coluna passa do que a célula segura --- RECUSADO.\n");
+                        if(sql_cap){ sql_cap->ok = 0;
+                            snprintf(sql_cap->err, sizeof sql_cap->err, "string too long"); }
+                        return 0;
+                    }
                     db[dn] = 0;
                     defv_j = (long)tx_guarda(db, dn); deftem_j = 1;
                     pula(&p); continue;
@@ -3144,6 +3222,28 @@ static int insere(const char *resto){
 
     Word cat = mem_le(S_CAT); (void)cat;
     long ncols = cat_ncols(), nrows = cat_nrows();
+    /* E A LINHA QUE NÃO CABE RECUSA, EM VEZ DE PISAR O VIZINHO.
+     *
+     * A condição existe aqui: é o primeiro ponto em que nrows se conhece, e
+     * ainda nada foi escrito — a base fica INDISTINGUÍVEL de um INSERT que
+     * nunca chegou a ser dito. Uma linha mais abaixo já seria tarde: o valor da
+     * célula é gravado antes do bit do vivo. */
+    if(nrows >= LIN_TECTO){
+        printf("erro: o mapa de slots desta máquina comporta %ld linhas e a tabela"
+               " já as tem — o tecto é do MAPA, não da teoria (arquitetura.tex"
+               " §sec:torre: o que cresce é o objecto, não a máquina)\n", LIN_TECTO);
+        return 0;
+    }
+    /* E O OUTRO EIXO DA MESMA FRONTEIRA: a célula ocupa um slot por zona, e o
+     * endereço é i·ncols + j — logo o mapa limita o PRODUTO. Com uma coluna o
+     * bitmap aperta primeiro; com oito, esta. As duas são a mesma parede vista
+     * de dois lados, e por isso estão à mesma porta. */
+    if(ncols > 0 && (nrows + 1) * ncols > CEL_TECTO){
+        printf("erro: o mapa comporta %ld células e esta linha pediria %ld"
+               " (%ld linhas × %ld colunas) — o tecto é do PRODUTO, não das"
+               " linhas\n", CEL_TECTO, (nrows + 1) * ncols, nrows + 1, ncols);
+        return 0;
+    }
     static long v[COL_MAX]; long nv = 0;
     /* o PADRÃO do segundo componente vem do CORPO: no racional é denominador (1), no áureo é
      * o coeficiente de σ (0 — "5" é o inteiro 5, não 5+σ). O par é o mesmo; o que muda é o que
@@ -3903,12 +4003,20 @@ static int le_fator_num(const char **p, struct tensor *t){
         char buf[TX_MAX + 2]; int bn = 0;
         while(*r){
             if(*r == '\''){
-                if(r[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; r += 2; continue; }
+                if(r[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; else bn = TX_MAX + 1; r += 2; continue; }
                 r++; break;
             }
-            if(bn < TX_MAX) buf[bn++] = *r;
+            if(bn < TX_MAX) buf[bn++] = *r; else bn = TX_MAX + 1;
             r++;
         }
+        /* E A CADEIA QUE NÃO CABE NUMA CÉLULA TAMBÉM NÃO ESTÁ NO POOL --- logo o
+         * endereço dela é o ZERO, que é o que este bloco já diz três linhas
+         * acima. A lei existia e não ALCANÇAVA este caso: truncava a pergunta a
+         * TX_MAX e procurava o pedaço, pelo que perguntar por 300 caracteres
+         * encontrava a célula que tem os primeiros 240 e respondia «1 linha».
+         * Não é uma linha a mais: é uma cadeia que ninguém escreveu a ser dada
+         * como escrita. */
+        if(bn > TX_MAX){ ten_const(t, 0); *p = r; return 1; }
         buf[bn] = 0;
         ten_const(t, (long)tx_procura(buf, bn));
         *p = r;
@@ -6745,13 +6853,26 @@ static int varre(const char *resto, int acao){
         else if(*p == '\''){
             const char *r = p + 1;
             char buf[TX_MAX + 2]; int bn = 0, fechou = 0;
+            /* E A CADEIA QUE NÃO CABE RECUSA AQUI TAMBÉM — a mesma forma do
+             * INSERT, porque é a mesma escrita. Estava `if(bn < TX_MAX)`, que
+             * DESCARTA em silêncio: um SET de 300 caracteres gravava 240 e
+             * anunciava «1 linha atualizada», sem aviso nenhum. O INSERT já
+             * marcava e recusava; a guarda tinha sido posta numa face do par e
+             * não na outra, e é exactamente o desfecho que o comentário acima
+             * conta ter custado caro — aceitar e não fazer o que foi dito. */
             while(*r){
                 if(*r == '\''){
-                    if(r[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; r += 2; continue; }
+                    if(r[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; else bn = TX_MAX + 1; r += 2; continue; }
                     r++; fechou = 1; break;
                 }
-                if(bn < TX_MAX) buf[bn++] = *r;
+                if(bn < TX_MAX) buf[bn++] = *r; else bn = TX_MAX + 1;
                 r++;
+            }
+            if(bn > TX_MAX){
+                printf("erro: a cadeia do SET passa do que a célula segura --- RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err, "string too long"); }
+                return 0;
             }
             buf[bn] = 0;
             if(!fechou){
@@ -7579,8 +7700,7 @@ static int varre(const char *resto, int acao){
      * emitida em emit_atomos e a comparação é sobre o NUMERADOR do denominador comum. O que
      * era recusa honesta virou conta feita — inclusive com mais de uma coluna racional. */
     prepara(v, acao == ACAO_SET ? col_set : -1);
-    Word z = {0,0};
-    for(long i = 0; i <= nrows / (long)SLOT_BITS; i++) mem_grava(S_MATCH + (unsigned)i, z);
+    match_limpa(nrows);
 
     /* UM molde só, o da linha 0 — e depois a PA anda com ele por todas as linhas.
      *
@@ -7658,9 +7778,7 @@ static int varre(const char *resto, int acao){
          * apaga-se e acendem-se só as que a árvore devolveu. Os passos da ISA
          * não contam esta parte porque ela não é ISA: é a árvore, e a árvore é
          * o corte. */
-        { Word z = {0,0};
-          for(long q = 0; q <= nrows / (long)SLOT_BITS; q++)
-              mem_grava(S_MATCH + (unsigned)q, z); }
+        match_limpa(nrows);
         ord_usa_indice(idx_col);
         static int achados[J_MAXLIN];
         int n = j_faixa(idx_lo, idx_hi, achados, J_MAXLIN);
@@ -7768,9 +7886,7 @@ static int varre(const char *resto, int acao){
 
         /* de volta em casa, o campo reescreve-se do zero: a troca de tabela
          * mexeu-lhe, e o que vale é a decisão que já está tomada. */
-        { Word z = {0,0};
-          for(long q = 0; q <= nrows / (long)SLOT_BITS; q++)
-              mem_grava(S_MATCH + (unsigned)q, z); }
+        match_limpa(nrows);
         for(int k = 0; k < ne; k++)
             if(passa[k]) bit_poe(S_MATCH, in_idx[k], 1);
     }
@@ -7839,9 +7955,7 @@ static int varre(const char *resto, int acao){
     if(ex_usa && !ex_vale){
         /* o quantificador é uma CONSTANTE: falso apaga o campo inteiro, e
          * verdadeiro deixa-o como está — nenhuma linha é olhada */
-        Word z = {0,0};
-        for(long q2 = 0; q2 <= nrows / (long)SLOT_BITS; q2++)
-            mem_grava(S_MATCH + (unsigned)q2, z);
+        match_limpa(nrows);
     }
 
     if(nul_usa){

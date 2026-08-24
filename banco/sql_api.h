@@ -21,6 +21,16 @@
  * caminho, o motor RECUSA o que não cabe em vez de truncar: uma linha truncada
  * não é uma linha curta, é uma linha em que a posição k passa a ser outra
  * coisa. Quem precisar de mais nomeia as colunas — e essas atravessam. */
+/* QUANTAS LINHAS COMPORTA O MAPA DESTA MÁQUINA — e PERGUNTA-SE, não se escreve.
+ * A teoria não tem tecto de linhas (`§sec:torre`: o que cresce é o objecto, não a
+ * máquina); o MAPA DE SLOTS tem, e quem não cabe RECUSA. Escrevê-lo aqui seria o
+ * número em dois sítios: o mapa mudaria e este mentiria. */
+long sql_lin_tecto(void);
+/* e o OUTRO eixo da mesma parede: a célula ocupa um slot por zona e o endereço é
+ * i·ncols + j, pelo que o mapa limita o PRODUTO. Com uma coluna aperta o bitmap
+ * das linhas; com oito, aperta este. */
+long sql_cel_tecto(void);
+
 #define SQL_OUT_MAX_COLS 64
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64

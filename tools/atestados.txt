@@ -35,7 +35,7 @@ balanco 7633a1b04e15a806 0
 banco 65871676a87669aa 0
 banco_relogio 78deb56415847f6f 0
 banda 3fc1f9dc2d5c2900 0
-barramento ce55de0e7cbe9356 0
+barramento bf7b3fc573519c4e 0
 base 2d21d6b77b1c1d23 0
 base_local 148cac48fa1aeea7 0
 batuta_continuo 7671972b9f96081b 0
@@ -183,7 +183,7 @@ entre ff067afd0df154f7 0
 entrega 5e7be49869d7d9b2 0
 entropia_dual 0e62dee11e3fc413 0
 equivalencia_universal db7d0dc65a704ccf 0
-erg c7020abd3fd87388 0
+erg f7924762bf8868f7 0
 escada 52dc73c081e6fbec 0
 escala b5c334f9d5c62319 0
 escala_dourada 5c990fc76f6f0948 0
@@ -364,7 +364,7 @@ os28_medidos a6fda10ad4f9bf5f 0
 ouro_base dfedd53bacfc7159 0
 ouro_branco f50a42364dff2254 0
 palavra 4d471b92c0f27a12 0
-palavra8 b4fd56b8e643aa7a 0
+palavra8 a78e034ce674aa4f 0
 parabola 14c29b773abdad1a 0
 paracomplexo 2691565615f4e600 0
 parseval 60ec25b7375cb96a 0
@@ -374,7 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 16453c56f267fee3 0
+pgwire ea52f02999edd872 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -465,7 +465,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 4574acab8dff5a0a 0
+sql e9ab1af537d99d36 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
