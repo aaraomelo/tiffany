@@ -28569,6 +28569,126 @@ int main(void){
            " erosão nenhuma a comutar.", mal == 0);
     }
 
+    /* ═══ §W197: ESCREVER ACUMULA (ζ) — o MergeTree, e o que ele promete ═══ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W197 mergetree: o índice acompanha a escrita, e os dois caminhos concordam.\n\n");
+        unlink("/tmp/pgwire_w197.mem"); unlink("/tmp/pgwire_w197.prog");
+        unlink("/tmp/pgwire_w197.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w197__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w197__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w197")) mal++;
+
+        /* ── O QUE O MERGETREE PROMETE, E O QUE JÁ CÁ ESTAVA ─────────────────
+         *
+         * Ele promete duas coisas: escrever é BARATO (cada INSERT é um append
+         * que não reordena nada) e ler é CERTO (as partes fundem-se e a resposta
+         * é a mesma). A primeira já cá estava, e o motor di-lo de si:
+         *
+         *   «`thm:zeta-mu`: escrever é a convolução com ζ, que ACUMULA. [...]
+         *    Acrescentar uma chave à árvore é acumular --- desce-se uma vez e
+         *    escreve-se ---, e por isso um INSERT não tem de invalidar o índice:
+         *    mantém-no. Tirar uma chave seria o μ, e essa não é a mesma
+         *    facilidade numa árvore de prefixos.»
+         *
+         * E o tombstone dele também: o bitmap S_VIVO já diz se a linha existe,
+         * pelo que a chave apagada pode ficar na árvore sem mentir --- quem
+         * desce filtra pelo vivo.
+         *
+         * O QUE FALTAVA ERA MEDIR A SEGUNDA. Uma sequência intercalada de
+         * escritas é onde um índice que acompanha se engana, e a única prova é
+         * pôr os DOIS CAMINHOS lado a lado a cada passo: `k = X` desce a árvore
+         * (0 bytes de ISA, não compila varredura) e `k+0 = X` varre (a soma
+         * impede o índice). Se algum dia divergirem, é aqui. */
+        sql_executa("CREATE TABLE t (k INTEIRO, v INTEIRO)", &o);
+        for(int i = 1; i <= 10; i++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 10);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE INDEX ix197 ON t (k)", &o);
+
+        /* a sequência que mistura as três operações --- é ela que desarruma */
+        static const char *PASSO[7] = {
+            "INSERT INTO t VALUES (11,110)",
+            "DELETE FROM t WHERE k = 3",
+            "INSERT INTO t VALUES (12,120)",
+            "UPDATE t SET k = 99 WHERE k = 5",
+            "INSERT INTO t VALUES (13,130)",
+            "DELETE FROM t WHERE k = 7",
+            "INSERT INTO t VALUES (14,140)",
+        };
+        long concordam = 0, comparadas = 0;
+        for(int p = 0; p <= 7; p++){
+            if(p > 0) sql_executa(PASSO[p-1], &o);
+            /* a cada passo, os dois caminhos sobre TODAS as chaves possíveis */
+            for(int k = 1; k <= 14; k++){
+                char q1[100], q2[100];
+                snprintf(q1, sizeof q1, "SELECT k FROM t WHERE k = %d", k);
+                snprintf(q2, sizeof q2, "SELECT k FROM t WHERE k+0 = %d", k);
+                sql_executa(q1, &o); long a1 = o.ok ? o.nrows : -1;
+                sql_executa(q2, &o); long a2 = o.ok ? o.nrows : -1;
+                comparadas++;
+                if(a1 == a2) concordam++;
+                else printf("        no passo %d, a chave %d: a árvore diz %ld e a"
+                            " varredura %ld\n", p, k, a1, a2);
+            }
+        }
+        printf("      sete escritas intercaladas × catorze chaves: a árvore e a"
+               " varredura concordam em %ld/%ld\n", concordam, comparadas);
+        if(concordam != comparadas) mal++;
+
+        /* ── E O CUSTO DE ESCREVER NÃO CRESCE: é isso que faz do ζ um append.
+         * Se o INSERT reconstruísse o índice, o custo subiria com a tabela. */
+        long custo[3];
+        for(int k = 0; k < 3; k++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)",
+                                 20 + k, (20 + k) * 10);
+            sql_executa(q, &o);
+            custo[k] = sql_ultimos_passos;
+        }
+        printf("      o custo de três INSERT seguidos, com o índice construído:"
+               " %ld, %ld, %ld passos\n", custo[0], custo[1], custo[2]);
+        if(!(custo[0] == custo[1] && custo[1] == custo[2] && custo[0] > 0)) mal++;
+
+        /* ── E O CONTROLO: os dois caminhos TÊM de ser dois. Se `k+0 = X`
+         * também descesse o índice, isto compararia o mesmo consigo próprio. */
+        sql_executa("SELECT k FROM t WHERE k = 12", &o);
+        long b_idx = sql_ultimo_prog ? 1 : 0;
+        sql_executa("SELECT k FROM t WHERE k = 12", &o);
+        long bytes_idx = sql_ultimos_passos;
+        sql_executa("SELECT k FROM t WHERE k+0 = 12", &o);
+        long bytes_var = sql_ultimos_passos;
+        printf("      CONTROLO — são DOIS caminhos: a árvore custa %ld passos e a"
+               " varredura %ld\n", bytes_idx, bytes_var);
+        if(bytes_var <= bytes_idx) mal++;
+        (void)b_idx;
+
+        sql_fechar();
+        printf("\n");
+        ok("ESCREVER ACUMULA, E É POR ISSO QUE O ÍNDICE ACOMPANHA. O MergeTree promete"
+           " duas coisas --- escrever é BARATO, porque cada INSERT é um append que não"
+           " reordena nada, e ler é CERTO, porque as partes fundem-se sem mudar a"
+           " resposta --- e a primeira já cá estava, dita pelo próprio motor: «escrever é"
+           " a convolução com ζ, que ACUMULA; acrescentar uma chave à árvore é acumular,"
+           " desce-se uma vez e escreve-se, e por isso um INSERT não tem de invalidar o"
+           " índice: mantém-no. Tirar uma chave seria o μ, e essa não é a mesma facilidade"
+           " numa árvore de prefixos.» O tombstone dele também já cá estava: o bitmap"
+           " S_VIVO diz se a linha existe, pelo que a chave apagada fica na árvore sem"
+           " mentir --- quem desce filtra pelo vivo. O QUE FALTAVA ERA MEDIR A SEGUNDA."
+           " Uma sequência intercalada de escritas é onde um índice que acompanha se"
+           " engana, e a única prova é pôr os DOIS CAMINHOS lado a lado a cada passo:"
+           " `k = X` desce a árvore, sem compilar varredura nenhuma, e `k+0 = X` varre,"
+           " porque a soma impede o índice. Sete escritas --- INSERT, DELETE e UPDATE"
+           " intercalados --- por catorze chaves dão 112 comparações, e as duas respostas"
+           " coincidem em todas. E o custo de escrever NÃO CRESCE: três INSERT seguidos"
+           " com o índice construído custam os mesmos passos, que é o que distingue"
+           " acumular de reconstruir. O CONTROLO é os dois caminhos serem mesmo dois ---"
+           " se a segunda forma também descesse o índice, isto compararia o mesmo consigo"
+           " próprio e concordaria sempre.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
