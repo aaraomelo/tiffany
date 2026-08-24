@@ -30125,6 +30125,124 @@ int main(void){
            " entre eles É o dano.", mal == 0);
     }
 
+    /* ═══ §W210: A FOLGA É UMA SÓ — três operações numa identidade ═════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W210 a folga é uma só: ∑(G−1) = |I| − |X|, e liga três operações.\n\n");
+
+        /* ── O QUE O cor:folga DIZ ───────────────────────────────────────────
+         *
+         * «As duas perguntas --- QUANTAS PARTES DA FOLHA FORAM COLADAS NESTA
+         * CÉLULA? e QUANTOS PONTOS DA RÉGUA AINDA ESTÃO SEM FOLHA? --- têm a
+         * mesma resposta:  ∑_x (G(x) − 1) = |I| − |X|. Não é coincidência de
+         * números: é a MESMA folga vista pelos dois mapas. Do lado de π ela
+         * aparece como colagem em excesso; do lado de ρ, como lugar por
+         * preencher.»
+         *
+         * No motor, π é «linhas → valores de uma coluna» e G(v) é a fibra do
+         * valor. A identidade traduz-se assim, e liga TRÊS operações que o
+         * motor calcula por caminhos diferentes:
+         *
+         *     ∑G − grupos   (do GROUP BY)  =  count(*) − count(DISTINCT)
+         *
+         * É por isso um medidor de UNIFICAÇÃO e não de uma operação: nenhuma
+         * das três pode truncar sem que a igualdade se abra. Verificado contra
+         * o motor de antes das correcções de hoje, ele dá ∑G = 64 com |I| = 200
+         * --- a esquerda 57, a direita 193, e a identidade QUEBRA por 136. Os
+         * três defeitos que corrigi em separado (o count(DISTINCT) a contar
+         * metade, o GROUP BY a parar na janela, o SELECT DISTINCT a devolver
+         * repetidos) são todos visíveis aqui de uma vez. */
+        unlink("/tmp/pgwire_w210.mem"); unlink("/tmp/pgwire_w210.prog");
+        unlink("/tmp/pgwire_w210.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w210__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w210__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w210")) mal++;
+
+        /* Mede-se em REGIMES DE FOLGA DIFERENTE, porque uma identidade que só
+         * se verificasse onde a folga é zero não diria nada: com todos os
+         * valores distintos os dois lados são zero e a igualdade é trivial. */
+        /* E OS GRUPOS TÊM DE CABER NA JANELA DA PORTA C, senão o ∑G que aqui se
+         * soma é só o que ela entrega --- e a identidade passaria a comparar um
+         * número parcial. À primeira pus 200 valores distintos: os 200 grupos
+         * não cabem nos 64 da janela, o ∑G saiu 64, e a identidade FECHOU na
+         * mesma porque com folga zero os dois lados são zero. Fechar assim não é
+         * medir. Todos os casos têm agora menos grupos do que a janela leva. */
+        struct { long nl, mod; const char *rot; } CASO[4] = {
+            { 200, 7,   "muita folga  " },   /* 7 fibras grandes            */
+            {  60, 60,  "folga ZERO   " },   /* todos distintos: 0 = 0      */
+            { 300, 2,   "folga máxima " },   /* duas fibras enormes         */
+            { 150, 50,  "folga média  " },   /* 50 fibras de três           */
+        };
+        long fecharam = 0, folgas_vistas = 0, folga_ant = -1;
+        for(int c = 0; c < 4; c++){
+            snprintf(q, sizeof q, "DROP TABLE t");  sql_executa(q, &o);
+            sql_executa("CREATE TABLE t (c INTEIRO)", &o);
+            for(long i = 0; i < CASO[c].nl; i++){
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld)", i % CASO[c].mod);
+                sql_executa(q, &o);
+            }
+            sql_executa("SELECT count(*) FROM t", &o);
+            long I = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+            sql_executa("SELECT count(DISTINCT c) FROM t", &o);
+            long X = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+            sql_executa("SELECT c, count(*) FROM t GROUP BY c", &o);
+            long somaG = 0, grupos = o.ok ? o.nrows : -1;
+            for(int r = 0; r < o.nrows; r++) somaG += atol(o.cell[r][1]);
+
+            /* se os grupos não coubessem na janela, o ∑G seria PARCIAL e a
+             * comparação não valia --- diz-se, em vez de se comparar às cegas */
+            if(grupos >= SQL_OUT_MAX_ROWS){
+                printf("      %s os grupos (%ld) não cabem na janela: ∑G seria"
+                       " parcial\n", CASO[c].rot, grupos);
+                mal++; continue;
+            }
+            long esq = somaG - grupos, dir = I - X;
+            printf("      %s |I|=%3ld |X|=%3ld ∑G=%3ld grupos=%3ld → ∑(G−1)=%3ld,"
+                   " |I|−|X|=%3ld  %s\n", CASO[c].rot, I, X, somaG, grupos, esq, dir,
+                   esq == dir ? "fecha" : "QUEBRA");
+            if(esq == dir && I > 0) fecharam++;
+            if(esq != folga_ant){ folgas_vistas++; folga_ant = esq; }
+        }
+        if(fecharam != 4) mal++;
+
+        /* ── O CONTROLO: as folgas medidas TÊM de ser diferentes ─────────────
+         *
+         * Se os quatro casos dessem a mesma folga --- ou pior, folga zero em
+         * todos ---, a identidade estaria a ser verificada num ponto só, e
+         * «fecha em quatro» seria «fecha uma vez, quatro vezes». Exige-se que
+         * os regimes sejam mesmo distintos. */
+        printf("      CONTROLO — folgas DISTINTAS medidas: %ld de 4 regimes\n",
+               folgas_vistas);
+        if(folgas_vistas < 3) mal++;
+
+        ok("A FOLGA É UMA SÓ, E ISSO LIGA TRÊS OPERAÇÕES NUMA IDENTIDADE. O `cor:folga` diz"
+           " que as duas perguntas --- «quantas partes da folha foram coladas nesta célula?»"
+           " e «quantos pontos da régua ainda estão sem folha?» --- têm a MESMA resposta,"
+           " ∑_x (G(x) − 1) = |I| − |X|, e que não é coincidência de números: é a mesma"
+           " folga vista pelos DOIS MAPAS, como colagem em excesso do lado de π e como lugar"
+           " por preencher do lado de ρ. No motor, π é «linhas → valores de uma coluna» e"
+           " G(v) é a fibra, pelo que a identidade se escreve com três operações que o motor"
+           " calcula por CAMINHOS DIFERENTES: ∑G menos os grupos, do GROUP BY, igual a"
+           " count(*) menos count(DISTINCT). É por isso um medidor de UNIFICAÇÃO e não de"
+           " uma operação --- nenhuma das três pode truncar sem que a igualdade se abra. E"
+           " não é hipótese: contra o motor de antes das correcções de hoje ele dá ∑G = 64"
+           " com |I| = 200, a esquerda 57 e a direita 193, e a identidade QUEBRA por 136."
+           " Os três defeitos que eu tinha corrigido em SEPARADO --- o count(DISTINCT) a"
+           " contar metade, o GROUP BY a parar na janela da porta C, o SELECT DISTINCT a"
+           " devolver repetidos --- seriam todos visíveis aqui de uma vez, e por um só"
+           " número. O CONTROLO é as folgas medidas serem DISTINTAS: com todos os valores"
+           " distintos os dois lados são zero e a igualdade é trivial, pelo que verificá-la"
+           " só aí seria «fecha uma vez, quatro vezes» --- medem-se quatro regimes, da folga"
+           " zero à folga máxima. E há uma condição que o medidor VERIFICA em vez de supor:"
+           " os grupos têm de caber na JANELA da porta C, senão o ∑G somado aqui é só o que"
+           " ela entrega. À primeira pus 200 valores distintos --- os 200 grupos não cabem"
+           " nos 64, o ∑G saiu 64, e a identidade fechou na mesma porque com folga zero os"
+           " dois lados são zero. Fechar assim não é medir, e agora um caso em que os"
+           " grupos não caibam faz o bloco FALHAR em vez de comparar às cegas.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

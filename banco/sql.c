@@ -219,7 +219,12 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 /* ACIMA DE TUDO O RESTO. Eu pus isto em S_LINHAS+50000 e enterrei o S_NO da cifra (que mora em
  * S_LINHAS+240000): os nos do indice passaram a ir para a rede em vez do disco, e a bateria
  * apanhou-o em tres asserçoes. A fronteira de um backend tem de ficar onde nao pisa ninguem. */
-#define S_CANAL   (ISA_TECTO + ZONA(600))
+/* A ZONA ONDE A MEMÓRIA ACABA E A BANDA COMEÇA --- dita UMA vez. O 600 estava
+ * escrito em TRÊS sítios de lei: aqui, no IDX_MAXCOL e no typedef que os
+ * verifica. Mudar o canal de sítio deixava dois errados, e o typedef passaria a
+ * confirmar uma conta contra um número que já não era o dele. */
+#define ZONA_CANAL 600u
+#define S_CANAL   (ISA_TECTO + ZONA(ZONA_CANAL))
 /* as três zonas da célula têm de caber no que a instrução alcança */
 typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 /* O POOL, O MESMO DESENHO. Acima de S_POOL, LOAD devolve um campo do job corrente e STORE no
@@ -685,7 +690,7 @@ long sql_lin_tecto(void){ return LIN_TECTO; }   /* quem define é quem responde 
 #define S_LINRASC  (ISA_TECTO + ZONA(82))
 #define ZONA_LIVRE1    83u                /* a primeira zona depois do reservado */
 #define IDX_ZONA1      ZONA_LIVRE1
-#define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
+#define IDX_MAXCOL     (8u + (ZONA_CANAL - IDX_ZONA1))
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
                                                  : IDX_ZONA1 + (unsigned)(k) - 8u))
 #define S_IDXCAB(k)    (S_IDXBASE(k))        /* {coluna+1, 0}                    */
@@ -6387,7 +6392,7 @@ static long hav_n  = 0;
  * valer por um número: «a vizinhança na árvore tem UM elemento, e o custo é
  * Θ(1) e não Θ(n)». */
 #define ORD_MAXNO_I ((ZONA_SLOTS - 3u) / ORD_LARG_)
-static unsigned ord_tecto = 600u;    /* o do espaço que a árvore corrente TEM */
+static unsigned ord_tecto = ORD_MAXNO_I;   /* o do espaço que a árvore corrente TEM */
 #define S_ORDCAB   (S_ORD - 1)
 
 /* ── O ÍNDICE VIVE NOUTRA ZONA, E NO DISCO ───────────────────────────────────
@@ -6500,7 +6505,8 @@ static void ord_usa_indice(long k){ ord_raiz = S_IDX((unsigned)k);
  * anula. A altura desta torre é o mesmo: não se fixa, calcula-se do que há para
  * separar, e cada consulta constrói a sua. */
 
-#define ORD_MAXNO  600u                  /* o que a zona de um ÍNDICE segura */
+/* (o `ORD_MAXNO 600u` que aqui vivia era `#define` MORTO --- nunca usado em
+ * código, só a repetir o número que o `ORD_MAXNO_I` já deriva do mapa. Saiu.) */
 typedef char ord_larg_bate[(ORD_LARG == ORD_LARG_) ? 1 : -1];   /* os dois têm de ser um */
 
 static unsigned ord_novo(void){
@@ -6724,7 +6730,17 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
 typedef char zonas_nao_pisam_os_indices[(45u + J_ZONAS <= 77u) ? 1 : -1];
 typedef char lcs_nao_pisa_o_invertido[(77u + LCS_ZONAS <= 79u) ? 1 : -1];
 typedef char invertido_nao_pisa_os_indices[(79u + INV_ZONAS <= ZONA_LIVRE1) ? 1 : -1];
-typedef char indices_cabem_abaixo_do_canal[(IDX_ZONA1 + IDX_MAXCOL - 8u <= 600u) ? 1 : -1];
+/* ── E ESTA VERIFICAÇÃO MUDOU DE CONTEÚDO COM A UNIFICAÇÃO ───────────────────
+ *
+ * Ela era `IDX_ZONA1 + IDX_MAXCOL - 8 <= 600`, com o 600 escrito à mão nos dois
+ * lados --- e aí verificava algo: que as duas contas batiam. Agora que o
+ * IDX_MAXCOL DERIVA do ZONA_CANAL, a desigualdade é verdadeira por construção,
+ * e seria a tautologia dentro da correcção: os dois lados a mesma expressão.
+ *
+ * O que pode falhar é outra coisa, e é essa que se verifica: que a primeira zona
+ * dos índices esteja ABAIXO do canal --- se as zonas reservadas crescerem até lá,
+ * não sobra índice nenhum ---, e que sobrem pelo menos as OITO de sempre. */
+typedef char ha_zona_para_indices[(IDX_ZONA1 + 8u <= ZONA_CANAL) ? 1 : -1];
 
 static char j_tab_dir[64] = "";   /* a tabela da direita, "" se não há JOIN */
 static char j_col_esq[64] = "";   /* a coluna da esquerda no ON            */
