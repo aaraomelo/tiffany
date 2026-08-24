@@ -27387,6 +27387,128 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W189: LER É ESCREVER — A VOLTA, EM TODOS OS CORPOS ══════════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W189 a volta: μ∘ζ = id em cada corpo e por cada caminho de escrita.\n\n");
+        unlink("/tmp/pgwire_w189.mem"); unlink("/tmp/pgwire_w189.prog");
+        unlink("/tmp/pgwire_w189.undo");
+        { static const char *tt[3] = {"t","mae","filha"};
+          for(int k = 0; k < 3; k++){
+              char m[256], g[256];
+              snprintf(m, sizeof m, "/tmp/pgwire_w189__%s.mem", tt[k]);
+              snprintf(g, sizeof g, "/tmp/pgwire_w189__%s.prog", tt[k]);
+              unlink(m); unlink(g); } }
+        if(!sql_abrir("/tmp/pgwire_w189")) mal++;
+
+        /* ── A PERGUNTA É UMA SÓ, E NÃO DUAS ─────────────────────────────────
+         *
+         * Andei a varrer «quem ESCREVE os três planos» e «quem os LÊ» como duas
+         * listas, e isso é tratar as duas faces como dois objectos. A
+         * §sec:dualidades diz o contrário: «um lado comprime e perde uma
+         * distinção; o outro repõe-na noutro sítio, e paga por isso» --- e o par
+         * ζ/μ é o único que INVERTE DOS DOIS LADOS, por nilpotência.
+         *
+         * Então o que se mede não é a lista dos escritores nem a dos leitores:
+         * é a VOLTA. Escrever x e ler tem de devolver x, em cada corpo e por
+         * cada caminho --- e uma face que não feche aparece aqui, seja de que
+         * lado for o defeito. Uma varredura por caminho encontra o que eu me
+         * lembrar de varrer; a volta encontra o que eu não me lembrei. */
+        sql_executa("CREATE TABLE t (i INTEIRO, r RACIONAL, d DATA, s TEXTO, b BOOLEANO)", &o);
+
+        struct { const char *pos; const char *esc; const char *esp[5]; } P[4] = {
+          { "INSERT",
+            "INSERT INTO t VALUES (30000, 3/4, 1787443200, 'ola', 1)",
+            {"30000","3/4","2026-08-23 00:00:00","ola","t"} },
+          { "UPDATE",
+            "UPDATE t SET i = 32000",
+            {"32000","3/4","2026-08-23 00:00:00","ola","t"} },
+          { "UPDATE numa DATA",
+            "UPDATE t SET d = 1800000000",
+            {"32000","3/4","2027-01-15 08:00:00","ola","t"} },
+          { "ALTER noutra coluna",
+            "ALTER TABLE t ADD COLUMN z",
+            {"32000","3/4","2027-01-15 08:00:00","ola","t"} },
+        };
+        long voltas = 0, medidas = 0;
+        for(int k = 0; k < 4; k++){
+            sql_executa(P[k].esc, &o);
+            sql_executa("SELECT i,r,d,s,b FROM t", &o);
+            medidas++;
+            int bate = (o.ok && o.nrows == 1 && o.ncols == 5);
+            for(int c = 0; c < 5 && bate; c++)
+                if(strcmp(o.cell[0][c], P[k].esp[c])) bate = 0;
+            printf("        %-20s ", P[k].pos);
+            if(o.ok && o.nrows == 1)
+                for(int c = 0; c < o.ncols; c++)
+                    printf("%s%s", o.cell[0][c], c + 1 < o.ncols ? " | " : "");
+            printf("  %s\n", bate ? "" : "← NÃO VOLTA");
+            if(bate) voltas++;
+        }
+        printf("      → %ld de %ld: o que se escreveu é o que se lê\n", voltas, medidas);
+        if(voltas != medidas) mal++;
+
+        /* ── E A VOLTA DO ROLLBACK, que é o μ explícito: a trajectória inteira
+         * repõe-se sem que nada dela tenha sido guardado além do diário. */
+        sql_executa("BEGIN", &o);
+        sql_executa("UPDATE t SET i = 7", &o);
+        sql_executa("UPDATE t SET d = 5", &o);
+        sql_executa("ROLLBACK", &o);
+        sql_executa("SELECT i,d FROM t", &o);
+        int desfez = (o.ok && o.nrows == 1
+                      && !strcmp(o.cell[0][0], "32000")
+                      && !strcmp(o.cell[0][1], "2027-01-15 08:00:00"));
+        printf("      o ROLLBACK repõe os DOIS (o inteiro e a data): %s%s%s\n",
+               o.ok && o.nrows == 1 ? o.cell[0][0] : "?", o.ok && o.nrows == 1 ? " · " : "",
+               o.ok && o.nrows == 1 ? o.cell[0][1] : "");
+        if(!desfez) mal++;
+
+        /* ── E O CONTROLO, sem o qual isto não distingue nada: uma escrita que
+         * MUDA tem de aparecer. Se o SELECT devolvesse sempre o que o INSERT
+         * pôs, todas as linhas acima passavam com o motor a ignorar os UPDATE. */
+        sql_executa("UPDATE t SET i = 11", &o);
+        sql_executa("SELECT i FROM t", &o);
+        int muda = (o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "11"));
+        printf("      CONTROLO — uma escrita nova aparece na leitura: %s\n",
+               muda ? "sim (11)" : "NÃO");
+        if(!muda) mal++;
+
+        /* ── E A FOLGA CONTA-SE DOS DOIS LADOS. A §sec:dualidades: «o que de um
+         * lado aparece como colagem em excesso é, do outro, lugar por preencher,
+         * e o número é |I|−|X| nos dois». Aqui: as células escritas contra as
+         * células presentes --- uma linha com uma coluna acrescentada tem uma
+         * célula a MENOS presente do que o catálogo diz que ela tem, e esse é
+         * exactamente o lugar por preencher que o ALTER abriu. */
+        sql_executa("SELECT count(*) FROM t", &o);
+        long linhas = (o.ok && o.nrows == 1) ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT z FROM t", &o);
+        int ausente = (o.ok && o.nrows == 1 && (o.nulo[0][0] || o.cell[0][0][0] == 0));
+        printf("      a coluna que o ALTER abriu está AUSENTE e não a zero: %s"
+               " (em %ld linha)\n", ausente ? "sim" : "NÃO", linhas);
+        if(!ausente) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("LER É ESCREVER: O QUE SE MEDE É A VOLTA, E NÃO DUAS LISTAS. Andei a varrer"
+           " «quem escreve os três planos da célula» e «quem os lê» como duas coisas, e"
+           " isso é tratar as duas faces como dois objectos. A §sec:dualidades diz o"
+           " contrário: «um lado comprime e perde uma distinção; o outro repõe-na noutro"
+           " sítio, e paga por isso», e o par ζ/μ é o ÚNICO que inverte dos dois lados,"
+           " por nilpotência do S (lem:nilp) --- os outros são RETRAÇÕES, e só um lado"
+           " fecha. Então a pergunta certa é uma só: escrever x e ler devolve x? Mede-se"
+           " em cada corpo --- INTEIRO, RACIONAL, DATA, TEXTO, BOOLEANO --- e por cada"
+           " caminho de escrita: o INSERT, o UPDATE, o UPDATE numa DATA (que usa os três"
+           " planos, e é onde o defeito vivia), e o ALTER noutra coluna, que REESCREVE"
+           " todas as células de sítio. Uma varredura por caminho encontra o que eu me"
+           " lembrar de varrer; a volta encontra o que eu não me lembrei, e o defeito"
+           " aparece seja de que lado for. O ROLLBACK é o μ explícito e repõe os dois"
+           " valores sem nada da trajectória ter sido guardado além do diário. E há dois"
+           " controlos, porque sem eles isto não distinguiria nada: uma escrita NOVA tem"
+           " de aparecer na leitura --- senão um motor que ignorasse os UPDATE passava em"
+           " tudo ---, e a coluna que o ALTER abriu tem de estar AUSENTE e não a zero,"
+           " que é a folga contada do outro lado: o lugar por preencher.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
