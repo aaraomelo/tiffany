@@ -5941,6 +5941,12 @@ static void celula_qz(long i, long j, long nc, long *num, long *den){
     *num = celula_valor(i, j, nc); *den = 1;
 }
 
+/* OS TRÊS PLANOS, aqui também. Este caminho --- a propagação ON UPDATE CASCADE
+ * e o desfazer de um SET --- escrevia dois de três, e o terceiro ficava com o do
+ * valor anterior: uma DATA propagada por uma seta mudava de instante, e o
+ * `rollback` de um SET repunha o baixo e deixava o alto2 do valor novo. É o
+ * mesmo defeito que o UPDATE tinha, noutro caminho --- e é por isso que a
+ * célula tem de ter UM sítio que a escreve, não três parecidos. */
 static void celula_grava(long i, long j, long nc, long valor){
     unsigned pos = (unsigned)(i*nc + j);
     Word b = mem_le(S_LINHAS + pos);
@@ -5948,6 +5954,9 @@ static void celula_grava(long i, long j, long nc, long valor){
     mem_grava(S_LINHAS + pos, b);
     { Word a; a.total = (Word8)(((unsigned long)valor >> 8) & 255u); a.e = 0;
       mem_grava(S_ALTO + pos, a); }
+    { Word c; c.total = (Word8)(((unsigned long)valor >> 16) & 255u);
+      c.e     = (Word8)(((unsigned long)valor >> 24) & 255u);
+      mem_grava(S_ALTO2 + pos, c); }
 }
 
 /* FASE 1 do join: copiar a tabela da DIREITA para o banco e indexá-la.
@@ -12438,7 +12447,19 @@ static int do_bloco(const char *q){
           if(!strncasecmp(k, "ARRAY", 5)){
               const char *r = k + 5;
               while(r < cf && *r != '[') r++;
-              while(r < cf && *r != ']' && crit_nl < TAB_ENUM_MAX){
+              /* a lista escrita não se trunca: se ela nomear mais tabelas do
+               * que cabem, o bloco é RECUSADO --- correr metade de um laço é
+               * dizer que se aplicou a política a tabelas que ficaram de fora */
+              while(r < cf && *r != ']'){
+                  if(crit_nl >= TAB_ENUM_MAX){
+                      printf("erro: a lista do bloco DO nomeia mais de %d tabelas"
+                             " — RECUSADO. Correr metade seria dizer que se fez o"
+                             " que não se fez.\n", TAB_ENUM_MAX);
+                      if(sql_cap){ sql_cap->ok = 0;
+                          snprintf(sql_cap->err, sizeof sql_cap->err,
+                                   "DO: table list exceeds %d names", TAB_ENUM_MAX); }
+                      return 0;
+                  }
                   while(r < cf && *r != '\'' && *r != ']') r++;
                   if(r >= cf || *r == ']') break;
                   r++;
