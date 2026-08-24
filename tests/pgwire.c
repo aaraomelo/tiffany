@@ -30019,6 +30019,112 @@ int main(void){
            " disto caiu.", mal == 0);
     }
 
+    /* ═══ §W209: O RASCUNHO DO SCRIPT ESCREVIA DENTRO DAS CÉLULAS ══════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W209 o carregamento por script corrompia as suas próprias células.\n\n");
+
+        /* ── O DEFEITO, E COMO SE CHEGOU A ELE ───────────────────────────────
+         *
+         * O `aranha §sec:dualidades` diz que cada par tem dois lados --- «um
+         * lado comprime e perde uma distinção; o outro repõe-na noutro sítio, e
+         * paga por isso». Varrendo o motor à procura de pares com UM SÓ lado,
+         * saiu uma zona ESCRITA E NUNCA LIDA: o `S_LINHA`, o rascunho onde o
+         * `main` guarda cada linha do script lido da entrada.
+         *
+         * E ele estava escrito assim: `S_LINHA = S_LINHAS + 20000`. Ora
+         * S_LINHAS é a ZONA(1) e ela ACABA EM 32768 --- 16384 + 20000 = 36384
+         * cai dentro do S_DEN, que é a zona dos DENOMINADORES. Cada caractere
+         * lido do script escrevia por cima do denominador de uma célula, e com
+         * LIN_MAX a valer 16384 uma linha podia atravessar o S_DEN inteiro e
+         * entrar no S_ALTO.
+         *
+         * O DANO É DO PRÓPRIO CARREGAMENTO. Uma tabela de 2000 linhas carregada
+         * pelo script respondia 1985 onde a mesma carregada por comando
+         * respondia 2000 --- quinze linhas perdidas porque o script escreve no
+         * sítio onde os dados vivem. Confirmou-se nos BYTES do ficheiro: 24
+         * bytes mudados no S_DEN, exactamente os 24 caracteres da linha
+         * executada.
+         *
+         * E nenhum medidor o apanhava, por duas razões que interessa dizer: a
+         * célula atingida é a 3616, e é preciso uma tabela GRANDE para lá
+         * chegar --- os medidores usam tabelas pequenas ---; e os guardas de
+         * zona do §W200 não o viam, porque este acesso usa `mem_grava` directo e
+         * não passa pelo `cel_ix`. */
+        unlink("/tmp/pgwire_w209.mem"); unlink("/tmp/pgwire_w209.prog");
+        unlink("/tmp/pgwire_w209.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w209__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w209__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w209")) mal++;
+
+        /* A CÉLULA QUE O RASCUNHO ATINGIA é a 3616 --- `S_LINHA - S_DEN`. Com
+         * duas colunas, é a linha 1808. A tabela tem de LÁ CHEGAR, senão isto
+         * mede um sítio onde o defeito não vive, que é o erro que fez os outros
+         * medidores não o verem. */
+        static const long NL = 2000, NC = 2;
+        sql_executa("CREATE TABLE t (a INTEIRO, b INTEIRO)", &o);
+        for(long i = 0; i < NL; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, 7)", i);
+            sql_executa(q, &o);
+        }
+        printf("      %ld linhas × %ld colunas = %ld células (a atingida era a 3616)\n",
+               NL, NC, NL * NC);
+
+        /* o DENOMINADOR de todas elas tem de ser UM --- é o que a corrupção
+         * mudava, e é por isso que a coluna perdia linhas na comparação. */
+        sql_executa("SELECT count(*) FROM t WHERE b = 7", &o);
+        long viu = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      linhas com b = 7: %ld (esperado %ld)\n", viu, NL);
+        if(viu != NL) mal++;
+
+        /* e a linha 1808 em particular, que é a que o rascunho atingia */
+        sql_executa("SELECT count(*) FROM t WHERE a = 1808", &o);
+        long alvo = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        sql_executa("SELECT count(*) FROM t WHERE a = 1810", &o);
+        long alvo2 = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      as linhas 1808 e 1810, no alcance do rascunho: %ld e %ld\n",
+               alvo, alvo2);
+        if(alvo != 1 || alvo2 != 1) mal++;
+
+        /* ── O CONTROLO: a conservação, que é o que a corrupção quebrava ─────
+         *
+         * ∑G = |I| do `thm:escada`. Uma célula cujo denominador deixou de ser um
+         * sai da fibra sem sair da tabela: o count(*) continua a dar 2000 e a
+         * comparação dá 1985. Por isso o que se compara são os DOIS --- o total
+         * e a fibra ---, e a diferença entre eles é exactamente o dano. */
+        sql_executa("SELECT count(*) FROM t", &o);
+        long total = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      CONTROLO — total %ld e fibra %ld: a diferença é o dano (%ld)\n",
+               total, viu, total - viu);
+        if(total != NL || total != viu) mal++;
+        sql_fechar();
+
+        ok("O RASCUNHO DO SCRIPT ESCREVIA DENTRO DAS CÉLULAS. O `§sec:dualidades` diz que"
+           " cada par tem dois lados --- «um lado comprime e perde uma distinção; o outro"
+           " repõe-na noutro sítio, e paga por isso» ---, e varrer o motor à procura de"
+           " pares com UM SÓ lado deu uma zona escrita e NUNCA LIDA: o rascunho onde o"
+           " `main` guarda cada linha do script. Ele estava escrito `S_LINHAS + 20000`, e"
+           " S_LINHAS é a ZONA(1), que ACABA em 32768: 36384 cai dentro do S_DEN, a zona"
+           " dos DENOMINADORES. Cada caractere lido do script escrevia por cima do"
+           " denominador de uma célula, e com LIN_MAX a valer 16384 uma linha podia"
+           " atravessar o S_DEN inteiro e entrar no S_ALTO. O dano é do PRÓPRIO"
+           " carregamento: uma tabela de 2000 linhas carregada por script respondia 1985"
+           " onde a mesma carregada por comando respondia 2000 --- quinze linhas perdidas"
+           " porque o script escreve no sítio onde os dados vivem. Confirmou-se nos BYTES"
+           " do ficheiro: 24 mudados no S_DEN, exactamente os 24 caracteres da linha"
+           " executada. E nenhum medidor o apanhava por duas razões que interessa dizer: a"
+           " célula atingida é a 3616, e é preciso uma tabela GRANDE para lá chegar,"
+           " enquanto os medidores usam tabelas pequenas; e os guardas de zona do §W200 não"
+           " o viam, porque este acesso usa `mem_grava` directo e não passa pelo `cel_ix` a"
+           " que eles estão ligados. Este bloco mede portanto no sítio onde o defeito VIVE."
+           " E o CONTROLO é a conservação do `thm:escada`: uma célula cujo denominador"
+           " deixou de ser um sai da FIBRA sem sair da TABELA, pelo que o count(*) continua"
+           " a dar 2000 enquanto a comparação dá 1985 --- comparam-se os dois, e a diferença"
+           " entre eles É o dano.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

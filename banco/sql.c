@@ -666,7 +666,24 @@ long sql_lin_tecto(void){ return LIN_TECTO; }   /* quem define é quem responde 
 #define S_GRPSEQ_N  (ZONA_SLOTS / 2u)
 #define S_GRPAUS    (S_GRPSEQ + S_GRPSEQ_N)
 
-#define ZONA_LIVRE1    82u                /* a primeira zona depois do reservado */
+/* ── O RASCUNHO DA LINHA DO SCRIPT, E ELE ESTAVA DENTRO DAS CÉLULAS ──────────
+ *
+ * Estava `#define S_LINHA (S_LINHAS + 20000u)` dentro do `main`, com o
+ * comentário «o rascunho da linha, no banco». Ora S_LINHAS é a ZONA(1) e ela
+ * acaba em 32768: 16384 + 20000 = 36384 cai dentro do S_DEN, que é a zona dos
+ * DENOMINADORES. Cada caractere lido do script escrevia por cima do
+ * denominador de uma célula --- e com LIN_MAX a valer 16384, uma linha podia
+ * atravessar o S_DEN inteiro e entrar no S_ALTO.
+ *
+ * MEDIDO, e o dano é do próprio carregamento: uma tabela de 2000 linhas
+ * carregada pelo STDIN respondia 1985 onde a mesma carregada por ARGUMENTO
+ * respondia 2000. Quinze linhas perdidas por o script escrever no sítio onde os
+ * dados vivem. Nenhum medidor o apanhava porque a célula atingida é a 3616 ---
+ * é preciso uma tabela grande para lá chegar.
+ *
+ * Zona própria, como a do GROUP BY. */
+#define S_LINRASC  (ISA_TECTO + ZONA(82))
+#define ZONA_LIVRE1    83u                /* a primeira zona depois do reservado */
 #define IDX_ZONA1      ZONA_LIVRE1
 #define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
@@ -17291,7 +17308,7 @@ int main(int argc, char **argv){
      * o banco tem. O buffer e FIXO e pequeno — e a janela de escrita, nao o texto. */
     if(argc >= 3 && !strcmp(argv[2], "-")){
         if(!abrir_base(argv[1])){ perror("base"); return 2; }
-        #define S_LINHA  (S_LINHAS + 20000u)          /* o rascunho da linha, no banco */
+        #define S_LINHA  S_LINRASC                    /* zona própria: ver S_LINRASC */
         #define LIN_MAX  16384u                        /* 1024 slots: o que o banco lhe reserva */
         char *lin = DISCO_FIXO(char, 20);              /* a JANELA, fixa — nao cresce nunca */
         disco_prende(DISCO_BASE(20),"dados/sql_lin.bin",(size_t)LIN_MAX,1);
