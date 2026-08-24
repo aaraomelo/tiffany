@@ -28360,6 +28360,109 @@ int main(void){
            " índice.", mal == 0);
     }
 
+    /* ═══ §W195: A MARCA DIZ SE VALE A PENA ANDAR — o skip index ═══════════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W195 a marca da coluna: sentir é ler G, e ler a marca custa O(1).\n\n");
+        unlink("/tmp/pgwire_w195.mem"); unlink("/tmp/pgwire_w195.prog");
+        unlink("/tmp/pgwire_w195.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w195__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w195__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w195")) mal++;
+
+        /* ── O QUE O CLICKHOUSE CHAMA `skip index`, E O QUE ELE É AQUI ───────
+         *
+         * A cláusula (4) do thm:multiplicidade: «sentir é ler G ... a distinção
+         * é propriedade do ESPAÇO». A marca de uma coluna --- o maior valor lá
+         * escrito, que o `col_marca` deixa no ACTO da escrita e não numa
+         * varredura --- é exactamente isso: uma leitura O(1) que diz o alcance.
+         *
+         * Com ela, uma condição que não pode ser satisfeita responde sem ler
+         * linha nenhuma. Não precisou de índice: a marca já estava escrita, e o
+         * que faltava era LÊ-LA antes de andar.
+         *
+         * MAS O QUE SE MEDE PRIMEIRO NÃO É O CUSTO --- É A RESPOSTA. Uma guarda
+         * que poupa a varredura e muda o que sai é pior do que não a haver, e
+         * esta saiu errada TRÊS vezes antes de ficar: dava vazio numa coluna
+         * toda ausente (onde a marca 0 não é uma afirmação), saltava o agregado
+         * (e `sum` sobre um vazio devolve AUSENTE, não zero) e saltava as
+         * operações de matriz (onde «zero linhas não é a conta deu vazio: é NÃO
+         * HAVER conta»). O medidor apanhou as três. */
+        sql_executa("CREATE TABLE t (a INTEIRO, b INTEIRO)", &o);
+        for(int i = 1; i <= 20; i++){
+            char q[80]; snprintf(q, sizeof q, "INSERT INTO t VALUES (%d,%d)", i, i * 2);
+            sql_executa(q, &o);
+        }
+        /* o maior valor escrito em `a` é 20 */
+        struct { const char *q; long esp; const char *rot; } C[6] = {
+          { "SELECT a FROM t WHERE a > 1000", 0,  "impossível pela marca" },
+          { "SELECT a FROM t WHERE a > 19",   1,  "possível, e no limite" },
+          { "SELECT a FROM t WHERE a = 20",   1,  "o próprio máximo" },
+          { "SELECT a FROM t WHERE a = 21",   0,  "um acima do máximo" },
+          { "SELECT a FROM t WHERE a > 0",   20,  "toda a tabela" },
+          { "SELECT a FROM t WHERE a < 1",    0,  "abaixo do mínimo" },
+        };
+        long certas = 0;
+        for(int k = 0; k < 6; k++){
+            sql_executa(C[k].q, &o);
+            long n = o.ok ? o.nrows : -1;
+            printf("        %-32s %2ld (esp %2ld)  %s%s\n",
+                   C[k].rot, n, C[k].esp, "", (n == C[k].esp) ? "" : "← NÃO BATE");
+            if(n == C[k].esp) certas++;
+        }
+        printf("      → %ld de 6: a guarda não muda a RESPOSTA, só o custo\n", certas);
+        if(certas != 6) mal++;
+
+        /* ── E OS CAMINHOS QUE ELA NÃO PODE SALTAR ──────────────────────────
+         * O agregado sobre um vazio devolve AUSENTE e não zero; o count sobre o
+         * mesmo vazio devolve 0. São níveis diferentes, e é o que a guarda tem
+         * de deixar acontecer. */
+        sql_executa("SELECT sum(a) FROM t WHERE a > 1000", &o);
+        int sum_ausente = (o.ok && o.nrows == 1 && (o.nulo[0][0] || o.cell[0][0][0] == 0));
+        sql_executa("SELECT count(*) FROM t WHERE a > 1000", &o);
+        int cnt_zero = (o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "0"));
+        printf("      sobre o MESMO vazio: sum devolve ausente (%s) e count devolve"
+               " «0» (%s) — níveis diferentes\n",
+               sum_ausente ? "sim" : "NÃO", cnt_zero ? "sim" : "NÃO");
+        if(!sum_ausente || !cnt_zero) mal++;
+
+        /* ── E O CONTROLO DA MARCA A ZERO ───────────────────────────────────
+         * Numa coluna cujas células estão todas AUSENTES a marca vale zero --- e
+         * zero não é uma afirmação sobre o alcance: vale o mesmo numa coluna por
+         * escrever. Concluir «impossível» dali era dar vazio a quem podia ter
+         * resposta. */
+        sql_executa("CREATE TABLE vz (x INTEIRO, y INTEIRO)", &o);
+        sql_executa("INSERT INTO vz VALUES (NULL, 5)", &o);
+        sql_executa("SELECT y FROM vz WHERE y > 0", &o);
+        int nao_saltou = (o.ok && o.nrows == 1);
+        printf("      CONTROLO — com a coluna vizinha toda AUSENTE, a consulta corre na"
+               " mesma: %s\n", nao_saltou ? "sim" : "NÃO (saltou e perdeu a linha)");
+        if(!nao_saltou) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("A MARCA DIZ SE VALE A PENA ANDAR, E ISSO É A CLÁUSULA (4). O que o ClickHouse"
+           " chama `skip index` não precisou de índice nenhum aqui: a marca de uma coluna"
+           " --- o maior valor lá escrito --- já estava a ser deixada pelo `col_marca` no"
+           " ACTO da escrita, e não numa varredura. Lê-la custa O(1) e diz o ALCANCE, que"
+           " é exactamente a cláusula (4) do thm:multiplicidade: «sentir é ler G, e a"
+           " distinção é propriedade do ESPAÇO». Com ela, `a > 1000` numa coluna cujo"
+           " maior valor escrito é 20 responde sem ler linha nenhuma --- o máximo da forma"
+           " `a − 1000` é −980, e nada `> 0` sai de lá. MAS O QUE SE MEDE PRIMEIRO NÃO É O"
+           " CUSTO: É A RESPOSTA. Uma guarda que poupa a varredura e muda o que sai é pior"
+           " do que não a haver, e esta saiu errada TRÊS vezes antes de ficar --- dava"
+           " vazio numa coluna toda AUSENTE, onde a marca a zero não é uma afirmação sobre"
+           " o alcance (vale o mesmo numa coluna por escrever); saltava o AGREGADO, e"
+           " `sum` sobre um vazio devolve ausente e não zero, que são níveis diferentes; e"
+           " saltava as operações de MATRIZ, onde «zero linhas não é a conta deu vazio: é"
+           " NÃO HAVER conta». O medidor apanhou as três, e por isso a guarda vale só na"
+           " projecção simples. Mede-se em seis condições --- as duas impossíveis, as duas"
+           " no limite exacto e as duas que apanham tudo --- e o que se exige é que a"
+           " resposta seja a MESMA que a varredura daria.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

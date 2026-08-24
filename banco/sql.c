@@ -4570,6 +4570,64 @@ static int atom_cabe(const struct arvore *a, int j, long ncols, long nrows, long
     return !(alto > limite || baixo < -(limite + 1));
 }
 
+/* ── A MARCA DIZ SE VALE A PENA ANDAR ────────────────────────────────────────
+ *
+ * A cláusula (4) do thm:multiplicidade: «sentir é ler G ... a distinção é
+ * propriedade do ESPAÇO». A marca de uma coluna --- o maior valor lá escrito,
+ * que o `col_marca` deixa no acto da escrita e não numa varredura --- é
+ * exactamente isso: uma leitura O(1) que diz o ALCANCE da coluna.
+ *
+ * Com ela, uma condição que não pode ser satisfeita responde sem ler linha
+ * nenhuma. `c1 > 1000` numa coluna cujo maior valor escrito é 1: o máximo da
+ * forma `c1 − 1000` é −999, e nada `> 0` sai de lá. É o `skip index` do
+ * ClickHouse, e aqui não precisou de índice --- a marca já estava escrita, e
+ * faltava LÊ-LA antes de andar.
+ *
+ * Devolve 1 quando a condição PODE ser satisfeita (e aí varre-se), 0 quando ela
+ * é impossível pelo alcance. Na dúvida devolve 1: uma resposta vazia dada por
+ * engano seria pior do que uma varredura. */
+static int atom_possivel(const struct arvore *a, int j, long ncols, long nrows){
+    long long alto = 0, baixo = 0;
+    for(int cod = 0; cod < NMON; cod++){
+        long c = a->av[j].c[cod];
+        if(!c) continue;
+        int d[KGRAU]; mi_de(cod, d);
+        if(mi_cod(d) != cod) continue;
+        long long mag_alto = 1, mag_baixo = 1;
+        int tem_col = 0;
+        for(int t = 0; t < KGRAU; t++){
+            if(!d[t]) continue;
+            long cc = col_de_sim(d[t] - 1);
+            if(cc < 0 || cc >= ncols) return 1;        /* não sei: varre-se */
+            /* a coluna vai de 0 (o mínimo do corpo sem sinal) à MARCA.
+             *
+             * E A MARCA A ZERO NÃO É UMA AFIRMAÇÃO. Ela vale zero tanto numa
+             * coluna cujo maior valor é 0 como numa que ainda não foi escrita ou
+             * cujas células estão todas AUSENTES --- e nesse caso concluir
+             * «impossível» é dar vazio a quem podia ter resposta, que é o pior
+             * desfecho. Foi o que fiz à primeira, e três asserções caíram sobre
+             * uma coluna toda ausente. Na dúvida varre-se: escrevi-o no
+             * comentário e não o respeitei no código. */
+            unsigned long mx = col_max(cc, ncols, nrows);
+            if(mx == 0 || mx > 0x7FFFFFFFul) return 1;
+            mag_alto  *= (long long)mx;
+            mag_baixo *= 0;
+            tem_col = 1;
+        }
+        if(!tem_col){ alto += c; baixo += c; continue; }   /* o termo constante */
+        if(c > 0){ alto += (long long)c * mag_alto; baixo += (long long)c * mag_baixo; }
+        else     { alto += (long long)c * mag_baixo; baixo += (long long)c * mag_alto; }
+    }
+    /* a forma vale entre `baixo` e `alto`; o teste é contra ZERO */
+    switch(a->aop[j]){
+        case '>': if(alto <= 0) return 0; break;   /* nunca é positiva  */
+        case '<': if(baixo >= 0) return 0; break;  /* nunca é negativa  */
+        case '=': if(alto < 0 || baixo > 0) return 0; break;  /* o zero não cabe */
+        default: break;
+    }
+    return 1;
+}
+
 static int cl_cabe16(const struct arvore *a, long ncols, long nrows){
     for(int j = 0; j < a->natomo; j++){
         /* o MÁXIMO e o MÍNIMO da forma, separados: somar magnitudes ignorava que
@@ -7372,6 +7430,49 @@ static int varre(const char *resto, int acao){
     long ncols = cat_ncols(), nrows = cat_nrows();
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
+    /* ── E A MARCA DIZ SE VALE A PENA ANDAR ──────────────────────────────────
+     *
+     * Antes de compilar a varredura, lê-se o ALCANCE de cada coluna citada ---
+     * a marca que o `col_marca` deixou no acto da escrita --- e pergunta-se se a
+     * condição pode sequer ser satisfeita. `c1 > 1000` numa coluna cujo maior
+     * valor escrito é 1 não precisa de ler linha nenhuma: o máximo da forma
+     * `c1 − 1000` é −999.
+     *
+     * Só se decide com UM átomo. Com vários há OR pelo meio, e um átomo
+     * impossível não torna a cláusula impossível --- concluir dali seria dar
+     * vazio a quem tinha resposta, que é o pior desfecho. Na dúvida varre-se. */
+    /* e SÓ na projecção simples: com agregação ou GROUP BY o caminho tem de
+     * correr, porque `sum` sobre um vazio devolve AUSENTE e não zero --- são
+     * níveis diferentes, e saltar o agregado dava o número no lugar do dual.
+     * O mesmo com as operações de MATRIZ: «zero linhas não é a conta deu vazio,
+     * é NÃO HAVER conta», e elas têm de recusar em vez de devolver nada.
+     * A guarda poupa a varredura; não substitui a resposta --- foi assim que ela
+     * saiu à segunda e à terceira, com o medidor a apanhar as duas. */
+    if(tem_where > 0 && cl.natomo == 1 && acao == ACAO_MARCA
+       && agr_n == 0 && !agr_viu_count && !grp_col[0] && !dis_usa && !mat_op
+       && !atom_possivel(&cl, 0, ncols, nrows)){
+        for(long i = 0; i < nrows; i++) bit_poe(S_MATCH, i, 0);
+        ultima_conta = 0;
+        printf("-- a marca da coluna diz que nenhuma linha pode satisfazer:"
+               " 0 linha(s), sem varrer\n");
+        if(sql_cap){
+            memset(sql_cap, 0, sizeof *sql_cap);
+            sql_cap->ok = 1; sql_cap->nrows = 0;
+            sql_cap->ncols = proj_n ? proj_n : (int)(ncols < SQL_OUT_MAX_COLS
+                                                     ? ncols : SQL_OUT_MAX_COLS);
+            for(int c = 0; c < sql_cap->ncols; c++){
+                char cn[S_COLNOME_W * 2 + 2];
+                int src = proj_n ? proj[c] : c;
+                cn[0] = 0;
+                if(src >= 0) col_nome_le(src, cn, (int)sizeof cn);
+                if(cn[0]) snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "%s", cn);
+                else      snprintf(sql_cap->col[c], sizeof sql_cap->col[0], "%c", 'a' + src);
+                sql_cap->tipo[c] = SQL_TIPO_INT4;
+            }
+            snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT 0");
+        }
+        return 1;
+    }
     if(tem_where > 0 && cit_texto && cit_desig){
         printf("erro: uma desigualdade sobre coluna de TEXTO — RECUSADA. A célula guarda"
                " o ENDEREÇO no pool, e a leitura preserva a IGUALDADE (endereços iguais"
