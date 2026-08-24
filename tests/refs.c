@@ -699,6 +699,112 @@ int main(void)
            faltam == 0 && nd > 20 && verificadas > 100);
     }
 
+    /* ------- §R7 — a barra que o C come antes de o LaTeX a ver -------------- */
+    printf("\n§R7 o LaTeX escrito DENTRO de um literal C: a barra tem de sobreviver\n");
+    printf("       ao compilador antes de chegar ao compositor.\n\n");
+    {
+        /* ── PORQUE É QUE ISTO É DA MESMA FAMÍLIA DO §R1 ──────────────────────
+         *
+         * O motor e a assistente IMPRIMEM matemática: são mais de mil comandos
+         * LaTeX escritos dentro de literais C. Ora numa cadeia C a barra é o
+         * escape, e há dois desfechos, os dois silenciosos:
+         *
+         *  - `\;`, `\q`, `\p` não são escapes de C. O compilador AVISA (e o
+         *    aviso perde-se entre outros) e deita a barra fora: `\qquad` sai
+         *    como a palavra «qquad», `\;` sai como um ponto-e-vírgula.
+         *
+         *  - `\t`, `\n`, `\a`, `\b`, `\f`, `\v`, `\r` SÃO escapes de C, e não
+         *    há aviso nenhum. `\text{moldura}` sai com um TAB seguido de
+         *    «ext{moldura}», `\nabla` com uma quebra de linha, `\frac` com um
+         *    form feed. Este é o pior: compila limpo, corre, e imprime lixo.
+         *
+         * É exactamente a assinatura que este ficheiro persegue --- NADA FALHA,
+         * e o leitor é o primeiro a saber. Medido: 29 barras comidas em dez
+         * linhas do `conversa.c`, e um `\text` que virou TAB sem um único aviso.
+         *
+         * A LEI: num literal C, uma barra seguida de letra ou de `;` só é
+         * legítima se for DUPLA. Verifica-se lendo o ficheiro e seguindo o
+         * estado «dentro de aspas», que é o mesmo que o compilador faz. */
+        static const char *FONTES[] = {
+            "../banco/conversa.c", "../banco/sql.c", "../banco/fala.c",
+            "../tests/dominios.c", "../tests/tex.c", "../tests/tikz.c",
+        };
+        const int NF = (int)(sizeof FONTES / sizeof FONTES[0]);
+        long comidas = 0, lidos = 0, literais = 0;
+        char pior[256]; pior[0] = 0;
+
+        for(int k = 0; k < NF; k++){
+            FILE *fp = fopen(FONTES[k], "r");
+            if(!fp) continue;
+            lidos++;
+            char lin[4096]; long nl = 0;
+            while(fgets(lin, sizeof lin, fp)){
+                nl++;
+                int dentro = 0;
+                for(size_t i = 0; lin[i]; i++){
+                    if(!dentro){
+                        /* o comentário de linha e o de bloco não são código */
+                        if(lin[i] == '/' && lin[i+1] == '/') break;
+                        if(lin[i] == '"') { dentro = 1; literais++; }
+                        continue;
+                    }
+                    if(lin[i] == '"'){ dentro = 0; continue; }
+                    if(lin[i] != '\\') continue;
+                    char c = lin[i+1];
+                    if(c == '\\'){ i++; continue; }        /* barra dupla: legítima */
+                    /* a barra que o C consome antes de uma letra ou de `;` */
+                    if(((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ';')
+                       && !(c=='n'||c=='t'||c=='r'||c=='0'||c=='x'||c=='u'||c=='U')){
+                        comidas++;
+                        if(!pior[0])
+                            snprintf(pior, sizeof pior, "%s:%ld  \\%c", FONTES[k], nl, c);
+                    }
+                    i++;
+                }
+            }
+            fclose(fp);
+        }
+        printf("      %ld ficheiro(s), %ld literal(is) lidos: %ld barra(s) comida(s)\n",
+               lidos, literais, comidas);
+        if(pior[0]) printf("      a primeira: %s\n", pior);
+        ok("nenhuma barra de LaTeX é comida pelo compilador C antes de chegar ao"
+           " compositor — o `\\qquad` que vira «qquad» e o `\\;` que vira «;» não"
+           " voltam", lidos >= 4 && literais > 500 && comidas == 0);
+
+        /* ── O CONTROLO: a lógica TEM de ver a barra comida ───────────────────
+         *
+         * Sem isto, um extractor que não entrasse em literal nenhum daria zero
+         * e passaria verde --- que é a asserção vazia que este ficheiro nomeia.
+         * Escreve-se o defeito à mão, na forma exacta que ele tinha, e exige-se
+         * que a MESMA lógica o veja. */
+        {
+            /* a linha REAL que estava partida no `conversa.c`, tal e qual. Na
+             * cadeia que o C forma há cinco barras comidas: quatro `\p` dos
+             * `\pm` e um `\q` do `\qquad`. As chavetas `\{` e `\}` também
+             * perdem a barra, mas não entram nesta conta porque a lei olha para
+             * letra ou `;` --- e o número aqui é o MEDIDO, não o que eu supus:
+             * à primeira escrevi três e o controlo derrubou-me. */
+            static const char *MAU =
+              "printf(\"      $\\{\\pm I, \\pm J, \\pm S, \\pm X\\}$,\\qquad $J^{4} = I$\");";
+            long viu = 0; int dentro = 0;
+            for(size_t i = 0; MAU[i]; i++){
+                if(!dentro){ if(MAU[i] == '"') dentro = 1; continue; }
+                if(MAU[i] == '"'){ dentro = 0; continue; }
+                if(MAU[i] != '\\') continue;
+                char c = MAU[i+1];
+                if(c == '\\'){ i++; continue; }
+                if(((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ';')
+                   && !(c=='n'||c=='t'||c=='r'||c=='0'||c=='x'||c=='u'||c=='U')) viu++;
+                i++;
+            }
+            printf("      CONTROLO — na linha que TINHA o defeito, a mesma lógica vê"
+                   " %ld barra(s) comida(s)\n", viu);
+            ok("e a lógica do §R7 VÊ a barra comida quando ela lá está — sem isto,"
+               " «zero comidas» seria indistinguível de um extractor que não lê"
+               " literal nenhum", viu == 5);
+        }
+    }
+
     printf("\n================================================================\n");
     conclui("um \\ref órfão não falha o pdflatex: emite Warning, imprime \"??\" e o PDF sai.");
     conclui("o portão mede páginas e passa. Este medidor é o que fecha esse buraco.");

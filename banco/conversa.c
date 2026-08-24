@@ -5365,8 +5365,8 @@ static void dforma_resolve(int n){
              : n == 4 ? "em grau 1, d é o rotacional:" : "em grau 2, d é a divergência:");
         printf(n == 2 ? "      $d: \\Lambda^{k} \\to \\Lambda^{k+1}$\n"
              : n == 3 ? "      $df = (\\partial_1 f, \\partial_2 f, \\partial_3 f)$\n"
-             : n == 4 ? "      $d\\omega = (\\partial_2 R - \\partial_3 Q,\;"
-                        " \\partial_3 P - \\partial_1 R,\; \\partial_1 Q - \\partial_2 P)$\n"
+             : n == 4 ? "      $d\\omega = (\\partial_2 R - \\partial_3 Q,\\;"
+                        " \\partial_3 P - \\partial_1 R,\\; \\partial_1 Q - \\partial_2 P)$\n"
                       : "      $d\\omega = \\partial_1 A + \\partial_2 B + \\partial_3 C$\n");
         tique7(2, "e AQUI ESTÁ O ANDAR: o grad, o rot e o div NÃO são três operadores"
                   " parecidos. São O MESMO, e o que muda é o grau da forma. O d escreve-se"
@@ -6429,7 +6429,7 @@ static void calculo2_resolve(int n){
         tique7(1, n == 3 ? "a convergência, com o N procurado:"
                          : "limitada e MONÓTONA implica convergente:");
         printf(n == 3
-               ? "      $\\forall\\varepsilon>0\;\\exists N: n>N \\Rightarrow"
+               ? "      $\\forall\\varepsilon>0\\;\\exists N: n>N \\Rightarrow"
                  " |a_n - 1| < \\varepsilon$\n"
                : "      limitada $+$ monótona $\\Rightarrow$ convergente\n");
         tique7(2, n == 3
@@ -7534,8 +7534,8 @@ static void universal_resolve(int n){
         tique7(1, "a ESCADA é uma filtração por refinamento sucessivo:");
         /* o \prec nao tem glifo no tradutor, e a escada E' inclusao de particoes:
          * cada nivel refina o anterior, logo escreve-se com \subset, que ele conhece */
-        printf("      $I_1=(E)\;\\subset\;I_2=(E,\\Phi)\;\\subset\;"
-               "I_3=(E,\\Phi,\\Phi_2)\;\\subset\;\\cdots$\n");
+        printf("      $I_1=(E)\\;\\subset\\;I_2=(E,\\Phi)\\;\\subset\\;"
+               "I_3=(E,\\Phi,\\Phi_2)\\;\\subset\\;\\cdots$\n");
         tique7(2, "TRADUÇÃO: «observador» é um SISTEMA COMPLETO DE INVARIANTES (termo"
                   " consagrado); «escada» é uma FILTRAÇÃO por refinamento de partições;"
                   " Φ_m = Σ(i+1)^m·bᵢ são os MOMENTOS DE POTÊNCIA, com Φ₁ a fase e Φ₂ a"
@@ -7761,7 +7761,7 @@ static void universal_resolve(int n){
     case 12:
         tique7(0, "sejam as 52 fusões da curadoria e o contorno traçado de cada uma");
         tique7(1, "o contorno FECHA, não cruza, e é PLANO:");
-        printf("      $E_{\partial} - E(\mathrm{id}) = E(\text{moldura}) = 295\\,589$"
+        printf("      $E_{\\partial} - E(\\mathrm{id}) = E(\\text{moldura}) = 295\\,589$"
                "   --- a mesma constante nas $52$\n");
         tique7(2, "TRADUÇÃO — e aqui eu tinha traduzido MAL: «contorno» não é curva de"
                   " nível. É o CONTORNO TRAÇADO, no sentido de emparelhamento de"
@@ -7784,7 +7784,7 @@ static void universal_resolve(int n){
     case 13:
         tique7(0, "seja J a estrutura complexa (J² = −I, período 4, det J = +1)");
         tique7(1, "J legitima a carta (x, Jx), e o anel {aI + bJ} é ℂ:");
-        printf("      $(a,b)(c,d) = (ac-bd,\; ad+bc)$ --- exacto, e comuta\n");
+        printf("      $(a,b)(c,d) = (ac-bd,\\; ad+bc)$ --- exacto, e comuta\n");
         tique7(2, "TRADUÇÃO: {aI + bJ} ≅ ℂ é a REPRESENTAÇÃO MATRICIAL DOS COMPLEXOS"
                   " (consagrado), (x,Jx) é uma CARTA (consagrado), e a regra é a"
                   " multiplicação complexa. Tudo exacto em inteiros");
@@ -7911,7 +7911,7 @@ static void universal_resolve(int n){
     case 19:
         tique7(0, "sejam as cinco operações medidas em cada nível da torre");
         tique7(1, "o teorema de estrutura:");
-        printf("      corpo em cada nível $\;\\to\;$ ordem de REFINAMENTO $\;\\to\;$"
+        printf("      corpo em cada nível $\\;\\to\\;$ ordem de REFINAMENTO $\\;\\to\\;$"
                " completude, com limite $\\mathbb{Z}_2$\n");
         tique7(2, "TRADUÇÃO: «corpo operacional» é CORPO (consagrado) quando o"
                   " discriminante não separa, e ANEL COM DIVISORES DE ZERO — uma álgebra"
@@ -7958,8 +7958,8 @@ static void universal_resolve(int n){
     case 21:
         tique7(0, "seja a pergunta da mesa: «que estrutura as operações determinam?»");
         tique7(1, "a geometria é o par (forma, grupo), e o grupo é D₄:");
-        printf("      $\{\pm I, \pm J, \pm S, \pm X\}$,\qquad $J^{4} = S^{2} = I$,"
-               "\qquad $SJS = J^{-1}$\n");
+        printf("      $\\{\\pm I, \\pm J, \\pm S, \\pm X\\}$,\\qquad $J^{4} = S^{2} = I$,"
+               "\\qquad $SJS = J^{-1}$\n");
         tique7(2, "TRADUÇÃO: isto é o PROGRAMA DE ERLANGEN de Klein (consagrado) — uma"
                   " geometria identifica-se com o grupo que deixa a forma invariante. E o"
                   " grupo NOMEIA-SE: é D₄, o DIEDRAL de ordem 8, graduado pelo determinante"
@@ -8272,7 +8272,7 @@ static void torre_resolve(int n){
         tique7(0, "seja q = (a, u) com a ∈ ℤ e u ∈ ℤ³, um quaternião partido em real e vector");
         tique7(1, "o produto parte-se em DIRECTO e CRUZADO:");
         printf("      $(a,\\mathbf u)(c,\\mathbf v) = (ac - \\mathbf u\\cdot\\mathbf v,"
-               "\; a\\mathbf v + c\\mathbf u + \\mathbf u\\times\\mathbf v)$\n");
+               "\\; a\\mathbf v + c\\mathbf u + \\mathbf u\\times\\mathbf v)$\n");
         tique7(2, "o produto ESCALAR controla a parte real e o produto VECTORIAL controla a"
                   " imaginária — e isto é literalmente o andar anterior: o directo é a"
                   " parte simétrica, o cruzado a antissimétrica. O quaternião não é uma"
@@ -8373,8 +8373,8 @@ static void torre_resolve(int n){
         tique7(0, "seja A_{n+1} = A_n ⊕ A_n e a dobra de Cayley–Dickson, com A_0 = ℝ");
         tique7(1, n == 9 ? "a dimensão dobra a cada andar:"
                          : "a fronteira é onde norma E divisão valem ao mesmo tempo:");
-        printf(n == 9 ? "      $d_{k+1} = 2 d_k \;\\Rightarrow\; d_k = 2^{k}$\n"
-                      : "      $N(xy) = N(x)N(y)\;$ e $\;x \\neq 0 \\Rightarrow"
+        printf(n == 9 ? "      $d_{k+1} = 2 d_k \\;\\Rightarrow\\; d_k = 2^{k}$\n"
+                      : "      $N(xy) = N(x)N(y)\\;$ e $\\;x \\neq 0 \\Rightarrow"
                         " x^{-1}$ existe\n");
         tique7(2, "e as perdas NÃO caem todas no mesmo sítio: a comutatividade cai em 4, a"
                   " associatividade em 8, a divisão em 16. É esse DESENCONTRO que faz a"
@@ -24395,8 +24395,8 @@ static int teste(void){
                             if(v) nexiste_nao = 1;
                             if(!v) ntodos_nao = 0;
                         }
-                        if(!todos != nexiste_nao) qmal++;     /* ¬∀ ≡ ∃¬ */
-                        if(!existe != ntodos_nao) qmal++;     /* ¬∃ ≡ ∀¬ */
+                        if((!todos) != nexiste_nao) qmal++;   /* ¬∀ ≡ ∃¬ */
+                        if((!existe) != ntodos_nao) qmal++;   /* ¬∃ ≡ ∀¬ */
                     }
                 }
                 ok("e a NEGAÇÃO DOS QUANTIFICADORES fecha no domínio finito: ¬∀x P ≡ ∃x ¬P"
