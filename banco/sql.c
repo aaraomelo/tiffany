@@ -5984,9 +5984,26 @@ static int checa_corpos(unsigned citadas, long ncols){
         if(primeira < 0){ primeira = (int)j; Dref = D; Bref = B; continue; }
         if(D != Dref){
             long d = D - Dref; if(d < 0) d = -d;
-            printf("erro: as colunas %c e %c estão em corpos de classes DIFERENTES "
-                   "(Δ = %ld e Δ = %ld, distância %ld).\n",
-                   (char)('a'+primeira), (char)('a'+j), Dref, D, d);
+            /* ── CORPO DIFERENTE NÃO É CLASSE DIFERENTE ─────────────────────
+             *
+             * Dizia «corpos de classes DIFERENTES» sempre que Δ diferia --- e
+             * pela `thm:leidisc` a CLASSE é o SINAL de Δ, não o Δ. AUREO(1) tem
+             * Δ = 5 e AUREO(3) tem Δ = 13: são corpos distintos e a travessia
+             * não existe, mas os dois são HIPERBÓLICOS, a mesma classe. A
+             * recusa estava certa; o nome dela é que confundia duas coisas ---
+             * são três classes e infinitos corpos, e é o Δ que separa os corpos.
+             *
+             * Diz-se agora o que é: corpos diferentes, e se a classe também
+             * diferir acrescenta-se, porque aí não há sequer régua comum. */
+            int mesma_classe = corpo_classe(D) == corpo_classe(Dref);
+            printf("erro: as colunas %c e %c estão em corpos DIFERENTES "
+                   "(Δ = %ld e Δ = %ld, distância %ld)%s.\n",
+                   (char)('a'+primeira), (char)('a'+j), Dref, D, d,
+                   mesma_classe ? "" : " — e de classes diferentes");
+            if(!mesma_classe)
+                printf("      %c é %s e %c é %s: nem a régua é a mesma.\n",
+                       (char)('a'+primeira), corpo_classe_nome(Dref, 0),
+                       (char)('a'+j), corpo_classe_nome(D, 0));
             printf("      a consulta é RECUSADA: comparar através delas daria um número sem "
                    "significado.\n");
             return 0;

@@ -2234,6 +2234,86 @@ $S=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, de traço $0$ e
 $\det=-1$, logo $\Delta=4>0$, hiperbólica. \emph{A diferença entre $\{1,2,3,4,6\}$
 e $\{3,4,6\}$ é exatamente o que reflete em vez de rodar.}
 
+\subsection*{A caixa de Pandora: os espelhos, e a distância entre eles}
+
+\noindent O Teor.~\ref{thm:leidisc} dá \textbf{três} classes; os \emph{espelhos}
+são infinitos, e é preciso não confundir uma coisa com a outra. Chame-se
+\textbf{caixa} ao conjunto
+\[
+\mathcal{P}=\bigl\{\,(B,C)\in \Zc^{2}\;:\;\lvert C\rvert=1\,\bigr\},
+\qquad
+\Delta(B,C)=B^{2}-4C ,
+\]
+--- as réguas quadráticas binárias de determinante unitário, que são as matrizes
+a que o Teor.~\ref{thm:leidisc} se aplica. Cada elemento é um \textbf{espelho}: o
+áureo $\sigma^{2}=m\sigma+1$ é $(m,-1)$ com $\Delta=m^{2}+4$, e o cristalino
+$\omega^{2}=t\omega-1$ é $(t,+1)$ com $\Delta=t^{2}-4$.
+
+\begin{definicao}[a distância entre espelhos]\label{def:pandora}
+Para $P,Q\in\mathcal{P}$,
+\[
+d_{\mathcal{P}}(P,Q)=\bigl\lvert\Delta(P)-\Delta(Q)\bigr\rvert .
+\]
+\end{definicao}
+
+\begin{teorema}[o que a caixa separa, e o que ela liga]\label{thm:pandora}
+Com a Def.~\ref{def:pandora}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A classe é grosseira, o espelho é fino.} A aplicação
+$P\mapsto\operatorname{sgn}\Delta(P)$ tem \emph{três} valores --- as classes do
+Teor.~\ref{thm:leidisc} --- e cada uma tem infinitos espelhos: $\Delta=5$ e
+$\Delta=13$ são \emph{corpos distintos da mesma classe hiperbólica}. Logo
+$d_{\mathcal{P}}=0$ é estritamente mais forte do que ter a mesma classe.
+\item[(2)] \textbf{Distância zero é isomorfismo, e ele escreve-se.} Se
+$\Delta(P)=\Delta(Q)$ com $P=(B_P,C)$, $Q=(B_Q,C)$, então
+$t=(B_P-B_Q)/2$ é inteiro e $\varphi_t$ --- o cisalhamento
+$\left(\begin{smallmatrix}1&t\\0&1\end{smallmatrix}\right)$ --- leva uma régua na
+outra. A travessia não é dada por existência: é \textbf{emitida}.
+\item[(3)] \textbf{Distância não nula é ausência de travessia.} Com
+$\Delta(P)\neq\Delta(Q)$ não há isomorfismo de réguas, e uma comparação que
+atravesse as duas não é uma pergunta difícil: é uma pergunta \emph{mal posta},
+como a ordem num corpo elíptico. O que se deve fazer é \textbf{recusar}, e a
+distância diz \emph{quão} longe se estava de poder responder.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $\operatorname{sgn}$ tem três valores e a tricotomia dos inteiros esgota
+(Teor.~\ref{thm:leidisc}); que cada classe é infinita vê-se na família
+$\Delta=m^{2}+4$, estritamente crescente em $m\ge0$. Que $d_{\mathcal{P}}=0$
+implica a mesma classe é imediato, e a recíproca falha em $\Delta=5,13$.
+
+(2) De $B_P^{2}-4C=B_Q^{2}-4C$ vem $B_P^{2}=B_Q^{2}$, e com $B_P\neq -B_Q$ os
+dois têm a mesma paridade, donde $t$ inteiro. O cisalhamento é unimodular
+($\det=1$) e conjuga uma companheira na outra, o que é a mudança de base entre
+as duas réguas.
+
+(3) Se houvesse um isomorfismo de réguas ele conjugaria as companheiras, e o
+$\Delta$ --- polinómio simétrico em traço e determinante, ambos invariantes por
+conjugação --- teria de coincidir.
+\end{proof}
+
+\medskip\noindent\textbf{E é daqui que vem o nome.} Abrir a caixa é misturar os
+espelhos: comparar através de dois com $\Delta$ diferente devolve sempre
+\emph{algum} número, e esse número não é sobre objeto nenhum. O que sai da caixa
+não é um erro que se veja --- é uma resposta com a cara de certa. Por isso a
+regra é a do Teor.~\ref{thm:pandora}(3), e a distância existe para que a recusa
+seja \emph{quantitativa}: diz-se quanto falta, e não apenas que falta.
+
+\medido{\code{banco/sql.c} \code{checa\_corpos} --- as colunas de uma consulta
+são varridas e o $\Delta$ de cada uma pedido ao \code{corpo\_delta}. Com
+\code{AUREO(1)} e \code{AUREO(3)} a consulta é recusada com $\Delta=5$ e
+$\Delta=13$, distância $8$, e \emph{sem} invocar classe --- os dois são
+hiperbólicos. Com \code{AUREO(1)} e \code{CRISTALINO(0)} a recusa acrescenta que
+as classes diferem, $\Delta=5$ contra $\Delta=-4$, distância $9$: «$a$ é
+hiperbólico e $c$ é elíptico, nem a régua é a mesma». E com \code{AUREO(1)} e
+\code{AUREO(-1)}, distância $0$, o motor não recusa: diz «são ISOMORFOS em bases
+diferentes --- $\varphi_t$ com $t=1$» e \textbf{emite} a travessia como
+\code{(TROCA GOLD)}$^t$ no caminho do átomo. A primeira escrita desta mensagem
+chamava «classes diferentes» a toda a distância não nula, confundindo as três
+classes com os infinitos espelhos; a distinção do Teor.~\ref{thm:pandora}(1) é o
+que a corrigiu.}
+
 \medido{\code{tests/pgwire.c} §W116 --- as três classes esgotam $360$ matrizes de
 $\mathrm{GL}_2(\mathbb{Z})$ com entradas em $-4..4$; as elípticas têm todas ordem finita e
 dão $\{3,4,6\}$, com a $5$ ausente e a $2$ também; $\lvert\operatorname{tr}\rvert=2$
