@@ -1315,11 +1315,29 @@ static long bits_conta(unsigned base, long n){
     long ate = n / (long)SLOT_BITS;
     if(ate > tecto) ate = tecto;
     if(ate < 0) ate = 0;
+    /* ── E CONTA-SE COMO O `aranha.c` CONTA: SEM RAMIFICAR ───────────────
+     *
+     * Estava `while(v){ soma += v & 1u; v >>= 1; }` --- um laço cujo número de
+     * voltas DEPENDE DO VALOR: um átomo a zero sai logo, um com o bit alto
+     * ligado dá oito voltas. Isso é o agente a percorrer, e o custo passa a ser
+     * função do dado em vez de o ser da largura.
+     *
+     * O `papers/aranha.c` mostra a forma, e não tem um único `if`:
+     *
+     *     phase[0] += (b >> 0) & 1u;
+     *     phase[1] += (b >> 1) & 1u;   ... oito, fixos
+     *
+     * «Cada bit alimenta exactamente uma lei» --- é a projecção na base
+     * ortonormal e_k = 2^k, com uma soma por coordenada e nenhuma decisão. É a
+     * mesma coisa que o motor já diz de si no WHERE: «o par ⊗/⊘ do algoritmo
+     * não ramifica: OPERA», com as faces a correrem simultaneamente no espaço
+     * de fases. Aqui as coordenadas são os bits do átomo, e o laço é sobre a
+     * LARGURA (que é do tipo, e conhecida), não sobre o valor. */
     for(long sl = 0; sl <= ate; sl++){
         Word w = mem_le(base + (unsigned)sl);
         for(unsigned a = 0; a < WORD_ISA_ATOMS; a++){
             unsigned v = atomo_le(w, a);
-            while(v){ soma += (long)(v & 1u); v >>= 1; }
+            for(unsigned k = 0; k < ATOMO_BITS; k++) soma += (long)((v >> k) & 1u);
         }
     }
     return soma;
@@ -6205,7 +6223,22 @@ static long hav_n  = 0;
 #define ORD_ZONAS  8u
 #define ORD_LARG_  16u                                  /* = ORD_LARG, declarado adiante */
 #define ORD_MAXNO_R ((ZONA_SLOTS * ORD_ZONAS) / ORD_LARG_)
-#define ORD_MAXNO_I 600u                  /* o que a zona de um ÍNDICE segura */
+/* ── E O TECTO DO ÍNDICE SAI DO MAPA, COMO O DA ORDEM ────────────────────────
+ *
+ * Estava `600u`, com o comentário acima a justificá-lo como «o que a zona de um
+ * ÍNDICE segura (9603 slots / ORD_LARG)». O 9603 é de um mapa ANTIGO, de quando
+ * os índices partilhavam espaço: hoje cada um tem UMA ZONA sua --- 16384 slots,
+ * menos os três do cabeçalho ---, o que dá 1023 nós. O número ficou escrito e o
+ * mapa cresceu por baixo dele, que é o mesmo defeito do comentário do tecto de
+ * linhas: um número à mão sobrevive à mudança que o invalida.
+ *
+ * E o preço não era espaço desperdiçado: era o MOTOR A VARRER. Medido --- com
+ * 190 linhas o `WHERE k = 5` indexado custa ZERO passos, porque quem responde é
+ * a árvore; com 200 o CREATE INDEX recusa («o índice não coube») e a mesma
+ * consulta passa a custar 17200. É a lei do `aranha §sec:ultra` a deixar de
+ * valer por um número: «a vizinhança na árvore tem UM elemento, e o custo é
+ * Θ(1) e não Θ(n)». */
+#define ORD_MAXNO_I ((ZONA_SLOTS - 3u) / ORD_LARG_)
 static unsigned ord_tecto = 600u;    /* o do espaço que a árvore corrente TEM */
 #define S_ORDCAB   (S_ORD - 1)
 

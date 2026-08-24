@@ -4178,6 +4178,89 @@ $m$; de $\sigma\sigma'=-1$ vem $\sigma'=-1/\sigma$, e como $\sigma>1$ para
 $m\ge1$, o outro tem módulo menor que $1$.
 \end{proof}
 
+\subsection*{O mesmo algoritmo em oito fases: as coordenadas são as réguas}
+
+\noindent A cisão $\oplus$ agrupa em \emph{$n$ fases}, e $n$ é parâmetro --- a
+forma de três linhas acima é o caso $n=2$, com $\mathtt{0xAA}$ e $\mathtt{0x55}$
+a partir o byte em posições pares e ímpares. O caso que interessa ao byte não é
+esse: é $n=8$, uma fase por \textbf{direção}, e as máscaras deixam de ser duas
+escolhidas para serem as oito que já existem.
+
+\medskip\noindent\textbf{E elas não se escolhem: são a base.} Pelo
+Teor.~\ref{thm:base8} as direções de aresta de $Q_8$ são os $e_k=2^{k}$, base de
+$F_8$ sobre $B$, ortonormal para $\langle a,b\rangle=$ paridade$(a\wedge b)$ com
+Gram $=\mathrm{Id}$. Um byte escreve-se nelas,
+\[
+b=\sum_{k=0}^{7} b_k\,e_k ,\qquad b_k\in B ,
+\]
+e as oito máscaras da cisão são exatamente os $e_k$. As duas do caso $n=2$ são o
+que sobra ao \emph{agrupar} estas oito duas a duas ---
+$\mathtt{0x55}=e_0{+}e_2{+}e_4{+}e_6$ e $\mathtt{0xAA}=e_1{+}e_3{+}e_5{+}e_7$
+---, e por isso a partição em oito é a fina e a partição em duas é uma
+grosseira dela.
+
+\medskip\noindent\textbf{Medir é ler o bit, e é aqui que isso se paga.} O
+Teor.~\ref{thm:base8} nota que, sendo a base ortonormal, \emph{medir} e
+\emph{ler o bit} são a mesma operação. A projeção na coordenada $k$ não pede
+produto interno nenhum:
+\[
+\langle b,e_k\rangle=\text{paridade}(b\wedge e_k)=b_k=(b\gg k)\wedge 1 .
+\]
+O mesmo teorema chama \textbf{régua} a $g^{(k)}$, o peso que mede só $e_k$, e
+diz o que ela é: \emph{cada uma é cega às outras sete, as oito compostas medem
+todo salto, e tirando uma qualquer fica uma direção por medir}. As oito fases do
+algoritmo \emph{são} as oito réguas.
+
+\medskip\noindent\textbf{O algoritmo, expandido.} Sobre o mesmo ficheiro lido
+byte a byte, acumulando uma coordenada por régua:
+\[
+\boxed{\;
+f_k \;\mathrel{+}=\; (b\gg k)\wedge 1 \quad (k=0,\dots,7),
+\qquad
+\text{sai } \bigl[\,\textstyle\sum_k f_k,\ f_0,\dots,f_7\,\bigr].
+\;}
+\]
+São oito somas \textbf{fixas}, sem uma única decisão: nenhum $\mathbf{if}$,
+nenhum laço cujo número de voltas dependa do valor. É a mesma exigência que o
+ciclo da §\ref{sec:algoritmo} já faz --- o par $\otimes/\oslash$ não ramifica,
+opera ---, aqui com as oito faces a correrem no lugar de quatro. E a leitura
+continua a ser \emph{local} no sentido da cláusula~(4): o que se lê é o dado
+corrente, e nenhum passo consulta $\pi(0),\dots,\pi(t)$.
+
+\medskip\noindent\textbf{A conservação é a mesma, e agora é uma partição de
+oito.} Porque $\{e_k\}$ é base, os oito $e_k$ particionam o byte --- $e_i\wedge
+e_j=0$ para $i\neq j$ e $\bigvee_k e_k=\mathtt{0xFF}$ ---, exatamente como
+$\mathtt{0xAA}$ e $\mathtt{0x55}$ particionavam no caso $n=2$. Logo
+\[
+\sum_{k=0}^{7} f_k=\sum_{\text{bytes}}\operatorname{pop}(b),
+\]
+que é o Lema~\ref{lem:conserva} lido nesta cisão: $\sum_x G(x)=\abs{I}$, com as
+células a serem as oito coordenadas. Não há sobreposição a acautelar, pelo mesmo
+motivo do Teor.~\ref{thm:bolas}: quando a partição é genuína, a soma fecha
+sozinha.
+
+\medskip\noindent\textbf{E o levantamento sobe de $\Zc^{2}$ para $\Zc^{8}$.} O
+par $[\,e+o,\ e\,]$ do caso $n=2$ era o gato aplicado uma vez
+(Def.~\ref{def:gato} com $n=2$); em oito fases o objeto é
+$c=(f_0,\dots,f_7)\in\Zc^{8}$ e o gato é o mesmo da Def.~\ref{def:gato} com
+$n=8$,
+\[
+\otimes c=(m\,f_0+f_7,\ f_0,\ f_1,\ \dots,\ f_6),
+\]
+a matriz companheira de $x^{8}-m\,x^{7}-1$. Pelo Teor.~\ref{thm:gato} a volta é
+exata e inteira \emph{sem hipótese nenhuma sobre o vetor} --- $\oslash\circ\otimes=\mathrm{id}$
+em $\Zc^{8}$, e $\abs{\det\otimes}=1$ ---, pelo que guardar
+$[\,\sum_k f_k,\ f_0,\dots,f_7\,]$ é um levantamento no sentido do
+Teor.~\ref{thm:levantamento}: o total é a conservação e as coordenadas são a
+folha que desdobra.
+
+\medskip\noindent\textbf{E o oito não foi escolhido aqui, tal como não o foi
+lá.} O Teor.~\ref{thm:base8} di-lo: a dimensão cresce por \emph{duplicação},
+$2^{1}\to2^{2}\to2^{4}\to2^{8}$, e o oito é o que três dobras binárias dão. A
+expansão de duas fases para oito não é um algoritmo diferente --- é o mesmo com
+$n$ no seu valor, e $n$ entra num sítio só, como a §\ref{sec:dimensao} exige.
+
+\medskip
 \medskip\noindent\textbf{E este par é o par da §\ref{sec:zeta}, noutra base.} O
 Teor.~\ref{thm:shift} deu $\zeta$ a \emph{acumular} e $\mu=1-S$ a
 \emph{diferenciar}, com $\mu=\zeta^{-1}$ (Teor.~\ref{thm:mu}); o gato acumula ao

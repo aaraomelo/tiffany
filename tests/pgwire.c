@@ -29528,6 +29528,102 @@ int main(void){
            " defeitos existe e o medidor passaria sem tocar em nada.", mal == 0);
     }
 
+    /* ═══ §W205: O ÍNDICE ALCANÇA O QUE A ZONA LHE DÁ ══════════════════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W205 o alcance do índice: um número à mão fazia o motor VARRER.\n\n");
+
+        /* ── O DEFEITO, E PORQUE ELE CUSTA A LEI TODA ────────────────────────
+         *
+         * `aranha §sec:ultra`, thm:viz-arvore: «cada bola de raio 2^-p tem
+         * EXATAMENTE UM irmão [...] logo |V(x)| = 1, e o custo dos passos 2 e 3
+         * é Θ(1) e não Θ(n)». É a razão de existir um índice: quem responde é a
+         * árvore, e a árvore NÃO VARRE.
+         *
+         * O tecto de nós de um índice estava escrito `600u`, com o comentário
+         * ao lado a justificá-lo como «o que a zona de um ÍNDICE segura (9603
+         * slots / ORD_LARG)». Só que o 9603 é de um mapa ANTIGO, de quando os
+         * índices partilhavam espaço: hoje cada um tem UMA ZONA sua --- 16384
+         * slots menos os três do cabeçalho ---, o que dá 1023 nós. O número
+         * ficou escrito e o mapa cresceu por baixo dele.
+         *
+         * E o preço não era espaço por usar: era o motor a VARRER. Com 190
+         * linhas o `WHERE k = 5` indexado custava ZERO passos; com 200 o CREATE
+         * INDEX recusava e a mesma consulta passava a custar 17200. A lei do
+         * §sec:ultra deixava de valer por causa de um número à mão. */
+        unlink("/tmp/pgwire_w205.mem"); unlink("/tmp/pgwire_w205.prog");
+        unlink("/tmp/pgwire_w205.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w205__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w205__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w205")) mal++;
+
+        /* O QUE SE MEDE É O CUSTO, e ele tem de ser ZERO --- não «pequeno».
+         * Zero bytes de ISA é a árvore a responder sozinha; qualquer coisa
+         * acima disso é o molde a passar pelas linhas, que é a varredura. */
+        static const long CASO[3] = { 150, 200, 300 };
+        long com_indice = 0;
+        for(int c = 0; c < 3; c++){
+            snprintf(q, sizeof q, "DROP TABLE t");  sql_executa(q, &o);
+            sql_executa("CREATE TABLE t (k INTEIRO, v INTEIRO)", &o);
+            for(long i = 0; i < CASO[c]; i++){
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", i, i % 7);
+                sql_executa(q, &o);
+            }
+            sql_executa("CREATE INDEX ixw205 ON t (k)", &o);
+            int criou = o.ok;
+            sql_executa("SELECT count(*) FROM t WHERE k = 5", &o);
+            long achou = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+            long passos = sql_ultimos_passos;
+            printf("      %3ld linhas: índice criado=%d, WHERE k=5 devolve %ld,"
+                   " custa %ld passo(s)\n", CASO[c], criou, achou, passos);
+            if(!criou || achou != 1) mal++; else if(passos == 0) com_indice++;
+        }
+        printf("      dos %d tamanhos, %ld responderam SEM VARRER (custo zero)\n",
+               3, com_indice);
+        if(com_indice != 3) mal++;
+
+        /* ── O CONTROLO: a resposta é a MESMA sem índice ─────────────────────
+         *
+         * Sem isto, um índice avariado que devolvesse sempre uma linha passaria
+         * as asserções de cima. Compara-se com o caminho que NÃO desce a árvore
+         * --- `k+0 = 5`, porque a soma impede o índice ---, e os dois têm de
+         * concordar: o índice muda o CUSTO e nunca o resultado. */
+        sql_executa("SELECT count(*) FROM t WHERE k = 5", &o);
+        long pela_arvore = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        long c_arv = sql_ultimos_passos;
+        sql_executa("SELECT count(*) FROM t WHERE k+0 = 5", &o);
+        long pela_varredura = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        long c_var = sql_ultimos_passos;
+        printf("      CONTROLO — a árvore diz %ld (%ld passos) e a varredura %ld"
+               " (%ld passos): mesmo resultado, custo distinto\n",
+               pela_arvore, c_arv, pela_varredura, c_var);
+        if(pela_arvore != pela_varredura || c_var <= c_arv) mal++;
+        sql_fechar();
+
+        ok("O ÍNDICE ALCANÇA O QUE A ZONA LHE DÁ, E UM NÚMERO À MÃO FAZIA O MOTOR VARRER."
+           " O `aranha §sec:ultra` (thm:viz-arvore) diz porque existe um índice: «cada bola"
+           " tem EXATAMENTE UM irmão [...] logo |V(x)| = 1, e o custo dos passos 2 e 3 é"
+           " Θ(1) e não Θ(n)» --- quem responde é a árvore, e a árvore NÃO VARRE. O tecto"
+           " de nós estava escrito `600u`, justificado ao lado como «o que a zona de um"
+           " ÍNDICE segura (9603 slots / ORD_LARG)»; só que o 9603 é de um mapa ANTIGO, de"
+           " quando os índices partilhavam espaço, e hoje cada um tem UMA ZONA sua ---"
+           " 16384 slots menos os três do cabeçalho, o que dá 1023 nós. O número ficou"
+           " escrito e o mapa cresceu por baixo dele, que é o mesmo defeito do comentário"
+           " do tecto de linhas: um número à mão sobrevive à mudança que o invalida. E o"
+           " preço não era espaço por usar --- era o motor a VARRER: com 190 linhas o"
+           " `WHERE k = 5` indexado custava ZERO passos, e com 200 o CREATE INDEX recusava"
+           " e a mesma consulta passava a custar 17200. A lei do §sec:ultra deixava de"
+           " valer por causa de um número. O que se mede é o CUSTO SER ZERO e não «ser"
+           " pequeno»: zero bytes de ISA é a árvore a responder sozinha, e qualquer coisa"
+           " acima disso é o molde a passar pelas linhas. E o CONTROLO é a resposta ser a"
+           " MESMA pelos dois caminhos --- `k = 5` desce a árvore e `k+0 = 5` varre, porque"
+           " a soma impede o índice ---, porque um índice avariado que devolvesse sempre"
+           " uma linha passaria tudo o que está acima: o índice muda o custo e NUNCA o"
+           " resultado.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
