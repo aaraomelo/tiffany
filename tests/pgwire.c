@@ -27535,6 +27535,34 @@ int main(void){
                " ninguém escreveu %ld\n", ig_a, ig_g, ig_n);
         if(ig_a != 3 || ig_g != 1 || ig_n != 0) mal++;
 
+        /* ── E O UPDATE SOBRE TEXTO: ESCREVER CRIA A MARCA ──────────────────
+         *
+         * `UPDATE SET s = 'novo'` dizia «1 linha atualizada» e o valor
+         * DESAPARECIA. A causa é a face errada da mesma operação: o SET usa o
+         * mesmo leitor do WHERE, e esse lê a cadeia como o ENDEREÇO dela com
+         * `tx_procura`, que pergunta e não escreve. Numa condição está certo ---
+         * perguntar por uma cadeia que ninguém escreveu não a pode criar. Numa
+         * ESCRITA está errado: 'novo' não estava no pool, o endereço vinha 0, e
+         * a célula ficava ausente. Aceitava e apagava.
+         *
+         * Quem escreve usa o que escreve. E o CONTROLO é a coluna de outro
+         * corpo: uma cadeia numa coluna de inteiros TEM de ser recusada, senão
+         * a correcção seria «aceitar cadeias em todo o lado». */
+        sql_executa("CREATE TABLE up (s TEXTO, n INTEIRO)", &o);
+        sql_executa("INSERT INTO up VALUES ('velho', 1)", &o);
+        sql_executa("UPDATE up SET s = 'novo'", &o);
+        sql_executa("SELECT s FROM up", &o);
+        int escreveu = (o.ok && o.nrows == 1 && !strcmp(o.cell[0][0], "novo"));
+        sql_executa("SELECT s FROM up WHERE s = 'novo'", &o);
+        int acha_up = (o.ok && o.nrows == 1);
+        sql_executa("UPDATE up SET n = 'x'", &o);
+        int recusa_up = !o.ok;
+        printf("      o UPDATE escreve a cadeia (%s), a igualdade acha-a (%s), e numa"
+               " coluna de INTEIROS recusa (%s)\n",
+               escreveu ? "sim" : "NÃO", acha_up ? "sim" : "NÃO",
+               recusa_up ? "sim" : "NÃO");
+        if(!escreveu || !acha_up || !recusa_up) mal++;
+
         /* ── E O QUE A COMPRESSÃO NÃO PRESERVA: A ORDEM ─────────────────────
          *
          * Este é o par completo, e é ele que diz o que a leitura do texto vale.

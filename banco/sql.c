@@ -6568,6 +6568,48 @@ static int varre(const char *resto, int acao){
         pula(&p); if(*p != '=') return 0; p++;
         pula(&p);
         if(palavra(&p, "NULL")) { set_anula = 1; v = 0; }
+        /* ── A CADEIA NO SET ESCREVE-SE, E NÃO SE PROCURA ────────────────────
+         *
+         * `SET s = 'novo'` caía no `le_num`, que lê a cadeia como o ENDEREÇO
+         * dela no pool --- e o faz com `tx_procura`, que pergunta e não escreve.
+         * Numa condição isso está certo: perguntar por uma cadeia que ninguém
+         * escreveu não a pode criar. Numa ESCRITA está errado: 'novo' não estava
+         * no pool, o endereço vinha 0, e a célula ficava AUSENTE. O UPDATE dizia
+         * «1 linha atualizada» e o valor desaparecia --- aceitava e apagava.
+         *
+         * É a mesma distinção que o `tx_procura` traz escrita na porta: ele é a
+         * outra face do `tx_guarda`. Quem escreve usa o que escreve. */
+        else if(*p == '\''){
+            const char *r = p + 1;
+            char buf[TX_MAX + 2]; int bn = 0, fechou = 0;
+            while(*r){
+                if(*r == '\''){
+                    if(r[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; r += 2; continue; }
+                    r++; fechou = 1; break;
+                }
+                if(bn < TX_MAX) buf[bn++] = *r;
+                r++;
+            }
+            buf[bn] = 0;
+            if(!fechou){
+                printf("erro: a cadeia do SET não fecha — RECUSADA.\n");
+                if(sql_cap){ sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err, "unterminated string"); }
+                return 0;
+            }
+            { long ca = col_indice(alvo);
+              if(ca < 0 || corpo_de(ca).total != CORPO_TEXTO){
+                  printf("erro: a coluna «%s» não é de TEXTO e veio uma cadeia —"
+                         " RECUSADA. Um valor de outro corpo não se converte em"
+                         " silêncio.\n", alvo);
+                  if(sql_cap){ sql_cap->ok = 0;
+                      snprintf(sql_cap->err, sizeof sql_cap->err,
+                               "column \"%s\" is not textual", alvo); }
+                  return 0;
+              } }
+            v = (long)tx_guarda(buf, bn);
+            p = r;
+        }
         else if(!numero(&p, &v)){
             /* ── NÃO É NÚMERO: TENTA-SE COMO EXPRESSÃO ──────────────────────
              * O MESMO `le_num` do WHERE e da projecção — não uma segunda
