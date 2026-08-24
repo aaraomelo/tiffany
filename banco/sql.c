@@ -2087,6 +2087,20 @@ static int col_e_inteira(long j, long ncols, long nrows){
  * definida, degenerada, indefinida --- sem despachar por nenhuma. É essa a chave
  * da ordenação. O B e o C da coluna pedem-se ao `corpo_B` e ao `corpo_C`, que
  * são quem os define. */
+/* ── E O QUE ESTA CHAVE AINDA NÃO ALCANÇA ────────────────────────────────────
+ *
+ * Esta régua serve o `ORDER BY`. A DESIGUALDADE do WHERE não passa por aqui: o
+ * avaliador compara a célula átomo a átomo, o que numa coluna quadrática é a
+ * PARTE REAL. Medido: com {1+2σ, 0+0σ} numa coluna AUREO, `WHERE a > 0` devolve
+ * 1+2σ --- certo pela parte real (1 > 0) e pelo valor (4,236 > 0), e ERRADO pela
+ * régua, cuja norma é −1. Ou seja: a mesma consulta ordena por uma régua e
+ * filtra por outra, que é `duas réguas para o mesmo objecto` no mesmo comando.
+ *
+ * Não se remenda aqui. O avaliador é de bytecode sobre átomos de oito bits, e
+ * pôr a norma nele é trabalho no emissor --- e antes disso é uma DECISÃO: em
+ * `a > 0` o zero é um literal, e comparar a norma de `a` com ele não é a mesma
+ * pergunta que comparar o valor. Fica escrito porque é trabalho e não um
+ * remendo, e porque o que não está dito passa por resolvido. */
 static void celula_qz(long i, long j, long nc, long *num, long *den);
 static long corpo_B(long cp, long parm);
 static long corpo_C(long cp);
