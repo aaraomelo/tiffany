@@ -5136,6 +5136,30 @@ static long corpo_delta(long cp, long parm){
     long B = corpo_B(cp, parm), C = corpo_C(cp);
     return B*B - 4*C;
 }
+/* ── AS TRÊS CLASSES, DITAS UMA VEZ — `aranha thm:leidisc` ───────────────────
+ *
+ * «Δ < 0 ELÍPTICO: ordem finita, e ela está em {3,4,6}. Δ = 0 PARABÓLICO: raiz
+ * DUPLA, o corte terminado. Δ > 0 HIPERBÓLICO: duas direcções reais, uma expande
+ * e a outra contrai.» E o teorema avisa do erro fácil: «o traço sozinho não
+ * classifica --- quem classifica é Δ», com a nota de que a primeira escrita dele
+ * produziu dezasseis falsas elípticas por separar pelo traço.
+ *
+ * A tricotomia estava escrita DUAS vezes neste ficheiro, com os mesmos três
+ * nomes em géneros diferentes --- uma fala do corpo, outra da régua ---, e uma
+ * delas recalculava Δ = B² − 4C à mão em vez de pedir ao `corpo_delta`. Três
+ * escritas da mesma lei. Fica uma, e é esta: os nomes pedem-se com o género. */
+enum { CL_ELIPTICO = -1, CL_PARABOLICO = 0, CL_HIPERBOLICO = 1 };
+static int corpo_classe(long D){
+    return D < 0 ? CL_ELIPTICO : (D == 0 ? CL_PARABOLICO : CL_HIPERBOLICO);
+}
+static const char *corpo_classe_nome(long D, int fem){
+    switch(corpo_classe(D)){
+        case CL_ELIPTICO:   return fem ? "elíptica"    : "elíptico";
+        case CL_PARABOLICO: return fem ? "parabólica"  : "parabólico";
+        default:            return fem ? "hiperbólica" : "hiperbólico";
+    }
+}
+
 
 static void emit_transporte(long t, unsigned s){
     /* φ_t = [[1,t],[0,1]] = (TROCA GOLD)^t, e para t<0 é (NEGRO TROCA)^|t| */
@@ -11634,9 +11658,13 @@ static int varre(const char *resto, int acao){
              * e a classificação por Δ é a mesma do catálogo — hiperbólico,
              * parabólico, elíptico — e a mesma que classifica uma EDP de 2ª
              * ordem pelo seu símbolo. Uma tríade, três nomes. */
-            const char *classe = (D > 0) ? "hiperbólico (duas raízes reais)"
-                               : (D == 0) ? "parabólico (raiz dupla)"
-                                          : "elíptico (par conjugado)";
+            /* a tricotomia pede-se ao `corpo_classe_nome` --- ver thm:leidisc */
+            char cls[48];
+            snprintf(cls, sizeof cls, "%s (%s)", corpo_classe_nome(D, 0),
+                     corpo_classe(D) == CL_HIPERBOLICO ? "duas raízes reais"
+                   : corpo_classe(D) == CL_PARABOLICO  ? "raiz dupla"
+                                                       : "par conjugado");
+            const char *classe = cls;
             const char *reg;
             if(D < 0) reg = (tr.a < 0) ? "CRISTAL" : (tr.a == 0) ? "BORDA" : "CAOS";
             else {
@@ -12679,12 +12707,15 @@ static int distancia(void){
                    "—", "—", "fora da família quadrática");
             continue;
         }
-        long B = corpo_B(c.total, c.e), C = corpo_C(c.total), D = B*B - 4*C;
+        /* o Δ pede-se ao `corpo_delta`, que é quem o define --- estava aqui
+         * recalculado como B² − 4C, a mesma conta escrita a segunda vez */
+        long B = corpo_B(c.total, c.e), C = corpo_C(c.total);
+        long D = corpo_delta(c.total, c.e);
         char nm[32];
         snprintf(nm, sizeof nm, "%s(%d)", c.total == CORPO_AUREO ? "AUREO" : "CRISTALINO", c.e);
         char rg[24]; snprintf(rg, sizeof rg, "(%ld,%ld)", B, C);
         printf("      %-7ld %-17s %-13s %-11ld %s\n", j, nm, rg, D,
-               D < 0 ? "elíptica" : (D == 0 ? "parabólica" : "hiperbólica"));
+               corpo_classe_nome(D, 1));
     }
     printf("\n      a distância d(i,j) = |Δᵢ − Δⱼ|, e ZERO quer dizer ISOMORFOS:\n\n");
     printf("      ");
