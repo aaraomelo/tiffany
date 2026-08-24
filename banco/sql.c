@@ -6327,6 +6327,27 @@ static void pres_migra(long ncols, long nrows){
  * começar em 257. A do índice é dois: ela recusa nos seus 600 nós muito antes
  * das 256 linhas, pelo que ali a colisão não chega a acontecer, e mudá-la
  * mudaria a forma de uma árvore GRAVADA que três caminhos relêem. */
+/* ── A ALTURA DE CADA ÁRVORE, E OS CINCO NÚMEROS QUE A NÃO LIAM ──────────────
+ *
+ * A do rascunho é QUATRO níveis --- ela recebe as linhas que o WHERE deixou, e
+ * com dois colidiria acima de 256, o que faria 300 linhas saírem a começar em
+ * 257. A do índice é DOIS, e o que a segura é o `IDX_LIN_MAX` abaixo, derivado
+ * dela: acima de 256 linhas o índice ABSTÉM-SE.
+ *
+ * O que aqui muda não é o valor: é quem o lê. O número de níveis do índice
+ * estava ESCRITO À MÃO em cinco sítios do `j_faixa` --- `if(d < 2)`, dois
+ * `e >= 2` e dois `(e-2)` ---, e era por eles que mexer nesta linha partia a
+ * árvore EM SILÊNCIO. O comentário do `j_casam` já dizia «este era o quarto
+ * sítio onde o número de níveis estava dito, e o único que eu não tinha
+ * encontrado»: faltavam estes. Agora todos leem daqui, e a linha mexe-se.
+ *
+ * UNIFICAR EM QUATRO é o que a teoria pede --- `§sec:realizacoes`: «o Algoritmo
+ * A corre em todas elas SEM UMA LINHA DIFERENTE», e a `thm:navega` dá-lhe o
+ * preço, porque duas árvores de alturas diferentes divergem no PRIMEIRO nível e
+ * D = 2^0 = 1, o máximo. Está medido nos dois sentidos: com quatro os dois
+ * caminhos concordam em todos os tamanhos, mas cada chave gasta mais dois
+ * níveis de nós e o índice deixa de caber às ~220 linhas em vez das 256. Fica
+ * como está até a árvore ter mais espaço, que é uma decisão sobre o MAPA. */
 #define ord_niv_idx   (ord_raiz == S_ORD ? 4 : 2)
 #define ord_bits_idx  ((int)ORD_BITS * ord_niv_idx)
 #define ORD_NIV    (ORD_NIV_VAL + ord_niv_idx)
@@ -6815,7 +6836,13 @@ static int j_faixa(long vmin, long vmax, int *saida, int cap){
         sql_ultimos_nos++;
         if(!no) return 0;                      /* nem sequer o prefixo existe */
     }
-    if(d < 2){ faixa_folhas(no, saida, &n, cap); return n; }
+    /* ── E O NÚMERO DE NÍVEIS DO ÍNDICE LÊ-SE ONDE ELE É DITO ────────────
+     * Estavam aqui CINCO `2` escritos à mão --- este, e os dois pares abaixo
+     * ---, quando a altura já tem nome: `ord_niv_idx`. Era o mesmo número em
+     * seis sítios, e o comentário do `j_casam` chegou a dizer «este era o
+     * quarto sítio, e o único que eu não tinha encontrado»: faltavam estes. É
+     * por eles que mudar a altura partia a árvore em silêncio. */
+    if(d < ord_niv_idx){ faixa_folhas(no, saida, &n, cap); return n; }
 
     /* aqui os caminhos separam-se. O ramo do símbolo baixo leva tudo o que for
      * >= vmin dentro dele; o do símbolo alto leva tudo o que for <= vmax; e os
@@ -6832,8 +6859,8 @@ static int j_faixa(long vmin, long vmax, int *saida, int cap){
     /* o lado de baixo: segue o caminho de vmin e leva os ramos ACIMA dele */
     { unsigned b = par_le(ord_raiz + no*ORD_LARG + sl);
       sql_ultimos_nos++;
-      for(int e = d - 1; b && e >= 2; e--){
-          unsigned s = (unsigned)((lo >> (ORD_BITS*(e-2))) & (ORD_LARG - 1u));
+      for(int e = d - 1; b && e >= ord_niv_idx; e--){
+          unsigned s = (unsigned)((lo >> (ORD_BITS*(e-ord_niv_idx))) & (ORD_LARG - 1u));
           for(unsigned m = s + 1; m < ORD_LARG; m++){
               unsigned f = par_le(ord_raiz + b*ORD_LARG + m);
               sql_ultimos_nos++;
@@ -6848,8 +6875,8 @@ static int j_faixa(long vmin, long vmax, int *saida, int cap){
     /* e o lado de cima: segue o caminho de vmax e leva os ramos ABAIXO dele */
     { unsigned t = par_le(ord_raiz + no*ORD_LARG + sh);
       sql_ultimos_nos++;
-      for(int e = d - 1; t && e >= 2; e--){
-          unsigned s = (unsigned)((hi >> (ORD_BITS*(e-2))) & (ORD_LARG - 1u));
+      for(int e = d - 1; t && e >= ord_niv_idx; e--){
+          unsigned s = (unsigned)((hi >> (ORD_BITS*(e-ord_niv_idx))) & (ORD_LARG - 1u));
           for(unsigned m = 0; m < s; m++){
               unsigned f = par_le(ord_raiz + t*ORD_LARG + m);
               sql_ultimos_nos++;
@@ -6922,13 +6949,19 @@ static int idx_constroi(long col, long ncols, long nrows){
  * de vir de um efeito lateral do tecto de nós --- para que ele não dependa de
  * mais nada que eu possa vir a alargar. Acima disto o índice não se usa e a
  * varredura responde: devagar, e certo. */
-#define IDX_LIN_MAX  (1L << (ORD_BITS * 2))    /* os dois níveis do índice */
+#define IDX_LIN_MAX  (1L << (ORD_BITS * 2))   /* os dois níveis do ÍNDICE */
 
 static int idx_valido(long col, long nrows){
     if(nrows > IDX_LIN_MAX) return 0;          /* a chave não distinguiria as linhas */
     if(col < 0 || col >= IDX_MAXCOL) return 0;
     Word c = mem_le(S_IDXCAB(col));
     if((long)c.total != col + 1) return 0;
+    /* A FORMA TEM DE BATER. O `.e` do cabeçalho já guardava a altura com que a
+     * árvore foi escrita --- «é o que torna a altura VIVA possível sem mudar o
+     * formato outra vez», diz quem o pôs lá ---, e faltava lê-la. Um índice
+     * gravado com outra altura é dado por velho e reconstrói-se: o formato novo
+     * LÊ o que o velho escreveu, e nunca o lê com a régua errada. */
+    if((long)c.e != 2) return 0;
     Word n = mem_le(S_IDXCAB2(col));
     long quando = (long)n.total | ((long)n.e << 8);
     return quando == nrows;                  /* a tabela mudou: o índice é velho */
