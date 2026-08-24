@@ -27515,9 +27515,32 @@ int main(void){
         if(o.ok) for(int r = 0; r < o.nrows; r++) printf(" %s|%s", o.cell[r][0], o.cell[r][1]);
         printf("  %s\n", (cadeia && fibra) ? "" : "← NÃO VOLTA");
         if(!cadeia || !fibra) mal++;
+        /* ── E A IGUALDADE SOBRE TEXTO, que não existia.
+         *
+         * `WHERE s = 'acme'` era RECUSADO --- «o WHERE não foi entendido» --- e
+         * o TEXTO é o corpo mais usado por um cliente real. Não faltava um
+         * operador: faltava LER a constante. E a leitura é a que a casa já tem:
+         * a célula guarda o ENDEREÇO no pool e o pool DEDUPLICA, pelo que
+         * comparar cadeias É comparar endereços --- `x = y ⟺ R(x) = R(y)`, o
+         * critério da leitura. A cadeia que ninguém escreveu tem endereço zero,
+         * que é a ausência, e nenhuma célula presente o tem: zero linhas é a
+         * resposta, não um erro. */
+        sql_executa("SELECT s FROM tx WHERE s = 'acme'", &o);
+        long ig_a = o.ok ? o.nrows : -1;
+        sql_executa("SELECT s FROM tx WHERE s = 'globex'", &o);
+        long ig_g = o.ok ? o.nrows : -1;
+        sql_executa("SELECT s FROM tx WHERE s = 'ninguem'", &o);
+        long ig_n = o.ok ? o.nrows : -1;
+        printf("      a igualdade sobre TEXTO: 'acme' %ld · 'globex' %ld · e uma que"
+               " ninguém escreveu %ld\n", ig_a, ig_g, ig_n);
+        if(ig_a != 3 || ig_g != 1 || ig_n != 0) mal++;
+
         /* e o CONTROLO da compressão: cadeias IGUAIS caem na mesma fibra e
          * cadeias diferentes em fibras diferentes --- sem isto, um pool que
          * devolvesse sempre o mesmo endereço dava uma fibra só e passava */
+        /* o controlo recorre a consulta: ler o `o` que ficou de outra pergunta
+         * é medir o passo anterior, que é o defeito que o §W190 persegue */
+        sql_executa("SELECT s, count(*) FROM tx GROUP BY s", &o);
         printf("      CONTROLO — as três «acme» numa fibra e a «globex» noutra:"
                " %d fibra(s)\n", o.ok ? o.nrows : -1);
         if(!o.ok || o.nrows != 2) mal++;

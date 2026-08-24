@@ -1242,6 +1242,30 @@ static unsigned atomos_le_u32(unsigned base){
 }
 /* ── GUARDA uma cadeia no pool e devolve o seu endereço (índice de átomo).
  * O topo vive no próprio disco, para o pool sobreviver ao fecho da base. */
+/* ── PROCURAR SEM ESCREVER: a outra face do tx_guarda ────────────────────────
+ * O `tx_guarda` procura e, não achando, ESCREVE. Uma condição não escreve: ela
+ * pergunta. `WHERE s = 'acme'` com o 'acme' ausente do pool não pode criar o
+ * 'acme' --- isso seria a leitura a mudar o espaço, e o campo é do espaço mas a
+ * marca é de quem escreve. Devolve 0, que é a ausência, e nenhuma célula
+ * presente a tem. */
+static unsigned tx_procura(const char *s2, int n){
+    if(n < 0) n = 0;
+    if(n > TX_MAX) n = TX_MAX;
+    unsigned topo = atomos_le_u32(S_TXTOPO);
+    if(topo < S_TXPOOL) return 0;
+    for(unsigned a2 = S_TXPOOL; a2 < topo; ){
+        int ln = (int)slot_mem_le(fmem, a2);
+        if(ln == n){
+            int igual = 1;
+            for(int i = 0; i < n; i++)
+                if((char)slot_mem_le(fmem, a2 + 1u + (unsigned)i) != s2[i]){ igual = 0; break; }
+            if(igual) return a2 - S_TXPOOL + 1u;
+        }
+        a2 += 1u + (unsigned)ln;
+    }
+    return 0;
+}
+
 static unsigned tx_guarda(const char *s2, int n){
     if(n < 0) n = 0;
     if(n > TX_MAX) n = TX_MAX;
@@ -3747,6 +3771,38 @@ static int le_fator_num(const char **p, struct tensor *t){
         return 1;
     }
     *t = ten_zero();
+    /* ── A CADEIA É O SEU ENDEREÇO, E COMPARAR CADEIAS É COMPARAR ENDEREÇOS ──
+     *
+     * `WHERE s = 'acme'` era RECUSADO --- «o WHERE não foi entendido» ---, e o
+     * TEXTO é o corpo mais usado por um cliente real. Não faltava um operador:
+     * faltava LER a constante.
+     *
+     * E a leitura é a que a casa já tem. A célula de uma coluna de texto guarda
+     * o ENDEREÇO no pool, e o pool DEDUPLICA --- «a mesma cadeia tem de dar o
+     * mesmo endereço, e isto não é economia de espaço: é o CRITÉRIO DA LEITURA,
+     * x = y ⟹ R(x) = R(y)». Então `s = 'acme'` é `s = <endereço de acme>`, e
+     * toda a maquinaria da igualdade vale sem uma linha a mais.
+     *
+     * A cadeia que NÃO está no pool não existe em linha nenhuma, e o endereço
+     * que se lhe dá é o ZERO --- que é a ausência, e nenhuma célula presente o
+     * tem. Zero linhas é a resposta certa, não um erro: perguntar por uma
+     * cadeia que ninguém escreveu é uma pergunta legítima com resposta vazia. */
+    if(**p == '\''){
+        const char *r = *p + 1;
+        char buf[TX_MAX + 2]; int bn = 0;
+        while(*r){
+            if(*r == '\''){
+                if(r[1] == '\''){ if(bn < TX_MAX) buf[bn++] = '\''; r += 2; continue; }
+                r++; break;
+            }
+            if(bn < TX_MAX) buf[bn++] = *r;
+            r++;
+        }
+        buf[bn] = 0;
+        ten_const(t, (long)tx_procura(buf, bn));
+        *p = r;
+        return 1;
+    }
     if(isdigit((unsigned char)**p)){
         long k;
         if(!numero(p, &k)) return 0;
@@ -11126,7 +11182,14 @@ static int varre(const char *resto, int acao){
          * Recolhe-se por isso na ordem PEDIDA e imprime-se no fim, que é o que o
          * SqlOut já fazia: passam a ser o MESMO caminho e não dois — o texto e o
          * protocolo não podem discordar sobre a linha que ambos descrevem. */
-        char saida[SQL_OUT_MAX_COLS][SQL_OUT_CELL];
+        /* ── O BUFFER DA LINHA NÃO É A CÉLULA DO TRANSPORTE ──────────────────
+         * Era `SQL_OUT_CELL` = 64, e o corpo TEXTO segura TX_MAX = 240: uma
+         * cadeia de 100 caracteres entrava inteira no pool, a igualdade
+         * achava-a, e a LEITURA devolvia 63 --- truncada, em silêncio, no
+         * terminal e no fio. A volta não fechava e nada dizia.
+         * O que se monta aqui é a linha; o que a janela da API C leva é outra
+         * pergunta, e essa RECUSA quando não cabe. */
+        static char saida[SQL_OUT_MAX_COLS][TX_MAX + 2];
         int nsai = proj_n ? proj_n
                  : (int)(ncols < SQL_OUT_MAX_COLS ? ncols : SQL_OUT_MAX_COLS);
         unsigned char sai_nulo[SQL_OUT_MAX_COLS];
@@ -11134,7 +11197,7 @@ static int varre(const char *resto, int acao){
         for(long j = 0; j < ncols; j++){
             Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
             long cp = corpo_de(j).total;
-            char cel[SQL_OUT_CELL];
+            char cel[TX_MAX + 2];
             cel[0] = 0;
             if(cp == CORPO_MORFICO){
                 cel_morfico((unsigned long)c.total, corpo_de(j).e, cel, (int)sizeof cel);
@@ -11229,11 +11292,11 @@ static int varre(const char *resto, int acao){
             if(proj_n){
                 for(int k = 0; k < proj_n; k++)
                     if(!proj_ex[k] && proj[k] == (int)j){
-                        snprintf(saida[k], SQL_OUT_CELL, "%s", cel);
+                        snprintf(saida[k], sizeof saida[0], "%s", cel);
                         sai_nulo[k] = (unsigned char)ausente;
                     }
             }else if(j < nsai){
-                snprintf(saida[j], SQL_OUT_CELL, "%s", cel);
+                snprintf(saida[j], sizeof saida[0], "%s", cel);
                 sai_nulo[j] = (unsigned char)ausente;
             }
         }
@@ -11364,6 +11427,20 @@ static int varre(const char *resto, int acao){
                 if(k + 1 < nsai) printf(" | ");
             }
             if(sql_cap && row_i >= 0 && row_i < SQL_OUT_MAX_ROWS){
+                /* e o que não cabe na janela DIZ-SE. Truncar aqui era o mesmo
+                 * defeito da linha larga: o cliente recebia uma cadeia curta com
+                 * a cara de uma completa. */
+                if(strlen(saida[k]) >= SQL_OUT_CELL){
+                    printf("erro: a célula tem %zu caracteres e a janela da porta C"
+                           " leva %d — RECUSADA. O valor está inteiro no banco; peça-o"
+                           " por um caminho que o leve todo.\n",
+                           strlen(saida[k]), SQL_OUT_CELL - 1);
+                    sql_cap->ok = 0;
+                    snprintf(sql_cap->err, sizeof sql_cap->err,
+                             "cell has %zu chars; the C window carries %d",
+                             strlen(saida[k]), SQL_OUT_CELL - 1);
+                    return 0;
+                }
                 snprintf(sql_cap->cell[row_i][k], SQL_OUT_CELL, "%s", saida[k]);
                 sql_cap->nulo[row_i][k] = sai_nulo[k];
             }
