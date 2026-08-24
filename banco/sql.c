@@ -1303,6 +1303,24 @@ static void ordaus_poe(long k, long v){
     mem_grava(S_SAIDAUS + (unsigned)k, w);
 }
 
+/* ── O MÓRFICO ESCRITO COMO CONJUNTO, NUM SÍTIO SÓ ───────────────────────────
+ * A célula guarda a máscara e lê-se `{0,2}`. Estava inline no laço da saída, e
+ * a chave do GROUP BY não a tinha --- devolvia o número cru, que é a coordenada
+ * no lugar do objecto, o mesmo defeito que o TEXTO tinha. Um sítio, dois
+ * leitores. */
+static void cel_morfico(unsigned long msk, long n, char *out, int cap){
+    if(n < 1 || n > 62) n = 6;
+    size_t o = 0;
+    if(cap < 4){ if(cap) out[0] = 0; return; }
+    out[o++] = '{';
+    int primeiro = 1;
+    for(long t = 0; t < n && o + 8 < (size_t)cap; t++) if(msk & (1UL << t)){
+        o += (size_t)snprintf(out + o, (size_t)cap - o, "%s%ld", primeiro ? "" : ",", t);
+        primeiro = 0;
+    }
+    if(o < (size_t)cap - 1){ out[o++] = '}'; out[o] = 0; }
+}
+
 static void corpo_poe(long j, Word w){
     if(j < 8) mem_grava(S_CORPO + (unsigned)j, w);
     if(j < (long)S_CORPOX_N) mem_grava(S_CORPOX + (unsigned)j, w);
@@ -4655,10 +4673,20 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             unsigned termo = prod;
             /* a BASE DE REFERÊNCIA do átomo: a primeira coluna citada que tenha régua. As
              * outras da mesma classe são transportadas até ela. */
+            /* O `cc` É O SÍMBOLO, e a coluna vem do mapa --- aqui ficou a ler
+             * `corpo_de(cc)` com o símbolo no lugar da coluna, que é o mesmo
+             * defeito que já se corrigiu duas linhas abaixo. Enquanto os dois
+             * coincidiam ninguém dava por ele; depois de o símbolo passar a ser
+             * atribuído por ordem de aparecimento, o corpo lido é o da coluna
+             * errada --- e num corpo com RÉGUA isso significa não transportar.
+             * Medido: `WHERE au = 11` numa coluna ÁUREA com 11 devolvia ZERO,
+             * enquanto `au > 10` devolvia a linha. */
             long b_ref = 0; int b_ref_ok = 0;
             for(int cc = 0; cc < NCOL && !b_ref_ok; cc++){
                 if(!cit[cc]) continue;
-                Word cw = corpo_de(cc);
+                long ccol_r = col_de_sim(cc);
+                if(ccol_r < 0 || ccol_r >= ncols) continue;
+                Word cw = corpo_de(ccol_r);
                 if(corpo_tem_regua(cw.total)){ b_ref = corpo_B(cw.total, cw.e); b_ref_ok = 1; }
             }
             emit_copia(S_UM, prod);
@@ -4672,8 +4700,23 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 if(ccol < 0 || ccol >= ncols) continue;
                 int usa = 0;
                 for(int t = 0; t < KGRAU; t++) if(d[t] == cc+1) usa = 1;
+                /* ── O `q` É O NEUTRO, E NUM CORPO COM RÉGUA NÃO É O S_DEN ───
+                 *
+                 * Onde o monómio NÃO usa a coluna entra o denominador dela, para
+                 * os dois lados ficarem sobre o mesmo q. Só que num corpo com
+                 * RÉGUA --- áureo, cristalino --- o segundo componente não é
+                 * denominador nenhum: é o coeficiente de σ, e vale ZERO numa
+                 * célula escrita como inteiro. O termo constante era então
+                 * multiplicado por zero e DESAPARECIA: `WHERE au = 11` numa
+                 * coluna áurea com 11 virava `au = 0` e devolvia vazio, enquanto
+                 * `au > 10` devolvia a linha --- o mesmo valor, duas respostas.
+                 *
+                 * Nesses corpos o neutro é o UM, que é o que ele sempre foi. */
+                Word cw_q = corpo_de(ccol);
                 unsigned fonte = usa ? (S_LINHAS + (unsigned)(linha*ncols + ccol))
-                                     : (S_DEN    + (unsigned)(linha*ncols + ccol));
+                               : (corpo_tem_regua(cw_q.total)
+                                    ? S_UM
+                                    : (S_DEN + (unsigned)(linha*ncols + ccol)));
                 /* O TRANSPORTE, LIGADO. Se a coluna vive noutra base da MESMA classe, o
                  * valor tem de ser levado à base de referência antes de entrar no produto —
                  * e isso é φ_t, o cisalhamento, palavra nos geradores.
@@ -10937,6 +10980,8 @@ static int varre(const char *resto, int acao){
                     Word cw_ = corpo_de(col); \
                     if(!(temv)) snprintf((dst), 80, "(ausente)"); \
                     else if(cw_.total == CORPO_TEXTO) tx_le((unsigned)(val), (dst), 80); \
+                    else if(cw_.total == CORPO_MORFICO) \
+                        cel_morfico((unsigned long)(val), cw_.e, (dst), 80); \
                     else snprintf((dst), 80, "%ld", (long)(val)); \
                 } while(0)
                 GRP_CHAVE(k1, gc, tem, v);
@@ -11074,16 +11119,7 @@ static int varre(const char *resto, int acao){
             char cel[SQL_OUT_CELL];
             cel[0] = 0;
             if(cp == CORPO_MORFICO){
-                long n = corpo_de(j).e; if(n < 1 || n > 62) n = 6;
-                unsigned long msk = (unsigned long)c.total;
-                size_t o = 0;
-                cel[o++] = '{';
-                int primeiro = 1;
-                for(long t = 0; t < n && o + 8 < sizeof cel; t++) if(msk & (1UL << t)){
-                    o += (size_t)snprintf(cel + o, sizeof cel - o, "%s%ld", primeiro ? "" : ",", t);
-                    primeiro = 0;
-                }
-                if(o < sizeof cel - 1){ cel[o++] = '}'; cel[o] = 0; }
+                cel_morfico((unsigned long)c.total, corpo_de(j).e, cel, (int)sizeof cel);
             /* ── O LEITOR TEM DE LER COM O SINAL QUE O CORPO DECLARA ──────────────
              * A célula é um octeto e a Word8 é sem sinal, mas o que ele SIGNIFICA
              * vem do corpo da coluna: num RACIONAL o numerador é assinado (−1/3
@@ -12629,6 +12665,18 @@ static void salta_prosa(const char **pp){
 
 static int executa(const char *sql){
     const char *p = sql;
+    /* ── OS SÍMBOLOS SÃO DESTE COMANDO, E DE MAIS NENHUM ─────────────────────
+     *
+     * O `sim_col` mapeia coluna→símbolo por ordem de aparecimento, e zerava-se
+     * ao ler a expressão. Só que há caminhos que a lêem sem passar por lá, e os
+     * símbolos ACUMULAVAM entre consultas: ao fim de sete colunas distintas
+     * numa sessão, uma consulta que cita UMA era recusada com «a expressão cita
+     * mais de 6 colunas distintas».
+     *
+     * É a cláusula (3) do thm:multiplicidade violada --- «nenhum passo consulta
+     * π(0),…,π(t)» --- e fui eu que a introduzi. O sítio de zerar é o passo, e
+     * o passo é o comando. */
+    sim_zera();
     salta_prosa(&p);
     /* ── O LOTE VEM PRIMEIRO. Uma cadeia com mais de um comando parte-se com
      * consciência do dólar (ver `cmd_fim`) e corre-se um a um. É por aqui que

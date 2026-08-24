@@ -27448,6 +27448,47 @@ int main(void){
         printf("      → %ld de %ld: o que se escreveu é o que se lê\n", voltas, medidas);
         if(voltas != medidas) mal++;
 
+        /* ── E A VOLTA NOS CORPOS COM RÉGUA: a igualdade não fechava.
+         *
+         * A volta apanhou-o à segunda pergunta. Numa coluna ÁUREA com 11,
+         * `WHERE au > 10` devolvia a linha e `WHERE au = 11` devolvia VAZIO ---
+         * o mesmo valor, duas respostas. A causa: na contração, onde o monómio
+         * não usa a coluna entra o denominador dela, para os dois lados ficarem
+         * sobre o mesmo q. Só que no áureo e no cristalino o segundo componente
+         * NÃO é denominador: é o coeficiente de σ, e vale zero numa célula
+         * escrita como inteiro. O termo constante era multiplicado por zero e
+         * DESAPARECIA --- `au = 11` virava `au = 0`.
+         *
+         * Nesses corpos o neutro é o UM, que é o que ele sempre foi. E o
+         * controlo é a igualdade FALSA: sem ele, um motor que casasse tudo
+         * passava. */
+        sql_executa("CREATE TABLE reg (au AUREO, cr CRISTALINO, mo MORFICO, i INTEIRO)", &o);
+        sql_executa("INSERT INTO reg VALUES (11, 11, 11, 11)", &o);
+        static const char *CP[4] = { "au", "cr", "mo", "i" };
+        long acha = 0, recusa = 0;
+        for(int k = 0; k < 4; k++){
+            char q[80];
+            snprintf(q, sizeof q, "SELECT %s FROM reg WHERE %s = 11", CP[k], CP[k]);
+            sql_executa(q, &o);  if(o.ok && o.nrows == 1) acha++;
+            else printf("        o corpo «%s» não acha o 11 (nrows=%d)\n",
+                        CP[k], o.ok ? o.nrows : -1);
+            snprintf(q, sizeof q, "SELECT %s FROM reg WHERE %s = 7", CP[k], CP[k]);
+            sql_executa(q, &o);  if(o.ok && o.nrows == 0) recusa++;
+        }
+        printf("      a igualdade fecha nos quatro corpos: acha %ld/4 · e o CONTROLO,"
+               " a igualdade falsa não acha: %ld/4\n", acha, recusa);
+        if(acha != 4 || recusa != 4) mal++;
+
+        /* e a chave do grupo repõe-se no MÓRFICO pelo mesmo caminho da célula */
+        sql_executa("SELECT mo FROM reg", &o);
+        char cel_mo[64]; snprintf(cel_mo, sizeof cel_mo, "%s",
+                                  (o.ok && o.nrows == 1) ? o.cell[0][0] : "?");
+        sql_executa("SELECT mo, count(*) FROM reg GROUP BY mo", &o);
+        const char *chv_mo = (o.ok && o.nrows == 1) ? o.cell[0][0] : "?";
+        printf("      a célula lê-se %s e a chave do grupo %s  %s\n",
+               cel_mo, chv_mo, !strcmp(cel_mo, chv_mo) ? "" : "← DISCORDAM");
+        if(strcmp(cel_mo, chv_mo)) mal++;
+
         /* ── E A VOLTA DO TEXTO, que é onde a compressão é mais funda.
          *
          * Numa coluna de TEXTO a célula guarda o ENDEREÇO no pool: a cadeia
