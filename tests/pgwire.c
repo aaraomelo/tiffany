@@ -29624,6 +29624,119 @@ int main(void){
            " resultado.", mal == 0);
     }
 
+    /* ═══ §W206: O CAMPO JÁ ESTÁ ESCRITO — não se reconstrói por linha ═════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W206 sem condição, o match É o vivo — e o vivo está no espaço.\n\n");
+
+        /* ── A CLÁUSULA (3), APLICADA AO CUSTO ───────────────────────────────
+         *
+         * `thm:multiplicidade`(3): «a memória não pertence ao agente [...] cada
+         * passo altera G num único ponto, e esse ponto é a célula corrente.
+         * NENHUM passo consulta π(0),…,π(t)». O campo do vivo É essa memória, e
+         * está no ESPAÇO.
+         *
+         * O motor reconstruía-o. Com `tem_where` falso, o molde emitia
+         * `emit_copia(S_CHEIO, S_ACC)` e as quatro faces reduziam-se a
+         * `match |= (VIVO ∧ e_i) ∧ TUDO`, isto é, a match = VIVO --- e o
+         * programa corria POR CADA LINHA para chegar a uma cópia de um bitmap
+         * que já estava no disco. Eram dezasseis passos por linha, e era o
+         * custo BASE de tudo o que não tem condição: o count(*), o sum, o
+         * DISTINCT, o GROUP BY e o ORDER BY pagavam-no antes de começar.
+         *
+         * Copia-se por SLOT --- SLOT_BITS linhas de uma vez, que é o que a Word
+         * segura --- e o custo passa de nrows a nrows/SLOT_BITS. O que se mede
+         * é a lei, não a velocidade: ZERO bytes de ISA executados. */
+        unlink("/tmp/pgwire_w206.mem"); unlink("/tmp/pgwire_w206.prog");
+        unlink("/tmp/pgwire_w206.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w206__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w206__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w206")) mal++;
+
+        static const long NL = 300;
+        sql_executa("CREATE TABLE t (k INTEIRO, v INTEIRO)", &o);
+        for(long i = 0; i < NL; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", i, i % 7);
+            sql_executa(q, &o);
+        }
+
+        /* ── E O CUSTO NÃO CRESCE COM A TABELA ───────────────────────────────
+         * Medir zero num tamanho só não distingue «não varre» de «a tabela é
+         * pequena». Mede-se em dois tamanhos, e o custo tem de ser o MESMO. */
+        static const char *SEM_WHERE[3] = {
+            "SELECT count(*) FROM t",
+            "SELECT sum(v) FROM t",
+            "SELECT k FROM t ORDER BY k",
+        };
+        long zeros = 0;
+        for(int c = 0; c < 3; c++){
+            sql_executa(SEM_WHERE[c], &o);
+            long p = sql_ultimos_passos;
+            printf("      %-32s %ld passo(s)\n", SEM_WHERE[c], p);
+            if(p == 0) zeros++;
+        }
+        if(zeros != 3) mal++;
+
+        /* o dobro das linhas, e o custo continua zero */
+        for(long i = NL; i < NL * 2; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", i, i % 7);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT count(*) FROM t", &o);
+        long dobro_p = sql_ultimos_passos;
+        long dobro_r = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      com o DOBRO das linhas (%ld): count(*) = %ld, %ld passo(s)\n",
+               NL * 2, dobro_r, dobro_p);
+        if(dobro_p != 0 || dobro_r != NL * 2) mal++;
+
+        /* ── O CONTROLO: com CONDIÇÃO, o trabalho existe e paga-se ───────────
+         *
+         * Sem isto, um motor que não executasse nada passaria este medidor ---
+         * e «não varre» seria indistinguível de «não faz». Uma condição sobre
+         * coluna sem índice TEM de custar, porque aí há uma pergunta por
+         * responder linha a linha: o que desapareceu foi o trabalho que não era
+         * trabalho nenhum, e não o trabalho. */
+        sql_executa("SELECT count(*) FROM t WHERE v = 3", &o);
+        long com_p = sql_ultimos_passos;
+        long com_r = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      CONTROLO — com condição não indexada: %ld passo(s), e a"
+               " resposta é %ld\n", com_p, com_r);
+        if(com_p <= 0 || com_r <= 0) mal++;
+
+        /* e a resposta sem condição CONFERE com a soma das fibras: o campo
+         * copiado é o mesmo campo, e não um bitmap qualquer */
+        sql_executa("SELECT count(*) FROM t", &o);
+        long total = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        sql_executa("DELETE FROM t WHERE k = 0", &o);
+        sql_executa("SELECT count(*) FROM t", &o);
+        long apos = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      e o campo copiado É o vivo: %ld antes do DELETE, %ld depois\n",
+               total, apos);
+        if(apos != total - 1) mal++;
+        sql_fechar();
+
+        ok("O CAMPO JÁ ESTÁ ESCRITO, E O MOTOR RECONSTRUÍA-O POR LINHA. A cláusula (3) do"
+           " `thm:multiplicidade` diz que «a memória não pertence ao agente [...] cada passo"
+           " altera G num único ponto», e o campo do VIVO é essa memória, guardada no"
+           " ESPAÇO. Ora com `tem_where` falso o molde emitia `emit_copia(S_CHEIO, S_ACC)` e"
+           " as quatro faces reduziam-se a `match |= (VIVO ∧ e_i) ∧ TUDO`, isto é, a match ="
+           " VIVO --- e o programa corria POR CADA LINHA para chegar a uma cópia de um"
+           " bitmap que já estava no disco. Eram dezasseis passos por linha, e era o custo"
+           " BASE de tudo o que não tem condição: o count(*), o sum, o DISTINCT, o GROUP BY"
+           " e o ORDER BY pagavam-no antes de começar. Percorrer as linhas para reconstruir"
+           " o que o espaço guarda é exactamente o agente a carregar o mapa. Copia-se agora"
+           " por SLOT --- SLOT_BITS linhas de uma vez, que é o que a Word segura --- e o que"
+           " se mede é a LEI e não a velocidade: zero bytes de ISA executados. E mede-se em"
+           " DOIS tamanhos, porque zero num tamanho só não distingue «não varre» de «a"
+           " tabela é pequena»: com o dobro das linhas o custo continua zero e a resposta"
+           " continua certa. O CONTROLO é o trabalho que EXISTE ainda se pagar --- uma"
+           " condição sobre coluna sem índice tem de custar, senão «não varre» seria"
+           " indistinguível de «não faz» ---, e o segundo controlo é o campo copiado ser"
+           " mesmo o VIVO: um DELETE tem de fazer a contagem descer de um.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

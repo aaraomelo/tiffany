@@ -8000,6 +8000,25 @@ static int varre(const char *resto, int acao){
             rel_anda(i);
             passos += rodar(pc_emit);
         }
+    }else if(!idx_usa && !tem_where){
+        /* ── SEM CONDIÇÃO, O MATCH É O VIVO --- E O VIVO JÁ ESTÁ ESCRITO ─────
+         *
+         * Com `tem_where` falso o molde emite `emit_copia(S_CHEIO, S_ACC)`, e
+         * as quatro faces reduzem-se a `match |= (VIVO ∧ e_i) ∧ TUDO`, isto é,
+         * a match = VIVO. O programa corria por CADA LINHA para chegar a uma
+         * cópia de um bitmap que já estava no disco --- 16 passos por linha, e
+         * era o custo BASE de tudo o que não tem WHERE: o count(*), o sum, o
+         * DISTINCT, o GROUP BY e o ORDER BY pagavam-no antes de começar.
+         *
+         * A cláusula (3) do `thm:multiplicidade` diz porque isto é errado: «a
+         * memória não pertence ao agente [...] cada passo altera G num único
+         * ponto». O campo do vivo É a memória, e está no ESPAÇO; percorrer as
+         * linhas para o reconstruir é o agente a refazer o que o espaço guarda.
+         * Copia-se por SLOT, que é o que a Word segura --- SLOT_BITS linhas de
+         * uma vez ---, e o custo passa de nrows a nrows/SLOT_BITS. */
+        long slots = (nrows + (long)SLOT_BITS - 1) / (long)SLOT_BITS;
+        for(long sl = 0; sl < slots; sl++)
+            mem_grava(S_MATCH + (unsigned)sl, mem_le(S_VIVO + (unsigned)sl));
     }else if(!idx_usa)
         for(long i = 0; i < nrows; i++){ rel_anda(i); passos += rodar(pc_emit); }
 
