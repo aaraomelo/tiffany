@@ -27801,6 +27801,37 @@ int main(void){
                o.ok ? o.nrows : -1);
         if(!o.ok || o.nrows != 0) mal++;
 
+        /* ── NENHUM COMANDO FICA CALADO ─────────────────────────────────────
+         *
+         * Um comando que o motor não conhece diz «nao entendi». Mas seis que ele
+         * CONHECE --- ACHA, BUSCA, VERIFICA, CABECALHO, IMPORT e GET --- só
+         * sabiam uma forma cada, e fora dela devolviam zero e saíam calados. O
+         * silêncio é o pior desfecho: não distingue «correu e não havia nada» de
+         * «não correu», e quem chamou fica sem saber se fez.
+         *
+         * Cada um passa a nomear a forma que sabe, que é o que permite corrigir
+         * a frase em vez de adivinhar. O CONTROLO é a forma CERTA continuar a
+         * ser aceite --- senão a correcção seria «recusar tudo». */
+        static const char *MUDOS[6] = {
+            "ACHA 7", "BUSCA 7", "VERIFICA t", "CABECALHO t",
+            "IMPORT XPTO", "GET XPTO",
+        };
+        long falam = 0;
+        for(int k = 0; k < 6; k++){
+            sql_executa(MUDOS[k], &o);
+            if(!o.ok && o.err[0]) falam++;
+            else printf("        «%s» ficou calado (ok=%d err=[%s])\n",
+                        MUDOS[k], o.ok, o.err);
+        }
+        printf("      os seis comandos que ficavam calados agora RECUSAM e dizem a"
+               " forma: %ld/6\n", falam);
+        if(falam != 6) mal++;
+        /* e o CONTROLO: a forma certa passa */
+        sql_executa("SELECT 1", &o);
+        printf("      CONTROLO — a forma certa continua a ser aceite: %s\n",
+               o.ok ? "sim" : "NÃO");
+        if(!o.ok) mal++;
+
         /* ── E O CONTROLO, que é a cláusula (3) ao contrário: o que MUDA o
          * resultado é a marca no espaço, e só ela. Sem isto, um motor que
          * devolvesse sempre a mesma coisa passava em tudo o que está acima ---

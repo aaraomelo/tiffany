@@ -12215,7 +12215,14 @@ static int distancia_corpos(void){
  * O martelo compila como tudo o resto — LOAD, LOAD, OP_MARTELO — e quem executa é o banco. */
 static int cabecalho(const char *p){
     pula(&p);
-    if(*p != '\'' && *p != '"') return 0;
+    if(*p != '\'' && *p != '"'){
+        printf("erro: `CABECALHO` pede a cadeia entre aspas — `CABECALHO '<texto>'` —"
+               " e veio «%.30s» — RECUSADO.\n", p);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "CABECALHO needs a quoted string"); }
+        return 0;
+    }
     char asp = *p++;
     unsigned char cab[80]; memset(cab, 0, 80);
     int n = 0;
@@ -12305,7 +12312,13 @@ static int martelo(const char *p){
  * ordem 4, quatro voltas e está-se onde se partiu. Não há reversão a escrever — há a usar. */
 static int verifica(const char *p){
     long n = 0; pula(&p);
-    if(!numero(&p, &n)) return 0;
+    if(!numero(&p, &n)){
+        printf("erro: `VERIFICA` pede o NÚMERO do martelo — `VERIFICA <n>` — e veio"
+               " «%.30s» — RECUSADO.\n", p);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "VERIFICA needs a number"); }
+        return 0;
+    }
     unsigned char cab[80], h1[32], h2[32], alvo[32];
     atomos_le(S_CAB, cab, 80);
     atomos_le(S_ALVO, alvo, 32);
@@ -13618,16 +13631,41 @@ static int executa(const char *sql){
         if(!strncasecmp(q, "LINGUAGENS", 10)) return import_linguagens(q+10);
         if(!strncasecmp(q, "CORPO", 5)) return import_corpo(q+5);
         if(!strncasecmp(q, "IDIOMA", 6)) return import_idioma(q+6);
+        printf("erro: `IMPORT` sabe três formas — LINGUAGENS, CORPO e IDIOMA — e veio"
+               " «%.30s» — RECUSADO.\n", q);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "IMPORT: known forms are LINGUAGENS, CORPO, IDIOMA"); }
         return 0;
     }
     if(palavra(&p, "GET")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "CORPO", 5)) return get_corpo(q+5);
+        printf("erro: `GET` sabe uma forma só — `GET CORPO <caminho>` — e veio"
+               " «%.30s» — RECUSADO.\n", q);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "GET: only `GET CORPO <path>` is known"); }
         return 0;
     }
+    /* ── O COMANDO RECONHECIDO QUE NÃO RESPONDE NEM RECUSA ───────────────────
+     *
+     * `BUSCA` e `ACHA` só sabem a forma com TEXTO; fora dela devolviam ZERO e
+     * saíam CALADOS. Um comando que não existe diz «nao entendi»; estes eram
+     * lidos, não faziam nada, e não diziam --- e quem chamou fica sem saber se
+     * fez. O silêncio é o pior desfecho: não distingue «correu e não havia
+     * nada» de «não correu».
+     *
+     * A recusa nomeia a forma que ele sabe, que é o que permite corrigir a
+     * frase em vez de adivinhar. */
     if(palavra(&p, "BUSCA")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return busca_texto(q+5);
+        printf("erro: `BUSCA` sabe uma forma só — `BUSCA TEXTO <cadeia>` — e veio"
+               " «%.30s» — RECUSADO.\n", q);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "BUSCA: only `BUSCA TEXTO <string>` is known"); }
         return 0;
     }
     if(palavra(&p, "CORPOS")) return insere_corpos();
@@ -13639,6 +13677,11 @@ static int executa(const char *sql){
     if(palavra(&p, "ACHA")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return acha_texto(q+5);
+        printf("erro: `ACHA` sabe uma forma só — `ACHA TEXTO <cadeia>` — e veio"
+               " «%.30s» — RECUSADO.\n", q);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "ACHA: only `ACHA TEXTO <string>` is known"); }
         return 0;
     }
     if(palavra(&p, "SELECT")){
