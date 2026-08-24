@@ -3388,12 +3388,25 @@ int main(void){
          * com |X| as linhas percorridas e |I| as que casam. Um molde que ainda
          * ramificasse dava um coeficiente maior e variável; um que não tivesse
          * fase de avaliação dava 3 = 0. */
-        long p_base = passos[2];                    /* o caso em que nada casa */
+        /* ── E O CASO IMPOSSÍVEL NÃO ENTRA NA LEI, PORQUE NÃO VARRE ──────────
+         *
+         * O `fc` tem valores 1..10 e a condição é `a > 10`: a MARCA da coluna
+         * descarta-o sem ler linha nenhuma, e o custo dele é ZERO. Isso é outra
+         * lei --- a do §W195 e §W208 ---, e a desta vale para o que VARRE.
+         *
+         * Isto esteve escondido: o `sql_ultimos_passos` era escrito num sítio
+         * só, no fim do caminho normal, e a saída antecipada da marca saltava-o
+         * --- pelo que `passos[2]` trazia o custo da consulta ANTERIOR e os três
+         * números batiam POR ACIDENTE. Quando o contador passou a dizer a
+         * verdade, a comparação revelou-se. A base passa a ser o caso que casa
+         * TUDO, que varre de facto. */
+        long p_base = passos[0];                    /* o caso que varre inteiro */
         int lei = 1;
-        for(int k = 0; k < 3; k++)
-            if(passos[k] != p_base) lei = 0;
-        printf("      -> passos = %ld nos TRÊS, sem termo em |I|: %s\n",
-               p_base, lei ? "sim" : "NAO");
+        for(int k = 0; k < 2; k++)                  /* os dois que varrem */
+            if(passos[k] != p_base) lei = 0;   /* os que varrem custam o MESMO */
+        if(passos[2] != 0) lei = 0;                 /* e o impossível não varre */
+        printf("      -> %ld passos nos que VARREM, sem termo em |I|, e ZERO no"
+               " impossível: %s\n", p_base, lei ? "sim" : "NAO");
         if(!lei) mal++;
 
         /* e o CONTROLO: se o custo não mudasse NUNCA, a asserção de cima passava
@@ -29893,6 +29906,117 @@ int main(void){
            " a custo zero e com 300 não, porque se ele nunca fosse usado isto seria a"
            " varredura comparada consigo própria e concordaria sempre --- o que distingue"
            " «abstém-se quando não distingue» de «não existe».", mal == 0);
+    }
+
+    /* ═══ §W208: A MARCA TEM DUAS METADES — e faltava-lhe uma ══════════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W208 a marca da coluna: o máximo sozinho não distingue.\n\n");
+
+        /* ── O CRITÉRIO VEM DO thm:medida ────────────────────────────────────
+         *
+         * «Sempre que uma quantidade se propuser a distinguir realizações, a
+         * pergunta é se ela é ou não INVARIANTE DA MEDIDA --- porque as que
+         * são, não distinguem.»
+         *
+         * A marca da coluna existe para responder «vale a pena andar?» sem
+         * andar, e guardava só o MÁXIMO: o `atom_possivel` assumia ZERO para o
+         * outro lado, com `mag_baixo *= 0` escrito à letra. Ora o máximo sozinho
+         * não distingue as colunas cujo intervalo está inteiramente ACIMA do
+         * alvo --- numa coluna de 600 a 899 ele não permite descartar `k < 100`,
+         * e o motor varria as 300 linhas para responder zero.
+         *
+         * O par (mín, máx) distingue. A casa do dual é a MESMA zona, pela dobra
+         * `F_{2w} = F_w ⊕ σF_w`, e o terceiro bloco --- «já foi medido?» --- é
+         * necessário por uma razão que o S_PRES já ensinou: o máximo pode usar o
+         * zero como «ainda não», o mínimo NÃO PODE, porque zero é um mínimo
+         * legítimo. Concluir «impossível» a partir de um mínimo inventado seria
+         * dar vazio a quem tinha resposta. */
+        unlink("/tmp/pgwire_w208.mem"); unlink("/tmp/pgwire_w208.prog");
+        unlink("/tmp/pgwire_w208.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w208__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w208__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w208")) mal++;
+
+        static const long BASE = 600, NL = 300;
+        sql_executa("CREATE TABLE t (k INTEIRO, v INTEIRO)", &o);
+        for(long i = 0; i < NL; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", BASE + i, i);
+            sql_executa(q, &o);
+        }
+
+        /* (1) O QUE SÓ O MÍNIMO DESCARTA: o intervalo está todo acima do alvo.
+         *     Mede-se o CUSTO, porque a resposta (zero) o máximo também dava
+         *     --- depois de varrer as 300. O que mudou é não varrer. */
+        sql_executa("SELECT count(*) FROM t WHERE k < 100", &o);
+        long r_baixo = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        long c_baixo = sql_ultimos_passos;
+        printf("      k < 100 numa coluna de %ld..%ld: %ld linha(s), %ld passo(s)\n",
+               BASE, BASE + NL - 1, r_baixo, c_baixo);
+        if(r_baixo != 0 || c_baixo != 0) mal++;
+
+        /* (2) O QUE O MÁXIMO JÁ DESCARTAVA --- a outra metade do par, para que
+         *     a correcção não seja meia outra vez. */
+        sql_executa("SELECT count(*) FROM t WHERE k > 5000", &o);
+        long r_alto = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        long c_alto = sql_ultimos_passos;
+        printf("      k > 5000 na mesma coluna: %ld linha(s), %ld passo(s)\n",
+               r_alto, c_alto);
+        if(r_alto != 0 || c_alto != 0) mal++;
+
+        /* ── O CONTROLO: o que é POSSÍVEL tem de custar e de responder ───────
+         *
+         * Uma marca que descartasse tudo passaria as duas asserções de cima com
+         * distinção nenhuma --- seria a recusa constante disfarçada de rigor. O
+         * `k < 700` cai DENTRO do intervalo: tem de varrer e de dar o número
+         * certo, que são as 100 linhas de 600 a 699. */
+        sql_executa("SELECT count(*) FROM t WHERE k < 700", &o);
+        long r_meio = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        long c_meio = sql_ultimos_passos;
+        printf("      CONTROLO — k < 700 cai DENTRO: %ld linha(s) (espera 100),"
+               " %ld passo(s)\n", r_meio, c_meio);
+        if(r_meio != 100 || c_meio <= 0) mal++;
+
+        /* ── E O SEGUNDO CONTROLO: a coluna toda AUSENTE não afirma nada ─────
+         *
+         * É a lição do S_PRES, e é onde a primeira versão disto caiu: uma coluna
+         * sem valor nenhum tem mínimo indefinido, e dar-lhe zero faria o motor
+         * concluir «impossível» sobre uma coluna de que nada sabe. Acrescenta-se
+         * uma coluna nova --- todas as células ausentes --- e exige-se que a
+         * consulta RESPONDA (com zero linhas, que é a resposta certa) em vez de
+         * ser descartada por uma marca inventada. */
+        sql_executa("ALTER TABLE t ADD COLUMN w INTEIRO", &o);
+        sql_executa("SELECT count(*) FROM t WHERE w < 100", &o);
+        int respondeu = o.ok;
+        long r_aus = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      CONTROLO — coluna toda AUSENTE: respondeu=%d, %ld linha(s)\n",
+               respondeu, r_aus);
+        if(!respondeu) mal++;
+        sql_fechar();
+
+        ok("A MARCA TEM DUAS METADES, E FALTAVA-LHE UMA. O `thm:medida` dá o critério:"
+           " «sempre que uma quantidade se propuser a distinguir realizações, a pergunta é"
+           " se ela é ou não INVARIANTE DA MEDIDA --- porque as que são, não distinguem». A"
+           " marca da coluna existe para responder «vale a pena andar?» sem andar, e"
+           " guardava só o MÁXIMO: o `atom_possivel` assumia zero para o outro lado, com"
+           " `mag_baixo *= 0` escrito à letra. Ora o máximo sozinho NÃO DISTINGUE as"
+           " colunas cujo intervalo está inteiramente acima do alvo --- numa coluna de 600"
+           " a 899 ele não permite descartar `k < 100`, e o motor varria as 300 linhas para"
+           " responder zero. É o par dual medido de um lado só, que é o defeito que esta"
+           " casa já nomeia. A casa do dual é a MESMA zona, pela dobra F_2w = F_w ⊕ σF_w:"
+           " ela segura 16384 slots e as colunas são no máximo 1024, com espaço para os"
+           " três blocos. E o terceiro --- «já foi medido?» --- é necessário por uma razão"
+           " que o S_PRES já tinha ensinado: o máximo pode usar o ZERO como «ainda não», o"
+           " mínimo NÃO PODE, porque zero é um mínimo legítimo. O que se mede é o CUSTO e"
+           " não a resposta, porque a resposta (zero) o máximo também dava --- depois de"
+           " varrer as 300; o que mudou é não varrer. Medem-se as DUAS metades, para a"
+           " correcção não ser meia outra vez. E os CONTROLOS são dois: o que cai DENTRO do"
+           " intervalo tem de varrer e dar 100, senão uma marca que descartasse tudo"
+           " passaria com distinção nenhuma; e a coluna toda AUSENTE tem de RESPONDER em"
+           " vez de ser descartada por uma marca inventada, que é onde a primeira versão"
+           " disto caiu.", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

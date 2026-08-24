@@ -885,6 +885,29 @@ long sql_cels_fora(void){ return cels_fora; }
  * ZONA_SLOTS Words e cada nome ocupa S_COLNOME_W: o tecto é o quociente, e nada
  * mais. */
 #define S_COLNOME_N (ZONA_SLOTS / S_COLNOME_W)
+
+/* ── E A MARCA TEM DUAS METADES: O MÁXIMO E O MÍNIMO ─────────────────────────
+ *
+ * A marca guardava só o MÁXIMO, e quem a lê --- o `atom_possivel` --- assumia
+ * zero para o outro lado. É meia marca: numa coluna cujos valores estão todos
+ * entre 600 e 700, o máximo não permite descartar `k < 100`, e o mínimo
+ * permitiria dizer «nenhuma linha pode satisfazer» sem varrer uma.
+ *
+ * É o par dual outra vez, medido só de um lado. O `thm:medida` dá o critério:
+ * «sempre que uma quantidade se propuser a distinguir realizações, a pergunta é
+ * se ela é ou não invariante da medida --- porque as que são, não distinguem».
+ * O máximo sozinho não distingue as colunas cujo intervalo está ACIMA do alvo;
+ * o par (mín, máx) distingue.
+ *
+ * A casa é a MESMA zona, pela dobra `F_{2w} = F_w ⊕ σF_w`: ela segura 16384
+ * slots e as colunas são no máximo S_COLNOME_N, pelo que há espaço para os três
+ * blocos --- o máximo, o mínimo, e o «já foi escrito» que o mínimo precisa e o
+ * máximo não. O máximo usa o zero como «ainda não»; o mínimo não pode, porque
+ * zero é um mínimo legítimo, e essa é exactamente a lição do S_PRES: «a marca a
+ * zero não é uma afirmação». */
+#define S_COLMIN    (S_COLMAX + S_COLNOME_N)
+#define S_COLMINCAB (S_COLMIN + S_COLNOME_N)
+typedef char marca_cabe_na_zona[(3u * S_COLNOME_N <= ZONA_SLOTS) ? 1 : -1];
 /* S_CF definido em lib/slot_map.h — região FC, 2048..S_CF_END */
 #define MAXLIN    250
 /* quantas chaves uma propagação de seta pode olhar de uma vez --- é o tamanho
@@ -1959,11 +1982,22 @@ static int col_indice(const char *nome){
  * ambiente, e não numa lista que o agente carregue. */
 static void col_marca(long j, unsigned long v){
     if(j < 0 || j >= (long)S_COLNOME_N) return;
-    Word m = mem_le(S_COLMAX + (unsigned)j);
-    unsigned long antes = (unsigned long)m.total | ((unsigned long)m.e << 8);
-    if(v <= antes) return;
-    m.total = (Word8)(v & 255u); m.e = (Word8)((v >> 8) & 255u);
-    mem_grava(S_COLMAX + (unsigned)j, m);
+    /* o MÁXIMO */
+    { Word m = mem_le(S_COLMAX + (unsigned)j);
+      unsigned long antes = (unsigned long)m.total | ((unsigned long)m.e << 8);
+      if(v > antes){
+          m.total = (Word8)(v & 255u); m.e = (Word8)((v >> 8) & 255u);
+          mem_grava(S_COLMAX + (unsigned)j, m); } }
+    /* e o MÍNIMO, que é o dual e precisa de dizer se já foi escrito --- zero é
+     * um mínimo legítimo, pelo que o slot a zero não pode significar «ainda
+     * não». É a mesma lição do S_PRES: a ausência diz-se, não se herda. */
+    { Word cab = mem_le(S_COLMINCAB + (unsigned)j);
+      Word m   = mem_le(S_COLMIN + (unsigned)j);
+      unsigned long antes = (unsigned long)m.total | ((unsigned long)m.e << 8);
+      if(!cab.total || v < antes){
+          m.total = (Word8)(v & 255u); m.e = (Word8)((v >> 8) & 255u);
+          mem_grava(S_COLMIN + (unsigned)j, m);
+          { Word c1 = {1,0}; mem_grava(S_COLMINCAB + (unsigned)j, c1); } } }
 }
 
 /* e SENTIR É LER A MARCA — uma leitura, não uma varredura.
@@ -1983,6 +2017,56 @@ static unsigned long col_max(long j, long ncols, long nrows){
     }
     col_marca(j, v_max);                     /* a marca fica escrita: uma vez */
     return v_max;
+}
+
+/* e o MÍNIMO da coluna, com a mesma migração do máximo: uma base escrita antes
+ * de o dual existir tem o cabeçalho a zero, e aí percorre-se UMA vez e
+ * escreve-se. Sem cabeçalho não haveria como distinguir «o mínimo é zero» de
+ * «ainda não foi medido», e concluir «impossível» a partir de um mínimo
+ * inventado seria dar vazio a quem tinha resposta. */
+/* A MARCA REPRESENTA O VALOR COMPARADO? --- e a pergunta é sobre as CÉLULAS.
+ *
+ * O `atom_so_inteiro` já o dizia deste ficheiro: «perguntar pelo corpo não
+ * chega: uma coluna declarada INTEIRO aceita 3/4, e o denominador vive na
+ * CÉLULA (S_DEN), não no catálogo». Numa coluna com racionais, a comparação
+ * faz-se sobre o numerador do DENOMINADOR COMUM, e a marca guarda o numerador
+ * como ele está escrito --- os dois não são o mesmo número.
+ *
+ * Com o mínimo assumido ZERO isso não fazia mal: o intervalo [0, máx] era largo
+ * e nunca descartava a mais. Com o mínimo REAL aperta, e passa a descartar
+ * consultas que têm resposta --- foi o que aconteceu, e dois medidores do `sql`
+ * apanharam-no («a igualdade racional fecha», «6/8 casa com 3/4»). O mínimo só
+ * se usa onde a marca é o valor: quando todas as células têm denominador um. */
+static int col_e_inteira(long j, long ncols, long nrows){
+    if(corpo_de(j).total != CORPO_INTEIRO) return 0;
+    for(long i = 0; i < nrows; i++){
+        long d = (long)mem_le(S_DEN + cel_ix(i*ncols + j)).total;
+        if(d != 1 && d != 0) return 0;          /* 0 = célula por escrever */
+    }
+    return 1;
+}
+
+static unsigned long col_min(long j, long ncols, long nrows){
+    if(j < 0 || j >= (long)S_COLNOME_N) return 0;
+    Word cab = mem_le(S_COLMINCAB + (unsigned)j);
+    if(cab.total){
+        Word m = mem_le(S_COLMIN + (unsigned)j);
+        return (unsigned long)m.total | ((unsigned long)m.e << 8);
+    }
+    if(nrows <= 0) return 0;
+    unsigned long v_min = ~0ul; int viu = 0;
+    for(long i = 0; i < nrows; i++){
+        if(!bit_le(S_VIVO, i)) continue;
+        if(!bit_le(S_PRES, i*ncols + j)) continue;
+        unsigned long v = (unsigned long)mem_le(S_LINHAS + cel_ix(i*ncols + j)).total
+                        | ((unsigned long)mem_le(S_ALTO + cel_ix(i*ncols + j)).total << 8);
+        if(!viu || v < v_min){ v_min = v; viu = 1; }
+    }
+    if(!viu) return 0;                       /* coluna toda ausente: não se afirma */
+    { Word m; m.total = (Word8)(v_min & 255u); m.e = (Word8)((v_min >> 8) & 255u);
+      mem_grava(S_COLMIN + (unsigned)j, m);
+      Word c1 = {1,0}; mem_grava(S_COLMINCAB + (unsigned)j, c1); }
+    return v_min;
 }
 
 static int col_larga(long j, long ncols, long nrows){
@@ -4882,8 +4966,18 @@ static int atom_possivel(const struct arvore *a, int j, long ncols, long nrows){
              * comentário e não o respeitei no código. */
             unsigned long mx = col_max(cc, ncols, nrows);
             if(mx == 0 || mx > 0x7FFFFFFFul) return 1;
+            /* E O OUTRO LADO DO PAR. Estava `mag_baixo *= 0` --- o mínimo
+             * ASSUMIDO zero, que é meia marca: numa coluna cujos valores estão
+             * todos entre 600 e 700 isso não permite descartar `k < 100`. Com o
+             * mínimo lido, permite: nenhuma linha pode satisfazer, e não se
+             * varre uma. Os valores da marca são não-negativos, pelo que o
+             * mínimo do produto é o produto dos mínimos. */
             mag_alto  *= (long long)mx;
-            mag_baixo *= 0;
+            /* e só se a marca FOR o valor comparado --- ver `col_e_inteira`.
+             * Onde não é (racionais na célula), volta-se ao zero, que é largo e
+             * nunca descarta a mais. */
+            mag_baixo *= col_e_inteira(cc, ncols, nrows)
+                       ? (long long)col_min(cc, ncols, nrows) : 0;
             tem_col = 1;
         }
         if(!tem_col){ alto += c; baixo += c; continue; }   /* o termo constante */
@@ -7927,6 +8021,14 @@ static int varre(const char *resto, int acao){
        && !atom_possivel(&cl, 0, ncols, nrows)){
         for(long i = 0; i < nrows; i++) bit_poe(S_MATCH, i, 0);
         ultima_conta = 0;
+        /* E O CONTADOR DE PASSOS DIZ-SE AQUI TAMBÉM. Ele é escrito num sítio
+         * só, lá em baixo, e esta saída antecipada salta-o --- pelo que quem
+         * perguntasse o custo desta consulta recebia o da ANTERIOR. É o defeito
+         * que esta casa já regista noutro sítio («a saída antecipada salta a
+         * linha que escreve o contador»), e aqui doía a dobrar: o custo é
+         * exactamente o que esta guarda existe para tornar ZERO, e era o único
+         * número que não se via. */
+        sql_ultimos_passos = 0;
         printf("-- a marca da coluna diz que nenhuma linha pode satisfazer:"
                " 0 linha(s), sem varrer\n");
         if(sql_cap){
@@ -8022,6 +8124,7 @@ static int varre(const char *resto, int acao){
          * e por isso não aparece em quem correr a consulta sozinha. */
         ultima_conta = 0;
         ultima_fibras = 0;
+        sql_ultimos_passos = 0;      /* a tabela vazia também não custou nada */
         /* A TABELA VAZIA TAMBÉM TEM COLUNAS, e uma consulta que não devolve linhas
          * tem de devolver a DESCRIÇÃO delas e o `CommandComplete`. Esta saída
          * antecipada devolvia `ncols = 0` e tag vazia: pela porta FEBE o driver
