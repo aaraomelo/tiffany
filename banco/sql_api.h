@@ -31,6 +31,21 @@ long sql_lin_tecto(void);
  * das linhas; com oito, aperta este. */
 long sql_cel_tecto(void);
 
+/* QUANTAS VEZES SE PEDIU UM BIT FORA DO SEU BITMAP. Os três bitmaps da casa
+ * atravessam todos o mesmo par de funções, pelo que a lei vive lá: quem sai não
+ * escreve no vizinho, CONTA. Isto é um instrumento, não uma asserção --- diz
+ * quantas vezes, e quem mede exige que seja zero. */
+long sql_bits_fora(void);
+void sql_bits_fora_zera(void);
+int  sql_bit_fora_de_proposito(long i);   /* o gume do guarda: ver sql.c */
+
+/* e o mesmo para as CÉLULAS. Estas não têm porta única --- o endereço i·ncols+j
+ * forma-se em quarenta sítios ---, pelo que se lhes fez uma: `cel_ix`. É
+ * INSTRUMENTO e não correcção: devolve o índice tal como veio e apenas conta
+ * quando ele sai do tecto, porque truncar mandaria a escrita para outra célula,
+ * que é corromper de outra maneira. A recusa está a montante, no INSERT. */
+long sql_cels_fora(void);
+
 #define SQL_OUT_MAX_COLS 64
 #define SQL_OUT_MAX_ROWS 64
 #define SQL_OUT_CELL     64

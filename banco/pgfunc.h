@@ -102,7 +102,8 @@ static void pgf_walsh(int k, int m, char *dst, int cap){
 /* o campo G de uma recta de n passos: cada célula visitada uma vez */
 static void pgf_campo_recta(int n, char *dst, int cap){
     int i = 0;
-    if(n < 0) n = 0; if(n > 64) n = 64;
+    if(n < 0) n = 0;
+    if(n > 64) n = 64;
     if(cap > 0) dst[0] = 0;
     i += snprintf(dst + i, cap - i, "[");
     for(int j = 0; j < n && i < cap - 8; j++)

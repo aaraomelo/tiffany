@@ -28974,6 +28974,86 @@ int main(void){
         sql_fechar();
     }
 
+    /* ═══ §W200: NINGUÉM SAIU DA SUA ZONA — o contador dos 199 anteriores ═══ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W200 o guarda do bitmap: quem sai não escreve no vizinho, conta.\n\n");
+
+        /* ── PORQUE É QUE ISTO EXISTE ────────────────────────────────────────
+         *
+         * Os dois piores defeitos desta semana foram o MESMO defeito visto de
+         * dois sítios --- um bit escrito além do seu bitmap, a aterrar no
+         * vizinho ---, e nenhum deu erro: deram LINHAS A DESAPARECER, que é a
+         * pior forma de os dar, porque o resultado continua a parecer um
+         * resultado. Encontrei-os por SORTE, um de cada vez.
+         *
+         * Ora os três bitmaps da casa atravessam todos o mesmo par de funções.
+         * A lei passou a viver lá: cada base sabe quantos bits comporta, quem
+         * pede um bit fora não escreve, e CONTA. E como o contador é global e
+         * acumula, este bloco --- que corre depois de todos --- afirma sobre os
+         * CENTO E NOVENTA E NOVE medidores anteriores de uma vez só: nenhum,
+         * em nenhuma das suas consultas, pediu um bit fora do seu bitmap.
+         *
+         * O CONTROLO é o que dá conteúdo a isto: o contador tem de saber CONTAR.
+         * Sem ele, um contador que nunca incrementa e um sistema que nunca sai
+         * de zona são indistinguíveis --- e a asserção «é zero» passaria verde
+         * sobre um instrumento avariado. */
+        long fora_de_todos = sql_bits_fora(), cels_de_todos = sql_cels_fora();
+        printf("      os %d medidores anteriores pediram %ld bit(s) fora do bitmap"
+               " e %ld célula(s) fora da zona\n", 199, fora_de_todos, cels_de_todos);
+        if(fora_de_todos != 0 || cels_de_todos != 0) mal++;
+
+        /* CONTROLO — o contador conta. Pede-se de propósito um bit que não
+         * existe, pelo caminho por onde o defeito real entrava: uma linha além
+         * do tecto do mapa. Tem de subir, e tem de subir a resposta CERTA. */
+        unlink("/tmp/pgwire_w200.mem"); unlink("/tmp/pgwire_w200.prog");
+        unlink("/tmp/pgwire_w200.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w200__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w200__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w200")) mal++;
+        sql_executa("CREATE TABLE t (a INTEIRO)", &o);
+        sql_executa("INSERT INTO t VALUES (1)", &o);
+
+        long antes = sql_bits_fora();
+        /* uma linha além do tecto, PELO BITMAP QUE O DEFINE. Cada bitmap tem o
+         * seu, e o LIN_TECTO é o menor deles --- pedir este índice ao bitmap
+         * mais largo seria pedir um bit que CABE, e o controlo daria zero sem
+         * que nada estivesse avariado. Foi o que aconteceu à primeira. */
+        sql_bit_fora_de_proposito(sql_lin_tecto());
+        long subiu = sql_bits_fora() - antes;
+        printf("      CONTROLO — pedido UM bit além do tecto: o contador subiu %ld\n", subiu);
+        if(subiu != 1) mal++;
+
+        /* e o dado não se moveu: quem saiu NÃO escreveu no vizinho */
+        sql_executa("SELECT count(*) FROM t", &o);
+        long ainda = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+        printf("      e a tabela continua com %ld linha(s): não se escreveu no vizinho\n", ainda);
+        if(ainda != 1) mal++;
+        sql_fechar();
+
+        ok("NENHUM DOS 199 MEDIDORES ANTERIORES PEDIU UM BIT FORA DO SEU BITMAP --- E ISSO"
+           " É MEDIDO, NÃO SUPOSTO. Os dois piores defeitos desta semana foram o MESMO"
+           " defeito visto de dois sítios: um bit escrito além do seu bitmap, a aterrar no"
+           " vizinho. Nenhum deu erro --- deram LINHAS A DESAPARECER, que é a pior forma de"
+           " os dar, porque o resultado continua a parecer um resultado, e encontrei os"
+           " dois por SORTE, um de cada vez. Ora os três bitmaps desta casa (o match, o"
+           " vivo e a presença) atravessam todos o MESMO par de funções, pelo que a lei"
+           " passou a viver lá: cada base sabe quantos bits comporta --- e sabe-o pelo"
+           " MAPA, não por um número escrito ---, quem pede um bit fora não escreve, e"
+           " CONTA. Ler fora devolve zero, que é a ausência e é a resposta certa: o bit que"
+           " não existe não está ligado. O contador é um INSTRUMENTO e não uma asserção que"
+           " pára o programa: diz QUANTAS vezes se saiu, e como é global e acumula, este"
+           " bloco afirma sobre todos os medidores anteriores de uma só vez, sobre todas as"
+           " consultas que eles correm. O CONTROLO é o que dá conteúdo a isto: pede-se de"
+           " propósito um bit além do tecto e exige-se que o contador suba UM --- sem isso,"
+           " um contador avariado que nunca incrementa e um sistema que nunca sai de zona"
+           " seriam indistinguíveis, e o «é zero» passaria verde sobre o instrumento morto."
+           " E o segundo controlo é o dado NÃO SE MOVER: quem saiu não escreveu no vizinho,"
+           " que é a diferença entre recusar e corromper.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -776,6 +776,35 @@ typedef char as_tres_zonas_da_celula_sao_iguais[
     ((long)(S_ALTO - S_DEN)     >= CEL_TECTO &&
      (long)(ISA_TECTO - S_ALTO) >= CEL_TECTO) ? 1 : -1];
 long sql_cel_tecto(void){ return CEL_TECTO; }   /* quem define é quem responde */
+
+/* NOTA sobre os `>= 0` que parecem redundantes nas guardas de índice desta
+ * casa (col, fc, j): os quatro TÊM guarda a montante --- `if(fc < 0) continue`,
+ * `if(achou < 0) RECUSADA` --- e sem o `>= 0` local funcionavam na mesma, mas
+ * por ACIDENTE DO SINAL: comparar um int negativo com um unsigned converte-o
+ * para um número enorme, e a comparação dá falso «à sorte». Quem visse o aviso
+ * do compilador e o calasse com um cast assinado partia isso em silêncio, e o
+ * índice −1 passava a escrever fora. O `>= 0` torna a rede DELIBERADA e local,
+ * e deixa o compilador calado --- que é o que faz um aviso novo ser sinal. */
+/* ── A PORTA POR ONDE O ÍNDICE DA CÉLULA SE FORMA ────────────────────────────
+ *
+ * Os bitmaps têm um par de funções por onde tudo passa, e por isso a lei coube
+ * lá. As células NÃO têm: o endereço `i·ncols + j` é formado em quarenta sítios
+ * espalhados, e o defeito é INDISTINGUÍVEL a jusante --- um índice além do
+ * tecto de S_LINHAS aterra em S_DEN, que para o `mem_grava` é um slot tão
+ * legítimo como qualquer outro. Não há guarda possível na gravação: tem de ser
+ * onde o índice NASCE.
+ *
+ * Esta função é INSTRUMENTO e não correcção. Devolve o índice tal como veio ---
+ * não trunca, não desvia, não muda uma vírgula do que o motor faz ---, e apenas
+ * CONTA quando ele sai do tecto. É deliberado: truncar mandaria a escrita para
+ * outra célula, que é corromper de outra maneira, e a recusa já está a montante,
+ * no INSERT, onde a base ainda está intacta. Aqui o que se quer é SABER. */
+static long cels_fora = 0;
+static unsigned cel_ix(long k){
+    if(k < 0 || k >= CEL_TECTO) cels_fora++;
+    return (unsigned)k;
+}
+long sql_cels_fora(void){ return cels_fora; }
 #define S_COLNOME   (ISA_TECTO + ZONA(6))
 /* ── O DEFAULT: o valor que a coluna toma quando o INSERT não o diz.
  *
@@ -1187,13 +1216,47 @@ static void match_limpa(long nrows){
     for(long q = 0; q * (long)SLOT_BITS < nrows; q++) mem_grava(S_MATCH + (unsigned)q, z);
 }
 
+/* ── O GUARDA DO BITMAP: TODO O BIT PASSA POR AQUI, LOGO A LEI TAMBÉM ────────
+ *
+ * Os dois piores defeitos que este ficheiro teve esta semana foram o MESMO
+ * defeito visto de dois sítios: um bit escrito além do seu bitmap, a aterrar no
+ * vizinho. Nem um nem outro deu erro --- deram LINHAS A DESAPARECER, que é a
+ * pior forma de os dar, porque o resultado continua a parecer um resultado.
+ *
+ * Encontrei-os por sorte, um de cada vez. Ora os três bitmaps desta casa
+ * atravessam TODOS estas duas funções, e portanto a lei pode viver aqui: cada
+ * base sabe quantos bits comporta, e quem pede um bit fora não escreve no
+ * vizinho --- CONTA. Ler fora devolve ZERO, que é a ausência e é a resposta
+ * certa: o bit que não existe não está ligado.
+ *
+ * O contador é o instrumento. Não é uma asserção que pára o programa: é uma
+ * MEDIDA que os medidores podem exigir seja zero, e que diz QUANTAS vezes se
+ * saiu, em vez de dizer que se saiu uma vez. Uma base que este mapa não conheça
+ * devolve tecto −1 e não é vigiada --- não se afirma sobre o que não se sabe. */
+static long bit_tecto(unsigned base){
+    if(base == S_MATCH) return LIN_MATCH;
+    if(base == S_VIVO)  return LIN_VIVO;
+    if(base == S_PRES)  return (long)(S_RESTR - S_PRES) * (long)WORD_ISA_BITS;
+    return -1;
+}
+static long bits_fora = 0;        /* quantas vezes se pediu um bit fora do bitmap */
+static int bit_cabe(unsigned base, long i){
+    long t = bit_tecto(base);
+    if(i < 0 || (t >= 0 && i >= t)){ bits_fora++; return 0; }
+    return 1;
+}
+long sql_bits_fora(void){ return bits_fora; }
+void sql_bits_fora_zera(void){ bits_fora = 0; }
+
 static int bit_le(unsigned base, long i){
+    if(!bit_cabe(base, i)) return 0;        /* o bit que não existe é ausência */
     unsigned long u = (unsigned long)i;
     Word w = mem_le(base + (unsigned)(u / SLOT_BITS));
     unsigned k = (unsigned)(u % SLOT_BITS);
     return (int)((atomo_le(w, k / ATOMO_BITS) >> (k % ATOMO_BITS)) & 1u);
 }
 static void bit_poe(unsigned base, long i, int liga){
+    if(!bit_cabe(base, i)) return;          /* e não se escreve no vizinho */
     unsigned long u = (unsigned long)i;
     unsigned sl = base + (unsigned)(u / SLOT_BITS), k = (unsigned)(u % SLOT_BITS);
     unsigned a = k / ATOMO_BITS, m = 1u << (k % ATOMO_BITS);
@@ -1202,6 +1265,16 @@ static void bit_poe(unsigned base, long i, int liga){
     atomo_poe(&w, a, liga ? (v | m) : (v & ~m));
     mem_grava(sl, w);
 }
+/* O GUME DO PRÓPRIO GUARDA. O medidor precisa de exigir que o contador CONTE, e
+ * para isso tem de pedir um bit que não existe --- pelo caminho normal, que é o
+ * mesmo por onde o defeito real entrava. Se o índice couber, isto é uma leitura
+ * como outra qualquer; se não couber, é o guarda a fazer o seu trabalho. Sem
+ * isto, «bits_fora == 0» e um contador avariado seriam indistinguíveis. */
+int sql_bit_fora_de_proposito(long i){ return bit_le(S_MATCH, i); }
+/* PELO MATCH, e não pelo vivo: cada bitmap tem o SEU tecto, e o LIN_TECTO é o
+ * MENOR dos dois --- o do match. Pedir o bit LIN_TECTO ao vivo, que comporta o
+ * dobro, é pedir um bit que CABE, e foi o que fiz à primeira: o controlo deu
+ * zero e apanhou-me, que é exactamente para o que ele lá está. */
 
 /* ∑ — O KIRCHHOFF: CONTAR É POPCOUNT, NÃO VARRER.
  *
@@ -1754,7 +1827,7 @@ static int fk_existe(const char *tab, int col, long valor, const char *guarda){
     { long nc = cat_ncols(), nr = cat_nrows();
       if(col < 0 || col >= nc){ usa_tabela(guarda, 0); return -1; }
       /* a árvore, se a houver — e numa coluna UNIQUE há sempre */
-      if(col < IDX_MAXCOL && idx_valido(col, nr)){
+      if(col >= 0 && col < (long)IDX_MAXCOL && idx_valido(col, nr)){
           int saida[4], q;
           ord_usa_indice(col);
           q = j_casam(valor, saida, 4);
@@ -1832,8 +1905,8 @@ static unsigned long col_max(long j, long ncols, long nrows){
     if(marca || nrows <= 0) return marca;
     unsigned long v_max = 0;
     for(long i = 0; i < nrows; i++){
-        unsigned long v = (unsigned long)mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total
-                        | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total << 8);
+        unsigned long v = (unsigned long)mem_le(S_LINHAS + cel_ix(i*ncols + j)).total
+                        | ((unsigned long)mem_le(S_ALTO + cel_ix(i*ncols + j)).total << 8);
         if(v > v_max) v_max = v;
     }
     col_marca(j, v_max);                     /* a marca fica escrita: uma vez */
@@ -2561,7 +2634,6 @@ static int le_check(const char **p, char *out, size_t cap){
  * quem a fecha é ele. */
 static int insere(const char *resto);
 static int insere_muitas(const char *resto){
-    const char *p = resto;
     const char *v = NULL;
     char cab[128];
     int n = 0, quantos = 0;
@@ -2853,7 +2925,8 @@ static int cria(const char *resto){
                                /* DECIMAL(18,2) e TIMESTAMP(3): a escala declara-se
                                 * e não muda o corpo --- o racional guarda a classe */
                                while(*p == ','){ p++; pula(&p); long q2;
-                                                 if(!numero(&p, &q2)) break; pula(&p); }
+                                                 if(!numero(&p, &q2)) break;
+                                                 pula(&p); }
                                if(*p == ')') p++; }
             }
         }
@@ -3582,23 +3655,23 @@ static int insere(const char *resto){
     for(long j = 0; j < ncols; j++){
         w.total = v[j]; w.e = den[j];      /* e = denominador; 1 para inteiro */
         mem_grava(S_KINS + (unsigned)j, w);                     /* a constante, na memória */
-        emit_copia(S_KINS + (unsigned)j, S_LINHAS + (unsigned)(nrows*ncols + j));
+        emit_copia(S_KINS + (unsigned)j, S_LINHAS + cel_ix(nrows*ncols + j));
         /* o byte ALTO no plano paralelo — a Word da linha não muda, e por isso
          * toda a aritmética emitida continua a ler exactamente o que sempre leu */
         { Word wa; wa.total = (Word8)(((unsigned long)v[j] >> 8) & 255u); wa.e = 0;
-          mem_grava(S_ALTO + (unsigned)(nrows*ncols + j), wa); }
+          mem_grava(S_ALTO + cel_ix(nrows*ncols + j), wa); }
         /* e o ANDAR SEGUINTE, para o que passa de dezasseis bits --- os bytes 2
          * e 3 no plano S_ALTO2. Quem lê em baixo continua a ler o mesmo. */
         { Word wb; wb.total = (Word8)(((unsigned long)v[j] >> 16) & 255u);
           wb.e    = (Word8)(((unsigned long)v[j] >> 24) & 255u);
-          mem_grava(S_ALTO2 + (unsigned)(nrows*ncols + j), wb); }
+          mem_grava(S_ALTO2 + cel_ix(nrows*ncols + j), wb); }
         /* e a ESCRITA DEIXA A MARCA — thm:multiplicidade cláusula 3. Sem isto o
          * leitor teria de percorrer as linhas para saber a largura, que é o
          * agente a carregar o mapa. */
         if(v[j] >= 0) col_marca(j, (unsigned long)v[j]);
         Word wd; wd.total = den[j]; wd.e = 0;
         mem_grava(S_KDEN + (unsigned)j, wd);
-        emit_copia(S_KDEN + (unsigned)j, S_DEN + (unsigned)(nrows*ncols + j));
+        emit_copia(S_KDEN + (unsigned)j, S_DEN + cel_ix(nrows*ncols + j));
     }
     /* nrows++ pela própria máquina: LOAD cat, LOAD um, ADD, STORE — mas nrows é o campo .e,
      * e a ULA soma componente a componente; então a constante um vai no campo .e. */
@@ -4502,10 +4575,10 @@ static void emit_mul_zeck(unsigned acc, unsigned termo, long n, int soma, unsign
  * (baixo,0) com (0,alto). Nenhuma instrução nova para montar o par. */
 static void emit_valor16(unsigned dest, long linha, long ncols, int cc, unsigned tmp){
     /* dest ← (baixo, 0) */
-    emit_copia(S_LINHAS + (unsigned)(linha*ncols + cc), dest);
+    emit_copia(S_LINHAS + cel_ix(linha*ncols + cc), dest);
     MOVE(dest, +1); MOVE(S_MT, +1); emit1(OP_AND); MOVE(dest, -1);
     /* tmp ← (alto, 0) → TROCA → (0, alto) */
-    emit_copia(S_ALTO + (unsigned)(linha*ncols + cc), tmp);
+    emit_copia(S_ALTO + cel_ix(linha*ncols + cc), tmp);
     MOVE(tmp, +1); MOVE(S_MT, +1); emit1(OP_AND); MOVE(tmp, -1);
     MOVE(tmp, +1); emit1(OP_TROCA); MOVE(tmp, -1);
     /* dest ← dest + tmp, componente a componente: (baixo, alto) */
@@ -4650,7 +4723,7 @@ static int atom_so_inteiro(const struct arvore *a, int j, long ncols, long nrows
     if(a->av[j].den && a->av[j].den != 1) return 0;    /* a própria expressão tem denominador */
     for(long i = 0; i < nrows; i++)
         for(long cc = 0; cc < ncols; cc++){
-            long d = (long)mem_le(S_DEN + (unsigned)(i*ncols + cc)).total;
+            long d = (long)mem_le(S_DEN + cel_ix(i*ncols + cc)).total;
             if(d != 1 && d != 0) return 0;      /* 0 = célula por escrever */
         }
     return 1;
@@ -5065,10 +5138,10 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                  *
                  * Nesses corpos o neutro é o UM, que é o que ele sempre foi. */
                 Word cw_q = corpo_de(ccol);
-                unsigned fonte = usa ? (S_LINHAS + (unsigned)(linha*ncols + ccol))
+                unsigned fonte = usa ? (S_LINHAS + cel_ix(linha*ncols + ccol))
                                : (corpo_tem_regua(cw_q.total)
                                     ? S_UM
-                                    : (S_DEN + (unsigned)(linha*ncols + ccol)));
+                                    : (S_DEN + cel_ix(linha*ncols + ccol)));
                 /* O TRANSPORTE, LIGADO. Se a coluna vive noutra base da MESMA classe, o
                  * valor tem de ser levado à base de referência antes de entrar no produto —
                  * e isso é φ_t, o cisalhamento, palavra nos geradores.
@@ -5157,8 +5230,12 @@ static void check_le(char *out, int cap){
     txt_le(S_CHECK, S_CHECK_W, out, (size_t)cap);
 }
 
+/* (o `acao` saiu daqui: era parâmetro e não era lido. Quem decide o que a acção
+ * faz é o emissor lá em cima --- esta função emite o MOLDE da linha, e o molde é
+ * o mesmo para todas. Um parâmetro que ninguém lê promete uma dependência que
+ * não existe.) */
 static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where,
-                       int acao, int col_set)
+                       int col_set)
 {
     if(tem_where){
         emit_atomos(a, i, ncols);                   /* cada átomo distinto, uma vez só */
@@ -5364,12 +5441,12 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
                 w.e     = (Word8)(((unsigned long)num >> 24) & 255u);
                 mem_grava(S_VB, w); }
               pc_emit = 0;
-              emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
-              emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));
+              emit_copia(S_V,  S_LINHAS + cel_ix(i*ncols + col_set));
+              emit_copia(S_VA, S_ALTO   + cel_ix(i*ncols + col_set));
               /* o S_ALTO2 vive ACIMA do tecto da ISA, e o endereço da
                * instrução tem dezasseis bits: não se alcança por bytecode.
                * Escreve-se em C, como o INSERT já fazia. */
-              mem_grava(S_ALTO2 + (unsigned)(i*ncols + col_set), mem_le(S_VB));
+              mem_grava(S_ALTO2 + cel_ix(i*ncols + col_set), mem_le(S_VB));
               emit1(OP_HALT);
               rodar(pc_emit);
               feitas++; }
@@ -5406,9 +5483,9 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
         unsigned pos = pc_emit; emit1(0); emit1(0);
         unsigned ini = pc_emit;
         if(acao == ACAO_SET){
-            emit_copia(S_V,  S_LINHAS + (unsigned)(i*ncols + col_set));
-            emit_copia(S_VA, S_ALTO   + (unsigned)(i*ncols + col_set));   /* o par inteiro */
-            mem_grava(S_ALTO2 + (unsigned)(i*ncols + col_set), mem_le(S_VB)); /* o andar de cima, em C */
+            emit_copia(S_V,  S_LINHAS + cel_ix(i*ncols + col_set));
+            emit_copia(S_VA, S_ALTO   + cel_ix(i*ncols + col_set));   /* o par inteiro */
+            mem_grava(S_ALTO2 + cel_ix(i*ncols + col_set), mem_le(S_VB)); /* o andar de cima, em C */
         }
         else {                          /* apagar é DESLIGAR a coordenada */
             MOVE(S_VIVO + (unsigned)((unsigned long)i / SLOT_BITS), +1);
@@ -5450,7 +5527,6 @@ static long aplica_diario(long ncols, long nrows, int acao, int col_set){
 static void refaz_diario(void){
     Word d = mem_le(S_DIA);
     if(d.total == 0) return;
-    Word cat = mem_le(S_CAT);
     int an = (d.total > 3), ac = an ? ACAO_SET : (int)d.total - 1;
     printf("-- diário aberto: refazendo %s\n",
            an ? "um UPDATE que APAGA a célula" : (ac == ACAO_SET ? "um UPDATE" : "um DELETE"));
@@ -5606,7 +5682,7 @@ static int fk_propaga(const char *mae, long nrows, long ncols, int mudar, long n
               }
               if(tocadas){
                   /* a árvore da coluna deixou de bater com o que lá está */
-                  if(fc < IDX_MAXCOL){ Word z = {0,0}; mem_grava(S_IDXCAB(fc), z); }
+                  if(fc >= 0 && fc < (int)IDX_MAXCOL){ Word z = {0,0}; mem_grava(S_IDXCAB(fc), z); }
                   barreira();
                   printf("-- a seta de «%s»: %ld linha(s) %s\n", ft, tocadas,
                          modo == 2 ? "soltas para o dual (SET NULL)"
@@ -6305,8 +6381,8 @@ static char j_col_dir[64] = "";   /* a coluna da direita no ON             */
  * saiu 44 — que é 300 mod 256. O envelope é de oito bits e o número vive no
  * PAR: é a dobra da fronteira de leitura, e ignorá-la é ler metade do valor. */
 static long celula_valor(long i, long j, long nc){
-    return (long)((unsigned long)mem_le(S_LINHAS + (unsigned)(i*nc + j)).total
-                | ((unsigned long)mem_le(S_ALTO + (unsigned)(i*nc + j)).total << 8));
+    return (long)((unsigned long)mem_le(S_LINHAS + cel_ix(i*nc + j)).total
+                | ((unsigned long)mem_le(S_ALTO + cel_ix(i*nc + j)).total << 8));
 }
 /* e o dual do leitor: a célula é um PAR — o átomo baixo e o alto —, e escrever
  * só metade é o defeito que o `SET v = 30000` já mostrou uma vez (ficava 29952,
@@ -6321,13 +6397,13 @@ static long celula_valor(long i, long j, long nc){
  * eram duas réguas para a mesma célula, e a matriz usava a que não sabe do
  * corpo. Devolve-se o par (numerador, denominador), que é o que o racional é. */
 static void celula_qz(long i, long j, long nc, long *num, long *den){
-    Word c = mem_le(S_LINHAS + (unsigned)(i*nc + j));
+    Word c = mem_le(S_LINHAS + cel_ix(i*nc + j));
     long cp = corpo_de(j).total;
     /* ── O NUMERADOR LÊ-SE NO ANDAR EM QUE FOI ESCRITO: os dois planos.
      * O baixo é a Word da linha, o alto é o S_ALTO --- que é o σF_w do
      * thm:espaco ---, e juntos dão a palavra de largura dupla. Para o corpo
      * ASSINADO o andar parte-se ao meio, e o bit de topo diz de que lado. */
-    long alto = (long)mem_le(S_ALTO + (unsigned)(i*nc + j)).total;
+    long alto = (long)mem_le(S_ALTO + cel_ix(i*nc + j)).total;
     long bruto = (long)c.total | (alto << 8);
     long assin16 = (bruto & 0x8000L) ? bruto - 65536L : bruto;
     if(cp == CORPO_RACIONAL || c.e > 1){
@@ -6370,7 +6446,6 @@ static void celula_grava(long i, long j, long nc, long valor){
  * recusada: um join com metade da direita é um join errado, não um join menor). */
 static int j_col_dir_idx = -1;       /* a coluna de junção na direita */
 static int j_carrega_direita(long *ncols_dir){
-    Word cat;
     long nc, nr;
     int oc, postos = 0;
     if(!usa_tabela(j_tab_dir, 0)) return -1;
@@ -6378,7 +6453,8 @@ static int j_carrega_direita(long *ncols_dir){
     oc = col_indice(j_col_dir);
     if(oc < 0) return -2;                         /* a coluna não existe lá */
     j_col_dir_idx = oc;                           /* para a desigualdade a ler */
-    cat = mem_le(S_CAT); nc = cat_ncols(); nr = cat_nrows();
+    nc = cat_ncols(); nr = cat_nrows();   /* o catálogo lia-se para nada: as duas
+                                            contas já o abrem por dentro */
     if(nc > J_MAXCOL) return -1;
     ord_limpa();
     for(long i = 0; i < nr; i++){
@@ -7711,7 +7787,7 @@ static int varre(const char *resto, int acao){
      * responder). Quem responde é a árvore, e a árvore não varre. */
     pc_emit = 0; nrel = 0; rel_ncols = ncols; salto_estourou = 0;
     if(!idx_usa){
-        emit_linha(0, ncols, &cl, tem_where, acao, col_set);
+        emit_linha(0, ncols, &cl, tem_where, col_set);
         emit1(OP_HALT);
     }
     rel_ncols = 0;
@@ -8219,7 +8295,7 @@ static int varre(const char *resto, int acao){
             return 0;
         }
         static char nome_esq[J_MAXCOL][S_COLNOME_W * 2 + 2];
-        for(int j = 0; j < J_MAXCOL; j++) nome_esq[j][0] = 0;
+        for(int j = 0; j < (int)J_MAXCOL; j++) nome_esq[j][0] = 0;
         /* ── O QUE NÃO CABE RECUSA-SE, E NÃO SE TRUNCA ───────────────────────
          *
          * Este laço parava em J_MAXLIN e seguia: com 600 linhas à esquerda, o
@@ -8362,7 +8438,7 @@ static int varre(const char *resto, int acao){
                 int j = jn ? jmapa[k] : k;         /* o mapa, ou a identidade */
                 if(j < nc_esq){
                     /* lidos acima, enquanto a esquerda ainda estava aberta */
-                    if(j < J_MAXCOL && nome_esq[j][0])
+                    if(j >= 0 && j < (int)J_MAXCOL && nome_esq[j][0])
                         snprintf(sql_cap->col[k], sizeof sql_cap->col[k], "%s", nome_esq[j]);
                     else
                         snprintf(sql_cap->col[k], sizeof sql_cap->col[k], "%c", 'a' + j);
@@ -11855,7 +11931,7 @@ static int varre(const char *resto, int acao){
         unsigned char sai_nulo[SQL_OUT_MAX_COLS];
         for(int k = 0; k < nsai; k++){ saida[k][0] = 0; sai_nulo[k] = 0; }
         for(long j = 0; j < ncols; j++){
-            Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
+            Word c = mem_le(S_LINHAS + cel_ix(i*ncols + j));
             long cp = corpo_de(j).total;
             char cel[TX_MAX + 2];
             cel[0] = 0;
@@ -11882,8 +11958,8 @@ static int varre(const char *resto, int acao){
             } else if(cp == CORPO_DATA){
                 /* a contagem lê-se nos TRÊS planos --- baixo, alto, alto2 --- e
                  * sai como o instante que o cliente espera */
-                unsigned long alt = mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
-                Word b2 = mem_le(S_ALTO2 + (unsigned)(i*ncols + j));
+                unsigned long alt = mem_le(S_ALTO + cel_ix(i*ncols + j)).total;
+                Word b2 = mem_le(S_ALTO2 + cel_ix(i*ncols + j));
                 unsigned long seg = (unsigned long)c.total | (alt << 8)
                                   | ((unsigned long)b2.total << 16)
                                   | ((unsigned long)b2.e << 24);
@@ -11893,17 +11969,19 @@ static int varre(const char *resto, int acao){
                 long ano = 1970, mes = 1;
                 for(;;){ int b3 = (ano%4==0 && (ano%100!=0 || ano%400==0));
                          unsigned long dd = b3 ? 366UL : 365UL;
-                         if(dias < dd) break; dias -= dd; ano++; }
+                         if(dias < dd) break;
+                         dias -= dd; ano++; }
                 { static const int ml[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
                   int b4 = (ano%4==0 && (ano%100!=0 || ano%400==0));
                   for(mes = 1; mes <= 12; mes++){
                       unsigned long dm = (unsigned long)ml[mes-1] + ((mes==2 && b4)?1UL:0UL);
-                      if(dias < dm) break; dias -= dm; } }
+                      if(dias < dm) break;
+                      dias -= dm; } }
                 snprintf(cel, sizeof cel, "%04ld-%02ld-%02lu %02lu:%02lu:%02lu",
                          ano, mes, dias + 1, resto/3600UL, (resto/60UL)%60UL, resto%60UL);
             } else if(cp == CORPO_TEXTO){
                 /* a célula guarda o endereço; o que sai é a CADEIA que lá está */
-                long alt = (long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                long alt = (long)mem_le(S_ALTO + cel_ix(i*ncols + j)).total;
                 unsigned ix = (unsigned)(((unsigned long)c.total) | ((unsigned long)alt << 8));
                 tx_le(ix, cel, (int)sizeof cel);
             } else if(cp == CORPO_BOOLEANO){
@@ -11912,7 +11990,7 @@ static int varre(const char *resto, int acao){
                 snprintf(cel, sizeof cel, "%s", c.total ? "t" : "f");
             } else if(cp == CORPO_AUREO || cp == CORPO_CRISTAL
                       || cp == CORPO_RACIONAL || c.e > 1){
-                long alt = (long)mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                long alt = (long)mem_le(S_ALTO + cel_ix(i*ncols + j)).total;
                 long bru = (long)c.total | (alt << 8);
                 long t = (bru & 0x8000L) ? bru - 65536L : bru;
                 if(cp == CORPO_AUREO){
@@ -11931,7 +12009,7 @@ static int varre(const char *resto, int acao){
             } else {
                 /* o valor de uma coluna inteira é o par (baixo, alto) lido como UM
                  * número — a dobra do §26 aplicada à fronteira de leitura */
-                unsigned long alto = mem_le(S_ALTO + (unsigned)(i*ncols + j)).total;
+                unsigned long alto = mem_le(S_ALTO + cel_ix(i*ncols + j)).total;
                 snprintf(cel, sizeof cel, "%lu", (unsigned long)c.total | (alto << 8));
             }
             /* A PROJECÇÃO VALE PARA OS DOIS LADOS.
@@ -13816,7 +13894,8 @@ static int executa(const char *sql){
                           /* índice composto: só a primeira coluna desce, e diz-se */
                           int mais = 0;
                           while(*q == ','){ q++; pula(&q); char m2[64];
-                                            if(!ident(&q, m2, sizeof m2)) break; pula(&q); mais++; }
+                                            if(!ident(&q, m2, sizeof m2)) break;
+                                            pula(&q); mais++; }
                           if(*q == ')'){
                               char re[256];
                               snprintf(re, sizeof re, "CREATE INDEX ON %s (%s)", tb, cl);
@@ -13955,7 +14034,8 @@ static int executa(const char *sql){
             if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "CREATE INDEX");
             return 1;
           } }
-        if(!palavra(&p, "TABLE")) return 0; return cria(p); }
+        if(!palavra(&p, "TABLE")) return 0;
+        return cria(p); }
     if(palavra(&p, "ALTER")){
         /* ── ACRESCENTAR UMA COLUNA É O LEVANTAMENTO ──────────────────────
          *
@@ -13979,7 +14059,6 @@ static int executa(const char *sql){
         if(!usa_tabela(nome, 0)) return cat_nome_recusa(nome);
         if(!cat_nome_bate(nome)) return cat_nome_recusa(nome);
 
-        Word cat = mem_le(S_CAT);
         long ncols = cat_ncols(), nrows = cat_nrows();
         /* O TECTO É O DO CORPO, e o corpo já vai a S_CORPOX_N. Estava em 8 de
          * quando as oito eram tudo o que havia: a zona larga entrou e o comando
@@ -14015,9 +14094,9 @@ static int executa(const char *sql){
         static unsigned char pres_velho[ALT_MAX];
         for(long i = 0; i < nrows; i++)
             for(long j = 0; j < ncols; j++){
-                velho[i*ncols + j]      = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
-                velho_alto[i*ncols + j] = mem_le(S_ALTO   + (unsigned)(i*ncols + j));
-                velho_alt2[i*ncols + j] = mem_le(S_ALTO2  + (unsigned)(i*ncols + j));
+                velho[i*ncols + j]      = mem_le(S_LINHAS + cel_ix(i*ncols + j));
+                velho_alto[i*ncols + j] = mem_le(S_ALTO   + cel_ix(i*ncols + j));
+                velho_alt2[i*ncols + j] = mem_le(S_ALTO2  + cel_ix(i*ncols + j));
                 pres_velho[i*ncols + j] = (unsigned char)bit_le(S_PRES, i*ncols + j);
             }
         /* o catálogo sobe: é aqui que o andar muda */
@@ -14035,15 +14114,15 @@ static int executa(const char *sql){
                 Word v = {0,0}, va = {0,0}, vb = {0,0};
                 if(j < ncols){ v  = velho[i*ncols + j]; va = velho_alto[i*ncols + j];
                                vb = velho_alt2[i*ncols + j]; }
-                mem_grava(S_LINHAS + (unsigned)(i*novo + j), v);
-                mem_grava(S_ALTO   + (unsigned)(i*novo + j), va);
-                mem_grava(S_ALTO2  + (unsigned)(i*novo + j), vb);
+                mem_grava(S_LINHAS + cel_ix(i*novo + j), v);
+                mem_grava(S_ALTO   + cel_ix(i*novo + j), va);
+                mem_grava(S_ALTO2  + cel_ix(i*novo + j), vb);
                 /* a presença acompanha a célula para o sítio novo; a coluna
                  * acrescentada nasce AUSENTE, que é o neutro — e não a zero,
                  * que seria um valor. */
                 bit_poe(S_PRES, i*novo + j, j < ncols ? pres_velho[i*ncols + j] : 0);
-                mem_grava(S_DEN    + (unsigned)(i*novo + j),
-                          j < ncols ? mem_le(S_DEN + (unsigned)(i*ncols + j)) : (Word){1,0});
+                mem_grava(S_DEN    + cel_ix(i*novo + j),
+                          j < ncols ? mem_le(S_DEN + cel_ix(i*ncols + j)) : (Word){1,0});
             }
         }
         /* os índices ficam velhos: o passo mudou, e as chaves apontam para o
@@ -14479,7 +14558,6 @@ int sql_cols_de(const char *tabela, char nomes[][32], int cap){
 int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
                    long *fora){
     char antes[64];
-    Word cat;
     long nc, nr;
     int oc, dentro = 0;
     if(fora) *fora = 0;
@@ -14488,7 +14566,8 @@ int sql_histograma(const char *tabela, const char *coluna, long *hist, int n,
     if(!usa_tabela(tabela, 0)) return -1;
     oc = col_indice(coluna);
     if(oc < 0){ if(antes[0]) usa_tabela(antes, 0); return -1; }
-    cat = mem_le(S_CAT); nc = cat_ncols(); nr = cat_nrows();
+    nc = cat_ncols(); nr = cat_nrows();   /* o catálogo lia-se para nada: as duas
+                                            contas já o abrem por dentro */
     for(long i = 0; i < nr; i++){
         if(!bit_le(S_VIVO, i)) continue;
         { long v = celula_valor(i, oc, nc);
@@ -15656,15 +15735,15 @@ int main(int argc, char **argv){
                 long distintos = 0, proj_ok = 0, pares = 0;
                 for(int i = 0; i < 4; i++){
                     /* (2) pr₁ ∘ π̃ = π — o byte BAIXO é a célula velha, lida do .mem */
-                    unsigned b = mem_le(S_LINHAS + (unsigned)(i*ncols_f)).total;
-                    unsigned a = mem_le(S_ALTO   + (unsigned)(i*ncols_f)).total;
+                    unsigned b = mem_le(S_LINHAS + cel_ix(i*ncols_f)).total;
+                    unsigned a = mem_le(S_ALTO   + cel_ix(i*ncols_f)).total;
                     if(b == (unsigned)(V[i] % 256)) proj_ok++;
                     /* (1) G̃ ≡ 1 — o par (b,a) não se repete entre linhas */
                     int repete = 0;
                     for(int j2 = 0; j2 < 4; j2++){
                         if(j2 == i) continue;
-                        unsigned b2 = mem_le(S_LINHAS + (unsigned)(j2*ncols_f)).total;
-                        unsigned a2 = mem_le(S_ALTO   + (unsigned)(j2*ncols_f)).total;
+                        unsigned b2 = mem_le(S_LINHAS + cel_ix(j2*ncols_f)).total;
+                        unsigned a2 = mem_le(S_ALTO   + cel_ix(j2*ncols_f)).total;
                         if(b2 == b && a2 == a) repete = 1;
                     }
                     if(!repete) pares++;
@@ -15677,7 +15756,7 @@ int main(int argc, char **argv){
                 unsigned b0 = mem_le(S_LINHAS + 0).total;
                 long G_base = 0;
                 for(int i = 0; i < 4; i++)
-                    if(mem_le(S_LINHAS + (unsigned)(i*ncols_f)).total == b0) G_base++;
+                    if(mem_le(S_LINHAS + cel_ix(i*ncols_f)).total == b0) G_base++;
                 printf("\n     levantamento: [%s][%s][%s][%s] — %ld distintos, %ld pares"
                        " únicos (G̃≡1), pr₁ bate em %ld\n     e na BASE os quatro caem na"
                        " MESMA célula (%u): G = %ld — é essa a dobra que a folha desfaz\n",
@@ -15879,7 +15958,9 @@ int main(int argc, char **argv){
             /* O INVARIANTE que distingue este corpo de todos os outros: TODO elemento é
              * IDEMPOTENTE, A ∧ A = A. É por isso que ele só é corpo quando n = 1 — com n > 1
              * há divisor de zero e elemento sem inverso (morfico.py, teo:socorpon1). */
-            unsigned A = (unsigned)x.total, B = (unsigned)y.total;
+            /* (o A e o B que aqui viviam eram os operandos da asserção vazia que o
+             * revisor apanhou: `A & B & ~A == 0` é identicamente zero, e os valores
+             * nunca contaram. Saíram com ela.) */
             int idem = 1;
             for(unsigned t = 0; t < 64; t++) if(mo_prod(t,t) != t) idem = 0;
             /* `t & t == t` é identidade booleana para todo unsigned, e continua verdade com o produto
