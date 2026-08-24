@@ -6904,7 +6904,28 @@ static int idx_constroi(long col, long ncols, long nrows){
 }
 
 /* a coluna `col` tem índice válido? — existe, é dela, e não está velho */
+/* ── QUANTAS LINHAS A CHAVE DO ÍNDICE DISTINGUE ──────────────────────────────
+ *
+ * A chave é `(valor << ord_bits_idx) | (idx & máscara)`, e no índice
+ * `ord_niv_idx` é DOIS --- oito bits para o número da linha. Logo ele distingue
+ * 256 linhas, e a 260.ª colide com a 4.ª.
+ *
+ * Isto estava salvaguardado por uma PREMISSA, e o comentário do `ord_niv_idx`
+ * dizia-a: «a do índice é dois: ela recusa nos seus 600 nós MUITO ANTES das 256
+ * linhas, pelo que ali a colisão não chega a acontecer». Ora eu derivei o tecto
+ * de nós do mapa, de 600 para 1023 --- e a premissa CAIU com a melhoria. O
+ * índice passou a ser criado com 300 linhas e a responder ERRADO: `WHERE
+ * k = 260` devolvia a linha 4, e a varredura devolvia a 260.
+ *
+ * É o gume que a melhoria desarma: alarguei o envelope e uma lei que dependia
+ * do limite deixou de valer. O limite volta, e agora DERIVADO da chave em vez
+ * de vir de um efeito lateral do tecto de nós --- para que ele não dependa de
+ * mais nada que eu possa vir a alargar. Acima disto o índice não se usa e a
+ * varredura responde: devagar, e certo. */
+#define IDX_LIN_MAX  (1L << (ORD_BITS * 2))    /* os dois níveis do índice */
+
 static int idx_valido(long col, long nrows){
+    if(nrows > IDX_LIN_MAX) return 0;          /* a chave não distinguiria as linhas */
     if(col < 0 || col >= IDX_MAXCOL) return 0;
     Word c = mem_le(S_IDXCAB(col));
     if((long)c.total != col + 1) return 0;

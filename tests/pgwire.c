@@ -29594,7 +29594,9 @@ int main(void){
         /* O QUE SE MEDE É O CUSTO, e ele tem de ser ZERO --- não «pequeno».
          * Zero bytes de ISA é a árvore a responder sozinha; qualquer coisa
          * acima disso é o molde a passar pelas linhas, que é a varredura. */
-        static const long CASO[3] = { 150, 200, 300 };
+        /* até onde a CHAVE do índice distingue as linhas --- ver §W207: são os
+         * dois níveis dela, e não um número escolhido aqui */
+        static const long CASO[3] = { 150, 200, 256 };
         long com_indice = 0;
         for(int c = 0; c < 3; c++){
             snprintf(q, sizeof q, "DROP TABLE t");  sql_executa(q, &o);
@@ -29767,6 +29769,130 @@ int main(void){
            " condição sobre coluna sem índice tem de custar, senão «não varre» seria"
            " indistinguível de «não faz» ---, e o segundo controlo é o campo copiado ser"
            " mesmo o VIVO: um DELETE tem de fazer a contagem descer de um.", mal == 0);
+    }
+
+    /* ═══ §W207: O ÍNDICE MENTIU, E FUI EU QUE O DESTAPEI ══════════════════ */
+    {
+        int mal = 0;  SqlOut o;  char q[160];
+        printf("\n§W207 a chave do índice distingue 256 linhas — e a premissa caiu com a melhoria.\n\n");
+
+        /* ── O QUE ACONTECEU, E É PRECISO DIZÊ-LO ────────────────────────────
+         *
+         * A chave do índice é `(valor << ord_bits_idx) | (idx & máscara)`, e no
+         * índice `ord_niv_idx` é DOIS --- oito bits para o número da linha. Ele
+         * distingue 256 linhas, e a 260.ª colide com a 4.ª.
+         *
+         * Isso estava salvaguardado por uma PREMISSA, escrita no comentário do
+         * próprio `ord_niv_idx`: «a do índice é dois: ela recusa nos seus 600
+         * nós MUITO ANTES das 256 linhas, pelo que ali a colisão não chega a
+         * acontecer». A premissa era verdadeira, e o aviso estava lá.
+         *
+         * E EU DERRUBEI-A. Derivei o tecto de nós do mapa --- de 600 para 1023,
+         * com bom motivo, porque o 600 vinha de um mapa antigo ---, e com isso
+         * o índice passou a ser criado com 300 linhas. Medido no momento em que
+         * aconteceu: `WHERE k = 260` devolvia a linha 4 e a varredura devolvia
+         * a 260. Uma resposta ERRADA apresentada como resultado, e fui eu que a
+         * pus lá.
+         *
+         * É o gume que a melhoria desarma: alargar o envelope faz cair leis que
+         * dependiam do limite. O limite volta, e agora DERIVADO DA CHAVE em vez
+         * de vir de um efeito lateral do tecto de nós --- para não voltar a
+         * depender de algo que eu possa alargar. */
+        unlink("/tmp/pgwire_w207.mem"); unlink("/tmp/pgwire_w207.prog");
+        unlink("/tmp/pgwire_w207.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w207__t.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w207__t.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w207")) mal++;
+
+        /* ── OS DOIS CAMINHOS, DOS DOIS LADOS DA FRONTEIRA ───────────────────
+         *
+         * O gume não é o custo: é a RESPOSTA. Compara-se `k = X` (que desce a
+         * árvore quando ela serve) com `k+0 = X` (que varre sempre, porque a
+         * soma impede o índice), e exige-se que coincidam --- abaixo da
+         * fronteira, onde o índice responde, e ACIMA dela, onde ele tem de se
+         * abster. Foi exactamente esta comparação que apanhou o defeito. */
+        static const long TAM[2] = { 200, 300 };
+        long concordam = 0, comparadas = 0;
+        for(int c = 0; c < 2; c++){
+            snprintf(q, sizeof q, "DROP TABLE t");  sql_executa(q, &o);
+            sql_executa("CREATE TABLE t (k INTEIRO, m INTEIRO)", &o);
+            for(long i = 0; i < TAM[c]; i++){
+                snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", i, i);
+                sql_executa(q, &o);
+            }
+            sql_executa("CREATE INDEX ixw207 ON t (k)", &o);
+            /* as linhas que a chave de oito bits CONFUNDIRIA: a k e a k+256 */
+            static const long ALVO[4] = { 4, 100, 260, 299 };
+            for(int a = 0; a < 4; a++){
+                if(ALVO[a] >= TAM[c]) continue;
+                snprintf(q, sizeof q, "SELECT m FROM t WHERE k = %ld", ALVO[a]);
+                sql_executa(q, &o);
+                long pela_arvore = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+                snprintf(q, sizeof q, "SELECT m FROM t WHERE k+0 = %ld", ALVO[a]);
+                sql_executa(q, &o);
+                long pela_varredura = (o.ok && o.nrows > 0) ? atol(o.cell[0][0]) : -1;
+                comparadas++;
+                if(pela_arvore == pela_varredura && pela_arvore == ALVO[a]) concordam++;
+                else printf("        %ld linhas, k=%ld: árvore diz %ld, varredura diz %ld\n",
+                            TAM[c], ALVO[a], pela_arvore, pela_varredura);
+            }
+        }
+        printf("      os dois caminhos, dos dois lados da fronteira: %ld/%ld concordam"
+               " (e com o valor certo)\n", concordam, comparadas);
+        if(concordam != comparadas || comparadas < 6) mal++;
+
+        /* ── O CONTROLO: a fronteira EXISTE, e vê-se no custo ────────────────
+         *
+         * Se o índice nunca fosse usado, tudo isto concordaria por não haver
+         * dois caminhos --- seria a varredura comparada consigo própria. Exige-
+         * se por isso que ABAIXO da fronteira ele responda a custo ZERO e ACIMA
+         * não: é o que distingue «abstém-se quando não distingue» de «não
+         * existe». */
+        snprintf(q, sizeof q, "DROP TABLE t");  sql_executa(q, &o);
+        sql_executa("CREATE TABLE t (k INTEIRO, m INTEIRO)", &o);
+        for(long i = 0; i < 256; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", i, i);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE INDEX ixw207b ON t (k)", &o);
+        sql_executa("SELECT m FROM t WHERE k = 100", &o);
+        long dentro = sql_ultimos_passos;
+        for(long i = 256; i < 300; i++){
+            snprintf(q, sizeof q, "INSERT INTO t VALUES (%ld, %ld)", i, i);
+            sql_executa(q, &o);
+        }
+        sql_executa("CREATE INDEX ixw207c ON t (k)", &o);
+        sql_executa("SELECT m FROM t WHERE k = 100", &o);
+        long fora = sql_ultimos_passos;
+        printf("      CONTROLO — com 256 linhas custa %ld passo(s); com 300, %ld\n",
+               dentro, fora);
+        if(dentro != 0 || fora <= 0) mal++;
+        sql_fechar();
+
+        ok("A CHAVE DO ÍNDICE DISTINGUE 256 LINHAS, E A PREMISSA CAIU COM A MELHORIA ---"
+           " FUI EU QUE A DERRUBEI. A chave é `(valor << ord_bits_idx) | (idx & máscara)` e"
+           " no índice o `ord_niv_idx` é DOIS: oito bits para o número da linha, logo 256"
+           " linhas distinguíveis e a 260.ª a colidir com a 4.ª. Isso estava salvaguardado"
+           " por uma premissa, e ela estava ESCRITA no comentário do próprio"
+           " `ord_niv_idx`: «a do índice é dois: ela recusa nos seus 600 nós MUITO ANTES"
+           " das 256 linhas, pelo que ali a colisão não chega a acontecer». Ora eu derivei"
+           " o tecto de nós do mapa --- de 600 para 1023, com bom motivo, porque o 600 vinha"
+           " de um mapa antigo ---, e a premissa caiu com a melhoria: o índice passou a ser"
+           " criado com 300 linhas e a responder ERRADO. Medido no momento: `WHERE k = 260`"
+           " devolvia a linha 4 e a varredura devolvia a 260 --- uma resposta errada"
+           " apresentada como resultado, e posta lá por mim. É o gume que a melhoria"
+           " desarma, e a lição é que alargar um envelope faz cair as leis que dependiam do"
+           " limite. O limite volta DERIVADO DA CHAVE, e não de um efeito lateral do tecto"
+           " de nós, para não voltar a depender de algo que eu possa alargar. O que se mede"
+           " é a RESPOSTA e não o custo: os dois caminhos --- `k = X` que desce a árvore e"
+           " `k+0 = X` que varre, porque a soma impede o índice --- têm de coincidir dos"
+           " DOIS lados da fronteira, e foi exactamente esta comparação que apanhou o"
+           " defeito. E o CONTROLO é a fronteira EXISTIR: com 256 linhas o índice responde"
+           " a custo zero e com 300 não, porque se ele nunca fosse usado isto seria a"
+           " varredura comparada consigo própria e concordaria sempre --- o que distingue"
+           " «abstém-se quando não distingue» de «não existe».", mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
