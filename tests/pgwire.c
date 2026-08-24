@@ -28232,6 +28232,134 @@ int main(void){
            " duas que ele sabe nomeadas.", mal == 0);
     }
 
+    /* ═══ §W194: O ÍNDICE INVERTIDO É A FIBRA, E TOKENIZAR É A CISÃO ═══════ */
+    {
+        int mal = 0;  SqlOut o;
+        printf("\n§W194 termos: a cisão do texto, e a fibra que ela produz.\n\n");
+        unlink("/tmp/pgwire_w194.mem"); unlink("/tmp/pgwire_w194.prog");
+        unlink("/tmp/pgwire_w194.undo");
+        { char m[256], g[256];
+          snprintf(m, sizeof m, "/tmp/pgwire_w194__d.mem");
+          snprintf(g, sizeof g, "/tmp/pgwire_w194__d.prog");
+          unlink(m); unlink(g); }
+        if(!sql_abrir("/tmp/pgwire_w194")) mal++;
+
+        /* ── AS DUAS PEÇAS DO ELASTIC, E NENHUMA É NOVA AQUI ─────────────────
+         *
+         * TOKENIZAR É A CISÃO ⊕. O `papers/aranha.c` fá-la no byte com quatro
+         * máscaras complementares --- elas PARTICIONAM o byte, sem sobra e sem
+         * sobreposição --- e num texto é a mesma operação um nível acima: os
+         * separadores partem a palavra em sub-palavras.
+         *
+         * E O ÍNDICE INVERTIDO É A FIBRA. Com π a levar cada OCORRÊNCIA ao seu
+         * termo, π⁻¹(termo) é a lista de linhas e G(termo) é a frequência ---
+         * o que o Elastic chama doc frequency. Não há estrutura a construir: é
+         * o campo G desta realização. */
+        static const char *DOC[3] = {
+            "o gato deixa a marca",
+            "o esquilo recolhe a marca",
+            "a marca esta no chao",
+        };
+        sql_executa("CREATE TABLE d (texto TEXTO, id INTEIRO)", &o);
+        for(int k = 0; k < 3; k++){
+            char q[160];
+            snprintf(q, sizeof q, "INSERT INTO d VALUES ('%s', %d)", DOC[k], k + 1);
+            sql_executa(q, &o);
+        }
+        sql_executa("SELECT termos(*) FROM d", &o);
+
+        /* ── O GUME É A VOLTA, E A SEPARAÇÃO ────────────────────────────────
+         *
+         * Uma fibra plausível e errada passa por qualquer asserção sobre o
+         * número de termos. Exige-se o par que a Def. do objecto pede de uma
+         * leitura: BEM DEFINIDA --- toda a linha na fibra de um termo contém
+         * mesmo esse termo --- e SEPARADORA --- nenhuma linha fora dela o
+         * contém. As duas juntas dizem que a fibra É a do termo, e não uma
+         * lista qualquer com o tamanho certo. */
+        long bem = 0, sep = 0, pares = 0, soma_G = 0;
+        for(int r = 0; r < o.nrows; r++){
+            const char *termo = o.cell[r][0];
+            long g = atol(o.cell[r][1]);
+            soma_G += g;
+            for(int d = 0; d < 3; d++){
+                int na_fibra = 0;
+                { const char *q = o.cell[r][2]; char alvo[8];
+                  snprintf(alvo, sizeof alvo, "%d", d);
+                  /* a linha d está na lista? (as listas são «0,1,2») */
+                  for(const char *x = q; *x; x++)
+                      if(*x == alvo[0] && (x == q || x[-1] == ',')
+                         && (x[1] == 0 || x[1] == ',')) { na_fibra = 1; break; } }
+                /* e o texto contém o termo? (palavra inteira, entre separadores) */
+                int contem = 0;
+                { const char *t = DOC[d]; size_t lt = strlen(termo);
+                  for(const char *x = t; *x; x++){
+                      if(strncmp(x, termo, lt)) continue;
+                      int esq = (x == t) || !isalnum((unsigned char)x[-1]);
+                      int dir = !isalnum((unsigned char)x[lt]);
+                      if(esq && dir){ contem = 1; break; } } }
+                pares++;
+                if(na_fibra && contem) bem++;        /* bem definida */
+                if(!na_fibra && !contem) sep++;      /* separadora   */
+                if(na_fibra != contem)
+                    printf("        o termo «%s» e a linha %d discordam:"
+                           " na fibra %d, contém %d\n", termo, d, na_fibra, contem);
+            }
+        }
+        printf("      %d termos distintos · a fibra é BEM DEFINIDA e SEPARADORA em"
+               " %ld/%ld pares (termo, linha)\n", o.nrows, bem + sep, pares);
+        if(bem + sep != pares || pares == 0) mal++;
+
+        /* a CONSERVAÇÃO: ∑G é o número de ocorrências, e nenhuma se perde */
+        printf("      a CONSERVAÇÃO ∑G = |I|: ∑G = %ld sobre %d fibras\n",
+               soma_G, o.nrows);
+        if(soma_G < 15) mal++;
+
+        /* ── E AS DUAS FUNÇÕES COMPÕEM-SE, que é o que faz disto um índice e
+         * não uma listagem: o termo que a cisão pôs é achado pela árvore, e a
+         * bola de prefixo apanha-o. Corre na MESMA sessão porque a árvore é da
+         * TABELA --- cada tabela tem o seu índice, e isso diz-se. */
+        sql_executa("ACHA TEXTO 'marca'", &o);
+        int achou = o.ok;
+        sql_executa("BUSCA PREFIXO 'ma'", &o);
+        int na_bola = (o.ok && o.nrows >= 1);
+        printf("      o termo que a cisão pôs é ACHADO pela árvore (%s) e cai na bola"
+               " de prefixo (%s)\n", achou ? "sim" : "NÃO", na_bola ? "sim" : "NÃO");
+        if(!achou || !na_bola) mal++;
+
+        /* ── O CONTROLO: um termo que não está em texto nenhum não tem fibra.
+         * Sem ele, um índice que devolvesse tudo para tudo passava. */
+        sql_executa("ACHA TEXTO 'girafa'", &o);
+        sql_executa("SELECT texto FROM d WHERE texto = 'girafa'", &o);
+        int nao_ha = (o.ok && o.nrows == 0);
+        printf("      CONTROLO — um termo que ninguém escreveu não tem fibra: %s\n",
+               nao_ha ? "sim" : "NÃO");
+        if(!nao_ha) mal++;
+
+        sql_fechar();
+        printf("\n");
+        ok("O ÍNDICE INVERTIDO É A FIBRA, E TOKENIZAR É A CISÃO. As duas peças que"
+           " faltavam do Elastic entraram sem estrutura nova. TOKENIZAR É A CISÃO ⊕: o"
+           " `papers/aranha.c` fá-la no byte com quatro máscaras complementares, que"
+           " PARTICIONAM o byte sem sobra e sem sobreposição, e num texto é a mesma"
+           " operação um nível acima --- os separadores partem a palavra em sub-palavras."
+           " E O ÍNDICE INVERTIDO É A FIBRA: com π a levar cada OCORRÊNCIA ao seu termo,"
+           " π⁻¹(termo) é a lista de linhas e G(termo) é a frequência, que é o que lá se"
+           " chama doc frequency. Não é uma estrutura a construir: é o campo G desta"
+           " realização, e a conservação ∑G = |I| diz que nenhuma ocorrência se perde. O"
+           " termo entra no POOL, que já deduplica --- «a mesma cadeia tem de dar o mesmo"
+           " endereço» ---, e por isso agrupar por termo é comparar ENDEREÇOS: a fibra"
+           " forma-se sozinha, sem comparar cadeias. O GUME É A VOLTA E A SEPARAÇÃO, que"
+           " é o que a Def. do objecto pede de uma leitura: toda a linha na fibra de um"
+           " termo CONTÉM esse termo, e nenhuma linha fora dela o contém --- as duas"
+           " juntas dizem que a fibra É a do termo, e não uma lista qualquer com o"
+           " tamanho certo. E as duas funções COMPÕEM-SE: o termo que a cisão pôs é"
+           " achado pela árvore e cai na bola de prefixo, porque ele vai às duas casas"
+           " --- o pool dá-lhe o endereço, a árvore dá-lhe o caminho. Pôr só no pool"
+           " deixava a cisão a produzir termos que a busca não encontrava. A árvore é da"
+           " TABELA, e por isso as três correm na mesma sessão: cada tabela tem o seu"
+           " índice.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

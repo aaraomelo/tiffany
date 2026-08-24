@@ -610,7 +610,16 @@ typedef char cabe_a_base[(S_BITM + WORD_ISA_ATOMS*8u <= 224u
 #define S_LCS          (ISA_TECTO + ZONA(77))
 #define LCS_ZONAS      2u
 #define LCS_CELULAS    ((ZONA_SLOTS * LCS_ZONAS) / 2u)
-#define ZONA_LIVRE1    79u                /* a primeira zona depois do reservado */
+/* ── O ÍNDICE INVERTIDO É A FIBRA, E MORA NO DISCO ───────────────────────────
+ *
+ * Três Words por ocorrência --- o endereço do termo no pool, a linha, e a
+ * posição dentro do texto --- e o resto é leitura: a FIBRA de um termo é o
+ * conjunto das ocorrências com aquele endereço, e G(termo) é o tamanho dela. */
+#define S_INV          (ISA_TECTO + ZONA(79))
+#define INV_ZONAS      2u
+#define INV_W          3u
+#define INV_MAX        ((ZONA_SLOTS * INV_ZONAS) / INV_W)
+#define ZONA_LIVRE1    81u                /* a primeira zona depois do reservado */
 #define IDX_ZONA1      ZONA_LIVRE1
 #define IDX_MAXCOL     (8u + (600u - IDX_ZONA1))
 #define S_IDXBASE(k)   (ISA_TECTO + ZONA((k) < 8 ? IDX_ZONA0 + (unsigned)(k) \
@@ -1327,6 +1336,7 @@ static unsigned atomos_le_u32(unsigned base){
  * `tx(s, n, -1)` escreve: procura primeiro (a mesma cadeia TEM de dar o mesmo
  * endereço, que é o critério da leitura) e só grava se ela não estiver lá. */
 static unsigned tx(const char *s2, int n, int sinal);
+static int poe_chave_texto(const char *s);   /* o termo também vai à árvore */
 static unsigned tx_procura(const char *s2, int n){ return tx(s2, n, +1); }
 static unsigned tx_guarda (const char *s2, int n){ return tx(s2, n, -1); }
 static unsigned tx(const char *s2, int n, int sinal){
@@ -5672,7 +5682,8 @@ static int lista_colunas(const char **pp, char *out, int cap){
                        : !strcasecmp(nome,"GLOBAL") ? 30
                        : !strcasecmp(nome,"EDO") ? 31
                        : !strcasecmp(nome,"FUNDE") ? 32
-                       : !strcasecmp(nome,"LCS") ? 33 : 0;
+                       : !strcasecmp(nome,"LCS") ? 33
+                       : !strcasecmp(nome,"TERMOS") ? 34 : 0;
                 if(qm == 8 || qm == 11){
                     /* o produto pede a OUTRA tabela pelo nome: é a composição,
                      * e uma composição tem dois lados */
@@ -6114,7 +6125,8 @@ static int ord_percorre(unsigned no, int nivel, unsigned long ch,
  * pisar. O que não é verificado pelo compilador tem de ser verificado por
  * alguém --- e ninguém estava. */
 typedef char zonas_nao_pisam_os_indices[(45u + J_ZONAS <= 77u) ? 1 : -1];
-typedef char lcs_nao_pisa_os_indices[(77u + LCS_ZONAS <= ZONA_LIVRE1) ? 1 : -1];
+typedef char lcs_nao_pisa_o_invertido[(77u + LCS_ZONAS <= 79u) ? 1 : -1];
+typedef char invertido_nao_pisa_os_indices[(79u + INV_ZONAS <= ZONA_LIVRE1) ? 1 : -1];
 typedef char indices_cabem_abaixo_do_canal[(IDX_ZONA1 + IDX_MAXCOL - 8u <= 600u) ? 1 : -1];
 
 static char j_tab_dir[64] = "";   /* a tabela da direita, "" se não há JOIN */
@@ -9103,6 +9115,125 @@ static int varre(const char *resto, int acao){
                falha == 0 ? "a régua DESCE: a leitura serve"
                           : "a régua NÃO desce: a leitura não serve");
         return 1;
+    }
+
+    /* ══ TERMOS: A CISÃO DO TEXTO, E A FIBRA QUE ELA PRODUZ ════════════════
+     *
+     * É o índice invertido do Elastic, e nenhuma das duas peças é nova aqui.
+     *
+     * TOKENIZAR É A CISÃO ⊕. O `papers/aranha.c` fá-la no byte com quatro
+     * máscaras complementares --- «0xAA ∨ 0x55 = 0xFF e 0xAA ∧ 0x55 = 0, logo
+     * PARTICIONAM o byte» ---, e num texto é a mesma operação um nível acima: os
+     * separadores particionam a palavra em sub-palavras, sem sobra e sem
+     * sobreposição. A cisão é a realização π da Def. do objecto.
+     *
+     * E O ÍNDICE INVERTIDO É A FIBRA. Com π a levar cada OCORRÊNCIA ao seu
+     * termo, a fibra π⁻¹(termo) é a lista de linhas onde ele aparece, e G(termo)
+     * é a frequência --- que é o que o Elastic chama doc frequency. Não é uma
+     * estrutura a construir: é o campo G desta realização, e a conservação
+     * ∑G = |I| diz que nenhuma ocorrência se perde no caminho.
+     *
+     * O termo entra no pool, que já deduplica --- «a mesma cadeia tem de dar o
+     * mesmo endereço, x = y ⟹ R(x) = R(y)» ---, e por isso agrupar ocorrências
+     * por termo é compará-las por ENDEREÇO: a fibra forma-se sozinha. */
+    if(acao == ACAO_MARCA && mat_op == 34){
+        if(ncols < 1 || corpo_de(0).total != CORPO_TEXTO){
+            printf("erro: `termos` pede que a PRIMEIRA coluna seja de TEXTO --- é ela"
+                   " que se parte. RECUSADO.\n");
+            if(sql_cap){ sql_cap->ok = 0;
+                snprintf(sql_cap->err, sizeof sql_cap->err,
+                         "termos needs a text column first"); }
+            return 0;
+        }
+        long ocor = 0;
+        /* (1) A CISÃO: cada linha parte-se, e cada termo entra no pool */
+        for(long i = 0; i < nrows && ocor < (long)INV_MAX; i++){
+            if(!bit_le(S_MATCH, i)) continue;
+            if(!bit_le(S_PRES, i*ncols)) continue;
+            char T[TX_MAX + 2];
+            tx_le((unsigned)celula_valor(i, 0, ncols), T, (int)sizeof T);
+            long pos = 0;
+            for(const char *q = T; *q; ){
+                while(*q && !isalnum((unsigned char)*q)) q++;   /* o separador */
+                if(!*q) break;
+                char tok[TX_MAX + 2]; int tn = 0;
+                while(*q && isalnum((unsigned char)*q)){
+                    if(tn < TX_MAX) tok[tn++] = (char)baixa1(*q);
+                    q++;
+                }
+                tok[tn] = 0;
+                if(!tn) continue;
+                if(ocor >= (long)INV_MAX){
+                    printf("erro: as ocorrências passam de %u — RECUSADO. Truncar daria"
+                           " uma fibra que não é a de nenhum texto.\n", INV_MAX);
+                    if(sql_cap){ sql_cap->ok = 0;
+                        snprintf(sql_cap->err, sizeof sql_cap->err,
+                                 "inverted index exceeds %u occurrences", INV_MAX); }
+                    return 0;
+                }
+                /* ── O TERMO VAI PARA AS DUAS CASAS, E TEM DE IR ────────────
+                 * O pool dá-lhe o ENDEREÇO --- é ele que faz a fibra formar-se
+                 * por comparação de endereços, sem comparar cadeias. A árvore
+                 * dá-lhe o CAMINHO --- e é ela que o `ACHA` desce e o
+                 * `BUSCA PREFIXO` usa para escolher a bola. Pôr só no pool
+                 * deixava as duas funções sem se comporem: a cisão produzia
+                 * termos que a busca não encontrava. */
+                unsigned end = tx(tok, tn, -1);      /* escreve: a marca é de quem escreve */
+                poe_chave_texto(tok);                /* e o caminho na árvore */
+                Word w1; w1.total = (Word8)(end & 255); w1.e = (Word8)((end >> 8) & 255);
+                mem_grava(S_INV + (unsigned)(ocor * INV_W), w1);
+                Word w2; w2.total = (Word8)(i & 255); w2.e = (Word8)((i >> 8) & 255);
+                mem_grava(S_INV + (unsigned)(ocor * INV_W + 1), w2);
+                Word w3; w3.total = (Word8)(pos & 255); w3.e = (Word8)((pos >> 8) & 255);
+                mem_grava(S_INV + (unsigned)(ocor * INV_W + 2), w3);
+                ocor++; pos++;
+            }
+        }
+        /* (2) A FIBRA: as ocorrências com o mesmo endereço de termo */
+        #define INV_TERMO(k) ((long)mem_le(S_INV + (unsigned)((k)*INV_W)).total \
+                            | ((long)mem_le(S_INV + (unsigned)((k)*INV_W)).e << 8))
+        #define INV_LINHA(k) ((long)mem_le(S_INV + (unsigned)((k)*INV_W+1)).total \
+                            | ((long)mem_le(S_INV + (unsigned)((k)*INV_W+1)).e << 8))
+        long fibras = 0, soma_G = 0;
+        if(sql_cap){ memset(sql_cap, 0, sizeof *sql_cap); sql_cap->ok = 1;
+            sql_cap->ncols = 3;
+            snprintf(sql_cap->col[0], sizeof sql_cap->col[0], "termo");
+            snprintf(sql_cap->col[1], sizeof sql_cap->col[1], "G");
+            snprintf(sql_cap->col[2], sizeof sql_cap->col[2], "linhas");
+            sql_cap->tipo[0] = SQL_TIPO_TEXT; sql_cap->tipo[1] = SQL_TIPO_INT4;
+            sql_cap->tipo[2] = SQL_TIPO_TEXT; }
+        printf("      termo              G   as linhas (a fibra)\n");
+        for(long k = 0; k < ocor; k++){
+            long e = INV_TERMO(k);
+            int primeiro = 1;
+            for(long j = 0; j < k; j++) if(INV_TERMO(j) == e){ primeiro = 0; break; }
+            if(!primeiro) continue;
+            char nom[TX_MAX + 2]; tx_le((unsigned)e, nom, (int)sizeof nom);
+            char lst[128]; int ln = 0; long g = 0;
+            for(long j = k; j < ocor; j++)
+                if(INV_TERMO(j) == e){
+                    g++;
+                    if(ln < 100) ln += snprintf(lst + ln, sizeof lst - (size_t)ln,
+                                                "%s%ld", ln ? "," : "", INV_LINHA(j));
+                }
+            lst[ln] = 0;
+            printf("      %-18s %-3ld %s\n", nom, g, lst);
+            fibras++; soma_G += g;
+            if(sql_cap && sql_cap->nrows < SQL_OUT_MAX_ROWS){
+                long r = sql_cap->nrows;
+                snprintf(sql_cap->cell[r][0], SQL_OUT_CELL, "%s", nom);
+                snprintf(sql_cap->cell[r][1], SQL_OUT_CELL, "%ld", g);
+                snprintf(sql_cap->cell[r][2], SQL_OUT_CELL, "%s", lst);
+                sql_cap->nrows++;
+            }
+        }
+        printf("      -> %ld termo(s) distintos, %ld ocorrência(s); a CONSERVAÇÃO"
+               " ∑G = |I|: %ld = %ld %s\n", fibras, ocor, soma_G, ocor,
+               (soma_G == ocor) ? "" : "← NÃO FECHA");
+        if(sql_cap) snprintf(sql_cap->tag, sizeof sql_cap->tag, "SELECT %ld", fibras);
+        #undef INV_TERMO
+        #undef INV_LINHA
+        return soma_G == ocor;
     }
 
     /* ══ LCS: A DOBRA ALTERNADA DAS DUAS FACES ══════════════════════════════
