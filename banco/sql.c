@@ -13522,6 +13522,18 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
  { "venom",           1, -1, 0, 0, 16, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
+
+/* O CATÁLOGO DA CASA, pela porta. São 44 corpos com nome próprio, e a `aranha`
+ * caixa de Pandora aplica-se a eles: a condição de pertença é |C| = 1, e a óptica
+ * lê-se nas duas coordenadas. O medidor tem de varrer o catálogo VERDADEIRO. */
+int sql_corpo28_n(void){ return N28; }
+const char *sql_corpo28(int i, long *B, long *C){
+    if(i < 0 || i >= N28) return 0;
+    if(B) *B = CORPO28[i].B;
+    if(C) *C = CORPO28[i].C;
+    return CORPO28[i].nome;
+}
+
 /* O codificador vem do cifra.h — um so, e encoda qualquer corpo: foi ele que deu a cifra
  * aos 31 e e ele que da a de um formato. Estava aqui dentro e saiu para nao haver dois. */
 /* A DISTANCIA ENTRE OS CORPOS: o prefixo comum das cifras completas, e a distancia e 1/2^k. E a

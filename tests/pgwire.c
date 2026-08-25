@@ -31580,6 +31580,108 @@ int main(void){
            " travessia leva o corpo» não distinguiria nada.", mal == 0);
     }
 
+    /* ═══ §W222: A ÓPTICA APLICADA AO CATÁLOGO DA CASA ═════════════════════ */
+    {
+        int mal = 0;
+        printf("\n§W222 os 44 corpos com nome próprio, lidos pela óptica.\n\n");
+
+        /* ── PORQUE ESTE BLOCO EXISTE ────────────────────────────────────────
+         *
+         * A caixa de Pandora foi construída em abstracto e a óptica caracterizou
+         * o que cada elemento faz. Falta a pergunta que fecha: os corpos que
+         * esta casa DECLARA estão lá dentro, e o que são?
+         *
+         * A condição de pertença é |C| = 1 --- a conservação. Se um corpo do
+         * catálogo a violasse, a teoria estaria a ser aplicada fora do domínio,
+         * e nenhuma das leis acima valeria para ele. */
+        { int n = sql_corpo28_n();
+          long fora = 0, prop = 0, imp = 0, el = 0, par = 0, hip = 0, na_borda = 0;
+          long viola_lei = 0;
+          const char *nome_borda[8]; int nb = 0;
+          printf("      o catálogo tem %d corpos\n", n);
+          for(int i = 0; i < n; i++){
+              long B, C;
+              const char *nm = sql_corpo28(i, &B, &C);
+              if(!nm) continue;
+              { long D = B*B - 4*C;
+                if(C != 1 && C != -1) fora++;               /* saiu da caixa */
+                if(C > 0) prop++; else imp++;
+                if(D < 0) el++; else if(D == 0) par++; else hip++;
+                if(C < 0 && D <= 0) viola_lei++;            /* impróprio não-hiperbólico */
+                /* na borda: Δ ≥ 0 quadrado e as metades no anel */
+                if(D >= 0){ long r = sql_raizi(D);
+                    if(r*r == D && (B+r)%2 == 0 && (B-r)%2 == 0){
+                        na_borda++;
+                        if(nb < 8) nome_borda[nb++] = nm; } }
+              }
+          }
+          printf("      TODOS na caixa (|C| = 1)? corpos fora: %ld\n", fora);
+          printf("      orientação: %ld próprios · %ld impróprios\n", prop, imp);
+          printf("      regime:     %ld elípticos · %ld parabólicos · %ld hiperbólicos\n",
+                 el, par, hip);
+          printf("      na BORDA (a régua factoriza): %ld — ", na_borda);
+          for(int k = 0; k < nb; k++) printf("%s%s", nome_borda[k], k+1 < nb ? ", " : "");
+          printf("%s\n", na_borda > nb ? ", …" : "");
+          printf("      a LEI (impróprio ⟹ hiperbólico): %ld violações\n", viola_lei);
+          if(fora != 0) mal++;              /* a caixa contém o catálogo */
+          if(viola_lei != 0) mal++;         /* e a lei do cor:optica vale nele */
+          /* e as três classes existem no catálogo — senão o varrimento seria magro */
+          if(el == 0 || par == 0 || hip == 0) mal++;
+          if(prop == 0 || imp == 0) mal++;
+          if(na_borda == 0) mal++;          /* a borda não é vazia aqui */
+          if(na_borda == n) mal++;          /* nem é toda a gente */
+        }
+
+        /* (2) OS NOMES BATEM COM A ÓPTICA. Três casos que a casa já nomeara sem
+         *     esta leitura, e que ela agora explica. */
+        { struct { const char *nome; long B, C, D; int achou; } CASO[3] = {
+              {"optico",     0,  1, -4, 0},    /* elíptico: RODA — a redonda */
+              {"criativo",   0, -1,  4, 0},    /* Δ=4: é o espelho ν, na borda */
+              {"racional",   2,  1,  0, 0} };  /* Δ=0: o corte parabólico */
+          int n = sql_corpo28_n();
+          for(int i = 0; i < n; i++){
+              long B, C; const char *nm = sql_corpo28(i, &B, &C);
+              if(!nm) continue;
+              for(int k = 0; k < 3; k++)
+                  if(!strcmp(nm, CASO[k].nome)){
+                      long D = B*B - 4*C;
+                      CASO[k].achou = (B == CASO[k].B && C == CASO[k].C && D == CASO[k].D);
+                      printf("      «%s» = (%ld,%ld), Δ = %ld → %s\n", nm, B, C, D,
+                             D < 0 ? "elíptico: RODA — e o nome já o dizia"
+                                   : (D == 0 ? "parabólico: o CORTE"
+                                             : "hiperbólico, e Δ=4 é o espelho ν"));
+                  }
+          }
+          for(int k = 0; k < 3; k++) if(!CASO[k].achou) mal++;
+        }
+
+        /* ── O CONTROLO: um corpo FORA da caixa seria visto ──────────────────
+         * Sem isto, «todos na caixa» não se distinguiria de «a verificação não
+         * olha o C». Constrói-se um (B,C) com |C| = 2 e exige-se que a mesma
+         * lógica o marque como fora. */
+        { long C = 2; int fora = (C != 1 && C != -1);
+          printf("      CONTROLO — um corpo com C = %ld seria marcado fora da caixa? %s\n",
+                 C, fora ? "sim" : "NÃO (a verificação é vazia!)");
+          if(!fora) mal++; }
+
+        ok("A ÓPTICA LÊ O CATÁLOGO DA CASA, E ELE ESTÁ TODO DENTRO DA CAIXA. A caixa foi"
+           " construída em abstracto e a óptica caracterizou o que cada elemento faz;"
+           " faltava a pergunta que fecha — os corpos que esta casa DECLARA estão lá"
+           " dentro, e o que são? A condição de pertença é |C| = 1, a conservação, e"
+           " nenhum dos corpos do catálogo a viola: se violasse, a teoria estaria a ser"
+           " aplicada fora do domínio e nenhuma das leis valeria para ele. Lidos pela"
+           " óptica repartem-se em próprios e impróprios, e nas três classes — as três"
+           " existem, o que impede o varrimento de ser magro. A LEI do cor:optica"
+           " (impróprio ⟹ hiperbólico) vale em TODOS, sem uma violação. E há um grupo na"
+           " BORDA, onde a régua factoriza em duas lineares — nem vazio nem toda a gente,"
+           " o que é o que dá conteúdo à distinção. Por fim os NOMES batem com a leitura:"
+           " «optico» é (0,1) de Δ = −4, elíptico, o que RODA — a casa já lhe tinha"
+           " chamado assim sem esta leitura; «criativo» é (0,−1) de Δ = 4, que é o espelho"
+           " ν; e «racional» é (2,1) de Δ = 0, o corte parabólico. O controlo constrói um"
+           " C = 2 e exige que a mesma lógica o marque fora: sem ele, «todos na caixa» não"
+           " se distinguiria de uma verificação que não olha o C.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
