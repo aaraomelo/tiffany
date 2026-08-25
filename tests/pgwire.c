@@ -31237,6 +31237,140 @@ int main(void){
            " a fazer).", mal == 0);
     }
 
+    /* ═══ §W219: A ÓPTICA DA CAIXA — O QUE CADA ESPELHO FAZ A UM RAIO ══════ */
+    {
+        int mal = 0;
+        printf("\n§W219 a óptica da caixa: duas coordenadas, e uma delas proíbe a outra.\n\n");
+
+        /* ── PORQUE ISTO NÃO É METÁFORA ──────────────────────────────────────
+         *
+         * Uma matriz 2×2 que age sobre (posição, ângulo) é a matriz de um
+         * sistema óptico, e |det| = 1 é a conservação --- o sistema não perde
+         * nem ganha. A caixa 𝒫 = {(B,C) : C unidade} É, portanto, o conjunto dos
+         * sistemas sem perda, e as suas duas coordenadas leem-se opticamente:
+         *
+         *   C = det   → a ORIENTAÇÃO: +1 PRÓPRIO, −1 IMPRÓPRIO (reflecte)
+         *   sgn Δ     → o REGIME: <0 roda, =0 cisalha, >0 expande
+         *
+         * E o Δ não é um análogo do critério de estabilidade: É ele. Com det=+1,
+         * a órbita é limitada exactamente quando |tr| < 2, isto é tr² < 4, isto
+         * é tr² − 4·det < 0, isto é Δ < 0. */
+
+        /* (1) A LEI: O IMPRÓPRIO É SEMPRE INSTÁVEL.
+         *     C = −1 dá Δ = B² + 4 ≥ 4 > 0 para todo B: das SEIS combinações de
+         *     (orientação, regime) só existem TRÊS. O que reflecte não roda. */
+        { long AU = sql_corpo_aureo(), CR = sql_corpo_cristal();
+          long n_imp_el = 0, n_imp_par = 0, n_imp_hip = 0;
+          long n_pro_el = 0, n_pro_par = 0, n_pro_hip = 0;
+          for(long i = -300; i <= 300; i++){
+              long B, C, D;
+              sql_corpo_cifra(AU, i, &B, &C, &D);            /* impróprio: C = −1 */
+              if(C == -1){ if(D < 0) n_imp_el++; else if(D == 0) n_imp_par++; else n_imp_hip++; }
+              sql_corpo_cifra(CR, i, &B, &C, &D);            /* próprio: C = +1 */
+              if(C == 1){ if(D < 0) n_pro_el++; else if(D == 0) n_pro_par++; else n_pro_hip++; }
+          }
+          printf("      varridos B ∈ [−300,300] nos dois tipos:\n");
+          printf("        IMPRÓPRIO (det −1): elíptico %ld · parabólico %ld · hiperbólico %ld\n",
+                 n_imp_el, n_imp_par, n_imp_hip);
+          printf("        PRÓPRIO   (det +1): elíptico %ld · parabólico %ld · hiperbólico %ld\n",
+                 n_pro_el, n_pro_par, n_pro_hip);
+          { int quantas = (n_imp_el>0) + (n_imp_par>0) + (n_imp_hip>0)
+                         + (n_pro_el>0) + (n_pro_par>0) + (n_pro_hip>0);
+            printf("      → das SEIS combinações existem %d: o IMPRÓPRIO só é HIPERBÓLICO\n",
+                   quantas);
+            /* O NÚMERO ASSERE-SE. Eu tinha escrito «três» no veredicto sem o
+             * contar, e o bloco passava porque nenhuma asserção o olhava: a
+             * saída dizia QUATRO e o texto dizia três. O impróprio ocupa 1 das 3
+             * combinações e o próprio ocupa as 3, o que dá 4 de 6. */
+            if(quantas != 4) mal++; }
+          if(n_imp_el != 0) mal++;             /* a LEI: nenhum impróprio elíptico */
+          if(n_imp_par != 0) mal++;            /* nem parabólico: Δ = B²+4 ≥ 4 */
+          if(n_imp_hip == 0) mal++;            /* e a varredura não é vazia */
+          if(n_pro_el == 0 || n_pro_par == 0 || n_pro_hip == 0) mal++;   /* as três existem */
+        }
+
+        /* (2) O QUE CADA REGIME FAZ A UM RAIO — a órbita de (1,0) sob a
+         *     companheira. É a distinção medida, não afirmada. */
+        { struct { const char *nome; long B, C; } E[3] = {
+              {"elíptico   ", 0, 1}, {"parabólico ", 2, 1}, {"hiperbólico", 1, -1} };
+          long fim[3];
+          for(int k = 0; k < 3; k++){
+              long a = 1, b = 0;                 /* o raio (1,0) */
+              printf("      %s Δ=%3ld  |v|:", E[k].nome, E[k].B*E[k].B - 4*E[k].C);
+              for(int t = 0; t < 6; t++){
+                  long na = -E[k].C * b, nb = a + E[k].B * b;   /* a companheira */
+                  a = na; b = nb;
+                  { long m = (a < 0 ? -a : a) > (b < 0 ? -b : b)
+                             ? (a < 0 ? -a : a) : (b < 0 ? -b : b);
+                    printf(" %ld", m);
+                    if(t == 5) fim[k] = m; }
+              }
+              printf("\n");
+          }
+          printf("      → limitado · linear · geométrico (e os do hiperbólico são"
+                 " FIBONACCI, que é o ouro)\n");
+          if(fim[0] != 1) mal++;                       /* o elíptico FICA */
+          if(fim[1] <= fim[0] || fim[1] != 6) mal++;   /* o parabólico anda linear */
+          if(fim[2] <= fim[1]) mal++;                  /* o hiperbólico ESCAPA mais */
+        }
+
+        /* (3) A ORDEM DO ELÍPTICO É O RESSOADOR RE-ENTRANTE: quantas voltas até
+         *     a órbita fechar. O `thm:leidisc` diz {3,4,6}, e mede-se. */
+        { long ords[3], nk = 0;
+          for(long t = -1; t <= 1; t++){
+              long M[2][2] = {{0,-1},{1,0}}, P[2][2], k = 1;
+              M[0][1] = -1; M[1][1] = t;               /* companheira de (t, +1) */
+              P[0][0]=M[0][0]; P[0][1]=M[0][1]; P[1][0]=M[1][0]; P[1][1]=M[1][1];
+              while(k <= 12 && !(P[0][0]==1 && P[0][1]==0 && P[1][0]==0 && P[1][1]==1)){
+                  long Q[2][2];
+                  for(int i=0;i<2;i++) for(int j=0;j<2;j++)
+                      Q[i][j] = P[i][0]*M[0][j] + P[i][1]*M[1][j];
+                  P[0][0]=Q[0][0];P[0][1]=Q[0][1];P[1][0]=Q[1][0];P[1][1]=Q[1][1];
+                  k++;
+              }
+              printf("      CRISTALINO(%2ld) Δ=%3ld → M^%ld = I : ordem %ld\n",
+                     t, t*t-4, k, k);
+              if(nk < 3) ords[nk++] = k;
+          }
+          { int fora = 0;
+            for(int i = 0; i < 3; i++)
+                if(ords[i] != 3 && ords[i] != 4 && ords[i] != 6) fora++;
+            printf("      → as ordens caem todas em {3,4,6}: %s\n", fora ? "NÃO" : "sim");
+            if(fora) mal++;
+            /* e são DISTINTAS: se fossem todas iguais, «caem em {3,4,6}» seria fraco */
+            if(ords[0] == ords[1] && ords[1] == ords[2]) mal++; }
+        }
+
+        /* ── O CONTROLO: a lei do (1) SABE falhar ────────────────────────────
+         * Se em vez de C = −1 se tomar C = +1, tem de aparecer elíptico — senão
+         * «nenhum impróprio elíptico» não se distinguiria de «nenhum elíptico». */
+        { long achou = 0;
+          for(long B = -6; B <= 6; B++) if(B*B - 4*(+1) < 0) achou++;
+          printf("      CONTROLO — com C=+1 há elípticos? %ld  ← a lei é sobre a"
+                 " ORIENTAÇÃO, não sobre o regime não existir\n", achou);
+          if(achou == 0) mal++; }
+
+        ok("A ÓPTICA DA CAIXA TEM DUAS COORDENADAS, E UMA PROÍBE METADE DA OUTRA. Uma matriz"
+           " 2×2 sobre (posição, ângulo) é a matriz de um sistema óptico, e |det| = 1 é a"
+           " conservação — o sistema não perde nem ganha. A caixa 𝒫 = {(B,C) : C unidade} É"
+           " o conjunto dos sistemas sem perda, e as suas coordenadas leem-se: C = det dá a"
+           " ORIENTAÇÃO (+1 próprio, −1 IMPRÓPRIO, que reflecte) e sgn Δ dá o REGIME (roda,"
+           " cisalha, expande). E o Δ não é um análogo do critério de estabilidade: É ele —"
+           " com det=+1 a órbita é limitada exactamente quando |tr| < 2, isto é tr²−4det < 0."
+           " DAÍ SAI UMA LEI: C = −1 força Δ = B² + 4 > 0, pelo que o impróprio nunca roda nem"
+           " cisalha: ele ocupa UMA das três combinações e o próprio ocupa as três, o que dá"
+           " QUATRO das seis. O número é ASSERIDO e não afirmado — eu tinha escrito «três»"
+           " no veredicto sem o contar, e o bloco passava porque nenhuma asserção o olhava."
+           " Varrido em 601 valores de B sem um contra-exemplo,"
+           " varrido em 601 valores de B sem um contra-exemplo. O que cada regime faz a um"
+           " raio está medido na órbita de (1,0): o elíptico fica em 1, o parabólico anda"
+           " 1·2·3·4·5·6 (linear) e o hiperbólico 1·1·2·3·5·8 — FIBONACCI, que é o ouro. E a"
+           " ordem do elíptico é o ressoador re-entrante: as três dão 3, 4 e 6, que é"
+           " exactamente o {3,4,6} do thm:leidisc, e são DISTINTAS entre si. O controlo"
+           " mostra que com C=+1 há elípticos: a lei é sobre a ORIENTAÇÃO e não sobre o"
+           " regime não existir.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

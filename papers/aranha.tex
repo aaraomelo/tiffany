@@ -2650,6 +2650,68 @@ procurada. Com ela, a mesma descida devolve $1{+}1\sigma,\,2,\,3{-}1\sigma$
 (normas $1,4,5$) e $0{+}1\omega,\,3,\,1{+}3\omega$ (normas $1,9,10$) --- e o
 bloco exige que a norma \emph{não} coincida com o valor, senão não haveria
 escolha a nomear.}
+\subsection*{A óptica da caixa: o que cada espelho faz a um raio}
+
+\noindent Chamou-se \emph{espelho} a um elemento da caixa, e o nome não é
+decorativo. Uma matriz $2\times2$ que age sobre o par (posição, ângulo) é a
+matriz de um sistema óptico, e $\lvert\det\rvert=1$ é a \textbf{conservação}: o
+sistema não perde nem ganha. \emph{A caixa
+$\mathcal{P}=\{(B,C):C\in A^{\times}\}$ é, portanto, o conjunto dos sistemas sem
+perda}, e não por analogia --- é a mesma condição escrita duas vezes.
+
+\medskip\noindent\textbf{E ela tem duas coordenadas, que se leem.}
+\[
+\begin{array}{lll}
+C=\det & \text{a \textbf{orientação}} & +1\ \text{próprio};\ -1\ \text{\textbf{impróprio}, reflete}\\[2pt]
+\operatorname{sgn}\Delta & \text{o \textbf{regime}} & <0\ \text{roda};\ =0\ \text{cisalha};\ >0\ \text{expande}
+\end{array}
+\]
+E o $\Delta$ do Teor.~\ref{thm:leidisc} não é um análogo do critério de
+estabilidade de um ressoador: \textbf{é} ele. Com $\det=+1$ a órbita é limitada
+exactamente quando $\lvert\operatorname{tr}\rvert<2$, isto é
+$\operatorname{tr}^{2}-4\det<0$, isto é $\Delta<0$. As três classes são os três
+regimes: \emph{estável}, \emph{marginal}, \emph{instável}.
+
+\begin{corolario}[o impróprio é sempre instável]\label{cor:optica}
+Se $C=-1$ então $\Delta=B^{2}+4\ge4>0$, qualquer que seja $B$. Logo um espelho
+que \emph{reflete} é \textbf{sempre} hiperbólico: nunca roda nem cisalha. Das seis
+combinações de (orientação, regime) existem \textbf{quatro} --- o impróprio ocupa
+uma das três, e o próprio ocupa as três.
+\end{corolario}
+
+\noindent A prova é a conta, e o conteúdo é a leitura: \emph{a inversão de
+orientação e o confinamento excluem-se}. É a mesma frase que a
+§\ref{sec:dualidades} separou --- o que roda e o que não roda --- vista agora
+como impossibilidade, e não como classificação.
+
+\medskip\noindent\textbf{E o que cada regime faz a um raio distingue-se sem
+ambiguidade.} Seguindo a órbita de $(1,0)$ sob a companheira, a norma do vector
+cresce de três maneiras: \emph{fica} no elíptico, \emph{linearmente} no
+parabólico, \emph{geometricamente} no hiperbólico --- e no hiperbólico os números
+são os de Fibonacci, que é o ouro a aparecer onde a expansão é.
+
+\medskip\noindent\textbf{No interior e na fronteira.} Dentro de uma classe de
+$\Delta$ igual, o Teor.~\ref{thm:pandora}(2) emite a mudança de gerador: é o
+\emph{mesmo} sistema visto noutro referencial, e o $\Delta$ --- o invariante ---
+não muda. Entre $\Delta$ diferentes não há travessia, e a recusa da
+cláusula~(3) diz o que isso é opticamente: \emph{não são o mesmo aparelho}. Já na
+\textbf{borda} do Cor.~\ref{cor:borda} os eixos próprios estão no próprio anel
+--- $\nu$ tem $\lambda=\pm1$ ---, e fora dela vivem na extensão: real quadrática
+se $\Delta>0$, \emph{complexa conjugada} se $\Delta<0$. É por isso que a classe
+$\Delta<0$ se chama elíptica, e não é coincidência de nomenclatura: os eixos são
+os mesmos das cónicas.
+
+\medido{\code{tests/pgwire.c} \S W219, contra \code{sql\_corpo\_cifra}. Varridos
+$B\in[-300,300]$ nos dois tipos: dos impróprios, \textbf{zero} são elípticos,
+\textbf{zero} são parabólicos e os $601$ restantes hiperbólicos; dos próprios
+existem as três classes. Das seis combinações existem \textbf{quatro}, e o número
+é asserido --- escrevê-lo sem o contar foi o que quase deixou passar um «três». A órbita de $(1,0)$ dá $1,1,1,1,1,1$ no
+elíptico, $1,2,3,4,5,6$ no parabólico e $1,1,2,3,5,8$ no hiperbólico. E as ordens
+do elíptico saem $3$, $4$ e $6$ --- o $\{3,4,6\}$ do Teor.~\ref{thm:leidisc} ---,
+e são distintas entre si, o que impede a asserção de passar por acaso. O controlo
+mostra que com $C=+1$ há elípticos: a lei é sobre a \emph{orientação}, e não
+sobre o regime não existir.}
+
 \medskip\noindent\textbf{E é daqui que vem o nome.} Abrir a caixa é misturar os
 espelhos: comparar através de dois com $\Delta$ diferente devolve sempre
 \emph{algum} número, e esse número não é sobre objeto nenhum. O que sai da caixa
