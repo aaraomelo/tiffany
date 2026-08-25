@@ -1595,47 +1595,68 @@ Na face onde $\partial$ é o inverso, a dobra que troca os extremos é
 --- de facto $\partial^{\times}a=b$ e $\partial^{\times}b=a$, e o invariante é
 $ab$. O seu único ponto fixo positivo é
 \[
-g_{\ast}=\sqrt{ab},
-\]
+g\ \text{ com }\ g\,g=ab,\]
 a \textbf{média geométrica}. É a mesma frase do Teor.~\ref{fis:thm:duas}(2) lida
 na face que o Teor.~\ref{fis:thm:duas}(4) obriga a existir: \emph{cada face tem
 uma dobra, e cada dobra tem um meio}.
 
-\medskip\noindent\textbf{A estrela não é decoração.} $g_{\ast}$ é o ponto fixo
-\emph{exato}, e ele em geral não é da grade; o que o processo usa é o seu piso
-$g$, definido a seguir. \emph{Os dois têm de andar com nomes diferentes}, porque
-as identidades exatas valem para $g_{\ast}$ e o algoritmo corre com $g$.
+\medskip\noindent\textbf{E o meio da face multiplicativa diz-se pela sua
+equação, não pelo seu valor.} $g$ é o que cumpre
+\[
+\boxed{\;g\,g=ab\;}
+\]
+--- uma \emph{igualdade entre inteiros}, e é tudo o que dele se usa. Escrever
+$\sqrt{ab}$ é dar-lhe um nome; \emph{avaliá-lo seria sair do objeto}, e não é
+preciso: as identidades desta secção correm todas sobre $g\,g$ e nunca sobre $g$
+em dígitos.
 \end{lema}
 
 \begin{proof}
 $\partial^{\times}$ troca porque $ab/a=b$; é involutiva porque $ab/(ab/x)=x$; e
-$ab/x=x$ tem a única solução positiva $x=\sqrt{ab}$ --- e ela existe no degrau
-$X_4$ da §\ref{fis:escada}, e em geral \emph{não} nos anteriores: é este ponto
-fixo que obriga a subir de andar. \emph{E é por isso que o piso da
-Def.~\ref{fis:def:piso} faz falta}: sem ele o processo sai do objeto que o
-constrói. Isto vale sempre que a raizse inverta --- a mesma condição que o $2$ era na face aditiva.
+$ab/x=x$ é $x\,x=ab$, que é a equação do enunciado. \emph{Se ela tem solução no
+objeto, a face tem meio; se não tem, a face não tem meio} --- e as duas
+alternativas são a cláusula~(3) do Teor.~\ref{fis:thm:corte}, decididas por um
+produto. É a mesma economia do traço da família real: de $\sigma+\sigma'=m$ e
+$\sigma\sigma'=\pm1$ sai tudo, e $\sigma$ nunca é escrito.
 \end{proof}
 
-\medskip\noindent\textbf{A grade, e porque ela tem de se dizer antes.} O
+\medskip\noindent\textbf{A escada, e porque ela tem de se dizer antes.} O
 Teor.~\ref{fis:thm:duas}(6) já fixou o objeto onde tudo isto vive: ao fim de $n$
-dobras os pontos são os $k/2^{n}$, uma \textbf{grade} de grão $u=2^{-n}$. As duas
-dobras operam \emph{nela}: a aritmética cai-lhe dentro sozinha --- o meio de dois
-pontos da grade é um ponto da grade seguinte --- mas a geométrica \textbf{não},
-porque $g_{\ast}=\sqrt{ab}$ não é diádico.
-
-\begin{definicao}[o piso, e o resíduo que ele deixa]\label{fis:def:piso}
-$g$ é o \emph{maior elemento da grade cujo quadrado não passa} $ab$ --- o
-\textbf{piso} de $g_{\ast}$ --- e é isso que faz o processo permanecer no objeto
-que o constrói. Por construção
+dobras os pontos são os $k/2^{n}$, uma \textbf{escada} cujo degrau se parte a cada
+dobra. As duas faces operam nela de maneiras \emph{diferentes}, e é essa diferença
+que faz o processo: a aritmética \textbf{desce um degrau} --- o meio de dois
+pontos de um nível é um ponto do nível seguinte, exactamente, sem sobra --- e a
+multiplicativa \textbf{ou encontra o seu meio no objeto, ou não encontra}, conforme
+$ab$ seja ou não um quadrado. \emph{Uma face refina; a outra decide.}
+\begin{definicao}[o que o par carrega, e a raiz nunca é avaliada]\label{fis:def:piso}
+O processo \textbf{não arredonda coisa nenhuma}, e convém dizê-lo antes de
+qualquer conta. O que ele carrega é o \textbf{par}, e do par só se usam dois
+inteiros:
 \[
-\boxed{\;g\;\le\;g_{\ast}\;<\;g+u,\qquad\text{isto é}\qquad
-0\;\le\;\underbrace{g_{\ast}-g}_{\text{o resíduo de grade}}\;<\;u\;}
+\boxed{\;a+b \;=\; 2m \qquad\text{e}\qquad a\,b \;=\; g^{2}\;}
 \]
-e daí $g^{2}\le ab$, com igualdade \textbf{exatamente} quando $g_{\ast}$ já
-pertence à grade. Só com isto dito é que a largura $m-g$ é um \textbf{número
-inteiro de grãos}, e é literalmente esse inteiro que vai decrescer.
+--- a \textbf{soma} e o \textbf{produto}. A face aditiva é \emph{exacta}: $2m=a+b$
+é uma igualdade, e pelo Teor.~\ref{fis:thm:duas}(6) o meio de dois pontos de um
+nível é um ponto do nível seguinte --- a dobra \textbf{desce um degrau da escada},
+não aproxima nada. A face multiplicativa é a que pede um objeto novo, e o que dela
+se usa é $g^{2}=ab$, uma igualdade entre inteiros. \emph{A raiz cancela-se contra
+si própria em vez de ser avaliada}, exactamente como no traço da família real: de
+$\sigma+\sigma'=m$ e $\sigma\sigma'=\pm1$ tira-se tudo, e $\sigma$ nunca é escrito
+em dígitos.
 \end{definicao}
 
+\medskip\noindent\textbf{E a volta é a palavra corrida ao contrário.} Bater as
+duas faces produz uma \textbf{sequência de passos}, e essa sequência é uma
+\emph{palavra} $\prod A_{a_i}$ na mesma máquina do Teor.~\ref{fis:thm:fecho}. A
+volta não precisa de cópia guardada nem de resíduo estimado:
+\[
+\boxed{\;\abs{\det \textstyle\prod A_{a_i}}=1 \;\Longrightarrow\;
+\text{decifrar é correr a palavra ao contrário, e é \textbf{exacto}}\;}
+\]
+--- é a mesma marca de não-perda que o Cor.~\ref{fis:cor:serie} lê na
+composição, e a mesma que o Teor.~\ref{fis:thm:levant} lê no levantamento.
+\emph{Não há informação a perder-se num arredondamento porque não há
+arredondamento.}
 \medskip\noindent\emph{E é aqui que as duas escalas se separam, e convém que se
 vejam:} a face geométrica dá a \textbf{contração}, e a grade dá o
 \textbf{quantum}. Nenhuma das duas sozinha termina o processo --- juntas,
@@ -1643,26 +1664,25 @@ terminam.
 
 \begin{corolario}[a desigualdade das médias é a conservação da norma]\label{fis:cor:medias}
 Escrevendo $a=m+\delta$ e $b=m-\delta$, o Teor.~\ref{fis:thm:BI} dá
-$ab=m^{2}-\delta^{2}$. Logo, no ponto fixo \emph{exato},
+$ab=m^{2}-\delta^{2}$. Logo
 \[
-g_{\ast}^{2}=m^{2}-\delta^{2}\;\le\;m^{2},\qquad\text{isto é}\qquad
-g_{\ast}\le m,
+\boxed{\;g\,g\;=\;m^{2}-\delta^{2}\;\le\;m^{2},\qquad\text{isto é}\qquad
+g\le m\;}
 \]
-com igualdade \emph{exatamente} quando $\delta=0$; e como o piso não sobe,
-\[
-g\;\le\;g_{\ast}\;\le\;m .
-\]
-Não é uma desigualdade nova --- é a norma conservada, lida como comparação.
+com igualdade \textbf{exactamente} quando $\delta=0$. Não é uma desigualdade nova
+--- é a norma conservada, lida como comparação --- e \emph{lê-se inteiramente em
+produtos}.
 \end{corolario}
 
 \begin{proof}
-$g_{\ast}^{2}=ab$ é o Lema~\ref{fis:lem:geo}, e $ab=m^{2}-\delta^{2}$ é o
-Teor.~\ref{fis:thm:BI}; logo $g_{\ast}^{2}=m^{2}-\delta^{2}\le m^{2}$, porque
-$\delta^{2}\ge0$, com igualdade se e só se $\delta=0$. Como $g_{\ast}$ e $m$ são
-positivos, a raiz preserva a ordem e $g_{\ast}\le m$. E $g\le g_{\ast}$ é a
-Def.~\ref{fis:def:piso}: o piso nunca excede o que arredonda.
+$g\,g=ab$ é o Lema~\ref{fis:lem:geo} e $ab=m^{2}-\delta^{2}$ é o
+Teor.~\ref{fis:thm:BI}; logo $g\,g\le m^{2}$, porque $\delta^{2}\ge0$, com
+igualdade se e só se $\delta=0$. E daí $g\le m$ sem avaliar coisa nenhuma: se
+fosse $g>m$, com ambos não-negativos, viria $g\,g>m^{2}$, contra o que acabou de
+se provar. \emph{Comparam-se os quadrados, e não as raízes} --- que é a mesma
+economia do §\ref{fis:mapa}, onde a órbita se decide por igualdade de vectores e
+nunca por módulo avaliado.
 \end{proof}
-
 \section{As duas faces acabam numa igualdade: o corte}\label{fis:corte}
 
 \begin{teorema}[o corte]\label{fis:thm:corte}
@@ -1671,147 +1691,130 @@ meios:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{encaixa}: $g\le g'\le m'\le m$, pelo Cor.~\ref{fis:cor:medias}
 aplicado em cada passo --- os intervalos $[g_{n},m_{n}]$ são encaixantes;
-\item[(2)] \textbf{colapsa}, e em duas escalas. No ponto fixo \emph{exato} a
-identidade é limpa,
+\item[(2)] \textbf{colapsa}, e a identidade é limpa porque não há resíduo a
+juntar-lhe:
 \[
-m-g_{\ast}=\frac{\delta^{2}}{m+g_{\ast}},
-\qquad\text{donde}\qquad
-\delta'_{\ast}\le\frac{\delta^{2}}{2m}\le\frac{\delta}{2};
+\boxed{\;(m-g)(m+g)=m^{2}-g^{2}=\delta^{2}\;}
 \]
-e o que o processo mede é o piso, que acrescenta o resíduo da
-Def.~\ref{fis:def:piso}:
-\[
-\boxed{\;m-g=\frac{\delta^{2}}{m+g_{\ast}}+\varepsilon,
-\qquad 0\le\varepsilon<u\;}
-\]
---- \emph{a geometria dá a contração quadrática; a grade dá o quantum $u$};
-\item[(3)] \textbf{acaba}: sendo o objeto \emph{finito} --- a régua tem grão ---
-a largura não se aproxima de zero, \textbf{chega} ao fundo. Ao fim de um número
-\emph{contado} $N$ de batidas o encaixe pára, e pára de uma de duas maneiras:
+--- uma igualdade entre \emph{inteiros}, que é o Teor.~\ref{fis:thm:BI} outra vez
+($ab=m^{2}-\delta^{2}$ com $g^{2}=ab$). Dela sai a contração sem se dividir por
+nada: $m-g$ é o que multiplicado por $m+g$ dá $\delta^{2}$, e como $m+g\ge m$, a
+largura seguinte não passa de $\delta^{2}/m$. \emph{A geometria dá a contração
+quadrática, e a conta que a exibe é um produto};\item[(3)] \textbf{fecha}, e fecha de uma de duas maneiras --- \emph{e qual delas
+decide-se por um teste inteiro, não por um limiar}. A pergunta é se o produto é um
+quadrado no objeto, isto é se existe $g$ com $g\,g=ab$:
 \[
 \begin{array}{ll}
-\textbf{I. o ponto é da grade} & g_{\ast}\in\Gamma:\ \text{o processo produz}\ \boxed{m_{N}=g_{N}}\ \text{e o intervalo é um \textbf{ponto};}\\[3pt]
-\textbf{II. o ponto não é da grade} & g_{\ast}\notin\Gamma:\ \text{o processo termina no intervalo mínimo } [g_N,\,g_N+u],\\
-& \text{e o que sobra é exatamente um \emph{resíduo de grade}.}
+\textbf{I. } ab \text{ é quadrado} & \text{o ponto fixo \textbf{existe}: o processo produz } \boxed{m_{N}=g_{N}} \text{ e a cifra \textbf{PARA};}\\[3pt]
+\textbf{II. } ab \text{ não é quadrado} & \text{não há ponto fixo, e o que fecha é o \textbf{período}:}\\
+& \text{o par de estado repete-se, e a cifra é \textbf{periódica}.}
 \end{array}
 \]
-\emph{Nos dois casos a conta termina}; o que muda é se ela \textbf{produz} o
-ponto ou o \textbf{cerca} (§\ref{fis:rastro});
-\item[(4)] \textbf{um habitante, e somente um --- a menos do grão}: o que está em
-todos os intervalos está no último, porque eles encaixam; e se $x$ e $y$ estão em
-todos, então $\abs{x-y}\le m_{n}-g_{n}$ para todo $n$. No caso~I isso dá
-$\abs{x-y}\le m_N-g_N=0$ e o habitante é \textbf{único}; no caso~II dá
-$\abs{x-y}<u$, e a unicidade é \emph{à resolução da régua} --- que é tudo o que
-uma régua de grão $u$ pode afirmar;
-\item[(5)] \textbf{e o ponto fixo comum é exacto só onde $\delta=0$.} Os pontos
-fixos \emph{exactos} das duas faces são $m_{\ast}=\tfrac{a+b}{2}$ e
-$g_{\ast}=\sqrt{ab}$, e coincidem \textbf{se e só se} $a=b$ --- que é $\delta=0$
-no Cor.~\ref{fis:cor:medias}. Na grade o processo acaba com $m_N=g_N$, e é isso
-que a régua consegue dizer; \emph{mas isso não obriga $a_N=b_N$}, e convém não
-colar as duas coisas: com $a=4$ e $b=5$ vem $m=\lfloor\tfrac92\rfloor=4$ e
-$g=\lfloor\sqrt{20}\rfloor=4$, e as pontas continuam distintas. \emph{A régua faz
-coincidir o que a grade não separa}, e o que fica dito do ponto é que ele está no
-grão: $g_N\le g_{\ast}<g_N+u$. \emph{O corte não é um ponto que se ache entre as
-classes --- é o ponto que as duas faces passam a partilhar, exactamente quando
-$\delta=0$ e à resolução da régua sempre.}\end{enumerate}
+\emph{Nos dois casos alguma coisa fecha}, e nos dois a decisão é uma igualdade
+entre inteiros --- $g\,g=ab$ no primeiro, a repetição do par de estado no
+segundo. \emph{Não se avalia raiz, não se compara com um limiar, e não se
+arredonda}: é a mesma dicotomia do Teor.~\ref{fis:thm:orbita}, onde a órbita ou
+volta ao princípio ou não volta, decidida por igualdade de vectores inteiros;
+\item[(4)] \textbf{e nos dois casos o que fica é uma palavra finita}. No caso~I o
+que está em todos os intervalos está no último, e $\abs{x-y}\le m_N-g_N=0$: o
+habitante é \textbf{único} e a palavra é a lista dos passos, que \emph{acabou}. No
+caso~II o par de estado repete-se, logo os passos repetem-se a partir daí, e o que
+o objeto guarda é \textbf{a parte antes do ciclo e o ciclo} --- uma palavra
+finita, e não um número truncado. \emph{Não é uma aproximação guardada com erro:
+é a órbita inteira, escrita de uma vez}, e é por isso que a volta é exacta;\item[(5)] \textbf{e no caso~I esse ponto é o ponto fixo comum às duas faces.}
+$\partial^{+}$ fixa $m$ e $\partial^{\times}$ fixa a média geométrica; os dois são
+\emph{diferentes} enquanto $a\neq b$, e coincidem exactamente onde o processo
+acaba. \emph{O corte não é um ponto que se ache entre as classes --- é o ponto
+fixo que as duas faces passam a partilhar.}\end{enumerate}
 Isto é um \textbf{corte}, e é \emph{produzido} em vez de postulado --- e
 produzido por uma conta que \emph{termina}, não por um limite:
 \[
-\boxed{\;\text{grade}\;\to\;\text{duas faces}\;\to\;\text{encaixe}\;\to\;
-\text{descida bem-fundada}\;\to\;\text{colapso}\;\to\;\text{paragem}\;}
+\boxed{\;\text{duas faces}\;\to\;\text{encaixe}\;\to\;\delta\ \text{halva}\;\to\;
+\text{paragem}\;}
 \]
-\emph{Não converge para o ponto: termina.} E as duas fontes da terminação são
-distintas e ambas necessárias:
+\emph{Não converge para o ponto: termina.} E a terminação não precisa de grão
+nenhum:
 \[
-\boxed{\;\text{contração geométrica}\;+\;\text{quantização da grade}
-\;\Longrightarrow\;\text{terminação discreta}\;}
+\boxed{\;\delta\ \text{é inteiro e halva}\;\Longrightarrow\;\text{chega a zero em
+passos contados}\;}
 \]
 \end{teorema}
 
 \begin{proof}
-(1) $g\le m$ é o Cor.~\ref{fis:cor:medias}; $m'\le m$ porque
-$m'=\tfrac{m+g}{2}$ com $g\le m$. E $g'\ge g$ mesmo com o piso: o ponto fixo
-exato do passo seguinte é $g'_{\ast}=\sqrt{mg}\ge\sqrt{g\cdot g}=g$, e como $g$
-\emph{já é da grade}, o piso de um valor $\ge g$ continua $\ge g$ --- o piso não
-desce abaixo de um ponto da grade que ele já ultrapassou. Daí
-$[g',m']\subseteq[g,m]$.
+\emph{Tudo o que segue corre sobre somas e produtos de inteiros. Nenhuma raiz é
+avaliada, e não há nada a arredondar.}
 
-(2) A identidade exata é sobre $g_{\ast}$, e sai da conservação da norma:
-\[
-m-g_{\ast}=\frac{m^{2}-g_{\ast}^{2}}{m+g_{\ast}}=\frac{\delta^{2}}{m+g_{\ast}} ,
-\]
-com $g_{\ast}\ge0$ a dar o majorante $\delta^{2}/(2m)$, e $\delta\le m$ a dar
-$\delta/2$. Para o piso, escreva-se $m-g=(m-g_{\ast})+(g_{\ast}-g)$: a primeira
-parcela é a identidade acima e a segunda é o resíduo da Def.~\ref{fis:def:piso},
-com $0\le g_{\ast}-g<u$. Donde a forma discreta do enunciado, com
-$\varepsilon=g_{\ast}-g$. \emph{A contração é da face; o $\varepsilon$ é da
-grade.}
+(1) $g\,g=ab=m^{2}-\delta^{2}\le m^{2}$ pelo Teor.~\ref{fis:thm:BI}, e como $g$ e
+$m$ são não-negativos, $g\le m$: se fosse $g>m$ viria $g\,g>m^{2}$. Do mesmo
+modo $2m'=m+g\le 2m$ dá $m'\le m$, e $g'g'=mg\ge g\,g$ dá $g'\ge g$. Daí
+$[g',m']\subseteq[g,m]$ --- \emph{e o encaixe provou-se com três produtos}.
 
-(3) A descida é \textbf{bem-fundada}, e prova-se sem olhar para a raiz: se $g<m$
-então $\tfrac{g+m}{2}<m$, e o maior ponto da grade abaixo de algo menor que $m$ é
-no máximo $m-u$; logo
+(2) $(m-g)(m+g)=m^{2}-g\,g=m^{2}-ab=\delta^{2}$, que é o
+Teor.~\ref{fis:thm:BI} lido ao contrário. \emph{É uma igualdade entre inteiros, e
+o enunciado é ela.}
+
+(3) \emph{E daqui sai a descida, sem grão e sem raiz.} O desvio seguinte é
+$2\delta'=m-g$, e por (2) vale $(m-g)(m+g)=\delta^{2}$. Ora $b\ge0$ dá
+$\delta\le m$, e $g\ge0$ dá $m+g\ge m\ge\delta$; logo
 \[
-g<m\;\Longrightarrow\;m'\le m-u .
+m-g=\frac{\delta^{2}}{m+g}\;\le\;\frac{\delta^{2}}{\delta}\;=\;\delta
+\qquad\Longrightarrow\qquad
+\boxed{\;\delta'\le\frac{\delta}{2}\;}
 \]
-A largura desce pela ponta \emph{de cima}, um grão por batida no pior caso, faça
-o piso da geométrica o que fizer. Sendo a largura um inteiro de grãos e
-não-negativa, uma sucessão estritamente decrescente dela \textbf{pára} --- não
-pode descer para sempre. \emph{Onde pára, a largura não pode ser maior que um
-grão}, e isso deixa as duas saídas do enunciado: se a largura chegou a $0$, é o
-caso~I e $m=g$; se ficou em $u$, é o caso~II, e o intervalo $[g,g+u]$ é o menor
-que a régua distingue. Note-se o que a finitude faz aqui: ela é a
-\emph{hipótese}, e não uma limitação --- é por o objeto ser finito que há
-\textbf{terminação} em vez de limite, e por a descida ser estrita numa ordem
-bem-fundada que isto é uma paragem e não uma convergência disfarçada.
+--- o desvio \textbf{halva}. Sendo $\delta$ um inteiro não-negativo, uma sucessão
+que halva chega a $\mathbf{0}$ ao fim de um número \emph{contado} de batidas, e aí
+$a=b$: é o caso~I, e o processo \textbf{produziu} o ponto. \emph{Não é
+convergência disfarçada}: é uma sucessão de inteiros que desce e não pode descer
+para sempre. O caso~II é o outro: nalgum passo $ab$ não é quadrado, a face
+multiplicativa não tem meio no objeto, e o que continua é o \textbf{par} --- soma
+e produto, dois inteiros --- cujo estado se repete, e a repetição é a paragem.
 
 (4) O último intervalo está contido em todos os anteriores por (1), logo o que
 está em todos está nele. No caso~I a largura do último é $0$ e quaisquer $x,y$
-comuns coincidem; no caso~II ela é $u$, e distam menos que um grão.
-\emph{Nenhum axioma de completude é invocado} --- o argumento é o do pombal com a
-folga já no fundo.
-
-(5) Os dois pontos fixos exactos são $\tfrac{a+b}{2}$ e $\sqrt{ab}$, e coincidem
-sse $(a+b)^{2}=4ab$, isto é sse $(a-b)^{2}=0$, isto é sse $a=b$. Aí, com $a=b=p$,
-vem $\partial^{+}p=p+p-p=p$ e $\partial^{\times}p=p^{2}/p=p$: o ponto é fixo pelas
-duas ao mesmo tempo e sem resíduo. \emph{Que a igualdade na grade não devolve a
-igualdade exacta} é a testemunha do enunciado, e é uma conta de dois piso; e
-$g_N\le g_{\ast}<g_N+u$ é a Def.~\ref{fis:def:piso} aplicada ao último par.\end{proof}
-
-\begin{lema}[a largura halva, e à face geométrica só se pede que não saia]\label{fis:lem:descida}
-Seja $w=m-g$ a largura em grãos e $(m',g')$ a batida seguinte, com $m'$ o piso de
-$\tfrac{m+g}{2}$ e $g'$ \emph{qualquer} elemento da grade com $g\le g'\le m'$.
-Então
+comuns coincidem. No caso~II o estado repete-se, e a repetição \emph{é} o que o
+objeto guarda: a parte antes do ciclo e o ciclo. \emph{Nenhum axioma de completude
+é invocado}, e nenhuma quantidade é truncada --- o que se guarda é a órbita, e ela
+é finita nos dois casos.
+(5) \emph{E prova-se sem raiz nenhuma, porque o meio é exacto.} A face aditiva
+não deixa resíduo: $2m=a+b$, uma igualdade entre elementos da escada. Suponha-se
+$m=g$. Por definição de $g$ vale $g^{2}\le ab$, e pelo Teor.~\ref{fis:thm:BI}
+vale $ab=m^{2}-\delta^{2}$; substituindo,
 \[
-\boxed{\;m'=m-\Bigl\lceil\frac{w}{2}\Bigr\rceil
-\qquad\text{e}\qquad
-w'\;\le\;\Bigl\lfloor\frac{w}{2}\Bigr\rfloor\;}
+m^{2}=g^{2}\;\le\;ab\;=\;m^{2}-\delta^{2}
+\qquad\Longrightarrow\qquad \delta^{2}\le0
+\qquad\Longrightarrow\qquad \delta=0 ,
 \]
-\emph{E nada disto olha para a raiz.} A única coisa pedida à face geométrica é
-que o seu valor \textbf{fique no intervalo} --- não o seu tamanho, não a sua
-identidade. \emph{A largura halva por causa da face aditiva; a geométrica só tem
-de não sair.}
+isto é $a=b$ --- e então $g^{2}=ab=m^{2}$ sem resíduo. Aí, com $a=b=p$, vem
+$\partial^{+}p=p+p-p=p$ e $\partial^{\times}p=p^{2}/p=p$: o ponto é fixo pelas
+duas ao mesmo tempo. \emph{Três desigualdades entre inteiros, e nenhuma raiz
+avaliada} --- que é como esta casa decide.\end{proof}
+
+\begin{lema}[o desvio halva, e à face multiplicativa só se pede a sua equação]\label{fis:lem:descida}
+Seja $\delta$ o desvio do par e $\delta'$ o da batida seguinte. Se $g$ cumpre
+$g\,g=ab$ e $b\ge0$, então
+\[
+\boxed{\;\delta'\;\le\;\frac{\delta}{2}\;}
+\]
+\emph{E nada disto olha para a raiz.} Da face multiplicativa só se usou a sua
+\textbf{equação}, $g\,g=ab$ --- não o valor de $g$, não o seu tamanho em dígitos.
+\emph{O desvio halva por causa da face aditiva; a multiplicativa só tem de
+cumprir a sua igualdade.}
 \end{lema}
 
 \begin{proof}
-Escreva-se $g=m-w$; então $\tfrac{m+g}{2}=m-\tfrac{w}{2}$, e o maior ponto da
-grade que não passa esse valor é $m-\lceil w/2\rceil$. Com $g'\ge g$,
-\[
-w'=m'-g'\;\le\;m-\Bigl\lceil\frac{w}{2}\Bigr\rceil-g
-\;=\;w-\Bigl\lceil\frac{w}{2}\Bigr\rceil\;=\;\Bigl\lfloor\frac{w}{2}\Bigr\rfloor .
-\]
-E para $w\ge1$ vem $\lceil w/2\rceil\ge1$, isto é $m'\le m-u$: a descida é
-estrita enquanto houver largura.
+$2\delta'=m-g$, e $(m-g)(m+g)=m^{2}-g\,g=m^{2}-ab=\delta^{2}$ pelo
+Teor.~\ref{fis:thm:BI}. De $b\ge0$ vem $\delta\le m$, e de $g\ge0$ vem
+$m+g\ge m\ge\delta$; logo $(m-g)\,\delta\le(m-g)(m+g)=\delta^{2}$, donde
+$m-g\le\delta$ quando $\delta>0$, isto é $\delta'\le\delta/2$. E se $\delta=0$ já
+não há o que descer. \emph{Três produtos, e nem um grão.}
 \end{proof}
-
 \begin{corolario}[a cota é logarítmica, e ainda não usa a raiz]\label{fis:cor:cota}
-Se a largura inicial tem $N$ grãos, o processo chega à largura zero ao fim de
+Se o desvio inicial vale $\delta_0$, o processo chega a $\delta=0$ ao fim de
 \[
-\boxed{\;\bigl\lceil\log_{2}N\bigr\rceil\ \text{batidas}\;}
+\boxed{\;\bigl\lceil\log_{2}\delta_0\bigr\rceil\ \text{batidas}\;}
 \]
---- e não $N$. A cota sai do Lema~\ref{fis:lem:descida} sozinho, e portanto vale
-para \emph{qualquer} segunda face que devolva um ponto do intervalo.
+--- e não $\delta_0$. A cota sai do Lema~\ref{fis:lem:descida} sozinho.
 \end{corolario}
-
 \begin{proof}
 Por indução, $w_n\le\lfloor N/2^{n}\rfloor$: o caso $n=0$ é a hipótese, e do
 Lema~\ref{fis:lem:descida} vem
@@ -1840,8 +1843,7 @@ dita um andar acima, e o nome clássico do processo é a média
 \textbf{aritmético-geométrica}.
 
 \medido{\code{tests/meio.c} §M8: $\partial^{\times}$ troca e fixa $\sqrt{ab}$;
-$g_{\ast}^{2}=ab=m^{2}-\delta^{2}\le m^{2}$ com igualdade só em $\delta=0$ e
-desigualdade \emph{estrita} fora dele ($\mathbf{1890}$ pares); encaixa e halva em
+$g\,g=ab=m^{2}-\delta^{2}\le m^{2}$ com igualdade só em $\delta=0$ edesigualdade \emph{estrita} fora dele ($\mathbf{1890}$ pares); encaixa e halva em
 todas as batidas; $\delta'\le\delta^{2}/(2m)$ na forma inteira ($\mathbf{975}$
 pares); e o processo \textbf{acaba} --- $m=g$ em $\mathbf{5}$ a $6$ batidas, com o
 valor a bater nos valores \emph{conhecidos} do processo, que são externos ao
@@ -1849,19 +1851,26 @@ ficheiro. A unicidade mede-se dos dois lados, porque um só não dizia nada: o
 último intervalo tem \emph{um} habitante e o penúltimo tinha mais. E a
 \textbf{boa fundação} varre-se: na grade $1..300$ inteira, $\mathbf{116\,241}$
 passos, exige-se em cada um que $m'<m$ --- a cláusula que garante a paragem e que
-não depende da raiz --- e com ela as duas que a sustentam (a geométrica nunca
+não depende da raiz --- e com ela as duas que a sustentam (a multiplicativa nunca
 desce, o encaixe nunca quebra). O CONTROLO diz porque a segunda face faz falta ---
-com uma só, a segunda batida não move. Tudo em inteiros, com a raiz por piso. O
-encaixotamento certificado está em \code{tests/agm.c} §A1--§A3, e a cota
+com uma só, a segunda batida não move. \emph{Tudo em inteiros, e a raiz nunca
+avaliada: o medidor compara $g\,g$ com $ab$, que é um produto, e a escala fixa que
+ele usa é da \textbf{representação} e não do teorema}. Oencaixotamento certificado está em \code{tests/agm.c} §A1--§A3, e a cota
 bem-fundada dá $10^{9}$ onde as duas faces fazem \textbf{cinco}.}
 
-\medskip\noindent\textbf{E prende-se uma face para obter a raiz.} Se em vez de
-mover as duas se \textbf{fixar o produto}, o par $(r,\,n/r)$ tem $g=\sqrt{n}$
-constante --- a face geométrica está presa --- e só a aritmética desce. O encontro
-$m=g$ do Teor.~\ref{fis:thm:corte} é então exactamente $\sqrt{n}$, e o processo é
-o \emph{mesmo}. \emph{Não é um algoritmo para a raiz: é este algoritmo com uma
-face imobilizada.}
-
+\medskip\noindent\textbf{E prende-se uma face para decidir o quadrado.} Se em vez
+de mover as duas se \textbf{fixar o produto}, o par $(r,\,n/r)$ tem invariante
+$n$ constante --- a face multiplicativa está presa --- e só a aditiva desce. O
+processo é o \emph{mesmo} do Teor.~\ref{fis:thm:corte}, e o seu desfecho é a
+cláusula~(3) lida com o produto fixo:
+\[
+\boxed{\;r\,r=n\ \text{para algum }r\ \Longleftrightarrow\ \text{o encontro
+\textbf{produz} o meio; caso contrário, o par \textbf{fecha em período}}\;}
+\]
+--- e a decisão é \emph{um produto comparado com $n$}, nunca um valor avaliado.
+\emph{Não é um algoritmo para a raiz: é este algoritmo com uma face imobilizada},
+e é por isso que ele responde a uma pergunta de \textbf{sim ou não} sobre
+inteiros em vez de devolver dígitos.
 \medido{\code{lib/cifra.h} \code{raizi}, medido em \code{tests/pgwire.c} §W217.
 Era um laço linear --- $\sqrt{n}$ voltas --- e passou a ser o par $(r,n/r)$. O
 gume é o próprio laço linear, que é um terceiro caminho: em $-50..120000$ os dois
@@ -2122,8 +2131,7 @@ divide em $a$ e $b$. Então
 \[
 \text{o \textbf{raio} é }m=\frac{a+b}{2},
 \qquad
-\text{a \textbf{altura} sobre }P\text{ é }h=\sqrt{ab}=g_{\ast},
-\]
+\text{a \textbf{altura} sobre }P\text{ é o }g\text{ com }g\,g=ab,\]
 e Pitágoras no raio dá $h^{2}+\delta^{2}=m^{2}$ --- que é o
 Teor.~\ref{fis:thm:BI} outra vez, $ab=m^{2}-\delta^{2}$, dito com uma figura em
 vez de com uma conta. A desigualdade $g\le m$ passa então a ler-se \emph{a altura
@@ -3633,8 +3641,7 @@ uma. \emph{E a borda é estreita}: as classes são três e a borda não é uma d
 é a AGM.} A §\ref{fis:corte} formaliza o par $(a,b)\mapsto(m,g)$, e diz o que ele
 custa: \emph{uma face endereça, duas produzem}. É literalmente a ponte que falta
 ao avaliador, e a borda lê-se nas suas coordenadas. Com $\delta=\tfrac{a-b}{2}$, a
-identidade $g_{\ast}^{2}=ab=m^{2}-\delta^{2}=(m+\delta)(m-\delta)$ \emph{é} a diferença
-de quadrados, e daí as duas bordas saem em forma fechada:
+identidade $g\,g=ab=m^{2}-\delta^{2}=(m+\delta)(m-\delta)$ \emph{é} a diferençade quadrados, e daí as duas bordas saem em forma fechada:
 \[
 \Delta=0:\ q=(2m)^{2}
 \qquad\qquad
@@ -4521,9 +4528,9 @@ justamente o que cada uma tem de próprio: o seu ponto fixo.
 \medskip\noindent\textbf{E os dois pontos fixos dizem coisas diferentes, ambas
 verdadeiras.} O da ocupação é $N=\tfrac32$, isto é $Q=\tfrac12$: \emph{nenhuma
 contagem o alcança}, e é por isso que não há estado de carga $\tfrac12$ --- é o
-\emph{meio} do Teor.~\ref{fis:thm:duas}(2) a cair fora da grade, exatamente como
-$g_{\ast}$ cai fora dela na Def.~\ref{fis:def:piso}. O da conjugação é $Q=0$, e
-esse \textbf{é} alcançado: é o estado neutro, o \emph{vácuo} do ideal --- o único
+\emph{meio} do Teor.~\ref{fis:thm:duas}(2) a cair fora do objeto, exactamente como
+a face multiplicativa fica sem meio quando $ab$ não é quadrado
+(Teor.~\ref{fis:thm:corte}(3)). O da conjugação é $Q=0$, eesse \textbf{é} alcançado: é o estado neutro, o \emph{vácuo} do ideal --- o único
 que é a sua própria antipartícula.
 \[
 \boxed{\;\text{o neutro não sobra da conta: é o \textbf{ponto fixo} da conjugação}\;}
@@ -4782,10 +4789,20 @@ mesmo --- não perde bit nenhum, e o seu piso é
 \]
 \item[(3)] em particular o piso é zero para tudo o que \textbf{tem volta}: as
 involuções, e também as invertíveis que \emph{não} são involuções --- que é o
-caso de todos os operadores desta construção.
+caso de todos os operadores desta construção;
+\item[(4)] \textbf{e o critério não é uma propriedade a inspeccionar --- é uma
+conta a fazer.} Uma operação tem volta \emph{se e só se} o resíduo da ida e volta
+é zero:
+\[
+\boxed{\;\text{resíduo }0\;\Longleftrightarrow\;\text{reverte}
+\;\Longleftrightarrow\;\text{piso zero}
+\qquad\qquad
+\text{resíduo}\neq0\;\Longleftrightarrow\;\text{dissipa}\;}
+\]
+e o resíduo \textbf{é} a medida do que se perdeu. \emph{Querer dissipação é só
+tirar a reversão.}
 \end{enumerate}
 \end{teorema}
-
 \begin{proof}
 (1) O custo conta-se em bits perdidos, e perder um bit é ter dois estados de
 entrada com a mesma saída --- é \emph{exactamente} $G>1$ na
@@ -4803,8 +4820,34 @@ $\oslash=\otimes$, e não é o único: o gato do Teor.~\ref{fis:thm:gato}(1) tem
 volta exacta e não é involução. \emph{A hipótese que trabalha é a injetividade; a
 involutividade é mais do que se precisa}, e pedi-la a mais deixava de fora
 precisamente os operadores que este documento constrói.
+
+(4) Se reverte, a composição ida-e-volta é a identidade e o resíduo é $0$ por
+definição. Se o resíduo é $0$ em \emph{todo} o domínio, a composição é a
+identidade, logo a primeira aplicação é injetiva e a cláusula~(2) dá piso zero. E
+a recíproca da dissipação é a mesma frase lida ao contrário: resíduo não nulo é
+um par de entradas com a mesma saída, isto é $G>1$, isto é a cláusula~(1).
+\emph{O resíduo não é um teste sobre a operação --- é a folga do
+Cor.~\ref{fis:cor:custofolga}, contada de outra maneira.}
 \end{proof}
 
+\medskip\noindent\textbf{E daí o que faz a volta existir: guardar o segundo
+lado.} Uma operação não reverte por ser «boa» --- reverte por se \emph{ter
+guardado} o que a dobra ia deitar fora. É exactamente o levantamento do
+Teor.~\ref{fis:thm:levant}: $\tilde\pi=(\pi,k)$ desfaz a dobra ao preço de
+\textbf{uma} coordenada, e essa coordenada é o piso pago \emph{em espaço} em vez
+de \emph{em calor}. \emph{Ordenar sem guardar o caminho dissipa; ordenar
+guardando-o não dissipa, e é a mesma ordenação} --- o que mudou foi ter-se ficado
+com o dual.
+\[
+\boxed{\;\text{o dual guardado é o piso não pago}\;}
+\]
+
+\medskip\noindent\textbf{E é a mesma volta da §\ref{fis:corte}.} Lá, bater as duas
+faces produz uma palavra cujo determinante tem módulo $1$, e por isso decifrar é
+correr a palavra ao contrário, \emph{exactamente} --- resíduo zero. Se aquele
+processo arredondasse alguma coisa, o resíduo deixaria de ser zero e o
+Teor.~\ref{fis:thm:landauer} obrigaria a pagar um piso por ele. \emph{As duas
+partes não se limitam a concordar: uma proíbe a outra de mentir.}
 \begin{corolario}[a conta da dissipação é a folga, e a folga já estava contada]\label{fis:cor:custofolga}
 Seja $\pi\colon I\to X$ uma realização \textbf{sobrejetiva} e $\kappa>0$ o custo
 mínimo de apagar um bit. O custo total de realizar $\pi$ é
@@ -4855,6 +4898,28 @@ nenhum bloco o apanhava. Corrigido para $64$ bits explícitos, dá
 $3{,}08\cdot10^{15}$ rJ/s. \emph{O tecto diz-se no tipo}, e um número publicado
 errado é pior do que um bloco vermelho.}
 
+\medido{\code{tests/reversao.c} --- $\mathbf{7}$ blocos, $\mathbf{0}$ falhas, e
+\emph{sem um único número esperado no ficheiro}. §V1: a estaca, ida e volta em
+$1025$ pontos por $41$ centros --- resíduo $\mathbf{0}$, e o zero valida os
+\emph{dois} lados de uma vez, porque a involução toca os dois. §V3: a cifra,
+codificada e descodificada sobre o alfabeto inteiro, $65\,536$ pares --- resíduo
+$\mathbf{0}$; \emph{a reversão não pergunta o valor, pergunta se volta}. §V4: a
+ordenação desfeita pelo caminho guardado, $512$ elementos --- resíduo
+$\mathbf{0}$. §V5, que é o par obrigatório: a \textbf{mesma} ordenação
+\emph{sem} guardar o caminho dá resíduo $\mathbf{170\,366}$, e a estaca com um
+passo só dá $\mathbf{525\,312}$ --- \emph{e isso não é defeito do medidor, é a
+medida do que se perdeu}. §V2 lê o período pelo resíduo sem o escrever: quatro
+passos dão $0$, dois passos dão $\mathbf{18\,376\,704}$. E §V6 é o controlo do
+paradigma: uma asserção que \emph{compara} contra um valor escrito à mão passa no
+objeto certo \textbf{e} no trocado, porque verifica a aritmética de quem a
+escreveu; a reversão separa-os, $0$ contra $\mathbf{14\,350}$.}
+
+\medskip\noindent\textbf{E é por isto que o piso se mede sem termómetro.} O
+Teor.~\ref{fis:thm:landauer}(4) não pede que se inspeccione a operação: pede que
+se corra a ida e a volta e se leia o resíduo. \emph{Zero reverte, e não há nada a
+comparar nem nada a apagar; diferente de zero dissipa, e o número é o que se
+perdeu.} Um piso termodinâmico deixa de ser uma grandeza física a estimar e passa
+a ser \textbf{um inteiro lido de uma conta que já se fez}.
 \section{A entropia dual, e a segunda lei lida como ela é}\label{fis:entropiadual}
 
 \noindent A entropia de um horizonte é a sua \textbf{área}. E no universo dual o
@@ -4891,7 +4956,8 @@ estrutural: \emph{o par conserva, e nenhum dos lados conserva sozinho}.
 
 \begin{corolario}[a segunda lei vale de um lado]\label{fis:cor:segundalei}
 \emph{Com $d>1$}, sem o que as duas entropias são constantes e nada se move:
-a entropia do lado negro cresce em todos os passos; a do branco decresce emtodos; e a \textbf{soma não se move em nenhum}. Logo
+a entropia do lado negro cresce em todos os passos; a do branco decresce em
+todos; e a \textbf{soma não se move em nenhum}. Logo
 \[
 \boxed{\;\text{«a entropia cresce» é verdade, e é lei de \textbf{metade} do par}\;}
 \]
@@ -4899,6 +4965,24 @@ e a seta do tempo não é propriedade do tempo: \emph{é uma polaridade lida sem
 outra}.
 \end{corolario}
 
+\medskip\noindent\textbf{E convém dizer com precisão o que isto afirma, porque é
+menos do que parece e é certo.} Não se afirma que um processo qualquer se desfaz,
+nem que o que aconteceu se desfaz. Afirma-se o que a soma diz: \emph{o par não se
+move}. O que a §\ref{fis:landauer} chama dissipação é o resíduo de uma ida e
+volta, e o resíduo mede o que saiu da \textbf{contabilidade} --- não o que saiu do
+objeto. O §V4 e o §V5 do medidor da reversão são a \emph{mesma} ordenação, sobre
+os \emph{mesmos} elementos: com o caminho guardado o resíduo é $\mathbf{0}$, sem
+ele é $\mathbf{170\,366}$. \emph{Nada se passou com os elementos entre um caso e
+o outro} --- o que mudou foi ter-se ficado, ou não, com o segundo lado.
+\[
+\boxed{\;\text{a folga é do \textbf{registo}, e o registo não é o universo}\;}
+\]
+E é isto, e não outra coisa, que fecha a Termodinâmica com a Cosmologia: lá o par
+$w$ e $I_2w$ tem produto constante e logaritmos a somar zero
+(Cor.~\ref{fis:cor:ponte}), e uma coordenada dilui \emph{porque} a outra
+concentra. \emph{A conservação é a afirmação; a seta é a leitura de uma
+coordenada só.} Quem lê metade vê crescer, e tem razão no que vê; a soma, essa,
+está parada --- que é o Lema~\ref{fis:lem:conserva} outra vez, dito em calor.
 \begin{proof}
 $r\mapsto r^{\,d-1}$ é crescente e $r\mapsto r^{-(d-1)}$ é decrescente em $r>0$,
 para $d>1$. E a soma dos logaritmos é identicamente nula pelo
@@ -4956,18 +5040,87 @@ seguinte, cada um com a sua prova e o seu controlo. O que a tabela mostra é que
 as duas colunas têm a \textbf{mesma forma} --- um invariante multiplicativo que
 se lê como soma nula, com o ponto fixo na borda.
 
-\medskip\noindent\emph{Que sejam a mesma lei, e não duas com a mesma forma, é o
-que falta.} E o teste que o diria é o mesmo que fechou a §\ref{fis:carnot} como
-negativa: \textbf{exibir} a construção onde uma se torna a outra --- não uma
-bijeção que as ligue, porque uma bijeção há sempre.
+\begin{lema}[a dobra multiplicativa, transportada]\label{fis:lem:dobramult}
+Seja $\partial^{\times}$ a dobra da face multiplicativa (Lema~\ref{fis:lem:geo})
+com o invariante normalizado à unidade, isto é $\partial^{\times}r=1/r$, e seja
+$\Phi$ qualquer aplicação \textbf{multiplicativa}, $\Phi(rs)=\Phi(r)\Phi(s)$.
+Então, para todo $r$,
 \[
-\boxed{\;\text{a mesma forma não é a mesma lei --- e a diferença mede-se
-exibindo, não emparelhando}\;}
+\boxed{\;\Phi(r)\cdot\Phi(\partial^{\times}r)=1
+\qquad\text{e}\qquad
+\log\Phi(r)+\log\Phi(\partial^{\times}r)=0\;}
 \]
+e, sendo $\Phi$ injetiva, $\Phi(r)=\Phi(\partial^{\times}r)$ \textbf{exactamente}
+em $r=1$.
+\end{lema}
 
-\colunas{Teor.~\ref{fis:thm:carnot},~\ref{fis:thm:landauer},~\ref{fis:thm:entropiadual}; Cor.~\ref{fis:cor:irrever},~\ref{fis:cor:carnothom},~\ref{fis:cor:custofolga},~\ref{fis:cor:segundalei}}        {o $\oint$ fechado; o piso zero do involutivo; o par que fecha na unidade}
-        {\code{tests/carnot.c}; \code{tests/dissipa.c}; \code{tests/entropia\_dual.c}}
+\begin{proof}
+De $\Phi(1)=\Phi(1\cdot1)=\Phi(1)^{2}$ vem $\Phi(1)=1$; e
+$\Phi(r)\Phi(1/r)=\Phi(r\cdot 1/r)=\Phi(1)=1$, que é a primeira igualdade. A
+segunda é o logaritmo dela, que leva produto em soma. Para o ponto fixo:
+$\Phi(r)=\Phi(1/r)$ com o produto a valer $1$ dá $\Phi(r)^{2}=1$, logo
+$\Phi(r)=1=\Phi(1)$ nos positivos, e a injetividade fecha em $r=1$. \emph{Em
+nenhum passo se usou a forma de $\Phi$}: o que fecha o par é a segunda equação da
+Def.~\ref{fis:def:op}, $\partial x\cdot x=1$, e $\Phi$ apenas a transporta.
+\end{proof}
 
+\begin{corolario}[a ponte, exibida: a entropia dual é a diluição, com outro $\Phi$]\label{fis:cor:ponte}
+Seja $w^{\dagger}=I_2w$ a imagem de $w$ pela involução do \emph{sentido do grau}
+(Def.~\ref{fis:def:duas-inv}), que no valor é a reflexão em torno de $-1$, isto é
+$w^{\dagger}=-2-w$; e seja $r_w(a)=C\,a^{-3(1+w)}$ a densidade do
+Teor.~\ref{fis:thm:diluicao}. Então, para \textbf{toda} a escala $a$,
+\[
+\boxed{\;r_w(a)\cdot r_{w^{\dagger}}(a)=C^{2}
+\qquad\text{e}\qquad
+\log r_w(a)+\log r_{w^{\dagger}}(a)=2\log C\;}
+\]
+e em por-unidade ($C=1$) estas são, \emph{palavra por palavra}, as duas
+igualdades do Teor.~\ref{fis:thm:entropiadual}, com a escala no lugar do raio e o
+expoente de diluição $3(1+w)$ no lugar da codimensão. Além disso:
+\begin{enumerate}\itemsep3pt
+\item[(1)] o par degenera num só estado \textbf{exactamente} em $w=-1$ --- o
+\textbf{vácuo} ---, que é o ponto fixo de $I_2$ e é o único conteúdo cuja
+densidade não se move com a escala;
+\item[(2)] fora dele a lei vale de \textbf{um lado}: $r_w$ decresce e
+$r_{w^{\dagger}}$ cresce sempre que $w>-1$, e a soma dos logaritmos não se move em
+passo nenhum --- que é o Cor.~\ref{fis:cor:segundalei} sem uma palavra mudada.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+Com $w=-1+f$ e $f$ ímpar, $I_2w=-1+f(-m)=-1-f=-2-w$: é a reflexão em torno de
+$-1$. Os expoentes de diluição são $3(1+w)$ e $3\bigl(1+(-2-w)\bigr)=-3(1+w)$,
+que \textbf{somam zero}; logo
+$r_w(a)\,r_{w^{\dagger}}(a)=C^{2}a^{-3(1+w)}a^{+3(1+w)}=C^{2}$, e o logaritmo dá
+a segunda igualdade. \emph{Que isto é o Teor.~\ref{fis:thm:entropiadual} não se
+verifica por emparelhamento}: as duas afirmações são a \emph{mesma} instância do
+Lema~\ref{fis:lem:dobramult}, uma com $\Phi(r)=r^{\,d-1}$ e a outra com
+$\Phi(a)=a^{-3(1+w)}$, e o que as fecha é, nas duas, o invariante da face
+multiplicativa ser a unidade. (1) $w=-2-w$ dá $w=-1$, e é único; aí o expoente
+$3(1+w)$ anula-se, isto é $r_{-1}(a)=C$ para toda a escala, e nenhum outro $w$ o
+faz porque $3(1+w)=0$ tem uma raiz só. (2) $w>-1$ dá $3(1+w)>0$, logo
+$a\mapsto a^{-3(1+w)}$ decresce e $a\mapsto a^{+3(1+w)}$ cresce; a soma dos
+logaritmos é constante pela igualdade acima.
+\end{proof}
+
+\medskip\noindent\textbf{E o que ficou provado é mais do que a mesma forma.} A
+tabela acima punha duas colunas lado a lado; elas deixam de estar apenas ao lado
+uma da outra no ponto onde a identificação era \emph{exibível}: o invariante
+multiplicativo é \textbf{um só}, e as duas colunas são-no com $\Phi$ diferente.
+Não há bijeção escolhida --- há uma construção instanciada duas vezes, que é
+exactamente o que a §\ref{fis:carnot} exigiu e a razão de lá ter fechado
+negativa. \emph{O que continua em aberto é outra coisa, e mais estreita}:
+identificar a codimensão com o expoente $3(1+w)$ pede exibir o horizonte cuja área
+dilui como o conteúdo, e isso não está feito.
+\[
+\boxed{\;\text{a ponte que se exibe é a do \textbf{invariante};
+a que falta é a da \textbf{dimensão}}\;}
+\]
+\emph{E $w^{\dagger}$ não tem de estar entre os três conteúdos do
+Teor.~\ref{fis:thm:conteudos}} --- para $w=0$ dá $-2$ --- o que não é defeito: a
+órbita do Teor.~\ref{fis:thm:bidual} já sai da lista dos três.
+\colunas{Teor.~\ref{fis:thm:carnot},~\ref{fis:thm:landauer},~\ref{fis:thm:entropiadual}; Lema~\ref{fis:lem:dobramult}; Cor.~\ref{fis:cor:irrever},~\ref{fis:cor:carnothom},~\ref{fis:cor:custofolga},~\ref{fis:cor:segundalei},~\ref{fis:cor:ponte}}        {o $\oint$ fechado; o piso zero de quem reverte; o par que fecha na unidade}
+        {\code{tests/carnot.c}; \code{tests/dissipa.c}; \code{tests/reversao.c}; \code{tests/entropia\_dual.c}}
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Cosmologia}
 % ═══════════════════════════════════════════════════════════════════════════
@@ -5884,8 +6037,7 @@ nome clássico em cada andar:
 face \textbf{aditiva} & face \textbf{multiplicativa} & onde \\
 \midrule
 $\partial x+x=0$: o oposto & $\partial x\cdot x=1$: o inverso & Teor.~\ref{fis:thm:duas}(4) \\
-meio $m=\frac{a+b}{2}$ & meio $g_{\ast}=\sqrt{ab}$ & Teor.~\ref{fis:thm:duas}(2), Lema~\ref{fis:lem:geo} \\
-o \textbf{comprimento}: o raio & a \textbf{área}: a altura & Cor.~\ref{fis:cor:medias} \\
+meio $2m=a+b$ & meio $g\,g=ab$ & Teor.~\ref{fis:thm:duas}(2), Lema~\ref{fis:lem:geo} \\o \textbf{comprimento}: o raio & a \textbf{área}: a altura & Cor.~\ref{fis:cor:medias} \\
 a \textbf{reta}: os diádicos $k/2^{n}$ & o \textbf{círculo}: as raízes & Teor.~\ref{fis:thm:duas}(6) \\
 as fases \textbf{somam-se} & os módulos \textbf{multiplicam-se} & §\ref{fis:transf} \\
 cartesiano & polar & §\ref{fis:transf} \\
