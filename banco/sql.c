@@ -6375,6 +6375,26 @@ static int lista_colunas(const char **pp, char *out, int cap){
          * lêem-na de passagem. */
         { const char *q = p; pula(&q);
           if(*q == '('){
+              /* ── `sigma` NA LISTA: RECUSA-SE, E DIZ-SE PORQUÊ ────────────
+               *
+               * O WHERE sabe nomear o segundo andar da célula (§W215) e a
+               * materialização da linha NÃO: ela lê o par pelo `celula_valor` e
+               * imprime-o pelo corpo. Sem esta recusa, `SELECT sigma(a)` era
+               * aceite e devolvia a PARTE REAL --- medido: numa tabela com
+               * σ = 0, 1, −1 respondia 2, 1, 3, que são os `a`. Números certos
+               * para outra pergunta, que é o desfecho que esta casa persegue.
+               *
+               * O `ORDER BY sigma(a)` já recusava, com «a coluna sigma não
+               * existe»; aqui não recusava nada. A lei existia e não ALCANÇAVA
+               * este caminho. */
+              if(!strcasecmp(nome, "SIGMA")){
+                  printf("erro: `sigma(...)` na lista de colunas — RECUSADO. O WHERE sabe"
+                         " nomear o segundo andar da célula, e a materialização da linha"
+                         " ainda não: aceitar isto devolveria a PARTE REAL com a cara do σ.\n");
+                  printf("      A régua escreve-se no WHERE, que é onde ela decide:"
+                         " `WHERE c*c + B*c*sigma(c) + C*sigma(c)*sigma(c) OP k`.\n");
+                  return 0;
+              }
               /* O COUNT TAMBÉM SE LÊ AQUI, E ANTES NÃO SE LIA.
                *
                * As três de cima estavam reconhecidas e o `count` não: em

@@ -30929,6 +30929,126 @@ int main(void){
            " zero seria dar valor a uma pergunta mal posta.", mal == 0);
     }
 
+    /* ═══ §W216: OS DOIS ANDARES DO AVALIADOR TÊM DE CONCORDAR ═════════════ */
+    {
+        int mal = 0;
+        const char *base = "/tmp/pgwire_w216";
+        SqlOut out;
+        printf("\n§W216 a mesma pergunta pelos dois andares, e contra a conta em C.\n\n");
+
+        /* ── PORQUE ESTE BLOCO EXISTE ────────────────────────────────────────
+         *
+         * O avaliador tem DOIS caminhos --- oito bits e dezasseis --- e quem
+         * escolhe é o majorante da forma e o corpo da coluna. O §W215 apanhou um
+         * defeito que viveu anos exactamente nessa dobra: o de oito multiplicava
+         * uma vez por COLUNA CITADA em vez de uma por OCORRÊNCIA, e `a*a` saía
+         * como `a`. Nenhuma asserção o via porque as tabelas dos medidores são
+         * pequenas e vão pelo outro andar.
+         *
+         * O gume contra isso não é mais uma asserção: é a COMPARAÇÃO. A mesma
+         * pergunta, sobre os mesmos valores, tem de dar o mesmo em qualquer
+         * andar --- e os dois têm de bater com a conta feita aqui em C, que é um
+         * terceiro caminho e não passa pelo bytecode.
+         *
+         * Os andares forçam-se pelos DADOS: valores pequenos numa coluna com
+         * régua vão pelo de oito; valores acima de 127 vão pelo de dezasseis. */
+        static const long V[4] = {2, 1, 3, 5};
+        struct { const char *expr; long (*f)(long); } FORMAS[5];
+        (void)FORMAS;
+
+        unlink("/tmp/pgwire_w216.mem");
+        unlink("/tmp/pgwire_w216.prog");
+        if(!sql_abrir(base)){ mal++; printf("      sql_abrir FALHOU\n"); }
+        else{
+            sql_executa("CREATE TABLE p (a AUREO, k INTEIRO)", &out);   /* → andar de 8 */
+            sql_executa("CREATE TABLE q (a INTEIRO, k INTEIRO)", &out); /* → andar largo */
+            for(int i = 0; i < 4; i++){
+                char c1[96], c2[96];
+                snprintf(c1, sizeof c1, "INSERT INTO p VALUES (%ld+0s, %d)", V[i], i);
+                snprintf(c2, sizeof c2, "INSERT INTO q VALUES (%ld, %d)", V[i], i);
+                sql_executa(c1, &out); sql_executa(c2, &out);
+            }
+            { static const char *EXPR[6] = {
+                  "a > 2", "a*a > 4", "a*a > 9", "a*a - a > 2", "a*a + a > 6", "a*a*a > 8" };
+              int iguais = 0, batem = 0, total = 0;
+              for(int e = 0; e < 6; e++){
+                  char cmd[160];
+                  int np = -1, nq = -1;
+                  snprintf(cmd, sizeof cmd, "SELECT * FROM p WHERE %s", EXPR[e]);
+                  sql_executa(cmd, &out); np = out.ok ? out.nrows : -1;
+                  snprintf(cmd, sizeof cmd, "SELECT * FROM q WHERE %s", EXPR[e]);
+                  sql_executa(cmd, &out); nq = out.ok ? out.nrows : -1;
+                  /* o TERCEIRO caminho: a conta em C, sem bytecode nenhum */
+                  { int esp = 0;
+                    for(int i = 0; i < 4; i++){
+                        long a = V[i], v;
+                        switch(e){
+                          case 0: v = a;              break;
+                          case 1: v = a*a;            break;
+                          case 2: v = a*a;            break;
+                          case 3: v = a*a - a;        break;
+                          case 4: v = a*a + a;        break;
+                          default: v = a*a*a;         break;
+                        }
+                        { long lim = (e==0)?2:(e==1)?4:(e==2)?9:(e==3)?2:(e==4)?6:8;
+                          if(v > lim) esp++; }
+                    }
+                    total++;
+                    if(np == nq) iguais++;
+                    if(np == esp && nq == esp) batem++;
+                    printf("      %-14s AUREO(8bit)→%2d  INTEIRO(16bit)→%2d  C→%2d  %s\n",
+                           EXPR[e], np, nq, esp,
+                           (np == nq && np == esp) ? "" : "   ← DIVERGE");
+                    if(np != nq || np != esp) mal++;
+                  }
+              }
+              printf("      → %d de %d concordam entre andares, %d de %d batem com a conta"
+                     " em C\n", iguais, total, batem, total);
+            }
+
+            /* ── E O `sigma` NA LISTA DO SELECT: RECUSA, não parte real ──────
+             * O WHERE sabe nomear o segundo andar e a materialização da linha
+             * não. Sem recusa, `SELECT sigma(a)` devolvia os `a` --- números
+             * certos para outra pergunta. */
+            sql_executa("CREATE TABLE r (a AUREO, k INTEIRO)", &out);
+            sql_executa("INSERT INTO r VALUES (2+0s, 1)", &out);
+            sql_executa("INSERT INTO r VALUES (1+1s, 2)", &out);
+            sql_executa("INSERT INTO r VALUES (3-1s, 3)", &out);
+            sql_executa("SELECT sigma(a) FROM r", &out);
+            printf("      SELECT sigma(a): ok=%d  ← recusa; antes devolvia 2,1,3 (os `a`)\n",
+                   out.ok);
+            if(out.ok) mal++;
+            /* e o CONTROLO desta recusa: o que NÃO é sigma continua a passar */
+            sql_executa("SELECT a FROM r", &out);
+            printf("      CONTROLO — SELECT a: ok=%d nrows=%d  ← a recusa não é larga demais\n",
+                   out.ok, out.nrows);
+            if(!out.ok || out.nrows != 3) mal++;
+            sql_executa("SELECT * FROM r WHERE sigma(a) = 1", &out);
+            printf("      CONTROLO — sigma no WHERE: ok=%d nrows=%d  ← lá ele funciona\n",
+                   out.ok, out.nrows);
+            if(!out.ok || out.nrows != 1) mal++;
+
+            sql_fechar();
+        }
+
+        ok("OS DOIS ANDARES DO AVALIADOR CONCORDAM, E OS DOIS BATEM COM A CONTA EM C. O"
+           " avaliador tem dois caminhos — oito bits e dezasseis — e quem escolhe é o"
+           " majorante da forma e o corpo da coluna. Foi nessa dobra que viveu anos o"
+           " defeito do §W215: o de oito multiplicava uma vez por COLUNA CITADA em vez de"
+           " uma por OCORRÊNCIA, e `a*a` saía como `a`; nenhuma asserção o via porque as"
+           " tabelas dos medidores são pequenas e vão pelo outro andar. O gume contra isso"
+           " não é mais uma asserção — é a COMPARAÇÃO: seis formas de grau 1 a 3, sobre os"
+           " MESMOS valores, numa coluna AUREO (que força o andar de oito) e numa INTEIRO"
+           " (que força o largo), e as duas contra um TERCEIRO caminho que não passa pelo"
+           " bytecode — a conta feita aqui em C. Exige-se que os três coincidam nas seis."
+           " E a lei estendeu-se ao caminho que faltava: `sigma` na lista do SELECT era"
+           " ACEITE e devolvia a PARTE REAL — numa tabela com σ = 0, 1, −1 respondia"
+           " 2, 1, 3, que são os `a` —, enquanto o ORDER BY já recusava. Recusa-se agora,"
+           " com a razão dita e o caminho apontado, e dois controlos garantem que a recusa"
+           " não é larga demais: `SELECT a` passa, e `sigma` no WHERE continua a funcionar.",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
