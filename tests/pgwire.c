@@ -31682,6 +31682,107 @@ int main(void){
            " se distinguiria de uma verificação que não olha o C.", mal == 0);
     }
 
+    /* ═══ §W223: O CATÁLOGO É UMA REALIZAÇÃO, E O G CONTA-A ════════════════ */
+    {
+        int mal = 0;
+        printf("\n§W223 o campo G no catálogo: a escada fecha, e a folga é a repetição.\n\n");
+
+        /* ── O TEOREMA PRINCIPAL, NO OBJECTO REAL ────────────────────────────
+         *
+         * O catálogo é uma realização π : nome ↦ cifra (B,C). Onde dois nomes
+         * dão a mesma cifra, são O MESMO ESPELHO com nomes diferentes --- e é
+         * exactamente o `thm:multiplicidade`(2): G > 1 se e só se existem i ≠ j
+         * com π(i) = π(j).
+         *
+         * Daí saem as duas leis que a obra prova em abstracto, e aqui têm um
+         * objecto: `thm:escada` diz ∑G = |I|, e `cor:folga` diz ∑(G−1) = |I|−|X|.
+         * Se falhassem, ou o campo não é G ou a realização não é π. */
+        { int n = sql_corpo28_n();
+          long cif[64][2]; long G[64]; int nx = 0;
+          long somaG = 0, folga = 0, maxG = 0, com_repet = 0, sozinhos = 0;
+          for(int i = 0; i < n; i++){
+              long B, C; const char *nm = sql_corpo28(i, &B, &C);
+              if(!nm) continue;
+              { int k, achou = -1;
+                for(k = 0; k < nx; k++) if(cif[k][0] == B && cif[k][1] == C){ achou = k; break; }
+                if(achou < 0){ if(nx < 64){ cif[nx][0]=B; cif[nx][1]=C; G[nx]=1; nx++; } }
+                else G[achou]++; }
+          }
+          for(int k = 0; k < nx; k++){
+              somaG += G[k]; folga += G[k] - 1;
+              if(G[k] > maxG) maxG = G[k];
+              if(G[k] > 1) com_repet++; else sozinhos++;
+          }
+          printf("      |I| = %d nomes, |X| = %d cifras distintas\n", n, nx);
+          printf("      ∑G = %ld   contra |I| = %d      → thm:escada: %s\n",
+                 somaG, n, (somaG == n) ? "FECHA" : "QUEBRA");
+          printf("      ∑(G−1) = %ld  contra |I|−|X| = %d  → cor:folga: %s\n",
+                 folga, n - nx, (folga == n - nx) ? "FECHA" : "QUEBRA");
+          printf("      %ld fibras com G > 1, %ld com G = 1, e o maior G é %ld\n",
+                 com_repet, sozinhos, maxG);
+          if(somaG != n) mal++;
+          if(folga != n - nx) mal++;
+          /* e a folga NÃO é zero: se fosse, π era injectiva e as duas leis
+           * passariam por vacuidade --- é a repetição que lhes dá conteúdo */
+          if(folga == 0) mal++;
+          if(maxG < 2) mal++;
+          if(sozinhos == 0) mal++;      /* nem tudo se repete: há representantes únicos */
+
+          /* (2) E O MESMO Δ EM CIFRAS DIFERENTES — o thm:pandora(1) no catálogo.
+           *     «A classe é grosseira, o espelho é fino»: fibras distintas podem
+           *     partilhar Δ, e aí a distância é zero e a travessia existe. */
+          { long pares_mesmo_D = 0, com_orient_oposta = 0;
+            for(int a = 0; a < nx; a++) for(int b = a+1; b < nx; b++){
+                long Da = cif[a][0]*cif[a][0] - 4*cif[a][1];
+                long Db = cif[b][0]*cif[b][0] - 4*cif[b][1];
+                if(Da != Db) continue;
+                pares_mesmo_D++;
+                if(cif[a][1] != cif[b][1]){
+                    com_orient_oposta++;
+                    printf("      Δ = %ld em DUAS cifras: (%ld,%+ld) com G=%ld e"
+                           " (%ld,%+ld) com G=%ld — orientação OPOSTA\n",
+                           Da, cif[a][0], cif[a][1], G[a], cif[b][0], cif[b][1], G[b]);
+                }
+            }
+            printf("      pares de cifras distintas com o MESMO Δ: %ld (%ld de orientação"
+                   " oposta)\n", pares_mesmo_D, com_orient_oposta);
+            /* o catálogo TEM o caso da ressalva do §W221 — e é isso que o liga */
+            if(pares_mesmo_D == 0) mal++;
+            if(com_orient_oposta == 0) mal++; }
+        }
+
+        /* ── O CONTROLO: a lógica SABE ver uma realização INJECTIVA ──────────
+         * Sobre um conjunto onde cada nome tem cifra própria, ∑(G−1) tem de dar
+         * ZERO. Sem isto, «a folga é 26» não se distinguiria de uma contagem que
+         * soma o que calha. */
+        { long folga = 0, nx = 0;
+          long cif[8][2]; 
+          static const long FAKE[4][2] = {{1,1},{2,1},{3,1},{4,1}};   /* todas distintas */
+          for(int i = 0; i < 4; i++){
+              int achou = -1;
+              for(int k = 0; k < nx; k++) if(cif[k][0]==FAKE[i][0] && cif[k][1]==FAKE[i][1]) achou = k;
+              if(achou < 0){ cif[nx][0]=FAKE[i][0]; cif[nx][1]=FAKE[i][1]; nx++; }
+              else folga++;
+          }
+          printf("      CONTROLO — 4 cifras todas distintas: ∑(G−1) = %ld  ← a folga mede"
+                 " a REPETIÇÃO, e sem ela dá zero\n", folga);
+          if(folga != 0) mal++; }
+
+        ok("O CATÁLOGO É UMA REALIZAÇÃO, E O CAMPO G CONTA-A. π : nome ↦ cifra (B,C), e onde"
+           " dois nomes dão a mesma cifra são O MESMO ESPELHO com nomes diferentes — que é"
+           " o thm:multiplicidade(2), G > 1 se e só se existem i ≠ j com π(i) = π(j). As"
+           " duas leis que a obra prova em abstracto têm aqui um objecto: ∑G = |I| fecha"
+           " (thm:escada) e ∑(G−1) = |I| − |X| fecha (cor:folga). E não fecham por"
+           " vacuidade: a folga NÃO é zero — há fibras com G > 1 e há representantes"
+           " únicos, e é a repetição que dá conteúdo às duas. O maior G junta nove nomes"
+           " numa cifra só. Por fim o thm:pandora(1) aparece no catálogo: fibras DISTINTAS"
+           " partilham Δ — «a classe é grosseira, o espelho é fino» — e entre elas há"
+           " orientações OPOSTAS, que é exactamente o caso da ressalva do §W221, aqui com"
+           " nomes próprios de um lado e do outro. O controlo corre a mesma contagem sobre"
+           " quatro cifras todas distintas e exige folga ZERO: sem ele, «a folga é 26» não"
+           " se distinguiria de uma soma que conta o que calha.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
