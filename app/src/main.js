@@ -12,7 +12,7 @@ import { initTrailerCampo } from './trailer_campo.js'
 import { initCardsCampo } from './cards_campo.js'
 import { initMotorWasm, avancaFase } from './motor_wasm.js'
 import { iniciaRelogio } from './relogio.js'
-import { abrirDoc, idDeArquivo } from './tex_tradutor.js'
+import { abrirDoc, idDeArquivo, DOCS } from './tex_tradutor.js'
 import { initAssistente } from './assistente.js'
 
 // ── helpers ──
@@ -268,7 +268,9 @@ document.addEventListener('click', async (ev) => {
   const a = ev.target.closest && ev.target.closest('a[href*="/docs/"]')
   if (!a) return
   const id = idDeArquivo(a.getAttribute('href'))
-  if (!id) return // cv.pdf e o que não está no DOCS do tradutor
+  // Só se compõe o que o tradutor TEM. O cv.pdf e a fisica-araniana.pdf são
+  // ficheiros estáticos em /docs/ — o clique passa e o browser descarrega-os.
+  if (!id || !(id in DOCS)) return
   ev.preventDefault()
   // tab aberta AQUI (síncrono) — depois do await o popup blocker fecha a porta
   const janela = window.open('about:blank', '_blank')

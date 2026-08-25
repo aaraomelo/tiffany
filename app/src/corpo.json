@@ -1,6 +1,5 @@
 {
   "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",
-  "à_mão": "fisica.tex entrou À MÃO (o corpo.sh usa LD_PRELOAD e não corre fora de POSIX). A `soma` e os `bytes` abaixo são os da última MEDIÇÃO e não incluem esta linha — correr ./tools/corpo.sh num hospedeiro POSIX para os repor.",
   "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",
   "soma": "caba3c9b6ba15c39",
   "bytes": 6476229,
@@ -10,7 +9,6 @@
     "conecthus/pipeline.tex",
     "corpus/docs/arquitetura.tex",
     "corpus/docs/fisica.tex",
-    "fisica.tex",
     "corpus/docs/medida.tex",
     "corpus/docs/milenio.tex",
     "corpus/docs/partitura.tex",
