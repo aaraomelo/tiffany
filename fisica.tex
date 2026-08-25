@@ -2147,14 +2147,20 @@ vértices adjacentes a $x$ num \textbf{grafo}, e $\abs{\mathcal{V}(x)}$ é o
 grafo & vértice & aresta & grau \\
 \midrule
 a grade de posto $n$ & um ponto & $x\sim x\pm e_i$ & $2n$ \\
-a árvore do encaixe & uma bola & mãe\,--\,filha & $3$ (interno) \\
-o hipercubo $Q_m$ & palavra de $m$ bits & um bit trocado & $m$ \\
+a árvore do encaixe & uma bola & o \textbf{irmão} & $1$ (Teor.~\ref{fis:thm:vizarvore}) \\
+\quad\emph{(a mesma árvore, outra aresta)} & uma bola & mãe\,--\,filha & $3$ (interno) \\o hipercubo $Q_m$ & palavra de $m$ bits & um bit trocado & $m$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\begin{teorema}[o hipercubo constrói-se pela dobra]\label{fis:thm:hiper}
-$Q_m$ tem $2^m$ vértices e $m\,2^{m-1}$ arestas, e $Q_m$ são duas cópias de
+\noindent\emph{A árvore aparece duas vezes de propósito}: a vizinhança que a
+cláusula~(4) do Teor.~\ref{fis:thm:mult} consome é a do \textbf{irmão} --- e é
+$1$, pelo Teor.~\ref{fis:thm:vizarvore} --- ao passo que o grafo mãe--filha, que
+é o mesmo conjunto de bolas com outra aresta, tem grau $3$ no interior.
+\emph{Não são dois valores da mesma contagem: são duas arestas sobre os mesmos
+vértices.}
+
+\begin{teorema}[o hipercubo constrói-se pela dobra]\label{fis:thm:hiper}$Q_m$ tem $2^m$ vértices e $m\,2^{m-1}$ arestas, e $Q_m$ são duas cópias de
 $Q_{m-1}$ ligadas por um emparelhamento perfeito:
 $\mathrm{ar}(Q_m)=2\,\mathrm{ar}(Q_{m-1})+2^{m-1}$.
 \end{teorema}
@@ -2765,9 +2771,8 @@ salto}.
 \boxed{\;\text{A aranha não decide --- \textbf{cai}.}\;}
 \]
 
-\medido{\code{tests/aranha\_n.c} §AN21--§AN22: $(\partial\tau)^2$ inteiro por
-aresta com três $g$; $\tau=N$ com
-$g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$, que tem a diagonal
+\medido{\code{tests/aranha\_n.c} §AN21--§AN22: $q$ inteiro por
+aresta com três $g$; e §AN28: $\tau=N$ com$g=\bigl(\begin{smallmatrix}1&3\\3&1\end{smallmatrix}\bigr)$, que tem a diagonal
 a $1$ e o cruzado a $3$ --- \emph{a testemunha de que $g=\mathrm{id}$ não é
 preciso} --- e uma $g$ diagonal com uma entrada a $4$ já a afastar, que é o
 controlo sem o qual a primeira não diria nada; $g_{uv}(x)=G(x)\delta_{uv}$ curva
@@ -2987,18 +2992,18 @@ um enunciado das secções anteriores, escrito como passo. E ele cabe em três
 linhas. Sobre um ficheiro lido byte a byte, com $b$ o byte corrente:
 \[
 \boxed{\;
-e=\operatorname{pop}(b\wedge \mathtt{0xAA}),
-\qquad
-o=\operatorname{pop}(b\wedge \mathtt{0x55}),
-\qquad
+e=\operatorname{pop}(b\wedge \mathtt{0x55}),\qquad
+o=\operatorname{pop}(b\wedge \mathtt{0xAA}),\qquad
 \text{sai } [\,e+o,\ e\,].
 \;}
 \]
 As duas máscaras são \textbf{complementares} --- $\mathtt{0xAA}\vee\mathtt{0x55}
 =\mathtt{0xFF}$ e $\mathtt{0xAA}\wedge\mathtt{0x55}=0$ --- logo particionam o
 byte: é a cisão em duas fases, as posições de índice par e as de índice ímpar. O
-$\operatorname{pop}$ é o $\sum$. E o par que sai \emph{é o gato aplicado uma
-vez}. Não há torre nenhuma a correr --- \textbf{uma} aplicação. E a saída é um
+$\operatorname{pop}$ é o $\sum$ --- e $\mathtt{0x55}$ apanha os índices
+\textbf{pares}, que é a fase que o medidor guarda. E o par que sai \emph{é o gato
+aplicado uma vez}, com $m=1$ --- o ouro. Não há torre nenhuma a correr ---
+\textbf{uma} aplicação. E a saída é um
 \emph{levantamento}: guardado $(e+o,\,e)$, a fase que não aparece recupera-se,
 $o=(e+o)-e$. O total $e+o=\operatorname{pop}(b)$ é a conservação
 (Lema~\ref{fis:lem:conserva}); a segunda coordenada é a coordenada de folha que
@@ -3044,8 +3049,14 @@ volta não sai do anel.
 \sigma+\sigma'=m\ (\text{o traço}),\qquad \sigma\sigma'=-1\ (\text{o determinante}),
 \]
 com $\abs{\sigma}>1$ e $\abs{\sigma'}<1$: um \textbf{sorvedouro} e uma
-\textbf{fonte}.
-\end{enumerate}
+\textbf{fonte} \emph{na razão}, que é a dinâmica projectiva do
+Teor.~\ref{fis:thm:bitunico}; na linear os papéis trocam-se, e é a mesma frase
+vista de outro andar. \emph{E a dicotomia não é conta à parte}: a cifra do gato é
+$(\operatorname{tr},\det)=(m,-1)$, logo $\Delta=m^{2}+4$ e o
+Cor.~\ref{fis:cor:optica} põe-no na classe \textbf{hiperbólica} para todo o
+metal --- é o Teor.~\ref{fis:thm:leidisc} que dá um módulo maior que $1$ e outro
+menor, e não uma estimativa feita aqui. \emph{O gato é um espelho impróprio, e é
+por isso que expande.}\end{enumerate}
 \end{teorema}
 
 \begin{proof}
@@ -3902,11 +3913,15 @@ Teor.~\ref{fis:thm:corte}(5) já tinha identificado como o sítio onde o encaixe
 
 \medskip\noindent\textbf{E o átomo de grau $10$ lê-se peça a peça.} A cadeia de
 grau $10$ com $\abs{c_0}=1$ e raiz dominante mínima tem \textbf{um} núcleo,
-\textbf{um} elétron e \textbf{oito} modos no círculo: núcleo e elétron com massa
-$0{,}1624$ e $\theta=0$, e os oito fotões em quatro pares conjugados, com
-$\theta$ a valer $160{,}6^{\circ}$, $137{,}3^{\circ}$, $62{,}8^{\circ}$ e
-$107{,}0^{\circ}$. \emph{É radiação pura na borda}, e os pares conjugados são a
-involução do Teor.~\ref{fis:thm:duas}(2) a agir no espectro: $\theta$ e $-\theta$
+\textbf{um} elétron e \textbf{oito} modos no círculo --- e \emph{a estrutura
+lê-se sem avaliar raiz nenhuma}: ela é uma das $\mathbf{39\,310}$ que
+\textbf{escapam} ao grau $10$ (§E2), logo tem massa pelo
+Teor.~\ref{fis:thm:orbita}, e a massa vem aos pares pelo
+Teor.~\ref{fis:thm:massa}(2) --- um que expande e um que contrai, que são o
+núcleo e o elétron. Os restantes oito ficam no círculo, e é \emph{radiação pura
+na borda}. \emph{Os ângulos e o valor da massa pedem avaliar $\rho$, e isso está
+fora do método desta casa}: não se escrevem aqui, porque não há medidor que os
+produza sem sair dos inteiros. Os pares conjugados são ainvolução do Teor.~\ref{fis:thm:duas}(2) a agir no espectro: $\theta$ e $-\theta$
 são o que a dobra troca, e o par sobrevive porque o módulo --- que é o que dá a
 massa --- entra ao quadrado (Teor.~\ref{fis:thm:BI}).
 
@@ -5495,10 +5510,8 @@ e quando $T^{2}=-\mathrm{id}$ & \emph{roda} --- $p=4$, ordem $4$ & Teor.~\ref{fi
 construção isso não é uma peça nova: é o algoritmo da §\ref{fis:neuronio}
 aplicado uma vez.
 \[
-e=\operatorname{pop}(b\wedge\mathtt{0xAA}),
-\qquad
-o=\operatorname{pop}(b\wedge\mathtt{0x55}),
-\qquad
+e=\operatorname{pop}(b\wedge\mathtt{0x55}),\qquad
+o=\operatorname{pop}(b\wedge\mathtt{0xAA}),\qquad
 \text{sai } [\,e+o,\ e\,] .
 \]
 As duas máscaras \textbf{particionam} --- é a cisão $\oplus$ --- e o
