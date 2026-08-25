@@ -31150,6 +31150,93 @@ int main(void){
            " não se distinguiria de uma condição sempre verdadeira.", mal == 0);
     }
 
+    /* ═══ §W218: A CIFRA É TESTEMUNHA DA BORDA — E FALHA NUM SÍTIO SÓ ══════ */
+    {
+        int mal = 0;
+        printf("\n§W218 a cifra vê a borda, e o caso onde ela vê OUTRA coisa.\n\n");
+
+        /* ── DUAS TESTEMUNHAS DO MESMO, E ONDE SE SEPARAM ────────────────────
+         *
+         * O `lib/cifra.h` já distinguia a borda sem lhe chamar isso: a função
+         * `lado` faz `if(r*r == D)` e corre o EUCLIDES --- finito --- em vez do
+         * PQa --- periódico. O critério dela é |Δ| ser quadrado.
+         *
+         * O `cor:borda` diz que a régua factoriza sobre o ANEL BASE quando Δ é
+         * quadrado E as metades (B±√Δ)/2 lá estão. São critérios PARECIDOS e não
+         * são o mesmo: um usa |Δ|, o outro usa Δ.
+         *
+         * Onde divergem é onde Δ < 0 com |Δ| quadrado --- e aí a forma factoriza
+         * sobre a EXTENSÃO e não sobre a base. É a hipótese «sobre um anel
+         * comutativo A» do corolário a fazer trabalho: a resposta depende de A. */
+        { long AU = sql_corpo_aureo(), CR = sql_corpo_cristal();
+          long coinc = 0, div = 0, tot = 0, div_B = 0, div_C = 0, div_D = 0;
+          for(long fi = 0; fi < 2; fi++) for(long i = -6; i <= 6; i++){
+              long B, C, D;
+              sql_corpo_cifra(fi ? CR : AU, i, &B, &C, &D);
+              { int para = sql_cifra_para(B, C);
+                int fact = 0;
+                if(D >= 0){ long s = sql_raizi(D);
+                    if(s*s == D && (B+s) % 2 == 0 && (B-s) % 2 == 0) fact = 1; }
+                tot++;
+                if(para == fact) coinc++;
+                else { div++; div_B = B; div_C = C; div_D = D; }
+              }
+          }
+          printf("      dos %ld corpos de |m|,|t| ≤ 6: %ld coincidem, %ld divergem\n",
+                 tot, coinc, div);
+          printf("      a divergência é (B,C) = (%ld,%ld), Δ = %ld — o CRISTALINO(0),"
+                 " que é ω² = −1\n", div_B, div_C, div_D);
+          /* a testemunha NÃO é vazia: tem de coincidir na esmagadora maioria… */
+          if(coinc < 20) mal++;
+          /* …e tem de DIVERGIR nalgum, senão as duas seriam a mesma coisa e não
+           * haveria distinção a fazer */
+          if(div == 0) mal++;
+          /* e a divergência é EXACTAMENTE onde Δ < 0 com |Δ| quadrado */
+          if(div != 1 || div_D != -4) mal++;
+        }
+
+        /* (2) E A RAZÃO: a norma de Δ = −4 é a² + b², que factoriza sobre a
+         *     EXTENSÃO — (a+bi)(a−bi) — e não sobre a base. Verifica-se pelo
+         *     produto, em inteiros, sem sair do anel: (a+bi)(a−bi) tem parte
+         *     imaginária ZERO e parte real a²+b². */
+        { static const long P[4][2] = {{3,1},{2,5},{0,7},{-4,3}};
+          int bate = 1;
+          for(int k = 0; k < 4; k++){
+              long a = P[k][0], b = P[k][1];
+              /* (a+bi)(a−bi) = (a·a − b·(−b), a·(−b) + b·a) = (a²+b², 0) */
+              long re = a*a - b*(-b), im = a*(-b) + b*a;
+              if(re != a*a + b*b || im != 0) bate = 0;
+          }
+          printf("      (a+bi)(a−bi) = (a²+b², 0) em 4 pontos → %s"
+                 "  ← factoriza na EXTENSÃO, não na base\n", bate ? "bate" : "NÃO BATE");
+          if(!bate) mal++;
+          /* e o CONTROLO: sobre a BASE não há factorização — nenhum par inteiro
+           * (p,q) dá p+q = 0 e p·q = 1, que é o que a² + b² pediria. */
+          { long achou = 0;
+            for(long p = -30; p <= 30; p++) for(long q = -30; q <= 30; q++)
+                if(p + q == 0 && p * q == 1) achou++;
+            printf("      CONTROLO — pares inteiros com p+q=0 e p·q=1: %ld"
+                   "  ← sobre a base, nenhum\n", achou);
+            if(achou != 0) mal++; }
+        }
+
+        ok("A CIFRA DA CASA É TESTEMUNHA DA BORDA, E FALHA NUM SÍTIO SÓ. O `lib/cifra.h` já"
+           " distinguia a borda sem lhe chamar isso: a `lado` faz `if(r*r == D)` e corre o"
+           " EUCLIDES — finito — em vez do PQa — periódico —, e o critério dela é |Δ| ser"
+           " quadrado. O `cor:borda` diz que a régua factoriza sobre o ANEL BASE quando Δ é"
+           " quadrado e as metades (B±√Δ)/2 lá estão. São critérios parecidos e NÃO são o"
+           " mesmo: um usa |Δ|, o outro Δ. Medido sobre os 26 corpos de |m|,|t| ≤ 6: 25"
+           " coincidem e UM diverge — o CRISTALINO(0), Δ = −4, que é ω² = −1. E a razão"
+           " está medida: a norma a² + b² factoriza sobre a EXTENSÃO, (a+bi)(a−bi) = (a²+b², 0)"
+           " verificado em quatro pontos, e não sobre a base, onde nenhum par inteiro (p,q)"
+           " dá p+q=0 e p·q=1. É a hipótese «sobre um anel comutativo A» do corolário a"
+           " fazer trabalho: a resposta depende de A, e uma testemunha que a ignore acerta"
+           " em 25 de 26 — que é exactamente a forma de testemunha mais perigosa, a que"
+           " quase serve. O bloco exige as duas coisas: que coincidam na maioria (senão a"
+           " testemunha não valia nada) e que DIVERGAM nalgum (senão não haveria distinção"
+           " a fazer).", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

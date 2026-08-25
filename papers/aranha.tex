@@ -2514,6 +2514,36 @@ exactamente, e o controlo exige que em \code{AUREO(1)} ($\Delta=5$) \emph{nenhum
 par inteiro $(p,q')$ satisfaça as duas --- senão «a borda resolve» não se
 distinguiria de «tudo resolve».}
 
+\medskip\noindent\textbf{E a obra já tinha uma testemunha da borda --- que
+acerta em vinte e cinco de vinte e seis.} A \emph{cifra} de um espelho é a
+fracção contínua de $(B+\sqrt{\lvert\Delta\rvert})/2$, e ela distingue dois
+regimes sem que ninguém lho tenha mandado: onde $\lvert\Delta\rvert$ é quadrado a
+expansão \textbf{pára} --- é Euclides, finito ---, e onde não é ela é
+\textbf{periódica}. Isso parece o Cor.~\ref{cor:borda} dito de outra maneira, e
+quase é.
+
+\noindent \emph{Não é.} O critério da cifra é $\lvert\Delta\rvert$; o do
+corolário é $\Delta$, e mais a condição sobre as metades. Divergem exactamente
+onde $\Delta<0$ com $\lvert\Delta\rvert$ quadrado, e nesse regime a forma
+factoriza sobre a \textbf{extensão} e não sobre a base:
+\[
+a^{2}+b^{2}=(a+b\,\omega)(a-b\,\omega),\qquad \omega^{2}=-1 ,
+\]
+que é uma factorização em $A[\omega]$ e não em $A$. \emph{É a hipótese «sobre um
+anel comutativo $A$» a fazer trabalho}: a resposta depende de $A$, e uma
+testemunha que o ignore acerta quase sempre --- que é a forma de testemunha mais
+perigosa, a que \emph{quase} serve.
+
+\medido{\code{tests/pgwire.c} \S W218, contra \code{sql\_cifra\_para} e
+\code{sql\_corpo\_cifra}. Dos $26$ espelhos de $\lvert m\rvert,\lvert t\rvert\le6$,
+os dois critérios coincidem em $\mathbf{25}$ e divergem em $\mathbf{1}$: o
+$(B,C)=(0,1)$ de $\Delta=-4$, que é $\omega^{2}=-1$. A razão está medida em
+inteiros --- $(a+b\omega)(a-b\omega)$ tem parte $\omega$ nula e parte base
+$a^{2}+b^{2}$, em quatro pontos ---, e o controlo mostra que sobre a base não há
+factorização: nenhum par $(p,q)$ do anel satisfaz $p+q=0$ e $pq=1$. O bloco exige
+as \emph{duas} coisas: que coincidam na maioria, senão a testemunha não valeria
+nada, e que divirjam nalgum, senão não haveria distinção a fazer.}
+
 \medskip\noindent\textbf{E a borda $\Delta=4$ já tinha nome nesta obra: é o
 espelho $\nu$.} A tríade do Teor.~\ref{thm:leidisc} distingue o que \emph{roda}
 do que \emph{reflete}, e a testemunha da reflexão é

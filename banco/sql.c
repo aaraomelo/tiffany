@@ -5333,6 +5333,15 @@ enum { CL_ELIPTICO = -1, CL_PARABOLICO = 0, CL_HIPERBOLICO = 1 };
  * O medidor tem de comparar pelo comparador VERDADEIRO --- o do `corpos.h` --- e
  * não por uma cópia dele escrita no teste, que seria medir a minha aritmética e
  * não a da casa. Abre-se a porta em vez de duplicar a régua. */
+/* «a cifra PARA?» — o critério que o `cifra.h` já usa para escolher entre o
+ * Euclides (finito) e o PQa (periódico): |Δ| ser quadrado. É uma TESTEMUNHA da
+ * borda, e o medidor precisa dela pela porta para a comparar com a factorização
+ * sobre o anel base, que é outra coisa. */
+int sql_cifra_para(long B, long C){
+    long D = B*B - 4*C; if(D < 0) D = -D;
+    { long r = raizi(D); return r*r == D; }
+}
+
 /* a raiz inteira da casa, pela porta: o medidor tem de medir a VERDADEIRA (a do
  * `cifra.h`, que o motor usa) e não uma cópia escrita no teste. */
 long sql_raizi(long n){ return raizi(n); }
