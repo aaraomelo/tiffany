@@ -2484,6 +2484,63 @@ procurada. Com ela, a mesma descida devolve $1{+}1\sigma,\,2,\,3{-}1\sigma$
 (normas $1,4,5$) e $0{+}1\omega,\,3,\,1{+}3\omega$ (normas $1,9,10$) --- e o
 bloco exige que a norma \emph{não} coincida com o valor, senão não haveria
 escolha a nomear.}
+\subsection*{A borda: onde a régua colapsa numa forma linear}
+
+\noindent A régua $q(a,b)=a^{2}+Bab+Cb^{2}$ é \textbf{multiplicativa} ---
+$q(xy)=q(x)q(y)$ ---, e uma máquina que só saiba somar não a calcula: somar dá
+progressão aritmética, multiplicar dá geométrica, e a ponte entre as duas é
+precisamente o que falta. \emph{Esta é a razão pela qual uma realização pode
+ordenar por $q$ e não conseguir comparar por $q$}, e ela é estrutural, não uma
+falha de esforço.
+
+\begin{corolario}[a régua factoriza exactamente na borda]\label{cor:borda}
+Sobre um anel comutativo $A$, a forma $q$ do espelho $(B,C)$ escreve-se como
+produto de duas formas \emph{lineares} sobre $A$,
+\[
+q(a,b)=(a+p\,b)(a+q'b),\qquad p+q'=B,\quad p\,q'=C ,
+\]
+se e só se $\Delta$ é um quadrado em $A$ e as metades $(B\pm\sqrt{\Delta})/2$
+estão em $A$. Em particular:
+\begin{enumerate}\itemsep2pt
+\item[(1)] $\Delta=0$ --- a classe \textbf{parabólica}, o corte do
+  Teor.~\ref{thm:leidisc} --- dá $p=q'=B/2$ e $q$ é o \textbf{quadrado de uma
+  única linear}, $q=(a+\tfrac{B}{2}b)^{2}$;
+\item[(2)] $\Delta$ quadrado não nulo dá duas lineares distintas, e o
+  \emph{sinal} de $q$ é o produto dos sinais delas.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+As raízes de $x^{2}-Bx+C$ são $(B\pm\sqrt{\Delta})/2$, e $q(a,b)=b^{2}\,\pi(a/b)$
+com $\pi$ o polinómio característico; a factorização existe exactamente quando as
+raízes estão em $A$. A condição sobre as metades é a mesma do
+Teor.~\ref{thm:pandora}(2) --- o comportamento do $2$ no anel --- e reaparece aqui
+sem ser convidada.
+\end{proof}
+
+\medskip\noindent\textbf{E é isso que uma máquina aditiva alcança.} No caso~(1) a
+comparação $q\ \mathrm{OP}\ k$ é $\lvert a+\tfrac{B}{2}b\rvert\ \mathrm{OP}\
+\sqrt{k}$, com $\sqrt{k}$ calculado \emph{antes} de correr: cabe inteira, sem uma
+multiplicação em execução. No caso~(2) o valor ainda pede produto, mas o sinal
+não --- as duas rectas $L_{1}=0$ e $L_{2}=0$ \textbf{cortam} o plano em quatro
+partes e $q$ tem sinal constante em cada uma, pelo que $q>0$ é uma conjunção de
+duas comparações lineares. Fora da borda a forma é irredutível e não há corte
+nenhum a fazer.
+
+\medskip\noindent\emph{E a borda é estreita}, o que é o conteúdo do corolário: as
+classes são três e a borda não é uma delas --- é o conjunto dos espelhos cujo
+$\Delta$ é quadrado, e ele é raro. A classe parabólica está inteiramente dentro
+dela, e é a única que está.
+
+\medido{\code{tests/pgwire.c} \S W214, contra \code{sql\_corpo\_cifra}. Varridos
+os corpos de $\lvert m\rvert,\lvert t\rvert\le12$ dos dois tipos --- $50$ ---,
+apenas $\mathbf{3}$ factorizam: os dois cristalinos de $\Delta=0$ e o
+\code{AUREO(0)} de $\Delta=4$, onde $\sigma^{2}=1$ e o ouro colapsa na unidade.
+Os outros $\mathbf{47}$ são irredutíveis. A testemunha exige $p+q'=B$ e $p\,q'=C$
+exactamente, e o controlo exige que em \code{AUREO(1)} ($\Delta=5$) \emph{nenhum}
+par inteiro $(p,q')$ satisfaça as duas --- senão «a borda resolve» não se
+distinguiria de «tudo resolve».}
+
 \medskip\noindent\textbf{E é daqui que vem o nome.} Abrir a caixa é misturar os
 espelhos: comparar através de dois com $\Delta$ diferente devolve sempre
 \emph{algum} número, e esse número não é sobre objeto nenhum. O que sai da caixa

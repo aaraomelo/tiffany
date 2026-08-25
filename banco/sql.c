@@ -334,6 +334,10 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
                               * consulta, e a tabela encolhia. 216..223 é a folga
                               * entre o S_BITM (200..215) e o S_NOME (224). */
 #define S_UM16    217        /* a constante 1 do OP_ADD16 que sobe o TOPO de andar       */
+/* o slot da NORMA: a régua de uma coluna quadrática, computada em C na emissão
+ * (o `emit_atomos` corre POR LINHA) e copiada daqui pelo bytecode. Vive nos seis
+ * slots que sobram entre o S_UM16 e o S_NOME, e o typedef abaixo prende-o: se
+ * alguém baixar o S_NOME, não compila em vez de pisar. */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
 /* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver docs/TOOLKIT.md).
  *
@@ -418,6 +422,7 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  * nome — é a mesma compatibilidade que o CORPO_INTEIRO tem por ser o código 0. */
 #define S_NOME    224        /* 224..239: 16 Words = 32 caracteres (folga até S_MATCH) */
 #define S_NOME_N  16
+
 /* A BASE ORTONORMAL, EM SLOTS: e_k = 2^k, k = 0..15.
  *
  * `naturais.tex thm:base`: os produtos dos geradores dão e_k = 2^k, e essa base
@@ -5054,6 +5059,16 @@ static int atom_possivel(const struct arvore *a, int j, long ncols, long nrows){
              * desfecho. Foi o que fiz à primeira, e três asserções caíram sobre
              * uma coluna toda ausente. Na dúvida varre-se: escrevi-o no
              * comentário e não o respeitei no código. */
+            /* ── E A MARCA TEM DE MEDIR O QUE O AVALIADOR COMPARA ────────
+             * Numa coluna com régua o avaliador compara a NORMA, e a marca
+             * guarda o máximo da PARTE REAL: são duas quantidades diferentes, e
+             * podar com uma para descartar sobre a outra descarta linhas que
+             * casam. Medido: com {2+0σ, 1+1σ, 3−1σ} a marca dá 3 e `a > 4`
+             * saía «nenhuma linha pode satisfazer, sem varrer» --- e a norma de
+             * 3−1σ é 5, que satisfaz. Na dúvida varre-se, que é o que o
+             * comentário acima já mandava. */
+            { Word cwm = corpo_de(cc);
+              if(cwm.total == CORPO_AUREO || cwm.total == CORPO_CRISTAL) return 1; }
             unsigned long mx = col_max(cc, ncols, nrows);
             if(mx == 0 || mx > 0x7FFFFFFFul) return 1;
             /* E O OUTRO LADO DO PAR. Estava `mag_baixo *= 0` --- o mínimo

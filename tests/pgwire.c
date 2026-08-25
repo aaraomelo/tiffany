@@ -30629,6 +30629,126 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W214: A BORDA — ONDE A PG COLAPSA NUMA PA, E A NORMA CABE ═══════ */
+    {
+        int mal = 0;
+        printf("\n§W214 a dualidade PA/PG: porque a norma não cabe, e onde cabe.\n\n");
+
+        /* ── A PERGUNTA, E PORQUE ELA TEM RESPOSTA EXACTA ────────────────────
+         *
+         * O `ORDER BY` ordena pela RÉGUA (a norma do `contrato.h`); o WHERE
+         * compara a PARTE REAL, transportada à base de referência. Duas réguas
+         * para o mesmo objecto, e tentei unificá-las metendo a norma no
+         * avaliador. Não cabe, e a razão é ESTRUTURAL — não é falta de trabalho:
+         *
+         *   · o avaliador é ADITIVO: `c₀ + Σ cᵢ·xᵢ`, com ADD16/SUB16, e a
+         *     multiplicação por CONSTANTE feita por Zeckendorf (somas de Fibonacci).
+         *   · a norma é MULTIPLICATIVA: N(xy) = N(x)·N(y), e q = a² + B·a·b + C·b²
+         *     pede produtos de dois valores lidos em EXECUÇÃO.
+         *   · e o molde é UM SÓ, o da linha 0, que a PA do relocador anda por
+         *     todas as linhas — pelo que nem se pode pré-computar a norma em C:
+         *     ela não é função afim do endereço.
+         *
+         * PA de um lado, PG do outro, e a ponte entre elas é o que falta.
+         *
+         * MAS HÁ BORDA. A forma q factoriza sobre o anel base exactamente quando
+         * Δ = B² − 4C é QUADRADO PERFEITO, e aí é produto de duas LINEARES — que
+         * é precisamente o que o avaliador sabe fazer. É o CORTE: as duas rectas
+         * partem o plano, e o sinal de q é constante em cada parte. */
+
+        { long AU = sql_corpo_aureo(), CR = sql_corpo_cristal();
+          long achados = 0, delta0 = 0, delta_q = 0, irredut = 0;
+          printf("      os corpos de |m|,|t| ≤ 12, e onde a forma FACTORIZA:\n");
+          for(long fi = 0; fi < 2; fi++) for(long i = -12; i <= 12; i++){
+              long B, C, D;
+              sql_corpo_cifra(fi ? CR : AU, i, &B, &C, &D);
+              { long r = 0; while(r*r < D && D > 0) r++;
+                int quad = (D >= 0 && r*r == D);
+                if(!quad){ irredut++; continue; }
+                /* factoriza: a² + Bab + Cb² = (a + p·b)(a + q·b) com p+q = B, p·q = C */
+                { long p2 = B + r, q2 = B - r;
+                  if(p2 % 2 || q2 % 2){ irredut++; continue; }
+                  { long p = p2/2, q = q2/2;
+                    /* a testemunha: p+q = B e p·q = C, exactamente */
+                    if(p + q != B || p * q != C) mal++;
+                    achados++;
+                    if(D == 0) delta0++; else delta_q++;
+                    printf("        %-14s B=%2ld C=%2ld Δ=%3ld  q = (a %+ldb)(a %+ldb)%s\n",
+                           fi ? "CRISTALINO" : "AUREO", B, C, D, p, q,
+                           D == 0 ? "   ← Δ=0: é um QUADRADO, o corte" : "");
+                  } }
+              }
+          }
+          printf("      %ld factorizam, %ld não — e das que factorizam, %ld são Δ=0\n",
+                 achados, irredut, delta0);
+          if(achados < 2) mal++;            /* a borda existe e não é vazia */
+          if(delta0 < 1) mal++;             /* e contém o corte parabólico */
+          if(delta_q < 1) mal++;            /* e uma hiperbólica */
+          if(irredut < 20) mal++;           /* e a maioria NÃO factoriza: não é vazio */
+        }
+
+        /* (2) Δ = 0 — a norma é o QUADRADO de UMA linear: cabe inteiro. */
+        { static const long PT[5][2] = {{3,1},{0,5},{-2,7},{4,-4},{6,0}};
+          int bate = 1;
+          for(int i = 0; i < 5; i++){
+            long a = PT[i][0], b = PT[i][1];
+            long q = a*a + 2*a*b + b*b, L = a + b;
+            if(q != L*L) bate = 0;
+          }
+          printf("      Δ=0 : q(a,b) = (a+b)² em 5 pontos → %s"
+                 "  ← uma LINEAR, zero multiplicações em execução\n",
+                 bate ? "bate" : "NÃO BATE");
+          if(!bate) mal++;
+        }
+
+        /* (3) Δ = 4 (AUREO(0), a borda m=0: σ²=1, o ouro colapsa na unidade)
+         *     o VALOR ainda pede multiplicar, mas o SINAL é o produto dos sinais
+         *     — e sinais o avaliador decide pelo bit 7 da diferença. */
+        { static const long PT[6][2] = {{5,2},{2,5},{-5,2},{-2,5},{3,3},{3,-3}};
+          int bate = 1;
+          for(int i = 0; i < 6; i++){
+            long a = PT[i][0], b = PT[i][1];
+            long q = a*a - b*b;
+            int s1 = (a+b > 0) - (a+b < 0), s2 = (a-b > 0) - (a-b < 0);
+            if((q > 0) != (s1*s2 > 0)) bate = 0;
+          }
+          printf("      Δ=4 : sgn q = sgn(a+b)·sgn(a−b) em 6 pontos → %s"
+                 "  ← duas LINEARES e um AND\n", bate ? "bate" : "NÃO BATE");
+          if(!bate) mal++;
+        }
+
+        /* ── O CONTROLO: fora da borda NÃO há factorização ───────────────────
+         * Sem isto, «a borda resolve» não se distinguiria de «tudo resolve». Em
+         * AUREO(1) (Δ=5) exige-se que NENHUM par (p,q) inteiro dê p+q=1, p·q=−1. */
+        { long B = 1, C = -1, achou = 0;
+          for(long p = -40; p <= 40; p++) for(long q = -40; q <= 40; q++)
+              if(p + q == B && p * q == C) achou++;
+          printf("      CONTROLO — AUREO(1), Δ=5: pares (p,q) inteiros com p+q=%ld"
+                 " e p·q=%ld: %ld\n", B, C, achou);
+          if(achou != 0) mal++;             /* se houvesse, a borda não seria borda */
+        }
+
+        ok("A DUALIDADE PA/PG DIZ PORQUE A NORMA NÃO CABE, E A BORDA DIZ ONDE CABE. O"
+           " avaliador é ADITIVO — `c₀ + Σ cᵢ·xᵢ`, com ADD16/SUB16 e a multiplicação por"
+           " constante em Zeckendorf — e a norma é MULTIPLICATIVA, N(xy) = N(x)·N(y),"
+           " pedindo produtos de valores lidos em execução. E o molde é UM SÓ, o da"
+           " linha 0, que a PA do relocador anda por todas: nem pré-computar em C serve,"
+           " porque a norma não é função afim do endereço. É essa a razão de o WHERE"
+           " comparar a parte real e o ORDER BY a norma — estrutural, não falta de"
+           " trabalho. MAS HÁ BORDA: a forma factoriza sobre o anel base exactamente"
+           " quando Δ é QUADRADO PERFEITO, e aí é produto de duas LINEARES, que é o que"
+           " o avaliador sabe fazer. Em Δ=0 — a classe PARABÓLICA, o corte entre"
+           " elíptico e hiperbólico — ela é o QUADRADO de UMA linear, (a+b)², e"
+           " `q OP k` vira `|a+b| OP √k` com o √k calculado na compilação: cabe inteiro,"
+           " zero multiplicações. Em Δ=4 — AUREO(0), a borda m=0 onde σ²=1 e o ouro"
+           " colapsa na unidade — é (a+b)(a−b), e o SINAL é o produto dos sinais: duas"
+           " lineares e um AND. É o corte: as duas rectas partem o plano e q tem sinal"
+           " constante em cada parte. O controlo exige que fora da borda NÃO haja"
+           " factorização — em AUREO(1), Δ=5, nenhum par inteiro (p,q) dá p+q=1 e"
+           " p·q=−1 —, senão «a borda resolve» não se distinguiria de «tudo resolve».",
+           mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
