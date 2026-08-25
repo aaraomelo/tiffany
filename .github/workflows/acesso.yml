@@ -118,7 +118,16 @@ jobs:
           #!/bin/bash
           set -e
           AK=/root/.ssh/authorized_keys
-          NOVA="$1"; REVOGAR="$2"
+
+          # OS VALORES ENTRAM POR STDIN, uma linha cada, e é a única forma que
+          # resiste. Passá-los como argumentos do ssh NÃO funciona: o ssh não
+          # entrega argv ao outro lado — junta tudo numa string e manda ao
+          # shell remoto. Medido em 25/08/2026: `ssh host 'sh "$0"' "$PUB"`
+          # pôs a palavra `bash` no authorized_keys (o $0 do shell remoto) e
+          # espalhou a chave pelo resto do comando. Por stdin não há linha de
+          # comando onde o texto se possa misturar.
+          IFS= read -r NOVA    || NOVA=""
+          IFS= read -r REVOGAR || REVOGAR=""
 
           mkdir -p /root/.ssh && chmod 700 /root/.ssh
           touch "$AK" && chmod 600 "$AK"
@@ -127,6 +136,13 @@ jobs:
           if [ -n "$NOVA" ]; then
             TIPO=$(printf '%s' "$NOVA" | cut -d' ' -f1)
             BLOB=$(printf '%s' "$NOVA" | cut -d' ' -f2)
+            # o que chegou tem de continuar a ser uma chave DEPOIS da viagem —
+            # é aqui que a corrupção do transporte aparece, se aparecer
+            case "$TIPO" in
+              ssh-ed25519|ssh-rsa|ecdsa-sha2-*|sk-ssh-ed25519@*|sk-ecdsa-sha2-*) ;;
+              *) echo "!! chegou corrompida: tipo '$TIPO' não é chave. Nada escrito."; exit 1 ;;
+            esac
+            test -n "$BLOB" || { echo "!! chegou sem corpo. Nada escrito."; exit 1; }
             if grep -qF "$BLOB" "$AK"; then
               echo "= já lá estava, não duplico"
             else
@@ -151,23 +167,41 @@ jobs:
             fi
           fi
 
+          # o sshd tem de aceitar o ficheiro; um authorized_keys que ele recusa
+          # é uma porta fechada que só se descobre no próximo login
+          sshd -t || { echo "!! o sshd recusa a configuração"; exit 1; }
+
           echo
           echo "authorized_keys agora ($(grep -c . "$AK") chaves):"
           cut -d' ' -f1,3 "$AK" | sed 's/^/  · /'
           SCRIPT
 
           scp $SSHOPT /tmp/acesso.sh "$HOST:/tmp/acesso.sh"
-          # os dois valores viajam como ARGUMENTOS do ssh ($0 e $1 do lado de lá),
-          # nunca colados dentro do texto do comando remoto
-          ssh $SSHOPT "$HOST" \
-            'chmod +x /tmp/acesso.sh && /tmp/acesso.sh "$0" "$1"; r=$?; rm -f /tmp/acesso.sh; exit $r' \
-            "$PUBKEY" "$REVOGAR"
+          # duas linhas por STDIN: a pública e o alvo da revogação. Nenhuma
+          # delas aparece na linha de comando remota — ver o comentário lá dentro.
+          printf '%s\n%s\n' "$PUBKEY" "$REVOGAR" | ssh $SSHOPT "$HOST" \
+            'bash /tmp/acesso.sh; r=$?; rm -f /tmp/acesso.sh; exit $r'
 
-      - name: A chave nova abre mesmo a porta?
+      - name: A chave chegou INTEIRA ao outro lado?
         if: inputs.pubkey != ''
+        env:
+          PUBKEY: ${{ inputs.pubkey }}
         run: |
           set -e
-          # Instalada não é o mesmo que a funcionar. Só o login prova.
-          echo "::warning::A privada desta chave está na tua máquina, não aqui — a prova final é tua:"
-          echo "  ssh -i <a-tua-privada> ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} 'hostname'"
-          ssh-keygen -l -f /tmp/nova.pub | sed 's/^/  instalada: /'
+          # ISTO NÃO É ZELO A MAIS — é o passo que faltava a 25/08/2026, quando
+          # o transporte corrompeu a chave, o passo anterior disse "instalada"
+          # e ninguém deu por nada. Comparar o BLOB (o corpo em base64, que é a
+          # chave de facto) contra o que ficou no ficheiro é o que separa
+          # "escrevi qualquer coisa" de "escrevi ISTO".
+          HOST="${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
+          SSHOPT="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30"
+          BLOB=$(printf '%s' "$PUBKEY" | cut -d' ' -f2)
+
+          printf '%s\n' "$BLOB" | ssh $SSHOPT "$HOST" \
+            'IFS= read -r b; grep -qF "$b" /root/.ssh/authorized_keys' \
+            || { echo "::error::A chave NÃO está no authorized_keys. Nada mudou de facto."; exit 1; }
+
+          ssh-keygen -l -f /tmp/nova.pub | sed 's/^/  ✓ confirmada no servidor: /'
+          echo
+          echo "::notice::Agora prova do teu lado (a privada está aí, não aqui):"
+          echo "  ssh -i <a-tua-privada> $HOST 'hostname'"
