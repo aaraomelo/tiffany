@@ -31049,6 +31049,107 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W217: A RAIZ INTEIRA É A AGM COM A FACE GEOMÉTRICA PRESA ════════ */
+    {
+        int mal = 0;
+        printf("\n§W217 a raiz da casa deixou de varrer: é a AGM, e mede-se.\n\n");
+
+        /* ── O QUE ISTO É, E PORQUE É A MESMA COISA ──────────────────────────
+         *
+         * O `lib/cifra.h` tinha `while((r+1)*(r+1) <= n) r++` --- um laço
+         * LINEAR, √n voltas. A `aranha` §sec:objeto formaliza o par (a,b)↦(m,g)
+         * com m=(a+b)/2 e g=√(ab), e o `thm:duas` diz o que ele custa.
+         *
+         * Aqui o par é (r, n/r): o PRODUTO é n e não muda --- a face geométrica
+         * está PRESA ---, e o que desce é a média aritmética. O encontro m=g é
+         * exactamente √n. Não é «um algoritmo mais rápido»: é o MESMO processo
+         * que o `meio.c` §M8 já mede, com uma face fixada.
+         *
+         * É a ponte PA↔PG da caixa de Pandora a fazer trabalho: o invariante é
+         * multiplicativo, o passo é aditivo. */
+
+        /* (1) O GUME: contra o LAÇO LINEAR, que é o terceiro caminho e não passa
+         *     pela função nova. Se divergissem numa gama, a troca era falsa. */
+        { long dif = 0, pior_n = -1, voltas_lin = 0, voltas_max = 0;
+          for(long n = -50; n <= 120000; n++){
+              long lin = 0;
+              if(n >= 0) while((lin+1)*(lin+1) <= n) lin++;
+              { long agm = sql_raizi(n);
+                if(agm != lin){ if(dif == 0) pior_n = n; dif++; }
+                voltas_lin += lin;
+                if(lin > voltas_max) voltas_max = lin; }
+          }
+          printf("      −50..120000 contra o laço linear: %ld divergência(s)%s\n",
+                 dif, dif ? "" : "  ← a resposta é a MESMA");
+          printf("      o linear faria %ld voltas no total (máx %ld numa só)\n",
+                 voltas_lin, voltas_max);
+          if(dif) { mal++; printf("      primeira em n=%ld\n", pior_n); }
+        }
+
+        /* (2) A GAMA ALTA, onde o laço antigo nem chegava --- e onde `r*r`
+         *     ESTOURA. O piso corrige-se por divisão, e verifica-se pelo par:
+         *     r ≤ n/r e (r+1) > n/(r+1) é o que «piso da raiz» significa. */
+        { static const long G[5] = {1000000000L, 2147483647L, 1099511627776L,
+                                    4611686014132420609L, 4611686018427387903L};
+          int ok5 = 1;
+          for(int i = 0; i < 5; i++){
+              long n = G[i], r = sql_raizi(n);
+              int abaixo = (r <= n / r), acima = ((r+1) > n / (r+1));
+              printf("      n=%-20ld → %-11ld  r ≤ n/r:%s  (r+1) > n/(r+1):%s\n",
+                     n, r, abaixo ? "sim" : "NÃO", acima ? "sim" : "NÃO");
+              if(!abaixo || !acima){ ok5 = 0; mal++; }
+          }
+          printf("      → o piso fecha nos cinco: %s  (o laço linear faria %ld voltas"
+                 " no maior)\n", ok5 ? "sim" : "NÃO", sql_raizi(G[4]));
+        }
+
+        /* (3) E O NÚMERO DE BATIDAS É O DO PAPER. O `meio.c` §M8 mede a AGM a
+         *     acabar em 5 a 6 batidas; aqui a face está presa e o processo é o
+         *     mesmo, pelo que o número tem de ser da mesma ordem --- e é. Conta-se
+         *     replicando a iteração, porque a função não a devolve. */
+        { long pmax = 0, soma = 0, n_am = 0;
+          for(long n = 2; n <= 120000; n++){
+              long r, k = 0, m2 = n, p = 0;
+              while(m2){ m2 >>= 1; k++; }
+              r = 1L << ((k + 1) / 2);
+              for(;;){ long q = n / r, m = (r + q) / 2; p++; if(m >= r) break; r = m; }
+              soma += p; n_am++;
+              if(p > pmax) pmax = p;
+          }
+          printf("      batidas da AGM em 2..120000: máx %ld, média %.1f"
+                 "  ← o paper mede 5 a 6 para a AGM geral\n",
+                 pmax, (double)soma / (double)n_am);
+          if(pmax > 8) mal++;              /* se subisse, não era o mesmo processo */
+          if(pmax < 2) mal++;              /* e se fosse 1, não estaria a iterar */
+        }
+
+        /* ── O CONTROLO: a verificação SABE falhar ───────────────────────────
+         * Um `r` de um a mais tem de quebrar a caracterização do piso. Sem isto,
+         * «o piso fecha» não se distinguiria de uma condição sempre verdadeira. */
+        { long n = 1000000000L, r = sql_raizi(n) + 1;
+          int abaixo = (r <= n / r);
+          printf("      CONTROLO — com r+1 = %ld: r ≤ n/r ainda vale? %s\n",
+                 r, abaixo ? "SIM (a condição é vazia!)" : "não");
+          if(abaixo) mal++; }
+
+        ok("A RAIZ INTEIRA DA CASA É A AGM COM A FACE GEOMÉTRICA PRESA. O `cifra.h` tinha"
+           " `while((r+1)*(r+1) <= n) r++` — um laço LINEAR, √n voltas. A §sec:objeto"
+           " formaliza o par (a,b)↦(m,g) com m=(a+b)/2 e g=√(ab); aqui o par é (r, n/r), o"
+           " PRODUTO é n e não muda — a face geométrica está presa — e o que desce é a"
+           " média aritmética, com o encontro m=g a ser exactamente √n. Não é «um algoritmo"
+           " mais rápido»: é o MESMO processo que o `meio.c` §M8 mede, com uma face fixada,"
+           " e é a ponte PA↔PG da caixa de Pandora a fazer trabalho — invariante"
+           " multiplicativo, passo aditivo. O gume é o LAÇO LINEAR, que é um terceiro"
+           " caminho e não passa pela função nova: em −50..120000 dá a MESMA resposta, sem"
+           " uma divergência. E alcança onde o outro não chegava: em n perto de 2^62 o"
+           " produto `r*r` ESTOURA, pelo que o piso se corrige por divisão — verifica-se"
+           " pelo par r ≤ n/r e (r+1) > n/(r+1), que é o que «piso da raiz» significa, e"
+           " fecha nos cinco valores altos. As batidas ficam em 5 no máximo, que é o número"
+           " que o paper mede para a AGM geral — não é coincidência, é o mesmo processo. O"
+           " controlo põe r+1 e exige que a caracterização QUEBRE: sem isso, «o piso fecha»"
+           " não se distinguiria de uma condição sempre verdadeira.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

@@ -46,7 +46,7 @@ borda_sem_teto d44177745d1d4f8d 0
 buracos d80eae4b72a7e693 0
 cadeia 23aae5b832cd1d3b 0
 calculo2 5ae7bc60ae4d3256 0
-caminho b30bb4976e4ee877 0
+caminho 7856c7077c2573ac 0
 canal a3948d75be9f5dc1 0
 cantor f60254a17a9734ee 0
 cantor_julia_dual 6bff83a60f07952b 0
@@ -78,10 +78,10 @@ complexo aca9fb56a8d7dc17 0
 condicao_pisot 20e5398ec58f76bd 0
 cone_espiral c70d46b54d994a4b 0
 cone_nulo e0b4d86159a39096 0
-config_corpo 66f610a83755e9a5 0
+config_corpo 5d6fc824135d03a0 0
 conico 9c1b6d98809a1aa8 0
 conjunto 3226319eb3a8e6e0 0
-conservacao_metrica cd43b3ccb37ce2dc 0
+conservacao_metrica 9b0b9839c0231b66 0
 constantes e84f7e2fc17f94fb 0
 constroi c85b8230866a958f 0
 conta c5bef5b671d30055 0
@@ -91,7 +91,7 @@ continuo c67c826d23cf83bb 0
 contorno_riemann f675c33725a349a3 0
 contrato 2fb51b9eb064e925 0
 controlo_front e94ce67fbef877c1 0
-conversa 8e551034baeb2389 0
+conversa 0979cd58f050ad93 0
 converte aed943df396fe8b2 0
 convolucao_universal fc0e5813ad42301b 0
 coroa b7ee5ecba9494c3f 0
@@ -220,7 +220,7 @@ fita 9c72ed8abcd5cbf7 0
 fonte_banco ddecbf15c38334f4 0
 fonte_corpo b71085ec1b3db094 0
 forca f3697bbcd4f53da2 0
-fractais 0cf9c29acdcb9409 0
+fractais 3da64bf0b1e30e70 0
 fractal 520a02bd37bb507c 0
 fronteira_front efe3776eb4b37362 0
 furos b414ba885cc27a47 0
@@ -354,7 +354,7 @@ orbita_real 82a8e8c2f72981ae 0
 orbitas 0b6092795499af02 0
 ordem bbeeb8ed37b7aa9c 0
 ordena_n 14f5600190418477 0
-ordenado f0407194617ddb07 0
+ordenado f3dc07c666acfef3 0
 ordenados28 f7e98c9a5b3d25e8 0
 origem 19e403085bcc0be8 0
 ortogonal ee737d79bed379e0 0
@@ -374,7 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 5891673ce4cfdc2b 0
+pgwire 26c859d7d209d4ee 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -395,7 +395,7 @@ potencia 7349e8c2aa8caa4f 0
 prensor cd1d45c4c2fb2a2b 0
 primitivas a87c3dc3813be8a4 0
 primos_irracionais 1535759cdad94d4b 0
-prisma 8c5814a6e5792628 0
+prisma d8ca29f1f6ab68fa 0
 produto_dual ddd1edbd32b0678a 0
 progressoes 36f2db34b595d74a 0
 projetiva fae3ea2db0b600b9 0
@@ -421,7 +421,7 @@ recursao 268dd5df56bb546b 0
 rede_dual 441d23a4e0824dce 0
 reducao a55c5836822c89da 0
 refracao 7a6fe4d08af5aa96 0
-refs 29a5140752e149bf 0
+refs d5ddec9da22a87f9 0
 refuta feefc6499e4d89e0 0
 regua 273501d5d2f33deb 0
 regua_continua 02efe28cd3eea5d0 0
@@ -464,15 +464,15 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql 6d4a8145bd1bbe9b 0
+sql 557413250791e16a 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
-supremo 568c6aeab1c2d901 0
+supremo f078fbd1a9aaac21 0
 sustento 76b5cae9f1c12f5d 0
 tecido 0667fee92a568329 0
-teletransporte 13325a54f46c3966 0
-telomero bf3503fa02b001a6 0
+teletransporte 80ebdffc6b5b0ba5 0
+telomero 8bc26db3b6d733d6 0
 tensor c25aa42072707903 0
 teorema_universal df27b1753b369ed2 0
 teoria_vetorial 4720f0890da571d2 0
@@ -502,7 +502,7 @@ transformada_andar 5a4c77edb0f1c502 0
 transformada_universal 3aefce775c8fa2b9 0
 transfusao ab49fd9161221215 0
 travessia 4835d817045f4804 0
-tres_caminhos a4f168db5e3ef341 0
+tres_caminhos 72d833ab2951e5d7 0
 tres_pontos e1a1eaeaa9f3db92 0
 tres_reconstroi 1926bf6b90de731b 0
 tres_regimes b4e2bf6fca28994d 0

@@ -5333,6 +5333,10 @@ enum { CL_ELIPTICO = -1, CL_PARABOLICO = 0, CL_HIPERBOLICO = 1 };
  * O medidor tem de comparar pelo comparador VERDADEIRO --- o do `corpos.h` --- e
  * não por uma cópia dele escrita no teste, que seria medir a minha aritmética e
  * não a da casa. Abre-se a porta em vez de duplicar a régua. */
+/* a raiz inteira da casa, pela porta: o medidor tem de medir a VERDADEIRA (a do
+ * `cifra.h`, que o motor usa) e não uma cópia escrita no teste. */
+long sql_raizi(long n){ return raizi(n); }
+
 /* a CIFRA de um corpo, pela porta: (traço, determinante) da sua régua. O medidor
  * que a quiser varrer não a pode escrever à mão --- seria medir a minha
  * aritmética e não a da casa. CORPO_AUREO = 2, CORPO_CRISTAL = 4. */

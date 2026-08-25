@@ -647,6 +647,24 @@ faz falta --- com uma só, a segunda batida não move. Tudo em inteiros, com a r
 folga do piso dita onde é usada. O encaixotamento certificado está em
 \code{tests/agm.c} §A1--§A3.}
 
+\medskip\noindent\textbf{E prende-se uma face para obter a raiz.} Se em vez de
+mover as duas se \textbf{fixar o produto}, o par $(r,\,n/r)$ tem $g=\sqrt{n}$
+constante --- a face geométrica está presa --- e só a aritmética desce. O
+encontro $m=g$ do Teor.~\ref{thm:corte} é então exactamente $\sqrt{n}$, e o
+processo é o \emph{mesmo}: a mesma cota bem-fundada garante que acaba, e a mesma
+$\delta'\le\delta^{2}/(2m)$ diz que acaba depressa. \emph{Não é um algoritmo
+para a raiz: é este algoritmo com uma face imobilizada.}
+
+\medido{\code{lib/cifra.h} \code{raizi}, medido em \code{tests/pgwire.c} \S W217.
+Era um laço linear --- $\sqrt{n}$ voltas ---, e passou a ser o par $(r,n/r)$. O
+gume é o próprio laço linear, que é um terceiro caminho: em $-50..120000$ os dois
+dão a \textbf{mesma} resposta, sem uma divergência, e as batidas caem de $346$
+(o máximo do laço nessa gama, $27\,653\,185$ voltas ao todo) para $\mathbf{5}$ --- \emph{o mesmo cinco} que o §M8 mede para a AGM de
+duas faces, o que não é coincidência mas o mesmo processo. E alcança onde o outro
+não chegava: perto de $2^{62}$ o produto $r\cdot r$ transborda, pelo que o piso
+se caracteriza por divisão, $r\le n/r$ e $(r{+}1)>n/(r{+}1)$; fecha nos cinco
+valores altos, e o controlo põe $r{+}1$ para exigir que a caracterização quebre.}
+
 \colunas{\code{thm:duas}(2) e (4); \code{lem:conserva}}
         {$\partial^{\times}x=ab/x$; as duas classes; o par $(a,b)$ basta}
         {\code{tests/meio.c} §M8; \code{tests/agm.c} §A1--§A3}

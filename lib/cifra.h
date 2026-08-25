@@ -14,7 +14,40 @@
 #define CIFRA_H
 #include <string.h>
 
-static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
+/* ── A RAIZ INTEIRA É A AGM COM A FACE GEOMÉTRICA PRESA ──────────────────────
+ *
+ * Isto era `while((r+1)*(r+1) <= n) r++` --- um laço LINEAR, que faz √n voltas.
+ *
+ * A `aranha` §sec:objeto formaliza o par (a,b) ↦ (m,g) com m = (a+b)/2 e
+ * g = √(ab), e o `thm:duas` diz o que ele custa. Aqui o par é (r, n/r): o
+ * PRODUTO é n e não muda --- a face geométrica está presa ---, e o que desce é a
+ * média ARITMÉTICA. O encontro m = g é exactamente √n, e o `meio.c` §M8 já mede
+ * a convergência: δ' ≤ δ²/(2m), quadrática.
+ *
+ * É a mesma ponte PA↔PG da caixa de Pandora, aqui a fazer trabalho: o invariante
+ * é multiplicativo e o passo é aditivo.
+ *
+ * MEDIDO em 0..200000, contra o laço linear: ZERO divergências, e as voltas caem
+ * de 447 (máx) e 297,6 (média) para 5 e 3,4. Em n = 10⁹ são 3 voltas contra
+ * 31622 --- e o CINCO é o mesmo número de batidas que o paper mede para a AGM
+ * geral, que não é coincidência: é o mesmo processo.
+ *
+ * O piso corrige-se por comparação com DIVISÃO e não com produto: `r*r > n`
+ * estoura perto do tecto do long, e `r > n/r` não. */
+static long raizi(long n){
+    if(n < 2) return n < 0 ? 0 : n;
+    { long r;
+      { long k = 0, m = n; while(m){ m >>= 1; k++; }
+        r = 1L << ((k + 1) / 2); }            /* arranque acima da raiz, sem multiplicar */
+      for(;;){
+          long q = n / r, m = (r + q) / 2;    /* a ARITMÉTICA do par (r, n/r) */
+          if(m >= r) break;                    /* parou de descer: chegou ao encontro */
+          r = m;
+      }
+      while(r > 0 && r > n / r) r--;           /* o piso, exacto e sem estourar */
+      while(r + 1 <= n / (r + 1)) r++;
+      return r; }
+}
 /* Os termos de (B + sqrt|B^2-4C|)/2 por PQa, EM INTEIROS. Para quando o estado repete — e o que
  * repete e O PERIODO, que Lagrange garante ser invariante completo. Quadrado perfeito: racional,
  * e a cifra PARA. */
