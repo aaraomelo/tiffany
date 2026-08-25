@@ -310,7 +310,7 @@ int main(void){
            " involucoes que COMUTAM mas reflectem em centros diferentes — 0 e -1 — e por isso"
            " a orbita tem quatro estados. Excepto no PONTO FIXO m = 0, onde a segunda nao move"
            " nada e a orbita DEGENERA em dois. E w+1 sobe para 2/3 sempre POR BAIXO, com a"
-           " distancia a valer 16/(9D) — o numerador e' 4.4, o discriminante a aparecer, e a"
+           " DIFERENCA DOS QUADRADOS a valer 16/(9D) - nao a distancia — o numerador e' 4.4, o discriminante a aparecer, e a"
            " conta e' exacta em inteiros: aqui nao ha' tolerancia nenhuma. E a troca de sinal e'"
            " verificada pela DEFINICAO — w + (-w) = 0 nas duas coordenadas — porque a contagem"
            " sozinha aceita qualquer involucao que separe quatro estados",

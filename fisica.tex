@@ -3,10 +3,10 @@
 %  fisica.tex — A FÍSICA ARANIANA. Compila SOZINHO (pdflatex fisica.tex) e
 %  também dentro do livro. O preâmbulo é o estilo.tex.
 %
-%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos seis
+%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos dez
 %  lugares onde ela opera — álgebra, topologia, análise, geometria, mecânica,
-%  óptica. Nada foi inventado e nada foi acrescentado: os enunciados, as provas
-%  e os medidos são os que a obra já tem, postos cada um no seu sítio.
+%  óptica, partículas e núcleo, termodinâmica, cosmologia, redes. Nada foi
+%  inventado e nada foi acrescentado: os enunciados, as provas%  e os medidos são os que a obra já tem, postos cada um no seu sítio.
 %
 %  AUTOCONTIDO: toda a matemática de que precisa está DENTRO. Onde um irmão da
 %  obra dizia a mesma coisa, o enunciado foi DUPLICADO e não referenciado — este
@@ -139,8 +139,7 @@ a pergunta & a resposta & onde \\
 O que é o ponto de partida? & dois extremos e a dobra que os troca & Def.~\ref{fis:def:op} \\
 Donde vêm as operações e os dois dígitos? & da dobra: sem meio, são precisas duas faces & Teor.~\ref{fis:thm:duas},~\ref{fis:thm:B} \\
 E as coordenadas? & a tupla ordenada: a \emph{representação} & Teor.~\ref{fis:thm:coord} \\
-Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{fis:hipercubo} \\
-Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{fis:thm:mult}(3) \\
+Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{fis:folha} \\Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{fis:thm:mult}(3) \\
 O que acontece quando volta? & a dobra: $G>1$ & Def.~\ref{fis:def:objeto} \\
 Como se representam os passos? & por uma palavra no alfabeto das arestas & Teor.~\ref{fis:thm:palavra} \\
 E se forem muitos construtores? & o campo não os distingue & Teor.~\ref{fis:thm:agentes} \\
@@ -200,9 +199,21 @@ que segue precisa de escrever um número negativo.
 \begin{teorema}[uma composição não chega]\label{fis:thm:duas}
 Com $\partial$ da Def.~\ref{fis:def:op}:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{O invariante é o neutro.} O valor comum $e$ cumpre
-$e\circ x=x\circ e=x$.
-\item[(2)] \textbf{$\partial$ é involutiva, e tem um ponto fixo: o MEIO.} São
+\item[(1)] \textbf{O invariante é o neutro exactamente quando $\partial$ é a
+inversão.} Numa composição comutativa, associativa e com \emph{volta} --- a mesma
+palavra que a Def.~\ref{fis:def:op} já exige de $\partial$ ---, de neutro $n$,
+são equivalentes:
+\[
+e=n
+\qquad\Longleftrightarrow\qquad
+\partial n=n
+\qquad\Longleftrightarrow\qquad
+\partial x=x^{-1}\ \text{para todo }x .
+\]
+E na falta delas $\partial$ é a inversão \emph{seguida da translação por $e$},
+$\partial x=e\circ x^{-1}$ --- que é a Def.~\ref{fis:def:op} com $e=a+b$, antes
+de se escolher a régua. \emph{A normalização não é o que faz o teorema: é o que a
+equivalência diz que se está a fazer.}\item[(2)] \textbf{$\partial$ é involutiva, e tem um ponto fixo: o MEIO.} São
 factos da dobra e não dependem de composição nenhuma:
 \[
 \partial^{2}=\mathrm{id},\qquad \partial m=m,\qquad m=\tfrac{a+b}{2} .
@@ -237,11 +248,17 @@ Teor.~\ref{fis:thm:coord} vai ler.
 \end{teorema}
 
 \begin{proof}
-(1) Aplicando a definição a $x$ e a $\partial x$ vem
-$x\circ\partial x=e=\partial x\circ\partial\partial x$. Compondo
-$e\circ x=(x\circ\partial x)\circ x$ e usando a associatividade, o valor não
-depende de $x$; avaliando em $x=e$ obtém-se $e\circ e=e$, e daí $e\circ x=x$.
-
+(1) Volta mais associatividade dão grupo: seja $e_a$ a solução de
+$e_a\circ a=a$; para $b$ qualquer, tomando $u$ com $a\circ u=b$ vem
+$e_a\circ b=(e_a\circ a)\circ u=a\circ u=b$, pelo que $e_a$ é neutro à esquerda e
+não depende de $a$; do outro lado o mesmo, e os dois neutros coincidem.
+Chame-se-lhe $n$. De $x\circ\partial x=e$ tira-se $\partial x=e\circ x^{-1}$, que
+é involutivo por comutatividade. Se $e=n$ então $\partial x=x^{-1}$ e
+$\partial n=n$; se $\partial n=n$ então $e=n\circ\partial n=n$; e se $\partial$ é
+a inversão então $e=x\circ x^{-1}=n$. O ciclo fecha. \emph{Que a hipótese não se
+pode deitar fora}: sobre um ciclo de três, $\partial x=c\circ x^{-1}$ cumpre tudo
+o que a Def.~\ref{fis:def:op} pede e o invariante é $c$, que pode ser qualquer um
+dos três.
 (2) $\partial\partial x=a+b-(a+b-x)=x$, directamente; e $a+b-x=x$ tem a única
 solução $x=\tfrac{a+b}{2}$, que existe sempre que o $2$ se inverta. Note-se que
 \emph{escrever} a dobra já usa o dois --- é o número de extremos --- pelo que
@@ -785,9 +802,10 @@ Para todos $f\in V$ e $k\in X$,
 \]
 --- cada $\chi_k$ é vetor próprio de \emph{todos} os operadores de convolução ao
 mesmo tempo, e o valor próprio de $C_f$ em $\chi_k$ é a coordenada
-$\widehat{f}(k)$. Os $2^{m}$ caracteres são linearmente independentes, logo
-formam base de $V$.
-\end{teorema}
+$\widehat{f}(k)$. Os $2^{m}$ caracteres são linearmente independentes --- são
+\textbf{livres} sobre $\Zc$, e é só a liberdade que se usa a seguir. Base de $V$
+não são: $\delta_0=2^{-m}\sum_k\chi_k$ pede uma divisão que $\Zc$ não tem, e é
+essa divisão --- e não outra coisa --- o fator $2^{m}$ do Teor.~\ref{fis:thm:H}.\end{teorema}
 
 \begin{proof}
 $(f*\chi_k)(y)=\sum_x f(x)\chi_k(x\oplus y)=\chi_k(y)\sum_x f(x)\chi_k(x)$ pelo
@@ -798,14 +816,16 @@ ortogonalidade: uma família ortogonal de vetores não nulos é livre.
 \begin{definicao}[a transformada]\label{fis:def:transf}
 $\mathcal{F}(f)_k=\widehat{f}(k)=\sum_x f(x)\chi_k(x)$. Na base canónica a sua
 matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: é a \textbf{avaliação nos
-caracteres}, inteira. E ela é a mudança de base \emph{não normalizada}: as
-coordenadas de $f$ na base $\{\chi_k\}$ são $c=2^{-m}\mathcal{F}(f)$.
-\end{definicao}
+caracteres}, inteira. E ela é a mudança de base \emph{não normalizada}: escrever $f$ na família
+$\{\chi_k\}$ pediria $c=2^{-m}\mathcal{F}(f)$, \emph{e é exactamente essa divisão
+que $\Zc$ não faz}. O fator fica pendurado, e o Teor.~\ref{fis:thm:H} diz onde.\end{definicao}
 
 \begin{teorema}[inversa, involutividade e Parseval]\label{fis:thm:H}
-$H^{2}=2^{m}\,\mathrm{Id}$; logo $\mathcal{F}$ é invertível com
-$\mathcal{F}^{-1}=2^{-m}\mathcal{F}$, e
-\[
+$H^{2}=2^{m}\,\mathrm{Id}$; logo $\mathcal{F}$ é \textbf{injetiva} e a volta
+fecha \emph{a menos do fator $2^{m}$} --- sobre $\Zc$ ela não é invertível para
+$m\ge1$, \emph{e não tinha de ser}: o fator é a escala que a tabela desta secção
+cobra, e é ele que distingue esta ordem da ordem total, onde a volta fecha sem
+fator nenhum. E\[
 \mathcal{F}\circ \mathcal{F}=2^{m}\cdot\mathrm{id},\qquad
 \lVert \mathcal{F}(f)\rVert^{2}=2^{m}\lVert f\rVert^{2}.
 \]
@@ -863,8 +883,10 @@ do grafo é uma delas.
 
 \begin{teorema}[convolução, deconvolução, e onde degenera]\label{fis:thm:conv}
 $\mathcal{F}(f*g)=\mathcal{F}(f)\cdot \mathcal{F}(g)$ ponto a ponto. Se
-$\widehat{f}(k)\neq0$ para todo $k$, então $C_f$ é invertível. Se
-$\widehat{f}(k_0)=0$ para algum $k_0$, então $C_f$ é singular:
+$\widehat{f}(k)\neq0$ para todo $k$, então $C_f$ é \textbf{injetivo}; e é
+invertível exactamente quando cada $\widehat{f}(k)$ se inverte em $\Zc$ ---
+\emph{as duas coisas não coincidem}, e $C_{\delta_0+\delta_0}$ testemunha-o: é
+injetivo e não é invertível, porque $\Zc$ tem opostos e não tem inversos. Se$\widehat{f}(k_0)=0$ para algum $k_0$, então $C_f$ é singular:
 $\chi_{k_0}\in\ker C_f$, e dois $g$ que difiram por um múltiplo de $\chi_{k_0}$
 dão o mesmo produto.
 \end{teorema}
@@ -1587,8 +1609,11 @@ as identidades exatas valem para $g_{\ast}$ e o algoritmo corre com $g$.
 
 \begin{proof}
 $\partial^{\times}$ troca porque $ab/a=b$; é involutiva porque $ab/(ab/x)=x$; e
-$ab/x=x$ tem a única solução positiva $x=\sqrt{ab}$, que existe sempre que a raiz
-se inverta --- a mesma condição que o $2$ era na face aditiva.
+$ab/x=x$ tem a única solução positiva $x=\sqrt{ab}$ --- e ela existe no degrau
+$X_4$ da §\ref{fis:escada}, e em geral \emph{não} nos anteriores: é este ponto
+fixo que obriga a subir de andar. \emph{E é por isso que o piso da
+Def.~\ref{fis:def:piso} faz falta}: sem ele o processo sai do objeto que o
+constrói. Isto vale sempre que a raizse inverta --- a mesma condição que o $2$ era na face aditiva.
 \end{proof}
 
 \medskip\noindent\textbf{A grade, e porque ela tem de se dizer antes.} O
@@ -1678,12 +1703,17 @@ todos, então $\abs{x-y}\le m_{n}-g_{n}$ para todo $n$. No caso~I isso dá
 $\abs{x-y}\le m_N-g_N=0$ e o habitante é \textbf{único}; no caso~II dá
 $\abs{x-y}<u$, e a unicidade é \emph{à resolução da régua} --- que é tudo o que
 uma régua de grão $u$ pode afirmar;
-\item[(5)] \textbf{e no caso~I esse ponto é o ponto fixo comum às duas faces.}
-$\partial^{+}$ fixa $m$ e $\partial^{\times}$ fixa $g_{\ast}$; os dois são
-\emph{diferentes} enquanto $a\neq b$, e coincidem exatamente onde o processo
-acaba. \emph{O corte não é um ponto que se ache entre as classes --- é o ponto
-fixo que as duas faces passam a partilhar.}
-\end{enumerate}
+\item[(5)] \textbf{e o ponto fixo comum é exacto só onde $\delta=0$.} Os pontos
+fixos \emph{exactos} das duas faces são $m_{\ast}=\tfrac{a+b}{2}$ e
+$g_{\ast}=\sqrt{ab}$, e coincidem \textbf{se e só se} $a=b$ --- que é $\delta=0$
+no Cor.~\ref{fis:cor:medias}. Na grade o processo acaba com $m_N=g_N$, e é isso
+que a régua consegue dizer; \emph{mas isso não obriga $a_N=b_N$}, e convém não
+colar as duas coisas: com $a=4$ e $b=5$ vem $m=\lfloor\tfrac92\rfloor=4$ e
+$g=\lfloor\sqrt{20}\rfloor=4$, e as pontas continuam distintas. \emph{A régua faz
+coincidir o que a grade não separa}, e o que fica dito do ponto é que ele está no
+grão: $g_N\le g_{\ast}<g_N+u$. \emph{O corte não é um ponto que se ache entre as
+classes --- é o ponto que as duas faces passam a partilhar, exactamente quando
+$\delta=0$ e à resolução da régua sempre.}\end{enumerate}
 Isto é um \textbf{corte}, e é \emph{produzido} em vez de postulado --- e
 produzido por uma conta que \emph{termina}, não por um limite:
 \[
@@ -1740,19 +1770,62 @@ comuns coincidem; no caso~II ela é $u$, e distam menos que um grão.
 \emph{Nenhum axioma de completude é invocado} --- o argumento é o do pombal com a
 folga já no fundo.
 
-(5) Os dois pontos fixos são $\tfrac{a+b}{2}$ e $\sqrt{ab}$, e coincidem sse
-$(a+b)^{2}=4ab$, isto é sse $a=b$ --- que é o caso~I de (3). Aí, com $a=b=p$, vem
-$\partial^{+}p=p+p-p=p$ e $\partial^{\times}p=p^{2}/p=p$.
+(5) Os dois pontos fixos exactos são $\tfrac{a+b}{2}$ e $\sqrt{ab}$, e coincidem
+sse $(a+b)^{2}=4ab$, isto é sse $(a-b)^{2}=0$, isto é sse $a=b$. Aí, com $a=b=p$,
+vem $\partial^{+}p=p+p-p=p$ e $\partial^{\times}p=p^{2}/p=p$: o ponto é fixo pelas
+duas ao mesmo tempo e sem resíduo. \emph{Que a igualdade na grade não devolve a
+igualdade exacta} é a testemunha do enunciado, e é uma conta de dois piso; e
+$g_N\le g_{\ast}<g_N+u$ é a Def.~\ref{fis:def:piso} aplicada ao último par.\end{proof}
+
+\begin{lema}[a largura halva, e à face geométrica só se pede que não saia]\label{fis:lem:descida}
+Seja $w=m-g$ a largura em grãos e $(m',g')$ a batida seguinte, com $m'$ o piso de
+$\tfrac{m+g}{2}$ e $g'$ \emph{qualquer} elemento da grade com $g\le g'\le m'$.
+Então
+\[
+\boxed{\;m'=m-\Bigl\lceil\frac{w}{2}\Bigr\rceil
+\qquad\text{e}\qquad
+w'\;\le\;\Bigl\lfloor\frac{w}{2}\Bigr\rfloor\;}
+\]
+\emph{E nada disto olha para a raiz.} A única coisa pedida à face geométrica é
+que o seu valor \textbf{fique no intervalo} --- não o seu tamanho, não a sua
+identidade. \emph{A largura halva por causa da face aditiva; a geométrica só tem
+de não sair.}
+\end{lema}
+
+\begin{proof}
+Escreva-se $g=m-w$; então $\tfrac{m+g}{2}=m-\tfrac{w}{2}$, e o maior ponto da
+grade que não passa esse valor é $m-\lceil w/2\rceil$. Com $g'\ge g$,
+\[
+w'=m'-g'\;\le\;m-\Bigl\lceil\frac{w}{2}\Bigr\rceil-g
+\;=\;w-\Bigl\lceil\frac{w}{2}\Bigr\rceil\;=\;\Bigl\lfloor\frac{w}{2}\Bigr\rfloor .
+\]
+E para $w\ge1$ vem $\lceil w/2\rceil\ge1$, isto é $m'\le m-u$: a descida é
+estrita enquanto houver largura.
 \end{proof}
 
-\medskip\noindent\textbf{A cota, e o que a segunda face acrescenta.} De
-$m'\le m-u$ sai imediatamente que, se a largura inicial tem $N$ grãos, não há
-mais de $N$ descidas: a terminação é literalmente $N,\,N-1,\,\ldots,\,0$. É
-\emph{essa} cota que prova que acaba, e ela não usa a raiz. O que a face
-geométrica acrescenta é a \textbf{velocidade}: por (2) o colapso é quadrático.
-\emph{Sem a primeira não se sabe que acaba, sem a segunda não se sabe que acaba
-depressa} --- e só a primeira é uma demonstração de terminação.
+\begin{corolario}[a cota é logarítmica, e ainda não usa a raiz]\label{fis:cor:cota}
+Se a largura inicial tem $N$ grãos, o processo chega à largura zero ao fim de
+\[
+\boxed{\;\bigl\lceil\log_{2}N\bigr\rceil\ \text{batidas}\;}
+\]
+--- e não $N$. A cota sai do Lema~\ref{fis:lem:descida} sozinho, e portanto vale
+para \emph{qualquer} segunda face que devolva um ponto do intervalo.
+\end{corolario}
 
+\begin{proof}
+Por indução, $w_n\le\lfloor N/2^{n}\rfloor$: o caso $n=0$ é a hipótese, e do
+Lema~\ref{fis:lem:descida} vem
+$w_{n+1}\le\lfloor w_n/2\rfloor\le\bigl\lfloor\lfloor N/2^{n}\rfloor/2\bigr\rfloor
+=\lfloor N/2^{n+1}\rfloor$. Com $2^{n}\ge N$ vem $w_n=0$.
+\end{proof}
+
+\medskip\noindent\textbf{A cota, e o que cada face acrescenta.} São \emph{três}
+números, e não dois. A descida ingénua --- um grão por batida --- dá $N$. O
+Lema~\ref{fis:lem:descida} dá $\log_{2}N$, e ainda \textbf{sem a raiz}: a face
+aditiva halva a largura sozinha, e à geométrica só se pede que não saia do
+intervalo. E a cláusula (2) dá $\log\log N$, que é onde a raiz finalmente se
+paga. \emph{Sem a primeira não se sabe que acaba; sem a segunda não se sabe que
+acaba \textbf{depressa}} --- e só a primeira é uma demonstração de terminação.
 \medskip\noindent\textbf{E é aqui que a segunda face se paga.} Com \emph{uma}
 face só, o par colapsa num passo --- $(a,b)\mapsto(m,m)$ --- e a batida seguinte
 não move nada: para continuar é preciso \textbf{escolher} um lado em cada nível,
@@ -1936,11 +2009,84 @@ Def.~\ref{fis:def:op}}.
 \end{proposicao}
 
 \begin{proof}
-Das duas séries vem $c'=-s$ e $s'=c$; logo
-$(c^{2}+s^{2})'=2cc'+2ss'=-2cs+2sc=0$, e o valor em $0$ é $1$, pelo que o par
-nunca sai do nível.
+A cisão por paridade diz que $c$ é \emph{par} e $s$ é \emph{ímpar} --- os
+expoentes de $c$ são os $t^{2k}$ e os de $s$ os $t^{2k+1}$ --- pelo que
+$\exp(-tJ)=c(t)\cdot1-s(t)\cdot J$. Multiplicando a cisão pela sua própria
+reflexão, e usando \emph{só} $J^{2}=-1$:
+\[
+1=\exp(0)=\exp(tJ)\exp(-tJ)=(c+sJ)(c-sJ)=c^{2}-s^{2}J^{2}=c^{2}+s^{2}.
+\]
+\emph{A conservação é a cisão vezes a sua reflexão}, e não entrou mais nada ---
+nem derivada, nem limite. Quanto ao encaixotado, ele \emph{define} $\pi$ porque o
+mínimo existe: é a Prop.~\ref{fis:prop:piexiste}.
 \end{proof}
 
+\begin{proposicao}[o $\pi$ existe, e é produzido por um corte]\label{fis:prop:piexiste}
+O conjunto $\{t>0:\exp(tJ)\cdot1=-1\}$ não é vazio e tem \textbf{mínimo}: a
+proposição anterior \emph{define} $\pi$, e não apenas o nomeia. Mais: sendo
+$t_0$ o primeiro zero de $c$,
+\[
+\boxed{\;\exp(t_0J)=J,\qquad \pi=2t_0,\qquad
+\exp(2\pi J)=1\ \text{com $2\pi$ o \textbf{menor} tempo que fecha}\;}
+\]
+--- \emph{o quarto de volta é o corte, a meia volta é o seu dobro, e a volta
+inteira é o período}.
+\end{proposicao}
+
+\begin{proof}
+\emph{A condição reduz-se a uma equação só.} $\exp(tJ)\cdot1=c(t)+s(t)J$, e
+$c+sJ=-1$ pede $c(t)=-1$ e $s(t)=0$; mas $c^{2}+s^{2}=1$, pelo que $c(t)=-1$ já
+força $s(t)=0$. Basta procurar onde $c$ vale $-1$.
+
+\emph{As duas cotas alternadas.} Para $0<t\le2$ os termos de $c$ decrescem a
+partir de $k=1$ --- a razão é $t^{2}/\bigl((2k{+}1)(2k{+}2)\bigr)$, e
+$t^{2}\le4<12$ --- e os de $s$ decrescem já de $k=0$, porque $t^{2}\le4<6$.
+Truncando cada série num termo, com o resto alternado a ter o sinal do primeiro
+termo omitido:
+\[
+1-\frac{t^{2}}{2}\;\le\;c(t)\;\le\;1-\frac{t^{2}}{2}+\frac{t^{4}}{24},
+\qquad
+s(t)\;\ge\;t\Bigl(1-\frac{t^{2}}{6}\Bigr) .
+\]
+
+\emph{$c$ muda de sinal antes de $t=2$}, porque $c(0)=1>0$ e
+$c(2)\le1-2+\tfrac{2}{3}=-\tfrac13<0$.
+
+\emph{Logo há um primeiro zero, e ele é um corte.} O sinal de $c$ decide-se em
+cada ponto da grade, e a bissecção do Teor.~\ref{fis:thm:duas}(6) sobre $[0,2]$
+--- ficando de cada vez com a metade onde o sinal muda --- dá um encaixe cuja
+largura halva (Lema~\ref{fis:lem:descida}). É o Teor.~\ref{fis:thm:corte} com
+\emph{uma} face presa: o ponto que ele determina é $t_0$, o menor $t>0$ com
+$c(t_0)=0$, e $c>0$ em $[0,t_0)$. \emph{O $\pi$ não é postulado: é o corte que a
+mudança de sinal produz.}
+
+\emph{Em $t_0$ o fluxo vale $J$.} Como $t_0\le2<\sqrt6$, a cota de $s$ é positiva
+em $(0,t_0]$; e $c(t_0)^{2}+s(t_0)^{2}=1$ com $c(t_0)=0$ dá $s(t_0)=1$. Donde
+$\exp(t_0J)=0\cdot1+1\cdot J=J$.
+
+\emph{E $2t_0$ é o primeiro tempo que dá $-1$.} Primeiro,
+$\exp(2t_0J)=\exp(t_0J)^{2}=J^{2}=-1$: o conjunto não é vazio. Depois, se
+$0<t<2t_0$, escreva-se $t=t_0+r$ com $\abs{r}<t_0$; então
+\[
+\exp(tJ)=\exp(t_0J)\exp(rJ)=J\bigl(c(r)+s(r)J\bigr)=-s(r)+c(r)\,J ,
+\]
+e isso vale $-1$ só se $c(r)=0$ --- impossível, porque $c$ é \emph{par} e não se
+anula em $(-t_0,t_0)$. Logo o mínimo existe e $\pi=2t_0$.
+
+\emph{O período é $2\pi$.} $\exp(2\pi J)=\exp(\pi J)^{2}=(-1)^{2}=1$. Que nenhum
+$\tau\in(0,2\pi)$ feche vê-se por descida: se $\exp(\tau J)=1$, ponha-se
+$\exp(\tfrac{\tau}{2}J)=c+sJ$; do quadrado vem $c^{2}-s^{2}=1$ e $2cs=0$, que com
+$c^{2}+s^{2}=1$ dá $s=0$ e $c=\pm1$. Se $c=-1$, então $\tfrac{\tau}{2}\ge\pi$ por
+definição de $\pi$, e $\tau\ge2\pi$. Se $c=+1$, então $\tfrac{\tau}{2}$ também
+fecha, e repetindo obtém-se $\tau/2^{n}$ a fechar para todo $n$ --- mas a cota de
+cima dá $c(t)<1$ para $0<t\le2$, logo nenhum $t$ de $(0,2]$ fecha. Contradição.
+\end{proof}
+
+\medskip\noindent\textbf{E o $\pi$ fica ligado à §\ref{fis:corte} pelo
+mecanismo, não pela retórica.} Ele é \emph{literalmente} um corte produzido por
+bissecção --- o Teor.~\ref{fis:thm:corte} com a face geométrica substituída pelo
+sinal de $c$ --- e é por isso que o $J^{4}=\mathrm{id}$ do relógio discreto é
+esta mesma frase contada em quartos.
 \medskip\noindent Nenhuma palavra disto é geométrica: não há arco, não há área, e
 o círculo aparece \emph{depois}, como a figura que este fluxo desenha ---
 \emph{a figura não é o dado, é o rasto}. E é isto que faz de $\pi$ uma
@@ -2036,25 +2182,54 @@ bit de $\sigma$ obtêm-se as duas cópias e o emparelhamento, como no
 Teor.~\ref{fis:thm:hiper}.
 \end{proof}
 
-\medskip\noindent\textbf{E neste grafo o campo $G$ É o triângulo de Pascal.} Um
-percurso de $n$ passos pelas direções de aresta chega à célula que a \emph{soma}
-dos passos indica; e a soma é comutativa, logo esquece a ordem por que foram
-dados. Quantos índices caem então na mesma célula? Os que usam os mesmos eixos por
-outra ordem --- e isso é $\binom{n}{k}$:
+\begin{teorema}[o campo do peso é a linha de Pascal]\label{fis:thm:pascal}
+Seja $I=Q_n$ --- as $2^{n}$ palavras de $n$ bits --- e $\pi(x)=\abs{x}$ o
+\textbf{peso}, o número de bits a $1$. Então $\pi$ é uma realização
+(Def.~\ref{fis:def:objeto}) e o seu campo é a $n$-ésima linha do triângulo:
 \[
-G \;=\; \Bigl(\tbinom{n}{0},\tbinom{n}{1},\dots,\tbinom{n}{n}\Bigr),
-\qquad
-\sum G \;=\; 2^{n} \;=\; \abs{I} .
+\boxed{\;G(k)=\binom{n}{k},\qquad k=0,\dots,n,
+\qquad \sum_{k}G(k)=2^{n}=\abs{I}\;}
 \]
-A segunda igualdade é o Lema~\ref{fis:lem:conserva} lido no triângulo: cada linha
-soma o andar inteiro, porque nenhum índice se perde --- só se sobrepõe. E o
-triângulo também não vem de fora: a recorrência
-$\binom{n}{k}=\binom{n-1}{k-1}+\binom{n-1}{k}$ \emph{é} o passo da torre lido como
-contagem --- ou o eixo novo entra, ou não entra, dois casos exaustivos e
-disjuntos. A simetria $\binom{n}{k}=\binom{n}{n-k}$ é a \textbf{involução}, e o
-\textbf{máximo de $G$ cai no seu ponto fixo}, $k=n/2$: \emph{a dobra é maior no
-meio}, que é onde mais caminhos se sobrepõem.
+e mais:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{a recorrência é o passo da torre.}
+$\binom{n}{k}=\binom{n-1}{k-1}+\binom{n-1}{k}$ é a cisão de $Q_n$ em duas cópias
+de $Q_{n-1}$ pelo último bit --- \emph{ou o eixo novo entra, ou não entra}, dois
+casos exaustivos e disjuntos;
+\item[(2)] \textbf{a simetria é a involução.} A complementação
+$\varsigma(x)=x\oplus(2^{n}-1)$ é involutiva e leva a fibra de $k$ na de $n-k$,
+donde $\binom{n}{k}=\binom{n}{n-k}$;
+\item[(3)] \textbf{e o máximo cai no ponto fixo da involução}, $k=n/2$: \emph{a
+dobra é maior no meio}, que é onde mais índices se sobrepõem.
+\end{enumerate}
+\end{teorema}
 
+\begin{proof}
+$\pi$ está definida em todo o $Q_n$ e o contradomínio $\{0,\dots,n\}$ tem
+igualdade decidível: é a Def.~\ref{fis:def:objeto}. A fibra de $k$ são as
+palavras com exactamente $k$ bits a $1$, contadas escolhendo quais das $n$
+posições: $\binom{n}{k}$. A soma é o Lema~\ref{fis:lem:conserva} --- as fibras
+particionam $Q_n$, e nenhum índice se perde, só se sobrepõe.
+
+(1) Separando pelo último bit, as palavras de peso $k$ com esse bit a $1$ são as
+de peso $k-1$ na cópia de $Q_{n-1}$ e as com o bit a $0$ são as de peso $k$; as
+duas classes são disjuntas e cobrem a fibra.
+
+(2) $\varsigma$ é uma bijeção com $\abs{\varsigma(x)}=n-\abs{x}$, logo leva a
+fibra de $k$ bijetivamente na de $n-k$.
+
+(3) Pela simetria basta comparar termos consecutivos: a razão
+$\binom{n}{k+1}\big/\binom{n}{k}=\tfrac{n-k}{k+1}$ excede $1$ exactamente para
+$k<\tfrac{n-1}{2}$, pelo que a linha sobe até ao meio e desce depois; e o meio é
+o ponto fixo de $k\mapsto n-k$, que é o de $\varsigma$ lido no peso.
+\end{proof}
+
+\medskip\noindent\textbf{E convém dizer porque é o peso e não um percurso.} Num
+percurso pelo hipercubo a soma é $\oplus$, que é \emph{involutivo}: repetir uma
+direção \textbf{desfá-la}, e o campo lê a \textbf{paridade} de cada eixo, não a
+contagem. É o peso --- a realização que esquece \emph{quais} bits e retém
+\emph{quantos} --- que dá Pascal. \emph{A dobra aqui é a comutatividade lida no
+cardinal}, e a sua medida é o Lema~\ref{fis:lem:conserva}.
 \begin{teorema}[as direções de aresta são a base ortonormal]\label{fis:thm:base}
 As $m$ direções de aresta de $Q_m$ são os $e_k=2^{k}$, e para $m=8$ elas são a
 base de $F_8$ sobre $B$ obtida como \emph{produtos} dos três geradores das três
@@ -2157,10 +2332,16 @@ a isometria é a rotação em torno de $P_M$, e ela é de $\pm90^{\circ}$ porque
 $\upsilon$ toma valores em $\{\pm1\}$. Portanto a segunda metade é
 $P_M+R\,(P_M-P_{M-j})$, que é $\mathcal{D}_k^{*}$.
 
-Que o sinal de $R$ é o \emph{mesmo} para todo $k$: ele é determinado por
-$\upsilon(2^{k}+1)$; os casos $k=0$ e $k=1$ verificam-se diretamente, e para
-$k\ge2$ o número $2^{k}+1$ é ímpar com $2^{k}+1\equiv1\pmod4$, valor constante.
-\end{proof}
+Que o sinal de $R$ é o \emph{mesmo} para todo $k$, e qual ele é. A rotação $R$ é
+a viragem que liga a primeira metade à segunda, isto é a viragem do passo
+$s=M=2^{k}$ --- o único que a conta acima não cobre, porque é a \textbf{própria
+dobradiça}. De facto, a primeira direção de $\mathcal{D}^{*}$ é
+$P^{*}_1-P^{*}_0=R\,(P_M-P_{M-1})=R\,u_{M-1}$, e em $\mathcal{C}_{k+1}$ essa
+direção é $u_M=R_{\upsilon(M)}u_{M-1}$; logo $R=R_{\upsilon(2^{k})}$. E a régua
+lê-o sem caso nenhum: $2^{k}=2^{k}\cdot1$ tem parte ímpar $m=1\equiv1\pmod4$,
+donde $\upsilon(2^{k})=+1$ para todo $k\ge0$. Portanto $R=R_{+1}$, a rotação de
+$+90^{\circ}$, a mesma para todo $k$. \emph{A dobra do papel tem um sentido só, e
+a régua di-lo na potência de dois.}\end{proof}
 
 \medskip\noindent\textbf{Duas construções, nenhuma linha em comum.} A
 Def.~\ref{fis:def:bits} decide cada viragem por uma conta sobre os bits do
@@ -2565,8 +2746,12 @@ Com $h=\mathrm{id}$, $q=G(y)$ para todo vizinho $y$, e minimizar um é minimizar
 outro; e como $t\mapsto\sqrt t$ é estritamente crescente em $t\ge0$, o mínimo de
 $q$ é também o mínimo de $\sqrt q=\partial\tau$ --- \emph{as três escolhas
 coincidem}. Com $h_{ii}$ não constante, $q=G(y)h_{ii}$ e um vizinho de $G$ maior
-pode ter $q$ menor; exibe-se um.
-\end{proof}
+pode ter $q$ menor, e exibe-se um: tome-se posto $2$,
+$h=\operatorname{diag}(1,4)$, e dois vizinhos --- $y_1$ na direção $1$ com
+$G(y_1)=2$ e $y_2$ na direção $2$ com $G(y_2)=1$. Então $q_1=2\cdot1=2$ e
+$q_2=1\cdot4=4$: o vizinho de menor $G$ é $y_2$, e o de menor $q$ é $y_1$.
+\emph{As duas escolhas separam-se, e separam-se por uma régua que não é a
+canónica.}\end{proof}
 
 \medskip\noindent\emph{E convém dizer qual das duas grandezas o passo minimiza:}
 ele lê $G$, logo minimiza $q$. Que isso seja também o mínimo de $\partial\tau$ é
@@ -3102,8 +3287,27 @@ $t$ de um e exige que a cifra deixe de bater.}
 
 \section{A lei do discriminante, e as ordens que uma rede admite}\label{fis:leidisc}
 
-\begin{lema}[a rede só admite cinco ordens]\label{fis:lem:cristal}
-Se $A$ é uma matriz $2\times2$ de entradas \emph{inteiras} com $\abs{\det A}=1$ e
+\begin{lema}[Cayley--Hamilton binária: a cifra é a recorrência]\label{fis:lem:ch2}
+Sobre um anel comutativo $A$, toda $M\in M_{2}(A)$ cumpre
+\[
+\boxed{\;M^{2}=B\,M-C\,I,\qquad (B,C)=(\operatorname{tr}M,\det M)\;}
+\]
+Logo as potências de $M$ vivem no módulo gerado por $I$ e $M$, e obedecem à
+recorrência de \emph{dois} termos cujos coeficientes são a cifra:
+$M^{k+1}=B\,M^{k}-C\,M^{k-1}$.
+\end{lema}
+
+\begin{proof}
+Conta directa nas entradas. Com
+$M=\left(\begin{smallmatrix}a&b\\c&d\end{smallmatrix}\right)$, as duas matrizes
+$M^{2}$ e $(a+d)M-(ad-bc)I$ têm ambas
+$\left(\begin{smallmatrix}a^{2}+bc & b(a+d)\\ c(a+d) & d^{2}+bc\end{smallmatrix}\right)$
+por entradas. \emph{Não se dividiu, não se diagonalizou e não se saiu de $A$}: a
+identidade é polinomial nas entradas e vale em qualquer anel comutativo. A
+recorrência é multiplicar por $M^{k-1}$.
+\end{proof}
+
+\begin{lema}[a rede só admite cinco ordens]\label{fis:lem:cristal}Se $A$ é uma matriz $2\times2$ de entradas \emph{inteiras} com $\abs{\det A}=1$ e
 $A^{k}=I$ para algum $k\ge1$, então $k\in\{1,2,3,4,6\}$. Em particular
 \textbf{não há ordem $5$}.
 \end{lema}
@@ -3161,11 +3365,18 @@ $\Delta=\operatorname{tr}^{2}A-4\det A$. As três possibilidades esgotam:
 A tricotomia \emph{da ordem} esgota, e é ela --- e não uma realização numérica ---
 que dá as três possibilidades. Se $\Delta<0$ as raízes são conjugadas com produto
 $\det$ e módulo $\sqrt{\abs{\det}}=1$: ficam no círculo, e a órbita não cresce. Se
-$\Delta=0$ há raiz dupla, isto é $\delta=0$ no Teor.~\ref{fis:thm:corte}(3), que é
-onde o processo \textbf{chega} --- e aí as duas faces partilham o ponto fixo. Se
-$\Delta>0$ as raízes são reais e distintas, e como o produto tem módulo $1$, uma
-tem módulo maior que $1$ e a outra menor.
-\end{proof}
+$\Delta=0$ há raiz dupla, isto é $\delta=0$ no Cor.~\ref{fis:cor:medias}, e é aí
+que o Teor.~\ref{fis:thm:corte}(5) põe as duas faces a partilhar o ponto fixo ---
+que éonde o processo \textbf{chega} --- e aí as duas faces partilham o ponto fixo. Se
+$\Delta>0$ as raízes são reais e distintas e $\abs{\lambda_1\lambda_2}=1$; com
+$\det=+1$ vem $\lambda_2=1/\lambda_1$, e $\abs{\lambda_1}=1$ obrigaria
+$\lambda_1=\pm1=\lambda_2$, contra a distinção --- logo uma expande e a outra
+contrai. Com $\det=-1$ vem $\lambda_2=-1/\lambda_1$, e $\abs{\lambda_1}=1$ força
+$\{\lambda_1,\lambda_2\}=\{+1,-1\}$, isto é $\operatorname{tr}=0$. \emph{Fica
+então uma excepção, e é uma só}: $\operatorname{tr}=0$ com $\det=-1$ --- o espelho
+$\nu$, hiperbólico pela cifra e de órbita \textbf{fechada} pela ordem.
+\emph{Reflectir não é expandir}, e é por isso que a §\ref{fis:improprio} tem de
+falar de \textbf{duas} fontes de órbita finita e não de uma.\end{proof}
 
 \begin{corolario}[e sobre uma rede inteira o elíptico tem ordem finita]\label{fis:cor:ordem}
 Se além disso $A$ tem \textbf{entradas inteiras}, então
@@ -3175,13 +3386,29 @@ Se além disso $A$ tem \textbf{entradas inteiras}, então
 \end{corolario}
 
 \begin{proof}
-Por $\Delta<0$ as raízes estão no círculo e são conjugadas; sendo $A$ inteira, o
-traço é inteiro e o Lema~\ref{fis:lem:cristal} aplica-se, dando a ordem em
-$\{1,2,3,4,6\}$. As ordens $1$ e $2$ ficam de fora: $A=\pm I$ tem $\Delta=0$, e
-uma involução com $A\neq\pm I$ tem $\operatorname{tr}=0$ e $\det=-1$, donde
-$\Delta=4>0$.
-\end{proof}
+A ordem finita \emph{não se supõe} --- deduz-se; e é por isso que o
+Lema~\ref{fis:lem:cristal} não pode ser chamado aqui: a hipótese dele é a
+conclusão desta.
 
+\emph{O determinante.} Se fosse $\det A=-1$, o Cor.~\ref{fis:cor:optica} daria
+$\Delta=B^{2}+4\ge4>0$, contra $\Delta<0$. Logo $\det A=+1$ e $\Delta=t^{2}-4$
+com $t=\operatorname{tr}A$.
+
+\emph{O traço.} De $\Delta<0$ vem $t^{2}<4$, e $t$ está em $\Zc$ por $A$ o estar:
+$t\in\{-1,0,1\}$. Pelo Lema~\ref{fis:lem:ch2}, $A^{2}=tA-I$, e cada valor de $t$
+fecha a órbita por conta directa, \emph{sem raízes e sem extensão}:
+\[
+\begin{array}{clll}
+t=-1: & A^{2}=-A-I & A^{3}=-A^{2}-A=I & k=3\\
+t=\phantom{-}0: & A^{2}=-I & A^{4}=I & k=4\\
+t=\phantom{-}1: & A^{2}=A-I & A^{3}=A^{2}-A=-I,\ A^{6}=I & k=6
+\end{array}
+\]
+e as ordens são \emph{exactamente} estas: em $t=-1$ é $A\neq I$ porque
+$\operatorname{tr}I=2$; em $t=0$ é $A^{2}=-I\neq I$; em $t=1$ é $A^{3}=-I\neq I$,
+o que exclui $k\mid3$, e $A^{2}=A-I=I$ forçaria $A=2I$, de traço $4$. As ordens
+$1$ e $2$ ficam de fora por não haver quarta linha.
+\end{proof}
 \medskip\noindent\textbf{E as duas camadas ficam separadas, que é o que importa.}
 O teorema é sobre a \emph{ordem}: dá os três \textbf{regimes}, e corre em qualquer
 anel ordenado. O corolário é sobre a \emph{discretude}: dá a \textbf{ordem
@@ -3264,17 +3491,59 @@ $\abs B>2$: o próprio realiza as \emph{três}. Total $1+3=4$.
 confinamento excluem-se}. É a mesma frase que separa o que roda do que não roda,
 vista agora como \textbf{impossibilidade}.
 
-\medskip\noindent\textbf{E há duas fontes de órbita finita, não uma.} O
-Cor.~\ref{fis:cor:ordem} diz que $\Delta<0$ dá ordem finita em $\{3,4,6\}$; o
-Lema~\ref{fis:lem:cristal} diz que ordem finita está em $\{1,2,3,4,6\}$. \emph{As
-duas listas diferem no $\{1,2\}$}, e é fácil ler a primeira como se fosse a
-caracterização --- «ordem finita $\iff$ elíptico». Não é: o espelho $\nu$ tem
-$\Delta=4>0$ e $\nu^{2}=\mathrm{id}$. \textbf{Reflectir duas vezes é a
-identidade}, e isso fecha a órbita sem rodar nada. As duas fontes são
-\textbf{disjuntas}, e quem o garante é este corolário: o que reflete é impróprio,
-logo hiperbólico, logo não é elíptico. \emph{Rodar fecha a órbita em $\{3,4,6\}$;
-reflectir fecha-a em $2$, e nunca há um mesmo espelho a fazer as duas coisas.}
+\begin{teorema}[as três fontes de órbita finita, e o que cada uma fecha]\label{fis:thm:tresfontes}
+Seja $A$ uma matriz $2\times2$ de entradas em $\Zc$ com $A^{k}=I$ para algum
+$k\ge1$. Então $\det A=\pm1$ --- \emph{e isto não é hipótese} --- e dá-se
+\textbf{exactamente um} de três casos:
+\[
+\begin{array}{lllc}
+\textbf{escalar} & A=\pm I & \Delta=0,\ \text{parabólico} & k\in\{1,2\}\\[2pt]
+\textbf{reflexão} & \operatorname{tr}A=0,\ \det A=-1 & \Delta=4,\ \text{hiperbólico} & k=2\\[2pt]
+\textbf{rotação} & \operatorname{tr}A\in\{-1,0,1\},\ \det A=+1 & \Delta<0,\ \text{elíptico} & k\in\{3,4,6\}
+\end{array}
+\]
+Em particular $\Delta\in\{-4,-3,0,4\}$ e mais nada. E o regime \textbf{não}
+determina a ordem:
+\[
+\boxed{\;\text{o }\Delta\text{ lê o \textbf{regime}; o traço lê a \textbf{ordem}}\;}
+\]
+--- $\Delta=-3$ é $k=3$ ou $k=6$ conforme $\operatorname{tr}A=-1$ ou $+1$, e
+$\Delta=0$ é $k=1$ ou $k=2$ conforme $A=I$ ou $-I$.
+\end{teorema}
 
+\begin{proof}
+$\det A$ está em $\Zc$ e $(\det A)^{k}=\det(A^{k})=1$, donde $\det A=\pm1$: a
+condição da caixa é consequência da ordem finita e não precisa de ser pedida.
+
+Se $\det A=-1$, o argumento do Lema~\ref{fis:lem:cristal} --- aqui legítimo,
+porque $A^{k}=I$ é hipótese --- dá valores próprios $\{+1,-1\}$, logo
+$\operatorname{tr}A=0$, $\Delta=0+4=4$ e $A^{2}=I$ com $A\neq\pm I$.
+
+Se $\det A=+1$, o mesmo Lema dá $t=\operatorname{tr}A\in\{-2,\dots,2\}$. Nos
+extremos $t=\pm2$ a raiz é dupla e a diagonalização força $A=\pm I$, com
+$\Delta=4-4=0$. Nos três do meio $\Delta=t^{2}-4<0$ e a conta do
+Cor.~\ref{fis:cor:ordem} --- $A^{2}=tA-I$, Lema~\ref{fis:lem:ch2} --- dá as
+ordens $3$, $4$ e $6$.
+
+Os três casos excluem-se porque os três $\Delta$ são $0$, $4$ e $<0$; e esgotam
+porque esgotam os sinais de $\det$ e os valores de $t$.
+\end{proof}
+
+\medskip\noindent\textbf{E há três fontes de órbita finita, não duas --- mas
+sobre companheiras são duas.} O Cor.~\ref{fis:cor:ordem} diz que $\Delta<0$ dá
+ordem finita em $\{3,4,6\}$; o Lema~\ref{fis:lem:cristal} diz que ordem finita
+está em $\{1,2,3,4,6\}$, e é fácil ler a primeira como se fosse a caracterização.
+Não é: o espelho $\nu$ tem $\Delta=4>0$ e $\nu^{2}=\mathrm{id}$ ---
+\textbf{reflectir duas vezes é a identidade}, e isso fecha a órbita sem rodar
+nada. O Teor.~\ref{fis:thm:tresfontes} separa as três: \emph{rodar} fecha em
+$\{3,4,6\}$, \emph{reflectir} fecha em $2$, e os \emph{escalares} $\pm I$ fecham
+em $1$ e $2$ sem fazer nem uma coisa nem outra. As três são disjuntas, e quem o
+garante é o $\Delta$: $<0$, $=4$, $=0$. Sobre \textbf{companheiras} --- que é
+onde o catálogo e o varrimento vivem --- os escalares não ocorrem, porque a
+companheira tem sempre $1$ na entrada de baixo à esquerda, e a única parabólica
+que resta, a de cifra $(2,1)$, é o bloco de Jordan, de ordem \emph{infinita}. Daí
+que ali sejam duas: \emph{não é o mesmo enunciado dito com menos cuidado --- é
+outro universo}.
 \begin{corolario}[a orientação compõe-se, o regime não]\label{fis:cor:serie}
 A aplicação $\det\colon\mathcal{P}\to A^{\times}$ é um \textbf{homomorfismo}, e a
 caixa é fechada para a composição porque unidade vezes unidade é unidade; em
@@ -3334,8 +3603,9 @@ dos sinais delas.
 
 \begin{proof}
 As raízes de $x^{2}-Bx+C$ são $(B\pm\sqrt{\Delta})/2$, e
-$q(a,b)=b^{2}\,p(a/b)$ com $p$ o polinómio característico; a factorização existe
-exactamente quando as raízes estão em $A$. A condição sobre as metades é a mesma
+$q(a,b)=b^{2}\,p(-a/b)$ com $p$ o polinómio característico --- \emph{o sinal
+conta}: as raízes de $q$ projectivizada são as \textbf{simétricas} das do
+característico; a factorização existeexactamente quando as raízes estão em $A$. A condição sobre as metades é a mesma
 do Teor.~\ref{fis:thm:pandora}(2) --- o comportamento do $2$ no anel --- e
 reaparece aqui sem ser convidada.
 \end{proof}
@@ -3396,8 +3666,7 @@ quadrática se $\Delta>0$, \emph{complexa conjugada} se $\Delta<0$. É por isso 
 coincidência de nomenclatura: \emph{os eixos são os mesmos das cónicas}.
 
 \begin{corolario}[o primeiro corte da árvore é o elíptico, e só ele]\label{fis:cor:pandbola}
-Na ultramétrica da caixa, a bola de raio $1$ --- os espelhos que \emph{não}
-divergem no bit mais alto --- é exatamente $\{\Delta<0\}$ e o seu complemento.
+Na ultramétrica da caixa, a bola de raio $2^{-1}$ --- os espelhos que \emph{não}divergem no bit mais alto --- é exatamente $\{\Delta<0\}$ e o seu complemento.
 Logo o primeiro nível da árvore separa \textbf{elíptico} de
 \textbf{não-elíptico}, e mais nada: a distinção entre \emph{parabólico} e
 \emph{hiperbólico} vive \textbf{mais fundo}.
@@ -3437,10 +3706,8 @@ recusa seja \textbf{quantitativa}: diz-se quanto falta, e não apenas que falta.
 \medido{\code{tests/pgwire.c} §W214: varridos os corpos de $\abs{m},\abs{t}\le12$
 dos dois tipos --- $50$ --- apenas $\mathbf{3}$ factorizam (os dois cristalinos de
 $\Delta=0$ e o áureo de $\Delta=4$, onde o ouro colapsa na unidade) e os outros
-$\mathbf{47}$ são irredutíveis. §W224: varrido $\abs{B}\le3000$ nos dois sinais de
-$C$, e depois $C\in[-40,40]$ com $\abs{B}\le200$: em todos os casos de $\Delta$
-quadrado --- $\mathbf{723}$ no segundo varrimento --- as metades estão no anel.
-§W218: dos $26$ espelhos, o critério da cifra e o do Cor.~\ref{fis:cor:borda}
+$\mathbf{47}$ são irredutíveis. §W224: o resumo da óptica recontado contra o
+catálogo cru --- $\mathbf{7}$ números a bater em $\mathbf{44}$ corpos.§W218: dos $26$ espelhos, o critério da cifra e o do Cor.~\ref{fis:cor:borda}
 coincidem em $\mathbf{25}$ e divergem em $\mathbf{1}$ --- o $(0,1)$ de $\Delta=-4$,
 onde a forma factoriza sobre a \emph{extensão} e não sobre a base. \emph{É a
 hipótese «sobre um anel comutativo $A$» a fazer trabalho: uma testemunha que o
@@ -3628,8 +3895,7 @@ unidade, $\Delta<0$ põe as duas raízes \emph{sobre} o círculo --- é o
 \textbf{elíptico}, o que roda, e é o regime sem massa; $\Delta>0$ tira-as de lá
 --- é o \textbf{hiperbólico}, uma expande e a outra contrai, e é o regime com
 massa. A fronteira $\Delta=0$ é a \emph{raiz dupla}, que o
-Teor.~\ref{fis:thm:corte}(3) já tinha identificado como o sítio onde o encaixe
-das duas faces \textbf{chega}.
+Teor.~\ref{fis:thm:corte}(5) já tinha identificado como o sítio onde o encaixedas duas faces \textbf{chega}.
 \[
 \boxed{\;\text{massa}=0\ \iff\ \rho=1\ \iff\ \text{o modo roda em vez de expandir}\;}
 \]
@@ -3652,8 +3918,7 @@ separação lê-se na \textbf{órbita da companheira}, que é inteira do primeir
 passo ao último.
 
 \begin{teorema}[a dicotomia da órbita]\label{fis:thm:orbita}
-Seja $c$ uma cadeia de grau $N$ com $\abs{a_0}=1$ e $C$ a sua companheira. A
-órbita de $e_1$ sob $C$ --- que é uma sucessão de vectores \emph{inteiros} ---
+Seja $c$ uma cadeia de grau $N$ com $\abs{c_0}=1$ e $C$ a sua companheira. Aórbita de $e_1$ sob $C$ --- que é uma sucessão de vectores \emph{inteiros} ---
 faz uma de duas coisas, e nunca outra:
 \[
 \begin{array}{lll}
@@ -3680,10 +3945,203 @@ cláusula~(1) do Teor.~\ref{fis:thm:mult}: duplicidade é dobra, e a dobra
 decide-se por igualdade.
 \end{proof}
 
+\begin{definicao}[o factor de ordem $d$]\label{fis:def:ciclo}
+Para cada $d\ge1$, seja $\Phi_d$ o factor mónico irredutível cujas raízes são
+\emph{exactamente} as raízes de ordem $d$ da unidade, e seja
+$\varphi(d)=\deg\Phi_d$ --- que é, por construção, uma \textbf{contagem}: o
+número de raízes cuja ordem é $d$, e não menos. Não é objeto novo: é o que o
+Lema~\ref{fis:lem:cristal} já escreveu caso a caso,
+\[
+\Phi_1=\lambda-1,\quad \Phi_2=\lambda+1,\quad \Phi_3=\lambda^{2}+\lambda+1,\quad
+\Phi_4=\lambda^{2}+1,\quad \Phi_6=\lambda^{2}-\lambda+1,
+\]
+e a lista de graus $\varphi=1,1,2,2,2$ é a razão de \emph{ali} só caberem cinco
+ordens.
+\end{definicao}
+
+\begin{teorema}[a luz é um produto de factores de ordem, todos distintos]\label{fis:thm:ciclo}
+Seja $c$ uma cadeia de grau $N$ com $\abs{c_0}=1$, $p_c$ a sua mónica e $C$ a
+companheira. São equivalentes:
+\begin{enumerate}\itemsep3pt
+\item[(1)] a órbita de $e_1$ sob $C$ \textbf{fecha} (Teor.~\ref{fis:thm:orbita});
+\item[(2)] $C$ tem \textbf{ordem finita};
+\item[(3)] $p_c=\prod_{d\in D}\Phi_d$ para um conjunto finito $D$ de ordens,
+\textbf{sem repetições}.
+\end{enumerate}
+E quando valem,
+\[
+\boxed{\;p=\operatorname{mmc}(D)
+\qquad\text{e}\qquad
+\sum_{d\in D}\varphi(d)=N\;}
+\]
+--- o período é o \textbf{mínimo múltiplo comum} das ordens presentes, e os graus
+dos factores \textbf{particionam} o grau da cadeia. \emph{A lista dos átomos de
+luz de grau $N$ é a lista das partições de $N$ em valores distintos de $\varphi$
+--- e é finita antes de se correr um só passo de órbita.}
+\end{teorema}
+
+\begin{proof}
+(1)$\Rightarrow$(2) está feito no Teor.~\ref{fis:thm:orbita}: fechar dá
+$C^{p}e_1=e_1$ e, sendo $e_1$ cíclico, $C^{p}=\mathrm{id}$.
+
+(2)$\Rightarrow$(3). Seja $p$ a ordem. De $C^{p}=\mathrm{id}$, o polinómio
+\emph{mínimo} de $C$ divide $\lambda^{p}-1$. Ora numa companheira o mínimo e o
+característico \textbf{coincidem} --- é outra vez $e_1$ ser cíclico: um polinómio
+de grau $<N$ que anulasse $C$ anularia $e_1,Ce_1,\dots,C^{N-1}e_1$, que são
+independentes. Logo $p_c\mid\lambda^{p}-1$. E $\lambda^{p}-1$ \textbf{não tem
+raiz múltipla}: as suas raízes são as $p$ raízes de ordem divisora de $p$, e são
+$p$ distintas. Portanto $p_c$ é um produto de factores irredutíveis
+\emph{distintos} de $\lambda^{p}-1$; agrupando as raízes pela sua ordem vem
+$\lambda^{p}-1=\prod_{d\mid p}\Phi_d$, donde $p_c=\prod_{d\in D}\Phi_d$ com $D$
+sem repetições.
+
+(3)$\Rightarrow$(1). Sendo os $\Phi_d$ distintos e irredutíveis, $p_c$ não tem
+raiz múltipla e $C$ \textbf{diagonaliza}; cada raiz tem ordem em $D$, logo
+$\lambda^{m}=1$ para $m=\operatorname{mmc}(D)$ e $C^{m}=\mathrm{id}$. A órbita de
+$e_1$ volta a $e_1$: fecha.
+
+\emph{E $p=\operatorname{mmc}(D)$ exactamente}: $C^{m}=\mathrm{id}$ dá $p\mid m$;
+e $C^{p}=\mathrm{id}$ obriga cada raiz a ter ordem divisora de $p$, isto é
+$d\mid p$ para todo $d\in D$, donde $m\mid p$. A segunda igualdade é a soma dos
+graus dos factores.
+\end{proof}
+
+\begin{corolario}[a restrição cristalográfica, e agora a contagem]\label{fis:cor:cristal3}
+Em grau $N=2$ os únicos $D$ sem repetições com $\sum_{d\in D}\varphi(d)=2$ são
+$\{1,2\},\ \{3\},\ \{4\},\ \{6\}$ --- \textbf{quatro}, e os períodos
+correspondentes são $2,3,4,6$. \emph{Não há $5$, porque $\varphi(5)=4>2$.}
+\end{corolario}
+
+\begin{proof}
+$\varphi(d)=1$ só para $d=1$ e $d=2$; $\varphi(d)=2$ só para $d=3,4,6$; e para
+todo o outro $d$, $\varphi(d)\ge4$. Sem repetições, uma soma de valores de
+$\varphi$ igual a $2$ é ou $1+1$ --- forçosamente $\{1,2\}$ --- ou um único termo
+de valor $2$. Os períodos saem de $\operatorname{mmc}$.
+\end{proof}
+
+\medskip\noindent\textbf{E são três caminhos, não dois.} O
+Lema~\ref{fis:lem:cristal} fecha a lista pelo \textbf{traço}: um intervalo de
+comprimento $4$ só tem cinco inteiros. O §E3 fecha-a pela \textbf{órbita}: corre
+e o $5$ não aparece. O Cor.~\ref{fis:cor:cristal3} fecha-a pela
+\textbf{contagem}: $\varphi(5)=4$ não cabe em $2$. \emph{E o terceiro dá o que os
+outros dois não davam --- o número $\mathbf{4}$ de cadeias, que o §E2 mede e que
+agora se deriva.}
+
+\begin{corolario}[o grau de entrada de um primo]\label{fis:cor:entra}
+Um primo $q$ divide algum período de grau $N$ apenas se $N\ge q-1$; e o primeiro
+grau em que $q$ é ele próprio um período é exactamente $N=q-1$.
+\end{corolario}
+
+\begin{proof}
+$q\mid\operatorname{mmc}(D)$ obriga $q\mid d$ para algum $d\in D$, e então
+$\varphi(d)\ge\varphi(q)=q-1$; como $\sum_{d\in D}\varphi(d)=N$, vem $N\ge q-1$.
+No outro sentido, $D=\{q\}$ tem $\sum\varphi=q-1$ e $\operatorname{mmc}(D)=q$.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que a tabela do §E3 estava a dizer.} O $5$
+entra ao grau $4=5-1$; o $7$ ao grau $6=7-1$; o $11$ ao grau $10=11-1$.
+\emph{Não é um padrão notado --- é o enunciado, e os três casos são a sua
+verificação.} E ele diz mais do que o varrimento viu: o $13$ só pode aparecer ao
+grau $12$, que está \textbf{fora} do varrimento --- pelo que a próxima corrida
+tem onde falhar.
+\[
+\boxed{\;\text{a proibição do cinco não é da REDE nem do POSTO: é de }\varphi\;}
+\]
+
+\begin{corolario}[o teto é dispensável]\label{fis:cor:teto}
+Ponha-se
+\[
+P(N)=\max\Bigl\{\operatorname{mmc}(D)\ :\ D\ \text{sem repetições},\
+\textstyle\sum_{d\in D}\varphi(d)=N\Bigr\},
+\]
+um inteiro que depende \textbf{só de $N$}. Se a órbita de $e_1$ sob $C$ não
+voltou a $e_1$ ao fim de $P(N)$ passos, ela nunca voltará.
+\end{corolario}
+
+\begin{proof}
+Se fecha, fecha com cauda $\ell=0$ (Teor.~\ref{fis:thm:orbita}) e período
+$p=\operatorname{mmc}(D)\le P(N)$ (Teor.~\ref{fis:thm:ciclo}), isto é
+$C^{p}e_1=e_1$ com $p\le P(N)$.
+\end{proof}
+
+\medskip\noindent\textbf{E daí o §E5 muda de estatuto.} Ele estava lá como
+\emph{controlo}: mover o teto por cinco décadas e ver que a contagem não mexe. O
+Cor.~\ref{fis:cor:teto} diz porquê --- \emph{não há teto nenhum a mover}, porque
+o número de passos a testar é uma função de $N$ e não uma escolha de quem corre.
+O §E5 passa a ser a \textbf{verificação} de um enunciado, e não a evidência que
+fazia as vezes dele.
+\[
+\boxed{\;\text{o único número escolhido do varrimento deixou de ser escolhido}\;}
+\]
+
+\begin{corolario}[fechar obriga a recíproca; ser recíproca não basta]\label{fis:cor:recip}
+Se a órbita fecha, então $c_i=\pm c_{N-i}$ para todo $i$. O recíproco é falso.
+\end{corolario}
+
+\begin{proof}
+Pelo Teor.~\ref{fis:thm:ciclo} o conjunto das raízes de $p_c$ é o das raízes de
+ordem em $D$, e esse conjunto é fechado pela \textbf{inversão}
+$\rho\mapsto\rho^{-1}$, porque o inverso de uma raiz de ordem $d$ tem ordem $d$.
+Logo a cadeia invertida $\lambda^{N}p_c(1/\lambda)$ é mónica a menos de sinal,
+tem o mesmo grau e as mesmas raízes com as mesmas multiplicidades --- que são $1$
+--- donde é $\pm p_c$. \emph{E não basta}: uma cadeia recíproca pode ter um par
+$\rho,\rho^{-1}$ \textbf{fora} do círculo, e aí escapa --- que é o que os
+$\mathbf{540}$ do §E6 contam.
+\end{proof}
+
+\begin{corolario}[a unidade não é hipótese, do lado da luz]\label{fis:cor:unidade}
+Se a órbita fecha, $\abs{c_0}=1$ \textbf{sai} --- não é preciso pedi-la.
+\end{corolario}
+
+\begin{proof}
+$c_0=\prod_{d\in D}\Phi_d(0)$, e $\Phi_1(0)=-1$ enquanto $\Phi_d(0)=1$ para
+$d>1$. Logo $c_0=\pm1$. \emph{A neutralidade da Prop.~\ref{fis:prop:neutro} é, do
+lado da luz, uma consequência e não uma condição.}
+\end{proof}
+
+\begin{corolario}[a quantização é anterior à medida]\label{fis:cor:nasce}
+Para uma cadeia de grau $N$ com $\abs{c_0}=1$, o inteiro
+\[
+p=\min\{\,t\ge1:\ C^{t}e_1=e_1\,\}\qquad(\text{e nenhum, se não houver tal }t)
+\]
+cumpre, \emph{todas de uma vez}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] é decidido por \textbf{igualdades entre vectores de $I$} --- a
+cláusula~(1) do Teor.~\ref{fis:thm:mult} --- e por um número de testes limitado
+por $P(N)$ (Cor.~\ref{fis:cor:teto}): \emph{nenhum módulo é formado, nenhuma
+grandeza é comparada, nenhum limiar é escolhido};
+\item[(2)] a sua existência decide a leitura espectral \textbf{inteira}: existir
+dá massa nula em todos os modos, não existir dá massa
+(Teor.~\ref{fis:thm:massa} e~\ref{fis:thm:orbita});
+\item[(3)] quando existe, é $p=\operatorname{mmc}(D)$ e $D$ é o espectro lido
+como \textbf{conjunto de ordens} (Teor.~\ref{fis:thm:ciclo}).
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) é a definição de $C^{t}e_1$, cujas componentes são somas e produtos de
+inteiros, mais o Cor.~\ref{fis:cor:teto}. (2) é o Teor.~\ref{fis:thm:orbita}.
+(3) é o Teor.~\ref{fis:thm:ciclo}.
+\end{proof}
+
+\medskip\noindent\textbf{E é este o sentido literal de a física nascer
+quantizada.} Uma construção diz-se \emph{quantizada a posteriori} quando a sua
+classificação discreta tem a forma \guilsinglleft grandeza acima de um
+corte\guilsinglright --- uma quantidade $\mu$ e um limiar escolhido por quem
+escreve. \emph{Aqui não há onde pôr o limiar}: o objeto que classifica é o
+inteiro $p$, ele existe antes de $\mu$, e o Cor.~\ref{fis:cor:teto} tira o único
+candidato que restava.
+\[
+\boxed{\;\text{o inteiro }p\text{ existe \textbf{antes} do módulo;
+o módulo é a sua \textbf{leitura}, não a sua origem}\;}
+\]
+--- e a diferença entre as duas coisas é a diferença entre um teorema e uma
+convicção. O contínuo não foi discretizado: ele entra, se alguém quiser, quando
+se decidir avaliar $\rho$; e esta secção inteira corre sem que ninguém decida
+isso.
 \medskip\noindent\textbf{E daí o varrimento.} Tomadas \emph{todas} as cadeias
 mónicas de grau $2$ a $10$ com coeficientes no trial $\{-1,0,+1\}$ e
-$\abs{a_0}=1$ --- $\mathbf{59\,046}$ delas --- a dicotomia reparte-as assim:
-
+$\abs{c_0}=1$ --- $\mathbf{59\,046}$ delas --- a dicotomia reparte-as assim:
 \begin{center}\small
 \begin{tabular}{@{}lrrrrrrrrrr@{}}
 \toprule
@@ -3876,12 +4334,10 @@ Com $R$ da Def.~\ref{fis:def:reproducao} e $v_n$ a composição da geração $n$
 \[
 \begin{array}{llll}
 k<1 & \textbf{subcrítico} & v_n\to0\ \text{geometricamente} & \text{o decaimento}\\[2pt]
-k=1 & \textbf{crítico} & v_n\ \text{nem cresce nem morre} & \text{o reator}\\[2pt]
-k>1 & \textbf{supercrítico} & v_n\ \text{cresce geometricamente} & \text{a explosão}
+k=1 & \textbf{crítico} & v_n\ \text{não cresce geometricamente} & \text{o reator}\\[2pt]k>1 & \textbf{supercrítico} & v_n\ \text{cresce geometricamente} & \text{a explosão}
 \end{array}
 \]
-e a tricotomia é exaustiva porque $k$ é um real não-negativo.
-\end{teorema}
+e a tricotomia é exaustiva porque $k$ é um valor não-negativo numa ordem total.\end{teorema}
 
 \begin{proof}
 $v_n=R^{n}v_0$, e o crescimento de $\lVert R^{n}\rVert$ é governado por
@@ -4137,8 +4593,7 @@ comparação --- é o que aquelas cento e oitenta e quatro cadeias que fecham s�
 a arquitetura que os produz pode ser \textbf{pequena}}\;}
 \]
 
-\colunas{Prop.~\ref{fis:prop:neutro}; Teor.~\ref{fis:thm:massa},~\ref{fis:thm:orbita},~\ref{fis:thm:defeito},~\ref{fis:thm:ferro},~\ref{fis:thm:kappa},~\ref{fis:thm:cadeia},~\ref{fis:thm:carga}}
-        {o átomo de grau $N$; a borda onde a matéria vira luz; o vale do ferro como corte; os três regimes de $k$}
+\colunas{Prop.~\ref{fis:prop:neutro}; Teor.~\ref{fis:thm:massa},~\ref{fis:thm:orbita},~\ref{fis:thm:ciclo},~\ref{fis:thm:defeito},~\ref{fis:thm:ferro},~\ref{fis:thm:kappa},~\ref{fis:thm:cadeia},~\ref{fis:thm:carga}; Cor.~\ref{fis:cor:teto},~\ref{fis:cor:nasce}}        {o átomo de grau $N$; a borda onde a matéria vira luz; o vale do ferro como corte; os três regimes de $k$}
         {\code{cristal/cristal\_fisica.tex} (energia nuclear, partículas minerais); \code{tests/neuronio.c}; \code{tests/pgwire.c} §W116, §W219--§W220}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -4201,8 +4656,70 @@ $\oint$ --- rejeitar calor a mais --- derruba $\eta$ abaixo do máximo,
 \boxed{\;\text{o tecto não é limite de engenharia: é o }\oint\text{ fechado}\;}
 \]
 
-\subsection*{E uma conjectura desta casa, fechada como negativa}
+\begin{corolario}[abrir o $\oint$ custa exactamente o que se abriu]\label{fis:cor:irrever}
+Seja um ciclo entre $T_f<T_q$ que rejeita ao frio
+$Q_f=Q_f^{\text{rev}}+\varepsilon$ com $\varepsilon>0$, onde
+$Q_f^{\text{rev}}=Q_q\,T_f/T_q$ é o reversível do Teor.~\ref{fis:thm:carnot}.
+Então
+\[
+\oint\frac{dQ}{T}=-\frac{\varepsilon}{T_f}<0
+\qquad\text{e}\qquad
+\eta=\eta_{\text{C}}-\frac{\varepsilon}{Q_q}<\eta_{\text{C}} ,
+\]
+e as duas leituras são a \textbf{mesma}:
+\[
+\boxed{\;\eta_{\text{C}}-\eta
+=\frac{T_f}{Q_q}\;\Bigl\lvert\oint\frac{dQ}{T}\Bigr\rvert\;}
+\]
+--- \emph{a queda do rendimento não é «menor»: é a abertura do $\oint$, medida na
+mesma unidade}.
+\end{corolario}
 
+\begin{proof}
+A primeira lei não vê a irreversibilidade: $\oint dU=0$ continua a dar
+$W=Q_q-Q_f$, logo $\eta=1-Q_f/Q_q$. Substituindo,
+\[
+\eta=1-\frac{Q_f^{\text{rev}}+\varepsilon}{Q_q}
+    =1-\frac{T_f}{T_q}-\frac{\varepsilon}{Q_q}
+    =\eta_{\text{C}}-\frac{\varepsilon}{Q_q} .
+\]
+E a circulação:
+$\oint dQ/T=\dfrac{Q_q}{T_q}-\dfrac{Q_f}{T_f}
+=\dfrac{Q_q}{T_q}-\dfrac{Q_q}{T_q}-\dfrac{\varepsilon}{T_f}
+=-\dfrac{\varepsilon}{T_f}$, onde a parcela reversível se cancela por
+construção. Multiplicando o módulo desta por $T_f/Q_q$ vem $\varepsilon/Q_q$, que
+é a queda. \emph{As duas contas são o mesmo $\varepsilon$ dividido por coisas
+diferentes} --- e é por isso que o tecto não é de engenharia: só desce quem abre
+o $\oint$, e desce \textbf{o que} abriu.
+\end{proof}
+
+\begin{corolario}[o rendimento não soma: o que compõe é $1-\eta$]\label{fis:cor:carnothom}
+Sejam dois ciclos reversíveis em série, um entre $T_q$ e um intermédio $T_m$ e
+outro entre $T_m$ e $T_f$, com $T_f<T_m<T_q$. Então
+\[
+\boxed{\;1-\eta_{qf}=(1-\eta_{qm})\,(1-\eta_{mf})\;}
+\]
+--- \textbf{$1-\eta$ é um homomorfismo} da composição em série para o produto, e
+$\eta$ \emph{não} é aditivo. Em particular $\eta_{qf}<\eta_{qm}+\eta_{mf}$.
+\end{corolario}
+
+\begin{proof}
+Pelo Teor.~\ref{fis:thm:carnot}, $1-\eta_{ab}=T_b/T_a$ em cada troço. Logo
+$(1-\eta_{qm})(1-\eta_{mf})=\tfrac{T_m}{T_q}\cdot\tfrac{T_f}{T_m}=\tfrac{T_f}{T_q}
+=1-\eta_{qf}$, e o $T_m$ \emph{cancela-se} --- o intermédio não aparece no
+resultado, e é isso que faz disto um homomorfismo e não uma coincidência de três
+temperaturas. Para a desigualdade, com $x=\eta_{qm}$ e $y=\eta_{mf}$ vem
+$\eta_{qf}=1-(1-x)(1-y)=x+y-xy<x+y$, porque $xy>0$.
+\end{proof}
+
+\medskip\noindent\textbf{E é a mesma frase do Cor.~\ref{fis:cor:serie}, na outra
+caixa.} Lá o que compõe é o \emph{determinante} --- a orientação --- e o que
+\textbf{não} compõe é a classe do $\Delta$. Aqui o que compõe é $1-\eta$ e o que
+não compõe é $\eta$. \emph{Em ambos os casos atravessa a série o invariante
+multiplicativo e não o aditivo}, e somar rendimentos é o mesmo erro que somar
+regimes.
+
+\subsection*{E uma conjectura desta casa, fechada como negativa}
 \noindent Houve aqui uma identificação tentadora: a razão focal de uma elipse,
 $(1-e)/(1+e)$, como candidata a $T_f/T_q$. Ela \emph{funciona} --- dá um valor
 válido para todo $e\in(0,1)$. E é por isso que não serve.
@@ -4222,10 +4739,12 @@ disto: o ciclo fecha se e só se $\Delta<0$, os dois focos são dois, e a janela
 aberta nos extremos --- \emph{isso é geometria da secção}
 (Teor.~\ref{fis:thm:leidisc}), e vale. A temperatura é que não entrou.
 
-\medido{\code{tests/carnot.c} --- $9$ blocos, $\mathbf{0}$ falhas, \emph{resíduo
-$0$, exacto em racionais}. §C1: o ciclo fecha, $\oint dU=0$. §C2: o reversível dá
-$Q_f/Q_q=T_f/T_q$. §C3: $\eta=1-T_f/T_q$ igual a $W/Q_q$ em toda a varredura. E o
-veredito \textbf{negativo} sobre a razão focal está no próprio medidor, não numa
+\medido{\code{tests/carnot.c} --- $5$ blocos, $\mathbf{0}$ falhas, \emph{resíduo
+$0$, exacto no degrau das frações}. §C1: o ciclo fecha, $\oint dU=0$. §C2: o
+reversível dá $Q_f/Q_q=T_f/T_q$. §C3: $\eta=1-T_f/T_q$ igual a $W/Q_q$ em toda a
+varredura. §C4: abrir o $\oint$ dá circulação \emph{estritamente} negativa e
+derruba $\eta$ abaixo de Carnot em $\mathbf{1122}$ de $1122$ ciclos --- e a
+amostra fecha o Cor.~\ref{fis:cor:irrever} ao valor exacto. E overedito \textbf{negativo} sobre a razão focal está no próprio medidor, não numa
 nota de rodapé.}
 
 \section{O que custa é apagar}\label{fis:landauer}
@@ -4235,16 +4754,20 @@ duas separam-se de forma que não deixa dúvida: um vector grande que nunca é
 escrito não dissipa nada, e um único bit reescrito mil milhões de vezes paga mil
 milhões de vezes.
 
-\begin{teorema}[o piso do involutivo é zero exacto]\label{fis:thm:landauer}
-Apagar um bit tem um custo mínimo, e ele é positivo. Logo:
+\begin{teorema}[o piso do invertível é zero exacto]\label{fis:thm:landauer}
+\emph{Hipótese importada, e a única desta obra}: apagar um bit tem um custo
+mínimo, e ele é positivo. Sob ela:
 \begin{enumerate}\itemsep3pt
 \item[(1)] uma operação \textbf{destrutiva} --- que identifica estados --- paga
 por cada bit que perde;
-\item[(2)] uma operação \textbf{involutiva} --- que aplicada duas vezes devolve
---- não perde bit nenhum, e o seu piso é
+\item[(2)] uma operação \textbf{injetiva} --- que nunca leva dois estados ao
+mesmo --- não perde bit nenhum, e o seu piso é
 \[
 \boxed{\;\text{zero \textbf{exacto}, e não um número pequeno}\;}
 \]
+\item[(3)] em particular o piso é zero para tudo o que \textbf{tem volta}: as
+involuções, e também as invertíveis que \emph{não} são involuções --- que é o
+caso de todos os operadores desta construção.
 \end{enumerate}
 \end{teorema}
 
@@ -4254,12 +4777,44 @@ entrada com a mesma saída --- é \emph{exactamente} $G>1$ na
 Def.~\ref{fis:def:objeto}. Uma operação destrutiva tem fibra não trivial, logo
 tem bits a perder.
 
-(2) Uma involução é bijetiva: $I^{2}=\mathrm{id}$ obriga $I$ a ser injetiva, logo
-$G\equiv1$ pela cláusula~(2) do Teor.~\ref{fis:thm:mult}. Sem fibra não trivial
-não há estado identificado, logo não há bit apagado, e a soma dos custos é uma
-soma vazia --- \emph{zero, e não um infinitésimo}.
+(2) Ser injetiva é $G\le1$, pela cláusula~(2) do Teor.~\ref{fis:thm:mult}. Sem
+fibra não trivial não há estado identificado, logo não há bit apagado, e a soma
+dos custos é uma soma vazia --- \emph{zero, e não um infinitésimo}.
+
+(3) Ter volta é ter inversa à esquerda, e isso \textbf{é} injetividade: de
+$\oslash\circ\otimes=\mathrm{id}$ e $\otimes c=\otimes c'$ vem
+$c=\oslash\otimes c=\oslash\otimes c'=c'$. A involução é o caso
+$\oslash=\otimes$, e não é o único: o gato do Teor.~\ref{fis:thm:gato}(1) tem
+volta exacta e não é involução. \emph{A hipótese que trabalha é a injetividade; a
+involutividade é mais do que se precisa}, e pedi-la a mais deixava de fora
+precisamente os operadores que este documento constrói.
 \end{proof}
 
+\begin{corolario}[a conta da dissipação é a folga, e a folga já estava contada]\label{fis:cor:custofolga}
+Seja $\pi\colon I\to X$ uma realização \textbf{sobrejetiva} e $\kappa>0$ o custo
+mínimo de apagar um bit. O custo total de realizar $\pi$ é
+\[
+\boxed{\;\kappa\sum_{x}\bigl(G(x)-1\bigr)\;=\;\kappa\,\bigl(\abs{I}-\abs{X}\bigr)\;}
+\]
+--- \emph{a dissipação não é uma segunda grandeza}: é a folga do
+Cor.~\ref{fis:cor:folga} vezes uma constante, e portanto é a \textbf{mesma}
+quantidade que o Teor.~\ref{fis:thm:defeito} chama defeito de massa. Em
+particular anula-se \textbf{exactamente} quando $\pi$ é injetiva.
+\end{corolario}
+
+\begin{proof}
+Cada fibra $\pi^{-1}(x)$ tem $G(x)$ índices e deixa sair um só estado, logo
+identifica $G(x)-1$; somando sobre o suporte, o número de identificações é
+$\sum_x(G(x)-1)$, e o custo é $\kappa$ vezes isso pela cláusula~(1). A igualdade
+com $\abs{I}-\abs{X}$ é o Cor.~\ref{fis:cor:folga}. A anulação é a cláusula~(2)
+do Teor.~\ref{fis:thm:mult}: a soma é vazia se e só se $G\le1$.
+\end{proof}
+
+\medskip\noindent\textbf{E daí uma leitura só para três palavras que pareciam
+três.} O que a §\ref{fis:folga} chama \emph{folga}, o que a §\ref{fis:defeito}
+chama \emph{defeito de massa} e o que esta secção chama \emph{dissipação} são a
+mesma contagem, $\abs{I}-\abs{X}$, lida em três unidades. \emph{Não são análogos:
+é uma quantidade com três nomes.}
 \medskip\noindent\textbf{E é a dobra outra vez, com unidade física.} O que a
 §\ref{fis:folga} conta como $\sum_x(G(x)-1)$ --- os índices que vieram parar à
 mesma célula --- é aqui o que se paga. \emph{A folga tem preço}, e o preço é o
@@ -4320,8 +4875,8 @@ determinante é unidade. Aqui a soma dos dois expoentes é nula pela mesma razã
 estrutural: \emph{o par conserva, e nenhum dos lados conserva sozinho}.
 
 \begin{corolario}[a segunda lei vale de um lado]\label{fis:cor:segundalei}
-A entropia do lado negro cresce em todos os passos; a do branco decresce em
-todos; e a \textbf{soma não se move em nenhum}. Logo
+\emph{Com $d>1$}, sem o que as duas entropias são constantes e nada se move:
+a entropia do lado negro cresce em todos os passos; a do branco decresce emtodos; e a \textbf{soma não se move em nenhum}. Logo
 \[
 \boxed{\;\text{«a entropia cresce» é verdade, e é lei de \textbf{metade} do par}\;}
 \]
@@ -4340,9 +4895,11 @@ Teor.~\ref{fis:thm:entropiadual}, logo não varia com $r$: o que cresce de um la
 entropias coincidem --- $r=1$ --- e aí ambas valem a unidade, e no logaritmo,
 zero. \emph{É aí que a seta não aponta para lado nenhum}, porque nem cresce nem
 decresce. É o círculo unitário do Teor.~\ref{fis:thm:massa}, o $\delta=0$ do
-Teor.~\ref{fis:thm:corte}, e o $\Delta=0$ da §\ref{fis:leidisc} --- \emph{a mesma
-borda, pelo quarto caminho diferente}.
-
+Cor.~\ref{fis:cor:medias} e do Teor.~\ref{fis:thm:corte}(5), e o $\Delta=0$ da
+§\ref{fis:leidisc} --- \emph{a mesma borda, pelo quarto caminho diferente. E há
+um quinto, na parte seguinte}: o $w=-\tfrac13$ do Cor.~\ref{fis:cor:destino},
+onde $1+3w=0$ e as duas coordenadas deixam de separar. \emph{Cinco caminhos
+independentes, e nenhum deles foi construído para encontrar os outros.}
 \medido{\code{tests/entropia\_dual.c} --- $6$ blocos, $\mathbf{0}$ falhas. §X5:
 há \textbf{um} raio em $40$ onde as duas entropias coincidem, e é $r=1$. §X6, o
 \textbf{controlo}: o par fecha com o expoente da \emph{área} com $\mathbf{0}$
@@ -4393,8 +4950,7 @@ bijeção que as ligue, porque uma bijeção há sempre.
 exibindo, não emparelhando}\;}
 \]
 
-\colunas{Teor.~\ref{fis:thm:carnot},~\ref{fis:thm:landauer},~\ref{fis:thm:entropiadual}; Cor.~\ref{fis:cor:segundalei}}
-        {o $\oint$ fechado; o piso zero do involutivo; o par que fecha na unidade}
+\colunas{Teor.~\ref{fis:thm:carnot},~\ref{fis:thm:landauer},~\ref{fis:thm:entropiadual}; Cor.~\ref{fis:cor:irrever},~\ref{fis:cor:carnothom},~\ref{fis:cor:custofolga},~\ref{fis:cor:segundalei}}        {o $\oint$ fechado; o piso zero do involutivo; o par que fecha na unidade}
         {\code{tests/carnot.c}; \code{tests/dissipa.c}; \code{tests/entropia\_dual.c}}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -4411,8 +4967,8 @@ construção:
 \toprule
 & \textbf{a estrutura} & \textbf{o que a obriga} \\
 \midrule
-a taxa de expansão & $H^{2}=1/D$: a régua, invertida & Teor.~\ref{fis:thm:taxa} \\
-os conteúdos & os três valores do trial & Teor.~\ref{fis:thm:conteudos} \\
+a taxa de expansão & $H^{2}=1/D$: a régua, invertida & Def.~\ref{fis:def:regua-cosmo} \\
+e o seu valor & $H_m^{2}=1/(m^{2}+4)$, lido do operador & Teor.~\ref{fis:thm:taxa} \\os conteúdos & os três valores do trial & Teor.~\ref{fis:thm:conteudos} \\
 a diluição & a involução entre o aditivo e o multiplicativo & Teor.~\ref{fis:thm:diluicao} \\
 o destino & o mesmo sinal, lido em $-(1+3w)$ & Cor.~\ref{fis:cor:destino} \\
 a equação de estado & uma órbita de quatro, duas no ponto fixo & Teor.~\ref{fis:thm:bidual} \\
@@ -4706,16 +5262,98 @@ Donde os quatro são distintos exactamente fora de $f\in\{-1,0,1\}$.
 ponto, e a órbita é $\{-1,\,1\}$.
 \end{proof}
 
-\medskip\noindent É a mesma estrutura do rotor $R^{4}=\mathrm{id}$
-(Teor.~\ref{fis:thm:fecho}) e do ciclo de quatro de $J$ na §\ref{fis:pi}: duas
-involuções que comutam geram o grupo de quatro elementos, e quando uma delas fixa
-o estado o ciclo cai a dois. \emph{O quatro não foi escolhido: é o que duas
-involuções independentes dão.}
+\medskip\noindent\textbf{E o quatro daqui não é o quatro do rotor --- são os dois
+quatros que existem, e convém não os colar.} O rotor
+(Teor.~\ref{fis:thm:fecho}) e o $J$ da §\ref{fis:pi} têm um gerador de ordem
+\textbf{quatro}: $R^{2}=-\mathrm{id}\neq\mathrm{id}$, e o grupo é \emph{cíclico}.
+Aqui \emph{todo} elemento tem ordem $\le2$, pela cláusula~(1) e por
+$(I_1I_2)^{2}=I_1^{2}I_2^{2}=\mathrm{id}$: o grupo é o de \textbf{Klein}, e não é
+isomorfo ao do rotor. \emph{São os dois grupos de ordem quatro}, e a diferença é
+a mesma da §\ref{fis:leidisc}: uma \textbf{raiz} do espelho fecha em quatro
+\emph{rodando}; \textbf{dois} espelhos fecham em quatro \emph{reflectindo}. A
+cosmologia está do segundo lado, e é por isso que o seu quatro não tem uma
+meia-volta lá dentro. \emph{O quatro não foi escolhido: é o que duas involuções
+independentes dão.}
 
-\medskip\noindent E $w+1$ sobe para $\tfrac23$ \textbf{sempre por baixo}, com a
-distância ao limite a valer $\dfrac{16}{9D}$ --- o discriminante a aparecer outra
-vez, e a conta exacta em inteiros.
+\medskip\noindent\textbf{E $f$ não fica em aberto na família metálica}: ela é
+\[
+f(m)=\frac{2m}{3\sqrt{D}},\qquad D=m^{2}+4 ,
+\]
+ímpar em $m$ porque $D$ é par em $m$. \emph{O enunciado da bidualidade só pede
+que $f$ seja ímpar; a cónica do teorema seguinte pede esta.}
 
+\begin{teorema}[a taxa e o estado fecham numa cónica, e a conta é inteira]\label{fis:thm:conica}
+Na família metálica, com $D=m^{2}+4$, $H^{2}=1/D$
+(Def.~\ref{fis:def:regua-cosmo}) e $w+1=\dfrac{2m}{3\sqrt D}$, vale a identidade
+\textbf{exacta}
+\[
+\boxed{\;9\,(w+1)^{2}\;+\;16\,H^{2}\;=\;4\;}
+\]
+--- os dois lidos do \emph{mesmo} operador $M_m$ --- e dela, sem tirar raiz
+nenhuma:
+\begin{enumerate}\itemsep3pt
+\item[(1)] $\bigl(\tfrac23\bigr)^{2}-(w+1)^{2}=\dfrac{16}{9D}=\tfrac{16}{9}H^{2}$
+--- é a \textbf{diferença dos quadrados} que vale $16/(9D)$, e não a distância;
+\item[(2)] $\abs{w+1}<\tfrac23$ para toda a assinatura, e com igualdade em
+\textbf{nenhuma}: o limite é aproximado \emph{por baixo} e nunca atingido;
+\item[(3)] logo $1+3w<0$ para todo $m$: pelo Cor.~\ref{fis:cor:destino} a família
+metálica \textbf{acelera para toda a assinatura}, e $w=-\tfrac13$ é o seu
+\emph{limite}, não um dos seus estados.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+$(w+1)^{2}=\dfrac{4m^{2}}{9D}$, logo $9(w+1)^{2}=\dfrac{4m^{2}}{D}$; e
+$16H^{2}=\dfrac{16}{D}$. Somando,
+\[
+9(w+1)^{2}+16H^{2}=\frac{4m^{2}+16}{D}=\frac{4(m^{2}+4)}{D}=\frac{4D}{D}=4 ,
+\]
+e o $16$ que fecha a conta é \emph{o $4$ de $D=m^{2}+4$ vezes quatro} --- é o
+discriminante a pagar a identidade, e não um número posto à mão.
+
+(1) é a mesma igualdade dividida por $9$. (2) $16H^{2}=16/D>0$ força
+$9(w+1)^{2}<4$, isto é $3\abs{w+1}<2$; a igualdade exigiria $16/D=0$, e
+$D=m^{2}+4$ não se anula. \emph{E lê-se sem raiz}: $9(w+1)^{2}<4$ é $4m^{2}<4D$,
+isto é $m^{2}<m^{2}+4$. (3) $1+3w=3(w+1)-2$, e por (2) $3(w+1)<2$, donde
+$1+3w<0$; o Cor.~\ref{fis:cor:destino} põe isso do lado que acelera, e a
+desigualdade estrita de~(2) é que $w=-\tfrac13$ não é atingido.
+\end{proof}
+
+\medskip\noindent\textbf{E esta elipse é exibida, não parametrizada.} A
+§\ref{fis:carnot} fechou como \textbf{negativa} uma identificação com uma cónica
+porque nada obrigava aquela e não outra --- qualquer bijeção servia. Aqui não há
+bijeção nenhuma: os dois eixos são $w+1$ e $H$, ambos lidos \emph{do mesmo
+operador}, e os semi-eixos $\tfrac23$ e $\tfrac12$ \textbf{saem} da conta em vez
+de serem postos nela. \emph{É essa a diferença que a casa mede}: uma
+parametrização não pode falhar; esta identidade falha se o $4$ de $D=m^{2}+4$ for
+outro.
+
+\begin{corolario}[na órbita de quatro, quem move o destino é $I_1$]\label{fis:cor:destino-orbita}
+Na família metálica, com a órbita $\mathcal{O}(w)$ do Teor.~\ref{fis:thm:bidual}:
+\[
+\begin{array}{lll}
+w=-1+f & I_2w=-1-f & \textbf{aceleram} \text{ os dois}\\[2pt]
+I_1w=1-f & I_1I_2w=1+f & \textbf{travam} \text{ os dois}
+\end{array}
+\]
+Isto é: \textbf{$I_2$ preserva o destino e $I_1$ inverte-o}. A órbita de quatro
+não é uma lista de quatro destinos --- é \emph{dois}, cada um com dois
+representantes.
+\end{corolario}
+
+\begin{proof}
+O destino é o sinal de $1+3w$ (Cor.~\ref{fis:cor:destino}), e pelo
+Teor.~\ref{fis:thm:conica}(2) vale $3\abs{f}<2$ nesta família. Avaliando:
+$1+3(-1+f)=3f-2<0$, $1+3(-1-f)=-3f-2<0$, $1+3(1-f)=4-3f>0$ e $1+3(1+f)=4+3f>0$,
+onde as quatro desigualdades são a \emph{mesma}, $3\abs{f}<2$, lida nos dois
+sinais. Logo $I_2$ não muda o sinal e $I_1$ muda-o sempre.
+\end{proof}
+
+\medskip\noindent\textbf{E as duas involuções ficam com leituras distintas, que é
+o que faltava ao par.} $I_2$ é a \textbf{dualidade}: não toca no destino e troca
+o que dilui pelo que concentra. $I_1$ é o \textbf{destino}: troca travar por
+acelerar e não toca na dualidade. \emph{São independentes porque fazem coisas
+diferentes, e é isso que o grupo de Klein regista.}
 \medido{\code{tests/cosmologia.c} §C5: $w\mapsto-w$ é involução com
 $\mathbf{0}$ desvios em $17$ graus; a órbita dá $\mathbf{4}$ estados em $m=5$ e
 $\mathbf{2}$ em $m=0$, o ponto fixo; e a distância ao limite $\tfrac23$ vale
@@ -4819,8 +5457,7 @@ arquitetura, e a escala é a coordenada em que ela se lê.}
 \boxed{\;\text{que universo sobrevive às leis da construção?}\;}
 \]
 
-\colunas{Teor.~\ref{fis:thm:taxa},~\ref{fis:thm:conteudos},~\ref{fis:thm:diluicao},~\ref{fis:thm:bidual}; Cor.~\ref{fis:cor:destino}}
-        {$H^{2}=1/D$; os três conteúdos no trial; a diluição com a sua constante; a órbita de quatro}
+\colunas{Teor.~\ref{fis:thm:taxa},~\ref{fis:thm:conteudos},~\ref{fis:thm:diluicao},~\ref{fis:thm:bidual},~\ref{fis:thm:conica}; Cor.~\ref{fis:cor:destino},~\ref{fis:cor:destino-orbita}}        {$H^{2}=1/D$; os três conteúdos no trial; a diluição com a sua constante; a órbita de quatro}
         {\code{tests/cosmologia.c} §C1--§C6}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -4845,9 +5482,10 @@ a sobreposição & o \textbf{prefixo comum} & Teor.~\ref{fis:thm:sobrepoe} \\
 recuperar & \emph{descer} --- energia, ou profundidade & Teor.~\ref{fis:thm:desce} \\
 a interferência & a \textbf{dobra}: $G>1$ & Teor.~\ref{fis:thm:interfere} \\
 a árvore & o \textbf{levantamento}: $\tilde G\equiv1$ & Teor.~\ref{fis:thm:levant} \\
-a parte simétrica & \emph{mede} --- converge a ponto fixo & Teor.~\ref{fis:thm:duastorres} \\
-a parte antissimétrica & \emph{ordena} --- cicla com período $2$ & Teor.~\ref{fis:thm:duastorres} \\
-\bottomrule
+a parte simétrica, assíncrona & \emph{mede} --- ponto fixo & Teor.~\ref{fis:thm:desce} \\
+a parte simétrica, síncrona & \emph{espelha} --- $p\mid2$, ordem $2$ & Teor.~\ref{fis:thm:goles} \\
+a parte antissimétrica & \emph{ordena} --- tira Lyapunov, e não dá período & Teor.~\ref{fis:thm:duastorres} \\
+e quando $T^{2}=-\mathrm{id}$ & \emph{roda} --- $p=4$, ordem $4$ & Teor.~\ref{fis:thm:duasordens} \\\bottomrule
 \end{tabular}
 \end{center}
 
@@ -5044,9 +5682,131 @@ sozinha --- pede hipótese sobre a regra de actualização.
 \text{o período é questão da \textbf{dinâmica}}\;}
 \]
 
+\begin{proposicao}[a antissimetria é exactamente o que a energia não vê e a dinâmica vê]\label{fis:prop:cego}
+Para toda a matriz $W$ e todo o estado $s$ de $N$ níveis a $\pm1$:
+\begin{enumerate}\itemsep3pt
+\item[(1)] $s^{\!\top}Ws=s^{\!\top}W_s\,s$, e o \textbf{núcleo} de $W\mapsto E_W$
+é \emph{exactamente} o conjunto das antissimétricas --- a energia é cega a $W_a$,
+e não é cega a mais nada;
+\item[(2)] $W_a\,s=0$ para \emph{todo} $s$ se e só se $W_a=0$ --- \emph{a
+dinâmica não é cega a $W_a$}.
+\end{enumerate}
+Consequentemente, para $W_a\neq0$ a energia $E$ é função de Lyapunov da
+actualização gerada por $W_s$ e \textbf{não} da gerada por $W$.
+\end{proposicao}
+
+\begin{proof}
+(1) A cláusula~(2) do Teor.~\ref{fis:thm:duastorres} dá $s^{\!\top}W_as=0$, e
+$W=W_s+W_a$. Para a recíproca: como função do estado,
+$s^{\!\top}W_ss=\sum_i(W_s)_{ii}+\sum_{i<j}2(W_s)_{ij}\,s_is_j$ é uma combinação
+dos caracteres $1$ e $s_is_j$ da Def.~\ref{fis:def:dual}, que são
+\emph{distintos}; pelo Lema~\ref{fis:lem:orto} caracteres distintos são
+independentes, pelo que a função ser identicamente nula anula todos os
+coeficientes: $\operatorname{tr}W_s=0$ e $(W_s)_{ij}=0$, isto é $W_s=0$.
+
+(2) Os estados \textbf{geram}: $\mathbf{1}$ e os $N$ vectores $\mathbf{1}-2e_i$
+são todos estados, e as suas diferenças são $2e_i$. Logo $W_as=0$ para todo $s$
+dá $W_ae_i=0$ para todo $i$, donde $W_a=0$.
+\end{proof}
+
+\medskip\noindent\textbf{E é aqui que a fronteira do §F10 fica dita com
+precisão.} O que a antissimetria tira não é a energia --- na rede completa a
+energia continua lá, e vale $E_{W_s}$. O que ela tira é o \textbf{acordo}: a
+energia mede $W_s$ e o passo lê $W_s+W_a$, e uma quantidade que o passo não olha
+não pode governá-lo.
+\[
+\boxed{\;\text{a energia é cega a }W_a\text{; o passo não é ---
+e é a \textbf{diferença} que desfaz Lyapunov}\;}
+\]
+
+\begin{teorema}[o síncrono desce numa energia de dois tempos]\label{fis:thm:goles}
+Seja $W$ \textbf{simétrica} e a actualização \textbf{síncrona}
+$s_{t+1}=\operatorname{sgn}(Ws_t)$, e suponha-se que o campo local nunca se anula
+ao longo da órbita: $(Ws_t)_i\neq0$ para todo $t$ e todo $i$. Com a
+\textbf{energia de dois tempos} $E_t=-\,s_{t+1}^{\!\top}W s_t$, vale
+$E_{t+1}\le E_t$ para todo $t$, e a órbita fecha com
+\[
+\boxed{\;p\mid2\;}
+\]
+--- \emph{ponto fixo ou alternância, e nada mais}.
+\end{teorema}
+
+\begin{proof}
+Com $h_{t+1}=Ws_{t+1}$,
+\[
+E_{t+1}-E_t=-s_{t+2}^{\!\top}Ws_{t+1}+s_{t+1}^{\!\top}Ws_t
+=-\bigl(s_{t+2}-s_t\bigr)^{\!\top}h_{t+1},
+\]
+onde a segunda igualdade usa a \textbf{simetria}:
+$s_{t+1}^{\!\top}Ws_t=s_t^{\!\top}Ws_{t+1}=s_t^{\!\top}h_{t+1}$. Componente a
+componente, $(s_{t+2})_i=\operatorname{sgn}\bigl((h_{t+1})_i\bigr)$ dá
+$(s_{t+2})_i(h_{t+1})_i=\abs{(h_{t+1})_i}\ge(s_t)_i(h_{t+1})_i$, porque
+$(s_t)_i=\pm1$. Logo cada parcela é $\ge0$ e $E_{t+1}\le E_t$.
+
+O espaço de estados é finito, portanto $E_t$ toma finitos valores e, não subindo,
+\textbf{estabiliza}. A partir daí $E_{t+1}=E_t$ força
+$(s_{t+2})_i(h_{t+1})_i=(s_t)_i(h_{t+1})_i$ para todo $i$; e como
+$(h_{t+1})_i\neq0$, vem $(s_t)_i=(s_{t+2})_i$. Donde $s_{t+2}=s_t$, e $p\mid2$.
+\end{proof}
+
+\medskip\noindent\textbf{A hipótese do campo não nulo é essencial, e é honesto
+dizer onde ela vive.} Ela é a mesma coisa que a convenção $\operatorname{sgn}(0)$
+esconde: com $(Ws)_i=0$ a actualização escolhe um sinal \emph{por decreto}, e um
+decreto não é uma lei. E ela é \textbf{verificável em inteiros}, por $\neq0$ ---
+não por limiar. \emph{E daí as duas actualizações ficam separadas}: o
+Teor.~\ref{fis:thm:desce} é o \textbf{assíncrono}, uma coordenada de cada vez, a
+energia de um tempo, e o destino é um \emph{ponto fixo}; este é o
+\textbf{síncrono}, todas ao mesmo tempo, a energia de dois tempos, e o destino é
+$p\mid2$. \emph{A mesma matriz simétrica faz coisas diferentes conforme a regra
+--- e confundir as duas é confundir uma medição com outra.}
+
+\begin{teorema}[as duas ordens são os dois sinais de $T^{2}$]\label{fis:thm:duasordens}
+Seja $T(s)=\operatorname{sgn}(Ws)$ a actualização síncrona.
+\begin{enumerate}\itemsep3pt
+\item[(1)] Se $T^{2}=\mathrm{id}$, toda a órbita tem $p\mid2$: $T$
+\textbf{espelha}, e a ordem é $\mathbf{2}$.
+\item[(2)] Se $T^{2}=-\mathrm{id}$, toda a órbita tem período \textbf{exactamente
+$\mathbf{4}$}: $T$ \textbf{roda}, e $T^{4}=\mathrm{id}$.
+\item[(3)] E as duas realizam-se, uma em cada metade. $W=\mathrm{Id}$, simétrica,
+dá $T=\mathrm{id}$. E sobre $2m$ unidades a matriz \textbf{antissimétrica}
+\[
+J=\begin{pmatrix}0&\mathrm{Id}_m\\[2pt]-\mathrm{Id}_m&0\end{pmatrix},
+\qquad J^{\!\top}=-J,\qquad J^{2}=-\mathrm{Id},
+\]
+dá $T(u,v)=(v,-u)$, logo $T^{2}=-\mathrm{id}$ e a ordem é $4$.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é imediato. (2): $T^{4}=(-\mathrm{id})^{2}=\mathrm{id}$, logo $p\mid4$; e
+$p\notin\{1,2\}$ porque $T^{2}s=-s\neq s$ --- \emph{um estado nunca é o seu
+oposto}, já que as componentes são $\pm1$ e não $0$. Donde $p=4$. (3): com
+$W=\mathrm{Id}$ vem $Ws=s$ e $\operatorname{sgn}(s)=s$. Com $W=J$ vem
+$J(u,v)=(v,-u)$, cujas componentes já são $\pm1$, pelo que $\operatorname{sgn}$
+não altera nada; e $T^{2}(u,v)=(-u,-v)$.
+\end{proof}
+
+\medskip\noindent\textbf{E é esta a hipótese que faltava, dita onde ela vive.} A
+afirmação dinâmica ---\,\emph{a torre negra cicla}\,--- \textbf{não} se segue de
+$W_a^{\!\top}=-W_a$, e o Teor.~\ref{fis:thm:duastorres} continua a não a afirmar.
+Ela segue-se de $T^{2}=-\mathrm{id}$, que é uma hipótese sobre a
+\textbf{actualização composta} e não sobre a simetria de $W$ --- e a cláusula~(3)
+mostra que a hipótese não é vazia: $J$ realiza-a, e $J$ é antissimétrica.
+\[
+\boxed{\;\text{ordem }2\iff T^{2}=+\mathrm{id}
+\qquad\qquad
+\text{ordem }4\iff T^{2}=-\mathrm{id}\;}
+\]
+\emph{E são as duas interfaces do §F12, e não duas coincidências:} a branca é
+$u\cdot u=+1$, a negra é $i\cdot i=-1$, e a única diferença entre as duas linhas
+da tabela é o \textbf{sinal} --- que é exactamente o sinal de $T^{2}$.
+
 \medskip\noindent\textbf{E o que se mede diz exactamente onde a fronteira está.}
-Com a actualização considerada nesta construção e $W$ \emph{puramente}
-antissimétrica, a órbita observada fecha com período $2$ (§F7). Mas somando as
+Com a actualização considerada nesta construção, a metade \emph{simétrica} fecha
+com período $\mathbf{2}$ --- ela \textbf{espelha} --- e a \emph{puramente
+antissimétrica} fecha com período $\mathbf{4}$ --- ela \textbf{roda} ---, nos
+$40$ arranques de cada (§F7), que são as duas cláusulas do
+Teor.~\ref{fis:thm:duasordens}. Mas somando as
 duas metades --- $W_s+W_a$, que é a rede completa --- \emph{a órbita medida não
 passa a ciclar}: o bloco que o afirmava \textbf{falha} (§F10). Fica escrito
 porque é o resultado: \emph{a antissimetria tira a função de Lyapunov, e não põe
@@ -5096,8 +5856,7 @@ acima são o que aparece quando eles correm}.}
 
 \colunas{Teor.~\ref{fis:thm:sobrepoe},~\ref{fis:thm:desce},~\ref{fis:thm:interfere},~\ref{fis:thm:duastorres}}
         {o neurónio como cisão$+$soma; a árvore como levantamento; as duas torres}
-        {\code{tests/hopfield.c} §F1--§F10; \code{tests/neuronio.c}}
-
+        {\code{tests/hopfield.c} §F1--§F14; \code{tests/neuronio.c}}
 % ═══════════════════════════════════════════════════════════════════════════
 \section{As dualidades, reunidas}\label{fis:dualidades}
 
@@ -5195,9 +5954,10 @@ euclidiana falha ambas com o mesmo raio);
 Teor.~\ref{fis:thm:periodo} §AN8 ($\abs{\{G>1\}}=p$ e $\abs{\{G=1\}}=\ell$, com o
 período obtido por busca independente e a órbita que escapa como controlo);
 ciclo em qualquer posto e Teor.~\ref{fis:thm:fecho} §AN13;
-Teor.~\ref{fis:thm:vizarvore} e o custo \textbf{contado} §AN14 ($2n$ leituras por
-passo, nem uma a mais --- o autómato não varre);
-Teor.~\ref{fis:thm:espaco} e \ref{fis:thm:base} §AN19, §AN24 (Gram
+Teor.~\ref{fis:thm:dim} e o custo \textbf{contado} §AN14 ($2n$ leituras por passo
+\emph{na grade}, nem uma a mais --- o autómato não varre); e
+Teor.~\ref{fis:thm:vizarvore}, onde a árvore dá $\abs{\mathcal{V}}=1$ e o custo
+cai a $\Theta(1)$;Teor.~\ref{fis:thm:espaco} e \ref{fis:thm:base} §AN19, §AN24 (Gram
 $=\mathrm{Id}$; as oito réguas cegas e compostas; os $256$ elementos a
 reconstruírem-se);
 Teor.~\ref{fis:thm:euler} §AN25 ($b_1=D=335$ no dragão, a espiral a reusar

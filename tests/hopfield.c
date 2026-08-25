@@ -533,7 +533,7 @@ int main(void){
     }
 
     /* ── §F7  A TORRE NEGRA ──────────────────────────────────────────────── */
-    puts("§F7  A TORRE NEGRA: a W ANTISSIMETRICA nao converge — ela CICLA, e o periodo e 2");
+    puts("§F7  A TORRE NEGRA: a SIMETRICA espelha (periodo 2) e a ANTISSIMETRICA roda (periodo 4)");
     puts("     O Aarao: 'a arvore e uma torre, a branca; a parte reversivel e a torre NEGRA.");
     puts("     Entao tem ciclos sim, mas ANTISSIMETRICOS.' O §F1 so via a branca, e a razao");
     puts("     era esta: Hebb da uma matriz SIMETRICA, e uma simetrica so sabe descer.\n");
