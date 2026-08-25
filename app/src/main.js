@@ -127,7 +127,7 @@ function docs(dd) {
   const ic = { 'enredo.pdf': '📜', 'teoria.pdf': '📐', 'catalogo.pdf': '📖', 'livro.pdf': '📚',
                'corpo_analitico.pdf': '⭐', 'computacional.pdf': '🔀',
                'naturais.pdf': '𝟙', 'inteiros.pdf': 'ℤ', 'racionais.pdf': 'ℚ', 'reais.pdf': 'ℝ',
-               'fisica.pdf': '⚛️',
+               'fisica.pdf': '⚛️', 'fisica-araniana.pdf': '🕷️',
                'medida.pdf': '📏', 'milenio.pdf': '∞', 'arquitetura.pdf': '🏗️',
                'corpo-peano.pdf': '🎵', 'partitura.pdf': '🎼' }
   const items = dd.map((d) => {

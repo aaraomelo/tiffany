@@ -13,6 +13,11 @@
 /geometrico.pdf
 /corpo_universal.pdf
 /tiffany.pdf
+/fisica.pdf
+
+# os binários dos medidores: o .c entra, o executável não. Em Windows saem .exe,
+# e sem esta linha eles entravam no commit com o resto.
+*.exe
 /microprocessador.pdf
 /viveiro.pdf
 

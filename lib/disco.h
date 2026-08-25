@@ -137,10 +137,29 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+/* ── O MESMO MOVIMENTO ONDE NAO HA' mmap ────────────────────────────────────────────
+ *
+ * O ficheiro E' o vector: e' isso que este cabecalho faz, e nao muda. O que muda entre
+ * hospedeiros e' o NOME da chamada. Em POSIX e' mmap(MAP_SHARED); em Windows e'
+ * CreateFileMapping + MapViewOfFile(FILE_MAP_ALL_ACCESS) sobre PAGE_READWRITE, que tem
+ * a MESMA semantica: o que se escreve JA' ESTA' no ficheiro, sem "gravar" nenhum.
+ *
+ * Isto nao e' uma segunda implementacao do disco — e' a mesma, com o verbo do sistema.
+ * Sem este ramo, os medidores que pedem o vector em disco nao correm fora de POSIX, e
+ * ficam por correr — que foi exactamente o que aconteceu com o hopfield.c e o
+ * neuronio.c antes de isto existir. */
+#if defined(_WIN32)
+  #include <windows.h>
+  #include <io.h>
+  #include <direct.h>
+  #define DISCO_WIN 1
+#else
+  #include <unistd.h>
+  #include <sys/mman.h>
+#endif
 
 /* ftruncate e POSIX e com -std=c99 ESTRITO a libc esconde-o. Definir
  * _POSIX_C_SOURCE aqui nao chega: quando este cabecalho e lido, a libc ja foi
@@ -149,7 +168,7 @@
  *   (a bateria compila com -std=c99; eu testei com -std=gnu99 e os tres primeiros
  *    ficheiros migrados NAO COMPILARAM la. testar com flags diferentes das do
  *    sistema nao e testar.) */
-#if !defined(__USE_XOPEN2K) && !defined(_GNU_SOURCE)
+#if !defined(DISCO_WIN) && !defined(__USE_XOPEN2K) && !defined(_GNU_SOURCE)
 extern int ftruncate(int, off_t);
 #endif
 
@@ -163,8 +182,35 @@ static void *disco_mapa(const char *path, size_t n, size_t tam)
         size_t k = (size_t)(b - path);
         if (k >= sizeof dir) k = sizeof dir - 1;
         memcpy(dir, path, k); dir[k] = 0;
+#if defined(DISCO_WIN)
+        _mkdir(dir);
+#else
         mkdir(dir, 0755);
+#endif
     }
+#if defined(DISCO_WIN)
+    /* o mesmo movimento: abrir, esticar ao tamanho, e mapear PARTILHADO */
+    HANDLE h = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) { perror(path); exit(1); }
+    LARGE_INTEGER sz;
+    if (!GetFileSizeEx(h, &sz)) { perror(path); CloseHandle(h); exit(1); }
+    if ((size_t)sz.QuadPart < bytes) {         /* esticar: o ftruncate daqui */
+        LARGE_INTEGER novo; novo.QuadPart = (LONGLONG)bytes;
+        if (!SetFilePointerEx(h, novo, NULL, FILE_BEGIN) || !SetEndOfFile(h)) {
+            perror(path); CloseHandle(h); exit(1);
+        }
+    }
+    HANDLE m = CreateFileMappingA(h, NULL, PAGE_READWRITE,
+                                  (DWORD)(((uint64_t)bytes) >> 32),
+                                  (DWORD)(bytes & 0xFFFFFFFFu), NULL);
+    if (!m) { perror(path); CloseHandle(h); exit(1); }
+    void *p = MapViewOfFile(m, FILE_MAP_ALL_ACCESS, 0, 0, bytes);
+    CloseHandle(m); CloseHandle(h);            /* a vista sobrevive aos handles */
+    if (!p) { perror(path); exit(1); }
+    return p;
+#else
     int fd = open(path, O_RDWR | O_CREAT, 0644);
     if (fd < 0) { perror(path); exit(1); }
     struct stat st;
@@ -176,6 +222,7 @@ static void *disco_mapa(const char *path, size_t n, size_t tam)
     close(fd);                                 /* o mapa sobrevive ao descritor */
     if (p == MAP_FAILED) { perror(path); exit(1); }
     return p;
+#endif
 }
 
 static unsigned      *disco_u32(const char *p, size_t n){ return (unsigned*)      disco_mapa(p,n,sizeof(unsigned)); }
@@ -214,7 +261,11 @@ static void disco_vira(void *p, size_t n, size_t tam, unsigned char m){
 }
 
 /* devolve ao sistema; opcional, o fim do processo tambem o faz */
+#if defined(DISCO_WIN)
+static void disco_larga(void *p, size_t n, size_t tam){ (void)n; (void)tam; if(p) UnmapViewOfFile(p); }
+#else
 static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); }
+#endif
 
 /* ── ZERO ABSOLUTO: o endereco e' CONSTANTE, nao e' variavel ─────────────────────────
  *
@@ -256,8 +307,47 @@ static void disco_prende(void *onde, const char *path, size_t n, size_t tam)
         size_t k = (size_t)(b - path);
         if (k >= sizeof dir) k = sizeof dir - 1;
         memcpy(dir, path, k); dir[k] = 0;
+#if defined(DISCO_WIN)
+        _mkdir(dir);
+#else
         mkdir(dir, 0755);
+#endif
     }
+#if defined(DISCO_WIN)
+    /* o mesmo prender, com o verbo do sistema: MapViewOfFileEx aceita o endereco
+     * como SUGESTAO OBRIGATORIA — devolve NULL se nao puder por-lo ali. E a mesma
+     * idempotencia do ramo POSIX: se ja' esta' prendido aqui, a segunda passagem
+     * nao e' erro. */
+    {
+        HANDLE h = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                               OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (h == INVALID_HANDLE_VALUE) { perror(path); exit(1); }
+        LARGE_INTEGER sz;
+        if (!GetFileSizeEx(h, &sz)) { perror(path); CloseHandle(h); exit(1); }
+        if ((size_t)sz.QuadPart < bytes) {
+            LARGE_INTEGER novo; novo.QuadPart = (LONGLONG)bytes;
+            if (!SetFilePointerEx(h, novo, NULL, FILE_BEGIN) || !SetEndOfFile(h)) {
+                perror(path); CloseHandle(h); exit(1);
+            }
+        }
+        MEMORY_BASIC_INFORMATION mbi;
+        if (VirtualQuery(onde, &mbi, sizeof mbi) && mbi.State != MEM_FREE) {
+            CloseHandle(h); return;            /* ja' prendido: segunda passagem */
+        }
+        HANDLE m = CreateFileMappingA(h, NULL, PAGE_READWRITE,
+                                      (DWORD)(((uint64_t)bytes) >> 32),
+                                      (DWORD)(bytes & 0xFFFFFFFFu), NULL);
+        if (!m) { perror(path); CloseHandle(h); exit(1); }
+        void *p = MapViewOfFileEx(m, FILE_MAP_ALL_ACCESS, 0, 0, bytes, onde);
+        CloseHandle(m); CloseHandle(h);
+        if (p != onde) {
+            fprintf(stderr, "disco_prende: nao consegui %s em %p\n", path, onde);
+            exit(1);
+        }
+        return;
+    }
+#else
     int fd = open(path, O_RDWR | O_CREAT, 0644);
     if (fd < 0) { perror(path); exit(1); }
     struct stat st;
@@ -285,6 +375,7 @@ static void disco_prende(void *onde, const char *path, size_t n, size_t tam)
         fprintf(stderr, "disco_prende: nao consegui %s em %p (%s)\n", path, onde, strerror(errno));
         exit(1);
     }
+#endif   /* DISCO_WIN */
 }
 
 #endif

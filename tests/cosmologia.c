@@ -100,15 +100,19 @@ int main(void){
          * potencias de dois onde a divisao inteira e' exacta. */
         /* PELA METADE: o residuo com o expoente certo E o residuo com outro. Uma metade
          * sozinha nao mede — nao diz que so' aquele expoente conserva. */
+        /* 64 BITS EXPLICITOS, e nao `long`: em Windows o `long` tem 32 bits e o
+         * 1L<<40 transborda — o `base` vinha lixo, o residuo dava zero e o CONTROLO
+         * deixava de discriminar (o expoente errado "conservava" nos 36 casos). Em
+         * Linux passava por `long` ter 64. O teto tem de ser dito no tipo. */
         long nao_conserva = 0, casos = 0, conserva_errado = 0;
         for(long C = 1; C <= 6; C++){
-            long base = C * (1L<<40);
+            long long base = (long long)C * (1LL<<40);
             for(int k = 0; k <= 5; k++){
-                long a = 1L << k;
-                long r = base/(a*a*a*a);                  /* radiacao: r = C.a^-4 */
+                long long a = 1LL << k;
+                long long r = base/(a*a*a*a);             /* radiacao: r = C.a^-4 */
                 if(r * (a*a*a*a) != base) nao_conserva++;  /* r.a^{3(1+w)} volta a C */
                 /* a outra metade: com o expoente da materia, NAO volta */
-                long r3 = base/(a*a*a);
+                long long r3 = base/(a*a*a);
                 if(r3 * (a*a*a*a) == base) conserva_errado++;
                 casos++;
             }
