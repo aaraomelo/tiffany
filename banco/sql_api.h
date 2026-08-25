@@ -59,6 +59,9 @@ long sql_ord_perdidos(void);
 
 /* as DUAS réguas da caixa de Pandora (`aranha thm:pandora`): a aritmética, que
  * diz quanto falta, e a profundidade da ultramétrica, que dá a partição. */
+/* o resumo óptico do catálogo — contado UMA vez, lido pelo comando e pelo medidor */
+void sql_optica_resumo(long *fora, long *prop, long *el, long *par, long *hip,
+                       long *borda, long *viola);
 /* o catálogo dos corpos com nome próprio, pela porta */
 int  sql_corpo28_n(void);
 const char *sql_corpo28(int i, long *B, long *C);

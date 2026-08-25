@@ -374,7 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire adfb33d6e14defcd 0
+pgwire 6b55847ef7d0424c 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -421,7 +421,7 @@ recursao 268dd5df56bb546b 0
 rede_dual 441d23a4e0824dce 0
 reducao a55c5836822c89da 0
 refracao 7a6fe4d08af5aa96 0
-refs 0b1b9e20d3ff5e66 0
+refs 2ca47687c1fecedb 0
 refuta feefc6499e4d89e0 0
 regua 273501d5d2f33deb 0
 regua_continua 02efe28cd3eea5d0 0
@@ -464,7 +464,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql e9cbbe4a0c33604b 0
+sql 695ed08464a8db0d 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0

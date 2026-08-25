@@ -31783,6 +31783,109 @@ int main(void){
            " se distinguiria de uma soma que conta o que calha.", mal == 0);
     }
 
+    /* ═══ §W224: O COMANDO PUBLICA A ÓPTICA, E O NÚMERO É UM SÓ ════════════ */
+    {
+        int mal = 0;
+        const char *base = "/tmp/pgwire_w224";
+        SqlOut out;
+        printf("\n§W224 o `CORPOS` diz a óptica — e a conta é feita num sítio só.\n\n");
+
+        /* ── A ÚLTIMA MILHA, E O DEFEITO QUE ELA CONVIDA ─────────────────────
+         *
+         * A caixa, a borda e a óptica estavam medidas e não chegavam a quem usa
+         * o motor: o comando `CORPOS` imprimia o B e o C e não dizia o que eles
+         * são. Passa a dizer --- Δ, orientação, regime, borda --- e a publicar o
+         * resumo.
+         *
+         * E isso convida o defeito que esta casa persegue: o comando faria a sua
+         * conta e o medidor faria outra, DUAS RÉGUAS para o mesmo objecto. Conta
+         * -se num sítio (`sql_optica_resumo`) e os dois lêem de lá.
+         *
+         * O gume é este bloco RECONTAR a partir do catálogo cru --- pela
+         * `sql_corpo28`, sem passar pela função de resumo --- e exigir que os
+         * dois números coincidam. São dois caminhos, e é a comparação que mede. */
+        { long fora = 0, prop = 0, el = 0, par = 0, hip = 0, bd = 0, viola = 0;
+          sql_optica_resumo(&fora, &prop, &el, &par, &hip, &bd, &viola);
+          { /* o SEGUNDO caminho: a varredura crua do catálogo */
+            long f2 = 0, p2 = 0, e2 = 0, a2 = 0, h2 = 0, b2 = 0, v2 = 0;
+            int n = sql_corpo28_n();
+            for(int i = 0; i < n; i++){
+                long B, C;
+                if(!sql_corpo28(i, &B, &C)) continue;
+                { long D = B*B - 4*C;
+                  if(C != 1 && C != -1) f2++;
+                  if(C > 0) p2++;
+                  if(D < 0) e2++; else if(D == 0) a2++; else h2++;
+                  if(C < 0 && D <= 0) v2++;
+                  if(D >= 0){ long r = sql_raizi(D);
+                      if(r*r == D && (B+r) % 2 == 0 && (B-r) % 2 == 0) b2++; } }
+            }
+            printf("      resumo publicado : fora %ld · próprios %ld · %ld/%ld/%ld ·"
+                   " borda %ld · violações %ld\n", fora, prop, el, par, hip, bd, viola);
+            printf("      recontado do cru : fora %ld · próprios %ld · %ld/%ld/%ld ·"
+                   " borda %ld · violações %ld\n", f2, p2, e2, a2, h2, b2, v2);
+            { int iguais = (fora==f2) + (prop==p2) + (el==e2) + (par==a2)
+                         + (hip==h2) + (bd==b2) + (viola==v2);
+              printf("      → os dois caminhos concordam em %d de 7 números\n", iguais);
+              if(iguais != 7) mal++; }
+            /* e os números NÃO são triviais: se fossem todos zero, «concordam»
+             * não distinguiria nada */
+            if(prop == 0 || el == 0 || par == 0 || hip == 0 || bd == 0) mal++;
+            if(prop + (long)sql_corpo28_n() - prop != (long)sql_corpo28_n()) mal++;
+            if(el + par + hip != (long)sql_corpo28_n()) mal++;   /* a partição fecha */
+          }
+        }
+
+        /* (2) E O COMANDO CORRE. Sem isto, «o comando publica» era sobre código
+         *     que ninguém executa. */
+        unlink("/tmp/pgwire_w224.mem");
+        unlink("/tmp/pgwire_w224.prog");
+        if(!sql_abrir(base)){ mal++; printf("      sql_abrir FALHOU\n"); }
+        else{
+            sql_executa("CORPOS", &out);
+            printf("      o comando CORPOS: ok=%d  ← e imprime a coluna da óptica\n", out.ok);
+            if(!out.ok) mal++;
+            sql_fechar();
+        }
+
+        /* ── O CONTROLO: a recontagem SABE divergir ──────────────────────────
+         * Aplica-se a mesma lógica com um critério ERRADO de borda (Δ quadrado
+         * sem a condição das metades) e exige-se que o número MUDE. Sem isto,
+         * «os dois caminhos concordam» não se distinguiria de duas cópias da
+         * mesma linha. */
+        { long b_certo = 0, b_errado = 0;
+          int n = sql_corpo28_n();
+          for(int i = 0; i < n; i++){
+              long B, C;
+              if(!sql_corpo28(i, &B, &C)) continue;
+              { long D = B*B - 4*C;
+                if(D >= 0){ long r = sql_raizi(D);
+                    if(r*r == D){ b_errado++;
+                        if((B+r) % 2 == 0 && (B-r) % 2 == 0) b_certo++; } } }
+          }
+          printf("      CONTROLO — sem a condição das metades a borda daria %ld em vez de"
+                 " %ld: %s\n", b_errado, b_certo,
+                 (b_errado != b_certo) ? "o critério MORDE"
+                                       : "os dois critérios coincidem (a condição é vazia!)");
+          /* aqui a condição das metades pode não morder no catálogo, e isso é um
+           * FACTO a registar --- mas então o controlo não vale, e diz-se */
+          printf("      (se coincidirem, é porque no catálogo B e √Δ têm sempre a mesma"
+                 " paridade — o que é um facto, não uma verificação)\n"); }
+
+        ok("O COMANDO PUBLICA A ÓPTICA, E A CONTA É FEITA NUM SÍTIO SÓ. A caixa, a borda e a"
+           " óptica estavam medidas e não chegavam a quem usa o motor: o `CORPOS` imprimia o"
+           " B e o C sem dizer o que são. Passa a dizer — Δ, orientação, regime, borda — e a"
+           " publicar o resumo. E isso convidava o defeito que esta casa persegue: o comando"
+           " faria a sua conta e o medidor outra, DUAS RÉGUAS para o mesmo objecto. Conta-se"
+           " num sítio, `sql_optica_resumo`, e os dois lêem de lá. O gume é este bloco"
+           " RECONTAR a partir do catálogo cru, pela `sql_corpo28`, sem passar pela função"
+           " de resumo, e exigir que os SETE números coincidam — são dois caminhos, e é a"
+           " comparação que mede, não a asserção. Exige-se também que a partição feche"
+           " (elípticos + parabólicos + hiperbólicos = total) e que os números não sejam"
+           " triviais, senão «concordam» não distinguiria nada. E o comando CORRE: sem isso,"
+           " «o comando publica» seria sobre código que ninguém executa.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

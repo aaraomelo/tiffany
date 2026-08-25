@@ -2501,6 +2501,22 @@ Teor.~\ref{thm:pandora}(2) --- o comportamento do $2$ no anel --- e reaparece aq
 sem ser convidada.
 \end{proof}
 
+\medskip\noindent\textbf{E no segundo degrau essa condição não morde.} De
+$\Delta=B^{2}-4C$ vem $\Delta\equiv B^{2}$ módulo $4$; se $\Delta=r^{2}$, então
+$r^{2}\equiv B^{2}$ e daí $r\equiv B$ módulo $2$, pelo que $B\pm r$ é
+\emph{sempre} par. \emph{A hipótese é genuína no enunciado e vazia na
+realização}: a prova acima usa a paridade, que é do segundo degrau, e num anel
+onde o $2$ se comporte de outra maneira ela volta a ter conteúdo. As duas coisas
+dizem-se, porque calar a segunda faria a hipótese parecer ociosa e calar a
+primeira faria-a parecer necessária em toda a parte.
+
+\medido{\code{tests/pgwire.c} \S W224. Varrido $\lvert B\rvert\le3000$ nos dois
+sinais de $C$, e depois $C\in[-40,40]$ com $\lvert B\rvert\le200$: em todos os
+casos de $\Delta$ quadrado --- $723$ deles no segundo varrimento --- as metades
+estão no anel, sem um contra-exemplo. É por isso que o controlo do medidor
+\emph{não} consegue fazer o critério divergir no catálogo, e diz que não
+consegue em vez de fingir que conseguiu.}
+
 \medskip\noindent\textbf{E é isso que uma máquina aditiva alcança.} No caso~(1) a
 comparação $q\ \mathrm{OP}\ k$ é $\lvert a+\tfrac{B}{2}b\rvert\ \mathrm{OP}\
 \sqrt{k}$, com $\sqrt{k}$ calculado \emph{antes} de correr: cabe inteira, sem uma

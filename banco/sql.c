@@ -13534,6 +13534,29 @@ const char *sql_corpo28(int i, long *B, long *C){
     return CORPO28[i].nome;
 }
 
+/* ── UM SÍTIO QUE CONTA ──────────────────────────────────────────────────────
+ * O comando `CORPOS` imprime o resumo óptico do catálogo e o medidor verifica-o.
+ * Se cada um fizesse a sua conta seriam DUAS RÉGUAS para o mesmo objecto, e o
+ * defeito que esta casa persegue era plantado de propósito. Conta-se aqui, e os
+ * dois lêem daqui. */
+void sql_optica_resumo(long *fora, long *prop, long *el, long *par, long *hip,
+                       long *borda, long *viola){
+    long f = 0, p = 0, e = 0, a = 0, h = 0, b = 0, v = 0;
+    for(int i = 0; i < N28; i++){
+        long B = CORPO28[i].B, C = CORPO28[i].C, D = B*B - 4*C;
+        if(C != 1 && C != -1) f++;
+        if(C > 0) p++;
+        if(D < 0) e++; else if(D == 0) a++; else h++;
+        if(C < 0 && D <= 0) v++;                  /* a lei do cor:optica */
+        if(D >= 0){ long r = raizi(D);
+            if(r*r == D && (B+r) % 2 == 0 && (B-r) % 2 == 0) b++; }
+    }
+    if(fora) *fora = f;   if(prop) *prop = p;   if(el) *el = e;
+    if(par) *par = a;     if(hip) *hip = h;     if(borda) *borda = b;
+    if(viola) *viola = v;
+}
+
+
 /* O codificador vem do cifra.h — um so, e encoda qualquer corpo: foi ele que deu a cifra
  * aos 31 e e ele que da a de um formato. Estava aqui dentro e saiu para nao haver dois. */
 /* A DISTANCIA ENTRE OS CORPOS: o prefixo comum das cifras completas, e a distancia e 1/2^k. E a
@@ -13827,15 +13850,28 @@ static int minera(const char *p){
 }
 static int insere_corpos(void){
     long antes = txt_n();
-    printf("      corpo             razao sinal dual  cifra completa\n");
+    /* ── E A ÓPTICA, QUE A `aranha` LÊ NESTAS MESMAS DUAS COLUNAS ───────
+     * O «razao» é o B (traço) e o «sinal» é o C (determinante), e a caixa de
+     * Pandora lê-os: C é a ORIENTAÇÃO (+1 próprio, −1 reflecte) e o sinal de
+     * Δ = B²−4C é o REGIME (roda, cisalha, expande). A tabela dizia os dois
+     * números e não o que eles são --- e a `cor:optica` diz que um proíbe metade
+     * do outro: com C = −1 vem Δ = B²+4 > 0, pelo que o impróprio nunca roda. */
+    printf("      corpo             razao sinal dual   Δ  orient  regime      borda"
+           "  cifra completa\n");
     for(int i = 0; i < N28; i++){
         long a[128];
         size_t n = cifra_geral(CORPO28[i].per, CORPO28[i].np, CORPO28[i].B, CORPO28[i].C,
                                CORPO28[i].rd, a, 128);
         long ja = txt_n();
         cif_poe(a, n);
-        printf("      %-17s %-3ld %-3ld %-4ld ", CORPO28[i].nome,
-               CORPO28[i].B, CORPO28[i].C, CORPO28[i].rd);
+        { long B = CORPO28[i].B, C = CORPO28[i].C, D = B*B - 4*C;
+          const char *ori = (C > 0) ? "propr" : "REFLE";
+          const char *reg = (D < 0) ? "roda      " : (D == 0 ? "cisalha   " : "expande   ");
+          int bd = 0;
+          if(D >= 0){ long r = raizi(D);
+              bd = (r*r == D && (B+r) % 2 == 0 && (B-r) % 2 == 0); }
+          printf("      %-17s %-3ld %-3ld %-4ld %4ld %-6s %-10s %-5s ", CORPO28[i].nome,
+                 B, C, CORPO28[i].rd, D, ori, reg, bd ? "SIM" : ""); }
         mostra_cifra(a, n);
         printf("%s\n", txt_n() == ja ? "   <- lugar ja tomado" : "");
     }
@@ -13845,6 +13881,16 @@ static int insere_corpos(void){
         for(int k = 0; k < nr; k++) if(vb[k]==CORPO28[i].B && vc[k]==CORPO28[i].C) ja = 1;
         if(!ja){ vb[nr]=CORPO28[i].B; vc[nr]=CORPO28[i].C; nr++; } }
       printf("      %d reguas (B,C) distintas.\n", nr); }
+    /* o resumo da leitura, LIDO de quem o conta --- não recontado aqui */
+    { long fora = 0, prop = 0, el = 0, par = 0, hip = 0, bd = 0, viola = 0;
+      sql_optica_resumo(&fora, &prop, &el, &par, &hip, &bd, &viola);
+      printf("      caixa de Pandora: %ld fora (|C| != 1), %ld proprios e %ld que"
+             " reflectem.\n", fora, prop, (long)N28 - prop);
+      printf("      regimes: %ld rodam (eliptico), %ld cisalham (parabolico), %ld"
+             " expandem (hiperbolico).\n", el, par, hip);
+      printf("      na borda (a regua factoriza em duas lineares): %ld.\n", bd);
+      printf("      a lei «o que reflecte nunca roda nem cisalha»: %ld violacoes.\n",
+             viola); }
     return 1;
 }
 static int insere_texto(const char *p){
