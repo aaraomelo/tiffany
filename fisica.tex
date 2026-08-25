@@ -52,7 +52,7 @@
   \gkcapa{A Física Araniana}
          {multiplicidade e memória}
          {álgebra, topologia, análise, geometria, mecânica, óptica, partículas e núcleo,
-          cosmologia, redes --- nove lugares, um sistema}
+          termodinâmica, cosmologia, redes --- dez lugares, um sistema}
   \maketitle
   \tableofcontents
 }{%
@@ -97,7 +97,7 @@ igualdade} --- o ponto onde para é o ponto fixo que as duas faces passam a
 partilhar, e é ele o \textbf{corte}. Não converge para o ponto: termina nele.
 
 \medskip\noindent\textbf{A organização deste documento.} A matéria é uma só e
-opera em \textbf{nove} lugares, e é por eles que ela se reparte aqui. A
+opera em \textbf{dez} lugares, e é por eles que ela se reparte aqui. A
 \textbf{álgebra} constrói: a dobra, as duas faces, os dois símbolos, a lista, a
 multiplicidade, o par $\zeta/\mu$, a transformada, a escada e a caixa. A
 \textbf{topologia} conta o que a construção identifica: a ultramétrica que
@@ -109,11 +109,13 @@ correr: o ciclo, a lei local, o levantamento, o tempo e a régua que a memória
 curva. A \textbf{óptica} lê os espelhos: a caixa dos sistemas sem perda, a lei
 do discriminante, as ordens que uma rede admite e a borda onde a régua colapsa.
 
-\medskip\noindent E os três últimos lugares são o mesmo sistema em três escalas.
-As \textbf{partículas e o núcleo}: o átomo como cadeia espectral, a massa como
-distância ao círculo, a ligação como folga, e o mapa espectral que diz que
-átomos a álgebra permite. A \textbf{cosmologia}: a taxa como a régua invertida,
-os conteúdos como os três valores do trial, e o universo como uma órbita. E as
+\medskip\noindent E os quatro últimos lugares são o mesmo sistema em quatro
+escalas. As \textbf{partículas e o núcleo}: o átomo como cadeia espectral, a
+massa como distância ao círculo, a ligação como folga, e o mapa espectral que diz
+que átomos a álgebra permite. A \textbf{termodinâmica} e a \textbf{cosmologia},
+que são um par --- \emph{entropia é o que se desfaz, expansão é o que se abre} ---
+com o rendimento a sair do $\oint$ fechado, o custo a ser a dobra, a segunda lei a
+valer de \emph{um} lado, e a taxa de expansão a ser a régua invertida. E as
 \textbf{redes}: o neurónio como cisão e soma, a sobreposição como prefixo comum,
 a interferência como dobra, e as duas torres --- a que mede e a que ordena.
 
@@ -4140,6 +4142,261 @@ a arquitetura que os produz pode ser \textbf{pequena}}\;}
         {\code{cristal/cristal\_fisica.tex} (energia nuclear, partículas minerais); \code{tests/neuronio.c}; \code{tests/pgwire.c} §W116, §W219--§W220}
 
 % ═══════════════════════════════════════════════════════════════════════════
+% ═══════════════════════════════════════════════════════════════════════════
+\part{Termodinâmica}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\section*{A tese desta parte}\label{fis:termo-tese}
+
+\noindent A parte seguinte lê a expansão. Esta lê a \textbf{entropia}, e as duas
+são o mesmo par --- o que se desfaz e o que se abre. Mas há uma coisa a dizer
+primeiro, e ela vem antes de qualquer identificação: \emph{este é o terreno onde
+é mais fácil chamar lei ao que é escolha de quem escreve}. A §\ref{fis:carnot}
+fecha uma conjectura desta casa \textbf{como negativa}, e fecha-a por essa razão
+exacta.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{a estrutura} & \textbf{o que a obriga} \\
+\midrule
+o rendimento máximo & o $\oint$ fechado, não a engenharia & Teor.~\ref{fis:thm:carnot} \\
+o que custa & apagar --- e apagar é a \emph{dobra} & Teor.~\ref{fis:thm:landauer} \\
+o piso do reversível & \textbf{zero exacto}, não pequeno & Teor.~\ref{fis:thm:landauer} \\
+a entropia dual & o produto vale $1$; os expoentes somam $0$ & Teor.~\ref{fis:thm:entropiadual} \\
+a segunda lei & vale de \textbf{um} lado --- o par não se move & Cor.~\ref{fis:cor:segundalei} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{O rendimento é o $\oint$ fechado}\label{fis:carnot}
+
+\begin{teorema}[o rendimento máximo, derivado de duas integrais]\label{fis:thm:carnot}
+Num ciclo:
+\[
+\oint dU=0 \;\Longrightarrow\; W=Q_q-Q_f ,
+\qquad
+\oint \frac{dQ}{T}=0 \;\Longrightarrow\; \frac{Q_f}{Q_q}=\frac{T_f}{T_q} ,
+\]
+donde
+\[
+\boxed{\;\eta=\frac{W}{Q_q}=1-\frac{Q_f}{Q_q}=1-\frac{T_f}{T_q}\;}
+\]
+\end{teorema}
+
+\begin{proof}
+A primeira integral é o ciclo voltar ao estado: a energia interna é função de
+estado, logo a sua variação num ciclo é nula, e o que sobra é $W=Q_q-Q_f$. A
+segunda é a reversibilidade: $dQ/T$ é diferencial exacta num ciclo reversível,
+logo a sua circulação anula-se, e daí $Q_q/T_q=Q_f/T_f$. Substituindo a razão dos
+calores pela razão das temperaturas em $\eta=1-Q_f/Q_q$ vem o enunciado.
+\end{proof}
+
+\medskip\noindent\textbf{É o $\oint$ que faz o trabalho.} A primeira integral dá
+$W$; a segunda converte a razão dos \emph{calores} na razão das
+\emph{temperaturas}. Sem a segunda, $\eta$ fica em $Q$ e não em $T$. E abrir o
+$\oint$ --- rejeitar calor a mais --- derruba $\eta$ abaixo do máximo,
+\emph{sempre}:
+\[
+\boxed{\;\text{o tecto não é limite de engenharia: é o }\oint\text{ fechado}\;}
+\]
+
+\subsection*{E uma conjectura desta casa, fechada como negativa}
+
+\noindent Houve aqui uma identificação tentadora: a razão focal de uma elipse,
+$(1-e)/(1+e)$, como candidata a $T_f/T_q$. Ela \emph{funciona} --- dá um valor
+válido para todo $e\in(0,1)$. E é por isso que não serve.
+
+\medskip\noindent\textbf{O teste que a derruba é uma pergunta só:} \emph{que
+parâmetros do teorema fui eu que escolhi?} Qualquer bijeção de $(0,1)$ em $(0,1)$
+daria um $T_f/T_q$ igualmente válido. Sem \textbf{exibir} o ciclo cuja trajetória
+\emph{é} a elipse do corte, aquilo não é um teorema --- é uma
+\textbf{parametrização}, e uma parametrização não prova nada porque não pode
+falhar.
+\[
+\boxed{\;\text{se qualquer bijeção servisse, a que se escolheu não é resultado}\;}
+\]
+\emph{Fica fechado como negativo}, e fica escrito, porque um negativo medido vale
+mais do que uma coincidência bonita. O que \textbf{sobrevive} é o que não dependia
+disto: o ciclo fecha se e só se $\Delta<0$, os dois focos são dois, e a janela é
+aberta nos extremos --- \emph{isso é geometria da secção}
+(Teor.~\ref{fis:thm:leidisc}), e vale. A temperatura é que não entrou.
+
+\medido{\code{tests/carnot.c} --- $9$ blocos, $\mathbf{0}$ falhas, \emph{resíduo
+$0$, exacto em racionais}. §C1: o ciclo fecha, $\oint dU=0$. §C2: o reversível dá
+$Q_f/Q_q=T_f/T_q$. §C3: $\eta=1-T_f/T_q$ igual a $W/Q_q$ em toda a varredura. E o
+veredito \textbf{negativo} sobre a razão focal está no próprio medidor, não numa
+nota de rodapé.}
+
+\section{O que custa é apagar}\label{fis:landauer}
+
+\noindent A régua não é a memória reservada --- é o \textbf{bit apagado}. E as
+duas separam-se de forma que não deixa dúvida: um vector grande que nunca é
+escrito não dissipa nada, e um único bit reescrito mil milhões de vezes paga mil
+milhões de vezes.
+
+\begin{teorema}[o piso do involutivo é zero exacto]\label{fis:thm:landauer}
+Apagar um bit tem um custo mínimo, e ele é positivo. Logo:
+\begin{enumerate}\itemsep3pt
+\item[(1)] uma operação \textbf{destrutiva} --- que identifica estados --- paga
+por cada bit que perde;
+\item[(2)] uma operação \textbf{involutiva} --- que aplicada duas vezes devolve
+--- não perde bit nenhum, e o seu piso é
+\[
+\boxed{\;\text{zero \textbf{exacto}, e não um número pequeno}\;}
+\]
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) O custo conta-se em bits perdidos, e perder um bit é ter dois estados de
+entrada com a mesma saída --- é \emph{exactamente} $G>1$ na
+Def.~\ref{fis:def:objeto}. Uma operação destrutiva tem fibra não trivial, logo
+tem bits a perder.
+
+(2) Uma involução é bijetiva: $I^{2}=\mathrm{id}$ obriga $I$ a ser injetiva, logo
+$G\equiv1$ pela cláusula~(2) do Teor.~\ref{fis:thm:mult}. Sem fibra não trivial
+não há estado identificado, logo não há bit apagado, e a soma dos custos é uma
+soma vazia --- \emph{zero, e não um infinitésimo}.
+\end{proof}
+
+\medskip\noindent\textbf{E é a dobra outra vez, com unidade física.} O que a
+§\ref{fis:folga} conta como $\sum_x(G(x)-1)$ --- os índices que vieram parar à
+mesma célula --- é aqui o que se paga. \emph{A folga tem preço}, e o preço é o
+mínimo termodinâmico vezes a folga.
+\[
+\boxed{\;\text{dissipar é dobrar}\;}
+\]
+Donde a leitura que a construção já vinha a fazer sem lhe chamar isto: as
+operações que este documento constrói --- o gato e o esquilo, a subida e a
+descida da torre, $\zeta$ e $\mu$ --- \emph{invertem}, e por isso o seu piso é
+zero. \emph{Não é economia de implementação: é o Teor.~\ref{fis:thm:gato}(1),
+$\oslash\circ\otimes=\mathrm{id}$, lido como termodinâmica.}
+
+\medido{\code{tests/dissipa.c} --- $4$ blocos, $\mathbf{0}$ falhas. Contam-se os
+bits apagados dos \emph{dois} lados, na mesma tarefa e com a mesma entrada: a
+destrutiva paga $\mathbf{376\,304\,828\,416}$ rJ ($10^{-27}$ J), a involutiva
+paga $\mathbf{0}$ --- e os dois lados têm de ser \emph{visíveis} para a frase
+valer, senão a distinção não aparece em lado nenhum. E a involutiva é mesmo
+involutiva: repetida, devolve o original em $\mathbf{4096}$ de $4096$ posições.
+\emph{Nota:} este bloco imprimia um custo por segundo que transbordava num alvo
+de inteiro largo a $32$ bits --- saía \emph{negativo}, e por não ser asserido
+nenhum bloco o apanhava. Corrigido para $64$ bits explícitos, dá
+$3{,}08\cdot10^{15}$ rJ/s. \emph{O tecto diz-se no tipo}, e um número publicado
+errado é pior do que um bloco vermelho.}
+
+\section{A entropia dual, e a segunda lei lida como ela é}\label{fis:entropiadual}
+
+\noindent A entropia de um horizonte é a sua \textbf{área}. E no universo dual o
+raio é o inverso --- não há nada a inventar: aplica-se a mesma lei ao raio dual.
+
+\begin{teorema}[o par fecha na unidade]\label{fis:thm:entropiadual}
+Com $S=r^{\,d-1}$ a área em codimensão $1$, e o dual a inverter o raio:
+\[
+S_{\text{negro}}=r^{\,d-1}\ \ (\text{cresce}),
+\qquad
+S_{\text{branco}}=r^{-(d-1)}\ \ (\text{decresce}),
+\]
+e então
+\[
+\boxed{\;S_{\text{negro}}\cdot S_{\text{branco}}=1
+\qquad\text{e}\qquad
+\log S_{\text{negro}}+\log S_{\text{branco}}=0\;}
+\]
+--- o \textbf{produto} vale a unidade, e a \textbf{soma dos expoentes} é nula.
+\end{teorema}
+
+\begin{proof}
+$r^{\,d-1}\cdot r^{-(d-1)}=r^{0}=1$, e o logaritmo de $1$ é $0$. As duas
+igualdades são a mesma escrita nas duas faces: \emph{o que é produto de um lado é
+soma do outro}, e a exponencial é o dicionário entre elas
+(§\ref{fis:transf}). E não é acidente que a entropia caiba na segunda: ela
+\emph{já é um logaritmo} --- conta caminhos, e contar caminhos é somar expoentes.
+\end{proof}
+
+\medskip\noindent\textbf{E isto é a neutralidade, outra vez.} A
+Prop.~\ref{fis:prop:neutro} diz que num átomo $\sum_i\log\abs{\rho_i}=0$ porque o
+determinante é unidade. Aqui a soma dos dois expoentes é nula pela mesma razão
+estrutural: \emph{o par conserva, e nenhum dos lados conserva sozinho}.
+
+\begin{corolario}[a segunda lei vale de um lado]\label{fis:cor:segundalei}
+A entropia do lado negro cresce em todos os passos; a do branco decresce em
+todos; e a \textbf{soma não se move em nenhum}. Logo
+\[
+\boxed{\;\text{«a entropia cresce» é verdade, e é lei de \textbf{metade} do par}\;}
+\]
+e a seta do tempo não é propriedade do tempo: \emph{é uma polaridade lida sem a
+outra}.
+\end{corolario}
+
+\begin{proof}
+$r\mapsto r^{\,d-1}$ é crescente e $r\mapsto r^{-(d-1)}$ é decrescente em $r>0$,
+para $d>1$. E a soma dos logaritmos é identicamente nula pelo
+Teor.~\ref{fis:thm:entropiadual}, logo não varia com $r$: o que cresce de um lado
+é exactamente o que decresce do outro.
+\end{proof}
+
+\medskip\noindent\textbf{E o ponto fixo é a borda.} Há um só raio onde as duas
+entropias coincidem --- $r=1$ --- e aí ambas valem a unidade, e no logaritmo,
+zero. \emph{É aí que a seta não aponta para lado nenhum}, porque nem cresce nem
+decresce. É o círculo unitário do Teor.~\ref{fis:thm:massa}, o $\delta=0$ do
+Teor.~\ref{fis:thm:corte}, e o $\Delta=0$ da §\ref{fis:leidisc} --- \emph{a mesma
+borda, pelo quarto caminho diferente}.
+
+\medido{\code{tests/entropia\_dual.c} --- $6$ blocos, $\mathbf{0}$ falhas. §X5:
+há \textbf{um} raio em $40$ onde as duas entropias coincidem, e é $r=1$. §X6, o
+\textbf{controlo}: o par fecha com o expoente da \emph{área} com $\mathbf{0}$
+falhas; trocando a codimensão pelo \emph{volume} falha em $\mathbf{9}$; e com um
+dual \emph{falso} --- o inverso trocado por um múltiplo dele --- falha em
+$\mathbf{10}$. \emph{Logo o zero não veio de a álgebra ser generosa}: veio de a
+entropia ser a fronteira e de os dois universos serem duais.}
+
+\section{E porque esta parte vem antes da seguinte}\label{fis:termo-cosmo}
+
+\noindent As duas leituras são o mesmo par, e é por isso que estão lado a lado:
+\[
+\boxed{\;\textbf{entropia} \text{ é o que se desfaz};\qquad
+\textbf{expansão} \text{ é o que se abre}\;}
+\]
+Uma conta estados; a outra cria lugar. \emph{O que se solta de um lado é o espaço
+que nasce do outro.}
+
+\medskip\noindent E a forma é a mesma nas duas partes, o que se vê pondo-as em
+paralelo:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{termodinâmica} & \textbf{cosmologia} \\
+\midrule
+o invariante & $S_{\text{n}}\!\cdot\!S_{\text{b}}=1$ & $r\,a^{3(1+w)}=C$ \\
+como se lê & soma de logaritmos $=0$ & entra aditiva, sai multiplicativa \\
+o ponto fixo & $r=1$: a seta não aponta & $w=-\tfrac13$: a aceleração anula \\
+a lei de um lado & «a entropia cresce» & «o universo expande» \\
+a lei do par & a soma não muda & a constante não muda \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E aqui é preciso ser exacto sobre o que está e o que não
+está demonstrado}, porque é o terreno onde esta casa já se enganou uma vez. O que
+está provado é cada coluna \emph{por si}: os teoremas desta parte e os da
+seguinte, cada um com a sua prova e o seu controlo. O que a tabela mostra é que
+as duas colunas têm a \textbf{mesma forma} --- um invariante multiplicativo que
+se lê como soma nula, com o ponto fixo na borda.
+
+\medskip\noindent\emph{Que sejam a mesma lei, e não duas com a mesma forma, é o
+que falta.} E o teste que o diria é o mesmo que fechou a §\ref{fis:carnot} como
+negativa: \textbf{exibir} a construção onde uma se torna a outra --- não uma
+bijeção que as ligue, porque uma bijeção há sempre.
+\[
+\boxed{\;\text{a mesma forma não é a mesma lei --- e a diferença mede-se
+exibindo, não emparelhando}\;}
+\]
+
+\colunas{Teor.~\ref{fis:thm:carnot},~\ref{fis:thm:landauer},~\ref{fis:thm:entropiadual}; Cor.~\ref{fis:cor:segundalei}}
+        {o $\oint$ fechado; o piso zero do involutivo; o par que fecha na unidade}
+        {\code{tests/carnot.c}; \code{tests/dissipa.c}; \code{tests/entropia\_dual.c}}
+
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Cosmologia}
 % ═══════════════════════════════════════════════════════════════════════════

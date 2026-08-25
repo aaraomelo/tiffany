@@ -129,11 +129,14 @@ int main(void){
          *   k_B·T·ln2 = 2 870 978 rJ   (resto 0,885… de rJ, truncado — dito)
          *
          * ≈ 2,871·10⁻²¹ J por bit apagado, que é o limite de Landauer a 300 K. */
-        const long KT_LN2_rJ = 2870978L;             /* 10⁻²⁷ J; ln2 truncado, ver acima */
-        printf("      a %ld rJ (10⁻²⁷ J) por bit: destrutiva %ld rJ, involutiva %ld rJ\n",
-               KT_LN2_rJ, perdidos_d*KT_LN2_rJ, perdidos_i*KT_LN2_rJ);
-        printf("      e uma DRAM que refresque isto 8192x/s pagaria %ld rJ/s so' por existir\n",
-               (long)N*32*8192*KT_LN2_rJ);
+        /* 64 BITS EXPLICITOS: N*32*8192*KT_LN2_rJ passa dos 2^31, e num alvo onde o
+         * `long` tem 32 bits saia' NEGATIVO — um numero publicado errado, e este nao
+         * e' asserido, logo nenhum bloco o apanhava. O tecto diz-se no tipo. */
+        const long long KT_LN2_rJ = 2870978LL;       /* 10⁻²⁷ J; ln2 truncado, ver acima */
+        printf("      a %lld rJ (10⁻²⁷ J) por bit: destrutiva %lld rJ, involutiva %lld rJ\n",
+               KT_LN2_rJ, (long long)perdidos_d*KT_LN2_rJ, (long long)perdidos_i*KT_LN2_rJ);
+        printf("      e uma DRAM que refresque isto 8192x/s pagaria %lld rJ/s so' por existir\n",
+               (long long)N*32*8192*KT_LN2_rJ);
         ok("E O PISO DA INVOLUTIVA E' ZERO EXACTO, e nao um numero pequeno: nao ha' bit"
            " apagado, logo nao ha' minimo termodinamico nenhum a pagar. E os dois lados"
            " têm de ser VISÍVEIS para a frase valer: a destrutiva paga um número > 0 na"
