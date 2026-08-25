@@ -1628,8 +1628,7 @@ que faz o processo: a aritmética \textbf{desce um degrau} --- o meio de dois
 pontos de um nível é um ponto do nível seguinte, exactamente, sem sobra --- e a
 multiplicativa \textbf{ou encontra o seu meio no objeto, ou não encontra}, conforme
 $ab$ seja ou não um quadrado. \emph{Uma face refina; a outra decide.}
-\begin{definicao}[o que o par carrega, e a raiz nunca é avaliada]\label{fis:def:piso}
-O processo \textbf{não arredonda coisa nenhuma}, e convém dizê-lo antes de
+\begin{definicao}[o que o par carrega, e a raiz nunca é avaliada]\label{fis:def:par}O processo \textbf{não arredonda coisa nenhuma}, e convém dizê-lo antes de
 qualquer conta. O que ele carrega é o \textbf{par}, e do par só se usam dois
 inteiros:
 \[
@@ -1816,15 +1815,16 @@ Se o desvio inicial vale $\delta_0$, o processo chega a $\delta=0$ ao fim de
 --- e não $\delta_0$. A cota sai do Lema~\ref{fis:lem:descida} sozinho.
 \end{corolario}
 \begin{proof}
-Por indução, $w_n\le\lfloor N/2^{n}\rfloor$: o caso $n=0$ é a hipótese, e do
-Lema~\ref{fis:lem:descida} vem
-$w_{n+1}\le\lfloor w_n/2\rfloor\le\bigl\lfloor\lfloor N/2^{n}\rfloor/2\bigr\rfloor
-=\lfloor N/2^{n+1}\rfloor$. Com $2^{n}\ge N$ vem $w_n=0$.
+Por indução, $2^{n}\delta_n\le\delta_0$: o caso $n=0$ é a hipótese, e do
+Lema~\ref{fis:lem:descida} vem $2\delta_{n+1}\le\delta_n$, donde
+$2^{n+1}\delta_{n+1}\le2^{n}\delta_n\le\delta_0$. Como $\delta_n$ é um inteiro
+não-negativo, $2^{n}>\delta_0$ força $\delta_n=0$. \emph{Nenhuma divisão foi
+feita: multiplicou-se.}
 \end{proof}
 
 \medskip\noindent\textbf{A cota, e o que cada face acrescenta.} São \emph{três}
-números, e não dois. A descida ingénua --- um grão por batida --- dá $N$. O
-Lema~\ref{fis:lem:descida} dá $\log_{2}N$, e ainda \textbf{sem a raiz}: a face
+números, e não dois. A descida ingénua --- uma unidade por batida --- dá
+$\delta_0$. OLema~\ref{fis:lem:descida} dá $\log_{2}N$, e ainda \textbf{sem a raiz}: a face
 aditiva halva a largura sozinha, e à geométrica só se pede que não saia do
 intervalo. E a cláusula (2) dá $\log\log N$, que é onde a raiz finalmente se
 paga. \emph{Sem a primeira não se sabe que acaba; sem a segunda não se sabe que
@@ -3863,9 +3863,11 @@ que expande é o núcleo.
 dimensão de $2$ a $8$, e a razão de termos consecutivos a tender para $\sigma$.
 \code{tests/pgwire.c} §W116: a família metálica é toda hiperbólica, com
 $\det A_m=-1$ e $\operatorname{tr}A_m^{2}=m^{2}+2$ pelo motor. A cadeia de grau
-$7$ com $\abs{c_0}=1$ tem sete modos e conserva $\prod=\pm1$; o associador mede
-$\approx10^{-15}$ em grau $3$ (associativo) e $\approx13$ em grau $7$.}
-
+$7$ com $\abs{c_0}=1$ tem sete modos e conserva $\prod=\pm1$. E a
+associatividade, quando é medida, é medida por \textbf{igualdade exacta}: §W117
+conta os triplos da base cujo associador é \emph{não nulo}, e conta-os --- não há
+um número pequeno a fazer de zero, porque \emph{um associador ou é zero ou não é},
+e a igualdade de inteiros decide qual.}
 \section{A massa é o logaritmo do raio, e a luz é a borda}\label{fis:massa}
 
 \begin{teorema}[a fronteira entre matéria e luz é o círculo]\label{fis:thm:massa}
@@ -4277,12 +4279,14 @@ E a folga é uma só, vista pelos dois mapas (§\ref{fis:folga}): do lado de que
 do lado de quem \emph{conta} ela aparece como lugar por preencher --- a energia
 que falta para o desmontar. \emph{São o mesmo número.}
 
-\medskip\noindent\textbf{E a curva da ligação tem um fundo.} A energia de ligação
-por constituinte sobe do mais leve até ao ferro e desce depois: o pico está em
-$\mathrm{Fe}\text{-}56/\mathrm{Ni}\text{-}62$, com $\approx8{,}79$ MeV por
-núcleon. \emph{Subir a curva liberta energia}, e é isso que o teorema seguinte
-organiza.
-
+\medskip\noindent\textbf{E a curva da ligação tem um fundo.} A folga por
+constituinte sobe do mais leve até ao ferro e desce depois --- \emph{e o que esta
+obra afirma é a forma da curva, não o valor do seu pico}: o pico existe porque a
+folga é uma diferença de contagens (Cor.~\ref{fis:cor:folga}) e uma diferença de
+contagens que sobe e desce tem um extremo. \emph{Onde ele cai em unidades de
+laboratório é medida de fora, e não se escreve aqui} --- não há nesta casa
+medidor que o produza, e um número sem medidor não entra. \emph{Subir a curva
+liberta}, e é isso que o teorema seguinte organiza.
 \section{As duas faces do núcleo, e o ponto fixo que partilham}\label{fis:fusaofissao}
 
 \noindent A §\ref{fis:corte} mostrou que o operador tem \emph{duas} faces, que
@@ -4639,8 +4643,7 @@ exacta.
 \midrule
 o rendimento máximo & o $\oint$ fechado, não a engenharia & Teor.~\ref{fis:thm:carnot} \\
 o que custa & apagar --- e apagar é a \emph{dobra} & Teor.~\ref{fis:thm:landauer} \\
-o piso do reversível & \textbf{zero exacto}, não pequeno & Teor.~\ref{fis:thm:landauer} \\
-a entropia dual & o produto vale $1$; os expoentes somam $0$ & Teor.~\ref{fis:thm:entropiadual} \\
+o piso de quem reverte & \textbf{zero exacto}, não pequeno & Teor.~\ref{fis:thm:landauer}(4) \\a entropia dual & o produto vale $1$; os expoentes somam $0$ & Teor.~\ref{fis:thm:entropiadual} \\
 a segunda lei & vale de \textbf{um} lado --- o par não se move & Cor.~\ref{fis:cor:segundalei} \\
 \bottomrule
 \end{tabular}
@@ -4895,8 +4898,8 @@ involutiva: repetida, devolve o original em $\mathbf{4096}$ de $4096$ posições
 \emph{Nota:} este bloco imprimia um custo por segundo que transbordava num alvo
 de inteiro largo a $32$ bits --- saía \emph{negativo}, e por não ser asserido
 nenhum bloco o apanhava. Corrigido para $64$ bits explícitos, dá
-$3{,}08\cdot10^{15}$ rJ/s. \emph{O tecto diz-se no tipo}, e um número publicado
-errado é pior do que um bloco vermelho.}
+$\mathbf{3\,082\,689\,154\,383\,872}$ rJ/s --- \emph{o inteiro, e não um decimal
+que o corte}. \emph{O tecto diz-se no tipo}, e um número publicadoerrado é pior do que um bloco vermelho.}
 
 \medido{\code{tests/reversao.c} --- $\mathbf{7}$ blocos, $\mathbf{0}$ falhas, e
 \emph{sem um único número esperado no ficheiro}. §V1: a estaca, ida e volta em
@@ -6005,10 +6008,12 @@ duais e a diferença é o \textbf{sinal} --- a branca com $u\cdot u=+1$, ordem $
 espelha; a negra com $i\cdot i=-1$, ordem $4$, roda; $1024$ pares na tabela,
 $1024$ fecham.
 \smallskip\emph{E as duas que falham.} §F2: a Hopfield \textbf{satura} --- isso
-passa --- mas a capacidade medida \emph{não} cai na vizinhança do $0{,}138\,N$ da
-literatura: com $N=128$ ela recupera $100\%$ até $P=38$, que é cerca de
-$0{,}30\,N$. O próprio bloco anota que $N=128$ é pequeno; \emph{a saturação é o
-resultado, o valor da constante não}. §F10: o bloco que afirmava que somar a
+passa --- mas a capacidade medida \emph{não} cai na vizinhança dos
+$\mathbf{138}$ milésimos da literatura: com $N=128$ o último $P$ com $95\%$ de
+recuperação é $\mathbf{40}$, isto é $\tfrac{40}{128}=\mathbf{312}$ milésimos.
+\emph{A fracção é exacta, e é ela que se escreve} --- o decimal é que
+arredondava, e o próprio bloco o diz. Ele anota também que $N=128$ é pequeno;
+\emph{a saturação é o resultado, o valor da constante não}. §F10: o bloco que afirmava que somar a
 torre negra à branca faz a rede \textbf{passar a ciclar} falha --- e é
 exactamente o que o Teor.~\ref{fis:thm:duastorres} agora não afirma: a
 antissimetria tira a função de Lyapunov e não põe um ciclo no lugar dela.
