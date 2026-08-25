@@ -30798,6 +30798,137 @@ int main(void){
            mal == 0);
     }
 
+    /* ═══ §W215: A RÉGUA ESCREVE-SE, E O EXPOENTE CONTA ════════════════════ */
+    {
+        int mal = 0;
+        const char *base = "/tmp/pgwire_w215";
+        SqlOut out;
+        printf("\n§W215 a régua do corpo, escrita em SQL — e o grau que não contava.\n\n");
+
+        /* ── O CAMINHO ATÉ AQUI ──────────────────────────────────────────────
+         *
+         * O `ORDER BY` ordena pela NORMA e o WHERE comparava a parte real: duas
+         * réguas para o mesmo objecto. Tentei meter a norma no avaliador e não
+         * cabe (§W214: PA contra PG, e o molde é um só que a PA reloca). O
+         * `cor:borda` diz onde caberia, e é uma borda estreita.
+         *
+         * Mas a saída não era nenhuma dessas. O `checa_corpos` já dizia o que
+         * fazer --- «comparar por norma é OUTRA pergunta, e quem a quiser tem de
+         * a escrever» --- e faltava com QUE a escrever: a célula de um corpo
+         * quadrático é o par (a,b) e o WHERE só sabia nomear o `a`. O `b` --- o
+         * coeficiente de σ --- não tinha nome.
+         *
+         * Com `sigma(col)` tem, e a régua escreve-se como ela é:
+         *
+         *     q(a,b) = a² + B·a·b + C·b²
+         *     →  col*col + B*col*sigma(col) + C*sigma(col)*sigma(col)
+         *
+         * que é GRAU 2, e o avaliador faz grau 2. Não faltava capacidade.
+         *
+         * E AO LIGAR ISTO APARECEU UM DEFEITO ANTIGO: o caminho de oito bits
+         * multiplicava UMA vez por COLUNA CITADA, com um booleano `usa`, e o
+         * expoente do símbolo no monómio é o número de OCORRÊNCIAS. `a*a` era
+         * emitido como `a`. Só não se via porque o andar de dezasseis trata o
+         * grau, e uma coluna INTEIRA vai por lá. */
+
+        unlink("/tmp/pgwire_w215.mem");
+        unlink("/tmp/pgwire_w215.prog");
+        if(!sql_abrir(base)){ mal++; printf("      sql_abrir FALHOU\n"); }
+        else{
+            /* (1) O GUME: a MESMA tabela em dois corpos tem de dar a MESMA
+             *     resposta. Sem a correcção do expoente, não dava. */
+            sql_executa("CREATE TABLE h (a AUREO, k INTEIRO)", &out);
+            sql_executa("INSERT INTO h VALUES (2+0s, 1)", &out);
+            sql_executa("INSERT INTO h VALUES (1+0s, 2)", &out);
+            sql_executa("INSERT INTO h VALUES (3+0s, 3)", &out);
+            sql_executa("CREATE TABLE i (a INTEIRO, k INTEIRO)", &out);
+            sql_executa("INSERT INTO i VALUES (2, 1)", &out);
+            sql_executa("INSERT INTO i VALUES (1, 2)", &out);
+            sql_executa("INSERT INTO i VALUES (3, 3)", &out);
+            { int nh, ni, ok3 = 1;
+              static const char *Q[3] = {"a*a > 4", "a*a > 0", "a > 1"};
+              static const int ESP[3] = {1, 3, 2};
+              for(int q = 0; q < 3; q++){
+                  char cmd[128];
+                  snprintf(cmd, sizeof cmd, "SELECT * FROM h WHERE %s", Q[q]);
+                  sql_executa(cmd, &out); nh = out.ok ? out.nrows : -1;
+                  snprintf(cmd, sizeof cmd, "SELECT * FROM i WHERE %s", Q[q]);
+                  sql_executa(cmd, &out); ni = out.ok ? out.nrows : -1;
+                  printf("      valores 2,1,3 · %-8s AUREO→%d  INTEIRO→%d  (esperado %d)%s\n",
+                         Q[q], nh, ni, ESP[q],
+                         (nh == ni && nh == ESP[q]) ? "" : "   ← DIVERGEM");
+                  if(nh != ni || nh != ESP[q]){ ok3 = 0; mal++; }
+              }
+              printf("      → os dois corpos concordam nas três: %s\n", ok3 ? "sim" : "NÃO");
+            }
+
+            /* (2) O σ TEM NOME, e lê o andar certo da célula ----------------- */
+            sql_executa("CREATE TABLE g (a AUREO, k INTEIRO)", &out);
+            sql_executa("INSERT INTO g VALUES (2+0s, 1)", &out);
+            sql_executa("INSERT INTO g VALUES (1+1s, 2)", &out);
+            sql_executa("INSERT INTO g VALUES (3-1s, 3)", &out);
+            sql_executa("SELECT * FROM g WHERE sigma(a) = 1", &out);
+            printf("      sigma(a) = 1 → %d linha(s) [%s]  ← lê o SEGUNDO andar\n",
+                   out.nrows, out.nrows ? out.cell[0][0] : "-");
+            if(!out.ok || out.nrows != 1 || strcmp(out.cell[0][0], "1+1σ")) mal++;
+            sql_executa("SELECT * FROM g WHERE sigma(a) = 0", &out);
+            if(!out.ok || out.nrows != 1 || strcmp(out.cell[0][0], "2")) mal++;
+
+            /* (3) A RÉGUA COMPLETA, e ela é a MESMA que o ORDER BY usa ------- */
+            { static const int K[4]   = {0, 1, 4, 5};
+              static const int ESP[4] = {3, 2, 1, 0};
+              int bate = 1;
+              for(int q = 0; q < 4; q++){
+                  char cmd[192];
+                  snprintf(cmd, sizeof cmd,
+                           "SELECT * FROM g WHERE a*a + a*sigma(a) - sigma(a)*sigma(a) > %d", K[q]);
+                  sql_executa(cmd, &out);
+                  printf("      q(a,σ) > %d → %d linha(s)  (esperado %d)\n",
+                         K[q], out.ok ? out.nrows : -1, ESP[q]);
+                  if(!out.ok || out.nrows != ESP[q]){ bate = 0; mal++; }
+              }
+              printf("      → a régua q = a² + a·σ − σ² responde certo nos quatro: %s\n",
+                     bate ? "sim" : "NÃO");
+            }
+            sql_executa("SELECT * FROM g ORDER BY a", &out);
+            printf("      e o ORDER BY dá %s %s %s — normas 1, 4, 5: a MESMA régua\n",
+                   out.nrows > 0 ? out.cell[0][0] : "-",
+                   out.nrows > 1 ? out.cell[1][0] : "-",
+                   out.nrows > 2 ? out.cell[2][0] : "-");
+            if(!out.ok || out.nrows != 3 || strcmp(out.cell[0][0], "1+1σ")
+               || strcmp(out.cell[1][0], "2") || strcmp(out.cell[2][0], "3-1σ")) mal++;
+
+            /* (4) O CONTROLO: `sigma` de uma coluna SEM segundo andar recusa-se.
+             *     Devolver zero seria dar valor a uma pergunta mal posta — e é o
+             *     que impede este bloco de passar num motor que aceite tudo. */
+            sql_executa("SELECT * FROM g WHERE sigma(k) = 0", &out);
+            printf("      CONTROLO — sigma(k) numa coluna INTEIRO: ok=%d  ← recusa, não"
+                   " devolve zero com cara de valor\n", out.ok);
+            if(out.ok) mal++;
+
+            sql_fechar();
+        }
+
+        ok("A RÉGUA DO CORPO ESCREVE-SE EM SQL, E O EXPOENTE PASSOU A CONTAR. O ORDER BY"
+           " ordena pela NORMA e o WHERE comparava a parte real — duas réguas para o mesmo"
+           " objecto. Meter a norma no avaliador não cabe (§W214: PA contra PG), e a borda"
+           " onde caberia é estreita. Mas a saída não era nenhuma dessas: o `checa_corpos`"
+           " já dizia «comparar por norma é OUTRA pergunta, e quem a quiser tem de a"
+           " escrever», e faltava com QUE a escrever — a célula é o par (a,b) e só o `a`"
+           " tinha nome. Com `sigma(col)` o `b` tem, e a régua escreve-se como ela é:"
+           " `col*col + B*col*sigma(col) + C*sigma(col)*sigma(col)`, que é grau 2, e o"
+           " avaliador FAZ grau 2. Não faltava capacidade. E ao ligar isto apareceu um"
+           " defeito antigo: o caminho de oito bits multiplicava UMA vez por COLUNA CITADA,"
+           " com um booleano, e o expoente é o número de OCORRÊNCIAS — `a*a` era emitido"
+           " como `a`. Só não se via porque o andar de dezasseis trata o grau e uma coluna"
+           " INTEIRA vai por lá: com a MESMA tabela (2, 1, 3), `a*a > 4` dava 1 linha em"
+           " INTEIRO e ZERO em AUREO, o mesmo valor com duas respostas conforme o corpo"
+           " declarado. Agora os dois concordam nas três consultas, a régua responde certo"
+           " nos quatro limiares, e é a MESMA régua que o ORDER BY usa — as duas deixaram"
+           " de ser duas. O controlo recusa `sigma` de uma coluna sem segundo andar: devolver"
+           " zero seria dar valor a uma pergunta mal posta.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

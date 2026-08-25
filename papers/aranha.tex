@@ -2537,6 +2537,37 @@ lida na caixa: onde basta uma face, a régua é linear e a máquina aditiva
 alcança-a; onde são precisas as duas, ela é o produto delas e só o \emph{sinal}
 se decide sem multiplicar.
 
+\medskip\noindent\textbf{E fora da borda a régua não se calcula: escreve-se.} O
+Cor.~\ref{cor:borda} diz onde a régua cabe numa máquina aditiva, e a resposta é
+«quase em lado nenhum». Mas isso é sobre \emph{calcular} $q$ com as somas; se a
+realização souber \textbf{multiplicar}, $q$ é apenas uma expressão de grau $2$ nas
+duas coordenadas da célula --- e o que falta então não é capacidade, é
+\emph{nome}: uma célula de corpo quadrático é o par $(a,b)$, e uma linguagem que
+só saiba nomear o $a$ põe a régua fora do alcance de quem a queira.
+
+\noindent Dando nome ao $b$, a régua escreve-se como ela é,
+\[
+q(a,b)=a^{2}+B\,a\,b+C\,b^{2},
+\]
+e a realização avalia-a sem uma lei nova. \emph{É a única saída que não força
+nada}: não obriga a máquina a calcular o que não sabe (que era a tentativa), não
+recusa o corpo (que descaracteriza a lei), e não inventa uma segunda semântica na
+borda. A régua fica ao alcance de quem a pedir, que é o que o
+Teor.~\ref{thm:pandora}(3) já mandava --- comparar por norma é \emph{outra
+pergunta}, e quem a quiser tem de a escrever.
+
+\medido{\code{tests/pgwire.c} \S W215. Com \code{sigma(col)} a nomear o segundo
+andar da célula, \code{q > k} escreve-se em SQL e responde certo nos quatro
+limiares $0,1,4,5$ sobre $\{2{+}0\sigma,1{+}1\sigma,3{-}1\sigma\}$ (normas
+$4,1,5$) --- \emph{e é a mesma régua que o \code{ORDER BY} usa}, pelo que as duas
+deixaram de ser duas. Ao ligar isto apareceu um defeito antigo: o avaliador
+multiplicava uma vez por \emph{coluna citada} e o expoente é o número de
+\emph{ocorrências}, pelo que $a\cdot a$ era emitido como $a$. Só não se via
+porque o andar largo trata o grau e uma coluna de $\Zc$ vai por lá --- com a
+mesma tabela $(2,1,3)$, \code{a*a > 4} dava $1$ linha num corpo e $\mathbf{0}$ no
+outro. O controlo recusa \code{sigma} de uma coluna sem segundo andar: devolver
+zero seria dar valor a uma pergunta mal posta.}
+
 \medskip\noindent\textbf{E a mesma separação decide o que se pode ordenar.} Uma
 árvore de prefixos ordena pelos \emph{bits} do endereço --- é a ultramétrica do
 Lema~\ref{lem:ultra}, e é global. A ordem de $a+b\sigma$ \emph{como valor} é

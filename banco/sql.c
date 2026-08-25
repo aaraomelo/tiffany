@@ -334,6 +334,9 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
                               * consulta, e a tabela encolhia. 216..223 é a folga
                               * entre o S_BITM (200..215) e o S_NOME (224). */
 #define S_UM16    217        /* a constante 1 do OP_ADD16 que sobe o TOPO de andar       */
+/* a extensão de sinal do σ: o `Word8` não traz sinal e um σ de −1 chega 255.
+ * Vive nos slots que sobram entre o S_UM16 e o S_NOME; o typedef abaixo prende. */
+#define S_SIGEXT  218
 /* o slot da NORMA: a régua de uma coluna quadrática, computada em C na emissão
  * (o `emit_atomos` corre POR LINHA) e copiada daqui pelo bytecode. Vive nos seis
  * slots que sobram entre o S_UM16 e o S_NOME, e o typedef abaixo prende-o: se
@@ -422,6 +425,7 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  * nome — é a mesma compatibilidade que o CORPO_INTEIRO tem por ser o código 0. */
 #define S_NOME    224        /* 224..239: 16 Words = 32 caracteres (folga até S_MATCH) */
 #define S_NOME_N  16
+typedef char sigext_nao_pisa_o_nome[(S_SIGEXT < S_NOME) ? 1 : -1];
 
 /* A BASE ORTONORMAL, EM SLOTS: e_k = 2^k, k = 0..15.
  *
@@ -4144,6 +4148,22 @@ static void ten_const(struct tensor *t, long k){
  * cada WHERE lido; `sim_de` devolve o símbolo de uma coluna, atribuindo-o se
  * for a primeira vez, e −1 quando já não há símbolos. */
 static long sim_col[NCOL];
+/* ── E O PLANO DO SÍMBOLO: QUAL ANDAR DA CÉLULA ELE LÊ ───────────────────────
+ *
+ * Uma célula de corpo quadrático é o PAR (a, b) --- a parte racional e o
+ * coeficiente de σ ---, e o WHERE só sabia nomear a primeira. Isso põe a RÉGUA
+ * fora do alcance de quem a queira: `q(a,b) = a² + B·a·b + C·b²` é grau 2, e o
+ * avaliador FAZ grau 2 (medido: `WHERE a*a + a*b - b*b > 10` corre e responde
+ * certo). Não faltava capacidade --- faltava poder nomear o `b`.
+ *
+ * O `checa_corpos` já dizia o que fazer: «comparar por norma é OUTRA pergunta, e
+ * quem a quiser tem de a escrever». Isto é o que lhe dá com que a escrever.
+ *
+ * O plano é 0 para a parte racional (S_LINHAS/S_ALTO, como sempre) e 1 para o σ
+ * (S_DEN). A coluna é a mesma; o que muda é o andar --- e o endereço tem a MESMA
+ * forma, `base + linha*ncols + col`, pelo que a PA do relocador anda nele sem
+ * uma linha diferente. */
+static int  sim_plano[NCOL];
 static int  sim_n = 0;
 /* ── A ORDEM DO TEXTO NÃO É A DOS ENDEREÇOS ─────────────────────────────────
  * A célula guarda o endereço no pool: a leitura preserva a IGUALDADE e não a
@@ -4154,16 +4174,23 @@ static int  sim_n = 0;
 static int cit_texto = 0;      /* o WHERE cita alguma coluna de texto */
 static int cit_desig = 0;      /* e há nele uma desigualdade */
 
-static void sim_zera(void){ sim_n = 0; for(int k = 0; k < NCOL; k++) sim_col[k] = -1;
+static void sim_zera(void){ sim_n = 0;
+                            for(int k = 0; k < NCOL; k++){ sim_col[k] = -1; sim_plano[k] = 0; }
                             cit_texto = 0; cit_desig = 0; }
-static int  sim_de(long col){
-    for(int k = 0; k < sim_n; k++) if(sim_col[k] == col) return k;
+static int  sim_de_plano(long col, int plano){
+    for(int k = 0; k < sim_n; k++)
+        if(sim_col[k] == col && sim_plano[k] == plano) return k;
     if(sim_n >= NCOL) return -1;
-    sim_col[sim_n] = col; return sim_n++;
+    sim_col[sim_n] = col; sim_plano[sim_n] = plano; return sim_n++;
 }
+static int  sim_de(long col){ return sim_de_plano(col, 0); }
 static long col_de_sim(int sim){          /* sim é 0-based; d[k]-1 dá-o */
     if(sim < 0 || sim >= sim_n) return -1;
     return sim_col[sim];
+}
+static int  plano_de_sim(int sim){
+    if(sim < 0 || sim >= sim_n) return 0;
+    return sim_plano[sim];
 }
 
 static void ten_var(struct tensor *t, int col){
@@ -4380,9 +4407,44 @@ static int le_fator_num(const char **p, struct tensor *t){
     if(isalpha((unsigned char)**p)){
         char nome[64];
         if(!ident(p, nome, sizeof nome)) return 0;
+        int plano = 0;
+        /* ── `sigma(col)`: O OUTRO ANDAR DA CÉLULA ───────────────────────────
+         * A célula de um corpo quadrático é o par (a,b), e sem isto só o `a`
+         * tinha nome. Com ele a RÉGUA escreve-se: a norma do corpo (B,C) é
+         * `col*col + B*col*sigma(col) + C*sigma(col)*sigma(col)`, que é grau 2 e
+         * o avaliador faz. Onde o corpo não tem σ o valor é o neutro, e a
+         * recusa é dita em vez de se devolver zero com cara de valor. */
+        if(!strcasecmp(nome, "sigma") || !strcasecmp(nome, "SIGMA")){
+            const char *q = *p;
+            pula(&q);
+            if(*q == '('){
+                char dentro[64];
+                q++;
+                if(ident(&q, dentro, sizeof dentro)){
+                    pula(&q);
+                    if(*q == ')'){
+                        long c2 = col_indice(dentro);
+                        if(c2 < 0){
+                            printf("erro: `sigma(%s)` — não há coluna com esse nome.\n", dentro);
+                            return 0;
+                        }
+                        { Word cw = corpo_de(c2);
+                          if(cw.total != CORPO_AUREO && cw.total != CORPO_CRISTAL){
+                              printf("erro: `sigma(%s)` — a coluna não é de um corpo quadrático,"
+                                     " e não tem segundo andar. Devolver zero seria dar um valor"
+                                     " a uma pergunta mal posta.\n", dentro);
+                              return 0;
+                          } }
+                        *p = q + 1;
+                        snprintf(nome, sizeof nome, "%s", dentro);
+                        plano = 1;
+                    }
+                }
+            }
+        }
         int col = col_indice(nome);          /* pelo NOME; a letra é o recurso das bases antigas */
         if(col < 0) return 0;
-        int sim = sim_de(col);
+        int sim = sim_de_plano(col, plano);
         if(sim < 0){
             printf("erro: a expressão cita mais de %d colunas distintas — RECUSADA."
                    " O tecto é da EXPRESSÃO (a ordem do tensor), e não da tabela.\n", NCOL);
@@ -4843,7 +4905,28 @@ static void emit_mul_zeck(unsigned acc, unsigned termo, long n, int soma, unsign
  * E a junção faz-se com o que a ISA já tem: TROCA leva (alto,0) a (0,alto), e o
  * OP_ADD — COMPONENTE A COMPONENTE, que aqui é exactamente o que se quer — junta
  * (baixo,0) com (0,alto). Nenhuma instrução nova para montar o par. */
+static void emit_valor16_p(unsigned dest, long linha, long ncols, int cc,
+                           unsigned tmp, int plano);
 static void emit_valor16(unsigned dest, long linha, long ncols, int cc, unsigned tmp){
+    emit_valor16_p(dest, linha, ncols, cc, tmp, 0);
+}
+/* o mesmo, dizendo de que ANDAR se lê: 0 a parte racional, 1 o σ (S_DEN). O
+ * endereço tem a mesma forma nos dois, pelo que o relocador anda igual. */
+static void emit_valor16_p(unsigned dest, long linha, long ncols, int cc,
+                           unsigned tmp, int plano){
+    if(plano == 1){
+        /* o σ vive num átomo só, e com SINAL: o `Word8` não o traz, e um σ de −1
+         * lia-se 255. Estende-se o bit 7 para o andar de cima, que é o que o
+         * `assin16` faz do outro lado. */
+        emit_copia(S_DEN + cel_ix(linha*ncols + cc), dest);
+        MOVE(dest, +1); MOVE(S_MT, +1); emit1(OP_AND); MOVE(dest, -1);
+        { long b = (long)mem_le(S_DEN + cel_ix(linha*ncols + cc)).total;
+          if(b & 0x80L){                       /* negativo: o alto é 0xFF */
+              Word f; f.total = 0; f.e = 255;
+              mem_grava(S_SIGEXT, f);
+              MOVE(dest, +1); MOVE(S_SIGEXT, +1); emit1(OP_ADD); MOVE(dest, -1); } }
+        return;
+    }
     /* dest ← (baixo, 0) */
     emit_copia(S_LINHAS + cel_ix(linha*ncols + cc), dest);
     MOVE(dest, +1); MOVE(S_MT, +1); emit1(OP_AND); MOVE(dest, -1);
@@ -5407,9 +5490,10 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 }
                 if(fora16) continue;
                 if(gr == 1){
-                    int cc = -1;
-                    for(int t = 0; t < KGRAU; t++) if(d1[t]) cc = (int)col_de_sim(d1[t] - 1);
-                    emit_valor16(x16, linha, ncols, cc, tmp16);
+                    int cc = -1, pl = 0;
+                    for(int t = 0; t < KGRAU; t++) if(d1[t]){
+                        cc = (int)col_de_sim(d1[t] - 1); pl = plano_de_sim(d1[t] - 1); }
+                    emit_valor16_p(x16, linha, ncols, cc, tmp16, pl);
                 }else{
                     /* GRAU >= 2: o monómio é um produto de colunas, e o produto de
                      * dezasseis bits é deslocamento e soma (naturais thm:transporte,
@@ -5417,7 +5501,8 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                     int primeiro = 1;
                     for(int t = 0; t < KGRAU; t++){
                         if(!d1[t]) continue;
-                        emit_valor16(q16, linha, ncols, (int)col_de_sim(d1[t] - 1), tmp16);
+                        emit_valor16_p(q16, linha, ncols, (int)col_de_sim(d1[t] - 1),
+                                       tmp16, plano_de_sim(d1[t] - 1));
                         if(primeiro){ emit_copia(q16, x16); primeiro = 0; }
                         else { emit_mul16(p16, x16, q16, base16); emit_copia(p16, x16); }
                     }
@@ -5487,9 +5572,26 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             for(int cc = 0; cc < NCOL; cc++){
                 if(!cit[cc]) continue;
                 long ccol = col_de_sim(cc);
+                int pl_col = plano_de_sim(cc);
                 if(ccol < 0 || ccol >= ncols) continue;
+                /* ── QUANTAS VEZES, E NÃO SE SIM OU NÃO ──────────────────────
+                 *
+                 * Isto era `usa = 1` --- um booleano ---, e o produto entrava UMA
+                 * vez por coluna citada. Mas o monómio `a*a` cita a coluna DUAS
+                 * vezes, e o expoente é o número de ocorrências em `d[]`: com o
+                 * booleano, `a*a` era emitido como `a`.
+                 *
+                 * Medido, com a MESMA tabela (valores 2, 1, 3) em dois corpos:
+                 * numa coluna INTEIRO `a*a > 4` devolvia 1 linha (o andar de
+                 * dezasseis trata o grau) e numa coluna AUREO devolvia ZERO ---
+                 * porque aqui virava `a > 4`, que nenhum dos três satisfaz. O
+                 * mesmo valor, duas respostas, conforme o corpo declarado.
+                 *
+                 * O comentário da contracção já dizia «escolhendo p onde o
+                 * monómio usa a coluna»; o que faltava é que «usa» tem
+                 * MULTIPLICIDADE, e ela é o expoente. */
                 int usa = 0;
-                for(int t = 0; t < KGRAU; t++) if(d[t] == cc+1) usa = 1;
+                for(int t = 0; t < KGRAU; t++) if(d[t] == cc+1) usa++;
                 /* ── O `q` É O NEUTRO, E NUM CORPO COM RÉGUA NÃO É O S_DEN ───
                  *
                  * Onde o monómio NÃO usa a coluna entra o denominador dela, para
@@ -5503,10 +5605,14 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                  *
                  * Nesses corpos o neutro é o UM, que é o que ele sempre foi. */
                 Word cw_q = corpo_de(ccol);
-                unsigned fonte = usa ? (S_LINHAS + cel_ix(linha*ncols + ccol))
-                               : (corpo_tem_regua(cw_q.total)
-                                    ? S_UM
-                                    : (S_DEN + cel_ix(linha*ncols + ccol)));
+                /* e o PLANO decide de que andar se lê quando a coluna É usada:
+                 * 0 a parte racional, 1 o σ. Sem plano, `sigma(a)` lia o `a`. */
+                unsigned fonte = usa
+                    ? (pl_col == 1 ? (S_DEN    + cel_ix(linha*ncols + ccol))
+                                   : (S_LINHAS + cel_ix(linha*ncols + ccol)))
+                    : (corpo_tem_regua(cw_q.total)
+                         ? S_UM
+                         : (S_DEN + cel_ix(linha*ncols + ccol)));
                 /* O TRANSPORTE, LIGADO. Se a coluna vive noutra base da MESMA classe, o
                  * valor tem de ser levado à base de referência antes de entrar no produto —
                  * e isso é φ_t, o cisalhamento, palavra nos geradores.
@@ -5524,8 +5630,14 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 }
                 MOVE(tmpm, +1); MOVE(S_MT, +1); emit1(OP_AND);
                 MOVE(tmpm, -1);
-                emit_mul(prod2, prod, tmpm, base);
-                emit_copia(prod2, prod);
+                /* uma vez por OCORRÊNCIA: o expoente do símbolo neste monómio.
+                 * Onde a coluna não é usada, `usa` é zero e entra o neutro uma
+                 * vez só --- que é o que a contracção sempre fez. */
+                { int vezes = usa ? usa : 1;
+                  for(int r = 0; r < vezes; r++){
+                      emit_mul(prod2, prod, tmpm, base);
+                      emit_copia(prod2, prod);
+                  } }
             }
             (void)g;
             emit_mul_zeck(acc, termo, n, c > 0, acc + 8);
