@@ -2690,6 +2690,39 @@ cresce de três maneiras: \emph{fica} no elíptico, \emph{linearmente} no
 parabólico, \emph{geometricamente} no hiperbólico --- e no hiperbólico os números
 são os de Fibonacci, que é o ouro a aparecer onde a expansão é.
 
+\medskip\noindent\textbf{E em série as duas coordenadas comportam-se de maneira
+oposta.} Compor é pôr dois sistemas em série, e a caixa é fechada para isso ---
+$\det(XY)=\det X\cdot\det Y$, e unidade vezes unidade é unidade. A partir daí:
+
+\begin{corolario}[a orientação compõe-se, o regime não]\label{cor:serie}
+A aplicação $\det\colon\mathcal{P}\to A^{\times}$ é um \textbf{homomorfismo}; em
+particular, com $A^{\times}=\{\pm1\}$, o produto de dois espelhos impróprios é
+\textbf{próprio} --- \emph{duas reflexões são uma rotação}. Já
+$\operatorname{sgn}\Delta$ \textbf{não é função} das classes dos factores: existem
+$X,Y$ elípticos com $XY$ hiperbólico.
+\end{corolario}
+
+\begin{proof}
+A primeira metade é a multiplicatividade do determinante. A segunda é um
+contra-exemplo, e ele é dado abaixo pela medida: das nove combinações de classes,
+sete admitem mais de uma classe no produto.
+\end{proof}
+
+\noindent \emph{A razão está na natureza dos dois invariantes.} O determinante é
+invariante de \textbf{composição}; o $\Delta$ é invariante de
+\textbf{conjugação} --- classifica o \emph{elemento}, não o produto. Por isso a
+caixa não é graduada pelo $\Delta$, e por isso compor dois sistemas estáveis pode
+dar um instável: a estabilidade não é uma propriedade que se transporte ao longo
+de uma série.
+
+\medido{\code{tests/pgwire.c} \S W220. Nas $2500$ composições dos espelhos de
+$\lvert B\rvert\le12$ dos dois tipos, $\det(XY)=\det X\cdot\det Y$ em
+\textbf{todas}. E das nove combinações de classes, \textbf{sete} não determinam a
+do produto --- incluindo elíptico$\,\circ\,$elíptico, que produz as três. Só
+$\text{parabólico}\circ\text{hiperbólico}$ e o seu simétrico saem sempre
+hiperbólicos. O controlo compõe um impróprio com um próprio e exige $\det=-1$:
+sem ele, «é homomorfismo» não se distinguiria de «$\det$ é sempre $+1$».}
+
 \medskip\noindent\textbf{No interior e na fronteira.} Dentro de uma classe de
 $\Delta$ igual, o Teor.~\ref{thm:pandora}(2) emite a mudança de gerador: é o
 \emph{mesmo} sistema visto noutro referencial, e o $\Delta$ --- o invariante ---

@@ -31371,6 +31371,117 @@ int main(void){
            " regime não existir.", mal == 0);
     }
 
+    /* ═══ §W220: A COMPOSIÇÃO — UMA COORDENADA COMPÕE-SE, A OUTRA NÃO ══════ */
+    {
+        int mal = 0;
+        printf("\n§W220 sistemas em série: a orientação é homomorfismo, o regime não é função.\n\n");
+
+        /* ── O QUE ESTE BLOCO SEPARA ─────────────────────────────────────────
+         *
+         * Opticamente, compor é pôr dois sistemas EM SÉRIE. A caixa é fechada
+         * para isso --- det(XY) = det(X)·det(Y), e unidade vezes unidade é
+         * unidade ---, e a pergunta é o que acontece às duas coordenadas do
+         * §W219.
+         *
+         * A ORIENTAÇÃO compõe-se: é um homomorfismo 𝒫 → {±1}, e daí sai o
+         * teorema clássico --- DUAS REFLEXÕES SÃO UMA ROTAÇÃO, porque
+         * (−1)·(−1) = +1.
+         *
+         * O REGIME não. E não é «quase»: de nove pares de classes, SETE não
+         * determinam a classe do produto. Compor dois sistemas ESTÁVEIS pode dar
+         * um INSTÁVEL, que é o contrário do que a intuição diz e é o que
+         * acontece em cavidades reais.
+         *
+         * A razão está na natureza dos dois: o det é invariante de COMPOSIÇÃO
+         * (multiplicativo), e o Δ é invariante de CONJUGAÇÃO --- classifica o
+         * elemento, e não o produto. A caixa não é graduada pelo Δ. */
+        { long ESP[50][2]; int ne = 0;
+          for(int ci = 0; ci < 2; ci++) for(long B = -12; B <= 12; B++){
+              ESP[ne][0] = B; ESP[ne][1] = ci ? 1 : -1; ne++;
+          }
+          { long n = 0, det_hom = 0;
+            int saiu[3][3];            /* [classe de X][classe de Y] → máscara */
+            for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++) saiu[i][j] = 0;
+            for(int a = 0; a < ne; a++) for(int b = 0; b < ne; b++){
+                long Ba = ESP[a][0], Ca = ESP[a][1], Bb = ESP[b][0], Cb = ESP[b][1];
+                /* companheiras e o produto, em inteiros */
+                long X[2][2] = {{0,-1},{1,0}}, Y[2][2] = {{0,-1},{1,0}}, M[2][2];
+                X[0][1] = -Ca; X[1][1] = Ba;
+                Y[0][1] = -Cb; Y[1][1] = Bb;
+                for(int r = 0; r < 2; r++) for(int c = 0; c < 2; c++)
+                    M[r][c] = X[r][0]*Y[0][c] + X[r][1]*Y[1][c];
+                { long dX = X[0][0]*X[1][1]-X[0][1]*X[1][0];
+                  long dY = Y[0][0]*Y[1][1]-Y[0][1]*Y[1][0];
+                  long dM = M[0][0]*M[1][1]-M[0][1]*M[1][0];
+                  long trM = M[0][0]+M[1][1];
+                  long Da = Ba*Ba - 4*Ca, Db = Bb*Bb - 4*Cb, Dm = trM*trM - 4*dM;
+                  n++;
+                  if(dM == dX*dY) det_hom++;
+                  { int ia = (Da<0)?0:((Da==0)?1:2);
+                    int ib = (Db<0)?0:((Db==0)?1:2);
+                    int im = (Dm<0)?0:((Dm==0)?1:2);
+                    saiu[ia][ib] |= (1 << im); } }
+            }
+            printf("      %ld composições de espelhos com |B| ≤ 12, os dois tipos\n", n);
+            printf("      det(XY) = det(X)·det(Y) em %ld → %s\n", det_hom,
+                   (det_hom == n) ? "HOMOMORFISMO" : "NÃO é homomorfismo");
+            if(det_hom != n) mal++;
+            { static const char *NM[3] = {"elípt","parab","hiper"};
+              int indet = 0;
+              printf("      e o REGIME — que classes saem de cada par:\n");
+              for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+                  int m = saiu[i][j], c = (m&1) + ((m>>1)&1) + ((m>>2)&1);
+                  if(c > 1) indet++;
+                  printf("        %s ∘ %s → {%s%s%s}%s\n", NM[i], NM[j],
+                         (m&1)?"elípt ":"", ((m>>1)&1)?"parab ":"", ((m>>2)&1)?"hiper":"",
+                         (c>1) ? "   ← NÃO determinado" : "");
+              }
+              printf("      → %d de 9 pares não determinam a classe do produto\n", indet);
+              if(indet < 5) mal++;      /* se fosse quase-função, a afirmação era outra */
+              /* e o CONTRA-EXEMPLO nomeado: estável ∘ estável = instável */
+              if(!((saiu[0][0] >> 2) & 1)) mal++;
+            }
+          }
+        }
+
+        /* (2) DUAS REFLEXÕES SÃO UMA ROTAÇÃO — o caso nomeado, verificado. */
+        { long B1 = 1, C1 = -1, B2 = 3, C2 = -1;
+          long X[2][2] = {{0,-C1},{1,B1}}, Y[2][2] = {{0,-C2},{1,B2}}, M[2][2];
+          for(int r = 0; r < 2; r++) for(int c = 0; c < 2; c++)
+              M[r][c] = X[r][0]*Y[0][c] + X[r][1]*Y[1][c];
+          { long dM = M[0][0]*M[1][1]-M[0][1]*M[1][0];
+            printf("      (%ld,%ld) ∘ (%ld,%ld): det = (−1)·(−1) = %ld → o produto é"
+                   " PRÓPRIO\n", B1, C1, B2, C2, dM);
+            if(dM != 1) mal++; }
+        }
+
+        /* ── O CONTROLO: a orientação SABE distinguir ────────────────────────
+         * Se um dos factores for próprio, o produto tem de ser IMPRÓPRIO. Sem
+         * isto, «é homomorfismo» não se distinguiria de «det é sempre +1». */
+        { long X[2][2] = {{0,1},{1,0}}, Y[2][2] = {{0,-1},{1,2}}, M[2][2];
+          for(int r = 0; r < 2; r++) for(int c = 0; c < 2; c++)
+              M[r][c] = X[r][0]*Y[0][c] + X[r][1]*Y[1][c];
+          { long dM = M[0][0]*M[1][1]-M[0][1]*M[1][0];
+            printf("      CONTROLO — impróprio ∘ próprio: det = (−1)·(+1) = %ld"
+                   "  ← e não é sempre +1\n", dM);
+            if(dM != -1) mal++; }
+        }
+
+        ok("EM SÉRIE, UMA COORDENADA COMPÕE-SE E A OUTRA NÃO É SEQUER FUNÇÃO. Compor é pôr"
+           " dois sistemas em série, e a caixa é fechada para isso: det(XY) = det(X)·det(Y)"
+           " e unidade vezes unidade é unidade. A ORIENTAÇÃO compõe-se — homomorfismo"
+           " 𝒫 → {±1}, verificado nas 2500 composições de |B| ≤ 12 sem uma excepção — e daí"
+           " sai o teorema clássico: DUAS REFLEXÕES SÃO UMA ROTAÇÃO, porque (−1)·(−1) = +1."
+           " O REGIME não, e não é «quase»: de NOVE pares de classes, SETE não determinam a"
+           " classe do produto. Compor dois sistemas ESTÁVEIS pode dar um INSTÁVEL, o"
+           " contrário do que a intuição diz e o que acontece em cavidades reais. A razão"
+           " está na natureza dos dois invariantes: o det é invariante de COMPOSIÇÃO"
+           " (multiplicativo) e o Δ é invariante de CONJUGAÇÃO — classifica o elemento, não"
+           " o produto —, pelo que a caixa NÃO é graduada pelo Δ. O controlo compõe um"
+           " impróprio com um próprio e exige det = −1: sem ele, «é homomorfismo» não se"
+           " distinguiria de «det é sempre +1».", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
