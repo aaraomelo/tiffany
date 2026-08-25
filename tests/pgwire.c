@@ -31886,6 +31886,110 @@ int main(void){
            " «o comando publica» seria sobre código que ninguém executa.", mal == 0);
     }
 
+    /* ═══ §W225: DUAS FONTES DE ÓRBITA FINITA, E SÃO DISJUNTAS ═════════════ */
+    {
+        int mal = 0;
+        printf("\n§W225 rodar e reflectir fecham a órbita — por razões diferentes.\n\n");
+
+        /* ── A DISTINÇÃO QUE O CATÁLOGO EXPÔS ────────────────────────────────
+         *
+         * O `thm:leidisc` diz: Δ < 0 (elíptico) ⟹ ordem finita, e ela está em
+         * {3,4,6}. O `lem:cristal` diz: ordem finita ⟹ ela está em {1,2,3,4,6}.
+         *
+         * As duas listas DIFEREM no {1,2}, e eu tinha lido a primeira como se
+         * fosse a caracterização --- «ordem finita ⟺ elíptico». Não é: ao varrer
+         * o catálogo apareceu UMA cifra não-elíptica com órbita finita, e ela é
+         * o espelho ν, de ordem 2. Reflectir duas vezes é a identidade, e isso
+         * fecha a órbita sem rodar nada.
+         *
+         * Há portanto DUAS fontes de órbita finita --- rodar e reflectir --- e
+         * elas são DISJUNTAS pelo `cor:optica`: o que reflecte é impróprio, logo
+         * hiperbólico, logo não é elíptico. */
+        { int n = sql_corpo28_n();
+          long cif[64][2]; int nx = 0;
+          long ord_el[8], nel = 0, ord_out[8], nout = 0;
+          long tres = 0, quatro = 0, seis = 0, dois = 0;
+          for(int i = 0; i < n; i++){
+              long B, C; if(!sql_corpo28(i, &B, &C)) continue;
+              { int ja = 0;
+                for(int k = 0; k < nx; k++) if(cif[k][0]==B && cif[k][1]==C) ja = 1;
+                if(!ja && nx < 64){ cif[nx][0]=B; cif[nx][1]=C; nx++; } }
+          }
+          for(int k = 0; k < nx; k++){
+              long B = cif[k][0], C = cif[k][1], D = B*B - 4*C;
+              /* a ordem: potências da companheira até dar a identidade */
+              long M[2][2] = {{0,-C},{1,B}}, P[2][2] = {{0,-C},{1,B}}, o = 1;
+              while(o <= 24 && !(P[0][0]==1 && P[0][1]==0 && P[1][0]==0 && P[1][1]==1)){
+                  long Q[2][2];
+                  for(int r = 0; r < 2; r++) for(int c = 0; c < 2; c++)
+                      Q[r][c] = P[r][0]*M[0][c] + P[r][1]*M[1][c];
+                  P[0][0]=Q[0][0];P[0][1]=Q[0][1];P[1][0]=Q[1][0];P[1][1]=Q[1][1];
+                  o++;
+              }
+              if(o > 24) continue;                       /* não fecha */
+              if(D < 0){ if(nel < 8) ord_el[nel++] = o; }
+              else      { if(nout < 8) ord_out[nout++] = o; }
+              if(o == 2) dois++; else if(o == 3) tres++;
+              else if(o == 4) quatro++; else if(o == 6) seis++;
+              printf("      (B,C)=(%2ld,%+ld) Δ=%3ld → ordem %ld   %s\n", B, C, D, o,
+                     D < 0 ? "RODA (elíptico)" : "REFLECTE (involução, e Δ > 0)");
+          }
+          printf("      → %ld cifras elípticas com órbita finita, %ld não-elípticas\n",
+                 nel, nout);
+          { int el_ok = 1, out_ok = 1;
+            for(long i = 0; i < nel; i++)
+                if(ord_el[i] != 3 && ord_el[i] != 4 && ord_el[i] != 6) el_ok = 0;
+            for(long i = 0; i < nout; i++)
+                if(ord_out[i] != 1 && ord_out[i] != 2) out_ok = 0;
+            printf("      as dos elípticos caem em {3,4,6}: %s\n", el_ok ? "sim" : "NÃO");
+            printf("      as das outras caem em {1,2}:     %s\n", out_ok ? "sim" : "NÃO");
+            if(!el_ok) mal++;
+            if(!out_ok) mal++; }
+          /* e as TRÊS ordens do thm:leidisc realizam-se, cada uma numa cifra */
+          printf("      as três de {3,4,6} realizam-se no catálogo: %ld·%ld·%ld\n",
+                 tres, quatro, seis);
+          if(tres == 0 || quatro == 0 || seis == 0) mal++;
+          /* e o {2} existe, senão a distinção não teria caso */
+          if(dois == 0) mal++;
+          if(nout == 0) mal++;
+        }
+
+        /* ── O CONTROLO: as duas fontes são DISJUNTAS, e prova-se ────────────
+         * Se houvesse um elíptico de ordem 2, as listas cruzavam-se e a
+         * distinção caía. Pelo cor:optica isso é impossível — ordem 2 significa
+         * M² = I, e para a companheira isso força B = 0 e C = −1, que é Δ = 4.
+         * Verifica-se varrendo, e exige-se ZERO. */
+        { long cruzam = 0, testados = 0;
+          for(long C = -1; C <= 1; C += 2) for(long B = -60; B <= 60; B++){
+              long D = B*B - 4*C;
+              if(D >= 0) continue;                        /* só os elípticos */
+              testados++;
+              { long M[2][2] = {{0,-C},{1,B}}, P[2][2];
+                for(int r = 0; r < 2; r++) for(int c = 0; c < 2; c++)
+                    P[r][c] = M[r][0]*M[0][c] + M[r][1]*M[1][c];
+                if(P[0][0]==1 && P[0][1]==0 && P[1][0]==0 && P[1][1]==1) cruzam++; }
+          }
+          printf("      CONTROLO — elípticos de ordem 2 em %ld varridos: %ld"
+                 "  ← as duas fontes não se cruzam\n", testados, cruzam);
+          if(cruzam != 0) mal++;
+          if(testados == 0) mal++; }
+
+        ok("RODAR E REFLECTIR FECHAM A ÓRBITA POR RAZÕES DIFERENTES, E AS DUAS FONTES SÃO"
+           " DISJUNTAS. O thm:leidisc diz que Δ < 0 dá ordem finita em {3,4,6}; o"
+           " lem:cristal diz que ordem finita está em {1,2,3,4,6}. As duas listas DIFEREM"
+           " no {1,2}, e eu tinha lido a primeira como se fosse a caracterização — «ordem"
+           " finita ⟺ elíptico». Não é: ao varrer o catálogo apareceu uma cifra"
+           " NÃO-elíptica com órbita finita, e ela é o espelho ν, de ordem 2 — reflectir"
+           " duas vezes é a identidade, e isso fecha a órbita sem rodar nada. Medido no"
+           " catálogo: as cifras elípticas dão ordens em {3,4,6} e as TRÊS realizam-se,"
+           " cada uma numa cifra com nomes próprios; a única não-elíptica que fecha dá 2. E"
+           " o cor:optica explica porque não se cruzam: o que reflecte é impróprio, logo"
+           " hiperbólico, logo não é elíptico — a ordem finita dele não vem de rodar, vem"
+           " de ser uma INVOLUÇÃO. O controlo varre os elípticos à procura de um de ordem 2"
+           " e exige ZERO: sem ele, «as duas fontes são disjuntas» seria uma afirmação sem"
+           " tentativa de a refutar.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }

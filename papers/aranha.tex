@@ -2771,6 +2771,28 @@ e são distintas entre si, o que impede a asserção de passar por acaso. O cont
 mostra que com $C=+1$ há elípticos: a lei é sobre a \emph{orientação}, e não
 sobre o regime não existir.}
 
+\medskip\noindent\textbf{E há duas fontes de órbita finita, não uma.} O
+Teor.~\ref{thm:leidisc} diz que $\Delta<0$ dá ordem finita em $\{3,4,6\}$; o
+Lema~\ref{lem:cristal} diz que ordem finita está em $\{1,2,3,4,6\}$. \emph{As duas
+listas diferem no $\{1,2\}$}, e é fácil ler a primeira como se fosse a
+caracterização --- «ordem finita $\iff$ elíptico». Não é: o espelho $\nu$ tem
+$\Delta=4>0$ e $\nu^{2}=\mathrm{id}$. \textbf{Reflectir duas vezes é a
+identidade}, e isso fecha a órbita sem rodar nada.
+
+\noindent As duas fontes são \textbf{disjuntas}, e quem o garante é o
+Cor.~\ref{cor:optica}: o que reflete é impróprio, logo hiperbólico, logo não é
+elíptico. \emph{Rodar fecha a órbita em $\{3,4,6\}$; reflectir fecha-a em $2$, e
+nunca há um mesmo espelho a fazer as duas coisas.}
+
+\medido{\code{tests/pgwire.c} \S W225. Nas cifras do catálogo, as elípticas dão
+ordens em $\{3,4,6\}$ e \textbf{as três realizam-se} --- $\Delta=-3$ com ordem
+$6$, $\Delta=-4$ com ordem $4$, e $\Delta=-3$ com ordem $3$ na outra base ---,
+cada uma com nomes próprios. A única não-elíptica que fecha dá $\mathbf{2}$, e é
+o $(0,-1)$ cujo comentário na obra já dizia «involução». O controlo varre os
+elípticos de $\lvert B\rvert\le60$ à procura de um de ordem $2$ e exige zero:
+sem ele, «as duas fontes são disjuntas» seria uma afirmação sem tentativa de a
+refutar.}
+
 \medskip\noindent\textbf{E o catálogo é uma realização, com o seu campo $G$.} A
 aplicação $\pi\colon\text{nome}\mapsto\text{cifra}$ é uma realização no sentido da
 §\ref{sec:objeto}, e onde dois nomes dão a mesma cifra eles são \emph{o mesmo
