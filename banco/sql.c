@@ -6303,10 +6303,22 @@ static int checa_corpos(unsigned citadas, long ncols){
                        "— φ_t com t = %ld,\n", (char)('a'+primeira), (char)('a'+j), D, t);
                 printf("      EMITIDO no caminho do átomo como %s.\n",
                        t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|");
-                if(tr == Bref && de == Cref)
+                if(tr == Bref && de == Cref){
                     printf("      e CONFERIDO: M+tI tem cifra (%ld, %ld), que é a de %c —"
                            " é mudança de GERADOR, não conjugação (essa preservaria o"
                            " traço, e o traço muda).\n", tr, de, (char)('a'+primeira));
+                    /* ── E O QUE A TRAVESSIA NÃO PRESERVA ────────────────────
+                     * Δ igual dá o mesmo CORPO --- as raízes vivem na mesma
+                     * extensão ---, e é isso que a travessia transporta. Não
+                     * transporta a ORIENTAÇÃO: o determinante É o C, e a
+                     * translação M ↦ M+tI muda-o. Opticamente (`aranha`
+                     * cor:optica) um é um espelho e o outro não, e dizê-lo é a
+                     * diferença entre «é o mesmo objecto» e «é o mesmo corpo». */
+                    if(C != Cref)
+                        printf("      NOTA: a orientação MUDA — det %ld contra %ld. A"
+                               " travessia leva o CORPO (Δ igual, mesma extensão) e não o"
+                               " sistema: um destes reflecte e o outro não.\n", Cref, C);
+                }
                 else
                     printf("      MAS NÃO CONFERE: M+tI tem cifra (%ld, %ld) e a de %c é"
                            " (%ld, %ld) — o t não transporta, e dizê-lo seria mentir.\n",

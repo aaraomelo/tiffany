@@ -31482,6 +31482,104 @@ int main(void){
            " distinguiria de «det é sempre +1».", mal == 0);
     }
 
+    /* ═══ §W221: O QUE A TRAVESSIA LEVA, E O QUE ELA DEIXA PARA TRÁS ═══════ */
+    {
+        int mal = 0;
+        const char *base = "/tmp/pgwire_w221";
+        SqlOut out;
+        printf("\n§W221 a travessia leva o CORPO e não o sistema: a orientação fica.\n\n");
+
+        /* ── A RESSALVA QUE FALTAVA AO thm:pandora(2) ────────────────────────
+         *
+         * O §W220 mostrou que o det é homomorfismo para a COMPOSIÇÃO. Mas a
+         * travessia do `thm:pandora(2)` não é uma composição: é a TRANSLAÇÃO
+         * M ↦ M + tI, e nela o determinante não se conserva.
+         *
+         * A consequência é precisa: Δ igual significa que as raízes vivem na
+         * MESMA EXTENSÃO --- é o mesmo CORPO ---, e é isso que a travessia
+         * transporta. Não transporta a ORIENTAÇÃO. Existem espelhos de Δ igual
+         * com C oposto, e entre eles a travessia existe e o determinante muda:
+         * um reflecte e o outro não. Opticamente NÃO são o mesmo sistema.
+         *
+         * Isto não invalida a cláusula (2) --- invalida uma leitura dela. */
+        { long AU = sql_corpo_aureo(), CR = sql_corpo_cristal();
+          long ESP[80][3]; int ne = 0;
+          for(int ci = 0; ci < 2; ci++) for(long i = -8; i <= 8; i++){
+              long B, C, D;
+              sql_corpo_cifra(ci ? CR : AU, i, &B, &C, &D);
+              ESP[ne][0] = B; ESP[ne][1] = C; ESP[ne][2] = D; ne++;
+          }
+          { long mesmoC = 0, outroC = 0, trav_ok = 0, det_mudou = 0;
+            for(int a = 0; a < ne; a++) for(int b = a+1; b < ne; b++){
+                if(ESP[a][2] != ESP[b][2]) continue;             /* Δ diferente */
+                { long Bp = ESP[a][0], Cp = ESP[a][1];
+                  long Bq = ESP[b][0], Cq = ESP[b][1];
+                  if(Cp == Cq) mesmoC++;
+                  else{
+                      outroC++;
+                      { long d = Bp - Bq;
+                        if(d % 2) continue;
+                        { long t = d / 2;
+                          /* a testemunha: M_Q + tI tem de ter cifra (B_P, C_P) */
+                          long trK = Bq + 2*t, deK = t*t + t*Bq + Cq;
+                          if(trK == Bp && deK == Cp) trav_ok++;
+                          if(Cp != Cq) det_mudou++; } }
+                  } }
+            }
+            printf("      pares de Δ igual: %ld com a MESMA orientação, %ld com orientação"
+                   " OPOSTA\n", mesmoC, outroC);
+            printf("      dos opostos, a travessia existe em %ld — e em %ld o determinante"
+                   " MUDA\n", trav_ok, det_mudou);
+            /* a existência dos dois tipos é o que dá conteúdo à ressalva */
+            if(mesmoC == 0) mal++;
+            if(outroC == 0) mal++;
+            if(trav_ok == 0) mal++;
+            if(det_mudou != outroC) mal++;   /* opostos ⟹ det muda, por definição */
+          }
+        }
+
+        /* (2) E O MOTOR DI-LO. Sem isto o utilizador vê «são ISOMORFOS» e conclui
+         *     que são o mesmo objecto — que é a leitura que a ressalva desfaz. */
+        unlink("/tmp/pgwire_w221.mem");
+        unlink("/tmp/pgwire_w221.prog");
+        if(!sql_abrir(base)){ mal++; printf("      sql_abrir FALHOU\n"); }
+        else{
+            sql_executa("CREATE TABLE k (a AUREO(1), b CRISTALINO(3))", &out);
+            sql_executa("INSERT INTO k VALUES (3+2s, 1+1s)", &out);
+            sql_executa("SELECT * FROM k WHERE a - b > 0", &out);
+            printf("      AUREO(1) e CRISTALINO(3): Δ = 5 nos dois, C = −1 e +1\n");
+            printf("      a consulta que os atravessa: ok=%d nrows=%d  ← a travessia EXISTE"
+                   " (é o mesmo corpo)\n", out.ok, out.nrows);
+            if(!out.ok || out.nrows != 1) mal++;
+            sql_fechar();
+        }
+
+        /* ── O CONTROLO: com Δ DIFERENTE não há travessia nenhuma ────────────
+         * Se houvesse, «a travessia leva o corpo» não distinguiria nada. */
+        { long AU = sql_corpo_aureo(), CR = sql_corpo_cristal();
+          long Bp, Cp, Dp, Bq, Cq, Dq;
+          sql_corpo_cifra(AU, 1, &Bp, &Cp, &Dp);       /* Δ = 5 */
+          sql_corpo_cifra(CR, 0, &Bq, &Cq, &Dq);       /* Δ = −4 */
+          printf("      CONTROLO — AUREO(1) Δ=%ld contra CRISTALINO(0) Δ=%ld:"
+                 " distância %ld ≠ 0 → sem travessia\n", Dp, Dq, sql_esp_dist(Dp, Dq));
+          if(Dp == Dq) mal++;
+          if(sql_esp_dist(Dp, Dq) == 0) mal++; }
+
+        ok("A TRAVESSIA LEVA O CORPO E DEIXA A ORIENTAÇÃO PARA TRÁS. O §W220 mostrou que o"
+           " det é homomorfismo para a COMPOSIÇÃO — mas a travessia do thm:pandora(2) não é"
+           " uma composição: é a TRANSLAÇÃO M ↦ M + tI, e nela o determinante não se"
+           " conserva. A consequência é precisa: Δ igual significa que as raízes vivem na"
+           " MESMA EXTENSÃO, é o mesmo CORPO, e é isso que a travessia transporta — não"
+           " transporta a ORIENTAÇÃO. Medido sobre os espelhos de |B| ≤ 8: há pares de Δ"
+           " igual com a mesma orientação e há pares com orientação OPOSTA, e nestes a"
+           " travessia EXISTE (a testemunha M_Q + tI fecha) com o determinante a MUDAR. Um"
+           " reflecte e o outro não: opticamente NÃO são o mesmo sistema, ainda que sejam o"
+           " mesmo corpo. Isto não invalida a cláusula (2) — invalida uma LEITURA dela, e o"
+           " motor passou a dizê-lo em vez de imprimir «são ISOMORFOS» e deixar concluir. O"
+           " controlo toma dois de Δ diferente e exige distância não nula: sem ele, «a"
+           " travessia leva o corpo» não distinguiria nada.", mal == 0);
+    }
+
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);
     return falhas ? 1 : 0;
 }
