@@ -99,20 +99,39 @@ jobs:
           echo "✅ cv.pdf ($N páginas) — vai para /docs/cv.pdf, ligado em «O autor»"
           cd ..
 
+      - name: A Física Araniana compila? (estático — para o link poder ser colado)
+        run: |
+          # O tratado também sobe pré-composto, e a razão é ESTREITA: um link de
+          # currículo é COLADO, não clicado dentro da app. O /docs/*.pdf do resto
+          # continua a compor-se no browser; esta é a SEGUNDA excepção, e não a
+          # abertura de uma regra nova.
+          for i in 1 2 3; do
+            pdflatex -interaction=nonstopmode fisica.tex >/dev/null 2>&1 || true
+          done
+          test -s fisica.pdf || { echo "❌ fisica.pdf não compilou — não publico"; exit 1; }
+          N=$(pdfinfo fisica.pdf | awk '/^Pages/{print $2}')
+          [ "${N:-0}" -ge 80 ] || { echo "❌ fisica.pdf tem $N páginas, mínimo 80 — não publico"; exit 1; }
+          if grep -q 'undefined references' fisica.log; then
+            echo "❌ fisica.pdf tem referências por resolver — não publico"; exit 1
+          fi
+          echo "✅ fisica.pdf ($N páginas) — vai para /docs/fisica-araniana.pdf"
+
       - name: Construir o app
         run: |
           cd app
           npm ci
           npx vite build
-          # só o CV fica pré-composto; teoria/papers saem de tex.wasm + /corpo/
+          # o CV e o tratado ficam pré-compostos; o resto sai de tex.wasm + /corpo/
           mkdir -p dist/docs
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
+          cp ../fisica.pdf dist/docs/fisica-araniana.pdf
 
       - name: O build tem o tradutor, o corpo e o CV?
         run: |
           cd app
           test -s dist/wasm/tex.wasm || { echo "❌ falta dist/wasm/tex.wasm"; exit 1; }
           test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }
+          test -s dist/docs/fisica-araniana.pdf || { echo "❌ falta dist/docs/fisica-araniana.pdf"; exit 1; }
           # o corpo: a lista medida — sem ela o cliente não abre fontes/estilo
           for f in estilo.tex teoria.tex papers/arquitetura.tex lib/fontes/documento-regular.otf; do
             test -s "dist/corpo/$f" || { echo "❌ falta dist/corpo/$f"; exit 1; }
