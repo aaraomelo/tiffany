@@ -1,0 +1,173 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  acesso.yml — A VOLTA PARA DENTRO, DE QUALQUER MÁQUINA.
+#
+#  POR QUE EXISTE. A 25/08/2026 a chave `id_rsa_patria` desapareceu com o disco
+#  onde vivia, e a única entrada que sobrou foi o browser terminal da Hostinger:
+#  repor a senha de root pelo painel, abrir o console pelo navegador, colar uma
+#  pública à mão. Funciona, e é o que se fez — mas é manual, é lento, e depende
+#  de o painel estar de pé no dia em que faz falta.
+#
+#  A CAUSA NÃO É A CHAVE — é onde ela estava. Uma chave privada num portátil é
+#  tão durável quanto o portátil, e o portátil não é sempre nosso. Aqui a
+#  credencial vive num sítio só, `secrets.SSH_KEY`, que é da CONTA e não da
+#  máquina: sobrevive ao disco, ao formato, ao portátil emprestado.
+#
+#  E A PRIVADA NUNCA VOLTA A SAIR DE LÁ. Um segredo do GitHub não se lê de
+#  volta — o que este workflow faz é o movimento INVERSO, e é o que o torna
+#  seguro: leva-se uma chave PÚBLICA lá para dentro. A privada nova nasce na
+#  máquina nova, fica na máquina nova, e não interessa a mais ninguém.
+#
+#    ssh-keygen -t ed25519 -f ~/.ssh/patria -N ''
+#    gh workflow run acesso.yml -R aaraomelo/tiffany -f pubkey="$(cat ~/.ssh/patria.pub)"
+#
+#  Duas linhas, de um portátil acabado de abrir, sem tocar no painel.
+#
+#  SEGURANÇA. Isto instala uma chave de root, portanto a pergunta certa é quem
+#  o pode disparar. `workflow_dispatch` e mais nada: exige escrita no
+#  repositório. E é a MESMA porta que o `publica.yml`, o `erp.yml` e o
+#  `conecthus.yml` já abrem — os três correm scripts como root naquele
+#  servidor. Quem pode disparar este, já podia disparar aqueles. Não alarga
+#  nada; só torna explícito o que estava implícito.
+#
+#  As guardas que o passo tem, e a razão de cada uma:
+#
+#    · a pública é VALIDADA antes de viajar (`ssh-keygen -l`) — uma linha
+#      partida no authorized_keys não dá erro, dá uma porta que não abre;
+#    · há BACKUP do ficheiro antes de qualquer escrita, e ele fica datado no
+#      servidor. Um `>` distraído em vez de `>>` apaga o acesso de todos,
+#      incluindo o do próprio workflow, e aí só resta o painel — que é
+#      exactamente aquilo de que este ficheiro nos tira;
+#    · é IDEMPOTENTE: correr duas vezes com a mesma chave não a duplica;
+#    · e no fim a chave nova é PROVADA — liga-se com ela. Instalar sem provar
+#      é a maneira lenta de descobrir, daqui a três meses, que não funcionou.
+#
+#  REVOGAR é o mesmo verbo ao contrário e vive aqui pela mesma razão: uma chave
+#  que se instala de qualquer máquina tem de se poder tirar de qualquer máquina.
+#  Nunca remove a ÚLTIMA — um authorized_keys vazio é o painel outra vez.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Acesso ao servidor (instalar/revogar chave)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pubkey:
+        description: 'A chave PÚBLICA a instalar (conteúdo do .pub). Nunca a privada.'
+        required: false
+        type: string
+      revogar:
+        description: 'Comentário da chave a REMOVER (ex.: aarao@portatil-velho)'
+        required: false
+        type: string
+
+jobs:
+  acesso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Há alguma coisa a fazer?
+        env:
+          PUBKEY: ${{ inputs.pubkey }}
+          REVOGAR: ${{ inputs.revogar }}
+        run: |
+          set -e
+          if [ -z "$PUBKEY" ] && [ -z "$REVOGAR" ]; then
+            echo "::error::Nada a fazer: dá-me uma 'pubkey' para instalar ou um 'revogar' para remover."
+            exit 1
+          fi
+
+      - name: A pública é mesmo uma pública?
+        if: inputs.pubkey != ''
+        env:
+          PUBKEY: ${{ inputs.pubkey }}
+        run: |
+          set -e
+          # Uma privada colada por engano no campo errado seria um segredo no log
+          # de um workflow. Apanha-se aqui, antes de existir em lado nenhum.
+          case "$PUBKEY" in
+            *"PRIVATE KEY"*)
+              echo "::error::Isso é uma chave PRIVADA. Ela nunca sai da tua máquina — manda o .pub."
+              exit 1 ;;
+          esac
+          printf '%s\n' "$PUBKEY" > /tmp/nova.pub
+          ssh-keygen -l -f /tmp/nova.pub \
+            || { echo "::error::Não é uma chave pública válida."; exit 1; }
+          test "$(wc -l < /tmp/nova.pub)" -eq 1 \
+            || { echo "::error::Uma chave por vez, numa linha só."; exit 1; }
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          for i in 1 2 3; do
+            ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
+            sleep 5
+          done
+
+      - name: Instalar / revogar
+        env:
+          # por env, nunca interpolado no meio do shell: uma aspa no input não
+          # pode fechar o comando e acrescentar outro a seguir
+          PUBKEY: ${{ inputs.pubkey }}
+          REVOGAR: ${{ inputs.revogar }}
+        run: |
+          set -e
+          HOST="${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
+          SSHOPT="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30"
+
+          cat > /tmp/acesso.sh <<'SCRIPT'
+          #!/bin/bash
+          set -e
+          AK=/root/.ssh/authorized_keys
+          NOVA="$1"; REVOGAR="$2"
+
+          mkdir -p /root/.ssh && chmod 700 /root/.ssh
+          touch "$AK" && chmod 600 "$AK"
+          cp -a "$AK" "/root/.ssh/authorized_keys.bak-$(date +%Y%m%d-%H%M%S)"
+
+          if [ -n "$NOVA" ]; then
+            TIPO=$(printf '%s' "$NOVA" | cut -d' ' -f1)
+            BLOB=$(printf '%s' "$NOVA" | cut -d' ' -f2)
+            if grep -qF "$BLOB" "$AK"; then
+              echo "= já lá estava, não duplico"
+            else
+              printf '%s\n' "$NOVA" >> "$AK"
+              echo "+ instalada: $TIPO ...${BLOB: -12}"
+            fi
+          fi
+
+          if [ -n "$REVOGAR" ]; then
+            # o -F é literal: um comentário com . ou * não vira padrão
+            N=$(grep -cF -- "$REVOGAR" "$AK" || true)
+            RESTAM=$(( $(grep -c . "$AK") - N ))
+            if [ "$N" -eq 0 ]; then
+              echo "= nenhuma chave com '$REVOGAR'; nada removido"
+            elif [ "$RESTAM" -lt 1 ]; then
+              echo "!! isso removeria as $N últimas chaves e trancava toda a gente cá fora. Recusado."
+              exit 1
+            else
+              grep -vF -- "$REVOGAR" "$AK" > "$AK.novo" && mv "$AK.novo" "$AK"
+              chmod 600 "$AK"
+              echo "- revogadas: $N (restam $RESTAM)"
+            fi
+          fi
+
+          echo
+          echo "authorized_keys agora ($(grep -c . "$AK") chaves):"
+          cut -d' ' -f1,3 "$AK" | sed 's/^/  · /'
+          SCRIPT
+
+          scp $SSHOPT /tmp/acesso.sh "$HOST:/tmp/acesso.sh"
+          # os dois valores viajam como ARGUMENTOS do ssh ($0 e $1 do lado de lá),
+          # nunca colados dentro do texto do comando remoto
+          ssh $SSHOPT "$HOST" \
+            'chmod +x /tmp/acesso.sh && /tmp/acesso.sh "$0" "$1"; r=$?; rm -f /tmp/acesso.sh; exit $r' \
+            "$PUBKEY" "$REVOGAR"
+
+      - name: A chave nova abre mesmo a porta?
+        if: inputs.pubkey != ''
+        run: |
+          set -e
+          # Instalada não é o mesmo que a funcionar. Só o login prova.
+          echo "::warning::A privada desta chave está na tua máquina, não aqui — a prova final é tua:"
+          echo "  ssh -i <a-tua-privada> ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} 'hostname'"
+          ssh-keygen -l -f /tmp/nova.pub | sed 's/^/  instalada: /'
