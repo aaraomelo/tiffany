@@ -59,6 +59,10 @@ long sql_ord_perdidos(void);
 
 /* as DUAS réguas da caixa de Pandora (`aranha thm:pandora`): a aritmética, que
  * diz quanto falta, e a profundidade da ultramétrica, que dá a partição. */
+/* a cifra (traço, determinante, discriminante) de um corpo, pela porta */
+void sql_corpo_cifra(long corpo, long parm, long *B, long *C, long *D);
+int  sql_corpo_aureo(void);
+int  sql_corpo_cristal(void);
 /* os comparadores dos corpos, pela porta — a régua verdadeira, não uma cópia */
 int  sql_au_cmp(long ua, long ub, long va, long vb, long m);
 int  sql_cr_cmp(long ua, long ub, long va, long vb, long t);

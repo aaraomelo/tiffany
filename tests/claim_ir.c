@@ -1,3 +1,7 @@
+/* DEPENDE-DE: conecthus/pipeline.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* tests/claim_ir.c — a IR executável: parse → execute → R → mutação.
  *
  * §C0  as dez .claim parseiam; residual= no ficheiro é recusado

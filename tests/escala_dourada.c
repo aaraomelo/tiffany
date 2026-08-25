@@ -1,3 +1,7 @@
+/* DEPENDE-DE: papers/estilo.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* escala_dourada.c — A ESCALA TIPOGRÁFICA É A DOURADA, E O DEGRAU É UM INTEIRO.
  *
  * Corpos em centésimos (estilo.tex). φ^(k/3) em ℤ por Fibonacci, sem log/pow.

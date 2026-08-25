@@ -1,3 +1,7 @@
+/* DEPENDE-DE: papers/estilo.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 #define _GNU_SOURCE
 /* tex.c — O CORPO TRADUTOR DE FORMATO: .tex -> PDF, sem TeX Live e sem dependência nenhuma.
  *

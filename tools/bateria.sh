@@ -135,17 +135,32 @@ negativo_esperado() { return 1; }
 # É o mesmo defeito que a atestação existe para impedir, um andar acima: ela guardava o
 # resultado sem guardar de que CÓDIGO ele saiu. As dependências vêm do compilador (cc -MM),
 # que é quem sabe: nada de listas à mão, que envelhecem caladas.
+#
+# E O MESMO BURACO EXISTIA PARA OS DADOS. Os headers entraram; os FICHEIROS QUE O MEDIDOR LÊ
+# não. O `refs.c` lê `papers/*.tex` e nenhum entrava na assinatura: mudei 124 linhas do
+# `aranha.tex` — duplicando dois `\label` — e a bateria respondeu «537 verdes» com o atestado
+# do refs de três horas antes. Verde sobre um estado que já não existe, que é exactamente o
+# que a atestação existe para impedir.
+#
+# A dependência declara-se NO MEDIDOR, numa linha `DEPENDE-DE:`, e não numa lista aqui. É a
+# mesma razão do `cc -MM`: quem sabe de que dados um medidor depende é o medidor, e uma lista
+# na bateria envelhece calada enquanto o medidor muda. Aceita globs, relativos à raiz.
 assinatura() {
   { cat "$1" 2>/dev/null || cat "${1%.c}.py" 2>/dev/null || cat "${1%.c}.js"
+    # os DADOS declarados pelo próprio medidor — ordem do glob, que é estável
+    # a linha INTEIRA depois do marcador: um `[^*]*` pararia no primeiro `*`, e
+    # `papers/*.tex` tem um — a regex comia o glob e a assinatura não mudava.
+    dep=$(grep -m1 'DEPENDE-DE:' "$1" 2>/dev/null | sed 's|.*DEPENDE-DE: *||')
+    if [ -n "$dep" ]; then
+      for pat in $dep; do
+        for g in $RAIZ/$pat; do [ -f "$g" ] && cat "$g"; done
+      done
+    fi
     case "$1" in *.c)
       cc -MM -I "$RAIZ/lib" -I "$RAIZ/banco" -I "$RAIZ/tests" -I "$RAIZ/tools" "$1" 2>/dev/null \
         | tr ' \\' '\n\n' | grep '\.h$' | sort -u \
         | while read -r h; do [ -f "$h" ] && cat "$h"; done
-      # pgwire liga sql.c + pgwire.c (Trios PG2–PG3)
-      if [ "$(basename "$1")" = pgwire.c ]; then
-        [ -f "$RAIZ/banco/sql.c" ] && cat "$RAIZ/banco/sql.c"
-        [ -f "$RAIZ/banco/pgwire.c" ] && cat "$RAIZ/banco/pgwire.c"
-      fi ;;
+      ;;
     esac
     printf '%s' "$2"
   } | sha256sum | cut -c1-16

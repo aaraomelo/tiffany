@@ -1,3 +1,7 @@
+/* DEPENDE-DE: papers/estilo.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* design.c — O DESIGN SYSTEM SAI DO estilo.tex, E DESENHA-SE POR CAMINHO.
  *
  * O Aarão: «vê o design que estava antes e reconstrói igual — ainda sem design system nos

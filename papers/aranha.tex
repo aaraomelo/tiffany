@@ -2406,6 +2406,17 @@ $\Delta$ --- polinómio simétrico em traço e determinante, ambos invariantes p
 conjugação --- teria de coincidir.
 \end{proof}
 
+\medido{\code{tests/pgwire.c} \S W213, contra \code{sql\_corpo\_cifra}. Sobre
+\emph{todos} os pares de corpos com $\lvert m\rvert,\lvert t\rvert\le40$ dos dois
+tipos, há $\mathbf{168}$ com $\Delta$ igual e $B$ diferente. Em $\mathbf{0}$ deles
+a diferença é ímpar --- \emph{a condição do~(2) não morde nesta casa}, e isso
+varre-se em vez de se supor ---, e a testemunha $M_Q+tI=(B_P,C_P)$ fecha nos
+$\mathbf{168}$. Oito são \emph{cruzados}, áureo contra cristalino, que é o que
+impede a varredura de ser vazia. É essa medida que dá o direito de deixar o
+guarda escrito no motor: ele é para o \emph{anel}, e não para os corpos de hoje.
+O controlo move o $t$ de um e exige que a cifra deixe de bater --- $t=-1$ dá
+$(1,-1)$, que é a de \code{AUREO(1)}, e $t=0$ dá $(3,1)$, que não é.}
+
 \begin{corolario}[o primeiro corte da árvore é o elíptico, e só ele]\label{cor:pandbola}
 Na ultramétrica $d_{\mathrm{u}}$ da caixa, a bola de raio $1$ --- os espelhos que
 \emph{não} divergem no bit mais alto --- é exatamente $\{\Delta<0\}$ e o seu
@@ -2473,158 +2484,6 @@ procurada. Com ela, a mesma descida devolve $1{+}1\sigma,\,2,\,3{-}1\sigma$
 (normas $1,4,5$) e $0{+}1\omega,\,3,\,1{+}3\omega$ (normas $1,9,10$) --- e o
 bloco exige que a norma \emph{não} coincida com o valor, senão não haveria
 escolha a nomear.}
-
-\medskip\noindent\textbf{E o que ainda se herda, dito em vez de escondido.} A
-caixa deixou de nomear um conjunto numérico, mas apoia-se no
-Teor.~\ref{thm:leidisc}, que está enunciado \emph{sobre matrizes de entradas
-inteiras}. Nem toda essa âncora é da mesma natureza, e vale distinguir:
-\begin{itemize}\itemsep2pt
-\item no Teor.~\ref{thm:leidisc} a inteireza é \textbf{acidental}: o que a
-  tricotomia usa é a \emph{ordem}, e a prova corre igual em qualquer anel
-  ordenado --- é o mesmo padrão que aqui se corrigiu;
-\item no Lema~\ref{lem:cristal} ela é \textbf{essencial}: o argumento é que um
-  intervalo de comprimento $4$ contém \emph{cinco} valores, e é a discretude ---
-  não a ordem --- que fecha a lista $\{1,2,3,4,6\}$. Tirá-la aí não generaliza o
-  lema; destrói-o.
-\end{itemize}
-\noindent A caixa não precisa de nenhuma das duas para existir; precisa da ordem
-para a tricotomia, e é essa a hipótese que a Def.~\ref{def:pandora} nomeia.
-
-\medskip\noindent\textbf{E as medidas abaixo são realizações, não a teoria.}
-Correm todas com $A$ tomado no segundo degrau, porque é o que a máquina tem ---
-mas nenhuma cláusula acima o pede, e trocar $A$ por outro anel ordenado onde $2$
-não seja unidade muda os números e não muda um enunciado.
-
-\medido{\code{tests/pgwire.c} \S W211, contra \code{sql\_esp\_dist} e
-\code{sql\_esp\_prof}. Sobre os $26^3=17576$ triplos dos espelhos de
-$\lvert m\rvert,\lvert t\rvert\le6$, a aritmética viola
-$d(x,z)\le\max\{d(x,y),d(y,z)\}$ em $\mathbf{4448}$ deles e a ultramétrica em
-$\mathbf{0}$ --- uma acumula, a outra absorve. E no percurso
-$\Delta=-4\to5\to0\to40\to-3$ a local soma $\mathbf{97}$ para uma distância
-directa de $\mathbf{1}$, enquanto a global mede $2^{-31}$ entre as pontas contra
-um pior passo de $2^{0}$: a cadeia inteira cabe folgadamente no seu pior degrau.
-Exige-se o \emph{par} --- que a soma exceda a directa e que a profundidade
-directa não desça abaixo da pior do caminho ---, porque só uma das duas metades
-não distinguiria as réguas.}
-
-\medido{Sobre os dezoito espelhos de $\lvert m\rvert,\lvert t\rvert\le4$ --- os
-$5832$ triplos ---, a aritmética viola $d(x,z)\le\max$ em $1264$ deles e a
-ultramétrica em \textbf{zero}. A primeira escrita desta subsecção chamou
-``distância'' à aritmética sem verificar qual das duas desigualdades ela cumpria;
-a medida separou-as.}
-
-\begin{teorema}[o que a caixa separa, e o que ela liga]\label{thm:pandora}
-Com a Def.~\ref{def:pandora}:
-\begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{A classe é grosseira, o espelho é fino.} A aplicação
-$P\mapsto\operatorname{sgn}\Delta(P)$ tem \emph{três} valores --- as classes do
-Teor.~\ref{thm:leidisc} --- e cada uma tem infinitos espelhos: $\Delta=5$ e
-$\Delta=13$ são \emph{corpos distintos da mesma classe hiperbólica}. Logo
-$d_{\mathcal{P}}=0$ é estritamente mais forte do que ter a mesma classe.
-\item[(2)] \textbf{Distância zero é mudança de gerador, e ela escreve-se.} Se
-$\Delta(P)=\Delta(Q)$, os dois espelhos têm raízes
-$\alpha_P,\alpha_Q$ com $2\alpha=B+\sqrt{\Delta}$ na mesma extensão, e elas
-diferem por $2t=B_P-B_Q$. Onde esse $t$ está em $A$, o cisalhamento
-$\varphi_t=\left(\begin{smallmatrix}1&t\\0&1\end{smallmatrix}\right)$ é a
-\textbf{mudança de base} de $\{1,\alpha_P\}$ para $\{1,\alpha_Q\}$, e nela a
-multiplicação por $\alpha_P$ é $M_Q+tI$, de traço $B_P$ e determinante $C_P$. A
-travessia não é dada por existência: é \textbf{emitida}.
-
-\emph{E ela não é uma conjugação} --- dizê-lo era um erro desta subsecção. Traço
-e determinante são invariantes de conjugação, pelo que $B_P\neq B_Q$ exclui
-\emph{qualquer} conjugação entre as companheiras, $\varphi_t$ inclusive. O que
-$\varphi_t$ faz é transladar o gerador; é por isso que o traço muda, e tem de
-mudar. É a cláusula~(3) que usa a invariância, e essa está certa.
-\item[(3)] \textbf{Distância não nula é ausência de travessia.} Com
-$\Delta(P)\neq\Delta(Q)$ não há isomorfismo de réguas, e uma comparação que
-atravesse as duas não é uma pergunta difícil: é uma pergunta \emph{mal posta},
-como a ordem num corpo elíptico. O que se deve fazer é \textbf{recusar}, e a
-distância diz \emph{quão} longe se estava de poder responder.
-\end{enumerate}
-\end{teorema}
-
-\begin{proof}
-(1) $\operatorname{sgn}$ tem três valores e a tricotomia \emph{da ordem} de $A$
-esgota (Teor.~\ref{thm:leidisc}) --- a hipótese é a ordem, e não um conjunto
-numérico em particular. Que cada classe é infinita vê-se na família
-$\Delta=m^{2}+4$, estritamente crescente em $m\ge0$. Que $d_{\mathcal{P}}=0$
-implica a mesma classe é imediato, e a recíproca falha em $\Delta=5,13$.
-
-(2) De $\Delta=B^{2}-4C$ vem $B_P^{2}-B_Q^{2}\in(4)$, logo $B_P-B_Q\in(2)$ e
-$t$ está em $A$ --- \emph{esta} é a condição, e ela é sobre como o $2$ se comporta
-no anel: onde $2\in A^{\times}$ é vazia, e onde não é, é ela que decide. Escrever
-«$t$ é inteiro» nomeava uma realização em vez da hipótese. O cisalhamento é
-unimodular ($\det=1$), e o que ele faz é a mudança de base $\{1,\alpha_P\}\to
-\{1,\alpha_Q\}$: nela a multiplicação por $\alpha_P$ escreve-se $M_Q+tI$, cujo
-traço é $B_Q+2t=B_P$ e cujo determinante é $C_P$. Não é uma conjugação, e não
-podia ser: o traço muda.
-
-(3) Se houvesse um isomorfismo de réguas ele conjugaria as companheiras, e o
-$\Delta$ --- polinómio simétrico em traço e determinante, ambos invariantes por
-conjugação --- teria de coincidir.
-\end{proof}
-
-\begin{corolario}[o primeiro corte da árvore é o elíptico, e só ele]\label{cor:pandbola}
-Na ultramétrica $d_{\mathrm{u}}$ da caixa, a bola de raio $1$ --- os espelhos que
-\emph{não} divergem no bit mais alto --- é exatamente $\{\Delta<0\}$ e o seu
-complemento. Logo o primeiro nível da árvore separa \textbf{elíptico} de
-\textbf{não-elíptico}, e mais nada: a distinção entre \emph{parabólico} e
-\emph{hiperbólico} vive \textbf{mais fundo}, e não a uma profundidade fixa.
-\end{corolario}
-
-\begin{proof}
-O bit mais alto da representação de $\Delta$ é o do sinal, pelo que
-$\operatorname{prof}(\Delta_P,\Delta_Q)=0$ se e só se os sinais diferem. Que
-$\Delta=0$ não forma bola vê-se por não haver raio que o isole dos positivos: ele
-partilha com cada um deles um prefixo próprio, e a profundidade depende do
-positivo escolhido.
-\end{proof}
-
-\medskip\noindent\textbf{A tricotomia não é uma partição por bolas.} É este o
-conteúdo do Cor.~\ref{cor:pandbola}, e vale a pena dizê-lo ao contrário: das três
-classes do Teor.~\ref{thm:leidisc}, \emph{só a elíptica é uma bola}. E o corte
-que a árvore faz primeiro é justamente o que a §\ref{sec:dualidades} separou ---
-\emph{o que roda} e \emph{o que não roda}: «a diferença entre $\{1,2,3,4,6\}$ e
-$\{3,4,6\}$ é exatamente o que reflete em vez de rodar». A régua ultramétrica
-encontra essa fronteira no \textbf{primeiro} bit, sem que ninguém lha tenha
-dito.
-
-\medido{Sobre os vinte e seis espelhos de $\lvert m\rvert,\lvert t\rvert\le6$ ---
-três elípticos e vinte e três não ---, as três condições verificam-se: dois
-elípticos nunca divergem no bit $0$; dois não-elípticos também não; e um de cada
-lado divergem \emph{sempre} nele. A recíproca ingénua --- «mesma bola $\iff$
-mesma classe» --- falha em $84$ dos $676$ pares, e as falhas são \textbf{todas}
-com $\Delta=0$: $\Delta=40$ e $\Delta=0$ estão na mesma bola de raio $1$ e são de
-classes diferentes. Foi a medida que separou a afirmação verdadeira da falsa.}
-
-\medskip\noindent\textbf{E a mesma separação decide quem pode ordenar.} Uma
-árvore de prefixos ordena pelos \emph{bits} do endereço --- é a ultramétrica do
-Lema~\ref{lem:ultra}, e é global. A ordem de um corpo quadrático é a de
-$a+b\sigma$ como \emph{valor} --- é arquimediana, e é local ao corpo. \emph{Não são a mesma
-régua, e não há descida por prefixo que dê a segunda}: ordenar por
-$a+b\sigma$ é ordenar por \textbf{comparação}, e comparar é perguntar ao corpo.
-Um motor que tenha só a árvore pode devolver a lexicográfica de $(a,b)$ com a
-cara da ordem pedida --- e é exactamente a caixa aberta: não um erro que se veja,
-uma resposta com a cara de certa.
-
-\noindent O critério da recusa sai daí sem escolha: pergunta-se se a coluna tem
-alguma segunda componente. Com $b=0$ em toda a parte os valores estão na
-\textbf{imagem de $A$} dentro do corpo, a ordem do corpo restringe-se à de $A$, e
-as duas réguas \emph{coincidem} --- recusar aí seria recusar onde não há defeito. Basta um
-$b\neq0$ para deixarem de coincidir. E a \emph{igualdade} nunca se recusa: ela é
-do corpo e não da ordem, e o Teor.~\ref{thm:multiplicidade}(4) já a tinha do lado
-da leitura.
-
-\medido{\code{tests/pgwire.c} \S W212, contra \code{sql\_au\_cmp}. O
-\code{corpos.h} traz quatro comparadores e o motor não chamava
-\textbf{nenhum}: ordenava sempre pelos bits. Sobre $\{2+0\sigma,\,1+1\sigma,\,
-3-1\sigma\}$ --- valores $2{,}000$, $2{,}618$, $1{,}382$ --- dois dos três postos
-discordam, e não de qualquer maneira: a ordem dos bits é a \textbf{inversa} da do
-corpo (o posto do meio fica, porque uma inversão de três fixa-o). Três controlos
-excluem que a recusa seja larga demais: a igualdade passa, a desigualdade sobre
-coluna do anel base passa, e a coluna com $\sigma=0$ em toda a parte ordena
-$2\cdot5\cdot9$ sem recusa.}
-
 \medskip\noindent\textbf{E é daqui que vem o nome.} Abrir a caixa é misturar os
 espelhos: comparar através de dois com $\Delta$ diferente devolve sempre
 \emph{algum} número, e esse número não é sobre objeto nenhum. O que sai da caixa

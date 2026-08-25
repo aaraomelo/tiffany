@@ -5235,6 +5235,17 @@ enum { CL_ELIPTICO = -1, CL_PARABOLICO = 0, CL_HIPERBOLICO = 1 };
  * O medidor tem de comparar pelo comparador VERDADEIRO --- o do `corpos.h` --- e
  * não por uma cópia dele escrita no teste, que seria medir a minha aritmética e
  * não a da casa. Abre-se a porta em vez de duplicar a régua. */
+/* a CIFRA de um corpo, pela porta: (traço, determinante) da sua régua. O medidor
+ * que a quiser varrer não a pode escrever à mão --- seria medir a minha
+ * aritmética e não a da casa. CORPO_AUREO = 2, CORPO_CRISTAL = 4. */
+void sql_corpo_cifra(long corpo, long parm, long *B, long *C, long *D){
+    if(B) *B = corpo_B(corpo, parm);
+    if(C) *C = corpo_C(corpo);
+    if(D) *D = corpo_delta(corpo, parm);
+}
+int sql_corpo_aureo(void){ return CORPO_AUREO; }
+int sql_corpo_cristal(void){ return CORPO_CRISTAL; }
+
 int sql_au_cmp(long ua, long ub, long va, long vb, long m){
     Par u, v; u.a = ua; u.b = ub; v.a = va; v.b = vb;
     return au_cmp(u, v, m);
@@ -6083,13 +6094,14 @@ long sql_ultimo_prog = 0;
  * desigualdade sobre coluna elíptica é RECUSADA, e diz-se porquê — comparar por norma é outra
  * pergunta, e quem a quiser tem de a escrever. */
 static int checa_corpos(unsigned citadas, long ncols){
-    int primeira = -1; long Dref = 0, Bref = 0;
+    int primeira = -1; long Dref = 0, Bref = 0, Cref = 0;
     for(long j = 0; j < ncols && j < (long)COL_MAX; j++){
         if(!(citadas & (1u << j))) continue;
         Word c = corpo_de(j);
         if(!corpo_tem_regua(c.total)) continue;
         long D = corpo_delta(c.total, c.e), B = corpo_B(c.total, c.e);
-        if(primeira < 0){ primeira = (int)j; Dref = D; Bref = B; continue; }
+        long C = corpo_C(c.total);           /* a testemunha precisa dos DOIS da cifra */
+        if(primeira < 0){ primeira = (int)j; Dref = D; Bref = B; Cref = C; continue; }
         if(D != Dref){
             long d = D - Dref; if(d < 0) d = -d;
             /* ── CORPO DIFERENTE NÃO É CLASSE DIFERENTE ─────────────────────
@@ -6118,11 +6130,48 @@ static int checa_corpos(unsigned citadas, long ncols){
             return 0;
         }
         if(B != Bref){
-            long t = (Bref - B) / 2;
-            printf("nota: %c e %c são ISOMORFOS (Δ = %ld, distância 0) em bases diferentes "
-                   "— φ_t com t = %ld,\n", (char)('a'+primeira), (char)('a'+j), D, t);
-            printf("      EMITIDO no caminho do átomo como %s.\n",
-                   t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|");
+            /* ── O t NÃO SE AFIRMA: VERIFICA-SE, E ANTES DELE A CONDIÇÃO ─────
+             *
+             * `aranha thm:pandora(2)`, na forma corrigida: com Δ igual, os dois
+             * espelhos têm raízes na mesma extensão e elas diferem por 2t =
+             * B_P − B_Q. A condição é B_P − B_Q ∈ (2) --- é sobre como o DOIS
+             * se comporta no anel, e não sobre «t ser inteiro», que nomeava uma
+             * realização. Aqui o anel é o do motor, onde 2 não é unidade: logo
+             * a condição MORDE, e escrevia-se `(Bref - B) / 2` sem a verificar.
+             * Com diferença ímpar a divisão trunca em silêncio e o motor
+             * anunciava «são ISOMORFOS» com um transporte que não transporta.
+             *
+             * E o φ_t NÃO É UMA CONJUGAÇÃO --- dizê-lo era o erro do paper, e
+             * este comentário chegou a repeti-lo. Traço e determinante são
+             * invariantes de conjugação, pelo que B ≠ Bref exclui qualquer uma.
+             * O que φ_t faz é a MUDANÇA DE GERADOR, e ela tem testemunha: na
+             * base {1,α_j} a multiplicação por α_ref escreve-se M_j + tI, cuja
+             * cifra tem de ser (Bref, Cref). Calcula-se e confere-se. */
+            long dif = Bref - B;
+            if(dif % 2 != 0){
+                printf("nota: %c e %c têm o mesmo Δ = %ld mas B difere de %ld, que é ÍMPAR"
+                       " — a travessia NÃO se emite.\n",
+                       (char)('a'+primeira), (char)('a'+j), D, dif);
+                printf("      `thm:pandora(2)` pede B_P − B_Q no ideal (2), e neste anel o"
+                       " 2 não é unidade: a condição morde. Dividir na mesma truncaria, e o"
+                       " t truncado não transporta.\n");
+            }else{
+                long t = dif / 2;
+                /* a testemunha: cifra de M_j + tI, que TEM de ser (Bref, Cref) */
+                long tr = B + 2*t, de = t*t + t*B + C;
+                printf("nota: %c e %c são ISOMORFOS (Δ = %ld, distância 0) em bases diferentes "
+                       "— φ_t com t = %ld,\n", (char)('a'+primeira), (char)('a'+j), D, t);
+                printf("      EMITIDO no caminho do átomo como %s.\n",
+                       t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|");
+                if(tr == Bref && de == Cref)
+                    printf("      e CONFERIDO: M+tI tem cifra (%ld, %ld), que é a de %c —"
+                           " é mudança de GERADOR, não conjugação (essa preservaria o"
+                           " traço, e o traço muda).\n", tr, de, (char)('a'+primeira));
+                else
+                    printf("      MAS NÃO CONFERE: M+tI tem cifra (%ld, %ld) e a de %c é"
+                           " (%ld, %ld) — o t não transporta, e dizê-lo seria mentir.\n",
+                           tr, de, (char)('a'+primeira), Bref, Cref);
+            }
         }
     }
     return 1;

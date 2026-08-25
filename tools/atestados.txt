@@ -66,7 +66,7 @@ circuito f5f167a8cb27bdc8 0
 circuito_tradutor 07c8f27a16388254 0
 claim_control c928c471692d56d3 0
 claim_fronteira a090b5147aedc033 0
-claim_ir 8a09558f0a33a717 0
+claim_ir 0bd83c26d0ccba0c 0
 clifford_dual 9dc35b54aea9cbdf 0
 clifford_pleno 8861e58d2970553f 0
 cobertura cd2b4b081dfa3fc8 0
@@ -133,7 +133,7 @@ densidade c8594d52fd644c0b 0
 derivacao_primitivas 3d04c680af7012a7 0
 descida_mobius 35d55f28509bc55d 0
 desenha 5918033b43ea7382 0
-design f782a62b62cb35d7 0
+design 668f9e1eef0da4a6 0
 design_no_pdf 56c19bf7591a6b78 0
 diagonal 3e9007a09dd88e37 0
 dif bdaa45952a512e90 0
@@ -186,7 +186,7 @@ equivalencia_universal db7d0dc65a704ccf 0
 erg f7924762bf8868f7 0
 escada 52dc73c081e6fbec 0
 escala b5c334f9d5c62319 0
-escala_dourada 5c990fc76f6f0948 0
+escala_dourada bc24ef94c48301fa 0
 escala_espaco 26ed3534a655fc9d 0
 escuros 6bc3e85125c6c969 0
 espanhol_aranha 95ea513f8cba1bf5 0
@@ -217,7 +217,7 @@ fecho_convexo c990307f513c1d36 0
 fermat 493d7f99a09da8fa 0
 fisica b69674987d594da3 0
 fita 9c72ed8abcd5cbf7 0
-fonte_banco efabbe1b5817063b 0
+fonte_banco ddecbf15c38334f4 0
 fonte_corpo b71085ec1b3db094 0
 forca f3697bbcd4f53da2 0
 fractais 0cf9c29acdcb9409 0
@@ -230,7 +230,7 @@ gauss 3747dd377d17c971 0
 geometria_corpo 99c0472d0316ad9f 0
 geometria_real c10cab4d106c84c1 0
 geometrico e8868d7dfd7dacc7 0
-gerador 9346767fd30170fe 0
+gerador 14c9b30e99877f70 0
 gerador_analog 17b795aafe8e77f9 0
 gerador_andar 3bb26b73aa6e4b05 0
 gerador_primos dccf9257d62b61f2 0
@@ -374,7 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
-pgwire 11f8315cb400eb28 0
+pgwire 64e819951cc9f18e 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
 pi_rei 57834a9a1275f93b 0
@@ -421,7 +421,7 @@ recursao 268dd5df56bb546b 0
 rede_dual 441d23a4e0824dce 0
 reducao a55c5836822c89da 0
 refracao 7a6fe4d08af5aa96 0
-refs 077b1c42bcc1011b 0
+refs 21b2dfe678202ffa 0
 refuta feefc6499e4d89e0 0
 regua 273501d5d2f33deb 0
 regua_continua 02efe28cd3eea5d0 0
@@ -442,7 +442,7 @@ ribossomo 616faff37ba3f76f 0
 rn 285a2a8f53a81e4f 0
 robo 04522f17ecc47e02 0
 rotacao 6091fc46d4b601c4 0
-rotaciona fbdcddd468f66ecb 0
+rotaciona a779e413883e4bd6 0
 rotulos 28c554e2d4f0fbe9 0
 roupa 5278947011643752 0
 sair_pu a64d5e2b256b4dc8 0
@@ -464,7 +464,7 @@ sombra_cone 5e3a81a74d93d005 0
 sombras 4cdee1845f8c56fd 0
 spinor32 52cc87063065a82e 0
 spline 5fa4c5faf3ddbb4c 0
-sql a10a894ccfe17614 0
+sql 188ea3bd8b5a872f 0
 sshb b5b379cf1a3d89ff 0
 str2dbl_dual 7a67f5b0e1b47955 0
 superficie_tate 42631bd983dc985c 0
@@ -479,7 +479,7 @@ teoria_vetorial 4720f0890da571d2 0
 termica 311fcda857dacbf5 0
 tesseracto d5df0dc21b1a36b7 0
 tesserato_espiral c954b99bb3dadc01 0
-tex ebb7bb97f567d5be 0
+tex 4aae89297bd943b8 0
 tex_wasm acc91ca1832e4b32 0
 texto f0352367dab67a04 0
 tick_idioma 1acc77b18ee4dbf0 0
@@ -504,7 +504,7 @@ transfusao ab49fd9161221215 0
 travessia 4835d817045f4804 0
 tres_caminhos a4f168db5e3ef341 0
 tres_pontos e1a1eaeaa9f3db92 0
-tres_reconstroi a5c6c39b856c8fe4 0
+tres_reconstroi 1926bf6b90de731b 0
 tres_regimes b4e2bf6fca28994d 0
 triade c463a522292edbb0 0
 trialidade 641376c3e748e701 0

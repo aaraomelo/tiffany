@@ -1,3 +1,7 @@
+/* DEPENDE-DE: teoria.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* tres_reconstroi.c — TRES DE CADA LADO RECONSTROI OS MODOS. Testado na prosa.
  *
  * A afirmacao: uma de cada lado (𝒢 = ℱ∘ℒ) ja' resolve a funcao de onda; TRES de cada

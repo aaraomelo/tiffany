@@ -1,3 +1,7 @@
+/* DEPENDE-DE: banco/sql.c banco/pgwire.c
+ * O que este medidor LÊ entra na assinatura da bateria. Sem esta linha, mudar
+ * um destes ficheiros não reabre a semente: a bateria dá verde sobre um estado
+ * que já não existe — é a mesma razão dos headers, um andar acima. */
 /* pgwire.c — FEBE: Trios PG1–PG4 (frames, Simple, TCP, Extended Query).
  *
  * Referência: Postgres Protocol Message Formats — implementação Tiffany do zero.
@@ -30525,6 +30529,104 @@ int main(void){
            " haveria escolha a nomear. E nomeia-se: a saída diz por que régua ordenou, com"
            " o Δ e a classe, porque ordenar por uma régua sem a nomear é o mesmo defeito de"
            " ordenar pelos bits.", mal == 0);
+    }
+
+    /* ═══ §W213: A TRAVESSIA CONFERE-SE, E A CONDIÇÃO DO (2) NÃO MORDE ═════ */
+    {
+        int mal = 0;
+        printf("\n§W213 o t não se afirma: verifica-se — e a condição prova-se varrendo.\n\n");
+
+        /* ── O QUE ESTE BLOCO MEDE ───────────────────────────────────────────
+         *
+         * O `aranha thm:pandora(2)`, na forma corrigida, diz duas coisas que o
+         * motor escrevia sem verificar:
+         *
+         *  (a) A CONDIÇÃO é B_P − B_Q ∈ (2) — sobre como o DOIS se comporta no
+         *      anel, e não sobre «t ser inteiro», que nomeava uma realização.
+         *      O motor fazia `(Bref − B) / 2` sem a testar: com diferença ímpar
+         *      a divisão trunca em silêncio e anuncia-se «são ISOMORFOS» com um
+         *      transporte que não transporta.
+         *
+         *  (b) φ_t NÃO É UMA CONJUGAÇÃO — o paper dizia que «conjuga uma
+         *      companheira na outra», e traço e determinante são invariantes de
+         *      conjugação: B_P ≠ B_Q exclui qualquer uma. É MUDANÇA DE GERADOR,
+         *      α_P = α_Q + t, e tem testemunha: na base {1,α_Q} a multiplicação
+         *      por α_P é M_Q + tI, cuja cifra tem de ser (B_P, C_P).
+         *
+         * E há um terceiro ponto, que é o gume deste bloco: o ramo da condição
+         * NUNCA CORRE nos corpos desta casa. Isso não se supõe — VARRE-SE, e é
+         * a varredura que dá o direito de deixar o guarda escrito. */
+
+        { const long M = 40;                 /* m e t de −40 a 40 */
+          long pares = 0, impares = 0, testemunhas = 0, falhou = 0;
+          long AU = sql_corpo_aureo(), CR = sql_corpo_cristal();
+          long viu_cruzado = 0;
+          for(long i = -M; i <= M; i++) for(long fi = 0; fi < 2; fi++){
+            for(long j = -M; j <= M; j++) for(long fj = 0; fj < 2; fj++){
+              long Bp, Cp, Dp, Bq, Cq, Dq;
+              sql_corpo_cifra(fi ? CR : AU, i, &Bp, &Cp, &Dp);
+              sql_corpo_cifra(fj ? CR : AU, j, &Bq, &Cq, &Dq);
+              if(Dp != Dq) continue;                 /* só os de distância zero */
+              if(Bp == Bq) continue;                 /* nada a transportar */
+              { long dif = Bp - Bq;
+                if(dif % 2 != 0){ impares++; continue; }
+                pares++;
+                if(fi != fj) viu_cruzado++;          /* áureo contra cristalino */
+                { long t = dif / 2;
+                  long tr = Bq + 2*t, de = t*t + t*Bq + Cq;
+                  if(tr == Bp && de == Cp) testemunhas++; else falhou++; }
+              }
+            }
+          }
+          printf("      varridos os corpos de |m|,|t| ≤ %ld, os dois tipos:\n", M);
+          printf("        pares com Δ igual e B diferente : %ld\n", pares + impares);
+          printf("        com B_P − B_Q ÍMPAR             : %ld  ← a condição do (2)"
+                 " não morde nesta casa\n", impares);
+          printf("        testemunha M+tI = (B_P,C_P) OK  : %ld de %ld\n", testemunhas, pares);
+          printf("        e destes, ÁUREO contra CRISTALINO: %ld  ← o cruzado existe,"
+                 " logo a varredura não é vazia\n", viu_cruzado);
+          if(impares != 0) mal++;             /* a inalcançabilidade é o resultado */
+          if(falhou != 0) mal++;              /* e a testemunha fecha em TODOS */
+          if(pares < 100) mal++;              /* varredura não-vazia, e larga */
+          if(viu_cruzado == 0) mal++;         /* e que atravessa os dois tipos */
+        }
+
+        /* ── O CONTROLO: a testemunha SABE FALHAR ────────────────────────────
+         * Uma verificação que não pode dar errado não verifica nada. Move-se o
+         * t de um e exige-se que a cifra deixe de bater — se batesse na mesma, a
+         * linha acima estaria a medir a aritmética e não o transporte. */
+        { long Bq = 3, Cq = 1, Bp = 1, Cp = -1;      /* CRISTALINO(3) → AUREO(1) */
+          long t = (Bp - Bq) / 2;
+          long tr_ok = Bq + 2*t,     de_ok = t*t + t*Bq + Cq;
+          long tr_no = Bq + 2*(t+1), de_no = (t+1)*(t+1) + (t+1)*Bq + Cq;
+          printf("      controlo: t = %ld dá cifra (%ld,%ld) — a de AUREO(1) é (%ld,%ld):"
+                 " %s\n", t, tr_ok, de_ok, Bp, Cp,
+                 (tr_ok == Bp && de_ok == Cp) ? "bate" : "NÃO BATE");
+          printf("                t+1 = %ld dá (%ld,%ld): %s ← a testemunha sabe falhar\n",
+                 t+1, tr_no, de_no,
+                 (tr_no == Bp && de_no == Cp) ? "AINDA BATE (é vazia!)" : "não bate");
+          if(!(tr_ok == Bp && de_ok == Cp)) mal++;
+          if(tr_no == Bp && de_no == Cp) mal++;      /* o gume */
+        }
+
+        ok("A TRAVESSIA CONFERE-SE, E A CONDIÇÃO DO (2) NÃO MORDE NESTA CASA. O"
+           " `thm:pandora(2)` dizia «t = (B_P−B_Q)/2 é inteiro» e que φ_t «conjuga uma"
+           " companheira na outra» — e as duas coisas estavam mal. A condição é"
+           " B_P − B_Q ∈ (2), sobre como o DOIS se comporta no anel e não sobre um"
+           " conjunto numérico; e φ_t NÃO conjuga, porque traço e determinante são"
+           " invariantes de conjugação e B_P ≠ B_Q exclui qualquer uma. É mudança de"
+           " GERADOR, α_P = α_Q + t, e tem testemunha: M_Q + tI tem de ter cifra"
+           " (B_P, C_P). O motor fazia a divisão sem testar a condição — com diferença"
+           " ímpar truncaria e anunciaria «são ISOMORFOS» com um transporte que não"
+           " transporta. Agora testa, e confere a testemunha em vez de a afirmar. E o"
+           " ramo da condição NUNCA CORRE nesta casa: isso não se supõe, VARRE-SE — em"
+           " todos os pares de corpos com |m|,|t| ≤ 40 e Δ igual, a diferença é SEMPRE"
+           " par e a testemunha fecha em TODOS, incluindo os cruzados (áureo contra"
+           " cristalino), que é o que impede a varredura de ser vazia. É essa varredura"
+           " que dá o direito de deixar o guarda escrito: ele é para o anel, não para os"
+           " corpos de hoje. E o controlo move o t de um para exigir que a cifra deixe"
+           " de bater — uma verificação que não pode falhar não verifica nada.",
+           mal == 0);
     }
 
     printf("\n=== %d asserções, %d falhas ===\n", unidades, falhas);

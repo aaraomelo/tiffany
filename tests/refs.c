@@ -1,3 +1,7 @@
+/* DEPENDE-DE: papers/*.tex teoria.tex catalogo.tex enredo.tex
+ * O que este medidor LÊ entra na assinatura da bateria. Sem esta linha, mudar
+ * um destes ficheiros não reabre a semente: a bateria dá verde sobre um estado
+ * que já não existe — é a mesma razão dos headers, um andar acima. */
 /* refs.c — A REFERÊNCIA ÓRFÃ NÃO FALHA A COMPILAÇÃO: IMPRIME "??" E SEGUE.
  *
  * Em 03/08/2026 descobriu-se que `obs:ouro5` era citada QUATRO vezes no catálogo e o
@@ -803,6 +807,76 @@ int main(void)
                " «zero comidas» seria indistinguível de um extractor que não lê"
                " literal nenhum", viu == 5);
         }
+    }
+
+    /* ------- §R8 — o que o medidor LÊ tem de entrar na sua assinatura ------- */
+    printf("\n§R8 quem lê um documento declara-o: senão a bateria atesta um estado morto\n");
+    {
+        /* ── O BURACO, E COMO SE VIU ─────────────────────────────────────────
+         *
+         * A assinatura de um medidor na `tools/bateria.sh` era o FONTE mais os
+         * HEADERS (por `cc -MM`). Os FICHEIROS QUE ELE LÊ não entravam. Este
+         * medidor lê `papers/*.tex`, e portanto: dupliquei 124 linhas do
+         * `aranha.tex` --- dois `\label` repetidos, que é exactamente o que o
+         * §R2 existe para apanhar --- e a bateria respondeu «537 verdes», com o
+         * atestado deste medidor de três horas antes. Verde sobre um estado que
+         * já não existe, que é o que a atestação existe para impedir.
+         *
+         * O comentário da própria `assinatura()` já contava esta história uma
+         * vez, para os headers: «a bateria dava verde sobre resultados derivados
+         * de uma lib que já não existia». O mesmo buraco, um andar ao lado.
+         *
+         * A dependência declara-se NO MEDIDOR (linha `DEPENDE-DE:`) e não numa
+         * lista na bateria --- pela mesma razão do `cc -MM`: quem sabe de que
+         * dados um medidor depende é o medidor, e uma lista na bateria envelhece
+         * calada. Aqui verifica-se que a declaração existe onde é precisa. */
+        static const char *LEEM[] = {          /* medidores que lêem documentos */
+            "refs.c", "claim_ir.c", "design.c", "escala_dourada.c", "fonte_banco.c",
+            "gerador.c", "rotaciona.c", "tex.c", "tex_core.c", "tres_reconstroi.c",
+            "pgwire.c"
+        };
+        const int NL = (int)(sizeof LEEM / sizeof LEEM[0]);
+        int sem_decl = 0, com_decl = 0, nao_abriu = 0;
+        for (int i = 0; i < NL; i++) {
+            char cam[512]; FILE *f = NULL;
+            { static const char *PRE[] = { "", "../", "./" };
+              for (int p = 0; p < 3 && !f; p++) {
+                  snprintf(cam, sizeof cam, "%stests/%s", PRE[p], LEEM[i]);
+                  f = fopen(cam, "r");
+              } }
+            if (!f) { nao_abriu++; continue; }
+            { char lin[1024]; int viu = 0, n = 0;
+              while (n++ < 40 && fgets(lin, sizeof lin, f)) if (strstr(lin, "DEPENDE-DE:")) viu = 1;
+              fclose(f);
+              if (viu) com_decl++;
+              else { sem_decl++; printf("      SEM DECLARAÇÃO  tests/%s\n", LEEM[i]); } }
+        }
+        printf("      %d de %d medidores que lêem documentos declaram DEPENDE-DE"
+               " (%d não abriram)\n", com_decl, NL, nao_abriu);
+        ok("todo medidor que lê um documento declara-o — sem isso a bateria atesta"
+           " um estado que já não existe", sem_decl == 0 && nao_abriu == 0);
+
+        /* ── O CONTROLO: a lógica SABE ver a falta ───────────────────────────
+         * Um extractor que não lesse nada daria «0 sem declaração» e passaria.
+         * Corre-se a MESMA lógica sobre um medidor que não lê documento nenhum
+         * e portanto não declara — e exige-se que ela o veja como não-declarado.
+         * Sem isto, este bloco não distinguiria «todos declaram» de «não li um
+         * único ficheiro». */
+        { const char *SEM = "trio.c";          /* não lê documento, não declara */
+          char cam[512]; FILE *f = NULL; int viu = 0, achou = 0;
+          { static const char *PRE[] = { "", "../", "./" };
+            for (int p = 0; p < 3 && !f; p++) {
+                snprintf(cam, sizeof cam, "%stests/%s", PRE[p], SEM);
+                f = fopen(cam, "r");
+            } }
+          if (f) { char lin[1024]; int n = 0; achou = 1;
+                   while (n++ < 40 && fgets(lin, sizeof lin, f)) if (strstr(lin, "DEPENDE-DE:")) viu = 1;
+                   fclose(f); }
+          printf("      CONTROLO — `%s` não lê documento e não declara: a lógica vê"
+                 " declaração? %s\n", SEM, viu ? "SIM (é vazia!)" : "não");
+          ok("e a lógica do §R8 SABE ver a ausência — senão «todos declaram» seria"
+             " indistinguível de um extractor que não lê ficheiro nenhum",
+             achou && !viu); }
     }
 
     printf("\n================================================================\n");

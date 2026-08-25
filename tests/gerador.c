@@ -1,3 +1,7 @@
+/* DEPENDE-DE: teoria.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* gerador.c — O GERADOR GLOBAL: a constante que vai escrita, e por que ela vai escrita.
  *
  * O enredo (§197.2, §199.6) fixa a construção, e ela não é uma escolha de gosto:

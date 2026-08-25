@@ -1,3 +1,7 @@
+/* DEPENDE-DE: catalogo.tex enredo.tex teoria.tex papers/arquitetura.tex papers/corpo_analitico.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* fonte_banco.c — A FONTE DO DOCUMENTO ENTRA NO BANCO, E SAI INTEIRA.
  *
  * O Aarao: «o pdf entra no banco e e' renderizado na hora» · «quando clica renderiza em

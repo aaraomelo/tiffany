@@ -1,3 +1,7 @@
+/* DEPENDE-DE: livro.tex papers/estilo.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* tex.c --- O WRAPPER NATIVO do tradutor. O NUCLEO (a composicao, sem libc) esta em
  * tex_core.c, que sobe para wasm pelo tools/traduz.c. Este ficheiro e o lado NATIVO:
  * inclui o nucleo e junta as ferramentas de plataforma (a volta, os escritores de PDF

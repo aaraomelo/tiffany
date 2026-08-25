@@ -1,3 +1,7 @@
+/* DEPENDE-DE: teoria.tex
+ * O que este medidor LÊ entra na assinatura da bateria — sem isto, mudar um
+ * destes ficheiros não reabre a semente, e o verde é sobre um estado que já
+ * não existe. Mesma razão dos headers, um andar acima. */
 /* rotaciona.c — ROTACIONA um polinômio pelo GATO, DESROTACIONA pelo ESQUILO. Ida e volta.
  *
  * Um polinômio é um dado: δ = Σ dᵢ σⁱ em Rⁿ = ℤ_p[x]/(x^n − m x^{n−1} − 1). Rotacioná-lo é o gato,
