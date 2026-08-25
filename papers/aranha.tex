@@ -2209,8 +2209,9 @@ possibilidades esgotam:
 \end{teorema}
 
 \begin{proof}
-$\Delta$ é inteiro porque $\operatorname{tr}$ e $\det$ o são, e a tricotomia dos
-inteiros esgota. Se $\Delta<0$ as raízes são conjugadas de módulo
+$\Delta$ é inteiro porque $\operatorname{tr}$ e $\det$ o são, e a tricotomia
+\emph{da ordem} esgota --- é a ordem, e não a inteireza, que dá as três
+possibilidades, e o Cor.~\ref{cor:borda} usa essa distinção. Se $\Delta<0$ as raízes são conjugadas de módulo
 $\sqrt{\lvert\det\rvert}=1$, logo raízes da unidade, e o Lema~\ref{lem:cristal}
 dá a ordem em $\{1,2,3,4,6\}$; as ordens $1$ e $2$ ficam de fora porque $A=\pm I$
 tem $\Delta=0$ e uma involução com $A\neq\pm I$ tem $\operatorname{tr}=0$ e
@@ -2263,60 +2264,7 @@ alguma coisa. \emph{Nenhuma delas precisa de um conjunto numérico concreto}, e
 onde este texto escreveu «inteiro» estava a nomear uma realização em vez da
 hipótese --- o que se corrige abaixo, no sítio onde acontecia.
 
-\begin{definicao}[a distância entre espelhos]\label{def:pandora}
-Para $P,Q\in\mathcal{P}(A)$ com $A$ ordenado,
-\[
-d_{\mathcal{P}}(P,Q)=\bigl\lvert\Delta(P)-\Delta(Q)\bigr\rvert .
-\]
-O \emph{núcleo} $d_{\mathcal{P}}=0\iff\Delta(P)=\Delta(Q)$ não usa a ordem e vale
-em qualquer $A$; é ele --- e não o valor --- que a recusa da cláusula~(3) precisa.
-\end{definicao}
-
-\medskip\noindent\textbf{E a caixa tem DUAS réguas, como a §\ref{sec:leitura} já
-dizia do percurso.} A $d_{\mathcal{P}}$ acima é a \emph{aritmética}, e é métrica
---- mas \textbf{não é ultramétrica}: com $\Delta=20,13,8$ vem
-$d_{\mathcal{P}}(20,8)=12$ contra $\max\{7,5\}=7$. A ultramétrica da caixa é a da
-Def.~\ref{def:arvore} lida sobre os mesmos $\Delta$,
-\[
-d_{\mathrm{u}}(P,Q)=2^{-\operatorname{prof}(\Delta(P),\Delta(Q))},
-\]
-e essa cumpre o Lema~\ref{lem:ultra} --- no mesmo triplo,
-$d_{\mathrm{u}}(20,8)=\max\{d_{\mathrm{u}}(20,13),d_{\mathrm{u}}(13,8)\}$, com
-igualdade. \emph{As duas são réguas do mesmo objeto}, e a diferença entre elas
-não é de precisão: é de \textbf{alcance}.
-
-\medskip\noindent\textbf{A ultramétrica é GLOBAL; a aritmética é LOCAL, do
-corpo.} É esta a leitura das duas, e cada palavra tem conteúdo verificável:
-\begin{center}\footnotesize
-\begin{tabular}{@{}lll@{}}
-\toprule
- & $d_{\mathcal{P}}=\lvert\Delta_P-\Delta_Q\rvert$ & $d_{\mathrm{u}}=2^{-\operatorname{prof}}$ \\
-\midrule
-alcance & \textbf{local}: entre dois corpos & \textbf{global}: sobre a caixa toda \\
-num percurso & \textbf{acumula} (triangular) & \textbf{absorve} (Teor.~\ref{thm:navega}) \\
-o que dá & \emph{quanto} falta --- a recusa & a \textbf{partição} (Teor.~\ref{thm:bolas}) \\
-onde se usa & dentro de uma vizinhança & para navegar entre classes \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent A aritmética obedece à desigualdade \emph{triangular} e mais nada:
-somar os passos de um percurso pode dar muito mais do que a distância entre as
-pontas, e é por isso que ela não serve para medir uma travessia --- serve para
-medir um \emph{salto}. A ultramétrica obedece ao Lema~\ref{lem:ultra}, e o
-Teor.~\ref{thm:navega} tira daí a consequência global: \emph{uma cadeia de $L$
-travessias tem o custo do seu pior passo, qualquer que seja $L$}. Uma acumula ao
-longo do caminho; a outra não vê o caminho, só o pior degrau dele.
-
-\medskip\noindent\textbf{E é por isso que a recusa pode usar a local.} O que a
-recusa do Teor.~\ref{thm:pandora}(3) precisa é de um número que se anule
-exatamente quando há travessia --- e nisso as duas concordam,
-$d_{\mathcal{P}}=0\iff d_{\mathrm{u}}=0$, porque ambas anulam em
-$\Delta(P)=\Delta(Q)$. \emph{Reportar} a distância é um gesto local, entre as
-duas colunas que a consulta citou; \emph{navegar} pela caixa não é, e aí a régua
-tem de ser a outra.
-
-\medskip\noindent\textbf{E o que ainda se herda, dito em vez de escondido.} A
+\medskip\noindent\textbf{O que ainda se herda, dito em vez de escondido.} A
 caixa deixou de nomear um conjunto numérico, mas apoia-se no
 Teor.~\ref{thm:leidisc}, que está enunciado \emph{sobre matrizes de entradas
 inteiras}. Nem toda essa âncora é da mesma natureza, e vale distinguir:
@@ -2332,10 +2280,54 @@ inteiras}. Nem toda essa âncora é da mesma natureza, e vale distinguir:
 \noindent A caixa não precisa de nenhuma das duas para existir; precisa da ordem
 para a tricotomia, e é essa a hipótese que a Def.~\ref{def:pandora} nomeia.
 
-\medskip\noindent\textbf{E as medidas abaixo são realizações, não a teoria.}
-Correm todas com $A$ tomado no segundo degrau, porque é o que a máquina tem ---
-mas nenhuma cláusula acima o pede, e trocar $A$ por outro anel ordenado onde $2$
-não seja unidade muda os números e não muda um enunciado.
+\begin{definicao}[a distância entre espelhos]\label{def:pandora}
+Para $P,Q\in\mathcal{P}(A)$ com $A$ ordenado,
+\[
+d_{\mathcal{P}}(P,Q)=\bigl\lvert\Delta(P)-\Delta(Q)\bigr\rvert .
+\]
+O \emph{núcleo} $d_{\mathcal{P}}=0\iff\Delta(P)=\Delta(Q)$ não usa a ordem e vale
+em qualquer $A$; é ele --- e não o valor --- que a recusa da cláusula~(3) precisa.
+\end{definicao}
+
+\medskip\noindent\textbf{A caixa tem duas réguas, e elas não são intermutáveis.}
+A $d_{\mathcal{P}}$ da Def.~\ref{def:pandora} é métrica mas \textbf{não é
+ultramétrica}: com $\Delta=20,13,8$ vem $d_{\mathcal{P}}(20,8)=12$ contra
+$\max\{7,5\}=7$. A ultramétrica da caixa é a da Def.~\ref{def:arvore} lida sobre
+os mesmos $\Delta$,
+\[
+d_{\mathrm{u}}(P,Q)=2^{-\operatorname{prof}(\Delta(P),\Delta(Q))},
+\]
+e essa cumpre o Lema~\ref{lem:ultra} --- no mesmo triplo com igualdade. A
+diferença entre as duas não é de precisão: é de \textbf{alcance}.
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & $d_{\mathcal{P}}=\lvert\Delta_P-\Delta_Q\rvert$ & $d_{\mathrm{u}}=2^{-\operatorname{prof}}$ \\
+\midrule
+alcance & \textbf{local}: entre dois corpos & \textbf{global}: sobre a caixa toda \\
+num percurso & \textbf{acumula} (triangular) & \textbf{absorve} (Teor.~\ref{thm:navega}) \\
+o que dá & \emph{quanto} falta --- a recusa & a \textbf{partição} (Teor.~\ref{thm:bolas}) \\
+onde se usa & dentro de uma vizinhança & para navegar entre classes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A aritmética obedece à triangular e mais nada: somar os passos de um
+percurso pode dar muito mais do que a distância entre as pontas, pelo que ela
+mede um \emph{salto} e não uma travessia. A ultramétrica obedece ao
+Lema~\ref{lem:ultra}, e o Teor.~\ref{thm:navega} tira daí a consequência global
+--- \emph{uma cadeia de $L$ travessias custa o seu pior passo, qualquer que seja
+$L$}. Uma vê o caminho; a outra só o pior degrau dele.
+
+\noindent \emph{A recusa pode usar a local} porque o que o
+Teor.~\ref{thm:pandora}(3) precisa é de um número que se anule exactamente quando
+há travessia, e nisso as duas concordam: $d_{\mathcal{P}}=0\iff d_{\mathrm{u}}=0$,
+ambas em $\Delta(P)=\Delta(Q)$. Reportar é local, entre as duas colunas que a
+consulta citou; navegar não é.
+
+\medskip\noindent\textbf{As medidas são realizações, não a teoria.} Correm todas
+com $A$ no segundo degrau, porque é o que a máquina tem; nenhuma cláusula acima o
+pede, e trocar $A$ por outro anel ordenado muda os números e não muda um enunciado.
 
 \medido{\code{tests/pgwire.c} \S W211, contra \code{sql\_esp\_dist} e
 \code{sql\_esp\_prof}. Sobre os $26^3=17576$ triplos dos espelhos de
@@ -2347,13 +2339,9 @@ directa de $\mathbf{1}$, enquanto a global mede $2^{-31}$ entre as pontas contra
 um pior passo de $2^{0}$: a cadeia inteira cabe folgadamente no seu pior degrau.
 Exige-se o \emph{par} --- que a soma exceda a directa e que a profundidade
 directa não desça abaixo da pior do caminho ---, porque só uma das duas metades
-não distinguiria as réguas.}
-
-\medido{Sobre os dezoito espelhos de $\lvert m\rvert,\lvert t\rvert\le4$ --- os
-$5832$ triplos ---, a aritmética viola $d(x,z)\le\max$ em $1264$ deles e a
-ultramétrica em \textbf{zero}. A primeira escrita desta subsecção chamou
+não distinguiria as réguas. \emph{A primeira escrita desta subsecção chamou
 ``distância'' à aritmética sem verificar qual das duas desigualdades ela cumpria;
-a medida separou-as.}
+foi a medida que as separou.}}
 
 \begin{teorema}[o que a caixa separa, e o que ela liga]\label{thm:pandora}
 Com a Def.~\ref{def:pandora}:
@@ -2442,7 +2430,8 @@ $\{3,4,6\}$ é exatamente o que reflete em vez de rodar». A régua ultramétric
 encontra essa fronteira no \textbf{primeiro} bit, sem que ninguém lha tenha
 dito.
 
-\medido{Sobre os vinte e seis espelhos de $\lvert m\rvert,\lvert t\rvert\le6$ ---
+\medido{\code{tests/pgwire.c} \S W211, o mesmo bloco. Sobre os vinte e seis
+espelhos de $\lvert m\rvert,\lvert t\rvert\le6$ ---
 três elípticos e vinte e três não ---, as três condições verificam-se: dois
 elípticos nunca divergem no bit $0$; dois não-elípticos também não; e um de cada
 lado divergem \emph{sempre} nele. A recíproca ingénua --- «mesma bola $\iff$
@@ -2450,40 +2439,6 @@ mesma classe» --- falha em $84$ dos $676$ pares, e as falhas são \textbf{todas
 com $\Delta=0$: $\Delta=40$ e $\Delta=0$ estão na mesma bola de raio $1$ e são de
 classes diferentes. Foi a medida que separou a afirmação verdadeira da falsa.}
 
-\medskip\noindent\textbf{E a mesma separação decide o que se pode ordenar.} Uma
-árvore de prefixos ordena pelos \emph{bits} do endereço --- é a ultramétrica do
-Lema~\ref{lem:ultra}, e é global. A ordem de $a+b\sigma$ \emph{como valor} é
-arquimediana, e é local ao corpo. \emph{Não são a mesma régua, e nenhuma descida
-por prefixo dá a segunda}: ordenar por valor é ordenar por \textbf{comparação}. Um
-motor que tenha só a árvore e ordene com ela devolve a lexicográfica de $(a,b)$
-com a cara da ordem pedida --- e é exactamente a caixa aberta.
-
-\noindent Mas a saída não é recusar. \emph{O que distingue um corpo de outro é a
-sua régua}, e a régua é a forma $q(a,b)=a^{2}+Bab+Cb^{2}$ --- a norma, cuja
-assinatura $B^{2}-4C$ \textbf{é} o $\Delta$ da Def.~\ref{def:pandora}. Ela dá um
-\emph{número}, e um número a árvore ordena; e ela \textbf{compõe as três
-classes}, sem despachar por nenhuma: a mesma descida serve o elíptico e o
-hiperbólico sem uma linha diferente, que é o que a §\ref{sec:realizacoes} pede.
-É a régua que ordena, e não os bits.
-
-\noindent \emph{E ela não é o valor.} A norma mede \textbf{tamanho} e não
-posição: no elíptico é a única régua que há, e no hiperbólico dá uma ordem
-distinta da de $a+b\sigma$. Por isso a única coisa que resta é \textbf{nomeá-la}
---- ordenar por uma régua sem dizer qual é o mesmo defeito de ordenar pelos bits,
-com outra cara. O que se recusa continua a ser a \textbf{travessia} entre corpos
-de $\Delta$ diferente (Teor.~\ref{thm:pandora}(3)); um corpo sozinho nunca se
-recusa, porque nele não há nada a atravessar.
-
-\medido{\code{tests/pgwire.c} \S W212, contra \code{sql\_au\_cmp}. Sobre
-$\{2+0\sigma,\,1+1\sigma,\,3-1\sigma\}$ os bits davam a \textbf{inversa} do valor
---- dois dos três postos discordam, e o do meio fica porque uma inversão de três
-o fixa. A primeira correcção escrita foi \emph{recusar}, e ela derrubou dois
-medidores verdes que dizem a lei da casa: «a consulta dentro de uma coluna passa»
-e «o sistema não recusa nem despacha por classe». A régua já existia e não fora
-procurada. Com ela, a mesma descida devolve $1{+}1\sigma,\,2,\,3{-}1\sigma$
-(normas $1,4,5$) e $0{+}1\omega,\,3,\,1{+}3\omega$ (normas $1,9,10$) --- e o
-bloco exige que a norma \emph{não} coincida com o valor, senão não haveria
-escolha a nomear.}
 \subsection*{A borda: onde a régua colapsa numa forma linear}
 
 \noindent A régua $q(a,b)=a^{2}+Bab+Cb^{2}$ é \textbf{multiplicativa} ---
@@ -2541,6 +2496,81 @@ exactamente, e o controlo exige que em \code{AUREO(1)} ($\Delta=5$) \emph{nenhum
 par inteiro $(p,q')$ satisfaça as duas --- senão «a borda resolve» não se
 distinguiria de «tudo resolve».}
 
+\medskip\noindent\textbf{E a borda $\Delta=4$ já tinha nome nesta obra: é o
+espelho $\nu$.} A tríade do Teor.~\ref{thm:leidisc} distingue o que \emph{roda}
+do que \emph{reflete}, e a testemunha da reflexão é
+$S=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, de traço $0$ e
+$\det=-1$ --- \emph{cifra $(0,-1)$, que é exactamente a de} \code{AUREO(0)}. Não
+são dois objectos parecidos: são o mesmo elemento da caixa, e a obra dizia-o em
+dois sítios sem os ligar.
+
+\noindent E daí sai a \emph{razão} de a régua factorizar ali, que o
+Cor.~\ref{cor:borda} prova mas não explica. Com $m=0$ a borda $\sigma^{2}=m\sigma+1$
+dá $\sigma^{2}=1$: uma \textbf{involução}. Uma involução tem valores próprios
+$\pm1$ e diagonaliza \emph{sobre o próprio anel} --- e diagonalizar uma forma
+\textbf{é} factorizá-la. As duas rectas $a+b=0$ e $a-b=0$ do
+Cor.~\ref{cor:borda} não são um artefacto da conta: são os \textbf{eixos
+próprios} de $\nu$, com $\nu(1,1)=(1,1)$ e $\nu(1,-1)=-(1,-1)$.
+\emph{Reflectir é ser a própria inversa, e é isso que a factorização exprime.}
+
+\medskip\noindent\textbf{E a ponte entre as duas progressões já está construída:
+é a AGM.} A §\ref{sec:objeto} formaliza o par $(a,b)\mapsto(m,g)$ com
+$m=\tfrac{a+b}{2}$ --- a média \emph{aritmética} --- e $g=\sqrt{ab}$ --- a
+\emph{geométrica} ---, e o Teor.~\ref{thm:duas} diz o que ele custa: \emph{uma
+face endereça, duas produzem}. É literalmente a ponte PA$\leftrightarrow$PG que
+falta ao avaliador, e a borda lê-se nas suas coordenadas. Com
+$\delta=\tfrac{a-b}{2}$, a identidade que o \code{meio.c} §M8 mede,
+\[
+g^{2}=ab=m^{2}-\delta^{2}=(m+\delta)(m-\delta),
+\]
+\emph{é} a diferença de quadrados, e $(m+\delta,\,m-\delta)$ é o par de partida:
+não é uma conta, é a mesma igualdade escrita ao contrário. Daí as duas bordas
+saem em forma fechada:
+\[
+\Delta=0:\ q=(2m)^{2}
+\qquad\qquad
+\Delta=4:\ q=4\,m\,\delta .
+\]
+\emph{A classe parabólica usa só a face aritmética; a borda hiperbólica usa as
+duas.} É a dicotomia do Teor.~\ref{thm:duas}(4) --- uma composição não chega ---
+lida na caixa: onde basta uma face, a régua é linear e a máquina aditiva
+alcança-a; onde são precisas as duas, ela é o produto delas e só o \emph{sinal}
+se decide sem multiplicar.
+
+\medskip\noindent\textbf{E a mesma separação decide o que se pode ordenar.} Uma
+árvore de prefixos ordena pelos \emph{bits} do endereço --- é a ultramétrica do
+Lema~\ref{lem:ultra}, e é global. A ordem de $a+b\sigma$ \emph{como valor} é
+arquimediana, e é local ao corpo. \emph{Não são a mesma régua, e nenhuma descida
+por prefixo dá a segunda}: ordenar por valor é ordenar por \textbf{comparação}. Um
+motor que tenha só a árvore e ordene com ela devolve a lexicográfica de $(a,b)$
+com a cara da ordem pedida --- e é exactamente a caixa aberta.
+
+\noindent Mas a saída não é recusar. \emph{O que distingue um corpo de outro é a
+sua régua}, e a régua é a forma $q(a,b)=a^{2}+Bab+Cb^{2}$ --- a norma, cuja
+assinatura $B^{2}-4C$ \textbf{é} o $\Delta$ da Def.~\ref{def:pandora}. Ela dá um
+\emph{número}, e um número a árvore ordena; e ela \textbf{compõe as três
+classes}, sem despachar por nenhuma: a mesma descida serve o elíptico e o
+hiperbólico sem uma linha diferente, que é o que a §\ref{sec:realizacoes} pede.
+É a régua que ordena, e não os bits.
+
+\noindent \emph{E ela não é o valor.} A norma mede \textbf{tamanho} e não
+posição: no elíptico é a única régua que há, e no hiperbólico dá uma ordem
+distinta da de $a+b\sigma$. Por isso a única coisa que resta é \textbf{nomeá-la}
+--- ordenar por uma régua sem dizer qual é o mesmo defeito de ordenar pelos bits,
+com outra cara. O que se recusa continua a ser a \textbf{travessia} entre corpos
+de $\Delta$ diferente (Teor.~\ref{thm:pandora}(3)); um corpo sozinho nunca se
+recusa, porque nele não há nada a atravessar.
+
+\medido{\code{tests/pgwire.c} \S W212, contra \code{sql\_au\_cmp}. Sobre
+$\{2+0\sigma,\,1+1\sigma,\,3-1\sigma\}$ os bits davam a \textbf{inversa} do valor
+--- dois dos três postos discordam, e o do meio fica porque uma inversão de três
+o fixa. A primeira correcção escrita foi \emph{recusar}, e ela derrubou dois
+medidores verdes que dizem a lei da casa: «a consulta dentro de uma coluna passa»
+e «o sistema não recusa nem despacha por classe». A régua já existia e não fora
+procurada. Com ela, a mesma descida devolve $1{+}1\sigma,\,2,\,3{-}1\sigma$
+(normas $1,4,5$) e $0{+}1\omega,\,3,\,1{+}3\omega$ (normas $1,9,10$) --- e o
+bloco exige que a norma \emph{não} coincida com o valor, senão não haveria
+escolha a nomear.}
 \medskip\noindent\textbf{E é daqui que vem o nome.} Abrir a caixa é misturar os
 espelhos: comparar através de dois com $\Delta$ diferente devolve sempre
 \emph{algum} número, e esse número não é sobre objeto nenhum. O que sai da caixa

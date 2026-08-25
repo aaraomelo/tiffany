@@ -30717,6 +30717,45 @@ int main(void){
           if(!bate) mal++;
         }
 
+        /* (4) A BORDA Δ=4 JÁ TINHA NOME: É O ESPELHO ν DA TRÍADE.
+         *
+         * A testemunha da reflexão é S = [[0,1],[1,0]], de traço 0 e det −1 ---
+         * cifra (0,−1), que é EXACTAMENTE a de AUREO(0). Não são dois objectos
+         * parecidos: são o mesmo elemento da caixa, e a obra dizia-o em dois
+         * sítios sem os ligar.
+         *
+         * E daí sai a RAZÃO de a régua factorizar ali. Com m=0 a borda σ²=mσ+1
+         * dá σ²=1: uma INVOLUÇÃO. Uma involução tem valores próprios ±1 e
+         * diagonaliza sobre o próprio anel --- e diagonalizar uma forma É
+         * factorizá-la. As duas rectas a+b=0 e a−b=0 são os EIXOS PRÓPRIOS. */
+        { long B, C, D;
+          sql_corpo_cifra(sql_corpo_aureo(), 0, &B, &C, &D);
+          printf("      ν = [[0,1],[1,0]]: traço 0, det −1, Δ = 4\n");
+          printf("      AUREO(0) pela porta: B = %ld, C = %ld, Δ = %ld  → %s\n",
+                 B, C, D, (B == 0 && C == -1 && D == 4) ? "A MESMA CIFRA" : "DIFERENTE");
+          if(B != 0 || C != -1 || D != 4) mal++;
+          /* ν² = id, e os eixos próprios são as duas rectas da factorização */
+          { long S[2][2] = {{0,1},{1,0}}, S2[2][2];
+            for(int i = 0; i < 2; i++) for(int j = 0; j < 2; j++)
+                S2[i][j] = S[i][0]*S[0][j] + S[i][1]*S[1][j];
+            printf("      ν² = [[%ld,%ld],[%ld,%ld]] → %s\n",
+                   S2[0][0],S2[0][1],S2[1][0],S2[1][1],
+                   (S2[0][0]==1&&S2[0][1]==0&&S2[1][0]==0&&S2[1][1]==1)
+                     ? "é a identidade: INVOLUÇÃO" : "NÃO é a identidade");
+            if(S2[0][0]!=1||S2[0][1]!=0||S2[1][0]!=0||S2[1][1]!=1) mal++;
+            { static const long V[2][2] = {{1,1},{1,-1}};
+              static const long LAM[2] = {1,-1};
+              int eixos = 1;
+              for(int k = 0; k < 2; k++){
+                  long w0 = S[0][0]*V[k][0] + S[0][1]*V[k][1];
+                  long w1 = S[1][0]*V[k][0] + S[1][1]*V[k][1];
+                  if(w0 != LAM[k]*V[k][0] || w1 != LAM[k]*V[k][1]) eixos = 0;
+              }
+              printf("      e (1,1)→+1·(1,1), (1,−1)→−1·(1,−1): as rectas a±b=0 são os"
+                     " EIXOS PRÓPRIOS → %s\n", eixos ? "sim" : "NÃO");
+              if(!eixos) mal++; } }
+        }
+
         /* ── O CONTROLO: fora da borda NÃO há factorização ───────────────────
          * Sem isto, «a borda resolve» não se distinguiria de «tudo resolve». Em
          * AUREO(1) (Δ=5) exige-se que NENHUM par (p,q) inteiro dê p+q=1, p·q=−1. */
@@ -30745,7 +30784,17 @@ int main(void){
            " lineares e um AND. É o corte: as duas rectas partem o plano e q tem sinal"
            " constante em cada parte. O controlo exige que fora da borda NÃO haja"
            " factorização — em AUREO(1), Δ=5, nenhum par inteiro (p,q) dá p+q=1 e"
-           " p·q=−1 —, senão «a borda resolve» não se distinguiria de «tudo resolve».",
+           " p·q=−1 —, senão «a borda resolve» não se distinguiria de «tudo resolve». E A BORDA Δ=4 JÁ"
+           " TINHA NOME NESTA OBRA: é o espelho ν da tríade, cuja testemunha S = [[0,1],[1,0]]"
+           " tem traço 0 e det −1 — cifra (0,−1), EXACTAMENTE a de AUREO(0), verificada pela"
+           " porta. Não são dois objectos parecidos: são o mesmo elemento da caixa, e a obra"
+           " dizia-o em dois sítios sem os ligar. E daí sai a RAZÃO de a régua factorizar"
+           " ali, que o corolário prova mas não explica: com m=0 vem σ²=1, uma INVOLUÇÃO;"
+           " uma involução tem valores próprios ±1 e diagonaliza sobre o próprio anel, e"
+           " diagonalizar uma forma É factorizá-la. As duas rectas a+b=0 e a−b=0 não são"
+           " artefacto da conta — são os EIXOS PRÓPRIOS de ν, medidos aqui: ν²=id,"
+           " ν(1,1)=+(1,1) e ν(1,−1)=−(1,−1). Reflectir é ser a própria inversa, e é isso"
+           " que a factorização exprime.",
            mal == 0);
     }
 
