@@ -1739,14 +1739,14 @@ v(\sigma^{\dagger})=h(\sigma),
 \]
 --- \emph{a troca cruzada da Def.~\ref{fis:def:duomorf} com uma soma conservada
 por cima.}
-\item[(4)] \textbf{E a caixa classifica-a: o duomorfismo \emph{reflete}, não
-roda.} A cifra de $S$ é $\operatorname{tr}=0$ e $\det=-1$, donde
-$\Delta=0+4=4>0$: pelo Teor.~\ref{fis:thm:leidisc} é \textbf{hiperbólica}, e pelo
-Cor.~\ref{fis:cor:optica} é \textbf{imprópria}. \emph{É por isso que ela troca os
-eixos em vez de os girar} --- e é a separação entre os dois: o que fecha
-\emph{rodando} é o rotor do Teor.~\ref{fis:thm:fecho}, com $\det=+1$; o que fecha
-\emph{reflectindo} é esta, com $\det=-1$. \emph{Nada disto foi escolhido: sai da
-cifra de uma matriz de troca.}
+\item[(4)] \textbf{E o duomorfismo \emph{reflete}, não roda --- e lê-se na
+própria matriz.} $S$ tem $\operatorname{tr}=0$ e $\det=-1$, e os seus valores
+próprios são $+1$ e $-1$: ela fixa a diagonal, troca o sinal na antidiagonal, e
+$S^{2}=\mathrm{id}$. \emph{Fecha em dois, e sem rodar.} Contra ela, o rotor do
+Teor.~\ref{fis:thm:fecho} tem $\det=+1$ e $R^{2}=-\mathrm{id}$: fecha em quatro
+\emph{rodando}. \textbf{É esta a separação}, e sai da cifra de uma matriz de
+troca, sem se pedir nada emprestado. (A §\ref{fis:leidisc} volta a esta cifra
+com o nome que lá lhe dá; aqui não é preciso.)
 \item[(5)] \textbf{E a interface difere nos dois níveis, e é conta.} Por
 coordenada, $\sigma^{\dagger}(x,x)=\sigma(x,x)$: a interface é a \textbf{diagonal},
 e nenhuma enumeração é auto-dual --- $\sigma^{\dagger}=\sigma$ obrigaria
@@ -1772,10 +1772,10 @@ logo as duas somas trocam termo a termo, e a soma total fica. E
 $\dagger\circ\dagger=\mathrm{id}$ pelo Lema~\ref{fis:lem:doisunico}.
 
 (4) $S$ tem diagonal nula, donde $\operatorname{tr}S=0$; e
-$\det S=0\cdot0-1\cdot1=-1$. Logo $\Delta=\operatorname{tr}^{2}-4\det=4$, e o
-Teor.~\ref{fis:thm:leidisc} põe-na na classe hiperbólica --- o que também sai do
-Cor.~\ref{fis:cor:optica} sem olhar ao traço, porque $\det=-1$ dá
-$\Delta=B^{2}+4\ge4$ seja qual for $B$.
+$\det S=0\cdot0-1\cdot1=-1$. De $S(1,1)=(1,1)$ e $S(1,-1)=-(1,-1)$ saem os
+valores próprios $+1$ e $-1$, e daí $S^{2}=\mathrm{id}$ --- que também se lê
+directamente, porque trocar duas vezes é não trocar. \emph{Tudo isto é conta na
+matriz}, e não usa nada de outra parte.
 
 (5) $\sigma^{\dagger}(x,y)=\sigma(y,x)$ dá a igualdade em $y=x$ imediatamente.
 Fora da diagonal, $\sigma^{\dagger}=\sigma$ diria $\sigma(x,y)=\sigma(y,x)$ com
@@ -3685,36 +3685,33 @@ que essa identificação custa.
 passo é uma aresta. Numa régua \emph{fechada} --- a que a face multiplicativa dá,
 onde a volta regressa --- o limite tem outra forma, e sai da mesma dobra.
 
-\medskip\noindent\emph{Um aviso de letra, e vale para toda esta parte}: nesta
-secção $q$ é o \textbf{número de marcas} da régua fechada, e na
-§\ref{fis:rel-intervalo} $q$ é a \textbf{forma quadrática} da
-Def.~\ref{fis:def:tempo}(ii). São dois objetos e uma só letra --- o documento já
-gasta $B$ no binário e $\mathcal{B}$ na bola pela mesma razão. \emph{Onde as duas
-aparecem juntas, o contexto di-lo, e onde não disser é defeito.}
+\medskip\noindent\emph{E a letra é $L$, e não $q$}: o $q$ deste documento é a
+forma quadrática da Def.~\ref{fis:def:tempo}(ii), que a §\ref{fis:rel-intervalo}
+vai usar, e as duas apareceriam lado a lado na mesma tabela.
 
 \begin{teorema}[o máximo é a involução]\label{fis:thm:meiavolta}
-Sobre uma régua fechada de $q$ marcas, a distância entre duas marcas separadas de
+Sobre uma régua fechada de $L$ marcas, a distância entre duas marcas separadas de
 $p$ passos é a \emph{menor} das duas voltas,
 \[
-\boxed{\;d(p)=\min\{\,p,\ q-p\,\}\;}
+\boxed{\;d(p)=\min\{\,p,\ L-p\,\}\;}
 \]
 --- andar mais do que meia volta é andar para trás pelo outro lado. Então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{O máximo é $q/2$, e é atingido exactamente onde $p=q-p$.}
+\item[(1)] \textbf{O máximo é $L/2$, e é atingido exactamente onde $p=L-p$.}
 \item[(2)] \textbf{E esse ponto é o ponto fixo da dobra.} A aplicação
-$p\mapsto q-p$ é a Def.~\ref{fis:def:op} com extremos $0$ e $q$; o seu único
+$p\mapsto L-p$ é a Def.~\ref{fis:def:op} com extremos $0$ e $L$; o seu único
 ponto fixo é o \textbf{meio} (Teor.~\ref{fis:thm:duas}(2)), e é ele o máximo.
 \emph{A velocidade máxima é a interface}: o único lugar onde os dois sentidos dão
 o mesmo número.
 \item[(3)] \textbf{Ser atingida é uma questão de paridade.} Existe $p$ com
-$p=q-p$ se e só se $q$ é \textbf{par}. Em $q$ ímpar a involução não tem ponto
+$p=L-p$ se e só se $L$ é \textbf{par}. Em $L$ ímpar a involução não tem ponto
 fixo na régua, e o máximo é aproximado e nunca alcançado.
 \item[(4)] \textbf{E onde é atingida não há sentido, logo não há órbita.} Em
-$p=q/2$ ida e volta dão o mesmo número; o passo deixa de distinguir os dois
+$p=L/2$ ida e volta dão o mesmo número; o passo deixa de distinguir os dois
 sentidos, e com ele deixa de haver o sucessor que a Def.~\ref{fis:def:percurso}
 pede para haver composição.
-\item[(5)] \textbf{O número muda com a régua; a razão não.} Trocando $q$
-\emph{par}, o máximo $q/2$ muda de valor e a razão $d/q$ vale sempre
+\item[(5)] \textbf{O número muda com a régua; a razão não.} Trocando $L$
+\emph{par}, o máximo $L/2$ muda de valor e a razão $d/L$ vale sempre
 $\tfrac12$ --- e a restrição à paridade é a de~(3), sem a qual o máximo nem
 existe. \emph{Não se postulou velocidade limite nenhuma --- ela saiu de o círculo
 ser fechado.}
@@ -3723,37 +3720,37 @@ ser fechado.}
 
 \begin{proof}
 (1) $d$ é o mínimo de duas funções, uma crescente em $p$ e outra decrescente;
-elas cruzam-se onde $p=q-p$, e aí $d=p=q/2$. Para $p$ menor vale $d=p<q/2$; para
-$p$ maior vale $d=q-p<q/2$. Logo o máximo é $q/2$ e é atingido só no cruzamento.
+elas cruzam-se onde $p=L-p$, e aí $d=p=L/2$. Para $p$ menor vale $d=p<L/2$; para
+$p$ maior vale $d=L-p<L/2$. Logo o máximo é $L/2$ e é atingido só no cruzamento.
 
-(2) $\partial p=0+q-p$ é a Def.~\ref{fis:def:op} com $a=0$ e $b=q$; pelo
+(2) $\partial p=0+L-p$ é a Def.~\ref{fis:def:op} com $a=0$ e $b=L$; pelo
 Teor.~\ref{fis:thm:duas}(2) ela é involutiva e tem um único ponto fixo, o meio
-$\tfrac{q}{2}$. O cruzamento de~(1) é a equação $\partial p=p$, que é a definição
+$\tfrac{L}{2}$. O cruzamento de~(1) é a equação $\partial p=p$, que é a definição
 de ponto fixo. \emph{Não são dois factos: é um, lido em duas linguagens.}
 
-(3) $p=q-p$ é $2p=q$. Com $q$ par a solução está na régua; com $q$ ímpar o lado
+(3) $p=L-p$ é $2p=L$. Com $L$ par a solução está na régua; com $L$ ímpar o lado
 direito é ímpar e o esquerdo par, e não há solução --- é a mesma conta do
 Teor.~\ref{fis:thm:dual}(7), onde os extremos $0$ e $N-1$ com $N$ par dão
 interface vazia. \emph{A interface existe ou não existe conforme a paridade dos
 extremos, e é sempre esta conta que o decide.}
 
-(4) Em $p=q/2$ tem-se $p=q-p$, isto é, os dois caminhos têm o mesmo comprimento;
+(4) Em $p=L/2$ tem-se $p=L-p$, isto é, os dois caminhos têm o mesmo comprimento;
 nada na régua os separa. Sem sentido definido não há sucessor bem definido, e a
 Def.~\ref{fis:def:percurso} pede um.
 
-(5) $d(q/2)/q=\tfrac12$ para todo $q$ par, por substituição directa. \emph{A razão
+(5) $d(L/2)/L=\tfrac12$ para todo $L$ par, por substituição directa. \emph{A razão
 é da dobra; o número é da régua.}
 \end{proof}
 
 \begin{corolario}[no máximo, o par de sentidos tem um elemento só]\label{fis:cor:semmassa}
-Com $q$ par, no ponto $p=q/2$ os dois sentidos dão o mesmo número --- é a
-cláusula~(4) --- pelo que o par $\{p,\,q-p\}$ tem \textbf{um} elemento e não dois.
+Com $L$ par, no ponto $p=L/2$ os dois sentidos dão o mesmo número --- é a
+cláusula~(4) --- pelo que o par $\{p,\,L-p\}$ tem \textbf{um} elemento e não dois.
 \emph{Ali não há ida-e-volta a contar}: a distinção entre uma passagem e duas,
 que o Teor.~\ref{fis:thm:volta} vai usar, degenera exactamente neste ponto.
 \end{corolario}
 
 \begin{proof}
-$p=q-p$ dá $\{p,q-p\}=\{p\}$, de cardinal um. É o
+$p=L-p$ dá $\{p,L-p\}=\{p\}$, de cardinal um. É o
 Teor.~\ref{fis:thm:meiavolta}(4) sem mais nada --- \emph{e nada aqui usa o
 Teor.~\ref{fis:thm:volta}, que só vem adiante}: o que se afirma é a degenerescência
 do par, e o que ela custa lê-se lá.
@@ -3763,8 +3760,8 @@ do par, e o que ela custa lê-se lá.
 
 \noindent A Def.~\ref{fis:def:tempo}(ii) já escreveu o intervalo, e a
 §\ref{fis:tempo} já disse o que dele se usa: \emph{sobre uma aresta $q$ é
-inteiro}; só $\tau$ pede raiz. Tudo o que segue corre sobre $q$, e nenhuma raiz é
-avaliada.
+inteiro} --- com $h$ inteira, que é o caso do medidor --- e só $\tau$ pede raiz.
+Tudo o que segue corre sobre $q$, e nenhuma raiz é avaliada.
 
 \begin{teorema}[três classes, e a decisão é um sinal]\label{fis:thm:tresclasses}
 Com $q(\partial x)=g_{uv}\,\partial x^{u}\partial x^{v}$ e $g$ simétrica e não
@@ -3868,8 +3865,8 @@ $\operatorname{Fix}$, e diferem em se o ponto fixo cai dentro do objeto:
 \toprule
  & a condição & o que se segue \\
 \midrule
-régua fechada, $q$ par & $\operatorname{Fix}(\partial)$ está na régua & o máximo \textbf{atinge-se} --- e ali não há repouso \\
-régua fechada, $q$ ímpar & $\operatorname{Fix}(\partial)=\emptyset$ & o máximo é aproximado e nunca alcançado \\
+régua fechada, $L$ par & $\operatorname{Fix}(\partial)$ está na régua & o máximo \textbf{atinge-se} --- e ali não há repouso \\
+régua fechada, $L$ ímpar & $\operatorname{Fix}(\partial)=\emptyset$ & o máximo é aproximado e nunca alcançado \\
 a borda, $q=0$ & nenhuma aresta a realiza & é fronteira, e não sítio \\
 \bottomrule
 \end{tabular}
@@ -3933,9 +3930,9 @@ enunciado onde ele se mede; aqui não se supõe.
 \]
 
 \medido{\code{tests/renormaliza.c} §N1: a velocidade máxima é meia volta, e a
-razão $d/q$ vale $\tfrac12$ em toda a escala --- o número muda com a régua e a
-razão não, que é o Teor.~\ref{fis:thm:meiavolta}(5). §N2: e \emph{só fecha em $q$
-par} --- em $q$ ímpar não há $p$ com $p=q-p$, isto é, a involução \emph{não tem
+razão $d/L$ vale $\tfrac12$ em toda a escala --- o número muda com a régua e a
+razão não, que é o Teor.~\ref{fis:thm:meiavolta}(5). §N2: e \emph{só fecha em $L$
+par} --- em $L$ ímpar não há $p$ com $p=L-p$, isto é, a involução \emph{não tem
 ponto fixo na régua} (ela existe sempre), que é a
 cláusula~(3) medida, com o caso ímpar como controlo. \code{tests/cone\_nulo.c}
 §K1: sobre a órbita, $\abs{N}$ é invariante e \textbf{nunca} é zero --- a
@@ -4276,13 +4273,22 @@ $1,1,1,1,1,1$ no elíptico, $1,2,3,4,5,6$ no parabólico e $1,1,2,3,5,8$ no
 hiperbólico; e as ordens do elíptico saem $3$, $4$ e $6$, \emph{distintas entre
 si}, o que impede a asserção de passar por acaso.}
 
-\section{O impróprio é sempre instável, e a orientação compõe-se}\label{fis:improprio}
+\section{O impróprio é sempre hiperbólico, e a orientação compõe-se}\label{fis:improprio}
 
-\begin{corolario}[o impróprio é sempre instável]\label{fis:cor:optica}
+\begin{corolario}[o impróprio é sempre hiperbólico]\label{fis:cor:optica}
 Se $C=-1$ então $\Delta=B^{2}+4\ge4>0$, qualquer que seja $B$. Logo um espelho que
 \emph{reflete} é \textbf{sempre} hiperbólico: nunca roda nem cisalha. Das seis
 combinações de (orientação, regime) existem \textbf{quatro} --- o impróprio ocupa
 uma das três, e o próprio ocupa as três.
+
+\medskip\noindent\textbf{E hiperbólico não quer dizer instável --- aqui não, e é
+o único sítio onde a leitura falha.} A hipótese $\abs{\det}=1$ faz «hiperbólico»
+querer dizer expande/contrai \emph{quando as duas direções são distintas}; com
+$\operatorname{tr}=0$ e $\det=-1$ os valores próprios são $+1$ e $-1$, e a órbita
+\textbf{fecha} em dois. É a excepção que a prova do Teor.~\ref{fis:thm:leidisc}
+já isola --- \emph{reflectir não é expandir} --- e o Teor.~\ref{fis:thm:tresfontes}
+dá-lhe a linha própria. \emph{Este corolário classifica o regime; não afirma
+instabilidade}, e quem quiser a ordem lê o traço.
 \end{corolario}
 
 \begin{proof}
@@ -4294,9 +4300,10 @@ $\Delta=B^{2}-4$, que é negativo em $\abs B<2$, nulo em $\abs B=2$ e positivo e
 $\abs B>2$: o próprio realiza as \emph{três}. Total $1+3=4$.
 \end{proof}
 
-\medskip\noindent O conteúdo é a leitura: \emph{a inversão de orientação e o
-confinamento excluem-se}. É a mesma frase que separa o que roda do que não roda,
-vista agora como \textbf{impossibilidade}.
+\medskip\noindent O conteúdo é a leitura, e ela é sobre \emph{rodar}, não sobre
+confinar: \emph{a inversão de orientação e a rotação excluem-se}. Quem reflete
+não roda --- mas pode fechar, e fecha em dois. \emph{Confinamento e rotação são
+duas coisas, e é o Teor.~\ref{fis:thm:tresfontes} que as separa.}
 
 \begin{teorema}[as três fontes de órbita finita, e o que cada uma fecha]\label{fis:thm:tresfontes}
 Seja $A$ uma matriz $2\times2$ de entradas em $\Zc$ com $A^{k}=I$ para algum
