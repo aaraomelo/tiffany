@@ -3,9 +3,9 @@
 %  fisica.tex — A FÍSICA ARANIANA. Compila SOZINHO (pdflatex fisica.tex) e
 %  também dentro do livro. O preâmbulo é o estilo.tex.
 %
-%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos dez
+%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos onze
 %  lugares onde ela opera — álgebra, topologia, análise, geometria, mecânica,
-%  óptica, partículas e núcleo, termodinâmica, cosmologia, redes. Nada foi
+%  relatividade, óptica, partículas e núcleo, termodinâmica, cosmologia, redes. Nada foi
 %  inventado e nada foi acrescentado: os enunciados, as provas%  e os medidos são os que a obra já tem, postos cada um no seu sítio.
 %
 %  AUTOCONTIDO: toda a matemática de que precisa está DENTRO. Onde um irmão da
@@ -51,8 +51,8 @@
 \ifSubfilesClassLoaded{%
   \gkcapa{A Física Araniana}
          {multiplicidade e memória}
-         {álgebra, topologia, análise, geometria, mecânica, óptica, partículas e núcleo,
-          termodinâmica, cosmologia, redes --- dez lugares, um sistema}
+         {álgebra, topologia, análise, geometria, mecânica, relatividade, óptica,
+          partículas e núcleo, termodinâmica, cosmologia, redes --- onze lugares, um sistema}
   \maketitle
   \tableofcontents
 }{%
@@ -97,7 +97,7 @@ igualdade} --- o ponto onde para é o ponto fixo que as duas faces passam a
 partilhar, e é ele o \textbf{corte}. Não converge para o ponto: termina nele.
 
 \medskip\noindent\textbf{A organização deste documento.} A matéria é uma só e
-opera em \textbf{dez} lugares, e é por eles que ela se reparte aqui. A
+opera em \textbf{onze} lugares, e é por eles que ela se reparte aqui. A
 \textbf{álgebra} constrói: a dobra, as duas faces, os dois símbolos, a lista, a
 multiplicidade, o par $\zeta/\mu$, a transformada, a escada e a caixa. A
 \textbf{topologia} conta o que a construção identifica: a ultramétrica que
@@ -106,7 +106,10 @@ folga vista pelos dois mapas. A \textbf{análise} faz o encaixe terminar, e dá 
 corte e o número $\pi$. A \textbf{geometria} realiza: o semicírculo, o
 hipercubo, a base ortonormal e o dragão. A \textbf{mecânica} põe a construção a
 correr: o ciclo, a lei local, o levantamento, o tempo e a régua que a memória
-curva. A \textbf{óptica} lê os espelhos: a caixa dos sistemas sem perda, a lei
+curva. A \textbf{relatividade} conta o que um passo alcança: o limite que a
+vizinhança já impunha, a meia volta onde os dois sentidos coincidem e por isso
+não há órbita, e a borda que limita sem ser lugar. A \textbf{óptica} lê os
+espelhos: a caixa dos sistemas sem perda, a lei
 do discriminante, as ordens que uma rede admite e a borda onde a régua colapsa.
 
 \medskip\noindent E os quatro últimos lugares são o mesmo sistema em quatro
@@ -147,6 +150,9 @@ Como se desfaz a sobreposição? & por uma coordenada de folha & Teor.~\ref{fis:
 Onde entra a dimensão? & na vizinhança, e só aí & Teor.~\ref{fis:thm:dim} \\
 De onde vem o tempo? & da contagem das aplicações do operador & Def.~\ref{fis:def:tempo} \\
 O que curva a régua? & o campo: $g_{uv}=G\,h_{uv}$ & §\ref{fis:tempo} \\
+E a curvatura, o que é? & a dobra: $G>1$ --- e é espacial & Teor.~\ref{fis:thm:curvatura} \\
+Até onde chega um passo? & a uma aresta --- e o grau proíbe o atalho & Teor.~\ref{fis:thm:passo} \\
+Donde vem a velocidade máxima? & de a régua fechar: é meia volta, o ponto fixo & Teor.~\ref{fis:thm:meiavolta} \\
 O que classifica um sistema sem perda? & $\Delta$, e não o traço & Teor.~\ref{fis:thm:leidisc} \\
 Que ordens admite uma rede? & $\{1,2,3,4,6\}$, e nunca $5$ & Lema~\ref{fis:lem:cristal} \\
 \bottomrule
@@ -1572,8 +1578,399 @@ usar; encher com $G\equiv2$; $\pi\circ\rho=\mathrm{id}$ e $\rho\circ\pi$ a falha
 em $256$ de $512$; e a serpentina com dobra $0$ e buraco $0$ em
 $M=2,4,8,16,32$.}
 
-\colunas{Lema~\ref{fis:lem:ultra}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:euler},~\ref{fis:thm:dim},~\ref{fis:thm:vizniso},~\ref{fis:thm:navega}; Cor.~\ref{fis:cor:folga}}
-        {a árvore, o dragão e a espiral, a serpentina, a travessia por dígitos}
+\section{O duomorfismo, e a bijeção duomorfa}\label{fis:duomorf}
+
+\noindent A Prop.~\ref{fis:prop:travessia} deu a travessia entre duas
+representações reversíveis do mesmo objeto e \emph{escreveu-a}; o
+Teor.~\ref{fis:thm:navega} disse o que ela custa. Falta uma palavra e falta uma
+prova, e não são a mesma coisa: a travessia ser \textbf{única} não a faz
+\textbf{duomorfa}. Unicidade é sobre o mapa; duomorfia é sobre as
+\emph{operações}, e tem de se demonstrar à parte. É o que esta secção faz.
+
+\subsection*{Os três níveis}
+
+\begin{definicao}[bijeção, isomorfismo, duomorfismo]\label{fis:def:duomorf}
+Sejam $A=(X,\oplus_1,\otimes_1)$ e $B=(Y,\oplus_2,\otimes_2)$ estruturas com
+\emph{duas} operações cada --- e as operações são \textbf{dados da estrutura},
+não a soma e o produto: podem ser $\min$ e $\max$, as do
+Teor.~\ref{fis:thm:B}, ou quaisquer duas que a construção produza. Para
+$f\colon X\to Y$:
+\[
+\begin{array}{ll}
+\textbf{bijeção} & \text{correspondência reversível, e nada mais;}\\[3pt]
+\textbf{isomorfismo} & f(x\oplus_1 y)=f(x)\oplus_2 f(y)\ \ \text{e}\ \ f(x\otimes_1 y)=f(x)\otimes_2 f(y);\\[3pt]
+\textbf{duomorfismo} & f(x\oplus_1 y)=f(x)\otimes_2 f(y)\ \ \text{e}\ \ f(x\otimes_1 y)=f(x)\oplus_2 f(y).
+\end{array}
+\]
+Isto é: o duomorfismo é o isomorfismo para a estrutura com as operações
+\emph{trocadas},
+\[
+\boxed{\;f\colon\ (X,\oplus_1,\otimes_1)\ \xrightarrow{\ \cong\ }\ (Y,\otimes_2,\oplus_2)\;}
+\]
+\emph{O «duo» não vem de haver dois objetos} --- vem da dualidade operacional
+$\oplus_1\leftrightarrow\otimes_2$, $\otimes_1\leftrightarrow\oplus_2$. E onde
+houver ordem ela vai junto: a troca obriga $f$ a ser \textbf{antitónica},
+$a\le_1 b\iff f(b)\le_2 f(a)$, e a chegada é $\le_2^{\mathrm{op}}$.
+\end{definicao}
+
+\begin{lema}[as quatro leis são duas]\label{fis:lem:quatro}
+Se $f$ é bijeção e cumpre as duas leis cruzadas da Def.~\ref{fis:def:duomorf},
+então a inversa cumpre as outras duas \emph{sem hipótese nova}:
+\[
+f^{-1}(u\otimes_2 v)=f^{-1}(u)\oplus_1 f^{-1}(v),
+\qquad
+f^{-1}(u\oplus_2 v)=f^{-1}(u)\otimes_1 f^{-1}(v).
+\]
+\emph{Não são quatro condições: são duas, e a volta é consequência.}
+\end{lema}
+
+\begin{proof}
+Dados $u,v\in Y$, ponha-se $x=f^{-1}(u)$ e $y=f^{-1}(v)$. Então
+$f(x\oplus_1 y)=f(x)\otimes_2 f(y)=u\otimes_2 v$, e aplicando $f^{-1}$ vem
+$f^{-1}(u\otimes_2 v)=x\oplus_1 y=f^{-1}(u)\oplus_1 f^{-1}(v)$. A outra sai da
+segunda lei do mesmo modo. \emph{Só se usou que $f$ é bijeção}, que é o primeiro
+dos três níveis.
+\end{proof}
+
+\subsection*{Unicidade não é duomorfia}
+
+\begin{corolario}[a travessia já está escrita, e é única]\label{fis:cor:travunica}
+Sejam $R$ e $S$ duas leituras reversíveis do mesmo objeto. Então a travessia $T$
+com $T\circ R=S$ existe e é \textbf{única}:
+\[
+\boxed{\;T=S\circ R^{-1}\;}
+\]
+--- existência e forma são a Prop.~\ref{fis:prop:travessia}(1); a unicidade é $R$
+ser bijeção, pelo que $T\circ R=S$ determina $T$ ponto a ponto. \emph{Não há
+travessia a escolher: fixadas as duas leituras, o mapa é um só.}
+\end{corolario}
+
+\begin{proof}
+De $T\circ R=S$ com $R$ bijetiva vem $T=S\circ R^{-1}$, bijeção por composição; e
+se $T'\circ R=S$ então $T'=S\circ R^{-1}=T$.
+\end{proof}
+
+\begin{teorema}[há exactamente duas involuções, e não se confundem]\label{fis:thm:duasinvol}
+Sobre uma estrutura com \emph{duas} operações distintas, uma involução pode
+preservar uma operação ou transportá-la na outra, e as duas coisas excluem-se:
+\[
+\dagger\colon\ (x\oplus y)^{\dagger}=x^{\dagger}\oplus y^{\dagger}
+\qquad\qquad
+\mathcal{D}\colon\ \mathcal{D}(x\oplus y)=\mathcal{D}(x)\otimes\mathcal{D}(y) .
+\]
+Se uma \emph{mesma} aplicação sobrejetiva cumprisse as duas, viria
+$\oplus=\otimes$ --- contra haver duas. Logo $\dagger\neq\mathcal{D}$, e
+\textbf{nenhuma identidade de uma se transporta para a outra sem demonstração}.
+\emph{É $\mathcal{D}$, e não a estaca, que troca o aditivo pelo multiplicativo.}
+\end{teorema}
+
+\begin{proof}
+Suponha-se $u$ sobrejetiva com $u(x\oplus y)=u(x)\oplus u(y)$ e
+$u(x\oplus y)=u(x)\otimes u(y)$ para todos $x,y$. Igualando,
+$u(x)\oplus u(y)=u(x)\otimes u(y)$; como $u$ é sobrejetiva, todo par de $Y$ é da
+forma $(u(x),u(y))$, donde $\oplus$ e $\otimes$ coincidem em toda a parte. É a
+mesma conta do Teor.~\ref{fis:thm:duas}(4) noutro andar: \emph{duas leis sobre o
+mesmo suporte ou são duas, ou são uma}.
+\end{proof}
+
+\medskip\noindent\textbf{Donde a ressalva, e ela é um teorema e não um cuidado.}
+O Cor.~\ref{fis:cor:travunica} dá que a travessia entre duas leituras é única.
+\emph{Não dá que ela seja duomorfa}: ser duomorfa é a condição operacional
+cruzada da Def.~\ref{fis:def:duomorf}, e pelo Teor.~\ref{fis:thm:duasinvol} ela
+não se herda de ser travessia. Um exemplo fecha a questão: sobre a face aditiva,
+a \textbf{estaca} $\partial x=2c-x$ com $c$ o meio cumpre
+$\partial(x\oplus y)=\partial x\oplus\partial y$ quando $c$ é o neutro --- é um
+$\dagger$, e para ser $\mathcal{D}$ teria de valer $\partial(x+y)=\partial x\cdot\partial y$,
+que é falso já em dois pontos genéricos. \emph{A mesma aplicação é $\dagger$ para
+um par de operações e $\mathcal{D}$ para outro; a duomorfia é relativa ao par, e
+por isso prova-se por par.} É o que segue.
+
+\subsection*{A função não se põe: sai do operador}
+
+\noindent Uma definição que \emph{postulasse} a bijeção duomorfa não valeria nada
+aqui --- seria uma escolha, e a Def.~\ref{fis:def:op} não permite escolhas. O que
+segue constrói-a, e a construção tem um só passo: \textbf{sobre dois objetos o
+operador é a troca, e não há outro}.
+
+\begin{lema}[sobre dois, o operador é único]\label{fis:lem:doisunico}
+Sobre um par $\{u,v\}$, a Def.~\ref{fis:def:op} tem \textbf{exactamente uma}
+solução: $\partial u=v$ e $\partial v=u$. Não há segunda, e não há escolha.
+\end{lema}
+
+\begin{proof}
+As bijeções de um conjunto de dois elementos são duas: a identidade e a troca. A
+Def.~\ref{fis:def:op} exige $\partial\neq\mathrm{id}$ --- é a cláusula
+\emph{efetiva} ---, o que deixa a troca; e a troca tem volta e é involutiva, pelo
+que cumpre o resto. \emph{A unicidade não é um bónus: é o que faz a construção
+não ter parâmetro.}
+\end{proof}
+
+\begin{teorema}[a função duomorfa constrói-se, e nos dois lugares onde há par]\label{fis:thm:constroi}
+A construção oferece um par em \emph{dois} lugares, e o Lema~\ref{fis:lem:doisunico}
+dá em cada um a mesma coisa --- a troca --- sem que se acrescente nada:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Os dois símbolos de cada posição.} Pelo
+Teor.~\ref{fis:thm:B} a posição carrega $B=\{0,1\}$; aplicando $\partial$ em cada
+posição de uma palavra de largura $p$ obtém-se
+\[
+D=\partial\ \text{em cada dígito}\;=\;\bigl(i\mapsto(N-1)-i\bigr) ,
+\]
+que é a bijeção do Teor.~\ref{fis:thm:dual}. \emph{O nível é o dígito.}
+\item[(2)] \textbf{As duas coordenadas de um endereço.} Um endereço de posto
+dois é o par $[p{:}q]$, e aplicando-lhe o mesmo $\partial$ vem a troca de
+coordenadas
+\[
+\dagger\colon[p{:}q]\mapsto[q{:}p],
+\qquad
+S=\begin{pmatrix}0&1\\1&0\end{pmatrix} .
+\]
+\emph{O nível é a coordenada}, e o operador é o mesmo: a Def.~\ref{fis:def:op}
+sobre dois.
+\item[(3)] \textbf{E os dois são duomorfismos.} O primeiro troca $\min$ e $\max$
+--- Teor.~\ref{fis:thm:dual}(3). O segundo troca as duas somas de salto: sendo
+$h(\sigma)$ e $v(\sigma)$ os saltos no índice entre vizinhos horizontais e
+verticais de uma enumeração $\sigma$ da grade,
+\[
+h(\sigma^{\dagger})=v(\sigma),
+\qquad
+v(\sigma^{\dagger})=h(\sigma),
+\qquad\text{e}\qquad
+\boxed{\;h+v\ \text{é invariante por }\dagger\;}
+\]
+--- \emph{a troca cruzada da Def.~\ref{fis:def:duomorf} com uma soma conservada
+por cima.}
+\item[(4)] \textbf{E a caixa classifica-a: o duomorfismo \emph{reflete}, não
+roda.} A cifra de $S$ é $\operatorname{tr}=0$ e $\det=-1$, donde
+$\Delta=0+4=4>0$: pelo Teor.~\ref{fis:thm:leidisc} é \textbf{hiperbólica}, e pelo
+Cor.~\ref{fis:cor:optica} é \textbf{imprópria}. \emph{É por isso que ela troca os
+eixos em vez de os girar} --- e é a separação entre os dois: o que fecha
+\emph{rodando} é o rotor do Teor.~\ref{fis:thm:fecho}, com $\det=+1$; o que fecha
+\emph{reflectindo} é esta, com $\det=-1$. \emph{Nada disto foi escolhido: sai da
+cifra de uma matriz de troca.}
+\item[(5)] \textbf{E a interface difere nos dois níveis, e é conta.} Por
+coordenada, $\sigma^{\dagger}(x,x)=\sigma(x,x)$: a interface é a \textbf{diagonal},
+e nenhuma enumeração é auto-dual --- $\sigma^{\dagger}=\sigma$ obrigaria
+$\sigma(x,y)=\sigma(y,x)$ com $(x,y)\neq(y,x)$, contra a injetividade. Por
+posição, a interface é $\{i: (N-1)-i=i\}$, isto é $2i=N-1$, que em $N=2^{p}$ com
+$p\ge1$ é \textbf{vazia} (Teor.~\ref{fis:thm:dual}(7)).
+\[
+\boxed{\;\text{interface}=\operatorname{Fix}(\partial)\;\text{---\ o único lugar onde a travessia não paga}\;}
+\]
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são o Lema~\ref{fis:lem:doisunico} aplicado ao par que cada nível
+oferece; que a aplicação por dígito dê $(N-1)-i$ é o
+Teor.~\ref{fis:thm:dual}(2), e que a troca de coordenadas seja aquela matriz é
+lê-la nas duas colunas.
+
+(3) A primeira metade é o Teor.~\ref{fis:thm:dual}(3). Para a segunda: $\dagger$
+leva o par de vizinhos horizontais $(x,y),(x{+}1,y)$ no par de vizinhos verticais
+$(y,x),(y,x{+}1)$, e reciprocamente, \emph{sem alterar o índice de nenhum ponto};
+logo as duas somas trocam termo a termo, e a soma total fica. E
+$\dagger\circ\dagger=\mathrm{id}$ pelo Lema~\ref{fis:lem:doisunico}.
+
+(4) $S$ tem diagonal nula, donde $\operatorname{tr}S=0$; e
+$\det S=0\cdot0-1\cdot1=-1$. Logo $\Delta=\operatorname{tr}^{2}-4\det=4$, e o
+Teor.~\ref{fis:thm:leidisc} põe-na na classe hiperbólica --- o que também sai do
+Cor.~\ref{fis:cor:optica} sem olhar ao traço, porque $\det=-1$ dá
+$\Delta=B^{2}+4\ge4$ seja qual for $B$.
+
+(5) $\sigma^{\dagger}(x,y)=\sigma(y,x)$ dá a igualdade em $y=x$ imediatamente.
+Fora da diagonal, $\sigma^{\dagger}=\sigma$ diria $\sigma(x,y)=\sigma(y,x)$ com
+$(x,y)\neq(y,x)$, contra a injetividade de $\sigma$. A conta do outro nível é o
+Teor.~\ref{fis:thm:dual}(7).
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que faz a definição não ser uma definição.} A
+Def.~\ref{fis:def:duomorf} diz o que um duomorfismo \emph{é}; o
+Teor.~\ref{fis:thm:constroi} diz que ele \textbf{existe sem ser posto} --- em cada
+lugar onde a construção põe dois, o operador dá a troca, e a troca é o
+duomorfismo. \emph{A dualidade não é uma segunda hipótese sobre a estrutura: é o
+que a Def.~\ref{fis:def:op} já dizia, lida em cada nível onde há um par.}
+
+\medido{\code{tests/pgwire.c} §W122, em $M=32$: os quatro números trocam de lugar
+sem sobra nos dois pares; a serpentina dá $(1,63)$ e a de Hilbert $(853,341)$ nos
+máximos; e $h+v$ vale $\mathbf{32\,736}$ no par da serpentina e $\mathbf{38\,936}$
+no da de Hilbert --- \emph{o $\dagger$ conserva o total e redistribui-o}, que é a
+cláusula~(3) medida. \code{tests/meio.c} §M5--§M6: sobre dois objectos, com
+$\partial$ a trocá-los, as composições com invariante por neutro são
+\textbf{nenhuma} --- que é o Lema~\ref{fis:lem:doisunico} pelo lado que falta, e a
+interface vazia da cláusula~(5).}
+
+\subsection*{A bijeção duomorfa}
+
+\begin{teorema}[a bijeção duomorfa: existe, é única, e é a dobra]\label{fis:thm:dual}
+Seja $I$ a lista do Teor.~\ref{fis:thm:BI} em largura $p$, com $N=2^{p}$, e
+\textbf{sejam $\oplus$ e $\otimes$ as operações que a ordem induz},
+\[
+x\oplus y=\min\{x,y\},\qquad x\otimes y=\max\{x,y\} .
+\]
+Seja $R$ uma leitura reversível e $R^{\dagger}$ a leitura dual --- a segunda
+nomeação do Teor.~\ref{fis:thm:B}. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A leitura dual existe e é uma só.} Pelo
+Teor.~\ref{fis:thm:B} as soluções das duas tabelas são \emph{duas}, e a segunda é
+a primeira com $0$ e $1$ trocados. Logo há uma segunda leitura reversível e uma
+só, e pelo Cor.~\ref{fis:cor:travunica} a bijeção entre elas é
+\[
+\boxed{\;D=R^{\dagger}\circ R^{-1}\;}
+\]
+--- \emph{determinada, e não escolhida}: não há família de duomorfismos entre
+aquelas duas leituras, há um.
+\item[(2)] \textbf{E ela é a dobra.} Sobre o índice,
+\[
+D(i)=(N-1)-i=\partial i ,
+\]
+que é a Def.~\ref{fis:def:op} com $a=0$ e $b=N-1$. \emph{Não é função nova: é a
+primeira coisa que este documento definiu, lida no endereço.} Donde, sem prova a
+mais, $D\circ D=\mathrm{id}$ e $D$ inverte a ordem
+(Teor.~\ref{fis:thm:duas}(2)).
+\item[(3)] \textbf{$D$ é duomorfa}, e as quatro leis valem:
+\[
+\boxed{
+\begin{aligned}
+D(x\oplus y)&=D(x)\otimes D(y) & D^{-1}(u\otimes v)&=D^{-1}(u)\oplus D^{-1}(v)\\
+D(x\otimes y)&=D(x)\oplus D(y) & D^{-1}(u\oplus v)&=D^{-1}(u)\otimes D^{-1}(v)
+\end{aligned}}
+\]
+--- as duas da esquerda provam-se, as duas da direita são o
+Lema~\ref{fis:lem:quatro}. \emph{E é aqui que a duomorfia entra}: ela não veio do
+Cor.~\ref{fis:cor:travunica}, veio de $\oplus$ e $\otimes$ serem lidas da
+\textbf{ordem} e de $D$ a inverter.
+\item[(4)] \textbf{$D$ é um $\mathcal{D}$ e não um $\dagger$, para \emph{este}
+par.} Pelo Teor.~\ref{fis:thm:duasinvol} as duas coisas excluem-se, e~(3) põe $D$
+do lado de $\mathcal{D}$. \emph{A mesma estaca que preserva a face aditiva troca
+o mínimo pelo máximo} --- não há contradição: são pares de operações diferentes.
+\item[(5)] \textbf{A profundidade não se move, e a métrica não se duplica.}
+$\operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)$, donde $d(Da,Db)=d(a,b)$:
+$D$ é \textbf{isometria} da Def.~\ref{fis:def:arvore}, e a ultramétrica do
+Lema~\ref{fis:lem:ultra} passa ao dual sem se transportar coisa nenhuma --- e
+passa \emph{porque} ela é governada pelo $\max$, que é uma das duas operações que
+$D$ troca.
+\item[(6)] \textbf{Logo o dual não é um segundo corpo.} Se $a_i\oplus a_j=a_k$
+então $a_{Di}\otimes a_{Dj}=a_{Dk}$: guarda-se \emph{uma} tabela e o inteiro $N$,
+e a outra forma produz-se no acesso, com o custo já contado pela
+Prop.~\ref{fis:prop:travessia}(3). \emph{Uma memória é física; a outra é o mesmo
+objeto reendereçado.}
+\item[(7)] \textbf{A interface é $\operatorname{Fix}(D)$ --- e no binário está
+\emph{vazia}.} O único lugar onde a travessia não paga é onde as duas leituras
+coincidem, isto é $D(i)=i$, que é $2i=N-1$: o \textbf{meio}. Com $N=2^{p}$ e
+$p\ge1$, $N-1$ é ímpar e \emph{não há} tal $i$ na lista. \emph{Todo o ponto paga},
+e é a mesma frase do Teor.~\ref{fis:thm:duas}(4) --- «sobre dois objectos apenas,
+$\partial$ troca-os e não fixa nenhum» --- dita em largura $p$ em vez de $1$.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) É o Teor.~\ref{fis:thm:B} --- «sobrevivem exatamente duas soluções, e a
+segunda é a primeira com $0$ e $1$ trocados» --- mais o
+Cor.~\ref{fis:cor:travunica} aplicado a $R$ e $R^{\dagger}$.
+
+(2) Aplicada posição a posição, a troca leva cada dígito $b$ em $\partial b=1-b$
+(Teor.~\ref{fis:thm:B}). Ora $N-1=2^{p}-1$ é a palavra de $p$ dígitos todos $1$,
+que é o \emph{máximo} em cada posição; logo a subtração $(N-1)-i$ corre posição a
+posição \textbf{sem transporte} e coincide com a troca dígito a dígito. E
+$(N-1)-i=0+(N-1)-i$ é a Def.~\ref{fis:def:op} com aqueles extremos, por
+substituição. Involutividade e inversão da ordem são o
+Teor.~\ref{fis:thm:duas}(2); explicitamente, de $i<j$ vem $(N-1)-j<(N-1)-i$.
+
+(3) \emph{E esta é a alínea que se pede.} Por~(2), $D$ é bijetiva e inverte a
+ordem. Logo, para quaisquer $x,y$,
+\[
+D(x\oplus y)=(N-1)-\min\{x,y\}=\max\{(N-1)-x,\,(N-1)-y\}=D(x)\otimes D(y) ,
+\]
+onde a igualdade do meio é a definição de $\min$ e $\max$ sob uma bijeção
+decrescente: o menor dos dois argumentos tem a maior imagem. Trocando $\min$ por
+$\max$ vem a segunda lei. As duas da direita são o Lema~\ref{fis:lem:quatro}, que
+só pede bijetividade. \emph{Nada se usou das operações além de virem da ordem} ---
+e é essa a hipótese do enunciado, posta lá em cima e não escondida aqui.
+
+(4) Se $D$ fosse também $\dagger$ para este par, cumpriria
+$D(x\oplus y)=D(x)\oplus D(y)$; com~(3) isso daria
+$D(x)\oplus D(y)=D(x)\otimes D(y)$ para todo o par de imagens, e por $D$ ser
+sobrejetiva $\min=\max$ em toda a parte, isto é $x=y$ sempre --- a lista teria um
+elemento só, contra $p\ge1$. É o Teor.~\ref{fis:thm:duasinvol} instanciado.
+
+(5) Por~(2), $D$ é a troca dígito a dígito. Para cada posição $j$ vale
+$a_j=b_j\iff\partial a_j=\partial b_j$, porque $\partial$ é bijeção de $B$
+(Teor.~\ref{fis:thm:B}); logo o conjunto das posições onde $a$ e $b$ concordam é
+o mesmo para $Da$ e $Db$, e em particular a \emph{primeira} divergência está na
+mesma posição. Como também $a=b\iff Da=Db$, os dois ramos da
+Def.~\ref{fis:def:arvore} correspondem-se e $d$ fica invariante.
+
+(6) É~(3) reescrita, aplicando $D$ aos dois lados. Que baste $N$ é~(2): $D$
+escreve-se com $N$ e mais nada. O custo é a Prop.~\ref{fis:prop:travessia}(3),
+sob a hipótese $M=2$ que ela pede --- e aqui o dígito \emph{é} o bit.
+
+(7) $D(i)=i$ é $(N-1)-i=i$, isto é $2i=N-1$. Em $N=2^{p}$ com $p\ge1$ o lado
+direito é ímpar e o esquerdo par: não há solução. \emph{A ausência de ponto fixo
+não é um defeito da lista --- é o que o Teor.~\ref{fis:thm:duas}(4) já dizia sobre
+dois extremos, e é ela que obriga a haver \textbf{duas} nomeações e não uma.}
+\end{proof}
+
+\medskip\noindent\textbf{As três colunas, lado a lado.}
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & bijeção & isomorfismo & \textbf{duomorfismo} \\
+\midrule
+operações & --- & $\oplus_1\mapsto\oplus_2$, $\otimes_1\mapsto\otimes_2$ & $\oplus_1\mapsto\otimes_2$, $\otimes_1\mapsto\oplus_2$ \\
+ordem & --- & $\le_1\mapsto\le_2$ & $\le_1\mapsto\ \ge_2$ \\
+índice & qualquer & $i\mapsto i$ & $i\mapsto (N-1)-i$, que é $\partial$ \\
+o que fixa & --- & tudo & a \textbf{profundidade}, e só ela \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E há duas inversões de ordem, e não são a mesma.} A
+bijeção $D$ inverte a ordem \emph{dos índices} e fixa a profundidade; e
+$t\mapsto2^{-t}$ --- a aplicação que a prova do Lema~\ref{fis:lem:ultra} usa,
+\emph{«que inverte a ordem»} --- inverte a ordem \emph{das profundidades} e
+produz a distância, levando $\min$ em $\max$ e a soma no produto:
+\[
+2^{-\min\{p,q\}}=\max\{2^{-p},2^{-q}\},
+\qquad
+2^{-(p+q)}=2^{-p}\cdot2^{-q} .
+\]
+A profundidade está entre as duas: invariante pela primeira, e é da segunda que
+recebe a métrica. \emph{São dois duomorfismos encadeados, e o segundo já estava
+escrito --- numa linha, dentro de uma prova.}
+
+\medskip\noindent\textbf{O que o dual não guarda, e porquê.} $\min$ e $\max$ são
+\textbf{idempotentes}, e uma composição idempotente não tem volta: se tivesse
+neutro $n$ e $\partial$ com $x\oplus\partial x=n$, de
+$x=x\oplus n=x\oplus(x\oplus\partial x)=(x\oplus x)\oplus\partial x=x\oplus\partial x=n$
+sairia que \emph{todo} elemento é $n$. Pela Def.~\ref{fis:def:op} isso é um
+\textbf{esmagamento} e não uma dobra --- e é a mesma perda que o
+Teor.~\ref{fis:thm:BI} já contava: $a\vee b=m+\abs{\delta}$ e
+$a\wedge b=m-\abs{\delta}$ deitam fora o \emph{sinal} de $\delta$, isto é
+\emph{qual dos dois é qual}. A orientação não está na operação do dual; está na
+bijeção, e a bijeção é a dobra --- que é exactamente o que a
+Def.~\ref{fis:def:op} lhe exige ao pedir-lhe \textbf{volta}.
+
+\medido{Não foram corridas medições novas: são as que já estão, lidas nas
+cláusulas deste teorema. \code{tests/aranha\_n.c} §AN35: as duas nomeações a
+darem tabelas isomorfas \textbf{pela troca}, com a \emph{identidade} a NÃO servir
+como controlo ($6$ discordâncias) --- que é a cláusula~(1) medida, a segunda
+leitura a existir e a bijeção a não ser a identidade. \code{tests/meio.c}
+§M3--§M4: os nove pares ordenados caem em \textbf{seis} imagens por
+$(a\vee b,a\wedge b)$ e as três colisões \emph{são os pares trocados}, contra
+\textbf{nove} em nove por $(m,\delta)$ --- que é a orientação a não estar na
+operação, contada. §M5--§M6: sobre dois objectos, com $\partial$ a trocá-los, as
+composições com invariante por neutro são \textbf{nenhuma} --- que é a
+cláusula~(7), a interface vazia, medida no seu caso mínimo.
+\code{tests/pgwire.c} §W128: $\mu(T(E))=\mu(E)$ em $12/12$ e a fórmula do custo
+confirmada pelo supremo varrido --- que é o Cor.~\ref{fis:cor:travunica} e a
+cláusula~(6). §AN6: as bolas particionam e todo ponto é centro, com a euclidiana
+a falhar \emph{ambas} no mesmo raio. \emph{Duas coisas ficam provadas e NÃO
+varridas, e dizem-se}: a invariância de $\operatorname{prof}$ sob $D$
+(cláusula~5), e a separação $\dagger\neq\mathcal{D}$ do
+Teor.~\ref{fis:thm:duasinvol} sobre um par concreto de tabelas.}
+
+\colunas{Lema~\ref{fis:lem:ultra}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:euler},~\ref{fis:thm:dim},~\ref{fis:thm:vizniso},~\ref{fis:thm:navega},~\ref{fis:thm:duasinvol},~\ref{fis:thm:constroi},~\ref{fis:thm:dual}; Lema~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:travunica}}
+        {a árvore, o dragão e a espiral, a serpentina, a travessia por dígitos, a leitura dual}
         {\code{tests/aranha\_n.c} §AN6--§AN7, §AN13--§AN14, §AN25, §AN29, §AN37; \code{tests/pgwire.c} §W122--§W123, §W128}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -3165,6 +3562,397 @@ $2$ a $8$; o bit único a desenhar o metal; e a razão a tender para $\sigma$.
         {\code{tests/aranha\_n.c} §AN1--§AN2, §AN5, §AN8--§AN11, §AN18, §AN20--§AN23, §AN31; \code{tests/aranha\_inversa.c} §AI1--§AI7; \code{tests/neuronio.c}}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\part{Relatividade}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\section*{A tese desta parte}\label{fis:rel-tese}
+
+\noindent Não se postula uma velocidade limite: conta-se o que um passo alcança.
+Não se postula o intervalo: é a forma quadrática que a Def.~\ref{fis:def:tempo}
+já escreveu. Não se postulam três classes: é o sinal dessa grandeza, que a régua
+faz \emph{inteira} na aresta quando ela própria o é. Não se postula a borda:
+procura-se o ponto fixo da dobra, e
+pergunta-se se ele cai dentro do objeto. Não se postula a energia: contam-se as
+passagens pela régua.
+
+\medskip\noindent Cada uma dessas frases tem, à sua direita, o enunciado que a
+obriga:
+\begin{center}\small
+\begin{tabular}{@{}p{0.30\textwidth}p{0.34\textwidth}l@{}}
+\toprule
+ & \textbf{a estrutura} & \textbf{o que a obriga} \\
+\midrule
+o limite de um passo & a vizinhança: o passo \emph{é} uma aresta & Def.~\ref{fis:def:percurso}, Teor.~\ref{fis:thm:passo} \\
+a velocidade máxima & meia volta --- o ponto fixo da dobra & Teor.~\ref{fis:thm:meiavolta} \\
+o ser atingida, ou não & a paridade dos extremos & Teor.~\ref{fis:thm:meiavolta}(3) \\
+o intervalo & $q=g_{uv}\partial x^{u}\partial x^{v}$, inteiro na aresta se $h$ o for & Def.~\ref{fis:def:tempo}(ii) \\
+as três classes & o sinal de $q$, e a tricotomia da ordem & Teor.~\ref{fis:thm:tresclasses} \\
+a borda & $q=0$ --- e não tem ponto & Teor.~\ref{fis:thm:borda} \\
+a energia & a volta fechada, resíduo $0$ & Teor.~\ref{fis:thm:volta} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Porque esta parte vem aqui}\label{fis:rel-porque}
+
+\noindent A Mecânica entrega tudo o que segue, e nenhuma outra parte o tem: o
+\textbf{tempo} como contagem de passos (Def.~\ref{fis:def:tempo}), a
+\textbf{forma quadrática} $q$ com $g$ simétrica e não degenerada, a \textbf{régua
+curvada pelo campo} $g_{uv}(x)=G(x)h_{uv}$, e a \textbf{queda}
+(Teor.~\ref{fis:thm:geodesica}: \emph{a aranha não decide --- cai}). A
+§\ref{fis:tempo} chama-se «O espaço e o tempo»; esta parte é a sua continuação
+directa.
+
+\medskip\noindent E a Óptica, do outro lado, é o que esta parte alimenta --- mas
+\emph{não pela porta que parece}. Aqui a tricotomia enuncia-se sobre $q$, que é
+\emph{inteiro na aresta sempre que $h$ o seja}; lá o
+Teor.~\ref{fis:thm:leidisc} enuncia uma tricotomia
+sobre $\Delta$. \textbf{As duas não são o mesmo enunciado, e convém dizê-lo antes
+de alguém as colar}: $q$ é o \emph{valor} da forma num salto, sob uma régua fixa;
+$\Delta$ é o \emph{invariante da própria régua}. São de níveis diferentes, e o
+que partilham é o passo de prova --- a tricotomia \textbf{da ordem} ---, que nos
+dois sítios está escrito com as mesmas palavras.
+
+\medskip\noindent\textbf{E onde as duas se tocam --- que é só no posto dois ---
+elas repelem-se.} Tome-se a régua binária $q(a,b)=a^{2}+Bab+Cb^{2}$ da
+§\ref{fis:borda}. Sem dividir por $2$, que este documento não permite supor,
+\[
+\boxed{\;4\,q(a,b)=(2a+Bb)^{2}-\Delta\,b^{2}\;}
+\]
+e daí lê-se tudo: com $\Delta\le0$ os dois termos não se cancelam num anel
+ordenado, e $q$ é semidefinida; com $\Delta>0$ ela toma os dois sinais. Logo
+\emph{indefinida $\iff\Delta>0$}, e $\Delta=0$ é o caso \textbf{degenerado}.
+Donde a borda desta parte --- que pede $q=0$ com salto não nulo --- \textbf{não}
+é a classe parabólica. \emph{Mas também não é a hiperbólica}, e convém não trocar
+uma colagem por outra: ser indefinida é preciso e não chega, como o
+Teor.~\ref{fis:thm:borda}(1) mostra com $h=\operatorname{diag}(1,-2)$, que tem
+$\Delta=8>0$ e borda \emph{vazia}. A inclusão é \textbf{estrita}: quem tem borda
+está no hiperbólico, e não o contrário.
+
+\medskip\noindent\textbf{E a comparação pára aqui, de propósito.} $\Delta$ está
+definido para réguas \emph{binárias} (Def.~\ref{fis:def:caixa}); esta parte corre
+em posto $n$ qualquer, e a §\ref{fis:rel-naoderiva} diz que $n$ entra como dado.
+Em posto $\ge3$ a comparação não tem sujeito. \emph{Não se afirma, portanto, que
+uma parte esteja contida na outra}: afirma-se apenas que no posto onde as duas
+falam, o parabólico fica de fora por a forma degenerar, e o que tem borda é uma
+\emph{parte} do hiperbólico --- qual parte, é o Cor.~\ref{fis:cor:borda} que o
+decide, e decide-o por $\Delta$ ser quadrado, não por ser positivo.
+
+\section{O limite de um passo, e ele já estava escrito}\label{fis:rel-passo}
+
+\begin{teorema}[o passo não escolhe a sua distância]\label{fis:thm:passo}
+Seja $\pi$ um percurso na acepção da Def.~\ref{fis:def:percurso} ---
+$\pi(t+1)\in\mathcal{V}(\pi(t))$ para todo $t$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Por unidade de parâmetro, o deslocamento é uma aresta e mais
+nada.} O tempo conta aplicações do operador (Def.~\ref{fis:def:tempo}(i)); cada
+aplicação move o índice de uma célula para uma vizinha. \emph{O limite não é uma
+grandeza que se meça: é a definição de percurso}.
+\item[(2)] \textbf{E o que fica de fora fica de fora por não ser aresta.} Na
+grade, o passo $(1,1)$ não é aresta, e a reta diagonal não é percurso --- embora
+seja realização perfeitamente legítima. A proibição é do \emph{grafo}, não da
+trajetória.
+\item[(3)] \textbf{O limite não depende do ponto nem do instante.} Pelo
+Teor.~\ref{fis:thm:dim} vale $\abs{\mathcal{V}(x)}=2n$ em todo $x$, com os $2n$
+vizinhos distintos: a leitura é das mesmas $2n$ células em qualquer ponto e em
+qualquer instante. \emph{É por isso que o limite é o mesmo para todos} --- não
+por um princípio, mas por a vizinhança não variar.
+\item[(4)] \textbf{E não há atalho que o contorne.} Pelo
+Teor.~\ref{fis:thm:vizniso}, nenhuma injeção leva vizinhos em vizinhos para
+$n\ge2$: não existe representação em que um salto proibido passe a permitido.
+\emph{O grau proíbe-o}, e proíbe-o em toda a representação.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são a Def.~\ref{fis:def:percurso} lida, mais a
+Def.~\ref{fis:def:tempo}(i) para o parâmetro. (3) é o Teor.~\ref{fis:thm:dim},
+cuja cláusula dá $2n$ vizinhos distintos em todo ponto, sem hipótese sobre $x$ ou
+sobre $t$. (4) é o Teor.~\ref{fis:thm:vizniso}: a existência de $\varphi$ injetiva
+com $\varphi(\mathcal{V}(x))\subseteq\mathcal{V}(\varphi(x))$ obriga $n\le1$; para
+$n\ge2$ não há nenhuma, logo mudar de representação não liberta o salto.
+\end{proof}
+
+\medskip\noindent\textbf{E convém dizer o que isto \emph{não} é.} Não é uma
+afirmação sobre uma constante do mundo. É uma afirmação sobre o par (realização,
+grafo): \emph{as bordas não sabem que existe luz}. Identificar este limite com
+uma velocidade medida é \textbf{realização}, e a §\ref{fis:rel-naoderiva} diz o
+que essa identificação custa.
+
+\section{A velocidade máxima é meia volta}\label{fis:rel-meiavolta}
+
+\noindent O Teor.~\ref{fis:thm:passo} deu o limite numa régua \emph{aberta}: o
+passo é uma aresta. Numa régua \emph{fechada} --- a que a face multiplicativa dá,
+onde a volta regressa --- o limite tem outra forma, e sai da mesma dobra.
+
+\medskip\noindent\emph{Um aviso de letra, e vale para toda esta parte}: nesta
+secção $q$ é o \textbf{número de marcas} da régua fechada, e na
+§\ref{fis:rel-intervalo} $q$ é a \textbf{forma quadrática} da
+Def.~\ref{fis:def:tempo}(ii). São dois objetos e uma só letra --- o documento já
+gasta $B$ no binário e $\mathcal{B}$ na bola pela mesma razão. \emph{Onde as duas
+aparecem juntas, o contexto di-lo, e onde não disser é defeito.}
+
+\begin{teorema}[o máximo é a involução]\label{fis:thm:meiavolta}
+Sobre uma régua fechada de $q$ marcas, a distância entre duas marcas separadas de
+$p$ passos é a \emph{menor} das duas voltas,
+\[
+\boxed{\;d(p)=\min\{\,p,\ q-p\,\}\;}
+\]
+--- andar mais do que meia volta é andar para trás pelo outro lado. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O máximo é $q/2$, e é atingido exactamente onde $p=q-p$.}
+\item[(2)] \textbf{E esse ponto é o ponto fixo da dobra.} A aplicação
+$p\mapsto q-p$ é a Def.~\ref{fis:def:op} com extremos $0$ e $q$; o seu único
+ponto fixo é o \textbf{meio} (Teor.~\ref{fis:thm:duas}(2)), e é ele o máximo.
+\emph{A velocidade máxima é a interface}: o único lugar onde os dois sentidos dão
+o mesmo número.
+\item[(3)] \textbf{Ser atingida é uma questão de paridade.} Existe $p$ com
+$p=q-p$ se e só se $q$ é \textbf{par}. Em $q$ ímpar a involução não tem ponto
+fixo na régua, e o máximo é aproximado e nunca alcançado.
+\item[(4)] \textbf{E onde é atingida não há sentido, logo não há órbita.} Em
+$p=q/2$ ida e volta dão o mesmo número; o passo deixa de distinguir os dois
+sentidos, e com ele deixa de haver o sucessor que a Def.~\ref{fis:def:percurso}
+pede para haver composição.
+\item[(5)] \textbf{O número muda com a régua; a razão não.} Trocando $q$
+\emph{par}, o máximo $q/2$ muda de valor e a razão $d/q$ vale sempre
+$\tfrac12$ --- e a restrição à paridade é a de~(3), sem a qual o máximo nem
+existe. \emph{Não se postulou velocidade limite nenhuma --- ela saiu de o círculo
+ser fechado.}
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $d$ é o mínimo de duas funções, uma crescente em $p$ e outra decrescente;
+elas cruzam-se onde $p=q-p$, e aí $d=p=q/2$. Para $p$ menor vale $d=p<q/2$; para
+$p$ maior vale $d=q-p<q/2$. Logo o máximo é $q/2$ e é atingido só no cruzamento.
+
+(2) $\partial p=0+q-p$ é a Def.~\ref{fis:def:op} com $a=0$ e $b=q$; pelo
+Teor.~\ref{fis:thm:duas}(2) ela é involutiva e tem um único ponto fixo, o meio
+$\tfrac{q}{2}$. O cruzamento de~(1) é a equação $\partial p=p$, que é a definição
+de ponto fixo. \emph{Não são dois factos: é um, lido em duas linguagens.}
+
+(3) $p=q-p$ é $2p=q$. Com $q$ par a solução está na régua; com $q$ ímpar o lado
+direito é ímpar e o esquerdo par, e não há solução --- é a mesma conta do
+Teor.~\ref{fis:thm:dual}(7), onde os extremos $0$ e $N-1$ com $N$ par dão
+interface vazia. \emph{A interface existe ou não existe conforme a paridade dos
+extremos, e é sempre esta conta que o decide.}
+
+(4) Em $p=q/2$ tem-se $p=q-p$, isto é, os dois caminhos têm o mesmo comprimento;
+nada na régua os separa. Sem sentido definido não há sucessor bem definido, e a
+Def.~\ref{fis:def:percurso} pede um.
+
+(5) $d(q/2)/q=\tfrac12$ para todo $q$ par, por substituição directa. \emph{A razão
+é da dobra; o número é da régua.}
+\end{proof}
+
+\begin{corolario}[no máximo, o par de sentidos tem um elemento só]\label{fis:cor:semmassa}
+Com $q$ par, no ponto $p=q/2$ os dois sentidos dão o mesmo número --- é a
+cláusula~(4) --- pelo que o par $\{p,\,q-p\}$ tem \textbf{um} elemento e não dois.
+\emph{Ali não há ida-e-volta a contar}: a distinção entre uma passagem e duas,
+que o Teor.~\ref{fis:thm:volta} vai usar, degenera exactamente neste ponto.
+\end{corolario}
+
+\begin{proof}
+$p=q-p$ dá $\{p,q-p\}=\{p\}$, de cardinal um. É o
+Teor.~\ref{fis:thm:meiavolta}(4) sem mais nada --- \emph{e nada aqui usa o
+Teor.~\ref{fis:thm:volta}, que só vem adiante}: o que se afirma é a degenerescência
+do par, e o que ela custa lê-se lá.
+\end{proof}
+
+\section{O intervalo, as três classes, e a borda sem ponto}\label{fis:rel-intervalo}
+
+\noindent A Def.~\ref{fis:def:tempo}(ii) já escreveu o intervalo, e a
+§\ref{fis:tempo} já disse o que dele se usa: \emph{sobre uma aresta $q$ é
+inteiro}; só $\tau$ pede raiz. Tudo o que segue corre sobre $q$, e nenhuma raiz é
+avaliada.
+
+\begin{teorema}[três classes, e a decisão é um sinal]\label{fis:thm:tresclasses}
+Com $q(\partial x)=g_{uv}\,\partial x^{u}\partial x^{v}$ e $g$ simétrica e não
+degenerada sobre o suporte, a tricotomia da ordem esgota:
+\[
+\begin{array}{lll}
+q>0 & \text{a régua mede o salto} & \text{o percurso avança e a volta existe}\\[2pt]
+q=0 & \text{a \textbf{borda}} & \text{o salto tem comprimento nulo sem ser nulo}\\[2pt]
+q<0 & \text{o outro ramo} & \text{a régua troca de face}
+\end{array}
+\]
+E a decisão é \textbf{um teste inteiro} \emph{sempre que $h$ o for}: pelo
+Teor.~\ref{fis:thm:gcanon} uma aresta na direção $i$ dá $q=g_{ii}$, e com
+$g_{uv}(x)=G(x)h_{uv}$ vale $q=G(x)\,h_{ii}$ --- produto de $G$, que é o cardinal
+de uma fibra (Def.~\ref{fis:def:objeto}), pela entrada $h_{ii}$. \emph{A
+inteireza de $q$ não é de graça: pede-se a $h$, e é o caso do medidor, que corre
+com $h=\delta$.} Feito isso, não há limiar, não há arredondamento, e a raiz nunca
+é tirada.
+\end{teorema}
+
+\begin{proof}
+A tricotomia \emph{da ordem} esgota, e é ela --- e não uma realização numérica ---
+que dá as três possibilidades; a prova corre em qualquer anel ordenado, e esta
+metade não usa inteireza nenhuma. Que $q$ seja inteiro na aresta é o
+Teor.~\ref{fis:thm:gcanon} (o percurso só sonda a diagonal de $g$, porque um
+salto diagonal não é aresta pela Def.~\ref{fis:def:percurso}) mais $G$ inteiro
+pela Def.~\ref{fis:def:objeto} \emph{e $h_{ii}$ inteiro por hipótese sobre $h$}.
+\emph{São duas coisas separadas}: a classificação é da ordem, a inteireza é da
+régua escolhida, e só a segunda precisa de hipótese.
+\end{proof}
+
+\begin{teorema}[a borda é limite e não é lugar]\label{fis:thm:borda}
+Seja $\mathcal{B}=\{\partial x: q(\partial x)=0\}$ a borda do
+Teor.~\ref{fis:thm:tresclasses}. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Ser indefinida é preciso, e não chega.} Se $g$ é definida,
+$q(\partial x)=0$ força $\partial x=0$: sem indefinição não há borda. \emph{Mas a
+recíproca é falsa sobre um anel}, e convém dizê-lo em vez de a supor: com
+$h=\operatorname{diag}(1,-2)$ a forma é indefinida e não degenerada, e
+$a^{2}-2b^{2}=0$ não tem solução não nula em $\Zc$. \textbf{A condição que falta
+tem a forma já escrita} do outro lado do documento: pelo Cor.~\ref{fis:cor:borda}
+--- que é sobre \emph{espelhos}, e portanto de posto dois com $C$ invertível ---
+a régua parte-se em lineares quando $\Delta$ é um \emph{quadrado} em $A$ e as
+metades estão em $A$ ---
+e é isso, e não o sinal, que decide se a borda tem direção.
+\item[(2)] \textbf{E na borda a régua não normaliza.} Para todo $\lambda$ vale
+$q(\lambda\,\partial x)=\lambda^{2}q(\partial x)=0$: \emph{nenhum reescalamento dá
+comprimento unidade a uma direção da borda}. É esta a falha, e não a
+injetividade de $q$ --- que nenhuma forma quadrática tem, porque $q(v)=q(-v)$
+sempre.
+\item[(3)] \textbf{E sobre a grade diagonal a borda não tem aresta.} Suponha-se
+$h_{ii}\neq0$ para toda a direção usada --- que é o caso de
+$g_{uv}(x)=G(x)\delta_{uv}$, o do medidor. Então $q=G(x)h_{ii}\neq0$ em toda
+aresta, porque no suporte $G\ge1$: \textbf{não há aresta na borda}, e ela é
+atingida como limite de razões e nunca como salto realizado. \emph{É fronteira,
+e não sítio.} \emph{A hipótese não é decorativa}: $h=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$
+é não degenerada com diagonal nula, e nela a aresta $e_1$ está na borda. \emph{E
+não se diga que é a matriz do espelho}: aquela, na §\ref{fis:borda}, é a de um
+\textbf{endomorfismo}, e esta é uma \textbf{Gram} --- lida como Gram dá $q=2ab$,
+que sobre $\Zc$ nem é equivalente a $a^{2}-b^{2}$, precisamente porque a mudança
+de base tem determinante $-2$.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Se $g$ é definida, $q$ anula-se só em $0$, por definição de definida. O
+contra-exemplo verifica-se: $a^{2}=2b^{2}$ com $b\neq0$ daria $2$ quadrado, e a
+descida infinita exclui-o; com $b=0$ vem $a=0$. A caracterização por $\Delta$
+quadrado é o Cor.~\ref{fis:cor:borda}, já demonstrado.
+
+(2) $q$ é quadrática: $q(\lambda v)=\lambda^{2}q(v)$, que é a
+Def.~\ref{fis:def:tempo}(ii) lida sobre um múltiplo. Com $q(\partial x)=0$ o lado
+direito é nulo para todo $\lambda$. \emph{E o que aqui falha é a normalização,
+não a volta de $\partial$}: a dobra da Def.~\ref{fis:def:op} é involutiva sempre,
+e não depende de $q$.
+
+(3) Numa aresta na direção $i$ vale $q=G(x)h_{ii}$ pelo
+Teor.~\ref{fis:thm:tresclasses}; por hipótese $h_{ii}\neq0$, e no suporte é
+$G(x)\ge1$ pela Def.~\ref{fis:def:objeto}. Logo $q\neq0$ em toda aresta. Que a
+hipótese é necessária vê-se na matriz do enunciado, cuja diagonal é nula com
+determinante $-1$.
+\end{proof}
+
+\medskip\noindent\textbf{E a borda tem testemunha, na Óptica, exibida.} A
+cláusula~(3) diz que nenhuma aresta a realiza; o que ela não dá é um caso
+concreto. A §\ref{fis:borda} dá-o: com a cifra $(B,C)=(0,-1)$ a régua é
+$q(a,b)=a^{2}-b^{2}$, e $q(1,1)=0$ --- as duas rectas $a+b=0$ e $a-b=0$, que lá
+são os \emph{eixos próprios} do espelho $\nu$, \textbf{são} a borda desta parte.
+E a direcção $(1,1)$ é exactamente a que o Teor.~\ref{fis:thm:passo}(2) já tinha
+recusado: \emph{o passo $(1,1)$ não é aresta}. \emph{Os dois enunciados foram
+escritos em partes diferentes e dizem o mesmo ponto} --- um proíbe, o outro
+exibe.
+
+\medskip\noindent\textbf{E as duas maneiras de não chegar são duas, e não uma.} O
+Teor.~\ref{fis:thm:meiavolta}(3) diz que o máximo pode \emph{não existir} na
+régua --- questão de paridade dos extremos; o Teor.~\ref{fis:thm:borda}(3) diz
+que a borda \emph{existe} e não tem ponto realizável. As duas são leituras de
+$\operatorname{Fix}$, e diferem em se o ponto fixo cai dentro do objeto:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & a condição & o que se segue \\
+\midrule
+régua fechada, $q$ par & $\operatorname{Fix}(\partial)$ está na régua & o máximo \textbf{atinge-se} --- e ali não há repouso \\
+régua fechada, $q$ ímpar & $\operatorname{Fix}(\partial)=\emptyset$ & o máximo é aproximado e nunca alcançado \\
+a borda, $q=0$ & nenhuma aresta a realiza & é fronteira, e não sítio \\
+\bottomrule
+\end{tabular}
+\end{center}
+\emph{É a mesma conta do Teor.~\ref{fis:thm:dual}(7), com outros extremos.}
+
+\section{A volta dá a energia}\label{fis:rel-volta}
+
+\begin{teorema}[uma passagem é momento; a volta fechada é energia]\label{fis:thm:volta}
+Contem-se as passagens de um percurso pela régua, e não as suas dimensões:
+\[
+\begin{array}{lll}
+\textbf{uma passagem} & \text{não reverte} & \text{é o \textbf{momento}}\\[2pt]
+\textbf{ida \emph{e} volta} & \text{resíduo }0 & \text{é a \textbf{energia}}
+\end{array}
+\]
+A separação é de \emph{contagem}: a primeira passagem deixa a dobra por desfazer,
+e é a segunda que a desfaz, com resíduo zero pela involutividade
+(Teor.~\ref{fis:thm:duas}(2)). \emph{Logo a energia é a volta fechada, e não uma
+grandeza de segunda ordem por acidente de unidades.}
+\end{teorema}
+
+\begin{proof}
+Pela Def.~\ref{fis:def:op}, $\partial$ tem volta e $\partial^{2}=\mathrm{id}$
+(Teor.~\ref{fis:thm:duas}(2)). Uma aplicação leva $x$ em $\partial x$ e não
+regressa: o par $(x,\partial x)$ tem dois elementos distintos sempre que $x$ não
+é o meio, e a diferença é o que ficou por desfazer. Duas aplicações devolvem $x$
+exactamente, isto é, com resíduo $0$. A contagem das passagens é a contagem das
+aplicações do operador, que é o tempo da Def.~\ref{fis:def:tempo}(i); logo as duas
+grandezas distinguem-se por um número inteiro de passagens e não por uma escolha
+de escala. E no meio --- $x=\partial x$ --- o par colapsa, que é o
+Cor.~\ref{fis:cor:semmassa}.
+\end{proof}
+
+\section{O que esta parte não deriva}\label{fis:rel-naoderiva}
+
+\noindent Três coisas, e dizem-se porque não dizê-las seria fazê-las passar.
+
+\medskip\noindent\textbf{Primeira: a dimensão.} Nada aqui produz o número de
+direções. O Teor.~\ref{fis:thm:dim} põe a dimensão num sítio único ---
+$\abs{\mathcal{V}(x)}=2n$ --- e é tudo: $n$ entra como \emph{dado da grade}, e
+nenhum enunciado desta parte o obriga a valer três, nem a valer coisa nenhuma.
+\emph{Uma assinatura com três direções de um sinal e uma do outro é escolha de
+realização, e não teorema}; quem a escrever tem de a pagar noutro sítio.
+
+\medskip\noindent\textbf{Segunda: a identificação com uma constante medida.} O
+Teor.~\ref{fis:thm:passo} e o Teor.~\ref{fis:thm:meiavolta} são sobre
+\textbf{bordas} --- a vizinhança de um grafo, e o fecho de uma régua. As bordas
+não sabem que existe luz. Dizer que este limite \emph{é} a velocidade de um sinal
+do mundo é uma realização a mais, e ela não está aqui nem se segue do que está.
+
+\medskip\noindent\textbf{Terceira, e é de vocabulário: a palavra «luz» já está
+tomada neste documento, e não é neste sentido.} No Teor.~\ref{fis:thm:massa} a
+\emph{luz} é a fronteira espectral --- todas as raízes sobre o círculo,
+$\rho=1$, a massa a desaparecer --- e o círculo unitário é a fronteira onde a
+matéria vira luz. Isso é uma afirmação sobre \emph{espectros}, e a borda desta
+parte é uma afirmação sobre \emph{saltos}. As duas encontram-se, e o encontro é
+enunciado onde ele se mede; aqui não se supõe.
+\[
+\boxed{\ \text{o que se deriva é o \textbf{limite}; o que se atribui é o \textbf{nome}.}\ }
+\]
+
+\medido{\code{tests/renormaliza.c} §N1: a velocidade máxima é meia volta, e a
+razão $d/q$ vale $\tfrac12$ em toda a escala --- o número muda com a régua e a
+razão não, que é o Teor.~\ref{fis:thm:meiavolta}(5). §N2: e \emph{só fecha em $q$
+par} --- em $q$ ímpar não há $p$ com $p=q-p$, isto é, a involução \emph{não tem
+ponto fixo na régua} (ela existe sempre), que é a
+cláusula~(3) medida, com o caso ímpar como controlo. \code{tests/cone\_nulo.c}
+§K1: sobre a órbita, $\abs{N}$ é invariante e \textbf{nunca} é zero --- a
+trajetória não toca a borda. §K2: e num varrimento de $801\times801$ pontos
+inteiros, \textbf{zero} estão na borda --- que é o Teor.~\ref{fis:thm:borda}(3),
+medido por exaustão em vez de argumentado. \code{tests/aranha\_n.c}
+§AN21--§AN22: $q$ inteiro por aresta com três $g$, e $g_{uv}(x)=G(x)\delta_{uv}$
+--- que é a hipótese de inteireza do Teor.~\ref{fis:thm:tresclasses}, já
+verificada na Mecânica e aqui usada sem se repetir a conta. \emph{E fica dito o
+que NÃO está varrido}: o Teor.~\ref{fis:thm:passo}(4) é herdado do
+Teor.~\ref{fis:thm:vizniso} e não tem varredura própria nesta parte.}
+
+\colunas{Teor.~\ref{fis:thm:passo},~\ref{fis:thm:meiavolta},~\ref{fis:thm:tresclasses},~\ref{fis:thm:borda},~\ref{fis:thm:volta}; Cor.~\ref{fis:cor:semmassa}}
+        {a régua fechada, a borda sem ponto, a volta que fecha}
+        {\code{tests/renormaliza.c} §N1--§N2; \code{tests/cone\_nulo.c} §K1--§K2; \code{tests/aranha\_n.c} §AN21--§AN22}
+
+% ═══════════════════════════════════════════════════════════════════════════
 \part{Óptica}
 % ═══════════════════════════════════════════════════════════════════════════
 
@@ -3671,7 +4459,11 @@ afirmação certa não é «uma involução diagonaliza sobre qualquer anel» --
 correr sobre $A$ quando a divisão por $2$ é permitida}. É a mesma condição que o
 Cor.~\ref{fis:cor:borda} pede às metades $(B\pm\sqrt\Delta)/2$ e que o
 Teor.~\ref{fis:thm:pandora}(2) pede ao $t$ --- \emph{o comportamento do $2$ no
-anel}, a aparecer pela terceira vez e sempre no mesmo sítio.
+anel}, a aparecer pela terceira vez e sempre no mesmo sítio. \emph{E o $2$ tem
+uma segunda carreira, que não é esta}: no Teor.~\ref{fis:thm:meiavolta}(3) o que
+decide é $2p=q$ --- \textbf{divisibilidade}, num anel onde o $2$ nunca se
+inverte. \emph{São o mesmo número em dois papéis, e colá-los seria trocar
+inverter por dividir.}
 \emph{Reflectir é ser a própria inversa, e é isso que a factorização exprime.}
 
 \medskip\noindent\textbf{No interior e na fronteira.} Dentro de uma classe de
@@ -5527,11 +6319,176 @@ acelerar e não toca na dualidade. \emph{São independentes porque fazem coisas
 diferentes, e é isso que o grupo de Klein regista.}
 \medido{\code{tests/cosmologia.c} §C5: $w\mapsto-w$ é involução com
 $\mathbf{0}$ desvios em $17$ graus; a órbita dá $\mathbf{4}$ estados em $m=5$ e
-$\mathbf{2}$ em $m=0$, o ponto fixo; e a distância ao limite $\tfrac23$ vale
+$\mathbf{2}$ em $m=0$, o ponto fixo; e a \emph{diferença dos quadrados} ao limite
+$\tfrac23$ --- \textbf{e não a distância}, que é o que o
+Teor.~\ref{fis:thm:conica}(1) separa --- vale
 $16/(9D)$ em $12$ graus, com $\mathbf{0}$ desvios --- \emph{sem tolerância
 nenhuma, porque a conta é inteira}. E a troca de sinal é verificada pela
 \textbf{definição}, $w+(-w)=0$ nas duas coordenadas, porque a contagem sozinha
 aceitaria qualquer involução que separasse quatro estados.}
+
+\section{A curvatura, e o que ela é neste documento}\label{fis:curvatura}
+
+\noindent Fora da linha do roteiro, a palavra ainda não tinha sido usada --- e há
+razão: ela já estava escrita sem nome. A §\ref{fis:tempo} pôs
+\[
+g_{uv}(x)=G(x)\,h_{uv} ,
+\]
+e disse o que isso significa --- \emph{é a memória, ao ficar no espaço, que o
+curva}. Não é preciso importar curvatura nenhuma: ela é o campo $G$, e o que
+falta é lê-la nas coordenadas que esta parte já tem.
+
+\begin{definicao}[plana e curva]\label{fis:def:curvatura}
+Sobre o suporte de uma realização, com $g_{uv}(x)=G(x)h_{uv}$ e $h$ fixa, a
+\textbf{curvatura} é o desvio de $G$ à unidade:
+\[
+\boxed{
+\begin{array}{lll}
+G\equiv1 & \textbf{plana} & \tau=N:\ \text{o próprio e o parâmetro coincidem}\\[2pt]
+G>1\ \text{nalgum ponto} & \textbf{curva} & \tau\ \text{afasta-se do parâmetro}
+\end{array}}
+\]
+\emph{E são dois, e não três}: sobre o suporte vale $G\ge1$
+(Def.~\ref{fis:def:objeto}), pelo que $\operatorname{sgn}(G-1)$ toma dois valores
+e não os três do trial. O terceiro caso --- $G=0$, onde $\det g=G^{n}\det h$ se
+anula e não há régua --- \textbf{não é um estado da curvatura}: é o complemento
+do suporte, isto é, o sítio onde a definição não fala. \emph{Convém dizê-lo, e
+não estirar a analogia até onde ela não vai.}
+
+\medskip\noindent Curvatura não é, portanto, uma propriedade acrescentada ao
+espaço: é o que a trajetória lá deixou.
+\end{definicao}
+
+\begin{teorema}[a curvatura é a dobra, e ela é espacial]\label{fis:thm:curvatura}
+Com a Def.~\ref{fis:def:curvatura}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Curvar é dobrar.} $G(x)>1$ se e só se existem $i\neq j$ com
+$\pi(i)=\pi(j)=x$ (Teor.~\ref{fis:thm:mult}(2)). Logo a métrica é plana
+exactamente onde $\pi$ é injetiva, e curva exactamente onde ela não é.
+\emph{A curvatura é a multiplicidade, e não outra grandeza com o mesmo nome.}
+\item[(2)] \textbf{E é \emph{espacial}, no único sentido que este documento
+tem.} A separação entre espaço e tempo já está feita e não é escolha: o tempo é o
+\emph{parâmetro}, a contagem das aplicações do operador
+(Def.~\ref{fis:def:tempo}(i)), e o espaço é onde a realização aterra. O parâmetro
+conta um por um e não se curva --- \emph{cada aplicação é uma}. Tudo o que curva
+está em $G$, e $G$ vive na célula. \emph{A curvatura é do lado do espaço porque a
+memória é do lado do espaço} (Teor.~\ref{fis:thm:mult}(3)).
+\item[(3)] \textbf{Um valor pontual não é observável por si.} Se $G'=c\,G$ com
+$c>0$ constante, o passo é o mesmo: ele lê $G$, e $\arg\min(cG)=\arg\min G$.
+\emph{Logo a escala de $G$ não move a trajetória.} E daqui sai um aviso sobre a
+própria Def.~\ref{fis:def:curvatura}: ela decide pelo \emph{valor} --- $G\equiv1$
+plana --- e o reescalamento leva uma métrica plana em $G'\equiv c$, que a Def.
+chama curva sem que a trajetória tenha mudado. \textbf{A Def. fixa a unidade; ela
+não é invariante de escala}, e é preciso dizê-lo em vez de o deixar por
+descobrir. \emph{E fica dito o que aqui não se prova}: qual seria a leitura
+invariante --- sobre um ciclo fechado, e com que resíduo --- é enunciado que esta
+parte não tem.
+\item[(4)] \textbf{E o percurso só sonda a diagonal.} Pelo
+Teor.~\ref{fis:thm:gcanon} uma aresta na direção $i$ dá $q=g_{ii}$, e os termos
+cruzados não são medidos por passo nenhum, porque um salto diagonal não é aresta
+(Def.~\ref{fis:def:percurso}). \emph{Logo a curvatura que um percurso lê é a das
+direções, uma a uma} --- e é essa, e não outra, a que esta secção mede.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) É o Teor.~\ref{fis:thm:mult}(2) mais a Def.~\ref{fis:def:curvatura}: $G>1$ é
+a existência de dois índices na mesma fibra, e $G\le1$ é a injetividade.
+
+(2) A Def.~\ref{fis:def:tempo}(i) dá o parâmetro como contagem, e cada aplicação
+do operador acrescenta \emph{um}: não há factor por onde o parâmetro se possa
+curvar. A dependência do ponto entra por $G(x)$, e o
+Teor.~\ref{fis:thm:mult}(3) dá que $G$ se altera na célula corrente e em mais
+nenhuma --- é do espaço. \emph{A assimetria não foi posta aqui: vem de a
+realização ter domínio e contradomínio de naturezas diferentes.}
+
+(3) O passo vai ao vizinho de menor $G$ --- é o ciclo da §\ref{fis:algoritmo},
+que \emph{lê $G$}. Com $c>0$, $cG(y)<cG(z)\iff G(y)<G(z)$, pelo que o mínimo é o
+mesmo vizinho e a trajetória não muda. \emph{A hipótese $c>0$ é necessária}: com
+$c<0$ o mínimo passa a máximo. E não se invoca aqui o
+Teor.~\ref{fis:thm:geodesica}, que pediria $h=\mathrm{id}$ --- hipótese que
+cláusula nenhuma desta secção faz.
+
+(4) É o Teor.~\ref{fis:thm:gcanon}, cuja prova observa que para medir os termos
+cruzados seria preciso um salto diagonal, e esse não é aresta.
+\end{proof}
+
+\begin{corolario}[a fronteira $w=-\tfrac13$ é borda, e não estado]\label{fis:cor:fronteira-curv}
+Na família metálica, $w=-\tfrac13$ é onde $1+3w=0$, isto é onde as duas
+coordenadas do Cor.~\ref{fis:cor:destino} \emph{deixam de separar}. E ela
+\textbf{não é atingida}: pelo Teor.~\ref{fis:thm:conica}(2) vale
+$\abs{w+1}<\tfrac23$ com igualdade em \textbf{nenhuma} assinatura, porque
+$9(w+1)^{2}=4m^{2}/D$ e $m^{2}<D=m^{2}+4$ sempre. \emph{É fronteira, e não
+sítio} --- a terceira linha da tabela da §\ref{fis:rel-intervalo}, e pela mesma
+razão: um inteiro que não se anula impede a igualdade. Lá é $G\ge1$; aqui é o
+$4$ do discriminante.
+\end{corolario}
+
+\begin{proof}
+$1+3w=0$ é $w=-\tfrac13$, e aí $w+1=\tfrac23$. Ora $9(w+1)^{2}=4m^{2}/D<4$
+porque $D-m^{2}=4>0$, donde $\abs{w+1}<\tfrac23$ estritamente. O
+Teor.~\ref{fis:thm:conica}(2) enuncia-o, e o Teor.~\ref{fis:thm:borda}(3) é a
+mesma figura noutro objeto --- \emph{semelhança de mecanismo, e não identidade de
+réguas}.
+\end{proof}
+
+\medskip\noindent\textbf{E o que esta secção NÃO prova, porque foi tentado e não
+fecha.} A cónica $9(w+1)^{2}+16H^{2}=4$ é exacta, e é tentador ler nela que não
+há sítio para um terceiro termo --- logo que a família é plana. \emph{Não se
+segue}, por três razões que se dizem em vez de se esconderem:
+\begin{enumerate}\itemsep2pt
+\item[(i)] a identidade é \textbf{tautologia das definições}: $H^{2}$ define-se
+como $1/D$ (Def.~\ref{fis:def:regua-cosmo}) e $w+1=2m/(3\sqrt D)$ é dado, pelo
+que a cónica é $u^{2}+v^{2}=1$ com $u=m/\sqrt D$ e $v=2/\sqrt D$. \emph{Não há
+constrangimento onde só há cancelamento};
+\item[(ii)] somar $t$ e ver que $4+t\neq4$ \textbf{pressupõe} que a curvatura
+apareceria como parcela aditiva naquele lado --- forma que este documento nunca
+derivou; e não exclui parcela \emph{negativa};
+\item[(iii)] e sobretudo: a curvatura da Def.~\ref{fis:def:curvatura} é $G$, o
+cardinal de uma fibra, e \textbf{nada na cónica menciona $G$, $\pi$ ou o
+suporte}. Não há realização associada à família metálica, pelo que o termo não
+teria referente na equação onde se afirmaria que é nulo.
+\end{enumerate}
+\emph{Fica a pergunta aberta e o caminho fechado}: para dizer que a família é
+plana seria preciso primeiro dar-lhe uma realização, e isso não está feito.
+
+\medskip\noindent\textbf{E há duas coisas com o nome de curvatura, e uma delas é
+baptizada aqui.} A da Def.~\ref{fis:def:curvatura} é a do \emph{percurso}:
+mede-se em $G$ e distingue plana de curva. E o Teor.~\ref{fis:thm:leidisc} lê o
+sinal de $\Delta$, que separa os três regimes --- \emph{esse teorema nunca usa a
+palavra curvatura, e é esta secção que lha empresta}. Dito isso, não se colam:
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & o que mede & onde vive & o que separa \\
+\midrule
+a do percurso & $G$, a multiplicidade & na célula & plana / curva \\
+a da régua & $\operatorname{sgn}\Delta$ & na cifra $(B,C)$ & roda / cisalha / expande \\
+\bottomrule
+\end{tabular}
+\end{center}
+Uma é o valor da forma num salto, a outra é o invariante dela --- a distinção da
+§\ref{fis:rel-porque}. \emph{E é por isso que não se conclui a primeira a partir
+da segunda}, que é exactamente o que o parágrafo acima recusa fazer.
+
+\medido{\code{tests/aranha\_n.c} §AN22: a métrica generalizada
+$g_{uv}(x)=G(x)\delta_{uv}$ --- o dragão, que dobra, dá $g$ a variar ponto a
+ponto; a reta axial, com $G\equiv1$, dá $g$ constante. \emph{E o teste mede $g$
+constante, não $G\equiv1$}: as duas condições coincidem nos dois casos exibidos e
+não em geral, pelo que a Def.~\ref{fis:def:curvatura} fica testemunhada nesses
+dois e não caracterizada. A variante anisotrópica corre no mesmo bloco e mostra
+necessária a hipótese $h=\mathrm{id}$ do Teor.~\ref{fis:thm:geodesica} ---
+\emph{dele, e não de cláusula nenhuma desta secção, que não a faz}. §AN21: $q$
+inteiro por aresta com três $g$, e o termo cruzado nunca sondado.
+\code{tests/cosmologia.c} §C3: o $D$ sai do operador e $D=m^{2}+4$ confere nos
+graus varridos --- \emph{$H^{2}=1/D$ é definição, e não é o que ali se mede};
+§C5: a órbita de quatro com \textbf{dois} em $m=0$, e a \emph{diferença dos
+quadrados} a valer $16/(9D)$ com \textbf{zero} desvios --- \textbf{e não a
+distância}, que é o que o Teor.~\ref{fis:thm:conica}(1) e o próprio medidor
+fazem questão de separar. \emph{E fica dito o que NÃO está varrido}: a leitura
+da curvatura sobre um ciclo fechado não é enunciada nem medida nesta parte; o
+\code{tests/isomorfo.c} §V mede uma holonomia de face num objeto vizinho, e
+ligá-la exigiria o enunciado que aqui não está escrito.}
 
 \section{O universo é uma órbita}\label{fis:universo-orbita}
 
@@ -5585,7 +6542,7 @@ $H^{2}=1/D$ & o discriminante da caixa & Teor.~\ref{fis:thm:leidisc} \\
 os três conteúdos & o trial $\{-1,0,+1\}$ & §\ref{fis:mapa} \\
 $C$ aditiva $\to$ multiplicativa & a forma polar & §\ref{fis:transf} \\
 $w=-\tfrac13$ neutro & o ponto fixo comum às duas faces & Teor.~\ref{fis:thm:corte} \\
-a órbita de quatro & o rotor $R^{4}=\mathrm{id}$ & Teor.~\ref{fis:thm:fecho} \\
+a órbita de quatro & \emph{não} o rotor: o \textbf{outro} quatro & Teor.~\ref{fis:thm:bidual} \\
 a expansão da família metálica & o regime hiperbólico & Teor.~\ref{fis:thm:leidisc} \\
 \bottomrule
 \end{tabular}
@@ -5628,7 +6585,7 @@ arquitetura, e a escala é a coordenada em que ela se lê.}
 \boxed{\;\text{que universo sobrevive às leis da construção?}\;}
 \]
 
-\colunas{Teor.~\ref{fis:thm:taxa},~\ref{fis:thm:conteudos},~\ref{fis:thm:diluicao},~\ref{fis:thm:bidual},~\ref{fis:thm:conica}; Cor.~\ref{fis:cor:destino},~\ref{fis:cor:destino-orbita}}        {$H^{2}=1/D$; os três conteúdos no trial; a diluição com a sua constante; a órbita de quatro}
+\colunas{Teor.~\ref{fis:thm:taxa},~\ref{fis:thm:conteudos},~\ref{fis:thm:diluicao},~\ref{fis:thm:bidual},~\ref{fis:thm:conica},~\ref{fis:thm:curvatura}; Cor.~\ref{fis:cor:destino},~\ref{fis:cor:destino-orbita},~\ref{fis:cor:fronteira-curv}}        {$H^{2}=1/D$; os três conteúdos no trial; a diluição com a sua constante; a órbita de quatro; a curvatura como dobra, e a fronteira que não é estado}
         {\code{tests/cosmologia.c} §C1--§C6}
 
 % ═══════════════════════════════════════════════════════════════════════════
