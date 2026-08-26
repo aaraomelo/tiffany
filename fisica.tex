@@ -139,11 +139,21 @@ universo, a memória de uma rede --- e as dualidades que os ligam.
 % ═══════════════════════════════════════════════════════════════════════════
 \section*{As perguntas, e onde estão respondidas}\label{fis:roteiro}
 
-\begin{center}\small
-\begin{tabular}{@{}p{0.44\textwidth}p{0.32\textwidth}l@{}}
+{\small
+\begin{longtable}{@{}p{0.44\textwidth}p{0.32\textwidth}l@{}}
 \toprule
 a pergunta & a resposta & onde \\
 \midrule
+\endfirsthead
+\toprule
+a pergunta & a resposta & onde \\
+\midrule
+\endhead
+\bottomrule
+\multicolumn{3}{@{}r@{}}{\footnotesize\itshape continua na página seguinte}\\
+\endfoot
+\bottomrule
+\endlastfoot
 O que é o ponto de partida? & dois extremos e a dobra que os troca & Def.~\ref{fis:def:op} \\
 Donde vêm as operações e os dois dígitos? & da dobra: sem meio, são precisas duas faces & Teor.~\ref{fis:thm:duas},~\ref{fis:thm:B} \\
 E as coordenadas? & a tupla ordenada: a \emph{representação} & Teor.~\ref{fis:thm:coord} \\
@@ -159,6 +169,11 @@ E a curvatura, o que é? & a dobra: $G>1$ --- e é espacial & Teor.~\ref{fis:thm
 O que é o gradiente? & a diferença relativa $G(y)/G(x)-1$ & Teor.~\ref{fis:thm:gradiente} \\
 E a magnitude, onde está? & não é eixo: é a dobra contada & Teor.~\ref{fis:thm:magnitude} \\
 E a matéria? & é o espaço concentrado, $\mathfrak{m}=G-1$ & Teor.~\ref{fis:thm:materia} \\
+O que é um duomorfismo? & isomorfismo para a estrutura \emph{dual}, $A\cong B^{\vee}$ & Def.~\ref{fis:def:duomorf} \\
+E dois deles, compostos? & dão um isomorfismo: a passagem tem paridade & Teor.~\ref{fis:thm:duo-composicao} \\
+Quantos quadrantes há? & quatro: duas metades, dois bits, e $Q_{ab}Q_{a'b'}=Q_{a\oplus a',b\oplus b'}$ & Teor.~\ref{fis:thm:quarteto} \\
+E a estrela, o que é? & o elemento onde as duas dobras coincidem: $x^{2}=x+1$ & Teor.~\ref{fis:thm:estrela} \\
+E ela existe onde? & num ponto que o encaixe entrega, em inteiros & Teor.~\ref{fis:thm:estrelaencaixe} \\
 E o espaço, é palco? & não: é componente, e o par é duomorfo & Teor.~\ref{fis:thm:duoesp} \\
 E a interacção de $N$ corpos? & é o $c$: as células que partilham & Teor.~\ref{fis:thm:ncorpos} \\
 E a energia, onde está? & no grau dois: $\sum G^{2}=\abs{I}+2P$ & Teor.~\ref{fis:thm:tresgraus} \\
@@ -171,9 +186,7 @@ Até onde chega um passo? & a uma aresta --- e o grau proíbe o atalho & Teor.~\
 Donde vem a velocidade máxima? & de a régua fechar: é meia volta, o ponto fixo & Teor.~\ref{fis:thm:meiavolta} \\
 O que classifica um sistema sem perda? & $\Delta$, e não o traço & Teor.~\ref{fis:thm:leidisc} \\
 Que ordens admite uma rede? & $\{1,2,3,4,6\}$, e nunca $5$ & Lema~\ref{fis:lem:cristal} \\
-\bottomrule
-\end{tabular}
-\end{center}
+\end{longtable}}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Álgebra}
@@ -181,42 +194,311 @@ Que ordens admite uma rede? & $\{1,2,3,4,6\}$, e nunca $5$ & Lema~\ref{fis:lem:c
 
 \section{O operador, e as duas faces}\label{fis:dobra}
 
-\noindent Em quatro frases, e cada uma é um resultado abaixo:
+\noindent Em quatro frases --- \emph{epígrafe, e não enunciado}: cada uma é o
+resumo de um resultado que se demonstra adiante, e o rótulo vai ao lado para não
+haver dívida por cobrar.
 \[
 \boxed{
-\begin{array}{l}
-\text{O finito é \textbf{codificado}.}\\
-\text{O infinito é \textbf{caminhado}.}\\
-\text{A representação \textbf{comprime}.}\\
-\text{A dobra \textbf{mede} o que foi perdido.}
+\begin{array}{ll}
+\text{O finito é \textbf{codificado}.} & \text{Teor.~\ref{fis:thm:coord}}\\
+\text{O infinito é \textbf{caminhado}.} & \text{§\ref{fis:escada}, Teor.~\ref{fis:thm:corte}}\\
+\text{A representação \textbf{comprime}.} & \text{Teor.~\ref{fis:thm:mult}}\\
+\text{A dobra \textbf{mede} o que foi perdido.} & \text{Def.~\ref{fis:def:folga}, Cor.~\ref{fis:cor:folga}}
 \end{array}}
 \]
 
-\medskip\noindent O documento parte de \emph{dois} extremos e de \emph{uma}
-operação sobre eles: dobrar ao meio. Não se supõem números, nem símbolos, nem
-quantos são --- tudo o que segue é o que a dobra produz, e produz por indução.
+\medskip\noindent O documento parte de \emph{uma} aplicação e de \emph{uma}
+cláusula sobre ela: que a sua ordem seja dois. \textbf{Nem sequer se dão dois
+pontos} --- eles saem, e saem porque uma aplicação com volta não tem para onde
+levar um ponto além de si e de um outro. Não se supõem números,
+nem símbolos, nem quantos são: \emph{tudo o que segue é o que a dobra produz, e
+produz por indução}.
 
 \begin{definicao}[o operador]\label{fis:def:op}
-Dado um intervalo de extremos $a$ e $b$, a \textbf{dobra} é a acção que os
-\emph{troca}:
+\textbf{Um único mapa} $\partial\colon S\to S$ num suporte $S$ qualquer ---
+\emph{sem números, sem símbolos, sem se dizer quantos são} --- e \textbf{uma}
+cláusula:
 \[
-\boxed{\;\partial x \;=\; a+b-x\;}
+\boxed{\;\operatorname{ord}(\partial)=2\;}
 \]
-Ela \textbf{conserva}: para todo $x$, a composição $x\circ\partial x$ vale sempre
-o mesmo --- a soma dos extremos --- e a esse valor comum chama-se o
-\textbf{invariante}. Pede-se ainda que $\partial$ seja \emph{efetiva}
-($\partial\neq\mathrm{id}$) e que tenha \textbf{volta}: de $\partial x$
-recupera-se $x$. Sem a volta não há o que conservar, e é ela que distingue uma
-dobra de um esmagamento.
+\emph{A dobra é o que \textbf{fecha em dois}.}
 
-\medskip\noindent Normalizando os extremos --- que é só escolher a régua --- fica
-$\partial x=1-x$, e o invariante é uma \textbf{unidade}:
+\medskip\noindent\textbf{E é uma e não duas, de propósito.} Escrever
+$\partial\circ\partial=\mathrm{id}$ \emph{e} $\partial\neq\mathrm{id}$ é
+\textbf{explicitar em duas cláusulas o que $\operatorname{ord}(\partial)=2$ já
+contém}: a primeira diz que a ordem divide dois, a segunda que não é um, e a
+conjunção das duas \emph{é} a ordem ser exactamente dois. As duas leituras saem
+dela e não se pedem:
 \[
-\boxed{\;\abs{\,x\circ\partial x\,}=1\;}
+\partial\circ\partial=\mathrm{id}\quad(\text{fecha})\;,\qquad
+\partial\neq\mathrm{id}\quad(\text{em \textbf{dois}, não em um}) .
 \]
-O $\abs{\cdot}$ diz apenas isso. Não diz qual, e não traz sinal nenhum: nada do
-que segue precisa de escrever um número negativo.
+
+\medskip\noindent\textbf{E a identidade não é candidato: é o composto.} Depois da
+segunda seta não nasceu um $\partial_2$ --- nasceu o \emph{fecho}, e é o mesmo
+$\partial$ que o fecha. \emph{A cisão também não é um segundo operador}: é a
+órbita $x\longleftrightarrow\partial x$ de um ponto que não ficou quieto. Não há
+$\partial_1$ e $\partial_2$ --- há um, e dois \textbf{estados} dele.
+
+\medskip\noindent\emph{E «fechar em dois» é a frase que este documento vai
+repetir}: o Teor.~\ref{fis:thm:constroi}(4) separa por ela a troca do rotor ---
+$\det=-1$ fecha em dois \emph{sem rodar}, $\det=+1$ com $R^{2}=-\mathrm{id}$
+fecha em quatro \emph{rodando} ---, e o Teor.~\ref{fis:thm:quarteto}(3) diz que
+os quatro quadrantes fecham todos em dois. \textbf{É a ordem, e é sempre a
+ordem.}
+
+\medskip\noindent Não se dão extremos, não se dá meio, não se dá soma, não se dá
+afinidade --- o suporte ainda nem tem nome. \emph{O que segue sai daqui, e sai
+como teorema.}
 \end{definicao}
+
+\begin{teorema}[os dois pontos não são dados: saem forçados]\label{fis:thm:doispontos}
+Com a Def.~\ref{fis:def:op}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Toda a órbita é um ciclo de comprimento um ou dois, e nunca
+mais.} A órbita de $x$ é $\{x,\partial x\}$, e aplicar $\partial$ outra vez
+devolve $x$. \emph{Não há terceiro sítio para onde ir}: nos pares o ciclo é
+$x\mapsto\partial x\mapsto x$, nos fixos é $m\mapsto m$. \textbf{E o fecho
+$\partial\circ\partial=\mathrm{id}$ vale nos dois} --- ele é o composto, não o
+comprimento: o que a cisão observa é que \emph{nalgum} ponto o ciclo tem
+comprimento dois.
+\item[(2)] \textbf{E há pelo menos uma de \emph{dois}.} A ordem ser dois --- e não
+um --- é haver $x$ com $\partial x\neq x$; para esse $x$ a órbita tem dois
+elementos distintos:
+\[
+\boxed{\;a:=x\;,\qquad b:=\partial x\;,\qquad a\neq b\;,\qquad \partial a=b\;,\ \partial b=a\;}
+\]
+\emph{Os extremos não são dados ao documento: são o que a dobra produz.} E são
+\textbf{dois} porque a órbita não pode ser maior, e não podem ser \emph{um}
+porque a efetividade o proíbe.
+\item[(3)] \textbf{O suporte parte-se, e parte-se só em duas espécies.}
+\[
+\boxed{\;S=\operatorname{Fix}(\partial)\ \sqcup\ \bigsqcup_{\text{pares}}\{a,b\}\;}
+\]
+--- os pontos que a dobra deixa quietos, e os \emph{pares} que ela troca. \emph{É
+a cisão do ponto}: cada órbita tem \textbf{um} elemento, se o ponto é fixo, ou
+\textbf{dois}, se não é.
+\item[(4)] \textbf{E o caso mínimo é o par sozinho.} O menor suporte onde uma
+dobra efetiva existe tem \textbf{dois} elementos, e aí
+$\operatorname{Fix}(\partial)=\varnothing$: \emph{não há vinco}. Um suporte de um
+elemento só admite $\partial=\mathrm{id}$, que a efetividade exclui.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) A ordem ser dois dá $\partial\circ\partial=\mathrm{id}$, isto é
+$\partial(\partial x)=x$; logo $\{x,\partial x\}$ é fechado por $\partial$,
+contém a órbita e está contido nela. Tem um elemento se $\partial x=x$ e dois se
+não.
+
+(2) Se $\partial x=x$ para todo $x$, então $\partial=\mathrm{id}$ e a ordem seria
+\emph{um} --- contra a definição. Logo existe $x$ com $\partial x\neq x$, e para
+esse (1) dá dois, com $\partial a=\partial x=b$ e
+$\partial b=\partial\partial x=x=a$.
+
+(3) As órbitas de uma aplicação com volta particionam o suporte, porque «estar na
+mesma órbita» é reflexiva ($\partial^{2}=\mathrm{id}$ dá $x$ na sua), simétrica
+($b=\partial a\Rightarrow a=\partial b$) e transitiva (por (1), as órbitas têm no
+máximo dois). Por (1) cada bloco tem um ou dois elementos.
+
+(4) Num suporte de um elemento a única aplicação é a identidade. Num de dois, a
+efetividade obriga à troca, e a troca não fixa nenhum dos dois.
+\end{proof}
+
+\medskip\noindent\textbf{E a aresta é a memória --- é isto que ela é, e não uma
+figura.} O par $\{a,b\}$ do Teor.~\ref{fis:thm:doispontos}(2) é \textbf{não
+ordenado}: a dobra dá os dois e não diz qual é o primeiro. \emph{O ponto sozinho
+não sabe do outro}; quem sabe é o par. E um par não ordenado de pontos
+distintos, num suporte, é uma \textbf{aresta}:
+\[
+\boxed{\;\text{a aresta é o par que a dobra faz --- e é ela que guarda o que o ponto não guarda}\;}
+\]
+É por isso que este documento conta arestas e não só vértices, e é o mesmo
+\emph{a aresta é a memória da divisão} que o Teor.~\ref{fis:thm:coord} volta a
+dizer noutro andar. \emph{A memória não está no ponto: está na travessia.}
+
+\medskip\noindent\textbf{E daqui sai a falta que obriga a tudo o resto.} Pela
+cláusula~(4), no caso mínimo não há ponto quieto. \emph{Uma composição precisa de
+um invariante, e um invariante compatível com a dobra teria de ser fixo por
+ela} --- e não há fixo. É essa falta, e só ela, que obriga a uma
+\textbf{segunda} face, e é dela que $0$ e $1$ nascem
+(Teor.~\ref{fis:thm:duas}(4)). \textbf{O operador define o fundamento; o resto
+sai forçado, e começa aqui.}
+
+\medskip\noindent\emph{E note-se o que ainda não há.} Não há soma, não há
+produto, não há ordem e não há distância --- há um suporte, uma aplicação com
+volta, e a partição que ela faz. \textbf{Tudo o que se seguir tem de dizer de
+onde vem}, e o que vier de fora entra como \emph{realização} e diz-se que o é.
+
+\begin{teorema}[a dobra afim, e é uma realização e não a dobra]\label{fis:thm:dobra}
+\emph{Quando} o suporte carrega uma soma --- o que a Def.~\ref{fis:def:op} não
+dá, e por isso se declara --- e \emph{quando} a diferença dos extremos é
+\textbf{cancelável}, a dobra que troca $a$ e $b$ e é \textbf{afim} é uma só:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Existe uma, e não há segunda.} De $\partial x=\alpha x+\beta$
+com $\partial a=b$ e $\partial b=a$ vem, subtraindo,
+\[
+(\alpha+1)(a-b)=0 ,
+\]
+e \emph{daqui} $\alpha=-1$ --- \textbf{não por $a\neq b$, mas por $a-b$ ser
+cancelável}; e daí $\beta=a+b$:
+\[
+\boxed{\;\partial x=a+b-x\;}
+\]
+\emph{A hipótese não é decorativa}: em $\Zc/8$ com $a=0$, $b=2$, a aplicação
+$\partial x=3x+2$ troca os extremos, é afim e cumpre $\partial\partial x=9x+8=x$
+--- e \textbf{não} é $a+b-x$, porque ali $a-b=6$ não é cancelável ($6\cdot4=0$).
+\emph{Duas dobras afins com os mesmos extremos}, e a unicidade cai. Onde a
+diferença cancela --- e é o caso dos dois símbolos, que é o que este documento
+usa --- não há segunda.
+\item[(2)] \textbf{E cumpre a Def.~\ref{fis:def:op} --- verifica-se, não se
+pede.} $\partial(\partial x)=a+b-(a+b-x)=x$, e $\partial a=b\neq a$.
+\emph{A realização honra o operador}, que é o que se lhe exige.
+\item[(3)] \textbf{E conserva:}
+\[
+\boxed{\;x+\partial x=a+b\quad\text{para todo }x\;}
+\]
+\emph{Esta é a constante da dobra afim}, e é dela que os invariantes das duas
+faces vão sair. \textbf{Vale com vinco ou sem ele.}
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é a conta escrita; (2) é substituir a fórmula em si própria; (3) é somar $x$
+aos dois lados. \emph{E em nenhum passo se usou mais do que a soma declarada e a
+troca do Teor.~\ref{fis:thm:doispontos}(2).}
+\end{proof}
+
+\medskip\noindent\emph{E é preciso dizer o que a afinidade é aqui}: não é uma
+propriedade da dobra --- a Def.~\ref{fis:def:op} não a conhece --- é a
+\textbf{escolha de como a carregar} num suporte que soma. \emph{Outra realização
+daria outra fórmula e a mesma dobra}; o que não muda é a partição do
+Teor.~\ref{fis:thm:doispontos}(3), porque essa é do operador.
+
+\begin{teorema}[o vinco: quando existe, e o que morre quando não]\label{fis:thm:vinco}
+Chame-se \textbf{vinco} a um ponto que a dobra não move, $\partial m=m$ ---
+\emph{isto é, a uma órbita de \textbf{um} elemento no sentido do
+Teor.~\ref{fis:thm:doispontos}(1)}. \textbf{Na dobra em geral não há mais a
+dizer}: o vinco é ou não é, e a cláusula~(4) daquele teorema já mostra um caso em
+que não é. \emph{Onde há soma}, e só aí, ele ganha equação:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Na realização afim, ser vinco é resolver uma equação, e uma
+só.} De $\partial m=m$ e do Teor.~\ref{fis:thm:dobra}(1) vem $a+b-m=m$, isto é
+\[
+\boxed{\;m\in\operatorname{Fix}(\partial)\iff 2m=a+b\;}
+\]
+\item[(2)] \textbf{E são duas perguntas, não uma: existir e ser único.}
+\[
+\boxed{\;\operatorname{Fix}(\partial)=\{\,m:\ 2m=a+b\,\}\;}
+\]
+\emph{Existe} onde $a+b$ for o dobro de alguém; \emph{é único} onde a duplicação
+for injetiva --- isto é, onde $2u=0$ obrigue $u=0$. \textbf{As duas podem falhar
+em separado}: num suporte com $u\neq0$ e $2u=0$, se $m$ é vinco então $m+u$
+também o é, e são dois. Onde as duas valem, escreve-se $m=\tfrac{a+b}{2}$, e a
+constante do Teor.~\ref{fis:thm:dobra}(3) ganha o seu nome: $x+\partial x=2m$.
+\emph{O $2m$ não é a lei --- é o nome que a constante recebe quando o meio
+pertence ao suporte e é um só.}
+\item[(3)] \textbf{Em característica $2$ com $a+b\neq0$ não há vinco.} Aí $2m=0$
+para \emph{todo} $m$, pelo que a equação de~(1) pede $a+b=0$:
+\[
+\boxed{\;2m=0\ \text{e}\ a+b\neq0\;\Longrightarrow\;\operatorname{Fix}(\partial)=\varnothing\;}
+\]
+\emph{E isto não pede nome nenhum}: basta um suporte de dois pontos onde a soma
+de cada um consigo dá zero e a soma dos dois não dá --- o caso que a
+\textbf{cláusula~(4)} descreve e que o Teor.~\ref{fis:thm:B} \emph{depois} vai
+nomear. \textbf{A ordem é esta e não a contrária}: o facto é sobre dois pontos, e
+o nome chega quando as tabelas existirem.
+\item[(4)] \textbf{E o que morre é o ponto quieto, não o operador.} Ali, ao mesmo
+tempo:
+\[
+\boxed{\;\partial^{2}=\mathrm{id}\;,\qquad \partial\neq\mathrm{id}\;,\qquad
+\operatorname{Fix}(\partial)=\varnothing\;}
+\]
+\emph{A passagem continua; o centro deixa de pertencer ao suporte.} E a
+conservação do Teor.~\ref{fis:thm:dobra}(3) continua a valer: sobre o par,
+$x+\partial x=a+b$ nos dois elementos, e o valor é $a+b$ --- que ali \textbf{não}
+é o zero da face aditiva. \emph{É essa falta --- do ponto quieto, e só dela ---
+que obriga a uma segunda face}, e é o Teor.~\ref{fis:thm:duas}(4) que a conta.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é a substituição directa. (2): o conjunto das soluções é o que a equação diz;
+duas soluções $m,m'$ dão $2(m-m')=0$, pelo que coincidem exactamente onde a
+duplicação é injetiva --- e onde não é, $m$ e $m+u$ com $2u=0$ são ambas. E
+$x+\partial x=a+b=2m$ é o Teor.~\ref{fis:thm:dobra}(3) com o nome trocado.
+
+(3) $2m=m+m=0$ em característica $2$, para todo $m$; logo a equação de~(1) só tem
+solução se $a+b=0$, e com $a+b\neq0$ não tem nenhuma. \emph{E é tudo} --- não se
+usa aqui suporte nomeado nenhum.
+
+(4) As três afirmações são o Teor.~\ref{fis:thm:dobra}(2) e a cláusula~(3) postas
+juntas; e a conservação é o Teor.~\ref{fis:thm:dobra}(3), que vale sem vinco
+porque a sua prova não o usa.
+\end{proof}
+
+\medskip\noindent\emph{E há uma redundância que convém confessar em vez de
+esconder.} A troca dos extremos, sozinha, já determinou a seta
+(Teor.~\ref{fis:thm:dobra}(1)): \textbf{o vinco não escolhe a seta --- escolhe o
+sítio onde ela tem ponto quieto}, e é esse sítio que falha em $B$. \emph{A
+distinção não é fina: é a que faz a segunda face nascer por necessidade e não por
+gosto.}
+
+\medskip\noindent\textbf{E as duas conservações não são do mesmo grau.} A
+primeira sai da \emph{forma} da dobra; a segunda sai da \emph{involução} a agir
+sobre um invariante de composição, e pede uma composição que ainda não existe
+aqui:
+\[
+\underbrace{\;x+\partial x=a+b\;}_{\text{a constante da dobra --- Teor.~\ref{fis:thm:dobra}(3)}}
+\qquad\qquad
+\underbrace{\;x\circ\partial x=\partial x\circ x\;}_{\text{a simetria do par --- Lema~\ref{fis:lem:comutapar}}}
+\]
+\emph{Não se ponham lado a lado como se fossem ambas imediatas.} A segunda pede
+$\circ$ com $I(x)=x\circ\partial x$ invariante, e é isso, e só isso, que o lema
+usa.
+
+\medskip\noindent\textbf{E o vinco mostra o sítio onde a lei do par deixa de ser
+lei e passa a ser escrita.} Onde ele existe, $\partial m=m$ faz de
+$m\circ\partial m$ e $\partial m\circ m$ \textbf{a mesma expressão}, letra por
+letra --- \emph{ali a comutação não é lei, é escrita}. \textbf{Mas essa
+identidade local não propaga nada}: fora do vinco quem trabalha é
+$\partial^{2}=\mathrm{id}$ com a invariância de $I$. \emph{O vinco mostra o
+centro; a invariância faz a lei valer no par inteiro.} \emph{E onde ele existe, o
+meio não é inventado pela dobra: é o que ela deixa quieto}, e é o primeiro ponto
+que a conta nomeia. \emph{Onde não existe, o que fica é precisamente o dado que
+resta da falha de $2m=a+b$} --- e não é pouco: é ele que obriga a segunda face.
+
+\begin{lema}[o operador fabrica a lei do par]\label{fis:lem:comutapar}
+Seja $\circ$ uma composição cujo valor $I(x)=x\circ\partial x$ não depende de
+$x$. Então, para todo $x$,
+\[
+\boxed{\;x\circ\partial x\;=\;\partial x\circ x\;}
+\]
+e \textbf{a seta é de sentido único}:
+\[
+\boxed{\;\partial\;\longrightarrow\;\partial^{2}=\mathrm{id}\;\longrightarrow\;I(x)=I(\partial x)\;\longrightarrow\;x\circ\partial x=\partial x\circ x\;}
+\]
+\emph{Não é a comutatividade que explica o operador: é o operador que fabrica a
+comutatividade do par.} A dobra não recebe uma lei de fora --- \textbf{produz a
+lei a que o par obedece}, e produz porque foi a acção dela sobre $x$ que
+escreveu o segundo arranjo.
+\end{lema}
+
+\begin{proof}
+\emph{No vinco não há o que provar}: em $x=m$ vale $\partial m=m$, e
+$m\circ\partial m$ e $\partial m\circ m$ são a mesma expressão --- a comutação é
+ali \textbf{identidade}, e é essa a semente. Para todo o $x$: o segundo arranjo
+não é posto, é $\partial$ aplicado ao primeiro. Escrevendo a
+mesma expressão em $\partial x$ no lugar de $x$,
+\[
+I(\partial x)\;=\;\partial x\circ\partial(\partial x)\;=\;\partial x\circ x ,
+\]
+onde a segunda igualdade é $\partial^{2}=\mathrm{id}$, que a
+Def.~\ref{fis:def:op} dá --- e é tudo o que ela dá. Como $I$ não depende do
+argumento, $I(x)=I(\partial x)$, e as duas escritas são a mesma. \emph{A
+comutatividade não é sobre a composição inteira: é sobre o \textbf{par}
+$\{x,\partial x\}$} --- e esse par é obra de $\partial$, não do suporte.
+\end{proof}
 
 \begin{teorema}[uma composição não chega]\label{fis:thm:duas}
 Com $\partial$ da Def.~\ref{fis:def:op}:
@@ -235,37 +517,93 @@ e=n
 E na falta delas $\partial$ é a inversão \emph{seguida da translação por $e$},
 $\partial x=e\circ x^{-1}$ --- que é a Def.~\ref{fis:def:op} com $e=a+b$, antes
 de se escolher a régua. \emph{A normalização não é o que faz o teorema: é o que a
-equivalência diz que se está a fazer.}\item[(2)] \textbf{$\partial$ é involutiva, e tem um ponto fixo: o MEIO.} São
-factos da dobra e não dependem de composição nenhuma:
+equivalência diz que se está a fazer.}
+\item[(2)] \textbf{$\partial$ é involutiva, e o seu ponto fixo é o MEIO --- onde
+ele existe.} São factos da dobra e não dependem de composição nenhuma; estão
+demonstrados atrás, e cita-se em vez de se repetir:
 \[
-\partial^{2}=\mathrm{id},\qquad \partial m=m,\qquad m=\tfrac{a+b}{2} .
+\partial^{2}=\mathrm{id}\ \ (\text{Teor.~\ref{fis:thm:dobra}}(2)),
+\qquad
+\partial m=m\iff 2m=a+b\ \ (\text{Teor.~\ref{fis:thm:vinco}}(1)) .
 \]
-O meio é \emph{um só} e não é acrescentado ao conjunto --- é \textbf{produzido}
-pela dobra.
-\item[(3)] \textbf{E onde houver composição, é ele o neutro dela.} Por (1) o
-invariante é o neutro, e por (2) o invariante de uma composição compatível com
-$\partial$ tem de ser fixo por $\partial$; havendo um só fixo, é o meio.
-\emph{Enquanto não houver a face, o meio é só o centro} --- a identificação com
-o neutro nasce com a composição, não antes dela.
+Onde a metade existe o meio é \emph{um só} e vale $\tfrac{a+b}{2}$; e não é
+\item[(3)] \textbf{E onde houver composição \emph{cujo invariante seja o
+neutro}, é ele o meio.} A hipótese é essa, e diz-se: por~(1) ela equivale a
+$\partial$ ser a inversão, e então o invariante é fixo por $\partial$; havendo um
+só fixo, é o meio. \emph{Sem a hipótese a cláusula é falsa}, e a testemunha é
+curta: sobre três objectos com $\circ$ a soma e $\partial x=c-x$ com $c\neq0$, a
+composição é compatível com a dobra, o invariante é $c$, o neutro é $0$, e o
+fixo é $2c$ --- \textbf{os três distintos}. \emph{Enquanto não houver a face, o
+meio é só o centro}; e a identificação com o neutro não nasce com a composição
+--- nasce com a régua que a normaliza.
 \item[(4)] \textbf{Nos extremos sozinhos não há meio, e por isso uma composição
-não chega.} Sobre dois objectos apenas, $\partial$ troca-os e não fixa nenhum;
-então (3) não pode valer numa composição só --- o invariante teria de ser fixo,
-e não há fixo nenhum. É preciso uma \textbf{segunda}, e o seu invariante é o
-\emph{outro} extremo:
+não chega.} Sobre dois objectos apenas, $\partial$ troca-os e não fixa nenhum ---
+e o Teor.~\ref{fis:thm:vinco}(3) conta porquê, com a conta: o vinco pede
+$a+b=2m$, e nos dois símbolos $a+b=1$ com $2m=0$. Então (3) não pode valer numa
+composição só --- o invariante teria de ser fixo, e não há fixo nenhum.
+\smallskip\noindent\emph{E a saída não é escolher uma segunda: é contar quantas
+faltam.} Uma composição dá \textbf{um} invariante e $\partial$ tem de ser, nela,
+ou o oposto ou o inverso --- pela cláusula~(1), conforme o invariante seja ou não
+o neutro. \emph{E a cláusula~(1) pede volta}: onde a face não a tiver, a
+dicotomia não se aplica, e é o que sucede na face multiplicativa, onde um dos
+dois pontos não se inverte. Faltando o fixo, nenhuma se basta sozinha, e as duas
+juntas bastam: \emph{é por isso que são \textbf{duas} e não três}.
+
+\smallskip\noindent\textbf{E que os dois neutros sejam os dois pontos é
+\emph{pedido}, e não derivado --- diga-se.} Duas composições podem
+perfeitamente partilhar o neutro: sobre os mesmos dois objectos, a soma e a
+disjunção têm ambas neutro o primeiro deles, ambas honram a dobra, e nenhuma tem
+o invariante no neutro. \textbf{Só que aí o segundo ponto nunca ganha nome}, e o
+par fica com uma marca em vez de duas. \emph{Pedir os neutros distintos é pedir
+que cada face nomeie um extremo} --- e é exactamente isso que faz do par um
+suporte com dois símbolos, $0$ e $1$. \emph{É aqui que eles nascem}, e é nesse
+suporte que aparecem as duas realizações que o Teor.~\ref{fis:thm:B} vai
+determinar --- que é também o teorema que volta a declarar esta hipótese, em vez
+de a herdar em silêncio.
+
+\smallskip\noindent\textbf{E os invariantes ficam \emph{cruzados} --- é isso, e
+não outra coisa, que obriga a duas faces.} Sem ponto quieto, $\partial$ troca os
+dois pontos, pelo que sobre o par
 \[
-\boxed{\;\partial x + x = 0\;}\qquad\qquad\boxed{\;\partial x\cdot x = 1\;}
+\boxed{\;x\oplus\partial x=1\;}\qquad\qquad\boxed{\;x\otimes\partial x=0\;}
 \]
---- $\partial$ é o \emph{oposto} numa face e o \emph{inverso} na outra, e o
-invariante de cada uma é o neutro da outra.
-\item[(5)] \textbf{Dobrando, a estrutura repete-se dos DOIS lados.} O meio parte
-o intervalo em $[a,m]$ e $[m,b]$, e cada um, reescalado, é uma cópia exata do
-inteiro --- mesma dobra, mesmo meio, mesmos extremos. \emph{O ponto fixo de uma
-dobra é extremo da seguinte.}
-\item[(6)] \textbf{E a indução dá todos os pontos.} Ao fim de $n$ dobras há
-$2^{n}$ intervalos e $2^{n}+1$ pontos, e eles são exatamente os $k/2^{n}$ com
-$0\le k\le 2^{n}$. Nada se escolhe pelo caminho: cada nível é o anterior dobrado,
-e a escolha de \emph{qual lado} em cada passo é a coordenada que o
-Teor.~\ref{fis:thm:coord} vai ler.
+--- \emph{o invariante de cada lei é o neutro da \textbf{outra}}. \textbf{E o
+cruzamento sai só dos neutros, sem uma única tabela}: com $\partial$ a trocar
+$0$ e $1$, a neutralidade de $0$ para $\oplus$ dá $0\oplus1=1$, e a de $1$ para
+$\otimes$ dá $1\otimes0=0$; a comutatividade fecha os outros dois casos.
+\emph{Nada disto usa o Teor.~\ref{fis:thm:B}}, e é por isso que o pode preceder.
+É ainda a cláusula~(1) lida ao contrário: a inversão \emph{sempre} fixa o seu
+neutro, e aqui não há fixo nenhum, pelo que $\partial$ \textbf{não é} a inversão
+de composição nenhuma. \emph{Duas leis, e nenhuma se basta: o que uma deixa por
+dizer é exactamente o neutro da outra.}
+
+\smallskip\noindent\textbf{E é preciso não confundir isto com as equações da
+inversão.} As caixas
+\[
+\partial x+x=0\qquad\qquad \partial x\cdot x=1
+\]
+são as da \emph{inversão}, e pertencem às réguas \textbf{com} vinco da
+Obs.~\ref{fis:obs:reguas} --- $a+b=0$ numa face, $\abs{ab}=1$ na outra. Lá o
+invariante \emph{é} o neutro da própria face, porque lá $\partial$ é a inversão.
+\textbf{Aqui, onde o vinco falta, vale o contrário}, e é essa troca que faz a
+segunda face nascer por necessidade.
+\item[(5)] \textbf{Dobrando, a estrutura repete-se dos DOIS lados --- e aqui
+declara-se o que isto pede.} \emph{Onde a duplicação for invertível}, e só aí ---
+a mesma espécie de declaração que o Teor.~\ref{fis:thm:dobra} faz para a soma,
+e a condição que o Teor.~\ref{fis:thm:vinco}(2) isolou --- o vinco existe, é um
+só, e parte o suporte em dois lados; cada um, reescalado, é uma cópia exata do
+inteiro. \emph{O ponto fixo de uma dobra é extremo da seguinte.}
+\item[(6)] \textbf{E a indução dá todos os pontos, sob a mesma declaração.} Ao
+fim de $n$ dobras há $2^{n}$ pedaços e $2^{n}+1$ pontos, e eles são exatamente
+os $k/2^{n}$ com $0\le k\le 2^{n}$. Nada se escolhe pelo caminho: cada nível é o
+anterior dobrado, e a escolha de \emph{qual lado} em cada passo é a coordenada
+que o Teor.~\ref{fis:thm:coord} vai ler.
+\smallskip
+\emph{E é preciso dizer o que estas duas cláusulas custam}: elas não saem de
+$\operatorname{ord}(\partial)=2$. Pedem a duplicação invertível, e com ela a
+divisão por dois --- \textbf{que é exactamente o que falha no nível zero}, pela
+cláusula~(3) do Teor.~\ref{fis:thm:vinco}. \emph{São a realização do lado onde há
+metade}, e não o fundamento; o fundamento é (1)--(4).
 \end{enumerate}
 \end{teorema}
 
@@ -323,12 +661,43 @@ e exigindo comutatividade e associatividade sobra \textbf{uma} --- o ciclo de
 ordem três, com o meio de ordem $1$ e os extremos de ordem $3$. Não são dois
 teoremas: é o mesmo, medido dos dois lados. Os primeiros níveis de (6) em §M3.}
 
+\begin{observacao}[as três réguas, e não são três poses da mesma]\label{fis:obs:reguas}
+Normalizar é escolher a régua, e há uma por face. \textbf{As três linhas não são
+três formas da mesma operação}: a primeira fixa a escala do encaixe; a segunda
+normaliza o invariante \emph{aditivo}; a terceira normaliza o invariante da
+\emph{outra} face, e só fará sentido quando essa face existir. \emph{Não são três
+condições simultâneas sobre os mesmos extremos.}
+\[
+\begin{array}{lll}
+\text{a régua do \textbf{encaixe}} & a=0,\ b=1 & \partial x=1-x,\qquad x+\partial x=1\\[2pt]
+\text{a régua da face \textbf{aditiva}} & a+b=0 & \partial x=-x,\qquad\ \ x+\partial x=0\\[2pt]
+\text{a régua da face \textbf{multiplicativa}} & \abs{ab}=1 & \text{na face onde }\partial x=x^{-1}\colon\ x\cdot\partial x=\pm1
+\end{array}
+\]
+A primeira é a que a cláusula~(6) do Teor.~\ref{fis:thm:duas} usa, e é ela que dá
+os $k/2^{n}$. A segunda faz de $\partial$ o \textbf{oposto}. A terceira faz dele
+o \textbf{inverso} --- \emph{e não sai da fórmula afim}: pede a face
+multiplicativa, que o Teor.~\ref{fis:thm:duas}(4) acabou de obrigar a existir. É
+\emph{só ali} que o $\abs{\cdot}$ aparece, e por uma razão única: \emph{para não
+se escrever o sinal}.
+
+\medskip\noindent\textbf{E o invariante de cada face é da sua face, com uma
+distinção que convém não perder.} Na aditiva, a normalização põe o invariante no
+neutro $0$. Na multiplicativa, fixa-lhe o \emph{módulo} $1$; o \textbf{valor}
+pode depender da família --- na estrela do Teor.~\ref{fis:thm:duasfaces}(3), é $-1$.
+\emph{Módulo um não é o neutro.} E \emph{não se escreva $\abs{x+\partial x}=1$ na
+face aditiva}: lá o invariante é $0$, e nenhum módulo faz de zero um.
+\end{observacao}
+
+
 \section{Os dois símbolos, a lista, e o par centro/desvio}\label{fis:binario}
 
-\begin{teorema}[as soluções são únicas]\label{fis:thm:B}
+\begin{teorema}[as soluções são únicas, e o que isso custa]\label{fis:thm:B}
 No nível $0$ --- os dois extremos, sem meio --- as duas composições do
-Teor.~\ref{fis:thm:duas}(4) ficam \textbf{forçadas}, e sem que se escreva um
-sinal:
+Teor.~\ref{fis:thm:duas}(4) ficam \textbf{forçadas} \emph{sob duas hipóteses que
+aqui se declaram, e sem as quais não ficam}: a face aditiva é
+\textbf{associativa} e tem \textbf{volta}; e a multiplicativa
+\textbf{distribui} sobre ela. Então, e sem que se escreva um sinal:
 \[
 \begin{array}{c|cc}
 \cdot & 0 & 1\\\hline
@@ -349,17 +718,46 @@ dois.
 \end{teorema}
 
 \begin{proof}
-O invariante da segunda face é o neutro dela, logo $1\cdot x=x$; e
-$\partial 1=0$, pelo que $0$ fica absorvente, $0\cdot x=0$ --- as quatro entradas
-ficam determinadas. Para a primeira, $0$ é neutro e falta $1+1$: da
-Def.~\ref{fis:def:op} em $x=1$ vem $\partial 1+1=0$, isto é $0+1=1$, e em $x=0$
-vem $1+0=1$; compondo $\partial$ consigo lê-se $\partial\partial=1$, donde
-$1+1=0$.
+\emph{As tabelas não saem da dobra: saem de haver duas composições sobre dois
+pontos com neutros distintos.} A dobra entra depois, a verificar.
 
-Sobre dois símbolos com invariantes distintos sobrevivem exatamente \emph{duas}
-soluções, e a segunda é a primeira com $0$ e $1$ trocados: a mesma estrutura
-noutra nomeação. Partir do $0$ e construir o $1$, ou o contrário, é o mesmo
-percurso lido nos dois sentidos.
+\smallskip\noindent\textbf{A face aditiva.} Peça-se-lhe volta --- cada elemento
+com oposto, e associativa. Com neutro $0$, falta uma entrada: $1+1$. Se fosse
+$1+1=1$, então somando o oposto de $1$ dos dois lados --- e é a
+\textbf{associatividade} que permite fechar o lado esquerdo antes de somar ---
+viria $1=0$, contra os neutros serem distintos. Logo $1+1=0$, e a tabela fecha.
+\textbf{É a única composição com volta sobre dois pontos}, e daí: \emph{o oposto
+de $1$ é $1$}, e o $-1$ nunca precisa de ser escrito.
+
+\smallskip\noindent\textbf{A face multiplicativa.} Peça-se-lhe neutro $1$ ---
+$1\cdot x=x$, e $x\cdot1=x$ pela comutatividade ---, o que determina três
+entradas. Falta $0\cdot0$. \emph{E aqui o que decide é a outra face}: pela
+\textbf{distributividade declarada},
+$0\cdot0=(1+1)\cdot0=1\cdot0+1\cdot0=0+0=0$. Logo $0$ é absorvente e a tabela
+fecha.
+
+\smallskip\noindent\textbf{E convém ver que essa hipótese carrega mesmo o
+peso}, em vez de a supor inofensiva. Sem ela a tabela \textbf{não} é única:
+$x\otimes y:=$ «$x$ e $y$ são iguais» --- isto é $0\otimes0=1$ --- é
+comutativa, associativa, tem neutro $1$, \emph{e passa o teste da dobra}, porque
+$0\otimes1=1\otimes0=0$ dá o mesmo invariante cruzado $x\otimes\partial x=0$.
+\textbf{O cruzamento não a distingue.} Quem a mata é a distributividade, e só
+ela: $0\cdot(1+1)=0\cdot0=1$ contra $0\cdot1+0\cdot1=0$, isto é $1=0$.
+\emph{Declarada a distributividade, é única; sem ela, são duas.}
+
+\smallskip\noindent\textbf{E só agora a dobra, a verificar.} Com $\partial$ a
+troca ($\partial0=1$, $\partial1=0$):
+\[
+x\oplus\partial x=1\ \text{nos dois}\;,\qquad\qquad x\otimes\partial x=0\ \text{nos dois},
+\]
+que são exactamente os invariantes cruzados do Teor.~\ref{fis:thm:duas}(4).
+\emph{A dobra não impôs as tabelas: as tabelas honram a dobra}, e o cruzamento é
+a testemunha de que ali não há vinco.
+
+\smallskip\noindent Sobre dois símbolos com neutros distintos sobrevivem
+exatamente \emph{duas} nomeações, e a segunda é a primeira com $0$ e $1$
+trocados: a mesma estrutura noutro nome. Partir do $0$ e construir o $1$, ou o
+contrário, é o mesmo percurso lido nos dois sentidos.
 \end{proof}
 
 \begin{definicao}[o binário]\label{fis:def:B}
@@ -367,7 +765,9 @@ $B$ é o conjunto dos dois símbolos do Teor.~\ref{fis:thm:B}.
 \end{definicao}
 
 \medido{\code{tests/meio.c} §M7: varridas as tabelas comutativas com esses
-neutros há exatamente \textbf{uma} de cada. E \code{tests/aranha\_n.c} §AN33: as
+neutros \emph{e com as hipóteses do teorema} --- volta na aditiva,
+distributividade na multiplicativa --- há exatamente \textbf{uma} de cada. Sem
+elas há \textbf{duas} de cada, e é isso que a prova mede. E \code{tests/aranha\_n.c} §AN33: as
 quatro aplicações, as duas invertíveis e involutivas, e a única tabela de
 produto em dezasseis.}
 
@@ -387,20 +787,29 @@ andares uns dentro dos outros,
 com as palavras de largura $w$ em número de $2^{w}$ e a dobra a duplicar a
 largura. A \textbf{lista} $I$ é essa ordem.
 
-\medskip\noindent\textbf{E a mesma identidade lê-se a partir do meio.} O meio da
-Def.~\ref{fis:def:op} é $m=\tfrac{a+b}{2}$; escrevendo o \textbf{desvio}
-$\delta=\tfrac{a-b}{2}$ \emph{com sinal},
+\medskip\noindent\textbf{E a mesma identidade lê-se a partir do meio --- fora da
+lista, e diz-se onde.} \emph{Onde a metade existir} --- que não é em $I$, e o
+Teor.~\ref{fis:thm:vinco}(2) é quem o governa --- o vinco é
+$m=\tfrac{a+b}{2}$; escrevendo o \textbf{desvio} $\delta=\tfrac{a-b}{2}$
+\emph{com sinal},
 \[
 \boxed{\;a \;=\; m+\delta\,,\qquad\qquad b \;=\; m-\delta\;}
 \]
---- igualdade e não aproximação: $(m,\delta)$ e $(a,b)$ são a mesma coisa escrita
-duas vezes, e a volta devolve o par \emph{ordenado} com resíduo $0$. É a dobra
-outra vez: $m$ é o que $\partial$ fixa, $\delta$ o que ele reflete.
+--- igualdade e não aproximação, e a volta devolve o par \emph{ordenado} com
+resíduo $0$. É a dobra outra vez: $m$ é o que $\partial$ fixa, $\delta$ o que ele
+reflete. \textbf{E a leitura não vive em $I$}: com $a=0$ e $b=1$ o meio é
+$\tfrac12$, que a lista não tem. \emph{Este par pertence ao degrau onde o dois se
+inverte} --- o $X_3$ do Teor.~\ref{fis:thm:escada} ---, e é lá que se lê.
 
-\medskip\noindent\textbf{Só depois entram $\vee$ e $\wedge$}, e é aí que se
-perde: $a\vee b=m+\abs{\delta}$ e $a\wedge b=m-\abs{\delta}$. O módulo não é o
-objeto --- é a \emph{intensidade}, e a intensidade é \textbf{metade}, porque
-deixa cair o sinal de $\delta$, isto é, \emph{qual dos dois é qual}.
+\medskip\noindent\textbf{Só depois entram o máximo e o mínimo}, e é aí que se
+perde: $\max(a,b)=m+\abs{\delta}$ e $\min(a,b)=m-\abs{\delta}$ --- \emph{e
+escrevem-se assim, e não com $\vee$ e $\wedge$}, porque o $\wedge$ deste teorema
+já é o \textbf{e-lógico posição a posição} do primeiro display, e não o mínimo:
+com $a=2$ e $b=1$ o primeiro dá $0$ e o segundo dá $1$. \emph{Dois objectos, dois
+sinais.} O módulo não é o objeto --- é a \emph{intensidade}, e a intensidade é
+\textbf{metade}, porque deixa cair o sinal de $\delta$, isto é, \emph{qual dos
+dois é qual}. E pede uma \textbf{ordem}, que a lista tem e o suporte da
+Def.~\ref{fis:def:op} não.
 
 \medskip\noindent\textbf{E daqui sai a conservação, que não foi pedida.}
 Expandindo, $a\,b=(m+\delta)(m-\delta)=m^{2}-\delta^{2}$; e $\partial$, que troca
@@ -417,13 +826,14 @@ vem a identidade. Na iteração, $a\wedge b$ multiplicado por $2$ desloca-se uma
 posição para cima, de modo que ao fim de tantos passos quantos os bits da largura
 a segunda componente é nula. O encaixe é a restrição das operações de um andar ao
 anterior, e a ordem resultante é total.
-
 A forma do meio é imediata e não usa a identidade: de $m=\tfrac{a+b}{2}$ e
-$\delta=\tfrac{a-b}{2}$ vem $m+\delta=a$ e $m-\delta=b$, somando e subtraindo. O
-sistema é triangular e inverte-se sem condição nenhuma --- é por isso que a volta
-é exata, e é por isso que \emph{não} aparece aqui módulo nenhum. Os extremos
-$\vee$ e $\wedge$ pedem-no: escolher o maior é perguntar o \emph{sinal} de
-$\delta$ e deitá-lo fora, ficando com $\abs{\delta}$. Por fim
+$\delta=\tfrac{a-b}{2}$ vem $m+\delta=a$ e $m-\delta=b$, somando e subtraindo. E
+\emph{a condição é uma e escreve-se}: o sistema tem determinante $-2$, pelo que
+a volta pede o \textbf{dois invertível} --- não é «sem condição nenhuma», e é
+por isso que a leitura vive no degrau onde essa inversão existe e não na lista.
+Onde ela existe, a volta é exata e \emph{não} aparece módulo nenhum. O máximo e
+o mínimo pedem-no: escolher o maior é perguntar o \emph{sinal} de $\delta$ e
+deitá-lo fora, ficando com $\abs{\delta}$. Por fim
 $ab=(m+\delta)(m-\delta)=m^{2}-\delta^{2}$ é o produto expandido pela
 distributividade, e a troca $a\leftrightarrow b$ é $\delta\mapsto-\delta$ com $m$
 fixo, que a potência par absorve.
@@ -437,35 +847,46 @@ nove pares. E \code{tests/aranha\_n.c} §AN34: a codificação em
 $\lceil\log_2 c\rceil$ bits para $c$ de $1$ a $64$, e nenhum a menos.}
 
 \begin{teorema}[o processo dá as coordenadas, e elas são a representação]\label{fis:thm:coord}
-Aplicando $\partial$ sucessivamente --- ao argumento, depois ao que dele saiu,
-depois ao que daí saiu --- fica registada, por ordem, qual metade se tomou em
-cada passo. Essa sucessão é a \textbf{tupla}
+\textbf{Encaixando} dobras --- a de todo o suporte, depois a de cada metade que
+ela produziu, depois a de cada metade dessa --- fica registada, por ordem, qual
+metade se tomou em cada nível. \emph{Não é iterar $\partial$}: pelo
+Teor.~\ref{fis:thm:doispontos}(1) a segunda aplicação devolve o argumento, e não
+há terceiro sítio para onde ir. \textbf{O que encadeia é a cláusula~(5) do
+Teor.~\ref{fis:thm:duas}}, e com ela a declaração que ela carrega. Essa sucessão
+é a \textbf{tupla}
 \[
 \boxed{\;x=(x_1,x_2,\dots,x_w)\in B^{w}\;}
 \]
 e sobre ela valem três coisas:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{Ordenada, e a ordem é a do operador.} O índice $j$ não é uma
-etiqueta escolhida: é a \emph{contagem das aplicações} de $\partial$. Permutar as
-componentes muda o objeto representado.
+etiqueta escolhida: é o \emph{nível} do encaixe. Permutar as componentes muda o
+objeto representado \emph{sempre que as componentes trocadas diferirem} --- e
+onde forem iguais nada há para mover. \emph{A ordem é do processo; a permutação
+só se lê onde há o que permutar.}
 \item[(2)] \textbf{É a representação, não o objeto.} A tupla é a lista das
 decisões que levaram ao objeto; o objeto é aquilo a que elas levaram.
-\item[(3)] \textbf{E a passagem de uma à outra perde.} Duas tuplas distintas
-podem representar o mesmo objeto, e uma largura finita obriga a que representem:
-em largura $w$ há $2^{w}$ tuplas, e mais nada. \emph{É a conta, e é toda}. (A
-§\ref{fis:mult}, a seguir, dá nome ao que aqui se conta --- a \textbf{dobra},
-medida por $G$ --- e não é preciso esperar por ela para ver a cláusula.)
+\item[(3)] \textbf{E a passagem de uma à outra perde, assim que houver mais
+objectos do que tuplas.} Duas tuplas distintas podem representar o mesmo objeto,
+e representar \textbf{mais do que $2^{w}$} objectos obriga a que representem: em
+largura $w$ há $2^{w}$ tuplas, e mais nada. \emph{É a conta, e é toda} --- e
+abaixo desse número não obriga a nada: com $w=1$ e dois objectos há tuplas para
+todos. (A §\ref{fis:mult}, a seguir, dá nome ao que aqui se conta --- a
+\textbf{dobra}, medida por $G$ --- e não é preciso esperar por ela para ver a
+cláusula.)
 \end{enumerate}
 \end{teorema}
 
 \begin{proof}
-(1) Por construção: o passo $j$ só existe depois do passo $j-1$, porque divide o
+(1) Por construção: o nível $j$ só existe depois do nível $j-1$, porque divide o
 que ele produziu; a sucessão é portanto ordenada pelo próprio processo, e é essa
-a única ordem que há. (2) A tupla é um objeto de $B^{w}$ e o representado vive
-onde o processo o pôs; a aplicação de um para o outro não é forçada a ser
-injetiva por coisa nenhuma na construção. (3) É a contagem, e só ela: em largura
-$w$ há $2^{w}$ tuplas, pelo que representar mais do que $2^{w}$ objetos obriga
-duas tuplas a caírem no mesmo --- casa de pombos, sem mais.
+a única ordem que há. Que permutar mova o representado é a injetividade da
+leitura componente a componente, e vale exactamente onde as componentes trocadas
+são distintas. (2) A tupla é um objeto de $B^{w}$ e o representado vive onde o
+processo o pôs; a aplicação de um para o outro não é forçada a ser injetiva por
+coisa nenhuma na construção. (3) É a contagem, e só ela: em largura $w$ há
+$2^{w}$ tuplas, pelo que representar mais do que $2^{w}$ objetos obriga duas
+tuplas a caírem no mesmo --- casa de pombos, sem mais.
 \end{proof}
 
 \medskip\noindent\textbf{Donde as três palavras deste documento, já todas
@@ -602,9 +1023,13 @@ diferentes, isto é, com $\max G_\pi\neq\max G_{\pi'}$.
 
 \begin{proof}
 A igualdade é o Lema~\ref{fis:lem:conserva} aplicado duas vezes. Para a segunda
-afirmação basta uma testemunha: a curva de Heighway de $2^{12}$ passos e a
-espiral quadrada do mesmo comprimento têm ambas $\abs{I}=4097$ e
-$\sum G=\abs{I}$, e $\max G=2$ contra $\max G=1025$ (§\ref{fis:realizacoes}).
+afirmação basta contar, e \emph{dentro da própria definição}: sobre o mesmo $I$
+com $\abs{I}\ge2$ e um $X$ com pelo menos dois objectos, tome-se $\pi$
+\textbf{constante} --- toda a lista no mesmo objecto, donde $\max G=\abs{I}$ ---
+e $\pi'$ \textbf{não constante} --- donde $\max G'<\abs{I}$. As duas cumprem
+$\sum G=\abs{I}$ pelo mesmo lema, e as dobras diferem. \emph{Não é preciso
+exibir curva nenhuma}; as realizações da §\ref{fis:realizacoes} são ilustração
+do mesmo facto, e não a sua prova.
 \end{proof}
 
 \medskip\noindent\textbf{É esta a razão de ser de $G$.} A projeção identifica
@@ -768,22 +1193,29 @@ e de mais nada:
 \begin{array}{lll}
 X_1 & = & I,\ \text{as palavras em } B\\[2pt]
 X_2 & = & X_1^{\,2}/{\sim}, \qquad (a,b)\sim(c,d)\iff a+d=b+c\\[2pt]
-X_3 & = & \bigl(X_2\times X_2^{\ast}\bigr)/{\sim}, \qquad (p,q)\sim(r,s)\iff ps=qr\\[2pt]
+X_3 & = & \bigl(X_2\times X_2^{\bullet}\bigr)/{\sim}, \qquad (p,q)\sim(r,s)\iff ps=qr\\[2pt]
 X_4 & = & \text{os cortes de } X_3
 \end{array}}
 \]
-com $X_2^{\ast}$ os elementos invertíveis, e as três realizações a serem
-$(a,b)\mapsto a-b$, $(p,q)\mapsto p/q$ reduzido, e $q\mapsto$ o cilindro que o
-contém. Nenhuma precisa de um símbolo importado: o domínio de cada uma é o
-contradomínio da anterior, e o único dado de toda a cadeia é a distinção da
-Def.~\ref{fis:def:B}.
+com $X_2^{\bullet}$ os elementos \textbf{canceláveis} --- \emph{e não os
+invertíveis}, que em $X_2$ são apenas dois e dariam de volta o próprio $X_2$ ---
+e as três realizações a serem $(a,b)\mapsto a-b$, $(p,q)\mapsto p/q$ reduzido, e
+$q\mapsto$ o cilindro que o contém. O produto que $X_3$ usa não vem de fora: é o
+de $B$ (Teor.~\ref{fis:thm:B}) estendido às palavras pela distributividade sobre
+a soma com transporte do Teor.~\ref{fis:thm:BI}, e daí a $X_2$ pela regra
+habitual sobre os pares. \textbf{E o quarto degrau diz o que pede}: «corte» é
+ordem completada, e a ordem que ele usa é a da lista, ao passo que a completação
+é \emph{leitura} --- a §\ref{fis:corte} da Análise é quem a constrói, e é para lá
+que esta linha aponta. Nenhum degrau precisa de um símbolo importado: o domínio
+de cada um é o contradomínio do anterior, e o único dado de toda a cadeia é a
+distinção da Def.~\ref{fis:def:B}.
 
 \medskip\noindent\textbf{E o primeiro andar não é um quociente.} $X_1$
 constrói-se \emph{sem identificar nada} --- na dobra a segunda cópia não é colada
 à primeira, é \emph{multiplicada} --- ao passo que $X_2$, $X_3$ e $X_4$ são
 construídos \emph{por} quociente.
 
-\begin{teorema}[os degraus por quociente são realizações]\label{fis:thm:escada}
+\begin{teorema}[os degraus, e os três por quociente são realizações]\label{fis:thm:escada}
 Nos quatro casos abaixo, $\pi$ é uma realização e $\sum_x G(x)=\abs{I}$. Nos três
 últimos --- os que se constroem \emph{por} quociente --- a fibra $\pi^{-1}(x)$
 \emph{é} a classe de equivalência que define o andar. No primeiro não há
@@ -793,10 +1225,10 @@ quociente a identificar, e a fibra é a da soma:
 \toprule
 $\pi$ & a aplicação & a fibra é & o repr. $k=1$ & a \textbf{face} que fecha \\
 \midrule
-a soma em $X_1$ \emph{(sem quoc.)} & $(x,y)\mapsto x\oplus y$ & a da soma & $x\oplus z$ & o \textbf{neutro} $0$ \\
+a soma em $X_1$ \emph{(sem quoc.)} & $(x,y)\mapsto x\oplus y$ & a da soma & o par $(x,y)$ com $y=0$ & o \textbf{neutro} $0$ \\
 $\pi_2$: $X_1^{2}/{\sim}$ & $(a,b)\mapsto a-b$ & $a+d=b+c$ & $a=0$ ou $b=0$ & o \textbf{oposto}: $\partial x+x=0$ \\
 $\pi_3$: as frações & $(p,q)\mapsto p/q$ red. & $ps=qr$ & o irredutível & o \textbf{inverso}: $\partial x\cdot x=1$ \\
-$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & a bola (§\ref{fis:ultra}) & o menor do cilindro & o \textbf{neutro} $1$ \\
+$\pi_4$: os cortes & $q\mapsto$ o corte de $p$ bits & o mesmo prefixo de $p$ bits & o menor do cilindro & o \textbf{neutro} $1$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -814,7 +1246,7 @@ ordem do domínio, e a enumeração escolhida fá-lo coincidir com o canónico.
 \end{proof}
 
 \medskip\noindent\textbf{E a última coluna fecha o documento no seu princípio.}
-As duas equações da Def.~\ref{fis:def:op} têm \textbf{quatro} peças, e não duas
+As duas equações do Teor.~\ref{fis:thm:duas}(4) têm \textbf{quatro} peças, e não duas
 --- duas \emph{operações} e dois \emph{neutros}:
 \[
 \boxed{\;
@@ -827,7 +1259,7 @@ São essas as \textbf{faces da operação}, e a escada percorre-as. Não as reso
 ao mesmo tempo: resolve \emph{uma por andar}, e os dois duais saem da
 \textbf{mesma troca} --- o par $(a,b)$ trocado por $\iota(a,b)=(b,a)$ induz o
 \emph{oposto} em $X_2$ e o \emph{inverso} nas frações. E os dois neutros não
-nascem na escada: nascem na Def.~\ref{fis:def:op}, porque é lá que as duas
+nascem na escada: nascem no Teor.~\ref{fis:thm:duas}(4), porque é lá que as duas
 equações os \emph{nomeiam}. Em uma frase:
 \[
 \boxed{\ \text{quocientar é esquecer a distinção; }G\text{ mede quantos elementos
@@ -896,10 +1328,12 @@ apenas.
 convergência: uma matriz nilpotente torna $1-S$ invertível, com inversa a
 \emph{série de Neumann finita} $\sum_{j<\dim W}S^{j}$ --- que é exatamente
 $\zeta$. Compare-se com a §\ref{fis:transf}: lá os operadores comutam e
-\emph{diagonalizam}, e a inversão existe se e só se nenhum valor próprio se
-anula; aqui o operador é um bloco de Jordan e não diagonaliza, mas a inversão
-existe \textbf{sempre}. Duas álgebras lineares, dois motivos de invertibilidade
---- e as duas operações da aranha, uma em cada.
+\emph{diagonalizam}, e a inversão pede que cada valor próprio \textbf{se
+inverta em $\Zc$} --- não apenas que não se anule, distinção que o
+Teor.~\ref{fis:thm:conv} faz e testemunha; aqui o operador é um bloco de Jordan
+e não diagonaliza, mas a inversão existe \textbf{sempre}, e existe sobre $\Zc$
+porque a série é finita. \emph{Duas álgebras lineares, dois motivos de
+invertibilidade} --- e as duas operações da aranha, uma em cada.
 
 \begin{teorema}[$\mu=\zeta^{-1}$ na ordem total]\label{fis:thm:mu}
 Na ordem total, a inversa de $\zeta$ é
@@ -1113,7 +1547,22 @@ $\mathcal{F}(f)_k=\widehat{f}(k)=\sum_x f(x)\chi_k(x)$. Na base canónica a sua
 matriz é $H_{kx}=\chi_k(x)$, com entradas $\pm1$: é a \textbf{avaliação nos
 caracteres}, inteira. E ela é a mudança de base \emph{não normalizada}: escrever $f$ na família
 $\{\chi_k\}$ pediria $c=2^{-m}\mathcal{F}(f)$, \emph{e é exactamente essa divisão
-que $\Zc$ não faz}. O fator fica pendurado, e o Teor.~\ref{fis:thm:H} diz onde.\end{definicao}
+que $\Zc$ não faz}. O fator fica pendurado, e o Teor.~\ref{fis:thm:H} diz onde.
+
+\medskip\noindent\textbf{E a \emph{norma} usada adiante é esta, e é uma contagem
+--- não uma medida importada.} Para $f\colon X\to\Zc$,
+\[
+\boxed{\;\lVert f\rVert^{2}\;:=\;\sum_{x}f(x)\,f(x)\;}
+\]
+--- \emph{uma soma finita de produtos}, e mais nada. Escreve-se com o quadrado
+porque é assim que ela aparece; \textbf{a raiz nunca é tirada}, e por isso não se
+pede ordem, nem métrica, nem completude ao suporte. E o emparelhamento que a
+acompanha é $\langle f,g\rangle=\sum_x f(x)g(x)$, com
+$\lVert f\rVert^{2}=\langle f,f\rangle$. \emph{Este $\langle\cdot,\cdot\rangle$
+não é o da Def.~\ref{fis:def:dual}} --- aquele é a paridade de um \emph{e} lógico
+sobre bits, este é uma soma de produtos em $\Zc$ ---, e usam o mesmo símbolo
+porque cada um é o natural na sua face. \textbf{Onde houver risco, diz-se qual.}
+\end{definicao}
 
 \begin{teorema}[inversa, involutividade e Parseval]\label{fis:thm:H}
 $H^{2}=2^{m}\,\mathrm{Id}$; logo $\mathcal{F}$ é \textbf{injetiva} e a volta
@@ -1192,12 +1641,29 @@ dão o mesmo produto.
 \begin{proof}
 O produto é o Teor.~\ref{fis:thm:proprios} lido em coordenadas: na base própria,
 um operador que age por multiplicação escalar compõe-se multiplicando escalares.
-A inversão é diagonal, e existe exatamente quando nenhum valor próprio é nulo. O
-núcleo é gerado pelos $\chi_k$ com $\widehat{f}(k)=0$.
+
+\smallskip\noindent A injetividade sob $\widehat f\neq0$: se $C_fg=0$ então
+$\widehat f\widehat g\equiv0$, e como $\Zc$ não tem divisores de zero vem
+$\widehat g\equiv0$, donde $g=0$ pela injetividade de $\mathcal F$
+(Teor.~\ref{fis:thm:H}). \textbf{A invertibilidade é outra pergunta}, e é a que
+o enunciado separa: a inversa diagonal pede $1/\widehat f(k)$ \emph{em} $\Zc$,
+e não basta $\widehat f(k)\neq0$. \emph{Não se escreva «existe quando nenhum
+valor próprio é nulo»} --- isso é a regra de um corpo, e $\Zc$ não o é; é
+precisamente o que a testemunha $C_{\delta_0+\delta_0}$ nega.
+
+\smallskip\noindent E a singularidade: $C_f\chi_{k_0}=\widehat f(k_0)\chi_{k_0}=0$
+dá $\chi_{k_0}\in\ker C_f$, e daí a segunda frase. \emph{Mas não se diga que o
+núcleo é \textbf{gerado} pelos $\chi_k$ com $\widehat f(k)=0$}: sobre $\Zc$ é
+falso, e a testemunha é do tamanho de duas linhas --- com dois andares e
+$f=\delta_0+\delta_1$, o elemento $g=\delta_0-\delta_1$ está no núcleo e não é
+combinação inteira de caracteres, porque toda a combinação inteira tem
+transformada múltipla de $4$ e a de $g$ vale $2$. \textbf{Sobre um corpo seria
+verdade; aqui não é}, e é a mesma fronteira anel/corpo que o resto do teorema
+marca.
 \end{proof}
 
 \medskip\noindent\textbf{E na forma polar isto lê-se de outra maneira.}
-Escrevendo cada caractere como $r\,e^{\partial\theta}$, o módulo é
+Escrevendo cada caractere como $r\,e^{i\theta}$, o módulo é
 \emph{constante}:
 \[
 \abs{\chi_k(j)}=1\ \text{para todos os }k,j,
@@ -1276,7 +1742,7 @@ $A\chi_k=(m-2\abs{k})\chi_k$ exato em inteiros, e o corte com $\abs{k}2^{m-1}$
 arestas. §AN28: $c=2^{-m}\mathcal{F}(f)$ a recompor $f$ nos $256$, com o passo
 sem a normalização a bater só nos zeros de $f$.}
 
-\colunas{Teor.~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Lema~\ref{fis:lem:conserva}; Teor.~\ref{fis:thm:mult},~\ref{fis:thm:mu},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:escada}}
+\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:escada},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}}
         {$B$, a lista $I$, o par $(m,\delta)$, o anel de grupo, a escada}
         {\code{tests/meio.c} §M3--§M7; \code{tests/aranha\_n.c} §AN12, §AN15--§AN18, §AN26--§AN28, §AN32--§AN36}
 
@@ -1956,29 +2422,871 @@ prova, e não são a mesma coisa: a travessia ser \textbf{única} não a faz
 
 \subsection*{Os três níveis}
 
-\begin{definicao}[bijeção, isomorfismo, duomorfismo]\label{fis:def:duomorf}
-Sejam $A=(X,\oplus_1,\otimes_1)$ e $B=(Y,\oplus_2,\otimes_2)$ estruturas com
-\emph{duas} operações cada --- e as operações são \textbf{dados da estrutura},
-não a soma e o produto: podem ser $\min$ e $\max$, as do
-Teor.~\ref{fis:thm:B}, ou quaisquer duas que a construção produza. Para
-$f\colon X\to Y$:
+\begin{definicao}[o duomorfismo: o operador, as duas metades, e a interface]\label{fis:def:duomorf}
+Seja $A=(X,\oplus_A,\otimes_A)$ uma estrutura com \emph{duas} operações internas
+--- e as operações são \textbf{dados da estrutura}, não a soma e o produto:
+podem ser $\min$ e $\max$, as do Teor.~\ref{fis:thm:B}, ou quaisquer duas que a
+construção produza.
+
+\medskip\noindent\textbf{Primeiro o operador.} A \textbf{dualidade operacional}
+$\mathcal{D}$ leva $A$ na sua \textbf{estrutura dual},
+\[
+\boxed{\;\mathcal{D}(A)\;=\;A^{\vee}\;:=\;(X,\otimes_A,\oplus_A)\;}
+\]
+\emph{$\mathcal{D}$ não actua sobre os elementos de $X$}: actua sobre a
+\textbf{função estrutural} das duas operações, trocando-lhes os papéis. O suporte
+é o mesmo, e o que muda é qual delas se chama primeira.
+
+\medskip\noindent\textbf{Depois as duas metades, porque uma lei de duas entradas
+não é uma coisa só.} Toda a lei $\ast$ se parte em duas, e elas não se comportam
+do mesmo modo:
+\[
+\boxed{
+\begin{array}{ll}
+\textbf{o directo} & \text{a metade \emph{simétrica}: não vê a ordem das entradas}\\[2pt]
+\textbf{o cruzado} & \text{a metade \emph{antissimétrica}: \emph{é} a ordem das entradas}
+\end{array}}
+\]
+\emph{O directo mede; o cruzado ordena.} E sob uma troca \textbf{o directo fica e o
+cruzado muda de sinal} --- a peça que mede é a mesma dos dois lados, e a que
+ordena é a que se inverte. \textbf{Uma passagem que declare só o directo está
+por declarar}, e uma que deduza o cruzado do directo afirma de graça.
+
+\medskip\noindent\textbf{Donde a passagem tem \emph{dois} bits, e não um.} Postas
+$A$ e $B$ e uma aplicação $f\colon X\to Y$, o que ela faz lê-se em duas
+perguntas independentes:
+\[
+\boxed{
+\begin{array}{ll}
+a\in B: & \text{as \textbf{operações} trocam?}\quad(\text{o directo})\\[2pt]
+b\in B: & \text{a \textbf{ordem} troca?}\quad(\text{o cruzado})
+\end{array}}
+\]
+e as três palavras deste documento são casos do par $(a,b)$:
 \[
 \begin{array}{ll}
-\textbf{bijeção} & \text{correspondência reversível, e nada mais;}\\[3pt]
-\textbf{isomorfismo} & f(x\oplus_1 y)=f(x)\oplus_2 f(y)\ \ \text{e}\ \ f(x\otimes_1 y)=f(x)\otimes_2 f(y);\\[3pt]
-\textbf{duomorfismo} & f(x\oplus_1 y)=f(x)\otimes_2 f(y)\ \ \text{e}\ \ f(x\otimes_1 y)=f(x)\oplus_2 f(y).
+\textbf{bijeção} & f\ \text{reversível, e nada mais se pede;}\\[3pt]
+\textbf{isomorfismo} & a=0:\ f(x\oplus_A y)=f(x)\oplus_B f(y)\ \ \text{e}\ \ f(x\otimes_A y)=f(x)\otimes_B f(y);\\[3pt]
+\textbf{duomorfismo} & a=1:\ f(x\oplus_A y)=f(x)\otimes_B f(y)\ \ \text{e}\ \ f(x\otimes_A y)=f(x)\oplus_B f(y).
 \end{array}
 \]
-Isto é: o duomorfismo é o isomorfismo para a estrutura com as operações
-\emph{trocadas},
+Donde a leitura que dispensa a definição verbal: \emph{$f$ é duomorfismo de $A$
+em $B$ exactamente quando é isomorfismo de $A$ na estrutura dual de $B$},
 \[
-\boxed{\;f\colon\ (X,\oplus_1,\otimes_1)\ \xrightarrow{\ \cong\ }\ (Y,\otimes_2,\oplus_2)\;}
+\boxed{\;f\colon\ A\ \xrightarrow{\ \cong\ }\ \mathcal{D}(B)=B^{\vee}\;}
 \]
-\emph{O «duo» não vem de haver dois objetos} --- vem da dualidade operacional
-$\oplus_1\leftrightarrow\otimes_2$, $\otimes_1\leftrightarrow\oplus_2$. E onde
-houver ordem ela vai junto: a troca obriga $f$ a ser \textbf{antitónica},
-$a\le_1 b\iff f(b)\le_2 f(a)$, e a chegada é $\le_2^{\mathrm{op}}$.
+\emph{São duas leituras da \textbf{mesma} passagem}, e o «duo» não vem de haver
+dois objetos: vem da troca dos dois papéis operacionais.
+
+\medskip\noindent\textbf{E o bit da ordem é o cruzado, dito à parte porque é
+outra metade.} Quando $f$ é \textbf{antitónica} ($b=1$) vale
+\[
+\boxed{\;a\le_A b'\iff f(b')\le_B f(a)\;}
+\]
+e a chegada é $\le_B^{\mathrm{op}}$. \emph{Isso é a metade cruzada da mesma
+passagem} --- não lhe é estranho, e também não sai da metade directa: trocar
+$\oplus$ por $\otimes$ é afirmação sobre o simétrico. Onde as duas coincidem,
+coincidem por uma razão que se diz: no Teor.~\ref{fis:thm:dual} as operações
+\textbf{são} a ordem ($\min$ e $\max$), e por isso o directo é o cruzado; no
+Teor.~\ref{fis:thm:constroi}(3) a separação vê-se a olho --- $h+v$ é o directo e
+não se move, $h-v$ é o cruzado e troca de sinal.
+
+\medskip\noindent\textbf{E onde $\mathcal{D}$ não move nada.} O ponto fixo do
+operador é a condição
+\[
+\boxed{\;\operatorname{Fix}(\mathcal{D})\;=\;\{\,A\ :\ \oplus_A=\otimes_A\,\}\;}
+\]
+--- \emph{as estruturas em que as duas operações são a mesma}. \textbf{E é
+preciso dizer já o que isso custa}: pelo Teor.~\ref{fis:thm:duasinvol}, com
+$\oplus=\otimes$ deixa de haver \emph{duas} operações, e a estrutura sai do
+alcance desta definição. \emph{Não é onde a passagem trabalha melhor: é onde ela
+deixa de ter objecto.}
+
+\medskip\noindent\emph{E é por isso que a \textbf{estrela} deste documento não é
+este conjunto.} Ela é condição sobre um \textbf{elemento} --- $x\otimes x=x\oplus1$,
+o Teor.~\ref{fis:thm:estrela} --- e não sobre a estrutura inteira; e é aí, e não
+aqui, que ela se demonstra. \textbf{Nem se afirma aqui que seja única, nem que
+seja a única reversível}: o que o teorema prova é que ela é o ponto onde as duas
+\emph{dobras} coincidem, e é só isso que se usa.
 \end{definicao}
+
+\begin{teorema}[o operador dual é uma involução]\label{fis:thm:dual-involutiva}
+O operador $\mathcal{D}$ da Def.~\ref{fis:def:duomorf} cumpre
+\[
+\boxed{\;\mathcal{D}^{2}=\mathrm{id}\;}
+\]
+--- e cumpre-o por \textbf{igualdade estrutural} e não por isomorfismo: para toda
+a estrutura $A=(X,\oplus,\otimes)$,
+\[
+\mathcal{D}^{2}(A)=\mathcal{D}(X,\otimes,\oplus)=(X,\oplus,\otimes)=A ,
+\]
+que é a \emph{mesma} estrutura e não uma cópia dela. \emph{A dualidade
+operacional fecha em dois}: uma troca produz o dual, duas restauram o original.
+\end{teorema}
+
+\begin{proof}
+Pela Def.~\ref{fis:def:duomorf}, $\mathcal{D}$ escreve o par de operações pela
+ordem contrária, e mais nada --- não toca em $X$, não escolhe, não acrescenta.
+Escrever duas vezes pela ordem contrária é escrever pela ordem. \emph{E é a
+Def.~\ref{fis:def:op} outra vez, aplicada a dois \textbf{papéis} em vez de a dois
+elementos}: o operador é efectivo --- troca mesmo, porque as duas operações são
+duas --- e é involutivo, que são as duas cláusulas que lá se pedem.
+\end{proof}
+
+\begin{teorema}[a composição, e a sua paridade]\label{fis:thm:duo-composicao}
+Sejam $f\colon A\to B$ e $g\colon B\to C$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Dois duomorfismos compõem-se num isomorfismo.} Se $f$ e $g$
+são duomorfismos, $g\circ f$ é isomorfismo de $A$ em $C$.
+\item[(2)] \textbf{E um de cada dá um duomorfismo.} Se um é isomorfismo e o outro
+duomorfismo --- em qualquer ordem ---, a composta é duomorfismo.
+\item[(3)] \textbf{Donde a passagem tem \emph{paridade}}, e são duas espécies e
+não mais:
+\[
+\boxed{
+\begin{array}{ccl}
+A&\xrightarrow{\ \text{isomorfismo}\ }&B\\[2pt]
+A&\xrightarrow{\ \text{duomorfismo}\ }&B^{\vee}
+\end{array}}
+\qquad
+\begin{array}{c|cc}
+\circ & \text{iso} & \text{duo}\\\hline
+\text{iso} & \text{iso} & \text{duo}\\
+\text{duo} & \text{duo} & \text{iso}
+\end{array}
+\]
+--- é a tábua de $B$ com a soma, isto é a do Teor.~\ref{fis:thm:B}. \emph{E não é
+convenção: é a paridade de $\mathcal{D}$}, porque pelo
+Teor.~\ref{fis:thm:dual-involutiva}
+\[
+\mathcal{D}^{0}=\mathrm{id},\quad \mathcal{D}^{1}=\mathcal{D},\quad
+\mathcal{D}^{2}=\mathrm{id},\quad \mathcal{D}^{3}=\mathcal{D},\ \dots
+\]
+e o rótulo da passagem é o expoente lido em $B$: $0$ é \emph{iso}, $1$ é
+\emph{duo}, e compor é somar. \emph{É o bit $a$ da Def.~\ref{fis:def:duomorf}}, e
+o bit $b$ --- o do cruzado --- tem a sua tábua própria, igual e independente.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Para a primeira operação, $f(x\oplus_A y)=f(x)\otimes_B f(y)$ porque $f$ é
+duomorfismo; aplicando $g$, que também o é,
+$g\bigl(f(x)\otimes_B f(y)\bigr)=g(f(x))\oplus_C g(f(y))$. Donde
+$(g\circ f)(x\oplus_A y)=(g\circ f)(x)\oplus_C(g\circ f)(y)$. Para a segunda,
+$f(x\otimes_A y)=f(x)\oplus_B f(y)$ e
+$g\bigl(f(x)\oplus_B f(y)\bigr)=g(f(x))\otimes_C g(f(y))$, que é a outra lei.
+As duas juntas são a definição de isomorfismo. \emph{E lê-se de uma vez pela
+seta}: $f\colon A\cong B^{\vee}$ e $g\colon B\cong C^{\vee}$ dão
+$g\colon B^{\vee}\cong C$ pelo Teor.~\ref{fis:thm:dual-involutiva}, donde
+$g\circ f\colon A\cong C$.
+
+(2) A mesma conta com uma das duas passagens a não trocar: a troca ocorre uma vez
+só, e uma troca é a definição de duomorfismo.
+
+(3) É (1) e (2) postas em tábua. Que a tábua seja a da soma em $B$ é lê-la: dois
+iguais dão o neutro, dois distintos dão o outro.
+\end{proof}
+
+\begin{teorema}[os quatro quadrantes, e as passagens entre eles]\label{fis:thm:quarteto}
+\textbf{Fixem-se} um operador $\mathcal{D}$ com $\mathcal{D}^{2}=\mathrm{id}$ e
+uma involução $\dagger$ com $\dagger^{2}=\mathrm{id}$ --- \emph{não um segundo
+operador primitivo, que a Def.~\ref{fis:def:op} não tem, mas uma das três coisas
+que a nota adiante lista} ---, \textbf{ambos sobre o mesmo tipo de objeto} (ou os
+dois sobre estruturas, ou os dois sobre elementos), e suponha-se
+$\mathcal{D}\dagger=\dagger\mathcal{D}$. Ponha-se
+$Q_{ab}:=\mathcal{D}^{a}\dagger^{b}$ com $a,b$ em $B$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{São quatro, e o rótulo é o par $(a,b)$.}
+\[
+\boxed{
+\begin{array}{c|cc}
+ & b=0 & b=1\\\hline
+a=0 & Q_{00}=\mathrm{id} & Q_{01}=\dagger\\[2pt]
+a=1 & Q_{10}=\mathcal{D} & Q_{11}=\mathcal{D}\dagger
+\end{array}}
+\]
+\item[(2)] \textbf{E as passagens entre eles estão todas definidas, por uma
+fórmula só.} Compor é somar os dois rótulos, cada um em $B$:
+\[
+\boxed{\;Q_{ab}\circ Q_{a'b'}\;=\;Q_{\,a\oplus a',\;b\oplus b'}\;}
+\]
+As dezasseis composições saem daqui sem excepção, e o quadro fecha.
+\item[(3)] \textbf{Cada uma é involutiva.} $Q_{ab}\circ Q_{ab}=Q_{00}=\mathrm{id}$
+para os quatro, e cada uma é o seu próprio inverso. \emph{Nenhum dos quatro
+roda}: fecham todos em dois.
+\item[(4)] \textbf{E são quatro \emph{distintos} exactamente quando as duas são
+efectivas e distintas.} Se $\mathcal{D}=\mathrm{id}$, ou $\dagger=\mathrm{id}$,
+ou $\mathcal{D}=\dagger$, o quadro degenera e sobram dois --- ou um.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(2) e (3) Pela comutação, $\mathcal{D}^{a}\dagger^{b}\mathcal{D}^{a'}\dagger^{b'}
+=\mathcal{D}^{a+a'}\dagger^{b+b'}$, e os expoentes reduzem-se em $B$ por
+$\mathcal{D}^{2}=\dagger^{2}=\mathrm{id}$: é a paridade do
+Teor.~\ref{fis:thm:duo-composicao}, uma vez por gerador. Donde
+$Q_{ab}^{2}=Q_{00}$.
+
+(4) $Q_{10}=Q_{00}$ diz $\mathcal{D}=\mathrm{id}$; $Q_{01}=Q_{00}$ diz
+$\dagger=\mathrm{id}$; $Q_{11}=Q_{00}$ diz $\mathcal{D}=\dagger$ (compondo com
+$\dagger$). As recíprocas são as mesmas igualdades lidas ao contrário.
+\end{proof}
+
+\medskip\noindent\textbf{E antes das hipóteses, o que a $\dagger$ \emph{não} pode
+ser.} O fundamento tem \textbf{um} operador (Def.~\ref{fis:def:op}), e um
+segundo involutivo primitivo, posto ao mesmo nível, \emph{não existe} --- não há
+$\partial_1$ e $\partial_2$. Logo a $\dagger$ deste teorema é sempre uma de três
+coisas, e nunca uma quarta:
+\[
+\boxed{
+\begin{array}{l}
+\text{o mesmo }\partial\ \text{sobre \textbf{outra operação} do mesmo suporte;}\\[2pt]
+\text{ou o mesmo par lido por \textbf{outro invariante} ---}\ x\otimes\partial x\ \text{contra}\ x\oplus\partial x;\\[2pt]
+\text{ou a mesma seta com \textbf{outro nome}, depois de escolhida a régua: \emph{oposto} contra \emph{inverso}.}
+\end{array}}
+\]
+\emph{A $\dagger$ ou é o mesmo $\partial$ noutro fato, ou é composta} ---
+\textbf{gémea não é}. É por isso que ela entra aqui por hipótese, e por isso que
+a hipótese se paga onde se realiza.
+
+\medskip\noindent\textbf{E as três hipóteses são hipóteses, e não saem de graça.}
+Convém dizê-lo, porque a tentação é grande e já custou uma versão deste texto:
+\begin{enumerate}\itemsep3pt
+\item[(i)] \textbf{A comutação pede-se}, e não se deduz de serem duas involuções:
+duas involuções geram um diedral, e só comutam quando $(\mathcal{D}\dagger)^{2}=\mathrm{id}$.
+O Teor.~\ref{fis:thm:bidual} é o exemplo de como se paga: lá as duas comutam
+\emph{porque agem em coordenadas diferentes}, e isso é dito e provado.
+\item[(ii)] \textbf{O tipo pede-se.} O $\mathcal{D}$ da Def.~\ref{fis:def:duomorf}
+age sobre \emph{estruturas}; o $\dagger$ do Teor.~\ref{fis:thm:duasinvol} está
+escrito sobre \emph{elementos}. \emph{Compor os dois assim não faz sentido}, e
+antes de escrever $\mathcal{D}\dagger$ é preciso pô-los no mesmo andar.
+\item[(iii)] \textbf{E o par pede-se.} Duas passagens podem trocar a mesma coisa
+sem serem a mesma: no Teor.~\ref{fis:thm:bidual} as duas involuções preservam
+ambas a soma e invertem ambas a sua coordenada, e \emph{são distintas}. Logo
+«troca as operações?» e «troca a ordem?» \textbf{não} identificam uma passagem ---
+identificam a sua classe. $Q_{ab}$ é um rótulo do grupo $\langle\mathcal{D},\dagger\rangle$
+\emph{já fixado}, e não uma classificação de todas as passagens possíveis.
+\end{enumerate}
+
+\medskip\noindent\textbf{E o quatro é a conta de dois bits, não um teorema sobre
+leis.} A tentação seguinte era dizer que toda a lei de duas entradas se parte em
+metade simétrica e metade antissimétrica, e que por isso não há quinto quadrante.
+\emph{Não se pode dizer aqui}: essa decomposição precisa de somar no
+contradomínio e de dividir por dois, e sobre $B$ --- onde $1+1=0$
+(Teor.~\ref{fis:thm:B}) --- ela não existe. A projecção $\ast(x,y)=x$ testemunha-o:
+é assimétrica e não é soma de simétrica com antissimétrica, porque em $B$ as duas
+condições coincidem. \textbf{A cisão directo\,/\,cruzado da
+Def.~\ref{fis:def:duomorf} é uma \emph{leitura}, e vale onde o contradomínio a
+suporta} --- na Óptica, na Análise, no emparelhamento. Onde não a suporta, o par
+de bits continua a ser dois, mas por serem duas perguntas e não por haver duas
+metades.
+
+\medskip\noindent\textbf{E daqui sai o cruzado, e sai nulo.} Pela
+Def.~\ref{fis:def:duomorf} a lei parte-se em metade que não vê a ordem das
+entradas e metade que \emph{é} a ordem. O Lema~\ref{fis:lem:comutapar} diz que
+sobre o par da dobra as duas entradas dão o mesmo nas duas ordens: \emph{o
+cruzado anula-se ali}. Donde
+\[
+\boxed{\;\text{no par }\{x,\partial x\}\ \text{só há directo}\;}
+\]
+--- e é por isso que o bit $b$ do Teor.~\ref{fis:thm:quarteto} não move nada
+sobre os pares da dobra. \emph{A dobra fabrica pares onde a ordem não conta}, e
+essa é a razão pela qual o documento inteiro pode falar em «o par» sem dizer qual
+é o primeiro.
+
+\medskip\noindent\textbf{E os dois invariantes são a \emph{cruz}.} Com $s$ o
+invariante da face aditiva e $p$ o da multiplicativa,
+\[
+\boxed{\;s=x\oplus\partial x\;,\qquad p=x\otimes\partial x\;}
+\]
+--- \emph{a soma e o produto do par}, e mais nada. São as duas únicas coisas que
+o par determina sem escolher qual é qual, precisamente porque o cruzado é nulo.
+E a cadeia inteira tem uma direcção só:
+\[
+\boxed{\;\text{a lei do par}\;\longrightarrow\;\text{os invariantes }(s,p)\;\longrightarrow\;\text{a equação das duas raízes}\;}
+\]
+\emph{E onde a álgebra permitir a escrita polinomial} --- que é hipótese e
+diz-se ---, essa equação é
+\[
+\boxed{\;t^{2}-s\,t+p=0\;}
+\]
+com $x$ e $\partial x$ por raízes. É a do Teor.~\ref{fis:thm:duasfaces}, escrita
+na incógnita. \emph{As duas equações do operador não são duas condições sobre
+$x$: são os dois coeficientes de uma equação de que $x$ é raiz}, e o outro é
+$\partial x$.
+
+\begin{teorema}[o centro e os dois lados --- e a quarta, que existe]\label{fis:thm:trial}
+Três leis, com o seu lugar --- \emph{e uma quarta, que este teorema não esconde}:
+\[
+\boxed{
+\begin{array}{lll}
+\textbf{comutatividade} & \text{2 elementos, 1 operação} & x\circ y=y\circ x\\[2pt]
+\textbf{associatividade} & \text{3 elementos, 1 operação} & (x\circ y)\circ z=x\circ(y\circ z)\\[2pt]
+\textbf{distributividade} & \text{3 elementos, \textbf{2} operações} & x\otimes(y\oplus z)=(x\otimes y)\oplus(x\otimes z)\\[4pt]
+\textbf{absorção} & \text{2 elementos, \textbf{2} operações} & x\oplus(x\otimes y)=x
+\end{array}}
+\]
+\textbf{E não se diga que são três e não há quarta}: há, e é a
+\textbf{absorção} --- dois elementos e duas operações, a célula que a leitura
+por «número de elementos» deixava vazia. \emph{Ela não é consequência das outras
+três}, e é ela que separa o \textbf{reticulado} do \textbf{anel}: vale em
+$(\min,\max)$ e falha na soma com o produto, onde $x+(x\cdot y)=x$ obrigaria
+$x\,y=0$ para todo $y$. \emph{Nem se diga que cada linha é uma lei}: cada uma tem
+a sua versão na outra operação e, na distributividade, os dois lados --- o que dá
+mais do que quatro enunciados. \textbf{O que este teorema afirma não é a
+contagem: é o \emph{lugar} de cada uma}, e é isso que segue.
+
+\medskip\noindent E então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A comutatividade é o centro, e é a que a dobra dá de graça.}
+Pelo Lema~\ref{fis:lem:comutapar} ela vale no par $\{x,\partial x\}$ sem se
+pedir, porque ali o cruzado se anula. \emph{É a lei do par, e o par é o que a
+dobra fabrica.}
+\item[(2)] \textbf{A associatividade é o lado \emph{directo}.} Ela corre dentro
+de \textbf{uma} face e não faz a outra agir: é o produto componente a componente,
+$(g_1,h_1)(g_2,h_2)=(g_1g_2,\,h_1h_2)$ --- \emph{os dois lados ignoram-se}.
+\item[(3)] \textbf{A distributividade é o lado \emph{cruzado}.} Ela é a única das
+três que \textbf{põe uma face a agir sobre a outra}, e é isso que a antissimetria
+mede: no par cruzado a segunda coordenada leva $g_1\!\cdot\! h_2\oplus h_1$ ---
+um produto a distribuir-se sobre uma soma. \emph{Uma passa por cima da outra, e a
+ordem conta.}
+\item[(4)] \textbf{E os dois lados são duais, com uma consequência que decide o
+par deste documento.} $\mathcal{D}$ leva associatividade de $\oplus$ em
+associatividade de $\otimes$ --- permuta-as. Mas leva a distributividade
+\[
+x\otimes(y\oplus z)=(x\otimes y)\oplus(x\otimes z)
+\qquad\text{em}\qquad
+x\oplus(y\otimes z)=(x\oplus y)\otimes(x\oplus z)
+\]
+que é \emph{outra lei}, e que em geral \textbf{é falsa}. \emph{Uma estrutura só é
+simétrica por $\mathcal{D}$ quando as duas distributividades valem} --- e é
+exactamente isso que $(\min,\max)$ tem e que $(+,\times)$ não tem.
+\[
+\boxed{\;\text{um par é simétrico por }\mathcal{D}\text{ quando as \textbf{duas} distributividades valem.}\;}
+\]
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) É o Lema~\ref{fis:lem:comutapar}.
+
+(2) e (3) \emph{Não são identificação demonstrada, e diz-se}: são a leitura das
+duas fórmulas de par --- na do produto directo nenhuma coordenada entra na outra,
+na do cruzado a primeira entra na segunda, e é essa entrada que a
+distributividade escreve. \textbf{É analogia estrutural com o par de grupos, e
+fica marcada como tal.} O que está \emph{provado} é que uma põe uma face a agir
+sobre a outra e a outra não.
+
+(4) Aplicar $\mathcal{D}$ é trocar os papéis dos símbolos
+(Def.~\ref{fis:def:duomorf}); fazendo-o nas duas leis obtém-se o que está
+escrito. Que a segunda distributividade falhe em geral vê-se onde $\oplus$ tem
+oposto e $\otimes$ absorve o zero: com $y=z=0$ vem $x\oplus0=x$ de um lado e
+$(x\oplus0)\otimes(x\oplus0)=x\otimes x$ do outro, e $x\neq x\otimes x$ em
+qualquer $x$ que não seja idempotente. Que valha em $(\min,\max)$ é a
+distributividade dos dois lados de um reticulado, e verifica-se caso a caso pela
+ordem: $\min\{x,\max\{y,z\}\}=\max\{\min\{x,y\},\min\{x,z\}\}$ e a dual, porque
+em cada uma há um dos três que é o menor e a igualdade reduz-se a ele.
+\end{proof}
+
+\medskip\noindent\textbf{E uma correcção ao que a caixa acima dizia.} O par de
+base \emph{deste documento} não é $(\min,\max)$: é o do Teor.~\ref{fis:thm:B},
+que o Teor.~\ref{fis:thm:BI} escreve como $\oplus$ e $\wedge$. O $(\min,\max)$
+entra no Teor.~\ref{fis:thm:dual}, e entra por outra razão, que lá se diz --- são
+\emph{as operações que a ordem induz}. \emph{O que a cláusula~(4) mostra é o que
+$\mathcal{D}$ pede a um par para ser simétrico}, e não porque é que este
+documento escolheu o seu.
+
+\medskip\noindent\textbf{E aqui há uma coisa que tem de ser dita, porque sem ela
+o $p$ parece não ser invariante.} Se se calcular o produto sob a dobra
+\emph{aditiva} $\partial^{+}x=s-x$, ele varia:
+\[
+x\cdot\partial^{+}x \;=\; x(s-x) \;=\; sx-x^{2}.
+\]
+\emph{Mas isso não é o $p$: é o produto medido com a dobra errada.} Cada face traz
+a sua, e cada uma conserva sob a sua.
+
+\smallskip\noindent\textbf{E o que o operador fixa é o \emph{módulo} de $p$, não
+o seu valor.} O Teor.~\ref{fis:thm:duas}(4) dá $\partial x\cdot x=1$ na face
+multiplicativa \emph{normalizada}, e a Obs.~\ref{fis:obs:reguas} já disse que ali
+o $\abs{\cdot}$ existe para não se escrever o sinal: $\abs{p}=1$, e
+$p\in\{+1,-1\}$. \emph{É por isso que $p=-1$ adiante não contradiz nada} --- é o
+outro sinal do mesmo módulo, e é o que o Cor.~\ref{fis:cor:encontro} mede.
+\textbf{O que \emph{não} é livre é o módulo}, e é isso que faz de $s$ o único
+parâmetro da família.
+
+\begin{lema}[são duas dobras, e cada uma conserva sob a sua]\label{fis:lem:duasdobras}
+Com $s=a+b$ e $p=ab$, cada face tem a sua troca dos extremos:
+\[
+\boxed{\;\partial^{+}x=s-x\;}\qquad\qquad\boxed{\;\partial^{\times}x=\frac{p}{x}\;}
+\]
+e cada uma conserva o \emph{seu} invariante e só o seu:
+$x+\partial^{+}x=s$ para todo $x$; $x\cdot\partial^{\times}x=p$ para todo
+$x\neq0$. \textbf{Sob a outra, nenhuma conserva.} Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{As duas coincidem exactamente onde}
+\[
+\boxed{\;\partial^{+}x=\partial^{\times}x\iff s-x=\frac{p}{x}\iff x^{2}-s\,x+p=0\;}
+\]
+\item[(2)] \textbf{E esse lugar é o dos \emph{extremos}.} As raízes de
+$t^{2}-st+p=0$ com $s=a+b$ e $p=ab$ são $a$ e $b$: em $x=a$ as duas dobras dão
+$b$ --- $s-a=b$ e $p/a=b$ ---, e em $x=b$ dão $a$. \emph{Fora deles as duas
+separam-se.}
+\item[(3)] \textbf{Logo $p$ é invariante nas duas faces exactamente sobre
+$\{a,b\}$}, e é aí, e só aí, que faz sentido escrever $(s,p)$ como o par de
+invariantes de \emph{uma} dobra.
+\end{enumerate}
+\end{lema}
+
+\begin{proof}
+(1) De $s-x=p/x$ vem $sx-x^{2}=p$ com $x\neq0$, que é a equação; e ao contrário
+igualmente.
+
+(2) É a conta directa: $s-a=(a+b)-a=b$ e $p/a=ab/a=b$; simetricamente em $b$. E
+que $a$ e $b$ sejam as duas raízes de $t^{2}-st+p$ é a definição de $s$ e $p$
+como soma e produto deles.
+
+(3) Por (1) e (2): fora de $\{a,b\}$ a dobra aditiva move o produto, e a
+multiplicativa move a soma.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que arruma a equação, e arruma-a por baixo.} O
+Teor.~\ref{fis:thm:duasfaces} vai escrever $x^{2}=sx-p$ como \emph{a} equação do
+operador. Ela não é uma condição posta sobre $x$: \textbf{é o lugar onde as duas
+dobras são a mesma dobra}, e portanto o lugar onde há \emph{um} operador e não
+dois. \emph{Fora dele há duas faces com duas trocas; nele há uma troca só}, e é
+por isso que o documento pode dizer «a dobra» no singular.
+\[
+\boxed{\;\text{a equação não descreve um ponto: descreve onde as duas faces se tornam uma.}\;}
+\]
+
+\medskip\noindent\emph{E o Teor.~\ref{fis:thm:corte}(5) já dizia isto, noutro
+andar e sem lhe chamar assim}: lá $\partial^{+}$ fixa o meio, $\partial^{\times}$
+fixa a média geométrica, \emph{«os dois são diferentes enquanto $a\neq b$, e
+coincidem exactamente onde o processo acaba»}. É a mesma separação, e o mesmo
+encontro.
+
+\begin{teorema}[as duas faces do operador dão \emph{uma} equação]\label{fis:thm:duasfaces}
+A Def.~\ref{fis:def:op} tem \textbf{quatro} peças e não duas --- duas operações e
+dois neutros ---, e escreve-se nas duas faces
+\[
+\underbrace{\partial x\oplus x=s}_{\oplus\ \text{e o seu neutro}}
+\qquad\qquad
+\underbrace{\partial x\otimes x=p}_{\otimes\ \text{e o seu neutro}}
+\]
+com $s=a+b$ a soma dos extremos. \textbf{Pedidas ao \emph{mesmo} $\partial$, as
+duas não são duas: são uma}, e é esta:
+\[
+\boxed{\;x\otimes x\;=\;s\,x\ominus p\;,\qquad\text{isto é}\qquad x^{2}=s\,x-p\;}
+\]
+E daí saem, sem se acrescentar nada, os três objectos que este documento usa:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{$s=0$, $p=1$ --- e vem $x^{2}=-1$.} É a face aditiva com o
+neutro $0$ e a multiplicativa com o neutro $1$, tal como a §\ref{fis:escada} as
+escreve. \emph{A troca não fecha em dois: fecha em quatro} --- é o rotor
+$R^{2}=-\mathrm{id}$ do Teor.~\ref{fis:thm:fecho}, e são os quatro quadrantes do
+Teor.~\ref{fis:thm:quarteto} vistos no elemento.
+\item[(2)] \textbf{$s=m$, $p=-1$ --- e vem $x^{2}=mx+1$.} É a família que o
+Cor.~\ref{fis:cor:encontro} já usa, com $\sigma+\sigma'=m$ e
+$\sigma\sigma'=-1$. \emph{O $m$ é o que a face aditiva fixa}, e é a mesma
+grandeza que o Teor.~\ref{fis:thm:BI} chama o meio.
+\item[(3)] \textbf{$s=1$, $p=-1$ --- e vem $x^{2}=x+1$.} \emph{Elevar ao quadrado
+é somar um}: as duas faces fazem o mesmo a $x$, uma com cada neutro. É a
+\textbf{estrela}, e é o membro $m=1$ de~(2).
+\item[(4)] \textbf{E a estrela tem segunda forma, com o operador à frente --- e o
+sinal é o da própria estrela.} Aqui $p=-1$ e não $1$, pelo que aplicar $\otimes x$
+à face multiplicativa dá $\partial x\otimes x\otimes x=(-1)\otimes x$, isto é
+$\partial x\otimes x^{2}=\ominus x$; e com $x^{2}=x\oplus1$ vem
+\[
+\boxed{\;\partial x\otimes(x\oplus1)\;=\;\ominus x\;}
+\]
+--- \emph{equivalente a~(3)}: multiplicando por $x$ vem $p\,(x\oplus1)=\ominus x^{2}$,
+isto é $-(x+1)=-x^{2}$, isto é $x^{2}=x+1$. \textbf{E o sinal não é detalhe}: com
+$s=1$ a dobra é $\partial x=1-x$, e a conta fecha no próprio objeto ---
+$(1-\sigma)(\sigma+1)=1-\sigma^{2}=1-(\sigma+1)=-\sigma$. \emph{Escrever $+x$
+seria tomar o $p$ de uma régua e o $s$ de outra}, que é exactamente o que a
+Def.~\ref{fis:def:op} acabou de separar.
+\end{enumerate}
+\emph{Nenhum dos três se põe.} Os três saem de exigir que as duas equações da
+Def.~\ref{fis:def:op} valham ao mesmo tempo, e o que os separa são os dois
+neutros --- que é a única coisa que ali há para escolher.
+\end{teorema}
+
+\begin{proof}
+De $\partial x\oplus x=s$ vem $\partial x=s\ominus x$, que é a
+Def.~\ref{fis:def:op} escrita ao contrário --- lá $\partial x=a+b-x$, e $s=a+b$.
+Levando à segunda face,
+\[
+(s-x)\,x=p ,\qquad\text{isto é}\qquad sx-x^{2}=p ,\qquad\text{isto é}\qquad x^{2}=sx-p .
+\]
+As três cláusulas são a mesma igualdade com os neutros que cada uma nomeia:
+$(0,1)$ dá $x^{2}=-1$; $(m,-1)$ dá $x^{2}=mx+1$; $(1,-1)$ dá $x^{2}=x+1$.
+\emph{Não se usou mais nada}, e em particular não se usou nenhuma propriedade do
+suporte além de as duas operações existirem com os seus neutros.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que faz a estrela não ser uma escolha.} O
+Teor.~\ref{fis:thm:estrela} vai chamar estrela ao caso $s=1$; a razão de ele
+existir é esta, e não uma preferência: \emph{a mesma conta que dá o rotor dá a
+família, e a família tem um membro onde o segundo termo é o próprio $x$}. Os
+quatro quadrantes e a estrela saem do mesmo sítio --- as duas equações do
+operador --- e diferem só em qual neutro se põe de cada lado.
+\[
+\boxed{\;\text{um operador, duas faces, dois neutros: e a equação decide o resto.}\;}
+\]
+
+
+\begin{corolario}[o discriminante: é o desvio do par, ao quadrado]\label{fis:cor:disc}
+Da equação do Teor.~\ref{fis:thm:duasfaces} sai um só invariante, e sai
+\emph{sem se acrescentar nada}. Chame-se
+\[
+\boxed{\;\Delta\;:=\;s^{2}\ominus 4p\;}
+\]
+Então, com $a$ e $b$ os dois extremos do Teor.~\ref{fis:thm:doispontos}(2):
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{É o quadrado da separação dos extremos.} Com $s=a+b$ e
+$p=ab$,
+\[
+\boxed{\;\Delta=(a-b)^{2}\;}
+\]
+--- \emph{e é por isso que ele existe}: é a única coisa que se pode dizer sobre a
+distância entre os dois pontos sem dizer qual é qual.
+\item[(2)] \textbf{É invariante pela dobra, e é isso que o qualifica.} A dobra
+troca $a$ com $b$, isto é $(a-b)\mapsto-(a-b)$; a potência par absorve a troca,
+pelo que $\Delta$ é \textbf{o mesmo nos dois}. \emph{O que a dobra move não
+sobrevive; $\Delta$ sobrevive} --- e é o mesmo argumento com que o
+Teor.~\ref{fis:thm:BI} conserva o produto.
+\item[(3)] \textbf{Anula-se exactamente onde a dobra deixa de ser efetiva.}
+$\Delta=0\iff a=b$, que a Def.~\ref{fis:def:op} proíbe pela sua única cláusula.
+\emph{Um discriminante nulo não é um caso limite: é a ausência de par.}
+\item[(4)] \textbf{E na leitura pelo centro é o desvio ao quadrado.} Com o par
+$(m,\delta)$ do Teor.~\ref{fis:thm:BI}, $a-b=2\delta$, donde
+$\Delta=4\delta^{2}$. \emph{O centro não entra} --- e não devia entrar: $m$ é o
+que a dobra fixa, e $\Delta$ é o que ela reflete.
+\item[(5)] \textbf{Os três objectos do Teor.~\ref{fis:thm:duasfaces} separam-se
+por ele, e por mais nada:}
+\[
+\begin{array}{lll}
+(s,p)=(0,1) & \Delta=-4 & \text{o \textbf{rotor}}\\[2pt]
+(s,p)=(m,-1) & \Delta=m^{2}+4 & \text{a família \textbf{metálica}}\\[2pt]
+(s,p)=(1,-1) & \Delta=5 & \text{a \textbf{estrela}}
+\end{array}
+\]
+\emph{E a família é estritamente crescente em $m$}, pelo que cada membro tem o
+seu $\Delta$ e não há dois no mesmo.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) $(a+b)^{2}-4ab=a^{2}-2ab+b^{2}=(a-b)^{2}$, que só usa a comutatividade e a
+distributividade. (2) é (1) com $\delta\mapsto-\delta$, e a potência par. (3) num
+suporte sem divisores de zero, $(a-b)^{2}=0\iff a=b$; e $a\neq b$ é o
+Teor.~\ref{fis:thm:doispontos}(2). (4) é substituir $a=m+\delta$ e $b=m-\delta$.
+(5) é a conta em cada linha.
+\end{proof}
+
+\medskip\noindent\textbf{E convém dizer o que $\Delta$ \emph{não} é.} Não é uma
+medida, e não pede ordem: a cláusula~(2) vale em qualquer suporte onde as duas
+operações existam. \emph{Onde houver ordem}, e só aí, o seu sinal separa três
+regimes e $\abs{\Delta_P-\Delta_Q}$ passa a poder chamar-se distância --- e é
+essa a leitura que a §\ref{fis:caixa} faz, no seu andar e com os seus espelhos.
+\textbf{Aqui $\Delta$ é o invariante do par; lá é a etiqueta de um espelho.}
+\emph{O objecto é o mesmo, e a leitura é que muda.}
+
+\begin{corolario}[o discriminante dá duas réguas, e não são intermutáveis]\label{fis:cor:duasreguas}
+Onde $A$ for ordenado, o $\Delta$ do Cor.~\ref{fis:cor:disc} carrega
+\textbf{duas} maneiras de comparar dois pares, e elas não medem a mesma coisa:
+\[
+d_{\mathcal{P}}(P,Q)=\abs{\Delta_P-\Delta_Q}
+\qquad\qquad
+d_{\mathrm{u}}(P,Q)=2^{-\operatorname{prof}(P,Q)}
+\]
+--- a primeira \emph{aritmética}, a segunda a da Def.~\ref{fis:def:arvore} lida
+sobre os mesmos $\Delta$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A primeira é métrica e NÃO é ultramétrica.} Testemunha:
+$\Delta=20,13,8$ dá $d_{\mathcal{P}}(20,8)=12$ contra
+$\max\{7,5\}=7$. \emph{Uma conta, e chega.}
+\item[(2)] \textbf{A segunda é ultramétrica}, pelo Lema~\ref{fis:lem:ultra}, e é
+essa que particiona (Teor.~\ref{fis:thm:bolas}) e que não acumula ao compor
+(Teor.~\ref{fis:thm:navega}).
+\item[(3)] \textbf{E a diferença não é de precisão: é de \emph{alcance}.}
+\end{enumerate}
+\begin{center}\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & $d_{\mathcal{P}}=\abs{\Delta_P-\Delta_Q}$ & $d_{\mathrm{u}}=2^{-\operatorname{prof}}$ \\
+\midrule
+alcance & \textbf{local}: entre dois pares & \textbf{global}: sobre o conjunto todo \\
+num percurso & \textbf{acumula} (triangular) & \textbf{absorve} (Teor.~\ref{fis:thm:navega}) \\
+o que dá & \emph{quanto} falta --- a recusa & a \textbf{partição} (Teor.~\ref{fis:thm:bolas}) \\
+onde se usa & dentro de uma vizinhança & para navegar entre classes \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Uma vê o caminho; a outra só o pior degrau dele.}
+\end{corolario}
+
+\medskip\noindent\textbf{E é o $\Delta$ que as gera às duas, o que não é
+acidente.} Pela cláusula~(2) do Cor.~\ref{fis:cor:disc} ele é o que sobrevive à
+dobra; e uma quantidade que sobrevive é exactamente uma quantidade que se pode
+\emph{comparar} entre pares. \emph{A ultramétrica não vem de fora da álgebra:
+vem de se ler o mesmo invariante pela profundidade do encaixe em vez de pela
+diferença.} É a mesma separação que o Teor.~\ref{fis:thm:navega} já tinha feito
+sem lhe pôr número.
+
+\medido{\code{tests/pgwire.c} §W211: sobre os $26^3=\mathbf{17\,576}$ triplos dos
+pares de $\abs{m},\abs{t}\le6$, a aritmética viola
+$d(x,z)\le\max\{d(x,y),d(y,z)\}$ em $\mathbf{4448}$ deles e a ultramétrica em
+$\mathbf{0}$. E no percurso $\Delta=-4\to5\to0\to40\to-3$ a local soma
+$\mathbf{97}$ para uma distância directa de $\mathbf{1}$, enquanto a global mede
+$2^{-31}$ entre as pontas contra um pior passo de $2^{0}$. Exige-se o \emph{par},
+porque só uma das duas metades não distinguiria as réguas.}
+
+\begin{teorema}[a estrela: onde as duas faces fazem o mesmo]\label{fis:thm:estrela}
+Numa estrutura com duas operações e com os dois neutros que a
+Def.~\ref{fis:def:op} nomeia --- o $0$ de $\oplus$ e o $1$ de $\otimes$ ---
+chama-se \textbf{estrela} ao elemento onde as duas faces fazem o mesmo a $x$,
+cada uma com o seu neutro:
+\[
+\boxed{\;x\otimes x\;=\;x\oplus 1\;,\qquad\text{isto é}\qquad x^{2}=x+1\;}
+\]
+\emph{Elevar ao quadrado é somar um.} Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Não se põe: deriva-se do operador.} É a cláusula~(3) do
+Teor.~\ref{fis:thm:duasfaces} --- o caso $s=1$, $p=-1$ das duas equações da
+Def.~\ref{fis:def:op}. \emph{E é equação, não escolha}: ou tem solução no objeto,
+ou não tem, e o Lema~\ref{fis:lem:geo} já corre essa dicotomia com a face
+multiplicativa.
+\item[(1\,\!$'$)] \textbf{E a solução tem onde estar, sem que se importe o
+contínuo.} A escada da §\ref{fis:escada} é finita em cada andar, e nenhum andar
+finito a contém. \emph{Mas não é preciso todo o infinito: é preciso \textbf{um
+ponto}} --- e é isso que o encaixe dá. Os intervalos do
+Teor.~\ref{fis:thm:corte} apertam-se por dentro uns dos outros e o processo
+\textbf{termina} numa igualdade, no ponto fixo que as duas faces passam a
+partilhar:
+\[
+\boxed{\;\text{um ponto acima da indução, e não a indução toda: é a âncora, e o encaixe garante-a}\;}
+\]
+\emph{Não se converge para ele: acaba-se nele} --- e é a diferença entre pedir
+uma âncora e pedir um corpo inteiro. \textbf{É por isso que este documento não
+importa conjunto numérico nenhum}: nunca precisa de mais do que um ponto de cada
+vez, e o encaixe produz esse.
+\item[(2)] \textbf{É o membro $m=1$ da família que este documento já tem.} O
+Cor.~\ref{fis:cor:encontro} usa $x^{2}-mx-1$, com $\sigma\sigma'=-1$ e
+$\sigma+\sigma'=m$. Em $m=0$ vem $x^{2}=1$, que é a \textbf{troca} --- cifra
+$(0,-1)$, a matriz do Teor.~\ref{fis:thm:constroi}(4). \emph{Em $m=1$ vem a
+estrela}, e é o único $m$ em que o segundo termo é o próprio $x$:
+\[
+\boxed{\;m=0:\ \text{a troca}\qquad m=1:\ \text{a estrela}\qquad s=0,p=1:\ x^{2}=-1,\ \text{o rotor}\;}
+\]
+\item[(3)] \textbf{E aí as duas \emph{dobras} coincidem --- que não é o mesmo que
+ser ponto fixo de $\mathcal{D}$, e a diferença conta.} Pelo
+Lema~\ref{fis:lem:duasdobras}, $\partial^{+}x=1-x$ e $\partial^{\times}x=-1/x$
+são a mesma aplicação exactamente onde $x^{2}=x+1$. \emph{É esse o sentido em que
+a estrela é interface}: o ponto onde as duas faces deixam de ter duas trocas.
+\smallskip
+\emph{E não se diga mais do que isso.} A equação \textbf{não} é invariante por
+$\mathcal{D}$: trocar $\oplus$ por $\otimes$ em $x\otimes x=x\oplus1$ dá
+$x\oplus x=x\otimes1=x$, isto é $x=0$ --- \textbf{outra equação, e não esta}. A
+estrela é ponto fixo do \emph{par de dobras}, e não de $\mathcal{D}$; e é por
+isso que ela não desfaz a estrutura, ao contrário do que $\oplus=\otimes$
+faria.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) É a definição: uma igualdade entre dois elementos do objeto, decidível pela
+igualdade que a Def.~\ref{fis:def:objeto} pede.
+
+(2) $x^{2}=mx+1$ com $m=1$ é $x^{2}=x+1$; e o segundo termo é $x$ exactamente
+quando $m=1$, porque $mx=x$ para todo $x$ obriga $m=1$. O caso $m=0$ é a conta já
+feita no Cor.~\ref{fis:cor:encontro}.
+
+(3) $\partial^{+}x=\partial^{\times}x$ é $1-x=-1/x$, isto é $x-x^{2}=-1$, isto é
+$x^{2}=x+1$ --- as duas dobras coincidem exactamente na estrela, e é o
+Lema~\ref{fis:lem:duasdobras}(1) com $s=1$ e $p=-1$. \emph{E a ressalva
+verifica-se por substituição}: $\mathcal{D}$ aplicado a $x\otimes x=x\oplus1$ dá
+$x\oplus x=x\otimes1$, cujo lado direito é $x$ pelo neutro, donde $x=0$ --- que
+não é a estrela. \textbf{Logo a equação não é $\mathcal{D}$-invariante, e não se
+afirma que seja.}
+\end{proof}
+
+\begin{teorema}[o encaixe entrega a estrela, e entrega-a em inteiros]\label{fis:thm:estrelaencaixe}
+Seja $u_0=0$, $u_1=1$ e $u_{k+1}=u_k+u_{k-1}$ --- a recorrência do
+Teor.~\ref{fis:thm:duasfaces}(2) com $m=1$ ---, e sejam os \textbf{cocientes}
+$c_k=u_{k+1}/u_k$ para $k\ge1$. Então, \emph{sem avaliar raiz nenhuma}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A largura é exacta e é um inverso de inteiros.} Vale
+$u_{k+1}^{2}-u_{k+2}u_{k}=(-1)^{k}$, donde
+\[
+\boxed{\;c_{k+1}-c_{k}\;=\;\frac{(-1)^{k+1}}{u_{k}\,u_{k+1}}\;}
+\]
+--- \emph{o sinal alterna e o módulo é $1/u_ku_{k+1}$}, os dois lidos de
+inteiros.
+\item[(2)] \textbf{Os intervalos encaixam.} Por (1) os $c_k$ caem alternadamente
+de cada lado, e $[c_{k+1},c_k]$ (ou $[c_k,c_{k+1}]$, conforme a paridade) está
+\emph{dentro} do anterior. \emph{Cada um cabe no que veio antes, e nenhum sai.}
+\item[(3)] \textbf{E apertam abaixo de qualquer marca.} Como $u_k$ cresce, para
+todo o inteiro $N$ há $k$ com $u_ku_{k+1}>N$: a largura fica menor que $1/N$.
+\emph{Isto é contagem, não passagem ao limite.}
+\item[(4)] \textbf{Logo há \emph{no máximo um} ponto em todos eles.} Dois pontos
+distintos teriam uma separação que alguma largura de~(3) já não comporta.
+\textbf{A âncora é uma, e a unicidade é o encaixe} --- não é hipótese.
+\item[(5)] \textbf{E esse ponto é a estrela.} A recorrência dá
+$c_{k+1}=1+1/c_k$, isto é, a passagem de um cociente ao seguinte é
+$M(x)=1\oplus 1/x$; e $M$ leva cada intervalo no seguinte. O ponto comum é
+portanto fixo por $M$:
+\[
+x=1+\frac1x\quad\Longleftrightarrow\quad\boxed{\;x^{2}=x+1\;}
+\]
+que é a equação do Teor.~\ref{fis:thm:estrela}. \emph{A solução não se importa:
+constrói-se.}
+\item[(6)] \textbf{E ali as duas dobras são a mesma.} Com $s=1$ e $p=-1$,
+$\partial^{+}x=1-x$ e $\partial^{\times}x=-1/x$; e
+\[
+1-x=-\frac1x\quad\Longleftrightarrow\quad x-x^{2}=-1\quad\Longleftrightarrow\quad x^{2}=x+1 .
+\]
+\emph{É o Lema~\ref{fis:lem:duasdobras}(1) realizado}: o encaixe entrega
+exactamente o ponto onde as duas faces deixam de ter duas trocas.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) A identidade $u_{k+1}^{2}-u_{k+2}u_{k}=(-1)^{k}$ sai por indução da
+recorrência. Base $k=0$: $u_1^{2}-u_2u_0=1-1\cdot0=1$. Passo: substituindo
+$u_{k+2}=u_{k+1}+u_k$ e $u_{k+3}=u_{k+2}+u_{k+1}$,
+\[
+u_{k+2}^{2}-u_{k+3}u_{k+1}=u_{k+2}^{2}-(u_{k+2}+u_{k+1})u_{k+1}
+=u_{k+2}(u_{k+2}-u_{k+1})-u_{k+1}^{2}=u_{k+2}u_{k}-u_{k+1}^{2},
+\]
+que é o simétrico do valor em $k$ --- logo o sinal alterna, e é $(-1)^{k+1}$.
+Confere: $k=1$ dá $1-2\cdot1=-1$ e $k=2$ dá $4-3\cdot1=1$. Então
+\[
+c_{k+1}-c_{k}=\frac{u_{k+2}}{u_{k+1}}-\frac{u_{k+1}}{u_{k}}
+=\frac{u_{k+2}u_{k}-u_{k+1}^{2}}{u_{k}u_{k+1}}
+=\frac{-(-1)^{k}}{u_{k}u_{k+1}} ,
+\]
+que é o enunciado. \emph{Tudo em inteiros, e a fracção nunca é avaliada.}
+
+(2) O sinal de (1) alterna com $k$, pelo que os $c_k$ saltam de lado a cada
+passo; e o módulo decresce, porque $u_ku_{k+1}$ cresce. Saltar de lado com passo
+menor é ficar dentro.
+
+(3) A recorrência é crescente a partir de $u_2$, pelo que $u_ku_{k+1}$ ultrapassa
+qualquer inteiro dado. A comparação é entre inteiros.
+
+(4) Se $y\neq z$ estivessem em todos, a separação $|y-z|$ seria menor que toda a
+largura; por (3) há largura abaixo de qualquer marca, e a única separação que a
+comporta é a nula.
+
+(5) De $u_{k+2}=u_{k+1}+u_k$ vem
+$c_{k+1}=u_{k+2}/u_{k+1}=1+u_k/u_{k+1}=1+1/c_k$. Como $M$ leva $c_k$ em
+$c_{k+1}$ e é decrescente, leva cada intervalo no seguinte; o ponto que está em
+todos é levado em si próprio, isto é, $M(x)=x$.
+
+(6) É a conta escrita, e é equivalente à de (5).
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que dispensa importar o contínuo.} Não se pediu
+um corpo completo, nem se afirmou que a escada o alcança: pediu-se \textbf{um
+ponto}, e o encaixe deu-o --- com largura exacta, unicidade demonstrada, e sem
+que uma raiz fosse avaliada. \emph{A âncora é um ponto acima da indução, e é só
+disso que a estrela precisa.}
+
+\begin{definicao}[o duomorfismo estrela]\label{fis:def:duoestrela}
+Seja $\sigma$ a estrela do Teor.~\ref{fis:thm:estrela} --- o elemento com
+$\sigma^{2}=\sigma+1$ --- e seja $\sigma'=\partial\sigma$ a sua imagem pela
+dobra. O \textbf{duomorfismo estrela} é a dobra lida sobre o par
+$\{\sigma,\sigma'\}$:
+\[
+\boxed{\;\partial\colon\ \sigma\longleftrightarrow\sigma'\;,\qquad
+\sigma\oplus\sigma'=1\;,\qquad \sigma\otimes\sigma'=-1\;}
+\]
+--- \emph{uma aplicação só, a servir as duas faces}. Chama-se-lhe \textbf{estrela}
+porque é ali, e só ali, que a passagem entre as faces não precisa de duas
+aplicações.
+\end{definicao}
+
+\begin{teorema}[a estrela é a interface reversível, e é a única]\label{fis:thm:duoestrela}
+Com a Def.~\ref{fis:def:duoestrela}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Uma dobra serve as duas faces.} Pelo
+Lema~\ref{fis:lem:duasdobras}, $\partial^{+}x=1-x$ e $\partial^{\times}x=-1/x$
+coincidem exactamente onde $x^{2}=x+1$; logo em $\sigma$ há \emph{uma} troca e
+não duas, e ela é ao mesmo tempo o \textbf{oposto} de uma face e o
+\textbf{inverso} da outra.
+\item[(2)] \textbf{É reversível, e a volta é ela própria.}
+$\partial^{2}=\mathrm{id}$ pelo Teor.~\ref{fis:thm:dobra}(2), pelo que
+\emph{ler é escrever ao contrário}: não há segunda aplicação a construir para
+desfazer a primeira.
+\[
+\boxed{\;\text{fora da estrela a travessia pede \textbf{duas} aplicações; nela pede \textbf{uma}}\;}
+\]
+\item[(3)] \textbf{E é a única com essa propriedade.} Pedir que a mesma
+aplicação seja oposto e inverso é pedir $s-x=p/x$, isto é $x^{2}=sx-p$
+(Lema~\ref{fis:lem:duasdobras}(1)); com os neutros que o operador fixa ---
+$s=1$ e $p=-1$ --- a equação é $x^{2}=x+1$, e as suas soluções são $\sigma$ e
+$\sigma'$, que são \emph{o mesmo par}. \emph{Não há segundo lugar onde uma dobra
+sirva as duas faces.}
+\item[(4)] \textbf{E a interface não é o colapso.} $\oplus$ e $\otimes$ continuam
+\emph{duas} sobre a estrela --- $\sigma\oplus\sigma'=1$ e
+$\sigma\otimes\sigma'=-1$ são valores distintos ---, pelo que o
+Teor.~\ref{fis:thm:duasinvol} não é violado: \emph{o que se junta é a
+\textbf{aplicação}, não as operações}. É essa a diferença entre a estrela e a
+condição $\oplus=\otimes$ da Def.~\ref{fis:def:duomorf}, que desfaria a
+estrutura.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) É o Lema~\ref{fis:lem:duasdobras}(1) com $s=1$, $p=-1$, mais a conta
+$1-\sigma=-1/\sigma\iff\sigma-\sigma^{2}=-1\iff\sigma^{2}=\sigma+1$.
+
+(2) É o Teor.~\ref{fis:thm:dobra}(2), que não pede vinco nem régua.
+
+(3) A condição «oposto e inverso ao mesmo tempo» é uma equação de segundo grau
+com coeficientes fixados pelos dois neutros, e uma equação de segundo grau tem
+por raízes um par --- que é o par da Def.~\ref{fis:def:duoestrela}. Que os
+coeficientes sejam $s=1$ e $p=-1$ é o Teor.~\ref{fis:thm:duasfaces}(3).
+
+(4) Substituindo: $\sigma\oplus\sigma'=\sigma+(1-\sigma)=1$ e
+$\sigma\otimes\sigma'=\sigma(1-\sigma)=\sigma-\sigma^{2}=-1$ pela equação da
+estrela. Como $1\neq-1$ onde $2\neq0$, as duas operações continuam a ser duas.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que o corpo estelar chama a \emph{plena}.} A
+condição «uma aplicação serve as duas faces» é a mesma que ali se lê como
+\emph{ler é escrever ao contrário}, e é o que faz da estrela uma \textbf{interface
+reversível}. \emph{Aqui ela sai da equação}, e não de um grau escolhido; o que
+naquele lado é um número --- o seis, onde a soma dos divisores próprios iguala o
+produto deles --- é ali uma coincidência aritmética sobre um conjunto finito, e
+este documento não junta as duas sem realização que as ligue. \textbf{O que se
+afirma é o que se provou}: uma dobra, duas faces, um par.
+
+\medskip\noindent\textbf{E o que \emph{não} se afirma aqui, para não se ler de
+mais.} Três coisas, e cada uma tem a sua razão.
+
+\emph{Primeira: não se diz que a estrela seja uma estrutura com $\oplus=\otimes$.}
+Isso é condição sobre a estrutura inteira, e o Teor.~\ref{fis:thm:duasinvol}
+usa-a como \emph{absurdo} --- «viria $\oplus=\otimes$, contra haver duas». A
+estrela é condição sobre um \textbf{elemento}, e por isso não desfaz a estrutura.
+
+\emph{Segunda: não se diz que a travessia «não paga».} O custo, neste documento,
+é o do Teor.~\ref{fis:thm:landauer}: bits apagados, com piso zero para tudo o que
+tem volta. Ora $\mathcal{D}^{2}=\mathrm{id}$ vale em toda a parte
+(Teor.~\ref{fis:thm:dual-involutiva}), pelo que por esse critério a troca nunca
+apaga nada, dentro ou fora da estrela. \emph{A estrela não é onde se poupa: é
+onde as duas faces coincidem}, e confundir as duas coisas seria trazer de outra
+casa uma palavra que aqui já tem dono.
+
+\emph{Terceira: não se diz que o seis seja esta interface.} O corpo estelar
+chama \emph{plena} ao seis porque $1+2+3=6=1\cdot2\cdot3$ --- a soma dos
+divisores próprios igual ao produto deles, e a conta fecha: com $n=pq$ vem
+$(p-1)(q-1)=2$, donde $p=2$ e $q=3$. \textbf{Mas isso é uma coincidência
+numérica sobre um conjunto finito, e não a identidade $\oplus=\otimes$}: já em
+$\{1,2,3\}$ se tem $1+2=3\neq2=1\cdot2$. \emph{São duas afirmações com a mesma
+frase por cima e conteúdos diferentes}, e este documento não as junta sem
+realização que as ligue --- que não está escrita.
 
 \begin{lema}[as quatro leis são duas]\label{fis:lem:quatro}
 Se $f$ é bijeção e cumpre as duas leis cruzadas da Def.~\ref{fis:def:duomorf},
@@ -2163,19 +3471,28 @@ não é um defeito da lista --- é o que o Teor.~\ref{fis:thm:duas}(4) já dizia
 dois extremos, e é ela que obriga a haver \textbf{duas} nomeações e não uma.}
 \end{proof}
 
-\medskip\noindent\textbf{As três colunas, lado a lado.}
+\medskip\noindent\textbf{As três colunas, lado a lado --- \emph{neste} teorema.}
 \begin{center}\small
 \begin{tabular}{@{}llll@{}}
 \toprule
  & bijeção & isomorfismo & \textbf{duomorfismo} \\
 \midrule
 operações & --- & $\oplus_1\mapsto\oplus_2$, $\otimes_1\mapsto\otimes_2$ & $\oplus_1\mapsto\otimes_2$, $\otimes_1\mapsto\oplus_2$ \\
-ordem & --- & $\le_1\mapsto\le_2$ & $\le_1\mapsto\ \ge_2$ \\
+ordem \emph{(aqui)} & --- & $\le_1\mapsto\le_2$ & $\le_1\mapsto\ \ge_2$ \\
 índice & qualquer & $i\mapsto i$ & $i\mapsto (N-1)-i$, que é $\partial$ \\
 o que fixa & --- & tudo & a \textbf{profundidade}, e só ela \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\medskip\noindent\textbf{E a linha da ordem vale aqui, e não em geral.} Ela é
+verdadeira \emph{neste} teorema porque aqui $\oplus$ e $\otimes$ \textbf{são} a
+ordem --- foram definidos como $\min$ e $\max$ na hipótese. Pela
+Def.~\ref{fis:def:duomorf} a dualidade da \emph{ordem} não se herda da dualidade
+da \emph{operação}: trocar $\oplus$ por $\otimes$ não obriga aplicação nenhuma a
+inverter uma ordem arbitrária. \emph{E a seta corre no sentido contrário do que a
+tabela sugere}: é $D$ inverter a ordem --- provado na cláusula~(2) --- que
+\textbf{dá} a troca de $\min$ por $\max$, e não a troca que dá a inversão.
 
 \medskip\noindent\textbf{E há duas inversões de ordem, e não são a mesma.} A
 bijeção $D$ inverte a ordem \emph{dos índices} e fixa a profundidade; e
@@ -2276,6 +3593,20 @@ v(\sigma^{\dagger})=h(\sigma),
 \]
 --- \emph{a troca cruzada da Def.~\ref{fis:def:duomorf} com uma soma conservada
 por cima.}
+
+\smallskip\noindent\emph{E o símbolo $\dagger$ aqui não contradiz o
+Teor.~\ref{fis:thm:duasinvol}, mas só porque o par muda com ele.} Sobre as
+\textbf{coordenadas} do endereço a aplicação troca, e é $\mathcal{D}$; sobre a
+grandeza $h+v$ ela \emph{preserva}, e é $\dagger$. É exactamente a ressalva já
+escrita adiante --- \emph{a mesma aplicação é $\dagger$ para um par de operações e
+$\mathcal{D}$ para outro} ---, e é por isso que a espécie se declara \textbf{por
+par} e nunca de uma vez. O que o Teor.~\ref{fis:thm:duasinvol} proíbe é ser as
+duas \emph{no mesmo par}, e isso aqui não acontece.
+
+\smallskip\noindent E daqui sai de graça uma antitonia que o texto não tirava:
+com $h+v$ fixo, $h$ sobe se e só se $v$ desce --- \emph{a mesma conta do
+Teor.~\ref{fis:thm:duoesp}(2) noutro andar}, e outra vez provada pela soma fixa e
+não pela troca das operações.
 \item[(4)] \textbf{E o duomorfismo \emph{reflete}, não roda --- e lê-se na
 própria matriz.} $S$ tem $\operatorname{tr}=0$ e $\det=-1$, e os seus valores
 próprios são $+1$ e $-1$: ela fixa a diagonal, troca o sinal na antidiagonal, e
@@ -2378,8 +3709,11 @@ superaditivo do outro, pela mesma quantidade.
 \operatorname{esp}(E)+\operatorname{mat}(E)=\abs{E} ,
 \]
 e em particular $\abs{X}+\sum_x\mathfrak{m}(x)=\abs{I}$: \emph{a fixo
-$\abs{I}$, mais matéria é menos espaço}. É a antitonia que a
-Def.~\ref{fis:def:duomorf} pede quando há ordem.
+$\abs{I}$, mais matéria é menos espaço}. \textbf{E esta antitonia é provada aqui,
+não herdada}: sai da soma ser fixa, e de mais nada. A
+Def.~\ref{fis:def:duomorf} \emph{não} a dá --- lá está dito que a dualidade da
+ordem se trata à parte da dualidade da operação. \emph{As duas coisas encontram-se
+neste par; não se implicam em geral.}
 \item[(3)] \textbf{As duas faces têm naturezas diferentes, e é isso que as
 separa.} $\operatorname{esp}$ conta um \emph{conjunto} --- visitar duas vezes não
 acrescenta célula, e por isso ela é \textbf{idempotente} no que junta;
@@ -2421,8 +3755,9 @@ paga} ---, aqui com a disjunção das imagens no papel do ponto fixo.
 \medskip\noindent\textbf{Donde a correcção ao que se poderia ter escrito.} Não é
 que espaço e matéria \emph{sejam a mesma coisa} --- isso apagaria o par e com ele
 a conta. É que são \textbf{duomorfos}: o mesmo objecto lido nas duas faces, com a
-operação trocada e a ordem invertida, e com um número --- o $c$ --- a passar de
-uma para a outra com o sinal virado. \emph{A igualdade seria colapso; a duomorfia
+operação trocada, e com um número --- o $c$ --- a passar de uma para a outra com
+o sinal virado. \emph{E a ordem inverte-se também}, mas isso é a cláusula~(2) e
+tem prova própria: vem da soma ser fixa, não da troca das operações. \emph{A igualdade seria colapso; a duomorfia
 é o que mantém os dois e ainda assim não os deixa independentes.}
 \[
 \boxed{\;\text{o espaço é componente, não palco; e a sua companheira é a matéria.}\;}
@@ -2551,7 +3886,10 @@ depois de a realização estar feita. \emph{Dá a energia do par e não dá a su
 dinâmica.} Para a dar seria preciso que o passo de um corpo consultasse o
 $\pi(E_j)$ do outro --- e o Teor.~\ref{fis:thm:mult}(3) diz que nenhum passo
 consulta mais do que a célula corrente. \emph{A interacção existe e é contável; o
-que falta é ela ter voz no passo.}
+que falta \textbf{aqui} é ela ter voz no passo} --- e é a §\ref{fis:grav-forca}
+que lhe dá voz, sem quebrar nenhuma destas cláusulas: pela face $\otimes$ o passo
+lê a coerência sem consultar ninguém, porque lê $G$ sobre $\mathcal{V}(x)$ e mais
+nada.
 
 \section{Espaço, matéria e energia são três graus do mesmo campo}\label{fis:topo-energia}
 
@@ -2732,7 +4070,7 @@ esta prova pede à escada, e pede-a toda.} Note-se
 que a preservação é, como em~(2), \textbf{a menos do factor $2^{m}$}: é a mesma
 escala, e não conteúdo.
 \end{proof}
-\colunas{Lema~\ref{fis:lem:ultra}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:euler},~\ref{fis:thm:dim},~\ref{fis:thm:vizniso},~\ref{fis:thm:navega},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte},~\ref{fis:thm:palavra},~\ref{fis:thm:handshake}; Lema~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:espmat},~\ref{fis:def:corpos},~\ref{fis:def:palavra}}
+\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:comutapar},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:euler},~\ref{fis:thm:dim},~\ref{fis:thm:vizniso},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte},~\ref{fis:thm:palavra},~\ref{fis:thm:handshake}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos},~\ref{fis:def:palavra}}
         {a árvore, o dragão e a espiral, a serpentina, a travessia por dígitos, a leitura dual}
         {\code{tests/aranha\_n.c} §AN6--§AN7, §AN13--§AN14, §AN25, §AN29, §AN37; \code{tests/pgwire.c} §W122--§W123, §W128}
 
@@ -4108,7 +5446,7 @@ para se dizer.
 \section{O que esta parte não deriva}\label{fis:mec-naoderiva}
 
 \noindent Uma parte chamada mecânica faz esperar dez coisas. Esta tem uma,
-empresta quatro, e cinco não estão aqui --- e enumerar quais é mais honesto do que
+empresta cinco, e quatro não estão aqui --- e enumerar quais é mais honesto do que
 deixar o nome trabalhar sozinho.
 
 \begin{center}\small
@@ -4117,9 +5455,9 @@ deixar o nome trabalhar sozinho.
  & existe aqui? & onde, ou porque não \\
 \midrule
 conservação & \textbf{sim} & Teor.~\ref{fis:thm:kirchhoff}, e é de corrente \\
-momento & só o \emph{nome} & Teor.~\ref{fis:thm:volta}: uma passagem \\
+momento & noutra parte & tem fórmula: $\mathfrak{p}=\sum\theta$ --- Def.~\ref{fis:def:momcoer} \\
 energia & noutra parte & no grau dois --- Teor.~\ref{fis:thm:tresgraus} \\
-força & \textbf{não}, no espaço & não há fonte --- Teor.~\ref{fis:thm:semfonte} \\
+força & noutra parte & é $\mathcal{D}$(queda) --- Teor.~\ref{fis:thm:forca}; fonte é que não há \\
 ligação & noutra parte & é a folga --- Teor.~\ref{fis:thm:defeito} \\
 aceleração & \textbf{não} & o incremento vive em $2n$ valores \\
 lagrangiana & \textbf{não} & não há extremo global \\
@@ -4133,10 +5471,18 @@ $N$ corpos & noutra parte & a interacção é o $c$ --- Teor.~\ref{fis:thm:ncorp
 \medskip\noindent\textbf{Momento e energia são nomes, e o documento já o admitiu
 noutro sítio.} O Teor.~\ref{fis:thm:volta} distingue uma passagem de duas, e
 chama à primeira momento e à segunda energia. O que ele prova é
-$\partial^{2}=\mathrm{id}$ e mais nada: não há grandeza aditiva entre corpos ---
-não há corpos ---, nem grandeza que se conserve ao longo do parâmetro. Vale aqui
-a mesma frase da §\ref{fis:rel-naoderiva}: \emph{o que se deriva é o limite; o
-que se atribui é o nome.}
+$\partial^{2}=\mathrm{id}$ --- e isso \emph{é} a paridade do
+Teor.~\ref{fis:thm:duo-composicao}(3), pelo que uma passagem e duas são os dois
+rótulos de $B$, e são dois e não três pelo Teor.~\ref{fis:thm:quarteto}(1).
+\emph{Nesta parte não há corpos}, e por isso não há aqui grandeza aditiva entre
+eles. \textbf{Mas há-a no documento}: a Def.~\ref{fis:def:momcoer} dá ao momento
+uma fórmula, $\mathfrak{p}(E)=\sum_{t\in E}\theta(t)$, e o
+Teor.~\ref{fis:thm:momcoer}(1) prova-lhe a aditividade sobre troços disjuntos ---
+que são os corpos da Def.~\ref{fis:def:corpos}. E há grandeza conservada: o
+Lema~\ref{fis:lem:conserva}, $\sum_x G(x)=\abs{I}$. \emph{O que falta aqui é a
+\textbf{régua}, não a grandeza}, e é por isso que ela é da Gravitação. Vale a
+mesma frase da §\ref{fis:rel-naoderiva}: \emph{o que se deriva é o limite; o que
+se atribui é o nome.}
 
 \medskip\noindent\textbf{E a lagrangiana não se escreve, por três razões que não
 se reparam umas às outras.} Esta parte tem três candidatos, e cada um falha por
@@ -4178,7 +5524,8 @@ Teor.~\ref{fis:thm:agentes}. \emph{Não é um buraco a tapar: é uma escolha, e 
 está a ser paga aqui.}
 \[
 \boxed{\ \text{esta parte \textbf{conta}; o que \textbf{mede} está na
-§\ref{fis:grav-regua}, e o que \textbf{puxa} não está em parte nenhuma.}\ }
+§\ref{fis:grav-regua}; e o que \textbf{puxa} é a dobra do que cai
+(§\ref{fis:grav-forca}).}\ }
 \]
 
 \colunas{Teor.~\ref{fis:thm:agentes},~\ref{fis:thm:kirchhoff},~\ref{fis:thm:periodo},~\ref{fis:thm:leitura},~\ref{fis:thm:gato}}
@@ -4194,7 +5541,9 @@ está a ser paga aqui.}
 postula a queda: ela é o que o passo faz quando não delibera. Não se postula uma
 fonte --- e é aqui que esta parte se separa da gravitação que o leitor traz: a
 \textbf{não há}, e diz-se em vez de se fingir. E não se postula atracção: o sinal
-que a construção tem é o \emph{outro}, e conta-se qual.
+que a face do ciclo tem é o \emph{outro}, conta-se qual, e a atracção
+\textbf{deriva-se} da outra face --- Teor.~\ref{fis:thm:forca}, na
+§\ref{fis:grav-forca}.
 
 \medskip\noindent Cada frase com o enunciado que a obriga:
 \begin{center}\small
@@ -4213,6 +5562,8 @@ espaço, matéria, energia & \emph{já no alicerce}: os três graus & Teor.~\ref
 os $N$ corpos & \emph{já no alicerce}: a interacção é o $c$ & Teor.~\ref{fis:thm:ncorpos} \\
 e o sinal é o outro & o passo \emph{foge} de $G$; e $\partial\tau$ cresce com $G$ & Teor.~\ref{fis:thm:sinal} \\
 não há fonte & a única lei de $G$ é o próprio percurso & Teor.~\ref{fis:thm:semfonte} \\
+momento e coerência & as duas faces, e a transformada é a passagem & Teor.~\ref{fis:thm:momcoer} \\
+e a força & é $\mathcal{D}$(queda): o $\arg\max$ é a dobra do $\arg\min$ & Teor.~\ref{fis:thm:forca} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -4785,7 +6136,8 @@ em $G$; a composição de um mínimo com uma função crescente é o mínimo do
 argumento.
 \end{proof}
 
-\medskip\noindent\textbf{E é por isso que o que aqui há não é atracção.} Um poço
+\medskip\noindent\textbf{E é por isso que o que a face do ciclo dá não é
+atracção.} Um poço
 gravitacional pede o contrário das duas cláusulas: o passo a ir para $G$
 \emph{maior}, e o relógio a andar \emph{mais devagar} onde o campo é forte. A
 construção dá os dois sinais trocados, e dá-os por um mecanismo que se lê no
@@ -4793,11 +6145,14 @@ ciclo. \emph{O «cai» do Teor.~\ref{fis:thm:geodesica} não é queda num campo:
 ausência de deliberação}, e é assim que o próprio teorema o define --- «não uma
 heurística de exploração nem uma escolha».
 
-\medskip\noindent\textbf{Para ter atracção há um passo, e ele custa.} Basta
-trocar o passo~3 para o vizinho de \emph{maior} $G$. Isso é uma
-\textbf{realização nova} --- muda o ciclo da §\ref{fis:algoritmo} ---, e paga-se
-com o que qualquer realização paga: enunciado próprio e medidor próprio.
-\emph{Nenhum dos dois está escrito, e por isso ela não entra aqui.}
+\medskip\noindent\textbf{Para ter atracção há um passo, e ele não se inventa.}
+Basta trocar o passo~3 para o vizinho de \emph{maior} $G$ --- e a questão toda é
+se essa troca é uma \textbf{hipótese nova} ou uma \emph{consequência}. É a
+segunda, e a §\ref{fis:grav-forca} demonstra-o: o passo do $\arg\max$ é a imagem
+do passo do $\arg\min$ pelo operador $\mathcal{D}$ da Def.~\ref{fis:def:duomorf},
+que não tem parâmetro nenhum a escolher. \emph{A força é a dobra da queda}
+(Teor.~\ref{fis:thm:forca}), e os dois sinais desta secção trocam \textbf{juntos}
+porque a aplicação que os troca é uma só.
 
 \section{Não há fonte}\label{fis:grav-semfonte}
 
@@ -4887,17 +6242,282 @@ Cor.~\ref{fis:cor:cruzado}: os mesmos pares de corpos, contados com
 multiplicidade. \emph{Só a primeira não é interacção}; as outras duas são-o, e a
 diferença entre elas é o peso.
 
+\section{O momento, a coerência, e a força}\label{fis:grav-forca}
+
+\noindent Esta parte deixou três dívidas escritas. \textbf{Aqui pagam-se duas, e
+a terceira fica --- dita, e com a razão.} A primeira é o
+Teor.~\ref{fis:thm:sinal}: \emph{os dois sinais estão trocados}. A segunda é o
+Teor.~\ref{fis:thm:semfonte}: \emph{não há segundo termo do lado direito}. A
+terceira está na §\ref{fis:grav-ncorpos}: \emph{a interacção existe e é contável,
+e o que falta é ela ter voz no passo} --- e essa não se paga, pela razão que a
+cláusula~(4) do Teor.~\ref{fis:thm:forca} escreve. \textbf{E não se paga nenhuma
+acrescentando coisa nova}: paga-se aplicando o operador $\mathcal{D}$ da
+Def.~\ref{fis:def:duomorf} ao que já está.
+
+\begin{definicao}[o momento e a coerência]\label{fis:def:momcoer}
+Duas grandezas do percurso, e as duas já estão construídas com outros nomes.
+
+\medskip\noindent\textbf{O momento.} Para um troço $E\subseteq I$, o
+\textbf{momento} é o passo \emph{acumulado},
+\[
+\boxed{\;\mathfrak{p}(E)\;=\;\sum_{t\in E}\theta(t)\;}
+\]
+com $\theta$ o incremento e a soma a ser a acumulação $\zeta$ do
+Teor.~\ref{fis:thm:shift}. \emph{Não é objeto novo}: pela
+Def.~\ref{fis:def:serie} a acumulação do incremento \textbf{é} a realização,
+$\zeta\theta=\pi$. O momento é o rasto --- o que o percurso somou e não largou.
+
+\medskip\noindent\textbf{A coerência.} Para dois troços \textbf{disjuntos}
+$E,F\subseteq I$ --- a disjunção é a da Def.~\ref{fis:def:corpos}, e é pedida ---
+a \textbf{coerência} é o número de células que os dois ocupam,
+\[
+\boxed{\;\mathfrak{c}(E,F)\;=\;\bigl\lvert\pi(E)\cap\pi(F)\bigr\rvert\;}
+\]
+--- que é o $c$ da Def.~\ref{fis:def:corpos}, agora nomeado pelo que ele mede.
+\emph{É a franja}: quanto de um troço bate no outro.
+\end{definicao}
+
+\begin{teorema}[momento e coerência são as duas faces, e a passagem é a transformada]\label{fis:thm:momcoer}
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O momento vive na face aditiva.} A acumulação
+$\zeta=\sum_{j\ge0}S^{j}$ é uma \textbf{convolução} (Def.~\ref{fis:def:conv}), e
+sobre troços disjuntos o momento soma sem defeito:
+$\mathfrak{p}(E\sqcup F)=\mathfrak{p}(E)+\mathfrak{p}(F)$.
+\item[(2)] \textbf{A coerência vive na face multiplicativa.} Pelo
+Teor.~\ref{fis:thm:conv}, $\mathcal{F}(f*g)=\mathcal{F}(f)\cdot\mathcal{F}(g)$:
+\emph{o que no domínio é acumular, no espectro é multiplicar}. E é lá que a
+coerência se lê --- pelo Teor.~\ref{fis:thm:ponte}(3) o emparelhamento cruzado
+atravessa a transformada a menos do factor $2^{m}$.
+\item[(3)] \textbf{Logo a transformada é o duomorfismo entre as duas.}
+$\mathcal{F}$ leva a primeira operação na segunda e a segunda na primeira, que
+são as duas leis cruzadas da Def.~\ref{fis:def:duomorf}:
+\[
+\boxed{\;\mathcal{F}\colon\ (\text{o domínio},\ \ast,\ \cdot)\ \xrightarrow{\ \cong\ }\ \mathcal{D}\bigl(\text{o espectro},\ \ast,\ \cdot\bigr)\;}
+\]
+\emph{Momento e coerência não são duas grandezas a relacionar: são uma, lida nas
+duas faces}, e a passagem estava construída desde a Álgebra.
+\item[(4)] \textbf{E a coerência é exactamente o que a soma não vê.} Pelo
+Teor.~\ref{fis:thm:duoesp}(1), juntar dois troços dá
+\[
+\operatorname{esp}(E\sqcup F)=\operatorname{esp}(E)+\operatorname{esp}(F)-\mathfrak{c},
+\qquad
+\operatorname{mat}(E\sqcup F)=\operatorname{mat}(E)+\operatorname{mat}(F)+\mathfrak{c}.
+\]
+\emph{O mesmo número, com sinais opostos nas duas faces} --- e é por isso que ele
+é a interacção, e não um resíduo.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $\zeta$ é a série do deslocamento (Teor.~\ref{fis:thm:shift}), e uma série de
+deslocamentos é a convolução com a indicadora de $\{j\ge0\}$. A aditividade sobre
+disjuntos é a soma partir-se pela partição do índice.
+
+(2) É o Teor.~\ref{fis:thm:conv} aplicado à acumulação, mais o
+Teor.~\ref{fis:thm:ponte}(3) para o emparelhamento cruzado.
+
+(3) É (1) e (2) postas lado a lado e comparadas com a Def.~\ref{fis:def:duomorf}.
+
+(4) É o Teor.~\ref{fis:thm:duoesp}(1), com $\mathfrak{c}$ a ser o $c$ de lá pela
+Def.~\ref{fis:def:momcoer}.
+\end{proof}
+
+\begin{teorema}[a força é a dobra da queda]\label{fis:thm:forca}
+Sejam $\oplus=\min$ e $\otimes=\max$ as operações que a ordem induz sobre
+$\mathcal{V}(x)$ --- as do Teor.~\ref{fis:thm:dual}. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O passo do ciclo é a face aditiva.} O passo~3 da
+§\ref{fis:algoritmo} é o $\arg\min$ de $G$ sobre $\mathcal{V}(x)$, isto é
+$\oplus$ aplicado ao campo nos vizinhos.
+\item[(2)] \textbf{O seu dual existe e é o $\arg\max$ --- e sai da definição, não
+de uma bijeção.} $\mathcal{D}$ da Def.~\ref{fis:def:duomorf} actua sobre a
+\emph{função estrutural} das operações e não sobre os elementos: aplicado à
+estrutura $(\,\cdot\,,\min,\max)$ dá $(\,\cdot\,,\max,\min)$, e a decisão que era
+o menor passa a ser o maior. \emph{Não se escolheu, e não se transportou nada}: o
+operador não tem parâmetro, e a volta é o Teor.~\ref{fis:thm:dual-involutiva}.
+\smallskip
+\emph{E é preciso não citar aqui o Teor.~\ref{fis:thm:dual}}, por muito que ele
+troque $\min$ e $\max$: ele corre sobre a lista $I$ em largura $p$, e o passo
+corre sobre $\mathcal{V}(x)$, que tem $2n$ elementos e \textbf{não} se identifica
+com um troço de $I$ preservando vizinhança --- é o
+Teor.~\ref{fis:thm:vizniso}, que o proíbe para $n\ge2$. \textbf{A troca aqui é a
+do operador sobre a estrutura, e não a de uma bijeção do suporte}; é por isso que
+não precisa daquele teorema e não pode pedir-lhe emprestada a unicidade.
+\item[(3)] \textbf{E cada passo alimenta uma face e não a outra.} Um passo
+acrescenta \emph{um} ao índice, e esse um vai inteiro para um dos dois lados: se
+$G(y)=0$, acrescenta célula e não acrescenta duplicidade; se $G(y)\ge1$,
+acrescenta duplicidade e não acrescenta célula. O passo $\oplus$ prefere o
+primeiro caso, o passo $\otimes$ prefere o segundo:
+\[
+\boxed{\;\text{a queda \emph{prefere} espaço; a força \emph{prefere} matéria; e cada passo dá um a uma das duas.}\;}
+\]
+\emph{E diz-se \textbf{prefere} e não \textbf{maximiza}, de propósito}: o passo é
+um $\arg\min$ de vizinhança, e promovê-lo a extremo funcional seria escrever o
+que a §\ref{fis:mec-naoderiva} já desmente. \textbf{Nem se diz que a soma não se
+move}: $\operatorname{esp}+\operatorname{mat}=\abs{E}$ cresce de um por passo. A
+antitonia do Teor.~\ref{fis:thm:duoesp}(2) é a $\abs{I}$ \emph{fixo} --- compara
+duas realizações do mesmo comprimento, e não dois instantes da mesma. \emph{As
+duas faces trocam-se entre realizações, não ao longo de uma.}
+\smallskip
+\emph{E a preferência não é estrita nos dois extremos}: se todos os $2n$ vizinhos
+têm $G\ge1$, o passo $\oplus$ acrescenta matéria à mesma; se todos têm $G=0$, o
+passo $\otimes$ acrescenta espaço. \textbf{Nesses dois regimes as duas faces
+coincidem}, e não há dobra a ler.
+\item[(3\,\!$'$)] \textbf{E onde as duas decisões dão as mesmas células --- que
+\emph{não} é a estrela.} Sobre $\mathcal{V}(x)$ finito,
+$\arg\min G=\arg\max G$ exactamente quando $G_t$ é \textbf{constante} na
+vizinhança; e aí os dois conjuntos são $\mathcal{V}(x)$ inteiro.
+\[
+\boxed{\;\arg\min G_t=\arg\max G_t\ \text{ em }\mathcal{V}(x)\iff G_t\ \text{constante aí}\;}
+\]
+\textbf{E é preciso dizer três coisas, para isto não valer mais do que vale.}
+\emph{Primeira}: não é acordo, é \textbf{indeterminação} --- os dois passos
+devolvem os $2n$ candidatos e nenhum escolhe, e o ciclo não tem regra de
+desempate escrita. \emph{Segunda}: isto é $\min=\max$ sobre o que a decisão lê,
+isto é $\operatorname{Fix}(\mathcal{D})$ --- e a Def.~\ref{fis:def:duomorf} diz
+que ali a estrutura \emph{deixa de ter objecto}, e o Teor.~\ref{fis:thm:estrela}
+diz que a estrela \textbf{não é} esse conjunto. \emph{Terceira}: em
+$(\min,\max)$ não há oposto nem inverso, pelo que as duas dobras do
+Lema~\ref{fis:lem:duasdobras} \textbf{nem sequer existem neste andar}. \textbf{Não
+é, portanto, a leitura do Teor.~\ref{fis:thm:duoestrela}} --- é o seu contrário:
+lá as duas dobras coincidem \emph{sem} as operações colapsarem; aqui as operações
+colapsam.
+\smallskip
+\emph{E o conjunto é fino}: fora do suporte $G\equiv0$ e a condição vale por
+vacuidade, onde não há régua nem passo; sobre a trajetória, $\mathcal{V}(\pi(t))$
+contém $\pi(t-1)$ com $G\ge1$, pelo que a constância pede saturação uniforme de
+toda a vizinhança --- e o passo do $\arg\min$ produz precisamente o contrário.
+\textbf{Em grade não saturada é o instante inicial e mais nada.}
+\item[(4)] \textbf{E \emph{nada} se acrescenta do lado direito.} A recorrência do
+Teor.~\ref{fis:thm:semfonte} é a \textbf{mesma} nos dois passos: continua a
+alterar $G$ num ponto só, continua sem termo em $G_t(y)$ para $y\neq x$, e
+continua a não propagar. \emph{O que muda é qual dos dois neutros a decisão usa,
+e não a lei que escreve.} Donde a força não faz aparecer fonte nenhuma.
+\smallskip
+\textbf{E a terceira dívida \emph{não} se paga aqui, e é preciso dizê-lo.} O que
+o passo dual lê continua a ser $G$ sobre $\mathcal{V}(x)$, e $G$ é a soma
+$\sum_i G_i$: pelo Teor.~\ref{fis:thm:agentes} ele \textbf{não distingue quem
+escreveu}. Logo $G(y)\ge1$ não separa «voltei aqui» de «o outro corpo passou
+aqui», e a coerência $\mathfrak{c}(E,F)$ --- que é grandeza de \emph{dois} troços
+--- não é legível no passo. \emph{Duas execuções com os troços trocados entre
+corpos dão o mesmo $G$, logo o mesmo passo, e $\mathfrak{c}$ diferente}: uma
+grandeza que muda sem que o passo mude não tem voz nele. \textbf{O que
+$\mathcal{D}$ paga é o sinal, e só o sinal.} A voz da interacção continua a pedir
+o identificador que o Teor.~\ref{fis:thm:agentes} diz não sair do campo.
+\item[(5)] \textbf{Donde a queda e o puxão não são duas leis.} São a mesma lei
+nas duas faces, e $\mathcal{D}$ leva uma na outra sem hipótese nova:
+\[
+\boxed{\;\text{a força é }\mathcal{D}(\text{queda})\;}
+\]
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Escolher o menor de um conjunto finito é aplicar $\min$, e $\min$ é o
+$\oplus$ que a ordem induz --- \emph{a hipótese do enunciado, e não uma citação}.
+
+(2) $\mathcal{D}$ leva a estrutura $(\,\cdot\,,\min,\max)$ em
+$(\,\cdot\,,\max,\min)$ \emph{pela Def.~\ref{fis:def:duomorf} e por mais nada} ---
+o operador escreve o par de operações pela ordem contrária, e a decisão que era o
+menor passa a ser o maior. Que aplicá-lo duas vezes devolva o passo original é o
+Teor.~\ref{fis:thm:dual-involutiva}. \textbf{E não se cita aqui o
+Teor.~\ref{fis:thm:dual}}, como o enunciado avisa: ele corre sobre a lista, não
+sobre $\mathcal{V}(x)$, e a troca de que aqui se precisa é a do operador sobre a
+estrutura --- que não pede bijeção nenhuma do suporte.
+
+(3) $G(y)=0$ acrescenta uma célula ao suporte e não acrescenta duplicidade;
+$G(y)\ge1$ acrescenta duplicidade e não acrescenta célula --- é a
+Def.~\ref{fis:def:folga} lida no passo. A soma fixa é o
+Lema~\ref{fis:lem:conserva}, e a antitonia sai dela como no
+Teor.~\ref{fis:thm:duoesp}(2).
+
+(3$'$) Se $G$ é constante em $\mathcal{V}(x)$, todo o elemento é minimizante e
+maximizante, e os dois conjuntos são $\mathcal{V}(x)$. Se não é, então
+$\min G<\max G$, e nenhum minimizante atinge o máximo: os dois conjuntos são
+\textbf{disjuntos}, e em particular distintos. \emph{É a dicotomia inteira}, e
+$\mathcal{V}(x)$ é finito e não vazio pela Def.~\ref{fis:def:viztopo} e pelo
+Teor.~\ref{fis:thm:dim}.
+
+(4) A recorrência do Teor.~\ref{fis:thm:semfonte} depende de $\pi(t+1)$ e de mais
+nada. Trocar a \emph{regra que escolhe} $\pi(t+1)$ não lhe acrescenta termo: o
+lado direito continua a ser a indicatriz de uma célula. \emph{É por isso que
+trocar a face é legítimo e acrescentar uma força não seria.}
+
+(5) É (2) e (4).
+\end{proof}
+
+\medskip\noindent\textbf{E o relógio acompanha, com o sinal certo.} O
+Teor.~\ref{fis:thm:sinal}(3) prova uma \emph{equivalência}: minimizar
+$\partial\tau$ \textbf{é} fugir de $G$. Aplicando $\mathcal{D}$ à equivalência
+inteira --- e não a metade dela --- vem
+\[
+\boxed{\;\text{sob }h=\mathrm{id}\text{: o passo dual \textbf{prefere} o maior tempo próprio}\;}
+\]
+porque $\partial\tau=\sqrt{G\,h_{ii}}$ cresce com $G$ e o passo dual vai ao $G$
+maior. \emph{Os dois sinais trocam juntos, e trocam pela mesma aplicação} --- que
+é precisamente o que faltava, porque trocar só o passo deixaria o relógio ao
+contrário.
+
+\smallskip\noindent\emph{E a hipótese $h=\mathrm{id}$ não é decorativa}: é a
+mesma do Teor.~\ref{fis:thm:sinal}(1) e do Teor.~\ref{fis:thm:geodesica}, e o
+contra-exemplo já está escrito nesta parte --- com $h=\operatorname{diag}(1,4)$,
+um vizinho com $G=2$ na direção~1 dá $q=2$ e um com $G=1$ na direção~2 dá $q=4$,
+pelo que o maior $G$ e o maior $\partial\tau$ \textbf{não são o mesmo vizinho}.
+Fora da régua isótropa as duas leituras separam-se, e o teorema não as junta.
+
+\medskip\noindent\emph{E uma nota de honestidade, na forma que este documento usa
+para elas.} Que o passo dual maximize o tempo próprio \textbf{coincide} com o
+princípio extremal da gravitação importada, e a coincidência não foi procurada:
+saiu de aplicar $\mathcal{D}$ a uma equivalência já demonstrada. \emph{A
+derivação é interna; a coincidência é leitura, e fica marcada como tal.} O que
+aqui se deriva é que \textbf{há duas faces e que uma é a dobra da outra}; qual
+delas o mundo corre não é pergunta que este documento faça.
+
+\medskip\noindent\textbf{E o quarteto \emph{não} se monta aqui, por três razões
+que convém escrever em vez de contornar.} Seria tentador cruzar
+momento\,/\,coerência com anda\,/\,está e chamar-lhe o quarteto do
+Teor.~\ref{fis:thm:quarteto}. Não é, e falha nos três requisitos:
+\begin{enumerate}\itemsep3pt
+\item[(i)] \textbf{Os pares são dois, e não um.} O $\mathcal{D}$ deste teorema
+age sobre $(\min,\max)$; o do Teor.~\ref{fis:thm:momcoer} age sobre
+$(\ast,\cdot)$. A Def.~\ref{fis:def:duomorf} avisa que \emph{as operações são
+dados da estrutura}, e o Teor.~\ref{fis:thm:duasinvol} que \emph{a espécie é
+relativa ao par}: cruzar os dois sob os mesmos símbolos seria a colagem que
+ambos proíbem.
+\item[(ii)] \textbf{A comutação não está verificada}, e o
+Teor.~\ref{fis:thm:quarteto}(2) pede-a por hipótese.
+\item[(iii)] \textbf{E a coluna $q=0$ é vazia.} O Teor.~\ref{fis:thm:borda}(3)
+prova que $q=G(x)h_{ii}\neq0$ em toda a aresta, porque $G\ge1$ no suporte ---
+\emph{não há aresta na borda}, e §K2 varre-o sem uma ocorrência. Um quarteto com
+uma coluna sem membro é uma tabela, não um grupo.
+\end{enumerate}
+\emph{O que aqui há é o par de faces e mais nada}, e é quanto basta para o
+sinal. Onde o quarteto fecha mesmo é na Cosmologia
+(Teor.~\ref{fis:thm:bidual}), e lá as duas involuções são do \emph{mesmo} tipo
+--- ambas $\dagger$ ---, o que faz dele outro quarteto e não este.
+
+\medido{\code{tests/cone\_nulo.c} §K1--§K2: as duas faces separadas por $q=0$,
+quem anda e quem está. \code{tests/aranha\_n.c} §AN31: o campo não distingue quem
+escreveu --- é o que faz o momento somar sem defeito, a cláusula~(1) do
+Teor.~\ref{fis:thm:momcoer} medida. \code{tests/pgwire.c} §W122: a troca cruzada
+nos dois pares com $h+v$ conservado, que é a antitonia da cláusula~(3) do
+Teor.~\ref{fis:thm:forca} medida noutro andar.}
+
 \section{O que esta parte não deriva}\label{fis:grav-naoderiva}
 
-\noindent Quatro coisas, e dizem-se porque um leitor treinado em gravitação vai
-supor as quatro sem ler.
+\noindent Três coisas, e dizem-se porque um leitor treinado em gravitação vai
+supor as três sem ler. \emph{Eram quatro}: a \textbf{atracção} saiu desta lista
+quando a §\ref{fis:grav-forca} a derivou --- o Teor.~\ref{fis:thm:forca} mostra
+que o passo do $\arg\max$ é a imagem do passo do ciclo pelo operador
+$\mathcal{D}$, e não uma hipótese a acrescentar. \emph{O que fica de fora não é
+o puxão: é o que se segue.}
 
-\medskip\noindent\textbf{Primeira: a atracção.} O sinal é o outro, e o
-Teor.~\ref{fis:thm:sinal} conta-o nas duas leituras. Nada aqui puxa.
-
-\medskip\noindent\textbf{Segunda: a fonte, e com ela a lei de força \emph{no
+\medskip\noindent\textbf{Primeira: a fonte, e com ela a lei de força \emph{no
 espaço}.} Não há $T_{uv}$ e não há termo que faça um constituinte mover-se por
-causa de outro --- Teor.~\ref{fis:thm:semfonte}. \emph{E é preciso ser exacto
+causa de outro --- Teor.~\ref{fis:thm:semfonte}. \emph{E note-se que a
+§\ref{fis:grav-forca} não a acrescenta}: o Teor.~\ref{fis:thm:forca}(4) mostra
+que trocar a face deixa a recorrência intacta, e é por isso que a troca é
+legítima e uma fonte não seria. \emph{E é preciso ser exacto
 aqui, porque o documento tem duas coisas que se confundem com força e não são.}
 
 \medskip\noindent A primeira é a \textbf{ligação}, e essa \emph{existe}: o
@@ -4922,7 +6542,7 @@ definido fora dele, que é precisamente para onde o passo vai. \emph{A trajetór
 lê o gradiente na borda do que já conhece}, e é isso, e não uma lei de força, que
 a move.
 
-\medskip\noindent\textbf{Terceira: a massa, e a ponte com ela.} A palavra está
+\medskip\noindent\textbf{Segunda: a massa, e a ponte com ela.} A palavra está
 tomada, e no outro sentido: no Teor.~\ref{fis:thm:massa} a massa é
 $\abs{\log\rho}$, a distância logarítmica de uma raiz ao círculo. Isso vive no
 espectro de uma cadeia; $G$ vive numa célula de $X$. \emph{Não existe aplicação
@@ -4930,13 +6550,13 @@ escrita entre os dois objetos}, e escrever «a massa curva o espaço» seria
 inventar uma. Para a escrever seria preciso primeiro dar uma realização
 $\pi$ à cadeia espectral, e isso não está feito.
 
-\medskip\noindent\textbf{Quarta: a dilatação do tempo, e ela vem ao contrário.}
+\medskip\noindent\textbf{Terceira: a dilatação do tempo, e ela vem ao contrário.}
 Onde há dobra, $\partial\tau=\sqrt{G h_{ii}}>1$: o tempo próprio por passo é
 \emph{maior}. O relógio não atrasa no campo --- adianta-se em relação ao
 parâmetro. Quem quiser o sinal habitual precisa de $G<1$, e $G\ge1$ no suporte
 pela Def.~\ref{fis:def:objeto}.
 \[
-\boxed{\ \text{o que se deriva é a \textbf{régua} e a \textbf{queda}; o que não se deriva é o \textbf{puxão}.}\ }
+\boxed{\ \text{deriva-se a \textbf{régua}, a \textbf{queda} e o \textbf{puxão}; não se deriva a \textbf{fonte}.}\ }
 \]
 
 \medido{§AN21--§AN22 e §AN28 estão medidos na §\ref{fis:grav-regua} e não se
@@ -4951,9 +6571,9 @@ está varrido}: o Teor.~\ref{fis:thm:sinal} é conta sobre os enunciados citados
 não tem varredura própria; e o Teor.~\ref{fis:thm:semfonte} é uma afirmação sobre
 o que \emph{não} existe no documento, que se verifica lendo-o e não correndo-o.}
 
-\colunas{Teor.~\ref{fis:thm:gcanon},~\ref{fis:thm:campo},~\ref{fis:thm:curvatura},~\ref{fis:thm:gradiente},~\ref{fis:thm:magnitude},~\ref{fis:thm:divergente},~\ref{fis:thm:materia},~\ref{fis:thm:geodesica},~\ref{fis:thm:sinal},~\ref{fis:thm:semfonte}; Cor.~\ref{fis:cor:encontro}; Def.~\ref{fis:def:curvatura},~\ref{fis:def:grad},~\ref{fis:def:materia}}
-        {a régua e a sua diagonal; o campo que a curva; a queda; o sinal trocado; a ausência de fonte}
-        {\code{tests/aranha\_n.c} §AN21--§AN22, §AN28, §AN31}
+\colunas{Teor.~\ref{fis:thm:gcanon},~\ref{fis:thm:campo},~\ref{fis:thm:curvatura},~\ref{fis:thm:gradiente},~\ref{fis:thm:magnitude},~\ref{fis:thm:divergente},~\ref{fis:thm:materia},~\ref{fis:thm:geodesica},~\ref{fis:thm:sinal},~\ref{fis:thm:semfonte},~\ref{fis:thm:momcoer},~\ref{fis:thm:forca}; Cor.~\ref{fis:cor:encontro}; Def.~\ref{fis:def:curvatura},~\ref{fis:def:grad},~\ref{fis:def:materia},~\ref{fis:def:momcoer}}
+        {a régua e a sua diagonal; o campo que a curva; a queda e a sua dobra, que é a força; o sinal trocado; a ausência de fonte}
+        {\code{tests/aranha\_n.c} §AN21--§AN22, §AN28, §AN31; \code{tests/cone\_nulo.c} §K1--§K2; \code{tests/pgwire.c} §W122}
 
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -5360,15 +6980,25 @@ cuja cifra tem determinante inversível, e a cifra é o par (traço, determinant
 \begin{definicao}[a caixa e a distância]\label{fis:def:caixa}
 Sobre um anel comutativo $A$, chame-se \textbf{caixa} a
 \[
-\mathcal{P}(A)=\bigl\{\,(B,C)\;:\;B\in A,\ C\in A^{\times}\,\bigr\},
-\qquad
-\Delta(B,C)=B^{2}-4C ,
+\mathcal{P}(A)=\bigl\{\,(B,C)\;:\;B\in A,\ C\in A^{\times}\,\bigr\}
 \]
 --- as réguas quadráticas binárias cujo determinante é \textbf{invertível}. Cada
-elemento é um \textbf{espelho}. Para $A$ ordenado, a distância é
-$d_{\mathcal{P}}(P,Q)=\abs{\Delta(P)-\Delta(Q)}$; o seu \emph{núcleo}
-$d_{\mathcal{P}}=0\iff\Delta(P)=\Delta(Q)$ não usa a ordem e vale em qualquer
-$A$.
+elemento é um \textbf{espelho}, e o par $(B,C)$ é o $(s,p)$ do
+Teor.~\ref{fis:thm:duasfaces} com os nomes desta parte: o traço é a soma, o
+determinante é o produto.
+
+\medskip\noindent\textbf{O $\Delta$ não se define aqui}: é o discriminante do
+Cor.~\ref{fis:cor:disc}, $\Delta(B,C)=B^{2}-4C$, e o que dele se usa nesta parte
+já lá está provado --- que é invariante da dobra, que se anula só onde o par
+colapsa, e que é o quadrado da separação das raízes. \emph{Aqui acrescenta-se uma
+coisa e uma só}: \textbf{a ordem}. Para $A$ ordenado, a distância entre espelhos
+é
+\[
+d_{\mathcal{P}}(P,Q)=\abs{\Delta(P)-\Delta(Q)} ,
+\]
+e o seu \emph{núcleo} $d_{\mathcal{P}}=0\iff\Delta(P)=\Delta(Q)$ não usa a ordem
+e vale em qualquer $A$. \emph{É esta a realização}: o invariante vem de cima, e o
+que esta parte lhe põe em cima é a régua que o mede.
 
 \medskip\noindent\textbf{Duas condições com o mesmo apelido, e convém separá-las
 aqui e não adiante:}
@@ -5403,33 +7033,12 @@ C=\det & \text{a \textbf{orientação}} & +1\ \text{próprio};\ -1\ \text{\textb
 \end{array}
 \]
 
-\medskip\noindent\textbf{A caixa tem duas réguas, e elas não são intermutáveis.} A
-$d_{\mathcal{P}}$ é métrica mas \textbf{não é ultramétrica}: com
-$\Delta=20,13,8$ vem $d_{\mathcal{P}}(20,8)=12$ contra $\max\{7,5\}=7$. A
-ultramétrica da caixa é a da Def.~\ref{fis:def:arvore} lida sobre os mesmos
-$\Delta$, e essa cumpre o Lema~\ref{fis:lem:ultra}. A diferença não é de precisão:
-é de \textbf{alcance}.
-\begin{center}\footnotesize
-\begin{tabular}{@{}lll@{}}
-\toprule
- & $d_{\mathcal{P}}=\abs{\Delta_P-\Delta_Q}$ & $d_{\mathrm{u}}=2^{-\operatorname{prof}}$ \\
-\midrule
-alcance & \textbf{local}: entre dois corpos & \textbf{global}: sobre a caixa toda \\
-num percurso & \textbf{acumula} (triangular) & \textbf{absorve} (Teor.~\ref{fis:thm:navega}) \\
-o que dá & \emph{quanto} falta --- a recusa & a \textbf{partição} (Teor.~\ref{fis:thm:bolas}) \\
-onde se usa & dentro de uma vizinhança & para navegar entre classes \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent \emph{Uma vê o caminho; a outra só o pior degrau dele.}
-
-\medido{\code{tests/pgwire.c} §W211: sobre os $26^3=\mathbf{17\,576}$ triplos dos
-espelhos de $\abs{m},\abs{t}\le6$, a aritmética viola
-$d(x,z)\le\max\{d(x,y),d(y,z)\}$ em $\mathbf{4448}$ deles e a ultramétrica em
-$\mathbf{0}$. E no percurso $\Delta=-4\to5\to0\to40\to-3$ a local soma
-$\mathbf{97}$ para uma distância directa de $\mathbf{1}$, enquanto a global mede
-$2^{-31}$ entre as pontas contra um pior passo de $2^{0}$. Exige-se o \emph{par},
-porque só uma das duas metades não distinguiria as réguas.}
+\medskip\noindent\textbf{E as duas réguas da caixa são as duas do
+Cor.~\ref{fis:cor:duasreguas}}, lidas aqui sobre espelhos: a
+$d_{\mathcal{P}}=\abs{\Delta_P-\Delta_Q}$ diz \emph{quanto} falta entre dois
+corpos, e a ultramétrica da Def.~\ref{fis:def:arvore} sobre os mesmos $\Delta$ diz
+em que classe se está. \emph{A separação é de lá; o que esta parte acrescenta são
+os nomes} --- orientação e regime.
 
 \begin{teorema}[o que a caixa separa, e o que ela liga]\label{fis:thm:pandora}
 \begin{enumerate}\itemsep3pt
@@ -5868,7 +7477,7 @@ Cor.~\ref{fis:cor:borda} pede às metades $(B\pm\sqrt\Delta)/2$ e que o
 Teor.~\ref{fis:thm:pandora}(2) pede ao $t$ --- \emph{o comportamento do $2$ no
 anel}, a aparecer pela terceira vez e sempre no mesmo sítio. \emph{E o $2$ tem
 uma segunda carreira, que não é esta}: no Teor.~\ref{fis:thm:meiavolta}(3) o que
-decide é $2p=q$ --- \textbf{divisibilidade}, num anel onde o $2$ nunca se
+decide é $2p=L$ --- \textbf{divisibilidade}, num anel onde o $2$ nunca se
 inverte. \emph{São o mesmo número em dois papéis, e colá-los seria trocar
 inverter por dividir.}
 \emph{Reflectir é ser a própria inversa, e é isso que a factorização exprime.}
@@ -5922,7 +7531,8 @@ recusa seja \textbf{quantitativa}: diz-se quanto falta, e não apenas que falta.
 
 \medido{\code{tests/pgwire.c} §W214: varridos os corpos de $\abs{m},\abs{t}\le12$
 dos dois tipos --- $50$ --- apenas $\mathbf{3}$ factorizam (os dois cristalinos de
-$\Delta=0$ e o áureo de $\Delta=4$, onde o ouro colapsa na unidade) e os outros
+$\Delta=0$ e a \textbf{troca} de $\Delta=4$ --- o $m=0$, onde o ouro colapsa na
+unidade e que \emph{não} é o áureo, que vive em $\Delta=5$) e os outros
 $\mathbf{47}$ são irredutíveis. §W224: o resumo da óptica recontado contra o
 catálogo cru --- $\mathbf{7}$ números a bater em $\mathbf{44}$ corpos. §W218: dos $26$ espelhos, o critério da cifra e o do Cor.~\ref{fis:cor:borda}
 coincidem em $\mathbf{25}$ e divergem em $\mathbf{1}$ --- o $(0,1)$ de $\Delta=-4$,
@@ -6982,8 +8592,13 @@ escrito não dissipa nada, e um único bit reescrito mil milhões de vezes paga 
 milhões de vezes.
 
 \begin{teorema}[o piso do invertível é zero exacto]\label{fis:thm:landauer}
-\emph{Hipótese importada, e a única desta obra}: apagar um bit tem um custo
-mínimo, e ele é positivo. Sob ela:
+\emph{Hipótese importada, e declarada}: apagar um bit tem um custo mínimo, e ele
+é positivo. \textbf{E não é a única deste documento} --- dizê-lo seria falso, e a
+lista está à vista nesta mesma parte e na seguinte: o §\ref{fis:carnot} importa
+as duas leis da termodinâmica; a §\ref{fis:diluicao} importa a equação da
+continuidade; a §\ref{fis:destino} importa a da aceleração. \emph{O que se
+afirma é mais modesto e verifica-se}: cada uma dessas entra \textbf{marcada}, e
+nenhuma é usada para estabelecer coisa nenhuma do alicerce. Sob ela:
 \begin{enumerate}\itemsep3pt
 \item[(1)] uma operação \textbf{destrutiva} --- que identifica estados --- paga
 por cada bit que perde;
@@ -7343,7 +8958,7 @@ construção:
 \midrule
 a taxa de expansão & $H^{2}=1/D$: a régua, invertida & Def.~\ref{fis:def:regua-cosmo} \\
 e o seu valor & $H_m^{2}=1/(m^{2}+4)$, lido do operador & Teor.~\ref{fis:thm:taxa} \\os conteúdos & os três valores do trial & Teor.~\ref{fis:thm:conteudos} \\
-a diluição & a involução entre o aditivo e o multiplicativo & Teor.~\ref{fis:thm:diluicao} \\
+a diluição & o \emph{duomorfismo} entre o aditivo e o multiplicativo & Teor.~\ref{fis:thm:diluicao} \\
 o destino & o mesmo sinal, lido em $-(1+3w)$ & Cor.~\ref{fis:cor:destino} \\
 a equação de estado & uma órbita de quatro, duas no ponto fixo & Teor.~\ref{fis:thm:bidual} \\
 \bottomrule
@@ -7467,13 +9082,23 @@ Da continuidade $r'+3H(r+p)=0$ com $p=w\,r$ integra-se
 \]
 e $C$ é o \textbf{invariante} que a expansão conserva. Ela entra
 \emph{aditiva} --- integrar soma --- e sai \emph{multiplicativa} em $r$: é a
-involução a passar de um lado ao outro, e é a mesma travessia
-soma\,$\leftrightarrow$\,produto que a forma polar faz na §\ref{fis:transf}.
+travessia soma\,$\leftrightarrow$\,produto, a mesma que a forma polar faz na
+§\ref{fis:transf}. \emph{E quem atravessa é o logaritmo, que \textbf{não} é uma
+involução} --- a volta dele é a exponencial e não ele próprio. \textbf{Logo não é
+o $\mathcal{D}$ da Def.~\ref{fis:def:duomorf}}, que é operador sobre estruturas e
+cumpre $\mathcal{D}^{2}=\mathrm{id}$: é um \emph{duomorfismo}, no sentido da
+mesma definição --- uma aplicação que leva a primeira operação na segunda. Pelo
+Teor.~\ref{fis:thm:duasinvol} é do lado de $\mathcal{D}$ e não do de $\dagger$
+que ele está, e é só isso que aqui se afirma. \emph{O operador e a aplicação
+partilham a face e não partilham o tipo.}
 \end{teorema}
 
 \begin{proof}
 Com $p=w\,r$ e $w$ constante, a continuidade é
-$r'=-3H\,r\,(1+w)$. Como $H=a'/a$, isto é
+$r'=-3H\,r\,(1+w)$. \emph{E aqui $H$ é a \textbf{taxa} $a'/a$ ao longo da escala,
+e não o $H$ da Def.~\ref{fis:def:regua-cosmo}}, que é um número por operador,
+função da assinatura $m$. \textbf{São dois, com o mesmo símbolo, e nada neste
+documento os liga} --- dizê-lo é mais barato do que fingir. Com $H=a'/a$, isto é
 \[
 \frac{r'}{r}=-3(1+w)\,\frac{a'}{a} .
 \]
@@ -7559,10 +9184,19 @@ fronteira $w=-\tfrac13$ a sair \textbf{exactamente} neutra.}
 \section{A equação de estado fecha em quatro}\label{fis:bidual}
 
 \noindent\textbf{Antes do enunciado, as duas involuções têm de ser nomeadas} ---
-e a razão é aritmética: \emph{uma involução sozinha tem órbitas de tamanho $1$ ou
-$2$; para obter quatro estados são precisas duas involuções \textbf{distintas},
-\textbf{comutantes} e \textbf{independentes}}. Duas que comutem podem gerar um
-subgrupo de ordem $1$, $2$ ou $4$ --- é a independência que fixa o quatro.
+e a álgebra delas não é desta parte: é o Teor.~\ref{fis:thm:quarteto}, que dá as
+quatro passagens e a fórmula que as compõe, \emph{a partir de duas involuções
+comutantes, distintas e efectivas}. \textbf{As três hipóteses pagam-se aqui}, e é
+esse o trabalho desta secção: qual é o par, em $w$, e por que é que ele comuta.
+\emph{A álgebra é de lá; a realização é daqui.}
+
+\medskip\noindent\emph{E convém dizer já qual dos dois bits este par não tem.} As
+duas involuções abaixo \textbf{preservam ambas a soma} --- são as duas do tipo
+$\dagger$ do Teor.~\ref{fis:thm:duasinvol}, e nenhuma é a que leva soma em
+produto. Logo o quarteto desta parte corre com o bit do \emph{cruzado} em duas
+coordenadas, e \textbf{sem} o bit do directo: é um quarteto legítimo pelo
+Teor.~\ref{fis:thm:quarteto}, e não é o par $(\mathcal{D},\dagger)$ da
+Def.~\ref{fis:def:duomorf}.
 
 \begin{definicao}[as duas involuções cosmológicas]\label{fis:def:duas-inv}
 Escreva-se a equação de estado como
@@ -7709,6 +9343,13 @@ de serem postos nela. \emph{É essa a diferença que a casa mede}: uma
 parametrização não pode falhar; esta identidade falha se o $4$ de $D=m^{2}+4$ for
 outro.
 
+\smallskip\noindent\textbf{E é preciso dizer o que \emph{está} posto, para a
+frase acima não valer mais do que vale.} O que sai da conta são os semi-eixos; o
+que \textbf{não} sai é a forma $f(m)=2m/(3\sqrt D)$, que é \emph{dada} --- e o
+Cor.~\ref{fis:cor:fronteira-curv}(i) di-lo com essas palavras. \emph{Posta a
+forma, os eixos são consequência e o $4$ é testemunha}; posta outra forma,
+outra conta. \textbf{A não-arbitrariedade é dos eixos, e não da forma.}
+
 \begin{corolario}[na órbita de quatro, quem move o destino é $I_1$]\label{fis:cor:destino-orbita}
 Na família metálica, com a órbita $\mathcal{O}(w)$ do Teor.~\ref{fis:thm:bidual}:
 \[
@@ -7731,10 +9372,14 @@ sinais. Logo $I_2$ não muda o sinal e $I_1$ muda-o sempre.
 \end{proof}
 
 \medskip\noindent\textbf{E as duas involuções ficam com leituras distintas, que é
-o que faltava ao par.} $I_2$ é a \textbf{dualidade}: não toca no destino e troca
+o que faltava ao par.} $I_2$ é a \textbf{diluição}: não toca no destino e troca
 o que dilui pelo que concentra. $I_1$ é o \textbf{destino}: troca travar por
-acelerar e não toca na dualidade. \emph{São independentes porque fazem coisas
-diferentes, e é isso que o grupo de Klein regista.}
+acelerar e não toca na diluição. \emph{São independentes porque fazem coisas
+diferentes, e é isso que o quarteto regista.} (\emph{E nenhuma delas se chama «a
+dualidade»}: pelo Teor.~\ref{fis:thm:duasinvol} a dualidade operacional é a
+$\mathcal{D}$ que troca soma por produto, e as duas involuções desta parte
+preservam a soma. A palavra está tomada, e tomá-la aqui apagaria a distinção que
+esta parte usa.)
 \medido{\code{tests/cosmologia.c} §C5: $w\mapsto-w$ é involução com
 $\mathbf{0}$ desvios em $17$ graus; a órbita dá $\mathbf{4}$ estados em $m=5$ e
 $\mathbf{2}$ em $m=0$, o ponto fixo; e a \emph{diferença dos quadrados} ao limite
@@ -7890,9 +9535,11 @@ a expansão da família metálica & o regime hiperbólico & Teor.~\ref{fis:thm:l
 
 \medskip\noindent\textbf{E é a mesma economia que a §\ref{fis:leitura-dados}
 pede.} O grande e o pequeno não recebem duas teorias: recebem a mesma, com o
-mesmo discriminante a decidir o regime, o mesmo trial a dar os conteúdos, e a
-mesma involução a atravessar o par soma\,/\,produto. Em três escalas, e é a mesma
-máquina:
+mesmo discriminante a decidir o regime, o mesmo trial a dar os conteúdos, e o
+mesmo \emph{duomorfismo} a atravessar o par soma\,/\,produto --- \textbf{a
+aplicação, e não o operador $\mathcal{D}$}, pela distinção que o
+Teor.~\ref{fis:thm:diluicao} faz e que aqui se herda. Em três escalas, e é a
+mesma máquina:
 \[
 \boxed{\;
 \begin{array}{c}
@@ -8097,7 +9744,11 @@ $\tilde G\equiv1$. \emph{A hierarquia é a folha.}
 --- e usou-a de forma essencial. A outra metade da matriz faz outra coisa.
 
 \begin{teorema}[a partição é única, e cada metade faz uma coisa só]\label{fis:thm:duastorres}
-Toda matriz decompõe-se de \textbf{maneira única} em
+\emph{Esta é a cisão \textbf{directo\,/\,cruzado} da Def.~\ref{fis:def:duomorf},
+realizada em matrizes} --- e realiza-se aqui porque \textbf{o contradomínio a
+suporta}: há soma e o $2$ inverte-se. \textbf{É a condição que aquela definição
+pede e que sobre $B$ falha}, e paga-se dizendo-a. Posto isso: toda a matriz
+decompõe-se de \textbf{maneira única} em
 \[
 W=W_{s}+W_{a},\qquad
 W_{s}=\tfrac12(W+W^{\!\top}),\qquad
@@ -8280,8 +9931,11 @@ um ciclo no lugar dela}.
 
 \medskip\noindent\textbf{Feita a separação, o par que atravessa o documento
 mantém-se.} A parte simétrica é a que \emph{mede} e não vê a ordem; a
-antissimétrica é a que \emph{ordena} e não dá tamanho --- exactamente as duas
-faces do Teor.~\ref{fis:thm:duas}(4). E o que se mede das duas \emph{interfaces}
+antissimétrica é a que \emph{ordena} e não dá tamanho --- que é a cisão
+\textbf{directo\,/\,cruzado} da Def.~\ref{fis:def:duomorf}, e \emph{não} as duas
+faces do Teor.~\ref{fis:thm:duas}(4). \textbf{São eixos diferentes}: face é o par
+$\oplus/\otimes$, directo\,/\,cruzado é o par simétrico\,/\,antissimétrico ---
+colar os dois apagaria o segundo bit. E o que se mede das duas \emph{interfaces}
 é a diferença de ordem: a branca tem ordem $2$ e espelha, a negra tem ordem $4$ e
 roda (§F12) --- que são o $\nu$ e o $i$ da §\ref{fis:borda}, com $\det-1$ e
 $\det+1$.
@@ -8351,8 +10005,12 @@ $\oplus$: a cisão & $\otimes$: o gato & Def.~\ref{fis:def:gato} \\
 
 \medskip\noindent Duas coisas a reter. \textbf{Primeira:} as duas faces não são
 simétricas no que \emph{fazem} --- uma endereça e a outra produz --- mas são-no no
-que \emph{são}: cada uma é uma dobra, com o seu invariante e o seu ponto fixo, e o
-invariante de cada uma é o neutro da outra. \textbf{Segunda:} juntas elas
+que \emph{são}: cada uma é uma dobra, com o seu invariante e o seu ponto fixo.
+\emph{E aqui, onde há vinco e régua posta}, o invariante de cada uma é o neutro
+dela própria --- $0$ na aditiva, $1$ na multiplicativa ---, porque aqui
+$\partial$ \textbf{é} a inversão de cada face, que é a cláusula~(1) do
+Teor.~\ref{fis:thm:duas}. \textbf{No nível zero era o contrário}, e é essa troca
+que lá obrigou a duas. \textbf{Segunda:} juntas elas
 \emph{fecham}, e o ponto onde fecham é o ponto fixo que as duas passam a partilhar:
 \[
 \boxed{\;\text{o corte é o \textbf{ponto fixo comum} às duas faces}\;}
