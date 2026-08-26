@@ -1,0 +1,174 @@
+name: A bateria
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  A bateria corre AQUI, e não na máquina de quem escreve. A razão é concreta e
+#  custou um susto: em 26/08 corri-a numa máquina Windows/MinGW e ela começou a
+#  reescrever tools/atestados.txt com falhas que não eram da matemática —
+#
+#      banco/agentes.c:21: fatal error: sys/mman.h: No such file or directory
+#      acesso        5727811cc6d6a5a6 0   →   acesso        e797e0774a38edae 1
+#      agm_analitico 71272f7669b34069 0   →   agm_analitico df244c68d9d9e3ba 127
+#
+#  Zeros verdes a virarem 1 e 127 por faltar um header POSIX e por faltar o node
+#  no caminho. Foi apanhado a tempo e revertido, mas é exactamente o defeito que
+#  matou os atestados de 30/07 com outra roupa: refazer o teste a destruir
+#  registo. O repositório é POSIX; o runner é POSIX; a máquina de quem escreve
+#  pode não ser. É por isso que este ficheiro existe.
+#
+#  E A ATESTAÇÃO É PORTÁTIL, o que é o que torna isto legítimo. A assinatura
+#  (tools/bateria.sh, função `assinatura`) é do CONTEÚDO: o fonte, os dados que
+#  o medidor declara em DEPENDE-DE, os headers que o `cc -MM` encontra, e os
+#  argumentos. O compilador não entra. Logo um verde atestado aqui é facto sobre
+#  a obra e vale em qualquer máquina — e um vermelho por falta de header não é
+#  facto nenhum, e é por isso que não podia ficar gravado.
+#
+#  O QUE ESTE WORKFLOW NÃO FAZ: não commita os atestados. A corrida sobe-os como
+#  artefato e mostra o diff no resumo, e adoptá-los é decisão de quem lê. Um
+#  workflow que escreve na master por si é um segundo autor sem cara.
+#
+#  E NÃO CORRE NO PUSH, de propósito: são dez minutos por corrida, e a maior
+#  parte dos pushes é .tex, que medidor nenhum lê (nenhum DEPENDE-DE aponta para
+#  fisica.tex). Quem quiser ligá-lo ao push acrescenta o gatilho aqui — é uma
+#  linha, e a decisão é sobre tempo de máquina, não sobre correcção.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "refaz = reabre TODAS as sementes (~10 min). atestados = só as que mudaram desde o último atestado."
+        type: choice
+        options: [refaz, atestados]
+        default: refaz
+      reatesta:
+        description: "Reatestar UM medidor só (nome sem extensão, ex.: aranha_n). Vazio = ignorar."
+        type: string
+        default: ""
+
+jobs:
+  bateria:
+    runs-on: ubuntu-latest
+    # O cabeçalho da bateria diz ~10 min para --refaz. 60 dá folga para o dia em
+    # que alguém acrescentar medidores, sem deixar uma corrida presa por horas.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ferramentas
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            gcc libc6-dev python3 fonts-liberation
+          # A bateria chama `cc`, não `gcc`. No Ubuntu o alternatives já o dá,
+          # mas se um dia não der, o medidor não compilava e a corrida saía
+          # vermelha por uma razão que não é a obra. Melhor garantir aqui.
+          command -v cc >/dev/null || sudo ln -s "$(command -v gcc)" /usr/local/bin/cc
+          # fonts-liberation: tests/spline.c mede glifos da Liberation Sans. Sem
+          # ela o medidor não falha — diz NAO MEDIDO e conta como saltada (ver
+          # lib/unidade.h, saltou()). Instalar é preferir medir a saltar.
+          echo "cc  -> $(cc --version | head -1)"
+          echo "node-> $(node --version)"
+          echo "py  -> $(python3 --version)"
+
+      - name: O estado de que se parte
+        run: |
+          # O selo antes de correr, e a cópia do atestado que veio do repositório.
+          # É contra isto que o diff do fim se lê.
+          cp tools/atestados.txt /tmp/atestados_antes.txt
+          wc -l < tools/atestados.txt | xargs printf 'atestados no repositório: %s linhas\n'
+
+      - name: A bateria
+        id: corrida
+        # Os dois vêm por ENV e não interpolados no script. Um `${{ }}` dentro do
+        # shell é substituído ANTES de o shell correr, e o campo `reatesta` é
+        # texto livre — quem dispara escreveria comando em vez de nome. Por env,
+        # o valor é dado e nunca código.
+        env:
+          MODO: ${{ inputs.modo }}
+          REATESTA: ${{ inputs.reatesta }}
+        run: |
+          set +e
+          case "$MODO" in
+            refaz) ARG=--refaz ;;
+            *)     ARG= ;;
+          esac
+          if [ -n "$REATESTA" ]; then
+            # e o nome é validado: só o que pode ser um medidor
+            case "$REATESTA" in
+              *[!A-Za-z0-9_-]*) echo "❌ nome inválido: $REATESTA"; exit 1 ;;
+            esac
+            ARG="--reatesta $REATESTA"
+          fi
+          echo "::group::corrida (bateria.sh $ARG)"
+          bash tools/bateria.sh $ARG 2>&1 | tee /tmp/bateria.txt
+          R=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          echo "saida=$R" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: O veredito
+        run: |
+          # O resumo vai para a página da corrida, para não ser preciso abrir o
+          # log. As linhas que interessam são as do fim: total, selo, unidades.
+          {
+            echo '## A bateria'
+            echo
+            echo '```'
+            grep -E '^(total|selo|unidades|MUDOS|ATENCAO|VERDE FALSO)' /tmp/bateria.txt || true
+            echo '```'
+            echo
+            if grep -qE 'FALHA|NÃO COMPILOU' /tmp/bateria.txt; then
+              echo '### O que não fechou'
+              echo
+              echo '```'
+              grep -E 'FALHA|NÃO COMPILOU' /tmp/bateria.txt
+              echo '```'
+            fi
+            echo
+            echo '### O que a corrida atestou'
+            echo
+            if diff -q /tmp/atestados_antes.txt tools/atestados.txt >/dev/null; then
+              echo 'Nada mudou em `tools/atestados.txt`.'
+            else
+              echo 'A corrida mudou `tools/atestados.txt`. **Não foi commitado** — está no artefato.'
+              echo
+              echo '```diff'
+              diff -u /tmp/atestados_antes.txt tools/atestados.txt | head -120 || true
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guarda contra o verde vazio
+        run: |
+          # A bateria já tem a sua guarda (conta os percorridos contra a lista).
+          # Esta é a de fora, e cobre o caso em que ela nem chegou a imprimir:
+          # um relatório sem a linha `total` não é um relatório verde, é um
+          # relatório que não existe. Foi assim que um erro de aritmética deixou
+          # sair "0 falhas" sobre dois medidores de oitenta e três.
+          grep -qE '^total [0-9]+ :' /tmp/bateria.txt || {
+            echo "❌ a bateria não imprimiu a linha 'total' — a corrida não vale"; exit 1; }
+
+      - name: Guardar as saídas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bateria
+          # A saída de cada medidor, o relatório, e os atestados que ESTA corrida
+          # produziu. Para ver outra fatia lê-se o artefato — não se roda de novo.
+          path: |
+            /tmp/bateria.txt
+            /tmp/bateria/
+            tools/atestados.txt
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Verde ou vermelho
+        run: |
+          R="${{ steps.corrida.outputs.saida }}"
+          [ "$R" = "0" ] && { echo "✅ a bateria fechou verde"; exit 0; }
+          echo "❌ a bateria saiu com $R — ver 'O que não fechou' no resumo"
+          exit 1
