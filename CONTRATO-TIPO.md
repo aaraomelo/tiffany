@@ -2,11 +2,13 @@
   CONTRATO-TIPO TIFFANY — ADESÃO POR PIX
 ═══════════════════════════════════════════════════════════════════════════════
 
-    Versão:        2026-08
-    Canônico:      https://github.com/aaraomelo/tiffany
-    Este arquivo:  https://github.com/aaraomelo/tiffany/blob/master/CONTRATO-TIPO.md
-    Titular:       Aarão Melo Lopes  <aarao.melo.lopes@gmail.com>
+    Repositório:   https://github.com/aaraomelo/tiffany
+    Licença:       https://github.com/aaraomelo/tiffany/blob/master/LICENSE
+    Contrato:      https://github.com/aaraomelo/tiffany/blob/master/CONTRATO-TIPO.md
+    Titular:       Aarão Melo Lopes
+    Contato:       aarao.melo.lopes@gmail.com
     Chave PIX:     aarao.melo.lopes@gmail.com
+    Versão:        2026-08
 
 Este documento é a Via A da seção 5 da LICENSE. O que ele não concede está na
 Via B, e essa continua a exigir acordo escrito.
@@ -131,8 +133,8 @@ no crédito.
 
 8. VERSÃO
 
-Vigora o texto publicado no canônico no dia do PIX. Adesões já feitas não são
-restringidas por versão posterior.
+Vigora o texto publicado no endereço do cabeçalho no dia do PIX. Adesões já
+feitas não são restringidas por versão posterior.
 
 A versão em vigor é a que consta do cabeçalho deste arquivo.
 
