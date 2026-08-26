@@ -128,6 +128,19 @@ curriculo/*
 !curriculo/cv-academico.tex
 !curriculo/montar-cv.py
 "Imagem colada.png"
+# Os dados/*.bin NÃO são dados: são o backing store dos arrays mapeados. O
+# disco_prende (lib/disco.h) abre com O_CREAT e dimensiona com ftruncate — o
+# medidor FAZ o ficheiro do tamanho que precisa, e um clone limpo corre sem eles
+# (medido: bidual, coroa, entre, espelho e furos fecham a verde com a pasta
+# apagada, e recriam o que usam).
+#
+# Estas três linhas já cá estavam, mas os 107 ficheiros de tests/dados/ ficaram
+# no índice — o .gitignore não desregista o que já foi registado, e faltava o
+# `git rm --cached`. Ficou feito em 26/08.
+#
+# E o sintoma era este: cifrando.c pede V.bin com MAXV*768*4 e transfusao_real.c
+# com MAXV*MAXD*8. O mesmo caminho, dois tamanhos — quem corre por último fixa-o,
+# e a árvore aparecia suja sem ninguém lhe ter tocado.
 tests/dados/
 banco/dados/
 dados/
