@@ -2504,6 +2504,95 @@ usou apenas a igualdade em $X$ --- e numa grade ela decide-se coordenada a
 coordenada.
 \end{proof}
 
+\medskip\noindent\textbf{E os $2n$ vizinhos não estão soltos: estão aos pares, e
+cada par é uma dobra.} É o que se mostra a seguir, e é onde a dimensão, as
+coordenadas e o oito se encontram.
+
+\begin{teorema}[a vizinhança é $n$ dobras, e o vértice é o vinco de todas]\label{fis:thm:vizdobra}
+Numa grade de posto $n$, fixe-se um vértice $x$ e escreva-se cada ponto como
+$y=x+\sum_j c_j e_j$. Para cada direcção $i$ ponha-se
+\[
+\boxed{\;\sigma_i(y)\;=\;x+\sum_{j\neq i}c_j e_j\;-\;c_i e_i\;}
+\]
+--- \emph{reverte a coordenada $i$ e mantém as outras}. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Cada $\sigma_i$ é uma dobra, e o vértice é o seu vinco.}
+$\sigma_i^{2}=\mathrm{id}$ e $\sigma_i(x)=x$. E ela troca exactamente os dois
+vizinhos da direcção $i$: $\sigma_i(x\pm e_i)=x\mp e_i$, \emph{deixando os outros
+$2n-2$ quietos}. É o Teor.~\ref{fis:thm:dobra} sobre o par $\{x+e_i,x-e_i\}$,
+cuja soma é $2x$ --- donde o vinco, pelo Teor.~\ref{fis:thm:vinco}(1).
+\item[(2)] \textbf{São $n$, uma por direcção, e o vértice é o vinco comum.} A
+vizinhança do Teor.~\ref{fis:thm:dim} parte-se em $n$ pares, e não em $2n$
+pontos soltos: \emph{a dimensão conta pares, e cada par é uma dobra}.
+\item[(3)] \textbf{Elas comutam --- e aqui de graça, não sob condição.}
+$\sigma_i\sigma_j=\sigma_j\sigma_i$, porque cada uma move a sua coordenada e não
+toca nas outras. \textbf{É a hipótese~(i) do Teor.~\ref{fis:thm:quarteto}
+satisfeita por independência}, e não pedida --- ao contrário do par
+horizontal/vertical do Teor.~\ref{fis:thm:duascoord}(5), onde a vertical depende
+da altura e a comutação tem de ser verificada.
+\item[(4)] \textbf{E o grupo que geram tem $2^{n}$ elementos, indexados por
+\emph{quais} dobras se aplicaram.} Cada elemento é
+$\sigma_{i_1}\cdots\sigma_{i_r}$ com os índices distintos, e duas escolhas
+distintas dão aplicações distintas:
+\[
+\boxed{\;\langle\sigma_1,\dots,\sigma_n\rangle\ \text{tem}\ 2^{n}\ \text{elementos, um por subconjunto de direcções}\;}
+\]
+\emph{O expoente é o número de dobras independentes, e o índice é o subconjunto
+lido em binário.}
+\item[(5)] \textbf{Todos de ordem dois, e nenhum roda.} Todo o elemento é
+involutivo, pelo que em $n=2$ isto é o quarteto do
+Teor.~\ref{fis:thm:quarteto} --- \emph{quatro lugares de ordem dois} --- e
+\textbf{não} o rotor do Teor.~\ref{fis:thm:fecho}, que tem um gerador de ordem
+quatro e não fixa o vértice.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $\sigma_i$ aplicada duas vezes devolve $c_i$; e em $y=x$ todos os $c_j$ são
+nulos. A troca dos vizinhos é substituir $c_i=\pm1$ com os outros nulos.
+
+(2) O Teor.~\ref{fis:thm:dim} dá $2n$ vizinhos distintos; a partição por
+direcção é a da Def.~\ref{fis:def:grade}, $\mathcal V(x)=\{x\pm e_i\}$.
+
+(3) Duas coordenadas distintas: $\sigma_i$ não altera $c_j$ e $\sigma_j$ não
+altera $c_i$, pelo que a ordem de aplicação não conta.
+
+(4) Por (1) e (3), todo o produto reduz-se a um com índices distintos, o que dá
+no máximo $2^{n}$. E são distintos: um produto sobre $S$ leva $x+\sum_j e_j$ em
+$x+\sum_j\varepsilon_j e_j$ com $\varepsilon_j=-1$ exactamente em $S$, e as
+direcções são independentes.
+
+(5) Cada $\sigma_i$ é involutiva por (1), e as involutivas que comutam compõem-se
+em involutivas por (3). Que o vértice fique fixo é (1); o rotor não o fixa, e
+tem ordem quatro pelo Teor.~\ref{fis:thm:fecho}.
+\end{proof}
+
+\medido{\code{tests/aranha\_n.c}: em posto $3$, varridos os $5^{3}=\mathbf{125}$
+pontos de coeficientes em $-2..2$ --- as três $\sigma_i$ são involutivas em
+\textbf{zero} falhas, comutam duas a duas em \textbf{zero}, fixam o vértice em
+\textbf{zero}, e cada uma reverte a sua direcção mantendo as outras em
+\textbf{zero}. O grupo gerado tem \textbf{8} elementos distintos, que é $2^{3}$.}
+
+\medskip\noindent\textbf{E é aqui que o oito deixa de ser um número e passa a
+ser uma contagem de dobras.} Em posto três a vizinhança tem seis vizinhos e
+\textbf{três} pares; as três dobras geram \textbf{oito}. \emph{É o mesmo oito do
+Teor.~\ref{fis:thm:largura} em $w=3$}, e é o mesmo que indexa a base ortonormal
+do Teor.~\ref{fis:thm:base} --- onde o índice de $e_k$ é, pelo mesmo argumento,
+\emph{o subconjunto de dobras que o produziu, lido em binário}. \textbf{Três
+enunciados, um só facto:} $k$ dobras independentes dão $2^{k}$, e o que varia é
+sobre o que elas agem --- o ponto, o andar, ou a vizinhança.
+\[
+\boxed{\;\text{o expoente é o número de dobras; o índice é quais delas se aplicaram}\;}
+\]
+
+\medskip\noindent\textbf{E a frase «manter e reverter» é o que as define.} Cada
+$\sigma_i$ \emph{reverte} uma coordenada e \emph{mantém} todas as outras --- e é
+essa assimetria que a torna uma dobra e não uma simetria qualquer. \emph{Reverter
+tudo de uma vez} seria $y\mapsto2x-y$, que é o produto das $n$ e é o elemento
+mais distante do grupo; \emph{não reverter nada} é a identidade. \textbf{Os
+$2^{n}$ elementos são todos os graus intermédios entre não mexer e virar tudo}, e
+a vizinhança é o sítio onde eles se leem um a um.
+
 \begin{teorema}[o fecho, e o único sítio onde a dimensão faz mais]\label{fis:thm:fecho}
 Numa grade de posto $n$, a aplicação $R_{ij}\colon(a,b)\mapsto(-b,a)$ --- que
 age em duas coordenadas e fixa as outras --- cumpre $R_{ij}^{4}=\mathrm{id}$ e
@@ -4693,7 +4782,7 @@ esta prova pede à escada, e pede-a toda.} Note-se
 que a preservação é, como em~(2), \textbf{a menos do factor $2^{m}$}: é a mesma
 escala, e não conteúdo.
 \end{proof}
-\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Prop.~\ref{fis:prop:travessia}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:vizarvore},~\ref{fis:thm:euler},~\ref{fis:thm:handshake},~\ref{fis:thm:dim},~\ref{fis:thm:fecho},~\ref{fis:thm:vizniso},~\ref{fis:thm:palavra},~\ref{fis:thm:contraria},~\ref{fis:thm:bijeccao},~\ref{fis:thm:enumera},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:matriz},~\ref{fis:cor:disc},~\ref{fis:cor:duasreguas},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:viztopo},~\ref{fis:def:arvore},~\ref{fis:def:percurso},~\ref{fis:def:grade},~\ref{fis:def:palavra},~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos}}
+\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Prop.~\ref{fis:prop:travessia}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:vizarvore},~\ref{fis:thm:euler},~\ref{fis:thm:handshake},~\ref{fis:thm:dim},~\ref{fis:thm:vizdobra},~\ref{fis:thm:fecho},~\ref{fis:thm:vizniso},~\ref{fis:thm:palavra},~\ref{fis:thm:contraria},~\ref{fis:thm:bijeccao},~\ref{fis:thm:enumera},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:matriz},~\ref{fis:cor:disc},~\ref{fis:cor:duasreguas},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:viztopo},~\ref{fis:def:arvore},~\ref{fis:def:percurso},~\ref{fis:def:grade},~\ref{fis:def:palavra},~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos}}
         {a árvore, o dragão e a espiral, a serpentina, a travessia por dígitos, a leitura dual}
         {\code{tests/aranha\_n.c} §AN6--§AN7, §AN13--§AN14, §AN25, §AN29, §AN37; \code{tests/pgwire.c} §W122--§W123, §W128}
 
