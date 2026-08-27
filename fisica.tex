@@ -5493,6 +5493,57 @@ duas faces: vale onde a subtracção e a distributividade existem}, e é aí que
 resto desta Parte a lê.
 \end{proof}
 
+\begin{corolario}[o traço e o determinante são os dois invariantes do par]\label{fis:cor:trdet}
+\emph{E daqui saem duas grandezas que este documento usa muito e nunca construiu ---
+e não é preciso construí-las, porque são estas.} Uma aplicação de posto dois
+determina um par: os dois elementos que ela não mistura. Sobre esse par,
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{o \emph{traço} é o invariante da face aditiva e o
+\emph{determinante} o da multiplicativa}:
+\[
+\boxed{\;\operatorname{tr}=s=a\oplus b\;,\qquad \det=p=a\otimes b\;}
+\]
+\emph{São o $s$ e o $p$ deste teorema, e não duas noções novas} --- um por face,
+como tudo o mais nesta obra.
+\item[(2)] \textbf{E a equação que os liga é a mesma, escrita na aplicação em vez
+de no elemento.} Aqui vale $x^{2}=s\,x\ominus p$; ali vale
+$M^{2}=\operatorname{tr}(M)\,M\ominus\det(M)\,I$, que é o
+Lema~\ref{fis:lem:ch2}. \textbf{Uma equação, dois andares} --- e é a mesma coisa
+que o Teor.~\ref{fis:thm:antissim} faz ao subir do ponto ao par.
+\item[(3)] \textbf{Donde o discriminante é o de sempre.}
+$\Delta=\operatorname{tr}^{2}\ominus4\det$ é o $s^{2}\ominus4p$ do
+Cor.~\ref{fis:cor:disc}, e o Cor.~\ref{fis:cor:geradorfora} lê-se sobre matrizes
+sem mudar uma letra.
+\item[(4)] \textbf{E note-se \emph{o que} fica no andar e o que não fica.} O
+\textbf{par} pode estar fora --- é isso que o Cor.~\ref{fis:cor:geradorfora} diz
+quando $\Delta$ não é quadrado ---, \emph{mas os dois invariantes estão sempre
+dentro}, porque são a soma e o produto, e essas o andar tem. \textbf{É por isso
+que se pode calcular com eles sem nunca avaliar o par}, e é o que esta obra faz
+em todo o lado.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) Os dois elementos que a aplicação não mistura satisfazem $x^{2}=sx\ominus p$
+com $s$ a sua soma e $p$ o seu produto, que é o enunciado acima; e essas são as
+definições de traço e determinante em posto dois.
+
+(2) Substituição.
+
+(3) $\Delta=s^{2}\ominus4p$ pelo Cor.~\ref{fis:cor:disc}(1).
+
+(4) $s$ e $p$ são obtidos por uma soma e um produto de elementos do andar, e o
+andar fecha para as duas faces; ao passo que recuperar $a$ e $b$ de $s$ e $p$ pede
+a raiz de $\Delta$, que é o que pode faltar.
+\end{proof}
+
+\medskip\noindent\textbf{E o único uso fora do posto dois diz-se, e é um só.} Onde
+esta obra escreve $\det g=G^{\,n}\det h$, o que usa é que escalar as $n$ linhas por
+$G$ multiplica o determinante por $G$ \emph{$n$ vezes} --- \emph{isto é, a iteração
+da face multiplicativa}, que o Cor.~\ref{fis:cor:produto} funda. \textbf{Não se usa
+ali mais nenhuma propriedade de determinantes}, e diz-se para que não se tome o
+resto por adquirido.
+
 \medskip\noindent\textbf{E é isto que faz a estrela não ser uma escolha.} O
 Teor.~\ref{fis:thm:estrela} vai chamar estrela ao caso $s=1$; a razão de ele
 existir é esta, e não uma preferência: \emph{a mesma conta que dá o rotor dá a
@@ -9901,6 +9952,16 @@ recorrência de \emph{dois} termos cujos coeficientes são a cifra:
 $M^{k+1}=B\,M^{k}-C\,M^{k-1}$.
 \end{lema}
 
+\medskip\noindent\textbf{E este lema não introduz o traço nem o determinante ---
+apanha-os já construídos, e diz-se onde.} O Cor.~\ref{fis:cor:trdet} mostra que são
+os \emph{dois invariantes do par}, um por face: a soma e o produto dos dois
+elementos que a aplicação não mistura. \emph{Logo a igualdade acima é a equação do
+Teor.~\ref{fis:thm:duasfaces} escrita na aplicação em vez de no elemento}, e o que
+este lema acrescenta é a \textbf{conta directa} que o confirma nas entradas.
+\textbf{É por isso que ele pode aparecer aqui sem dívida}: as duas grandezas
+nasceram na Álgebra, e as Partes anteriores que já as usam estão a usar aquilo, e
+não isto.
+
 \begin{proof}
 Conta directa nas entradas. Com
 $M=\left(\begin{smallmatrix}a&b\\c&d\end{smallmatrix}\right)$, as duas matrizes
@@ -11278,7 +11339,14 @@ a segunda lei & vale de \textbf{um} lado --- o par não se move & Cor.~\ref{fis:
 \section{O rendimento é o $\oint$ fechado}\label{fis:carnot}
 
 \begin{teorema}[o rendimento máximo, derivado de duas integrais]\label{fis:thm:carnot}
-Num ciclo:
+\emph{Hipótese importada, e declarada aqui} --- \textbf{e a lista completa está no
+Teor.~\ref{fis:thm:landauer}}, que a enuncia por todas: esta secção recebe as
+\textbf{duas leis da termodinâmica}, e recebe-as \emph{marcadas}. \textbf{Nenhuma
+delas é usada para estabelecer coisa nenhuma do alicerce}, e o que segue é o que
+elas dão, e não o que a dobra dá. \emph{Diz-se à entrada para que ninguém leia como
+derivado o que é recebido.}
+
+\medskip\noindent Num ciclo:
 \[
 \oint dU=0 \;\Longrightarrow\; W=Q_q-Q_f ,
 \qquad
