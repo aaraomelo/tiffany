@@ -485,8 +485,10 @@ $(110)\otimes(100)=000$. \emph{Duas dobras afins com os mesmos extremos}, e a
 unicidade cai. Onde a diferença cancela --- e é o caso dos dois símbolos, que é o
 que este documento usa --- não há segunda.
 \item[(2)] \textbf{E cumpre a Def.~\ref{fis:def:op} --- verifica-se, não se
-pede.} $\partial(\partial x)=a+b-(a+b-x)=x$, e $\partial a=b\neq a$.
-\emph{A realização honra o operador}, que é o que se lhe exige.
+pede.} $\partial(\partial x)=a+b-(a+b-x)=x$. \emph{E é \textbf{efectiva}, o que é
+mais do que a definição pede}: $\partial a=b\neq a$, e a efectividade é a segunda
+espécie do Teor.~\ref{fis:thm:doispontos}(0) --- \textbf{cumpre-se aqui, e por
+isso diz-se}.
 \item[(3)] \textbf{E conserva:}
 \[
 \boxed{\;x+\partial x=a+b\quad\text{para todo }x\;}
@@ -634,7 +636,9 @@ $\{x,\partial x\}$} --- e esse par é obra de $\partial$, não do suporte.
 \end{proof}
 
 \begin{teorema}[uma composição não chega]\label{fis:thm:duas}
-Com $\partial$ da Def.~\ref{fis:def:op}:
+Com $\partial$ \textbf{efectiva} da Def.~\ref{fis:def:op} --- \emph{a segunda
+espécie do Teor.~\ref{fis:thm:doispontos}(0), e diz-se porque a cláusula~(4) a
+usa}:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{O invariante é o neutro exactamente quando $\partial$ é a
 inversão.} Numa composição comutativa, associativa e com \emph{volta} --- a mesma
@@ -759,7 +763,9 @@ solução $x=\tfrac{a+b}{2}$, que existe sempre que o $2$ se inverta. Note-se qu
 tê-lo é condição de a construção operar; e tê-lo é ter o seu dual $\tfrac12$,
 que é o próprio meio. Nada disto menciona composição: são factos da reflexão.
 
-(3) Dada uma composição $\circ$ que cumpra a Def.~\ref{fis:def:op}, o seu
+(3) Dada uma composição $\circ$ \emph{compatível} com o $\partial$ da
+Def.~\ref{fis:def:op} --- \emph{uma composição não «cumpre» aquela definição, que
+é sobre $\partial$ e não sobre $\circ$} ---, o seu
 invariante $e$ é neutro por (1), e de $e\circ\partial e=e$ com
 $e\circ\partial e=\partial e$ vem $\partial e=e$: o invariante é fixo por
 $\partial$. Como o único fixo é $m$, é $m$. A implicação corre neste sentido e
@@ -1742,10 +1748,12 @@ também num círculo}, e daí sai --- sem se acrescentar nada --- a escada que e
 documento vai usar sempre que alguma coisa fechar em mais do que dois.
 
 \medskip\noindent\textbf{E antes de tudo, uma palavra que colide.} A
-Def.~\ref{fis:def:op} e o Teor.~\ref{fis:thm:duas}(1) usam \emph{volta} no
+O Teor.~\ref{fis:thm:duas}(1) usa \emph{volta} no
 sentido de \textbf{invertibilidade} --- «uma composição com volta» é aquela em
-que todo o elemento tem inverso. \emph{Nesta secção, e só nela, «volta» quer
-dizer \textbf{giro}}: o que fecha. São dois sentidos, e diz-se qual.
+que todo o elemento tem inverso ---, ao passo que a Def.~\ref{fis:def:op} a usa no
+sentido de \textbf{involução}: o que volta ao ponto de partida. \emph{Nesta secção,
+e só nela, «volta» quer dizer \textbf{giro}}: o que fecha. São três sentidos, e
+diz-se qual.
 
 \begin{teorema}[a largura é a ordem]\label{fis:thm:largura}
 Fixe-se uma largura $w\ge1$. \emph{Sob a declaração da cláusula~(5) do
@@ -6029,8 +6037,11 @@ escrito --- numa linha, dentro de uma prova.}
 \textbf{idempotentes}, e uma composição idempotente não tem volta: se tivesse
 neutro $n$ e $\partial$ com $x\oplus\partial x=n$, de
 $x=x\oplus n=x\oplus(x\oplus\partial x)=(x\oplus x)\oplus\partial x=x\oplus\partial x=n$
-sairia que \emph{todo} elemento é $n$. Pela Def.~\ref{fis:def:op} isso é um
-\textbf{esmagamento} e não uma dobra --- e é a mesma perda que o
+sairia que \emph{todo} elemento é $n$. Isso é um
+\textbf{esmagamento} e não uma dobra efectiva --- \emph{e note-se que a
+Def.~\ref{fis:def:op} sozinha não o exclui}: $\partial=\mathrm{id}$ é solução dela.
+Quem o exclui é a efectividade, isto é, a segunda espécie do
+Teor.~\ref{fis:thm:doispontos}(0). É a mesma perda que o
 Teor.~\ref{fis:thm:BI} já contava: $a\vee b=m+\abs{\delta}$ e
 $a\wedge b=m-\abs{\delta}$ deitam fora o \emph{sinal} de $\delta$, isto é
 \emph{qual dos dois é qual}. A orientação não está na operação do dual; está na
@@ -6059,8 +6070,10 @@ Teor.~\ref{fis:thm:duasinvol} sobre um par concreto de tabelas.}
 
 \noindent O Teor.~\ref{fis:thm:dual} exibiu a bijeção e mostrou que ela é a
 dobra. Falta dizer que ela \emph{não foi escolhida} --- que em cada sítio onde a
-construção põe dois, é a única que existe. \emph{A Def.~\ref{fis:def:op} não
-permite escolhas}, e a construção tem um só passo: \textbf{sobre dois objetos o
+construção põe dois, é a única que existe. \emph{Sobre um par não há escolha a
+fazer} --- e é o Lema~\ref{fis:lem:doisunico} que o diz, não a
+Def.~\ref{fis:def:op}, que admite exactamente \textbf{duas} espécies
+(Teor.~\ref{fis:thm:doispontos}(0)). A construção tem um só passo: \textbf{sobre dois objetos o
 operador é a troca, e não há outro}.
 
 \begin{lema}[sobre dois, a dobra efectiva é única]\label{fis:lem:doisunico}
@@ -6175,7 +6188,8 @@ Def.~\ref{fis:def:duomorf} diz o que um duomorfismo \emph{é}; o
 Teor.~\ref{fis:thm:constroi} diz que ele \textbf{existe sem ser posto} --- em cada
 lugar onde a construção põe dois, o operador dá a troca, e a troca é o
 duomorfismo. \emph{A dualidade não é uma segunda hipótese sobre a estrutura: é o
-que a Def.~\ref{fis:def:op} já dizia, lida em cada nível onde há um par.}
+que a Def.~\ref{fis:def:op} já dizia, lida em cada nível onde a dobra é efectiva e
+há portanto um par (Teor.~\ref{fis:thm:doispontos}(2)).}
 
 \medido{\code{tests/pgwire.c} §W122, em $M=32$: os quatro números trocam de lugar
 sem sobra nos dois pares; a serpentina dá $(1,63)$ e a de Hilbert $(853,341)$ nos
@@ -9431,7 +9445,9 @@ usada, é só onde o mesmo facto reaparece dito sobre o anel.)
 (2) $q$ é quadrática: $q(\lambda v)=\lambda^{2}q(v)$, que é a
 Def.~\ref{fis:def:intervalo} lida sobre um múltiplo. Com $q(\partial x)=0$ o lado
 direito é nulo para todo $\lambda$. \emph{E o que aqui falha é a normalização,
-não a volta de $\partial$}: a dobra da Def.~\ref{fis:def:op} é involutiva sempre,
+não a volta de $\partial$}: a dobra da Def.~\ref{fis:def:op} é involutiva sempre
+--- \emph{e aqui $\partial$ é a dobra, e não o incremento que esta Parte também
+escreve assim} (ver a regra de leitura da §\ref{fis:tempo}) ---,
 e não depende de $q$.
 
 (3) Numa aresta na direção $i$ vale $q=G(x)h_{ii}$ pelo
@@ -9487,7 +9503,8 @@ grandeza de segunda ordem por acidente de unidades.}
 
 \begin{proof}
 Pela Def.~\ref{fis:def:op}, $\partial$ tem volta e $\partial^{2}=\mathrm{id}$
-(Teor.~\ref{fis:thm:duas}(2)). Uma aplicação leva $x$ em $\partial x$ e não
+(Teor.~\ref{fis:thm:duas}(2)); e \emph{sendo ela \textbf{efectiva}}, o
+Teor.~\ref{fis:thm:doispontos}(2) dá o par de dois. Uma aplicação leva $x$ em $\partial x$ e não
 regressa: o par $(x,\partial x)$ tem dois elementos distintos sempre que $x$ não
 é o meio, e a diferença é o que ficou por desfazer. Duas aplicações devolvem $x$
 exactamente, isto é, com resíduo $0$. A contagem das passagens é a contagem das
