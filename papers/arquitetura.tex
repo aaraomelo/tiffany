@@ -2166,7 +2166,12 @@ com $\mu$, os passos lêem-se de volta, exactos.
 \medskip\noindent\textbf{E não é uma segunda álgebra: é a que o motor já tinha,
 lida ao contrário.} O \code{lib/dirichlet.h} já realizava a mesma inversão na
 ordem por \emph{divisibilidade} --- $F=f*\mathbf 1 \Leftrightarrow f=F*\mu$, a
-Möbius clássica ---; o \code{lib/incidencia.h} realiza-a na ordem \emph{total},
+Möbius clássica ---; e o \code{lib/incidencia.h} já realizava o trio como
+\emph{operador} --- $S$ a subdiagonal, $\zeta=\sum S^{j}$, $\mu=1-S$, com a
+nilpotência a fechar a série (o \code{tests/escada.c} mede-o: «$\zeta$ acumula,
+$\mu$ desfaz, e a volta é exacta sem divisão»). O que faltava era a leitura de
+\emph{percurso}, que é a que o $G$ do \code{GROUP BY} atravessa, e é a que se
+acrescenta ali (prefixo \code{inc\_}) na ordem \emph{total},
 que é a que o $G$ percorre. «A álgebra não muda --- $\zeta$ acumula, $\mu$
 desacumula --- e só muda a ordem sobre a qual se acumula» (\code{fis:cor:mobius}).
 Tudo em \code{long}: $\zeta$ e $\mu$ de funções inteiras são inteiras, e a
