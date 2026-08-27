@@ -1052,6 +1052,127 @@ não só do número.}
 \boxed{\;\text{contar não orienta --- é preciso \textbf{escolher}, e escolher é o bit da cláusula~(5)}\;}
 \]
 
+\medskip\noindent\textbf{E há uma pergunta por baixo desta, que é a de saber o
+que \emph{sobrevive}.} Se orientar custa um bit, e a dobra troca os dois lados,
+então a orientação é a peça que a dobra \textbf{move} --- e convém saber
+exactamente o que dela fica. \emph{É o que se prova a seguir}, e prova-se com o
+mesmo instrumento, aplicado mais um andar acima: agora sobre as \textbf{funções}
+do par.
+
+\begin{teorema}[a antissimetria: o que a dobra nunca fixa, e o que dela sobrevive]\label{fis:thm:antissim}
+Seja $\tau$ a transposição do Teor.~\ref{fis:thm:simbolos} a agir sobre as
+funções do par, $(\tau\!\cdot\! f)(x,y)=f(y,x)$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{$\tau$ é ainda uma dobra, e o seu vinco são as funções
+simétricas.} $\tau\circ\tau=\mathrm{id}$ é a Def.~\ref{fis:def:op} sem mais nada;
+e $\tau\!\cdot\! f=f$ diz exactamente que $f$ não vê a ordem das entradas.
+\emph{Isto não custa hipótese nenhuma.}
+\item[(2)] \textbf{Onde houver simétrico e o dois se inverter, e só aí, a dobra
+tem \emph{dois} valores próprios --- e são as duas metades da
+Def.~\ref{fis:def:duomorf}.}
+\[
+\boxed{\;\tau\ \text{age como}\ +1\ \text{no \textbf{directo}}\;,\qquad
+\text{como}\ -1\ \text{no \textbf{cruzado}}\;}
+\]
+\emph{A declaração diz-se}: partir $f$ nas duas metades pede dividir por dois, e
+falar de $-1$ pede o simétrico. \textbf{Sem isso há vinco e não há cisão}, e a
+cláusula~(4) diz o que acontece então.
+\item[(3)] \textbf{E aqui está a assimetria entre as duas metades.} No directo
+\emph{todo} o elemento é fixo; no cruzado \textbf{nenhum é}, tirando o nulo:
+$\tau\!\cdot\! c=c$ com $\tau\!\cdot\! c=-c$ obriga
+\[
+\boxed{\;2c=0\;}
+\]
+\emph{Não há grandeza antissimétrica invariante e não nula.} E note-se que esta é
+a equação do vinco do Teor.~\ref{fis:thm:vinco}(1) com a soma dos extremos posta
+a zero --- \textbf{é a mesma pergunta}, e a resposta depende do mesmo: se o dois
+se inverte.
+\item[(4)] \textbf{Donde a excepção, e ela é o binário.} Onde $2=0$ --- que é o
+$B$ do Teor.~\ref{fis:thm:B} --- vem $-1=+1$, os dois valores próprios colam, e
+a antissimetria \emph{é} invariante porque deixou de se distinguir da simetria.
+\emph{Não é um caso a mais: é o caso onde a pergunta desaparece}, e é por isso
+que o binário não tem lado escolhido para perder.
+\item[(5)] \textbf{A potência preserva a antissimetria, e lê a paridade.} De
+$\tau\!\cdot\! c=-c$ vem $\tau\!\cdot\! c^{\,n}=(-1)^{n}c^{\,n}$, isto é
+\[
+\boxed{\;n\ \text{ímpar}:\ \text{fica antissimétrica}\;;\qquad
+n\ \text{par}:\ \text{cai no directo}\;}
+\]
+--- \emph{o expoente não muda a peça, muda a metade em que ela aterra}. E não há
+terceira, pelo Teor.~\ref{fis:thm:doispontos}(0): $(-1)^{n}$ toma dois valores
+porque $-1$ é uma dobra.
+\item[(6)] \textbf{Logo o menor invariante é o \emph{quadrado} --- e ele já tem
+nome nesta obra.} A primeira potência par é a segunda, e sobre os dois extremos
+do Teor.~\ref{fis:thm:doispontos}(2) o cruzado é $a-b$; o seu quadrado é
+\[
+\boxed{\;\Delta=(a-b)^{2}\;}
+\]
+que é o Cor.~\ref{fis:cor:disc}(1). \emph{Aquele corolário já dizia isto sem o
+nomear} --- «a única coisa que se pode dizer sobre a distância entre os dois
+pontos sem dizer qual é qual» --- e o que aqui se acrescenta é a \textbf{razão}:
+é o quadrado porque o quadrado é a primeira potência par.
+\item[(7)] \textbf{E é assim que o simétrico guarda o antissimétrico: guarda-lhe
+o módulo e perde-lhe a direcção.} O par $(s,\Delta)$ com $s=a+b$ recupera o
+produto, $4ab=s^{2}-\Delta$, e portanto recupera o \textbf{par} $\{a,b\}$; mas
+não recupera o \textbf{sinal} de $a-b$, e sem ele não se sabe qual é o primeiro.
+\[
+\boxed{\;\text{o quadrado é a \textbf{memória}; o sinal é a \textbf{direcção}, e a dobra nunca a fixa}\;}
+\]
+\emph{É por isso que a coisa é reversível sem ser orientada}: desfaz-se, porque o
+par voltou; não se aponta, porque o lado não voltou.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $(\tau\!\cdot\!(\tau\!\cdot\! f))(x,y)=f(x,y)$; e $\tau\!\cdot\! f=f$ é
+$f(x,y)=f(y,x)$.
+
+(2) Com o dois invertível, $f=\tfrac12(f+\tau\!\cdot\! f)+\tfrac12(f-\tau\!\cdot\! f)$
+e $\tau$ fixa a primeira parcela e troca o sinal da segunda; a identificação com
+as duas metades é a Def.~\ref{fis:def:duomorf}, que as define por esses mesmos
+comportamentos.
+
+(3) É a conta escrita. E a leitura: $\operatorname{Fix}(\tau)$ restrito ao
+cruzado é o núcleo da duplicação.
+
+(4) Em $B$ vale $1+1=0$, logo $-1=1$; as duas condições da cláusula~(3) tornam-se
+a mesma e (2) não parte nada.
+
+(5) Indução sobre $n$, e $\tau$ respeita o produto porque é substituição de
+argumentos.
+
+(6) $\tau$ troca $a$ com $b$ pelo Teor.~\ref{fis:thm:doispontos}(2), logo $a-b$ é
+cruzado; $(a-b)^{2}$ é directo por~(5) com $n=2$; e a identificação com $\Delta$
+é o Cor.~\ref{fis:cor:disc}(1).
+
+(7) $s^{2}-\Delta=(a+b)^{2}-(a-b)^{2}=4ab$. Que o sinal não se recupere: $(a,b)$
+e $(b,a)$ dão o mesmo $s$ e o mesmo $\Delta$ e diferem no sinal de $a-b$ ---
+\emph{e diferem}, sempre que a dobra for efectiva.
+\end{proof}
+
+\medskip\noindent\textbf{E isto casa exactamente com a conta do cardinal.} Ali
+uma relação ignorava a ordem quando lia só \emph{quantos} dos dois blocos tomava,
+e não \emph{qual}; aqui uma grandeza é invariante quando é o quadrado, que dá o
+módulo e não o sinal. \emph{São a mesma perda, contada de dois modos}: o cardinal
+não distingue os dois lados, o quadrado não distingue os dois sinais. \textbf{E é
+sempre o mesmo bit da cláusula~(5) do Teor.~\ref{fis:thm:simbolos} que falta}, e
+sempre por não vir da dobra.
+
+\medskip\noindent\textbf{E daqui o infinito ganha chão, que é o que faltava.} A
+cláusula~(3) diz que o directo tem \emph{todos} os pontos fixos e o cruzado
+\emph{nenhum}, e no entanto a dobra age no cruzado por uma regra constante ---
+multiplicar por $-1$. \emph{Isso é ter passo e não ter ponto}, e não é figura de
+estilo: é a cláusula~(2) lida nas duas metades.
+\[
+\boxed{\;\text{ponto fixo}=\text{o valor próprio}+1\;;\qquad
+\text{passo fixo}=\text{o valor próprio}-1\;}
+\]
+\textbf{Donde o que a próxima página chama infinito não é um lugar longe: é a
+metade que a dobra não fixa}, e a frase «o finito tem ponto fixo, o infinito tem
+passo fixo» deixa de ser leitura e passa a ser a cisão da cláusula~(2). \emph{E
+diga-se o que continua a não haver}: um elemento chamado $\infty$. O que há é
+uma metade sem pontos fixos, e uma regra que nela nunca pára.
+
 \medskip\noindent\textbf{E isto já estava a ser usado, sem se dizer.} A
 cláusula~(2) do Teor.~\ref{fis:thm:central} parte o rectângulo por
 «$x\le f(i)$ ou $f(i)<x$, e exactamente uma das duas» --- \emph{que é o fechado e
@@ -1135,10 +1256,13 @@ acima é que o permite: \textbf{procurava-se no espaço o que pertence ao passo}
 \[
 \boxed{\;\text{o s\'imbolo }\infty\ \text{n\~ao designa ponto, elemento, tecido nem realiza\c{c}\~ao}\;}
 \]
-\emph{Designa a dinâmica indefinidamente continuável do operador} --- e não há,
-nesta obra, objecto nenhum com esse nome. \textbf{No finito, a dobra fixa um
-ponto; na torre, a indução fixa o passo}; e o que se chama infinito é o que
-resulta de não haver último passo.
+\emph{Designa a metade que a dobra não fixa} --- e isso já não é modo de dizer:
+é o Teor.~\ref{fis:thm:antissim}(3), onde o directo tem todos os pontos fixos e
+o cruzado não tem nenhum, e no entanto a regra que nele age é constante.
+\textbf{Não há, nesta obra, objecto nenhum com esse nome}, e agora sabe-se
+porquê: o que ali existe é um valor próprio, e um valor próprio não é um ponto.
+\textbf{No finito, a dobra fixa um ponto; na torre, a indução fixa o passo}; e o
+que se chama infinito é o que resulta de não haver último passo.
 \[
 \boxed{\;\text{o finito tem \textbf{ponto} fixo; o infinito tem \textbf{passo} fixo}\;}
 \]
