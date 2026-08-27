@@ -764,9 +764,14 @@ escolhido e $>$ ao outro:
 \emph{As duas leituras não são dois símbolos parecidos: são os dois lados que a
 dobra permuta.}
 \item[(6)] \textbf{E uma orientação não é ainda uma ordem.} Ser ordem pede
-\textbf{transitividade}, e isso a dobra não dá: ela parte em blocos e não os
-relaciona entre si. \emph{É este o preço exacto do $<$}, e diz-se: um bit por
-bloco, mais a coerência entre blocos.
+\textbf{transitividade} --- condição sobre \emph{três} ---, e isso a dobra não
+dá: ela parte em blocos e não os relaciona entre si. \emph{E daqui sai a escada
+dos custos, que é o que esta secção tem de mais útil}:
+\[
+\boxed{\;\text{a \textbf{diferença} custa um bloco;\quad a \textbf{orientação}, um bit por bloco;\quad a \textbf{ordem}, coerência entre blocos}\;}
+\]
+--- \emph{e cada degrau paga-se sobre o anterior}: sem bloco não há bit a
+escolher, e sem bits não há coerência a exigir.
 \item[(7)] \textbf{O fecho é juntar o vinco.} Com $\le$ a designar a união do
 lado escolhido com $\operatorname{Fix}(\tau)$,
 \[
@@ -844,6 +849,17 @@ mesmo. O que este teorema dá é o \textbf{critério} --- formar o par e pergunt
 se a dobra sobre ele é efectiva --- e é o critério, e não a relação, que uma
 máquina corre. \emph{É por isso que a Def.~\ref{fis:def:objeto} pede igualdade
 \textbf{decidível} e não igualdade}: o que ela pede é que o critério termine.
+
+\medskip\noindent\textbf{E a secção fecha-se numa frase, que é o que dela se
+deve reter.} \emph{Os símbolos não precedem a relação}: o sinal $=$ é o
+\textbf{vinco} da transposição; $\neq$ é o que a dobra \textbf{separa}; $<$ e $>$
+são as duas \textbf{orientações} possíveis dessa separação; e $\le$ e $\ge$ são
+essas orientações depois de receberem o próprio vinco. \textbf{A ordem, essa, não
+nasce da dobra isolada}: nasce quando as orientações dos blocos passam a obedecer
+a uma coerência comum.
+\[
+\boxed{\;\text{a dobra dá os blocos; a ordem entra como estrutura \textbf{sobre} eles}\;}
+\]
 
 
 \section{Os dois símbolos, a lista, e o par centro/desvio}\label{fis:binario}
