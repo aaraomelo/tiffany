@@ -61,8 +61,10 @@
 }
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} De \textbf{uma aplicação e uma cláusula}:
-$\operatorname{ord}(\partial)=2$. Os \textbf{dois extremos} não são dados --- saem
+\textbf{De onde parte.} De \textbf{uma aplicação e uma identidade}:
+$\partial\circ\partial=\mathrm{id}$. \emph{Nem o dois se dá}: a identidade obriga
+a ordem a dividir dois, e um divisor de dois ou é um --- e aí nada se move --- ou
+é dois. Os \textbf{dois extremos} não são dados --- saem
 forçados, porque uma aplicação que fecha em dois não tem para onde levar um ponto
 além de si e de um outro. Onde o suporte carregar uma soma, a dobra realiza-se
 como $\partial x=a+b-x$, e o seu ponto fixo é o \emph{meio}; dobrando outra vez de
@@ -220,23 +222,20 @@ produz por indução}.
 
 \begin{definicao}[o operador]\label{fis:def:op}
 \textbf{Um único mapa} $\partial\colon S\to S$ num suporte $S$ qualquer ---
-\emph{sem números, sem símbolos, sem se dizer quantos são} --- e \textbf{uma}
-cláusula:
+\emph{sem números, sem símbolos, sem se dizer quantos são} --- e \textbf{uma
+identidade}:
 \[
-\boxed{\;\operatorname{ord}(\partial)=2\;}
+\boxed{\;\partial\circ\partial=\mathrm{id}\;}
 \]
-\emph{A dobra é o que \textbf{fecha em dois}.}
+\emph{A dobra é o que \textbf{volta}.}
 
-\medskip\noindent\textbf{E é uma e não duas, de propósito.} Escrever
-$\partial\circ\partial=\mathrm{id}$ \emph{e} $\partial\neq\mathrm{id}$ é
-\textbf{explicitar em duas cláusulas o que $\operatorname{ord}(\partial)=2$ já
-contém}: a primeira diz que a ordem divide dois, a segunda que não é um, e a
-conjunção das duas \emph{é} a ordem ser exactamente dois. As duas leituras saem
-dela e não se pedem:
-\[
-\partial\circ\partial=\mathrm{id}\quad(\text{fecha})\;,\qquad
-\partial\neq\mathrm{id}\quad(\text{em \textbf{dois}, não em um}) .
-\]
+\medskip\noindent\textbf{E é uma identidade, e não uma ordem --- a diferença
+conta.} Dizer $\operatorname{ord}(\partial)=2$ seria dizer mais: a \emph{ordem}
+de um mapa é o menor número de aplicações que devolve a identidade, pelo que
+falar dela já pressupõe a identidade --- que é a ordem \textbf{um}. \emph{Não se
+pode pôr o dois no fundamento sem pôr o um antes dele.} O que aqui se põe é a
+igualdade, e mais nada; \textbf{o dois sai}, e sai no
+Teor.~\ref{fis:thm:doispontos}.
 
 \medskip\noindent\textbf{E a identidade não é candidato: é o composto.} Depois da
 segunda seta não nasceu um $\partial_2$ --- nasceu o \emph{fecho}, e é o mesmo
@@ -251,15 +250,28 @@ fecha em quatro \emph{rodando} ---, e o Teor.~\ref{fis:thm:quarteto}(3) diz que
 os quatro quadrantes fecham todos em dois --- \emph{e são \textbf{quatro} de
 ordem dois, contra \textbf{um} de ordem quatro no rotor: as duas únicas maneiras
 de quatro coisas fecharem, e a nota do Teor.~\ref{fis:thm:quarteto} separa-as}.
-\textbf{É a ordem, e é sempre a ordem.}
+\textbf{É a ordem, e é sempre a ordem} --- \emph{mas a ordem é o que se lê, e não
+o que se põe}.
 
 \medskip\noindent Não se dão extremos, não se dá meio, não se dá soma, não se dá
-afinidade --- o suporte ainda nem tem nome. \emph{O que segue sai daqui, e sai
-como teorema.}
+afinidade, e não se dá sequer o \textbf{dois} --- o suporte ainda nem tem nome.
+\emph{O que segue sai daqui, e sai como teorema.}
 \end{definicao}
 
-\begin{teorema}[os dois pontos não são dados: saem forçados]\label{fis:thm:doispontos}
+\begin{teorema}[o dois não é dado: sai forçado, e com ele os dois pontos]\label{fis:thm:doispontos}
 Com a Def.~\ref{fis:def:op}:
+\begin{enumerate}\itemsep3pt
+\item[(0)] \textbf{A identidade admite exactamente duas espécies de solução, e a
+ordem lê-se \emph{delas}.} Ou $\partial=\mathrm{id}$ --- e então
+$\operatorname{ord}(\partial)=1$, nada se move, e não há par nenhum ---, ou
+$\partial\neq\mathrm{id}$ --- e então $\operatorname{ord}(\partial)=2$,
+\emph{porque não há terceira}: a identidade dá que a ordem divide dois, e um
+divisor de dois ou é um ou é dois. \textbf{É aqui que o dois nasce}, e nasce por
+exclusão e não por decreto. \emph{Chama-se \textbf{efectiva} à segunda espécie},
+e é dela que o resto fala.
+\end{enumerate}
+\emph{E daqui em diante $\partial$ é efectiva}, que é a única hipótese que as
+cláusulas seguintes acrescentam:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{Toda a órbita é um ciclo de comprimento um ou dois, e nunca
 mais.} A órbita de $x$ é $\{x,\partial x\}$, e aplicar $\partial$ outra vez
@@ -292,14 +304,20 @@ elemento só admite $\partial=\mathrm{id}$, que a efetividade exclui.
 \end{teorema}
 
 \begin{proof}
-(1) A ordem ser dois dá $\partial\circ\partial=\mathrm{id}$, isto é
-$\partial(\partial x)=x$; logo $\{x,\partial x\}$ é fechado por $\partial$,
-contém a órbita e está contido nela. Tem um elemento se $\partial x=x$ e dois se
-não.
+(0) A identidade dá que a ordem de $\partial$ \textbf{divide} dois: aplicá-la duas
+vezes devolve o argumento. Os divisores de dois são um e dois, e mais nenhum ---
+donde as duas espécies, e só duas. A ordem é um exactamente quando
+$\partial=\mathrm{id}$, e aí todo o ponto é fixo e não há par. \emph{Fora disso é
+dois}, e não por escolha: por não restar terceiro divisor.
 
-(2) Se $\partial x=x$ para todo $x$, então $\partial=\mathrm{id}$ e a ordem seria
-\emph{um} --- contra a definição. Logo existe $x$ com $\partial x\neq x$, e para
-esse (1) dá dois, com $\partial a=\partial x=b$ e
+(1) A identidade dá $\partial(\partial x)=x$; logo $\{x,\partial x\}$ é fechado
+por $\partial$, contém a órbita e está contido nela. Tem um elemento se
+$\partial x=x$ e dois se não.
+
+(2) Se $\partial x=x$ para todo $x$, então $\partial=\mathrm{id}$ e a ordem é
+\emph{um} --- que é a primeira espécie de~(0), e não a efectiva. Logo, sendo
+efectiva, existe $x$ com $\partial x\neq x$, e para esse (1) dá dois, com
+$\partial a=\partial x=b$ e
 $\partial b=\partial\partial x=x=a$.
 
 (3) As órbitas de uma aplicação com volta particionam o suporte, porque «estar na
@@ -1323,7 +1341,8 @@ Teor.~\ref{fis:thm:levant}(3), e a aplicação que troca os seus extremos é
 \boxed{\;\hat\partial_{\mathrm{v}}(x,k)=\bigl(x,\;1+G(x)-k\bigr)\;}
 \]
 --- \emph{ela inverte a ordem das visitas e não sai da célula}. \textbf{Mas com
-$G(x)=1$ ela é a identidade}, que a Def.~\ref{fis:def:op} exclui: numa coluna de
+$G(x)=1$ ela é a identidade}, isto é a espécie \emph{não efectiva} do
+Teor.~\ref{fis:thm:doispontos}(0): numa coluna de
 altura um não há par para trocar. \emph{E note-se que ela não é uma aplicação da
 segunda coordenada}: depende de $x$ pela altura, e é isso que torna a
 cláusula~(4) uma pergunta e não uma trivialidade.
@@ -4385,10 +4404,10 @@ solução: $\partial u=v$ e $\partial v=u$. Não há segunda, e não há escolha
 
 \begin{proof}
 As bijeções de um conjunto de dois elementos são duas: a identidade e a troca. A
-Def.~\ref{fis:def:op} exige $\partial\neq\mathrm{id}$ --- é a cláusula
-\emph{efetiva} ---, o que deixa a troca; e a troca tem volta e é involutiva, pelo
-que cumpre o resto. \emph{A unicidade não é um bónus: é o que faz a construção
-não ter parâmetro.}
+efectividade do Teor.~\ref{fis:thm:doispontos}(0) exclui a identidade --- é a
+espécie de ordem \emph{dois} ---, o que deixa a troca; e a troca tem volta e é
+involutiva, pelo que cumpre o resto. \emph{A unicidade não é um bónus: é o que faz
+a construção não ter parâmetro.}
 \end{proof}
 
 \begin{teorema}[a função duomorfa constrói-se, e nos dois lugares onde há par]\label{fis:thm:constroi}
