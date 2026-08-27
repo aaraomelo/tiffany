@@ -2416,9 +2416,20 @@ uma lista.
 Cada degrau do Teor.~\ref{fis:thm:escada} é o \textbf{mesmo} passo aplicado ao
 andar anterior:
 \[
-\boxed{\;X_{k+1}\;=\;X_k\ \sqcup\ X_k^{\vee}\ \big/\!\sim\;}
+\boxed{\;X_{k+1}\;=\;\bigl(X_k\times X_k^{\bullet}\bigr)\big/\!\sim\;}
 \]
---- \emph{o andar mais o seu dual, colados pela relação que a dobra impõe}. E daí:
+--- \emph{o \textbf{produto} do andar por si próprio, quocientado pela fibra do
+morfismo da face} (cláusula~(1)), com $X_k^{\bullet}$ os canceláveis, que no
+primeiro degrau são todo o andar. \textbf{E o resultado \emph{lê-se} como o andar
+mais o seu dual} --- $X_k$ entra por $a\mapsto(a,0)$ e $X_k^{\vee}$ por
+$a\mapsto(0,a)$ ---, \emph{mas essa é a leitura do resultado e não a construção}, e
+as duas coisas confundiam-se aqui.
+
+\smallskip\noindent\textbf{E a união não é disjunta}: as duas cópias
+\emph{encontram-se}, e encontram-se exactamente no \textbf{vinco} --- $(a,0)$ e
+$(0,c)$ caem na mesma classe quando $a\oplus c=0$, isto é, só no neutro. \emph{Um
+$\sqcup$ ali seria falso duas vezes}: o domínio é o produto e não a soma, e o
+resultado cola no vinco em vez de separar. E daí:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{As quatro construções são a mesma.} Passar às diferenças, às
 razões e aos cortes parece três coisas distintas; são a mesma, com o
@@ -5282,10 +5293,13 @@ duas operações e dois neutros. \textbf{A Def.~\ref{fis:def:op} não as dá}: d
 mapa e uma identidade, e nada mais. \emph{São hipótese deste enunciado, e é a
 cláusula~(4) que paga o preço de as ter pedido.} Postas elas, escreve-se nas duas faces
 \[
-\underbrace{\partial x\oplus x=s}_{\oplus\ \text{e o seu neutro}}
+\underbrace{\partial x\oplus x=s}_{\oplus\ \text{e o seu \textbf{invariante}}}
 \qquad\qquad
-\underbrace{\partial x\otimes x=p}_{\otimes\ \text{e o seu neutro}}
+\underbrace{\partial x\otimes x=p}_{\otimes\ \text{e o seu \textbf{invariante}}}
 \]
+\emph{E diz-se \textbf{invariante}, e não «neutro»}: $s$ e $p$ são o que cada face
+conserva ao longo da órbita, e só coincidem com os neutros próprios na régua com
+vinco --- \textbf{são duas coisas, e a cláusula~(1) mostra-as separadas}.
 com $s=a+b$ a soma dos extremos. \textbf{Pedidas ao \emph{mesmo} $\partial$, as
 duas não são duas: são uma}, e é esta:
 \[
@@ -5772,12 +5786,21 @@ desfazer a primeira.
 \[
 \boxed{\;\text{fora da estrela a travessia pede \textbf{duas} aplicações; nela pede \textbf{uma}}\;}
 \]
-\item[(3)] \textbf{E é a única com essa propriedade.} Pedir que a mesma
+\item[(3)] \textbf{E é a única com essa propriedade --- \emph{fixados $s=1$ e
+$p=-1$}, e a hipótese diz-se.} Pedir que a mesma
 aplicação seja oposto e inverso é pedir $s-x=p/x$, isto é $x^{2}=sx-p$
-(Lema~\ref{fis:lem:duasdobras}(1)); com os neutros que o operador fixa ---
-$s=1$ e $p=-1$ --- a equação é $x^{2}=x+1$, e as suas soluções são $\sigma$ e
-$\sigma'$, que são \emph{o mesmo par}. \emph{Não há segundo lugar onde uma dobra
-sirva as duas faces.}
+(Lema~\ref{fis:lem:duasdobras}(1)); com $s=1$ e $p=-1$
+a equação é $x^{2}=x+1$, e as suas soluções são $\sigma$ e
+$\sigma'$, que são \emph{o mesmo par}.
+
+\smallskip
+\emph{E diga-se o alcance, porque sem ele a frase seria falsa}: o
+Cor.~\ref{fis:cor:estrelaanti}(1) mostra que \textbf{negar é inverter em toda a
+família $p=-1$}, e não só na estrela. \emph{O que é único aqui é o membro em que
+\textbf{também} as operações colam} --- o $s=1$ --- e é isso, e só isso, que a
+palavra «única» cobre. \textbf{Não há segundo lugar onde uma dobra sirva as duas
+faces \emph{com os dois invariantes fixados}}; há outros onde ela serve as duas
+\emph{involuções}, e são todos os metais.
 \item[(4)] \textbf{E a interface não é o colapso.} $\oplus$ e $\otimes$ continuam
 \emph{duas} sobre a estrela --- $\sigma\oplus\sigma'=1$ e
 $\sigma\otimes\sigma'=-1$ são valores distintos ---, pelo que o
