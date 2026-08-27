@@ -1263,6 +1263,102 @@ pré-imagem da primeira coordenada é $\pi^{-1}(x)$, cuja cardinalidade é $G(x)
 A última afirmação é que a folha acrescenta uma direção às $n$ da grade.
 \end{proof}
 
+\medskip\noindent\textbf{E daqui sai o sistema de coordenadas em que este
+documento trabalha --- que estava a ser usado sem se dizer.} A cláusula~(3)
+acabou de lhe chamar \emph{fibra vertical}; falta dizer que a outra direcção é a
+horizontal, e que juntas são um endereço.
+
+\begin{definicao}[as duas coordenadas]\label{fis:def:coord2}
+Dada uma realização $\pi\colon I\to X$, chamem-se
+\[
+\boxed{\;\underbrace{x\in X}_{\textbf{horizontal: \emph{onde}}}
+\qquad\qquad
+\underbrace{k\in\{1,\dots,G(x)\}}_{\textbf{vertical: \emph{qual vez}}}\;}
+\]
+--- a \textbf{horizontal} é a célula, a \textbf{vertical} é o número de visita da
+Def.~\ref{fis:def:k}. O par $(x,k)$ é o levantamento $\tilde\pi$ do
+Teor.~\ref{fis:thm:levant}. \emph{Não são duas coisas novas}: são as duas que
+$\pi$ tinha, uma guardada e outra deitada fora.
+\end{definicao}
+
+\begin{teorema}[há uma dobra por coordenada, e elas comutam sob condição]\label{fis:thm:duascoord}
+Com a Def.~\ref{fis:def:coord2}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O par é endereço completo, e a horizontal sozinha não é.}
+$\tilde\pi$ é injetiva (Teor.~\ref{fis:thm:levant}(1)), pelo que $(x,k)$
+determina o índice; $\pi$ não, e o que ela perde é \emph{exactamente} a vertical
+--- é isso que $G$ mede. \emph{A dobra da realização é a coluna vista de cima.}
+\item[(2)] \textbf{Cada coordenada tem a sua dobra.} Na coluna de $x$ a lista dos
+visitantes é $\{1,\dots,G(x)\}$ pelo Teor.~\ref{fis:thm:levant}(3), e a dobra
+afim que troca os seus extremos é, pelo Teor.~\ref{fis:thm:dobra}(1),
+\[
+\boxed{\;\partial_{\mathrm{v}}k \;=\; 1+G(x)-k\;}
+\]
+--- \emph{ela inverte a ordem das visitas e não sai da célula}. E onde $X$
+carregar uma soma, a dobra horizontal $\partial_{\mathrm{h}}$ é a do mesmo
+teorema sobre $X$ --- \emph{move a célula e não toca no número de visita}.
+\item[(3)] \textbf{Cada uma conserva o que a outra move.} $\partial_{\mathrm{v}}$
+fixa $x$ e por isso conserva $G$; $\partial_{\mathrm{h}}$ fixa $k$ e por isso
+conserva a posição na coluna. \emph{São dois eixos, e é isso que os torna
+coordenadas e não duas leituras da mesma.}
+\item[(4)] \textbf{E comutam exactamente onde a horizontal conserva a
+multiplicidade.}
+\[
+\boxed{\;\partial_{\mathrm{v}}\partial_{\mathrm{h}}=\partial_{\mathrm{h}}\partial_{\mathrm{v}}
+\iff G(\partial_{\mathrm{h}}x)=G(x)\ \text{para todo }x\;}
+\]
+\emph{Não é de graça}: $\partial_{\mathrm{v}}$ depende da altura da coluna, e a
+horizontal pode mudá-la. \textbf{E é este o critério que a hipótese~(i) do
+Teor.~\ref{fis:thm:quarteto} pede} --- lá a comutação é \emph{pedida}; aqui
+diz-se \emph{quando} se tem.
+\item[(5)] \textbf{E onde comutam, geram o quarteto.} As duas são involutivas e
+distintas, pelo que, cumprida~(4), o Teor.~\ref{fis:thm:quarteto} aplica-se e dá
+quatro quadrantes de ordem \textbf{dois} --- \emph{não um rotor}. É o par de
+involuções em coordenadas distintas, e é por isso que fecha em quatro sem rodar.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é o Teor.~\ref{fis:thm:levant}(1) e~(5). (2) é o Teor.~\ref{fis:thm:dobra}(1)
+com $a=1$ e $b=G(x)$ na coluna, e o mesmo sobre $X$ quando lá houver soma; a
+diferença dos extremos é cancelável na coluna porque ela é um troço da lista.
+
+(3) é ler o que cada uma deixa fixo.
+
+(4) $\partial_{\mathrm{v}}\partial_{\mathrm{h}}(x,k)=(\partial_{\mathrm{h}}x,\;
+1+G(\partial_{\mathrm{h}}x)-k)$ e
+$\partial_{\mathrm{h}}\partial_{\mathrm{v}}(x,k)=(\partial_{\mathrm{h}}x,\;
+1+G(x)-k)$; as duas coincidem para todo $k$ exactamente quando
+$G(\partial_{\mathrm{h}}x)=G(x)$.
+
+(5) é o Teor.~\ref{fis:thm:quarteto} com $\mathcal{D}=\partial_{\mathrm{h}}$ e
+$\dagger=\partial_{\mathrm{v}}$, cujas três hipóteses ficam: a comutação por~(4),
+o tipo porque as duas actuam no mesmo par $(x,k)$, e a distinção porque uma move
+a célula e a outra não.
+\end{proof}
+
+\medido{\code{tests/aranha\_n.c}: varridas as $3^{4}=\mathbf{81}$ configurações de
+alturas de coluna numa grade de quatro células com a dobra $x\mapsto3-x$, a
+equivalência da cláusula~(4) --- comutar contra $G$ ser invariante --- confirma-se
+em \textbf{81} e falha em \textbf{zero}.}
+
+\medskip\noindent\textbf{E é este o sistema de coordenadas que o resto do
+documento usa.} O Teor.~\ref{fis:thm:central} soma o rectângulo pelas duas: pelo
+domínio é somar \textbf{colunas}, pela imagem é somar \textbf{linhas}. O
+Teor.~\ref{fis:thm:medida} diz que a medida é cega à vertical --- duas
+realizações com a mesma $G$ e dobras diferentes. E o Teor.~\ref{fis:thm:constroi}(3)
+mede as duas com esse nome, $h$ e $v$, e mostra $\dagger$ a trocá-las com $h+v$
+conservado. \emph{São o mesmo par de eixos, e agora tem definição.}
+
+\medskip\noindent\emph{E diga-se o que estes dois eixos \textbf{não} são}, porque
+este documento já tem pares a mais para se confundirem. \textbf{Não são as duas
+faces} do Teor.~\ref{fis:thm:duas}(4), que são duas \emph{operações} sobre um
+suporte; \textbf{não são o directo e o cruzado} da Def.~\ref{fis:def:duomorf},
+que são duas \emph{metades de uma lei}; e \textbf{não são o ponto e o andar} do
+Teor.~\ref{fis:thm:tecidos}, que são dois \emph{graus} em que a mesma dobra age.
+Aqui são duas \emph{direcções de um endereço} --- e o que os identifica é que o
+par $(x,k)$ é injetivo e cada um deles sozinho não é.
+
 \medskip\noindent\textbf{O algoritmo inverso.} Inicializar um campo $c\equiv0$;
 para $i=0,\dots,N$, ler $x\leftarrow\pi(i)$, escrever $c(x)\leftarrow c(x)+1$ e
 emitir $\bigl(x,\,c(x)\bigr)$. O campo $c$ é o próprio $G$ parcial: \emph{o
@@ -2078,7 +2174,7 @@ $A\chi_k=(m-2\abs{k})\chi_k$ exato em inteiros, e o corte com $\abs{k}2^{m-1}$
 arestas. §AN28: $c=2^{-m}\mathcal{F}(f)$ a recompor $f$ nos $256$, com o passo
 sem a normalização a bater só nos zeros de $f$.}
 
-\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva},~\ref{fis:lem:comutapar}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:escada},~\ref{fis:thm:tecidos},~\ref{fis:thm:central},~\ref{fis:thm:largura},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}}
+\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva},~\ref{fis:lem:comutapar}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:duascoord},~\ref{fis:thm:escada},~\ref{fis:thm:tecidos},~\ref{fis:thm:central},~\ref{fis:thm:largura},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}; Def.~\ref{fis:def:coord2}}
         {$B$, a lista $I$, o par $(m,\delta)$, o anel de grupo, a escada}
         {\code{tests/meio.c} §M3--§M7; \code{tests/aranha\_n.c} §AN12, §AN15--§AN18, §AN26--§AN28, §AN32--§AN36}
 
