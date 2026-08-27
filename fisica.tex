@@ -912,6 +912,111 @@ isomorfas pela troca, com a identidade a NÃO servir como controlo ($6$
 discordâncias); e permutar a tupla a mudar o objeto em $\mathbf{32}$ das $64$,
 com as outras $32$ a serem exatamente as de componentes iguais.}
 
+\section{A largura é a ordem: os degraus da fase}\label{fis:largura}
+
+\noindent A tupla do Teor.~\ref{fis:thm:coord} lê-se numa régua. \emph{Lê-se
+também num círculo}, e daí sai --- sem se acrescentar nada --- a escada que este
+documento vai usar sempre que alguma coisa fechar em mais do que dois.
+
+\medskip\noindent\textbf{E antes de tudo, uma palavra que colide.} A
+Def.~\ref{fis:def:op} e o Teor.~\ref{fis:thm:duas}(1) usam \emph{volta} no
+sentido de \textbf{invertibilidade} --- «uma composição com volta» é aquela em
+que todo o elemento tem inverso. \emph{Nesta secção, e só nela, «volta» quer
+dizer \textbf{giro}}: o que fecha. São dois sentidos, e diz-se qual.
+
+\begin{teorema}[a largura é a ordem]\label{fis:thm:largura}
+Fixe-se uma largura $w\ge1$. \emph{Sob a declaração da cláusula~(5) do
+Teor.~\ref{fis:thm:duas}} --- a duplicação é invertível --- e na régua do
+encaixe da Obs.~\ref{fis:obs:reguas}, ponha-se
+\[
+\boxed{\;\Phi_w:=\Bigl\{\,\tfrac{k}{2^{w}}\ \text{de volta}\ :\ 0\le k<2^{w}\,\Bigr\},
+\qquad \rho_w:=\tfrac{1}{2^{w}}\ \text{de volta}\;}
+\]
+com a soma de fases e o fecho da volta. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{São $2^{w}$ lugares, e são os que $w$ dobras produzem.}
+$\Phi_w$ é o conjunto da cláusula~(6) do Teor.~\ref{fis:thm:duas} posto na fase,
+e está em bijeção com o $B^{w}$ do Teor.~\ref{fis:thm:coord}: \emph{a fase é a
+palavra, e a largura é o número de dobras.}
+\item[(2)] \textbf{E a ordem do gerador é a contagem dos lugares, exactamente.}
+$\Phi_w=\langle\rho_w\rangle$ e $\operatorname{ord}(\rho_w)=2^{w}$ ---
+\emph{e não um divisor próprio}.
+\item[(3)] \textbf{Os degraus encaixam, e cada um é uma \textbf{oitava} do
+anterior.} $\Phi_w\subset\Phi_{w+1}$, com $\rho_{w+1}\oplus\rho_{w+1}=\rho_w$,
+donde $\operatorname{ord}(\rho_{w+1})=2\operatorname{ord}(\rho_w)$. \emph{É o
+encaixe do Teor.~\ref{fis:thm:BI}, lido no círculo em vez da régua} --- e uma
+oitava é uma duplicação, que é o que a palavra diz.
+\item[(4)] \textbf{E os três primeiros degraus têm nome.}
+\[
+\begin{array}{cllll}
+w=1 & 2\ \text{lugares} & \operatorname{ord}=2 & \text{meia volta} & \text{a \textbf{dobra}}\\[2pt]
+w=2 & 4\ \text{lugares} & \operatorname{ord}=4 & \text{um \textbf{quarto} de volta} & \text{o \textbf{rotor}}\\[2pt]
+w=3 & 8\ \text{lugares} & \operatorname{ord}=8 & \text{um \textbf{oitavo} de volta} & \text{a \textbf{base oito}}
+\end{array}
+\]
+O primeiro é a Def.~\ref{fis:def:op}, e não é analogia: é ela.
+\item[(5)] \textbf{E o segundo degrau declara o que custa.} $\rho_w$ com
+$w\ge2$ obriga a meia volta a não ser a identidade, isto é
+$-\mathrm{id}\neq\mathrm{id}$, isto é $2\neq0$. \emph{Sobre os dois símbolos do
+Teor.~\ref{fis:thm:B} não há segundo degrau}: lá $1+1=0$, e a escada pára no
+primeiro.
+\end{enumerate}
+\emph{Nada disto importa ângulo, unidade de ângulo ou conjunto numérico}: o que
+define cada degrau é \textbf{em quantas aplicações fecha}, tal como o que define
+a dobra é $\operatorname{ord}(\partial)=2$.
+\end{teorema}
+
+\begin{proof}
+(1) A contagem é a cláusula~(6) do Teor.~\ref{fis:thm:duas}: ao fim de $w$
+dobras os pontos são exactamente os $k/2^{w}$. Que estejam em bijeção com
+$B^{w}$ é o Teor.~\ref{fis:thm:coord}, cuja cláusula~(3) conta as tuplas de
+largura $w$ e dá $2^{w}$, «e mais nada».
+
+(2) Que $\rho_w$ gere: $k\rho_w=k/2^{w}$ percorre os lugares quando $k$ percorre
+as palavras, e a soma de fases com fecho da volta é a soma com transporte do
+Teor.~\ref{fis:thm:BI} com o transporte que sai pelo topo a ser deitado fora.
+Que a ordem seja \emph{exactamente} $2^{w}$: $k\rho_w$ é volta inteira
+precisamente quando $2^{w}$ divide $k$, pelo que o menor $k$ positivo é $2^{w}$.
+
+(3) $k/2^{w}=2k/2^{w+1}$ dá a inclusão. E $\rho_{w+1}\oplus\rho_{w+1}=\rho_w$ é
+o transporte $2(a\wedge b)$ da identidade do Teor.~\ref{fis:thm:BI}: somar duas
+vezes o menor passo de um degrau é o menor passo do anterior. A duplicação da
+ordem sai de~(2).
+
+(4) É~(1) e~(2) em $w=1,2,3$. Em $w=1$ há dois lugares e o gerador é involutivo,
+que é $\operatorname{ord}(\partial)=2$; e o par que ele produz é o do
+Teor.~\ref{fis:thm:doispontos}(1).
+
+(5) Se $2=0$ então $-\mathrm{id}=\mathrm{id}$, a meia volta é a identidade, e
+$\rho_2$ colapsa em $\rho_1$. Sobre os dois símbolos $1+1=0$ pelo
+Teor.~\ref{fis:thm:B}, e é esse o caso.
+\end{proof}
+
+\medskip\noindent\textbf{E diga-se onde a escada pára, para não ser lida a
+mais.} Ela dá \emph{só} potências de dois. As ordens $3$ e $6$ que o
+Cor.~\ref{fis:cor:ordem} encontra \textbf{não são degraus dela} --- vêm do traço
+sobre uma rede, e é outro mecanismo. \emph{A escada não é um catálogo de ordens
+finitas: é o que a dobra encaixada produz}, e a dobra encaixada duplica.
+
+\medskip\noindent\textbf{E há dois «oitos» neste documento, que convém não
+colar.} Aqui as três dobras duplicam os \textbf{lugares}: $2\to4\to8$, e a
+largura vai a três. Na §\ref{fis:hipercubo} as duplicações duplicam a
+\textbf{largura}: $2^{1}\to2^{2}\to2^{4}\to2^{8}$, e o oito é a largura final, não
+o número de lugares. \emph{Os dois processos dão «oito» e não são o mesmo}; o
+primeiro é esta escada, o segundo é a torre de larguras.
+
+\medskip\noindent\textbf{E o que a escada acrescenta ao que o par já dizia.}
+Sobre $2^{w}$ lugares há mais do que uma maneira de fechar. Em $w=2$ são duas, e
+o documento já as separa: quatro de ordem \emph{dois} --- o quarteto do
+Teor.~\ref{fis:thm:quarteto} --- contra \emph{um} de ordem quatro, que é o
+$\rho_2$ desta escada. \textbf{Os lugares são os mesmos; o que muda é como se
+lá chega}: por bits, que é endereçar, ou por passos, que é percorrer. Em $w=3$
+repete-se com três bits e oito lugares --- e é por isso que a \textbf{base de
+oito} é indexada por três dobras, e não por um número escolhido.
+\[
+\boxed{\;\text{a largura endereça; a ordem percorre --- e são $2^{w}$ lugares nas duas}\;}
+\]
+
 \section{A realização, e o que ela perde}\label{fis:mult}
 
 \begin{definicao}[trajetória, realização, multiplicidade]\label{fis:def:objeto}
@@ -1689,64 +1794,44 @@ caso extremo da divisão do Teor.~\ref{fis:thm:BI} entre a intensidade e o sinal
 aqui a intensidade é sempre a mesma, e o que distingue dois caracteres é só
 \emph{para onde apontam}.
 
+
 \medskip\noindent\textbf{E agora diga-se de onde a forma polar vem, porque ela
-não é importada: é a escada das larguras lida na fase.} A fase mede-se em
-\textbf{voltas}, e não em unidade nenhuma de fora --- uma volta é o que fecha, e
-é a única referência que há. Uma palavra de largura $w$ é, pelo
-Teor.~\ref{fis:thm:coord}, $w$ dobras encaixadas; e pela cláusula~(6) do
-Teor.~\ref{fis:thm:duas} os pontos que $w$ dobras produzem são exactamente os
-$k/2^{w}$. \textbf{Ponha-se esse $k/2^{w}$ na fase, e a forma polar está
-escrita:}
-\[
-\boxed{\;\theta=\frac{k}{2^{w}}\ \text{de volta}\;,\qquad 0\le k<2^{w}\;}
-\]
---- \emph{a fase é a palavra}, e a largura é o número de dobras. Nada se
-acrescentou: é o Teor.~\ref{fis:thm:coord} escrito num círculo em vez de numa
-régua.
+não é importada: é o Teor.~\ref{fis:thm:largura}, lido aqui.} A fase mede-se em
+voltas; uma palavra de largura $w$ dá os $2^{w}$ lugares $k/2^{w}$; e a ordem do
+menor passo é exactamente $2^{w}$. \emph{A fase é a palavra, e a largura é a
+ordem} --- está provado atrás, e aqui só se usa.
 
-\medskip\noindent\textbf{E daí sai a escada das ordens, que é a mesma escada.}
-Cada dobra a mais duplica os lugares, e a ordem do gerador duplica com ela:
-\[
-\begin{array}{cllll}
-w=1 & 2\ \text{lugares} & \operatorname{ord}=2 & \text{meia volta} & \text{a \textbf{dobra}}\\[2pt]
-w=2 & 4\ \text{lugares} & \operatorname{ord}=4 & \text{um \textbf{quarto} de volta} & \text{o \textbf{rotor} (Teor.~\ref{fis:thm:fecho})}\\[2pt]
-w=3 & 8\ \text{lugares} & \operatorname{ord}=8 & \text{um \textbf{oitavo} de volta} & \text{a \textbf{base oito}}
-\end{array}
-\]
-\emph{Cada degrau é uma \textbf{oitava} do anterior} --- é o mesmo dobrar, e é
-por isso que a palavra serve: uma oitava é uma duplicação, e a escada inteira é
-$2^{w}$. E o terceiro degrau tem nome próprio nos outros trabalhos desta obra:
-\textbf{a Lei 8}, que fecha em $\operatorname{Ind}^{8}=\mathrm{id}$, e que ali se
-lê --- \emph{na letra} --- como $2^{3}$, isto é \textbf{três dobras}. É a mesma
-conta que aqui dá $B^{3}$, as oito palavras de três bits. \emph{O oito não é um
-número escolhido: é a terceira dobra.}
-
-\medskip\noindent\textbf{E é aqui que os quadrantes do duomorfismo se leem.} O
-Teor.~\ref{fis:thm:quarteto} dá quatro quadrantes de ordem \emph{dois} --- dois
-bits, $Q_{ab}$, e a composição a somar os bits sem transporte. O segundo degrau
-desta escada dá quatro lugares com um gerador de ordem \emph{quatro}. \textbf{São
-os mesmos quatro lugares, e duas maneiras de lá chegar}: pelos \emph{bits}, que
-é o duomorfismo a dizer \emph{qual} quadrante; ou pela \emph{volta}, que é o
-rotor a dizer \emph{quantos passos} até lá. \emph{Um endereça, o outro percorre},
-e é a distinção que a nota do Teor.~\ref{fis:thm:quarteto} faz. No terceiro
-degrau a mesma coisa se repete com \textbf{três} bits e oito lugares --- e é por
-isso que a Lei 8 tem $2^{3}$ e não outro número.
+\medskip\noindent\textbf{E o terceiro degrau tem nome próprio nos outros
+trabalhos desta obra.} É \textbf{a Lei 8}, que ali fecha em
+$\operatorname{Ind}^{8}=\mathrm{id}$ e se lê --- \emph{na letra} --- como
+$2^{3}$, isto é \textbf{três dobras}. É a mesma conta que a cláusula~(4) dá em
+$w=3$: as oito palavras de $B^{3}$. \emph{O oito não é um número escolhido: é a
+terceira dobra.} \textbf{E há aqui a mesma distinção do quatro}: o índice das
+oito leis percorre-as com \emph{um} passo de ordem oito, ao passo que a base de
+oito as endereça com \emph{três} dobras de ordem dois --- \emph{são os dois modos
+de ter oito lugares}, e o Teor.~\ref{fis:thm:largura} separa-os.
 
 \medskip\noindent\textbf{E vê-se então o que a base ortonormal desta secção é: o
 primeiro degrau, e só ele.} O caractere do Teor.~\ref{fis:thm:base} vale
-$\pm1$, isto é $\theta\in\{0,\tfrac12\}$ de volta --- \emph{duas fases, uma
+$\pm1$, isto é $\theta\in\{0,\tfrac12\}$ de volta --- \emph{duas casas, uma
 dobra}. \textbf{Não é uma limitação da transformada: é a largura em que ela
-corre.} Com $w$ dobras na fase, os valores seriam os $2^{w}$ lugares da volta, a
-ortonormalidade seria a mesma soma e o factor de Parseval o mesmo $\abs{X}$ ---
-\emph{o que muda é quantos lugares a fase distingue}. E é por isso que aqui o
-módulo degenera: com dois lugares só, a face multiplicativa não tem o que
-separar, e sobra o ou-exclusivo.
+corre.} Com largura $w$ na fase, os valores seriam os $2^{w}$ lugares da volta, a
+ortogonalidade seria a mesma soma e o factor de Parseval o mesmo $\abs{X}$ ---
+\emph{o que muda é quantos lugares a fase distingue}.
+
+\medskip\noindent\textbf{E convém dizer o que degenera aqui, porque não é o
+módulo.} Em \emph{qualquer} largura o caractere tem módulo constante, e a face
+multiplicativa nunca tem o que separar. \emph{O que degenera em largura um é a
+\textbf{fase}}, que fica com duas casas; e o que sobra é o ou-exclusivo porque o
+grupo tem \textbf{expoente dois}, e não porque o módulo seja constante. É o que
+o quadro adiante diz melhor: o par $(\zeta,\mu)$ não é propriedade da álgebra ---
+é da ordem.
 \[
 \boxed{\;\text{a fase é a palavra; a largura é a ordem; e a base ortonormal é a largura \textbf{um}}\;}
 \]
 \emph{Onde este documento escrever $\pi$} --- o que só acontece depois de a
 §\ref{fis:pi} o construir --- \textbf{é o nome da meia volta}, e nada mais; a
-escada acima não precisa dele para existir.
+escada não precisa dele para existir.
 
 \medskip\noindent\textbf{E a forma polar é a separação das duas faces.} Não é uma
 notação conveniente: é o Teor.~\ref{fis:thm:duas}(4) escrito num sítio onde as
