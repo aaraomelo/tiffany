@@ -460,6 +460,16 @@ produto, não há ordem e não há distância --- há um suporte, uma aplicaçã
 volta, e a partição que ela faz. \textbf{Tudo o que se seguir tem de dizer de
 onde vem}, e o que vier de fora entra como \emph{realização} e diz-se que o é.
 
+\smallskip\noindent\textbf{E a palavra «realização» serve duas coisas nesta obra,
+e diz-se já qual, porque a segunda entra aqui e a primeira só adiante.}
+\emph{Neste sentido} --- o desta linha e o do teorema seguinte --- realização é
+\textbf{o que se instancia e se declara}, por oposição ao que se demonstra: uma
+escolha concreta que honra o operador sem ser forçada por ele. \emph{No outro}
+--- o da Def.~\ref{fis:def:objeto}, e é o mais frequente --- realização é a
+\textbf{aplicação} $\pi\colon I\to X$, que é objecto e não estatuto.
+\textbf{São dois, e o contexto separa-os}: onde houver $\pi$, é o segundo; onde se
+falar de \emph{entrar de fora}, é o primeiro.
+
 \begin{teorema}[a dobra afim, e é uma realização e não a dobra]\label{fis:thm:dobra}
 \emph{Quando} o suporte carrega uma soma --- o que a Def.~\ref{fis:def:op} não
 dá, e por isso se declara --- e \emph{quando} a diferença dos extremos é
@@ -1253,7 +1263,7 @@ não só do número.}
 que \emph{sobrevive}.} Se orientar custa um bit, e a dobra troca os dois lados,
 então a orientação é a peça que a dobra \textbf{move} --- e convém saber
 exactamente o que dela fica. \emph{É o que se prova a seguir}, e prova-se com o
-mesmo instrumento, aplicado mais um andar acima: agora sobre as \textbf{funções}
+mesmo instrumento, aplicado mais um grau acima: agora sobre as \textbf{funções}
 do par.
 
 \begin{teorema}[a antissimetria: o que a dobra nunca fixa, e o que dela sobrevive]\label{fis:thm:antissim}
@@ -1493,7 +1503,8 @@ $\partial$. \textbf{Estas quatro faltavam:}
 \textbf{vinco} & \text{o que uma \emph{involução} não move --- Teor.~\ref{fis:thm:vinco}, e só dessas ele fala}\\
 \textbf{ponto fixo} & \text{o que um \emph{mapa qualquer} não move --- pode não haver involução}\\
 \textbf{passo fixo} & \text{a \emph{regra} não muda de andar para andar --- não é elemento nenhum}\\
-\textbf{andar}\ /\ \textbf{degrau} & \text{o nível }X_k\text{ e a sua realização --- Teor.~\ref{fis:thm:escada}}
+\textbf{andar}\ /\ \textbf{degrau} & \text{o nível }X_k\text{ e a sua realização --- Teor.~\ref{fis:thm:escada}}\\
+\textbf{grau} & \text{o \emph{andar de aplicação} da dobra: ponto, par, função do par}
 \end{array}
 \]
 \emph{E as três primeiras não se misturam}: chamar «ponto fixo» ao que é vinco
@@ -1502,6 +1513,11 @@ que não se provou; e chamar «ponto» ao passo é o erro que a caixa desta sec�
 proíbe. \textbf{Onde o mapa não for involutivo, diz-se \emph{ponto fixo} e nomeia-se
 o mapa} --- é o que se faz no Cor.~\ref{fis:cor:geradorfora} e no
 Teor.~\ref{fis:thm:metainducao}.
+
+\emph{E \textbf{andar} não é \textbf{grau}}: subir um andar é passar de $X_k$ a
+$X_{k+1}$; subir um grau é aplicar a mesma dobra a um objecto de tipo mais alto ---
+do ponto ao par, do par às funções do par. \textbf{A escada tem andares; o operador
+tem graus}, e a obra usa «um grau acima» para o segundo.
 
 \smallskip\noindent\emph{E declaram-se as colisões que ficam}, porque a obra
 declara todas as outras e estas estavam por declarar. \textbf{Torre} serve a
@@ -2337,7 +2353,7 @@ Teor.~\ref{fis:thm:doispontos}(0), uma dobra que não move nada não dá par nen
 \[
 \boxed{\;\text{o passo é \textbf{efectivo} quando o que ele entrega não estava lá}\;}
 \]
-\textbf{É a efectividade da Def.~\ref{fis:def:op} lida um andar acima}: ali o
+\textbf{É a efectividade da Def.~\ref{fis:def:op} lida um grau acima}: ali o
 operador era efectivo por a imagem não ser o argumento; aqui o passo é efectivo
 por o ponto fixo não ser do andar. \emph{E a testemunha está construída}: a
 estrela cumpre $x^{2}=x+1$, o encaixe entrega-a
@@ -2529,7 +2545,7 @@ avaliar potência nenhuma além de as formar.
 Reciprocamente, $b^{p}=k^{q}$ com $p,q\ge1$ obriga $b$ e $k$ a serem potências de
 um mesmo elemento, com expoentes proporcionais. \emph{É o mesmo argumento que faz
 o corte da raiz não fechar}, e é o Teor.~\ref{fis:thm:estrelaencaixe} outra vez,
-um andar acima.
+um grau acima.
 \end{proof}
 
 \medido{\code{tests/fractal.c} §FR2. Cinco coberturas, decididas por comparação
@@ -6878,7 +6894,7 @@ não se escolhe nada: o corte é \textbf{determinado} pelos dois extremos.
 \boxed{\;\text{uma face \textbf{endereça}; duas \textbf{produzem}}\;}
 \]
 É a frase do Teor.~\ref{fis:thm:duas}(4) --- \emph{uma composição não chega} ---
-dita um andar acima, e o nome clássico do processo é a média
+dita um grau acima, e o nome clássico do processo é a média
 \textbf{aritmético-geométrica}.
 
 \medido{\code{tests/meio.c} §M8: $\partial^{\times}$ troca e fixa $\sqrt{ab}$;
@@ -7953,7 +7969,7 @@ num passo:
 Obs.~\ref{fis:obs:reguas}, $\partial x\cdot x=1$, com $\otimes$ a desempenhar o papel
 de $x$ e $\oslash$ o de $\partial x$. \emph{Realização, e não identidade}: a
 equação vive nas faces do operador e $\oslash\circ\otimes=\mathrm{id}$ vive nos
-operadores que as executam --- é o mesmo enunciado um andar acima, e escrever
+operadores que as executam --- é o mesmo enunciado um grau acima, e escrever
 «literalmente» colaria dois níveis que convém manter separados.
 
 \medskip\noindent\textbf{E em oito fases as coordenadas são as réguas.} A cisão
