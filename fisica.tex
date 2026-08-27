@@ -291,8 +291,12 @@ Com a Def.~\ref{fis:def:op}:
 ordem lê-se \emph{delas}.} Ou $\partial=\mathrm{id}$ --- e então
 $\operatorname{ord}(\partial)=1$, nada se move, e não há par nenhum ---, ou
 $\partial\neq\mathrm{id}$ --- e então $\operatorname{ord}(\partial)=2$,
-\emph{porque não há terceira}: a identidade dá que a ordem divide dois, e um
-divisor de dois ou é um ou é dois. \textbf{É aqui que o dois nasce}, e nasce por
+\emph{porque não há terceira}: a ordem é o \textbf{menor} $k$ com
+$\partial^{k}=\mathrm{id}$, e a identidade da Def.~\ref{fis:def:op} exibe o
+candidato $k=2$ --- pelo que o menor é, quando muito, dois, e portanto é um ou é
+dois. \emph{E note-se o que \textbf{não} se usou}: divisibilidade nenhuma.
+Bastou haver um menor e haver um candidato, e nenhuma das duas coisas pede
+dividir. \textbf{É aqui que o dois nasce}, e nasce por
 exclusão e não por decreto. \emph{Chama-se \textbf{efectiva} à segunda espécie},
 e é dela que o resto fala.
 \end{enumerate}
@@ -876,6 +880,81 @@ distintos; a transitividade é uma condição sobre três elementos, e nenhuma
 cláusula da Def.~\ref{fis:def:op} a alcança.
 \end{proof}
 
+\medskip\noindent\textbf{E a escada dos custos tem um degrau por pagar --- diga-se
+antes de o pagar.} A diferença pagou-se com um bloco, e a orientação com um bit;
+mas a \emph{coerência entre blocos} ficou enunciada e não liquidada, e é dela que
+depende tudo o que conte ou compare nesta obra. \emph{Paga-se agora}, e paga-se
+onde é barato.
+
+\begin{teorema}[o terceiro custo paga-se uma vez, e paga-se nos dois símbolos]\label{fis:thm:ordem}
+Sobre o suporte de \textbf{dois} símbolos do Teor.~\ref{fis:thm:B}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Ali há exactamente \emph{um} bloco fora do vinco.} Pela
+cláusula~(3), $S\times S$ parte-se no vinco e em blocos de dois; com dois
+símbolos o vinco tem dois elementos e sobra \textbf{um} bloco,
+$\{(0,1),(1,0)\}$. \emph{Não há segundo bloco a orientar}, e por isso a
+cláusula~(5) custa aqui um bit, e um só.
+\item[(2)] \textbf{Escolhe-se esse bit, e é a única vez que esta obra o escolhe.}
+Chame-se $0<1$. \emph{É a cláusula~(5) executada} --- não descrita ---, e o
+resto do documento não volta a escolher lado nenhum: herda este.
+\item[(3)] \textbf{A ordem na largura não pede bit novo.} Duas palavras da mesma
+largura comparam-se pela posição \textbf{mais alta} em que diferem, e ali decide
+o bit de~(2). \emph{Cada posição usa o mesmo bit}; não há uma escolha por
+posição, há uma escolha, e depois uma regra.
+\item[(4)] \textbf{E essa regra é total, antissimétrica e transitiva --- em toda
+a largura.} Donde é ordem, e não apenas orientação:
+\[
+\boxed{\;\text{um bloco}\ \to\ \text{um bit}\ \to\ \text{uma indução}\;}
+\]
+\item[(5)] \textbf{Logo o terceiro custo paga-se por \emph{indução}, e não por
+escolha.} A coerência entre blocos não é um segundo bit: é o que a largura
+transporta do bit único. \emph{A escada dos custos fecha}, e fecha sem que o
+operador receba ordem nenhuma de fora --- \textbf{a ordem lê-se da dinâmica dele,
+e não se lhe põe}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são a contagem da cláusula~(3) com dois símbolos, mais a escolha.
+
+(3) é a definição da regra.
+
+(4) Indução na largura. Na largura um a regra \emph{é} o bit de~(2), e as três
+propriedades lêem-se nos dois elementos. Passando de $w$ a $w+1$: se duas
+palavras diferem na posição mais alta, o bit decide e o que está abaixo não é
+lido; se coincidem ali, a comparação é a da largura $w$, e vale a hipótese.
+
+\emph{Totalidade}: duas palavras distintas diferem nalguma posição, logo há uma
+mais alta, logo comparam.
+
+\emph{Antissimetria}: nessa posição uma tem $0$ e a outra $1$, e ler ao contrário
+dá a decisão oposta --- que é o Teor.~\ref{fis:thm:antissim}(3), a dobra a agir
+no cruzado por $-1$.
+
+\emph{Transitividade}, que é o degrau que se estava a dever. Sejam $a<b$
+decidido na posição $j$ e $b<c$ decidido em $k$. Acima de $j$ vale $a=b$, e acima
+de $k$ vale $b=c$. \emph{Ora $j\neq k$}: se fossem a mesma, ali $b$ teria de ser
+ao mesmo tempo o maior de $a$ e o menor de $c$ com o mesmo símbolo, o que é
+impossível com dois símbolos. Fica o maior dos dois, chame-se $m$; acima de $m$
+as três palavras coincidem, e em $m$ a decisão que existe transporta-se, porque a
+terceira palavra coincide ali com aquela que não estava a ser decidida. Logo $a$
+e $c$ decidem-se em $m$, e decidem-se no mesmo sentido.
+
+(5) é a leitura de~(4): nada foi escolhido depois de~(2).
+\end{proof}
+
+\medido{\code{tests/ordem.c}. Varridas todas as palavras até à largura cinco, e
+todos os ternos delas --- $32768$ na largura cinco ---, verificando
+transitividade, totalidade e antissimetria da regra da cláusula~(3). \textbf{Zero
+falhas em toda a largura.} E contou-se o número de blocos fora do vinco nos dois
+símbolos: \textbf{um}.}
+
+\medskip\noindent\textbf{E é isto que fecha a secção, porque é isto que a
+computação corre.} O Teor.~\ref{fis:thm:central} pede ordem \emph{total} e
+declara-o; a Def.~\ref{fis:def:tempo} lê o tempo como contagem sobre a lista; e
+ambas assentavam, até aqui, numa afirmação por demonstrar. \emph{Assenta agora
+num bit}, e o bit está identificado: é o único que os dois símbolos admitem.
+
 \medskip\noindent\textbf{E a árvore das perguntas é esta, que é o que a
 computação corre.}
 \[
@@ -1427,7 +1506,8 @@ $a_j+b_j=(a_j\oplus b_j)+2(a_j\wedge b_j)$; multiplicando por $2^{j}$ e somando
 vem a identidade. Na iteração, $a\wedge b$ multiplicado por $2$ desloca-se uma
 posição para cima, de modo que ao fim de tantos passos quantos os bits da largura
 a segunda componente é nula. O encaixe é a restrição das operações de um andar ao
-anterior, e a ordem resultante é total.
+anterior, e a ordem resultante é total \emph{pelo Teor.~\ref{fis:thm:ordem}} ---
+que a deriva do bit único dos dois símbolos, e não a supõe.
 A forma do meio é imediata e não usa a identidade: de $m=\tfrac{a+b}{2}$ e
 $\delta=\tfrac{a-b}{2}$ vem $m+\delta=a$ e $m-\delta=b$, somando e subtraindo. E
 \emph{a condição é uma e escreve-se}: o sistema tem determinante $-2$, pelo que
