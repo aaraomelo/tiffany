@@ -248,8 +248,10 @@ $\partial_1$ e $\partial_2$ --- há um, e dois \textbf{estados} dele.
 repetir}: o Teor.~\ref{fis:thm:constroi}(4) separa por ela a troca do rotor ---
 $\det=-1$ fecha em dois \emph{sem rodar}, $\det=+1$ com $R^{2}=-\mathrm{id}$
 fecha em quatro \emph{rodando} ---, e o Teor.~\ref{fis:thm:quarteto}(3) diz que
-os quatro quadrantes fecham todos em dois. \textbf{É a ordem, e é sempre a
-ordem.}
+os quatro quadrantes fecham todos em dois --- \emph{e são \textbf{quatro} de
+ordem dois, contra \textbf{um} de ordem quatro no rotor: as duas únicas maneiras
+de quatro coisas fecharem, e a nota do Teor.~\ref{fis:thm:quarteto} separa-as}.
+\textbf{É a ordem, e é sempre a ordem.}
 
 \medskip\noindent Não se dão extremos, não se dá meio, não se dá soma, não se dá
 afinidade --- o suporte ainda nem tem nome. \emph{O que segue sai daqui, e sai
@@ -349,12 +351,15 @@ cancelável}; e daí $\beta=a+b$:
 \[
 \boxed{\;\partial x=a+b-x\;}
 \]
-\emph{A hipótese não é decorativa}: em $\Zc/8$ com $a=0$, $b=2$, a aplicação
-$\partial x=3x+2$ troca os extremos, é afim e cumpre $\partial\partial x=9x+8=x$
---- e \textbf{não} é $a+b-x$, porque ali $a-b=6$ não é cancelável ($6\cdot4=0$).
-\emph{Duas dobras afins com os mesmos extremos}, e a unicidade cai. Onde a
-diferença cancela --- e é o caso dos dois símbolos, que é o que este documento
-usa --- não há segunda.
+\emph{A hipótese não é decorativa}, e a testemunha não precisa de vir de fora:
+na régua de \textbf{três bits fechada sobre a largura} --- as oito palavras, com
+a soma e o produto do Teor.~\ref{fis:thm:BI} e o transporte do topo deitado
+fora --- tome-se $a=000$ e $b=010$. A aplicação $\partial x=(011)x\oplus(010)$
+troca os extremos, é afim, e cumpre $\partial\partial x=x$; e \textbf{não} é
+$a+b-x$, porque ali a diferença $a-b=110$ \emph{não cancela}:
+$(110)\otimes(100)=000$. \emph{Duas dobras afins com os mesmos extremos}, e a
+unicidade cai. Onde a diferença cancela --- e é o caso dos dois símbolos, que é o
+que este documento usa --- não há segunda.
 \item[(2)] \textbf{E cumpre a Def.~\ref{fis:def:op} --- verifica-se, não se
 pede.} $\partial(\partial x)=a+b-(a+b-x)=x$, e $\partial a=b\neq a$.
 \emph{A realização honra o operador}, que é o que se lhe exige.
@@ -2013,9 +2018,12 @@ coordenada.
 \end{proof}
 
 \begin{teorema}[o fecho, e o único sítio onde a dimensão faz mais]\label{fis:thm:fecho}
-O passo de fecho do ciclo é o rotor $R^{4}=\mathrm{id}$. Numa grade de posto $n$,
-uma rotação de $90^{\circ}$ vive num \emph{plano} coordenado $(e_i,e_j)$, atuando
-por $R_{ij}\colon(a,b)\mapsto(-b,a)$ nessas duas coordenadas e fixando as outras.
+Numa grade de posto $n$, a aplicação $R_{ij}\colon(a,b)\mapsto(-b,a)$ --- que
+age em duas coordenadas e fixa as outras --- cumpre $R_{ij}^{4}=\mathrm{id}$ e
+$R_{ij}^{2}=-\mathrm{id}$. \emph{É um \textbf{quarto de volta}, e a expressão é a
+definição}: não se importa ângulo nem unidade de ângulo --- \textbf{o que a
+define é fechar em quatro}, tal como a dobra fecha em dois. Ela vive num
+\emph{plano} coordenado $(e_i,e_j)$, e não na grade toda.
 Então $R_{ij}^{4}=\mathrm{id}$ para todo par $i<j$, e o número de planos é
 $\binom{n}{2}$: nenhum no posto $1$, um no posto $2$, três no $3$, seis no $4$.
 \end{teorema}
@@ -2637,6 +2645,39 @@ $\dagger=\mathrm{id}$; $Q_{11}=Q_{00}$ diz $\mathcal{D}=\dagger$ (compondo com
 $\dagger$). As recíprocas são as mesmas igualdades lidas ao contrário.
 \end{proof}
 
+\medskip\noindent\textbf{E há uma segunda maneira de quatro coisas se
+arrumarem, que não é esta --- e confundi-las é o erro fácil deste sítio.} Sobre
+quatro objectos há \emph{duas} arrumações fechadas e não mais, e o que as separa
+é a única grandeza que a Def.~\ref{fis:def:op} conhece: \textbf{a ordem}.
+\[
+\begin{array}{lll}
+\textbf{o quarteto} & \text{quatro de ordem }2 & Q_{ab}^{2}=\mathrm{id}\ \text{para os quatro}\\[2pt]
+\textbf{o rotor} & \text{um de ordem }4 & R^{2}=-\mathrm{id}\,,\quad R^{4}=\mathrm{id}
+\end{array}
+\]
+\emph{No quarteto ninguém roda}: cada quadrante é uma dobra, desfaz-se
+aplicando-se outra vez, e a cláusula~(2) diz que compor dois dá um terceiro sem
+sair dos quatro. \emph{No rotor há um só gerador}, e é preciso aplicá-lo
+\textbf{quatro} vezes para voltar --- duas levam ao oposto, não à identidade.
+
+\medskip\noindent\textbf{Os quatro quadrantes são os \emph{lugares}; o rotor é o
+\emph{passo} que os visita.} É por isso que a mesma palavra serve os dois e é
+por isso que se trocam: o rotor faz, de cada vez, \emph{um quarto de volta} ---
+que é o nome próprio do gerador de ordem quatro, e é o que a §\ref{fis:pi} há de
+ler como $\pi/2$ quando o $\pi$ existir. \emph{Aqui não precisa: o que o define é
+$R^{4}=\mathrm{id}$}, tal como o que define a dobra é $\operatorname{ord}=2$.
+\[
+\boxed{\;\text{quatro lugares, e dois modos de os ter: quatro dobras, ou uma volta em quatro passos}\;}
+\]
+
+\medskip\noindent\textbf{E daqui sai onde o rotor pode existir.} Uma dobra ---
+$\operatorname{ord}=2$ --- aplicada duas vezes dá a identidade, \emph{por
+definição}. O rotor aplicado duas vezes dá $-\mathrm{id}$. Logo \textbf{o rotor
+não é uma dobra}, e só aparece onde $-\mathrm{id}\neq\mathrm{id}$, isto é onde
+$2\neq0$: nos dois símbolos do Teor.~\ref{fis:thm:B} ele \emph{não existe}, e o
+que lá há é o quarteto. \emph{A cláusula~(3) não é uma limitação do quarteto: é a
+sua assinatura}, e é ela que o distingue do que roda.
+
 \medskip\noindent\textbf{E antes das hipóteses, o que a $\dagger$ \emph{não} pode
 ser.} O fundamento tem \textbf{um} operador (Def.~\ref{fis:def:op}), e um
 segundo involutivo primitivo, posto ao mesmo nível, \emph{não existe} --- não há
@@ -2853,15 +2894,20 @@ invariantes de \emph{uma} dobra.
 \end{enumerate}
 \end{lema}
 
-\medskip\noindent\textbf{E as hipóteses não são decorativas --- há número contra
-cada uma.} Onde houver divisores de zero, as três cláusulas caem juntas: sobre
-os inteiros módulo oito, com $a=1$ e $b=7$ vem $s=0$ e $p=7$, e em $x=3$ as duas
-dobras dão \textbf{ambas} $5$ --- \emph{um terceiro ponto de encontro, fora dos
-extremos}. Pior, o par $\{3,5\}$ tem o \emph{mesmo} $(s,p)=(0,7)$: ali
-\textbf{o par de invariantes não determina o par}, e a cláusula~(3) fica sem
-objecto. E se algum extremo for zero, $p=0$ e $\partial^{\times}$ deixa de ser
-sequer aplicação. \emph{É por isso que o suporte se declara à entrada, e não a
-meio da prova.}
+\medskip\noindent\textbf{E as hipóteses não são decorativas --- há conta contra
+cada uma, e num objecto que este documento constrói.} Tome-se a \textbf{régua de
+três bits fechada sobre a largura}: as palavras de $B^{3}$ do
+Teor.~\ref{fis:thm:coord}, com a soma e o produto do Teor.~\ref{fis:thm:BI} e o
+transporte que sai pelo topo \emph{deitado fora}. São oito objectos, e ali há
+divisores de zero --- $100\otimes010=1000$, cujo topo cai, e sobra $000$.
+\smallskip
+\emph{E as três cláusulas caem juntas.} Com $a=001$ e $b=111$ vem $s=000$ e
+$p=111$; em $x=011$ as duas dobras dão \textbf{ambas} $101$ --- \emph{um terceiro
+ponto de encontro, fora dos extremos}. Pior: o par $\{011,101\}$ tem o
+\emph{mesmo} $(s,p)$. Ali \textbf{o par de invariantes não determina o par}, e a
+cláusula~(3) fica sem objecto. E se algum extremo for $000$, então $p=000$ e
+$\partial^{\times}$ deixa de ser sequer aplicação. \emph{É por isso que o suporte
+se declara à entrada, e não a meio da prova.}
 
 \begin{proof}
 (1) De $s-x=p/x$ vem $sx-x^{2}=p$ com $x\neq0$, que é a equação; e ao contrário
@@ -2908,9 +2954,13 @@ E daí saem, sem se acrescentar nada, os três objectos que este documento usa:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{$s=0$, $p=1$ --- e vem $x^{2}=-1$.} É a face aditiva com o
 neutro $0$ e a multiplicativa com o neutro $1$, tal como a §\ref{fis:escada} as
-escreve. \emph{A troca não fecha em dois: fecha em quatro} --- é o rotor
-$R^{2}=-\mathrm{id}$ do Teor.~\ref{fis:thm:fecho}, e são os quatro quadrantes do
-Teor.~\ref{fis:thm:quarteto} vistos no elemento.
+escreve. \emph{E aqui a troca deixa de fechar em dois}: aplicar $x\mapsto x^{2}$
+duas vezes dá $-\mathrm{id}$ e não a identidade, pelo que o que aparece é o
+\textbf{rotor} do Teor.~\ref{fis:thm:fecho} --- \emph{um} gerador de ordem
+quatro, um quarto de volta de cada vez. \textbf{Não são os quatro quadrantes do
+Teor.~\ref{fis:thm:quarteto}}, que são quatro de ordem \emph{dois} e não rodam:
+são as duas arrumações de quatro, e a nota daquele teorema separa-as. \emph{São
+os quatro lugares; isto é a volta que os percorre.}
 \item[(2)] \textbf{$s=m$, $p=-1$ --- e vem $x^{2}=mx+1$.} É a família que o
 Cor.~\ref{fis:cor:encontro} já usa, com $\sigma+\sigma'=m$ e
 $\sigma\sigma'=-1$. \emph{O $m$ é o que a face aditiva fixa}, e é a mesma
@@ -4868,21 +4918,23 @@ linha em comum, e é essa coincidência que a fixa.
 Para $k\ge1$ escreva-se $k=2^{a}m$ com $m$ ímpar. Ponha-se $\upsilon(k)=+1$ se
 $m\equiv1\pmod 4$ e $-1$ se $m\equiv3\pmod 4$. A \textbf{curva de bits}
 $\mathcal{C}_K$ é a sucessão $P_0=(0,0)$, $P_1=P_0+u_0$ com $u_0=(1,0)$, e
-$P_{s+1}=P_s+u_s$, onde $u_{s}=R_{\upsilon(s)}\,u_{s-1}$, com $R_{+1}$ a rotação
-de $+90^{\circ}$ e $R_{-1}$ a de $-90^{\circ}$.
+$P_{s+1}=P_s+u_s$, onde $u_{s}=R_{\upsilon(s)}\,u_{s-1}$, com $R_{\pm1}$ os dois
+quartos de volta do Teor.~\ref{fis:thm:fecho} --- $R_{+1}(a,b)=(-b,a)$ e
+$R_{-1}(a,b)=(b,-a)$ ---, que é o que a §\ref{fis:pi} leria como $\pm\pi/2$ e
+aqui não precisa de o ser: \emph{o que os define é $R^{4}=\mathrm{id}$}.
 \end{definicao}
 
 \begin{definicao}[a dobra]\label{fis:def:dobrar}
 Dada uma sucessão finita de pontos $\mathcal{D}=(P_0,\dots,P_M)$, o seu
 \textbf{dual} é $\mathcal{D}^{*}=(P^{*}_0,\dots,P^{*}_M)$ com
-$P^{*}_j=P_M+R\,(P_M-P_{M-j})$, e $R$ uma rotação fixa de $\pm90^{\circ}$. A
+$P^{*}_j=P_M+R\,(P_M-P_{M-j})$, e $R$ um quarto de volta fixo, $R_{\pm1}$. A
 \textbf{soma} $\mathcal{D}+\mathcal{D}^{*}$ é a concatenação suprimindo o ponto
 repetido. Define-se $\mathcal{D}_0=\bigl((0,0),(1,0)\bigr)$ e
 $\mathcal{D}_{k+1}=\mathcal{D}_k+\mathcal{D}_k^{*}$.
 \end{definicao}
 
 \noindent Em palavras: $\mathcal{D}^{*}$ é a curva percorrida ao contrário e
-rodada de $90^{\circ}$ em torno do ponto final. \emph{É a dobra do papel} ---
+rodada de um quarto de volta em torno do ponto final. \emph{É a dobra do papel} ---
 dobrar a tira ao meio é colar-lhe a sua própria imagem invertida --- e é o mesmo
 passo $T+T^{*}$ do Teor.~\ref{fis:thm:espaco}, aqui numa curva.
 
@@ -4927,7 +4979,7 @@ vista do outro sentido é uma viragem à direita. Logo a sucessão de viragens d
 $\operatorname{rev}(\mathcal{C}_k)$ é exatamente a da segunda metade de
 $\mathcal{C}_{k+1}$. Duas curvas com a mesma sucessão de viragens e o mesmo passo
 unitário diferem por uma isometria direta do plano; como ambas começam em $P_M$,
-a isometria é a rotação em torno de $P_M$, e ela é de $\pm90^{\circ}$ porque
+a isometria é a rotação em torno de $P_M$, e ela é um quarto de volta porque
 $\upsilon$ toma valores em $\{\pm1\}$. Portanto a segunda metade é
 $P_M+R\,(P_M-P_{M-j})$, que é $\mathcal{D}_k^{*}$.
 
@@ -4939,7 +4991,7 @@ $P^{*}_1-P^{*}_0=R\,(P_M-P_{M-1})=R\,u_{M-1}$, e em $\mathcal{C}_{k+1}$ essa
 direção é $u_M=R_{\upsilon(M)}u_{M-1}$; logo $R=R_{\upsilon(2^{k})}$. E a régua
 lê-o sem caso nenhum: $2^{k}=2^{k}\cdot1$ tem parte ímpar $m=1\equiv1\pmod4$,
 donde $\upsilon(2^{k})=+1$ para todo $k\ge0$. Portanto $R=R_{+1}$, a rotação de
-$+90^{\circ}$, a mesma para todo $k$. \emph{A dobra do papel tem um sentido só, e
+o quarto de volta \textbf{directo}, o mesmo para todo $k$. \emph{A dobra do papel tem um sentido só, e
 a régua di-lo na potência de dois.}\end{proof}
 
 \medskip\noindent\textbf{Duas construções, nenhuma linha em comum.} A
