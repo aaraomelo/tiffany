@@ -2362,11 +2362,25 @@ consequência a verificar: com $\operatorname{prof}(a,a)=p$ viria
 $d(a,a)=2^{-p}\neq0$, e não seria métrica.
 \end{definicao}
 
-\begin{lema}[$d$ é ultramétrica]\label{fis:lem:ultra}
-$d(a,c)\le\max\{d(a,b),d(b,c)\}$ para quaisquer $a,b,c$.
+\begin{lema}[$d$ é ultramétrica, e é simétrica]\label{fis:lem:ultra}
+Para quaisquer $a,b,c$ de $p$ bits:
+\[
+d(a,b)=d(b,a)\;,\qquad\qquad d(a,c)\le\max\{d(a,b),d(b,c)\}\;.
+\]
+\emph{A simetria diz-se}, porque o Teor.~\ref{fis:thm:bolas} vai usá-la e ela não
+sai da desigualdade do máximo.
 \end{lema}
 
 \begin{proof}
+A simetria: $\operatorname{prof}$ é definida pela \emph{primeira divergência}
+entre dois bits, e divergir é simétrico.
+
+A desigualdade, e primeiro os casos em que $\operatorname{prof}$ não está
+definida. Se $a=c$ o lado esquerdo é $0$ e não há nada a provar. Se $a=b$ ou
+$b=c$, o máximo à direita contém $d(a,c)$ e a desigualdade é uma igualdade. Fora
+disso os três são distintos dois a dois e $\operatorname{prof}$ está definida nos
+três pares.
+
 Se $a$ e $b$ concordam nos $\operatorname{prof}(a,b)$ bits mais altos e $b$ e $c$
 nos $\operatorname{prof}(b,c)$, então $a$ e $c$ concordam nos primeiros
 $\min\{\operatorname{prof}(a,b),\operatorname{prof}(b,c)\}$, logo
@@ -2376,29 +2390,40 @@ $d(a,c)\le\max\{d(a,b),d(b,c)\}$.
 \end{proof}
 
 \begin{teorema}[as bolas particionam]\label{fis:thm:bolas}
-Seja $(X,d)$ ultramétrico e $\mathcal{B}(a,r)=\{x: d(a,x)\le r\}$ a bola ---
-caligráfico, para não colidir com o binário $B$ da Def.~\ref{fis:def:B}. Então:
+Seja $(X,d)$ ultramétrico \textbf{e simétrico}, $r\ge0$, e
+$\mathcal{B}(a,r)=\{x: d(a,x)\le r\}$ a bola --- caligráfico, para não colidir com
+o binário $B$ da Def.~\ref{fis:def:B}. Então:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{Todo ponto é centro:} se $b\in \mathcal{B}(a,r)$ então
-$\mathcal{B}(b,r)=\mathcal{B}(a,r)$.
+$\mathcal{B}(b,r)=\mathcal{B}(a,r)$. \emph{É aqui que a simetria entra}, e por
+isso ela foi pedida.
 \item[(2)] \textbf{Partição:} duas bolas de raio $r$ ou coincidem ou são
-disjuntas. Em particular, para cada $r$ as bolas de raio $r$ formam uma partição
-de $X$.
-\item[(3)] Fixado $r$, seja $\pi_r(i)$ a bola de raio $r$ que contém $i$. Então
-$\pi_r$ é uma realização no sentido da Def.~\ref{fis:def:objeto}, a sua célula
-\emph{é} a bola, e $G(x)$ é o número de índices dentro dela.
+disjuntas. Em particular, para cada $r\ge0$ as bolas de raio $r$ formam uma
+partição de $X$ --- \emph{e é preciso $r\ge0$}, senão nenhuma bola tem centro e
+não há partição nenhuma.
+\item[(3)] \textbf{E na árvore finita elas dão uma realização.} \emph{Sobre a
+Def.~\ref{fis:def:arvore}}, com palavras de $p$ bits --- e é aí, e não num
+ultramétrico qualquer ---, seja $\pi_r(i)$ a bola de raio $r$ que contém $i$.
+Então $\pi_r$ é uma realização no sentido da Def.~\ref{fis:def:objeto}, a sua
+célula \emph{é} a bola, e $G(x)$ é o número de índices dentro dela.
+\emph{A restrição não é cautela}: a Def.~\ref{fis:def:objeto} pede igualdade
+decidível no contradomínio e $I$ finito, e é a árvore de $p$ bits que os dá ---
+as bolas identificam-se pelo prefixo, e são em número finito.
 \end{enumerate}
 \end{teorema}
 
 \begin{proof}
 (1) Seja $x\in \mathcal{B}(a,r)$. Então $d(b,x)\le\max\{d(b,a),d(a,x)\}\le r$,
 logo $x\in \mathcal{B}(b,r)$ e $\mathcal{B}(a,r)\subseteq \mathcal{B}(b,r)$. Como
-$b\in \mathcal{B}(a,r)$ implica $a\in \mathcal{B}(b,r)$, a inclusão contrária sai
-do mesmo argumento com os papéis trocados.
+$d$ é \textbf{simétrica}, $b\in \mathcal{B}(a,r)$ dá $a\in \mathcal{B}(b,r)$, e a
+inclusão contrária sai do mesmo argumento com os papéis trocados. \emph{Sem a
+simetria isto é falso}, e a testemunha é curta: em dois pontos com $d(a,b)=1$ e
+$d(b,a)=5$ a desigualdade do máximo vale, e $\mathcal{B}(b,1)$ não é
+$\mathcal{B}(a,1)$.
 
 (2) Se $c\in \mathcal{B}(a,r)\cap \mathcal{B}(b,r)$, por (1) tem-se
 $\mathcal{B}(a,r)=\mathcal{B}(c,r)=\mathcal{B}(b,r)$. Que cobrem $X$ é imediato:
-$a\in \mathcal{B}(a,r)$.
+$a\in \mathcal{B}(a,r)$, e isso pede $r\ge0$.
 
 (3) A aplicação está bem definida por (2): há \emph{exatamente} uma bola de raio
 $r$ contendo $i$. Quanto à igualdade no contradomínio, na árvore finita de $p$
@@ -2430,11 +2455,15 @@ e as duas particionam a bola-mãe de raio $2^{-(p-1)}$. Logo
 $\abs{\mathcal{V}(x)}=1$, e o custo dos passos de leitura e decisão é $\Theta(1)$
 e não $\Theta(n)$.
 
-\medskip\noindent\emph{A hipótese $p\ge1$ é necessária e não é decorativa}: em
-$p=0$ a bola é a \textbf{raiz} --- o espaço inteiro --- e não tem irmão nenhum,
-porque não há bola-mãe acima dela. A vizinhança da árvore é a de uma bola
-\emph{não-raiz}, e o autómato nunca a pede na raiz porque aí não há para onde
-descer.
+\medskip\noindent\emph{E a hipótese tem \textbf{duas} pontas, não uma.} Em $p=0$
+a bola é a \textbf{raiz} --- o espaço inteiro --- e não tem irmão, porque não há
+bola-mãe acima dela. \textbf{E em $p>w$, com $w$ a largura da palavra, também
+não há irmão}: não existe $p$-ésimo bit para trocar, a bola é o ponto, e ali
+$\abs{\mathcal{V}(x)}=0$ e não $1$. \emph{Numa árvore de três bits, a bola de raio
+$2^{-5}$ é a mesma que a de raio $2^{-4}$, e é um ponto só.} A vizinhança da
+árvore é a de uma bola \emph{não-raiz e não-folha}, e é entre $1$ e $w$ que ela
+vale um. O autómato não a pede fora disso: na raiz não há para onde descer, e na
+folha não há o que dividir.
 \end{teorema}
 
 \begin{proof}
@@ -2491,8 +2520,12 @@ Para um grafo conexo de dimensão $1$, $b_1=a-v+1$, donde $b_1=1-\chi$. Com
 $a=N=\abs{I}-1$ vem $b_1=\abs{I}-1-v+1=\abs{I}-v=D$.
 \end{proof}
 
-\medskip\noindent A hipótese é necessária: a espiral quadrada de $1024$ passos
-usa $\mathbf{4}$ arestas, e aí $b_1=1$ com $D=\abs{I}-v=1025-4=\mathbf{1021}$.
+\medskip\noindent A hipótese é necessária, e a testemunha é a que o §AN25 corre:
+a curva que roda um quarto de volta \emph{a cada passo} --- que percorre o mesmo
+quadrado unitário mil e vinte e quatro vezes --- usa $\mathbf{4}$ arestas, e aí
+$b_1=1$ com $D=\abs{I}-v=1025-4=\mathbf{1021}$. \emph{E o nome importa}: uma
+espiral quadrada a sério é injetiva, tem $a=N$ e $D=0=b_1$, \textbf{cumpre} a
+hipótese e não testemunha nada. O que testemunha é o quatro-ciclo.
 Sem ela, o que $G$ conta por \emph{vértice} deixa de ser o que a topologia conta
 em \emph{ciclos}. E a reta axial dá $\chi=1$ com $b_1=0$: \emph{percorrer sem
 dobrar é percorrer uma árvore}.
@@ -2512,10 +2545,14 @@ Def.~\ref{fis:def:percurso}. Então, para cada vértice $x$,
 \end{teorema}
 
 \begin{proof}
-Cada visita a $x$ num índice interior $0<t<N$ usa duas arestas incidentes, a de
-$t-1$ para $t$ e a de $t$ para $t+1$; a visita em $t=0$ usa uma só, e a em $t=N$
-também. Somando sobre as $G(x)$ visitas vem o enunciado. A segunda igualdade é
-contar as $N$ arestas do percurso.
+
+Cada visita a $x$ num índice interior $0<t<N$ usa duas \textbf{passagens}
+incidentes, a de $t-1$ para $t$ e a de $t$ para $t+1$; a visita em $t=0$ usa uma
+só, e a em $t=N$ também. \emph{Passagens, e não arestas}: se $\pi(t-1)=\pi(t+1)$
+as duas passagens são pela \textbf{mesma} aresta, e é $G_{\mathrm{ar}}$ que as
+conta separadas --- num percurso $x\to y\to x$ a visita interior a $y$ usa uma
+aresta duas vezes, e a conta fecha na mesma. Somando sobre as $G(x)$ visitas vem
+o enunciado. A segunda igualdade é contar as $N$ passagens do percurso.
 \end{proof}
 
 \medskip\noindent A multiplicidade do vértice determina, assim, a das arestas
@@ -2772,9 +2809,9 @@ $\pi(t+1)=\pi(t)+T(e_{s_t})$, onde $T$ diz como cada letra se realiza.
 \end{definicao}
 
 \begin{teorema}[a palavra reconstrói, e a dobra é o núcleo]\label{fis:thm:palavra}
-$\pi$ recupera-se de $\pi(0)$ e da palavra. Além disso, a posição é a \emph{soma}
-das letras realizadas, e a soma é comutativa; logo o morfismo
-$w\colon\mathcal{A}^{*}\to X$ tem \textbf{núcleo}, e
+\emph{Onde a soma de $X$ for comutativa e \textbf{cancelável}} --- que é o caso
+da grade e do hipercubo, e por isso se declara --- $\pi$ recupera-se de $\pi(0)$
+e da palavra; a posição é a \emph{soma} das letras realizadas; e
 \[
 \begin{array}{c}
 G(x)>1
@@ -2787,10 +2824,29 @@ G(x)>1
 \end{teorema}
 
 \begin{proof}
-A reconstrução é a recorrência da Def.~\ref{fis:def:palavra}. Se $\pi(i)=\pi(j)$
-com $i<j$, os prefixos de comprimentos $i$ e $j$ têm a mesma imagem, e o fator
-entre eles tem imagem $0$; o recíproco é a mesma conta ao contrário.
+A reconstrução é a recorrência da Def.~\ref{fis:def:palavra}, e não usa nada.
+
+A cadeia de equivalências usa o \textbf{cancelamento}, \emph{duas vezes}, e
+diz-se onde. Se $\pi(i)=\pi(j)$ com $i<j$, então
+$\pi(0)\oplus w(\text{pref}_i)=\pi(0)\oplus w(\text{pref}_j)$; cancelar $\pi(0)$
+dá $w(\text{pref}_i)=w(\text{pref}_j)$ --- \emph{primeira vez}. E de
+$w(\text{pref}_j)=w(\text{pref}_i)\oplus w(\text{fator})$ cancelar
+$w(\text{pref}_i)$ dá $w(\text{fator})=0$ --- \emph{segunda vez}. O recíproco é a
+mesma conta ao contrário, e essa não precisa de cancelar.
+
+\emph{E note-se o que \textbf{não} se usou}: a existência de núcleo não vem da
+comutatividade. \textbf{Todo o morfismo tem pré-imagem do neutro}; o que a
+comutatividade dá é que a ordem das letras não conte, e é isso, e só isso, que
+faz a posição depender do \emph{multiconjunto} de letras e não da sua sequência.
 \end{proof}
+
+\medskip\noindent\textbf{E sem cancelamento a cadeia parte-se.} A testemunha
+cabe em três elementos: sobre $\{e,g,g^{2}\}$ com $g^{3}=g$ --- comutativo, com
+neutro, e sem cancelamento, porque $g\cdot g^{2}=g\cdot e$ com $g^{2}\neq e$ ---
+a palavra $aaa$ com $a$ realizada por $g$ dá o percurso $e,g,g^{2},g$. Ali
+$G(g)=2$, os prefixos de comprimento $1$ e $3$ têm a mesma imagem, \emph{e nenhum
+fator está no núcleo}: o fator $aa$ tem imagem $g^{2}\neq e$. \textbf{A primeira
+equivalência sobrevive; a segunda cai.}
 
 \medskip\noindent Um fator com imagem $0$ é um \emph{ciclo fechado}, o que liga
 isto ao Teor.~\ref{fis:thm:euler}. Em três linhas, e cada uma guarda menos que a
@@ -2952,8 +3008,10 @@ representações:
 \[
 \boxed{\;D(\sigma,\rho)\;\le\;\max\bigl\{D(\sigma,\tau),\,D(\tau,\rho)\bigr\}\;}
 \]
-\emph{Logo uma cadeia de $L$ travessias tem o custo do seu \textbf{pior passo}},
-qualquer que seja $L$.
+\emph{Logo uma cadeia de $L$ travessias \textbf{não excede} o custo do seu pior
+passo}, qualquer que seja $L$ --- \emph{e é «não excede» e não «é igual a»}: com
+$\sigma=\rho$ e $\tau$ diferente dos dois, a cadeia custa zero e o pior passo não.
+O que a ultramétrica proíbe é acumular; não obriga a atingir.
 \end{teorema}
 
 \begin{proof}
