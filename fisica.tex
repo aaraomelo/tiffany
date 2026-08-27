@@ -61,12 +61,16 @@
 }
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} De \textbf{dois extremos e de uma dobra}: a acção que os
-troca, $\partial x=a+b-x$. O seu ponto fixo é o \emph{meio}, e dobrando outra vez
-de cada lado --- a mesma estrutura nos dois --- a indução dá todos os pontos. Nos
-extremos sozinhos não há meio, e é essa falta que obriga a \emph{duas}
-composições, com as duas equações $\partial x+x=0$ e $\partial x\cdot x=1$: é
-nelas que $0$ e $1$ nascem, como o que a dobra devolve em cada face. As tabelas
+\textbf{De onde parte.} De \textbf{uma aplicação e uma cláusula}:
+$\operatorname{ord}(\partial)=2$. Os \textbf{dois extremos} não são dados --- saem
+forçados, porque uma aplicação que fecha em dois não tem para onde levar um ponto
+além de si e de um outro. Onde o suporte carregar uma soma, a dobra realiza-se
+como $\partial x=a+b-x$, e o seu ponto fixo é o \emph{meio}; dobrando outra vez de
+cada lado, a indução dá todos os pontos. Nos extremos sozinhos \textbf{não há}
+meio, e é essa falta que obriga a \emph{duas} composições --- com os invariantes
+\textbf{cruzados} $x\oplus\partial x=1$ e $x\otimes\partial x=0$, em que o
+invariante de cada face é o neutro da \textbf{outra}. É aí que $0$ e $1$ nascem.
+As tabelas
 saem daí forçadas, sem que se escreva um sinal, e delas a soma com transporte; a
 \textbf{lista} $I$ é o objeto finito que daí se obtém. Só então entra uma
 \textbf{realização} $\pi\colon I\to X$ num conjunto $X$ com igualdade decidível,
@@ -527,6 +531,7 @@ demonstrados atrás, e cita-se em vez de se repetir:
 \partial m=m\iff 2m=a+b\ \ (\text{Teor.~\ref{fis:thm:vinco}}(1)) .
 \]
 Onde a metade existe o meio é \emph{um só} e vale $\tfrac{a+b}{2}$; e não é
+acrescentado ao suporte --- é o que a dobra deixa quieto.
 \item[(3)] \textbf{E onde houver composição \emph{cujo invariante seja o
 neutro}, é ele o meio.} A hipótese é essa, e diz-se: por~(1) ela equivale a
 $\partial$ ser a inversão, e então o invariante é fixo por $\partial$; havendo um
@@ -2955,33 +2960,52 @@ troca $a$ com $b$, isto é $(a-b)\mapsto-(a-b)$; a potência par absorve a troca
 pelo que $\Delta$ é \textbf{o mesmo nos dois}. \emph{O que a dobra move não
 sobrevive; $\Delta$ sobrevive} --- e é o mesmo argumento com que o
 Teor.~\ref{fis:thm:BI} conserva o produto.
-\item[(3)] \textbf{Anula-se exactamente onde a dobra deixa de ser efetiva.}
-$\Delta=0\iff a=b$, que a Def.~\ref{fis:def:op} proíbe pela sua única cláusula.
+\item[(3)] \textbf{Anula-se exactamente onde a dobra deixa de ser efetiva ---
+num suporte sem divisores de zero, que aqui se declara.} $\Delta=0\iff a=b$, e
+$a\neq b$ é o Teor.~\ref{fis:thm:doispontos}(2), que é quem produz o par.
 \emph{Um discriminante nulo não é um caso limite: é a ausência de par.}
 \item[(4)] \textbf{E na leitura pelo centro é o desvio ao quadrado.} Com o par
-$(m,\delta)$ do Teor.~\ref{fis:thm:BI}, $a-b=2\delta$, donde
-$\Delta=4\delta^{2}$. \emph{O centro não entra} --- e não devia entrar: $m$ é o
-que a dobra fixa, e $\Delta$ é o que ela reflete.
+$(m,\delta)$ do Teor.~\ref{fis:thm:BI} --- que se lê no degrau onde o dois se
+inverte, e não na lista --- vem $a-b=2\delta$, donde
+\[
+\Delta=4\delta^{2} .
+\]
+\emph{O centro não entra} --- e não devia entrar: ele é o que a dobra fixa, e
+$\Delta$ é o que ela reflete.
 \item[(5)] \textbf{Os três objectos do Teor.~\ref{fis:thm:duasfaces} separam-se
 por ele, e por mais nada:}
 \[
 \begin{array}{lll}
 (s,p)=(0,1) & \Delta=-4 & \text{o \textbf{rotor}}\\[2pt]
-(s,p)=(m,-1) & \Delta=m^{2}+4 & \text{a família \textbf{metálica}}\\[2pt]
+(s,p)=(t,-1) & \Delta=t^{2}+4 & \text{a família \textbf{metálica}}\\[2pt]
 (s,p)=(1,-1) & \Delta=5 & \text{a \textbf{estrela}}
 \end{array}
 \]
-\emph{E a família é estritamente crescente em $m$}, pelo que cada membro tem o
-seu $\Delta$ e não há dois no mesmo.
+\emph{E o $t$ da segunda linha é o \textbf{parâmetro da família}, isto é o $s$}
+--- \textbf{não é o centro da cláusula~(4)}, que vale $\tfrac{a+b}{2}$ e que o
+Teor.~\ref{fis:thm:BI} chama $m$. Os dois seriam iguais só onde $a+b=0$.
+\smallskip
+\emph{E a separação tem um limite, que se diz}: $\Delta=t^{2}+4$ é \textbf{par
+em $t$}, pelo que $t$ e $-t$ dão o \emph{mesmo} discriminante --- $t=1$ e
+$t=-1$ dão ambos $5$. \textbf{O que $\Delta$ separa é o par $\{t,-t\}$, e não o
+membro.} É a cláusula~(1) a repetir-se: ele não sabe qual dos dois é qual, nem
+aqui nem lá.
 \end{enumerate}
+\smallskip\noindent\textbf{E as linhas do quadro não se leem todas no mesmo
+suporte.} Pela cláusula~(1), $\Delta=(a-b)^{2}$ é um quadrado; num suporte
+ordenado nenhum quadrado é negativo, pelo que a linha do \textbf{rotor} ---
+$\Delta=-4$ --- \emph{não vive num suporte ordenado}. É esse o conteúdo do caso
+$(0,1)$: ele pede que $-1$ seja quadrado, e é por isso que fecha em quatro e não
+em dois. \emph{As outras duas linhas leem-se onde há ordem; a primeira, não.}
 \end{corolario}
 
 \begin{proof}
 (1) $(a+b)^{2}-4ab=a^{2}-2ab+b^{2}=(a-b)^{2}$, que só usa a comutatividade e a
-distributividade. (2) é (1) com $\delta\mapsto-\delta$, e a potência par. (3) num
-suporte sem divisores de zero, $(a-b)^{2}=0\iff a=b$; e $a\neq b$ é o
-Teor.~\ref{fis:thm:doispontos}(2). (4) é substituir $a=m+\delta$ e $b=m-\delta$.
-(5) é a conta em cada linha.
+distributividade. (2) é (1) com $\delta\mapsto-\delta$, e a potência par. (3) é
+$(a-b)^{2}=0\iff a=b$, que vale pela ausência de divisores de zero declarada no
+enunciado, mais o Teor.~\ref{fis:thm:doispontos}(2). (4) é substituir
+$a=m+\delta$ e $b=m-\delta$. (5) é a conta em cada linha, e a paridade em $t$ é
+$(-t)^{2}=t^{2}$.
 \end{proof}
 
 \medskip\noindent\textbf{E convém dizer o que $\Delta$ \emph{não} é.} Não é uma
@@ -2993,30 +3017,55 @@ essa a leitura que a §\ref{fis:caixa} faz, no seu andar e com os seus espelhos.
 \emph{O objecto é o mesmo, e a leitura é que muda.}
 
 \begin{corolario}[o discriminante dá duas réguas, e não são intermutáveis]\label{fis:cor:duasreguas}
-Onde $A$ for ordenado, o $\Delta$ do Cor.~\ref{fis:cor:disc} carrega
-\textbf{duas} maneiras de comparar dois pares, e elas não medem a mesma coisa:
+Onde $A$ for ordenado --- e por isso, pelo Cor.~\ref{fis:cor:disc}, com
+$\Delta\ge0$ ---, e escrevendo cada $\Delta$ como palavra de $B$ pelo
+Teor.~\ref{fis:thm:enumera}, o discriminante carrega \textbf{duas} maneiras de
+comparar dois pares, e elas não medem a mesma coisa:
 \[
 d_{\mathcal{P}}(P,Q)=\abs{\Delta_P-\Delta_Q}
 \qquad\qquad
-d_{\mathrm{u}}(P,Q)=2^{-\operatorname{prof}(P,Q)}
+d_{\mathrm{u}}(P,Q)=2^{-\operatorname{prof}(\Delta_P,\Delta_Q)}
 \]
 --- a primeira \emph{aritmética}, a segunda a da Def.~\ref{fis:def:arvore} lida
-sobre os mesmos $\Delta$. Então:
+sobre essas palavras. \emph{A largura declara-se}: as duas correm sobre palavras
+de largura fixa, e é dela que sai a profundidade. Então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{A primeira é métrica e NÃO é ultramétrica.} Testemunha:
+\item[(1)] \textbf{Nenhuma das duas separa pares --- são \emph{pseudo}métricas,
+e é o $\Delta$ que o obriga.} Pelo Cor.~\ref{fis:cor:disc}(1) o discriminante é
+$(a-b)^{2}$, e não sabe qual dos dois é qual nem onde está o centro: os pares
+$\{0,2\}$ e $\{1,3\}$ têm ambos $\Delta=4$, logo $d_{\mathcal{P}}=0$ sem serem o
+mesmo par. \emph{Elas comparam \textbf{separações}, e não pares} --- e é isso,
+exactamente, que se lhes pede.
+\item[(2)] \textbf{A primeira NÃO é ultramétrica.} Testemunha:
 $\Delta=20,13,8$ dá $d_{\mathcal{P}}(20,8)=12$ contra
 $\max\{7,5\}=7$. \emph{Uma conta, e chega.}
-\item[(2)] \textbf{A segunda é ultramétrica}, pelo Lema~\ref{fis:lem:ultra}, e é
-essa que particiona (Teor.~\ref{fis:thm:bolas}) e que não acumula ao compor
-(Teor.~\ref{fis:thm:navega}).
-\item[(3)] \textbf{E a diferença não é de precisão: é de \emph{alcance}.}
+\item[(3)] \textbf{A segunda é ultramétrica}, pelo Lema~\ref{fis:lem:ultra}
+aplicado às palavras, e é essa que particiona (Teor.~\ref{fis:thm:bolas}) e que
+não acumula ao compor (Teor.~\ref{fis:thm:navega}).
+\item[(4)] \textbf{E a diferença não é de precisão: é de \emph{alcance}.}
 \end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) É o Cor.~\ref{fis:cor:disc}(1) mais a conta: $(0-2)^{2}=(1-3)^{2}=4$. A
+reflexividade e a simetria são imediatas, e a desigualdade triangular vale nas
+duas por serem lidas sobre um invariante comum --- o que falha é só a separação.
+
+(2) $\abs{20-8}=12$ e $\max\{\abs{20-13},\abs{13-8}\}=\max\{7,5\}=7$, e $12>7$.
+
+(3) É o Lema~\ref{fis:lem:ultra}, cuja hipótese --- palavras de largura fixa ---
+é a que o enunciado acabou de declarar. As duas cláusulas citadas seguem-se dele
+sem mais.
+
+(4) É a leitura das duas anteriores, e o quadro abaixo di-la em quatro linhas.
+\end{proof}
+
 \begin{center}\footnotesize
 \begin{tabular}{@{}lll@{}}
 \toprule
  & $d_{\mathcal{P}}=\abs{\Delta_P-\Delta_Q}$ & $d_{\mathrm{u}}=2^{-\operatorname{prof}}$ \\
 \midrule
-alcance & \textbf{local}: entre dois pares & \textbf{global}: sobre o conjunto todo \\
+alcance & \textbf{local}: entre duas separações & \textbf{global}: sobre o conjunto todo \\
 num percurso & \textbf{acumula} (triangular) & \textbf{absorve} (Teor.~\ref{fis:thm:navega}) \\
 o que dá & \emph{quanto} falta --- a recusa & a \textbf{partição} (Teor.~\ref{fis:thm:bolas}) \\
 onde se usa & dentro de uma vizinhança & para navegar entre classes \\
@@ -3024,7 +3073,6 @@ onde se usa & dentro de uma vizinhança & para navegar entre classes \\
 \end{tabular}
 \end{center}
 \noindent \emph{Uma vê o caminho; a outra só o pior degrau dele.}
-\end{corolario}
 
 \medskip\noindent\textbf{E é o $\Delta$ que as gera às duas, o que não é
 acidente.} Pela cláusula~(2) do Cor.~\ref{fis:cor:disc} ele é o que sobrevive à
@@ -3034,13 +3082,16 @@ vem de se ler o mesmo invariante pela profundidade do encaixe em vez de pela
 diferença.} É a mesma separação que o Teor.~\ref{fis:thm:navega} já tinha feito
 sem lhe pôr número.
 
-\medido{\code{tests/pgwire.c} §W211: sobre os $26^3=\mathbf{17\,576}$ triplos dos
-pares de $\abs{m},\abs{t}\le6$, a aritmética viola
-$d(x,z)\le\max\{d(x,y),d(y,z)\}$ em $\mathbf{4448}$ deles e a ultramétrica em
-$\mathbf{0}$. E no percurso $\Delta=-4\to5\to0\to40\to-3$ a local soma
-$\mathbf{97}$ para uma distância directa de $\mathbf{1}$, enquanto a global mede
-$2^{-31}$ entre as pontas contra um pior passo de $2^{0}$. Exige-se o \emph{par},
-porque só uma das duas metades não distinguiria as réguas.}
+\medido{\code{tests/pgwire.c} §W211, e corre na leitura da §\ref{fis:caixa} ---
+onde $\Delta$ é a etiqueta de um espelho e pode ser negativo ---, e não na deste
+corolário, onde ele é $(a-b)^{2}$ e não desce abaixo de zero. Sobre os
+$26^3=\mathbf{17\,576}$ triplos de espelhos de $\abs{m},\abs{t}\le6$, a
+aritmética viola $d(x,z)\le\max\{d(x,y),d(y,z)\}$ em $\mathbf{4448}$ deles e a
+ultramétrica em $\mathbf{0}$. E no percurso $\Delta=-4\to5\to0\to40\to-3$ a local
+soma $\mathbf{97}$ para uma distância directa de $\mathbf{1}$, enquanto a global
+mede $2^{-31}$ entre as pontas contra um pior passo de $2^{0}$ --- o expoente é a
+largura de palavra da medição, e é ela que a profundidade conta. Exige-se o
+\emph{par}, porque só uma das duas metades não distinguiria as réguas.}
 
 \begin{teorema}[a estrela: onde as duas faces fazem o mesmo]\label{fis:thm:estrela}
 Numa estrutura com duas operações e com os dois neutros que a
@@ -3769,7 +3820,7 @@ tem prova própria: vem da soma ser fixa, não da troca das operações. \emph{A
 \toprule
 o par & uma face & a outra & o que atravessa \\
 \midrule
-os dois símbolos & $\partial x+x=0$ & $\partial x\cdot x=1$ & o oposto e o inverso \\
+os dois símbolos & $x\oplus\partial x=1$ & $x\otimes\partial x=0$ & os invariantes \textbf{cruzados} \\
 os dois meios & $\tfrac{a+b}{2}$ & $g\,g=ab$ & o corte, onde coincidem \\
 enche / conta & $\pi$, a dobra & $\rho$, o buraco & a folga, uma só \\
 espaço / matéria & $\operatorname{esp}$, idempotente & $\operatorname{mat}$, aditiva & o $c$, com o sinal virado \\
@@ -4070,7 +4121,7 @@ esta prova pede à escada, e pede-a toda.} Note-se
 que a preservação é, como em~(2), \textbf{a menos do factor $2^{m}$}: é a mesma
 escala, e não conteúdo.
 \end{proof}
-\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:comutapar},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:euler},~\ref{fis:thm:dim},~\ref{fis:thm:vizniso},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte},~\ref{fis:thm:palavra},~\ref{fis:thm:handshake}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos},~\ref{fis:def:palavra}}
+\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Prop.~\ref{fis:prop:travessia}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:vizarvore},~\ref{fis:thm:euler},~\ref{fis:thm:handshake},~\ref{fis:thm:dim},~\ref{fis:thm:fecho},~\ref{fis:thm:vizniso},~\ref{fis:thm:palavra},~\ref{fis:thm:contraria},~\ref{fis:thm:bijeccao},~\ref{fis:thm:enumera},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:matriz},~\ref{fis:cor:disc},~\ref{fis:cor:duasreguas},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:viztopo},~\ref{fis:def:arvore},~\ref{fis:def:percurso},~\ref{fis:def:grade},~\ref{fis:def:palavra},~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos}}
         {a árvore, o dragão e a espiral, a serpentina, a travessia por dígitos, a leitura dual}
         {\code{tests/aranha\_n.c} §AN6--§AN7, §AN13--§AN14, §AN25, §AN29, §AN37; \code{tests/pgwire.c} §W122--§W123, §W128}
 
