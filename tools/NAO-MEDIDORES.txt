@@ -39,6 +39,15 @@ tools/traduz.c         o tradutor C->WASM: traduz, não afirma. Quem mede é tes
 tests/tex_core.c       núcleo do compositor LaTeX — incluído por tests/tex.c, não medidor
                        standalone (sem main). Quem mede é tests/tex.c e tests/tex_wasm.js.
 
+tests/tex_env.js       o env do tex.wasm (__fich_miss: o fopen que conta os ficheiros que
+                       faltam) — stub incluído por tex_ponta.js, tex_wasm.js, autoria_tradutor.js,
+                       corpo_disco.js e estrela_unifica.js, sem afirmação própria. Quem o
+                       inclui é quem mede; sozinho tem ZERO asserções.
+
+tests/pdf_casa_texto.js  o leitor do dialecto de PDF da casa: extrai o texto, não afirma —
+                       incluído por avalia_macros.js, design_no_pdf.js, dois_streams.js e
+                       sem_chute.js, que medem com ele. Sem teste próprio, ZERO asserções.
+
 tools/isa.c            a ISA do broca-so transcrita no subconjunto que sobe para wasm: é a
                        máquina, não afirma nada. Quem mede é tests/isa_wasm.js — MOVE reverte,
                        os metais desfazem-se, e os períodos 4 e 2 saem dela.
