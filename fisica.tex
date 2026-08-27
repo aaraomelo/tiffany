@@ -1563,13 +1563,13 @@ aqui se declaram, e sem as quais não ficam}: a face aditiva é
 \textbf{distribui} sobre ela. Então, e sem que se escreva um sinal:
 \[
 \begin{array}{c|cc}
-\cdot & 0 & 1\\\hline
+\otimes & 0 & 1\\\hline
 0 & 0 & 0\\
 1 & 0 & 1
 \end{array}
 \qquad\qquad
 \begin{array}{c|cc}
-+ & 0 & 1\\\hline
+\oplus & 0 & 1\\\hline
 0 & 0 & 1\\
 1 & 1 & 0
 \end{array}
@@ -1704,7 +1704,7 @@ fixo, que a potência par absorve.
 \end{proof}
 
 \medido{\code{tests/meio.c} §M3--§M4: os nove pares ordenados de
-$\{0,\tfrac12,1\}$ caem em \textbf{seis} imagens por $(a\vee b,a\wedge b)$ --- e
+$\{0,\tfrac12,1\}$ caem em \textbf{seis} imagens por $(\max,\min)$ --- e
 as três colisões são os pares trocados --- contra \textbf{nove} em nove por
 $(m,\delta)$. O controlo exige que a troca mova de facto o desvio, em seis dos
 nove pares. E \code{tests/aranha\_n.c} §AN34: a codificação em
@@ -2423,7 +2423,9 @@ morfismo da face} (cláusula~(1)), com $X_k^{\bullet}$ os canceláveis, que no
 primeiro degrau são todo o andar. \textbf{E o resultado \emph{lê-se} como o andar
 mais o seu dual} --- $X_k$ entra por $a\mapsto(a,0)$ e $X_k^{\vee}$ por
 $a\mapsto(0,a)$ ---, \emph{mas essa é a leitura do resultado e não a construção}, e
-as duas coisas confundiam-se aqui.
+as duas coisas confundiam-se aqui. \textbf{E o expoente $\vee$ diz-se aqui, que é
+onde estreia}: designa o \emph{dual}, e a Def.~\ref{fis:def:duomorf} há de dar-lhe
+a forma geral --- \emph{recebe-se agora e paga-se lá}.
 
 \smallskip\noindent\textbf{E a união não é disjunta}: as duas cópias
 \emph{encontram-se}, e encontram-se exactamente no \textbf{vinco} --- $(a,0)$ e
@@ -6090,8 +6092,8 @@ sairia que \emph{todo} elemento é $n$. Isso é um
 Def.~\ref{fis:def:op} sozinha não o exclui}: $\partial=\mathrm{id}$ é solução dela.
 Quem o exclui é a efectividade, isto é, a segunda espécie do
 Teor.~\ref{fis:thm:doispontos}(0). É a mesma perda que o
-Teor.~\ref{fis:thm:BI} já contava: $a\vee b=m+\abs{\delta}$ e
-$a\wedge b=m-\abs{\delta}$ deitam fora o \emph{sinal} de $\delta$, isto é
+Teor.~\ref{fis:thm:BI} já contava: $\max(a,b)=m+\abs{\delta}$ e
+$\min(a,b)=m-\abs{\delta}$ deitam fora o \emph{sinal} de $\delta$, isto é
 \emph{qual dos dois é qual}. A orientação não está na operação do dual; está na
 bijeção, e a bijeção é a dobra --- que é exactamente o que a
 Def.~\ref{fis:def:op} lhe exige ao pedir-lhe \textbf{volta}.
@@ -6102,7 +6104,7 @@ darem tabelas isomorfas \textbf{pela troca}, com a \emph{identidade} a NÃO serv
 como controlo ($6$ discordâncias) --- que é a cláusula~(1) medida, a segunda
 leitura a existir e a bijeção a não ser a identidade. \code{tests/meio.c}
 §M3--§M4: os nove pares ordenados caem em \textbf{seis} imagens por
-$(a\vee b,a\wedge b)$ e as três colisões \emph{são os pares trocados}, contra
+$(\max,\min)$ e as três colisões \emph{são os pares trocados}, contra
 \textbf{nove} em nove por $(m,\delta)$ --- que é a orientação a não estar na
 operação, contada. §M5--§M6: sobre dois objectos, com $\partial$ a trocá-los, as
 composições com invariante por neutro são \textbf{nenhuma} --- que é a
@@ -7871,7 +7873,10 @@ o=\operatorname{pop}(b\wedge \mathtt{0xAA}),\qquad
 \;}
 \]
 As duas máscaras são \textbf{complementares} --- $\mathtt{0xAA}\vee\mathtt{0x55}
-=\mathtt{0xFF}$ e $\mathtt{0xAA}\wedge\mathtt{0x55}=0$ --- logo particionam o
+=\mathtt{0xFF}$ e $\mathtt{0xAA}\wedge\mathtt{0x55}=0$, \emph{com $\vee$ e $\wedge$
+aqui a designarem o \textbf{ou} e o \textbf{e} posição a posição sobre a palavra},
+que é o terceiro sentido deste sinal nesta obra e o único que se declara à
+chegada --- logo particionam o
 byte: é a cisão em duas fases, as posições de índice par e as de índice ímpar. O
 $\operatorname{pop}$ é o $\sum$ --- e $\mathtt{0x55}$ apanha os índices
 \textbf{pares}, que é a fase que o medidor guarda. E o par que sai \emph{é o gato
