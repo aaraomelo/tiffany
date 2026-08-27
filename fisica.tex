@@ -2494,6 +2494,102 @@ porque é o que o quociente exclui, e é nomeável porque a dobra o emparelha co
 algo que o andar tem. \textbf{Um bloco tem duas pontas; o andar guarda uma, e a
 dobra diz o nome da outra.}
 
+\subsection*{O fractal negro: o que repete e o que conserva}
+
+\noindent\textbf{Falta a outra metade, e ela não é mais indução --- é
+conservação.} O que se construiu acima repete a forma: o passo é o mesmo em todos
+os andares, e a auto-semelhança é essa repetição vista no objecto. \emph{Mas
+repetir não é tudo o que a dobra faz.} Pelo Teor.~\ref{fis:thm:antissim}, ela
+tem duas metades: a que fica e a que troca de sinal --- e a segunda não repete,
+\textbf{guarda}.
+\[
+\boxed{\;\text{o fractal \textbf{claro} repete a forma; o \textbf{negro} conserva a diferença}\;}
+\]
+\emph{E «negro» diz-se pela estrutura, e não pela aparência}: é o lado do bloco
+cuja medida \textbf{cresce}, isto é, o de expoente positivo. Nada aqui é
+metáfora visual.
+
+\begin{teorema}[o fractal tem dual, e o invariante é do par]\label{fis:thm:fractalnegro}
+Seja $s$ a dimensão do Teor.~\ref{fis:thm:dimcorte} e $r$ a escala. Sob a dobra
+multiplicativa $r\mapsto1/r$:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A dimensão é antissimétrica, e não é escolha.} Passar à escala
+dual leva $s$ em $-s$: é a metade cruzada do Teor.~\ref{fis:thm:antissim}(2), com
+valor próprio $-1$, lida sobre o \emph{expoente}. \emph{O que troca de sinal é a
+dimensão}, e não a medida.
+\item[(2)] \textbf{Donde duas conservações, e não são a mesma.} Chamem-se $S$ à
+medida do lado que cresce e $S^{\vee}$ à do dual:
+\[
+\boxed{\;S\cdot S^{\vee}=1\quad(\text{a face multiplicativa})\;,\qquad
+s+(-s)=0\quad(\text{a face aditiva})\;}
+\]
+--- e são exactamente as \textbf{duas réguas da inversão} da
+Obs.~\ref{fis:obs:reguas}, uma por face. \emph{Não se confundam com os
+invariantes cruzados do Teor.~\ref{fis:thm:duas}(4)}, que são os outros dois e
+que aquele teorema manda expressamente não misturar.
+\item[(3)] \textbf{E o par não se move, embora cada lado se mova sempre.} Em
+qualquer passo de escala, a medida de um lado cresce e a do outro decresce ---
+\emph{e o produto fica}. Logo dizer «a medida cresce» é dizer verdade sobre
+\textbf{metade} de um bloco:
+\[
+\boxed{\;\text{a seta não é do passo: é uma \textbf{polaridade lida sem a outra ponta}}\;}
+\]
+\item[(4)] \textbf{O ponto fixo é a estrela.} As duas medidas coincidem
+exactamente onde $r=1$, que é o ponto fixo de $r\mapsto1/r$; e é ali que a
+polaridade não aponta para lado nenhum. \emph{É o Cor.~\ref{fis:cor:estrelaanti}
+outra vez}: onde negar e inverter colam, os dois lados deixam de se distinguir.
+\item[(5)] \textbf{E $\{S,S^{\vee}\}$ é um bloco, exactamente como
+$\{0,\infty\}$.} Pelo Teor.~\ref{fis:thm:zeroinf}(4) aquele par era um bloco da
+dobra, com o invariante a ser do par e não do membro. \emph{Aqui é o mesmo}: o
+que se conserva é o produto, que é uma propriedade das duas pontas juntas.
+\textbf{A dobra dá o par, e o invariante é do par.}
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Substituir $r$ por $1/r$ em $r^{s}$ dá $r^{-s}$, e a troca de sinal no
+expoente é a acção do Teor.~\ref{fis:thm:antissim}(2) na metade cruzada.
+
+(2) $r^{s}\cdot r^{-s}=1$ e $s+(-s)=0$. Que sejam duas e não uma: a primeira é
+uma identidade entre \emph{medidas}, a segunda entre \emph{dimensões}, e as duas
+grandezas não são a mesma --- a dimensão é o expoente, a medida é a potência.
+
+(3) Se a escala cresce, $r^{s}$ cresce e $r^{-s}$ decresce, porque $s>0$; e o
+produto é constante por~(2), pelo que não se move nunca.
+
+(4) $r=1/r$ dá $r^{2}=1$; no lado que a construção usa, $r=1$. E aí
+$r^{s}=r^{-s}=1$.
+
+(5) É a leitura de~(2) e do Teor.~\ref{fis:thm:zeroinf}(4).
+\end{proof}
+
+\medido{\code{tests/negro.c} §N1--§N3. Em $200$ casos --- cinco dimensões e
+quarenta escalas --- o produto das medidas vale um e a soma das dimensões vale
+zero, \textbf{sem falha}; e os pontos onde os dois lados coincidem são um por
+dimensão, e são $r=1$. Em $19$ passos de escala o lado que cresce sobe em
+\textbf{todos}, o dual desce em \textbf{todos}, e o par move-se em
+\textbf{nenhum}.}
+
+\medskip\noindent\textbf{E é aqui que o duomorfismo fecha, porque agora tem as
+duas direcções.} O Teor.~\ref{fis:thm:eixos} separou o que a passagem
+\emph{preserva} do que ela \emph{perde}; a indução leva o objecto ao andar
+seguinte; e esta secção mostra o que sobrevive à passagem: \emph{não a forma, que
+se repete, mas a \textbf{diferença}, que se conserva no par}.
+\[
+\begin{array}{ll}
+\textbf{a indução} & \text{conserva o \emph{objecto} no andar seguinte}\\[2pt]
+\textbf{a conservação} & \text{conserva a \emph{diferença} entre as duas pontas}
+\end{array}
+\]
+\emph{E a segunda é a que torna a primeira reversível}: pelo
+Teor.~\ref{fis:thm:antissim}(7), o simétrico guarda ao antissimétrico o módulo e
+perde-lhe a direcção --- \textbf{desfaz-se porque o par voltou, não se aponta
+porque o lado não voltou}. O fractal claro diz \emph{como} se repete; o negro diz
+\emph{o que} não se perdeu ao repetir.
+\[
+\boxed{\;\text{repetir é da forma; conservar é do par --- e é o par que a dobra dá}\;}
+\]
+
 \medskip\noindent\textbf{E o degrau onde \emph{contar} passa a \emph{integrar}
 tem aqui o seu núcleo, que é exacto e não pede integral nenhum.} Nos outros
 trabalhos desta obra ele é o \textbf{teorema central} --- Gentil e Hurwitz duais
