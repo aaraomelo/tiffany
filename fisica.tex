@@ -221,6 +221,62 @@ escolha de quais se tomam. \textbf{Os dois últimos não têm sinal próprio}, p
 nada há a escrever quando nunca ou sempre; mas sem eles o quadro não fecharia em
 potência de dois.
 
+\medskip\noindent\textbf{E há um segundo quadro, dos sinais que \emph{não} são
+relações --- e ele tem duas metades, porque nem tudo o que a obra escreve está
+pago.} \emph{A primeira metade traz o teorema ao lado}; a segunda diz o que falta,
+e diz-se para que ninguém o tome por derivado.
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+sinal & o que é & de onde sai & \\
+\midrule
+$\partial$ & a \textbf{dobra} & Def.~\ref{fis:def:op} --- e é tudo o que ela dá & \\
+$0$ , $1$ & os dois \textbf{neutros} & Teor.~\ref{fis:thm:duas}(4), Teor.~\ref{fis:thm:B} & \\
+$\oplus$ , $\otimes$ & as duas \textbf{faces} & Teor.~\ref{fis:thm:duas} & \\
+$\infty$ & o \textbf{parceiro do zero}: $\tau(0)$ & Teor.~\ref{fis:thm:zeroinf} & \\
+$\Delta$ & a \textbf{separação} do par, ao quadrado & Cor.~\ref{fis:cor:disc} & \\
+$G$ , $\Phi$ & a \textbf{medida} e a \textbf{folga} & Def.~\ref{fis:def:objeto}, Def.~\ref{fis:def:folga} & \\
+$\propto$ & a mesma razão & Cor.~\ref{fis:cor:prop} & \\
+$\Sigma$ & a contagem pela estrutura & Teor.~\ref{fis:thm:central} & \\
+\midrule
+\multicolumn{4}{@{}l@{}}{\emph{e em dívida, que se declara:}} \\
+$\Pi$ & o produto iterado & \textbf{sem nascimento} --- usa-se, e não se funda & \\
+$\equiv$ & (vários sentidos) & \textbf{sem nascimento} --- reservá-lo à congruência & \\
+$\in$ & a pertença & \textbf{sem nascimento} --- é a igualdade sobre uma fibra & \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\emph{Uma obra que factura os seus custos tem de facturar também as suas
+dívidas}, e estas três estão em aberto à data desta linha.
+
+\medskip\noindent\textbf{E os dois extremos da tabela são um bloco, e não dois
+avulsos.} O $0$ é o extremo \emph{sem escolha}; o $\infty$ não é um lugar longe ---
+é o que a dobra faz ao $0$ quando ela se lê no par, e o Teor.~\ref{fis:thm:zeroinf}
+mostra que o terceiro degrau o exclui \emph{por construção}:
+\[
+\boxed{\;\underset{\text{extremo da escolha}}{0}\ \longleftrightarrow\
+\underset{\text{a interface}}{\bigstar}\ \longleftrightarrow\
+\underset{\text{o que o andar exclui}}{\infty}\;}
+\]
+\emph{E a estrela está no meio porque é onde as duas leituras colam} --- ali negar
+é inverter, e multiplicar por ela é somar um
+(Cor.~\ref{fis:cor:estrelaanti}, Teor.~\ref{fis:thm:metainducao}).
+
+\medskip\noindent\textbf{E a dinâmica do operador caracteriza-se numa linha, e é
+preciso dizê-la com o alcance certo.} O que a torre tem de fixo não é um ponto: é
+o \textbf{passo}. E o ponto fixo do passo existe --- só que \emph{fora do andar em
+que o passo corre}:
+\[
+\boxed{\;\text{no finito, a dobra fixa um \textbf{ponto}; na torre, o que fica fixo é o \textbf{passo}}\;}
+\]
+\emph{E não se diga «fora de todos os corpos», porque é falso}: o
+Cor.~\ref{fis:cor:corpofinito} mostra que numa face finita o ponto fixo
+\textbf{existe}, para cerca de metade dos metais, e ali a órbita cai nele e não há
+corte a fazer. \textbf{O que é verdade é mais fino}: ele está fora dos
+\emph{degraus} da escada, onde o discriminante nunca é quadrado --- e o corte é o
+que acontece quando a equação do ponto fixo não fecha no corpo onde a órbita
+corre.
+
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Álgebra}
 % ═══════════════════════════════════════════════════════════════════════════
@@ -2414,6 +2470,47 @@ e com que conta}: porque o discriminante não é quadrado, e o discriminante é 
 invariante que o Teor.~\ref{fis:thm:antissim}(6) já tinha identificado como o
 único que a dobra deixa passar. \textbf{É a mesma peça a fazer os dois
 trabalhos}: medir a separação do par, e dizer se ela cabe no andar.
+
+\begin{corolario}[e diga-se o que \emph{não} é verdade: ele não está fora de todos os corpos]\label{fis:cor:corpofinito}
+A afirmação «o gerador está sempre fora» vale \textbf{do andar}, e não de qualquer
+estrutura onde a órbita corra. \emph{Diz-se o alcance, porque a frase curta é
+falsa}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O critério é local ao corpo, e não absoluto.} Pelo
+Cor.~\ref{fis:cor:geradorfora} lido ao contrário, $x^{2}=mx+1$ tem raiz num corpo
+exactamente quando $\Delta=m^{2}+4$ é quadrado \emph{nesse corpo}. \emph{É uma
+pergunta sobre o corpo, não sobre a equação.}
+\item[(2)] \textbf{Nos degraus da escada nunca é} --- e aí a razão são as duas
+desigualdades do Cor.~\ref{fis:cor:geradorfora}, não uma varredura.
+\item[(3)] \textbf{Mas numa \emph{face finita} é, para cerca de metade dos
+metais.} E então a órbita \textbf{cai} no ponto fixo, e não há corte a fazer.
+\item[(4)] \textbf{Donde o corte não é defeito do andar:}
+\[
+\boxed{\;\text{o corte é o que acontece quando a equação do ponto fixo \textbf{não fecha no corpo onde a órbita corre}}\;}
+\]
+\emph{Noutro corpo, a mesma órbita fecha}, e o degrau seguinte não teria o que
+acrescentar.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) é o Cor.~\ref{fis:cor:geradorfora}(1) sem a hipótese sobre o andar: completar
+o quadrado dá $(2x\ominus m)^{2}=\Delta$, e a solubilidade é a existência da raiz
+de $\Delta$.
+
+(2) é aquele corolário.
+
+(3) A raiz existe conforme $\Delta$ seja ou não quadrado no corpo, e numa face
+finita os quadrados são cerca de metade dos elementos não nulos.
+
+(4) é a leitura de (2) e (3) juntas.
+\end{proof}
+
+\medido{\code{tests/corpos.c} §C1. Contados, pelo critério de Euler, os metais com
+ponto fixo em faces de $5$, $7$, $11$, $13$, $127$ e $257$ elementos: $2$ de $4$,
+$2$ de $6$, $4$ de $10$, $6$ de $12$, $\mathbf{62}$ de $\mathbf{126}$ e $128$ de
+$256$. \emph{Cerca de metade, e nunca todos nem nenhum} --- que é exactamente o
+que a cláusula~(4) precisa para não ser uma frase.}
 
 \subsection*{O zero e o infinito são o mesmo bloco, e é isso que justifica o símbolo}
 
