@@ -717,6 +717,134 @@ pode depender da família --- na estrela do Teor.~\ref{fis:thm:duasfaces}(3), é
 face aditiva}: lá o invariante é $0$, e nenhum módulo faz de zero um.
 \end{observacao}
 
+\section{A simbologia: o ponto, o tecido e o fecho}\label{fis:simbolos}
+
+\noindent \textbf{Os símbolos de relação não são vocabulário primitivo desta
+obra.} Primeiro há o que a relação \emph{não separa}; depois o que ela
+\emph{separa}; depois a \emph{orientação} dessa separação; e por fim a decisão de
+\emph{incluir ou não} o ponto onde ela fecha. \emph{Os seis sinais saem dessas
+quatro perguntas}, e é isso que se prova aqui --- não se define.
+
+\medskip\noindent\textbf{E o instrumento é o mesmo de sempre, aplicado um andar
+acima.} Até agora a dobra agiu sobre pontos. \emph{Agora aplica-se ao espaço dos
+\textbf{pares}}, e é daí que a simbologia cai.
+
+\begin{teorema}[a relação parte-se em três, e a partição é a da dobra]\label{fis:thm:simbolos}
+Sobre $S\times S$ considere-se a \textbf{transposição}
+$\tau(x,y)=(y,x)$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{$\tau$ é uma dobra.} $\tau\circ\tau=\mathrm{id}$, que é a
+Def.~\ref{fis:def:op} --- e a única identidade que ela pede.
+\item[(2)] \textbf{O seu vinco é a coincidência.}
+$\operatorname{Fix}(\tau)=\{(x,x)\}$: \emph{o par que $\tau$ não move é o par que
+não é par}. Pelo Teor.~\ref{fis:thm:doispontos}(0), é ali --- e só ali --- que
+$\tau$ tem ordem \textbf{um}.
+\item[(3)] \textbf{E $S\times S$ parte-se em três, sem resto.} Pelo
+Teor.~\ref{fis:thm:doispontos}(3) aplicado a $\tau$,
+\[
+\boxed{\;S\times S\;=\;\underbrace{\operatorname{Fix}(\tau)}_{\text{coincide}}
+\ \sqcup\ \underbrace{\bigsqcup_{\text{pares}}\bigl\{(x,y),(y,x)\bigr\}}_{\text{separa}}\;}
+\]
+--- e cada bloco da segunda espécie tem \textbf{exactamente dois} elementos, que
+$\tau$ troca.
+\item[(4)] \textbf{Donde as duas primeiras leituras, e são duas porque as
+espécies são duas.} Escreve-se $x=y$ quando o par está no vinco, e $x\neq y$
+quando está num bloco de dois. \emph{Não são duas relações a definir: são as duas
+espécies do Teor.~\ref{fis:thm:doispontos}(0), lidas em $S\times S$.} A igualdade
+\textbf{fecha}; a diferença \textbf{abre}, e o que ela abre é o tecido.
+\item[(5)] \textbf{A orientação é uma escolha por bloco --- e a dobra não a dá.}
+Orientar é escolher um dos dois elementos de cada bloco. Pelo
+Teor.~\ref{fis:thm:doispontos}(2) o par é \textbf{não ordenado} --- a dobra
+produz os dois e não diz qual é o primeiro ---, pelo que a escolha
+\emph{acrescenta} exactamente um bit por bloco. Feita a escolha, chama-se $<$ ao
+escolhido e $>$ ao outro:
+\[
+\boxed{\;\tau\ \text{troca}\ <\ \text{com}\ >\;}
+\]
+\emph{As duas leituras não são dois símbolos parecidos: são os dois lados que a
+dobra permuta.}
+\item[(6)] \textbf{E uma orientação não é ainda uma ordem.} Ser ordem pede
+\textbf{transitividade}, e isso a dobra não dá: ela parte em blocos e não os
+relaciona entre si. \emph{É este o preço exacto do $<$}, e diz-se: um bit por
+bloco, mais a coerência entre blocos.
+\item[(7)] \textbf{O fecho é juntar o vinco.} Com $\le$ a designar a união do
+lado escolhido com $\operatorname{Fix}(\tau)$,
+\[
+\boxed{\;\le\;=\;<\ \sqcup\ =\;,\qquad\qquad \ge\;=\;>\ \sqcup\ =\;}
+\]
+--- \emph{o tecido acrescido do seu vinco}. E daí, sem se acrescentar nada:
+$\le$ e $\ge$ cobrem $S\times S$ e cruzam-se exactamente no vinco, ao passo que
+$<$ e $>$ cobrem-no menos o vinco e não se cruzam.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $\tau(\tau(x,y))=(x,y)$.
+
+(2) $\tau(x,y)=(x,y)$ obriga $y=x$; e reciprocamente.
+
+(3) É o Teor.~\ref{fis:thm:doispontos}(3) com $\tau$ no lugar de $\partial$ e
+$S\times S$ no lugar de $S$; a cláusula~(1) daquele teorema dá que cada bloco tem
+um ou dois elementos, e (2) daqui identifica os de um.
+
+(4) e (7) são leitura da partição: um nome por bloco de~(3), e a união de um lado
+com o vinco.
+
+(5) A troca é (1); que a escolha não venha da dobra é o
+Teor.~\ref{fis:thm:doispontos}(2), que produz o par sem ordem.
+
+(6) A dobra parte $S\times S$ em blocos e não diz nada sobre pares de blocos
+distintos; a transitividade é uma condição sobre três elementos, e nenhuma
+cláusula da Def.~\ref{fis:def:op} a alcança.
+\end{proof}
+
+\medskip\noindent\textbf{E a árvore das perguntas é esta, que é o que a
+computação corre.}
+\[
+\begin{array}{rcl}
+\text{a relação colapsa?} & \text{sim} & \Longrightarrow\ =\\[2pt]
+ & \text{não} & \Longrightarrow\ \neq\\[4pt]
+\text{a separação orienta-se?} & \text{sim} & \Longrightarrow\ <\ \text{ou}\ >\\[4pt]
+\text{o vinco entra?} & \text{sim} & \Longrightarrow\ \le\ \text{ou}\ \ge
+\end{array}
+\]
+\emph{Não são seis testes soltos: são três perguntas, e cada uma só faz sentido
+depois da anterior.} \textbf{A computação não começa nos símbolos: começa naquilo
+que os símbolos conseguem distinguir.}
+
+\medskip\noindent\textbf{E o quadro vem depois dos teoremas, e não antes.}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+símbolo & o que a relação lê & regime \\
+\midrule
+$=$ & coincidência & o \textbf{vinco} de $\tau$ \\
+$\neq$ & separação, sem orientação & o \textbf{tecido} \\
+$<$ & separação orientada & um lado do tecido \\
+$>$ & a leitura dual & o outro lado \\
+$\le$ & o lado, com o vinco & tecido \textbf{fechado} \\
+$\ge$ & a leitura dual, com o vinco & tecido \textbf{fechado} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{E isto já estava a ser usado, sem se dizer.} A
+cláusula~(2) do Teor.~\ref{fis:thm:central} parte o rectângulo por
+«$x\le f(i)$ ou $f(i)<x$, e exactamente uma das duas» --- \emph{que é o fechado e
+o aberto a esgotarem}, pela cláusula~(7). E a ordem \textbf{total} que aquele
+teorema declara precisar é, na leitura daqui, a exigência de que a orientação
+esteja definida em \textbf{todos} os blocos e seja coerente --- que é a
+cláusula~(6). \emph{O teorema central pedia a simbologia inteira, e ela só agora
+tem chão.}
+
+\medskip\noindent\emph{E diga-se o que não se derivou}, porque a obra não vive de
+mais do que prova. \textbf{A igualdade como relação não é criada aqui}: ter um
+mapa $\partial\colon S\to S$ já pressupõe saber quando dois argumentos são o
+mesmo. O que este teorema dá é o \textbf{critério} --- formar o par e perguntar
+se a dobra sobre ele é efectiva --- e é o critério, e não a relação, que uma
+máquina corre. \emph{É por isso que a Def.~\ref{fis:def:objeto} pede igualdade
+\textbf{decidível} e não igualdade}: o que ela pede é que o critério termine.
+
 
 \section{Os dois símbolos, a lista, e o par centro/desvio}\label{fis:binario}
 
@@ -2258,7 +2386,7 @@ $A\chi_k=(m-2\abs{k})\chi_k$ exato em inteiros, e o corte com $\abs{k}2^{m-1}$
 arestas. §AN28: $c=2^{-m}\mathcal{F}(f)$ a recompor $f$ nos $256$, com o passo
 sem a normalização a bater só nos zeros de $f$.}
 
-\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva},~\ref{fis:lem:comutapar}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:endereco},~\ref{fis:thm:duascoord},~\ref{fis:thm:escada},~\ref{fis:thm:tecidos},~\ref{fis:thm:central},~\ref{fis:thm:largura},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}; Def.~\ref{fis:def:coord2}}
+\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord},~\ref{fis:thm:simbolos}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva},~\ref{fis:lem:comutapar}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:endereco},~\ref{fis:thm:duascoord},~\ref{fis:thm:escada},~\ref{fis:thm:tecidos},~\ref{fis:thm:central},~\ref{fis:thm:largura},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}; Def.~\ref{fis:def:coord2}}
         {$B$, a lista $I$, o par $(m,\delta)$, o anel de grupo, a escada}
         {\code{tests/meio.c} §M3--§M7; \code{tests/aranha\_n.c} §AN12, §AN15--§AN18, §AN26--§AN28, §AN32--§AN36}
 
