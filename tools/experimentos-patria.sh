@@ -98,6 +98,9 @@ echo
 echo '==================== AS OITO RELAÇÕES (tests/simbolos.c) ===================='
 cc -O2 -std=c99 -w -Ilib -Itests -o /tmp/simbolos tests/simbolos.c -lm && /tmp/simbolos | tail -3
 echo
+echo '==================== ζ ACUMULA, μ DESACUMULA (tests/zetamu.c) ===================='
+cc -O2 -std=c99 -w -Ilib -Itests -o /tmp/zetamu tests/zetamu.c -lm && /tmp/zetamu | grep -a -E '#UNIT|unidades,'
+echo
 echo '==================== OS SEIS SINAIS CONTRA O ORÁCULO ===================='
 B=\$(mktemp -d); cd "\$B"
 /tmp/sqlb t "CREATE TABLE t (a,c)" >/dev/null
