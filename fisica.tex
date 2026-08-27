@@ -212,11 +212,10 @@ haver dívida por cobrar.
 \text{A dobra \textbf{mede} o que foi perdido.} & \text{Def.~\ref{fis:def:folga}, Cor.~\ref{fis:cor:folga}}
 \end{array}}
 \]
-
 \medskip\noindent O documento parte de \emph{uma} aplicação e de \emph{uma}
-cláusula sobre ela: que a sua ordem seja dois. \textbf{Nem sequer se dão dois
-pontos} --- eles saem, e saem porque uma aplicação com volta não tem para onde
-levar um ponto além de si e de um outro. Não se supõem números,
+identidade sobre ela: $\partial\circ\partial=\mathrm{id}$. \textbf{Nem o dois se
+dá, e nem sequer se dão dois pontos} --- saem, e saem porque uma aplicação que
+volta não tem para onde levar um ponto além de si e de um outro. Não se supõem números,
 nem símbolos, nem quantos são: \emph{tudo o que segue é o que a dobra produz, e
 produz por indução}.
 
@@ -270,8 +269,8 @@ divisor de dois ou é um ou é dois. \textbf{É aqui que o dois nasce}, e nasce 
 exclusão e não por decreto. \emph{Chama-se \textbf{efectiva} à segunda espécie},
 e é dela que o resto fala.
 \end{enumerate}
-\emph{E daqui em diante $\partial$ é efectiva}, que é a única hipótese que as
-cláusulas seguintes acrescentam:
+\emph{E daqui em diante, dentro deste teorema, $\partial$ é efectiva} --- que é a
+única hipótese que as cláusulas seguintes acrescentam:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{Toda a órbita é um ciclo de comprimento um ou dois, e nunca
 mais.} A órbita de $x$ é $\{x,\partial x\}$, e aplicar $\partial$ outra vez
@@ -302,7 +301,6 @@ $\operatorname{Fix}(\partial)=\varnothing$: \emph{não há vinco}. Um suporte de
 elemento só admite $\partial=\mathrm{id}$, que a efetividade exclui.
 \end{enumerate}
 \end{teorema}
-
 \begin{proof}
 (0) A identidade dá que a ordem de $\partial$ \textbf{divide} dois: aplicá-la duas
 vezes devolve o argumento. Os divisores de dois são um e dois, e mais nenhum ---
@@ -328,6 +326,14 @@ máximo dois). Por (1) cada bloco tem um ou dois elementos.
 (4) Num suporte de um elemento a única aplicação é a identidade. Num de dois, a
 efetividade obriga à troca, e a troca não fixa nenhum dos dois.
 \end{proof}
+
+\medskip\noindent\textbf{E fica aqui a convenção, com o alcance dito.} \emph{Em
+todo o resto deste documento, $\partial$ designa uma dobra \textbf{efectiva}} ---
+a segunda espécie da cláusula~(0). \textbf{Onde a identidade for admitida,
+diz-se}; e onde um enunciado disser «a dobra» sem mais, é a efectiva que se
+entende. \emph{A primeira espécie não desaparece}: ela é o caso em que o par
+degenera, e é ela que o Teor.~\ref{fis:thm:simbolos} lê como \textbf{igualdade}.
+
 
 \medskip\noindent\textbf{E a aresta é a memória --- é isto que ela é, e não uma
 figura.} O par $\{a,b\}$ do Teor.~\ref{fis:thm:doispontos}(2) é \textbf{não
@@ -729,16 +735,20 @@ quatro perguntas}, e é isso que se prova aqui --- não se define.
 acima.} Até agora a dobra agiu sobre pontos. \emph{Agora aplica-se ao espaço dos
 \textbf{pares}}, e é daí que a simbologia cai.
 
-\begin{teorema}[a relação parte-se em três, e a partição é a da dobra]\label{fis:thm:simbolos}
-Sobre $S\times S$ considere-se a \textbf{transposição}
-$\tau(x,y)=(y,x)$. Então:
+\begin{teorema}[a relação parte-se em três, e as relações são oito]\label{fis:thm:simbolos}
+Sobre $S\times S$, com $\abs{S}\ge2$ --- \emph{e é preciso, senão $\tau$ é a
+identidade e não há espécie nenhuma a separar} ---, considere-se a
+\textbf{transposição} $\tau(x,y)=(y,x)$. Então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{$\tau$ é uma dobra.} $\tau\circ\tau=\mathrm{id}$, que é a
-Def.~\ref{fis:def:op} --- e a única identidade que ela pede.
+\item[(1)] \textbf{$\tau$ é uma dobra, e é efectiva.}
+$\tau\circ\tau=\mathrm{id}$, que é a Def.~\ref{fis:def:op} --- e a única
+identidade que ela pede; e com $\abs{S}\ge2$ ela move alguma coisa, logo é da
+segunda espécie do Teor.~\ref{fis:thm:doispontos}(0).
 \item[(2)] \textbf{O seu vinco é a coincidência.}
 $\operatorname{Fix}(\tau)=\{(x,x)\}$: \emph{o par que $\tau$ não move é o par que
-não é par}. Pelo Teor.~\ref{fis:thm:doispontos}(0), é ali --- e só ali --- que
-$\tau$ tem ordem \textbf{um}.
+não é par}. \emph{E note-se de que se fala}: $\tau$ tem ordem \textbf{dois} como
+aplicação; o que ali tem comprimento \textbf{um} é a \textbf{órbita} do ponto ---
+Teor.~\ref{fis:thm:doispontos}(1), e não a cláusula~(0).
 \item[(3)] \textbf{E $S\times S$ parte-se em três, sem resto.} Pelo
 Teor.~\ref{fis:thm:doispontos}(3) aplicado a $\tau$,
 \[
@@ -781,6 +791,42 @@ lado escolhido com $\operatorname{Fix}(\tau)$,
 $\le$ e $\ge$ cobrem $S\times S$ e cruzam-se exactamente no vinco, ao passo que
 $<$ e $>$ cobrem-no menos o vinco e não se cruzam.
 \end{enumerate}
+\item[(8)] \textbf{E o quadro fecha em OITO, contando o nulo --- que é preciso, e
+é por ele que o número sai certo.} Feita a escolha de~(5), $S\times S$ está
+partido em \textbf{três} blocos: $<$, $=$ e $>$. \emph{Uma relação é uma escolha
+de quais deles se tomam}, e as escolhas são $2^{3}$:
+\[
+\boxed{\;\text{três blocos}\ \Longrightarrow\ 2^{3}=\mathbf{8}\ \text{relações, e nem uma a mais}\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}ccccl@{}}
+\toprule
+$>$ & $=$ & $<$ & relação & o que diz \\
+\midrule
+$0$&$0$&$0$ & \textbf{nula} & nunca \\
+$0$&$0$&$1$ & $<$ & um lado \\
+$0$&$1$&$0$ & $=$ & o vinco \\
+$0$&$1$&$1$ & $\le$ & o lado com o vinco \\
+$1$&$0$&$0$ & $>$ & o outro lado \\
+$1$&$0$&$1$ & $\neq$ & os dois lados, sem o vinco \\
+$1$&$1$&$0$ & $\ge$ & o outro lado com o vinco \\
+$1$&$1$&$1$ & \textbf{total} & sempre \\
+\bottomrule
+\end{tabular}
+\end{center}
+\emph{O índice da relação é o subconjunto de blocos que ela toma, lido em
+binário} --- e é a mesma leitura do Teor.~\ref{fis:thm:largura} em $w=3$ e do
+Teor.~\ref{fis:thm:vizdobra} em posto três. \textbf{Sem a nula e a total são
+seis, e seis não é potência de dois}: é o nulo que faz o quadro fechar.
+\item[(9)] \textbf{E há duas dobras sobre as oito, e elas comutam.} A
+\textbf{complementação} --- tomar os blocos que ficaram de fora --- troca
+$\varnothing$ com a total, $=$ com $\neq$, $<$ com $\ge$ e $>$ com $\le$:
+\emph{quatro pares, e \textbf{nenhum} fixo}, porque três blocos não se repartem
+ao meio. A \textbf{transposição} $\tau$ troca $<$ com $>$ e $\le$ com $\ge$, e
+fixa as outras quatro. \textbf{As duas comutam}, pelo que geram o quarteto do
+Teor.~\ref{fis:thm:quarteto} --- \emph{e é o mesmo padrão do
+Teor.~\ref{fis:thm:vizdobra}: dobras independentes que comutam por agirem em
+coisas distintas}. Uma mexe em \emph{quais} blocos; a outra em \emph{qual lado}.
 \end{teorema}
 
 \begin{proof}
@@ -817,7 +863,8 @@ computação corre.}
 depois da anterior.} \textbf{A computação não começa nos símbolos: começa naquilo
 que os símbolos conseguem distinguir.}
 
-\medskip\noindent\textbf{E o quadro vem depois dos teoremas, e não antes.}
+lista os \textbf{seis com nome}, que são os oito da cláusula~(8) menos a nula e a
+total, essas sem sinal próprio porque nada há a escrever quando nunca ou sempre.
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -832,6 +879,46 @@ $\ge$ & a leitura dual, com o vinco & tecido \textbf{fechado} \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\medskip\noindent\textbf{E há um sétimo sinal, que \emph{não} sai da dobra
+sozinha --- e é por isso que fica fora do quadro.} A proporcionalidade,
+$x\propto y$, não é uma sétima resposta às três perguntas: é a \textbf{igualdade
+lida noutro sítio}, e esse sítio custa a face multiplicativa.
+
+\begin{corolario}[a proporção é a igualdade um degrau acima]\label{fis:cor:prop}
+\emph{Onde houver a segunda face} (Teor.~\ref{fis:thm:duas}(4)) \emph{e o suporte
+não tiver divisores de zero} --- e as duas hipóteses declaram-se, porque nenhuma
+sai da Def.~\ref{fis:def:op} --- a relação
+\[
+\boxed{\;(p,q)\propto(r,s)\ :\Longleftrightarrow\ p\,s=q\,r\;}
+\]
+é a \textbf{igualdade} do Teor.~\ref{fis:thm:simbolos}(4) lida sobre o degrau
+$X_3$ do Teor.~\ref{fis:thm:escada}: \emph{$\propto$ é $=$ depois de se passar às
+razões}, e é exactamente o quociente que constrói aquele degrau.
+\emph{Não é igualdade de grandezas: é igualdade da relação entre grandezas.}
+\end{corolario}
+
+\begin{proof}
+O degrau $X_3$ é, por construção, $\bigl(X_2\times X_2^{\bullet}\bigr)/{\sim}$
+com $(p,q)\sim(r,s)\iff ps=qr$; dizer $\propto$ é dizer que as duas razões caem
+na mesma classe, isto é que são o mesmo ponto de $X_3$ --- e ser o mesmo ponto é
+a cláusula~(4). Que $\sim$ seja transitiva pede a ausência de divisores de zero:
+de $ps=qr$ e $rv=su$ tira-se $pv\,s=qu\,s$, e cortar o $s$ é cancelar.
+\end{proof}
+
+\medskip\noindent\textbf{E o custo dela lê-se na escada dos custos.} A diferença
+custava um bloco; a orientação, um bit; a ordem, coerência. \emph{A proporção
+custa a segunda face} --- sem $\otimes$ não há razão a formar, e o sinal não tem
+sobre o que falar. É o degrau seguinte da mesma conta.
+
+\medskip\noindent\textbf{E é isto que a trajetória lê.} Pelo
+Teor.~\ref{fis:thm:curvatura}(3), trocar $G$ por $cG$ com $c>0$ dá \emph{a mesma
+trajetória}; e o Teor.~\ref{fis:thm:magnitude}(4) diz que a escala «é real e não
+é observável pela trajetória», por o passo ler um quociente. \emph{Isto é
+$\propto$ a agir}: o percurso não distingue $G$ de $cG$ porque \textbf{o que ele
+compara é a razão, e não a grandeza}. \textbf{O que é invariante de escala é
+invariante de $\propto$}, e é por isso que o passo não pode ser um extremo
+variacional --- se multiplicar por $c$ não muda nada, não estava a medir nada.
 
 \medskip\noindent\textbf{E isto já estava a ser usado, sem se dizer.} A
 cláusula~(2) do Teor.~\ref{fis:thm:central} parte o rectângulo por
@@ -3524,14 +3611,14 @@ sair dos quatro. \emph{No rotor há um só gerador}, e é preciso aplicá-lo
 por isso que se trocam: o rotor faz, de cada vez, \emph{um quarto de volta} ---
 que é o nome próprio do gerador de ordem quatro, e é o que a §\ref{fis:pi} há de
 ler como $\pi/2$ quando o $\pi$ existir. \emph{Aqui não precisa: o que o define é
-$R^{4}=\mathrm{id}$}, tal como o que define a dobra é $\operatorname{ord}=2$.
+$R^{4}=\mathrm{id}$}, tal como o que define a dobra é a sua identidade.
 \[
 \boxed{\;\text{quatro lugares, e dois modos de os ter: quatro dobras, ou uma volta em quatro passos}\;}
 \]
 
-\medskip\noindent\textbf{E daqui sai onde o rotor pode existir.} Uma dobra ---
-$\operatorname{ord}=2$ --- aplicada duas vezes dá a identidade, \emph{por
-definição}. O rotor aplicado duas vezes dá $-\mathrm{id}$. Logo \textbf{o rotor
+\medskip\noindent\textbf{E daqui sai onde o rotor pode existir.} Uma dobra efectiva ---
+a identidade da Def.~\ref{fis:def:op} --- aplicada duas vezes dá a identidade,
+\emph{por definição}. O rotor aplicado duas vezes dá $-\mathrm{id}$. Logo \textbf{o rotor
 não é uma dobra}, e só aparece onde $-\mathrm{id}\neq\mathrm{id}$, isto é onde
 $2\neq0$: nos dois símbolos do Teor.~\ref{fis:thm:B} ele \emph{não existe}, e o
 que lá há é o quarteto. \emph{A cláusula~(3) não é uma limitação do quarteto: é a
@@ -4541,9 +4628,11 @@ construção põe dois, é a única que existe. \emph{A Def.~\ref{fis:def:op} n�
 permite escolhas}, e a construção tem um só passo: \textbf{sobre dois objetos o
 operador é a troca, e não há outro}.
 
-\begin{lema}[sobre dois, o operador é único]\label{fis:lem:doisunico}
-Sobre um par $\{u,v\}$, a Def.~\ref{fis:def:op} tem \textbf{exactamente uma}
-solução: $\partial u=v$ e $\partial v=u$. Não há segunda, e não há escolha.
+\begin{lema}[sobre dois, a dobra efectiva é única]\label{fis:lem:doisunico}
+Sobre um par $\{u,v\}$ a identidade da Def.~\ref{fis:def:op} tem \textbf{duas}
+soluções --- a identidade e a troca ---, que são as duas espécies do
+Teor.~\ref{fis:thm:doispontos}(0). \emph{Das duas, a \textbf{efectiva} é uma só}:
+$\partial u=v$ e $\partial v=u$. Não há segunda, e não há escolha.
 \end{lema}
 
 \begin{proof}
