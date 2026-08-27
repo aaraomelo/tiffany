@@ -2313,6 +2313,187 @@ potências de dois sem se copiarem um ao outro.
 \]
 
 
+\section{A auto-semelhança, a dimensão, e o que o andar deixa de fora}\label{fis:fractal}
+
+\noindent\textbf{A auto-semelhança não é uma propriedade a acrescentar: é a
+indução, lida sobre o objecto em vez de sobre a construção.} O
+Teor.~\ref{fis:thm:tecidos} diz que cada degrau é o \emph{mesmo} passo aplicado
+ao anterior; dizer que o objecto é auto-semelhante é dizer exactamente isso, e
+mais nada. \emph{Não há aqui um conceito novo}, há a mesma álgebra a repetir-se,
+e é por isso que ela cabe nesta Parte e não numa à parte.
+\[
+\boxed{\;\text{o passo é um só; \textbf{auto-semelhante} é o nome do objecto que ele constrói}\;}
+\]
+
+\medskip\noindent\textbf{E daqui sai a dimensão --- sem logaritmo, sem medida, e
+sem número trazido de fora.} O que segue é a leitura da cobertura que o próprio
+andar já dá.
+
+\begin{teorema}[a dimensão é um corte, e decide-se por comparação]\label{fis:thm:dimcorte}
+Guardando $k$ das $b$ escolhas em cada passo:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A cobertura do nível $n$ tem $k^{n}$ peças, cada uma $b$ vezes
+menor que a do nível anterior.} É a auto-semelhança contada: o passo é o mesmo,
+logo o nível $n$ é o nível um repetido $n$ vezes.
+\item[(2)] \textbf{Donde a soma das potências $s$ dos diâmetros é
+$(k\,b^{-s})^{n}$}, e ela só não degenera --- nem colapsa, nem cresce sem cota
+--- quando $k=b^{s}$. \emph{É esse $s$ que se chama dimensão}, e é o único
+expoente que o objecto admite.
+\item[(3)] \textbf{E esse $s$ é um \emph{corte}, decidido por comparação e não
+por avaliação:}
+\[
+\boxed{\;A=\Bigl\{\tfrac{p}{q}\ \text{do terceiro degrau}\ :\ b^{p}<k^{q}\Bigr\}\;}
+\]
+--- \emph{duas potências e uma comparação}, que são operações do andar. \textbf{E
+não aparece logaritmo nenhum}, nem é preciso: o logaritmo é a \emph{leitura} do
+corte, e o corte é a coisa.
+\item[(4)] \textbf{E ele fecha no andar exactamente quando $b$ e $k$ são
+potências de um mesmo elemento.} Com $b=m^{i}$ e $k=m^{j}$ vem $s=j/i$, que é
+habitante do terceiro degrau; fora disso o corte fica \textbf{fora} dele, e é o
+quarto degrau que o recebe.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são a contagem e a conta.
+
+(3) $k=b^{s}$ com $s=p/q$ é $k^{q}=b^{p}$, e o corte separa os $p/q$ conforme a
+comparação --- que a ordem do Teor.~\ref{fis:thm:ordem} decide, e que não pede
+avaliar potência nenhuma além de as formar.
+
+(4) Se $b=m^{i}$ e $k=m^{j}$, então $b^{j}=k^{i}$ e o corte fecha em $j/i$.
+Reciprocamente, $b^{p}=k^{q}$ com $p,q\ge1$ obriga $b$ e $k$ a serem potências de
+um mesmo elemento, com expoentes proporcionais. \emph{É o mesmo argumento que faz
+o corte da raiz não fechar}, e é o Teor.~\ref{fis:thm:estrelaencaixe} outra vez,
+um andar acima.
+\end{proof}
+
+\medido{\code{tests/fractal.c} §FR2. Cinco coberturas, decididas por comparação
+inteira e sem logaritmo: $k=2$ de $b=3$ --- o Cantor --- \textbf{não} fecha, e
+$3$ de $5$ também não; $2$ de $4$ fecha em $s=1/2$, $2$ de $8$ em $s=1/3$, e o
+intervalo inteiro em $s=1$. \emph{A dimensão nem sempre fica fora do andar}, e
+por isso não se afirma que fique.}
+
+\medskip\noindent\textbf{E há um critério para isto, e ele já estava nesta obra
+--- por ligar.} O Cor.~\ref{fis:cor:disc}(1) diz que $\Delta=(a-b)^{2}$ é o
+quadrado da separação dos dois extremos. \emph{Logo os dois extremos são
+habitantes do andar exactamente quando $\Delta$ é quadrado nele} --- porque
+$a$ e $b$ recuperam-se de $s$ e de $\Delta$, e só a raiz de $\Delta$ falta.
+\[
+\boxed{\;\text{o ponto fixo está no andar}\iff\Delta\ \text{é quadrado no andar}\;}
+\]
+
+\begin{corolario}[o gerador está sempre fora, e o discriminante di-lo]\label{fis:cor:geradorfora}
+Para a família metálica $x^{2}=mx+1$ do Teor.~\ref{fis:thm:estrela}(2), vale
+$s=m$ e $p=-1$, donde
+\[
+\boxed{\;\Delta=m^{2}+4\;}
+\]
+e \textbf{esse nunca é quadrado}: fica estritamente entre $m^{2}$ e $(m+2)^{2}$,
+e o único quadrado entre eles é $(m+1)^{2}=m^{2}+2m+1$, que igualado a $m^{2}+4$
+pede $2m=3$ --- sem solução. \emph{Portanto o ponto fixo do passo metálico está
+sempre fora do andar em que o passo corre}, e é isso, e só isso, que faz o degrau
+seguinte acrescentar alguma coisa.
+\end{corolario}
+
+\begin{proof}
+$\Delta=s^{2}-4p$ com $s=m$ e $p=-1$ dá $m^{2}+4$. As desigualdades são
+$m^{2}<m^{2}+4$ e $m^{2}+4<m^{2}+4m+4$ para $m\ge1$; entre dois quadrados
+consecutivos de índices $m$ e $m+2$ só cabe o de índice $m+1$.
+\end{proof}
+
+\medido{\code{tests/fractal.c} §FR1. Varrido $m$ de $1$ a cinco milhões:
+\textbf{nenhum} $m^{2}+4$ é quadrado. \emph{E a varredura não é a prova} --- a
+prova é a das duas desigualdades, e cabe em duas linhas; a varredura só confirma
+que não há caso pequeno a contradizê-la.}
+
+\medskip\noindent\textbf{E isto fecha o que a §\ref{fis:escada} tinha deixado
+declarado sem prova.} Ali disse-se que o corte não é elemento do andar que corta,
+e que o gerador não pode ser membro do que gera. \emph{Agora sabe-se \emph{porquê}
+e com que conta}: porque o discriminante não é quadrado, e o discriminante é o
+invariante que o Teor.~\ref{fis:thm:antissim}(6) já tinha identificado como o
+único que a dobra deixa passar. \textbf{É a mesma peça a fazer os dois
+trabalhos}: medir a separação do par, e dizer se ela cabe no andar.
+
+\subsection*{O zero e o infinito são o mesmo bloco, e é isso que justifica o símbolo}
+
+\noindent\textbf{Esta obra recusou escrever $\infty$ enquanto ele fosse um lugar
+longe --- e a recusa mantém-se.} O que se acrescenta aqui é que ele \emph{não é}
+um lugar longe: é o \textbf{parceiro do zero} sob a dobra lida no par, e um
+parceiro não é um lugar.
+
+\begin{teorema}[o infinito é o dual do zero, e o par é o da dobra]\label{fis:thm:zeroinf}
+Leiam-se os habitantes do terceiro degrau em \textbf{coordenadas do par},
+$[p:q]$, como o Teor.~\ref{fis:thm:escada} os constrói. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A dobra do par é a transposição, e é a mesma de sempre.} A
+troca $[p:q]\mapsto[q:p]$ é a $\tau$ do Teor.~\ref{fis:thm:simbolos}, aplicada às
+duas entradas de um habitante em vez de às de uma relação. \emph{Não é uma dobra
+nova}: é a mesma, um andar acima.
+\item[(2)] \textbf{Lida sobre os elementos, ela é a inversão.} Onde $q$ for
+cancelável, $[p:q]$ é a razão $p/q$ e a troca dá $q/p$ --- \emph{o inverso}, que
+é a face que o terceiro degrau fecha (Teor.~\ref{fis:thm:escada}, última coluna).
+\item[(3)] \textbf{E ela leva o zero num ponto que o andar não tem.} O zero é
+$[0:1]$; a troca dá $[1:0]$, e $q=0$ está \textbf{excluído por construção} --- o
+degrau quocienta $X_2\times X_2^{\bullet}$, e $X_2^{\bullet}$ são os
+\emph{canceláveis}. \emph{Chama-se $\infty$ a esse $[1:0]$}:
+\[
+\boxed{\;\infty:=\tau(0)=[1:0]\;}
+\]
+\item[(4)] \textbf{Donde $\{0,\infty\}$ é um \emph{bloco} da dobra, e não dois
+pontos soltos.} Aplicar a troca duas vezes devolve o zero, pelo que a órbita tem
+dois elementos: é a segunda espécie do Teor.~\ref{fis:thm:doispontos}(0), e o par
+é \textbf{não ordenado} pela cláusula~(2) --- \emph{a dobra dá os dois e não diz
+qual é o primeiro}.
+\[
+\boxed{\;0\ \text{e}\ \infty\ \text{são as duas pontas de \textbf{um} bloco}\;}
+\]
+\item[(5)] \textbf{E é por isso que o símbolo se justifica sem que nasça
+objecto.} O que $\infty$ nomeia não é um habitante do andar --- a
+cláusula~(3) mostra que ele é precisamente o que o andar exclui --- mas
+\textbf{a outra ponta de um bloco cuja primeira ponta o andar tem}. \emph{Nomear
+a segunda ponta de um par não acrescenta objecto}: acrescenta uma leitura, e a
+leitura é a dobra.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $[p:q]\mapsto[q:p]$ composta consigo devolve $[p:q]$, que é a
+Def.~\ref{fis:def:op}; e é a $\tau$ do Teor.~\ref{fis:thm:simbolos} por ser a
+troca das duas entradas.
+
+(2) É a leitura da razão.
+
+(3) $\tau([0:1])=[1:0]$; e $[1:0]$ tem $q=0$, que não é cancelável, logo não está
+no domínio que o degrau quocienta.
+
+(4) A involutividade é~(1); a não-ordenação é o Teor.~\ref{fis:thm:doispontos}(2).
+
+(5) É a leitura de~(3) e~(4).
+\end{proof}
+
+\medido{\code{tests/fractal.c} §FR3. A troca leva $[0:1]$ em $[1:0]$ e volta; e o
+terceiro degrau exclui $q=0$ por construção. \emph{Duas verificações de uma
+linha}, e é tudo o que a afirmação pede.}
+
+\medskip\noindent\textbf{E isto \emph{afina} o que a §\ref{fis:simbolos} disse, e
+convém dizer em que ponto.} Lá escreveu-se que $\infty$ não designa ponto,
+elemento, tecido nem realização, e que o que ali existia era \emph{passo} e não
+\emph{ponto} --- a metade que a dobra não fixa, o valor próprio $-1$ do
+Teor.~\ref{fis:thm:antissim}(3). \emph{Isso continua verdadeiro, e não é
+contrariado aqui}: as duas leituras são a mesma peça vista de dois lados.
+\[
+\begin{array}{ll}
+\text{lido na \textbf{dinâmica}} & \text{a metade sem ponto fixo --- \emph{passo, e não lugar}}\\[2pt]
+\text{lido no \textbf{par}} & \text{a outra ponta do bloco do zero --- \emph{parceiro, e não lugar}}
+\end{array}
+\]
+\textbf{Nas duas, o que se recusa é a mesma coisa}: que $\infty$ seja um habitante
+do andar. \emph{O que se ganha aqui é o \textbf{porquê}} --- ele não é habitante
+porque é o que o quociente exclui, e é nomeável porque a dobra o emparelha com
+algo que o andar tem. \textbf{Um bloco tem duas pontas; o andar guarda uma, e a
+dobra diz o nome da outra.}
+
 \medskip\noindent\textbf{E o degrau onde \emph{contar} passa a \emph{integrar}
 tem aqui o seu núcleo, que é exacto e não pede integral nenhum.} Nos outros
 trabalhos desta obra ele é o \textbf{teorema central} --- Gentil e Hurwitz duais
