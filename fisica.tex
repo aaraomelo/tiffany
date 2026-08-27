@@ -2684,6 +2684,105 @@ sinal}.
 \textbf{As duas juntas é que são a informação reversível}, e é isso, e só isso,
 que o duomorfismo faz a interface entre.
 
+\subsection*{A meta-indução, e porque a estrela é a interface}
+
+\noindent\textbf{Falta dizer o que induz a \emph{regra}, e não o objecto --- e não
+é preciso inventar nada, porque já está construído.} O que se segue não
+acrescenta operador nenhum: lê o que existe um degrau acima.
+
+\begin{teorema}[a meta-indução é a indução lida na razão, e a estrela é o seu ponto fixo]\label{fis:thm:metainducao}
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A meta-indução não é regra nova: é a mesma, dividida pela
+última letra.} A indução age no \emph{termo}, $u_{k+1}=u_k\oplus u_{k-1}$
+(Teor.~\ref{fis:thm:estrelaencaixe}). Lida na \textbf{razão}
+$c_k=u_{k+1}/u_k$ --- que é o \emph{terceiro degrau} do
+Teor.~\ref{fis:thm:escada} --- a mesma igualdade escreve-se
+\[
+\boxed{\;c_{k+1}=1\oplus\frac{1}{c_k}\;}
+\]
+\emph{Mudou o degrau, não a regra.} \textbf{É por isso que ela se chama
+\emph{meta}}: não induz outro objecto, induz a mesma coisa num andar onde o
+objecto \emph{é} a regra.
+\item[(2)] \textbf{E ela é a indução composta com a inversão.} $x\mapsto1\oplus
+1/x$ é \emph{somar um} depois de \emph{inverter} --- a face aditiva com a dobra
+multiplicativa do Cor.~\ref{fis:cor:estrelaanti}(2) pelo meio. \emph{Não há um
+segundo operador}: há o mesmo, com a dobra entre as duas aplicações.
+\item[(3)] \textbf{A diferença entre as duas é o ponto fixo, e é \emph{toda} a
+diferença.} No termo, $x=x\oplus1$ não tem solução: \textbf{a indução não fecha},
+e é isso que o Teor.~\ref{fis:thm:tecidos}(4) chama «a escada não pára por
+dentro». Na razão, o ponto fixo é $x^{2}=x\oplus1$ --- \textbf{a estrela}.
+\[
+\boxed{\;\text{a indução não tem ponto fixo; a meta-indução tem \textbf{um}, e é a estrela}\;}
+\]
+\item[(4)] \textbf{E esse ponto fixo não é habitante do degrau --- o que é o
+motor da escada, e não um defeito dela.} Pelo Cor.~\ref{fis:cor:geradorfora},
+$\Delta=m^{2}+4$ nunca é quadrado, logo a estrela fica fora do andar onde a regra
+corre. \emph{A meta-indução aponta sempre para fora}, e é exactamente isso que
+faz haver degrau seguinte.
+\item[(5)] \textbf{E é \emph{reversível}, porque o determinante vale um.} A regra
+escreve-se $A=\bigl(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\bigr)$, com
+$\det A=-1$; logo a inversa é \textbf{inteira} e a descida é exacta.
+\[
+\boxed{\;\abs{\det A}=1\ \Longrightarrow\ \text{subir e descer são o \emph{mesmo} caminho}\;}
+\]
+\emph{É este, e não outro, o sentido em que a estrela é \textbf{interface
+reversível}}: nada se perde ao subir, porque a descida existe e não aproxima ---
+devolve.
+\item[(6)] \textbf{E na estrela as duas deixam de ser duas.} A equação
+$\sigma\otimes\sigma=\sigma\oplus1$ diz que ali \emph{multiplicar por ela é somar
+um}: o passo da regra e o passo do objecto coincidem. \emph{É o
+Cor.~\ref{fis:cor:estrelaanti}(3)} --- um membro qualquer da família tem as
+involuções coladas, só a estrela tem também as \textbf{operações}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Dividir $u_{k+1}=u_k\oplus u_{k-1}$ por $u_k$ dá
+$c_k=1\oplus u_{k-1}/u_k=1\oplus1/c_{k-1}$. \emph{E a conta faz-se sem dividir}:
+a igualdade em razões é $u_{k+2}\,u_k=(u_{k+1}\oplus u_k)\,u_k$, que é a
+recorrência multiplicada.
+
+(2) Leitura da fórmula.
+
+(3) $x=x\oplus1$ dá $0=1$, e os dois neutros são distintos pelo
+Teor.~\ref{fis:thm:duas}(4). O outro é $x=1\oplus1/x$, isto é $x^{2}=x\oplus1$,
+que é o Teor.~\ref{fis:thm:estrela}.
+
+(4) É o Cor.~\ref{fis:cor:geradorfora}.
+
+(5) $\det A=1\cdot0-1\cdot1=-1$, e a inversa
+$\bigl(\begin{smallmatrix}0&1\\1&-1\end{smallmatrix}\bigr)$ tem entradas no
+andar; o produto das duas é a identidade.
+
+(6) É a equação da estrela, lida com o produto de um lado e a soma do outro.
+\end{proof}
+
+\medido{\code{tests/meta.c} §M1--§M5. A identidade da cláusula~(1) verifica-se em
+$26$ degraus \emph{sem dividir uma vez}; a cláusula~(3) confirma que $x=x\oplus1$
+não tem solução e que $x^{2}=x\oplus1$ não fecha no degrau das razões, varridos
+$121\times60$ pares; a cláusula~(2) verifica-se em $1600$ razões; e a
+cláusula~(5) confecciona a inversa e devolve a identidade. \textbf{Zero falhas.}}
+
+\medskip\noindent\textbf{E é isto que fecha a dualidade, e fecha-a onde ela
+sempre fechou.}
+\[
+\begin{array}{ll}
+\textbf{a indução} & \text{conserva o \emph{objecto} --- e não tem ponto fixo}\\[2pt]
+\textbf{a meta-indução} & \text{conserva a \emph{regra} --- e tem um, fora do andar}
+\end{array}
+\]
+\emph{Não são duas induções}: são a mesma, lida no termo e lida na razão, e o que
+as separa é só o degrau em que se lê. \textbf{E a estrela é onde a separação
+desaparece} --- ali a regra \emph{é} o objecto, porque multiplicar por ela é somar
+um.
+\[
+\boxed{\;\text{a estrela é onde a \textbf{regra} e o \textbf{objecto} são o mesmo passo}\;}
+\]
+\emph{E a reversibilidade não é um extra}: é o determinante unitário da
+cláusula~(5), e é a mesma coisa que o Teor.~\ref{fis:thm:antissim}(7) dizia do
+par --- \textbf{desfaz-se porque a volta existe}, e aqui a volta é inteira e não
+aproxima.
+
 \medskip\noindent\textbf{E o degrau onde \emph{contar} passa a \emph{integrar}
 tem aqui o seu núcleo, que é exacto e não pede integral nenhum.} Nos outros
 trabalhos desta obra ele é o \textbf{teorema central} --- Gentil e Hurwitz duais
