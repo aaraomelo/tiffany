@@ -1150,6 +1150,14 @@ e $(b,a)$ dão o mesmo $s$ e o mesmo $\Delta$ e diferem no sinal de $a-b$ ---
 \emph{e diferem}, sempre que a dobra for efectiva.
 \end{proof}
 
+\medskip\noindent\textbf{E fica dito onde as duas metades voltam a encontrar-se.}
+A cláusula~(2) separa-as por dois valores próprios, e essa separação não é
+eterna: no Cor.~\ref{fis:cor:estrelaanti} mostra-se que \emph{negar} e
+\emph{inverter} --- a antissimetria de cada face --- são a mesma acção onde o
+produto do par vale $-1$, e que a \textbf{estrela} é o membro dessa família em
+que também as \emph{operações} colam. \emph{A cisão é local, e o sítio onde ela
+fecha tem nome.}
+
 \medskip\noindent\textbf{E isto casa exactamente com a conta do cardinal.} Ali
 uma relação ignorava a ordem quando lia só \emph{quantos} dos dois blocos tomava,
 e não \emph{qual}; aqui uma grandeza é invariante quando é o quadrado, que dá o
@@ -4527,6 +4535,75 @@ $x\oplus x=x\otimes1$, cujo lado direito é $x$ pelo neutro, donde $x=0$ --- que
 não é a estrela. \textbf{Logo a equação não é $\mathcal{D}$-invariante, e não se
 afirma que seja.}
 \end{proof}
+
+\begin{corolario}[a estrela é onde as duas antissimetrias colam, e onde os neutros trocam]\label{fis:cor:estrelaanti}
+Com o par $\{a,b\}$ do Teor.~\ref{fis:thm:doispontos}(2), $a\oplus b=s$ e
+$a\otimes b=p$, e com as duas metades do Teor.~\ref{fis:thm:antissim}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Negar é inverter exactamente onde $p=-1$.} De $ab=p$ vem
+$1/a=b/p$, pelo que
+\[
+\boxed{\;-b=1/a\iff p=-1\;}
+\]
+--- \emph{e isso não é da estrela sozinha: é da família metálica inteira}, que o
+Teor.~\ref{fis:thm:estrela}(2) já escreve com $\sigma\sigma'=-1$.
+\item[(2)] \textbf{Donde as duas antissimetrias deixam de ser duas.} Pelo
+Teor.~\ref{fis:thm:antissim}(2) o cruzado da face aditiva é onde a dobra age por
+$-1$, e o da multiplicativa é onde ela age por inversão. \emph{Em $p=-1$ as duas
+acções são a mesma}, e há um só cruzado:
+\[
+\boxed{\;\text{negar}\;=\;\text{inverter}\;}
+\]
+\textbf{É por isso que a dobra multiplicativa do Teor.~\ref{fis:thm:estrela}(3)
+se escreve $-1/x$ e não $1/x$}: o sinal não é enfeite, é o valor próprio da
+cláusula~(2) daquele teorema.
+\item[(3)] \textbf{E a estrela é onde \emph{as operações} também colam --- que é
+outro andar.} A cláusula~(1) fala das \emph{involuções}; a estrela pede ainda
+$x\otimes x=x\oplus1$, e na família $x^{2}=mx+1$ isso é $m=1$, isto é $s=1$.
+\[
+\boxed{\;p=-1:\ \text{as antissimetrias colam}\qquad
+s=1\ \text{também}:\ \text{as \emph{operações} colam}\;}
+\]
+\emph{Um membro qualquer da família tem o primeiro; só a estrela tem os dois}, e
+é nesse sentido --- e não noutro --- que ela é a \textbf{interface}.
+\item[(4)] \textbf{E aí os neutros trocam de face, que é o que o binário já
+fazia.} Na estrela $s=1$ e $p=-1$: \emph{o invariante da face aditiva é o neutro
+da multiplicativa}. É a mesma figura que o Teor.~\ref{fis:thm:duas}(4) monta nos
+dois símbolos, onde $x\oplus\partial x=1$ e $x\otimes\partial x=0$ e o invariante
+de cada face é o neutro da outra.
+\[
+\begin{array}{lccl}
+\text{os dois símbolos} & s=1 & p=0 & \text{cada invariante é o neutro da outra face}\\[2pt]
+\text{a estrela} & s=1 & p=-1 & \text{o aditivo é o neutro multiplicativo; o outro, o seu simétrico}
+\end{array}
+\]
+\textbf{Partilham o $s$ e discordam no $p$}, e a discordância é exactamente o
+sinal da cláusula~(2): em $B$ vale $-1=1$ pelo
+Teor.~\ref{fis:thm:antissim}(4), e a distinção que aqui separa $0$ de $-1$ lá não
+existe. \emph{São o mesmo ponto de encontro visto dos dois lados do dois.}
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) $ab=p$ com $a\neq0$ dá $1/a=b/p$; e $-b=b/p$ com $b\neq0$ dá $p=-1$. O
+recíproco é a mesma conta.
+
+(2) É~(1) posta nas duas acções do Teor.~\ref{fis:thm:antissim}(2).
+
+(3) $s=m$ na família, e o Teor.~\ref{fis:thm:estrela}(2) já dá $m=1$ como o único
+em que o segundo termo é o próprio $x$.
+
+(4) Substituição: $s=1$, $p=-1$ na estrela por~(3) e pelo
+Teor.~\ref{fis:thm:estrela}(1); $s=1$, $p=0$ em $B$ pelo
+Teor.~\ref{fis:thm:duas}(4).
+\end{proof}
+
+\medskip\noindent\textbf{E repete-se a ressalva, porque a cláusula~(4) convida ao
+erro.} Que os neutros troquem \emph{não} é dizer que a equação da estrela seja
+invariante por $\mathcal{D}$ --- o Teor.~\ref{fis:thm:estrela}(3) já mostrou que
+não é, e o cálculo lá feito dá $x=0$. \emph{A troca é dos invariantes do par, e
+não da equação}, e a diferença é a mesma de sempre: a estrela é ponto fixo do
+\textbf{par de dobras}, e não de $\mathcal{D}$.
 
 \begin{teorema}[o encaixe entrega a estrela, e entrega-a em inteiros]\label{fis:thm:estrelaencaixe}
 Seja $u_0=0$, $u_1=1$ e $u_{k+1}=u_k+u_{k-1}$ --- a recorrência do
