@@ -2743,10 +2743,15 @@ contagem: é o \emph{lugar} de cada uma}, e é isso que segue.
 
 \medskip\noindent E então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{A comutatividade é o centro, e é a que a dobra dá de graça.}
-Pelo Lema~\ref{fis:lem:comutapar} ela vale no par $\{x,\partial x\}$ sem se
-pedir, porque ali o cruzado se anula. \emph{É a lei do par, e o par é o que a
-dobra fabrica.}
+\item[(1)] \textbf{A comutatividade é o centro --- e a dobra dá-a, mas não de
+graça: dá-a sob \emph{uma} hipótese, e diz-se qual.} Pelo
+Lema~\ref{fis:lem:comutapar} ela vale no par $\{x,\partial x\}$ \emph{quando
+$I(x)=x\circ\partial x$ não depende de $x$}, e é essa a hipótese inteira.
+\emph{Sem ela é falsa}, e a testemunha é a que este teorema já usou noutra
+linha: sobre dois objectos com $\partial$ a trocá-los e $x\circ y:=x$, vem
+$a\circ\partial a=a$ e $\partial a\circ a=b$ --- \textbf{o par não comuta}. Ali
+$I(x)=x$, que não é constante. \emph{É a lei do par onde o par tem lei}, e o par
+é o que a dobra fabrica.
 \item[(2)] \textbf{A associatividade é o lado \emph{directo}.} Ela corre dentro
 de \textbf{uma} face e não faz a outra agir: é o produto componente a componente,
 $(g_1,h_1)(g_2,h_2)=(g_1g_2,\,h_1h_2)$ --- \emph{os dois lados ignoram-se}.
@@ -2787,10 +2792,13 @@ sobre a outra e a outra não.
 escrito. Que a segunda distributividade falhe em geral vê-se onde $\oplus$ tem
 oposto e $\otimes$ absorve o zero: com $y=z=0$ vem $x\oplus0=x$ de um lado e
 $(x\oplus0)\otimes(x\oplus0)=x\otimes x$ do outro, e $x\neq x\otimes x$ em
-qualquer $x$ que não seja idempotente. Que valha em $(\min,\max)$ é a
-distributividade dos dois lados de um reticulado, e verifica-se caso a caso pela
-ordem: $\min\{x,\max\{y,z\}\}=\max\{\min\{x,y\},\min\{x,z\}\}$ e a dual, porque
-em cada uma há um dos três que é o menor e a igualdade reduz-se a ele.
+qualquer $x$ que não seja idempotente. Que valha em $(\min,\max)$ pede a
+\textbf{ordem total}, e diz-se: aí, em cada uma das duas igualdades, há um dos
+três que é o menor e a conta reduz-se a ele. \emph{Numa ordem apenas parcial as
+duas falham} --- com $a,b,c$ incomparáveis entre si, um abaixo e um acima,
+$\min\{a,\max\{b,c\}\}$ dá $a$ e $\max\{\min\{a,b\},\min\{a,c\}\}$ dá o de
+baixo. \textbf{O exemplo simétrico por $\mathcal{D}$ é a ordem \emph{total}, e
+não o reticulado qualquer.}
 \end{proof}
 
 \medskip\noindent\textbf{E uma correcção ao que a caixa acima dizia.} O par de
@@ -2820,7 +2828,9 @@ outro sinal do mesmo módulo, e é o que o Cor.~\ref{fis:cor:encontro} mede.
 parâmetro da família.
 
 \begin{lema}[são duas dobras, e cada uma conserva sob a sua]\label{fis:lem:duasdobras}
-Com $s=a+b$ e $p=ab$, cada face tem a sua troca dos extremos:
+\emph{Num suporte comutativo onde se divida e \textbf{sem divisores de zero}}
+--- que é o que a escrita $p/x$ pede, e por isso se declara --- e com
+$s=a+b$, $p=ab$ e $a,b\neq0$, cada face tem a sua troca dos extremos:
 \[
 \boxed{\;\partial^{+}x=s-x\;}\qquad\qquad\boxed{\;\partial^{\times}x=\frac{p}{x}\;}
 \]
@@ -2835,12 +2845,23 @@ $x\neq0$. \textbf{Sob a outra, nenhuma conserva.} Então:
 \item[(2)] \textbf{E esse lugar é o dos \emph{extremos}.} As raízes de
 $t^{2}-st+p=0$ com $s=a+b$ e $p=ab$ são $a$ e $b$: em $x=a$ as duas dobras dão
 $b$ --- $s-a=b$ e $p/a=b$ ---, e em $x=b$ dão $a$. \emph{Fora deles as duas
-separam-se.}
+separam-se}, e é a ausência de divisores de zero que o garante: um polinómio de
+grau dois não tem lá terceira raiz.
 \item[(3)] \textbf{Logo $p$ é invariante nas duas faces exactamente sobre
 $\{a,b\}$}, e é aí, e só aí, que faz sentido escrever $(s,p)$ como o par de
 invariantes de \emph{uma} dobra.
 \end{enumerate}
 \end{lema}
+
+\medskip\noindent\textbf{E as hipóteses não são decorativas --- há número contra
+cada uma.} Onde houver divisores de zero, as três cláusulas caem juntas: sobre
+os inteiros módulo oito, com $a=1$ e $b=7$ vem $s=0$ e $p=7$, e em $x=3$ as duas
+dobras dão \textbf{ambas} $5$ --- \emph{um terceiro ponto de encontro, fora dos
+extremos}. Pior, o par $\{3,5\}$ tem o \emph{mesmo} $(s,p)=(0,7)$: ali
+\textbf{o par de invariantes não determina o par}, e a cláusula~(3) fica sem
+objecto. E se algum extremo for zero, $p=0$ e $\partial^{\times}$ deixa de ser
+sequer aplicação. \emph{É por isso que o suporte se declara à entrada, e não a
+meio da prova.}
 
 \begin{proof}
 (1) De $s-x=p/x$ vem $sx-x^{2}=p$ com $x\neq0$, que é a equação; e ao contrário
@@ -2925,8 +2946,17 @@ Levando à segunda face,
 \]
 As três cláusulas são a mesma igualdade com os neutros que cada uma nomeia:
 $(0,1)$ dá $x^{2}=-1$; $(m,-1)$ dá $x^{2}=mx+1$; $(1,-1)$ dá $x^{2}=x+1$.
-\emph{Não se usou mais nada}, e em particular não se usou nenhuma propriedade do
-suporte além de as duas operações existirem com os seus neutros.
+\emph{E diga-se o que se usou}, porque não é «nada»: para escrever
+$\partial x=s\ominus x$ foi preciso o \textbf{oposto} aditivo; para passar de
+$(s\ominus x)\otimes x$ a $s\otimes x\ominus x\otimes x$ foi preciso a
+\textbf{distributividade}; e a arrumação usou comutatividade e
+associatividade. \textbf{São quatro hipóteses, e nenhuma é gratuita} --- a
+testemunha está dentro deste documento: no par $(\min,\max)$, que a
+Def.~\ref{fis:def:duomorf} admite e o Teor.~\ref{fis:thm:dual} usa,
+\emph{não existe $\ominus$}, e a equação $x\otimes x=s\otimes x\ominus p$ não é
+sequer escrevível. \emph{A equação do operador não vale em toda a estrutura de
+duas faces: vale onde a subtracção e a distributividade existem}, e é aí que o
+resto desta Parte a lê.
 \end{proof}
 
 \medskip\noindent\textbf{E é isto que faz a estrela não ser uma escolha.} O
@@ -2972,8 +3002,8 @@ inverte, e não na lista --- vem $a-b=2\delta$, donde
 \]
 \emph{O centro não entra} --- e não devia entrar: ele é o que a dobra fixa, e
 $\Delta$ é o que ela reflete.
-\item[(5)] \textbf{Os três objectos do Teor.~\ref{fis:thm:duasfaces} separam-se
-por ele, e por mais nada:}
+\item[(5)] \textbf{Os três objectos do Teor.~\ref{fis:thm:duasfaces} têm cada
+um o seu $\Delta$ --- mas ele não os separa, e diz-se porquê:}
 \[
 \begin{array}{lll}
 (s,p)=(0,1) & \Delta=-4 & \text{o \textbf{rotor}}\\[2pt]
@@ -2985,11 +3015,16 @@ por ele, e por mais nada:}
 --- \textbf{não é o centro da cláusula~(4)}, que vale $\tfrac{a+b}{2}$ e que o
 Teor.~\ref{fis:thm:BI} chama $m$. Os dois seriam iguais só onde $a+b=0$.
 \smallskip
-\emph{E a separação tem um limite, que se diz}: $\Delta=t^{2}+4$ é \textbf{par
-em $t$}, pelo que $t$ e $-t$ dão o \emph{mesmo} discriminante --- $t=1$ e
-$t=-1$ dão ambos $5$. \textbf{O que $\Delta$ separa é o par $\{t,-t\}$, e não o
-membro.} É a cláusula~(1) a repetir-se: ele não sabe qual dos dois é qual, nem
-aqui nem lá.
+\emph{E $\Delta$ perde por duas vezes.} Primeiro, $t^{2}+4$ é \textbf{par em
+$t$}: $t$ e $-t$ dão o mesmo discriminante, e $t=1$ e $t=-1$ dão ambos $5$.
+Segundo --- e é o mais forte --- \textbf{ele nem separa as famílias}: a família
+de $p=+1$ dá $\Delta=t^{2}-4$, e em $t=3$ isso é $5$, que é o valor da
+\emph{estrela}. \textbf{Dois pares $(s,p)$ distintos, o mesmo $\Delta$.}
+\smallskip
+\emph{E isto não é um defeito: é a cláusula~(1) a repetir-se.} $\Delta$ é
+$(a-b)^{2}$, e o quadrado não sabe o sinal; quem quiser separar $(s,p)$ tem de
+ler \textbf{os dois}, e é por isso que a caixa do Teor.~\ref{fis:thm:duasfaces}
+traz o par e não o discriminante. \emph{$\Delta$ diz a separação; o par diz quem.}
 \end{enumerate}
 \smallskip\noindent\textbf{E as linhas do quadro não se leem todas no mesmo
 suporte.} Pela cláusula~(1), $\Delta=(a-b)^{2}$ é um quadrado; num suporte
