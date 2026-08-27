@@ -14673,9 +14673,22 @@ static int janela_executa(int op, const char *col, const char *resto){
     static SqlOut jl;                                /* grande demais para a pilha */
     memset(&jl, 0, sizeof jl);
     sql_cap = &jl;                                   /* captura o interno sem tocar no externo */
+    /* SILENCIA O STREAM CRU. O SELECT interno enche o `jl` (memória) E imprime as
+     * linhas cruas; enquanto ele corre, o stdout vai para /dev/null ao nível do
+     * DESCRITOR --- não se caça cada printf à mão, e o `jl` continua a encher-se
+     * porque é memória e não stdout. Restaura-se logo a seguir, e só a janela
+     * (impressa depois) chega ao terminal. */
+    fflush(stdout);
+    int g_salvo = dup(1), g_nulo = open("/dev/null", O_WRONLY);
+    if(g_salvo >= 0 && g_nulo >= 0) dup2(g_nulo, 1);
     int r = executa(inner);                          /* corre o SELECT interno, na ordem pedida */
+    fflush(stdout);
+    if(g_salvo >= 0){ dup2(g_salvo, 1); close(g_salvo); }
+    if(g_nulo >= 0) close(g_nulo);
     sql_cap = cap_ext;
     if(!r){
+        printf("-- janela: a consulta interna falhou%s%s\n",
+               jl.err[0] ? ": " : "", jl.err[0] ? jl.err : "");
         if(cap_ext){ cap_ext->ok = 0;
             snprintf(cap_ext->err, sizeof cap_ext->err, "%s",
                      jl.err[0] ? jl.err : "janela: a consulta interna falhou"); }
