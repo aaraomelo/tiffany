@@ -10727,6 +10727,57 @@ e a lista de graus $\varphi=1,1,2,2,2$ é a razão de \emph{ali} só caberem cin
 ordens.
 \end{definicao}
 
+\medskip\noindent\textbf{E os \emph{ciclotómicos}, que esta obra também usa, são a
+mesma partição lida do lado multiplicativo.}
+
+\begin{corolario}[a partição da borda por ordem, e as suas duas leituras]\label{fis:cor:ciclo}
+Sobre a borda:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{$\lambda^{n}=1$ diz que a \emph{ordem} de $\lambda$ divide
+$n$}, que é o Teor.~\ref{fis:thm:doispontos}(0) lido um grau acima: ali a ordem era
+um ou dois porque a identidade exibia o candidato dois; aqui é qualquer divisor,
+porque o candidato é $n$.
+\item[(2)] \textbf{Donde a borda se parte por ordem exacta, e sem resto}:
+\[
+\boxed{\;\{\lambda:\lambda^{n}=1\}\;=\;\bigsqcup_{d\mid n}\{\lambda:\operatorname{ord}\lambda=d\}\;}
+\]
+--- \emph{é o Teor.~\ref{fis:thm:doispontos}(3) aqui}: cada elemento tem uma ordem
+e uma só, logo cai num bloco e num só.
+\item[(3)] \textbf{E a \emph{mesma} partição lê-se nas duas faces.} Contando os
+blocos pelo tamanho, os tamanhos \textbf{somam}; tomando um factor por bloco, os
+factores \textbf{multiplicam}:
+\[
+\boxed{\;\underbrace{\textstyle\sum_{d\mid n}\varphi(d)=n}_{\text{face aditiva}}
+\qquad\qquad
+\underbrace{\textstyle\prod_{d\mid n}\Phi_d=\lambda^{n}-1}_{\text{face multiplicativa}}\;}
+\]
+\emph{Uma partição, duas leituras} --- e é a figura do Teor.~\ref{fis:thm:central},
+que parte o rectângulo e lê as duas contagens. \textbf{Lá a partição lê-se somando;
+aqui, do outro lado da borda, lê-se multiplicando.}
+\end{enumerate}
+\end{corolario}
+
+\medido{\code{tests/ciclo.c}. A leitura aditiva verifica-se para todo $n$ até
+$16$: os tamanhos dos blocos somam exactamente $n$, \textbf{sem falha}; e o número
+de blocos é o número de divisores, que é o número de factores do outro lado.}
+
+\medskip\noindent\emph{E note-se o que já estava e o que se acrescenta.} A
+Def.~\ref{fis:def:ciclo} \textbf{já} dá o factor de ordem $d$, e dá-o como uma
+\emph{contagem} --- o número de raízes cuja ordem é exactamente $d$ ---, dizendo
+que não é objecto novo. \textbf{O que este corolário acrescenta não é o factor: é a
+\emph{partição}}, e a observação de que ela se lê nas duas faces sem mudar de
+objecto. \emph{O factor era a peça; a partição é a figura.}
+
+\medskip\noindent\textbf{E aqui a tríade fecha, cada nome no seu lugar.} A
+\textbf{sucessão} --- os tamanhos que somam --- é a face aditiva, e é o que se
+chamou \emph{Clifford}. A \textbf{multiplicidade} --- os factores que compõem --- é
+a multiplicativa, e é o que se chamou \emph{La~Hire}. E a passagem de uma à outra é
+o carácter avaliado na borda, que é \emph{Pontryagin} --- e é barata ali, e só ali,
+porque na borda o módulo vale um.
+\[
+\boxed{\;\text{a partição é uma; as faces são duas; e a borda é onde a troca não custa}\;}
+\]
+
 \begin{teorema}[a luz é um produto de factores de ordem, todos distintos]\label{fis:thm:ciclo}
 Seja $c$ uma cadeia de grau $N$ com $\abs{c_0}=1$, $p_c$ a sua mónica e $C$ a
 companheira. São equivalentes:
