@@ -989,29 +989,54 @@ static void caminho_tabela(const char *nome, char *out, size_t cap, const char *
 static int canal_fd = -1;
 static unsigned char canal_banda[32];
 static struct sockaddr_in canal_dst;
+/* ── O CANAL SAI DO LOOPBACK QUANDO SE LHO PEDE, E SÓ AÍ ──────────────────────
+ * O grupo, a porta e a interface eram três constantes cravadas em loopback: o
+ * canal falava consigo próprio e nunca cruzava a máquina. Passam a ler-se do
+ * ambiente, e os DEFAULTS são os de sempre --- sem env, o byte que sai é o
+ * mesmo, e o `sql teste` não muda. Para o barramento a sério (dois bancos, duas
+ * máquinas) põe-se a interface na placa real:
+ *
+ *   TIFFANY_CANAL_GRUPO  o multicast (por omissão 239.7.31.27)
+ *   TIFFANY_CANAL_PORTA  a porta      (por omissão 47313)
+ *   TIFFANY_CANAL_IF     a interface: "loopback" (omissão), "any" (0.0.0.0, a
+ *                        placa que o SO escolher), ou um IP concreto da placa
+ *
+ * Nada disto toca no que VIAJA: a trama continua 6 bytes (slot·4 + Word·2),
+ * bump-ada com a banda do tecido. Muda por ONDE viaja, não O QUE. */
+static unsigned long canal_if_addr(void){
+    const char *v = getenv("TIFFANY_CANAL_IF");
+    if(!v || !*v || !strcmp(v, "loopback")) return INADDR_LOOPBACK;
+    if(!strcmp(v, "any")) return INADDR_ANY;
+    unsigned long a = ntohl(inet_addr(v));
+    return a ? a : INADDR_LOOPBACK;   /* IP inválido: não se abre uma porta muda em 0.0.0.0 sem querer */
+}
 static void canal_abre(void){
     if(canal_fd >= 0) return;
     banda_de(getenv("TIFFANY_TECIDO") ? getenv("TIFFANY_TECIDO") : "tecido por omissao",
              canal_banda);
+    const char *grupo = getenv("TIFFANY_CANAL_GRUPO"); if(!grupo || !*grupo) grupo = "239.7.31.27";
+    const char *porta_s = getenv("TIFFANY_CANAL_PORTA");
+    unsigned short porta = (porta_s && *porta_s) ? (unsigned short)atoi(porta_s) : 47313;
+    unsigned long ifaddr = canal_if_addr();
     canal_fd = socket(AF_INET, SOCK_DGRAM, 0);
     int um = 1;
     setsockopt(canal_fd, SOL_SOCKET, SO_REUSEADDR, &um, sizeof um);
     struct sockaddr_in e; memset(&e, 0, sizeof e);
-    e.sin_family = AF_INET; e.sin_addr.s_addr = htonl(INADDR_ANY); e.sin_port = htons(47313);
+    e.sin_family = AF_INET; e.sin_addr.s_addr = htonl(INADDR_ANY); e.sin_port = htons(porta);
     bind(canal_fd, (struct sockaddr*)&e, sizeof e);
     struct ip_mreq mr;
-    mr.imr_multiaddr.s_addr = inet_addr("239.7.31.27");
-    mr.imr_interface.s_addr = htonl(INADDR_LOOPBACK);
+    mr.imr_multiaddr.s_addr = inet_addr(grupo);
+    mr.imr_interface.s_addr = htonl(ifaddr);
     setsockopt(canal_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mr, sizeof mr);
-    struct in_addr i; i.s_addr = htonl(INADDR_LOOPBACK);
+    struct in_addr i; i.s_addr = htonl(ifaddr);
     setsockopt(canal_fd, IPPROTO_IP, IP_MULTICAST_IF, &i, sizeof i);
     setsockopt(canal_fd, IPPROTO_IP, IP_MULTICAST_LOOP, &um, sizeof um);
     struct timeval to = { 0, 200000 };
     setsockopt(canal_fd, SOL_SOCKET, SO_RCVTIMEO, &to, sizeof to);
     memset(&canal_dst, 0, sizeof canal_dst);
     canal_dst.sin_family = AF_INET;
-    canal_dst.sin_addr.s_addr = inet_addr("239.7.31.27");
-    canal_dst.sin_port = htons(47313);
+    canal_dst.sin_addr.s_addr = inet_addr(grupo);
+    canal_dst.sin_port = htons(porta);
 }
 static void canal_grava(unsigned slot, Word w){
     canal_abre();
