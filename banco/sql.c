@@ -79,6 +79,11 @@
  * três casos para as podar, e um `nega` solto para as negar — três leituras da
  * MESMA coisa, e por isso três sítios onde discordarem. Agora há um. */
 #include "../lib/simbolos.h"
+/* ── A DESACUMULAÇÃO VEM DE UM TEOREMA, E NÃO SE ESCREVE AQUI ────────────────
+ * O `fisica.tex thm:zetamu`: o `count` acumula (é a convolução com ζ) e a volta
+ * é a diferença finita μ. O `ACUMULA`/`DELTA` do WHERE são ζ e μ ao longo da
+ * ordem, e a álgebra mora no `incidencia.h` — aqui só se liga à porta do SQL. */
+#include "../lib/incidencia.h"
 /* ── AS FUNÇÕES ANALÍTICAS VÊM DA CASA, NÃO SE ESCREVEM AQUI ─────────────────
  * O `aranha §sec:serie` deriva-as todas de uma só: com J² = −1 as potências de J
  * ciclam com período quatro, a série da exponencial PARTE-SE PELA PARIDADE do
@@ -14625,6 +14630,78 @@ static void salta_prosa(const char **pp){
     *pp = p;
 }
 
+/* ── A JANELA ζ/μ: ACUMULA E DELTA, UM SELECT SÓ ─────────────────────────────
+ *
+ * `SELECT ACUMULA(col) FROM t [WHERE …] [ORDER BY …]` é a convolução com ζ ao
+ * longo da ordem --- a soma-prefixo, o `G_t` do `thm:zetamu`. `DELTA(col)` é o
+ * inverso, a diferença finita μ: recupera os passos do acumulado. O par fecha
+ * (`thm:mu`): DELTA(ACUMULA(x)) = x.
+ *
+ * NÃO SE ESCREVE UM CAMINHO NOVO NO EXECUTOR: corre-se o `SELECT col …` interno
+ * --- que já tem o WHERE, o ORDER BY e tudo o resto --- captura-se a coluna na
+ * ORDEM em que ela sai, e aplica-se o `incidencia.h`. É aditivo: os caminhos
+ * quentes do motor não sabem que a janela existe. A v1 é a função sozinha na
+ * lista (`ACUMULA(a), b` cai no caminho normal); a álgebra é exacta em ℤ. */
+static int executa(const char *sql);
+static int janela_parse(const char *sql, int *op, char *col, size_t coln,
+                        char *resto, size_t restn){
+    const char *p = sql;
+    if(!palavra(&p, "SELECT")) return 0;
+    int o;
+    if(palavra(&p, "ACUMULA")) o = 1;
+    else if(palavra(&p, "DELTA")) o = 2;
+    else return 0;
+    pula(&p);
+    if(*p != '(') return 0;
+    p++;
+    if(!ident(&p, col, coln)) return 0;
+    if(!strcmp(col, "*")) return 0;                 /* a janela é sobre UMA coluna */
+    pula(&p);
+    if(*p != ')') return 0;
+    p++;
+    pula(&p);
+    if(strncasecmp(p, "FROM", 4) || isalnum((unsigned char)p[4])) return 0;
+    snprintf(resto, restn, "%s", p);                /* "FROM t [WHERE …] [ORDER BY …]" */
+    *op = o;
+    return 1;
+}
+static int janela_executa(int op, const char *col, const char *resto){
+    char inner[600];
+    int k = snprintf(inner, sizeof inner, "SELECT %s %s", col, resto);
+    if(k <= 0 || (size_t)k >= sizeof inner) return 0;
+    SqlOut *cap_ext = sql_cap;                       /* o out do chamador (NULL no CLI/teste) */
+    static SqlOut jl;                                /* grande demais para a pilha */
+    memset(&jl, 0, sizeof jl);
+    sql_cap = &jl;                                   /* captura o interno sem tocar no externo */
+    int r = executa(inner);                          /* corre o SELECT interno, na ordem pedida */
+    sql_cap = cap_ext;
+    if(!r){
+        if(cap_ext){ cap_ext->ok = 0;
+            snprintf(cap_ext->err, sizeof cap_ext->err, "%s",
+                     jl.err[0] ? jl.err : "janela: a consulta interna falhou"); }
+        return 0;
+    }
+    long n = jl.nrows; if(n > SQL_OUT_MAX_ROWS) n = SQL_OUT_MAX_ROWS;
+    long v[SQL_OUT_MAX_ROWS], w[SQL_OUT_MAX_ROWS];
+    for(long i = 0; i < n; i++) v[i] = strtol(jl.cell[i][0], NULL, 10);
+    if(op == 1) inc_zeta(v, w, n); else inc_mu(v, w, n);   /* ζ acumula, μ desacumula */
+    const char *nome = op == 1 ? "acumula" : "delta";
+    printf("   -- %s(%s), %s ao longo da ordem:\n", op == 1 ? "ACUMULA" : "DELTA", col,
+           op == 1 ? "ζ soma o prefixo" : "μ é a diferença finita");
+    for(long i = 0; i < n; i++) printf("   %ld\n", w[i]);
+    printf("-- %ld linha(s) na janela %s\n", n, nome);
+    if(cap_ext){
+        memset(cap_ext, 0, sizeof *cap_ext);
+        cap_ext->ok = 1; cap_ext->ncols = 1; cap_ext->nrows = (int)n;
+        cap_ext->tipo[0] = SQL_TIPO_INT4;
+        snprintf(cap_ext->col[0], sizeof cap_ext->col[0], "%s", nome);
+        for(long i = 0; i < n; i++)
+            snprintf(cap_ext->cell[i][0], SQL_OUT_CELL, "%ld", w[i]);
+        snprintf(cap_ext->tag, sizeof cap_ext->tag, "SELECT %ld", n);
+    }
+    return 1;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
     /* ── OS SÍMBOLOS SÃO DESTE COMANDO, E DE MAIS NENHUM ─────────────────────
@@ -14640,6 +14717,12 @@ static int executa(const char *sql){
      * o passo é o comando. */
     sim_zera();
     salta_prosa(&p);
+    /* A JANELA ζ/μ INTERCEPTA AQUI: se for ACUMULA/DELTA, corre o SELECT interno
+     * e aplica a incidência. Todo o comando passa por este sítio --- pgwire, CLI
+     * e o `sql teste` ---, e por isso a janela cobre os três de uma vez. */
+    { int wop; char wcol[64], wrest[512];
+      if(janela_parse(p, &wop, wcol, sizeof wcol, wrest, sizeof wrest))
+          return janela_executa(wop, wcol, wrest); }
     /* A REESCRITA DA SUBCONSULTA CORRE AQUI, e não no `sql_executa_1`: este é o
      * sítio por onde todo o comando passa --- o cliente com captura e o
      * terminal sem ela. Pô-la lá deixava o CLI de fora, e um caminho que só

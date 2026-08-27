@@ -120,9 +120,30 @@ for op in "=" "<>" "<" ">" "<=" ">="; do for k in 0 1 20 33 50 100; do for neg i
 done; done; done
 cd /; rm -rf "\$B"; rm -f /tmp/sql_teste.* /tmp/sql_udp.out
 echo "\$tot consultas contra o oráculo, \$mau erradas"
-[ "\${ma:-0}" = 0 ] && [ "\${mau:-0}" = 0 ] && [ "\${bv_ma:-0}" = 0 ] \
-  || { echo; echo "❌ HÁ VERMELHO: \$ma unidade(s), \$mau consulta(s), \$bv_ma banda(s)"; exit 1; }
-echo; echo "✅ tudo verde no metal — o banco mede-se onde o canal existe, e a banda está viva por UDP"
+
+echo
+echo '==================== A JANELA ζ/μ: ACUMULA/DELTA E O ROUND-TRIP POR SQL ===================='
+JB=\$(mktemp -d); cd "\$JB"
+/tmp/sqlb t "CREATE TABLE s (x)" >/dev/null
+for v in 5 3 8 2 7; do /tmp/sqlb t "INSERT INTO s VALUES (\$v)" >/dev/null; done
+ac=\$(/tmp/sqlb t "SELECT ACUMULA(x) FROM s" 2>&1 | awk '/-- ACUMULA/{f=1;next} /^-- /{f=0} f && /^ +[0-9-]+\$/{print \$1}')
+dr=\$(/tmp/sqlb t "SELECT DELTA(x) FROM s" 2>&1   | awk '/-- DELTA/{f=1;next} /^-- /{f=0} f && /^ +[0-9-]+\$/{print \$1}')
+/tmp/sqlb t "CREATE TABLE u (y)" >/dev/null
+for v in \$ac; do /tmp/sqlb t "INSERT INTO u VALUES (\$v)" >/dev/null; done
+dd=\$(/tmp/sqlb t "SELECT DELTA(y) FROM u" 2>&1   | awk '/-- DELTA/{f=1;next} /^-- /{f=0} f && /^ +[0-9-]+\$/{print \$1}')
+cd /; rm -rf "\$JB"
+echo "  ACUMULA(x)=[\$(echo \$ac)]  DELTA(x)=[\$(echo \$dr)]  DELTA(ACUMULA(x))=[\$(echo \$dd)]"
+jan_ma=0
+[ "\$(echo \$ac)" = "5 8 16 18 25" ] || jan_ma=1
+[ "\$(echo \$dr)" = "5 -2 5 -6 5" ]  || jan_ma=1
+[ "\$(echo \$dd)" = "5 3 8 2 7" ]     || jan_ma=1
+[ "\$jan_ma" = 0 ] && echo "  ✅ ACUMULA é ζ, DELTA é μ, e μ desfaz ζ pela porta SQL" \
+                   || echo "  ❌ a janela ζ/μ não fecha"
+
+echo
+[ "\${ma:-0}" = 0 ] && [ "\${mau:-0}" = 0 ] && [ "\${bv_ma:-0}" = 0 ] && [ "\${jan_ma:-0}" = 0 ] \
+  || { echo; echo "❌ HÁ VERMELHO: \$ma unidade(s), \$mau consulta(s), \$bv_ma banda(s), \$jan_ma janela(s)"; exit 1; }
+echo; echo "✅ tudo verde no metal — o canal existe, a banda vive por UDP, e a desacumulação fecha"
 REMOTO_SCRIPT
 }
 

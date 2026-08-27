@@ -2180,9 +2180,35 @@ $\{G_t(x)\}$, valendo $1$ exactamente nas visitas de $x$; a mesma inversão nos
 divisores ($\mu*\mathbf 1=\varepsilon$); e o levantamento a subir $1$ por visita
 ($\tilde G=1$). \textbf{8 unidades, zero falhas.}}
 
+\medskip\noindent\textbf{E a porta SQL ganhou as duas.} O motor tinha o
+\code{count} (o $\zeta$, que reduz a fibra a um número); faltava-lhe a leitura
+\emph{ordenada} e a sua volta. Entram como duas funções de janela:
+\[
+\code{SELECT ACUMULA(x) FROM t [WHERE …] [ORDER BY …]}
+\quad\text{é}\quad \zeta:\ \text{a soma-prefixo } G_t,
+\]
+\[
+\code{SELECT DELTA(x) FROM t …}
+\quad\text{é}\quad \mu:\ \text{a diferença finita } x_t-x_{t-1}.
+\]
+Ambas correm ao longo da \emph{ordem} que a consulta pede --- o \code{ORDER BY},
+ou a de escrita ---, e o par fecha pela porta: \code{DELTA(ACUMULA(x))} devolve
+\code{x}. E não é um caminho novo no executor: a janela corre o \code{SELECT x}
+interno --- que já tem o \code{WHERE}, o \code{ORDER BY} e tudo o resto --- e
+aplica o \code{incidencia.h} à coluna na ordem em que ela sai. Os caminhos
+quentes do motor não sabem que a janela existe, e as $98$ unidades do
+\code{sql teste} não se movem.
+
+\medido{No metal da \code{srv1559444}: sobre \code{x = 5,3,8,2,7},
+\code{ACUMULA(x)} dá $5,8,16,18,25$ (o $\zeta$), \code{DELTA(x)} dá
+$5,-2,5,-6,5$ (o $\mu$), e \code{DELTA(ACUMULA(x))} devolve $5,3,8,2,7$ ---
+$\mu$ desfaz $\zeta$ pela porta SQL. Com \code{ORDER BY x} a janela ordena
+$2,3,5,7,8$ e acumula $2,5,10,17,25$; com \code{WHERE x>3} vê $5,8,7$ e acumula
+$5,13,20$. As $98$ unidades do \code{sql teste} permanecem verdes.}
+
 \colunas{\code{fisica.tex thm:mu, thm:zetamu, cor:mobius}}
-        {\code{lib/incidencia.h}; a ponte para \code{lib/dirichlet.h}}
-        {\code{tests/zetamu.c} §Z1--§Z5}
+        {\code{lib/incidencia.h}; \code{banco/sql.c} (\code{ACUMULA}/\code{DELTA})}
+        {\code{tests/zetamu.c} §Z1--§Z5; \code{tools/experimentos-patria.sh}}
 
 \medskip\noindent\textbf{E o que a porta não faz, RECUSA com a razão.} Um erro
 disfarçado de resultado vazio é o pior desfecho para quem chama, e a regra vale
