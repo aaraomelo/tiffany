@@ -1400,10 +1400,10 @@ equivalência da cláusula~(5) --- comutar contra $G$ ser invariante --- confirm
 em \textbf{81} e falha em \textbf{zero}.}
 
 \medskip\noindent\textbf{E é este o sistema que o resto do documento usa, quando
-usa.} O Teor.~\ref{fis:thm:central} soma o rectângulo pelas duas leituras: pelo
-domínio é somar \textbf{colunas}, pela imagem é somar \textbf{linhas} --- \emph{e
-note-se que ali o objecto é o rectângulo cheio, e aqui é a escada denteada
-$E(\pi)$}. O Teor.~\ref{fis:thm:medida} diz que a medida é cega à vertical: duas
+usa.} O Teor.~\ref{fis:thm:central} soma o rectângulo pelas duas leituras: uma
+fixa o índice, a outra fixa a célula --- \emph{e note-se que ali o objecto é o
+rectângulo cheio, e aqui é a escada denteada $E(\pi)$, cuja coluna $x$ tem altura
+$G(x)$}. O Teor.~\ref{fis:thm:medida} diz que a medida é cega à vertical: duas
 realizações com a mesma $\sum G$ e $\max G$ diferentes. E o
 Lema~\ref{fis:lem:vizalg} dá vizinhança \textbf{só à horizontal} --- a vertical é
 um índice ordenado e não uma direcção com adjacência, e o «$n+1$ direções» do
@@ -1612,7 +1612,10 @@ Então:
 $(i,x)$ do rectângulo cumpre $x\le f(i)$ ou $f(i)<x$, \emph{e exactamente uma
 das duas} --- \textbf{e é aqui que a ordem total entra}: numa ordem apenas
 parcial as duas condições deixam de esgotar. A primeira contagem lê as células
-por \textbf{colunas}, a segunda por \textbf{linhas}.
+fixando o \textbf{índice} e varrendo a célula; a segunda fixa a \textbf{célula} e
+varre o índice. \emph{Não se lhes chame coluna e linha}: qual delas é qual depende
+de que eixo se desenha na horizontal, e a Def.~\ref{fis:def:coord2} desenha o
+outro.
 \item[(3)] \textbf{Trocar as duas leituras é uma dobra --- e diga-se sobre o
 quê.} A troca $\Sigma_{\mathrm{dom}}\leftrightarrow\Sigma_{\mathrm{im}}$ actua
 sobre o \textbf{par de leituras}, e aí é involutiva: aplicada duas vezes devolve
@@ -5376,6 +5379,28 @@ $k<\tfrac{n-1}{2}$, pelo que a linha sobe até ao meio e desce depois; e o meio 
 o ponto fixo de $k\mapsto n-k$, que é o de $\varsigma$ lido no peso.
 \end{proof}
 
+\medskip\noindent\textbf{E aqui está o único sítio deste documento onde as duas
+dobras das coordenadas comutam \emph{por teorema}.} A cláusula~(2) prova
+$\binom{n}{k}=\binom{n}{n-k}$, isto é
+\[
+\boxed{\;G(\varsigma k)=G(k)\;}
+\]
+--- que é \textbf{exactamente} a hipótese que o
+Teor.~\ref{fis:thm:duascoord}(4) pede à dobra horizontal. Logo aqui a horizontal
+levanta-se ao espaço de endereços, comuta com a vertical, e as duas geram o
+quarteto do Teor.~\ref{fis:thm:quarteto} --- \emph{quatro quadrantes de ordem
+dois, e não um rotor}. \textbf{Em toda a outra realização do livro essa hipótese
+é suposição ou falha}; na espiral quadrada, por exemplo, ela falha por uma
+visita.
+
+\medskip\noindent\textbf{E a cláusula~(3) diz mais do que parece, nessa
+leitura.} O máximo de $G$ cai no \textbf{ponto fixo} da dobra horizontal ---
+$k=n/2$ é o vinco de $\varsigma$, pelo Teor.~\ref{fis:thm:vinco}(1). Isto é: \emph{a
+coluna mais alta assenta no vinco}. E é obrigatório que assim seja, porque uma
+função que a dobra conserva não pode ter máximo estrito fora do que ela fixa ---
+o máximo viria em par, e os dois seriam iguais. \emph{A dobra é maior no meio
+porque o meio é o que ela não move.}
+
 \medskip\noindent\textbf{E convém dizer porque é o peso e não um percurso.} Num
 percurso pelo hipercubo a soma é $\oplus$, que é \emph{involutivo}: repetir uma
 direção \textbf{desfá-la}, e o campo lê a \textbf{paridade} de cada eixo, não a
@@ -8955,8 +8980,10 @@ a carga não é um número posto à mão --- é um \textbf{número de ocupação
 quantizada porque uma contagem é inteira.
 
 \begin{teorema}[a carga sai da contagem, e por isso é quantizada]\label{fis:thm:carga}
-Seja $N$ o número de ocupação de um estado --- a contagem das escadas ocupadas,
-que é exatamente uma fibra no sentido da Def.~\ref{fis:def:objeto}. Então $N$ toma
+Seja $N$ o número de ocupação de um estado --- a contagem das escadas ocupadas.
+\emph{Nas coordenadas da Def.~\ref{fis:def:coord2}, $N$ é a \textbf{célula}} --- a
+horizontal --- \emph{e não a fibra}: a fibra sobre $N$ são os estados que dão essa
+ocupação, e o seu cardinal é $G(N)$. Então $N$ toma
 \textbf{quatro} valores, $N\in\{0,1,2,3\}$, sobre \textbf{oito} estados, com
 multiplicidades $1,3,3,1$ --- e
 \[
@@ -8970,10 +8997,10 @@ geração.
 \end{teorema}
 
 \begin{proof}
-$N$ é o cardinal de uma fibra, logo inteiro e não-negativo por
-Def.~\ref{fis:def:objeto}; e $Q=N/3$ herda a discretude. A contagem por nível dá
-as multiplicidades $1,3,3,1$ para $N=0,1,2,3$ --- que é a linha do triângulo da
-§\ref{fis:hipercubo} com $n=3$ --- e a soma $1+3+3+1=8$ é o
+$N$ é uma contagem, logo inteiro e não-negativo; e $Q=N/3$ herda a discretude. A
+contagem por nível dá as multiplicidades $1,3,3,1$ para $N=0,1,2,3$ --- que é a
+linha do triângulo da §\ref{fis:hipercubo} com $n=3$, isto é $G(N)=\binom{3}{N}$
+--- e a soma $1+3+3+1=8$ é o
 $\sum G=2^{n}=\abs{I}$ do Lema~\ref{fis:lem:conserva}. O conjugado duplica a
 contagem sem a alterar, e $8+8=16$.
 \end{proof}
