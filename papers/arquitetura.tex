@@ -3009,10 +3009,10 @@ interior do parêntese passava sempre que os números coincidissem por acaso.}
 
 \noindent Duas construções que parecem pedir avaliador novo e não pedem.
 \code{x IN (v1, v2)} é \code{x = v1 OR x = v2}; \code{NOT (…)} é
-\textbf{De Morgan} --- trocam-se os conectivos e nega-se cada folha, com o
-\code{nega} que a comparação já tinha para o \code{<>}, o \code{<=} e o
-\code{>=}. Escritas na leitura, tudo o que a árvore já fazia vale para elas: a
-contração, a ordenação dos ramos, a idempotência.
+\textbf{De Morgan} --- trocam-se os conectivos e \textbf{complementa-se} a
+relação de cada folha (\code{lib/simbolos.h}, adiante). Escritas na leitura,
+tudo o que a árvore já fazia vale para elas: a contração, a ordenação dos
+ramos, a idempotência.
 
 \medskip\noindent\textbf{E é aí que aparece uma medida que faltava.} Duas
 consultas escritas de maneiras diferentes podem devolver a mesma resposta por
@@ -3027,6 +3027,64 @@ programa emitido --- e exige-se que ela \textbf{coincida}:
 \]
 byte a byte, e não linha a linha. As duas últimas são as duas metades da lei ---
 medir uma só era meia lei.
+
+\subsection*{Os sinais do \code{WHERE} são oito, e o motor conhecia seis}
+
+\noindent Os seis operadores de comparação estavam escritos à mão no
+\code{banco/sql.c}, em seis linhas de \code{if}, como um par
+\code{(op, nega)}: três blocos --- \code{=}, \code{<}, \code{>} --- mais um bit
+de negação para o \code{<>}, o \code{<=} e o \code{>=}. Funciona, e esconde uma
+estrutura. O \code{fisica.tex §fis:simbolos} mostra qual: a transposição
+$\tau(x,y)=(y,x)$ parte $S\times S$ em \textbf{três} blocos, uma relação é a
+escolha de quais deles se tomam, e as escolhas são $2^{3}=\mathbf{8}$ --- as
+seis com sinal, mais a \textbf{nula} e a \textbf{total}, que são as duas que
+\emph{não precisam de ler a linha}.
+
+\medskip\noindent\textbf{E o par \code{(op, nega)} não é uma segunda tabela: é
+uma leitura da primeira.} A complementação --- tomar os blocos que ficaram de
+fora --- troca $=$ com $\neq$, $<$ com $\ge$ e $>$ com $\le$. Logo toda relação
+de dois blocos é a complementar de uma de um bloco só, e é isso, e só isso, que
+o \code{nega} era. Passou a derivar-se:
+\[
+\code{nega} = \bigl[\,\abs{\text{blocos}} \ge 2\,\bigr], \qquad
+\code{op} = \text{o bloco único, dela ou da complementar}.
+\]
+Uma relação é um \textbf{byte com três bits}; a complementação é
+\code{\~{}m \& 7}; a transposição é trocar os dois bits laterais. O emissor
+continua a conhecer três blocos e um \code{XOR} --- não mudou uma instrução.
+
+\medskip\noindent\textbf{O que se ganhou não é elegância: é um sítio só.} A
+mesma cláusula estava executada em \emph{três} lugares --- a leitura do sinal, a
+negação da folha, e a poda que decide se uma consulta pode ser satisfeita --- e
+o terceiro estava por fazer. A poda comparava o \code{op} \textbf{derivado} sem
+olhar a \code{nega}, pelo que lia $\le$ como $>$, $\ge$ como $<$ e $\neq$ como
+$=$: descartava a consulta \emph{exactamente quando ela era verdadeira para
+todas as linhas}. Numa coluna cujo maior valor escrito é $50$:
+\[
+\code{WHERE a <= 100}\ ,\qquad \code{WHERE a >= 5}\ ,\qquad \code{WHERE a <> 999}
+\]
+respondiam «nenhuma linha pode satisfazer: 0 linha(s), sem varrer» --- sem erro
+e sem aviso, que é o pior desfecho que esta casa admite.
+
+\medskip\noindent\textbf{E a correcção não é um caso a mais no \code{switch}:
+é retirar o \code{switch}.} Os blocos que o intervalo $[\text{baixo},
+\text{alto}]$ alcança são eles próprios uma relação --- $<$ se ele desce abaixo
+de zero, $=$ se o contém, $>$ se sobe acima --- e a pergunta «isto pode ser
+satisfeito?» é se as duas se \textbf{cruzam}. Um \code{\&}, e vale para as oito.
+
+\medido{\code{tests/simbolos.c}: as oito varridas inteiras ---
+$33$ unidades, zero falhas. O §S10 mede a poda contra a varredura exaustiva nos
+$360$ pares (intervalo, relação) de $[-4,4]$: a tabela de três casos dá
+\textbf{50} vazios falsos, o alcance dá \textbf{zero}. E contra um oráculo
+independente sobre uma tabela real, $72$ consultas: \textbf{12 erradas antes,
+0 depois}. O \code{sql teste} mantém as $98$ unidades \code{\#UNIT} idênticas, e
+o bytecode muda em três consultas de dois átomos --- mesma contagem de bytes,
+mesmos passos, mesmo resultado: é a ordem dos ramos comutativos, que segue a
+assinatura, e a assinatura passou a levar um campo em vez de dois.}
+
+\colunas{\code{fisica.tex thm:simbolos}(8),(9)}
+        {\code{lib/simbolos.h}; \code{banco/sql.c} \code{fecha\_cond} e \code{atom\_possivel}}
+        {\code{tests/simbolos.c} §S1--§S11}
 
 \subsection*{As funções analíticas no núcleo}
 

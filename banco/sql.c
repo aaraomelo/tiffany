@@ -72,6 +72,13 @@
 #include "../lib/word_isa.h"
 #include "../lib/slot_map.h"
 #include "../lib/reta.h"
+/* ── OS SINAIS DO WHERE VÊM DE UM TEOREMA, E NÃO DE UMA TABELA AQUI ──────────
+ * O `fisica.tex §fis:simbolos` prova que os símbolos de relação saem de uma
+ * dobra sobre S×S: três blocos, 2³ = 8 relações, e as duas involuções que as
+ * permutam. Este ficheiro escrevia seis linhas à mão para as ler, uma tabela de
+ * três casos para as podar, e um `nega` solto para as negar — três leituras da
+ * MESMA coisa, e por isso três sítios onde discordarem. Agora há um. */
+#include "../lib/simbolos.h"
 /* ── AS FUNÇÕES ANALÍTICAS VÊM DA CASA, NÃO SE ESCREVEM AQUI ─────────────────
  * O `aranha §sec:serie` deriva-as todas de uma só: com J² = −1 as potências de J
  * ciclam com período quatro, a série da exponencial PARTE-SE PELA PARIDADE do
@@ -4278,8 +4285,10 @@ enum { NO_COND, NO_AND, NO_OR };
 struct no {
     int tipo;
     int esq, dir;          /* índices na árvore                                   */
-    int op;                /* '=', '<', '>'                                       */
-    int nega;              /* 1 se o resultado deve ser invertido (!=, <=, >=)     */
+    int rel;               /* A RELAÇÃO: uma das oito do `simbolos.h`. É ESTE o    */
+                           /* campo que o parser escreve — os dois abaixo derivam.  */
+    int op;                /* '=', '<', '>'   — `sb_op(rel)`                        */
+    int nega;              /* 1 se o resultado deve ser invertido — `sb_nega(rel)`   */
     struct tensor v;       /* o lado numérico já contraído: L − R                  */
     int decidido;          /* 0 = precisa da linha; 1 = já se sabe (const)         */
     int valor;             /* se decidido: 0 ou 1                                  */
@@ -4292,7 +4301,8 @@ struct arvore {
     /* a CONTRAÇÃO: os átomos distintos, depois de normalizar a árvore */
     int natomo;
     unsigned long asig[16];
-    int aop[16], anega[16];
+    int arel[16];                     /* a relação do átomo — a fonte              */
+    int aop[16], anega[16];           /* e as duas leituras dela que o emissor usa */
     struct tensor av[16];
 };
 static int le_expr(const char **p, struct arvore *a);
@@ -4517,21 +4527,71 @@ static int le_soma(const char **p, struct tensor *t){
 }
 static int le_num(const char **p, struct tensor *v){ return le_soma(p, v); }
 
+/* ── FECHAR UMA CONDIÇÃO: A CANONIZAÇÃO, E DEPOIS AS LEITURAS ────────────────
+ *
+ * Uma condição do WHERE é um par `(v, rel)`: a forma numérica `v = L − R` e uma
+ * das oito relações. Duas coisas acontecem aqui, e nenhuma é escolha arbitrária:
+ *
+ *  (1) CANONIZAR pela τ. Trocar o par `(x,y)` por `(y,x)` é negar `v`, e pela
+ *      cláusula (5) do `fis:thm:simbolos` isso troca `<` com `>`. Logo aplicar a
+ *      τ aos DOIS lados — à forma e à relação — deixa a verdade onde estava, e
+ *      autoriza levar toda relação para o lado ESCOLHIDO. Sem isto `b > 20` e
+ *      `20 < b` são o mesmo facto com vectores opostos, e emitiam bytecode
+ *      diferente. As τ-FIXAS — ∅, =, ≠, total — não têm lado a escolher, e para
+ *      elas o representante fixa-se pelo sinal do primeiro coeficiente, que é um
+ *      critério de fora da dobra e diz-se que é.
+ *
+ *  (2) DERIVAR o par `(op, nega)`. O emissor conhece três blocos e um XOR; as
+ *      outras cinco relações chegam-lhe pela cláusula (9) — negar é
+ *      complementar. Aqui é o ÚNICO sítio onde essa derivação acontece.
+ *
+ * E a nula e a total saem daqui já DECIDIDAS mesmo com a forma a depender da
+ * linha: são as duas que não precisam de a ler. O parser do SQL não as escreve
+ * (não há sinal para elas), mas a contracção pode chegar lá, e quando chegar
+ * este caminho responde em vez de emitir um teste que não existe. */
+static void fecha_cond(struct no *n){
+    if(sb_transpor_pede(n->rel)){                  /* (1) leva-se para o `>` */
+        n->v   = ten_soma(ten_zero(), n->v, -1);
+        n->rel = sb_tau(n->rel);
+    } else if(sb_tau_fixa(n->rel)){                /* sem lado: escolhe-se o sinal */
+        long primeiro = 0;
+        for(int k = 1; k < NMON && !primeiro; k++) if(n->v.c[k]) primeiro = n->v.c[k];
+        if(!primeiro) primeiro = n->v.c[0];
+        if(primeiro < 0) n->v = ten_soma(ten_zero(), n->v, -1);
+    }
+    n->op   = sb_op(n->rel);                       /* (2) as duas leituras       */
+    n->nega = sb_nega(n->rel);
+
+    /* CONTRAÇÃO decide na compilação: se não sobrou variável, a resposta já se sabe.
+     * E se der falso, isso não é erro do cliente — é uma CONDIÇÃO DE PARADA. */
+    if(sb_decidida(n->rel)){
+        n->decidido = 1; n->valor = sb_constante(n->rel);
+    } else if(ten_constante(n->v)){
+        n->decidido = 1; n->valor = sb_vale(n->rel, n->v.c[0]);
+    }
+}
 /* ── A NEGAÇÃO EMPURRA-SE PARA AS FOLHAS ─────────────────────────────────────
  *
  * `NOT (A OR B)` não precisa de um nó novo na árvore: precisa de De Morgan.
  * Trocam-se os conectivos e nega-se cada folha, e o que sai é uma árvore da
- * mesma forma que o emissor já sabe percorrer — com o `nega` que a comparação
- * já tinha para o `<>`, o `<=` e o `>=`. É a mesma escolha da CONTRAÇÃO: o
- * equivalente vira o MESMO objeto, em vez de duas coisas que uma regra depois
+ * mesma forma que o emissor já sabe percorrer. É a mesma escolha da CONTRAÇÃO:
+ * o equivalente vira o MESMO objeto, em vez de duas coisas que uma regra depois
  * iguala. E a lei fica medível de fora: `NOT (a = 1 OR a = 2)` tem de devolver
- * exactamente o que `a <> 1 AND a <> 2` devolve, pelo mesmo bytecode. */
+ * exactamente o que `a <> 1 AND a <> 2` devolve, pelo mesmo bytecode.
+ *
+ * E negar uma folha é COMPLEMENTAR a relação — cláusula (9) do
+ * `fis:thm:simbolos` —, e não virar um bit ao lado dela. Como a complementação
+ * é uma involução, negar duas vezes devolve a mesma relação e o mesmo bytecode,
+ * que é o que o De Morgan exige. O `fecha_cond` volta a correr porque a
+ * complementar pode ter mudado de lado: `NOT (a < 3)` é `a >= 3`, e esse pede a
+ * τ que o `a < 3` não pedia. */
 static void nega_arvore(struct arvore *a, int i){
     if(i < 0 || i >= a->n) return;
     { struct no *n = &a->no[i];
       if(n->tipo == NO_COND){
-          n->nega = !n->nega;
-          if(n->decidido) n->valor = !n->valor;
+          n->rel = sb_compl(n->rel);
+          n->decidido = 0; n->valor = 0;
+          fecha_cond(n);
           return;
       }
       n->tipo = (n->tipo == NO_AND) ? NO_OR : NO_AND;
@@ -4583,11 +4643,14 @@ static int le_fator(const char **p, struct arvore *a){
                           if(!le_num(p, &K)) break;
                           { int i = novo_no(a); if(i < 0) return -1;
                             { struct no *n = &a->no[i];
-                              n->tipo = NO_COND; n->op = '='; n->nega = 0;
+                              /* e é o MESMO fecho da comparação, e não um
+                               * parecido: sem ele `x IN (3)` e `x = 3` eram o
+                               * mesmo facto com o vector de sinal oposto, e a
+                               * contracção — que promete o mesmo bytecode para
+                               * WHEREs equivalentes — via dois átomos onde há um. */
+                              n->tipo = NO_COND; n->rel = SB_EQ;
                               n->v = ten_soma(L, K, -1);
-                              if(ten_constante(n->v)){
-                                  n->decidido = 1; n->valor = (n->v.c[0] == 0);
-                              } }
+                              fecha_cond(n); }
                             if(e < 0) e = i;
                             else { int j = novo_no(a); if(j < 0) return -1;
                                    a->no[j].tipo = NO_OR; a->no[j].esq = e;
@@ -4615,52 +4678,28 @@ static int le_fator(const char **p, struct arvore *a){
     }
     return -1;
 tem_comparacao:;
-    int op = 0, nega = 0;
-    if(**p == '!' && (*p)[1] == '=')        { op = '='; nega = 1; *p += 2; }
-    else if(**p == '<' && (*p)[1] == '>')   { op = '='; nega = 1; *p += 2; }   /* <> é não-= */
-    else if(**p == '<' && (*p)[1] == '=')   { op = '>'; nega = 1; *p += 2; }   /* ≤ é não-> */
-    else if(**p == '>' && (*p)[1] == '=')   { op = '<'; nega = 1; *p += 2; }   /* ≥ é não-< */
-    else if(**p == '=')                     { op = '='; (*p)++; }
-    else if(**p == '<')                     { op = '<'; (*p)++; }
-    else if(**p == '>')                     { op = '>'; (*p)++; }
-    else return -1;
+    /* SEIS SINAIS, UMA LEITURA. O `<>`, o `<=` e o `>=` não são três casos a
+     * escrever: são três das oito relações, e a `sb_le` devolve a relação e diz
+     * quantos caracteres consumiu. Quem escrevia aqui o par `(op, nega)` estava
+     * a fazer à mão a cláusula (9) — negar é COMPLEMENTAR —, e a fazê-la só
+     * neste sítio, que é o que deixou os outros dois por fazer. */
+    int nsin = 0, rel = sb_le(*p, &nsin);
+    if(nsin == 0) return -1;
+    *p += nsin;
     if(!le_num(p, &R)) return -1;
 
     int i = novo_no(a); if(i < 0) return -1;
     struct no *n = &a->no[i];
-    n->tipo = NO_COND; n->op = op; n->nega = nega;
-    if(op == '<' || op == '>'){
+    n->tipo = NO_COND; n->rel = rel;
+    if(sb_orientada(rel)){
         cit_desig = 1;
         /* as colunas DESTE fator: as que a leitura de L e R acrescentou desde o
          * início dele. É a diferença, e não o total, porque a lei é sobre a
          * coluna que a ORDEM toca — não sobre a consulta inteira. */
         citadas_desig |= (citadas_where & ~cit_antes);
     }
-    n->v = ten_soma(L, R, -1);                     /* L op R  ⟺  (L−R) op 0 */
-
-    /* CANONIZAR o par (vetor, operador): sem isto, `b > 20` e `20 < b` são o mesmo fato
-     * escrito com vetores opostos, e emitiriam bytecode diferente.
-     *   v < 0  ⟺  (−v) > 0        — logo o '<' desaparece
-     *   v = 0  ⟺  (−v) = 0        — logo o sinal do '=' é livre, e fixa-se */
-    if(op == '<'){
-        n->v = ten_soma(ten_zero(), n->v, -1);
-        n->op = '>';
-    } else if(op == '='){
-        long primeiro = 0;
-        for(int i = 1; i < NMON && !primeiro; i++) if(n->v.c[i]) primeiro = n->v.c[i];
-        if(!primeiro) primeiro = n->v.c[0];
-        if(primeiro < 0) n->v = ten_soma(ten_zero(), n->v, -1);
-    }
-    op = n->op;
-
-    /* CONTRAÇÃO decide na compilação: se não sobrou variável, a resposta já se sabe.
-     * E se der falso, isso não é erro do cliente — é uma CONDIÇÃO DE PARADA. */
-    if(ten_constante(n->v)){
-        long d = n->v.c[0];
-        int vale = (op == '=') ? (d == 0) : (op == '<') ? (d < 0) : (d > 0);
-        if(nega) vale = !vale;
-        n->decidido = 1; n->valor = vale;
-    }
+    n->v = ten_soma(L, R, -1);                     /* L rel R  ⟺  (L−R) rel 0 */
+    fecha_cond(n);
     return i;
 }
 static int le_termo(const char **p, struct arvore *a){
@@ -4710,8 +4749,10 @@ static unsigned long sig_de(struct arvore *a, int i, unsigned long *cache){
     struct no *n = &a->no[i];
     unsigned long h;
     if(n->tipo == NO_COND){
-        h = mistura(1469598103934665603UL, (unsigned long)n->op);
-        h = mistura(h, (unsigned long)n->nega);
+        /* a assinatura leva a RELAÇÃO, e não o par derivado dela: são um campo e
+         * não dois, e dois campos redundantes numa assinatura são dois sítios
+         * onde ela pode distinguir o que é igual. */
+        h = mistura(1469598103934665603UL, (unsigned long)n->rel);
         h = mistura(h, (unsigned long)n->decidido);
         h = mistura(h, (unsigned long)n->valor);
         for(int i = 0; i < NMON; i++) if(n->v.c[i]) h = mistura(mistura(h,(unsigned long)i),
@@ -4776,7 +4817,8 @@ static void junta_atomos(struct arvore *a, int i, unsigned long *cache){
         if(a->asig[j] == h){ n->atomo = j; return; }                 /* (1) já existe */
     if(a->natomo >= 16){ n->atomo = 0; return; }
     int j = a->natomo++;
-    a->asig[j] = h; a->aop[j] = n->op; a->anega[j] = n->nega; a->av[j] = n->v;
+    a->asig[j] = h; a->arel[j] = n->rel;
+    a->aop[j] = n->op; a->anega[j] = n->nega; a->av[j] = n->v;
     n->atomo = j;
 }
 static void contrai_arvore(struct arvore *a){
@@ -5172,14 +5214,26 @@ static int atom_possivel(const struct arvore *a, int j, long ncols, long nrows){
         if(c > 0){ alto += (long long)c * mag_alto; baixo += (long long)c * mag_baixo; }
         else     { alto += (long long)c * mag_baixo; baixo += (long long)c * mag_alto; }
     }
-    /* a forma vale entre `baixo` e `alto`; o teste é contra ZERO */
-    switch(a->aop[j]){
-        case '>': if(alto <= 0) return 0; break;   /* nunca é positiva  */
-        case '<': if(baixo >= 0) return 0; break;  /* nunca é negativa  */
-        case '=': if(alto < 0 || baixo > 0) return 0; break;  /* o zero não cabe */
-        default: break;
-    }
-    return 1;
+    /* A forma vale entre `baixo` e `alto`, e o teste é contra ZERO. E a pergunta
+     * não é um caso por operador: os blocos que o intervalo ALCANÇA são eles
+     * próprios uma relação — `<` se ele desce abaixo de zero, `=` se o contém,
+     * `>` se sobe acima —, e a condição é possível sse as duas se cruzam. Um
+     * `&`, e vale para as oito.
+     *
+     * ── E ISTO ERA UM DEFEITO, E DOS QUE RESPONDEM ERRADO EM SILÊNCIO ─────────
+     * O que estava aqui era um `switch` de três casos sobre o `op` DERIVADO, e
+     * ele não olhava a `nega`. Ora as relações de dois blocos chegam aqui com o
+     * `op` da COMPLEMENTAR, pelo que a poda lia `≤` como se fosse `>`, `≥` como
+     * `<` e `≠` como `=` — e podava exactamente quando a condição era verdadeira
+     * para TODAS as linhas. Numa coluna que não passa de 50:
+     *
+     *     WHERE a <= 100   →  «nenhuma linha pode satisfazer»,  com todas a
+     *     WHERE a >= 5         satisfazer. Zero linhas, sem varrer, e sem aviso.
+     *     WHERE a <> 999
+     *
+     * O `tests/simbolos.c §S10` mede-o: nos 360 pares (intervalo, relação) de
+     * [-4,4], a tabela de três casos dá 50 falsos VAZIOS e o alcance dá zero. */
+    return sb_possivel(a->arel[j], baixo, alto);
 }
 
 static int cl_cabe16(const struct arvore *a, long ncols, long nrows){
