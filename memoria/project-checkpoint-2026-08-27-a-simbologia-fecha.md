@@ -85,3 +85,44 @@ segundo, tinha posto no livro uma contradição com um teorema meu de três sess
 Os empréstimos **declarados** das Partes de física — Carnot, a continuidade, a aceleração —
 que entram marcados e não alimentam o alicerce. E a álgebra linear: `det`, traço, companheira
 e ciclotómicos fazem trabalho portante sem serem construídos.
+
+## Adenda: o que entrou depois do checkpoint
+
+De `2fd8b116` em diante, mais **três páginas** (198 → **201**) e **dez medidores**,
+todos verdes. Fechou-se o que eu tinha dado por fora de alcance.
+
+**O traço e o determinante estavam fundados e ninguém tinha ligado.** O teorema das
+duas faces dá `x² = s·x ⊖ p`; o lema de Cayley--Hamilton binária dá
+`M² = tr(M)·M ⊖ det(M)·I`. **São o mesmo `s` e o mesmo `p`** — os dois invariantes do
+par, um por face. Uma equação, dois andares. E fica dito o que é do andar: **o par
+pode estar fora, mas os invariantes estão sempre dentro**, porque são uma soma e um
+produto — e é por isso que se calcula com eles sem nunca avaliar o par.
+
+**O raio espectral é o meio de uma face ou da outra**, e o sinal de `Δ` escolhe qual:
+`|m|+|δ|` no ramo real (aditiva), `g` com `g⊗g = p` no complexo (multiplicativa).
+Nenhum pede avaliar o par.
+
+**E o raio 1 é a borda.** O livro já dizia as duas metades sem as ligar: o carácter
+tem módulo um, e a ordem finita força módulo um. **É a borda que torna Pontryagin
+barato** — o carácter leva `⊕` a `⊗` sem perder medida *porque ali o módulo vale um*.
+Fora da borda a troca custaria.
+
+**E as duas conservações fecham, uma por face:** Parseval diz que a norma não se move
+ao trocar de face; o central diz que o rectângulo não se move ao trocar de leitura.
+**A mesma figura** — cada lado move-se, o par não.
+
+**Os ciclotómicos são a partição da borda por ordem**, e a mesma partição lê-se nas
+duas faces: os tamanhos somam `n`, os factores multiplicam para `λⁿ−1`. *Lá a
+partição lê-se somando; aqui, do outro lado da borda, lê-se multiplicando.* O livro já
+definia o factor como uma **contagem**; o que se acrescenta é a **figura**, não a
+peça.
+
+**E a tríade fecha, cada nome no seu lugar** — e fui buscá-la ao `catalogo.tex`, não a
+inventei: a sucessão é **Clifford**, a multiplicidade é **La~Hire**, e a passagem
+avaliada na borda é **Pontryagin**. *Os nomes apanham o arranjo; não apanham o andar.*
+
+### Verificação final
+
+`201` páginas, `0` erros, `0` referências por resolver, `0` quebradas, `0` rótulos
+duplicados, `310` rótulos, **10 medidores de 10**. Terminadores só LF, nenhuma palavra
+partida, nenhuma barra órfã.
