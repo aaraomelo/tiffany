@@ -2590,6 +2590,100 @@ porque o lado não voltou}. O fractal claro diz \emph{como} se repete; o negro d
 \boxed{\;\text{repetir é da forma; conservar é do par --- e é o par que a dobra dá}\;}
 \]
 
+\subsection*{As duas conservações: a idempotência e a potência}
+
+\noindent\textbf{E há uma cisão por baixo de tudo isto, que é a mesma em todo o
+lado: conservar \emph{quantos} há, ou conservar \emph{qual é qual}.} As duas
+metades do Teor.~\ref{fis:thm:antissim} não são só duas peças de uma soma --- são
+\textbf{duas leis}, e cada uma tem a sua operação.
+
+\begin{teorema}[a cardinalidade é idempotente, a ordem é potência, e a cisão custa]\label{fis:thm:cardordem}
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O lado cardinal lê-se por \emph{idempotência}.} Contar a fibra
+não distingue cópias: repetir um elemento não cria indivíduo novo, e a lei desse
+lado é $x\ast x=x$. \emph{É a leitura do $G$} --- o Teor.~\ref{fis:thm:medida} já
+dizia que a medida conta e não distingue quem contou. \textbf{Ali há
+\emph{clones}, e a individualidade não é o que a operação conserva.}
+\item[(2)] \textbf{O lado ordinal lê-se por \emph{potência}.} Ali não basta saber
+que há dois: é preciso saber qual é qual, e a operação não apaga a repetição ---
+conta-a. Pelo Teor.~\ref{fis:thm:antissim}(5), $\partial^{n}$ lê a
+\textbf{paridade}, e é isso que guarda a direcção.
+\[
+\boxed{\;\text{a idempotência \textbf{apaga} a multiplicidade da repetição; a potência \textbf{conta-a}}\;}
+\]
+\item[(3)] \textbf{E um idempotente não trivial \emph{é} um divisor de zero.} De
+$x\ast x=x$ vem
+\[
+\boxed{\;x\,(x\ominus1)=0\;}
+\]
+--- pelo que, se $x$ não é o $0$ nem o $1$, os dois factores são não nulos e o
+produto anula-se. \emph{E diga-se o sentido, porque só vale um}: haver divisores
+de zero \textbf{não} obriga a haver idempotente não trivial.
+\item[(4)] \textbf{Donde partir em duas metades tem preço, e o preço é esse.} Os
+projectores $P_{\pm}=(1\pm\partial)/2$ do Teor.~\ref{fis:thm:antissim}(2) são
+idempotentes, somam à identidade, e
+\[
+\boxed{\;P_{+}\ast P_{-}=0\;}
+\]
+\emph{Fabricar a cisão é fabricar divisores de zero.} Não é acidente do exemplo:
+é o que a cláusula~(3) obriga, porque nenhum dos dois é o $0$ nem o $1$.
+\item[(5)] \textbf{E é por isso que a ordem não vive desse lado.} O
+Cor.~\ref{fis:cor:prop} declara precisar da \textbf{ausência} de divisores de zero
+para a razão ser transitiva. \emph{A mesma coisa que faz a cardinalidade poder
+identificar clones é a que impede a ordem de fechar}, e as duas leituras não
+podem correr no mesmo sítio com as mesmas hipóteses.
+\item[(6)] \textbf{E onde $2=0$ não há preço nenhum, porque não há cisão.} Nos
+dois símbolos os projectores não existem --- pedem o dois invertível ---, os
+únicos idempotentes são os \emph{dois neutros}, e não há divisores de zero.
+\emph{É o lado da identidade}, e é o Teor.~\ref{fis:thm:antissim}(4) outra vez:
+ali $-1=+1$, as duas metades colam, e a pergunta desaparece.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são as leituras, e apoiam-se nos teoremas citados.
+
+(3) $x\ast x=x$ dá $x\ast x\ominus x=0$, isto é $x\ast(x\ominus1)=0$. Que o
+recíproco falhe vê-se num suporte de quatro objectos: ali o produto de dois não
+nulos anula-se e, no entanto, os únicos idempotentes são $0$ e $1$.
+
+(4) $P_{\pm}^{2}=P_{\pm}$ é conta directa de $\partial^{2}=\mathrm{id}$; e
+$P_{+}P_{-}=(1-\partial^{2})/4=0$. Ambos são distintos de $0$ e de $1$ sempre que
+a dobra for efectiva, pelo que~(3) se aplica.
+
+(5) É a hipótese declarada do Cor.~\ref{fis:cor:prop}, posta ao lado de~(4).
+
+(6) Com $2=0$ a divisão por dois não existe, logo não há $P_{\pm}$; e em $B$ os
+idempotentes são $0$ e $1$, que são os dois neutros do Teor.~\ref{fis:thm:B}.
+\end{proof}
+
+\medido{\code{tests/idem.c} §I1--§I3. Varridos suportes de dois a duzentos: a
+implicação da cláusula~(3) --- mais de dois idempotentes obriga divisores de zero
+--- \textbf{não falha uma vez}; e o recíproco falha, como se diz, já no suporte
+de quatro. Os projectores da cláusula~(4) verificam-se em $169$ pares: ambos
+idempotentes, produto nulo, soma igual à identidade, \textbf{zero falhas}.}
+
+\medskip\noindent\textbf{E aqui as duas metades ganham nome, e é o nome que
+faltava.}
+\[
+\begin{array}{ll}
+\textbf{o cardinal} & \text{identifica clones, conserva a \emph{classe}, e pergunta «quantos?»}\\[2pt]
+\textbf{o ordinal} & \text{distingue indivíduos, conserva a \emph{posição}, e pergunta «qual?»}
+\end{array}
+\]
+\emph{E não são duas teorias em competição}: são as duas conservações da mesma
+dobra. \textbf{A cardinalidade comprime; a ordem guarda a memória da compressão}
+--- e é a segunda que impede a primeira de ser destrutiva, que é exactamente o
+Teor.~\ref{fis:thm:antissim}(7) dito por outras palavras: \emph{o par volta
+porque o simétrico o guardou; o lado não volta porque o antissimétrico perdeu o
+sinal}.
+\[
+\boxed{\;\text{a simetria conserva o \textbf{par}; a antissimetria conserva a \textbf{diferença}}\;}
+\]
+\emph{Só o par não recupera a orientação, e só a diferença não recupera o par.}
+\textbf{As duas juntas é que são a informação reversível}, e é isso, e só isso,
+que o duomorfismo faz a interface entre.
+
 \medskip\noindent\textbf{E o degrau onde \emph{contar} passa a \emph{integrar}
 tem aqui o seu núcleo, que é exacto e não pede integral nenhum.} Nos outros
 trabalhos desta obra ele é o \textbf{teorema central} --- Gentil e Hurwitz duais
