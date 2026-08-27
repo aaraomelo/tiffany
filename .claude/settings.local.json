@@ -8,9 +8,13 @@
       "Bash(echo \"[exit $?]\")",
       "Bash(gh workflow *)",
       "Bash(gh run *)",
+      "Bash(bash tools/chave-patria.sh:*)",
+      "Bash(gh variable set:*)",
+      "Bash(gh secret set:*)",
       "Bash(cc -O2 -std=c99 -Wall -I../lib claim_ir.c -o /tmp/claude-1000/-home-aaraolopes-Documentos-tiffany/b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d/scratchpad/claim_ir)",
       "Bash(/tmp/claude-1000/-home-aaraolopes-Documentos-tiffany/b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d/scratchpad/claim_ir)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(grep -oE '\\\\\\\\prod\\([^a-zA-Z]|$\\)' fisica.tex)"
     ]
   }
 }
