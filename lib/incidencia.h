@@ -1,44 +1,91 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * lib/incidencia.h — ζ ACUMULA, μ DESACUMULA. NA ORDEM TOTAL, μ É A DIFERENÇA.
+ * lib/incidencia.h — S, ζ, μ: o deslocamento gera a soma e a inversão
  *
- * O `fisica.tex thm:mu` e `thm:zetamu` dizem o que o motor tinha por metade: ele
- * ACUMULA (o `GROUP BY`/`COUNT` constrói o G, que é a convolução com ζ) mas não
- * DESACUMULA. A inversa de ζ na álgebra da incidência é μ, e na ordem TOTAL μ é
- * a diferença finita:
+ * Um operador e o trio inteiro sai dele:
  *
- *      μ(t,t) = 1,   μ(t-1,t) = -1,   μ(u,t) = 0 nos restantes,
+ *     S    a subdiagonal de uns          S_ij = [i = j+1]
+ *     ζ    a série de S                  ζ = Σ_{j≥0} S^j   (a triangular de uns)
+ *     μ    a diferença finita            μ = 1 − S
+ *     μζ = ζμ = id                       (aranha thm:shift)
  *
- *      logo   (b * μ)(t) = b(t) − b(t−1).
+ * A série é FINITA porque S é nilpotente, e o trio vive na face Δ = 0 --- a
+ * mesma nilpotência do corpo exterior. É por isso que o inverso sai sem fração.
  *
- * E o par fecha: ζ soma o prefixo, μ desfaz a soma, e ζ∘μ = μ∘ζ = id (resíduo
- * 0). É o `thm:zetamu`:
- *
- *      escrever é convolução com ζ:     G_t(x) = (a_x * ζ)(t)     — o acumulado
- *      recuperar é deconvolução com μ:  a_x(t) = G_t(x) − G_{t−1}(x)  — a volta
- *
- * «Conhecida a família {G_t}, a trajetória inteira volta — sem que nada dela
- * tenha sido guardado.» O motor guarda o G; a diferença finita devolve-lhe os
- * passos.
- *
- * ── DUAS ORDENS, A MESMA ÁLGEBRA ─────────────────────────────────────────────
- * Este ficheiro é a ordem TOTAL (a cadeia 0,1,2,…). O `fis:cor:mobius` diz que a
- * mesma inversão na ordem por DIVISIBILIDADE é a função de Möbius clássica, e
- * essa já está no `lib/dirichlet.h` (`dl_acumula` = f*1, `dl_inverte` = F*μ). Não
- * se duplica: «a álgebra não muda — ζ acumula, μ desacumula — e só muda a ordem
- * sobre a qual se acumula». O `tests/zetamu.c` confronta as duas.
- *
- * ── EXACTO EM ℤ ──────────────────────────────────────────────────────────────
- * ζ e μ de funções inteiras são inteiras: a álgebra corre em `long`, sem vírgula.
- * A diferença finita não perde nada — é o inverso EXACTO da soma, não uma
- * aproximação dela.
- *
- * Medido em `tests/zetamu.c`.
- *   cc -O2 -std=c99 -Ilib -Itests -o /tmp/zetamu tests/zetamu.c && /tmp/zetamu
+ * Tudo em inteiros, e sem alocar: o cliente dá o vector e o tamanho.
+ * Medido em `tests/incidencia.c` e `tests/pgwire.c` §W153.
  * ═══════════════════════════════════════════════════════════════════════════ */
 #ifndef INCIDENCIA_H
 #define INCIDENCIA_H
 
-/* ── ζ: acumula o prefixo. b(t) = Σ_{u≤t} a(u). É a convolução com ζ na cadeia. */
+#define IN_MAX 64
+
+/* ── ζ: a acumulação, (ζa)(t) = Σ_{u≤t} a(u) ─────────────────────────────
+ * É a convolução pela triangular de uns, feita num passo por índice. */
+static void in_zeta(const long *a, long *out, int n){
+    long acc = 0;
+    for(int i = 0; i < n; i++){ acc += a[i]; out[i] = acc; }
+}
+
+/* ── μ: a diferença finita, (μa)(t) = a(t) − a(t−1) ─────────────────────
+ * É 1 − S, e desfaz ζ exactamente --- sem divisão, sem resto. */
+static void in_mu(const long *a, long *out, int n){
+    for(int i = n - 1; i > 0; i--) out[i] = a[i] - a[i-1];
+    if(n > 0) out[0] = a[0];
+}
+
+/* ── S: o deslocamento, (Sa)(t) = a(t−1) ────────────────────────────────── */
+static void in_desloca(const long *a, long *out, int n){
+    for(int i = n - 1; i > 0; i--) out[i] = a[i-1];
+    if(n > 0) out[0] = 0;
+}
+
+/* ── O grau de nilpotência: S^k = 0 exactamente em k = n ─────────────────
+ * É ele que faz a série de ζ terminar, e devolve-se para o cliente saber
+ * quantos termos a série tem. */
+static int in_grau_nilpotente(int n){ return n; }
+
+/* ── A VOLTA, verificada: μ(ζa) = a e ζ(μa) = a ──────────────────────────
+ * Devolve 1 se a volta é exacta em todo o vector. Não é decoração: é a lei
+ * que garante ao cliente que acumular e diferenciar não perde nada. */
+static int in_volta_exacta(const long *a, int n){
+    long z[IN_MAX], v[IN_MAX];
+    if(n > IN_MAX) return 0;
+    in_zeta(a, z, n);  in_mu(z, v, n);
+    for(int i = 0; i < n; i++) if(v[i] != a[i]) return 0;
+    in_mu(a, z, n);    in_zeta(z, v, n);
+    for(int i = 0; i < n; i++) if(v[i] != a[i]) return 0;
+    return 1;
+}
+
+/* ── E O GUME, que o cliente pode chamar: com o deslocamento CÍCLICO a série
+ * não fecha. Devolve 1 se o cíclico volta à identidade em n passos --- e nesse
+ * caso 1 − S é singular, pelo que não há inversa. */
+static int in_ciclico_nao_fecha(int n){
+    /* S_cic^n = I: a soma de cada linha de 1 − S_cic é zero, logo é singular */
+    (void)n;
+    return 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * A MESMA ÁLGEBRA, LIDA AO LONGO DA ORDEM — para o motor.
+ *
+ * O que está acima é o trio como OPERADOR: S a subdiagonal, ζ = ΣS^j, μ = 1−S,
+ * e a nilpotência a garantir que a série é finita. O que está abaixo é o mesmo
+ * trio lido como PERCURSO, que é a forma de que o `banco/sql.c` precisa: o
+ * `count` do `GROUP BY` é a convolução com ζ (`thm:zetamu`: G_t(x) = (a_x*ζ)(t)),
+ * e a volta é a diferença finita.
+ *
+ *     in_zeta / in_mu     o operador, sobre `int n`   (o de cima)
+ *     inc_zeta / inc_mu   o percurso,  sobre `long n` (o de baixo)
+ *
+ * NÃO SÃO DUAS ÁLGEBRAS: são a mesma, e é por isso que vivem no mesmo ficheiro.
+ * O `tests/escada.c` mede a leitura de operador; o `tests/zetamu.c` mede a de
+ * percurso e o par a fechar (ζ∘μ = μ∘ζ = id, resíduo 0). O prefixo distingue a
+ * leitura, e o guarda de inclusão é um só.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── ζ: acumula o prefixo. b(t) = Σ_{u≤t} a(u). A convolução com ζ na cadeia. */
 static void inc_zeta(const long *a, long *b, long n){
     long s = 0;
     for(long t = 0; t < n; t++){ s += a[t]; b[t] = s; }
@@ -52,7 +99,8 @@ static void inc_mu(const long *b, long *a, long n){
 
 /* ── o núcleo μ(u,t) da ordem total, tal como o thm:mu o dá ────────────────────
  * É a definição pontual, para quem quiser a matriz em vez do operador: vale 1 na
- * diagonal, −1 logo abaixo, e zero em tudo o resto. `inc_mu` é isto aplicado. */
+ * diagonal, −1 logo abaixo, e zero em tudo o resto. `inc_mu` é isto aplicado —
+ * e é a mesma subdiagonal S do trio lá de cima, com o sinal da cláusula. */
 static long inc_mu_nucleo(long u, long t){
     if(u == t)     return  1;
     if(u == t - 1) return -1;
@@ -79,8 +127,6 @@ static void inc_G(const long *pi, long n, long x, long *G){
  * no r-ésimo encontro vale r. A sua diferença finita vale 1 em cada visita —
  * é o G̃ = 1 do levantamento, dito na linguagem da incidência. */
 static void inc_levanta(const long *pi, long n, long *k){
-    /* uma passagem: para cada valor, o contador sobe a cada visita, e k[t] recebe-o */
-    /* usa uma tabela pequena indexada pelo valor; o chamador garante pi[t] em [0,VMAX) */
     long cont[256];
     for(int v = 0; v < 256; v++) cont[v] = 0;
     for(long t = 0; t < n; t++){
