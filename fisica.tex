@@ -160,7 +160,8 @@ a pergunta & a resposta & onde \\
 \endfoot
 \bottomrule
 \endlastfoot
-O que é o ponto de partida? & dois extremos e a dobra que os troca & Def.~\ref{fis:def:op} \\
+O que é o ponto de partida? & um mapa e uma identidade: $\partial\circ\partial=\mathrm{id}$ & Def.~\ref{fis:def:op} \\
+E os dois extremos, de onde vêm? & saem forçados, e não são dados & Teor.~\ref{fis:thm:doispontos}(2) \\
 Donde vêm as operações e os dois dígitos? & da dobra: sem meio, são precisas duas faces & Teor.~\ref{fis:thm:duas},~\ref{fis:thm:B} \\
 E as coordenadas? & a tupla ordenada: a \emph{representação} & Teor.~\ref{fis:thm:coord} \\
 Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{fis:folha} \\Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{fis:thm:mult}(3) \\
@@ -647,7 +648,7 @@ e=n
 \partial x=x^{-1}\ \text{para todo }x .
 \]
 E na falta delas $\partial$ é a inversão \emph{seguida da translação por $e$},
-$\partial x=e\circ x^{-1}$ --- que é a Def.~\ref{fis:def:op} com $e=a+b$, antes
+$\partial x=e\circ x^{-1}$ --- que é a forma afim do Teor.~\ref{fis:thm:dobra}(1) com $e=a+b$, antes
 de se escolher a régua. \emph{A normalização não é o que faz o teorema: é o que a
 =alência diz que se está a fazer.}
 \item[(2)] \textbf{$\partial$ é involutiva, e o seu ponto fixo é o MEIO --- onde
@@ -769,7 +770,8 @@ que se declara neutro por si.
 objetos trocados, o invariante teria de ser fixo e nenhum o é; restam
 \emph{duas} composições, cada uma com o seu invariante, e os dois invariantes são
 os dois objetos. Chamando-lhes $0$ e $1$, e $+$ e $\cdot$ às composições, a
-Def.~\ref{fis:def:op} lê-se nas duas equações do enunciado.
+Def.~\ref{fis:def:op} lê-se nas duas equações do enunciado \emph{deste teorema},
+que as pede e não as recebe dela.
 
 (5) A aplicação afim que leva $[a,m]$ em $[a,b]$ transporta a dobra na dobra,
 porque $\partial$ é afim e os afins compõem-se; o mesmo do outro lado. E $m$ é
@@ -1741,7 +1743,7 @@ w=2 & 4\ \text{lugares} & \operatorname{ord}=4 & \text{um \textbf{quarto} de vol
 w=3 & 8\ \text{lugares} & \operatorname{ord}=8 & \text{um \textbf{oitavo} de volta} & \text{a \textbf{base oito}}
 \end{array}
 \]
-O primeiro é a Def.~\ref{fis:def:op}, e não é analogia: é ela.
+O primeiro é a ordem dois do Teor.~\ref{fis:thm:doispontos}(0), e não é analogia: é ela.
 \item[(5)] \textbf{E o segundo degrau declara o que custa.} $\rho_w$ com
 $w\ge2$ obriga a meia volta a não ser a identidade, isto é
 $-\mathrm{id}\neq\mathrm{id}$, isto é $2\neq0$. \emph{Sobre os dois símbolos do
@@ -4873,7 +4875,9 @@ $\dagger$). As recíprocas são as mesmas igualdades lidas ao contrário.
 \medskip\noindent\textbf{E há uma segunda maneira de quatro coisas se
 arrumarem, que não é esta --- e confundi-las é o erro fácil deste sítio.} Sobre
 quatro objectos há \emph{duas} arrumações fechadas e não mais, e o que as separa
-é a única grandeza que a Def.~\ref{fis:def:op} conhece: \textbf{a ordem}.
+é a única grandeza que a dobra \emph{deixa ler}: \textbf{a ordem} --- que não é da
+Def.~\ref{fis:def:op}, mas do Teor.~\ref{fis:thm:doispontos}(0), onde ela se lê
+das duas espécies.
 \[
 \begin{array}{lll}
 \textbf{o quarteto} & \text{quatro de ordem }2 & Q_{ab}^{2}=\mathrm{id}\ \text{para os quatro}\\[2pt]
@@ -5163,8 +5167,10 @@ coincidem exactamente onde o processo acaba»}. É a mesma separação, e o mesm
 encontro.
 
 \begin{teorema}[as duas faces do operador dão \emph{uma} equação]\label{fis:thm:duasfaces}
-A Def.~\ref{fis:def:op} tem \textbf{quatro} peças e não duas --- duas operações e
-dois neutros ---, e escreve-se nas duas faces
+\emph{Este teorema pede \textbf{quatro} peças, e é preciso dizer que as pede} ---
+duas operações e dois neutros. \textbf{A Def.~\ref{fis:def:op} não as dá}: dá um
+mapa e uma identidade, e nada mais. \emph{São hipótese deste enunciado, e é a
+cláusula~(4) que paga o preço de as ter pedido.} Postas elas, escreve-se nas duas faces
 \[
 \underbrace{\partial x\oplus x=s}_{\oplus\ \text{e o seu neutro}}
 \qquad\qquad
@@ -5214,7 +5220,7 @@ neutros --- que é a única coisa que ali há para escolher.
 
 \begin{proof}
 De $\partial x\oplus x=s$ vem $\partial x=s\ominus x$, que é a
-Def.~\ref{fis:def:op} escrita ao contrário --- lá $\partial x=a+b-x$, e $s=a+b$.
+forma afim do Teor.~\ref{fis:thm:dobra}(1) escrita ao contrário --- lá $\partial x=a+b-x$, e $s=a+b$.
 Levando à segunda face,
 \[
 (s-x)\,x=p ,\qquad\text{isto é}\qquad sx-x^{2}=p ,\qquad\text{isto é}\qquad x^{2}=sx-p .
@@ -5405,7 +5411,7 @@ largura de palavra da medição, e é ela que a profundidade conta. Exige-se o
 
 \begin{teorema}[a estrela: onde as duas faces fazem o mesmo]\label{fis:thm:estrela}
 Numa estrutura com duas operações e com os dois neutros que a
-Def.~\ref{fis:def:op} nomeia --- o $0$ de $\oplus$ e o $1$ de $\otimes$ ---
+Teor.~\ref{fis:thm:duas}(4) pede --- o $0$ de $\oplus$ e o $1$ de $\otimes$ ---
 chama-se \textbf{estrela} ao elemento onde as duas faces fazem o mesmo a $x$,
 cada uma com o seu neutro:
 \[
@@ -5818,7 +5824,7 @@ aquelas duas leituras, há um.
 \[
 D(i)=(N-1)-i=\partial i ,
 \]
-que é a Def.~\ref{fis:def:op} com $a=0$ e $b=N-1$. \emph{Não é função nova: é a
+que é o Teor.~\ref{fis:thm:dobra}(1) com $a=0$ e $b=N-1$. \emph{Não é função nova: é a
 primeira coisa que este documento definiu, lida no endereço.} Donde, sem prova a
 mais, $D\circ D=\mathrm{id}$ e $D$ inverte a ordem
 (Teor.~\ref{fis:thm:duas}(2)).
@@ -5867,7 +5873,7 @@ Cor.~\ref{fis:cor:travunica} aplicado a $R$ e $R^{\dagger}$.
 (Teor.~\ref{fis:thm:B}). Ora $N-1=2^{p}-1$ é a palavra de $p$ dígitos todos $1$,
 que é o \emph{máximo} em cada posição; logo a subtração $(N-1)-i$ corre posição a
 posição \textbf{sem transporte} e coincide com a troca dígito a dígito. E
-$(N-1)-i=0+(N-1)-i$ é a Def.~\ref{fis:def:op} com aqueles extremos, por
+$(N-1)-i=0+(N-1)-i$ é o Teor.~\ref{fis:thm:dobra}(1) com aqueles extremos, por
 substituição. Involutividade e inversão da ordem são o
 Teor.~\ref{fis:thm:duas}(2); explicitamente, de $i<j$ vem $(N-1)-j<(N-1)-i$.
 
@@ -7845,8 +7851,8 @@ num passo:
 \oslash\ \text{esquilo} & \text{a deconvolução} & \mu=\zeta^{-1} & \text{o \textbf{neutro} }1:\ \oslash\otimes=\mathrm{id}
 \end{array}
 \]
---- e a última linha é a \textbf{realização operacional} da segunda equação da
-Def.~\ref{fis:def:op}, $\partial x\cdot x=1$, com $\otimes$ a desempenhar o papel
+--- e a última linha é a \textbf{realização operacional} da régua multiplicativa da
+Obs.~\ref{fis:obs:reguas}, $\partial x\cdot x=1$, com $\otimes$ a desempenhar o papel
 de $x$ e $\oslash$ o de $\partial x$. \emph{Realização, e não identidade}: a
 equação vive nas faces do operador e $\oslash\circ\otimes=\mathrm{id}$ vive nos
 operadores que as executam --- é o mesmo enunciado um andar acima, e escrever
@@ -9210,7 +9216,7 @@ $p$ passos é a \emph{menor} das duas voltas,
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{O máximo é $L/2$, e é atingido exactamente onde $p=L-p$.}
 \item[(2)] \textbf{E esse ponto é o ponto fixo da dobra.} A aplicação
-$p\mapsto L-p$ é a Def.~\ref{fis:def:op} com extremos $0$ e $L$; o seu único
+$p\mapsto L-p$ é o Teor.~\ref{fis:thm:dobra}(1) com extremos $0$ e $L$; o seu único
 ponto fixo é o \textbf{meio} (Teor.~\ref{fis:thm:duas}(2)), e é ele o máximo.
 \emph{A velocidade máxima é a interface}: o único lugar onde os dois sentidos dão
 o mesmo número.
@@ -9234,7 +9240,7 @@ ser fechado.}
 elas cruzam-se onde $p=L-p$, e aí $d=p=L/2$. Para $p$ menor vale $d=p<L/2$; para
 $p$ maior vale $d=L-p<L/2$. Logo o máximo é $L/2$ e é atingido só no cruzamento.
 
-(2) $\partial p=0+L-p$ é a Def.~\ref{fis:def:op} com $a=0$ e $b=L$; pelo
+(2) $\partial p=0+L-p$ é o Teor.~\ref{fis:thm:dobra}(1) com $a=0$ e $b=L$; pelo
 Teor.~\ref{fis:thm:duas}(2) ela é involutiva e tem um único ponto fixo, o meio
 $\tfrac{L}{2}$. O cruzamento de~(1) é a equação $\partial p=p$, que é a definição
 de ponto fixo. \emph{Não são dois factos: é um, lido em duas linguagens.}
@@ -11399,8 +11405,8 @@ $\Phi(r)\Phi(1/r)=\Phi(r\cdot 1/r)=\Phi(1)=1$, que é a primeira igualdade. A
 segunda é o logaritmo dela, que leva produto em soma. Para o ponto fixo:
 $\Phi(r)=\Phi(1/r)$ com o produto a valer $1$ dá $\Phi(r)^{2}=1$, logo
 $\Phi(r)=1=\Phi(1)$ nos positivos, e a injetividade fecha em $r=1$. \emph{Em
-nenhum passo se usou a forma de $\Phi$}: o que fecha o par é a segunda equação da
-Def.~\ref{fis:def:op}, $\partial x\cdot x=1$, e $\Phi$ apenas a transporta.
+nenhum passo se usou a forma de $\Phi$}: o que fecha o par é a régua multiplicativa da
+Obs.~\ref{fis:obs:reguas}, $\partial x\cdot x=1$, e $\Phi$ apenas a transporta.
 \end{proof}
 
 \begin{corolario}[a ponte, exibida: a entropia dual é a diluição, com outro $\Phi$]\label{fis:cor:ponte}
