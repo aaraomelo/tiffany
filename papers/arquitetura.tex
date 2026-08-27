@@ -2146,6 +2146,44 @@ Pelo Teor. da multiplicidade, $G(x)>1$ \emph{é} a existência de dois índices
 distintos na mesma célula --- é pedir ao motor as células onde a realização
 dobrou.
 
+\subsection*{O motor acumulava, e não desacumulava: $\mu$ é a diferença finita}
+
+\noindent O \code{count} do \code{GROUP BY} é o campo $G$, e o
+\code{fisica.tex thm:zetamu} diz o que isso é por baixo: a \textbf{convolução com
+$\zeta$}. Ao longo da ordem, $G_t(x)=(a_x*\zeta)(t)$ é a contagem acumulada de
+$x$ até ao passo $t$ --- o motor \emph{acumula}. O que ele não tinha é a volta.
+A inversa de $\zeta$ na álgebra da incidência é a função de Möbius $\mu$, e na
+ordem total $\mu$ é a \textbf{diferença finita}:
+\[
+\mu(t,t)=1,\quad \mu(t{-}1,t)=-1,\quad \mu(u,t)=0\ \text{no resto}
+\qquad\Longrightarrow\qquad
+a_x(t)=G_t(x)-G_{t-1}(x).
+\]
+\emph{Conhecida a família $\{G_t\}$, a trajetória inteira volta --- sem que nada
+dela tenha sido guardado.} O motor guardava o acumulado e deitava fora os passos;
+com $\mu$, os passos lêem-se de volta, exactos.
+
+\medskip\noindent\textbf{E não é uma segunda álgebra: é a que o motor já tinha,
+lida ao contrário.} O \code{lib/dirichlet.h} já realizava a mesma inversão na
+ordem por \emph{divisibilidade} --- $F=f*\mathbf 1 \Leftrightarrow f=F*\mu$, a
+Möbius clássica ---; o \code{lib/incidencia.h} realiza-a na ordem \emph{total},
+que é a que o $G$ percorre. «A álgebra não muda --- $\zeta$ acumula, $\mu$
+desacumula --- e só muda a ordem sobre a qual se acumula» (\code{fis:cor:mobius}).
+Tudo em \code{long}: $\zeta$ e $\mu$ de funções inteiras são inteiras, e a
+diferença finita é o inverso \emph{exacto} da soma, não uma aproximação dela.
+
+\medido{\code{lib/incidencia.h} e \code{tests/zetamu.c}, medido local e no metal
+da \code{srv1559444}: $\zeta\circ\mu=\mu\circ\zeta=\mathrm{id}$ com resíduo
+\textbf{0} em toda a largura até $200$ ($40200$ posições); a diferença finita
+iguala o núcleo $\mu$ do \code{thm:mu}; a trajetória $a_x$ recuperada de
+$\{G_t(x)\}$, valendo $1$ exactamente nas visitas de $x$; a mesma inversão nos
+divisores ($\mu*\mathbf 1=\varepsilon$); e o levantamento a subir $1$ por visita
+($\tilde G=1$). \textbf{8 unidades, zero falhas.}}
+
+\colunas{\code{fisica.tex thm:mu, thm:zetamu, cor:mobius}}
+        {\code{lib/incidencia.h}; a ponte para \code{lib/dirichlet.h}}
+        {\code{tests/zetamu.c} §Z1--§Z5}
+
 \medskip\noindent\textbf{E o que a porta não faz, RECUSA com a razão.} Um erro
 disfarçado de resultado vazio é o pior desfecho para quem chama, e a regra vale
 nos dois sentidos: \code{DISTINCT} pede uma coluna --- a linha inteira não é

@@ -3477,7 +3477,12 @@ $I$, a outra soma sobre o \emph{contradomínio} $X$.
 $\sum S^j$ a ser a triangular de uns, $\dim\ker S=1$. §AN15: $\mu=\zeta^{-1}$ em
 $\mathbf{4096}$ pares; o directo e o inverso com resíduo $\mathbf{0}$ sobre a
 fibra mais funda que a realização tem; e a mesma inversão na árvore dos
-divisores. §AN18: $(1-S)\zeta=\mathrm{id}$.}
+divisores. §AN18: $(1-S)\zeta=\mathrm{id}$. E \code{lib/incidencia.h} com
+\code{tests/zetamu.c}: a mesma inversão como \emph{operador do motor} --- $\zeta$
+a soma-prefixo, $\mu$ a diferença finita ---, $\zeta\circ\mu=\mu\circ\zeta=
+\mathrm{id}$ com resíduo $\mathbf{0}$ em toda a largura, a trajetória $a_x$
+recuperada de $\{G_t(x)\}$ exactamente nas visitas, e $\mu*\mathbf 1=\varepsilon$
+na árvore dos divisores. \textbf{8 unidades, zero falhas.}}
 
 \begin{teorema}[as potências de dois são a base ortonormal]\label{fis:thm:base}
 Sobre palavras de $m$ símbolos de $B$, com $\langle a,b\rangle=\operatorname{paridade}(a\wedge b)$:
