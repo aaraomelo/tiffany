@@ -1435,56 +1435,82 @@ pela medida ---, e o que lá se escreve com dois integrais escreve-se aqui com
 duas contagens. \emph{O integral é a leitura; a conta é esta.}
 
 \begin{teorema}[os dois cortes dão a mesma contagem]\label{fis:thm:central}
-Sejam $I$ e $X$ finitos e ordenados, e $f\colon I\to X$ uma aplicação
-\textbf{qualquer}. Escreva-se o \textbf{corte do domínio} e o \textbf{corte da
-imagem}:
+Sejam $I$ e $X$ finitos e \textbf{totalmente} ordenados --- \emph{e a ordem tem
+de ser total, que é o que faz a cláusula~(2) ser exaustiva} --- e
+$f\colon I\to X$ uma aplicação \textbf{qualquer}. Escrevam-se as duas contagens:
 \[
-\Sigma(f)\;=\;\sum_{i\in I}\abs{\{x\in X:\ x\le f(i)\}}\;,
+\Sigma_{\mathrm{dom}}(f)=\sum_{i\in I}\abs{\{x\in X:\ x\le f(i)\}}\;,
 \qquad
-\Sigma(f^{\vee})\;=\;\sum_{x\in X}\abs{\{i\in I:\ f(i)<x\}}\;.
+\Sigma_{\mathrm{im}}(f)=\sum_{x\in X}\abs{\{i\in I:\ f(i)<x\}}\;.
 \]
+--- a primeira soma pelo \textbf{domínio}, a segunda pela \textbf{imagem}.
 Então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{Os dois somam o rectângulo, exactamente e sem resto:}
+\item[(1)] \textbf{As duas somam o rectângulo, exactamente e sem resto:}
 \[
-\boxed{\;\Sigma(f)\;+\;\Sigma(f^{\vee})\;=\;\abs{I}\cdot\abs{X}\;}
+\boxed{\;\Sigma_{\mathrm{dom}}(f)\;+\;\Sigma_{\mathrm{im}}(f)\;=\;\abs{I}\cdot\abs{X}\;}
 \]
 \item[(2)] \textbf{E a razão é uma partição, não uma conta feliz.} Cada célula
-$(i,x)$ do rectângulo cumpre $x\le f(i)$ ou $x>f(i)$, \emph{e exactamente uma
-das duas}. O primeiro corte conta as células por \textbf{colunas}, o segundo por
-\textbf{linhas}, e juntos cobrem tudo uma vez.
-\item[(3)] \textbf{As duas leituras são um par da dobra.} Trocar coluna por linha
-é a transposição do rectângulo, que é involutiva: aplicada duas vezes devolve a
-célula. \emph{São $f$ e $f^{\vee}$ o par que ela produz}, no sentido do
-Teor.~\ref{fis:thm:doispontos}(2), e o rectângulo é o que ela \textbf{conserva}
---- o invariante do par, como $s$ e $p$ o são no seu.
-\item[(4)] \textbf{E não se pede monotonia.} A identidade vale para toda $f$. A
-monotonia é o que faz de $f^{\vee}$ a \emph{inversa} de $f$ e não apenas a
-contagem dual; \emph{a conservação é da partição, e a inversão é da ordem}.
+$(i,x)$ do rectângulo cumpre $x\le f(i)$ ou $f(i)<x$, \emph{e exactamente uma
+das duas} --- \textbf{e é aqui que a ordem total entra}: numa ordem apenas
+parcial as duas condições deixam de esgotar. A primeira contagem lê as células
+por \textbf{colunas}, a segunda por \textbf{linhas}.
+\item[(3)] \textbf{Trocar as duas leituras é uma dobra --- e diga-se sobre o
+quê.} A troca $\Sigma_{\mathrm{dom}}\leftrightarrow\Sigma_{\mathrm{im}}$ actua
+sobre o \textbf{par de leituras}, e aí é involutiva: aplicada duas vezes devolve
+a leitura de partida. \emph{Sobre as células ela é uma bijecção
+$I\times X\to X\times I$, e só é endomorfismo quando $I$ e $X$ são o mesmo
+suporte} --- fora disso não tem ordem, porque não se compõe consigo própria,
+e o Teor.~\ref{fis:thm:quarteto} já obriga a pôr os dois no mesmo andar antes de
+compor. \textbf{O rectângulo é o invariante do par}, como $s$ e $p$ o são no seu.
+\item[(4)] \textbf{E há vinco quando o rectângulo é par.} As duas leituras
+coincidem quando $2\,\Sigma_{\mathrm{dom}}(f)=\abs{I}\cdot\abs{X}$ --- que é a
+equação do Teor.~\ref{fis:thm:vinco}(1) com $a+b=\abs{I}\cdot\abs{X}$. \emph{Logo
+há $f$ com as duas leituras iguais se e só se $\abs{I}\cdot\abs{X}$ for par}, e é
+a mesma pergunta de paridade que decide o ponto fixo na régua fechada. \textbf{O
+vinco desta dobra é a $f$ que reparte o rectângulo ao meio.}
+\item[(5)] \textbf{E não se pede monotonia.} A identidade vale para toda $f$. A
+monotonia é o que faz de $\Sigma_{\mathrm{im}}$ a soma de uma \emph{inversa}, e
+não apenas a contagem dual; \emph{a conservação é da partição, e a inversão é da
+ordem}.
 \end{enumerate}
 \end{teorema}
 
 \begin{proof}
-(2) e (1): para cada $i$ fixo, $X$ parte-se em $\{x\le f(i)\}$ e $\{x>f(i)\}$,
-que são disjuntos e cobrem $X$; somando em $i$ vem $\abs I\cdot\abs X$ à direita,
-e à esquerda a primeira parcela é $\Sigma(f)$ por definição. A segunda é
-$\sum_i\abs{\{x:x>f(i)\}}$, e trocar a ordem das duas somas dá
-$\sum_x\abs{\{i:f(i)<x\}}=\Sigma(f^{\vee})$ --- \emph{é a mesma partição contada
-pelo outro índice}, que é o Lema~\ref{fis:lem:conserva} aplicado ao rectângulo em
-vez de à lista.
+(2) e (1): para cada $i$ fixo, a ordem total parte $X$ em $\{x\le f(i)\}$ e
+$\{f(i)<x\}$, disjuntos e a cobrir $X$; somando em $i$ vem $\abs I\cdot\abs X$ à
+direita, e à esquerda a primeira parcela é $\Sigma_{\mathrm{dom}}(f)$ por
+definição. A segunda é $\sum_i\abs{\{x:f(i)<x\}}$, e trocar a ordem das duas
+somas dá $\sum_x\abs{\{i:f(i)<x\}}=\Sigma_{\mathrm{im}}(f)$ --- \emph{é a mesma
+partição contada pelo outro índice}, que é o Lema~\ref{fis:lem:conserva} aplicado
+ao rectângulo em vez de à lista.
 
-(3) A transposição $(i,x)\mapsto(x,i)$ cumpre a Def.~\ref{fis:def:op}, e leva o
-corte do domínio no da imagem.
+(3) A troca das duas leituras é uma permutação de dois objectos, e o
+Teor.~\ref{fis:thm:doispontos}(1) dá-lhe ordem dois. Que o rectângulo não se mova
+é (1).
 
-(4) Nenhum passo de (1) ou (2) usou a ordem de $f$ --- só a de $X$, para
-escrever $\le$.
+(4) É (1) posto igual a duas vezes uma parcela, e o Teor.~\ref{fis:thm:vinco}(1)
+lido com $a+b=\abs I\cdot\abs X$. A existência pede $\abs I\cdot\abs X$ par, e a
+unicidade não se afirma: várias $f$ podem repartir ao meio.
+
+(5) Nenhum passo de (1) ou (2) usou a ordem de $f$ --- só a de $X$, para
+escrever $\le$ e $<$.
 \end{proof}
+
+\medskip\noindent\textbf{E diga-se o que aqui é lei e o que é contagem, pelo
+critério que este documento aplica a si próprio.} Pelo
+Teor.~\ref{fis:thm:kirchhoff}(1), uma conservação que vale sempre e não separa
+nada \emph{não é lei: é contagem}. A cláusula~(1) vale para \textbf{toda} $f$,
+pelo que é isso mesmo --- uma contagem, e diz-se. \textbf{O que separa é
+$\Sigma_{\mathrm{dom}}$ sozinho}, que distingue $f$ de $f$; e o conteúdo está na
+cláusula~(2), que é a partição, e na~(4), que é onde ela tem vinco. \emph{O total
+não é a notícia; a maneira como ele se parte é.}
 
 \medido{\code{tests/meio.c}: varridas \textbf{todas} as $6^{5}=\mathbf{7776}$
 aplicações de cinco índices em seis células, monótonas ou não, a identidade
-$\Sigma(f)+\Sigma(f^{\vee})=30$ falha em \textbf{zero}. E com $f$ não monótona a
-igualdade mantém-se enquanto $f^{\vee}$ deixa de ser inversa --- que é a
-cláusula~(4) medida.}
+$\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=30$ falha em \textbf{zero}. E com $f$
+não monótona a igualdade mantém-se enquanto $\Sigma_{\mathrm{im}}$ deixa de ser a
+soma de uma inversa --- que é a cláusula~(5) medida.}
 
 \medskip\noindent\textbf{E é isto que a passagem discreto/contínuo é, quando se
 lhe tira o vocabulário.} \emph{Contar} é somar pelo domínio; \emph{integrar} é
@@ -2052,7 +2078,7 @@ $A\chi_k=(m-2\abs{k})\chi_k$ exato em inteiros, e o corte com $\abs{k}2^{m-1}$
 arestas. §AN28: $c=2^{-m}\mathcal{F}(f)$ a recompor $f$ nos $256$, com o passo
 sem a normalização a bater só nos zeros de $f$.}
 
-\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:escada},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}}
+\colunas{Teor.~\ref{fis:thm:doispontos},~\ref{fis:thm:dobra},~\ref{fis:thm:vinco},~\ref{fis:thm:duas},~\ref{fis:thm:B},~\ref{fis:thm:BI},~\ref{fis:thm:coord}; Obs.~\ref{fis:obs:reguas}; Lema~\ref{fis:lem:vizalg},~\ref{fis:lem:conserva},~\ref{fis:lem:comutapar}; Teor.~\ref{fis:thm:medida},~\ref{fis:thm:mult},~\ref{fis:thm:levant},~\ref{fis:thm:escada},~\ref{fis:thm:tecidos},~\ref{fis:thm:central},~\ref{fis:thm:largura},~\ref{fis:thm:mu},~\ref{fis:thm:zetamu},~\ref{fis:thm:base},~\ref{fis:thm:proprios},~\ref{fis:thm:H},~\ref{fis:thm:dobranorma},~\ref{fis:thm:conv}; Cor.~\ref{fis:cor:mobius},~\ref{fis:cor:modos}}
         {$B$, a lista $I$, o par $(m,\delta)$, o anel de grupo, a escada}
         {\code{tests/meio.c} §M3--§M7; \code{tests/aranha\_n.c} §AN12, §AN15--§AN18, §AN26--§AN28, §AN32--§AN36}
 
@@ -5776,9 +5802,11 @@ $\oslash^{k}\otimes^{k}c=c$: a deconvolução devolve o bit único, com resíduo
 Por (1) do Teor.~\ref{fis:thm:gato}, $\oslash^{k}\otimes^{k}=\mathrm{id}$. Para a
 primeira parte, em $n=2$ o gato é $(a,b)\mapsto(ma+b,\,a)$, que é exatamente o
 passo da recorrência com o par a guardar dois termos consecutivos --- a
-\emph{memória de ordem dois}. A razão de termos consecutivos de uma recorrência
-linear de raízes $\sigma,\sigma'$ com $\abs{\sigma'}<1$ tende para $\sigma$,
-porque a componente em $\sigma'$ decai.
+\emph{memória de ordem dois}. Que a razão de termos consecutivos se aproxime de
+$\sigma$ \textbf{não se prova aqui por limite}: é o
+Teor.~\ref{fis:thm:estrelaencaixe}, que o faz \emph{em inteiros}, com a largura
+do encaixe a valer $1/(u_ku_{k+1})$ e sem se avaliar raiz nenhuma. \emph{Isto é
+contagem, e não passagem ao limite} --- e é lá que está escrito.
 \end{proof}
 
 \medskip\noindent\textbf{O discreto e o contínuo, de um bit só.} O dado é
@@ -5788,7 +5816,7 @@ $b\in B$. A \emph{presença} $b=1$ é o único operacional; a \emph{ausência} $
 \boxed{
 \begin{array}{l}
 \text{o \textbf{discreto} é o bit;}\\
-\text{o \textbf{contínuo} é o rasto da convolução --- a razão que tende para }\sigma;\\
+\text{o \textbf{contínuo} é o que fica \textbf{entre} dois vincos --- e o encaixe parte-o;}\\
 \text{o \textbf{dual} é o bit ausente.}
 \end{array}}
 \]
