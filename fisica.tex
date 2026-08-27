@@ -2125,10 +2125,13 @@ andar anterior:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{As quatro construções são a mesma.} Passar às diferenças, às
 razões e aos cortes parece três coisas distintas; são a mesma, com o
-$\mathcal{D}$ da Def.~\ref{fis:def:duomorf} a trocar a face em que se lê. Em cada
-degrau a involução é uma, e é ela que dá o quociente: no primeiro é
-$(a,b)\mapsto(b,a)$, no segundo é $(p,q)\mapsto(q,p)$, e no terceiro é o corte
-lido dos dois lados. \emph{Uma operação, quatro nomes.}
+$\mathcal{D}$ da Def.~\ref{fis:def:duomorf} a trocar a face em que se lê.
+\emph{E é preciso separar duas peças que se confundem facilmente}, porque a
+confusão dá um enunciado falso: \textbf{o quociente é a fibra do morfismo da
+face} --- $(a,b)\mapsto a\ominus b$ no primeiro degrau, $(p,q)\mapsto p\oslash q$
+no segundo, o prefixo no terceiro ---, e \textbf{a involução age sobre o
+quociente já feito}, onde dá o \emph{dual}. \emph{Uma operação, quatro nomes; mas
+o quociente vem da face, e a dobra vem depois dele.}
 \item[(2)] \textbf{O passo duplica, e é a \emph{mesma} duplicação da fase.}
 Juntar o dual é juntar o que a dobra produz --- pelo
 Teor.~\ref{fis:thm:doispontos}(2) ela dá \textbf{dois} onde havia um ---, pelo
@@ -2148,17 +2151,35 @@ passo está definido em todos, porque só usa a dobra e o quociente que ela imp�
 
 \begin{proof}
 (1) Cada linha da tabela do Teor.~\ref{fis:thm:escada} é um par do andar anterior
-quocientado por uma relação; e em cada uma essa relação é o núcleo de uma
-involução do par, isto é a troca das duas entradas. Que a troca seja involutiva é
-o Teor.~\ref{fis:thm:doispontos}(1); que ela seja a mesma seta em faces
+quocientado por uma relação, e essa relação é a \textbf{fibra do morfismo da
+face}: $(a,b)\sim(c,d)$ é $a\ominus b=c\ominus d$, que é o que a prova daquele
+teorema escreve ao identificar $\pi(u)=\pi(v)$ em cada degrau. Pela
+Def.~\ref{fis:def:objeto} toda a fibra é equivalência, e é daí --- \emph{e não da
+troca} --- que vem o quociente. Que a leitura seja a mesma seta em faces
 diferentes é o Teor.~\ref{fis:thm:dual-involutiva}.
 
-(2) O andar $k+1$ tem por domínio $X_k\times X_k$ antes do quociente; a
-involução parte-o em órbitas de um ou dois elementos
-(Teor.~\ref{fis:thm:doispontos}(3)), e o quociente conta uma por órbita. A
-duplicação é a passagem de $X_k$ ao par, e o quociente é a dobra a identificar o
-que ela troca. \emph{É a dobra a agir sobre o andar}, e o Teor.~\ref{fis:thm:largura}(3)
-diz que isso duplica.
+\emph{E diga-se porque \textbf{não} pode ser a troca}, que é o erro natural aqui
+e que esta obra chegou a cometer. A troca $(a,b)\mapsto(b,a)$ é involutiva, logo
+pelo Teor.~\ref{fis:thm:doispontos}(1) as suas órbitas têm um ou dois elementos;
+mas as classes destes quocientes \textbf{não cabem em dois} --- a medição da
+§\ref{fis:simbolos} dá $\mathbf{4}$, $\mathbf{6}$ e $\mathbf{8}$ para a diferença
+e $\mathbf{3}$, $\mathbf{5}$ e $\mathbf{7}$ para a razão, contra o máximo de dois
+que a dobra permite. \textbf{Logo a troca não gera este quociente}, e a caixa
+daquela secção --- \emph{a dobra dá a equivalência mais fina} --- é exactamente o
+que o proíbe.
+
+\emph{O que a troca faz, faz depois.} Sobre o quociente já formado ela lê-se
+$a\ominus b\mapsto b\ominus a$, isto é a negação; e pelo
+Teor.~\ref{fis:thm:antissim}(2) a negação é a acção da dobra na metade cruzada,
+com valor próprio $-1$. \textbf{É assim que ela dá o dual, e é isso que a fórmula
+em caixa diz}: o quociente vem da face, o $X_k^{\vee}$ vem da dobra.
+
+(2) O andar $k+1$ tem por domínio $X_k\times X_k$ antes do quociente. A
+duplicação não vem de contar órbitas --- vem de \textbf{juntar o dual}: pela
+cláusula~(1) a dobra age no quociente por $-1$ e produz $X_k^{\vee}$, e pelo
+Teor.~\ref{fis:thm:doispontos}(2) ela dá \textbf{dois} onde havia um. \emph{É a
+dobra a agir sobre o andar}, e o Teor.~\ref{fis:thm:largura}(3) diz que isso
+duplica.
 
 (3) É o Teor.~\ref{fis:thm:vinco}(1) aplicado à involução do passo: os elementos
 que ela não move são os que resolvem $\partial m=m$, e são exactamente os que o
@@ -3764,14 +3785,21 @@ a\in B: & \text{as \textbf{operações} trocam?}\quad(\text{o directo})\\[2pt]
 b\in B: & \text{a \textbf{ordem} troca?}\quad(\text{o cruzado})
 \end{array}}
 \]
-e as três palavras deste documento são casos do par $(a,b)$:
+e as três palavras deste documento são casos do par $(a,b)$ --- \emph{e é preciso
+dizer já que a primeira não é do mesmo eixo que as outras duas}:
 \[
 \begin{array}{ll}
-\textbf{bijeção} & f\ \text{reversível, e nada mais se pede;}\\[3pt]
+\textbf{bijeção} & \text{eixo do que }f\ \textbf{perde}:\ f\ \text{reversível, e nada mais se pede;}\\[3pt]
 \textbf{isomorfismo} & a=0:\ f(x\oplus_A y)=f(x)\oplus_B f(y)\ \ \text{e}\ \ f(x\otimes_A y)=f(x)\otimes_B f(y);\\[3pt]
 \textbf{duomorfismo} & a=1:\ f(x\oplus_A y)=f(x)\otimes_B f(y)\ \ \text{e}\ \ f(x\otimes_A y)=f(x)\oplus_B f(y).
 \end{array}
 \]
+\textbf{As duas últimas dizem o que $f$ \emph{preserva}; a primeira diz o que $f$
+\emph{não perde}, e são perguntas independentes} --- o Teor.~\ref{fis:thm:eixos}
+prova-o e mede a segunda. \emph{Onde este documento escrever «isomorfismo» ou
+«duomorfismo» com a seta $\cong$, entende-se as equações \textbf{mais} a
+bijectividade}; onde só as equações forem precisas, diz-se.
+
 Donde a leitura que dispensa a definição verbal: \emph{$f$ é duomorfismo de $A$
 em $B$ exactamente quando é isomorfismo de $A$ na estrutura dual de $B$},
 \[
@@ -3779,6 +3807,7 @@ em $B$ exactamente quando é isomorfismo de $A$ na estrutura dual de $B$},
 \]
 \emph{São duas leituras da \textbf{mesma} passagem}, e o «duo» não vem de haver
 dois objetos: vem da troca dos dois papéis operacionais.
+
 
 \medskip\noindent\textbf{E o bit da ordem é o cruzado, dito à parte porque é
 outra metade.} Quando $f$ é \textbf{antitónica} ($b=1$) vale
@@ -3811,6 +3840,98 @@ aqui, que ela se demonstra. \textbf{Nem se afirma aqui que seja única, nem que
 seja a única reversível}: o que o teorema prova é que ela é o ponto onde as duas
 \emph{dobras} coincidem, e é só isso que se usa.
 \end{definicao}
+
+\begin{teorema}[os dois eixos da passagem: o que preserva e o que perde]\label{fis:thm:eixos}
+Com $f\colon A\to B$ e o bit $a$ acima:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O bit $a$ é ele próprio uma dobra, e por isso as espécies são
+duas e não três.} Compor soma os bits: $a\mapsto a\oplus1$ cumpre
+$(a\oplus1)\oplus1=a$, que é a Def.~\ref{fis:def:op}. Logo, pelo
+Teor.~\ref{fis:thm:doispontos}(0), há \textbf{exactamente duas} espécies de
+passagem, e chamam-se isomorfismo e duomorfismo.
+\[
+\boxed{\;\text{iso}\circ\text{iso}=\text{iso},\quad
+\text{duo}\circ\text{duo}=\text{iso},\quad
+\text{iso}\circ\text{duo}=\text{duo}\;}
+\]
+\emph{Não são duas definições postas lado a lado: são as duas espécies de uma
+dobra}, e é o Teor.~\ref{fis:thm:duo-composicao} que já as compunha sem o dizer.
+\item[(2)] \textbf{E o outro eixo é independente deste.} Preservar as operações
+nada diz sobre colapsar ou cobrir: as equações do bit $a$ são condições sobre
+\emph{pares} de argumentos, e a injectividade é uma condição sobre pares de
+argumentos com a \emph{mesma imagem}. \emph{Uma não implica a outra em nenhum dos
+sentidos}, e por isso a bijeção está numa linha à parte no quadro acima.
+\item[(3)] \textbf{Mas o segundo eixo já está medido nesta obra, e o medidor é
+$G$.} Sobre uma realização $\pi$ da Def.~\ref{fis:def:objeto}, com
+$G(x)=\abs{\pi^{-1}(x)}$:
+\[
+\boxed{\;\pi\ \text{injetiva}\iff G\le1\;,\qquad
+\pi\ \text{sobrejetiva}\iff G\ge1\;}
+\]
+--- a primeira é o Teor.~\ref{fis:thm:mult}(2), e a segunda é a definição de
+imagem. \emph{Injectar é não colapsar; sobrejectar é não deixar buraco}, e $G$ lê
+as duas faltas com o mesmo número.
+\item[(4)] \textbf{Donde bijectivo é o mesmo que plano, e não é metáfora.} As
+duas juntas dão $G\equiv1$, isto é $\Phi(\pi)=\sum_x(G-1)=0$, que é a
+Def.~\ref{fis:def:folga} a anular-se:
+\[
+\boxed{\;f\ \text{bijectiva}\iff G\equiv1\iff \Phi=0\iff\text{plana}\;}
+\]
+\emph{O que a folga mede é exactamente a falha da injectividade}, e é por isso
+que o Teor.~\ref{fis:thm:curvatura} pode ler curvatura num campo de contagens:
+\textbf{curvar é dobrar, e dobrar é colapsar}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Os bits somam-se porque compor duas trocas de papéis devolve os papéis
+originais, e compor uma troca com nenhuma troca. A soma módulo dois é involutiva,
+e o resto é o Teor.~\ref{fis:thm:doispontos}(0). \emph{Verificado nas quatro
+composições, sem excepção.}
+
+(2) Testemunhas nos dois sentidos. Uma aplicação constante num neutro cumpre as
+equações do caso $a=0$ e não é injetiva; e a identidade de conjunto entre duas
+estruturas com operações distintas é bijectiva e não cumpre nenhuma das duas
+famílias de equações.
+
+(3) $G(x)\le1$ para todo $x$ diz que nenhum $x$ tem dois índices, que é a
+injectividade; $G(x)\ge1$ diz que nenhum $x$ fica sem índice, que é a
+sobrejectividade sobre $X$.
+
+(4) Conjunção de~(3); e $\sum_x(G-1)=0$ com $G\ge1$ obriga $G\equiv1$, porque uma
+soma de parcelas não negativas só se anula com todas nulas.
+\end{proof}
+
+\medido{\code{tests/eixos.c} §E1--§E3. As quatro composições do bit $a$ fecham na
+tabela da cláusula~(1). E as três equivalências das cláusulas~(3) e~(4) varrem-se
+em $1477$ realizações, sobre \textbf{três} regimes de formato --- $\abs{I}$ menor,
+igual e maior que $\abs{X}$ ---, \emph{porque num formato só metade das
+equivalências ficaria verificada em vazio}: com $\abs{I}>\abs{X}$ nenhuma
+realização é injetiva, e com $\abs{I}<\abs{X}$ nenhuma é sobrejetiva. Nos três
+juntos: $72$ injetivas, $306$ sobrejetivas, $30$ bijectivas, \textbf{zero
+falhas}.}
+
+\medskip\noindent\textbf{E diga-se o que aqui é novo e o que não é, porque a
+metade que não é tem nome fora desta obra.} Onde as duas operações \textbf{são} a
+ordem --- o $\min$ e o $\max$ do Teor.~\ref{fis:thm:dual} --- o duomorfismo é o
+que a teoria dos reticulados chama \textbf{homomorfismo dual}, e a sua versão
+bijectiva \textbf{anti-isomorfismo}: um mapa que troca supremos com ínfimos, de
+que as leis de De~Morgan são o caso conhecido. \emph{Não se reclama isso}, e a
+Def.~\ref{fis:def:duomorf} deve ler-se como a generalização desse caso, e não
+como a sua descoberta.
+
+\medskip\noindent\textbf{Novo é o que sobra quando se sai do reticulado, e são
+duas coisas.} \emph{Primeira}: ali as operações são a ordem, pelo que os dois
+bits $(a,b)$ colapsam num só --- e é por isso que a teoria clássica não precisa
+de os separar. Onde as operações \textbf{não} são a ordem eles separam-se, e o
+Teor.~\ref{fis:thm:eixos} mostra que o de cima ainda é uma dobra. \emph{Segunda}:
+o par $(\oplus,\otimes)$ desta obra \textbf{não} é autodual --- o
+Teor.~\ref{fis:thm:trial}(4) prova que lhe falta uma das duas distributividades
+---, pelo que a troca de papéis não é aqui uma simetria da estrutura, mas uma
+\textbf{passagem} entre duas estruturas distintas.
+\[
+\boxed{\;\text{no reticulado, o duomorfismo é uma \textbf{simetria}; fora dele, é uma \textbf{passagem}}\;}
+\]
 
 \begin{teorema}[o operador dual é uma involução]\label{fis:thm:dual-involutiva}
 O operador $\mathcal{D}$ da Def.~\ref{fis:def:duomorf} cumpre
@@ -6532,8 +6653,21 @@ $\theta(t)=[\,G_{t}(\pi(t))>1\,]$, e $\mu D=\theta$. Esta \emph{não} é um temp
 é memória. No fim do percurso $D(N)=\abs{I}-v$ --- o mesmo $D$ do
 Teor.~\ref{fis:thm:euler}, e não outra grandeza com a mesma letra.
 \end{enumerate}
-(O \emph{incremento} escreve-se $\partial$, que é o operador da
-Def.~\ref{fis:def:op} --- não há aqui um diferencial importado do contínuo.)
+\medskip\noindent\textbf{E o símbolo $\partial$ colide aqui, de propósito ---
+mas são dois, e diz-se qual.} \emph{Não são o mesmo objecto}, e dizê-lo seria
+falso:
+\[
+\begin{array}{ll}
+\partial\ \text{sozinho} & \text{a \textbf{dobra} da Def.~\ref{fis:def:op}: um mapa }S\to S\text{, com }\partial\circ\partial=\mathrm{id}\\[2pt]
+\partial x\ \text{com índice, ou multiplicado} & \text{o \textbf{incremento}: o passo dado, e não a imagem de um ponto}
+\end{array}
+\]
+\emph{A regra de leitura é a componente}: onde $\partial x$ tiver índice
+superior, ou for multiplicado por um escalar, é o incremento --- porque a dobra
+devolve um elemento do suporte, e um elemento do suporte não tem componentes nem
+se escala. \textbf{E o incremento não é um diferencial importado do contínuo}: é
+a diferença entre dois lugares da lista, que é finita e já está construída.
+\emph{O que se partilha é a palavra «passo», e não o operador.}
 
 \medskip\noindent\textbf{E falta uma terceira, que não é desta parte.} O
 \emph{tempo próprio} --- o mesmo percurso \emph{medido por uma régua} --- pede
