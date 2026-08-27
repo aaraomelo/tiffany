@@ -1427,12 +1427,94 @@ potências de dois sem se copiarem um ao outro.
 \boxed{\;\text{no ponto, a dobra dá o par; no andar, dá o degrau --- e é a mesma dobra}\;}
 \]
 
-\medskip\noindent\emph{E diga-se o que fica por trazer.} Nos outros trabalhos
-desta obra este passo aparece como \textbf{a lei dos tecidos},
-$T_{k+1}=T_k+T_k^{*}$, com um degrau onde ele muda de natureza --- aquele em que
-\emph{contar} passa a \emph{integrar}. \textbf{Esse degrau não está neste
-documento}, e não se finge que está: aqui a escada corre enquanto o quociente
-correr, e o que ela não faz é dito no sítio onde faria falta.
+
+\medskip\noindent\textbf{E o degrau onde \emph{contar} passa a \emph{integrar}
+tem aqui o seu núcleo, que é exacto e não pede integral nenhum.} Nos outros
+trabalhos desta obra ele é o \textbf{teorema central} --- Gentil e Hurwitz duais
+pela medida ---, e o que lá se escreve com dois integrais escreve-se aqui com
+duas contagens. \emph{O integral é a leitura; a conta é esta.}
+
+\begin{teorema}[os dois cortes dão a mesma contagem]\label{fis:thm:central}
+Sejam $I$ e $X$ finitos e ordenados, e $f\colon I\to X$ uma aplicação
+\textbf{qualquer}. Escreva-se o \textbf{corte do domínio} e o \textbf{corte da
+imagem}:
+\[
+\Sigma(f)\;=\;\sum_{i\in I}\abs{\{x\in X:\ x\le f(i)\}}\;,
+\qquad
+\Sigma(f^{\vee})\;=\;\sum_{x\in X}\abs{\{i\in I:\ f(i)<x\}}\;.
+\]
+Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Os dois somam o rectângulo, exactamente e sem resto:}
+\[
+\boxed{\;\Sigma(f)\;+\;\Sigma(f^{\vee})\;=\;\abs{I}\cdot\abs{X}\;}
+\]
+\item[(2)] \textbf{E a razão é uma partição, não uma conta feliz.} Cada célula
+$(i,x)$ do rectângulo cumpre $x\le f(i)$ ou $x>f(i)$, \emph{e exactamente uma
+das duas}. O primeiro corte conta as células por \textbf{colunas}, o segundo por
+\textbf{linhas}, e juntos cobrem tudo uma vez.
+\item[(3)] \textbf{As duas leituras são um par da dobra.} Trocar coluna por linha
+é a transposição do rectângulo, que é involutiva: aplicada duas vezes devolve a
+célula. \emph{São $f$ e $f^{\vee}$ o par que ela produz}, no sentido do
+Teor.~\ref{fis:thm:doispontos}(2), e o rectângulo é o que ela \textbf{conserva}
+--- o invariante do par, como $s$ e $p$ o são no seu.
+\item[(4)] \textbf{E não se pede monotonia.} A identidade vale para toda $f$. A
+monotonia é o que faz de $f^{\vee}$ a \emph{inversa} de $f$ e não apenas a
+contagem dual; \emph{a conservação é da partição, e a inversão é da ordem}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(2) e (1): para cada $i$ fixo, $X$ parte-se em $\{x\le f(i)\}$ e $\{x>f(i)\}$,
+que são disjuntos e cobrem $X$; somando em $i$ vem $\abs I\cdot\abs X$ à direita,
+e à esquerda a primeira parcela é $\Sigma(f)$ por definição. A segunda é
+$\sum_i\abs{\{x:x>f(i)\}}$, e trocar a ordem das duas somas dá
+$\sum_x\abs{\{i:f(i)<x\}}=\Sigma(f^{\vee})$ --- \emph{é a mesma partição contada
+pelo outro índice}, que é o Lema~\ref{fis:lem:conserva} aplicado ao rectângulo em
+vez de à lista.
+
+(3) A transposição $(i,x)\mapsto(x,i)$ cumpre a Def.~\ref{fis:def:op}, e leva o
+corte do domínio no da imagem.
+
+(4) Nenhum passo de (1) ou (2) usou a ordem de $f$ --- só a de $X$, para
+escrever $\le$.
+\end{proof}
+
+\medido{\code{tests/meio.c}: varridas \textbf{todas} as $6^{5}=\mathbf{7776}$
+aplicações de cinco índices em seis células, monótonas ou não, a identidade
+$\Sigma(f)+\Sigma(f^{\vee})=30$ falha em \textbf{zero}. E com $f$ não monótona a
+igualdade mantém-se enquanto $f^{\vee}$ deixa de ser inversa --- que é a
+cláusula~(4) medida.}
+
+\medskip\noindent\textbf{E é isto que a passagem discreto/contínuo é, quando se
+lhe tira o vocabulário.} \emph{Contar} é somar pelo domínio; \emph{integrar} é
+somar pela imagem. \textbf{As duas dão o mesmo rectângulo}, e é essa igualdade
+--- e não um limite --- que faz a travessia. \emph{O que muda de um lado para o
+outro não é a grandeza: é por que índice se soma.}
+\[
+\boxed{\;\text{contar pelo domínio e contar pela imagem são as duas faces --- e o rectângulo é o invariante}\;}
+\]
+
+\medskip\noindent\textbf{E daqui vê-se onde o contínuo vive.} O corte do domínio
+salta de índice em índice; o da imagem salta de célula em célula. \emph{Entre
+dois pontos que a dobra não move não há salto que a conta veja} --- e é aí, e só
+aí, que a leitura contínua acrescenta alguma coisa. \textbf{O tecido é o que fica
+entre dois vincos}, e o Teor.~\ref{fis:thm:tecidos} é o que o produz: cada degrau
+mete um ponto novo onde o anterior não tinha nenhum. \emph{A escada não aproxima
+o contínuo: parte o intervalo, e o contínuo é o nome do que sobra por partir.}
+
+\medskip\noindent\emph{E o que continua a não estar aqui, diga-se.} A leitura de
+Lebesgue, o limite e a completação não estão neste documento; o que está é o
+\textbf{núcleo finito} de que elas são a leitura. \textbf{Quem quiser o degrau em
+que o corte deixa de ser algébrico não o encontra nesta obra} --- encontra a
+identidade que ele generaliza, e a fronteira dita.
+
+\medskip\noindent\emph{E fica dito de onde este passo vem.} Nos outros trabalhos
+desta obra ele é \textbf{a lei dos tecidos}, $T_{k+1}=T_k+T_k^{*}$; aqui é o
+Teor.~\ref{fis:thm:tecidos}, e o degrau em que ele muda de natureza --- aquele em
+que \emph{contar} passa a \emph{integrar} --- tem o seu núcleo exacto no
+Teor.~\ref{fis:thm:central}. \emph{O que não está é a leitura contínua desse
+núcleo}, e diz-se onde faria falta em vez de se fingir que está.
 
 \medskip\noindent\textbf{E a última coluna fecha o documento no seu princípio.}
 As duas equações do Teor.~\ref{fis:thm:duas}(4) têm \textbf{quatro} peças, e não duas
@@ -7622,21 +7704,36 @@ separam-se pela \emph{ordem} --- o menor $k$ com $f^{k}=\mathrm{id}$:
 \[
 \begin{array}{llcl}
 \text{Cantor / Julia} & \text{o espelho da dobra} & 2 & \nu^{2}=\mathrm{id}\\
-\text{o trial} & \tau\in\{-1,0,+1\} & 3 & \tau^{3}=\mathrm{id}\\
-\text{Viviani} & i,\ \text{o meio-ângulo} & 4 & i^{4}=\mathrm{id}
+\text{o cristalino } t=-1 & A\ \text{com } A^{2}=-A-I & 3 & A^{3}=\mathrm{id}\\
+\text{Viviani} & i,\ \text{o quarto de volta} & 4 & i^{4}=\mathrm{id}
 \end{array}
 \]
 A dobra da Def.~\ref{fis:def:op} é a \textbf{primeira linha}: $\partial\partial=
 \mathrm{id}$, e é por isso que ela espelha. \emph{Viviani é a sua raiz} --- o que
 ao quadrado dá o espelho --- e por isso tem o dobro da ordem: girar duas vezes um
-quarto de volta é espelhar. O trial (ordem $3$) e Viviani (ordem $4$)
-\emph{rodam}, e são elípticos. O espelho $\nu$ (ordem $2$) \textbf{não roda:
-reflete} --- a sua testemunha é
+quarto de volta é espelhar. \textbf{É a oitava do Teor.~\ref{fis:thm:largura}(3),
+instanciada}: a primeira linha é o degrau $w=1$ e a terceira é o degrau $w=2$.
+
+\medskip\noindent\textbf{E a linha do meio não é o trial --- diga-se, porque os
+dois têm o mesmo três.} O operador de ordem $3$ é o do
+Lema~\ref{fis:lem:cristal} com $t=-1$, e a sua equação é $A^{3}=\mathrm{id}$. O
+\textbf{trial} é outra coisa: é o \emph{conjunto} $\{-1,0,+1\}$, três
+\textbf{valores} que a tricotomia da ordem produz --- e nenhum deles é um
+operador que feche em três. \emph{Não se escreva $\tau^{3}=\mathrm{id}$}: se
+$\tau$ fosse o valor $-1$, $\tau^{3}$ valeria $-1$. \textbf{São dois treses, e
+não se colam} --- um é ordem de operador, o outro é cardinal de conjunto ---, tal
+como o quatro do rotor não é o quatro do quarteto e o oito da largura não é o
+oito do degrau.
+
+\medskip\noindent E o resto lê-se como estava: o cristalino de ordem $3$ e
+Viviani de ordem $4$ \emph{rodam}, e são elípticos. O espelho $\nu$ (ordem $2$)
+\textbf{não roda: reflete} --- a sua testemunha é
 $\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$, de traço $0$ e
 $\det=-1$, logo $\Delta=4>0$, hiperbólica. \emph{A diferença entre
 $\{1,2,3,4,6\}$ e $\{3,4,6\}$ é exatamente o que reflete em vez de rodar.} E o
 $6$ é onde as duas primeiras voltam juntas, $\operatorname{lcm}(2,3)$ --- o toro é
-o sítio onde elas vivem juntas.
+o sítio onde elas vivem juntas. \textbf{E nem o $3$ nem o $6$ são degraus da
+escada}: ela é diádica, e estes vêm da inteireza do traço.
 
 \medido{\code{tests/pgwire.c} §W116: as três classes esgotam $\mathbf{360}$
 matrizes de entradas em $-4..4$; as elípticas têm todas ordem finita e dão
@@ -9325,7 +9422,8 @@ construção:
 & \textbf{a estrutura} & \textbf{o que a obriga} \\
 \midrule
 a taxa de expansão & $H^{2}=1/D$: a régua, invertida & Def.~\ref{fis:def:regua-cosmo} \\
-e o seu valor & $H_m^{2}=1/(m^{2}+4)$, lido do operador & Teor.~\ref{fis:thm:taxa} \\os conteúdos & os três valores do trial & Teor.~\ref{fis:thm:conteudos} \\
+e o seu valor & $H_m^{2}=1/(m^{2}+4)$, lido do operador & Teor.~\ref{fis:thm:taxa} \\
+os conteúdos & os três valores do trial & Teor.~\ref{fis:thm:conteudos} \\
 a diluição & o \emph{duomorfismo} entre o aditivo e o multiplicativo & Teor.~\ref{fis:thm:diluicao} \\
 o destino & o mesmo sinal, lido em $-(1+3w)$ & Cor.~\ref{fis:cor:destino} \\
 a equação de estado & uma órbita de quatro, duas no ponto fixo & Teor.~\ref{fis:thm:bidual} \\
