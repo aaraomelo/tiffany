@@ -1360,6 +1360,80 @@ mas não a que constrói o andar. O representante $k=1$ é o primeiro da fibra n
 ordem do domínio, e a enumeração escolhida fá-lo coincidir com o canónico.
 \end{proof}
 
+\medskip\noindent\textbf{E os quatro degraus não são quatro construções: são uma,
+repetida.} É o que se mostra a seguir, e é o que faz da escada uma escada e não
+uma lista.
+
+\begin{teorema}[o passo é um só: juntar o dual]\label{fis:thm:tecidos}
+Cada degrau do Teor.~\ref{fis:thm:escada} é o \textbf{mesmo} passo aplicado ao
+andar anterior:
+\[
+\boxed{\;X_{k+1}\;=\;X_k\ \sqcup\ X_k^{\vee}\ \big/\!\sim\;}
+\]
+--- \emph{o andar mais o seu dual, colados pela relação que a dobra impõe}. E daí:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{As quatro construções são a mesma.} Passar às diferenças, às
+razões e aos cortes parece três coisas distintas; são a mesma, com o
+$\mathcal{D}$ da Def.~\ref{fis:def:duomorf} a trocar a face em que se lê. Em cada
+degrau a involução é uma, e é ela que dá o quociente: no primeiro é
+$(a,b)\mapsto(b,a)$, no segundo é $(p,q)\mapsto(q,p)$, e no terceiro é o corte
+lido dos dois lados. \emph{Uma operação, quatro nomes.}
+\item[(2)] \textbf{O passo duplica, e é a \emph{mesma} duplicação da fase.}
+Juntar o dual é juntar o que a dobra produz --- pelo
+Teor.~\ref{fis:thm:doispontos}(2) ela dá \textbf{dois} onde havia um ---, pelo
+que o andar dobra de tamanho. \textbf{É o operador aplicado ao andar em vez de
+ao ponto}, e é por isso que cada degrau é uma \textbf{oitava} do anterior, no
+sentido exacto do Teor.~\ref{fis:thm:largura}(3).
+\item[(3)] \textbf{E o ponto fixo do passo é o que fica de fora do par.} Em cada
+degrau a involução tem, ou não tem, quem ela não mova --- e é isso, e só isso,
+que o degrau acrescenta: o neutro da diferença, o irredutível da razão, o corte
+que nenhum dos lados contém. \emph{O que o andar novo tem e o velho não é o
+\textbf{vinco} do passo}, e o Teor.~\ref{fis:thm:vinco} conta quando ele existe.
+\item[(4)] \textbf{A escada não pára por dentro.} Nenhum andar é o último: o
+passo está definido em todos, porque só usa a dobra e o quociente que ela impõe.
+\emph{O que a faz parar é de fora} --- o suporte que se esgota, e não o passo.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) Cada linha da tabela do Teor.~\ref{fis:thm:escada} é um par do andar anterior
+quocientado por uma relação; e em cada uma essa relação é o núcleo de uma
+involução do par, isto é a troca das duas entradas. Que a troca seja involutiva é
+o Teor.~\ref{fis:thm:doispontos}(1); que ela seja a mesma seta em faces
+diferentes é o Teor.~\ref{fis:thm:dual-involutiva}.
+
+(2) O andar $k+1$ tem por domínio $X_k\times X_k$ antes do quociente; a
+involução parte-o em órbitas de um ou dois elementos
+(Teor.~\ref{fis:thm:doispontos}(3)), e o quociente conta uma por órbita. A
+duplicação é a passagem de $X_k$ ao par, e o quociente é a dobra a identificar o
+que ela troca. \emph{É a dobra a agir sobre o andar}, e o Teor.~\ref{fis:thm:largura}(3)
+diz que isso duplica.
+
+(3) É o Teor.~\ref{fis:thm:vinco}(1) aplicado à involução do passo: os elementos
+que ela não move são os que resolvem $\partial m=m$, e são exactamente os que o
+quociente não colapsa em pares.
+
+(4) O passo não pede nada do andar além de ter uma dobra, e o andar novo tem-na
+pela cláusula~(1). Logo aplica-se outra vez.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que arruma os dois eixos de duplicação deste
+documento.} A dobra aplicada ao \textbf{ponto} dá dois lugares, e repetida $w$
+vezes dá $2^{w}$ --- é o Teor.~\ref{fis:thm:largura}. A dobra aplicada ao
+\textbf{andar} dá o andar seguinte, e repetida dá a escada --- é este teorema.
+\emph{São o mesmo operador, em dois graus}, e é por isso que os dois dão
+potências de dois sem se copiarem um ao outro.
+\[
+\boxed{\;\text{no ponto, a dobra dá o par; no andar, dá o degrau --- e é a mesma dobra}\;}
+\]
+
+\medskip\noindent\emph{E diga-se o que fica por trazer.} Nos outros trabalhos
+desta obra este passo aparece como \textbf{a lei dos tecidos},
+$T_{k+1}=T_k+T_k^{*}$, com um degrau onde ele muda de natureza --- aquele em que
+\emph{contar} passa a \emph{integrar}. \textbf{Esse degrau não está neste
+documento}, e não se finge que está: aqui a escada corre enquanto o quociente
+correr, e o que ela não faz é dito no sítio onde faria falta.
+
 \medskip\noindent\textbf{E a última coluna fecha o documento no seu princípio.}
 As duas equações do Teor.~\ref{fis:thm:duas}(4) têm \textbf{quatro} peças, e não duas
 --- duas \emph{operações} e dois \emph{neutros}:
@@ -4769,8 +4843,13 @@ diz o mesmo em geral: aqui a conta é directa, e a Análise não fica a dever à
 parte que vem depois.
 \end{proof}
 
-\medskip\noindent\textbf{E a série de $\pi$ sai da cisão por paridade.} A única
-hipótese é $J^{2}=-1$. Com isso as potências de $J$ ciclam com período quatro,
+\medskip\noindent\textbf{E a série de $\pi$ sai da cisão por paridade ---} e o
+$J^{2}=-1$ que ela usa \textbf{não é hipótese desta secção}: é o segundo degrau
+do Teor.~\ref{fis:thm:largura}. Um gerador de ordem quatro, aplicado duas vezes,
+tem de dar $-\mathrm{id}$ --- é a única maneira de fechar em quatro sem fechar em
+dois ---, e o Teor.~\ref{fis:thm:fecho} já o tinha realizado no plano coordenado.
+\emph{Aqui recebe-se, e cita-se.} Com isso as potências de $J$ ciclam com período
+quatro,
 \[
 J^{0}=1,\quad J^{1}=J,\quad J^{2}=-1,\quad J^{3}=-J,\quad J^{4}=1,\ \dots
 \]
@@ -5044,9 +5123,16 @@ para a paridade, com Gram $=\mathrm{Id}$; e pelo Teor.~\ref{fis:thm:hiper} são
 exactamente as $m$ direções em que $Q_m$ se percorre. \emph{São o mesmo objeto
 lido nos dois sítios} --- lá como base de um emparelhamento, aqui como as saídas
 de um vértice ---, e é essa coincidência que faz \emph{medir} e \emph{andar} ser
-a mesma conta. E o oito não foi escolhido: a dimensão cresce por
-\textbf{duplicação}, $2^{1}\to2^{2}\to2^{4}\to2^{8}$, e $8$ é o que três dobras
-binárias dão.
+a mesma conta. E o oito não foi escolhido: a \textbf{largura} cresce por
+duplicação, $2^{1}\to2^{2}\to2^{4}\to2^{8}$, e $8$ é a largura que três
+duplicações dão.
+
+\medskip\noindent\textbf{E este oito não é o oito do terceiro degrau da fase ---
+diga-se, porque os dois têm o mesmo número e a mesma palavra.} Aqui duplica-se a
+\textbf{largura} ($1\to2\to4\to8$), e os lugares seriam $2^{8}$. No
+Teor.~\ref{fis:thm:largura} duplicam-se os \textbf{lugares} ($2\to4\to8$), e a
+largura vai a três. \emph{Duas duplicações, dois eixos, e o mesmo oito por razões
+diferentes} --- é a largura oito de um lado, e o degrau três do outro.
 
 \medido{\code{tests/aranha\_n.c} §AN19: $F_{2w}=F_w\oplus\sigma F_w$ como
 $Q_{2w}$. §AN17: o grau nos três grafos. \code{tests/pascal.c}: o máximo de $G$
