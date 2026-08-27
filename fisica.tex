@@ -208,8 +208,8 @@ $=$ & coincidência & o \textbf{vinco} da transposição \\
 $\neq$ & separação, sem orientação & o \textbf{tecido} \\
 $<$ & separação orientada & um lado do tecido \\
 $>$ & a leitura dual & o outro lado \\
-$\le$ & o lado, com o vinco & tecido \textbf{fechado} \\
-$\ge$ & a leitura dual, com o vinco & tecido \textbf{fechado} \\
+$\le$ & o lado, com o vinco & um lado \textbf{fechado} \\
+$\ge$ & a leitura dual, com o vinco & o outro lado, \textbf{fechado} \\
 \midrule
 a \textbf{nula} & nunca --- nenhum bloco & o $0$ \\
 a \textbf{total} & sempre --- todos os blocos & o $1$ \\
@@ -886,7 +886,9 @@ lado escolhido com $\operatorname{Fix}(\tau)$,
 \[
 \boxed{\;\le\;=\;<\ \sqcup\ =\;,\qquad\qquad \ge\;=\;>\ \sqcup\ =\;}
 \]
---- \emph{o tecido acrescido do seu vinco}. E daí, sem se acrescentar nada:
+--- \emph{um lado do tecido, acrescido do vinco} --- \textbf{e diga-se «um lado»,
+e não «o tecido»}: o tecido inteiro mais o vinco seria a relação total, e não
+$\le$. E daí, sem se acrescentar nada:
 $\le$ e $\ge$ cobrem $S\times S$ e cruzam-se exactamente no vinco, ao passo que
 $<$ e $>$ cobrem-no menos o vinco e não se cruzam.
 \end{enumerate}
@@ -995,9 +997,13 @@ lido; se coincidem ali, a comparação é a da largura $w$, e vale a hipótese.
 \emph{Totalidade}: duas palavras distintas diferem nalguma posição, logo há uma
 mais alta, logo comparam.
 
-\emph{Antissimetria}: nessa posição uma tem $0$ e a outra $1$, e ler ao contrário
-dá a decisão oposta --- que é o Teor.~\ref{fis:thm:antissim}(3), a dobra a agir
-no cruzado por $-1$.
+\emph{Antissimetria}: nessa posição uma palavra tem $0$ e a outra $1$, e ler ao
+contrário dá a decisão oposta. \emph{E não se invoque aqui o
+Teor.~\ref{fis:thm:antissim}}: aquele teorema pede o dois invertível, e a sua
+cláusula~(4) diz expressamente que sobre os \textbf{dois símbolos} os dois valores
+próprios colam e a cisão não existe. \textbf{A antissimetria daqui é outra coisa,
+e é mais barata}: é a troca dos dois símbolos no bloco único da cláusula~(1),
+que os permuta porque são dois e não há terceiro.
 
 \emph{Transitividade}, que é o degrau que se estava a dever. Sejam $a<b$
 decidido na posição $j$ e $b<c$ decidido em $k$. Acima de $j$ vale $a=b$, e acima
@@ -1397,11 +1403,21 @@ indução, e não a indução toda»}.
 \boxed{\;\text{a indução não tem topo nem fundo; o que ela conserva é a partição}\;}
 \]
 
-\medskip\noindent\emph{E daí a obra não escreve $\infty$, e não é por descuido.}
-Escrevê-lo pediria um lugar que a construção não produz, e o que ela produz é
-melhor: \textbf{a invariância do passo}. \emph{Uma invariância é uma afirmação
-sobre a regra, não sobre um sítio onde ela terminasse} --- e é por isso que a
-indução pode correr para os dois lados sem que se lhe peça um fim.
+\medskip\noindent\emph{E daí esta secção não escreve $\infty$ como \textbf{lugar},
+e não é por descuido.} Escrevê-lo assim pediria um sítio que a construção não
+produz, e o que ela produz é melhor: \textbf{a invariância do passo}. \emph{Uma
+invariância é uma afirmação sobre a regra, não sobre um sítio onde ela
+terminasse} --- e é por isso que a indução pode correr para os dois lados sem que
+se lhe peça um fim.
+
+\smallskip\noindent\textbf{E diga-se já que o símbolo \emph{vai} aparecer, e com
+que estatuto}, para que a promessa desta secção não seja lida como uma proibição
+que a obra depois quebra. O Teor.~\ref{fis:thm:zeroinf} nomeia $\infty$
+--- \emph{não como lugar, mas como a outra ponta do bloco que a dobra forma com o
+zero}, e mostra que o degrau das razões o exclui \textbf{por construção}.
+\emph{As duas leituras são a mesma peça}: aqui a metade que a dobra não fixa,
+ali a ponta que o degrau não guarda. \textbf{O que nenhuma das duas admite é um
+habitante do andar com esse nome.}
 
 
 \medskip\noindent\textbf{E daqui sai o princípio, que é o que fecha esta secção
@@ -1414,7 +1430,7 @@ acima é que o permite: \textbf{procurava-se no espaço o que pertence ao passo}
 \emph{Designa a metade que a dobra não fixa} --- e isso já não é modo de dizer:
 é o Teor.~\ref{fis:thm:antissim}(3), onde o directo tem todos os pontos fixos e
 o cruzado não tem nenhum, e no entanto a regra que nele age é constante.
-\textbf{Não há, nesta obra, objecto nenhum com esse nome}, e agora sabe-se
+\textbf{Não há, nesta obra, \emph{habitante de andar nenhum} com esse nome}, e agora sabe-se
 porquê: o que ali existe é um valor próprio, e um valor próprio não é um ponto.
 \textbf{No finito, a dobra fixa um ponto; na torre, a indução fixa o passo}; e o
 que se chama infinito é o que resulta de não haver último passo.
@@ -1431,7 +1447,7 @@ chamaria infinito.
 \[
 \underbrace{0\,,\,1}_{\text{extremos}}\ \longrightarrow\
 \underbrace{=}_{\text{vinco}}\ \longrightarrow\
-\underbrace{\neq,\ <,\ >,\ \le,\ \ge}_{\text{tecido}}\ \longrightarrow\
+\underbrace{\neq,\ <,\ >,\ \le,\ \ge}_{\text{do tecido}}\ \longrightarrow\
 \underbrace{\text{a torre}}_{\text{indução}}\ \longrightarrow\
 \underbrace{\text{sem último degrau}}_{\text{a caminhada}}
 \]
@@ -2309,8 +2325,9 @@ razões e aos cortes parece três coisas distintas; são a mesma, com o
 $\mathcal{D}$ da Def.~\ref{fis:def:duomorf} a trocar a face em que se lê.
 \emph{E é preciso separar duas peças que se confundem facilmente}, porque a
 confusão dá um enunciado falso: \textbf{o quociente é a fibra do morfismo da
-face} --- $(a,b)\mapsto a\ominus b$ no primeiro degrau, $(p,q)\mapsto p\oslash q$
-no segundo, o prefixo no terceiro ---, e \textbf{a involução age sobre o
+face} --- $(a,b)\mapsto a\ominus b$ no degrau das \textbf{diferenças},
+$(p,q)\mapsto p\oslash q$ no das \textbf{razões}, o prefixo no dos
+\textbf{cortes} ---, e \textbf{a involução age sobre o
 quociente já feito}, onde dá o \emph{dual}. \emph{Uma operação, quatro nomes; mas
 o quociente vem da face, e a dobra vem depois dele.}
 \item[(2)] \textbf{O passo duplica, e é a \emph{mesma} duplicação da fase.}
@@ -2457,7 +2474,11 @@ $s=m$ e $p=-1$, donde
 \[
 \boxed{\;\Delta=m^{2}+4\;}
 \]
-e \textbf{esse nunca é quadrado}: fica estritamente entre $m^{2}$ e $(m+2)^{2}$,
+e \textbf{esse nunca é quadrado para $m\ge1$} --- \emph{e a restrição diz-se,
+porque em $m=0$ é}: ali $\Delta=4$, as raízes são os dois símbolos, e o ponto fixo
+\emph{está} no andar. \textbf{E isso não é excepção incómoda: é a razão de $m=0$
+não gerar degrau nenhum} --- o Teor.~\ref{fis:thm:estrela}(2) chama-lhe «a troca»,
+e uma troca não constrói andar. Para $m\ge1$, $\Delta$ fica estritamente entre $m^{2}$ e $(m+2)^{2}$,
 e o único quadrado entre eles é $(m+1)^{2}=m^{2}+2m+1$, que igualado a $m^{2}+4$
 pede $2m=3$ --- sem solução. \emph{Portanto o ponto fixo do passo metálico está
 sempre fora do andar em que o passo corre}, e é isso, e só isso, que faz o degrau
@@ -2492,7 +2513,10 @@ falsa}:
 Cor.~\ref{fis:cor:geradorfora} lido ao contrário, $x^{2}=mx+1$ tem raiz num corpo
 exactamente quando $\Delta=m^{2}+4$ é quadrado \emph{nesse corpo}. \emph{É uma
 pergunta sobre o corpo, não sobre a equação.}
-\item[(2)] \textbf{Nos degraus da escada nunca é} --- e aí a razão são as duas
+\item[(2)] \textbf{Nos degraus onde a regra corre nunca é} --- \emph{e diz-se
+quais}: nos que a comparação de quadrados alcança, isto é, até às razões. \emph{No
+quarto degrau ela não corre}, e é por isso que é lá que o ponto fixo é recebido
+(Teor.~\ref{fis:thm:estrelaencaixe}). E aí a razão são as duas
 desigualdades do Cor.~\ref{fis:cor:geradorfora}, não uma varredura.
 \item[(3)] \textbf{Mas numa \emph{face finita} é, para cerca de metade dos
 metais.} E então a órbita \textbf{cai} no ponto fixo, e não há corte a fazer.
@@ -2535,10 +2559,14 @@ parceiro não é um lugar.
 Leiam-se os habitantes do terceiro degrau em \textbf{coordenadas do par},
 $[p:q]$, como o Teor.~\ref{fis:thm:escada} os constrói. Então:
 \begin{enumerate}\itemsep3pt
-\item[(1)] \textbf{A dobra do par é a transposição, e é a mesma de sempre.} A
-troca $[p:q]\mapsto[q:p]$ é a $\tau$ do Teor.~\ref{fis:thm:simbolos}, aplicada às
-duas entradas de um habitante em vez de às de uma relação. \emph{Não é uma dobra
-nova}: é a mesma, um andar acima.
+\item[(1)] \textbf{A dobra do par é a transposição --- e diga-se \emph{sobre o
+quê}, porque é aí que está o essencial.} A troca $[p:q]\mapsto[q:p]$ é a $\tau$ do
+Teor.~\ref{fis:thm:simbolos}, e ela é uma dobra no sentido da
+Def.~\ref{fis:def:op} \textbf{sobre o conjunto dos pares}, não sobre o degrau:
+$\tau\circ\tau=\mathrm{id}$ ali, e $\tau$ é total ali. \emph{No degrau ela
+\textbf{não} é total} --- o degrau exclui $q=0$, e $\tau$ leva-lhe um habitante
+para fora. \textbf{E é exactamente essa falta de totalidade que produz o
+$\infty$}: se $\tau$ fechasse no degrau, não haveria nada a nomear.
 \item[(2)] \textbf{Lida sobre os elementos, ela é a inversão.} Onde $q$ for
 cancelável, $[p:q]$ é a razão $p/q$ e a troca dá $q/p$ --- \emph{o inverso}, que
 é a face que o terceiro degrau fecha (Teor.~\ref{fis:thm:escada}, última coluna).
@@ -2549,14 +2577,17 @@ degrau quocienta $X_2\times X_2^{\bullet}$, e $X_2^{\bullet}$ são os
 \[
 \boxed{\;\infty:=\tau(0)=[1:0]\;}
 \]
-\item[(4)] \textbf{Donde $\{0,\infty\}$ é um \emph{bloco} da dobra, e não dois
-pontos soltos.} Aplicar a troca duas vezes devolve o zero, pelo que a órbita tem
-dois elementos: é a segunda espécie do Teor.~\ref{fis:thm:doispontos}(0), e o par
-é \textbf{não ordenado} pela cláusula~(2) --- \emph{a dobra dá os dois e não diz
-qual é o primeiro}.
+\item[(4)] \textbf{Donde $\{0,\infty\}$ é um \emph{bloco} da dobra sobre os pares,
+e não dois pontos soltos.} Aplicar a troca duas vezes devolve o zero, pelo que a
+órbita tem dois elementos: é a segunda espécie do
+Teor.~\ref{fis:thm:doispontos}(0) \emph{lida sobre os pares}, que é onde $\tau$ é
+total e onde aquele teorema se aplica. E o par é \textbf{não ordenado} pela
+cláusula~(2) --- \emph{a dobra dá os dois e não diz qual é o primeiro}.
 \[
 \boxed{\;0\ \text{e}\ \infty\ \text{são as duas pontas de \textbf{um} bloco}\;}
 \]
+\emph{E o degrau guarda uma ponta e não a outra}, que é a cláusula~(3): não é o
+bloco que está partido, é o degrau que só apanha metade dele.
 \item[(5)] \textbf{E é por isso que o símbolo se justifica sem que nasça
 objecto.} O que $\infty$ nomeia não é um habitante do andar --- a
 cláusula~(3) mostra que ele é precisamente o que o andar exclui --- mas
@@ -2828,7 +2859,7 @@ motor da escada, e não um defeito dela.} Pelo Cor.~\ref{fis:cor:geradorfora},
 $\Delta=m^{2}+4$ nunca é quadrado, logo a estrela fica fora do andar onde a regra
 corre. \emph{A meta-indução aponta sempre para fora}, e é exactamente isso que
 faz haver degrau seguinte.
-\item[(5)] \textbf{E é \emph{reversível}, porque o determinante vale um.} A regra
+\item[(5)] \textbf{E é \emph{reversível}, porque o determinante vale um \emph{em módulo}.} A regra
 escreve-se $A=\bigl(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\bigr)$, com
 $\det A=-1$; logo a inversa é \textbf{inteira} e a descida é exacta.
 \[
@@ -2929,7 +2960,7 @@ fim não sobrou um corpo fundamental}: sobrou a construção que produz os corpo
 \emph{Isto não é modéstia nem retórica}: é a cláusula~(4) do
 Teor.~\ref{fis:thm:tecidos} lida ao contrário. Se algum andar fundasse os
 outros, o passo teria ali um ponto fixo --- e o Cor.~\ref{fis:cor:geradorfora}
-mostra que não tem, em andar nenhum da escada. \textbf{A escada não assenta num
+mostra que não tem, em nenhum dos andares onde a regra corre. \textbf{A escada não assenta num
 degrau porque nenhum degrau a contém.}
 
 \medskip\noindent\emph{E diga-se, para fechar, o que continua em aberto}, porque
@@ -4611,13 +4642,18 @@ $G(x)=\abs{\pi^{-1}(x)}$:
 --- a primeira é o Teor.~\ref{fis:thm:mult}(2), e a segunda é a definição de
 imagem. \emph{Injectar é não colapsar; sobrejectar é não deixar buraco}, e $G$ lê
 as duas faltas com o mesmo número.
-\item[(4)] \textbf{Donde bijectivo é o mesmo que plano, e não é metáfora.} As
-duas juntas dão $G\equiv1$, isto é $\Phi(\pi)=\sum_x(G-1)=0$, que é a
-Def.~\ref{fis:def:folga} a anular-se:
+\item[(4)] \textbf{Donde bijectivo é o mesmo que plano --- \emph{e a hipótese que
+falta diz-se}.} A Def.~\ref{fis:def:folga} soma \textbf{sobre o suporte}, onde
+$G\ge1$ por construção; logo, ali, $\Phi$ anula-se exactamente quando $\pi$ é
+\textbf{injetiva}, e não quando é bijectiva. \emph{A sobrejectividade é a segunda
+metade, e é ela que faz o suporte ser todo o $X$}:
 \[
-\boxed{\;f\ \text{bijectiva}\iff G\equiv1\iff \Phi=0\iff\text{plana}\;}
+\boxed{\;\pi\ \text{injetiva}\iff\Phi=0\ \text{no suporte}\;;\qquad
+\text{e com }\pi\ \text{sobrejetiva}:\ \ G\equiv1\iff\text{plana}\;}
 \]
-\emph{O que a folga mede é exactamente a falha da injectividade}, e é por isso
+\emph{Contar com lugares por usar é injetivo, é plano no suporte, e não é
+bijectivo} --- e o próprio medidor desta obra tem esse caso. \textbf{O que a folga
+mede é exactamente a falha da injectividade}, e é por isso
 que o Teor.~\ref{fis:thm:curvatura} pode ler curvatura num campo de contagens:
 \textbf{curvar é dobrar, e dobrar é colapsar}.
 \end{enumerate}
@@ -5438,10 +5474,14 @@ de cada face é o neutro da outra.
 \text{a estrela} & s=1 & p=-1 & \text{o aditivo é o neutro multiplicativo; o outro, o seu simétrico}
 \end{array}
 \]
-\textbf{Partilham o $s$ e discordam no $p$}, e a discordância é exactamente o
-sinal da cláusula~(2): em $B$ vale $-1=1$ pelo
-Teor.~\ref{fis:thm:antissim}(4), e a distinção que aqui separa $0$ de $-1$ lá não
-existe. \emph{São o mesmo ponto de encontro visto dos dois lados do dois.}
+\textbf{Partilham o $s$ e discordam no $p$} --- \emph{e a discordância é real, e
+não se dissolve}. \textbf{Diga-se, porque a tentação aqui é grande}: em $B$ vale
+$-1=+1$ pelo Teor.~\ref{fis:thm:antissim}(4), \emph{e não $-1=0$}. Colar $0$ com
+$-1$ pediria $1=0$, que o Teor.~\ref{fis:thm:duas}(4) proíbe --- os dois neutros
+são distintos, e é disso que a obra vive. \textbf{Logo os dois casos não são o
+mesmo}: nos dois símbolos cada invariante é o neutro da outra face, e na estrela
+só o aditivo o é, sendo o multiplicativo o \emph{simétrico} do neutro. \emph{A
+figura é parecida e não é a mesma}, e a tabela acima já o dizia na última coluna.
 \end{enumerate}
 \end{corolario}
 
