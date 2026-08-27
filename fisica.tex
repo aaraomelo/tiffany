@@ -238,17 +238,17 @@ $\infty$ & o \textbf{parceiro do zero}: $\tau(0)$ & Teor.~\ref{fis:thm:zeroinf} 
 $\Delta$ & a \textbf{separação} do par, ao quadrado & Cor.~\ref{fis:cor:disc} & \\
 $G$ , $\Phi$ & a \textbf{medida} e a \textbf{folga} & Def.~\ref{fis:def:objeto}, Def.~\ref{fis:def:folga} & \\
 $\propto$ & a mesma razão & Cor.~\ref{fis:cor:prop} & \\
-$\Sigma$ & a contagem pela estrutura & Teor.~\ref{fis:thm:central} & \\
-\midrule
-\multicolumn{4}{@{}l@{}}{\emph{e em dívida, que se declara:}} \\
-$\Pi$ & o produto iterado & \textbf{sem nascimento} --- usa-se, e não se funda & \\
+$\Sigma$ , $\Pi$ & a \textbf{iteração} de uma face & Cor.~\ref{fis:cor:produto}; e Teor.~\ref{fis:thm:central} para o $\Sigma$ & \\
+$\in$ & a pertença & Cor.~\ref{fis:cor:pertenca}: é o $=$ sobre uma fibra & \\
 $\equiv$ & a \textbf{congruência}, e só ela & reservado --- as outras leituras passaram a $=$ e a $:=$ & \\
-$\in$ & a pertença & \textbf{sem nascimento} --- é a igualdade sobre uma fibra & \\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent\emph{Uma obra que factura os seus custos tem de facturar também as suas
-dívidas}, e estas três estão em aberto à data desta linha.
+\noindent\emph{Nenhum destes sinais foi escolhido para representar um conceito de
+fora}: cada um está aqui porque alguma estrutura já demonstrada o produziu, e a
+coluna da direita diz qual. \textbf{Os três últimos pareceram dívida e não eram} ---
+\emph{eram citações por fazer}, e o corolário de cada um vai buscar a fundação ao
+sítio onde ela já estava.
 
 \medskip\noindent\textbf{E os dois extremos da tabela são um bloco, e não dois
 avulsos.} O $0$ é o extremo \emph{sem escolha}; o $\infty$ não é um lugar longe ---
@@ -950,6 +950,40 @@ Teor.~\ref{fis:thm:doispontos}(2), que produz o par sem ordem.
 (6) A dobra parte $S\times S$ em blocos e não diz nada sobre pares de blocos
 distintos; a transitividade é uma condição sobre três elementos, e nenhuma
 cláusula da Def.~\ref{fis:def:op} a alcança.
+\end{proof}
+
+\begin{corolario}[a pertença é a igualdade lida sobre uma fibra]\label{fis:cor:pertenca}
+\emph{O sinal $\in$ não é um nono sinal a acrescentar às oito}, e a razão está
+escrita noutro sítio desta obra:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A Def.~\ref{fis:def:objeto} já o resolve, e sem o dizer.} Ali
+lê-se $G(x)=\bigl\lvert\{\,i\in I:\pi(i)=x\,\}\bigr\rvert$ --- \emph{e a pertença
+que aparece à esquerda é, à direita, a igualdade $\pi(i)=x$}. \textbf{O sinal não
+acrescenta relação: abrevia uma}.
+\item[(2)] \textbf{E é sempre assim, porque os lados direitos são de quatro
+formas e não mais.} Nesta obra, $x\in A$ é: a \emph{fibra} de uma aplicação já
+definida, $\pi(i)=x$; a \emph{imagem} ou o \emph{suporte}, isto é, existir $t$ com
+$\pi(t)=x$; um \emph{bloco} de uma partição, isto é, coincidir de bloco; ou uma
+\emph{lista finita} de literais, isto é, uma disjunção finita de igualdades.
+\item[(3)] \textbf{Donde}
+\[
+\boxed{\;\in\ =\ \text{o}\ =\ \text{da cláusula~(4), composto com uma aplicação já definida}\;}
+\]
+--- \emph{ou uma disjunção finita dele}. \textbf{O quadro das oito não mente por
+omissão}: as oito são as relações que a dobra sobre os pares produz, e $\in$ não é
+outra, é uma delas escrita mais curto.
+\item[(4)] \textbf{E o que a máquina corre é o critério, não o conjunto.} A
+Def.~\ref{fis:def:objeto} pede igualdade \textbf{decidível}, e é isso, e só isso,
+que a cláusula~(3) precisa: \emph{formar a aplicação e perguntar se dá $x$}.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) é leitura da definição citada. (2) é a inspecção das formas: qualquer $A$ deste
+documento é imagem, fibra, bloco ou lista, porque é assim que todos se constroem
+--- Teor.~\ref{fis:thm:escada} para os degraus, Def.~\ref{fis:def:objeto} para as
+células, Teor.~\ref{fis:thm:simbolos}(3) para os blocos. (3) e (4) são a conjunção
+das duas.
 \end{proof}
 
 \medskip\noindent\textbf{E a escada dos custos tem um degrau por pagar --- diga-se
@@ -2998,13 +3032,23 @@ outros, o passo teria ali um ponto fixo --- e o Cor.~\ref{fis:cor:geradorfora}
 mostra que não tem, em nenhum dos andares onde a regra corre. \textbf{A escada não assenta num
 degrau porque nenhum degrau a contém.}
 
-\medskip\noindent\emph{E diga-se, para fechar, o que continua em aberto}, porque
-esta Parte factura os seus custos e não pode deixar de facturar os que não pagou:
-o $\Pi$ sem nascimento e o $\in$ a fazer trabalho pesado sem chão --- \emph{dois
-dos três que o quadro da abertura declarava}. \textbf{O terceiro pagou-se}: o
-$\equiv$ tinha quatro leituras e passou a ter uma, a congruência; as outras eram
-igualdade de funções e escrevem-se $=$, ou estipulação e escrevem-se $:=$.
-\textbf{Ficam ditos, e ficam por pagar.}
+\medskip\noindent\emph{E diga-se, para fechar, o que era dívida e afinal não era},
+porque a lição vale mais do que a conta. Os três sinais que o quadro da abertura
+declarava sem nascimento --- $\Pi$, $\equiv$ e $\in$ --- \textbf{tinham-no, e no
+próprio livro}. O $\equiv$ não precisava de nascer: quatro das suas leituras eram
+igualdade de funções ou estipulação, e escrevem-se $=$ e $:=$; ficou-lhe a
+congruência, que é uma. O $\in$ estava fundado na Def.~\ref{fis:def:objeto}, que
+escreve a fibra como $\{i:\pi(i)=x\}$ --- \emph{a pertença ali é a igualdade}, e é
+o Cor.~\ref{fis:cor:pertenca}. E o $\Pi$ estava fundado no
+Teor.~\ref{fis:thm:trial}(4), que diz que $\mathcal{D}$ \emph{permuta} as
+associatividades: o que serve uma face serve a outra, e é o
+Cor.~\ref{fis:cor:produto}.
+\[
+\boxed{\;\text{o que parecia falta de fundamento era falta de \textbf{citação}}\;}
+\]
+\emph{E fica a regra de quem varre}: antes de fundar um sinal, procurar se a obra
+já o funda noutro sítio --- \textbf{porque acrescentar um teorema onde bastava uma
+referência engorda o livro e não o fecha}.
 
 \medskip\noindent\textbf{E o degrau onde \emph{contar} passa a \emph{integrar}
 tem aqui o seu núcleo, que é exacto e não pede integral nenhum.} Nos outros
@@ -5069,6 +5113,39 @@ duas falham} --- com $a,b,c$ incomparáveis entre si, um abaixo e um acima,
 $\min\{a,\max\{b,c\}\}$ dá $a$ e $\max\{\min\{a,b\},\min\{a,c\}\}$ dá o de
 baixo. \textbf{O exemplo simétrico por $\mathcal{D}$ é a ordem \emph{total}, e
 não o reticulado qualquer.}
+\end{proof}
+
+\begin{corolario}[o produto iterado nasce onde a soma iterada nasce]\label{fis:cor:produto}
+\emph{E daqui sai o $\Pi$, que parecia estar sem chão e não está}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Iterar uma face sobre a lista pede duas coisas, e só duas.}
+Que a lista seja \textbf{finita e ordenada} --- Teor.~\ref{fis:thm:BI} e
+Teor.~\ref{fis:thm:ordem} --- e que a face seja \textbf{associativa}, para que o
+resultado não dependa de como se agrupa.
+\item[(2)] \textbf{E a associatividade é das que $\mathcal{D}$ transporta.} Pela
+cláusula~(4) deste teorema, $\mathcal{D}$ leva a associatividade de $\oplus$ na de
+$\otimes$ --- \emph{permuta-as}. \textbf{Logo o que serve uma face serve a outra},
+e sem hipótese nova.
+\item[(3)] \textbf{Donde $\Pi$ nasce exactamente onde $\Sigma$ nasce, e pelo mesmo
+teorema.}
+\[
+\boxed{\;\Sigma\ \text{e}\ \Pi\ \text{são a \textbf{mesma} iteração, uma por face}\;}
+\]
+\emph{Não havia sinal por fundar}: havia uma citação por fazer.
+\item[(4)] \textbf{E a assimetria que se nota tem a razão na mesma cláusula.} O
+$\Sigma$ tem o Teor.~\ref{fis:thm:central} e o $\Pi$ não tem análogo --- e isso
+\emph{não} é dívida: é que aquele teorema vive da \textbf{partição} do rectângulo,
+e a lei que a sustenta é a distributividade, que é precisamente a que
+$\mathcal{D}$ \textbf{não} transporta. \emph{A notação dualiza; o teorema não}, e
+a cláusula~(4) diz porquê.
+\end{enumerate}
+\end{corolario}
+
+\begin{proof}
+(1) é a definição de iteração sobre lista. (2) é a cláusula~(4) acima. (3) é a
+conjunção. (4) é a mesma cláusula lida do outro lado: as duas distributividades
+valem em $(\min,\max)$ e não em $(\oplus,\otimes)$, pelo que a lei de que o
+Teor.~\ref{fis:thm:central} vive não tem dual.
 \end{proof}
 
 \medskip\noindent\textbf{E uma correcção ao que a caixa acima dizia.} O par de
