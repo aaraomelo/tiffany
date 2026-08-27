@@ -1,0 +1,1801 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  psi/multifocal.tex — A INTELIGÊNCIA MULTIFOCAL, FUNDADA.
+%
+%  O QUE ESTE FICHEIRO É: a teoria da inteligência multifocal de Augusto Jorge
+%  Cury («Inteligência Multifocal — Análise da Construção dos Pensamentos e da
+%  Formação de Pensadores», Cultrix, 8.ª ed.) posta em forma: postulados
+%  declarados, definições, teoremas e demonstrações, sobre o alicerce do
+%  `fisica.tex`.
+%
+%  DUAS PARTES, e a ordem importa.
+%   I — A CONSTRUÇÃO. Seis postulados de tradução, e tudo o resto sai deles com
+%       demonstração: a reconstrução, o eu como acumulação, a multifocalidade,
+%       a âncora, a psicoadaptação, os dois pensamentos conscientes, a
+%       interpretação do outro, o custo do caos e a medida do «antiespaço».
+%   II — AS RACHADURAS. Catorze sítios onde o livro afirma duas coisas que não
+%       podem valer juntas, e o teorema da Parte I que fecha cada uma.
+%
+%  A REGRA: a rachadura é sempre um PAR de asserções DO PRÓPRIO LIVRO. Não se
+%  discute com o autor a partir de fora. Onde ele está certo, diz-se que está —
+%  e a §pe mostra que é na maior parte.
+%
+%  E NÃO SE TOCA NO fisica.tex. Este documento CITA-O pelo rótulo, e repete o
+%  enunciado citado em uma linha, para que isto se leia sem abrir outro
+%  ficheiro. A matéria formal do alicerce é de lá e fica lá; o que se demonstra
+%  aqui é a ESPECIALIZAÇÃO dela aos postulados desta tradução.
+%
+%  Compila SOZINHO (`pdflatex psi/multifocal.tex`) e dentro do livro.
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[../livro.tex]{subfiles}
+
+\begin{document}
+
+% ─── Licença ──────────────────────────────────────────────────────────────
+% Proprietário / comercial. Copyright (c) 2026 Aarão Melo Lopes.
+% Uso de código ou textos mediante contrato e pagamento — ver LICENSE na raiz.
+% Contacto: aarao.melo.lopes@gmail.com
+
+% ── o que o estilo.tex não dá, e este documento usa ──
+% O teste é `\lema` e NÃO `\c@lema`: o lema partilha o contador `teorema`, pelo
+% que `\c@lema` nunca chega a existir e o guarda seria sempre falso.
+\ifcsname lema\endcsname\else
+  \theoremstyle{plain}\newtheorem{lema}[teorema]{Lema}
+\fi
+\providecolor{cinza}{gray}{0.35}
+\providecommand{\abs}[1]{\lvert #1\rvert}
+
+%% A CITAÇÃO DO LIVRO. É sempre literal, e vai entre aspas angulares.
+\providecommand{\cury}[1]{\emph{«#1»}}
+
+%% A CITAÇÃO DO fisica.tex: o nome do resultado, e o rótulo por baixo, para que
+%% a dívida se possa cobrar sem sair desta página.
+\providecommand{\fis}[2]{\textbf{#2}~\textnormal{(\code{#1})}}
+
+%% O POSTULADO DE TRADUÇÃO, citado pelo número: são seis, e são todos.
+\providecommand{\pt}[1]{\textbf{P#1}}
+
+%% A LINHA DE FECHO de cada rachadura.
+\providecommand{\sepc}{\quad\penalty0$\big|$\quad\penalty0}
+\providecommand{\fecha}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{no livro}: #1\sepc\textbf{a rachadura}: #2\sepc\textbf{o fecho}: #3\par}\smallskip}
+
+\ifSubfilesClassLoaded{%
+  \gkcapa{A Inteligência Multifocal, Fundada}
+         {seis postulados, doze teoremas, catorze rachaduras}
+         {a teoria de Augusto Cury posta em forma sobre a dobra --- o que se
+          demonstra, o que não fechava, e o que fica por fechar}
+  \maketitle
+  \tableofcontents
+}{%
+  \part*{A Inteligência Multifocal}\addcontentsline{toc}{part}{A Inteligência Multifocal}
+}
+
+\begin{abstract}\noindent
+\textbf{O que se leu.} \emph{Inteligência Multifocal --- Análise da Construção
+dos Pensamentos e da Formação de Pensadores}, de Augusto Jorge Cury (Editora
+Cultrix, 8.\textsuperscript{a} edição revista e ampliada, 2006; primeira edição
+1998). O livro inteiro, do prefácio ao glossário.
+
+\medskip\noindent\textbf{O que o livro afirma.} Que a memória não guarda para
+devolver: \cury{não existe lembrança}, só reconstrução. Que a leitura da memória
+é feita por \textbf{quatro} fenómenos e não por um --- a autochecagem, o
+autofluxo, a âncora da memória e o \emph{eu} ---, e que três deles são
+inconscientes, pelo que a maior parte do que se pensa não foi decidido por
+ninguém. Que a interpretação tem \textbf{cinco etapas}, das quais as três
+primeiras são inconscientes, e que o \emph{eu} \textbf{só se forma na quinta}.
+Que a emoção se adapta ao que se repete --- a \textbf{psicoadaptação} --- e que
+por isso nem a dor nem o prazer duram. E que entre a consciência e a coisa há um
+\cury{antiespaço}, uma distância que nunca se atravessa.
+
+\medskip\noindent\textbf{O que este documento faz --- e são duas coisas, nesta
+ordem.} \emph{Primeiro constrói.} Declara \textbf{seis postulados de tradução} e
+mais nenhum, e deduz deles, com demonstração, as afirmações centrais da teoria:
+que a leitura é reconstrução e não resgate e \emph{quanto} se perde; que o
+\emph{eu} é uma \textbf{acumulação} e os outros três fenómenos são o
+\textbf{incremento}; que nenhuma leitura carrega o seu autor --- e é isso, e não
+a contagem quatro, que faz a inteligência ser multifocal; que a âncora é uma
+\textbf{bola} e que os territórios particionam; que a psicoadaptação é
+$1/G$; que a dor se perpetua por repartição e se alivia por concentração; que os
+dois pensamentos conscientes são as duas metades de um operador, e a cisão é
+única; que a traição da interpretação é a \textbf{soma}; e que o antiespaço tem
+medida e ela halva. \emph{Depois diagnostica.} Encontra no livro
+\textbf{catorze} pares de afirmações do próprio autor que não podem valer
+juntas, e fecha cada um com um teorema da primeira parte.
+
+\medskip\noindent\textbf{E o resultado, numa linha.} Quase tudo o que o livro
+descreve \emph{como fenómeno} é, nesta construção, \textbf{uma leitura de um
+campo}; e quase todas as contradições do livro nascem de confundir duas leituras
+diferentes \textbf{do mesmo campo} com dois fenómenos diferentes:
+\[
+\boxed{\;\text{a disponibilidade é }\zeta;\qquad
+\text{a resposta é }\mu;\qquad
+\text{a adaptação é }1/G\;}
+\]
+\emph{Três nomes, um campo.} O livro tinha razão em dizer que são inevitáveis, e
+não tinha como dizer porquê --- porque lhe faltava a conta.
+
+\medskip\noindent\textbf{E o que fica de pé é mais do que o que cai.} As teses
+centrais de Cury --- que a inteligência é multifocal, que o \emph{eu} não é o
+autor da maior parte do que pensa, que a leitura da memória é reconstrução, e que
+nenhuma classificação de pessoas se lê no funcionamento da mente --- saem daqui
+\textbf{demonstradas} em vez de observadas. O que cai são as junções, e são as
+junções que este documento refaz.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A regra deste documento, e o que ele não afirma}\label{mf:regra}
+
+\noindent\textbf{Quatro regras, e são de leitura obrigatória} --- sem elas este
+documento lê-se como uma coisa que não é.
+
+\medskip\noindent\textbf{(1) A construção parte de seis postulados, e de mais
+nenhum.} Os postulados da §\ref{mf:postulados} são a \emph{totalidade} do
+compromisso com a psicologia. Tudo o que a Parte~I afirma depois deles é
+demonstrado --- ou de um resultado do \code{fisica.tex}, citado pelo rótulo, ou
+dos postulados, ou dos dois. \emph{Quem negar um postulado sabe exactamente que
+teoremas caem com ele}, porque cada demonstração diz quais usou.
+
+\medskip\noindent\textbf{(2) A rachadura é interna, e é sempre um par.} Não se
+chama rachadura a uma tese com que se discorde, nem a uma afirmação sem prova ---
+um livro de teoria tem direito a postulados. Chama-se rachadura ao sítio onde
+\textbf{o livro afirma $A$ e afirma $\neg A$}, ou onde afirma $A$ e afirma $B$ e
+$B$ torna $A$ impossível. As duas asserções vão citadas \emph{à letra}, e o
+capítulo delas vai ao lado. \emph{Quem discordar da rachadura vai ao livro e
+confere as duas frases.}
+
+\medskip\noindent\textbf{(3) O fecho é um teorema desta obra, e não uma
+sugestão.} Cada rachadura da Parte~II fecha num enunciado da Parte~I, com o
+número. \emph{Nenhum fecho é inventado no sítio}: se o resultado não existisse, a
+rachadura ficaria na lista dos que não fecham (§\ref{mf:aberto}), e há-os.
+
+\medskip\noindent\textbf{(4) E o fecho custa um compromisso, que se declara.}
+Fechar uma rachadura é escolher uma leitura, e a leitura escolhida exclui outras.
+Onde isso acontece --- e acontece em todas --- diz-se \textbf{qual é o
+compromisso}. \emph{Um fecho que não custe nada não fechou nada.}
+
+\medskip
+\gkcaixa{\textbf{O que este documento NÃO afirma.} \emph{Nada aqui é uma
+afirmação sobre cérebros.} O \code{fisica.tex} constrói um operador, uma
+realização e um campo; não constrói neurónios, não mede pessoas, e não tem uma
+única observação clínica. Quando o Teor.~\ref{mf:thm:adapta} diz que \emph{a
+psicoadaptação é $1/G$}, afirma \textbf{uma coisa e só uma}: que dos postulados
+\pt{1}--\pt{3} isso se segue. \textbf{Não se afirma} que a mente humana
+\emph{seja} uma realização $\pi\colon I\to X$; não se afirma que os números
+medidos nos programas da bateria digam alguma coisa sobre um paciente; e não se
+afirma que Cury estivesse a descrever isto. \emph{Os medidos citados são medidas
+de programas, e de mais nada.} Quem quiser passar daqui para a clínica tem de
+medir na clínica --- e este documento não o fez. A §\ref{mf:aberto} diz o que
+isso deixa em aberto, e diz-o pelo nome.}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% ═══════════════════════════════════════════════════════════════════════════
+\part{A construção}
+
+\section{O alicerce, e o que dele se importa}\label{mf:alicerce}
+
+\noindent\textbf{Este documento não reconstrói a álgebra}, e diz de onde a
+tira. Tudo o que segue assenta em cinco objectos do \code{fisica.tex}, e são
+estes --- \emph{cada um com o seu rótulo, para que a dívida se possa cobrar}:
+
+\medskip
+{\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o objecto & o que é & onde \\
+\midrule
+$\partial$ & a \textbf{dobra}: um mapa com $\partial\circ\partial=\mathrm{id}$ & \code{fis:def:op} \\
+$\pi\colon I\to X$ & a \textbf{realização}: $X$ só precisa de igualdade decidível & \code{fis:def:objeto} \\
+$G(x)=\abs{\pi^{-1}(x)}$ & a \textbf{multiplicidade}: quantos índices na célula $x$ & \code{fis:def:objeto} \\
+$\Phi=\sum_x(G(x)-1)$ & a \textbf{folga}: quantos vieram parar a sítio ocupado & \code{fis:def:folga} \\
+$\zeta,\ \mu=\zeta^{-1}$ & \textbf{acumular} e \textbf{desacumular}: $\mu$ é a diferença finita & \code{fis:thm:mu} \\
+\bottomrule
+\end{tabular}}
+
+\medskip\noindent\textbf{E uma frase do alicerce, que é a que este documento
+mais usa.} A multiplicidade obedece a uma recorrência local em que
+\emph{nenhum passo consulta $\pi(0),\dots,\pi(t)$}: cada escrita altera $G$ num
+único ponto, e esse ponto é a célula corrente
+(\fis{fis:thm:mult}{Teor. «multiplicidade geométrica»}, cláusula~(3)). É a isso
+que a obra chama \emph{a memória não pertence ao agente} --- e é dela que sai
+quase tudo o que segue.
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Os seis postulados de tradução}\label{mf:postulados}
+
+\noindent\textbf{São seis, e são todos.} Cada um traduz um objecto do livro num
+objecto do alicerce. \emph{Não são teoremas e não se demonstram} --- são o preço
+de entrada, e é por isso que estão juntos, numerados, e numa página só.
+
+\begin{quote}\small
+\textbf{\pt{1} (o registo).} A história intrapsíquica é uma realização
+$\pi\colon I\to X$, onde $I$ é a lista \emph{ordenada} das experiências
+vividas e $X$ o conjunto das representações psicossemânticas, com igualdade
+decidível e mais nada. \emph{O fenómeno RAM \textbf{é} $\pi$}: escreve, e não
+pergunta.
+
+\smallskip\textbf{\pt{2} (a disponibilidade).} A disponibilidade histórica da
+representação $x$ no instante $t$ é $G_t(x)$.
+
+\smallskip\textbf{\pt{3} (a leitura).} O que um passo \emph{lê} não é o campo: é
+a \textbf{diferença relativa} do campo, $G(y)/G(x)-1$, sobre a vizinhança
+corrente.
+
+\smallskip\textbf{\pt{4} (o território).} $X$ é hierárquico: as representações
+endereçam-se por palavras de $p$ bits, com a distância
+$d(a,b)=2^{-\operatorname{prof}(a,b)}$ da árvore do encaixe
+(\code{fis:def:arvore}). \emph{A âncora da memória é a bola $\mathcal{B}(a,r)$
+dessa árvore.}
+
+\smallskip\textbf{\pt{5} (o consciente).} O \emph{eu} no instante $t$ é a
+\textbf{acumulação} do campo até $t$; os fenómenos da autochecagem, do autofluxo
+e da âncora são os \textbf{incrementos} que a compõem.
+
+\smallskip\textbf{\pt{6} (o outro).} A leitura de outra pessoa é a
+\textbf{soma}, numa matriz única, do padrão diretivo e dos padrões associativos
+que o estímulo convoca.
+\end{quote}
+
+\medskip\noindent\textbf{E diga-se logo qual é o mais caro.} É \pt{4}: pedir que
+a memória seja hierárquica é uma hipótese forte, e é a mais forte deste
+documento --- as três propriedades da âncora saem dela e caem com ela. \pt{3} é
+o segundo: identificar «o que se sente» com o gradiente, e não com o campo, é
+uma escolha, e é a que faz a psicoadaptação fechar. \pt{1}, \pt{2} e \pt{5} são
+baratos: o livro já os afirma quase nas mesmas palavras. \pt{6} é a regra de
+Hebb, e usa-se \emph{só} na §\ref{mf:outro}.
+
+\medskip\noindent\textbf{E o que \emph{não} está aqui.} Não há postulado para
+\emph{energia psíquica}. O livro põe-na como substância; este documento não a
+traduz e não a usa, e a §\ref{mf:aberto} diz porquê.
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{A memória: o que se conserva, o que se perde, e quanto}\label{mf:memoria}
+
+\begin{teorema}[a memória conserva a contagem e perde a fibra]\label{mf:thm:reconstroi}
+Sob \pt{1}--\pt{2}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Conserva:} $\displaystyle\sum_{x}G(x)=\abs{I}$, seja qual for
+a história.
+\item[(2)] \textbf{E não distingue:} existem duas histórias $\pi\neq\pi'$ sobre
+o mesmo $I$ com a mesma medida e dobras diferentes, isto é, com
+$\max G_\pi\neq\max G_{\pi'}$.
+\item[(3)] \textbf{Logo a leitura não é resgate.} A aplicação
+$\pi\mapsto\bigl(\sum_xG(x)\bigr)$ não é injetiva; o estado da memória não
+determina a história que o produziu.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é o \fis{fis:lem:conserva}{Lema «conservação»}: as fibras $\pi^{-1}(x)$
+particionam $I$, e a cardinalidade é aditiva sobre partições finitas.
+
+(2) é o \fis{fis:thm:medida}{Teor. «a medida conserva-se, a fibra perde-se»}, e a
+testemunha está dentro da própria definição: sobre o mesmo $I$ com
+$\abs{I}\ge2$ e um $X$ com pelo menos dois objectos, tome-se $\pi$
+\textbf{constante} --- donde $\max G=\abs{I}$ --- e $\pi'$ \textbf{não
+constante} --- donde $\max G'<\abs{I}$. As duas cumprem (1).
+
+(3) é (2) lido como enunciado sobre a aplicação: duas pré-imagens distintas com a
+mesma imagem.
+\end{proof}
+
+\medskip\noindent\textbf{É isto, e só isto, que \cury{não existe lembrança}
+quer dizer que se possa demonstrar.} \emph{Não} que nada se conserve --- a
+cláusula~(1) diz que a contagem se conserva sempre. É que \textbf{o que se
+conserva não chega para reconstituir}: a marca não diz quantas patas a
+produziram.
+
+\begin{corolario}[o débito tem número]\label{mf:cor:debito}
+Sob \pt{1}--\pt{2}, com $\pi$ sobrejetiva sobre $X$, o que se perdeu é
+\[
+\boxed{\;\Phi\;=\;\sum_{x}\bigl(G(x)-1\bigr)\;=\;\abs{I}-\abs{X}\;}
+\]
+e $\Phi=0$ \emph{exactamente} quando nenhuma experiência caiu sobre outra.
+\end{corolario}
+
+\begin{proof}
+É a \fis{fis:def:folga}{Def. «a folga, local e total»} com o
+\fis{fis:cor:folga}{Cor. «a folga é uma só»}: a soma da esquerda é
+$\sum_xG(x)-\abs{\operatorname{supp}G}$, que por (1) do
+Teor.~\ref{mf:thm:reconstroi} vale $\abs{I}-\abs{X}$; e ela anula-se exactamente
+quando $G\le1$, que é a injetividade
+(\fis{fis:thm:mult}{Teor. «multiplicidade geométrica»}, cláusula~(2)).
+\end{proof}
+
+\medskip\noindent\textbf{E daqui sai a leitura fina da recordação.} O que fica de
+uma experiência não é a experiência: é um par. Na secção
+\code{fis:rastro} a obra chama-lhe o \textbf{rastro}, e separa três coisas com
+três nomes ---
+$(m,\delta)$ é o par, $m$ é o que se guarda, e $\delta$ é a perda \emph{medida}.
+A frase da casa é a que aqui interessa: \emph{$\delta$ não é um erro a lamentar;
+é o que a dobra devolve, e é por existir que se sabe quanto ficou de fora}.
+
+\begin{corolario}[duas recordações da mesma coisa são duas folhas]\label{mf:cor:folhas}
+Sob \pt{1}, para cada representação $x$ os números de visita percorrem
+\emph{exactamente} $\{1,2,\dots,G(x)\}$, e o par $\bigl(\pi(i),k(i)\bigr)$ é
+injetivo. Logo duas recordações da mesma experiência \textbf{não são a mesma
+leitura repetida}: são dois pontos distintos da fibra vertical de $x$.
+\end{corolario}
+
+\begin{proof}
+É o \fis{fis:thm:levant}{Teor. «levantamento em folhas»}, cláusulas~(3) e~(1):
+fixado $x$ e sendo $i_1<\dots<i_g$ a sua fibra, $k(i_r)=r$, que é uma bijeção
+sobre $\{1,\dots,g\}$; e daí a injetividade de $\tilde\pi=(\pi,k)$.
+\end{proof}
+
+\medido{\code{tests/aranha\_n.c} §AN1--§AN2: campo incremental igual à recontagem
+e $\sum G=\abs{I}$. §AN16: \emph{a mesma medida com dobras diferentes} --- as
+duas curvas, com a reta como controlo. \code{tests/meio.c} §M8: o centro contra
+as suas fronteiras em três grades, $\mathbf{6}$ a $\mathbf{13}$ vezes melhor.
+\emph{São medidas de programas.}}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{O \emph{eu} é uma acumulação, e gerir é desacumular}\label{mf:eu}
+
+\noindent A peça que o livro não tem é a \textbf{diferença de nível} entre o
+\emph{eu} e os outros três fenómenos. Ela existe, é uma identidade, e traz com
+ela o atraso do \emph{eu} --- com o seu tamanho exacto.
+
+\begin{teorema}[o campo escreve com $\zeta$ e lê-se com $\mu$]\label{mf:thm:zetamu}
+Sob \pt{1}, \pt{2} e \pt{5}, pondo
+$a_x(t)=\mathbf{1}_{\{\pi(t)=x\}}$:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Os três mordomos são o incremento:} cada passo altera $G$
+numa célula só, e $a_x$ é esse incremento.
+\item[(2)] \textbf{O \emph{eu} é a acumulação:} $G_t(x)=(a_x*\zeta)(t)$.
+\item[(3)] \textbf{Gerir é desacumular:} $a_x(t)=G_t(x)-G_{t-1}(x)$; conhecida a
+família $\{G_t\}$, a trajetória inteira volta --- \emph{sem que nada dela tenha
+sido guardado}.
+\item[(4)] \textbf{E o atraso é exactamente um passo.} $G_t$ depende de $a_x(u)$
+apenas para $u\le t$; logo o \emph{eu} em $t-1$ não contém $a_x(t)$, e o
+\emph{eu} em $t$ é o \emph{eu} em $t-1$ mais $a_x(t)$.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é a cláusula~(3) do \fis{fis:thm:mult}{Teor. «multiplicidade geométrica»}:
+$G_{t+1}(x)=G_t(x)+\mathbf{1}_{\{x=\pi(t+1)\}}$, e para $x\neq\pi(t+1)$ a
+indicatriz anula-se.
+
+(2) e (3) são as cláusulas~(1) e~(2) do
+\fis{fis:thm:zetamu}{Teor. «o ciclo é $\zeta$; a recuperação é $\mu$»}, com
+$\mu=\zeta^{-1}$ a ser a diferença finita
+(\fis{fis:thm:mu}{Teor. «$\mu=\zeta^{-1}$ na ordem total»}).
+
+(4) De (2), $G_t(x)=\sum_{u\le t}a_x(u)$, soma em que não entra nenhum $u>t$; e a
+diferença $G_t-G_{t-1}$ é o único termo que os separa, que é $a_x(t)$ por (3).
+\end{proof}
+
+\begin{corolario}[porque é mais fácil ser vítima do que agente]\label{mf:cor:vitima}
+Sob \pt{5}, \textbf{uma acumulação não pode ser um incremento}: o \emph{eu} em
+$t$ é função de $a$ até $t$, e o passo em $t$ não é função do \emph{eu} em $t$
+--- é uma das suas parcelas. Logo o \emph{eu} não determina o passo que o
+constitui, e determina-o com um passo de atraso e não mais.
+\end{corolario}
+
+\begin{proof}
+A primeira metade é a cláusula~(4) do Teor.~\ref{mf:thm:zetamu}. Para a segunda:
+por (3) do mesmo teorema, $a_x(t)$ recupera-se de $\{G_t,G_{t-1}\}$, que estão
+ambos disponíveis em $t$; logo o atraso é de um passo e não é maior.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que dá sentido ao \cury{retroativamente} do
+livro.} Não é agir no passado --- o que não quer dizer nada. É \textbf{ler o
+passado do campo presente}: $\mu$ opera sobre $\{G_t\}$, que está todo escrito
+agora, e devolve o passo que foi dado. \emph{A operação clínica que o livro
+descreve e não sabe nomear é uma deconvolução.}
+
+\medido{\code{lib/incidencia.h} com \code{tests/zetamu.c}:
+$\zeta\circ\mu=\mu\circ\zeta=\mathrm{id}$ com resíduo $\mathbf{0}$ em toda a
+largura, e a trajetória $a_x$ recuperada de $\{G_t(x)\}$ exactamente nas visitas.
+\textbf{8 unidades, zero falhas.} \code{tests/aranha\_n.c} §AN15:
+$\mu=\zeta^{-1}$ em $\mathbf{4096}$ pares.}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{A multifocalidade, demonstrada --- e não é a contagem quatro}\label{mf:multi}
+
+\noindent A tese que dá nome ao livro pode enunciar-se e demonstrar-se, e o
+enunciado \textbf{não menciona quantos são os leitores}. É melhor assim: a
+contagem quatro é da observação do autor, e o que faz o trabalho é outra coisa.
+
+\begin{teorema}[nenhuma leitura carrega o seu autor]\label{mf:thm:multifocal}
+Sob \pt{1}--\pt{2}, atribua-se a cada escrita um agente. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Invariância:} duas execuções que produzam a mesma ocupação
+por célula dão campos iguais célula a célula, e $\abs{I}$ é o mesmo --- $G$ é
+invariante sob qualquer reatribuição de agentes que preserve a ocupação.
+\item[(2)] \textbf{Logo nenhuma função do campo distingue autores.} Se $F$ é
+qualquer aplicação definida em $G$, então $F$ toma o mesmo valor nas duas
+execuções.
+\item[(3)] \textbf{E a indistinção é a dos dois extremos:} um agente a visitar
+uma célula $K$ vezes e $K$ agentes a visitá-la uma vez cada produzem o mesmo
+campo.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (3) são o \fis{fis:thm:agentes}{Teor. «$G$ não vê o construtor»}: pela
+cláusula~(3) do \fis{fis:thm:mult}{Teor. «multiplicidade geométrica»}, cada
+escrita incrementa $G$ na célula corrente e \emph{nada mais regista} --- em
+particular nenhuma escrita carrega a identidade de quem a fez; como as duas
+execuções produzem a mesma multiplicidade por célula, os campos coincidem.
+
+(2) é imediato de (1): uma função de um invariante é um invariante. Se
+$G=G'$ então $F(G)=F(G')$.
+\end{proof}
+
+\medskip\noindent\textbf{E aqui está a tese do livro, dita como ela é.} A
+inteligência não é multifocal \emph{porque há quatro fenómenos}; é multifocal
+porque \textbf{o campo não tem coluna para o autor}. Acrescentar ou tirar
+leitores não muda nada no ciclo, e é isso que faz o mecanismo escalar:
+\[
+\boxed{\;\text{o campo é memória da \textbf{construção}, e não do
+\textbf{construtor}}\;}
+\]
+
+\begin{teorema}[a introspecção repõe a ordem, e não a autoria]\label{mf:thm:folha}
+Sob \pt{1}, seja $k(i)$ o número de visita e $\tilde\pi(i)=(\pi(i),k(i))$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] $\tilde\pi$ é \textbf{injetiva}, $\tilde G=1$ na imagem, e $G$
+recupera-se de $\tilde\pi$ sem qualquer outro dado. \emph{Uma coordenada, e a
+dobra desfaz-se} --- e ela sobe \emph{um} andar, seja qual for a dimensão.
+\item[(2)] \textbf{Mas o agente não é função de $\tilde\pi$}: existem duas
+atribuições de agentes distintas com o mesmo $\tilde\pi$. Separar agentes pede
+outra coordenada --- o identificador --- e essa \textbf{não sai do campo}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é o \fis{fis:thm:levant}{Teor. «levantamento em folhas»}, cláusulas~(1),
+(3) e~(5).
+
+(2) A atribuição de agentes é um dado \emph{a mais} sobre a mesma trajetória:
+fixada a sucessão $\pi$ --- e portanto fixados $k$ e $\tilde\pi$ --- pode
+repartir-se as escritas por um agente ou por vários sem alterar $\pi(t)$ para
+nenhum $t$. Logo $\tilde\pi$ é o mesmo e a atribuição não; donde ela não é
+função de $\tilde\pi$. Que a distinção também não sai de $G$ é a cláusula~(2) do
+Teor.~\ref{mf:thm:multifocal}.
+\end{proof}
+
+\medskip\noindent\textbf{Donde a leitura clínica, e ela é mais modesta do que a
+do livro e mais útil.} O \cury{stop introspectivo} não é --- e não pode ser ---
+uma auditoria de autoria: ninguém recupera \emph{quem} construiu um pensamento.
+O que a introspecção repõe é a \textbf{ordem}: o que veio primeiro, o que veio a
+seguir, e quantas vezes se passou por ali. \emph{É o que os clínicos de facto
+fazem}, e agora sabe-se porquê.
+
+\medido{\code{tests/aranha\_n.c} §AN31: um agente com $4$ voltas e $4$ agentes
+com uma volta --- campos iguais nas $\mathbf{64}$ células, $G=4$ nas $16$, com o
+controlo negativo a ver as $16$ a diferir contra $3$ voltas. E a separação medida
+dos dois lados: a ordem separa \textbf{todos} os pares que caem na mesma célula
+($\mathbf{96}$ de $96$), o identificador separa só os que atravessam a fronteira
+entre agentes ($\mathbf{64}$).}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{A âncora é a bola, e os territórios particionam}\label{mf:ancora}
+
+\noindent O livro declara a âncora \cury{difícil de ser definida} e faz dela a
+peça que suporta o edifício clínico. \pt{4} dá-lhe a definição, e as três
+propriedades que o livro precisava de postular passam a ser cláusulas.
+
+\begin{teorema}[o território]\label{mf:thm:ancora}
+Sob \pt{4}, com $\mathcal{B}(a,r)=\{x:d(a,x)\le r\}$ e $r\ge0$:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Delimita, e é uma célula:} $\pi_r(i)=$ a bola de raio $r$ que
+contém $i$ é uma realização no sentido de \code{fis:def:objeto}; a sua célula
+\emph{é} a bola, e $G$ conta os índices dentro dela.
+\item[(2)] \textbf{É uma:} duas bolas de raio $r$ ou coincidem ou são disjuntas;
+para cada $r$ as bolas \textbf{particionam} $X$. Há \emph{exactamente} uma que
+contém o ponto corrente.
+\item[(3)] \textbf{Alarga-se de dentro:} todo ponto é centro, e para
+$r'\ge r$ tem-se $\mathcal{B}(a,r)\subseteq\mathcal{B}(a,r')$ com o \emph{mesmo}
+ponto por centro. \emph{Subir o raio não pede um ponto de fora.}
+\item[(4)] \textbf{E há dois deslocamentos, e não um:} mudar $r$ (o território
+fica mais largo ou mais estreito) e mudar de prefixo (o território muda de sítio
+à mesma profundidade). \emph{São operações diferentes.}
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são as cláusulas~(3) e~(2) do
+\fis{fis:thm:bolas}{Teor. «as bolas particionam»}, que valem porque $d$ é
+ultramétrica e \textbf{simétrica}
+(\fis{fis:lem:ultra}{Lema «$d$ é ultramétrica, e é simétrica»}).
+
+(3) A primeira metade é a cláusula~(1) do mesmo teorema: se
+$b\in\mathcal{B}(a,r)$ então $\mathcal{B}(b,r)=\mathcal{B}(a,r)$. A inclusão é
+imediata: $d(a,x)\le r\le r'$. E o centro conserva-se porque
+$a\in\mathcal{B}(a,r')$ e vale outra vez a cláusula~(1).
+
+(4) As bolas identificam-se pelo prefixo (cláusula~(3) do mesmo teorema, na
+árvore finita de $p$ bits): um par $(\text{prefixo},r)$, e cada coordenada varia
+sem a outra.
+\end{proof}
+
+\begin{corolario}[não há duas leituras ao mesmo tempo]\label{mf:cor:umsotem}
+Sob \pt{4}, fixado $r$, o ponto corrente pertence a uma e uma só bola de raio
+$r$. \emph{É a versão exacta de \cury{não há convivência simultânea de dois
+tipos de emoções, motivações e pensamentos na mente}.}
+\end{corolario}
+
+\begin{proof}
+Cláusula~(2) do Teor.~\ref{mf:thm:ancora}: as bolas de raio $r$ formam uma
+partição, e um elemento pertence a exactamente uma parte de uma partição.
+\end{proof}
+
+\begin{corolario}[a proximidade entre territórios tem número]\label{mf:cor:prox}
+Sob \pt{4}, para dois padrões de $N$ níveis que concordam nos primeiros $q$ e
+discordam nos seguintes, a sobreposição é $(2q-N)/N$, \emph{estritamente
+crescente} em $q$. Duas memórias próximas são duas memórias na mesma bola.
+\end{corolario}
+
+\begin{proof}
+É o \fis{fis:thm:sobrepoe}{Teor. «a sobreposição é a contagem dos níveis que
+concordam»}: há $q$ concordâncias e $N-q$ discordâncias, e a derivada em $q$ é
+$2/N>0$. A ligação à bola é a distância da árvore, $d=2^{-\operatorname{prof}}$,
+que é decrescente na mesma profundidade.
+\end{proof}
+
+\medido{\code{tests/aranha\_n.c} §AN6: as bolas particionam; todo ponto é
+centro; \emph{e a euclidiana falha ambas com o mesmo raio}.
+\code{tests/hopfield.c} §F3: a sobreposição é exactamente a conta dos níveis que
+concordam, em $\mathbf{4096}$ pares sem um erro, e cresce com o prefixo.}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{A psicoadaptação é $1/G$, e o luto crónico é subaditividade}\label{mf:adapta}
+
+\noindent Aqui a construção dá mais do que o livro pedia: dá a lei, e dá com ela
+o mecanismo de duas coisas que o livro observa e não explica --- a perpetuação da
+dor e o alívio pela exposição.
+
+\begin{teorema}[a adaptação é a divisão pela contagem]\label{mf:thm:adapta}
+Sob \pt{1}--\pt{3}, seja $x$ uma representação com disponibilidade $G\ge1$ e
+considere-se mais uma visita a $x$. Então:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O que se escreve é sempre o mesmo:} o incremento vale $1$,
+seja qual for $G$.
+\item[(2)] \textbf{O que se lê decresce:} a diferença relativa entre o campo
+depois e antes é
+\[
+\boxed{\;\frac{G+1}{G}-1=\frac{1}{G}\;}
+\]
+\item[(3)] \textbf{E é estritamente decrescente em $G$:} $1/(G+1)<1/G$ para todo
+$G\ge1$. Logo a resposta a repetições sucessivas do mesmo estímulo decresce
+\emph{enquanto o registo cresce}.
+\item[(4)] \textbf{E não depende da escala:} trocando $G$ por $cG$ com $c>0$, a
+diferença relativa não se move.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) é a cláusula~(1) do Teor.~\ref{mf:thm:zetamu}: cada escrita incrementa $G$ na
+célula corrente em uma unidade.
+
+(2) é \pt{3} aplicado ao par (antes, depois): a diferença relativa é
+$(G+1)/G-1$, e a conta é imediata. Que a grandeza lida seja esta, e não a
+diferença absoluta, é a cláusula~(2) do
+\fis{fis:thm:gradiente}{Teor. «o gradiente é a diferença relativa»} --- ao
+levantar o índice com $g^{uv}=G^{-1}h^{uv}$ a escala cancela e o que resta é a
+razão menos um.
+
+(3) $1/(G+1)<1/G$ porque $G<G+1$ e $t\mapsto1/t$ é decrescente em $t>0$.
+
+(4) é a mesma cláusula~(2): o diferencial multiplica por $c$ e o levantamento
+divide por $c$.
+\end{proof}
+
+\medskip\noindent\textbf{E as duas asserções contrárias do livro passam a ser a
+mesma frase, lida em dois sítios:}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+no livro & é & e por isso \\
+\midrule
+o RAM regista em zonas privilegiadas & $G$ sobe & fica \textbf{mais} disponível \\
+a emoção adapta-se ao repetido & $1/G$ desce & sente-se \textbf{menos} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\emph{Uma frase é sobre o campo, a outra é sobre o gradiente do campo, e
+a segunda é o inverso da primeira.}
+
+\begin{lema}[a soma harmónica é subaditiva]\label{mf:lem:sub}
+Seja $H_g=\sum_{r=1}^{g}1/r$, com $H_0=0$. Então, para $a,b\ge0$ inteiros,
+\[
+H_{a+b}\;\le\;H_a+H_b ,
+\]
+com igualdade se e só se $a=0$ ou $b=0$. Além disso $H_g\le g$, com igualdade se
+e só se $g\le1$.
+\end{lema}
+
+\begin{proof}
+$H_{a+b}-H_a=\sum_{r=a+1}^{a+b}1/r$, e cada termo desta soma é
+$1/(a+r')\le1/r'$ para $r'=1,\dots,b$, com desigualdade \emph{estrita} sempre que
+$a\ge1$. Logo $H_{a+b}-H_a\le H_b$, estritamente se $a\ge1$ e $b\ge1$. A segunda
+afirmação é a mesma conta com $1/r\le1$, estrita para $r\ge2$.
+\end{proof}
+
+\begin{corolario}[o luto crónico é repartição; a exposição é concentração]\label{mf:cor:luto}
+Sob \pt{1}--\pt{3}, seja uma história de $N$ visitas repartida por $k$
+representações distintas com fibras de tamanhos $g_1,\dots,g_k$,
+$\sum_ig_i=N$. Chame-se \textbf{resposta total} a
+$R=\sum_{i}H_{g_i}$, a soma do que se leu em cada visita. Então:
+\[
+\boxed{\;H_N\;\le\;R\;\le\;N\;}
+\]
+--- o \textbf{mínimo} $H_N$ atinge-se \emph{concentrando} tudo numa
+representação ($k=1$), e o \textbf{máximo} $N$ atinge-se \emph{espalhando} por
+$N$ representações distintas ($k=N$, todos $g_i=1$).
+\end{corolario}
+
+\begin{proof}
+Que a resposta acumulada numa fibra de tamanho $g$ é $H_g$: pela cláusula~(2) do
+Teor.~\ref{mf:thm:adapta}, a $r$-ésima visita lê $1/r$, e a fibra tem os números
+de visita $1,\dots,g$ exactamente uma vez (Cor.~\ref{mf:cor:folhas}); somar dá
+$H_g$.
+
+O limite superior: pelo Lema~\ref{mf:lem:sub}, $H_{g_i}\le g_i$, e somar dá
+$R\le\sum_ig_i=N$, com igualdade sse todos os $g_i\le1$.
+
+O limite inferior: por subaditividade e indução em $k$,
+$H_N=H_{g_1+\dots+g_k}\le\sum_iH_{g_i}=R$, com igualdade sse todos menos um dos
+$g_i$ forem nulos.
+\end{proof}
+
+\medskip\noindent\textbf{E é este o mecanismo que faltava ao livro, em duas
+frases.} Cury observa que \cury{a multiplicidade das experiências psíquicas\dots
+dificulta a operacionalização espontânea psicodinâmica do fenômeno da
+psicoadaptação, estabelecendo uma perpetuação da dor, um luto crônico}.
+\emph{Aqui isso é aritmética}: com o mesmo número $N$ de visitas, repartir
+maximiza a resposta e concentrar minimiza-a, e a diferença entre os dois extremos
+é $N$ contra $H_N$ --- que cresce como o logaritmo. \textbf{Não se sofre mais:
+sofre-se em mais lados}, e é isso que não adapta. E a recíproca é a exposição:
+voltar deliberadamente à mesma representação faz $G$ subir e $1/G$ cair.
+\emph{É a mesma conta, corrida ao contrário.}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Os dois pensamentos conscientes: o que mede e o que ordena}\label{mf:conscientes}
+
+\noindent O livro tem três tipos de pensamento e, para os ligar, dois fenómenos
+postulados --- o «LVD» e um segundo que ele deixa em \cury{provavelmente}. A
+cisão certa é outra, é \textbf{única}, e dispensa os dois.
+
+\begin{teorema}[a partição é única, e cada metade faz uma coisa só]\label{mf:thm:duas}
+\emph{Hipótese, e é a mais forte desta parte}: suponha-se que a leitura do campo
+sobre si mesmo se representa por uma matriz $W$ de pesos, com transposta, e que
+a actualização é assíncrona por sinal. Então $W$ decompõe-se de maneira
+\textbf{única} em $W=W_s+W_a$ com $W_s$ simétrica e $W_a$ antissimétrica, e:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{$W_s$ mede:} a energia $E=-\tfrac12\sum_{ij}W_{ij}s_is_j$
+nunca sobe, e a trajetória atinge um \emph{ponto fixo} em número finito de
+passos.
+\item[(2)] \textbf{$W_a$ não mede:} $s^{\!\top}W_a\,s=0$ para todo $s$, e a
+dinâmica deixa de ter a função de Lyapunov que a energia fornecia.
+\item[(3)] \textbf{E é só isto que a antissimetria dá.} O que a órbita faz depois
+--- ciclar, e com que período --- \textbf{não se segue daqui}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+Existência e unicidade da cisão, e as cláusulas~(1) e~(2), são o
+\fis{fis:thm:duastorres}{Teor. «a partição é única, e cada metade faz uma coisa
+só»}: a existência é
+$W=\tfrac12(W+W^{\!\top})+\tfrac12(W-W^{\!\top})$, a unicidade sai de transpor e
+somar; (1) é o \fis{fis:thm:desce}{Teor. «a descida, e porque ela não sobe»},
+onde $\Delta E\le0$ e o espaço de estados é finito; e (2) é o cancelamento aos
+pares, $(W_a)_{ji}=-(W_a)_{ij}$ com diagonal nula. A cláusula~(3) é a
+advertência do mesmo teorema.
+\end{proof}
+
+\medskip\noindent\textbf{E é aqui que os dois pensamentos conscientes do livro
+caem no sítio:}
+\[
+\boxed{
+\begin{array}{lll}
+\text{o \textbf{essencial}} & \text{o campo }G & \text{real, e no \textbf{espaço} --- não no agente}\\[2pt]
+\text{o \textbf{dialético}} & W_s & \text{\emph{mede}: desce, tem ponto fixo, verbaliza-se}\\[2pt]
+\text{o \textbf{antidialético}} & W_a & s^{\!\top}W_as=0:\ \text{\emph{define o indefinível}}
+\end{array}}
+\]
+
+\begin{corolario}[a ansiedade vital é a metade que a energia não vê]\label{mf:cor:ansiedade}
+Sob a hipótese do Teor.~\ref{mf:thm:duas}, a metade antissimétrica é
+\emph{exactamente} a parte do operador que não aparece na energia e move a
+órbita. Logo ela \textbf{não tem para onde parar}, e não por escolha: não há
+grandeza que ela faça descer.
+\end{corolario}
+
+\begin{proof}
+É a \fis{fis:prop:cego}{Prop. «a antissimetria é exactamente o que a energia não
+vê e a dinâmica vê»}, junta com a cláusula~(2) do Teor.~\ref{mf:thm:duas}: sem
+forma quadrática não há função de Lyapunov, e o argumento de terminação da
+cláusula~(1) não tem sobre o que operar.
+\end{proof}
+
+\begin{corolario}[a passagem entre o campo e a sua leitura não custa]\label{mf:cor:ponte}
+A travessia entre a célula e o espectro conserva a norma e é involutiva; logo
+\textbf{não há custo por explicar} na passagem do campo aos pensamentos
+conscientes, e não é preciso postular um fenómeno para a fazer.
+\end{corolario}
+
+\begin{proof}
+É o \fis{fis:thm:ponte}{Teor. «a travessia entre a célula e o espectro não paga»}
+com o \fis{fis:thm:H}{Teor. «inversa, involutividade e Parseval»}.
+\end{proof}
+
+\medskip\noindent\textbf{E a assimetria que o livro observa --- que o dialético
+traduz mal o antidialético e não o contrário --- lê-se na transformada:}
+\emph{o módulo não carrega nada, e a fase carrega tudo}, e a fase, em largura um,
+é \textbf{um bit}. Quem lê pela face que mede recebe magnitude e perde o lado;
+quem lê pela outra recebe o lado e não tem magnitude. \emph{O «truncamento da
+comunicação» não é uma deficiência da linguagem: é a face pela qual se leu.}
+
+\medido{\code{tests/hopfield.c} §F1: a energia nunca sobe num passo assíncrono,
+em milhares de passos, e $8$ padrões corrompidos a $10\%$ voltam todos ao
+original. §F8: a partição $W=W_s+W_a$ é exacta, medida \emph{em inteiros e por
+igualdade}, sem limiar. §F10: \emph{falha} --- e a falha é o resultado, porque a
+cláusula~(3) não afirma o ciclo.}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{A interpretação do outro: a traição é a soma}\label{mf:outro}
+
+\noindent É a única secção que usa \pt{6}, e dela sai o mecanismo que o livro
+não tem para uma palavra que ele usa muito: \cury{inevitável}.
+
+\begin{teorema}[somar identifica; separar custa espaço]\label{mf:thm:outro}
+Sob \pt{6}, com $W_{ij}=\sum_{p}\xi^p_i\xi^p_j$ a matriz onde os padrões
+diretivo e associativos são somados:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A leitura não é injetiva:} conjuntos distintos de padrões
+podem dar a mesma $W$; a multiplicidade dessa realização é $G>1$, e a isso
+chama-se \textbf{interferência}.
+\item[(2)] \textbf{E a razão é o núcleo:} um morfismo que soma tem núcleo, e
+dois conjuntos cuja diferença esteja no núcleo têm a mesma imagem.
+\item[(3)] \textbf{Desfazer custa uma coordenada:} pondo cada padrão no seu
+ramo, a realização é injetiva e $G\le1$ --- é o levantamento, com o ramo no
+lugar da folha.
+\item[(4)] \textbf{E a coordenada ocupa lugar:} a matriz somada é $N^2$
+\textbf{fixo} e satura; a árvore \textbf{cresce} com o que guarda. \emph{A folga
+é uma só: quem enche paga com dobra, quem conta paga com buraco.}
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (3) são o \fis{fis:thm:interfere}{Teor. «somar identifica; separar não»}.
+(2) é o \fis{fis:thm:palavra}{Teor. «a palavra reconstrói, e a dobra é o
+núcleo»}: dois prefixos com a mesma imagem dão um factor no núcleo, o que é
+$G>1$ pela cláusula~(2) do \fis{fis:thm:mult}{Teor. «multiplicidade
+geométrica»}; na árvore cada memória ocupa um prefixo distinto e prefixos
+distintos são bolas disjuntas (Teor.~\ref{mf:thm:ancora}(2)). (4) é o
+\fis{fis:cor:folga}{Cor. «a folga é uma só»}, lido nos dois mapas.
+\end{proof}
+
+\begin{corolario}[conhecemos o outro a partir de nós, e isso é uma divisão]\label{mf:cor:outroeu}
+Sob \pt{1}--\pt{3} e \pt{6}, a imagem do outro entra como incremento sobre um
+campo que já carrega a história do observador; pelo Teor.~\ref{mf:thm:adapta}, o
+que dela se lê é $1/G$ com $G$ a disponibilidade prévia. \emph{Quanto mais
+história, menos o outro aparece} --- e o \cury{quanto} é $1/G$.
+\end{corolario}
+
+\begin{proof}
+Cláusula~(2) do Teor.~\ref{mf:thm:adapta}, aplicada à célula onde o padrão do
+outro é somado.
+\end{proof}
+
+\medskip\noindent\textbf{E a prescrição do livro fica com o seu preço}, que é a
+parte que ele não tinha:
+\[
+\boxed{\;\text{a árvore troca \textbf{interferência} por \textbf{espaço}}\;}
+\]
+\emph{Colocar-se no lugar do outro é dar-lhe um ramo} --- não o somar à própria
+matriz. E isso \textbf{ocupa lugar}: não é capacidade infinita de graça, e cada
+distinção preservada ocupa lugar na hierarquia. Eis porque é que quase ninguém o
+faz, e a resposta não é falta de virtude: \emph{é que a alternativa barata ---
+somar --- é a que o mecanismo dá de borla}.
+
+\medido{\code{tests/hopfield.c} §F5: a árvore nunca fica abaixo da matriz somada
+e fica acima em pelo menos um $P$, \emph{sem limiar}; e o preço em espaço está
+medido, não escondido. §F2: a saturação da matriz somada é o resultado ---
+\emph{e o valor da constante não}.}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{O custo do caos, e a medida do «antiespaço»}\label{mf:custo}
+
+\noindent Faltam duas contas, e são as que o livro pede sem as abrir: quanto
+custa apagar, e qual é a distância entre a consciência e a coisa.
+
+\begin{teorema}[o que custa é apagar, e a conta é a folga]\label{mf:thm:custo}
+\emph{Hipótese importada e declarada}: apagar um bit tem um custo mínimo
+$\kappa>0$. Sob \pt{1} e com $\pi$ sobrejetiva:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Destrutivo paga:} uma operação que identifica estados paga
+por cada bit que perde.
+\item[(2)] \textbf{Injetivo não paga:} o piso de uma operação que nunca leva dois
+estados ao mesmo é \textbf{zero exacto} --- e não um número pequeno.
+\item[(3)] \textbf{E a conta total é a folga:}
+$\displaystyle\kappa\sum_x\bigl(G(x)-1\bigr)=\kappa\bigl(\abs{I}-\abs{X}\bigr)
+=\kappa\,\Phi$, que se anula exactamente quando $\pi$ é injetiva.
+\item[(4)] \textbf{Donde o dual guardado é o piso não pago:} guardar a folha do
+Teor.~\ref{mf:thm:folha} põe o piso a zero, e paga em \emph{espaço} o que
+deixaria de pagar em \emph{calor}.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1), (2) e (4) são o \fis{fis:thm:landauer}{Teor. «o piso do invertível é zero
+exacto»}: perder um bit é ter dois estados com a mesma saída, que é $G>1$; ser
+injetiva é $G\le1$, e sem fibra não trivial a soma dos custos é uma soma vazia;
+e a reversão obtém-se guardando a coordenada que a dobra ia deitar fora, que é
+$\tilde\pi=(\pi,k)$.
+
+(3) é o \fis{fis:cor:custofolga}{Cor. «a conta da dissipação é a folga, e a
+folga já estava contada»}, com o Cor.~\ref{mf:cor:debito} a dar a segunda
+igualdade.
+\end{proof}
+
+\medskip\noindent\textbf{E é isto que põe a prescrição central do livro em
+contas.} Cury defende que se \cury{revise, recicle, reorganize} em vez de se
+descartar, e apresenta-o como higiene intelectual. Aqui é uma factura: \emph{o
+que se guarda reverte a custo zero; o que se deita fora é cobrado}. E o critério
+não é uma propriedade a inspeccionar --- é uma conta a fazer:
+\emph{resíduo zero $\Longleftrightarrow$ reverte $\Longleftrightarrow$ piso
+zero}.
+
+\begin{teorema}[o antiespaço tem medida, e ela halva]\label{mf:thm:rastro}
+Batendo alternadamente as duas faces sobre um par $(L,U)$ que cerca um ponto:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{O que fica é um par:} $(m,\delta)$ com $m=\tfrac{L+U}{2}$ e
+$\delta=\tfrac{U-L}{2}$ --- \emph{$(L,U)$ escrito duas vezes, com resíduo zero}.
+\item[(2)] \textbf{A compressão é ficar só com $m$}, e o que ela deita fora não é
+desconhecido: é $\delta$, \emph{medido}.
+\item[(3)] \textbf{Há dois desfechos, e os dois fecham:} ou o ponto está na
+grade, e o processo acaba em $m=g$; ou não está, e o processo acaba com a largura
+no grão --- \emph{as duas faces cercam-no}.
+\item[(4)] \textbf{E a largura desce:} a largura seguinte não passa de
+$\delta^2/m$, e a cota é logarítmica.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) e (2) são a secção \code{fis:rastro}, onde os três nomes --- rastro,
+compressão, perda --- são separados. (3) é a dicotomia da mesma secção, com o
+caso na grade a ser a cláusula~(3.I) do \fis{fis:thm:corte}{Teor. «o corte»}.
+(4) é a cláusula~(2) do mesmo teorema, $(m-g)(m+g)=\delta^2$ com $m+g\ge m$, e o
+\fis{fis:cor:cota}{Cor. «a cota é logarítmica»}.
+\end{proof}
+
+\medskip\noindent\textbf{Donde o \cury{antiespaço} do livro deixa de ser um
+absoluto e passa a ser uma grandeza.} A consciência \textbf{não incorpora} a
+coisa --- verdade: fica com $m$, e $m$ não é o ponto. E \textbf{umas leituras
+estão mais perto do que outras} --- verdade: é $\delta$, e $\delta$ é um número
+que desce. \emph{O que é infinito é o número de batidas que seriam precisas para
+lá chegar, e não a distância a que se está.}
+
+\begin{corolario}[a tríade do autor é a alternância das faces]\label{mf:cor:triade}
+O encaixe da cláusula~(4) do Teor.~\ref{mf:thm:rastro} exige que se bata
+\textbf{alternadamente} nas duas faces: batendo sempre do mesmo lado o intervalo
+não encaixa. \emph{A arte da pergunta, a arte da dúvida e a arte da crítica são a
+alternância}, e é essa a sua razão estrutural.
+\end{corolario}
+
+\begin{proof}
+A cláusula~(1) do \fis{fis:thm:corte}{Teor. «o corte»}: é a aplicação alternada
+das duas médias que dá $g\le g'\le m'\le m$, e é dela que sai a contracção da
+cláusula~(2). Uma face sozinha não produz o encaixe.
+\end{proof}
+
+\medido{\code{tests/dissipa.c} --- $4$ blocos, $\mathbf{0}$ falhas. Na mesma
+tarefa e com a mesma entrada, a destrutiva paga
+$\mathbf{376\,304\,828\,416}$ rJ e a involutiva paga $\mathbf{0}$; e a
+involutiva, repetida, devolve o original em $\mathbf{4096}$ de $4096$ posições.
+\code{tests/meio.c} §M8: os dois desfechos medidos lado a lado --- o processo a
+acabar em $m=g$ com o ponto na grade, e a torre de duplicação a acabar com o
+ponto \emph{cercado}.}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{O que a Parte I derivou, e de quê}\label{mf:derivou}
+
+{\small
+\begin{longtable}{@{}p{0.34\textwidth}p{0.28\textwidth}p{0.30\textwidth}@{}}
+\toprule
+o que ficou demonstrado & de que postulados & sobre que resultado \\
+\midrule
+\endfirsthead
+\toprule
+o que ficou demonstrado & de que postulados & sobre que resultado \\
+\midrule
+\endhead
+\bottomrule
+\multicolumn{3}{@{}r@{}}{\footnotesize\itshape continua na página seguinte}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Teor.~\ref{mf:thm:reconstroi} --- conserva a contagem, perde a fibra &
+\pt{1}, \pt{2} & \code{fis:lem:conserva}, \code{fis:thm:medida} \\
+Cor.~\ref{mf:cor:debito} --- o débito é $\Phi=\abs{I}-\abs{X}$ &
+\pt{1}, \pt{2} & \code{fis:def:folga}, \code{fis:cor:folga} \\
+Cor.~\ref{mf:cor:folhas} --- duas recordações são duas folhas &
+\pt{1} & \code{fis:thm:levant} \\
+Teor.~\ref{mf:thm:zetamu} --- o \emph{eu} é $\zeta$, gerir é $\mu$ &
+\pt{1}, \pt{2}, \pt{5} & \code{fis:thm:zetamu}, \code{fis:thm:mu} \\
+Cor.~\ref{mf:cor:vitima} --- o atraso é exactamente um passo &
+\pt{5} & Teor.~\ref{mf:thm:zetamu}(4) \\
+Teor.~\ref{mf:thm:multifocal} --- nenhuma leitura carrega o autor &
+\pt{1}, \pt{2} & \code{fis:thm:agentes} \\
+Teor.~\ref{mf:thm:folha} --- repõe-se a ordem, não a autoria &
+\pt{1} & \code{fis:thm:levant} \\
+Teor.~\ref{mf:thm:ancora} --- a âncora é a bola, e particiona &
+\pt{4} & \code{fis:thm:bolas}, \code{fis:lem:ultra} \\
+Cor.~\ref{mf:cor:umsotem} --- um só território de cada vez &
+\pt{4} & Teor.~\ref{mf:thm:ancora}(2) \\
+Cor.~\ref{mf:cor:prox} --- a proximidade tem número &
+\pt{4} & \code{fis:thm:sobrepoe} \\
+Teor.~\ref{mf:thm:adapta} --- a psicoadaptação é $1/G$ &
+\pt{1}--\pt{3} & \code{fis:thm:gradiente}, \code{fis:thm:zetamu} \\
+Cor.~\ref{mf:cor:luto} --- $H_N\le R\le N$: luto e exposição &
+\pt{1}--\pt{3} & Lema~\ref{mf:lem:sub} (aqui) \\
+Teor.~\ref{mf:thm:duas} --- a cisão é única: mede\,/\,ordena &
+hipótese local & \code{fis:thm:duastorres}, \code{fis:thm:desce} \\
+Cor.~\ref{mf:cor:ansiedade} --- a ansiedade vital não pára &
+hipótese local & \code{fis:prop:cego} \\
+Cor.~\ref{mf:cor:ponte} --- a passagem não custa &
+--- & \code{fis:thm:ponte}, \code{fis:thm:H} \\
+Teor.~\ref{mf:thm:outro} --- somar identifica; separar custa &
+\pt{6} & \code{fis:thm:interfere}, \code{fis:thm:palavra} \\
+Teor.~\ref{mf:thm:custo} --- apagar paga $\kappa\Phi$ &
+\pt{1} + Landauer & \code{fis:thm:landauer}, \code{fis:cor:custofolga} \\
+Teor.~\ref{mf:thm:rastro} --- o antiespaço é $\delta$, e halva &
+--- & \code{fis:rastro}, \code{fis:thm:corte} \\
+\end{longtable}}
+
+\noindent\textbf{E a leitura desta tabela.} Dezoito enunciados, seis postulados,
+uma hipótese local declarada e uma hipótese física importada e marcada.
+\emph{Nenhuma outra coisa entrou.} O que a coluna do meio mostra é onde cada
+teorema é frágil: quem negar \pt{4} perde a §\ref{mf:ancora} inteira e a
+Rachadura~V; quem negar \pt{3} perde a §\ref{mf:adapta} e com ela o luto crónico.
+\emph{É assim que se lê uma construção: pela coluna do meio.}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% ═══════════════════════════════════════════════════════════════════════════
+\part{As rachaduras}
+
+\section{O dicionário, e o modo de ler a Parte II}\label{mf:dicionario}
+
+\noindent Cada secção desta parte tem quatro blocos: \textbf{no livro} (as duas
+citações, à letra), \textbf{porque não fecham}, \textbf{o fecho} (um enunciado da
+Parte~I, pelo número) e \textbf{o compromisso}. A linha final resume os três.
+
+\medskip
+{\small
+\begin{longtable}{@{}p{0.30\textwidth}p{0.40\textwidth}l@{}}
+\toprule
+no livro & é, nesta construção & onde \\
+\midrule
+\endfirsthead
+\toprule
+no livro & é, nesta construção & onde \\
+\midrule
+\endhead
+\bottomrule
+\multicolumn{3}{@{}r@{}}{\footnotesize\itshape continua na página seguinte}\\
+\endfoot
+\bottomrule
+\endlastfoot
+a experiência psíquica vivida & o índice $i\in I$, e a lista é ordenada & \pt{1} \\
+a RPS na memória & a célula $x\in X$, com igualdade decidível e nada mais & \pt{1} \\
+o fenómeno RAM & a realização $\pi\colon I\to X$: escreve, e não pergunta & \pt{1} \\
+a disponibilidade histórica & $G(x)=\abs{\pi^{-1}(x)}$, a multiplicidade & \pt{2} \\
+\cury{o passado não é lembrado, mas reconstruído} & a fibra perde-se, a medida conserva-se & Teor.~\ref{mf:thm:reconstroi} \\
+o débito de toda recordação & a folga $\Phi$ --- \emph{medida} & Cor.~\ref{mf:cor:debito} \\
+a âncora da memória & a \textbf{bola} de raio $r$ na árvore & \pt{4}, Teor.~\ref{mf:thm:ancora} \\
+o deslocamento da âncora & mudar $r$, ou mudar de prefixo & Teor.~\ref{mf:thm:ancora}(4) \\
+a autochecagem (o gatilho) & o incremento $a_x(t)$, que é $\mu G$ & Teor.~\ref{mf:thm:zetamu}(1) \\
+o fenómeno do autofluxo & a metade que não mede & Cor.~\ref{mf:cor:ansiedade} \\
+o \emph{eu} & a acumulação $\zeta$ --- memória, e não passo & \pt{5}, Teor.~\ref{mf:thm:zetamu}(2) \\
+o gerenciamento do \emph{eu} & a deconvolução $\mu$ & Teor.~\ref{mf:thm:zetamu}(3) \\
+o pensamento essencial & o campo: real, e no espaço & Teor.~\ref{mf:thm:duas} \\
+o pensamento dialético & a metade \textbf{simétrica}: mede, desce & Teor.~\ref{mf:thm:duas}(1) \\
+o pensamento antidialético & a metade \textbf{antissimétrica} & Teor.~\ref{mf:thm:duas}(2) \\
+a leitura virtual (o «fenómeno LVD») & a transformada, e ela não paga & Cor.~\ref{mf:cor:ponte} \\
+a psicoadaptação & $1/G$ & Teor.~\ref{mf:thm:adapta} \\
+a ansiedade vital & a metade sem energia a descer & Cor.~\ref{mf:cor:ansiedade} \\
+o caos psicodinâmico & apagar --- e apagar é o que custa & Teor.~\ref{mf:thm:custo} \\
+o \cury{antiespaço} da consciência & $\delta$, medido, e halva & Teor.~\ref{mf:thm:rastro} \\
+a traição inevitável da interpretação & a interferência: $G>1$ na soma & Teor.~\ref{mf:thm:outro} \\
+\cury{colocar-se no lugar do outro} & o ramo: interferência por espaço & Teor.~\ref{mf:thm:outro}(3) \\
+\cury{há apenas uma personalidade} & uma partição --- as bolas não se tocam & Teor.~\ref{mf:thm:ancora}(2) \\
+\end{longtable}}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura I --- a objecção à matemática destrói a própria teoria}\label{mf:r1}
+
+\noindent\textbf{No livro} (cap.~\emph{A Metodologia\dots}, «As teorias na
+Matemática também são limitadas»): \cury{até nas indiscutíveis operações de soma
+há limitações, pois 1 mais 1 só é 2 se o primeiro 1 é, em todos os níveis
+microessenciais, exatamente igual ao segundo 1. Porém, como tudo no universo é
+essencialmente distinto\dots conclui-se que a Matemática\dots só é realmente
+imutável por artifícios intelectuais que não se verificam no universo
+essencial.}
+
+\noindent E, no mesmo livro (cap.~\emph{A Memória e os Três Tipos de
+Pensamentos}): \cury{cada informação ou experiência psíquica é armazenada na
+memória como um sistema de código físico-químico, que chamo de representação
+psicossemântica, RPS} --- e as RPSs \cury{são e serão sempre pobres, restritivas,
+em relação à experiência original}.
+
+\medskip\noindent\textbf{Porque não fecham.} A segunda frase \textbf{é} a
+primeira operação que a primeira declarou impossível. Dizer que a RPS representa
+a experiência de forma redutora é dizer que \emph{experiências distintas caem na
+mesma representação} --- que é exactamente o que «$1+1=2$» afirma: dois objectos
+distintos, uma contagem. Se a distinção microessencial proibisse a igualdade, não
+haveria RPS nenhuma, porque não haveria \emph{a mesma} RPS a ser relida; e sem
+isso não há memória, não há disponibilidade histórica, e não há teoria. \emph{O
+livro destrói o instrumento de que precisa três capítulos adiante.}
+
+\medskip\noindent\textbf{O fecho.} A objecção confunde \textbf{identidade dos
+objectos} com \textbf{igualdade no contradomínio}, e \pt{1} só pede a segunda:
+\[
+\boxed{\;\begin{array}{c}
+\pi\colon I\longrightarrow X\ \text{pede \textbf{só} igualdade decidível em }X\\[2pt]
+\text{--- nem métrica, nem dimensão, nem estrutura ---}
+\end{array}\;}
+\]
+Os dois uns \textbf{são} índices distintos, $i\neq j$; o que a igualdade afirma é
+$\pi(i)=\pi(j)$, e daí não se conclui que $i$ e $j$ sejam o mesmo --- conclui-se
+que estão na mesma fibra. E o Cor.~\ref{mf:cor:debito} dá o resto: \textbf{o que
+Cury diz que a matemática esconde é precisamente o que $\Phi$ conta}. A frase
+certa não é \emph{«$1+1=2$ é um artifício»}: é \emph{«$1+1=2$ afirma que a fibra
+tem dois elementos»}, e a perda que ele quer denunciar tem número.
+
+\medskip\noindent\textbf{O compromisso.} \pt{1}, e é barato: é menos do que o
+livro já assume quando diz que a mesma RPS é relida.
+
+\fecha{a igualdade é um artifício que o universo não verifica}
+      {sem igualdade não há RPS, e a teoria da memória cai com ela}
+      {\pt{1} pede só igualdade decidível, e a perda que ela produz é
+       $\Phi$ --- Cor.~\ref{mf:cor:debito}}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura II --- o \emph{eu} nasce na quinta etapa e opera na segunda}\label{mf:r2}
+
+\noindent\textbf{No livro} (cap.~\emph{A Metodologia\dots}): as matrizes dos
+pensamentos essenciais históricos \cury{são produzidas, em milésimos de segundos,
+por quatro fenômenos que utilizam a história intrapsíquica arquivada na memória:
+o fenômeno da autochecagem da memória, a âncora da memória, o fenômeno do
+autofluxo e o eu} --- e a produção dessas matrizes é a \textbf{segunda} etapa da
+interpretação.
+
+\noindent E (cap.~\emph{O Gerenciamento do Eu\dots}): \cury{o eu é formado na
+quinta etapa da interpretação, quando já foi desencadeada toda uma rica
+construção de pensamentos nas etapas anteriores}; \cury{só quando o eu é gerado
+na quinta etapa é que ele, retroativamente, pode exercer um gerenciamento da
+construção de pensamentos}.
+
+\medskip\noindent\textbf{Porque não fecham.} O \emph{eu} é ao mesmo tempo
+\textbf{entrada da segunda etapa} e \textbf{saída da quinta}, no mesmo ciclo e no
+mesmo instante. Não é realimentação bem posta --- para o ser, teria de haver dois
+relógios, e o livro só tem um. E \cury{retroativamente} não é resposta: ou age
+sobre uma segunda etapa \emph{futura}, e então não é retroactivo, é apenas tarde;
+ou age sobre a que já passou, e então age sobre o que já não existe. \emph{O
+livro usa a palavra e não escolhe o sentido.}
+
+\medskip\noindent\textbf{O fecho.} O erro é de \textbf{nível}, e o
+Teor.~\ref{mf:thm:zetamu} separa os dois:
+\[
+\boxed{\;G_t(x)=(a_x*\zeta)(t)\quad\text{(a escrita)}
+\qquad\qquad
+a_x(t)=G_t(x)-G_{t-1}(x)\quad\text{(a recuperação)}\;}
+\]
+Os três mordomos são o \textbf{incremento}; o \emph{eu} é a \textbf{acumulação};
+e o gerenciamento não é faculdade nova --- é $\mu$. O
+Cor.~\ref{mf:cor:vitima} dá a consequência que o livro observa e não deriva:
+\cury{é mais fácil ele ser vítima do que agente modificador da sua história} é
+$\zeta$ ser causal, e o atraso é \textbf{exactamente um passo} --- não é um
+defeito de carácter. E \cury{retroativamente} ganha o sentido que faltava: não é
+agir no passado, é \textbf{ler o passado do campo presente}.
+
+\medskip\noindent\textbf{O compromisso.} \pt{5} tira ao \emph{eu} o estatuto de
+\emph{fenómeno que lê}, que o livro lhe dá quatro vezes. Em troca dá-lhe uma
+operação exacta e um lugar sem circularidade. \emph{Não se pode ter as duas
+coisas.}
+
+\fecha{o \emph{eu} é um dos quatro leitores, e forma-se depois dos outros três}
+      {entrada da segunda etapa e saída da quinta, no mesmo instante}
+      {Teor.~\ref{mf:thm:zetamu}: os três são $\mu$, o \emph{eu} é $\zeta$, e
+       gerir é desacumular; Cor.~\ref{mf:cor:vitima} dá o atraso de um passo}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura III --- quatro leitores, e nenhuma assinatura}\label{mf:r3}
+
+\noindent\textbf{No livro} (cap.~\emph{A Memória e os Três Tipos de
+Pensamentos}): \cury{quando o eu dá continuidade às cadeias psicodinâmicas
+produzidas pelos demais fenômenos que lêem a memória, ele o faz através de uma
+construção mais analítica e histórico-crítica} --- o que exige que o \emph{eu}
+saiba \textbf{qual} dos quatro produziu a cadeia que tem à frente.
+
+\noindent E (cap.~\emph{O Fenômeno da Autochecagem}): o registo é feito
+\cury{por um fenômeno que chamo de fenômeno RAM --- registro automático da
+memória}, e é \cury{involuntário e automático}. O RAM regista o pensamento;
+\emph{não regista quem o construiu}.
+
+\medskip\noindent\textbf{Porque não fecham.} O livro pede ao \emph{eu} uma
+distinção que os seus próprios postulados tornam impossível. Se as quatro
+leituras produzem matrizes essenciais e o RAM as regista todas do mesmo modo,
+então \textbf{nada na memória diz de onde veio o quê}. \emph{E o livro precisa
+dessa separação em todos os capítulos clínicos.}
+
+\medskip\noindent\textbf{O fecho, e é o mais duro deste documento: a distinção é
+provadamente impossível, e a que é possível está identificada.} O
+Teor.~\ref{mf:thm:multifocal} diz que $G$ é invariante sob qualquer reatribuição
+de agentes, e que \textbf{nenhuma função do campo} distingue autores; o
+Teor.~\ref{mf:thm:folha} diz o que se repõe e o que não se repõe:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o que se quer separar & a coordenada que o faz & sai do campo? \\
+\midrule
+\textbf{a ordem} da visita & a folha $k(i)$ & \textbf{sim} \\
+\textbf{o agente} que escreveu & o identificador & \textbf{não} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E o mais importante: \textbf{isto não enfraquece a tese do livro ---
+substitui-a por uma melhor}. A inteligência não é multifocal porque há quatro
+fenómenos; é multifocal porque o campo não tem coluna para o autor. \emph{A
+contagem quatro é da observação; o teorema não precisa dela.}
+
+\medskip\noindent\textbf{O compromisso.} Perde-se a frase segundo a qual o
+\emph{eu} trata criticamente «as cadeias dos outros fenómenos». Ganha-se uma
+operação que se enuncia e se mede, e uma explicação para uma coisa que o livro
+observa sem explicar: porque é que a introspecção honesta produz
+\emph{cronologia} e nunca produz \emph{atribuição}.
+
+\fecha{o \emph{eu} distingue as cadeias que os outros três produziram}
+      {nada no registo carrega o autor: o RAM regista o pensamento, não o
+       construtor}
+      {Teor.~\ref{mf:thm:multifocal}: nenhuma função do campo distingue autores;
+       Teor.~\ref{mf:thm:folha}: repõe-se a ordem, não a autoria}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura IV --- não há lembrança, e mesmo assim há relação lógica}\label{mf:r4}
+
+\noindent\textbf{No livro} (cap.~\emph{A Memória e os Três Tipos de
+Pensamentos}): \cury{não existe lembrança. Não há lembrança das informações
+contidas na memória, mas reconstrução das mesmas}; \cury{a história existencial
+(intrapsíquica) está morta essencialmente na memória}.
+
+\noindent E (cap.~\emph{O Fenômeno da Autochecagem}): \cury{embora a construção
+de pensamentos ultrapasse os limites da lógica, ela possui um sistema de relação
+lógica; caso contrário, não seria possível produzir ciência, não haveria verdade
+científica}.
+
+\medskip\noindent\textbf{Porque não fecham.} Perda total e fidelidade suficiente
+são afirmadas lado a lado, sem \textbf{nenhuma grandeza} que as separe. O livro
+diz \cury{toda «recordação» tem um débito emocional em relação à experiência
+original} --- e a palavra \emph{débito} promete um número que nunca aparece.
+
+\medskip\noindent\textbf{O fecho, e tem duas partes.} \emph{Primeiro}, o
+Teor.~\ref{mf:thm:reconstroi} separa o que se conserva do que se perde:
+\[
+\boxed{\;\sum_x G(x)=\abs{I}\ \text{sempre}
+\qquad\text{e}\qquad
+\text{a medida \textbf{não distingue} realizações}\;}
+\]
+\emph{É a frase que o livro procurava}: a memória conserva a \textbf{contagem} e
+perde a \textbf{fibra}. \emph{Segundo}, o Cor.~\ref{mf:cor:debito} dá o número:
+$\Phi=\abs{I}-\abs{X}$. E o Teor.~\ref{mf:thm:rastro} dá a forma da recordação:
+o par $(m,\delta)$ --- o que se guarda, e o que se perdeu, medido. \emph{O
+«débito emocional» de Cury é $\delta$.} A sua observação de que a mesma perda é
+recordada com intensidades diferentes é o Cor.~\ref{mf:cor:folhas}: \emph{não é a
+mesma recordação duas vezes; são duas folhas da mesma célula}.
+
+\medskip\noindent\textbf{O compromisso.} Aceita-se que o que a memória guarda é
+um par e não um conteúdo --- o que o livro, de resto, já negava --- e paga-se com
+a única coisa que ele queria e não tinha: \emph{a medida do que se perdeu}.
+
+\fecha{a memória não devolve, reconstrói; e mesmo assim há relação lógica}
+      {perda total e fidelidade suficiente, sem grandeza que as separe}
+      {Teor.~\ref{mf:thm:reconstroi} e Cor.~\ref{mf:cor:debito}: conserva-se a
+       medida, perde-se a fibra, e o débito é $\Phi$}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura V --- a âncora, que o autor declara não saber definir}\label{mf:r5}
+
+\noindent\textbf{No livro} (cap.~\emph{A Âncora da Memória}), e a citação é a
+confissão: \cury{a âncora da memória é difícil de ser definida, mas em síntese
+ela se refere a um foco ou «território» de leitura da memória num determinado
+momento da existência}.
+
+\noindent E, no mesmo capítulo, a âncora tem de fazer \textbf{três} coisas
+precisas: delimitar o que está disponível; ser \textbf{uma} em cada momento (é
+ela que faz do mesmo homem um \cury{anjo social} e um \cury{carrasco da
+família}); e poder ser \textbf{alargada} pelo \emph{eu}.
+
+\medskip\noindent\textbf{Porque não fecha.} Um \cury{território} sem critério não
+delimita nada. O livro não diz o que faz de um conjunto de RPSs um território,
+nem porque é que os territórios não se sobrepõem, nem porque é que há exactamente
+um de cada vez --- e as três coisas são carga estrutural: sem elas, a explicação
+do pânico, da embriaguez e do \cury{cárcere intelectual} não tem sobre o que
+assentar. \emph{Uma peça que suporta o edifício não pode entrar declarada como
+indefinível.}
+
+\medskip\noindent\textbf{O fecho.} \pt{4} define-a, e o
+Teor.~\ref{mf:thm:ancora} demonstra as três exigências, uma por cláusula:
+delimita (é uma célula), é uma (as bolas particionam, e daí o
+Cor.~\ref{mf:cor:umsotem}), e alarga-se de dentro (todo ponto é centro). E dá uma
+quarta coisa que o livro não tinha: \textbf{são dois deslocamentos e não um} ---
+mudar o raio, ou mudar de prefixo. É por isso que o pânico \emph{estreita} e a
+festa de formatura \emph{muda de sítio}: \emph{são movimentos diferentes}. O
+Cor.~\ref{mf:cor:prox} acrescenta o número: a proximidade entre territórios é
+$(2q-N)/N$, crescente no prefixo partilhado.
+
+\medskip\noindent\textbf{O compromisso.} \pt{4}, e é o mais caro do documento.
+Em troca, as três propriedades que o livro precisava de postular tornam-se
+cláusulas de um teorema --- e a euclidiana, a alternativa óbvia, \emph{falha
+ambas}, o que está medido.
+
+\fecha{a âncora é um «território» de leitura, e o autor declara não a saber
+       definir}
+      {sem critério, não delimita, não explica a unicidade e não explica o
+       alargamento}
+      {\pt{4} + Teor.~\ref{mf:thm:ancora}: é a bola, as bolas particionam, todo
+       ponto é centro, e há dois deslocamentos}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura VI --- o RAM reforça o que a psicoadaptação apaga}\label{mf:r6}
+
+\noindent\textbf{No livro} (cap.~\emph{A Reorganização do Caos\dots}):
+\cury{quanto mais emoção tensa, ansiosa ou prazerosa as cadeias de pensamentos
+possuem, mais o fenômeno RAM as registra em zonas privilegiadas da memória, o que
+facilita sua leitura}.
+
+\noindent E (cap.~\emph{A Comunicação Social Mediada\dots}): a psicoadaptação é
+\cury{uma «incapacidade» da energia emocional e motivacional de se submeter aos
+mesmos processos de transformações essenciais, diante da exposição das matrizes
+idênticas ou semelhantes de pensamentos essenciais históricos}; \cury{todos os
+estímulos que interpretamos, sejam dolorosos ou prazerosos, com o passar do tempo
+não provocam a mesma emoção}.
+
+\medskip\noindent\textbf{Porque não fecham.} A \emph{mesma} repetição faz as duas
+coisas contrárias: torna a experiência \textbf{mais disponível} e \textbf{menos
+sentida}. O livro afirma as duas sem lei conjunta, e usa-as em sentidos opostos
+no mesmo parágrafo --- o luto crónico é explicado por a multiplicidade das
+matrizes \emph{derrotar} a psicoadaptação, o que só faz sentido se houver uma
+conta, e a conta não está lá.
+
+\medskip\noindent\textbf{O fecho, e é o melhor do documento.} O
+Teor.~\ref{mf:thm:adapta} mostra que são duas leituras de um campo, e que a
+segunda é uma divisão:
+\[
+\boxed{\;
+\underbrace{G\ \text{sobe}}_{\text{o RAM: acumula}}
+\qquad
+\underbrace{\text{o incremento vale }1}_{\text{sempre}}
+\qquad
+\underbrace{\frac{G+1}{G}-1=\frac1G}_{\text{o que se sente}}
+\;}
+\]
+\emph{Não há contradição nenhuma}: uma frase é sobre o campo, a outra sobre o seu
+gradiente, e a segunda é o inverso da primeira. E o
+Cor.~\ref{mf:cor:luto} dá o mecanismo do luto crónico, que o livro observa e não
+deriva: com $N$ visitas, a resposta total obedece a $H_N\le R\le N$, e
+\textbf{repartir maximiza, concentrar minimiza}. Não se sofre mais: sofre-se
+\emph{em mais lados}. E a recíproca é a exposição.
+
+\medskip\noindent\textbf{O compromisso.} \pt{3} --- identificar «o que se sente»
+com o gradiente e não com o campo. \emph{Quem preferir identificá-lo com $G$ tem
+de explicar porque é que o vigésimo dia com o carro novo não vale vinte vezes o
+primeiro.}
+
+\fecha{a repetição regista mais fundo, e a repetição faz sentir menos}
+      {a mesma causa com dois efeitos contrários, e sem lei que os ligue}
+      {Teor.~\ref{mf:thm:adapta}: o incremento vale $1$ e o que se sente é
+       $1/G$; Cor.~\ref{mf:cor:luto}: $H_N\le R\le N$}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura VII --- o fluxo que nunca repousa, e a terapia que o faz repousar}\label{mf:r7}
+
+\noindent\textbf{No livro} (cap.~\emph{O Fenômeno do Autofluxo\dots}): \cury{o
+campo de energia psíquica nunca se «equilibra», mas vive continuamente um
+«desequilíbrio psicodinâmico»}; e os termos correntes da psicologia ---
+\cury{equilíbrio emocional}, \cury{pessoa equilibrada} --- \cury{são
+superficiais; não procedem do ponto de vista científico}.
+
+\noindent E (cap.~\emph{O Gerenciamento do Eu\dots}): \cury{desacelerar o fluxo
+dos pensamentos e alargar os territórios de leitura da memória (âncora) é
+fundamental para que o eu possa administrar a produção dos pensamentos com
+lógica}.
+
+\medskip\noindent\textbf{Porque não fecham.} Se o campo \textbf{não pode}
+repousar --- por princípio, e o livro chama-lhe \emph{princípio dos princípios}
+--- então desacelerar até uma leitura organizada é impossível, e a terapia que o
+livro pratica não tem sobre o que operar. Se pode, o \cury{nunca} é falso e os
+termos que ele recusa eram os certos.
+
+\medskip\noindent\textbf{O fecho.} O Teor.~\ref{mf:thm:duas}: a cisão
+$W=W_s+W_a$ é \textbf{única}, e as duas metades fazem coisas disjuntas --- uma
+mede e pára em passos finitos, a outra não tem forma quadrática e portanto não
+tem função de Lyapunov. \emph{As duas afirmações de Cury são ambas verdadeiras,
+de metades diferentes}: a ansiedade vital é a antissimétrica
+(Cor.~\ref{mf:cor:ansiedade}), o repouso da terapia é a simétrica.
+
+\medskip\noindent\textbf{E o que o livro afirma a mais, e que não se segue.} Cury
+faz do desequilíbrio um princípio \emph{produtivo}. A cláusula~(3) do
+Teor.~\ref{mf:thm:duas} não dá isso: a antissimetria \textbf{tira} a função de
+Lyapunov e \textbf{não põe} um ciclo no lugar dela. \emph{E a obra pagou por o
+ter aprendido:} o medidor que afirmava o contrário falha, e a falha é o resultado.
+
+\medskip\noindent\textbf{O compromisso.} A hipótese local do
+Teor.~\ref{mf:thm:duas} --- que a leitura se represente por uma matriz com
+transposta. É real, e é a mais forte da Parte~I depois de \pt{4}.
+
+\fecha{o campo nunca repousa, por princípio}
+      {e a terapia do autor consiste em o fazer repousar}
+      {Teor.~\ref{mf:thm:duas}: a cisão é única --- uma metade mede e pára, a
+       outra ordena e não tem energia a descer}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura VIII --- três pensamentos, e um fenómeno tapa-buraco}\label{mf:r8}
+
+\noindent\textbf{No livro} (cap.~\emph{A Memória e os Três Tipos de
+Pensamentos}): há três tipos, e só três --- o essencial (inconsciente, e \cury{de
+natureza real}), o dialético e o antidialético.
+
+\noindent E, para explicar a passagem do primeiro aos outros dois, entra um
+quarto objecto: \cury{o processo de leitura virtual das matrizes dos pensamentos
+essenciais é realizado por um fenômeno intrapsíquico, chamado de fenômeno LVD}. E
+logo a seguir, para o antidialético: \cury{os pensamentos antidialéticos são
+produzidos por uma leitura virtual mais difusa, provavelmente por outro fenômeno
+que não o LVD, ou então por um processo de leitura difusa desse fenômeno}.
+
+\medskip\noindent\textbf{Porque não fecha.} A contagem «três» não é derivada de
+nada: para a sustentar entra um fenómeno com iniciais, e para sustentar
+\emph{esse} entra um \cury{provavelmente} entre duas hipóteses que o autor não
+escolhe. \emph{Uma teoria que precisa de um fenómeno novo para cada passagem não
+tem três tipos: tem tantos quantos os buracos.}
+
+\medskip\noindent\textbf{O fecho, e ele desmonta o quarto objecto em vez de o
+substituir.} O Teor.~\ref{mf:thm:duas} dá \textbf{um} campo e \textbf{duas}
+metades, com a cisão única; e a caracterização do antidialético cai no sítio pelo
+Cor.~\ref{mf:cor:ansiedade} --- \emph{o que não tem energia não tem como ser
+dito, e continua a mandar}, que é à letra o que Cury descreve. E o «LVD» não é
+substituído: é \textbf{dispensado} pelo Cor.~\ref{mf:cor:ponte}, porque a
+travessia não paga. \emph{Um fenómeno é preciso onde há custo por justificar;
+aqui o custo é zero, e o \cury{provavelmente} desaparece com a pergunta que o
+gerou.}
+
+\medskip\noindent\textbf{O compromisso.} Perde-se a arrumação em «três tipos».
+Ganha-se a dispensa de dois fenómenos postulados e de um \cury{provavelmente}.
+
+\fecha{três tipos, ligados por um «fenómeno LVD» e por um segundo fenómeno
+       provável}
+      {a contagem não é derivada, e cada passagem exige um fenómeno novo}
+      {Teor.~\ref{mf:thm:duas}: um campo e duas metades; Cor.~\ref{mf:cor:ponte}:
+       a passagem não paga, logo não precisa de fenómeno}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura IX --- uma distância infinita que mesmo assim se gradua}\label{mf:r9}
+
+\noindent\textbf{No livro} (cap.~\emph{A Metodologia\dots}): \cury{entre o
+conhecimento consciente e a realidade essencial dos objetos e fenômenos há uma
+distância infinita, um antiespaço entre o virtual (consciência) e o real
+(fenômeno essencial)}; a consciência \cury{nunca incorpora a realidade essencial
+dos fenômenos e dos objetos}.
+
+\noindent E, poucas páginas adiante: \cury{quanto mais a consciência existencial
+mantém um sistema de relação com a verdade essencial, mais ela conquista um
+status de verdade científica, capaz de resultar em aplicabilidade e
+previsibilidade de fenômenos}.
+
+\medskip\noindent\textbf{Porque não fecham.} Uma distância infinita não admite
+\emph{mais} nem \emph{menos}. Se o antiespaço é intransponível e sempre o mesmo,
+não há como uma consciência estar mais perto da verdade essencial do que outra --
+e cai com isso a única defesa que o livro tem contra o relativismo que ele
+próprio recusa em voz alta. \emph{O autor precisa de uma medida e declarou-a
+infinita.}
+
+\medskip\noindent\textbf{O fecho.} O Teor.~\ref{mf:thm:rastro}: o que fica é o
+par $(m,\delta)$; a consciência guarda $m$ e \textbf{não} incorpora o ponto ---
+verdade; e o que ficou de fora é $\delta$, que é um número e que desce com
+largura seguinte $\le\delta^2/m$ e cota logarítmica. \emph{O que é infinito é o
+número de batidas, e não a distância.} E há um desfecho para a tese forte do
+livro: pela cláusula~(3), o ponto \textbf{pode não caber em grade nenhuma} --- e
+mesmo então as duas faces cercam-no, com medida.
+
+\medskip\noindent\textbf{E o método do livro sai justificado por um argumento que
+ele não tinha}: o Cor.~\ref{mf:cor:triade} mostra que o encaixe exige bater
+\textbf{alternadamente} nas duas faces. \emph{A tríade pergunta\,/\,dúvida\,/\,
+crítica é a alternância}, e é essa a sua razão estrutural.
+
+\medskip\noindent\textbf{O compromisso.} Troca-se um absoluto retórico por uma
+grandeza. Quem quiser guardar o absoluto guarda-o --- mas tem de riscar a frase
+sobre a verdade científica, e com ela a distinção entre uma teoria e um palpite.
+
+\fecha{entre a consciência e a coisa há uma distância infinita}
+      {e mesmo assim umas consciências estão mais perto da verdade do que
+       outras}
+      {Teor.~\ref{mf:thm:rastro}: a distância é $\delta$, mede-se e halva; o
+       infinito é o número de batidas}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura X --- a traição inevitável da interpretação, sem mecanismo}\label{mf:r10}
+
+\noindent\textbf{No livro} (cap.~\emph{A Comunicação Social Mediada\dots}):
+\cury{não comunicamos a essência do que pensamos e sentimos}; o observador
+\cury{reconstrói interpretativamente} a experiência do outro, e \cury{conhecemos
+as pessoas a partir de nós mesmos}. A isto ele chama a \cury{traição inevitável
+da interpretação}.
+
+\noindent E, no mesmo capítulo, o mecanismo: a autochecagem lê \textbf{ao mesmo
+tempo} as RPS \emph{diretivas} e as \emph{associativas}, e das duas sai
+\emph{uma} matriz de pensamentos essenciais históricos.
+
+\medskip\noindent\textbf{Porque não fecha.} \cury{Inevitável} é uma palavra forte
+e o livro não a sustenta: nada diz \emph{porque} é que a reconstrução tem de
+distorcer, nem \emph{quanto}, nem \emph{o que fazer para distorcer menos} ---
+embora exija que se faça. A prescrição (\cury{aprender a se colocar no lugar do
+outro}) fica sem custo declarado, e por isso sem força: \emph{uma recomendação
+que não custa nada não explica porque é que quase ninguém a cumpre}.
+
+\medskip\noindent\textbf{O fecho.} O Teor.~\ref{mf:thm:outro}: a leitura do outro
+é uma \textbf{soma}, a soma tem \textbf{núcleo}, e dois «outros» distintos podem
+produzir a mesma leitura --- \emph{a interferência é $G>1$}. É esse o mecanismo
+que faltava, e é consequência de somar, não fraqueza moral. O
+Cor.~\ref{mf:cor:outroeu} dá o \emph{quanto}: o outro entra como incremento sobre
+um campo que já carrega a história do observador, e o que dele se lê é $1/G$ ---
+\emph{quanto mais história, menos o outro aparece}. E a prescrição fica com o
+preço: a cláusula~(3) desfaz a interferência com \textbf{uma} coordenada --- o
+ramo --- e a cláusula~(4) diz que ela \textbf{ocupa lugar}.
+
+\medskip\noindent\textbf{O compromisso.} \pt{6}, e com ele uma consequência
+incómoda: \emph{a distorção não se elimina com boa vontade}; elimina-se com
+espaço, ou não se elimina.
+
+\fecha{a interpretação do outro trai sempre, e deve-se aprender a colocar-se no
+       lugar dele}
+      {nenhum mecanismo diz porquê, e a prescrição não tem custo declarado}
+      {Teor.~\ref{mf:thm:outro}: somar identifica e separar custa espaço;
+       Cor.~\ref{mf:cor:outroeu} dá o quanto, e é $1/G$}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura XI --- o caos é o motor, e ninguém paga a conta}\label{mf:r11}
+
+\noindent\textbf{No livro} (cap.~\emph{A Memória e os Três Tipos de
+Pensamentos}): \cury{a morte do presente é a única possibilidade de expansão do
+próprio presente}; \cury{tem de haver a morte ou o caos do «eu sou»\dots para que
+surja o «fui histórico»}.
+
+\noindent E (cap.~\emph{A Reorganização do Caos\dots}): esse ciclo é
+\cury{extremamente rápido}, corre \cury{milhares de vezes ao dia}, e é
+apresentado como a condição de toda a construção --- \emph{sem uma linha sobre o
+que custa}.
+
+\medskip\noindent\textbf{Porque não fecha.} O livro faz do apagamento a fonte de
+tudo e trata-o como gratuito. Mas também afirma que o campo psíquico
+\cury{co-interfere} com o campo físico-químico do cérebro e se transmuta nele ---
+e no momento em que uma coisa se transmuta em física, apagar deixa de ser de
+graça. \emph{A teoria pede uma economia e não abre livro nenhum.}
+
+\medskip\noindent\textbf{O fecho.} O Teor.~\ref{mf:thm:custo}: o piso do
+invertível é \textbf{zero exacto}, o destrutivo paga por cada bit, e a conta
+total é $\kappa\Phi$ --- \emph{a mesma folga da Rachadura~IV, vezes uma
+constante}. E a cláusula~(4) dá a frase que reordena o capítulo:
+\[
+\boxed{\;\text{o dual guardado é o piso não pago}\;}
+\]
+\textbf{Donde a prescrição central de Cury fica certa, e pela razão que ele não
+deu.} Ele defende que se \cury{revise, recicle, reorganize} em vez de se
+descartar, e apresenta-o como higiene intelectual. Aqui é uma factura: \emph{o
+que se guarda reverte a custo zero; o que se deita fora é cobrado.}
+
+\medskip\noindent\textbf{O compromisso.} Importa-se uma hipótese física, e ela
+vai marcada. E aceita-se que o \cury{caos psicodinâmico} é apagamento --- que é a
+leitura do livro, mas é uma leitura: quem preferir chamar-lhe
+\emph{recodificação} não paga nada e também não explica nada.
+
+\fecha{o caos do presente é a condição de toda a construção}
+      {apagar é apresentado como gratuito, num campo que se transmuta em física}
+      {Teor.~\ref{mf:thm:custo}: piso zero exacto para o invertível,
+       $\kappa\Phi$ para o destrutivo, e o dual guardado é o piso não pago}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura XII --- escravo da âncora, e capaz de a alargar}\label{mf:r12}
+
+\noindent\textbf{No livro} (cap.~\emph{A Âncora da Memória}): \cury{muitas vezes
+achamos que somos livres na produção das idéias, mas somos prisioneiros da âncora
+da memória}; \cury{quem determina o cárcere intelectual é a âncora da memória}.
+
+\noindent E, três parágrafos depois: \cury{devemos aprender a gerenciá-la,
+reciclá-la criticamente e deslocá-la com liberdade}; e nos focos de tensão,
+\cury{se ele não tiver êxito em abrir a âncora e alargar os territórios de
+leitura da memória a produção de pensamentos e reações emocionais pode ser
+insegura, fóbica, agressiva}.
+
+\medskip\noindent\textbf{Porque não fecham.} Se tudo o que se lê vem de dentro do
+território ancorado, \textbf{a decisão de alargar também tem de vir de lá} --- e
+o que está lá é, por hipótese, o que produz a reacção estreita. É um regresso:
+para sair é preciso já estar fora. O livro nota o problema (\cury{o eu tanto
+dirige os deslocamentos da âncora da memória como é dirigido por esses
+deslocamentos}) e deixa-o como paradoxo.
+
+\medskip\noindent\textbf{O fecho, e tem três peças.} \emph{Primeira}: pela
+cláusula~(3) do Teor.~\ref{mf:thm:ancora}, \textbf{todo ponto é centro}, e a bola
+de raio maior tem o mesmo ponto por centro --- \emph{subir $r$ é uma operação
+disponível de dentro}, e o regresso desfaz-se. \emph{Segunda}: pela
+cláusula~(1) do Teor.~\ref{mf:thm:duas} a descida é bem-fundada e \textbf{pára}
+--- o \cury{stop introspectivo} acaba em número finito de passos. \emph{Terceira},
+e é a que dá o mecanismo do \cury{resgate da liderança do eu nos focos de
+tensão}: o passo natural vai ao \textbf{menor} $G$ ---
+\fis{fis:thm:sinal}{Teor. «o passo foge do campo»} --- e deliberar é ir ao
+$\arg\max$, isto é, \emph{voltar} ao sítio onde já se esteve muitas vezes.
+\textbf{E isso não é hipótese nova}: o passo do $\arg\max$ é a imagem do passo do
+$\arg\min$ pelo operador $\mathcal{D}$, sem parâmetro a escolher
+(\fis{fis:thm:forca}{Teor. «a força é a dobra da queda»}). O custo vem no mesmo
+teorema: atravessar uma célula já visitada custa
+$\partial\tau=\sqrt{G(x)h_{ii}}$ --- \emph{voltar demora, e demora
+$\sqrt G$}. É a razão estrutural de a introspecção ser lenta em proporção ao que
+já lá está.
+
+\medskip\noindent\textbf{O compromisso.} Fica-se com uma liberdade modesta: não é
+escolher o que se pensa --- é escolher \textbf{o sentido do passo}, e nada mais.
+É menos do que o livro promete nos capítulos finais, é mais do que ele sustenta
+nos teóricos, e \emph{é a única que não faz regresso}.
+
+\fecha{somos prisioneiros da âncora, e devemos aprender a alargá-la}
+      {a decisão de alargar teria de ser lida de dentro do que a estreita ---
+       regresso}
+      {Teor.~\ref{mf:thm:ancora}(3): todo ponto é centro, logo alarga-se de
+       dentro; e deliberar é $\arg\max$ contra $\arg\min$}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura XIII --- uma só mente, e dois territórios que não se tocam}\label{mf:r13}
+
+\noindent\textbf{No livro} (cap.~\emph{A Âncora da Memória}): há pessoas que fora
+de casa são \cury{sorridentes, solícitas, pacientes e sóbrias (um «anjo
+social»)} e dentro de casa \cury{se transformam em «carrascos da família»}. E o
+veredicto: \cury{o termo dupla personalidade é dialeticamente pobre e
+cientificamente inverificável. Há apenas uma personalidade porque há apenas uma
+mente, apenas um campo de energia psíquica}.
+
+\medskip\noindent\textbf{Porque não fecha.} O argumento é de \textbf{substância}
+(há um só campo) contra uma observação de \textbf{estrutura} (há duas produções
+que não comunicam). Não responde: um só campo pode ter partes que não se
+alcançam, e é isso, e não a duplicação da substância, o que o fenómeno pede.
+Pior: o próprio livro fornece o que faltava --- os territórios da âncora --- e
+não o usa aqui, porque nunca disse que os territórios são \emph{disjuntos}.
+
+\medskip\noindent\textbf{O fecho.} A cláusula~(2) do Teor.~\ref{mf:thm:ancora}:
+duas bolas do mesmo raio \textbf{ou coincidem ou são disjuntas}, e para cada $r$
+formam uma \textbf{partição} de $X$:
+\[
+\boxed{\;\text{um só } X\ \text{---}\ \text{e as suas bolas não se tocam}\;}
+\]
+\emph{Um campo, e uma partição dele.} Não é preciso duplicar mente nenhuma: é
+preciso notar que uma partição de um conjunto não faz dois conjuntos. E a obra
+tem o enunciado exacto para o par: o
+\fis{fis:thm:duoesp}{Teor. «o par é duomorfo, e a interface é não se tocarem»}
+--- \emph{a interface é a ausência de contacto}.
+
+\medskip\noindent\textbf{Donde o veredicto de Cury fica certo, e o argumento
+muda.} \cury{Não há dupla personalidade} --- verdade, e agora por uma razão.
+\cury{Porque há apenas uma mente} --- irrelevante, e é isso que torna o argumento
+fraco: a unicidade da substância não implicaria nada sobre a comunicação entre as
+partes. \emph{O que faz o trabalho não é haver um campo; é as bolas
+particionarem.}
+
+\medskip\noindent\textbf{O compromisso.} Passa-se de uma tese sobre \emph{o que a
+mente é} para uma tese sobre \emph{como ela está partida} --- e a segunda é
+verificável e a primeira não.
+
+\fecha{não há dupla personalidade porque há uma só mente}
+      {argumento de substância contra uma observação de estrutura --- não
+       responde}
+      {Teor.~\ref{mf:thm:ancora}(2): um só $X$, e as suas bolas ou coincidem ou
+       são disjuntas}
+
+% ───────────────────────────────────────────────────────────────────────────
+\section{Rachadura XIV --- «os computadores jamais», sem critério}\label{mf:r14}
+
+\noindent\textbf{No livro} (cap.~\emph{Minha Trajetória de Pesquisa}): \cury{será
+impossível que um dia os computadores conquistem essa consciência}; \cury{para os
+computadores, o tudo e o nada, o ter e o ser, um segundo e a eternidade, serão
+inevitavelmente sempre a mesma coisa}.
+
+\noindent E o motivo, dado dois capítulos adiante: \cury{nos computadores
+procuramos as informações através de rígidos e engessados sistemas de códigos},
+ao passo que na memória humana \cury{ela não é lida por índice, mas por conteúdos
+seletivos}.
+
+\medskip\noindent\textbf{Porque não fecham.} O motivo é \textbf{arquitectural} e
+a conclusão é \textbf{metafísica}. E o motivo é negado pelo próprio livro: as
+RPSs são \cury{sistemas de códigos físico-químicos} arquivados em
+\cury{determinados sítios do córtex cerebral} e lidos por endereço associativo
+--- que é uma arquitectura de índice com outro nome. \emph{Se o critério é a
+arquitectura, não separa o que o autor quer separar; e se não é, o autor não deu
+critério nenhum.}
+
+\medskip\noindent\textbf{O fecho: o critério existe, é estrutural, e não é sobre
+substrato.}
+\[
+\boxed{\;\text{a memória está \textbf{no agente}}
+\qquad\text{contra}\qquad
+\text{a memória está \textbf{no espaço}}\;}
+\]
+É a cláusula~(3) do \fis{fis:thm:mult}{Teor. «multiplicidade geométrica»} ---
+\emph{nenhum passo consulta $\pi(0),\dots,\pi(t)$} --- que a §\ref{mf:alicerce}
+importou e que a cláusula~(1) do Teor.~\ref{mf:thm:zetamu} usa. E a diferença tem
+consequência operacional, que se mede: pelo
+\fis{fis:thm:periodo}{Teor. «o período lê-se no campo»}, com a memória no espaço
+\textbf{um cursor basta} --- a cauda e o período lêem-se no campo, sem segunda
+passagem e sem comparar posições, onde o algoritmo clássico precisa de dois.
+
+\medskip\noindent\textbf{Donde a afirmação de Cury tem de ser reescrita, e fica
+mais fraca e verdadeira.} O que a máquina da arquitectura clássica não tem não é
+consciência: é um \textbf{campo que ela não carrega}. E no momento em que passa a
+carregá-lo, a distinção deixa de ser sobre silício e passa a ser sobre onde está
+a marca --- propriedade de \emph{desenho}, não de matéria. \emph{O «jamais» não
+se segue de nada que o livro tenha estabelecido.}
+
+\medskip\noindent\textbf{E note-se o que este documento \emph{não} está a
+afirmar.} Não se afirma que uma máquina com o campo no espaço tenha consciência
+existencial; afirma-se que o argumento do livro não estabelece o contrário, e que
+o critério que ele procurava existe e é este. \emph{Trocar uma impossibilidade
+por uma pergunta em aberto é um ganho, e não uma concessão.}
+
+\fecha{os computadores jamais terão consciência existencial, porque lêem por
+       índice}
+      {motivo arquitectural para conclusão metafísica --- e o motivo é negado
+       pelas próprias RPSs do livro}
+      {memória no agente contra memória no espaço --- e mede-se: um cursor onde
+       o clássico precisa de dois}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que fica de pé}\label{mf:pe}
+
+\noindent\textbf{E fica muito, e convém dizê-lo com a mesma clareza com que se
+disseram as rachaduras.} Um livro com catorze junções partidas continua a poder
+estar certo no essencial, e este está --- e está de um modo raro: as suas teses
+centrais, que na altura eram heresias, saem daqui \textbf{demonstradas} em vez de
+observadas.
+
+\medskip
+{\small
+\begin{tabular}{@{}p{0.44\textwidth}p{0.49\textwidth}@{}}
+\toprule
+a tese do livro & e aqui é \\
+\midrule
+a construção da inteligência é \textbf{multifocal} --- não há autor único &
+Teor.~\ref{mf:thm:multifocal}. \emph{E melhor do que ele a punha: não é que haja
+quatro; é que o campo não tem coluna para eles} \\[4pt]
+o \emph{eu} \textbf{não é} o líder dos processos que o produzem &
+Cor.~\ref{mf:cor:vitima}: uma acumulação não pode ser um incremento, e o atraso
+é de um passo \\[4pt]
+o passado \textbf{não é lembrado}, é reconstruído &
+Teor.~\ref{mf:thm:reconstroi} + Cor.~\ref{mf:cor:debito}: conserva-se a medida,
+perde-se a fibra, e o que se perdeu tem número \\[4pt]
+a leitura da memória é \textbf{inevitável} diante do estímulo &
+a escrita é a realização, e ela não pergunta: \pt{1} com
+Teor.~\ref{mf:thm:zetamu}(1) \\[4pt]
+todos têm \textbf{o mesmo espectáculo} nos bastidores &
+Teor.~\ref{mf:thm:multifocal}(2): nenhuma função do campo distingue autores ---
+\emph{nem, portanto, pessoas} \\[4pt]
+a dor perpetua-se por \textbf{multiplicidade} de experiências &
+Cor.~\ref{mf:cor:luto}: $H_N\le R\le N$, e repartir maximiza \\[4pt]
+\textbf{reciclar} vale mais do que descartar &
+Teor.~\ref{mf:thm:custo}(4): o dual guardado é o piso não pago \\[4pt]
+a tríade pergunta\,/\,dúvida\,/\,crítica, e a alternância &
+Cor.~\ref{mf:cor:triade}: o encaixe exige as \emph{duas} faces \\
+\bottomrule
+\end{tabular}}
+
+\medskip\noindent\textbf{E há uma que merece linha própria, porque é a mais
+bonita.} Cury faz um argumento humanista a partir da construção dos pensamentos:
+como todos leem a memória do mesmo modo, \cury{não deveria haver uma
+intelligentsia como classe, ou qualquer outra forma de classificação intelectual
+que distinga os seres humanos}. \emph{Aqui isso é um teorema, e não uma
+exortação}: pela cláusula~(2) do Teor.~\ref{mf:thm:multifocal}, \textbf{nenhuma
+função do campo distingue quem escreveu} --- a marca não carrega a dignidade de
+quem a fez. Se se quiser uma classificação de pessoas, terá de vir de outro lado,
+e o campo não a fornece. \emph{É o argumento dele, com a prova que lhe faltava.}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que fica por fechar}\label{mf:aberto}
+
+\noindent\textbf{Três coisas, e nenhuma se disfarça.}
+
+\medskip\noindent\textbf{(1) A energia psíquica como substância.} O livro põe um
+campo de energia psíquica que \emph{coexiste} com o cérebro e se transmuta nele
+por \cury{janelas de transmutação}. Este documento \textbf{não a traduz e não a
+usa} --- e não porque seja falsa, mas porque não tem, no livro, nenhuma
+propriedade da qual se possa deduzir alguma coisa: não se diz o que se conserva,
+o que a mede, nem o que a distingue de uma redescrição. \emph{Um postulado do
+qual nada se segue não tem onde encaixar}, e inventar-lhe uma estrutura aqui
+seria pôr na boca do autor o que ele não disse. \textbf{Não há \pt{7}.}
+
+\medskip\noindent\textbf{(2) A natureza «virtual» do pensamento consciente.} O
+livro insiste que o dialético e o antidialético são \cury{de natureza virtual},
+\cury{destituídos de realidade}, e que só o essencial é real. O
+Teor.~\ref{mf:thm:duas} fecha o que era \emph{estrutural} nessa distinção --- o
+que mede e o que ordena --- mas \textbf{não fecha a ontologia}, e não tem como:
+\emph{real} e \emph{virtual} não são predicados que a construção saiba atribuir.
+Fica assinalado que o trabalho todo do livro se faz sem eles.
+
+\medskip\noindent\textbf{(3) O salto para a clínica.} Todos os teoremas da
+Parte~I são consequências dos seis postulados, e os postulados são
+\textbf{modelo}, não medida. As medidas citadas são medidas de programas. O
+Teor.~\ref{mf:thm:adapta} e o Cor.~\ref{mf:cor:luto} fazem uma
+\textbf{previsão falsificável} --- que a resposta a uma repetição vá com $1/G$, e
+que a resposta total obedeça a $H_N\le R\le N$ com repartir a maximizar --- e
+essa previsão é a que teria de ser medida fora do computador para valer alguma
+coisa como psicologia. \emph{Este documento não a mediu, e não deve ser lido como
+se tivesse.} É, aliás, o trabalho seguinte que ele aponta.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O quadro, todo}\label{mf:quadro}
+
+{\small
+\begin{longtable}{@{}p{0.05\textwidth}p{0.40\textwidth}p{0.45\textwidth}@{}}
+\toprule
+ & a rachadura & o fecho \\
+\midrule
+\endfirsthead
+\toprule
+ & a rachadura & o fecho \\
+\midrule
+\endhead
+\bottomrule
+\multicolumn{3}{@{}r@{}}{\footnotesize\itshape continua na página seguinte}\\
+\endfoot
+\bottomrule
+\endlastfoot
+I & a objecção à matemática destrói a RPS de que o livro precisa &
+\pt{1} pede só igualdade decidível; a perda é $\Phi$ --- Cor.~\ref{mf:cor:debito} \\
+II & o \emph{eu} é entrada da 2.\textsuperscript{a} etapa e saída da 5.\textsuperscript{a} &
+Teor.~\ref{mf:thm:zetamu}: $\mu$ e $\zeta$; Cor.~\ref{mf:cor:vitima}: um passo \\
+III & o \emph{eu} distingue quem construiu, e nada regista o autor &
+Teor.~\ref{mf:thm:multifocal} e Teor.~\ref{mf:thm:folha}: a ordem sim, a autoria
+não \\
+IV & não há lembrança, e mesmo assim há relação lógica &
+Teor.~\ref{mf:thm:reconstroi} e Cor.~\ref{mf:cor:debito} \\
+V & a âncora é declarada indefinível e suporta o edifício &
+\pt{4} e Teor.~\ref{mf:thm:ancora}: a bola, e a partição \\
+VI & o RAM reforça o que a psicoadaptação apaga &
+Teor.~\ref{mf:thm:adapta} ($1/G$) e Cor.~\ref{mf:cor:luto} ($H_N\le R\le N$) \\
+VII & o campo nunca repousa, e a terapia fá-lo repousar &
+Teor.~\ref{mf:thm:duas}: a cisão é única, e as metades são disjuntas \\
+VIII & três pensamentos, e um fenómeno tapa-buraco por passagem &
+Teor.~\ref{mf:thm:duas} e Cor.~\ref{mf:cor:ponte}: a passagem não paga \\
+IX & distância infinita, e mesmo assim graduável &
+Teor.~\ref{mf:thm:rastro}: a distância é $\delta$, e halva \\
+X & a traição é inevitável, e sem mecanismo nem custo &
+Teor.~\ref{mf:thm:outro} e Cor.~\ref{mf:cor:outroeu} \\
+XI & o caos é o motor, e ninguém paga a conta &
+Teor.~\ref{mf:thm:custo}: $\kappa\Phi$, e o dual guardado é o piso não pago \\
+XII & escravo da âncora, e capaz de a alargar &
+Teor.~\ref{mf:thm:ancora}(3), e $\arg\max$ contra $\arg\min$ \\
+XIII & uma só mente contra dois territórios que não se tocam &
+Teor.~\ref{mf:thm:ancora}(2): uma partição não faz dois conjuntos \\
+XIV & «os computadores jamais», sem critério &
+memória no agente contra memória no espaço --- \code{fis:thm:mult}(3),
+\code{fis:thm:periodo} \\
+\end{longtable}}
+
+\medskip\noindent\textbf{E a leitura do quadro, em uma linha.} Doze dos catorze
+fechos são o \textbf{mesmo objecto} visto de ângulos diferentes: a realização
+$\pi\colon I\to X$, a sua multiplicidade $G$, e o par $\zeta/\mu$ que a escreve e
+a desescreve. \emph{Não é que a construção sirva para tudo}; é que o livro
+descrevia, com catorze nomes, um objecto só --- e por não ter o objecto, teve de
+postular um fenómeno de cada vez que precisou de outra das suas leituras.
+\[
+\boxed{\;\text{a disponibilidade é }\zeta;\qquad
+\text{a resposta é }\mu;\qquad
+\text{a adaptação é }1/G\;}
+\]
+\emph{Três nomes, um campo.}
+
+\end{document}

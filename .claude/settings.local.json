@@ -14,7 +14,19 @@
       "Bash(cc -O2 -std=c99 -Wall -I../lib claim_ir.c -o /tmp/claude-1000/-home-aaraolopes-Documentos-tiffany/b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d/scratchpad/claim_ir)",
       "Bash(/tmp/claude-1000/-home-aaraolopes-Documentos-tiffany/b6c6c5cb-b5ec-45f0-ac00-480c20a1bb2d/scratchpad/claim_ir)",
       "Bash(echo \"exit=$?\")",
-      "Bash(grep -oE '\\\\\\\\prod\\([^a-zA-Z]|$\\)' fisica.tex)"
+      "Bash(grep -oE '\\\\\\\\prod\\([^a-zA-Z]|$\\)' fisica.tex)",
+      "Bash(cd *)",
+      "Bash(bash tools/experimentos-patria.sh tudo)",
+      "Bash(grep -n \"sql_executa_1\\(const char \\\\*sql, SqlOut \\\\*out\\){\" banco/sql.c)",
+      "Bash(grep -vE \"^   [0-9-]+$\")",
+      "Bash(timeout 400 pdflatex -interaction=nonstopmode -halt-on-error arquitetura.tex)",
+      "Bash(echo \"arq exit=$?\")",
+      "Bash(grep -n 'LISTA=\\\\|LISTA \"\\\\|> \"$LISTA\"\\\\|>> \"$LISTA\"\\\\|refs\\\\|fisica\\\\|teoria\\\\|catalogo\\\\|enredo\\\\|papers' tools/bateria.sh)",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*m//g')",
+      "Read(//tmp/**)",
+      "Bash(awk '{print $1, $2, $3, $4, $5, $6}')",
+      "Bash(sed 's/.*Z //')",
+      "Bash(awk '{print $1}')"
     ]
   }
 }

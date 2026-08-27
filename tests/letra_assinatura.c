@@ -91,18 +91,34 @@ int main(void)
 
     /* TODAS as fontes que houver — e não uma. É o ponto: uma assinatura que só vale numa
      * fonte não é assinatura, é um ajuste. */
+    /* E A ÁRVORE DAS FONTES NÃO É UMA SÓ. O mesmo pacote — a Liberation, a DejaVu —
+     * instala em sítios diferentes conforme a distribuição: o Fedora põe a família
+     * na raiz (`fonts/liberation-sans/`), o Debian e o Ubuntu põem-na sob
+     * `fonts/truetype/<família>/`. Esta lista tinha CINCO caminhos do Fedora e um
+     * do Debian, pelo que numa máquina Debian resolvia UM — e o medidor, que
+     * precisa de comparar duas, dizia «menos de duas fontes, NAO MEDIU» com o
+     * sistema cheio de fontes instaladas. Não faltavam fontes: faltavam caminhos.
+     * O `tests/spline.c` e o `tests/dual_spline_ttf.c` já listavam as duas árvores;
+     * é essa a convenção da casa, e é ela que aqui se completa. */
     static const char *TODAS[] = {
+        /* Fedora / RHEL — a família na raiz */
         "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
         "/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf",
-        "/usr/share/fonts/google-noto-vf/NotoSerif[wght].ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
-        "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
         "/usr/share/fonts/liberation/LiberationSerif-Regular.ttf",
+        "/usr/share/fonts/google-noto-vf/NotoSerif[wght].ttf",
+        "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
+        /* Debian / Ubuntu — a mesma família sob truetype/ */
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
     };
-    static Ttf F[6];
-    static const char *NOME[6];
+    enum { NTODAS = (int)(sizeof TODAS / sizeof TODAS[0]) };
+    static Ttf F[NTODAS];
+    static const char *NOME[NTODAS];
     long nf = 0;
-    for(long i = 0; i < 6; i++)
+    for(long i = 0; i < NTODAS; i++)
         if(ttf_abre(&F[nf], TODAS[i])){ NOME[nf] = TODAS[i]; nf++; }
 
 printf("\n=== CADA LETRA TEM ASSINATURA, E E' ELA QUE ATRAVESSA AS FONTES ===============\n");
