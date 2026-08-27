@@ -316,7 +316,15 @@ for f in $(cat "$LISTA"); do
       LC_ALL=C sort -S 64M "$SAIDA/dente_sig.txt" | (ulimit -v 2000000; timeout 120 "$bin" agrupa > "$out" 2>&1)
     r=$?
   else
-    (ulimit -v 2000000; timeout 560 "$bin" $(args "$base") </dev/null > "$out" 2>&1); r=$?
+    # O TECTO É DE TEMPO, E O TEMPO NÃO É DA OBRA. Um medidor que expira sai com
+    # 124 e ZERO unidades vermelhas --- não falhou asserção nenhuma, não chegou
+    # ao fim. O `tests/pgwire.c` leva ~370 s quando o runner está folgado (e mais
+    # de 240 s num servidor dedicado e ocioso), contra os 560 que aqui estavam:
+    # a margem era fina de mais para uma máquina partilhada, e ele oscilava —
+    # verde numa corrida, 124 na seguinte, com a mesma obra. Isso não é medir,
+    # é sortear. Sobe para 900: quem passa continua a passar, e um medidor
+    # verdadeiramente preso ainda é apanhado.
+    (ulimit -v 2000000; timeout 900 "$bin" $(args "$base") </dev/null > "$out" 2>&1); r=$?
   fi
   # atesta a semente. Só a linha DESTE medidor é substituída — nunca se limpa a tabela.
   grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"

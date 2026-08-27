@@ -62,7 +62,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends \
-            gcc libc6-dev python3 fonts-liberation
+            gcc libc6-dev python3 fonts-liberation fonts-dejavu-core
           # A bateria chama `cc`, não `gcc`. No Ubuntu o alternatives já o dá,
           # mas se um dia não der, o medidor não compilava e a corrida saía
           # vermelha por uma razão que não é a obra. Melhor garantir aqui.
@@ -70,9 +70,17 @@ jobs:
           # fonts-liberation: tests/spline.c mede glifos da Liberation Sans. Sem
           # ela o medidor não falha — diz NAO MEDIDO e conta como saltada (ver
           # lib/unidade.h, saltou()). Instalar é preferir medir a saltar.
+          #
+          # E DUAS FAMÍLIAS, não uma. O `tests/letra_assinatura.c` COMPARA a
+          # assinatura da mesma letra ATRAVÉS de fontes — com uma família só ele
+          # diz «menos de duas fontes no sistema, NAO MEDIU» e a corrida sai
+          # vermelha por falta de dados, não por defeito. A dejavu-core é a
+          # segunda, e é o que torna a comparação possível. Pela mesma razão do
+          # comentário acima: preferir medir a saltar.
           echo "cc  -> $(cc --version | head -1)"
           echo "node-> $(node --version)"
           echo "py  -> $(python3 --version)"
+          echo "fontes-> $(fc-list 2>/dev/null | wc -l) ficheiro(s)"
 
       - name: O estado de que se parte
         run: |
