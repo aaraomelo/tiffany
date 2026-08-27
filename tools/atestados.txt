@@ -374,6 +374,7 @@ patria_front bd725634b0b6534c 0
 pdf_corpo 98999b4c0c479c80 0
 peano_dual bce380b1c987657b 0
 pendulo 0a54853abfecdeb8 0
+pental 659687e9c64fca8f 0
 pgwire bf16b31eb4fd5c0b 0
 pi edf300fc9ada26c6 0
 pi_familia ea3960ed8925d824 0
@@ -455,6 +456,7 @@ semantico 458155145c6d26d3 0
 semente bdf47d333634825f 0
 serie_phi 5bd6af9a92aaa5a7 0
 significado aff35c553960fdcb 0
+simbolos b2422ee39e2c81b6 0
 simula 8d47ff0fbbdab6f3 0
 sistema 6c04fecc64fdc48c 0
 smartcontract ff52509164a5bbd5 0
@@ -535,3 +537,4 @@ zeta e83d4db2ff987838 0
 zeta_global bb4d049db28f27f5 0
 zeta_universal c1995884d7e0d044 0
 zetadin b73fe1e626aaa0ad 0
+zetamu 3d30422b31379d6c 0
