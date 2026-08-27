@@ -5544,6 +5544,69 @@ da face multiplicativa}, que o Cor.~\ref{fis:cor:produto} funda. \textbf{Não se
 ali mais nenhuma propriedade de determinantes}, e diz-se para que não se tome o
 resto por adquirido.
 
+\subsection*{O raio, a borda, e as duas conservações}
+
+\noindent\textbf{E daqui sai o \emph{raio espectral}, que esta obra usa sem nunca o
+construir --- e ele não pede construção: é o \emph{meio} de uma face ou da outra.}
+
+\begin{corolario}[o raio é o meio de uma face, e o sinal do discriminante escolhe qual]\label{fis:cor:raio}
+Com $s$ e $p$ os dois invariantes do Cor.~\ref{fis:cor:trdet} e
+$\Delta=s^{2}\ominus4p$:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{Onde $\Delta\ge0$, o par é do andar e o raio é o \emph{máximo}}:
+com $m=s/2$ o meio aditivo e $\abs{\delta}=\sqrt{\Delta}/2$ o desvio,
+\[
+\boxed{\;\text{raio}=\abs{m}+\abs{\delta}\;}
+\]
+--- que é o máximo pelo meio e pelo desvio do Teor.~\ref{fis:thm:BI}. \emph{Face
+aditiva.}
+\item[(2)] \textbf{Onde $\Delta<0$, os dois têm o \emph{mesmo} módulo, e ele é o
+meio multiplicativo}: de $g\otimes g=p$ vem
+\[
+\boxed{\;\text{raio}=g\;}
+\]
+--- que é o Lema~\ref{fis:lem:geo}. \emph{Face multiplicativa.}
+\item[(3)] \textbf{E nenhum dos dois pede avaliar o par.} Pedem $s$, $p$ e o
+\emph{sinal} de $\Delta$ --- e os três estão no andar, pelo
+Cor.~\ref{fis:cor:trdet}(4). \textbf{O raio lê-se sem se saber quem são os dois.}
+\end{enumerate}
+\end{corolario}
+
+\medido{\code{tests/espectro.c}. O ramo aditivo verifica-se em $513$ pares $(s,p)$ e
+o multiplicativo em $112$, \textbf{sem uma falha}.}
+
+\medskip\noindent\textbf{E o raio $1$ tem nome: é a \emph{borda}, e é lá que a
+transformada é avaliada.} O Teor.~\ref{fis:thm:base} escreve
+$\abs{\chi_k(j)}=1$ --- \emph{o módulo não carrega nada, e a fase carrega tudo} ---
+e o Lema~\ref{fis:lem:cristal} obriga o mesmo pelo outro lado: ordem finita força
+$\abs{\lambda}=1$. \textbf{São a mesma condição, vista da transformada e vista da
+órbita.}
+\[
+\boxed{\;\text{a borda é onde o raio vale um --- e é onde a fase é tudo o que resta}\;}
+\]
+
+\medskip\noindent\textbf{E é a borda que torna Pontryagin barato.} O carácter leva
+a face aditiva na multiplicativa --- é o duomorfismo da
+Def.~\ref{fis:def:duomorf} ---, e \emph{fá-lo sem perder medida} precisamente
+porque ali o módulo vale um. \textbf{Fora da borda a troca custaria}; na borda não
+custa, e é por isso que a passagem existe.
+
+\medskip\noindent\textbf{E as duas conservações fecham, uma por face.}
+\[
+\begin{array}{lll}
+\textbf{Parseval} & \lVert\mathcal{F}(f)\rVert^{2}=2^{m}\lVert f\rVert^{2} & \text{Teor.~\ref{fis:thm:H}}\\
+\textbf{o central} & \Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=\abs{I}\cdot\abs{X} & \text{Teor.~\ref{fis:thm:central}}
+\end{array}
+\]
+\emph{Uma diz que a \textbf{norma} não se move ao trocar de face; a outra que o
+\textbf{rectângulo} não se move ao trocar de leitura.} \textbf{São a mesma figura}
+--- o Teor.~\ref{fis:thm:fractalnegro}(3) já a tinha: \emph{cada lado move-se, e o
+par não}. E nenhuma delas pede integral: a primeira é uma soma de quadrados, a
+segunda duas contagens.
+\[
+\boxed{\;\text{o raio diz \emph{onde}; a borda diz \emph{quanto custa}; as duas conservações dizem \emph{que não se perde}}\;}
+\]
+
 \medskip\noindent\textbf{E é isto que faz a estrela não ser uma escolha.} O
 Teor.~\ref{fis:thm:estrela} vai chamar estrela ao caso $s=1$; a razão de ele
 existir é esta, e não uma preferência: \emph{a mesma conta que dá o rotor dá a
