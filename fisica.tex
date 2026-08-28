@@ -3970,8 +3970,38 @@ escolha, a topologia diz de que escolha é que ele pode prescindir.
 
 \section{Espaços ultramétricos: a célula é a bola}\label{fis:ultra}
 
-\noindent O Teor.~\ref{fis:thm:mult} não pediu métrica. Mas quando $X$ tem uma, a
-relação entre $G$ e as bolas diz o que a métrica é.
+\noindent O Teor.~\ref{fis:thm:mult} não pediu métrica. Mas, uma vez que o espaço
+é construído por cortes binários, há uma métrica natural que não mede extensão
+no sentido euclidiano: mede \emph{profundidade de concordância}. Dois pontos
+estão próximos quando o encaixe os mantém iguais por muitos níveis.
+
+\medskip\noindent\textbf{As mesmas palavras, três geometrias.} O conjunto
+$\{0,1\}^p$ é um só. Sobre ele este documento lê três estruturas --- e não um
+par dual, e não três objectos:
+\[
+\boxed{\;
+\{0,1\}^p
+\;\longrightarrow\;
+\begin{cases}
+Q_m & \text{incidência dos bits}\\
+\mathcal{T} & \text{encaixe por prefixos}\\
+I & \text{ordem de visita}
+\end{cases}
+\;}
+\]
+$Q_m$ é o hipercubo da §\ref{fis:hipercubo}, aqui com $m=p$: aresta = um bit
+qualquer, grau $m$. $\mathcal{T}$ é a \textbf{árvore do encaixe} desta secção:
+aresta = o irmão (Teor.~\ref{fis:thm:vizarvore}). $I$ é o domínio da realização
+$\pi\colon I\to X$ (Def.~\ref{fis:def:objeto}). \emph{Não é necessário dizer
+qual geometria é a verdadeira}: o conjunto de palavras é o mesmo; o que muda é
+a estrutura que se lê.
+
+\medskip\noindent A distância que se define agora é a da \textbf{segunda}
+geometria --- métrica de $\mathcal{T}$, não Hamming de $Q_m$, não comprimento de
+percurso em $I$:
+\[
+\boxed{\;d(a,b)=2^{-\operatorname{prof}(a,b)}\;}
+\]
 
 \begin{definicao}[a árvore do encaixe]\label{fis:def:arvore}
 Para $a\neq b$ de $p$ bits, seja $\operatorname{prof}(a,b)$ --- e não $\delta$,
@@ -4012,6 +4042,37 @@ $\operatorname{prof}(a,c)\ge\min\{\operatorname{prof}(a,b),\operatorname{prof}(b
 Aplicando $t\mapsto2^{-t}$, que inverte a ordem, vem
 $d(a,c)\le\max\{d(a,b),d(b,c)\}$.
 \end{proof}
+
+\medskip\noindent\textbf{Leitura física.} A métrica do corte não mede «quanto
+espaço» existe entre dois pontos. Mede \emph{quanto da construção eles ainda
+compartilham}:
+\[
+\boxed{\;
+\text{mais bits comuns}
+\;\Longrightarrow\;
+\text{maior profundidade}
+\;\Longrightarrow\;
+\text{menor distância}.
+\;}
+\]
+O $\max$ da desigualdade é o da primeira divergência dos dois trechos: a
+divergência entre os extremos não pode aparecer antes da que já se viu num
+deles. \emph{Não} é uma operação sobre o conteúdo da célula, e \emph{não} é a
+distância de $Q_m$ nem a do percurso:
+\[
+\boxed{\;d_{\mathrm{ultra}}\;\neq\;d_{\mathrm{Hamming}}\;\neq\;d_{\mathrm{percurso}}\;}
+\]
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+geometria & o que mede \\
+\midrule
+$Q_m$ & quantos / qual eixo de bits muda \\
+$\mathcal{T}$ & \textbf{onde} ocorre a primeira divergência \\
+percurso $I$ & em que ordem os estados são visitados \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \begin{teorema}[as bolas particionam]\label{fis:thm:bolas}
 Seja $(X,d)$ ultramétrico \textbf{e simétrico}, $r\ge0$, e
@@ -4067,8 +4128,36 @@ cuidado nenhum aqui: \emph{não há sobreposição a haver}.
 
 \medskip\noindent\textbf{E é a métrica do corte.} Dois pontos construídos como
 cortes estão próximos nesta métrica quando \emph{concordam até fundo}: a
-distância decai com a profundidade em que a expansão binária ainda coincide. É a
-topologia que o encaixe induz.
+distância decai com a profundidade em que a expansão binária ainda coincide. Não
+conta quantos bits diferem, e não conta quantos passos o percurso deu. Na árvore
+de $p$ bits a bola de raio $2^{-p}$ \emph{é} a célula do encaixe nesse nível:
+\[
+\boxed{\;
+\mathcal{B}(a,2^{-p})
+=
+\{\,x:\text{$x$ e $a$ partilham o prefixo de $p$ bits}\,\}
+\;}
+\]
+\[
+\boxed{\;
+\mathcal{T}
+\overset{\mathrm{profundidade}}{\longrightarrow}
+d
+\qquad\text{e}\qquad
+I
+\overset{\pi}{\longrightarrow}
+X
+\;}
+\]
+A primeira seta é esta secção. A segunda é a Def.~\ref{fis:def:objeto}: o índice
+ocupa a célula, e a ordem $I$ não entra em $d$. O Teor.~\ref{fis:thm:navega}
+trata depois a distância entre \emph{representações},
+$D(\sigma,\tau)=\sup_x d\bigl(\sigma(x),\tau(x)\bigr)$ --- ultramétrica sobre
+leituras, não sobre pontos. A topologia não foi acrescentada depois da
+construção: é a leitura métrica do encaixe que já estava nos bits.
+\[
+\boxed{\;\text{a mesma palavra admite geometrias diferentes conforme a estrutura que se lê}\;}
+\]
 
 \begin{teorema}[a vizinhança na árvore, e ela não é $2n$]\label{fis:thm:vizarvore}
 As cláusulas (1)--(3) do Teor.~\ref{fis:thm:mult} correm sobre a árvore sem
@@ -4103,7 +4192,9 @@ outros três passos do ciclo são os mesmos nas duas.
 
 \medido{\code{tests/aranha\_n.c} §AN6: as bolas particionam; todo ponto é centro;
 e a euclidiana falha \emph{ambas} com o mesmo raio. §AN14: o custo contado ---
-$2n$ leituras por passo, nem uma a mais, o autómato não varre.}
+$2n$ leituras por passo, nem uma a mais, o autómato não varre.
+§AN17: o grau nos três grafos --- árvore, grade, hipercubo --- sobre as mesmas
+palavras.}
 
 \section{A dobra vista por Euler}\label{fis:euler}
 
@@ -4625,7 +4716,8 @@ próximas umas das outras}.
 
 \begin{teorema}[a travessia é uma operação, e compor não acumula]\label{fis:thm:navega}
 Sejam $\sigma,\tau,\rho$ representações de $X$ ligadas por bijeções efetivas, e
-$d$ a ultramétrica da Def.~\ref{fis:def:arvore}. Defina-se
+$d$ a ultramétrica da Def.~\ref{fis:def:arvore} --- métrica de $\mathcal{T}$,
+sobre pontos, não sobre a ordem $I$. Defina-se
 $d_x(\sigma,\tau)=d(\sigma(x),\tau(x))$ e
 $D(\sigma,\tau)=\sup_{x} d_x(\sigma,\tau)$. Então $D$ é ultramétrica sobre as
 representações:
@@ -7538,6 +7630,13 @@ $1$, pelo Teor.~\ref{fis:thm:vizarvore} --- ao passo que o grafo mãe--filha, qu
 é o mesmo conjunto de bolas com outra aresta, tem grau $3$ no interior.
 \emph{Não são dois valores da mesma contagem: são duas arestas sobre os mesmos
 vértices.}
+
+\medskip\noindent\textbf{E a métrica dessas palavras não é a deste grafo.} Os
+vértices de $Q_m$ são as mesmas palavras da Def.~\ref{fis:def:arvore}. A aresta
+de $Q_m$ troca um bit \emph{qualquer}; a ultramétrica da §\ref{fis:ultra} lê
+\emph{onde} começa a primeira divergência. Donde $d=2^{-\operatorname{prof}}$
+não é Hamming, e o percurso $\pi\colon I\to X$ (Def.~\ref{fis:def:objeto}) é
+uma terceira leitura, não uma quarta geometria.
 
 \begin{teorema}[o hipercubo constrói-se pela dobra]\label{fis:thm:hiper}$Q_m$ tem $2^m$ vértices e $m\,2^{m-1}$ arestas, e $Q_m$ são duas cópias de
 $Q_{m-1}$ ligadas por um emparelhamento perfeito:
