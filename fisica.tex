@@ -3,10 +3,10 @@
 %  fisica.tex — A FÍSICA ARANIANA. Compila SOZINHO (pdflatex fisica.tex) e
 %  também dentro do livro. O preâmbulo é o estilo.tex.
 %
-%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos doze
+%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos treze
 %  lugares onde ela opera — álgebra, topologia, análise, geometria, mecânica,
-%  gravitação, relatividade, óptica, partículas e núcleo, termodinâmica,
-%  cosmologia, redes. Nada foi
+%  gravitação, relatividade, eletromagnetismo, óptica, partículas e núcleo,
+%  termodinâmica, cosmologia, redes. Nada foi
 %  inventado e nada foi acrescentado: os enunciados, as provas%  e os medidos são os que a obra já tem, postos cada um no seu sítio.
 %
 %  AUTOCONTIDO: toda a matemática de que precisa está DENTRO. Onde um irmão da
@@ -53,7 +53,8 @@
   \gkcapa{A Física Araniana}
          {multiplicidade e memória}
          {álgebra, topologia, análise, geometria, mecânica, gravitação, relatividade,
-          óptica, partículas e núcleo, termodinâmica, cosmologia, redes --- doze lugares}
+          eletromagnetismo, óptica, partículas e núcleo, termodinâmica, cosmologia,
+          redes --- treze lugares}
   \maketitle
   \tableofcontents
 }{%
@@ -104,7 +105,7 @@ igualdade} --- o ponto onde para é o ponto fixo que as duas faces passam a
 partilhar, e é ele o \textbf{corte}. Não converge para o ponto: termina nele.
 
 \medskip\noindent\textbf{A organização deste documento.} A matéria é uma só e
-opera em \textbf{doze} lugares, e é por eles que ela se reparte aqui. A
+opera em \textbf{treze} lugares, e é por eles que ela se reparte aqui. A
 \textbf{álgebra} constrói: a dobra, as duas faces, os dois símbolos, a lista, a
 multiplicidade, a folga, a base ortonormal, o par $\zeta/\mu$, a transformada e a
 escada --- e dá à vizinhança a sua base, que é um conjunto de geradores. A
@@ -119,7 +120,9 @@ o tempo. A \textbf{gravitação} mede: a régua e a sua diagonal, o campo que a
 curva, a queda --- e o sinal, que é o outro, porque o passo foge da memória em
 vez de ser puxado por ela. A \textbf{relatividade} conta o que um passo alcança: o limite que a
 vizinhança já impunha, a meia volta onde os dois sentidos coincidem e por isso
-não há órbita, e a borda que limita sem ser lugar. A \textbf{óptica} lê os
+não há órbita, e a borda que limita sem ser lugar. O \textbf{eletromagnetismo}
+lê o par de escritas $(E,B)$: forma, metal, e o cruzado como metade orientada
+da cisão que a transposição já escreveu. A \textbf{óptica} lê os
 espelhos: a caixa dos sistemas sem perda, a lei
 do discriminante, as ordens que uma rede admite e a borda onde a régua colapsa.
 
@@ -162,6 +165,7 @@ a pergunta & a resposta & onde \\
 \endlastfoot
 O que é o ponto de partida? & um mapa e uma identidade: $\partial\circ\partial=\mathrm{id}$ & Def.~\ref{fis:def:op} \\
 E os dois extremos, de onde vêm? & saem forçados, e não são dados & Teor.~\ref{fis:thm:doispontos}(2) \\
+Como se parte um par? & a operação $\tau$ é uma; $X_{+}$ e $X_{-}$ dependem do domínio & Obs.~\ref{fis:obs:cisao} \\
 Donde vêm as operações e os dois dígitos? & da dobra: sem meio, são precisas duas faces & Teor.~\ref{fis:thm:duas},~\ref{fis:thm:B} \\
 E as coordenadas? & a tupla ordenada: a \emph{representação} & Teor.~\ref{fis:thm:coord} \\
 Como constrói? & a aresta: ela \emph{é} a memória da divisão & §\ref{fis:folha} \\Como sabe por onde passou? & não sabe --- a marca está no espaço & Teor.~\ref{fis:thm:mult}(3) \\
@@ -189,6 +193,11 @@ Como se atravessa ao espectro? & pela transformada, e Parseval conserva & Teor.~
 O passo cai para onde? & para o \emph{menor} $G$: foge da dobra & Teor.~\ref{fis:thm:sinal} \\
 E o que produz o campo? & nada além do percurso: não há fonte & Teor.~\ref{fis:thm:semfonte} \\
 O que se conserva? & a corrente, não a energia & Teor.~\ref{fis:thm:kirchhoff} \\
+A forma $E^{2}-B^{2}$, o que é? & forma catalogada; \emph{não} é corpo no sentido da Def.~\ref{fis:def:corpos} & Def.~\ref{fis:def:em-forma} \\
+O cruzado $E\times B$? & leitura orientada do par, não o operador $\partial$ & Def.~\ref{fis:def:em-fluxo} \\
+A leitura local do par? & $\lvert E\rvert/\lvert B\rvert$, o metal; a reatividade é outra leitura da forma & Def.~\ref{fis:def:em-metal} \\
+Hodge, no plano? & preserva o cruzado e inverte o metal & Teor.~\ref{fis:thm:em-hodge} \\
+A forma nula? & o metal vale $1$; o vácuo do catálogo pede também $E\cdot B=0$ & Lema~\ref{fis:lem:em-cone} \\
 Até onde chega um passo? & a uma aresta --- e o grau proíbe o atalho & Teor.~\ref{fis:thm:passo} \\
 Donde vem a velocidade máxima? & de a régua fechar: é meia volta, o ponto fixo & Teor.~\ref{fis:thm:meiavolta} \\
 O que classifica um sistema sem perda? & $\Delta$, e não o traço & Teor.~\ref{fis:thm:leidisc} \\
@@ -233,6 +242,7 @@ sinal & o que é & de onde sai \\
 \midrule
 $\partial$ & a \textbf{dobra} & Def.~\ref{fis:def:op} --- e é tudo o que ela dá \\
 $\tau$ & a dobra lida \textbf{no par} & Teor.~\ref{fis:thm:simbolos}(1) \\
+$m$, $\delta$ & centro e desvio: $X_{+}$ e $X_{-}$ nos extremos & Teor.~\ref{fis:thm:BI}, Obs.~\ref{fis:obs:cisao} \\
 $\dagger$ & o \textbf{dual}: a mesma $\tau$ nas coordenadas & Teor.~\ref{fis:thm:constroi}(2) \\
 $\mathcal{D}$ & a dobra lida \textbf{nas operações} & Def.~\ref{fis:def:duomorf}, Teor.~\ref{fis:thm:dual-involutiva} \\
 \midrule
@@ -241,6 +251,7 @@ $\oplus$ , $\otimes$ & as duas \textbf{faces} & Teor.~\ref{fis:thm:duas} \\
 $\ominus$ , $\oslash$ & as \textbf{voltas} de cada face & Obs.~\ref{fis:obs:reguas} \\
 $\infty$ & o \textbf{parceiro do zero}: $\tau(0)$ & Teor.~\ref{fis:thm:zeroinf} \\
 $\sigma$ & a \textbf{estrela}: onde as duas faces colam & Teor.~\ref{fis:thm:estrela}, Cor.~\ref{fis:cor:estrelaanti} \\
+$E\times B$ & a \textbf{leitura orientada} do par eletromagnético & a cisão directo\,/\,cruzado; Def.~\ref{fis:def:em-fluxo} \\
 \midrule
 $\Delta$ & a \textbf{separação} do par, ao quadrado & Cor.~\ref{fis:cor:disc}, Teor.~\ref{fis:thm:antissim}(6) \\
 $G$ , $\Phi$ & a \textbf{medida} e a \textbf{folga} & Def.~\ref{fis:def:objeto}, Def.~\ref{fis:def:folga} \\
@@ -1385,6 +1396,92 @@ e $(b,a)$ dão o mesmo $s$ e o mesmo $\Delta$ e diferem no sinal de $a-b$ ---
 \emph{e diferem}, sempre que a dobra for efectiva.
 \end{proof}
 
+\begin{observacao}[a cisão é uma; as realizações não são o mesmo objecto]\label{fis:obs:cisao}
+O Teor.~\ref{fis:thm:antissim} já partiu as funções do par sob a transposição
+$\tau$. \emph{Nada se acrescenta}: a cláusula~(2), onde o dois inverte, é a
+conta da prova,
+\[
+f=\tfrac12(f+\tau\cdot f)+\tfrac12(f-\tau\cdot f),
+\]
+e as duas parcelas são os valores próprios $+1$ e $-1$. Escreva-se
+\[
+\boxed{\;\tau\cdot X_{+}=+X_{+}\;,\qquad \tau\cdot X_{-}=-X_{-}\;}
+\]
+--- \emph{é o mesmo enunciado, com os nomes da prova}. Sem o dois invertível
+há vinco e não há cisão, e isso já é a cláusula~(4). $\tau$ não é
+$\mathcal{D}$: aquela troca as entradas do par, esta as operações
+(Teor.~\ref{fis:thm:duasinvol}).
+\[
+\boxed{\;\tau\ \text{é a mesma operação de troca;}\quad
+X_{+},\,X_{-}\ \text{dependem do domínio}\;}
+\]
+\emph{Unifica-se a estrutura, não o objecto.}
+
+\medskip\noindent\textbf{As coordenadas do par de extremos}, no degrau onde o
+dois inverte, são as do Teor.~\ref{fis:thm:BI}:
+\[
+m=\tfrac{a+b}{2},\qquad \delta=\tfrac{a-b}{2},
+\]
+com $\tau$ a fixar $m$ e a mandar $\delta\mapsto-\delta$. \emph{Não são
+coordenadas novas}: são $X_{+}$ e $X_{-}$ \emph{nesse} domínio.
+
+\medskip\noindent\textbf{As ocorrências abaixo são realizações locais da mesma
+operação de troca, quando o texto já o diz.} Não são o mesmo objecto: cada
+linha lê $\tau$ num par distinto, e $X_{\pm}$ mudam com o domínio.
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+domínio & a troca & $X_{+}$ & $X_{-}$ \\
+\midrule
+o par de extremos & $a\leftrightarrow b$ & $m$ (e $s=a+b$) & $\delta$ (e $a-b$) \\
+funções do par & $\tau\cdot f(x,y)=f(y,x)$ & directo & cruzado \\
+saltos da grade & $\dagger\colon[p:q]\mapsto[q:p]$ & $h+v$ & $h-v$ \\
+escritas no plano & $(E,B)\mapsto(B,E)$ & $E\cdot B$ & $E\times B$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+A primeira linha é o Teor.~\ref{fis:thm:BI} com a cláusula~(6) acima. A
+segunda \emph{é} este teorema --- o teorema-mãe, não uma realização à parte.
+A terceira é o Teor.~\ref{fis:thm:constroi}(2)--(3), que já declara
+$\dagger=\tau$. A quarta é a Def.~\ref{fis:def:em-fluxo} com o
+Lema~\ref{fis:lem:em-lagrange}: $\tau$ age no par de escritas por
+$(E,B)\mapsto(B,E)$, e
+\[
+E\cdot B\;\longmapsto\; E\cdot B,\qquad
+E\times B\;\longmapsto\; -\,E\times B.
+\]
+\emph{É realização local, não lei eletromagnética.} \emph{Não se promove
+medição a enunciado.}
+
+\medskip\noindent\textbf{O que esta observação não faz, e diz-se para não se
+fazer.}
+\begin{enumerate}\itemsep2pt
+\item[$\bullet$] \textbf{$(s,p)$ e $(\operatorname{tr},\det)$} são os dois
+invariantes das faces (Cor.~\ref{fis:cor:trdet}):
+\[
+\boxed{\;\tau(s,p)=(s,p)\;}
+\]
+--- \emph{ambos sobrevivem}. Não são o eixo $(X_{+},X_{-})$. Duas coordenadas
+não são automaticamente $+$ e $-$.
+\item[$\bullet$] \textbf{O rotor} $R_{ij}$ do Teor.~\ref{fis:thm:fecho} e
+\textbf{Hodge} $H$ do Teor.~\ref{fis:thm:em-hodge} não são $\tau$:
+\[
+\boxed{\;\tau^{2}=I\;,\qquad R^{4}=I\;,\qquad H^{4}=I\;}
+\]
+O Teor.~\ref{fis:thm:constroi}(4) já os separa de $S=\tau$.
+\item[$\bullet$] \textbf{$\Delta$} é a memória quadrática do cruzado, não o
+cruzado:
+\[
+\boxed{\;\Delta=(a-b)^{2}\;}
+\]
+--- cláusula~(6): memória, não operador, não coordenada ímpar.
+\item[$\bullet$] \textbf{Nenhum $t$} é parâmetro desta cisão. A forma
+$E^{2}-B^{2}$ e o metal não entram na tabela: sob $E\leftrightarrow B$ a forma
+muda de sinal \emph{e} o metal inverte, que não é $\tau\cdot X_{\pm}=\pm X_{\pm}$
+no sentido das duas metades.
+\end{enumerate}
+\end{observacao}
+
 \medskip\noindent\textbf{E fica dito onde as duas metades voltam a encontrar-se.}
 A cláusula~(2) separa-as por dois valores próprios, e essa separação não é
 eterna: no Cor.~\ref{fis:cor:estrelaanti} mostra-se que \emph{negar} e
@@ -1700,7 +1797,9 @@ $m=\tfrac{a+b}{2}$; escrevendo o \textbf{desvio} $\delta=\tfrac{a-b}{2}$
 \]
 --- igualdade e não aproximação, e a volta devolve o par \emph{ordenado} com
 resíduo $0$. É a dobra outra vez: $m$ é o que $\partial$ fixa, $\delta$ o que ele
-reflete. \textbf{E a leitura não vive em $I$}: com $a=0$ e $b=1$ o meio é
+reflete. \emph{São as coordenadas $X_{+}$ e $X_{-}$ do Teor.~\ref{fis:thm:antissim}(2),
+lidas nos extremos} --- a Obs.~\ref{fis:obs:cisao} não acrescenta par, aponta-o.
+\textbf{E a leitura não vive em $I$}: com $a=0$ e $b=1$ o meio é
 $\tfrac12$, que a lista não tem. \emph{Este par pertence ao degrau onde o dois se
 inverte} --- o $X_3$ do Teor.~\ref{fis:thm:escada} ---, e é lá que se lê.
 
@@ -5615,7 +5714,10 @@ determina um par: os dois elementos que ela não mistura. Sobre esse par,
 \boxed{\;\operatorname{tr}=s=a\oplus b\;,\qquad \det=p=a\otimes b\;}
 \]
 \emph{São o $s$ e o $p$ deste teorema, e não duas noções novas} --- um por face,
-como tudo o mais nesta obra.
+como tudo o mais nesta obra. \textbf{E ambos ficam sob a troca}: $a\leftrightarrow b$
+não os move, isto é $\tau(s,p)=(s,p)$. \emph{Não são as duas metades da
+Obs.~\ref{fis:obs:cisao}} --- essas são $(s,a-b)$, e o $p$ é o produto, que é
+directo.
 \item[(2)] \textbf{E a equação que os liga é a mesma, escrita na aplicação em vez
 de no elemento.} Aqui vale $x^{2}=s\,x\ominus p$; ali vale
 $M^{2}=\operatorname{tr}(M)\,M\ominus\det(M)\,I$, que é o
@@ -6331,9 +6433,13 @@ Cor.~\ref{fis:cor:travunica}, veio de $\oplus$ e $\otimes$ serem lidas da
 par.} Pelo Teor.~\ref{fis:thm:duasinvol} as duas coisas excluem-se, e~(3) põe $D$
 do lado de $\mathcal{D}$. \emph{A mesma estaca que preserva a face aditiva troca
 o mínimo pelo máximo} --- não há contradição: são pares de operações diferentes.
-\item[(5)] \textbf{A profundidade não se move, e a métrica não se duplica.}
-$\operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)$, donde $d(Da,Db)=d(a,b)$:
-$D$ é \textbf{isometria} da Def.~\ref{fis:def:arvore}, e a ultramétrica do
+\item[(5)] \textbf{A profundidade não se move, e $D$ é isometria de $u$.}
+$\operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)$, donde, com
+$u=2^{-\operatorname{prof}}$,
+\[
+u(Da,Db)=2^{-\operatorname{prof}(Da,Db)}=2^{-\operatorname{prof}(a,b)}=u(a,b):
+\]
+$D$ é \textbf{isometria} da Def.~\ref{fis:def:arvore} --- e a ultramétrica do
 Lema~\ref{fis:lem:ultra} passa ao dual sem se transportar coisa nenhuma --- e
 passa \emph{porque} ela é governada pelo $\max$, que é uma das duas operações que
 $D$ troca.
@@ -6532,7 +6638,8 @@ v(\sigma^{\dagger})=h(\sigma),
 \boxed{\;h+v\ \text{é invariante por }\dagger\;}
 \]
 --- \emph{a troca cruzada da Def.~\ref{fis:def:duomorf} com uma soma conservada
-por cima.}
+por cima.} Com $h(\sigma^{\dagger})=v(\sigma)$ vem $h-v$ a mudar de sinal: é a
+linha dos saltos da Obs.~\ref{fis:obs:cisao}, e não um par novo.
 
 \smallskip\noindent\emph{E o símbolo $\dagger$ aqui não contradiz o
 Teor.~\ref{fis:thm:duasinvol}, mas só porque o par muda com ele.} Sobre as
@@ -9993,6 +10100,317 @@ Teor.~\ref{fis:thm:vizniso} e não tem varredura própria nesta parte.}
         {\code{tests/renormaliza.c} §N1--§N2; \code{tests/cone\_nulo.c} §K1--§K2; \code{tests/aranha\_n.c} §AN21--§AN22}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\part{Eletromagnetismo}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\section*{A tese desta parte}\label{fis:em-tese}
+
+\noindent Não se postula Maxwell. Não se postula uma equação de continuidade.
+Não se chama corpo à forma, no sentido da Def.~\ref{fis:def:corpos}. Não se
+promove o cruzado ao operador $\partial$. O par de escritas admite \emph{três
+leituras}, e esta parte não as funde:
+
+\[
+\boxed{\;
+(E,B)
+\ \longrightarrow\
+\begin{cases}
+E^{2}-B^{2} & \text{forma local, catalogada}\\[2pt]
+\lvert E\rvert/\lvert B\rvert & \text{metal}\\[2pt]
+E\times B & \text{leitura orientada}
+\end{cases}
+\;}
+\]
+
+O Teor.~\ref{fis:thm:kirchhoff}(3) conservou a corrente e declarou que não
+havia quantidade transportada. A Relatividade deu à energia o nome da volta
+fechada (Teor.~\ref{fis:thm:volta}) e recusou identificar a borda com um sinal
+do mundo (§\ref{fis:rel-naoderiva}). \emph{O que esta parte faz é ler o par
+já escrito, sem lhe fabricar a lei que o repositório não tem.}
+\[
+\boxed{\;\text{estado local}\;\neq\;\text{quantidade transportada}\;}
+\]
+A forma e o metal pertencem à escrita; o cruzado regista a orientação. \emph{É
+leitura, não axioma} --- a analogia com Kirchhoff é estrutural e interna, e
+não transforma a Mecânica em eletromagnetismo.
+
+\medskip\noindent Cada frase com o enunciado que a obriga:
+\begin{center}\small
+\begin{tabular}{@{}p{0.30\textwidth}p{0.38\textwidth}l@{}}
+\toprule
+ & \textbf{a estrutura} & \textbf{o que a obriga} \\
+\midrule
+o par de escritas & $(E,B)$, e não o campo $G$ da Mecânica & Def.~\ref{fis:def:em-par} \\
+a forma & $E^{2}-B^{2}$, catalogada; não é a Def.~\ref{fis:def:corpos} & Def.~\ref{fis:def:em-forma} \\
+o metal & $\lvert E\rvert/\lvert B\rvert$; a reatividade é outra leitura & Def.~\ref{fis:def:em-metal} \\
+o cruzado & $E\times B$, a metade orientada da cisão directo\,/\,cruzado & Def.~\ref{fis:def:em-fluxo}, Obs.~\ref{fis:obs:cisao} \\
+o interior & $E\cdot B$, a metade directa no mesmo par & Lema~\ref{fis:lem:em-lagrange}, Obs.~\ref{fis:obs:cisao} \\
+a forma nula & metal $=1$ $\iff$ $E^{2}-B^{2}=0$; \emph{não} é o vácuo & Lema~\ref{fis:lem:em-cone} \\
+Hodge, no plano & preserva o cruzado e inverte o metal & Teor.~\ref{fis:thm:em-hodge} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\emph{Não é uma quarta geometria da palavra.} A árvore, o
+hipercubo e o percurso já estão noutros sítios; o cruzado não se lhes cola.
+
+\section{Porque esta parte vem aqui}\label{fis:em-porque}
+
+\noindent A \textbf{Mecânica} conta a passagem e não lhe dá carga. A
+\textbf{Relatividade} fecha a volta e chama-lhe energia, e diz que as bordas não
+sabem que existe luz. A \textbf{Óptica}, a seguir, compara espelhos pela caixa
+(Def.~\ref{fis:def:caixa}). A palavra «luz» já está tomada no
+Teor.~\ref{fis:thm:massa} --- fronteira espectral, não sinal --- e esta parte
+não a reabre. Entre a volta fechada e a caixa, falta exactamente o que a
+escrita local não esgota: a orientação do par.
+
+\medskip\noindent\textbf{Vem depois da Relatividade} porque a identificação da
+borda com um sinal é realização a mais, e esta parte não a faz. \textbf{Vem
+antes da Óptica} porque o par $(E,B)$ não é um espelho da caixa: é uma escrita
+com forma, metal e cruzado, e a caixa compara $\Delta$, não $\lvert E\rvert/\lvert B\rvert$.
+
+\medskip\noindent\textbf{E a troca que esta parte lê já estava escrita.} No par
+de escritas, $\tau$ é a transposição do Teor.~\ref{fis:thm:simbolos}, neste
+domínio:
+\[
+(E,B)\;\xrightarrow{\ \tau\ }\;(B,E),\qquad
+E\cdot B\;\longmapsto\; E\cdot B,\qquad
+E\times B\;\longmapsto\; -\,E\times B.
+\]
+\emph{É a quarta linha da Obs.~\ref{fis:obs:cisao}}, realização local, não lei
+nova. A forma $E^{2}-B^{2}$, o metal e Hodge ficam de fora dessa linha: a
+observação já os recusa, e esta parte não os reconvoca. $\tau$ não espera por
+esta parte: o leitor já a encontrou no Teor.~\ref{fis:thm:antissim}.
+
+\section{O par, a forma, o metal, a leitura orientada}\label{fis:em-par}
+
+\begin{definicao}[o par de escritas]\label{fis:def:em-par}
+Um \textbf{par eletromagnético} é um par de escritas $(E,B)$ sobre a mesma
+grade. \emph{Não é o campo $G$ da Def.~\ref{fis:def:objeto}}: $G$ conta
+visitas; $(E,B)$ é uma realização com duas componentes. Duas escritas
+$(E,B)$ e $(\lambda E,\lambda B)$ com $\lambda\neq0$ são a \emph{mesma} classe
+na leitura local da Def.~\ref{fis:def:em-metal} --- como duas fracções da mesma
+razão ---, e não dois elementos. \emph{A escrita não é o objeto.}
+\end{definicao}
+
+\begin{definicao}[a forma catalogada]\label{fis:def:em-forma}
+A \textbf{forma local} do par é $E^{2}-B^{2}$. O catálogo lê-lhe a assinatura
+$(3,3,0)$: três redondas, três hiperbólicas, nenhuma colapsada, grau seis.
+\emph{Não é um corpo no sentido da Def.~\ref{fis:def:corpos}}: não é um troço
+de $I$, não tem $c_S$, não se superpõe célula a célula. A assinatura é leitura
+do catálogo, não teorema de dimensão --- a §\ref{fis:rel-naoderiva} já disse
+que $n$ entra como dado da grade.
+\end{definicao}
+
+\medskip\noindent\textbf{E $E\times B$ não entra como forma à parte.} O
+catálogo expulsa-o da lista de corpos; o motor confirma: o levantamento fecha
+$E^{2}-B^{2}$ e recusa o cruzado como linha (\code{tests/pgwire.c} §W175).
+\emph{Isso recusa uma fusão, não nomeia um operador.}
+
+\begin{definicao}[o metal do par]\label{fis:def:em-metal}
+A \textbf{leitura local} do par, quando $B\neq0$, é a razão
+\[
+\boxed{\;\frac{\lvert E\rvert}{\lvert B\rvert}\;}
+\]
+--- o \textbf{metal}. O catálogo escreve-a $\sigma=\lvert E\rvert/\lvert B\rvert$.
+\textbf{Neste documento $\sigma$ já é a estrela} (Teor.~\ref{fis:thm:estrela}),
+e a leitura local não lhe toma o sinal. O metal é o quociente; a estrela é o
+ponto onde as duas faces colam. \emph{São dois objetos.}
+
+\medskip\noindent A \textbf{reatividade} é outra leitura da forma: o catálogo
+chama reativo ao sítio $E^{2}-B^{2}\neq0$. \emph{Não é sinónimo do metal.}
+Fora do zero, a forma escala com $\lambda^{2}$ e o metal não ---
+$(\lambda E,\lambda B)$ conserva o quociente e multiplica o resíduo. O
+Lema~\ref{fis:lem:em-cone} identifica as duas \emph{só na anulação}.
+\end{definicao}
+
+\begin{definicao}[a leitura orientada]\label{fis:def:em-fluxo}
+O cruzado do par, no plano, é o determinante
+\[
+\boxed{\;E\times B\ :=\ E_{1}B_{2}-E_{2}B_{1}\;}
+\]
+--- a \textbf{leitura orientada}, a metade que lê a ordem na cisão
+directo\,/\,cruzado já escrita (Obs.~\ref{fis:obs:cisao}). Não é o operador $\partial$ da
+Def.~\ref{fis:def:op}. Não é ultramétrica, não é hipercubo, não é percurso.
+\emph{Regista a orientação da passagem; não é grandeza de estado.}
+\end{definicao}
+
+\section{O interior fecha o cruzado}\label{fis:em-lagrange}
+
+\noindent O cruzado sozinho não fecha a conta do par. Falta a outra
+componente bilinear, simétrica --- a metade directa da Obs.~\ref{fis:obs:cisao}:
+
+\begin{lema}[Lagrange do cruzado, no plano]\label{fis:lem:em-lagrange}
+Sobre duas escritas de duas coordenadas,
+\[
+\boxed{\;\lvert E\times B\rvert^{2}\;=\;\lvert E\rvert^{2}\lvert B\rvert^{2}-(E\cdot B)^{2}\;}
+\]
+--- identidade algébrica, e o domínio é este. O interior $E\cdot B$ é a
+componente que o cruzado não vê; juntos esgotam o produto das normas.
+\end{lema}
+
+\begin{proof}
+Escreva-se $E=(E_{1},E_{2})$, $B=(B_{1},B_{2})$. O cruzado é o determinante
+$E_{1}B_{2}-E_{2}B_{1}$, e o interior é $E_{1}B_{1}+E_{2}B_{2}$. Expandindo,
+\begin{align*}
+(E_{1}B_{2}-E_{2}B_{1})^{2}+(E_{1}B_{1}+E_{2}B_{2})^{2}
+&=E_{1}^{2}B_{2}^{2}-2E_{1}E_{2}B_{1}B_{2}+E_{2}^{2}B_{1}^{2}\\
+&\qquad+E_{1}^{2}B_{1}^{2}+2E_{1}E_{2}B_{1}B_{2}+E_{2}^{2}B_{2}^{2}\\
+&=(E_{1}^{2}+E_{2}^{2})(B_{1}^{2}+B_{2}^{2}).
+\end{align*}
+Os termos cruzados cancelam. \emph{Não se importou um espaço de três eixos}:
+o plano do Teor.~\ref{fis:thm:fecho} já basta.
+\end{proof}
+
+\medskip\noindent\textbf{E no plano perpendicular o cruzado satura a norma}:
+se $E\cdot B=0$, vem $\lvert E\times B\rvert=\lvert E\rvert\lvert B\rvert$.
+Isso não identifica o vácuo; identifica a cláusula em que o interior não come
+cruzado.
+
+\medskip\noindent\textbf{Um parâmetro linear $t$ no termo cruzado lê o sinal
+do discriminante que o Teor.~\ref{fis:thm:leidisc} já nomeou}, e não
+acrescenta uma quarta classe. Com $D=E\cdot B$, $C=E\times B$ e
+$A_t=\bigl(\begin{smallmatrix}D&tC\\C&D\end{smallmatrix}\bigr)$, vem
+$\Delta=4tC^{2}$ --- \emph{sem} a hipótese $\lvert\det A\rvert=1$ daquele
+teorema, logo sem a leitura expande/contrai, só a tricotomia do sinal:
+\[
+\begin{array}{lll}
+t<0 & \Delta<0\text{ se }C\neq0 & \textbf{elíptico}: o par orientado \emph{roda}\\[2pt]
+t=0 & \Delta=0 & \textbf{parabólico}: a orientação apaga-se\\[2pt]
+t>0 & \Delta>0\text{ se }C\neq0 & \textbf{hiperbólico}: o sinal de \Delta\text{ é o do catálogo}
+\end{array}
+\]
+O rotor $(s,p)=(0,1)$, $x^{2}=-1$, cai no elíptico e tem ordem $4$ --- é a
+\textbf{espiral} que o Teor.~\ref{fis:thm:estrela}(2) já escreveu. A
+\textbf{estrela} $(s,p)=(1,-1)$, $x^{2}=x+1$, cai no hiperbólico e não tem
+ordem finita. \emph{Não se deriva a estrela desta parte: ela já estava}, ao
+lado do rotor, no mesmo enunciado. O cone $\det A_t=0$ em $t=1$ é
+$\lvert D\rvert=\lvert C\rvert$, e não é a estrela nem a forma nula
+$E^{2}-B^{2}=0$.
+
+\begin{lema}[a forma nula, e o metal]\label{fis:lem:em-cone}
+Se $B\neq0$, escrevendo $E^{2}$ e $B^{2}$ pelas normas das escritas,
+\[
+\boxed{\;E^{2}-B^{2}=0\qquad\Longleftrightarrow\qquad\frac{\lvert E\rvert}{\lvert B\rvert}=1\;}
+\]
+--- a forma anula exactamente onde o metal vale um. \emph{São a mesma
+condição de anulação}, lida uma vez na forma e outra vez no quociente. Não é
+o vácuo.
+\end{lema}
+
+\begin{proof}
+$E^{2}-B^{2}=B^{2}\bigl((\lvert E\rvert/\lvert B\rvert)^{2}-1\bigr)$, e
+$B^{2}\neq0$.
+\end{proof}
+
+\medskip\noindent O catálogo pede \emph{os dois} invariantes para o vácuo da
+onda plana:
+\[
+E^{2}-B^{2}=0,\qquad E\cdot B=0.
+\]
+O lema cobre só o primeiro. O segundo é a saturação de Lagrange, e é
+independente. \emph{Chamar vácuo à forma nula sozinha seria fundir o que o
+próprio paper separa.} A identificação com o casamento $\Gamma=0$ é do
+catálogo, não deste lema.
+
+\section{Hodge, no plano}\label{fis:em-hodge}
+
+\noindent Seja $H(E,B)=(B,-E)$, sobre o par de escritas do plano. O rotor
+$R_{ij}$ do Teor.~\ref{fis:thm:fecho} age em \emph{duas coordenadas de um
+ponto} da grade. $H$ age num \emph{par de escritas}. \textbf{Não são o mesmo
+operador.} Quando os dois domínios se reduzem ao mesmo par de escalares,
+$R\colon(a,b)\mapsto(-b,a)$ e $H\colon(a,b)\mapsto(b,-a)=-R$, e as ordens
+coincidem: $R^{4}=H^{4}=\mathrm{id}$, $R^{2}=H^{2}=-\mathrm{id}$. \emph{É a
+mesma estrutura de ordem, não uma identidade de mapas na grade.} Nem $H$ é
+$\tau$: aquela tem ordem quatro, esta tem ordem dois, e a
+Obs.~\ref{fis:obs:cisao} já as separa.
+
+\begin{teorema}[Hodge no plano: o cruzado fica, o metal inverte]\label{fis:thm:em-hodge}
+Sobre escritas de duas coordenadas, com $H(E,B)=(B,-E)$ e o cruzado o
+determinante do Lema~\ref{fis:lem:em-lagrange}:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{$H$ preserva o cruzado}: $H(E)\times H(B)=E\times B$.
+\item[(2)] \textbf{$H$ inverte o metal}: $\lvert H(E)\rvert/\lvert H(B)\rvert
+=\lvert B\rvert/\lvert E\rvert$ sempre que $E\neq0$.
+\item[(3)] \textbf{$H^{2}=-\mathrm{id}$ e $H^{4}=\mathrm{id}$.} Ordem quatro
+no par. No cruzado, $H$ já é a identidade pela cláusula~(1).
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $H(E)=B$, $H(B)=-E$, logo $B\times(-E)=-B\times E=E\times B$ pela
+antissimetria do determinante no plano.
+
+(2) $\lvert B\rvert/\lvert E\rvert$ é o recíproco do metal.
+
+(3) $H(B,-E)=(-E,-B)=-(E,B)$. Uma segunda aplicação devolve o par. O cruzado
+de $(-E,-B)$ é $E\times B$.
+\end{proof}
+
+\medskip\noindent\textbf{O resto é medição, e não se promove.}
+$\nu\circ\mathrm{rev}$, a troca de normas recíprocas, a composição, e o
+cruzado a três eixos ficam no \verb|\medido|. \emph{Estado local $\neq$
+quantidade transportada} lê-se já nas cláusulas~(1) e~(2): $H$ conserva o que
+é orientado e mexe no metal. A outra metade --- metal que fica, cruzado que
+inverte --- mede-se, e não se escreve como lei.
+
+\section{O que esta parte não deriva}\label{fis:em-naoderiva}
+
+\noindent Recusas, e dizem-se porque não dizê-las seria fazê-las passar.
+
+\medskip\noindent\textbf{Maxwell, e a continuidade.} Nada aqui produz
+rotacional nem divergente. A forma
+$\partial u/\partial t+\nabla\cdot\mathbf{S}=-\mathbf{J}\cdot\mathbf{E}$
+não está na construção. \emph{Não entra.}
+
+\medskip\noindent\textbf{A forma como corpo, o cruzado como $\partial$, o
+cruzado como geometria.} $E^{2}-B^{2}$ não é a Def.~\ref{fis:def:corpos}.
+$E\times B$ não é a Def.~\ref{fis:def:op}. Não se lhe inventa uma quarta
+leitura da palavra.
+
+\medskip\noindent\textbf{$H$ como $R_{ij}$.} A estrutura de ordem coincide no
+par de escalares; os domínios não.
+
+\medskip\noindent\textbf{$H$ como $\tau$.} Ordem quatro contra ordem dois. A
+Obs.~\ref{fis:obs:cisao} já as separa.
+
+\medskip\noindent\textbf{A forma nula como vácuo.} O vácuo do catálogo pede
+$E^{2}-B^{2}=0$ \emph{e} $E\cdot B=0$. O lema cobre só a primeira.
+
+\medskip\noindent\textbf{A dimensão três, $\Gamma=0$, $\mathrm{FP}=1$, e
+$\Sigma h=\log\det G$.} A assinatura $(3,3,0)$ é leitura do catálogo
+(\code{tests/assinatura\_corpos.c}). $\Gamma$ e $\mathrm{FP}$ são o contrato
+do catálogo, não teoremas. $\Sigma h$ não tem medidor nesta parte.
+
+\section{O que continua pergunta}\label{fis:em-pergunta}
+
+\noindent Três, e ficam perguntas:
+\[
+\Gamma=0,\qquad \mathrm{FP}=1,\qquad \Sigma h=\log\det G.
+\]
+\emph{Não se promovem.} A forma diz o que fica; o cruzado diz o que passa ---
+e isso é a leitura desta parte, não uma lei nova.
+
+\medido{\code{tests/travessia.c} §T6: no plano, Lagrange exacta em $2304/2304$
+pares, e o determinante troca de sinal sob $(E,B)\mapsto(B,E)$; Hodge no
+fluido de oito passos, $E'\times B'=E\times B$ em $8/8$ e troca de normas em
+$8/8$; $H^{2}=-I$, $H^{4}=I$. A mapa dos recíprocos $\lvert E^{*}\rvert=1/\lvert B\rvert$
+não é o laço dos $2304$ pares, e não se promove. §T4: o fluido tem
+$E\perp B$ e cruzado não nulo.
+\code{tests/pgwire.c} §W175: $E^{2}-B^{2}$ fecha no banco; $E\times B$ saiu do
+lote. \code{tests/assinatura\_corpos.c} §S1: a forma lê $(3,3,0)$.
+\code{tests/quebra.c} §Q4: o metal é a classe da ordem; o par é a escrita.
+\code{tools/\_probe\_cruzado\_t.c}: $t$ no cruzado, $6400$ pares do plano;
+$t<0$ elíptico $6016$, $t=0$ parabólico $6400$, $t>0$ hiperbólico $6016$;
+rotor $(0,1)$ ordem $4$, estrela $(1,-1)$ hiperbólica sem ordem finita,
+troca $(0,-1)$ ordem $2$; Cassini $10/10$ em Fibonacci; o cone
+$\lvert D\rvert=\lvert C\rvert$ em $t=1$ dá $640$ pares, e não é a estrela.}
+
+\colunas{Lema~\ref{fis:lem:em-lagrange},~\ref{fis:lem:em-cone}; Teor.~\ref{fis:thm:em-hodge}; Def.~\ref{fis:def:em-forma},~\ref{fis:def:em-metal},~\ref{fis:def:em-fluxo}}
+        {o par, a forma $E^{2}-B^{2}$, o metal, a leitura orientada; Hodge no plano}
+        {\code{tests/travessia.c} §T4, §T6; \code{tests/pgwire.c} §W175; \code{tests/assinatura\_corpos.c} §S1; \code{tests/quebra.c} §Q4; \code{tools/\_probe\_cruzado\_t.c}}
+
+% ═══════════════════════════════════════════════════════════════════════════
 \part{Óptica}
 % ═══════════════════════════════════════════════════════════════════════════
 
@@ -13270,6 +13688,9 @@ Teor.~\ref{fis:thm:gato} e \ref{fis:thm:bitunico} \code{papers/aranha.c} e
 \code{tests/neuronio.c};
 a caixa e a óptica \code{tests/pgwire.c} §W116, §W211--§W215, §W217--§W220,
 §W222--§W225 e \code{banco/sql.c};
+o eletromagnetismo \code{tests/travessia.c} §T4, §T6, \code{tests/pgwire.c} §W175,
+\code{tests/assinatura\_corpos.c} §S1, \code{tests/quebra.c} §Q4 e
+\code{tools/\_probe\_cruzado\_t.c};
 o plano \code{tests/aranha\_g.c} §AG1--§AG11 e \code{tests/aranha\_inversa.c}
 §AI1--§AI7.}
 
