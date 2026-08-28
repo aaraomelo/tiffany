@@ -152,8 +152,8 @@ III & preserva objecto/medida; \emph{não} isometria automática de $u$
 (\fis{fis:prop:travessia}{travessia}) \\
 duomorfismo $\oplus/\otimes$ no pipe &
 III & face operacional (\code{fis:def:duomorf}); $D$ canónico não demonstrado \\
-Hopfield / Hebb & III & $G_{\mathrm{real}}>1$, combinação aberta --- hipótese extra \\
-§RG6 / \code{overwrite} & III & política host; combinação entre incidências aberta \\
+Hopfield / Hebb & III & $G_{\mathrm{real}}>1$, $C$ sem nome --- hipótese extra \\
+§RG6 / \code{overwrite} & III & política host; lei entre incidências não determinada \\
 $W_s/W_a$ & III & eixo \code{fis:thm:duastorres}; distinto de $\oplus/\otimes$ \\
 \bottomrule
 \end{tabular}}
@@ -560,8 +560,8 @@ experimento (até §RG5).
 \subsubsection{§RG6 --- Quatro focos sobre estado compartilhado}\label{redes:rg6}
 
 \noindent\textbf{Estatuto \textbf{III} (\S\ref{redes:troca}).} Partilhar arena e slots
-não demonstra troca dual $R,R^{\dagger}$ nem isometria de $u$; a combinação entre
-incidências concorrentes permanece aberta (Prop.~\ref{redes:prop-troca}).
+não demonstra troca dual $R,R^{\dagger}$ nem isometria de $u$; a lei entre
+incidências concorrentes não é determinada (Prop.~\ref{redes:prop-troca}).
 
 \medskip\noindent\textbf{Primeira experiência com $X$ real.} O medidor
 \code{tests/redes\_multifocal\_io.js} (\code{lib/arena\_multifocal.mjs}) faz quatro
@@ -700,9 +700,9 @@ ausência de matriz $W$.
 \downarrow\\[2pt]
 \text{overwrite}\\[2pt]
 \downarrow\\[2pt]
-\text{lei de combinação?}\\[2pt]
+\text{família medida (\code{combinacao.tex})}\\[2pt]
 \downarrow\\[2pt]
-\textbf{ABERTA}\\[2pt]
+$C$\ \text{sem nome}\\[2pt]
 \downarrow\\[2pt]
 \textbf{P6}\ \text{(TRAVADA)}
 \end{array}
@@ -748,10 +748,12 @@ após o teorema). \code{corpo\_analitico.tex} \code{thm:central}: Hurwitz conta,
 Lebesgue transporta ordem. Ligar \code{duomorfismo-pipe.md} «$m{=}0$» ao parâmetro metal é
 \emph{analogia documental}, não teorema do host §RG6.
 
-\medskip\noindent\textbf{Pergunta aberta (fronteira já registada).}
+\medskip\noindent\textbf{Pergunta registada (fronteira medida, $C$ sem nome).}
 Quando dois focos incidem na \emph{mesma} representação (\S\ref{redes:rg6}), a arquitetura
 \code{m=0}/\code{m=1}/Parseval/$\nu\circ\nu$ \textbf{não} determina a operação de combinação:
-overwrite sim; lei entre incidências concorrentes \textbf{não}. \textbf{P6 permanece TRAVADA.}
+overwrite sim; lei entre incidências concorrentes \textbf{não}.
+A família de §\ref{redes:fronteira} foi executada em \code{combinacao.tex};
+$C$ permanece sem nome. \textbf{P6 permanece TRAVADA.}
 Não inferir Hebb, soma, Hopfield, nem causalidade $m{\to}P6$.
 
 \subsection{Campo $G_{\mathrm{visit}}$ na arena}
@@ -904,7 +906,9 @@ antissimetria sozinha. \code{tests/hopfield.c} §F10: somar torres \textbf{não}
 
 \noindent Este paper fecha como \textbf{interface}: árvore $\to$ campo $\to$ quatro
 focos $\to$ conversação $\to$ incidência conjunta $\to$ overwrite. A pergunta que
-§RG6 \emph{produziu} --- e não respondeu --- é a fronteira experimental seguinte.
+§RG6 \emph{produziu} --- e não respondeu --- foi medida noutro paper:
+\code{combinacao.tex} (commit \code{30be75d1}; bateria \code{231/231}, zero falhas).
+\textbf{Não} é experimento futuro deste documento.
 
 \medskip\noindent\textbf{Overwrite observado (Caso C).}
 \[
@@ -915,11 +919,12 @@ X_0 \xrightarrow{F_1} X_1 \xrightarrow{F_2} X_2,
 Isto é \textbf{overwrite} --- política do suporte \code{OFF\_IN}, não lei de combinação.
 
 \caixa{%
-  duas incidências $\longrightarrow$ mesma representação $\longrightarrow$ \textbf{?}%
+  duas incidências $\longrightarrow$ mesma representação $\longrightarrow$ overwrite (política);\\
+  $C$ \textbf{sem nome}%
 }
 
-\medskip\noindent\textbf{Família experimental proposta} (sem chamar nenhuma operação de
-Hebb antecipadamente):
+\medskip\noindent\textbf{Família experimental --- executada em \code{combinacao.tex}}
+(sem chamar nenhuma operação de Hebb):
 {\small
 \[
 \begin{array}{c}
@@ -930,30 +935,39 @@ Hebb antecipadamente):
 \text{recuperação}
 \end{array}
 \]}
-Medir \emph{qual propriedade aparece} em cada degrau --- comutatividade, idempotência,
-conservação de medida, efeito em $G_{\mathrm{real}}$ --- antes de nomear a operação.
+O que se mediu em cada degrau --- comutatividade, idempotência, conservação de
+medida, efeito em $G_{\mathrm{real}}$ --- \emph{não} nomeou a operação.
 
-\medskip\noindent\textbf{P6 --- TRAVADA; pergunta algébrica reservada.}
-Quando (e só quando) a família experimental exigir, abre-se a pergunta
+\medskip\noindent\textbf{Resultado autorizado} (classificação, não lei).
+\caixa{%
+  a ordem lex restringe a classe de realizações;\\
+  $\partial$ não selecciona uma realização%
+}
+Isto \textbf{não} determina $C\colon X\times X\to X$ e \textbf{não} promove
+\code{lexMax}.
+
+\medskip\noindent\textbf{P6 --- TRAVADA; $C$ sem nome.}
+A família experimental \textbf{já correu} e \textbf{não} exigiu nomear
 \[
-C\colon X\times X \to X,
-\qquad
-C(x_1,x_2)=?
+C\colon X\times X \to X.
 \]
-com requisitos mensuráveis: comutatividade $C(a,b)=C(b,a)$? idempotência $C(a,a)=a$?
-associatividade? conservação de medida? compatibilidade com $\pi$? efeito em
-$G_{\mathrm{real}}$? operação dual/inversa? \emph{Se} dessa análise sair uma soma
-Hebbiana, Hopfield entra como \textbf{realização de uma lei já encontrada} --- não
-como peça colocada porque «redes neurais precisam de Hopfield».
+$C$ permanece \textbf{sem determinação}. Requisitos mensuráveis (comutatividade,
+idempotência, associatividade, conservação de medida, compatibilidade com $\pi$,
+efeito em $G_{\mathrm{real}}$, operação dual/inversa) \emph{restringiram a classe};
+não identificaram a lei. \emph{Se} uma medição posterior determinar $C$ e dessa
+análise sair uma soma Hebbiana, Hopfield entra como \textbf{realização de uma lei
+já encontrada} --- não como peça colocada porque «redes neurais precisam de Hopfield».
 
 \caixa{%
-  qual lei de combinação é compatível com a arquitetura já construída?%
+  $C$ sem nome e sem determinação;\\
+  \textbf{P6 TRAVADA}%
 }
 
 \medskip\noindent\textbf{Escada medida deste documento.}
 \caixa{%
   $G=1$ $\to$ $G_{\mathrm{visit}}$ $\to$ $G_{\mathrm{real}}$ $\to$ $G>1$ $\to$
-  múltiplos focos $\to$ mesma representação $\to$ overwrite $\to$ \textbf{P6 (TRAVADA)}%
+  múltiplos focos $\to$ mesma representação $\to$ overwrite $\to$
+  família medida (\code{combinacao.tex}) $\to$ $C$ sem nome $\to$ \textbf{P6 (TRAVADA)}%
 }
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -961,7 +975,7 @@ como peça colocada porque «redes neurais precisam de Hopfield».
 
 \noindent\textbf{Não é lacuna acidental.} Hopfield, Hebb e P6 (\mf{postulados}{P6})
 permanecem \textbf{fora} do pipe e da bateria RG --- entrada futura \emph{depois} da
-lei $C$ (§\ref{redes:fronteira}).
+lei $C$, que permanece sem nome (§\ref{redes:fronteira}).
 
 \begin{center}
 \begin{minipage}{0.80\textwidth}
@@ -969,13 +983,13 @@ lei $C$ (§\ref{redes:fronteira}).
 {\small
 \code{pipe actual (RG0--RG6 FECHADO)}\\
 $\downarrow$\\
-overwrite determinado; combinação \textbf{ABERTA}\\
+overwrite determinado; família experimental medida (\code{combinacao.tex})\\
 $\downarrow$\\
-família experimental (§\ref{redes:fronteira})\\
+ordem lex restringe a classe; $\partial$ não selecciona realização\\
 $\downarrow$\\
-pergunta $C(x_1,x_2)=?$\\
+$C$ sem nome / sem determinação\\
 $\downarrow$\\
-\textbf{P6 / Hopfield --- só se a lei sair da medição}}
+\textbf{P6 / Hopfield TRAVADA --- só se a lei sair da medição}}
 \end{minipage}
 \end{center}
 
@@ -989,6 +1003,8 @@ $\downarrow$\\
 \code{tests/redes\_g.js} §RG0--§RG3 (9--10 asserts);\\
 \code{tests/redes\_multifocal.js} §RG4--§RG5 (13 asserts);\\
 \code{tests/redes\_multifocal\_io.js} §RG6 FECHADO (37 asserts; \code{p6:'TRAVADA'}).\\
+Família da fronteira (\S\ref{redes:fronteira}): medida em \code{combinacao.tex}
+(\code{30be75d1}; \code{231/231}) --- \emph{não} desta bateria RG; $C$ sem nome.\\
 \code{tests/neuronio.c}: cisão $\oplus$ + soma $\sum$; volta
 $\oslash\otimes=\mathrm{id}$ em dimensões $2$--$8$; bit único desenha $\sigma$.\\
 \code{tests/hopfield.c} §F1--§F14 \emph{(medidor separado; fora da bateria RG)}:
