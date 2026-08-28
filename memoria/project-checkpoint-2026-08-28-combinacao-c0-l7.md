@@ -124,10 +124,12 @@ papers/combinacao.tex          — paper fechado
 papers/redes.tex               — §RG6 fechado (não tocar)
 lib/arena_combinacao.mjs       — C0–L7, PROBE_REDUCER, CANDIDATO
 tests/redes_combinacao.js      — 174 asserts
-tools/auditoria_rg6.bat        — wrapper da bateria
 memoria/redes-pipe.md          — pipe RG6
 memoria/duomorfismo-pipe.md    — faces ⊕/⊗
 ```
+
+Nota: `tools/auditoria_rg6.bat` pode existir no disco como wrapper local, mas está
+**gitignoreado** — a verificação canónica é o `node` abaixo.
 
 ## Como verificar
 
