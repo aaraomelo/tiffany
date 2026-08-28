@@ -1,4 +1,4 @@
-/* tests/redes_combinacao.js — C0–C8, S0–S4, R0–R4, D0–D3, K0–K7, L0–L7 (fronteira RG6 · P6 TRAVADA).
+/* tests/redes_combinacao.js — C0–C8, S0–S4, R0–R4, D0–D3, K0–K7, L0–L7, M1–M2, E_∂ (fronteira RG6 · P6 TRAVADA).
  *   node tests/redes_combinacao.js
  *
  *   C0–C8  caracterização (lei C aberta)
@@ -7,9 +7,11 @@
  *   D0–D3  sonda do cruzado (sem postular distributividade)
  *   K0–K7  caracterização dos candidatos lexMax / rectCell
  *   L0–L7  invariantes do suporte — classe admissível de f
+ *   M1–M2  autoridade da ordem lex sobre A_min (isolada de ∂; não promove lexMax)
+ *   E_∂    covariância sob a dobra (isolada da ordem lex; não promove lexMax)
  *
  *   Régua: fis:def:incid, fis:thm:zetamu, fis:thm:troca-realizacao, fis:def:duomorf,
- *          fis:thm:central, fis:thm:trial; catalogo.tex trio S,ζ,μ.
+ *          fis:thm:trial; catalogo.tex trio S,ζ,μ; thm:rn (ordem). Central fora.
  */
 'use strict'
 import {
@@ -62,6 +64,9 @@ import {
   classificarDependenciaCruzado,
   isEncodingLike,
   cruzadoReport,
+  retanguloCentral,
+  retanguloPi,
+  encodeRectCell,
   K_PAYLOADS,
   CANDIDATO,
   runK0Repeticao,
@@ -79,6 +84,16 @@ import {
   runLInvariantes,
   runLBateriaInvariantes,
   analisarSelecaoInvariantes,
+  M_CADEIA,
+  precLex,
+  runM0ControleOrdem,
+  runM1MonoArg1,
+  runM2MonoArg2,
+  runMBateriaOrdem,
+  E_ALFABETO,
+  dobraPartial,
+  runE0ControleDobra,
+  runEBateriaDobra,
 } from '../lib/arena_combinacao.mjs'
 
 let falhas = 0, feitas = 0
@@ -381,6 +396,30 @@ ok('§D3 todos: gReal em células', d3keep1.celulas.x11.gReal > 0)
 ok('§D3 todos: timeline registada', d3keep1.celulas.x11.timeline.length >= 4)
 ok('§D3 todos: lei C null (não postulada)', d3lexMax.resposta === 'sim_candidato')
 
+// ── rectângulo I×X: completar a estrutura (fis:thm:central + dual 𝔐/ℰ) ─
+const rectDiag = retanguloCentral('X1', 'X1')
+const rectAB = retanguloCentral('A0', 'B0')
+const rectBA = retanguloCentral('B0', 'A0')
+
+ok('§rect diagonal: fecha Σ_dom+Σ_im=|I|·|X|', rectDiag.fecha && rectDiag.sDom + rectDiag.sIm === rectDiag.area)
+ok('§rect diagonal: área 2, corte 2+0', rectDiag.area === 2 && rectDiag.sDom === 2 && rectDiag.sIm === 0)
+ok('§rect diagonal: massa=1 energia=4 (G=2, régua²)', rectDiag.massa === 1 && rectDiag.energia === 4 && rectDiag.G[0] === 2)
+ok('§rect distinto: fecha 3+1=4', rectAB.fecha && rectAB.sDom === 3 && rectAB.sIm === 1 && rectAB.area === 4)
+ok('§rect distinto: vazio massa=0 energia=espaço', rectAB.vazio && rectAB.massa === 0 && rectAB.energia === rectAB.nI)
+ok('§rect troca: área e Σ não se movem', rectAB.sDom === rectBA.sDom && rectAB.sIm === rectBA.sIm && rectAB.area === rectBA.area)
+ok('§rect troca: célula orienta (duas faces)', rectAB.celula !== rectBA.celula)
+ok('§rect dual: ℰ=ΣG², 𝔐=|I|-|X|', rectAB.energia === 1 + 1 && rectAB.massa === rectAB.nI - rectAB.nX)
+ok('§rect encode: duas metades', encodeRectCell('X1', 'X1') === 'dom:le|im:le#2+0=2#m1e4')
+ok('§rect encode distinto A0,B0', encodeRectCell('A0', 'B0') === 'dom:le|im:gt#3+1=4#m0e2')
+ok('§rect π: I são índices, não payloads', rectAB.I.join('|') === '0|1' && rectAB.pi.join('|') === 'A0|B0')
+ok('§rect π ocupado é sobrejectiva', rectAB.sobrejectiva && rectDiag.sobrejectiva)
+
+const rectCheio = retanguloPi(['B0', 'C0'], ['A0', 'B0', 'C0', 'D0'])
+ok('§rect I×X cheio: área |I|·|X|=8', rectCheio.nI === 2 && rectCheio.nX === 4 && rectCheio.area === 8)
+ok('§rect I×X cheio: fecha 5+3=8 (células vazias entram)', rectCheio.fecha && rectCheio.sDom === 5 && rectCheio.sIm === 3)
+ok('§rect I×X cheio: 𝔐=|I|-|supp| não |I|-|X|', rectCheio.massa === 0 && rectCheio.nSupp === 2 && !rectCheio.sobrejectiva)
+ok('§rect I×X cheio: ℰ=ΣG² só no suporte', rectCheio.energia === 2 && rectCheio.G.join('|') === '0|1|1|0')
+
 // ── K0–K7 caracterização dos candidatos ──────────────────────────────────
 const kLex = runKCaracterizacao(CANDIDATO.lexMax)
 const kRect = runKCaracterizacao(CANDIDATO.rectCell)
@@ -388,7 +427,7 @@ const k7 = runK7ComparacaoCandidatos()
 const kBat = runKBateriaCandidatos()
 
 ok('§K0 lexMax: f(X1,X1)=X1', kLex.K0.fxx === 'X1')
-ok('§K0 rectCell: f(X1,X1) medido', kRect.K0.fxx === 'dom:le|im:le')
+ok('§K0 rectCell: f(X1,X1) rectângulo completo', kRect.K0.fxx === 'dom:le|im:le#2+0=2#m1e4')
 
 ok('§K1 lexMax: comutativa', kLex.K1.comuta)
 ok('§K1 lexMax: f(x1,x2)=X1', kLex.K1.fx1x2 === 'X1')
@@ -448,6 +487,73 @@ ok('§L seleção: nenhum elimina lexMax', sel.eliminaLexMax.length === 0)
 ok('§L não-unicidade: ambos admissíveis em L0+L1', lLex.L0 && lRect.L0 && lLex.L1 && lRect.L1)
 ok('§L bateria: lei C null', lBat.leiC === null)
 
+// ── M1–M2 autoridade da ordem lex (isolada de ∂) ─────────────────────
+const mBat = runMBateriaOrdem()
+const mReg = mBat.registro
+const mCtrl = mBat.m0
+
+ok('§M0 cadeia total estrita crescente', mCtrl.totalEstrita)
+ok('§M0 A0≺B0≺C0≺D0', precLex('A0', 'B0') && precLex('B0', 'C0') && precLex('C0', 'D0'))
+ok('§M0 cadeia canónica', M_CADEIA.join('|') === 'A0|B0|C0|D0')
+
+ok('§M1 lexMax monótona no 1º argumento', mBat.lexMax.M1.mono)
+ok('§M2 lexMax monótona no 2º argumento', mBat.lexMax.M2.mono)
+ok('§M1 lexMax 0 violações / 24', mBat.lexMax.M1.nViolacoes === 0 && mBat.lexMax.M1.nAmostras === 24)
+ok('§M2 lexMax 0 violações / 24', mBat.lexMax.M2.nViolacoes === 0 && mBat.lexMax.M2.nAmostras === 24)
+
+ok('§M1 rectCell não monótona no 1º', !mBat.rectCell.M1.mono)
+ok('§M2 rectCell não monótona no 2º', !mBat.rectCell.M2.mono)
+ok('§M1 rectCell violações > 0', mBat.rectCell.M1.nViolacoes > 0)
+ok('§M2 rectCell violações > 0', mBat.rectCell.M2.nViolacoes > 0)
+
+ok('§M separa lexMax de rectCell', mBat.separa)
+ok('§M registro M1: lexMax sim, rectCell não', mReg.M1.lexMax && !mReg.M1.rectCell)
+ok('§M registro M2: lexMax sim, rectCell não', mReg.M2.lexMax && !mReg.M2.rectCell)
+ok('§M registro K: lexMax comut+assoc+idempot+bemDef', mReg.K.lexMax.comutativa && mReg.K.lexMax.associativa && mReg.K.lexMax.idempotente && mReg.K.lexMax.bemDefinida)
+ok('§M registro K: rectCell bemDef, não comut', mReg.K.rectCell.bemDefinida && !mReg.K.rectCell.comutativa)
+ok('§M registro K7: leis distintas', mReg.K.K7leisDistintas)
+ok('§M bateria: lei C null', mBat.leiC === null)
+ok('§M não promove lexMax', mBat.lexMax.M1.leiC === null && mBat.congelado.naoPromove.includes('≠ C'))
+
+// ── E_∂ covariância sob a dobra (isolada da ordem lex) ───────────────
+const e0 = runE0ControleDobra()
+const eBat = runEBateriaDobra()
+const eReg = eBat.registro
+const registroMEK = {
+  M1: mReg.M1,
+  M2: mReg.M2,
+  E_partial: eReg.E_partial,
+  K: mReg.K,
+}
+
+ok('§E0 ∂²=id', e0.involucao)
+ok('§E0 alfabeto fecha', e0.fecha)
+ok('§E0 sem ponto fixo', e0.semPontoFixo)
+ok('§E0 D: P0↔P3, P1↔P2', e0.imagens.join('|') === 'P3|P2|P1|P0')
+ok('§E0 alfabeto canónico', E_ALFABETO.join('|') === 'P0|P1|P2|P3')
+ok('§E0 D(D(P0))=P0', dobraPartial(dobraPartial('P0')) === 'P0')
+
+ok('§E_∂ lexMax aplicável no carrier', eBat.lexMax.sintese.aplicavel)
+ok('§E_∂ lexMax não covariante', !eBat.lexMax.sintese.covariante)
+ok('§E_∂ lexMax 4/16 iguais (diagonal)', eBat.lexMax.sintese.nIguais === 4 && eBat.lexMax.sintese.nAmostras === 16)
+ok('§E_∂ lexMax iguais só na diagonal', eBat.lexMax.E.amostras.filter((a) => a.igual).every((a) => a.x === a.y))
+
+ok('§E_∂ rectCell não aplicável (imagem fora do carrier)', !eBat.rectCell.sintese.aplicavel)
+ok('§E_∂ rectCell 16/16 fora do suporte', eBat.rectCell.sintese.nFora === 16)
+ok('§E_∂ rectCell não covariante', !eBat.rectCell.sintese.covariante)
+
+ok('§E_∂ bateria: lei C null', eBat.leiC === null)
+ok('§E_∂ não promove lexMax', eBat.congelado.naoPromove.includes('≠ C'))
+
+ok('§(M,E,K) lexMax: M1∧M2 e não E_∂', registroMEK.M1.lexMax && registroMEK.M2.lexMax && !registroMEK.E_partial.lexMax.covariante)
+ok('§(M,E,K) rectCell: nem M nem E_∂', !registroMEK.M1.rectCell && !registroMEK.M2.rectCell && !registroMEK.E_partial.rectCell.covariante)
+ok('§(M,E,K) K7 leis distintas', registroMEK.K.K7leisDistintas)
+ok('§(M,E,K) lei C null', mBat.leiC === null && eBat.leiC === null)
+
+ok('§resultado lexMax (M1,M2,E∂)=(1,1,0)', registroMEK.M1.lexMax === true && registroMEK.M2.lexMax === true && registroMEK.E_partial.lexMax.covariante === false)
+ok('§resultado rectCell M1=M2=0, E∂ não aplicável', registroMEK.M1.rectCell === false && registroMEK.M2.rectCell === false && registroMEK.E_partial.rectCell.aplicavel === false)
+ok('§resultado: ordem restringe; ∂ não selecciona', registroMEK.M1.lexMax && !registroMEK.M1.rectCell && !registroMEK.E_partial.lexMax.covariante)
+
 console.log('#C0', JSON.stringify(repC0))
 console.log('#C1', JSON.stringify(repC1))
 console.log('#C2', JSON.stringify(repC2))
@@ -483,6 +589,25 @@ console.log('#CRUZADO fronteira', JSON.stringify({
   },
   epistemologia: 'não chamar distributividade antes da medição',
   referencias: ['fis:thm:central', 'fis:thm:trial', 'fis:def:duomorf'],
+  p6: 'TRAVADA',
+}))
+console.log('#RECTANGULO', JSON.stringify({
+  diagonal: { fecha: rectDiag.fecha, sDom: rectDiag.sDom, sIm: rectDiag.sIm, massa: rectDiag.massa, energia: rectDiag.energia, I: rectDiag.I, pi: rectDiag.pi },
+  distinto: { AB: { celula: rectAB.celula, sDom: rectAB.sDom, sIm: rectAB.sIm, I: rectAB.I }, BA: { celula: rectBA.celula, sDom: rectBA.sDom, sIm: rectBA.sIm } },
+  cheio: { fecha: rectCheio.fecha, area: rectCheio.area, sDom: rectCheio.sDom, sIm: rectCheio.sIm, nX: rectCheio.nX, nSupp: rectCheio.nSupp },
+  encode: { xx: encodeRectCell('X1', 'X1'), AB: encodeRectCell('A0', 'B0') },
+}))
+console.log('#RECTANGULO fronteira', JSON.stringify({
+  mensagem: 'rectCell: rectângulo I×X completo (não só a célula)',
+  congelado: {
+    metade1: 'célula: x≤f(i) ou f(i)<x — fis:thm:central(2)',
+    metade2: 'Σ_dom+Σ_im=|I|·|X| — fis:thm:central(1), células vazias incluídas',
+    pi: 'π:I→X (fis:def:objeto): I=índices, X=células; X omisso = im π',
+    dual: '𝔐=Σ(G−1) grau1; ℰ=ΣG² grau2 — massa é energia pela régua ao quadrado',
+    troca: 'trocar as duas leituras não move o rectângulo',
+    naoC: 'estrutura do candidato; não selecciona C',
+  },
+  referencias: ['fis:thm:central', 'fis:thm:tresgraus'],
   p6: 'TRAVADA',
 }))
 console.log('#K0-K7', JSON.stringify({
@@ -522,6 +647,48 @@ console.log('#INVARIANTES fronteira', JSON.stringify({
   },
   epistemologia: 'não escolher C; mapear o espaço de respostas',
   referencias: ['catalogo.tex trio incidência', 'lib/incidencia.h', 'fis:thm:zetamu', 'fis:thm:troca-realizacao'],
+  p6: 'TRAVADA',
+}))
+console.log('#M1-M2', JSON.stringify({
+  m0: mBat.m0,
+  lexMax: mBat.lexMax.sintese,
+  rectCell: mBat.rectCell.sintese,
+  registro: mReg,
+  separa: mBat.separa,
+  leiC: mBat.leiC,
+}))
+console.log('#ORDEM fronteira', JSON.stringify({
+  mensagem: 'M1–M2: autoridade da ordem lex sobre A_min (isolada de ∂)',
+  congelado: mBat.congelado,
+  registro: '(M1, M2, K)',
+  epistemologia: 'medir primeiro; não axiomatizar a partir do candidato; não promover lexMax',
+  referencias: ['thm:rn', 'K0–K7', 'L0–L7'],
+  p6: 'TRAVADA',
+}))
+console.log('#E_partial', JSON.stringify({
+  e0: { involucao: eBat.e0.involucao, fecha: eBat.e0.fecha, semPontoFixo: eBat.e0.semPontoFixo, imagens: eBat.e0.imagens },
+  lexMax: eBat.lexMax.sintese,
+  rectCell: eBat.rectCell.sintese,
+  registro: eReg.E_partial,
+  leiC: eBat.leiC,
+}))
+console.log('#DOBRA fronteira', JSON.stringify({
+  mensagem: 'E_∂: covariância sob a dobra (isolada da ordem lex)',
+  congelado: eBat.congelado,
+  registro: '(M1, M2, E_∂, K)',
+  tuplo: registroMEK,
+  epistemologia: 'independência é resultado válido; não misturar lex e ∂; não promover lexMax',
+  referencias: ['fis:thm:troca-realizacao'],
+  p6: 'TRAVADA',
+}))
+console.log('#RESULTADO experimental', JSON.stringify({
+  tuplo: '(M1, M2, E_∂, K)',
+  lexMax: { M1: 1, M2: 1, E_partial: 0 },
+  rectCell: { M1: 0, M2: 0, E_partial: 'nao_aplicavel' },
+  frase: 'a ordem lex restringe a classe de realizações; ∂ não selecciona uma delas',
+  metodo: 'estrutura restringe a realização, mas não determina a lei',
+  independentes: 'M1∧M2 em lexMax ⇏ E_∂',
+  leiC: null,
   p6: 'TRAVADA',
 }))
 console.log('#REDUCAO fronteira', JSON.stringify({
