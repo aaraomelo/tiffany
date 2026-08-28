@@ -1,0 +1,603 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  papers/combinacao.tex — A FRONTEIRA DA COMBINAÇÃO
+%
+%  Regista a família experimental C0–C8 (lib/arena_combinacao.mjs) sem definir C.
+%  Continuação de papers/redes.tex (§RG6 FECHADO); não altera redes.tex.
+%    cd papers && pdflatex combinacao.tex
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{array}\usepackage{xcolor}
+\usepackage[htt]{hyphenat}
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\caixa}[1]{%
+  \par\smallskip\noindent
+  \begin{center}
+  \fbox{\begin{minipage}{0.94\textwidth}\centering\smallskip #1\smallskip\end{minipage}}
+  \end{center}\smallskip}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newcommand{\fis}[2]{\textbf{#2}~\textnormal{(\code{#1})}}
+\newcommand{\redes}[1]{\code{redes.tex} §\textit{#1}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\providecommand{\interfacen}[1]{}
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{hipotese}[teorema]{Hipótese experimental}
+\renewcommand{\proofname}{Demonstração}
+
+\input{gkcapa}
+
+\begin{document}
+\interfacen{7}
+\gkcapa{A Fronteira da Combinação}
+       {overwrite, cópia, acumulação e a classe admissível de combinações}
+       {C0--L7: a máquina encontrou uma \emph{classe}, não uma lei única}
+\maketitle
+
+\begin{abstract}\noindent
+\textbf{De onde parte.} De \code{papers/redes.tex} §RG6: a arquitectura host determina
+\textbf{overwrite} quando múltiplos focos incidem na mesma representação, mas \textbf{não}
+determina uma lei $C(x_1,x_2)$ entre incidências concorrentes. Este documento regista a
+escada experimental \textbf{C0--L7} (\code{lib/arena\_combinacao.mjs}) --- do que o suporte
+\emph{faz} até à classe de combinações que a infraestrutura \emph{admite}, sem postular $C$.
+
+\medskip\noindent\textbf{Tese final.}
+\[
+\boxed{\text{a máquina encontrou uma \textbf{classe} de combinações,
+não uma lei única de combinação.}}
+\]
+Existência de $f\colon X\times X\to X$ bem definido e bilateralmente dependente:
+\textbf{sim} (D0--D3). Unicidade: \textbf{não} (K0--K7). A incidência $\zeta/\mu/S$ determina
+acumulação/deconvolução, mas \textbf{não} determina por si só a lei de combinação (L7).
+
+\medskip\noindent\textbf{Verificação.}
+\code{tests/redes\_combinacao.js} (174 asserts);
+\code{tools/auditoria\_rg6.bat} (bateria completa, após §RG6).
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A regra deste documento}\label{comb:regra}
+
+\noindent\textbf{Princípio.}
+\caixa{%
+  não procurar a lei que queremos;\\
+  procurar a lei que o suporte permite.%
+}
+
+\medskip\noindent\textbf{Proibições explícitas.}
+\begin{enumerate}\itemsep3pt
+\item \textbf{Não definir} $C\colon X\times X\to X$ neste paper;
+\item \textbf{Não rotular} overwrite como interferência, Hebb, soma ou Hopfield;
+\item \textbf{Não confundir} $G_{\mathrm{event}}$ com $G_{\mathrm{state}}^{\mathrm{surv}}$
+(\redes{RG6});
+\item \textbf{Não confundir} acumulação $A$ (dois slots físicos) com combinação $C$
+(um slot, dois payloads);
+\item \textbf{Não alterar} \code{redes.tex} --- cumpriu o papel de interface;
+\item \textbf{Não abrir P6} --- reservada para comparação futura (§\ref{comb:hebb}).
+\end{enumerate}
+
+\medskip\noindent\textbf{O que se mede.} Protocolos nomeados C0--C8 sobre a arena
+multifocal (\code{lib/arena\_multifocal.mjs}): quatro focos, célula lógica $X$,
+slots \code{OFF\_IN}/\code{OFF\_OUT}, registo de eventos, overwrites e métricas $G$.
+Cada protocolo responde uma pergunta \emph{sem} escolher a lei de antemão.
+
+\medskip\noindent\textbf{Escada completa (congelada).}
+{\small
+\[
+\begin{array}{c}
+\text{C0--C8}\ \to\ \text{caracterização}\ \to\ \text{operações observáveis}\\
+\text{S0--S4}\ \to\ \text{capacidade do suporte}\ \to\ \text{preservação}\\
+\text{R0--R4}\ \to\ \text{redução deliberada}\ \to\ R\colon(x_1,x_2)\mapsto x\\
+\text{D0--D3}\ \to\ \text{sonda do cruzado}\ \to\ \text{dependência bilateral}\\
+\text{K0--K7}\ \to\ \text{caracterização}\ \to\ \text{não-unicidade}\\
+\text{L0--L7}\ \to\ \text{invariantes}\ \to\ \mathcal A_{\min}\ \text{e discriminantes}
+\end{array}
+\]}
+Este documento fecha na \textbf{classificação}; $C(x,y)$ permanece reservada.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Objeto e cinco leituras de $G$}\label{comb:objeto}
+
+\noindent\textbf{Objecto experimental.} Arena única de $65536$ bytes; quatro diários
+$I_a$ (focos $F_1,\ldots,F_4$) incidem sobre a célula lógica $X$ via slots físicos
+\code{OFF\_IN} e \code{OFF\_OUT}. Cada incidência regista foco, operação, payload e
+slot --- \textbf{sem} chamar \code{interpretar.c}.
+
+\medskip\noindent\textbf{Cinco leituras de $G$} (herdadas de \redes{RG6}):
+{\small
+\begin{align*}
+G_{\mathrm{event}}(x) &= \text{número de eventos/visitas em }x;\\
+G_{\mathrm{focus}}(x) &= \text{focos distintos que incidiram sobre }x;\\
+G_{\mathrm{state}}^{\mathrm{esc}}(x) &= \text{payloads distintos \emph{escritos} em }x;\\
+G_{\mathrm{state}}^{\mathrm{surv}}(x) &= \text{payloads distintos \emph{sobreviventes}
+no suporte físico de }x;\\
+G_{\mathrm{slots}}^{\mathrm{surv}}(x) &= \text{slots físicos não vazios ligados a }x.
+\end{align*}}
+Implementação: \code{gEvent}, \code{gFocus}, \code{gStateWritten},
+\code{gStateSurviving}, \code{gSlotsSurviving} em \code{lib/arena\_combinacao.mjs}.
+
+\medskip\noindent\textbf{Distinção central (já congelada em C0--C4).}
+\caixa{%
+  $\text{overwrite}\neq\text{cópia}\neq\text{acumulação}\neq\text{combinação}$%
+}
+Fronteira experimental limpa:
+\[
+\boxed{C2\colon\ G_{\mathrm{state}}^{\mathrm{surv}}=2
+\qquad\text{vs}\qquad
+C3\colon\ G_{\mathrm{state}}^{\mathrm{surv}}=1.}
+\]
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C0 --- overwrite}\label{comb:c0}
+
+\noindent\textbf{Protocolo.} Estado inicial $X_0$; $F_1\!\to\!X\colon x_1$;
+$F_2\!\to\!X\colon x_2$ (mesmo slot \code{OFF\_IN}); $F_3$ lê.
+
+\medskip\noindent\textbf{Resultado observado.}
+\[
+C_{\mathrm{ow}}(x_1,x_2)=x_2.
+\]
+Registo \code{overwrite\_single\_slot}; $G_{\mathrm{state}}^{\mathrm{surv}}(X)=1$;
+$G_{\mathrm{state}}^{\mathrm{esc}}(X)=2$.
+
+\medskip\noindent\textbf{Leitura.} Overwrite é \textbf{política do suporte} --- uma
+coordenada por slot; segunda escrita substitui (\fis{fis:def:incid}{incidência}).
+Não implica lei de combinação.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C1 --- duplicação}\label{comb:c1}
+
+\noindent\textbf{Protocolo.} $F_1$ escreve $x_1$ em \code{OFF\_IN}; $F_2$ escreve
+$x_1$ em \code{OFF\_OUT}; $F_3,F_4$ leem.
+
+\medskip\noindent\textbf{Resultado observado.} Dois slots físicos ocupados;
+\textbf{um} payload distinto sobrevive ($G_{\mathrm{state}}^{\mathrm{surv}}=1$,
+$G_{\mathrm{slots}}^{\mathrm{surv}}=2$). Sem overwrite.
+
+\medskip\noindent\textbf{Leitura.} \textbf{Cópia}, não duas realizações independentes.
+A mesma informação numérica aparece em duas coordenadas físicas da mesma célula lógica.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C2 --- acumulação}\label{comb:c2}
+
+\noindent\textbf{Protocolo.} $F_1\!\to\!\code{OFF\_IN}\colon x_1$;
+$F_2\!\to\!\code{OFF\_OUT}\colon x_2$; leituras.
+
+\medskip\noindent\textbf{Resultado observado.}
+\[
+A(x_1,x_2)=(x_1,x_2).
+\]
+$G_{\mathrm{state}}^{\mathrm{surv}}(X)=2$; $G_{\mathrm{slots}}^{\mathrm{surv}}=2$;
+sem overwrite.
+
+\medskip\noindent\textbf{Leitura.} Acumulação usa \textbf{dois suportes físicos}
+($V=\mathbb{Z}_c^X$ --- duas coordenadas, mesma célula lógica). Distinto de
+$C(x_1,x_2)=x_3$ (§\ref{comb:c3}).
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C3 --- tentativa de combinação}\label{comb:c3}
+
+\noindent\textbf{Protocolo.} $F_1\!\to\!X\colon x_1$; $F_2\!\to\!X\colon x_2$
+(mesmo slot); $F_3$ lê.
+
+\medskip\noindent\textbf{Resultado observado.} Estado final $x_2$ (overwrite);
+\textbf{não} existe $x_3$; \code{leiC: null}.
+
+\medskip\noindent\textbf{Leitura.} Slot único com payloads distintos \textbf{não produz}
+combinação algébrica --- reproduz overwrite. A pergunta $C(x_1,x_2)=?$ permanece aberta.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C4 --- recuperação}\label{comb:c4}
+
+\noindent\textbf{Protocolo.} Executa C2; relê o par acumulado.
+
+\medskip\noindent\textbf{Resultado observado.} Par $\{in\colon x_1,\ out\colon x_2\}$
+recuperado; \code{combinado: null}. Acumulação preservada ($G_{\mathrm{state}}^{\mathrm{surv}}=2$).
+
+\medskip\noindent\textbf{Leitura.} Recuperação lê o par --- não funde incidências
+(\fis{fis:thm:zetamu}{ciclo $\zeta$; recuperação $\mu$}). $\mu$ sobre série finita
+reservada para experimentos posteriores.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C5 --- ordem}\label{comb:c5}
+
+\noindent\textbf{Protocolo.} Mesmos payloads, slots e focos; apenas a ordem temporal
+muda:
+\begin{align*}
+A_{12}(x_1,x_2)&\colon\ F_1\!\to\!\code{IN}(x_1),\ F_2\!\to\!\code{OUT}(x_2);\\
+A_{21}(x_2,x_1)&\colon\ F_2\!\to\!\code{OUT}(x_2),\ F_1\!\to\!\code{IN}(x_1).
+\end{align*}
+
+\medskip\noindent\textbf{Resultado observado.}
+\begin{center}\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+medida & $A_{12}$ & $A_{21}$ \\
+\midrule
+estado final & $(x_1,x_2)$ & $(x_1,x_2)$ \\
+$G_{\mathrm{event}}$ & $2$ & $2$ \\
+$G_{\mathrm{focus}}$ & $2$ & $2$ \\
+$G_{\mathrm{state}}^{\mathrm{esc}}$ & $2$ & $2$ \\
+$G_{\mathrm{state}}^{\mathrm{surv}}$ & $2$ & $2$ \\
+timeline & \code{F1→IN; F2→OUT} & \code{F2→OUT; F1→IN} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Resultado congelado.}
+\[
+\boxed{A_{12}=A_{21}\ \text{como estado};\quad\text{timeline}\neq.}
+\]
+
+\medskip\noindent\textbf{Leitura.} A acumulação de \textbf{duas} incidências em slots
+distintos é \textbf{comutativa como estado}. A ordem temporal distingue-se na
+realização (eventos), não no estado final.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C6 --- repetição}\label{comb:c6}
+
+\noindent\textbf{Protocolo.} Compara $(x_1,x_1)$ com $(x_1,x_2)$ em duas variantes:
+\begin{enumerate}\itemsep2pt
+\item \textbf{dual} --- $F_1\!\to\!\code{IN}(x_1)$, $F_2\!\to\!\code{OUT}(x_1)$;
+\item \textbf{slot único} --- $F_1\!\to\!X\colon x_1$, $F_2\!\to\!X\colon x_1$.
+\end{enumerate}
+
+\medskip\noindent\textbf{Resultado observado.}
+\begin{center}\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+variante & estado & $G_{\mathrm{state}}^{\mathrm{surv}}$ & overwrite? \\
+\midrule
+dual $(x_1,x_1)$ & $(x_1,x_1)$ & $1$ & não \\
+slot $(x_1,x_1)$ & $x_1$ & $1$ & não (payload idêntico) \\
+C2 $(x_1,x_2)$ & $(x_1,x_2)$ & $2$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Leitura.} $A(x,x)$ dual produz \textbf{cópia} (dois slots,
+um payload). No slot único, comportamento \textbf{idempotente} sem registo de overwrite
+(política: overwrite só quando payloads \emph{distintos}).
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C7 --- três incidências}\label{comb:c7}
+
+\noindent\textbf{Protocolo.} Terceira incidência sobre o par acumulado; compara
+dois aninhamentos no suporte dual:
+\begin{align*}
+\text{esquerda:}\ &A\bigl(A(x_1,x_2),x_3\bigr)
+\ \colon\ F_1\!\to\!\code{IN}(x_1),\ F_2\!\to\!\code{OUT}(x_2),\ F_3\!\to\!\code{IN}(x_3);\\
+\text{direita:}\ &A\bigl(x_1,A(x_2,x_3)\bigr)
+\ \colon\ F_2\!\to\!\code{OUT}(x_2),\ F_3\!\to\!\code{IN}(x_3),\ F_1\!\to\!\code{IN}(x_1).
+\end{align*}
+
+\medskip\noindent\textbf{Resultado observado.}
+\[
+A\bigl(A(x_1,x_2),x_3\bigr)=(x_3,x_2),
+\qquad
+A\bigl(x_1,A(x_2,x_3)\bigr)=(x_1,x_2).
+\]
+Ambos registam overwrite em \code{OFF\_IN} na terceira incidência; estados finais
+\textbf{distintos}.
+
+\medskip\noindent\textbf{Resultado congelado --- correção conceptual.}
+\[
+\boxed{
+A_{12}=A_{21}
+\quad\text{mas}\quad
+A\bigl(A(x_1,x_2),x_3\bigr)\neq A\bigl(x_1,A(x_2,x_3)\bigr).
+}
+\]
+\textbf{Comutatividade em duas incidências não implica associatividade em três.}
+
+\medskip\noindent\textbf{Leitura.} C5 mostrou comutatividade \emph{como estado} para
+duas incidências em slots distintos. C7 mostra que o \textbf{suporte finito com
+overwrite} quebra a composição de três incidências: a terceira incidência em
+\code{OFF\_IN} sobrescreve uma coordenada do par, e \emph{qual} coordenatura
+sobrevive depende da ordem e do aninhamento interpretado.
+
+\medskip\noindent\textbf{Consequência.} A representação física \textbf{não} é detalhe
+de implementação. A composição depende de \emph{onde} a incidência chega e de
+\emph{qual} célula física ela sobrescreve.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{C8 --- colisão}\label{comb:c8}
+
+\noindent\textbf{Protocolo.} Situação mínima em que $C(x_1,x_2)=?$ torna-se
+inevitável:
+\[
+F_1\!\to\!X\colon x_1,\qquad F_2\!\to\!X\colon x_2,
+\]
+duas fontes, mesma célula lógica, \textbf{mesmo slot físico}, payloads distintos.
+
+\medskip\noindent\textbf{Resultado observado.} Estado final $x_2$; overwrite
+registado; $G_{\mathrm{state}}^{\mathrm{surv}}=1$; \code{leiC: null}.
+
+\medskip\noindent\textbf{Leitura.} O objectivo de C8 \textbf{não} é descobrir o
+resultado (já conhecido como overwrite desde C0/C3), mas medir as \textbf{condições
+de colisão}:
+\caixa{%
+  2 focos $\cdot$ mesma célula $X$ $\cdot$ mesmo slot $\cdot$ payloads distintos%
+}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que já foi demonstrado}\label{comb:demonstrado}
+
+\noindent\textbf{Tabela C0--C8.}
+\begin{center}\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.38\textwidth}>{\raggedright\arraybackslash}p{0.52\textwidth}@{}}
+\toprule
+propriedade & resultado \\
+\midrule
+overwrite & observado (C0, C3, C8) \\
+cópia & observado (C1, C6 dual) \\
+acumulação & observado (C2) \\
+combinação & \textbf{não determinada} (C3, C8: \code{leiC: null}) \\
+recuperação do par & observado (C4) \\
+comutatividade de 2 incidências & \textbf{sim, como estado} (C5) \\
+associatividade de 3 incidências & \textbf{não} (C7; limitação do suporte cap~2) \\
+$A(x,x)$ & cópia (dual) / idempotente no slot único (C6) \\
+colisão mínima & 2 focos + mesmo $X$ + mesmo slot + payloads distintos (C8) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{S0--S4 (capacidade).}
+$\text{perda por overwrite}\neq\text{lei de composição}$. Capacidade~2: $G_{\mathrm{state}}^{\mathrm{surv}}=2$
+(S1); terceira incidência perde um payload (S2). Capacidade~3: três payloads recuperáveis (S3);
+não-associatividade de C7 era \textbf{limitação física}, não propriedade intrínseca.
+
+\medskip\noindent\textbf{R0--R4 (redução).} Redução deliberada $R\colon(x_1,x_2)\mapsto x$ com
+capacidade $\ge2$: preservar (R0), seleccionar $x_2$ (R1), seleccionar $x_1$ (R2),
+codificar $x_1|x_2$ (R3), descartar (R4). Controle causal:
+$R_{\mathrm{surv}}(\mathrm{S0})=R_{\mathrm{surv}}(\mathrm{R1})$ mas
+$\mathrm{real}(\mathrm{S0})\neq\mathrm{real}(\mathrm{R1})$ --- overwrite acidental
+$\neq$ redução deliberada.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{D0--D3: sonda do cruzado}\label{comb:d}
+
+\noindent\textbf{Metodologia.} Não se postula distributividade antes da medição.
+Família de sondas sobre suporte preservador:
+\begin{itemize}\itemsep2pt
+\item D0 --- controle: $R_\theta=\mathrm{id}$, baseline;
+\item D1 --- fixa $x_2$, varia $x_1\to x_1'$, mede $\Delta x$;
+\item D2 --- fixa $x_1$, varia $x_2\to x_2'$, mede $\Delta x$;
+\item D3 --- matriz $2\times2$; classifica seleção, codificação ou candidato.
+\end{itemize}
+
+\medskip\noindent\textbf{Resultado D3 (bateria de reduções).}
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+$R$ & leitura \\
+\midrule
+keep1 & seleção de $x_1$ \\
+keep2 & seleção de $x_2$ \\
+encode & codificação (R3-like) \\
+discard & constante $\varnothing$ \\
+lexMax & \textbf{dependência dupla} --- candidato \\
+rectCell & \textbf{dependência dupla} --- candidato \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Primeira existência medida.}
+\[
+\boxed{\exists f\colon X\times X\to X\ \text{com dependência observável nos dois argumentos.}}
+\]
+Ainda \textbf{não} $f=C$; ainda menos ``distributividade''.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{K0--K7: não-unicidade}\label{comb:k}
+
+\noindent\textbf{Caracterização} dos candidatos lexMax e rectCell:
+\begin{center}\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+propriedade & lexMax & rectCell \\
+\midrule
+$f(x,y)=f(y,x)$ & sim & não \\
+$f(f(x,y),z)=f(x,f(y,z))$ & sim & não \\
+$f(y,y)=y$ & sim & não \\
+bem definida (mesmo par $\Rightarrow$ mesmo $f$) & sim & sim \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{K7.} lexMax $\neq$ rectCell em todos os pares testados ---
+\textbf{duas leis}, não duas representações da mesma.
+
+\medskip\noindent\textbf{Resultado congelado.}
+\[
+\boxed{\text{dependência bilateral é \textbf{necessária}, não \textbf{suficiente}
+para determinar $f$.}}
+\]
+\[
+\boxed{\text{existência de combinação}\ \neq\ \text{unicidade da combinação.}}
+\]
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{L0--L7: classe admissível e invariantes discriminantes}\label{comb:l}
+
+\noindent\textbf{Classe mínima observada.}
+\[
+\mathcal A_{\min}
+=\bigl\{f\colon X\times X\to X:
+\text{bilateral, bem definido, }\tau,\,G,\,\zeta/\mu\text{-compatível}\bigr\}.
+\]
+Implementação: L0--L7 em \code{lib/arena\_combinacao.mjs}; $\zeta,\mu$ conforme
+\code{catalogo.tex} / \code{lib/incidencia.h} ($S$ gera $\zeta=\sum S^j$, $\mu=1-S$,
+$\mu\zeta=\mathrm{id}$).
+
+\medskip\noindent\textbf{Tabela L0--L7.}
+\begin{center}\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+invariante & lexMax & rectCell \\
+\midrule
+L0 dependência bilateral & $\checkmark$ & $\checkmark$ \\
+L1 bem-definição & $\checkmark$ & $\checkmark$ \\
+L2 comutatividade & $\checkmark$ & $\times$ \\
+L3 idempotência & $\checkmark$ & $\times$ \\
+L4 associatividade & $\checkmark$ & $\times$ \\
+L5 invariância $\tau$ (realização) & $\checkmark$ & $\checkmark$ \\
+L6 compatibilidade $G$ & $\checkmark$ & $\checkmark$ \\
+L7 compatibilidade $\zeta/\mu$ & $\checkmark$ & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{Membros de $\mathcal A_{\min}$.}
+$\operatorname{rectCell}\in\mathcal A_{\min}$ e $\operatorname{lexMax}\in\mathcal A_{\min}$.
+Acrescentando $\{\text{comutatividade, idempotência, associatividade}\}$, a classe encolhe
+e rectCell sai; lexMax sobrevive --- \textbf{classificação}, não escolha de $C$.
+
+\medskip\noindent\textbf{Conclusão sobre $\zeta/\mu$.}
+\[
+\boxed{\text{a incidência determina acumulação/deconvolução,
+mas não determina por si só a lei de combinação.}}
+\]
+A ponte $\zeta+\mu\Longrightarrow C$ \textbf{não} é suficiente; medido empiricamente (L7).
+
+\medskip\noindent\textbf{Papel dos candidatos.}
+\begin{itemize}\itemsep2pt
+\item \textbf{lexMax} --- sobrevivente sob exigência de semilattice; \textbf{não} declarado $C$;
+\item \textbf{rectCell} --- contraexemplo à suficiência da dependência bilateral.
+\end{itemize}
+
+\medskip\noindent\textbf{Princípio metodológico.}
+\caixa{%
+  a máquina não recebeu a lei;\\
+  recebeu critérios para procurar uma realização.%
+}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Síntese congelada}\label{comb:sintese}
+
+\noindent\textbf{O que este ciclo fechou.}
+\begin{enumerate}\itemsep3pt
+\item Eliminação de falsas equivalências (C0--C8);
+\item Capacidade determina preservação, não combinação (S0--S4);
+\item Redução $\neq$ overwrite acidental (R0--R4);
+\item Existência de combinação bilateral (D0--D3);
+\item Não-unicidade estrutural (K0--K7);
+\item Classe $\mathcal A_{\min}$ e invariantes discriminantes (L0--L7);
+\item $\zeta/\mu/S$ compatível com ambas as geometrias --- não selecciona $f$.
+\end{enumerate}
+
+\medskip\noindent\textbf{O que permanece aberto.}
+\begin{enumerate}\itemsep3pt
+\item Qual estrutura \emph{dentro da arquitectura} tem autoridade para seleccionar uma lei;
+\item Operação $C\colon X\times X\to X$ \textbf{nomeada} e única;
+\item Comparação com Hebb/Hopfield (§\ref{comb:hebb}) --- P6 \textbf{TRAVADA}.
+\end{enumerate}
+
+\medskip\noindent\textbf{Pergunta que substitui ``qual é $C$?''}
+\caixa{%
+  o que, dentro da arquitectura, teria autoridade suficiente para seleccionar uma lei?%
+}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que C0--C8 demonstrou (detalhe)}\label{comb:c0c8}
+
+\noindent\textbf{Síntese C0--C8.}
+\begin{enumerate}\itemsep3pt
+\item $\text{overwrite}\neq\text{cópia}\neq\text{acumulação}\neq\text{combinação}$.
+\item Fronteira $G_{\mathrm{state}}^{\mathrm{surv}}$: acumulação ($=2$) vs slot único ($=1$).
+\item Comutatividade binária como estado; não-associatividade ternária no suporte cap~2.
+\item Colisão mínima caracterizada.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que ainda não foi definido}\label{comb:aberto}
+
+\noindent\textbf{Aberto --- após C0--L7.}
+\begin{enumerate}\itemsep3pt
+\item Autoridade arquitectural suficiente para \textbf{seleccionar} uma lei entre
+$\mathcal A_{\min}$ (ou extensões);
+\item Nomear $C\colon X\times X\to X$ como lei única --- \textbf{não feito};
+\item Comparação com regra Hebb / descida Hopfield (§\ref{comb:hebb}) --- P6 travada.
+\end{enumerate}
+
+\medskip\noindent\textbf{Explicitamente fechado.}
+\begin{enumerate}\itemsep3pt
+\item Existência de $f$ bilateral e bem definido;
+\item Não-unicidade dentro de $\mathcal A_{\min}$;
+\item Insuficiência de $\zeta+\mu$ para implicar $C$;
+\item Insuficiência de impor L2--L4 apenas para ``fazer lexMax vencer'' --- isso seria
+procurar a lei desejada; aqui registra-se \textbf{classificação}.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Reserva para $C(x,y)$}\label{comb:reserva}
+
+\begin{hipotese}[classe admissível --- medida, não escolha]\label{comb:hip-exist}
+Existe uma classe
+\[
+\mathcal A_{\min}\subset\{f\colon X\times X\to X\}
+\]
+de operações observáveis bilateralmente dependentes, bem definidas, e compatíveis com
+$\tau$, $G$ e $\zeta/\mu$. Dentro dela há pelo menos duas geometrias (lexMax, rectCell).
+Impor comutatividade, idempotência e associatividade restringe a classe; \textbf{não}
+identifica $C$ de forma única sem invariantes adicionais com autoridade arquitectural.
+\end{hipotese}
+
+\medskip\noindent\textbf{Estatuto.} Resultado \textbf{experimental} (D0--L7), não teorema de
+$f=C$. lexMax é \textbf{sobrevivente} sob semilattice; rectCell é \textbf{contraexemplo}
+à suficiência da dependência bilateral.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Relação futura com Hebb/Hopfield}\label{comb:hebb}
+
+\noindent\textbf{Reserva explícita.} Este paper \textbf{não} é sobre Hopfield,
+redes neurais clássicas nem regra Hebb. Regista o momento em que a arquitectura
+multifocal chega à \textbf{necessidade} de uma operação que ainda \textbf{não possui}.
+
+\medskip\noindent\textbf{Ponte futura} (quando $C$ existir como lei medida):
+\begin{enumerate}\itemsep3pt
+\item Comparar $C$ observada com $W_{ij}=\sum_p\xi_i^p\xi_j^p$
+(\redes{Hopfield futuro});
+\item Medir se $G_{\mathrm{real}}>1$ emerge \emph{depois} de $C$, não antes;
+\item Manter P6 \textbf{TRAVADA} até a lei $C$ estar definida experimentalmente.
+\end{enumerate}
+
+\medskip\noindent\textbf{Escada completa (estado final).}
+{\small
+\[
+\begin{array}{c}
+\text{C0--C8}\ \checkmark
+\ \to\ \text{S0--S4}\ \checkmark
+\ \to\ \text{R0--R4}\ \checkmark
+\ \to\ \text{D0--D3}\ \checkmark
+\ \to\ \text{K0--K7}\ \checkmark
+\ \to\ \text{L0--L7}\ \checkmark\\
+\downarrow\\
+\mathcal A_{\min}\ \text{medida}\ \to\ C(x,y)\ \textbf{reservada}\ \to\ \text{Hebb/P6 travada}
+\end{array}
+\]}
+Este documento fecha na \textbf{classificação}; a lei única permanece reservada.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\medskip\noindent\rule{\textwidth}{0.4pt}
+
+\medido{\textbf{Bateria C0--L7} (\code{node tests/redes\_combinacao.js}):\\
+174 asserts, 0 falhas; \code{lib/arena\_combinacao.mjs};\\
+integrada em \code{tools/auditoria\_rg6.bat} após §RG6.\\
+\code{redes.tex} permanece congelado como documento de interface.\\
+\code{combinacao.tex} fecha com classificação; $C=\operatorname{lexMax}$ \textbf{não} declarado.}
+
+\end{document}
