@@ -186,6 +186,7 @@ estes --- \emph{cada um com o seu rótulo, para que a dívida se possa cobrar}:
 o objecto & o que é & onde \\
 \midrule
 $\partial$ & a \textbf{dobra}: um mapa com $\partial\circ\partial=\mathrm{id}$ & \code{fis:def:op} \\
+$u=2^{-\operatorname{prof}}$ & a \textbf{ultramétrica estrutural} de endereço & \code{fis:def:arvore}; \code{fis:thm:troca-realizacao} \\
 $\pi\colon I\to X$ & a \textbf{realização}: $X$ só precisa de igualdade decidível & \code{fis:def:objeto} \\
 $G(x)=\abs{\pi^{-1}(x)}$ & a \textbf{multiplicidade}: quantos índices na célula $x$ & \code{fis:def:objeto} \\
 $\Phi=\sum_x(G(x)-1)$ & a \textbf{folga}: quantos vieram parar a sítio ocupado & \code{fis:def:folga} \\
@@ -224,9 +225,11 @@ corrente.
 
 \smallskip\textbf{\pt{4} (o território).} $X$ é hierárquico: as representações
 endereçam-se por palavras de $p$ bits, com a distância
-$d(a,b)=2^{-\operatorname{prof}(a,b)}$ da árvore do encaixe
+$d(a,b)=u(a,b)=2^{-\operatorname{prof}(a,b)}$ da árvore do encaixe
 (\code{fis:def:arvore}). \emph{A âncora da memória é a bola $\mathcal{B}(a,r)$
-dessa árvore.}
+dessa árvore.} A invariância $u(\partial a,\partial b)=u(a,b)$ sob a troca dual
+$R,R^{\dagger}$ está no \fis{fis:thm:troca-realizacao}{Teor. «troca de
+realização»} --- \emph{não} se afirma aqui para leituras arbitrárias de $\pi$.
 
 \smallskip\textbf{\pt{5} (o consciente).} O \emph{eu} no instante $t$ é a
 \textbf{acumulação} do campo até $t$; os fenómenos da autochecagem, do autofluxo
@@ -250,6 +253,77 @@ Hebb, e usa-se \emph{só} na §\ref{mf:outro}.
 traduz e não a usa, e a §\ref{mf:aberto} diz porquê.
 
 % ───────────────────────────────────────────────────────────────────────────
+\section{Régua: troca de realização}\label{mf:troca}
+
+\noindent O \fis{fis:thm:troca-realizacao}{Teor. «troca de realização»} do
+\code{fisica.tex} é a régua que este documento \emph{já usava} sem
+reconstruí-la: foco como realização $R_F$, e --- \emph{neste domínio} da lista
+binária e das leituras do \code{fis:thm:B} --- o mapa
+$D_{\mathrm{can}}=R^{\dagger}\circ R^{-1}$ com $D_{\mathrm{can}}(i)=(N-1)-i$,
+donde $\operatorname{prof}$ e $u=2^{-\operatorname{prof}}$ se preservam
+(\code{fis:thm:dual}(5)). \emph{Não se generaliza}: leituras distintas de $\pi$,
+travessias espectro/célula e soma Hebb são outros eixos.
+\emph{Não se identifica} $D_{\mathrm{can}}$ com $\tau$
+(\code{fis:obs:cisao}): $\tau$ parte o par; $D_{\mathrm{can}}$ complementa o índice.
+
+\medskip\noindent\textbf{Três situações --- para não confundir.}
+\begin{enumerate}\itemsep3pt
+\item[\textbf{(I)}] \textbf{Já segue do teorema, neste domínio} --- citar
+\code{fis:thm:troca-realizacao} basta.
+\item[\textbf{(II)}] \textbf{Instância com hipóteses já presentes} --- formalizar
+como corolário local (ex.: \pt{4} + bolas).
+\item[\textbf{(III)}] \textbf{Exige mais} --- marcar a hipótese extra; não
+inventar $u(Da,Db)=u(a,b)$.
+\end{enumerate}
+
+\medskip\noindent\textbf{Mapa dos resultados deste documento.}
+
+\begin{center}
+{\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.24\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.63\textwidth}@{}}
+\toprule
+resultado & est. & relação com \code{fis:thm:troca-realizacao} \\
+\midrule
+\pt{4} & I & $u=2^{-\operatorname{prof}}$: ultramétrica \textbf{estrutural}
+(\code{fis:def:arvore}) \\
+\code{fis:thm:bolas} (bolas/partição) &
+I/II & citar o teorema neste domínio; isometria sob $D_{\mathrm{can}}$ se
+$R,R^{\dagger}$ canónicas \\
+Teor.~\ref{mf:thm:ancora} & II/III &
+foco = realização local (bola); isometria só se leituras $R,R^{\dagger}$
+identificáveis (Cor.~\ref{mf:cor:troca-u}) \\
+Teor.~\ref{mf:thm:reconstroi} & III &
+$\sum G=\abs I$ conserva-se; $\pi\neq\pi'$ pode coincidir na medida \\
+Cor.~\ref{mf:cor:ponte} & III &
+travessia célula/espectro (\code{fis:thm:ponte}); não $D_{\mathrm{can}}$ \\
+Teor.~\ref{mf:thm:outro} (Hebb) & III &
+interferência; levantamento árvore --- hipótese extra \\
+foco clínico (Rach.~V) & II/III &
+território = bola; dual canónico exige $R,R^{\dagger}$ explícitas \\
+Teor.~\ref{mf:thm:duas} & III &
+eixo \code{fis:thm:duastorres}; distinto de \code{fis:def:duomorf} \\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+\begin{corolario}[Isometria da troca dual no multifocal]\label{mf:cor:troca-u}
+Sob \pt{4}, com $u(a,b)=2^{-\operatorname{prof}(a,b)}$ e leituras reversíveis
+$R,R^{\dagger}$ no sentido do \fis{fis:thm:troca-realizacao}{Teor. «troca de
+realização»},
+\[
+u(Da,Db)=u(a,b),
+\qquad D=R^{\dagger}\circ R^{-1}.
+\]
+\emph{Mudar o raio ou o prefixo altera a \textbf{realização} do território; $u$
+permanece estrutural sob a troca dual demonstrada.}
+\end{corolario}
+
+\begin{proof}
+É o \fis{fis:thm:troca-realizacao}{Teor. «troca de realização»}, cláusula~(4),
+com $u=d$ da \code{fis:def:arvore} importada por \pt{4}.
+\end{proof}
+
+% ───────────────────────────────────────────────────────────────────────────
 \section{A memória: o que se conserva, o que se perde, e quanto}\label{mf:memoria}
 
 \begin{teorema}[a memória conserva a contagem e perde a fibra]\label{mf:thm:reconstroi}
@@ -264,6 +338,10 @@ $\max G_\pi\neq\max G_{\pi'}$.
 $\pi\mapsto\bigl(\sum_xG(x)\bigr)$ não é injetiva; o estado da memória não
 determina a história que o produziu.
 \end{enumerate}
+\emph{Classificação pela régua (\S\ref{mf:troca}):} cláusula~(1) conserva contagem;
+cláusulas~(2)--(3) mostram que \emph{realizações} distintas podem coincidir na
+medida --- estatuto \textbf{III}; não se conclui $u(Da,Db)=u(a,b)$ entre focos
+arbitrários.
 \end{teorema}
 
 \begin{proof}
@@ -477,7 +555,10 @@ entre agentes ($\mathbf{64}$).}
 
 \noindent O livro declara a âncora \cury{difícil de ser definida} e faz dela a
 peça que suporta o edifício clínico. \pt{4} dá-lhe a definição, e as três
-propriedades que o livro precisava de postular passam a ser cláusulas.
+propriedades que o livro precisava de postular passam a ser cláusulas. \emph{O
+foco} clínico é realização local (bola); a isometria $u(Da,Db)=u(a,b)$ entre
+focos duais canónicos está no Cor.~\ref{mf:cor:troca-u}, não em qualquer par de
+territórios.
 
 \begin{teorema}[o território]\label{mf:thm:ancora}
 Sob \pt{4}, com $\mathcal{B}(a,r)=\{x:d(a,x)\le r\}$ e $r\ge0$:
@@ -502,6 +583,8 @@ fica mais largo ou mais estreito) e mudar de prefixo (o território muda de sít
 \fis{fis:thm:bolas}{Teor. «as bolas particionam»}, que valem porque $d$ é
 ultramétrica e \textbf{simétrica}
 (\fis{fis:lem:ultra}{Lema «$d$ é ultramétrica, e é simétrica»}).
+\emph{A isometria $u(Da,Db)=u(a,b)$ sob troca dual canónica não se reprova aqui:
+está no Cor.~\ref{mf:cor:troca-u} via \code{fis:thm:troca-realizacao}.}
 
 (3) A primeira metade é a cláusula~(1) do mesmo teorema: se
 $b\in\mathcal{B}(a,r)$ então $\mathcal{B}(b,r)=\mathcal{B}(a,r)$. A inclusão é
@@ -719,6 +802,8 @@ cláusula~(1) não tem sobre o que operar.
 A travessia entre a célula e o espectro conserva a norma e é involutiva; logo
 \textbf{não há custo por explicar} na passagem do campo aos pensamentos
 conscientes, e não é preciso postular um fenómeno para a fazer.
+\emph{Estatuto \textbf{III} (\S\ref{mf:troca}):} é \code{fis:thm:ponte}, não a troca
+$D=R^{\dagger}R^{-1}$ do \code{fis:thm:troca-realizacao}.
 \end{corolario}
 
 \begin{proof}
@@ -1788,7 +1873,8 @@ memória no agente contra memória no espaço --- \code{fis:thm:mult}(3),
 \medskip\noindent\textbf{E a leitura do quadro, em uma linha.} Doze dos catorze
 fechos são o \textbf{mesmo objecto} visto de ângulos diferentes: a realização
 $\pi\colon I\to X$, a sua multiplicidade $G$, e o par $\zeta/\mu$ que a escreve e
-a desescreve. \emph{Não é que a construção sirva para tudo}; é que o livro
+a desescreve --- com $u=2^{-\operatorname{prof}}$ do lado estrutural
+(\S\ref{mf:troca}, \code{fis:thm:troca-realizacao}). \emph{Não é que a construção sirva para tudo}; é que o livro
 descrevia, com catorze nomes, um objecto só --- e por não ter o objecto, teve de
 postular um fenómeno de cada vez que precisou de outra das suas leituras.
 \[

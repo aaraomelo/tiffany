@@ -88,8 +88,11 @@ distintos (\fis{fis:duastorres}{duas torres} vs \fis{fis:def:duomorf}{duomorfism
 \item \textbf{Não confundir quatro focos com Hopfield} --- partilhar $\pi$ e $X$
 (§\ref{redes:rg4}) $\neq$ soma Hebb;
 \item \textbf{Não confundir quatro focos com troca dual} --- partilhar $X$ é
-uma $\pi$; isometria $u(Da,Db)=u(a,b)$ exige $R,R^{\dagger}$
+uma $\pi$; isometria $u(Da,Db)=u(a,b)$ exige $R,R^{\dagger}$ e o
+$D_{\mathrm{can}}$ deste domínio
 (\S\ref{redes:troca}, \code{fis:thm:troca-realizacao});
+\item \textbf{Não identificar $D_{\mathrm{can}}$ com $\tau$} --- $\tau$ é cisão
+do par (\code{fis:obs:cisao}); $D_{\mathrm{can}}$ é complemento no índice;
 \item \textbf{Não afirmar recuperação por descida} onde só há passagem única
 (\code{node\_corre} / \code{bash\_corre} no pipe);
 \item \textbf{Não identificar $G_{\mathrm{event}}$ com $G_{\mathrm{state}}^{\mathrm{surv}}$}
@@ -107,24 +110,36 @@ Hopfield}, não no pipe (\code{VINCO}/prefixo byte-a-byte).
 \section{Régua: troca de realização}\label{redes:troca}
 
 \noindent O \fis{fis:thm:troca-realizacao}{Teor. «troca de realização»} do
-\code{fisica.tex} é a régua para reler o que este documento \emph{já mede}:
+\code{fisica.tex} é a régua para reler o que este documento \emph{já mede}.
+\emph{A ordem, neste domínio} --- lista binária, leituras do \code{fis:thm:B},
+$D_{\mathrm{can}}\colon i\mapsto(N-1)-i$ --- é
 \[
-\partial^{2}=\mathrm{id}
-\;\Longrightarrow\;
+\begin{array}{@{}ll@{}}
+T=S\circ R^{-1}
+  & \text{definição e unicidade}\\[2pt]
+S=R^{\dagger}
+  & \text{as duas leituras}\\[2pt]
 D=R^{\dagger}\circ R^{-1}
-\;\Longrightarrow\;
+  & \text{o mapa entre elas}\\[2pt]
+D(i)=(N-1)-i=\partial i
+  & \code{fis:thm:dual}(2)\\[2pt]
 \operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)
-\;\Longrightarrow\;
-\boxed{\,u(Da,Db)=u(a,b)\,}
+  & \code{fis:thm:dual}(5)\\[2pt]
+u(Da,Db)=u(a,b)
+  & \text{definição }u=2^{-\operatorname{prof}}
+\end{array}
 \]
-com $u=2^{-\operatorname{prof}}$. \emph{Só no domínio binário} das leituras
-$R,R^{\dagger}$ do \code{fis:thm:B}; travessias arbitrárias e quatro focos
-partilhando $\pi$ são outras camadas. \emph{A demonstração fica em}
-\code{fisica.tex}; aqui só se classifica o que este documento mede.
+\emph{Não se atribui a $\partial^{2}=\mathrm{id}$ a determinação de $R^{\dagger}$.}
+A isometria é dedução de \code{fis:thm:dual}(5), não medição do pipe.
+Travessias arbitrárias e quatro focos partilhando $\pi$ são outras camadas.
+\emph{Não se identifica} $D_{\mathrm{can}}$ com $\tau$ da cisão
+(\code{fis:obs:cisao}): $\tau$ parte o par; $D_{\mathrm{can}}$ complementa o índice.
+\emph{A demonstração fica em} \code{fisica.tex}; aqui só se classifica o que
+este documento mede.
 
 \medskip\noindent\textbf{Três situações --- para não confundir.}
 \begin{enumerate}\itemsep3pt
-\item[\textbf{(I)}] \textbf{Já segue do teorema global} --- citar
+\item[\textbf{(I)}] \textbf{Já segue do teorema, neste domínio} --- citar
 \code{fis:thm:troca-realizacao} basta.
 \item[\textbf{(II)}] \textbf{Instância com hipóteses já presentes} --- ex.: árvore
 com $u=2^{-\operatorname{prof}}$ e leituras $R,R^{\dagger}$ canónicas
@@ -142,16 +157,17 @@ inventar $u(Da,Db)=u(a,b)$.
 trecho & est. & relação com \code{fis:thm:troca-realizacao} \\
 \midrule
 árvore, prefixo, $u=2^{-\operatorname{prof}}$ &
-I & \code{fis:def:arvore}, \code{fis:lem:ultra}; citar teorema global \\
+I & \code{fis:def:arvore}, \code{fis:lem:ultra}; citar o teorema neste domínio \\
 Teor.~\ref{redes:thm-arvore} & II &
-isometria de $u$ sob $D$ canónico (Cor.~\ref{redes:cor:troca-u}) \\
+isometria de $u$ sob $D_{\mathrm{can}}$ (Cor.~\ref{redes:cor:troca-u}) \\
 §RG4: quatro focos, uma $\pi$, mesmo $X$ &
 III & fontes numa \emph{realização}; $\neq$ par $R,R^{\dagger}$ \\
 travessia $T=R_d\circ R_o^{-1}$ &
 III & preserva objecto/medida; \emph{não} isometria automática de $u$
 (\fis{fis:prop:travessia}{travessia}) \\
 duomorfismo $\oplus/\otimes$ no pipe &
-III & face operacional (\code{fis:def:duomorf}); $D$ canónico não demonstrado \\
+III & face operacional (\code{fis:def:duomorf}); o pipe \emph{não} realiza
+$D_{\mathrm{can}}$ --- o teorema está em \code{fisica.tex} \\
 Hopfield / Hebb & III & $G_{\mathrm{real}}>1$, $C$ sem nome --- hipótese extra \\
 §RG6 / \code{overwrite} & III & política host; lei entre incidências não determinada \\
 $W_s/W_a$ & III & eixo \code{fis:thm:duastorres}; distinto de $\oplus/\otimes$ \\

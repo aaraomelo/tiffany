@@ -3,7 +3,8 @@
 %  papers/combinacao.tex — A FRONTEIRA DA COMBINAÇÃO
 %
 %  Regista a família experimental C0–C8 (lib/arena_combinacao.mjs) sem definir C.
-%  Continuação de papers/redes.tex (§RG6 FECHADO); não altera redes.tex.
+%  Continuação de papers/redes.tex (§RG6 FECHADO). C0--L7 intacto; M1--M2 e E_∂
+%  registados. Não promove lexMax. P6 TRAVADA. Compila:
 %    cd papers && pdflatex combinacao.tex
 % ─────────────────────────────────────────────────────────────────────────────
 \documentclass[11pt,a4paper]{article}
@@ -64,8 +65,9 @@ Existência de $f\colon X\times X\to X$ bem definido e bilateralmente dependente
 acumulação/deconvolução, mas \textbf{não} determina por si só a lei de combinação (L7).
 
 \medskip\noindent\textbf{Verificação.}
-\code{tests/redes\_combinacao.js} (174 asserts);
+\code{tests/redes\_combinacao.js} (231 asserts);
 \code{tools/auditoria\_rg6.bat} (bateria completa, após §RG6).
+M1--M2 e $E_{\partial}$ registados; $C$ continua reservada.
 \end{abstract}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -86,6 +88,7 @@ acumulação/deconvolução, mas \textbf{não} determina por si só a lei de com
 \item \textbf{Não confundir} acumulação $A$ (dois slots físicos) com combinação $C$
 (um slot, dois payloads);
 \item \textbf{Não alterar} \code{redes.tex} --- cumpriu o papel de interface;
+\item \textbf{Não identificar} L5/K6 com $\tau$ da cisão nem com $D_{\mathrm{can}}$;
 \item \textbf{Não abrir P6} --- reservada para comparação futura (§\ref{comb:hebb}).
 \end{enumerate}
 
@@ -103,7 +106,9 @@ Cada protocolo responde uma pergunta \emph{sem} escolher a lei de antemão.
 \text{R0--R4}\ \to\ \text{redução deliberada}\ \to\ R\colon(x_1,x_2)\mapsto x\\
 \text{D0--D3}\ \to\ \text{sonda do cruzado}\ \to\ \text{dependência bilateral}\\
 \text{K0--K7}\ \to\ \text{caracterização}\ \to\ \text{não-unicidade}\\
-\text{L0--L7}\ \to\ \text{invariantes}\ \to\ \mathcal A_{\min}\ \text{e discriminantes}
+\text{L0--L7}\ \to\ \text{invariantes}\ \to\ \mathcal A_{\min}\ \text{e discriminantes}\\
+\text{M1--M2}\ \to\ \text{ordem lex}\ \to\ \text{restringe a classe, não escolhe }C\\
+\text{$E_{\partial}$}\ \to\ \text{covariância sob }D_{\mathrm{can}}\ \to\ \text{não selecciona }C
 \end{array}
 \]}
 Este documento fecha na \textbf{classificação}; $C(x,y)$ permanece reservada.
@@ -437,11 +442,15 @@ para determinar $f$.}}
 \[
 \mathcal A_{\min}
 =\bigl\{f\colon X\times X\to X:
-\text{bilateral, bem definido, }\tau,\,G,\,\zeta/\mu\text{-compatível}\bigr\}.
+\text{bilateral, bem definido, }G\text{- e }\zeta/\mu\text{-compatível,
+K6-invariante}\bigr\}.
 \]
 Implementação: L0--L7 em \code{lib/arena\_combinacao.mjs}; $\zeta,\mu$ conforme
 \code{catalogo.tex} / \code{lib/incidencia.h} ($S$ gera $\zeta=\sum S^j$, $\mu=1-S$,
 $\mu\zeta=\mathrm{id}$).
+\emph{L5 não é $\tau$}: é a invariância de K6 (mesmo par, ordem de escrita
+permutada $\Rightarrow$ mesmo resultado). Não é a cisão do par
+(\code{fis:obs:cisao}) nem o $D_{\mathrm{can}}$ de \code{fis:thm:troca-realizacao}.
 
 \medskip\noindent\textbf{Tabela L0--L7.}
 \begin{center}\footnotesize
@@ -454,7 +463,7 @@ L1 bem-definição & $\checkmark$ & $\checkmark$ \\
 L2 comutatividade & $\checkmark$ & $\times$ \\
 L3 idempotência & $\checkmark$ & $\times$ \\
 L4 associatividade & $\checkmark$ & $\times$ \\
-L5 invariância $\tau$ (realização) & $\checkmark$ & $\checkmark$ \\
+L5 invariância K6 (ordem de escrita) & $\checkmark$ & $\checkmark$ \\
 L6 compatibilidade $G$ & $\checkmark$ & $\checkmark$ \\
 L7 compatibilidade $\zeta/\mu$ & $\checkmark$ & $\checkmark$ \\
 \bottomrule
@@ -486,6 +495,65 @@ A ponte $\zeta+\mu\Longrightarrow C$ \textbf{não} é suficiente; medido empiric
 }
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{M1--M2 e $E_{\partial}$: duas autoridades, nenhuma lei}\label{comb:me}
+
+\noindent\textbf{Núcleo C0--L7 intocado.} Depois de L7 mediram-se
+dois protocolos \emph{isolados um do outro}: a ordem lex (M1--M2) e a
+covariância sob a dobra de índice ($E_{\partial}$). Nem um nem o outro nomeia
+$C$. O $D_{\mathrm{can}}$ de \code{fis:thm:troca-realizacao} já prova
+$u(Da,Db)=u(a,b)$ na árvore; \emph{isso não é} $E_{\partial}$.
+
+\medskip\noindent\textbf{M1--M2 --- ordem lex, isolada de $\partial$.}
+Cadeia $A_0\prec B_0\prec C_0\prec D_0$. Realização: ordem lex em Word.
+\[
+M_1:\ x\prec_{\mathrm{lex}}x'\Rightarrow f(x,y)\preceq_{\mathrm{lex}}f(x',y)
+\qquad
+M_2:\ y\prec_{\mathrm{lex}}y'\Rightarrow f(x,y)\preceq_{\mathrm{lex}}f(x,y')
+\]
+\begin{center}\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+ & lexMax & rectCell \\
+\midrule
+$M_1$ & $0/24$ & $10/24$ \\
+$M_2$ & $0/24$ & $6/24$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\emph{Classificação}: a ordem lex restringe a classe; \textbf{não} promove
+$\operatorname{lexMax}$ a $C$.
+
+\medskip\noindent\textbf{$E_{\partial}$ --- covariância da operação, isolada da lex.}
+Alfabeto $(P_0,P_1,P_2,P_3)$, distinto da cadeia lex. A dobra no índice é
+$D_{\mathrm{can}}(i)=(N-1)-i$. A pergunta \emph{não} é a isometria de $u$:
+\[
+E_{\partial}:\quad
+\partial\bigl(f(\partial x,\partial y)\bigr)\;\stackrel{?}{\sim}\;f(x,y).
+\]
+lexMax: aplicável, \textbf{não} covariante ($4/16$ iguais, só a diagonal).
+rectCell: imagem fora do carrier --- \textbf{não aplicável}.
+E0 confirma $\partial^{2}=\mathrm{id}$ no alfabeto; isso \emph{não} determina
+$R^{\dagger}$ nem $C$.
+
+\medskip\noindent\textbf{Tuplo registado.}
+\[
+\boxed{
+\begin{array}{c|cc}
+ & \operatorname{lexMax} & \operatorname{rectCell} \\
+\hline
+M_1 & \checkmark & \times \\
+M_2 & \checkmark & \times \\
+E_{\partial} & \times\ \text{(aplicável, não covariante)} & \times\ \text{(não aplicável)} \\
+\end{array}}
+\]
+\[
+\boxed{\text{a ordem lex restringe; a dobra não selecciona; nenhuma determina }C.}
+\]
+Independência: $M_1\wedge M_2$ em lexMax $\not\Rightarrow E_{\partial}$.
+\emph{Não se identifica} $E_{\partial}$ com a isometria $u(Da,Db)=u(a,b)$, nem
+$D_{\mathrm{can}}$ com $\tau$, nem K6 com qualquer dos dois.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{Síntese congelada}\label{comb:sintese}
 
 \noindent\textbf{O que este ciclo fechou.}
@@ -496,7 +564,9 @@ A ponte $\zeta+\mu\Longrightarrow C$ \textbf{não} é suficiente; medido empiric
 \item Existência de combinação bilateral (D0--D3);
 \item Não-unicidade estrutural (K0--K7);
 \item Classe $\mathcal A_{\min}$ e invariantes discriminantes (L0--L7);
-\item $\zeta/\mu/S$ compatível com ambas as geometrias --- não selecciona $f$.
+\item $\zeta/\mu/S$ compatível com ambas as geometrias --- não selecciona $f$;
+\item Ordem lex restringe, $E_{\partial}$ não selecciona --- nenhuma determina $C$
+(§\ref{comb:me}).
 \end{enumerate}
 
 \medskip\noindent\textbf{O que permanece aberto.}
@@ -525,7 +595,7 @@ A ponte $\zeta+\mu\Longrightarrow C$ \textbf{não} é suficiente; medido empiric
 % ═══════════════════════════════════════════════════════════════════════════
 \section{O que ainda não foi definido}\label{comb:aberto}
 
-\noindent\textbf{Aberto --- após C0--L7.}
+\noindent\textbf{Aberto --- após M1--M2 e $E_{\partial}$.}
 \begin{enumerate}\itemsep3pt
 \item Autoridade arquitectural suficiente para \textbf{seleccionar} uma lei entre
 $\mathcal A_{\min}$ (ou extensões);
@@ -539,7 +609,9 @@ $\mathcal A_{\min}$ (ou extensões);
 \item Não-unicidade dentro de $\mathcal A_{\min}$;
 \item Insuficiência de $\zeta+\mu$ para implicar $C$;
 \item Insuficiência de impor L2--L4 apenas para ``fazer lexMax vencer'' --- isso seria
-procurar a lei desejada; aqui registra-se \textbf{classificação}.
+procurar a lei desejada; aqui registra-se \textbf{classificação};
+\item Insuficiência de $M_1\wedge M_2$ e de $E_{\partial}$ para seleccionar $C$
+(§\ref{comb:me}).
 \end{enumerate}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -550,8 +622,8 @@ Existe uma classe
 \[
 \mathcal A_{\min}\subset\{f\colon X\times X\to X\}
 \]
-de operações observáveis bilateralmente dependentes, bem definidas, e compatíveis com
-$\tau$, $G$ e $\zeta/\mu$. Dentro dela há pelo menos duas geometrias (lexMax, rectCell).
+de operações observáveis bilateralmente dependentes, bem definidas, K6-invariantes,
+e compatíveis com $G$ e $\zeta/\mu$. Dentro dela há pelo menos duas geometrias (lexMax, rectCell).
 Impor comutatividade, idempotência e associatividade restringe a classe; \textbf{não}
 identifica $C$ de forma única sem invariantes adicionais com autoridade arquitectural.
 \end{hipotese}
@@ -584,7 +656,9 @@ multifocal chega à \textbf{necessidade} de uma operação que ainda \textbf{nã
 \ \to\ \text{R0--R4}\ \checkmark
 \ \to\ \text{D0--D3}\ \checkmark
 \ \to\ \text{K0--K7}\ \checkmark
-\ \to\ \text{L0--L7}\ \checkmark\\
+\ \to\ \text{L0--L7}\ \checkmark
+\ \to\ \text{M1--M2}\ \checkmark
+\ \to\ E_{\partial}\ \checkmark\\
 \downarrow\\
 \mathcal A_{\min}\ \text{medida}\ \to\ C(x,y)\ \textbf{reservada}\ \to\ \text{Hebb/P6 travada}
 \end{array}
@@ -594,10 +668,12 @@ Este documento fecha na \textbf{classificação}; a lei única permanece reserva
 % ═══════════════════════════════════════════════════════════════════════════
 \medskip\noindent\rule{\textwidth}{0.4pt}
 
-\medido{\textbf{Bateria C0--L7} (\code{node tests/redes\_combinacao.js}):\\
-174 asserts, 0 falhas; \code{lib/arena\_combinacao.mjs};\\
+\medido{\textbf{Bateria C0--L7 + M1--M2 + $E_{\partial}$}
+(\code{node tests/redes\_combinacao.js}):\\
+231 asserts, 0 falhas; \code{lib/arena\_combinacao.mjs};\\
 integrada em \code{tools/auditoria\_rg6.bat} após §RG6.\\
-\code{redes.tex} permanece congelado como documento de interface.\\
+\code{redes.tex} permanece interface (§RG6 fechado); a régua da troca alinha-se a
+\code{fis:thm:troca-realizacao}.\\
 \code{combinacao.tex} fecha com classificação; $C=\operatorname{lexMax}$ \textbf{não} declarado.}
 
 \end{document}
