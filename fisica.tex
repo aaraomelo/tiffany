@@ -4902,6 +4902,9 @@ $M\ge2$; para esse $x$ a divergência é exatamente em $q$, e o supremo é ating
 medida não distingue as réguas, mas a \textbf{localidade} sim. \emph{O que uma
 mudança de régua move é o custo do salto, nunca o tamanho do conjunto}; e é por
 isso que a escolha de representação é uma questão de operação e não de medida.
+\emph{A troca dual do Teor.~\ref{fis:thm:troca-realizacao} é caso particular em
+que $\operatorname{prof}$ e $u$ se preservam; travessias arbitrárias $T=R_d\circ
+R_o^{-1}$ não herdam isso automaticamente.}
 
 \medskip\noindent\textbf{E a álgebra não desce --- transporta-se.} Sendo $c$ a
 codificação, é \emph{falso} que $c(A+B)=c(A)+c(B)$ --- e tem de ser, senão a soma
@@ -5937,7 +5940,10 @@ $\Delta=20,13,8$ dá $d_{\mathcal{P}}(20,8)=12$ contra
 $\max\{7,5\}=7$. \emph{Uma conta, e chega.}
 \item[(3)] \textbf{A segunda é ultramétrica}, pelo Lema~\ref{fis:lem:ultra}
 aplicado às palavras, e é essa que particiona (Teor.~\ref{fis:thm:bolas}) e que
-não acumula ao compor (Teor.~\ref{fis:thm:navega}).
+não acumula ao compor (Teor.~\ref{fis:thm:navega}). Pelo
+Teor.~\ref{fis:thm:troca-realizacao}, a troca dual preserva
+$\operatorname{prof}$ e portanto $d_{\mathrm u}$ --- \emph{no domínio binário
+onde $D=R^{\dagger}R^{-1}$}; não se confunde com $d_{\mathcal P}$.
 \item[(4)] \textbf{E a diferença não é de precisão: é de \emph{alcance}.}
 \end{enumerate}
 \end{corolario}
@@ -6388,6 +6394,157 @@ $\dagger$, e para ser $\mathcal{D}$ teria de valer $\partial(x+y)=\partial x\cdo
 que é falso já em dois pontos genéricos. \emph{A mesma aplicação é $\dagger$ para
 um par de operações e $\mathcal{D}$ para outro; a duomorfia é relativa ao par, e
 por isso prova-se por par.} É o que segue.
+
+\subsection*{A troca de realização, neste domínio}
+
+\noindent O argumento que abaixo se prova item a item vale \textbf{neste
+domínio}: a lista binária de largura $p$, a árvore da Def.~\ref{fis:def:arvore},
+e o $D$ canónico $i\mapsto(N-1)-i$. \emph{Não se generaliza}: não se
+afirma que qualquer involução preserve qualquer ultramétrica, nem que qualquer
+travessia $T=S\circ R^{-1}$ seja isometria.
+
+\begin{teorema}[troca de realização e invariância ultramétrica]\label{fis:thm:troca-realizacao}
+Seja $I$ a lista do Teor.~\ref{fis:thm:BI} em largura $p$, com $N=2^{p}$, e
+sejam $\oplus=\min$ e $\otimes=\max$ as operações que a ordem induz. Se $R$ e
+$R^{\dagger}$ são as duas leituras reversíveis do mesmo objecto
+(Teor.~\ref{fis:thm:B}) e
+\[
+\boxed{\;D=R^{\dagger}\circ R^{-1}\;}
+\]
+então, no domínio de endereços da Def.~\ref{fis:def:arvore}, com
+$d(a,b)=u(a,b)=2^{-\operatorname{prof}(a,b)}$:
+\begin{enumerate}\itemsep3pt
+\item[(1)] \textbf{A dobra fecha.} $D^{2}=\mathrm{id}$, e $D$ \emph{realiza} a
+dobra $\partial$ da Def.~\ref{fis:def:op} no índice:
+\[
+\boxed{\;D(i)=(N-1)-i=\partial i\;}
+\]
+\item[(2)] \textbf{A troca é duomorfa.} $D(x\oplus y)=D(x)\otimes D(y)$ e
+$D(x\otimes y)=D(x)\oplus D(y)$ --- a mesma passagem que
+$\mathcal{D}(X,\oplus,\otimes)=(X,\otimes,\oplus)$ da Def.~\ref{fis:def:duomorf},
+lida \emph{no endereço} e não só na estrutura.
+\item[(3)] \textbf{A profundidade não se move.} Para quaisquer endereços $a,b$,
+\[
+\boxed{\;\operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)\;}
+\]
+--- provado no Teor.~\ref{fis:thm:dual}(5).
+\item[(4)] \textbf{Donde $D$ é isometria de $u$.} Pela cláusula~(3) e pela
+definição $u(a,b)=2^{-\operatorname{prof}(a,b)}$,
+\[
+\boxed{
+\begin{aligned}
+u(Da,Db)
+&=2^{-\operatorname{prof}(Da,Db)}
+=2^{-\operatorname{prof}(a,b)}
+=u(a,b)
+\end{aligned}}
+\]
+--- \emph{esta igualdade de distâncias é a isometria}; não é corolário verbal,
+é o resultado. Como $D=\partial$ na cláusula~(1),
+\[
+\boxed{\;u(\partial a,\partial b)=u(a,b)\;}
+\]
+\item[(5)] \textbf{A troca de foco não cria outro objecto.} Guarda-se uma tabela
+e o inteiro $N$; a leitura dual produz o mesmo objecto \emph{reendereçado}:
+\emph{«Uma memória é física; a outra é o mesmo objecto reendereçado.»}
+\end{enumerate}
+\emph{A ordem, neste domínio, é}
+\[
+\begin{array}{@{}ll@{}}
+T=S\circ R^{-1}
+  & \text{definição e unicidade (Cor.~\ref{fis:cor:travunica})}\\[2pt]
+S=R^{\dagger}
+  & \text{hipótese: as duas leituras do Teor.~\ref{fis:thm:B}}\\[2pt]
+D=R^{\dagger}\circ R^{-1}
+  & \text{o mapa entre elas}\\[2pt]
+D(i)=(N-1)-i=\partial i
+  & \text{Teor.~\ref{fis:thm:dual}(2)}\\[2pt]
+\operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)
+  & \text{Teor.~\ref{fis:thm:dual}(5)}\\[2pt]
+u(Da,Db)=u(a,b)
+  & \text{definição de }u
+\end{array}
+\]
+\emph{Não se atribui a $\partial^{2}=\mathrm{id}$ a determinação de $R^{\dagger}$.}
+A demonstração das cláusulas~(1)--(4) é o Teor.~\ref{fis:thm:dual}.
+
+\medskip\noindent\textbf{O que muda e o que não muda.}
+\[
+\boxed{
+\begin{array}{@{}l@{\quad}l@{}}
+\textbf{estrutural --- preservado} & \partial^{2}=\mathrm{id},\;
+\operatorname{prof}(\partial x,\partial y)=\operatorname{prof}(x,y),\;
+u(\partial x,\partial y)=u(x,y)\\[4pt]
+\textbf{realização --- pode mudar} & \text{endereço, coordenadas, }G,\;
+\|v\|,\;d_{\mathcal{P}},\;D(R,S),\;\text{localidade, dimensão aparente}
+\end{array}}
+\]
+\emph{Mesma estrutura $\neq$ mesma aparência. Trocar foco não troca o objecto;
+troca a realização.}
+
+\medskip\noindent\textbf{Métricas, e não confundir.} A quantidade
+$u=2^{-\operatorname{prof}}$ é a \textbf{ultramétrica estrutural de endereço} e
+é preservada pela troca dual \emph{demonstrada} acima. As métricas e custos de
+realização --- $\|v\|$, $G$, $d_{\mathcal{P}}=|\Delta_P-\Delta_Q|$,
+$D(R,S)=\sup_x d(R(x),S(x))$, localidade dos saltos --- \textbf{podem mudar};
+preservar $u$ \emph{não} implica igualdade entre elas
+(Cor.~\ref{fis:cor:duasreguas}, Prop.~\ref{fis:prop:travessia},
+\code{algebrico thm:metrica}).
+
+\medskip\noindent\textbf{Dobra no índice, duomorfismo nas operações --- e não
+$\tau$.} Neste domínio $D$ coincide com $\partial$ no índice e é um
+$\mathcal{D}$ para $(\min,\max)$. \emph{São dois papéis do mesmo mapa, neste
+domínio.} Não se identifica
+\[
+D=\tau,\qquad \partial=\tau,\qquad D=\nu,\qquad D=\mathrm{relocAddr}.
+\]
+$\tau$ é a transposição no \textbf{par} (Obs.~\ref{fis:obs:cisao}): a cisão
+$X_{+}\oplus X_{-}$. $D$ é a dobra no \textbf{índice} da lista: o complemento
+dos bits. \emph{Conversam sem se identificarem}; o texto não as funde. Também
+não se identifica $r\mapsto1/r$ com este $D$.
+
+\medskip\noindent\textbf{Camadas de referência, neste domínio.}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Camada} & \textbf{Papel} \\
+\midrule
+Objecto & estrutura que permanece \\
+$R$, $R^{\dagger}$ & as duas leituras reversíveis \\
+$D=R^{\dagger}\circ R^{-1}$ & o mapa único entre elas \\
+$D(i)=(N-1)-i$ & o complemento canónico, neste domínio \\
+$\partial$ & a dobra no índice (Def.~\ref{fis:def:op}) \\
+$\operatorname{prof}$ & primeira divergência MSB (Def.~\ref{fis:def:arvore}) \\
+$u=2^{-\operatorname{prof}}$ & ultramétrica estrutural deste $D$ \\
+$G$, $\|v\|$, $\Delta$, $D(R,S)$ & métricas/custos da realização: \emph{podem} mudar \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{teorema}
+
+\begin{corolario}[foco e realização]\label{fis:cor:foco}
+Um \textbf{foco} $F$ determina uma realização $R_F$ do objecto. A troca para o
+foco dual $F^{\dagger}$ é
+\[
+D_F=R_{F^{\dagger}}\circ R_F^{-1}.
+\]
+\emph{Quando} $D_F$ é a dobra dual do Teor.~\ref{fis:thm:troca-realizacao} ---
+lista binária, leituras do Teor.~\ref{fis:thm:B} ---, valem $D_F^{2}=\mathrm{id}$,
+$\operatorname{prof}(D_Fa,D_Fb)=\operatorname{prof}(a,b)$ e a isometria
+$u(D_Fa,D_Fb)=u(a,b)$. Donde
+\[
+\boxed{\;F\text{ determina a realização;}\qquad u\text{ pertence à estrutura.}\;}
+\]
+\emph{Não se afirma} que focos arbitrários do corpus sejam automaticamente
+isometrias: travessias genéricas preservam o objecto/medida e podem mudar
+localidade (Prop.~\ref{fis:prop:travessia}).
+\end{corolario}
+
+\medido{\code{tools/\_probe\_duomorf\_prof.c}: $D_{\mathrm{can}}\colon i\mapsto(N-1)-i$
+preserva $\operatorname{prof}$ em todos os pares das árvores $p=8$ e $p=12$;
+$T_{\mathrm{rev}}$ (bits invertidos) não preserva; \code{relocAddr} só no
+subdomínio identidade. \emph{Confirmação, não prova}: o
+Teor.~\ref{fis:thm:dual}(5) não depende desta sonda.}
 
 \subsection*{A bijeção duomorfa}
 
@@ -7118,7 +7275,7 @@ esta prova pede à escada, e pede-a toda.} Note-se
 que a preservação é, como em~(2), \textbf{a menos do factor $2^{m}$}: é a mesma
 escala, e não conteúdo.
 \end{proof}
-\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Prop.~\ref{fis:prop:travessia}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:vizarvore},~\ref{fis:thm:euler},~\ref{fis:thm:handshake},~\ref{fis:thm:dim},~\ref{fis:thm:vizdobra},~\ref{fis:thm:fecho},~\ref{fis:thm:vizniso},~\ref{fis:thm:palavra},~\ref{fis:thm:contraria},~\ref{fis:thm:bijeccao},~\ref{fis:thm:enumera},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:matriz},~\ref{fis:cor:disc},~\ref{fis:cor:duasreguas},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:viztopo},~\ref{fis:def:arvore},~\ref{fis:def:percurso},~\ref{fis:def:grade},~\ref{fis:def:palavra},~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos}}
+\colunas{Lema~\ref{fis:lem:ultra},~\ref{fis:lem:duasdobras},~\ref{fis:lem:doisunico},~\ref{fis:lem:quatro}; Prop.~\ref{fis:prop:travessia}; Teor.~\ref{fis:thm:bolas},~\ref{fis:thm:vizarvore},~\ref{fis:thm:euler},~\ref{fis:thm:handshake},~\ref{fis:thm:dim},~\ref{fis:thm:vizdobra},~\ref{fis:thm:fecho},~\ref{fis:thm:vizniso},~\ref{fis:thm:palavra},~\ref{fis:thm:contraria},~\ref{fis:thm:bijeccao},~\ref{fis:thm:enumera},~\ref{fis:thm:navega},~\ref{fis:thm:dual-involutiva},~\ref{fis:thm:duo-composicao},~\ref{fis:thm:quarteto},~\ref{fis:thm:trial},~\ref{fis:thm:duasfaces},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:duoestrela},~\ref{fis:thm:duasinvol},~\ref{fis:thm:troca-realizacao},~\ref{fis:thm:dual},~\ref{fis:thm:constroi},~\ref{fis:thm:duoesp},~\ref{fis:thm:ncorpos},~\ref{fis:thm:tresgraus},~\ref{fis:thm:ponte}; Cor.~\ref{fis:cor:folga},~\ref{fis:cor:matriz},~\ref{fis:cor:disc},~\ref{fis:cor:duasreguas},~\ref{fis:cor:foco},~\ref{fis:cor:travunica},~\ref{fis:cor:cruzado}; Def.~\ref{fis:def:viztopo},~\ref{fis:def:arvore},~\ref{fis:def:percurso},~\ref{fis:def:grade},~\ref{fis:def:palavra},~\ref{fis:def:duomorf},~\ref{fis:def:duoestrela},~\ref{fis:def:espmat},~\ref{fis:def:corpos}}
         {a árvore, o dragão e a espiral, a serpentina, a travessia por dígitos, a leitura dual}
         {\code{tests/aranha\_n.c} §AN6--§AN7, §AN13--§AN14, §AN25, §AN29, §AN37; \code{tests/pgwire.c} §W122--§W123, §W128}
 
