@@ -2,6 +2,17 @@
   "titulo": "Backends da ISA — realizações, nenhuma privilegiada",
   "nota": "Fonte de verdade das claims: conecthus/claims/*.claim. C→traduz→wasm. Paper/teste/código são projeções.",
   "interface_padrao": "sql",
+  "operacoes": {
+    "p": "analisa / descompila — face ⊕, MOVE(+1) absorve",
+    "q": "compila forma interna — face ⊗, MOVE(−1) emite",
+    "r": "atravessa pleno (metal, shell, slots S_CANAL+*)",
+    "paridade": "π(L)=(p+q+r) mod 2; a(A→B)=π(A)⊕π(B): 0=iso, 1=duo; duo∘duo=iso via hub sql",
+    "tradutor": "MOVE na arena + arestas; absorcao fio a fio (latex/bash/node); sem adaptador SQL",
+    "doc": "memoria/duomorfismo-pipe.md",
+    "medidor": "tests/duomorf_pipe.js; tools/test_metal.exe; tests/cosmologia.c",
+    "celula": "mvp: consultar.wasm + GKBANCO (LS); pleno sql.c so no metal",
+    "medidor_cadeia": "tests/traduz_c_wasm_node.js; tests/traduz_c_wasm_shell.js; tests/traduz_asm_wasm.c; tests/traduz_c_asm_node.c; tests/traduz_c_asm_shell.c; tests/celula_wasm_sec.c; tests/corre_fita_metal.c; tests/corre_fita_browser.js"
+  },
   "interface_nota": "Quando nada se especifica, o corpo entra e sai como query SQL: banco/sql.c compila para a ISA, memória no disco, e traduz programas. LaTeX e as outras linguagens continuam backends de porta única — tex.wasm é o tradutor pleno do latex, não da interface. Medidor: tests/interface_padrao.js",
   "entrada_apps": "pgwire",
   "entrada_apps_nota": "Apps e drivers falam FEBE (Postgres wire) com banco/pgwire.c — tipicamente 127.0.0.1:5432 se livre, senão 55432. Não é o servidor PostgreSQL; é a face Tiffany do protocolo. Para aplicações em C há a fachada lib/pqlike.h (PQconnectdb/PQexec/PQntuples/PQgetvalue) escrita aqui sobre o mesmo wire — não se linka -lpq do sistema. Motor e interface_padrao continuam sql (banco/sql.c). Medidores: tests/pgwire.c §W4 (listener) e §W7 (fachada, dois caminhos a concordar).",
@@ -115,11 +126,14 @@
       "fonte": "conecthus/backends/sql/consultar.c",
       "wasm": "consultar.wasm",
       "exports": [
+        "sql_move",
         "sql_compilar",
         "sql_descompilar"
       ],
       "pleno": "banco/sql.c",
-      "nota": "interface padrão; pleno = compilador no metal"
+      "nota": "interface padrao; wasm=celula browser; pleno=sql.c metal",
+      "arena": "browser",
+      "armazenamento": "GKBANCO"
     },
     {
       "nome": "latex",
@@ -133,7 +147,16 @@
         "latex_compor",
         "latex_descompor"
       ],
-      "pleno": "tex.wasm"
+      "pleno": "tex.wasm",
+      "absorcao": {
+        "move": "latex_compor",
+        "exports": [
+          "latex_compor",
+          "latex_descompor"
+        ],
+        "fio": "arena",
+        "pleno": "tex.wasm"
+      }
     },
     {
       "nome": "claim",
@@ -174,7 +197,866 @@
       "exports": [
         "MOVE"
       ],
-      "nota": "porta única MOVE"
+      "nota": "porta única MOVE",
+      "cadeia": {
+        "asm": "texto .erg (ERG-64)",
+        "fita": "bytecode montado",
+        "wasm": "isa.wasm + secção custom erg.fita",
+        "fonte": "tools/isa.c",
+        "monta": "lib/erg_monta.mjs",
+        "ponte": "tools/asm_wasm.mjs",
+        "duomorf": {
+          "asm_wasm": "a fita é comum; asm=erg monta/desmonta, wasm=MOVE+erg.fita",
+          "wasm_metal": { "a": 0, "b": 0, "quadrante": "Q00", "fio": "arena" },
+          "involucao": "monta∘desmonta=id na fita"
+        }
+      }
+    },
+    {
+      "nome": "bash",
+      "faz": "interpretar",
+      "p": 1,
+      "q": 1,
+      "r": 0,
+      "fonte": "conecthus/backends/bash/interpretar.c",
+      "wasm": "interpretar.wasm",
+      "exports": [
+        "bash_move",
+        "bash_escreve",
+        "bash_le",
+        "bash_pronto",
+        "bash_pendente"
+      ],
+      "pleno": "banco/bash.c",
+      "nota": "wasm = protocolo na arena DISCO; pleno = popen/PTY na Patria; slots S_CANAL+9100/9101",
+      "absorcao": {
+        "move": "bash_move",
+        "exports": [
+          "bash_move",
+          "bash_escreve",
+          "bash_le",
+          "bash_pronto",
+          "bash_pendente"
+        ],
+        "slots": {
+          "in": 9100,
+          "out": 9101
+        },
+        "fio": "canal"
+      },
+      "cadeia": {
+        "c": "conecthus/backends/bash/interpretar.c",
+        "wasm": "interpretar.wasm",
+        "asm": "conecthus/backends/bash/celula.erg",
+        "pleno": "banco/bash.c",
+        "traduz": "tools/bin/traduz",
+        "ponte_asm": "tools/wasm_sec.c",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": ["c", "wasm", "asm", "bash_pleno"],
+        "celula": {
+          "nome": "bash_celula",
+          "p": 1,
+          "q": 1,
+          "r": 0
+        },
+        "metal": {
+          "nome": "bash_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 1,
+            "quadrante": "Q01",
+            "fio": "canal"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
+    },
+    {
+      "nome": "powershell",
+      "faz": "interpretar",
+      "p": 1,
+      "q": 1,
+      "r": 0,
+      "fonte": "conecthus/backends/powershell/interpretar.c",
+      "wasm": "powershell.wasm",
+      "exports": [
+        "powershell_move",
+        "powershell_escreve",
+        "powershell_le",
+        "powershell_pronto",
+        "powershell_pendente"
+      ],
+      "pleno": "banco/powershell.c",
+      "nota": "Windows local; slots S_CANAL+9110/9111",
+      "absorcao": {
+        "move": "powershell_move",
+        "exports": [
+          "powershell_move",
+          "powershell_escreve",
+          "powershell_le",
+          "powershell_pronto",
+          "powershell_pendente"
+        ],
+        "slots": {
+          "in": 9110,
+          "out": 9111
+        },
+        "fio": "canal"
+      },
+      "cadeia": {
+        "c": "conecthus/backends/powershell/interpretar.c",
+        "wasm": "powershell.wasm",
+        "pleno": "banco/powershell.c",
+        "traduz": "tools/bin/traduz",
+        "celula": {
+          "nome": "powershell_celula",
+          "p": 1,
+          "q": 1,
+          "r": 0
+        },
+        "metal": {
+          "nome": "powershell_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 1,
+            "quadrante": "Q01",
+            "fio": "canal"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
+    },
+    {
+      "nome": "node",
+      "faz": "interpretar",
+      "p": 1,
+      "q": 1,
+      "r": 0,
+      "fonte": "conecthus/backends/node/interpretar.c",
+      "wasm": "node.wasm",
+      "exports": [
+        "node_move",
+        "node_escreve",
+        "node_le",
+        "node_pronto",
+        "node_pendente"
+      ],
+      "pleno": "banco/node.c",
+      "nota": "Node no metal (TIFFANY_NODE); slots S_CANAL+9120/9121",
+      "absorcao": {
+        "move": "node_move",
+        "exports": [
+          "node_move",
+          "node_escreve",
+          "node_le",
+          "node_pronto",
+          "node_pendente"
+        ],
+        "slots": {
+          "in": 9120,
+          "out": 9121
+        },
+        "fio": "canal",
+        "fio_c": "traduz sobe/desce"
+      },
+      "cadeia": {
+        "c": "conecthus/backends/node/interpretar.c",
+        "wasm": "node.wasm",
+        "asm": "conecthus/backends/node/celula.erg",
+        "pleno": "banco/node.c",
+        "traduz": "tools/bin/traduz",
+        "ponte_asm": "tools/wasm_sec.c",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": ["c", "wasm", "asm", "node_pleno"],
+        "celula": {
+          "nome": "node_celula",
+          "p": 1,
+          "q": 1,
+          "r": 0
+        },
+        "metal": {
+          "nome": "node_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce — mesma regua, nao passagem A→B",
+          "wasm_metal": {
+            "a": 0,
+            "b": 1,
+            "quadrante": "Q01",
+            "fio": "canal",
+            "slots": {
+              "in": 9120,
+              "out": 9121
+            }
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        },
+        "nota": "C sobe para wasm; pleno executa Node; b=1 no cruzado r (fisica.tex §fis:def:duomorf)"
+      }
+    },
+    {
+      "nome": "html",
+      "faz": "compor",
+      "p": 1,
+      "q": 1,
+      "r": 1,
+      "fonte": "conecthus/backends/html/compor.c",
+      "wasm": "html_compor.wasm",
+      "exports": [
+        "html_move",
+        "html_compor",
+        "html_descompor"
+      ],
+      "nota": "DOM — estrutura"
+    },
+    {
+      "nome": "css",
+      "faz": "aplicar",
+      "p": 1,
+      "q": 0,
+      "r": 1,
+      "fonte": "conecthus/backends/css/aplicar.c",
+      "wasm": "css_aplicar.wasm",
+      "exports": [
+        "css_move",
+        "css_aplicar"
+      ],
+      "nota": "DOM — pintar"
+    },
+    {
+      "nome": "js",
+      "faz": "escapar",
+      "p": 1,
+      "q": 0,
+      "r": 1,
+      "fonte": "conecthus/backends/js/escapar.c",
+      "wasm": "js_escapar.wasm",
+      "exports": [
+        "js_move",
+        "js_escapar"
+      ],
+      "nota": "DOM — script"
+    }
+  ],
+  "pipe_linguagens": [
+    "sql",
+    "html",
+    "css",
+    "js",
+    "bash",
+    "node",
+    "powershell"
+  ],
+  "arestas": [
+    {
+      "de": "sql",
+      "para": "html",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "sql",
+        "html"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "sql",
+      "para": "css",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "css"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "js",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "js"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "bash",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "bash"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "powershell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "powershell"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "html",
+      "para": "sql",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "html",
+      "para": "css",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "css"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "js",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "js"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "bash",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "bash"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "powershell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "powershell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "css",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "css",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "css",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "css",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "css",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "css",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "js",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "js",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "js",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "js",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "js",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "bash",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "bash",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "node",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "node",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "powershell",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "powershell",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "canal",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "canal",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "canal",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "canal"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "canal",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "canal",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "canal",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "canal"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "canal",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "canal",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "canal",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "canal"
+      ],
+      "ponte": null
+    }
+  ],
+  "traduzentes": [
+    "sql",
+    "html",
+    "css",
+    "js",
+    "bash",
+    "node",
+    "powershell"
+  ],
+  "mvp": {
+    "celula": "consultar.wasm na arena DISCO (singleton browser)",
+    "pleno": "banco/sql.c na Patria (canal); browser=arena wasm",
+    "armazenamento": {
+      "magia": "GKBANCO",
+      "chave": "gk:banco:estado",
+      "nota": "localStorage — padrao GKCORPO; sem I/O por query SQL"
+    },
+    "sql": {
+      "wasm": "consultar.wasm",
+      "pleno": "banco/sql.c",
+      "fonte_wasm": "conecthus/backends/sql/consultar.c",
+      "exports": [
+        "sql_move",
+        "sql_compilar",
+        "sql_descompilar"
+      ]
+    },
+    "maquina": "MOVE na arena DISCO; canal sincroniza slots; backends absorvidos como latex",
+    "absorcao": "tests/backends_wasm.js §W4 latex §W8 bash §W10 node"
+  },
+  "protocolo": {
+    "nome": "canal",
+    "bidireccional": true,
+    "fio": "ws:/canal",
+    "slots": "S_CHUNK+S_*_IN/OUT",
+    "nota": "unico fio real; sincroniza arena com Patria",
+    "p": 1,
+    "q": 0,
+    "r": 1
+  },
+  "fios": [
+    {
+      "nome": "post",
+      "nota": "semantica classica NAO absorvida — ponte dev apenas",
+      "absorvido": false
+    },
+    {
+      "nome": "http",
+      "nota": "sinonimo post",
+      "absorvido": false
+    },
+    {
+      "nome": "fetch",
+      "nota": "GET estatico — leitura ficheiro",
+      "absorvido": false
     }
   ]
 }

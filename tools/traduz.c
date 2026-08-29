@@ -2996,14 +2996,16 @@ static int desce_corpo(long fim, int fidx){
         /* MOVE(+1): do slot para o registo. Volta como `*(T*)(endereço)` — a forma que
          * torna a subir exactamente no mesmo opcode, sem eu ter de adivinhar se aquilo era
          * um vector ou um escalar: o endereço está lá, e o endereço é o slot. */
-        case 0x28: case 0x29: case 0x2B: case 0x2C: {
-            const char *T2 = op == 0x28 ? "int" : op == 0x29 ? "long" : op == 0x2B ? "double" : "char";
+        case 0x28: case 0x29: case 0x2B: case 0x2C: case 0x2D: {
+            const char *T2 = op == 0x28 ? "int" : op == 0x29 ? "long" : op == 0x2B ? "double"
+                : "unsigned char";
             (void)d_u(); (void)d_u();                                   /* alinhamento, desvio */
             empurra("*(%s*)(%s)", T2, puxa());
         } break;
         /* e MOVE(-1): do registo para o slot */
-        case 0x36: case 0x37: case 0x39: case 0x3A: {
-            const char *T2 = op == 0x36 ? "int" : op == 0x37 ? "long" : op == 0x39 ? "double" : "char";
+        case 0x36: case 0x37: case 0x39: case 0x3A: case 0x3C: {
+            const char *T2 = op == 0x36 ? "int" : op == 0x37 ? "long" : op == 0x39 ? "double"
+                : "unsigned char";
             (void)d_u(); (void)d_u();
             char v[512]; snprintf(v, sizeof v, "%s", puxa());
             frase(prof, "*(%s*)(%s) = %s;", T2, puxa(), v);
@@ -3607,16 +3609,7 @@ int main(int argc, char **argv){
     /* O SENTIDO SAI DO PRÓPRIO OBJECTO, não de uma opção: um módulo diz-se pela marca. É a
      * mesma interface do corpo_analitico — `MOVE(slot, sentido)`: −1 emite, +1 absorve. */
     if(n >= 4 && !memcmp(SRC, "\0asm", 4)){
-        if(IMG_INI >= 0 && IMG_FIM > IMG_INI){        /* 11: os dados — um segmento só */
-        bu(&SEC, 1);
-        bu(&SEC, 0);                              /* o segmento activo, na memória 0 */
-        bput(&SEC, 0x41); bs(&SEC, IMG_INI); bput(&SEC, 0x0B);   /* onde começa */
-        bu(&SEC, (unsigned long)(IMG_FIM - IMG_INI));
-        bmany(&SEC, IMG + IMG_INI, IMG_FIM - IMG_INI);
-        seccao(11, &SEC);
-    }
-
-    FILE *o = fopen(sai, "wb");
+        FILE *o = fopen(sai, "wb");
         if(!o){ fprintf(stderr, "traduz: não escreve %s\n", sai); return 2; }
         int bom = desce_modulo((const unsigned char *)SRC, n, o);
         fclose(o);

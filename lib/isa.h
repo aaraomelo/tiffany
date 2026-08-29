@@ -66,7 +66,14 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
         * de uma condição não ramifica — `<` e `>` são o bit de sinal espalhado, e
         * `=` é o complemento disso —, e o molde da linha recebe já a máscara sem
         * ter de a fabricar com `0 − ACC`. No FIM, como manda a VOLTA. */
-       OP_ESPALHA };
+       OP_ESPALHA,
+       /* Endereçamento indireto (pipe wasm→ERG): o operando aponta ao slot que
+        * guarda o índice u16 do destino; LOADS lê, STORE_IND grava. No FIM. */
+       OP_STORE_IND,
+       /* VINCO: SUB face ⊕ + flags←zero(R) — fis:thm:simbolos (4); evita STORE·LOAD·CMP */
+       OP_VINCO,
+       /* INC slot: slot←slot+1 Word — laço i++/nout++ num passo (fis:algoritmo escrita) */
+       OP_INC };
 
 #define FL_ZERO 0x01
 #define FL_EQ   0x02

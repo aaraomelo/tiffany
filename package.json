@@ -1,0 +1,13 @@
+{
+  "name": "tiffany-mvp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "mvp": "node tools/mvp.mjs",
+    "mvp:bench": "node tools/bench_mvp.mjs",
+    "mvp:test": "node tests/mvp_ponta.js",
+    "mvp:metal": "node tests/banco_metal.js",
+    "gera:nucleo": "node tools/gera_nucleo.mjs all",
+    "serve": "node tools/serve_banco.mjs"
+  }
+}

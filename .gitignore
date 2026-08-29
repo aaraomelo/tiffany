@@ -47,6 +47,7 @@ tools/*
 # excepcoes nomeia .c, .md, .sh e .py — nao .js. O compara.js viveu um dia inteiro so' no
 # disco, e num clone limpo nao existiria. Um medidor que nao esta' no repo nao e' medidor.
 !tools/*.js
+!tools/*.bat
 !tools/*.py
 !tools/atestados.txt
 !tools/NAO-MEDIDORES.txt

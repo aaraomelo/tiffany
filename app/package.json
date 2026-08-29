@@ -6,8 +6,11 @@
   "description": "Reino Dourado (Golden Kingdom) — a arte-conceito rasterizada no metal, empacotada num app Vite local",
   "scripts": {
     "dev": "vite",
+    "dev:banco": "vite --open /banco/",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:banco": "vite preview --open /banco/",
+    "test:canal": "node ../tests/canal_browser.js && node ../tests/canal_chunk.js"
   },
   "devDependencies": {
     "vite": "^5.4.10"

@@ -247,6 +247,16 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
  *   +0 versao   +1 nbits   +2 ntime   +3..+10 prevhash   +11 tem job   +12..+19 merkle
  *   +20 a SHARE: escrever aqui submete o nonce */
 #define S_POOL     (S_CANAL + 100000u)
+/* bash no barramento: stdin/stdout como Words no canal (plano-terminal-barramento.md) */
+#define S_BASH_IN  (S_CANAL + 9100u)
+#define S_BASH_OUT (S_CANAL + 9101u)
+#define S_PWSH_IN  (S_CANAL + 9110u)
+#define S_PWSH_OUT (S_CANAL + 9111u)
+#define S_NODE_IN  (S_CANAL + 9120u)
+#define S_NODE_OUT (S_CANAL + 9121u)
+#define S_CHUNK    (S_CANAL + 9102u)
+#define S_FRONT_REQ (S_CANAL + 9200u)
+#define S_FRONT_RSP (S_CANAL + 9201u)
 #define S_POOL_SH  (S_POOL + 20u)
 /* Blobs (cab/alvo/merkle/coinbase): índices FÍSICOS de átomo (atomos_* → slot_mem directo).
  * Não passam pelo stride-2 das Words ISA. Longe do mapa Word (S_LINHAS…). */
@@ -2572,6 +2582,18 @@ static int passo(Regs *r, unsigned prog_len){
     }
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
+    case OP_VINCO: {
+        r->R = ula_sub(r->A, r->B);
+        r->flags = zero(r->R) ? FL_ZERO : 0;
+        break; }
+    case OP_INC: {
+        unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc + 1) << 8);
+        pc += 2;
+        Word w = mem_le(slot);
+        w = ula_add(w, (Word){ 1, 0 });
+        mem_grava(slot, w);
+        r->R = w;
+        break; }
     /* a Word lida como UM número de dezasseis bits: o vai-um atravessa (§26) */
     case OP_ADD16: {
         W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
@@ -14236,6 +14258,175 @@ static int get_corpo(const char *p){
     return 1;
 }
 
+/* ---------------- SHELL backends: BASH / POWERSHELL / NODE (wasm + pleno) */
+static void shell_dir(char *out, size_t cap, const char *nome){
+    snprintf(out, cap, "%s_%s", g_base[0] ? g_base : "/tmp/sql_shell", nome);
+}
+static int shell_parse_literal(const char *p, char *cmd, size_t cap){
+    size_t k = 0;
+    if(*p == '\'' || *p == '"'){
+        char asp = *p++;
+        while(*p && *p != asp && k + 1 < cap){
+            if(*p == '\\' && p[1]){ cmd[k++] = p[1]; p += 2; continue; }
+            cmd[k++] = *p++;
+        }
+        if(*p == asp) p++;
+    } else {
+        while(*p && *p != ';' && *p != '\n' && k + 1 < cap)
+            cmd[k++] = *p++;
+    }
+    cmd[k] = 0;
+    return (int)k;
+}
+static int shell_escreve(const char *label, const char *nome, unsigned slot_in, const char *cmd, long n){
+    char dir[640], pin[768], aux[768];
+    shell_dir(dir, sizeof dir, nome);
+    mkdir(dir, 0755);
+    snprintf(pin, sizeof pin, "%s/in", dir);
+    FILE *f = fopen(pin, "wb");
+    if(!f){ printf("erro: %s MOVE -1 nao abri %s\n", label, pin); return 0; }
+    if((long)fwrite(cmd, 1, (size_t)n, f) != n){ fclose(f); return 0; }
+    fclose(f);
+    if(!strcmp(nome, "powershell")){
+        snprintf(aux, sizeof aux, "%s/in.ps1", dir);
+        f = fopen(aux, "wb");
+        if(f){ fwrite(cmd, 1, (size_t)n, f); fclose(f); }
+    } else if(!strcmp(nome, "node")){
+        snprintf(aux, sizeof aux, "%s/in.js", dir);
+        f = fopen(aux, "wb");
+        if(f){ fwrite(cmd, 1, (size_t)n, f); fclose(f); }
+    }
+    { char pout[768]; snprintf(pout, sizeof pout, "%s/out", dir); unlink(pout); }
+    mem_grava(slot_in, (Word){ (Word8)(n & 255u), (Word8)((n >> 8) & 255u) });
+    printf("%s MOVE -1: %ld bytes (slot %u)\n", label, n, slot_in);
+    return 1;
+}
+static FILE *shell_popen_run(const char *nome, const char *dir, const char *cmd){
+    char run[8704];
+    if(!strcmp(nome, "bash"))
+        return popen(cmd, "r");
+    if(!strcmp(nome, "powershell")){
+        char ps1[768];
+        snprintf(ps1, sizeof ps1, "%s/in.ps1", dir);
+#ifdef _WIN32
+        snprintf(run, sizeof run, "powershell -NoProfile -ExecutionPolicy Bypass -File \"%s\"", ps1);
+#else
+        snprintf(run, sizeof run, "pwsh -NoProfile -File \"%s\"", ps1);
+#endif
+        return popen(run, "r");
+    }
+    if(!strcmp(nome, "node")){
+        char js[768];
+        const char *nb = getenv("TIFFANY_NODE");
+        if(!nb || !*nb) nb = "node";
+        snprintf(js, sizeof js, "%s/in.js", dir);
+        snprintf(run, sizeof run, "\"%s\" \"%s\"", nb, js);
+        return popen(run, "r");
+    }
+    return NULL;
+}
+static int shell_corre(const char *label, const char *nome, unsigned slot_out){
+    char dir[640], pin[768], pout[768], cmd[8192];
+    shell_dir(dir, sizeof dir, nome);
+    snprintf(pin, sizeof pin, "%s/in", dir);
+    snprintf(pout, sizeof pout, "%s/out", dir);
+    FILE *in = fopen(pin, "rb");
+    if(!in){ printf("erro: %s MOVE -1 sem stdin — use %s MOVE '...' primeiro\n", label, label); return 0; }
+    long nin = 0;
+    while(nin < 8191){
+        int c = fgetc(in);
+        if(c == EOF) break;
+        cmd[nin++] = (char)c;
+    }
+    fclose(in);
+    cmd[nin] = 0;
+    if(nin <= 0){ printf("erro: %s MOVE -1 stdin vazio\n", label); return 0; }
+    FILE *f = shell_popen_run(nome, dir, cmd);
+    if(!f){ printf("erro: %s MOVE -1 popen falhou\n", label); return 0; }
+    FILE *out = fopen(pout, "wb");
+    long nout = 0;
+    unsigned char buf[512];
+    for(;;){
+        size_t r = fread(buf, 1, sizeof buf, f);
+        if(r == 0) break;
+        if(out && fwrite(buf, 1, r, out) != r){ pclose(f); if(out) fclose(out); return 0; }
+        nout += (long)r;
+    }
+    pclose(f);
+    if(out) fclose(out);
+    mem_grava(slot_out, (Word){ (Word8)(nout & 255u), (Word8)((nout >> 8) & 255u) });
+    printf("%s MOVE -1: %ld bytes correr (slot %u)\n", label, nout, slot_out);
+    return 1;
+}
+static int shell_le(const char *label, const char *nome){
+    char dir[640], pout[768];
+    shell_dir(dir, sizeof dir, nome);
+    snprintf(pout, sizeof pout, "%s/out", dir);
+    FILE *f = fopen(pout, "rb");
+    if(!f){ fprintf(stderr, "%s MOVE +1: sem saida\n", label); return 0; }
+    unsigned char buf[8192];
+    size_t n;
+    while((n = fread(buf, 1, sizeof buf, f)) > 0)
+        if(fwrite(buf, 1, n, stdout) != n){ fclose(f); return 0; }
+    fclose(f);
+    fflush(stdout);
+    fprintf(stderr, "%s MOVE +1: ok\n", label);
+    return 1;
+}
+static int cmd_shell(const char *p, const char *label, const char *nome,
+                     unsigned slot_in, unsigned slot_out){
+    pula(&p);
+    if(strncasecmp(p, "MOVE", 4)){
+        printf("erro: %s sabe apenas MOVE — veio «%.20s»\n", label, p);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "%s: use MOVE", label); }
+        return 0;
+    }
+    p += 4; pula(&p);
+    int sentido = 0;
+    if(p[0] == '-' && p[1] == '1'){ sentido = -1; p += 2; pula(&p); }
+    else if(p[0] == '+' && p[1] == '1'){ sentido = +1; p += 2; pula(&p); }
+
+    char cmd[8192];
+    int k = 0;
+    if(*p == '\'' || *p == '"')
+        k = shell_parse_literal(p, cmd, sizeof cmd);
+
+    if(sentido == +1){
+        if(k > 0){
+            printf("erro: %s MOVE +1 nao le argumentos\n", label);
+            return 0;
+        }
+        return shell_le(label, nome);
+    }
+    if(k <= 0){
+        printf("erro: %s MOVE precisa do corpo — `%s MOVE '...'` ou `%s MOVE -1 '...'`\n",
+               label, label, label);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "%s MOVE: missing body", label); }
+        return 0;
+    }
+    if(!shell_escreve(label, nome, slot_in, cmd, (long)k)) return 0;
+    if(!shell_corre(label, nome, slot_out)) return 0;
+    if(sentido == -1) return 1;
+    return shell_le(label, nome);
+}
+static int cmd_bash(const char *p){
+    return cmd_shell(p, "BASH", "bash", S_BASH_IN, S_BASH_OUT);
+}
+static int cmd_powershell(const char *p){
+    return cmd_shell(p, "POWERSHELL", "powershell", S_PWSH_IN, S_PWSH_OUT);
+}
+static int cmd_node(const char *p){
+    return cmd_shell(p, "NODE", "node", S_NODE_IN, S_NODE_OUT);
+}
+
+/* legado: nomes bash_* mantidos para grep/tests */
+static void bash_dir(char *out, size_t cap){ shell_dir(out, cap, "bash"); }
+static int bash_escreve_cmd(const char *cmd, long n){ return shell_escreve("BASH", "bash", S_BASH_IN, cmd, n); }
+static int bash_corre_cmd(void){ return shell_corre("BASH", "bash", S_BASH_OUT); }
+static int bash_le_cmd(void){ return shell_le("BASH", "bash"); }
+
 /* Idioma natural = álgebra byte-level: idioma/<iso>/{alfabeto,lexico,regra,orbita}/…
  * Ficheiros: lib/classe/{portugues,ingles,espanhol}_idioma.txt
  *            lib/classe/corpus_orbitas_pt.txt  (tipo orbita → idioma/pt/orbita/…) */
@@ -15311,6 +15502,9 @@ static int executa(const char *sql){
         if(!strncasecmp(q, "TEXTO", 5)) return insere_texto(q+5);
         return insere_muitas(p);
     }
+    if(palavra(&p, "BASH")) return cmd_bash(p);
+    if(palavra(&p, "POWERSHELL")) return cmd_powershell(p);
+    if(palavra(&p, "NODE")) return cmd_node(p);
     if(palavra(&p, "IMPORT")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "LINGUAGENS", 10)) return import_linguagens(q+10);

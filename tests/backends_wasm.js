@@ -8,6 +8,9 @@
  * §W5  sql: compilar† = descompilar (interface padrão)
  * §W6  isabelle x⊕x=0
  * §W7  control: RETAIN/MOVE/RETRACT na arena (8 eixos)
+ * §W8  bash: escreve/le na arena (protocolo; pleno em tests/bash_pleno.c)
+ * §W9  dom: html compor† + css aplicar + js escapar (front via banco)
+ * §W10 powershell + node: protocolo na arena (pleno em tests/*_pleno.c)
  */
 'use strict';
 const fs = require('fs');
@@ -196,6 +199,89 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
         for (let i = 0; i < 8; i++) a[i] = (i + 1) * 17;
         const falhasXor = p.provar_xor_nulo(8);
         ok('§W6 isabelle x⊕x=0', falhasXor === 0);
+    }
+
+    /* §W8 bash — protocolo na arena (pleno = tests/bash_pleno.c) */
+    {
+        const B = await load('interpretar.wasm');
+        const m = u8(B);
+        ok('§W8 bash exports', typeof B.bash_move === 'function' &&
+            typeof B.bash_escreve === 'function' &&
+            typeof B.bash_le === 'function' && typeof B.bash_pronto === 'function');
+        const cmd = enc.encode('echo ouro\n');
+        m.set(cmd, BASE + 1024);
+        const nw = B.bash_move(1024, cmd.length, 0, -1);
+        ok('§W8 bash_move -1 aceita comando', nw === cmd.length);
+        ok('§W8 bash_pendente', B.bash_pendente() === cmd.length);
+        ok('§W8 bash_pronto inicia vazio', B.bash_pronto() === 0);
+        ok('§W8 bash_corre export', typeof B.bash_corre === 'function');
+        const gotB = B.bash_corre();
+        ok('§W8 bash_corre semântica', gotB > 0);
+        const nr = B.bash_move(8192, 32, 8192, +1);
+        const got = dec.decode(m.slice(BASE + 8192, BASE + 8192 + nr));
+        ok('§W8 bash_move +1 devolve stdout', got.indexOf('ouro') >= 0);
+    }
+
+    /* §W9 DOM — html + css + js (backends do front) */
+    {
+        const H = await load('html_compor.wasm');
+        const mH = u8(H);
+        const html = enc.encode('<p>oi</p>');
+        mH.set(html, BASE + 100);
+        const hn = H.html_move(100, html.length, 2000, -1);
+        const hn2 = H.html_move(2000, hn, 4000, +1);
+        const htmlBack = dec.decode(mH.slice(BASE + 4000, BASE + 4000 + hn2));
+        ok('§W9 html_move ±1', htmlBack === '<p>oi</p>');
+
+        const C = await load('css_aplicar.wasm');
+        const mC = u8(C);
+        const css = enc.encode('.x { color: red }\n.y { margin: 0 }');
+        mC.set(css, BASE + 100);
+        const cn = C.css_move(100, css.length, 2000, -1);
+        const cssOut = dec.decode(mC.slice(BASE + 2000, BASE + 2000 + cn));
+        ok('§W9 css_move -1 normaliza', cssOut === '.x { color: red }; .y { margin: 0 };');
+
+        const J = await load('js_escapar.wasm');
+        const mJ = u8(J);
+        const js = enc.encode('a\n"b"');
+        mJ.set(js, BASE + 100);
+        const jn = J.js_move(100, js.length, 2000, -1);
+        const jsOut = dec.decode(mJ.slice(BASE + 2000, BASE + 2000 + jn));
+        ok('§W9 js_move -1', jsOut === 'a\\n\\"b\\"');
+    }
+
+    /* §W10 powershell + node — protocolo na arena */
+    {
+        const P = await load('powershell.wasm');
+        const mP = u8(P);
+        const ps = new TextEncoder().encode('Write-Output x');
+        mP.set(ps, BASE + 1024);
+        const nw = P.powershell_move(1024, ps.length, 0, -1);
+        ok('§W10 powershell_move -1', nw === ps.length && P.powershell_pendente() === ps.length);
+        ok('§W10 powershell_corre export', typeof P.powershell_corre === 'function');
+        const gotPs = P.powershell_corre();
+        ok('§W10 powershell_corre semântica', gotPs > 0);
+        const nr = P.powershell_move(8192, 32, 8192, +1);
+        const gotP = dec.decode(mP.slice(BASE + 8192, BASE + 8192 + nr));
+        ok('§W10 powershell_move +1', gotP.indexOf('x') >= 0);
+
+        const N = await load('node.wasm');
+        const mN = u8(N);
+        ok('§W10 node exports', typeof N.node_move === 'function' &&
+            typeof N.node_escreve === 'function' &&
+            typeof N.node_le === 'function' && typeof N.node_pronto === 'function');
+        const js = new TextEncoder().encode('console.log(1)');
+        mN.set(js, BASE + 1024);
+        const nw = N.node_move(1024, js.length, 0, -1);
+        ok('§W10 node_move -1 aceita script', nw === js.length);
+        ok('§W10 node_pendente', N.node_pendente() === js.length);
+        ok('§W10 node_pronto inicia vazio', N.node_pronto() === 0);
+        ok('§W10 node_corre export', typeof N.node_corre === 'function');
+        const got = N.node_corre();
+        ok('§W10 node_corre semântica', got > 0);
+        const nr = N.node_move(8192, 32, 8192, +1);
+        const gotN = dec.decode(mN.slice(BASE + 8192, BASE + 8192 + nr));
+        ok('§W10 node_move +1 devolve stdout', gotN.indexOf('1') >= 0);
     }
 
     /* §W7 Controlo em wasm (8 eixos) */

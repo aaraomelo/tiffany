@@ -149,6 +149,46 @@ eliminam `rectCell` **só** como critérios de classe — **não** axiomas para 
    Próxima pergunta (se houver): invariantes de uma realização admissível sob $\partial$,
    não «qual é $C$».
 
+## Mapa — não toca (cosmologia)
+
+Confirmação arquitectural, **não** experiência nova. **Não tocar em `30be75d1`.**
+
+$$
+\boxed{\text{grandeza de um lado}\neq\text{invariante do par}}
+$$
+
+Mecânica (`fis:thm:kirchhoff`): conserva-se a **corrente**, não a energia.
+Cosmologia (`fis:thm:diluicao`): $r'+3H(r+p)=0$ evolui a **densidade**;
+$r\,a^{3(1+w)}=C$ é o invariante da órbita.
+
+$$
+w=-1 \;\Longrightarrow\; 3(1+w)=0 \;\Longrightarrow\; r=C
+$$
+
+— ponto fixo onde a densidade de um lado coincide com o invariante.
+$w=-1/3$ ($1+3w=0$) é fronteira, **não** substância.
+
+Paralelo com a parede de $C$:
+
+$$
+\partial^2=\mathrm{id}\ \not\Rightarrow\ C_{\mathrm{local}}
+\qquad
+\text{expansão}\ \not\Rightarrow\ \text{conservação de }r.
+$$
+
+$$
+\boxed{
+\text{densidade não se conserva}
+\quad|\quad
+\text{invariante do par se conserva}
+\quad|\quad
+w=-1:\ \text{densidade também é ponto fixo}
+}
+$$
+
+A mesma arquitectura a outra escala. Medidor já existente: `tests/cosmologia.c` §C1–§C6.
+**Não transformar isto em toca.**
+
 ## Ficheiros âncora
 
 ```

@@ -14,6 +14,7 @@ import { initMotorWasm, avancaFase } from './motor_wasm.js'
 import { iniciaRelogio } from './relogio.js'
 import { abrirDoc, idDeArquivo, DOCS } from './tex_tradutor.js'
 import { initAssistente } from './assistente.js'
+import { initTerminal } from './terminal.js'
 
 // ── helpers ──
 const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild }
@@ -228,6 +229,7 @@ main.insertAdjacentHTML('beforeend', trailer(manifesto.trailer))
 main.appendChild(initSubstratos(substratosData))
 main.appendChild(initPontes(pontesData))
 main.appendChild(initAssistente())
+initTerminal().then((sec) => main.appendChild(sec))
 main.insertAdjacentHTML('beforeend', docs(manifesto.docs))
 main.insertAdjacentHTML('beforeend', autor(manifesto.autor))
 main.insertAdjacentHTML('beforeend', `

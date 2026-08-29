@@ -36,12 +36,23 @@
  */
 'use strict';
 const fs = require('fs');
+const os = require('os');
 const { execFileSync } = require('child_process');
 const path = require('path');
 
 const RAIZ = path.resolve(__dirname, '..');
-const CC = path.join(RAIZ, 'tools', 'bin', 'traduz');
-const TMP = process.env.TMPDIR || '/tmp';
+const CC = path.join(RAIZ, 'tools', 'bin', process.platform === 'win32' ? 'traduz.exe' : 'traduz');
+const TMP = process.env.TMPDIR || process.env.TEMP || os.tmpdir();
+
+function acharCompilador() {
+  if (process.env.CC) return process.env.CC;
+  for (const c of ['cc', 'gcc', 'clang']) {
+    try { execFileSync(c, ['--version'], { stdio: 'ignore' }); return c; }
+    catch (_) {}
+  }
+  throw new Error('nenhum compilador C (cc/gcc/clang) no PATH');
+}
+const SYS_CC = acharCompilador();
 
 let falhas = 0, feitas = 0;
 function ok(q, cond) {
@@ -275,7 +286,7 @@ function caminho_nativo(p, fonte_alt) {
     main += '  return 0;\n}\n';
     fs.writeFileSync(fonte, main);
     const bin = path.join(TMP, `ccv_${p.nome}${fonte_alt ? '_volta' : ''}`);
-    execFileSync('cc', ['-O2', '-std=c99', '-w', fonte, '-lm', '-o', bin]);
+    execFileSync(SYS_CC, ['-O2', '-std=c99', '-w', fonte, '-lm', '-o', bin]);
     return execFileSync(bin).toString().trim().split('\n');
 }
 
@@ -341,8 +352,8 @@ console.log('=== O TRADUTOR: dois caminhos que tem de concordar, e a VOLTA ===\n
  * nao ha defeito. Custa 0,3 s e tira a duvida toda. */
 try {
     fs.mkdirSync(path.dirname(CC), { recursive: true });
-    execFileSync('cc', ['-O2', '-std=c99', '-w', path.join(RAIZ, 'tools', 'traduz.c'),
-                        '-o', CC], { cwd: path.join(RAIZ, 'tools') });
+    execFileSync(SYS_CC, ['-O2', '-std=c99', '-w', path.join(RAIZ, 'tools', 'traduz.c'),
+                          '-o', CC], { cwd: path.join(RAIZ, 'tools') });
 } catch (e) {
     console.log('  o tradutor nao construiu — e sem ele nao ha nada a medir.');
     console.log(`#TOTAL 0 1`); process.exit(1);
@@ -655,7 +666,7 @@ long norma_primeira(long m, long k){
         fs.writeFileSync(fn, main);
         const bin = path.join(TMP, 'ccv_gerador');
         try {
-            execFileSync('cc', ['-O2', '-std=c99', '-w', fn, '-o', bin]);
+            execFileSync(SYS_CC, ['-O2', '-std=c99', '-w', fn, '-o', bin]);
             val = execFileSync(bin).toString().trim().split('\n').map(BigInt);
         } catch (e) { val = null; }
     }
@@ -808,7 +819,7 @@ long pi_fixa(long q){
         fs.writeFileSync(fn, main);
         const bin = path.join(TMP, 'ccv_lyapdual');
         try {
-            execFileSync('cc', ['-O2', '-std=c99', '-w', fn, '-o', bin]);
+            execFileSync(SYS_CC, ['-O2', '-std=c99', '-w', fn, '-o', bin]);
             const v = execFileSync(bin).toString().trim().split('\n').map(BigInt);
             const tab = { sobe: {}, volta: {}, pi: {} };
             let q = 0;

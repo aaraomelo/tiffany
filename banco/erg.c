@@ -58,6 +58,15 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifdef _WIN32
+#include <io.h>
+#ifndef O_BINARY
+#define O_BINARY 0x8000
+#endif
+#define OPEN_BIN (O_BINARY)
+#else
+#define OPEN_BIN 0
+#endif
 #include "unidade.h"
 
 #include "../lib/word_isa.h"
@@ -98,6 +107,9 @@ static const Instr ISA[] = {
     { "CMP16",      OP_CMP16,      0 },
     { "MUL16",      OP_MUL16,      0 },
     { "ESPALHA",    OP_ESPALHA,    0 },
+    { "STORE_IND",  OP_STORE_IND,  2 },
+    { "VINCO",      OP_VINCO,      0 },
+    { "INC",        OP_INC,        2 },
 };
 static const int NISA = (int)(sizeof ISA / sizeof ISA[0]);
 
@@ -238,6 +250,51 @@ static unsigned MOVE_exec(Regs *r, unsigned pc, int sentido){
  * com s = +1 e' a reflexao (det -1, a troca). UMA operacao, o sinal decide qual. */
 static Word corpo_gira(Word w, long s){ Word r = { s * w.e, w.total }; return r; }
 
+typedef struct { Word8 baixo, alto; } W16;
+static Word8 ula_xor_w(Word8 a, Word8 b){ return (Word8)(a ^ b); }
+static Word8 ula_nand_w(Word8 a, Word8 b){ return (Word8)~(a & b); }
+static Word8 ula_and_w(Word8 a, Word8 b){ Word8 n = ula_nand_w(a,b); return ula_nand_w(n,n); }
+static Word8 ula_soma_c(Word8 a, Word8 b, Word8 cin, Word8 *cout){
+    Word8 s = 0, c = cin;
+    for(int i = 0; i < 8; i++){
+        Word8 ai = (Word8)((a >> i) & 1u), bi = (Word8)((b >> i) & 1u);
+        Word8 x  = ula_xor_w(ai, bi);
+        Word8 si = ula_xor_w(x, c);
+        Word8 c1 = ula_and_w(ai, bi), c2 = ula_and_w(c, x);
+        c = ula_nand_w(ula_nand_w(c1, c1), ula_nand_w(c2, c2));
+        s = (Word8)(s | (Word8)(si << i));
+    }
+    *cout = (Word8)(c & 1u);
+    return s;
+}
+static W16 ula_add16(W16 a, W16 b, Word8 *transbordo){
+    W16 r; Word8 c1 = 0, c2 = 0;
+    r.baixo = ula_soma_c(a.baixo, b.baixo, 0, &c1);
+    r.alto  = ula_soma_c(a.alto,  b.alto,  c1, &c2);
+    if(transbordo) *transbordo = c2;
+    return r;
+}
+static W16 ula_sub16(W16 a, W16 b, Word8 *empresta){
+    W16 nb; Word8 c1 = 0, c2 = 0; W16 r;
+    nb.baixo = ula_nand_w(b.baixo, b.baixo);
+    nb.alto  = ula_nand_w(b.alto,  b.alto);
+    r.baixo = ula_soma_c(a.baixo, nb.baixo, 1, &c1);
+    r.alto  = ula_soma_c(a.alto,  nb.alto,  c1, &c2);
+    if(empresta) *empresta = (Word8)(c2 ? 0u : 1u);
+    return r;
+}
+static W16 ula_mul16(W16 a, W16 b){
+    W16 r = { 0, 0 }, p = a;
+    unsigned bb = (unsigned)b.baixo | ((unsigned)b.alto << 8);
+    for(unsigned k = 0; k < 16u; k++){
+        if(bb & (1u << k)) r = ula_add16(r, p, NULL);
+        p = ula_add16(p, p, NULL);
+    }
+    return r;
+}
+static int ula_menor16(W16 a, W16 b){ Word8 emp = 0; (void)ula_sub16(a, b, &emp); return emp != 0; }
+static int ula_igual16(W16 a, W16 b){ return a.baixo == b.baixo && a.alto == b.alto; }
+
 /* MOVER: poe `destino` no pc se `cond`, senao poe `senao`. E' a transferencia com o pc
  * como slot — a Lei 1 aplicada ao proprio contador de programa. */
 static int MOVE_no_pc(Regs *r, unsigned destino, unsigned senao, int cond){
@@ -246,7 +303,7 @@ static int MOVE_no_pc(Regs *r, unsigned destino, unsigned senao, int cond){
 }
 
 static int MOVE_pc(Regs *r, unsigned pc, int cond){
-    int rel = (signed char)prog_le(pc);
+    int rel = (int)(int16_t)((unsigned)prog_le(pc) | ((unsigned)prog_le(pc + 1) << 8));
     /* ── E O SALTO E' A MESMA TRANSFERENCIA: o pc e' so' mais um destino ────────────
      * A Lei 1 outra vez — 1† = -1, e a unidade e' dual. Mover um valor para um slot e
      * mover um valor para o pc sao a MESMA operacao; o que muda e' o DESTINO, e o
@@ -257,7 +314,12 @@ static int MOVE_pc(Regs *r, unsigned pc, int cond){
      *   destino = pc     e sentido -1   ->  era o SALTO
      *
      * Escrito assim, a ISA tem UMA operacao: mover, com destino e sentido. */
-    return MOVE_no_pc(r, (unsigned)((int)pc + 1 + rel), pc + 1, cond);
+    return MOVE_no_pc(r, (unsigned)((int)pc + 2 + rel), pc + 2, cond);
+}
+
+static unsigned slot_indice(unsigned ptr){
+    Word idx = mem_le(ptr);
+    return (unsigned)idx.total | ((unsigned)idx.e << 8);
 }
 
 static int passo(Regs *r, unsigned prog_len){
@@ -276,8 +338,24 @@ static int passo(Regs *r, unsigned prog_len){
      *     sentido +1   do SLOT para o registo   (era LOAD)   — o gerador,  fp -> 1
      *     sentido -1   do registo para o SLOT   (era STORE)  — o motor,    fp -> 0
      */
-    case OP_LOAD: case OP_LOADS: pc = MOVE_exec(r, pc, +1); break;
-    case OP_STORE:               pc = MOVE_exec(r, pc, -1); break;
+    case OP_LOAD: pc = MOVE_exec(r, pc, +1); break;
+    case OP_LOADS: {
+        unsigned ptr = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
+        pc += 2;
+        r->B = r->A;
+        Word w = mem_le(slot_indice(ptr));
+        r->A.total = w.total;
+        r->A.e = 0;   /* arena[s] ↔ slot.total; .e não é arena[s+1] */
+        break; }
+    case OP_STORE: pc = MOVE_exec(r, pc, -1); break;
+    case OP_STORE_IND: {
+        /* Arena[s] ↔ slot (NULO+s).total — só o átomo baixo; .e não é arena[s+1]. */
+        unsigned ptr = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
+        pc += 2;
+        unsigned tgt = slot_indice(ptr);
+        if(fmem >= 0)
+            slot_mem_grava(fmem, tgt * 2u, r->R.total);
+        break; }
     case OP_GOLD:       r->A = cifra_an  (r->A, 1); r->R = r->A; break;
     case OP_NEGRO_OURO: r->A = decifra_an(r->A, 1); r->R = r->A; break;
     /* ── ESQUILO e TROCA sao A MESMA operacao, e o sinal e' argumento ──────────────
@@ -289,6 +367,18 @@ static int passo(Regs *r, unsigned prog_len){
     case OP_TROCA:   { Word w = corpo_gira(r->A, +1); r->A = w; r->R = w; break; }
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
+    case OP_VINCO: {
+        r->R = ula_sub(r->A, r->B);
+        r->flags = zero(r->R) ? FL_ZERO : 0;
+        break; }
+    case OP_INC: {
+        unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc + 1) << 8);
+        pc += 2;
+        Word w = mem_le(slot);
+        w = ula_add(w, (Word){ 1, 0 });
+        mem_grava(slot, w);
+        r->R = w;
+        break; }
     case OP_AND: r->R = ula_and(r->A, r->B); break;
     case OP_OR:  r->R = ula_or (r->A, r->B); break;
     case OP_XOR: r->R = ula_xor(r->A, r->B); break;
@@ -314,6 +404,30 @@ static int passo(Regs *r, unsigned prog_len){
     case OP_JMP: return MOVE_pc(r, pc, 1);
     case OP_JZ:  return MOVE_pc(r, pc,  (r->flags & FL_ZERO) != 0);
     case OP_JNZ: return MOVE_pc(r, pc, !(r->flags & FL_ZERO));
+    case OP_ADD16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
+        x = ula_add16(a, b, NULL);
+        r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_SUB16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
+        x = ula_sub16(a, b, NULL);
+        r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_MUL16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e }, x;
+        x = ula_mul16(a, b);
+        r->R.total = x.baixo; r->R.e = x.alto; break; }
+    case OP_CMP16: {
+        W16 a = { r->A.total, r->A.e }, b = { r->B.total, r->B.e };
+        unsigned char f = 0;
+        if(zero(r->A) && zero(r->B)) f |= FL_ZERO;
+        if(ula_igual16(a, b)) f |= FL_EQ;
+        else if(ula_menor16(a, b)) f |= FL_LT;
+        r->flags = f;
+        break; }
+    case OP_ESPALHA:
+        r->R.total = (r->A.total || r->A.e) ? 0xFF : 0;
+        r->R.e     = (r->A.total || r->A.e) ? 0xFF : 0;
+        break;
     default: return 0;
     }
     r->pc = pc;
@@ -328,11 +442,15 @@ static long rodar(unsigned prog_len, long teto){
 }
 
 /* ---------------- o montador: texto → bytecode, com rótulos ---------------- */
-#define ROT_MAX 64
+#define ROT_MAX 256
 typedef struct { char nome[32]; int end; } Rotulo;
 
-/* Devolve o tamanho em bytes, ou −1 com o erro em `erro`. Duas passagens: a primeira acha os
- * rótulos, a segunda emite — porque um salto para a frente não sabe o destino ainda. */
+static int acha_rotulo_idx(const Rotulo *rots, int nrot, const char *nome){
+    for(int i = 0; i < nrot; i++) if(!strcmp(rots[i].nome, nome)) return i;
+    return -1;
+}
+
+/* Duas passagens: rótulos, depois emissão. Saltos usam rel s16 (3 bytes). */
 static int monta(const char *texto, unsigned char *saida, int cap, char *erro, int nerro){
     Rotulo rots[ROT_MAX]; int nrot = 0;
     for(int passagem = 0; passagem < 2; passagem++){
@@ -348,15 +466,20 @@ static int monta(const char *texto, unsigned char *saida, int cap, char *erro, i
             linha++;
             p = (*fim) ? fim + 1 : fim;
 
-            char *c = strchr(buf, ';'); if(c) *c = 0;     /* o comentário */
+            char *c = strchr(buf, ';'); if(c) *c = 0;
             char *s = buf; while(*s && isspace((unsigned char)*s)) s++;
             char *t = s + strlen(s); while(t > s && isspace((unsigned char)t[-1])) *--t = 0;
             if(!*s) continue;
 
-            if(*s == ':'){                                  /* um rótulo */
+            if(*s == ':'){
                 if(passagem == 0){
                     if(nrot >= ROT_MAX){ snprintf(erro,(size_t)nerro,"linha %d: rótulos a mais",linha); return -1; }
-                    snprintf(rots[nrot].nome, sizeof rots[0].nome, "%s", s + 1);
+                    char nm[32];
+                    snprintf(nm, sizeof nm, "%s", s + 1);
+                    for(char *q = nm; *q; q++){
+                        if(*q == '\r' || isspace((unsigned char)*q)){ *q = 0; break; }
+                    }
+                    snprintf(rots[nrot].nome, sizeof rots[0].nome, "%s", nm);
                     rots[nrot].end = pos; nrot++;
                 }
                 continue;
@@ -364,13 +487,18 @@ static int monta(const char *texto, unsigned char *saida, int cap, char *erro, i
             char mnem[64] = {0}, arg[64] = {0};
             int campos = sscanf(s, "%63s %63s", mnem, arg);
             for(char *q = mnem; *q; q++) *q = (char)toupper((unsigned char)*q);
+            for(char *q = arg; *q; q++){
+                if(*q == '\r' || isspace((unsigned char)*q)){ *q = 0; break; }
+            }
             const Instr *in = acha_nome(mnem);
             if(!in){ snprintf(erro,(size_t)nerro,"linha %d: opcode desconhecido '%s'",linha,mnem); return -1; }
             if(in->operando && campos < 2){
                 snprintf(erro,(size_t)nerro,"linha %d: %s precisa de operando",linha,mnem); return -1; }
 
             if(passagem == 1){
-                if(pos + 1 + in->operando > cap){ snprintf(erro,(size_t)nerro,"programa maior que %d bytes",cap); return -1; }
+                if(pos + 1 + (in->operando == 1 ? 2 : in->operando) > cap){
+                    snprintf(erro,(size_t)nerro,"programa maior que %d bytes",cap); return -1;
+                }
                 saida[pos] = (unsigned char)in->op;
             }
             int base = pos;
@@ -378,26 +506,32 @@ static int monta(const char *texto, unsigned char *saida, int cap, char *erro, i
             if(in->operando == 2){
                 long slot = strtol(arg, NULL, 0);
                 if(slot < 0 || slot > 65535){ snprintf(erro,(size_t)nerro,"linha %d: slot %ld fora de 0..65535",linha,slot); return -1; }
-                if(passagem == 1){ saida[pos] = (unsigned char)(slot & 0xFF);
-                                   saida[pos+1] = (unsigned char)((slot >> 8) & 0xFF); }
+                if(passagem == 1){
+                    saida[pos] = (unsigned char)(slot & 0xFF);
+                    saida[pos+1] = (unsigned char)((slot >> 8) & 0xFF);
+                }
                 pos += 2;
             } else if(in->operando == 1){
-                pos += 1;
-                if(passagem == 1){
-                    int destino;
-                    if(isdigit((unsigned char)arg[0]) || arg[0] == '-' || arg[0] == '+')
-                        destino = (int)strtol(arg, NULL, 0) + base;   /* absoluto, se for número */
-                    else {
-                        int achou = -1;
-                        for(int i = 0; i < nrot; i++) if(!strcmp(rots[i].nome, arg)) achou = rots[i].end;
-                        if(achou < 0){ snprintf(erro,(size_t)nerro,"linha %d: rótulo '%s' não existe",linha,arg); return -1; }
-                        destino = achou;
+                int destino;
+                if(isdigit((unsigned char)arg[0]) || arg[0] == '-' || arg[0] == '+')
+                    destino = (int)strtol(arg, NULL, 0) + base;
+                else {
+                    int ri = acha_rotulo_idx(rots, nrot, arg);
+                    if(ri < 0){
+                        if(passagem == 1){
+                            snprintf(erro,(size_t)nerro,"linha %d: rótulo '%s' não existe",linha,arg); return -1;
+                        }
+                        destino = base;
+                    } else {
+                        destino = rots[ri].end;
                     }
-                    /* a ISA: destino = (endereço do byte do rel) + 1 + rel  =  base + 2 + rel */
-                    int rel = destino - (base + 2);
-                    if(rel < -128 || rel > 127){ snprintf(erro,(size_t)nerro,"linha %d: salto de %d bytes não cabe em s8",linha,rel); return -1; }
-                    saida[base+1] = (unsigned char)(signed char)rel;
                 }
+                int rel = destino - (base + 3);
+                if(passagem == 1){
+                    saida[pos] = (unsigned char)(rel & 0xFF);
+                    saida[pos+1] = (unsigned char)((rel >> 8) & 0xFF);
+                }
+                pos += 2;
             }
             (void)base;
         }
@@ -415,28 +549,36 @@ static void desmonta(const unsigned char *b, int n, FILE *saida){
         if(in->operando == 2 && pos + 2 < n){
             unsigned slot = (unsigned)b[pos+1] | ((unsigned)b[pos+2] << 8);
             fprintf(saida, "%s %u\n", in->nome, slot); pos += 3;
-        } else if(in->operando == 1 && pos + 1 < n){
-            int rel = (signed char)b[pos+1];
-            fprintf(saida, "%s %d\n", in->nome, pos + 2 + rel);   /* absoluto: a volta é exata */
-            pos += 2;
+        } else if(in->operando == 1 && pos + 2 < n){
+            int rel = (int)(int16_t)((unsigned)b[pos+1] | ((unsigned)b[pos+2] << 8));
+            fprintf(saida, "%s %d\n", in->nome, pos + 3 + rel);
+            pos += 3;
         } else { fprintf(saida, "%s\n", in->nome); pos += 1; }
     }
 }
 
 /* ---------------- as ferragens do piloto ---------------- */
 static int abre_mem(const char *caminho){
-    fmem = open(caminho, O_RDWR | O_CREAT, 0644);
+    fmem = open(caminho, O_RDWR | O_CREAT | OPEN_BIN, 0644);
     return fmem;
 }
 static int escreve(const char *caminho, const unsigned char *b, int n){
+#ifdef _WIN32
+    FILE *f = fopen(caminho, "wb");
+    if(!f) return -1;
+    size_t w = fwrite(b, 1, (size_t)n, f);
+    fclose(f);
+    return (w == (size_t)n) ? 0 : -1;
+#else
     int f = open(caminho, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if(f < 0) return -1;
     ssize_t w = write(f, b, (size_t)n);
     close(f);
     return (w == n) ? 0 : -1;
+#endif
 }
 static int le_ficheiro(const char *caminho, unsigned char *b, int cap){
-    int f = open(caminho, O_RDONLY);
+    int f = open(caminho, O_RDONLY | OPEN_BIN);
     if(f < 0) return -1;
     ssize_t n = read(f, b, (size_t)cap);
     close(f);
@@ -452,7 +594,7 @@ static long corre_texto(const char *texto, const char *mem, long teto, char *err
     const char *tmp = "/tmp/erg_prog.bin";
     if(escreve(tmp, b, n) < 0){ snprintf(erro,(size_t)nerro,"não gravou %s", tmp); return -1; }
     if(fprog >= 0) close(fprog);
-    fprog = open(tmp, O_RDONLY);
+    fprog = open(tmp, O_RDONLY | OPEN_BIN);
     if(fprog < 0){ snprintf(erro,(size_t)nerro,"não abriu %s", tmp); return -1; }
     if(fmem >= 0) close(fmem);
     if(abre_mem(mem) < 0){ snprintf(erro,(size_t)nerro,"não abriu %s", mem); return -1; }
@@ -460,7 +602,7 @@ static long corre_texto(const char *texto, const char *mem, long teto, char *err
     return passos;
 }
 static void zera_mem(const char *caminho, int nslots){
-    int f = open(caminho, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int f = open(caminho, O_WRONLY | O_CREAT | O_TRUNC | OPEN_BIN, 0644);
     if(f < 0) return;
     SlotWord z = 0;
     for(int i = 0; i < nslots * 2; i++) (void)!write(f, &z, SLOT);  /* n Words = 2n átomos */
@@ -468,7 +610,7 @@ static void zera_mem(const char *caminho, int nslots){
 }
 /* Disco: Word ISA = 2 átomos (total,e), base = slot*2 (Lei 7). */
 static void poe_slot(const char *caminho, unsigned slot, long total, long e){
-    int f = open(caminho, O_WRONLY | O_CREAT, 0644);
+    int f = open(caminho, O_WRONLY | O_CREAT | OPEN_BIN, 0644);
     if(f < 0) return;
     SlotWord a = (SlotWord)(int8_t)total, b = (SlotWord)(int8_t)e;
     (void)!pwrite(f, &a, SLOT, (off_t)(slot * 2u) * SLOT);
@@ -477,7 +619,7 @@ static void poe_slot(const char *caminho, unsigned slot, long total, long e){
 }
 static Word ve_slot(const char *caminho, unsigned slot){
     Word w = { 0, 0 };
-    int f = open(caminho, O_RDONLY);
+    int f = open(caminho, O_RDONLY | OPEN_BIN);
     if(f < 0) return w;
     SlotWord a = 0, b = 0;
     (void)!pread(f, &a, SLOT, (off_t)(slot * 2u) * SLOT);
@@ -928,7 +1070,7 @@ int main(int argc, char **argv){
     if(argc >= 2 && !strcmp(argv[1], "corre")){
         if(argc < 4){ fprintf(stderr, "uso: erg corre <prog.bin> <mem.dat> [teto]\n"); return 2; }
         long teto = (argc >= 5) ? strtol(argv[4], NULL, 0) : 1000000;
-        fprog = open(argv[2], O_RDONLY);
+        fprog = open(argv[2], O_RDONLY | OPEN_BIN);
         if(fprog < 0){ fprintf(stderr, "não abriu %s\n", argv[2]); return 1; }
         off_t len = lseek(fprog, 0, SEEK_END);
         if(abre_mem(argv[3]) < 0){ fprintf(stderr, "não abriu %s\n", argv[3]); return 1; }

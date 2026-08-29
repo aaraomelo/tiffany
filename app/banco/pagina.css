@@ -1,0 +1,5 @@
+.bk { max-width: 40rem; margin: 2rem auto; padding: 1.5rem; font-family: system-ui, sans-serif; }
+.bk-lede { color: #444; line-height: 1.5; }
+.bk-status { color: #6c3aed; font-weight: 600; }
+.bk-btn { margin-top: 1rem; padding: 0.5rem 1rem; border: 1px solid #6c3aed; background: #f5f0ff; border-radius: 8px; cursor: pointer; }
+.bk-btn:hover { background: #ebe3ff; }

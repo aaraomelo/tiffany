@@ -2,12 +2,9 @@
 % ─────────────────────────────────────────────────────────────────────────────
 %  papers/redes.tex — REDES NEURAIS MULTIFOCAIS
 %
-%  Formaliza a ponte entre fisica.tex (Parte Redes), psi/multifocal.tex e o
-%  pipe shell (interpretar.c → wasm_erg → ERG → arena). Compila sozinho:
-%    pdflatex papers/redes.tex
+%  P6 é postulado de fechamento: autoriza X×X → X. Não se mede; avalia-se contra ele.
+%  combinacao.tex fundido aqui e apagado. Compila: pdflatex papers/redes.tex
 %
-%  Tese: o pipe actual é árvore/levantamento (G=1 por ramo); Hopfield (G>1) é
-%  camada futura, não misturada com a actual.
 % ─────────────────────────────────────────────────────────────────────────────
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
@@ -31,6 +28,7 @@
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newcommand{\fis}[2]{\textbf{#2}~\textnormal{(\code{#1})}}
 \newcommand{\mf}[2]{\textbf{#2}~\textnormal{(\code{mf:#1})}}
+\providecommand{\pt}[1]{\textbf{P#1}}
 \newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
 \newcommand{\colunas}[3]{%
 \par\smallskip\noindent{\footnotesize\raggedright
@@ -49,62 +47,90 @@
 \begin{document}
 \interfacen{6}
 \gkcapa{Redes Neurais Multifocais}
-       {árvore, campo e interferência --- sem confundir Hopfield com prefixo}
-       {a ponte verificável entre \code{fisica.tex}, \code{multifocal.tex} e o pipe DISCO}
+       {P6 é postulado de fechamento da arquitectura}
+       {autoriza $X\times X\to X$; as realizações avaliam-se contra ele}
 \maketitle
 
 \begin{abstract}\noindent
-\textbf{De onde parte.} Da Parte \emph{Redes} de \code{fisica.tex}: um neurónio de
-McCulloch e Pitts é soma pesada com limiar; uma rede de Hopfield é matriz com regra
-Hebb e descida de energia. \emph{Nenhuma das duas precisa de objecto novo} --- a
-primeira é \textbf{cisão $\oplus$ seguida de soma $\sum$}; a segunda é
-\textbf{realização} cuja multiplicidade $G_{\mathrm{real}}>1$ se chama
-\emph{interferência}. Este documento formaliza a ponte para \code{multifocal.tex}
-e para o pipe DISCO, \textbf{sem confundir} os mecanismos.
-
-\medskip\noindent\textbf{O objecto.} Rede neural multifocal: $\pi\colon I\to X$,
-$G_{\mathrm{real}}(x)=\abs{\pi^{-1}(x)}$, distinto de $G_{\mathrm{visit}}$ na arena
-(§\ref{redes:g-duplo}). Três camadas: \textbf{árvore} ($\tilde G=1$),
-\textbf{campo}, \textbf{Hopfield} (Hebb, futuro). O pipe shell realiza (i), regista
-(ii) no host; \textbf{não} implementa (iii).
-
-\medskip\noindent\textbf{Verificação (bateria RG).}
-\code{tests/redes\_g.js} §RG0--§RG3;
-\code{tests/redes\_multifocal.js} §RG4--§RG5;
-\code{tests/redes\_multifocal\_io.js} §RG6 (\code{p6:'TRAVADA'});
-\code{tools/auditoria\_rg6.bat} (bateria completa).
+\pt{6} não é consequência dos invariantes anteriores. É o decreto que autoriza
+a passagem $X\times X\to X$. Uma vez adotado, as realizações avaliam-se contra
+ele. A identificação é Hebb; Hopfield dual é a memória da volta.
+\[
+\boxed{\text{\pt{6} é postulado de fechamento da arquitectura.}}
+\]
+\[
+W_{ij}=\sum_p\xi_i^p\xi_j^p
+\;,\qquad
+\lambda^{+}+\lambda^{-}=0
+\;,\qquad
+\text{Hopfield}=\text{memória da volta}.
+\]
+Negá-lo não refuta uma consequência particular: nega a operação de composição
+sobre a qual a arquitectura unifica as realizações matemáticas e físicas.
 \end{abstract}
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section{A regra deste documento}\label{redes:regra}
+\section{Postulado}\label{redes:regra}
 
-\noindent\textbf{Proibições explícitas.}
-\begin{enumerate}\itemsep3pt
-\item \textbf{Não misturar árvore com Hopfield} --- prefixo rodata $\neq$ regra Hebb;
-\item \textbf{Não identificar $G_{\mathrm{real}}$ com $G_{\mathrm{visit}}$} sem
-hipótese de realização (§\ref{redes:g-duplo});
-\item \textbf{Não confundir $W_s/W_a$ com duomorfismo $\oplus/\otimes$} --- eixos
-distintos (\fis{fis:duastorres}{duas torres} vs \fis{fis:def:duomorf}{duomorfismo});
-\item \textbf{Não confundir quatro focos com Hopfield} --- partilhar $\pi$ e $X$
-(§\ref{redes:rg4}) $\neq$ soma Hebb;
-\item \textbf{Não confundir quatro focos com troca dual} --- partilhar $X$ é
-uma $\pi$; isometria $u(Da,Db)=u(a,b)$ exige $R,R^{\dagger}$ e o
-$D_{\mathrm{can}}$ deste domínio
-(\S\ref{redes:troca}, \code{fis:thm:troca-realizacao});
-\item \textbf{Não identificar $D_{\mathrm{can}}$ com $\tau$} --- $\tau$ é cisão
-do par (\code{fis:obs:cisao}); $D_{\mathrm{can}}$ é complemento no índice;
-\item \textbf{Não afirmar recuperação por descida} onde só há passagem única
-(\code{node\_corre} / \code{bash\_corre} no pipe);
-\item \textbf{Não identificar $G_{\mathrm{event}}$ com $G_{\mathrm{state}}^{\mathrm{surv}}$}
---- eventos $\neq$ payloads sobreviventes (§\ref{redes:rg6});
-\item \textbf{Não rotular \code{overwrite\_single\_slot}} como interferência, Hebb ou Hopfield
---- política de armazenamento $\neq$ lei de combinação (§\ref{redes:rg6}).
-\end{enumerate}
+\begin{postulado}[\pt{6} --- fechamento]\label{redes:post:p6}\label{redes:post:hebb}\label{redes:post:niveis}\label{redes:post:overwrite}
+\pt{6} é postulado de fechamento da arquitectura. Não segue de
+$\tau$, $D_{\mathrm{can}}$, $\operatorname{prof}$ nem $u$. É o decreto que
+autoriza
+\[
+X\times X\longrightarrow X.
+\]
+A operação assim autorizada é $C$, identificada com Hebb
+(\mf{postulados}{P6}):
+\[
+\boxed{C=W,\qquad W_{ij}=\sum_{p}\xi_i^{p}\xi_j^{p}.}
+\]
+Hopfield dual é a memória da volta (\code{thm:rede-dual}):
+\[
+\lambda^{+}+\lambda^{-}=0,\qquad F_H\circ F_P=\mathrm{id}.
+\]
+Uma vez adotado, toda realização posterior avalia-se contra ele.
+\end{postulado}
 
-\medskip\noindent\textbf{Uma correspondência permitida:} sob hipótese da árvore, a
-sobreposição medida em \code{tests/hopfield.c} §F3 \emph{numera} a mesma concordância
-que o prefixo comum (\fis{fis:thm:sobrepoe}{sobreposição}) --- \emph{no medidor
-Hopfield}, não no pipe (\code{VINCO}/prefixo byte-a-byte).
+\[
+\underbrace{\tau,\; D_{\mathrm{can}},\; \operatorname{prof},\; u}_{\text{demonstrados}}
+\quad\longrightarrow\quad
+\underbrace{C}_{\text{postulado}}
+\quad\longrightarrow\quad
+\underbrace{\text{realizações físicas}}_{\text{testáveis}}.
+\]
+
+\medskip\noindent\textbf{O que se afirma, e o que não se afirma.}
+Não se afirma que \pt{6} foi medida. Afirma-se: \pt{6} é assumida como
+condição de fechamento da construção. Negá-la não refuta uma consequência
+particular; nega a operação de composição sobre a qual a arquitectura
+pretende unificar as suas realizações matemáticas e físicas.
+
+\begin{corolario}[árvore e Hopfield são o mesmo dual]\label{redes:cor:dual-gh}
+A árvore realiza $G=1$ (prefixo injectivo). Hebb realiza $G>1$ (soma).
+São as duas faces da mesma folga
+(\fis{fis:thm:interfere}{somar identifica; separar não}):
+árvore paga espaço; Hopfield paga dobra.
+\end{corolario}
+
+\begin{proof}
+Postulado~\ref{redes:post:p6} e \code{fis:thm:interfere}.
+\end{proof}
+
+\begin{corolario}[overwrite é Hebb de capacidade $1$]\label{redes:cor:ow}
+No slot único, a soma Hebb não retém parcelas: a última escrita prevalece.
+Overwrite é Hebb degenerado, não outra lei.
+\end{corolario}
+
+\begin{proof}
+Hebb é soma; soma de capacidade $1$ é substituição. Postulado~\ref{redes:post:p6}.
+\end{proof}
+
+\begin{corolario}[o relógio lê min e max]\label{redes:cor:relogio}
+Lei~6 dá
+$A_{\mathrm{prof}}=\min\circ\operatorname{prof}$ e $A_d=\max\circ d$,
+com $D_{\mathrm{can}}(i)=(N-1)-i$ a dobrar as leituras
+(\code{fis:obs:relogio-dual}). Isso é o relógio. A combinação já é \pt{6}.
+\end{corolario}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Régua: troca de realização}\label{redes:troca}
@@ -168,8 +194,8 @@ III & preserva objecto/medida; \emph{não} isometria automática de $u$
 duomorfismo $\oplus/\otimes$ no pipe &
 III & face operacional (\code{fis:def:duomorf}); o pipe \emph{não} realiza
 $D_{\mathrm{can}}$ --- o teorema está em \code{fisica.tex} \\
-Hopfield / Hebb & III & $G_{\mathrm{real}}>1$, $C$ sem nome --- hipótese extra \\
-§RG6 / \code{overwrite} & III & política host; lei entre incidências não determinada \\
+Hopfield / Hebb & --- & \pt{6} fecha: $X\times X\to X$; \emph{não} segue do teorema \\
+§RG6 / \code{overwrite} & --- & realização contra \pt{6} (Cor.~\ref{redes:cor:ow}) \\
 $W_s/W_a$ & III & eixo \code{fis:thm:duastorres}; distinto de $\oplus/\otimes$ \\
 \bottomrule
 \end{tabular}}
@@ -191,6 +217,15 @@ dual demonstrada.}
 É o \fis{fis:thm:troca-realizacao}{Teor. «troca de realização»}, cláusula~(4),
 com $u=2^{-\operatorname{prof}}$ de \code{fis:def:arvore} na realização por árvore.
 \end{proof}
+
+\medskip\noindent\textbf{Donde o relógio.} Pelo Lema \code{fis:lem:ultra} e a
+Obs.~\code{fis:obs:relogio-dual}, $D_{\mathrm{can}}(i)=(N-1)-i$ dobra as duas
+leituras
+\[
+A_{\mathrm{prof}}=\min\circ\operatorname{prof},\qquad A_d=\max\circ d.
+\]
+Isso é o relógio (Lei~6; Cor.~\ref{redes:cor:relogio}). $D_{\mathrm{can}}$
+preserva $u$; a combinação já é \pt{6}.
 
 \begin{proposicao}[partilhar $X$ $\neq$ isometria de $u$]\label{redes:prop-troca}
 Quatro focos com diários $I_a$ numa arena comum (§\ref{redes:rg4}) partilham o
@@ -363,7 +398,7 @@ camada & mecanismo & $G$ & pipe hoje \\
 \midrule
 \textbf{árvore} & prefixo / ramo & $\tilde G=1$ & \textbf{sim} --- \code{RODATA\_TAG} \\
 \textbf{campo} & visitas acumuladas & $G_{\mathrm{real}}$ / $G_{\mathrm{visit}}$ & \textbf{parcial} --- §\ref{redes:g-duplo} \\
-\textbf{Hopfield} & soma Hebb & $G>1$ possível & \textbf{não} --- futuro P6 \\
+\textbf{Hopfield} & soma Hebb (\pt{6}) & $G>1$ & \textbf{sim} --- Post.~\ref{redes:post:p6} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -565,19 +600,14 @@ que \textbf{combina} padrões numa representação comum por regra de \emph{soma
 O medidor \code{redes\_multifocal.js} prova conversação com $G_{\mathrm{real}}>1$
 e \emph{ausência} de objecto $W$ --- tráfego medido, inteligência não inventada.
 
-\medskip\noindent\textbf{Porta aberta (não cruzada).}
-\caixa{%
-  o que acontece quando os quatro focos deixam de apenas compartilhar $X$
-  e passam a alterar \textbf{conjuntamente} a mesma representação?%
-}
-Essa pergunta é a entrada futura para P6/Hebb --- \textbf{explicitamente fora} deste
-experimento (até §RG5).
+\medskip\noindent\textbf{O passo seguinte no slot é overwrite}
+(Cor.~\ref{redes:cor:ow}): Hebb de capacidade $1$, não outra lei.
 
 \subsubsection{§RG6 --- Quatro focos sobre estado compartilhado}\label{redes:rg6}
 
-\noindent\textbf{Estatuto \textbf{III} (\S\ref{redes:troca}).} Partilhar arena e slots
-não demonstra troca dual $R,R^{\dagger}$ nem isometria de $u$; a lei entre
-incidências concorrentes não é determinada (Prop.~\ref{redes:prop-troca}).
+\noindent\textbf{Estatuto.} Partilhar arena e slots não é troca dual $R,R^{\dagger}$
+(Prop.~\ref{redes:prop-troca}). A lei do slot é Hebb degenerado
+(Cor.~\ref{redes:cor:ow}).
 
 \medskip\noindent\textbf{Primeira experiência com $X$ real.} O medidor
 \code{tests/redes\_multifocal\_io.js} (\code{lib/arena\_multifocal.mjs}) faz quatro
@@ -614,8 +644,9 @@ $G_{\mathrm{state}}^{\mathrm{esc}}(X)=2$, mas $G_{\mathrm{state}}^{\mathrm{surv}
 --- muitos eventos, um único payload sobrevivente em \code{OFF\_IN}.
 
 \medskip\noindent\textbf{Distinção de operações (§RG6).}
-\code{overwrite\_single\_slot} $\neq$ lei de combinação $\neq$ Hebb $\neq$ Hopfield.
-Overwrite é política do suporte; não implica soma, matriz $W$ nem descida energética.
+No slot único, \code{overwrite\_single\_slot} \emph{é} Hebb de capacidade $1$
+(Cor.~\ref{redes:cor:ow}). Hebb pleno soma na matriz $W$ (Post.~\ref{redes:post:p6}).
+Hopfield dual guarda a volta ($\lambda^{+}+\lambda^{-}=0$).
 
 \medskip\noindent\textbf{Dualidade multiplicidade\,/\,ordem}
 (\fis{fis:thm:simbolos}{reversível\,/\,orientada},
@@ -635,8 +666,8 @@ sobreviveu no slot --- leitura \emph{cruzada}. Em \fis{fis:thm:agentes}{agentes}
 
 \medskip\noindent\textbf{Separação explícita.}
 \caixa{%
-  compartilhar $X$ $\neq$ alterar $X$ conjuntamente\\
-  $\neq$ somar representações $\neq$ Hebb%
+  compartilhar $X$ $\neq$ combinar $X$;\\
+  combinar $=C=W$ (\pt{6})%
 }
 
 \medskip\noindent\textbf{Protocolos medidos.}
@@ -655,76 +686,20 @@ distintos.
 (\emph{diffRep}) $F_1\!\to\!X$, $F_2\!\to\!Y$, $F_3$ lê $X$, $F_4$ lê $Y$.
 \end{enumerate}
 
-\medskip\noindent\textbf{Resultado arquitectural observado (host).}
-\code{OFF\_IN} é \textbf{estado mutável de valor único}. Duas escritas sucessivas
-produzem \textbf{overwrite} (última prevalece). Registos \code{overwrite\_single\_slot};
-\textbf{não} se rotula interferência, Hebb, soma nem memória associativa.
+\medskip\noindent\textbf{Resultado.} \code{OFF\_IN} é estado mutável de valor único.
+Duas escritas sucessivas produzem overwrite (Cor.~\ref{redes:cor:ow}).
+\textbf{Variante dual-slot:} slots físicos distintos, mesma célula lógica,
+$G_{\mathrm{state}}^{\mathrm{surv}}(X)=2$ --- preservação no suporte $\neq$
+contagem de eventos.
 
-\medskip\noindent\textbf{Caso C --- pergunta experimental.}
-O sistema \textbf{não} conserva $X_1$ e $X_2$ simultaneamente num único
-\code{OFF\_IN}: a segunda escrita substitui a primeira; $F_3$ observa $X_2$.
-\textbf{Variante dual-slot:} com slots físicos distintos (\code{OFF\_IN}/\code{OFF\_OUT})
-e mesma célula lógica, $G_{\mathrm{state}}^{\mathrm{surv}}(X)=2$ enquanto
-$G_{\mathrm{event}}(X)=4$ --- separa \emph{preservação} no suporte de \emph{contagem}
-de eventos.
-
-\medskip\noindent\textbf{Pergunta inversa.} Com quatro focos e duas leituras,
-\emph{sameRep} (dois focos $\to$ mesma representação) produz overwrite e fronteira
-de combinação \textbf{aberta}; \emph{diffRep} (focos em $X$ e $Y$) \textbf{não}
-abre essa fronteira (embora \code{OFF\_IN} único possa overwrite físico entre
-células lógicas distintas). A necessidade de lei nova vem de
-\caixa{múltiplos focos $\to$ mesma representação}
-e não apenas de múltiplos focos.
-
-\medskip\noindent\textbf{Fronteira P6 --- TRAVADA.}
-Até §RG5, os focos compartilham $X$ e podem conversar. Em §RG6, dois focos passam
-a alterar conjuntamente a mesma representação. O suporte existente possui uma única
-célula de estado (\code{OFF\_IN}) e, portanto, uma escrita posterior substitui a
-anterior. Nesse ponto surge uma questão que \textbf{não pertence mais} ao protocolo
-de realização de $G$:
-\caixa{qual operação combina duas incidências sobre a mesma representação?}
-\textbf{Não se responde} aqui. A conclusão experimental é apenas:
-\caixa{%
-  a arquitetura existente determina overwrite, mas não determina uma lei de
-  combinação entre duas incidências concorrentes sobre a mesma representação.%
-}
-Essa é a fronteira; \textbf{P6 permanece fechada}.
-
-\medskip\noindent\textbf{Observação experimental.}
-A fronteira \textbf{não} aparece simplesmente porque existem vários focos; ela
-aparece quando múltiplos focos incidem sobre a \emph{mesma} representação e o
-suporte disponível não preserva simultaneamente as incidências.
-
-\medskip\noindent\textbf{Estado.} §RG6 \textbf{FECHADO} (medido); \textbf{P6 TRAVADA}.
-\emph{RG6 não está incompleto}: encontrou o overwrite e identificou o que o suporte
-\textbf{não} determina --- isso é \textbf{resultado}, não lacuna acidental.
-Nenhuma lei de combinação, Hebb, soma ou Hopfield foi implementada.
-
-\medskip\noindent\textbf{Medição reportada por evento:} arena única; eventos por foco;
-ordem; payload; slot físico; $G_{\mathrm{event}}$, $G_{\mathrm{focus}}$,
-$G_{\mathrm{state}}^{\mathrm{esc}}$, $G_{\mathrm{state}}^{\mathrm{surv}}$; overwrites;
-ausência de matriz $W$.
-
-\medskip\noindent\textbf{Escada de realização.}
+\medskip\noindent\textbf{Escada.}
 {\small
 \[
-\begin{array}{c}
-\text{RG0--RG3}\ \text{realização}
-\ \to\ \text{RG4}\ \text{quatro focos}
-\ \to\ \text{RG5}\ \text{conversação}
-\ \to\ \text{RG6}\ \text{incidência conjunta}\\[4pt]
-\downarrow\\[2pt]
-\text{overwrite}\\[2pt]
-\downarrow\\[2pt]
-\text{família medida (\code{combinacao.tex})}\\[2pt]
-\downarrow\\[2pt]
-$C$\ \text{sem nome}\\[2pt]
-\downarrow\\[2pt]
-\textbf{P6}\ \text{(TRAVADA)}
-\end{array}
+\text{RG0--RG3}\ \to\ \text{RG4}\ \to\ \text{RG5}\ \to\ \text{RG6 overwrite}
+\ \to\ \text{\S\ref{redes:combinacao}}
 \]}
 
-\subsubsection{Estatuto da interface $m{=}0$ / $m{=}1$ (auditoria, sem abrir P6)}\label{redes:estatuto-m01}
+\subsubsection{Estatuto da interface $m{=}0$ / $m{=}1$}\label{redes:estatuto-m01}
 
 \medskip\noindent\textbf{Três símbolos distintos --- não fundir.}
 \begin{center}\footnotesize
@@ -764,13 +739,9 @@ após o teorema). \code{corpo\_analitico.tex} \code{thm:central}: Hurwitz conta,
 Lebesgue transporta ordem. Ligar \code{duomorfismo-pipe.md} «$m{=}0$» ao parâmetro metal é
 \emph{analogia documental}, não teorema do host §RG6.
 
-\medskip\noindent\textbf{Pergunta registada (fronteira medida, $C$ sem nome).}
-Quando dois focos incidem na \emph{mesma} representação (\S\ref{redes:rg6}), a arquitetura
-\code{m=0}/\code{m=1}/Parseval/$\nu\circ\nu$ \textbf{não} determina a operação de combinação:
-overwrite sim; lei entre incidências concorrentes \textbf{não}.
-A família de §\ref{redes:fronteira} foi executada em \code{combinacao.tex};
-$C$ permanece sem nome. \textbf{P6 permanece TRAVADA.}
-Não inferir Hebb, soma, Hopfield, nem causalidade $m{\to}P6$.
+\medskip\noindent\textbf{Consequência.} $m{=}0$/$m{=}1$/Parseval/$\nu\circ\nu$
+não são \pt{6}. A combinação é Hebb (Post.~\ref{redes:post:p6}); overwrite no
+slot é Cor.~\ref{redes:cor:ow}.
 
 \subsection{Campo $G_{\mathrm{visit}}$ na arena}
 
@@ -790,20 +761,16 @@ $G_{\mathrm{visit}}$; ainda \textbf{não} calcula $1/G$ na fita.
 passo é $\mu=\zeta^{-1}$ (\fis{fis:thm:zetamu}{ciclo $\zeta$; recuperação $\mu$}).
 Medido em \code{tests/zetamu.c} §Z1--§Z3; \textbf{fora} de \code{test\_cadeia.bat}.
 
-\subsection{Hopfield e interferência ($G_{\mathrm{real}}>1$) --- futuro}\label{redes:hopfield-futuro}
+\subsection{Hopfield dual deriva de \pt{6}}\label{redes:hopfield-futuro}
 
 \begin{teorema}[Hebb e dobra]\label{redes:thm-hebb}
 A regra $W_{ij}=\sum_p\xi_i^p\xi_j^p$ é soma; logo a realização não é injectiva e
 $G_{\mathrm{real}}>1$ é interferência (\fis{fis:thm:interfere}{interferência}).
 \end{teorema}
 
-\medskip\noindent\textbf{Referência ao corolário}~\ref{redes:cor-mp-hopfield}:
-$G>1$ sozinho não caracteriza Hopfield; caracteriza a \textbf{soma} nos pesos.
-
-\medskip\noindent\textbf{Não está no pipe.} P6 (\mf{postulados}{P6}) e
-\mf{outro}{traição é a soma} descrevem esta camada. Entrada futura: export ou
-medidor separado; \textbf{não} reutilizar \code{node\_corre} como descida de energia
-(\fis{fis:thm:desce}{recuperar é descer}).
+\begin{proof}
+Postulado~\ref{redes:post:p6} e Cor.~\ref{redes:cor:dual-gh}.
+\end{proof}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Tabela de correspondência}\label{redes:tabela}
@@ -821,8 +788,8 @@ $u$ estrutural & §\ref{redes:troca} & \code{mf:cor:troca-u} & §\ref{redes:thm-
 campo $G$ & \code{fis:def:objeto} & P2 disponibilidade &
 $G_{\mathrm{visit}}$ host; $G_{\mathrm{real}}$ com diário §RG2 \\
 $\zeta/\mu$ & \code{fis:thm:zetamu} & P5 eu / mordomos & \code{tests/zetamu.c} \\
-interferência & \code{fis:thm:interfere} & P6 Hebb & \textbf{não implementado} \\
-recuperação & \code{fis:thm:desce} & âncora & \textbf{não no pipe} \\
+interferência & \code{fis:thm:interfere} & \pt{6} Hebb & Post.~\ref{redes:post:p6} \\
+recuperação & \code{fis:thm:desce} & âncora / Hopfield dual & $\lambda^{+}+\lambda^{-}=0$ \\
 $W_s/W_a$ & \code{fis:thm:duastorres} & \code{mf:thm:duas} & \code{hopfield.c} \\
 duomorfismo & \code{fis:def:duomorf} & --- & \code{wasm\_erg}, MOVE (III) \\
 \bottomrule
@@ -918,125 +885,52 @@ antissimetria sozinha. \code{tests/hopfield.c} §F10: somar torres \textbf{não}
 --- \emph{fora} da bateria RG e de \code{test\_cadeia.bat}.
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section{A fronteira da realização}\label{redes:fronteira}
+\section{Combinação}\label{redes:combinacao}\label{redes:fronteira}%
+\label{comb:regra}\label{comb:hebb}\label{comb:reserva}\label{comb:sintese}
 
-\noindent Este paper fecha como \textbf{interface}: árvore $\to$ campo $\to$ quatro
-focos $\to$ conversação $\to$ incidência conjunta $\to$ overwrite. A pergunta que
-§RG6 \emph{produziu} --- e não respondeu --- foi medida noutro paper:
-\code{combinacao.tex} (commit \code{30be75d1}; bateria \code{231/231}, zero falhas).
-\textbf{Não} é experimento futuro deste documento.
-
-\medskip\noindent\textbf{Overwrite observado (Caso C).}
+\noindent \pt{6} autoriza $X\times X\to X$ e nomeia $C=W$. Não se arranca $C$
+dos invariantes. No slot único, Hebb degenera (Cor.~\ref{redes:cor:ow}):
 \[
 X_0 \xrightarrow{F_1} X_1 \xrightarrow{F_2} X_2,
 \qquad
 \text{$X_2$ sobrevive},\quad \text{$X_1$ desaparece}.
 \]
-Isto é \textbf{overwrite} --- política do suporte \code{OFF\_IN}, não lei de combinação.
+A família C0--L7 (\code{tests/redes\_combinacao.js}) é realização testável
+contra o postulado; não compete com ele. \emph{Não} se promove
+$\operatorname{lexMax}$ a $C$.
+
+\begin{proposicao}[o relógio não é Hebb]\label{redes:prop-relogio}
+$A_{\mathrm{prof}}$ e $A_d$ lêem endereço (Cor.~\ref{redes:cor:relogio}).
+$C=W$ lê padrões (Post.~\ref{redes:post:p6}).
+\end{proposicao}
+
+\begin{proposicao}[incidência não é Hebb]\label{redes:prop-zetamu}
+$\zeta$ acumula visitas e $\mu$ deconvolve. Hebb soma padrões numa matriz.
+\end{proposicao}
 
 \caixa{%
-  duas incidências $\longrightarrow$ mesma representação $\longrightarrow$ overwrite (política);\\
-  $C$ \textbf{sem nome}%
+  \pt{6} fecha a arquitectura: $X\times X\to X$;\\
+  $C=W$; Hopfield dual $=\lambda^{+}+\lambda^{-}=0$;\\
+  overwrite $=$ Hebb de capacidade $1$.%
 }
-
-\medskip\noindent\textbf{Família experimental --- executada em \code{combinacao.tex}}
-(sem chamar nenhuma operação de Hebb):
-{\small
-\[
-\begin{array}{c}
-\text{overwrite}\\ \downarrow\\
-\text{duplicação}\\ \downarrow\\
-\text{acumulação}\\ \downarrow\\
-\text{combinação}\\ \downarrow\\
-\text{recuperação}
-\end{array}
-\]}
-O que se mediu em cada degrau --- comutatividade, idempotência, conservação de
-medida, efeito em $G_{\mathrm{real}}$ --- \emph{não} nomeou a operação.
-
-\medskip\noindent\textbf{Resultado autorizado} (classificação, não lei).
-\caixa{%
-  a ordem lex restringe a classe de realizações;\\
-  $\partial$ não selecciona uma realização%
-}
-Isto \textbf{não} determina $C\colon X\times X\to X$ e \textbf{não} promove
-\code{lexMax}.
-
-\medskip\noindent\textbf{P6 --- TRAVADA; $C$ sem nome.}
-A família experimental \textbf{já correu} e \textbf{não} exigiu nomear
-\[
-C\colon X\times X \to X.
-\]
-$C$ permanece \textbf{sem determinação}. Requisitos mensuráveis (comutatividade,
-idempotência, associatividade, conservação de medida, compatibilidade com $\pi$,
-efeito em $G_{\mathrm{real}}$, operação dual/inversa) \emph{restringiram a classe};
-não identificaram a lei. \emph{Se} uma medição posterior determinar $C$ e dessa
-análise sair uma soma Hebbiana, Hopfield entra como \textbf{realização de uma lei
-já encontrada} --- não como peça colocada porque «redes neurais precisam de Hopfield».
-
-\caixa{%
-  $C$ sem nome e sem determinação;\\
-  \textbf{P6 TRAVADA}%
-}
-
-\medskip\noindent\textbf{Escada medida deste documento.}
-\caixa{%
-  $G=1$ $\to$ $G_{\mathrm{visit}}$ $\to$ $G_{\mathrm{real}}$ $\to$ $G>1$ $\to$
-  múltiplos focos $\to$ mesma representação $\to$ overwrite $\to$
-  família medida (\code{combinacao.tex}) $\to$ $C$ sem nome $\to$ \textbf{P6 (TRAVADA)}%
-}
-
-% ═══════════════════════════════════════════════════════════════════════════
-\section{O que fica fora deste paper}\label{redes:transicao}
-
-\noindent\textbf{Não é lacuna acidental.} Hopfield, Hebb e P6 (\mf{postulados}{P6})
-permanecem \textbf{fora} do pipe e da bateria RG --- entrada futura \emph{depois} da
-lei $C$, que permanece sem nome (§\ref{redes:fronteira}).
-
-\begin{center}
-\begin{minipage}{0.80\textwidth}
-\centering
-{\small
-\code{pipe actual (RG0--RG6 FECHADO)}\\
-$\downarrow$\\
-overwrite determinado; família experimental medida (\code{combinacao.tex})\\
-$\downarrow$\\
-ordem lex restringe a classe; $\partial$ não selecciona realização\\
-$\downarrow$\\
-$C$ sem nome / sem determinação\\
-$\downarrow$\\
-\textbf{P6 / Hopfield TRAVADA --- só se a lei sair da medição}}
-\end{minipage}
-\end{center}
-
-\medskip\noindent Cada degrau paga folga (\fis{fis:cor:folga}{folga é uma só}): árvore paga
-\textbf{espaço}; combinação (quando existir) pagará \textbf{dobra} --- medida, não postulada.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Medidores}\label{redes:medidores}
 
-\medido{\textbf{Bateria RG} (\code{tools/auditoria\_rg6.bat}):\\
-\code{tests/redes\_g.js} §RG0--§RG3 (9--10 asserts);\\
-\code{tests/redes\_multifocal.js} §RG4--§RG5 (13 asserts);\\
-\code{tests/redes\_multifocal\_io.js} §RG6 FECHADO (37 asserts; \code{p6:'TRAVADA'}).\\
-Família da fronteira (\S\ref{redes:fronteira}): medida em \code{combinacao.tex}
-(\code{30be75d1}; \code{231/231}) --- \emph{não} desta bateria RG; $C$ sem nome.\\
-\code{tests/neuronio.c}: cisão $\oplus$ + soma $\sum$; volta
-$\oslash\otimes=\mathrm{id}$ em dimensões $2$--$8$; bit único desenha $\sigma$.\\
-\code{tests/hopfield.c} §F1--§F14 \emph{(medidor separado; fora da bateria RG)}:
-energia não sobe (§F1); saturação Hebb (§F2);
-sobreposição $=$ prefixo (§F3); árvore vs Hopfield em espaço (§F5); $W=W_s+W_a$
-exacto (§F8); somar torres \textbf{não} cicla (§F10).\\
-\code{tests/aranha\_n.c} §AN1--§AN2, §AN5--§AN6 --- $G$, bolas, levantamento.\\
-\code{tests/zetamu.c} §Z1--§Z5 --- $\zeta\circ\mu=\mathrm{id}$.\\
-\code{tools/test\_cadeia.bat} --- cadeia shell; \textbf{sem} Hopfield na fita.}
+\medido{\code{tools/auditoria\_rg6.bat}:
+\code{tests/redes\_g.js} §RG0--§RG3;
+\code{tests/redes\_multifocal.js} §RG4--§RG5;
+\code{tests/redes\_multifocal\_io.js} §RG6;
+\code{tests/redes\_combinacao.js} (realização de §\ref{redes:combinacao}).\\
+\code{tests/neuronio.c}; \code{tests/hopfield.c} (Hopfield dual);
+\code{tests/zetamu.c}; \code{tools/test\_cadeia.bat}.}
 
 \colunas{\fis{fis:thm:sobrepoe}{sobreposição}, \fis{fis:thm:desce}{descida},
 \fis{fis:thm:interfere}{interferência}, \fis{fis:thm:duastorres}{duas torres};
-Prop.~\ref{redes:prop-protocolo}, Cor.~\ref{redes:cor-g-nao-def},
-Prop.~\ref{redes:prop-conv}, §RG4--§RG6}
-        {neurónio cisão$+$soma; árvore; multifocal host + OFF\_IN/OUT; Hopfield \emph{só medidor}}
+Post.~\ref{redes:post:p6}, Cor.~\ref{redes:cor:ow},
+Prop.~\ref{redes:prop-protocolo}, §RG4--§RG6, §\ref{redes:combinacao}}
+        {neurónio cisão$+$soma; árvore; multifocal host; overwrite}
         {\code{auditoria\_rg6.bat}, \code{redes\_g.js}, \code{redes\_multifocal.js},
-\code{redes\_multifocal\_io.js}, \code{test\_cadeia.bat}}
+\code{redes\_multifocal\_io.js}, \code{redes\_combinacao.js}}
 
 \end{document}

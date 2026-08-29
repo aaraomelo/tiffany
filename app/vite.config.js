@@ -1,10 +1,11 @@
 import { resolveNoCorpo, tipoDe, FICHEIROS } from './src/corpo.js'
 import { defineConfig } from 'vite'
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, pathToFileURL, URL } from 'node:url'
 import { execSync } from 'node:child_process'
 import { statSync, existsSync, readFileSync, writeFileSync, copyFileSync, mkdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import net from 'node:net'
+import dgram from 'node:dgram'
 import crypto from 'node:crypto'
 import { Buffer } from 'node:buffer'
 
@@ -80,6 +81,23 @@ function serveOCorpo () {
     },
   }
   function mw (req, res, next) {
+    const url = (req.url || '').split('?')[0]
+    if (url === '/conecthus/backends/manifesto.json') {
+      const p = resolve(raiz, 'conecthus/backends/manifesto.json')
+      res.setHeader('Content-Type', 'application/json; charset=utf-8')
+      return res.end(readFileSync(p))
+    }
+    if (url.startsWith('/conecthus/backends/')) {
+      const rel = url.slice('/conecthus/backends/'.length).replace(/\?.*$/, '')
+      if (rel && !rel.includes('..')) {
+        const p = resolve(raiz, 'conecthus/backends', rel)
+        if (existsSync(p) && statSync(p).isFile()) {
+          const ext = rel.endsWith('.erg') ? 'text/plain; charset=utf-8' : 'application/octet-stream'
+          res.setHeader('Content-Type', ext)
+          return res.end(readFileSync(p))
+        }
+      }
+    }
     if (!(req.url || '').startsWith('/corpo/')) return next()
     const rel = resolveNoCorpo(req.url)
     if (!rel) {
@@ -207,12 +225,128 @@ function antenaFala () {
   }
 }
 
-// ── SQL NO METAL: /sql executa banco/sql.c contra a base .torre/reino ──
+/** Envia frame WebSocket binário (RFC6455, sem máscara no servidor). */
+function wsEnviaBin (socket, data) {
+  const buf = Buffer.isBuffer(data) ? data : Buffer.from(data)
+  let hdr
+  if (buf.length < 126) {
+    hdr = Buffer.from([0x82, buf.length])
+  } else if (buf.length < 65536) {
+    hdr = Buffer.alloc(4)
+    hdr[0] = 0x82; hdr[1] = 126; hdr.writeUInt16BE(buf.length, 2)
+  } else {
+    hdr = Buffer.alloc(10)
+    hdr[0] = 0x82; hdr[1] = 127; hdr.writeBigUInt64BE(BigInt(buf.length), 2)
+  }
+  socket.write(Buffer.concat([hdr, buf]))
+}
+
+// ── Canal S_CANAL: WS /canal ↔ UDP multicast (6 bytes bump-ados, sem traduzir) ──
+// O browser fala bump+banda; o Vite é só o fio até o mesmo grupo que banco/sql.c.
+function antenaCanal () {
+  const grupo = process.env.TIFFANY_CANAL_GRUPO || '239.7.31.27'
+  const porta = Number(process.env.TIFFANY_CANAL_PORTA || 47313)
+  let udp = null
+  const clientes = new Set()
+
+  function ensureUdp () {
+    if (udp) return udp
+    udp = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+    udp.on('message', (msg) => {
+      if (msg.length !== 6) return
+      for (const s of clientes) {
+        if (!s.destroyed) wsEnviaBin(s, msg)
+      }
+    })
+    udp.on('error', (e) => console.error('canal udp:', e.message))
+    udp.bind(porta, () => {
+      try {
+        udp.addMembership(grupo)
+        console.log(`  canal: UDP ${grupo}:${porta} ↔ WS /canal (6 bytes bump)`)
+      } catch (e) {
+        console.warn('canal: multicast indisponível —', e.message)
+      }
+    })
+    return udp
+  }
+
+  return {
+    name: 'antena-canal',
+    configureServer (server) {
+      server.httpServer?.on('upgrade', (req, socket, head) => {
+        const url = req.url || ''
+        if (!url.startsWith('/canal')) return
+        const key = req.headers['sec-websocket-key']
+        if (!key) { socket.destroy(); return }
+        const accept = crypto
+          .createHash('sha1')
+          .update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11')
+          .digest('base64')
+        socket.write(
+          'HTTP/1.1 101 Switching Protocols\r\n' +
+          'Upgrade: websocket\r\nConnection: Upgrade\r\n' +
+          `Sec-WebSocket-Accept: ${accept}\r\n\r\n`
+        )
+        ensureUdp()
+        clientes.add(socket)
+        let acc = Buffer.alloc(0)
+        socket.on('data', (chunk) => {
+          acc = Buffer.concat([acc, chunk])
+          while (acc.length >= 2) {
+            const b0 = acc[0], b1 = acc[1]
+            const masked = (b1 & 0x80) !== 0
+            let len = b1 & 0x7f
+            let o = 2
+            if (len === 126) {
+              if (acc.length < 4) return
+              len = acc.readUInt16BE(2); o = 4
+            } else if (len === 127) {
+              if (acc.length < 10) return
+              len = Number(acc.readBigUInt64BE(2)); o = 10
+            }
+            const need = o + (masked ? 4 : 0) + len
+            if (acc.length < need) return
+            let payload = acc.subarray(o + (masked ? 4 : 0), need)
+            if (masked) {
+              const m = acc.subarray(o, o + 4)
+              payload = Buffer.from(payload)
+              for (let i = 0; i < payload.length; i++) payload[i] ^= m[i & 3]
+            }
+            acc = acc.subarray(need)
+            const opcode = b0 & 0x0f
+            if (opcode === 0x8) { socket.end(); return }
+            if (opcode === 0x9) {
+              const pong = Buffer.alloc(2 + payload.length)
+              pong[0] = 0x8a; pong[1] = payload.length
+              payload.copy(pong, 2)
+              socket.write(pong)
+              continue
+            }
+            if ((opcode === 0x2 || opcode === 0x1) && payload.length === 6) {
+              udp.send(payload, porta, grupo)
+            }
+          }
+        })
+        socket.on('close', () => clientes.delete(socket))
+        socket.on('error', () => { clientes.delete(socket); socket.destroy() })
+        if (head && head.length) socket.unshift(head)
+      })
+    },
+  }
+}
+
+// ── SQL NO METAL: /sql executa banco/sql.c (Unix) ou MOVE no disco (Win) ──
 function serveSql () {
   const raiz = fileURLToPath(new URL('..', import.meta.url))
   const sqlBin = resolve(raiz, 'app/.cache/tiffany_sql')
   const sqlBase = resolve(raiz, '.torre/reino')
+  const discoMod = resolve(raiz, 'tools/banco_sql_disco.mjs')
+  const isWin = process.platform === 'win32'
   function ensureSql () {
+    if (isWin) {
+      mkdirSync(sqlBase, { recursive: true })
+      return
+    }
     if (!existsSync(sqlBin)) {
       mkdirSync(dirname(sqlBin), { recursive: true })
       execSync(
@@ -223,15 +357,25 @@ function serveSql () {
     }
     mkdirSync(sqlBase, { recursive: true })
   }
-  function runQuery (q, res) {
+  async function runQuery (q, res) {
     try {
       ensureSql()
+      if (isWin) {
+        const { execSqlDisco } = await import(pathToFileURL(discoMod).href)
+        const r = execSqlDisco(sqlBase, q)
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+        res.setHeader('X-Tiffany-Shell', 'disco')
+        res.end(r.out)
+        return
+      }
       const out = execSync(
         `"${sqlBin}" "${sqlBase}" ${JSON.stringify(q)}`,
         { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }
       )
       res.statusCode = 200
       res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      res.setHeader('X-Tiffany-Shell', 'sql.c')
       res.end(out)
     } catch (e) {
       const msg = (e.stdout || '') + (e.stderr || '') + (e.message || '')
@@ -274,9 +418,62 @@ function serveSql () {
   }
 }
 
+// ── Front via banco: /banco/ (html+css+js wasm) ──
+function serveBancoFront () {
+  const bancoDir = fileURLToPath(new URL('./banco', import.meta.url))
+  const tipos = { html: 'text/html', css: 'text/css', js: 'text/javascript' }
+  return {
+    name: 'serve-banco-front',
+    configureServer (server) { server.middlewares.use(mw) },
+    configurePreviewServer (server) { server.middlewares.use(mw) },
+    closeBundle () {
+      const raiz = fileURLToPath(new URL('..', import.meta.url))
+      const dest = resolve(raiz, 'app/dist/banco')
+      for (const nome of ['pagina.html', 'pagina.css', 'pagina.js']) {
+        const de = resolve(bancoDir, nome)
+        if (!existsSync(de)) throw new Error(`banco front: falta ${nome}`)
+        const para = resolve(dest, nome)
+        mkdirSync(dirname(para), { recursive: true })
+        copyFileSync(de, para)
+      }
+      console.log('  banco: pagina.html/css/js → dist/banco/')
+    },
+  }
+  function mw (req, res, next) {
+    const url = (req.url || '').split('?')[0]
+    if (url === '/banco') {
+      res.statusCode = 302
+      res.setHeader('Location', '/banco/')
+      return res.end()
+    }
+    if (url === '/banco/node_path') {
+      const p = resolve(bancoDir, 'node_pagina.mjs')
+      res.setHeader('Content-Type', 'application/json; charset=utf-8')
+      return res.end(JSON.stringify({ path: p, dir: bancoDir, node: process.execPath }))
+    }
+    const m = url.match(/^\/banco\/(pagina\.(html|css|js))$/)
+    if (!m) return next()
+    const cam = resolve(bancoDir, m[1])
+    if (!existsSync(cam)) {
+      res.statusCode = 404
+      return res.end('não encontrado\n')
+    }
+    res.setHeader('Content-Type', `${tipos[m[2]]}; charset=utf-8`)
+    res.end(readFileSync(cam))
+  }
+}
+
 export default defineConfig({
-  plugins: [serveOCorpo(), serveSql(), antenaFala()],
+  plugins: [serveOCorpo(), serveSql(), antenaFala(), antenaCanal(), serveBancoFront()],
   base: './',
+  build: {
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        banco: fileURLToPath(new URL('./banco/index.html', import.meta.url)),
+      },
+    },
+  },
   // publicDir: /reino/*.png, /wasm/tex.wasm — o tradutor no cliente, não PDFs pré-gravados
   publicDir: fileURLToPath(new URL('../assets/figuras', import.meta.url)),
   server: { open: true },

@@ -94,3 +94,8 @@ int sql_descompilar(int in_off, int n, int out_off){
     }
     return m;
 }
+
+int sql_move(int in_off, int n, int out_off, int sentido){
+    if(sentido < 0) return sql_compilar(in_off, n, out_off);
+    return sql_descompilar(in_off, n, out_off);
+}

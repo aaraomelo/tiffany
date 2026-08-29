@@ -23,12 +23,23 @@
  */
 'use strict';
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
 const RAIZ = path.resolve(__dirname, '..');
-const TRADUZ = path.join(RAIZ, 'tools', 'bin', 'traduz');
-const TMP = process.env.TMPDIR || '/tmp';
+const TRADUZ = path.join(RAIZ, 'tools', 'bin', process.platform === 'win32' ? 'traduz.exe' : 'traduz');
+const TMP = process.env.TMPDIR || process.env.TEMP || os.tmpdir();
+
+function acharCompilador() {
+  if (process.env.CC) return process.env.CC;
+  for (const c of ['cc', 'gcc', 'clang']) {
+    try { execFileSync(c, ['--version'], { stdio: 'ignore' }); return c; }
+    catch (_) {}
+  }
+  throw new Error('nenhum compilador C (cc/gcc/clang) no PATH');
+}
+const SYS_CC = acharCompilador();
 
 let falhas = 0, feitas = 0;
 function ok(q, cond) {
@@ -51,7 +62,7 @@ int e4(void){ return (int)B4; }
 const w = path.join(TMP, 'libc.wasm');
 try {
     fs.mkdirSync(path.dirname(TRADUZ), { recursive: true });
-    execFileSync('cc', ['-O2', '-std=c99', '-w', path.join(RAIZ, 'tools', 'traduz.c'), '-o', TRADUZ]);
+    execFileSync(SYS_CC, ['-O2', '-std=c99', '-w', path.join(RAIZ, 'tools', 'traduz.c'), '-o', TRADUZ]);
     fs.writeFileSync(unidade, PREAMBULO + fs.readFileSync(path.join(RAIZ, 'tools', 'libc.c'), 'utf8'));
     execFileSync(TRADUZ, [unidade, '-o', w]);
 } catch (e) {
@@ -219,7 +230,7 @@ function do_sistema() {
     const f = path.join(TMP, 'libc_sistema.c');
     fs.writeFileSync(f, c);
     const bin = path.join(TMP, 'libc_sistema');
-    execFileSync('cc', ['-O2', '-std=c99', '-w', f, '-o', bin]);
+    execFileSync(SYS_CC, ['-O2', '-std=c99', '-w', f, '-o', bin]);
     /* LATIN1, e não utf8: o que o programa escreve são BYTES, e lê-los como utf8 troca
      * cada acentuado por um losango — a diferença aparecia no medidor e não no objecto. */
     return execFileSync(bin).toString('latin1').trim().split('\n').map(x => x.trim());

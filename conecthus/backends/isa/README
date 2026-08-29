@@ -1,4 +1,9 @@
 /* conecthus/backends/isa/README
  * A ISA MOVE-only vive em tools/isa.c — uma função, um disco.
  * sobe_backends_wasm.sh traduz tools/isa.c → assets/figuras/wasm/isa.wasm
+ *
+ * Ponte ASM ↔ WASM (a mesma ISA nas duas réguas):
+ *   lib/erg_monta.mjs     — monta/desmonta texto .erg ↔ fita
+ *   tools/asm_wasm.mjs    — sobe/desce: fita ↔ isa.wasm + secção erg.fita
+ *   tests/traduz_asm_wasm.js · tests/isa_dupla.js
  */

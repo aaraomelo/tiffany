@@ -1,6 +1,15 @@
 // fala_protocolo.js — Protocolo TFAL no browser (banda = sha256(Assinatura)).
 // Cada cliente: Assinatura(corpo) → banda → bump. Sem API de grafo.
 
+import {
+  bandaDeAssinatura,
+  keystream,
+  bump,
+  hex16,
+} from './banda.js'
+
+export { bandaDeAssinatura, hex16 } from './banda.js'
+
 const MAGIC = new TextEncoder().encode('TFAL')
 export const FALA_HELLO = 1
 export const FALA_FALA = 2
@@ -15,44 +24,6 @@ function be32 (n) {
 }
 function rb32 (u8, o) {
   return ((u8[o] << 24) | (u8[o + 1] << 16) | (u8[o + 2] << 8) | u8[o + 3]) >>> 0
-}
-
-/** Assinatura do corpo do cliente → banda (32 bytes). O hash É a assinatura. */
-export async function bandaDeAssinatura (assinatura) {
-  const data = new TextEncoder().encode(assinatura)
-  const dig = await crypto.subtle.digest('SHA-256', data)
-  return new Uint8Array(dig)
-}
-
-export function hex16 (banda) {
-  return [...banda.slice(0, 16)].map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-async function sha256 (bytes) {
-  return new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))
-}
-
-/** keystream = sha256(banda||contador) em blocos de 32 — igual a lib/banda.h */
-async function keystream (banda, n) {
-  const ks = new Uint8Array(n)
-  const sem = new Uint8Array(36)
-  sem.set(banda, 0)
-  for (let o = 0; o < n; o += 32) {
-    const ctr = (o / 32) >>> 0
-    sem[32] = ctr & 255
-    sem[33] = (ctr >>> 8) & 255
-    sem[34] = (ctr >>> 16) & 255
-    sem[35] = (ctr >>> 24) & 255
-    const bloco = await sha256(sem)
-    ks.set(bloco.subarray(0, Math.min(32, n - o)), o)
-  }
-  return ks
-}
-
-function bump (ent, ks) {
-  const sai = new Uint8Array(ent.length)
-  for (let i = 0; i < ent.length; i++) sai[i] = ent[i] ^ ks[i]
-  return sai
 }
 
 export async function empacota (op, seq, banda, texto) {

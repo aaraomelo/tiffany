@@ -1479,6 +1479,13 @@ cruzado:
 $E^{2}-B^{2}$ e o metal não entram na tabela: sob $E\leftrightarrow B$ a forma
 muda de sinal \emph{e} o metal inverte, que não é $\tau\cdot X_{\pm}=\pm X_{\pm}$
 no sentido das duas metades.
+\item[$\bullet$] \textbf{O relógio da árvore} --- mínimo na profundidade, máximo
+na distância --- e uma operação sobre o \emph{conteúdo} da célula \textbf{não}
+são $\tau$. Aquela dualidade é o Lema~\ref{fis:lem:ultra} /
+Obs.~\ref{fis:obs:relogio-dual}; esta observação parte o par:
+\[
+\boxed{\;\tau\longrightarrow(X_{+},X_{-})\;}
+\]
 \end{enumerate}
 \end{observacao}
 
@@ -4173,6 +4180,41 @@ percurso $I$ & em que ordem os estados são visitados \\
 \end{tabular}
 \end{center}
 
+\begin{observacao}[o par dual do relógio]\label{fis:obs:relogio-dual}
+O Lema~\ref{fis:lem:ultra} já contém as duas desigualdades, e não se acrescenta
+nada: a profundidade lê pelo mínimo, a distância pelo máximo, porque
+$t\mapsto 2^{-t}$ inverte a ordem do relógio discreto (índices da árvore, não
+um contínuo). Escreva-se
+\[
+\boxed{\;
+\operatorname{prof}(a,c)\ge
+\min\bigl\{\operatorname{prof}(a,b),\operatorname{prof}(b,c)\bigr\}
+\;}
+\]
+\[
+\boxed{\;
+d(a,c)\le
+\max\bigl\{d(a,b),d(b,c)\bigr\}
+\;}
+\]
+donde o par de operadores do \textbf{endereço}
+\[
+\boxed{\;
+A_{\mathrm{prof}}=\min\circ\operatorname{prof}
+\;,\qquad
+A_d=\max\circ d
+\;}
+\]
+--- \emph{não} se chama $A_{\min}$ ao primeiro: esse nome, noutro sítio, é a
+classe admissível de combinações de conteúdos. $D_{\mathrm{can}}(i)=(N-1)-i$
+(Teor.~\ref{fis:thm:troca-realizacao}) faz a dobra entre as duas leituras.
+\emph{Operam sobre endereços e profundidade; não combinam o conteúdo da célula.}
+A geometria do suporte não determina a álgebra do conteúdo:
+\[
+\boxed{\;(A_{\mathrm{prof}},A_d)\;\nRightarrow\;C\;}
+\]
+\end{observacao}
+
 \begin{teorema}[as bolas particionam]\label{fis:thm:bolas}
 Seja $(X,d)$ ultramétrico \textbf{e simétrico}, $r\ge0$, e
 $\mathcal{B}(a,r)=\{x: d(a,x)\le r\}$ a bola --- caligráfico, para não colidir com
@@ -6515,11 +6557,39 @@ $D=R^{\dagger}\circ R^{-1}$ & o mapa único entre elas \\
 $D(i)=(N-1)-i$ & o complemento canónico, neste domínio \\
 $\partial$ & a dobra no índice (Def.~\ref{fis:def:op}) \\
 $\operatorname{prof}$ & primeira divergência MSB (Def.~\ref{fis:def:arvore}) \\
+$A_{\mathrm{prof}}=\min\circ\operatorname{prof}$ & leitura da profundidade no relógio (Obs.~\ref{fis:obs:relogio-dual}) \\
 $u=2^{-\operatorname{prof}}$ & ultramétrica estrutural deste $D$ \\
+$A_d=\max\circ d$ & leitura da distância no relógio (Obs.~\ref{fis:obs:relogio-dual}) \\
 $G$, $\|v\|$, $\Delta$, $D(R,S)$ & métricas/custos da realização: \emph{podem} mudar \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\medskip\noindent\textbf{Três níveis --- e a seta que não existe.}
+\[
+\boxed{\;\tau\longrightarrow(X_{+},X_{-})\;}
+\quad\text{(Obs.~\ref{fis:obs:cisao}: cisão)}
+\]
+\[
+\boxed{\;
+\operatorname{prof}\longrightarrow A_{\mathrm{prof}}
+\;,\qquad
+d\longrightarrow A_d
+\;}
+\quad\text{(Obs.~\ref{fis:obs:relogio-dual}: relógio)}
+\]
+A isometria $u(\partial a,\partial b)=u(a,b)$ \textbf{não} implica
+covariância de uma operação $f$ sobre o conteúdo:
+\[
+\boxed{\;
+D_{\mathrm{can}}\ \text{preserva }u
+\qquad\text{sem}\qquad
+D_{\mathrm{can}}\bigl(f(x,y)\bigr)=f(D_{\mathrm{can}}x,D_{\mathrm{can}}y)
+\;}
+\]
+Uma lei de combinação de conteúdos, se existir, vive noutro nível. O par
+$(A_{\mathrm{prof}},A_d)$ \textbf{não} a determina
+(Obs.~\ref{fis:obs:relogio-dual}).
 \end{teorema}
 
 \begin{corolario}[foco e realização]\label{fis:cor:foco}
