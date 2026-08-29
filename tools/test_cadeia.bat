@@ -70,6 +70,8 @@ if not errorlevel 1 (
   node tests\canal_chunk.js || exit /b 1
   echo [test_cadeia] canal_watcher...
   node tests\canal_watcher.js || exit /b 1
+  echo [test_cadeia] canal_patria...
+  node tests\canal_patria.js || exit /b 1
 ) else (
   echo [test_cadeia] canal omitido — call tools\env_node.bat
 )

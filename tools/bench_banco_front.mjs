@@ -241,7 +241,7 @@ const gargalos = [
     id: 'G7',
     lei: 'S_FRONT_REQ/RSP + S_CHUNK no barramento',
     fora: 'watcher local em serve_banco; Patria usa canal_patria.c (UDP)',
-    medida: 'tests/canal_watcher.js §N1; Patria pendente multicast',
+    medida: 'tests/canal_watcher.js §N1; tests/canal_patria.js §P0–§P1 (UDP loopback)',
   },
 ]
 
