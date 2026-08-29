@@ -111,8 +111,8 @@ S_{\text{negro}} \cdot S_{\text{branco}} = 1
 3. ~~**Front DOM via banco**~~ — `app/banco/` + wasm html/css/js
 4. ~~**`canal_patria`**~~ — watcher na Patria (`banco/canal_patria.c`, MOVE)
 5. **PTY** (`forkpty`) em vez de `popen` por linha (v2)
-6. **Medidor** par negro/branco no canal: produto das medidas = 1 ao fim de ida+volta
-7. **`canal_patria.c`** — watcher na Patria (distribuído)
+6. ~~**Medidor** par negro/branco~~ — `tests/canal_watcher.js` §N1 (`medeParN1`)
+7. ~~**`canal_patria.c` distribuído**~~ — `tests/canal_patria.js` §P0–§P1 (contrato C + UDP loopback)
 
 ## Dev local (Windows)
 
@@ -142,6 +142,8 @@ Mesma forma para `POWERSHELL` e `NODE`. Front local: fetch + `html_move`/`css_mo
 
 - `tests/negro.c` — §N1–N3 produto=1, par não se move
 - `tests/canal.c` / `tests/banda_viva.c` — bump no canal
+- `tests/canal_patria.js` — slots C = JS; bump UDP 6B no grupo
+- `tests/mvp_ponta.js` — dois bancos wasm + WS /canal + DISCO
 - `banco/fala.c` §A2 — bump∘bump = id
 - `node tests/backends_wasm.js` — §W8 bash wasm
 - `tests/bash_pleno.c` — pleno popen

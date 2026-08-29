@@ -72,8 +72,10 @@ export function attachCanalLoopback (httpServer, onFrame) {
           continue
         }
         if ((opcode === 0x2 || opcode === 0x1) && payload.length === 6) {
+          // O negro já emitiu; o branco absorve (onFrame) e só então
+          // broadcast da diferença. Ecoar o próprio STORE no S_CHUNK
+          // partilhado mistura o corpo enviado com a resposta.
           if (onFrame) onFrame(payload)
-          broadcast(payload)
         }
       }
     })

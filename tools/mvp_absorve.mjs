@@ -47,8 +47,7 @@ let cacheWasm = null
 function wasmNode () {
   if (cacheWasm) return cacheWasm
   const buf = readFileSync(join(RAIZ, 'assets', 'figuras', 'wasm', 'node.wasm'))
-  const { instance } = new WebAssembly.Instance(new WebAssembly.Module(buf))
-  cacheWasm = instance.exports
+  cacheWasm = new WebAssembly.Instance(new WebAssembly.Module(buf), {}).exports
   return cacheWasm
 }
 
