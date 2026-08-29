@@ -1,15 +1,16 @@
 /* tests/absorve_node.js — node absorvido como latex/bash (§W10), não adaptador SQL.
  *   node tests/absorve_node.js
  */
-'use strict'
-const fs = require('fs')
-const path = require('path')
+import { existsSync, readFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const RAIZ = path.join(__dirname, '..')
-const man = JSON.parse(fs.readFileSync(
-  path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
+const man = JSON.parse(readFileSync(
+  join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
 
-let falhas = 0, feitas = 0
+let falhas = 0
+let feitas = 0
 function ok (q, cond) {
   feitas++
   if (!cond) falhas++
@@ -24,11 +25,11 @@ ok('§A0 node slots canal', node?.absorcao?.slots?.in === 9120)
 ok('§A0 node nao em fios', !(man.fios || []).find((f) => f.nome === 'node'))
 ok('§A0 canal→node', !!man.arestas.find((e) => e.de === 'canal' && e.para === 'node'))
 
-const wasmPath = path.join(RAIZ, 'assets', 'figuras', 'wasm', 'node.wasm')
-if (!fs.existsSync(wasmPath)) {
+const wasmPath = join(RAIZ, 'assets', 'figuras', 'wasm', 'node.wasm')
+if (!existsSync(wasmPath)) {
   ok('§A1 node.wasm', false)
 } else {
-  const N = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(wasmPath)), {}).exports
+  const N = new WebAssembly.Instance(new WebAssembly.Module(readFileSync(wasmPath)), {}).exports
   const m = new Uint8Array(N.DISCO.buffer)
   const js = Buffer.from('console.log(1)', 'utf8')
   m.set(js, BASE + 1024)
@@ -43,8 +44,8 @@ if (!fs.existsSync(wasmPath)) {
   ok('§A1 node_move +1 roundtrip arena', got === '1\n')
 }
 
-ok('§A2 banco_absorve.js', fs.existsSync(path.join(RAIZ, 'app', 'src', 'banco_absorve.js')))
-ok('§A2 sem banco_semantica', !fs.existsSync(path.join(RAIZ, 'app', 'src', 'banco_semantica.js')))
+ok('§A2 banco_absorve.js', existsSync(join(RAIZ, 'app', 'src', 'banco_absorve.js')))
+ok('§A2 sem banco_semantica', !existsSync(join(RAIZ, 'app', 'src', 'banco_semantica.js')))
 
 console.log(`\n=== absorve_node: ${feitas - falhas}/${feitas} OK ===`)
 process.exit(falhas ? 1 : 0)

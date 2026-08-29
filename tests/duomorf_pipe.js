@@ -8,13 +8,13 @@
  *
  *   node tests/duomorf_pipe.js
  */
-'use strict'
-const fs = require('fs')
-const path = require('path')
+import { existsSync, readFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const RAIZ = path.join(__dirname, '..')
-const man = JSON.parse(fs.readFileSync(
-  path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
+const man = JSON.parse(readFileSync(
+  join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -66,9 +66,9 @@ const BASE = man.nulo_disco || 8
 
 function loadWasm (nome) {
   const L = lang(nome)
-  const p = path.join(RAIZ, 'assets', 'figuras', 'wasm', L.wasm)
-  if (!fs.existsSync(p)) return null
-  return new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(p)), {}).exports
+  const p = join(RAIZ, 'assets', 'figuras', 'wasm', L.wasm)
+  if (!existsSync(p)) return null
+  return new WebAssembly.Instance(new WebAssembly.Module(readFileSync(p)), {}).exports
 }
 
 function enc (ex, off, str) {
@@ -264,8 +264,9 @@ function traduzWasm (de, para, texto, inst) {
   const node = man.linguagens.find((l) => l.nome === 'node')
   const cd = node?.cadeia
   ok('§D8 cadeia C→asm→Node', cd?.sequencia?.join('→') === 'c→wasm→asm→node_pleno')
-  ok('§D8 ponte_asm shell', cd?.ponte_asm === 'tools/c_asm_shell.mjs')
-  ok('§D8 wasm_erg', cd?.wasm_erg === 'lib/wasm_para_erg.mjs')
+  ok('§D8 ponte_asm wasm_sec.c', cd?.ponte_asm === 'tools/wasm_sec.c' && existsSync(join(RAIZ, 'tools', 'wasm_sec.c')))
+  ok('§D8 wasm_erg.c', cd?.wasm_erg === 'tools/wasm_erg.c' && existsSync(join(RAIZ, 'tools', 'wasm_erg.c')))
+  ok('§D8 JS gémeo lib/', existsSync(join(RAIZ, 'lib', 'c_asm_shell.mjs')) && existsSync(join(RAIZ, 'lib', 'wasm_para_erg.mjs')))
   ok('§D8 medidor c_asm_node', man.operacoes.medidor_cadeia.includes('traduz_c_asm_node'))
 }
 
@@ -275,7 +276,7 @@ function traduzWasm (de, para, texto, inst) {
   const cd = bash?.cadeia
   ok('§D9 cadeia C→asm→bash', cd?.sequencia?.join('→') === 'c→wasm→asm→bash_pleno')
   ok('§D9 bash asm celula.erg', cd?.asm?.includes('bash/celula.erg'))
-  ok('§D9 ponte_asm shell', cd?.ponte_asm === 'tools/c_asm_shell.mjs')
+  ok('§D9 ponte_asm wasm_sec.c', cd?.ponte_asm === 'tools/wasm_sec.c' && existsSync(join(RAIZ, 'tools', 'wasm_sec.c')))
   ok('§D9 medidor c_asm_shell', man.operacoes.medidor_cadeia.includes('traduz_c_asm_shell'))
 }
 

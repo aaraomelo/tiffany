@@ -144,6 +144,8 @@ Mesma forma para `POWERSHELL` e `NODE`. Front local: fetch + `html_move`/`css_mo
 - `tests/canal.c` / `tests/banda_viva.c` — bump no canal
 - `tests/canal_patria.js` — slots C = JS; bump UDP 6B no grupo
 - `tests/mvp_ponta.js` — dois bancos wasm + WS /canal + DISCO
+- `tests/duomorf_pipe.js` — paridade (p,q,r), rotas, involução MOVE
+- `tests/absorve_node.js` — §W10 node_move na arena
 - `banco/fala.c` §A2 — bump∘bump = id
 - `node tests/backends_wasm.js` — §W8 bash wasm
 - `tests/bash_pleno.c` — pleno popen

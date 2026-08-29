@@ -6,20 +6,19 @@
  *
  *   node tests/traduz_c_wasm_node.js
  */
-'use strict'
+import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, statSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const { execFileSync, spawnSync } = require('child_process')
-
-const RAIZ = path.join(__dirname, '..')
-const TMP = process.env.TEMP || process.env.TMPDIR || os.tmpdir()
-const FONTE_C = path.join(RAIZ, 'conecthus', 'backends', 'node', 'interpretar.c')
-const PLENO_C = path.join(RAIZ, 'banco', 'node.c')
-const WASM_OUT = path.join(RAIZ, 'assets', 'figuras', 'wasm', 'node.wasm')
-const TRADUZ = path.join(RAIZ, 'tools', 'bin', process.platform === 'win32' ? 'traduz.exe' : 'traduz')
-const TRADUZ_SRC = path.join(RAIZ, 'tools', 'traduz.c')
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
+const TMP = process.env.TEMP || process.env.TMPDIR || tmpdir()
+const FONTE_C = join(RAIZ, 'conecthus', 'backends', 'node', 'interpretar.c')
+const PLENO_C = join(RAIZ, 'banco', 'node.c')
+const WASM_OUT = join(RAIZ, 'assets', 'figuras', 'wasm', 'node.wasm')
+const TRADUZ = join(RAIZ, 'tools', 'bin', process.platform === 'win32' ? 'traduz.exe' : 'traduz')
+const TRADUZ_SRC = join(RAIZ, 'tools', 'traduz.c')
 const BASE = 8
 const OFF_NOUT = 24578
 const OFF_BUF_OUT = 16384
@@ -43,13 +42,13 @@ function acharCc () {
 }
 
 function garanteTraduz () {
-  if (fs.existsSync(TRADUZ)) return true
+  if (existsSync(TRADUZ)) return true
   const cc = acharCc()
   if (!cc) return false
   try {
-    fs.mkdirSync(path.dirname(TRADUZ), { recursive: true })
-    execFileSync(cc, ['-O2', '-std=c99', '-w', TRADUZ_SRC, '-o', TRADUZ], { cwd: path.join(RAIZ, 'tools') })
-    return fs.existsSync(TRADUZ)
+    mkdirSync(dirname(TRADUZ), { recursive: true })
+    execFileSync(cc, ['-O2', '-std=c99', '-w', TRADUZ_SRC, '-o', TRADUZ], { cwd: join(RAIZ, 'tools') })
+    return existsSync(TRADUZ)
   } catch {
     return false
   }
@@ -71,7 +70,7 @@ function difBytes (a, b) {
 }
 
 function loadWasm (p) {
-  return new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(p))).exports
+  return new WebAssembly.Instance(new WebAssembly.Module(readFileSync(p))).exports
 }
 
 function injetaStdout (mem, texto) {
@@ -95,9 +94,9 @@ function arenaWasm (ex, script, quiet) {
 }
 
 function arenaCNativo (script) {
-  const harness = path.join(TMP, 'cwn_arena.c')
-  const bin = path.join(TMP, process.platform === 'win32' ? 'cwn_arena.exe' : 'cwn_arena')
-  fs.writeFileSync(harness, `#include <stdio.h>
+  const harness = join(TMP, 'cwn_arena.c')
+  const bin = join(TMP, process.platform === 'win32' ? 'cwn_arena.exe' : 'cwn_arena')
+  writeFileSync(harness, `#include <stdio.h>
 #include <string.h>
 extern unsigned char arena[65536];
 int node_escreve(int in_off, int n);
@@ -138,9 +137,9 @@ int main(void){
 }
 
 function plenoNode (script) {
-  const harness = path.join(TMP, 'cwn_pleno.c')
-  const bin = path.join(TMP, process.platform === 'win32' ? 'cwn_pleno.exe' : 'cwn_pleno')
-  fs.writeFileSync(harness, `#include <stdio.h>
+  const harness = join(TMP, 'cwn_pleno.c')
+  const bin = join(TMP, process.platform === 'win32' ? 'cwn_pleno.exe' : 'cwn_pleno')
+  writeFileSync(harness, `#include <stdio.h>
 #include <string.h>
 extern unsigned char arena[65536];
 int node_escreve(int in_off, int n);
@@ -179,24 +178,24 @@ int main(void){
 
 /* §CN0 — fontes e traduz */
 {
-  ok('§CN0 interpretar.c existe', fs.existsSync(FONTE_C))
-  ok('§CN0 banco/node.c pleno', fs.existsSync(PLENO_C))
+  ok('§CN0 interpretar.c existe', existsSync(FONTE_C))
+  ok('§CN0 banco/node.c pleno', existsSync(PLENO_C))
   ok('§CN0 traduz disponível', garanteTraduz())
 }
 
 /* §CN1 — C sobe para wasm */
-let wasmTmp = path.join(TMP, 'node_traduz.wasm')
+let wasmTmp = join(TMP, 'node_traduz.wasm')
 if (garanteTraduz()) {
   try {
     sobe(FONTE_C, wasmTmp)
-    ok('§CN1 sobe(interpretar.c) corre', fs.existsSync(wasmTmp))
-    const ex = WebAssembly.Module.exports(new WebAssembly.Module(fs.readFileSync(wasmTmp)))
+    ok('§CN1 sobe(interpretar.c) corre', existsSync(wasmTmp))
+    const ex = WebAssembly.Module.exports(new WebAssembly.Module(readFileSync(wasmTmp)))
     for (const name of EXPORTS) {
       ok('§CN1 export ' + name, ex.some((e) => e.name === name && e.kind === 'function'))
     }
-    fs.mkdirSync(path.dirname(WASM_OUT), { recursive: true })
-    fs.copyFileSync(wasmTmp, WASM_OUT)
-    ok('§CN1 node.wasm actualizado', fs.existsSync(WASM_OUT))
+    mkdirSync(dirname(WASM_OUT), { recursive: true })
+    copyFileSync(wasmTmp, WASM_OUT)
+    ok('§CN1 node.wasm actualizado', existsSync(WASM_OUT))
   } catch (e) {
     ok('§CN1 sobe(interpretar.c)', false)
     console.log('  ', String(e.message || e).split('\n')[0])
@@ -204,20 +203,20 @@ if (garanteTraduz()) {
 }
 
 /* §CN2 — VOLTA: sobe(desce(M)) = M (quando traduz desce static); sobe é determinístico */
-if (garanteTraduz() && fs.existsSync(wasmTmp)) {
+if (garanteTraduz() && existsSync(wasmTmp)) {
   try {
-    const wasm2 = path.join(TMP, 'node_traduz2.wasm')
+    const wasm2 = join(TMP, 'node_traduz2.wasm')
     sobe(FONTE_C, wasm2)
-    const a = fs.readFileSync(wasmTmp)
-    const b = fs.readFileSync(wasm2)
+    const a = readFileSync(wasmTmp)
+    const b = readFileSync(wasm2)
     ok('§CN2 sobe(C) determinístico (byte a byte)', difBytes(a, b) === 0)
-    const voltaC = path.join(TMP, 'node_volta.c')
+    const voltaC = join(TMP, 'node_volta.c')
     try {
       desce(wasmTmp, voltaC)
-      ok('§CN2 desce(wasm) gera C', fs.existsSync(voltaC) && fs.statSync(voltaC).size > 50)
-      const wasm3 = path.join(TMP, 'node_volta.wasm')
+      ok('§CN2 desce(wasm) gera C', existsSync(voltaC) && statSync(voltaC).size > 50)
+      const wasm3 = join(TMP, 'node_volta.wasm')
       sobe(voltaC, wasm3)
-      const c = fs.readFileSync(wasm3)
+      const c = readFileSync(wasm3)
       const dif = difBytes(a, c)
       ok('§CN2 sobe(desce(M)) = M byte a byte', dif === 0)
       if (dif) console.log(`       ${dif} bytes diferentes de ${a.length}`)
@@ -232,7 +231,7 @@ if (garanteTraduz() && fs.existsSync(wasmTmp)) {
 }
 
 /* §CN3 — wasm ↔ arena (célula r=0) */
-if (fs.existsSync(WASM_OUT)) {
+if (existsSync(WASM_OUT)) {
   try {
     const N = loadWasm(WASM_OUT)
     const script = 'console.log(1)'
@@ -246,7 +245,7 @@ if (fs.existsSync(WASM_OUT)) {
 }
 
 /* §CN4 — C nativo (interpretar.c) concorda com wasm na arena */
-if (fs.existsSync(WASM_OUT)) {
+if (existsSync(WASM_OUT)) {
   const script = 'x=1'
   let cOut = null
   let wOut = null
@@ -282,7 +281,7 @@ if (fs.existsSync(WASM_OUT)) {
 
 /* §CN6 — manifesto declara cadeia e duomorfismo */
 {
-  const man = JSON.parse(fs.readFileSync(path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+  const man = JSON.parse(readFileSync(join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
   const node = man.linguagens.find((l) => l.nome === 'node')
   ok('§CN6 manifesto cadeia c→wasm→node', node?.cadeia?.wasm === 'node.wasm')
   ok('§CN6 manifesto pleno', node?.cadeia?.pleno === 'banco/node.c')
@@ -294,7 +293,7 @@ if (fs.existsSync(WASM_OUT)) {
 }
 
 /* §CN7 — duomorfismo na arena: MOVE(−1)⊗ depois MOVE(+1)⊕ (Lei 1, fisica.tex) */
-if (fs.existsSync(WASM_OUT)) {
+if (existsSync(WASM_OUT)) {
   try {
     const N = loadWasm(WASM_OUT)
     const mem = Buffer.from(N.DISCO.buffer)
@@ -307,7 +306,7 @@ if (fs.existsSync(WASM_OUT)) {
     const got = mem.slice(BASE + 8192, BASE + 8192 + n2).toString('utf8')
     ok('§CN7 MOVE(+1) absorve (⊕)', got === '42\n')
     ok('§CN7 par negro·branco arena', N.node_pendente() === body.length && N.node_pronto() === 0)
-    const canalEdge = JSON.parse(fs.readFileSync(path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+    const canalEdge = JSON.parse(readFileSync(join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
       .arestas.find((e) => e.de === 'canal' && e.para === 'node')
     ok('§CN7 aresta canal→node b=1', canalEdge && canalEdge.b === 1)
     ok('§CN7 duo∘duo=iso (a=0 wasm↔metal)', (0 ^ 0) === 0)
@@ -318,11 +317,11 @@ if (fs.existsSync(WASM_OUT)) {
 }
 
 /* §CN8 — volta traduz: C desceido ainda fala de arena e node_move */
-if (garanteTraduz() && fs.existsSync(wasmTmp)) {
+if (garanteTraduz() && existsSync(wasmTmp)) {
   try {
-    const voltaC = path.join(TMP, 'node_volta_chk.c')
+    const voltaC = join(TMP, 'node_volta_chk.c')
     desce(wasmTmp, voltaC)
-    const txt = fs.readFileSync(voltaC, 'utf8')
+    const txt = readFileSync(voltaC, 'utf8')
     ok('§CN8 desce menciona DISCO ou arena', txt.includes('DISCO') || txt.includes('arena'))
     ok('§CN8 desce menciona node_move', txt.includes('node_move'))
   } catch {
