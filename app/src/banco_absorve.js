@@ -1,4 +1,4 @@
-// banco_absorve.js — absorção fio a fio (como latex §W4 / bash §W8 / node §W10).
+// banco_absorve.js — absorção órbita a órbita (latex §W4 / sql arena / node §W10).
 // MOVE(−1) emite na arena; canal sincroniza slots; MOVE(+1) absorve. Sem string SQL adaptadora.
 
 import { moveWasm, u8, NULO } from './banco_move.js'

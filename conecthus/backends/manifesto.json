@@ -7,9 +7,9 @@
     "q": "compila forma interna — face ⊗, MOVE(−1) emite",
     "r": "atravessa pleno (metal, shell, slots S_CANAL+*)",
     "paridade": "π(L)=(p+q+r) mod 2; a(A→B)=π(A)⊕π(B): 0=iso, 1=duo; duo∘duo=iso via hub sql",
-    "tradutor": "MOVE na arena + arestas; absorcao fio a fio (latex/bash/node); sem adaptador SQL",
+    "tradutor": "MOVE na arena + arestas; absorcao orbita a orbita (latex/sql/node); sem adaptador SQL",
     "doc": "memoria/duomorfismo-pipe.md",
-    "medidor": "tests/duomorf_pipe.js; tools/test_metal.exe; tests/cosmologia.c",
+    "medidor": "tests/duomorf_pipe.js; tests/orbitas_hopfield.js; tools/test_metal.exe; tests/cosmologia.c",
     "celula": "mvp: consultar.wasm + GKBANCO (LS); pleno sql.c so no metal",
     "medidor_cadeia": "tests/traduz_c_wasm_node.js; tests/traduz_c_wasm_shell.js; tests/traduz_asm_wasm.c; tests/traduz_c_asm_node.c; tests/traduz_c_asm_shell.c; tests/celula_wasm_sec.c; tests/corre_fita_metal.c; tests/corre_fita_browser.js"
   },
@@ -133,7 +133,16 @@
       "pleno": "banco/sql.c",
       "nota": "interface padrao; wasm=celula browser; pleno=sql.c metal",
       "arena": "browser",
-      "armazenamento": "GKBANCO"
+      "armazenamento": "GKBANCO",
+      "absorcao": {
+        "move": "sql_move",
+        "exports": [
+          "sql_move",
+          "sql_compilar",
+          "sql_descompilar"
+        ],
+        "orbita": "arena"
+      }
     },
     {
       "nome": "latex",
@@ -154,7 +163,7 @@
           "latex_compor",
           "latex_descompor"
         ],
-        "fio": "arena",
+        "orbita": "arena",
         "pleno": "tex.wasm"
       }
     },
@@ -207,7 +216,7 @@
         "ponte": "tools/asm_wasm.mjs",
         "duomorf": {
           "asm_wasm": "a fita é comum; asm=erg monta/desmonta, wasm=MOVE+erg.fita",
-          "wasm_metal": { "a": 0, "b": 0, "quadrante": "Q00", "fio": "arena" },
+          "wasm_metal": { "a": 0, "b": 0, "quadrante": "Q00", "orbita": "arena" },
           "involucao": "monta∘desmonta=id na fita"
         }
       }
@@ -242,7 +251,7 @@
           "in": 9100,
           "out": 9101
         },
-        "fio": "canal"
+        "orbita": "canal"
       },
       "cadeia": {
         "c": "conecthus/backends/bash/interpretar.c",
@@ -271,7 +280,7 @@
             "a": 0,
             "b": 1,
             "quadrante": "Q01",
-            "fio": "canal"
+            "orbita": "canal"
           },
           "involucao": "MOVE(-1)∘MOVE(+1)=id"
         }
@@ -307,7 +316,7 @@
           "in": 9110,
           "out": 9111
         },
-        "fio": "canal"
+        "orbita": "canal"
       },
       "cadeia": {
         "c": "conecthus/backends/powershell/interpretar.c",
@@ -332,7 +341,7 @@
             "a": 0,
             "b": 1,
             "quadrante": "Q01",
-            "fio": "canal"
+            "orbita": "canal"
           },
           "involucao": "MOVE(-1)∘MOVE(+1)=id"
         }
@@ -368,8 +377,8 @@
           "in": 9120,
           "out": 9121
         },
-        "fio": "canal",
-        "fio_c": "traduz sobe/desce"
+        "orbita": "canal",
+        "orbita_c": "traduz sobe/desce"
       },
       "cadeia": {
         "c": "conecthus/backends/node/interpretar.c",
@@ -398,7 +407,7 @@
             "a": 0,
             "b": 1,
             "quadrante": "Q01",
-            "fio": "canal",
+            "orbita": "canal",
             "slots": {
               "in": 9120,
               "out": 9121
@@ -1035,17 +1044,59 @@
   "protocolo": {
     "nome": "canal",
     "bidireccional": true,
-    "fio": "ws:/canal",
+    "orbita": "ws:/canal",
     "slots": "S_CHUNK+S_*_IN/OUT",
-    "nota": "unico fio real; sincroniza arena com Patria",
+    "nota": "unica orbita real do canal; sincroniza arena com Patria",
     "p": 1,
     "q": 0,
     "r": 1
   },
+  "orbitas": [
+    {
+      "nome": "sql",
+      "lingua": "sql",
+      "suporte": "arena",
+      "xi": "hub",
+      "corpus": "lib/classe/corpus_orbitas_pt.txt",
+      "chave": "idioma/pt/orbita/<meta>",
+      "latex": "papers/arquitetura.tex idiomas=algebras; papers/redes.tex",
+      "involucao": "sql_compilar∘sql_descompilar=id"
+    },
+    {
+      "nome": "latex",
+      "lingua": "latex",
+      "suporte": "arena",
+      "xi": "compor",
+      "involucao": "latex_compor∘latex_descompor=id",
+      "nota": "mesma orbita que o SQL escreve como chave; face dual = bits invertidos"
+    },
+    {
+      "nome": "node",
+      "lingua": "node",
+      "suporte": "canal",
+      "xi": "shell",
+      "slots": {
+        "in": 9120,
+        "out": 9121
+      },
+      "involucao": "MOVE(-1)∘MOVE(+1)=id",
+      "nota": "ingerido como linguagem + orbita; nao entra em fios HTTP"
+    }
+  ],
+  "hopfield": {
+    "hebb": "W_ij = sum_p xi_i^p xi_j^p",
+    "dual": "W = W_s + W_a",
+    "W_s": "memoria — Hebb das orbitas sql/latex/node e do corpus idioma/pt/orbita",
+    "W_a": "ordem — canal cliente/servidor (paragem cliente↔servidor); s^T W_a s = 0",
+    "fecho": "lambda+ + lambda- = 0",
+    "eixos": "W_s/W_a ≠ duomorfismo (a,b)",
+    "fita": "G=1 (arvore); a matriz e declaracao das orbitas, nao da fita",
+    "medidor": "tests/orbitas_hopfield.js"
+  },
   "fios": [
     {
       "nome": "post",
-      "nota": "semantica classica NAO absorvida — ponte dev apenas",
+      "nota": "transporte HTTP NAO absorvido — nao e orbita Hopfield; ponte dev apenas",
       "absorvido": false
     },
     {

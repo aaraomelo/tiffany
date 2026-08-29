@@ -21,12 +21,12 @@ Formalização LaTeX: [`papers/redes.tex`](../papers/redes.tex) — **Redes Neur
 
 ## Tese central
 
-> **O pipe actual realiza o lado árvore/levantamento (`G=1`); ele ainda não é uma rede de Hopfield (`G>1`).**
+> **O pipe da fita realiza o lado árvore/levantamento (`G=1`). As órbitas sql/latex/node declaram a matriz Hopfield dual (`tests/orbitas_hopfield.js`); isso não é a fita.**
 
 | Lado | Mecanismo | Multiplicidade | No pipe hoje |
 |------|-----------|----------------|--------------|
 | **Árvore / levantamento** | prefixo distinto por memória; ramo separado | \(\tilde G=1\) (`fis:thm:levant`) | **sim** — prefixo rodata |
-| **Hopfield / Hebb** | soma de padrões numa matriz \(W\) | \(G>1\) (`fis:thm:interfere`) | **não** — sem regra Hebb, sem descida de energia |
+| **Hopfield / Hebb** | soma de padrões numa matriz \(W\) | \(G>1\) (`fis:thm:interfere`) | **órbitas** — `tests/orbitas_hopfield.js` (sql/latex/node + corpus); **fita** ainda \(G=1\) |
 
 Não confundir **árvore com Hopfield**: a sobreposição de prefixos coincide numericamente com o produto interno Hopfield *sob hipótese da árvore* (`fis:thm:sobrepoe`), mas o **mecanismo** de gravação difere — separar vs somar (`fis:thm:interfere`). Medido em `tests/hopfield.c` §F3 vs §F5.
 
@@ -59,11 +59,11 @@ interpretar.c  ──traduz──►  wasm  ──wasm_erg.c──►  ERG/ISA  
 | **sobreposição** | prefixo comum (`fis:thm:sobrepoe`) | Cor. proximidade (`mf:cor:prox`) | laço `arena[OFF_IN+k]` vs `RODATA_TAG+k` (concordância de níveis) |
 | **levantamento / árvore** | ramo → \(\tilde G=1\) (`fis:thm:levant`, `fis:thm:interfere`) | P4: âncora = bola | `RODATA_TAG` + `seedRodataArena` (`lib/arena_disco.mjs`); um backend = um ramo |
 | **~ diferença / trial** | três equivalências ~ (`fis:def:duomorf`) | — | `VINCO`+`JZ` na fita; trial `{−1,0,+1}` em `interpretar.c` |
-| **interferência** | \(G_{\mathrm{real}}>1\) por soma Hebb (`fis:thm:interfere`) | P6, `mf:thm:outro` | **não implementado** |
-| **recuperação (descer)** | energia Lyapunov (`fis:thm:desce`) | âncora / território | **não implementado** — `*_corre` é passagem única, não iteração assíncrona |
+| **interferência** | \(G_{\mathrm{real}}>1\) por soma Hebb (`fis:thm:interfere`) | P6, `mf:thm:outro` | **órbitas** `tests/orbitas_hopfield.js`; **não na fita** |
+| **recuperação (descer)** | energia Lyapunov (`fis:thm:desce`) | âncora / território | **órbitas** — descida Hebb no medidor; fita `*_corre` continua passagem única |
 | **neurónio (cisão+soma)** | `fis:redes-neuronio` | — | **não no pipe** — ver `tests/neuronio.c` (fora de `test_cadeia`) |
 | **ζ / μ** | `fis:thm:zetamu`, `fis:thm:mu` | P5, `mf:thm:zetamu` | **não na fita** — `G` host acumula; μ = diferença finita em `tests/zetamu.c` |
-| **\(W_s\) / \(W_a\)** | `fis:thm:duastorres` | `mf:thm:duas` | **não no pipe** — ver `tests/hopfield.c` §F7–§F10 |
+| **\(W_s\) / \(W_a\)** | `fis:thm:duastorres` | `mf:thm:duas` | **órbitas** `tests/orbitas_hopfield.js`; medidor pleno `tests/hopfield.c` §F7–§F10 |
 | **duomorfismo ⊕/⊗** | `fis:def:duomorf` (face aditiva/multiplicativa) | — | `wasm_erg`, manifesto MOVE — ver [`duomorfismo-pipe.md`](duomorfismo-pipe.md) |
 
 ---

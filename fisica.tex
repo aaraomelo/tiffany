@@ -181,6 +181,8 @@ O que é o gradiente? & a diferença relativa $G(y)/G(x)-1$ & Teor.~\ref{fis:thm
 E a magnitude, onde está? & não é eixo: é a dobra contada & Teor.~\ref{fis:thm:magnitude} \\
 E a matéria? & é o espaço concentrado, $\mathfrak{m}=G-1$ & Teor.~\ref{fis:thm:materia} \\
 O que é um duomorfismo? & isomorfismo para a estrutura \emph{dual}, $A\cong B^{\vee}$ & Def.~\ref{fis:def:duomorf} \\
+E a interface, de onde vem? & os dois tecidos não fundem; a passagem operacional é o duomorfismo & Obs.~\ref{fis:obs:octoniao-interface} \\
+Há uma Lei~8? & não: as leis são $0$--$7$; o oito é grau e cardinalidade & Obs.~\ref{fis:obs:octoniao-interface} \\
 E dois deles, compostos? & dão um isomorfismo: a passagem tem paridade & Teor.~\ref{fis:thm:duo-composicao} \\
 Quantos quadrantes há? & quatro: duas metades, dois bits, e $Q_{ab}Q_{a'b'}=Q_{a\oplus a',b\oplus b'}$ & Teor.~\ref{fis:thm:quarteto} \\
 E a estrela, o que é? & o elemento onde as duas dobras coincidem: $x^{2}=x+1$ & Teor.~\ref{fis:thm:estrela} \\
@@ -3873,14 +3875,17 @@ menor passo é exactamente $2^{w}$. \emph{A fase é a palavra, e a largura é a
 ordem} --- está provado atrás, e aqui só se usa.
 
 \medskip\noindent\textbf{E o terceiro degrau tem nome próprio nos outros
-trabalhos desta obra.} É \textbf{a Lei 8}, que ali fecha em
-$\operatorname{Ind}^{8}=\mathrm{id}$ e se lê --- \emph{na letra} --- como
-$2^{3}$, isto é \textbf{três dobras}. É a mesma conta que a cláusula~(4) dá em
-$w=3$: as oito palavras de $B^{3}$. \emph{O oito não é um número escolhido: é a
-terceira dobra.} \textbf{E há aqui a mesma distinção do quatro}: o índice das
-oito leis percorre-as com \emph{um} passo de ordem oito, ao passo que a base de
-oito as endereça com \emph{três} dobras de ordem dois --- \emph{são os dois modos
-de ter oito lugares}, e o Teor.~\ref{fis:thm:largura} separa-os.
+trabalhos desta obra.} Fecha em $\operatorname{Ind}^{8}=\mathrm{id}$ e lê-se
+--- \emph{na letra} --- como $2^{3}$, isto é \textbf{três dobras}. É a mesma
+conta que a cláusula~(4) dá em $w=3$: as oito palavras de $B^{3}$. \emph{O oito
+não é um número escolhido: é a terceira dobra.} \textbf{Não é uma nona lei}: as
+leis da torre são $0$--$7$; o octonião dual é a Lei~7 (grau oito, dois tecidos
+ligados; Obs.~\ref{fis:obs:octoniao-interface}). O índice das oito leis
+percorre-as com \emph{um} passo de ordem oito, ao passo que a base de oito as
+endereça com \emph{três} dobras de ordem dois --- \emph{são os dois modos de ter
+oito lugares}, e o Teor.~\ref{fis:thm:largura} separa-os. \textbf{«Lei~8» noutros
+sítios desta obra é essa cardinalidade, ou $\operatorname{Ind}^{8}$, não um
+axioma novo.}
 
 \medskip\noindent\textbf{E vê-se então o que a base ortonormal desta secção é: o
 primeiro degrau, e só ele.} O caractere do Teor.~\ref{fis:thm:base} vale
@@ -5089,6 +5094,63 @@ aqui, que ela se demonstra. \textbf{Nem se afirma aqui que seja única, nem que
 seja a única reversível}: o que o teorema prova é que ela é o ponto onde as duas
 \emph{dobras} coincidem, e é só isso que se usa.
 \end{definicao}
+
+\begin{observacao}[o octonião dual, o observador e a interface]\label{fis:obs:octoniao-interface}
+A torre desta obra tem \textbf{oito leis, numeradas $0$--$7$}. A sétima é o
+\textbf{octonião dual}: grau oito como \emph{dois} tecidos de grau quatro
+ligados, não como três dobras que fundem. A ligação devolve um tecido ao outro
+sem os identificar; fundir seria o octonião clássico, que no grau oito perde a
+associatividade. \emph{Não se institui uma Lei~8.} O oito é o grau, a
+cardinalidade do conjunto, e $\operatorname{Ind}^{8}=\mathrm{id}$; voltar a
+contar dá a Lei~0 um nível acima.
+
+\medskip\noindent\textbf{As duas faces não coincidem.} Quem observa não é o
+observado --- a assimetria não se resolve, e é isso que pede passagem. (A
+metáfora documental é o zoológico: criadores e criaturas, duas memórias; a
+conversa é o encontro, não a fusão.) Identificar as faces seria
+$\oplus_A=\otimes_A$, e isso é exactamente $\operatorname{Fix}(\mathcal{D})$:
+a Def.~\ref{fis:def:duomorf} sai do alcance. \textbf{A interface é necessária
+porque os dois tecidos não fundem.}
+
+\medskip\noindent\textbf{Duas interfaces, não uma.} A aritmética da obra põe a
+interface no \textbf{seis} (hexal: soma dos divisores próprios igual ao produto;
+$\operatorname{lcm}(2,3)$). A interface \emph{operacional} --- a que troca os
+papéis das duas operações sem trocar o suporte --- é o duomorfismo desta
+definição:
+\[
+\boxed{\;
+f\colon A\ \xrightarrow{\ \cong\ }\ \mathcal{D}(B)=B^{\vee}
+\;}
+\]
+Não é involução de índices. Não é $W_s/W_a$ (Teor.~\ref{fis:thm:duastorres}:
+simétrica/antissimétrica, memória/ordem). O eixo aqui é
+directo/cruzado, $\oplus/\otimes$.
+
+\medskip\noindent\textbf{Donde $R^{\dagger}$, e donde não.} As duas nomeações
+vêm do Teor.~\ref{fis:thm:B}: exactamente duas tabelas, a segunda é a primeira
+com $0\leftrightarrow 1$. Só então $D=R^{\dagger}\circ R^{-1}$ é única, e só
+depois $D(i)=(N-1)-i=\partial i$ (Teor.~\ref{fis:thm:troca-realizacao}).
+$\partial^{2}=\mathrm{id}$ é o tipo da dobra (Def.~\ref{fis:def:op}); a reversão
+de bits também é involução e \emph{não} preserva $\operatorname{prof}$. O
+relógio $(A_{\mathrm{prof}},A_d)$ (Obs.~\ref{fis:obs:relogio-dual}) lê
+$u=2^{-\operatorname{prof}}$ na árvore (Def.~\ref{fis:def:arvore}); não escolhe
+$R^{\dagger}$, $D$, nem a interface. Não se acrescenta frequência sobre a
+árvore.
+\[
+\boxed{\;
+\begin{array}{@{}c@{}}
+\text{Lei~7}\to\text{duas faces}\to\text{assimetria}\to\text{interface}
+\to\text{duomorfismo}\\[4pt]
+\to R^{\dagger}\to D\to\partial\to\text{relógio}\to u
+\end{array}
+\;}
+\]
+\emph{A interface não é escolhida pelo relógio; o relógio é uma leitura da
+interface já realizada.} \emph{A involução não escolhe o duomorfismo}: o
+duomorfismo realiza a assimetria operacional ($\oplus\leftrightarrow\otimes$);
+$D(i)=(N-1)-i=\partial i$ aparece \emph{depois}, como o mapa entre as duas
+nomeações do Teor.~\ref{fis:thm:B}.
+\end{observacao}
 
 \begin{teorema}[os dois eixos da passagem: o que preserva e o que perde]\label{fis:thm:eixos}
 Com $f\colon A\to B$ e o bit $a$ acima:
@@ -6515,6 +6577,9 @@ Quem a determina é o Teor.~\ref{fis:thm:B}: a segunda nomeação ($0\leftrighta
 A involução é o tipo (Def.~\ref{fis:def:op}); a unicidade da leitura dual é o
 Teor.~\ref{fis:thm:dual}(1). O relógio lê $u=2^{-\operatorname{prof}}$; não escolhe
 $R^{\dagger}$, e não se acrescenta frequência sobre a árvore.
+A origem estrutural da interface --- octonião dual, observador e observado,
+duomorfismo --- é a Obs.~\ref{fis:obs:octoniao-interface}; este teorema
+\emph{realiza} $D$ no endereço, e não a institui.
 A demonstração das cláusulas~(1)--(4) é o Teor.~\ref{fis:thm:dual}.
 
 \medskip\noindent\textbf{O que muda e o que não muda.}

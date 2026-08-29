@@ -17,15 +17,22 @@ function man () {
   return manifestoAtual()
 }
 
-/** Backend wasm ou protocolo canal (único fio real). */
+/** Backend wasm, protocolo canal, ou transporte HTTP não absorvido. */
 export function entradaManifesto (nome) {
   const m = man()
   const L = m.linguagens.find((l) => l.nome === nome)
   if (L) return L
   if (m.protocolo?.nome === nome) return m.protocolo
-  const f = m.fios?.find((f) => f.nome === nome)
+  const o = m.orbitas?.find((x) => x.nome === nome)
+  if (o) return o
+  const f = m.fios?.find((x) => x.nome === nome)
   if (f) return f
   return null
+}
+
+/** Órbita Hopfield declarada (sql/latex/node). Não é fio HTTP. */
+export function orbitaManifesto (nome) {
+  return man().orbitas?.find((o) => o.nome === nome) || null
 }
 
 export function assinaturaParidade (lang) {

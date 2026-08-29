@@ -27,6 +27,8 @@ function lang (nome) {
   const L = man.linguagens.find((l) => l.nome === nome)
   if (L) return L
   if (man.protocolo?.nome === nome) return man.protocolo
+  const O = (man.orbitas || []).find((o) => o.nome === nome)
+  if (O) return O
   const F = (man.fios || []).find((f) => f.nome === nome)
   if (F) return F
   throw new Error('lang ' + nome)
@@ -217,14 +219,23 @@ function traduzWasm (de, para, texto, inst) {
   ok('§D4 bash→node b=0', e2 && e2.b === 0)
 }
 
-/* §D5 — absorção (canal↔shell) e fios não absorvidos */
+/* §D5 — absorção (canal↔shell), órbitas Hopfield, fios HTTP não absorvidos */
 {
   ok('§D5 protocolo canal', man.protocolo?.nome === 'canal')
   ok('§D5 node tem absorcao', !!man.linguagens.find((l) => l.nome === 'node')?.absorcao?.move)
   ok('§D5 latex tem absorcao', !!man.linguagens.find((l) => l.nome === 'latex')?.absorcao)
+  ok('§D5 sql tem absorcao', !!man.linguagens.find((l) => l.nome === 'sql')?.absorcao)
   ok('§D5 canal→node', ARESTAS.find((e) => e.de === 'canal' && e.para === 'node'))
-  ok('§D5 node nao em fios', !(man.fios || []).find((f) => f.nome === 'node'))
-  ok('§D5 fios nao absorvidos', (man.fios || []).every((f) => f.absorvido === false))
+  ok('§D5 node nao em fios HTTP', !(man.fios || []).find((f) => f.nome === 'node'))
+  ok('§D5 fios HTTP nao absorvidos', (man.fios || []).every((f) => f.absorvido === false))
+  ok('§D5 orbitas sql/latex/node', ['sql', 'latex', 'node'].every(
+    (n) => (man.orbitas || []).find((o) => o.nome === n)))
+  ok('§D5 absorcao.orbita (nao fio)', ['sql', 'latex', 'node'].every((n) => {
+    const L = man.linguagens.find((l) => l.nome === n)
+    return L?.absorcao?.orbita && L.absorcao.fio === undefined
+  }))
+  ok('§D5 hopfield eixos distintos', man.hopfield?.eixos?.includes('≠') ||
+    man.hopfield?.eixos?.includes('duomorfismo'))
   let d5ok = true
   for (const edge of ARESTAS) {
     try {

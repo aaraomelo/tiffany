@@ -1,4 +1,4 @@
-// terminal.js — terminal: absorção node_move + canal (fio a fio).
+// terminal.js — terminal: absorção node_move + canal (órbita a órbita).
 
 import { initBancoSql, shellPadrao, SHELLS } from './banco_sql.js'
 import { abrirCanal } from './canal_browser.js'
@@ -170,7 +170,7 @@ export async function initTerminal () {
     }
   })
 
-  linha('terminal — absorção fio a fio', 'sys')
+  linha('terminal — absorção órbita a órbita', 'sys')
   arranque()
 
   return sec

@@ -2,7 +2,7 @@
 % ─────────────────────────────────────────────────────────────────────────────
 %  papers/redes.tex — REDES NEURAIS MULTIFOCAIS
 %
-%  P6 desce da combinação física (fis:thm:combina). Hebb é realização, não postulado.
+%  P6 é instanciação de fis:thm:combina, não postulado. Hebb/Hopfield são declarações.
 %  combinacao.tex fundido aqui e apagado. Compila: pdflatex papers/redes.tex
 %
 % ─────────────────────────────────────────────────────────────────────────────
@@ -39,7 +39,6 @@
 \newtheorem{definicao}[teorema]{Definição}
 \newtheorem{corolario}[teorema]{Corolário}
 \newtheorem{proposicao}[teorema]{Proposição}
-\newtheorem{postulado}[teorema]{Postulado de tradução}
 \renewcommand{\proofname}{Demonstração}
 
 \input{gkcapa}
@@ -47,28 +46,30 @@
 \begin{document}
 \interfacen{6}
 \gkcapa{Redes Neurais Multifocais}
-       {P6 desce da combinação física}
+       {P6 é instanciação, não postulado}
        {a rede só realiza; não legisla}
 \maketitle
 
 \begin{abstract}\noindent
-Hebb/Hopfield na rede \textbf{não} são a fonte da lei. A lei é a combinação
-física (\code{fis:thm:combina}): superposição no suporte, termo cruzado,
-acoplamento. A descida é
+Hebb/Hopfield na rede \textbf{não} são a fonte da lei, nem um postulado.
+São declarações: $W_{ij}$ é o Cor.~\code{fis:cor:hebb}; a descida energética
+é o Teor.~\code{fis:thm:desce}. A lei da combinação é o
+Teor.~\code{fis:thm:combina}. A descida é
 \[
 \boxed{\text{álgebra}\to\text{norma}\to\text{combinação}\to C
 \to\text{interferência}\to\text{Hebb/Hopfield}.}
 \]
 $C\colon X\times X\to X$ é o tipo (duas incidências, uma célula). A forma é
-superposição em $V$. $W_{ij}=\sum_p\xi_i^p\xi_j^p$ é o Cor.~\code{fis:cor:hebb},
-não um decreto. A autoridade não vem de $\operatorname{lexMax}$,
+superposição em $V$. O fecho das duas faces é a Lei~7 --- interface realizada
+pelo duomorfismo (\code{fis:obs:octoniao-interface}); \emph{não} há Lei~8 nem
+postulado neste documento. A autoridade não vem de $\operatorname{lexMax}$,
 $D_{\mathrm{can}}$, $\tau$ nem do pipe.
 \end{abstract}
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section{Postulado}\label{redes:regra}
+\section{Descida operacional}\label{redes:regra}
 
-\begin{postulado}[\pt{6} --- descida]\label{redes:post:p6}\label{redes:post:hebb}\label{redes:post:niveis}\label{redes:post:overwrite}
+\begin{teorema}[\pt{6} --- a descida é teorema, não postulado]\label{redes:post:p6}\label{redes:post:hebb}\label{redes:post:niveis}\label{redes:post:overwrite}\label{redes:thm:p6}
 \pt{6} é a instanciação discreta do \fis{fis:thm:combina}{Teor. «a combinação
 física é superposição»}. Não escolhe $C=W$ por decreto. A sequência é
 \[
@@ -81,10 +82,18 @@ interacção é superposição em $V$. Hebb é o \code{fis:cor:hebb}; Hopfield d
 \[
 \lambda^{+}+\lambda^{-}=0,\qquad F_H\circ F_P=\mathrm{id}.
 \]
-Não se promove Hebb. Hebb perde o estatuto de postulado porque aparece como
-consequência da lei anterior. Este documento \textbf{não legisla}: só realiza
-o que a física já provou.
-\end{postulado}
+Hebb e Hopfield são \textbf{declarações} --- corolário e teorema da física ---,
+não axiomas deste documento. Este documento \textbf{não legisla}: só realiza
+o que a física já provou. O fecho das duas faces é a Lei~7 (Obs.~\code{fis:obs:octoniao-interface}):
+interface realizada pelo duomorfismo; \emph{não} há Lei~8.
+\end{teorema}
+
+\begin{proof}
+A combinação é o Teor.~\code{fis:thm:combina}; $W_{ij}$ é o
+Cor.~\code{fis:cor:hebb}; a descida energética é o Teor.~\code{fis:thm:desce}.
+Logo Hebb/Hopfield não reabrem postulado. As faces não fundem: a interface é o
+duomorfismo, e o fecho é a Lei~7.
+\end{proof}
 
 \[
 \text{teorema físico}
@@ -120,7 +129,7 @@ Overwrite é Hebb degenerado, não outra lei.
 \end{corolario}
 
 \begin{proof}
-Hebb é soma; soma de capacidade $1$ é substituição. Postulado~\ref{redes:post:p6}.
+Hebb é soma; soma de capacidade $1$ é substituição. Teor.~\ref{redes:thm:p6}.
 \end{proof}
 
 \begin{corolario}[o relógio lê min e max]\label{redes:cor:relogio}
@@ -169,6 +178,28 @@ D=R^{\dagger}\circ R^{-1}\text{ é única;}\quad
 \text{depois }D(i)=(N-1)-i.
 \;}
 \]
+\medskip\noindent\textbf{Donde a dualidade vem} --- cadeia positiva, descida;
+este documento não legisla.
+\[
+\begin{array}{@{}cl@{}}
+\text{Lei~7} & \text{octonião dual: dois tecidos, ligar sem fundir}\\[2pt]
+& \text{(o oito é grau e cardinalidade; \emph{não} há Lei~8)}\\[2pt]
+\to & \text{observador $\neq$ observado (as faces não fundem)}\\[2pt]
+\to & \text{interface necessária}\\[2pt]
+\to & \text{duomorfismo: $A\cong B^{\vee}$ (\code{fis:def:duomorf}; \code{fis:obs:octoniao-interface})}\\[2pt]
+\to & R^{\dagger}\text{ do Teor.\ \code{fis:thm:B}}\\[2pt]
+\to & D=R^{\dagger}\circ R^{-1}\text{ única}\\[2pt]
+\to & D(i)=(N-1)-i=\partial i\\[2pt]
+\to & \text{relógio lê }u=2^{-\operatorname{prof}}
+\end{array}
+\]
+A hexal (seis) é a interface \emph{aritmética} da torre; o duomorfismo é a
+interface \emph{operacional}. Distintos de $W_s/W_a$.
+\emph{A interface não é escolhida pelo relógio; o relógio é uma leitura da
+interface já realizada} (\code{fis:obs:octoniao-interface}).
+\emph{A involução não escolhe o duomorfismo}: o duomorfismo realiza a assimetria;
+$D=\partial$ aparece depois, das duas nomeações.
+
 O relógio \textbf{não} determina o operador.
 $(A_{\mathrm{prof}},A_d)$ lê profundidade e distância no endereço
 (Cor.~\ref{redes:cor:relogio}). A árvore já traz a escala
@@ -667,7 +698,7 @@ $G_{\mathrm{state}}^{\mathrm{esc}}(X)=2$, mas $G_{\mathrm{state}}^{\mathrm{surv}
 \medskip\noindent\textbf{Distinção de operações (§RG6).}
 No slot único, \code{overwrite\_single\_slot} \emph{é} Hebb de capacidade $1$
 (Cor.~\ref{redes:cor:ow}). Hebb pleno soma na matriz $W$
-(\code{fis:cor:hebb}; Post.~\ref{redes:post:p6} é a descida, não o decreto).
+(\code{fis:cor:hebb}; Teor.~\ref{redes:thm:p6} é a descida, não o decreto).
 Hopfield dual guarda a volta ($\lambda^{+}+\lambda^{-}=0$).
 
 \medskip\noindent\textbf{Dualidade multiplicidade\,/\,ordem}
@@ -763,7 +794,7 @@ Lebesgue transporta ordem. Ligar \code{duomorfismo-pipe.md} «$m{=}0$» ao parâ
 
 \medskip\noindent\textbf{Consequência.} $m{=}0$/$m{=}1$/Parseval/$\nu\circ\nu$
 não são \pt{6}. A combinação é o \code{fis:thm:combina}; Hebb realiza
-(\code{fis:cor:hebb}; Post.~\ref{redes:post:p6}). Overwrite no
+(\code{fis:cor:hebb}; Teor.~\ref{redes:thm:p6}). Overwrite no
 slot é Cor.~\ref{redes:cor:ow}.
 
 \subsection{Campo $G_{\mathrm{visit}}$ na arena}
@@ -796,6 +827,39 @@ $G_{\mathrm{real}}>1$ é interferência (\fis{fis:thm:interfere}{interferência}
 \code{fis:thm:combina}, \code{fis:cor:hebb}, \code{fis:thm:interfere}.
 \end{proof}
 
+\medido{\code{tests/orbitas\_hopfield.js}: padrões $\xi$ das órbitas
+\code{sql}/\code{latex}/\code{node} (corpus \code{idioma/pt/orbita} e face
+\LaTeX{} dual); Hebb $W_s$; canal $W_a$; $\lambda^{+}+\lambda^{-}=0$.
+Eixos $W_s/W_a$ e duomorfismo permanecem distintos. A fita continua $G=1$.}
+
+\medskip\noindent\textbf{Hopfield não é teoria do transporte.} A cadeia
+correcta no motor cliente/servidor é
+\[
+\text{arena}\to\text{duas faces}\to\text{absorção}\to\text{órbitas}
+\to\xi\to W.
+\]
+HTTP/\texttt{POST}/\texttt{FETCH} ficam \code{fios}: transporte externo,
+\emph{não} memória, \emph{não} órbita. O que virou órbita foi o que foi
+absorvido. $W_a$ ordena o canal das línguas absorvidas (período~$4$);
+\emph{não} é o fio HTTP, nem a aresta $a{=}1$.
+\caixa{a \textbf{matriz} memoriza as línguas absorvidas; o \textbf{fio}
+transporta o que ainda não foi absorvido}\label{redes:memoria-fio}
+Interface não é transporte. Memória não é fio.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+peça & faz & não é \\
+\midrule
+$W_s$ ($W_s^{\top}=W_s$) & memória --- recupera $\xi$ & transporte \\
+$W_a$ ($W_a^{\top}=-W_a$) & ordem do canal --- $s^{\top}W_as=0$ & aresta $a{=}1$ \\
+$a{=}1$ & aresta duo da rede de línguas & $W_a$ \\
+$G{=}1$ & fita / passagem única & Hopfield \\
+\code{fios} & HTTP não absorvido & órbita, $W$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Tabela de correspondência}\label{redes:tabela}
 
@@ -812,10 +876,11 @@ $u$ estrutural & §\ref{redes:troca} & \code{mf:cor:troca-u} & §\ref{redes:thm-
 campo $G$ & \code{fis:def:objeto} & P2 disponibilidade &
 $G_{\mathrm{visit}}$ host; $G_{\mathrm{real}}$ com diário §RG2 \\
 $\zeta/\mu$ & \code{fis:thm:zetamu} & P5 eu / mordomos & \code{tests/zetamu.c} \\
-interferência & \code{fis:thm:combina}, \code{fis:cor:hebb} & \pt{6} descida & $W$ realiza o acoplamento \\
+interferência & \code{fis:thm:combina}, \code{fis:cor:hebb} & \pt{6} descida & $W$ nas órbitas (\code{orbitas\_hopfield.js}); fita $G=1$ \\
 recuperação & \code{fis:thm:desce} & âncora / Hopfield dual & $\lambda^{+}+\lambda^{-}=0$ \\
-$W_s/W_a$ & \code{fis:thm:duastorres} & \code{mf:thm:duas} & \code{hopfield.c} \\
+$W_s/W_a$ & \code{fis:thm:duastorres} & \code{mf:thm:duas} & \code{orbitas\_hopfield.js}; \code{hopfield.c} \\
 duomorfismo & \code{fis:def:duomorf} & --- & \code{wasm\_erg}, MOVE (III) \\
+fio HTTP & --- & --- & \code{fios} --- transporte; \emph{não} $W$ \\
 \bottomrule
 \end{tabular}}
 \end{center}
@@ -898,6 +963,7 @@ eixo & par & objecto \\
 \midrule
 \textbf{face} & $\oplus$ / $\otimes$ & directo / cruzado (\code{fis:def:duomorf}) \\
 \textbf{matriz} & $W_s$ / $W_a$ & simétrica / antissimétrica (\code{fis:thm:duastorres}) \\
+\textbf{absorção} & órbita / fio & memória das línguas / transporte HTTP \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -906,7 +972,10 @@ eixo & par & objecto \\
 no medidor Hopfield, $W_s$ desce (Lyapunov); $W_a$ tem $s^\top W_a s=0$; período $2$ vs $4$
 exige hipótese sobre $T^2$ (\fis{fis:thm:duasordens}{duas ordens}), \textbf{não} da
 antissimetria sozinha. \code{tests/hopfield.c} §F10: somar torres \textbf{não} faz ciclar
---- \emph{fora} da bateria RG e de \code{test\_cadeia.bat}.
+--- \emph{fora} da bateria RG; \code{tests/orbitas\_hopfield.js} mede $W_s/W_a$ nas
+órbitas absorvidas, \emph{não} nos \code{fios}.
+
+\caixa{interface não é transporte; memória não é fio}\label{redes:interface-fio}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Combinação}\label{redes:combinacao}\label{redes:fronteira}%
@@ -953,11 +1022,12 @@ superposição, não a incidência.
 \code{tests/redes\_multifocal\_io.js} §RG6;
 \code{tests/redes\_combinacao.js} (realização de §\ref{redes:combinacao}).\\
 \code{tests/neuronio.c}; \code{tests/hopfield.c} (Hopfield dual);
+\code{tests/orbitas\_hopfield.js} (órbitas sql/latex/node; \code{fios} fora de $W$);
 \code{tests/zetamu.c}; \code{tools/test\_cadeia.bat}.}
 
 \colunas{\fis{fis:thm:sobrepoe}{sobreposição}, \fis{fis:thm:desce}{descida},
 \fis{fis:thm:interfere}{interferência}, \fis{fis:thm:duastorres}{duas torres};
-Post.~\ref{redes:post:p6}, Cor.~\ref{redes:cor:ow},
+Teor.~\ref{redes:thm:p6}, Cor.~\ref{redes:cor:ow},
 Prop.~\ref{redes:prop-protocolo}, §RG4--§RG6, §\ref{redes:combinacao}}
         {neurónio cisão$+$soma; árvore; multifocal host; overwrite}
         {\code{auditoria\_rg6.bat}, \code{redes\_g.js}, \code{redes\_multifocal.js},

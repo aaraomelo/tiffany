@@ -22,7 +22,9 @@ const node = man.linguagens.find((l) => l.nome === 'node')
 
 ok('§A0 node tem absorcao no manifesto', node?.absorcao?.move === 'node_move')
 ok('§A0 node slots canal', node?.absorcao?.slots?.in === 9120)
-ok('§A0 node nao em fios', !(man.fios || []).find((f) => f.nome === 'node'))
+ok('§A0 node orbita canal', node?.absorcao?.orbita === 'canal')
+ok('§A0 node nao em fios HTTP', !(man.fios || []).find((f) => f.nome === 'node'))
+ok('§A0 node em orbitas Hopfield', !!(man.orbitas || []).find((o) => o.nome === 'node'))
 ok('§A0 canal→node', !!man.arestas.find((e) => e.de === 'canal' && e.para === 'node'))
 
 const wasmPath = join(RAIZ, 'assets', 'figuras', 'wasm', 'node.wasm')
