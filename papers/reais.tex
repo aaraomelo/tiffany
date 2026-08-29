@@ -63,6 +63,18 @@ enumerabilidade (§\ref{sec:preco}).
 %======================================================================
 \section*{Onde este documento vive}
 
+\noindent\textbf{Camada N--R}, não a Parte Análise, não \(\operatorname{Star}(\mathcal{U})\).
+\[
+\boxed{\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\operatorname{Star}(\mathbb{R})=\{\varphi,\psi\}
+\quad\neq\quad
+\text{o que a Física constrói}
+\;}
+\]
+Passagem por \textbf{completação}, não por \(\mathcal{D}\). \(x^{2}=-1\) recusado pela ordem. O corte \textbf{não} é o paper analítico (\(\tau=+1\)).
+
 Degrau $k=2$ da torre $T_{k+1}=T_k+T_k^{*}$ (\code{analitico thm:tecidos}) --- o
 \textbf{quarto} da construção, que se lê num sentido só:
 
@@ -99,7 +111,7 @@ $1$  & $\mathbb{Z}\!\to\!\Q$ & a \textbf{multiplicação}
      & $0^{-1}$ não existe & $\iota(a,b)=(b,a)\Rightarrow$ inverso; Fix $=\{\pm1\}$
      & \code{racionais.tex} \\
 $2$  & $\Q\!\to\!\R$ & o \textbf{corte} (completação)
-     & a \textbf{enumerabilidade} & $(A,B)\mapsto(B,A)$; Fix: o corte que fecha
+     & a \textbf{enumerabilidade} & complementar da representação $(A,B)$; involução: $\nu(x)=-x$
      & \code{reais.tex} \\
 \bottomrule
 \end{tabular}
@@ -199,7 +211,7 @@ torre binária dobrar sem excepção. A Lei~5 falta nos dois extremos por razõe
  & lei (centro) & realização $\Q\!\to\!\R$ & estatuto & § \\
 \midrule
 \textbf{0} & divisão do zero & o \textbf{buraco}: corte sem racional em cima; $0\leftrightarrow\infty$ em $\mathbb{P}^1$ & explícita & \ref{sec:corte}, \ref{sec:porque} \\
-\textbf{1} & dual ($1\dg=-1$) & $\nu(x)=-x$; e o dual do andar é a troca $(A,B)\mapsto(B,A)$ & explícita & \ref{sec:corte} \\
+\textbf{1} & dual ($1\dg=-1$) & $\nu(x)=-x$ em $(\R,+)$. O par $(A,B)$: complementar da representação, não involução de $\R$ & explícita & \ref{sec:corte} \\
 \textbf{2} & bidual & $B=\Q\setminus A$: complementar duas vezes é a identidade & explícita & \ref{sec:corte} \\
 \textbf{3} & trial $\{-1,0,+1\}$ & \code{rz\_cmp} devolve os três; $\tau=0$ (em cima) é \emph{vazio} $\iff$ irracional & explícita & \ref{sec:corte} \\
 \textbf{4} & tetral ($T+T^{*}$) & $\R=\{(A,B)\}$: duplicar $\Q$ e quocientar aberto/fechado & explícita & \ref{sec:corte} \\
@@ -225,9 +237,13 @@ Para $a\in\mathbb{N}$ e $n\in\{1,2,3\}$, o corte de $\sqrt[n]{a}$ é o par
 \[
 \boxed{\;A=\{q\in\Q: q\le 0\ \text{ou}\ q^{n}<a\},\qquad B=\Q\setminus A\;}
 \]
---- \textbf{Lei 4} ($T+T^{*}$): duplica-se $\Q$ nas duas classes; \textbf{Lei 1}:
-o dual do andar é a troca $(A,B)\mapsto(B,A)$; \textbf{Lei 2}: complementar duas
-vezes devolve $A$. A decisão é \textbf{inteira}: $q=p/d$ está em $A$ conforme
+--- \textbf{Lei 4} ($T+T^{*}$): duplica-se $\Q$ nas duas classes. $A$ é a classe
+inferior ($q^{n}<a$, aberta); $B=\Q\setminus A$ é a classe superior. A operação
+$(A,B)\mapsto(B,A)$ é o \textbf{complementar da representação} --- troca a
+orientação do par e \textbf{não} permanece no espaço orientado dos cortes, nem
+é involução de $\R$. A involução de $(\R,+)$ é $\nu(x)=-x$, noutro sítio.
+\textbf{Lei 2}: $B=\Q\setminus A$ duas vezes devolve o mesmo par não ordenado
+$\{A,B\}$. A decisão é \textbf{inteira}: $q=p/d$ está em $A$ conforme
 $p^{n}$ compare com $a\,d^{n}$, e nenhuma casa decimal entra
 (\code{lib/reais.h}, \code{rz\_cmp}). O \textbf{quociente} identifica os dois
 representantes do mesmo real quando $A$ tem máximo: $(A,B)$ e
@@ -853,6 +869,21 @@ de §FR4.
 %======================================================================
 \section*{Síntese}
 
+\begin{observacao}[o Corpo Real, e o que não é]
+\texttt{Corpo Real} é o nome estrutural desta obra. \textbf{Estatuto:}
+corpo ordenado completo --- unicidade (Teorema~\ref{thm:unico}) \emph{depois}
+do corte (Def.~\ref{def:corte}), não como definição.
+A passagem $\mathbb{Q}\to\mathbb{R}$ fecha por \textbf{completação}, não por
+$\mathcal{D}$ e não por isomorfismo ($\mathbb{Q}\not\cong\mathbb{R}$).
+
+A involução de $(\mathbb{R},+)$ é $\nu(x)=-x$, $\nu\neq\mathcal{D}$,
+$\nu\neq\star$. O par $(A,B)$ com $B=\mathbb{Q}\setminus A$ admite o
+complementar da representação $(A,B)\mapsto(B,A)$: troca orientação, não é
+involução do espaço orientado dos cortes nem do corpo.
+$x^{2}=-1$ é recusado pela ordem. $\operatorname{Star}(\mathbb{R})=\{\varphi,\psi\}$,
+lei complementar da cadeia, não analogia com Alonzo.
+\end{observacao}
+
 \[
 \boxed{
 \begin{array}{c}
@@ -865,7 +896,7 @@ de §FR4.
 
 \begin{itemize}\itemsep2pt
 \item[\textbf{0}] o buraco: o corte sem racional em cima --- e ele é a regra, não a excepção.
-\item[\textbf{1}] o dual do andar é a troca das duas classes $(A,B)\mapsto(B,A)$.
+\item[\textbf{1}] o complementar da representação $(A,B)\mapsto(B,A)$ troca a orientação; a involução de $(\R,+)$ é $\nu(x)=-x$.
 \item[\textbf{2}] $B=\Q\setminus A$: complementar duas vezes é a identidade.
 \item[\textbf{3}] a tricotomia $\{-1,0,+1\}$ de \code{rz\_cmp}; $\tau=0$ vazio $\iff$ irracional.
 \item[\textbf{4}] duplicar $\Q$ no par e quocientar aberto/fechado.

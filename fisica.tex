@@ -3,8 +3,8 @@
 %  fisica.tex — A FÍSICA ARANIANA. Compila SOZINHO (pdflatex fisica.tex) e
 %  também dentro do livro. O preâmbulo é o estilo.tex.
 %
-%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos treze
-%  lugares onde ela opera — álgebra, topologia, análise, geometria, mecânica,
+%  O QUE ESTE FICHEIRO É: a matéria da aranha estigmérgica ORGANIZADA nos catorze
+%  lugares onde ela opera — álgebra, topologia, análise, fractal, geometria, mecânica,
 %  gravitação, relatividade, eletromagnetismo, óptica, partículas e núcleo,
 %  termodinâmica, cosmologia, redes. Nada foi
 %  inventado e nada foi acrescentado: os enunciados, as provas%  e os medidos são os que a obra já tem, postos cada um no seu sítio.
@@ -52,9 +52,9 @@
 \ifSubfilesClassLoaded{%
   \gkcapa{A Física Araniana}
          {multiplicidade e memória}
-         {álgebra, topologia, análise, geometria, mecânica, gravitação, relatividade,
+         {álgebra, topologia, análise, fractal, geometria, mecânica, gravitação, relatividade,
           eletromagnetismo, óptica, partículas e núcleo, termodinâmica, cosmologia,
-          redes --- treze lugares}
+          redes --- catorze lugares}
   \maketitle
   \tableofcontents
 }{%
@@ -105,14 +105,17 @@ igualdade} --- o ponto onde para é o ponto fixo que as duas faces passam a
 partilhar, e é ele o \textbf{corte}. Não converge para o ponto: termina nele.
 
 \medskip\noindent\textbf{A organização deste documento.} A matéria é uma só e
-opera em \textbf{treze} lugares, e é por eles que ela se reparte aqui. A
+opera em \textbf{catorze} lugares, e é por eles que ela se reparte aqui. A
 \textbf{álgebra} constrói: a dobra, as duas faces, os dois símbolos, a lista, a
 multiplicidade, a folga, a base ortonormal, o par $\zeta/\mu$, a transformada e a
 escada --- e dá à vizinhança a sua base, que é um conjunto de geradores. A
 \textbf{topologia} conta o que a construção identifica: a vizinhança já sem os
 geradores, a ultramétrica que particiona, a característica que lê a dobra em
 ciclos, o grau que proíbe, o duomorfismo, e a folga vista pelos dois mapas. A
-\textbf{análise} faz o encaixe terminar, e dá o corte e o número $\pi$. A
+\textbf{análise} faz o encaixe terminar, e dá o corte e o número $\pi$. O
+\textbf{fractal} organiza a composição: o corpo canónico é Alonzo; Cantor, Julia,
+Viviani, a auto-semelhança e o regime tropical são fenómenos no suporte que
+têm. A
 \textbf{geometria} realiza: o semicírculo, o hipercubo, a linha de Pascal e o
 dragão. A \textbf{mecânica} põe a construção a
 correr: o ciclo, a lei local do vértice e da aresta, o levantamento, o período e
@@ -135,9 +138,10 @@ com o rendimento a sair do $\oint$ fechado, o custo a ser a dobra, a segunda lei
 valer de \emph{um} lado, e a taxa de expansão a ser a régua invertida. E as
 \textbf{redes}: o neurónio como cisão e soma, a sobreposição como prefixo comum,
 a interferência como dobra, e as duas torres --- a que mede e a que ordena.
-A gramática que \textbf{relaciona} e \textbf{processa} os treze não é um
-14º lugar: é o \textbf{Corpo Universal} (§\ref{fis:universal}),
-intermediário operacional $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$. O catálogo
+A gramática que \textbf{relaciona} e \textbf{processa} as Partes não é
+ela própria uma Parte: é o \textbf{Corpo Universal} (§\ref{fis:universal}),
+intermediário operacional $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$. Não decide
+quantos capítulos existem. O catálogo
 regista; não decide. O Universal não promove evidência a estrutura.
 
 \medskip\noindent\textbf{O alcance.} De um operador com duas equações e de uma
@@ -210,7 +214,8 @@ Até onde chega um passo? & a uma aresta --- e o grau proíbe o atalho & Teor.~\
 Donde vem a velocidade máxima? & de a régua fechar: é meia volta, o ponto fixo & Teor.~\ref{fis:thm:meiavolta} \\
 O que classifica um sistema sem perda? & $\Delta$, e não o traço & Teor.~\ref{fis:thm:leidisc} \\
 Que ordens admite uma rede? & $\{1,2,3,4,6\}$, e nunca $5$ & Lema~\ref{fis:lem:cristal} \\
-O Corpo Universal, o que é? & $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$; consome o espaço; \textbf{não} é o 14º & §\ref{fis:universal} \\
+O Corpo Universal, o que é? & $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$; consome o espaço; \textbf{não} é uma Parte & §\ref{fis:universal} \\
+O que a Parte Fractal realiza? & Corpo Alonzo; fractal/tropical são fenómenos, não magmas novas & §\ref{fis:alonzo} \\
 $\mathcal{U}$ é o catálogo? & não: $\mathcal{U}\neq$ catálogo $\neq\operatorname{INGEST}$ & Def.~\ref{fis:def:U} \\
 A base de $X$? & $e_k=2^{k}=$ Lei $k$; $\dim=8$; não há Lei~8 & Teor.~\ref{fis:thm:base}; §\ref{fis:neuronio} \\
 $X^{*}$ é $\mathbf{Duo}$? & não: $X^{*}\neq V^{*}\neq\mathbf{Duo}$ & Def.~\ref{fis:def:U},~\ref{fis:def:dual} \\
@@ -313,14 +318,14 @@ que acontece quando a equação do ponto fixo não fecha no corpo onde a órbita
 corre.
 
 % ═══════════════════════════════════════════════════════════════════════════
-\section*{O Corpo Universal --- não é o décimo-quarto lugar}\label{fis:universal}
+\section*{O Corpo Universal --- não é uma Parte}\label{fis:universal}
 \addcontentsline{toc}{section}{O Corpo Universal}
 
 \begin{definicao}[Corpo Universal]\label{fis:def:U}
 O \textbf{Corpo Universal} $\mathcal{U}$ consome o espaço já construído
 neste documento (Def.~\ref{fis:def:doisandares}, Def.~\ref{fis:def:dual},
-Teor.~\ref{fis:thm:base}) e opera nele. Não contém os treze lugares.
-Não é o 14º lugar. Não é o catálogo.
+Teor.~\ref{fis:thm:base}) e opera nele. Não contém as Partes.
+Não é uma Parte. Não decide a lista. Não é o catálogo.
 \[
 \boxed{\;\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})\;}
 \]
@@ -333,6 +338,20 @@ $\mathsf{Aut}$ processa o vector $G\in V$ (Teor.~\ref{fis:thm:mult}).
 \[
 \boxed{\;\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}\;}
 \]
+Papéis, e não se fundem:
+\[
+\boxed{\;
+\begin{array}{c}
+\mathcal{U}\text{ (gramática / reconhecimento)}\\[2pt]
+\longrightarrow\\[2pt]
+\text{Física (construção / existência)}\\[2pt]
+\longrightarrow\\[2pt]
+\text{Catálogo (auditoria / registo)}
+\end{array}
+\;}
+\]
+A Física constrói. \(\mathcal{U}\) processa e valida o contrato.
+O catálogo regista sem inventar estrutura.
 \[
 \boxed{\;X^{*}\neq V^{*}\neq\mathbf{Duo}.\;}
 \]
@@ -367,13 +386,18 @@ autorizada?} --- é respondida pelo autómato $\operatorname{INGEST}$.
 \[
 \boxed{\;\operatorname{INGEST}\text{ é autómato, não explorador}\;}
 \]
+A regra não menciona o capítulo: o custo de auditar a família é o pior
+passo na ultramétrica (\code{univ:def:metainducao}), não a soma de
+auditorias. Sem deliberação: evidência do contrato \(\to\)
+\texttt{realizado}; incompatível \(\to\) \texttt{N/A}; busca sem prova
+de ausência \(\to\) \texttt{não localizada}.
 \[
 \boxed{\;\mathbf{Duo}\neq\mathcal{C}^{\mathrm{op}}\;}
 \]
 A categoria oposta inverte o sentido da seta. $\mathbf{Duo}$ pode
 permanecer no mesmo suporte e trocar as operações
 $(\oplus,\otimes)\to(\otimes,\oplus)$ (Def.~\ref{fis:def:duomorf}).
-2-células: \texttt{não localizada}. O percurso dos treze é execução do
+2-células: \texttt{não localizada}. O percurso das Partes é execução do
 autómato, não 2-morfismo.
 \[
 \boxed{\;
@@ -425,9 +449,82 @@ estrutura $C^{\infty}$ escrita no lugar; se não estiver, o slot é
 \texttt{não localizada}, não \texttt{N/A}.
 \end{observacao}
 
-\noindent Daqui em diante os treze lugares \textbf{não} inventam
+\noindent Os slots não se fundem:
+\[
+\boxed{\;\mathrm{I}_{4}=\mathrm{GLH}
+\qquad
+\mathrm{I}_{11}=\text{morfismos / estado}\;}
+\]
+\(\operatorname{Isom}_{\mu}\) não invade \(\mathrm{I}_{4}\). Preservar
+não é trocar. O invariante abstracto pede contrato, e o contrato pede
+realização no suporte --- cada uma com a sua identidade
+(\texttt{corpo\_universal.tex}).
+
+\begin{observacao}[três canónicos]\label{fis:obs:tres-canonicos}
+\[
+\boxed{\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\operatorname{Star}(K)=\{x:x^{2}=x+1\}
+\quad\neq\quad
+\text{o que cada Parte conserva}
+\;}
+\]
+Isto é a proibição de \(\mathrm{I}_{0}\) sobre a palavra «estrela»:
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\textwidth}
+                >{\raggedright\arraybackslash}p{0.32\textwidth}
+                >{\raggedright\arraybackslash}p{0.28\textwidth}@{}}
+\toprule
+nome & o que é & slot \\
+\midrule
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\)
+  & estrutural; bit \(a=1\); troca \((\oplus,\otimes)\mapsto(\otimes,\oplus)\)
+  & gramática; I7 se o suporte o admitir \\
+\(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\)
+  & ponto fixo de um \emph{elemento} neste \(S\)
+  & \(\mathrm{I}_{9}\) --- não \(x^{2}=-1\) \\
+factor / métrica local
+  & o contrato que o suporte sustenta (p.ex.\ \(\lvert\det DT\rvert=1\) em \(\operatorname{Isom}_{\mu}\))
+  & \(\mathrm{I}_{11}\) (Mor); \textbf{não} \(\mathrm{I}_{4}\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Confundi-las é a analogia fácil que \(\mathrm{I}_{0}\) proíbe.
+\begin{center}\small
+\begin{tabular}{@{}llp{0.42\textwidth}@{}}
+\toprule
+camada & autoridade & nesta Física \\
+\midrule
+\(\mathcal{U}\)
+  & gramática
+  & consome o espaço; não é uma Parte (Def.~\ref{fis:def:U}) \\
+N--R
+  & cadeia \(F_8\to\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}\to\mathbb{R}\)
+  & \textbf{não} é esta Física: papers \texttt{naturais}--\texttt{reais}. \(\mathcal{D}=\texttt{N/A}\) \\
+Física
+  & o construído nas Partes
+  & gato \(\lvert\det\otimes\rvert=1\); contagem \(\sum G=\lvert I\rvert\); dragão \(T+T^{*}=1\); Alonzo na Parte Fractal; \ldots \\
+\bottomrule
+\end{tabular}
+\end{center}
+O que \textbf{recebe} (Carnot, continuidade, aceleração) entra marcado e
+não vira canónico desta Física. O bestiário não legisla. A estrela da
+Topologia é \(x^{2}=x+1\) no elemento, \textbf{não}
+\(\operatorname{Star}(\mathcal{U})\).
+\end{observacao}
+
+\noindent Daqui em diante as Partes \textbf{não} inventam
 metodologia. Correm as mesmas operações e consultam os mesmos contratos
-de mapa. O que muda é o suporte, e a evidência.
+de mapa. O que muda é o suporte, e a evidência. \(\mathcal{U}\) não decide
+quais capítulos existem.
+\[
+\boxed{\;
+\text{catorze palcos de exposição}
+\;\neq\;
+\text{catorze corpos isolados}
+\;}
+\]
 
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Álgebra}
@@ -2809,8 +2906,10 @@ potências de dois sem se copiarem um ao outro.
 indução, lida sobre o objecto em vez de sobre a construção.} O
 Teor.~\ref{fis:thm:tecidos} diz que cada degrau é o \emph{mesmo} passo aplicado
 ao anterior; dizer que o objecto é auto-semelhante é dizer exactamente isso, e
-mais nada. \emph{Não há aqui um conceito novo}, há a mesma álgebra a repetir-se,
-e é por isso que ela cabe nesta Parte e não numa à parte.
+mais nada. \emph{Não há aqui um conceito novo}, há a mesma álgebra a repetir-se.
+A identidade é desta Parte; o estudo organizado --- composição, Cantor, Julia,
+Viviani, dimensão como fenómeno, regime tropical --- está na Parte Fractal
+(Corpo canónico: Alonzo, §\ref{fis:alonzo}).
 \[
 \boxed{\;\text{o passo é um só; \textbf{auto-semelhante} é o nome do objecto que ele constrói}\;}
 \]
@@ -8173,6 +8272,191 @@ que qualquer uma das três somas esteja errada.}
 \colunas{Lema~\ref{fis:lem:geo}; Cor.~\ref{fis:cor:medias}; Teor.~\ref{fis:thm:corte},~\ref{fis:thm:serie}; Prop.~\ref{fis:prop:pi}}
         {a AGM, o rastro $(m,\delta)$, a raiz com uma face presa, $\pi$ como tempo}
         {\code{tests/meio.c} §M8; \code{tests/agm.c} §A1--§A3; \code{tests/pgwire.c} §W217; \code{tests/aranha\_n.c} §AN11}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\part{Fractal}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\section{Porque esta parte vem aqui}\label{fis:alonzo}
+
+\noindent A Álgebra construiu o passo. A Análise fez o encaixe terminar.
+A Geometria ainda não saltou à figura. \textbf{Aqui organiza-se a composição}
+--- o que itera, o que se parece consigo, o que tropicaliza ---
+\emph{sem inventar magma}.
+\[
+\boxed{\;
+\text{Parte --- Fractal / Tropical}
+\qquad
+\text{Corpo canónico: Alonzo}
+\;}
+\]
+\[
+\boxed{\;
+\text{Alonzo é o corpo canónico}
+\;\neq\;
+\text{Fractal é o nome da Parte}
+\;}
+\]
+O nome provisório da Parte é \textbf{Fractal / Tropical}. Tropical é
+regime, não identidade com fractal. O corpo canónico \textbf{não} se
+renomeia.
+\[
+\boxed{\;
+\text{Parte Física (ontologia)}
+\;\xrightarrow{\text{realiza}}\;
+\text{Alonzo (corpo canónico)}
+\;\xrightarrow{\operatorname{INGEST}}\;
+\mathcal{U}
+\;\longrightarrow\;
+\text{Catálogo}
+\;}
+\]
+\(\mathcal{U}\) não decide que esta Parte existe. Fornece a língua
+operacional comum. O catálogo pergunta \emph{qual construção é esta};
+esta Parte pergunta \emph{onde se estuda}. Lê o calibrador Alonzo já
+fechado: não reabre a Álgebra, não infla \(\mathrm{I}_{0}\).
+
+\begin{observacao}[identidade \(\neq\) exposição]\label{fis:obs:fractal-i0}
+\(\mathrm{I}_{0}\) sobre o nome «fractal» / «tropical» \textbf{não mudou de
+veredicto}: não há magma nova. Cantor / Julia / Viviani \(\subset\) Alonzo.
+A auto-semelhança \textbf{é} a indução da Álgebra (Teor.~\ref{fis:thm:dimcorte},
+Teor.~\ref{fis:thm:fractalnegro}). O tropical \((\max,+)\) é o
+\textbf{entrópico} do bestiário; a Termodinâmica não o toma.
+O que esta Parte faz é \textbf{exposição}: o mesmo Alonzo ganha lugar
+próprio, sem fundir os homónimos.
+Não se afirma \(\text{fractais}=\text{álgebra tropical}\) nem que um
+conjunto de Julia seja um corpo.
+\end{observacao}
+
+\section{O corpo da composição}\label{fis:alonzo-corpo}
+
+\begin{definicao}[Corpo Alonzo]\label{fis:def:alonzo}
+O \textbf{corpo de Alonzo} é o corpo da \emph{composição}. A operação é
+iterar,
+\[
+\boxed{\;f_c(z)=z^{2}+c\;}
+\]
+--- o \(z\mapsto z^{2}\) é a dobra do tecido, o \(+c\) é a estaca. A
+régua é a \textbf{cruz}
+\[
+(x\oplus x^{\dagger},\,x\otimes x^{\dagger})=(\text{soma},\,\text{produto}),
+\qquad
+x^{\dagger}=-1/x.
+\]
+Os dois lados são os goldens \(\varphi\) e \(\psi\), raízes de
+\(x^{2}=x+1\) (Teor.~\ref{fis:thm:estrela} com \(m=1\)):
+\[
+\boxed{\;\text{cantor}=\varphi,\qquad\text{julia}=\psi,\qquad\varphi\psi=-1\;}
+\]
+A cruz é invariante pela troca. Hexal \(6=\mathrm{lcm}(2,3)\) é
+interface aritmética, \textbf{não} duomorfismo.
+\[
+\boxed{\;\dagger\neq\mathcal{D}\;}
+\]
+\end{definicao}
+
+\noindent A estrela é \textbf{do elemento} nesta construção, não
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\). \(\mathcal{D}\) na cruz
+troca \((\oplus,\otimes)\); o par Caelum é outro suporte
+(\texttt{N/A} como o mesmo \(\mathcal{D}\)).
+
+\begin{teorema}[Cantor e Julia: o mesmo par, duas cartas]\label{fis:thm:alonzo-par}
+O shift \(\theta\mapsto 2\theta\) (Cantor, aditivo) e o quadrado
+\(z\mapsto z^{2}\) (Julia, multiplicativo) conjugam-se por
+\(z=e^{2\pi i\theta}\): é o contar\(\leftrightarrow\)integrar do
+Teor.~\ref{fis:thm:central} na dinâmica quadrática.
+\texttt{ISO-DUAL} por essa \(\phi\), \textbf{não} \texttt{AUTO-DUAL} da
+cruz. Os regimes \(c\) no Mandelbrot (Julia conexo) e \(c\) fora
+(poeira de Cantor) são os dois lados da mesma estaca, não dois corpos.
+A leitura dinâmica na Mecânica (§\ref{fis:periodo}) é a mesma órbita
+lida como período.
+\end{teorema}
+
+\begin{proof}
+\(e^{2\pi i\cdot 2\theta}=(e^{2\pi i\theta})^{2}\). O ponto fixo de
+\(z^{2}+c\) cumpre \(z^{2}=z-c\); em \(c=-1\) é \(\varphi^{2}=\varphi+1\),
+o Teor.~\ref{fis:thm:estrela} com \(s=1\), \(p=-1\). A estaca
+\(\dagger=-1/x\) troca as duas raízes e deixa a cruz invariante: Vieta
+dá soma \(1\) e produto \(-1\).
+\end{proof}
+
+\medido{\code{tests/cantor\_julia\_dual.c}: conjugação exacta em
+\(\mathbb{Z}[i]\); áureo em \(c=-1\); período \(2\) contra poeira em
+\(c=-3\).}
+
+\begin{teorema}[Viviani: o mesmo par, determinante \(+1\)]\label{fis:thm:viviani}
+A curva de Viviani é o par dual desta Parte com o sinal do
+determinante trocado. Da esfera \(x^{2}+y^{2}+z^{2}=4a^{2}\) e do
+cilindro \((x-a)^{2}+y^{2}=a^{2}\),
+\[
+\boxed{\;z^{2}=2a\,(2a-x)\;}
+\]
+Os ramos \(\pm z\) são o par: soma \(0\), produto \(-z^{2}\). A
+recorrência da dobra é
+\[
+t_k=m\,t_{k-1}-d\,t_{k-2},
+\qquad
+\begin{array}{ll}
+d=-1 & \text{recta (hiperbólica)}\\
+d=+1 & \text{Viviani (rotação)}
+\end{array}
+\]
+Não é um terceiro corpo: é Cantor/Julia com \(d=+1\).
+\end{teorema}
+
+\begin{proof}
+Subtrair as duas quádricas dá o encaixado. A troca \(z\mapsto -z\) é a
+dobra da Def.~\ref{fis:def:op} no par de ramos. O sinal de \(d\) é o
+do determinante da matriz da recorrência: \(-1\) cresce (corte), \(+1\)
+roda (meio-ângulo). É a mesma família metálica do
+Teor.~\ref{fis:thm:estrela}, lida no ramo próprio.
+\end{proof}
+
+\section{Fenómenos, não magmas}\label{fis:alonzo-fenomenos}
+
+\noindent Cada construção nesta Parte apresenta-se pelo suporte que
+\textbf{tem}.
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.50\textwidth}@{}}
+\toprule
+fenómeno & suporte, e o que não é \\
+\midrule
+auto-semelhança / dimensão
+  & indução da Álgebra (Teor.~\ref{fis:thm:dimcorte}). O corte \(k=b^{s}\)
+    já está construído; aqui lê-se como fenómeno de Alonzo, não como
+    magma nova \\
+fractal negro
+  & o par \(\{S,S^{\vee}\}\) (Teor.~\ref{fis:thm:fractalnegro}): o claro
+    repete a forma, o negro conserva a diferença. Invariante do par,
+    não Duo de Alonzo \\
+tropical \((\max,+)\)
+  & regime idempotente. Já é o \textbf{entrópico} do bestiário.
+    \textbf{Não} magma desta Parte. Termodinâmica I0: não se toma \\
+conjunto de Julia \(J_c\)
+  & bordo da órbita de \(f_c\). \textbf{Não} é um corpo. A composição
+    \(f_{c_1}\circ f_{c_2}\) nas dinâmicas é \textbf{monóide}
+    (associativa, não comutativa, sem inversos) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O «corpo tropical» que declara o corpo \(=\mathbb{R}\) é a
+cadeia N--R, outro canónico. O computador fractal (subshift / IFS) é
+atrator: homónimo do Teor.~\ref{fis:thm:dimcorte}, não magma.
+
+\[
+\boxed{\;
+\text{Cantor / Viviani / Julia}
+\;\subset\;
+\text{Alonzo}
+\;}
+\]
+
+\colunas{Def.~\ref{fis:def:alonzo}; Teor.~\ref{fis:thm:alonzo-par},~\ref{fis:thm:viviani},~\ref{fis:thm:dimcorte},~\ref{fis:thm:fractalnegro},~\ref{fis:thm:estrela},~\ref{fis:thm:central}}
+        {a cruz da composição; o par Cantor/Julia; Viviani \(d=+1\); dimensão como corte}
+        {\code{tests/cantor\_julia\_dual.c}; \code{tests/fractal.c}; \code{tests/negro.c}}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Geometria}

@@ -98,18 +98,36 @@ par & #8\\
 
 
 \begin{abstract}
-Este é o \emph{embaixo} da estratégia: a \code{fisica.tex} guarda a teoria global --- o corpo
-autossimilar, a dualidade, o duomorfismo, os teoremas que já estão provados --- e este catálogo.
-Este volume \textbf{não} compete com ela: especializa esses teoremas aos corpos já escritos e deriva leis
-complementares. Duas camadas, a mesma gramática: a cadeia canónica
-$\mathbb{N}\xrightarrow{\text{opostos}}\mathbb{Z}\xrightarrow{\text{quocientes}}\mathbb{Q}\xrightarrow{\text{completação}}\mathbb{R}$
-(estatuto crescente, não quatro corpos iguais), as construções especiais do bestiário,
-e o \textbf{Corpo Universal} (\code{corpo\_universal.tex};
-\code{fis:universal}):
-$(X,X^{*},\mathsf{Mor},\mathsf{Aut})$, intermediário operacional, não supercorpo.
-$\mathcal{U}\neq$ catálogo $\neq\operatorname{INGEST}$.
-Este volume consome o túplo de $\operatorname{INGEST}$ --- não decide
+Este é o \emph{embaixo} da estratégia: a \code{fisica.tex} guarda o
+\textbf{construído} nas catorze Partes; \code{corpo\_universal.tex} guarda a
+\textbf{gramática} \(\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})\);
+os papers \code{naturais.tex}--\code{reais.tex} guardam a cadeia
+\textbf{N--R}. Este volume \textbf{não} compete com nenhum dos três:
+regista e classifica. Três canónicos, e não se copiam
+(\S\ref{cat:tres-canonicos}):
+\[
+\boxed{\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\operatorname{Star}(K)=\{x:x^{2}=x+1\}
+\quad\neq\quad
+\text{o que cada Parte conserva}
+\;}
+\]
+Papéis:
+\[
+\boxed{\;
+\mathcal{U}\text{ (gramática)}
+\;\longrightarrow\;
+\text{Física (construção)}
+\;\longrightarrow\;
+\text{Catálogo (auditoria)}
+\;}
+\]
+\(\mathcal{U}\neq\) catálogo \(\neq\operatorname{INGEST}\).
+Este volume consome o túplo de \(\operatorname{INGEST}\) --- não decide
 «parece isomorfo». O Universal não promove evidência a estrutura.
+A cadeia \(\mathbb{N}\to\mathbb{R}\) não é régua do bestiário.
 Um por entrada, com o que se mediu e com que resíduo.
 
 Nada aqui é ilustração: a bateria monta a sua lista a partir dos papers, e \emph{o que não é
@@ -163,18 +181,118 @@ diferença. É o que este volume é para os outros dois. \textbf{A origem não �
 tempo --- é aquilo em relação a que todo o resto é medido.}
 
 \medskip
-\noindent A primeira família canónica é a cadeia
-$\mathbb{N}\xrightarrow{\text{opostos}}\mathbb{Z}\xrightarrow{\text{quocientes}}\mathbb{Q}\xrightarrow{\text{completação}}\mathbb{R}$
+\noindent A primeira família canónica \textbf{N--R} é a cadeia
+\(\mathbb{N}\xrightarrow{\text{opostos}}\mathbb{Z}\xrightarrow{\text{quocientes}}\mathbb{Q}\xrightarrow{\text{completação}}\mathbb{R}\)
 (\S\ref{cat:numericos}) --- construções de estatuto algébrico crescente, não
-quatro corpos do mesmo tipo. O bestiário que a segue --- Alonzo, Caelum, rotor, Omnitrix ---
-não se apaga: é a segunda camada. A fusão por estrela, abaixo, é o gancho operacional,
-não a ordem de canonicidade.
+quatro corpos do mesmo tipo, \textbf{não} a régua do bestiário.
+O bestiário que a segue --- Alonzo, Caelum, rotor, Omnitrix ---
+não se apaga: é realização classificada por \(\mathcal{U}\), não canónico
+novo. A fusão por estrela, abaixo, é o gancho operacional do
+\textbf{elemento} (\(x^{2}=x+1\)), não \(\operatorname{Star}(\mathcal{U})\).
+
+\section*{Três canónicos}
+\addcontentsline{toc}{section}{Três canónicos}
+\label{cat:tres-canonicos}
+
+\[
+\boxed{\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\operatorname{Star}(K)=\{x:x^{2}=x+1\}
+\quad\neq\quad
+\text{o que cada Parte conserva}
+\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}llp{0.48\textwidth}@{}}
+\toprule
+camada & autoridade & o que este volume faz \\
+\midrule
+\(\mathcal{U}\)
+  & gramática (\code{corpo\_universal.tex})
+  & consome o túplo de \(\operatorname{INGEST}\); não legisla estrutura \\
+N--R
+  & cadeia (\code{naturais.tex}--\code{reais.tex})
+  & regista opostos / quocientes / completação; \(\mathcal{D}=\texttt{N/A}\) \\
+Física
+  & o construído (\code{fisica.tex}, catorze Partes)
+  & exporta as fichas de ingestão já fechadas \\
+bestiário
+  & realização classificada por \(\mathcal{U}\)
+  & Alonzo \textbf{também} é Parte Fractal; Caelum, rotor, Omnitrix, Neural, EM-interface --- \textbf{não} canónico novo \\
+\bottomrule
+\end{tabular}
+\end{center}
+Isto é a proibição de \(\mathrm{I}_{0}\) sobre a palavra «estrela»:
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) (bit \(a=1\);
+troca das operações) \(\neq\)
+\(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\) (elemento; slot \(\mathrm{I}_{9}\))
+\(\neq\) o factor que o suporte conserva (p.ex.\ \(\lvert\det DT\rvert=1\)
+em \(\operatorname{Isom}_{\mu}\); \(\mathrm{I}_{11}\), não \(\mathrm{I}_{4}\)).
+Confundi-las é a analogia fácil que \(\mathrm{I}_{0}\) proíbe.
+Cadeia conceptual:
+\[
+\boxed{\;
+\text{invariante abstracto}
+\to
+\text{contrato}
+\to
+\text{realização no suporte}
+\;}
+\]
+Papéis:
+\[
+\boxed{\;
+\begin{array}{c}
+\mathcal{U}\text{ (gramática / reconhecimento)}\\[2pt]
+\longrightarrow\\[2pt]
+\text{Física (construção / existência)}\\[2pt]
+\longrightarrow\\[2pt]
+\text{Catálogo (auditoria / registo)}
+\end{array}
+\;}
+\]
+A Física constrói. \(\mathcal{U}\) processa e valida o contrato.
+Este volume regista sem inventar estrutura.
+\[
+\boxed{\;
+\text{Alonzo é o corpo canónico}
+\;\neq\;
+\text{Fractal é o nome da Parte}
+\;}
+\]
+\[
+\boxed{\;
+\text{catorze palcos}
+\;\neq\;
+\text{catorze corpos}
+\;}
+\]
+\[
+\boxed{\;
+\text{Parte Física}
+\;\xrightarrow{\text{realiza}}\;
+\text{Corpo canónico}
+\;\xrightarrow{\operatorname{INGEST}}\;
+\mathcal{U}
+\;\longrightarrow\;
+\text{Catálogo}
+\;}
+\]
+\(\mathcal{U}\) não decide quais capítulos existem.
+Universalidade \(\neq\) homogeneização.
+O calibrador (\S\ref{cat:calibrador}) é a \textbf{ficha} (como se preenche),
+não a autoridade da Física nem de \(\mathcal{U}\).
+
 
 
 \section*{Fundir corpos: a estrela, e é assim que se faz}
 \addcontentsline{toc}{section}{Fundir corpos: a estrela, sem limite}
 
-\noindent \textbf{Isto abre o catálogo porque é operacional daqui para a frente.} Todo o bestiário
+\noindent \textbf{Esta estrela é do elemento} --- \(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\)
+e a interface \(\gamma\) da fusão --- \textbf{não}
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\)
+(\S\ref{cat:tres-canonicos}). Todo o bestiário
 que se segue são corpos; a pergunta que os liga --- \emph{como se fundem dois num maior} --- tem
 uma resposta única, e não é a clássica. \textbf{Fundir dois corpos é ligá-los por uma estrela}, e o
 procedimento é o mesmo para qualquer par, de qualquer grau.
@@ -318,6 +436,14 @@ $6=1+2+3=1\cdot2\cdot3$, \textbf{soma$=$produto} dos divisores (\emph{Teoria}, o
 no par cantor/julia (Vieta: soma $1$, produto $-1$, o inversor), e é \textbf{simétrico} --- a estaca
 $x^{\dagger}=-1/x$ troca-os e a cruz $(x\oplus x^{\dagger},x\otimes x^{\dagger})$ fica invariante.
 
+\noindent\textit{camada:} bestiário \textbf{e} Parte Fractal --- a Física
+realiza (\code{fis:def:alonzo}); o catálogo classifica.
+\(\operatorname{Star}\) do elemento \(\neq\operatorname{Star}(\mathcal{U})\).
+\[
+\boxed{\;\text{Cantor / Viviani / Julia}\;\subset\;\text{Alonzo}\;}
+\]
+O nome \textbf{Alonzo} fica. Fractal / tropical são fenómenos da Parte,
+não magmas novas (\S\ref{cat:i0:fractal}, \S\ref{cat:ingestao:fractal}).
 \fichaconstrucao{Alonzo}
   {composição: iterar $f_c(z)=z^{2}+c$; cruz $(\oplus,\otimes)$ com a estaca}
   {$\oplus$ e $\otimes$ na cruz; iterar}
@@ -404,6 +530,7 @@ caminhos batem componente a componente, resíduo $0$, e a mutação de UM bit nu
 por $\mathbf{256}$ de $256$ componentes --- o selo é global, não local
 (\code{tests/tex.c}~§X15; a volta exacta da transformada em \code{tests/relogio\_curva.c}~§R8).}
 
+\noindent\textit{camada:} bestiário --- classificado por \(\mathcal{U}\); uma operação \(\Rightarrow\mathcal{D}\) \texttt{N/A}.
 \fichaconstrucao{Caelum}
   {esqueleto: malha $\otimes$; espectro em $\mathbb{Z}_{65537}$, $N=2^{8}$}
   {$\otimes$ (a malha); a transformada universal do anel}
@@ -1122,13 +1249,14 @@ canónicos; cada ficha declara o estatuto usual e não o apaga:
 \end{array}
 \;}
 \]
-A teoria é a de \code{fisica.tex}; as realizações são
+A teoria construída é a de \code{fisica.tex}; as realizações \textbf{N--R} são
 \code{papers/naturais.tex}, \code{papers/inteiros.tex},
 \code{papers/racionais.tex}, \code{papers/reais.tex}.
-O bestiário abaixo (Alonzo, Caelum, rotor, Omnitrix, \ldots) é a segunda
-camada. A gramática é a mesma. \(\mathcal{D}\) \textbf{não} é necessário para
+O bestiário abaixo (Alonzo, Caelum, rotor, Omnitrix, \ldots) é realização
+classificada por \(\mathcal{U}\), \textbf{não} o segundo canónico.
+A gramática de ficha é a mesma. \(\mathcal{D}\) \textbf{não} é necessário para
 completar uma construção: cada passagem desta cadeia fecha por um mecanismo
-próprio (opostos, localização, completação). Essa régua é o calibrador
+próprio (opostos, localização, completação). Essa régua de ficha é o calibrador
 (\S\ref{cat:calibrador}).
 
 \noindent\textbf{Régua uniforme} --- só se uma etapa existir ela recebe
@@ -1192,6 +1320,7 @@ A construção é a de \code{papers/naturais.tex}: $F_1=\mathbb{F}_2\to F_8$ por
 dobras (\code{naturais def:dobra}), depois o transporte
 (\code{naturais thm:transporte}). Não é Peano: Peano é banco de teste.
 Não se introduzem inversos negativos nem divisão.
+\noindent\textit{camada:} N--R.
 \fichaconstrucao{Corpo Natural}
   {\textbf{estatuto: sem corpo.} $F_1\to F_8$ por $F_{2w}=F_w\oplus\sigma F_w$; $\mathbb{N}|_{\texttt{Word\_8}}=F_8+$transporte}
   {$+$ de $\mathbb{N}$ reconstruída; $\times$ por deslocamento e soma. $\oplus,\otimes$ de $F_8$ são do corpo finito, não de $\mathbb{N}$}
@@ -1213,6 +1342,7 @@ Não se introduzem inversos negativos nem divisão.
 A construção é a de \code{papers/inteiros.tex}: $\mathbb{Z}=\mathbb{N}^{2}/{\sim}$
 com $a+d=b+c$ (\code{inteiros thm:z}). $\mathbb{N}$ entra por Peano
 (\code{inteiros def:peano}); o envelope vem do degrau anterior.
+\noindent\textit{camada:} N--R.
 \fichaconstrucao{Corpo Inteiro}
   {\textbf{estatuto: domínio de integridade.} $\mathbb{N}^{2}/{\sim}$, soma cruzada; $\Phi([(a,b)])=a-b$}
   {$\oplus,\otimes$ no quociente (anel). Oposto $[(b,a)]$}
@@ -1234,6 +1364,7 @@ com $a+d=b+c$ (\code{inteiros thm:z}). $\mathbb{N}$ entra por Peano
 A construção é a de \code{papers/racionais.tex}:
 $\mathbb{Q}=\operatorname{Frac}(\mathbb{Z})$, $(a,b)\sim(c,d)\iff ad=bc$
 (\code{racionais thm:q}).
+\noindent\textit{camada:} N--R.
 \fichaconstrucao{Corpo Racional}
   {\textbf{estatuto: corpo.} $V_{\mathrm{rat}}/{\sim}$, $b\neq0$; $\Psi([(a,b)])=a/b$}
   {soma $(ad+bc,bd)$; produto $(ac,bd)$. Inverso $[(b,a)]$ se $a\neq0$}
@@ -1259,6 +1390,7 @@ caminhos, a mesma classe (\code{reais thm:tres}). Completude
 (\code{reais thm:sup}) e unicidade (\code{reais thm:unico}) \textbf{depois}
 da construção, não como definição. Não se substitui por «$\mathbb{R}$ é o
 corpo completo dos racionais».
+\noindent\textit{camada:} N--R.
 \fichaconstrucao{Corpo Real}
   {\textbf{estatuto: corpo ordenado completo.} cortes $(A,B)/{\sim}$ sobre $\mathbb{Q}$; Möbius e fracção contínua = a mesma classe}
   {$+$ e $\times$ descem ao quociente (\code{reais thm:desce})}
@@ -1307,9 +1439,9 @@ via encaixes, não $A+B$ na lib.
 \addcontentsline{toc}{subsection}{O calibrador}
 \label{cat:calibrador}
 
-\noindent A cadeia canónica não é mais quatro fichas: é a \textbf{régua} do
-catálogo. O ponto que ela prova por construção, e que o bestiário abaixo não
-pode desfazer:
+\noindent A cadeia N--R não é mais quatro fichas: é o \textbf{canónico da
+família numérica}, não a régua do catálogo nem de \(\mathcal{U}\). O ponto
+que ela prova por construção, e que o bestiário abaixo não pode desfazer:
 \[
 \boxed{\;
 \text{construção completa}
@@ -1328,7 +1460,9 @@ Cada andar ganha exactamente a operação estrutural que lhe faltava:
 \mathbb{R}.
 \]
 Opostos, localização, completação. Nenhum destes mecanismos é duomorfismo.
-\code{fisica.tex} não se altera: o calibrador especializa, não legisla.
+\(\mathcal{D}=\texttt{N/A}\) na cadeia \textbf{satisfaz} \(\operatorname{INGEST}\)
+e \textbf{não} realiza Duo. \code{fisica.tex} não se altera: o calibrador
+preenche a ficha, não legisla.
 
 \noindent A estrela é o \textbf{teste transversal} da família, não uma taxonomia
 de dualidade:
@@ -1349,7 +1483,7 @@ Alonzo deriva a mesma equação na cruz via $\dagger=-1/x$.
 coincidência dos operadores. O rotor é outro caso: $x^{2}=-1$.
 
 \noindent Todo corpo novo --- Alonzo, Caelum, rotor, e os que vierem --- passa
-pela mesma sequência. Só se uma etapa existir ela recebe afirmação:
+pela mesma sequência de \textbf{ficha} (não pela autoridade N--R). Só se uma etapa existir ela recebe afirmação:
 \[
 \boxed{\;
 \begin{array}{rl}
@@ -1531,6 +1665,17 @@ X\simeq B^{8},\quad e_k=2^{k}=\text{Lei }k,\quad
 \texttt{catalogo.tex}
 \;}
 \]
+\[
+\boxed{\;
+\begin{array}{c}
+\mathcal{U}\text{ (gramática / reconhecimento)}\\[2pt]
+\longrightarrow\\[2pt]
+\text{Física (construção / existência)}\\[2pt]
+\longrightarrow\\[2pt]
+\text{Catálogo (auditoria / registo)}
+\end{array}
+\;}
+\]
 \code{fisica.tex} é autoridade sobre os corpos que existem
 (§\code{fis:universal}).
 Este volume \textbf{não} descobre a matemática. Recebe o túplo
@@ -1565,7 +1710,7 @@ Autómato $=$ como uma construção é processada.
 \(\operatorname{INGEST}\) é autómato, não explorador
 (\code{fis:algoritmo}, \code{fis:thm:mult}): sem deliberação;
 \texttt{não localizada} não vira \texttt{N/A} sem prova estrutural.
-2-células: \texttt{não localizada}. O percurso dos treze é execução
+2-células: \texttt{não localizada}. O percurso das Partes é execução
 do autómato, não 2-morfismo.
 A Física é o que foi construído. Este volume é o registo.
 \[
@@ -1628,18 +1773,28 @@ Saída: \texttt{fichaingestao} $\to$ calibrador $\to$
 \section*{Índice de realizações}\label{cat:indice}
 \addcontentsline{toc}{section}{Índice de realizações}
 
-\noindent Três camadas de \emph{conteúdo}, e o Universal à parte ---
-não se misturam:
+\noindent Três \textbf{autoridades}, e o catálogo como registo
+(\S\ref{cat:tres-canonicos}):
 \[
-\boxed{\;\code{fisica.tex}\;=\;\text{teoria global}\;}
+\boxed{\;
+\mathcal{U}=\text{gramática}
 \qquad
-\boxed{\;\code{papers/}\;=\;\text{construções independentes}\;}
+\mathrm{N{-}R}=\text{cadeia}
 \qquad
-\boxed{\;\code{catalogo.tex}\;=\;\text{registo}\;}
+\text{Física}=\text{o construído}
+\qquad
+\text{catálogo}=\text{o registo}
+\;}
 \]
-O quarto sítio, que \textbf{não} é capítulo do bestiário:
+Os ficheiros não são os canónicos:
 \[
-\boxed{\;\code{corpo\_universal.tex}\;=\;\mathcal{U}\text{ (mapas); }\operatorname{INGEST}\subset\mathcal{U}\;}
+\boxed{\;
+\code{corpo\_universal.tex}
+\;\neq\;
+\code{naturais.tex}{-}\code{reais.tex}
+\;\neq\;
+\code{fisica.tex}
+\;}
 \]
 Um capítulo \textbf{não} vira paper por existir. Se a Física já contém a
 construção, constrói-se lá e exporta-se a ficha. Se a construção é grande,
@@ -1654,14 +1809,12 @@ nomes anteriores são aliases/homónimos, não novos corpos.}
 \]
 O mapa decide, capítulo a capítulo, \emph{construir na Física} ou
 \emph{manter paper}. O nome canónico é \textbf{classificação do catálogo}
-(\S\ref{cat:mae}), não legislação sobre a Física: \code{fisica.tex} não se
-edita neste passo. Nome parecido \textbf{não} faz corpo.
+(\S\ref{cat:mae}), não legislação sobre a Física. Nome parecido \textbf{não} faz corpo.
 
-\noindent A ficha canónica (a preencher \emph{depois} da decisão, e só então)
-tem os campos: capítulo, corpo canónico, suporte, operações, construção,
-involução, $\operatorname{Star}$, $\mathcal{D}$, lei complementar, estatuto
-(teorema / definição / construção / medição / hipótese / fundamento pendente),
-correspondência (alias histórico, se houver).
+\noindent A ficha canónica tem os campos: \textbf{camada}
+(\(\mathcal{U}\) / N--R / Física / bestiário), capítulo, corpo canónico,
+suporte, operações, construção, involução, $\operatorname{Star}$,
+\(\mathcal{D}\), lei complementar, estatuto, correspondência.
 \[
 \text{lei complementar}
 \quad
@@ -1669,7 +1822,44 @@ correspondência (alias histórico, se houver).
 \quad
 \text{construção local}.
 \]
-Nenhuma etiqueta nova. O calibrador (\S\ref{cat:calibrador}) continua a régua.
+O calibrador (\S\ref{cat:calibrador}) preenche a ficha; não é a autoridade.
+
+\subsection*{Alinhamento às três camadas}
+
+\noindent Cada realização aponta para \textbf{uma} autoridade. Não se funde.
+{\footnotesize
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.14\textwidth}>{\raggedright\arraybackslash}p{0.54\textwidth}@{}}
+\toprule
+realização & camada & contrato / degrau / Parte \\
+\midrule
+\(\mathcal{U}\)
+  & gramática
+  & \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\); \(\lvert\det\rvert=1\); I4/I11. \textbf{Não} entra no bestiário \\
+Natural\(\to\)Real
+  & N--R
+  & transporte; opostos; quocientes; completação. \(\mathcal{D}=\texttt{N/A}\). \(\operatorname{Star}\) do elemento \\
+Álgebra \ldots Redes
+  & Física
+  & INGEST fechado (\S\ref{cat:bloco1}--\ref{cat:bloco3}). Não reabrir I0 \\
+Alonzo, Caelum, rotor, Omnitrix
+  & bestiário
+  & classificados por \(\mathcal{U}\); \(\operatorname{Star}(K)\) do elemento \(\neq\operatorname{Star}(\mathcal{U})\) \\
+quinze formas
+  & bestiário
+  & homónimos da Geometria; não o Corpo Geométrico \\
+Neural
+  & bestiário \(+\) Física
+  & Parte realizada; \(H\) candidato no bestiário \\
+EM-interface
+  & Física (interface)
+  & \S\ref{cat:bloco4}; \(\mathrm{lcm}/\mathrm{gcd}\) realiza I7, não canónico geral de \(\mathcal{U}\) \\
+toro \(T^{2}\)
+  & realização de \(\mathcal{U}\)
+  & palco de \(\lvert\det\rvert=1\); Duo \texttt{N/A} \\
+\bottomrule
+\end{tabular}
+\end{center}}
 
 \subsection*{A correspondência, lida nos ficheiros}
 
@@ -1683,9 +1873,11 @@ $c_S$ --- \emph{não} é a ficha de um corpo do bestiário.
 \toprule
 capítulo & construção (ficheiro) & entrada antiga no catálogo & correspondência \\
 \midrule
-Álgebra & Parte Álgebra; \code{papers/corpo\_algebrico.tex}; cadeia \code{naturais.tex}--\code{reais.tex} & cadeia $\mathbb{N}\to\mathbb{R}$; Alonzo; Omnitrix & o algébrico realiza $\mathbb{R}$ em $\mathbb{Q}(m\sqrt D)$. A cadeia realiza os números. \textbf{Não fundir} \\
+N--R & \code{papers/naturais.tex}--\code{reais.tex} & cadeia $\mathbb{N}\to\mathbb{R}$ & canónico N--R. \(\mathcal{D}=\texttt{N/A}\). \textbf{Não} é a Parte Álgebra \\
+Álgebra & Parte Álgebra; \code{papers/corpo\_algebrico.tex} & Omnitrix & o algébrico realiza $\mathbb{R}$ em $\mathbb{Q}(m\sqrt D)$. \textbf{Não} fundir com N--R. Alonzo $=$ Parte Fractal \\
 Topologia & Parte Topologia; \code{papers/corpo\_topologico.tex}; \code{papers/aranha.tex} (multiplicidade $G$, vizinhança) & o \emph{part} Topologia migrado & o paper é o palco ($\tau=-1$). Aranha constrói $G$. Homónimo interno \\
-Análise & Parte Análise; \code{papers/corpo\_analitico.tex}; \code{papers/reais.tex} (corte) & o \emph{part} Análise migrado & o paper é $\tau=+1$. O corte dos reais é a mesma construção, outro ficheiro \\
+Análise & Parte Análise; \code{papers/corpo\_analitico.tex} & o \emph{part} Análise migrado & o paper é $\tau=+1$. O corte dos reais é N--R (\code{reais.tex}), \textbf{não} este paper \\
+Fractal & Parte Fractal (\code{fis:alonzo}) & Alonzo (bestiário) & Corpo canónico Alonzo. Cantor/Julia/Viviani $\subset$ Alonzo. Tropical $=$ regime \\
 Geometria & Parte Geometria (hipercubo, dragão) & quinze formas; exterior & ficha exportada (\S\ref{cat:bloco1}). Formas $=$ homónimos. \code{lcs\_dobra.tex} é instância, não um corpo \\
 Mecânica & Parte Mecânica; \code{papers/aranha.tex} & motor; rotor & a aranha é o ciclo e a multiplicidade. Motor/rotor \textbf{não} se identificam com esta parte \\
 Gravitação & Parte Gravitação (campo $G$, $\mathfrak{m}=G-1$) & --- & ficha exportada (\S\ref{cat:bloco1}). $\mathcal{D}$ em $\mathcal{V}(x)$, não no entrópico. Sem paper \\
@@ -1731,11 +1923,11 @@ fundido e apagado; a autoridade da combinação é \code{redes.tex}.
 \toprule
 paper & capítulo de Física & no catálogo & estatuto \\
 \midrule
-\code{naturais.tex} & Álgebra (números) & Corpo Natural & construção; $\operatorname{Star}=\varnothing$ \\
-\code{inteiros.tex} & Álgebra & Corpo Inteiro & construção; domínio de integridade \\
-\code{racionais.tex} & Álgebra & Corpo Racional & construção; corpo, não completo \\
-\code{reais.tex} & Álgebra $+$ Análise (corte) & Corpo Real & construção; c.o.c.; $\operatorname{Star}=\{\varphi,\psi\}$ \\
-\code{corpo\_algebrico.tex} & Álgebra (tríade $\tau=0$) & --- (não fundir com a cadeia) & construção geométrica de $\mathbb{R}$ em $\mathbb{Q}(m\sqrt D)$ \\
+\code{naturais.tex} & \textbf{N--R} (não é Parte) & Corpo Natural & construção; $\operatorname{Star}=\varnothing$; \(\mathcal{D}=\texttt{N/A}\) \\
+\code{inteiros.tex} & \textbf{N--R} & Corpo Inteiro & construção; domínio de integridade; \(\mathcal{D}=\texttt{N/A}\) \\
+\code{racionais.tex} & \textbf{N--R} & Corpo Racional & construção; corpo, não completo; \(\mathcal{D}=\texttt{N/A}\) \\
+\code{reais.tex} & \textbf{N--R} (corte) & Corpo Real & construção; c.o.c.; $\operatorname{Star}=\{\varphi,\psi\}$. \textbf{Não} o paper analítico \\
+\code{corpo\_algebrico.tex} & Álgebra (tríade $\tau=0$) & --- (não fundir com N--R) & construção geométrica de $\mathbb{R}$ em $\mathbb{Q}(m\sqrt D)$ \\
 \code{corpo\_topologico.tex} & Topologia ($\tau=-1$) & part migrado $=$ homónimo & palco; fecha \\
 \code{corpo\_analitico.tex} & Análise ($\tau=+1$) & part migrado $=$ homónimo & alcance; não fecha; corte \\
 \code{aranha.tex} & Mecânica $+$ Topologia ($G$) & Corpo Mecânico; aranha $=$ alias; \textbf{não} motor/rotor & construção: multiplicidade, ciclo, $\zeta/\mu$ \\
@@ -1771,9 +1963,10 @@ construção, quando existe, vive na Física. Não se inventa o ficheiro.
 \toprule
 capítulo & construção & paper? & corpo canónico & decisão & lacuna \\
 \midrule
-Álgebra & dobra, duas faces; $\mathbb{R}$ geométrico; cadeia $\mathbb{N}\to\mathbb{R}$ & sim: algébrico $+$ cadeia & Corpo Algébrico; cadeia (não fundir) & \textbf{manter papers} & não fundir os três suportes \\
+N--R & opostos, quocientes, completação & sim: quatro papers & Corpos Natural\ldots Real & \textbf{manter papers} & \(\mathcal{D}=\texttt{N/A}\); não é Parte \\
+Álgebra & dobra, duas faces; $\mathbb{R}$ geométrico & sim: algébrico & Corpo Algébrico (\textbf{não} a cadeia) & \textbf{manter paper} & não fundir com N--R \\
 Topologia & vizinhança, ultra, $G$; palco $\tau=-1$ & sim: topológico $+$ aranha & Corpo Topológico & \textbf{manter papers} & part migrado $=$ homónimo \\
-Análise & corte, $\pi$; alcance $\tau=+1$ & sim: analítico $+$ reais & Corpo Analítico; Corpo Real (corte) & \textbf{manter papers} & part migrado $=$ homónimo \\
+Análise & $\pi$; alcance $\tau=+1$ & sim: analítico & Corpo Analítico & \textbf{manter paper} & corte dos reais $=$ N--R, não este paper \\
 Geometria & hipercubo, dragão, semicírculo & não (\code{lcs\_dobra} $=$ instância) & Corpo Geométrico (não as quinze formas) & \textbf{exportado} (\S\ref{cat:bloco1}) & formas $\neq$ capítulo \\
 Mecânica & ciclo da aranha, neurónio & sim: \code{aranha.tex} & Corpo Mecânico; aranha $=$ alias (não motor/rotor) & \textbf{manter paper} (\S\ref{cat:bloco2}) & aliases motor/rotor \\
 Gravitação & $G$, $\mathfrak{m}=G-1$, sem fonte, força $=\mathcal{D}$(queda) & não & Corpo Gravitacional & \textbf{exportado} (\S\ref{cat:bloco1}) & $\mathcal{D}$ em $\mathcal{V}(x)$ $\neq$ entrópico \\
@@ -1818,9 +2011,9 @@ Quando \code{fisica.tex} for revisto lugar a lugar, cada Parte pode apontar
 \]
 e a ficha referencia isso. \textbf{Essa caixa ainda não se escreve nas
 Partes.} O Corpo Universal já está na Física
-(\code{fis:universal}, Def.~\code{fis:def:U}) --- gramática, não 14º
-lugar. Os treze correm o mesmo $\mathcal{U}$; não se inventa metodologia
-por capítulo.
+(\code{fis:universal}, Def.~\code{fis:def:U}) --- gramática, não uma Parte.
+As Partes correm o mesmo $\mathcal{U}$; não se inventa metodologia
+por capítulo. \(\mathcal{U}\) não decide a lista.
 
 {\footnotesize
 \begin{center}
@@ -1828,9 +2021,10 @@ por capítulo.
 \toprule
 capítulo & corpo canónico & fonte primária & alias / homónimo antigo & estatuto \\
 \midrule
-Álgebra & Corpo Algébrico $+$ cadeia numérica & papers & Natural/Inteiro/Racional/Real; Alonzo; Omnitrix & construção (\S\ref{cat:bloco2}) \\
+Álgebra & Corpo Algébrico $+$ cadeia numérica & papers & Natural/Inteiro/Racional/Real; Omnitrix. Alonzo $=$ Parte Fractal & construção (\S\ref{cat:bloco2}) \\
 Topologia & Corpo Topológico & paper $+$ Física & part migrado $=$ homónimo & construção (\S\ref{cat:bloco2}) \\
 Análise & Corpo Analítico & paper $+$ cadeia real & Real, \emph{onde o corte é o mesmo} --- \textbf{não} fundir os ficheiros & construção (\S\ref{cat:bloco2}) \\
+Fractal & \textbf{Corpo Alonzo} & \code{fisica.tex} & Cantor/Julia/Viviani $\subset$ Alonzo; tropical $=$ regime & exportado (\S\ref{cat:ingestao:fractal}) \\
 Geometria & Corpo Geométrico & \code{fisica.tex} & quinze formas; exterior & exportado (\S\ref{cat:bloco1}) \\
 Mecânica & Corpo Mecânico & \code{aranha.tex} $+$ Física & aranha; motor/rotor $=$ homónimos & construção (\S\ref{cat:bloco2}) \\
 Gravitação & Corpo Gravitacional & \code{fisica.tex} & gravítico & exportado (\S\ref{cat:bloco1}) \\
@@ -1847,9 +2041,72 @@ Redes & \textbf{Corpo Neural} & \code{redes.tex} $+$ Física & nervoso & \texttt
 
 \noindent «Corpo canónico» classifica a realização da Parte. Não afirma duas
 magmas $+$ $\mathcal{D}$ $+$ $\operatorname{Star}$ em todos os capítulos.
+Catorze palcos $\neq$ catorze corpos. Fractal $\neq$ Alonzo como nome:
+o palco chama-se Fractal; o corpo é Alonzo.
 Eletromagnetismo: interface fechada --- $(\mathrm{lcm},\mathrm{gcd})$,
 $\nu$ duomorfo, Lei~7 (\S\ref{cat:bloco4}). A forma $E^{2}-B^{2}$ continua
 a não ser corpo.
+
+\subsection*{Consulta \(\mathrm{I}_{0}\) --- fractal / tropical}
+\addcontentsline{toc}{subsection}{Consulta I0: fractal / tropical}
+\label{cat:i0:fractal}
+
+\noindent \(\mathrm{I}_{0}\) pergunta se «corpo fractal» / «corpo tropical»
+é estrutura ou homónimo. Veredicto de \textbf{identidade}: não há magma nova.
+Cantor--Viviani--Julia \(\subset\) Alonzo. A auto-semelhança é a indução da
+Álgebra. O tropical \((\max,+)\) é o entrópico. A composição de Julias é
+monóide, não corpo.
+\[
+\boxed{\;
+\text{Cantor / Viviani / Julia}
+\;\subset\;
+\text{Alonzo}
+\;}
+\]
+\[
+\boxed{\;
+\text{Alonzo é o corpo canónico}
+\;\neq\;
+\text{Fractal é o nome da Parte}
+\;}
+\]
+A Física abriu \textbf{Parte de exposição} (\code{fis:alonzo}): o corpo
+canónico é Alonzo; fractal / tropical são fenómenos e regimes no suporte
+que têm. O catálogo continua a dizer \emph{qual construção é esta}. A
+Física diz \emph{onde se estuda}. Não se reabre Álgebra. Não se renomeia
+Alonzo.
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}
+                >{\raggedright\arraybackslash}p{0.36\textwidth}
+                >{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+\toprule
+candidato & evidência & já é \\
+\midrule
+Cantor--Julia--Viviani
+  & \(f_c(z)=z^{2}+c\); \(\varphi\psi=-1\); Viviani \(d=+1\) (\code{fis:thm:viviani})
+  & \textbf{Alonzo} --- agora Parte Fractal (\S\ref{cat:alonzo}, \S\ref{cat:ingestao:fractal}) \\
+auto-semelhança / \(\dim_H\)
+  & indução no objecto; corte \(k=b^{s}\)
+  & Teor.\ \code{fis:thm:dimcorte} na Álgebra; fenómeno na Parte Fractal \\
+\((\max,+)\) / idempotência
+  & magmas tropicais; \(\mathcal{D}(\max,+)=(+,\max)\)
+  & bestiário \textbf{entrópico} (\S\ref{cat:audit:entropico}). Termodinâmica I0: não se toma. Regime da Parte, não magma de Alonzo \\
+«corpo tropical» (\code{machine})
+  & o paper declara o corpo \(=\mathbb{R}\)
+  & cadeia N--R. Regime \(\neq\) corpo novo \\
+álgebra de Julias (\code{hiper} XIX)
+  & composição associativa, não comutativa, sem inversos
+  & \textbf{monóide}, não corpo. Os corpos ficam nos números \\
+computador fractal
+  & subshift / IFS / \(\dim_H=\log_2\lambda\)
+  & atrator, não magma. Homónimo de \code{fis:thm:dimcorte} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\) de Alonzo
+\(\neq\) dimensão de Hausdorff \(\neq\) \(\lvert\det\rvert=1\). Isso é a
+proibição de \(\mathrm{I}_{0}\) sobre a palavra «estrela»
+(\S\ref{cat:tres-canonicos}).
 
 \noindent A ingestão abaixo é $\operatorname{INGEST}$ da \textbf{Parte}
 Álgebra de \code{fisica.tex}. Não é o paper e não é a cadeia. Não se
@@ -1857,7 +2114,7 @@ reabre se esta ficha já existir.
 
 \label{cat:ingestao:algebra}
 \fichaingestao{Álgebra}{%
-\ficharow{$\mathrm{I}_{0}$}{$\zeta/\mu$ da ordem; $\mu$ da medida; dual linear (\code{fis:def:dual}); $\tau\neq\mathcal{D}$; $\operatorname{Star}$ do elemento $\neq\operatorname{Star}(\mathcal{U})$; Iso $\neq\operatorname{Isom}_{\mu}$; paper $\mathbb{Q}(m\sqrt{D})$; cadeia; Alonzo; Omnitrix. Não se tomam}
+\ficharow{$\mathrm{I}_{0}$}{$\zeta/\mu$ da ordem; $\mu$ da medida; dual linear (\code{fis:def:dual}); $\tau\neq\mathcal{D}$; $\operatorname{Star}$ do elemento $\neq\operatorname{Star}(\mathcal{U})$; Iso $\neq\operatorname{Isom}_{\mu}$; paper $\mathbb{Q}(m\sqrt{D})$; cadeia; Alonzo (Parte Fractal); Omnitrix. Não se tomam}
 \ficharow{$\mathrm{I}_{1}$}{$S$ do operador (\code{fis:def:op}); lista $I$, realização $\pi\colon I\to X$ (\code{fis:def:objeto}). Não se importa $\mathbb{R}$. Não se funde Real com Analítico}
 \ficharow{$\mathrm{I}_{2}$}{cisão $\tau$ / $X_{\pm}$ no mesmo suporte das funções do par (\code{fis:thm:antissim}, \code{fis:obs:cisao}). \textbf{Não} $\mu_S+\mu_A$ do tensor (EM). \textbf{Não} $\zeta/\mu$ como cisão}
 \ficharow{$\mathrm{I}_{3}$}{directo / cruzado (\code{fis:thm:antissim}(2)); uma composição não chega (\code{fis:thm:duas}(4))}
@@ -1872,6 +2129,7 @@ reabre se esta ficha já existir.
 }
 
 \fichacapitulo{Álgebra}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão}{\S\ref{cat:ingestao} --- instância \S\ref{cat:ingestao:algebra}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{Corpo Algébrico (\code{papers/corpo\_algebrico.tex}); a cadeia \code{naturais}--\code{reais} é outra realização, numérica}
 \ficharow{suporte}{na Parte: $S$ de \code{fis:def:op}, depois $I$ e $\pi$. No paper: $\mathbb{Q}(m\sqrt D)$. Na cadeia: $F_8$, $\mathbb{N}^{2}/{\sim}$, $\operatorname{Frac}(\mathbb{Z})$, cortes}
@@ -1883,7 +2141,7 @@ reabre se esta ficha já existir.
 \ficharow{$\mathcal{D}$}{\texttt{não localizada} na Parte (Def.\ em Topologia). \texttt{N/A} na cadeia. Alonzo tem $\mathcal{D}$ interno --- outra construção}
 \ficharow{lei complementar}{não se deriva ainda: a correspondência não funde paper, cadeia e Alonzo}
 \ficharow{estatuto}{Parte: \texttt{realizado}. Paper e cadeia: construções noutros suportes. Três entradas, sem fusão}
-\ficharow{correspondência}{antiga: «Corpo Natural / Inteiro / Racional / Real»; Alonzo; Omnitrix. Homónimos a preservar}
+\ficharow{correspondência}{antiga: «Corpo Natural / Inteiro / Racional / Real»; Omnitrix. Alonzo $=$ Parte Fractal. Homónimos a preservar}
 }
 
 \noindent A ingestão abaixo é $\operatorname{INGEST}$ da \textbf{Parte}
@@ -1926,7 +2184,45 @@ nem o Corpo Real da cadeia.
 \ficharow{$\mathrm{I}_{11}$}{par: as duas faces $(m,g)$. Estado: \texttt{realizado}. $\mathsf{Mor}$: Hom das duas faces; $\operatorname{Isom}_{\mu}$ da palavra $\lvert\det\prod A_{a_i}\rvert=1$ (\code{fis:geo}); Diff não localizada; $\mathbf{Duo}$ não localizada}
 }
 
+\noindent A ingestão abaixo é $\operatorname{INGEST}$ da \textbf{Parte}
+Fractal de \code{fisica.tex}. Corpo canónico: Alonzo. Lê o calibrador
+já fechado (\S\ref{cat:audit:alonzo}). Não se reabre Álgebra. Não se
+inventa magma.
+
+\label{cat:ingestao:fractal}
+\fichaingestao{Fractal}{%
+\ficharow{$\mathrm{I}_{0}$}{corpo fractal $\neq$ Alonzo; tropical $=$ Alonzo; Julia $=$ corpo; \(\mathbb{R}\) de \code{machine/corpo\_tropical}; monóide de Julias; IFS como magma; \(\operatorname{Star}(K)=\operatorname{Star}(\mathcal{U})\); Hausdorff como \(\lvert\det\rvert\). Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{cruz da composição: iterar $f_c(z)=z^{2}+c$ (\code{fis:def:alonzo}). Não se importa $\mathbb{R}$}
+\ficharow{$\mathrm{I}_{2}$}{$\oplus$ e $\otimes$ da cruz: duas, internas, distintas (\code{cat:audit:alonzo}). \textbf{Não} $(\max,+)$ como cisão desta Parte. \textbf{Não} $\mu_S+\mu_A$}
+\ficharow{$\mathrm{I}_{3}$}{cantor / julia na cruz; Viviani $d=+1$ (\code{fis:thm:viviani}). Uma composição de $J_c$ não chega --- é monóide, outro suporte}
+\ficharow{$\mathrm{I}_{4}$}{GLH: referência a \code{fis:thm:central} (Álgebra). Não se funde com a dimensão de Hausdorff}
+\ficharow{$\mathrm{I}_{5}$}{tríade: não localizada. $\mathcal{F}$ é Álgebra}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia). Hexal $6=\mathrm{lcm}(2,3)$ é interface, não Lei~7}
+\ficharow{$\mathrm{I}_{7}$}{hexal $\neq$ $\mathbf{Duo}$ (\code{cat:def:alonzo}). $\mathcal{D}$ interno na cruz: lê-se o calibrador. \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$. \textbf{Não} o entrópico}
+\ficharow{$\mathrm{I}_{8}$}{$\dagger(x)=-1/x$, $\dagger^{2}=\mathrm{id}$. $\dagger\neq\mathcal{D}$, $\dagger\neq\nu$}
+\ficharow{$\mathrm{I}_{9}$}{realizado: $\dagger x\oplus x=1\Rightarrow x^{2}=x+1$. $\operatorname{Star}=\{\varphi,\psi\}$ nesta construção. Não unificar com $\operatorname{Star}(\mathbb{R})$. Não $\operatorname{Star}(\mathcal{U})$. Não $x^{2}=-1$}
+\ficharow{$\mathrm{I}_{10}$}{realizado: a Parte organiza Alonzo; dimcorte e fractalnegro ficam na Álgebra (citados). Não «completo»$\Rightarrow$ magma tropical}
+\ficharow{$\mathrm{I}_{11}$}{par: cantor/julia \texttt{ISO-DUAL} por $\phi(\theta)=e^{2\pi i\theta}$. Estado: \texttt{realizado}. $\mathsf{Mor}$: Hom da cruz; Caelum \texttt{N/A} como $\mathcal{D}$; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada nesta Parte; $\mathbf{Duo}$ na cruz lê o calibrador, hexal $\neq$ Duo}
+}
+
+\fichacapitulo{Fractal}{%
+\ficharow{camada}{Física}
+\ficharow{ingestão}{\S\ref{cat:ingestao:fractal}. Doze slots. Não se reconstrói. Calibrador: \S\ref{cat:audit:alonzo}}
+\ficharow{corpo canónico}{\textbf{Corpo Alonzo} (\code{fis:def:alonzo}). \textbf{Não} o nome da Parte. Fractal / Tropical $=$ palco (tropical $=$ regime)}
+\ficharow{suporte}{cruz da composição; iterar $f_c$}
+\ficharow{operações}{$\oplus$ e $\otimes$ na cruz; iterar. \textbf{Não} $(\max,+)$ como magma da Parte}
+\ficharow{construção}{\code{fis:alonzo}. Dimensão / auto-semelhança: Álgebra (\code{fis:thm:dimcorte}, \code{fis:thm:fractalnegro}), citadas}
+\ficharow{involução}{$\dagger=-1/x$. $\dagger\neq\mathcal{D}$}
+\ficharow{$\operatorname{Star}$}{$x^{2}=x+1$ no elemento. Cantor/Julia $=\{\varphi,\psi\}$. Não $\operatorname{Star}(\mathcal{U})$}
+\ficharow{$\mathcal{D}$}{interno na cruz (\code{cat:audit:alonzo}). Caelum: \texttt{N/A} como o mesmo $\mathcal{D}$. Entrópico: outro corpo}
+\ficharow{lei complementar}{$\dagger x\oplus x=1\Rightarrow x^{2}=x+1$; $\varphi\psi=-1$}
+\ficharow{morfismos}{ISO-DUAL cantor/julia; Hom da cruz; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada; hexal $\neq$ Duo}
+\ficharow{estatuto}{Parte realizada; bestiário Alonzo continua, agora com realização na Física}
+\ficharow{correspondência}{Cantor/Viviani/Julia $\subset$ Alonzo. Julia $\neq$ corpo. Tropical $\neq$ Alonzo}
+}
+
 \fichacapitulo{Eletromagnetismo}{%
+\ficharow{camada}{Física (interface)}
 \ficharow{ingestão}{\S\ref{cat:ingestao} --- instância \S\ref{cat:bloco4}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{não há} --- a Parte não chama corpo à forma (\code{fis:def:em-forma}, roteiro). Sem paper}
 \ficharow{suporte}{par de escritas $(E,B)$ em $V'$ sobre o Corpo Real (\S\ref{cat:audit:real})}
@@ -1942,14 +2238,17 @@ nem o Corpo Real da cadeia.
 }
 
 \fichacapitulo{Redes}{%
+\ficharow{camada}{Física $+$ bestiário (\texttt{candidato} em $H$)}
+\ficharow{ingestão}{\S\ref{cat:ingestao:redes}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Neural} (\code{papers/redes.tex} $+$ Parte). Alias: nervoso}
 \ficharow{suporte}{rede: matriz $W$, padrões $\pm1$. O neurónio é a cisão $+$ soma da Mecânica (\code{fis:neuronio}), não peça nova}
-\ficharow{operações}{bilinear $W\times X\to X$. \textbf{Não} duas magmas. Hebb/Hopfield são realização, não lei (\code{fis:cor:hebb})}
+\ficharow{operações}{bilinear $W\times X\to X$. Partição $W_s+W_a$ $=$ eixo directo/cruzado, \textbf{não} magmas $\oplus,\otimes$}
 \ficharow{construção}{\code{fis:thm:desce}: descer até mínimo. \code{papers/redes.tex}: P6 instancia \code{fis:thm:combina}}
-\ficharow{involução}{\texttt{N/A} como $\mathcal{D}$}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A} --- não se inventa a dual}
+\ficharow{involução}{$W\mapsto W^{\!\top}$ gera a partição. $T^{2}=\pm\mathrm{id}$ é da actualização, não desta involução}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. $W_s/W_a$ \textbf{não} são estrela. $T^{2}=-\mathrm{id}$ é rotor, não $\operatorname{Star}(\mathcal{U})$}
+\ficharow{$\mathcal{D}$}{\texttt{N/A} (I2). $\bowtie$ motor $\neq$ \code{fis:def:duomorf}. Hexal $\neq$ Duo}
 \ficharow{lei complementar}{descida sob $H$: $W=W^{\top}$, $W_{ii}=0$}
+\ficharow{morfismos}{Hom da cisão$+$soma; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada; $\mathbf{Duo}$ \texttt{N/A}}
 \ficharow{estatuto}{teoremas da Parte $+$ \texttt{candidato}: $H$ de \code{fis:thm:desce} nomeada, não realizada no bestiário (\S\ref{cat:bloco3})}
 \ficharow{correspondência}{nervoso $=$ alias. $\bowtie$ motor: homónimo, não $\mathcal{D}$. sql/latex/node: \code{arquitetura.tex}. \textbf{Não} eletromagnético}
 }
@@ -1971,6 +2270,7 @@ nem o Corpo Real da cadeia.
 }
 
 \fichacapitulo{Mecânica}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão}{\S\ref{cat:ingestao:mecanica}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Mecânico}. Construção: \code{papers/aranha.tex}. Alias: aranha. Não é o motor nem o rotor}
 \ficharow{suporte}{lista $I$; realização $\pi\colon I\to X$; multiplicidade $G(x)=\lvert\pi^{-1}(x)\rvert$}
@@ -1992,7 +2292,9 @@ nem o Corpo Real da cadeia.
 \noindent A Física é a autoridade. Cada ficha abaixo \textbf{exporta} o que a
 Parte já constrói; não inventa magma, \(\operatorname{Star}\) nem
 \(\mathcal{D}\) para completar a grelha. Álgebra, Mecânica, Topologia, Análise e
-Redes ficam no Bloco~2/3 (papers). Eletromagnetismo fica no Bloco~4
+Redes ficam no Bloco~2/3 (papers). Fractal exporta Alonzo
+(\S\ref{cat:ingestao:fractal}; calibrador já em \S\ref{cat:audit:alonzo}).
+Eletromagnetismo fica no Bloco~4
 (\texttt{N/A} como corpo).
 
 \[
@@ -2034,6 +2336,7 @@ O corpo do capítulo é o da Parte, \textbf{não} as quinze formas
 }
 
 \fichacapitulo{Geometria}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão}{\S\ref{cat:ingestao:geometria}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Geométrico}. As quinze formas são homónimos, não este corpo}
 \ficharow{suporte}{troços da lista; vizinhança; bits}
@@ -2084,6 +2387,7 @@ sobre um par \(\oplus,\otimes\) de um «corpo gravitacional». Sem fonte.
 }
 
 \fichacapitulo{Gravitação}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão}{\S\ref{cat:ingestao:gravitacao}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Gravitacional}. Sem paper}
 \ficharow{suporte}{grafo com $G$; vizinhança $\mathcal{V}(x)$ de $2n$ elementos}
@@ -2108,23 +2412,42 @@ bestiário \textbf{não} são este capítulo.
   {aresta / passo da Parte}
   {\texttt{N/A} como par de magmas do capítulo}
   {passo $=$ aresta; máximo $=$ ponto fixo da dobra}
-  {\texttt{N/A} no suporte do capítulo. $R^{4}$ é da Mecânica}
-  {\texttt{N/A}}
-  {\texttt{N/A}. $\operatorname{artanh}$ do bestiário é dicionário, não $\mathcal{D}$}
-  {sem Lorentz derivado aqui}
+  {involução da dobra $p\mapsto L-p$ (\code{fis:thm:meiavolta}). $R^{4}$ é da Mecânica}
+  {\texttt{não localizada}. O meio da dobra \textbf{não} é $x^{2}=x+1$}
+  {\texttt{N/A} (I2). $\operatorname{artanh}$ do bestiário é dicionário, não $\mathcal{D}$}
+  {sem Lorentz derivado aqui (\code{fis:rel-naoderiva})}
   {passo $=$ aresta}
 
+\label{cat:ingestao:relatividade}
+\fichaingestao{Relatividade}{%
+\ficharow{$\mathrm{I}_{0}$}{Lorentz; $c$ como luz; rotor; motor; $\operatorname{artanh}$; $R^{4}$; $\Delta$ da Óptica $\neq q$; Minkowski; «luz» espectral (\code{fis:thm:massa}). Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{aresta / passo (\code{fis:def:percurso}); $q$ da Gravitação (\code{fis:def:intervalo}); régua fechada de $L$ marcas. Não se importa $\mathbb{R}$. $n$ é dado da grade (\code{fis:rel-naoderiva})}
+\ficharow{$\mathrm{I}_{2}$}{\texttt{N/A} como par $\oplus,\otimes$ de magmas do capítulo. Os dois sentidos da régua fechada são a dobra, não um corpo. \textbf{Não} $\min/\max$ da Gravitação}
+\ficharow{$\mathrm{I}_{3}$}{\texttt{N/A} (I2)}
+\ficharow{$\mathrm{I}_{4}$}{GLH: não localizada nesta Parte. Referência: \code{fis:thm:central}. Tricotomia de $q$ é sinal da ordem (\code{fis:thm:tresclasses}), não o rectângulo}
+\ficharow{$\mathrm{I}_{5}$}{tríade: não localizada. $\mathcal{F}$ é Álgebra}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia)}
+\ficharow{$\mathrm{I}_{7}$}{\texttt{N/A} (I2). \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$. $\operatorname{artanh}$: Iso do bestiário, não $\mathbf{Duo}$}
+\ficharow{$\mathrm{I}_{8}$}{involução da dobra $p\mapsto L-p$ (\code{fis:thm:meiavolta}(2); \code{fis:thm:dobra}). $\partial^{2}=\mathrm{id}$ na volta (\code{fis:thm:volta}). Não $R^{4}$; não o rotor}
+\ficharow{$\mathrm{I}_{9}$}{máximo $=$ ponto fixo da dobra, $2p=L$ (\code{fis:thm:meiavolta}). \textbf{Não} $x^{2}=x+1$. $\operatorname{Star}$: não localizada (o Teor.\ é Topologia). Não $x^{2}=-1$}
+\ficharow{$\mathrm{I}_{10}$}{realizado: passo $=$ aresta; máximo $=$ meia volta; três classes; borda sem ponto; energia $=$ volta fechada, resíduo $0$. Sem Lorentz; sem identificação com constante medida}
+\ficharow{$\mathrm{I}_{11}$}{par: \texttt{N/A}. Estado: \texttt{realizado}. $\mathsf{Mor}$: Hom da dobra na régua fechada; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada ($q$ não é $\lvert\det Df\rvert=1$); $\mathbf{Duo}$ \texttt{N/A}}
+}
+
 \fichacapitulo{Relatividade}{%
+\ficharow{camada}{Física}
+\ficharow{ingestão}{\S\ref{cat:ingestao:relatividade}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Relativístico}. Não o rotor}
-\ficharow{suporte}{aresta / passo}
+\ficharow{suporte}{aresta / passo; régua fechada de $L$ marcas}
 \ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo}
-\ficharow{construção}{\code{fis:thm:passo}, \code{fis:thm:meiavolta}. Sem paper}
-\ficharow{involução}{\texttt{N/A} neste suporte}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A}. $\operatorname{artanh}$: ISO / dicionário, não duomorfismo}
-\ficharow{lei complementar}{máximo $=$ meia volta $=$ ponto fixo da dobra}
+\ficharow{construção}{\code{fis:thm:passo}, \code{fis:thm:meiavolta}, \code{fis:thm:tresclasses}, \code{fis:thm:borda}, \code{fis:thm:volta}. Sem paper}
+\ficharow{involução}{a dobra $p\mapsto L-p$ na régua fechada. $R^{4}$ é Mecânica}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. O meio \textbf{não} é $x^{2}=x+1$}
+\ficharow{$\mathcal{D}$}{\texttt{N/A} (I2). $\operatorname{artanh}$: ISO / dicionário, não duomorfismo}
+\ficharow{lei complementar}{máximo $=$ meia volta $=$ ponto fixo da dobra; energia $=$ volta fechada}
+\ficharow{morfismos}{Hom da dobra; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada; $\mathbf{Duo}$ \texttt{N/A}}
 \ficharow{estatuto}{realizado na Física; exportado; sem paper próprio}
-\ficharow{correspondência}{rotor, motor, $\operatorname{artanh}$: homónimos do bestiário, não este corpo}
+\ficharow{correspondência}{rotor, motor, $\operatorname{artanh}$, Lorentz, luz: homónimos, não este corpo}
 }
 
 \medskip
@@ -2135,25 +2458,44 @@ O antigo «óptico» do bestiário é alias, não corpo novo.
 
 \calibrador
   {caixa $\mathcal{P}(A)$; par $(B,C)=(s,p)$}
-  {\texttt{N/A} como par de magmas do capítulo}
-  {caixa da Parte; $d=\lvert\Delta P-\Delta Q\rvert$}
-  {\texttt{N/A}}
-  {\texttt{N/A}}
-  {\texttt{N/A}. $d=\lvert\Delta P-\Delta Q\rvert$ é complementar da representação, não duomorfismo}
+  {par $(B,C)=(s,p)$ no mesmo espelho. \textbf{Não} magmas de um corpo novo}
+  {caixa da Parte; $d=\lvert\Delta P-\Delta Q\rvert$; $\lvert\det\rvert=1$}
+  {espelho $\nu$: $\nu^{2}=\mathrm{id}$ (\code{fis:thm:tresfontes})}
+  {\texttt{não localizada}. $\Delta=0$ é o corte, não $x^{2}=x+1$}
+  {\texttt{não localizada}. $d=\lvert\Delta P-\Delta Q\rvert$ é complementar da representação, não $\mathcal{D}$}
   {Cauchy a partir de $\Delta$, não completação de corpo}
-  {$d=\lvert\Delta P-\Delta Q\rvert$}
+  {$d=\lvert\Delta P-\Delta Q\rvert$; $\lvert\det\rvert=1$}
+
+\label{cat:ingestao:optica}
+\fichaingestao{Óptica}{%
+\ficharow{$\mathrm{I}_{0}$}{«óptico» do bestiário; luz; lente; tríade dourada $\neq$ $\{2,3,4\}$; $\mathrm{lcm}(2,3)$ da ordem $6$; trial $\neq$ ordem $3$; rotor $\neq$ Viviani; $q$ da Relatividade $\neq\Delta$; ultramétrica $\neq d_{\mathcal{P}}\neq\lvert\det\rvert=1$; $\sum G=\lvert I\rvert$ $\neq$ conservação óptica. Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{caixa $\mathcal{P}(A)=\{(B,C):C\in A^{\times}\}$ (\code{fis:def:caixa}). Anel comutativo; ordem para as três classes. Não se importa $\mathbb{R}$}
+\ficharow{$\mathrm{I}_{2}$}{par $(B,C)=(s,p)$ no mesmo espelho (\code{fis:thm:duasfaces}). \textbf{Não} magmas de um corpo óptico novo. \textbf{Não} $\mu_S+\mu_A$. \textbf{Não} $\zeta/\mu$}
+\ficharow{$\mathrm{I}_{3}$}{$C=\det$: orientação ($\pm1$ próprio/impróprio); $\operatorname{sgn}\Delta$: regime (roda / cisalha / expande)}
+\ficharow{$\mathrm{I}_{4}$}{GLH: não localizada nesta Parte. Referência: \code{fis:thm:central}. Tricotomia de $\Delta$ (\code{fis:thm:leidisc}) $\neq$ tricotomia de $q$ (Relatividade)}
+\ficharow{$\mathrm{I}_{5}$}{tríade dourada: não localizada. A tríade de ordens $\{2,3,4\}$ classifica órbitas, não $\mathcal{F}\circ\Lambda$}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia)}
+\ficharow{$\mathrm{I}_{7}$}{$\mathbf{Duo}$: não localizada. $d_{\mathcal{P}}$ é complementar, não troca de leis. \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$; o $6=\mathrm{lcm}(2,3)$ é ordem, não I7}
+\ficharow{$\mathrm{I}_{8}$}{espelho $\nu$: $\nu^{2}=\mathrm{id}$, reflexão, $\Delta=4$ (\code{fis:thm:tresfontes}). $\partial\partial=\mathrm{id}$ é a dobra (Álgebra). Não o rotor}
+\ficharow{$\mathrm{I}_{9}$}{$\Delta=0$: corte terminado, faces no mesmo ponto (\code{fis:thm:corte}(5)) --- \textbf{não} $x^{2}=x+1$. $\operatorname{Star}$: não localizada. Não $x^{2}=-1$}
+\ficharow{$\mathrm{I}_{10}$}{realizado: caixa; $d_{\mathcal{P}}$; três classes; ordens $\{1,2,3,4,6\}$, sem $5$; borda factoriza. Cauchy a partir de $\Delta$, não completação}
+\ficharow{$\mathrm{I}_{11}$}{par: $(B,C)$ no espelho. Estado: \texttt{realizado}. $\mathsf{Mor}$: Hom de $\det\colon\mathcal{P}\to A^{\times}$ (\code{fis:cor:serie}); $\operatorname{Isom}_{\mu}$ realizada ($\lvert\det\rvert=1$ é a conservação; $\varphi_t$ unimodular); Diff não localizada; $\mathbf{Duo}$ não localizada}
+}
 
 \fichacapitulo{Óptica}{%
+\ficharow{camada}{Física}
+\ficharow{ingestão}{\S\ref{cat:ingestao:optica}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Óptico} (caixa $\mathcal{P}(A)$). Alias: óptico}
 \ficharow{suporte}{$\mathcal{P}(A)=\{(B,C):C\in A^{\times}\}$}
-\ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo}
-\ficharow{construção}{caixa da Parte; $(B,C)=(s,p)$ de \code{fis:thm:duasfaces}. Sem paper}
-\ficharow{involução}{\texttt{N/A}}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A}. Distância em $\Delta$: complementar da representação}
-\ficharow{lei complementar}{$d=\lvert\Delta P-\Delta Q\rvert$}
+\ficharow{operações}{par $(B,C)=(s,p)$ no espelho. \textbf{Não} um corpo novo de magmas}
+\ficharow{construção}{caixa; \code{fis:thm:leidisc}; \code{fis:thm:tresfontes}; \code{fis:cor:borda}. Sem paper}
+\ficharow{involução}{$\nu^{2}=\mathrm{id}$ (reflexão). Não o rotor}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. $\Delta=0$ é o corte, não $x^{2}=x+1$}
+\ficharow{$\mathcal{D}$}{\texttt{não localizada}. Distância em $\Delta$: complementar da representação}
+\ficharow{lei complementar}{$d=\lvert\Delta P-\Delta Q\rvert$; $\lvert\det\rvert=1$}
+\ficharow{morfismos}{Hom de $\det$; $\operatorname{Isom}_{\mu}$ realizada; Diff não localizada; $\mathbf{Duo}$ não localizada}
 \ficharow{estatuto}{realizado na Física; exportado; sem paper próprio}
-\ficharow{correspondência}{«óptico» do bestiário $=$ alias (\S\ref{cat:mae})}
+\ficharow{correspondência}{«óptico» do bestiário $=$ alias (\S\ref{cat:mae}). Relatividade: $q\neq\Delta$}
 }
 
 \medskip
@@ -2162,26 +2504,45 @@ Modo espectral; massa \(\lvert\log\rho\rvert\) (\code{fis:def:atomo}). Não há
 dinâmica de colisão neste export.
 
 \calibrador
-  {espectro / átomo da Parte}
-  {\texttt{N/A} como par de magmas do capítulo}
-  {modo espectral; $m=\lvert\log\rho\rvert$}
-  {\texttt{N/A}}
-  {\texttt{N/A}}
-  {\texttt{N/A}. $\log\rho$ é dicionário, não $\mathcal{D}$}
-  {espectral; sem dinâmica}
-  {$m=\lvert\log\rho\rvert$}
+  {espectro / átomo da Parte (\code{fis:def:atomo})}
+  {duas faces do corte no mesmo $S$ (fusão / fissão). \textbf{Não} magmas de um corpo novo}
+  {modo espectral; $m=\lvert\log\rho\rvert$; $\prod\rho=\pm1$}
+  {duas involuções: ocupação e conjugado (\code{fis:thm:carga}). Não se colam}
+  {\texttt{não localizada}. O vale do ferro é o corte, não $x^{2}=x+1$}
+  {\texttt{não localizada} como $\mathcal{D}$ de magmas. $\log\rho$ é dicionário, não Duo}
+  {espectral; sem dinâmica de colisão neste export}
+  {$m=\lvert\log\rho\rvert$; $\lvert\det\rvert=1$ no espectro}
+
+\label{cat:ingestao:particulas}
+\fichaingestao{Partículas}{%
+\ficharow{$\mathrm{I}_{0}$}{partícula ontológica; $\log$ da cadeia / Real; luz $\rho=1$ $\neq$ borda da Relatividade $\neq$ EM; elétron/núcleo $=$ hipótese, não teorema; $Q=N/3$; colisão. Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{cadeia / átomo de grau $N$, $\lvert c_0\rvert=1$; raízes da companheira (\code{fis:def:atomo}). Não se importa $\mathbb{R}$}
+\ficharow{$\mathrm{I}_{2}$}{duas faces no mesmo $S$: fusão / fissão $=$ corte (\code{fis:thm:ferro}, \code{fis:thm:corte}); expande / contrai pela neutralidade. \textbf{Não} magmas de um corpo novo. \textbf{Não} $\mathrm{lcm}/\mathrm{gcd}$}
+\ficharow{$\mathrm{I}_{3}$}{núcleo expande, modo ligado contrai; fusão sobe, fissão desce; $\rho<1$ / $=1$ / $>1$}
+\ficharow{$\mathrm{I}_{4}$}{GLH: não localizada nesta Parte. Referência: \code{fis:thm:central}. Neutralidade $\sum\log\lvert\rho\rvert=0$ é $\lvert\det\rvert=1$, \textbf{não} o rectângulo. Defeito $\sum(G-1)$ é contagem}
+\ficharow{$\mathrm{I}_{5}$}{tríade dourada: não localizada. $\mathcal{F}$ é Álgebra}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia)}
+\ficharow{$\mathrm{I}_{7}$}{$\mathbf{Duo}$: não localizada como troca de magmas (as faces do corte não são $(\oplus,\otimes)$). $\log\rho$ dicionário, não $\mathcal{D}$. \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$}
+\ficharow{$\mathrm{I}_{8}$}{duas involuções, e não se colam (\code{fis:thm:carga}): $\binom{n}{k}=\binom{n}{n-k}$ na ocupação; conjugado $=$ antipartícula, ponto fixo $Q=0$}
+\ficharow{$\mathrm{I}_{9}$}{vale do ferro $=$ corte, ponto fixo comum das duas faces (\code{fis:thm:ferro}, \code{fis:thm:corte}(5)) --- \textbf{não} $x^{2}=x+1$. $\operatorname{Star}$: não localizada}
+\ficharow{$\mathrm{I}_{10}$}{realizado: átomo espectral; massa; neutralidade; três regimes de $k$; carga quantizada. Sem dinâmica de colisão neste export}
+\ficharow{$\mathrm{I}_{11}$}{par: as duas faces do corte. Estado: \texttt{realizado}. $\mathsf{Mor}$: $\operatorname{Isom}_{\mu}$ realizada ($\lvert\det\rvert=1$ no espectro, \code{fis:prop:neutro}, \code{fis:thm:gato}(2)); Hom das faces; Diff não localizada; $\mathbf{Duo}$ não localizada}
+}
 
 \fichacapitulo{Partículas}{%
+\ficharow{camada}{Física}
+\ficharow{ingestão}{\S\ref{cat:ingestao:particulas}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo de Partículas} (modo espectral). Sem paper}
 \ficharow{suporte}{átomo / espectro (\code{fis:def:atomo})}
-\ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo}
-\ficharow{construção}{massa $=\lvert\log\rho\rvert$. Sem paper}
-\ficharow{involução}{\texttt{N/A}}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A}}
-\ficharow{lei complementar}{$m=\lvert\log\rho\rvert$}
+\ficharow{operações}{duas faces do corte (fusão / fissão). \textbf{Não} magmas de um corpo novo}
+\ficharow{construção}{\code{fis:def:atomo}, \code{fis:thm:massa}, \code{fis:thm:ferro}, \code{fis:thm:carga}. Sem paper}
+\ficharow{involução}{ocupação e conjugado --- duas, não uma}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. Ferro é o corte, não $x^{2}=x+1$}
+\ficharow{$\mathcal{D}$}{\texttt{não localizada}. $\log\rho$ é dicionário}
+\ficharow{lei complementar}{$m=\lvert\log\rho\rvert$; $\prod\rho=\pm1$}
+\ficharow{morfismos}{$\operatorname{Isom}_{\mu}$ realizada (neutralidade); Hom das faces; Diff não localizada; $\mathbf{Duo}$ não localizada}
 \ficharow{estatuto}{realizado na Física; exportado; sem paper próprio}
-\ficharow{correspondência}{não unificar com o Algébrico nem com o Real por ter um $\log$}
+\ficharow{correspondência}{não unificar com o Algébrico nem com o Real por ter um $\log$. Luz espectral $\neq$ borda da Relatividade}
 }
 
 \medskip
@@ -2193,26 +2554,45 @@ construção dual. Entropia dual: \(S_{\mathrm{negro}}\cdot S_{\mathrm{branco}}=
 entrópico (min/max na lista \(I\)).
 
 \calibrador
-  {par térmico da Parte}
+  {ciclo / par térmico da Parte (\code{fis:thm:carnot})}
   {\texttt{N/A} como par de magmas do capítulo}
-  {Carnot recebido; $S_{\mathrm{n}}\cdot S_{\mathrm{b}}=1$}
-  {\texttt{N/A} no suporte térmico}
-  {\texttt{N/A}}
-  {\texttt{N/A} como duomorfismo de magmas. O produto $=1$ é complementar do par (como Alonzo), não $\mathcal{D}$. O entrópico é outro corpo}
-  {leis recebidas; não é completação}
-  {$Q_1/Q_2=T_1/T_2$ (recebido)}
+  {Carnot recebido; $S_{\mathrm{n}}\cdot S_{\mathrm{b}}=1$; piso $=$ resíduo}
+  {$r\mapsto 1/r$ no par de entropias. Piso zero das involuções dos operadores é leitura, não involução nova}
+  {\texttt{não localizada}. $r=1$ é a borda, não $x^{2}=x+1$}
+  {\texttt{N/A} (I2). O produto $=1$ é complementar do par (como Alonzo), não $\mathcal{D}$. O log/exp é dicionário. O entrópico é outro corpo}
+  {leis recebidas; não é completação; conjectura da elipse fechada como negativa}
+  {$Q_f/Q_q=T_f/T_q$ (recebido); $1-\eta$ Hom}
+
+\label{cat:ingestao:termodinamica}
+\fichaingestao{Termodinâmica}{%
+\ficharow{$\mathrm{I}_{0}$}{leis derivadas da dobra; razão focal $(1-e)/(1+e)$ como $T_f/T_q$ (fechada como negativa); térmico $=$ entrópico ($\max,+$); $S_{\mathrm{n}}\cdot S_{\mathrm{b}}=1$ como $\mathbf{Duo}$; log/exp como $\mathcal{D}$; $1-\eta$ como $\lvert\det\rvert$; dissipação como volume; ciclo da Relatividade; continuidade / aceleração (Cosmologia). Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{ciclo com $\oint$; par $T_q,T_f$; par de entropias em $r$ (\code{fis:thm:carnot}, \code{fis:thm:entropiadual}). Não se importa $\mathbb{R}$. As duas leis entram \emph{marcadas}}
+\ficharow{$\mathrm{I}_{2}$}{\texttt{N/A} como par $\oplus,\otimes$ de magmas. Negro/branco é complementar de uma lei de área, não cisão de magmas. Entropia / expansão é a Parte seguinte, não I2. \textbf{Não} $\mathrm{lcm}/\mathrm{gcd}$}
+\ficharow{$\mathrm{I}_{3}$}{\texttt{N/A} (I2)}
+\ficharow{$\mathrm{I}_{4}$}{GLH: não localizada nesta Parte. Referência: \code{fis:thm:central}. Dissipação $=\kappa(\lvert I\rvert-\lvert X\rvert)$ é \textbf{contagem} (\code{fis:cor:custofolga}), não o rectângulo. $1-\eta$ é Hom em I11, não GLH}
+\ficharow{$\mathrm{I}_{5}$}{tríade dourada: não localizada. $\mathcal{F}$ é Álgebra. A elipse do corte sobrevive como geometria (\code{fis:thm:leidisc}); a temperatura não entrou}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia)}
+\ficharow{$\mathrm{I}_{7}$}{\texttt{N/A} (I2). $S_{\mathrm{n}}\cdot S_{\mathrm{b}}=1$: complementar do par, não $\mathbf{Duo}$. Log/exp: dicionário (Iso), não $\mathcal{D}$. \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$. \textbf{Não} o entrópico}
+\ficharow{$\mathrm{I}_{8}$}{involução do raio $r\mapsto 1/r$ no par de entropias; ponto fixo $r=1$ (\code{fis:thm:entropiadual}). As involuções dos operadores desta construção têm piso zero (\code{fis:thm:landauer}(3)) --- leitura do gato, não involução nova. Não $R^{4}$}
+\ficharow{$\mathrm{I}_{9}$}{$r=1$ é a borda onde as duas entropias coincidem --- \textbf{não} $x^{2}=x+1$. $\operatorname{Star}$: não localizada. Conjectura da razão focal: negativa}
+\ficharow{$\mathrm{I}_{10}$}{realizado como \textbf{recepção}: $\oint$ fechado; piso exacto $0$ do injectivo; par de entropias; segunda lei de um lado. Não é completação. Não deriva do dual}
+\ficharow{$\mathrm{I}_{11}$}{par: negro/branco (complementar, não magmas). Estado: \texttt{realizado} (recepção). $\mathsf{Mor}$: Hom de $1-\eta$ (\code{fis:cor:carnothom}); Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada ($\oint dQ/T=0$ não é $\lvert\det Df\rvert=1$); $\mathbf{Duo}$ \texttt{N/A}}
+}
 
 \fichacapitulo{Termodinâmica}{%
+\ficharow{camada}{Física}
+\ficharow{ingestão}{\S\ref{cat:ingestao:termodinamica}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Termodinâmico} (Carnot recebido). Alias possível: térmico. \textbf{Não} o entrópico}
-\ficharow{suporte}{par térmico da Parte}
-\ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo}
+\ficharow{suporte}{ciclo / par térmico; par de entropias em $r$}
+\ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo. As duas leis são recebidas}
 \ficharow{construção}{\code{fis:thm:carnot}, \code{fis:thm:landauer}, \code{fis:thm:entropiadual}. Sem paper}
-\ficharow{involução}{\texttt{N/A} neste suporte}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A}. $S_{\mathrm{n}}\cdot S_{\mathrm{b}}=1$: complementar do par, não duomorfismo}
-\ficharow{lei complementar}{$Q_1/Q_2=T_1/T_2$ (recebido)}
+\ficharow{involução}{$r\mapsto 1/r$ no par de entropias. Piso zero das involuções dos operadores é leitura}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. $r=1$ é a borda, não $x^{2}=x+1$}
+\ficharow{$\mathcal{D}$}{\texttt{N/A} (I2). Produto $=1$: complementar do par, não duomorfismo}
+\ficharow{lei complementar}{$Q_f/Q_q=T_f/T_q$ (recebido); $1-\eta$ Hom; dissipação $=$ folga}
+\ficharow{morfismos}{Hom de $1-\eta$; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada; $\mathbf{Duo}$ \texttt{N/A}}
 \ficharow{estatuto}{realizado na Física como recepção; exportado; sem paper próprio}
-\ficharow{correspondência}{térmico $\neq$ entrópico. Não transportar}
+\ficharow{correspondência}{térmico $\neq$ entrópico. $1-\eta$ $\neq$ $\lvert\det\rvert$. Entropia / expansão: Parte seguinte}
 }
 
 \medskip
@@ -2222,26 +2602,45 @@ transporta aditivo \(\leftrightarrow\) multiplicativo e \textbf{não} é
 \(\mathcal{D}\) (\code{fis:thm:diluicao}). O antigo «cósmico» é alias.
 
 \calibrador
-  {régua cosmológica da Parte}
+  {régua $H^{2}D=1$ (\code{fis:def:regua-cosmo})}
   {\texttt{N/A} como par de magmas do capítulo}
-  {$H^{2}D=1$; diluição por log}
-  {\texttt{N/A}}
-  {\texttt{N/A}}
-  {\texttt{N/A}. O log da diluição é ISO (aditivo $\leftrightarrow$ multiplicativo), explicitamente não $\mathcal{D}$}
-  {$H^{2}D=1$ exacto; log $\neq$ $\mathcal{D}$}
-  {$H^{2}D=1$}
+  {$H^{2}D=1$; diluição $r\,a^{3(1+w)}=C$; três conteúdos}
+  {duas involuções $I_1,I_2$ tipo $\dagger$; Klein; \textbf{não} o rotor}
+  {\texttt{não localizada}. $w=-\tfrac13$ é a borda / corte, não $x^{2}=x+1$}
+  {\texttt{N/A} (I2). O log da diluição é Iso (aditivo $\leftrightarrow$ multiplicativo), partilha a \emph{face} com $\mathcal{D}$ e não o \emph{tipo}}
+  {$H^{2}D=1$ exacto; dois $H$ não ligados; ponte da dimensão em aberto}
+  {$H^{2}D=1$; $r\,a^{3(1+w)}=C$}
+
+\label{cat:ingestao:cosmologia}
+\fichaingestao{Cosmologia}{%
+\ficharow{$\mathrm{I}_{0}$}{os dois $H$ (régua $H^{2}D=1$ $\neq$ $H=a'/a$, \code{fis:thm:diluicao}); a palavra «duomorfismo» da tese como operador $\mathcal{D}$; log como $\mathcal{D}$; Klein $=$ rotor; $H^{2}D=1$ como $\lvert\det\rvert=1$; $\Delta$ da Óptica $\neq D$ $\neq q$; $w=-\tfrac13$ como estrela; quarto conteúdo; ponte da dimensão (codimensão $\leftrightarrow 3(1+w)$); Friedmann / constante medida; «cósmico» do bestiário. Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{régua $H^{2}D=1$; família metálica $M_m$; escala $a$; $w$ (\code{fis:def:regua-cosmo}). Não se importa $\mathbb{R}$. Continuidade e aceleração entram \emph{marcadas}}
+\ficharow{$\mathrm{I}_{2}$}{\texttt{N/A} como par $\oplus,\otimes$ de magmas. O par $r_w,r_{w^{\dagger}}$ é complementar via $I_2$, não cisão de magmas. Os dois $H$ são homónimos, não duas ops. \textbf{Não} $\mathrm{lcm}/\mathrm{gcd}$}
+\ficharow{$\mathrm{I}_{3}$}{\texttt{N/A} (I2)}
+\ficharow{$\mathrm{I}_{4}$}{GLH: não localizada nesta Parte. Referência: \code{fis:thm:central}. $C$ conservado é invariante da diluição, não o rectângulo. $H^{2}D=1$ é a régua, \textbf{não} $\lvert\det\rvert=1$. $\lvert\det M_m\rvert=1$ é o gato (Mecânica), herdado}
+\ficharow{$\mathrm{I}_{5}$}{tríade dourada: não localizada. $\mathcal{F}$ / polar é Álgebra (\code{fis:def:transf}). A cónica $9(w+1)^{2}+16H^{2}=4$ é identidade do mesmo operador (\code{fis:thm:conica}), não a tríade}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia)}
+\ficharow{$\mathrm{I}_{7}$}{\texttt{N/A} (I2). Log: Iso / dicionário, \textbf{não} $\mathcal{D}$ (partilha a face, não o tipo; \code{fis:thm:diluicao}). O quarteto é dois $\dagger$, \textbf{não} $(\mathcal{D},\dagger)$. \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$}
+\ficharow{$\mathrm{I}_{8}$}{duas involuções, tipo $\dagger$, e não se colam (\code{fis:def:duas-inv}): $I_1\colon w\mapsto -w$; $I_2\colon m\mapsto -m$. Klein $C_2\times C_2$ (\code{fis:thm:bidual}). \textbf{Não} o rotor (cíclico de ordem $4$)}
+\ficharow{$\mathrm{I}_{9}$}{$w=-\tfrac13$ é a borda da aceleração, limite da família metálica, corte (\code{fis:thm:corte}(5)) --- \textbf{não} $x^{2}=x+1$. $w=-1$ é ponto fixo de $I_2$ (vácuo). $\operatorname{Star}$: não localizada}
+\ficharow{$\mathrm{I}_{10}$}{realizado: régua; três conteúdos; diluição com $C$; destino pelo sinal; órbita de Klein; cónica. Continuidade recebida. Ponte da dimensão \textbf{em aberto}. Os dois $H$ não se ligam}
+\ficharow{$\mathrm{I}_{11}$}{par: $r_w,r_{w^{\dagger}}$ (complementar, \code{fis:cor:ponte}). Estado: \texttt{realizado}. $\mathsf{Mor}$: Iso do log (dicionário); Hom da dobra multiplicativa transportada (\code{fis:lem:dobramult}); Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada ($H^{2}D=1$ não é $\lvert\det Df\rvert=1$); $\mathbf{Duo}$ \texttt{N/A}}
+}
 
 \fichacapitulo{Cosmologia}{%
+\ficharow{camada}{Física}
+\ficharow{ingestão}{\S\ref{cat:ingestao:cosmologia}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Cosmológico} ($H^{2}D=1$). Alias: cósmico}
-\ficharow{suporte}{régua \code{fis:def:regua-cosmo}}
-\ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo}
-\ficharow{construção}{\code{fis:def:regua-cosmo}, \code{fis:thm:diluicao}. Sem paper}
-\ficharow{involução}{\texttt{N/A}}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A}. Log da diluição $=$ dicionário, não duomorfismo}
-\ficharow{lei complementar}{$H^{2}D=1$}
-\ficharow{estatuto}{realizado na Física; exportado; sem paper próprio}
-\ficharow{correspondência}{«cósmico» $=$ alias (\S\ref{cat:mae})}
+\ficharow{suporte}{régua \code{fis:def:regua-cosmo}; família metálica $M_m$}
+\ficharow{operações}{\texttt{N/A} como \(\oplus,\otimes\) de corpo. Continuidade recebida}
+\ficharow{construção}{\code{fis:def:regua-cosmo}, \code{fis:thm:diluicao}, \code{fis:thm:bidual}, \code{fis:thm:conica}. Sem paper}
+\ficharow{involução}{$I_1,I_2$ tipo $\dagger$; Klein. \textbf{Não} o rotor}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. $w=-\tfrac13$ é a borda, não $x^{2}=x+1$}
+\ficharow{$\mathcal{D}$}{\texttt{N/A} (I2). Log $=$ dicionário / Iso, não duomorfismo-operador}
+\ficharow{lei complementar}{$H^{2}D=1$; $r\,a^{3(1+w)}=C$}
+\ficharow{morfismos}{Iso do log; Hom da dobra $\times$ transportada; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada; $\mathbf{Duo}$ \texttt{N/A}}
+\ficharow{estatuto}{realizado na Física; exportado; sem paper próprio. Ponte da dimensão em aberto}
+\ficharow{correspondência}{«cósmico» $=$ alias (\S\ref{cat:mae}). Klein $\neq$ rotor. Dois $H$, um símbolo}
 }
 
 \section*{Bloco 2 --- papers como construção}
@@ -2314,6 +2713,7 @@ Estatuto exportado: construção. \(\mathcal{D}=\texttt{N/A}\) nos quatro.
   {\code{fis:thm:troca-realizacao}: $\partial^{2}=\mathrm{id}$, $u$ invariante}
 
 \fichacapitulo{Álgebra (paper)}{%
+\ficharow{camada}{Física (paper); N--R é outra camada}
 \ficharow{corpo canónico}{\textbf{Corpo Algébrico}. A cadeia é outra realização, numérica (\S\ref{cat:numericos})}
 \ficharow{suporte}{$\mathbb{Q}(m\sqrt{D})$}
 \ficharow{operações}{$\star$ com $\tau$; cinco ops do paper. \textbf{Não} $+$/$\times$ da cadeia}
@@ -2323,7 +2723,7 @@ Estatuto exportado: construção. \(\mathcal{D}=\texttt{N/A}\) nos quatro.
 \ficharow{$\mathcal{D}$}{\texttt{N/A}}
 \ficharow{lei complementar}{\texttt{N/A} nomeada. Par Dir/Cruz $=$ metades de $\star$}
 \ficharow{estatuto}{construção do paper. Completude clássica recusada}
-\ficharow{correspondência}{cadeia $\mathbb{N}\to\mathbb{R}$; Alonzo; Omnitrix --- três suportes, sem fusão}
+\ficharow{correspondência}{cadeia $\mathbb{N}\to\mathbb{R}$; Alonzo (Parte Fractal); Omnitrix --- três suportes, sem fusão}
 }
 
 \subsection*{Corpo Topológico --- $\tau=-1$}
@@ -2344,6 +2744,7 @@ homónimo, não este corpo.
   {\code{fis:thm:troca-realizacao}}
 
 \fichacapitulo{Topologia}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão da Parte}{\S\ref{cat:ingestao:topologia} --- \code{fisica.tex}, não este paper. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Topológico} ($\tau=-1$)}
 \ficharow{suporte}{$\mathcal{C}_K$; $\Lambda_K$}
@@ -2376,6 +2777,7 @@ Corpo Real. A Estrela do paper \textbf{não} se unifica com
   {temas paralelos: \code{fis:thm:corte}, \code{fis:thm:duasfaces} --- o paper \textbf{não} os cita}
 
 \fichacapitulo{Análise}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão da Parte}{\S\ref{cat:ingestao:analise} --- \code{fisica.tex}, não este paper. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Analítico} ($\tau=+1$). Corpo Real $=$ cadeia, outro ficheiro}
 \ficharow{suporte}{corte / caminho; $\mathbb{R}$ como domínio}
@@ -2408,6 +2810,7 @@ do rotor, não \(\operatorname{Star}\). Alias: aranha. Motor/rotor
   {conservação $\sum_x G(x)=\lvert I\rvert$}
 
 \fichacapitulo{Mecânica (paper)}{%
+\ficharow{camada}{Física}
 \ficharow{ingestão da Parte}{\S\ref{cat:ingestao:mecanica} --- \code{fisica.tex}. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Mecânico}. Alias: aranha}
 \ficharow{suporte}{$I$, $\pi$, $G$}
@@ -2463,25 +2866,44 @@ autovalores real\(\leftrightarrow\)complexo como \(\mathcal{D}\): \textbf{não}
 
 \calibrador
   {matriz $W$; padrões $\xi^{p}\in\{\pm1\}^{N}$; estados $s\in\{\pm1\}^{N}$}
-  {bilinear $W\times X\to X$. \textbf{Não} duas magmas $X\times X\to X$. $\sigma$ unária no alias nervoso}
+  {partição única $W=W_s+W_a$ (directo/cruzado). \textbf{Não} magmas $\oplus,\otimes$. Bilinear $W\times X\to X$}
   {\code{fis:thm:combina} (teorema); Hebb $=$ realização (\code{fis:cor:hebb}); descida \textbf{se} $H$ (\code{fis:thm:desce})}
-  {\texttt{N/A} como $\mathcal{D}$ ou $\nu$ de magmas}
-  {\texttt{N/A}. $W_s/W_a$ \textbf{não} são estrela}
-  {\texttt{N/A}. Não se inventa a dual. $\bowtie$ motor $\neq$ \code{fis:def:duomorf}}
+  {$W\mapsto W^{\!\top}$. $T^{2}=\pm\mathrm{id}$ é da actualização}
+  {\texttt{não localizada}. $W_s/W_a$ \textbf{não} são estrela. $T^{2}=-\mathrm{id}$ é rotor, não $x^{2}=x+1$}
+  {\texttt{N/A} (I2). Não se inventa a dual. $\bowtie$ motor $\neq$ \code{fis:def:duomorf}. Hexal $\neq$ Duo. $W_s+W_a$ $\neq$ $\mathrm{lcm}/\mathrm{gcd}$}
   {$H$ explícita na Física, \textbf{não} realizada no bestiário: $W=W^{\top}$ e $W_{ii}=0$}
   {descida sob $H$: $W=W^{\top}$, $W_{ii}=0$}
 
+\label{cat:ingestao:redes}
+\fichaingestao{Redes}{%
+\ficharow{$\mathrm{I}_{0}$}{limiar McCulloch--Pitts como neurónio da casa; Hebb como lei; Hopfield $\cong$ árvore; $W_s/W_a$ como $\oplus/\otimes$ ou $\mathrm{lcm}/\mathrm{gcd}$ ou estrela ou $\mathbf{Duo}$; $T^{2}=-\mathrm{id}$ como Klein / $\operatorname{Star}(\mathcal{U})$; Lei~7 desta Parte; hexal como Duo; $\bowtie$ motor como $\mathcal{D}$; EM; «torre» $\neq$ \code{fis:thm:tecidos}; $H$ energia $\neq$ $H$ cosmologia; $D_{\mathrm{can}}=\tau$; ciclo $W_s+W_a$ (§F10 falha). Não se tomam}
+\ficharow{$\mathrm{I}_{1}$}{matriz $W$; padrões $\xi^{p}\in\{\pm1\}^{N}$; estados $s$. Neurónio $=$ \code{fis:neuronio} (Mecânica), não peça nova. Não se importa $\mathbb{R}$}
+\ficharow{$\mathrm{I}_{2}$}{partição única $W=W_s+W_a$ no mesmo $S$ (\code{fis:thm:duastorres}): eixo \textbf{directo/cruzado} de \code{fis:def:duomorf}. \textbf{Não} magmas $\oplus,\otimes$ (eixos diferentes; colar apaga o segundo bit). \textbf{Não} $\mathrm{lcm}/\mathrm{gcd}$}
+\ficharow{$\mathrm{I}_{3}$}{$W_s$ mede (Lyapunov, ponto fixo); $W_a$ ordena (forma quadrática $\equiv0$). Síncrono $p\mid2$; $T^{2}=-\mathrm{id}$ ordem $4$}
+\ficharow{$\mathrm{I}_{4}$}{GLH: não localizada nesta Parte. Referência: \code{fis:thm:central}. Sobreposição é \textbf{contagem} (\code{fis:thm:sobrepoe}). $E$ é Lyapunov, não o rectângulo. Ultramétrica $d=2^{-\operatorname{prof}}$ é Topologia. $\Delta_{\mathrm{int}}$ é termo cruzado, não GLH}
+\ficharow{$\mathrm{I}_{5}$}{tríade dourada: não localizada. $\mathcal{F}$ é Álgebra}
+\ficharow{$\mathrm{I}_{6}$}{Lei~7: não localizada (Topologia). O paper classifica; não prova aqui}
+\ficharow{$\mathrm{I}_{7}$}{\texttt{N/A} como $\mathbf{Duo}$ de magmas (I2). $W_s/W_a$ $\neq$ Duo. Hexal $\neq$ Duo. $\bowtie$ motor $\neq$ \code{fis:def:duomorf}. \textbf{Não} copiar $(\mathrm{lcm},\mathrm{gcd})$}
+\ficharow{$\mathrm{I}_{8}$}{involução $W\mapsto W^{\!\top}$ gera a partição. $I^{2}=\mathrm{id}$ do operador $\neq$ $s_{t+2}=s_t$ da órbita (\code{fis:thm:duastorres}). $T^{2}=-\mathrm{id}$ / $J$ é homónimo do rotor, não esta involução}
+\ficharow{$\mathrm{I}_{9}$}{ponto fixo da descida $=$ forma do corte (\code{fis:thm:desce}) --- \textbf{não} $x^{2}=x+1$. $T^{2}=-\mathrm{id}$ é $x^{2}=-1$ da actualização, não $\operatorname{Star}(\mathcal{U})$. $\operatorname{Star}$: não localizada}
+\ficharow{$\mathrm{I}_{10}$}{realizado na Parte: combina; Hebb $=$ realização; interferência $=G>1$; descida sob $H$; duas torres; $p\mid2$ e ordem $4$. Paper instancia combina, cita desce. $H$ no bestiário: \texttt{candidato}. §F10: somar as metades \textbf{não} põe ciclo}
+\ficharow{$\mathrm{I}_{11}$}{par: $W_s,W_a$ (directo/cruzado, não magmas). Estado: \texttt{realizado} na Parte; \texttt{candidato} no bestiário. $\mathsf{Mor}$: Hom da cisão$+$soma e da superposição em $V$; árvore $\not\cong$ Hopfield ($G=1$ vs $G>1$, mesma folga); Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada ($E$ $\neq$ $\lvert\det Df\rvert=1$); $\mathbf{Duo}$ \texttt{N/A}}
+}
+
 \fichacapitulo{Redes}{%
+\ficharow{camada}{Física $+$ bestiário (\texttt{candidato} em $H$)}
+\ficharow{ingestão}{\S\ref{cat:ingestao:redes}. Doze slots. Não se reconstrói}
 \ficharow{corpo canónico}{\textbf{Corpo Neural}}
 \ficharow{alias}{nervoso (histórico). \textbf{Não} eletromagnético}
 \ficharow{suporte}{rede: $W$, padrões $\pm1$. Neurónio $=$ \code{fis:neuronio}, não peça nova}
-\ficharow{operações}{bilinear $W\times X\to X$. Hebb/Hopfield $=$ realização, não lei}
+\ficharow{operações}{bilinear $W\times X\to X$. $W_s+W_a$ $=$ directo/cruzado, \textbf{não} magmas}
 \ficharow{construção}{\code{papers/redes.tex} instancia \code{fis:thm:combina}; cita \code{fis:thm:desce}}
-\ficharow{involução}{\texttt{N/A}}
-\ficharow{$\operatorname{Star}$}{\texttt{N/A}}
-\ficharow{$\mathcal{D}$}{\texttt{N/A}}
-\ficharow{lei complementar}{descida sob $H$ --- hipótese nomeada, realização falta}
-\ficharow{estatuto}{\texttt{candidato}. Não se eleva a fechado enquanto $H$ não estiver escrita e realizada no suporte}
+\ficharow{involução}{$W\mapsto W^{\!\top}$. $T^{2}=\pm\mathrm{id}$ é da actualização}
+\ficharow{$\operatorname{Star}$}{\texttt{não localizada}. $W_s/W_a$ não são estrela}
+\ficharow{$\mathcal{D}$}{\texttt{N/A} (I2). $\bowtie$ motor $\neq$ duomorfismo}
+\ficharow{lei complementar}{descida sob $H$ --- hipótese nomeada, realização no bestiário falta}
+\ficharow{morfismos}{Hom da cisão$+$soma; Diff não localizada; $\operatorname{Isom}_{\mu}$ não localizada; $\mathbf{Duo}$ \texttt{N/A}}
+\ficharow{estatuto}{\texttt{candidato} no bestiário. Teoremas da Parte realizados. Não se eleva a fechado enquanto $H$ não estiver escrita e realizada no suporte}
 }
 
 \noindent Sem \(H\) realizada, \code{fis:thm:desce} não aplica ao alias
@@ -2509,7 +2931,7 @@ proposição \emph{Decomposição simétrica/antissimétrica} em
 \ficharow{$\mathrm{I}_{4}$}{GLH: \code{fis:thm:central} $+$ \code{analitico thm:central-energia}}
 \ficharow{$\mathrm{I}_{5}$}{dourada $\mathcal{F}\circ\Lambda$; $m=0$ troca $a\pm b$; $m=1$ estrela $a+b\varphi$}
 \ficharow{$\mathrm{I}_{6}$}{Lei~7: dois tecidos, sem fusão, sem Lei~8. Não se batiza $\mathbb{H}\times\mathbb{H}^{*}$}
-\ficharow{$\mathrm{I}_{7}$}{realização: $\otimes=\mathrm{lcm}$, $\otimes^{*}=\mathrm{gcd}$; $\nu_N(d)=N/d$. \textbf{Não} regra de todo corpo (\code{univ:obs:lcm})}
+\ficharow{$\mathrm{I}_{7}$}{realização: $\otimes=\mathrm{lcm}$, $\otimes^{*}=\mathrm{gcd}$; $\nu_N(d)=N/d$ manifesta $\mathcal{D}$ neste suporte (\code{univ:def:lcm}). \textbf{Não} $\operatorname{Star}(\mathcal{U})=\nu_N$. Hexal $=$ rótulo, não $\mathbf{Duo}$. \textbf{Não} regra de todo corpo (\code{univ:obs:lcm})}
 \ficharow{$\mathrm{I}_{8}$}{$\tau$ nos argumentos; conjugação $=\dagger$ de $\mu$, não $\mathcal{D}$}
 \ficharow{$\mathrm{I}_{9}$}{$m=1$ é \code{fis:thm:estrela} (metálica). Não $\operatorname{Star}$ da interface}
 \ficharow{$\mathrm{I}_{10}$}{interface fechada; forma $E^{2}-B^{2}$ ainda não corpo}
@@ -6579,6 +7001,7 @@ A arquitetura é mínima de propósito. Ali um teorema não é um texto: é um \
 
 E o próprio corpo grava o limite dele: \emph{$x\oplus x=0$ passa nos $k$ casos testados, mas \textbf{a amostra não é o universo}}. O fechamento dele é a \textbf{fase}: o eixo gerar $\bowtie$ atestar \emph{é} o eixo magnitude $\bowtie$ fase --- quem gera dissipa, $|e^{at}|\neq1$; quem atesta conserva, $|e^{i\theta}|=1$. Uma verificação que alterasse o que verifica teria módulo diferente de um, e seria vazamento. \textbf{JOGADA: a atestação} --- resíduo $0$, o lance é legal; resíduo não nulo, o lance \emph{não aconteceu}. A única peça que não ataca, e sem ela nenhum universo abre.
 
+\noindent\textit{camada:} bestiário --- classificado por \(\mathcal{U}\).
 \fichaconstrucao{princesas / $\mathbb{F}_{2}$}
   {veredito: $x\oplus x=0$; sequente hipóteses $\vdash$ proposição}
   {$\oplus=\mathrm{XOR}$; $\otimes=\mathrm{AND}$; $\prod=\mathrm{NOT}$}
@@ -6617,6 +7040,7 @@ Não são duas grandezas: é a \textbf{mesma} grandeza em duas réguas. O que sa
 
 O rotor fecha porque \textbf{conserva}: é a fase, o círculo $|z|=1$, regulador nulo, a órbita que volta ao mesmo ponto. Sozinho é meia coisa; com o motor --- a magnitude, que cresce e dissipa --- fecha um corpo de assinatura $(2,0,0)$: um número é motor vezes rotor, e $\log z=\log|z|+i\theta$ reparte a magnitude (aditiva) da fase (o giro). \textbf{JOGADA: o impulso.} Somar velocidades nunca leva além do limite; somar rapidezes não tem teto. \textbf{A peça que aprende a trocar de régua ganha} --- e é o mesmo lance.
 
+\noindent\textit{camada:} bestiário --- \(x^{2}=-1\) \(\neq\operatorname{Star}(\mathcal{U})\); \(\neq\) Klein da Cosmologia.
 \fichaconstrucao{rotor $\bowtie$ motor}
   {$\oplus$ de rapideces; $\log z=\log|z|+i\theta$}
   {uma: $\oplus$. O produto no denominador \textbf{não} é segunda magma (\S\ref{cat:audit:rotor})}
@@ -6650,6 +7074,7 @@ Sob o logaritmo, a expansão inteira é uma reta de inclinação $H$. É a mesma
 
 A régua fina é o \textbf{dipolo}: dois atratores, o negro (o poço, o mate) e o branco (o pico, o refúgio), e o potencial de um ponto é a diferença dos inversos das duas distâncias. O flip é a reflexão $\nu=-1$: trocar as fontes leva $V\mapsto-V$, e o atrator vira repulsor. É esse dipolo --- e não uma régua feita para a ocasião --- que mede o gap do rei: o mate de bispo e cavalo é literalmente um problema de dois atratores, com o poço na cor do bispo e o refúgio na oposta. O corpo entrópico é a \textbf{metade} deste: o negro é o máximo de entropia, o branco o mínimo, e o entrópico fica com uma polaridade só. Meia régua.
 
+\noindent\textit{camada:} bestiário --- \textbf{não} o Corpo Termodinâmico; \(\min/\max\) da lista \(I\).
 \fichaconstrucao{entrópico}
   {$\oplus=\max$; custo mínimo; uma polaridade do dipolo}
   {$\max,+$; duas operações --- $\mathcal{D}$ actua}
@@ -6690,6 +7115,7 @@ com o logaritmo da razão do outro lado --- o mesmo $\exp/\log$ dos juros e da e
 
 O corpo nervoso é \textbf{conservativo}, e isso tem marca exata no gerador: os autovalores são \textbf{reais} e os atratores são \textbf{pontos fixos} --- as memórias, os fundos de poço. O seu dual é o motor, que \textbf{dissipa}: ali os autovalores são complexos e os atratores são \textbf{ciclos}. O flip troca real por complexo, e \textbf{a rotação é a marca do dual}. Um guarda, o outro gasta. E a rede de atratores \textbf{é o tabuleiro cósmico em pequena escala}: cada memória um poço local, e a rede desce ao mais próximo. \textbf{JOGADA: a cadeia.} O lance não atinge a peça: atinge \textbf{a rede dela} --- propaga pelos pesos, soma nos nós. Isolar é a defesa; conectar é o poder e o risco.
 
+\noindent\textit{camada:} bestiário --- homónimo; a Parte Redes é Física.
 \fichaconstrucao{nervoso $\bowtie$ motor}
   {rede: matriz $W$, activação unária $\sigma$}
   {bilinear $W\times X\to X$. \textbf{Não} duas magmas. $\mathcal{D}=\mathrm{N/A}$}
@@ -6720,6 +7146,7 @@ A régua dele é o que \textbf{falta}: mede pela dimensão que sobra. Em $\R^n$ 
 
 E é assim que ele fecha: casado com a fase, o operador que gira ativa a segunda coordenada, $e^2=0$ vira $i^2=-1$, a norma $a^2$ vira $a^2+b^2$ --- e a assinatura sobe de $(1,0,1)$ para $(2,0,0)$. Com $r=0$ e a norma definida, todo elemento não nulo passa a ter inverso. \textbf{Sozinho o exterior é um cone; com o rotor, é um corpo.} \textbf{JOGADA: o corte.} Atacar na direção do inimigo não gera nada; atacar \textbf{transversal} gera a lâmina.
 
+\noindent\textit{camada:} bestiário --- quinze formas / homónimos da Geometria.
 \fichaconstrucao{exterior}
   {$ab=a\cdot b+a\wedge b$; $e^{2}=0$; assinatura $(1,0,1)$}
   {interior simétrico; wedge antissimétrico}
@@ -6775,6 +7202,7 @@ Recolha-se a construção inteira, que agora se lê de uma vez.
 
 Há \textbf{um} corpo elementar, o algébrico: uma régua redonda, grau $1$, e um operador que não foi escolhido --- o sucessor, os caracteres, a órbita da torção. Cada corpo do bestiário sai de uma \textbf{assinatura}: a órbita que colapsa a classe e a regenera, ida e volta, sem terminar. Congelada, ela dá a contagem $(p,q,r)$; a correr, ela dá o gato, e o gato dá o corpo. \textbf{Cada corpo é uma matriz}, e nenhuma opera sozinha --- ligam-se todas por duais, que dão o que falta, e por transformadas, que levam de uma à outra. Reunidas sob $\oplus$ (que soma os graus) e $\otimes$ (La Hire, que compõe), com a torção por invariante e a norma multiplicativa por lei de conservação, essas matrizes formam de novo um único corpo --- o \textbf{Omnitrix} ---, e a torre onde ele vive fecha no grau $8$, assinatura $(8,0,0)$: oito réguas redondas, e não há nona.
 
+\noindent\textit{camada:} bestiário --- classificado por \(\mathcal{U}\); torção \(\neq T^{2}\).
 \fichaconstrucao{Omnitrix}
   {matrizes das assinaturas reunidas sob $\oplus$ e $\otimes$; torre grau $8$}
   {$\oplus$ (bloco diagonal); $\otimes$ (Kronecker / La Hire)}

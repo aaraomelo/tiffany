@@ -571,11 +571,14 @@ famílias de experiências
 \[
 I=I_1\sqcup I_2\sqcup I_3\sqcup I_4,
 \]
-com uma \textbf{única} realização $\pi\colon I\to X$ num mesmo espaço $X$. Os quatro
-\emph{focos} (FDPs, leituras, agentes) são fontes dentro da mesma realização
-cerebral --- não quatro redes separadas. \emph{Não confundir} com a troca dual
+com uma \textbf{única} realização $\pi\colon I\to X$ num mesmo espaço $X$.
+Os quatro \emph{focos} --- leituras ou agentes --- são fontes dentro da mesma
+realização cerebral, e não quatro redes separadas.
+
+\emph{Não confundir} com a troca dual
 $R,R^{\dagger}$ do \fis{fis:thm:troca-realizacao}{Teor. «troca de realização»}:
-a isometria $u(Da,Db)=u(a,b)$ exige aquelas leituras (Prop.~\ref{redes:prop-troca}).
+a isometria $u(Da,Db)=u(a,b)$ exige aquelas leituras
+(Prop.~\ref{redes:prop-troca}).
 
 \medskip\noindent\textbf{Multiplicidade agregada.} Para cada foco $a\in\{1,2,3,4\}$,
 seja $\pi_a=\pi|_{I_a}$. Então
@@ -844,7 +847,31 @@ absorvido. $W_a$ ordena o canal das línguas absorvidas (período~$4$);
 \emph{não} é o fio HTTP, nem a aresta $a{=}1$.
 \caixa{a \textbf{matriz} memoriza as línguas absorvidas; o \textbf{fio}
 transporta o que ainda não foi absorvido}\label{redes:memoria-fio}
-Interface não é transporte. Memória não é fio.
+
+\medskip\noindent\textbf{Descida do domínio} (\code{fis:def:dominio-interface}).
+Não se transformam os quatro quadrantes em quatro operadores. A leitura
+$2{\times}2$ é a interface \emph{filtrada}:
+\[
+\mathcal{M}=\mathcal{O}\sqcup\mathcal{T},\qquad
+\mathcal{D}^{2}=\mathrm{id}_{\mathcal{O}},
+\]
+com $\mathcal{O}=\{\texttt{sql},\texttt{latex},\texttt{node},\ldots\}$ (órbitas)
+e $\mathcal{T}=\{\texttt{post},\texttt{http},\texttt{fetch}\}$ (\code{fios}).
+$\mathcal{D}$ troca a face \emph{dentro} de $\mathcal{O}$; em $\mathcal{T}$ não
+tem domínio. O canto inferior direito é vazio porque o fio ainda não tem
+$\oplus/\otimes$.
+\[
+\begin{array}{c|cc}
+ & a{=}0 & a{=}1\\\hline
+\mathcal{O} & \xi,\;Q_{00/01} & \xi^{\vee},\;Q_{10/11}\\[2pt]
+\mathcal{T} & \text{fio} & \text{---}
+\end{array}
+\]
+Dentro de $\mathcal{O}$ entram os dois bits que já existem,
+$Q_{ab}=\mathcal{D}^{a}\dagger^{b}$. $W=W_s+W_a$ é a matriz \emph{depois} da
+absorção, noutro eixo --- \emph{não} é a linha $a{=}1$. $G=1$ continua a ser a
+fita. A frase seguinte deixa de ser só editorial: é a Def.~\code{fis:def:dominio-interface}
+lida no pipe.
 
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
@@ -852,10 +879,10 @@ Interface não é transporte. Memória não é fio.
 peça & faz & não é \\
 \midrule
 $W_s$ ($W_s^{\top}=W_s$) & memória --- recupera $\xi$ & transporte \\
-$W_a$ ($W_a^{\top}=-W_a$) & ordem do canal --- $s^{\top}W_as=0$ & aresta $a{=}1$ \\
-$a{=}1$ & aresta duo da rede de línguas & $W_a$ \\
+$W_a$ ($W_a^{\top}=-W_a$) & ordem do canal --- $s^{\top}W_as=0$ & aresta $a{=}1$, nem face~$1$ \\
+$Q_{ab}$ & quarteto interno a $\mathcal{O}$ & quatro operadores sobre $\mathcal{M}$ \\
 $G{=}1$ & fita / passagem única & Hopfield \\
-\code{fios} & HTTP não absorvido & órbita, $W$ \\
+$\mathcal{T}$ & HTTP não absorvido & órbita, $W$, $\mathcal{D}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -880,6 +907,7 @@ interferência & \code{fis:thm:combina}, \code{fis:cor:hebb} & \pt{6} descida & 
 recuperação & \code{fis:thm:desce} & âncora / Hopfield dual & $\lambda^{+}+\lambda^{-}=0$ \\
 $W_s/W_a$ & \code{fis:thm:duastorres} & \code{mf:thm:duas} & \code{orbitas\_hopfield.js}; \code{hopfield.c} \\
 duomorfismo & \code{fis:def:duomorf} & --- & \code{wasm\_erg}, MOVE (III) \\
+domínio & \code{fis:def:dominio-interface} & --- & \code{cat:dominio-interface}: $\mathcal{O}/\mathcal{T}$ \\
 fio HTTP & --- & --- & \code{fios} --- transporte; \emph{não} $W$ \\
 \bottomrule
 \end{tabular}}
@@ -976,6 +1004,8 @@ antissimetria sozinha. \code{tests/hopfield.c} §F10: somar torres \textbf{não}
 órbitas absorvidas, \emph{não} nos \code{fios}.
 
 \caixa{interface não é transporte; memória não é fio}\label{redes:interface-fio}
+--- $\mathcal{D}$ interno a $\mathcal{O}$; $\mathcal{T}$ só transporta;
+$W$ só memoriza $\mathcal{O}$.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Combinação}\label{redes:combinacao}\label{redes:fronteira}%

@@ -16,7 +16,7 @@ Contrato: `corpo_universal.tex` (raiz). Instância na Física: `fis:universal`, 
 \boxed{\mathcal{U}\neq\text{catálogo}\neq\operatorname{INGEST}}
 \]
 
-Estrutura **já construída** (`fis:def:doisandares`, `fis:def:dual`, `fis:thm:base`). Não se protocola. Não é supercorpo. Não é o 14º lugar. Não entra no bestiário.
+Estrutura **já construída** (`fis:def:doisandares`, `fis:def:dual`, `fis:thm:base`). Não se protocola. Não é supercorpo. **Não é uma Parte.** Não decide quais capítulos existem. Não entra no bestiário.
 
 - \(X\): espaço vectorial sobre \(B\), \(\dim=8\), \(e_k=2^{k}\). As oito leis **são** esta base (`papers/aranha.c`, `papers/aranha.asm`: `neuronio8`). Não há Lei~8. Dual explícito no medidor: só \(0^{\dagger}=\infty\); não inventar pares 1–7.
 - \(X^{*}\): dual de \(X\) pelo emparelhamento \(\langle a,b\rangle=\operatorname{paridade}(a\wedge b)\). Em cima, \(V\) e \(V^{*}\) (`fis:def:dual`). \[X^{*}\neq V^{*}\neq\mathbf{Duo}.\]
@@ -27,25 +27,65 @@ Estrutura **já construída** (`fis:def:doisandares`, `fis:def:dual`, `fis:thm:b
 \boxed{\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}}
 \]
 
-Percurso Álgebra→…→Redes = execução do autómato, não 2-morfismo. Física = o construído. Catálogo = o registo.
+\[
+\boxed{\mathcal{U}\text{ (gramática/reconhecimento)}\;\longrightarrow\;\text{Física (construção/existência)}\;\longrightarrow\;\text{Catálogo (auditoria/registo)}}
+\]
+
+A Física constrói. \(\mathcal{U}\) processa e valida o contrato. O catálogo regista sem inventar. Percurso Álgebra→…→Redes = execução do autómato, não 2-morfismo. INGEST não menciona o capítulo: custo = pior passo na ultramétrica, não soma de auditorias. Sem deliberação: evidência → `realizado`; incompatível → `N/A`; busca sem prova de ausência → `não localizada`.
+
+\[
+\boxed{\text{Parte Física}\;\xrightarrow{\text{realiza}}\;\text{Corpo canónico}\;\xrightarrow{\operatorname{INGEST}}\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}}
+\]
+
+\[
+\boxed{\text{Alonzo é o corpo canónico}\;\neq\;\text{Fractal é o nome da Parte}}
+\]
+
+\[
+\boxed{\text{catorze palcos}\;\neq\;\text{catorze corpos}}
+\]
+
+\(\mathcal{U}\) não decide quais capítulos existem.
 
 Agente: «qual é a evidência para o contrato neste suporte?» — nunca «parece um duomorfismo».
 
 ## Canónicos
 
 \[
+\boxed{\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\operatorname{Star}(K)=\{x:x^{2}=x+1\}
+\quad\neq\quad
+\text{o que cada Parte conserva}}
+\]
+
+Três autoridades. Não se copiam. I0 proíbe confundir as três «estrelas»:
+
+1. \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) — estrutural, bit \(a=1\): troca \((\oplus,\otimes)\mapsto(\otimes,\oplus)\). I7 se o suporte o admitir.
+2. \(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\) — ponto fixo de **elemento**. Slot I9. Não \(x^{2}=-1\).
+3. Factor / métrica local — o contrato que o suporte sustenta (p.ex. \(\lvert\det DT\rvert=1\) em \(\operatorname{Isom}_{\mu}\)). I11, **não** I4.
+
+- **U** (gramática, `corpo_universal.tex`): \(\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})\); \(\lvert\det\rvert=1\); \(\mathrm{I}_{4}=\mathrm{GLH}\), \(\mathrm{I}_{11}=\mathsf{Mor}\); vocabulário; INGEST. Toro, \(\mathrm{lcm}/\mathrm{gcd}\), \(\nu_N\), gato, dragão, \(\sum G\) são **realizações**, não canónicos gerais de \(\mathcal{U}\).
+- **N–R** (`naturais.tex`--`reais.tex`): transporte; opostos; quocientes; completação. \(\mathcal{D}=\texttt{N/A}\) em toda a cadeia. \(\operatorname{Star}(\mathbb{N},\mathbb{Z},\mathbb{Q})=\varnothing\), \(\operatorname{Star}(\mathbb{R})=\{\varphi,\psi\}\). **Não** é a Parte Álgebra.
+- **Física** (`fisica.tex`, catorze Partes): o construído. INGEST: as outras Partes fechadas; Fractal = Alonzo (exposição, não magma nova). O recebido (Carnot, continuidade) não vira canónico. O bestiário é realização classificada por \(\mathcal{U}\). Alonzo é canónico da Parte Fractal.
+
+O catálogo **regista**. Calibrador = ficha, não autoridade.
+
+\[
 \boxed{\operatorname{Star}(\mathcal{U})=\mathcal{D}}
 \]
 
-Não é \(x^{2}=x+1\) (`fis:thm:estrela`: elemento). Lei~5 \(x^{2}=-1\) **não** é a estrela. \(\mathcal{D}\) **não** é Hom, Iso, Diff nem Isom.
+Não é \(x^{2}=x+1\) (`fis:thm:estrela`: elemento). Lei~5 \(x^{2}=-1\) **não** é a estrela. \(\mathcal{D}\) **não** é Hom, Iso, Diff nem Isom. \(\nu_N\) no reticulado \(\mid\) **realiza** \(\mathcal{D}\); não substitui \(\operatorname{Star}(\mathcal{U})\). Hexal \(6=\mathrm{lcm}(2,3)\) é rótulo, não Duo.
 
 \[
 \boxed{\lvert\det\rvert=1}
 \]
 
-Métrica canónica = Lei~4 / conservação de volume (`fis:thm:gato`(2), `fis:thm:metainducao`(5)). **Não** é a medida de contagem (`fis:thm:medida`) nem \(d=\mu(A\triangle B)\) nem a ultramétrica do índice.
+Métrica canónica = Lei~4 / conservação de volume (`fis:thm:gato`(2), `fis:thm:metainducao`(5)). O toro \(T^{2}\) é a realização geométrica desse invariante (`univ:def:toro`): \(\operatorname{Aut}(T^{2})\) pede \(\lvert\det\rvert=1\); ordens \(\{1,2,3,4,6\}\). Hexal \(6\) é ordem da acção, não Duo. \(\operatorname{Isom}_{\mu}\) no palco é \(\mathrm{I}_{11}\), não \(\mathrm{I}_{4}\). \(\mathbf{Duo}\) no toro: `N/A` (acção de volume, não troca de leis). Gato fora. Lei~8: \(8\notin\{1,2,3,4,6\}\), restrição cristalográfica, não decreto. **Não** grupo modular. Torção do Omnitrix \(\neq\) toro \(T^{2}\).
 
-Iso algébrico \(\neq\) Isom de volume \(\neq\) ultramétrica. Homónimo **não** entra na ficha até I0 decidir.
+Iso algébrico \(\neq\) Isom de volume \(\neq\) ultramétrica \(\neq\) \(\mathrm{lcm}\cdot\mathrm{gcd}=ab\). Homónimo **não** entra na ficha até I0 decidir.
+
+Árvore de bits (`fis:def:arvore`) \(\neq\) árvore dos divisores \((\mathbb{N}_{>0},\mid)\). O par \(\mathrm{lcm}/\mathrm{gcd}\) é canónico **do par** nessa segunda (`univ:def:lcm`), **não** canónico geral de \(\mathcal{U}\): \(\vee=\mathrm{lcm}\), \(\wedge=\mathrm{gcd}\), produto = rectângulo GLH, \(\mathcal{D}\) via \(\nu_N\). Hexal \(6=\mathrm{lcm}(2,3)\) é rótulo, não Duo.
 
 ## Dois vocabulários
 
@@ -62,12 +102,17 @@ Primeiro procurar, depois demonstrar ausência, só então classificar `N/A`.
 
 Quádruplo: (pergunta, evidência, resultado, proibição). I0 → I11 → `fichaingestao` → calibrador → `fichacapitulo`. Evidência no catálogo; o paper não a legisla.
 
-I7: \(\mathrm{lcm}/\mathrm{gcd}\) é **uma** realização, não regra de todo corpo. Uma só operação em I2 \(\Rightarrow\) I7 é `N/A`.
+I7: no reticulado \(\mid\), o canónico do par é \(\vee=\mathrm{lcm}\), \(\wedge=\mathrm{gcd}\), \(\mathrm{lcm}\cdot\mathrm{gcd}=ab\), \(\mathcal{D}\) troca via \(\nu_N\) (`univ:def:lcm`). **Não** regra de todo corpo. Hexal \(6=\mathrm{lcm}(2,3)\) é rótulo, não Duo. Árvore de bits \(\neq\) árvore dos divisores. Uma só operação em I2 \(\Rightarrow\) I7 é `N/A`.
 
 ## Paragem
 
-Não se inventa o passo. Não se recomeça em I0 se a ficha já existe. Não se inventa metodologia por capítulo: os treze correm o mesmo \(\mathcal{U}\).
+Não se inventa o passo. Não se recomeça em I0 se a ficha já existe. Não se inventa metodologia por capítulo: as Partes correm o mesmo \(\mathcal{U}\). \(\mathcal{U}\) não decide a lista.
 
-Já ingeridas (não reabrir): Álgebra, Topologia, Análise, Geometria, Mecânica, Gravitação. EM: ler `cat:bloco4`; Mor em I11 sem reabrir I0. Seguinte: Relatividade.
+Já ingeridas (não reabrir): Álgebra, Topologia, Análise, Fractal (Alonzo; lê `cat:audit:alonzo`), Geometria, Mecânica, Gravitação, Relatividade, Óptica, Partículas, Termodinâmica, Cosmologia, Redes. EM: ler `cat:bloco4`; Mor em I11 sem reabrir I0. Não reabrir I0 das Partes fechadas.
+
+\[
+\boxed{I_4=\mathrm{GLH}\qquad I_{11}=\text{morfismos/estado}}
+\]
+\(\operatorname{Isom}_{\mu}\) não invade I4. Preservar \(\neq\) trocar. Cadeia: invariante abstracto \(\to\) contrato \(\to\) realização no suporte. GLH: rectângulo. Duo: troca das duas operações. \(\operatorname{Isom}_{\mu}\): medida. Contagem: \(\sum G\). Dragão: \(T+T^{*}=1\). \(\nu_N\) realiza \(\mathcal{D}\) no reticulado \(\mid\); não substitui \(\operatorname{Star}(\mathcal{U})\). Universalidade \(\neq\) homogeneização.
 
 Não commitar salvo pedido explícito. O Universal **não** entra no bestiário.
