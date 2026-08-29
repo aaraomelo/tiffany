@@ -1,0 +1,746 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  corpo_universal.tex — CORPO UNIVERSAL (raiz)
+%
+%  Objecto de nível superior: o corpo das transformações entre construções.
+%  Não é supercorpo. Não entra no bestiário. INGEST ⊂ U (realização).
+%  Compila: pdflatex corpo_universal.tex
+%
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{array}\usepackage{tabularx}\usepackage{xcolor}
+\usepackage[htt]{hyphenat}
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small\codecolon#1:\endcolon}}
+\def\codecolon#1:#2\endcolon{\codehyphen#1-\endhyphen\ifx\relax#2\relax\else:\allowbreak\codecolon#2\endcolon\fi}
+\def\codehyphen#1-#2\endhyphen{#1\ifx\relax#2\relax\else-\allowbreak\codehyphen#2\endhyphen\fi}
+\newcommand{\caixa}[1]{%
+  \par\smallskip\noindent
+  \begin{center}
+  \fbox{\begin{minipage}{0.92\linewidth}\centering\smallskip #1\smallskip\end{minipage}}
+  \end{center}\smallskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
+\renewcommand{\proofname}{Demonstração}
+
+\input{papers/gkcapa}
+
+\begin{document}
+\gkcapa{O Corpo Universal}
+       {espaço, dual, base das oito leis}
+       {consome a Física; não inventa estrutura; o catálogo lê as coordenadas}
+\maketitle
+
+\begin{abstract}\noindent
+O \textbf{Corpo Universal} \(\mathcal{U}\) é o intermediário operacional
+entre a Física e o catálogo. Não é supercorpo. Não é o 14º lugar.
+A estrutura não se protocola: \textbf{já está construída}.
+\[
+\boxed{\;\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})\;}
+\]
+\(X\) é o espaço vectorial de largura oito, com dual \(X^{*}\).
+A base ortonormal \(\{e_k=2^{k}\}_{k=0}^{7}\) \textbf{é} as oito leis
+(\code{fis:thm:base}; \code{papers/aranha.c}, \code{papers/aranha.asm}).
+\(\mathsf{Mor}\) relaciona construções.
+\(\mathsf{Aut}\) processa um vector nesse espaço.
+\[
+\boxed{\;\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}\;}
+\]
+Não se promove evidência a estrutura. Não há Lei~8.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{O que isto é, e o que não é}\label{univ:sec:estatuto}
+
+\begin{definicao}[Corpo Universal]\label{univ:def:U}
+O \textbf{Corpo Universal} \(\mathcal{U}\) consome o espaço que a Física
+já construiu --- Def.~\code{fis:def:doisandares}, Def.~\code{fis:def:dual},
+Teor.~\code{fis:thm:base} --- e opera nele. Não o inventa. Não contém
+os treze lugares.
+\[
+\boxed{\;\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})\;}
+\]
+Em baixo, \(X\) é espaço vectorial sobre o binário \(B\), dimensão \(8\),
+e \(X^{*}\) o dual pelo emparelhamento que torna \(\{e_k\}\) ortonormal
+(Def.~\ref{univ:def:dualU}). Em cima, o estado de \(\mathsf{Aut}\) é um
+vector \(G\) do módulo das funções sobre \(X\)
+(Def.~\code{fis:def:doisandares}).
+\(\mathsf{Mor}=\{\mathrm{Hom},\mathrm{Iso},\mathrm{Diff},\operatorname{Isom}_{\mu},\mathbf{Duo}\}\)
+é preservação.
+\[
+\boxed{\;\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}\;}
+\]
+Não entra no bestiário. Não é uma categoria universal.
+\end{definicao}
+
+\noindent \(\mathsf{Mor}\) pergunta que contrato \(f\) preserva;
+\(\mathsf{Aut}\) pergunta o estado e a transição.
+\caixa{%
+$\begin{array}{rcl}
+\text{categoria}
+& = &
+\text{como as construções se relacionam}\\[3pt]
+\text{autómato}
+& = &
+\text{como uma construção é processada}\\[3pt]
+\text{Física}
+& = &
+\text{o que efectivamente foi construído}\\[3pt]
+\text{catálogo}
+& = &
+\text{o registo do resultado}
+\end{array}$}
+\caixa{\(\mathcal{U}\neq\text{catálogo}\neq\operatorname{INGEST}\)}
+Um capítulo \textbf{não} vira corpo por ser ingerido, nem por admitir
+um mapa. O percurso Álgebra\(\to\cdots\to\)Redes é execução do autómato
+sobre uma sequência de entradas, não composição de 2-morfismos.
+
+\begin{observacao}[não contaminar a taxonomia]\label{univ:obs:taxonomia}
+Declarar \(\mathcal{U}\) objecto de nível superior \textbf{não} implica
+que todo capítulo seja um corpo. A cadeia
+\(\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}\to\mathbb{R}\) fecha por opostos,
+quocientes e completação, com \(\mathcal{D}=\texttt{N/A}\): isso
+\emph{satisfaz} o contrato de ingestão (o slot responde) e \emph{não}
+realiza duomorfismo. A forma \(E^{2}-B^{2}\) da Parte EM \textbf{não} é
+corpo (\code{fis:def:em-forma}) com a interface fechada.
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{O espaço, o dual, e as oito leis}\label{univ:sec:espaco}
+
+\begin{definicao}[o espaço]\label{univ:def:espaco}
+A Física já o tem (Def.~\code{fis:def:doisandares}). \(\mathcal{U}\)
+\textbf{consome}:
+\[
+\boxed{\;
+X\text{ espaço vectorial sobre }B,\quad
+\dim X=8,\quad
+e_k=2^{k}\ (0\le k<8).
+\;}
+\]
+As direções de aresta do hipercubo \emph{são} esta base. Não se escolhe
+armazenamento: o byte \emph{é} a escrita nas oito coordenadas
+(\code{fis:thm:base}(2): \(\langle b,e_k\rangle=(b\gg k)\wedge 1\)).
+\end{definicao}
+
+\begin{definicao}[o dual]\label{univ:def:dualU}
+O dual de \(X\) é o emparelhamento da Def.~\code{fis:def:dual}:
+\[
+\langle a,b\rangle=\operatorname{paridade}(a\wedge b),
+\qquad
+X^{*}\simeq X
+\text{ via }\{e_k\}.
+\]
+Em cima, o módulo \(V\) das funções tem dual \(V^{*}\)
+(Def.~\code{fis:def:dual}) e caracteres
+\(\chi_k(j)=(-1)^{\langle k,j\rangle}\). Três objectos, e não se misturam:
+\[
+\boxed{\;X^{*}\neq V^{*}\neq\mathbf{Duo}.\;}
+\]
+O dual linear não é a troca \((\oplus,\otimes)\mapsto(\otimes,\oplus)\)
+(Obs.~\ref{univ:obs:D}).
+\end{definicao}
+
+\begin{teorema}[a base é ortonormal, e é as oito leis]\label{univ:thm:base}
+\[
+\boxed{\;\langle e_i,e_j\rangle=\delta_{ij}\;}
+\]
+--- Teor.~\code{fis:thm:base}, Gram \(=\mathrm{Id}\). Donde a coordenada
+é ler o bit. No caso do byte (\(m=8\)), as oito máscaras \emph{são} os
+\(e_k\), e identificam-se com as oito leis da torre
+(\code{fis:obs:octoniao-interface}: leis \(0\)--\(7\); não há Lei~8):
+\begin{center}\small
+\begin{tabular}{@{}cll@{}}
+\toprule
+\(k\) & lei & o que a Física já nomeia \\
+\midrule
+0 & Lei~0 & \((+1)\oplus(-1)\); \(0^{\dagger}=\infty\) \\
+1 & Lei~1 & \(\nu\circ\nu=\mathrm{id}\) \\
+2 & Lei~2 & \(K^{**}=K\) \\
+3 & Lei~3 & \(\{-1,0,+1\}\) \\
+4 & Lei~4 & \(T+T^{*}\); \(\lvert\det\rvert=1\) \\
+5 & Lei~5 & \(x^{2}=-1\) (bit \(i\); \textbf{não} a estrela) \\
+6 & Lei~6 & interface \(\oplus=\otimes\) no suporte em que isso está escrito \\
+7 & Lei~7 & \(H\times H^{*}\); dois tecidos ligam sem fundir \\
+\bottomrule
+\end{tabular}
+\end{center}
+A Lei~4 \emph{é} a métrica canónica de \(\mathcal{U}\)
+(Def.~\ref{univ:def:volume}). A Lei~5 \textbf{não} é
+\(\operatorname{Star}\) do elemento (\(x^{2}=x+1\)).
+O dual explícito conhecido no medidor é só Lei~0: \(0^{\dagger}=\infty\).
+Os demais pares \textbf{não} se inventam (\code{papers/aranha.c}).
+\end{teorema}
+\begin{proof}
+É o Teor.~\code{fis:thm:base} em \(m=8\). A identificação
+máscara \(=e_k=\) Lei \(k\) está em \code{fis:neuronio}.
+\end{proof}
+
+\begin{observacao}[verificação]\label{univ:obs:aranha}
+O mesmo enunciado corre sem ramo cujo número de voltas dependa do valor
+(\code{fis:neuronio}):
+\[
+f_k \mathrel{+}= (b\gg k)\wedge 1,\qquad k=0,\dots,7.
+\]
+Medido em \code{papers/aranha.c} e \code{papers/aranha.asm}
+(\texttt{neuronio8}): oito somas fixas, \(\sum_k f_k\) conserva o
+popcount. Gram nos \(64\) pares: \code{tests/aranha\_n.c} §AN24.
+Isto \textbf{não} institui um corpo de \(256\) elementos como 14º lugar:
+é a escrita do espaço que \(\mathcal{U}\) consome.
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Operações do corpo, e morfismos entre corpos}\label{univ:sec:modulos}
+
+\begin{definicao}[a cisão que fecha a espinha]\label{univ:def:modulos}
+A espinha \textbf{não} é uma cadeia em que um implica o outro, e
+\textbf{não} mistura o que \(\mathcal{U}\) \emph{faz} com o que
+\(\mathcal{U}\) \emph{classifica}.
+\caixa{%
+$\begin{array}{rcl}
+X,X^{*},\mathsf{Aut}
+&:&
+\text{espaço, dual, autómato}\\[4pt]
+\mathsf{Mor}
+&:&
+\operatorname{Hom},\ \operatorname{Iso},\ \operatorname{Diff},\ \operatorname{Isom}_{\mu},\ \mathbf{Duo}
+\end{array}$}
+O primeiro bloco processa. O segundo relaciona. Não se misturam.
+\end{definicao}
+
+\begin{definicao}[os quatro contratos de mapa]\label{univ:def:mapas}
+Isto \textbf{não} são operações de \(\mathcal{U}\). São os morfismos
+que \(\mathcal{U}\) classifica. Postas construções \(A,B\) (ou variedades
+\(M,N\)) e \(f\) entre os suportes, \(\mathcal{U}\) pergunta o que \(f\)
+preserva --- Def.~\code{fis:def:duomorf} para as duas primeiras linhas
+algébricas; as duas últimas quando essa estrutura existe no capítulo.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+módulo & o que \(f\) preserva & equação \\
+\midrule
+\(\operatorname{Hom}(A,B)\)
+  & a operação
+  & \(f(a\oplus b)=f(a)\oplus f(b)\)
+    (e a segunda lei, se houver) \\
+\(\operatorname{Iso}(A,B)\)
+  & o mesmo, e é bijecção
+  & Hom bijetivo; bit \(a=0\) de \code{fis:def:duomorf} \\
+\(\operatorname{Diff}(M,N)\)
+  & a estrutura diferenciável
+  & \(f\) bijecção \(C^{\infty}\) com inversa \(C^{\infty}\) \\
+\(\operatorname{Isom}(M,N)\)
+  & o volume (canónico de \(\mathcal{U}\))
+  & \(\lvert\det Df\rvert=1\), i.e.\ \(\mu(f(E))=\mu(E)\) \\
+\(\mathbf{Duo}(A,B)\)
+  & troca \(\oplus\) com \(\otimes\)
+  & bit \(a=1\): \(f\colon A\xrightarrow{\cong}\mathcal{D}(B)\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+O comprimento euclidiano \(g(fx,fy)=g(x,y)\) é \textbf{outro} contrato
+(\code{algebrico thm:metrica}: \(\lvert\det\rvert=1\) sem
+\(\lVert Tv\rVert=\lVert v\rVert\)). Não é o canónico de \(\mathcal{U}\).
+\end{definicao}
+
+\begin{observacao}[homónimo \(\operatorname{Iso}\)]\label{univ:obs:iso}
+\(\operatorname{Iso}\) algébrico \textbf{não} é \(\operatorname{Isom}\)
+de volume, \textbf{nem} isometria euclidiana, \textbf{nem} a
+ultramétrica do índice. I0 aplica-se a este paper: a coincidência de
+letras não promove um ao outro (Def.~\ref{univ:def:tres-reguas}).
+O catálogo consulta o módulo, não a palavra.
+\end{observacao}
+
+\begin{definicao}[realização / transporte]\label{univ:def:realizacao}
+\(\mathcal{U}\) tem um operador de \textbf{realização} que decide
+\textbf{qual} estrutura \(f\) está a preservar. Não escolhe o módulo
+por analogia com outro capítulo. A pergunta é sempre:
+\caixa{$A\ \xrightarrow{\;f\;}\ B$ \quad --- \quad que contrato \(f\) satisfaz?}
+Se as duas leis se preservam na mesma ordem: Hom (Iso se bijecção).
+Se a estrutura diferenciável está escrita e \(f\) a preserva: Diff.
+Se \(\lvert\det Df\rvert=1\) (volume): \(\operatorname{Isom}\) canónico de
+\(\mathcal{U}\) (\S\ref{univ:sec:metrica}).
+Se o bit \(a=1\) e \(f\colon A\xrightarrow{\cong}\mathcal{D}(B)\):
+\(\mathbf{Duo}\) --- contrato próprio, não \(\mathcal{C}^{\mathrm{op}}\).
+Se \(g(fx,fy)=g(x,y)\): isometria euclidiana --- outro contrato.
+Se nenhuma dessas evidências aparece: \texttt{não localizada}, não
+«parece isomorfo».
+\end{definicao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Linguagem consagrada: categorias, e o autómato}\label{univ:sec:lingua}
+
+\begin{observacao}[homónimo «categoria»]\label{univ:obs:categoria}
+O catálogo proíbe \emph{categoria nova} como eixo taxonómico
+(\code{catalogo}: sem eixo novo, sem etiqueta nova). Isso \textbf{não}
+é a teoria das categorias. I0: coincidência de letras. A linguagem consagrada abaixo é \textbf{comparação} com o que
+\(\mathcal{U}\) já classifica. \(\mathcal{U}\) \textbf{não} é uma
+categoria universal, nem institui \(\mathbf{Cat}\) no bestiário, nem
+um 14º lugar.
+\end{observacao}
+
+\begin{definicao}[as categorias concretas que \(\mathcal{U}\) classifica]\label{univ:def:cat}
+Os morfismos de Def.~\ref{univ:def:mapas} são, na língua consagrada,
+morfismos de \textbf{categorias concretas} sobre as construções que a
+evidência nomeia --- objectos \(=\) capítulos/construções com suporte;
+setas \(=\) contratos de preservação. Não são uma categoria só:
+\caixa{%
+$\begin{array}{rcl}
+\mathbf{Hom}
+&:&
+\text{preserva }\oplus\text{ (e }\otimes\text{, se houver)}\\[2pt]
+\mathbf{Iso}
+&:&
+\text{subcategoria das bijecções; bit }a=0\\[2pt]
+\mathbf{Diff}
+&:&
+\text{quando }C^{\infty}\text{ está escrita}\\[2pt]
+\mathbf{Isom}_{\mu}
+&:&
+\lvert\det\rvert=1\\[2pt]
+\mathbf{Duo}
+&:&
+f\colon A\xrightarrow{\cong}\mathcal{D}(B);\ \text{bit }a=1
+\end{array}$}
+O operador de realização (Def.~\ref{univ:def:realizacao}) escolhe
+\[
+f\in\{\mathrm{Hom},\mathrm{Iso},\mathrm{Diff},\operatorname{Isom}_{\mu},\mathbf{Duo}\}.
+\]
+Não se pergunta «parece um duomorfismo»; pergunta-se:
+\emph{qual é a evidência para o contrato \(\mathbf{Duo}\) neste suporte?}
+\[
+\boxed{\;\mathbf{Duo}\neq\mathcal{C}^{\mathrm{op}}\;}
+\]
+A categoria oposta inverte o sentido da seta,
+\(A\xrightarrow{f}B\mapsto B\xrightarrow{f^{\mathrm{op}}}A\).
+\(\mathbf{Duo}\) pode permanecer no mesmo suporte e trocar as operações:
+\[
+\mathbf{D}:
+\quad
+(\oplus,\otimes)
+\longrightarrow
+(\otimes,\oplus).
+\]
+Logo \(\mathbf{Duo}\) é uma \textbf{seta com contrato próprio}, não uma
+categoria oposta (Def.~\code{fis:def:duomorf}).
+\end{definicao}
+
+\begin{observacao}[2-células: não localizada]\label{univ:obs:2cat}
+\[
+\boxed{\text{2-células: não localizada}}
+\]
+Não há 2-células escritas neste contrato. Não se promove a realizada.
+O percurso
+\(\text{Álgebra}\to\text{Topologia}\to\cdots\to\text{Redes}\)
+é execução do autómato sobre uma sequência de entradas, não composição
+de 2-morfismos. Um funtor \(F\colon\mathbf{Iso}\to\mathbf{Hom}\)
+(esquecimento da bijecção) é comparação legítima: Iso não implica Diff.
+\end{observacao}
+
+\begin{definicao}[\(\operatorname{INGEST}\) é autómato]\label{univ:def:aut}
+O estado de \(\mathsf{Aut}\) é um vector de \(V\): o campo \(G\)
+(Def.~\code{fis:def:doisandares}). O Teor.~\code{fis:thm:mult} \textbf{é}
+o autómato; o ciclo da aranha lê-o (\code{fis:algoritmo}) --- escrita,
+leitura, decisão, fecho; \textbf{sem deliberação}.
+\(\operatorname{INGEST}\) instancia o mesmo objecto:
+estado \(=\) (coordenada na base \(\{e_k\}\), evidência);
+transição \(=\) (pergunta, evidência, resultado, proibição).
+Não explorador. \(\texttt{não localizada}\) não vira \(\texttt{N/A}\)
+sem prova estrutural.
+\end{definicao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Métrica canónica: conservação de volume}\label{univ:sec:metrica}
+
+\begin{definicao}[métrica canónica de \(\mathcal{U}\)]\label{univ:def:volume}
+A métrica canónica de \(\mathcal{U}\) é a \textbf{conservação de volume}:
+\[
+\boxed{\;
+\lvert\det DT(x)\rvert=1
+\quad\Longrightarrow\quad
+\mu\bigl(T(E)\bigr)=\mu(E).
+\;}
+\]
+É o factor local da medida (\code{analitico thm:medida-jacobiano}: já o
+nomeia como conservação métrica por dualidade neste Corpo Universal).
+No reticulado, exacto sem integral:
+\([\mathbb{Z}^{2}:T(\mathbb{Z}^{2})]=\lvert\det T\rvert\), donde
+\(\lvert\det T\rvert=1\) se e só se \(T\) é sobrejectiva e conserva
+\(\mu\) (\code{algebrico thm:metrica}).
+\end{definicao}
+
+\begin{observacao}[Lebesgue mede a medida, não o volume]\label{univ:obs:lebesgue}
+A métrica de Lebesgue no Algébrico é a diferença simétrica
+\[
+d(A,B)=\mu(A\,\triangle\,B)
+\]
+(\code{algebrico thm:metrica}). Toda bijecção é isometria \emph{nessa}
+\(d\), e no entanto \(\Phi(A)=A\triangle K\) é isometria que
+\textbf{muda} \(\mu\). Donde:
+\caixa{conservar a medida é estritamente mais forte do que preservar \(d\)}
+\(\lvert\det\rvert=1\) \textbf{não} é condição topológica: é o
+jacobiano. Lebesgue no teorema central GLH
+(\code{analitico thm:central-energia}) \textbf{casa a ordem}
+(\(\sigma\)-aditividade: a ponte não leva valores, leva ordem). Não
+institui \(d=\mu(\triangle)\) como canónica de \(\mathcal{U}\), nem
+confunde transporte de ordem com conservação de volume.
+\end{observacao}
+
+\begin{definicao}[três réguas, e I0 aplica-se]\label{univ:def:tres-reguas}
+\[
+\boxed{\;
+d_{\mathrm{Lebesgue}}
+\;\neq\;
+\lvert\det\rvert=1
+\;\neq\;
+d_{\mathrm{ultra}}
+\;}
+\]
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+régua & o que mede & cabe em \(\mathcal{U}\) como \\
+\midrule
+\(d(A,B)=\mu(A\triangle B)\)
+  & a medida, não a forma
+  & \texttt{não} canónica: isometrias mudam \(\mu\) \\
+\(\lvert\det DT\rvert=1\)
+  & o volume
+  & \textbf{canónica} (Def.~\ref{univ:def:volume}) \\
+\(d(a,b)=2^{-\operatorname{prof}(a,b)}\)
+  & profundidade de concordância no \textbf{índice}
+  & ultramétrica da família / metaindução \\
+\(g(fx,fy)=g(x,y)\)
+  & comprimento euclidiano
+  & contrato à parte; o gato tem volume sem isto \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Dois teoremas centrais, e não se fundem: GLH (Hurwitz conta, Gentil
+integra, Lebesgue casa a ordem) \textbf{não} é o teorema central da
+ultramétrica (a célula é a bola; compor não acumula).
+\end{definicao}
+
+\begin{proposicao}[o que a ultramétrica cabe, e o que não cabe]\label{univ:prop:ultra}
+A ultramétrica dos endereços
+(\code{fis:def:arvore}, \code{fis:lem:ultra})
+\[
+d(a,c)\le\max\bigl\{d(a,b),d(b,c)\bigr\}
+\]
+vive no \textbf{índice}, e a bijecção transporta-a
+(\code{catalogo sec:completa-global}): \(d_X(x,y):=d_I(R(x),R(y))\).
+As bolas particionam (\code{fis:thm:bolas}): a célula \emph{é} a bola.
+A travessia não acumula (\code{aranha thm:navega},
+\code{aranha cor:global}):
+\[
+D(\sigma,\rho)\le\max\bigl\{D(\sigma,\tau),D(\tau,\rho)\bigr\}.
+\]
+Custo de uma cadeia \(=\) o pior passo, qualquer que seja o comprimento.
+Isso é a régua da \textbf{metaindução} e de \(\operatorname{INGEST}\):
+a regra não menciona o capítulo, e o preço não soma treze auditorias.
+\textbf{Não} é a métrica canónica de \(\mathcal{U}\): não vê volume.
+Endereçar é geral; conservar \(\mu\) pede o jacobiano.
+\end{proposicao}
+
+\begin{observacao}[homónimo «teorema central»]\label{univ:obs:centrais}
+I0: «teorema central» em GLH \textbf{não} é «teorema central» da
+ultramétrica. O primeiro transporta contar\(\leftrightarrow\)integrar
+sem perder ordem. O segundo diz que bolas de raio \(r\) coincidem ou
+são disjuntas, e que \(D\) nas representações é ultramétrica. Promover
+um ao outro é o mesmo erro que promover uma coincidência de letras.
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Indução e metaindução}\label{univ:sec:inducao}
+
+\begin{definicao}[indução]\label{univ:def:inducao}
+A indução prova uma propriedade \textbf{dentro} de um suporte:
+\[
+P(0),\qquad
+P(n)\Rightarrow P(n+1)
+\quad\Longrightarrow\quad
+\forall n\,P(n).
+\]
+É o passo da torre (\code{algebrico def:inducao}: toda transformação é
+um passo de indução; o corpo do passo não menciona o andar).
+\end{definicao}
+
+\begin{definicao}[metaindução]\label{univ:def:metainducao}
+A metaindução prova uma propriedade \textbf{da família de
+construções}:
+\caixa{se a própria regra de construção é preservada, a construção inteira é preservada}
+Se o passo \(\mathcal{C}(n)\to\mathcal{C}(n+1)\) não menciona \(n\),
+então \(\forall n\,\mathcal{C}(n)\) segue da \textbf{forma} do passo
+(\code{algebrico thm:meta-inducao}). O resultado não é a tabela dos
+andares: é a forma. É por isso que \(\mathcal{U}\) é universal
+\textbf{sem} ser um supercorpo: não absorve os corpos; preserva a
+regra que os relaciona. A régua dessa família é a ultramétrica dos
+endereços (Prop.~\ref{univ:prop:ultra}): o custo é o pior passo, não a
+soma.
+\end{definicao}
+
+\noindent Donde o catálogo deixa de repetir treze auditorias. A regra
+de ingestão é uma só; a metaindução transporta-a a cada capítulo.
+\(\operatorname{INGEST}\) é essa realização (\S\ref{univ:sec:motor}).
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{\texorpdfstring{Estrela de \(\mathcal{U}\): o duomorfismo}{Estrela do Universal: o duomorfismo}}\label{univ:sec:estrela}
+
+\begin{definicao}[estrela do Universal]\label{univ:def:star}
+A estrela de \(\mathcal{U}\) \textbf{não} é a equação
+\(x\otimes x=x\oplus 1\) (Teor.~\code{fis:thm:estrela}: condição sobre
+um \textbf{elemento}, noutro suporte). A Física já o separa: a estrela
+daquele documento \textbf{não} é \(\operatorname{Fix}(\mathcal{D})\)
+(\code{fis:def:duomorf}).
+A estrela de \(\mathcal{U}\) é o \textbf{duomorfismo}:
+\[
+\boxed{\;
+\operatorname{Star}(\mathcal{U})
+=\mathcal{D},
+\qquad
+f\colon A\ \xrightarrow{\ \cong\ }\ \mathcal{D}(B)=B^{\vee}
+\;}
+\]
+isto é, o bit \(a=1\) de \code{fis:def:duomorf}:
+\[
+f(x\oplus_A y)=f(x)\otimes_B f(y),
+\qquad
+f(x\otimes_A y)=f(x)\oplus_B f(y).
+\]
+\(\mathcal{D}\) não actua sobre os elementos: actua sobre a função
+estrutural das duas operações, no mesmo suporte.
+\end{definicao}
+
+\begin{observacao}[\(\mathcal{D}\) não é mapa genérico]\label{univ:obs:D}
+\(\mathcal{D}\) da Física é \textbf{mais específico} do que qualquer
+módulo de \S\ref{univ:sec:modulos}. Não se confunde:
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+isto & não é isto \\
+\midrule
+\(\operatorname{Hom}\) & \(\mathcal{D}\) (Hom preserva a ordem das leis; \(\mathcal{D}\) troca-as) \\
+\(\operatorname{Iso}\) & \(\mathcal{D}\) (Iso é \(a=0\); duomorfismo é \(a=1\)) \\
+\(\operatorname{Diff}\) & \(\mathcal{D}\) (estrutura \(C^{\infty}\), outro suporte) \\
+\(\operatorname{Isom}\) & \(\mathcal{D}\) (volume \(\lvert\det\rvert=1\), outro suporte) \\
+\(\operatorname{Star}(S)\) de \code{fis:thm:estrela} & \(\operatorname{Star}(\mathcal{U})\) \\
+corpo dual \((V,V^{*})\); Poincaré; dual do Rei & \(\mathcal{D}\) do duomorfismo \\
+\bottomrule
+\end{tabular}
+\end{center}
+O catálogo já tem esta lista de homónimos. \(\mathcal{U}\) não a
+reabre: consome-a em I0.
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Vocabulário do resultado}\label{univ:sec:vocab}
+
+\begin{definicao}[cinco valores, e um sexto que não é valor de existência]\label{univ:def:vocab}
+Cada slot --- de mapa, de módulo, ou de ingestão --- devolve
+\textbf{exactamente um} dos seguintes.
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+valor & o que significa & o que \emph{não} significa \\
+\midrule
+\texttt{não localizada}
+  & procurou-se; a evidência não apareceu
+  & que o objecto não existe \\
+\texttt{N/A}
+  & demonstrou-se que a estrutura \textbf{não admite} o passo
+  & que o agente não achou \\
+\texttt{dívida}
+  & a hipótese falta (há o que pedir)
+  & ausência demonstrada \\
+\texttt{candidato}
+  & a hipótese está escrita; a realização falta
+  & «parece combinar» / «parece isomorfo» \\
+\texttt{realizado}
+  & evidência matemática preenche o slot
+  & analogia \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\caixa{não encontrado $\neq$ não existe}
+\texttt{não localizada} é valor de \emph{busca}. \texttt{N/A} é valor de
+\emph{estrutura}, e só depois de demonstrar que o suporte não admite
+aquela etapa. Confundi-los é o erro que promove homónimo a termo técnico.
+\end{definicao}
+
+\noindent Primeiro \textbf{procurar}, depois \textbf{demonstrar
+ausência}, só então classificar \texttt{N/A}. Se o agente encontra uma
+palavra («estrela», \(\mu\), «iso») em \code{redes.tex} ou
+noutro sítio, I0 pergunta se é estrutura ou homónimo \textbf{antes} de
+pôr o nome na ficha.
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{\texorpdfstring{Ingestão: uma realização de \(\mathcal{U}\)}{Ingestão: uma realização do Universal}}\label{univ:sec:contrato}
+
+\begin{definicao}[ingestão é realização, não definição]\label{univ:def:curta}
+\(\operatorname{INGEST}\) instancia \(\mathsf{Aut}\) nos capítulos: a
+regra não menciona o lugar. Forma curta --- setas verificáveis, não
+promessa de existência ---:
+\[
+\boxed{\;
+\operatorname{INGEST}:\quad
+S
+\to
+(\oplus,\otimes)
+\to
+C
+\to
+\nu
+\to
+\operatorname{Star}
+\to
+\mathcal{D}
+\to
+\mathrm{fecho}
+\to
+\mathrm{estado}.
+\;}
+\]
+Aqui \(\operatorname{Star}\) é a de \code{fis:thm:estrela} \emph{no
+capítulo}; \(\mathcal{D}\) é o duomorfismo \emph{no capítulo}. Não se
+confundem com \(\operatorname{Star}(\mathcal{U})\)
+(Def.~\ref{univ:def:star}). A ordem \(\mathrm{I}_{0},\ldots,\mathrm{I}_{11}\)
+está em \S\ref{univ:sec:motor}; a evidência fica no catálogo.
+\end{definicao}
+
+\begin{observacao}[\(\mathrm{lcm}\) e \(\mathrm{gcd}\) são uma realização]\label{univ:obs:lcm}
+A identidade
+\[
+\otimes=\operatorname{lcm},\qquad
+\otimes^{*}=\operatorname{gcd},\qquad
+ab=\operatorname{lcm}(a,b)\operatorname{gcd}(a,b)
+\]
+com \(\nu_N(d)=N/d\) a trocar os papéis (\code{topologico def:somaprod},
+\code{topologico thm:reticulo}) é \textbf{uma} realização de
+\(\mathrm{I}_{7}\), medida no reticulado \((\mathbb{N}_{>0},\mid)\).
+\textbf{Não} é regra de que todo corpo tenha \(\mathrm{lcm}/\mathrm{gcd}\).
+A cadeia numérica responde \(\mathcal{D}=\texttt{N/A}\) nesse slot, e
+cumpre o contrato. A EM selecciona esta realização para a
+\emph{interface}, não para \(V=\mathbb{R}^{n}\) como reticulado.
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{\texorpdfstring{O motor --- \(\operatorname{INGEST}\)}{O motor --- INGEST}}\label{univ:sec:motor}
+
+\begin{definicao}[o quádruplo de cada estágio]\label{univ:def:quadruplo}
+Todo slot \(\mathrm{I}_{k}\) tem quatro campos fixos:
+\caixa{(pergunta, evidência, resultado, proibição)}
+\begin{itemize}\itemsep2pt
+\item \textbf{pergunta} --- o que o motor pergunta, e só isso;
+\item \textbf{evidência} --- onde já está escrito (Física, paper, medidor);
+\item \textbf{resultado} --- um valor de Def.~\ref{univ:def:vocab}, mais o
+conteúdo se \texttt{realizado};
+\item \textbf{proibição} --- o que não se pode pôr na ficha mesmo que a
+palavra apareça no texto.
+\end{itemize}
+A proibição é o que impede o homónimo de virar termo técnico: a pergunta
+de \(\mathrm{I}_{0}\) corre \textbf{antes} de qualquer promoção.
+Na língua do autómato (Def.~\ref{univ:def:aut}): o quádruplo \textbf{é}
+a transição; o resultado é um juízo, não uma analogia.
+\end{definicao}
+
+\begin{definicao}[\(\operatorname{INGEST}\)]\label{univ:def:ingest}
+Dado um capítulo (Parte da Física, paper, ou nome do bestiário),
+\[
+\operatorname{INGEST}(\textit{capítulo})
+\]
+percorre \(\mathrm{I}_{0},\ldots,\mathrm{I}_{11}\) \textbf{nesta ordem}
+--- máquina de estados, não recomendações --- e devolve ao catálogo o
+túplo
+\[
+(\text{suporte},\
+\text{operações},\
+\text{construção},\
+\text{morfismos},\
+\text{autómato},\
+\text{estado}).
+\]
+O catálogo \textbf{não} descobre a matemática: recebe este túplo e
+regista.
+\caixa{\texttt{fichaingestao} $\to$ calibrador $\to$ \texttt{fichacapitulo}}
+Lei complementar só depois (\code{catalogo cat:derivacao}). Não se
+recomeça em \(\mathrm{I}_{0}\) se a \texttt{fichaingestao} do capítulo já
+existe: lê-se. Não se inventa o objecto que o slot não localizou.
+O passo seguinte deste contrato \textbf{não} é outra camada teórica:
+é aplicar \(\mathcal{U}\) a \code{fisica.tex}, Parte a Parte.
+\end{definicao}
+
+\subsection*{A ordem de \(\mathsf{Aut}\)}
+\label{univ:tab:pipeline}
+
+\noindent Não é protocolo à parte: é a ordem em que \(\mathsf{Aut}\) lê
+coordenadas. Forma curta: Def.~\ref{univ:def:curta}. Uma linha por passo
+--- pergunta, e só isso.
+
+{\small
+\begin{enumerate}\itemsep1pt
+\item[\(\mathrm{I}_{0}\)] estrutura ou homónimo?
+\item[\(\mathrm{I}_{1}\)] onde vive \(S\)?
+\item[\(\mathrm{I}_{2}\)] cisão no mesmo \(S\)? (uma só op \(\Rightarrow\) \(\mathrm{I}_{7}\) \texttt{N/A})
+\item[\(\mathrm{I}_{3}\)] o que cada lado escreve?
+\item[\(\mathrm{I}_{4}\)] as duas contagens somam o rectângulo? (\code{fis:thm:central})
+\item[\(\mathrm{I}_{5}\)] transformada, dois polos?
+\item[\(\mathrm{I}_{6}\)] Lei~7: ligam sem fundir?
+\item[\(\mathrm{I}_{7}\)] que operações, e quem as troca?
+\item[\(\mathrm{I}_{8}\)] que involução?
+\item[\(\mathrm{I}_{9}\)] \(x^{2}=x+1\) neste \(S\)? (não \(x^{2}=-1\); não \(\operatorname{Star}(\mathcal{U})\))
+\item[\(\mathrm{I}_{10}\)] o que fecha, por que mecanismo?
+\item[\(\mathrm{I}_{11}\)] par e estado; \(\mathsf{Mor}\) se houver \(f\)
+\end{enumerate}}
+
+A evidência, o resultado e a proibição de cada passo estão no catálogo
+(\texttt{fichaingestao}). Este paper não os volta a legislar.
+
+\subsection*{Paragem}
+
+\begin{proposicao}[regras de paragem]\label{univ:prop:paragem}
+\begin{enumerate}\itemsep2pt
+\item \texttt{não localizada} passa ao slot seguinte \textbf{sem} inventar
+o objecto e \textbf{sem} promover a \texttt{N/A}.
+\item \texttt{N/A} em \(\mathrm{I}_{2}\) (uma só operação) implica
+\texttt{N/A} em \(\mathrm{I}_{7}\). Não se pergunta «qual seria a dual».
+\item \(\mathrm{I}_{7}\) realizado \textbf{não} obriga \(\mathrm{I}_{10}\)
+realizado.
+\item Dívida e candidato não se encerram por analogia, nem por «parece
+isomorfo».
+\item Se a \texttt{fichaingestao} já existe no catálogo, o trabalho é ler,
+não reabrir \(\mathrm{I}_{0}\).
+\item Classificar \(f\) como Hom / Iso / Diff / Isom / \(\mathcal{D}\)
+pede o contrato de Def.~\ref{univ:def:mapas} e Def.~\ref{univ:def:star}.
+A palavra no texto não basta.
+\end{enumerate}
+\end{proposicao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{O que o agente recebe}\label{univ:sec:agente}
+
+\noindent Não «descubra qual corpo é este». Lê o vector em \(V\), executa
+a transição autorizada, pergunta a evidência do contrato de \(f\) se
+houver mapa. Saída: o túplo de Def.~\ref{univ:def:ingest}.
+
+\begin{observacao}[autoridade]\label{univ:obs:autoridade}
+A Física constrói. \(\mathcal{U}\) opera no espaço e recusa a promoção.
+O catálogo regista coordenadas. Os treze correm o mesmo motor
+(Def.~\ref{univ:def:metainducao}). EM (\code{catalogo cat:bloco4}) é
+preenchimento, não legislação.
+\end{observacao}
+
+\end{document}

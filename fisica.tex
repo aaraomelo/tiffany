@@ -135,6 +135,10 @@ com o rendimento a sair do $\oint$ fechado, o custo a ser a dobra, a segunda lei
 valer de \emph{um} lado, e a taxa de expansão a ser a régua invertida. E as
 \textbf{redes}: o neurónio como cisão e soma, a sobreposição como prefixo comum,
 a interferência como dobra, e as duas torres --- a que mede e a que ordena.
+A gramática que \textbf{relaciona} e \textbf{processa} os treze não é um
+14º lugar: é o \textbf{Corpo Universal} (§\ref{fis:universal}),
+intermediário operacional $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$. O catálogo
+regista; não decide. O Universal não promove evidência a estrutura.
 
 \medskip\noindent\textbf{O alcance.} De um operador com duas equações e de uma
 aplicação com igualdade no contradomínio saem, com demonstração, o percurso, a
@@ -183,8 +187,10 @@ E a matéria? & é o espaço concentrado, $\mathfrak{m}=G-1$ & Teor.~\ref{fis:th
 O que é um duomorfismo? & isomorfismo para a estrutura \emph{dual}, $A\cong B^{\vee}$ & Def.~\ref{fis:def:duomorf} \\
 E a interface, de onde vem? & os dois tecidos não fundem; a passagem operacional é o duomorfismo & Obs.~\ref{fis:obs:octoniao-interface} \\
 Há uma Lei~8? & não: as leis são $0$--$7$; o oito é grau e cardinalidade & Obs.~\ref{fis:obs:octoniao-interface} \\
+O duomorfismo actua onde? & nos absorvidos $\mathcal{O}$; no fio $\mathcal{T}$ não tem domínio & Def.~\ref{fis:def:dominio-interface} \\
+O $2{\times}2$ da leitura é o quarteto? & não: $Q_{ab}$ é interno a $\mathcal{O}$; o canto vazio é matemático & Def.~\ref{fis:def:dominio-interface} \\
 E dois deles, compostos? & dão um isomorfismo: a passagem tem paridade & Teor.~\ref{fis:thm:duo-composicao} \\
-Quantos quadrantes há? & quatro: duas metades, dois bits, e $Q_{ab}Q_{a'b'}=Q_{a\oplus a',b\oplus b'}$ & Teor.~\ref{fis:thm:quarteto} \\
+Quantos quadrantes há? & quatro, \emph{em} $\mathcal{O}$: duas metades, dois bits, $Q_{ab}Q_{a'b'}=Q_{a\oplus a',b\oplus b'}$ & Teor.~\ref{fis:thm:quarteto} \\
 E a estrela, o que é? & o elemento onde as duas dobras coincidem: $x^{2}=x+1$ & Teor.~\ref{fis:thm:estrela} \\
 E ela existe onde? & num ponto que o encaixe entrega, em inteiros & Teor.~\ref{fis:thm:estrelaencaixe} \\
 E o espaço, é palco? & não: é componente, e o par é duomorfo & Teor.~\ref{fis:thm:duoesp} \\
@@ -204,6 +210,12 @@ Até onde chega um passo? & a uma aresta --- e o grau proíbe o atalho & Teor.~\
 Donde vem a velocidade máxima? & de a régua fechar: é meia volta, o ponto fixo & Teor.~\ref{fis:thm:meiavolta} \\
 O que classifica um sistema sem perda? & $\Delta$, e não o traço & Teor.~\ref{fis:thm:leidisc} \\
 Que ordens admite uma rede? & $\{1,2,3,4,6\}$, e nunca $5$ & Lema~\ref{fis:lem:cristal} \\
+O Corpo Universal, o que é? & $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$; consome o espaço; \textbf{não} é o 14º & §\ref{fis:universal} \\
+$\mathcal{U}$ é o catálogo? & não: $\mathcal{U}\neq$ catálogo $\neq\operatorname{INGEST}$ & Def.~\ref{fis:def:U} \\
+A base de $X$? & $e_k=2^{k}=$ Lei $k$; $\dim=8$; não há Lei~8 & Teor.~\ref{fis:thm:base}; §\ref{fis:neuronio} \\
+$X^{*}$ é $\mathbf{Duo}$? & não: $X^{*}\neq V^{*}\neq\mathbf{Duo}$ & Def.~\ref{fis:def:U},~\ref{fis:def:dual} \\
+Estrela de $\mathcal{U}$? & o duomorfismo; \textbf{não} $x^{2}=x+1$ & Def.~\ref{fis:def:duomorf}; Teor.~\ref{fis:thm:estrela} \\
+Métrica canónica de $\mathcal{U}$? & $\lvert\det\rvert=1$, conservação de volume & Teor.~\ref{fis:thm:gato}(2),~\ref{fis:thm:metainducao}(5) \\
 \end{longtable}}
 
 \medskip\noindent\textbf{E os sinais que este documento usa não são vocabulário
@@ -299,6 +311,123 @@ corte a fazer. \textbf{O que é verdade é mais fino}: ele está fora dos
 \emph{degraus} da escada, onde o discriminante nunca é quadrado --- e o corte é o
 que acontece quando a equação do ponto fixo não fecha no corpo onde a órbita
 corre.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section*{O Corpo Universal --- não é o décimo-quarto lugar}\label{fis:universal}
+\addcontentsline{toc}{section}{O Corpo Universal}
+
+\begin{definicao}[Corpo Universal]\label{fis:def:U}
+O \textbf{Corpo Universal} $\mathcal{U}$ consome o espaço já construído
+neste documento (Def.~\ref{fis:def:doisandares}, Def.~\ref{fis:def:dual},
+Teor.~\ref{fis:thm:base}) e opera nele. Não contém os treze lugares.
+Não é o 14º lugar. Não é o catálogo.
+\[
+\boxed{\;\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})\;}
+\]
+$X$ é o espaço vectorial sobre $B$, dimensão $8$, base
+$e_k=2^{k}$. $X^{*}$ é o dual pelo emparelhamento
+$\langle a,b\rangle=\operatorname{paridade}(a\wedge b)$.
+As oito leis \emph{são} essa base (§\ref{fis:neuronio} no byte;
+não há Lei~8). $\mathsf{Mor}$ relaciona;
+$\mathsf{Aut}$ processa o vector $G\in V$ (Teor.~\ref{fis:thm:mult}).
+\[
+\boxed{\;\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}\;}
+\]
+\[
+\boxed{\;X^{*}\neq V^{*}\neq\mathbf{Duo}.\;}
+\]
+Não se promove evidência a estrutura.
+\end{definicao}
+
+\noindent Duas línguas, e não se misturam:
+\[
+\boxed{\;
+\begin{array}{rcl}
+\text{categoria}
+& = &
+\text{como as construções se relacionam}\\[3pt]
+\text{autómato}
+& = &
+\text{como uma construção é processada}\\[3pt]
+\text{Física}
+& = &
+\text{o que efectivamente foi construído}\\[3pt]
+\text{catálogo}
+& = &
+\text{o registo do resultado}
+\end{array}
+\;}
+\]
+A primeira pergunta --- \emph{que relação existe entre duas
+construções?} --- é respondida por
+$\operatorname{Hom}$, $\operatorname{Iso}$, $\operatorname{Diff}$,
+$\operatorname{Isom}_{\mu}$, $\mathbf{Duo}$.
+A segunda --- \emph{em que estado está a construção, e qual transição é
+autorizada?} --- é respondida pelo autómato $\operatorname{INGEST}$.
+\[
+\boxed{\;\operatorname{INGEST}\text{ é autómato, não explorador}\;}
+\]
+\[
+\boxed{\;\mathbf{Duo}\neq\mathcal{C}^{\mathrm{op}}\;}
+\]
+A categoria oposta inverte o sentido da seta. $\mathbf{Duo}$ pode
+permanecer no mesmo suporte e trocar as operações
+$(\oplus,\otimes)\to(\otimes,\oplus)$ (Def.~\ref{fis:def:duomorf}).
+2-células: \texttt{não localizada}. O percurso dos treze é execução do
+autómato, não 2-morfismo.
+\[
+\boxed{\;
+\begin{array}{rcl}
+X,X^{*},\mathsf{Aut}
+&:&
+\text{espaço, dual, autómato}\\[4pt]
+\mathsf{Mor}
+&:&
+\operatorname{Hom},\ \operatorname{Iso},\ \operatorname{Diff},\ \operatorname{Isom}_{\mu},\ \mathbf{Duo}
+\end{array}
+\;}
+\]
+Hom e Iso são o bit $a=0$ da Def.~\ref{fis:def:duomorf}. O bit $a=1$ é o
+\textbf{duomorfismo}: $f\colon A\xrightarrow{\cong}\mathcal{D}(B)=B^{\vee}$.
+Isso --- e não $x^{2}=x+1$ --- é a estrela de $\mathcal{U}$:
+\[
+\boxed{\;\operatorname{Star}(\mathcal{U})=\mathcal{D}\;}
+\]
+A métrica canónica de $\mathcal{U}$ é a conservação de volume, já
+medida neste documento:
+\[
+\boxed{\;\lvert\det\rvert=1\;}
+\]
+--- Teor.~\ref{fis:thm:gato}(2) no gato; Teor.~\ref{fis:thm:metainducao}(5)
+na meta-indução, onde $\lvert\det A\rvert=1$ é o sentido em que subir e
+descer são o mesmo caminho. A medida de contagem
+(Teor.~\ref{fis:thm:medida}) \textbf{não} é isto: conserva $\sum G=\lvert I\rvert$
+e é cega à fibra. A ultramétrica $d=2^{-\operatorname{prof}}$
+(Def.~\ref{fis:def:arvore}, Lema~\ref{fis:lem:ultra}) vive no
+\textbf{índice}: as bolas particionam (Teor.~\ref{fis:thm:bolas}); não
+vê volume.
+
+\begin{observacao}[três réguas, e I0]\label{fis:obs:U-reguas}
+\[
+\boxed{\;
+\text{medida de contagem}
+\neq
+\lvert\det\rvert=1
+\neq
+d_{\mathrm{ultra}}
+\neq
+x^{2}=x+1
+\;}
+\]
+O comprimento euclidiano é ainda outro contrato: o gato tem
+$\lvert\det\otimes\rvert=1$ sem preservar $\lVert Tv\rVert$. Diff pede
+estrutura $C^{\infty}$ escrita no lugar; se não estiver, o slot é
+\texttt{não localizada}, não \texttt{N/A}.
+\end{observacao}
+
+\noindent Daqui em diante os treze lugares \textbf{não} inventam
+metodologia. Correm as mesmas operações e consultam os mesmos contratos
+de mapa. O que muda é o suporte, e a evidência.
 
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Álgebra}
@@ -5151,6 +5280,54 @@ duomorfismo realiza a assimetria operacional ($\oplus\leftrightarrow\otimes$);
 $D(i)=(N-1)-i=\partial i$ aparece \emph{depois}, como o mapa entre as duas
 nomeações do Teor.~\ref{fis:thm:B}.
 \end{observacao}
+
+\begin{definicao}[domínio da interface]\label{fis:def:dominio-interface}
+A interface operacional (Def.~\ref{fis:def:duomorf}) \textbf{não} é um
+transporte, e \textbf{não} se lêem quatro operadores no duomorfismo. O universo
+nomeado de uma realização parte-se
+\[
+\boxed{\;\mathcal{M}\;=\;\mathcal{O}\,\sqcup\,\mathcal{T}\;}
+\]
+--- objectos \textbf{absorvidos} $\mathcal{O}$ (têm as duas operações no
+suporte; $\mathcal{D}$ actua) e objectos de \textbf{transporte} $\mathcal{T}$
+(fios: ainda sem a estrutura sobre a qual $\mathcal{D}$ se define).
+\emph{Não} se identifica esta cisão com $\mathrm{MOVE}(+1)$ na porta: aquele
+absorve é a face $\oplus$ de um objecto \emph{já} em $\mathcal{O}$.
+
+\medskip\noindent\textbf{$\mathcal{D}$ é involução interna a $\mathcal{O}$.}
+\[
+\boxed{\;\mathcal{D}\colon\mathcal{O}_{0}\longleftrightarrow\mathcal{O}_{1}\;,\qquad
+\mathcal{D}^{2}=\mathrm{id}_{\mathcal{O}}\;}
+\]
+Em $\mathcal{T}$ o duomorfismo \textbf{não tem domínio}: não há
+$\oplus/\otimes$ a trocar. O canto «face~$1$, não absorvido» da leitura
+$2{\times}2$ é \textbf{vazio matemático}, não editorial. Os quatro do
+Teor.~\ref{fis:thm:quarteto} não se promovem a quatro operadores sobre
+$\mathcal{M}$: $Q_{ab}=\mathcal{D}^{a}\dagger^{b}$ vive \emph{dentro} de
+$\mathcal{O}$. A leitura
+\[
+\begin{array}{c|cc}
+ & \text{face }0\ (a{=}0) & \text{face }1\ (a{=}1)\\\hline
+\mathcal{O} & Q_{00},\;Q_{01} & Q_{10},\;Q_{11}\\[2pt]
+\mathcal{T} & \text{fio} & \text{---}
+\end{array}
+\]
+é a \textbf{interface filtrada}: absorção escolhe a coluna (o domínio);
+$\mathcal{D}$ troca a face \emph{no} domínio. Não é lei nova, nem Lei~8: o
+quatro do quarteto já estava; o vazio diz onde ele \emph{não} actua.
+\[
+\boxed{\;
+\text{Lei~7}\to\text{duas faces}\to\text{assimetria}\to\text{interface}
+\to\text{duomorfismo}\to\text{absorção}\to Q_{ab}
+\;}
+\]
+e, à margem, $\mathcal{T}$ é transporte. \emph{Interface não é transporte.}
+$W_s/W_a$ não entram aqui (Teor.~\ref{fis:thm:duastorres}): são a matriz
+depois da absorção, noutro eixo. Quais nomes \emph{realizam} esta partição,
+e onde a cadeia candidato$\to$manifesto$\to$dual está interrompida, está no
+catálogo (\code{cat:dominio-interface}): dívida construtiva, não taxonomia
+nova.
+\end{definicao}
 
 \begin{teorema}[os dois eixos da passagem: o que preserva e o que perde]\label{fis:thm:eixos}
 Com $f\colon A\to B$ e o bit $a$ acima:

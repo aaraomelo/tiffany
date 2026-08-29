@@ -1,0 +1,73 @@
+---
+description: Corpo Universal = (X, X*, Mor, Aut); espaço e dual; base = oito leis; intermediário Física ↔ Catálogo.
+globs: catalogo.tex, corpo_universal.tex, papers/**/*.tex, fisica.tex, teoria.tex
+alwaysApply: true
+---
+
+# Corpo Universal
+
+Contrato: `corpo_universal.tex` (raiz). Instância na Física: `fis:universal`, Def. `fis:def:U`. O catálogo **consome** o resultado de INGEST; não decide «parece isomorfo».
+
+\[
+\boxed{\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})}
+\]
+
+\[
+\boxed{\mathcal{U}\neq\text{catálogo}\neq\operatorname{INGEST}}
+\]
+
+Estrutura **já construída** (`fis:def:doisandares`, `fis:def:dual`, `fis:thm:base`). Não se protocola. Não é supercorpo. Não é o 14º lugar. Não entra no bestiário.
+
+- \(X\): espaço vectorial sobre \(B\), \(\dim=8\), \(e_k=2^{k}\). As oito leis **são** esta base (`papers/aranha.c`, `papers/aranha.asm`: `neuronio8`). Não há Lei~8. Dual explícito no medidor: só \(0^{\dagger}=\infty\); não inventar pares 1–7.
+- \(X^{*}\): dual de \(X\) pelo emparelhamento \(\langle a,b\rangle=\operatorname{paridade}(a\wedge b)\). Em cima, \(V\) e \(V^{*}\) (`fis:def:dual`). \[X^{*}\neq V^{*}\neq\mathbf{Duo}.\]
+- \(\mathsf{Mor}=\{\mathrm{Hom},\mathrm{Iso},\mathrm{Diff},\operatorname{Isom}_{\mu},\mathbf{Duo}\}\): preservação. Realização escolhe o contrato. \(\mathbf{Duo}\neq\mathcal{C}^{\mathrm{op}}\). 2-células: `não localizada`.
+- \(\mathsf{Aut}\): estado = vector \(G\in V\). INGEST instancia `fis:thm:mult`. Transição = quádruplo. **Não explorador.** `não localizada` não vira `N/A` sem prova estrutural.
+
+\[
+\boxed{\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}}
+\]
+
+Percurso Álgebra→…→Redes = execução do autómato, não 2-morfismo. Física = o construído. Catálogo = o registo.
+
+Agente: «qual é a evidência para o contrato neste suporte?» — nunca «parece um duomorfismo».
+
+## Canónicos
+
+\[
+\boxed{\operatorname{Star}(\mathcal{U})=\mathcal{D}}
+\]
+
+Não é \(x^{2}=x+1\) (`fis:thm:estrela`: elemento). Lei~5 \(x^{2}=-1\) **não** é a estrela. \(\mathcal{D}\) **não** é Hom, Iso, Diff nem Isom.
+
+\[
+\boxed{\lvert\det\rvert=1}
+\]
+
+Métrica canónica = Lei~4 / conservação de volume (`fis:thm:gato`(2), `fis:thm:metainducao`(5)). **Não** é a medida de contagem (`fis:thm:medida`) nem \(d=\mu(A\triangle B)\) nem a ultramétrica do índice.
+
+Iso algébrico \(\neq\) Isom de volume \(\neq\) ultramétrica. Homónimo **não** entra na ficha até I0 decidir.
+
+## Dois vocabulários
+
+\[
+\boxed{\texttt{não encontrado}\neq\texttt{não existe}}
+\]
+
+- `não localizada`: procurou-se; a evidência não apareceu.
+- `N/A`: demonstrou-se que a estrutura **não admite** o passo.
+
+Primeiro procurar, depois demonstrar ausência, só então classificar `N/A`.
+
+## INGEST
+
+Quádruplo: (pergunta, evidência, resultado, proibição). I0 → I11 → `fichaingestao` → calibrador → `fichacapitulo`. Evidência no catálogo; o paper não a legisla.
+
+I7: \(\mathrm{lcm}/\mathrm{gcd}\) é **uma** realização, não regra de todo corpo. Uma só operação em I2 \(\Rightarrow\) I7 é `N/A`.
+
+## Paragem
+
+Não se inventa o passo. Não se recomeça em I0 se a ficha já existe. Não se inventa metodologia por capítulo: os treze correm o mesmo \(\mathcal{U}\).
+
+Já ingeridas (não reabrir): Álgebra, Topologia, Análise, Geometria, Mecânica, Gravitação. EM: ler `cat:bloco4`; Mor em I11 sem reabrir I0. Seguinte: Relatividade.
+
+Não commitar salvo pedido explícito. O Universal **não** entra no bestiário.
