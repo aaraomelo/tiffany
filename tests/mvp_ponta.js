@@ -78,7 +78,7 @@ const outBuf = Buffer.alloc(outLen)
 let bi = 0
 for (let pi = 0; bi < outLen && pi < parts.length; pi++) outBuf[bi++] = parts[pi] & 255
 ok('§M1 canal→wasm DISCO', outBuf.toString('utf8').includes('mvp-ponta'))
-ok('§M1 par N1', medeParN1(body.length, outLen))
+ok('§M1 par N1', medeParN1(body.length))
 
 // §M2 — servidor HTTP+WS + cliente wasm (reutiliza MVP_PORT se ligado)
 const PORT = Number(process.env.MVP_PORT) || (5180 + Math.floor(Math.random() * 200))
