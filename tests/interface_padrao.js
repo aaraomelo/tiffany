@@ -16,9 +16,9 @@
  *
  *   node tests/interface_padrao.js
  */
-'use strict'
-const fs = require('fs')
-const path = require('path')
+import { existsSync, readFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -27,9 +27,9 @@ function ok (q, cond) {
   console.log(`#UNIT ${cond ? 'ok' : 'falha'} ${q}`)
 }
 
-const RAIZ = path.join(__dirname, '..')
-const man = JSON.parse(fs.readFileSync(
-  path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
+const man = JSON.parse(readFileSync(
+  join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
 
 /* §I0 — a declaração */
 ok('§I0 o manifesto declara interface_padrao = sql', man.interface_padrao === 'sql')
@@ -58,11 +58,11 @@ ok('§I0 o manifesto declara interface_padrao = sql', man.interface_padrao === '
 /* §I3 — a involução da porta SQL, no wasm real */
 {
   const BASE = man.nulo_disco || 8
-  const wasmPath = path.join(RAIZ, 'assets', 'figuras', 'wasm', 'consultar.wasm')
-  if (!fs.existsSync(wasmPath)) {
+  const wasmPath = join(RAIZ, 'assets', 'figuras', 'wasm', 'consultar.wasm')
+  if (!existsSync(wasmPath)) {
     ok('§I3 consultar.wasm existe (corra tools/sobe_backends_wasm.sh)', false)
   } else {
-    const mod = new WebAssembly.Module(fs.readFileSync(wasmPath))
+    const mod = new WebAssembly.Module(readFileSync(wasmPath))
     const inst = new WebAssembly.Instance(mod, {})
     const E = inst.exports
     const mem = new Uint8Array(E.DISCO.buffer)
@@ -79,7 +79,7 @@ ok('§I0 o manifesto declara interface_padrao = sql', man.interface_padrao === '
 
 /* §I4 — o pleno nativo está atestado */
 {
-  const at = fs.readFileSync(path.join(RAIZ, 'tools', 'atestados.txt'), 'utf8')
+  const at = readFileSync(join(RAIZ, 'tools', 'atestados.txt'), 'utf8')
   const linha = at.split('\n').filter(l => /^sql /.test(l)).pop() || ''
   ok('§I4 o pleno banco/sql.c está verde na bateria (sql … 0)', / 0$/.test(linha.trim()))
 }

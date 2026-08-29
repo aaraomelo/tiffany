@@ -146,6 +146,9 @@ Mesma forma para `POWERSHELL` e `NODE`. Front local: fetch + `html_move`/`css_mo
 - `tests/mvp_ponta.js` — dois bancos wasm + WS /canal + DISCO
 - `tests/duomorf_pipe.js` — paridade (p,q,r), rotas, involução MOVE
 - `tests/absorve_node.js` — §W10 node_move na arena
+- `tests/interface_padrao.js` — hub sql (1,1,1); pgwire é face
+- `tests/celula_browser.js` — sql_move na arena + GKBANCO
+- `tests/traduz_asm_wasm.js` — monta∘desmonta = id na fita
 - `banco/fala.c` §A2 — bump∘bump = id
 - `node tests/backends_wasm.js` — §W8 bash wasm
 - `tests/bash_pleno.c` — pleno popen

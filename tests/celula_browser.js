@@ -7,13 +7,13 @@
  *
  *   node tests/celula_browser.js
  */
-'use strict'
-const fs = require('fs')
-const path = require('path')
+import { existsSync, readFileSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const RAIZ = path.join(__dirname, '..')
-const man = JSON.parse(fs.readFileSync(
-  path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
+const man = JSON.parse(readFileSync(
+  join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
@@ -25,9 +25,9 @@ function ok (q, cond) {
 const BASE = man.nulo_disco || 8
 
 function loadWasm () {
-  const p = path.join(RAIZ, 'assets', 'figuras', 'wasm', man.mvp?.sql?.wasm || 'consultar.wasm')
-  if (!fs.existsSync(p)) return null
-  return new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(p)), {}).exports
+  const p = join(RAIZ, 'assets', 'figuras', 'wasm', man.mvp?.sql?.wasm || 'consultar.wasm')
+  if (!existsSync(p)) return null
+  return new WebAssembly.Instance(new WebAssembly.Module(readFileSync(p)), {}).exports
 }
 
 /* §C0 */
@@ -56,8 +56,8 @@ function loadWasm () {
 
 /* §C2/C3 — módulos browser + persistência GKBANCO isomórfica */
 {
-  ok('§C2 banco_celula.js existe', fs.existsSync(path.join(RAIZ, 'app', 'src', 'banco_celula.js')))
-  ok('§C3 banco_disco.js GKBANCO', fs.existsSync(path.join(RAIZ, 'app', 'src', 'banco_disco.js')))
+  ok('§C2 banco_celula.js existe', existsSync(join(RAIZ, 'app', 'src', 'banco_celula.js')))
+  ok('§C3 banco_disco.js GKBANCO', existsSync(join(RAIZ, 'app', 'src', 'banco_disco.js')))
   const store = new Map()
   const ls = {
     getItem (k) { return store.has(k) ? store.get(k) : null },
