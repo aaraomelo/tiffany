@@ -143,11 +143,11 @@ $D_{\mathrm{can}}\colon i\mapsto(N-1)-i$ --- é
 T=S\circ R^{-1}
   & \text{definição e unicidade}\\[2pt]
 S=R^{\dagger}
-  & \text{as duas leituras}\\[2pt]
+  & \text{segunda nomeação de \code{fis:thm:B}}\\[2pt]
 D=R^{\dagger}\circ R^{-1}
-  & \text{o mapa entre elas}\\[2pt]
+  & \text{o mapa entre elas, único}\\[2pt]
 D(i)=(N-1)-i=\partial i
-  & \code{fis:thm:dual}(2)\\[2pt]
+  & \code{fis:thm:dual}(2) --- \emph{depois}\\[2pt]
 \operatorname{prof}(Da,Db)=\operatorname{prof}(a,b)
   & \code{fis:thm:dual}(5)\\[2pt]
 u(Da,Db)=u(a,b)
@@ -155,6 +155,27 @@ u(Da,Db)=u(a,b)
 \end{array}
 \]
 \emph{Não se atribui a $\partial^{2}=\mathrm{id}$ a determinação de $R^{\dagger}$.}
+Quem determina $R^{\dagger}$ é o Teor.~\code{fis:thm:B}: exactamente duas
+nomeações das tabelas, e a segunda é a primeira com $0$ e $1$ trocados.
+A involução $\partial^{2}=\mathrm{id}$ é o \emph{tipo} da dobra
+(\code{fis:def:op}); não escolhe qual involução. $T_{\mathrm{rev}}$ (bits
+reordenados) também cumpre $\partial^{2}=\mathrm{id}$ e \emph{não} preserva
+$\operatorname{prof}$. A leitura dual é a segunda solução, não o fecho da
+primeira. Donde
+\[
+\boxed{\;
+R^{\dagger}\text{ vem de \code{fis:thm:B};}\quad
+D=R^{\dagger}\circ R^{-1}\text{ é única;}\quad
+\text{depois }D(i)=(N-1)-i.
+\;}
+\]
+O relógio \textbf{não} determina o operador.
+$(A_{\mathrm{prof}},A_d)$ lê profundidade e distância no endereço
+(Cor.~\ref{redes:cor:relogio}). A árvore já traz a escala
+$u=2^{-\operatorname{prof}}$ --- passo diádico do prefixo
+(\code{fis:def:arvore}), não uma frequência extra a postular. Não se
+acrescenta batimento fractal sobre $R^{\dagger}$: o relógio lê $u$; não a
+inventa.
 A isometria é dedução de \code{fis:thm:dual}(5), não medição do pipe.
 Travessias arbitrárias e quatro focos partilhando $\pi$ são outras camadas.
 \emph{Não se identifica} $D_{\mathrm{can}}$ com $\tau$ da cisão
@@ -223,7 +244,8 @@ leituras
 \[
 A_{\mathrm{prof}}=\min\circ\operatorname{prof},\qquad A_d=\max\circ d.
 \]
-Isso é o relógio (Lei~6; Cor.~\ref{redes:cor:relogio}). $D_{\mathrm{can}}$
+Isso é o relógio (Lei~6; Cor.~\ref{redes:cor:relogio}): leitura do endereço,
+não determinação de $R^{\dagger}$. $D_{\mathrm{can}}$
 preserva $u$; a combinação já é \pt{6}.
 
 \begin{proposicao}[partilhar $X$ $\neq$ isometria de $u$]\label{redes:prop-troca}
