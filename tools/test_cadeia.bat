@@ -62,6 +62,18 @@ tools\bin\traduz_asm_wasm.exe || exit /b 1
 echo [test_cadeia] cosmologia...
 tools\bin\cosmologia.exe || exit /b 1
 
+call tools\env_node.bat >nul 2>&1
+if not errorlevel 1 (
+  echo [test_cadeia] canal_browser...
+  node tests\canal_browser.js || exit /b 1
+  echo [test_cadeia] canal_chunk...
+  node tests\canal_chunk.js || exit /b 1
+  echo [test_cadeia] canal_watcher...
+  node tests\canal_watcher.js || exit /b 1
+) else (
+  echo [test_cadeia] canal omitido — call tools\env_node.bat
+)
+
 echo.
 echo === test_cadeia: TUDO OK ===
 endlocal

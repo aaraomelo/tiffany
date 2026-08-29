@@ -2,11 +2,12 @@
 import net from 'node:net'
 import crypto from 'node:crypto'
 import { bandaDeTecido, tramaBump, tramaClara } from './banco_banda.mjs'
-import { S_CHUNK, S_NODE_IN, S_NODE_OUT, S_BASH_IN, S_BASH_OUT } from './canal_slots.mjs'
+import { S_CHUNK, S_NODE_IN, S_NODE_OUT, S_BASH_IN, S_BASH_OUT, S_PWSH_IN, S_PWSH_OUT } from './canal_slots.mjs'
 
 const SLOTS_SHELL = {
   node: { in: S_NODE_IN, out: S_NODE_OUT },
   bash: { in: S_BASH_IN, out: S_BASH_OUT },
+  powershell: { in: S_PWSH_IN, out: S_PWSH_OUT },
 }
 
 function wsFrame (opcode, payload) {

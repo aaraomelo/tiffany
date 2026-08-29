@@ -4,10 +4,7 @@
  */
 'use strict'
 
-const ISA_TECTO = 1 << 16
-const S_CANAL = ISA_TECTO + (600 << 14)
-const S_CHUNK = S_CANAL + 9102
-const S_FRONT_RSP = S_CANAL + 9201
+import { S_CHUNK, S_FRONT_RSP } from '../tools/canal_slots.mjs'
 
 let falhas = 0, feitas = 0
 function ok (q, cond) {
