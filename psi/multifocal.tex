@@ -245,9 +245,9 @@ a memória seja hierárquica é uma hipótese forte, e é a mais forte deste
 documento --- as três propriedades da âncora saem dela e caem com ela. \pt{3} é
 o segundo: identificar «o que se sente» com o gradiente, e não com o campo, é
 uma escolha, e é a que faz a psicoadaptação fechar. \pt{1}, \pt{2} e \pt{5} são
-baratos: o livro já os afirma quase nas mesmas palavras. \pt{6} é postulado de
-fechamento da arquitectura (\code{papers/redes.tex}): autoriza
-$X\times X\to X$ e identifica $C$ com Hebb; aqui lê-se na §\ref{mf:outro}.
+baratos: o livro já os afirma quase nas mesmas palavras. \pt{6} traduz o outro
+como superposição já determinada pela física (\code{fis:thm:combina}); Hebb é
+o \code{fis:cor:hebb}, não decreto. Aqui lê-se na §\ref{mf:outro}.
 
 \medskip\noindent\textbf{E o que \emph{não} está aqui.} Não há postulado para
 \emph{energia psíquica}. O livro põe-na como substância; este documento não a
@@ -266,6 +266,10 @@ donde $\operatorname{prof}$ e $u=2^{-\operatorname{prof}}$ se preservam
 travessias espectro/célula e soma Hebb são outros eixos.
 \emph{Não se identifica} $D_{\mathrm{can}}$ com $\tau$
 (\code{fis:obs:cisao}): $\tau$ parte o par; $D_{\mathrm{can}}$ complementa o índice.
+Quem determina $R^{\dagger}$ é o \code{fis:thm:B} (segunda nomeação,
+$0\leftrightarrow 1$), não $\partial^{2}=\mathrm{id}$. O relógio lê
+$u=2^{-\operatorname{prof}}$; não escolhe o operador, e não se acrescenta
+frequência sobre a árvore.
 O par $(A_{\mathrm{prof}},A_d)$ do relógio (\code{fis:obs:relogio-dual}) é a
 leitura ultramétrica desse $D_{\mathrm{can}}$, \textbf{não} uma lei de combinação
 de conteúdos.
@@ -301,7 +305,7 @@ $\sum G=\abs I$ conserva-se; $\pi\neq\pi'$ pode coincidir na medida \\
 Cor.~\ref{mf:cor:ponte} & III &
 travessia célula/espectro (\code{fis:thm:ponte}); não $D_{\mathrm{can}}$ \\
 Teor.~\ref{mf:thm:outro} (Hebb) & --- &
-\pt{6} fecha $X\times X\to X$; interferência segue (\code{fis:thm:interfere}) \\
+descida de \code{fis:thm:combina}/\code{fis:cor:hebb}; \emph{não} segue da troca \\
 foco clínico (Rach.~V) & II/III &
 território = bola; dual canónico exige $R,R^{\dagger}$ explícitas \\
 Teor.~\ref{mf:thm:duas} & III &
@@ -338,16 +342,19 @@ A_d=\max\circ d
 dobra $D_{\mathrm{can}}(i)=(N-1)-i$. A isometria $u(Da,Db)=u(a,b)$ é do
 \textbf{endereço}. Não implica
 $D_{\mathrm{can}}(f(x,y))=f(D_{\mathrm{can}}x,D_{\mathrm{can}}y)$ sobre o
-conteúdo da representação. Donde os invariantes não autorizam a passagem
-$X\times X\to X$:
+conteúdo da representação. Donde os invariantes de endereço \textbf{não}
+autorizam $X\times X\to X$. Quem determina a combinação é o
+Teor.~\code{fis:thm:combina}. \pt{6} realiza essa lei na leitura do outro; não
+a legisla. $G>1$ é consequência da soma, não axioma.
 \[
-\underbrace{\tau,\; D_{\mathrm{can}},\; \operatorname{prof},\; u}_{\text{demonstrados}}
-\quad\longrightarrow\quad
-\underbrace{C}_{\text{postulado}}
-\quad\longrightarrow\quad
-\underbrace{\text{realizações físicas}}_{\text{testáveis}}.
+\boxed{\;
+C\;\longrightarrow\;S\;\longrightarrow\;\Delta_{\mathrm{int}}
+\;\longrightarrow\;W_{ij}.
+\;}
 \]
-\pt{6} é o decreto de fechamento; não se mede, avalia-se contra ele.
+$\tau$, $D_{\mathrm{can}}$, $\operatorname{lexMax}$ e o pipe ficam \emph{fora}
+desta derivação. O relógio lê $u$; não escolhe $R^{\dagger}$.
+\code{papers/redes.tex} só realiza.
 
 % ───────────────────────────────────────────────────────────────────────────
 \section{A memória: o que se conserva, o que se perde, e quanto}\label{mf:memoria}
@@ -853,17 +860,19 @@ cláusula~(3) não afirma o ciclo.}
 % ───────────────────────────────────────────────────────────────────────────
 \section{A interpretação do outro: a traição é a soma}\label{mf:outro}
 
-\noindent Aqui \pt{6} lê-se nesta secção (no pipe da rede, é o postulado de
-\code{papers/redes.tex}). Dela sai o mecanismo que o livro não tem para uma
-palavra que ele usa muito: \cury{inevitável}.
+\noindent Aqui \pt{6} realiza a combinação física (\code{fis:thm:combina}) na
+leitura do outro. \code{papers/redes.tex} só realiza; não legisla. Hebb é o
+\code{fis:cor:hebb}. $G>1$ é consequência da soma, não axioma. É o mecanismo
+que o livro não tem para a palavra \cury{inevitável}.
 
 \begin{teorema}[somar identifica; separar custa espaço]\label{mf:thm:outro}
-Sob \pt{6}, com $W_{ij}=\sum_{p}\xi^p_i\xi^p_j$ a matriz onde os padrões
-diretivo e associativos são somados:
+Sob \pt{6} --- que realiza o \code{fis:thm:combina} na leitura do outro ---,
+com $W_{ij}=\sum_{p}\xi^p_i\xi^p_j$ o \code{fis:cor:hebb}:
 \begin{enumerate}\itemsep3pt
 \item[(1)] \textbf{A leitura não é injetiva:} conjuntos distintos de padrões
 podem dar a mesma $W$; a multiplicidade dessa realização é $G>1$, e a isso
-chama-se \textbf{interferência}.
+chama-se \textbf{interferência}. $G>1$ \emph{não} é posto à mão: aparece porque
+$\sum_p\xi^p$ não é injetiva.
 \item[(2)] \textbf{E a razão é o núcleo:} um morfismo que soma tem núcleo, e
 dois conjuntos cuja diferença esteja no núcleo têm a mesma imagem.
 \item[(3)] \textbf{Desfazer custa uma coordenada:} pondo cada padrão no seu
@@ -876,7 +885,8 @@ lugar da folha.
 \end{teorema}
 
 \begin{proof}
-(1) e (3) são o \fis{fis:thm:interfere}{Teor. «somar identifica; separar não»}.
+(1) e (3) são o \fis{fis:thm:interfere}{Teor. «somar identifica; separar não»},
+com $W$ o \code{fis:cor:hebb} da superposição \code{fis:thm:combina}.
 (2) é o \fis{fis:thm:palavra}{Teor. «a palavra reconstrói, e a dobra é o
 núcleo»}: dois prefixos com a mesma imagem dão um factor no núcleo, o que é
 $G>1$ pela cláusula~(2) do \fis{fis:thm:mult}{Teor. «multiplicidade
@@ -1056,7 +1066,7 @@ hipótese local & \code{fis:prop:cego} \\
 Cor.~\ref{mf:cor:ponte} --- a passagem não custa &
 --- & \code{fis:thm:ponte}, \code{fis:thm:H} \\
 Teor.~\ref{mf:thm:outro} --- somar identifica; separar custa &
-\pt{6} & \code{fis:thm:interfere}, \code{fis:thm:palavra} \\
+\pt{6} & \code{fis:thm:combina}, \code{fis:cor:hebb}, \code{fis:thm:interfere} \\
 Teor.~\ref{mf:thm:custo} --- apagar paga $\kappa\Phi$ &
 \pt{1} + Landauer & \code{fis:thm:landauer}, \code{fis:cor:custofolga} \\
 Teor.~\ref{mf:thm:rastro} --- o antiespaço é $\delta$, e halva &
@@ -1564,7 +1574,8 @@ um campo que já carrega a história do observador, e o que dele se lê é $1/G$
 preço: a cláusula~(3) desfaz a interferência com \textbf{uma} coordenada --- o
 ramo --- e a cláusula~(4) diz que ela \textbf{ocupa lugar}.
 
-\medskip\noindent\textbf{O compromisso.} \pt{6}, e com ele uma consequência
+\medskip\noindent\textbf{O compromisso.} \pt{6} como realização da combinação
+física, e com ele uma consequência
 incómoda: \emph{a distorção não se elimina com boa vontade}; elimina-se com
 espaço, ou não se elimina.
 
