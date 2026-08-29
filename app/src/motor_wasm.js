@@ -1,4 +1,5 @@
-// ── O PAINEL DE CONTROLE DO MOTOR — o painel_motor.wasm + o torque_fractal.wasm (do CHESSC), no front ──
+// ── PAINEL DO CAMPO — painel_motor.wasm + torque_fractal.wasm no front. ──
+// Roupa no mesmo DISCO que banco/sql.c (o motor ISA). Não é Alonzo; não é tests/motor.c.
 // Nada por cima: os dois .wasm foram emitidos pelo chessc (o broca-so) de naked Chess (a IR ERG-64), a
 // costura interp≡WASM≡Dafny provada. O AVANÇO da fase (painel_motor.wasm): nova_fase = fase + ω·dt (a MULT
 // ⊗ da Rainha ∘ a SOMA ⊕ de Kirchhoff). O TORQUE FRACTAL (torque_fractal.wasm): a torre de Koch Σφ^-j (os

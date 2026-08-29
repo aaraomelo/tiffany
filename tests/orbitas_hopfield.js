@@ -169,6 +169,11 @@ function sobrepoe (a, b) {
     hp.fecho.includes('lambda') &&
     hp.eixos.includes('duomorfismo') &&
     hp.fita.includes('G=1'))
+  ok('§H0 hopfield e o candidato Neural (uma matriz, as tres orbitas)',
+    hp.canonico === 'Corpo Neural' &&
+    hp.estatuto === 'candidato' &&
+    Array.isArray(hp.orbitas) &&
+    hp.orbitas.join(',') === 'sql,latex,node')
 }
 
 /* §H1 — eixos distintos: aresta a/b não é W_s/W_a */

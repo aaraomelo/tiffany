@@ -1,4 +1,5 @@
 /* conecthus/backends/c/escapar.c — C realiza «escapar» (Φ pontes).
+ * Roupa: não copia a ULA/gato de banco/sql.c (o motor).
  * Assinatura no banco: (1,0,1). Sobe: traduz → escapar.wasm
  * Contrato host: offsets relativos a arena[]; memória exportada DISCO (base NULO=8). */
 unsigned char arena[65536];

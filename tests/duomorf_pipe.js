@@ -65,6 +65,7 @@ function caminho (de, para) {
 const PIPE = man.pipe_linguagens || []
 const ARESTAS = man.arestas || []
 const BASE = man.nulo_disco || 8
+const LINGUAS = (man.linguagens || []).map((l) => l.nome)
 
 function loadWasm (nome) {
   const L = lang(nome)
@@ -98,6 +99,11 @@ function ponteSql (ex, corpo, sentido) {
   return dec(ex, 4096, outLen)
 }
 
+function moveNome (nome) {
+  const L = lang(nome)
+  return L.absorcao?.move || (nome + '_move')
+}
+
 function traduzWasm (de, para, texto, inst) {
   const edge = ARESTAS.find((e) => e.de === de && e.para === para)
   if (!edge) throw new Error('aresta ' + de + '→' + para)
@@ -106,7 +112,7 @@ function traduzWasm (de, para, texto, inst) {
   const exDe = inst[nomeDe]
   const exPara = inst[nomePara]
   const exSql = inst.sql
-  let corpo = move(exDe, nomeDe + '_move', texto, -1)
+  let corpo = move(exDe, moveNome(nomeDe), texto, -1)
   if (edge.ponte === 'sql_tags' && exSql) {
     corpo = ponteSql(exSql, corpo, -1)
     corpo = ponteSql(exSql, corpo, +1)
@@ -114,13 +120,13 @@ function traduzWasm (de, para, texto, inst) {
     if (nomePara === 'sql') corpo = ponteSql(exSql, corpo, -1)
     else if (nomeDe === 'sql') corpo = ponteSql(exSql, corpo, +1)
   }
-  return move(exPara, nomePara + '_move', corpo, +1)
+  return move(exPara, moveNome(nomePara), corpo, +1)
 }
 
 /* §D0 — arestas vs (p,q,r) */
 {
-  ok('§D0 pipe_linguagens declarado', PIPE.length === 7)
-  ok('§D0 arestas pipe (7×6)', ARESTAS.filter((e) => PIPE.includes(e.de) && PIPE.includes(e.para)).length === PIPE.length * (PIPE.length - 1))
+  ok('§D0 pipe_linguagens = linguagens[]', PIPE.length === LINGUAS.length && LINGUAS.every((n) => PIPE.includes(n)))
+  ok('§D0 arestas pipe (n×n−1)', ARESTAS.filter((e) => PIPE.includes(e.de) && PIPE.includes(e.para)).length === PIPE.length * (PIPE.length - 1))
   ok('§D0 sql e html têm π=1', pi(lang('sql')) === 1 && pi(lang('html')) === 1)
   ok('§D0 css tem π=0', pi(lang('css')) === 0)
   ok('§D0 tábua: iso∘iso=iso', (0 ^ 0) === 0)
@@ -225,6 +231,8 @@ function traduzWasm (de, para, texto, inst) {
   ok('§D5 node tem absorcao', !!man.linguagens.find((l) => l.nome === 'node')?.absorcao?.move)
   ok('§D5 latex tem absorcao', !!man.linguagens.find((l) => l.nome === 'latex')?.absorcao)
   ok('§D5 sql tem absorcao', !!man.linguagens.find((l) => l.nome === 'sql')?.absorcao)
+  ok('§D5 todas as linguas tem absorcao.move',
+    (man.linguagens || []).every((l) => l.absorcao && l.absorcao.move && (l.exports || []).includes(l.absorcao.move)))
   ok('§D5 canal→node', ARESTAS.find((e) => e.de === 'canal' && e.para === 'node'))
   ok('§D5 node nao em fios HTTP', !(man.fios || []).find((f) => f.nome === 'node'))
   ok('§D5 fios HTTP nao absorvidos', (man.fios || []).every((f) => f.absorvido === false))

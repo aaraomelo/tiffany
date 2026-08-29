@@ -30,6 +30,8 @@ import { passoPatria, pedePatria, medePatriaLive } from './patria.js'
 import { passoCristal } from './cristal.js'
 import { comporTexto } from './tex_tradutor.js'
 import { parsePdfCasa, pintaPagina, corposDoPdf } from './canvas_tex.js'
+import { carregaManifesto, manifestoAtual, corposDoManifesto } from './manifesto_loader.js'
+import { initBancoSql, sqlQuery } from './banco_sql.js'
 
 /** basename / path → id do tradutor (docs_tradutor.json). */
 function mapaTex () {
@@ -78,7 +80,7 @@ export function initAssistente () {
       <p class="asst-lede">Rede dual · Controlo <code>C</code> · Fronteira <code>F</code>
         · Estação <code>E</code> · Banco <code>B</code> · Pátria <code>D</code>.
         «mostra a fronteira» · <code>gut:60,48 ordem:0,1</code> ·
-        <code>lead:65 estacao:65</code> · «mostra o banco» · «mostra o deploy».</p>
+        <code>lead:65 estacao:65</code> · «mostra o banco» · «mostra os corpos» · «mostra o deploy».</p>
       <div class="asst">
         <div class="asst-meta">
           <span class="asst-estado" data-est>desligada</span>
@@ -110,7 +112,7 @@ export function initAssistente () {
           · rede: ℱ:(x,h)↦(x′,h′); |u|≤Δ retém; Hopfield=memória Y; λ⁻ da conjugação
           · Π=quê · I=sentido · r · C=Controlo · F=Fronteira · E=Estação · B=banco · D=Pátria · X=Cristal
           · corpus: <code>tools/pipeline.sh</code> · <code>gut:…</code> /
-            <code>lead:65 estacao:65</code></p>
+            <code>lead:65 estacao:65</code> · <code>mostra os corpos</code></p>
       </div>
     </div>`
 
@@ -139,6 +141,11 @@ export function initAssistente () {
   const historico = []
   const assinatura = assinaturaDoCorpo(corpoJson)
   const rede = criarEstadoRede({ c: 0, delta: 0.18 })
+  carregaManifesto().then(() => {
+    if (!rede.hopfield) {
+      try { rede.hopfield = manifestoAtual().hopfield } catch (_) { /* sem manifesto */ }
+    }
+  }).catch(() => { /* serve_banco opcional neste ecrã */ })
   /** Estado retido para Controlo IR (vizinhança 𝒱). */
   let retidoCtrl = { x: 0, n: 0, mut: 0, residual: 0, texto: '' }
   let ultimoImplante = null
@@ -240,7 +247,40 @@ export function initAssistente () {
 
   function mostraBanco (fala) {
     if (!pedeBanco(fala)) return
+    const t = String(fala || '').toLowerCase()
+    const querCorpos = /mostra os corpos|corpo canonico|mostra o motor/.test(t)
     const doc = ultimoImplante
+
+    ;(async () => {
+      try {
+        await initBancoSql()
+        await carregaManifesto()
+        const man = manifestoAtual()
+        const corpos = corposDoManifesto()
+        const mot = corpos && corpos.motor
+        if (querCorpos && corpos) {
+          const palcos = (corpos.lista || []).filter((c) => c.camada === 'Fisica')
+          const linhas = palcos.map((c) =>
+            (c.parte || '?') + '→' + (c.canonico == null ? '∅' : c.canonico))
+          bancoEl.textContent = 'B=' + palcos.length
+          bancoEl.className = 'asst-banco ok'
+          bancoEl.title = (mot && mot.isa) || 'banco/sql.c'
+          linha('sys', 'banco',
+            'motor ' + (mot && mot.isa) + ' · ' + linhas.join(' · '), false)
+          return
+        }
+        try {
+          const out = await sqlQuery('SELECT 1')
+          linha('sys', 'banco', 'motor ' + man.interface_padrao + ': ' + String(out).trim(), false)
+        } catch (err) {
+          linha('sys', 'banco', 'célula sql ainda sem wasm — manifesto ' + man.interface_padrao, false)
+        }
+      } catch (err) {
+        /* manifesto / banco opcional neste tick */
+      }
+    })()
+
+    if (querCorpos) return
     if (!doc) {
       bancoEl.textContent = 'B=—'
       bancoEl.className = 'asst-banco'

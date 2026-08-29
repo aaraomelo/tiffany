@@ -11,16 +11,19 @@
  * §W8  bash: escreve/le na arena (protocolo; pleno em tests/bash_pleno.c)
  * §W9  dom: html compor† + css aplicar + js escapar (front via banco)
  * §W10 powershell + node: protocolo na arena (pleno em tests/*_pleno.c)
+ * §W11 absorcao.move em cada língua; ptx/llvm/glsl/wasm MOVE na arena
+ *
+ *   node tests/backends_wasm.js
  */
-'use strict';
-const fs = require('fs');
-const path = require('path');
-const { execFileSync } = require('child_process');
+import fs from 'node:fs'
+import path from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
-const RAIZ = path.resolve(__dirname, '..');
-const OUT = path.join(RAIZ, 'assets', 'figuras', 'wasm');
-const MAN = JSON.parse(fs.readFileSync(path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'));
-const BASE = MAN.nulo_disco || 8;
+const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const OUT = path.join(RAIZ, 'assets', 'figuras', 'wasm')
+const MAN = JSON.parse(fs.readFileSync(path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json'), 'utf8'))
+const BASE = MAN.nulo_disco || 8
 
 let falhas = 0, feitas = 0;
 function ok(q, cond) {
@@ -30,8 +33,20 @@ function ok(q, cond) {
 
 console.log('=== BACKENDS WASM: realizações pela mesma porta (traduz) ===\n');
 
+function wasmPronto (L) {
+    const w = path.join(OUT, L.wasm)
+    return fs.existsSync(w) && fs.statSync(w).size > 32
+}
+
 try {
-    execFileSync('bash', [path.join(RAIZ, 'tools', 'sobe_backends_wasm.sh')], { stdio: 'inherit' });
+    const faltam = MAN.linguagens.filter((L) => !wasmPronto(L))
+    if (faltam.length) {
+        const cc = process.env.CC || 'gcc'
+        const traduzBin = path.join(RAIZ, 'tools', 'bin', process.platform === 'win32' ? 'traduz.exe' : 'traduz')
+        fs.mkdirSync(path.dirname(traduzBin), { recursive: true })
+        execFileSync(cc, ['-O2', '-std=c99', '-w', path.join(RAIZ, 'tools', 'traduz.c'), '-o', traduzBin], { stdio: 'inherit' })
+        execFileSync(process.execPath, [path.join(RAIZ, 'tools', 'sobe_backends_wasm.mjs')], { stdio: 'inherit' })
+    }
 } catch (e) {
     ok('sobe_backends_wasm corre', false);
     console.log('#TOTAL', feitas, falhas + 1);
@@ -256,13 +271,13 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
         const mP = u8(P);
         const ps = new TextEncoder().encode('Write-Output x');
         mP.set(ps, BASE + 1024);
-        const nw = P.powershell_move(1024, ps.length, 0, -1);
-        ok('§W10 powershell_move -1', nw === ps.length && P.powershell_pendente() === ps.length);
+        const nwPs = P.powershell_move(1024, ps.length, 0, -1);
+        ok('§W10 powershell_move -1', nwPs === ps.length && P.powershell_pendente() === ps.length);
         ok('§W10 powershell_corre export', typeof P.powershell_corre === 'function');
         const gotPs = P.powershell_corre();
         ok('§W10 powershell_corre semântica', gotPs > 0);
-        const nr = P.powershell_move(8192, 32, 8192, +1);
-        const gotP = dec.decode(mP.slice(BASE + 8192, BASE + 8192 + nr));
+        const nrPs = P.powershell_move(8192, 32, 8192, +1);
+        const gotP = dec.decode(mP.slice(BASE + 8192, BASE + 8192 + nrPs));
         ok('§W10 powershell_move +1', gotP.indexOf('x') >= 0);
 
         const N = await load('node.wasm');
@@ -272,15 +287,15 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
             typeof N.node_le === 'function' && typeof N.node_pronto === 'function');
         const js = new TextEncoder().encode('console.log(1)');
         mN.set(js, BASE + 1024);
-        const nw = N.node_move(1024, js.length, 0, -1);
-        ok('§W10 node_move -1 aceita script', nw === js.length);
+        const nwN = N.node_move(1024, js.length, 0, -1);
+        ok('§W10 node_move -1 aceita script', nwN === js.length);
         ok('§W10 node_pendente', N.node_pendente() === js.length);
         ok('§W10 node_pronto inicia vazio', N.node_pronto() === 0);
         ok('§W10 node_corre export', typeof N.node_corre === 'function');
         const got = N.node_corre();
         ok('§W10 node_corre semântica', got > 0);
-        const nr = N.node_move(8192, 32, 8192, +1);
-        const gotN = dec.decode(mN.slice(BASE + 8192, BASE + 8192 + nr));
+        const nrN = N.node_move(8192, 32, 8192, +1);
+        const gotN = dec.decode(mN.slice(BASE + 8192, BASE + 8192 + nrN));
         ok('§W10 node_move +1 devolve stdout', gotN.indexOf('1') >= 0);
     }
 
@@ -304,6 +319,57 @@ function i32(ex) { return new Int32Array(ex.DISCO.buffer, BASE); }
         ctl.control_dist_arena();
         ok('§W7 dist L1=4 caixa=2 forma=2 teclado=0',
             a[10] === 4 && a[14] === 2 && a[15] === 0 && a[17] === 2);
+    }
+
+    /* §W11 — cada língua do manifesto: export absorcao.move; MOVE ±1 onde a forma é bytes */
+    {
+        let nMove = 0;
+        for (const L of MAN.linguagens) {
+            const ex = await load(L.wasm);
+            const fn = L.absorcao && L.absorcao.move;
+            const okFn = fn && typeof ex[fn] === 'function';
+            if (okFn) nMove++;
+            else console.log('  falta export', L.nome, fn);
+        }
+        ok(`§W11 absorcao.move nas ${MAN.linguagens.length} linguas`, nMove === MAN.linguagens.length);
+
+        const P = await load('emitir.wasm');
+        const mP = u8(P);
+        const ptx = enc.encode('mov.u32 r1, r2;');
+        mP.set(ptx, BASE + 100);
+        const n1 = P.emitir(100, ptx.length, 2000);
+        const n2 = P.emitir_volta(2000, n1, 4000);
+        const ptxBack = dec.decode(mP.slice(BASE + 4000, BASE + 4000 + n2));
+        ok('§W11 ptx emitir†=emitir_volta', ptxBack === 'mov.u32 r1, r2;');
+
+        const Lv = await load('baixar.wasm');
+        const mL = u8(Lv);
+        const ir = enc.encode('define i32 @f()');
+        mL.set(ir, BASE + 100);
+        const ln = Lv.baixar(100, ir.length, 2000);
+        const irBack = dec.decode(mL.slice(BASE + 2000, BASE + 2000 + ln));
+        ok('§W11 llvm baixar copia', irBack === 'define i32 @f()');
+
+        const G = await load('filtrar.wasm');
+        const aG = i32(G);
+        aG[0] = 1; aG[1] = 1;
+        G.filtrar(1);
+        ok('§W11 glsl filtrar dep', aG[2] === 1);
+        aG[0] = 1; aG[1] = 0;
+        G.filtrar(1);
+        ok('§W11 glsl filtrar recusa', aG[2] === 0);
+
+        const W = await load('empilhar.wasm');
+        const sp = W.empilhar_push(7);
+        ok('§W11 wasm empilhar push/pop', sp === 1 && W.empilhar_pop() === 7);
+
+        const H = await load('html_compor.wasm');
+        const mH = u8(H);
+        const html = enc.encode('<p>x</p>');
+        mH.set(html, BASE + 100);
+        const hn = H.html_move(100, html.length, 2000, -1);
+        const hn2 = H.html_move(2000, hn, 4000, +1);
+        ok('§W11 html_move ±1', dec.decode(mH.slice(BASE + 4000, BASE + 4000 + hn2)) === '<p>x</p>');
     }
 
     console.log(`#TOTAL ${feitas} ${falhas}`);

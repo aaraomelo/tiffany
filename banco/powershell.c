@@ -1,8 +1,18 @@
-/* banco/powershell.c — pleno PowerShell (Windows local; pwsh noutros).
+/* banco/powershell.c — pleno PowerShell (pwsh/powershell in.ps1 no metal).
  *   cc -O2 -std=c99 -DPLENO_PWSH banco/powershell.c conecthus/backends/powershell/interpretar.c -o powershell */
 #define PLENO_PWSH 1
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include "tiffany_shell.h"
+
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir_p(p) _mkdir(p)
+#else
+#include <sys/stat.h>
+#define mkdir_p(p) mkdir(p, 0755)
+#endif
 
 extern unsigned char arena[65536];
 
@@ -28,32 +38,43 @@ int powershell_le(int out_off, int max);
 int powershell_pronto(void);
 int powershell_pendente(void);
 
-static FILE *powershell_popen(const char *script){
-#ifdef _WIN32
-    char run[CAP + 96];
-    snprintf(run, sizeof run, "powershell -NoProfile -ExecutionPolicy Bypass -Command \"%s\"", script);
-    return popen(run, "r");
-#else
-    char run[CAP + 64];
-    snprintf(run, sizeof run, "pwsh -NoProfile -Command \"%s\"", script);
-    return popen(run, "r");
-#endif
-}
-
 int powershell_corre(void){
     int nin = le16(OFF_NIN);
     if(nin <= 0) return 0;
     if(nin > CAP) nin = CAP;
-    char cmd[CAP + 1];
+    char script[CAP + 1];
     int i = 0;
     while(i < nin){
-        cmd[i] = (char)arena[OFF_IN + i];
+        script[i] = (char)arena[OFF_IN + i];
         i = i + 1;
     }
-    cmd[i] = 0;
+    script[i] = 0;
     grava16(OFF_NIN, 0);
 
-    FILE *f = powershell_popen(cmd);
+    char dir[256], path[320], run[768];
+#ifdef _WIN32
+    const char *tmp = getenv("TEMP");
+    if(!tmp || !*tmp) tmp = "C:\\temp";
+    snprintf(dir, sizeof dir, "%s\\tiffany_pwsh", tmp);
+#else
+    snprintf(dir, sizeof dir, "/tmp/tiffany_pwsh");
+#endif
+    mkdir_p(dir);
+    snprintf(path, sizeof path, "%s/in.ps1", dir);
+    FILE *ps = fopen(path, "wb");
+    if(!ps) return -1;
+    fwrite(script, 1, (size_t)i, ps);
+    fclose(ps);
+
+#ifdef _WIN32
+    snprintf(run, sizeof run,
+        "\"%s\" -NoProfile -ExecutionPolicy Bypass -File \"%s\"",
+        tiffany_pwsh_bin(), path);
+#else
+    snprintf(run, sizeof run, "\"%s\" -NoProfile -File \"%s\"",
+        tiffany_pwsh_bin(), path);
+#endif
+    FILE *f = popen(run, "r");
     if(!f) return -1;
 
     int nout = le16(OFF_NOUT);

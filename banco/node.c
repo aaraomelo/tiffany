@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "tiffany_node.h"
 
 #ifdef _WIN32
 #define _POSIX_C_SOURCE 200809L
@@ -39,8 +40,7 @@ int node_pronto(void);
 int node_pendente(void);
 
 static const char *node_bin(void){
-    const char *v = getenv("TIFFANY_NODE");
-    return (v && *v) ? v : "node";
+    return tiffany_node_bin();
 }
 
 int node_corre(void){

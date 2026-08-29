@@ -1,4 +1,5 @@
-// banco_init.js — arranque Araano: manifesto + tradutor.
+// banco_init.js — arranque: manifesto ISA + tradutor + célula.
+// O motor é banco/sql.c (interface_padrao=sql). Assistente e terminal são clientes.
 
 import { carregaManifesto } from './manifesto_loader.js'
 import { initTradutor } from './banco_tradutor.js'

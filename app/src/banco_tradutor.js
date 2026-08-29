@@ -1,6 +1,6 @@
 // banco_tradutor.js — máquina: MOVE na arena + arestas do manifesto. Sem adaptador SQL.
 
-import { moveWasm, enc, dec, loadWasm } from './banco_move.js'
+import { moveByForma, enc, dec, loadWasm } from './banco_move.js'
 import { manifestoAtual } from './manifesto_loader.js'
 import { execQueryCelula, initCelula } from './banco_celula.js'
 import { absorveBackend } from './banco_absorve.js'
@@ -103,6 +103,7 @@ export function caminho (de, para, hub = HUB) {
 
 export function moveExport (lang) {
   const L = typeof lang === 'string' ? langManifesto(lang) : lang
+  if (L.absorcao?.move) return L.absorcao.move
   if (L.exports) {
     const m = L.exports.find((e) => e.endsWith('_move'))
     if (m) return m
@@ -131,7 +132,7 @@ export function traduzWasm ({ de, para, texto, instancias, hub = HUB }) {
   const exSql = instancias.get(hub)
   if (!exDe || !exPara) throw new Error('wasm de/para não carregado')
 
-  let corpo = moveWasm(exDe, moveExport(nomeDe), texto, -1)
+  let corpo = moveByForma(exDe, langManifesto(nomeDe), texto, -1)
 
   if (edge.ponte === 'sql_tags' && exSql) {
     corpo = ponteSql(exSql, corpo, -1)
@@ -142,7 +143,7 @@ export function traduzWasm ({ de, para, texto, instancias, hub = HUB }) {
   }
 
   return {
-    texto: moveWasm(exPara, moveExport(nomePara), corpo, +1),
+    texto: moveByForma(exPara, langManifesto(nomePara), corpo, +1),
     rota,
     par: Q,
     aresta: edge,

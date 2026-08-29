@@ -28,6 +28,7 @@ const APP = path.join(RAIZ, 'app')
 
 const WASM = path.join(RAIZ, 'assets', 'figuras', 'wasm')
 
+/* Fonte única ISA: linguagens, orbitas, hopfield, corpos. Sem segundo URL. */
 const MANIFESTO = path.join(RAIZ, 'conecthus', 'backends', 'manifesto.json')
 
 const BANCO = path.join(APP, 'banco')

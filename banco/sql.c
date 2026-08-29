@@ -1,6 +1,12 @@
 
 /* sql.c — SQL NO METAL. Compila para a ISA, e a memória é o DISCO. Sem RAM.
  *
+ * ESTE é o motor da casa (interface_padrao=sql; manifesto.corpos.motor.isa).
+ * Não confundir com app/src/motor_campo.js (roupa WebGL no mesmo DISCO) nem com
+ * tests/motor.c (medidor da Parte Mecânica: DTC/indução). Backends não copiam
+ * a ULA: são roupas (MOVE/traduz). As 19 línguas da ISA ingerem-se por essa
+ * porta; asm é degrau ERG de isa, não língua.
+ *
  * Nada aqui é simulado por cima de estruturas em memória: o SQL vira BYTECODE da ISA do
  * broca-so (ula/instrucoes.h), o bytecode vive num arquivo, a memória da máquina vive noutro
  * arquivo, e o interpretador lê instrução por instrução com pread. O único estado em RAM são
@@ -159,6 +165,7 @@
 #include "contrato.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
 #include "sql_api.h"    /* porta C para pgwire — captura de resultado */
 #include "pgcat.h"      /* Trio PG6: o catálogo de SESSÃO, antes do motor */
+#include "tiffany_node.h"  /* shells ingeridos: node/bash/pwsh via tiffany_shell.h */
 
 /* ── A CONSULTA DE DENTRO NÃO FALA ──────────────────────────────────────────
  * Uma subconsulta é um passo de outra, e não uma resposta ao cliente: as linhas
@@ -14295,6 +14302,10 @@ static int shell_escreve(const char *label, const char *nome, unsigned slot_in, 
         snprintf(aux, sizeof aux, "%s/in.js", dir);
         f = fopen(aux, "wb");
         if(f){ fwrite(cmd, 1, (size_t)n, f); fclose(f); }
+    } else if(!strcmp(nome, "bash")){
+        snprintf(aux, sizeof aux, "%s/in.sh", dir);
+        f = fopen(aux, "wb");
+        if(f){ fwrite(cmd, 1, (size_t)n, f); fclose(f); }
     }
     { char pout[768]; snprintf(pout, sizeof pout, "%s/out", dir); unlink(pout); }
     mem_grava(slot_in, (Word){ (Word8)(n & 255u), (Word8)((n >> 8) & 255u) });
@@ -14303,24 +14314,30 @@ static int shell_escreve(const char *label, const char *nome, unsigned slot_in, 
 }
 static FILE *shell_popen_run(const char *nome, const char *dir, const char *cmd){
     char run[8704];
-    if(!strcmp(nome, "bash"))
-        return popen(cmd, "r");
+    (void)cmd;
+    if(!strcmp(nome, "bash")){
+        char sh[768];
+        snprintf(sh, sizeof sh, "%s/in.sh", dir);
+        snprintf(run, sizeof run, "\"%s\" \"%s\"", tiffany_bash_bin(), sh);
+        return popen(run, "r");
+    }
     if(!strcmp(nome, "powershell")){
         char ps1[768];
         snprintf(ps1, sizeof ps1, "%s/in.ps1", dir);
 #ifdef _WIN32
-        snprintf(run, sizeof run, "powershell -NoProfile -ExecutionPolicy Bypass -File \"%s\"", ps1);
+        snprintf(run, sizeof run,
+            "\"%s\" -NoProfile -ExecutionPolicy Bypass -File \"%s\"",
+            tiffany_pwsh_bin(), ps1);
 #else
-        snprintf(run, sizeof run, "pwsh -NoProfile -File \"%s\"", ps1);
+        snprintf(run, sizeof run, "\"%s\" -NoProfile -File \"%s\"",
+            tiffany_pwsh_bin(), ps1);
 #endif
         return popen(run, "r");
     }
     if(!strcmp(nome, "node")){
         char js[768];
-        const char *nb = getenv("TIFFANY_NODE");
-        if(!nb || !*nb) nb = "node";
         snprintf(js, sizeof js, "%s/in.js", dir);
-        snprintf(run, sizeof run, "\"%s\" \"%s\"", nb, js);
+        snprintf(run, sizeof run, "\"%s\" \"%s\"", tiffany_node_bin(), js);
         return popen(run, "r");
     }
     return NULL;

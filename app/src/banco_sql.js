@@ -26,7 +26,7 @@ export function discoBanco () {
   return _disco
 }
 
-/** Query SQL — absorvida na arena (sql_move), não adaptador. */
+/** Query SQL — absorvida na arena (sql_move), não adaptador. Motor = banco/sql.c. */
 export async function sqlQuery (q, ctx = {}) {
   await initBancoSql(ctx)
   const r = await execQueryCelula(q, ctx)

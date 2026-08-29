@@ -18,10 +18,10 @@ export function documentoImplante ({ proj, meas, external = 1, id = '' } = {}) {
   return { fala, resposta, R }
 }
 
-/** «mostra o banco» / «o que e a volta no banco» — RAG, não pesos. */
+/** «mostra o banco» / corpos do manifesto / motor sql — RAG, não pesos. */
 export function pedeBanco (fala) {
   const t = String(fala || '').toLowerCase()
-  return /(mostra o banco|volta no banco|o que e a volta no banco)/.test(t)
+  return /(mostra o banco|volta no banco|o que e a volta no banco|mostra os corpos|corpo canonico|mostra o motor)/.test(t)
 }
 
 export function parseImplante (src) {

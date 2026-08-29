@@ -1,14 +1,24 @@
-/* banco/bash.c — pleno do backend bash (popen na Patria; PTY depois).
+/* banco/bash.c — pleno bash (bash in.sh no metal).
  *
  * Compilar com interpretar.c:
  *   cc -O2 -std=c99 banco/bash.c conecthus/backends/bash/interpretar.c -o bash
  *
- * bash_corre lê o stdin da arena, executa com popen, escreve no stdout da arena.
+ * bash_corre lê o stdin da arena, corre o bash ingerido, escreve no stdout da arena.
  * No browser só corre interpretar.wasm; bash_corre existe só no metal. */
 #define PLENO_BASH 1
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include "tiffany_shell.h"
+
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir_p(p) _mkdir(p)
+#else
+#include <sys/stat.h>
+#define mkdir_p(p) mkdir(p, 0755)
+#endif
 
 extern unsigned char arena[65536];
 
@@ -38,16 +48,36 @@ int bash_corre(void){
     int nin = le16(OFF_NIN);
     if(nin <= 0) return 0;
     if(nin > CAP) nin = CAP;
-    char cmd[CAP + 1];
+    char script[CAP + 1];
     int i = 0;
     while(i < nin){
-        cmd[i] = (char)arena[OFF_IN + i];
+        script[i] = (char)arena[OFF_IN + i];
         i = i + 1;
     }
-    cmd[i] = 0;
+    script[i] = 0;
     grava16(OFF_NIN, 0);
 
-    FILE *f = popen(cmd, "r");
+    char dir[256], path[320], run[640];
+#ifdef _WIN32
+    const char *tmp = getenv("TEMP");
+    if(!tmp || !*tmp) tmp = "C:\\temp";
+    snprintf(dir, sizeof dir, "%s\\tiffany_bash", tmp);
+#else
+    snprintf(dir, sizeof dir, "/tmp/tiffany_bash");
+#endif
+    mkdir_p(dir);
+    snprintf(path, sizeof path, "%s/in.sh", dir);
+    FILE *sh = fopen(path, "wb");
+    if(!sh) return -1;
+    fwrite(script, 1, (size_t)i, sh);
+    fclose(sh);
+
+#ifdef _WIN32
+    snprintf(run, sizeof run, "\"%s\" \"%s\"", tiffany_bash_bin(), path);
+#else
+    snprintf(run, sizeof run, "\"%s\" \"%s\"", tiffany_bash_bin(), path);
+#endif
+    FILE *f = popen(run, "r");
     if(!f) return -1;
 
     int nout = le16(OFF_NOUT);

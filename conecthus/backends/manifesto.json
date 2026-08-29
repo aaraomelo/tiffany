@@ -9,7 +9,7 @@
     "paridade": "π(L)=(p+q+r) mod 2; a(A→B)=π(A)⊕π(B): 0=iso, 1=duo; duo∘duo=iso via hub sql",
     "tradutor": "MOVE na arena + arestas; absorcao orbita a orbita (latex/sql/node); sem adaptador SQL",
     "doc": "memoria/duomorfismo-pipe.md",
-    "medidor": "tests/duomorf_pipe.js; tests/orbitas_hopfield.js; tools/test_metal.exe; tests/cosmologia.c",
+    "medidor": "tests/duomorf_pipe.js; tests/orbitas_hopfield.js; tests/manifesto_corpos.js; tools/test_metal.exe; tests/cosmologia.c",
     "celula": "mvp: consultar.wasm + GKBANCO (LS); pleno sql.c so no metal",
     "medidor_cadeia": "tests/traduz_c_wasm_node.js; tests/traduz_c_wasm_shell.js; tests/traduz_asm_wasm.c; tests/traduz_c_asm_node.c; tests/traduz_c_asm_shell.c; tests/celula_wasm_sec.c; tests/corre_fita_metal.c; tests/corre_fita_browser.js"
   },
@@ -29,7 +29,53 @@
       "wasm": "escapar.wasm",
       "exports": [
         "escapar"
-      ]
+      ],
+      "absorcao": {
+        "move": "escapar",
+        "exports": [
+          "escapar"
+        ],
+        "orbita": "arena",
+        "forma": "bytes3",
+        "pleno": "escapar.wasm"
+      },
+      "pleno": "escapar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/c/escapar.c",
+        "wasm": "escapar.wasm",
+        "asm": "conecthus/backends/c/celula.erg",
+        "pleno": "escapar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "c_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "c_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     },
     {
       "nome": "ptx",
@@ -42,7 +88,59 @@
       "exports": [
         "emitir",
         "emitir_volta"
-      ]
+      ],
+      "absorcao": {
+        "move": "emitir",
+        "exports": [
+          "emitir",
+          "emitir_volta"
+        ],
+        "orbita": "arena",
+        "forma": "bytes3",
+        "pleno": "emitir.wasm"
+      },
+      "pleno": "emitir.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/ptx/emitir.c",
+        "wasm": "emitir.wasm",
+        "asm": "conecthus/backends/ptx/celula.erg",
+        "pleno": "emitir.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "ptx_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "ptx_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      },
+      "hospedeiro": {
+        "env": "TIFFANY_PTX",
+        "path": "nao localizada",
+        "nota": "opcional; pleno da casa = wasm na arena"
+      }
     },
     {
       "nome": "wasm",
@@ -55,7 +153,54 @@
       "exports": [
         "empilhar_push",
         "empilhar_pop"
-      ]
+      ],
+      "absorcao": {
+        "move": "empilhar_push",
+        "exports": [
+          "empilhar_push",
+          "empilhar_pop"
+        ],
+        "orbita": "arena",
+        "forma": "stack1",
+        "pleno": "empilhar.wasm"
+      },
+      "pleno": "empilhar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/wasm/empilhar.c",
+        "wasm": "empilhar.wasm",
+        "asm": "conecthus/backends/wasm/celula.erg",
+        "pleno": "empilhar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "wasm_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "wasm_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     },
     {
       "nome": "llvm",
@@ -67,7 +212,58 @@
       "wasm": "baixar.wasm",
       "exports": [
         "baixar"
-      ]
+      ],
+      "absorcao": {
+        "move": "baixar",
+        "exports": [
+          "baixar"
+        ],
+        "orbita": "arena",
+        "forma": "bytes3",
+        "pleno": "baixar.wasm"
+      },
+      "pleno": "baixar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/llvm/baixar.c",
+        "wasm": "baixar.wasm",
+        "asm": "conecthus/backends/llvm/celula.erg",
+        "pleno": "baixar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "llvm_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "llvm_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      },
+      "hospedeiro": {
+        "env": "TIFFANY_LLC",
+        "path": "nao localizada",
+        "nota": "opcional; pleno da casa = wasm na arena"
+      }
     },
     {
       "nome": "glsl",
@@ -79,7 +275,58 @@
       "wasm": "filtrar.wasm",
       "exports": [
         "filtrar"
-      ]
+      ],
+      "absorcao": {
+        "move": "filtrar",
+        "exports": [
+          "filtrar"
+        ],
+        "orbita": "arena",
+        "forma": "ints1",
+        "pleno": "filtrar.wasm"
+      },
+      "pleno": "filtrar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/glsl/filtrar.c",
+        "wasm": "filtrar.wasm",
+        "asm": "conecthus/backends/glsl/celula.erg",
+        "pleno": "filtrar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "glsl_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "glsl_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      },
+      "hospedeiro": {
+        "env": "TIFFANY_GLSL",
+        "path": "nao localizada",
+        "nota": "opcional; pleno da casa = wasm na arena"
+      }
     },
     {
       "nome": "haskell",
@@ -91,7 +338,58 @@
       "wasm": "rotular.wasm",
       "exports": [
         "rotular"
-      ]
+      ],
+      "absorcao": {
+        "move": "rotular",
+        "exports": [
+          "rotular"
+        ],
+        "orbita": "arena",
+        "forma": "bytes3",
+        "pleno": "rotular.wasm"
+      },
+      "pleno": "rotular.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/haskell/rotular.c",
+        "wasm": "rotular.wasm",
+        "asm": "conecthus/backends/haskell/celula.erg",
+        "pleno": "rotular.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "haskell_celula",
+          "p": 0,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "haskell_pleno",
+          "p": 0,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      },
+      "hospedeiro": {
+        "env": "TIFFANY_GHC",
+        "path": "nao localizada",
+        "nota": "opcional; pleno da casa = wasm na arena"
+      }
     },
     {
       "nome": "dafny",
@@ -103,7 +401,58 @@
       "wasm": "decidir.wasm",
       "exports": [
         "decidir"
-      ]
+      ],
+      "absorcao": {
+        "move": "decidir",
+        "exports": [
+          "decidir"
+        ],
+        "orbita": "arena",
+        "forma": "ints1",
+        "pleno": "decidir.wasm"
+      },
+      "pleno": "decidir.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/dafny/decidir.c",
+        "wasm": "decidir.wasm",
+        "asm": "conecthus/backends/dafny/celula.erg",
+        "pleno": "decidir.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "dafny_celula",
+          "p": 1,
+          "q": 1,
+          "r": 0
+        },
+        "metal": {
+          "nome": "dafny_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      },
+      "hospedeiro": {
+        "env": "TIFFANY_DAFNY",
+        "path": "nao localizada",
+        "nota": "opcional; pleno da casa = wasm na arena"
+      }
     },
     {
       "nome": "isabelle",
@@ -115,7 +464,58 @@
       "wasm": "provar.wasm",
       "exports": [
         "provar_xor_nulo"
-      ]
+      ],
+      "absorcao": {
+        "move": "provar_xor_nulo",
+        "exports": [
+          "provar_xor_nulo"
+        ],
+        "orbita": "arena",
+        "forma": "ints1",
+        "pleno": "provar.wasm"
+      },
+      "pleno": "provar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/isabelle/provar.c",
+        "wasm": "provar.wasm",
+        "asm": "conecthus/backends/isabelle/celula.erg",
+        "pleno": "provar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "isabelle_celula",
+          "p": 0,
+          "q": 1,
+          "r": 1
+        },
+        "metal": {
+          "nome": "isabelle_pleno",
+          "p": 0,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      },
+      "hospedeiro": {
+        "env": "TIFFANY_ISABELLE",
+        "path": "nao localizada",
+        "nota": "opcional; pleno da casa = wasm na arena"
+      }
     },
     {
       "nome": "sql",
@@ -141,7 +541,45 @@
           "sql_compilar",
           "sql_descompilar"
         ],
-        "orbita": "arena"
+        "orbita": "arena",
+        "forma": "bytes4",
+        "pleno": "banco/sql.c"
+      },
+      "cadeia": {
+        "c": "conecthus/backends/sql/consultar.c",
+        "wasm": "consultar.wasm",
+        "asm": "conecthus/backends/sql/celula.erg",
+        "pleno": "banco/sql.c",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "sql_celula",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "metal": {
+          "nome": "sql_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
       }
     },
     {
@@ -164,7 +602,44 @@
           "latex_descompor"
         ],
         "orbita": "arena",
-        "pleno": "tex.wasm"
+        "pleno": "tex.wasm",
+        "forma": "bytes3"
+      },
+      "cadeia": {
+        "c": "conecthus/backends/latex/compor.c",
+        "wasm": "compor.wasm",
+        "asm": "conecthus/backends/latex/celula.erg",
+        "pleno": "tex.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "latex_celula",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "metal": {
+          "nome": "latex_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
       }
     },
     {
@@ -179,7 +654,53 @@
         "claim_run",
         "claim_residual"
       ],
-      "ir": "conecthus/claims/*.claim"
+      "ir": "conecthus/claims/*.claim",
+      "absorcao": {
+        "move": "claim_run",
+        "exports": [
+          "claim_run",
+          "claim_residual"
+        ],
+        "orbita": "arena",
+        "forma": "id1",
+        "pleno": "claim.wasm"
+      },
+      "pleno": "claim.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/claim/runtime.c",
+        "wasm": "claim.wasm",
+        "asm": "nao localizada",
+        "pleno": "claim.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm"
+        ],
+        "celula": {
+          "nome": "claim_celula",
+          "p": 1,
+          "q": 1,
+          "r": 0
+        },
+        "metal": {
+          "nome": "claim_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     },
     {
       "nome": "control",
@@ -193,7 +714,54 @@
         "control_decide",
         "control_dist_arena"
       ],
-      "nota": "histerese acima da IR"
+      "nota": "histerese acima da IR",
+      "absorcao": {
+        "move": "control_decide",
+        "exports": [
+          "control_decide",
+          "control_dist_arena"
+        ],
+        "orbita": "arena",
+        "forma": "unit0",
+        "pleno": "control.wasm"
+      },
+      "pleno": "control.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/control/runtime.c",
+        "wasm": "control.wasm",
+        "asm": "conecthus/backends/control/celula.erg",
+        "pleno": "control.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "control_celula",
+          "p": 1,
+          "q": 1,
+          "r": 0
+        },
+        "metal": {
+          "nome": "control_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     },
     {
       "nome": "isa",
@@ -216,10 +784,26 @@
         "ponte": "tools/asm_wasm.mjs",
         "duomorf": {
           "asm_wasm": "a fita é comum; asm=erg monta/desmonta, wasm=MOVE+erg.fita",
-          "wasm_metal": { "a": 0, "b": 0, "quadrante": "Q00", "orbita": "arena" },
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
           "involucao": "monta∘desmonta=id na fita"
-        }
-      }
+        },
+        "pleno": "tools/isa.c"
+      },
+      "absorcao": {
+        "move": "MOVE",
+        "exports": [
+          "MOVE"
+        ],
+        "orbita": "arena",
+        "forma": "slot2",
+        "pleno": "tools/isa.c"
+      },
+      "pleno": "tools/isa.c"
     },
     {
       "nome": "bash",
@@ -237,7 +821,7 @@
         "bash_pendente"
       ],
       "pleno": "banco/bash.c",
-      "nota": "wasm = protocolo na arena DISCO; pleno = popen/PTY na Patria; slots S_CANAL+9100/9101",
+      "nota": "Bash ingerido: linguagem+canal, nao orbita Hopfield. Pleno banco/bash.c resolve tiffany_bash_bin (TIFFANY_BASH / Git). Celula r=0; metal r=1.",
       "absorcao": {
         "move": "bash_move",
         "exports": [
@@ -251,7 +835,9 @@
           "in": 9100,
           "out": 9101
         },
-        "orbita": "canal"
+        "orbita": "canal",
+        "forma": "bytes4",
+        "pleno": "banco/bash.c"
       },
       "cadeia": {
         "c": "conecthus/backends/bash/interpretar.c",
@@ -261,7 +847,12 @@
         "traduz": "tools/bin/traduz",
         "ponte_asm": "tools/wasm_sec.c",
         "wasm_erg": "tools/wasm_erg.c",
-        "sequencia": ["c", "wasm", "asm", "bash_pleno"],
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm",
+          "bash_pleno"
+        ],
         "celula": {
           "nome": "bash_celula",
           "p": 1,
@@ -302,7 +893,7 @@
         "powershell_pendente"
       ],
       "pleno": "banco/powershell.c",
-      "nota": "Windows local; slots S_CANAL+9110/9111",
+      "nota": "PowerShell ingerido: linguagem+canal, nao orbita Hopfield. Pleno banco/powershell.c resolve tiffany_pwsh_bin (TIFFANY_PWSH / System32). Celula r=0; metal r=1.",
       "absorcao": {
         "move": "powershell_move",
         "exports": [
@@ -316,7 +907,9 @@
           "in": 9110,
           "out": 9111
         },
-        "orbita": "canal"
+        "orbita": "canal",
+        "forma": "bytes4",
+        "pleno": "banco/powershell.c"
       },
       "cadeia": {
         "c": "conecthus/backends/powershell/interpretar.c",
@@ -344,7 +937,16 @@
             "orbita": "canal"
           },
           "involucao": "MOVE(-1)∘MOVE(+1)=id"
-        }
+        },
+        "asm": "conecthus/backends/powershell/celula.erg",
+        "wasm_erg": "tools/wasm_erg.c",
+        "ponte_asm": "tools/wasm_sec.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm",
+          "powershell_pleno"
+        ]
       }
     },
     {
@@ -363,7 +965,7 @@
         "node_pendente"
       ],
       "pleno": "banco/node.c",
-      "nota": "Node no metal (TIFFANY_NODE); slots S_CANAL+9120/9121",
+      "nota": "Node ingerido: linguagem+orbita canal, nao fio HTTP. Pleno banco/node.c resolve tiffany_node.h (TIFFANY_NODE / helper Cursor). Celula r=0; metal r=1.",
       "absorcao": {
         "move": "node_move",
         "exports": [
@@ -378,7 +980,9 @@
           "out": 9121
         },
         "orbita": "canal",
-        "orbita_c": "traduz sobe/desce"
+        "orbita_c": "traduz sobe/desce",
+        "forma": "bytes4",
+        "pleno": "banco/node.c"
       },
       "cadeia": {
         "c": "conecthus/backends/node/interpretar.c",
@@ -388,7 +992,12 @@
         "traduz": "tools/bin/traduz",
         "ponte_asm": "tools/wasm_sec.c",
         "wasm_erg": "tools/wasm_erg.c",
-        "sequencia": ["c", "wasm", "asm", "node_pleno"],
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm",
+          "node_pleno"
+        ],
         "celula": {
           "nome": "node_celula",
           "p": 1,
@@ -431,7 +1040,55 @@
         "html_compor",
         "html_descompor"
       ],
-      "nota": "DOM — estrutura"
+      "nota": "DOM — estrutura",
+      "absorcao": {
+        "move": "html_move",
+        "exports": [
+          "html_move",
+          "html_compor",
+          "html_descompor"
+        ],
+        "orbita": "arena",
+        "forma": "bytes4",
+        "pleno": "html_compor.wasm"
+      },
+      "pleno": "html_compor.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/html/compor.c",
+        "wasm": "html_compor.wasm",
+        "asm": "conecthus/backends/html/celula.erg",
+        "pleno": "html_compor.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "html_celula",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "metal": {
+          "nome": "html_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     },
     {
       "nome": "css",
@@ -445,7 +1102,54 @@
         "css_move",
         "css_aplicar"
       ],
-      "nota": "DOM — pintar"
+      "nota": "DOM — pintar",
+      "absorcao": {
+        "move": "css_move",
+        "exports": [
+          "css_move",
+          "css_aplicar"
+        ],
+        "orbita": "arena",
+        "forma": "bytes4",
+        "pleno": "css_aplicar.wasm"
+      },
+      "pleno": "css_aplicar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/css/aplicar.c",
+        "wasm": "css_aplicar.wasm",
+        "asm": "conecthus/backends/css/celula.erg",
+        "pleno": "css_aplicar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "css_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "css_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     },
     {
       "nome": "js",
@@ -459,20 +1163,1870 @@
         "js_move",
         "js_escapar"
       ],
-      "nota": "DOM — script"
+      "nota": "DOM — script",
+      "absorcao": {
+        "move": "js_move",
+        "exports": [
+          "js_move",
+          "js_escapar"
+        ],
+        "orbita": "arena",
+        "forma": "bytes4",
+        "pleno": "js_escapar.wasm"
+      },
+      "pleno": "js_escapar.wasm",
+      "cadeia": {
+        "c": "conecthus/backends/js/escapar.c",
+        "wasm": "js_escapar.wasm",
+        "asm": "conecthus/backends/js/celula.erg",
+        "pleno": "js_escapar.wasm",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "js_celula",
+          "p": 1,
+          "q": 0,
+          "r": 1
+        },
+        "metal": {
+          "nome": "js_pleno",
+          "p": 1,
+          "q": 0,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     }
   ],
   "pipe_linguagens": [
+    "c",
+    "ptx",
+    "wasm",
+    "llvm",
+    "glsl",
+    "haskell",
+    "dafny",
+    "isabelle",
     "sql",
+    "latex",
+    "claim",
+    "control",
+    "isa",
+    "bash",
+    "powershell",
+    "node",
     "html",
     "css",
-    "js",
-    "bash",
-    "node",
-    "powershell"
+    "js"
   ],
   "arestas": [
     {
+      "de": "c",
+      "para": "ptx",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "c",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "c",
+      "para": "dafny",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "c",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "c",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "c",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "c",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "c",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "c",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "c",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "c",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "c",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "c",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "c",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "c",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "c",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "c",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "c",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "c",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "c",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "ptx",
+      "para": "dafny",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "ptx",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "ptx",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "ptx",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "ptx",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "ptx",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "ptx",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "ptx",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "ptx",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "ptx",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "ptx",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "ptx",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "ptx",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "c",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "ptx",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "wasm",
+      "para": "dafny",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "wasm",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "wasm",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "wasm",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "wasm",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "wasm",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "wasm",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "wasm",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "wasm",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "wasm",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "wasm",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "wasm",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "wasm",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "c",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "ptx",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "llvm",
+      "para": "dafny",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "llvm",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "llvm",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "llvm",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "llvm",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "llvm",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "llvm",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "llvm",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "llvm",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "llvm",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "llvm",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "llvm",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "llvm",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "c",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "ptx",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "glsl",
+      "para": "dafny",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "glsl",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "glsl",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "glsl",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "glsl",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "glsl",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "glsl",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "glsl",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "glsl",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "glsl",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "glsl",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "glsl",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "glsl",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "haskell",
+      "para": "c",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "c"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "ptx",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "ptx"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "wasm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "wasm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "llvm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "llvm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "glsl",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "glsl"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "dafny",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "haskell",
+        "sql",
+        "dafny"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "isabelle",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "isabelle"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "sql",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "haskell",
+      "para": "latex",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "latex"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "haskell",
+      "para": "claim",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "haskell",
+        "sql",
+        "claim"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "control",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "haskell",
+        "sql",
+        "control"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "isa",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "isa"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "haskell",
+      "para": "bash",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "haskell",
+        "sql",
+        "bash"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "powershell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "haskell",
+        "sql",
+        "powershell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "haskell",
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "html",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "html"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "haskell",
+      "para": "css",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "css"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "haskell",
+      "para": "js",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "haskell",
+        "sql",
+        "js"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "dafny",
+      "para": "c",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "ptx",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "wasm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "llvm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "glsl",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "haskell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "dafny",
+      "para": "isabelle",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "dafny",
+      "para": "latex",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "dafny",
+      "para": "claim",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "dafny",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "control",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "dafny",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "isa",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "dafny",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "dafny",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "dafny",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "dafny",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "dafny",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "dafny",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "dafny",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "c",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "ptx",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isabelle",
+      "para": "dafny",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "isabelle",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "sql",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "isabelle",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isabelle",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "isabelle",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "isabelle",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isabelle",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "isabelle",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "isabelle",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "isabelle",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "html",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isabelle",
+      "para": "css",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isabelle",
+      "para": "js",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isabelle",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "sql",
+      "para": "c",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "c"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "ptx",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "ptx"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "wasm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "wasm"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "llvm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "llvm"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "glsl",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "glsl"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "haskell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "sql",
+        "haskell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "sql",
+      "para": "dafny",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "dafny"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "isabelle",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "sql",
+        "isabelle"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "latex",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "sql",
+        "latex"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "sql",
+      "para": "claim",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "claim"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "control",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "control"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "isa",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "sql",
+        "isa"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "sql",
+      "para": "bash",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "bash"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "powershell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "powershell"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "sql",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_face"
+    },
+    {
       "de": "sql",
       "para": "html",
       "a": 0,
@@ -506,37 +3060,1533 @@
       "ponte": "sql_face"
     },
     {
-      "de": "sql",
+      "de": "latex",
+      "para": "c",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "c"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "ptx",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "ptx"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "wasm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "wasm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "llvm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "llvm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "glsl",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "glsl"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "haskell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "latex",
+        "haskell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "latex",
+      "para": "dafny",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "latex",
+        "sql",
+        "dafny"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "isabelle",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "isabelle"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "sql",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "latex",
+      "para": "claim",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "latex",
+        "sql",
+        "claim"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "control",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "latex",
+        "sql",
+        "control"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "isa",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "latex",
+        "isa"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "latex",
       "para": "bash",
       "a": 1,
       "b": 1,
       "rota": [
+        "latex",
         "sql",
         "bash"
       ],
-      "ponte": "sql_face"
+      "ponte": "sql_tags"
     },
     {
-      "de": "sql",
-      "para": "node",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "sql",
-        "node"
-      ],
-      "ponte": "sql_face"
-    },
-    {
-      "de": "sql",
+      "de": "latex",
       "para": "powershell",
       "a": 1,
       "b": 1,
       "rota": [
+        "latex",
         "sql",
         "powershell"
       ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "latex",
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "html",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "latex",
+        "html"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "latex",
+      "para": "css",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "css"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "latex",
+      "para": "js",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "latex",
+        "sql",
+        "js"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "claim",
+      "para": "c",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "ptx",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "wasm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "llvm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "glsl",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "haskell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "claim",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "claim",
+      "para": "dafny",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "claim",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "isabelle",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "claim",
+        "sql"
+      ],
       "ponte": "sql_face"
+    },
+    {
+      "de": "claim",
+      "para": "latex",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "claim",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "claim",
+      "para": "control",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "claim",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "isa",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "claim",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "claim",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "claim",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "claim",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "claim",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "claim",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "claim",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "claim",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "claim",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "c",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "ptx",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "wasm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "llvm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "glsl",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "haskell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "control",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "control",
+      "para": "dafny",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "control",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "isabelle",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "control",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "control",
+      "para": "latex",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "control",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "control",
+      "para": "claim",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "control",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "isa",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "control",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "control",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "control",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "control",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "control",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "control",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "control",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "control",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "control",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isa",
+      "para": "c",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "c"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "ptx",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "ptx"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "wasm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "wasm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "llvm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "llvm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "glsl",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "glsl"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "haskell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isa",
+        "haskell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isa",
+      "para": "dafny",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "isa",
+        "sql",
+        "dafny"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "isabelle",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "isabelle"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "sql",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isa",
+      "para": "latex",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isa",
+        "latex"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isa",
+      "para": "claim",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "isa",
+        "sql",
+        "claim"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "control",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "isa",
+        "sql",
+        "control"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "bash",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "isa",
+        "sql",
+        "bash"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "powershell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "isa",
+        "sql",
+        "powershell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "isa",
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "html",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "isa",
+        "html"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "isa",
+      "para": "css",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "css"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "isa",
+      "para": "js",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "isa",
+        "sql",
+        "js"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "bash",
+      "para": "c",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "ptx",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "wasm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "llvm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "glsl",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "haskell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "bash",
+      "para": "dafny",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "isabelle",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "bash",
+      "para": "latex",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "bash",
+      "para": "claim",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "control",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "isa",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "bash",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "bash",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "bash",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "bash",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "bash",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "bash",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "c",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "ptx",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "wasm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "llvm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "glsl",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "haskell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "powershell",
+      "para": "dafny",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "isabelle",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "powershell",
+      "para": "latex",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "powershell",
+      "para": "claim",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "control",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "isa",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "powershell",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "node",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "powershell",
+        "node"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "powershell",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "powershell",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "powershell",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "c",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "ptx",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "wasm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "llvm",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "glsl",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "haskell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "node",
+      "para": "dafny",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "isabelle",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "isabelle"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "sql",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql"
+      ],
+      "ponte": "sql_face"
+    },
+    {
+      "de": "node",
+      "para": "latex",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "node",
+      "para": "claim",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "control",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "isa",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "node",
+      "para": "bash",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "powershell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "node",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "node",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "node",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "node",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "node",
+        "js"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "html",
+      "para": "c",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "c"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "ptx",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "ptx"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "wasm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "wasm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "llvm",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "llvm"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "glsl",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "glsl"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "haskell",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "html",
+        "haskell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "html",
+      "para": "dafny",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "dafny"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "isabelle",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "html",
+        "sql",
+        "isabelle"
+      ],
+      "ponte": "sql_tags"
     },
     {
       "de": "html",
@@ -548,6 +4598,88 @@
         "sql"
       ],
       "ponte": null
+    },
+    {
+      "de": "html",
+      "para": "latex",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "html",
+        "latex"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "html",
+      "para": "claim",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "claim"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "control",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "control"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "isa",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "html",
+        "isa"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "html",
+      "para": "bash",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "bash"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "powershell",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "powershell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "html",
+      "para": "node",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "html",
+        "sql",
+        "node"
+      ],
+      "ponte": "sql_tags"
     },
     {
       "de": "html",
@@ -574,40 +4706,93 @@
       "ponte": "sql_tags"
     },
     {
-      "de": "html",
-      "para": "bash",
-      "a": 1,
-      "b": 1,
+      "de": "css",
+      "para": "c",
+      "a": 0,
+      "b": 0,
       "rota": [
-        "html",
+        "css",
+        "c"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "ptx",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "css",
+        "ptx"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "css",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "css",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "css",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "css",
         "sql",
-        "bash"
+        "haskell"
       ],
       "ponte": "sql_tags"
     },
     {
-      "de": "html",
-      "para": "node",
-      "a": 1,
+      "de": "css",
+      "para": "dafny",
+      "a": 0,
       "b": 1,
       "rota": [
-        "html",
-        "sql",
-        "node"
+        "css",
+        "dafny"
       ],
-      "ponte": "sql_tags"
+      "ponte": null
     },
     {
-      "de": "html",
-      "para": "powershell",
-      "a": 1,
-      "b": 1,
+      "de": "css",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
       "rota": [
-        "html",
-        "sql",
-        "powershell"
+        "css",
+        "isabelle"
       ],
-      "ponte": "sql_tags"
+      "ponte": null
     },
     {
       "de": "css",
@@ -619,6 +4804,85 @@
         "sql"
       ],
       "ponte": "sql_face"
+    },
+    {
+      "de": "css",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "css",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "css",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "css",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "css",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "css",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "css",
+        "node"
+      ],
+      "ponte": null
     },
     {
       "de": "css",
@@ -644,35 +4908,91 @@
       "ponte": null
     },
     {
-      "de": "css",
-      "para": "bash",
+      "de": "js",
+      "para": "c",
       "a": 0,
-      "b": 1,
+      "b": 0,
       "rota": [
-        "css",
-        "bash"
+        "js",
+        "c"
       ],
       "ponte": null
     },
     {
-      "de": "css",
-      "para": "node",
+      "de": "js",
+      "para": "ptx",
       "a": 0,
-      "b": 1,
+      "b": 0,
       "rota": [
-        "css",
-        "node"
+        "js",
+        "ptx"
       ],
       "ponte": null
     },
     {
-      "de": "css",
-      "para": "powershell",
+      "de": "js",
+      "para": "wasm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "js",
+        "wasm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "llvm",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "js",
+        "llvm"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "glsl",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "js",
+        "glsl"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "haskell",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "js",
+        "sql",
+        "haskell"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "js",
+      "para": "dafny",
       "a": 0,
       "b": 1,
       "rota": [
-        "css",
-        "powershell"
+        "js",
+        "dafny"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "isabelle",
+      "a": 0,
+      "b": 0,
+      "rota": [
+        "js",
+        "isabelle"
       ],
       "ponte": null
     },
@@ -686,6 +5006,85 @@
         "sql"
       ],
       "ponte": "sql_face"
+    },
+    {
+      "de": "js",
+      "para": "latex",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "js",
+        "sql",
+        "latex"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "js",
+      "para": "claim",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "claim"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "control",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "control"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "isa",
+      "a": 1,
+      "b": 0,
+      "rota": [
+        "js",
+        "sql",
+        "isa"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "js",
+      "para": "bash",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "bash"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "powershell",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "powershell"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "js",
+      "para": "node",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "js",
+        "node"
+      ],
+      "ponte": null
     },
     {
       "de": "js",
@@ -707,240 +5106,6 @@
       "rota": [
         "js",
         "css"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "js",
-      "para": "bash",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "js",
-        "bash"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "js",
-      "para": "node",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "js",
-        "node"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "js",
-      "para": "powershell",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "js",
-        "powershell"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "bash",
-      "para": "sql",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "bash",
-        "sql"
-      ],
-      "ponte": "sql_face"
-    },
-    {
-      "de": "bash",
-      "para": "html",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "bash",
-        "sql",
-        "html"
-      ],
-      "ponte": "sql_tags"
-    },
-    {
-      "de": "bash",
-      "para": "css",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "bash",
-        "css"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "bash",
-      "para": "js",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "bash",
-        "js"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "bash",
-      "para": "node",
-      "a": 0,
-      "b": 0,
-      "rota": [
-        "bash",
-        "node"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "bash",
-      "para": "powershell",
-      "a": 0,
-      "b": 0,
-      "rota": [
-        "bash",
-        "powershell"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "node",
-      "para": "sql",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "node",
-        "sql"
-      ],
-      "ponte": "sql_face"
-    },
-    {
-      "de": "node",
-      "para": "html",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "node",
-        "sql",
-        "html"
-      ],
-      "ponte": "sql_tags"
-    },
-    {
-      "de": "node",
-      "para": "css",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "node",
-        "css"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "node",
-      "para": "js",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "node",
-        "js"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "node",
-      "para": "bash",
-      "a": 0,
-      "b": 0,
-      "rota": [
-        "node",
-        "bash"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "node",
-      "para": "powershell",
-      "a": 0,
-      "b": 0,
-      "rota": [
-        "node",
-        "powershell"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "powershell",
-      "para": "sql",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "powershell",
-        "sql"
-      ],
-      "ponte": "sql_face"
-    },
-    {
-      "de": "powershell",
-      "para": "html",
-      "a": 1,
-      "b": 1,
-      "rota": [
-        "powershell",
-        "sql",
-        "html"
-      ],
-      "ponte": "sql_tags"
-    },
-    {
-      "de": "powershell",
-      "para": "css",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "powershell",
-        "css"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "powershell",
-      "para": "js",
-      "a": 0,
-      "b": 1,
-      "rota": [
-        "powershell",
-        "js"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "powershell",
-      "para": "bash",
-      "a": 0,
-      "b": 0,
-      "rota": [
-        "powershell",
-        "bash"
-      ],
-      "ponte": null
-    },
-    {
-      "de": "powershell",
-      "para": "node",
-      "a": 0,
-      "b": 0,
-      "rota": [
-        "powershell",
-        "node"
       ],
       "ponte": null
     },
@@ -1012,13 +5177,25 @@
     }
   ],
   "traduzentes": [
+    "c",
+    "ptx",
+    "wasm",
+    "llvm",
+    "glsl",
+    "haskell",
+    "dafny",
+    "isabelle",
     "sql",
+    "latex",
+    "claim",
+    "control",
+    "isa",
+    "bash",
+    "powershell",
+    "node",
     "html",
     "css",
-    "js",
-    "bash",
-    "node",
-    "powershell"
+    "js"
   ],
   "mvp": {
     "celula": "consultar.wasm na arena DISCO (singleton browser)",
@@ -1091,7 +5268,16 @@
     "fecho": "lambda+ + lambda- = 0",
     "eixos": "W_s/W_a ≠ duomorfismo (a,b)",
     "fita": "G=1 (arvore); a matriz e declaracao das orbitas, nao da fita",
-    "medidor": "tests/orbitas_hopfield.js"
+    "medidor": "tests/orbitas_hopfield.js",
+    "canonico": "Corpo Neural",
+    "estatuto": "candidato",
+    "orbitas": [
+      "sql",
+      "latex",
+      "node"
+    ],
+    "assistente": "app/src/rede_dual.js realiza o candidato; nao e segunda matriz",
+    "nao_e": "nao e Alonzo; nao e Duo; nao e gato 2x2; nao e a fita G=1"
   },
   "fios": [
     {
@@ -1109,5 +5295,573 @@
       "nota": "GET estatico — leitura ficheiro",
       "absorvido": false
     }
-  ]
+  ],
+  "corpos": {
+    "nota": "Censo das Partes e do bestiario fechado. Fonte: catalogo.tex cat:indice. Lingua ≠ palco ≠ corpo canonico. Nao inventa magmas. Celula vazia = nao localizada.",
+    "proibicao": "linguagens[] nao sao Partes; orbitas = sql/latex/node; Alonzo/Fractal nao sao linguas; tests/motor.c ≠ banco/sql.c ≠ motor_campo",
+    "palcos": 14,
+    "motor": {
+      "isa": "banco/sql.c",
+      "interface": "sql",
+      "entrada_apps": "pgwire",
+      "celula": "consultar.wasm",
+      "ula": "banco/sql.c — backends nao copiam GOLD/gato; sao roupas (MOVE/traduz)",
+      "shell_padrao": "node",
+      "ingerido": [
+        "c",
+        "ptx",
+        "wasm",
+        "llvm",
+        "glsl",
+        "haskell",
+        "dafny",
+        "isabelle",
+        "sql",
+        "latex",
+        "claim",
+        "control",
+        "isa",
+        "bash",
+        "powershell",
+        "node",
+        "html",
+        "css",
+        "js"
+      ],
+      "homonimos": [
+        "app/src/motor_campo.js",
+        "app/src/motor_wasm.js",
+        "tests/motor.c"
+      ],
+      "linguagens_isa": {
+        "c": {
+          "absorcao": "sim",
+          "move": "escapar",
+          "forma": "bytes3",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/c/escapar.c",
+            "wasm": "escapar.wasm",
+            "asm": "conecthus/backends/c/celula.erg",
+            "pleno": "escapar.wasm"
+          },
+          "metal": "escapar.wasm",
+          "hospedeiro": "N/A"
+        },
+        "ptx": {
+          "absorcao": "sim",
+          "move": "emitir",
+          "forma": "bytes3",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/ptx/emitir.c",
+            "wasm": "emitir.wasm",
+            "asm": "conecthus/backends/ptx/celula.erg",
+            "pleno": "emitir.wasm"
+          },
+          "metal": "emitir.wasm",
+          "hospedeiro": "nao localizada"
+        },
+        "wasm": {
+          "absorcao": "sim",
+          "move": "empilhar_push",
+          "forma": "stack1",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/wasm/empilhar.c",
+            "wasm": "empilhar.wasm",
+            "asm": "conecthus/backends/wasm/celula.erg",
+            "pleno": "empilhar.wasm"
+          },
+          "metal": "empilhar.wasm",
+          "hospedeiro": "N/A"
+        },
+        "llvm": {
+          "absorcao": "sim",
+          "move": "baixar",
+          "forma": "bytes3",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/llvm/baixar.c",
+            "wasm": "baixar.wasm",
+            "asm": "conecthus/backends/llvm/celula.erg",
+            "pleno": "baixar.wasm"
+          },
+          "metal": "baixar.wasm",
+          "hospedeiro": "nao localizada"
+        },
+        "glsl": {
+          "absorcao": "sim",
+          "move": "filtrar",
+          "forma": "ints1",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/glsl/filtrar.c",
+            "wasm": "filtrar.wasm",
+            "asm": "conecthus/backends/glsl/celula.erg",
+            "pleno": "filtrar.wasm"
+          },
+          "metal": "filtrar.wasm",
+          "hospedeiro": "nao localizada"
+        },
+        "haskell": {
+          "absorcao": "sim",
+          "move": "rotular",
+          "forma": "bytes3",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/haskell/rotular.c",
+            "wasm": "rotular.wasm",
+            "asm": "conecthus/backends/haskell/celula.erg",
+            "pleno": "rotular.wasm"
+          },
+          "metal": "rotular.wasm",
+          "hospedeiro": "nao localizada"
+        },
+        "dafny": {
+          "absorcao": "sim",
+          "move": "decidir",
+          "forma": "ints1",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/dafny/decidir.c",
+            "wasm": "decidir.wasm",
+            "asm": "conecthus/backends/dafny/celula.erg",
+            "pleno": "decidir.wasm"
+          },
+          "metal": "decidir.wasm",
+          "hospedeiro": "nao localizada"
+        },
+        "isabelle": {
+          "absorcao": "sim",
+          "move": "provar_xor_nulo",
+          "forma": "ints1",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/isabelle/provar.c",
+            "wasm": "provar.wasm",
+            "asm": "conecthus/backends/isabelle/celula.erg",
+            "pleno": "provar.wasm"
+          },
+          "metal": "provar.wasm",
+          "hospedeiro": "nao localizada"
+        },
+        "sql": {
+          "absorcao": "sim",
+          "move": "sql_move",
+          "forma": "bytes4",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/sql/consultar.c",
+            "wasm": "consultar.wasm",
+            "asm": "conecthus/backends/sql/celula.erg",
+            "pleno": "banco/sql.c"
+          },
+          "metal": "banco/sql.c",
+          "hospedeiro": "N/A"
+        },
+        "latex": {
+          "absorcao": "sim",
+          "move": "latex_compor",
+          "forma": "bytes3",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/latex/compor.c",
+            "wasm": "compor.wasm",
+            "asm": "conecthus/backends/latex/celula.erg",
+            "pleno": "tex.wasm"
+          },
+          "metal": "tex.wasm",
+          "hospedeiro": "N/A"
+        },
+        "claim": {
+          "absorcao": "sim",
+          "move": "claim_run",
+          "forma": "id1",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/claim/runtime.c",
+            "wasm": "claim.wasm",
+            "asm": "nao localizada",
+            "pleno": "claim.wasm"
+          },
+          "metal": "claim.wasm",
+          "hospedeiro": "N/A"
+        },
+        "control": {
+          "absorcao": "sim",
+          "move": "control_decide",
+          "forma": "unit0",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/control/runtime.c",
+            "wasm": "control.wasm",
+            "asm": "conecthus/backends/control/celula.erg",
+            "pleno": "control.wasm"
+          },
+          "metal": "control.wasm",
+          "hospedeiro": "N/A"
+        },
+        "isa": {
+          "absorcao": "sim",
+          "move": "MOVE",
+          "forma": "slot2",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "tools/isa.c",
+            "wasm": "isa.wasm + secção custom erg.fita",
+            "asm": "texto .erg (ERG-64)",
+            "pleno": "tools/isa.c"
+          },
+          "metal": "tools/isa.c",
+          "hospedeiro": "N/A"
+        },
+        "bash": {
+          "absorcao": "sim",
+          "move": "bash_move",
+          "forma": "bytes4",
+          "orbita": "canal",
+          "cadeia": {
+            "c": "conecthus/backends/bash/interpretar.c",
+            "wasm": "interpretar.wasm",
+            "asm": "conecthus/backends/bash/celula.erg",
+            "pleno": "banco/bash.c"
+          },
+          "metal": "banco/bash.c",
+          "hospedeiro": "N/A"
+        },
+        "powershell": {
+          "absorcao": "sim",
+          "move": "powershell_move",
+          "forma": "bytes4",
+          "orbita": "canal",
+          "cadeia": {
+            "c": "conecthus/backends/powershell/interpretar.c",
+            "wasm": "powershell.wasm",
+            "asm": "conecthus/backends/powershell/celula.erg",
+            "pleno": "banco/powershell.c"
+          },
+          "metal": "banco/powershell.c",
+          "hospedeiro": "N/A"
+        },
+        "node": {
+          "absorcao": "sim",
+          "move": "node_move",
+          "forma": "bytes4",
+          "orbita": "canal",
+          "cadeia": {
+            "c": "conecthus/backends/node/interpretar.c",
+            "wasm": "node.wasm",
+            "asm": "conecthus/backends/node/celula.erg",
+            "pleno": "banco/node.c"
+          },
+          "metal": "banco/node.c",
+          "hospedeiro": "N/A"
+        },
+        "html": {
+          "absorcao": "sim",
+          "move": "html_move",
+          "forma": "bytes4",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/html/compor.c",
+            "wasm": "html_compor.wasm",
+            "asm": "conecthus/backends/html/celula.erg",
+            "pleno": "html_compor.wasm"
+          },
+          "metal": "html_compor.wasm",
+          "hospedeiro": "N/A"
+        },
+        "css": {
+          "absorcao": "sim",
+          "move": "css_move",
+          "forma": "bytes4",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/css/aplicar.c",
+            "wasm": "css_aplicar.wasm",
+            "asm": "conecthus/backends/css/celula.erg",
+            "pleno": "css_aplicar.wasm"
+          },
+          "metal": "css_aplicar.wasm",
+          "hospedeiro": "N/A"
+        },
+        "js": {
+          "absorcao": "sim",
+          "move": "js_move",
+          "forma": "bytes4",
+          "orbita": "arena",
+          "cadeia": {
+            "c": "conecthus/backends/js/escapar.c",
+            "wasm": "js_escapar.wasm",
+            "asm": "conecthus/backends/js/celula.erg",
+            "pleno": "js_escapar.wasm"
+          },
+          "metal": "js_escapar.wasm",
+          "hospedeiro": "N/A"
+        },
+        "asm": {
+          "lingua": false,
+          "cadeia_de": "isa",
+          "asm": "texto .erg (ERG-64)",
+          "monta": "lib/erg_monta.mjs",
+          "nota": "ERG-64: degrau da cadeia isa, nao entra em linguagens[]"
+        }
+      },
+      "asm": "degrau de isa.cadeia (ERG-64); nao e lingua"
+    },
+    "lista": [
+      {
+        "parte": "Algebra",
+        "canonico": "Corpo Algebrico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/fractal.c",
+          "papers/aranha.c"
+        ],
+        "matriz": "gato 2x2 |det|=1 (fis:thm:gato, fis:thm:metainducao). Nao Hopfield.",
+        "orbita": null,
+        "homonimos": [
+          "Omnitrix"
+        ]
+      },
+      {
+        "parte": "Topologia",
+        "canonico": "Corpo Topologico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/topologia.c"
+        ],
+        "matriz": "Duo realizado (D troca as duas ops). Nao W_s/W_a.",
+        "orbita": null
+      },
+      {
+        "parte": "Analise",
+        "canonico": "Corpo Analitico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/analiticas.c"
+        ],
+        "matriz": "duas faces (m,g) no par. Nao Duo. Nao Hopfield.",
+        "orbita": null
+      },
+      {
+        "parte": "Fractal",
+        "canonico": "Alonzo",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/cantor_julia_dual.c",
+          "tests/cantor.c"
+        ],
+        "matriz": "cruz (oplus, otimes). Nao W. Nao (max,+).",
+        "orbita": null,
+        "homonimos": [
+          "tropical",
+          "Julia como corpo"
+        ]
+      },
+      {
+        "parte": "Geometria",
+        "canonico": "Corpo Geometrico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/hipercubo32.c"
+        ],
+        "matriz": "N/A (I2: dobra do ciclo, nao par oplus/otimes de corpo)",
+        "orbita": null,
+        "homonimos": [
+          "quinze formas"
+        ]
+      },
+      {
+        "parte": "Mecanica",
+        "canonico": "Corpo Mecanico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/mecanica.c",
+          "papers/aranha.c"
+        ],
+        "matriz": "N/A como magmas. Gato |det otimes|=1 e Isom_mu (I11), nao I4.",
+        "orbita": null,
+        "homonimos": [
+          "tests/motor.c"
+        ]
+      },
+      {
+        "parte": "Gravitacao",
+        "canonico": "Corpo Gravitacional",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/aranha_n.c"
+        ],
+        "matriz": "min/max em V(x); Duo realizado na estrutura. Nao magmas de corpo. Nao tests/forca.c (homonimo).",
+        "orbita": null
+      },
+      {
+        "parte": "Relatividade",
+        "canonico": "Corpo Relativistico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [],
+        "matriz": "N/A (I2)",
+        "orbita": null,
+        "homonimos": [
+          "rotor",
+          "artanh",
+          "tests/motor.c"
+        ]
+      },
+      {
+        "parte": "Eletromagnetismo",
+        "canonico": null,
+        "camada": "Fisica",
+        "estatuto": "interface fechada; nao ha corpo",
+        "medidores": [
+          "tests/nne.c"
+        ],
+        "matriz": "lcm/gcd realiza I7 no par; nao canonico geral de U",
+        "orbita": null
+      },
+      {
+        "parte": "Optica",
+        "canonico": "Corpo Optico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [],
+        "matriz": "par (B,C) no espelho; |det|=1. Nao magmas novos.",
+        "orbita": null
+      },
+      {
+        "parte": "Particulas",
+        "canonico": "Corpo de Particulas",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/espectro.c"
+        ],
+        "matriz": "duas faces do corte (fusao/fissao). Nao magmas novos. Nao fundir com Optica.",
+        "orbita": null
+      },
+      {
+        "parte": "Termodinamica",
+        "canonico": "Corpo Termodinamico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/termica.c"
+        ],
+        "matriz": "N/A (I2). Carnot recebido. Nao o entropico.",
+        "orbita": null
+      },
+      {
+        "parte": "Cosmologia",
+        "canonico": "Corpo Cosmologico",
+        "camada": "Fisica",
+        "estatuto": "realizado",
+        "medidores": [
+          "tests/cosmologia.c"
+        ],
+        "matriz": "N/A (I2). H^2 D=1 e regua, nao |det|=1.",
+        "orbita": null,
+        "homonimos": [
+          "tests/cosmico.c"
+        ]
+      },
+      {
+        "parte": "Redes",
+        "canonico": "Corpo Neural",
+        "camada": "Fisica",
+        "estatuto": "candidato em H",
+        "medidores": [
+          "tests/orbitas_hopfield.js",
+          "tests/hopfield.c",
+          "tests/redes_combinacao.js",
+          "tests/redes_g.js"
+        ],
+        "matriz": "W=Ws+Wa (hopfield deste manifesto). Nao oplus/otimes. Nao segunda matriz.",
+        "orbita": null,
+        "homonimos": [
+          "nervoso"
+        ]
+      },
+      {
+        "parte": null,
+        "canonico": "cadeia N-R",
+        "camada": "N-R",
+        "estatuto": "cadeia, nao Parte",
+        "medidores": [
+          "tests/naturais.c",
+          "tests/reais.c"
+        ],
+        "matriz": "N/A (D=N/A em toda a cadeia)",
+        "orbita": null
+      },
+      {
+        "parte": null,
+        "canonico": "ISA SQL",
+        "camada": "operacional",
+        "estatuto": "realizacao operacional, nao capitulo (papers/arquitetura.tex)",
+        "medidores": [
+          "tests/interface_padrao.js",
+          "tests/pgwire.c",
+          "tests/duomorf_pipe.js",
+          "tests/manifesto_corpos.js",
+          "tests/traduz_c_wasm_node.js",
+          "tests/node_pleno.c",
+          "tests/bash_pleno.c",
+          "tests/powershell_pleno.c"
+        ],
+        "matriz": "Q_ab interno a O={sql,latex,node}",
+        "orbita": null
+      },
+      {
+        "parte": null,
+        "canonico": "Caelum",
+        "camada": "bestiario",
+        "estatuto": "complementar; N/A como o mesmo D de Alonzo",
+        "medidores": [
+          "tests/tex.c",
+          "tests/relogio_curva.c"
+        ],
+        "matriz": "N/A (uma operacao => D N/A)",
+        "orbita": null
+      },
+      {
+        "parte": null,
+        "canonico": "rotor",
+        "camada": "bestiario",
+        "estatuto": "homonimo; nao e Relatividade nem Mecanica",
+        "medidores": [
+          "tests/motor.c"
+        ],
+        "matriz": "N/A neste censo (x^2=-1 nao e Star)",
+        "orbita": null
+      },
+      {
+        "parte": null,
+        "canonico": "Omnitrix",
+        "camada": "bestiario",
+        "estatuto": "alias do Algebrico, nao corpo novo",
+        "medidores": [],
+        "matriz": "nao se copia da Algebra",
+        "orbita": null
+      },
+      {
+        "parte": null,
+        "canonico": "quinze formas",
+        "camada": "bestiario",
+        "estatuto": "homonimos da Geometria, nao o Corpo Geometrico",
+        "medidores": [],
+        "matriz": "N/A",
+        "orbita": null
+      }
+    ]
+  }
 }

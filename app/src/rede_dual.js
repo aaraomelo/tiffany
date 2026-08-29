@@ -5,8 +5,13 @@
 //
 // Hopfield = memória da volta; λ⁻ vem da dualidade reversível, não do atrator sozinho.
 // Metrónomo atesta λ⁺+λ⁻≈0 quando a volta fecha.
+//
+// A declaração da matriz é manifesto.hopfield (órbitas sql/latex/node, W=Ws+Wa,
+// candidato Corpo Neural). Isto realiza o candidato na UI — não é segunda matriz.
+// G=1 é fita, não Hopfield. W_s/W_a ≠ Duo.
 
 import { BATUTA } from './maestro.js'
+import { manifestoAtual } from './manifesto_loader.js'
 
 const DELTA_DEFAULT = 0.18
 const N_BITS = 32
@@ -99,6 +104,12 @@ function overlap (a, b) {
  * c = centro da estaca; padroes = ξ Hopfield (memória associativa ≠ inversão).
  */
 export function criarEstadoRede ({ c = 0, delta = DELTA_DEFAULT } = {}) {
+  let hopfield = null
+  try {
+    hopfield = manifestoAtual().hopfield || null
+  } catch (_) {
+    hopfield = null
+  }
   return {
     c,
     delta,
@@ -110,6 +121,7 @@ export function criarEstadoRede ({ c = 0, delta = DELTA_DEFAULT } = {}) {
     // ganhos locais aproximados (assinatura; conjugação medida pelo Metrónomo)
     lambdaP: 0,
     lambdaH: 0,
+    hopfield, // declaração do manifesto (candidato Neural); não segunda matriz
   }
 }
 

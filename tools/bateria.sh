@@ -53,6 +53,7 @@
 #   ./tools/bateria.sh --refaz         reabre TODAS, sem apagar atestado nenhum (~10 min)
 #   ./tools/bateria.sh --selo          imprime o selo e sai, sem abrir nada
 #   ./tools/bateria.sh --reatesta X    reatesta o medidor X (compilador novo, máquina nova)
+#   ./tools/bateria.sh --corpos        índice por canonico (manifesto.corpos); sai sem abrir
 
 set -u
 cd "$(dirname "$0")/.." || exit 1
@@ -60,9 +61,10 @@ RAIZ=$PWD
 SAIDA=/tmp/bateria; mkdir -p "$SAIDA"
 # o atestado vive NO REPO, não em /tmp: é fato sobre a matemática, não sobre esta máquina
 TABELA="$RAIZ/tools/atestados.txt"; touch "$TABELA"
-SO_SELO=0; REATESTA=""; REFAZ=0
+SO_SELO=0; REATESTA=""; REFAZ=0; SO_CORPOS=0
 case "${1:-}" in
   --selo)     SO_SELO=1 ;;
+  --corpos)   SO_CORPOS=1 ;;
   --reatesta) REATESTA="${2:-}"; [ -n "$REATESTA" ] || { echo "uso: --reatesta <medidor>"; exit 1; } ;;
   # A corrida completa, SEM o defeito que a fez ser apagada. O antigo --tudo truncava a tabela
   # de atestados antes de correr — e uma morte a meio deixava o repositório sem os factos que
@@ -90,6 +92,58 @@ LISTA=$(mktemp)
 { grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex corpus/docs/*.tex corpus/fala/*.tex cristal/*.tex
   grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex corpus/docs/*.tex corpus/fala/*.tex cristal/*.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
+
+# manifesto.corpos: censo por canonico (lingua ≠ Parte). Nao substitui a varredura
+# dos papers — junta o que o manifesto passou a indexar (incl. tests/manifesto_corpos.js).
+if [ -f conecthus/backends/manifesto.json ] && command -v node >/dev/null 2>&1; then
+  node -e "
+const fs = require('fs');
+const m = JSON.parse(fs.readFileSync('conecthus/backends/manifesto.json', 'utf8'));
+const out = [];
+for (const c of (m.corpos && m.corpos.lista) || []) {
+  for (const p of c.medidores || []) {
+    if (/^(tests|banco)\\/[a-z_0-9]+\\.(c|py|js)\$/.test(p)) out.push(p);
+  }
+}
+const ops = String((m.operacoes && m.operacoes.medidor) || '');
+for (const p of ops.match(/(tests|banco)\\/[a-z_0-9]+\\.(c|py|js)/g) || []) out.push(p);
+process.stdout.write(out.join('\\n') + (out.length ? '\\n' : ''));
+" >> "$LISTA"
+  sort -u "$LISTA" -o "$LISTA"
+fi
+
+index_corpos() {
+  if ! command -v node >/dev/null 2>&1; then
+    printf 'INDEX CANONICO: node indisponivel; leia conecthus/backends/manifesto.json corpos\n'
+    return 0
+  fi
+  node -e "
+const fs = require('fs');
+const m = JSON.parse(fs.readFileSync('conecthus/backends/manifesto.json', 'utf8'));
+const lista = (m.corpos && m.corpos.lista) || [];
+console.log('INDEX CANONICO: ' + lista.length + ' entradas (palcos=' + ((m.corpos && m.corpos.palcos) || 0) + ')');
+for (const c of lista) {
+  const nome = c.canonico == null ? '(nao ha)' : c.canonico;
+  const med = (c.medidores || []).join(', ') || 'nao localizada';
+  const chave = c.parte || c.camada;
+  console.log('  ' + chave + ' -> ' + nome + '  [' + med + ']');
+}
+const mot = (m.corpos && m.corpos.motor) || {};
+const isa = mot.linguagens_isa || {};
+const chaves = Object.keys(isa).filter((k) => k !== 'asm');
+console.log('LINGUAGENS ISA: ' + chaves.length + ' (asm=' + ((isa.asm && isa.asm.cadeia_de) || '?') + ') ingerido=' + ((mot.ingerido || []).join(',')));
+for (const k of chaves) {
+  const L = isa[k];
+  console.log('  ' + k + ' move=' + L.move + ' metal=' + L.metal + ' asm=' + ((L.cadeia && L.cadeia.asm) || '?'));
+}
+"
+}
+
+if [ "${SO_CORPOS:-0}" -eq 1 ]; then
+  index_corpos
+  rm -f "$LISTA"
+  exit 0
+fi
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)
 printf 'P5\n32 32\n255\n' > /tmp/bat.pgm
@@ -520,5 +574,6 @@ printf 'unidades: %d passaram, %d falharam, %d negativas por projeto (nas aberta
 [ "${uni_sal:-0}" -gt 0 ] && printf 'unidades SALTADAS por falta de recurso externo: %d (contam para o total, e dizem porque)\n' "$uni_sal"
 [ "$grosso" -gt 0 ] && printf '  (%d desses medidores contam 1 unidade GROSSA — o exit — por ainda\n   usarem idioma próprio. Não é fineza; é o mínimo para a soma não mentir.)\n' "$grosso"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
+index_corpos
 rm -f "$LISTA"
 [ "$falha" -eq 0 ] && [ "$quebradas" -eq 0 ] || exit 1

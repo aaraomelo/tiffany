@@ -21,7 +21,8 @@ const el = (html) => { const t = document.createElement('template'); t.innerHTML
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 const tags = (arr) => arr.map((t) => `<span class="tag"><b>${esc(t.rot)}</b> ${esc(t.val)}</span>`).join('')
 
-// ── os hosts que O MOTOR assume. O corpo é a FASE — o relógio, em ponto fixo, com o wrap a ser
+// ── os hosts que O CAMPO (roupa WebGL) assume. O motor ISA é banco/sql.c.
+//    O corpo pintado é a FASE — o relógio, em ponto fixo, com o wrap a ser
 //    um AND. Quem desenha é roupa; quem conta as voltas é o relógio.
 // O <img> desses hosts é só o FALLBACK de quem não tem WebGL2 — e por isso nasce SEM src (o caminho fica no
 // data-src). Antes ele nascia com src e loading=eager: o navegador baixava a gravação, pintava

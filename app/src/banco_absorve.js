@@ -1,24 +1,33 @@
 // banco_absorve.js — absorção órbita a órbita (latex §W4 / sql arena / node §W10).
 // MOVE(−1) emite na arena; canal sincroniza slots; MOVE(+1) absorve. Sem string SQL adaptadora.
+// Qualquer língua do manifesto entra pela absorcao.move; shells (canal) no metal se remoto.
 
-import { moveWasm, u8, NULO } from './banco_move.js'
+import { moveByForma, moveNome, u8, NULO } from './banco_move.js'
 import { manifestoAtual } from './manifesto_loader.js'
 import { shellRemoto } from './banco_sql_interno.js'
 import { discoBrowser, leEstado, gravaEstado, gravaShell } from './banco_disco.js'
 import { celulaDeWasm, secErgNome } from './wasm_sec_browser.js'
 import { correBackendMetal, fetchCorreErg } from './corre_metal_browser.js'
 
-const SHELLS = ['bash', 'node', 'powershell']
 const OFF_NOUT = 24578
 const OFF_BUF_OUT = 16384
 
 let cache = new Map()
 
+function linguaDoManifesto (nome) {
+  const L = manifestoAtual().linguagens.find((l) => l.nome === nome)
+  if (!L) throw new Error('backend «' + nome + '» ausente')
+  return L
+}
+
+function eCanal (L) {
+  return L.absorcao?.orbita === 'canal'
+}
+
 async function wasmBackend (nome, wasmBase = '/wasm/') {
   const k = nome + '@' + wasmBase
   if (cache.has(k)) return cache.get(k)
-  const L = manifestoAtual().linguagens.find((l) => l.nome === nome)
-  if (!L) throw new Error('backend «' + nome + '» ausente')
+  const L = linguaDoManifesto(nome)
   const r = await fetch(wasmBase + L.wasm)
   if (!r.ok) throw new Error('wasm ' + L.wasm + ': ' + r.status)
   const wasm = new Uint8Array(await r.arrayBuffer())
@@ -32,16 +41,12 @@ async function wasmBackend (nome, wasmBase = '/wasm/') {
       erg: celula.erg,
       fita: celula.fita,
       fitaLen: celula.fitaLen,
-      temAsm: celula.temErg && celula.erg.includes(nome + '_move'),
+      temAsm: celula.temErg && celula.erg.includes(moveNome(L)),
       temFita: celula.temFita,
     },
   }
   cache.set(k, pack)
   return pack
-}
-
-function moveExport (L) {
-  return L.exports?.find((e) => e.endsWith('_move')) || L.nome + '_move'
 }
 
 /** Injeta stdout no protocolo da arena (mesmo layout que interpretar.c). */
@@ -56,18 +61,17 @@ export function injetaStdoutArena (ex, texto) {
 }
 
 /**
- * Absorve script num backend shell.
- * ctx.motor: 'auto' (fita se embutida) | 'wasm' (node_move) | 'fita' (isa+erg.fita)
- * ctx.remoto: com canal, envia script à Patria (pleno) em vez de fita/wasm local.
+ * Absorve texto numa língua do manifesto (absorcao.move na arena).
+ * ctx.motor: 'auto' (fita se embutida) | 'wasm' | 'fita' (isa+erg.fita)
+ * ctx.remoto: com canal, envia script à Patria (pleno) — só órbita canal.
  */
 export async function absorveBackend (nome, script, ctx = {}) {
-  if (!SHELLS.includes(nome)) throw new Error('absorve: shell «' + nome + '»')
   const pack = await wasmBackend(nome, ctx.wasmBase)
   const { ex, L, celula } = pack
-  const fn = moveExport(L)
-  const body = nome === 'bash' && script && !script.endsWith('\n') ? script + '\n' : script
+  const fn = moveNome(L)
+  const body = nome === 'bash' && script && !script.endsWith('\n') ? script + '\n' : (script ?? '')
   const motor = ctx.motor ?? 'auto'
-  const querFita = motor === 'fita' || (motor === 'auto' && celula?.temFita && !ctx.remoto)
+  const querFita = eCanal(L) && (motor === 'fita' || (motor === 'auto' && celula?.temFita && !ctx.remoto))
 
   if (querFita && celula?.temFita) {
     const correErg = ctx.correErg ?? await fetchCorreErg(nome, ctx.ergBase)
@@ -98,16 +102,16 @@ export async function absorveBackend (nome, script, ctx = {}) {
     }
   }
 
-  const nw = moveWasm(ex, fn, body, -1)
+  const nw = moveByForma(ex, L, body, -1)
   let via = 'arena'
 
-  if (ctx.canal && ctx.remoto) {
+  if (eCanal(L) && ctx.canal && ctx.remoto) {
     const raw = await shellRemoto(body, ctx.canal, nome)
     injetaStdoutArena(ex, raw)
     via = 'canal'
   }
 
-  const out = moveWasm(ex, fn, '', +1, 8192, 8192)
+  const out = moveByForma(ex, L, '', +1, 8192, 8192)
 
   const st = discoBrowser(ctx)
   const estado = leEstado(st)
@@ -119,8 +123,8 @@ export async function absorveBackend (nome, script, ctx = {}) {
     meta: {
       via: via + '+GKBANCO',
       backend: nome,
-      bytesIn: nw,
-      bytesOut: out.length,
+      bytesIn: typeof nw === 'string' ? nw.length : nw,
+      bytesOut: String(out).length,
       move: fn,
       motor: 'wasm',
       celula: celula || null,

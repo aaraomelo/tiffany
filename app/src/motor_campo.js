@@ -1,7 +1,9 @@
-// ── O MOTOR EM o campo — o pipe de gênese, em TEMPO REAL no metal do navegador (WebGL2) ──
-// O motor é PADRÃO: começa com a GARRAFA DE KOCH VAZIA (a esfera, a=0) e EVOLUI (a→1) pela conversão
+// ── O CAMPO (roupa WebGL) — pipe de génese no navegador. NÃO é o motor ISA. ──
+// O motor da casa é banco/sql.c (manifesto.corpos.motor). Isto lê slots no mesmo
+// DISCO (estrela_porta) e pinta. Koch/fase ≠ Alonzo.
+// O motor visual é PADRÃO: começa com a GARRAFA DE KOCH VAZIA (a esfera, a=0) e EVOLUI (a→1) pela conversão
 // ponto a ponto (o inversor), rasterizada a cada quadro. A ASSINATURA do universo (a forma-alvo, o
-// circuito, a métrica) entra como UNIFORMS — traduzida para o campo — e o motor faz o resto. O TEMPO é o
+// circuito, a métrica) entra como UNIFORMS — traduzida para o campo — e o campo faz o resto. O TEMPO é o
 // backend (u_time), com a velocidade do reino (velEstado): é o mesmo relógio do circuito síncrono.
 // Roda agora, na GPU, em tempo real — a semente do jogo.
 // O u_time NÃO é contado aqui: vem do PAINEL (o DTC em WASM, faseDoMotor) — o WASM (CPU) entrega pro canvas (GPU).
