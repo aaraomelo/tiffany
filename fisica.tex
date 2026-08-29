@@ -4205,14 +4205,17 @@ A_{\mathrm{prof}}=\min\circ\operatorname{prof}
 A_d=\max\circ d
 \;}
 \]
---- \emph{não} se chama $A_{\min}$ ao primeiro: esse nome, noutro sítio, é a
-classe admissível de combinações de conteúdos. $D_{\mathrm{can}}(i)=(N-1)-i$
+--- \emph{não} se chama $A_{\min}$ ao primeiro: esse nome colide, noutro sítio,
+com outra construção. $D_{\mathrm{can}}(i)=(N-1)-i$
 (Teor.~\ref{fis:thm:troca-realizacao}) faz a dobra entre as duas leituras.
 \emph{Operam sobre endereços e profundidade; não combinam o conteúdo da célula.}
 A geometria do suporte não determina a álgebra do conteúdo:
 \[
 \boxed{\;(A_{\mathrm{prof}},A_d)\;\nRightarrow\;C\;}
 \]
+$C$ não se arranca daqui. A combinação física é o Teor.~\ref{fis:thm:combina}
+(superposição no suporte); Hebb é o Cor.~\ref{fis:cor:hebb}. O relógio não
+escolhe $C$.
 \end{observacao}
 
 \begin{teorema}[as bolas particionam]\label{fis:thm:bolas}
@@ -6587,8 +6590,16 @@ D_{\mathrm{can}}\ \text{preserva }u
 D_{\mathrm{can}}\bigl(f(x,y)\bigr)=f(D_{\mathrm{can}}x,D_{\mathrm{can}}y)
 \;}
 \]
-Uma lei de combinação de conteúdos, se existir, vive noutro nível. O par
-$(A_{\mathrm{prof}},A_d)$ \textbf{não} a determina
+A conservação da realização (endereço, $u$, $G=1$ na árvore)
+\textbf{não} é a lei do agregado:
+\[
+\boxed{\;\text{conservação da realização}\;\nRightarrow\;\text{lei do agregado}\;}
+\]
+O salto é o Teor.~\ref{fis:thm:combina}: superposição no suporte, termo
+cruzado, acoplamento. Hebb é o Cor.~\ref{fis:cor:hebb}, não o princípio.
+$G>1$ é $\Delta_{\mathrm{int}}$ --- a parcela que \emph{não existe} quando a
+composição colapsa a uma partícula efectiva.
+O par $(A_{\mathrm{prof}},A_d)$ \textbf{não} determina $C$
 (Obs.~\ref{fis:obs:relogio-dual}).
 \end{teorema}
 
@@ -13358,6 +13369,8 @@ na rede & é, nesta construção & onde \\
 o neurónio & a cisão $\oplus$ seguida da soma $\sum$ & §\ref{fis:neuronio} \\
 a sobreposição & o \textbf{prefixo comum} & Teor.~\ref{fis:thm:sobrepoe} \\
 recuperar & \emph{descer} --- energia, ou profundidade & Teor.~\ref{fis:thm:desce} \\
+a combinação & superposição no suporte; $\Delta_{\mathrm{int}}$ & Teor.~\ref{fis:thm:combina} \\
+Hebb / $W_{ij}$ & realização do acoplamento, não a lei & Cor.~\ref{fis:cor:hebb} \\
 a interferência & a \textbf{dobra}: $G>1$ & Teor.~\ref{fis:thm:interfere} \\
 a árvore & o \textbf{levantamento}: $\tilde G=1$ & Teor.~\ref{fis:thm:levant} \\
 a parte simétrica, assíncrona & \emph{mede} --- ponto fixo & Teor.~\ref{fis:thm:desce} \\
@@ -13453,23 +13466,86 @@ Teor.~\ref{fis:thm:sobrepoe} diz que a régua é a mesma.
 
 \section{A interferência é a dobra}\label{fis:interfere}
 
-\noindent Aqui está a diferença, e ela é o resultado.
+\noindent Aqui está a diferença, e ela é o resultado. \emph{Não} se começa
+pela regra de Hebb. Começa-se pelo suporte.
+
+\begin{teorema}[a combinação física é superposição]\label{fis:thm:combina}
+Duas incidências no mesmo suporte determinam \textbf{um} estado. O suporte
+escolhe o objecto --- a célula --- não uma lei em $\mathcal A_{\min}$.
+O estado da célula vive num espaço $V$ com forma bilinear
+$\langle\,\cdot\,,\,\cdot\,\rangle$. A superposição em $V$ --- a única
+operação binária que polariza essa forma --- lê cada incidência $k$ como
+peso $s_k$ na direcção $v_k$, e o estado é
+\[
+S=\sum_k s_k v_k.
+\]
+A norma expande-se, e o segundo termo é inevitável:
+\[
+\|S\|^2
+=\sum_k s_k^2\|v_k\|^2
++2\sum_{i<j}s_is_j\langle v_i,v_j\rangle,
+\qquad
+\boxed{\Delta_{\mathrm{int}}
+=2\sum_{i<j}s_is_j\langle v_i,v_j\rangle.}
+\]
+$\Delta_{\mathrm{int}}$ não é conservação nova nem escolha de $C$: é o
+termo cruzado de qualquer forma quadrática polarizável. $C\colon X\times X\to X$
+é o \emph{tipo} (duas incidências, uma célula). A forma da interacção, neste
+domínio, é a superposição em $V$. \emph{Não} se escreve $C(x,y)=x+y$ como
+lei sobre $X$: primeiro o objecto, depois a representação, depois a adição.
+\end{teorema}
+
+\begin{proof}
+Se $\pi(i)=\pi(j)=x$, a célula $x$ é uma (Teor.~\ref{fis:thm:mult}: $G(x)>1$
+conta incidências, não duplica o suporte). O conteúdo não é o endereço
+(Obs.~\ref{fis:obs:relogio-dual}): vive em $V$. Uma forma quadrática em $V$
+polariza-se de maneira única,
+$\|u+v\|^2=\|u\|^2+\|v\|^2+2\langle u,v\rangle$; qualquer outra operação
+binária sobre payloads que não polarize $\langle\,\cdot\,,\,\cdot\,\rangle$
+não é combinação \emph{neste} ambiente. Donde $S=\sum_k s_k v_k$ e
+$\Delta_{\mathrm{int}}$ saem da bilinearidade, não de uma escolha em
+$\mathcal A_{\min}$, nem de $\operatorname{lexMax}$, $D_{\mathrm{can}}$ ou
+$\tau$.
+\end{proof}
+
+\begin{corolario}[o acoplamento é a matriz de Hebb]\label{fis:cor:hebb}
+Se as incidências são padrões $\xi^p$, o termo cruzado agrega os pares e
+produz
+\[
+W_{ij}=\sum_p\xi_i^p\xi_j^p.
+\]
+\[
+\boxed{\text{superposição}\Rightarrow\text{termo cruzado}\Rightarrow
+\text{acoplamento}\Rightarrow W_{ij}.}
+\]
+Hebb é esta realização do acoplamento, não a lei. Hopfield é a memória da
+volta sobre essa matriz.
+\[
+\boxed{C\;\longrightarrow\;S\;\longrightarrow\;\Delta_{\mathrm{int}}
+\;\longrightarrow\;\text{acoplamento}\;\longrightarrow\;W_{ij}.}
+\]
+\end{corolario}
+
+\begin{proof}
+Cada padrão $p$ contribui $s=\xi^p$ sobre a base canónica de $V$. O termo
+$2\sum_{i<j}\xi_i^p\xi_j^p$ é a polarização de $W^{(p)}=\xi^p(\xi^p)^{\!\top}$;
+somar em $p$ é a superposição do Teor.~\ref{fis:thm:combina}. A fórmula de
+Hebb é o resultado, não o princípio.
+\end{proof}
 
 \begin{teorema}[somar identifica; separar não]\label{fis:thm:interfere}
-A regra de Hebb grava $P$ padrões numa \textbf{única} matriz,
-\[
-W_{ij}=\sum_{p=1}^{P}\xi_i^{p}\xi_j^{p} ,
-\]
-que é uma \textbf{soma}. Logo $W$ é a imagem de uma realização
+A matriz $W$ do Cor.~\ref{fis:cor:hebb} é imagem de uma realização
 $\pi\colon\{\text{padrões}\}\to\{\text{matrizes}\}$ que \emph{não é injetiva}:
 conjuntos distintos de padrões podem dar a mesma $W$, e a sua multiplicidade
-$G>1$ é exactamente o que se chama \textbf{interferência}. Já a árvore põe cada
+$G>1$ é exactamente o que se chama \textbf{interferência}. $G>1$ \emph{não} é
+posto à mão: aparece porque $\sum_p\xi^p$ não é injetiva. Interferência é
+consequência da combinação, não justificativa para a introduzir. Já a árvore põe cada
 memória no seu \emph{ramo}, uma por prefixo: aí a realização é injetiva e
 $G=1$.
 \end{teorema}
 
 \begin{proof}
-A soma é comutativa e não retém as parcelas: pelo Teor.~\ref{fis:thm:palavra}, um
+$W$ é soma (Cor.~\ref{fis:cor:hebb}). A soma é comutativa e não retém as parcelas: pelo Teor.~\ref{fis:thm:palavra}, um
 morfismo que soma tem \textbf{núcleo}, e dois conjuntos de padrões cuja diferença
 esteja no núcleo têm a mesma imagem --- que é $G>1$ pela cláusula~(2) do
 Teor.~\ref{fis:thm:mult}. Na árvore, cada memória ocupa um prefixo distinto, e
@@ -13495,6 +13571,26 @@ com buraco --- \emph{a folga é uma só, vista pelos dois mapas}.
 sugeriria equivalência funcional entre dois mecanismos que não a têm:
 \emph{a árvore realiza explicitamente, pela hierarquia, a separação que a soma de
 Hebb comprime e que aparece como interferência}.
+
+\medskip\noindent\textbf{A conservação da realização não é a lei do agregado.}
+A árvore ($G=1$) é uma realização individual: cada memória no seu ramo. A
+combinação de incidências no mesmo suporte é outra coisa: o
+Teor.~\ref{fis:thm:combina}. $C\colon X\times X\to X$ é o tipo (duas
+incidências, uma célula); a forma é superposição em $V$; Hebb é o
+Cor.~\ref{fis:cor:hebb}, não o princípio.
+\[
+\boxed{\;
+\text{álgebra}\to\text{norma}\to\text{combinação}\to C
+\to\text{interferência}\to\text{Hebb/Hopfield}
+\;}
+\]
+A autoridade não vem de $\operatorname{lexMax}$, $D_{\mathrm{can}}$, $\tau$,
+pipe nem Hopfield. Vem da superposição que polariza a forma quadrática do
+ambiente. $\Delta_{\mathrm{int}}$ é a parcela que \emph{não existe} quando a
+composição colapsa a uma partícula efectiva.
+\[
+\boxed{\;\text{conservação da realização}\;\nRightarrow\;\text{lei do agregado}\;}
+\]
 
 \medskip\noindent\textbf{E é o levantamento, dito numa rede.} Desfazer a
 interferência é exactamente o Teor.~\ref{fis:thm:levant}: acrescentar
@@ -13746,7 +13842,7 @@ partilha, e não uma segunda implementação do disco. Foi por não existir esse
 que estes dois blocos ficaram por correr até aqui --- \emph{e as duas falhas
 acima são o que aparece quando eles correm}.}
 
-\colunas{Teor.~\ref{fis:thm:sobrepoe},~\ref{fis:thm:desce},~\ref{fis:thm:interfere},~\ref{fis:thm:duastorres},~\ref{fis:thm:goles},~\ref{fis:thm:duasordens}; Prop.~\ref{fis:prop:cego}}
+\colunas{Teor.~\ref{fis:thm:combina},~\ref{fis:cor:hebb},~\ref{fis:thm:sobrepoe},~\ref{fis:thm:desce},~\ref{fis:thm:interfere},~\ref{fis:thm:duastorres},~\ref{fis:thm:goles},~\ref{fis:thm:duasordens}; Prop.~\ref{fis:prop:cego}}
         {o neurónio como cisão$+$soma; a árvore como levantamento; as duas torres}
         {\code{tests/hopfield.c} §F1--§F14; \code{tests/neuronio.c}}
 % ═══════════════════════════════════════════════════════════════════════════

@@ -2,7 +2,7 @@
 % ─────────────────────────────────────────────────────────────────────────────
 %  papers/redes.tex — REDES NEURAIS MULTIFOCAIS
 %
-%  P6 é postulado de fechamento: autoriza X×X → X. Não se mede; avalia-se contra ele.
+%  P6 desce da combinação física (fis:thm:combina). Hebb é realização, não postulado.
 %  combinacao.tex fundido aqui e apagado. Compila: pdflatex papers/redes.tex
 %
 % ─────────────────────────────────────────────────────────────────────────────
@@ -47,63 +47,61 @@
 \begin{document}
 \interfacen{6}
 \gkcapa{Redes Neurais Multifocais}
-       {P6 é postulado de fechamento da arquitectura}
-       {autoriza $X\times X\to X$; as realizações avaliam-se contra ele}
+       {P6 desce da combinação física}
+       {a rede só realiza; não legisla}
 \maketitle
 
 \begin{abstract}\noindent
-\pt{6} não é consequência dos invariantes anteriores. É o decreto que autoriza
-a passagem $X\times X\to X$. Uma vez adotado, as realizações avaliam-se contra
-ele. A identificação é Hebb; Hopfield dual é a memória da volta.
+Hebb/Hopfield na rede \textbf{não} são a fonte da lei. A lei é a combinação
+física (\code{fis:thm:combina}): superposição no suporte, termo cruzado,
+acoplamento. A descida é
 \[
-\boxed{\text{\pt{6} é postulado de fechamento da arquitectura.}}
+\boxed{\text{álgebra}\to\text{norma}\to\text{combinação}\to C
+\to\text{interferência}\to\text{Hebb/Hopfield}.}
 \]
-\[
-W_{ij}=\sum_p\xi_i^p\xi_j^p
-\;,\qquad
-\lambda^{+}+\lambda^{-}=0
-\;,\qquad
-\text{Hopfield}=\text{memória da volta}.
-\]
-Negá-lo não refuta uma consequência particular: nega a operação de composição
-sobre a qual a arquitectura unifica as realizações matemáticas e físicas.
+$C\colon X\times X\to X$ é o tipo (duas incidências, uma célula). A forma é
+superposição em $V$. $W_{ij}=\sum_p\xi_i^p\xi_j^p$ é o Cor.~\code{fis:cor:hebb},
+não um decreto. A autoridade não vem de $\operatorname{lexMax}$,
+$D_{\mathrm{can}}$, $\tau$ nem do pipe.
 \end{abstract}
 
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Postulado}\label{redes:regra}
 
-\begin{postulado}[\pt{6} --- fechamento]\label{redes:post:p6}\label{redes:post:hebb}\label{redes:post:niveis}\label{redes:post:overwrite}
-\pt{6} é postulado de fechamento da arquitectura. Não segue de
-$\tau$, $D_{\mathrm{can}}$, $\operatorname{prof}$ nem $u$. É o decreto que
-autoriza
+\begin{postulado}[\pt{6} --- descida]\label{redes:post:p6}\label{redes:post:hebb}\label{redes:post:niveis}\label{redes:post:overwrite}
+\pt{6} é a instanciação discreta do \fis{fis:thm:combina}{Teor. «a combinação
+física é superposição»}. Não escolhe $C=W$ por decreto. A sequência é
 \[
-X\times X\longrightarrow X.
+\boxed{\text{superposição}\Rightarrow\text{termo cruzado}\Rightarrow
+\text{acoplamento}\Rightarrow W_{ij}.}
 \]
-A operação assim autorizada é $C$, identificada com Hebb
-(\mf{postulados}{P6}):
-\[
-\boxed{C=W,\qquad W_{ij}=\sum_{p}\xi_i^{p}\xi_j^{p}.}
-\]
-Hopfield dual é a memória da volta (\code{thm:rede-dual}):
+$C\colon X\times X\to X$ é o tipo: duas incidências, uma célula. A forma da
+interacção é superposição em $V$. Hebb é o \code{fis:cor:hebb}; Hopfield dual
+é a memória da volta sobre essa matriz (\code{thm:rede-dual}):
 \[
 \lambda^{+}+\lambda^{-}=0,\qquad F_H\circ F_P=\mathrm{id}.
 \]
-Uma vez adotado, toda realização posterior avalia-se contra ele.
+Não se promove Hebb. Hebb perde o estatuto de postulado porque aparece como
+consequência da lei anterior. Este documento \textbf{não legisla}: só realiza
+o que a física já provou.
 \end{postulado}
 
 \[
-\underbrace{\tau,\; D_{\mathrm{can}},\; \operatorname{prof},\; u}_{\text{demonstrados}}
-\quad\longrightarrow\quad
-\underbrace{C}_{\text{postulado}}
-\quad\longrightarrow\quad
-\underbrace{\text{realizações físicas}}_{\text{testáveis}}.
+\text{teorema físico}
+\;\longrightarrow\;
+\text{instanciação discreta}
+\;\longrightarrow\;
+\text{rede}
+\;\longrightarrow\;
+\text{Hebb/Hopfield}.
 \]
 
 \medskip\noindent\textbf{O que se afirma, e o que não se afirma.}
-Não se afirma que \pt{6} foi medida. Afirma-se: \pt{6} é assumida como
-condição de fechamento da construção. Negá-la não refuta uma consequência
-particular; nega a operação de composição sobre a qual a arquitectura
-pretende unificar as suas realizações matemáticas e físicas.
+A conservação de uma realização individual (árvore, $G=1$, norma de um produto)
+\textbf{não} implica a lei do agregado. A autoridade da combinação não vem de
+$\operatorname{lexMax}$, $D_{\mathrm{can}}$, $\tau$ nem do pipe. Vem do
+Teor.~\code{fis:thm:combina}. $\Delta_{\mathrm{int}}$ é a parcela que não
+existe na partícula efectiva.
 
 \begin{corolario}[árvore e Hopfield são o mesmo dual]\label{redes:cor:dual-gh}
 A árvore realiza $G=1$ (prefixo injectivo). Hebb realiza $G>1$ (soma).
@@ -113,7 +111,7 @@ São as duas faces da mesma folga
 \end{corolario}
 
 \begin{proof}
-Postulado~\ref{redes:post:p6} e \code{fis:thm:interfere}.
+\code{fis:thm:combina}, \code{fis:cor:hebb} e \code{fis:thm:interfere}.
 \end{proof}
 
 \begin{corolario}[overwrite é Hebb de capacidade $1$]\label{redes:cor:ow}
@@ -129,7 +127,8 @@ Hebb é soma; soma de capacidade $1$ é substituição. Postulado~\ref{redes:pos
 Lei~6 dá
 $A_{\mathrm{prof}}=\min\circ\operatorname{prof}$ e $A_d=\max\circ d$,
 com $D_{\mathrm{can}}(i)=(N-1)-i$ a dobrar as leituras
-(\code{fis:obs:relogio-dual}). Isso é o relógio. A combinação já é \pt{6}.
+(\code{fis:obs:relogio-dual}). Isso é o relógio. A combinação é o
+Teor.~\code{fis:thm:combina}, não este par.
 \end{corolario}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -194,8 +193,8 @@ III & preserva objecto/medida; \emph{não} isometria automática de $u$
 duomorfismo $\oplus/\otimes$ no pipe &
 III & face operacional (\code{fis:def:duomorf}); o pipe \emph{não} realiza
 $D_{\mathrm{can}}$ --- o teorema está em \code{fisica.tex} \\
-Hopfield / Hebb & --- & \pt{6} fecha: $X\times X\to X$; \emph{não} segue do teorema \\
-§RG6 / \code{overwrite} & --- & realização contra \pt{6} (Cor.~\ref{redes:cor:ow}) \\
+Hopfield / Hebb & --- & descida de \code{fis:thm:combina}/\code{fis:cor:hebb}; \emph{não} segue da troca \\
+§RG6 / \code{overwrite} & --- & superposição degenerada (Cor.~\ref{redes:cor:ow}) \\
 $W_s/W_a$ & III & eixo \code{fis:thm:duastorres}; distinto de $\oplus/\otimes$ \\
 \bottomrule
 \end{tabular}}
@@ -398,7 +397,7 @@ camada & mecanismo & $G$ & pipe hoje \\
 \midrule
 \textbf{árvore} & prefixo / ramo & $\tilde G=1$ & \textbf{sim} --- \code{RODATA\_TAG} \\
 \textbf{campo} & visitas acumuladas & $G_{\mathrm{real}}$ / $G_{\mathrm{visit}}$ & \textbf{parcial} --- §\ref{redes:g-duplo} \\
-\textbf{Hopfield} & soma Hebb (\pt{6}) & $G>1$ & \textbf{sim} --- Post.~\ref{redes:post:p6} \\
+\textbf{Hopfield} & acoplamento (\code{fis:cor:hebb}) & $G>1$ & realização da superposição \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -667,7 +666,7 @@ sobreviveu no slot --- leitura \emph{cruzada}. Em \fis{fis:thm:agentes}{agentes}
 \medskip\noindent\textbf{Separação explícita.}
 \caixa{%
   compartilhar $X$ $\neq$ combinar $X$;\\
-  combinar $=C=W$ (\pt{6})%
+  combinar $=$ superposição (\code{fis:thm:combina}); Hebb realiza o acoplamento%
 }
 
 \medskip\noindent\textbf{Protocolos medidos.}
@@ -761,15 +760,16 @@ $G_{\mathrm{visit}}$; ainda \textbf{não} calcula $1/G$ na fita.
 passo é $\mu=\zeta^{-1}$ (\fis{fis:thm:zetamu}{ciclo $\zeta$; recuperação $\mu$}).
 Medido em \code{tests/zetamu.c} §Z1--§Z3; \textbf{fora} de \code{test\_cadeia.bat}.
 
-\subsection{Hopfield dual deriva de \pt{6}}\label{redes:hopfield-futuro}
+\subsection{Hopfield dual realiza o acoplamento}\label{redes:hopfield-futuro}
 
 \begin{teorema}[Hebb e dobra]\label{redes:thm-hebb}
-A regra $W_{ij}=\sum_p\xi_i^p\xi_j^p$ é soma; logo a realização não é injectiva e
+A matriz $W_{ij}=\sum_p\xi_i^p\xi_j^p$ é o acoplamento do
+\code{fis:cor:hebb}; logo a realização não é injectiva e
 $G_{\mathrm{real}}>1$ é interferência (\fis{fis:thm:interfere}{interferência}).
 \end{teorema}
 
 \begin{proof}
-Postulado~\ref{redes:post:p6} e Cor.~\ref{redes:cor:dual-gh}.
+\code{fis:thm:combina}, \code{fis:cor:hebb}, \code{fis:thm:interfere}.
 \end{proof}
 
 % ═══════════════════════════════════════════════════════════════════════════
@@ -788,7 +788,7 @@ $u$ estrutural & §\ref{redes:troca} & \code{mf:cor:troca-u} & §\ref{redes:thm-
 campo $G$ & \code{fis:def:objeto} & P2 disponibilidade &
 $G_{\mathrm{visit}}$ host; $G_{\mathrm{real}}$ com diário §RG2 \\
 $\zeta/\mu$ & \code{fis:thm:zetamu} & P5 eu / mordomos & \code{tests/zetamu.c} \\
-interferência & \code{fis:thm:interfere} & \pt{6} Hebb & Post.~\ref{redes:post:p6} \\
+interferência & \code{fis:thm:combina}, \code{fis:cor:hebb} & \pt{6} descida & $W$ realiza o acoplamento \\
 recuperação & \code{fis:thm:desce} & âncora / Hopfield dual & $\lambda^{+}+\lambda^{-}=0$ \\
 $W_s/W_a$ & \code{fis:thm:duastorres} & \code{mf:thm:duas} & \code{hopfield.c} \\
 duomorfismo & \code{fis:def:duomorf} & --- & \code{wasm\_erg}, MOVE (III) \\
@@ -888,30 +888,36 @@ antissimetria sozinha. \code{tests/hopfield.c} §F10: somar torres \textbf{não}
 \section{Combinação}\label{redes:combinacao}\label{redes:fronteira}%
 \label{comb:regra}\label{comb:hebb}\label{comb:reserva}\label{comb:sintese}
 
-\noindent \pt{6} autoriza $X\times X\to X$ e nomeia $C=W$. Não se arranca $C$
-dos invariantes. No slot único, Hebb degenera (Cor.~\ref{redes:cor:ow}):
-\[
-X_0 \xrightarrow{F_1} X_1 \xrightarrow{F_2} X_2,
-\qquad
-\text{$X_2$ sobrevive},\quad \text{$X_1$ desaparece}.
-\]
-A família C0--L7 (\code{tests/redes\_combinacao.js}) é realização testável
-contra o postulado; não compete com ele. \emph{Não} se promove
-$\operatorname{lexMax}$ a $C$.
+\noindent A conservação de uma realização individual não autoriza o salto.
+O Teor.~\code{fis:thm:combina} determina a combinação física: superposição no
+suporte, $\Delta_{\mathrm{int}}$ inevitável. $C\colon X\times X\to X$ é o tipo
+(duas incidências, uma célula), \emph{não} a soma de payloads. Sob a
+representação em $V$, a operação é aditiva e o acoplamento é $W$
+(\code{fis:cor:hebb}). Hebb é essa realização.
+
+\begin{itemize}
+\item superposição degenerada (todos iguais, overwrite, $G=1$): colapsa a uma
+      partícula --- recupera-se a lei individual (Cor.~\ref{redes:cor:ow});
+\item superposição plena ($G>1$): $\Delta_{\mathrm{int}}\neq0$ --- interferência
+      (\fis{fis:thm:interfere}{somar identifica; separar não}).
+\end{itemize}
+A família C0--L7 (\code{tests/redes\_combinacao.js}) testa o suporte contra a
+lei física; não escolhe $C$. \emph{Não} se promove $\operatorname{lexMax}$.
 
 \begin{proposicao}[o relógio não é Hebb]\label{redes:prop-relogio}
 $A_{\mathrm{prof}}$ e $A_d$ lêem endereço (Cor.~\ref{redes:cor:relogio}).
-$C=W$ lê padrões (Post.~\ref{redes:post:p6}).
+O acoplamento lê padrões (\code{fis:cor:hebb}).
 \end{proposicao}
 
 \begin{proposicao}[incidência não é Hebb]\label{redes:prop-zetamu}
-$\zeta$ acumula visitas e $\mu$ deconvolve. Hebb soma padrões numa matriz.
+$\zeta$ acumula visitas e $\mu$ deconvolve. Hebb realiza o acoplamento da
+superposição, não a incidência.
 \end{proposicao}
 
 \caixa{%
-  \pt{6} fecha a arquitectura: $X\times X\to X$;\\
-  $C=W$; Hopfield dual $=\lambda^{+}+\lambda^{-}=0$;\\
-  overwrite $=$ Hebb de capacidade $1$.%
+  teorema físico $\to$ instanciação $\to$ rede $\to$ Hebb/Hopfield;\\
+  $C\colon X\times X\to X$ é o tipo, não $x+y$ sobre $X$;\\
+  $\Delta_{\mathrm{int}}$ é a parcela que não existe na partícula efectiva.%
 }
 
 % ═══════════════════════════════════════════════════════════════════════════
