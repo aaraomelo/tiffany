@@ -1798,7 +1798,9 @@ evidência
     \code{fis:def:transf}; \code{fis:thm:H}; \code{fis:thm:conv};
     \code{univ:def:finv}; \code{univ:thm:reversao-byte};
     \code{univ:thm:glh-dual-fecha}; \code{univ:obs:banach};
-    \code{fis:obs:U-consome}; \code{tests/lei\_unica\_u.js}
+    \code{univ:obs:grafo-fecho}; \code{univ:thm:composicao-fechos};
+    \code{fis:obs:U-consome}; \code{tests/lei\_unica\_u.js};
+    \code{tests/grafo\_fecho\_u.js}
   & labels univ + fis + motor \\
 resultado
   & \texttt{realizado}: \(\mathcal{U}_{\mathrm{can}}\);
@@ -1847,6 +1849,23 @@ Codificação \(\operatorname{Sig}\to\mathbb{R}\):
 \code{univ:obs:denso-NN}; \S\ref{sec:codificacoes}).
 Densidade em \(X^{X}\): \texttt{não localizada}
 (\code{univ:obs:denso-XX}).
+Grafo de composição das oito leis:
+duas leituras do mesmo \(\widehat{L_7}\)
+(\(\mathcal{F}^{-1}\) vs \(\pi_{\mathcal{U}}\));
+\texttt{realizado} a volta conjunta
+\(\mathcal{F}^{-1}\mathcal{F}\) com
+\(\pi_{\mathcal{U}}(\mathcal{F}(L_7))\),
+\(\operatorname{Res}=0\)
+(\code{univ:thm:composicao-fechos};
+\code{tests/grafo\_fecho\_u.js}).
+Arestas sem operador \(L_i\to L_j\)
+(\(L_0\xrightarrow{\partial}L_1\); \(L_2\to L_2\);
+\(L_6\to\mathbf{Duo}\); par \(1\)--\(7\);
+Born-\(P_i\)): \texttt{não localizada}
+(\code{univ:obs:grafo-fecho};
+\code{fis:obs:quantica-grafo-fecho}).
+Born não fecha \(\mathcal{U}\).
+Não se reabre \(\mathrm{I}_{0}\)--\(\mathrm{I}_{11}\).
 O fecho canónico de \(\mathcal{U}\) não depende de \(X^{X}\).
 \[
 \boxed{\;
@@ -2647,7 +2666,7 @@ dinâmica de colisão neste export.
 \ficharow{lei complementar}{$m=\lvert\log\rho\rvert$; $\prod\rho=\pm1$}
 \ficharow{morfismos}{$\operatorname{Isom}_{\mu}$ realizada (neutralidade); Hom das faces; Diff não localizada; $\mathbf{Duo}$ não localizada}
 \ficharow{estatuto}{realizado na Física; exportado; sem paper próprio}
-\ficharow{correspondência}{não unificar com o Algébrico nem com o Real por ter um $\log$. Luz espectral $\neq$ borda da Relatividade}
+\ficharow{correspondência}{não unificar com o Algébrico nem com o Real por ter um $\log$. Luz espectral $\neq$ borda da Relatividade. Palco Quântica: $\rho$ em $\mathbf{P}^{1}$; associador $\neq$ concorrência IBM sem \code{hiper thm:emaranhamento}; $a+c^{2}=1$ $\neq$ rectângulo GLH; $P=k/N$ Hurwitz $\neq$ Born; $\pi^{2}=\pi\neq x^{2}=x+1\neq\operatorname{Star}(\mathcal{U})$; face aditiva Fourier/Mellin $=$ $m=0$ da dourada (\code{univ:def:dourada-m0}), não $\mathrm{I}_{5}$ desta ficha; Parseval de $\mathfrak{G}$ $=$ norma $L^{2}$ (\code{univ:obs:dourada-parseval}), não Born; GLH+dobras+Lei~7 $=$ contagem/conversão/interface no palco (\code{fis:thm:central}, \code{fis:thm:tresgraus}, \code{fis:obs:octoniao-interface}; Obs.\ \code{fis:obs:quantica-glh-dobras}), não fecha Born; estatutos em $\mathcal{U}$: \code{univ:obs:estatutos-u}; construído/aberto no palco: \code{fis:tab:quantica-palco}; Absorção$\leftrightarrow$Lei~7 e Paper~A \texttt{não localizada} em $\mathcal{U}$; Born aberto; dois $A_0$ desambiguados; sem 15.º}
 }
 
 \medskip

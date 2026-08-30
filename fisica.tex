@@ -132,7 +132,9 @@ do discriminante, as ordens que uma rede admite e a borda onde a régua colapsa.
 \medskip\noindent E os quatro últimos lugares são o mesmo sistema em quatro
 escalas. As \textbf{partículas e o núcleo}: o átomo como cadeia espectral, a
 massa como distância ao círculo, a ligação como folga, e o mapa espectral que diz
-que átomos a álgebra permite. A \textbf{termodinâmica} e a \textbf{cosmologia},
+que átomos a álgebra permite. A \textbf{quântica} não é o décimo quinto lugar
+nem um corpo novo: é o palco de exposição desse mesmo Corpo de Partículas
+(Def.~\ref{fis:def:atomo}), sem reabrir $\mathrm{I}_{0}$. A \textbf{termodinâmica} e a \textbf{cosmologia},
 que são um par --- \emph{entropia é o que se desfaz, expansão é o que se abre} ---
 com o rendimento a sair do $\oint$ fechado, o custo a ser a dobra, a segunda lei a
 valer de \emph{um} lado, e a taxa de expansão a ser a régua invertida. E as
@@ -216,6 +218,27 @@ O que classifica um sistema sem perda? & $\Delta$, e não o traço & Teor.~\ref{
 Que ordens admite uma rede? & $\{1,2,3,4,6\}$, e nunca $5$ & Lema~\ref{fis:lem:cristal} \\
 O Corpo Universal, o que é? & $(X,X^{*},\mathsf{Mor},\mathsf{Aut})$; consome o espaço; \textbf{não} é uma Parte & §\ref{fis:universal} \\
 O que a Parte Fractal realiza? & Corpo Alonzo; fractal/tropical são fenómenos, não magmas novas & §\ref{fis:alonzo} \\
+A Parte Quântica, que corpo realiza? & Corpo de Partículas (modo espectral); sem ficha própria no catálogo & §\ref{fis:quantica} \\
+Há um 15.º corpo? & não: Quântica é palco do já ingerido, não magma nova & Obs.~\ref{fis:obs:quantica-i0} \\
+O contrato estado+superposição+observável+Born? & Partículas: estado realizado; superposição parcial; observável e Born-\emph{regra} \texttt{não localizada}. Sem 15.º & §\ref{fis:quantica-contrato} \\
+Probabilidade é o inverso de uma contagem? & sim: $p_G=G/\lvert I\rvert$ (Hurwitz / frequentista); \textbf{não} $\lvert\psi\rvert^{2}$ & Obs.~\ref{fis:obs:quantica-prob} \\
+Born é o projector $\rho^{2}=\rho$? & $\det\rho=0$ medido; $\rho^{2}=(\operatorname{tr}\rho)\rho$; $\rho^{2}=\rho$ só se $\operatorname{tr}=1$. Regra: \texttt{não localizada} & Obs.~\ref{fis:obs:quantica-born} \\
+As duas quadráticas colam? & não: $\pi^{2}=\pi\neq x^{2}=1\neq x^{2}=x+1\neq x^{2}=-1\neq\operatorname{Star}(\mathcal{U})=\mathcal{D}$ & Obs.~\ref{fis:obs:quantica-quadraticas},~\ref{fis:obs:quantica-oito-leis} \\
+As oito leis no palco quântico? & $e_k=$ Lei~$k$ (\code{papers/aranha.c} \texttt{neuronio8}). L0 e L4 \texttt{realizadas}; L5 pental $=$ bit $i$ de $\mathbb{Z}[i]$ (\texttt{psi\_roda}); L1 \texttt{parcial}; L2, L6, L7 \texttt{não localizada} no modo espectral. Sem Lei~8. Sem par $1$--$7$ & Obs.~\ref{fis:obs:quantica-oito-leis} \\
+$x^{2}=-1$ é a estrela? & não: é a Lei~5 (pental, bit $i$). \textbf{Não} $x^{2}=x+1$, \textbf{não} $x^{2}=1$, \textbf{não} Alonzo, \textbf{não} $\mathbf{Duo}$ & Obs.~\ref{fis:obs:quantica-oito-leis} \\
+A face aditiva do par Fourier/Mellin? & realizada em $m=0$ da dourada ($x^{2}=1$, troca). \textbf{Não} $x^{2}=x+1$. \textbf{Não} $\mathcal{F}$ de Walsh & Obs.~\ref{fis:obs:quantica-dourada-m0} \\
+Parseval da dourada fecha Born? & não: fecha a norma $L^{2}$ da transformada. Born-\emph{regra} permanece \texttt{não localizada} & Obs.~\ref{fis:obs:quantica-parseval} \\
+GLH+dobras+Lei~7 fecham Born? & não: realizam contagem, conversão e interface no palco. Born-\emph{regra} permanece \texttt{não localizada} & Obs.~\ref{fis:obs:quantica-glh-dobras} \\
+O dual do associador? & o comutador da torre ($a+c^{2}=1$); \textbf{não} o distribuidor; \textbf{não} $\mathbf{Duo}$ & Obs.~\ref{fis:obs:quantica-triade} \\
+A lei de conservação no campo médio do Paper~CT é $a+c^{2}=1$? & não: decompõe $\lVert y\rVert^{2}$; $a+c^{2}=1$ só se $S_{\perp}=0$. Homónimo de $\lVert r\rVert^{2}+C^{2}=1$. Estatuto \texttt{não localizada} & Obs.~\ref{fis:obs:quantica-ct-mf} \\
+A interpolação e a norma do produto do Paper~A são Parseval / $\lvert\det\rvert=1$? & não: interpola o associador ao longo de $\times_s$; $\lVert z\cdot w\rVert^{2}=\lVert z\rVert^{2}\lVert w\rVert^{2}-V$. Estatuto \texttt{não localizada} & Obs.~\ref{fis:obs:quantica-paper-a-norma} \\
+O associador é o terceiro eixo afim do trial? & mede o lado \emph{directo} (associatividade); é trilinear. A dobra afim é outra célula. \textbf{Não} se colam & Teor.~\ref{fis:thm:trial}(2); Teor.~\ref{fis:thm:dobra}; Obs.~\ref{fis:obs:quantica-associador-eixo} \\
+A comutação $\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}$ é esse comutador? & não: outra célula, em $E(\pi)$; $G(\partial_{\mathrm{h}}x)=G(x)$. \textbf{Não} Duo, \textbf{não} $A_0$ & Teor.~\ref{fis:thm:duascoord}(5); Obs.~\ref{fis:obs:quantica-comuta-dobras} \\
+Lei~7 fecha com Lei~0? & sim: $\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0$, $\operatorname{Res}=0$. Dual do medidor: só $0^{\dagger}=\infty$. \textbf{Não} par $1$--$7$ & \code{univ:thm:retorno-canonico}; Teor.~\ref{fis:thm:zeroinf}; Obs.~\ref{fis:obs:octoniao-interface} \\
+O palco quântico é um circuito das 8 leis? & não: realiza operações da base; o grafo é da gramática. $\mathcal{F}^{-1}\mathcal{F}$ com $\pi_{\mathcal{U}}\mathcal{F}(L_7)$: $\operatorname{Res}=0$. Born isolado & Obs.~\ref{fis:obs:quantica-grafo-fecho}; \code{univ:thm:composicao-fechos} \\
+As 4 células do trial são as 3 línguas? & não: comuta/assoc/distrib/absorção $\neq$ $\mathrm{alg}/\mathrm{top}/\mathrm{an}$. \textbf{Não} A/T/N. \textbf{Não} $T^{3}$ & Teor.~\ref{fis:thm:trial}; \code{univ:def:linguas}; Obs.~\ref{fis:obs:quantica-absorcao-lei7} \\
+O resíduo absorção $\leftrightarrow$ Lei~7? & \texttt{não localizada}. O $\operatorname{Res}=0$ já medido é o retorno $L_7\to L_0$, outro resíduo. \textbf{Não} Born, \textbf{não} Parseval & Obs.~\ref{fis:obs:quantica-absorcao-lei7} \\
+O centro do trial é $[\hat\partial_{\mathrm{v}},\hat\partial_{\mathrm{h}}]=0$? & não: o centro é $x\circ y=y\circ x$ / \texttt{hip\_comutador}. A comutação das dobras é outra célula & Teor.~\ref{fis:thm:trial}(1); Obs.~\ref{fis:obs:quantica-comuta-dobras} \\
 $\mathcal{U}$ é o catálogo? & não: $\mathcal{U}\neq$ catálogo $\neq\operatorname{INGEST}$ & Def.~\ref{fis:def:U} \\
 A base de $X$? & $e_k=2^{k}=$ Lei $k$; $\dim=8$; não há Lei~8 & Teor.~\ref{fis:thm:base}; §\ref{fis:neuronio} \\
 $X^{*}$ é $\mathbf{Duo}$? & não: $X^{*}\neq V^{*}\neq\mathbf{Duo}$ & Def.~\ref{fis:def:U},~\ref{fis:def:dual} \\
@@ -2624,10 +2647,14 @@ o endereço $(x,2)$ vai parar a um sítio que não existe --- e compondo com a
 vertical daria \textbf{visita número zero}, que o
 Teor.~\ref{fis:thm:levant}(3) proíbe. \emph{A condição é a mesma dentro e fora do
 suporte}, porque $\partial_{\mathrm h}$ é involutiva.
-\item[(5)] \textbf{Cumprida~(4), as duas comutam.} $\hat\partial_{\mathrm{v}}
-\hat\partial_{\mathrm{h}}=\hat\partial_{\mathrm{h}}\hat\partial_{\mathrm{v}}$, e
-o recíproco também: coincidirem num endereço obriga
-$G(\partial_{\mathrm{h}}x)=G(x)$. \textbf{É este o critério que a hipótese~(i) do
+\item[(5)] \textbf{Cumprida~(4), as duas comutam --- e o recíproco também.}
+\[
+\boxed{\;\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}
+=\hat\partial_{\mathrm{h}}\hat\partial_{\mathrm{v}}
+\iff G(\partial_{\mathrm{h}}x)=G(x)\ \text{para todo }x\;}
+\]
+Coincidirem num endereço obriga as duas alturas iguais.
+\textbf{É este o critério que a hipótese~(i) do
 Teor.~\ref{fis:thm:quarteto} pede} --- lá a comutação é \emph{pedida}; aqui
 diz-se \emph{quando} se tem.
 \item[(6)] \textbf{E o quarteto sai com quatro \emph{distintos} sob \emph{três}
@@ -5879,6 +5906,17 @@ $x\,y=0$ para todo $y$. \emph{Nem se diga que cada linha é uma lei}: cada uma t
 a sua versão na outra operação e, na distributividade, os dois lados --- o que dá
 mais do que quatro enunciados. \textbf{O que este teorema afirma não é a
 contagem: é o \emph{lugar} de cada uma}, e é isso que segue.
+\(\mathrm{I}_{0}\): as quatro células \textbf{não} são as três
+línguas de \(\mathcal{U}\)
+(\code{univ:def:linguas}: \(\mathrm{alg}/\mathrm{top}/\mathrm{an}\),
+álgebra / topologia / análise --- \textbf{não} A/T/N).
+A absorção aqui é
+\(x\oplus(x\otimes y)=x\);
+\textbf{não} o poço \(a\cdot 0=0\);
+\textbf{não} o vinco
+\(\mathbf{1}=\operatorname{vinco}(L_0,L_7)\).
+O resíduo desta célula com a Lei~7:
+Obs.~\ref{fis:obs:quantica-absorcao-lei7}.
 
 \medskip\noindent E então:
 \begin{enumerate}\itemsep3pt
@@ -12787,6 +12825,2044 @@ a arquitetura que os produz pode ser \textbf{pequena}}\;}
         {\code{cristal/cristal\_fisica.tex} (energia nuclear, partículas minerais); \code{tests/neuronio.c}; \code{tests/pgwire.c} §W116, §W219--§W220}
 
 % ═══════════════════════════════════════════════════════════════════════════
+\part{Quântica}
+% ═══════════════════════════════════════════════════════════════════════════
+
+\section{Porque esta parte vem aqui}\label{fis:quantica}
+
+\noindent A Partículas já construiu o átomo como cadeia espectral
+(Def.~\ref{fis:def:atomo}). O catálogo já exportou
+(\code{catalogo cat:ingestao:particulas}): o corpo canónico é o
+\textbf{Corpo de Partículas}. \textbf{Não há ficha «Quântica».}
+Esta Parte organiza o modo espectral --- massa
+\(\lvert\log\rho\rvert\), luz \(\rho=1\) --- \emph{sem magma nova e
+sem reabrir \(\mathrm{I}_{0}\)}.
+\[
+\boxed{\;
+\text{Parte --- Quântica}
+\qquad
+\text{Corpo canónico: Corpo de Partículas (modo espectral)}
+\;}
+\]
+\[
+\boxed{\;
+\text{Corpo de Partículas é o corpo canónico}
+\;\neq\;
+\text{Quântica é o nome da Parte}
+\;}
+\]
+\[
+\boxed{\;
+\text{catorze palcos}
+\;\neq\;
+\text{catorze corpos}
+\qquad
+\text{Quântica não é o 15.º corpo}
+\;}
+\]
+\(\mathcal{U}\) não decide que esta Parte existe. O catálogo pergunta
+\emph{qual construção é esta}; esta Parte pergunta \emph{onde se
+estuda}. Lê o calibrador já fechado: não infla \(\mathrm{I}_{0}\), não
+promove o medidor a capítulo.
+
+\begin{observacao}[identidade \(\neq\) exposição]\label{fis:obs:quantica-i0}
+\(\mathrm{I}_{0}\) de Partículas \textbf{não mudou de veredicto}
+(\code{catalogo cat:ingestao:particulas}). Não há magma nova. Elétron /
+núcleo continuam hipótese, não teorema (§\ref{fis:atomo}). Luz
+espectral \(\rho=1\) \(\neq\) borda da Relatividade \(\neq\) EM
+(\code{catalogo cat:bloco4}: forma \(\neq\) corpo). \(\log\rho\) é
+dicionário, não \(\mathcal{D}\). \(\operatorname{Star}\) e
+\(\mathbf{Duo}\) permanecem \texttt{não localizada} na ficha
+exportada. Exposição: o mesmo corpo ganha palco, sem Corpo Quântico.
+Não se afirma \(\text{quântica}=\text{Partículas}\) como identidade de
+nomes, nem que \(\hbar\), Schrödinger ou Hilbert sejam capítulo.
+\end{observacao}
+
+\section{O que a Partículas já mediu}\label{fis:quantica-construido}
+
+\noindent Nada disto se constrói aqui.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{a estrutura} & \textbf{o que a obriga} \\
+\midrule
+átomo / modo espectral & cadeia de grau $N$, $\lvert c_0\rvert=1$; raízes da companheira & Def.~\ref{fis:def:atomo} \\
+massa & $\lvert\log\rho\rvert$ & Def.~\ref{fis:def:atomo}; Teor.~\ref{fis:thm:massa} \\
+luz espectral & $\rho=1$: o modo roda; a órbita fecha & Teor.~\ref{fis:thm:massa},~\ref{fis:thm:orbita} \\
+neutralidade & $\prod\rho=\pm1$, $\lvert\det\rvert=1$ no espectro & Prop.~\ref{fis:prop:neutro} \\
+quantum da Análise & o gap do andar / o tick da grade & §\ref{fis:corte}; \emph{não} $\hbar$ como lei de $\mathcal{U}$ \\
+$\hbar\omega$ no catálogo & reticulado de passo constante: o gap \emph{é} o passo & medido, não legislado \\
+leitura $\lvert\psi\rangle$ & igualdade projectiva em $\mathbf{P}^{1}$; $\rho=\lvert\psi\rangle\langle\psi\rvert$ & \code{lib/quantico.h}; \code{tests/quantico.c} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{O átomo já é o suporte.} Uma partícula é uma
+raiz; a massa é a distância ao círculo; a luz é estarem todas as raízes
+\emph{sobre} o círculo. Esta Parte não acrescenta um segundo átomo.
+
+\medskip\noindent\textbf{O «quantum» da Análise} é o passo da grade.
+Não é \(\hbar\) canónico de \(\mathcal{U}\). O oscilador
+\(E_n=(n+\tfrac12)\hbar\omega\) lê-se como reticulado de passo
+constante: \emph{o gap é o passo}. Evidência de leitura, não ficha.
+
+\section{O contrato que o palco pergunta}\label{fis:quantica-contrato}
+
+\noindent O palco pergunta pelo quádruplo, não por \(\mathcal{F}\):
+\[
+\boxed{\;
+\text{estado}+\text{superposição}+\text{observável}+\text{regra de medição}
+\;}
+\]
+\(\mathcal{F}\), \(\delta_x\), \(V\), base espectral e convolução são
+análise harmónica (\code{fis:thm:ponte}). \textbf{Não} são MQ.
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}
+                >{\raggedright\arraybackslash}p{0.72\textwidth}@{}}
+\toprule
+& \textbf{no catálogo já ingerido} \\
+\midrule
+estado
+  & \texttt{realizado} em Partículas:
+    $\rho=\lvert\psi\rangle\langle\psi\rvert$, $\mathbf{P}^{1}$
+    (\code{lib/quantico.h}). Óptica: caixa $\mathcal{P}(A)$;
+    fotão $\neq$ modo $\rho=1$ \\
+superposição
+  & \texttt{parcial} em Partículas: amplitudes em $\mathbf{P}^{1}$.
+    $\neq$ Teor.~\ref{fis:thm:combina} (em $V$; Redes).
+    Franja / Fourier $=$ análise, não MQ \\
+observável
+  & \texttt{não localizada} neste corpo (Óptica: o mesmo) \\
+Born-\emph{regra}
+  & \(p_i=\lvert\langle i\rvert\psi\rangle\rvert^{2}\):
+    \texttt{não localizada} neste corpo.
+    GHZ/Bell IBM $=$ metal, não gramática de $\mathcal{U}$ \\
+Born-\emph{estado}
+  & projector escalado: $\det\rho=0$ medido
+    (\code{tests/quantico.c} §Q3).
+    $\rho^{2}=(\operatorname{tr}\rho)\rho$.
+    $\rho^{2}=\rho$ só se $\operatorname{tr}\rho=1$ \\
+probabilidade-contagem
+  & $p_G=G/\lvert I\rvert$;
+    $\Sigma_{\mathrm{im}}/\lvert I\rvert\lvert X\rvert$ no rectângulo.
+    Hurwitz / frequentista. \textbf{Não} Born \\
+aditiva Fourier (\(m=0\))
+  & \texttt{realizada}: interface da dourada
+    (\code{univ:def:dourada-m0}; \code{catalogo sec:dourada}).
+    $x^{2}=1$, troca, $\operatorname{eval}=a\pm b$.
+    Fourier $=\oplus$. \textbf{Não} $x^{2}=x+1$ \\
+$x^{2}=x+1$
+  & $m=1$, polo multiplicativo / estrela
+    (Teor.~\ref{fis:thm:estrela}; \code{univ:def:dupolo}).
+    Mellin $=\otimes$. \textbf{Não} $\pi^{2}=\pi$.
+    Partículas $\mathrm{I}_{9}$ exportada: ferro $=$ corte;
+    não se reabre \\
+Parseval da dourada
+  & \texttt{realizado} como norma $L^{2}$ de
+    $\mathfrak{G}=\mathcal{F}\circ\Lambda$
+    (\code{univ:obs:dourada-parseval}).
+    \textbf{Não} Born. \textbf{Não} $\lvert\det\rvert=1$.
+    \textbf{Não} $P=k/N$. \textbf{Não} Walsh \\
+GLH + dobras + Lei~7
+  & rectângulo, conversão de $G$, interface.
+    \texttt{realizado} no palco
+    (Obs.~\ref{fis:obs:quantica-glh-dobras}).
+    \textbf{Não} fecha Born-\emph{regra} \\
+comutação $\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}$
+  & \texttt{realizado} em $E(\pi)$:
+    $G$ invariante sob a dobra horizontal
+    (Teor.~\ref{fis:thm:duascoord}(5)).
+    \textbf{Não} comutador da torre.
+    \textbf{Não} $\mathbf{Duo}$. \textbf{Não} $A_0$ \\
+associador / eixo afim
+  & medidor do lado directo
+    \texttt{realizado}
+    (Teor.~\ref{fis:thm:trial}(2);
+    \texttt{hip\_associador}).
+    Identificação com
+    $\partial x=a+b-x$:
+    \texttt{N/A}
+    (Obs.~\ref{fis:obs:quantica-associador-eixo}).
+    \textbf{Não} $S_{3}$. \textbf{Não} $\mathbf{Duo}$.
+    \textbf{Não} $A_0$ \\
+Lei~7 $\to$ Lei~0
+  & retorno canónico
+    \texttt{realizado}:
+    $\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0$,
+    $\operatorname{Res}=0$
+    (\code{univ:thm:retorno-canonico};
+    \code{tests/lei\_unica\_u.js}).
+    Dual do medidor: só
+    $0^{\dagger}=\infty$
+    (Teor.~\ref{fis:thm:zeroinf}).
+    \textbf{Não} par $1$--$7$ \\
+absorção $\leftrightarrow$ Lei~7
+  & quarta célula
+    $x\oplus(x\otimes y)=x$
+    \texttt{realizada}
+    (Teor.~\ref{fis:thm:trial}).
+    Resíduo com o acoplamento da
+    Lei~7:
+    \texttt{não localizada}
+    (Obs.~\ref{fis:obs:quantica-absorcao-lei7}).
+    \textbf{Não} o $\operatorname{Res}=0$
+    do retorno \\
+4 células / 3 línguas
+  & trial
+    $\neq$
+    $\mathrm{alg}/\mathrm{top}/\mathrm{an}$
+    (\code{univ:def:linguas}).
+    \textbf{Não} A/T/N.
+    \textbf{Não} $T^{3}$ \\
+oito leis $0$--$7$ / pental
+  & base de $X$: $e_k=$ Lei~$k$
+    (\code{papers/aranha.c} \texttt{neuronio8};
+    Def.~\ref{fis:def:U}).
+    Lei~5 $x^{2}=-1$ $=$ bit $i$
+    de $\mathbb{Z}[i]$
+    (\texttt{psi\_roda}).
+    Obs.~\ref{fis:obs:quantica-oito-leis}.
+    Sem Lei~8.
+    Sem par $1$--$7$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent O que falta (observável, Born-\emph{regra}) é
+\texttt{não localizada} \textbf{neste} corpo --- não um 15.º.
+Parseval da dourada não fecha esse gap
+(Obs.~\ref{fis:obs:quantica-parseval}):
+conserva \(L^{2}\), não produz \(p_{i}\).
+Quântica \textbf{não} é a torre \(X^{X^{\cdot^{\cdot}}}\)
+\textbf{e} \textbf{não} é \(\mathcal{F}\).
+
+\begin{observacao}[probabilidade-contagem \(\neq\) Born]\label{fis:obs:quantica-prob}
+Hurwitz \textbf{conta}. O inverso da contagem no suporte já construído
+\textbf{é} a probabilidade clássica / frequentista:
+\[
+\boxed{\;
+p_G(x)=\frac{G(x)}{\lvert I\rvert}
+\qquad
+\sum_x p_G(x)=1
+\;}
+\]
+--- Lema~\ref{fis:lem:conserva}. No rectângulo
+(Teor.~\ref{fis:thm:central}(1); \(\mathrm{I}_{4}=\mathrm{GLH}\),
+\textbf{não} \(\mathbf{Duo}\)):
+\[
+\boxed{\;
+p_{\mathrm{im}}(f)=\frac{\Sigma_{\mathrm{im}}(f)}{\lvert I\rvert\cdot\lvert X\rvert}
+\qquad
+p_{\mathrm{dom}}(f)=\frac{\Sigma_{\mathrm{dom}}(f)}{\lvert I\rvert\cdot\lvert X\rvert}
+\qquad
+p_{\mathrm{im}}+p_{\mathrm{dom}}=1
+\;}
+\]
+Isto é \(P=k/N\). \textbf{Não} é \(\lvert\psi\rvert^{2}\) sem um mapa extra.
+
+Parseval (Teor.~\ref{fis:thm:ponte}) já normaliza ao quadrado:
+\(\sum G^{2}=\lvert I\rvert+2P\). O quadrado é o de \(G\) (multiplicidade
+inteira), não o do módulo de uma amplitude em \(\mathbb{C}\). O que falta
+para Born-como-regra é \(\lvert\cdot\rvert^{2}\), não a contagem.
+
+IBM shots / \(C=2\lvert\det M\rvert\) (\code{hiper thm:emaranhamento}):
+fracção de contagem no metal --- realização da medição, não gramática de
+\(\mathcal{U}\). Continua \(k/N\), não Born.
+
+Não se funde com \(a+c^{2}=1\) (Obs.~\ref{fis:obs:quantica-triade})
+nem com o rectângulo como Duo.
+\end{observacao}
+
+\begin{observacao}[Born-como-projector do estado, não a regra]\label{fis:obs:quantica-born}
+O que \code{tests/quantico.c} §Q3 \textbf{asseriu} é \(\det\rho=0\)
+em todo estado, Lagrange nos quatro inteiros. \textbf{Não} asseriu
+\(\rho^{2}=\rho\) como igualdade de matrizes.
+
+Numa \(2\times2\) hermitiana, \(\det\rho=0\) é a idempotência
+\textbf{escalada}:
+\[
+\boxed{\;
+\det\rho=0
+\iff
+\rho^{2}=(\operatorname{tr}\rho)\,\rho
+\;}
+\]
+\(\rho^{2}=\rho\) pede \(\operatorname{tr}\rho=1\) (normalizar). Nos
+inteiros de \code{lib/quantico.h} isso só vale nos estados de norma \(1\).
+
+Born de livros: \(P^{2}=P\) e \(p=\langle\psi\rvert P\lvert\psi\rangle\).
+O ponto fixo do \textbf{estado} (pureza, posto \(1\)) está realizado:
+\(\rho=\lvert\psi\rangle\langle\psi\rvert\), \(\det\rho=0\).
+A regra \(p_i=\lvert\langle i\rvert\psi\rangle\rvert^{2}\)
+permanece \texttt{não localizada} \textbf{como fórmula}.
+As diagonais \(r_{11},r_{22}\) de \code{psi\_rho} \textbf{são}
+\(\lvert\psi_i\rvert^{2}\) sem norma --- pesos do estado, não postulado
+de medição. Observável: \texttt{não localizada}.
+
+Não se funde com \(p_G=G/\lvert I\rvert\)
+(Obs.~\ref{fis:obs:quantica-prob}) nem com \(\varphi\).
+\end{observacao}
+
+\begin{observacao}[as duas quadráticas, e não se colam]\label{fis:obs:quantica-quadraticas}
+\(\mathrm{I}_{0}\) obrigatório --- cinco contratos, e não se colam:
+\[
+\boxed{\;
+\pi^{2}=\pi
+\;\neq\;
+x^{2}=1
+\;\neq\;
+x^{2}=x+1
+\;\neq\;
+x^{2}=-1
+\;\neq\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.68\textwidth}@{}}
+\toprule
+face & o construído, e o que não é \\
+\midrule
+\(*\) / projector
+  & $\pi^{2}=\pi$ (Alonzo, \code{univ:def:alonzo-idemp});
+    $\rho^{2}=(\operatorname{tr}\rho)\rho$ (estado puro).
+    Multiplicativo, idempotente.
+    Possível Born-como-FP do estado
+    (Obs.~\ref{fis:obs:quantica-born}).
+    $\delta_0*\delta_0=\delta_0$: unidade da convolução
+    (Teor.~\ref{fis:thm:mu}), outra idempotência.
+    Vinco $\partial m=m$: outra.
+    Banach: ferramenta (\code{univ:obs:banach}) \\
+aditiva (eixo \(\oplus\))
+  & $m=0$, $x^{2}=1$, troca
+    (\code{univ:def:dourada-m0}; Teor.~\ref{fis:thm:estrela}(2)).
+    Fourier no círculo. \textbf{Não} $x^{2}=x+1$ \\
+$x^{2}=x+1$
+  & $m=1$, polo multiplicativo / estrela
+    (Teor.~\ref{fis:thm:estrela}, elemento, $\mathrm{I}_{9}$
+    nas construções que a têm).
+    Duplopolinómio: $P_g=x^{2}$, $P_a=mx+1$, colisão $P_g=P_a$
+    (\code{univ:def:dupolo}).
+    Mellin na semirreta.
+    Alonzo encaixe: $\varphi,\psi$
+    (Def.~\ref{fis:def:alonzo}; Teor.~\ref{fis:thm:estrelaencaixe}) \\
+$\operatorname{Star}(\mathcal{U})$
+  & $\mathcal{D}$, bit $a=1$ (\code{univ:def:star}). Terceira.
+    \textbf{Não} $1_{\mathcal{U}}$ \\
+$x^{2}=-1$
+  & Lei~5, pental, bit $i$
+    (\code{papers/aranha.c} \texttt{neuronio8};
+    \code{lib/quantico.h} \texttt{psi\_roda}).
+    Unidades de $\mathbb{Z}[i]$: $\{1,i,-1,-i\}$.
+    \textbf{Não} a estrela.
+    \textbf{Não} o polo $m=0$.
+    \textbf{Não} Alonzo.
+    \textbf{Não} $\mathbf{Duo}$.
+    Obs.~\ref{fis:obs:quantica-oito-leis} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Duas ``aditivas'', e \(\mathrm{I}_{0}\) separa-as: o eixo
+\(\oplus\) da dourada é \(m=0\); o elemento \(x^{2}=x+1\) é
+\(m=1\). Partículas \(\mathrm{I}_{9}\) exportada permanece:
+ferro $=$ corte; \(\operatorname{Star}\) \texttt{não
+localizada} --- \textbf{não} se reabre, \textbf{não} se promove
+\(m=1\) a estrela desta ficha. Born-projector fica à parte.
+
+Mesmo contrato de projecção idempotente em dois suportes (línguas
+Alonzo / raio em \(\mathbf{P}^{1}\)) \(\neq\) o mesmo objecto que a
+estrela do elemento. A pental \(x^{2}=-1\) é a quinta face
+(Obs.~\ref{fis:obs:quantica-oito-leis}): bit \(i\), não
+estrela. Sem colapso das estrelas. Sem \(15.^{\mathrm{o}}\).
+\end{observacao}
+
+\begin{observacao}[oito leis no palco: \(e_k=\) Lei~$k$; pental \(\neq\) estrela]\label{fis:obs:quantica-oito-leis}
+A base já é as oito leis
+(Teor.~\ref{fis:thm:base}; Def.~\ref{fis:def:U};
+\code{papers/aranha.c} \texttt{neuronio8}):
+\(e_k=2^{k}\), \(k=0,\ldots,7\).
+\textbf{Não} há Lei~8
+(Obs.~\ref{fis:obs:octoniao-interface}).
+Dual do medidor: só \(0^{\dagger}=\infty\)
+(Teor.~\ref{fis:thm:zeroinf}) ---
+\textbf{não} se inventa o par \(1\)--\(7\).
+No modo espectral deste palco (cita; não reabre
+\(\mathrm{I}_{0}\) de Partículas):
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.14\textwidth}
+                >{\raggedright\arraybackslash}p{0.20\textwidth}
+                >{\raggedright\arraybackslash}p{0.54\textwidth}@{}}
+\toprule
+lei & no palco & aponta \\
+\midrule
+\(L_0\)
+  & \texttt{realizado}
+  & \((+1)\oplus(-1)\); semente;
+    \(0^{\dagger}=\infty\)
+    (Teor.~\ref{fis:thm:zeroinf};
+    \code{univ:thm:retorno-canonico}).
+    \(\infty=\tau(0)\neq\)
+    \texttt{psi\_nulo}.
+    Sem par \(1\)--\(7\) \\
+\(L_1\)
+  & \texttt{parcial}
+  & \(\nu\circ\nu=\mathrm{id}\);
+    cisão \(1\to 2\) na base;
+    não magma nova deste palco.
+    Poincaré
+    \(H^{k}\leftrightarrow H_{n-k}\):
+    \texttt{não localizada}
+    (o paper \textbf{não} liga
+    a \(\partial^{2}=\mathrm{id}\)) \\
+\(L_2\)
+  & \texttt{não localizada}
+  & \(K^{**}=K\)
+    (\code{lib/umbit.h}
+    \texttt{lei2\_bidual}).
+    \(\neq\) rotor \(w=2\)
+    (Teor.~\ref{fis:thm:largura}(4)).
+    \(\neq\) Lei~5 \\
+\(L_3\)
+  & \texttt{parcial}
+  & \(\{-1,0,+1\}\);
+    trialidade \(S_{3}\)
+    (\code{tests/trialidade.c}).
+    \(\neq\) trial de leis
+    (\texttt{N/A};
+    Teor.~\ref{fis:thm:trial}).
+    \(\mathbf{P}^{1}(\mathbb{F}_{2})
+    \neq\mathbf{P}^{1}\) das amplitudes \\
+\(L_4\)
+  & \texttt{realizado}
+  & \(T+T^{*}\);
+    \(\lvert\det\rvert=1\)
+    (Teor.~\ref{fis:thm:gato}(2);
+    Prop.~\ref{fis:prop:neutro}).
+    \(\neq C=2\lvert\det M\rvert\).
+    \(\operatorname{Isom}_{\mu}\)
+    não invade \(\mathrm{I}_{4}\) \\
+\(L_5\)
+  & \texttt{realizado}
+    (pental)
+  & \(x^{2}=-1\), bit \(i\)
+    de \(\mathbb{Z}[i]\)
+    (\code{lib/quantico.h} \texttt{psi\_roda}).
+    Unidades \(\{1,i,-1,-i\}\).
+    Chão \texttt{neuronio8}:
+    \(\mathbb{Z}[i]\).
+    \(\neq x^{2}=1\),
+    \(\neq x^{2}=x+1\),
+    \(\neq\pi^{2}=\pi\),
+    \(\neq\operatorname{Star}(\mathcal{U})=\mathcal{D}\).
+    \(\hat{\mathbf{a}}^{2}=-1\) / Pauli:
+    \texttt{não localizada} \\
+\(L_6\)
+  & \texttt{não localizada}
+  & \(\oplus=\otimes\)
+    (interface / hexal).
+    \(\neq\mathbf{Duo}\)
+    (\texttt{N/A}:
+    \(\operatorname{Fix}(\mathcal{D})\)
+    sai do alcance).
+    Sem homogeneizar \\
+\(L_7\)
+  & \texttt{não localizada}
+    no modo espectral
+  & \(H\times H^{*}\).
+    Interface:
+    \texttt{realizado}
+    na Topologia
+    (Obs.~\ref{fis:obs:octoniao-interface}).
+    Partículas \(\mathrm{I}_{6}\):
+    \texttt{não localizada}
+    --- \textbf{não} se reabre.
+    \(\neq\) absorção
+    (Obs.~\ref{fis:obs:quantica-absorcao-lei7}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+\boxed{\;
+\pi^{2}=\pi
+\;\neq\;
+x^{2}=1
+\;\neq\;
+x^{2}=x+1
+\;\neq\;
+x^{2}=-1
+\text{ (Lei~5, pental)}
+\;\neq\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+Quadro e I0: §\ref{fis:quantica-oito-leis}.
+Espectro \([\mathrm{total},f_0,\ldots,f_7]\).
+\end{observacao}
+
+\begin{observacao}[o palco realiza a base; o grafo não é circuito]\label{fis:obs:quantica-grafo-fecho}
+O palco quântico \textbf{herda} \(\mathcal{U}\);
+\textbf{não} axioma novo. \textbf{Não} «Lei Quântica».
+\[
+\boxed{\;
+\mathcal{U}\longrightarrow
+\begin{cases}
+\text{norma / espectro}
+  & \mathcal{F},\;\mathcal{F}^{-1}\\
+\text{volume}
+  & \lvert\det\rvert=1\\
+\text{fase}
+  & x^{2}=-1\\
+\text{dobra}
+  & \nu^{2}=\mathrm{id}
+    \text{ (byte; palco $L_1$ parcial)}\\
+\text{retorno}
+  & \pi_{\mathcal{U}}\mathcal{F}(L_7)=L_0
+\end{cases}
+\;}
+\]
+Volume canónico: Lei~4 /
+Teor.~\ref{fis:thm:gato}(2),
+\(\lvert\det\rvert=1\).
+\textbf{Não} \(\lvert\det M\rvert=1\).
+Concorrência \(C=2\lvert\det M\rvert\)
+é outro medidor
+(\code{hiper thm:emaranhamento});
+cita-se à parte
+(Obs.~\ref{fis:obs:quantica-oito-leis}).
+O palco \textbf{realiza operações da base}
+(Obs.~\ref{fis:obs:quantica-oito-leis}):
+cada lei no seu lugar.
+O grafo é da
+\textbf{base / gramática}
+(\code{univ:obs:grafo-fecho}),
+\textbf{não} um circuito quântico.
+As duas leituras de \(\widehat{L_7}\)
+estão em \(\mathcal{U}\)
+(\code{univ:thm:composicao-fechos});
+aqui só se herda:
+\[
+\boxed{\;
+L_7\overset{\mathcal{F}}{\longrightarrow}\widehat{L_7}
+\overset{\mathcal{F}^{-1}}{\longrightarrow}L_7
+\qquad
+L_7\overset{\mathcal{F}}{\longrightarrow}\widehat{L_7}
+\overset{\pi_{\mathcal{U}}}{\longrightarrow}L_0
+\;}
+\]
+\(\operatorname{Res}(\mathcal{F}^{-1}\mathcal{F})=0\)
+e
+\(\operatorname{Res}(\pi_{\mathcal{U}}\mathcal{F}(L_7)-L_0)=0\),
+\texttt{realizado}
+(\code{univ:thm:composicao-fechos};
+\code{tests/grafo\_fecho\_u.js}).
+Sem transformação nova.
+Pental \(i^{4}=1\) (\texttt{psi\_roda})
+participa da composição; \textbf{não} vira
+\(\mathbf{Duo}\).
+Fronteira medida:
+\[
+\boxed{\;
+P=k/N
+\neq
+\lvert\psi_i\rvert^{2}
+\;}
+\]
+\(P=k/N\) já realizado (contagem).
+\(P_i=\lvert\psi_i\rvert^{2}\) continua
+\texttt{não localizada}
+(Obs.~\ref{fis:obs:quantica-born}).
+Born \textbf{não} fecha \(\mathcal{U}\).
+Se um dia \(\operatorname{Res}=0\) para Born,
+entra no contrato do palco / Partículas,
+não como remendo da gramática.
+\textbf{Não} se promove Born.
+\textbf{Não} se reabre \(\mathrm{I}_{0}\)
+de Partículas
+(Obs.~\ref{fis:obs:quantica-i0}).
+Born isolado: \textbf{não} se declara
+equivalente a Parseval, GLH,
+\(\lvert\det\rvert=1\), pental, face \(*\),
+associador nem \(\pi^{2}=\pi\).
+Sem Lei~8. Sem fundir a pêntade.
+\end{observacao}
+
+\begin{observacao}[interface \(m=0\): Fourier aditivo, Mellin multiplicativo]\label{fis:obs:quantica-dourada-m0}
+A face aditiva do par \textbf{não falta}: está na interface
+\(m=0\) da transformada dourada
+(\code{catalogo sec:dourada};
+\code{algebrico cor:dourada-completa};
+\code{univ:def:dourada-m0}).
+\[
+\boxed{\;
+\mathfrak{G}=\mathcal{F}\circ\Lambda,\qquad
+(\Lambda x)(u)=x(e^{u})
+\;}
+\]
+Mellin \emph{é} Fourier no grupo multiplicativo
+(\(x=e^{u}\)):
+\[
+\boxed{\;
+\mathcal{M}[f](s)
+=\int_{0}^{\infty}f(x)\,x^{s-1}\,dx
+=\widehat{g}(\tau)
+\qquad
+g(u)=f(e^{u})e^{\sigma u}
+\;}
+\]
+\[
+\boxed{\;
+\mathbb{C}^{*}\cong\mathbb{R}^{+}\times S^{1}
+\qquad
+\text{Fourier }(S^{1},\oplus)
+\qquad
+\text{Mellin }(\mathbb{R}^{+},\otimes)
+\;}
+\]
+Em \(m=0\):
+\[
+\boxed{\;
+A_{0}=\begin{pmatrix}0&1\\1&0\end{pmatrix},\qquad
+x^{2}=1,\qquad
+\operatorname{eval}_{\pm}(a,b)=a\pm b
+\;}
+\]
+Polo aditivo, troca, factor \(1/\sqrt{N}\).
+Em \(m=1\): \(x^{2}=x+1\), \(\varphi\), polo
+multiplicativo --- o paper liga \(\varphi^{2}=\varphi+1\)
+nas três cartas; \textbf{não} em \(m=0\).
+
+\(\mathrm{I}_{0}\): \(\mathcal{F}\) do Teor.~\ref{fis:thm:H}
+é Walsh em \(V\) (\(\chi_{k}\colon X\to\{\pm1\}\),
+\(H^{2}=2^{m}\mathrm{Id}\)).
+\textbf{Não} é o Fourier do flip
+\(\mathfrak{G}=\mathcal{F}\circ\Lambda\),
+\textbf{nem} a dourada discreta
+\(\mathcal{G}(x)_{k}=\sum_{j}x_{j}\sigma^{jk}\).
+Não se funde com Born
+(Obs.~\ref{fis:obs:quantica-prob},~\ref{fis:obs:quantica-born}).
+Não reabre Partículas \(\mathrm{I}_{5}\)
+(\(\mathcal{F}\) é Álgebra) nem \(\mathrm{I}_{9}\).
+Parseval desta realização:
+Obs.~\ref{fis:obs:quantica-parseval}.
+\end{observacao}
+
+\begin{observacao}[Parseval da dourada conserva \(L^{2}\), não produz Born]\label{fis:obs:quantica-parseval}
+A pergunta do palco já não é a face aditiva
+(Obs.~\ref{fis:obs:quantica-dourada-m0}).
+É se a dinâmica \(m=0\leftrightarrow m=1\)
+induz uma medida cuja densidade equivale a
+\(\lvert\psi\rvert^{2}\), ou se Born precisa
+de ser axiomatizado por fora.
+
+O paper escreve a conservação
+(\code{catalogo sec:dourada};
+\code{algebrico thm:dourada-discreta};
+\code{teoria thm:parseval-multi};
+\code{univ:obs:dourada-parseval}):
+\[
+\boxed{\;
+\int_{0}^{\infty}\lvert x(t)\rvert^{2}\,
+\frac{dt}{t}
+=
+\int_{-\infty}^{\infty}
+\lvert(\mathfrak{G}x)(\omega)\rvert^{2}\,
+\frac{d\omega}{2\pi}
+\qquad
+\mathfrak{G}=\mathcal{F}\circ\Lambda
+\;}
+\]
+\(\Lambda\) é isometria Haar
+(\(dt/t=du\)). \(\mathcal{F}\) é
+Plancherel clássico --- \textbf{leitura},
+não canónico de \(\mathcal{U}\).
+A composição é isometria. No discreto,
+o Dirac da borda dá factor \(N\)
+(\(m=1\)) ou \(1/\sqrt{N}\) (\(m=0\)).
+\[
+\boxed{\;
+\text{Parseval fecha a norma }L^{2}
+\text{ da transformada}
+\quad\neq\quad
+p_{i}=\lvert\langle i\rvert\psi\rangle\rvert^{2}
+\;}
+\]
+A densidade \(\lvert\mathfrak{G}x\rvert^{2}\)
+é energia espectral do flip, não
+probabilidade de medição numa base de
+Partículas. \(dt/t\) é Haar do grupo
+multiplicativo, não Born.
+\(\mathrm{I}_{0}\):
+\[
+\boxed{\;
+\begin{gathered}
+\text{Parseval de }\mathfrak{G}
+\;\neq\;
+\text{Walsh }2^{m}
+\text{ (Teor.~\ref{fis:thm:H})}
+\\
+\;\neq\;
+\lvert\det\rvert=1
+\text{ (Lei~4)}
+\;\neq\;
+P=k/N
+\text{ (Obs.~\ref{fis:obs:quantica-prob})}
+\\
+\;\neq\;
+\text{face }*\text{ de Walsh}
+\text{ (Def.~\code{univ:def:face-mult})}
+\;\neq\;
+A_{0}=\mathbf{Duo}
+\end{gathered}
+\;}
+\]
+Homónimo \(\det(A_{m}^{k})=(-1)^{k}\)
+não é esta isometria.
+Estatuto: norma \(L^{2}\)
+\texttt{realizado}.
+Medida na fibra / Born-\emph{regra}:
+\texttt{não localizada}.
+Não se importa Born por Parseval.
+\end{observacao}
+
+\begin{observacao}[GLH, dobras e Lei~7: contagem e conversão no palco, não Born]\label{fis:obs:quantica-glh-dobras}
+Três construções já no palco da Física. Cada uma tem sítio.
+\textbf{Não} se fundem numa regra de medição de Partículas.
+A pergunta aberta (Obs.~\ref{fis:obs:quantica-parseval}) ---
+a dinâmica \(m=0\leftrightarrow m=1\) induz
+\(\lvert\psi\rvert^{2}\)? --- \textbf{não} recebe resposta
+destas três.
+
+\medskip\noindent\textbf{O teorema central} é o
+Teor.~\ref{fis:thm:central}: para \(I,X\) finitos
+totalmente ordenados e \(f\colon I\to X\) qualquer,
+\[
+\boxed{\;
+\Sigma_{\mathrm{dom}}(f)+\Sigma_{\mathrm{im}}(f)
+=\lvert I\rvert\cdot\lvert X\rvert
+\;}
+\]
+Hurwitz \textbf{conta} o rectângulo
+(\(\mathrm{I}_{4}=\mathrm{GLH}\);
+\code{univ:def:glh-an}). Já lido como
+\(p_{\mathrm{im}}+p_{\mathrm{dom}}=1\)
+(Obs.~\ref{fis:obs:quantica-prob}): isto é
+\(P=k/N\). \textbf{Não} \(\mathbf{Duo}\).
+\textbf{Não} \(\lvert\psi\rvert^{2}\).
+
+\medskip\noindent\textbf{As três dobras} \(8=2^{3}\).
+A Def.~\ref{fis:def:op} põe
+\(\partial\circ\partial=\mathrm{id}\).
+O Teor.~\ref{fis:thm:largura}(4) nomeia os
+três primeiros degraus: \(w=1\) a dobra
+(\(\operatorname{ord}=2\)), \(w=2\) o rotor
+(\(\operatorname{ord}=4\)), \(w=3\) a base oito
+(\(\operatorname{ord}=8\)).
+\emph{O oito é a terceira dobra}, não uma
+Lei~8 (Obs.~\ref{fis:obs:octoniao-interface}).
+A largura endereça; a ordem percorre ---
+são \(2^{w}\) lugares nas duas.
+
+\medskip\noindent\textbf{Ind vs MetaInd.}
+O Teor.~\ref{fis:thm:metainducao}: a indução
+age no termo e \textbf{não} fecha; a
+meta-indução lê a mesma regra na razão,
+\(c_{k+1}=1\oplus 1/c_{k}\), e fecha na
+estrela \(x^{2}=x\oplus 1\), fora do andar.
+\(\mathcal{U}\) lê
+\(\operatorname{MetaInd}(L_7)=L_0\), não
+\(X_{k+1}\) (\code{univ:cor:metaind-fecho}).
+\textbf{Não} tetração.
+\textbf{Não} torre \(X^{X^{\cdot}}\)
+(\code{univ:obs:torre-XX}).
+
+\medskip\noindent\textbf{Conversão das dobras.}
+O Teor.~\ref{fis:thm:tresgraus}(4): a
+\(\lvert I\rvert\) fixo, sobrepor faz
+\(\operatorname{esp}\) descer,
+\(\mathfrak{M}\) subir e \(\mathcal{E}\)
+subir de \(2P\).
+\emph{Espaço vira matéria e a energia
+regista o quanto.}
+As três contas são a mesma dobra em três
+graus. GLH é o produto
+\(\lvert I\rvert\cdot\lvert X\rvert\)
+--- rectângulo, não conversão.
+Desdobrar devolve
+(Teor.~\ref{fis:thm:tresgraus}(5);
+Teor.~\ref{fis:thm:levant}).
+
+\medskip\noindent\textbf{Espaço e matéria
+são duomorfos}; matéria e energia
+\textbf{não} são o par Duo.
+O Teor.~\ref{fis:thm:duoesp}:
+\(\operatorname{esp}\) e \(\operatorname{mat}\)
+instanciam a Def.~\ref{fis:def:duomorf} ---
+o que uma perde, a outra ganha (o \(c\)).
+A energia é o grau~2 do mesmo \(G\)
+(Teor.~\ref{fis:thm:tresgraus}):
+\(\mathcal{E}=\sum G^{2}=\lvert I\rvert+2P\).
+A matéria local é \(\mathfrak{m}=G-1\)
+(Teor.~\ref{fis:thm:materia}).
+\textbf{Não} se cola o par
+espaço/matéria com o grau~2.
+
+\medskip\noindent\textbf{Lei~7.}
+Obs.~\ref{fis:obs:octoniao-interface}:
+octonião dual; grau oito como \emph{dois}
+tecidos de grau quatro ligados, sem fundir;
+cadeia
+Lei~7 \(\to\) duas faces \(\to\)
+assimetria \(\to\) interface
+\(\to\mathbf{Duo}\).
+Partículas \(\mathrm{I}_{6}\): Lei~7
+\texttt{não localizada} ---
+\textbf{não} se reabre.
+
+\medskip\noindent\textbf{O que o paper
+não identifica.}
+\(T_{k+1}=T_{k}+T_{k}^{*}\) é o passo
+dos tecidos (Teor.~\ref{fis:thm:tecidos});
+no dragão, \(\mathcal{D}_{k+1}=\mathcal{D}_{k}+\mathcal{D}_{k}^{*}\)
+(Def.~\ref{fis:def:dobrar}), o mesmo
+\(T+T^{*}\) do Teor.~\ref{fis:thm:espaco}
+numa curva.
+Lei~7 é ligar sem fundir.
+Matéria--energia são três graus de \(G\).
+O paper \textbf{não} cola os três.
+Lei~7 \(\neq\) Lei~8.
+O fecho com Lei~0 já está:
+\(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\),
+\(\operatorname{Res}=0\)
+(\code{univ:thm:retorno-canonico};
+Obs.~\ref{fis:obs:octoniao-interface}).
+Esse resíduo \textbf{não} é o da
+quarta célula com a interface
+(Obs.~\ref{fis:obs:quantica-absorcao-lei7}).
+Não há par \(1\)--\(7\) no dual do
+medidor: só \(0^{\dagger}=\infty\)
+(Teor.~\ref{fis:thm:zeroinf}).
+
+\medskip\noindent Estatuto:
+GLH / \(P=k/N\) \texttt{realizado}
+(contagem). Conversão das dobras
+\texttt{realizado} no palco
+(Teor.~\ref{fis:thm:tresgraus}).
+Lei~7 / \(\mathbf{Duo}\) na Topologia
+\texttt{realizado}
+(Obs.~\ref{fis:obs:octoniao-interface});
+em Partículas \texttt{não localizada}.
+Parseval \(L^{2}\) \texttt{realizado},
+\(\neq\) Born \(\neq\) \(P=k/N\).
+Born-\emph{regra} permanece
+\texttt{não localizada}.
+Estas três construções \textbf{não}
+realizam a medida de Partículas:
+realizam contagem, conversão e
+interface no palco da Física.
+\end{observacao}
+
+\begin{observacao}[comutação das dobras de endereço \(\neq\) comutador da torre]\label{fis:obs:quantica-comuta-dobras}
+O Teor.~\ref{fis:thm:duascoord} já constrói duas dobras no
+espaço de endereços \(E(\pi)\) (Def.~\ref{fis:def:coord2}).
+\(G\) é a multiplicidade da realização
+(Def.~\ref{fis:def:objeto}): \(G(x)=\lvert\pi^{-1}(x)\rvert\).
+\(x\) é a coordenada horizontal --- a célula.
+\(k\) é a vertical --- o número de visita
+(Def.~\ref{fis:def:k}).
+\[
+\boxed{\;
+\hat\partial_{\mathrm{v}}(x,k)=\bigl(x,\,1+G(x)-k\bigr)
+\qquad
+\hat\partial_{\mathrm{h}}(x,k)=\bigl(\partial_{\mathrm{h}}x,\,k\bigr)
+\;}
+\]
+A vertical inverte a ordem das visitas e não sai da célula.
+A horizontal é o levantamento de uma dobra
+\(\partial_{\mathrm{h}}\) na célula --- tipo da
+Def.~\ref{fis:def:op}, \(\partial\circ\partial=\mathrm{id}\),
+lida no eixo \emph{onde}.
+\textbf{Não} é um segundo operador primitivo: a
+Def.~\ref{fis:def:op} tem um; aqui são duas
+\emph{direcções de um endereço}.
+
+Cláusula~(5), as duas direcções:
+\[
+\boxed{\;
+\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}
+=\hat\partial_{\mathrm{h}}\hat\partial_{\mathrm{v}}
+\iff
+G(\partial_{\mathrm{h}}x)=G(x)
+\text{ para todo }x
+\;}
+\]
+\(\Rightarrow\): coincidirem num endereço obriga as
+alturas iguais
+(\(\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}(x,k)
+=(\partial_{\mathrm{h}}x,\,1+G(\partial_{\mathrm{h}}x)-k)\)
+contra
+\(\hat\partial_{\mathrm{h}}\hat\partial_{\mathrm{v}}(x,k)
+=(\partial_{\mathrm{h}}x,\,1+G(x)-k)\)).
+\(\Leftarrow\): cumprida a invariância, as duas
+composições coincidem. Sem \(G\) invariante a
+horizontal nem é aplicação de \(E(\pi)\)
+(cláusula~(4)).
+
+\emph{Significado}: \(G\) invariante sob a dobra
+horizontal; comutar as duas derivadas é conservar
+\(G\) nesse eixo. É o critério que a hipótese~(i)
+do Teor.~\ref{fis:thm:quarteto} pede --- lá a
+comutação é \emph{pedida}; aqui diz-se
+\emph{quando} se tem.
+No hipercubo a mesma hipótese sai por teorema
+(\(G(\varsigma k)=G(k)\)).
+No Teor.~\ref{fis:thm:vizdobra}(3) as \(\sigma_i\)
+comutam \emph{de graça} por independência de
+coordenadas; aqui a vertical depende da altura e
+a comutação verifica-se.
+
+O paper já separa estes eixos
+(após o Teor.~\ref{fis:thm:duascoord}):
+\textbf{não} são as duas faces
+(Teor.~\ref{fis:thm:duas});
+\textbf{não} o directo e o cruzado
+(Def.~\ref{fis:def:duomorf});
+\textbf{não} o ponto e o andar
+(Teor.~\ref{fis:thm:tecidos});
+\textbf{não} o \(h\) e o \(v\) geométricos
+(Teor.~\ref{fis:thm:constroi}(3)).
+O Teor.~\ref{fis:thm:central} \emph{usa} o mesmo
+sistema --- uma leitura fixa o índice, a outra a
+célula --- mas o objecto ali é o rectângulo cheio,
+aqui a escada denteada \(E(\pi)\).
+\textbf{Não} se homogeneíza com GLH, com os três
+graus, nem com matéria--energia
+(Teor.~\ref{fis:thm:tresgraus}).
+Lei~7 não entra neste sítio.
+
+\(\mathrm{I}_{0}\):
+\[
+\boxed{\;
+\begin{gathered}
+\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}
+=\hat\partial_{\mathrm{h}}\hat\partial_{\mathrm{v}}
+\;\neq\;
+[x,y]
+\text{ (\code{lib/torre.h} \texttt{hip\_comutador})}
+\\
+\;\neq\;
+\mathbf{Duo}
+\;\neq\;
+A_{0}
+\;\neq\;
+\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}
+\end{gathered}
+\;}
+\]
+O comutador da torre é \(xy-yx\) no produto
+Cayley--Dickson; dual do associador
+(Obs.~\ref{fis:obs:quantica-triade}).
+Esta comutação é de duas involuções no endereço.
+\textbf{Outra célula.}
+\(A_{0}\) é a troca \(m=0\) da dourada
+(Obs.~\ref{fis:obs:quantica-dourada-m0}), não
+esta dobra.
+
+Estatuto: comutação em \(E(\pi)\)
+\texttt{realizado}
+(Teor.~\ref{fis:thm:duascoord}(5);
+\code{tests/aranha\_n.c}, \(81/81\)).
+Identificação com o comutador da torre:
+\texttt{não localizada} --- o paper não a faz;
+os tipos diferem.
+Não fecha Born-\emph{regra}.
+Não se reabre \(\mathrm{I}_{0}\) de Partículas.
+Não se copia o enunciado para \(\mathcal{U}\).
+\end{observacao}
+
+\section{O operador que existe}\label{fis:quantica-operador}
+
+\noindent A pergunta é se o operador deste palco \emph{sai} de
+duplopolinómios compostos com a transformada em \(X^{X}\). O paper
+\textbf{não escreve essa fórmula}. O que está construído é outro
+objecto.
+
+\begin{observacao}[operador do palco \(\neq\) \(\mathcal{F}\) em \(X^{X}\)]\label{fis:obs:quantica-operador}
+O operador que esta Parte lê é o da Def.~\ref{fis:def:atomo}: a
+\textbf{companheira} da cadeia, e os modos são as suas raízes. Na
+companheira os dois polinómios já coincidem --- o do ponto fixo de
+Möbius e o característico ---
+\[
+\boxed{\;
+C=\begin{pmatrix}m&1\\1&0\end{pmatrix}
+\qquad
+p_{\mathrm{Mobius}}(x)=cx^{2}+(d-a)x-b
+\;=\;
+p_{\mathrm{char}}(x)=x^{2}-(\operatorname{tr}C)\,x+\det C
+\;}
+\]
+(\code{banco/conversa.c}: nas companheiras coincidem sempre; nas
+\(625\) matrizes \(2{\times}2\) de entradas em \(\{-2,\ldots,2\}\) a
+coincidência \emph{não} é geral). Isso é a caixa / a cadeia, já
+medida. \textbf{Não} é \(\mathcal{F}\) em \(X^{X}\).
+
+\(X^{X}=\{f\colon X\to X\}\) é o objecto de endomorfismos
+(\code{univ:def:XX}). \(\mathcal{F}\) corre em \(V\), a
+linearização (Def.~\ref{fis:def:transf}; Teor.~\ref{fis:thm:H}):
+\(\mathcal{F}(a\ast b)=\mathcal{F}(a)\cdot\mathcal{F}(b)\), e é
+\(\mathcal{D}\) da Álgebra (Teor.~\ref{fis:thm:ponte}). A ficha de
+Partículas já o recusou neste suporte:
+\(\mathrm{I}_{5}\) --- \(\mathcal{F}\) é Álgebra
+(\code{catalogo cat:ingestao:particulas}).
+\(\mathcal{U}_{\mathrm{fin}}=(\mathbf{Duo},\pi,\mathcal{F},\mathcal{F}^{-1})\)
+é o pacote operacional de \(\mathcal{U}\)
+(\code{univ:def:quadrupla-finita}), \textbf{não} o espaço de Hilbert.
+A equação elementar \(x^{x}=x^{n}\) (\code{tests/xx.c}) é outra
+escrita do mesmo símbolo, não o operador deste palco.
+
+O medidor local lê o estado, não o endomorfismo de \(\mathcal{U}\).
+A igualdade é \(\psi\sim\lambda\psi\) (\(\lambda\neq0\)): o espaço é
+\(\mathbf{P}^{1}\). As amplitudes quebram o objecto; \(\rho=\lvert\psi\rangle\langle\psi\rvert\)
+é bem definida e funde a fase racional de norma \(1\).
+\(\det\rho=0\) em todo estado (Lagrange nos quatro inteiros). A
+ultramétrica desce sobre o endereço da fase. Estatuto: medido na lib.
+\texttt{não localizada} como ficha de capítulo. Schrödinger
+\(U=e^{-iH\Delta t}\) não é operador desta Parte.
+\(\mathrm{I}_{0}\): a torre \(X^{X^{\cdot^{\cdot}}}\) /
+\(X^{\infty}\) (\code{univ:obs:torre-XX}) \textbf{não} é este
+operador.
+\end{observacao}
+
+\medido{\code{tests/quantico.c}: \(4\) asserções, \(0\) falhas.
+Órbitas livres de tamanho \(4\): \(624/624\). Pares \(194\,376\):
+amplitudes quebram \(936\), fundem \(0\); \(\rho\) quebra \(0\), funde
+\(96\) (todas por fase racional). \(\det\rho=0\) e
+\(\rho^{2}=(\operatorname{tr}\rho)\rho\) em \(2400/2400\);
+\(\rho^{2}=\rho\) em \(8/2400\) (norma \(1\)).
+Ultramétrica sobre endereços: \(64000/64000\) triplos, \(0\) falhas.
+A equação \(x^{x}\) e \(\mathcal{F}\) em \(X^{X}\) \textbf{não}
+entram neste medidor.}
+
+\section{Realização no metal, noutro repo}\label{fis:quantica-metal}
+
+\noindent Não é capítulo. Não se resubmete. Scripts Qiskit em
+\code{hiper/} já correram em \texttt{ibm\_marrakesh}; os JSON
+guardam o que o metal devolveu. \textbf{Não} é corpo novo,
+\textbf{não} reabre \(\mathrm{I}_{0}\).
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.34\textwidth}
+                >{\raggedright\arraybackslash}p{0.40\textwidth}@{}}
+\toprule
+ficheiro & o que mediu \\
+\midrule
+\code{hiper/circular/ibm\_ghz.py}
+  $+$ \code{ibm\_ghz\_result.json}
+  & GHZ 3 qubits: $C^{2}(i|\mathrm{resto})\approx0{,}998$;
+    $\langle XXX\rangle=0{,}942$; pares $\langle XX\rangle\approx0$ \\
+\code{hiper/circular/ibm\_hw.py}
+  $+$ \code{ibm\_hw\_result.json}
+  & Bell $\lvert\psi(\theta)\rangle$: $m^{2}+C^{2}$ entre $0{,}949$ e
+    $0{,}996$ \\
+\code{hiper/circular/ibm\_lopes.py}
+  $+$ \code{ibm\_lopes\_result.json}
+  & coerência GHZ $n=2\ldots7$; fidelidade/qubit $0{,}975$ \\
+\code{hiper/circular/ibm\_perda.py}
+  $+$ \code{ibm\_perda\_result.json}
+  & perda: ocioso $0{,}032$, portas $0{,}009$, emaranhamento $0{,}018$ \\
+\code{hiper/cripto/validation/grover\_symbeta\_ibm.log}
+  & Grover $\kappa=3,4$; alvo $=$ modo mais frequente \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Estatuto: realização no metal de leituras do hiper. Não
+funde o espectro da Partículas com o qubit supercondutor. Sem
+notebook, sem Braket, sem Cirq.
+
+\section{Associador, comutador, rectângulo}\label{fis:quantica-triade}
+
+\noindent Três peças já construídas; \textbf{não} se fundem.
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.40\textwidth}@{}}
+\toprule
+peça & label / sítio & o que mede \\
+\midrule
+associador
+  & \code{lib/torre.h} \texttt{hip\_associador};
+    Teor.~\ref{fis:thm:trial}(2);
+    \code{hiper thm:emaranhamento}
+  & $[x,y,z]=(xy)z-x(yz)$. Mede o lado
+    \emph{directo} do trial (associatividade:
+    3 elementos, 1 operação). Em $\mathbb{O}$:
+    zero ou não (\code{tests/pgwire.c} §W117).
+    Trilinear alternado. \textbf{Não} a dobra
+    afim $\partial x=a+b-x$
+    (Teor.~\ref{fis:thm:dobra}).
+    Obs.~\ref{fis:obs:quantica-associador-eixo} \\
+comutador
+  & \code{lib/torre.h} \texttt{hip\_comutador}
+  & $[x,y]=xy-yx$. Aparece em $\mathbb{H}$; o associador, em $\mathbb{O}$.
+    Dual algébrico do associador \\
+distribuidor
+  & Teor.~\ref{fis:thm:trial}(3)
+  & cruzado do \emph{par}: uma face age sobre a outra.
+    Analogia marcada, \textbf{não} o dual do associador \\
+rectângulo
+  & Teor.~\ref{fis:thm:central}; Lema~\ref{fis:lem:conserva};
+    \code{univ:def:glh-an}
+  & $\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=\lvert I\rvert\cdot\lvert X\rvert$.
+    GLH / língua an. \textbf{Não} $a+c^{2}=1$ \\
+comutação $\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}$
+  & Teor.~\ref{fis:thm:duascoord}(5)
+  & duas dobras no endereço $E(\pi)$. $G$ invariante na horizontal.
+    \textbf{Não} $[x,y]$ da torre.
+    Obs.~\ref{fis:obs:quantica-comuta-dobras} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacao}[dual do associador $=$ comutador, não o distribuidor]\label{fis:obs:quantica-triade}
+Na torre (\code{lib/torre.h}) o par medido é
+\(([x,y],\,[x,y,z])\): o comutador acha-se em grau \(4\), o
+associador em grau \(8\). O hiper fecha a conservação
+\emph{dessa} família:
+\[
+\boxed{\;
+a=\lvert 1-s^{2}\rvert
+\qquad
+c=\lvert s\rvert
+\qquad
+a+c^{2}=1
+\;}
+\]
+(\code{hiper eq:campomedio-conservacao}, relida no par de dois
+qubits como \(\lVert r\rVert^{2}+C^{2}=1\)). A concorrência é
+componente do associador, não postulado:
+\[
+\boxed{\;
+\bigl\lVert[o,\hat a,\sigma(o)]_{\mathbb{C}}\bigr\rVert
+=2\lvert\det M\rvert=C
+\;}
+\]
+(\code{hiper thm:emaranhamento}, \code{eq:assoc-concorrencia};
+\code{hiper/circular/associador\_ibm\_n2.py}). Em \(n=3\),
+\(\tau\) é o 3-tangle CKW --- associador iterado
+(\code{associador\_ibm\_n3.py}):
+\(\lVert r_{A}\rVert^{2}+C_{AB}^{2}+C_{AC}^{2}+\tau=1\).
+
+O \textbf{distribuidor} é outra célula: Teor.~\ref{fis:thm:trial}(3)
+--- cruzado do par, duas operações. A prova marca analogia, não
+identificação. \(\mathbf{Duo}\) troca \((\oplus,\otimes)\); o
+comutador \([x,y]\) \textbf{não} é Duo.
+
+O «cruzado» de \code{lib/quantico.h} é o teste projectivo
+\(x_{1}y_{2}=x_{2}y_{1}\) em \(\mathbf{P}^{1}\). \textbf{Não} é o
+comutador da torre.
+
+A comutação
+\(\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}
+=\hat\partial_{\mathrm{h}}\hat\partial_{\mathrm{v}}\)
+(Teor.~\ref{fis:thm:duascoord}(5))
+é outra célula: duas involuções no endereço,
+não \(xy-yx\).
+Obs.~\ref{fis:obs:quantica-comuta-dobras}.
+
+\(\mathrm{I}_{0}\): associador octoniónico \(\neq\) concorrência IBM
+\emph{sem} o Teor.~\code{hiper thm:emaranhamento}. Esse teorema
+\textbf{é} a evidência (resíduo \(10^{-16}\); o metal mede \(C\) e
+\(\tau\), não a gramática de \(\mathcal{U}\)). Comutador quântico
+de livros \(\neq\) Duo. \(a+c^{2}=1\) \(\neq\)
+\(\sum G=\lvert I\rvert\) \(\neq\) Parseval
+(\code{fis:thm:ponte}) \(\neq\) o rectângulo GLH.
+O associador \textbf{não} é eixo afim: Obs.~\ref{fis:obs:quantica-associador-eixo}.
+\end{observacao}
+
+\begin{observacao}[norma agregada do Paper~CT $\neq$ $a+c^{2}=1$ do par]\label{fis:obs:quantica-ct-mf}
+O palco já cita
+\code{hiper eq:campomedio-conservacao}
+(Obs.~\ref{fis:obs:quantica-triade}):
+\(\lVert r\rVert^{2}+C^{2}=1\) no par de dois qubits.
+\textbf{Não} é o Teor.~\code{hiper thm:conservacao-campo-medio}
+(\code{hiper/aposentados/teoria/papers/paper\_CT\_campo\_medio.tex}).
+
+Lá, campo médio $=$ combinação
+\(S=\operatorname{mean}_{k}(s_{k}v_{k})\)
+numa camada PRTSU (postulado \(X\times X\to X\)).
+Sob \(p=r=t=u=1\), \(w^{\mathrm{re}}=0\), a norma da saída
+agregada decompõe-se
+\[
+\boxed{\;
+\lVert y\rVert^{2}
+=
+\lVert y\rVert^{2}_{\mathrm{Paper~A}}(s_{\|})
++\Delta_{\perp}
+\;}
+\]
+(\code{eq:conserva-mf}).
+\(a(s_{\|})+c(s_{\|})^{2}=1\) conserva-se no agregado
+sse \(S_{\perp}=0\)
+(\code{hiper cor:refinamento-c1}).
+O que se avalia é \(\lVert y\rVert^{2}\), não energia
+(Teor.~\ref{fis:thm:tresgraus}),
+não \(\sum G\), não volume, não corrente.
+
+Estatuto no contrato \(\mathcal{U}\):
+\texttt{não localizada}.
+O paper não cita \(\mathcal{U}\), GLH, Parseval, Born,
+Lei~7 nem o retorno \(L_{7}\to L_{0}\).
+Não se copia a identidade para lei nova.
+\(\mathrm{I}_{0}\):
+\[
+\boxed{\;
+\lVert y\rVert^{2}_{\mathrm{CT}}
+\neq
+a+c^{2}=1
+\neq
+\lVert r\rVert^{2}+C^{2}=1
+\neq
+\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}
+\neq
+\operatorname{Parseval}\,L^{2}
+\neq
+p_{i}=\lvert\langle i\rvert\psi\rangle\rvert^{2}
+\neq
+\sum G^{2}
+\;}
+\]
+\end{observacao}
+
+\begin{observacao}[interpolação e norma do produto do Paper~A $\neq$ Parseval]\label{fis:obs:quantica-paper-a-norma}
+O palco já cita $a+c^{2}=1$
+(Obs.~\ref{fis:obs:quantica-triade})
+e o caso $p=r=t=1$ da norma
+(\code{catalogo} §U7;
+\code{tests/dtcn.c};
+\code{tests/forca.c}).
+\textbf{Não} é o Teor.~\code{teo:interpolacao}
+nem o Teor.~\code{teo:norma-produto}
+de
+\code{hiper/aposentados/teoria/papers/paper\_A\_algebra.tex}.
+
+Lá, interpolação $=$ caminho do
+associador $\times_s=s\cdot\mathrm{cross}$
+(\code{eq:interpolacao}):
+\[
+[x,y,z]_s=(1-s^{2})A_0+s^{2}R.
+\]
+Interpola $A_0$ ($s=0$) e
+$R=[x,y,z]_{\mathrm{cross}}$ ($s=1$).
+\textbf{Não} Lagrange, \textbf{não}
+Newton, \textbf{não} $\varphi$,
+\textbf{não} MetaInd
+(Teor.~\ref{fis:thm:metainducao}).
+O $A_0$ do paper é o associador
+em $s=0$; \textbf{não} é a
+involução $A_0$ com $x^{2}=1$.
+
+A norma do produto
+(\code{eq:norma-produto})
+é
+$\lVert z\cdot_{p,r,t,s}w\rVert^{2}$
+igual a
+$\lVert z\rVert^{2}\lVert w\rVert^{2}$
+menos o imposto $V(p,r,t,s)$.
+\textbf{Não} é
+$\lVert xy\rVert=\lVert x\rVert\lVert y\rVert$
+salvo o imposto anular
+($p=r=t=1$ e $s=\pm1$, ou $S=0$).
+\textbf{Não} é $\lVert x\otimes y\rVert$.
+O caso $p=r=t=1$ já está no
+catálogo via o paper~H.
+
+O paper \textbf{não} cita
+$\mathcal{U}$, Parseval, Born,
+Walsh, Lei~7, o retorno
+$L_7\to L_0$,
+nem $x^{2}=x+1$.
+Os campos locais dão
+$\hat{\mathbf{a}}^{2}=-1$
+(\code{teo:campos-locais}),
+outra quadrática.
+
+Estatuto no contrato $\mathcal{U}$:
+\texttt{não localizada}.
+Não se copia para lei.
+Não se reabre $\mathrm{I}_{0}$
+das Partes fechadas.
+$\mathrm{I}_{0}$:
+\[
+\boxed{\;
+\begin{gathered}
+\lVert z\cdot w\rVert^{2}_{\mathrm{A}}
+\neq
+\operatorname{Parseval}\,L^{2}
+\neq
+p_{i}=\lvert\langle i\rvert\psi\rangle\rvert^{2}
+\neq
+\lvert\det\rvert=1
+\\
+\neq
+\text{face }*\text{ de Walsh}
+\neq
+a+c^{2}=1
+\neq
+\lVert y\rVert^{2}_{\mathrm{CT}}
+\\
+[x,y,z]_s
+\neq
+\text{MetaInd}
+\neq
+\partial x=a+b-x
+\neq
+x^{2}=x+1
+\neq
+x^{2}=1
+\end{gathered}
+\;}
+\]
+\end{observacao}
+
+\begin{observacao}[associador $=$ lado directo do trial, não o eixo afim]\label{fis:obs:quantica-associador-eixo}
+O Teor.~\ref{fis:thm:trial} já constrói o quadro:
+\[
+\boxed{\;
+\begin{array}{lll}
+\textbf{centro}
+  & \text{comutatividade}
+  & x\circ y=y\circ x\\[2pt]
+\textbf{lado directo}
+  & \text{associatividade}
+  & (x\circ y)\circ z=x\circ(y\circ z)\\[2pt]
+\textbf{lado cruzado}
+  & \text{distributividade}
+  & x\otimes(y\oplus z)=(x\otimes y)\oplus(x\otimes z)\\[2pt]
+\textbf{quarta célula}
+  & \text{absorção}
+  & x\oplus(x\otimes y)=x
+\end{array}
+\;}
+\]
+Três leis, mais a absorção (quarta célula: 2 elementos,
+2 operações,
+\(x\oplus(x\otimes y)=x\)). O quadro do teorema é
+\emph{dois eixos binários}
+(elementos em \(\{2,3\}\times\) operações em \(\{1,2\}\)):
+não pede um terceiro eixo geométrico.
+
+Os medidores da torre (\code{lib/torre.h})
+assentam nas duas primeiras linhas, e não se fundem:
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}
+                >{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.46\textwidth}@{}}
+\toprule
+eixo do trial & medidor & fórmula / tipo \\
+\midrule
+centro
+  & \texttt{hip\_comutador}
+  & $[x,y]=xy-yx$. Bilinear. Achado em grau \(4\)
+    (\(\mathbb{H}\)) \\
+lado directo
+  & \texttt{hip\_associador}
+  & $[x,y,z]=(xy)z-x(yz)$. Trilinear
+    alternado. Achado em grau \(8\)
+    (\(\mathbb{O}\); \code{tests/pgwire.c} §W117) \\
+lado cruzado
+  & analogia
+    (Teor.~\ref{fis:thm:trial}(3))
+  & duas operações. A prova marca analogia,
+    não identificação. \textbf{Não} há
+    \texttt{hip\_distribuidor} \\
+\bottomrule
+\end{tabular}
+\end{center}
+O associador \textbf{é} o medidor do lado directo.
+Não é um terceiro eixo acrescentado ao trial:
+o lugar já estava nomeado
+(Teor.~\ref{fis:thm:trial}(2)).
+A trialidade \(S_{3}\) sobre \(\{-1,0,+1\}\)
+(\code{tests/trialidade.c}) é outro trial:
+três valores, eixos intercambiáveis.
+O paper já os separa
+(na óptica, após o Lema~\ref{fis:lem:cristal}):
+ordem \(3\) de operador \(\neq\) cardinal do conjunto.
+\textbf{Não} se cola o associador a um eixo de \(S_{3}\).
+
+A célula \textbf{afim} já está construída, e é outra:
+\[
+\boxed{\;
+\partial x=\alpha x+\beta
+\ \text{com troca dos extremos}
+\ \Longrightarrow\
+\partial x=a+b-x
+\;}
+\]
+(Teor.~\ref{fis:thm:dobra}(1); unária; grau \(1\);
+não passa pela origem salvo \(a+b=0\)).
+O associador de três argumentos
+\emph{anula-se na origem}:
+\([0,y,z]=0\). Trilinear \(\neq\)
+\(x\mapsto ax+b\).
+
+\(\mathrm{I}_{0}\):
+\[
+\boxed{\;
+\begin{gathered}
+[x,y,z]
+\;\neq\;
+\partial x=a+b-x
+\\
+\;\neq\;
+\mathbf{Duo}
+\;\neq\;
+A_{0}
+\;\neq\;
+\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}
+\\
+\;\neq\;
+\text{eixo de }S_{3}\text{ em }\{-1,0,+1\}
+\end{gathered}
+\;}
+\]
+\(\mathbf{Duo}\) permuta as duas associatividades
+(Teor.~\ref{fis:thm:trial}(4)); não é o associador.
+\(A_{0}\) no palco é a troca \(m=0\) da dourada
+(\(x^{2}=1\); Obs.~\ref{fis:obs:quantica-dourada-m0}).
+O tensor \([x,y,v]_{s}=(1-s^{2})A_{0}\) do hiper
+(cristal, Prop.~3.4) é homónimo:
+\textbf{não} se identifica com essa \(A_{0}\)
+sem o paper o fazer em \code{fisica.tex}.
+A comutação das dobras em \(E(\pi)\)
+é outra célula
+(Obs.~\ref{fis:obs:quantica-comuta-dobras}).
+A conservação \(a+c^{2}=1\) fecha o
+\emph{par} associador/comutador no hiper;
+não torna o associador afim
+nem o funde com o rectângulo GLH.
+Lei~7 / três graus
+(Teor.~\ref{fis:thm:tresgraus}):
+outro três; não se homogeneíza.
+
+Estatuto: associador como medidor do lado
+directo \texttt{realizado}
+(\code{lib/torre.h}; Teor.~\ref{fis:thm:trial}(2)).
+Identificação associador \(=\) eixo afim:
+\texttt{N/A} --- os tipos diferem
+(trilinear de três argumentos vs.\ dobra unária).
+Identificação associador \(=\) terceiro eixo de
+\(S_{3}\): \texttt{não localizada} ---
+o paper não a faz.
+Não se reabre \(\mathrm{I}_{0}\) de Partículas.
+Não se copia para \(\mathcal{U}\) como lei.
+\end{observacao}
+
+\begin{observacao}[absorção $\neq$ Lei~7; o fecho $L_7\to L_0$ é outro resíduo]\label{fis:obs:quantica-absorcao-lei7}
+O Teor.~\ref{fis:thm:trial} já escreve a quarta célula:
+\[
+\boxed{\;
+x\oplus(x\otimes y)=x
+\qquad
+\text{(2 elementos, 2 operações)}
+\;}
+\]
+Vale em \((\min,\max)\); falha em \((+,\times)\).
+\textbf{Não} é o poço \(a\cdot 0=0\)
+(testemunha na prova do Teor.~\ref{fis:thm:trial}(4),
+outra equação).
+\textbf{Não} é o vinco
+\(\mathbf{1}=\operatorname{vinco}(L_0,L_7)\)
+(\code{univ:def:unidade}).
+\textbf{Não} é \(L_0\).
+
+\medskip\noindent\textbf{Três homónimos de «absorção», sem colar.}
+A célula do trial é a lei acima.
+A interface filtrada
+(Def.~\ref{fis:def:dominio-interface})
+escolhe a coluna \(\mathcal{O}\) ---
+cadeia de nomes
+Lei~7 \(\to\) faces \(\to\) interface
+\(\to\mathbf{Duo}\to\) absorção \(\to Q_{ab}\),
+não um resíduo medido.
+\(\operatorname{MOVE}(+1)\) absorve na porta
+(outra operação).
+O paper \textbf{não} identifica as três.
+
+\medskip\noindent\textbf{Quatro células \(\neq\) três línguas.}
+As células são o quadro local
+(centro / directo / cruzado / absorção).
+As três línguas de \(\mathcal{U}\)
+(\code{univ:def:linguas})
+são
+\(\mathcal{U}_{\mathrm{alg}}\) /
+\(\mathcal{U}_{\mathrm{top}}\) /
+\(\mathcal{U}_{\mathrm{an}}\)
+--- álgebra, topologia, análise.
+\textbf{Não} A/T/N
+(Análise / Topologia / Número):
+o paper não escreve essas três letras.
+A trialidade \(S_{3}\) sobre
+\(\{-1,0,+1\}\)
+(\code{tests/trialidade.c})
+é outro trial.
+O \(T^{3}\) de línguas
+\textbf{não} se institui
+(\code{univ:obs:linguas-recusa};
+Def.~\code{univ:def:trindade}:
+sem \(T^{3}\)).
+
+\medskip\noindent\textbf{O centro não cola com
+\([\hat\partial_{\mathrm{v}},\hat\partial_{\mathrm{h}}]=0\).}
+O centro é
+\(x\circ y=y\circ x\);
+o medidor da torre é
+\texttt{hip\_comutador}.
+A comutação das dobras em \(E(\pi)\)
+é outra célula:
+\(G(\partial_{\mathrm{h}}x)=G(x)\)
+(Teor.~\ref{fis:thm:duascoord}(5);
+Obs.~\ref{fis:obs:quantica-comuta-dobras}).
+O paper \textbf{não} as cola.
+
+\medskip\noindent\textbf{Lei~7 fecha com Lei~0 --- outro
+resíduo, já construído.}
+\[
+\boxed{\;
+\pi_{\mathcal{U}}\bigl(\mathcal{F}(L_7)\bigr)=L_0
+\qquad
+(\operatorname{Res}=0)
+\;}
+\]
+(\code{univ:thm:retorno-canonico};
+\(\operatorname{MetaInd}(L_7)=L_0\)
+em \code{univ:thm:metaind-pi}).
+Medido:
+\code{tests/lei\_unica\_u.js}.
+Dual do medidor: só
+\(0^{\dagger}=\infty\)
+(Teor.~\ref{fis:thm:zeroinf}).
+\textbf{Não} se inventa o par \(1\)--\(7\).
+Este \(\operatorname{Res}=0\) é o retorno
+do ciclo das leis.
+\textbf{Não} é Born.
+\textbf{Não} é Parseval
+(Obs.~\ref{fis:obs:quantica-parseval};
+Teor.~\ref{fis:thm:H}).
+
+\medskip\noindent\textbf{Resíduo absorção \(\leftrightarrow\)
+Lei~7.}
+Não há teste em \code{tests/},
+\code{lib/torre.h} nem no cristal
+que meça o resíduo exacto entre
+\(x\oplus(x\otimes y)=x\)
+e o acoplamento da Lei~7
+(interface / octonião dual).
+A hipótese «célula no tecido~A $=$
+borda Lei~7 no tecido~N» \textbf{não}
+está no paper: as línguas são
+alg/top/an, não A/T/N.
+\[
+\boxed{\;
+\text{Resíduo}\bigl(
+\text{absorção}_{\mathrm{trial}}
+\leftrightarrow
+\text{Lei~7}
+\bigr)
+=\texttt{não localizada}
+\;}
+\]
+Não se importa o \(\operatorname{Res}=0\)
+do retorno para fechar esta célula.
+Não se homogeneíza com Born nem com
+Parseval.
+
+\medskip\noindent Estatuto:
+quarta célula
+\texttt{realizada}
+(Teor.~\ref{fis:thm:trial}).
+Retorno \(L_7\to L_0\),
+\(\operatorname{Res}=0\):
+\texttt{realizado}.
+Resíduo absorção \(\leftrightarrow\) Lei~7:
+\texttt{não localizada}.
+Identificação centro \(=\)
+\([\hat\partial_{\mathrm{v}},\hat\partial_{\mathrm{h}}]\):
+\texttt{N/A}
+--- o paper já as separou.
+Identificação 4 células \(=\) 3 línguas:
+\texttt{N/A}.
+\(T^{3}=\mathrm{id}\) como operador novo:
+não se institui.
+Partículas \(\mathrm{I}_{6}\): Lei~7
+\texttt{não localizada} ---
+\textbf{não} se reabre
+(Obs.~\ref{fis:obs:quantica-glh-dobras}).
+\end{observacao}
+
+\medskip\noindent\textbf{O central conta o rectângulo, não o
+associador.} O Teor.~\ref{fis:thm:central}(1) aplica o
+Lema~\ref{fis:lem:conserva} a \(I\times X\): as duas contagens
+somam \(\lvert I\rvert\cdot\lvert X\rvert\). Isso é GLH
+(\code{univ:def:glh-an}, \code{univ:obs:centrais}). O lado Hurwitz
+do teorema central analítico \emph{conta} os graus bilineares
+\(\{1,2,4,8\}\); a tábua das perdas (comuta até \(2\), associa até
+\(4\), divide até \(8\)) é o eval que \code{lib/torre.h} procura.
+\textbf{Não} se afirma que o rectângulo parta associador e
+comutador como as duas faces \(\Sigma_{\mathrm{dom}}\) /
+\(\Sigma_{\mathrm{im}}\). A conservação que fecha o par
+associador/comutador é \(a+c^{2}=1\), já medida no hiper; a que
+fecha o rectângulo é \(\sum G=\lvert I\rvert\). Homónimo de
+«conservação», não um corpo.
+
+\section{As oito leis no palco}\label{fis:quantica-oito-leis}
+
+\noindent As oito leis \emph{são} a base de \(X\)
+(Def.~\ref{fis:def:U}; Teor.~\ref{fis:thm:base};
+\code{papers/aranha.c} \texttt{neuronio8}):
+\(e_k=2^{k}\), espectro \([\mathrm{total},f_0,\ldots,f_7]\).
+\(\mathcal{U}\) não decide que esta Parte existe. Não há Lei~8.
+O dual explícito do medidor é só \(0^{\dagger}=\infty\):
+\textbf{não} se inventa \(\mathrm{Lei}\,i\mapsto\mathrm{Lei}\,j^{\dagger}\)
+para \(i=1,\ldots,7\).
+
+O quadro de oito linhas está na
+Obs.~\ref{fis:obs:quantica-oito-leis}.
+
+\medskip\noindent\textbf{O que é a pental neste palco.}
+A Lei~5. O operador é \(x^{2}=-1\): o bit \(i\).
+No medidor quântico isso \emph{é}
+a unidade \(i\in\mathbb{Z}[i]\) que roda o estado
+(\texttt{psi\_roda}: \((x+yi)\cdot i=-y+xi\) nas duas
+componentes). Aplicada duas vezes dá \(-\mathrm{id}\);
+quatro vezes, \(\mathrm{id}\). O chão que
+\texttt{neuronio8} escreve é \(\mathbb{Z}[i]\);
+\code{lib/quantico.h} escreve as amplitudes nesse anel.
+Isso é evidência, não analogia.
+
+O que a pental \textbf{não} é:
+a estrela \(x^{2}=x+1\) (\(\mathrm{I}_{9}\), elemento);
+o polo \(m=0\) (\(x^{2}=1\), troca);
+Alonzo (\(\pi^{2}=\pi\));
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\);
+\(\mathbf{Duo}\).
+O rotor de \(w=2\)
+(Teor.~\ref{fis:thm:largura}(4), ordem \(4\))
+partilha o período e o nome «rotor» com a Lei~2
+de \texttt{neuronio8}: o paper \textbf{não} cola
+\texttt{psi\_roda} a \(\Phi_{2}\).
+Os campos locais \(\hat{\mathbf{a}}^{2}=-1\)
+(\code{teo:campos-locais}) e o \(i\) de Pauli
+permanecem \texttt{não localizada} --- Paper~A
+não se promove; o medidor não assere matrizes
+de Pauli.
+
+\medskip\noindent\textbf{O que ficou \texttt{N/A} ou
+\texttt{não localizada}.}
+\texttt{N/A}: Lei~3 \(=\) trial de leis
+(tipos já separados);
+Lei~6 \(=\mathbf{Duo}\)
+(\(\operatorname{Fix}(\mathcal{D})\) sai do alcance
+de \(\mathbf{Duo}\)).
+\texttt{não localizada}: Lei~2 como operador do
+modo espectral; Poincaré-homologia da Lei~1;
+Lei~6 neste palco; Lei~7 em Partículas
+(\(\mathrm{I}_{6}\) fechada); resíduo
+absorção \(\leftrightarrow\) Lei~7;
+\(\hat{\mathbf{a}}^{2}=-1\) / Pauli como Lei~5.
+Paper~A / CT / Born-\emph{regra}:
+permanecem \texttt{não localizada}
+--- não se promovem.
+
+Não há 15.º. Não se reabre \(\mathrm{I}_{0}\)
+das Partes fechadas. As oito leis não são
+oito corpos.
+
+O grafo de fecho
+(Obs.~\ref{fis:obs:quantica-grafo-fecho})
+é da gramática: o palco \textbf{realiza}
+as operações já medidas, não desenha um
+circuito. Arestas em falta
+(\(L_0\xrightarrow{\partial}L_1\);
+\(L_2\to L_2\); \(L_6\to\mathbf{Duo}\);
+par \(1\)--\(7\); Born-\(P_i\))
+permanecem \texttt{não localizada}.
+
+\section{Homónimos que a ficha já recusou}\label{fis:quantica-homonimos}
+
+\noindent A pergunta INGEST é: \emph{qual é a evidência para o
+contrato neste suporte?} Nunca «parece um espaço de Hilbert».
+
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.50\textwidth}@{}}
+\toprule
+homónimo & o que já está, e o que não é \\
+\midrule
+curva de Hilbert
+  & vizinhança / áreas (Topologia). \textbf{Não} o Hilbert da
+    quântica de livros \\
+\(\mathcal{F}\) / Parseval / \(X^{X}\)
+  & transformada da Álgebra em \(V\)
+    (Teor.~\ref{fis:thm:ponte},~\ref{fis:thm:H};
+    \code{univ:def:XX}). Partículas \(\mathrm{I}_{5}\):
+    \(\mathcal{F}\) é Álgebra. Obs.~\ref{fis:obs:quantica-operador}.
+    Walsh \(\neq\) Fourier/Mellin da dourada
+    (Obs.~\ref{fis:obs:quantica-dourada-m0}) \\
+\(x^{x}=x^{n}\)
+  & \code{tests/xx.c}: duas raízes. Homónimo do símbolo, não o
+    operador do palco \\
+Dirac / \(\chi\)
+  & base de \(V\), caracteres --- já em \(\mathcal{U}\) e na Álgebra.
+    \textbf{Não} capítulo por analogia \\
+fotão da Óptica
+  & caixa \(\mathcal{P}(A)\) (Def.~\ref{fis:def:caixa}).
+    \(\lvert\det\rvert=1\) é a mesma marca; o suporte \textbf{não}
+    é o modo \(\rho=1\) \\
+par \((E,B)\)
+  & interface fechada (\code{catalogo cat:bloco4}). Forma
+    \(\neq\) corpo. Não se funde com EM \\
+\(\mathcal{U}_{\mathrm{fin}}\)
+  & pacote de \(\mathcal{U}\)
+    (\code{univ:def:quadrupla-finita}).
+    \textbf{Não} se homogeneíza com Hilbert \\
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\)
+  & estrutural, bit \(a=1\). \textbf{Não} \(x^{2}=x+1\)
+    (Teor.~\ref{fis:thm:estrela}) \\
+superposição em \(V\)
+  & Teor.~\ref{fis:thm:combina} (Redes / Cosmologia).
+    \textbf{Não} a superposição de amplitudes em \(\mathbf{P}^{1}\) \\
+comutador / Duo
+  & \([x,y]\) é da torre. \(\mathbf{Duo}\) troca leis.
+    Distribuidor $=$ cruzado do par (Teor.~\ref{fis:thm:trial}).
+    Obs.~\ref{fis:obs:quantica-triade} \\
+associador / eixo afim
+  & \([x,y,z]\) mede o lado directo
+    (Teor.~\ref{fis:thm:trial}(2)).
+    Trilinear. A dobra afim é
+    \(\partial x=a+b-x\)
+    (Teor.~\ref{fis:thm:dobra}).
+    \textbf{Não} se colam.
+    Obs.~\ref{fis:obs:quantica-associador-eixo} \\
+associador / \(S_{3}\) do trial
+  & trialidade permuta \(\{-1,0,+1\}\).
+    O associador não é um desses eixos.
+    Obs.~\ref{fis:obs:quantica-associador-eixo} \\
+\(\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}\) / \([x,y]\)
+  & comutação de duas dobras no endereço
+    \(\neq\) comutador da torre.
+    Obs.~\ref{fis:obs:quantica-comuta-dobras} \\
+\(a+c^{2}=1\) / GLH
+  & parábola do hiper \(\neq\) rectângulo
+    \(\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}\)
+    (Teor.~\ref{fis:thm:central}; \code{univ:obs:centrais}) \\
+\(\lVert y\rVert^{2}\) CT / \(a+c^{2}=1\) / \(\lVert r\rVert^{2}+C^{2}=1\)
+  & norma agregada PRTSU \(\neq\) ilha do Paper~A \(\neq\)
+    Bloch+concorrência.
+    Obs.~\ref{fis:obs:quantica-ct-mf} \\
+interpolação Paper~A / MetaInd / \(\varphi\)
+  & \([x,y,z]_s=(1-s^{2})A_0+s^{2}R\)
+    \(\neq\) indução na razão
+    \(\neq\) \(x^{2}=x+1\).
+    Obs.~\ref{fis:obs:quantica-paper-a-norma} \\
+\(\lVert z\cdot w\rVert^{2}\) Paper~A / Parseval / Born / \(\lvert\det\rvert=1\)
+  & norma do produto com imposto \(V\)
+    \(\neq\) \(L^{2}\) de \(\mathfrak{G}\)
+    \(\neq\) \(\lvert\psi\rvert^{2}\)
+    \(\neq\) volume.
+    Obs.~\ref{fis:obs:quantica-paper-a-norma} \\
+\(p_G=G/\lvert I\rvert\) / Born
+  & frequentista / Hurwitz \(\neq\) \(\lvert\psi\rvert^{2}\).
+    Obs.~\ref{fis:obs:quantica-prob},~\ref{fis:obs:quantica-born} \\
+\(\pi^{2}=\pi\) / \(x^{2}=x+1\) / \(\mathcal{D}\)
+  & projector \(\neq\) estrela do elemento \(\neq\)
+    \(\operatorname{Star}(\mathcal{U})\).
+    Obs.~\ref{fis:obs:quantica-quadraticas} \\
+pental \(x^{2}=-1\) / estrela / \(m=0\) / rotor \(w=2\)
+  & Lei~5, bit \(i\) de \(\mathbb{Z}[i]\)
+    (\texttt{psi\_roda})
+    \(\neq x^{2}=x+1\)
+    \(\neq x^{2}=1\)
+    \(\neq\) \(\Phi_{2}\)
+    (Teor.~\ref{fis:thm:largura}).
+    \(\neq K^{**}=K\).
+    Obs.~\ref{fis:obs:quantica-oito-leis} \\
+Lei~6 \(\oplus=\otimes\) / \(\mathbf{Duo}\)
+  & coincidência das operações
+    \(\neq\) troca das duas.
+    \(\operatorname{Fix}(\mathcal{D})\) sai do alcance.
+    Obs.~\ref{fis:obs:quantica-oito-leis} \\
+oito leis / oito corpos
+  & \(e_k=\) Lei \(k\) é a base de \(X\),
+    não catorze (nem oito) corpos.
+    Sem Lei~8.
+    Obs.~\ref{fis:obs:quantica-oito-leis} \\
+Walsh \(\mathcal{F}\) / dourada
+  & \(H^{2}=2^{m}\mathrm{Id}\) em \(V\) \(\neq\)
+    \(\mathfrak{G}=\mathcal{F}\circ\Lambda\) \(\neq\)
+    \(\mathcal{G}\) discreta.
+    Obs.~\ref{fis:obs:quantica-dourada-m0};
+    \code{univ:obs:dourada-m0} \\
+\(m=0\) / \(m=1\)
+  & $x^{2}=1$ (troca, Fourier) \(\neq\)
+    $x^{2}=x+1$ (estrela, Mellin).
+    Não se colam \\
+Parseval / Born
+  & \(L^{2}\) de \(\mathfrak{G}\)
+    \texttt{realizado}
+    \(\neq\) \(p_{i}=\lvert\langle i\rvert\psi\rangle\rvert^{2}\).
+    Obs.~\ref{fis:obs:quantica-parseval};
+    \code{univ:obs:dourada-parseval} \\
+GLH+dobras+Lei~7 / Born
+  & rectângulo, conversão de \(G\),
+    interface \(\neq\)
+    \(p_{i}=\lvert\langle i\rvert\psi\rangle\rvert^{2}\).
+    Obs.~\ref{fis:obs:quantica-glh-dobras} \\
+absorção / Lei~7
+  & \(x\oplus(x\otimes y)=x\)
+    \(\neq\)
+    octonião dual / interface.
+    Resíduo:
+    \texttt{não localizada}.
+    Obs.~\ref{fis:obs:quantica-absorcao-lei7} \\
+\(\operatorname{Res}=0\) do retorno / Born / Parseval
+  & \(\pi_{\mathcal{U}}(\mathcal{F}(L_7))-L_0=0\)
+    \(\neq\)
+    \(p_{i}\)
+    \(\neq\)
+    \(L^{2}\) de \(\mathfrak{G}\) \\
+4 células / alg/top/an / \(T^{3}\)
+  & trial
+    \(\neq\)
+    três línguas
+    \(\neq\)
+    operador \(T^{3}=\mathrm{id}\) \\
+centro / \(\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}\)
+  & \(x\circ y=y\circ x\)
+    \(\neq\)
+    comutação das dobras em \(E(\pi)\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Estatuto}\label{fis:quantica-estatuto}
+
+\noindent O palco \textbf{constrói}. \(\mathcal{U}\)
+\textbf{reconhece} (Obs.~\code{univ:obs:estatutos-u}).
+Esta tabela \textbf{cita}; não reabre
+\(\mathrm{I}_{0}\) das Partes fechadas.
+Sem 15.º. Sem Lei~8. Sem \(T^{3}=\mathrm{id}\).
+
+\paragraph{Construído vs aberto.}\label{fis:tab:quantica-palco}
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}
+                >{\raggedright\arraybackslash}p{0.16\textwidth}
+                >{\raggedright\arraybackslash}p{0.42\textwidth}@{}}
+\toprule
+no palco & estatuto & já construído / aberto \\
+\midrule
+absorção
+\(x\oplus(x\otimes y)=x\)
+  & \texttt{realizado}
+  & 4.ª célula
+    (Teor.~\ref{fis:thm:trial}).
+    \(\neq\) \(a\cdot 0=0\).
+    Encaixe com Lei~7:
+    \texttt{não localizada}
+    (Obs.~\ref{fis:obs:quantica-absorcao-lei7}) \\
+Lei~7 / interface
+  & \texttt{realizado}
+  & Obs.~\ref{fis:obs:octoniao-interface}.
+    Partículas \(\mathrm{I}_{6}\):
+    \texttt{não localizada}
+    --- \textbf{não} se reabre \\
+Lei~7 \(\to\) Lei~0
+  & \texttt{realizado}
+  & \(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\),
+    \(\operatorname{Res}=0\)
+    (\code{univ:thm:retorno-canonico}).
+    \(\neq\) resíduo Absorção\(\leftrightarrow\)Lei~7 \\
+GLH; dobras; trial;
+dobra afim; associador;
+três graus
+  & \texttt{realizado}
+  & Teor.~\ref{fis:thm:central},
+    \ref{fis:thm:trial},
+    \ref{fis:thm:dobra},
+    \ref{fis:thm:tresgraus}.
+    Cita; não reabre \(\mathrm{I}_{0}\) \\
+\(A_0\) dourada (\(x^{2}=1\))
+  & \texttt{realizado}
+    (\(m=0\))
+  & Obs.~\ref{fis:obs:quantica-dourada-m0}.
+    \(\neq\) \(A_0\) associador \(s=0\)
+    (Obs.~\ref{fis:obs:quantica-paper-a-norma}) \\
+\(x^{2}=x+1\) (\(m=1\))
+  & \(\operatorname{Star}(K)\),
+    \(\mathrm{I}_{9}\)
+  & Teor.~\ref{fis:thm:estrela}.
+    \(\neq\operatorname{Star}(\mathcal{U})=\mathcal{D}\) \\
+Parseval da dourada
+  & \(L^{2}\)
+    \texttt{realizado}
+  & Obs.~\ref{fis:obs:quantica-parseval}.
+    \(\neq\) Born \\
+comutação
+\(\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}\)
+  & \texttt{realizado}
+    em \(E(\pi)\)
+  & Obs.~\ref{fis:obs:quantica-comuta-dobras}.
+    \(\neq\) centro do trial
+    (\texttt{N/A} à colagem) \\
+associador / dobra afim
+  & lado directo
+    \texttt{realizado};
+    colagem \texttt{N/A}
+  & Obs.~\ref{fis:obs:quantica-associador-eixo} \\
+interpolação / norma \(+V\)
+(Paper~A)
+  & aponta o paper;
+    \textbf{não} lei
+  & Obs.~\ref{fis:obs:quantica-paper-a-norma} \\
+campo médio CT
+  & aponta o paper;
+    \textbf{não} lei
+  & Obs.~\ref{fis:obs:quantica-ct-mf}.
+    \(\neq\lVert r\rVert^{2}+C^{2}=1\) \\
+observável;
+Born-\emph{regra}
+  & \texttt{não localizada}
+  & contrato parcial
+    (§\ref{fis:quantica-contrato};
+    Obs.~\ref{fis:obs:quantica-born}).
+    \textbf{Não} se fecha \\
+Lei~0; \(0^{\dagger}=\infty\);
+retorno \(L_7\to L_0\)
+  & \texttt{realizado}
+  & Teor.~\ref{fis:thm:zeroinf};
+    Obs.~\ref{fis:obs:quantica-oito-leis}.
+    Sem par \(1\)--\(7\) \\
+Lei~4 \(\lvert\det\rvert=1\)
+  & \texttt{realizado}
+  & Prop.~\ref{fis:prop:neutro};
+    Teor.~\ref{fis:thm:gato}(2).
+    \(\neq C=2\lvert\det M\rvert\) \\
+Lei~5 pental \(x^{2}=-1\)
+  & \texttt{realizado}
+    (bit \(i\) de \(\mathbb{Z}[i]\))
+  & \texttt{psi\_roda};
+    Obs.~\ref{fis:obs:quantica-oito-leis}.
+    \(\neq x^{2}=x+1\)
+    \(\neq x^{2}=1\)
+    \(\neq\pi^{2}=\pi\)
+    \(\neq\mathcal{D}\) \\
+Lei~1 \(\nu\circ\nu=\mathrm{id}\)
+  & \texttt{parcial}
+  & tipo da dobra;
+    Poincaré-homologia
+    \texttt{não localizada} \\
+Lei~2 \(K^{**}=K\);
+Lei~6 \(\oplus=\otimes\);
+Lei~7 em Partículas
+  & \texttt{não localizada}
+  & Obs.~\ref{fis:obs:quantica-oito-leis}.
+    Lei~6 \(\neq\mathbf{Duo}\)
+    (\texttt{N/A}).
+    \(\mathrm{I}_{6}\) não se reabre \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+\boxed{\;
+\text{Quântica $=$ palco de Partículas}
+\quad
+\text{contrato parcial}
+\quad
+\text{dual do associador $=$ comutador}
+\;}
+\]
+\[
+\boxed{\;
+\pi^{2}=\pi
+\;\neq\;
+x^{2}=1
+\;\neq\;
+x^{2}=x+1
+\;\neq\;
+x^{2}=-1
+\;\neq\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+Sem 15.º corpo. Sem \(\mathrm{I}_{0}\) novo. Sem Lei~8. Sem Ficha~11.
+Sem \(\mathcal{F}(X^{X})\) como lei deste palco. Observável e
+Born-\emph{regra}: \texttt{não localizada} neste corpo.
+Face aditiva do par Fourier/Mellin: \texttt{realizada} em
+\(m=0\) da dourada (\(x^{2}=1\), troca).
+\(x^{2}=x+1\) fica em \(m=1\), não colada a \(\pi\).
+Parseval da dourada: norma \(L^{2}\) \texttt{realizado};
+Born-\emph{regra} permanece \texttt{não localizada}.
+GLH+dobras+Lei~7: contagem/conversão/interface no palco
+\texttt{realizado}; \textbf{não} fecha Born
+(Obs.~\ref{fis:obs:quantica-glh-dobras}).
+Comutação
+\(\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}\)
+em \(E(\pi)\): \texttt{realizado};
+\textbf{não} é o comutador da torre
+(Obs.~\ref{fis:obs:quantica-comuta-dobras}).
+Associador $=$ medidor do lado directo
+do trial: \texttt{realizado};
+\textbf{não} é a dobra afim
+(\texttt{N/A}; Obs.~\ref{fis:obs:quantica-associador-eixo}).
+Lei~7 fecha com Lei~0:
+\(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\),
+\(\operatorname{Res}=0\)
+\texttt{realizado}
+(\code{univ:thm:retorno-canonico}).
+Quarta célula
+\(x\oplus(x\otimes y)=x\)
+\texttt{realizada};
+resíduo com Lei~7
+\texttt{não localizada}
+(Obs.~\ref{fis:obs:quantica-absorcao-lei7}).
+4 células \(\neq\) alg/top/an.
+Sem \(T^{3}\).
+Interpolação e norma do produto
+do Paper~A: apontadas
+(\code{teo:interpolacao},
+\code{teo:norma-produto});
+estatuto \texttt{não localizada}
+(Obs.~\ref{fis:obs:quantica-paper-a-norma}).
+Partículas \(\mathrm{I}_{5}\), \(\mathrm{I}_{6}\) e \(\mathrm{I}_{9}\) não se reabrem.
+Walsh \(\neq\) Fourier/Mellin.
+Paper~CT \(\lVert y\rVert^{2}=\lVert y\rVert^{2}_{\mathrm{Paper~A}}+\Delta_{\perp}\):
+\texttt{não localizada} neste contrato
+(Obs.~\ref{fis:obs:quantica-ct-mf});
+\textbf{não} é \(a+c^{2}=1\) nem \(\lVert r\rVert^{2}+C^{2}=1\).
+As oito leis no palco
+(Obs.~\ref{fis:obs:quantica-oito-leis}):
+Lei~0 e Lei~4 \texttt{realizadas};
+Lei~5 pental \(=\) bit \(i\) de \(\mathbb{Z}[i]\)
+\texttt{realizado};
+Lei~1 \texttt{parcial};
+Lei~2, Lei~6, Lei~7 em Partículas
+\texttt{não localizada}.
+\(\mathrm{I}_{6}\) não se reabre.
+O grafo de composição
+(Obs.~\ref{fis:obs:quantica-grafo-fecho})
+não é circuito: volta conjunta
+\(\operatorname{Res}=0\).
+
+\colunas{Def.~\ref{fis:def:atomo},~\ref{fis:def:alonzo},~\ref{fis:def:coord2}; Prop.~\ref{fis:prop:neutro}; Teor.~\ref{fis:thm:massa},~\ref{fis:thm:orbita},~\ref{fis:thm:central},~\ref{fis:thm:trial},~\ref{fis:thm:dobra},~\ref{fis:thm:estrela},~\ref{fis:thm:estrelaencaixe},~\ref{fis:thm:largura},~\ref{fis:thm:metainducao},~\ref{fis:thm:duoesp},~\ref{fis:thm:tresgraus},~\ref{fis:thm:materia},~\ref{fis:thm:duascoord},~\ref{fis:thm:zeroinf},~\ref{fis:thm:gato},~\ref{fis:thm:base}; Lema~\ref{fis:lem:conserva}; Obs.~\ref{fis:obs:quantica-i0},~\ref{fis:obs:quantica-operador},~\ref{fis:obs:quantica-triade},~\ref{fis:obs:quantica-ct-mf},~\ref{fis:obs:quantica-paper-a-norma},~\ref{fis:obs:quantica-associador-eixo},~\ref{fis:obs:quantica-absorcao-lei7},~\ref{fis:obs:quantica-prob},~\ref{fis:obs:quantica-born},~\ref{fis:obs:quantica-quadraticas},~\ref{fis:obs:quantica-dourada-m0},~\ref{fis:obs:quantica-parseval},~\ref{fis:obs:quantica-glh-dobras},~\ref{fis:obs:quantica-comuta-dobras},~\ref{fis:obs:quantica-oito-leis},~\ref{fis:obs:quantica-grafo-fecho},~\ref{fis:obs:octoniao-interface}; \S\ref{fis:tab:quantica-palco}}
+        {o átomo espectral; $\rho$ em $\mathbf{P}^{1}$; o associador dual do comutador e medidor do lado directo; o rectângulo GLH à parte; Paper~A aponta interpolação e norma do produto, sem copiar para lei; associador $\neq$ dobra afim; absorção $\neq$ Lei~7 (resíduo não localizada); $L_7\to L_0$ é o outro $\operatorname{Res}=0$; as quadráticas sem colapso, pental $x^{2}=-1$ à parte; $m=0$ da dourada; Parseval $=L^{2}$, não Born; GLH+dobras+Lei~7 = palco, não medida; comutação $\hat\partial_{\mathrm{v}}\hat\partial_{\mathrm{h}}$ $\neq$ comutador da torre; Paper~CT $\|y\|^2$ $\neq$ $a+c^2=1$; tabela construído/aberto; oito leis no palco, $e_k=$ Lei $k$; grafo da gramática, não circuito, volta conjunta Res=0}
+        {\code{catalogo cat:ingestao:particulas}; \code{lib/quantico.h}; \code{lib/torre.h}; \code{lib/umbit.h}; \code{papers/aranha.c}; \code{tests/quantico.c}; \code{tests/trialidade.c}; \code{tests/lei\_unica\_u.js}; \code{tests/grafo\_fecho\_u.js}; \code{univ:thm:composicao-fechos}; \code{univ:thm:retorno-canonico}; \code{univ:def:linguas}; \code{univ:def:dupolo}; \code{univ:def:dourada-m0}; \code{univ:obs:dourada-parseval}; \code{univ:def:alonzo-idemp}; \code{hiper/circular/associador\_ibm\_n2.py}; \code{hiper/circular/associador\_ibm\_n3.py}; \code{hiper/circular/ibm\_ghz\_result.json}; \code{hiper/aposentados/teoria/papers/paper\_CT\_campo\_medio.tex}; \code{hiper/aposentados/teoria/papers/paper\_A\_algebra.tex}}
+
 % ═══════════════════════════════════════════════════════════════════════════
 \part{Termodinâmica}
 % ═══════════════════════════════════════════════════════════════════════════

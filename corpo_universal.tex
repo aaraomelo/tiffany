@@ -1896,6 +1896,12 @@ são disjuntas, e que \(D\) nas representações é ultramétrica. Promover
 um ao outro é o mesmo erro que promover uma coincidência de letras.
 GLH cabe em \(\mathcal{U}_{\mathrm{an}}\) (Def.~\ref{univ:def:glh-an}),
 não na ultramétrica.
+A conservação \(a+c^{2}=1\) do par associador/comutador
+(\code{hiper eq:campomedio-conservacao}; \code{fis:obs:quantica-triade})
+\textbf{não} é o rectângulo
+\(\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=\lvert I\rvert\cdot\lvert X\rvert\)
+(\code{fis:thm:central}). O comutador \([x,y]\) da torre
+\textbf{não} é \(\mathbf{Duo}\).
 \end{observacao}
 
 \begin{definicao}[GLH realiza o rectângulo de redução em \(\mathcal{U}_{\mathrm{an}}\)]\label{univ:def:glh-an}
@@ -2335,6 +2341,11 @@ Os \(\chi_{k}\) são os homomorfismos, não os
 idempotentes de \(*\).
 \(\delta_{0}*\delta_{0}=\delta_{0}\) é a unidade,
 não \(\pi\circ\pi=\pi\).
+\(\mathrm{I}_{0}\): esta face \(*\) é Walsh em \(V\)
+(Teor.~\code{fis:thm:conv}).
+\textbf{Não} é Mellin da dourada
+(Def.~\ref{univ:def:dourada-m0};
+Obs.~\ref{univ:obs:dourada-m0}).
 \end{definicao}
 
 \begin{teorema}[deconvolução: invertibilidade, não lei nova]\label{univ:thm:deconv}
@@ -2476,6 +2487,303 @@ Def.~\ref{univ:def:lei-canonica}).
 Banach e BW não fecham este gap (Obs.~\ref{univ:obs:banach}).
 \end{observacao}
 
+\begin{definicao}[duplopolinómio: colisão, grau \(2\) e grau \(n\)]\label{univ:def:dupolo}
+O dupolinómio do catálogo é a \textbf{colisão} PG/PA,
+não o par das torres
+(\code{catalogo}, princípio; \code{tests/estelar.c}):
+\[
+\boxed{\;
+P_g=x^{2},\qquad
+P_a=mx+1,\qquad
+P_g=P_a
+\implies
+x^{2}-mx-1=0
+\;}
+\]
+Companheira só no grau \(2\), \(\lvert c_0\rvert=1\):
+a \(2\times2\) dessa colisão.
+Coincidência (Möbius \(=\) característico)
+\textbf{não} é geral.
+A família em grau \(n\) é a mesma colisão
+no monómio dominante:
+\[
+\boxed{\;
+\beta_{n,m}
+=x^{n}-mx^{n-1}-1
+\qquad
+(m\ge2\text{ Pisot})
+\;}
+\]
+(\code{catalogo thm:pisot}).
+Não é \(\mathcal{F}\) em \(X^{X}\)
+(Def.~\ref{univ:def:XX}).
+O anel de todos os \(F=z^{N}-\sum c_{i}z^{i}\)
+como peça de \(\mathcal{U}\): \texttt{não localizada}.
+\end{definicao}
+
+\begin{definicao}[interface \(m=0\) da dourada: Fourier aditivo, Mellin multiplicativo]\label{univ:def:dourada-m0}
+A família é Def.~\ref{univ:def:dupolo}.
+A transformada é \textbf{uma}; os polos são dois
+(\code{catalogo sec:dourada};
+\code{algebrico cor:dourada-completa}):
+\[
+\boxed{\;
+\mathfrak{G}=\mathcal{F}\circ\Lambda,\qquad
+(\Lambda x)(u)=x(e^{u}),\qquad
+\mathfrak{G}^{-1}=\Lambda^{-1}\circ\mathcal{F}^{-1}
+\;}
+\]
+Mellin \emph{é} Fourier no grupo multiplicativo
+(\(x=e^{u}\)):
+\[
+\boxed{\;
+\mathcal{M}[f](s)
+=\int_{0}^{\infty}f(x)\,x^{s-1}\,dx
+=\widehat{g}(\tau)
+\qquad
+g(u)=f(e^{u})e^{\sigma u}
+\;}
+\]
+O par:
+\[
+\boxed{\;
+\mathbb{C}^{*}\cong\mathbb{R}^{+}\times S^{1}
+\qquad
+\text{Fourier }(S^{1},\oplus,e^{i\omega t})
+\qquad
+\text{Mellin }(\mathbb{R}^{+},\otimes,t^{s})
+\;}
+\]
+Fourier mede o passo (norma aditiva).
+Mellin mede a escala (norma multiplicativa).
+\(\log\) é o isomorfismo:
+\(t^{i\omega}=e^{i\omega\log t}\).
+Interface \(m=0\) --- polo \textbf{aditivo}, a troca
+(\code{fis:thm:estrela}(2)):
+\[
+\boxed{\;
+A_{0}=\begin{pmatrix}0&1\\1&0\end{pmatrix},\qquad
+x^{2}=1,\qquad
+\sigma_{\pm}=\pm1,\qquad
+\operatorname{eval}_{\pm}(a,b)=a\pm b
+\;}
+\]
+\(\sigma+\sigma^{\dagger}=0\), \(\sigma\sigma^{\dagger}=-1\),
+\(A_{0}^{2}=I\). Borda cíclica: raízes de \(x^{N}-1\),
+factor \(1/\sqrt{N}\).
+Polo \textbf{multiplicativo}: \(m=1\), \(x^{2}=x+1\),
+\(\varphi\) (\code{fis:thm:estrela}).
+A dourada liga \(\varphi^{2}=\varphi+1\) nas três cartas
+(\code{catalogo sec:dourada}: cálculo, base, espectro)
+--- \textbf{não} nesta interface.
+Face aditiva do par Fourier/Mellin:
+\texttt{realizada} neste sítio.
+Não é \(\mathrm{I}_{5}\) nem \(\mathrm{I}_{9}\)
+de Partículas.
+Não se funde com Born.
+Parseval desta realização:
+Obs.~\ref{univ:obs:dourada-parseval}
+--- norma \(L^{2}\) da transformada,
+não \(p_{i}\).
+\end{definicao}
+
+\begin{observacao}[três \(\mathcal{F}\), e \(m=0\) não é \(x^{2}=x+1\)]\label{univ:obs:dourada-m0}
+\(\mathrm{I}_{0}\) --- não se fundem:
+\[
+\boxed{\;
+\begin{gathered}
+\mathcal{F}_{\mathrm{Walsh}}
+\text{ (Def.~\code{fis:def:transf}; Teor.~\code{fis:thm:H})}\\
+\neq
+\mathcal{F}_{\mathrm{Fourier}}
+\text{ do flip }
+\mathfrak{G}=\mathcal{F}\circ\Lambda\\
+\neq
+\mathcal{G}
+\text{ discreta }
+(\code{algebrico thm:dourada-discreta})
+\end{gathered}
+\;}
+\]
+Walsh: \(\chi_{k}\colon X\to\{\pm1\}\),
+\(H^{2}=2^{m}\mathrm{Id}\).
+Dourada contínua: Fourier no \(\log\).
+Dourada discreta:
+\(\mathcal{G}(x)_{k}=\sum_{j}x_{j}\sigma^{jk}\),
+factor \(N\).
+A face \(*\) de Walsh (Def.~\ref{univ:def:face-mult})
+\textbf{não} é Mellin.
+\[
+\boxed{\;
+\pi^{2}=\pi
+\;\neq\;
+x^{2}=1\ (m=0)
+\;\neq\;
+x^{2}=x+1\ (m=1)
+\;\neq\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+\end{observacao}
+
+\begin{observacao}[Parseval da dourada: norma \(L^{2}\) da transformada, não Born]\label{univ:obs:dourada-parseval}
+A dourada contínua é o flip
+(Def.~\ref{univ:def:dourada-m0};
+\code{catalogo sec:dourada}):
+\[
+\boxed{\;
+\mathfrak{G}=\mathcal{F}\circ\Lambda,\qquad
+(\Lambda x)(u)=x(e^{u}),\qquad
+\mathfrak{G}^{-1}=\Lambda^{-1}\circ\mathcal{F}^{-1}
+\;}
+\]
+\(\Lambda\) leva Haar a Haar:
+\(dt/t=du\). Logo
+\(\Lambda\colon L^{2}(\mathbb{R}_{>0},dt/t)
+\to L^{2}(\mathbb{R},du)\)
+é isometria. \(\mathcal{F}\) em
+\(L^{2}(\mathbb{R})\) é Plancherel
+clássico --- \textbf{leitura}, não prova
+nova (\code{teoria thm:parseval-multi},
+obs.: «não se reivindica prova nova do
+Parseval clássico»). A composição de
+isometrias é isometria:
+\[
+\boxed{\;
+\int_{0}^{\infty}\lvert x(t)\rvert^{2}\,
+\frac{dt}{t}
+=
+\int_{-\infty}^{\infty}
+\lvert(\mathfrak{G}x)(\omega)\rvert^{2}\,
+\frac{d\omega}{2\pi}
+\;}
+\]
+Polo \(m=0\): Fourier no círculo
+(\(S^{1}\), \(\oplus\), factor
+\(1/\sqrt{N}\)).
+Polo \(m=1\): Mellin na semirreta
+(\(\mathbb{R}^{+}\), \(\otimes\));
+a dourada discreta fecha o grupo
+(\code{algebrico thm:dourada-discreta}):
+\[
+\boxed{\;
+\sum_{k=0}^{N-1}\sigma^{(j-j')k}
+=N\,\delta_{j,j'}
+\qquad
+\mathcal{G}(x)_{k}
+=\sum_{j}x_{j}\sigma^{jk}
+\qquad
+x_{j}
+=N^{-1}\sum_{k}\mathcal{G}(x)_{k}
+\sigma^{-jk}
+\;}
+\]
+No anel
+(\code{teoria thm:parseval-multi};
+\code{tests/cristal\_energia.js}):
+\[
+\boxed{\;
+\sum_{\mathbf{k}}X_{\mathbf{k}}X_{-\mathbf{k}}
+=
+\Bigl(\prod_{i}N_{i}\Bigr)
+\sum_{\mathbf{i}}x_{\mathbf{i}}^{2}
+\;}
+\]
+\(\mathrm{I}_{0}\) --- cinco conservações,
+não se fundem:
+\[
+\boxed{\;
+\begin{gathered}
+\text{Parseval }L^{2}\text{ de }
+\mathfrak{G}
+\;\neq\;
+\lVert\mathcal{F}_{\mathrm{Walsh}}(f)\rVert^{2}
+=2^{m}\lVert f\rVert^{2}
+\\
+\;\neq\;
+\lvert\det\rvert=1
+\;\neq\;
+P=k/N
+\;\neq\;
+p_{i}=\lvert\langle i\rvert\psi\rangle\rvert^{2}
+\end{gathered}
+\;}
+\]
+Walsh (Teor.~\code{fis:thm:H}) é o
+hipercubo. \(\lvert\det\rvert=1\) é
+Lei~4 / volume
+(\code{fis:thm:gato}(2)).
+\(P=k/N\) é Hurwitz / GLH
+(\code{fis:lem:conserva};
+\code{fis:thm:central}).
+O palco da Física conta o
+rectângulo, converte dobras e
+liga faces
+(\code{fis:obs:quantica-glh-dobras})
+--- \textbf{não} fecha Born.
+Born-\emph{regra} pede
+\(\lvert\cdot\rvert^{2}\) de amplitude
+em \(\mathbb{C}\), não a norma da
+transformada.
+A face \(*\) de Walsh
+(Def.~\ref{univ:def:face-mult})
+\textbf{não} é Mellin.
+\(A_{0}\) (involução concreta,
+\(x^{2}=1\)) \(\neq\mathbf{Duo}\).
+Homónimo «Parseval dourado»
+\(\det(A_{m}^{k})=(-1)^{k}\)
+(\code{tests/ponte\_universal\_metalica.js})
+é o gato na companheira, \textbf{não}
+esta isometria.
+Plancherel clássico
+\(\neq\) canónico de \(\mathcal{U}\).
+Estatuto: \(L^{2}\) da transformada
+\texttt{realizado} (composição \(+\)
+Dirac discreto medido).
+Medida na fibra / Born-\emph{regra}:
+\texttt{não localizada}.
+Ferramenta, no sentido da
+Obs.~\ref{univ:obs:banach} ---
+conserva o \(L^{2}\), não produz
+\(p_{i}\).
+\end{observacao}
+
+\begin{observacao}[torre \(X^{X^{\cdot}}\): não-composição]\label{univ:obs:torre-XX}
+Três objectos, não se confundem:
+\[
+\boxed{\;
+\operatorname{Ind}^{k}=2^{k}
+\;\neq\;
+\operatorname{MetaInd}(L_7)=L_0
+\;\neq\;
+\text{torre }X^{X^{\cdot}}
+\;}
+\]
+\(\operatorname{Ind}^{k}\): cardinalidade das dobras, escada
+binária (Def.~\ref{univ:def:lei-unica};
+Teor.~\code{fis:thm:base}).
+\(\operatorname{MetaInd}\): retração na fibra \(L_7\to L_0\),
+\textbf{não} iteração infinita de espaços funcionais
+(Cor.~\ref{univ:cor:metaind-fecho}).
+A torre \(X^{X^{\cdot}}\): \textbf{não construída};
+artefacto de notação. Esta observação regista a
+\textbf{não-composição}, não uma peça faltante.
+Duplopolinómios: Def.~\ref{univ:def:dupolo}
+--- \(x^{2}-mx-1\);
+\(\beta_{n,m}=x^{n}-mx^{n-1}-1\) (Pisot \(m\ge2\));
+companheira só grau \(2\), \(\lvert c_0\rvert=1\);
+coincidência não é geral.
+Interface \(m=0\): Def.~\ref{univ:def:dourada-m0}
+(Fourier aditivo / Mellin multiplicativo;
+Obs.~\ref{univ:obs:dourada-m0}).
+Parseval: Obs.~\ref{univ:obs:dourada-parseval}.
+Densidade \(\mathsf{Aut}/X^{X}\): Pisot e Gentil contínuo
+\textbf{não} dão (Obs.~\ref{univ:obs:denso-XX}).
+Quântica fora desta construção.
+O canónico de \(\mathcal{U}\) continua: escada \(2^{k}\)
++ retorno de fibra. Sem tetração ad hoc.
+\end{observacao}
+
 \begin{observacao}[Banach e BW: ferramentas de fecho, não peças de \(\mathcal{U}_{\mathrm{can}}\)]\label{univ:obs:banach}
 O repo já mede Banach--Caccioppoli
 (\code{lib/metrico.h}; \code{banco/conversa.c} MT9)
@@ -2586,6 +2894,140 @@ Unificação por redução \(\neq\) fusão:
 \(\pi(F)=\pi(B)=\pi(N)=L_0\), não \(F\cap B\cap N\).
 (\code{fis:thm:central}; Def.~\ref{univ:def:glh-an}.)
 \end{observacao}
+
+\begin{observacao}[grafo de composição: arestas medidas, não narrativa]\label{univ:obs:grafo-fecho}
+Os nós são as oito leis \(L_0,\ldots,L_7\) e os auxiliares
+\(\{\mathcal{F},\pi_{\mathcal{U}},\mathbf{Duo},i\}\).
+Cada seta é um operador \textbf{já existente}
+(\code{banco\_lei\_unica\_u.js}; \code{banco\_transf\_u.js};
+\code{lib/quantico.h}; \code{lib/umbit.h}).
+Se não há \(L_i\to L_j\), a aresta \textbf{não existe}
+(\texttt{não localizada}) --- não se desenha dobra por analogia.
+\[
+\boxed{\;
+\operatorname{Res}\Bigl(L_0\xrightarrow{\mathcal{O}_1}\cdots
+\xrightarrow{\mathcal{O}_n}L_0\Bigr)=0
+\quad\text{só com }\mathcal{O}_k\text{ no motor}
+\;}
+\]
+Dois caminhos, \textbf{duas leituras do mesmo}
+\(\widehat{L_7}\), não dois operadores concorrentes:
+\[
+\boxed{\;
+L_7\overset{\mathcal{F}}{\longrightarrow}\widehat{L_7}
+\overset{\mathcal{F}^{-1}}{\longrightarrow}L_7
+\qquad
+L_7\overset{\mathcal{F}}{\longrightarrow}\widehat{L_7}
+\overset{\pi_{\mathcal{U}}}{\longrightarrow}L_0
+\;}
+\]
+Medido, dirigido:
+\(\operatorname{Ind}\colon L_k\to L_{k+1}\) (\(k=0,\ldots,6\))
+e \(\operatorname{Ind}(L_7)=L_0\) (período;
+Def.~\ref{univ:def:lei-unica});
+\(\operatorname{MetaInd}/\pi_{\mathcal{U}}\colon L_7\to L_0\)
+(Teor.~\ref{univ:thm:metaind-pi});
+\(\mathcal{F}\colon L_7\to\widehat{L_7}\);
+\(\mathcal{F}^{-1}\colon\widehat{L_7}\to L_7\);
+\(\pi_{\mathcal{U}}\circ\mathcal{F}\colon\widehat{L_7}\to L_0\).
+Grafo involutivo medido (ciclos auxiliares,
+não arestas \(L_i\to L_j\) salvo o retorno):
+\[
+\boxed{\;
+\operatorname{Ind}^{8}=\mathrm{id}
+\qquad
+\mathbf{Duo}^{2}=\mathrm{id}
+\qquad
+i^{4}=\mathrm{id}
+\qquad
+\nu^{2}=\mathrm{id}
+\;}
+\]
+mais \(L_7\xrightarrow{\pi_{\mathcal{U}}\circ\mathcal{F}}L_0\).
+\(\nu^{2}=\mathrm{id}\) fecha no \emph{byte}
+(\code{lei1\_dual}); \textbf{não} é aresta
+\(L_0\to L_1\).
+Pêntade irredutível --- \textbf{não} se funde
+(Obs.~\ref{univ:obs:tres-canonicos};
+Obs.~\ref{univ:obs:estatutos-u}):
+\[
+\boxed{\;
+\pi^{2}=\pi
+\neq x^{2}=1
+\neq x^{2}=x+1
+\neq x^{2}=-1
+\neq\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+\(\mathcal{U}\) \textbf{não} precisa de Born,
+nem de Lei~8, nem de \(T^{3}=\mathrm{id}\).
+Consome, não constrói: GLH
+(Def.~\ref{univ:def:glh-an}; \code{fis:thm:central}),
+Parseval (\code{fis:thm:H};
+Obs.~\ref{univ:obs:dourada-parseval}),
+pental \(x^{2}=-1\) como operação da base
+(\code{fis:obs:quantica-oito-leis}; \texttt{psi\_roda}).
+\textbf{Não} se copia o palco quântico para
+\(\mathcal{U}\). \textbf{Não} há «Lei Quântica».
+Na gramática permanece \texttt{não localizada}:
+\(L_0\xrightarrow{\partial}L_1\)
+(Def.~\code{fis:def:op}: o paper não tem essa seta);
+\(K^{**}=K\) como aresta de leis
+(\code{lei2\_bidual} é identidade no byte);
+Lei~6 \(=\) \(\mathbf{Duo}\) (\texttt{N/A}:
+\(\oplus=\otimes\neq\mathbf{Duo}\));
+par \(1\)--\(7^{\dagger}\) (só \(0^{\dagger}=\infty\));
+Born-\(P_i\); Absorção\(\leftrightarrow\)Lei~7;
+Paper~A / CT como canónicos de \(\mathcal{U}\).
+Sem \(L_8\).
+(\code{tests/grafo\_fecho\_u.js};
+\code{banco\_grafo\_fecho\_u.js}.)
+\end{observacao}
+
+\begin{teorema}[composição dos dois fechamentos]\label{univ:thm:composicao-fechos}
+As duas leituras de \(\widehat{L_7}\) já são independentes.
+Não faltava Lei~8: faltava o grafo.
+\[
+\boxed{\;
+\mathcal{F}^{-1}\mathcal{F}=I
+\qquad
+\operatorname{Res}(\mathcal{F}^{-1}\mathcal{F})=0
+\quad(\text{Def.~\ref{univ:def:finv}})
+\;}
+\]
+\[
+\boxed{\;
+\pi_{\mathcal{U}}\bigl(\mathcal{F}(L_7)\bigr)=L_0
+\qquad
+\operatorname{Res}\bigl(\pi_{\mathcal{U}}\mathcal{F}(L_7)-L_0\bigr)=0
+\quad(\text{Teor.~\ref{univ:thm:retorno-canonico}})
+\;}
+\]
+A volta conjunta \textbf{não} inventa transformação.
+Reverter o campo \(\delta_{e_7}\) e depois o retorno:
+\[
+\boxed{\;
+\pi_{\mathcal{U}}\bigl(\mathcal{F}(\mathcal{F}^{-1}\mathcal{F}(L_7))\bigr)=L_0
+\qquad(\operatorname{Res}=0)
+\;}
+\]
+O retorno primeiro e a reversão em \(\delta_{e_0}\):
+\[
+\boxed{\;
+\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0
+\quad\text{e}\quad
+\mathcal{F}^{-1}\mathcal{F}(L_0)=L_0
+\qquad(\operatorname{Res}=0)
+\;}
+\]
+Compatível: o retorno canónico sobrevive à reversão
+espectral. Estatuto \texttt{realizado}
+(\code{tests/grafo\_fecho\_u.js}).
+Não funde a pêntade
+(Obs.~\ref{univ:obs:grafo-fecho}).
+Não é circuito quântico
+(\code{fis:obs:quantica-grafo-fecho}).
+\end{teorema}
 
 \begin{definicao}[o objecto \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)]\label{univ:def:XX}
 \[
@@ -3108,6 +3550,133 @@ ausência}, só então classificar \texttt{N/A}. Se o agente encontra uma
 palavra («estrela», \(\mu\), «iso») em \code{redes.tex} ou
 noutro sítio, I0 pergunta se é estrutura ou homónimo \textbf{antes} de
 pôr o nome na ficha.
+
+\begin{observacao}[estatutos no Universal: o que \(\mathcal{U}\) reconhece]\label{univ:obs:estatutos-u}
+Gramática e reconhecimento. \textbf{Não} bestiário.
+\textbf{Não} Parte. A Física constrói; esta tabela
+\textbf{consome} e aponta --- não copia o trial,
+as dobras em \(E(\pi)\) nem os três graus
+(\code{fis:thm:trial}, \code{fis:thm:duascoord},
+\code{fis:thm:tresgraus}).
+\[
+\boxed{\;
+\pi^{2}=\pi
+\;\neq\;
+x^{2}=1
+\;\neq\;
+x^{2}=x+1
+\;\neq\;
+x^{2}=-1
+\;\neq\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+\[
+\boxed{\;
+\mathrm{I}_{4}=\mathrm{GLH}
+\qquad
+\mathrm{I}_{11}=\text{morfismos / estado}
+\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\textwidth}
+                >{\raggedright\arraybackslash}p{0.18\textwidth}
+                >{\raggedright\arraybackslash}p{0.42\textwidth}@{}}
+\toprule
+item & em \(\mathcal{U}\) & aponta / proibição \\
+\midrule
+\(L_0\); retorno
+\(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\),
+\(\operatorname{Res}=0\)
+  & \texttt{realizado}
+  & Teor.~\ref{univ:thm:retorno-canonico}.
+    Este \(\operatorname{Res}=0\)
+    \(\neq\) Absorção\(\leftrightarrow\)Lei~7 \\
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\);
+\(\mathbf{Duo}\); \(\mathcal{F}\), \(\mathcal{F}^{-1}\)
+  & \texttt{realizado}
+  & Def.~\ref{univ:def:star};
+    Def.~\ref{univ:def:finv}.
+    Walsh / byte, não Born \\
+\(\mathfrak{G}=\mathcal{F}\circ\Lambda\);
+polo \(m=0\) (\(x^{2}=1\), \(A_0\) troca)
+  & \texttt{realizado}
+    (interface)
+  & Def.~\ref{univ:def:dourada-m0}.
+    \(A_0\) dourada \(\neq\) \(A_0\) associador
+    \(s=0\) (\code{fis:obs:quantica-paper-a-norma}) \\
+polo \(m=1\) (\(x^{2}=x+1\))
+  & realização \(\mathrm{I}_{9}\),
+    \textbf{não}
+    \(\operatorname{Star}(\mathcal{U})\)
+  & Def.~\ref{univ:def:dupolo};
+    \code{fis:thm:estrela} \\
+\(x^{2}=-1\) (Lei~5, pental)
+  & \textbf{não}
+    \(\operatorname{Star}(\mathcal{U})\)
+  & \code{fis:obs:quantica-oito-leis}.
+    Bit \(i\); não canónico de \(\mathcal{U}\) \\
+Parseval de \(\mathfrak{G}\)
+  & \texttt{realizado}
+    (\(L^{2}\))
+  & Obs.~\ref{univ:obs:dourada-parseval}.
+    \(\neq\) Born; \(\neq\) \(\lvert\det\rvert=1\) \\
+GLH / rectângulo
+  & consome
+    (\(\mathrm{I}_{4}\))
+  & Def.~\ref{univ:def:glh-an}.
+    \textbf{Não} copia
+    \code{fis:thm:central} \\
+\(\pi^{2}=\pi\)
+  & Alonzo / fecho
+  & Def.~\ref{univ:def:alonzo-idemp}.
+    \(\neq\pi_{\mathcal{U}}\) salvo o paper
+    identificar \\
+Absorção \(\leftrightarrow\) Lei~7
+  & \texttt{não localizada}
+  & \code{fis:obs:quantica-absorcao-lei7}.
+    Quarta célula do trial é da Física \\
+interpolação / norma \(+V\)
+(Paper~A)
+  & \texttt{não localizada}
+  & \code{fis:obs:quantica-paper-a-norma}.
+    Realizados \emph{no} paper;
+    não canónicos de \(\mathcal{U}\) \\
+campo médio CT
+  & \texttt{não localizada}
+  & \code{fis:obs:quantica-ct-mf}.
+    \(\neq\lVert r\rVert^{2}+C^{2}=1\)
+    já ingerido \\
+Born-\emph{regra}
+  & não é de \(\mathcal{U}\)
+  & contrato parcial no palco
+    (\code{fis:quantica-contrato}) \\
+\(\partial_{\mathrm{v}}\partial_{\mathrm{h}}\)
+\(=\) centro do trial
+  & \texttt{N/A}
+    (colagem)
+  & \code{fis:obs:quantica-comuta-dobras} \\
+associador \(=\) dobra afim
+  & \texttt{N/A}
+  & \code{fis:obs:quantica-associador-eixo} \\
+grafo \(L_0\)--\(L_7\);
+\(\mathcal{F}^{-1}\mathcal{F}\)
+com \(\pi_{\mathcal{U}}\mathcal{F}(L_7)\)
+  & \texttt{realizado}
+    (volta conjunta
+    \(\operatorname{Res}=0\))
+  & Teor.~\ref{univ:thm:composicao-fechos};
+    Obs.~\ref{univ:obs:grafo-fecho}.
+    Arestas em falta
+    \texttt{não localizada} \\
+\bottomrule
+\end{tabular}
+\end{center}
+Lei~8, 15.º corpo, \(T^{3}=\mathrm{id}\):
+não se institui.
+Três graus, dobra em \(E(\pi)\), trial como magma:
+citam-se; não se reescrevem aqui.
+\end{observacao}
 
 %═══════════════════════════════════════════════════════════════════════════
 \section{\texorpdfstring{Ingestão: uma realização de \(\mathcal{U}\)}{Ingestão: uma realização do Universal}}\label{univ:sec:contrato}
