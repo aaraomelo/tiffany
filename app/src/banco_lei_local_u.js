@@ -18,6 +18,7 @@ import {
   cicloDocker,
 } from './banco_maquina_u.js'
 import { medeTransformada, validaBanda } from './banco_transf_u.js'
+import { nucleoU } from './banco_lei_unica_u.js'
 
 export { validaBanda }
 
@@ -246,6 +247,7 @@ export function varrerLeiLocal (man, opts = {}) {
       proibicao: 'nao promover corpo; M_Docker permanece nao localizada',
     },
     recusas: RECUSAS.slice(),
+    nucleo: nucleoU(),
   }
 }
 

@@ -129,6 +129,8 @@ export function medeTransformada () {
     transformada_no_motor: true,
     fonte: 'fis:def:transf',
     teorema: 'fis:thm:H',
+    fis: 'fis:obs:U-consome',
+    cat: 'cat:nucleo-u',
     m: TRANSF_M,
     n: TRANSF_N,
     parseval,

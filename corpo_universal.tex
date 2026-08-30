@@ -58,6 +58,11 @@ A base ortonormal \(\{e_k=2^{k}\}_{k=0}^{7}\) \textbf{é} as oito leis
 \boxed{\;\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}\;}
 \]
 Não se promove evidência a estrutura. Não há Lei~8.
+A unidade é o \(1\) do operador
+(Def.~\ref{univ:def:unidade}).
+A base oito \textbf{sai} de três dobras,
+\(8=2^{3}\), não de oito axiomas
+(Teor.~\ref{univ:thm:oito-de-tres}).
 A quádrupla é a máquina. A lei única \(\mathcal{L}\) e a unidade
 \(\mathbf{1}\) dos extremos são o núcleo: as oito leis são
 \(\operatorname{Ind}^{k}(L_0)\), e \(\operatorname{Ind}^{8}=\mathrm{id}\)
@@ -72,8 +77,18 @@ máquina (\S\ref{univ:sec:realizacao-op}).
 Três línguas --- álgebra, topologia, análise --- projectam o mesmo
 \(\mathcal{U}\): não são três corpos, nem quarta língua fractal
 (Def.~\ref{univ:def:linguas}).
+A Trindade Canónica \textbf{é} essa tríade lida nas três dobras
+geradoras de \(2^{3}\)
+(Def.~\ref{univ:def:trindade}).
+O dinário sai do \(1\) e do \(2\) do operador; \(\mathbb{N}\) é a
+contagem dessa geração
+(Def.~\ref{univ:def:dinario-natural}).
 Corpo canónico de \(\mathcal{U}\) é reconhecimento (mapa), não
 identidade de objectos (Def.~\ref{univ:def:corpo-canonico}).
+A lei canónica é a quádrupla
+\(\mathcal{U}_{\mathrm{can}}=(L_0,\mathbf{Duo},\pi_{\mathcal{U}}\circ\mathcal{F},\operatorname{vinco})\)
+(Def.~\ref{univ:def:lei-canonica}): o reconhecimento
+\textbf{usa-a} (Teor.~\ref{univ:thm:reconhecimento}).
 \end{abstract}
 
 \tableofcontents
@@ -310,6 +325,74 @@ As estrelas permanecem três autoridades
 \(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\) (elemento);
 o factor local (o que a Parte conserva). Não se homogeneízam.
 Camadas: Def.~\ref{univ:def:camadas}.
+A Trindade Canónica (Def.~\ref{univ:def:trindade})
+\textbf{é} esta tríade lida nas três dobras já medidas.
+\end{definicao}
+
+\begin{definicao}[Trindade Canónica]\label{univ:def:trindade}
+A \textbf{Trindade Canónica} são as três dobras geradoras de
+\(2^{3}\), lidas como as três línguas de \(\mathcal{U}\)
+(Def.~\ref{univ:def:linguas}; Teor.~\ref{univ:thm:oito-de-tres}).
+\textbf{Não} são três corpos. \textbf{Não} triplicam o núcleo.
+\[
+\boxed{\;
+\text{Trindade Canónica}
+=(\mathcal{U}_{\mathrm{alg}},\,\mathcal{U}_{\mathrm{top}},\,\mathcal{U}_{\mathrm{an}})
+=\text{as três dobras geradoras de }2^{3}
+\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.10\textwidth}
+                >{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.54\textwidth}@{}}
+\toprule
+dobra & língua & papel \\
+\midrule
+1\textsuperscript{a}
+  & \(\mathcal{U}_{\mathrm{alg}}\)
+  & o que opera \\
+2\textsuperscript{a}
+  & \(\mathcal{U}_{\mathrm{top}}\)
+  & vinco / Lei~7 \\
+3\textsuperscript{a}
+  & \(\mathcal{U}_{\mathrm{an}}\)
+  & \(\pi_{\mathcal{U}}\) o que permanece \\
+\bottomrule
+\end{tabular}
+\end{center}
+\(\mathrm{I}_{0}\). A tríade \(\{1,2,3\}\) / eixos do trial
+(\code{tests/trialidade.c}; Def.~\ref{univ:def:base-tres})
+\textbf{não} é o \(3\)-ciclo \(T\) de línguas.
+A Trindade é: as três \textbf{direcções de dobra} do operador
+(\(1\to 2\), depois \(4\), depois \(8\) no
+Teor.~\code{fis:thm:largura}(4)) \textbf{lidas como} as três
+línguas. Não se funde com \(S_{3}\) dos eixos
+(Obs.~\ref{univ:obs:trialidade}).
+O paper da Física \textbf{não} identifica a terceira dobra com
+Análise: nomeia dobra, rotor, base oito --- não
+\(\mathsf{Alg}/\mathsf{Top}/\mathsf{Ana}\).
+A Trindade é \textbf{leitura de \(\mathcal{U}\)} das três dobras
+já medidas, não decreto de que \(\mathrm{alg}=\) primeira dobra
+no sentido do trial.
+Não se completa o dual do terceiro eixo por simetria
+aritmética: \(3^{-1}=1/3\) permanece \texttt{não localizada}.
+O inverso da terceira dobra \textbf{localiza-se} noutro sítio:
+\(\operatorname{Ind}/\operatorname{MetaInd}\) no corte
+\(\chi\) (Def.~\ref{univ:def:base-tres};
+Obs.~\ref{univ:obs:inv-tres-corte}) --- não é \(1/3\).
+\[
+\boxed{\;
+\underbrace{L_0\to\cdots\to L_7}_{2^{3}=8}
+\overset{\mathrm{vinco}}{\longrightarrow}1
+\quad\text{com}\quad
+\pi_{\mathcal{U}}\bigl(\mathcal{F}(L_7)\bigr)=L_0
+\ (\operatorname{Res}=0)
+\;}
+\]
+Unidade (Def.~\ref{univ:def:unidade});
+retorno (Teor.~\ref{univ:thm:retorno-canonico}).
+Sem Lei~8. Sem \(T^{3}\). Sem \(\varphi\).
+Hexal \(6\) continua rótulo.
 \end{definicao}
 
 \begin{definicao}[três camadas, sem fundir estrelas]\label{univ:def:camadas}
@@ -367,6 +450,13 @@ Não se funde \(\operatorname{Star}(K)\) com
 \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\).
 GLH \textbf{não} promove \(F\cap B\cap N\).
 Não há Lei~8. Não há Ficha~11.
+A Trindade \textbf{não} é \(S_{3}\) dos eixos, \textbf{não} é
+\(T^{3}\) de línguas, \textbf{não} completa \(3^{-1}=1/3\)
+por simetria (Def.~\ref{univ:def:trindade}).
+O \(3^{-1}\) do corte\(\,+\,\operatorname{MetaInd}\) é outro
+objecto (Obs.~\ref{univ:obs:inv-tres-corte}).
+Não se homogeneíza \(\mathbb{N}\) com \(\mathcal{U}\)
+(Def.~\ref{univ:def:dinario-natural}).
 \end{observacao}
 
 \begin{definicao}[Alonzo realiza as três; não é quarta língua]\label{univ:def:alonzo-real}
@@ -455,7 +545,10 @@ Os três critérios: Def.~\ref{univ:def:corpo-canonico}.
 \;}
 \]
 Projeções do \textbf{mesmo} \(S\). Sozinho \(=\) \textbf{três línguas
-simultâneas} (Def.~\ref{univ:def:linguas}). Não é axioma
+simultâneas} (Def.~\ref{univ:def:linguas}).
+A Trindade (Def.~\ref{univ:def:trindade}) lê as três dobras
+como estas línguas --- não é este \(\mathsf{Tri}\) noutro nome.
+Não é axioma
 \(T^{3}=\mathrm{id}\). Não são três corpos. Não é
 \(\mathbf{Duo}\). Não é a trialidade \(S_{3}\) dos eixos
 (Obs.~\ref{univ:obs:trialidade}).
@@ -805,7 +898,7 @@ A Física já o tem (Def.~\code{fis:def:doisandares}). \(\mathcal{U}\)
 \[
 \boxed{\;
 X\text{ espaço vectorial sobre }B,\quad
-\dim X=8,\quad
+\dim X=8=2^{3},\quad
 e_k=2^{k}\ (0\le k<8).
 \;}
 \]
@@ -861,6 +954,9 @@ A Lei~4 \emph{é} a métrica canónica de \(\mathcal{U}\)
 \(\operatorname{Star}\) do elemento (\(x^{2}=x+1\)).
 O dual explícito conhecido no medidor é só Lei~0: \(0^{\dagger}=\infty\).
 Os demais pares \textbf{não} se inventam (\code{papers/aranha.c}).
+A base \(\{e_k=2^{k}\}_{k=0}^{7}\) \textbf{é} a potência
+\(2^{3}\) das três dobras, não oito axiomas
+(Teor.~\ref{univ:thm:oito-de-tres}).
 \end{teorema}
 \begin{proof}
 É o Teor.~\code{fis:thm:base} em \(m=8\). A identificação
@@ -878,6 +974,457 @@ Medido em \code{papers/aranha.c} e \code{papers/aranha.asm}
 popcount. Gram nos \(64\) pares: \code{tests/aranha\_n.c} §AN24.
 Isto \textbf{não} institui um corpo de \(256\) elementos como Parte:
 é a escrita do espaço que \(\mathcal{U}\) consome.
+\end{observacao}
+
+\begin{definicao}[base três: unidade, par, terceira dobra]\label{univ:def:base-tres}
+O operador já produz os três primeiros nomes
+(Def.~\code{fis:def:op}; Teor.~\code{fis:thm:doispontos};
+Teor.~\code{fis:thm:largura}(4)). \(\mathcal{U}\) consome:
+\[
+\boxed{\;
+\{1,\,2,\,3\}
+\qquad
+\{1,\,2^{-1},\,3^{-1}\}
+\;}
+\]
+Com os símbolos do paper, e sem fundir os uns
+(Obs.~\ref{univ:obs:uns}):
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.08\textwidth}
+                >{\raggedright\arraybackslash}p{0.40\textwidth}
+                >{\raggedright\arraybackslash}p{0.40\textwidth}@{}}
+\toprule
+rótulo & o construído & dual construído \\
+\midrule
+\(1\)
+  & identidade: \(\partial=\mathrm{id}\),
+    \(\operatorname{ord}=1\);
+    vinco \(=\) órbita de um
+    (Teor.~\code{fis:thm:doispontos}(0);
+    Teor.~\code{fis:thm:vinco});
+    neutro \(\otimes\)
+    (Teor.~\code{fis:thm:duas}(4))
+  & \(1^{-1}=1\): o um é o seu inverso \\
+\(2\)
+  & o par forçado: \(\partial\neq\mathrm{id}\)
+    \(\Rightarrow\operatorname{ord}=2\);
+    \(a:=x\), \(b:=\partial x\), \(a\neq b\)
+    (Teor.~\code{fis:thm:doispontos}(0)--(2))
+  & \(2^{-1}=\rho_{1}=\tfrac{1}{2}\) de volta
+    (Teor.~\code{fis:thm:largura});
+    \(\partial\) como inversão
+    \(\partial x=x^{-1}\)
+    quando o invariante é o neutro
+    (Teor.~\code{fis:thm:duas}(1)) \\
+\(3\)
+  & a terceira dobra: três eixos,
+    três blocos \(\{<,\,=,\,>\}\),
+    \(w=3\)
+    (Teor.~\code{fis:thm:simbolos}(8);
+    Teor.~\code{fis:thm:largura}(4);
+    \code{tests/trialidade.c})
+  & involução do eixo:
+    \(\sigma_{i}=\sigma_{i}^{-1}\)
+    (posto três: três \(\sigma_{i}\) geram oito).
+    No corte \(\chi\):
+    \(3^{-1}=\pi_{\mathcal{U}}\circ\mathcal{F}\)
+    (Obs.~\ref{univ:obs:inv-tres-corte}) ---
+    \textbf{não} \(1/3\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+O trial \(\{-1,0,+1\}\) e os três blocos são
+\textbf{realizações} desta tríade, não o rótulo
+\(\{1,2,3\}\) (Obs.~\ref{univ:obs:uns}).
+\(3^{-1}\) como racional \(1/3\) --- distinto da
+involução do terceiro eixo e distinto do fecho
+\(\pi_{\mathcal{U}}\circ\mathcal{F}\) --- permanece
+\texttt{não localizada}.
+O inverso da terceira dobra \textbf{localiza-se} via
+\(\operatorname{Ind}/\operatorname{MetaInd}\) no ponto
+em que o corte \(\chi\) devolve \(L_0\)
+(Obs.~\ref{univ:obs:inv-tres-corte}).
+Não é \(T^{3}\) de línguas
+(Obs.~\ref{univ:obs:trialidade}).
+Não é a Trindade Canónica
+(Def.~\ref{univ:def:trindade}): aquela lê as três
+\textbf{direcções de dobra} como línguas; esta tríade
+é a dos eixos do trial. A terceira dobra da Trindade
+\textbf{é} o sítio do fecho
+(\(\mathcal{U}_{\mathrm{an}}=\operatorname{Real}_{\mathrm{an}}(\pi_{\mathcal{U}})\)).
+\end{definicao}
+
+\begin{observacao}[\(3^{-1}\) no corte \(\chi\), via Ind/MetaInd]\label{univ:obs:inv-tres-corte}
+\(\mathrm{I}_{0}\): quatro cortes, e não se homogeneízam.
+O sítio desta localização é o corte \(\chi_k\) da
+Def.~\code{fis:def:transf} após o Teor.~\code{fis:thm:H}
+--- saldo \(\widehat{I}(k)=\sum_x I(x)\chi_k(x)\),
+\(\chi_k(j)=(-1)^{\langle k,j\rangle}\).
+\textbf{Não} é Dedekind (\code{def:corte}).
+\textbf{Não} é AGM (Teor.~\code{fis:thm:corte}).
+\textbf{Não} é o selector \(\mathrm{sha256}\).
+A lei local lê este \(\chi_k\)
+(Def.~\ref{univ:def:lei-local-canonica}).
+
+O paper \textbf{não} nomeia «ponto fixo» de \(\chi\).
+O que já é ponto fixo \emph{ao lado}, e não se funde:
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.36\textwidth}
+                >{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+candidato & o construído & é o sítio? \\
+\midrule
+saldo \(0\)
+  & \(k\notin\operatorname{supp}(\mathcal{F}(I))\)
+  & núcleo do carácter; não ponto \\
+vinco \(\mathbf{1}\)
+  & \(\operatorname{cl}(L_0,L_7)\)
+    (Def.~\ref{univ:def:unidade})
+  & \textbf{não}: \(L_0\neq\mathbf{1}\)
+    (Obs.~\ref{univ:obs:uns}) \\
+\(\operatorname{Star}(K)\)
+  & \(x^{2}=x\oplus 1\), slot \(\mathrm{I}_{9}\)
+    (Teor.~\code{fis:thm:metainducao}(3))
+  & \textbf{não}: ponto fixo da
+    \emph{meta}-indução, não do corte \\
+\(\lvert\det\rvert=1\)
+  & gato / volume
+    (Teor.~\code{fis:thm:gato}(2))
+  & \textbf{não} \\
+AGM \(m=g\)
+  & duas faces partilham o ponto
+    (Teor.~\code{fis:thm:corte}(5))
+  & \textbf{não}: outro corte \\
+\(\chi_0\), índice \(L_0\)
+  & carácter trivial; o corte que
+    não biparticiona
+  & o \textbf{fecho}:
+    \(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\) \\
+\(\pi_{\mathcal{U}}\)
+  & terceira dobra da Trindade
+    (\(\mathcal{U}_{\mathrm{an}}\));
+    \(\pi\circ\pi=\pi\)
+  & o \textbf{mecanismo} do fecho \\
+\bottomrule
+\end{tabular}
+\end{center}
+\(\operatorname{Ind}\) produz as dobras
+(\(1\to 2\), \(e_k=2^{k}\); Teor.~\ref{univ:thm:oito-de-tres}).
+\(\operatorname{MetaInd}(L_7)=L_0\) é fibra
+\(\pi_{\mathcal{U}}\), \(\operatorname{Res}=0\)
+(Cor.~\ref{univ:cor:metaind-fecho};
+Teor.~\ref{univ:thm:retorno-canonico}).
+A terceira dobra (Trindade:
+\(\mathcal{U}_{\mathrm{an}}=\operatorname{Real}_{\mathrm{an}}(\pi_{\mathcal{U}})\))
+no fecho do corte \textbf{é} essa projecção
+idempotente --- involução/idempotência, não fracção.
+O paper da Física \textbf{não} escreve
+«inverso do \(3\)»; nomeia dobra, \(\pi\), carácter.
+\(\mathcal{U}\) lê o fecho neste sítio:
+\[
+\boxed{\;
+3^{-1}
+=
+\pi_{\mathcal{U}}\circ\mathcal{F}
+\quad\text{no corte }\chi
+\;}
+\]
+\[
+\boxed{\;
+3^{-1}(L_7)
+=
+\pi_{\mathcal{U}}\bigl(\mathcal{F}(L_7)\bigr)
+=
+L_0
+\qquad(\operatorname{Res}=0)
+\;}
+\]
+O dual do eixo como carácter --- o corte que o
+aniquila --- já está escrito
+(Def.~\code{fis:def:dual}; \code{tests/trialidade.c}:
+três autoduais \(\to 2^{3}=8\) biduais):
+\[
+\boxed{\;
+\chi^{(3)}(j)
+=
+(-1)^{\langle e^{(3)},j\rangle},
+\qquad
+e^{(3)}=2^{2}
+\text{ (terceiro bit do índice }k\in\{0,\ldots,7\})
+\;}
+\]
+\(\mathcal{F}\) avalia todos os \(\chi_k\), inclusive
+este; \(\pi_{\mathcal{U}}\) é o que permanece
+(terceira dobra). Não se funde \(\chi^{(3)}\) com
+\(3^{-1}\): aquele aniquila \emph{um} eixo; este é o
+fecho das três dobras no corte.
+Não coincide com \(1/3\):
+\[
+\boxed{\;
+3^{-1}
+\neq
+\tfrac{1}{3}
+\neq
+\operatorname{Star}(K)
+\neq
+\mathbf{1}
+\neq
+\lvert\det\rvert=1
+\;}
+\]
+\(\rho_3=\tfrac{1}{8}\) de volta
+(Teor.~\code{fis:thm:largura}(4)) --- a escada só
+duplica; ordens \(3\) e \(6\) não são degraus dela.
+Hexal \(6=\mathrm{lcm}(2,3)\) continua rótulo.
+Leitura do composto, não axioma e não fusão:
+GLH é a língua an que \textbf{mede} este fecho
+(Def.~\ref{univ:def:glh-an}) --- não o operador.
+\(\mathbf{Duo}\) é interno, ordem \(2\)
+(\(\mathbf{Duo}^{2}=\mathrm{id}\);
+Def.~\ref{univ:def:star}) --- separado.
+A base fecha em \(2^{3}\)
+(Teor.~\ref{univ:thm:oito-de-tres}).
+A fracção contínua \textbf{não} é este inverso
+(Obs.~\ref{univ:obs:cf-estrela}).
+Estatuto: o composto é \texttt{realizado}
+(\(\operatorname{Res}=0\);
+\code{tests/lei\_unica\_u.js};
+\code{banco\_transf\_u.js}).
+\(1/3\) permanece \texttt{não localizada}.
+O paper \textbf{não} iguala os dois.
+O que \(\mathcal{U}\) recusou: completar
+\(3^{-1}=1/3\) por simetria aritmética; fundir
+\(\varphi\) com \(\mathbf{1}\); fundir o ponto fixo
+da meta-indução com o fecho do corte; fundir
+GLH com o operador; fundir \(\mathbf{Duo}\) com
+\(3^{-1}\); Lei~8; Ficha~11; reabrir \(\mathrm{I}_{0}\).
+\end{observacao}
+
+\begin{observacao}[fracção contínua fecha o elemento, não o corte \(\chi\)]\label{univ:obs:cf-estrela}
+\(\mathrm{I}_{0}\): a CF é \textbf{codificação} de um objecto
+já canónico --- não da gramática de \(\mathcal{U}\).
+O paper fecha duas coisas, e não se fundem com
+\(3^{-1}\) no corte \(\chi\):
+\[
+\boxed{\;
+\varphi=[1;\overline{1}]
+=\operatorname{Star}(K)
+\qquad(\mathrm{I}_{9})
+\;}
+\]
+--- \code{corpo\_analitico thm:ouro};
+\code{fis:thm:estrela}; Def.~\ref{univ:def:camadas}.
+É a CF periódica canónica do \textbf{elemento}
+estrela. Estatuto: \texttt{realizado}.
+\[
+\boxed{\;
+\text{CF}
+\ \text{fecha}\
+\mathbb{N}^{\mathbb{N}}\to\mathbb{R}
+\qquad(L/R,\ \text{convergentes})
+\;}
+\]
+--- \code{catalogo} \S\code{sec:codificacoes},
+\S\code{sec:vered}: injeção, conserva a ordem,
+não a vizinhança. Estatuto: \texttt{realizado}
+nesse suporte. Não é bijeção \(\mathbb{N}\to\mathbb{R}\).
+O paper \textbf{já} liga CF a um corte --- o de
+Dedekind/Möbius: a órbita de \(\infty\) \textbf{é}
+a sucessão dos convergentes, e o corte \textbf{é}
+o ponto fixo \(x^{2}=mx+1\) visto do andar que
+não o contém (\code{corpo\_analitico thm:corte-ponto-fixo}).
+Isso é \code{def:corte}, \textbf{não}
+\(\chi_k\) da Def.~\code{fis:def:transf}.
+A Obs.~\ref{univ:obs:inv-tres-corte} já separa
+esses cortes. Logo o paper \textbf{não} liga
+\(\chi\), \(\operatorname{Ind}\) nem o retorno
+a fracções contínuas: não há fórmula a extrair.
+\[
+\boxed{\;
+\text{CF}
+\neq
+3^{-1}_{\chi}
+\neq
+\mathbf{Duo}
+\neq
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+Hurwitz das CF (pior aproximável,
+constante \(1/\sqrt{5}\)) \(\neq\) Hurwitz do
+GLH (conta bilinear \(1,2,4,8\);
+Def.~\ref{univ:def:glh-an}).
+Klein das velas (fechos convexos dos convergentes)
+\(\neq\) Klein da Cosmologia (\(C_2\times C_2\)).
+Hexal \(6\) continua rótulo.
+A codificação de \(\mathcal{U}\)
+(banda/\(\mathrm{id}\), \(\mathcal{F}\), corte
+\(\chi\), \(e_k=2^{k}\), dinário\(\to\mathbb{N}\))
+\textbf{não} fecha com CF:
+\texttt{não localizada}.
+Representar \(B(\mathrm{id})\) por
+\(\mathrm{sha256}\) \(\neq\) ser espectro
+(Def.~\ref{univ:def:lei-local-canonica})
+--- já fechado, e não é CF.
+Não se inventa ponte. Sem Lei~8. Sem Ficha~11.
+\end{observacao}
+
+\begin{teorema}[a base oito sai de três dobras]\label{univ:thm:oito-de-tres}
+A passagem \(1\to 2\) é o primeiro degrau do operador,
+já construído: não se põe o dois sem o um antes
+(Def.~\code{fis:def:op}); o dois \textbf{sai} por
+exclusão, sem terceiro divisor
+(Teor.~\code{fis:thm:doispontos}(0)).
+Esse passo \textbf{é} \(\operatorname{Ind}\) no
+primeiro degrau: a dobra duplica.
+Três dobras independentes dão a potência:
+\[
+\boxed{\;8=2^{3}\;}
+\]
+--- Teor.~\code{fis:thm:largura}(4): \(w=1\) dobra
+(\(2\) lugares), \(w=2\) rotor (\(4\)), \(w=3\)
+base oito (\(8\)); Teor.~\code{fis:thm:simbolos}(8):
+três blocos \(\Longrightarrow 2^{3}=\mathbf{8}\)
+relações; posto três: três \(\sigma_{i}\) geram
+oito; \code{tests/trialidade.c}: três eixos autoduais
+\(\longrightarrow 2^{3}=8\) biduais.
+\[
+\boxed{\;
+\{e_k=2^{k}\}_{k=0}^{7}
+\text{ \textbf{é} essa potência, não oito axiomas.}
+\;}
+\]
+O índice de \(e_k\) é o subconjunto de dobras que
+o produziu, lido em binário
+(Teor.~\code{fis:thm:base}).
+Não é Lei~8: as leis são \(0\)--\(7\);
+\(\operatorname{Ind}^{8}=\mathrm{id}\) é o período
+(Teor.~\ref{univ:thm:base};
+\code{fis:obs:octoniao-interface}).
+\(8\notin\{1,2,3,4,6\}\) no toro
+(Def.~\ref{univ:def:toro}).
+Hexal \(6=\mathrm{lcm}(2,3)\) continua rótulo.
+A Trindade (Def.~\ref{univ:def:trindade}) lê estas três
+dobras como as três línguas --- leitura de \(\mathcal{U}\),
+não identificação no trial.
+O inverso da terceira no corte \(\chi\) é
+Obs.~\ref{univ:obs:inv-tres-corte}: não \(\rho\) de
+um terço de volta.
+\end{teorema}
+\begin{proof}
+É o Teor.~\code{fis:thm:doispontos}(0) no primeiro
+degrau, o Teor.~\code{fis:thm:largura}(4) nos três
+primeiros \(w\), e o Teor.~\code{fis:thm:base} na
+escrita \(e_k=2^{k}\). Não se acrescenta axioma.
+\end{proof}
+
+\begin{definicao}[dinário \(\to\) natural]\label{univ:def:dinario-natural}
+O \(1\) e o \(2\) do operador geram o \textbf{dinário}:
+identidade (\(\operatorname{ord}=1\)) e par forçado
+(\(\operatorname{ord}=2\), sem terceiro divisor)
+(Def.~\code{fis:def:op}; Teor.~\code{fis:thm:doispontos}(0)).
+Os dois símbolos \(\{0,1\}\) \textbf{são} esse par
+(Teor.~\code{fis:thm:B}; Def.~\code{fis:def:B}):
+\[
+\boxed{\;
+\text{dinário}
+=B=\{0,1\}
+=\text{o que }1\text{ e }2\text{ do operador forçam}
+\;}
+\]
+O corpo natural \textbf{sai} do dinário: \(\mathbb{N}\) é a
+\textbf{leitura / contagem} dessa geração --- não axioma
+Peano posto de fora.
+A chave já tem label:
+\code{naturais.tex thm:transporte}
+(«\(\mathbb{N}\) do binário»);
+é o mesmo transporte da lista
+(Teor.~\code{fis:thm:BI}):
+\[
+\boxed{\;
+a+b=(a\oplus b)+2(a\wedge b)
+\;}
+\]
+Passagem da dobra (base \(2\)) à contagem.
+Hurwitz \textbf{conta} no rectângulo GLH
+(\(\mathrm{I}_{4}\); Def.~\ref{univ:def:glh-an};
+\code{fis:thm:central}) --- a contagem desta geração,
+não homogeneização de \(\mathbb{N}\) com \(\mathcal{U}\).
+Três dobras do dinário dão \(8=2^{3}\)
+(Teor.~\ref{univ:thm:oito-de-tres});
+não é Lei~8.
+N--R não reabre \(\mathrm{I}_{0}\):
+\(\mathcal{D}=\texttt{N/A}\) em \(\mathbb{N}\);
+\(\operatorname{Star}(\mathbb{N},\mathbb{Z},\mathbb{Q})=\varnothing\).
+\end{definicao}
+
+\begin{observacao}[os uns e os três, e não se fundem]\label{univ:obs:uns}
+\(\mathrm{I}_{0}\): quatro uns, três três, e o oito
+da potência --- nenhum é o outro.
+\[
+\boxed{\;
+1_{\mathbf{1}}
+\neq
+1_{\mathrm{trial}}
+\neq
+L_0
+\neq
+\varphi
+\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}
+                >{\raggedright\arraybackslash}p{0.38\textwidth}
+                >{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+\toprule
+símbolo & o que é & o que \textbf{não} é \\
+\midrule
+\(1_{\mathbf{1}}\)
+  & unidade do corpo
+    (Def.~\ref{univ:def:unidade}):
+    identidade, vinco, neutro \(\otimes\)
+  & \(+1\) do trial; Lei~0; hexal;
+    \(\varphi=1+1/\varphi\) \\
+\(1_{\mathrm{trial}}\)
+  & \(+1\in\{-1,0,+1\}\)
+    (Teor.~\code{fis:thm:trial};
+    \code{tests/trialidade.c})
+  & a unidade; \(e_0=2^{0}=1\) como máscara \\
+\(L_0\)
+  & semente \((+1)\oplus(-1)\);
+    \(e_0=2^{0}\)
+  & o vinco dos extremos; \(\operatorname{ord}=1\) \\
+\(\varphi\)
+  & \(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\),
+    equivalente a \(x=1+x^{-1}\)
+    (Obs.~\ref{univ:obs:tres-canonicos});
+    CF \(\varphi=[1;\overline{1}]\)
+    (Obs.~\ref{univ:obs:cf-estrela})
+  & \(\mathbf{1}=1\); \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\);
+    \(3^{-1}_{\chi}\) \\
+\(3\) da tríade
+  & terceira dobra / três eixos / três blocos
+    (Def.~\ref{univ:def:base-tres});
+    \(3^{-1}=\pi_{\mathcal{U}}\circ\mathcal{F}\)
+    no corte \(\chi\)
+    (Obs.~\ref{univ:obs:inv-tres-corte})
+  & \(1/3\); três línguas
+    \(\mathsf{Alg}/\mathsf{Top}/\mathsf{Ana}\);
+    Trindade (Def.~\ref{univ:def:trindade})
+    como se fosse este \(3\);
+    \(T^{3}\); hexal \(6=\mathrm{lcm}(2,3)\) \\
+\(8=2^{3}\)
+  & cardinalidade / \(\dim X\) / período
+    \(\operatorname{Ind}^{8}=\mathrm{id}\)
+    (Teor.~\ref{univ:thm:oito-de-tres})
+  & Lei~8; \(\operatorname{ord}\in\{1,2,3,4,6\}\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Não se promove \(T^{3}\) de línguas.
+Não se funde o \(1\) da unidade com \(\varphi\).
+Não se inventa Lei~8.
 \end{observacao}
 
 %═══════════════════════════════════════════════════════════════════════════
@@ -1604,10 +2151,19 @@ ligam sem fundir
 \[
 \boxed{\;
 \mathbf{1}
+=1
 =\operatorname{vinco}(L_0,L_7)
 =\operatorname{cl}(L_0,L_7).
 \;}
 \]
+O \(1\) é o do operador: identidade
+(\(\operatorname{ord}=1\)) antes do dois
+(Def.~\code{fis:def:op}); vinco \(=\) órbita de um
+(Teor.~\code{fis:thm:vinco}); neutro \(\otimes\)
+(Teor.~\code{fis:thm:duas}(4)). Não é objecto novo:
+é o mesmo um, lido no ciclo.
+Este \(1\) e o \(2\) que lhe segue geram o dinário
+(Def.~\ref{univ:def:dinario-natural}).
 \(\operatorname{cl}\) é a classe do vinco, já nomeada no teorema.
 Não se decreta \(L_0\star L_7\).
 A fechadura é idempotente
@@ -1616,6 +2172,10 @@ A fechadura é idempotente
 O emparelhamento \(\langle e_0,e_7\rangle=0\)
 (Teor.~\ref{univ:thm:base}) confirma que os extremos
 \textbf{não} fundem: Gram fora da diagonal.
+Este \(1\) \textbf{não} é \(\varphi=1+1/\varphi\)
+(\(\operatorname{Star}(K)\), Obs.~\ref{univ:obs:tres-canonicos}),
+\textbf{não} é o \(+1\) do trial, \textbf{não} é Lei~0
+(Obs.~\ref{univ:obs:uns}).
 \end{definicao}
 
 \begin{observacao}[núcleo e máquina]\label{univ:obs:nucleo}
@@ -1635,20 +2195,100 @@ O núcleo \((\mathcal{L},\mathbf{1})\) observa-a:
 \(\operatorname{Ind}\).
 As três línguas (Def.~\ref{univ:def:linguas}) projectam este mesmo
 núcleo; não o triplicam.
+A Trindade (Def.~\ref{univ:def:trindade}) é essa projecção lida
+nas três dobras; o dinário (Def.~\ref{univ:def:dinario-natural})
+é o \(1\) e o \(2\) que as geram.
 O Sistema Universal (Def.~\ref{univ:def:lei-unica}) é o núcleo
 operacional: \(\{L_0,\dots,L_7\}\) e o retorno
 \(\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}}\),
 \(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\). Sem Lei~8.
+A lei canónica empacota esses papéis
+(Def.~\ref{univ:def:lei-canonica}).
 \end{observacao}
+
+\begin{definicao}[lei canónica]\label{univ:def:lei-canonica}
+A lei canónica de \(\mathcal{U}\) \textbf{não} é Lei~8, não é
+\(1/3\), e não funde as três estrelas
+(Obs.~\ref{univ:obs:tres-canonicos}; Obs.~\ref{univ:obs:cf-estrela}).
+É a quádrupla de papéis já construídos:
+\[
+\boxed{\;
+\mathcal{U}_{\mathrm{can}}
+=(L_0,\;\mathbf{Duo},\;\pi_{\mathcal{U}}\circ\mathcal{F},\;\operatorname{vinco})
+\;}
+\]
+Papéis, e não se fundem:
+\begin{center}\small
+\begin{tabular}{@{}llp{0.50\textwidth}@{}}
+\toprule
+slot & papel & o que já está \\
+\midrule
+\(L_0\)
+  & pólo \((+1)\oplus(-1)\); \(0^{\dagger}=\infty\)
+  & Teor.~\ref{univ:thm:base}; Def.~\ref{univ:def:lei-unica} \\
+\(\mathbf{Duo}\)
+  & \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\);
+    cisão \(1\to 2\); \(2^{3}=8\)
+  & Def.~\ref{univ:def:star}; Teor.~\ref{univ:thm:oito-de-tres} \\
+\(\pi_{\mathcal{U}}\circ\mathcal{F}\)
+  & \(3^{-1}_{\chi}\colon L_7\to L_0\), \(\operatorname{Res}=0\)
+  & Teor.~\ref{univ:thm:retorno-canonico};
+    Obs.~\ref{univ:obs:inv-tres-corte} \\
+\(\operatorname{vinco}\)
+  & \(\mathbf{1}=\operatorname{vinco}(L_0,L_7)\)
+  & Def.~\ref{univ:def:unidade} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+\boxed{\;
+\mathrm{CF}/\varphi/\text{lemniscata}
+\neq
+3^{-1}_{\chi}
+\neq
+\mathbf{Duo}
+=\operatorname{Star}(\mathcal{U})
+\;}
+\]
+Não reabre a Def.~\ref{univ:def:U}. Não reabre os três critérios
+(Def.~\ref{univ:def:corpo-canonico}): o reconhecimento
+\textbf{usa} \(\mathcal{U}_{\mathrm{can}}\).
+\(\mathcal{L}_S(\mathrm{id})\) (Def.~\ref{univ:def:lei-local-canonica})
+é a leitura no suporte, não esta quádrupla.
+\end{definicao}
+
+\begin{teorema}[reconhecimento]\label{univ:thm:reconhecimento}
+Todo corpo \(C\) \textbf{não} precisa ser \(\mathcal{U}\).
+Precisa admitir realização onde \(\mathcal{U}_{\mathrm{can}}\)
+é reconhecida:
+\[
+\boxed{\;
+C
+=\operatorname{Real}_{S}(\mathcal{U}_{\mathrm{can}})
+\quad\text{com resíduo }0
+\quad\nRightarrow\quad
+C=\mathcal{U}
+\;}
+\]
+A Física fornece o suporte. \(\mathcal{U}\) reconhece o contrato.
+O catálogo regista. Não se reabre \(\mathrm{I}_{0}\).
+Os três critérios da Def.~\ref{univ:def:corpo-canonico}
+permanecem: o critério~(2) \(\rho_C/\operatorname{realize}\)
+\textbf{usa} \(\mathcal{U}_{\mathrm{can}}\) como o que se
+reconhece no mapa --- não identidade de objectos.
+\end{teorema}
 
 \begin{observacao}[realização no suporte, não teorema de instanciação]\label{univ:obs:real-S}
 Cada corpo já ingerido lê-se
 \[
 \boxed{\;
-C=\operatorname{Real}_{S}(\mathcal{L})
+C=\operatorname{Real}_{S}(\mathcal{U}_{\mathrm{can}})
 \;}
 \]
---- a lei única no suporte \(S\) que a Física construiu.
+--- a lei canónica (Def.~\ref{univ:def:lei-canonica}) no suporte
+\(S\) que a Física construiu. A lei única \(\mathcal{L}\) é o
+ciclo; \(\mathcal{U}_{\mathrm{can}}\) é o que o reconhecimento
+usa (Teor.~\ref{univ:thm:reconhecimento}).
 Isto é a leitura de \(\operatorname{INGEST}\), já implícita:
 evidência do contrato \(\to\) \texttt{realizado}.
 \textbf{Não} é teorema novo \(\forall C,\;
@@ -2463,6 +3103,9 @@ Não se fundem. \(6=\mathrm{lcm}(2,3)\) continua rótulo, não
 A trialidade \(S_{3}\) dos eixos é clone de leituras do
 \textbf{trial}, \textbf{não} é
 \(T\colon\mathsf{Alg}\to\mathsf{Top}\to\mathsf{Ana}\). Não fundir.
+A Trindade Canónica (Def.~\ref{univ:def:trindade})
+\textbf{não} é este \(S_{3}\): lê as três dobras de
+\code{fis:thm:largura} como línguas, sem permutar eixos.
 
 A \textbf{trialidade} já construída é \(S_{3}\) sobre os três eixos do
 trial \(\{-1,0,+1\}\): seis permutações, bijecções, peso conservado;
@@ -2478,6 +3121,9 @@ controlo: dois eixos não dão trialidade
 Isso é realização do relógio por eixo, \textbf{não} gramática de
 \(\mathcal{U}\), \textbf{não} \(\mathbf{Duo}\), \textbf{não}
 \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\).
+A potência \(8=2^{3}\) das três dobras \textbf{é}
+a base (Teor.~\ref{univ:thm:oito-de-tres});
+esta cadeia é uma realização dela, não outra origem.
 O \(8=2^{3}\) \textbf{não} é Lei~8; \(8\notin\{1,2,3,4,6\}\) no toro.
 \(\operatorname{Spin}(8)/\mathrm{SO}(8)\): \texttt{não localizada}
 neste repo.
@@ -2604,6 +3250,8 @@ EM (\code{catalogo cat:bloco4}) é preenchimento, não legislação.
 Candidato a corpo: as três línguas de uma vez
 (Def.~\ref{univ:def:linguas}); resíduo \(0\) numa só não basta.
 Os três critérios: Def.~\ref{univ:def:corpo-canonico}.
+O reconhecimento usa \(\mathcal{U}_{\mathrm{can}}\)
+(Def.~\ref{univ:def:lei-canonica}; Teor.~\ref{univ:thm:reconhecimento}).
 \end{observacao}
 
 \end{document}

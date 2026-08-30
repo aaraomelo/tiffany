@@ -35,6 +35,10 @@ const rel = varrerLeiLocal(man, { spawnSync })
 ok('§L0 ponte_varredura no motor',
   man.corpos?.motor?.ponte_varredura === 'app/src/banco_lei_local_u.js' &&
   existsSync(join(RAIZ, man.corpos.motor.ponte_varredura)))
+ok('§L0 ponte_lei_unica e ponte_transf',
+  man.corpos?.motor?.ponte_lei_unica === 'app/src/banco_lei_unica_u.js' &&
+  existsSync(join(RAIZ, man.corpos.motor.ponte_lei_unica)) &&
+  man.corpos?.motor?.ponte_transf === 'app/src/banco_transf_u.js')
 ok('§L0 CLI no disco', existsSync(CLI))
 ok('§L0 schema sem kind lei-local / ficha / identidade nova',
   !schema.properties.kind.enum.includes('lei-local') &&
@@ -75,6 +79,15 @@ ok('§L1 tex nao institui Lei 8 nem Ficha 11',
   /N[aã]o h[aá] Ficha~11/.test(tex) &&
   /n[aã]o se sobe a escada/.test(tex) &&
   /fis:thm:handshake/.test(tex))
+{
+  const fis = readFileSync(join(RAIZ, 'fisica.tex'), 'utf8')
+  const cat = readFileSync(join(RAIZ, 'catalogo.tex'), 'utf8')
+  ok('§L1 fis/cat: U consome + nucleo registado',
+    /\\label\{fis:obs:U-consome\}/.test(fis) &&
+    /\\mathcal\{L\}_S\(\\mathrm\{id\}\)/.test(fis) &&
+    /\\label\{cat:nucleo-u\}/.test(cat) &&
+    /n[aã]o localizada/.test(cat))
+}
 
 ok('§L2 so corpos residuo 0 (realizado + canonico)',
   corposResiduoZero(man).every((c) =>
@@ -109,6 +122,15 @@ ok('§L3 B(id)/F medidos; L_S_cliente nao promovido a corpo',
   rel.ls_cliente.corte === 'chi_k' &&
   !rel.candidatos.some((c) => c.id === 'L_S_cliente') &&
   !rel.promovidos.some((c) => c.id === 'L_S_cliente'))
+ok('§L3 nucleo no motor: retorno realizado; Docker/GLH/T3 nao localizada',
+  rel.nucleo?.retorno?.estatuto === 'realizado' &&
+  rel.nucleo?.retorno?.res === 0 &&
+  rel.nucleo?.composto?.estatuto === 'realizado' &&
+  rel.nucleo?.F_parseval?.estatuto === 'realizado' &&
+  rel.nucleo?.glh_byte === 'nao localizada' &&
+  rel.nucleo?.M_Docker === 'nao localizada' &&
+  rel.nucleo?.T3 === 'nao localizada' &&
+  rel.nucleo?.FBN === 'nao localizada')
 
 ok('§L4 recusas I0',
   RECUSAS.includes('Ficha 11') &&

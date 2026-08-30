@@ -166,5 +166,99 @@ export function residuoGlhPi (parsevalResiduo) {
     composto: m.composto,
     residuo_ciclo: c.residuo,
     promove_tripla: false,
+    fonte_fis: 'fis:obs:U-consome',
+    fonte_cat: 'cat:nucleo-u',
+  })
+}
+
+/**
+ * 3^{-1} no corte χ: π_U ∘ F, não 1/3.
+ * Terceira dobra = U_an = π. Fecho L7→L0, Res=0.
+ * χ^{(3)} aniquila o terceiro bit do índice; não é 3^{-1}.
+ */
+export function invTres () {
+  const m = residuoComposto()
+  return Object.freeze({
+    formula: 'pi_U o F',
+    fonte: 'univ:obs:inv-tres-corte',
+    de: 7,
+    para: m.pi,
+    res: m.res,
+    estatuto: m.res === 0 ? 'realizado' : 'descartado',
+    racional_1_3: 'nao localizada',
+    e_terceira: 1 << 2,
+    chi_terceira_nao_e_inv: true,
+  })
+}
+
+/**
+ * Lei canónica: quádrupla (L0, Duo, π_U∘F, vinco).
+ * CF/φ/lemniscata ≠ 3^{-1}_χ ≠ Duo. Sem Lei 8. Sem 1/3.
+ */
+export function leiCanonica () {
+  const m = residuoComposto()
+  return Object.freeze({
+    formula: '(L0, Duo, pi_U o F, vinco)',
+    fonte: 'univ:def:lei-canonica',
+    reconhecimento: 'univ:thm:reconhecimento',
+    L0: { k: L0.k, e: L0.e, polo: '(+1)⊕(-1)', dual: '0†=∞' },
+    Duo: { star: 'Star(U)=D', cisao: '1→2', base: '2^3=8' },
+    retorno: {
+      formula: '3^{-1}_chi',
+      de: 7,
+      para: m.pi,
+      res: m.res,
+      estatuto: m.res === 0 ? 'realizado' : 'descartado',
+    },
+    vinco: '1=vinco(L0,L7)',
+    cf_estrela: 'nao localizada como 3^{-1}_chi / Duo',
+    racional_1_3: 'nao localizada',
+    estatuto: m.res === 0 ? 'realizado' : 'descartado',
+    fis: 'fis:obs:U-consome',
+    cat: 'cat:nucleo-u',
+  })
+}
+
+/**
+ * Núcleo alinhado a fisica/catálogo. M_Docker / GLH-byte / F∩B∩N / T³
+ * permanecem nao localizada. Sem Lei 8. Sem Ficha 11.
+ */
+export function nucleoU () {
+  const c = residuoCiclo()
+  const m = residuoComposto()
+  const g = residuoGlhPi()
+  const can = leiCanonica()
+  return Object.freeze({
+    U_can: can,
+    retorno: {
+      estatuto: m.res === 0 ? 'realizado' : 'descartado',
+      res: m.res,
+      fonte: 'univ:thm:retorno-canonico',
+      fis: 'fis:obs:U-consome',
+      cat: 'cat:nucleo-u',
+    },
+    pi_alonzo: {
+      estatuto: 'realizado',
+      fonte: 'univ:def:alonzo-idemp',
+      fis: 'fis:def:alonzo',
+    },
+    F_parseval: {
+      estatuto: m.parseval === 0 ? 'realizado' : 'descartado',
+      fonte: 'fis:def:transf',
+      thm: 'fis:thm:H',
+    },
+    composto: {
+      estatuto: m.composto,
+      res: m.res,
+      fonte: 'univ:obs:residuo-glh',
+    },
+    glh_byte: 'nao localizada',
+    FBN: 'nao localizada',
+    M_Docker: 'nao localizada',
+    T3: 'nao localizada',
+    inv_tres: invTres(),
+    racional_1_3: 'nao localizada',
+    residuo_ciclo: c.residuo,
+    pi_realizado: g.pi_realizado,
   })
 }

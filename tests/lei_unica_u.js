@@ -9,11 +9,15 @@ import { fileURLToPath } from 'node:url'
 import {
   DIM, e, Ind, MetaInd, piU, paridadeAnd, medeCiclo, residuoCiclo,
   residuoGlhPi, lei, L0, L7, campoLei, leIndiceDoEspectro, residuoComposto,
+  nucleoU, invTres, leiCanonica,
 } from '../app/src/banco_lei_unica_u.js'
 import { medeTransformada } from '../app/src/banco_transf_u.js'
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TEX = join(RAIZ, 'corpo_universal.tex')
+const FIS = join(RAIZ, 'fisica.tex')
+const CAT = join(RAIZ, 'catalogo.tex')
+const MAN = join(RAIZ, 'conecthus', 'backends', 'manifesto.json')
 const MOTOR = join(RAIZ, 'app', 'src', 'banco_lei_unica_u.js')
 
 let falhas = 0
@@ -25,8 +29,52 @@ function ok (q, cond) {
 }
 
 const tex = readFileSync(TEX, 'utf8')
+const fis = readFileSync(FIS, 'utf8')
+const cat = readFileSync(CAT, 'utf8')
+const man = JSON.parse(readFileSync(MAN, 'utf8'))
 
 ok('§U0 motor no disco', existsSync(MOTOR))
+ok('§U0 tex: 3^{-1} no corte chi via MetaInd; != 1/3',
+  /\\label\{univ:obs:inv-tres-corte\}/.test(tex) &&
+  /\\label\{univ:def:base-tres\}/.test(tex) &&
+  /3\^\{-1\}/.test(tex) &&
+  /pi_\{\\mathcal\{U\}\}\\circ\\mathcal\{F\}/.test(tex) &&
+  /chi\^\{\(3\)\}/.test(tex) &&
+  /e\^\{\(3\)\}=2\^\{2\}/.test(tex) &&
+  /neq\s*\\tfrac\{1\}\{3\}/.test(tex) &&
+  /n[aã]o localizada/.test(tex) &&
+  /fis:def:transf/.test(tex) &&
+  /fis:thm:metainducao/.test(tex) &&
+  /Real\}_\{\\mathrm\{an\}\}/.test(tex) &&
+  /simetria aritm[eé]tica/.test(tex) &&
+  /l[ií]ngua an/.test(tex) &&
+  /mathbf\{Duo\}\^\{2\}/.test(tex) &&
+  /2\^\{3\}/.test(tex))
+ok('§U0 tex: CF fecha Star(K)=phi; nao fecha 3^{-1}_chi',
+  /\\label\{univ:obs:cf-estrela\}/.test(tex) &&
+  /\[1;\\overline\{1\}\]/.test(tex) &&
+  /operatorname\{Star\}\(K\)/.test(tex) &&
+  /3\^\{-1\}_\{\\chi\}/.test(tex) &&
+  /mathbb\{N\}\^\{\\mathbb\{N\}\}/.test(tex) &&
+  /thm:corte-ponto-fixo/.test(tex) &&
+  /thm:ouro/.test(tex) &&
+  /sec:codificacoes/.test(tex) &&
+  /Hurwitz das CF/.test(tex) &&
+  /n[aã]o localizada/.test(tex))
+ok('§U0 cat: 3^{-1} via corte registado; 1/3 nao localizada',
+  /univ:obs:inv-tres-corte/.test(cat) &&
+  /3\^\{-1\}=1\/3/.test(cat) &&
+  /univ:obs:cf-estrela/.test(cat) &&
+  /thm:corte-ponto-fixo/.test(cat))
+ok('§U0 tex: lei canonica U_can e reconhecimento',
+  /\\label\{univ:def:lei-canonica\}/.test(tex) &&
+  /\\label\{univ:thm:reconhecimento\}/.test(tex) &&
+  /mathcal\{U\}_\{\\mathrm\{can\}\}/.test(tex) &&
+  /\(L_0,\\;\\mathbf\{Duo\},\\;\\pi_\{\\mathcal\{U\}\}\\circ\\mathcal\{F\},\\;\\operatorname\{vinco\}\)/.test(tex) &&
+  /3\^\{-1\}_\{\\chi\}/.test(tex) &&
+  /nRightarrow/.test(tex) &&
+  /C=\\mathcal\{U\}/.test(tex) &&
+  /univ:def:corpo-canonico/.test(tex))
 ok('§U0 tex: labels do ciclo e da unidade',
   /\\label\{univ:def:lei-unica\}/.test(tex) &&
   /\\label\{univ:cor:metaind-fecho\}/.test(tex) &&
@@ -109,6 +157,47 @@ ok('§U0 tex nao institui Lei 8 nem funde L0 com L7',
   /N[aã]o se identifica/.test(tex) &&
   /L_0/.test(tex) && /L_7/.test(tex) &&
   /n[aã]o como \}X_\{k\+1\}/.test(tex))
+ok('§U0 fis: U consome; nao copia o tratado',
+  /\\label\{fis:obs:U-consome\}/.test(fis) &&
+  /univ:def:lei-canonica/.test(fis) &&
+  /univ:thm:reconhecimento/.test(fis) &&
+  /univ:thm:retorno-canonico/.test(fis) &&
+  /univ:def:lei-local-canonica/.test(fis) &&
+  /univ:def:alonzo-idemp/.test(fis) &&
+  /univ:cor:metaind-fecho/.test(fis) &&
+  /pi\\circ\\pi=\\pi/.test(fis) &&
+  /X_\{k\+1\}/.test(fis) &&
+  /N[aã]o se promove/.test(fis) &&
+  /Mandelbrot/.test(fis) &&
+  /cat:bloco4/.test(fis))
+ok('§U0 cat: nucleo registado; U_can; sem Ficha 11',
+  /\\label\{cat:nucleo-u\}/.test(cat) &&
+  /univ:def:lei-canonica/.test(cat) &&
+  /univ:thm:reconhecimento/.test(cat) &&
+  /mathcal\{U\}_\{\\mathrm\{can\}\}/.test(cat) &&
+  /univ:thm:retorno-canonico/.test(cat) &&
+  /tests\/lei\\_unica\\_u\.js/.test(cat) &&
+  /F\\cap B\\cap N/.test(cat) &&
+  /M_\{\\mathrm\{Docker\}\}/.test(cat) &&
+  /T\^\{3\}/.test(cat) &&
+  /sem Ficha~11/.test(cat) &&
+  /mathrm\{I\}_\{9\}/.test(cat) &&
+  !/\\fichaingestao\{Universal\}/.test(cat) &&
+  !/\\fichacapitulo\{Universal\}/.test(cat))
+ok('§U0 manifesto: ponte_lei_unica + nucleo',
+  man.corpos?.motor?.ponte_lei_unica === 'app/src/banco_lei_unica_u.js' &&
+  existsSync(join(RAIZ, man.corpos.motor.ponte_lei_unica)) &&
+  man.corpos?.motor?.ponte_transf === 'app/src/banco_transf_u.js' &&
+  /realizado/.test(man.corpos?.motor?.nucleo?.U_can || '') &&
+  /lei-canonica/.test(man.corpos?.motor?.nucleo?.U_can || '') &&
+  /realizado/.test(man.corpos?.motor?.nucleo?.retorno || '') &&
+  /nao localizada/.test(man.corpos?.motor?.nucleo?.M_Docker || '') &&
+  /nao localizada/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
+  /nao localizada/.test(man.corpos?.motor?.nucleo?.T3 || '') &&
+  /inv-tres-corte/.test(man.corpos?.motor?.nucleo?.inv_tres || '') &&
+  /nao localizada/.test(man.corpos?.motor?.nucleo?.racional_1_3 || '') &&
+  /cf-estrela/.test(man.corpos?.motor?.nucleo?.cf_estrela || '') &&
+  /Star\(K\)/.test(man.corpos?.motor?.nucleo?.cf_estrela || ''))
 
 ok('§U1 dim X = 8; e_k = 2^k',
   DIM === 8 &&
@@ -182,7 +271,51 @@ ok('§U1 extremos nao fundem: Gram <e0,e7>=0',
     g.glh === 'nao localizada' &&
     g.residuo_ciclo === 0 &&
     g.composto === 'realizado' &&
-    g.promove_tripla === false)
+    g.promove_tripla === false &&
+    g.fonte_fis === 'fis:obs:U-consome' &&
+    g.fonte_cat === 'cat:nucleo-u')
+  const n = nucleoU()
+  const can = leiCanonica()
+  ok('§U4 nucleoU alinhado a fisica/catalogo; recusas intactas',
+    n.retorno.estatuto === 'realizado' && n.retorno.res === 0 &&
+    n.retorno.fis === 'fis:obs:U-consome' && n.retorno.cat === 'cat:nucleo-u' &&
+    n.pi_alonzo.estatuto === 'realizado' &&
+    n.F_parseval.estatuto === 'realizado' &&
+    n.composto.estatuto === 'realizado' &&
+    n.glh_byte === 'nao localizada' &&
+    n.FBN === 'nao localizada' &&
+    n.M_Docker === 'nao localizada' &&
+    n.T3 === 'nao localizada' &&
+    n.racional_1_3 === 'nao localizada' &&
+    n.inv_tres.estatuto === 'realizado' &&
+    n.inv_tres.res === 0)
+  ok('§U4 U_can = (L0, Duo, pi_U o F, vinco); reconhecimento',
+    n.U_can.formula === '(L0, Duo, pi_U o F, vinco)' &&
+    n.U_can.fonte === 'univ:def:lei-canonica' &&
+    n.U_can.reconhecimento === 'univ:thm:reconhecimento' &&
+    n.U_can.estatuto === 'realizado' &&
+    n.U_can.L0.polo === '(+1)⊕(-1)' && n.U_can.L0.dual === '0†=∞' &&
+    n.U_can.Duo.star === 'Star(U)=D' && n.U_can.Duo.base === '2^3=8' &&
+    n.U_can.retorno.formula === '3^{-1}_chi' &&
+    n.U_can.retorno.res === 0 &&
+    n.U_can.vinco === '1=vinco(L0,L7)' &&
+    n.U_can.racional_1_3 === 'nao localizada' &&
+    can.fonte === n.U_can.fonte &&
+    can.estatuto === 'realizado')
+}
+
+{
+  const v = invTres()
+  ok('§U5 3^{-1}=pi_U o F no corte; Res=0; != 1/3',
+    v.formula === 'pi_U o F' &&
+    v.fonte === 'univ:obs:inv-tres-corte' &&
+    v.de === 7 &&
+    v.para === 0 &&
+    v.res === 0 &&
+    v.estatuto === 'realizado' &&
+    v.racional_1_3 === 'nao localizada' &&
+    v.e_terceira === 4 &&
+    v.chi_terceira_nao_e_inv === true)
 }
 
 {

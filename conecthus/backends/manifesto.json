@@ -5,12 +5,12 @@
   "operacoes": {
     "p": "analisa / descompila — face ⊕, MOVE(+1) absorve",
     "q": "compila forma interna — face ⊗, MOVE(−1) emite",
-    "r": "atravessa pleno (metal, shell, slots S_CANAL+*)",
+    "r": "atravessa pleno (realizacao remota, shell, slots S_CANAL+*) — cadeia.metal e a face r=1, nao 'o metal'",
     "paridade": "π(L)=(p+q+r) mod 2; a(A→B)=π(A)⊕π(B): 0=iso, 1=duo; duo∘duo=iso via hub sql",
     "tradutor": "MOVE na arena + arestas; absorcao orbita a orbita (latex/sql/node); sem adaptador SQL",
     "doc": "memoria/duomorfismo-pipe.md",
-    "medidor": "tests/duomorf_pipe.js; tests/orbitas_hopfield.js; tests/manifesto_corpos.js; tools/test_metal.exe; tests/cosmologia.c",
-    "celula": "mvp: consultar.wasm + GKBANCO (LS); pleno sql.c so no metal",
+    "medidor": "tests/duomorf_pipe.js; tests/orbitas_hopfield.js; tests/manifesto_corpos.js; tests/realizacao_u.js; tests/identidade_u.js; tools/test_metal.exe; tests/cosmologia.c",
+    "celula": "mvp: consultar.wasm + GKBANCO (LS); pleno sql.c na realizacao remota (cadeia.metal)",
     "medidor_cadeia": "tests/traduz_c_wasm_node.js; tests/traduz_c_wasm_shell.js; tests/traduz_asm_wasm.c; tests/traduz_c_asm_node.c; tests/traduz_c_asm_shell.c; tests/celula_wasm_sec.c; tests/corre_fita_metal.c; tests/corre_fita_browser.js"
   },
   "interface_nota": "Quando nada se especifica, o corpo entra e sai como query SQL: banco/sql.c compila para a ISA, memória no disco, e traduz programas. LaTeX e as outras linguagens continuam backends de porta única — tex.wasm é o tradutor pleno do latex, não da interface. Medidor: tests/interface_padrao.js",
@@ -5198,12 +5198,28 @@
     "js"
   ],
   "mvp": {
-    "celula": "consultar.wasm na arena DISCO (singleton browser)",
-    "pleno": "banco/sql.c na Patria (canal); browser=arena wasm",
+    "celula": "consultar.wasm na arena DISCO (realizacao wasm)",
+    "pleno": "banco/sql.c na realizacao remota (canal); wasm = CPU da maquina minima",
     "armazenamento": {
       "magia": "GKBANCO",
       "chave": "gk:banco:estado",
-      "nota": "localStorage — padrao GKCORPO; sem I/O por query SQL"
+      "memoria": "estado volatil do contexto (RAM)",
+      "disco": "localStorage — quota = tecto de contexto; linha de base. IndexedDB = ponte gk:banco:* atras de flag (opts.disco=idb); nao substitui LS no boot",
+      "canal": "S_ESTADO_REQ/RSP (9210/9211) transporta o mesmo JSON entre realizacoes",
+      "remoto": "gk/banco/estado.json — realizacao remota do mesmo disco, nao hospedeiro",
+      "deposito": "S_DEPOSITO_REQ/RSP (9220/9221) — blob opaco de utilizador em gk/banco/deposito.bin; Patria deposita bytes; sem a banda nao e JSON GKBANCO; != iso S_ESTADO",
+      "idb": "disco mapeado (object stores); M_WASM+IDB = nao localizada (candidato 1 em ingestao)",
+      "docker": "nao localizada — candidato 2 em ingestao; Fase B: Exec isolado (sql_move/gravaShell) D=volume C invariante; par WASM/volume medido no Exec nativo; sem paridade de contentor; sem compose; != metal != runtime; Identidade intocada; S_ESTADO ⊥ S_DEPOSITO",
+      "mongo": "nao localizada — candidato 3 em ingestao; mongo != disco; BSON↔U sem medidor",
+      "volume": "gk/banco/estado.json — snapshot GKBANCO; D neutro Fase B (par Exec); nao e M_Docker",
+      "nota": "M=(Exec,D,C); M_min=(WASM, D_*, Memoria local). C=MOVE nao entra no iso de disco. maquina minima = WASM + memoria + disco. solo = so M_wasm. remoto = M_wasm e M_remota no mesmo U. localStorage e o disco canonico. IDB/docker/mongo nao sao a maquina."
+    },
+    "realizacoes": {
+      "wasm": "realizado — M_WASM+LS; browser/Node memoriaLS; linha de base",
+      "remota": "realizado — processo/canal; TIFFANY_PUB e a chave da banda (realizacao, nao metal)",
+      "idb": "nao localizada — candidato 1 em ingestao; mesmo CPU; disco IDB atras de flag; Fase A no shim sem promocao",
+      "docker": "nao localizada — candidato 2 em ingestao; Fase B Exec isolado; Dockerfile.volume = ingestao; sem compose; sem paridade de contentor; sem privileged/host network; sem deposito.bin como JSON GKBANCO",
+      "mongo": "nao localizada — candidato 3 em ingestao; censo; sem driver"
     },
     "sql": {
       "wasm": "consultar.wasm",
@@ -5215,7 +5231,29 @@
         "sql_descompilar"
       ]
     },
-    "maquina": "MOVE na arena DISCO; canal sincroniza slots; backends absorvidos como latex",
+    "M": "(Exec, D, C)",
+    "M_min": "(WASM, D_*, Memoria local)",
+    "maquina": "M=(Exec,D,C); M_min=(WASM, D_*, Memoria local); C=MOVE nao entra no iso de disco; minima = WASM + memoria + disco; U reconhece/transporta; browser realiza, nao hospeda",
+    "identidade": {
+      "ponte": "app/src/banco_identidade_u.js",
+      "nota": "identidade != Exec/D/C; catalogo != manifesto != orbita. Identidade != Realizacao != Estado. Chave atravessa LS/IDB/Docker sem ser realizacao. Solo continua wasm+LS. banda (fio) = id (sujeito) = hex(sha256(bytes)); sem prefixo gk:id:v1.",
+      "proibicao": "identidade != realizacao da maquina; fingerprint != login; oauth != unica forma; sem segundo $id; oauth != autoridade de id; privada_wasm/docker nao vazam para resolveIdentidade",
+      "slots": {
+        "chave": "realizado — ?pub= + TIFFANY_PUB; banda=sha256(bytes), nao UTF-8 do hex; id=hex da banda; forca maxima",
+        "sessao": "realizado — UUID gk:banco:sessao; bind(t,de,para) sessao→chave; natureza=soft; efemera / nao soberana",
+        "fingerprint": "candidato — sinal de dispositivo; hash do que o ambiente der; similarity nao igualdade; sem medidor de binding",
+        "oauth": "nao localizada — censo; Google/Apple nao implementados; transporte/deposito, nunca unica forma; nao redefine id; nao e N/A"
+      },
+      "ciclo": {
+        "bootstrap": "realizado — ?pub= ou importacao; disco LS + bind se UUID existia; entre maquinas D_patria opaco (S_DEPOSITO 9220/9221)",
+        "bind": "realizado — natureza=soft (associacao no estado); binding cripto (assinatura) = candidato / nao localizada",
+        "rotacao": "candidato — transicao auditavel {t,de:id_old,para:id_new}; sem privada da old nao ha prova",
+        "recuperacao": "nao localizada — sem protocolo de shares; sem a privada ninguem le o deposito; nova chave = novo sujeito; terceiros nao redefinem id",
+        "privada_wasm": "candidato — WebCrypto/memoria; sem medidor; nao promover; diferenca nao vaza para Identidade",
+        "privada_docker": "nao localizada — sem medidor; tratamento de realizacao nao entra em resolveIdentidade"
+      },
+      "deposito": "S_DEPOSITO_REQ/RSP (9220/9221) — blob selado com a banda; gk/banco/deposito.bin; Patria = D_patria sem ler claro; != S_ESTADO 9210/9211 (JSON GKBANCO operacional)"
+    },
     "absorcao": "tests/backends_wasm.js §W4 latex §W8 bash §W10 node"
   },
   "protocolo": {
@@ -5223,7 +5261,9 @@
     "bidireccional": true,
     "orbita": "ws:/canal",
     "slots": "S_CHUNK+S_*_IN/OUT",
-    "nota": "unica orbita real do canal; sincroniza arena com Patria",
+    "nota": "canal entre realizacoes da mesma maquina. Sem addr+pub = solo (M_wasm). Com addr+pub = M_wasm e M_remota, disco local + sync. TIFFANY_PUB na realizacao remota. Nao e fallback offline. Nao e SSH.",
+    "endereco": "addr|host",
+    "chave": "pub hex — utilizador da chave; TIFFANY_PUB na realizacao remota (slots, nao metal)",
     "p": 1,
     "q": 0,
     "r": 1
@@ -5608,7 +5648,37 @@
           "nota": "ERG-64: degrau da cadeia isa, nao entra em linguagens[]"
         }
       },
-      "asm": "degrau de isa.cadeia (ERG-64); nao e lingua"
+      "asm": "degrau de isa.cadeia (ERG-64); nao e lingua",
+      "schema": "conecthus/schema/u.schema.json",
+      "schema_instancia": "conecthus/schema/u.json",
+      "parser": "banco/parse_ficheiro.h",
+      "ponte_u": "app/src/banco_manifesto_u.js",
+      "ponte_pagina": "app/src/banco_pagina_u.js",
+      "schema_pagina": "conecthus/schema/pagina.json",
+      "ponte_sessao": "app/src/banco_sessao_u.js",
+      "ponte_identidade": "app/src/banco_identidade_u.js",
+      "ponte_disco": "app/src/banco_disco.js",
+      "ponte_sync": "app/src/banco_sync.js",
+      "ponte_maquina": "app/src/banco_maquina_u.js",
+      "ponte_varredura": "app/src/banco_lei_local_u.js",
+      "ponte_trialidade": "app/src/banco_trialidade_u.js",
+      "ponte_lei_unica": "app/src/banco_lei_unica_u.js",
+      "ponte_transf": "app/src/banco_transf_u.js",
+      "nucleo": {
+        "U_can": "realizado — (L0, Duo, pi_U o F, vinco); univ:def:lei-canonica; univ:thm:reconhecimento; fis:obs:U-consome; cat:nucleo-u; tests/lei_unica_u.js",
+        "retorno": "realizado — pi_U(F(L_7))=L_0 Res=0; univ:thm:retorno-canonico; fis:obs:U-consome; cat:nucleo-u; tests/lei_unica_u.js",
+        "pi_alonzo": "realizado — pi o pi = pi; univ:def:alonzo-idemp; fis:def:alonzo",
+        "F_parseval": "realizado — fis:def:transf; fis:thm:H; banco_transf_u.js",
+        "composto": "realizado — pi_U o F; univ:obs:residuo-glh",
+        "glh_byte": "nao localizada",
+        "F_cap_B_cap_N": "nao localizada",
+        "M_Docker": "nao localizada",
+        "T3": "nao localizada — leitura, nao 3-ciclo",
+        "inv_tres": "realizado — 3^{-1}=pi_U o F no corte chi; L7->L0 Res=0; univ:obs:inv-tres-corte; GLH mede (lingua an) != operador; Duo interno ord 2 separado; base 2^3; != 1/3; != CF",
+        "racional_1_3": "nao localizada",
+        "cf_estrela": "realizado — phi=[1;1-bar]=Star(K) I9; CF fecha N^N->R (sec:codificacoes); nao localizada como 3^{-1}_chi / banda-id / F; univ:obs:cf-estrela; Hurwitz CF != Hurwitz GLH"
+      },
+      "cadeia_nota": "cadeia.metal = face r=1 (realizacao plena); cadeia.hospedeiro = estatuto de runtime externo. Nao sao 'o metal' nem hierarquia browser→sistema. docker = candidato 2 (nao localizada; != metal != runtime). mongo = candidato 3 (nao localizada; != disco)."
     },
     "lista": [
       {
@@ -5655,7 +5725,8 @@
         "estatuto": "realizado",
         "medidores": [
           "tests/cantor_julia_dual.c",
-          "tests/cantor.c"
+          "tests/cantor.c",
+          "tests/trialidade_linguas.js"
         ],
         "matriz": "cruz (oplus, otimes). Nao W. Nao (max,+).",
         "orbita": null,
@@ -5813,6 +5884,14 @@
           "tests/pgwire.c",
           "tests/duomorf_pipe.js",
           "tests/manifesto_corpos.js",
+          "tests/manifesto_u.js",
+          "tests/schema_u.js",
+          "tests/pagina_u.js",
+          "tests/canal_browser.js",
+          "tests/sessao_u.js",
+          "tests/identidade_u.js",
+          "tests/disco_sync.js",
+          "tests/realizacao_u.js",
           "tests/traduz_c_wasm_node.js",
           "tests/node_pleno.c",
           "tests/bash_pleno.c",

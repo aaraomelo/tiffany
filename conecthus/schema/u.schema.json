@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tiffany://u",
+  "title": "Nodo do Corpo Universal — autossimilar",
+  "$comment": "U=(X,X*,Mor,Aut). Completa (sentido=0) = cruz das duas metades MOVE ±1, como Alonzo. JSON é canónico; claim/erg/sql/tex/wasm/html/css/js são emissões. Star(U)=D ≠ Star(K)=x^2=x+1. U não é Parte nem Alonzo. M = projecção corpos×órbitas; pagina = tríade html/css/js no mesmo schema (cliente/servidor = faces no canal, não órbita Hopfield). Máquina M=(Exec,D,C); M_min=(WASM, D_*, Memória local); C=MOVE não entra no iso de disco. Browser/processo são realizações, não hospedeiros. IDB/docker/mongo = candidatos até medidor (nao localizada ≠ N/A). cadeia.metal = face r=1 (realização plena), não «o metal».",
+  "type": "object",
+  "required": ["kind", "id", "sentido", "formato"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["U", "realizacao", "metade", "lingua", "claim", "ficha", "ficheiro", "orbita", "celula", "pagina", "sessao"]
+    },
+    "id": { "type": "string", "minLength": 1 },
+    "sentido": {
+      "description": "0=completa (cruz); -1=emite; +1=absorve",
+      "type": "integer",
+      "enum": [-1, 0, 1]
+    },
+    "formato": {
+      "type": "string",
+      "enum": ["json", "claim", "erg", "sql", "tex", "wasm", "fita", "manifesto", "implante", "html", "css", "js", "sh", "ps1"]
+    },
+    "X": { "type": "object" },
+    "Xstar": { "type": "object" },
+    "Mor": { "type": "array", "items": { "type": "string" } },
+    "Aut": { "type": "object" },
+    "star": { "type": "string" },
+    "estatuto": {
+      "type": "string",
+      "enum": ["gramatica", "realizado", "nao localizada", "N/A"]
+    },
+    "proibicao": { "type": "string" },
+    "evidencia": { "type": "string" },
+    "fonte": { "type": "string" },
+    "faz": { "type": "string" },
+    "move": { "type": "string" },
+    "p": { "type": "integer" },
+    "q": { "type": "integer" },
+    "r": { "type": "integer" },
+    "law": { "type": "integer" },
+    "object": { "type": "string" },
+    "step": { "type": "string" },
+    "back": { "type": "string" },
+    "measure": { "type": "string" },
+    "invariant": { "type": "string" },
+    "mutate": { "type": "string" },
+    "classify": { "type": "string" },
+    "faces": {
+      "type": "object",
+      "description": "Cruz Alonzo: as duas metades têm este mesmo schema",
+      "properties": {
+        "menos": { "$ref": "#" },
+        "mais": { "$ref": "#" }
+      },
+      "additionalProperties": false
+    },
+    "realizacao": { "$ref": "#" },
+    "filhos": {
+      "type": "array",
+      "items": { "$ref": "#" }
+    },
+    "estado": { "type": "string" },
+    "parte": { "type": ["string", "null"] },
+    "canonico": { "type": ["string", "null"] },
+    "camada": { "type": "string" },
+    "matriz": { "type": "string" },
+    "orbita": { "type": ["string", "null"] },
+    "homonimos": { "type": "array", "items": { "type": "string" } },
+    "medidores": { "type": "array", "items": { "type": "string" } },
+    "i": { "type": "integer" },
+    "j": { "type": "integer" },
+    "posicao": { "type": "object" },
+    "relacoes": { "type": "boolean" },
+    "ocupada": { "type": "boolean" },
+    "corpo": { "type": "string" },
+    "lingua": { "type": "string" },
+    "suporte": { "type": "string" },
+    "xi": { "type": "string" },
+    "involucao": { "type": "string" },
+    "corpus": { "type": "string" },
+    "chave": { "type": "string" },
+    "latex": { "type": "string" },
+    "nota": { "type": "string" },
+    "slots": { "type": "object" },
+    "indice": {
+      "type": "object",
+      "description": "Projecção M: linhas=corpos, colunas=órbitas. Não é segundo schema.",
+      "properties": {
+        "linhas": { "type": "array", "items": { "type": "string" } },
+        "colunas": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "hopfield": { "type": "object" },
+    "corpos": { "type": "object" },
+    "texto": { "type": "string" },
+    "triade": {
+      "type": "array",
+      "description": "Projecção da página: html × css × js. Não é segundo schema.",
+      "items": { "type": "string" }
+    },
+    "endereco": { "type": "string" },
+    "modo": {
+      "type": "string",
+      "enum": ["solo", "remoto"],
+      "description": "qual realização está ligada. solo = só M_wasm (WASM+memória+disco). remoto = M_wasm e M_remota no mesmo U, disco local + sync S_ESTADO. Não é fallback offline."
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "U" } }, "required": ["kind"] },
+      "then": {
+        "properties": {
+          "star": { "const": "D" },
+          "estatuto": { "const": "gramatica" }
+        }
+      }
+    }
+  ]
+}
