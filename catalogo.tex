@@ -1794,6 +1794,7 @@ evidência
   & \code{univ:def:lei-canonica}; \code{univ:thm:reconhecimento};
     \code{univ:thm:retorno-canonico}; \code{univ:thm:metaind-pi};
     \code{univ:def:alonzo-idemp}; \code{fis:def:transf}; \code{fis:thm:H};
+    \code{univ:def:finv}; \code{univ:thm:reversao-byte};
     \code{fis:obs:U-consome}; \code{tests/lei\_unica\_u.js}
   & labels univ + fis + motor \\
 resultado
@@ -1801,11 +1802,12 @@ resultado
     retorno \(\operatorname{Res}=0\);
     \(\pi\circ\pi=\pi\) (Alonzo);
     \(\mathcal{F}\) Parseval \(0\);
+    GLH-byte \(I=\mathcal{F}^{-1}\mathcal{F}(I)\);
     CF/\(\varphi=\operatorname{Star}(K)\) em \(\mathrm{I}_{9}\)
   & unidade operacional \\
 proibição
   & sem Lei~8; sem Ficha~11; sem reabrir I0 das Partes fechadas;
-    \(1/3\), GLH-byte e \(F\cap B\cap N\) \texttt{não localizada}
+    \(1/3\), GLH contínuo e \(F\cap B\cap N\) \texttt{não localizada}
   & EM: \S\ref{cat:bloco4} \\
 \bottomrule
 \end{tabular}
@@ -1828,8 +1830,21 @@ e a codificação \(\mathbb{N}^{\mathbb{N}}\to\mathbb{R}\)
 \textbf{Não} fecha \(3^{-1}\) no corte \(\chi\)
 --- o paper liga CF ao corte de Dedekind/Möbius
 (\code{thm:corte-ponto-fixo}), não a \(\chi_k\).
+GLH no byte: \texttt{realizado}
+(\(I=\mathcal{F}^{-1}\mathcal{F}(I)\), \(\operatorname{Res}=0\);
+\code{univ:thm:reversao-byte}; \code{univ:def:finv}).
+\[
+\boxed{\;
+\mathcal{F}^{-1}\neq 3^{-1}_{\chi}
+\;}
+\]
+Síntese no byte (\(m_{\mathrm{Hadamard}}=8\),
+\(\mathcal{F}^{-1}=2^{-8}\mathcal{F}\))
+\textbf{não} é o retorno das leis
+(\(m_{\mathrm{dobras}}=3\), \(2^{3}=8\)).
+Gentil contínuo: \texttt{não localizada}.
 Permanece \texttt{não localizada}:
-GLH no byte (\code{univ:obs:residuo-glh});
+GLH contínuo (Hurwitz/Lebesgue/Gentil);
 \(F\cap B\cap N\) (unificação por redução \(\neq\) fusão);
 \(M_{\mathrm{Docker}}\) (\code{univ:def:maquina});
 \(T^{3}\) como 3-ciclo (\code{univ:obs:alonzo-tri});

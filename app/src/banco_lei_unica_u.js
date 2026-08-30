@@ -3,9 +3,12 @@
 // MetaInd(L7)=L0 = o mesmo passo como fibra, não X_{k+1}. Sem Lei 8.
 // Ind^8 = id = período do catálogo. Não funde L0 com L7.
 // Res = π_U(F(L_7))−L_0: F e chi de banco_transf_u (fis:def:transf).
-// Sem F_U. Sem GLH no byte — este número não é o rectângulo contínuo.
+// Sem F_U. GLH-byte = I=F^{-1}F(I) (reversão). GLH contínuo ≠ este sítio.
+// 3^{-1}_χ = π∘F ≠ F^{-1} = 2^{-m} F.
 
-import { F, TRANSF_N, residuoParseval } from './banco_transf_u.js'
+import {
+  F, TRANSF_M, TRANSF_N, residuoParseval, residuoReversao, caractere,
+} from './banco_transf_u.js'
 
 export const DIM = 8
 
@@ -137,7 +140,49 @@ export function residuoComposto () {
     res,
     pi_no_byte: piU(L7.e),
     composto: res === 0 ? 'realizado' : 'descartado',
-    glh: 'nao localizada',
+    glh: 'realizado',
+    glh_continuo: 'nao localizada',
+  })
+}
+
+/**
+ * GLH no byte = reversão da base ortonormal: I = F^{-1}(F(I)).
+ * F^{-1} = 2^{-m} F (fis:thm:H). Não é Gentil contínuo. ≠ 3^{-1}_χ.
+ */
+export function residuoGlhByte () {
+  const misto = new Array(TRANSF_N)
+  for (let i = 0; i < TRANSF_N; i++) misto[i] = (i % 5) - 2
+  const provas = [
+    { nome: 'chi_1', f: caractere(1) },
+    { nome: 'delta_e7', f: campoLei(7) },
+    { nome: 'delta_e0', f: campoLei(0) },
+    { nome: 'misto', f: misto },
+  ]
+  let res = 0
+  const detalhe = []
+  for (const p of provas) {
+    const hat = F(p.f)
+    const parseval = residuoParseval(p.f, hat)
+    const reversao = residuoReversao(p.f)
+    if (parseval !== 0 || reversao !== 0) res = 1
+    detalhe.push({ nome: p.nome, parseval, reversao })
+  }
+  return Object.freeze({
+    formula: 'I = F^{-1}(F(I))',
+    finv: '2^{-m} F',
+    m_hadamard: TRANSF_M,
+    m_dobras: 3,
+    factor: `2^{-${TRANSF_M}}`,
+    nao_e_1_8: TRANSF_M !== 3,
+    fonte: 'univ:thm:reversao-byte',
+    def: 'univ:def:finv',
+    thm: 'fis:thm:H',
+    n: TRANSF_N,
+    res,
+    detalhe,
+    glh_byte: res === 0 ? 'realizado' : 'descartado',
+    glh_continuo: 'nao localizada',
+    nao_e_inv_tres: true,
   })
 }
 
@@ -148,6 +193,7 @@ export function residuoComposto () {
 export function residuoGlhPi (parsevalResiduo) {
   const c = residuoCiclo()
   const m = residuoComposto()
+  const b = residuoGlhByte()
   const piOk = !!(c.residuo === 0 && c.piU && c.metaind_iff_piU)
   const parseval = parsevalResiduo !== undefined ? parsevalResiduo : m.parseval
   return Object.freeze({
@@ -156,13 +202,19 @@ export function residuoGlhPi (parsevalResiduo) {
     fonte_F: 'fis:def:transf',
     fonte_pi: 'univ:thm:metaind-pi',
     fonte_retorno: 'univ:thm:retorno-canonico',
+    fonte_finv: 'univ:def:finv',
+    fonte_reversao: 'univ:thm:reversao-byte',
     pi_realizado: piOk,
     F_parseval: parseval,
     parseval_L7: m.parseval,
     res: m.res,
     recuperado: m.recuperado,
     pi: m.pi,
-    glh: 'nao localizada',
+    glh: b.glh_byte,
+    glh_byte: b.glh_byte,
+    glh_continuo: b.glh_continuo,
+    reversao: b.res,
+    finv: b.finv,
     composto: m.composto,
     residuo_ciclo: c.residuo,
     promove_tripla: false,
@@ -188,6 +240,7 @@ export function invTres () {
     racional_1_3: 'nao localizada',
     e_terceira: 1 << 2,
     chi_terceira_nao_e_inv: true,
+    nao_e_finv: true,
   })
 }
 
@@ -220,14 +273,16 @@ export function leiCanonica () {
 }
 
 /**
- * Núcleo alinhado a fisica/catálogo. M_Docker / GLH-byte / F∩B∩N / T³
- * permanecem nao localizada. Sem Lei 8. Sem Ficha 11.
+ * Núcleo alinhado a fisica/catálogo. GLH-byte = reversão realizada.
+ * M_Docker / GLH contínuo / F∩B∩N / T³ permanecem nao localizada.
+ * Sem Lei 8. Sem Ficha 11.
  */
 export function nucleoU () {
   const c = residuoCiclo()
   const m = residuoComposto()
   const g = residuoGlhPi()
   const can = leiCanonica()
+  const b = residuoGlhByte()
   return Object.freeze({
     U_can: can,
     retorno: {
@@ -252,7 +307,26 @@ export function nucleoU () {
       res: m.res,
       fonte: 'univ:obs:residuo-glh',
     },
-    glh_byte: 'nao localizada',
+    glh_byte: b.glh_byte,
+    glh_continuo: b.glh_continuo,
+    reversao: { res: b.res, formula: b.formula, finv: b.finv },
+    dois_retornos: Object.freeze({
+      finv: Object.freeze({
+        formula: 'F^{-1}=2^{-m} F',
+        m_hadamard: b.m_hadamard,
+        factor: b.factor,
+        n: b.n,
+        res: b.res,
+        estatuto: b.glh_byte,
+        nao_e_1_8: b.nao_e_1_8,
+      }),
+      inv_tres: Object.freeze({
+        formula: '3^{-1}_chi = pi o F',
+        m_dobras: 3,
+        res: m.res,
+        estatuto: m.res === 0 ? 'realizado' : 'descartado',
+      }),
+    }),
     FBN: 'nao localizada',
     M_Docker: 'nao localizada',
     T3: 'nao localizada',

@@ -538,13 +538,16 @@ Retorno \(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\)
 Def.~\ref{fis:def:transf}, Teor.~\ref{fis:thm:H},
 Obs.~\ref{fis:obs:octoniao-interface}.
 \(\mathcal{U}_{\mathrm{an}}=\operatorname{Real}_{\mathrm{an}}(\pi_{\mathcal{U}})\):
-Teor.~\ref{fis:thm:central} (GLH no byte: \texttt{não localizada}).
+Teor.~\ref{fis:thm:central}
+(GLH no byte: \texttt{realizado} pela reversão
+\(\mathcal{F}^{-1}\mathcal{F}=\mathrm{id}\);
+contínuo: \texttt{não localizada}).
 \(\mathcal{L}_S(\mathrm{id})\): cláusula~(1) do Teor.~\ref{fis:thm:tecidos}
 (fibra, não \(X_{k+1}\)).
 Alonzo \(\pi\circ\pi=\pi\): Def.~\ref{fis:def:alonzo}.
 MetaInd: Teor.~\ref{fis:thm:metainducao}(1) --- mudou o degrau, não a
 regra. CF/\(\varphi\) em \(\mathrm{I}_{9}\)
-(\code{univ:obs:cf-estrela}); \(1/3\), GLH no byte e
+(\code{univ:obs:cf-estrela}); \(1/3\), GLH contínuo e
 \(F\cap B\cap N\) permanecem \texttt{não localizada}.
 Categoria/autómato acima \(\neq\) alg/top/an
 (\code{univ:def:linguas}). Sem Lei~8. Sem Ficha~11. Sem Docker, sem
@@ -552,6 +555,7 @@ EM-corpo (\code{catalogo cat:bloco4}), sem Mandelbrot no lugar de
 Alonzo. Não se promove evidência a estrutura.
 (\code{univ:thm:retorno-canonico}; \code{univ:def:lei-local-canonica};
 \code{univ:cor:metaind-fecho}; \code{univ:def:alonzo-idemp};
+\code{univ:def:finv}; \code{univ:thm:reversao-byte};
 \code{tests/lei\_unica\_u.js}.)
 \end{observacao}
 
@@ -4021,6 +4025,7 @@ fator nenhum. E\[
 \mathcal{F}\circ \mathcal{F}=2^{m}\cdot\mathrm{id},\qquad
 \lVert \mathcal{F}(f)\rVert^{2}=2^{m}\lVert f\rVert^{2}.
 \]
+\(\mathcal{U}\) lê esta inversa como \code{univ:def:finv} / GLH-byte.
 \end{teorema}
 
 \begin{proof}

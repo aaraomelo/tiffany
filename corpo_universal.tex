@@ -1159,12 +1159,18 @@ este; \(\pi_{\mathcal{U}}\) é o que permanece
 (terceira dobra). Não se funde \(\chi^{(3)}\) com
 \(3^{-1}\): aquele aniquila \emph{um} eixo; este é o
 fecho das três dobras no corte.
-Não coincide com \(1/3\):
+Não coincide com \(1/3\).
+Não se funde com \(\mathcal{F}^{-1}=2^{-m}\mathcal{F}\)
+(Def.~\ref{univ:def:finv}):
+um é retorno de leis \(L_7\to L_0\); o outro é
+síntese no espaço \(X\).
 \[
 \boxed{\;
-3^{-1}
+3^{-1}_{\chi}
 \neq
 \tfrac{1}{3}
+\neq
+\mathcal{F}^{-1}
 \neq
 \operatorname{Star}(K)
 \neq
@@ -1856,6 +1862,11 @@ O vinco do rectângulo par (\code{fis:thm:central}(4);
 \(\operatorname{Star}(K)\) nem
 \(\mathbf{1}=\operatorname{cl}(L_0,L_7)\).
 Não promove \(F\cap B\cap N\).
+No byte, o mesmo rectângulo lê-se pela reversão
+da base (Teor.~\ref{univ:thm:reversao-byte}):
+análise \(\mathcal{F}\) e síntese \(\mathcal{F}^{-1}\).
+O rectângulo contínuo (Gentil) \textbf{não} se
+promove a este sítio.
 \end{definicao}
 
 %═══════════════════════════════════════════════════════════════════════════
@@ -2103,6 +2114,95 @@ Não funde \(L_0\) com \(L_7\). Não funde as três estrelas
 (Obs.~\ref{univ:obs:tres-canonicos}).
 \end{teorema}
 
+\begin{definicao}[inversa da transformada: síntese da base]\label{univ:def:finv}
+\(\mathcal{F}\) é Def.~\code{fis:def:transf}.
+O Teor.~\code{fis:thm:H} já tem a volta:
+\[
+\mathcal{F}\circ\mathcal{F}=2^{m}\cdot\mathrm{id}
+\]
+Donde a inversa --- adjunto / síntese, o mesmo \(\chi\),
+sem FFT ---
+\[
+\boxed{\;
+\mathcal{F}^{-1}(\widehat{g})_{x}
+=2^{-m}\sum_{k}\widehat{g}(k)\chi_{k}(x)
+\;}
+\]
+\[
+\boxed{\;
+\mathcal{F}^{-1}=2^{-m}\mathcal{F}
+\;}
+\]
+\(\chi\) real \(\pm1\); no grupo \((\mathbb{Z}/2)^{m}\)
+tem-se \(-k=k\), logo \(\mathcal{F}\) é involutiva
+a menos do factor \(2^{m}\). A reversão
+\textbf{é} \(\mathcal{F}\) de novo.
+Não se funde com \(3^{-1}_{\chi}=\pi_{\mathcal{U}}\circ\mathcal{F}\)
+(Obs.~\ref{univ:obs:inv-tres-corte}):
+aquele é o retorno das leis \(L_{7}\to L_{0}\);
+este é a síntese no espaço \(X\).
+Podem compor na língua an.
+\(\mathrm{I}_{0}\) do factor --- dois \(m\), e não se fundem:
+\[
+\boxed{\;
+m_{\mathrm{dobras}}=3
+\qquad(2^{3}=8\text{ leis})
+\qquad\neq\qquad
+m_{\mathrm{Hadamard}}
+\text{ de }(\mathbb{Z}/2)^{m}
+\;}
+\]
+O paper: \(H^{2}=2^{m}\mathrm{Id}\) (Teor.~\code{fis:thm:H}).
+O motor mediu \(\lvert X\rvert=256=2^{8}\), logo
+\(m_{\mathrm{Hadamard}}=8\) e
+\[
+\boxed{\;
+\mathcal{F}^{-1}=2^{-8}\mathcal{F}
+\qquad\neq\qquad
+\tfrac{1}{8}\mathcal{F}
+\;}
+\]
+As três dobras \(2^{3}=8\) são as leis, não o \(m\)
+do hipercubo. \(\rho_{3}=\tfrac{1}{8}\)
+(Teor.~\code{fis:thm:largura}(4)) é a escada, não
+o factor de Parseval. Não se escreve
+«no byte \(m=3\), \(\mathcal{F}^{-1}=\tfrac18\mathcal{F}\)».
+\[
+\boxed{\;
+\mathcal{F}^{-1}\neq 3^{-1}_{\chi}
+\;}
+\]
+\end{definicao}
+
+\begin{teorema}[reversão da base no byte]\label{univ:thm:reversao-byte}
+A base \(\{\chi_{k}\}\) é ortonormal
+(Parseval, factor \(2^{m}\); Teor.~\code{fis:thm:H}).
+Logo existe \(\mathcal{F}^{-1}\) (Def.~\ref{univ:def:finv}).
+No byte (\(X\), \(\lvert X\rvert=2^{8}=256\),
+\(m_{\mathrm{Hadamard}}=8\)):
+\[
+\boxed{\;
+I=\mathcal{F}^{-1}\bigl(\mathcal{F}(I)\bigr)
+=2^{-8}\mathcal{F}\bigl(\mathcal{F}(I)\bigr)
+\qquad(\operatorname{Res}=0)
+\;}
+\]
+As duas contagens do rectângulo GLH
+\textbf{neste suporte} são análise \(\mathcal{F}\)
+e síntese \(\mathcal{F}^{-1}\). Parseval \(=0\).
+GLH-byte \textbf{realizado}.
+Não é \(m_{\mathrm{dobras}}=3\) nem
+\(\tfrac18\mathcal{F}\).
+O ponto fixo da reconstrução é
+\(I=\mathcal{F}^{-1}\mathcal{F}(I)\) ---
+não se funde com \(\operatorname{Star}(K)\)
+nem com \(\pi^{2}=\pi\) nem com o vinco.
+\(\mathrm{I}_{0}\): Hurwitz no byte
+\(\neq\) Gentil no contínuo.
+(\code{tests/lei\_unica\_u.js};
+\code{banco\_transf\_u.js}.)
+\end{teorema}
+
 \begin{observacao}[resíduo espectral: teste de estresse, não axioma]\label{univ:obs:residuo-glh}
 \(\mathcal{F}\) é Def.~\code{fis:def:transf}, já fechada na Álgebra.
 Não se inventa \(\mathcal{F}_{\mathcal{U}}\). A ponte
@@ -2124,13 +2224,22 @@ Estatuto. \(\pi_{\mathcal{U}}(L_7)=L_0\) é \texttt{realizado}
 (\code{fis:thm:H}; \code{banco\_transf\_u.js}).
 O composto \(\pi_{\mathcal{U}}\circ\mathcal{F}\) sobre \(L_7\) é
 \texttt{realizado} (unidade operacional): \(\operatorname{Res}=0\).
+A reversão \(I=\mathcal{F}^{-1}(\mathcal{F}(I))\) no byte é
+\texttt{realizado} (\(\operatorname{Res}=0\);
+Teor.~\ref{univ:thm:reversao-byte};
+Def.~\ref{univ:def:finv}).
 \(L_7,L_0\) são o índice e o byte \(e_k=2^{k}\) do ciclo;
 \(\mathcal{F}\) corre no campo \(\delta_{e_7}\);
 \(\pi_{\mathcal{U}}\) é \(\operatorname{MetaInd}\) no índice
 recuperado pela Gram nas oito frequências \(e_k\).
 Não se inventa \(\mathcal{F}_{\mathcal{U}}\).
-GLH no byte = \texttt{não localizada}: este número não é o
-rectângulo contínuo (Hurwitz/Lebesgue/Gentil).
+GLH no byte \(=\) a reversão ortonormal:
+\texttt{realizado} neste suporte
+(\(X\), \(\lvert X\rvert=256\)).
+GLH contínuo (Hurwitz/Lebesgue/Gentil) permanece
+\texttt{não localizada} neste sítio ---
+outro suporte, outra leitura
+(Def.~\ref{univ:def:glh-an}).
 Travas: diferença local \(\nRightarrow\) diferença da lei;
 sem medida de \(\pi\) \(\nRightarrow\) lei compartilhada.
 GLH \textbf{não} fecha a tripla \(F\cap B\cap N\).
@@ -2255,6 +2364,11 @@ Não reabre a Def.~\ref{univ:def:U}. Não reabre os três critérios
 \textbf{usa} \(\mathcal{U}_{\mathrm{can}}\).
 \(\mathcal{L}_S(\mathrm{id})\) (Def.~\ref{univ:def:lei-local-canonica})
 é a leitura no suporte, não esta quádrupla.
+Síntese, sem quinto slot e sem fundir retornos:
+\(\mathbf{Duo}\) gera; \(\pi_{\mathcal{U}}\circ\mathcal{F}\)
+retorna a torre; \(\mathcal{F}^{-1}\) reverte \(X\);
+o vinco dá \(\mathbf{1}\).
+GLH contínuo (Gentil) permanece \texttt{não localizada}.
 \end{definicao}
 
 \begin{teorema}[reconhecimento]\label{univ:thm:reconhecimento}

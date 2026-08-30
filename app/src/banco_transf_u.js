@@ -29,6 +29,18 @@ export function F (f) {
   return hat
 }
 
+/**
+ * F^{-1}(ĝ)_x = 2^{-m} Σ_k ĝ(k) χ_k(x). Mesmo chi. fis:thm:H: F∘F = 2^m id.
+ * χ real ±1; (Z/2)^m ⇒ −k=k; a reversão é F de novo. ≠ 3^{-1}_χ = π∘F.
+ */
+export function Finv (hat) {
+  const n = hat.length
+  const volta = F(hat)
+  const out = new Array(n)
+  for (let i = 0; i < n; i++) out[i] = volta[i] / n
+  return out
+}
+
 export function norma2 (f) {
   let s = 0
   for (let i = 0; i < f.length; i++) s += f[i] * f[i]
@@ -47,6 +59,15 @@ export function residuoVolta (f, hat) {
   const volta = F(hat)
   for (let i = 0; i < n; i++) {
     if (volta[i] !== n * f[i]) return 1
+  }
+  return 0
+}
+
+/** I = F^{-1}(F(I)). Síntese da base. Resíduo 0 ou 1. */
+export function residuoReversao (f) {
+  const rec = Finv(F(f))
+  for (let i = 0; i < f.length; i++) {
+    if (rec[i] !== f[i]) return 1
   }
   return 0
 }
@@ -125,17 +146,25 @@ export function medeTransformada () {
   const hat = F(f)
   const parseval = residuoParseval(f, hat)
   const volta = residuoVolta(f, hat)
+  const reversao = residuoReversao(f)
   return {
     transformada_no_motor: true,
     fonte: 'fis:def:transf',
     teorema: 'fis:thm:H',
+    inversa: 'univ:def:finv',
     fis: 'fis:obs:U-consome',
     cat: 'cat:nucleo-u',
     m: TRANSF_M,
+    m_hadamard: TRANSF_M,
+    m_dobras: 3,
     n: TRANSF_N,
     parseval,
     volta,
-    residuo: parseval === 0 && volta === 0 ? 0 : 1,
+    reversao,
+    finv: '2^{-m} F',
+    factor: `2^{-${TRANSF_M}}`,
+    nao_e_1_8: TRANSF_M !== 3,
+    residuo: parseval === 0 && volta === 0 && reversao === 0 ? 0 : 1,
     corte: 'chi_k',
     nota: 'F e o chi de transformada.c / aranha_n.c; id selecciona B, nao e F',
   }

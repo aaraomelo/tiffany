@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 import {
   DIM, e, Ind, MetaInd, piU, paridadeAnd, medeCiclo, residuoCiclo,
   residuoGlhPi, lei, L0, L7, campoLei, leIndiceDoEspectro, residuoComposto,
-  nucleoU, invTres, leiCanonica,
+  residuoGlhByte, nucleoU, invTres, leiCanonica,
 } from '../app/src/banco_lei_unica_u.js'
-import { medeTransformada } from '../app/src/banco_transf_u.js'
+import { medeTransformada, Finv, F, residuoReversao } from '../app/src/banco_transf_u.js'
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TEX = join(RAIZ, 'corpo_universal.tex')
@@ -72,6 +72,9 @@ ok('§U0 tex: lei canonica U_can e reconhecimento',
   /mathcal\{U\}_\{\\mathrm\{can\}\}/.test(tex) &&
   /\(L_0,\\;\\mathbf\{Duo\},\\;\\pi_\{\\mathcal\{U\}\}\\circ\\mathcal\{F\},\\;\\operatorname\{vinco\}\)/.test(tex) &&
   /3\^\{-1\}_\{\\chi\}/.test(tex) &&
+  /mathbf\{Duo\}/.test(tex) &&
+  /retorna a torre/.test(tex) &&
+  /reverte/.test(tex) &&
   /nRightarrow/.test(tex) &&
   /C=\\mathcal\{U\}/.test(tex) &&
   /univ:def:corpo-canonico/.test(tex))
@@ -109,11 +112,13 @@ ok('§U0 tex: U_an = realizacao analitica de pi_U; tres projeccoes',
   /unifica[cç][aã]o por redu[cç][aã]o/.test(tex) &&
   /pi\(F\)=\\pi\(B\)=\\pi\(N\)=L_0/.test(tex) &&
   /F\\cap B\\cap N/.test(tex))
-ok('§U0 tex: GLH em U_an; camadas; composto Res=0; GLH nao localizada',
+ok('§U0 tex: GLH em U_an; camadas; composto Res=0; GLH-byte realizado; continuo nao localizada',
   /\\label\{univ:def:camadas\}/.test(tex) &&
   /\\label\{univ:def:glh-an\}/.test(tex) &&
   /\\label\{univ:obs:residuo-glh\}/.test(tex) &&
   /\\label\{univ:thm:retorno-canonico\}/.test(tex) &&
+  /\\label\{univ:def:finv\}/.test(tex) &&
+  /\\label\{univ:thm:reversao-byte\}/.test(tex) &&
   /mathrm\{I\}_\{4\}=\\mathrm\{GLH\}/.test(tex) &&
   /Real\}_\{\\mathrm\{an\}\}/.test(tex) &&
   /Res[ií]duo/.test(tex) &&
@@ -122,9 +127,18 @@ ok('§U0 tex: GLH em U_an; camadas; composto Res=0; GLH nao localizada',
   /fis:def:transf/.test(tex) &&
   /operatorname\{Res\}=0/.test(tex) &&
   /unidade operacional/.test(tex) &&
+  /mathcal\{F\}\^\{-1\}=2\^\{-m\}\\mathcal\{F\}/.test(tex) &&
+  /I=\\mathcal\{F\}\^\{-1\}/.test(tex) &&
+  /m_\{\\mathrm\{Hadamard\}\}/.test(tex) &&
+  /m_\{\\mathrm\{dobras\}\}=3/.test(tex) &&
+  /2\^\{-8\}\\mathcal\{F\}/.test(tex) &&
+  /tfrac\{1\}\{8\}\\mathcal\{F\}/.test(tex) &&
+  /mathcal\{F\}\^\{-1\}\\neq 3\^\{-1\}_\{\\chi\}/.test(tex) &&
   /n[aã]o localizada/.test(tex) &&
   /[Nn][aã]o promove/.test(tex) &&
-  /mathcal\{F\}_\{\\mathcal\{U\}\}/.test(tex))
+  /mathcal\{F\}_\{\\mathcal\{U\}\}/.test(tex) &&
+  /3\^\{-1\}_\{\\chi\}/.test(tex) &&
+  /Hurwitz no byte/.test(tex))
 ok('§U0 tex: Sistema Universal = leis 0-7 e retorno; sem L_8',
   /Sistema Universal/.test(tex) &&
   /pi_\{\\mathcal\{U\}\}\^\{2\}=\\pi_\{\\mathcal\{U\}\}/.test(tex) &&
@@ -164,6 +178,9 @@ ok('§U0 fis: U consome; nao copia o tratado',
   /univ:thm:retorno-canonico/.test(fis) &&
   /univ:def:lei-local-canonica/.test(fis) &&
   /univ:def:alonzo-idemp/.test(fis) &&
+  /univ:def:finv/.test(fis) &&
+  /univ:thm:reversao-byte/.test(fis) &&
+  /GLH-byte/.test(fis) &&
   /univ:cor:metaind-fecho/.test(fis) &&
   /pi\\circ\\pi=\\pi/.test(fis) &&
   /X_\{k\+1\}/.test(fis) &&
@@ -176,6 +193,12 @@ ok('§U0 cat: nucleo registado; U_can; sem Ficha 11',
   /univ:thm:reconhecimento/.test(cat) &&
   /mathcal\{U\}_\{\\mathrm\{can\}\}/.test(cat) &&
   /univ:thm:retorno-canonico/.test(cat) &&
+  /univ:def:finv/.test(cat) &&
+  /univ:thm:reversao-byte/.test(cat) &&
+  /mathcal\{F\}\^\{-1\}\\neq 3\^\{-1\}_\{\\chi\}/.test(cat) &&
+  /m_\{\\mathrm\{Hadamard\}\}=8/.test(cat) &&
+  /m_\{\\mathrm\{dobras\}\}=3/.test(cat) &&
+  /Gentil/.test(cat) &&
   /tests\/lei\\_unica\\_u\.js/.test(cat) &&
   /F\\cap B\\cap N/.test(cat) &&
   /M_\{\\mathrm\{Docker\}\}/.test(cat) &&
@@ -192,7 +215,11 @@ ok('§U0 manifesto: ponte_lei_unica + nucleo',
   /lei-canonica/.test(man.corpos?.motor?.nucleo?.U_can || '') &&
   /realizado/.test(man.corpos?.motor?.nucleo?.retorno || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.M_Docker || '') &&
-  /nao localizada/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
+  /realizado/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
+  /m_Hadamard=8/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
+  /m_dobras=3/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
+  /2\^\{-8\}F/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
+  /nao localizada/.test(man.corpos?.motor?.nucleo?.glh_continuo || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.T3 || '') &&
   /inv-tres-corte/.test(man.corpos?.motor?.nucleo?.inv_tres || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.racional_1_3 || '') &&
@@ -261,14 +288,20 @@ ok('§U1 extremos nao fundem: Gram <e0,e7>=0',
     g.res === 0 &&
     g.parseval_L7 === 0 &&
     g.F_parseval === 0)
-  ok('§U4 residuo GLH/F/π: π realizado; composto realizado; GLH nao localizada',
+  ok('§U4 residuo GLH/F/π: π realizado; composto realizado; GLH-byte realizado',
     g.nome === 'Residuo(pi_U(F(L_7))-L_0)' &&
     g.fonte_GLH === 'fis:thm:central' &&
     g.fonte_F === 'fis:def:transf' &&
     g.fonte_pi === 'univ:thm:metaind-pi' &&
     g.fonte_retorno === 'univ:thm:retorno-canonico' &&
+    g.fonte_finv === 'univ:def:finv' &&
+    g.fonte_reversao === 'univ:thm:reversao-byte' &&
     g.pi_realizado === true &&
-    g.glh === 'nao localizada' &&
+    g.glh === 'realizado' &&
+    g.glh_byte === 'realizado' &&
+    g.glh_continuo === 'nao localizada' &&
+    g.reversao === 0 &&
+    g.finv === '2^{-m} F' &&
     g.residuo_ciclo === 0 &&
     g.composto === 'realizado' &&
     g.promove_tripla === false &&
@@ -282,13 +315,22 @@ ok('§U1 extremos nao fundem: Gram <e0,e7>=0',
     n.pi_alonzo.estatuto === 'realizado' &&
     n.F_parseval.estatuto === 'realizado' &&
     n.composto.estatuto === 'realizado' &&
-    n.glh_byte === 'nao localizada' &&
+    n.glh_byte === 'realizado' &&
+    n.glh_continuo === 'nao localizada' &&
+    n.reversao.res === 0 &&
     n.FBN === 'nao localizada' &&
     n.M_Docker === 'nao localizada' &&
     n.T3 === 'nao localizada' &&
     n.racional_1_3 === 'nao localizada' &&
     n.inv_tres.estatuto === 'realizado' &&
-    n.inv_tres.res === 0)
+    n.inv_tres.res === 0 &&
+    n.dois_retornos.finv.m_hadamard === 8 &&
+    n.dois_retornos.finv.factor === '2^{-8}' &&
+    n.dois_retornos.finv.nao_e_1_8 === true &&
+    n.dois_retornos.finv.res === 0 &&
+    n.dois_retornos.inv_tres.m_dobras === 3 &&
+    n.dois_retornos.inv_tres.res === 0 &&
+    n.dois_retornos.finv.formula !== n.dois_retornos.inv_tres.formula)
   ok('§U4 U_can = (L0, Duo, pi_U o F, vinco); reconhecimento',
     n.U_can.formula === '(L0, Duo, pi_U o F, vinco)' &&
     n.U_can.fonte === 'univ:def:lei-canonica' &&
@@ -315,15 +357,42 @@ ok('§U1 extremos nao fundem: Gram <e0,e7>=0',
     v.estatuto === 'realizado' &&
     v.racional_1_3 === 'nao localizada' &&
     v.e_terceira === 4 &&
-    v.chi_terceira_nao_e_inv === true)
+    v.chi_terceira_nao_e_inv === true &&
+    v.nao_e_finv === true)
+}
+
+{
+  const t = medeTransformada()
+  const b = residuoGlhByte()
+  const f = campoLei(7)
+  const rec = Finv(F(f))
+  ok('§U6 F^{-1}=2^{-m} F; I = F^{-1}(F(I)); Res=0 no byte',
+    t.finv === '2^{-m} F' &&
+    t.reversao === 0 &&
+    t.inversa === 'univ:def:finv' &&
+    t.m === 8 && t.m_hadamard === 8 && t.m_dobras === 3 &&
+    t.n === 256 && t.factor === '2^{-8}' && t.nao_e_1_8 === true &&
+    residuoReversao(f) === 0 &&
+    rec.length === f.length &&
+    rec.every((v, i) => v === f[i]) &&
+    b.res === 0 &&
+    b.formula === 'I = F^{-1}(F(I))' &&
+    b.finv === '2^{-m} F' &&
+    b.m_hadamard === 8 && b.m_dobras === 3 &&
+    b.factor === '2^{-8}' && b.nao_e_1_8 === true &&
+    b.glh_byte === 'realizado' &&
+    b.glh_continuo === 'nao localizada' &&
+    b.nao_e_inv_tres === true &&
+    b.n === 256 &&
+    b.detalhe.every((d) => d.parseval === 0 && d.reversao === 0))
 }
 
 {
   const m = residuoComposto()
   console.log('')
   console.log('  ciclo: L0 -Ind-> ... -Ind-> L7 -MetaInd-> L0; Ind^8=id')
-  console.log('  recusas: Lei 8, fundir 0 com 7, 2^8 = e_0, F_U, F∩B∩N, GLH no byte')
-  console.log(`  Res = pi_U(F(L_7))-L_0 = ${m.res}  composto=${m.composto}  glh=${m.glh}`)
+  console.log('  recusas: Lei 8, fundir 0 com 7, 2^8 = e_0, F_U, F∩B∩N, GLH continuo')
+  console.log(`  Res = pi_U(F(L_7))-L_0 = ${m.res}  composto=${m.composto}  glh_byte=${m.glh}`)
   console.log(`#TOTAL ${feitas} ${falhas}`)
 }
 process.exit(falhas ? 1 : 0)
