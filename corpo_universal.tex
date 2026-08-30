@@ -58,6 +58,22 @@ A base ortonormal \(\{e_k=2^{k}\}_{k=0}^{7}\) \textbf{é} as oito leis
 \boxed{\;\text{Física}\;\longleftarrow\;\mathcal{U}\;\longrightarrow\;\text{Catálogo}\;}
 \]
 Não se promove evidência a estrutura. Não há Lei~8.
+A quádrupla é a máquina. A lei única \(\mathcal{L}\) e a unidade
+\(\mathbf{1}\) dos extremos são o núcleo: as oito leis são
+\(\operatorname{Ind}^{k}(L_0)\), e \(\operatorname{Ind}^{8}=\mathrm{id}\)
+é o período --- não uma nona lei
+(Def.~\ref{univ:def:lei-unica}; Teor.~\code{fis:thm:tecidos}).
+O retorno canónico
+\(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\)
+fecha o ciclo com \(\operatorname{Res}=0\)
+(Teor.~\ref{univ:thm:retorno-canonico}).
+A máquina operacional realiza \(\mathcal{U}\); o browser realiza a
+máquina (\S\ref{univ:sec:realizacao-op}).
+Três línguas --- álgebra, topologia, análise --- projectam o mesmo
+\(\mathcal{U}\): não são três corpos, nem quarta língua fractal
+(Def.~\ref{univ:def:linguas}).
+Corpo canónico de \(\mathcal{U}\) é reconhecimento (mapa), não
+identidade de objectos (Def.~\ref{univ:def:corpo-canonico}).
 \end{abstract}
 
 \tableofcontents
@@ -99,6 +115,8 @@ Papéis, e não se fundem:
 A Física constrói. \(\mathcal{U}\) processa e valida o contrato.
 O catálogo regista sem inventar estrutura. Não entra no bestiário.
 Não é uma categoria universal. Não decide quais capítulos existem.
+A quádrupla é a máquina. O núcleo \((\mathcal{L},\mathbf{1})\)
+observa-a sem a apagar (Obs.~\ref{univ:obs:nucleo}).
 \[
 \boxed{\;
 \text{catorze palcos de exposição}
@@ -137,6 +155,9 @@ $\begin{array}{rcl}
 \text{o registo do resultado}
 \end{array}$}
 \caixa{\(\mathcal{U}\neq\text{catálogo}\neq\operatorname{INGEST}\)}
+A máquina operacional realiza \(\mathcal{U}\); o browser realiza a
+máquina; \(\mathcal{U}\) não descreve um browser
+(\S\ref{univ:sec:realizacao-op}).
 Um capítulo \textbf{não} vira corpo por ser ingerido, nem por admitir
 um mapa. O percurso Álgebra\(\to\cdots\to\)Redes é execução do autómato
 sobre uma sequência de entradas, não composição de 2-morfismos.
@@ -196,6 +217,583 @@ quocientes e completação, com \(\mathcal{D}=\texttt{N/A}\): isso
 realiza duomorfismo --- e \textbf{não} é canónico de \(\mathcal{U}\).
 A forma \(E^{2}-B^{2}\) da Parte EM \textbf{não} é
 corpo (\code{fis:def:em-forma}) com a interface fechada.
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Três línguas, um corpo}\label{univ:sec:linguas}
+
+\begin{definicao}[três línguas]\label{univ:def:linguas}
+\(\mathcal{U}\) lê-se em três línguas --- projeções complementares do
+\textbf{mesmo} Corpo Universal. \textbf{Não} são três corpos.
+\textbf{Não} triplicam o núcleo
+\((\mathcal{L},\mathbf{1},X,X^{*},\mathsf{Mor},\mathsf{Aut})\)
+(Def.~\ref{univ:def:U}; Obs.~\ref{univ:obs:nucleo}):
+projectam-no.
+\caixa{%
+\(\displaystyle
+\mathcal{U}
+=
+\underbrace{\mathcal{U}_{\mathrm{alg}}}_{\text{estrutura}}
++
+\underbrace{\mathcal{U}_{\mathrm{top}}}_{\text{relação}}
++
+\underbrace{\mathcal{U}_{\mathrm{an}}}_{\text{medida}}
+\)
+}
+\[
+\boxed{\;
+\mathcal{U}_{\mathrm{an}}
+=\text{a realização analítica de }\pi_{\mathcal{U}}
+\;}
+\]
+\[
+\boxed{\;
+\mathrm{alg}=\text{o que opera},\quad
+\mathrm{top}=\text{onde conecta},\quad
+\mathrm{an}=\text{o que permanece}
+\;}
+\]
+\[
+\boxed{\;
+\text{unificação por redução}\neq\text{fusão}:
+\quad
+\pi(F)=\pi(B)=\pi(N)=L_0
+\neq F\cap B\cap N
+\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.09\textwidth}
+                >{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.30\textwidth}
+                >{\raggedright\arraybackslash}p{0.25\textwidth}@{}}
+\toprule
+língua & pergunta & objectos & papel \\
+\midrule
+alg
+  & operações e relações
+  & \((X,\oplus,\otimes)\), cisão, dual,
+    \(\operatorname{Ind}\), \(\mathsf{Mor}\)
+  & o que opera \\
+top
+  & relação quando o suporte muda
+  & vizinhança, fibras, Lei~7
+  & onde conecta \\
+an
+  & limite, medida, transformação
+  & completação, \(\mu\), \(\int\), \(\mathcal{F}\), GLH
+  & o que permanece \\
+\bottomrule
+\end{tabular}
+\end{center}
+A língua an \textbf{cita} o que Análise e o teorema central já
+fecharam: GLH é o rectângulo das duas contagens
+(Teor.~\code{fis:thm:central}; \(\mathrm{I}_{4}\) da Parte Análise;
+Def.~\ref{univ:def:glh-an}).
+O que este ficheiro já nomeia --- Hurwitz conta, Gentil integra,
+Lebesgue casa a ordem (\S\ref{univ:sec:metrica}) --- não se
+redecreta como esteira nova, nem se promove a canónico geral de
+\(\mathcal{U}\).
+A cadeia \(\mathbb{N}\to\mathbb{R}\) é transporte (completação lida
+em an); \(\mathcal{D}=\texttt{N/A}\) nessa cadeia --- não é língua
+de \(\mathcal{U}\).
+\[
+\boxed{\;
+\text{três línguas}
+\;\neq\;
+\text{três estrelas}
+\;}
+\]
+As estrelas permanecem três autoridades
+(Obs.~\ref{univ:obs:tres-canonicos}):
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\)
+(pode viver em alg se o suporte o admitir);
+\(\operatorname{Star}(K)=\{x:x^{2}=x+1\}\) (elemento);
+o factor local (o que a Parte conserva). Não se homogeneízam.
+Camadas: Def.~\ref{univ:def:camadas}.
+\end{definicao}
+
+\begin{definicao}[três camadas, sem fundir estrelas]\label{univ:def:camadas}
+As três línguas lêem o mesmo núcleo. Cada camada cita o que o paper
+já fechou --- não axioma extra, não quarta estrela.
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.08\textwidth}
+                >{\raggedright\arraybackslash}p{0.20\textwidth}
+                >{\raggedright\arraybackslash}p{0.60\textwidth}@{}}
+\toprule
+língua & objecto & papel \\
+\midrule
+alg
+  & \(x^{2}=x+1\)
+  & auto-ref aditiva: vinco de \emph{elemento}, slot \(\mathrm{I}_{9}\).
+    \(\operatorname{Star}(K)\). Equivale a \(x=1+x^{-1}\)
+    (\code{fis:thm:estrelaencaixe}(5)). No Alonzo a cruz realiza
+    \(\varphi,\psi\) (\code{fis:def:alonzo}; \code{fis:thm:estrela};
+    \code{fis:thm:alonzo-par}). O vinco
+    \(\mathbf{1}=\operatorname{cl}(L_0,L_7)\)
+    (Def.~\ref{univ:def:unidade}) é Lei~7 --- cita-se no mesmo
+    suporte \textbf{sem} virar \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) \\
+top
+  & Lei~7 \(+\) \(\pi\circ\pi=\pi\)
+  & ligar sem fundir (Def.~\ref{univ:def:alonzo-idemp}) \\
+an
+  & GLH
+  & rectângulo das duas contagens (\code{fis:thm:central});
+    \(\operatorname{Img}(\pi)\) (Def.~\ref{univ:def:glh-an}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\(\mathcal{F}\) (Def.~\code{fis:def:transf}) é a ponte da composição
+aditiva para o espectral, onde \(\pi_{\mathcal{U}}\) colapsa o vinco.
+Não se inventa \(\mathcal{F}_{\mathcal{U}}\).
+\[
+\boxed{\;
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;\neq\;
+\operatorname{Star}(K)=\{x:x^{2}=x+1\}
+\;\neq\;
+\lvert\det\rvert=1
+\;}
+\]
+\end{definicao}
+
+\begin{observacao}[o que \(\mathcal{U}\) recusou]\label{univ:obs:linguas-recusa}
+Não são três corpos. Não há quarta língua fractal.
+Não há escada \(L_0\to L_8\): o ciclo das oito leis é período da
+lei única, não nona língua
+(Def.~\ref{univ:def:lei-unica}; Obs.~\ref{univ:obs:tecidos-periodo}).
+Não se inventa língua EM: a Parte não tem corpo
+(\code{fis:def:em-forma}; Obs.~\ref{univ:obs:taxonomia}).
+Não se funde \(\operatorname{Star}(K)\) com
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\).
+GLH \textbf{não} promove \(F\cap B\cap N\).
+Não há Lei~8. Não há Ficha~11.
+\end{observacao}
+
+\begin{definicao}[Alonzo realiza as três; não é quarta língua]\label{univ:def:alonzo-real}
+\[
+\boxed{\;\text{Fractal não é quarta língua.}\;}
+\]
+\[
+\boxed{\;
+\mathcal{U}_{\mathrm{Alonzo}}
+=
+\mathsf{Real}_{\mathrm{fractal}}
+\bigl(\mathcal{U}_{\mathrm{alg}},\,\mathcal{U}_{\mathrm{top}},\,\mathcal{U}_{\mathrm{an}}\bigr)
+\;}
+\]
+Alonzo é o ponto de encontro canónico da Parte Fractal --- já
+fechada (\code{fis:def:alonzo}; \code{cat:audit:alonzo};
+\code{cat:ingestao:fractal}). Não se reabre \(\mathrm{I}_{0}\).
+O núcleo já fecha o encontro sem axioma extra: unidade
+\(\mathbf{1}=\operatorname{vinco}(L_0,L_7)\)
+(Def.~\ref{univ:def:unidade}), cisão das duas operações,
+fibra da face (Lei~7: ligam sem fundir).
+A composição que a Parte \textbf{já} escreveu
+(\code{fis:def:alonzo}) é o suporte dessa realização, não língua
+nova de \(\mathcal{U}\) e não Mandelbrot por decreto.
+\(\operatorname{Star}\) do elemento nesta construção não se unifica
+com \(\operatorname{Star}(\mathbb{R})\) nem com
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\).
+\end{definicao}
+
+\begin{definicao}[idempotência da realização Alonzo]\label{univ:def:alonzo-idemp}
+O canónico extraído da construção --- não axioma \(T^{3}\) ---
+é a projecção idempotente sobre as três línguas:
+\[
+\boxed{\;
+\pi
+=
+\mathsf{Real}_{\mathrm{fractal}}
+\bigl(\mathcal{U}_{\mathrm{alg}},\,\mathcal{U}_{\mathrm{top}},\,\mathcal{U}_{\mathrm{an}}\bigr),
+\qquad
+\pi\circ\pi=\pi
+\;}
+\]
+É a abertura já escrita
+(Def.~\ref{univ:def:corpo-canonico}; \code{teo:adjuncao}):
+\[
+\boxed{\;
+\gamma=\delta\varepsilon
+=\operatorname{realize}\circ\rho_C,
+\qquad
+\gamma\circ\gamma=\gamma
+\;}
+\]
+Percorrer as três e voltar é o mesmo que não sair.
+Ordem \(2\) da projecção (\(e\circ e=e\)),
+\textbf{não} \(T^{3}=\mathrm{id}\) como \(3\)-ciclo,
+\textbf{não} \(\mathbf{Duo}^{2}=\mathrm{id}\) (troca das ops).
+Fecha a Lei~7: o encontro no vinco
+\(\mathbf{1}=\operatorname{vinco}(L_0,L_7)\)
+liga sem fundir --- não cria quarta língua, não inventa Lei~8.
+(\code{fis:def:alonzo}; \code{cat:audit:alonzo}.)
+\end{definicao}
+
+\begin{observacao}[acoplamento, esteira, candidato]\label{univ:obs:linguas-acoplamento}
+\[
+\boxed{\;
+\mathcal{U}_{\mathrm{alg}}
+\;\overset{\text{fibra}}{\longleftrightarrow}\;
+\mathcal{U}_{\mathrm{top}}
+\;\overset{\text{realização}}{\longleftrightarrow}\;
+\mathcal{U}_{\mathrm{an}}
+\;}
+\]
+Esteira: gramática tripla \(\to\)
+\(\operatorname{Real}_{\mathrm{regime}}\) \(\to\)
+Física / Alonzo \(\to\) \(\operatorname{INGEST}\) \(\to\)
+Catálogo.
+Candidato a corpo: testar as \textbf{três} projeções
+simultaneamente. Resíduo \(0\) numa língua não basta.
+Os três critérios: Def.~\ref{univ:def:corpo-canonico}.
+\end{observacao}
+
+\begin{definicao}[triplo de línguas do mesmo suporte]\label{univ:def:tri}
+\[
+\boxed{\;
+\mathsf{Tri}(S)=(S_{\mathrm{Alg}},S_{\mathrm{Top}},S_{\mathrm{Ana}})
+\;}
+\]
+Projeções do \textbf{mesmo} \(S\). Sozinho \(=\) \textbf{três línguas
+simultâneas} (Def.~\ref{univ:def:linguas}). Não é axioma
+\(T^{3}=\mathrm{id}\). Não são três corpos. Não é
+\(\mathbf{Duo}\). Não é a trialidade \(S_{3}\) dos eixos
+(Obs.~\ref{univ:obs:trialidade}).
+\end{definicao}
+
+\begin{definicao}[trialidade realizada: intersecção de imagens]\label{univ:def:teste-tri}\label{univ:def:trialidade-real}
+Trialidade realizada \textbf{não} é \(T^{3}=\mathrm{id}\).
+Forçar ordem \(3\) era artificial. O mecanismo é projecção
+de vários \(S\) distintos sobre a \textbf{mesma fibra},
+resíduo \(0\):
+\[
+\boxed{\;
+\text{trialidade realizada}
+=
+\pi_{C}\circ\pi_{C}=\pi_{C}
+\text{ em }\ge 3\text{ suportes},
+\quad
+\bigcap_{C}\operatorname{Img}(\pi_{C})
+\cong\mathcal{L}_{7},
+\quad\text{resíduo }0
+\;}
+\]
+As setas nomeadas ficam \textbf{leitura} da idempotência
+(Def.~\ref{univ:def:alonzo-idemp}), não o canónico:
+\[
+C_{\mathrm{Alg}}\xrightarrow{f_{\mathrm{AT}}}C_{\mathrm{Top}}
+\xrightarrow{f_{\mathrm{TA}}}C_{\mathrm{Ana}}
+\xrightarrow{f_{\mathrm{AA}}}C_{\mathrm{Alg}}
+\]
+\[
+\boxed{\;
+f_{\mathrm{AA}}\circ f_{\mathrm{TA}}\circ f_{\mathrm{AT}}
+=\operatorname{id}
+\quad\text{é leitura de }
+\pi\circ\pi=\pi,
+\quad\text{não a definição}
+\;}
+\]
+Não se inventa \(f_{\mathrm{AT}}\). Sem a intersecção tripla
+medida, essa leitura permanece \texttt{não localizada}; o
+\(\pi\) do Alonzo \textbf{já} está extraído e não se apaga
+(Def.~\ref{univ:def:alonzo-idemp}). Não se decreta Mandelbrot:
+o canónico Fractal é Alonzo (Def.~\ref{univ:def:alonzo-real}).
+Não se força \(T^{3}=\mathrm{id}\) sobre \(e\circ e=e\).
+(\code{tests/trialidade\_linguas.js}.)
+\end{definicao}
+
+\begin{observacao}[Alonzo: \(\pi\) realizado; \(T^{3}\) não é a definição]\label{univ:obs:alonzo-tri}
+O mecanismo de circulação das três línguas \textbf{está}
+na construção (Def.~\ref{univ:def:alonzo-real};
+Def.~\ref{univ:def:alonzo-idemp};
+\code{fis:def:alonzo}; \code{cat:audit:alonzo};
+\code{cat:ingestao:fractal}).
+O canónico é a idempotência: percorrer as três e voltar é o mesmo
+que não sair.
+\[
+\boxed{\;
+\text{Alonzo}
+=\text{projecção idempotente}
+\qquad
+\pi\circ\pi=\pi
+\qquad
+\texttt{realizado}
+\;}
+\]
+As setas \(f_{\mathrm{AT}}\), \(f_{\mathrm{TA}}\), \(f_{\mathrm{AA}}\)
+são leitura taxonómica dessa idempotência, não axioma
+\(T^{3}=\mathrm{id}\) e não «não há ciclo».
+Não se inventam. Não se promove. Não se reabre \(\mathrm{I}_{0}\).
+Não se volta a chamar o \(\pi\) do Alonzo de
+\texttt{não localizada}.
+\end{observacao}
+
+\begin{observacao}[três suportes da mesma \(\mathcal{L}\)]\label{univ:obs:tres-suportes}
+Fractal, banco e negro são três \(S\) do mesmo mapa
+\(C=\operatorname{Real}_{S}(\mathcal{L})\)
+(Obs.~\ref{univ:obs:real-S}), não três leis e não um corpo só.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\(S\) & realização & o que fecha \\
+\midrule
+fractal
+  & Alonzo
+  & \(\pi\circ\pi=\pi\)
+    (Def.~\ref{univ:def:alonzo-idemp}) \\
+banco
+  & \(M_{\mathrm{WASM}}\)
+  & merge idempotente
+    (Def.~\ref{univ:def:maquina}) \\
+negro
+  & \(\{S,S^{\vee}\}\)
+  & \(S\cdot S^{\vee}=1\)
+    (\code{fis:thm:fractalnegro}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+\boxed{\;
+F,\,B,\,N
+\;\longrightarrow\;
+\mathcal{L}_{7}
+\;\xrightarrow{\pi_{\mathcal{U}}}\;
+L_{0}
+\qquad
+\pi_{F}\circ\pi_{F}=\pi_{F},\;
+\pi_{B}\circ\pi_{B}=\pi_{B},\;
+\pi_{N}\circ\pi_{N}=\pi_{N}
+\;}
+\]
+O negro é o lado do par que conserva a diferença
+(\code{fis:thm:fractalnegro}; \code{tests/negro.c}):
+o claro repete a forma; o negro não funde com o claro.
+Não é buraco negro de Gravitação. Lei~7 nos três:
+ligam sem fundir. Não se fundem os sítios. Não se reabre
+\(\mathrm{I}_{0}\).
+A intersecção tripla
+\(\operatorname{Img}(\pi_{F})\cap\operatorname{Img}(\pi_{B})
+\cap\operatorname{Img}(\pi_{N})\cong\mathcal{L}_{7}\)
+mede-se; se o resíduo não for \(0\), essa intersecção fica
+\texttt{não localizada} --- sem apagar o \(\pi\) do Alonzo.
+\end{observacao}
+
+\begin{observacao}[ortogonal à lei local]\label{univ:obs:linguas-ortogonal}
+As três línguas são leitura \textbf{interna} de \(\mathcal{U}\).
+\(\mathcal{L}_S(\mathrm{id})\) é restrição operacional no suporte
+(Def.~\ref{univ:def:lei-local-canonica}).
+Não substituem. Não duplicam a Def.~\ref{univ:def:U}.
+\end{observacao}
+
+\begin{observacao}[o ciclo dos tecidos nas três línguas]\label{univ:obs:linguas-tecidos}
+O ciclo \(L_k=\operatorname{Ind}^{k}(L_0)\) vive na língua
+algébrica; o fecho \(\operatorname{MetaInd}(L_7)=L_0\) é fibra
+(top); \(\mathcal{F}\) e a medida são an
+(Obs.~\ref{univ:obs:tecidos-periodo}; Def.~\ref{univ:def:lei-unica};
+Cor.~\ref{univ:cor:metaind-fecho}).
+\(\operatorname{Ind}\neq\mathcal{F}\): não se fundem.
+\end{observacao}
+
+\begin{definicao}[corpo canónico de \(\mathcal{U}\)]\label{univ:def:corpo-canonico}
+Reconhecimento --- um \textbf{mapa} da estrutura, uma morfologia ---
+não axioma novo e não fusão de objectos. \(C\) é corpo canónico de
+\(\mathcal{U}\) quando os três critérios fecham:
+\caixa{%
+\(\displaystyle
+\begin{array}{cl}
+(1)
+&
+\text{fecho triplo: }
+\mathcal{U}_{\mathrm{alg}},\,
+\mathcal{U}_{\mathrm{top}},\,
+\mathcal{U}_{\mathrm{an}}
+\text{ fecham juntas}
+\\[6pt]
+(2)
+&
+C\xrightarrow{\rho_C}\mathcal{U}
+\xrightarrow{\operatorname{realize}}C',
+\ \text{resíduo }0
+\implies
+C\cong_{\mathcal{U}}C'
+\\[6pt]
+(3)
+&
+\text{Lei~7 invariante: }
+\text{face}\leftrightarrow\text{fibra}\leftrightarrow\text{face}
+\end{array}
+\)
+}
+\[
+\boxed{\;
+\text{nec+suf}
+\;\neq\;
+\text{identidade de objectos}
+\;}
+\]
+O necessário-e-suficiente \textbf{é} a dualidade reversível: o mapa
+\(\rho_C\) e o retorno \(\operatorname{realize}\) são recíprocos
+(resíduo \(0\)), \textbf{não} \(C=\mathcal{U}\). Não quer dizer que
+tudo é a mesma coisa.
+
+O critério~(2) \textbf{cita} a adjunção já construída
+(\code{def:morfico}, \code{teo:adjuncao}; Teor.~\code{thm:morf-par}):
+\[
+\boxed{\;
+\delta(A)\subseteq C
+\iff
+A\subseteq\varepsilon(C)
+\qquad
+(\delta\dashv\varepsilon)
+\;}
+\]
+\(\rho_C\) cita a erosão \(\varepsilon\) (estreita: extrai o contrato);
+\(\operatorname{realize}\) cita a dilatação \(\delta\) (alarga: escreve
+o suporte). O regresso é a abertura
+\(\gamma=\delta\varepsilon\) (\code{teo:adjuncao}; \(\alpha=\delta\circ\varepsilon\)
+em \code{thm:morf-par}):
+\[
+\gamma
+=
+\operatorname{realize}\circ\rho_C
+\;\le\;
+\mathrm{id}
+\;\le\;
+\varepsilon\delta
+=
+\varphi.
+\]
+Abertura e fecho \textbf{emergem} da adjunção; não se postulam. Resíduo
+\(0\) é a fronteira admissível: \(\gamma(C)=C\) nos \(B\)-abertos
+(\code{thm:morf-par}; \(29\) de \(64\) no universo medido) --- donde
+\(C\cong_{\mathcal{U}}C'\), e \textbf{não} \(C=\mathcal{U}\). Nenhum
+dos dois compostos é a identidade senão nessa minoria
+(\emph{Corpo Algébrico}: \(\delta\varepsilon\subseteq A\subseteq\varepsilon\delta\)).
+
+A Def.\ \textbf{não} cita \(\mathbf{Duo}\) como esse mapa
+(Obs.~\ref{univ:obs:morf-i0}).
+
+Alonzo já satisfaz os três
+(Def.~\ref{univ:def:alonzo-real}; \code{cat:audit:alonzo};
+\code{cat:ingestao:fractal}). Não se reabre Fractal.
+
+Candidatos (\(\{M_{\mathrm{WASM}},M_{\mathrm{Docker}}\}\),
+\(\mathcal{L}_S\)) testam os três; uma língua não basta
+(Obs.~\ref{univ:obs:linguas-acoplamento}).
+\(M_{\mathrm{Docker}}\) permanece \texttt{não localizada}
+(Def.~\ref{univ:def:maquina}).
+Ortogonal à lei local
+(Def.~\ref{univ:def:lei-local-canonica}).
+\end{definicao}
+
+\begin{observacao}[I0: adjunção \(\neq\mathbf{Duo}\)]\label{univ:obs:morf-i0}
+Os dois objectos já estão escritos. Não se fundem por homonímia.
+
+\(\mathbf{Duo}\) é Def.~\ref{univ:def:star}
+(\code{fis:def:duomorf}):
+\[
+\mathcal{D}(A)=A^{\vee}=(X,\otimes_A,\oplus_A),
+\qquad
+f\colon A\xrightarrow{\cong}\mathcal{D}(B),\quad a=1.
+\]
+Mesmo suporte; \(\mathcal{D}\) não actua nos elementos --- troca os
+papéis das duas operações internas.
+\(\mathcal{D}\circ\mathcal{D}=\mathrm{id}\)
+(\code{fis:thm:dual-involutiva}).
+\(\mathbf{Duo}\neq\mathrm{Hom},\mathrm{Iso},\mathrm{Diff},\operatorname{Isom}_{\mu}\)
+(Obs.~\ref{univ:obs:D}).
+\(\mathbf{Duo}\neq\mathcal{C}^{\mathrm{op}}\).
+Hexal \(6=\mathrm{lcm}(2,3)\) não é \(\mathbf{Duo}\).
+I7 se o suporte admitir o par.
+
+Dualidade reversível é o critério~(2) da
+Def.~\ref{univ:def:corpo-canonico}: \(\rho_C\) e
+\(\operatorname{realize}\) recíprocos, resíduo \(0\),
+\(C\cong_{\mathcal{U}}C'\) --- \textbf{não} \(C=\mathcal{U}\).
+Cita a adjunção \(\delta\dashv\varepsilon\)
+(\code{teo:adjuncao}, \code{thm:morf-par}):
+\(\delta(A)\subseteq C\iff A\subseteq\varepsilon(C)\).
+\(\delta\varepsilon\subseteq\mathrm{id}\subseteq\varepsilon\delta\);
+nenhum composto é a identidade senão nos \(B\)-abertos.
+
+\[
+\boxed{\;
+\mathbf{Duo}
+=\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\delta\dashv\varepsilon
+=\text{nec+suf}
+\;}
+\]
+\[
+\boxed{\;
+\text{gap}:
+\quad
+\mathcal{D}\circ\mathcal{D}=\mathrm{id}
+\text{ (involução, mesmo }X\text{)}
+\quad\text{vs}\quad
+\delta\varepsilon\subseteq\mathrm{id}\subseteq\varepsilon\delta
+\text{ (adjunção, muda o corpo)}
+\;}
+\]
+Coincidem só se o paper provar a \textbf{mesma} operação, nas mesmas
+hipóteses, no mesmo suporte. O Algébrico já demonstrou a ausência:
+o emparelhamento é o mesmo gesto; a natureza do par não é --- involução
+algébrica \(\neq\) adjunção de ordem; juntá-los é o atalho recusado.
+A dualidade da ordem \textbf{não} se herda da dualidade da operação
+(\code{fis:def:duomorf}). Donde a identificação é
+\texttt{N/A}, não \texttt{não localizada}: procurou-se; a prova de
+ausência já está.
+
+O que falta para um realizar o outro: \(\rho_C/\operatorname{realize}\)
+teriam de \textbf{ser} a troca
+\((\oplus,\otimes)\mapsto(\otimes,\oplus)\) no mesmo \(X\).
+Não o são --- tipo distinto (dois magmas internos vs.\ dois mapas no
+reticulado); \code{teo:guarda}: cada operador \textbf{guarda} uma
+lei, não as troca. Não se decreta «falta \(\mathbf{Duo}\) na
+morfologia»: I7 do duomorfismo é contrato sobre um par de magmas; a
+adjunção não é esse par. I7 no anel \((\mathbb{F}_2^{n},\oplus,\wedge)\)
+é outro slot --- não se mistura com \(\delta\dashv\varepsilon\).
+
+Homónimos restantes, e não se homogeneízam:
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\textwidth}
+                >{\raggedright\arraybackslash}p{0.32\textwidth}
+                >{\raggedright\arraybackslash}p{0.26\textwidth}@{}}
+\toprule
+nome & o construído & o que \textbf{não} é \\
+\midrule
+\(\delta\dashv\varepsilon\)
+  & adjunção de ordem; mapa nec+suf
+    (\code{teo:adjuncao})
+  & \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) \\
+\(\mathbf{Duo}\)
+  & troca \((\oplus,\otimes)\mapsto(\otimes,\oplus)\);
+    bit \(a=1\)
+  & erosão; dilatação; abertura \\
+corte \(\chi_k\)
+  & saldo no corte (Teor.~\code{fis:thm:H})
+  & adjunção; Dedekind \\
+Dedekind
+  & completação \(\mathbb{R}\) (\code{def:corte})
+  & \(\delta\dashv\varepsilon\); \(\chi_k\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+O corpo mórfico do catálogo (\code{def:morfico},
+\code{teo:socorpon1}) é anel booleano --- corpo sse \(n=1\) ---
+realizado noutro sítio: quinta primitiva do Algébrico
+(\(\varepsilon=\neg\delta\neg\)); face espacial da Topologia
+(\code{thm:morfologico}, coordenadas \((W,H)\)).
+Estatuto em \(\mathcal{U}\): o \textbf{mapa} cita-se; o anel
+\textbf{não} sobe a Parte. Não se cria corpo~15. Não se reabre
+\(\mathrm{I}_{0}\) de Álgebra nem de Topologia.
+Cinco corpos no toolkit (áureo, cristalino, racional, mórfico,
+mecânico) continuam censo de régua, não de canónicos
+(Obs.~\ref{univ:obs:censo-corpos}).
+Não há quarta língua. Não há Lei~8. Não há Ficha~11.
+Não se funde \(L_0\) com \(L_7\).
 \end{observacao}
 
 %═══════════════════════════════════════════════════════════════════════════
@@ -370,6 +968,8 @@ O catálogo proíbe \emph{categoria nova} como eixo taxonómico
 \(\mathcal{U}\) já classifica. \(\mathcal{U}\) \textbf{não} é uma
 categoria universal, nem institui \(\mathbf{Cat}\) no bestiário, nem
 uma Parte da Física.
+A língua consagrada abaixo compara contratos; não é quarta língua.
+As três línguas de \(\mathcal{U}\) são Def.~\ref{univ:def:linguas}.
 \end{observacao}
 
 \begin{definicao}[as categorias concretas que \(\mathcal{U}\) classifica]\label{univ:def:cat}
@@ -674,7 +1274,42 @@ ultramétrica. O primeiro transporta contar\(\leftrightarrow\)integrar
 sem perder ordem. O segundo diz que bolas de raio \(r\) coincidem ou
 são disjuntas, e que \(D\) nas representações é ultramétrica. Promover
 um ao outro é o mesmo erro que promover uma coincidência de letras.
+GLH cabe em \(\mathcal{U}_{\mathrm{an}}\) (Def.~\ref{univ:def:glh-an}),
+não na ultramétrica.
 \end{observacao}
+
+\begin{definicao}[GLH realiza o rectângulo de redução em \(\mathcal{U}_{\mathrm{an}}\)]\label{univ:def:glh-an}
+\[
+\boxed{\;
+\mathcal{U}_{\mathrm{an}}
+=\operatorname{Real}_{\mathrm{an}}(\pi_{\mathcal{U}})
+\;}
+\]
+É a realização analítica de \(\pi_{\mathcal{U}}\) --- a língua an
+lê a mesma projecção, não um segundo \(\pi\).
+O teorema central GLH --- Hurwitz conta, Lebesgue transporta a ordem,
+Gentil integra --- \textbf{não} é axioma extra nem canónico geral de
+\(\mathcal{U}\). É a realização, na língua analítica, do
+\textbf{rectângulo de redução} que \(\pi_{\mathcal{U}}\) realiza em
+geral (Teor.~\ref{univ:thm:metaind-pi}; \code{fis:thm:central}):
+\[
+\boxed{\;
+\mathrm{I}_{4}=\mathrm{GLH}
+=\operatorname{Real}_{\mathrm{an}}
+\bigl(\text{rectângulo de }\pi_{\mathcal{U}}\bigr)
+\;}
+\]
+As duas contagens somam \(\lvert I\rvert\cdot\lvert X\rvert\)
+(\code{fis:thm:central}(1)). \(\operatorname{Img}(\pi)\) é essa
+redução: o que sobrevive à projecção. Não é
+\(\operatorname{Isom}_{\mu}\) (\(\mathrm{I}_{11}\)). Não é
+\(\mathbf{Duo}\). Não é ultramétrica. Hexal \(6\) é rótulo.
+O vinco do rectângulo par (\code{fis:thm:central}(4);
+\code{fis:thm:vinco}) \textbf{não} é
+\(\operatorname{Star}(K)\) nem
+\(\mathbf{1}=\operatorname{cl}(L_0,L_7)\).
+Não promove \(F\cap B\cap N\).
+\end{definicao}
 
 %═══════════════════════════════════════════════════════════════════════════
 \section{Indução e metaindução}\label{univ:sec:inducao}
@@ -708,6 +1343,324 @@ soma.
 \noindent Donde o catálogo deixa de repetir auditorias por Parte. A regra
 de ingestão é uma só; a metaindução transporta-a a cada capítulo.
 \(\operatorname{INGEST}\) é essa realização (\S\ref{univ:sec:motor}).
+
+\noindent Estas duas definições são o passo da \emph{prova}
+(família de construções; custo ultramétrico).
+O \(\operatorname{Ind}\) do catálogo das oito leis é o
+\textbf{mesmo} passo único do Teor.~\code{fis:thm:tecidos}
+--- juntar o dual --- lido no índice \(k=0,\ldots,7\),
+não um operador novo.
+\(\mathbf{Duo}\neq\operatorname{Ind}\neq\operatorname{MetaInd}
+\neq\chi_k\neq\mathrm{lcm}\).
+
+\begin{observacao}[o teorema dos tecidos, e o que ele chama período]\label{univ:obs:tecidos-periodo}
+O Teor.~\code{fis:thm:tecidos} enuncia o passo único:
+\[
+\boxed{\;
+X_{k+1}
+=\bigl(X_k\times X_k^{\bullet}\bigr)\big/\!\sim
+\;}
+\]
+--- produto do andar por si, quocientado pela
+\textbf{fibra do morfismo da face} (cláusula~(1)).
+A união não é disjunta: as cópias encontram-se no
+\textbf{vinco} quando \(a\oplus c=0\), só no neutro.
+Quatro cláusulas, e não se fundem com outros «períodos»:
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.16\textwidth}
+                >{\raggedright\arraybackslash}p{0.38\textwidth}
+                >{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+\toprule
+cláusula & o que o teorema diz & o que \textbf{não} é \\
+\midrule
+(1) fibra
+  & uma operação, quatro nomes; o quociente vem da face
+  & \(\mathbf{Duo}\); corte \(\chi_k\); Dedekind \\
+(2) oitava
+  & cada degrau é oitava do anterior, no sentido de
+    \code{fis:thm:largura}(3): duplicação da \emph{largura}
+  & período do catálogo das leis; \(\operatorname{Aut}(T^{2})\) \\
+(3) vinco
+  & o que fica de fora do par; ligam sem fundir
+  & ponto fixo da estrela \(x^{2}=x\oplus 1\) \\
+(4) escada
+  & \textbf{não pára por dentro}; o que pára é o suporte, de fora
+  & ciclo das oito leis; Lei~8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+A torre \(T_{k+1}=T_k+T_k^{*}\) (\code{analitico thm:tecidos})
+\textbf{não tem período interno}: a indução não pára.
+O período oito é outro objecto --- a cardinalidade do
+\textbf{conjunto} das leis, \(\dim X=8\), \(e_k=2^{k}\)
+(Teor.~\code{fis:thm:base}; \code{fis:obs:octoniao-interface}):
+\[
+\boxed{\;
+\operatorname{Ind}^{8}=\mathrm{id}_{\mathcal{L}}
+\quad\text{é o período da lei única, não Lei~8}.
+\;}
+\]
+\(\mathrm{I}_{0}\): este \(8\) \(\neq\) oitava da largura
+\(\neq\) \(\operatorname{ord}\in\{1,2,3,4,6\}\) de
+\(\operatorname{Aut}(T^{2})\) (Def.~\ref{univ:def:toro};
+\(8\notin\{1,2,3,4,6\}\))
+\(\neq\) hexal \(6=\mathrm{lcm}(2,3)\) (rótulo, não
+\(\mathbf{Duo}\)).
+O ciclo das oito leis vive na língua algébrica; o fecho MetaInd é
+fibra (top); \(\mathcal{F}\) e a medida são an
+(Def.~\ref{univ:def:linguas}). \(\operatorname{Ind}\neq\mathcal{F}\).
+\end{observacao}
+
+\begin{definicao}[lei única]\label{univ:def:lei-unica}
+A lei única \(\mathcal{L}\) \textbf{não} é axioma de unificação,
+nem Lei~8, nem objecto externo às oito.
+É a semente \(L_0\) e o passo único do
+Teor.~\code{fis:thm:tecidos} --- juntar o dual ---
+aplicado ao índice:
+\[
+\boxed{\;
+\mathcal{L}
+=L_0+\operatorname{Ind},\qquad
+L_k=\operatorname{Ind}^{k}(L_0),\qquad
+0\le k\le 7.
+\;}
+\]
+\(L_0\) é a semente: \((+1)\oplus(-1)\); \(0^{\dagger}=\infty\)
+(Teor.~\ref{univ:thm:base}).
+\(\operatorname{Ind}(L_k)=L_{k+1}\) para \(k=0,\ldots,6\).
+Não se identifica \(L_0\) com \(L_7\).
+A lei única \textbf{é} as Leis \(0\)--\(7\) e o retorno
+\(L_7\to L_0\) (Cor.~\ref{univ:cor:metaind-fecho};
+Teor.~\ref{univ:thm:retorno-canonico}). Sem \(L_8\).
+\[
+\boxed{\;
+\text{Sistema Universal}
+=\{L_0,\dots,L_7\}
+\cup
+\{\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}},\;
+\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\}
+\;}
+\]
+\end{definicao}
+
+\begin{corolario}[fecho \(L_7\to L_0\): a mesma regra, não a escada]\label{univ:cor:metaind-fecho}
+Depois de \(L_7\) o passo ainda está definido
+(Teor.~\code{fis:thm:tecidos}(4): a escada não pára por dentro).
+Aplicá-lo como \(X_{k+1}\) \textbf{sobe} a torre e inventaria
+Lei~8 --- a lei local recusa isso
+(Def.~\ref{univ:def:lei-local}: fibra, não \(X_{k+1}\)).
+Lê-lo como fibra da face (cláusula~(1)) é a
+\textbf{metaindução}: mudou o degrau, não a regra
+(Teor.~\code{fis:thm:metainducao}(1)).
+\code{fis:obs:octoniao-interface} e
+\code{analitico thm:tecidos} já o nomeiam:
+não há Lei~8; há a Lei~0 um nível acima.
+A descida \(7\to 0\) é a progressão do catálogo.
+\[
+\boxed{\;
+L_0
+\overset{\mathrm{Ind}}{\longrightarrow}
+L_1
+\longrightarrow\cdots
+\overset{\mathrm{Ind}}{\longrightarrow}
+L_7
+\overset{\mathrm{MetaInd}}{\longrightarrow}
+L_0
+\;}
+\]
+\[
+\boxed{\;
+\operatorname{MetaInd}(L_7)=L_0
+=\text{o passo dos tecidos lido como fibra, não como }X_{k+1}.
+\;}
+\]
+\(\operatorname{Ind}^{8}=\mathrm{id}\) é este período:
+sete induções no índice e o fecho meta no vinco.
+Não funde \(L_0\) com \(L_7\).
+Estatuto: a identidade efectiva
+\(L_0\xrightarrow{\mathrm{Ind}^{k}}L_k\)
+é Teor.~\code{fis:thm:base} (\(e_k=2^{k}\));
+o fecho do índice \(7\to 0\) mede-se no byte
+(\code{tests/umbit.c} §B3; \code{tests/lei\_unica\_u.js}).
+Subir \(2^{8}=e_0\) é recusado: \(256\neq 1\).
+O mesmo fecho como projecção: Teor.~\ref{univ:thm:metaind-pi}.
+\end{corolario}
+
+\begin{definicao}[projecções da lei única]\label{univ:def:ind-pi}
+Cada suporte \(S_k\) projecta-se na lei única ---
+\(\operatorname{Ind}\) lido como projecção, não operador novo:
+\[
+\boxed{\;
+\pi_k\colon S_k\to\mathcal{L}_S,
+\qquad
+\pi_k\circ\pi_k=\pi_k
+\;}
+\]
+Lei~7 (ligar sem fundir): a intersecção das imagens é a
+\textbf{mesma} fibra
+\[
+\boxed{\;
+\bigcap_k\operatorname{Img}(\pi_k)\cong\mathcal{L}_S
+\;}
+\]
+Não funde os \(S_k\). Não é \(T^{3}=\mathrm{id}\).
+Não é \(\mathbf{Duo}\).
+\end{definicao}
+
+\begin{teorema}[fechamento meta-indutivo]\label{univ:thm:metaind-pi}
+A unidade é a fechadura idempotente: o topo reinduz a base.
+O Cor.~\ref{univ:cor:metaind-fecho} já lê
+\(\operatorname{MetaInd}(L_7)=L_0\) como fibra, não
+\(X_{k+1}\). O mesmo passo é a projecção canónica
+\(\pi_{\mathcal{U}}\) --- não um segundo teorema, não Lei~8:
+\[
+\boxed{\;
+\operatorname{MetaInd}(L_7)=L_0
+\iff
+\pi_{\mathcal{U}}(L_7)=L_0
+\quad(\text{resíduo }0)
+\;}
+\]
+\(\pi_{\mathcal{U}}\circ\pi_{\mathcal{U}}=\pi_{\mathcal{U}}\)
+é o mecanismo da Def.~\ref{univ:def:alonzo-idemp}, aplicado
+à Lei~7. Não contradiz aquele \(\pi\): o Alonzo já o tem;
+aqui liga-se o fecho do índice. Sem \(T^{3}\).
+Em \(\mathcal{U}_{\mathrm{an}}\) o mesmo rectângulo lê-se GLH
+(Def.~\ref{univ:def:glh-an}).
+(\code{tests/lei\_unica\_u.js}.)
+\end{teorema}
+
+\begin{teorema}[retorno canónico]\label{univ:thm:retorno-canonico}
+O Teor.~\ref{univ:thm:metaind-pi} lê o fecho no índice:
+\(\pi_{\mathcal{U}}(L_7)=L_0\). O mesmo \(\pi_{\mathcal{U}}\)
+composto com \(\mathcal{F}\) (Def.~\code{fis:def:transf})
+--- não se inventa \(\mathcal{F}_{\mathcal{U}}\) --- devolve a
+semente com resíduo \(0\):
+\[
+\boxed{\;
+\pi_{\mathcal{U}}\bigl(\mathcal{F}(L_7)\bigr)=L_0
+\qquad(\operatorname{Res}=0)
+\;}
+\]
+O ciclo fecha sem Lei~8:
+\[
+\boxed{\;
+L_0\to\cdots\to L_7
+\overset{\mathcal{F}}{\to}\mathcal{F}(L_7)
+\overset{\pi_{\mathcal{U}}}{\to}L_0
+\;}
+\]
+\(\operatorname{Res}=\pi_{\mathcal{U}}(\mathcal{F}(L_7))-L_0\).
+Medido: \code{tests/lei\_unica\_u.js}; \code{banco\_transf\_u.js}.
+Não funde \(L_0\) com \(L_7\). Não funde as três estrelas
+(Obs.~\ref{univ:obs:tres-canonicos}).
+\end{teorema}
+
+\begin{observacao}[resíduo espectral: teste de estresse, não axioma]\label{univ:obs:residuo-glh}
+\(\mathcal{F}\) é Def.~\code{fis:def:transf}, já fechada na Álgebra.
+Não se inventa \(\mathcal{F}_{\mathcal{U}}\). A ponte
+aditiva\(\to\)espectral é essa \(\mathcal{F}\);
+\(\pi_{\mathcal{U}}\) colapsa o vinco
+(Teor.~\ref{univ:thm:metaind-pi};
+Teor.~\ref{univ:thm:retorno-canonico}).
+O teste de estresse pergunta o resíduo; o retorno canónico
+já o fecha:
+\[
+\boxed{\;
+\text{Resíduo}\bigl(\pi_{\mathcal{U}}(\mathcal{F}(L_7))-L_0\bigr)
+=0
+\;}
+\]
+Estatuto. \(\pi_{\mathcal{U}}(L_7)=L_0\) é \texttt{realizado}
+(\code{tests/lei\_unica\_u.js}; resíduo do ciclo \(0\)).
+\(\mathcal{F}\) mede Parseval com resíduo \(0\)
+(\code{fis:thm:H}; \code{banco\_transf\_u.js}).
+O composto \(\pi_{\mathcal{U}}\circ\mathcal{F}\) sobre \(L_7\) é
+\texttt{realizado} (unidade operacional): \(\operatorname{Res}=0\).
+\(L_7,L_0\) são o índice e o byte \(e_k=2^{k}\) do ciclo;
+\(\mathcal{F}\) corre no campo \(\delta_{e_7}\);
+\(\pi_{\mathcal{U}}\) é \(\operatorname{MetaInd}\) no índice
+recuperado pela Gram nas oito frequências \(e_k\).
+Não se inventa \(\mathcal{F}_{\mathcal{U}}\).
+GLH no byte = \texttt{não localizada}: este número não é o
+rectângulo contínuo (Hurwitz/Lebesgue/Gentil).
+Travas: diferença local \(\nRightarrow\) diferença da lei;
+sem medida de \(\pi\) \(\nRightarrow\) lei compartilhada.
+GLH \textbf{não} fecha a tripla \(F\cap B\cap N\).
+Unificação por redução \(\neq\) fusão:
+\(\pi(F)=\pi(B)=\pi(N)=L_0\), não \(F\cap B\cap N\).
+(\code{fis:thm:central}; Def.~\ref{univ:def:glh-an}.)
+\end{observacao}
+
+\begin{definicao}[unidade pelos extremos]\label{univ:def:unidade}
+A unidade de \(\mathcal{U}\) \textbf{não} é objecto externo,
+nem \(\star\) novo, nem fusão de \(L_0\) com \(L_7\).
+É o vinco do Teor.~\code{fis:thm:tecidos} --- as cópias
+encontram-se quando \(a\oplus c=0\), só no neutro ---
+lido nos extremos do ciclo.
+Lei~7 \emph{é} esse produto: \(H\times H^{*}\), dois tecidos
+ligam sem fundir
+(\code{fis:obs:octoniao-interface}; cláusula~(3)).
+\[
+\boxed{\;
+\mathbf{1}
+=\operatorname{vinco}(L_0,L_7)
+=\operatorname{cl}(L_0,L_7).
+\;}
+\]
+\(\operatorname{cl}\) é a classe do vinco, já nomeada no teorema.
+Não se decreta \(L_0\star L_7\).
+A fechadura é idempotente
+(Teor.~\ref{univ:thm:metaind-pi}):
+\(\pi_{\mathcal{U}}(L_7)=L_0\) é o topo a reinduzir a base.
+O emparelhamento \(\langle e_0,e_7\rangle=0\)
+(Teor.~\ref{univ:thm:base}) confirma que os extremos
+\textbf{não} fundem: Gram fora da diagonal.
+\end{definicao}
+
+\begin{observacao}[núcleo e máquina]\label{univ:obs:nucleo}
+A Def.~\ref{univ:def:U} e a Def.~\code{fis:def:U} não se
+reabrem. A quádrupla operacional permanece.
+O núcleo \((\mathcal{L},\mathbf{1})\) observa-a:
+\[
+\boxed{\;
+\mathcal{U}
+=(\mathcal{L},\mathbf{1},X,X^{*},\mathsf{Mor},\mathsf{Aut})
+\;}
+\]
+--- a mesma \(\mathcal{U}\), não outro corpo.
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) permanece
+(Obs.~\ref{univ:obs:tres-canonicos}):
+\(\mathcal{D}\) troca \((\oplus,\otimes)\); não é
+\(\operatorname{Ind}\).
+As três línguas (Def.~\ref{univ:def:linguas}) projectam este mesmo
+núcleo; não o triplicam.
+O Sistema Universal (Def.~\ref{univ:def:lei-unica}) é o núcleo
+operacional: \(\{L_0,\dots,L_7\}\) e o retorno
+\(\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}}\),
+\(\pi_{\mathcal{U}}(\mathcal{F}(L_7))=L_0\). Sem Lei~8.
+\end{observacao}
+
+\begin{observacao}[realização no suporte, não teorema de instanciação]\label{univ:obs:real-S}
+Cada corpo já ingerido lê-se
+\[
+\boxed{\;
+C=\operatorname{Real}_{S}(\mathcal{L})
+\;}
+\]
+--- a lei única no suporte \(S\) que a Física construiu.
+Isto é a leitura de \(\operatorname{INGEST}\), já implícita:
+evidência do contrato \(\to\) \texttt{realizado}.
+\textbf{Não} é teorema novo \(\forall C,\;
+C=\operatorname{Real}_{\mathcal{U}}(C)\) que reabra
+\(\mathrm{I}_{0}\) nem que faça da Parte EM um corpo.
+O teste que precede qualquer tal corolário é a identidade
+efectiva do Cor.~\ref{univ:cor:metaind-fecho}
+com a mesma \(\mathbf{1}\).
+No catálogo do byte o resíduo do ciclo é \(0\);
+a instanciação universal permanece leitura, não decreto.
+EM continua sem corpo. O censo de Partes não muda.
+\end{observacao}
 
 %═══════════════════════════════════════════════════════════════════════════
 \section{\texorpdfstring{Estrela de \(\mathcal{U}\): o duomorfismo}{Estrela do Universal: o duomorfismo}}\label{univ:sec:estrela}
@@ -756,6 +1709,7 @@ isto & não é isto \\
 \(\operatorname{Star}(S)\) de \code{fis:thm:estrela} & \(\operatorname{Star}(\mathcal{U})\) \\
 \(\nu_N\) no reticulado \(\mid\) & \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) \\
 hexal \(6=\operatorname{lcm}(2,3)\) & \(\mathbf{Duo}\) \\
+\(\delta\dashv\varepsilon\) (nec+suf) & \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) \\
 corpo dual \((V,V^{*})\); Poincaré; dual do Rei & \(\mathcal{D}\) do duomorfismo \\
 \bottomrule
 \end{tabular}
@@ -958,6 +1912,678 @@ A palavra no texto não basta.
 \end{proposicao}
 
 %═══════════════════════════════════════════════════════════════════════════
+\section{Realização operacional}\label{univ:sec:realizacao-op}
+
+\noindent Vocabulário de realização e de \(\operatorname{INGEST}\),
+\textbf{não} estrutura nova de \(\mathcal{U}\). Não entra no bestiário.
+Não fortalece \(\mathcal{U}\) por decreto: \(\mathcal{U}\) consome o que
+a Física construiu. A máquina operacional realiza \(\mathcal{U}\); o
+browser realiza a máquina; \(\mathcal{U}\) não descreve um browser.
+\[
+\boxed{\;
+\mathcal{U}\text{ (gramática)}
+\;\longrightarrow\;
+\text{Física (construção)}
+\;\longrightarrow\;
+\text{Catálogo (registo)}
+\;}
+\]
+Já em \(\mathcal{U}\), e não se reinventa
+(Teor.~\ref{univ:thm:base}, Def.~\ref{univ:def:star}):
+Lei~0 \((+1)\oplus(-1)\), \(0^{\dagger}=\infty\);
+Lei~7 \(H\times H^{*}\), dois tecidos ligam sem fundir;
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\),
+\((\oplus,\otimes)\mapsto(\otimes,\oplus)\);
+não há Lei~8.
+
+\begin{definicao}[máquina operacional]\label{univ:def:maquina}
+A realização operacional da máquina é o tríplo
+\[
+\boxed{\;M=(\mathrm{Exec},\,D,\,C)\;}
+\]
+e a máquina mínima
+\[
+\boxed{\;M_{\min}=(\mathrm{WASM},\,D_{*},\,\text{memória local})\;}
+\]
+(\code{app/src/banco\_maquina\_u.js}; \code{conecthus/backends/manifesto.json}).
+\(C=\mathrm{MOVE}\) não entra no isomorfismo de disco.
+Estatutos (Def.~\ref{univ:def:vocab}):
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+realização & estatuto & nota \\
+\midrule
+\(M_{\mathrm{WASM}+\mathrm{LS}}\)
+  & \texttt{realizado}
+  & linha de base \\
+\(C\) remota (JSON GKBANCO)
+  & \texttt{realizado}
+  & Def.~\ref{univ:def:canais} \\
+\(D_{\mathrm{IDB}}\)
+  & mapeamento
+  & persistência; não é a máquina \\
+\(M_{\mathrm{WASM}+\mathrm{IDB}}\)
+  & \texttt{não localizada}
+  & candidato \\
+\(M_{\mathrm{Docker}}\)
+  & \texttt{não localizada}
+  & mesmo se \(\mathrm{hash}(S1_{\mathrm{wasm}})=\mathrm{hash}(S1_{\mathrm{volume}})\) \\
+Mongo
+  & \texttt{não localizada}
+  & candidato documental \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+\boxed{\;
+\mathrm{hash}(S1_{\mathrm{wasm}})=\mathrm{hash}(S1_{\mathrm{volume}})
+\;\not\Longrightarrow\;
+M_{\mathrm{Docker}}
+\;}
+\]
+Promover pede prova de contentor, não igualdade de snapshot
+(\code{tests/realizacao\_u.js}).
+\end{definicao}
+
+\begin{definicao}[identidade]\label{univ:def:identidade}
+A identidade do sujeito \textbf{não} é coordenada de \(M\):
+\[
+\boxed{\;
+\mathrm{id}=\mathrm{hex}(\mathrm{sha256}(\mathrm{bytes}(\mathit{pub})))
+=\text{banda do canal}
+\;}
+\]
+(\code{app/src/banco\_identidade\_u.js}).
+Força: \(\mathit{pub}\) \(>\) sessão\({}+{}\)bind soft \(>\) fingerprint \(>\) OAuth.
+\[
+\boxed{\;\text{Identidade}\;\perp\;\text{Realização}\;\perp\;\text{Estado}\;}
+\]
+A chave atravessa discos sem ser realização. Fingerprint não é login.
+OAuth não redefine \(\mathrm{id}\).
+\end{definicao}
+
+\begin{definicao}[dois canais, e não se fundem]\label{univ:def:canais}
+\[
+\boxed{\;S_{\mathrm{ESTADO}}\;\perp\;S_{\mathrm{DEPOSITO}}\;}
+\]
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+canal & slots & o que transporta \\
+\midrule
+\(S_{\mathrm{ESTADO}}\)
+  & \(9210/9211\)
+  & JSON GKBANCO (estado operacional) \\
+\(S_{\mathrm{DEPOSITO}}\)
+  & \(9220/9221\)
+  & blob opaco; Pátria \(=D_{\mathrm{patria}}\) sem ler claro \\
+\bottomrule
+\end{tabular}
+\end{center}
+Não são isomorfos. O depósito não é estado.
+\end{definicao}
+
+\begin{observacao}[cone--espiral: não localizada]\label{univ:obs:cone-espiral}
+Procurou-se neste ficheiro e nas Partes Geometria, Fractal, Mecânica:
+o par cone--espiral \textbf{não} é estrutura de \(\mathcal{U}\).
+Onde a palavra aparece noutro paper (motor \(\Pi/\Sigma\) no Algébrico,
+\code{corpo\_algebrico def:cone}; \code{tests/cone\_espiral.c}) é
+construção daquele corpo, não canónico de \(\mathcal{U}\), não Lei nova.
+Estatuto em \(\mathcal{U}\): \texttt{não localizada}
+--- procurou-se; não se promove metáfora nem resíduo a Lei.
+A leitura \(0\)--\(\infty\) refina Lei~0 (\(0^{\dagger}=\infty\)) e
+Lei~7 (\(H\times H^{*}\); ligam sem fundir). \textbf{Não} é Lei~8.
+Não há Lei~8.
+\end{observacao}
+
+\begin{observacao}[\(\operatorname{INGEST}\) não define \(\mathcal{U}\)]\label{univ:obs:ingest-nao-u}
+\(\operatorname{INGEST}\) instancia \(\mathsf{Aut}\)
+(Def.~\ref{univ:def:curta}). Não legisla o quádruplo
+\((X,X^{*},\mathsf{Mor},\mathsf{Aut})\).
+Candidato começa \texttt{não localizada}; promover só com prova.
+\[
+\boxed{\;\mathcal{U}\neq\text{catálogo}\neq\operatorname{INGEST}\;}
+\]
+\end{observacao}
+
+\begin{definicao}[lei local: fibra da face, não Lei nova]\label{univ:def:lei-local}
+A lei local no suporte \(S\) \textbf{não} é axioma, nem Parte, nem
+andar novo. É a cláusula~(1) do Teor.~\code{fis:thm:tecidos}
+--- o produto quocientado pela \textbf{fibra do morfismo da face} ---
+lida por \(\operatorname{INGEST}\) sobre contratos \textbf{já
+ingeridos} no mesmo \(S\):
+\[
+\boxed{\;
+\mathcal{L}_S
+=\operatorname{Pullback}(f,g)
+=\bigl\{(x,y)\in C_1\times C_2
+\mid\operatorname{Inv}_{C_1}(x)=\operatorname{Inv}_{C_2}(y)
+\text{ em }S\bigr\}
+\;}
+\]
+\[
+\boxed{\;
+\mathcal{L}_S=\bigcap_{C\in\mathcal{C}(S)}\operatorname{Contr}(C)
+\;}
+\]
+Lei~7: \(H\times H^{*}\), ligam sem fundir
+(\code{fis:obs:octoniao-interface}). A união não é disjunta: as cópias
+encontram-se no vinco. \textbf{Não} se aplica o passo de indução
+\(X_{k+1}=(X_k\times X_k^{\bullet})/\sim\) --- isso constrói o andar
+seguinte; aqui não se sobe a escada e não nasce corpo.
+\textbf{Não} é Teor.~\code{fis:thm:handshake} (homónimo: vértice/aresta).
+\code{analitico thm:tecidos} realiza a mesma fibra na torre
+\(\mathbb{N}\)--\(\mathbb{R}\); não é o \(\mathcal{L}_S\) operacional.
+O fecho \(\operatorname{MetaInd}(L_7)=L_0\) é esta fibra, não
+\(X_{k+1}\) (Cor.~\ref{univ:cor:metaind-fecho}).
+Não há Lei~8. Não há Ficha~11.
+\end{definicao}
+
+\begin{definicao}[execução sob a lei local]\label{univ:def:lei-local-exec}
+\[
+\boxed{\;
+\operatorname{Exec}(I,S_0)=S_1
+\iff
+\forall C\in\mathcal{C}(S),\
+\operatorname{Valida}_C(S_0,I,S_1)=\mathbf{true}
+\;}
+\]
+Qualquer falha devolve a \(S_0\) (já o disco: rollback do write-through;
+Def.~\ref{univ:def:identidade}: identidade intocada).
+O diagrama só se invoca com incidência real (mesmo \(S\), mesmos slots,
+mesma transição \(S_0\to S_1\)). Sem isso = analogia; I0 proíbe.
+\end{definicao}
+
+\begin{definicao}[lei local canónica]\label{univ:def:lei-local-canonica}
+A lei local de \(\mathcal{U}\) no suporte \(S\) é
+\[
+\boxed{\;
+\mathcal{L}_S(\mathrm{id})
+=
+\underbrace{\bigcap_{C \in \mathcal{C}(S)} \operatorname{Contr}(C)}_{\text{Restrição dos Corpos}}
+\;\;\cap\;\;
+\underbrace{\bigl\{ I : \operatorname{supp}(\mathcal{F}(I)) \subseteq B(\mathrm{id}) \bigr\}}_{\text{Filtro de Banda da Identidade}}
+\;}
+\]
+O primeiro termo é Def.~\ref{univ:def:lei-local}
+(Lei~7 / cláusula~(1) do Teor.~\code{fis:thm:tecidos}:
+fibra da face; \textbf{não} \(X_{k+1}\)).
+Execução: Def.~\ref{univ:def:lei-local-exec}.
+\(\mathrm{id}=\mathrm{hex}(\mathrm{sha256}(\mathrm{bytes}(\mathit{pub})))\)
+(Def.~\ref{univ:def:identidade}) é o selector discreto da partição
+\(B(\mathrm{id})\), \textbf{não} o espectro.
+\(\mathcal{F}(I)=\widehat{I}\) é a transformada universal
+(Def.~\code{fis:def:transf}; Teor.~\code{fis:thm:H}).
+\(\mathcal{L}_S(\mathrm{id}_1)\neq\mathcal{L}_S(\mathrm{id}_2)\)
+no mesmo \(S\) (multi-inquilino).
+A representação (banda/\(\mathrm{id}\)) selecciona
+\(B(\mathrm{id})\) sem ser espectro.
+O segundo termo lê o corte \(\chi_k\) já escrito após
+Teor.~\code{fis:thm:H}: \(\widehat{I}(k)\) é o saldo no corte
+que \(\chi_k\) define; \(k\in\operatorname{supp}(\mathcal{F}(I))\)
+sse o saldo \(\neq 0\). \(B(\mathrm{id})\) é a parte autorizada
+desses cortes, indexada pelo selector --- o corte \textbf{não}
+produz \(B(\mathrm{id})\).
+I0 (três cortes, não se homogeneízam):
+Def.~\code{def:corte} (Dedekind, completação \(\mathbb{R}\))
+\(\neq\) fibra dos tecidos (Teor.~\code{fis:thm:tecidos})
+\(\neq\) Teor.~\code{fis:thm:corte} (produz o real)
+\(\neq\) selector \(\mathrm{sha256}\).
+Definição contratada; realização no motor = medir
+\(B(\mathrm{id})\) e \(\mathcal{F}\) com resíduo \(0\).
+Candidato restante: par \(\{M_{\mathrm{WASM}},M_{\mathrm{Docker}}\}\)
+--- não a existência desta lei.
+Não há Lei~8. Não há Ficha~11.
+\(\mathcal{L}_S(\mathrm{id})\) é a \textbf{leitura} da lei única
+\(\mathcal{L}\) no suporte \(S\) com identidade
+(Def.~\ref{univ:def:lei-unica}); não é Lei~8.
+Ortogonal às três línguas (Def.~\ref{univ:def:linguas}): aquelas
+lêem \(\mathcal{U}\) por dentro; \(\mathcal{L}_S(\mathrm{id})\)
+restringe no suporte. Não substituem.
+\end{definicao}
+
+\begin{observacao}[lei local: estatuto e varredura]\label{univ:obs:lei-local}
+\(\mathcal{L}_S\) concretas = \texttt{não localizada} até o motor extrair
+e testar (Def.~\ref{univ:def:vocab}: candidato \(\neq\) realizado).
+\(\operatorname{INGEST}\): coincidência não declarada \(\to\) candidato;
+sobe a \texttt{realizado} só com resíduo \(0\) e \textbf{sem} expandir o
+censo. Alvos de varredura, não leis realizadas:
+\(S_{\mathrm{ESTADO}}\), \(S_{\mathrm{DEPOSITO}}\), o par
+\(\{M_{\mathrm{WASM}},M_{\mathrm{Docker}}\}\).
+\(M_{\mathrm{Docker}}\) permanece \texttt{não localizada}
+(Def.~\ref{univ:def:maquina}).
+Cone--espiral permanece \texttt{não localizada}
+(Obs.~\ref{univ:obs:cone-espiral}).
+POST/WS/SO como tríade nomeada permanece \texttt{não localizada}
+(Obs.~\ref{univ:obs:trialidade}).
+A lei é Def.~\ref{univ:def:lei-local-canonica}.
+\(B(\mathrm{id})\) e \(\mathcal{F}\) medem-se no motor
+(resíduo \(0\); Obs.~\ref{univ:obs:ls-cliente}).
+O par \(\{M_{\mathrm{WASM}},M_{\mathrm{Docker}}\}\) permanece
+\texttt{não localizada}.
+(\code{tools/varredura\_lei\_local.mjs}.)
+\end{observacao}
+
+\begin{observacao}[Mecânica: incidência já fechada]\label{univ:obs:mecanica}
+A Parte Mecânica já foi ingerida
+(\code{catalogo cat:ingestao:mecanica}). \(\mathcal{U}\) consome; não
+reconstrói. Não se reabre \(\mathrm{I}_{0}\). Quádruplo desta leitura
+--- observação, não Ficha~11, não capítulo:
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+campo & o construído \\
+\midrule
+pergunta
+  & qual é a evidência para o contrato neste suporte?
+    --- nunca «parece um duomorfismo» \\
+evidência
+  & ciclo (escrita, leitura, decisão, fecho);
+    \(\sum G=\lvert I\rvert\) (\code{fis:lem:conserva});
+    neurónio: cisão \(+\) soma (\code{fis:neuronio});
+    \(\operatorname{Isom}_{\mu}\) no gato \(\lvert\det\otimes\rvert=1\)
+    (\code{fis:thm:gato}(2)); Hom do ciclo;
+    \(\mathsf{Aut}\) instancia \code{fis:thm:mult} \\
+resultado
+  & \texttt{realizado}: ciclo, contagem, gato.
+    \texttt{N/A}: par \(\oplus,\otimes\) (I2); I7; \(\mathbf{Duo}\);
+    \(\operatorname{Star}\) neste suporte.
+    \texttt{não localizada}: tríade / \(\mathcal{F}\) (I5);
+    Lei~7 (I6) \\
+proibição
+  & não copiar \(\operatorname{Star}(K)\) nem
+    \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\);
+    não colar \(\sum G\) a \(\lvert\det\rvert=1\)
+    (Obs.~\ref{univ:obs:invariantes});
+    sem Lei~8; sem Ficha~11; sem corpo~15 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Sobre combinação / clone / \(\mathcal{L}_S\): o ciclo é a mesma forma
+(clone no mesmo suporte, Def.~\ref{univ:def:clone}). I7 é
+\texttt{N/A} --- não se copia \(\mathrm{lcm}/\mathrm{gcd}\).
+Lei~7 desta Parte é \texttt{não localizada}: a cadeia
+Lei~7 \(\to\) tecidos \(\to\) pullback \(\to\mathcal{L}_S\)
+\textbf{não} arranca da Mecânica. Os contratos realizados
+(ciclo, contagem, gato) podem entrar em \(\operatorname{Contr}(C)\)
+no mesmo \(S\); isso é incidência, não homogeneização.
+\(\mathcal{F}(G)\) em \code{fis:thm:dobranorma} e
+\code{fis:thm:ponte} \textbf{lê} a transformada da Álgebra
+(\code{fis:def:transf}, \code{fis:thm:H}; I5 da Álgebra realizada)
+sobre o campo \(G\) da realização --- a Mecânica não realiza
+\(\mathcal{F}\).
+\end{observacao}
+
+\begin{observacao}[\(B(\mathrm{id})\) no motor; Docker candidato]\label{univ:obs:ls-cliente}
+A lei é Def.~\ref{univ:def:lei-local-canonica}.
+O motor mede \(B(\mathrm{id})\) e \(\mathcal{F}\)
+(Def.~\code{fis:def:transf}, Teor.~\code{fis:thm:H}; resíduo \(0\))
+--- sem inventar FFT, sem fingir contentor.
+O que permanece \texttt{não localizada} é
+\(M_{\mathrm{Docker}}\) (Def.~\ref{univ:def:maquina}).
+Promover um suporte pede incidência real no mesmo \(S\).
+Homónimos (I0):
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+nome & o construído & estatuto \\
+\midrule
+banda do canal
+  & \(\mathrm{id}=\mathrm{hex}(\mathrm{sha256}(\mathrm{bytes}(\mathit{pub})))\)
+    (Def.~\ref{univ:def:identidade}; \code{banda.js}, \code{lib/banda.h})
+  & índice; representa; \textbf{não} é espectro \\
+corte \(\chi_k\)
+  & saldo \(\widehat{I}(k)\) no corte que \(\chi_k\) define
+    (Teor.~\code{fis:thm:H})
+  & lê \(\operatorname{supp}(\mathcal{F}(I))\); não produz \(B(\mathrm{id})\) \\
+\(B(\mathrm{id})\)
+  & parte autorizada dos cortes \(\chi_k\), indexada por \(\mathrm{id}\)
+  & lei: Def.~\ref{univ:def:lei-local-canonica};
+    medida no motor: resíduo \(0\); \textbf{não} corpo \\
+Teor.~\code{fis:thm:corte}
+  & duas faces produzem o real
+  & \texttt{N/A} para \(B(\mathrm{id})\) \\
+Def.~\code{def:corte}
+  & par Dedekind \((A,B)\) em \(\mathbb{Q}\to\mathbb{R}\)
+  & \texttt{N/A} para \(B(\mathrm{id})\) \\
+\(\mathcal{L}_S^{\mathrm{com}}\)
+  & Obs.~\ref{univ:obs:redes-em}
+  & candidato de suporte; não corpo \\
+\(M_{\mathrm{Docker}}\)
+  & Def.~\ref{univ:def:maquina}
+  & candidato de suporte \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Análise I5: \(\mathcal{F}\) é Álgebra. Partículas: modo espectral
+(\code{fis:def:atomo}) \(\neq B(\mathrm{id})\).
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
+\section{Fusão, clone e trialidade}\label{univ:sec:fusao-clone}
+
+\noindent Vocabulário de combinação. Não duplica Def.~\ref{univ:def:U}.
+Não sobe a escada. Não há Lei~8. Não há Ficha~11.
+
+\begin{definicao}[clone: a mesma forma, sem magma novo]\label{univ:def:clone}
+O \textbf{clone} copia o mesmo contrato no mesmo suporte. O corpo não
+cresce. Já construído: mesma forma, cópia
+(\code{catalogo} --- \code{tests/cruza.c}, \code{tests/fita.c});
+entre andares, \(T_{k+1}=T_k+T_k^{*}\)
+(\code{topologico}; \code{teoria sec:clonerep}).
+\[
+\boxed{\;\text{clone}\;=\;\text{a mesma forma}\;\neq\;\text{corpo novo}\;}
+\]
+Não é \(\operatorname{INGEST}\) a decretar assinatura interna.
+\end{definicao}
+
+\begin{definicao}[fusão: combinação do par, não Parte nova]\label{univ:def:fusao}
+A \textbf{fusão} em \(\mathcal{U}\) combina dois contratos
+\textbf{já ingeridos}. Lei~7: ligam sem fundir
+(\code{fis:obs:octoniao-interface}). Quando o suporte é o reticulado
+\((\mathbb{N}_{>0},\mid)\), a combinação \textbf{é} o canónico do par
+(Def.~\ref{univ:def:lcm}):
+\[
+\boxed{\;\vee=\operatorname{lcm},\qquad\wedge=\operatorname{gcd},\qquad
+\operatorname{lcm}(a,b)\operatorname{gcd}(a,b)=ab\;}
+\]
+Noutro suporte: \texttt{N/A} até evidência --- o par não se copia
+(Obs.~\ref{univ:obs:lcm}; I7: uma só operação em I2 \(\Rightarrow\) I7
+é \texttt{N/A}).
+A reprodução \(\mathbb{R}^{a}\vee\mathbb{R}^{b}=\mathbb{R}^{\mathrm{lcm}}\)
+(\code{catalogo}, \code{tests/cruza.c}) \textbf{é} esta combinação no
+reticulado \(\mid\), não um terceiro mecanismo.
+\[
+\boxed{\;\text{clone}\;\neq\;\text{fusão}\;}
+\]
+Homónimos, e não se tomam como canónicos de \(\mathcal{U}\):
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+nome & o que é & slot \\
+\midrule
+\code{catalogo def:fusao}
+  & estrela \(\gamma\) no bestiário; liga, não funde
+  & catálogo; \textbf{não} \(\operatorname{Star}(\mathcal{U})\) \\
+\code{fis:fusaofissao}
+  & faces do corte (Partículas)
+  & \textbf{não} magmas; \textbf{não} \(\mathrm{lcm}/\mathrm{gcd}\) \\
+Lei~7
+  & dois tecidos; \(H\times H^{*}\)
+  & ligar sem fundir; não Lei~8 \\
+\(\mathcal{L}_S(\mathrm{id})\)
+  & lei canónica (Def.~\ref{univ:def:lei-local-canonica})
+  & fibra da face; não \(X_{k+1}\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{definicao}
+
+\begin{definicao}[espaço de busca do par]\label{univ:def:busca-par}
+A lei é Def.~\ref{univ:def:lei-local-canonica}.
+Candidatos a \textbf{instância} são pares \((C_i,C_j)\) com resíduo \(0\)
+cuja incidência em \(S\) ainda não foi medida. Nascem em
+\(\operatorname{INGEST}\), não como axioma em \code{redes.tex}.
+\[
+\boxed{\;
+\mathrm{Res}(C_i)=\mathrm{Res}(C_j)=0
+\;\land\;
+\text{sem incidência no mesmo }S
+\;\Longrightarrow\;
+\text{candidato de suporte}
+\;}
+\]
+Sobe a \texttt{realizado} só com incidência real e resíduo \(0\),
+\textbf{sem} expandir o censo. Sem o mesmo \(S\): analogia; I0 proíbe.
+\end{definicao}
+
+\begin{observacao}[censo: o limitado já está fechado]\label{univ:obs:censo-corpos}
+O número de corpos canónicos é \textbf{limitado} porque a Física fechou
+a lista de palcos e \(\mathcal{U}\) não decide capítulos --- não porque
+esta gramática corte em \(5\) nem em \(27\).
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+número & o que o texto \textbf{já} prova & o que \textbf{não} é \\
+\midrule
+\(\dim X=8\)
+  & base \(e_k=2^{k}\); leis \(0\)--\(7\)
+  & Lei~8; censo de Partes \\
+catorze
+  & palcos de exposição
+  & catorze corpos \\
+EM
+  & interface fechada (\code{catalogo cat:bloco4})
+  & corpo \\
+Alonzo
+  & canónico da Parte Fractal
+  & nome da Parte \\
+\(5=2+3\)
+  & trono do ouro: soma, divisor de zero
+    (\code{catalogo obs:trono}, \code{obs:rei})
+  & censo de canónicos \\
+\(6=\mathrm{lcm}(2,3)\)
+  & cruzamento que voa; \(\operatorname{Aut}(T^{2})\)
+    em \(\{1,2,3,4,6\}\); hexal \(=\) rótulo
+  & \(\mathbf{Duo}\); entrar na \(6\) pede \(27\) \\
+\(3^{3}=27\)
+  & operações na tríade \(\{-1,0,+1\}\)
+    (\code{catalogo}; corpos \(\neq\) operações)
+  & censo de corpos; degrau para o hexal \\
+\(28\)
+  & bestiário (\code{tests/os28.c})
+  & Partes; operações \\
+\(8\notin\{1,2,3,4,6\}\)
+  & restrição cristalográfica em dim.\ \(2\)
+  & decreto contra Lei~8 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\(27\) como álgebra de Jordan / \(J_{3}(\mathbb{O})\) / teto para «entrar
+na \(6\)»: \texttt{não localizada} --- procurou-se; não se decreta.
+Cinco corpos \emph{implementados} no toolkit (áureo, cristalino, racional,
+mórfico, mecânico) é censo de régua, não de canónicos.
+\end{observacao}
+
+\begin{observacao}[Redes \(\bowtie\) EM]\label{univ:obs:redes-em}
+EM \textbf{não} tem corpo (\code{fis:def:em-forma};
+\code{catalogo cat:bloco4}). Redes «só realiza; não legisla»
+(\code{papers/redes.tex}). Donde:
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+leitura & estatuto \\
+\midrule
+corpo \(15\) / Parte nova
+  & \texttt{N/A} --- EM sem corpo; \(\mathcal{U}\) não decide a lista \\
+\(\mathrm{lcm}/\mathrm{gcd}\) dos contratos
+  & EM I7 realiza o par; Redes I7 é \texttt{N/A}
+    (I2: \(W_s+W_a\) \(\neq\) magmas; Obs.~\ref{univ:obs:lcm}) \\
+gramática \(\mu_S+\mu_A\) / \(W_s+W_a\)
+  & a mesma cisão noutro suporte
+    (\code{catalogo cat:bloco4} §1); \textbf{não} identifica nervoso
+    com EM \\
+\(\mathcal{L}_S\) de comunicação
+  & \texttt{não localizada} --- procura em redes \(+\) slots;
+    nasce no \(\operatorname{INGEST}\) (resíduo \(0\)),
+    não axioma em \code{redes.tex} \\
+Lei~7 / \(G_{\mathrm{visit}}=G_{\mathrm{real}}\) / fios vs memória
+  & realização já medida em Redes
+    (\code{redes:memoria-fio}, \code{tests/redes\_g.js});
+    \textbf{não} funde com a interface EM \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Electromecânico no banco (\code{catalogo}: fusão mecânico \(\times\)
+\(E^{2}-B^{2}\) por \(C_{\mathrm{ent}}\)) é combinação de
+\textbf{realizações} no bestiário, não corpo EM nem Parte nova.
+\end{observacao}
+
+\begin{observacao}[trialidade: \(S_{3}\) dos eixos \(\neq\) POST/WS/SO]\label{univ:obs:trialidade}
+I0: quatro conceitos, não se fundem.
+\[
+\boxed{\;
+\mathbf{Duo}\neq\mathsf{Tri}\neq S_{3}\neq\pi
+\;}
+\]
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}p{0.22\textwidth}
+  >{\raggedright\arraybackslash}X@{}}
+\toprule
+ & faz & equação & estatuto \\
+\midrule
+\(\mathbf{Duo}\)
+  & troca ops na mesma realização
+  & \(\mathbf{Duo}^{2}=\mathrm{id}\)
+  & realizado
+    \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\) \\
+\(\mathsf{Tri}\)
+  & coexistência das 3 línguas
+  & ---
+  & leitura, não operador
+    (Def.~\ref{univ:def:tri}) \\
+\(S_{3}\)
+  & permutação dos eixos do trial
+  & ---
+  & simetria de leituras
+    (\code{tests/trialidade.c}) \\
+\(\pi\)
+  & projecção canónica idempotente
+  & \(\pi\circ\pi=\pi\)
+  & mecanismo --- Alonzo
+    \texttt{realizado}
+    (Def.~\ref{univ:def:alonzo-idemp}) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Não se fundem. \(6=\mathrm{lcm}(2,3)\) continua rótulo, não
+\(\mathbf{Duo}\) e não evidência de \(T^{3}\).
+A trialidade \(S_{3}\) dos eixos é clone de leituras do
+\textbf{trial}, \textbf{não} é
+\(T\colon\mathsf{Alg}\to\mathsf{Top}\to\mathsf{Ana}\). Não fundir.
+
+A \textbf{trialidade} já construída é \(S_{3}\) sobre os três eixos do
+trial \(\{-1,0,+1\}\): seis permutações, bijecções, peso conservado;
+controlo: dois eixos não dão trialidade
+(\code{teoria.tex}; \code{tests/trialidade.c}; \code{catalogo}).
+\[
+\boxed{\;
+3\ \text{autoduais}
+\;\longrightarrow\;
+2^{3}=8\ \text{biduais}
+\;}
+\]
+Isso é realização do relógio por eixo, \textbf{não} gramática de
+\(\mathcal{U}\), \textbf{não} \(\mathbf{Duo}\), \textbf{não}
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\).
+O \(8=2^{3}\) \textbf{não} é Lei~8; \(8\notin\{1,2,3,4,6\}\) no toro.
+\(\operatorname{Spin}(8)/\mathrm{SO}(8)\): \texttt{não localizada}
+neste repo.
+
+O que as siglas \textbf{já} são, cada uma no seu sítio --- não se cola
+o nome «trialidade» por serem três palavras:
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+sigla & o construído & estatuto em \(\mathcal{U}\) \\
+\midrule
+POST / http / fetch
+  & fios \(\in\mathcal{T}\)
+    (\code{fis:def:dominio-interface}; \code{redes:memoria-fio})
+  & \texttt{N/A} como \(\mathbf{Duo}\) (sem \(\oplus/\otimes\)) \\
+WS / \code{ws:/canal}
+  & \(C=\mathrm{MOVE}\); protocolo \(\neq\) fio HTTP
+    (\code{catalogo}; Def.~\ref{univ:def:canais})
+  & realização da máquina; não corpo \\
+SO
+  & sem tríade POST/WS/SO escrita.
+    Homónimos: broca-so (ISA);
+    \(S_{\mathrm{DEPOSITO}}\) (opaco);
+    \(\mathrm{SO}(n)\) (ausente)
+  & \texttt{não localizada} como terceiro canal \\
+html / css / js
+  & tríade da página no mesmo schema
+  & faces no canal; \textbf{não} órbita Hopfield \\
+sql / latex / node
+  & órbitas \(\in\mathcal{O}\)
+  & absorvidas; \textbf{não} fios \\
+\bottomrule
+\end{tabularx}
+\end{center}
+POST/WS/SO como trialidade de três corpos ou de três leis:
+\texttt{não localizada}. Se um dia as três forem o \textbf{mesmo} \(S\)
+e a \textbf{mesma} transição \(S_{0}\to S_{1}\), isso caracteriza
+clone / \(\mathcal{L}_S\) (Def.~\ref{univ:def:clone},
+Def.~\ref{univ:def:lei-local}) --- não Lei~8, não corpo Docker, não
+entrada no bestiário.
+
+Integração com o par: a trialidade \(S_{3}\) permuta leituras do
+\textbf{mesmo} trial (clone de eixos). Combinar graus no medidor
+já devolve \(\mathrm{lcm}\cdot\mathrm{gcd}=ab\)
+(\code{tests/trialidade.c}, \(1600\) pares) --- canónico \emph{do par},
+não operador novo. Três transportes \(\in\mathcal{T}\) são
+\textbf{contraexemplo} de «três nomes \(\Rightarrow\) três canónicos»:
+o fio não tem magma; o canal não é o fio; SO não está no terno.
+\end{observacao}
+
+\begin{observacao}[relação Duo--Tri: períodos 2, 3 e 6; gap]\label{univ:obs:duo-tri}
+\(\mathbf{Duo}\) tem ordem \(2\):
+\(\mathcal{D}\circ\mathcal{D}=\mathrm{id}\)
+(Def.~\ref{univ:def:star}; Obs.~\ref{univ:obs:morf-i0};
+\code{fis:thm:dual-involutiva}).
+Um \(T\) de ordem \(3\) \textbf{não} é a definição
+(Def.~\ref{univ:def:trialidade-real}).
+Se existisse como operador, encontraria
+\(\operatorname{lcm}(2,3)=6\)
+(\code{catalogo obs:rei}; Def.~\ref{univ:def:toro};
+\(\operatorname{Aut}(T^{2})\) em \(\{1,2,3,4,6\}\)).
+
+A idempotência extraída tem ordem \(2\)
+(\(\pi\circ\pi=\pi\); Def.~\ref{univ:def:alonzo-idemp}).
+Donde o \(6\) \textbf{não} é evidência de trialidade de línguas
+--- só \(\mathrm{lcm}\) do par
+(Def.~\ref{univ:def:lcm}; Obs.~\ref{univ:obs:lcm}). Hexal
+\(6=\mathrm{lcm}(2,3)\) é rótulo, não \(\mathbf{Duo}\).
+Não se força \(T^{3}=\mathrm{id}\) sobre \(e\circ e=e\).
+
+O construído \textbf{não} diz que \(\mathbf{Duo}\) actua nas
+línguas (troca duas e a terceira fica), nem que
+\(\langle\mathbf{Duo},T\rangle\) gera diedral / \(S_{3}\) de
+línguas. \(\mathbf{Duo}\) actua nas operações \textbf{dentro} da
+mesma realização. Dualidade reversível
+(\(\delta\dashv\varepsilon\)) \(\neq\mathbf{Duo}\) e \textbf{não}
+é \(T\) (Obs.~\ref{univ:obs:morf-i0}).
+\(\mathbf{Duo}^{2}=\mathrm{id}\) (involução)
+\(\neq\) \(e\circ e=e\) (projecção)
+\(\neq\) \(\mathsf{Tri}\) (leitura)
+\(\neq\) \(S_{3}\) (eixos).
+
+Candidato de relação --- mapa, \textbf{não} \(T^{3}\) realizado:
+\[
+\boxed{\;
+\operatorname{ord}(\mathbf{Duo})=2,
+\quad
+\operatorname{ord}(\pi)=2,
+\quad
+\mathsf{Tri}\text{ não é operador},
+\quad
+\mathrm{lcm}(2,3)=6
+\;}
+\]
+Gap: as setas
+\(f_{\mathrm{AA}}\circ f_{\mathrm{TA}}\circ f_{\mathrm{AT}}
+=\mathrm{id}\)
+são leitura da idempotência \(\pi\circ\pi=\pi\), não o objecto
+em falta (Def.~\ref{univ:def:teste-tri};
+Def.~\ref{univ:def:alonzo-idemp}).
+A intersecção tripla das imagens é o que se mede
+(Def.~\ref{univ:def:trialidade-real}).
+(\code{tests/trialidade\_linguas.js}.)
+\end{observacao}
+
+%═══════════════════════════════════════════════════════════════════════════
 \section{O que o agente recebe}\label{univ:sec:agente}
 
 \noindent Não «descubra qual corpo é este». Lê o vector em \(V\), executa
@@ -975,6 +2601,9 @@ incompatível \(\to\) \texttt{N/A}; busca sem prova de ausência
 \(\to\) \texttt{não localizada}. Atravessar a Física e o catálogo
 sem reabrir \(\mathrm{I}_{0}\) é a prova de carga do autómato.
 EM (\code{catalogo cat:bloco4}) é preenchimento, não legislação.
+Candidato a corpo: as três línguas de uma vez
+(Def.~\ref{univ:def:linguas}); resíduo \(0\) numa só não basta.
+Os três critérios: Def.~\ref{univ:def:corpo-canonico}.
 \end{observacao}
 
 \end{document}
