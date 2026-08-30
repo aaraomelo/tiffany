@@ -1791,23 +1791,30 @@ pergunta
   & qual é a evidência para o contrato neste suporte?
   & nunca «parece isomorfo» \\
 evidência
-  & \code{univ:def:lei-canonica}; \code{univ:thm:reconhecimento};
+  & \code{univ:def:lei-canonica}; \code{univ:def:quadrupla-finita};
+    \code{univ:thm:reconhecimento};
     \code{univ:thm:retorno-canonico}; \code{univ:thm:metaind-pi};
-    \code{univ:def:alonzo-idemp}; \code{fis:def:transf}; \code{fis:thm:H};
+    \code{univ:def:alonzo-idemp}; \code{univ:def:face-mult};
+    \code{fis:def:transf}; \code{fis:thm:H}; \code{fis:thm:conv};
     \code{univ:def:finv}; \code{univ:thm:reversao-byte};
+    \code{univ:thm:glh-dual-fecha}; \code{univ:obs:banach};
     \code{fis:obs:U-consome}; \code{tests/lei\_unica\_u.js}
   & labels univ + fis + motor \\
 resultado
   & \texttt{realizado}: \(\mathcal{U}_{\mathrm{can}}\);
+    pacote finito \(\mathcal{U}_{\mathrm{fin}}=(\mathbf{Duo},\pi,\mathcal{F},\mathcal{F}^{-1})\);
     retorno \(\operatorname{Res}=0\);
     \(\pi\circ\pi=\pi\) (Alonzo);
     \(\mathcal{F}\) Parseval \(0\);
+    face \(*\);
     GLH-byte \(I=\mathcal{F}^{-1}\mathcal{F}(I)\);
     CF/\(\varphi=\operatorname{Star}(K)\) em \(\mathrm{I}_{9}\)
   & unidade operacional \\
 proibição
   & sem Lei~8; sem Ficha~11; sem reabrir I0 das Partes fechadas;
-    \(1/3\), GLH contínuo e \(F\cap B\cap N\) \texttt{não localizada}
+    as duas quádruplas \textbf{não} se fundem;
+    Banach/BW ferramentas, não peças;
+    \(1/3\), GLH contínuo, Pisot/Gentil e \(F\cap B\cap N\) \texttt{não localizada}
   & EM: \S\ref{cat:bloco4} \\
 \bottomrule
 \end{tabular}
@@ -1831,8 +1838,16 @@ e a codificação \(\mathbb{N}^{\mathbb{N}}\to\mathbb{R}\)
 --- o paper liga CF ao corte de Dedekind/Möbius
 (\code{thm:corte-ponto-fixo}), não a \(\chi_k\).
 GLH no byte: \texttt{realizado}
-(\(I=\mathcal{F}^{-1}\mathcal{F}(I)\), \(\operatorname{Res}=0\);
-\code{univ:thm:reversao-byte}; \code{univ:def:finv}).
+(injectivo, sobrejectivo \textbf{e} denso-trivial;
+\(I=\mathcal{F}^{-1}\mathcal{F}(I)\), \(\operatorname{Res}=0\);
+\code{univ:thm:denso-byte}; \code{univ:thm:reversao-byte};
+\code{univ:def:finv}).
+Codificação \(\operatorname{Sig}\to\mathbb{R}\):
+\texttt{realizado} (ordem \(+\) \(\mathbb{Q}\) denso;
+\code{univ:obs:denso-NN}; \S\ref{sec:codificacoes}).
+Densidade em \(X^{X}\): \texttt{não localizada}
+(\code{univ:obs:denso-XX}).
+O fecho canónico de \(\mathcal{U}\) não depende de \(X^{X}\).
 \[
 \boxed{\;
 \mathcal{F}^{-1}\neq 3^{-1}_{\chi}
@@ -1842,13 +1857,20 @@ Síntese no byte (\(m_{\mathrm{Hadamard}}=8\),
 \(\mathcal{F}^{-1}=2^{-8}\mathcal{F}\))
 \textbf{não} é o retorno das leis
 (\(m_{\mathrm{dobras}}=3\), \(2^{3}=8\)).
-Gentil contínuo: \texttt{não localizada}.
+Pacote finito \(\mathcal{U}_{\mathrm{fin}}\): \texttt{realizado}
+(\code{univ:def:quadrupla-finita}; \code{univ:def:face-mult}).
+Banach/BW: ferramentas de fecho, \textbf{não} peças
+(\code{univ:obs:banach}).
+Pisot / Gentil / GLH contínuo: \texttt{não localizada}
+(\code{univ:obs:denso-XX}; dual contínuo \(\neq\) este byte).
 Permanece \texttt{não localizada}:
-GLH contínuo (Hurwitz/Lebesgue/Gentil);
 \(F\cap B\cap N\) (unificação por redução \(\neq\) fusão);
 \(M_{\mathrm{Docker}}\) (\code{univ:def:maquina});
 \(T^{3}\) como 3-ciclo (\code{univ:obs:alonzo-tri});
 \(3^{-1}=1/3\);
+BAI / reticulado \(2^{X}\)
+(\code{univ:obs:bai-nao-terco}, \code{obs:bai})
+--- busca: \textbf{não} localiza \(1/3\);
 CF como codificação de \(\mathcal{U}\)
 (banda/\(\mathrm{id}\), \(\mathcal{F}\), \(\chi\)).
 Não se inventa capítulo. \(\mathcal{U}\) não entra no bestiário.

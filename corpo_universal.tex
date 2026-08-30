@@ -89,6 +89,15 @@ A lei canónica é a quádrupla
 \(\mathcal{U}_{\mathrm{can}}=(L_0,\mathbf{Duo},\pi_{\mathcal{U}}\circ\mathcal{F},\operatorname{vinco})\)
 (Def.~\ref{univ:def:lei-canonica}): o reconhecimento
 \textbf{usa-a} (Teor.~\ref{univ:thm:reconhecimento}).
+A face \(*\) / \(\mathcal{F}\) / \(\mathcal{F}^{-1}\) / \(\delta_{0}\)
+é o pacote de \(\mathcal{U}_{\mathrm{an}}\)
+(Def.~\ref{univ:def:pacote-an}): canónico nessa língua,
+não quinto slot.
+O pacote operacional finito
+\(\mathcal{U}_{\mathrm{fin}}=(\mathbf{Duo},\pi_{\mathcal{U}},\mathcal{F},\mathcal{F}^{-1})\)
+(Def.~\ref{univ:def:quadrupla-finita})
+realiza essa língua; \textbf{não} se funde com
+\(\mathcal{U}_{\mathrm{can}}\).
 \end{abstract}
 
 \tableofcontents
@@ -261,6 +270,8 @@ projectam-no.
 =\text{a realização analítica de }\pi_{\mathcal{U}}
 \;}
 \]
+O pacote \(*\) / \(\mathcal{F}\) / \(\mathcal{F}^{-1}\) / \(\delta_{0}\)
+é canónico nesta língua (Def.~\ref{univ:def:pacote-an}).
 \[
 \boxed{\;
 \mathrm{alg}=\text{o que opera},\quad
@@ -1198,6 +1209,9 @@ Estatuto: o composto é \texttt{realizado}
 \code{tests/lei\_unica\_u.js};
 \code{banco\_transf\_u.js}).
 \(1/3\) permanece \texttt{não localizada}.
+A busca no reticulado booleano / BAI
+\textbf{não} muda o estatuto
+(Obs.~\ref{univ:obs:bai-nao-terco}).
 O paper \textbf{não} iguala os dois.
 O que \(\mathcal{U}\) recusou: completar
 \(3^{-1}=1/3\) por simetria aritmética; fundir
@@ -1205,6 +1219,56 @@ O que \(\mathcal{U}\) recusou: completar
 da meta-indução com o fecho do corte; fundir
 GLH com o operador; fundir \(\mathbf{Duo}\) com
 \(3^{-1}\); Lei~8; Ficha~11; reabrir \(\mathrm{I}_{0}\).
+\end{observacao}
+
+\begin{observacao}[BAI / reticulado booleano: busca, não \(1/3\)]\label{univ:obs:bai-nao-terco}
+\(\mathrm{I}_{0}\): reticulado de bits \(\neq\) reticulado dos
+divisores (Def.~\ref{univ:def:lcm}; Obs.~\ref{univ:obs:lcm};
+Def.~\code{fis:def:arvore}).
+A pergunta era se o reticulado booleano ou a BAI
+localizam \(1/3\).
+\textbf{BAI} é a Biblioteca de Autorização Isomórfica
+(\code{obs:bai}; \code{casl-propagation}):
+quinteto \((\kappa,\delta,\Phi,T,\Psi)\) sobre o
+reticulado \(2^{X}\) das condições
+(\(\vee=\cup\), \(\wedge=\cap\), fail-closed).
+Não é o binário \(B\) (Def.~\code{fis:def:B}).
+Não é o par \(\mathrm{lcm}/\mathrm{gcd}\) em
+\((\mathbb{N}_{>0},\mid)\).
+O reticulado booleano tem \(2^{n}\) elementos
+(\code{lib/booleana.h}: \(\mathrm{GF}(2)\),
+AND \(=\otimes\), XOR \(=\oplus\)).
+O grupo \((2^{X},\triangle)\) é \((\mathbb{Z}/2)^{n}\):
+todo não-identidade tem ordem \(2\).
+Complemento \(=\) involução. Não há ordem \(3\)
+no grupo cíclico, nem elemento \(1/3\).
+Hexal \(6=\mathrm{lcm}(2,3)\) continua rótulo.
+A escada \(\operatorname{Ind}\) só duplica
+(\(e_k=2^{k}\); Teor.~\code{fis:thm:largura}):
+\[
+\boxed{\;
+\rho_3=\tfrac{1}{8}\ \text{de volta}
+\qquad\neq\qquad
+\tfrac{1}{3}
+\;}
+\]
+Ordens \(3\) e \(6\) \textbf{não} são degraus
+(\code{fisica} após Teor.~\code{fis:thm:largura}).
+Dual do 3º eixo \(=\) involução \(\chi^{(3)}\),
+não fracção (Obs.~\ref{univ:obs:inv-tres-corte}).
+\[
+\boxed{\;
+\mathrm{BAI}\ \text{não localiza}\ 1/3
+\qquad
+1/3\ \texttt{não localizada}
+\;}
+\]
+Não se funde com
+\(3^{-1}_{\chi}=\pi_{\mathcal{U}}\circ\mathcal{F}\)
+(\texttt{realizado}).
+O que \(\mathcal{U}\) recusou: decretar \(1/3\)
+por simetria; fundir BAI com \(B\); fundir
+\(2^{n}\) com ordem \(3\); reabrir \(\mathrm{I}_{0}\).
 \end{observacao}
 
 \begin{observacao}[fracção contínua fecha o elemento, não o corte \(\chi\)]\label{univ:obs:cf-estrela}
@@ -1232,8 +1296,11 @@ estrela. Estatuto: \texttt{realizado}.
 \;}
 \]
 --- \code{catalogo} \S\code{sec:codificacoes},
-\S\code{sec:vered}: injeção, conserva a ordem,
-não a vizinhança. Estatuto: \texttt{realizado}
+\S\code{sec:vered}, \code{thm:constr}:
+injeção, isomorfismo de ordem, denso, homeomorfismo
+nas palavras infinitas
+(\(\mathbb{Z}\times\mathbb{Z}_{\ge1}^{\mathbb{N}}\to\mathbb{R}\setminus\mathbb{Q}\)).
+Estatuto: \texttt{realizado}
 nesse suporte. Não é bijeção \(\mathbb{N}\to\mathbb{R}\).
 O paper \textbf{já} liga CF a um corte --- o de
 Dedekind/Möbius: a órbita de \(\infty\) \textbf{é}
@@ -1865,8 +1932,8 @@ Não promove \(F\cap B\cap N\).
 No byte, o mesmo rectângulo lê-se pela reversão
 da base (Teor.~\ref{univ:thm:reversao-byte}):
 análise \(\mathcal{F}\) e síntese \(\mathcal{F}^{-1}\).
-O rectângulo contínuo (Gentil) \textbf{não} se
-promove a este sítio.
+Esse par fecha \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)
+(Def.~\ref{univ:def:XX}; Teor.~\ref{univ:thm:glh-dual-fecha}).
 \end{definicao}
 
 %═══════════════════════════════════════════════════════════════════════════
@@ -2203,6 +2270,277 @@ nem com \(\pi^{2}=\pi\) nem com o vinco.
 \code{banco\_transf\_u.js}.)
 \end{teorema}
 
+\begin{definicao}[pacote da realização analítica]\label{univ:def:pacote-an}
+A face \(*\), \(\mathcal{F}\), \(\mathcal{F}^{-1}\) e \(\delta_{0}\)
+é o pacote canónico de \(\mathcal{U}_{\mathrm{an}}\) ---
+a língua da transformada (Def.~\ref{univ:def:linguas};
+Def.~\ref{univ:def:glh-an}).
+\textbf{Não} é quinto slot de
+\(\mathcal{U}_{\mathrm{can}}\)
+(Def.~\ref{univ:def:lei-canonica}).
+O pacote operacional finito
+(Def.~\ref{univ:def:quadrupla-finita})
+realiza esta língua; não a substitui.
+Pontryagin discreto finito: grupo \((\mathbb{Z}/2)^{m}\),
+\(\lvert X\rvert=2^{m}\).
+No byte, \(m_{\mathrm{Hadamard}}=8\)
+(\(\lvert X\rvert=256\); Def.~\ref{univ:def:finv}):
+\(2^{3}=8\) leis \(\neq m\).
+\[
+\boxed{\;
+(\mathbb{C}^{2^{m}},\,*)
+\xrightarrow{\;\mathcal{F}\;}
+(\mathbb{C}^{2^{m}},\,\cdot),
+\qquad
+\mathcal{F}^{-1}=2^{-m}\mathcal{F}
+\;}
+\]
+\(\delta_{0}\) é a unidade de \(*\)
+(Def.~\code{fis:def:conv}): \(\delta_{0}*f=f\).
+\(\mathcal{F}(\delta_{0})\) é o carácter trivial
+(a função \(1\)).
+O retorno \(3^{-1}_{\chi}=\pi_{\mathcal{U}}\circ\mathcal{F}\)
+usa \(\mathcal{F}\); a face \(*\) é como \(\mathcal{F}\)
+opera na álgebra; não substitui \(\mathbf{Duo}\) nem o vinco.
+Densidade neste suporte: denso-trivial
+(Teor.~\ref{univ:thm:denso-byte}).
+\end{definicao}
+
+\begin{definicao}[face multiplicativa de \(\mathcal{F}\)]\label{univ:def:face-mult}
+Os caracteres são homomorfismos
+(Lema~\code{fis:lem:orto}):
+\[
+\boxed{\;
+\chi_{k}(x\oplus y)=\chi_{k}(x)\,\chi_{k}(y)
+\implies
+\mathcal{F}(f*g)=\mathcal{F}(f)\cdot\mathcal{F}(g)
+\;}
+\]
+--- Teor.~\code{fis:thm:conv}. Ponte, não lei nova:
+\[
+\boxed{\;
+*\ \overset{\mathcal{F}}{\longleftrightarrow}\ \cdot
+\qquad
+\delta_{0}
+\xrightarrow{\ *\ }
+*
+\xrightarrow{\ \mathcal{F}\ }
+\chi
+\xrightarrow{\ \mathcal{F}^{-1}\ }
+*
+\;}
+\]
+Não é quarta face.
+Os \(\chi_{k}\) são os homomorfismos, não os
+idempotentes de \(*\).
+\(\delta_{0}*\delta_{0}=\delta_{0}\) é a unidade,
+não \(\pi\circ\pi=\pi\).
+\end{definicao}
+
+\begin{teorema}[deconvolução: invertibilidade, não lei nova]\label{univ:thm:deconv}
+Não é operador novo. É o Teor.~\code{fis:thm:conv}
+lido com a síntese (Def.~\ref{univ:def:finv}):
+se \(h=f*g\) e cada \(\widehat{f}(k)\) se inverte
+no dual,
+\[
+\boxed{\;
+g
+=\mathcal{F}^{-1}\bigl(\widehat{h}/\widehat{f}\bigr)
+=2^{-m}\mathcal{F}\bigl(\widehat{h}/\widehat{f}\bigr)
+\;}
+\]
+No byte, \(m=8\): \(\mathcal{F}^{-1}=2^{-8}\mathcal{F}\)
+(Teor.~\ref{univ:thm:reversao-byte}).
+Divisão na face \(\chi\), não axioma.
+Se \(\widehat{f}(k_{0})\) não inverte, não há volta
+nessa frequência.
+\(\zeta*\mu=\delta_{0}\) (Teor.~\code{fis:thm:mu})
+é a deconvolução da \emph{ordem}, não desta álgebra.
+\end{teorema}
+
+\begin{teorema}[duas idempotências, papéis distintos]\label{univ:thm:idemp-orto}
+\[
+\boxed{\;
+\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}}
+\neq
+\mathcal{F}^{-1}\mathcal{F}=I
+\;}
+\]
+A primeira é projecção / fecho de Alonzo
+(Def.~\ref{univ:def:alonzo-idemp}).
+A segunda é reversibilidade da dualidade
+(Teor.~\ref{univ:thm:reversao-byte}).
+Papéis, e não se fundem:
+\[
+\boxed{\;
+\mathbf{Duo}
+\mid
+\pi_{\mathcal{U}}
+\mid
+\mathcal{F}
+\mid
+\mathcal{F}^{-1}
+\mid
+\text{face }\chi
+\;}
+\]
+\(\mathbf{Duo}=\operatorname{Star}(\mathcal{U})\) troca as
+duas operações.
+\(\pi_{\mathcal{U}}\) projecta.
+\(\mathcal{F}\) transporta \(*\mapsto\cdot\).
+\(\mathcal{F}^{-1}\) reconstrói.
+A face \(\chi\) autoriza o transporte.
+Banach é outro ponto fixo, da contração
+(Obs.~\ref{univ:obs:banach}) --- não se funde.
+Pisot em \(X^{X}\): \texttt{não localizada}.
+A máquina finita \(2^{m}\) já fecha este pacote
+(Teor.~\ref{univ:thm:denso-byte}).
+\end{teorema}
+
+\begin{teorema}[densidade no byte: o fecho já é a reversão]\label{univ:thm:denso-byte}
+No grupo finito \((\mathbb{Z}/2)^{m}\),
+\(V=\operatorname{span}\{\delta_{x}\}_{x\in X}\)
+é discreto e completo: \(\dim V=2^{m}<\infty\).
+Densidade é trivial --- o fecho \textbf{é}
+\(\mathcal{F}^{-1}\mathcal{F}=I\):
+\[
+\boxed{\;
+\mathcal{F}\text{ injectiva},\quad
+\mathcal{F}^{-1}\text{ sobrejectiva},\quad
+\text{denso-trivial}
+\qquad(\operatorname{Res}=0)
+\;}
+\]
+\[
+\boxed{\;
+\overline{\operatorname{Img}(\mathcal{F})}
+=V
+=\mathcal{F}^{-1}\mathcal{F}(V)
+\;}
+\]
+No byte, \(m=8\), \(\lvert X\rvert=256\)
+(Teor.~\ref{univ:thm:reversao-byte};
+Def.~\ref{univ:def:pacote-an}).
+O dual GLH neste suporte fecha os três:
+injectivo, sobrejectivo \textbf{e} denso-trivial.
+Estatuto: \texttt{realizado}.
+Não pede Pisot. Não é \(1/3\).
+A completude aqui é \(\dim V<\infty\), não o
+ponto fixo de Banach (Obs.~\ref{univ:obs:banach}).
+\end{teorema}
+
+\begin{observacao}[codificação \(\mathbb{N}^{\mathbb{N}}\to\mathbb{R}\): ordem e densidade extraídas]\label{univ:obs:denso-NN}
+O paper já escreveu a injecção que conserva a ordem
+(\code{catalogo thm:constr}; \S\code{sec:codificacoes};
+Obs.~\ref{univ:obs:cf-estrela}):
+\[
+\boxed{\;
+\mathbf{a}\mapsto\bigcap_{n}J_{n}
+\colon
+\operatorname{Sig}\xrightarrow{\ \cong\ }\mathbb{R}
+\quad\text{(isomorfismo de ordem)}
+\;}
+\]
+Palavras finitas \(\mapsto\mathbb{Q}\), densas em \(\mathbb{R}\)
+(separabilidade, \texttt{provado}).
+Nas infinitas,
+\(\mathbb{Z}\times\mathbb{Z}_{\ge1}^{\mathbb{N}}
+\xrightarrow{\sim}\mathbb{R}\setminus\mathbb{Q}\)
+(homeomorfismo).
+\(\Sigma\colon\mathbb{N}^{\mathbb{N}}\to\mathbb{R}\) é sobrejectiva
+(\code{thm:cone}); a CF conserva \(\prec\)
+(\code{tests/pgwire.c} §W105).
+Estatuto: \texttt{realizado} \emph{neste} suporte ---
+codificação de \(\mathbb{R}\), não densidade de \(X^{X}\).
+Não funde com \(3^{-1}=1/3\).
+Não é canónico de \(\mathcal{U}\).
+\end{observacao}
+
+\begin{observacao}[densidade em \(X^{X}\): gap]\label{univ:obs:denso-XX}
+Uma topologia em \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)
+cuja densidade feche \(\mathsf{Aut}\) \textbf{não}
+está escrita. Pisot \(\lVert\sigma^{k}\rVert\to0\)
+é o encaixe no dual algébrico
+(\code{algebrico thm:pisot}), não essa topologia.
+\[
+\boxed{\;
+\text{densidade em }X^{X}
+\text{ (espaço de }\mathsf{Aut}\text{):}
+\texttt{não localizada}
+\;}
+\]
+O fecho canónico de \(\mathcal{U}\) \textbf{não depende}
+disto: a máquina finita já entrega
+(Teor.~\ref{univ:thm:denso-byte};
+Def.~\ref{univ:def:lei-canonica}).
+Banach e BW não fecham este gap (Obs.~\ref{univ:obs:banach}).
+\end{observacao}
+
+\begin{observacao}[Banach e BW: ferramentas de fecho, não peças de \(\mathcal{U}_{\mathrm{can}}\)]\label{univ:obs:banach}
+O repo já mede Banach--Caccioppoli
+(\code{lib/metrico.h}; \code{banco/conversa.c} MT9)
+e Bolzano--Weierstrass
+(\code{lib/analise.h} \code{an\_subsuc};
+\code{banco/conversa.c} AR8;
+via de \code{thm:ordenado-completo}).
+Não se re-prova nenhum.
+O pacote finito já selou
+\(\mathcal{F}^{-1}\mathcal{F}=I\), a face \(*\),
+\(\mathcal{U}_{\mathrm{can}}\) e
+\(\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}}\)
+(Teor.~\ref{univ:thm:denso-byte};
+Def.~\ref{univ:def:pacote-an};
+Def.~\ref{univ:def:lei-canonica};
+Teor.~\ref{univ:thm:idemp-orto}).
+\[
+\boxed{\;
+\operatorname{Banach},\;\mathrm{BW}
+\text{ são ferramentas de fecho disponíveis,
+não peças obrigatórias de }
+\mathcal{U}_{\mathrm{can}}
+\;}
+\]
+Completude (Banach) \(\neq\) compactez sequencial (BW).
+No byte, \(V=\operatorname{span}\{\delta_{x}\}\)
+tem \(\dim V=2^{m}<\infty\): completo, e
+Heine--Borel é automático
+(\code{banco/conversa.c} AR15) --- BW também.
+A contração \textbf{não} é \(\pi_{\mathcal{U}}\)
+--- Lipschitz \(1\), projecção
+(Def.~\ref{univ:def:alonzo-idemp}).
+A iteração que \textbf{é} contração no repo é
+\(\sigma=m+1/\sigma\) no metal (\(\mathrm{I}_{9}\))
+--- não se funde com \(1_{\mathbf{1}}\)
+(Def.~\ref{univ:def:unidade}).
+O ponto fixo único da contração é realização,
+não gramática.
+BW em \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)
+\textbf{não} está escrito: sem topologia, não
+fecha densidade (Obs.~\ref{univ:obs:denso-XX}).
+\[
+\boxed{\;
+\operatorname{Banach}(f)
+\neq
+\mathrm{BW}
+\neq
+\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}}
+\neq
+\operatorname{Star}(K)
+\neq
+\mathcal{F}^{-1}\mathcal{F}=I
+\neq
+1_{\mathbf{1}}
+\;}
+\]
+Nem Banach nem BW provam a sobrejectividade de
+\(\mathcal{F}^{-1}\): essa é
+\(\mathcal{F}^{-1}=2^{-m}\mathcal{F}\)
+(Teor.~\code{fis:thm:H}).
+Aplicação aberta / closed range / Steinhaus:
+\texttt{não localizada} neste repo ---
+não se inventam para fechar o dual.
+\end{observacao}
+
 \begin{observacao}[resíduo espectral: teste de estresse, não axioma]\label{univ:obs:residuo-glh}
 \(\mathcal{F}\) é Def.~\code{fis:def:transf}, já fechada na Álgebra.
 Não se inventa \(\mathcal{F}_{\mathcal{U}}\). A ponte
@@ -2235,17 +2573,208 @@ recuperado pela Gram nas oito frequências \(e_k\).
 Não se inventa \(\mathcal{F}_{\mathcal{U}}\).
 GLH no byte \(=\) a reversão ortonormal:
 \texttt{realizado} neste suporte
-(\(X\), \(\lvert X\rvert=256\)).
-GLH contínuo (Hurwitz/Lebesgue/Gentil) permanece
-\texttt{não localizada} neste sítio ---
-outro suporte, outra leitura
-(Def.~\ref{univ:def:glh-an}).
+(\(X\), \(\lvert X\rvert=256\);
+Teor.~\ref{univ:thm:denso-byte}).
+Codificação \(\operatorname{Sig}\to\mathbb{R}\):
+\texttt{realizado} (Obs.~\ref{univ:obs:denso-NN}).
+Densidade em \(X^{X}\): \texttt{não localizada}
+(Obs.~\ref{univ:obs:denso-XX}).
 Travas: diferença local \(\nRightarrow\) diferença da lei;
 sem medida de \(\pi\) \(\nRightarrow\) lei compartilhada.
 GLH \textbf{não} fecha a tripla \(F\cap B\cap N\).
 Unificação por redução \(\neq\) fusão:
 \(\pi(F)=\pi(B)=\pi(N)=L_0\), não \(F\cap B\cap N\).
 (\code{fis:thm:central}; Def.~\ref{univ:def:glh-an}.)
+\end{observacao}
+
+\begin{definicao}[o objecto \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)]\label{univ:def:XX}
+\[
+\boxed{\;
+X^{X}
+=\{f\colon X\to X\}
+\qquad
+\mathbb{N}^{\mathbb{N}}
+=\{a\colon\mathbb{N}\to\mathbb{N}\}
+\;}
+\]
+Espaço de funções \textbf{no próprio espaço}: endomorfismos /
+sequências. \(\mathbb{N}^{\mathbb{N}}\) realiza \(X^{X}\) quando
+\(X=\mathbb{N}\) (\code{tests/palavra.c}:
+\(N^{*}=N^{N}\leftrightarrow\mathbb{R}\setminus\mathbb{Q}\)).
+\(V\) da Def.~\code{fis:def:doisandares} é a linearização
+(valores no anel), com base
+\(\{\delta_{x}\}_{x\in X}\) --- os Dirac
+(\code{geometria\_real.c} §L1b: \(e_{k}\) \emph{são} os \(\delta\)
+transladados). \(\mathsf{Aut}\) lê a composição em \(X^{X}\);
+o estado é \(G=\sum_{x}G(x)\,\delta_{x}\).
+\(\mathcal{F}\) corre em \(V\) (Teor.~\code{fis:thm:H}).
+\(\mathrm{I}_{0}\): \(2^{X}\) (Boole) e \((\mathbb{N}_{>0},\mid)\)
+são realizações numéricas de reticulado, não o exponencial
+(Obs.~\ref{univ:obs:bai-nao-terco}; Def.~\ref{univ:def:lcm}).
+\end{definicao}
+
+\begin{teorema}[o dual GLH fecha \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)]\label{univ:thm:glh-dual-fecha}
+O objecto é Def.~\ref{univ:def:XX}. O par no suporte
+\(\mathbb{N}^{\mathbb{N}}\) já está escrito
+(\code{algebrico def:cone}, \code{thm:cone}):
+\[
+\boxed{\;
+\Pi\colon\mathbb{R}\to\mathbb{N}^{\mathbb{N}}
+\quad\text{(cone)}
+\qquad
+\Sigma\colon\mathbb{N}^{\mathbb{N}}\to\mathbb{R}
+\quad\text{(espiral)}
+\;}
+\]
+\(\Sigma\circ\Pi=\mathrm{Id}_{\mathbb{R}}\) --- \(\Pi\) injectiva,
+\(\Sigma\) sobrejectiva. \(\Pi\circ\Sigma\neq\mathrm{Id}\) ---
+duas representações racionais
+\([a_{0};\ldots,a_{n}]=[a_{0};\ldots,a_{n}-1,1]\).
+Fórmula da CF (\code{catalogo} prop.\ de injectividade;
+\S\code{sec:revI}):
+\[
+\boxed{\;
+a_{k}=\lfloor x_{k}\rfloor,\qquad
+x_{k+1}=\begin{pmatrix}0&1\\1&-a_{k}\end{pmatrix}\cdot x_{k},\qquad
+x=M_{n}\cdot x_{n+1}.
+\;}
+\]
+\(\mathbf{a}\mapsto\bigcap_{n}J_{n}\) é isomorfismo de ordem
+\(\mathrm{Sig}\xrightarrow{\sim}\mathbb{R}\), denso, completo;
+nas infinitas, homeomorfismo
+\(\mathbb{Z}\times\mathbb{Z}_{\ge1}^{\mathbb{N}}\to\mathbb{R}\setminus\mathbb{Q}\)
+(\code{catalogo thm:constr}; \code{prop:encaixe};
+\code{tests/pgwire.c} §W105, §W118).
+Estatuto: \texttt{realizado}.
+
+Pisot é o fecho geométrico do inverso. O operador produz o
+inteiro (\code{algebrico thm:pisot};
+\code{geometria\_real.c} §L5):
+\[
+\boxed{\;
+\sigma^{k}=t_{k}-(\sigma^{\dagger})^{k},\qquad
+\lvert\sigma^{\dagger}\rvert^{k}<\tfrac12
+\Longrightarrow
+\operatorname{dist}(\sigma^{k},\mathbb{Z})
+=\lvert\sigma^{\dagger}\rvert^{k}\to0.
+\;}
+\]
+\(\lvert\sigma\rvert>1\), \(\lvert\sigma^{\dagger}\rvert<1\)
+(\code{topologico thm:pisot}; \code{catalogo thm:pisotmetal}):
+vazamento zero, o encaixe aperta
+(\code{tests/ordenado.c} §U6; \code{pisotbase.c} §B4).
+A família \(\beta_{n,m}=x^{n}-mx^{n-1}-1\) é Pisot para
+\(m\ge2\) --- prova no dual, Rouché em \(\beta^{*}=x^{n}+mx-1\)
+(\code{catalogo thm:pisot}). Property~F: a \(\beta\)-expansão
+fecha finita porque o conjugado contrai.
+\(\varphi=\sigma_{1}\) é o Pisot clássico
+(\(\operatorname{Star}(K)\), \(\mathrm{I}_{9}\));
+\(\operatorname{Star}(\mathcal{U})=\mathcal{D}\)
+(Def.~\ref{univ:def:camadas}). Não se fundem.
+
+No byte o mesmo rectângulo lê-se \(\mathcal{F}\) e
+\(\mathcal{F}^{-1}\) em \(V\)
+(Def.~\ref{univ:def:glh-an}; Teor.~\ref{univ:thm:reversao-byte}).
+Teor.~\code{fis:thm:H}: \(\mathcal{F}\) injectiva,
+\(\mathcal{F}\circ\mathcal{F}=2^{m}\cdot\mathrm{id}\).
+Def.~\ref{univ:def:finv}: \(\mathcal{F}^{-1}=2^{-m}\mathcal{F}\),
+\(I=\mathcal{F}^{-1}\mathcal{F}(I)\) (\(\operatorname{Res}=0\)).
+Dirac entra neste par (Obs.~\ref{univ:obs:dirac}):
+\[
+\boxed{\;
+\delta_{0}
+=2^{-m}\sum_{k}\chi_{k}
+\qquad
+\text{(\code{fis:thm:proprios})}
+\;}
+\]
+--- a síntese \(\mathcal{F}^{-1}\) reconstrói o Dirac;
+o factor \(2^{m}\) é o preço da tabela
+(\(\{\delta_{x}\}\) vs \(\{\chi_{k}\}\)).
+O resíduo corre em \(\delta_{e_{7}}\)
+(Obs.~\ref{univ:obs:residuo-glh}).
+O anel da transformada é o dos caracteres \(\chi_{k}\) e do
+factor \(2^{m}\); o anel de Pisot é o do companheiro
+\(x^{2}-nx-1\) / \(\beta_{n,m}\). Não se fundem.
+\begin{center}\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.38\textwidth}
+                >{\raggedright\arraybackslash}p{0.28\textwidth}@{}}
+\toprule
+suporte & o que fecha & estatuto \\
+\midrule
+byte \(V=\operatorname{span}\{\delta_{x}\}\)
+  & \(\mathcal{F}\) inj.; \(\mathcal{F}^{-1}\) sobrej.;
+    denso-trivial \(=\mathcal{F}^{-1}\mathcal{F}=I\)
+  & \texttt{realizado}
+    (Teor.~\ref{univ:thm:denso-byte}) \\
+\(\operatorname{Sig}\to\mathbb{R}\)
+  & isomorfismo de ordem; \(\mathbb{Q}\) denso;
+    infinitas \(\xrightarrow{\sim}\mathbb{R}\setminus\mathbb{Q}\)
+  & \texttt{realizado} na codificação
+    (Obs.~\ref{univ:obs:denso-NN}) \\
+\(X^{X}\) / \(\mathsf{Aut}\)
+  & ---
+  & densidade \texttt{não localizada}
+    (Obs.~\ref{univ:obs:denso-XX}) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+\boxed{\;
+\begin{gathered}
+\text{fecho canónico: o byte}\\
+(\text{inj.\ }+\text{ sobrej.\ }+\text{ denso-trivial})
+\end{gathered}
+\;}
+\]
+O fecho finito no byte é o mesmo par lido em \(V\).
+\((\mathbb{N}_{>0},\mid)\) fecha por \(\zeta\dashv\mu\)
+(Teor.~\code{fis:thm:mu}; Cor.~\code{fis:cor:mobius})
+--- canónico \emph{do par} (Def.~\ref{univ:def:lcm}), realização
+numérica, não o objecto. Lebesgue casa a ordem
+(Obs.~\ref{univ:obs:lebesgue}).
+(\code{tests/lei\_unica\_u.js}; \code{banco\_transf\_u.js};
+\code{tests/cone\_espiral.c}; \code{geometria\_real.c} §L1b.)
+\end{teorema}
+
+\begin{observacao}[Dirac: vector no directo, síntese no inverso]\label{univ:obs:dirac}
+Dirac \textbf{já} está no construído --- é a base de \(V\) e a
+identidade da convolução, não um objecto novo.
+\[
+\boxed{\;
+\{\delta_{x}\}_{x\in X}
+\quad\text{base de }V
+\qquad
+\delta_{0}
+\quad\text{unidade de }*
+\;}
+\]
+--- Def.~\code{fis:def:doisandares}; Def.~\code{fis:def:conv}.
+No byte, \(e_{k}\) \emph{são} os Dirac transladados:
+\(\langle\,\cdot\,,e_{k}\rangle\) é a peneira, e a volta
+\(b=\sum_{k}\langle b,e_{k}\rangle e_{k}\) é exacta
+(\code{geometria\_real.c} §L1b). Isso é o
+\textbf{directo injectivo}: cada coordenada extrai um \(\delta\).
+No inverso, a síntese reconstrói o mesmo ponto:
+\(\delta_{0}=2^{-m}\sum_{k}\chi_{k}\)
+(\code{fis:thm:proprios}); \(\zeta*\mu=\delta_{0}\)
+(Teor.~\code{fis:thm:mu}); \(e^{x}\circledast e^{-x}=\delta\)
+com este \(\delta\) (\code{geometria\_real.c}, volumes da torre).
+O que localiza o encaixe \textbf{é} um \(\delta\).
+No byte o encaixe \textbf{é} \(\mathcal{F}^{-1}\mathcal{F}=I\)
+(Teor.~\ref{univ:thm:denso-byte}).
+Pisot em \(X^{X}\): \texttt{não localizada}
+(Obs.~\ref{univ:obs:denso-XX}).
+Em \(X^{X}\), \(f\) move o suporte:
+o estado \(G=\sum_{x}G(x)\,\delta_{x}\) é a combinação que
+\(\mathsf{Aut}\) processa.
+\(\mathrm{I}_{0}\): este \(\delta\) (Kronecker / base) não é o
+operador de Clifford \(D^{2}=L\).
+A unidade \(\delta_{0}\) e a face \(*\)
+estão no pacote de \(\mathcal{U}_{\mathrm{an}}\)
+(Def.~\ref{univ:def:pacote-an};
+Def.~\ref{univ:def:face-mult}).
 \end{observacao}
 
 \begin{definicao}[unidade pelos extremos]\label{univ:def:unidade}
@@ -2368,7 +2897,74 @@ Síntese, sem quinto slot e sem fundir retornos:
 \(\mathbf{Duo}\) gera; \(\pi_{\mathcal{U}}\circ\mathcal{F}\)
 retorna a torre; \(\mathcal{F}^{-1}\) reverte \(X\);
 o vinco dá \(\mathbf{1}\).
-GLH contínuo (Gentil) permanece \texttt{não localizada}.
+O retorno \(3^{-1}_{\chi}\) usa \(\mathcal{F}\);
+a face \(*\) (Def.~\ref{univ:def:face-mult};
+Def.~\ref{univ:def:pacote-an}) é como
+\(\mathcal{F}\) opera na álgebra --- canónico de
+\(\mathcal{U}_{\mathrm{an}}\), participante da mesma
+lei de realização; não substitui \(\mathbf{Duo}\)
+nem o vinco.
+Densidade no byte: \texttt{realizado}
+(Teor.~\ref{univ:thm:denso-byte}).
+Pisot / densidade em \(X^{X}\): \texttt{não localizada}
+(Obs.~\ref{univ:obs:denso-XX}).
+O fecho canónico \textbf{não depende} de \(X^{X}\).
+A quádrupla operacional finita
+(Def.~\ref{univ:def:quadrupla-finita})
+é outra camada --- o mecanismo finito, não esta
+torre.
+\end{definicao}
+
+\begin{definicao}[quádrupla operacional finita]\label{univ:def:quadrupla-finita}
+Provar que uma estrutura fecha \textbf{não} a torna peça
+da estrutura que fecha.
+O pacote operacional finito desta camada é
+\[
+\boxed{\;
+\mathcal{U}_{\mathrm{fin}}
+=(\mathbf{Duo},\;\pi_{\mathcal{U}},\;\mathcal{F},\;\mathcal{F}^{-1})
+\;}
+\]
+Contratos, e nada mais entra:
+\begin{center}\small
+\begin{tabular}{@{}llp{0.48\textwidth}@{}}
+\toprule
+slot & contrato & o que já está \\
+\midrule
+\(\mathbf{Duo}\)
+  & cisão \(1\to 2\); \(\operatorname{Star}(\mathcal{U})=\mathcal{D}\)
+  & Def.~\ref{univ:def:star} \\
+\(\pi_{\mathcal{U}}\)
+  & \(\pi_{\mathcal{U}}^{2}=\pi_{\mathcal{U}}\) (fecho)
+  & Def.~\ref{univ:def:alonzo-idemp} \\
+\(\mathcal{F}\)
+  & face \(*\): \(\mathcal{F}(f*g)=\mathcal{F}(f)\cdot\mathcal{F}(g)\)
+  & Def.~\ref{univ:def:face-mult}; Teor.~\code{fis:thm:conv} \\
+\(\mathcal{F}^{-1}\)
+  & \(\mathcal{F}^{-1}\mathcal{F}=I\) (reversibilidade)
+  & Def.~\ref{univ:def:finv}; Teor.~\ref{univ:thm:reversao-byte} \\
+\bottomrule
+\end{tabular}
+\end{center}
+A face \(*\) já está em Def.~\ref{univ:def:face-mult}.
+Banach e BW são ferramentas de fecho
+(Obs.~\ref{univ:obs:banach}), \textbf{não} peças.
+Pisot, GLH contínuo, \(1/3\), \(F\cap B\cap N\),
+\(M_{\mathrm{Docker}}\): \texttt{não localizada}.
+\[
+\boxed{\;
+\mathrm{I}_{0}\colon
+\mathcal{U}_{\mathrm{can}}
+\neq
+\mathcal{U}_{\mathrm{fin}}
+\;}
+\]
+A lei canónica (Def.~\ref{univ:def:lei-canonica})
+é a quádrupla da torre: pólos, Duo, retorno
+\(\pi_{\mathcal{U}}\circ\mathcal{F}\), vinco.
+Esta realiza a língua an / o mecanismo finito
+(Def.~\ref{univ:def:pacote-an}; Def.~\ref{univ:def:linguas}).
+As duas \textbf{não} se fundem.
 \end{definicao}
 
 \begin{teorema}[reconhecimento]\label{univ:thm:reconhecimento}
@@ -2777,17 +3373,14 @@ canal & slots & o que transporta \\
 Não são isomorfos. O depósito não é estado.
 \end{definicao}
 
-\begin{observacao}[cone--espiral: não localizada]\label{univ:obs:cone-espiral}
-Procurou-se neste ficheiro e nas Partes Geometria, Fractal, Mecânica:
-o par cone--espiral \textbf{não} é estrutura de \(\mathcal{U}\).
-Onde a palavra aparece noutro paper (motor \(\Pi/\Sigma\) no Algébrico,
-\code{corpo\_algebrico def:cone}; \code{tests/cone\_espiral.c}) é
-construção daquele corpo, não canónico de \(\mathcal{U}\), não Lei nova.
-Estatuto em \(\mathcal{U}\): \texttt{não localizada}
---- procurou-se; não se promove metáfora nem resíduo a Lei.
+\begin{observacao}[cone--espiral realiza o dual em \(\mathbb{N}^{\mathbb{N}}\)]\label{univ:obs:cone-espiral}
+O par \(\Pi/\Sigma\) (\code{algebrico def:cone}; \code{thm:cone};
+\code{tests/cone\_espiral.c}) \textbf{é} a leitura do dual GLH no
+objecto \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)
+(Def.~\ref{univ:def:XX}; Teor.~\ref{univ:thm:glh-dual-fecha}).
+Estatuto: \texttt{realizado}. Não é Lei nova. Não é Lei~8.
 A leitura \(0\)--\(\infty\) refina Lei~0 (\(0^{\dagger}=\infty\)) e
-Lei~7 (\(H\times H^{*}\); ligam sem fundir). \textbf{Não} é Lei~8.
-Não há Lei~8.
+Lei~7 (\(H\times H^{*}\); ligam sem fundir).
 \end{observacao}
 
 \begin{observacao}[\(\operatorname{INGEST}\) não define \(\mathcal{U}\)]\label{univ:obs:ingest-nao-u}
@@ -2906,8 +3499,8 @@ censo. Alvos de varredura, não leis realizadas:
 \(\{M_{\mathrm{WASM}},M_{\mathrm{Docker}}\}\).
 \(M_{\mathrm{Docker}}\) permanece \texttt{não localizada}
 (Def.~\ref{univ:def:maquina}).
-Cone--espiral permanece \texttt{não localizada}
-(Obs.~\ref{univ:obs:cone-espiral}).
+Cone--espiral: \texttt{realizado}
+(Obs.~\ref{univ:obs:cone-espiral}; Teor.~\ref{univ:thm:glh-dual-fecha}).
 POST/WS/SO como tríade nomeada permanece \texttt{não localizada}
 (Obs.~\ref{univ:obs:trialidade}).
 A lei é Def.~\ref{univ:def:lei-local-canonica}.

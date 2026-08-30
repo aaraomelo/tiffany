@@ -72,6 +72,29 @@ export function residuoReversao (f) {
   return 0
 }
 
+/** * no grupo (Z/2)^m: (f*g)(x) = Σ_y f(y) g(x⊕y). fis:def:conv. */
+export function conv (f, g) {
+  const n = f.length
+  const out = new Array(n).fill(0)
+  for (let x = 0; x < n; x++) {
+    let s = 0
+    for (let y = 0; y < n; y++) s += f[y] * g[x ^ y]
+    out[x] = s
+  }
+  return out
+}
+
+/** Face *: F(f*g) = F(f)·F(g). univ:def:face-mult; fis:thm:conv. Resíduo 0 ou 1. */
+export function residuoFaceMult (f, g) {
+  const hatConv = F(conv(f, g))
+  const hatF = F(f)
+  const hatG = F(g)
+  for (let k = 0; k < hatConv.length; k++) {
+    if (hatConv[k] !== hatF[k] * hatG[k]) return 1
+  }
+  return 0
+}
+
 export function supp (hat) {
   const out = []
   for (let k = 0; k < hat.length; k++) {

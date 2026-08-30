@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 import {
   DIM, e, Ind, MetaInd, piU, paridadeAnd, medeCiclo, residuoCiclo,
   residuoGlhPi, lei, L0, L7, campoLei, leIndiceDoEspectro, residuoComposto,
-  residuoGlhByte, nucleoU, invTres, leiCanonica,
+  residuoGlhByte, nucleoU, invTres, leiCanonica, quadruplaFinita,
 } from '../app/src/banco_lei_unica_u.js'
-import { medeTransformada, Finv, F, residuoReversao } from '../app/src/banco_transf_u.js'
+import { medeTransformada, Finv, F, residuoReversao, residuoFaceMult, caractere } from '../app/src/banco_transf_u.js'
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
 const TEX = join(RAIZ, 'corpo_universal.tex')
@@ -50,6 +50,19 @@ ok('§U0 tex: 3^{-1} no corte chi via MetaInd; != 1/3',
   /l[ií]ngua an/.test(tex) &&
   /mathbf\{Duo\}\^\{2\}/.test(tex) &&
   /2\^\{3\}/.test(tex))
+ok('§U0 tex: BAI/reticulado 2^n nao localiza 1/3; escada so duplica',
+  /\\label\{univ:obs:bai-nao-terco\}/.test(tex) &&
+  /Biblioteca de Autoriza/.test(tex) &&
+  /obs:bai/.test(tex) &&
+  /fis:def:B/.test(tex) &&
+  /2\^\{n\}/.test(tex) &&
+  /mathbb\{Z\}\/2/.test(tex) &&
+  /rho_3=\\tfrac\{1\}\{8\}/.test(tex) &&
+  /neq\s*\\tfrac\{1\}\{3\}/.test(tex) &&
+  /n[aã]o localiza/.test(tex) &&
+  /n[aã]o localizada/.test(tex) &&
+  /fis:def:arvore/.test(tex) &&
+  /univ:def:lcm/.test(tex))
 ok('§U0 tex: CF fecha Star(K)=phi; nao fecha 3^{-1}_chi',
   /\\label\{univ:obs:cf-estrela\}/.test(tex) &&
   /\[1;\\overline\{1\}\]/.test(tex) &&
@@ -65,7 +78,9 @@ ok('§U0 cat: 3^{-1} via corte registado; 1/3 nao localizada',
   /univ:obs:inv-tres-corte/.test(cat) &&
   /3\^\{-1\}=1\/3/.test(cat) &&
   /univ:obs:cf-estrela/.test(cat) &&
-  /thm:corte-ponto-fixo/.test(cat))
+  /thm:corte-ponto-fixo/.test(cat) &&
+  /univ:obs:bai-nao-terco/.test(cat) &&
+  /obs:bai/.test(cat))
 ok('§U0 tex: lei canonica U_can e reconhecimento',
   /\\label\{univ:def:lei-canonica\}/.test(tex) &&
   /\\label\{univ:thm:reconhecimento\}/.test(tex) &&
@@ -78,6 +93,17 @@ ok('§U0 tex: lei canonica U_can e reconhecimento',
   /nRightarrow/.test(tex) &&
   /C=\\mathcal\{U\}/.test(tex) &&
   /univ:def:corpo-canonico/.test(tex))
+ok('§U0 tex: quadrupla finita U_fin; I0 nao funde com U_can; face *; banach obs',
+  /\\label\{univ:def:quadrupla-finita\}/.test(tex) &&
+  /\\label\{univ:def:face-mult\}/.test(tex) &&
+  /\\label\{univ:obs:banach\}/.test(tex) &&
+  /mathcal\{U\}_\{\\mathrm\{fin\}\}/.test(tex) &&
+  /\(\\mathbf\{Duo\},\\;\\pi_\{\\mathcal\{U\}\},\\;\\mathcal\{F\},\\;\\mathcal\{F\}\^\{-1\}\)/.test(tex) &&
+  /mathcal\{U\}_\{\\mathrm\{can\}\}[\s\S]*?neq[\s\S]*?mathcal\{U\}_\{\\mathrm\{fin\}\}/.test(tex) &&
+  /\\mathcal\{F\}\(f\*g\)=\\mathcal\{F\}\(f\)\\cdot\\mathcal\{F\}\(g\)/.test(tex) &&
+  /ferramentas de fecho/.test(tex) &&
+  /se fundem/.test(tex) &&
+  /n[aã]o\} pe[cç]as/.test(tex))
 ok('§U0 tex: labels do ciclo e da unidade',
   /\\label\{univ:def:lei-unica\}/.test(tex) &&
   /\\label\{univ:cor:metaind-fecho\}/.test(tex) &&
@@ -119,6 +145,16 @@ ok('§U0 tex: GLH em U_an; camadas; composto Res=0; GLH-byte realizado; continuo
   /\\label\{univ:thm:retorno-canonico\}/.test(tex) &&
   /\\label\{univ:def:finv\}/.test(tex) &&
   /\\label\{univ:thm:reversao-byte\}/.test(tex) &&
+  /\\label\{univ:thm:glh-dual-fecha\}/.test(tex) &&
+  /\\label\{univ:def:XX\}/.test(tex) &&
+  /X\^\{X\}/.test(tex) &&
+  /mathbb\{N\}\^\{\\mathbb\{N\}\}/.test(tex) &&
+  /thm:pisot/.test(tex) &&
+  /thm:constr/.test(tex) &&
+  /thm:cone/.test(tex) &&
+  /fecho finito/.test(tex) &&
+  /fis:thm:mu/.test(tex) &&
+  /fis:cor:mobius/.test(tex) &&
   /mathrm\{I\}_\{4\}=\\mathrm\{GLH\}/.test(tex) &&
   /Real\}_\{\\mathrm\{an\}\}/.test(tex) &&
   /Res[ií]duo/.test(tex) &&
@@ -174,12 +210,16 @@ ok('§U0 tex nao institui Lei 8 nem funde L0 com L7',
 ok('§U0 fis: U consome; nao copia o tratado',
   /\\label\{fis:obs:U-consome\}/.test(fis) &&
   /univ:def:lei-canonica/.test(fis) &&
+  /univ:def:quadrupla-finita/.test(fis) &&
+  /univ:obs:banach/.test(fis) &&
+  /fis:thm:conv/.test(fis) &&
   /univ:thm:reconhecimento/.test(fis) &&
   /univ:thm:retorno-canonico/.test(fis) &&
   /univ:def:lei-local-canonica/.test(fis) &&
   /univ:def:alonzo-idemp/.test(fis) &&
   /univ:def:finv/.test(fis) &&
   /univ:thm:reversao-byte/.test(fis) &&
+  /univ:thm:glh-dual-fecha/.test(fis) &&
   /GLH-byte/.test(fis) &&
   /univ:cor:metaind-fecho/.test(fis) &&
   /pi\\circ\\pi=\\pi/.test(fis) &&
@@ -190,11 +230,16 @@ ok('§U0 fis: U consome; nao copia o tratado',
 ok('§U0 cat: nucleo registado; U_can; sem Ficha 11',
   /\\label\{cat:nucleo-u\}/.test(cat) &&
   /univ:def:lei-canonica/.test(cat) &&
+  /univ:def:quadrupla-finita/.test(cat) &&
+  /univ:def:face-mult/.test(cat) &&
+  /univ:obs:banach/.test(cat) &&
   /univ:thm:reconhecimento/.test(cat) &&
   /mathcal\{U\}_\{\\mathrm\{can\}\}/.test(cat) &&
+  /mathcal\{U\}_\{\\mathrm\{fin\}\}/.test(cat) &&
   /univ:thm:retorno-canonico/.test(cat) &&
   /univ:def:finv/.test(cat) &&
   /univ:thm:reversao-byte/.test(cat) &&
+  /univ:thm:glh-dual-fecha/.test(cat) &&
   /mathcal\{F\}\^\{-1\}\\neq 3\^\{-1\}_\{\\chi\}/.test(cat) &&
   /m_\{\\mathrm\{Hadamard\}\}=8/.test(cat) &&
   /m_\{\\mathrm\{dobras\}\}=3/.test(cat) &&
@@ -213,6 +258,11 @@ ok('§U0 manifesto: ponte_lei_unica + nucleo',
   man.corpos?.motor?.ponte_transf === 'app/src/banco_transf_u.js' &&
   /realizado/.test(man.corpos?.motor?.nucleo?.U_can || '') &&
   /lei-canonica/.test(man.corpos?.motor?.nucleo?.U_can || '') &&
+  /realizado/.test(man.corpos?.motor?.nucleo?.U_fin || '') &&
+  /quadrupla-finita/.test(man.corpos?.motor?.nucleo?.U_fin || '') &&
+  /U_can != U_fin/.test(man.corpos?.motor?.nucleo?.U_fin || '') &&
+  /ferramentas/.test(man.corpos?.motor?.nucleo?.banach_bw || '') &&
+  /univ:obs:banach/.test(man.corpos?.motor?.nucleo?.banach_bw || '') &&
   /realizado/.test(man.corpos?.motor?.nucleo?.retorno || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.M_Docker || '') &&
   /realizado/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
@@ -220,6 +270,7 @@ ok('§U0 manifesto: ponte_lei_unica + nucleo',
   /m_dobras=3/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
   /2\^\{-8\}F/.test(man.corpos?.motor?.nucleo?.glh_byte || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.glh_continuo || '') &&
+  /denso-XX/.test(man.corpos?.motor?.nucleo?.glh_continuo || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.T3 || '') &&
   /inv-tres-corte/.test(man.corpos?.motor?.nucleo?.inv_tres || '') &&
   /nao localizada/.test(man.corpos?.motor?.nucleo?.racional_1_3 || '') &&
@@ -344,6 +395,32 @@ ok('§U1 extremos nao fundem: Gram <e0,e7>=0',
     n.U_can.racional_1_3 === 'nao localizada' &&
     can.fonte === n.U_can.fonte &&
     can.estatuto === 'realizado')
+  const fin = quadruplaFinita()
+  ok('§U4 U_fin = (Duo, pi, F, F^{-1}); I0 nao funde com U_can; Banach/BW ferramentas',
+    n.U_fin.formula === '(Duo, pi, F, F^{-1})' &&
+    n.U_fin.fonte === 'univ:def:quadrupla-finita' &&
+    n.U_fin.nao_funde_com === 'univ:def:lei-canonica' &&
+    n.U_fin.i0 === 'U_can != U_fin' &&
+    n.U_fin.estatuto === 'realizado' &&
+    n.U_fin.formula !== n.U_can.formula &&
+    n.U_fin.fonte !== n.U_can.fonte &&
+    n.duas_quadruplas.fundem === false &&
+    n.U_fin.Duo.contrato === 'cisao' &&
+    n.U_fin.pi.contrato === 'pi^2=pi' &&
+    n.U_fin.pi.estatuto === 'realizado' &&
+    n.U_fin.F.contrato === 'F(f*g)=F(f)·F(g)' &&
+    n.U_fin.F.face === 'univ:def:face-mult' &&
+    n.U_fin.F.res === 0 &&
+    n.U_fin.Finv.contrato === 'F^{-1}F=I' &&
+    n.U_fin.Finv.res === 0 &&
+    n.U_fin.banach_bw.papel === 'ferramentas' &&
+    n.U_fin.banach_bw.fonte === 'univ:obs:banach' &&
+    n.U_fin.banach_bw.pecas === false &&
+    n.U_fin.pisot === 'nao localizada' &&
+    n.U_fin.Gentil === 'nao localizada' &&
+    n.banach_bw.pecas === false &&
+    fin.fonte === n.U_fin.fonte &&
+    fin.estatuto === 'realizado')
 }
 
 {
@@ -385,6 +462,9 @@ ok('§U1 extremos nao fundem: Gram <e0,e7>=0',
     b.nao_e_inv_tres === true &&
     b.n === 256 &&
     b.detalhe.every((d) => d.parseval === 0 && d.reversao === 0))
+  ok('§U6 face *: F(f*g)=F(f)·F(g); Res=0',
+    residuoFaceMult(campoLei(7), campoLei(0)) === 0 &&
+    residuoFaceMult(caractere(1), campoLei(7)) === 0)
 }
 
 {

@@ -122,12 +122,13 @@ ok('§L3 B(id)/F medidos; L_S_cliente nao promovido a corpo',
   rel.ls_cliente.corte === 'chi_k' &&
   !rel.candidatos.some((c) => c.id === 'L_S_cliente') &&
   !rel.promovidos.some((c) => c.id === 'L_S_cliente'))
-ok('§L3 nucleo no motor: retorno realizado; Docker/GLH/T3 nao localizada',
+ok('§L3 nucleo no motor: retorno/GLH-byte realizados; Docker/T3 nao localizada',
   rel.nucleo?.retorno?.estatuto === 'realizado' &&
   rel.nucleo?.retorno?.res === 0 &&
   rel.nucleo?.composto?.estatuto === 'realizado' &&
   rel.nucleo?.F_parseval?.estatuto === 'realizado' &&
-  rel.nucleo?.glh_byte === 'nao localizada' &&
+  rel.nucleo?.glh_byte === 'realizado' &&
+  rel.nucleo?.glh_continuo === 'nao localizada' &&
   rel.nucleo?.M_Docker === 'nao localizada' &&
   rel.nucleo?.T3 === 'nao localizada' &&
   rel.nucleo?.FBN === 'nao localizada')

@@ -541,13 +541,25 @@ Obs.~\ref{fis:obs:octoniao-interface}.
 Teor.~\ref{fis:thm:central}
 (GLH no byte: \texttt{realizado} pela reversão
 \(\mathcal{F}^{-1}\mathcal{F}=\mathrm{id}\);
-contínuo: \texttt{não localizada}).
+fecha \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)
+(\code{univ:def:XX}; \code{univ:thm:glh-dual-fecha};
+Pisot no inverso: \code{algebrico thm:pisot}).
 \(\mathcal{L}_S(\mathrm{id})\): cláusula~(1) do Teor.~\ref{fis:thm:tecidos}
 (fibra, não \(X_{k+1}\)).
 Alonzo \(\pi\circ\pi=\pi\): Def.~\ref{fis:def:alonzo}.
+Quádrupla operacional finita
+\((\mathbf{Duo},\pi,\mathcal{F},\mathcal{F}^{-1})\):
+\code{univ:def:quadrupla-finita}
+--- Duo Def.~\ref{fis:def:duomorf};
+\(\pi\) Def.~\ref{fis:def:alonzo};
+Teor.~\ref{fis:thm:H}; Teor.~\ref{fis:thm:conv}.
+\textbf{Não} se funde com \(\mathcal{U}_{\mathrm{can}}\).
+Banach/BW: ferramentas (\code{univ:obs:banach}),
+não peças. Pisot, GLH contínuo, Gentil:
+\texttt{não localizada}.
 MetaInd: Teor.~\ref{fis:thm:metainducao}(1) --- mudou o degrau, não a
 regra. CF/\(\varphi\) em \(\mathrm{I}_{9}\)
-(\code{univ:obs:cf-estrela}); \(1/3\), GLH contínuo e
+(\code{univ:obs:cf-estrela}); \(1/3\) e
 \(F\cap B\cap N\) permanecem \texttt{não localizada}.
 Categoria/autómato acima \(\neq\) alg/top/an
 (\code{univ:def:linguas}). Sem Lei~8. Sem Ficha~11. Sem Docker, sem
@@ -556,6 +568,7 @@ Alonzo. Não se promove evidência a estrutura.
 (\code{univ:thm:retorno-canonico}; \code{univ:def:lei-local-canonica};
 \code{univ:cor:metaind-fecho}; \code{univ:def:alonzo-idemp};
 \code{univ:def:finv}; \code{univ:thm:reversao-byte};
+\code{univ:thm:glh-dual-fecha};
 \code{tests/lei\_unica\_u.js}.)
 \end{observacao}
 
@@ -4025,7 +4038,8 @@ fator nenhum. E\[
 \mathcal{F}\circ \mathcal{F}=2^{m}\cdot\mathrm{id},\qquad
 \lVert \mathcal{F}(f)\rVert^{2}=2^{m}\lVert f\rVert^{2}.
 \]
-\(\mathcal{U}\) lê esta inversa como \code{univ:def:finv} / GLH-byte.
+\(\mathcal{U}\) lê esta inversa como \code{univ:def:finv} / GLH-byte
+(\code{univ:thm:glh-dual-fecha}: fecha \(X^{X}\) / \(\mathbb{N}^{\mathbb{N}}\)).
 \end{teorema}
 
 \begin{proof}

@@ -8,6 +8,7 @@
 
 import {
   F, TRANSF_M, TRANSF_N, residuoParseval, residuoReversao, caractere,
+  residuoFaceMult,
 } from './banco_transf_u.js'
 
 export const DIM = 8
@@ -182,6 +183,8 @@ export function residuoGlhByte () {
     detalhe,
     glh_byte: res === 0 ? 'realizado' : 'descartado',
     glh_continuo: 'nao localizada',
+    glh_continuo_fonte: 'univ:obs:denso-XX',
+    glh_continuo_objecto: 'X^X / N^N',
     nao_e_inv_tres: true,
   })
 }
@@ -273,8 +276,54 @@ export function leiCanonica () {
 }
 
 /**
+ * Pacote operacional finito: (Duo, π, F, F^{-1}).
+ * Não se funde com U_can = (L0, Duo, π∘F, vinco).
+ * Banach/BW = univ:obs:banach, ferramentas, não peças.
+ */
+export function quadruplaFinita () {
+  const c = residuoCiclo()
+  const b = residuoGlhByte()
+  const face = residuoFaceMult(campoLei(7), campoLei(0))
+  const piOk = !!(c.piU && c.residuo === 0)
+  const ok = piOk && b.res === 0 && face === 0
+  return Object.freeze({
+    formula: '(Duo, pi, F, F^{-1})',
+    fonte: 'univ:def:quadrupla-finita',
+    nao_funde_com: 'univ:def:lei-canonica',
+    i0: 'U_can != U_fin',
+    Duo: { contrato: 'cisao', star: 'Star(U)=D' },
+    pi: {
+      contrato: 'pi^2=pi',
+      fonte: 'univ:def:alonzo-idemp',
+      estatuto: piOk ? 'realizado' : 'descartado',
+    },
+    F: {
+      contrato: 'F(f*g)=F(f)·F(g)',
+      face: 'univ:def:face-mult',
+      thm: 'fis:thm:conv',
+      res: face,
+      estatuto: face === 0 ? 'realizado' : 'descartado',
+    },
+    Finv: {
+      contrato: 'F^{-1}F=I',
+      fonte: 'univ:def:finv',
+      res: b.res,
+      estatuto: b.glh_byte,
+    },
+    banach_bw: { papel: 'ferramentas', fonte: 'univ:obs:banach', pecas: false },
+    pisot: 'nao localizada',
+    Gentil: 'nao localizada',
+    glh_continuo: 'nao localizada',
+    estatuto: ok ? 'realizado' : 'descartado',
+    fis: 'fis:obs:U-consome',
+    cat: 'cat:nucleo-u',
+  })
+}
+
+/**
  * Núcleo alinhado a fisica/catálogo. GLH-byte = reversão realizada.
- * M_Docker / GLH contínuo / F∩B∩N / T³ permanecem nao localizada.
+ * Distingue U_can (torre) de U_fin (pacote operacional finito).
+ * M_Docker / GLH contínuo / Pisot / F∩B∩N / T³ permanecem nao localizada.
  * Sem Lei 8. Sem Ficha 11.
  */
 export function nucleoU () {
@@ -282,9 +331,18 @@ export function nucleoU () {
   const m = residuoComposto()
   const g = residuoGlhPi()
   const can = leiCanonica()
+  const fin = quadruplaFinita()
   const b = residuoGlhByte()
   return Object.freeze({
     U_can: can,
+    U_fin: fin,
+    duas_quadruplas: Object.freeze({
+      fundem: false,
+      i0: 'U_can != U_fin',
+      torre: 'univ:def:lei-canonica',
+      finito: 'univ:def:quadrupla-finita',
+    }),
+    banach_bw: fin.banach_bw,
     retorno: {
       estatuto: m.res === 0 ? 'realizado' : 'descartado',
       res: m.res,
