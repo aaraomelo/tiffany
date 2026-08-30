@@ -1,0 +1,909 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  papers/cripto.tex — a Cadeia de Cristais (CristalChain):
+%  livro-razão cuja cifra conserva
+%
+%  Nome formal: Cadeia de Cristais. Marca / repo / catálogo: CristalChain.
+%  Resgata o enunciado já construído em catalogo.tex («A CristalChain ---
+%  um livro-razão cuja cifra conserva»). Não é blockchain. Não é PoW.
+%  Não é palco quântico. Não é U. Não é 15.ª Parte. Sem Lei 8.
+%
+%  Compila:  cd papers && pdflatex cripto.tex
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{array}\usepackage{xcolor}
+\usepackage[htt]{hyphenat}
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\caixa}[1]{%
+  \par\smallskip\noindent
+  \begin{center}
+  \fbox{\begin{minipage}{0.94\textwidth}\centering\smallskip #1\smallskip\end{minipage}}
+  \end{center}\smallskip}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newcommand{\fis}[2]{\textbf{#2}~\textnormal{(\code{#1})}}
+\providecommand{\pt}[1]{\textbf{P#1}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova}: #1\sepcol\textbf{realiza}: #2\sepcol\textbf{verifica}: #3\par}\smallskip}
+\providecommand{\interfacen}[1]{}
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
+\renewcommand{\proofname}{Demonstração}
+
+\input{gkcapa}
+
+\begin{document}
+\interfacen{6}
+\gkcapa{Criptografia --- a Cadeia de Cristais (CristalChain)}
+       {livro-razão cuja cifra conserva}
+       {cripto $\neq$ palco quântico $\neq\mathcal{U}$; sem 15.\textsuperscript{a} Parte}
+\maketitle
+
+\begin{abstract}\noindent
+A \textbf{Cadeia de Cristais (CristalChain)} \textbf{já estava construída}
+no catálogo: um livro-razão cuja cifra conserva. Este paper \textbf{não}
+inventa a cadeia, \textbf{não} a promove a blockchain, \textbf{não} a
+funde com Born, Duo, Lei~8 nem com $A_0$ dourada. Resgata o enunciado,
+fecha os labels (\code{cripto:}\ldots) e marca \texttt{nao localizada}
+o elo que o repositório não mede.
+\[
+\boxed{\;
+\pi^{2}=\pi
+\neq x^{2}=1
+\neq x^{2}=x+1
+\neq x^{2}=-1
+\neq\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\;}
+\]
+A conservação da cadeia é $\det(B^{k})=+1$ no ouro branco
+(\code{tests/ouro\_branco.c}) --- o sinal do determinante sob
+composição, \textbf{não} um saldo económico.
+$P=k/N$ é GLH (\code{fis:thm:central}).
+Born é $p_i=\lvert\langle i\rvert\psi\rangle\rvert^{2}$.
+Parseval do corpus cristal é isometria do jornal
+(\code{tests/cristal\_energia.js}).
+$\mathrm{sha256}$ selecciona identidade
+(\code{univ:def:lei-local-canonica}), \textbf{não} é a cifra.
+Quatro conservações; não se fundem.
+O fecho de $\mathcal{U}$ já está em
+\code{univ:thm:composicao-fechos}; Born não o fecha.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{I0 --- três palcos, cinco quadráticas}\label{cripto:i0}
+
+\begin{observacao}[cripto $\neq$ palco quântico $\neq\mathcal{U}$]\label{cripto:obs:i0}
+Este documento é \textbf{realização}: consome o construído
+(\code{catalogo.tex}; \code{tests/ouro\_branco.c};
+\code{tests/smartcontract.c}).
+Não é Parte nova. Não reabre I0 das Partes fechadas.
+Não inventa Lei~8. Não contradiz
+\code{univ:thm:composicao-fechos}.
+\caixa{%
+criptografia (este paper)
+$\;\neq\;$
+palco quântico (\code{fis:obs:quantica-grafo-fecho})
+$\;\neq\;$
+$\mathcal{U}=(X,X^{*},\mathsf{Mor},\mathsf{Aut})$
+(\code{univ:def:U})%
+}
+\end{observacao}
+
+\begin{observacao}[cinco quadráticas, não se fundem]\label{cripto:obs:cinco-quadraticas}
+\caixa{%
+\begin{tabular}{@{}lll@{}}
+$\pi^{2}=\pi$ & Alonzo / idempotente & \code{univ:def:alonzo-idemp}\\
+$x^{2}=1$ & involução $A_0$ & \textbf{não} Duo\\
+$x^{2}=x+1$ & $\operatorname{Star}(K)$ / ouro & slot I9; \textbf{não} $\operatorname{Star}(\mathcal{U})$\\
+$x^{2}=-1$ & Lei~5 & \textbf{não} a estrela\\
+$\operatorname{Star}(\mathcal{U})=\mathcal{D}$ & estrutural, bit $a=1$ & \textbf{não} elemento\\
+\end{tabular}%
+}
+A família metálica é $x^{2}=nx+1$ e inclui o ouro $x^{2}=x+1$.
+O ouro branco é $x^{2}=4x-1$ --- \textbf{outro lado} do determinante,
+não mais um $n$ da família (\code{tests/ouro\_branco.c} §B1).
+$A_0$ ($x^{2}=1$) $\neq\mathbf{Duo}$.
+O associador do palco quântico
+(\code{hiper/circular/associador\_ibm\_n2.py})
+\textbf{não} é $A_0$ dourada.
+\end{observacao}
+
+\begin{observacao}[quatro conservações, não se fundem]\label{cripto:obs:conservacoes}
+\caixa{%
+\begin{tabular}{@{}lll@{}}
+$\det=+1$ & cifra ($\det(B^{k})$; \textbf{não} saldo) & ouro branco; §\ref{cripto:cifra}\\
+$P=k/N$ & rectângulo GLH & \code{fis:lem:conserva}; \code{fis:thm:central}\\
+$\sum X\cdot X_{-}=N\sum x^{2}$ & Parseval do corpus & \code{tests/cristal\_energia.js}\\
+$p_i=\lvert\langle i\rvert\psi\rangle\rvert^{2}$ & Born & \textbf{não} fecha $\mathcal{U}$\\
+\end{tabular}%
+}
+$P=k/N\neq\lvert\psi_i\rvert^{2}$.
+Born isolado:
+\code{univ:thm:composicao-fechos};
+\code{fis:obs:quantica-grafo-fecho}.
+$\lvert\det\rvert=1$ da Lei~4 / volume
+(\code{fis:thm:gato}(2))
+é o invariante de $\operatorname{Aut}(T^{2})$,
+\textbf{não} o $\det=+1$ da matriz $2\times2$ do ouro branco
+--- homónimo; I0 decide.
+Nenhuma das quatro linhas é conservação de valor económico.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Definição --- o que a cadeia já era}\label{cripto:def}
+
+O catálogo já o escreveu
+(\code{catalogo.tex}, «A CristalChain --- um livro-razão cuja cifra
+conserva»).
+A peça técnica é uma linha. O nome formal e a marca separam-se:
+
+\begin{observacao}[Cadeia de Cristais (CristalChain)]\label{cripto:obs:nome}
+\caixa{%
+\textbf{Cadeia de Cristais}
+$\;=\;$
+nome formal da construção
+\qquad
+\textbf{CristalChain}
+$\;=\;$
+marca / repo / catálogo%
+}
+No primeiro aparecimento: \textbf{Cadeia de Cristais (CristalChain)}.
+No texto técnico, \textbf{Cadeia de Cristais}.
+Em produto, implementação, repositório ou marca, \textbf{CristalChain}.
+O catálogo e a wiki já usam \code{CristalChain}; este paper não os
+reescreve.
+\end{observacao}
+
+\begin{definicao}[livro-razão]\label{cripto:def:livro-razao}
+Um \textbf{livro-razão} neste paper é uma sequência finita de
+registos
+\[
+R_0\to R_1\to R_2\to\cdots\to R_m
+\]
+em que cada $R_i$ guarda o estado da órbita e o trabalho liquidado.
+O sucessor obtém-se por um passo da cifra, \textbf{não} por consenso
+entre pares.
+Operacionalmente, $R_i$ é uma liquidação
+(\code{tests/smartcontract.c}: estrutura \texttt{Liquidacao} ---
+\texttt{liquidado}, régua, agente, \texttt{trabalho}).
+A primeira liquidação acrescenta trabalho ao livro; as seguintes
+são idempotentes (§S4: só a primeira conta).
+Isto \textbf{não} é um bloco de rede nem um saldo económico.
+\end{definicao}
+
+\begin{observacao}[realização do livro-razão por identidade]\label{cripto:obs:livro-identidade}
+O motor realiza o livro (Def.~\ref{cripto:def:livro-razao})
+no \code{id} da identidade
+(\code{app/src/banco\_identidade\_u.js}):
+a chave vence a sessão; o livro pede dono.
+\[
+\boxed{\;
+\begin{array}{c}
+\mathrm{id}\text{ identifica o livro;}\\
+R_i\text{ registra a liquidação;}\\
+B\text{ fornece a cifra;}\\
+\det(B^{k})=+1.
+\end{array}
+\;}
+\]
+Medido em \code{app/src/banco\_cristalchain\_u.js}
+e \code{tests/cristalchain\_u.js} ($20/0$).
+O nodo $\mathcal{U}$ usa \code{kind=orbita} (já existente);
+não se inventa kind.
+Idempotência da segunda liquidação
+(\code{acrescentou}$=0$) \textbf{não} é dupla despesa ---
+dupla despesa é \texttt{N/A}
+(Obs.~\ref{cripto:obs:nao-blockchain}).
+$\mathrm{sha256}$ produz o \code{id}; \textbf{não} é a cifra.
+Pisano $\pi(q)$ conta a órbita do ouro na régua $\{B=1,\,C=-1\}$;
+\textbf{não} é a companheira $B$ do ouro branco
+(Obs.~\ref{cripto:obs:passo}).
+\end{observacao}
+
+\begin{definicao}[Cadeia de Cristais]\label{cripto:def:cadeia}
+Uma \textbf{Cadeia de Cristais} (\textbf{CristalChain}) é um
+livro-razão (Def.~\ref{cripto:def:livro-razao}) cuja cifra conserva
+o invariante do passo (Def.~\ref{cripto:def:cifra-conserva}):
+\[
+\boxed{\;
+\text{Cadeia de Cristais}
+=
+\text{livro-razão}
++
+\text{cifra conservativa}
++
+\det=+1
+\;}
+\]
+A cifra \textbf{é forçada}, não escolhida.
+Uma corrente cifrada por $\det=-1$ inverte o invariante a cada passo.
+Uma corrente cifrada por $\det=+1$ conserva-o.
+\textbf{Conservar} aqui é $\det(B^{k})=+1$ para todo $k$
+(Teor.~\ref{cripto:thm:det}) --- o sinal do determinante sob
+composição. \textbf{Não} é conservação de valor económico
+(«nada se cria, nada se perde» no catálogo lê-se nesta restrição,
+não como lastro).
+\end{definicao}
+
+\begin{observacao}[cifra $\to$ registo $\to$ cadeia]\label{cripto:obs:passo}
+O passo algébrico da cifra do ouro branco é a companheira $B$:
+\[
+B=\begin{pmatrix}4&-1\\1&0\end{pmatrix},\qquad
+\begin{pmatrix}a_{k+1}\\b_{k+1}\end{pmatrix}
+=B\begin{pmatrix}a_{k}\\b_{k}\end{pmatrix},\qquad
+\det(B^{k})=+1.
+\]
+Medido em \code{tests/ouro\_branco.c} §B2--§B3 (potências do $\det$).
+A liquidação medida em \code{tests/smartcontract.c} dá o passo por
+produto na régua: $\sigma=(0,1)$, \texttt{prod}$(r,a,b,0,1)$;
+o contrato \textbf{regista} os passos como \texttt{trabalho}.
+A paragem §S6 corre na régua do ouro $\{B=1,\,C=-1\}$
+(Fibonacci $\bmod q$), \textbf{não} na companheira do ouro branco.
+\caixa{%
+passo da cifra ($B^{k}$, $\det=+1$)
+$\;\neq\;$
+passo da liquidação ($\sigma$, $\pi(q)$)%
+}
+Não se identificam as duas matrizes. Amarram-se os labels:
+Def.~\ref{cripto:def:cifra-conserva} $\leftrightarrow$
+\code{ouro\_branco.c};
+Def.~\ref{cripto:def:livro-razao} $\leftrightarrow$
+\code{smartcontract.c} \texttt{trabalho}.
+\end{observacao}
+
+\noindent
+O enredo chama-lhe «ouro externo».
+Isso é realização narrativa.
+O objecto técnico é a Def.~\ref{cripto:def:cadeia}.
+\textbf{Não} é analogia blockchain --- o próprio catálogo já o cortou
+(Obs.~\ref{cripto:obs:nao-blockchain}).
+O sítio canónico deste enunciado é \emph{aqui}
+(\code{cripto:def:cadeia}); o catálogo e os medidores
+\textbf{citam-se}, não se recopiam.
+
+\begin{observacao}[dois objectos que partilham a palavra «cristal»]\label{cripto:obs:dois-cristais}
+\caixa{%
+Cadeia de Cristais (este paper, $\det=+1$)
+$\;\neq\;$
+corpus cristal (\code{cristal/cristal.jsonl}, volta por endereço)%
+}
+O corpus tem medidores próprios
+(\code{tests/cristal\_volta.js}, \code{tests/cristal\_energia.js}):
+reconstrução $R=0$ pelo \emph{id}, energia $E=\sum x^{2}$ conservada,
+Parseval no anel $\mathbb{Z}/65537\mathbb{Z}$.
+Isso é a volta do jornal, \textbf{não} a cifra do livro-razão.
+Fundir os dois é homogeneizar homónimos.
+Estatuto do elo «são o mesmo objecto»:
+\texttt{nao localizada}
+(§\ref{cripto:nao-localizada}).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Mapa do repositório --- citar, não recopiar}\label{cripto:mapa}
+
+O que o repo já tem, por ofício. Cada linha é um objecto;
+I0 proíbe colá-los.
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.34\textwidth}p{0.58\textwidth}@{}}
+\toprule
+sítio & o que faz (e o que \textbf{não} é) \\
+\midrule
+\code{catalogo.tex} § CristalChain
+  & enunciado-fonte: livro-razão cuja cifra conserva;
+    \textbf{não} blockchain; fronteira dita \\
+\code{tests/ouro\_branco.c}
+  & $\det=\pm1$, norma, dobras $5,8,12$; cifra da Def.~\ref{cripto:def:cifra-conserva} \\
+\code{tests/smartcontract.c}
+  & paragem $\pi(q)$, agentes por $\Delta$, §S6 (teste $\neq$ prova) \\
+\code{app/src/banco\_cristalchain\_u.js}
+  & livro no disco GKBANCO; dono $=$ \code{id} da identidade;
+    cinco contratos liquidam-se; \textbf{não} blockchain \\
+\code{app/src/banco\_identidade\_u.js}
+  & chave $>$ sessão; \code{id}$=$\code{hex}(banda);
+    selector $\mathrm{sha256}$, \textbf{não} a cifra \\
+\code{tests/cristalchain\_u.js}
+  & medidor do motor + identidade \\
+\code{tests/trialidade.c}
+  & $S_3$ dos eixos; sobe a assinatura, \textbf{não} Duo \\
+\code{tests/trialidade\_linguas.js}
+  & $T^3$ das línguas \texttt{nao localizada} \\
+\code{tests/familia\_real.c}
+  & gato $A_m$, $\det=-1$, volta exacta; \textbf{não} sigilo (linear) \\
+\code{tests/cifra\_entrada.c}, \code{lib/cifra.h}
+  & cifra da ISA / fração contínua; \textbf{não} a cadeia \\
+\code{tests/cifra\_prova.c}
+  & cifra da demonstração (cadeia de passos $\neq$ cobertura) \\
+\code{tests/cristalino.c}
+  & esquilo $\det=+1$, $D<0$, ordem $4/6$;
+    \textbf{não} ouro branco ($d=3$, disc~$12$) \\
+\code{tests/cristal\_volta.js},
+\code{tests/cristal\_energia.js}
+  & volta do jornal \code{cristal.jsonl}; Parseval; objecto distinto \\
+\code{tests/cristal\_avanco.js},
+\code{tests/cristal\_curadoria.js},
+\code{tests/cristal\_adversarial.js}
+  & lotes / fusões / portão do corpus; \textbf{não} o livro-razão \\
+\code{tests/cristal\_front.js}, \code{app/src/cristal.js}
+  & chip X da UI (proveniência); \textbf{não} a cifra \\
+\code{tests/dtcn.c}
+  & $\star_s$, imposto algébrico; Paper~H; \textbf{não} livro-razão \\
+\code{app/src/banco\_lei\_local\_u.js}
+  & candidatos $\mathcal{L}_S$; $\mathrm{sha256}$ selector; sem promoção \\
+\code{banco/bai.sql}
+  & analogia «como a cristalchain»; guarda cifra do \emph{gato};
+    \textbf{não} mede $\det=+1$ \\
+\code{banco/sql.c} \code{OP\_MARTELO}
+  & Hashcash no banco: $H(\mathrm{header})<T$ (80+32 átomos);
+    \textbf{não} a Cadeia de Cristais (Obs.~\ref{cripto:obs:martelo}) \\
+\code{cristal/cristal\_*.tex}, \code{cristal.jsonl}
+  & wiki: nome, joalheria, GoldChain$\to$classe; papers prometidos ausentes \\
+\code{enredo.tex}, \code{curriculo/}
+  & ouro externo / proposta aberta; narrativa, não medidor \\
+\code{app/src/manifesto.json}
+  & dádiva $\sigma_1=\varphi$; enredo, não teorema \\
+\code{hiper/.../paper\_K\_cripto.tex}
+  & plano NIST + blockchain Patria; \textbf{outro} objecto
+    (Obs.~\ref{cripto:obs:paper-k}) \\
+\code{hiper/.../U4\_cripto*}
+  & sandbox / células de literatura; sem incidência na Def.~\ref{cripto:def:cadeia} \\
+\code{fisica.tex}, \code{corpo\_universal.tex},
+\code{banco/} (código C)
+  & zero ocorrências do nome; a ponte é o motor JS \\
+\code{papers/cristalchain.tex},
+\code{papers/cifra\_de\_cristal.tex}
+  & referenciados na wiki; \textbf{ausentes} --- o canónico é este ficheiro \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacao}[cristalino $\neq$ ouro branco]\label{cripto:obs:cristalino}
+\code{tests/cristalino.c} mede o esquilo $\det=+1$ em $\mathbb{Q}(\sqrt D)$, $D<0$
+(Gauss, Eisenstein; ordem $4$ ou $6$).
+O ouro branco é $x^{2}=4x-1$ em $\mathbb{Z}[\sqrt3]$, disc~$12>0$.
+Partilham o sinal do determinante; \textbf{não} são o mesmo corpo.
+Elo «cristalino $=$ cifra da cadeia»: \texttt{nao localizada}.
+\end{observacao}
+
+\begin{observacao}[a família real não é sigilo]\label{cripto:obs:familia-real}
+\code{tests/familia\_real.c}: $A_m$ é bijecção inteira e homomorfismo aditivo.
+Isso dá reversibilidade e soma em cofre; \textbf{não} dá sigilo
+(transformação linear cede a pares claro/cifrado).
+O sigilo, se existir, vem de outro sítio --- e esse sítio,
+como elo da Def.~\ref{cripto:def:cadeia}, está
+\texttt{nao localizada}.
+\end{observacao}
+
+\begin{observacao}[Paper~K e U4 não são esta cadeia]\label{cripto:obs:paper-k}
+\code{hiper/aposentados/teoria/papers/paper\_K\_cripto.tex}
+é um plano (Kyber/Dilithium, $\star_p$, blockchain Substrate).
+Não menciona CristalChain.
+U4 é literatura viva no sandbox.
+I0: plano $\neq$ Def.~\ref{cripto:def:cadeia};
+blockchain genérica já é \texttt{N/A}
+(Obs.~\ref{cripto:obs:nao-blockchain}).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A cifra que conserva}\label{cripto:cifra}
+
+\begin{definicao}[cifra que conserva]\label{cripto:def:cifra-conserva}
+No suporte $\mathbb{Z}[\sqrt d]$ a norma é $N(a+b\sqrt d)=a^{2}-d\,b^{2}$.
+A matriz do passo é $2\times2$.
+\[
+\boxed{\;
+\underbrace{x^{2}=nx+1}_{\text{família metálica},\ \det=-1}
+\qquad\text{contra}\qquad
+\underbrace{x^{2}=4x-1}_{\text{ouro branco},\ \det=+1}
+\;}
+\]
+Conservar $=$ $\det=+1$ e $N=-1$ vazio
+(\textbf{não} um valor económico; o sinal sob $B^{k}$).
+Anti-conservar $=$ $\det=-1$ (o gato inverte a cada passo ímpar).
+\end{definicao}
+
+\begin{teorema}[o determinante decide o lado]\label{cripto:thm:det}
+Para $n=1,2,3,4$ a matriz $A=\bigl(\begin{smallmatrix}n&1\\1&0\end{smallmatrix}\bigr)$
+tem $\det=-1$.
+A matriz $B=\bigl(\begin{smallmatrix}4&-1\\1&0\end{smallmatrix}\bigr)$
+do ouro branco tem $\det=+1$.
+$\det(A^{k})$ alterna com $k$; $\det(B^{k})=+1$ para todo $k$.
+Não existe $n\in[-20,20]$ que ponha $2+\sqrt3$ na forma $x^{2}=nx+1$.
+\end{teorema}
+
+\begin{proof}
+Conta na matriz, em $\mathbb{Z}$.
+$(2+\sqrt3)^{2}=4(2+\sqrt3)-1$ exacto em $\mathbb{Z}[\sqrt3]$
+(\code{tests/ouro\_branco.c} §B1--§B3).
+\end{proof}
+
+\begin{teorema}[a norma confirma por caminho independente]\label{cripto:thm:norma}
+Nos unitários, $N$ só toma os três valores do trial.
+O zero tem sempre exactamente uma solução (ponto fixo).
+Quais dos outros dois $N$ atinge \textbf{é} a assinatura:
+ouro ($d=5$) e prata ($d=2$) atingem $N=-1$ e $N=+1$;
+ouro branco ($d=3$) atinge só $N=+1$.
+\end{teorema}
+
+\begin{proof}
+Varredura em $a,b\in[-60,60]$
+(\code{tests/ouro\_branco.c} §B6).
+Duas contas que não se falam --- determinante e norma --- e o mesmo
+veredito: o ouro branco não tem o lado que anti-conserva.
+\end{proof}
+
+\medido{$\det=-1$ em toda a família metálica e $+1$ no ouro branco;
+$\det(A^{k})$ alterna na família e nunca no ouro branco;
+$(2+\sqrt3)^{2}=4(2+\sqrt3)-1$ e zero soluções $x^{2}=nx+1$;
+discriminantes $5$, $8$, $12$ (as dobras);
+entre $n=1\ldots9$ um só $x^{2}-nx+1$ dá discriminante $12$
+(\code{tests/ouro\_branco.c}).}
+
+\noindent
+As dobras $5$, $8$, $12$ são os discriminantes $b^{2}-4ac$,
+calculados, não tabelados.
+\textbf{Não} são Duo.
+\textbf{Não} são $\operatorname{Star}(\mathcal{U})$.
+Hexal $6=\mathrm{lcm}(2,3)$ é rótulo noutro suporte
+(\code{univ:def:lcm}), não entra nesta ficha.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que a cadeia não é}\label{cripto:fronteira}
+
+\begin{observacao}[não é blockchain]\label{cripto:obs:nao-blockchain}
+O catálogo e o medidor já o demonstraram:
+não há rede, nós, nem consenso entre pares;
+isto \textbf{não} resolve dupla despesa.
+\caixa{%
+Cadeia de Cristais
+$\;\neq\;$
+blockchain
+$\;\neq\;$
+GoldChain / HTLC / PoW
+(\code{cristal/cristal\_computacao.tex})%
+}
+GoldChain nomeia $\sigma_{1}$ (um metal).
+A wiki promoveu o nome à classe cristal
+(\code{cristalchain} especializa \code{goldchain}).
+Isso é nomenclatura do jornal, \textbf{não} prova de rede.
+Estatuto de «rede que não racha / bloco minerado a frio»
+como realização da Def.~\ref{cripto:def:cadeia}:
+\texttt{nao localizada}.
+PoW desmonta-se à parte (Obs.~\ref{cripto:obs:pow}):
+Hashcash pode existir sem cadeia Nakamoto,
+e o \code{MARTELO} do banco não é este livro.
+\end{observacao}
+
+\begin{proposicao}[a fronteira faz parte do resultado]\label{cripto:prop:fronteira}
+Está estabelecido: a cifra (Teor.~\ref{cripto:thm:det},~\ref{cripto:thm:norma})
+e a paragem (Teor.~\ref{cripto:thm:paragem}).
+O resto --- consenso, dupla despesa, computação geral, oráculo do mundo ---
+é trabalho por fazer ou recusa.
+A linguagem do contrato exprime corpos de grau~$2$, não Turing geral.
+O que se verifica a cada corrida é teste, não prova formal
+(\code{tests/smartcontract.c} §S6).
+\end{proposicao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Paragem, reentrância, oráculo interno}\label{cripto:contrato}
+
+O contrato \textbf{não se assina: liquida-se}.
+Fornece-se metade; o código deriva o resto e executa
+(\code{tests/smartcontract.c}).
+O agente não vem da entrada: $\Delta$ despacha
+gira / estica / limite.
+
+\begin{teorema}[a paragem é da álgebra]\label{cripto:thm:paragem}
+Num corpo finito $\bmod q$, a órbita do ouro fecha e não passa o tecto $q^{2}$.
+O número de passos é o período de Pisano $\pi(q)$, obtido pela
+recorrência de Fibonacci $\bmod q$ \textbf{sem tocar na órbita}.
+\end{teorema}
+
+\begin{proof}
+Duas contas independentes, $q\in\{3,4,5,7,11,12\}$:
+órbita por produto na régua $\{B=1,C=-1\}$ contra Fibonacci $\bmod q$.
+Passos $=8,6,20,16,10,24=\pi(q)$.
+Mutação $\bmod(q{+}1)$ faz a asserção falhar
+(\code{tests/smartcontract.c} §S6).
+\end{proof}
+
+\medido{órbita fecha para $q\in\{3,4,5,7,11,12\}$ sob $q^{2}$;
+passos batem com $\pi(q)$ por Fibonacci; o agente é função de $\Delta$,
+não da entrada (quatro entradas do ouro, um só agente);
+liquidar duas vezes é idempotente
+(\code{tests/smartcontract.c}).}
+
+\noindent
+A reentrância não existe \emph{neste} suporte: a entrada não escolhe o
+agente.
+O oráculo deixa de ser preciso \emph{onde a metade que falta se deriva}
+da metade fornecida, resíduo~$0$.
+\textbf{Isto não resolve o problema do oráculo em geral}:
+dados do mundo continuam a precisar de fonte.
+Dizer o contrário seria vender o que não há.
+
+\begin{observacao}[o trial sobe a cadeia, sem acrescentar]\label{cripto:obs:trial}
+A assinatura tem três entradas porque o trial tem três estados
+($p$ eixos em $+1$, $q$ em $-1$, $r$ em $0$).
+Cada eixo é um trial.
+\[
+\boxed{\;
+3\text{ autoduais}
+\to
+2^{3}=8\text{ biduais}
+\to
+8\times4=32\text{ órbitas}
+\to
+16{+}16\text{ pela paridade}
+\;}
+\]
+Medido em \code{tests/trialidade.c}.
+A trialidade é $S_{3}$ nos três eixos.
+\textbf{Não} é $T^{3}$ das línguas
+(\code{tests/trialidade\_linguas.js}:
+trialidade tripla \texttt{nao localizada}).
+Não se funde com Duo.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{PoW --- as quatro peças não se fundem}\label{cripto:pow}
+
+O PoW clássico é \textbf{uma} desigualdade, não quatro coisas coladas.
+Nakamoto (2008), Hashcash (Back, 1997):
+\[
+\boxed{\;
+H(\mathrm{header})<T
+\;}
+\]
+O \emph{header} inclui o nonce; $H=\mathrm{SHA256}^{2}$;
+$T$ é o alvo, função da dificuldade $d$.
+A prova é o par $(\mathrm{header},n)$ que satisfaz a desigualdade.
+A busca é sempre \emph{forward} (avalia-se $H$, não se inverte).
+A verificação é uma avaliação.
+O custo médio é $\mathbb{E}[\#\text{tentativas}]\propto T^{-1}$.
+
+Isto \textbf{não} é a Def.~\ref{cripto:def:cadeia}.
+Quatro ofícios, e nenhum implica o seguinte:
+
+\begin{observacao}[quatro ofícios, não se fundem]\label{cripto:obs:pow}
+\caixa{%
+trabalho (busca de $n$)
+$\;\neq\;$
+verificação (um $H$)
+$\;\neq\;$
+selecção de cadeia (a mais pesada)
+$\;\neq\;$
+consenso (pares convergem)%
+}
+Uma cadeia Nakamoto \emph{usa} as quatro.
+Hashcash usa só as duas primeiras (spam de correio, sem rede).
+Consenso e selecção de cadeia já estão \texttt{N/A}
+na Def.~\ref{cripto:def:cadeia}
+(Obs.~\ref{cripto:obs:nao-blockchain}; §S6).
+As duas primeiras não se herdam por homónimo.
+\end{observacao}
+
+\begin{observacao}[I0 --- três «trabalhos», três hashes]\label{cripto:obs:pow-i0}
+\caixa{%
+\begin{tabular}{@{}lll@{}}
+$H(\mathrm{header})<T$
+  & Hashcash / Nakamoto
+  & busca; testemunha $(h,n)$ \\
+$\mathrm{sha256}(\mathit{pub})\to\mathrm{id}$
+  & selector da identidade
+  & \textbf{não} a cifra; \textbf{não} o alvo \\
+\texttt{trabalho} em \code{smartcontract.c}
+  & passos da órbita
+  & \textbf{não} hashcash \\
+\end{tabular}%
+}
+$\mathrm{kind}=\mathrm{orbita}$ (já existente)
+$\neq$ cadeia Nakamoto (\texttt{prevhash}, altura, a mais pesada).
+$\pi(q)$ é o período da paragem (Teor.~\ref{cripto:thm:paragem}),
+\textbf{não} o alvo $T$.
+$\det(B^{k})=+1$ é identidade de conservação,
+\textbf{não} um limiar a bater.
+O \emph{gas} da EVM é cerca por fora da paragem Turing ---
+o contrato já o recusa (§S6);
+\textbf{não} é dificuldade de mineração.
+\end{observacao}
+
+\begin{observacao}[cinco peças na Cadeia de Cristais]\label{cripto:obs:pow-pecas}
+Cada linha é um ofício.
+O que a cadeia \textbf{já possui} não se homogeneíza com a coluna da esquerda.
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.22\textwidth}p{0.14\textwidth}p{0.54\textwidth}@{}}
+\toprule
+peça (PoW clássico) & estatuto & evidência neste suporte \\
+\midrule
+prova de trabalho
+  (custo de busca verificável)
+  & \texttt{N/A}
+  & \texttt{trabalho} $=$ passos até a órbita fechar
+    (\code{agente\_corre}); mesma entrada, mesmo número
+    (§S2; §S6, 200 corridas).
+    Não há nonce, não há faixa, não há tentativa rejeitada.
+    \code{liquida} é função pura dos termos. \\
+dificuldade
+  (parâmetro que encarece achar)
+  & \texttt{N/A}
+  & $\pi(q)$ é período, obtido por Fibonacci $\bmod q$
+    \textbf{sem} tocar na órbita --- número com nome, não botão $T$.
+    $q$ é o módulo do corpo.
+    $\det=+1$ vale para todo $k$, exacto, sem limiar.
+    Não se inventa $d$ por analogia. \\
+verificação barata
+  (verificar $\ll$ produzir)
+  & \texttt{N/A}
+  & o segundo caminho (Fibonacci) é a \textbf{mesma classe}
+    $O(\pi(q))$ que a órbita: duas contas que podiam discordar
+    (Teor.~\ref{cripto:thm:paragem}), não uma avaliação contra
+    uma busca.
+    Relêr o livro é ler um inteiro gravado, não conferir testemunha.
+    Obs.~\ref{cripto:obs:pow-contas}. \\
+selecção de cadeia
+  (várias histórias $\to$ critério)
+  & \texttt{N/A}
+  & um livro por dono; o sucessor é liquidação
+    (Def.~\ref{cripto:def:livro-razao}), não a cadeia mais pesada.
+    Sem forks no motor
+    (\code{tests/cristalchain\_u.js} §C7: donos distintos não se misturam).
+    Não há histórias a escolher. \\
+consenso
+  (vários participantes convergem)
+  & \texttt{N/A}
+  & sem rede, sem pares
+    (Obs.~\ref{cripto:obs:nao-blockchain}; §S6).
+    Idempotência da liquidação $\neq$ dupla despesa. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Nenhuma peça é \textbf{realizada} como PoW, nem \textbf{derivável}
+de $\det=+1$ ou de $\pi(q)$ sem inventar o passo.
+\end{observacao}
+
+\begin{observacao}[duas contas independentes $\neq$ assimetria PoW]\label{cripto:obs:pow-contas}
+A órbita $\bmod q$ e Fibonacci $\bmod q$ são dois caminhos
+do \textbf{mesmo} número $\pi(q)$, ambos lineares no período.
+É o padrão de medição já usado no determinante contra a norma
+(Teor.~\ref{cripto:thm:det},~\ref{cripto:thm:norma}):
+contas que não se falam e podem discordar.
+Isso \textbf{não} é $\text{verificar}\ll\text{produzir}$.
+A assimetria Hashcash pede uma via de sentido único e um limiar;
+aqui a paragem é gaiola finita, e \textbf{toda} corrida fecha
+(Teor.~\ref{cripto:thm:paragem}).
+Elo algébrico «$\pi(q)$ realiza $H(\mathrm{header})<T$»:
+\texttt{N/A} --- o suporte demonstra outro objecto.
+\end{observacao}
+
+\begin{observacao}[\code{MARTELO} $\neq$ livro-razão]\label{cripto:obs:martelo}
+\code{banco/sql.c} \code{OP\_MARTELO} realiza Hashcash:
+cabeçalho de 80~átomos, alvo de 32, $H=\mathrm{SHA256}^{2}$,
+faixa de nonces, decisão na régua elíptica
+(«a dificuldade é o raio da bola»).
+Isso é PoW no banco ISA --- objecto \textbf{distinto}.
+\code{app/src/banco\_cristalchain\_u.js} não o chama:
+sem \code{S\_CAB}, sem nonce, sem $T$.
+\caixa{%
+\code{MARTELO} (Hashcash no banco)
+$\;\neq\;$
+\texttt{trabalho} da liquidação
+$\;\neq\;$
+Def.~\ref{cripto:def:cadeia}%
+}
+Elo «\code{MARTELO} $=$ cifra da cadeia»:
+\texttt{nao localizada}
+(o martelo existe; o pipe $\det=+1$ não o atravessa;
+a wiki «bloco minerado a frio» já estava neste estatuto).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{GLH, Parseval, lei local --- elos e cortes}\label{cripto:elos}
+
+\subsection{GLH e $P=k/N$}
+$\mathrm{I}_{4}=\mathrm{GLH}$ é o rectângulo das duas contagens
+(\code{univ:def:glh-an}; \code{fis:thm:central}).
+$P=k/N$ é Hurwitz nesse rectângulo
+(\code{fis:lem:conserva}).
+A cadeia \textbf{conta} órbitas (Pisano, Teor.~\ref{cripto:thm:paragem})
+e \textbf{conserva} por $\det=+1$.
+Contar $\neq$ conservar o sinal do determinante.
+\[
+\boxed{\;
+P=k/N\ (\mathrm{GLH})
+\neq
+\det=+1\ (\text{cifra})
+\neq
+\lvert\det\rvert=1\ (\text{Lei~4 / volume})
+\neq
+p_i=\lvert\langle i\rvert\psi\rangle\rvert^{2}\ (\text{Born})
+\;}
+\]
+Elo «a cadeia \emph{é} GLH»: \texttt{nao localizada}.
+O que está realizado: as duas contas não se falam e não se fundem.
+
+\subsection{Parseval do corpus}
+\code{tests/cristal\_energia.js} mede
+$E(\text{fonte})=E(\text{reconstrução})$ (inteiro exacto)
+e Parseval $1\mathrm{D}/2\mathrm{D}/4\mathrm{D}$ no anel $p=65537$,
+factor $256$, raiz errada quebra.
+Isso é a volta do jornal cristal
+(Obs.~\ref{cripto:obs:dois-cristais}),
+\textbf{não} a cifra da Def.~\ref{cripto:def:cifra-conserva},
+\textbf{não} Born,
+\textbf{não} Lei~8 (não há Lei~8).
+Elo «Parseval do corpus $=$ cifra da cadeia»:
+\texttt{nao localizada}.
+
+\subsection{Lei local e $\mathrm{sha256}$}
+\code{banco\_lei\_local\_u.js} varre candidatos de
+\code{univ:def:lei-local-canonica}.
+$\mathrm{id}=\mathrm{hex}(\mathrm{sha256}(\mathrm{bytes}(\mathit{pub})))$
+é o selector discreto da partição $B(\mathrm{id})$,
+\textbf{não} o espectro $\mathcal{F}$.
+A banda do canal é $\mathrm{sha256}$; $B_{\mathrm{cliente}}$ é outra
+leitura (\code{fis:def:transf}).
+Todos os candidatos saem \texttt{nao localizada};
+sem Ficha~11; sem corpo novo.
+\caixa{%
+cifra da cadeia ($\det=+1$)
+$\;\neq\;$
+selector $\mathrm{sha256}$
+$\;\neq\;$
+$\mathcal{L}_{S}(\mathrm{id})$
+$\;\neq\;$
+$\mathcal{F}$ (\code{fis:thm:H})%
+}
+São o mesmo objecto? \texttt{nao localizada}
+--- e o motor já recusa a promoção
+(\code{banco\_lei\_local\_u.js} \code{RECUSAS};
+\code{semPromocoes}).
+
+\subsection{Cifra do gato (simétrica)}
+A wiki (\code{cristal/cristal\_computacao.tex}) descreve
+$A_{n}=\bigl(\begin{smallmatrix}n&1\\1&0\end{smallmatrix}\bigr)$,
+$\det=-1$, bijecção $\bmod N$: cifrar $=A_{n}^{k}$,
+decifrar $=(A_{n}^{-1})^{k}$.
+Isso é a família metálica --- a que \textbf{anti-conserva}
+(Teor.~\ref{cripto:thm:det}).
+Pode ser cifra simétrica noutro ofício.
+\textbf{Não} é a cifra da Cadeia de Cristais.
+O paper prometido \code{papers/cifra\_de\_cristal.tex} não está no disco.
+Dureza «idempotente $\Leftrightarrow$ factorar» (wiki, $143\to11\times13$):
+sem medidor neste repo com o mesmo objecto que a Def.~\ref{cripto:def:cadeia}
+--- \texttt{nao localizada} como elo da cadeia.
+
+\subsection{DTC hipercomplexo}
+\code{tests/dtcn.c} mede
+$\lVert z\star_{s}w\rVert^{2}+(1-s^{2})\lVert a\times b\rVert^{2}
+=\lVert z\rVert^{2}\lVert w\rVert^{2}$
+(Paper~H, \code{hiper/aposentados/teoria/papers/paper\_H\_dtc\_hipercomplexo.tex}).
+Conservação algébrica de motor, \textbf{não} livro-razão.
+Elo com a cadeia: \texttt{nao localizada}.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que ficou \texttt{nao localizada}}\label{cripto:nao-localizada}
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.46\textwidth}p{0.46\textwidth}@{}}
+\toprule
+candidato de elo & porquê \\
+\midrule
+Cadeia de Cristais $=$ blockchain / consenso / dupla despesa
+  & catálogo e §S6 \textbf{demonstram a ausência}: é \texttt{N/A},
+    não busca falhada \\
+Cadeia de Cristais $=$ PoW / Hashcash / $H(\mathrm{header})<T$
+  & cinco peças \texttt{N/A} (Obs.~\ref{cripto:obs:pow-pecas});
+    \texttt{trabalho} C $\neq$ work Bitcoin;
+    $\mathrm{sha256}\to\mathrm{id}\neq$ alvo \\
+$\pi(q)$ $=$ dificuldade $T$;
+    $\det=+1$ $=$ limiar
+  & período e conservação, não busca;
+    analogia recusada (Obs.~\ref{cripto:obs:pow-i0}) \\
+órbita $\parallel$ Fibonacci $=$ verificar $\ll$ produzir
+  & mesma classe $O(\pi(q))$; medição, não assimetria
+    (Obs.~\ref{cripto:obs:pow-contas}) \\
+\code{MARTELO} $=$ cifra da cadeia
+  & Hashcash no banco ISA; o motor da cadeia não o chama
+    (Obs.~\ref{cripto:obs:martelo}) --- \texttt{nao localizada} \\
+Cadeia de Cristais $=$ corpus cristal / Parseval do jornal
+  & dois objectos; sem medidor que os identifique \\
+Cadeia de Cristais $=$ $\mathcal{L}_{S}(\mathrm{id})$ / $\mathrm{sha256}$
+  & selector $\neq$ cifra; candidatos recusados no motor \\
+Cadeia de Cristais $=$ cifra do gato ($\det=-1$)
+  & o gato anti-conserva; a cadeia pede $\det=+1$ \\
+Cadeia de Cristais $=$ GLH / $P=k/N$
+  & contar o rectângulo $\neq$ conservar o sinal \\
+Cadeia de Cristais $=$ Born / palco quântico
+  & $P=k/N\neq\lvert\psi_{i}\rvert^{2}$; Born não fecha $\mathcal{U}$ \\
+Cadeia de Cristais $=$ DTC / $\star_{s}$
+  & Paper~H é torque; sem incidência no livro-razão \\
+Cadeia de Cristais $=$ Duo / $A_0$ / Lei~5 / Alonzo
+  & cinco quadráticas (Obs.~\ref{cripto:obs:cinco-quadraticas}) \\
+\code{papers/cifra\_de\_cristal.tex},
+\code{papers/cristalchain.tex}
+  & referenciados na wiki; \textbf{ausentes} no disco \\
+rede «que não racha», bloco minerado a frio
+    como realização da Def.~\ref{cripto:def:cadeia}
+  & prosa da wiki; sem medidor da conservação $\det=+1$ nesse pipe \\
+cristalino ($D<0$) $=$ ouro branco
+  & partilham $\det=+1$; corpos distintos
+    (Obs.~\ref{cripto:obs:cristalino}) \\
+família real $A_m$ $=$ sigilo da cadeia
+  & \code{familia\_real.c} mede o contrário: linear, sem sigilo \\
+Paper~K / U4 $=$ Cadeia de Cristais
+  & plano NIST/blockchain; sem o nome, sem o $\det=+1$ \\
+BAI \code{banco/bai.sql} $=$ a cadeia
+  & analogia + cifra do gato; sem medidor do ouro branco \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+\texttt{nao localizada} $=$ procurou-se; a evidência não apareceu.
+\texttt{N/A} $=$ demonstrou-se que o suporte não admite o passo
+(aqui: blockchain / consenso / dupla despesa / as cinco peças do PoW,
+já cortados).
+Não se promove coincidência de letras.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Medidores}\label{cripto:medidores}
+
+\medido{Cifra e lado:
+\code{tests/ouro\_branco.c} §B1--§B6.
+Paragem, agentes, fronteira:
+\code{tests/smartcontract.c} §S1--§S6.
+Motor + identidade:
+\code{app/src/banco\_cristalchain\_u.js};
+\code{tests/cristalchain\_u.js}
+($20/0$; dono $=$ \code{id}; chave $>$ sessão;
+\code{kind=orbita}; \texttt{N/A} blockchain e PoW;
+Obs.~\ref{cripto:obs:livro-identidade}).
+PoW desmontado (Hashcash $\neq$ liquidação $\neq$ \code{MARTELO}):
+Obs.~\ref{cripto:obs:pow}--\ref{cripto:obs:martelo}.
+Trial da assinatura:
+\code{tests/trialidade.c}
+(e \code{tests/trialidade\_linguas.js}: $T^{3}$ não é a def).
+Volta do corpus (objecto distinto):
+\code{tests/cristal\_volta.js},
+\code{tests/cristal\_energia.js}.
+Lei local / $\mathrm{sha256}$ (objecto distinto):
+\code{app/src/banco\_lei\_local\_u.js};
+\code{univ:def:lei-local-canonica}.
+DTC (objecto distinto):
+\code{tests/dtcn.c}.
+Cristalino / família real (objectos distintos):
+\code{tests/cristalino.c}; \code{tests/familia\_real.c}.
+Mapa: §\ref{cripto:mapa}.
+Fecho de $\mathcal{U}$ (não reabrir):
+\code{univ:thm:composicao-fechos};
+\code{tests/grafo\_fecho\_u.js}.}
+
+\colunas{Teor.~\ref{cripto:thm:det},~\ref{cripto:thm:norma},~\ref{cripto:thm:paragem};
+Obs.~\ref{cripto:obs:i0},~\ref{cripto:obs:cinco-quadraticas},~\ref{cripto:obs:conservacoes},
+~\ref{cripto:obs:nome},~\ref{cripto:obs:livro-identidade},~\ref{cripto:obs:passo},
+~\ref{cripto:obs:pow},~\ref{cripto:obs:pow-i0},~\ref{cripto:obs:pow-pecas},
+~\ref{cripto:obs:pow-contas},~\ref{cripto:obs:martelo};
+Def.~\ref{cripto:def:livro-razao},~\ref{cripto:def:cadeia},~\ref{cripto:def:cifra-conserva}}
+        {ouro branco $\det=+1$; órbita $\bmod q=\pi(q)$;
+livro-razão por identidade; sem consenso, sem PoW e sem saldo económico}
+        {\code{ouro\_branco.c}, \code{smartcontract.c}, \code{cristalchain\_u.js}}
+
+\end{document}

@@ -229,6 +229,127 @@ ok('§C0 as catorze Partes do cat:indice', [
     lista.some((c) => c.canonico === 'ISA SQL' && c.camada === 'operacional'))
 }
 
+/* §C12 — schema U autossimilar; JSON canónico; parser no motor */
+{
+  const mot = corpos?.motor || {}
+  ok('§C12 schema U no disco',
+    mot.schema === 'conecthus/schema/u.schema.json' &&
+    existsSync(join(RAIZ, mot.schema)))
+  ok('§C12 instancia U no disco',
+    mot.schema_instancia === 'conecthus/schema/u.json' &&
+    existsSync(join(RAIZ, mot.schema_instancia)))
+  ok('§C12 parser de ficheiros no motor',
+    mot.parser === 'banco/parse_ficheiro.h' &&
+    existsSync(join(RAIZ, mot.parser)))
+  {
+    const inst = JSON.parse(readFileSync(join(RAIZ, mot.schema_instancia), 'utf8'))
+    const sch = JSON.parse(readFileSync(join(RAIZ, mot.schema), 'utf8'))
+    ok('§C12 instancia star=D; autossimilar $ref',
+      inst.kind === 'U' && inst.star === 'D' &&
+      sch.properties?.faces?.properties?.menos?.$ref === '#')
+    ok('§C12 Alonzo nao e U', inst.id !== 'Alonzo')
+  }
+}
+
+/* §C13 — ponte Manifesto ↔ U: M é projecção, não segundo canónico */
+{
+  const mot = corpos?.motor || {}
+  ok('§C13 ponte_u no disco',
+    mot.ponte_u === 'app/src/banco_manifesto_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_u)))
+  ok('§C13 medidor da ponte',
+    existsSync(join(RAIZ, 'tests', 'manifesto_u.js')))
+  {
+    const sch = JSON.parse(readFileSync(join(RAIZ, mot.schema || 'conecthus/schema/u.schema.json'), 'utf8'))
+    ok('§C13 kinds orbita/celula no schema',
+      sch.properties?.kind?.enum?.includes('orbita') &&
+      sch.properties?.kind?.enum?.includes('celula'))
+  }
+}
+
+/* §C14 — schema da página web (mesmo U; cliente/servidor no canal) */
+{
+  const mot = corpos?.motor || {}
+  ok('§C14 ponte_pagina no disco',
+    mot.ponte_pagina === 'app/src/banco_pagina_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_pagina)))
+  ok('§C14 instancia pagina no disco',
+    mot.schema_pagina === 'conecthus/schema/pagina.json' &&
+    existsSync(join(RAIZ, mot.schema_pagina)))
+  ok('§C14 kind pagina no schema; html/css/js formatos',
+    JSON.parse(readFileSync(join(RAIZ, mot.schema || 'conecthus/schema/u.schema.json'), 'utf8'))
+      .properties?.kind?.enum?.includes('pagina'))
+}
+
+/* §C15 — sessão remota: endereço + chave pública no mesmo U */
+{
+  const mot = corpos?.motor || {}
+  ok('§C15 ponte_sessao no disco',
+    mot.ponte_sessao === 'app/src/banco_sessao_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_sessao)))
+  ok('§C15 kind sessao; formatos sh/ps1',
+    JSON.parse(readFileSync(join(RAIZ, mot.schema || 'conecthus/schema/u.schema.json'), 'utf8'))
+      .properties?.kind?.enum?.includes('sessao') &&
+    JSON.parse(readFileSync(join(RAIZ, mot.schema || 'conecthus/schema/u.schema.json'), 'utf8'))
+      .properties?.formato?.enum?.includes('sh'))
+}
+
+/* §C17 — identidade operacional: chave > sessão > fingerprint > oauth (censo) */
+{
+  const mot = corpos?.motor || {}
+  const id = man.mvp?.identidade
+  ok('§C17 ponte_identidade no disco',
+    mot.ponte_identidade === 'app/src/banco_identidade_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_identidade)))
+  ok('§C17 censo: chave/sessao realizados; fingerprint candidato; oauth nao localizada',
+    /realizado/.test(id?.slots?.chave || '') &&
+    /realizado/.test(id?.slots?.sessao || '') &&
+    /candidato/.test(id?.slots?.fingerprint || '') &&
+    /nao localizada/.test(id?.slots?.oauth || '') &&
+    /nao e N\/A/.test(id?.slots?.oauth || ''))
+  ok('§C17 identidade != Exec; sem kind identidade no schema',
+    (/!= Exec/.test(id?.nota || '') || /!= Exec/.test(id?.proibicao || '')) &&
+    !JSON.parse(readFileSync(join(RAIZ, mot.schema || 'conecthus/schema/u.schema.json'), 'utf8'))
+      .properties?.kind?.enum?.includes('identidade'))
+  ok('§C17 ciclo: bind soft; recuperacao nao localizada; S_DEPOSITO opaco',
+    /soft/.test(id?.ciclo?.bind || '') &&
+    /nao localizada/.test(id?.ciclo?.recuperacao || '') &&
+    /9220/.test(id?.deposito || '') &&
+    /deposito\.bin/.test(man.mvp?.armazenamento?.deposito || ''))
+}
+
+/* §C16 — disco local (LS) e sync remoto S_ESTADO */
+{
+  const mot = corpos?.motor || {}
+  ok('§C16 ponte_disco no disco',
+    mot.ponte_disco === 'app/src/banco_disco.js' &&
+    existsSync(join(RAIZ, mot.ponte_disco)))
+  ok('§C16 ponte_sync no disco',
+    mot.ponte_sync === 'app/src/banco_sync.js' &&
+    existsSync(join(RAIZ, mot.ponte_sync)))
+  ok('§C16 ponte_maquina no disco',
+    mot.ponte_maquina === 'app/src/banco_maquina_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_maquina)))
+  ok('§C16 candidatos IDB/docker/mongo no mvp',
+    man.mvp?.realizacoes?.idb?.includes('nao localizada') &&
+    man.mvp?.realizacoes?.docker?.includes('nao localizada') &&
+    man.mvp?.realizacoes?.mongo?.includes('nao localizada'))
+  ok('§C16 ponte_varredura no disco (nao promove L_S)',
+    mot.ponte_varredura === 'app/src/banco_lei_local_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_varredura)))
+  ok('§C16 ponte_lei_unica + nucleo (sem promover Docker)',
+    mot.ponte_lei_unica === 'app/src/banco_lei_unica_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_lei_unica)) &&
+    mot.ponte_transf === 'app/src/banco_transf_u.js' &&
+    /realizado/.test(mot.nucleo?.retorno || '') &&
+    /nao localizada/.test(mot.nucleo?.M_Docker || ''))
+  ok('§C18 ponte_cristalchain no disco',
+    mot.ponte_cristalchain === 'app/src/banco_cristalchain_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_cristalchain)) &&
+    /realizado/.test(mot.nucleo?.cristalchain || '') &&
+    /blockchain/.test(mot.nucleo?.cristalchain || ''))
+}
+
 console.log('')
 if (!falhas) {
   console.log('  Censo: 14 palcos no manifesto; medidores no disco; linguas ≠ Partes;')
