@@ -202,6 +202,14 @@ static void secao_N3(const char *conf){
     ok("e nenhum alias para o espelho — não é um clone partido, é um clone que não existe",
        !tem_alias);
 
+    int tem_canal = strstr(tudo, "location = /canal") != NULL;
+    int tem_proxy = strstr(tudo, "proxy_pass http://127.0.0.1:47314") != NULL;
+    int tem_alias_canal = strstr(tudo, "alias /canal") != NULL;
+    printf("        location = /canal  %s   proxy 47314  %s   alias /canal  %s\n",
+           tem_canal?"sim":"NÃO", tem_proxy?"sim":"NÃO", tem_alias_canal?"AINDA":"nenhum");
+    ok("location = /canal — o SPA não come o Upgrade WSS", tem_canal);
+    ok("o canal é proxy ao loopback, não alias de ficheiro", tem_proxy && !tem_alias_canal);
+
     conclui("a mesma regra de casamento serviu o clone e agora fecha-o: o que mudou foi o corpo do bloco.");
 }
 

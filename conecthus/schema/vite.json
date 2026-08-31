@@ -1,0 +1,12 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "estatuto": "realizado",
+  "evidencia": "app/index.html; type=module /src/main.js; Vite hospedeiro; tests/vite_u.js",
+  "proibicao": "Vite != pagina-banco; GLSL/LaTeX capacidades tardias; nao kind novo",
+  "fonte": "app/index.html",
+  "nota": "Vite = hospedeiro; esqueleto realizado; app original || app ingerido (?gk=1 iframe)",
+  "triade": ["html", "css", "js"]
+}

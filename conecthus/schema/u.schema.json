@@ -100,6 +100,10 @@
       "items": { "type": "string" }
     },
     "endereco": { "type": "string" },
+    "tenant": {
+      "type": "string",
+      "description": "Contexto de hospedagem (subdomínio). ≠ id criptográfico ≠ K_i da fusão. Apex = string vazia. Nginx realiza; não é peça do motor."
+    },
     "modo": {
       "type": "string",
       "enum": ["solo", "remoto"],

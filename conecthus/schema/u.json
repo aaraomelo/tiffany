@@ -1,0 +1,45 @@
+{
+  "kind": "U",
+  "id": "U",
+  "sentido": 0,
+  "formato": "json",
+  "X": {
+    "dim": 8,
+    "base": "e_k=2^k",
+    "dobras": 3,
+    "leis": 8,
+    "coord": "<b,e_k>=(b>>k) AND 1",
+    "gram": "Id",
+    "endereco": "(x,k) horizontal/vertical"
+  },
+  "Xstar": {
+    "emparelhamento": "paridade(a AND b)",
+    "nao": "X* != V* != Duo"
+  },
+  "Mor": ["Hom", "Iso", "Diff", "Isom_mu", "Duo"],
+  "Aut": {
+    "estado": "G in V"
+  },
+  "star": "D",
+  "estatuto": "gramatica",
+  "proibicao": "U != catalogo != INGEST; nao e Parte; nao entra no bestiario; Star(U)=D != x^2=x+1",
+  "evidencia": "corpo_universal.tex univ:def:U",
+  "faces": {
+    "menos": {
+      "kind": "metade",
+      "id": "U",
+      "sentido": -1,
+      "formato": "json",
+      "estatuto": "gramatica",
+      "evidencia": "MOVE emite"
+    },
+    "mais": {
+      "kind": "metade",
+      "id": "U",
+      "sentido": 1,
+      "formato": "json",
+      "estatuto": "gramatica",
+      "evidencia": "MOVE absorve"
+    }
+  }
+}

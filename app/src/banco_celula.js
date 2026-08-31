@@ -1,8 +1,8 @@
-// banco_celula.js — célula sql: consultar.wasm na arena + GKBANCO (localStorage = DISCO).
+// banco_celula.js — célula sql: consultar.wasm na arena + GKBANCO (LS = disco; IDB só com flag).
 
 import { loadWasm, moveWasm } from './banco_move.js'
 import { manifestoAtual } from './manifesto_loader.js'
-import { discoBrowser, leEstado, gravaEstado } from './banco_disco.js'
+import { escolheDisco, leEstado, gravaEstado } from './banco_disco.js'
 
 let exSql = null
 let estado = null
@@ -11,10 +11,10 @@ let wasmBase = '/wasm/'
 
 export async function initCelula (opts = {}) {
   wasmBase = opts.wasmBase || wasmBase
-  disco = discoBrowser(opts)
+  disco = await escolheDisco(opts)
   const man = manifestoAtual()
   const wasmNome = man.mvp?.sql?.wasm || man.linguagens.find((l) => l.nome === 'sql')?.wasm || 'consultar.wasm'
-  if (!exSql) exSql = await loadWasm(wasmBase, wasmNome)
+  if (!exSql) exSql = await loadWasm(wasmBase, wasmNome, disco)
   estado = leEstado(disco)
   return exSql
 }

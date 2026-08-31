@@ -2,6 +2,10 @@
 
 import { initBancoSql, shellPadrao, SHELLS } from './banco_sql.js'
 import { abrirCanal } from './canal_browser.js'
+import { paramsDaSessao, urlCanal, modoDaSessao } from './banco_sessao_u.js'
+import { escolheDisco } from './banco_disco.js'
+import { ligaIdentidade } from './banco_identidade_u.js'
+import { integraCadeia } from './banco_cristalchain_u.js'
 import { aresta, traduz, carregaInstanciasPipe } from './banco_tradutor.js'
 import { traduzCadeia, paridadeWasmMetal } from './c_wasm_shell.js'
 import { execQueryCelula } from './banco_celula.js'
@@ -87,21 +91,42 @@ export async function initTerminal () {
       linha(String(e.message || e), 'dim')
     }
     try {
-      canal = abrirCanal()
-      ctx.canal = canal
-      await canal.grava(sh.slotIn, 0, 0)
-      const hex = canal.bandaHex()
-      if (hex) bandaEl.textContent = 'banda=' + hex
-      estadoEl.textContent = arenaOk ? 'arena+canal' : 'canal'
-      estadoEl.className = 'term-estado ok'
-      linha('canal · slots ' + sh.slotIn + '/' + sh.slotOut +
-        (ctx.remoto ? ' · remoto' : ' · local'), 'sys')
+      const disco = await escolheDisco()
+      const sess = paramsDaSessao()
+      const identidade = await ligaIdentidade(disco, { chave: sess.chave })
+      const cadeia = await integraCadeia(identidade, disco)
+      const nCadeia = cadeia.livro && cadeia.livro.registos.length
+        ? ' · cadeia ' + cadeia.livro.registos.length
+        : ''
+      if (modoDaSessao(sess) === 'remoto') {
+        canal = abrirCanal({
+          url: urlCanal(sess.endereco) || undefined,
+          pub: sess.chave || undefined,
+        })
+        ctx.canal = canal
+        await canal.grava(sh.slotIn, 0, 0)
+        const hex = canal.bandaHex()
+        if (hex) bandaEl.textContent = 'banda=' + hex
+        estadoEl.textContent = arenaOk ? 'arena+canal' : 'canal'
+        estadoEl.className = 'term-estado ok'
+        linha('canal · slots ' + sh.slotIn + '/' + sh.slotOut +
+          (ctx.remoto ? ' · remoto' : ' · local+sync') +
+          (identidade.camada ? ' · id ' + identidade.camada : '') + nCadeia, 'sys')
+      } else {
+        canal = null
+        ctx.canal = null
+        estadoEl.textContent = arenaOk ? 'M_wasm' : 'sem wasm'
+        estadoEl.className = arenaOk ? 'term-estado ok' : 'term-estado mau'
+        linha(arenaOk
+          ? 'solo · realização wasm + disco localStorage' + (identidade.camada ? ' · id ' + identidade.camada : '') + nCadeia
+          : 'sem arena', 'sys')
+      }
     } catch (e) {
       canal = null
       ctx.canal = null
-      estadoEl.textContent = arenaOk ? 'arena' : 'offline'
+      estadoEl.textContent = arenaOk ? 'M_wasm' : 'sem wasm'
       estadoEl.className = arenaOk ? 'term-estado ok' : 'term-estado mau'
-      linha(arenaOk ? 'arena wasm — sem canal' : 'sem arena', 'sys')
+      linha(arenaOk ? 'M_wasm — canal sem resposta, disco local' : 'sem arena', 'sys')
     }
   }
 

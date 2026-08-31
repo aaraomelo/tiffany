@@ -1,0 +1,18 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "reino",
+  "estatuto": "realizado",
+  "evidencia": "main.js sem localStorage; manifesto=descricao; ancora=URL; velEstado efemero; tests/estado_gk_u.js",
+  "proibicao": "S_ESTADO != sessao != livro != coord != fuse; nao fundir manifesto no fio; velEstado.v != GKBANCO.v",
+  "fonte": "app/src/manifesto.json",
+  "tenant": "",
+  "nota": "F2: GK = descricao + sessao + capacidades; iframe oraculo; S_ESTADO intocado",
+  "slots": {
+    "descricao": "realizado",
+    "sessao": "realizado",
+    "capacidades": "tardias"
+  }
+}

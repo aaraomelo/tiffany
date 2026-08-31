@@ -1,4 +1,4 @@
-// banco_parse.js — parser MOVE partilhado (browser + metal).
+// banco_parse.js — parser MOVE partilhado (realização wasm e remota).
 
 export function parseLiteral (text) {
   const m = text.match(/^'((?:''|[^'])*)'/)

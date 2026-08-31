@@ -1,6 +1,32 @@
 <main class="bk">
   <h1>Banco</h1>
-  <p class="bk-lede">Front completo via <strong>html</strong> + <strong>css</strong> + <strong>js</strong> — backends wasm do manifesto.</p>
+    <p class="bk-lede">Front completo via <strong>html</strong> + <strong>css</strong> + <strong>js</strong> — backends wasm do manifesto. Reino Vite em paralelo: <a href="?gk=1"><code>?gk=1</code></a> (o banco hospeda a entrada do GK neste tenant; navegação <code>#id</code> original no iframe).</p>
   <p id="bk-status" class="bk-status">a compor…</p>
   <button type="button" id="bk-btn" class="bk-btn">clique</button>
+  <section class="bk-shell" id="bk-shell">
+    <h2>Máquina</h2>
+    <p class="bk-lede">Solo (sem query): realização wasm. Terminal Patria: <code>?patria=1</code> — WSS same-origin <code>/canal</code> + chave pública do repo. Alias genérico: <code>wss://canal.patriatechnology.com/canal</code>. Remoto genérico: <code>addr</code>+<code>pub</code>.</p>
+    <p>
+      <label for="bk-sh">shell</label>
+      <select id="bk-sh">
+        <option value="bash">bash</option>
+        <option value="powershell">powershell</option>
+      </select>
+    </p>
+    <textarea id="bk-cmd" rows="4" placeholder="echo ok"></textarea>
+    <button type="button" id="bk-run" class="bk-btn">executa</button>
+    <pre id="bk-out" class="bk-out"></pre>
+  </section>
+  <section class="bk-shell" id="bk-contrato">
+    <h2>Contrato</h2>
+    <p class="bk-lede">Dois lados, objectos distintos. <strong>Partição</strong>: uma banda do canal parte-se em N pedaços complementares. <strong>Fusão</strong>: N chaves independentes (cada uma → <code>id_i</code>) produzem um compromisso colectivo — não é soma de Ed25519. Local: os botões. WSS: <code>?patria=1&amp;papel=coord</code> e <code>?papel=worker&amp;i=0</code>…<code>3</code>; fusão: acrescente <code>&amp;modo=fuse</code>.</p>
+    <p>canal/σ <code id="bk-canal">—</code></p>
+    <p>
+      <button type="button" id="bk-abre" class="bk-btn">abre partição</button>
+      <button type="button" id="bk-abre-fuse" class="bk-btn">abre fusão</button>
+      <button type="button" id="bk-corre" class="bk-btn">corre as N</button>
+      <button type="button" id="bk-fecha" class="bk-btn">fecha</button>
+    </p>
+    <pre id="bk-selo" class="bk-out">partição: 1 canal → N pedaços · fusão: N chaves → σ colectivo</pre>
+  </section>
 </main>

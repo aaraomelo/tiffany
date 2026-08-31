@@ -1,11 +1,12 @@
 // banco_absorve.js — absorção órbita a órbita (latex §W4 / sql arena / node §W10).
 // MOVE(−1) emite na arena; canal sincroniza slots; MOVE(+1) absorve. Sem string SQL adaptadora.
-// Qualquer língua do manifesto entra pela absorcao.move; shells (canal) no metal se remoto.
+// Qualquer língua do manifesto entra pela absorcao.move; shells (canal) na realização remota se remoto.
 
 import { moveByForma, moveNome, u8, NULO } from './banco_move.js'
 import { manifestoAtual } from './manifesto_loader.js'
 import { shellRemoto } from './banco_sql_interno.js'
-import { discoBrowser, leEstado, gravaEstado, gravaShell } from './banco_disco.js'
+import { discoBrowser, leEstado, gravaEstado, gravaShell, gravaWasmLS, leWasmLS } from './banco_disco.js'
+import { sincroniza } from './banco_sync.js'
 import { celulaDeWasm, secErgNome } from './wasm_sec_browser.js'
 import { correBackendMetal, fetchCorreErg } from './corre_metal_browser.js'
 
@@ -24,13 +25,20 @@ function eCanal (L) {
   return L.absorcao?.orbita === 'canal'
 }
 
-async function wasmBackend (nome, wasmBase = '/wasm/') {
+async function wasmBackend (nome, wasmBase = '/wasm/', storage) {
   const k = nome + '@' + wasmBase
   if (cache.has(k)) return cache.get(k)
   const L = linguaDoManifesto(nome)
-  const r = await fetch(wasmBase + L.wasm)
-  if (!r.ok) throw new Error('wasm ' + L.wasm + ': ' + r.status)
-  const wasm = new Uint8Array(await r.arrayBuffer())
+  let wasm
+  try {
+    const r = await fetch(wasmBase + L.wasm)
+    if (!r.ok) throw new Error('wasm ' + L.wasm + ': ' + r.status)
+    wasm = new Uint8Array(await r.arrayBuffer())
+    if (storage) await gravaWasmLS(storage, L.wasm, wasm)
+  } catch (e) {
+    wasm = storage ? await leWasmLS(storage, L.wasm) : null
+    if (!wasm) throw e
+  }
   const celula = celulaDeWasm(wasm, nome)
   const { instance } = await WebAssembly.instantiate(wasm)
   const pack = {
@@ -49,6 +57,15 @@ async function wasmBackend (nome, wasmBase = '/wasm/') {
   return pack
 }
 
+async function persisteGkbanco (nome, body, out, ctx) {
+  const st = discoBrowser(ctx)
+  const estado = leEstado(st)
+  gravaShell(estado, nome, body, out)
+  gravaEstado(estado, st, { limite: ctx.limite })
+  if (ctx.canal && ctx.remoto) {
+    await sincroniza(ctx.canal, st, { limite: ctx.limite })
+  }
+}
 /** Injeta stdout no protocolo da arena (mesmo layout que interpretar.c). */
 export function injetaStdoutArena (ex, texto) {
   const mem = u8(ex)
@@ -63,10 +80,10 @@ export function injetaStdoutArena (ex, texto) {
 /**
  * Absorve texto numa língua do manifesto (absorcao.move na arena).
  * ctx.motor: 'auto' (fita se embutida) | 'wasm' | 'fita' (isa+erg.fita)
- * ctx.remoto: com canal, envia script à Patria (pleno) — só órbita canal.
+ * ctx.remoto: com canal, envia script à realização remota (pleno) — só órbita canal.
  */
 export async function absorveBackend (nome, script, ctx = {}) {
-  const pack = await wasmBackend(nome, ctx.wasmBase)
+  const pack = await wasmBackend(nome, ctx.wasmBase, discoBrowser(ctx))
   const { ex, L, celula } = pack
   const fn = moveNome(L)
   const body = nome === 'bash' && script && !script.endsWith('\n') ? script + '\n' : (script ?? '')
@@ -75,26 +92,23 @@ export async function absorveBackend (nome, script, ctx = {}) {
 
   if (querFita && celula?.temFita) {
     const correErg = ctx.correErg ?? await fetchCorreErg(nome, ctx.ergBase)
-    const metal = await correBackendMetal(nome, body, {
+    const fita = await correBackendMetal(nome, body, {
       wasmBase: ctx.wasmBase,
       wasmCelula: pack,
       correErg,
       maxSteps: ctx.maxSteps,
     })
-    const st = discoBrowser(ctx)
-    const estado = leEstado(st)
-    gravaShell(estado, nome, body, metal.out)
-    gravaEstado(estado, st)
+    await persisteGkbanco(nome, body, fita.out, ctx)
     return {
-      out: metal.out,
+      out: fita.out,
       meta: {
-        via: metal.meta.via + '+GKBANCO',
+        via: fita.meta.via + '+GKBANCO',
         backend: nome,
         bytesIn: body.length,
-        bytesOut: metal.out.length,
+        bytesOut: fita.out.length,
         move: fn,
         motor: 'fita',
-        passos: metal.meta.passos,
+        passos: fita.meta.passos,
         celula,
         secErg: celula?.secErg,
         fitaLen: celula?.fitaLen ?? 0,
@@ -106,17 +120,18 @@ export async function absorveBackend (nome, script, ctx = {}) {
   let via = 'arena'
 
   if (eCanal(L) && ctx.canal && ctx.remoto) {
-    const raw = await shellRemoto(body, ctx.canal, nome)
-    injetaStdoutArena(ex, raw)
-    via = 'canal'
+    try {
+      const raw = await shellRemoto(body, ctx.canal, nome)
+      injetaStdoutArena(ex, raw)
+      via = 'canal'
+    } catch {
+      via = 'arena'
+    }
   }
 
   const out = moveByForma(ex, L, '', +1, 8192, 8192)
 
-  const st = discoBrowser(ctx)
-  const estado = leEstado(st)
-  gravaShell(estado, nome, body, out)
-  gravaEstado(estado, st)
+  await persisteGkbanco(nome, body, out, ctx)
 
   return {
     out,

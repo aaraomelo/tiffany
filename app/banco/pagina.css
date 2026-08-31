@@ -3,3 +3,8 @@
 .bk-status { color: #6c3aed; font-weight: 600; }
 .bk-btn { margin-top: 1rem; padding: 0.5rem 1rem; border: 1px solid #6c3aed; background: #f5f0ff; border-radius: 8px; cursor: pointer; }
 .bk-btn:hover { background: #ebe3ff; }
+.bk-shell { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd; }
+.bk-shell textarea, .bk-out { display: block; width: 100%; margin-top: 0.5rem; font: 0.9rem ui-monospace, monospace; }
+.bk-out { min-height: 4rem; padding: 0.75rem; background: #f7f7f8; border-radius: 8px; white-space: pre-wrap; }
+.bk-shell .bk-btn { margin-right: 0.5rem; }
+#bk-gk iframe { display: block; width: 100%; min-height: 70vh; margin-top: 0.5rem; border: 1px solid #ddd; border-radius: 8px; background: #fff; }

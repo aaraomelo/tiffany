@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "capacidade",
+  "estatuto": "realizado",
+  "evidencia": "relogio.js iniciaRelogio; avancaFase wrap AND 2^20; tests/relogio_u.js",
+  "proibicao": "relogio conhecido != modulo != consumidor != tique; F6 nao executa cena card ou GLSL; rAF unico no original; motor tique discreto; nao tocar banco_front/disco/S_ESTADO",
+  "nota": "F6: pulso; iframe oraculo; GLSL/LaTeX/cena fora"
+}

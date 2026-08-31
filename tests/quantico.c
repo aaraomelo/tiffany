@@ -83,18 +83,26 @@ int main(void){
     /* ── §Q3 E A PUREZA É EXACTA ────────────────────────────────────────── */
     {
         printf("\n§Q3  det ρ = 0 em todo estado --- a pureza sai em inteiros.\n\n");
-        long puros = 0, tot = 0;
+        long puros = 0, tot = 0, escala = 0, idem = 0;
         for(long a = -3; a <= 3; a++) for(long b = -3; b <= 3; b++)
         for(long c = -3; c <= 3; c++) for(long d = -3; d <= 3; d++){
             Psi p = psi(a,b,c,d);
             if(psi_nulo(p)) continue;
+            Rho r = psi_rho(p);
             tot++;
-            if(rho_puro(psi_rho(p))) puros++;
+            if(rho_puro(r)) puros++;
+            if(rho_escala_projector(r)) escala++;
+            if(rho_tr(r) == 1) idem++;
         }
         printf("      det ρ = ρ11·ρ22 − |ρ12|² = 0 em %ld/%ld estados\n", puros, tot);
+        printf("      ρ² = (tr ρ)ρ em %ld/%ld --- a mesma identidade, 2×2 hermitiana\n",
+               escala, tot);
+        printf("      ρ² = ρ (tr=1) em %ld/%ld --- só a norma um; não se assere Born\n",
+               idem, tot);
         printf("        e sai exacto, sem uma raiz: é a identidade de Lagrange nos\n"
-               "        quatro inteiros da amplitude\n");
-        ok("todo estado é puro, e a conta é exacta em inteiros", puros == tot);
+               "        quatro inteiros da amplitude. Projector escalado ≠ ρ²=ρ\n");
+        ok("todo estado é puro; ρ²=(tr ρ)ρ; ρ²=ρ só na norma 1",
+           puros == tot && escala == tot && idem > 0 && idem < tot);
     }
 
     /* ── §Q4 A RÉGUA DO QUÂNTICO: a ultramétrica dos ENDEREÇOS ─────────── */

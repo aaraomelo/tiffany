@@ -5,7 +5,10 @@
  * Não confundir com app/src/motor_campo.js (roupa WebGL no mesmo DISCO) nem com
  * tests/motor.c (medidor da Parte Mecânica: DTC/indução). Backends não copiam
  * a ULA: são roupas (MOVE/traduz). As 19 línguas da ISA ingerem-se por essa
- * porta; asm é degrau ERG de isa, não língua.
+ * porta; asm é degrau ERG de isa, não língua. Schema de U: JSON canónico
+ * (`conecthus/schema/u.schema.json`); PARSE / IMPORT PARSER / GET SCHEMA;
+ * IMPORT MANIFESTO / MANIFESTO -> U / U -> MANIFESTO (ponte M↔U);
+ * IMPORT PAGINA / PAGINA -> U / U -> PAGINA (tríade html/css/js).
  *
  * Nada aqui é simulado por cima de estruturas em memória: o SQL vira BYTECODE da ISA do
  * broca-so (ula/instrucoes.h), o bytecode vive num arquivo, a memória da máquina vive noutro
@@ -166,6 +169,7 @@
 #include "sql_api.h"    /* porta C para pgwire — captura de resultado */
 #include "pgcat.h"      /* Trio PG6: o catálogo de SESSÃO, antes do motor */
 #include "tiffany_node.h"  /* shells ingeridos: node/bash/pwsh via tiffany_shell.h */
+#include "parse_ficheiro.h" /* schema U autossimilar; PARSE ficheiro → JSON canónico */
 
 /* ── A CONSULTA DE DENTRO NÃO FALA ──────────────────────────────────────────
  * Uma subconsulta é um passo de outra, e não uma resposta ao cliente: as linhas
@@ -264,6 +268,14 @@ typedef char zonas_cabem_na_isa[(ZONA(4) <= ISA_TECTO) ? 1 : -1];
 #define S_CHUNK    (S_CANAL + 9102u)
 #define S_FRONT_REQ (S_CANAL + 9200u)
 #define S_FRONT_RSP (S_CANAL + 9201u)
+#define S_ESTADO_REQ (S_CANAL + 9210u)
+#define S_ESTADO_RSP (S_CANAL + 9211u)
+/* S_DEPOSITO: blob opaco de utilizador (bootstrap/OAuth como transporte).
+ * ≠ S_ESTADO (JSON GKBANCO operacional entre realizações que já partilham a banda).
+ * A Pátria deposita bytes; sem a banda o ficheiro não é JSON. Banda do fio
+ * continua sha256(bytes da pub) — sem prefixo gk:id:v1. */
+#define S_DEPOSITO_REQ (S_CANAL + 9220u)
+#define S_DEPOSITO_RSP (S_CANAL + 9221u)
 #define S_POOL_SH  (S_POOL + 20u)
 /* Blobs (cab/alvo/merkle/coinbase): índices FÍSICOS de átomo (atomos_* → slot_mem directo).
  * Não passam pelo stride-2 das Words ISA. Longe do mapa Word (S_LINHAS…). */
@@ -1018,7 +1030,8 @@ static struct sockaddr_in canal_dst;
  * mesmo, e o `sql teste` não muda. Para o barramento a sério (dois bancos, duas
  * máquinas) põe-se a interface na placa real:
  *
- *   TIFFANY_CANAL_GRUPO  o multicast (por omissão 239.7.31.27)
+ *   TIFFANY_TECIDO       banda = sha256(tecido) (omissão: "tecido por omissao")
+ *   TIFFANY_PUB          chave pública hex → banda = sha256(bytes); tem prioridade
  *   TIFFANY_CANAL_PORTA  a porta      (por omissão 47313)
  *   TIFFANY_CANAL_IF     a interface: "loopback" (omissão), "any" (0.0.0.0, a
  *                        placa que o SO escolher), ou um IP concreto da placa
@@ -1036,6 +1049,14 @@ static void canal_abre(void){
     if(canal_fd >= 0) return;
     banda_de(getenv("TIFFANY_TECIDO") ? getenv("TIFFANY_TECIDO") : "tecido por omissao",
              canal_banda);
+    {
+      const char *pub = getenv("TIFFANY_PUB");
+      if(pub && *pub && !banda_de_chave(pub, canal_banda)){
+        fprintf(stderr, "TIFFANY_PUB: hex invalida — uso tecido\n");
+        banda_de(getenv("TIFFANY_TECIDO") ? getenv("TIFFANY_TECIDO") : "tecido por omissao",
+                 canal_banda);
+      }
+    }
     const char *grupo = getenv("TIFFANY_CANAL_GRUPO"); if(!grupo || !*grupo) grupo = "239.7.31.27";
     const char *porta_s = getenv("TIFFANY_CANAL_PORTA");
     unsigned short porta = (porta_s && *porta_s) ? (unsigned short)atoi(porta_s) : 47313;
@@ -14265,6 +14286,262 @@ static int get_corpo(const char *p){
     return 1;
 }
 
+static int schema_poe_nodo(const SchemaNodo *n){
+    char entrada[320];
+    snprintf(entrada, sizeof entrada, "schema/%s|%s|%d|%s",
+             n->id[0] ? n->id : "?", n->kind, n->sentido, n->formato);
+    return poe_chave_texto(entrada);
+}
+
+static int import_parser(const char *p){
+    char cam[512], dest[1280], raiz[640];
+    FILE *t;
+    le_caminho_arg(&p, cam, sizeof cam, "conecthus/schema/u.schema.json");
+    t = fopen(cam, "rb");
+    if(!t){
+        snprintf(cam, sizeof cam, "../conecthus/schema/u.schema.json");
+        t = fopen(cam, "rb");
+    }
+    if(t) fclose(t);
+    else {
+        printf("nao abri schema: conecthus/schema/u.schema.json\n");
+        return 0;
+    }
+    corpo_dir(raiz, sizeof raiz);
+    mkdir(raiz, 0755);
+    snprintf(dest, sizeof dest, "%s/schema/u.schema.json", raiz);
+    if(!copia_ficheiro(cam, dest)){
+        printf("nao copiei schema para o disco\n");
+        return 0;
+    }
+    {
+        SchemaNodo u;
+        schema_preenche_u(&u);
+        schema_poe_nodo(&u);
+    }
+    printf("      IMPORT PARSER: schema U no disco (%s)\n", dest);
+    return 1;
+}
+
+static int cmd_parse(const char *p){
+    char cam[512], as[32] = "json";
+    int sentido = 0;
+    le_caminho_arg(&p, cam, sizeof cam, "");
+    if(!cam[0]){
+        printf("erro: PARSE pede um caminho\n");
+        return 0;
+    }
+    pula(&p);
+    if(!strncasecmp(p, "AS", 2) && (p[2] == 0 || isspace((unsigned char)p[2]))){
+        p += 2; pula(&p);
+        sscanf(p, "%31s", as);
+        while(*p && !isspace((unsigned char)*p)) p++;
+        pula(&p);
+    }
+    if(!strncasecmp(p, "SENTIDO", 7)){
+        p += 7; pula(&p);
+        sentido = (int)strtol(p, 0, 10);
+        if(sentido != -1 && sentido != 0 && sentido != 1) sentido = 0;
+    }
+    if(!schema_parse_ficheiro(cam, as, sentido, stdout)){
+        printf("erro: PARSE nao reconheceu «%s» como formato da casa\n", cam);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "PARSE: unknown house format"); }
+        return 0;
+    }
+    fflush(stdout);
+    {
+        SchemaNodo n;
+        long nb = 0;
+        char *buf = schema_le_ficheiro(cam, &nb);
+        if(buf){
+            schema_parse_nodo(cam, buf, nb, &n);
+            n.sentido = sentido;
+            if(sentido != 0) snprintf(n.kind, sizeof n.kind, "metade");
+            schema_poe_nodo(&n);
+            free(buf);
+        }
+    }
+    return 1;
+}
+
+static int get_schema(const char *p){
+    char id[64] = "U";
+    le_caminho_arg(&p, id, sizeof id, "U");
+    if(!id[0]) snprintf(id, sizeof id, "U");
+    {
+        const char *cands[] = {
+            "conecthus/schema/u.json",
+            "../conecthus/schema/u.json",
+            NULL
+        };
+        int i;
+        if(!strcmp(id, "U") || !strcmp(id, "u")){
+            for(i = 0; cands[i]; i++){
+                if(schema_parse_ficheiro(cands[i], "json", 0, stdout)){
+                    fflush(stdout);
+                    return 1;
+                }
+            }
+        }
+        if(!strcmp(id, "pagina") || !strcmp(id, "PAGINA")){
+            const char *pcands[] = {
+                "conecthus/schema/pagina.json",
+                "../conecthus/schema/pagina.json",
+                NULL
+            };
+            for(i = 0; pcands[i]; i++){
+                if(schema_parse_ficheiro(pcands[i], "json", 0, stdout)){
+                    fflush(stdout);
+                    return 1;
+                }
+            }
+        }
+    }
+    printf("GET SCHEMA: instancia «%s» nao localizada\n", id);
+    return 0;
+}
+
+/* Ponte Manifesto ↔ U: o conversor é JS (JSON já parseado); o motor chama o
+ * node ingerido. Não adivinha Hebb; M é projecção, não segundo schema. */
+static int acha_relativo(const char *rel, char *out, size_t cap){
+    const char *pre[] = { "", "../", "./", NULL };
+    int i;
+    for(i = 0; pre[i]; i++){
+        snprintf(out, cap, "%s%s", pre[i], rel);
+        {
+            FILE *t = fopen(out, "rb");
+            if(t){ fclose(t); return 1; }
+        }
+    }
+    snprintf(out, cap, "%s", rel);
+    return 0;
+}
+static int pula_seta(const char **p){
+    pula(p);
+    if((*p)[0] == '-' && (*p)[1] == '>'){ *p += 2; pula(p); return 1; }
+    return 0;
+}
+static int ponte_node_mjs(const char *mjs_rel, const char *modo, const char *arg, const char *tag){
+    char mjs[768], run[2048];
+    FILE *f;
+    int c, st;
+    if(!acha_relativo(mjs_rel, mjs, sizeof mjs)){
+        printf("erro: %s nao localizada\n", mjs_rel);
+        return 0;
+    }
+    snprintf(run, sizeof run, "\"%s\" \"%s\" %s \"%s\"",
+             tiffany_node_bin(), mjs, modo, arg);
+    f = popen(run, "r");
+    if(!f){
+        printf("erro: ponte %s: popen\n", tag);
+        return 0;
+    }
+    while((c = fgetc(f)) != EOF) fputc(c, stdout);
+    fflush(stdout);
+    st = pclose(f);
+    if(st != 0){
+        printf("erro: ponte %s saiu %d\n", tag, st);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err, "%s: node ponte failed", tag); }
+        return 0;
+    }
+    return 1;
+}
+static int ponte_manifesto_u(const char *modo, const char *arg){
+    return ponte_node_mjs("tools/manifesto_u.mjs", modo, arg, "Manifesto");
+}
+static int import_manifesto(const char *p){
+    char cam[512], dest[1280], raiz[640];
+    FILE *t;
+    le_caminho_arg(&p, cam, sizeof cam, "conecthus/backends/manifesto.json");
+    t = fopen(cam, "rb");
+    if(!t){
+        snprintf(cam, sizeof cam, "../conecthus/backends/manifesto.json");
+        t = fopen(cam, "rb");
+    }
+    if(t) fclose(t);
+    else {
+        printf("nao abri manifesto: conecthus/backends/manifesto.json\n");
+        return 0;
+    }
+    corpo_dir(raiz, sizeof raiz);
+    mkdir(raiz, 0755);
+    snprintf(dest, sizeof dest, "%s/manifesto.json", raiz);
+    if(!copia_ficheiro(cam, dest)){
+        printf("nao copiei manifesto para o disco\n");
+        return 0;
+    }
+    poe_chave_texto("manifesto/corpos|orbitas=sql,latex,node");
+    printf("      IMPORT MANIFESTO: no disco (%s)\n", dest);
+    return 1;
+}
+static int cmd_manifesto_para_u(const char *p){
+    char cam[512];
+    le_caminho_arg(&p, cam, sizeof cam, "");
+    if(!cam[0] && !acha_relativo("conecthus/backends/manifesto.json", cam, sizeof cam)){
+        printf("erro: manifesto nao localizada\n");
+        return 0;
+    }
+    return ponte_manifesto_u("para-u", cam);
+}
+static int cmd_u_para_manifesto(const char *p){
+    char cam[512];
+    le_caminho_arg(&p, cam, sizeof cam, "");
+    if(!cam[0]){
+        printf("erro: U -> MANIFESTO pede um caminho do nodo U\n");
+        return 0;
+    }
+    return ponte_manifesto_u("para-m", cam);
+}
+static int import_pagina(const char *p){
+    char dir[512], pedido[512], dest[1280], raiz[640], de[768];
+    const char *nomes[] = { "pagina.html", "pagina.css", "pagina.js" };
+    int i, n = 0;
+    le_caminho_arg(&p, pedido, sizeof pedido, "app/banco");
+    if(!acha_relativo(pedido[0] ? pedido : "app/banco", dir, sizeof dir)){
+        if(!acha_relativo("app/banco", dir, sizeof dir)){
+            printf("nao abri pagina: app/banco\n");
+            return 0;
+        }
+    }
+    corpo_dir(raiz, sizeof raiz);
+    mkdir(raiz, 0755);
+    snprintf(dest, sizeof dest, "%s/pagina", raiz);
+    mkdir(dest, 0755);
+    for(i = 0; i < 3; i++){
+        char para[1400];
+        snprintf(de, sizeof de, "%s/%s", dir, nomes[i]);
+        snprintf(para, sizeof para, "%s/%s", dest, nomes[i]);
+        if(copia_ficheiro(de, para)) n++;
+    }
+    if(!n){
+        printf("nao copiei pagina.{html,css,js}\n");
+        return 0;
+    }
+    poe_chave_texto("pagina/triade|html,css,js");
+    printf("      IMPORT PAGINA: %d ficheiros (%s)\n", n, dest);
+    return 1;
+}
+static int cmd_pagina_para_u(const char *p){
+    char cam[512];
+    le_caminho_arg(&p, cam, sizeof cam, "");
+    if(!cam[0] && !acha_relativo("app/banco", cam, sizeof cam)){
+        printf("erro: pagina nao localizada\n");
+        return 0;
+    }
+    return ponte_node_mjs("tools/pagina_u.mjs", "para-u", cam, "Pagina");
+}
+static int cmd_u_para_pagina(const char *p){
+    char cam[512];
+    le_caminho_arg(&p, cam, sizeof cam, "");
+    if(!cam[0]){
+        printf("erro: U -> PAGINA pede um caminho do nodo U\n");
+        return 0;
+    }
+    return ponte_node_mjs("tools/pagina_u.mjs", "para-p", cam, "Pagina");
+}
+
 /* ---------------- SHELL backends: BASH / POWERSHELL / NODE (wasm + pleno) */
 static void shell_dir(char *out, size_t cap, const char *nome){
     snprintf(out, cap, "%s_%s", g_base[0] ? g_base : "/tmp/sql_shell", nome);
@@ -15527,21 +15804,25 @@ static int executa(const char *sql){
         if(!strncasecmp(q, "LINGUAGENS", 10)) return import_linguagens(q+10);
         if(!strncasecmp(q, "CORPO", 5)) return import_corpo(q+5);
         if(!strncasecmp(q, "IDIOMA", 6)) return import_idioma(q+6);
-        printf("erro: `IMPORT` sabe três formas — LINGUAGENS, CORPO e IDIOMA — e veio"
+        if(!strncasecmp(q, "PARSER", 6)) return import_parser(q+6);
+        if(!strncasecmp(q, "MANIFESTO", 9)) return import_manifesto(q+9);
+        if(!strncasecmp(q, "PAGINA", 6)) return import_pagina(q+6);
+        printf("erro: `IMPORT` sabe LINGUAGENS, CORPO, IDIOMA, PARSER, MANIFESTO, PAGINA — e veio"
                " «%.30s» — RECUSADO.\n", q);
         if(sql_cap){ sql_cap->ok = 0;
             snprintf(sql_cap->err, sizeof sql_cap->err,
-                     "IMPORT: known forms are LINGUAGENS, CORPO, IDIOMA"); }
+                     "IMPORT: known forms are LINGUAGENS, CORPO, IDIOMA, PARSER, MANIFESTO, PAGINA"); }
         return 0;
     }
     if(palavra(&p, "GET")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "CORPO", 5)) return get_corpo(q+5);
-        printf("erro: `GET` sabe uma forma só — `GET CORPO <caminho>` — e veio"
+        if(!strncasecmp(q, "SCHEMA", 6)) return get_schema(q+6);
+        printf("erro: `GET` sabe `GET CORPO` e `GET SCHEMA` — e veio"
                " «%.30s» — RECUSADO.\n", q);
         if(sql_cap){ sql_cap->ok = 0;
             snprintf(sql_cap->err, sizeof sql_cap->err,
-                     "GET: only `GET CORPO <path>` is known"); }
+                     "GET: known forms are CORPO and SCHEMA"); }
         return 0;
     }
     /* ── O COMANDO RECONHECIDO QUE NÃO RESPONDE NEM RECUSA ───────────────────
@@ -15567,6 +15848,38 @@ static int executa(const char *sql){
         return 0;
     }
     if(palavra(&p, "CORPOS")) return insere_corpos();
+    if(palavra(&p, "PARSE")) return cmd_parse(p);
+    if(palavra(&p, "MANIFESTO")){
+        pula_seta(&p);
+        if(palavra(&p, "U")) return cmd_manifesto_para_u(p);
+        printf("erro: `MANIFESTO` sabe `MANIFESTO -> U` — e veio"
+               " «%.30s» — RECUSADO.\n", p);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "MANIFESTO: known form is MANIFESTO -> U"); }
+        return 0;
+    }
+    if(palavra(&p, "PAGINA")){
+        pula_seta(&p);
+        if(palavra(&p, "U")) return cmd_pagina_para_u(p);
+        printf("erro: `PAGINA` sabe `PAGINA -> U` — e veio"
+               " «%.30s» — RECUSADO.\n", p);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "PAGINA: known form is PAGINA -> U"); }
+        return 0;
+    }
+    if(palavra(&p, "U")){
+        pula_seta(&p);
+        if(palavra(&p, "MANIFESTO")) return cmd_u_para_manifesto(p);
+        if(palavra(&p, "PAGINA")) return cmd_u_para_pagina(p);
+        printf("erro: `U` sabe `U -> MANIFESTO` e `U -> PAGINA` — e veio"
+               " «%.30s» — RECUSADO.\n", p);
+        if(sql_cap){ sql_cap->ok = 0;
+            snprintf(sql_cap->err, sizeof sql_cap->err,
+                     "U: known forms are U -> MANIFESTO and U -> PAGINA"); }
+        return 0;
+    }
     if(palavra(&p, "CABECALHO")) return cabecalho(p);
     if(palavra(&p, "MARTELO")) return martelo(p);
     if(palavra(&p, "MINERA")) return minera(p);

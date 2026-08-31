@@ -1,0 +1,14 @@
+{
+  "kind": "realizacao",
+  "id": "borda",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "hospedagem",
+  "estatuto": "realizado",
+  "evidencia": "app/nginx/goldenkingdom.conf; host→tenant→rota; tests/tenant_u.js",
+  "proibicao": "tenant != id != K_i; Nginx != motor; wildcard != chave; ERP tenantId != tenant DNS",
+  "fonte": "goldenkingdom.patriatechnology.com",
+  "endereco": "goldenkingdom.patriatechnology.com",
+  "tenant": "",
+  "nota": "Vite F0 → borda F0.5 → capacidades GK; iframe andaime; wildcard catalogado, cert do apex nao cobre 4 labels"
+}

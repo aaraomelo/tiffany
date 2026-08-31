@@ -144,6 +144,15 @@ $\lvert\det\rvert=1$ da Lei~4 / volume
 Nenhuma das quatro linhas é conservação de valor económico.
 \end{observacao}
 
+\begin{observacao}[I0 --- PoW não é este palco]\label{cripto:obs:i0-pow}
+$H(\mathrm{header})<T$ não é a cifra nem o livro.
+A pergunta isolada --- «existe objecto no repo que
+satisfaça uma peça do PoW?» --- vive em
+§\ref{cripto:pow}, Obs.~\ref{cripto:obs:pow-tabela}.
+As cinco peças na Cadeia continuam \texttt{N/A}
+(Obs.~\ref{cripto:obs:pow-pecas}): \textbf{não se reverte}.
+\end{observacao}
+
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Definição --- o que a cadeia já era}\label{cripto:def}
 
@@ -319,6 +328,30 @@ sítio & o que faz (e o que \textbf{não} é) \\
     selector $\mathrm{sha256}$, \textbf{não} a cifra \\
 \code{tests/cristalchain\_u.js}
   & medidor do motor + identidade \\
+\code{app/src/banco\_coord\_u.js},
+\code{tests/cristalchain\_coord\_u.js}
+  & job em faixas; livro $=$ atribuição;
+    resultado no banco; \textbf{não} consenso
+    (Obs.~\ref{cripto:obs:coord}) \\
+\code{tests/cristalchain\_coord\_remoto\_u.js}
+  & 4 discos isolados; \code{S\_ESTADO} cego ao recibo;
+    entrega KV junta o monolito
+    (Obs.~\ref{cripto:obs:coord-remoto}) \\
+\code{app/src/banco\_selo\_u.js},
+\code{tests/cristalchain\_coord\_selo\_u.js}
+  & $1$ canal $\to N$ partes; todos carregam $K$;
+    fecha só com as $N$; uma forja derruba o conjunto
+    (Obs.~\ref{cripto:obs:coord-nqubits}) \\
+\code{app/src/banco\_coord\_canal.js},
+\code{tests/cristalchain\_coord\_wss\_u.js}
+  & $N$ clientes no mesmo \code{/canal}; fan-out WSS;
+    selo fecha; \textbf{não} reabre a Def.~\ref{cripto:def:cadeia}
+    (Obs.~\ref{cripto:obs:coord-wss}) \\
+\code{app/src/banco\_fuse\_u.js},
+\code{tests/cristalchain\_coord\_fuse\_u.js}
+  & $N$ chaves independentes $\to\sigma$ colectivo;
+    $\mathsf{Fuse}\neq$ \code{separaChave}; $\neq$ soma em $\mathbb{Z}_{2^{256}}$
+    (Obs.~\ref{cripto:obs:coord-fuse}) \\
 \code{tests/trialidade.c}
   & $S_3$ dos eixos; sobe a assinatura, \textbf{não} Duo \\
 \code{tests/trialidade\_linguas.js}
@@ -351,6 +384,9 @@ sítio & o que faz (e o que \textbf{não} é) \\
 \code{banco/sql.c} \code{OP\_MARTELO}
   & Hashcash no banco: $H(\mathrm{header})<T$ (80+32 átomos);
     \textbf{não} a Cadeia de Cristais (Obs.~\ref{cripto:obs:martelo}) \\
+\code{lib/stratum.h}
+  & cliente de pool; \code{MINERA}; \textbf{não} o livro
+    (Obs.~\ref{cripto:obs:stratum}) \\
 \code{cristal/cristal\_*.tex}, \code{cristal.jsonl}
   & wiki: nome, joalheria, GoldChain$\to$classe; papers prometidos ausentes \\
 \code{enredo.tex}, \code{curriculo/}
@@ -487,6 +523,261 @@ como realização da Def.~\ref{cripto:def:cadeia}:
 PoW desmonta-se à parte (Obs.~\ref{cripto:obs:pow}):
 Hashcash pode existir sem cadeia Nakamoto,
 e o \code{MARTELO} do banco não é este livro.
+\end{observacao}
+
+\subsection{Coordenação $\neq$ consenso}\label{cripto:coord}
+
+Não se acrescenta nada à Def.~\ref{cripto:def:cadeia}.
+A pergunta não é «usar a Cadeia como blockchain».
+É: o livro-razão idempotente, identificado por \code{id},
+pode registar o estado de liquidações de um trabalho
+partido, sobre o transporte que o motor \textbf{já tem}?
+\[
+\boxed{\;
+\text{distribuição de trabalho}
+\neq
+\text{consenso}
+\;}
+\]
+\[
+\boxed{\;
+\text{rede}\to\text{banco}\to\text{Cadeia de Cristais}
+\qquad\text{e não}\qquad
+\text{Cadeia}\to\text{inventar uma rede}
+\;}
+\]
+
+\begin{observacao}[atribuição no livro; resultado no banco]\label{cripto:obs:coord}
+Um job $J$ parte-se em faixas $J_i$; cada worker, pelo seu \code{id},
+recebe uma liquidação nomeada $(id_i,J_i)\to R_i$.
+O resultado numérico volta ao banco, \textbf{fora} de \texttt{Liquidacao}.
+\[
+\boxed{\;
+J\mapsto(id_i,\;R_i,\;\text{estado})
+\;}
+\]
+$R_i$ continua a ser liquidação de termos de grau~$2$
+(testemunha \code{ouro}); a faixa $\{a,\ldots,b\}$ \textbf{não}
+entra em \texttt{liquida}.
+A companheira $B$ \textbf{não} distribui trabalho.
+Idempotência já medida: $\mathrm{liquida}(id,J)=\mathrm{liquida}(id,J)$
+na segunda execução, $\mathrm{acrescentou}=0$.
+Medido em \code{app/src/banco\_coord\_u.js},
+\code{tests/cristalchain\_coord\_u.js}:
+$J=\{0,\ldots,9999\}$, quatro faixas, quatro \code{id}s;
+junta $=$ monolito $49995000$; reconectar não corrompe.
+\caixa{%
+\begin{tabular}{@{}ll@{}}
+livro por \code{id} como atribuição
+  & \textbf{realizado} \\
+resultado do job como \texttt{Liquidacao}
+  & \texttt{nao localizada} \\
+$B$ distribui trabalho
+  & \texttt{nao localizada} \\
+coordenação $=$ consenso
+  & \texttt{N/A}
+    (Obs.~\ref{cripto:obs:nao-blockchain}) \\
+\end{tabular}%
+}
+Prefixo \code{gk:banco:coord:} $\neq$
+\code{gk:banco:cristalchain:}.
+O medidor é \textbf{um banco, quatro \code{id}s} --- o mesmo
+processo, o mesmo disco. \textbf{Não} são quatro browsers remotos.
+\[
+\boxed{\;
+\begin{array}{c}
+1\text{ banco},\ 4\ \mathrm{id}\text{ --- demonstrado}\\
+4\text{ discos isolados: }
+\text{\code{S\_ESTADO} cego; entrega KV sim}\\
+\text{WSS ao vivo: não}
+\end{array}
+\;}
+\]
+O modelo de atribuição funciona no banco partilhado.
+A pergunta seguinte --- sem mexer no núcleo --- é se o recibo
+basta quando o worker deixa de partilhar processo/disco.
+Estatuto: \code{coord\_distribuida} $=$ \texttt{candidato}.
+Não é capítulo.
+\end{observacao}
+
+\begin{observacao}[recibo local $\not\to$ \code{S\_ESTADO}]\label{cripto:obs:coord-remoto}
+Quatro discos isolados, quatro \code{id}s
+(\code{tests/cristalchain\_coord\_remoto\_u.js}, $12/0$).
+O worker liquida no \emph{seu} disco; o coordenador começa vazio.
+O fio que o motor já tem, \code{S\_ESTADO}, transporta
+\code{gk:banco:estado} (shells, página, pendente) ---
+\textbf{não} \code{gk:banco:cristalchain:} nem
+\code{gk:banco:coord:}.
+\[
+\boxed{\;
+\text{recibo local}
+\not\longrightarrow
+\text{\code{S\_ESTADO}}
+\qquad
+\text{entrega KV}
+\longrightarrow
+\text{junta}=\text{monolito}
+\;}
+\]
+O estado adicional que o transporte remoto exige é a chave KV
+da peça (e, se o coordenador quiser auditar $R_i$, a chave do livro).
+Não se mete o recibo dentro do JSON de estado: isso seria fundir
+objectos. WSS/Patria transportam o fio; o \code{DOM} não espera
+\code{S\_ESTADO\_RSP} (\code{sincronizaEmFundo}).
+\[
+\boxed{\;
+\text{estado remoto é eventual};
+\quad
+\text{DOM não depende dele}
+\;}
+\]
+O primeiro paint também não puxa coord, selo, fuse, metal nem isa
+(\code{capacidadesPosPaint}; \code{tests/disco\_sync.js}).
+\[
+\boxed{\;
+\text{primeiro paint não depende das capacidades não usadas}
+\;}
+\]
+\code{S\_ESTADO} não é barramento de identidade, coordenação nem
+da Def.~\ref{cripto:def:cadeia}.
+\end{observacao}
+
+\begin{observacao}[o selo fecha o contrato das $N$ partes]\label{cripto:obs:coord-nqubits}
+A álgebra já medida em \code{tests/selo.c} (resíduo~$0$;
+Obs.~\code{obs:selo}) aplica-se ao job:
+uma chave do canal parte-se em $N$ que se complementam;
+todos carregam a do canal; o contrato só fecha na junção.
+\[
+\boxed{\;
+\sum_{i=0}^{N-1}s_i + K_{\mathrm{canal}}\equiv 0
+\qquad
+\text{fecha} \iff \text{as }N\text{ + canal}
+\;}
+\]
+Medido em \code{banco\_selo\_u.js} /
+\code{tests/cristalchain\_coord\_selo\_u.js}:
+falta uma $\Rightarrow$ não fecha (mesmo podendo recuperar a última,
+§S4); uma forja derruba o conjunto (\code{validacao\_n\_qubits});
+sem o canal a falta é livre, com ele é única (§S5).
+A banda do canal \textbf{não} é o \code{id} do livro:
+quatro workers, quatro livros, uma $K_{\mathrm{canal}}$ partilhada.
+Não se mete no JSON \code{S\_ESTADO} --- as partes viajam na entrega KV
+ou no par \code{S\_COORD} do barramento.
+O selo no job está realizado; o transporte WSS é a
+Obs.~\ref{cripto:obs:coord-wss}.
+\end{observacao}
+
+\begin{observacao}[WSS transporta as $N$, não altera a cadeia]\label{cripto:obs:coord-wss}
+O loopback \code{/canal} retransmite a trama aos outros sockets
+(sem eco ao emissor). $N$ clientes no mesmo barramento, cada um com
+$(id_i,s_i,R_i)$; o coordenador junta e
+\[
+\boxed{\;
+\sum_i s_i+K_{\mathrm{canal}}\equiv 0\pmod{2^{256}}
+\;}
+\]
+Medido em \code{tests/cristalchain\_coord\_wss\_u.js}
+(4 workers + coord; junta $=$ monolito; selo fecha).
+Não reabre a Def.~\ref{cripto:def:cadeia}.
+Quatro browsers: \code{?patria=1\&papel=coord} e
+\code{?patria=1\&papel=worker\&i=}$0..3$.
+A chave pública da Pátria (\code{app/banco/patria.json}) é a banda
+partilhada, não o texto OpenSSH.
+\[
+\boxed{\;
+\text{coordenação distribuída por WSS}
+=
+\text{realizada no MVP}
+\;}
+\]
+Alias genérico em produção: \code{canal.patriatechnology.com}
+(\code{location = /canal} no nginx; o SPA não come o Upgrade).
+A página do contrato: \code{https://goldenkingdom.patriatechnology.com/banco/}.
+\code{coord\_distribuida} passa a \texttt{realizado}.
+\end{observacao}
+
+\begin{observacao}[$N$ chaves independentes $\to$ compromisso colectivo]\label{cripto:obs:coord-fuse}
+A partição
+\[
+\boxed{\;K_{\mathrm{canal}}\longrightarrow(s_0,s_1,s_2,s_3)\;}
+\]
+é clone: as $s_i$ derivam de uma origem comum. O selo prova que as
+quatro partes fecham juntas; \textbf{não} prova que quatro identidades
+originaram o contrato.
+O outro lado:
+\[
+\boxed{\;
+K_i\longrightarrow id_i\longrightarrow R_i
+\qquad
+\mathsf{Fuse}(K_0,\ldots,K_{N-1})\longrightarrow\sigma
+\;}
+\]
+Cada $K_i$ é independente e determina o seu $id_i$ (o mesmo mapa da
+identidade: \code{hex}(\code{sha256}(bytes))). Remover $K_i$ impede o
+fecho; alterar $K_i$ invalida $\sigma$; a mesma chave duas vezes é
+clone, não $N$ identidades; os $id_i$ não se apagam.
+$\mathsf{Fuse}$ \textbf{não} soma chaves em $\mathbb{Z}_{2^{256}}$ e
+\textbf{não} trata Ed25519 como grupo: é
+\code{sha256}(\code{fuse:v1}$\|N\|$ pares $id\|C$ ordenados).
+Medido em \code{banco\_fuse\_u.js} /
+\code{tests/cristalchain\_coord\_fuse\_u.js}.
+Na página: \code{abre fusão}; WSS \code{?modo=fuse}.
+Não reabre a Def.~\ref{cripto:def:cadeia}.
+\end{observacao}
+
+\begin{observacao}[superposição e emaranhamento não são desta ficha]\label{cripto:obs:coord-quantica}
+Se a pergunta for superposição ou emaranhamento, o sítio é o
+\textbf{palco quântico} (\code{fisica.tex}, depois de Partículas) ---
+não a Def.~\ref{cripto:def:cadeia} e não o medidor de faixas.
+\[
+\boxed{\;
+\begin{array}{c}
+\text{amplitudes em }\mathbf{P}^{1}
+\neq
+\text{superposição em }V
+\neq
+\text{partir }J\text{ em faixas}\\[0.4em]
+\text{Bell / }C
+\neq
+4\ \mathrm{id}\text{ no mesmo banco}
+\end{array}
+\;}
+\]
+Superposição quântica: \texttt{parcial} em Partículas
+(\code{fis:quantica-contrato}).
+Superposição em $V$: Teor.~\code{fis:thm:combina} (Redes) ---
+\textbf{não} $\mathbf{P}^{1}$.
+Emaranhamento / GHZ / Bell IBM: metal,
+\textbf{não} gramática de $\mathcal{U}$;
+Born-\emph{regra} \texttt{nao localizada}.
+Quatro \code{id}s a liquidar faixas \textbf{não} realizam
+um estado emaranhado.
+\[
+\boxed{\;
+(id_i,R_i,\text{estado})
+\neq
+\rho
+\qquad
+\text{Bell}/C
+\neq
+4\text{ workers}
+\;}
+\]
+Três camadas, independentes neste suporte:
+\[
+\boxed{\;
+\begin{array}{c}
+\text{Cadeia: }id\to R_i\to B^{k},\ \det(B^{k})=+1\\
+\text{coord: }J\to J_i\to(id_i,R_i,\text{estado})\\
+\text{palco: }\lvert\psi\rangle\to\text{superposição}\to\text{observável}\to p_i
+\end{array}
+\;}
+\]
+Os cruzamentos \textbf{não} foram demonstrados:
+\texttt{nao localizada} aqui \textbf{não} afirma «não há relação nenhuma»;
+afirma que o suporte actual não dá evidência para promover a relação
+a elo estrutural.
+Elo «coord $=$ palco quântico»: \texttt{nao localizada}.
 \end{observacao}
 
 \begin{proposicao}[a fronteira faz parte do resultado]\label{cripto:prop:fronteira}
@@ -714,6 +1005,208 @@ Elo «\code{MARTELO} $=$ cifra da cadeia»:
 a wiki «bloco minerado a frio» já estava neste estatuto).
 \end{observacao}
 
+\subsection{I0 --- clássico / cadeia / outro objecto}\label{cripto:pow-i0-tabela}
+
+A pergunta \textbf{não} é «como transformar a Cadeia em PoW».
+É: existe algum objecto \emph{já no repo} que satisfaça
+genuinamente uma das cinco peças?
+
+\begin{observacao}[tabela das cinco peças, três colunas]\label{cripto:obs:pow-tabela}
+A coluna da Cadeia \textbf{não se reabre}:
+cinco vezes \texttt{N/A} (Obs.~\ref{cripto:obs:pow-pecas}).
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{0.15\textwidth}p{0.22\textwidth}p{0.22\textwidth}p{0.31\textwidth}@{}}
+\toprule
+peça
+  & PoW clássico Nakamoto
+  & Cadeia de Cristais
+  & outro objecto no repo? \\
+\midrule
+trabalho computacional
+  ($H(\mathrm{header})<T$)
+  & busca de $n$;
+    testemunha $(h,n)$
+  & \texttt{N/A}
+  & \code{OP\_MARTELO}:
+    \textbf{realizado}
+    (Hashcash; 80+32;
+    $\mathrm{SHA256}^{2}$) \\
+dificuldade ($T$)
+  & alvo; $d$ encarece achar
+  & \texttt{N/A}
+    ($\pi(q)$, $\det=+1$
+    não são $T$)
+  & \code{S\_ALVO} 32~átomos:
+    \textbf{realizado} no martelo;
+    \texttt{N/A} na cadeia \\
+verificação barata
+  & um $H$
+  & \texttt{N/A}
+    (mesma classe $O(\pi(q))$)
+  & \code{VERIFICA}:
+    \textbf{realizado}
+    (um $\mathrm{SHA256}^{2}$) \\
+selecção entre histórias
+  & cadeia mais pesada
+  & \texttt{N/A}
+    (um livro; sem forks)
+  & \texttt{N/A} no martelo
+    (sem histórias;
+    pool externo $\neq$ este objecto) \\
+consenso
+  & pares convergem
+  & \texttt{N/A}
+    (sem rede)
+  & \texttt{N/A} no martelo
+    (\code{MINERA} é cliente
+    de pool alheio) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{observacao}
+
+\begin{definicao}[Hashcash do banco, objecto à parte]\label{cripto:def:martelo}
+\code{banco/sql.c} \code{OP\_MARTELO} é Hashcash
+(Back, 1997) no formato Nakamoto (2008):
+\[
+\boxed{\;
+H(\mathrm{header}\Vert n)<T,\qquad
+H=\mathrm{SHA256}^{2}
+\;}
+\]
+Cabeçalho de 80~átomos (\code{S\_CAB}),
+alvo $T$ de 32 (\code{S\_ALVO}),
+faixa de nonces $[A,B)$ (\code{S\_FAIXA}).
+A prova é o par $(\mathrm{header},n)$ que satisfaz a desigualdade.
+\code{VERIFICA} $n$ avalia um só $H$ e compara contra $T$
+(o bloco génese Bitcoin, nonce $2083236893$,
+confere na bateria do \code{sql.c}).
+Peças~1--3 \textbf{realizadas} \emph{neste} objecto;
+peças~4--5 \texttt{N/A} --- não há pares nem histórias
+deste objecto.
+Isto \textbf{não} é a cifra ($\det=+1$),
+\textbf{não} é o livro (Def.~\ref{cripto:def:cadeia}),
+\textbf{não} é \texttt{trabalho} da órbita.
+\end{definicao}
+
+\noindent
+A prosa «dificuldade $=$ raio da bola na régua elíptica»
+é gloss no comentário do opcode.
+O predicado medido é a comparação lexicográfica
+$H<T$ em 32~átomos.
+\textbf{Não} se promove o gloss.
+O resíduo do esquilo em \code{VERIFICA} (ordem~$4$)
+é identidade à parte, \textbf{não} peça de Hashcash.
+
+\begin{observacao}[candidatos, peça a peça, à parte da cadeia]\label{cripto:obs:pow-candidatos}
+Cada linha é um objecto.
+O estatuto é \textbf{como peça de PoW},
+não como elo da Def.~\ref{cripto:def:cadeia}.
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.28\textwidth}p{0.18\textwidth}p{0.46\textwidth}@{}}
+\toprule
+candidato & como PoW & evidência \\
+\midrule
+\code{OP\_MARTELO} / \code{VERIFICA}
+  & peças 1--3 \textbf{realizadas};
+    4--5 \texttt{N/A}
+  & Def.~\ref{cripto:def:martelo};
+    sem pares, sem histórias.
+    \code{MINERA} é cliente de pool alheio
+    (Stratum); o consenso é do Bitcoin,
+    não deste objecto. \\
+$\mathrm{sha256}(\mathit{pub})\to\mathrm{id}$
+  (\code{banda.js})
+  & \texttt{N/A}
+  & selector; sem $T$, sem nonce, sem busca
+    (Obs.~\ref{cripto:obs:pow-i0}). \\
+\texttt{trabalho} / $\pi(q)$ / $\det(B^{k})$
+  & \texttt{N/A}
+  & já cortados na cadeia
+    (Obs.~\ref{cripto:obs:pow-pecas},~\ref{cripto:obs:pow-contas}). \\
+gas EVM
+  & \texttt{N/A}
+  & cerca Turing; I0; o contrato recusa
+    (Obs.~\ref{cripto:obs:pow-i0}). \\
+GoldChain / HTLC (wiki)
+  & \texttt{nao localizada}
+  & prosa (\code{cristal/cristal\_computacao.tex});
+    \code{goldchain/*.py} \textbf{ausente} neste disco;
+    sem $H<T$ medido. \\
+Paper~K / U4
+  & \texttt{nao localizada}
+    (como $H<T$ neste repo)
+  & plano NIST/blockchain; I0
+    (Obs.~\ref{cripto:obs:paper-k});
+    sem incidência no motor. \\
+outro $H<T$ no repo
+  & \texttt{nao localizada}
+  & o único predicado $H(\mathrm{header})<T$
+    no código é o \code{MARTELO}
+    (e o cliente \code{MINERA} que o chama). \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Resposta à pergunta:
+o repo \textbf{já tem} Hashcash --- o \code{MARTELO}.
+Não tem PoW Nakamoto (falta rede).
+A Cadeia não ganha nenhuma peça por isso.
+\end{observacao}
+
+\subsection{PoW e infraestrutura externa}\label{cripto:pow-externo}
+
+Não se acrescenta nada à Def.~\ref{cripto:def:cadeia}.
+O mesmo motor contém os dois mundos \textbf{sem os fundir}.
+
+\begin{observacao}[três objectos; a ISA é cega ao transporte]\label{cripto:obs:stratum}
+O repo não tem só Hashcash isolado: tem um \textbf{cliente Stratum}
+na camada do banco (\code{lib/stratum.h}; \code{pool\_le}/\code{pool\_grava}
+em \code{banco/sql.c}) que alimenta o martelo.
+\[
+\boxed{\;
+\text{Stratum}\to\text{job}\to\text{Merkle}\to\text{cabeçalho}
+\to\text{\code{MARTELO}}\to\text{share}\to\text{submit}
+\;}
+\]
+Isso é infraestrutura de mineração Bitcoin, \textbf{não} da
+Cadeia de Cristais.
+\[
+\boxed{\;
+\text{Stratum}\to\text{\code{MARTELO}}
+\qquad\text{e não}\qquad
+\text{Stratum}\to\text{Cadeia de Cristais}
+\;}
+\]
+\caixa{%
+\begin{tabular}{@{}ll@{}}
+Cadeia de Cristais
+  & $id\to R_i\to B^{k}$, $\det(B^{k})=+1$ \\
+\code{MARTELO}
+  & $H(h)<T$ --- PoW \textbf{local} \\
+pipeline Stratum
+  & job $\to$ merkle $\to$ header $\to$ submit --- transporte de pool \\
+\code{MINERA}
+  & cliente de pool; sem pool, $S_{\mathrm{POOL}}=0$ \\
+\end{tabular}%
+}
+TCP, JSON-RPC, pool remoto: a ISA não precisa de saber.
+Trocar Stratum é trocar \emph{duas funções}; nenhuma linha de SQL.
+Peças 1--3: realizações locais (\code{MARTELO}, \code{S\_ALVO},
+\code{VERIFICA}).
+Peças 4--5: Bitcoin / pool \textbf{externo}.
+\[
+\boxed{\;
+\text{PoW existe no repositório;}
+\quad
+\text{não pertence à Cadeia de Cristais.}
+\;}
+\]
+Elo «Stratum $=$ Cadeia de Cristais»: \texttt{nao localizada}.
+\end{observacao}
+
 % ═══════════════════════════════════════════════════════════════════════════
 \section{GLH, Parseval, lei local --- elos e cortes}\label{cripto:elos}
 
@@ -821,8 +1314,47 @@ $\pi(q)$ $=$ dificuldade $T$;
   & mesma classe $O(\pi(q))$; medição, não assimetria
     (Obs.~\ref{cripto:obs:pow-contas}) \\
 \code{MARTELO} $=$ cifra da cadeia
-  & Hashcash no banco ISA; o motor da cadeia não o chama
+  & Hashcash no banco ISA (Def.~\ref{cripto:def:martelo});
+    o motor da cadeia não o chama
     (Obs.~\ref{cripto:obs:martelo}) --- \texttt{nao localizada} \\
+Stratum / \code{MINERA} $=$ Cadeia de Cristais
+  & cliente de pool; alimenta o martelo, não o livro
+    (Obs.~\ref{cripto:obs:stratum}) --- \texttt{nao localizada} \\
+job distribuído $=$ \texttt{Liquidacao};
+    $B$ distribui trabalho
+  & faixa numérica não é régua de grau~$2$;
+    $B$ cifra, não despacha
+    (Obs.~\ref{cripto:obs:coord}) --- \texttt{nao localizada} \\
+coordenação de faixas $=$ consenso
+  & o livro regista atribuição; os pares não votam
+    (Obs.~\ref{cripto:obs:nao-blockchain}) --- \texttt{N/A} \\
+coord / $4$ \code{id} $=$ emaranhamento / superposição $\mathbf{P}^{1}$
+  & palco quântico; $V$ das Redes $\neq$ faixas do banco
+    (Obs.~\ref{cripto:obs:coord-quantica}) --- \texttt{nao localizada} \\
+recibo local $=$ carga de \code{S\_ESTADO}
+  & o JSON de estado não leva livro nem job
+    (Obs.~\ref{cripto:obs:coord-remoto}) --- \texttt{nao localizada} \\
+\code{S\_ESTADO} $=$ identidade / coord / Cadeia
+  & shells e página; eventual; o DOM não espera o RSP
+    (Obs.~\ref{cripto:obs:coord-remoto}) --- \texttt{nao localizada} \\
+banda do canal $=$ um só \code{id} / quatro livros
+  & $K_{\mathrm{canal}}$ parte-se em $N$; os livros continuam por \code{id}
+    (Obs.~\ref{cripto:obs:coord-nqubits}) --- \texttt{nao localizada} \\
+selo das $N$ partes $=$ elo da Def.~\ref{cripto:def:cadeia}
+  & o selo fecha o \emph{job}, não a cifra $\det=+1$
+    (Obs.~\ref{cripto:obs:coord-nqubits}) --- \texttt{nao localizada} \\
+WSS / $4$ browsers $=$ Def.~\ref{cripto:def:cadeia}
+  & transporte; a cadeia não muda
+    (Obs.~\ref{cripto:obs:coord-wss}) --- \texttt{nao localizada} \\
+partição $1\to N$ $=$ fusão de $N$ identidades
+  & clone de uma banda $\neq$ $\mathsf{Fuse}(K_i)$; dois objectos
+    (Obs.~\ref{cripto:obs:coord-fuse}) --- \texttt{nao localizada} \\
+$\mathsf{Fuse}$ $=$ soma em $\mathbb{Z}_{2^{256}}$ / Ed25519 como grupo
+  & hash canónico por $id$; a chave não é um inteiro da álgebra
+    (Obs.~\ref{cripto:obs:coord-fuse}) --- \texttt{N/A} \\
+GoldChain / Paper~K / gas $=$ $H<T$ neste repo
+  & wiki ou plano; sem predicado medido
+    (Obs.~\ref{cripto:obs:pow-candidatos}) --- \texttt{nao localizada} \\
 Cadeia de Cristais $=$ corpus cristal / Parseval do jornal
   & dois objectos; sem medidor que os identifique \\
 Cadeia de Cristais $=$ $\mathcal{L}_{S}(\mathrm{id})$ / $\mathrm{sha256}$
@@ -857,7 +1389,9 @@ BAI \code{banco/bai.sql} $=$ a cadeia
 \end{center}
 
 \noindent
-\texttt{nao localizada} $=$ procurou-se; a evidência não apareceu.
+\texttt{nao localizada} $=$ procurou-se; a evidência não apareceu
+(não é «não há relação nenhuma»: é recusa de promover o cruzamento
+a elo estrutural sem medidor).
 \texttt{N/A} $=$ demonstrou-se que o suporte não admite o passo
 (aqui: blockchain / consenso / dupla despesa / as cinco peças do PoW,
 já cortados).
@@ -877,7 +1411,25 @@ Motor + identidade:
 \code{kind=orbita}; \texttt{N/A} blockchain e PoW;
 Obs.~\ref{cripto:obs:livro-identidade}).
 PoW desmontado (Hashcash $\neq$ liquidação $\neq$ \code{MARTELO}):
-Obs.~\ref{cripto:obs:pow}--\ref{cripto:obs:martelo}.
+Obs.~\ref{cripto:obs:pow}--\ref{cripto:obs:stratum};
+Def.~\ref{cripto:def:martelo}
+(peças 1--3 no martelo; 4--5 Bitcoin/pool externo;
+Cadeia: cinco \texttt{N/A}, não se reverte).
+Coordenação $\neq$ consenso (Obs.~\ref{cripto:obs:coord}):
+\code{tests/cristalchain\_coord\_u.js};
+job $\neq$ \texttt{Liquidacao}; $B$ não distribui.
+Recibo remoto (Obs.~\ref{cripto:obs:coord-remoto}):
+\code{tests/cristalchain\_coord\_remoto\_u.js};
+\code{S\_ESTADO} cego; entrega KV junta.
+Selo das $N$ (Obs.~\ref{cripto:obs:coord-nqubits}):
+\code{tests/cristalchain\_coord\_selo\_u.js};
+canal partilhado, contrato na junção.
+WSS das $N$ (Obs.~\ref{cripto:obs:coord-wss}):
+\code{tests/cristalchain\_coord\_wss\_u.js};
+fan-out no \code{/canal}, não na Def.~\ref{cripto:def:cadeia}.
+Fusão das $N$ (Obs.~\ref{cripto:obs:coord-fuse}):
+\code{tests/cristalchain\_coord\_fuse\_u.js};
+$N$ chaves $\to\sigma$; $\neq$ partição; $\neq$ soma $Z$.
 Trial da assinatura:
 \code{tests/trialidade.c}
 (e \code{tests/trialidade\_linguas.js}: $T^{3}$ não é a def).
@@ -897,13 +1449,22 @@ Fecho de $\mathcal{U}$ (não reabrir):
 \code{tests/grafo\_fecho\_u.js}.}
 
 \colunas{Teor.~\ref{cripto:thm:det},~\ref{cripto:thm:norma},~\ref{cripto:thm:paragem};
-Obs.~\ref{cripto:obs:i0},~\ref{cripto:obs:cinco-quadraticas},~\ref{cripto:obs:conservacoes},
+Obs.~\ref{cripto:obs:i0},~\ref{cripto:obs:i0-pow},~\ref{cripto:obs:cinco-quadraticas},~\ref{cripto:obs:conservacoes},
 ~\ref{cripto:obs:nome},~\ref{cripto:obs:livro-identidade},~\ref{cripto:obs:passo},
 ~\ref{cripto:obs:pow},~\ref{cripto:obs:pow-i0},~\ref{cripto:obs:pow-pecas},
-~\ref{cripto:obs:pow-contas},~\ref{cripto:obs:martelo};
-Def.~\ref{cripto:def:livro-razao},~\ref{cripto:def:cadeia},~\ref{cripto:def:cifra-conserva}}
+~\ref{cripto:obs:pow-contas},~\ref{cripto:obs:martelo},
+~\ref{cripto:obs:pow-tabela},~\ref{cripto:obs:pow-candidatos},
+~\ref{cripto:obs:stratum},~\ref{cripto:obs:coord},
+~\ref{cripto:obs:coord-quantica},~\ref{cripto:obs:coord-remoto},
+~\ref{cripto:obs:coord-nqubits},~\ref{cripto:obs:coord-wss},
+~\ref{cripto:obs:coord-fuse};
+Def.~\ref{cripto:def:livro-razao},~\ref{cripto:def:cadeia},
+~\ref{cripto:def:cifra-conserva},~\ref{cripto:def:martelo}}
         {ouro branco $\det=+1$; órbita $\bmod q=\pi(q)$;
-livro-razão por identidade; sem consenso, sem PoW e sem saldo económico}
-        {\code{ouro\_branco.c}, \code{smartcontract.c}, \code{cristalchain\_u.js}}
+livro-razão por identidade; sem consenso e sem saldo económico;
+Hashcash só no \code{MARTELO}; Stratum alimenta o martelo, não o livro;
+coordenação de faixas no banco, não na Def.~\ref{cripto:def:cadeia}}
+        {\code{ouro\_branco.c}, \code{smartcontract.c}, \code{cristalchain\_u.js},
+\code{cristalchain\_coord\_u.js}, \code{cristalchain\_coord\_remoto\_u.js}}
 
 \end{document}

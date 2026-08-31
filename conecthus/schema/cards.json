@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "capacidade",
+  "estatuto": "realizado",
+  "evidencia": "manifesto.secoes.pecas; indice kernels_campo.pecas (nao o GLSL); tests/cards_u.js",
+  "proibicao": "card != S_ESTADO != livro != sessao; GLSL/LaTeX refs nao ingeridas; card nao usado nao pinta",
+  "nota": "F3: card = capacidade; descricao global; interacao por tenant; iframe oraculo"
+}

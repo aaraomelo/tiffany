@@ -132,6 +132,7 @@ const mot = (m.corpos && m.corpos.motor) || {};
 const isa = mot.linguagens_isa || {};
 const chaves = Object.keys(isa).filter((k) => k !== 'asm');
 console.log('LINGUAGENS ISA: ' + chaves.length + ' (asm=' + ((isa.asm && isa.asm.cadeia_de) || '?') + ') ingerido=' + ((mot.ingerido || []).join(',')));
+console.log('SCHEMA U: ' + (mot.schema || 'nao localizada') + ' parser=' + (mot.parser || '?') + ' ponte=' + (mot.ponte_u || '?'));
 for (const k of chaves) {
   const L = isa[k];
   console.log('  ' + k + ' move=' + L.move + ' metal=' + L.metal + ' asm=' + ((L.cadeia && L.cadeia.asm) || '?'));

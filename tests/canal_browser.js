@@ -1,4 +1,4 @@
-/* canal_browser.js — trama S_CANAL bump-ada (§C0–§C4). Mesma banda que o metal.
+/* canal_browser.js — trama S_CANAL bump-ada (§C0–§C4). Mesma banda que a realização remota.
  *
  *   node tests/canal_browser.js
  */
@@ -8,8 +8,13 @@ import { fileURLToPath } from 'node:url'
 import { bandaDeTecido, tramaBump, tramaClara, bump, keystream } from '../tools/banco_banda.mjs'
 import {
   S_CANAL, S_BASH_IN, S_PWSH_IN, S_PWSH_OUT, S_CHUNK,
-  S_FRONT_REQ, S_FRONT_RSP, S_NODE_IN,
+  S_FRONT_REQ, S_FRONT_RSP, S_NODE_IN, S_ESTADO_REQ, S_ESTADO_RSP,
+  S_DEPOSITO_REQ, S_DEPOSITO_RSP, S_COORD, S_COORD_CHUNK, slotPeca, slotPecaChunk,
 } from '../tools/canal_slots.mjs'
+import {
+  S_COORD as S_COORD_B, S_COORD_CHUNK as S_COORD_CHUNK_B,
+  slotPeca as slotPecaB, slotPecaChunk as slotPecaChunkB,
+} from '../app/src/canal_browser.js'
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -29,6 +34,15 @@ ok('§C0 S_PWSH_IN/OUT', S_PWSH_IN === S_CANAL + 9110 && S_PWSH_OUT === S_CANAL 
 ok('§C0 S_NODE_IN', S_NODE_IN === S_CANAL + 9120)
 ok('§C4 S_CHUNK', S_CHUNK === S_CANAL + 9102)
 ok('§C4 S_FRONT_REQ/RSP', S_FRONT_REQ === S_CANAL + 9200 && S_FRONT_RSP === S_CANAL + 9201)
+ok('§C4 S_ESTADO_REQ/RSP', S_ESTADO_REQ === S_CANAL + 9210 && S_ESTADO_RSP === S_CANAL + 9211)
+ok('§C5 S_DEPOSITO_REQ/RSP', S_DEPOSITO_REQ === S_CANAL + 9220 && S_DEPOSITO_RSP === S_CANAL + 9221)
+ok('§C6 S_COORD fora do S_CHUNK', S_COORD === S_CANAL + 9230 && S_COORD_CHUNK === S_CANAL + 9232)
+ok('§C6 peca i tem par próprio',
+  slotPeca(0) === S_CANAL + 9240 && slotPecaChunk(3) === S_CANAL + 9247 &&
+  slotPeca(0) !== S_COORD_CHUNK)
+ok('§C6 browser = tools',
+  S_COORD === S_COORD_B && S_COORD_CHUNK === S_COORD_CHUNK_B &&
+  slotPeca(2) === slotPecaB(2) && slotPecaChunk(1) === slotPecaChunkB(1))
 
 const b1 = tramaBump(S_BASH_IN, 9, 1, banda)
 ok('§C1 trama tem 6 bytes', b1.length === 6)

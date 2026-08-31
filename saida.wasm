@@ -1,0 +1,150 @@
+char DISCO[65536];
+char LIT[13] = "console.log(\000";
+char RESTO[65515];
+
+int node_escreve(int v0, int v1);
+int node_le(int v0, int v1);
+int node_pronto(void);
+int node_pendente(void);
+static int f4(void);
+int node_corre(void);
+int node_move(int v0, int v1, int v2, int v3);
+
+int node_escreve(int v0, int v1){
+    int v2;
+    int v3;
+    v2 = (*(unsigned char*)((8 + 24576)) + (*(unsigned char*)((8 + (24576 + 1))) * 256));
+    v3 = 0;
+    while(((v3 < v1) && (v2 < 8192))){
+        *(unsigned char*)((8 + (256 + v2))) = *(unsigned char*)((8 + (v0 + v3)));
+        v2 = (v2 + 1);
+        v3 = (v3 + 1);
+    }
+    if((v2 < 0)){
+        v2 = 0;
+    }
+    if((v2 > 65535)){
+        v2 = 65535;
+    }
+    *(unsigned char*)((8 + 24576)) = (v2 % 256);
+    *(unsigned char*)((8 + (24576 + 1))) = (v2 / 256);
+    return v3;
+}
+
+int node_le(int v0, int v1){
+    int v2;
+    int v3;
+    int v4;
+    int v5;
+    v2 = (*(unsigned char*)((8 + 24578)) + (*(unsigned char*)((8 + (24578 + 1))) * 256));
+    if((v1 > v2)){
+        v1 = v2;
+    }
+    if((v1 > 8192)){
+        v1 = 8192;
+    }
+    v3 = 0;
+    while((v3 < v1)){
+        *(unsigned char*)((8 + (v0 + v3))) = *(unsigned char*)((8 + (16384 + v3)));
+        v3 = (v3 + 1);
+    }
+    v4 = (v2 - v1);
+    v5 = 0;
+    while((v5 < v4)){
+        *(unsigned char*)((8 + (16384 + v5))) = *(unsigned char*)((8 + ((16384 + v5) + v1)));
+        v5 = (v5 + 1);
+    }
+    if((v4 < 0)){
+        v4 = 0;
+    }
+    if((v4 > 65535)){
+        v4 = 65535;
+    }
+    *(unsigned char*)((8 + 24578)) = (v4 % 256);
+    *(unsigned char*)((8 + (24578 + 1))) = (v4 / 256);
+    return v1;
+}
+
+int node_pronto(void){
+    return (*(unsigned char*)((8 + 24578)) + (*(unsigned char*)((8 + (24578 + 1))) * 256));
+}
+
+int node_pendente(void){
+    return (*(unsigned char*)((8 + 24576)) + (*(unsigned char*)((8 + (24576 + 1))) * 256));
+}
+
+static int f4(void){
+    int v0;
+    int v1;
+    int v2;
+    int v3;
+    int v4;
+    int v5;
+    v0 = (*(unsigned char*)((8 + 24576)) + (*(unsigned char*)((8 + (24576 + 1))) * 256));
+    if((v0 <= 0)){
+        return 0;
+    }
+    if((v0 > 8192)){
+        v0 = 8192;
+    }
+    v1 = 0;
+    v2 = 65544;
+    while((((v1 < 12) && (v1 < v0)) && (*(unsigned char*)((8 + (256 + v1))) == *(unsigned char*)((v2 + v1))))){
+        v1 = (v1 + 1);
+    }
+    if((v1 < 12)){
+        return -1;
+    }
+    v3 = *(unsigned char*)((8 + (256 + v1)));
+    if(((v3 != 39) && (v3 != 34))){
+        return -1;
+    }
+    v1 = (v1 + 1);
+    v4 = 0;
+    v5 = 0;
+    while((((v1 < v0) && (*(unsigned char*)((8 + (256 + v1))) != v3)) && (v5 < (8192 - 2)))){
+        *(unsigned char*)((8 + (16384 + v5))) = *(unsigned char*)((8 + (256 + v1)));
+        v5 = (v5 + 1);
+        v1 = (v1 + 1);
+    }
+    if(((v1 >= v0) || (*(unsigned char*)((8 + (256 + v1))) != v3))){
+        return -1;
+    }
+    *(unsigned char*)((8 + (16384 + v5))) = 10;
+    v5 = (v5 + 1);
+    *(unsigned char*)((8 + 24576)) = 0;
+    *(unsigned char*)((8 + (24576 + 1))) = 0;
+    *(unsigned char*)((8 + 24578)) = (v5 % 256);
+    *(unsigned char*)((8 + (24578 + 1))) = (v5 / 256);
+    *(unsigned char*)((8 + 24580)) = ((*(unsigned char*)((8 + 24580)) + 1) % 256);
+    return v5;
+}
+
+int node_corre(void){
+    return f4();
+}
+
+int node_move(int v0, int v1, int v2, int v3){
+    if((v3 < 0)){
+        return node_escreve(v0, v1);
+    }
+    if((v1 <= 0)){
+        v1 = 8192;
+    }
+    return node_le(v2, v1);
+}
+
+#ifdef SHELL_ARENA_EXTERN
+#else
+#endif
+#define OFF_NIN  24576
+#define OFF_NOUT 24578
+#define OFF_SEQ  24580
+#define OFF_IN   256
+#define OFF_OUT  16384
+#define CAP      8192
+#ifndef PLENO_NODE
+#endif
+/* conecthus/backends/node/interpretar.c — Node realiza «interpretar» (script JS).
+ * Pleno: banco/node.c (-DPLENO_NODE). Slots S_CANAL+9120/9121.
+ * Sem helpers internos — só exports, para traduz desce fechar (sobe∘desce=iso). */

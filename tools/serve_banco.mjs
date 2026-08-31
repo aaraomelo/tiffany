@@ -16,7 +16,7 @@ import { attachCanalLoopback } from './canal_loopback.mjs'
 
 import { createCanalWatcher } from './canal_watcher.mjs'
 
-import { bandaDeTecido, publicaMeta } from './banco_banda.mjs'
+import { bandaDeTecido, bandaDeChave, publicaMeta } from './banco_banda.mjs'
 
 
 
@@ -59,7 +59,13 @@ const MIME = {
 
 
 
-const banda = bandaDeTecido()
+const bandaTecido = bandaDeTecido()
+let bandaPatria = null
+try {
+  const j = JSON.parse(fs.readFileSync(path.join(BANCO, 'patria.json'), 'utf8'))
+  if (j.pub) bandaPatria = bandaDeChave(j.pub)
+} catch { /* sem patria.json */ }
+const banda = bandaTecido
 
 let canal = null
 
@@ -195,17 +201,43 @@ const server = http.createServer((req, res) => {
 
 let broadcastFn = null
 
-const handleBump = createCanalWatcher({
+const watchers = [
 
-  sqlBase: SQL_BASE,
+  createCanalWatcher({
 
-  banda,
+    sqlBase: SQL_BASE,
 
-  broadcast: (b) => broadcastFn?.(b),
+    banda: bandaTecido,
 
-  bancoDir: BANCO,
+    broadcast: (b) => broadcastFn?.(b),
 
-})
+    bancoDir: BANCO,
+
+  }),
+
+]
+
+if (bandaPatria) {
+
+  watchers.push(createCanalWatcher({
+
+    sqlBase: SQL_BASE,
+
+    banda: bandaPatria,
+
+    broadcast: (b) => broadcastFn?.(b),
+
+    bancoDir: BANCO,
+
+  }))
+
+}
+
+function handleBump (bumped) {
+
+  for (const h of watchers) h(bumped)
+
+}
 
 canal = attachCanalLoopback(server, handleBump)
 
@@ -221,7 +253,7 @@ server.listen(PORT, '127.0.0.1', () => {
 
   console.log(`  sql: MOVE erg+DISCO (.torre/reino) — node→assembly→metal`)
 
-  console.log(`  canal: WS /canal bump bidirecional`)
+  console.log(`  canal: WS /canal fan-out` + (bandaPatria ? ' (tecido + patria)' : ''))
 
   console.log(`  wasm: ${WASM}`)
 

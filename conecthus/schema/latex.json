@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "capacidade",
+  "estatuto": "realizado",
+  "evidencia": "docs_tradutor.json; idDeArquivo = tex_tradutor.js; tex.wasm so na execucao; tests/latex_u.js",
+  "proibicao": "existencia != carga != execucao; tex.wasm notin G_paint; nao tocar banco_front/disco/S_ESTADO",
+  "nota": "F4: card dispara LaTeX; iframe oraculo; GLSL fora"
+}

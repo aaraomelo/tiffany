@@ -12,15 +12,15 @@ import { execMoveDisco } from '../tools/banco_shell_core.mjs'
 
 import { createCanalWatcher, medeParN1, medeIdaCanal, framesDeCorpo } from '../tools/canal_watcher.mjs'
 
-import { bandaDeTecido, tramaBump, tramaClara, bump, keystream } from '../tools/banco_banda.mjs'
+import { bandaDeTecido, tramaBump, tramaClara, bump, keystream, selaBlob } from '../tools/banco_banda.mjs'
 
-import { S_NODE_IN, S_NODE_OUT, S_CHUNK, S_PWSH_IN, S_PWSH_OUT } from '../tools/canal_slots.mjs'
+import { S_NODE_IN, S_NODE_OUT, S_CHUNK, S_PWSH_IN, S_PWSH_OUT, S_ESTADO_REQ, S_ESTADO_RSP, S_DEPOSITO_REQ, S_DEPOSITO_RSP } from '../tools/canal_slots.mjs'
 
 import { join, dirname } from 'node:path'
 
 import { fileURLToPath } from 'node:url'
 
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync, existsSync } from 'node:fs'
 
 
 
@@ -138,11 +138,63 @@ ok('§N1 bump∘bump = id (Lei 1)', Buffer.compare(bIn, bump(bId, ks)) === 0)
 
 ok('§N1 trama IN legível', t1.slot === S_NODE_IN && t1.total === (body.length & 255))
 
+{
+  const framesE = []
+  const handleE = createCanalWatcher({
+    sqlBase: SQL_BASE,
+    banda,
+    broadcast: (b) => framesE.push(Buffer.from(b)),
+    bancoDir: BANCO,
+  })
+  handleE(tramaBump(S_ESTADO_REQ, 0, 0, banda))
+  let pullLen = 0
+  const partsE = []
+  for (const f of framesE) {
+    const t = tramaClara(f, banda)
+    if (t.slot === S_CHUNK) partsE.push(t.total, t.e)
+    if (t.slot === S_ESTADO_RSP) pullLen = t.total + (t.e << 8)
+  }
+  const pullBuf = Buffer.alloc(pullLen)
+  let pi = 0
+  for (let i = 0; pi < pullLen && i < partsE.length; i++) pullBuf[pi++] = partsE[i] & 255
+  const vazio = JSON.parse(pullBuf.toString('utf8'))
+  ok('§N1 estado pull vazio magia', vazio.magia === 'GKBANCO')
 
+  framesE.length = 0
+  const corpo = JSON.stringify({
+    magia: 'GKBANCO', v: 2, shells: { bash: { in: 'echo', out: 'ok', t: '2026-01-01T00:00:00.000Z' } },
+    atualizado: '2026-01-01T00:00:00.000Z', pendente: [],
+  })
+  const bodyE = Buffer.from(corpo, 'utf8')
+  for (let i = 0; i < bodyE.length; i += 2) {
+    handleE(tramaBump(S_CHUNK, bodyE[i], i + 1 < bodyE.length ? bodyE[i + 1] : 0, banda))
+  }
+  handleE(tramaBump(S_ESTADO_REQ, bodyE.length & 255, (bodyE.length >> 8) & 255, banda))
+  const pathE = join(SQL_BASE, 'gk', 'banco', 'estado.json')
+  ok('§N1 estado push no disco remoto', existsSync(pathE) && readFileSync(pathE, 'utf8').includes('bash'))
 
-const r = execMoveDisco(SQL_BASE, 'node', 'console.log(1)')
+  framesE.length = 0
+  const claroD = Buffer.from(corpo, 'utf8')
+  const seladoD = selaBlob(claroD, banda)
+  for (let i = 0; i < seladoD.length; i += 2) {
+    handleE(tramaBump(S_CHUNK, seladoD[i], i + 1 < seladoD.length ? seladoD[i + 1] : 0, banda))
+  }
+  handleE(tramaBump(S_DEPOSITO_REQ, seladoD.length & 255, (seladoD.length >> 8) & 255, banda))
+  const pathD = join(SQL_BASE, 'gk', 'banco', 'deposito.bin')
+  let discoD = Buffer.alloc(0)
+  try { discoD = readFileSync(pathD) } catch { /* */ }
+  let parseou = false
+  try { JSON.parse(discoD.toString('utf8')); parseou = true } catch { /* opaco */ }
+  ok('§N1 deposito opaco no disco (nao e JSON GKBANCO)',
+    existsSync(pathD) && !parseou && !discoD.toString('utf8').includes('GKBANCO'))
+}
 
-ok('§N1 execMoveDisco meta slots', r.meta?.slotIn && r.meta?.slotOut)
+try {
+  const r = execMoveDisco(SQL_BASE, 'node', 'console.log(1)')
+  ok('§N1 execMoveDisco meta slots', r.meta?.slotIn && r.meta?.slotOut)
+} catch {
+  ok('§N1 execMoveDisco meta slots', false)
+}
 
 
 

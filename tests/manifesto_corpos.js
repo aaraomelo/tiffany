@@ -279,6 +279,30 @@ ok('§C0 as catorze Partes do cat:indice', [
   ok('§C14 kind pagina no schema; html/css/js formatos',
     JSON.parse(readFileSync(join(RAIZ, mot.schema || 'conecthus/schema/u.schema.json'), 'utf8'))
       .properties?.kind?.enum?.includes('pagina'))
+  ok('§C14 ponte_vite no disco (esqueleto; nao kind novo)',
+    mot.ponte_vite === 'app/src/banco_vite_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_vite)) &&
+    mot.schema_vite === 'conecthus/schema/vite.json' &&
+    existsSync(join(RAIZ, mot.schema_vite)) &&
+    /hospedeiro/.test(mot.nucleo?.vite_esqueleto || ''))
+  ok('§C14 ponte_tenant no disco (borda; Nginx != motor)',
+    mot.ponte_tenant === 'app/src/banco_tenant_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_tenant)) &&
+    mot.schema_tenant === 'conecthus/schema/tenant.json' &&
+    existsSync(join(RAIZ, mot.schema_tenant)) &&
+    /tenant != id != K_i/.test(mot.nucleo?.tenant_borda || ''))
+  ok('§C14 ponte_nav no disco (hash original; iframe oraculo)',
+    mot.ponte_nav === 'app/src/banco_nav_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_nav)) &&
+    mot.schema_nav === 'conecthus/schema/nav.json' &&
+    existsSync(join(RAIZ, mot.schema_nav)) &&
+    /iframe oraculo/.test(mot.nucleo?.nav_gk || ''))
+  ok('§C14 ponte_estado_gk (nao e S_ESTADO)',
+    mot.ponte_estado_gk === 'app/src/banco_estado_gk_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_estado_gk)) &&
+    mot.schema_estado_gk === 'conecthus/schema/estado_gk.json' &&
+    existsSync(join(RAIZ, mot.schema_estado_gk)) &&
+    /S_ESTADO != sessao/.test(mot.nucleo?.estado_gk || ''))
 }
 
 /* §C15 — sessão remota: endereço + chave pública no mesmo U */
@@ -348,6 +372,22 @@ ok('§C0 as catorze Partes do cat:indice', [
     existsSync(join(RAIZ, mot.ponte_cristalchain)) &&
     /realizado/.test(mot.nucleo?.cristalchain || '') &&
     /blockchain/.test(mot.nucleo?.cristalchain || ''))
+  ok('§C18 ponte_coord no disco (realizado WSS; nao funde com a cadeia)',
+    mot.ponte_coord === 'app/src/banco_coord_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_coord)) &&
+    mot.ponte_selo === 'app/src/banco_selo_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_selo)) &&
+    mot.ponte_fuse === 'app/src/banco_fuse_u.js' &&
+    existsSync(join(RAIZ, mot.ponte_fuse)) &&
+    mot.ponte_coord_canal === 'app/src/banco_coord_canal.js' &&
+    existsSync(join(RAIZ, mot.ponte_coord_canal)) &&
+    /realizado/.test(mot.nucleo?.coord_distribuida || '') &&
+    /consenso/.test(mot.nucleo?.coord_distribuida || '') &&
+    /S_ESTADO/.test(mot.nucleo?.coord_distribuida || '') &&
+    /eventual/.test(mot.nucleo?.coord_distribuida || '') &&
+    /capacidades/.test(mot.nucleo?.coord_distribuida || '') &&
+    /selo/.test(mot.nucleo?.coord_distribuida || '') &&
+    /fuse/.test(mot.nucleo?.coord_distribuida || ''))
 }
 
 console.log('')

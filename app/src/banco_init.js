@@ -4,10 +4,12 @@
 import { carregaManifesto } from './manifesto_loader.js'
 import { initTradutor } from './banco_tradutor.js'
 import { initBancoSql } from './banco_sql.js'
+import { escolheDisco } from './banco_disco.js'
 
 export async function initBanco (opts = {}) {
-  const man = await carregaManifesto(opts.manifestoUrl)
+  const disco = await escolheDisco(opts)
+  const man = await carregaManifesto(opts.manifestoUrl, disco)
   initTradutor(man)
-  await initBancoSql({ manifestoUrl: opts.manifestoUrl })
+  await initBancoSql({ ...opts, storage: disco })
   return man
 }

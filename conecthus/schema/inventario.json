@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "descricao",
+  "estatuto": "realizado",
+  "evidencia": "manifesto.secoes.pecas (op+tags+desc); indice pecas.kernel (nao o GLSL); pintor+mapa; K realiza lei da legenda; tests/inventario_u.js",
+  "proibicao": "observar→relacionar→provar→promover; op != regua != tag != formula do desc; nao inventar categoria; nao migrar por aparencia/arquivo/card; prova de promocao = mesmas leis observaveis, nao portar shader; F8 ainda nao",
+  "nota": "legendas tem as leis; 408 tags / 32 reguas / fase aura ×12; F8 ainda nao e execucao"
+}

@@ -82,11 +82,22 @@ static int rho_igual(Rho x, Rho y){
         && x.r12re == y.r12re && x.r12im == y.r12im;
 }
 
-/* ── A PUREZA, exacta: det ρ = ρ11·ρ22 − |ρ12|² = 0 para todo estado ─────── */
+/* ── A PUREZA, exacta: det ρ = ρ11·ρ22 − |ρ12|² = 0 para todo estado ───────
+ * Numa 2×2 hermitiana isso É ρ² = (tr ρ) ρ. ρ² = ρ pede tr ρ = 1 (normalizar);
+ * nos inteiros só os estados de norma 1. Não se assere Born-como-regra. */
 static long rho_det(Rho r){
     return r.r11*r.r22 - (r.r12re*r.r12re + r.r12im*r.r12im);
 }
 static int rho_puro(Rho r){ return rho_det(r) == 0; }
+static long rho_tr(Rho r){ return r.r11 + r.r22; }
+static int rho_escala_projector(Rho r){
+    long tr = rho_tr(r);
+    long n12 = r.r12re*r.r12re + r.r12im*r.r12im;
+    return r.r11*r.r11 + n12 == tr*r.r11
+        && r.r22*r.r22 + n12 == tr*r.r22
+        && r.r12re*tr == tr*r.r12re
+        && r.r12im*tr == tr*r.r12im;
+}
 
 /* ── A FASE QUE ρ MATA É MAIOR QUE A DO CORPO ────────────────────────────
  * ρ determina ψ a menos de fase de norma 1 em ℚ(i) --- e Z[i] só tem QUATRO

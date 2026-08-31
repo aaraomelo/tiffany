@@ -1,0 +1,12 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "estatuto": "realizado",
+  "evidencia": "main.js href=#id; manifesto.secoes; iframe oraculo; tests/nav_u.js",
+  "proibicao": "nav != S_ESTADO; iframe andaime; nao reinterpretar main.js; ?tenant= so localhost; X-Tenant deriva do Host",
+  "fonte": "/",
+  "tenant": "",
+  "nota": "F1 navegacao = hash original no hospedeiro; Host → tenant → gk → #ancora"
+}

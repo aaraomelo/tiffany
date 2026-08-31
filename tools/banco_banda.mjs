@@ -5,6 +5,15 @@ export function bandaDeTecido (tecido = 'tecido por omissao') {
   return createHash('sha256').update(tecido, 'utf8').digest()
 }
 
+/** Chave pública hex → banda = sha256(bytes). Mesmo bump que o tecido. */
+export function bandaDeChave (hex) {
+  const t = String(hex || '').replace(/[\s:]+/g, '')
+  if (!t || t.length % 2) throw new Error('chave publica: hex impar')
+  const raw = Buffer.from(t, 'hex')
+  if (!raw.length) throw new Error('chave publica vazia')
+  return createHash('sha256').update(raw).digest()
+}
+
 export function keystream (banda, n) {
   const ks = Buffer.alloc(n)
   const sem = Buffer.alloc(36)
@@ -21,6 +30,16 @@ export function bump (ent, ks) {
   const sai = Buffer.alloc(ent.length)
   for (let i = 0; i < ent.length; i++) sai[i] = ent[i] ^ ks[i]
   return sai
+}
+
+/** Selo do corpo (mesmo keystream da trama). Involução. ≠ domain separator do id. */
+export function selaBlob (bytes, banda) {
+  const b = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes)
+  return bump(b, keystream(banda, b.length))
+}
+
+export function abreBlob (blob, banda) {
+  return selaBlob(blob, banda)
 }
 
 export function tramaBump (slot, total, e, banda) {

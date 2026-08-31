@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "capacidade",
+  "estatuto": "realizado",
+  "evidencia": "manifesto.kernels; indice pecas.kernel (nao o GLSL); painel_motor.wasm; tests/glsl_u.js",
+  "proibicao": "GLSL catalogado != WASM carregado != kernel compilado != kernel executado; nao puxar substratos/motor_campo/kernels; nao tocar banco_front/disco/S_ESTADO",
+  "nota": "F5: card dispara GLSL; iframe oraculo; LaTeX ja fechado"
+}

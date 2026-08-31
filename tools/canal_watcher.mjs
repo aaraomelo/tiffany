@@ -1,8 +1,8 @@
 /* canal_watcher.mjs — lado branco local: bump → MOVE na arena DISCO (pleno C). */
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 
 import { tramaBump, tramaClara } from './banco_banda.mjs'
 
@@ -13,6 +13,9 @@ import {
   S_CHUNK, S_BASH_IN, S_BASH_OUT, S_PWSH_IN, S_PWSH_OUT,
 
   S_NODE_IN, S_NODE_OUT, S_FRONT_REQ, S_FRONT_RSP,
+
+  S_ESTADO_REQ, S_ESTADO_RSP,
+  S_DEPOSITO_REQ, S_DEPOSITO_RSP,
 
 } from './canal_slots.mjs'
 
@@ -109,6 +112,85 @@ export function createCanalWatcher ({ sqlBase, banda, broadcast, bancoDir }) {
 
   }
 
+  const ESTADO_VAZIO = '{"magia":"GKBANCO","v":2,"shells":{},"atualizado":null,"pendente":[]}'
+
+  function estadoPath () {
+
+    return join(sqlBase, 'gk', 'banco', 'estado.json')
+
+  }
+
+  function serveEstado (nin) {
+
+    const path = estadoPath()
+
+    mkdirSync(dirname(path), { recursive: true })
+
+    if (nin <= 0) {
+
+      chunk.length = 0
+
+      let body = ESTADO_VAZIO
+
+      try { body = readFileSync(path, 'utf8') } catch { /* disco vazio */ }
+
+      enviaCorpo(broadcast, banda, S_ESTADO_RSP, body)
+
+      return
+
+    }
+
+    const n = Math.min(nin, chunk.length)
+
+    const body = Buffer.from(chunk.splice(0, n)).toString('utf8')
+
+    chunk.length = 0
+
+    try { writeFileSync(path, body) } catch { /* quota do host */ }
+
+    enviaCorpo(broadcast, banda, S_ESTADO_RSP, body)
+
+  }
+
+  function depositoPath () {
+
+    return join(sqlBase, 'gk', 'banco', 'deposito.bin')
+
+  }
+
+  /* D_patria: bytes opacos. Não parseia JSON. Sem a banda ≠ GKBANCO. */
+  function serveDeposito (nin) {
+
+    const path = depositoPath()
+
+    mkdirSync(dirname(path), { recursive: true })
+
+    if (nin <= 0) {
+
+      chunk.length = 0
+
+      let body = Buffer.alloc(0)
+
+      try { body = readFileSync(path) } catch { /* disco vazio */ }
+
+      enviaCorpo(broadcast, banda, S_DEPOSITO_RSP, body)
+
+      return
+
+    }
+
+    const n = Math.min(nin, chunk.length)
+
+    const body = Buffer.from(chunk.splice(0, n))
+
+    chunk.length = 0
+
+    try { writeFileSync(path, body) } catch { /* quota do host */ }
+
+    enviaCorpo(broadcast, banda, S_DEPOSITO_RSP, body)
+
+  }
+
 
 
   return function handleBump (bumped) {
@@ -136,6 +218,26 @@ export function createCanalWatcher ({ sqlBase, banda, broadcast, bancoDir }) {
       chunk.length = 0
 
       serveFront(t.total)
+
+      return
+
+    }
+
+    if (t.slot === S_ESTADO_REQ) {
+
+      const nin = t.total + (t.e << 8)
+
+      serveEstado(nin)
+
+      return
+
+    }
+
+    if (t.slot === S_DEPOSITO_REQ) {
+
+      const nin = t.total + (t.e << 8)
+
+      serveDeposito(nin)
 
       return
 

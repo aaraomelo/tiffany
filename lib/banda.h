@@ -72,6 +72,32 @@ static void sha256(const unsigned char *m, size_t n, unsigned char *out){
 static void banda_de(const char *tecido, unsigned char *banda){
     sha256((const unsigned char*)tecido, strlen(tecido), banda);
 }
+/* Chave pública (hex) → banda = sha256(bytes). Mesmo bump; não é segundo protocolo.
+ * ECDH X25519 (papers) quando há par; o URL só traz a pública — projecção sha256. */
+static int banda_hexval(char c){
+    if(c >= '0' && c <= '9') return c - '0';
+    if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if(c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+static int banda_de_chave(const char *hex, unsigned char *banda){
+    unsigned char raw[256];
+    size_t n = 0;
+    const char *p;
+    if(!hex || !banda) return 0;
+    for(p = hex; *p; p++){
+        int hi, lo;
+        if(*p == ' ' || *p == '\n' || *p == '\r' || *p == ':') continue;
+        hi = banda_hexval(*p);
+        if(hi < 0 || !p[1]) return 0;
+        lo = banda_hexval(*++p);
+        if(lo < 0 || n >= sizeof raw) return 0;
+        raw[n++] = (unsigned char)((hi << 4) | lo);
+    }
+    if(!n) return 0;
+    sha256(raw, n, banda);
+    return 1;
+}
 /* O KEYSTREAM: a banda esticada pelo comprimento da mensagem — sha256(banda||contador). */
 static void keystream(const unsigned char *banda, unsigned char *ks, size_t n){
     unsigned char sem[36];

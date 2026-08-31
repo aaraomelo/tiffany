@@ -3,7 +3,6 @@
 import { carregaManifesto } from './manifesto_loader.js'
 import { initTradutor } from './banco_tradutor.js'
 import { initCelula, execQueryCelula } from './banco_celula.js'
-import { absorveBackend } from './banco_absorve.js'
 import { discoBrowser } from './banco_disco.js'
 import { escSql, shellPadrao, SHELLS, S_BASH_IN, S_BASH_OUT, S_PWSH_IN, S_PWSH_OUT, S_NODE_IN, S_NODE_OUT } from './banco_sql_interno.js'
 
@@ -12,9 +11,9 @@ let _disco = null
 
 export async function initBancoSql (opts = {}) {
   if (_pronto) return _pronto
-  const man = await carregaManifesto(opts.manifestoUrl)
-  initTradutor(man)
   _disco = discoBrowser(opts)
+  const man = await carregaManifesto(opts.manifestoUrl, _disco)
+  initTradutor(man)
   if (typeof document !== 'undefined' && opts.celula !== false) {
     await initCelula({ wasmBase: opts.wasmBase, storage: _disco })
   }
@@ -36,7 +35,13 @@ export async function sqlQuery (q, ctx = {}) {
 /** Script shell — node_move/bash_move na arena; canal sincroniza slots. */
 export async function shellMove (script, canal = null, backend = shellPadrao(), ctx = {}) {
   await initBancoSql(ctx)
-  const r = await absorveBackend(backend, script, { ...ctx, canal, storage: ctx.storage ?? _disco })
+  const { absorveBackend } = await import('./banco_absorve.js')
+  const r = await absorveBackend(backend, script, {
+    ...ctx,
+    canal,
+    storage: ctx.storage ?? _disco,
+    remoto: ctx.remoto ?? !!canal,
+  })
   return r.out
 }
 

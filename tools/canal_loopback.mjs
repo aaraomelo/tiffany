@@ -76,6 +76,10 @@ export function attachCanalLoopback (httpServer, onFrame) {
           // broadcast da diferença. Ecoar o próprio STORE no S_CHUNK
           // partilhado mistura o corpo enviado com a resposta.
           if (onFrame) onFrame(payload)
+          // Fan-out: os outros sockets vêem a trama. Sem eco ao emissor.
+          for (const s of clientes) {
+            if (s !== socket && !s.destroyed) wsEnviaBin(s, payload)
+          }
         }
       }
     })

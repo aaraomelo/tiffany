@@ -31,6 +31,10 @@
 #define S_PWSH_OUT (S_CANAL + 9111u)
 #define S_FRONT_REQ (S_CANAL + 9200u)
 #define S_FRONT_RSP (S_CANAL + 9201u)
+#define S_ESTADO_REQ (S_CANAL + 9210u)
+#define S_ESTADO_RSP (S_CANAL + 9211u)
+#define S_DEPOSITO_REQ (S_CANAL + 9220u)
+#define S_DEPOSITO_RSP (S_CANAL + 9221u)
 
 static int canal_fd = -1;
 static unsigned char canal_banda[32];
@@ -50,6 +54,11 @@ static void canal_abre(void){
     if(canal_fd >= 0) return;
     banda_de(getenv("TIFFANY_TECIDO") ? getenv("TIFFANY_TECIDO") : "tecido por omissao",
              canal_banda);
+    {
+        const char *pub = getenv("TIFFANY_PUB");
+        if(pub && *pub && !banda_de_chave(pub, canal_banda))
+            fprintf(stderr, "canal_patria: TIFFANY_PUB hex invalida — tecido\n");
+    }
     const char *grupo = getenv("TIFFANY_CANAL_GRUPO");
     if(!grupo || !*grupo) grupo = "239.7.31.27";
     const char *porta_s = getenv("TIFFANY_CANAL_PORTA");
@@ -165,10 +174,128 @@ static void serve_front(unsigned char kind){
     envia_corpo(S_FRONT_RSP, buf, n);
 }
 
-static unsigned char chunk_buf[8192];
+static unsigned char chunk_buf[65536];
 static int chunk_len = 0;
 
 #include <sys/stat.h>
+
+static void estado_path(char *out, size_t cap){
+    if(sql_base[0])
+        snprintf(out, cap, "%s/gk/banco/estado.json", sql_base);
+    else
+        snprintf(out, cap, "gk/banco/estado.json");
+}
+
+static void mkdirs_para(const char *file){
+    char tmp[768];
+    size_t i;
+    snprintf(tmp, sizeof tmp, "%s", file);
+    for(i = 1; tmp[i]; i++){
+        if(tmp[i] == '/'){
+            tmp[i] = 0;
+            mkdir(tmp, 0755);
+            tmp[i] = '/';
+        }
+    }
+}
+
+static int le_estado_ficheiro(unsigned char *out, int cap){
+    char path[768];
+    const char *vazio = "{\"magia\":\"GKBANCO\",\"v\":2,\"shells\":{},\"atualizado\":null,\"pendente\":[]}";
+    FILE *f;
+    int n;
+    estado_path(path, sizeof path);
+    f = fopen(path, "rb");
+    if(!f){
+        n = (int)strlen(vazio);
+        if(n >= cap) n = cap - 1;
+        memcpy(out, vazio, (size_t)n);
+        out[n] = 0;
+        return n;
+    }
+    n = (int)fread(out, 1, (size_t)(cap - 1), f);
+    fclose(f);
+    out[n] = 0;
+    return n;
+}
+
+static void grava_estado_ficheiro(const unsigned char *buf, int n){
+    char path[768];
+    FILE *f;
+    estado_path(path, sizeof path);
+    mkdirs_para(path);
+    f = fopen(path, "wb");
+    if(!f) return;
+    fwrite(buf, 1, (size_t)n, f);
+    fclose(f);
+}
+
+static void deposito_path(char *out, size_t cap){
+    if(sql_base[0])
+        snprintf(out, cap, "%s/gk/banco/deposito.bin", sql_base);
+    else
+        snprintf(out, cap, "gk/banco/deposito.bin");
+}
+
+static int le_deposito_ficheiro(unsigned char *out, int cap){
+    char path[768];
+    FILE *f;
+    int n;
+    deposito_path(path, sizeof path);
+    f = fopen(path, "rb");
+    if(!f) return 0;
+    n = (int)fread(out, 1, (size_t)cap, f);
+    fclose(f);
+    return n;
+}
+
+static void grava_deposito_ficheiro(const unsigned char *buf, int n){
+    char path[768];
+    FILE *f;
+    deposito_path(path, sizeof path);
+    mkdirs_para(path);
+    f = fopen(path, "wb");
+    if(!f) return;
+    fwrite(buf, 1, (size_t)n, f);
+    fclose(f);
+}
+
+/* D_patria: deposita bytes. Não parseia JSON. Sem a banda o blob não é GKBANCO. */
+static void serve_deposito(int nin){
+    unsigned char buf[65536];
+    int n;
+    if(nin <= 0){
+        chunk_len = 0;
+        n = le_deposito_ficheiro(buf, (int)sizeof buf);
+        envia_corpo(S_DEPOSITO_RSP, buf, n);
+        return;
+    }
+    if(nin > chunk_len) nin = chunk_len;
+    grava_deposito_ficheiro(chunk_buf, nin);
+    n = nin;
+    if(n > (int)sizeof buf) n = (int)sizeof buf;
+    memcpy(buf, chunk_buf, (size_t)n);
+    chunk_len = 0;
+    envia_corpo(S_DEPOSITO_RSP, buf, n);
+}
+
+static void serve_estado(int nin){
+    unsigned char buf[65536];
+    int n;
+    if(nin <= 0){
+        chunk_len = 0;
+        n = le_estado_ficheiro(buf, (int)sizeof buf);
+        envia_corpo(S_ESTADO_RSP, buf, n);
+        return;
+    }
+    if(nin > chunk_len) nin = chunk_len;
+    grava_estado_ficheiro(chunk_buf, nin);
+    n = nin;
+    if(n > (int)sizeof buf) n = (int)sizeof buf;
+    memcpy(buf, chunk_buf, (size_t)n);
+    chunk_len = 0;
+    envia_corpo(S_ESTADO_RSP, buf, n);
+}
 
 extern unsigned char arena[65536];
 
@@ -243,6 +370,16 @@ int main(int argc, char **argv){
         if(slot == S_FRONT_REQ){
             chunk_len = 0;
             serve_front(t);
+            continue;
+        }
+        if(slot == S_ESTADO_REQ){
+            int nin = (int)t + ((int)e << 8);
+            serve_estado(nin);
+            continue;
+        }
+        if(slot == S_DEPOSITO_REQ){
+            int nin = (int)t + ((int)e << 8);
+            serve_deposito(nin);
             continue;
         }
         if(slot == S_BASH_IN){

@@ -3,7 +3,11 @@
 import { moveByForma, enc, dec, loadWasm } from './banco_move.js'
 import { manifestoAtual } from './manifesto_loader.js'
 import { execQueryCelula, initCelula } from './banco_celula.js'
-import { absorveBackend } from './banco_absorve.js'
+
+async function absorveBackend (nome, script, ctx) {
+  const m = await import('./banco_absorve.js')
+  return m.absorveBackend(nome, script, ctx)
+}
 
 let HUB = 'sql'
 let PIPE = []
@@ -190,6 +194,9 @@ async function traduzPasso (de, para, texto, ctx) {
 export async function traduz ({ de, para, texto, ctx = {} }) {
   const edge = aresta(de, para)
   const Q = paridade(de, para)
+  if (de === 'fetch' && ['html', 'css', 'js'].includes(para)) {
+    return traduzPasso(de, para, texto, ctx)
+  }
   let corpo = texto
   const rota = edge.rota
 

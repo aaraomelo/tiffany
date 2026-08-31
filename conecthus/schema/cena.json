@@ -1,0 +1,11 @@
+{
+  "kind": "pagina",
+  "id": "gk",
+  "sentido": 0,
+  "formato": "json",
+  "camada": "capacidade",
+  "estatuto": "realizado",
+  "evidencia": "main.js .heroart + coracao_revela; initMotorCampo; u_time = faseDoMotor; tests/cena_u.js",
+  "proibicao": "host conhecido != carregado != registado != avancado pelo tique; F7 = F6 + um host; nao motor_campo inteiro; nao compile GLSL; nao WASM novo; nao trailer; nao cards_campo; nao tocar banco_front/disco/S_ESTADO; nao mexer relogio.js",
+  "nota": "F7: um host; iframe oraculo; F6 pulso; GLSL/trailer/cards fora"
+}

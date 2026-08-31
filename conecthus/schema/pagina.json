@@ -1,0 +1,33 @@
+{
+  "kind": "pagina",
+  "id": "pagina",
+  "sentido": 0,
+  "formato": "json",
+  "estatuto": "realizado",
+  "evidencia": "app/banco/pagina.{html,css,js}; canal S_FRONT_REQ/RSP",
+  "proibicao": "js != node; html/css/js != Parte; fetch/http nao e orbita Hopfield",
+  "triade": ["html", "css", "js"],
+  "slots": {
+    "in": 9200,
+    "out": 9201,
+    "base": "S_CANAL"
+  },
+  "faces": {
+    "menos": {
+      "kind": "metade",
+      "id": "pagina",
+      "sentido": -1,
+      "formato": "json",
+      "estatuto": "realizado",
+      "evidencia": "MOVE emite"
+    },
+    "mais": {
+      "kind": "metade",
+      "id": "pagina",
+      "sentido": 1,
+      "formato": "json",
+      "estatuto": "realizado",
+      "evidencia": "MOVE absorve"
+    }
+  }
+}

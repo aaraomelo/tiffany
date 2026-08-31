@@ -1,5 +1,7 @@
 // banco_move.js — MOVE(±1) na arena wasm DISCO
 
+import { gravaWasmLS, leWasmLS } from './banco_disco.js'
+
 export const NULO = 8
 
 export function backendsDom (man) {
@@ -66,9 +68,34 @@ export function moveByForma (ex, L, text, sentido = -1, inOff = 1024, outOff = 4
   return moveWasm(ex, fnName, text, sentido, inOff, outOff)
 }
 
-export async function loadWasm (base, nome) {
-  const r = await fetch(base + nome)
-  if (!r.ok) throw new Error('wasm ' + nome + ': ' + r.status)
-  const { instance } = await WebAssembly.instantiate(await r.arrayBuffer())
+const wasmCache = new Map()
+
+async function instanciaWasm (base, nome, storage) {
+  let buf
+  try {
+    const r = await fetch(base + nome)
+    if (!r.ok) throw new Error('wasm ' + nome + ': ' + r.status)
+    buf = new Uint8Array(await r.arrayBuffer())
+    if (storage) await gravaWasmLS(storage, nome, buf)
+  } catch (e) {
+    if (storage) buf = await leWasmLS(storage, nome)
+    if (!buf) throw e
+  }
+  const { instance } = await WebAssembly.instantiate(buf)
   return instance.exports
+}
+
+/** Uma instância por (base, nome). initCelula e o boot partilham consultar.wasm. */
+export async function loadWasm (base, nome, storage) {
+  const key = String(base || '') + String(nome || '')
+  const hit = wasmCache.get(key)
+  if (hit) return hit
+  const p = instanciaWasm(base, nome, storage)
+  wasmCache.set(key, p)
+  try {
+    return await p
+  } catch (e) {
+    wasmCache.delete(key)
+    throw e
+  }
 }

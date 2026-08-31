@@ -1,0 +1,5 @@
+{
+  "ssh": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC6NPRap5m3xmrC9nPCc+nabcVMhqiVuyvm5d3nWlT3J patria-20260827 jssim",
+  "pub": "2e8d3d16a9e66df19ab0bd9cf09cfa769b715321aa256ecaf9b97779d6953dc9",
+  "nota": "chave publica ed25519 da Patria. TIFFANY_PUB e ?pub= = pub (32 bytes hex, nao o texto OpenSSH). banda=sha256(bytes)."
+}

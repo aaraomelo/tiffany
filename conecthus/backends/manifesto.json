@@ -5174,6 +5174,40 @@
         "canal"
       ],
       "ponte": null
+    },
+    {
+      "de": "fetch",
+      "para": "html",
+      "a": 1,
+      "b": 1,
+      "rota": [
+        "fetch",
+        "sql",
+        "html"
+      ],
+      "ponte": "sql_tags"
+    },
+    {
+      "de": "fetch",
+      "para": "css",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "fetch",
+        "css"
+      ],
+      "ponte": null
+    },
+    {
+      "de": "fetch",
+      "para": "js",
+      "a": 0,
+      "b": 1,
+      "rota": [
+        "fetch",
+        "js"
+      ],
+      "ponte": null
     }
   ],
   "traduzentes": [
@@ -5205,7 +5239,7 @@
       "chave": "gk:banco:estado",
       "memoria": "estado volatil do contexto (RAM)",
       "disco": "localStorage — quota = tecto de contexto; linha de base. IndexedDB = ponte gk:banco:* atras de flag (opts.disco=idb); nao substitui LS no boot",
-      "canal": "S_ESTADO_REQ/RSP (9210/9211) transporta o mesmo JSON entre realizacoes",
+      "canal": "S_ESTADO_REQ/RSP (9210/9211) transporta o mesmo JSON entre realizacoes; estado remoto e eventual; DOM nao depende dele; primeiro paint nao depende das capacidades nao usadas (coord/selo/fuse/metal pos-paint); != livro != Ri != fuse != selo",
       "remoto": "gk/banco/estado.json — realizacao remota do mesmo disco, nao hospedeiro",
       "deposito": "S_DEPOSITO_REQ/RSP (9220/9221) — blob opaco de utilizador em gk/banco/deposito.bin; Patria deposita bytes; sem a banda nao e JSON GKBANCO; != iso S_ESTADO",
       "idb": "disco mapeado (object stores); M_WASM+IDB = nao localizada (candidato 1 em ingestao)",
@@ -5254,14 +5288,17 @@
       },
       "deposito": "S_DEPOSITO_REQ/RSP (9220/9221) — blob selado com a banda; gk/banco/deposito.bin; Patria = D_patria sem ler claro; != S_ESTADO 9210/9211 (JSON GKBANCO operacional)"
     },
+    "selo": "realizado — dois lados na pagina /banco/: particao 1 canal → N pedaços (separaChave) ≠ fuse N chaves → σ (banco_fuse_u.js); todos carregam o canal no primeiro; fecha so com as N; uma forja derruba o conjunto; #bk-contrato #bk-abre-fuse; tests/cristalchain_coord_selo_u.js; tests/cristalchain_coord_fuse_u.js; tests/selo.c",
+    "coord_wss": "realizado — 4 browsers via WSS; fan-out /canal 7/0; alias canal.patriatechnology.com; tests/cristalchain_coord_wss_u.js",
+    "coord_fuse": "realizado — Fuse(K_i) ≠ separaChave; ≠ soma Z; N identidades → σ; tests/cristalchain_coord_fuse_u.js",
     "absorcao": "tests/backends_wasm.js §W4 latex §W8 bash §W10 node"
   },
   "protocolo": {
     "nome": "canal",
     "bidireccional": true,
-    "orbita": "ws:/canal",
+    "orbita": "ws:/canal|wss://canal.patriatechnology.com/canal",
     "slots": "S_CHUNK+S_*_IN/OUT",
-    "nota": "canal entre realizacoes da mesma maquina. Sem addr+pub = solo (M_wasm). Com addr+pub = M_wasm e M_remota, disco local + sync. TIFFANY_PUB na realizacao remota. Nao e fallback offline. Nao e SSH.",
+    "nota": "canal entre realizacoes da mesma maquina. Sem addr+pub = solo (M_wasm). Com addr+pub = M_wasm e M_remota, disco local + sync. TIFFANY_PUB na realizacao remota. Alias genérico canal.patriatechnology.com (location = /canal). Nao e fallback offline. Nao e SSH.",
     "endereco": "addr|host",
     "chave": "pub hex — utilizador da chave; TIFFANY_PUB na realizacao remota (slots, nao metal)",
     "p": 1,
@@ -5655,6 +5692,28 @@
       "ponte_u": "app/src/banco_manifesto_u.js",
       "ponte_pagina": "app/src/banco_pagina_u.js",
       "schema_pagina": "conecthus/schema/pagina.json",
+      "ponte_vite": "app/src/banco_vite_u.js",
+      "schema_vite": "conecthus/schema/vite.json",
+      "ponte_tenant": "app/src/banco_tenant_u.js",
+      "schema_tenant": "conecthus/schema/tenant.json",
+      "ponte_nav": "app/src/banco_nav_u.js",
+      "schema_nav": "conecthus/schema/nav.json",
+      "ponte_estado_gk": "app/src/banco_estado_gk_u.js",
+      "schema_estado_gk": "conecthus/schema/estado_gk.json",
+      "ponte_cards": "app/src/banco_cards_u.js",
+      "schema_cards": "conecthus/schema/cards.json",
+      "ponte_latex": "app/src/banco_latex_u.js",
+      "schema_latex": "conecthus/schema/latex.json",
+      "ponte_glsl": "app/src/banco_glsl_u.js",
+      "schema_glsl": "conecthus/schema/glsl.json",
+      "ponte_relogio": "app/src/banco_relogio_u.js",
+      "schema_relogio": "conecthus/schema/relogio.json",
+      "ponte_cena": "app/src/banco_cena_u.js",
+      "schema_cena": "conecthus/schema/cena.json",
+      "ponte_inventario": "app/src/banco_inventario_u.js",
+      "schema_inventario": "conecthus/schema/inventario.json",
+      "ponte_lei_gk": "app/src/banco_lei_gk_u.js",
+      "schema_lei_gk": "conecthus/schema/lei_gk.json",
       "ponte_sessao": "app/src/banco_sessao_u.js",
       "ponte_identidade": "app/src/banco_identidade_u.js",
       "ponte_disco": "app/src/banco_disco.js",
@@ -5666,6 +5725,10 @@
       "ponte_transf": "app/src/banco_transf_u.js",
       "ponte_grafo_fecho": "app/src/banco_grafo_fecho_u.js",
       "ponte_cristalchain": "app/src/banco_cristalchain_u.js",
+      "ponte_coord": "app/src/banco_coord_u.js",
+      "ponte_coord_canal": "app/src/banco_coord_canal.js",
+      "ponte_selo": "app/src/banco_selo_u.js",
+      "ponte_fuse": "app/src/banco_fuse_u.js",
       "nucleo": {
         "U_can": "realizado — (L0, Duo, pi_U o F, vinco); univ:def:lei-canonica; univ:thm:reconhecimento; fis:obs:U-consome; cat:nucleo-u; tests/lei_unica_u.js",
         "U_fin": "realizado — (Duo, pi, F, F^{-1}); univ:def:quadrupla-finita; I0: U_can != U_fin; face * univ:def:face-mult; fis:thm:conv; fis:thm:H; fis:obs:U-consome; cat:nucleo-u; tests/lei_unica_u.js",
@@ -5683,7 +5746,19 @@
         "racional_1_3": "nao localizada",
         "cf_estrela": "realizado — phi=[1;1-bar]=Star(K) I9; CF fecha N^N->R (sec:codificacoes); nao localizada como 3^{-1}_chi / banda-id / F; univ:obs:cf-estrela; Hurwitz CF != Hurwitz GLH",
         "grafo_fecho": "realizado — F^{-1}F com pi_U F(L_7) Res=0; univ:thm:composicao-fechos; univ:obs:grafo-fecho; fis:obs:quantica-grafo-fecho; tests/grafo_fecho_u.js; arestas em falta nao localizada (dobra L0→L1, L2 auto, L6→Duo, par 1–7, Born P_i)",
-        "cristalchain": "realizado — livro-razao det=+1 ouro branco; contratos liquidam-se (smartcontract.c) no id da identidade; cripto:def:cadeia; tests/cristalchain_u.js; N/A blockchain; sha256 != cifra"
+        "cristalchain": "realizado — livro-razao det=+1 ouro branco; contratos liquidam-se (smartcontract.c) no id da identidade; cripto:def:cadeia; tests/cristalchain_u.js; N/A blockchain; sha256 != cifra",
+        "coord_distribuida": "realizado — dois lados: particao 1 canal → N pedaços (separaChave, tests/cristalchain_coord_selo_u.js) ≠ fuse N chaves independentes → σ colectivo (banco_fuse_u.js, tests/cristalchain_coord_fuse_u.js); 4 browsers WSS → 1 coord → selo fecha 49995000 (tests/cristalchain_coord_wss_u.js 7/0); S_COORD != S_CHUNK; tecido e Patria/pub no mesmo /canal; alias canal.patriatechnology.com + location = /canal; 1 banco 4 id; S_ESTADO nao leva recibo; estado remoto e eventual; DOM nao depende dele (sincronizaEmFundo; tests/disco_sync.js); primeiro paint nao depende das capacidades nao usadas (capacidadesPosPaint); job != Liquidacao; B nao distribui; != consenso; cripto:obs:coord; cripto:obs:coord-remoto; cripto:obs:coord-nqubits; cripto:obs:coord-wss; cripto:obs:coord-fuse",
+        "vite_esqueleto": "realizado — Vite = hospedeiro (nao kind novo); esqueleto app/index.html type=module /src/main.js; GLSL/LaTeX capacidades tardias; != pagina-banco; app original || app ingerido (?gk=1 iframe pos-paint); tests/vite_u.js",
+        "tenant_borda": "realizado — Nginx realiza wildcard/rotas; motor cataloga host→tenant→rota; tenant != id != K_i; apex = ausencia; canal.patriatechnology.com N/A como tenant GK; disco gk:t:{slug}: so sessao+livro+nav; S_ESTADO nao se parte (F2 classificou o Reino noutro objecto); wildcard catalogado, cert do apex nao cobre 4 labels; tests/tenant_u.js",
+        "nav_gk": "realizado — F1 hash original (#id) no hospedeiro; iframe oraculo; Host→tenant→gk→navegacao; nav(foo) perp nav(bar); id(K) pode coincidir; X-Tenant deriva do Host (WSS nao define cabecalho no browser); ?tenant= so localhost; tests/nav_u.js",
+        "estado_gk": "realizado — F2 classifica GK = descricao estatica + sessao (ancora URL + velEstado efemero) + capacidades tardias; S_ESTADO != sessao != livro != coord != fuse; velEstado.v != GKBANCO.v; manifesto nao entra no fio; main.js sem localStorage; iframe oraculo; tests/estado_gk_u.js",
+        "cards_gk": "realizado — F3 card = capacidade (nao estado); catalogo pecas do manifesto ≡ indice kernels_campo (nome/secao/kernel) sem executar GLSL; card != S_ESTADO != livro != sessao; descricao global; interacao perp por tenant; card nao usado nao pinta; LaTeX/GLSL refs listadas nao ingeridas; tests/cards_u.js",
+        "latex_gk": "realizado — F4 LaTeX sob demanda; existencia != carga != execucao; card dispara; tex_tradutor via import(); tex.wasm so na execucao, notin G_paint; ?gk=1 sem uso => 0 fetches; foo perp bar; nao toca banco_front/disco/S_ESTADO; tests/latex_u.js",
+        "glsl_gk": "realizado — F5 GLSL/WASM sob demanda; GLSL catalogado != WASM carregado != kernel compilado != kernel executado; card dispara aura; painel_motor.wasm so na carga; source GLSL nao entra; substratos/motor_campo/kernels fora do boot; ?gk=1 sem uso => 0 fetches 0 compiles; foo perp bar; nao toca banco_front/disco/S_ESTADO; tests/glsl_u.js",
+        "relogio_gk": "realizado — F6 contrato do pulso; relogio conhecido != modulo != consumidor != tique; F6 nao executa cena card ou GLSL; rAF unico no original; motor tique discreto; avancaFase wrap AND 2^20; ?gk=1 paint => 0 tiques 0 WASM 0 compile; foo perp bar; nao toca banco_front/disco/S_ESTADO; nao reabre F0-F5; tests/relogio_u.js",
+        "cena_gk": "realizado — F7 um host de cena; host conhecido != carregado != registado != avancado pelo tique; F7 = F6 + hero (.heroart / coracao_revela); u_time = fase F6; nao motor_campo inteiro; 0 compile GLSL; 0 WASM novo; trailer/cards_campo fora; ?gk=1 paint => cena nao carregada; foo perp bar; nao toca banco_front/disco/S_ESTADO; nao mexe relogio.js; tests/cena_u.js",
+        "inventario_gk": "realizado — tomografia do Reino: extrair a maquina que ja executa; observar→relacionar→provar→promover; op != regua != tag != formula do desc; 92 cards, 408 tags, 32 reguas, 63 ops, 12 kernels; 12 desc partilham fase=f·log2r+a·χ·cos(nθ); FP em todos; migrar por equivalencia observavel de instrumento e lei; prova de promocao = mesmas leis observaveis (nao portar shader); F8 ainda nao; tests/inventario_u.js",
+        "lei_gk": "realizado — CONGELADO: funil expressao>testemunhas>limiar>cruzamento; eixos interno != cruzamento; conhecida != realizado-paper; cruzamento nao vaza para realizar/cena; Reino nao herda fisica.tex; paper nao declara realizado o relacionado; card -> declaracao -> normalizacao -> lei -> testemunhas; cards sao evidencias, nao donos; lei notRightarrow realizacao notRightarrow cena; conhecer != realizar != cena; limiar 12; 5 leis com refs fisica.tex/catalogo.tex (fase-aura, fp-1, revela, triade-fecha, dual-smin); so triade cruz=realizado; observadas phi2, sigma-dual, julia-c (paper realizado, Reino <12); n=k parametro; X dim=8 e_k=2^k Gram=Id 3 dobras geram 8 leis (univ:thm:oito-de-tres); lei != gerador != realizacao; formula != lei; estrutura != lei; construcao != lei; teorema != tipo; funil teorema papel>relacao; desconhecido != ausente != novo tipo; e_k != lei_gk != gerador; dim/Gram/coord-byte nao sao leis; cadeia vizdobra>X>base>afim>vinco (gera, realiza, fixa); leitura coord-byte fora da cadeia (le, nao constroi); relacao nao promove; afim=realizacao 3a dobra (fis:thm:dobra) relacionado, nao substitui Pontryagin, nao associador, nao 6a lei; vinco 2m=a+b (fis:thm:vinco) realizacao:vinco lei_gk=N/A relacionado != unidade != estrela; gerador:vizdobra <sigma_1,sigma_2,sigma_3> um grupo 8 estados (fis:thm:vizdobra) gera X != 3 leis != sigma-dual; fis:thm:base(2) medir=ler aterra em leitura; rotor fis:thm:fecho desconhecido != dtc (relogio via inversor, cat:bloco4) != corpo-em (forma ainda nao corpo); fis:thm:fecho R_ij vive em (e_i,e_j) de X; busca objecto>relacao; nenhuma gera/realiza/fixa/le; fecho != gerador; identidade=expressao>suporte>realizacao; localizado e incompativel => desconhecido; fis:thm:base(3) g^(k)=b AND 2^k aterra em leitura (somam != composem); peso != reua do card; fis:def:dual paridade aterra em leitura; chi pede Zc desconhecido != dual-smin; teorema != objecto; destino por objecto; desconhecido estrutural != algebrica; mesma expressao notRightarrow mesmo objecto; mesmo suporte notRightarrow mesma realizacao; alojamento = reconhecimento; fis:thm:quarteto Q_ab aterra em vizdobra n=2 != rotor; subestrutura reconhecida != novo objecto; quatro estados != quatro geradores; elemento/subestrutura subset construcao != novo objecto; propriedade interna notRightarrow entrada em ONTOLOGIA; localizado em X notRightarrow pertence a vizdobra; suporte != pertencimento a construcao; vive em X notRightarrow gerado por vizdobra; ontologia fechada por contencao; descoberta notRightarrow expande ONTOLOGIA; V != X; objecto em V pede casa de V; xor != conv; C_f != hat != H; C_f != *; hat != chi != paridade; fator nao traduz para B; 2 != 0 em V/Zc nao autoriza 2mapsto0 em B; simbolo igual notRightarrow operacao igual; 2_V != 2_B; injetivo != invertivel; outra leitura do mesmo suporte nao cria casa; xor != * != F(f)F(g); oficio != categoria; parte nao acrescenta objectos; V_E != V; tres geometrias != tres objectos; d_ultra != d_Hamming != d_percurso; mesmo suporte notRightarrow mesma expressao; expressoes distintas notRightarrow objectos ontologicos distintos; propriedade da leitura != realizacao da expressao; B_cal != B; |N_T(x)|=1 != 2n; I != T; percurso != grafo; Euler != gerador; ciclo != lei; handshake != Euler; incidencia != grafo; grade != hipercubo; 2n != m; sigma_grade != sigma_B; n pares != 2n soltos; ordem 4 != ordem 2; binom(n,2) != 2n; codificar != linearizar; Peano != serpentina; I != V_grade; indice != conteudo; IxI != I; palavra != espaco; T_letra != T; alfabeto != A; comuta != cancela; G>1 != gerador; ker w != nucleo; pi != rho; buraco != dobra; folga != Duo; mesma folga != dois objectos; bijeccao != Iso; bijeccao != vizinhanca; posicional != vizinhanca; varphi != s; compor != acumular; d_x != D; T_trav != T; preco em pi != X; unica != duomorfa; Iso != Duo; D_op != D; interface != categoria; hexal != Duo; ligar != fundir; interface != transporte; T_fio != T; Q_ab != operadores de M; G=1 != Iso; eixo a != eixo G; duas especies != tres; igualdade estrutural != Iso; duas dobras != terceiro estado; tabua != objecto; compor = somar a; Q_sigma != Q_dt; quatro quadrantes != quatro objectos; centro != objecto; dois lados != duas casas; duas faces != dois objectos; equacao != nova lei; Star(U) != x^2=x+1; Star != Q_ab; Star != F8; Star != novo gerador; realizar em Zc != promover em B; reversivel != nova realizacao; Duo != Star; Duo reversivel != Iso; mesmo enunciado notRightarrow mesmo objecto; F8 ainda nao; tests/lei_gk_u.js"
       },
       "cadeia_nota": "cadeia.metal = face r=1 (realizacao plena); cadeia.hospedeiro = estatuto de runtime externo. Nao sao 'o metal' nem hierarquia browser→sistema. docker = candidato 2 (nao localizada; != metal != runtime). mongo = candidato 3 (nao localizada; != disco)."
     },
@@ -5898,6 +5973,11 @@
           "tests/sessao_u.js",
           "tests/identidade_u.js",
           "tests/cristalchain_u.js",
+          "tests/cristalchain_coord_u.js",
+          "tests/cristalchain_coord_remoto_u.js",
+          "tests/cristalchain_coord_selo_u.js",
+          "tests/cristalchain_coord_wss_u.js",
+          "tests/cristalchain_coord_fuse_u.js",
           "tests/disco_sync.js",
           "tests/realizacao_u.js",
           "tests/traduz_c_wasm_node.js",
