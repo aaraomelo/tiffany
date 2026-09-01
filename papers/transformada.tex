@@ -1,0 +1,341 @@
+﻿% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+\newtheorem{lema}{Lema}
+
+\begin{document}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\definecolor{cinza}{gray}{0.35}
+
+\input{gkcapa}
+\gkcapa{Transformada universal}
+       {\textbf{Mudança reversível de leitura}}
+       {círculo, reta, corda, carta local, leitura, transformada universal}
+\maketitle
+
+\begin{abstract}
+O objeto aqui construído não é uma nova aritmética: é uma ponte entre duas leituras do mesmo suporte discreto. A família de polígonos regulares aproxima a circunferência em sentido geométrico apropriado; a cadeia
+\[
+\mathbb N\subset\mathbb Z\subset\mathbb Q\subset\mathbb R
+\]
+produz o contínuo linear por contagem, orientação, densidade e completamento. A ligação entre as duas é a carta local
+\[
+ x=R\theta,
+\]
+porque a distância cordal
+\[
+\ell(\theta_1,\theta_2)=2R\sin\left(\frac{|\theta_1-\theta_2|}{2}\right)
+\]
+lineariza-se localmente:
+\[
+\ell(\theta_1,\theta_2)=R|\theta_1-\theta_2|+O(|\theta_1-\theta_2|^3).
+\]
+O erro a evitar é simples: não se conclui que $P_n\to\mathbb R$. O que se conclui é mais rigoroso: a família $P_n$ realiza geometricamente o círculo, a cadeia $\mathbb Q\to\mathbb R$ produz o contínuo linear e a carta local compatibiliza as duas escalas. A transformada universal não inventa a reta; ela organiza a passagem entre a leitura angular, a leitura cordal e a leitura linear local.
+\end{abstract}
+
+\section*{Onde este documento vive}
+
+\noindent\textbf{Camada N--R}, não a Parte Geometria nem a Parte Álgebra em sentido estrito; é a ponte entre a leitura circular e a leitura linear do mesmo suporte.
+\[
+\boxed{\;
+\underbrace{\mathbb N\to\mathbb Z\to\mathbb Q\to\mathbb R}_{\text{cadeia aritmética}}
+\qquad\text{e}\qquad
+\underbrace{P_n\to S^1}_{\text{realização geométrica global}}\;}
+\]
+A carta local $x=R\theta$ não identifica os dois níveis, mas faz a passagem entre eles. Por isso a reta não é a imagem literal do círculo: é a leitura linear que surge quando a métrica cordal é observada em escala infinitesimal.
+
+\section{Introdução}
+
+A reta geométrica não deve ser posta como limite direto dos polígonos regulares. O motivo é simples: a família inscrita $P_n$ aproxima a circunferência, e não a reta. Em outras palavras,
+\[
+P_n \longrightarrow S^1
+\quad\text{no sentido geométrico apropriado},\qquad S^1\neq\mathbb R.
+\]
+O que se pode fazer, de modo matematicamente correto, é distinguir duas construções distintas, no mesmo quadro da casa:
+
+\begin{itemize}[leftmargin=1.5em]
+\item a estrutura aritmética ordenada
+\[
+\mathbb N\subset\mathbb Z\subset\mathbb Q\subset\mathbb R,
+\]
+que dá contagem, orientação, densidade e completamento no registro linear;
+\item a realização geométrica global
+\[
+P_n\longrightarrow S^1,
+\]
+que dá a forma circular do suporte e a sua leitura como espaço de estados.
+\end{itemize}
+
+A ponte entre essas duas construções não é uma nova ontologia, mas a carta local
+\[
+ x=R\theta.
+\]
+Com essa carta, a família de cordas produz uma métrica local que é assintoticamente linear. O que se obtém é então o seguinte:
+
+\begin{itemize}[leftmargin=1.5em]
+\item o círculo é o limite global da família de polígonos;
+\item o contínuo linear aparece como leitura local e como completamento da estrutura ordenada;
+\item a metricidade linear local surge da aproximação da corda por uma reta em escala pequena;
+\item a transformada universal não cria uma reta global; ela compatibiliza as leituras angular e linear sem forçar uma unicidade global.
+\end{itemize}
+
+Neste ponto, o contínuo não é uma substituição imediata do discreto. Ele é a compatibilização de duas escalas: a escala global do círculo e a escala local da reta, conectadas pela carta $x=R\theta$ e pelo completamento da estrutura racional.
+
+\section{Polígonos, circunferência e duas leituras}
+
+Seja $P_n$ o polígono regular de $n$ lados inscrito no círculo unitário. Os vértices podem ser escritos como
+\[
+ z_k = e^{2\pi i k/n}, \qquad k=0,\dots,n-1.
+\]
+A distância entre vértices vizinhos é
+\[
+ d_n = |z_{k+1}-z_k| = 2\sin\left(\frac{\pi}{n}\right).
+\]
+Para uma corda geral que conecta $z_k$ e $z_j$, a distância é
+\[
+ |z_j-z_k| = 2\left|\sin\left(\frac{\pi (j-k)}{n}\right)\right|.
+\]
+A família de cordas contém a informação métrica do polígono. Quando $n$ cresce, as cordas se tornam pequenas e a estrutura poligonal aproxima a curva circular.
+
+\begin{definicao}[duas leituras de um mesmo sistema]
+A mesma família de vértices $V_n=\{e^{2\pi i k/n}\}$ admite duas leituras distintas:
+
+\begin{enumerate}
+\item \textbf{leitura angular}: a ordem é cíclica e dada pelo índice $k$ módulo $n$;
+\item \textbf{leitura cordal}: a métrica é dada pelos comprimentos de corda
+\[
+\ell_{jk}=|z_j-z_k|.
+\]
+\end{enumerate}
+
+Estas duas leituras são compatíveis, mas não idênticas. O círculo carrega a leitura angular global; a reta é a leitura métrica local.
+\end{definicao}
+
+\section{A cadeia aritmética e a carta local}
+
+A cadeia
+\[
+\mathbb N\subset\mathbb Z\subset\mathbb Q\subset\mathbb R
+\]
+fornece a leitura aritmética ordenada do contínuo, mas não é, por si só, o que transforma a família de cordas numa reta geométrica. No quadro do corpo universal, o objeto primário não é o conjunto numérico, mas o suporte que o operador descreve: dobra, lista, dualidade e realização. O que se tem, de fato, é a composição de duas construções distintas:
+\[
+\boxed{\underbrace{\mathbb N\to\mathbb Z\to\mathbb Q\to\mathbb R}_{\text{leitura aritmética do contínuo}}}
+\qquad\text{e}\qquad
+\boxed{\underbrace{P_n\to S^1}_{\text{realização geométrica global}}.}
+\]
+A ponte entre essas duas realizações não é uma fusão dos níveis; é a carta local
+\[
+\boxed{x=R\theta.}
+\]
+Em cada degrau da cadeia aritmética, o objeto recebe uma nova camada de compatibilização: os naturais dão a contagem, os inteiros introduzem a orientação, os racionais dão a densidade local e os reais fecham a métrica por completamento. A família de cordas, por sua vez, fornece uma realização geométrica global do mesmo sistema; a reta só aparece quando essa realização é linearizada localmente.
+
+Para isso, tomamos uma direção orientada no círculo, isto é, um ponto base $p_0$ e um parâmetro local $\theta\in(-\varepsilon,\varepsilon)$ em torno de $p_0\in S^1$. A diferença de posições entre dois pontos vizinhos é então
+\[
+\Delta x = R\,\Delta \theta.
+\]
+A distância entre os pontos $p(\theta_1)$ e $p(\theta_2)$ é dada pela corda
+\[
+\ell(\theta_1,\theta_2)=2R\sin\left(\frac{|\theta_1-\theta_2|}{2}\right).
+\]
+Para $|\theta_1-\theta_2|\ll 1$, temos
+\[
+\ell(\theta_1,\theta_2)
+=
+R|\theta_1-\theta_2|\bigl(1+O(|\theta_1-\theta_2|^2)\bigr).
+\]
+Equivalentemente,
+\[
+\boxed{
+\lim_{\Delta\theta\to0}
+\frac{\ell(\theta,\theta+\Delta\theta)}{R|\Delta\theta|}=1.
+}
+\]
+Se definimos a coordenada linear por $x(\theta)=R\theta$, então
+\[
+\ell(\theta_1,\theta_2)=|x(\theta_1)-x(\theta_2)|+O\!\bigl(R|\theta_1-\theta_2|^3\bigr).
+\]
+Este cálculo mostra que a corda é localmente assintótica à métrica linear. A construção da reta real exige, porém, uma etapa adicional: o completamento da métrica linear. Em termos precisos,
+\[
+\overline{R\mathbb Q}\cong\mathbb R.
+\]
+A reta não é a imagem literal do círculo. Ela é o fechamento ordenado e métrico da leitura linear local que nasce na carta $x=R\theta$.
+
+\section{Transformada universal e mudança de leitura}
+
+A transformada universal não é uma aplicação global
+\[
+S^1\longrightarrow\mathbb R.
+\]
+Ela também não deve ser identificada com uma única fórmula particular. O seu papel estrutural é mais geral: estabelecer uma regra reversível de mudança entre representações compatíveis do mesmo suporte.
+
+Na presente construção aparecem três leituras relacionadas:
+\[
+\boxed{
+\text{leitura angular}
+\qquad
+\text{leitura linear}
+\qquad
+\text{leitura espectral}.
+}
+\]
+A transformada universal é a regra que permite passar entre essas representações sem confundir o suporte com a sua representação.
+
+Na leitura geométrica local, essa regra é realizada pela aplicação
+\[
+\boxed{T_R:\theta\longleftrightarrow x=R\theta,}
+\]
+com inversa
+\[
+\boxed{T_R^{-1}:x\longmapsto \theta=\frac{x}{R}.}
+\]
+Portanto, $T_R$ não é uma transformação global do círculo na reta. É uma mudança reversível de coordenada dentro de uma carta angular local.
+
+A compatibilidade dessa mudança com a geometria é verificada pela corda
+\[
+\ell_R(\Delta\theta)=2R\left|\sin\frac{\Delta\theta}{2}\right|.
+\]
+Como
+\[
+\frac{\ell_R(\Delta\theta)}{|T_R(\Delta\theta)|}
+=
+\frac{2\left|\sin(\Delta\theta/2)\right|}{|\Delta\theta|}
+\longrightarrow 1,
+\qquad \Delta\theta\to 0,
+\]
+temos
+\[
+\boxed{\ell_R(\Delta\theta)\sim |T_R(\Delta\theta)|.}
+\]
+Assim, a corda não realiza a transformação: ela verifica que a mudança de leitura angular para linear preserva assintoticamente a métrica na escala local.
+
+A mesma estrutura de mudança de leitura aparece no registro espectral. Para uma sequência $a=(a_j)$ sobre um grupo finito, define-se
+\[
+\boxed{
+\mathcal F(a)_k
+=
+\frac1{\sqrt n}\sum_j a_j\chi_k(j),
+}
+\]
+com inversa
+\[
+\boxed{
+\mathcal F^{-1}(A)_j
+=
+\frac1{\sqrt n}\sum_k A_k\chi_{-k}(j).
+}
+\]
+Aqui a transformada troca a leitura no suporte pela leitura no dual. A convolução
+\[
+(a*b)_j = \sum_{u+v\equiv j} a_u b_v
+\]
+é convertida em produto pontual,
+\[
+\boxed{
+\mathcal F(a*b)=\sqrt n\,\mathcal F(a)\mathcal F(b).
+}
+\]
+Quando o espectro do segundo fator não se anula, a operação inversa recupera a leitura original por
+\[
+\boxed{
+ a = \mathcal F^{-1}\!\left(\frac{\mathcal F(c)}{\sqrt n\,\mathcal F(b)}\right).
+}
+\]
+
+A partir daqui, é importante deixar explícito o nível de abstração. $T_R$ e $\mathcal F$ não são a mesma aplicação. Elas são duas realizações diferentes do mesmo princípio estrutural: a mudança reversível de leitura entre representações compatíveis do mesmo suporte. Em termos formais, a transformada universal é o princípio
+\[
+\boxed{
+\text{representação}_1\; \overset{\mathcal T}{\longleftrightarrow}\; \text{representação}_2,
+}
+\]
+com inversibilidade e compatibilidade preservadas. A particularização geométrica local é
+\[
+T_R:\theta\longleftrightarrow x=R\theta,
+\]
+ enquanto a particularização espectral é
+\[
+\mathcal F:a\longleftrightarrow A.
+\]
+
+A geometria local e o dual espectral são, portanto, duas realizações diferentes da mesma ideia estrutural:
+\[
+\boxed{
+\begin{array}{ccc}
+\theta
+&\leftrightarrow&
+x
+\\[6pt]
+ a
+&\leftrightarrow&
+A
+\end{array}}
+\]
+Na primeira linha, a mudança de leitura é entre coordenada angular e coordenada linear. Na segunda, é entre representação no suporte e representação no dual.
+
+A corda fornece a compatibilidade métrica da primeira linha; a identidade de convolução fornece a compatibilidade algébrica da segunda. Em resumo, a arquitetura é:
+\[
+\boxed{
+\text{corda verifica}
+\quad|\quad
+T_R\text{ realiza}
+\quad|\quad
+\mathcal F\text{ realiza no dual}.}
+\]
+
+A contribuição deste texto não é resolver a Parte Estatística em toda a sua extensão, mas fechar a dívida estrutural que a precede. O que ele resolve é a passagem
+\[
+\boxed{
+\text{suporte discreto}
+\longrightarrow
+\text{leitura}
+\longrightarrow
+\text{contínuo}
+}
+\]
+sem cometer o salto ilegítimo $P_n\to\mathbb R$. Em outras palavras, ele mostra que a leitura linear não é a imagem literal do círculo, mas a realização local compatível com a métrica cordal; e que a leitura espectral não é uma nova entidade, mas outra representação do mesmo suporte. Neste quadro, a probabilidade não é tomada como princípio primeiro, mas como leitura de uma realização já construída.
+
+O mesmo princípio aparece no dual do repositório com uma forma mais precisa: a transformada universal é a avaliação nas folhas do corpo,
+\[
+\operatorname{eval}_{\pm}(a+b\alpha)=a\pm b\sqrt{D},
+\]
+com a multiplicação do corpo sendo convertida em convolução no espaço de coeficientes. Isso é exatamente o que o Teorema de \emph{corpo\_analitico.tex} enuncia: a ida é a convolução, a volta é a deconvolução, e a deconvolução só existe onde o espectro não se anula. O que o repositório mede em \texttt{tests/convolucao\_universal.js} confirma esse ponto: fora dos divisores de zero, a deconvolução recupera o original; quando o espectro se anula, a informação se perde e a volta falha por perda de informação, não por uma lei nova. A transformada universal, portanto, não inventa uma nova entidade: ela move a operação do suporte para o dual e a torna reversível.
+
+A sequência que se abre a partir daqui é, portanto,
+\[
+\boxed{
+\text{realização}
+\longrightarrow
+\text{representação}
+\longrightarrow
+\text{distribuição}
+\longrightarrow
+\text{Born}
+}
+\]
+mas esse último passo não é o objeto deste paper. O que aqui fica fechado é a infraestrutura que torna legítima essa passagem: o suporte, a carta local, a reversibilidade da leitura e a compatibilidade entre geometria e dual espectral. É essa camada que torna a Estatística possível sem axioma cego de continuidade.
+
+\section{Conclusão}
+
+A reta geométrica não é o limite global dos polígonos. O limite global é o círculo. A reta surge como completamento da leitura linear local, habilitada pela carta $x=R\theta$ e pela compatibilização métrica da corda. A transformada universal preserva esse ponto: ela não identifica o círculo com a reta, mas organiza a passagem de uma leitura para outra sem esquecer a diferença entre o suporte circular e a leitura linear. Nesse sentido, a geometria da corda e a aritmética da reta são duas descrições do mesmo suporte, não duas entidades confundidas em uma única imagem.
+
+\end{document}
