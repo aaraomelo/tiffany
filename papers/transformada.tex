@@ -134,6 +134,166 @@ A mesma família de vértices $V_n=\{e^{2\pi i k/n}\}$ admite duas leituras dist
 Estas duas leituras são compatíveis, mas não idênticas. O círculo carrega a leitura angular global; a reta é a realização linear local dessa leitura.
 \end{definicao}
 
+\subsection{Formalização Métrica e Medida no Toro $I=[0,1[$}
+
+Para fundamentar a transição sem apelar prematuramente para a reta não compacta $\mathbb R$, parametrizamos a circunferência diretamente no toro unidimensional
+
+$$
+I=[0,1[\,\cong\,\mathbb R/\mathbb Z.
+$$
+
+A coordenada angular $\theta\in[0,2\pi[$ é identificada com a variável normalizada
+
+$$
+t=\frac{\theta}{2\pi}\pmod 1.
+$$
+
+Transportando a métrica quociente (geodésica) de $\mathbb R/\mathbb Z$ para os representantes em $I$, obtemos
+
+$$
+\boxed{
+d_{S^1}(t_1,t_2)
+=
+\min\Bigl(|t_1-t_2|,\;1-|t_1-t_2|\Bigr).
+}
+$$
+
+Essa métrica satisfaz os axiomas de métrica em $I$ e preserva a simetria por translação cíclica.
+
+A métrica cordal extrínseca $\ell(t_1,t_2)$ em um círculo de raio $R$ é então
+
+$$
+\ell(t_1,t_2)
+=
+2R\sin\bigl(\pi d_{S^1}(t_1,t_2)\bigr).
+$$
+
+Para pontos vizinhos, escrevendo
+
+$$
+\Delta t=d_{S^1}(t_1,t_2)\ll1,
+$$
+
+a expansão de Taylor fornece
+
+$$
+\ell(t_1,t_2)
+=
+2\pi R\,\Delta t
+\left(
+1-\frac{\pi^2}{6}(\Delta t)^2
++O((\Delta t)^4)
+\right).
+$$
+
+Definindo o perímetro $L=2\pi R$ e a coordenada linear local
+
+$$
+x=L\,t,
+$$
+
+obtemos
+
+$$
+\boxed{
+\lim_{\Delta t\to0}
+\frac{\ell(t,t+\Delta t)}
+{L\,\Delta t}
+=1.
+}
+$$
+
+Portanto, a métrica cordal é assintoticamente linear em escala infinitesimal, mas essa linearização é estritamente local: ela não identifica globalmente $S^1$ com $\mathbb R$.
+
+A passagem do registro discreto para o contínuo estatístico pode ser formalizada no mesmo suporte compacto. Para
+
+$$
+V_n=
+\left\{
+t_k=\frac{k}{n}
+\;\middle|\;
+k=0,\ldots,n-1
+\right\},
+$$
+
+associamos ao polígono $P_n$ a medida de probabilidade discreta uniforme
+
+$$
+\mu_n
+=
+\frac1n
+\sum_{k=0}^{n-1}
+\delta_{k/n}.
+$$
+
+Quando $n\to\infty$, essas medidas convergem fracamente para a medida de Haar normalizada $\lambda$ em $\mathbb R/\mathbb Z$:
+
+$$
+\boxed{
+\mu_n\overset{w}{\longrightarrow}\lambda.
+}
+$$
+
+Equivalentemente, para toda função contínua $f\in C(I)$,
+
+$$
+\boxed{
+\frac1n
+\sum_{k=0}^{n-1}
+f\left(\frac{k}{n}\right)
+\longrightarrow
+\int_0^1f(t)\,dt.
+}
+$$
+
+A transição discreto $\to$ contínuo fica, portanto, decomposta em três níveis distintos:
+
+$$
+\boxed{
+\begin{array}{rll}
+P_n\longrightarrow S^1\cong\mathbb R/\mathbb Z
+&
+&\text{realização geométrica global},
+\\[4pt]
+\mu_n\overset{w}{\longrightarrow}\lambda
+&
+&\text{passagem discreto $\to$ contínuo no registro de medida},
+\\[4pt]
+\ell(t,t+\Delta t)\sim L|\Delta t|
+&
+&\text{linearização métrica local}.
+\end{array}
+}
+$$
+
+Esses três limites não devem ser identificados entre si. O primeiro é geométrico; o segundo é estatístico; o terceiro é local e métrico. A estrutura contínua já está presente no suporte compacto $I\cong\mathbb R/\mathbb Z$ e na sua medida de Haar, enquanto a reta $\mathbb R$ aparece apenas como leitura linear local habilitada pela carta
+
+$$
+x=L\,t.
+$$
+
+Assim, não há o salto ilegítimo
+
+$$
+P_n\longrightarrow\mathbb R.
+$$
+
+Há, em vez disso, uma decomposição rigorosa:
+
+$$
+\boxed{
+\text{discreto}
+\;\longrightarrow\;
+\begin{cases}
+\text{círculo global},\\
+\text{medida contínua},\\
+\text{métrica linear local},
+\end{cases}
+}
+$$
+
+preservando a distinção entre suporte, medida e coordenada.
+
 \section{A cadeia aritmética e a carta local}
 
 A cadeia
@@ -263,6 +423,12 @@ Aqui os caracteres $\chi_j$ do grupo cíclico são as formas lineares definidas 
 \chi_j\in X^*.
 \]
 Eles não são elementos arbitrários do dual: são os caracteres que diagonalizam a ação de $C_8$. Em outras palavras, a transformada universal é a passagem da base orbital para a base espectral da representação cíclica; a DFT-8 é a expressão matricial desta diagonalização.
+
+Sob a parametrização compacta $t \in [0,1[$, a DFT-$n$ no grid $V_n = \{t_k = k/n\}$ passa naturalmente ao limite contínuo como a Série de Fourier no espaço $L^2([0,1[)$:
+\[
+\hat{f}(k) = \int_{0}^{1} f(t) e^{-2\pi i k t}\,dt, \qquad k \in \mathbb Z.
+\]
+Isso confirma que o refinamento $n \to \infty$ transita da base espectral discreta para a análise harmônica contínua mantendo a compacidade do suporte $I = [0,1[$.
 
 Há um ponto importante que não pode ser confundido com isto: a DFT-8 é uma realização finita e cíclica da ação de $C_8$, mas não esgota a transformada do sistema. A distinção correta é a seguinte:
 \[
