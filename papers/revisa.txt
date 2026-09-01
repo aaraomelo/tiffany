@@ -1,0 +1,70 @@
+O texto LaTeX do capítulo **"Estatística: o espaço de probabilidade e a realização da onda"** apresenta uma estrutura lógica muito rigorosa, coesa e alinhada com os princípios do projeto (com a preservação dos resíduos zerados, a distinção clara entre hipótese e derivação, e a ausência de axiomas externos como a Regra de Born importada).
+
+---
+
+### **Pontos Fortes do Texto**
+
+* **Abertura e Tese Direta:** A inversão do problema — de *"como aplicar Born?"* para *"como a função de onda nasce da estrutura?"* — coloca a probabilidade no seu devido lugar: **interface de leitura estatística**, e não motor da dinâmica.
+* **Separabilidade Clara:** O texto não confunde nem funde as três equações base ($x^2=x$ para projeção, $x^2=-1$ para rotor/fase e $x^2=x+1$ para crescimento/espiral).
+* **Rigor Formal na Unicidade:** A demonstração de que $f'=f^{-1}$ fixa $b=\varphi$ e $a=\varphi^{-1/\varphi}$ *dentro da família de potências* está matemática e logicamente impecável. A ressalva de não promover isso a uma unicidade global no contínuo preserva o rigor do documento.
+* **Tratamento do Fechamento Angular:** A distinção entre o fechamento periódico do rotor discreto ($\mathrm{Res}_\theta^{\mathrm{ciclo}}=0$) e a identidade local do passo na espiral áurea ($\mathrm{Res}_\theta^{\mathrm{passo}}=0$) evita ambiguidades de convergência no plano.
+* **Álgebra Dual e Estrutura dos Pares:** A Seção 5/6 deixa explícito que a conservação $\vert{}\psi^+\vert{}\vert{}\psi^-\vert{}=1$ é de módulos e não implica $\psi^+\psi^-=1$, salvando a face idempotente $E^-$ de colapsar trivialmente em $1$.
+* **A Regra da Casa (Sem Lei 8):** O parágrafo dedicado ao retorno $7 \to 0$ sem a invocação de uma Lei 8 está alinhado com os checkpoints do repositório (`aranha.tex`).
+
+---
+
+### **Ajustes Recomendados e Correções (Code Review / Textual)**
+
+#### 1. **Typo de Formatação LaTeX (Barra Dupla Perdida)**
+
+Na introdução (logo após a cadeia da onda), há uma barra invertida dupla solta no código LaTeX:
+
+* **Trecho atual:**
+```latex
+Antes da ponte de Born, $\psi$ é uma \\emph{realização de onda candidata}: geométrica e dinâmica...
+
+```
+
+
+* **Correção:** Trocar `\\emph` por `\emph`.
+
+#### 2. **Sintaxe de Tabela no Ambiente `tabular**`
+
+Na Seção 5.5 (*O que é necessário para o par dual*), as quebras de linha dentro das linhas da tabela estão com barras normais ou desformatadas em alguns compiladores rigorosos de `booktabs`.
+
+* **Trecho atual:**
+```latex
+\begin{tabular}{@{}lll@{}}
+\toprule
+nível & condição & significado \
+\midrule
+anel & $(ab)c=a(bc)$ &
+associatividade da face \(+\) \
+...
+
+```
+
+
+* **Ajuste:** Certifique-se de que cada fim de linha da tabela use `\\` e não apenas `\`.
+
+#### 3. **Consistência de Delimitadores de Bloco de Equação**
+
+Na Seção 5, há uma mistura do ambiente TeX puro `$$ ... $$` com a notação padrão do LaTeX `\[ ... \]` ou ambientes `equation/align`.
+
+* **Recomendação:** Para padronizar a compilação com `pdflatex` sob o ecossistema `amsmath`, substitua os blocos `$$ ... $$` por `\[ ... \]` ou `\begin{equation*}` nos parágrafos da Seção 5 (especialmente nos blocos do par $R^+$ e $E^-$).
+
+#### 4. **Clareza de Dívida Causal no Teorema 4 (`thm:espiral-psi`)**
+
+O Teorema 4 prova a consistência da órbita sob o operador $T=\varphi e^{J\Delta\theta}$. Como o próprio texto adverte mais à frente, seria ideal acrescentar uma nota no enunciado ou na demonstração lembrando que $T$ é construído via a geometria do catálogo, mantendo a transição $L_0+L_7 \Rightarrow T$ marcada como dívida aberta.
+
+---
+
+### **Resumo da Avaliação**
+
+| Dimensão | Status | Nota |
+| --- | --- | --- |
+| **Rigor Matemático** | Impecável | $b=\varphi$ fixado com coeficiente $a=\varphi^{-1/\varphi}$; tratamento de resíduos isolado. |
+| **Coerência do Projeto** | Impecável | Probabilidade como contagem de fibras ($G/\vert{}I\vert{}$); negação da Regra de Born como axioma primário. |
+| **Sintaxe LaTeX** | Atenção | Pequeno erro de digitação (`\\emph`) e padronização de `$$` para `\[ \]`. |
+
+O capítulo está em excelente nível de maturidade e pronto para compilação e integração com a estrutura principal dos *papers*.

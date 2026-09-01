@@ -1,0 +1,1707 @@
+﻿% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  papers/estatistica.tex — Estatística: o espaço de probabilidade e a
+%  realização da onda.
+%
+%  Compila:  cd papers && pdflatex estatistica.tex
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazilian]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{array}\usepackage{enumitem}\usepackage{xcolor}
+\usepackage[htt]{hyphenat}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\caixa}[1]{%
+  \par\smallskip\noindent
+  \begin{center}
+  \fbox{\begin{minipage}{0.94\textwidth}\centering\smallskip #1\smallskip\end{minipage}}
+  \end{center}\smallskip}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\providecommand{\interfacen}[1]{}
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
+\newtheorem{problema}[teorema]{Problema}
+\renewcommand{\proofname}{Demonstração}
+
+\input{gkcapa}
+
+\begin{document}
+\interfacen{16}
+\gkcapa{Estatística --- a probabilidade como interface da realização}
+       {multiplicidade $\to$ módulo; dualidade $\to$ fase}
+       {a matéria é uma onda de probabilidades}
+\maketitle
+
+\begin{center}
+\small
+\textit{O que se afirma: esta obra constrói os seus objetos e mede-os.
+Cada número publicado tem o programa que o produziu, e cada enunciado tem a sua demonstração
+--- a bateria corre com um comando e diz o que mediu.
+Quem quiser conferir não precisa de acreditar em nada do que aqui está escrito.}
+\end{center}
+
+\vspace{1.2em}
+
+\section*{A tese desta parte}
+
+\begin{center}
+\large
+\textbf{a matéria é uma onda de probabilidades}
+\end{center}
+
+\vspace{0.4em}
+\begin{center}
+\small
+(esta é a leitura final da realização; \emph{não} é a definição inicial de $\psi$)
+\end{center}
+
+\vspace{0.6em}
+
+A regra de Born aparece na Quântica, mas não está localizada no Corpo de Partículas
+(Obs.~0.215). A probabilidade-contagem $p_G=G/|I|$ já está no palco desde a realização
+(Def.~0.23; Obs.~0.214). O espaço de probabilidade não é apenas o lugar onde se contam
+resultados: é o suporte onde a matéria se realiza estatisticamente.
+
+A pergunta correcta deixa de ser «como aplicar Born?» e passa a ser:
+
+\begin{center}
+\textit{como a função de onda nasce da estrutura que já temos?}
+\end{center}
+
+A onda não se constrói a partir de $\sqrt{G/|I|}$. Constrói-se de baixo para cima:
+
+\begin{center}
+Lei 0/7 $\to$ cisão $\to$ duas leituras $\to$ involução no par $(x,y)$\\[2pt]
+$d(xy)$ $\to$ $\int f+\int f^{-1}$\\[2pt]
+cisão por paridade $\to$ $\exp(tJ)=c+sJ$ $\to$ $c^2+s^2=1$ $\to$ $\theta$, $\pi$\\[2pt]
+$x^2=x+1$ $\to$ $\varphi$ $\to$ $A_n$\\[2pt]
+$\psi_n=A_n\,e^{J\theta_n}$
+\end{center}
+
+A probabilidade é leitura estatística dessa realização, não a receita.
+Em termos rigorosos, a ordem é
+\[
+\text{realização}	o \psi=Ae^{J\theta}	o |\psi|^2\to P_U.
+\]
+Antes da ponte de Born, $\psi$ é uma \emph{realização de onda candidata}: geométrica e dinâmica,
+mas ainda não uma distribuição de probabilidade. A frase “a matéria é uma onda de probabilidades”
+refere-se à interpretação final do mesmo objecto, não ao ponto de partida da construção.
+
+\vspace{1em}
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{3.4cm}p{7.6cm}p{3.6cm}@{}}
+\toprule
+\textbf{no espaço} & \textbf{é, nesta construção} & \textbf{onde} \\
+\midrule
+ocorrências / dobra &
+lista $I$, realização $\pi$, multiplicidade $G$ &
+Def.~0.23 \\
+medida de contagem &
+$p=G/|I|$ (estatística, não fonte do módulo) &
+Obs.~0.214; Teor.~0.44 \\
+projeção &
+$x^2=x$ (idempotente / estado puro) &
+Obs.~0.215 \\
+fase / rotação &
+$x^2=-1$ (rotor); degraus; $\operatorname{Res}_\theta=0$ &
+Teor.~0.102(2); 0.22 \\
+crescimento / amplitude &
+$x^2=x+1$ (estrela / espiral / Alonzo) &
+Teor.~0.102; catálogo 0.20.2 \\
+costura norma &
+exterior + rotor: $a^2\to a^2+b^2$ &
+catálogo (ext.+rotor) \\
+função de onda &
+objecto em que as três equações se realizam juntas &
+Def.~\ref{def:psi} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Porque esta parte vem aqui}
+% ============================================================
+
+A Parte Quântica (XII) organizou o modo espectral --- massa $|\log\rho|$, luz $\rho=1$ ---
+sem magma nova. Lá se leu explicitamente:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item $P=k/N$ já realizado (contagem);
+  \item $p_i=|\langle i|\psi\rangle|^2$ continua \emph{não localizada} (Obs.~0.215);
+  \item Parseval da dourada conserva a norma $L^2$ da transformada, \emph{não} produz Born
+        (Obs.~0.220);
+  \item GLH, dobras e Lei~7 realizam contagem e conversão no palco, \emph{não} Born
+        (Obs.~0.221).
+\end{itemize}
+
+Born só sai com estatística. Mas estatística, nesta construção, não começa por um axioma
+de medida abstracta: começa pela multiplicidade que a realização já conta.
+
+O Resumo da Física já declara o eixo dual que esta Parte vai usar:
+
+\begin{quote}
+\small
+«o cartesiano e o polar, onde as fases somam e os módulos multiplicam.
+E as duas fecham: batendo alternadas, os intervalos encaixam e o processo termina
+numa igualdade --- o ponto onde para é o ponto fixo que as duas faces passam a partilhar.»
+\end{quote}
+
+A transformada já construída é pura fase (Teor.~0.160(1)): os caracteres $\chi_k:X\to\{\pm1\}$
+não carregam magnitude. Toda a magnitude do transformado vem do campo $G$, e $G$ conta
+dobras --- mas a contagem regista a dobra, não fabrica sozinha a amplitude da espiral.
+O que falta para a onda é a realização conjunta das três equações
+(projeção, rotação, crescimento) no mesmo objecto, com teste de resíduo no lado rotacional
+e fecho ainda aberto no lado hiperbólico.
+
+% ============================================================
+\section{Da multiplicidade à medida}
+% ============================================================
+
+\begin{definicao}[realização e multiplicidade --- já construídas]
+\label{def:realizacao}
+Seja $I$ a lista finita (Teor.~0.20) e $X$ um conjunto com igualdade decidível.
+Uma realização é $\pi:I\to X$. A multiplicidade geométrica é
+\[
+G(x)=\bigl|\pi^{-1}(x)\bigr|=\bigl|\{i\in I:\pi(i)=x\}\bigr|.
+\]
+O suporte de $G$ é $\operatorname{supp}G=\operatorname{im}\pi$ (Def.~0.23).
+\end{definicao}
+
+\begin{definicao}[espaço de probabilidade clássico]
+\label{def:espaco-prob}
+O espaço de probabilidade clássico associado à realização é o triplo
+\[
+(\Omega,\mathcal{F},P)
+\quad\text{com}\quad
+\Omega=\operatorname{supp}G,\qquad
+\mathcal{F}=2^\Omega,\qquad
+P(A)=\frac{1}{|I|}\sum_{x\in A}G(x)=\frac{|A|_G}{|I|},
+\]
+onde $|A|_G=\sum_{x\in A}G(x)$ é a contagem com multiplicidade.
+Quando se identifica a fibra com a célula, $P(\{x\})=G(x)/|I|$.
+É a mesma contagem de Hurwitz (Teor.~0.44) lida como probabilidade.
+Não se introduz medida nova. A finitude fecha.
+\end{definicao}
+
+% ============================================================
+\section{A ponte: projeção, rotação e crescimento da espiral}
+\label{sec:ponte}
+% ============================================================
+
+A distribuição de contagem $p=G/|I|$ regista a dobra da realização.
+Heighway e a espiral quadrada podem partilhar o mesmo $|I|$ e ter multiplicidades
+radicalmente diferentes: a medida sozinha \emph{não} distingue realizações e
+\emph{não} fabrica, por si, a amplitude geométrica.
+Não se fecha portanto
+\[
+\psi=\sqrt{G/|I|}\,e^{i\theta}
+\]
+como se as duas fontes fossem independentes e fundamentais.
+Inverte-se a pergunta.
+
+\begin{problema}
+\label{prob:central}
+Dada a espiral $(z_n)$ construída no Reino, qual é a realização de onda?
+É $\psi_n\equiv z_n/\|z_n\|$?
+Ou $\psi_n=A_n\,e^{i\theta_n}$ com $A_n$ produzido pela própria recorrência?
+Nesse regime, $G/|I|$ pode aparecer \emph{depois}, como estatística observável
+da realização --- não como fonte primária da amplitude.
+\end{problema}
+
+\subsection{Três equações, três papéis}
+
+Os documentos separam com clareza três equações e não as fundem:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}llll@{}}
+\toprule
+equação & tipo & papel & sítio \\
+\midrule
+$x^2=x$ & idempotente & projeção / estado puro & Obs.~0.215; projector $\rho$ \\
+$x^2=-1$ & rotor (elíptico, ord.~4) & fase / rotação & Teor.~0.102(2); degrau $w=2$ \\
+$x^2=x+1$ & estrela (hiperbólica) & crescimento da espiral & Teor.~0.102; Alonzo; $\varphi$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}[leftmargin=1.3em,itemsep=2pt]
+  \item $x^2=x$ é o projector. Não é rotação nem expansão. É a realização de um estado puro.
+  \item $x^2=-1$ é o rotor: ordem finita 4, elíptico, ciclo
+        $1\to x\to-1\to-x\to1$. É a fase / orientação no plano.
+  \item $x^2=x+1$ é a estrela (Star(K)): hiperbólica, sem ordem finita; as raízes são
+        $\varphi$ e $\psi$. É o crescimento / deformação da espiral.
+\end{itemize}
+
+A onda aparece quando estas três leituras se realizam no \emph{mesmo objecto},
+não quando se anexa uma amplitude estatística a uma fase.
+
+\subsection{Exterior, rotor e a costura que produz a norma}
+
+O catálogo regista a costura explícita:
+
+\begin{itemize}[leftmargin=1.3em,itemsep=2pt]
+  \item \textbf{Exterior sozinho}: $a+be$, $e^2=0$, norma $a^2$ (cega a $e$),
+        assinatura com divisor de zero --- o cone nulo.
+  \item \textbf{Exterior + rotor}: troca $e^2=0$ por $i^2=-1$. Resultado $\mathbb{C}$,
+        norma $N=a^2+b^2$, equação $x^2=-1$.
+\end{itemize}
+
+O exterior sozinho é cone; com o rotor vira corpo. A norma passa de $a^2$ para $a^2+b^2$.
+Isso é a costura que o documento já fechou (forma $(2,0,0)$, ISO-DUAL).
+A fase (rotação) e a estrutura que sustenta o módulo (norma definida) nascem juntos
+nessa substituição --- não de uma contagem posterior.
+
+\subsection{A espiral de ouro e o cone nulo}
+
+No catálogo (0.20.2) a espiral áurea é o crescimento sequencial que selecciona $\varphi$
+(ângulo $2\pi/\varphi^2$). Uma dimensão acima, a malha erguida é um \textbf{cone nulo}:
+a espiral plana é a sombra da estrutura que vive no cone.
+O dual da espiral áurea é o cone nulo; o teste \texttt{tests/cone\_nulo.c} regista-o.
+
+Alonzo (corpo canónico da Parte Fractal) realiza a composição; $\varphi$ e $\psi$ são
+as raízes de $x^2=x+1$; o dual Cantor~$\leftrightarrow$~Julia liga os dois tecidos.
+A forma áurea $\varphi\cdot\varphi=\varphi+1$ é o produto que é a soma --- crescimento
+escrito como equação de ponto fixo.
+
+\subsection{Degraus da fase: o lado rotacional ainda vale}
+
+Os degraus (Teor.~0.22) continuam a dar a torre rotacional discreta:
+\[
+\Delta\theta_w=\frac{2\pi}{2^w},\qquad
+\operatorname{ord}(\rho_w)=2^w,\qquad
+\sum_{k=0}^{2^w-1}\Delta\theta_w=2\pi.
+\]
+No caso discreto, o resíduo de ciclo é
+\[
+\operatorname{Res}^{\mathrm{ciclo}}_\theta
+=\sum_{k=0}^{2^w-1}\Delta\theta_w-2\pi=0.
+\]
+Esse é o teste de fecho da \emph{parte fase} no rotor. Os degraus não fabricam o módulo;
+ fabricam a orientação. O módulo, se vier da espiral, vem da recorrência hiperbólica
+($x^2=x+1$), não de $\sqrt{G/|I|}$.
+
+Na espiral áurea a etapa angular é
+\[
+\Delta\theta=\frac{2\pi}{\varphi^2},
+\]
+mas como $\varphi^2$ é irracional, não existe $N\in\mathbb N$ tal que $N\Delta\theta=2\pi$.
+Logo, para a espiral, o fechamento plano não é periódico finito. O objecto relevante é a
+\emph{identidade local do passo angular}
+\[
+\operatorname{Res}^{\mathrm{passo}}_\theta
+=\Delta\theta-\frac{2\pi}{\varphi^2}=0,
+\]
+não um fechamento de ciclo inteiro no plano. Isso separa claramente:
+\[
+\text{rotor discreto} = \text{fecho periódico};\qquad
+\text{espiral áurea} = \text{passo angular exacto e não periódico.}
+\]
+
+\begin{teorema}[fecho rotacional --- resíduo nulo]
+\label{thm:fecho-fase}
+Sobre o ciclo gerado por $\rho_w$, $\sum\Delta\theta_w=2\pi$ e
+$\operatorname{Res}^{\mathrm{ciclo}}_\theta=0$.
+A condição está embutida na ordem do gerador (Teor.~0.22). Isso valida a parte
+rotacional da ponte; não valida ainda a origem da amplitude nem o fechamento plano da espiral áurea.
+\end{teorema}
+
+\subsection{Forma diferencial do Teorema Central}
+
+O Teorema Central não começa pela integral: começa pelo diferencial do produto.
+Seja
+\[
+y=f(x),\qquad x=f^{-1}(y).
+\]
+O termo central da identidade é
+\[
+\boxed{y\,dx+x\,dy=d(xy)}.
+\]
+Substituindo $y=f(x)$:
+\[
+\boxed{f(x)\,dx+f^{-1}(y)\,dy=d\bigl(x\,f(x)\bigr)},
+\]
+com $dy=f'(x)\,dx$. Esta é a forma diferencial do Teorema Central.
+
+A forma integral é a leitura acumulada: integrando de $a$ a $b$ no domínio e de $f(a)$ a $f(b)$ na imagem,
+\[
+\int_a^b y\,dx+\int_{f(a)}^{f(b)}x\,dy=\bigl[xy\bigr]_a^b,
+\]
+isto é
+\[
+\boxed{\int_a^b f(x)\,dx+\int_{f(a)}^{f(b)}f^{-1}(y)\,dy=b\,f(b)-a\,f(a).}
+\]
+É a partição reversível do mesmo rectângulo pelos dois cortes --- domínio (Riemann/Hurwitz)
+e imagem (Lebesgue/Gentil) --- sem resto. O catálogo já descreve a soma das duas leituras
+como essa partição; a forma diferencial mostra que a identidade é originalmente
+o diferencial do produto, e a integral é a sua acumulação.
+
+\subsection{Lei 0, Lei 7, Lei 2 --- e o que cada uma entrega}
+
+Antes de especializar $f'=f^{-1}$, a derivação tem de ser rastreada:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}llp{7.5cm}@{}}
+\toprule
+lei & conteúdo nos docs & o que entrega à ponte \\
+\midrule
+Lei 0 & $(+1)\oplus(-1)$; $0^\dagger=\infty$ &
+operação fundamental nos extremos \\
+Lei 7 & $H\times H^*$; dois tecidos ligam sem fundir &
+transporte / ligação sem fusão \\
+vinco & $1=\mathrm{cl}(L_0,L_7)$ &
+encontro das duas \\
+retorno & $\pi_U(F(L_7))=L_0$, $\mathrm{Res}=0$ &
+ciclo fechado (Teor.~univ:55) \\
+Lei 2 & $K^{**}=K$; catálogo: «$f\leftrightarrow f^{-1}$ (a Lei 2)» &
+involução dual explicitamente identificada \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Lei 0 + Lei 7 fecham o ciclo (vinco + retorno). A forma diferencial do produto
+\[
+y\,dx+x\,dy=d(xy)
+\]
+e a sua acumulação integral são o Teorema Central --- partição reversível do rectângulo
+pelos dois cortes. Isso não é lei nova.
+
+A identificação $f\leftrightarrow f^{-1}$ está no catálogo como conteúdo da \textbf{Lei 2},
+não como teorema derivado passo a passo de Lei 0+7. Enquanto essa derivação explícita
+não estiver escrita com resíduo zero, \emph{não} se declara $f'=f^{-1}$ ``obrigatória só porque
+$K^{**}=K$''. Declara-se: a involução dual está nomeada na Lei 2; o pedido analítico
+$f'=f^{-1}$ é a realização dessa involução \emph{dentro da família de potências}.
+
+\paragraph{Justificativa da casa: sem Lei 8 e com retorno de 7 a 0.}
+O repositório toma como afirmação canónica que as leis fecham em $0\ldots 7$, e que não existe
+uma \textbf{Lei 8} como nova lei dinâmica. Em termos do documento de referência do sistema,
+$8$ é a cardinalidade do conjunto das leis, não uma nova etapa da dinâmica; a Lei 7 não é uma
+parede, mas um corpo novo (o octonião dual) que reaplica a mesma estrutura e reentra no ciclo.
+Este ponto é explícito no \texttt{memoria/project-checkpoint-2026-08-09-oito-leis.md} e no \texttt{papers/aranha.tex}: o ciclo da aranha escreve, lê, decide e fecha, sem introduzir um
+sétimo passo extra. O fechamento é a volta ao ponto de origem, isto é, a descida $7\to 0$ pelo
+próprio ciclo, e não a criação de uma nova lei. A regra da casa é, portanto: 
+\[
+\boxed{\text{Lei 7 reaplica a estrutura e fecha em Lei 0, sem Lei 8}.}
+\]
+O mesmo padrão aparece no ciclo da aranha em \texttt{papers/aranha.tex}: escrita, leitura,
+decisão e fecho formam um retorno estrutural ao ponto base e não uma lei suplementar.
+
+\subsection{Unicidade do expoente --- não unicidade global da potência}
+
+Na família monomial $f(x)=a\,x^b$, a inversa é
+\[
+ f^{-1}(x)=\left(\frac{x}{a}\right)^{1/b}
+\]
+quando $a>0$ e $b\neq 0$. A derivada é
+\[
+ f'(x)=ab\,x^{b-1}.
+\]
+A condição $f'(x)=f^{-1}(x)$ obriga, em primeiro lugar, à igualdade dos expoentes:
+\[
+ b-1=\frac1b
+\qquad\Longrightarrow\qquad
+b^2-b-1=0
+\qquad\Longrightarrow\qquad
+b=\varphi.
+\]
+Mas a igualdade dos coeficientes impõe também
+\[
+ ab=a^{-1/b}
+\qquad\Longrightarrow\qquad
+a^{1+1/b}=\frac1b.
+\]
+Para $b=\varphi$, isso fixa o coeficiente
+\[
+ a=\varphi^{-1/\varphi}.
+\]
+Assim, dentro da família $a x^b$, a condição $f'=f^{-1}$ força \textbf{não só o expoente} $b=\varphi$, mas também o coeficiente $a$.
+
+Controlo negativo (\texttt{tests/aurea.c}): se $b\neq\varphi$, a igualdade quebra e o desvio
+acompanha $|b^2-b-1|$. Unicidade do expoente \emph{dentro} das potências: sim, com resíduo 0.
+
+O catálogo \textbf{não} afirma que as potências sejam as únicas funções $C^1$ que satisfazem
+$f'=f^{-1}$ no contínuo. Não se promove essa unicidade global. O quadro de trabalho é
+a família potência; dentro dela o ouro é forçado, e o coeficiente também fica fixado.
+\[
+f(x)\,dx+x\,f^{-1}(x)\,dx=d\bigl(x\,f(x)\bigr)
+\]
+(o factor $x$ no segundo termo é essencial).
+
+A matriz áurea
+\[
+M_\varphi=\begin{pmatrix}1&1\\1&0\end{pmatrix}
+\]
+tem $\det=-1$, autovalores $\varphi$ e $-1/\varphi$: uma direcção expande, a conjugada
+contrai e inverte a orientação. O sinal negativo da folha conjugada é esse determinante,
+não um postulado extra.
+
+Cadeia (com o que está fechado e o que ainda é identificação de catálogo):
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}cl@{}}
+Lei 0 + Lei 7 & vinco + retorno ($\mathrm{Res}=0$) \\
+$y\,dx+x\,dy=d(xy)$ & forma diferencial do Teorema Central \\
+$\displaystyle\int f+\int f^{-1}=bf(b)-af(a)$ & forma integral (acumulação) \\
+Lei 2 (catálogo) & nomeia $f\leftrightarrow f^{-1}$ \\
+$f'=f^{-1}$ em potências & realização analítica no quadro $ax^b$ \\
+$b=\varphi$ & expoente forçado (unicidade \emph{dentro} das potências) \\
+\end{tabular}
+\end{center}
+
+\subsection{Gentil--Hurwitz--Lebesgue: os dois lados da mesma medida}
+
+O teorema central (Teor.~cat:0.7 / thm:central) lê os dois lados pela medida:
+
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item \textbf{Hurwitz} conta (discreto, esfera, bilinear $1,2,4,8$);
+  \item \textbf{Lebesgue} transporta a ordem ($\mathbb{Q}\to\mathbb{R}$);
+  \item \textbf{Gentil} integra (contínuo, hipérbole, sem limite).
+\end{itemize}
+
+A bijeção dual é a estrela, realizada pela forma integral acima.
+Involução $f\leftrightarrow f^{-1}$ (Lei~2). Nunca se avalia uma raiz: os dois cortes
+dão a mesma contagem.
+
+Na leitura logarítmica a função áurea lineariza:
+\[
+\ln f(e^u)=\varphi\,u+\ln a,
+\]
+e o período espectral das voltas da reescala é
+\[
+\tau_0=\frac{2\pi}{\ln\varphi}.
+\]
+Recorrência $\varphi^n$ produz amplitude; $\ln\varphi$ produz a contagem das voltas (fase).
+São duas projecções da mesma máquina --- a que satisfaz $f'=f^{-1}$ --- não dois
+ingredientes colados.
+
+\subsection{Dois cortes, a mesma conservação}
+
+A arquitectura comum aos dois sítios:
+
+\begin{center}
+objeto $=$ face$_1$ $+$ face$_2$
+\qquad;\qquad
+reflexão/troca $\Longrightarrow$ conservação
+\end{center}
+
+\textbf{Corte 1 --- Teorema Central (Teor.~0.44).}
+Domínio $\mid$ imagem. A involução actua no \emph{par}:
+\[
+(x,y)\;\overset{\nu}{\longmapsto}\;(y,x),\qquad \nu^2=\mathrm{id}.
+\]
+Forma infinitesimal:
+\[
+\underbrace{y\,dx}_{\text{domínio}}+\underbrace{x\,dy}_{\text{imagem}}=\underbrace{d(xy)}_{\text{vinco/fecho}}.
+\]
+Acumulação:
+\[
+\int_a^b f+\int_{f(a)}^{f(b)}f^{-1}=bf(b)-af(a).
+\]
+A notação $f\leftrightarrow f^{-1}$ é coordenatização do par quando se escolhe a carta $y=f(x)$
+--- não um mapa novo $V\to V$ (catálogo e Teor.~0.44(3)).
+
+\textbf{Corte 2 --- exponencial / forma polar.}
+Par $\mid$ ímpar. Com $J^2=-1$ (segundo degrau da largura, ordem 4):
+\[
+\exp(tJ)=c(t)+s(t)J,
+\]
+\[
+c(t)=\sum_k\frac{(-1)^k t^{2k}}{(2k)!},\qquad
+s(t)=\sum_k\frac{(-1)^k t^{2k+1}}{(2k+1)!}.
+\]
+Conservação pela reflexão:
+\[
+(c+sJ)(c-sJ)=c^2+s^2=1.
+\]
+A exponencial é o dicionário entre as duas faces (módulo multiplica, fase soma);
+a forma polar não é importada --- é o Teor.~0.10(4)/0.22 onde as faces convivem.
+Julia ($z\mapsto z^2$) e Cantor ($\theta\mapsto 2\theta$) conjugam-se por $z=e^{2\pi i\theta}$.
+
+\textbf{$\pi$ produzido pelo fluxo, não postulada.}
+Uma vez fixada a parametrização do fluxo (por radianos na carta do rotor), escreve-se
+\[
+\pi=\min\{t>0:\exp(tJ)=-1\}.
+\]
+Quarto de volta $\to J$, meia volta $\to-1$, volta inteira $\to 1$.
+A fase é coordenada do fluxo; não se inventa a partir de $\pm1$.
+
+\subsection{A realização de onda --- de baixo para cima}
+
+\begin{definicao}[realização de onda]
+\label{def:psi}
+A realização de onda é o objecto em que as cisões e as recorrências já construídas se lêem juntas:
+\begin{enumerate}[leftmargin=1.2em,itemsep=2pt]
+  \item \textbf{Cisão / duas leituras} (Lei 0, Lei 7, Teor.~0.44): par $(x,y)$, involução $\nu$,
+        forma $d(xy)$.
+  \item \textbf{Rotação / fase} ($J^2=-1$, degraus, $\exp(tJ)=c+sJ$):
+        $\theta$ coordenada do fluxo, com $\operatorname{Res}^{\mathrm{ciclo}}_\theta=0$ no rotor discreto
+        e $\operatorname{Res}^{\mathrm{passo}}_\theta=0$ na espiral áurea.
+  \item \textbf{Crescimento / amplitude} ($x^2=x+1$, $f'=f^{-1}$ em potências):
+        $A_{n+1}=\varphi A_n$, forçado no quadro $ax^b$ (catálogo §0.64).
+\end{enumerate}
+Escreve-se
+\[
+\boxed{\psi_n=A_n\,e^{J\theta_n}}
+\]
+com $A_n$ da recorrência e $e^{J\theta_n}$ da cisão/rotação --- duas leituras da mesma realização,
+não dois ingredientes colados. No fluxo puro $\exp(tJ)$ tem-se $A\equiv 1$ e $c^2+s^2=1$;
+na espiral a recorrência metálica deforma a amplitude. O que se obtém aqui é uma
+\emph{realização de onda candidata}: a órbita $T^n\psi_0$ tem forma polar áurea, mas a ponte
+estatística para $P_U$ continua aberta e não pode ser usada como hipótese de construção.
+Este teorema prova a \emph{consistência} da órbita, não a derivação causal completa de
+$T=\varphi e^{J\Delta\theta}$ a partir de $L_0+L_7$. A distinção é importante: o texto
+constrói a solução da recorrência e a sua forma polar, mas não declara que essa mesma forma seja
+já derivada das leis anteriores; a derivação causal de $T$ permanece como dívida explícita, não como
+resultado escondido.
+\end{definicao}
+
+\begin{observacao}[probabilidade como interface, não como terceira face]
+\label{obs:nao-fecha}
+A probabilidade $G/|I|$ é leitura estatística da realização, não a receita que a constrói.
+A igualdade $|\psi|^2=P_U$ não é usada para a definir; ela é a ponte de compatibilidade entre as duas leituras do mesmo objecto. Não se promove $\sqrt{G/|I|}$ a amplitude fundamental.
+Não se inventa mapa $V\to V$ além do par de leituras (Teor.~0.44(3)).
+Em letras garrafais: $\text{norma}\neq\text{probabilidade}\neq\text{amplitude}$.
+A estrutura correta é
+\[
+\text{Geometria}
+\;\rightleftarrows\;
+P_U
+\;\rightleftarrows\;
+\text{Dinâmica},
+\]
+com $P_U$ no centro como interface de leitura, não como terceiro estádio da cadeia. A mesma recorrência que produz crescimento produz a parte radial; o rotor produz a parte angular; a probabilidade não entra para fazer a onda nem para definir a sua forma. A dívida restante é geométrica: mostrar como o par dual
+$(\psi^+,\psi^-)$ determina a fibra $\pi_U^{-1}(x)$ e, só então, a contagem $G(x)$.
+Fecha: involução no par; $d(xy)$; forma integral; $\exp(tJ)$ com conservação;
+$\varphi$ forçado em potências; $\operatorname{Res}^{\mathrm{ciclo}}_\theta=0$ no rotor;
+$\pi$ pelo fluxo. O passo que resta operacionalizar sítio a sítio é a identificação explícita
+$\psi_n=A_n e^{J\theta_n}$ em Alonzo / espiral de ouro / modo espectral, com o mesmo
+critério de resíduo zero, e a posteriori a ponte $P_U\stackrel{?}{=}|\psi|^2$.
+\end{observacao}
+
+
+% ============================================================
+\section{Fecho na espiral de ouro}
+\label{sec:espiral}
+% ============================================================
+
+O catálogo (0.20.2) constrói a espiral de ouro em três passos, sem postular onda:
+
+\begin{enumerate}[leftmargin=1.3em,itemsep=2pt]
+  \item crescimento sequencial com máxima simetria (cada semente no maior vão) ---
+        selecciona o número mais irracional $\varphi$;
+  \item giro entre sementes consecutivas
+        \[
+        \Delta\theta=2\pi\Bigl(1-\frac1\varphi\Bigr)=\frac{2\pi}{\varphi^2}\approx 137{,}507^\circ;
+        \]
+  \item malha erguida uma dimensão --- cone nulo (a espiral plana é a sombra).
+\end{enumerate}
+
+As espirais de Fibonacci aparecem sozinhas. Foram precisos: um ponto, o acto de dividir-se,
+e a memória de ter dividido.
+
+\subsection{O operador $T$ da recorrência}
+
+O mesmo passo estrutural produz módulo e fase:
+
+\begin{definicao}[operador da espiral de ouro]
+\label{def:T-espiral}
+\[
+T=\varphi\,e^{J\Delta\theta},\qquad
+\Delta\theta=\frac{2\pi}{\varphi^2},\qquad
+J^2=-1.
+\]
+\end{definicao}
+
+\begin{teorema}[a espiral resolve a recorrência de onda]
+\label{thm:espiral-psi}
+Seja $\psi_0=A_0\,e^{J\theta_0}$ com $A_0>0$. A órbita
+\[
+\psi_{n+1}=T\psi_n
+\]
+satisfaz
+\begin{enumerate}[leftmargin=1.2em,itemsep=1pt]
+  \item $|T\psi_n|=\varphi|\psi_n|$ \quad (logo $A_{n+1}/A_n=\varphi$);
+  \item $\arg(T\psi_n)-\arg(\psi_n)=\Delta\theta=2\pi/\varphi^2$;
+  \item a solução explícita
+        \[
+        \boxed{\psi_n=A_0\,\varphi^n\,e^{J(\theta_0+n\Delta\theta)}}.
+        \]
+\end{enumerate}
+Não é ansatz: é a órbita de $T$. A recorrência selecciona $A$; o ciclo (ângulo da condição
+de máxima simetria) selecciona $\theta$. Este teorema é de consistência da órbita e não
+substitui a derivação causal de $T$ a partir de $L_0+L_7$.
+\end{teorema}
+
+\begin{proof}
+$T$ é produto de escalar positivo $\varphi$ por rotação $e^{J\Delta\theta}$. Logo
+$|T\psi|=\varphi|\psi|$ e o argumento avança exactamente $\Delta\theta$. Por indução,
+$\psi_n=T^n\psi_0=A_0\varphi^n e^{J(\theta_0+n\Delta\theta)}$.
+A identificação $\varphi$ e $\Delta\theta=2\pi/\varphi^2$ é a do catálogo 0.20.2
+(máxima simetria sequencial $\Rightarrow\varphi$; giro $\Rightarrow 2\pi/\varphi^2$).
+\end{proof}
+
+\subsection{Resíduos}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}ll@{}}
+$\operatorname{Res}_A$ & $A_{n+1}/A_n-\varphi=0$ \\
+$\operatorname{Res}_\theta$ & passo angular $=2\pi/\varphi^2$; fecho plano não periódico
+($\varphi$ irracional); fecho no cone nulo (dual) \\
+$\operatorname{Res}_\psi$ & os dois simultaneamente na órbita de $T$ \\
+\end{tabular}
+\end{center}
+
+O resíduo local da espiral,
+\[
+\operatorname{Res}^{\mathrm{passo}}_\theta
+=\Delta\theta-\frac{2\pi}{\varphi^2},
+\]
+vale zero por construção de $\Delta\theta$. Isso garante a consistência algébrica da etapa angular,
+mas não substitui a derivação causal de $\Delta\theta$ a partir da estrutura anterior
+($L_0+L_7$ e o catálogo). A dívida é precisamente a passagem de um passo angular bem definido
+para a origem causal desse passo.
+
+Há também uma diferença precisa entre o \emph{invariante do par} e o \emph{resíduo de truncagem}.
+O par dual mantém
+\[
+|\psi^+|\,|\psi^-|=1
+\]
+como conservação do retorno; a truncagem num suporte finito introduz um resíduo de janela
+\[
+\mathcal R_N=\mathcal T_N(\psi)-\psi,
+\]
+que mede a perda da cauda e não a quebra do invariante. O que se exige aqui é separar estas duas
+coisas: o invariante do par é estrutural, enquanto o erro de suporte é finito e local.
+No plano a órbita não fecha (número mais irracional). Uma dimensão acima, o mesmo objecto
+é o cone nulo --- onde a distância própria é nula e o crescimento se conserva. O dual da
+espiral áurea é o cone nulo (\texttt{tests/cone\_nulo.c}).
+
+\subsection{O que isto fecha e o que deixa para a estatística}
+
+O que fica estabelecido é a forma dinâmica da órbita:
+\[
+\text{recorrência}\longrightarrow A,\qquad
+\text{ciclo}\longrightarrow\theta,\qquad
+\Longrightarrow\psi=A\,e^{J\theta}
+\]
+como solução de $\psi_{n+1}=T\psi_n$, com $T$ lido do catálogo. Isso produz uma
+\emph{realização de onda candidata} --- ou seja, a espiral realiza a forma de onda no
+sentido dinâmico.
+
+A dívida causal que permanece é a passagem de $L_0+L_7$ para o próprio operador
+$T=\varphi e^{J\Delta\theta}$. O teorema prova a consistência da órbita e a forma da solução,
+mas não fecha ainda a cadeia causal que produz $T$ a partir das leis anteriores.
+
+Não fecha ainda a leitura estatística $P_U$ dessa $\psi$ (frequências, Born como observação).
+A probabilidade observa a realização; não a fabrica. A ordem correta é: realização geométrica,
+$\pi_U$, multiplicidade, e só depois $P_U$. O passo que fica para depois do fecho geométrico é a ponte
+\[
+P_U(x)\stackrel{?}{=}|\psi_x|^2,
+\]
+que não pode ser usada como hipótese de construção.
+
+
+% ============================================================
+\section{Normalização: transformada, metais e Pisot}
+\label{sec:norm}
+% ============================================================
+
+A órbita da espiral
+\[
+\psi_n=A_0\varphi^n e^{J(\theta_0+n\Delta\theta)}
+\]
+cresce. A folha conjugada (Pisot) contrai:
+\[
+\bar\varphi=-\frac1\varphi,\qquad
+\bigl|\bar\varphi\bigr|^n=\varphi^{-n}\to 0.
+\]
+Duas folhas da mesma borda $b^2-b-1=0$:
+\[
+\varphi^n\quad\text{(expansiva)},\qquad
+(-\varphi^{-1})^n\quad\text{(contrativa)}.
+\]
+No limite a contrativa desaparece; a realização física vive na expansiva.
+No suporte finito a contrativa ainda contribui residualmente --- e o resíduo tem de
+ser controlado.
+
+\subsection{Corte finito e factor da transformada}
+
+Seja $I=\{0,\ldots,N-1\}$ o suporte finito e
+\[
+\Psi_I=(\psi_0,\ldots,\psi_{N-1})
+\]
+a órbita truncada. A normalização não é arbitrária: vem da mesma máquina que já
+normaliza a transformada (Teor.~0.60; mudança de base):
+\[
+c=2^{-m}F(f),\qquad N=2^m.
+\]
+Dois factores, duas leituras:
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}ll@{}}
+$2^{-m}=1/N$ & factor de amplitude da transformação \\
+$\sqrt N$ & factor da norma $L^2$ (Parseval: $\|F(f)\|_2^2=N\|f\|_2^2$) \\
+\end{tabular}
+\end{center}
+Os documentos distinguem $N$ de $\sqrt N$ precisamente porque são essas duas leituras,
+não dois factores concorrentes. Nos metais / dourada: em $m=0$ o factor reparte-se
+($\sqrt N$); em $m=1$ (estrela) junta-se ($N$).
+
+No contínuo / círculo unitário a área traz $\pi$; no discreto de largura $m$ o factor
+é potência de 2. As duas escalas não se misturam: cada suporte carrega a sua.
+
+\subsection{Uma dobra, duas leituras}
+
+\begin{center}
+Lei 0 + Lei 7 $\;\Longrightarrow\;$ dobra com retorno
+\end{center}
+A mesma dobra lê-se de dois lados:
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}ll@{}}
+dinâmica & $|\psi^+|\,|\psi^-|=1$ \\
+estatística & $G(x)=|\pi_U^{-1}(x)|$ \\
+\end{tabular}
+\end{center}
+$P_U=G/|I|$ não é segunda lei sobre a dinâmica: é a contagem das fibras da mesma projeção.
+
+Ordem:
+\[
+\text{Lei 0}\to\text{Lei 7}\to\text{vinco}\to\text{retorno}
+\to(\psi^+,\psi^-)\to\pi_U\to G\to P_U.
+\]
+
+\subsection{Invariante unitário por fibra}
+
+Seja $x$ fixo e
+\[
+\pi_U^{-1}(x)=\{u_1,\ldots,u_{G(x)}\}
+\]
+as suas pré-imagens. Cada $u$ carrega o par $(\psi_u^+,\psi_u^-)$. Se o invariante do retorno
+for \emph{unitário por pré-imagem},
+\[
+\boxed{\mathcal I(\psi_u^+,\psi_u^-)=1},
+\]
+então automaticamente
+\[
+\sum_{u\in\pi_U^{-1}(x)}\mathcal I(\psi_u^+,\psi_u^-)
+=\sum_{u\in\pi_U^{-1}(x)}1
+=|\pi_U^{-1}(x)|
+=G(x).
+\]
+A normalização é a contagem:
+\[
+\boxed{P_U(x)=\frac1{|I|}\sum_{u\in\pi_U^{-1}(x)}1=\frac{G(x)}{|I|}.}
+\]
+
+O par não deve ser entendido como duas cópias da mesma estrutura algébrica.
+A hipótese de trabalho é mais forte e mais específica: uma face pode realizar
+a composição anelar, enquanto a face dual realiza a projeção idempotente.
+
+$$
+\boxed{
+\psi_u^+\in R^+,\qquad
+\psi_u^-\in E^-,
+\qquad
+(\psi_u^-)^2=\psi_u^-.
+}
+$$
+
+No lado \(R^+\), a associatividade e a distributividade são
+
+$$
+(ab)c=a(bc),
+$$
+
+$$
+a(b+c)=ab+ac,\qquad
+(a+b)c=ac+bc.
+$$
+
+No lado \(E^-\), a condição fundamental é
+
+$$
+(\psi_u^-)^2=\psi_u^-,
+$$
+
+e, caso exista uma composição binária \(\circ\),
+
+$$
+(e_1\circ e_2)\circ e_3
+=
+e_1\circ(e_2\circ e_3).
+$$
+
+A dualidade relaciona as duas estruturas por leis de compatibilidade,
+não pela identificação dos produtos.
+
+Em particular,
+
+$$
+|\psi_u^+|\,|\psi_u^-|=1
+$$
+
+é uma conservação de módulo e não deve ser promovida a
+
+$$
+\psi_u^+\psi_u^-=1.
+$$
+
+Se a segunda igualdade fosse imposta e \(\psi_u^-\) fosse idempotente
+e invertível, então necessariamente \(\psi_u^-=1\). A estrutura dual
+desapareceria. O papel da dualidade é precisamente evitar essa
+identificação: uma face compõe, a outra estabiliza.
+
+Assim, a forma correcta do par é
+
+$$
+\boxed{
+\text{composição anelar}
+\quad\rightleftarrows\quad
+\text{projeção idempotente},
+\qquad
+|\psi^+|\,|\psi^-|=1.
+}
+$$
+
+O problema estatístico permanece inalterado:
+
+$$
+(\psi_u^+,\psi_u^-)
+\longrightarrow
+\pi_U^{-1}(x)
+\longrightarrow
+\sum 1
+\longrightarrow
+G(x)
+\longrightarrow
+P_U(x).
+$$
+
+A nova questão é algébrica: demonstrar que a correspondência entre as
+duas faces satisfaz as condições de associatividade internas e as leis
+de distributividade/compatibilidade dual, com resíduo zero.
+
+\begin{problema}[invariante unitário por fibra]
+\label{prob:norm}
+Localizar o invariante $\mathcal I$ do retorno (Lei 0+Lei 7, $|\det|=1$, emparelhamento dual)
+tal que
+\[
+\mathcal I(\psi_u^+,\psi_u^-)=1
+\quad\text{para cada }u\in I,
+\]
+e portanto
+\[
+\sum_{u\in\pi_U^{-1}(x)}\mathcal I=G(x).
+\]
+Candidatos já medidos: $|\psi^+||\psi^-|=1$; $\psi^+\psi^-=(-1)^{\mathrm{ord}}$; $|\det|=1$.
+Não inventar $\mathcal I$ fora do retorno. Não usar $C_N$, Fourier nem Pisot como fundamento.
+\end{problema}
+
+\section{A álgebra dual da realização: anel, idempotente e distributividade}
+\label{sec:algebra-dual}
+
+A conservação
+
+$$
+\boxed{|\psi_u^+|\,|\psi_u^-|=1}
+$$
+
+não exige que as duas faces sejam o mesmo tipo de objecto algébrico.
+Ao contrário: a realização pode ser dual precisamente porque as duas faces
+carregam estruturas diferentes que se conservam sob a troca.
+
+A distinção fundamental é
+
+$$
+\boxed{
+\psi^+\ \text{é realizado no lado anelar},
+\qquad
+\psi^-\ \text{é realizado no lado idempotente}.
+}
+$$
+
+A dualidade não identifica os dois produtos. Ela relaciona as duas estruturas.
+
+\subsection{Duas faces, duas estruturas}
+
+Seja \(A\) o suporte comum das duas realizações. A face \(+\) é
+munida da operação \(\star_+\), enquanto a face \(-\) é munida da
+operação transportada \(\star_-\). Seja
+
+$$
+\delta:A\to A,\qquad \delta^2=\mathrm{id},
+$$
+
+a involução que troca as duas faces. Define-se
+
+$$
+\boxed{
+ u\star_- v
+=
+\delta\!\left(\delta(u)\star_+\delta(v)\right).
+}
+$$
+
+Assim, a segunda face não é uma nova álgebra introduzida
+independentemente: é a realização da primeira lei após a troca de
+face.
+
+Da definição segue imediatamente
+
+$$
+\boxed{
+\delta(u\star_+v)
+=
+\delta(u)\star_-\delta(v).
+}
+$$
+
+Portanto, em geral,
+
+$$
+\delta(u\star_+v)
+\neq
+\delta(u)\star_+\delta(v),
+$$
+
+e isso não representa uma falha de preservação. A operação que deve ser
+preservada é a operação da face de chegada.
+
+Em outras palavras,
+
+$$
+\boxed{
+\delta:(A,\star_+)\xrightarrow{\cong}(A,\star_-).
+}
+$$
+
+A involução é reversível porque \(\delta^2=\mathrm{id}\). Se
+\(\star_+\) é associativa e distributiva, então \(\star_-\) possui as
+mesmas propriedades por transporte da estrutura. Por exemplo,
+
+$$
+(u\star_-v)\star_-w
+=
+ u\star_-(v\star_-w),
+$$
+
+e as leis distributivas de \(\star_-\) seguem das correspondentes de
+\(\star_+\).
+
+O ponto estrutural é, portanto,
+
+$$
+\boxed{
+\text{mesmo suporte}
++
+\text{operação transportada}
+=
+\text{segunda realização}.
+}
+$$
+
+A dualidade não exige que \(\delta\) seja automorfismo de uma única
+operação. Ela exige que a operação seja trocada juntamente com a face.
+
+\subsection{A dualidade não é inversão algébrica}
+
+O invariante da realização é
+
+$$
+\boxed{
+|\psi_u^+|\,|\psi_u^-|=1.
+}
+$$
+
+Esta igualdade é uma igualdade de módulos. Ela não implica
+
+$$
+\psi_u^+\psi_u^-=1.
+$$
+
+Esta separação é necessária. Se um elemento \(e\) fosse simultaneamente
+idempotente e invertível em um anel unitário, então
+
+$$
+e^2=e
+$$
+
+e, multiplicando pela inversa,
+
+$$
+e=1.
+$$
+
+Logo,
+
+$$
+\boxed{
+e^2=e\ \land\ e\text{ invertível}
+\Longrightarrow e=1.
+}
+$$
+
+A face idempotente não deve, portanto, ser interpretada como o inverso
+algébrico da face anelar. O exemplo transportado acima mostra precisamente a diferença entre
+inversão algébrica e dualidade estrutural. A involução \(\delta\) não
+produz, em geral,
+
+$$
+\delta(u\star_+v)=\delta(u)\star_+\delta(v).
+$$
+
+Ela produz
+
+$$
+\boxed{
+\delta(u\star_+v)=\delta(u)\star_-\delta(v),
+}
+$$
+
+isto é, preserva a composição somente depois da troca da operação.
+
+Assim,
+
+$$
+\boxed{
+\text{dualidade}\neq\text{automorfismo},
+\qquad
+\text{dualidade}=\text{troca reversível da realização}.
+}
+$$
+
+Esta distinção é a realização concreta do duomorfismo: a mesma
+transformação que não preserva a lei \(\star_+\) como lei fixa é um
+isomorfismo entre a estrutura de chegada e a estrutura transportada.
+
+\subsection{Condições mínimas de associatividade}
+
+Para que a composição interna de cada face seja bem definida, as operações
+devem satisfazer associatividade no seu próprio sítio.
+
+No lado anelar:
+
+$$
+\boxed{
+(ab)c=a(bc).
+}
+$$
+
+No lado idempotente, se \(\circ\) for uma operação binária interna,
+exige-se
+
+$$
+\boxed{
+(e_1\circ e_2)\circ e_3
+=
+e_1\circ(e_2\circ e_3).
+}
+$$
+
+A idempotência é então uma condição adicional:
+
+$$
+\boxed{
+e\circ e=e.
+}
+$$
+
+Assim, a estrutura mínima do lado \(-\) é um semigrupo idempotente;
+se \(\circ\) for comutativa, obtém-se um semilattice quando também houver
+as condições correspondentes de ordem.
+
+A associatividade não vem da dualidade. Ela é uma propriedade interna de
+cada operação. A dualidade acrescenta as condições que relacionam as duas
+faces.
+
+\subsection{Distributividade interna do lado anelar}
+
+No anel \(R^+\), a distributividade é a usual:
+
+$$
+\boxed{
+a(b+c)=ab+ac
+}
+$$
+
+e
+
+$$
+\boxed{
+(a+b)c=ac+bc.
+}
+$$
+
+Estas duas leis são consequências da estrutura de anel e não devem ser
+reintroduzidas como propriedades da face idempotente.
+
+A face idempotente pode possuir uma estrutura distributiva própria, mas
+isso deve ser declarado separadamente.
+
+\subsection{Distributividade dual}
+
+A palavra ``dual'' deve designar aqui uma relação entre as operações das
+duas faces, e não uma terceira operação.
+
+Se
+
+$$
+D:R^+\longleftrightarrow E^-
+$$
+
+é a correspondência dual, as operações são compatíveis quando a passagem
+de uma face para a outra preserva a forma da composição apropriada.
+
+Uma condição forte é
+
+$$
+\boxed{
+D(a(b+c))
+=
+D(ab)\circ D(ac)
+}
+$$
+
+e, dualmente,
+
+$$
+\boxed{
+D((a+b)c)
+=
+D(ac)\circ D(bc).
+}
+$$
+
+Estas equações não dizem que \(\circ\) seja o mesmo produto de \(R^+\).
+Elas dizem que a distribuição realizada no lado anelar possui uma leitura
+correspondente no lado idempotente.
+
+Uma forma mais simétrica é introduzir uma operação de ação
+
+$$
+\triangleright:R^+\times E^-\to E^-
+$$
+
+e exigir
+
+$$
+\boxed{
+(a+b)\triangleright e
+=
+(a\triangleright e)\circ(b\triangleright e)
+}
+$$
+
+e
+
+$$
+\boxed{
+(ab)\triangleright e
+=
+a\triangleright(b\triangleright e).
+}
+$$
+
+Nesse caso, a primeira equação é a distributividade da soma do anel sobre
+a composição da face idempotente, enquanto a segunda exprime
+compatibilidade da multiplicação com a composição.
+
+A condição dual correspondente pode ser escrita com uma ação
+
+$$
+\triangleleft:E^-\times R^+\to R^+
+$$
+
+e
+
+$$
+\boxed{
+e\triangleleft(a+b)
+=
+(e\triangleleft a)+(e\triangleleft b).
+}
+$$
+
+As ações não são obrigatórias para a definição do par dual; elas são a
+forma adequada de escrever a interação quando as duas faces precisam
+operar uma sobre a outra.
+
+\subsection{O que é necessário para o par dual}
+
+A estrutura mínima pode ser resumida em quatro níveis:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{nível} & \textbf{condição} & \textbf{significado} \\
+\midrule
+anel & $(ab)c=a(bc)$ & associatividade da face \(+\) \\
+anel & $a(b+c)=ab+ac$, $(a+b)c=ac+bc$ & distributividade interna \\
+idempotente & $e\circ e=e$ & projeção / estado fixo \\
+dual & compatibilidade $D,\triangleright,\triangleleft$ & ligação entre as faces \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A conservação
+
+$$
+|\psi_u^+|\,|\psi_u^-|=1
+$$
+
+é então uma condição adicional de fechamento da realização, não uma lei
+de associatividade ou distributividade.
+
+\subsection{O par como realização de uma única dobra}
+
+A estrutura completa pode ser representada por
+
+$$
+\boxed{
+R^+
+\ \underset{D^{-1}}{\overset{D}{\rightleftarrows}}\
+E^-,
+\qquad
+|\psi_u^+|\,|\psi_u^-|=1.
+}
+$$
+
+A face \(+\) realiza composição anelar:
+
+$$
+(a,b,c)\mapsto (ab)c=a(bc).
+$$
+
+A face \(-\) realiza estabilização:
+
+$$
+e\mapsto e\circ e=e.
+$$
+
+A troca entre as faces não cria uma terceira entidade. Ela apenas muda a
+leitura da mesma realização:
+
+$$
+\boxed{
+\text{composição}
+\quad\rightleftarrows\quad
+\text{projeção}.
+}
+$$
+
+Esta é precisamente a forma adequada para a dualidade da realização:
+uma face carrega a dinâmica de composição; a outra carrega o ponto fixo
+da projeção.
+
+\subsection{Consequência para o par \((\psi_u^+,\psi_u^-)\)}
+
+Para cada pré-imagem \(u\in I\), associa-se
+
+$$
+u\longmapsto(\psi_u^+,\psi_u^-)
+$$
+
+com
+
+$$
+\boxed{
+|\psi_u^+|\,|\psi_u^-|=1,
+}
+$$
+
+e com as condições estruturais
+
+$$
+\boxed{
+\psi_u^+\in R^+,
+\qquad
+\psi_u^-\in E^-,
+\qquad
+(\psi_u^-)^2=\psi_u^-.
+}
+$$
+
+A face idempotente não fornece uma segunda amplitude independente.
+Ela fornece a realização estabilizada da mesma fibra.
+
+Assim, para uma fibra
+
+$$
+\pi_U^{-1}(x)=\{u_1,\ldots,u_{G(x)}\},
+$$
+
+cada pré-imagem carrega um par dual e a contagem continua sendo
+
+$$
+G(x)=\sum_{u\in\pi_U^{-1}(x)}1.
+$$
+
+A dualidade algébrica, portanto, não altera a definição estatística:
+
+$$
+\boxed{
+P_U(x)=\frac{G(x)}{|I|}.
+}
+$$
+
+Ela fornece a estrutura que deve explicar por que cada visita possui peso
+unitário.
+
+\subsection{Critério de fechamento}
+
+A dívida agora pode ser formulada de modo mais preciso.
+
+Não basta verificar
+
+$$
+|\psi_u^+|\,|\psi_u^-|=1.
+$$
+
+É necessário verificar simultaneamente:
+
+$$
+\boxed{
+\begin{aligned}
+&(ab)c=a(bc),\\
+&a(b+c)=ab+ac,\\
+&(a+b)c=ac+bc,\\
+&e\circ e=e,\\
+&(e_1\circ e_2)\circ e_3
+=
+ e_1\circ(e_2\circ e_3),\\
+&\delta^2=\mathrm{id},\\
+&u\star_-v
+=
+\delta\!\left(\delta(u)\star_+\delta(v)\right),\\
+&\delta(u\star_+v)
+=
+\delta(u)\star_-\delta(v),\\
+&|\psi_u^+|\,|\psi_u^-|=1.
+\end{aligned}
+}
+$$
+
+O experimento com a ação escalar e a involução
+\(\delta(a,b)=(-a,b)\) realiza explicitamente as duas últimas condições
+estruturais de troca: \(\star_-\) é obtida por transporte de
+\(\star_+\), e a involução estabelece a correspondência reversível entre
+as duas leis. A associatividade e a distributividade da face transportada
+não precisam ser postuladas novamente: seguem das mesmas propriedades
+da lei de origem.
+
+O que permanece como dívida não é a existência da segunda lei, mas a sua
+identificação com a face idempotente \(E^-\) usada na realização de onda.
+
+A dualidade é a reversibilidade entre as duas faces da mesma realização.
+O teste de transporte mostra que essa reversibilidade pode trocar a lei
+de composição sem destruir as propriedades estruturais ou a norma:
+
+$$
+\boxed{
+(A,\star_+)
+\underset{\delta}{\overset{\delta}{\rightleftarrows}}
+(A,\star_-),
+\qquad
+\star_-
+=
+\delta\circ\star_+\circ(\delta,\delta).
+}
+$$
+
+Portanto,
+
+$$
+\boxed{
+\text{a dualidade preserva o invariante,
+mas pode trocar a lei de composição.}
+}
+$$
+
+Não se introduz uma terceira álgebra. Há um suporte, duas leituras
+operacionais e uma involução reversível que as relaciona.
+
+\subsection{Consequência para Born}
+
+Se o invariante por fibra for unitário, então $|\psi|^2$ (na carta analítica) é \emph{leitura}
+desse invariante --- não a regra que define a probabilidade. Born deixa de ser axioma:
+é a forma analítica de contar fibras de peso 1.
+
+Cadeia:
+\[
+\underbrace{\text{retorno}}_{\text{Lei 0+7}}
+\to
+\underbrace{\text{invariante unitário por fibra}}_{\mathcal I=1}
+\to
+\underbrace{\text{multiplicidade}}_{G=|\pi_U^{-1}|}
+\to
+\underbrace{\text{probabilidade}}_{P_U=G/|I|}.
+\]
+
+\begin{teorema}[conservação dual --- realização]
+\label{thm:par-dual}
+Na realização áurea, $|\psi^+_{n+1}|\,|\psi^-_{n+1}|=|\psi^+_n|\,|\psi^-_n|$
+($\varphi\cdot\varphi^{-1}=1$). Em $N=4$: $|\psi^+||\psi^-|=1$,
+$\psi^+\psi^-=(-1)^n$, $|\det|=1$. Realiza Lei~4 e Lei~7; não as funda.
+\end{teorema}
+
+\subsection{O que não se faz}
+
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item não começar por $(\psi^+,\psi^-)$ e encaixar leis depois;
+  \item não normalizar a folha expansiva por $C_N$ para forçar Born;
+  \item não inventar $\mathcal I$ / $\mathcal D$ fora do retorno e de $\pi_U$;
+  \item não subir $N$ enquanto $\mathcal I=1$ por fibra não estiver
+        localizado com resíduo zero nos documentos.
+\end{itemize}
+
+
+\subsection{Estatística fechada: $\mu=1$ por visita}
+
+A conservação estatística deixou de ser aposta. Teor.~0.50:
+\[
+\mu=\zeta^{-1}\quad\text{vale 1 em cada visita},\qquad
+\sum_{u\in\pi^{-1}(x)}\mu(u)=\sum_{u\in\pi^{-1}(x)}1=G(x),
+\]
+\[
+\boxed{P_U(x)=\frac{G(x)}{|I|}}.
+\]
+A unidade elementar da contagem \emph{já existe}. Não se fabrica densidade por $C_N$
+nem por Born. O problema deixa de ser «como obter uma probabilidade» e passa a ser:
+\[
+\boxed{\text{como a realização }(\psi^+,\psi^-)\text{ produz as fibras de }\pi_U?}
+\]
+Uma vez produzida a fibra, a estatística está pronta:
+\[
+(\psi^+,\psi^-)\;\longrightarrow\;\pi_U^{-1}(x)\;\longrightarrow\;
+\underbrace{\sum 1}_{G(x)}\;\longrightarrow\;\frac{G(x)}{|I|}.
+\]
+A última seta, da estatística $P_U$ para a forma analítica $|\psi|^2$, não é usada na construção:
+\[
+\boxed{P_U(x)\stackrel{?}{=}|\psi_x|^2.}
+\]
+Essa igualdade é a ponte de Born; não é a definição de $P_U$.
+
+\subsection{Dois fechamentos independentes}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}ccc@{}}
+composição & $\longrightarrow$ & $\Delta_N=0$ \\
+visita & $\longrightarrow$ & $\mu=1$ \\
+\multicolumn{3}{c}{$\Downarrow$} \\
+invariante por fibra & $\longrightarrow$ & $G(x)$ \\
+\end{tabular}
+\end{center}
+
+Não se identifica $\Delta_N$ com $\mu$. Encontram-se na projeção.
+
+\subsection{Cadeia e o que resta}
+
+\[
+\boxed{
+L_0\to L_7\to H\times H^*\to\text{composição}
+\to
+\begin{cases}\Delta_N=0\\ \mu=1\end{cases}
+\to\pi_U\to G\to P_U
+}
+\]
+
+\begin{problema}[selecção pelas Leis 0+7]
+\label{prob:defeitos}
+Demonstrar, a partir apenas de Lei~0 e Lei~7, que a realização selecciona
+$\Delta_N=0$ e $\mu=1$ por visita. Ordem de ataque:
+\begin{enumerate}[leftmargin=1.2em,itemsep=1pt]
+  \item Lei~0: operação nos extremos;
+  \item Lei~7: como produz $H\times H^*$ sem fundir;
+  \item composição: coeficientes impostos pelo par;
+  \item fechamento $\Delta_N=0$ (não postulado);
+  \item visita: por que $\mu=\zeta^{-1}$ dá 1 (já Teor.~0.50 na ordem);
+  \item realização: como $(\psi^+,\psi^-)$ corresponde a pré-imagens de $\pi_U$.
+\end{enumerate}
+\end{problema}
+
+\subsection{O que Alonzo já localiza}
+
+Catálogo Def.~0.8 / Física Def.~0.133: corpo da \emph{composição} (iterar $f\circ f\circ\cdots$).
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item dois golden: cantor $=\varphi$, julia $=\psi$, raízes de $x^2=x+1$;
+  \item inversor $x^\dagger=-1/x$; produto $\varphi\cdot\psi=-1$ (estaca);
+  \item $H\times H^*$: produto componente a componente; \emph{duas normas}, uma por
+        tecido, nada se mistura; associa em $4096/4096$;
+  \item três dobras da composição $\to$ octonião dual (grau 8, dois tecidos);
+  \item vinco $1=\mathrm{cl}(L_0,L_7)$ é Lei~7; $\pi\circ\pi=\pi$ (idempotência).
+\end{itemize}
+O par $(\varphi,\psi)$ com produto $-1$ e duas normas separadas é a realização dual
+já escrita em Alonzo --- não inventada na Parte XVI.
+
+\subsection{Separação em letras garrafais}
+
+\begin{center}
+\bfseries conservação não é $P_U$
+\end{center}
+A conservação produz o invariante unitário; a projeção produz a multiplicidade;
+a normalização produz a probabilidade. Não se toma $|\widehat\psi|^2=G/|I|$ como ponto
+de partida.
+
+\textbf{Fechado:} $G=|\pi^{-1}|$ (Def.~0.23); $\mu=1$ por visita (Teor.~0.50);
+$P_U=G/|I|$; par Alonzo $(\varphi,\psi)$ com $\varphi\cdot\psi=-1$ e duas normas;
+$|\psi^+||\psi^-|=1$ na órbita; $\Delta_N=0$ no caso Hurwitz $p=r=t=s=1$.
+
+\textbf{Aberto (dívida causal):}
+$L_0+L_7\stackrel{?}{\Longrightarrow}\{\Delta_N=0,\,\mu=1\}$ como \emph{uma} cadeia;
+como $(\psi^+,\psi^-)$ produz as fibras de $\pi_U$; e a ponte final
+$P_U(x)\stackrel{?}{=}|\psi_x|^2$.
+
+\section{A medição como variável aleatória sobre a onda}
+% ============================================================
+
+\begin{teorema}[a medição como variável aleatória sobre $P_U$]
+\label{thm:medicao-va}
+Seja $(\Omega,\mathcal F,P_U)$ o espaço de probabilidade associado à realização e seja $X:\Omega\to\mathbb R$
+uma variável aleatória sobre esse espaço. Dado um conjunto de outcomes $\Omega=\{x_1,\ldots,x_n\}$,
+\[
+\mathbb E[X]=\sum_{x\in\Omega} X(x)\,P_U(x).
+\]
+Se $\{P_i\}$ é uma família de projectores ortogonais sobre o espaço espectral (modo de Partículas,
+Def.~0.194), com $\sum_i P_i=\mathrm{Id}$, e $A=\sum_i\lambda_i P_i$, então
+\[
+\mathbb E[X]=\operatorname{Tr}(\rho A)
+\]
+quando $X$ toma o valor $\lambda_i$ no outcome $i$ e $\rho$ é o estado já medido em Partículas.
+A ponte com $|\psi|^2$ não entra na definição da medida: ela fica como objectivo posterior.
+\end{teorema}
+
+\begin{proof}
+Normalização e não-negatividade seguem de $P_U\ge 0$ e $\sum_x P_U(x)=1$.
+A esperança é a definição de $\mathbb{E}[X]$; o traço expande-se na base espectral.
+O ponto novo é a leitura: a família de pesos $P_U$ não é postulado de Born; é a contagem
+normalizada da realização, já construída como $G/|I|$.
+\end{proof}
+
+\begin{proposicao}[ponte com $|\psi|^2$]
+\label{prop:born-ponte}
+A igualdade
+\[
+P_U(x)=|\psi_x|^2
+\]
+não é usada para construir $P_U$. Ela é a ponte de Born, que deve ser provada depois da
+realização geométrica e da identificação do invariante unitário por fibra.
+\end{proposicao}
+
+\begin{observacao}[Born como consequência estatística]
+\label{obs:born-nao-axioma}
+Se a ponte da fase fechar com $\operatorname{Res}_\theta=0$ nos sítios de aplicação,
+Born deixa de ser postulado e passa a ser a estatística da realização de onda:
+a frequência relativa de outcomes aproxima $|\psi_i|^2$.
+Não se funde com Parseval da dourada (Obs.~0.220) nem com GLH (Obs.~0.221).
+Parseval conserva $\|F(G)\|_2$; a realização de onda levanta $P_U$ a $\psi$.
+Operações distintas; sítios distintos.
+\end{observacao}
+
+% ============================================================
+\section{Independência, produto e frequência}
+% ============================================================
+
+Duas variáveis aleatórias sobre o mesmo $(\Omega,\mathcal{F},P)$ são independentes se as
+frequências conjuntas factorizam. O produto de espaços realiza a independência de cópias:
+a medida produto é novamente contagem normalizada sobre o rectângulo --- outra vez Hurwitz.
+
+A lei dos grandes números, no suporte finito, afirma que a média empírica $S_n/n$ satisfaz
+\[
+P\bigl(\bigl|S_n/n-\mathbb{E}[X]\bigr|>\varepsilon\bigr)\to 0
+\quad(n\to\infty).
+\]
+Isto justifica a interpretação frequentista: a frequência relativa de outcomes aproxima
+$|\psi_i|^2$ em ensaios repetidos sobre cópias no mesmo estado.
+
+% ============================================================
+\section{O que esta parte herda e o que não promove}
+% ============================================================
+
+\textbf{Herda:}
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item a realização e a multiplicidade $G$ (Def.~0.23) --- como registo da dobra, não como fonte do módulo;
+  \item a contagem $p=G/|I|$ (Teor.~0.44; Obs.~0.214) --- como estatística observável;
+  \item os degraus da fase e $\operatorname{Res}_\theta=0$ (Teor.~0.22) --- lado rotacional;
+  \item o rotor $x^2=-1$, a estrela $x^2=x+1$, o idempotente $x^2=x$;
+  \item a costura exterior+rotor (norma $a^2\to a^2+b^2$);
+  \item a espiral de ouro e o seu dual cone nulo (catálogo 0.20.2);
+  \item Alonzo como corpo da composição ($\varphi,\psi$);
+  \item Lei 0+7: vinco + retorno ($\mathrm{Res}=0$);
+  \item Lei 2 no catálogo: nomeia $f\leftrightarrow f^{-1}$;
+  \item dentro das potências, $f'=f^{-1}$ força $\varphi$
+        (catálogo §0.64; \texttt{tests/aurea.c});
+  \item dualidade de medida Gentil--Hurwitz--Lebesgue (Teor.~cat:0.7).
+\end{itemize}
+
+\textbf{Não promove:}
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item $\sqrt{G/|I|}$ a amplitude geométrica fundamental;
+  \item fase e amplitude como fontes independentes coladas a posteriori;
+  \item Born a lei de U;
+  \item fase $\theta$ importada da mecânica quântica;
+  \item identificação de Parseval da dourada com $|\psi|^2$.
+\end{itemize}
+
+\vspace{0.8em}
+\begin{center}
+\textit{estatística fechada ($\mu=1$, $G$, $P_U$). Alonzo: $(\varphi,\psi)$, $\varphi\cdot\psi=-1$, duas normas.\newline
+\textbf{conservação não é $P_U$.} Dívida causal: $L_0+L_7\Rightarrow\{\Delta_N=0,\mu=1\}$;
+$(\psi^+,\psi^-)\to\pi_U^{-1}(x)$.}
+\end{center}
+
+\vspace{0.5em}
+\noindent
+{\small
+prova: Teor.~0.44(3); $d(xy)$; $\exp(tJ)$; catálogo 0.20.2 (espiral);
+$T=\varphi e^{J 2\pi/\varphi^2}$; Teor.~\ref{thm:espiral-psi}; §0.64; \texttt{tests/aurea.c},
+\texttt{tests/cone\_nulo.c}
+\quad|\quad
+realiza: $\psi_n=A_0\varphi^n e^{J(\theta_0+n\Delta\theta)}$ como órbita de $T$;
+$\operatorname{Res}_A=\operatorname{Res}_\theta=0$ no passo da espiral
+\quad|\quad
+verifica: ângulo $2\pi/\varphi^2$; dual cone nulo; $P_U$ continua sendo leitura de contagem
+\quad|\quad
+verifica: \texttt{tests/aurea.c} resíduo 0; Heighway $\neq$ espiral sob o mesmo $|I|$;
+norma $a^2\to a^2+b^2$; cone nulo dual da espiral áurea
+}
+
+\vspace{1.2em}
+\noindent
+Esta Parte não reabre $I_0$ de Partículas nem de Quântica.
+Não declara Born equivalente a Parseval, a $|\det|=1$, nem a $p=k/N$.
+Não promove $\sqrt{G/|I|}$ a amplitude geométrica.
+Isola a estatística como leitura observável e aponta a espiral
+(projeção + rotor + estrela no mesmo objecto) como candidata interna à realização de onda.
+O lado rotacional já tem teste de resíduo nulo. O lado do crescimento (recorrência hiperbólica)
+permanece como grau de liberdade que precisa ser fechado com o mesmo critério nos sítios de aplicação
+(Alonzo, espiral de ouro, modo espectral), sem confundir a sua realização geométrica com a
+ponte estatística $P_U\stackrel{?}{=}|\psi|^2$. Em outras palavras, a construção da órbita e a
+contagem por fibra estão fechadas; a identificação final com a regra de Born continua como ponte
+aberta a demonstrar, e não como premissa do argumento.
+
+\end{document}
+
+
+
+
+
+
