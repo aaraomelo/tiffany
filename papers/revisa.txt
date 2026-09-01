@@ -1,131 +1,74 @@
-Sim — **agora a dívida conceitual que estávamos perseguindo parece ter sido deslocada para o lugar certo e explicitamente resolvida no manuscrito**.
+Exato. **Essa é a separação que eu consideraria fechada.**
 
-O ponto decisivo é este:
+O ganho conceitual é grande porque agora não existe uma falsa cadeia
+
+$$
+\text{métrica}\rightarrow\text{probabilidade}.
+$$
+
+Existem **duas leituras independentes da mesma estrutura**:
 
 $$
 \boxed{
 \text{estrutura}
-\to
-\text{representação}
-\to
-\text{peso}
-\to
-\text{normalização}
-\to
-\text{distribuição}
-\to
-\text{Born}
+\overset{\text{geometria}}{\longrightarrow}
+\text{concordância}
 }
 $$
 
-com
+e
 
 $$
-\boxed{\text{distribuição}\neq\text{Born}}.
-$$
-
-E, sobretudo, se o texto realmente estabelece
-
-$$
-\boxed{P_U=\frac{G}{|I|}}
-$$
-
-como **consequência da estrutura de contagem**, então você matou uma das objeções mais perigosas: a normalização não está sendo introduzida simplesmente porque “probabilidades precisam somar 1”.
-
-### O que isso muda
-
-Antes, a narrativa podia ser atacada assim:
-
-$$
-\psi
-\overset{\text{Born}}{\longrightarrow}
-|\psi|^2
+\boxed{
+\text{estrutura}
+\overset{\text{contagem}}{\longrightarrow}
+G
 \overset{\text{normalização}}{\longrightarrow}
 P.
+}
 $$
 
-Isso deixa Born carregando peso demais.
+Depois:
 
-Agora a arquitetura pode ser lida como:
+$$
+\boxed{P\overset{\text{leitura física}}{\longrightarrow}\text{Born}}
+$$
+
+Então a arquitetura completa fica:
 
 $$
 \boxed{
 \text{estrutura}
-\to
-G
-\to
-\frac{G}{|I|}
-\to
-P_U
-}
-$$
-
-e **só depois** vem a interpretação física:
-
-$$
-\boxed{
-P_U
-\longleftrightarrow
-\text{leitura estatística/Born}.
-}
-$$
-
-Isso é uma diferença substancial.
-
-### E os dois papers agora se encaixam
-
-**Transformada universal:**
-
-$$
-\boxed{
-\text{suporte}
-\to
-\text{leitura}
-\to
-\text{representação dual}
-}
-$$
-
-**Estatística:**
-
-$$
-\boxed{
-\text{representação}
-\to
-\text{peso}
-\to
+\rightarrow
+\begin{cases}
+\text{métrica}\rightarrow\text{concordância}\\
+\text{multiplicidade}\rightarrow\text{peso}
+\end{cases}
+\rightarrow
 \text{normalização}
-\to
+\rightarrow
 \text{distribuição}
-\to
+\rightarrow
 \text{Born}
 }
 $$
 
-Portanto a ponte completa fica:
+### E isso fecha os três papers
 
-$$
-\boxed{
-\text{suporte}
-\longrightarrow
-\text{representação}
-\longrightarrow
-\text{peso}
-\longrightarrow
-\text{distribuição}
-\longrightarrow
-\text{leitura física}.
-}
-$$
+**Física:** constrói o suporte e sua estrutura.
 
-E aí eu **não faria mais mudanças matemáticas grandes** nesses dois textos. A partir daqui, qualquer alteração deveria ser editorial ou uma auditoria de dependências: garantir que nenhuma definição posterior esteja sendo usada silenciosamente para justificar algo anterior.
+**Transformada:** muda reversivelmente a representação dessa estrutura — incluindo a passagem para o dual.
 
-A frase que eu consideraria como o **fecho conceitual da dívida** é:
+**Estatística:** lê a multiplicidade como peso, normaliza e obtém a distribuição.
 
-$$
-\boxed{
-\text{Born não constrói a distribuição; Born lê a distribuição.}
-}
-$$
+**Born:** aparece como leitura física final.
 
-Se isso está agora sustentado pelas definições e teoremas de `estatistica.tex`, então sim: **a dívida de Estatística que estava pendurada na Transformada foi efetivamente quitada.**
+A frase que eu deixaria praticamente **intocável** no texto é:
+
+> **A métrica não produz a distribuição. Ela fornece uma leitura geométrica da estrutura de concordância do suporte. A multiplicidade \(G\), obtida pela contagem das dobras, fornece o peso; sua normalização \(G/|I|\) produz a distribuição; e Born é a leitura física dessa distribuição.**
+
+Isso é muito mais forte do que tentar fazer a métrica carregar a probabilidade inteira.
+
+E tem uma consequência importante: **\(G\) não é “a densidade”**. \(G\) é a multiplicidade/peso contado. A densidade é a interpretação desse peso sobre o suporte; a distribuição aparece após a normalização.
+
+Essa distinção deixa a construção matematicamente muito mais defensável.
