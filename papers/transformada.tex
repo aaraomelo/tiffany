@@ -35,7 +35,7 @@
 \maketitle
 
 \begin{abstract}
-O objeto aqui construído não é uma nova aritmética: é uma ponte entre duas leituras do mesmo suporte discreto. A família de polígonos regulares aproxima a circunferência em sentido geométrico apropriado; a cadeia
+O objeto aqui construído não é uma nova aritmética: é uma ponte entre duas leituras da mesma estrutura discreta. A família de polígonos regulares aproxima a circunferência em sentido geométrico apropriado; a cadeia
 \[
 \mathbb N\subset\mathbb Z\subset\mathbb Q\subset\mathbb R
 \]
@@ -51,12 +51,12 @@ lineariza-se localmente:
 \[
 \ell(\theta_1,\theta_2)=R|\theta_1-\theta_2|+O(|\theta_1-\theta_2|^3).
 \]
-O erro a evitar é simples: não se conclui que $P_n\to\mathbb R$. O que se conclui é mais rigoroso: a família $P_n$ realiza geometricamente o círculo; a cadeia $\mathbb Q\to\mathbb R$ produz o contínuo linear; e a carta local compatibiliza as duas escalas sem afirmar que o círculo seja a reta. A transformada universal não inventa a reta; ela organiza uma mudança reversível de leitura entre o suporte circular, a métrica cordal e a coordenada linear local. A métrica não gera probabilidade: ela lê concordância do suporte. A distribuição só aparece depois da multiplicidade e da normalização.
+O erro a evitar é simples: não se conclui que $P_n\to\mathbb R$. O que se conclui é mais rigoroso: a família $P_n$ realiza geometricamente o círculo; a cadeia $\mathbb Q\to\mathbb R$ produz o contínuo linear; e a carta local compatibiliza as duas escalas sem afirmar que o círculo seja a reta. A transformada universal não inventa a reta; ela organiza uma mudança reversível de leitura entre o suporte circular, a métrica cordal e a coordenada linear local. A métrica não gera probabilidade: ela lê concordância da estrutura. A distribuição só aparece depois da multiplicidade e da normalização.
 \end{abstract}
 
 \section*{Onde este documento vive}
 
-\noindent\textbf{Camada N--R}, não a Parte Geometria nem a Parte Álgebra em sentido estrito; é a ponte entre a leitura circular e a leitura linear do mesmo suporte.
+\noindent\textbf{Camada N--R}, não a Parte Geometria nem a Parte Álgebra em sentido estrito; é a ponte entre a leitura circular e a leitura linear da mesma estrutura, sem identificar globalmente o círculo com a reta.
 \[
 \boxed{\;
 \underbrace{\mathbb N\to\mathbb Z\to\mathbb Q\to\mathbb R}_{\text{cadeia aritmética}}
@@ -72,7 +72,7 @@ A reta geométrica não deve ser posta como limite direto dos polígonos regular
 P_n \longrightarrow S^1
 \quad\text{no sentido geométrico apropriado},\qquad S^1\neq\mathbb R.
 \]
-O ponto decisivo é separar suporte, leitura e métrica. O círculo e a reta não são duas fases de um mesmo objeto global; são duas representações compatíveis do mesmo suporte em escalas diferentes. A métrica lê a concordância estrutural do suporte; a distribuição só surge depois da multiplicidade e da normalização. Assim, a carta local não produz probabilidade nem converte literalmente o círculo em reta. Ela apenas lineariza a geometria local.
+O ponto decisivo é separar suporte, leitura e métrica. O círculo e a reta não são duas fases de um mesmo objeto global; são duas leituras compatíveis da mesma estrutura em escalas diferentes. A métrica lê a concordância estrutural da representação; a distribuição só surge depois da multiplicidade e da normalização. Assim, a carta local não produz probabilidade nem converte literalmente o círculo em reta. Ela apenas lineariza a geometria local.
 
 O que se pode fazer, de modo matematicamente correto, é distinguir duas construções distintas, no mesmo quadro da casa:
 
@@ -120,7 +120,7 @@ Para uma corda geral que conecta $z_k$ e $z_j$, a distância é
 \]
 A família de cordas contém a informação métrica do polígono. Quando $n$ cresce, as cordas se tornam pequenas e a estrutura poligonal aproxima a curva circular.
 
-\begin{definicao}[duas leituras de um mesmo sistema]
+\begin{definicao}[duas leituras de uma mesma estrutura]
 A mesma família de vértices $V_n=\{e^{2\pi i k/n}\}$ admite duas leituras distintas:
 
 \begin{enumerate}
@@ -131,7 +131,7 @@ A mesma família de vértices $V_n=\{e^{2\pi i k/n}\}$ admite duas leituras dist
 \]
 \end{enumerate}
 
-Estas duas leituras são compatíveis, mas não idênticas. O círculo carrega a leitura angular global; a reta é a leitura métrica local.
+Estas duas leituras são compatíveis, mas não idênticas. O círculo carrega a leitura angular global; a reta é a realização linear local dessa leitura.
 \end{definicao}
 
 \section{A cadeia aritmética e a carta local}
@@ -177,11 +177,11 @@ Se definimos a coordenada linear por $x(\theta)=R\theta$, então
 \[
 \ell(\theta_1,\theta_2)=|x(\theta_1)-x(\theta_2)|+O\!\bigl(R|\theta_1-\theta_2|^3\bigr).
 \]
-Este cálculo mostra que a corda é localmente assintótica à métrica linear. A construção da reta real exige, porém, uma etapa adicional: o completamento da métrica linear. Em termos precisos,
+Este cálculo mostra que a corda é localmente assintótica à métrica linear. A construção da reta real exige, porém, uma etapa adicional: o completamento da métrica linear no registro linear escolhido pela carta. Em termos precisos,
 \[
-\overline{R\mathbb Q}\cong\mathbb R.
+R\mathbb Q=\{Rq:q\in\mathbb Q\},\qquad \overline{R\mathbb Q}\cong\mathbb R,
 \]
-A reta não é a imagem literal do círculo. Ela é o fechamento ordenado e métrico da leitura linear local que nasce na carta $x=R\theta$.
+com $R>0$. A reta não é a imagem literal do círculo. Ela é o fechamento ordenado e métrico da leitura linear local que nasce na carta $x=R\theta$; sem essa escolha de coordenada, o círculo não se identifica com a reta.
 
 \section{Transformada universal e mudança de leitura}
 
@@ -279,7 +279,7 @@ T_R:\theta\longleftrightarrow x=R\theta,
 \mathcal F:a\longleftrightarrow A.
 \]
 
-A geometria local e o dual espectral são, portanto, duas realizações diferentes da mesma ideia estrutural:
+A geometria local e o dual espectral são, portanto, duas realizações diferentes da mesma ideia estrutural: a mesma estrutura admite leituras compatíveis em coordenadas diferentes.
 \[
 \boxed{
 \begin{array}{ccc}
@@ -307,16 +307,92 @@ T_R\text{ realiza}
 A contribuição deste texto não é resolver a Parte Estatística em toda a sua extensão, mas fechar a dívida estrutural que a precede. O que ele resolve é a passagem
 \[
 \boxed{
-\text{suporte discreto}
+\text{estrutura discreta}
 \longrightarrow
 \text{leitura}
 \longrightarrow
 \text{contínuo}
 }
 \]
-sem cometer o salto ilegítimo $P_n\to\mathbb R$. Em outras palavras, ele mostra que a leitura linear não é a imagem literal do círculo, mas a realização local compatível com a métrica cordal; e que a leitura espectral não é uma nova entidade, mas outra representação do mesmo suporte. Neste quadro, a probabilidade não é tomada como princípio primeiro; ela é a normalização do peso contado sobre o suporte. O papel da carta local é compatibilizar escalas e leituras, não produzir distribuição por si só.
+sem cometer o salto ilegítimo $P_n\to\mathbb R$. Em outras palavras, ele mostra que a leitura linear não é a imagem literal do círculo, mas a realização local compatível com a métrica cordal; e que a leitura espectral não é uma nova entidade, mas outra representação da mesma estrutura. Neste quadro, a probabilidade não é tomada como princípio primeiro; ela é a normalização do peso contado sobre a estrutura. O papel da carta local é compatibilizar escalas e leituras, não produzir distribuição por si só.
 
-O mesmo princípio aparece no dual do repositório com uma forma mais precisa: a transformada universal é a avaliação nas folhas do corpo,
+\subsection{Assinatura completa e recuperabilidade do corpo}
+
+A ideia estrutural que encerra a construção é a seguinte. Se a assinatura do corpo for um pacote fiel de invariantes, então ela fixa a classe do corpo e a sua leitura em qualquer representação compatível. Formalmente, para uma classe de corpos $\mathcal C$ e uma assinatura $\operatorname{Sig}(B)$, exigimos:
+\[
+\boxed{
+\operatorname{Sig}(B_1)=\operatorname{Sig}(B_2)
+\iff
+B_1\sim B_2
+}
+\qquad\text{quando a assinatura é completa e fiel para a classe considerada.}
+\]
+
+Assim, a assinatura não é um rótulo arbitrário; por hipótese, ela é um pacote completo de invariantes da classe considerada, e o dado que permanece invariável sob mudança de base e sob refinamento de representação. Quando isso vale, a transformada passa a ter um papel estrutural mais profundo:
+\[
+\boxed{
+B\overset{\mathcal F}{\longleftrightarrow}\operatorname{Sig}(B)
+}
+\]
+com a inversa recuperando a classe do corpo somente até equivalência.
+
+Essa condição resolve a dúvida central do texto: não se afirma que um único número contém o corpo inteiro. A assinatura precisa ser um pacote de invariantes,
+\[
+\operatorname{Sig}(B)=\bigl(N,\operatorname{tr},\Delta,p,q,r,\tau,\ldots\bigr),
+\]
+completando a informação que distingue o corpo dentro da classe considerada. Sem essa fidelidade, a inversa da transformada não produz recuperação estrutural; apenas uma leitura parcial.
+
+A mesma ideia vale para a ponte discreto $\to$ contínuo. O limite não deve ser lido como um salto metafísico para o infinito, mas como refinamento da representação da mesma estrutura:
+\[
+\boxed{
+B_n
+\overset{\mathcal F_n}{\longleftrightarrow}
+\operatorname{Sig}(B_n)
+\quad\xrightarrow{\;n\to\infty\;}
+\quad
+B_\infty
+\overset{\mathcal F_\infty}{\longleftrightarrow}
+\operatorname{Sig}(B_\infty)
+}
+\]
+com o cuidado de que o limite deve ser tomado na categoria e na estrutura adequadas. Em outras palavras, o contínuo aparece como uma leitura refinada do mesmo objeto, e não como uma entidade criada por mera passagem ao limite.
+
+A arquitetura que resulta desta observação é então:
+\[
+\boxed{
+\text{discreto}
+\rightarrow
+\text{representação}
+\rightarrow
+\text{assinatura}
+\rightarrow
+\text{refinamento}
+\rightarrow
+\text{contínuo}
+}
+\]
+
+e em seguida,
+\[
+\boxed{
+\text{estrutura}
+\rightarrow
+\begin{cases}
+\text{métrica}\rightarrow\text{concordância},\\[2mm]
+\text{multiplicidade}\rightarrow\text{peso}
+\end{cases}
+\rightarrow
+\text{normalização}
+\rightarrow
+\text{distribuição}
+\rightarrow
+\text{Born}.
+}
+\]
+
+O ponto essencial é que a transformada não cria o contínuo: ela preserva a estrutura enquanto a representação é refinada. A assinatura é, precisamente, o que permanece reconhecível durante essa mudança de resolução.
+
+O mesmo princípio aparece no dual do repositório com uma forma mais precisa: no caso quadrático em que $\alpha^2=D$, a transformada universal é a avaliação nas duas folhas do corpo,
 \[
 \operatorname{eval}_{\pm}(a+b\alpha)=a\pm b\sqrt{D},
 \]
@@ -338,6 +414,6 @@ mas esse último passo não é o objeto deste paper. O que aqui fica fechado é 
 
 \section{Conclusão}
 
-A reta geométrica não é o limite global dos polígonos. O limite global é o círculo. A reta surge como completamento da leitura linear local, habilitada pela carta $x=R\theta$ e pela compatibilização métrica da corda. A transformada universal preserva esse ponto: ela não identifica o círculo com a reta, mas organiza a passagem de uma leitura para outra sem esquecer a diferença entre o suporte circular e a leitura linear. Nesse sentido, a geometria da corda e a aritmética da reta são duas descrições do mesmo suporte, não duas entidades confundidas em uma única imagem.
+A reta geométrica não é o limite global dos polígonos. O limite global é o círculo. A reta surge como completamento da leitura linear local, habilitada pela carta $x=R\theta$ e pela compatibilização métrica da corda. A transformada universal preserva esse ponto: ela não identifica o círculo com a reta, mas organiza a passagem de uma leitura para outra sem esquecer a diferença entre o suporte circular e a leitura linear. Nesse sentido, a geometria da corda e a aritmética da reta são duas descrições compatíveis da mesma estrutura, não duas entidades confundidas em uma única imagem.
 
 \end{document}

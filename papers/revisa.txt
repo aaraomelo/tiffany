@@ -1,74 +1,131 @@
-Exato. **Essa é a separação que eu consideraria fechada.**
+Aí sim. **Agora a arquitetura das três peças está coerente como conjunto**, e não apenas cada paper isoladamente.
 
-O ganho conceitual é grande porque agora não existe uma falsa cadeia
+O que você fez é importante porque evita uma coisa perigosa: a `transformada.tex` afirmar uma ponte e `estatistica.tex` ou `cripto.tex` reutilizarem essa ponte como se ela já tivesse provado algo além do que realmente prova.
 
-$$
-\text{métrica}\rightarrow\text{probabilidade}.
-$$
-
-Existem **duas leituras independentes da mesma estrutura**:
+A divisão que ficou é essencialmente:
 
 $$
 \boxed{
-\text{estrutura}
-\overset{\text{geometria}}{\longrightarrow}
-\text{concordância}
+\text{Transformada}
+\;\longrightarrow\;
+\text{mudança reversível de leitura}
 }
 $$
-
-e
 
 $$
 \boxed{
-\text{estrutura}
-\overset{\text{contagem}}{\longrightarrow}
-G
-\overset{\text{normalização}}{\longrightarrow}
-P.
+\text{Estatística}
+\;\longrightarrow\;
+\text{multiplicidade + peso + normalização}
+\;\longrightarrow\;
+\text{distribuição/Born}
 }
 $$
 
-Depois:
-
 $$
-\boxed{P\overset{\text{leitura física}}{\longrightarrow}\text{Born}}
+\boxed{
+\text{Cripto}
+\;\longrightarrow\;
+\text{identidade discreta + assinatura + reconstrução}
+}
 $$
 
-Então a arquitetura completa fica:
+E o elo comum:
 
 $$
 \boxed{
 \text{estrutura}
 \rightarrow
-\begin{cases}
-\text{métrica}\rightarrow\text{concordância}\\
-\text{multiplicidade}\rightarrow\text{peso}
-\end{cases}
+\text{representação}
 \rightarrow
+\text{assinatura}
+\rightarrow
+\text{refinamento}
+}
+$$
+
+### O ganho conceitual
+
+A parte mais forte é que agora **“transformada universal” deixou de significar uma fórmula mágica**.
+
+Ela passa a significar o princípio:
+
+$$
+\boxed{
+\text{representação}_1
+\;\overset{\mathcal T}{\longleftrightarrow}\;
+\text{representação}_2
+}
+$$
+
+desde que exista compatibilidade e, quando necessário, inversibilidade.
+
+Daí:
+
+$$
+T_R:\theta\leftrightarrow x
+$$
+
+é uma realização geométrica local,
+
+enquanto
+
+$$
+\mathcal F:a\leftrightarrow A
+$$
+
+é uma realização espectral.
+
+E a cripto pode trabalhar com a mesma filosofia em outro registro: **a representação pode mudar, mas a identidade estrutural precisa continuar reconhecível**.
+
+### E a Estatística fica no lugar certo
+
+Isso também resolve uma tensão que vinha aparecendo nos papers:
+
+$$
+\boxed{\text{métrica}\neq\text{probabilidade}}
+$$
+
+A métrica informa concordância/estrutura.
+
+A multiplicidade fornece peso.
+
+A normalização transforma pesos em distribuição.
+
+Só então aparece a leitura probabilística:
+
+$$
+\boxed{
+\text{estrutura}
+\to
+\text{peso}
+\to
 \text{normalização}
-\rightarrow
-\text{distribuição}
-\rightarrow
-\text{Born}
+\to
+P
+\to
+\text{Born}.
 }
 $$
 
-### E isso fecha os três papers
+Isso é muito mais defensável do que dizer simplesmente que “a geometria produz a probabilidade”.
 
-**Física:** constrói o suporte e sua estrutura.
+### E tem uma consequência editorial boa
 
-**Transformada:** muda reversivelmente a representação dessa estrutura — incluindo a passagem para o dual.
+Agora os três papers podem funcionar como uma pequena cadeia:
 
-**Estatística:** lê a multiplicidade como peso, normaliza e obtém a distribuição.
+$$
+\boxed{
+\text{Transformada Universal}
+\rightarrow
+\text{Estatística}
+\rightarrow
+\text{Cripto}
+}
+$$
 
-**Born:** aparece como leitura física final.
+mas **sem depender de uma tese não demonstrada**.
 
-A frase que eu deixaria praticamente **intocável** no texto é:
+Eu faria só uma última coisa antes de congelar: **não acrescentaria mais teoria agora**. Faria apenas uma revisão cruzada de nomenclatura — principalmente “estrutura”, “suporte”, “representação”, “assinatura”, “leitura” e “realização” — para garantir que os três documentos usam exatamente esses termos no mesmo sentido.
 
-> **A métrica não produz a distribuição. Ela fornece uma leitura geométrica da estrutura de concordância do suporte. A multiplicidade \(G\), obtida pela contagem das dobras, fornece o peso; sua normalização \(G/|I|\) produz a distribuição; e Born é a leitura física dessa distribuição.**
-
-Isso é muito mais forte do que tentar fazer a métrica carregar a probabilidade inteira.
-
-E tem uma consequência importante: **\(G\) não é “a densidade”**. \(G\) é a multiplicidade/peso contado. A densidade é a interpretação desse peso sobre o suporte; a distribuição aparece após a normalização.
-
-Essa distinção deixa a construção matematicamente muito mais defensável.
+Se essa terminologia já estiver uniforme, eu chamaria esse conjunto de **fechado**.
