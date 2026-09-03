@@ -1,0 +1,299 @@
+% !TeX program = pdflatex
+
+% ─────────────────────────────────────────────────────────────────────────────
+% fermat.tex — A Escada de Fermat e o Programa da Obstrução de Assinatura
+% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[htt]{hyphenat}
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\Ucan}{\mathcal U}
+\newcommand{\Sig}{\operatorname{Sig}}
+\newcommand{\prof}{\operatorname{prof}}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
+
+\renewcommand{\proofname}{Demonstração}
+
+\title{%
+  \textbf{A Escada de Fermat e o Programa da Obstrução de Assinatura}\\[0.3em]
+  \large Realização Finita, Transferência Espectral e Invariância Estrutural no Corpo Universal\\[0.2em]
+  \small \textit{Da contagem de retângulos à investigação de combinações de incidências ordenadas}
+}
+
+\author{Aarão Melo Lopes}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\noindent
+Este trabalho formaliza uma realização finita da chamada estrutura central:
+a partição exata do retângulo $I\times X$ em duas classes disjuntas,
+uma contada pelo domínio e outra pela imagem. A identidade
+\[
+\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=|I|\,|X|
+\]
+é puramente combinatória e vale para toda realização finita entre conjuntos
+totalmente ordenados. A Escada de Fermat acrescenta a essa identidade uma
+família concreta de realizações sobre corpos finitos, construída a partir das
+equações $x^2=mx+1\pmod q$ nos andares primos de Fermat.
+
+A Transformada Universal e a infraestrutura $\zeta/\mu$ fornecem o mecanismo de recuperação exata
+por acumulação ($\operatorname{Sig}_\zeta$), garantindo a reconstrução da trajectória.
+Contudo, a tentativa de extrair uma obstrução pelo invariante metálico $J=xx^\dagger$ colide com $(x^k)(x^\dagger)^k=(-1)^k$, que preserva $J=-1$ para todo $k$ ímpar. 
+À luz das distinções de \code{redes.tex}, reorientamos o programa: a leitura escalar $J = xx^\dagger$ é apenas uma medição directa, cuja realização no espaço simétrico $W_s$ permanece sob investigação. 
+O espaço da realização desdobra-se na tripla $(G,\, u,\, M)$, onde $G$ é a multiplicidade, $u$ a ordem estrutural e $M$ a memória preservada. 
+Investiga-se se a igualdade $a^k+b^k=c^k$ exige uma lei de combinação sobre incidências ordenadas que a realização canônica não possui.
+
+\end{abstract}
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Hipóteses Gerais e Estrutura Finita}
+\label{sec:fermat-hip}
+% ═════════════════════════════════════════════════════════════════════════════
+
+Sejam $I$ e $X$ conjuntos finitos totalmente ordenados e seja
+\[
+f:I\longrightarrow X
+\]
+uma realização. Escrevemos
+\[
+|I|=N,\qquad |X|=q.
+\]
+
+Fixada uma identificação crescente $X\cong\{1,2,\ldots,q\}$, para cada $i\in I$ escrevemos $x_i=f(i)\in\{1,2,\ldots,q\}$.
+A identificação crescente permite interpretar $x_i$ simultaneamente como elemento de $X$ e como seu posto na ordem:
+\[
+x_i=\#\{v\in X:v\leq x_i\}.
+\]
+
+A construção da Escada de Fermat fornece realizações particulares dessa forma, cuja contagem discreta fundamenta o suporte combinatório sobre o qual as leituras do sistema operam.
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Conte pelo Domínio --- a Leitura de Hurwitz}
+\label{sec:fermat-dom}
+% ═════════════════════════════════════════════════════════════════════════════
+
+Para cada $i\in I$, o valor $x_i$ conta os níveis de $X$ que estão abaixo de $x_i$, incluindo o próprio nível. Portanto,
+\begin{equation}
+\label{eq:sigma-dom}
+\boxed{
+\Sigma_{\mathrm{dom}}
+=
+\sum_{i\in I}x_i
+=
+\#\bigl\{(i,v)\in I\times X:v\leq x_i\bigr\}.
+}
+\end{equation}
+
+Essa é a leitura pelo domínio: cada elemento $i$ fornece uma coluna do retângulo $I\times X$, e $x_i$ determina a quantidade de níveis contados nessa coluna.
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Conte pela Imagem --- a Leitura Complementar}
+\label{sec:fermat-im}
+% ═════════════════════════════════════════════════════════════════════════════
+
+Fixado $v\in X$, os pares complementares são aqueles para os quais $x_i<v$. Definimos
+\begin{equation}
+\label{eq:sigma-im}
+\Sigma_{\mathrm{im}}
+=
+\sum_{v\in X}
+\#\{i\in I:x_i<v\}.
+\end{equation}
+
+Os conjuntos $D_f = \{(i,v)\in I\times X:v\leq f(i)\}$ e $L_f = \{(i,v)\in I\times X:f(i)<v\}$ são disjuntos e sua união cobre todo o retângulo $I\times X$.
+
+\begin{teorema}[Partição finita central]
+\label{teo:particao}
+Para toda realização $f:I\to X$ entre conjuntos finitos totalmente ordenados,
+\[
+\boxed{ I\times X = D_f\;\dot\cup\;L_f }
+\qquad\implies\qquad
+\boxed{ \Sigma_{\mathrm{dom}} + \Sigma_{\mathrm{im}} = |I|\,|X| = Nq. }
+\]
+\end{teorema}
+
+\begin{proof}
+Para cada $(i,v)\in I\times X$, vale $v\le f(i)$ ou $f(i)<v$ de forma mutuamente exclusiva. Tomando cardinalidades e aplicando as definições de \eqref{eq:sigma-dom} e \eqref{eq:sigma-im}, obtém-se $|D_f|+|L_f| = Nq$.
+\end{proof}
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{A Escada de Fermat como Realização Finita}
+\label{sec:fermat-escada}
+% ═════════════════════════════════════════════════════════════════════════════
+
+Consideramos os andares $q=17, 257, 65537$ (primos de Fermat $F_r=2^{2^r}+1$). Sobre $\mathbb F_q$, tomamos a família algébrica
+\begin{equation}
+\label{eq:metalica}
+x^2=mx+1\pmod q.
+\end{equation}
+Escrevendo $w^2=m^2+4$, a existência das raízes em $\mathbb F_q$ requer que o discriminante $m^2+4$ seja um quadrado no corpo (isto é, $w\in \mathbb F_q$). Para tais parâmetros $m$, as duas raízes são $x=\frac{m+w}{2}$ e $x^\dagger=\frac{m-w}{2}$. Como $q$ é ímpar, o produto das duas raízes satisfaz localmente:
+\begin{equation}
+\label{eq:produto-folhas}
+J = xx^\dagger = -1.
+\end{equation}
+
+\begin{observacao}[Estatuto de $J$]
+$J = xx^\dagger$ é uma leitura escalar directa. Investiga-se se ela se realiza formalmente no componente simétrico $W_s$ da decomposição de rede, sem assumir $J \in W_s$ a priori.
+\end{observacao}
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Assinatura da Realização e Recuperação Exacta}
+\label{sec:sig-zeta}
+% ═════════════════════════════════════════════════════════════════════════════
+
+A infraestrutura de reversibilidade fornece um mecanismo de recuperação exata por acumulação:
+
+\begin{definicao}[assinatura de acumulação]
+Para uma realização $B$ com trajectória $\pi:I\to X$ e multiplicidade parcial $G_t(x)=\lvert\{i\le t:\pi(i)=x\}\rvert$,
+\[
+\boxed{ \operatorname{Sig}_\zeta(B) = \{G_t(x)\}_{t\in I,\,x\in X}. }
+\]
+\end{definicao}
+
+\begin{lema}[recuperação exacta da trajectória]
+\label{lem:rec-zeta}
+Considerando o elemento inicial $t_0 = \min I$ e convencionando $G_{t^-}(x) = 0$ para o antecedente imediato da origem, a família $\{G_t(x)\}_{t,x}$ recupera incrementalmente cada passo da trajectória sob a ordem total $(I,\le)$ através de $a_x(t) = G_t(x) - G_{t-1}(x)$.
+A convolução com $\zeta$ e a deconvolução com $\mu=\zeta^{-1}$ recuperam exatamente a sequência de incidências.
+\end{lema}
+
+\begin{corolario}[fidelidade da assinatura acumulada]
+A assinatura $\operatorname{Sig}_\zeta$ é completa e fiel ao nível das sequências ordenadas do domínio considerado:
+\[
+\boxed{ \operatorname{Sig}_\zeta(B_1) = \operatorname{Sig}_\zeta(B_2) \implies a(B_1) = a(B_2). }
+\]
+\end{corolario}
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Análise Estrutural: Tripla de Realização e Incidências}
+\label{sec:fermat-cruzada}
+% ═════════════════════════════════════════════════════════════════════════════
+
+A invariância $(x^k)(x^\dagger)^k = (-1)^k = -1$ para $k$ ímpar demonstra que a leitura escalar $J$ é insensível às mudanças de potência. À luz das distinções de \code{redes.tex}, desacoplamos a representação do sistema no seguinte mapa de eixos:
+
+\begin{equation}
+\label{eq:arq-redes}
+\boxed{
+\text{realização} \longrightarrow (G,\;u,\;M)
+}
+\end{equation}
+com
+\[
+G = \text{multiplicidade (o que o campo vê)}, \qquad 
+u = \text{ordem estrutural}, \qquad 
+M = \text{memória preservada}.
+\]
+
+\subsection{Desacoplamento entre Memória e Ordem}
+
+Diferenciamos a memória $M$ da matriz antissimétrica de ordenação $W_a$. Enquanto a decomposição $W = W_s + W_a$ separa a medição ($W_s$) da ordenação ($W_a$), a memória $M$ reflete o que a construção preserva ao longo das transformações.
+O mapeamento $M \longrightarrow W_a$ constitui uma hipótese de investigação, e não uma fusão categórica.
+
+\subsection{A Escada de Incidências e a Lei de Combinação}
+
+Redefinimos a busca por obstrução na equação de Fermat. Em vez de investigar a destruição de um invariante escalar, mapeia-se a transmissão da igualdade na seguinte escada categórica:
+
+\begin{equation}
+\label{eq:escada-fermat}
+\boxed{
+\begin{array}{c}
+a^k+b^k=c^k\\
+\downarrow\\
+\text{três realizações associadas às potências } a^k, b^k, c^k\\
+\downarrow\\
+\text{incidências sobre uma representação comum}\\
+\downarrow\\
+G \quad+\quad \text{ordem}\quad+\quad \text{estado}\\
+\downarrow\\
+\text{lei de combinação}\\
+\downarrow\\
+\text{obstrução}
+\end{array}
+}
+\end{equation}
+
+Isto conecta o problema de Fermat diretamente à fronteira do sistema: \textit{qual operação combina duas incidências sobre a mesma representação?} Investiga-se se a igualdade $a^k+b^k=c^k$ exige uma lei de combinação sobre a representação comum que a realização canônica da escada não possui.
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{O Programa da Obstrução de Fermat}
+\label{sec:fermat-lema}
+% ═════════════════════════════════════════════════════════════════════════════
+
+Seja $\mathscr C_{\mathcal U}$ a classe de realizações admissíveis no Corpo Universal $\mathcal U$.
+
+\begin{definicao}[Programa de Transferência de Fermat]
+\label{def:programa-fermat}
+O \textbf{Programa de Transferência de Fermat} consiste na formulação e busca de uma relação $R$ sobre incidências ordenadas tal que:
+\begin{enumerate}
+    \item A existência de uma solução inteira não trivial $a^k+b^k=c^k$ ($k>2$) imponha a relação $R$ na combinação das realizações associadas;
+    \item Nenhuma realização canônica em $\mathscr C_{\mathcal U}$ possa satisfazer essa mesma relação $R$.
+\end{enumerate}
+\end{definicao}
+
+\begin{observacao}[Estatuto da Conjectura]
+A validação completa do programa depende da extração explícita da relação $R$ a partir das propriedades de ordem e divisibilidade. Atualmente, a proposição de obstrução figura como \textbf{Conjectura de Obstrução Orientada}.
+\end{observacao}
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Teorema Condicional de Obstrução}
+\label{sec:teorema-condicional}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\begin{teorema}[Teorema condicional de obstrução]
+\label{teo:condicional}
+Suponha que:
+\begin{enumerate}
+    \item Toda solução $a^k+b^k=c^k$ ($k>2$) induza uma tripla de realizações associadas às potências $a^k, b^k, c^k$ em $\mathscr C_{\mathcal U}$;
+    \item A assinatura acumulada $\operatorname{Sig}_\zeta$ seja completa e fiel na preservação das trajetórias ordenadas no domínio de realizações considerado;
+    \item A igualdade $a^k+b^k=c^k$ exija uma relação intrínseca $R$ sobre a combinação de suas incidências na representação comum;
+    \item A classe de realizações admissíveis $\mathscr C_{\mathcal U}$ satisfaça universalmente a obstrução sistemática $\neg R$.
+\end{enumerate}
+Então não existe solução inteira não trivial para $a^k+b^k=c^k$ com $k>2$.
+\end{teorema}
+
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Conclusão}
+\label{sec:fermat-conclusao}
+% ═════════════════════════════════════════════════════════════════════════════
+
+A Escada de Fermat consolida uma base rigorosa para a partição finita do retângulo ($\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=Nq$) e para a recuperação exata da trajetória via $\operatorname{Sig}_\zeta$.
+
+Ao desacoplar o escalar $J = -1$ do espaço de estados e evitar a colagem prematura de $M$ em $W_a$, o documento estabelece uma questão matemática precisa: determinar se existe uma lei de combinação canônica para incidências concorrentes e, em caso afirmativo, caracterizar sua compatibilidade com a adição de potências. O problema de Fermat é assim reformulado como a busca por uma incompatibilidade entre a lei de combinação exigida pela equação e as propriedades da realização canônica.
+
+\end{document}
