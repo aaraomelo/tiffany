@@ -64,17 +64,14 @@ totalmente ordenados. A Escada de Fermat acrescenta a essa identidade uma
 família concreta de realizações sobre corpos finitos, construída a partir das
 equações $x^2=mx+1\pmod q$ nos andares primos de Fermat. Esses andares funcionam como realizações finitas de teste e não constituem, por si mesmos, uma prova uniforme para todos os expoentes.
 
-A Transformada Universal e a infraestrutura $\zeta/\mu$ fornecem o mecanismo de recuperação exacta
-por acumulação ($\operatorname{Sig}_\zeta$), garantindo a reconstrução da trajetória.
-Contudo, a tentativa de extrair uma obstrução pelo invariante metálico $J=xx^\dagger$ colide com $J_k=(x^k)(x^\dagger)^k=(-1)^k$, que preserva $J_k=-1$ para todo $k$ ímpar, tornando essa leitura insensível a mudanças de potência ímpar.
-Reorientamos o programa na escada
+A Transformada Universal e a infraestrutura $\zeta/\mu$ fornecem o mecanismo de recuperação exata por acumulação ($\operatorname{Sig}_\zeta$). Demonstra-se que a assinatura temporal completa com codomínio rotulado conserva a trajetória e a fase multiplicativa por construção. O Corpo Universal não "prova" Fermat por si só, mas fornece uma linguagem finita e rigorosa para delimitar onde a informação necessária à obstrução de Fermat é preservada ou descartada pelas leituras do sistema.
+Reorientamos o programa na escada:
 \[
-\text{Fermat local}\to\text{fase multiplicativa}\to\text{teste de conservação pela assinatura temporal}\to\text{refinamento se houver perda}\to\text{obstrução global}.
+\text{Fermat local}\to\text{fase multiplicativa}\to\text{teste de conservação via }\operatorname{Sig}_\zeta\text{ e projeções}\to\text{refinamento}\to\text{obstrução global}.
 \]
 O fato local (A) já está estabelecido: se $p\mid a$ então $\operatorname{ord}_p(bc^{-1})\mid k$.
-O problema de arquitectura (B) consiste em decidir, via o critério de fibras $N_{\rm par}$ versus $N_{\rm sig}$, se $\operatorname{Sig}_\zeta$ carrega a fase multiplicativa; em caso de perda formaliza-se o refinamento $\mathscr S=(\mathcal M_{\rm temp},\mathcal M_{\rm fase})$.
+O problema de arquitetura (B) consiste em analisar o comportamento das fibras sob compressão.
 O gargalo aberto (C) permanece a obtenção de uma incompatibilidade global da forma $\exists p\mid a:\operatorname{ord}_p(bc^{-1})\nmid k$.
-A prova de Fermat só nasce quando essa incompatibilidade aparecer.
 
 \end{abstract}
 
@@ -84,21 +81,13 @@ A prova de Fermat só nasce quando essa incompatibilidade aparecer.
 \label{sec:fermat-hip}
 % ═════════════════════════════════════════════════════════════════════════════
 
-Sejam $I$ e $X$ conjuntos finitos totalmente ordenados e seja
-\[
-f:I\longrightarrow X
-\]
-uma realização. Escrevemos
-\[
-|I|=N,\qquad |X|=q.
-\]
+Sejam $I$ e $X$ conjuntos finitos totalmente ordenados e seja $f:I\longrightarrow X$ uma realização. Escrevemos $|I|=N$ e $|X|=q$.
 
-Fixada um isomorfismo crescente de ordens $\iota: X \xrightarrow{\sim} \{1,2,\ldots,q\}$, definimos para cada $i \in I$ o seu posto $x_i := \iota(f(i)) \in \{1,2,\ldots,q\}$.
+Fixada uma isomorfismo crescente de ordens $\iota: X \xrightarrow{\sim} \{1,2,\ldots,q\}$, definimos para cada $i \in I$ o seu posto $x_i := \iota(f(i)) \in \{1,2,\ldots,q\}$.
 Essa identificação permite interpretar $x_i$ como a contagem da posição na ordem total:
 \[
 x_i = \#\{v \in X : v \leq f(i)\}.
 \]
-
 A construção da Escada de Fermat fornece realizações particulares dessa forma, cuja contagem discreta fundamenta o suporte combinatório sobre o qual as leituras do sistema operam.
 
 
@@ -118,7 +107,6 @@ Para cada $i\in I$, o valor $x_i$ conta os níveis de $X$ que estão abaixo de $
 \#\bigl\{(i,v)\in I\times X:v\leq f(i)\bigr\}.
 }
 \end{equation}
-
 Essa é a leitura pelo domínio: cada elemento $i$ fornece uma coluna do retângulo $I\times X$, e $x_i$ determina a quantidade de níveis contados nessa coluna.
 
 
@@ -158,99 +146,110 @@ Para cada $(i,v)\in I\times X$, vale $v\le f(i)$ ou $f(i)<v$ de forma mutuamente
 \label{sec:fermat-escada}
 % ═════════════════════════════════════════════════════════════════════════════
 
-Consideramos os andares $q=17, 257, 65537$ (primos de Fermat $F_r=2^{2^r}+1$). Sobre $\mathbb F_q$, tomamos a família algébrica
-\begin{equation}
-\label{eq:metalica}
-x^2=mx+1\pmod q.
-\end{equation}
-Escrevendo $w^2=m^2+4$, a existência das raízes em $\mathbb F_q$ requer que o discriminante $m^2+4$ seja um quadrado no corpo (isto é, $w\in \mathbb F_q$). Para tais parâmetros $m$, as duas raízes são $x=\frac{m+w}{2}$ e $x^\dagger=\frac{m-w}{2}$, sendo $2$ invertível em $\mathbb F_q$ por $q$ ser ímpar. Pelas relações de Viète, o produto das duas raízes satisfaz:
+Consideramos os andares $q=17, 257, 65537$ (primos de Fermat $F_r=2^{2^r}+1$). Sobre $\mathbb F_q$, tomamos a família algébrica $x^2=mx+1\pmod q$. Escrevendo $w^2=m^2+4$, a existência das raízes em $\mathbb F_q$ requer que $w\in \mathbb F_q$. As duas raízes são $x=\frac{m+w}{2}$ e $x^\dagger=\frac{m-w}{2}$. Pelas relações de Viète:
 \begin{equation}
 \label{eq:produto-folhas}
 J = xx^\dagger = -1.
 \end{equation}
 
 \begin{observacao}[Estatuto experimental dos andares]
-Os andares $q=17,257,65537$ \emph{não} são apresentados como redução dos expoentes de Fermat nem como uma família suficiente para o Último Teorema. Constituem apenas domínios finitos de experimentação da arquitectura de assinaturas e de recuperação de trajetória. Não há relação matemática especial entre estes primos e a prova geral de $a^k+b^k=c^k$.
+Os andares $q=17,257,65537$ não constituem uma prova uniforme para todos os expoentes, servindo apenas como domínios finitos para testes de arquitetura de assinaturas.
 \end{observacao}
 
 \begin{observacao}[Análise das Potências e Invariância de $J$]
 \label{obs:potencias-j}
-Para qualquer potência $k$, o produto das raízes transformadas atende a:
-\[
-J_k = (x^k)(x^\dagger)^k = (xx^\dagger)^k = (-1)^k.
-\]
-Portanto, para expoentes ímpares, a leitura escalar $J_k$ permanece igual a $-1$ e, por esse valor isoladamente, não distingue as diferentes potências ímpares. Assim, $J$ é incapaz de fornecer, por si só, uma obstrução para a equação de Fermat.
+Para qualquer potência $k$ ímpar, $J_k = (x^k)(x^\dagger)^k = (-1)^k = -1$.
+A leitura escalar $J_k$ é insensível a mudanças de potência ímpar e incapaz de fornecer uma obstrução isolada.
 \end{observacao}
 
 
 % ═════════════════════════════════════════════════════════════════════════════
-\section{Assinatura da Realização e Recuperação Exata}
+\section{Assinatura Temporal Completa e Fidelidade de Fase}
 \label{sec:sig-zeta}
 % ═════════════════════════════════════════════════════════════════════════════
 
-A infraestrutura de reversibilidade fornece um mecanismo de recuperação exata por acumulação:
-
-\begin{definicao}[Assinatura de Acumulação]
-Para uma realização $B$ com trajetória $\pi:I\to X$ e multiplicidade parcial $G_t(x)=\lvert\{i\le t:\pi(i)=x\}\rvert$, a assinatura de acumulação é a família:
+\begin{definicao}[Assinatura Temporal Completa]
+Para uma realização $B$ com domínio ordenado $I=\{0,1,\ldots,L-1\}$, codomínio $X = \mathbb F_p^\times$ e trajetória $\pi_x(t) = x^t$, a assinatura temporal de acumulação é a família de matrizes acumuladas:
 \[
-\boxed{ \operatorname{Sig}_\zeta(B) = \{G_t(x)\}_{t\in I,\,x\in X}. }
+\boxed{ \operatorname{Sig}_\zeta(B_x^L) = \{G_t(v)\}_{t\in I,\,v\in \mathbb F_p^\times}, \qquad G_t(v) = \#\{0 \le s \le t : \pi_x(s) = v\}. }
 \]
 \end{definicao}
 
-\begin{lema}[Recuperação Exata da Trajetória]
-\label{lem:rec-zeta}
-Considerando o elemento inicial $t_0 = \min I$ e convencionando $G_{t^-}(x) = 0$ para o antecedente imediato da origem, a família $\{G_t(x)\}_{t,x}$ recupera incrementalmente cada passo da trajetória sob a ordem total $(I,\le)$ através de $a_x(t) = G_t(x) - G_{t-1}(x)$.
-A convolução com $\zeta$ e a deconvolução com $\mu=\zeta^{-1}$ recuperam exatamente a sequência de incidências.
-\end{lema}
+\begin{teorema}[Conservação Trivial na Assinatura Completa]
+\label{teo:fidelidade-fase}
+Seja $L \ge 2$. O mapa $x \mapsto \operatorname{Sig}_\zeta(B_x^L)$ é injetivo sobre $\mathbb F_p^\times$. Em particular, a ordem multiplicativa $d_p(x) = \operatorname{ord}_p(x)$ é univocamente determinada por $\operatorname{Sig}_\zeta(B_x^L)$.
+\end{teorema}
 
-\begin{corolario}[Fidelidade no Nível das Trajetórias Ordenadas]
-\label{cor:fidelidade}
-Para duas realizações $B_1, B_2$ compartilhando o mesmo domínio ordenado $(I,\le)$, codomínio $X$ e indexação, a assinatura $\operatorname{Sig}_\zeta$ é estritamente fiel ao nível de suas sequências de incidências:
-\[
-\boxed{ \operatorname{Sig}_\zeta(B_1) = \operatorname{Sig}_\zeta(B_2) \iff a(B_1) = a(B_2). }
-\]
+\begin{proof}
+Analisamos a contagem acumulada no passo $t=1$, sabendo que a trajetória satisfaz $\pi_x(0) = 1$ e $\pi_x(1) = x$:
+\begin{itemize}
+    \item Se $x = 1$, a trajetória permanece em $1$. Logo, $G_1(1) = 2$ e $G_1(v) = 0$ para todo $v \neq 1$.
+    \item Se $x \neq 1$, a trajetória visita $1$ no tempo $t=0$ e $x$ no tempo $t=1$. Logo, $G_1(1) = 1$, $G_1(x) = 1$ e $G_1(v) = 0$ para todo $v \notin \{1, x\}$.
+\end{itemize}
+Em ambos os casos, o elemento $x \in \mathbb F_p^\times$ é recuperável unívocamente a partir da linha $t=1$ da matriz de acumulação $\operatorname{Sig}_\zeta(B_x^L)$. Determinando $x$, a ordem multiplicativa $d_p(x) = \operatorname{ord}_p(x)$ é estritamente determinada.
+\end{proof}
+
+\begin{corolario}[Ausência Espontânea de Perda de Fase]
+A realização completa $\operatorname{Sig}_\zeta(B_x^L)$ não produz colapso de fase ($N_{\rm par} = N_{\rm sig}$). A informação de torção está preservada na memória temporal ordenada.
 \end{corolario}
 
 
 % ═════════════════════════════════════════════════════════════════════════════
-\section{Análise Estrutural: da Multiplicidade à Fase}
-\label{sec:fermat-cruzada}
+\section{Operadores de Compressão e Perda de Informação}
+\label{sec:compressoes}
 % ═════════════════════════════════════════════════════════════════════════════
 
-Diante da insensibilidade de $J_k=-1$ para $k$ ímpar, a leitura escalar é abandonada. A representação do sistema é desacoplada no mapa
-\begin{equation}
-\label{eq:arq-redes}
-\boxed{
-\text{realização} \longrightarrow (G,\;u,\;M)
-}
-\end{equation}
-onde
+Como a assinatura completa é estritamente fiel, investigam-se as **projeções comprimidas** para determinar qual nível de abstração descarta a fase.
+
+\begin{definicao}[Projeções Comprimidas do Histograma]
+Dada a assinatura completa $\operatorname{Sig}_\zeta(B_x^L)$, definimos:
+\begin{enumerate}
+    \item \textbf{Projeção de Histograma Final ($\mathcal P_{\mathrm{hist}}$):} O estado acumulado na fronteira final $t=L-1$:
+    \[
+    \mathcal P_{\mathrm{hist}}(B_x^L) = H_x(v) := G_{L-1}(v) = \#\{0 \le t < L : x^t = v\}.
+    \]
+    \item \textbf{Projeção Multiconjunto / Esqueleto Não-Rotulado ($\mathcal P_{\mathrm{mult}}$):} A ordenação das frequências do histograma final, descartando a identidade dos elementos em $\mathbb F_p^\times$:
+    \[
+    \mathcal P_{\mathrm{mult}}(B_x^L) = \operatorname{sort}_{v} \bigl( H_x(v) \bigr).
+    \]
+\end{enumerate}
+\end{definicao}
+
+\begin{lema}[Estrutura do Histograma para Domínio Completo $L=p-1$]
+\label{lem:histograma-subgrupo}
+Para $L = p - 1$ e $x \in \mathbb F_p^\times$ com ordem multiplicativa $d = \operatorname{ord}_p(x)$, a trajetória percorre periodicamente o subgrupo $\langle x \rangle \subseteq \mathbb F_p^\times$. O histograma final satisfaz exatamente:
 \[
-G = \text{multiplicidade (o que o campo vê)}, \qquad
-u = \text{ordem estrutural}, \qquad
-M = \text{memória preservada}.
+H_x(v) = \begin{cases} \dfrac{p-1}{d}, & \text{se } v \in \langle x \rangle, \\[0.8em] 0, & \text{se } v \notin \langle x \rangle. \end{cases}
 \]
-A memória $M$ não é identificada a priori com a matriz antissimétrica $W_a$; o mapeamento $M\to W_a$ permanece hipótese de investigação.
+Em particular, $|\operatorname{supp}(H_x)| = d$.
+\end{lema}
 
-A arquitetura de investigação que substitui a busca por um invariante escalar é a seguinte escada:
-\begin{equation}
-\label{eq:escada-fermat}
-\boxed{
-\begin{array}{c}
-\text{Fermat local}\\
-\downarrow\\
-\text{fase multiplicativa}\\
-\downarrow\\
-\text{teste se a assinatura temporal conserva a fase}\\
-\downarrow\\
-\text{refinamento se houver perda}\\
-\downarrow\\
-\text{obstrução global}
-\end{array}
-}
-\end{equation}
+\begin{proof}
+Em $p-1$ passos, a trajetória $1, x, x^2, \ldots$ completa exatamente $(p-1)/d$ voltas inteiras sobre o subgrupo cíclico $\langle x \rangle$ de tamanho $d$. Cada elemento $v \in \langle x \rangle$ é visitado exatamente $(p-1)/d$ vezes, enquanto elementos fora do subgrupo recebem frequência $0$. O tamanho do suporte do histograma recupera a ordem $d$ diretamente por $|\operatorname{supp}(H_x)| = d$.
+\end{proof}
 
-Os três estágios lógicos dessa escada são separados com precisão abaixo.
+\begin{proposicao}[Colapso de Fase em Domínios Curtos]
+\label{prop:colapso-fase}
+Sejam $x, y \in \mathbb F_p^\times$ tais que $\operatorname{ord}_p(x) > L$ e $\operatorname{ord}_p(y) > L$.
+Então $\mathcal P_{\mathrm{mult}}(B_x^L) = \mathcal P_{\mathrm{mult}}(B_y^L)$. Em particular, a projeção multiconjunto $\mathcal P_{\mathrm{mult}}$ não preserva informação suficiente para determinar a fase multiplicativa para elementos de ordens superiores a $L$.
+\end{proposicao}
+
+\begin{proof}
+Se $\operatorname{ord}_p(x) > L$, a trajetória $1, x, x^2, \ldots, x^{L-1}$ é formada por $L$ elementos distintos em $\mathbb F_p^\times$. O histograma final $H_x(v)$ contém exatamente $L$ posições com valor $1$ e $p-1-L$ posições com valor $0$. Ao ordenar as frequências, obtém-se o vetor fixo:
+\[
+\mathcal P_{\mathrm{mult}}(B_x^L) = (\underbrace{0, \ldots, 0}_{p-1-L}, \underbrace{1, \ldots, 1}_{L}).
+\]
+Como este vetor depende apenas de $L$ e $p$, dois elementos $x, y$ de ordens distintas superiores a $L$ produzem exatamente o mesmo esqueleto multiconjunto, demonstrando a colisão de compressão.
+\end{proof}
+
+\begin{observacao}[Exemplo Concreto em $\mathbb F_{17}^\times$]
+Para $p=17$ e $L=4$, tomemos $x$ com $\operatorname{ord}_{17}(x) = 8$ e $y$ com $\operatorname{ord}_{17}(y) = 16$.
+Como $8 > 4$ e $16 > 4$, ambos geram trajetórias sem repetição de tamanho $4$. O esqueleto ordenado para ambos é:
+\[
+\mathcal P_{\mathrm{mult}}(B_x^4) = \mathcal P_{\mathrm{mult}}(B_y^4) = (0, 0, \ldots, 0, 1, 1, 1, 1).
+\]
+No entanto, $\operatorname{ord}_{17}(x) \neq \operatorname{ord}_{17}(y)$. A projeção multiconjunto não determina a ordem nessa fibra.
+\end{observacao}
 
 
 % ═════════════════════════════════════════════════════════════════════════════
@@ -258,141 +257,51 @@ Os três estágios lógicos dessa escada são separados com precisão abaixo.
 \label{sec:fermat-A}
 % ═════════════════════════════════════════════════════════════════════════════
 
-Seja $(a,b,c)$ uma solução primitiva de $a^k+b^k=c^k$ com $k>2$ e seja $p$ um primo tal que $p\mid a$. Então
+Seja $(a,b,c)$ uma solução primitiva de $a^k+b^k=c^k$ com $k>2$ e $p\mid a$. Na estrutura do corpo $\mathbb F_p^\times$:
 \[
-b^k\equiv c^k\pmod{p}.
+(bc^{-1})^k \equiv 1 \pmod p.
 \]
-Como $p\nmid b$ e $p\nmid c$ (primitividade), a congruência vive em $\mathbb F_p^\times$:
-\[
-\bigl(bc^{-1}\bigr)^k=1.
-\]
-Definimos a \textbf{fase relacional de Fermat} por
-\begin{equation}
-\label{eq:fase-relacional}
-\boxed{
-\rho_p(b,c)\,:=\,\operatorname{ord}_p(bc^{-1}).
-}
-\end{equation}
-O fato local fica então
+A \textbf{fase relacional de Fermat} $\rho_p(b,c) := \operatorname{ord}_p(bc^{-1})$ satisfaz o fato local:
 \begin{equation}
 \label{eq:ord-local}
-\boxed{
-\rho_p(b,c)\mid k.
-}
+\boxed{ \rho_p(b,c) \mid k. }
 \end{equation}
-Este é um fato de aritmética local, já provado. Não depende de assinaturas, de realizações finitas nem de qualquer construção posterior.
-
-A \textbf{fase própria} de um elemento $x\in\mathbb F_p^\times$ é simplesmente
-\[
-d_p(x)\,:=\,\operatorname{ord}_p(x).
-\]
-A arquitectura distingue as duas noções:
-\[
-\text{fase própria}\quad\leadsto\quad\text{fase relacional}\quad\leadsto\quad\text{restrição de Fermat}.
-\]
-
-\begin{observacao}[Guardrail de ordem]
-Nunca se escreve $\operatorname{ord}_p(n)$ quando $p\mid n$. Nesse caso $n\equiv0$ em $\mathbb F_p$ e a ordem multiplicativa não está definida.
-\end{observacao}
 
 
 % ═════════════════════════════════════════════════════════════════════════════
-\section{Definição concreta de $B_x$ e os dois experimentos}
-\label{sec:Bx}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Para que o teste de conservação de fase seja executável, a realização $B_x$ precisa de uma definição concreta. Há, contudo, um risco de circularidade que deve ser tornado explícito desde o início.
-
-\subsection{Construção cíclica minimal (Experimento~1 --- diagnóstico)}
-
-Fixado um primo ímpar $p$ e um elemento $x\in\mathbb F_p^\times$, a realização minimal associada à órbita de $x$ é
-\[
-B_x^{\mathrm{cyc}}=\mathcal B_{\mathrm{cyc}}(p,x)
-\]
-com
-\[
-I_{p,x}=\{0,1,\dots,d_p(x)-1\},\qquad
-X_{p,x}=\langle x\rangle\subseteq\mathbb F_p^\times,\qquad
-\pi_{p,x}(t)=x^t.
-\]
-A assinatura temporal correspondente é
-\[
-\operatorname{Sig}_\zeta(B_x^{\mathrm{cyc}})=\bigl\{G_t(y)\bigr\}_{t\in I_{p,x},\,y\in X_{p,x}}.
-\]
-Nesta construção o comprimento do domínio é exactamente $d_p(x)$. Portanto a assinatura pode revelar a ordem simplesmente pelo tamanho de $I_{p,x}$. O Experimento~1 serve apenas como diagnóstico preliminar: mede se há informação de fase visível na assinatura, mas não constitui um teste não-circular.
-
-\subsection{Construção de domínio fixo (Experimento~2 --- teste não-circular)}
-
-Para eliminar o vazamento pelo comprimento, fixamos um domínio comum
-\[
-I=\{0,1,\dots,L-1\}
-\]
-independente de $d_p(x)$, com $L$ adequado (por exemplo $L=p-1$ ou um múltiplo comum das ordens a serem testadas). Para cada $x\in\mathbb F_p^\times$ definimos a trajetória truncada
-\[
-\pi_x:I\longrightarrow\mathbb F_p^\times,\qquad t\longmapsto x^t
-\]
-e a realização
-\[
-B_x^{L}=\mathcal B_L(p,x)
-\]
-munida dessa trajetória. A assinatura temporal
-\[
-\operatorname{Sig}_\zeta(B_x^{L})
-\]
-é agora calculada sobre um domínio de tamanho uniforme. A pergunta que o Experimento~2 formula é:
-\begin{equation}
-\label{eq:pergunta-B}
-\boxed{
-\text{a fase é recuperável da assinatura por sua informação interna, sem usar explicitamente }d_p(x)\text{ na construção?}
-}
-\end{equation}
-Em símbolos:
-\[
-\operatorname{Sig}_\zeta(B_x^{L})\;\overset{?}{\longrightarrow}\;d_p(x).
-\]
-Se existirem $x,y$ tais que
-\[
-\operatorname{Sig}_\zeta(B_x^{L})=\operatorname{Sig}_\zeta(B_y^{L})\qquad\text{mas}\qquad d_p(x)\neq d_p(y),
-\]
-tem-se uma demonstração computacional concreta de que a memória temporal, neste modelo de realização, não carrega toda a fase multiplicativa. A colisão de assinaturas implica informação perdida; a questão seguinte passa a ser qual estrutura do Corpo Universal (se alguma) a recupera.
-
-\begin{observacao}[Estatuto dos dois experimentos]
-O Experimento~1 é diagnóstico e potencialmente circular. O Experimento~2 é o teste arquitectural relevante. Ambos são executáveis; apenas o segundo responde à pergunta formulada em~\eqref{eq:pergunta-B} sem vazamento a priori da ordem no tamanho do domínio.
-\end{observacao}
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{B --- Problema de Arquitetura: Conservação de Fase}
+\section{B --- Problema de Arquitetura e Análise de Fibras}
 \label{sec:fermat-B}
 % ═════════════════════════════════════════════════════════════════════════════
 
-Com as duas construções definidas, a pergunta arquitectural torna-se precisa. Adoptamos o critério quantitativo por fibras sobre o Experimento~2 (domínio fixo). Sejam
-\begin{align*}
-N_{\rm sig}&=\#\{\operatorname{Sig}_\zeta(B_x^{L})\},\\
-N_{\rm par}&=\#\bigl\{\bigl(\operatorname{Sig}_\zeta(B_x^{L}),\,d_p(x)\bigr)\bigr\}.
-\end{align*}
-Então:
-\begin{itemize}
-\item $N_{\rm par}=N_{\rm sig}$ se e somente se $d_p(x)$ é constante em cada fibra temporal;
-\item $N_{\rm par}>N_{\rm sig}$ significa que existe pelo menos uma fibra contendo elementos de ordens multiplicativas distintas. A projeção temporal perdeu informação de fase.
-\end{itemize}
+O uso de domínios curtos ($L < p-1$) permite observar a perda de informação que fica mascarada no caso especial $L=p-1$ (onde a geometria de subgrupo preenche uniformemente o suporte do histograma, conforme o Lema~\ref{lem:histograma-subgrupo}).
 
-No segundo caso introduzimos um refinamento que \emph{explicita} a informação de fase ausente da assinatura temporal:
-\begin{equation}
-\label{eq:S-refinamento}
-\boxed{
-\mathscr S(B)=\bigl(\mathcal M_{\rm temp}(B),\,\mathcal M_{\rm fase}(B)\bigr).
-}
-\end{equation}
-Não se declara a priori que $\mathscr S$ seja ``extensão mínima'', nem se identifica $\mathcal M_{\rm fase}$ com a mera anexação da coluna $d_p(x)$. O experimento interessante consiste em descobrir qual estrutura adicional do Corpo Universal (se alguma) permite reconstruir a fase a partir da arquitectura já presente; a simples anexação da ordem seria tautológica.
-
-\begin{observacao}[Status de B]
-O resultado (computacional ou teórico) sobre $N_{\rm par}$ versus $N_{\rm sig}$ \emph{não} prova o Último Teorema de Fermat. Ele apenas determina se a assinatura temporal, no modelo de domínio fixo, já carrega a torção multiplicativa ou se é necessário investigar memória adicional. A ligação com a fase relacional de Fermat é mediada pela identidade
+A análise experimental é conduzida comparando o número de assinaturas distintas $N_{\rm sig}$ e o número de pares assinatura-ordem $N_{\rm par}$:
 \[
-\rho_p(b,c)=d_p(bc^{-1}),
+\begin{array}{c|c|c}
+\text{Objeto Operacional} & \text{Comportamento} & \text{Preservação de Fase} \\
+\hline
+\operatorname{Sig}_\zeta(B_x^L) \text{ (Completa)}
+&
+N_{\rm par}=N_{\rm sig}
+&
+\text{Fase preservada por fidelidade à trajetória}
+\\[0.4em]
+\mathcal P_{\mathrm{hist}}(B_x^L) \text{ (Histograma)}
+&
+\text{Depende de }L
+&
+\text{Pode colapsar para }L\text{ pequeno}
+\\[0.4em]
+\mathcal P_{\mathrm{mult}}(B_x^L) \text{ (Multiconjunto)}
+&
+N_{\rm par}>N_{\rm sig}
+\text{ se existem ordens distintas }d_1,d_2>L
+&
+\text{Perda de informação por compressão}
+\end{array}
 \]
-sempre que $p\nmid bc$. A fase relacional só entra depois de o teste de conservação (Experimento~2) ter sido executado.
-\end{observacao}
+
+Quando $N_{\rm par} > N_{\rm sig}$, o refinamento $\mathscr S(B) = (\mathcal M_{\rm temp}(B), \mathcal M_{\rm fase}(B))$ formaliza a reconstrução necessária da memória de torção descartada pela compressão.
 
 
 % ═════════════════════════════════════════════════════════════════════════════
@@ -400,81 +309,15 @@ sempre que $p\nmid bc$. A fase relacional só entra depois de o teste de conserv
 \label{sec:fermat-C}
 % ═════════════════════════════════════════════════════════════════════════════
 
-O objetivo ainda aberto é obter uma incompatibilidade global suficientemente forte. A forma mais directa seria demonstrar, sob as mesmas hipóteses em que A vale, a existência de um primo
+O objetivo global é estabelecer a existência de um primo divisor:
 \begin{equation}
 \label{eq:obstrucao-global}
-\boxed{
-\exists\,p\mid a:\quad\rho_p(b,c)\nmid k.
-}
+\boxed{ \exists\,p\mid a:\quad\rho_p(b,c)\nmid k. }
 \end{equation}
-Se (C) pudesse ser estabelecida, a conjunção com (A) produziria imediatamente
+A conjunção de (C) com (A) geraria a contradição aritmética necessária para estabelecer o Último Teorema de Fermat:
 \[
-\forall p\mid a,\quad\rho_p(b,c)\mid k
-\qquad\text{e}\qquad
-\exists p\mid a,\quad\rho_p(b,c)\nmid k,
+\Bigl( \forall p \mid a, \; \rho_p(b,c) \mid k \Bigr) \;\land\; \Bigl( \exists p \mid a, \; \rho_p(b,c) \nmid k \Bigr) \implies \bot.
 \]
-a contradição clássica.
-
-\begin{observacao}[Status de C]
-C permanece aberto. Não se invoca Chebotarev para fabricar um primo violador especificamente entre os divisores de $a$; não se afirma que $\rho_p(b,c)=k$ para todo $p\mid a$ (A fornece apenas divisibilidade por $k$; ordem exactamente $k$ exige hipóteses adicionais, por exemplo a existência de um divisor primo primitivo); não se transforma ausência de colisões em testes finitos em completude universal; e não se altera o significado de $\operatorname{Sig}_\zeta$ apenas para forçá-la a carregar a informação desejada.
-\end{observacao}
-
-O pipeline operacional que torna esses três estágios visíveis é:
-\begin{center}
-\begin{verbatim}
-ord_mod.c
-    ↓
-d_p(x) = ord_p(x)
-    ↓
-fermat.c
-    ↓
-(ρ_p(b,c))_{p|a} = (ord_p(bc^{-1}))_{p|a}
-    ↓
-signature_phase.c   [Experimento 2: domínio fixo L]
-    ↓
-Sigζ(B_x^L) × d_p(x)
-    ↓
-fibras / kernel / colisão de assinatura
-    ↓
-S = (temporal, fase)   [só se N_par > N_sig]
-    ↓
-R*
-    ↓
-obstrução global
-    ↓
-⊥
-\end{verbatim}
-\end{center}
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Teorema Condicional (redução formal)}
-\label{sec:teorema-condicional}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Aritmeticamente, C contradiz A directamente. Arquitecturalmente, B pergunta se a informação necessária para expressar C pode ser lida na linguagem de assinaturas do sistema.
-
-\begin{teorema}[Redução Condicional]
-\label{teo:condicional}
-Suponha que:
-\begin{enumerate}
-    \item a assinatura temporal (ou um refinamento não-tautológico $\mathscr S$ quando $N_{\rm par}>N_{\rm sig}$) permita recuperar, para cada $p\mid a$, a fase relacional $\rho_p(b,c)$;
-    \item sob as hipóteses de uma solução primitiva $a^k+b^k=c^k$, seja possível demonstrar a existência de pelo menos um primo $p\mid a$ tal que $\rho_p(b,c)\nmid k$.
-\end{enumerate}
-Então não existe solução inteira não trivial para $a^k+b^k=c^k$ com $k>2$.
-\end{teorema}
-
-\begin{proof}
-A hipótese 2, por si só, já contradiz o fato local (A). A hipótese 1 não é necessária para a contradição aritmética; ela apenas pergunta se a obstrução global pode ser expressa e detectada no interior da arquitectura de assinaturas.
-\end{proof}
-
-\begin{observacao}[Escopo da redução]
-O teorema é estritamente condicional. Ele não demonstra o Último Teorema de Fermat. Isola dois níveis distintos:
-\begin{itemize}
-\item \textbf{Aritmético:} C contradiz A directamente.
-\item \textbf{Arquitectural:} B pergunta se C pode ser representada na linguagem de assinaturas do sistema, e se a memória de fase eventualmente necessária pode ser reconstruída a partir da estrutura já presente (sem anexação tautológica da ordem).
-\end{itemize}
-\end{observacao}
 
 
 % ═════════════════════════════════════════════════════════════════════════════
@@ -482,20 +325,16 @@ O teorema é estritamente condicional. Ele não demonstra o Último Teorema de F
 \label{sec:fermat-conclusao}
 % ═════════════════════════════════════════════════════════════════════════════
 
-A Escada de Fermat fornece a partição finita do retângulo ($\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=Nq$) e a recuperação exacta da trajetória via $\operatorname{Sig}_\zeta$. A leitura escalar $J_k=(-1)^k$ foi descartada por cegueira às potências ímpares. Os andares $17,257,65537$ permanecem laboratórios experimentais, não uma redução do FLT.
+O estudo refinado da realização $B_x$ revela que a máquina do Corpo Universal **não perde a fase espontaneamente** na sua assinatura temporal completa $\operatorname{Sig}_\zeta$. A perda de torção multiplicativa surge de maneira precisa quando aplicamos um operador de leitura comprimida, como a projeção multiconjunto $\mathcal P_{\mathrm{mult}}$.
 
-O programa reorganizado é:
+O Corpo Universal não substitui a demonstração analítica de Fermat; ele fornece a **linguagem finita e estruturada** para mapear exatamente em quais projeções a informação da torção é conservada ou descartada.
+
+O programa reafirma a trajetória:
 \[
 \text{A (fato local)}\;\longrightarrow\;
-\text{B (teste de conservação de fase)}\;\longrightarrow\;
-\text{C (obstrução global ainda aberta)}.
+\text{B (análise de compressão de fase)}\;\longrightarrow\;
+\text{C (obstrução global)}.
 \]
-A é teorema de aritmética local (fase relacional $\rho_p(b,c)\mid k$).  
-B é propriedade testável da arquitectura: o Experimento~2 (domínio fixo $L$) mede se $\operatorname{Sig}_\zeta(B_x^{L})$ determina $d_p(x)$ sem vazamento circular pelo comprimento. Colisão de assinaturas com ordens distintas constitui evidência concreta de perda de informação de fase. A fase relacional $\rho_p$ só entra depois desse teste.  
-C continua sendo o problema matemático realmente difícil.
-
-\begin{quote}
-A máquina já sabe contar incidência; agora verificamos se ela também sabe carregar a torção. Se não carregar, acrescentamos exactamente a memória que foi perdida --- mas só depois de medir a perda e sem fingir que a mera anexação da ordem resolve o problema. A prova de Fermat só nasce quando aparecer a incompatibilidade global.
-\end{quote}
+A informação de fase não desaparece espontaneamente da máquina; ela é descartada no momento em que uma leitura comprimida é realizada.
 
 \end{document}
