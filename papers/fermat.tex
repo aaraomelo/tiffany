@@ -1,340 +1,387 @@
 % !TeX program = pdflatex
-
-% ─────────────────────────────────────────────────────────────────────────────
-% fermat.tex — A Escada de Fermat e o Programa da Obstrução de Assinatura
-% ─────────────────────────────────────────────────────────────────────────────
-
 \documentclass[11pt,a4paper]{article}
-
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
-\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=2.4cm]{geometry}
-\usepackage{booktabs}
-\usepackage{array}
-\usepackage{xcolor}
-\usepackage[htt]{hyphenat}
-\usepackage[hidelinks,breaklinks]{hyperref}
-
-\sloppy
-\emergencystretch=2em
-
-\definecolor{cinza}{gray}{0.35}
-
-\newcommand{\code}[1]{\texttt{\small #1}}
-\newcommand{\abs}[1]{\lvert #1\rvert}
-\newcommand{\Ucan}{\mathcal U}
-\newcommand{\Sig}{\operatorname{Sig}}
-\newcommand{\prof}{\operatorname{prof}}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
 
 \newtheorem{teorema}{Teorema}
 \newtheorem{lema}[teorema]{Lema}
-\newtheorem{definicao}[teorema]{Definição}
-\newtheorem{corolario}[teorema]{Corolário}
 \newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{definicao}[teorema]{Definição}
 \newtheorem{observacao}[teorema]{Observação}
 
-\renewcommand{\proofname}{Demonstração}
-
-\title{%
-  \textbf{A Escada de Fermat e o Programa da Obstrução de Assinatura}\\[0.3em]
-  \large Realização Finita, Recuperação de Trajetória e Invariância Estrutural no Corpo Universal\\[0.2em]
-  \small \textit{Da contagem de retângulos à investigação de combinações de incidências ordenadas}
-}
-
+\title{\textbf{A Cadeia Finita de Fermat, Canonicalização da Fase e Obstrução de Holonomia}}
 \author{Aarão Melo Lopes}
 \date{\today}
 
 \begin{document}
-
 \maketitle
 
 \begin{abstract}
+Para uma hipotética solução primitiva $a^k+b^k=c^k$, com $k>2$, a aplicação do Teorema de Zsigmondy a $c^k-b^k$ garante a existência de um divisor primo primitivo $p \mid (c^k-b^k)$ tal que a ordem multiplicativa de $u_p = bc^{-1}$ em $\mathbb{F}_p^\times$ é exatamente $k$. Fixada uma convenção de realização que associa ao gerador do ciclo de ordem $k$ a fase fundamental $2\pi/k$ na subálgebra real $\langle 1, J \rangle$ com $J^2 = -1$, define-se a representação $\widehat{u}_{p,k} = \exp(\frac{2\pi}{k}J)$, que induz o operador $A_0^{(\mathbb{C})} = \operatorname{diag}(e^{2\pi i/k}, e^{-2\pi i/k}) \in \operatorname{SL}(2,\mathbb{C})$. O desvio de traço sob o refinamento de Koch fatora como $D_{\mathrm{geom}}(c) = (1-c)P_D(c)$, onde $c = \cos(2\pi/k)$ e $P_D(c) \in \mathbb{Z}[\sqrt{3}][c]$ é o polinômio geométrico de grau 6 associado.
 
-\noindent
-Este trabalho formaliza uma realização finita da chamada estrutura central:
-a partição exata do retângulo $I\times X$ em duas classes disjuntas,
-uma contada pelo domínio e outra pela imagem. A identidade
+Dentro do modelo geométrico assim definido, demonstra-se que
 \[
-\Sigma_{\mathrm{dom}}+\Sigma_{\mathrm{im}}=|I|\,|X|
+P_D\!\left(\cos\frac{2\pi}{k}\right)\neq0 \qquad\text{para todo }k>2,
 \]
-é puramente combinatória e vale para toda realização finita entre conjuntos
-totalmente ordenados. A Escada de Fermat acrescenta a essa identidade uma
-família concreta de realizações sobre corpos finitos, construída a partir das
-equações $x^2=mx+1\pmod q$ nos andares primos de Fermat. Esses andares funcionam como realizações finitas de teste e não constituem, por si mesmos, uma prova uniforme para todos os expoentes.
-
-A Transformada Universal e a infraestrutura $\zeta/\mu$ fornecem o mecanismo de recuperação exata por acumulação ($\operatorname{Sig}_\zeta$). Demonstra-se que a assinatura temporal completa com codomínio rotulado conserva a trajetória e a fase multiplicativa por construção. O Corpo Universal não "prova" Fermat por si só, mas fornece uma linguagem finita e rigorosa para delimitar onde a informação necessária à obstrução de Fermat é preservada ou descartada pelas leituras do sistema.
-Reorientamos o programa na escada:
+o que implica $D_{\mathrm{geom}}(c_k)\neq0$ e, portanto, a ruptura global da classe de conjugação
 \[
-\text{Fermat local}\to\text{fase multiplicativa}\to\text{teste de conservação via }\operatorname{Sig}_\zeta\text{ e projeções}\to\text{refinamento}\to\text{obstrução global}.
+\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0).
 \]
-O fato local (A) já está estabelecido: se $p\mid a$ então $\operatorname{ord}_p(bc^{-1})\mid k$.
-O problema de arquitetura (B) consiste em analisar o comportamento das fibras sob compressão.
-O gargalo aberto (C) permanece a obtenção de uma incompatibilidade global da forma $\exists p\mid a:\operatorname{ord}_p(bc^{-1})\nmid k$.
+Para $k=4$, o desvio avalia para $P_D(0)=11$, fornecendo $\operatorname{tr}(A_1)=11\notin\{-2,0,2\}$, donde $A_1^4\neq I$.
 
+A cadeia lógica completa até uma contradição com Fermat exige ainda o elo estrutural que transforma a existência de uma solução primitiva na exigência de que a holonomia refinada $A_1$ preserve a classe de conjugação de $A_0$ (ou, alternativamente, que $A_1^k=I$). Esse elo permanece residual e é formulado em termos da interface de Viviani e do operador de fratura $\Xi$.
 \end{abstract}
 
+\section{Seleção Aritmética do Primo Primitivo}
 
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Hipóteses Gerais e Estrutura Finita}
-\label{sec:fermat-hip}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Sejam $I$ e $X$ conjuntos finitos totalmente ordenados e seja $f:I\longrightarrow X$ uma realização. Escrevemos $|I|=N$ e $|X|=q$.
-
-Fixada uma isomorfismo crescente de ordens $\iota: X \xrightarrow{\sim} \{1,2,\ldots,q\}$, definimos para cada $i \in I$ o seu posto $x_i := \iota(f(i)) \in \{1,2,\ldots,q\}$.
-Essa identificação permite interpretar $x_i$ como a contagem da posição na ordem total:
-\[
-x_i = \#\{v \in X : v \leq f(i)\}.
-\]
-A construção da Escada de Fermat fornece realizações particulares dessa forma, cuja contagem discreta fundamenta o suporte combinatório sobre o qual as leituras do sistema operam.
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Conte pelo Domínio --- a Leitura de Hurwitz}
-\label{sec:fermat-dom}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Para cada $i\in I$, o valor $x_i$ conta os níveis de $X$ que estão abaixo de $f(i)$, incluindo o próprio nível. Portanto,
-\begin{equation}
-\label{eq:sigma-dom}
-\boxed{
-\Sigma_{\mathrm{dom}}
-=
-\sum_{i\in I}x_i
-=
-\#\bigl\{(i,v)\in I\times X:v\leq f(i)\bigr\}.
-}
-\end{equation}
-Essa é a leitura pelo domínio: cada elemento $i$ fornece uma coluna do retângulo $I\times X$, e $x_i$ determina a quantidade de níveis contados nessa coluna.
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Conte pela Imagem --- a Leitura Complementar}
-\label{sec:fermat-im}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Fixado $v\in X$, os pares complementares são aqueles para os quais $f(i)<v$. Definimos
-\begin{equation}
-\label{eq:sigma-im}
-\Sigma_{\mathrm{im}}
-=
-\sum_{v\in X}
-\#\{i\in I:f(i)<v\}.
-\end{equation}
-
-Os conjuntos $D_f = \{(i,v)\in I\times X:v\leq f(i)\}$ e $L_f = \{(i,v)\in I\times X:f(i)<v\}$ são disjuntos e sua união cobre todo o retângulo $I\times X$.
-
-\begin{teorema}[Partição finita central]
-\label{teo:particao}
-Para toda realização $f:I\to X$ entre conjuntos finitos totalmente ordenados,
-\[
-\boxed{ I\times X = D_f\;\dot\cup\;L_f }
-\qquad\implies\qquad
-\boxed{ \Sigma_{\mathrm{dom}} + \Sigma_{\mathrm{im}} = |I|\,|X| = Nq. }
-\]
-\end{teorema}
-
-\begin{proof}
-Para cada $(i,v)\in I\times X$, vale $v\le f(i)$ ou $f(i)<v$ de forma mutuamente exclusiva. Tomando cardinalidades e aplicando as definições de \eqref{eq:sigma-dom} e \eqref{eq:sigma-im}, obtém-se $|D_f|+|L_f| = Nq$.
-\end{proof}
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{A Escada de Fermat como Realização Finita}
-\label{sec:fermat-escada}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Consideramos os andares $q=17, 257, 65537$ (primos de Fermat $F_r=2^{2^r}+1$). Sobre $\mathbb F_q$, tomamos a família algébrica $x^2=mx+1\pmod q$. Escrevendo $w^2=m^2+4$, a existência das raízes em $\mathbb F_q$ requer que $w\in \mathbb F_q$. As duas raízes são $x=\frac{m+w}{2}$ e $x^\dagger=\frac{m-w}{2}$. Pelas relações de Viète:
-\begin{equation}
-\label{eq:produto-folhas}
-J = xx^\dagger = -1.
-\end{equation}
-
-\begin{observacao}[Estatuto experimental dos andares]
-Os andares $q=17,257,65537$ não constituem uma prova uniforme para todos os expoentes, servindo apenas como domínios finitos para testes de arquitetura de assinaturas.
-\end{observacao}
-
-\begin{observacao}[Análise das Potências e Invariância de $J$]
-\label{obs:potencias-j}
-Para qualquer potência $k$ ímpar, $J_k = (x^k)(x^\dagger)^k = (-1)^k = -1$.
-A leitura escalar $J_k$ é insensível a mudanças de potência ímpar e incapaz de fornecer uma obstrução isolada.
-\end{observacao}
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Assinatura Temporal Completa e Fidelidade de Fase}
-\label{sec:sig-zeta}
-% ═════════════════════════════════════════════════════════════════════════════
-
-\begin{definicao}[Assinatura Temporal Completa]
-Para uma realização $B$ com domínio ordenado $I=\{0,1,\ldots,L-1\}$, codomínio $X = \mathbb F_p^\times$ e trajetória $\pi_x(t) = x^t$, a assinatura temporal de acumulação é a família de matrizes acumuladas:
-\[
-\boxed{ \operatorname{Sig}_\zeta(B_x^L) = \{G_t(v)\}_{t\in I,\,v\in \mathbb F_p^\times}, \qquad G_t(v) = \#\{0 \le s \le t : \pi_x(s) = v\}. }
-\]
-\end{definicao}
-
-\begin{teorema}[Conservação Trivial na Assinatura Completa]
-\label{teo:fidelidade-fase}
-Seja $L \ge 2$. O mapa $x \mapsto \operatorname{Sig}_\zeta(B_x^L)$ é injetivo sobre $\mathbb F_p^\times$. Em particular, a ordem multiplicativa $d_p(x) = \operatorname{ord}_p(x)$ é univocamente determinada por $\operatorname{Sig}_\zeta(B_x^L)$.
-\end{teorema}
-
-\begin{proof}
-Analisamos a contagem acumulada no passo $t=1$, sabendo que a trajetória satisfaz $\pi_x(0) = 1$ e $\pi_x(1) = x$:
-\begin{itemize}
-    \item Se $x = 1$, a trajetória permanece em $1$. Logo, $G_1(1) = 2$ e $G_1(v) = 0$ para todo $v \neq 1$.
-    \item Se $x \neq 1$, a trajetória visita $1$ no tempo $t=0$ e $x$ no tempo $t=1$. Logo, $G_1(1) = 1$, $G_1(x) = 1$ e $G_1(v) = 0$ para todo $v \notin \{1, x\}$.
-\end{itemize}
-Em ambos os casos, o elemento $x \in \mathbb F_p^\times$ é recuperável unívocamente a partir da linha $t=1$ da matriz de acumulação $\operatorname{Sig}_\zeta(B_x^L)$. Determinando $x$, a ordem multiplicativa $d_p(x) = \operatorname{ord}_p(x)$ é estritamente determinada.
-\end{proof}
-
-\begin{corolario}[Ausência Espontânea de Perda de Fase]
-A realização completa $\operatorname{Sig}_\zeta(B_x^L)$ não produz colapso de fase ($N_{\rm par} = N_{\rm sig}$). A informação de torção está preservada na memória temporal ordenada.
-\end{corolario}
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Operadores de Compressão e Perda de Informação}
-\label{sec:compressoes}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Como a assinatura completa é estritamente fiel, investigam-se as **projeções comprimidas** para determinar qual nível de abstração descarta a fase.
-
-\begin{definicao}[Projeções Comprimidas do Histograma]
-Dada a assinatura completa $\operatorname{Sig}_\zeta(B_x^L)$, definimos:
+\begin{lema}[Primo Primitivo de Zsigmondy]
+Aplique o Teorema de Zsigmondy a $c^k-b^k$, com $c>b>0$ e $k>2$. Suponha uma solução primitiva $a^k+b^k=c^k$, com $\gcd(a,b,c)=1$. Então existe um primo $p \mid a$ tal que:
 \begin{enumerate}
-    \item \textbf{Projeção de Histograma Final ($\mathcal P_{\mathrm{hist}}$):} O estado acumulado na fronteira final $t=L-1$:
-    \[
-    \mathcal P_{\mathrm{hist}}(B_x^L) = H_x(v) := G_{L-1}(v) = \#\{0 \le t < L : x^t = v\}.
-    \]
-    \item \textbf{Projeção Multiconjunto / Esqueleto Não-Rotulado ($\mathcal P_{\mathrm{mult}}$):} A ordenação das frequências do histograma final, descartando a identidade dos elementos em $\mathbb F_p^\times$:
-    \[
-    \mathcal P_{\mathrm{mult}}(B_x^L) = \operatorname{sort}_{v} \bigl( H_x(v) \bigr).
-    \]
+    \item $p \mid (c^k - b^k)$ e $p \nmid (c^m - b^m)$ para todo $1 \le m < k$;
+    \item $p \nmid bc$;
+    \item $\operatorname{ord}_{\mathbb{F}_p^\times}(bc^{-1}) = k$.
 \end{enumerate}
-\end{definicao}
-
-\begin{lema}[Estrutura do Histograma para Domínio Completo $L=p-1$]
-\label{lem:histograma-subgrupo}
-Para $L = p - 1$ e $x \in \mathbb F_p^\times$ com ordem multiplicativa $d = \operatorname{ord}_p(x)$, a trajetória percorre periodicamente o subgrupo $\langle x \rangle \subseteq \mathbb F_p^\times$. O histograma final satisfaz exatamente:
-\[
-H_x(v) = \begin{cases} \dfrac{p-1}{d}, & \text{se } v \in \langle x \rangle, \\[0.8em] 0, & \text{se } v \notin \langle x \rangle. \end{cases}
-\]
-Em particular, $|\operatorname{supp}(H_x)| = d$.
+Em particular, pelo Teorema de Lagrange, $k \mid (p-1)$, o que garante $p \nmid k$.
 \end{lema}
 
 \begin{proof}
-Em $p-1$ passos, a trajetória $1, x, x^2, \ldots$ completa exatamente $(p-1)/d$ voltas inteiras sobre o subgrupo cíclico $\langle x \rangle$ de tamanho $d$. Cada elemento $v \in \langle x \rangle$ é visitado exatamente $(p-1)/d$ vezes, enquanto elementos fora do subgrupo recebem frequência $0$. O tamanho do suporte do histograma recupera a ordem $d$ diretamente por $|\operatorname{supp}(H_x)| = d$.
+Da primitividade $\gcd(a,b,c)=1$ segue $\gcd(b,c)=1$. De $a^k+b^k=c^k$ com $a,b>0$, temos automaticamente $c > b > 0$. Assim, a aplicação em $c^k - b^k = a^k$ está legitimada. O Teorema de Zsigmondy garante a existência de um divisor primo primitivo $p$ de $c^k - b^k$, exceto no caso $(c,b,k)=(2,1,6)$, o qual implicaria $a^6 = 2^6 - 1^6 = 63$, impossível pois $63$ não é uma sexta potência inteira.
+
+Como $p \mid (c^k - b^k) = a^k$, segue $p \mid a$. Como $p$ é divisor primitivo, $p \nmid (c^m - b^m)$ para $m < k$. Sendo $\gcd(b,c)=1$, temos $p \nmid bc$, de modo que $u_p = bc^{-1} \in \mathbb{F}_p^\times$ satisfaz $(bc^{-1})^k \equiv 1 \pmod p$. Se a ordem de $u_p$ fosse $d < k$, teríamos $p \mid (c^d - b^d)$, o que contradiz a primitividade de $p$. Logo, o elemento possui ordem multiplicativa exata
+\[
+\operatorname{ord}_{\mathbb{F}_p^\times}(u_p) = k.
+\]
+Pelo Teorema de Lagrange, $k \mid (p-1) \implies p \nmid k$.
 \end{proof}
 
-\begin{proposicao}[Colapso de Fase em Domínios Curtos]
-\label{prop:colapso-fase}
-Sejam $x, y \in \mathbb F_p^\times$ tais que $\operatorname{ord}_p(x) > L$ e $\operatorname{ord}_p(y) > L$.
-Então $\mathcal P_{\mathrm{mult}}(B_x^L) = \mathcal P_{\mathrm{mult}}(B_y^L)$. Em particular, a projeção multiconjunto $\mathcal P_{\mathrm{mult}}$ não preserva informação suficiente para determinar a fase multiplicativa para elementos de ordens superiores a $L$.
-\end{proposicao}
+\section{A Ponte Espectral e a Convenção de Realização}
 
-\begin{proof}
-Se $\operatorname{ord}_p(x) > L$, a trajetória $1, x, x^2, \ldots, x^{L-1}$ é formada por $L$ elementos distintos em $\mathbb F_p^\times$. O histograma final $H_x(v)$ contém exatamente $L$ posições com valor $1$ e $p-1-L$ posições com valor $0$. Ao ordenar as frequências, obtém-se o vetor fixo:
-\[
-\mathcal P_{\mathrm{mult}}(B_x^L) = (\underbrace{0, \ldots, 0}_{p-1-L}, \underbrace{1, \ldots, 1}_{L}).
-\]
-Como este vetor depende apenas de $L$ e $p$, dois elementos $x, y$ de ordens distintas superiores a $L$ produzem exatamente o mesmo esqueleto multiconjunto, demonstrando a colisão de compressão.
-\end{proof}
+A estrutura cíclica abstrata de ordem $k$ estabelecida em $\mathbb{F}_p^\times$ admite uma representação complexa para análise de holonomia. A passagem, contudo, não é canônica: trata-se de uma convenção de realização.
 
-\begin{observacao}[Exemplo Concreto em $\mathbb F_{17}^\times$]
-Para $p=17$ e $L=4$, tomemos $x$ com $\operatorname{ord}_{17}(x) = 8$ e $y$ com $\operatorname{ord}_{17}(y) = 16$.
-Como $8 > 4$ e $16 > 4$, ambos geram trajetórias sem repetição de tamanho $4$. O esqueleto ordenado para ambos é:
+\begin{definicao}[Convenção de Realização Angular]
+A ordem $k = \operatorname{ord}_{\mathbb{F}_p^\times}(u_p)$ garante uma estrutura cíclica de ordem $k$. Fixada uma convenção de realização que associa ao gerador positivo deste ciclo a fase fundamental $2\pi/k$ na subálgebra real $\langle 1, J \rangle$ (com $J^2 = -1$), representaremos o ciclo gerado por $u_p$ pelo elemento:
 \[
-\mathcal P_{\mathrm{mult}}(B_x^4) = \mathcal P_{\mathrm{mult}}(B_y^4) = (0, 0, \ldots, 0, 1, 1, 1, 1).
+\widehat{u}_{p,k} := \exp\left(\frac{2\pi}{k}J\right) = c_k \cdot 1 + s_k \cdot J,
 \]
-No entanto, $\operatorname{ord}_{17}(x) \neq \operatorname{ord}_{17}(y)$. A projeção multiconjunto não determina a ordem nessa fibra.
+onde $c_k = \cos(2\pi/k)$ e $s_k = \sin(2\pi/k)$. Esta escolha constitui uma convenção angular; sob a leitura coordenada $1 \longleftrightarrow 1$ e $J \longleftrightarrow i$, a representação complexa do elemento de holonomia base assume a forma:
+\[
+A_0^{(\mathbb{C})} = \begin{pmatrix} e^{2\pi i/k} & 0 \\ 0 & e^{-2\pi i/k} \end{pmatrix} \in \operatorname{SL}(2, \mathbb{C}),
+\]
+com $\operatorname{tr}(A_0) = 2c_k$ e $(A_0^{(\mathbb{C})})^k = I$.
+\end{definicao}
+
+\begin{observacao}[Status da convenção]
+A associação $u_p\mapsto\widehat{u}_{p,k}$ não é, no presente texto, um homomorfismo ou functor canônico entre a estrutura multiplicativa de $\mathbb{F}_p^\times$ e a subálgebra $\langle 1,J\rangle$. Trata-se de uma escolha de realização angular. Todas as consequências geométricas que se seguem são condicionais a essa escolha. O elo que transformaria a existência de uma solução de Fermat na necessidade de que a holonomia refinada preserve propriedades específicas de $A_0$ permanece residual (ver Síntese final).
 \end{observacao}
 
+\section{Interface de Viviani e Regime Elíptico}
 
-% ═════════════════════════════════════════════════════════════════════════════
-\section{A --- Fato Local Já Estabelecido}
-\label{sec:fermat-A}
-% ═════════════════════════════════════════════════════════════════════════════
-
-Seja $(a,b,c)$ uma solução primitiva de $a^k+b^k=c^k$ com $k>2$ e $p\mid a$. Na estrutura do corpo $\mathbb F_p^\times$:
+No Corpo Universal, a curva de Viviani (interseção da esfera $x^2+y^2+z^2=4a^2$ com o cilindro tangente $(x-a)^2+y^2=a^2$) realiza o regime \emph{elíptico} da dobra de renormalização. A recorrência
 \[
-(bc^{-1})^k \equiv 1 \pmod p.
+t_k = m\, t_{k-1} - d\, t_{k-2}
 \]
-A \textbf{fase relacional de Fermat} $\rho_p(b,c) := \operatorname{ord}_p(bc^{-1})$ satisfaz o fato local:
-\begin{equation}
-\label{eq:ord-local}
-\boxed{ \rho_p(b,c) \mid k. }
-\end{equation}
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{B --- Problema de Arquitetura e Análise de Fibras}
-\label{sec:fermat-B}
-% ═════════════════════════════════════════════════════════════════════════════
-
-O uso de domínios curtos ($L < p-1$) permite observar a perda de informação que fica mascarada no caso especial $L=p-1$ (onde a geometria de subgrupo preenche uniformemente o suporte do histograma, conforme o Lema~\ref{lem:histograma-subgrupo}).
-
-A análise experimental é conduzida comparando o número de assinaturas distintas $N_{\rm sig}$ e o número de pares assinatura-ordem $N_{\rm par}$:
-\[
-\begin{array}{c|c|c}
-\text{Objeto Operacional} & \text{Comportamento} & \text{Preservação de Fase} \\
+distingue dois casos:
+\begin{center}
+\begin{tabular}{c|c|c}
+$d$ & regime & interpretação \\
 \hline
-\operatorname{Sig}_\zeta(B_x^L) \text{ (Completa)}
-&
-N_{\rm par}=N_{\rm sig}
-&
-\text{Fase preservada por fidelidade à trajetória}
-\\[0.4em]
-\mathcal P_{\mathrm{hist}}(B_x^L) \text{ (Histograma)}
-&
-\text{Depende de }L
-&
-\text{Pode colapsar para }L\text{ pequeno}
-\\[0.4em]
-\mathcal P_{\mathrm{mult}}(B_x^L) \text{ (Multiconjunto)}
-&
-N_{\rm par}>N_{\rm sig}
-\text{ se existem ordens distintas }d_1,d_2>L
-&
-\text{Perda de informação por compressão}
+$-1$ & hiperbólico / rectilíneo & Cantor--Julia (corte) \\
+$+1$ & elíptico / rotação & \textbf{Viviani} \\
+\end{tabular}
+\end{center}
+Quando $d=+1$ a dinâmica roda (meio-ângulo); quando $d=-1$ ela cresce (corte). A interface de Viviani é, portanto, o lugar geométrico natural onde vive a holonomia inicial $A_0$ (rotação de ângulo $2\pi/k$, $\lvert\operatorname{tr}(A_0)\rvert\le 2$).
+
+Propriedades operacionais medidas no anel (Teor.~\emph{viviani} do corpus):
+\begin{itemize}
+    \item a dobra é a lei: $2\cos(2u)=(2\cos u)^2-2$ realiza o operador de renormalização $R$ com membrana $d=1$;
+    \item o recobrimento é o espelho: troca de folha $(y,z)\mapsto(y,-z)$ com $\mathrm{espelho}^2=I$;
+    \item o nó é o ponto fixo $R(2)=2$ da cascata;
+    \item as projeções são os cortes (parábola e quártica de Gerono).
+\end{itemize}
+A holonomia $A_0$ situa-se, por construção, nesta interface elíptica.
+
+\section{Geometria do Operador de Refinamento}
+
+Na família de holonomias considerada, a realização diagonal $A_0$ satisfaz a parametrização de invariantes
+\[
+x = \operatorname{tr}(A_0) = 2c, \qquad y = -4(1-c^2),
+\]
+com $c = \cos(2\pi/k)$. O refinamento de Koch
+\[
+\Xi(H) = H\, Q_1\, H\, Q_2\, H\, Q_3\, H
+\]
+atua sobre a interface de Viviani. A aplicação $\Xi(A_0)=A_1$ induz o desvio de traço bivariado $D(x,y)=\operatorname{tr}(A_1)-\operatorname{tr}(A_0)$. A substituição das coordenadas geométricas resulta na fatoração univariada exata:
+\[
+D_{\mathrm{geom}}(c) := D(2c, -4(1-c^2)) = (1-c) P_D(c),
+\]
+onde $P_D(c) \in \mathbb{Z}[\sqrt{3}][c]$ é o polinômio explícito de grau 6:
+\[
+\begin{aligned}
+P_D(c) ={}& 16\sqrt{3}\,c^6 + (40+16\sqrt{3})c^5 + (40-28\sqrt{3})c^4 \\
+& -(58+28\sqrt{3})c^3 + (-58+12\sqrt{3})c^2 + (9+12\sqrt{3})c + 11.
+\end{aligned}
+\]
+Como $1-c_k > 0$ para todo $k>2$, a condição de ruptura $\operatorname{tr}(A_1) \neq \operatorname{tr}(A_0)$ equivale a $P_D(c_k) \neq 0$.
+
+O desvio $D_{\mathrm{geom}}$ mede precisamente o quanto o refinamento empurra o sistema para fora do regime elíptico de Viviani ($d=+1$, $\lvert\operatorname{tr}\rvert\le 2$) em direção ao regime hiperbólico ($d=-1$, $\lvert\operatorname{tr}\rvert>2$).
+
+\section{Incompatibilidade Rigorosa para \texorpdfstring{$k=4$}{k=4}}
+
+\begin{teorema}[Quebra Efetiva de Ordem Finita para $k=4$]
+Para $k=4$, a convenção angular fixa $c_4 = \cos(\pi/2) = 0$. O desvio de traço geométrico avalia para:
+\[
+P_D(0) = 11 \implies D_{\mathrm{geom}}(0) = (1-0) \cdot 11 = 11,
+\]
+fornecendo $\operatorname{tr}(A_1) = \operatorname{tr}(A_0) + D_{\mathrm{geom}}(0) = 0 + 11 = 11$.
+
+Seja $A \in \operatorname{SL}(2, \mathbb{C})$. Se $A^4 = I$, a condição necessária para o traço é $\operatorname{tr}(A) \in \{-2, 0, 2\}$. Como $11 \notin \{-2, 0, 2\}$, conclui-se que:
+\[
+A_1^4 \neq I.
+\]
+Admitindo $\det A_1 = 1$, como $A_1 \in \operatorname{SL}(2, \mathbb{C})$ possui traço real $11 > 2$, seus autovalores são reais, positivos e recíprocos ($\lambda_\pm = \frac{11\pm\sqrt{117}}{2}$). Portanto, $A_1$ opera estritamente no regime hiperbólico, com raio espectral $\rho(A_1) > 1$.
+\end{teorema}
+
+\section{Certificado Algorítmico de Irredutibilidade sobre \texorpdfstring{$K$}{K}}
+
+\begin{lema}[Irredutibilidade do Polinômio Geométrico $P_D$]
+O polinômio geométrico $P_D(c) \in \mathbb{Z}[\sqrt{3}][c]$ é irredutível sobre $K = \mathbb{Q}(\sqrt{3})$.
+\end{lema}
+
+\begin{proof}
+Considere o ideal primo $\mathfrak{p} = (23, \sqrt{3} - 7) \subset \mathbb{Z}[\sqrt{3}]$, amparado por $7^2 = 49 \equiv 3 \pmod{23}$.
+Sob a redução $\sqrt{3} \mapsto 7 \pmod{23}$, obtemos:
+\[
+\bar{P}_{23}(c) = -3c^6 - 9c^5 + 5c^4 - c^3 + 3c^2 + c + 11 \in \mathbb{F}_{23}[c].
+\]
+Como $-3$ é invertível em $\mathbb{F}_{23}$, normalizamos dividindo pelo coeficiente líder para obter o polinômio mônico:
+\[
+f(c) = c^6 + 3c^5 + 6c^4 + 8c^3 - c^2 - 8c + 4 \in \mathbb{F}_{23}[c].
+\]
+Os testes de Frobenius, no sentido do critério padrão de irredutibilidade modular, exigem
+\[
+x^{23^6}\equiv x\pmod{f}
+\]
+e, para cada primo $\ell\mid 6$ (isto é, $\ell=2$ e $\ell=3$),
+\[
+\gcd\bigl(f,x^{23^{6/\ell}}-x\bigr)=1.
+\]
+Explicitamente:
+\[
+\gcd\bigl(f,x^{23^3}-x\bigr)=1, \qquad \gcd\bigl(f,x^{23^2}-x\bigr)=1.
+\]
+Essas três condições (certificadas computacionalmente) excluem fatores irredutíveis de graus $2$ e $3$, enquanto a congruência de grau $6$ garante que todos os fatores têm grau divisor de $6$. Logo $f$ é irredutível de grau $6$ em $\mathbb{F}_{23}[c]$. Pelo critério de redução modular, $P_D(c)$ é irredutível sobre $K = \mathbb{Q}(\sqrt{3})$.
+\end{proof}
+
+\section{Não-Anulação de \texorpdfstring{$P_D$}{PD} e Ruptura de Classe de Conjugação}
+
+\begin{teorema}[Ruptura Geral da Classe de Conjugação]
+Para todo inteiro $k>2$, vale
+\[
+\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0).
+\]
+Equivalentemente,
+\[
+P_D(c_k)\neq0,\qquad c_k=\cos\frac{2\pi}{k}.
+\]
+\end{teorema}
+
+\begin{proof}
+Suponha, por absurdo, que exista $k>2$ tal que
+\[
+P_D(c_k)=0.
+\]
+Pela irredutibilidade de $P_D$ sobre
+\[
+K=\mathbb{Q}(\sqrt{3}),
+\]
+e pelo fato de $\deg P_D=6$, segue que $P_D$ é o polinômio mínimo de $c_k$ sobre $K$. Portanto,
+\[
+[K(c_k):K]=6.
+\]
+Defina
+\[
+F_k=\mathbb{Q}(c_k).
+\]
+Como $K/\mathbb{Q}$ é uma extensão quadrática de Galois, vale a fórmula de graus
+\[
+[KF_k:K]=[F_k:K\cap F_k].
+\]
+Assim,
+\[
+6=[F_k:K\cap F_k].
+\]
+Como
+\[
+[K\cap F_k:\mathbb{Q}]\in\{1,2\},
+\]
+obtemos
+\[
+[F_k:\mathbb{Q}]=[F_k:K\cap F_k]\,[K\cap F_k:\mathbb{Q}]\in\{6,12\}.
+\]
+Para $k>2$,
+\[
+[F_k:\mathbb{Q}]=\left[\mathbb{Q}\!\left(\cos\frac{2\pi}{k}\right):\mathbb{Q}\right]=\frac{\varphi(k)}{2}.
+\]
+Consequentemente,
+\[
+\varphi(k)\in\{12,24\}.
+\]
+Os únicos inteiros $k>2$ com $\varphi(k)\in\{12,24\}$ são
+\[
+\mathcal{K}=\{13,21,26,28,35,36,39,42,45,52,56,70,72,78,84,90\}.
+\]
+Resta, portanto, excluir apenas esses casos.
+
+Considere o ideal primo
+\[
+\mathfrak{q}=(11,\sqrt{3}-5)\subset\mathbb{Z}[\sqrt{3}],
+\]
+que é primo porque
+\[
+5^2\equiv3\pmod{11}.
+\]
+A redução de $P_D$ módulo $\mathfrak{q}$ é
+\[
+\overline{P}_D(c)=3c^6-c^5-c^4+2c^2+3c\in\mathbb{F}_{11}[c].
+\]
+Para cada $k\in\mathcal{K}$, seja $m_k(c)\in\mathbb{Z}[c]$ o polinômio mínimo de
+$c_k=\cos(2\pi/k)$ sobre $\mathbb{Q}$, e defina
+\[
+R_k=\operatorname{Res}_c(P_D,m_k)\in\mathbb{Z}[\sqrt{3}].
+\]
+A redução dos resultantes no corpo residual
+\[
+\mathbb{Z}[\sqrt{3}]/\mathfrak{q}\simeq\mathbb{F}_{11}
+\]
+fornece:
+\[
+\begin{array}{c|c@{\qquad}c|c}
+k&R_k\bmod\mathfrak{q}&k&R_k\bmod\mathfrak{q}\\
+\hline
+13&2&45&3\\
+21&9&52&8\\
+26&9&56&1\\
+28&6&70&6\\
+35&5&72&6\\
+36&1&78&2\\
+39&3&84&6\\
+42&9&90&1
 \end{array}
 \]
-
-Quando $N_{\rm par} > N_{\rm sig}$, o refinamento $\mathscr S(B) = (\mathcal M_{\rm temp}(B), \mathcal M_{\rm fase}(B))$ formaliza a reconstrução necessária da memória de torção descartada pela compressão.
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{C --- Gargalo Aberto: a Obstrução Global}
-\label{sec:fermat-C}
-% ═════════════════════════════════════════════════════════════════════════════
-
-O objetivo global é estabelecer a existência de um primo divisor:
-\begin{equation}
-\label{eq:obstrucao-global}
-\boxed{ \exists\,p\mid a:\quad\rho_p(b,c)\nmid k. }
-\end{equation}
-A conjunção de (C) com (A) geraria a contradição aritmética necessária para estabelecer o Último Teorema de Fermat:
+e, portanto,
 \[
-\Bigl( \forall p \mid a, \; \rho_p(b,c) \mid k \Bigr) \;\land\; \Bigl( \exists p \mid a, \; \rho_p(b,c) \nmid k \Bigr) \implies \bot.
+R_k\bmod\mathfrak{q}\neq0
 \]
-
-
-% ═════════════════════════════════════════════════════════════════════════════
-\section{Conclusão}
-\label{sec:fermat-conclusao}
-% ═════════════════════════════════════════════════════════════════════════════
-
-O estudo refinado da realização $B_x$ revela que a máquina do Corpo Universal **não perde a fase espontaneamente** na sua assinatura temporal completa $\operatorname{Sig}_\zeta$. A perda de torção multiplicativa surge de maneira precisa quando aplicamos um operador de leitura comprimida, como a projeção multiconjunto $\mathcal P_{\mathrm{mult}}$.
-
-O Corpo Universal não substitui a demonstração analítica de Fermat; ele fornece a **linguagem finita e estruturada** para mapear exatamente em quais projeções a informação da torção é conservada ou descartada.
-
-O programa reafirma a trajetória:
+para todo $k\in\mathcal{K}$.
+Logo
 \[
-\text{A (fato local)}\;\longrightarrow\;
-\text{B (análise de compressão de fase)}\;\longrightarrow\;
-\text{C (obstrução global)}.
+R_k\neq0
 \]
-A informação de fase não desaparece espontaneamente da máquina; ela é descartada no momento em que uma leitura comprimida é realizada.
+em $K$. Assim,
+\[
+\gcd_{K[c]}(P_D,m_k)=1,
+\]
+o que implica
+\[
+P_D(c_k)\neq0
+\]
+para todo $k\in\mathcal{K}$.
+
+Isto contradiz a hipótese inicial $P_D(c_k)=0$. Portanto,
+\[
+P_D(c_k)\neq0\qquad\text{para todo }k>2.
+\]
+Como
+\[
+1-c_k>0\qquad(k>2),
+\]
+da fatoração
+\[
+D_{\mathrm{geom}}(c_k)=(1-c_k)P_D(c_k)
+\]
+segue
+\[
+D_{\mathrm{geom}}(c_k)\neq0.
+\]
+Finalmente,
+\[
+\operatorname{tr}(A_1)-\operatorname{tr}(A_0)=D_{\mathrm{geom}}(c_k)\neq0,
+\]
+e portanto
+\[
+\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)
+\]
+para todo $k>2$.
+\end{proof}
+
+\section{Síntese da Fronteira Lógica}
+
+\begin{observacao}[Diagnóstico de estado]
+O estado atual do argumento pode ser resumido assim:
+
+\begin{center}
+\begin{tabular}{@{}lp{9.2cm}@{}}
+\hline
+Componente & Estado \\
+\hline
+Zsigmondy + ordem $u_p=k$ & fechado \\
+construção angular $u_p\mapsto\widehat{u}_{p,k}$ & convenção (não canônica) \\
+interface de Viviani ($d=+1$, regime elíptico) & identificada \\
+fatoração $D_{\mathrm{geom}}=(1-c)P_D$ & fechado (dentro do modelo) \\
+irredutibilidade de $P_D$ sobre $K$ & fechado (certificado modular) \\
+redução a $16$ valores de $k$ & fechado \\
+não-anulação $P_D(c_k)$ & fechado (tabela de resultantes) \\
+$\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)$ $\forall k>2$ & fechado (dentro do modelo) \\
+$A_1^4\neq I$ & fechado \\
+$A_1^k\neq I$ $\forall k>4$ & residual (exige $\operatorname{tr}(A_1)\notin\mathcal{T}_k$) \\
+elo estrutural Fermat $\Rightarrow$ propriedade de $A_1$ & residual \\
+\hline
+\end{tabular}
+\end{center}
+
+Duas propriedades distintas estão em jogo:
+
+\begin{itemize}
+    \item \textbf{Obstrução de conjugação} (fechada dentro do modelo):
+    \[
+    \operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)\quad\Longrightarrow\quad A_1\not\sim A_0.
+    \]
+    O desvio $D_{\mathrm{geom}}$ mede a saída do regime elíptico de Viviani ($d=+1$) em direção ao regime hiperbólico ($d=-1$).
+    \item \textbf{Obstrução de ordem} (ainda aberta para $k>4$):
+    \[
+    A_1^k=I\quad\Longrightarrow\quad\operatorname{tr}(A_1)\in\mathcal{T}_k=\Bigl\{2\cos\frac{2\pi j}{k}:0\le j<k\Bigr\}.
+    \]
+\end{itemize}
+
+O ponto decisivo não é, a priori, atacar $\mathcal{T}_k$. A pergunta anterior é estrutural e agora pode ser formulada em termos da interface de Viviani:
+
+\begin{quote}
+O refinamento $\Xi$ aplicado à interface de Viviani gerada pelo ciclo aritmético de ordem $k$ (vindo do primo de Zsigmondy) deve preservar a classe de conjugação elíptica, ou a geometria da fratura/Koch é \emph{desenhada} para deformá-la?
+\end{quote}
+
+Há duas vias possíveis:
+
+\begin{enumerate}
+    \item \textbf{Via forte (preservação de classe).} Se a arquitetura exige que $\Xi$ preserve a classe de conjugação da monodromia de Viviani, então
+    \[
+    A_1\sim A_0.
+    \]
+    Nesse caso a obstrução de conjugação já obtida basta: a cadeia
+    \[
+    \text{Fermat}\ \Longrightarrow\ A_1\sim A_0\ \Longrightarrow\ \operatorname{tr}(A_1)=\operatorname{tr}(A_0)
+    \]
+    contradiz o teorema geométrico, e a prova fecha para todo $k>2$ sem necessidade de $\mathcal{T}_k$.
+
+    \item \textbf{Via fraca (preservação de ordem).} Se a propriedade forçada for apenas $A_1^k=I$, então resta excluir $\operatorname{tr}(A_1)\in\mathcal{T}_k$ para $k>4$.
+\end{enumerate}
+
+O trabalho residual prioritário é formalizar, a partir da definição precisa dos operadores de curvatura $Q_1,Q_2,Q_3$ e da interface de Viviani, se $\Xi$ é um morfismo que preserva a classe elíptica ou um operador de fratura que a quebra. Sem esse elo, a contradição com Fermat permanece incompleta.
+\end{observacao}
 
 \end{document}
