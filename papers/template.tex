@@ -1,0 +1,121 @@
+% !TeX program = pdflatex
+
+% ─────────────────────────────────────────────────────────────────────────────
+% papers/mosfet.tex — Modelagem Dual Algébrica do MOSFET
+%
+% Objeto:
+%   modelagem algébrica de um MOSFET por duas faces de realização:
+%   formação do canal e transporte.
+%
+% Tese:
+%   o campo de gate não é tratado como transporte de carga pelo gate;
+%   ele realiza uma modulação da face de formação do canal.
+%
+%   O estrangulamento (pinch-off) é modelado como uma interface em que
+%   a face de formação se anula localmente, sem que a face de transporte
+%   seja anulada — exactamente como, no eletromagnetismo araniano,
+%   estado local ≠ quantidade transportada.
+%
+% Arquitetura:
+%   formação → transporte → interface → estrangulamento → saturação.
+%
+% Alinhamento com fisica.tex (Parte Eletromagnetismo):
+%   o par (a,b) do MOSFET é lido como par de escritas local,
+%   com forma, metal e cruzado no sentido da Def. fis:def:em-par
+%   e da Obs. fis:obs:cisao. O duomorfismo é a mesma troca de face
+%   já escrita no Corpo Universal.
+%
+% Estatuto:
+%   modelagem algébrica. A confrontação quantitativa com dispositivos
+%   físicos reais é etapa posterior (verificação da realização).
+%
+% Não é:
+%   substituição da teoria de semicondutores;
+%   identificação prematura entre objetos algébricos e grandezas físicas;
+%   afirmação de equivalência física antes da verificação experimental.
+%
+% Compila:
+%   pdflatex mosfet.tex
+% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage[margin=2.4cm]{geometry}
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+
+\usepackage[htt]{hyphenat}
+
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\newcommand{\caixa}[1]{%
+  \par\smallskip\noindent
+  \begin{center}
+  \fbox{\begin{minipage}{0.94\textwidth}\centering\smallskip #1\smallskip\end{minipage}}
+  \end{center}\smallskip}
+
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\newcommand{\medido}[1]{%
+  \par\medskip\noindent
+  {\small\color{cinza}\textbf{Medido.} #1}
+  \par\medskip}
+
+\newcommand{\fis}[2]{\textbf{#2}~\textnormal{(\code{#1})}}
+
+\providecommand{\pt}[1]{\textbf{P#1}}
+
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova}: #1\sepcol
+\textbf{realiza}: #2\sepcol
+\textbf{verifica}: #3\par}\smallskip}
+
+\providecommand{\interfacen}[1]{}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
+
+\renewcommand{\proofname}{Demonstração}
+
+\input{gkcapa}
+
+\begin{document}
+
+\interfacen{6}
+
+\gkcapa
+  {MOSFET --- modelagem dual algébrica}
+  {formação do canal, transporte e estrangulamento}
+  {par de escritas local alinhado ao eletromagnetismo araniano}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+
+\end{abstract}
+
+
+\end{document}

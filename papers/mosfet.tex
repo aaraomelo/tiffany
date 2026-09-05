@@ -1,0 +1,628 @@
+% !TeX program = pdflatex
+
+% ─────────────────────────────────────────────────────────────────────────────
+% papers/mosfet.tex — Modelagem Dual Algébrica do MOSFET
+%
+% Objeto:
+%   modelagem algébrica de um MOSFET por duas faces de realização:
+%   formação do canal e transporte.
+%
+% Tese:
+%   o campo de gate não é tratado como transporte de carga pelo gate;
+%   ele realiza uma modulação da face de formação do canal.
+%
+%   O estrangulamento (pinch-off) é modelado como uma interface em que
+%   a face de formação se anula localmente, sem que a face de transporte
+%   seja anulada — exactamente como, no eletromagnetismo araniano,
+%   estado local ≠ quantidade transportada.
+%
+% Arquitetura:
+%   formação → transporte → interface → estrangulamento → saturação.
+%
+% Alinhamento com fisica.tex (Parte Eletromagnetismo):
+%   o par (a,b) do MOSFET é lido como par de escritas local,
+%   com forma, metal e cruzado no sentido da Def. fis:def:em-par
+%   e da Obs. fis:obs:cisao. O duomorfismo é a mesma troca de face
+%   já escrita no Corpo Universal.
+%
+% Estatuto:
+%   modelagem algébrica. A confrontação quantitativa com dispositivos
+%   físicos reais é etapa posterior (verificação da realização).
+%
+% Não é:
+%   substituição da teoria de semicondutores;
+%   identificação prematura entre objetos algébricos e grandezas físicas;
+%   afirmação de equivalência física antes da verificação experimental.
+%
+% Compila:
+%   pdflatex mosfet.tex
+% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage[margin=2.4cm]{geometry}
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+
+\usepackage[htt]{hyphenat}
+
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\definecolor{cinza}{gray}{0.35}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\newcommand{\caixa}[1]{%
+  \par\smallskip\noindent
+  \begin{center}
+  \fbox{\begin{minipage}{0.94\textwidth}\centering\smallskip #1\smallskip\end{minipage}}
+  \end{center}\smallskip}
+
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\newcommand{\medido}[1]{%
+  \par\medskip\noindent
+  {\small\color{cinza}\textbf{Medido.} #1}
+  \par\medskip}
+
+\newcommand{\fis}[2]{\textbf{#2}~\textnormal{(\code{#1})}}
+
+\providecommand{\pt}[1]{\textbf{P#1}}
+
+\newcommand{\sepcol}{\quad\penalty0$\big|$\quad\penalty0}
+
+\newcommand{\colunas}[3]{%
+\par\smallskip\noindent{\footnotesize\raggedright
+\textbf{prova}: #1\sepcol
+\textbf{realiza}: #2\sepcol
+\textbf{verifica}: #3\par}\smallskip}
+
+\providecommand{\interfacen}[1]{}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{observacao}[teorema]{Observação}
+
+\renewcommand{\proofname}{Demonstração}
+
+\input{gkcapa}
+
+\begin{document}
+
+\interfacen{6}
+
+\gkcapa
+  {MOSFET --- modelagem dual algébrica}
+  {formação do canal, transporte e estrangulamento}
+  {par de escritas local alinhado ao eletromagnetismo araniano}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+Este trabalho constrói uma modelagem algébrica dual para o MOSFET,
+tomando como objeto a relação entre a formação do canal, o transporte
+de carga e o estrangulamento (\emph{pinch-off}).
+
+A construção parte da separação entre duas faces de realização:
+uma face associada à disponibilidade do canal (determinada pela ação
+do campo elétrico do gate) e uma face associada ao transporte ao longo
+do canal. O ponto central é que o estrangulamento não constitui,
+algebricamente, o desaparecimento do transporte: a face de formação
+pode atingir valor nulo localmente enquanto a face de transporte
+permanece realizada.
+
+Esta leitura é alinhada à Parte de Eletromagnetismo de \code{fisica.tex}:
+o par local do MOSFET é tratado como \textbf{par de escritas}, com
+forma, metal e leitura orientada no sentido das Definições
+\fis{fis:def:em-par}{par}, \fis{fis:def:em-forma}{forma} e
+\fis{fis:def:em-fluxo}{cruzado}. A cláusula estrutural
+\[
+\boxed{\;\text{estado local}\;\neq\;\text{quantidade transportada}\;}
+\]
+é a mesma que separa, no eletromagnetismo araniano, a escrita local
+da quantidade que atravessa a interface.
+
+A hipótese é organizada pela estrutura dual do Corpo Universal:
+duas faces, cisão, interface e duomorfismo. O objectivo desta etapa
+é obter uma representação formal mínima da transição
+\[
+\text{canal} \longrightarrow
+\text{estrangulamento} \longrightarrow
+\text{transporte por campo},
+\]
+deixando a confrontação quantitativa com dispositivos físicos para
+a etapa de verificação da realização.
+\end{abstract}
+
+
+\section{Objeto e estatuto da construção}
+
+O objeto deste trabalho é o MOSFET enquanto sistema de controle
+eléctrico de uma região de condução.
+
+A construção não começa pela importação das equações usuais do
+dispositivo. Começa pela pergunta estrutural:
+
+\[
+\boxed{
+\text{como uma acção de campo pode modificar a disponibilidade
+do transporte sem constituir, ela própria, o transporte?}
+}
+\]
+
+No NMOS, a tensão \(V_{GS}\) modifica a concentração de portadores
+na região superficial do semicondutor, enquanto \(V_{DS}\) estabelece
+a queda de potencial ao longo do canal e, portanto, o campo responsável
+pelo transporte.
+
+A separação dessas duas funções fornece o primeiro par da modelagem:
+
+\[
+\boxed{
+\text{formação}
+\quad\big|\quad
+\text{transporte}
+}
+\]
+
+Esta separação é estrutural: não se identifica a grandeza que abre
+o canal com a grandeza que conduz a carga. É a mesma recusa de fusão
+que, no eletromagnetismo araniano, impede colapsar o par \((E,B)\)
+numa única escrita ou promover o cruzado a operador \(\partial\).
+
+
+\section{O par de escritas local do MOSFET}
+\label{sec:par}
+
+\begin{definicao}[par de escritas do MOSFET]
+\label{def:par-mosfet}
+Um \textbf{par de escritas local} do dispositivo é um par
+\[
+\mathcal M(x)=(a(x),b(x))
+\]
+sobre a mesma grade unidimensional do canal. \emph{Não é o campo \(G\)
+de contagens da Mecânica}: \(G\) conta visitas; \(\mathcal M\) é uma
+realização com duas componentes. Duas escritas \((\lambda a,\lambda b)\)
+com \(\lambda\neq0\) pertencem à mesma classe na leitura local do metal
+(Def.~\ref{def:metal-mosfet}).
+\end{definicao}
+
+A primeira componente representa a disponibilidade local do canal:
+
+\[
+a(x)=V_{GS}-V_{TH}-V_C(x),
+\]
+
+onde \(V_C(x)\) é o potencial local do canal.
+
+A segunda componente representa a acção de transporte. Na primeira
+realização tomamos
+
+\[
+b(x)=E_x(x),\qquad
+E_x(x)=-\frac{dV_C}{dx}.
+\]
+
+Assim,
+
+\[
+\boxed{
+\mathcal M(x)=
+\left(
+V_{GS}-V_{TH}-V_C(x),
+-\frac{dV_C}{dx}
+\right).
+}
+\]
+
+A primeira face determina se a inversão pode permanecer realizada;
+a segunda determina a acção de campo ao longo da região de transporte.
+O par não deve ser colapsado numa única variável --- exactamente como
+o par \((E,B)\) da Def.~\fis{fis:def:em-par}{par eletromagnético}
+não se funde num único campo.
+
+
+\section{Forma, metal e leitura orientada}
+\label{sec:forma-metal}
+
+Alinhando com a Parte de Eletromagnetismo, introduzimos as três leituras
+do par local:
+
+\begin{definicao}[forma local]
+\label{def:forma-mosfet}
+A \textbf{forma local} do par \(\mathcal M=(a,b)\) é
+\[
+\boxed{\;a^{2}-b^{2}\;}
+\]
+no sentido da Def.~\fis{fis:def:em-forma}{forma catalogada}. Não é um
+corpo no sentido da Def.~\fis{fis:def:corpos}{corpos}: não é um troço
+de \(I\), não se superpõe célula a célula. É leitura algébrica do
+resíduo entre as duas faces.
+\end{definicao}
+
+\begin{definicao}[metal do par]
+\label{def:metal-mosfet}
+A \textbf{leitura local} do par, quando \(b\neq0\), é a razão
+\[
+\boxed{\;\frac{\lvert a\rvert}{\lvert b\rvert}\;}
+\]
+--- o \textbf{metal}, no sentido da Def.~\fis{fis:def:em-metal}{metal}.
+O metal é o quociente; a interface de estrangulamento é o sítio onde
+a face de formação se anula. São dois objectos.
+\end{definicao}
+
+\begin{definicao}[leitura orientada]
+\label{def:cruzado-mosfet}
+O cruzado do par, no canal unidimensional, é o produto orientado
+\[
+\boxed{\;a\cdot b\;}
+\]
+lido com o sinal da orientação do transporte. Regista a ordem na
+cisão directo\,/\,cruzado já escrita (Obs.~\fis{fis:obs:cisao}{cisão}).
+Não é o operador \(\partial\). \emph{Regista a orientação da passagem;
+não é grandeza de estado.}
+\end{definicao}
+
+\begin{lema}[forma nula e metal]
+\label{lem:forma-nula}
+Se \(b\neq0\),
+\[
+\boxed{\;a^{2}-b^{2}=0\qquad\Longleftrightarrow\qquad\frac{\lvert a\rvert}{\lvert b\rvert}=1\;}
+\]
+--- a forma anula exactamente onde o metal vale um. Não é o vácuo do
+canal; é a condição de anulação lida uma vez na forma e outra vez no
+quociente (cf.\ Lema~\fis{fis:lem:em-cone}{forma nula e metal}).
+\end{lema}
+
+\begin{proof}
+\(a^{2}-b^{2}=b^{2}\bigl((\lvert a\rvert/\lvert b\rvert)^{2}-1\bigr)\) e
+\(b^{2}\neq0\).
+\end{proof}
+
+
+\section{Disponibilidade do canal}
+
+A condição local de existência da camada de inversão é escrita,
+nesta modelagem mínima, como
+
+\[
+a(x)>0.
+\]
+
+No limite,
+
+\[
+a(x)=0,
+\]
+
+a face de formação atinge a interface.
+
+Para o extremo do drain,
+
+\[
+a(L)=V_{GS}-V_{TH}-V_{DS}.
+\]
+
+Consequentemente,
+
+\[
+a(L)=0
+\]
+
+equivale à condição
+
+\[
+\boxed{
+V_{DS}=V_{GS}-V_{TH}.
+}
+\]
+
+Esta igualdade será tomada como a condição algébrica de entrada
+no estrangulamento.
+
+
+\section{Estrangulamento como interface}
+\label{sec:interface}
+
+O ponto central da construção é não identificar
+
+\[
+a(L)=0
+\]
+
+com
+
+\[
+\mathcal M(L)=(0,0).
+\]
+
+No estrangulamento,
+
+\[
+\boxed{
+\mathcal M(L)=(0,b(L)),
+}
+\]
+
+com
+
+\[
+b(L)\neq0.
+\]
+
+Portanto, o que desaparece é a face de formação do canal naquele
+ponto; a face de transporte permanece.
+
+A leitura estrutural é:
+
+\[
+\boxed{
+\text{formação}\;\longrightarrow\;
+\text{interface}\;\longrightarrow\;
+\text{transporte}.
+}
+\]
+
+O estrangulamento é, portanto, uma mudança de realização local,
+e não a anulação do objecto transportado. É a realização concreta,
+no dispositivo, da cláusula
+
+\[
+\boxed{\;\text{estado local}\;\neq\;\text{quantidade transportada}\;}
+\]
+
+já enunciada na tese do Eletromagnetismo araniano
+(\S\fis{fis:em-tese}{tese EM}).
+
+
+\section{Campo e persistência do transporte}
+
+A persistência do transporte após o estrangulamento é representada
+pela presença de campo eléctrico na região de interface:
+
+\[
+\mathbf F=q\mathbf E.
+\]
+
+A ausência local de uma camada de inversão não implica ausência
+de força sobre os portadores.
+
+Na representação dual,
+
+\[
+a(L)=0
+\qquad\text{enquanto}\qquad
+b(L)\neq0.
+\]
+
+Assim, a passagem não é representada por uma continuidade uniforme
+do canal. Ela é representada por uma travessia entre duas faces:
+
+\[
+\boxed{
+(a,b)
+\;\longrightarrow\;
+(0,b')
+}
+\]
+
+com \(b'\) determinado pela realização de transporte.
+
+
+\section{Duomorfismo e troca de leitura}
+\label{sec:duomorf}
+
+A estrutura anterior permite introduzir o duomorfismo como a
+interface entre as duas faces, no sentido do Teor.~\fis{fis:thm:em-hodge}{Hodge}
+e da Obs.~\fis{fis:obs:cisao}{cisão}.
+
+Se
+
+\[
+D:\oplus\longleftrightarrow\otimes
+\]
+
+é a troca de realização entre as operações directa e cruzada,
+a leitura do MOSFET utiliza a mesma estrutura sem identificar
+as duas faces.
+
+Esquematicamente:
+
+\[
+\boxed{
+\text{formação}
+\overset{D}{\longleftrightarrow}
+\text{transporte}.
+}
+\]
+
+A função do duomorfismo não é afirmar que formação e transporte
+são a mesma operação. Ao contrário: ele regista a passagem
+reversível entre as duas leituras do mesmo suporte.
+
+O estrangulamento é então localizado na interface dessa passagem.
+
+
+\section{A dobra no estrangulamento}
+
+Se \(\partial\) representa a dobra da realização, o pinch-off
+pode ser lido como uma mudança de representação:
+
+\[
+\partial:
+(a,b)
+\longrightarrow
+(0,b').
+\]
+
+A propriedade essencial não é a anulação completa do estado,
+mas a preservação da travessia sob mudança de face.
+
+Em particular,
+
+\[
+\boxed{
+\text{estrangulamento}
+\neq
+\text{bloqueio}.
+}
+\]
+
+O estrangulamento marca o ponto em que a primeira representação
+do transporte deixa de ser válida localmente e a realização passa
+a ser descrita pela região de campo.
+
+
+\section{Regime de saturação}
+
+A condição
+
+\[
+V_{DS}\geq V_{GS}-V_{TH}
+\]
+
+define, na teoria convencional de canal longo, a entrada na região
+de saturação.
+
+Na presente leitura, essa condição será interpretada como a
+condição em que a face de formação não pode mais ser estendida
+uniformemente até o drain.
+
+A queda adicional de potencial passa a ser realizada na região
+de estrangulamento.
+
+Assim, a saturação não é introduzida como uma regra independente.
+Ela deverá emergir da estrutura:
+
+\[
+\boxed{
+\text{formação}
+\rightarrow
+\text{deformação}
+\rightarrow
+\text{interface}
+\rightarrow
+\text{saturação}.
+}
+\]
+
+
+\section{Construção da corrente a partir do par}
+\label{sec:corrente}
+
+A etapa seguinte consiste em construir a corrente a partir do par
+
+\[
+\mathcal M(x)=(a(x),b(x))
+\]
+
+sem importar a fórmula de saturação como axioma.
+
+\begin{proposicao}[densidade de corrente local]
+\label{prop:densidade}
+Na região onde \(a(x)>0\), a densidade de corrente longitudinal
+é proporcional ao produto das faces:
+\[
+\boxed{\;j(x)\;\propto\;a(x)\,b(x)\;}
+\]
+--- o cruzado do par (Def.~\ref{def:cruzado-mosfet}). Na interface
+\(a=0\) a contribuição da face de formação anula-se localmente,
+mas a face de transporte \(b\) permanece e a corrente continua
+a ser realizada pela região de campo.
+\end{proposicao}
+
+\begin{observacao}
+A proporcionalidade \(j\propto a\cdot b\) é a realização mínima
+da leitura orientada. Não se identifica ainda \(a\) com carga de
+inversão nem \(b\) com mobilidade\(\times\)campo; essas
+identificações pertencem à etapa de verificação experimental.
+\end{observacao}
+
+Integrando ao longo do canal, no regime em que a face de formação
+se mantém positiva até ao drain (\(V_{DS}<V_{GS}-V_{TH}\)),
+obtém-se a dependência linear-quadrática clássica. No regime de
+saturação a integração detém-se na interface \(a(L_{\mathrm{eff}})=0\)
+e a corrente deixa de crescer com \(V_{DS}\).
+
+O alvo de verificação é recuperar
+
+\[
+I_D
+=
+\frac12 k_n
+\bigl(V_{GS}-V_{TH}\bigr)^2
+\]
+
+no regime de saturação, como \emph{consequência} da integração do
+par dual, e não como ponto de partida.
+
+O critério permanece:
+
+\[
+\boxed{
+\text{álgebra dual}
+\;\Longrightarrow\;
+\text{lei de transporte}
+\;\Longrightarrow\;
+\text{equação MOSFET}
+}
+\]
+
+e não o caminho inverso.
+
+
+\section{Mapa de alinhamento com o Eletromagnetismo}
+\label{sec:mapa}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.32\textwidth}p{0.32\textwidth}p{0.28\textwidth}@{}}
+\toprule
+\textbf{MOSFET} & \textbf{Eletromagnetismo (\code{fisica.tex})} & \textbf{estatuto} \\
+\midrule
+par \(\mathcal M=(a,b)\) & par de escritas \((E,B)\) & Def.~\ref{def:par-mosfet} / \fis{fis:def:em-par}{par} \\
+forma \(a^{2}-b^{2}\) & forma \(E^{2}-B^{2}\) & Def.~\ref{def:forma-mosfet} / \fis{fis:def:em-forma}{forma} \\
+metal \(\lvert a\rvert/\lvert b\rvert\) & metal \(\lvert E\rvert/\lvert B\rvert\) & Def.~\ref{def:metal-mosfet} / \fis{fis:def:em-metal}{metal} \\
+cruzado \(a\cdot b\) & cruzado \(E\times B\) & Def.~\ref{def:cruzado-mosfet} / \fis{fis:def:em-fluxo}{fluxo} \\
+interface \(a=0\), \(b\neq0\) & estado local \(\neq\) quantidade transportada & \S\ref{sec:interface} / \S\fis{fis:em-tese}{tese} \\
+duomorfismo \(D\) & Hodge / \(\tau\) no plano & \S\ref{sec:duomorf} / Teor.~\fis{fis:thm:em-hodge}{Hodge} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent
+\emph{Nenhuma identificação física prematura.} O mapa é estrutural:
+as mesmas dualidades, a mesma recusa de fusão, a mesma preservação
+da travessia sob mudança de face.
+
+
+\section{Próximas realizações}
+
+\begin{enumerate}
+\item Explicitar a integração do produto \(a(x)b(x)\) sob as duas
+  condições de contorno (linear e saturação) e obter as expressões
+  de \(I_D\) como teoremas de realização.
+\item Introduzir a mobilidade e a capacitância de óxido apenas como
+  factores de escala da realização, nunca como axiomas da dualidade.
+\item Confrontar numericamente com o modelo de nível~1 de SPICE
+  (canal longo) e registar os desvios como medidores de verificação.
+\item Estender o par \(\mathcal M\) a duas dimensões (largura do canal)
+  mantendo a separação formação\,/\,transporte.
+\end{enumerate}
+
+\end{document}

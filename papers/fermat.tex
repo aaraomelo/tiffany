@@ -3,7 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath,amssymb,amsthm,amscd}
 \usepackage[margin=2.4cm]{geometry}
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
@@ -23,19 +23,23 @@
 \maketitle
 
 \begin{abstract}
-Para uma hipotética solução primitiva $a^k+b^k=c^k$, com $k>2$, a aplicação do Teorema de Zsigmondy a $c^k-b^k$ garante a existência de um divisor primo primitivo $p \mid (c^k-b^k)$ tal que a ordem multiplicativa de $u_p = bc^{-1}$ em $\mathbb{F}_p^\times$ é exatamente $k$. Fixada uma convenção de realização que associa ao gerador do ciclo de ordem $k$ a fase fundamental $2\pi/k$ na subálgebra real $\langle 1, J \rangle$ com $J^2 = -1$, define-se a representação $\widehat{u}_{p,k} = \exp(\frac{2\pi}{k}J)$, que induz o operador $A_0^{(\mathbb{C})} = \operatorname{diag}(e^{2\pi i/k}, e^{-2\pi i/k}) \in \operatorname{SL}(2,\mathbb{C})$. O desvio de traço sob o refinamento de Koch fatora como $D_{\mathrm{geom}}(c) = (1-c)P_D(c)$, onde $c = \cos(2\pi/k)$ e $P_D(c) \in \mathbb{Z}[\sqrt{3}][c]$ é o polinômio geométrico de grau 6 associado.
-
-Dentro do modelo geométrico assim definido, demonstra-se que
+Para uma hipotética solução primitiva $a^k+b^k=c^k$, com $k>2$, a aplicação do Teorema de Zsigmondy a $c^k-b^k$ garante a existência de um divisor primo primitivo $p \mid (c^k-b^k)$ tal que a ordem multiplicativa de $u_p = bc^{-1}$ em $\mathbb{F}_p^\times$ é exatamente $k$. Fixada uma convenção de realização que associa o elemento $u_p$ de ordem $k$ à fase fundamental $2\pi/k$ na subálgebra real $\langle 1, J \rangle$ com $J^2 = -1$, define-se a representação $\widehat{u}_{p,k} = \exp(\frac{2\pi}{k}J)$, que induz o operador $A_0(k) = \operatorname{diag}(e^{2\pi i/k}, e^{-2\pi i/k}) \in \operatorname{SL}(2,\mathbb{C})$. Os operadores de curvatura do refinamento de Koch são definidos via \(\widetilde{J}=M_w^{-1}JM_w\) por
 \[
-P_D\!\left(\cos\frac{2\pi}{k}\right)\neq0 \qquad\text{para todo }k>2,
+Q_1=e^{\pi\widetilde{J}/6},\quad
+Q_2=e^{-\pi\widetilde{J}/3},\quad
+Q_3=e^{\pi\widetilde{J}/6},
 \]
-o que implica $D_{\mathrm{geom}}(c_k)\neq0$ e, portanto, a ruptura global da classe de conjugação
-\[
-\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0).
-\]
-Para $k=4$, o desvio avalia para $P_D(0)=11$, fornecendo $\operatorname{tr}(A_1)=11\notin\{-2,0,2\}$, donde $A_1^4\neq I$.
+e \(A_1:=\Xi(A_0)=A_0Q_1A_0Q_2A_0Q_3A_0\).
 
-A cadeia lógica completa até uma contradição com Fermat exige ainda o elo estrutural que transforma a existência de uma solução primitiva na exigência de que a holonomia refinada $A_1$ preserve a classe de conjugação de $A_0$ (ou, alternativamente, que $A_1^k=I$). Esse elo permanece residual e é formulado em termos da interface de Viviani e do operador de fratura $\Xi$.
+\textbf{Teorema geométrico (fechado dentro do modelo).}
+O desvio de traço fatora como \(D_{\mathrm{geom}}(c)=(1-c)P_D(c)\). Demonstra-se \(P_D(\cos(2\pi/k))\neq0\) para todo \(k>2\), donde \(\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)\). Para \(k=4\) obtém-se explicitamente \(\operatorname{tr}(A_1)=11\notin\{-2,0,2\}\), logo \(A_1^4\neq I\).
+
+\textbf{Teorema aritmético necessário (ainda aberto).}
+Pela Proposição de fatoração, \(\Xi\circ\mathcal{R}\) é constante nas fibras de \(\kappa\): \((\Xi\circ\mathcal{R})(a,b,c,p)=\widetilde{\Xi}(k)\). A composição atual é uma construção geométrica indexada por \(k\), não uma construção que ainda carregue \((a,b,c,p)\). Portanto
+\[
+\text{Zsigmondy + realização angular + Koch + obstrução espectral}\;\not\Rightarrow\;\text{FLT}.
+\]
+Fechar o Último Teorema de Fermat por esta via exigiria abandonar a fatoração \(\mathcal{R}=\widetilde{\mathcal{R}}\circ\kappa\) em favor de uma realização enriquecida que preserve informação aritmética suficiente até a entrada de \(\Xi\).
 \end{abstract}
 
 \section{Seleção Aritmética do Primo Primitivo}
@@ -51,100 +55,169 @@ Em particular, pelo Teorema de Lagrange, $k \mid (p-1)$, o que garante $p \nmid 
 \end{lema}
 
 \begin{proof}
-Da primitividade $\gcd(a,b,c)=1$ segue $\gcd(b,c)=1$. De $a^k+b^k=c^k$ com $a,b>0$, temos automaticamente $c > b > 0$. Assim, a aplicação em $c^k - b^k = a^k$ está legitimada. O Teorema de Zsigmondy garante a existência de um divisor primo primitivo $p$ de $c^k - b^k$, exceto no caso $(c,b,k)=(2,1,6)$, o qual implicaria $a^6 = 2^6 - 1^6 = 63$, impossível pois $63$ não é uma sexta potência inteira.
+Da primitividade $\gcd(a,b,c)=1$ segue $\gcd(a,b)=\gcd(a,c)=\gcd(b,c)=1$. De $a^k+b^k=c^k$ com $a,b>0$, temos automaticamente $c > b > 0$. Assim, a aplicação em $c^k - b^k = a^k$ está legitimada. O Teorema de Zsigmondy garante a existência de um divisor primo primitivo $p$ de $c^k - b^k$, exceto no caso $(c,b,k)=(2,1,6)$, o qual implicaria $a^6 = 2^6 - 1^6 = 63$, impossível pois $63$ não é uma sexta potência inteira.
 
-Como $p \mid (c^k - b^k) = a^k$, segue $p \mid a$. Como $p$ é divisor primitivo, $p \nmid (c^m - b^m)$ para $m < k$. Sendo $\gcd(b,c)=1$, temos $p \nmid bc$, de modo que $u_p = bc^{-1} \in \mathbb{F}_p^\times$ satisfaz $(bc^{-1})^k \equiv 1 \pmod p$. Se a ordem de $u_p$ fosse $d < k$, teríamos $p \mid (c^d - b^d)$, o que contradiz a primitividade de $p$. Logo, o elemento possui ordem multiplicativa exata
+Como $p \mid (c^k - b^k) = a^k$, segue $p \mid a$. Pela coprimalidade da solução ($\gcd(a,b)=\gcd(a,c)=1$), temos imediatamente $p \nmid b$ e $p \nmid c$, garantindo $p \nmid bc$. Como $p$ é divisor primitivo de $c^k-b^k$, $p \nmid (c^m - b^m)$ para $m < k$. Logo, $u_p = bc^{-1} \in \mathbb{F}_p^\times$ satisfaz $(bc^{-1})^k \equiv 1 \pmod p$. Se a ordem de $u_p$ fosse $d < k$, teríamos $p \mid (c^d - b^d)$, contradizendo a primitividade de $p$. Logo, o elemento possui ordem multiplicativa exata
 \[
 \operatorname{ord}_{\mathbb{F}_p^\times}(u_p) = k.
 \]
 Pelo Teorema de Lagrange, $k \mid (p-1) \implies p \nmid k$.
 \end{proof}
 
-\section{A Ponte Espectral e a Convenção de Realização}
+\section{A Ponte Espectral e a Fatoração da Realização}
 
-A estrutura cíclica abstrata de ordem $k$ estabelecida em $\mathbb{F}_p^\times$ admite uma representação complexa para análise de holonomia. A passagem, contudo, não é canônica: trata-se de uma convenção de realização.
+A estrutura cíclica abstrata de ordem $k$ estabelecida em $\mathbb{F}_p^\times$ admite uma representação complexa para análise de holonomia. A passagem não é canônica: trata-se de uma convenção de realização.
 
 \begin{definicao}[Convenção de Realização Angular]
-A ordem $k = \operatorname{ord}_{\mathbb{F}_p^\times}(u_p)$ garante uma estrutura cíclica de ordem $k$. Fixada uma convenção de realização que associa ao gerador positivo deste ciclo a fase fundamental $2\pi/k$ na subálgebra real $\langle 1, J \rangle$ (com $J^2 = -1$), representaremos o ciclo gerado por $u_p$ pelo elemento:
+O elemento $u_p$ de ordem $k$ é associado, por convenção, à fase $2\pi/k$ na subálgebra real $\langle 1, J \rangle$ (com $J^2 = -1$). Representamos o ciclo gerado por $u_p$ pelo elemento:
 \[
-\widehat{u}_{p,k} := \exp\left(\frac{2\pi}{k}J\right) = c_k \cdot 1 + s_k \cdot J,
+\widehat{u}_{p,k} := \exp\left(\frac{2\pi}{k}J\right) = \cos\frac{2\pi}{k}\cdot 1 + \sin\frac{2\pi}{k}\cdot J.
 \]
-onde $c_k = \cos(2\pi/k)$ e $s_k = \sin(2\pi/k)$. Esta escolha constitui uma convenção angular; sob a leitura coordenada $1 \longleftrightarrow 1$ e $J \longleftrightarrow i$, a representação complexa do elemento de holonomia base assume a forma:
+Sob a leitura coordenada $1 \longleftrightarrow 1$ e $J \longleftrightarrow i$, a representação complexa do elemento de holonomia base assume a forma:
 \[
-A_0^{(\mathbb{C})} = \begin{pmatrix} e^{2\pi i/k} & 0 \\ 0 & e^{-2\pi i/k} \end{pmatrix} \in \operatorname{SL}(2, \mathbb{C}),
+A_0(k) = \begin{pmatrix} e^{2\pi i/k} & 0 \\ 0 & e^{-2\pi i/k} \end{pmatrix} \in \operatorname{SL}(2, \mathbb{C}),
 \]
-com $\operatorname{tr}(A_0) = 2c_k$ e $(A_0^{(\mathbb{C})})^k = I$.
+com $\operatorname{tr}(A_0) = 2\cos(2\pi/k)$ e $A_0(k)^k = I$.
 \end{definicao}
 
+\begin{proposicao}[Fatoração da Realização pela Ordem $k$]
+Seja $\mathcal{S}$ o conjunto de tuplas $(a,b,c,p)$ correspondentes a soluções primitivas e ao seu primo de Zsigmondy associado. A aplicação de realização angular $\mathcal{R}:\mathcal{S}\to\operatorname{SL}(2,\mathbb{C})$ fatora através da projeção da ordem $\kappa(a,b,c,p)=\operatorname{ord}_{\mathbb{F}_p^\times}(bc^{-1})=k$, tal que
+\[
+\mathcal{R}=\widetilde{\mathcal{R}}\circ\kappa,\qquad\text{com }\widetilde{\mathcal{R}}(k)=A_0(k).
+\]
+Consequentemente,
+\[
+\Xi\circ\mathcal{R}=(\Xi\circ\widetilde{\mathcal{R}})\circ\kappa.
+\]
+Existe portanto uma única aplicação $\widetilde{\Xi}(k):=\Xi(A_0(k))$ tal que
+\[
+(\Xi\circ\mathcal{R})(a,b,c,p)=\widetilde{\Xi}(k).
+\]
+Em particular, $\Xi\circ\mathcal{R}$ é constante nas fibras de $\kappa$: se $\kappa(s_1)=\kappa(s_2)$, então $(\Xi\circ\mathcal{R})(s_1)=(\Xi\circ\mathcal{R})(s_2)$. O objeto produzido pelo pipeline atual não distingue duas quádruplas com o mesmo $k$.
+\end{proposicao}
+
 \begin{observacao}[Status da convenção]
-A associação $u_p\mapsto\widehat{u}_{p,k}$ não é, no presente texto, um homomorfismo ou functor canônico entre a estrutura multiplicativa de $\mathbb{F}_p^\times$ e a subálgebra $\langle 1,J\rangle$. Trata-se de uma escolha de realização angular. Todas as consequências geométricas que se seguem são condicionais a essa escolha. O elo que transformaria a existência de uma solução de Fermat na necessidade de que a holonomia refinada preserve propriedades específicas de $A_0$ permanece residual (ver Síntese final).
+A associação $u_p\mapsto\widehat{u}_{p,k}$ não é um homomorfismo ou functor canônico. Trata-se de uma escolha de realização angular. A Proposição acima transforma a perda de informação de $(a,b,c,p)$ em uma propriedade matemática da aplicação: $\Xi\circ\mathcal{R}$ depende exclusivamente de $k$.
 \end{observacao}
 
-\section{Interface de Viviani e Regime Elíptico}
+\section{Interface de Viviani e Classificação Espectral}
 
-No Corpo Universal, a curva de Viviani (interseção da esfera $x^2+y^2+z^2=4a^2$ com o cilindro tangente $(x-a)^2+y^2=a^2$) realiza o regime \emph{elíptico} da dobra de renormalização. A recorrência
+No Corpo Universal, a curva de Viviani (interseção da esfera \(x^2+y^2+z^2=4a^2\) com o cilindro tangente \((x-a)^2+y^2=a^2\)) realiza o regime associado ao parâmetro \(d=+1\) da dobra de renormalização. A recorrência
 \[
 t_k = m\, t_{k-1} - d\, t_{k-2}
 \]
-distingue dois casos:
+distingue dois casos internos:
 \begin{center}
 \begin{tabular}{c|c|c}
-$d$ & regime & interpretação \\
+\(d\) & interpretação no corpus & \\
 \hline
-$-1$ & hiperbólico / rectilíneo & Cantor--Julia (corte) \\
-$+1$ & elíptico / rotação & \textbf{Viviani} \\
+\(-1\) & hiperbólico / rectilíneo & Cantor--Julia (corte) \\
+\(+1\) & elíptico / rotação & \textbf{Viviani} \\
 \end{tabular}
 \end{center}
-Quando $d=+1$ a dinâmica roda (meio-ângulo); quando $d=-1$ ela cresce (corte). A interface de Viviani é, portanto, o lugar geométrico natural onde vive a holonomia inicial $A_0$ (rotação de ângulo $2\pi/k$, $\lvert\operatorname{tr}(A_0)\rvert\le 2$).
+Quando \(d=+1\) a dinâmica roda (meio-ângulo); quando \(d=-1\) ela cresce (corte). A interface de Viviani é o lugar geométrico natural onde se situa a holonomia inicial \(A_0\) (rotação de ângulo \(2\pi/k\)).
+
+Para conectar essa estrutura interna à classificação clássica de elementos de \(\operatorname{SL}(2,\mathbb{C})\), recordamos que se \(A\in\operatorname{SL}(2,\mathbb{C})\) então o polinômio característico é \(\chi_A(\lambda)=\lambda^2-\operatorname{tr}(A)\lambda+1\) e o discriminante espectral é
+\[
+\Delta_A=\operatorname{tr}(A)^2-4.
+\]
+No caso real:
+\begin{align*}
+\lvert\operatorname{tr}(A)\rvert<2 &\quad\Longrightarrow\quad\text{elíptico},\\
+\lvert\operatorname{tr}(A)\rvert=2 &\quad\Longrightarrow\quad\text{parabólico/degenerado},\\
+\lvert\operatorname{tr}(A)\rvert>2 &\quad\Longrightarrow\quad\text{hiperbólico}.
+\end{align*}
+A identificação entre o parâmetro \(d\) do corpus e o sinal de \(\Delta_A\) (ou, equivalentemente, a comparação de \(\lvert\operatorname{tr}(A)\rvert\) com \(2\)) é uma proposição estrutural que deve ser enunciada explicitamente quando se invoca a interface de Viviani em argumentos que cruzam os dois regimes. No presente texto, \(A_0\) satisfaz \(\lvert\operatorname{tr}(A_0)\rvert\le 2\) por construção (rotação), logo situa-se no regime elíptico clássico.
 
 Propriedades operacionais medidas no anel (Teor.~\emph{viviani} do corpus):
 \begin{itemize}
-    \item a dobra é a lei: $2\cos(2u)=(2\cos u)^2-2$ realiza o operador de renormalização $R$ com membrana $d=1$;
-    \item o recobrimento é o espelho: troca de folha $(y,z)\mapsto(y,-z)$ com $\mathrm{espelho}^2=I$;
-    \item o nó é o ponto fixo $R(2)=2$ da cascata;
+    \item a dobra é a lei: \(2\cos(2u)=(2\cos u)^2-2\) realiza o operador de renormalização \(R\) com membrana \(d=1\);
+    \item o recobrimento é o espelho: troca de folha \((y,z)\mapsto(y,-z)\) com \(\mathrm{espelho}^2=I\);
+    \item o nó é o ponto fixo \(R(2)=2\) da cascata;
     \item as projeções são os cortes (parábola e quártica de Gerono).
 \end{itemize}
-A holonomia $A_0$ situa-se, por construção, nesta interface elíptica.
 
 \section{Geometria do Operador de Refinamento}
 
-Na família de holonomias considerada, a realização diagonal $A_0$ satisfaz a parametrização de invariantes
+Seja \(J\) o gerador da subálgebra real com \(J^2=-I\). Fixada uma conjugação \(M_w\), defina
 \[
-x = \operatorname{tr}(A_0) = 2c, \qquad y = -4(1-c^2),
+\widetilde{J}:=M_w^{-1}JM_w.
 \]
-com $c = \cos(2\pi/k)$. O refinamento de Koch
+Então \(\widetilde{J}^2=-I\). Os operadores de curvatura do refinamento de Koch são as exponenciais do mesmo gerador:
 \[
-\Xi(H) = H\, Q_1\, H\, Q_2\, H\, Q_3\, H
+Q_1=e^{\frac{\pi}{6}\widetilde{J}},\qquad
+Q_2=e^{-\frac{\pi}{3}\widetilde{J}},\qquad
+Q_3=e^{\frac{\pi}{6}\widetilde{J}}.
 \]
-atua sobre a interface de Viviani. A aplicação $\Xi(A_0)=A_1$ induz o desvio de traço bivariado $D(x,y)=\operatorname{tr}(A_1)-\operatorname{tr}(A_0)$. A substituição das coordenadas geométricas resulta na fatoração univariada exata:
+Como são funções do mesmo operador, comutam, e
 \[
-D_{\mathrm{geom}}(c) := D(2c, -4(1-c^2)) = (1-c) P_D(c),
+Q_1Q_2Q_3=e^{(\pi/6-\pi/3+\pi/6)\widetilde{J}}=I.
 \]
-onde $P_D(c) \in \mathbb{Z}[\sqrt{3}][c]$ é o polinômio explícito de grau 6:
+O refinamento é
+\[
+\Xi(H)=H\,Q_1\,H\,Q_2\,H\,Q_3\,H,
+\]
+e \(A_1:=\Xi(A_0)\).
+
+Na família de holonomias considerada, a realização diagonal \(A_0\) satisfaz a parametrização de invariantes
+\[
+x=\operatorname{tr}(A_0)=2c,\qquad y=\operatorname{tr}(A_0\widetilde{J}),
+\]
+com \(c=\cos(2\pi/k)\). A aplicação \(\Xi(A_0)=A_1\) induz o desvio de traço bivariado \(D(x,y)=\operatorname{tr}(A_1)-\operatorname{tr}(A_0)\). A substituição das coordenadas geométricas resulta na fatoração univariada
+\[
+D_{\mathrm{geom}}(c):=D\bigl(2c,-4(1-c^2)\bigr)=(1-c)P_D(c),
+\]
+onde \(P_D(c)\in\mathbb{Z}[\sqrt{3}][c]\) é o polinômio explícito de grau 6:
 \[
 \begin{aligned}
-P_D(c) ={}& 16\sqrt{3}\,c^6 + (40+16\sqrt{3})c^5 + (40-28\sqrt{3})c^4 \\
-& -(58+28\sqrt{3})c^3 + (-58+12\sqrt{3})c^2 + (9+12\sqrt{3})c + 11.
+P_D(c)={}&16\sqrt{3}\,c^6+(40+16\sqrt{3})c^5+(40-28\sqrt{3})c^4\\
+&-(58+28\sqrt{3})c^3+(-58+12\sqrt{3})c^2+(9+12\sqrt{3})c+11.
 \end{aligned}
 \]
-Como $1-c_k > 0$ para todo $k>2$, a condição de ruptura $\operatorname{tr}(A_1) \neq \operatorname{tr}(A_0)$ equivale a $P_D(c_k) \neq 0$.
+Como \(1-c_k>0\) para todo \(k>2\), a condição de ruptura \(\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)\) equivale a \(P_D(c_k)\neq0\).
 
-O desvio $D_{\mathrm{geom}}$ mede precisamente o quanto o refinamento empurra o sistema para fora do regime elíptico de Viviani ($d=+1$, $\lvert\operatorname{tr}\rvert\le 2$) em direção ao regime hiperbólico ($d=-1$, $\lvert\operatorname{tr}\rvert>2$).
+O desvio \(D_{\mathrm{geom}}\) mede a variação do traço produzida pelo refinamento relativamente à holonomia inicial:
+\[
+D_{\mathrm{geom}}(c)=\operatorname{tr}(A_1)-\operatorname{tr}(A_0).
+\]
+Em particular, quando \(\lvert\operatorname{tr}(A_1)\rvert>2\), essa variação corresponde à saída do regime elíptico clássico para o regime hiperbólico. Essa saída é verificada para \(k=4\) (\(\operatorname{tr}(A_1)=11\)), mas não foi demonstrada para todo \(k>2\).
 
 \section{Incompatibilidade Rigorosa para \texorpdfstring{$k=4$}{k=4}}
 
 \begin{teorema}[Quebra Efetiva de Ordem Finita para $k=4$]
-Para $k=4$, a convenção angular fixa $c_4 = \cos(\pi/2) = 0$. O desvio de traço geométrico avalia para:
+Para $k=4$, a convenção angular fixa
 \[
-P_D(0) = 11 \implies D_{\mathrm{geom}}(0) = (1-0) \cdot 11 = 11,
+A_0=\begin{pmatrix}i&0\\0&-i\end{pmatrix},\qquad\operatorname{tr}(A_0)=0.
 \]
-fornecendo $\operatorname{tr}(A_1) = \operatorname{tr}(A_0) + D_{\mathrm{geom}}(0) = 0 + 11 = 11$.
-
-Seja $A \in \operatorname{SL}(2, \mathbb{C})$. Se $A^4 = I$, a condição necessária para o traço é $\operatorname{tr}(A) \in \{-2, 0, 2\}$. Como $11 \notin \{-2, 0, 2\}$, conclui-se que:
+Com a conjugação que produz
 \[
-A_1^4 \neq I.
+\widetilde{J}=\begin{pmatrix}2i&-1\\-3&-2i\end{pmatrix},
 \]
-Admitindo $\det A_1 = 1$, como $A_1 \in \operatorname{SL}(2, \mathbb{C})$ possui traço real $11 > 2$, seus autovalores são reais, positivos e recíprocos ($\lambda_\pm = \frac{11\pm\sqrt{117}}{2}$). Portanto, $A_1$ opera estritamente no regime hiperbólico, com raio espectral $\rho(A_1) > 1$.
+obtém-se
+\[
+A_0\widetilde{J}=\begin{pmatrix}-2&-i\\3i&-2\end{pmatrix},\qquad
+y=\operatorname{tr}(A_0\widetilde{J})=-4.
+\]
+A fórmula do desvio bivariado fornece então
+\[
+D(0,-4)=\frac18\bigl(6\cdot16-8\bigr)=\frac{88}{8}=11,
+\]
+logo
+\[
+\operatorname{tr}(A_1)=11.
+\]
+O polinômio característico de \(A_1\) é \(\lambda^2-11\lambda+1\), com raízes
+\[
+\lambda_\pm=\frac{11\pm\sqrt{117}}2
+\]
+(\(\lambda_+>1\), \(0<\lambda_-<1\)). Em particular \(\lvert\operatorname{tr}(A_1)\rvert=11>2\), de modo que \(A_1\) é hiperbólico. Como \(A^4=I\) implica necessariamente \(\operatorname{tr}(A)\in\{-2,0,2\}\) e \(11\notin\{-2,0,2\}\), conclui-se
+\[
+A_1^4\neq I.
+\]
+Assim a cadeia geométrica produz, para \(k=4\),
+\[
+A_0^4=I\qquad\text{mas}\qquad A_1^4\neq I.
+\]
 \end{teorema}
 
 \section{Certificado Algorítmico de Irredutibilidade sobre \texorpdfstring{$K$}{K}}
@@ -322,66 +395,82 @@ para todo $k>2$.
 
 \section{Síntese da Fronteira Lógica}
 
-\begin{observacao}[Diagnóstico de estado]
-O estado atual do argumento pode ser resumido assim:
+\begin{observacao}[Dois níveis, status distinto]
+A cadeia documentada no manuscrito é
+\[
+a^k+b^k=c^k
+\ \Longrightarrow\
+\operatorname{ord}_{\mathbb{F}_p^\times}(bc^{-1})=k
+\ \Longrightarrow\
+A_0^k=I
+\ \Longrightarrow\
+A_1=\Xi(A_0)
+\]
+e, independentemente,
+\[
+A_1=\Xi(A_0)
+\ \Longrightarrow\
+\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0).
+\]
+Isso está efetivamente fechado. Em particular, para \(k=4\),
+\[
+A_0^4=I,\qquad\operatorname{tr}(A_1)=11,\qquad A_1^4\neq I.
+\]
+O caso \(k=4\) não é um ``contraexemplo teórico definitivo'' à hipótese de Fermat; ele contradiz qualquer princípio adicional do modelo que imponha \(A_1^4=I\).
+
+A identidade \(Q_1Q_2Q_3=I\) \emph{não} permite reagrupar \(\Xi(A_0)\) como potência de \(A_0\), porque em geral \(Q_iA_0\neq A_0Q_i\). O próprio cálculo \(k=4\) demonstra a não-preservação.
+
+Além disso, \(\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)\) não implica \(A_1^k\neq I\). Para contradizer \(A_1^k=I\) seria necessário
+\[
+\operatorname{tr}(A_1)\notin\mathcal{T}_k=\Bigl\{2\cos\frac{2\pi j}{k}:0\le j<k\Bigr\}.
+\]
+Isso vale para \(k=4\) (\(\mathcal{T}_4=\{-2,0,2\}\), \(\operatorname{tr}(A_1)=11\)), mas não foi demonstrado para \(k>4\).
 
 \begin{center}
-\begin{tabular}{@{}lp{9.2cm}@{}}
+\begin{tabular}{@{}lp{9.0cm}@{}}
 \hline
-Componente & Estado \\
+Componente & Status \\
 \hline
-Zsigmondy + ordem $u_p=k$ & fechado \\
-construção angular $u_p\mapsto\widehat{u}_{p,k}$ & convenção (não canônica) \\
-interface de Viviani ($d=+1$, regime elíptico) & identificada \\
-fatoração $D_{\mathrm{geom}}=(1-c)P_D$ & fechado (dentro do modelo) \\
-irredutibilidade de $P_D$ sobre $K$ & fechado (certificado modular) \\
-redução a $16$ valores de $k$ & fechado \\
-não-anulação $P_D(c_k)$ & fechado (tabela de resultantes) \\
-$\operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)$ $\forall k>2$ & fechado (dentro do modelo) \\
-$A_1^4\neq I$ & fechado \\
-$A_1^k\neq I$ $\forall k>4$ & residual (exige $\operatorname{tr}(A_1)\notin\mathcal{T}_k$) \\
-elo estrutural Fermat $\Rightarrow$ propriedade de $A_1$ & residual \\
+Zsigmondy $\to\operatorname{ord}(u_p)=k$ & fechado \\
+Proposição de fatoração $\mathcal{R}=\widetilde{\mathcal{R}}\circ\kappa$ & fechado \\
+Invariância $Q_1Q_2Q_3=I$ & fechado \\
+Não-anulação $P_D(c_k)\neq0$ & fechado \\
+$k=4$: $\operatorname{tr}(A_1)=11\Rightarrow A_1^4\neq I$ & fechado \\
+Preservação genérica $A_1^k=I$ & incompatível em $k=4$ \\
+Ponte aritmética enriquecida (não fatorada por $k$) & aberta \\
 \hline
 \end{tabular}
 \end{center}
 
-Duas propriedades distintas estão em jogo:
+O ponto estrutural mais forte é o seguinte. A composição atual \(\Xi\circ\mathcal{R}\) é uma construção geométrica indexada por \(k\), e não uma construção que ainda carregue \((a,b,c,p)\). Formalmente o esquema é
+\[
+(a,b,c,p)\longrightarrow u_p\longrightarrow k\longrightarrow A_0(k)\longrightarrow A_1(k).
+\]
+Logo \(A_1=A_1(k)\): não existe dependência explícita de \(a,b,c,p\) que possa posteriormente ser usada para deduzir uma restrição adicional sobre \(A_1\). Após a convenção angular \(u_p\rightsquigarrow e^{2\pi i/k}\), dois dados aritméticos completamente diferentes que produzam o mesmo \(k\) chegam ao mesmo \(A_0\) e, portanto, ao mesmo \(A_1\).
 
-\begin{itemize}
-    \item \textbf{Obstrução de conjugação} (fechada dentro do modelo):
-    \[
-    \operatorname{tr}(A_1)\neq\operatorname{tr}(A_0)\quad\Longrightarrow\quad A_1\not\sim A_0.
-    \]
-    O desvio $D_{\mathrm{geom}}$ mede a saída do regime elíptico de Viviani ($d=+1$) em direção ao regime hiperbólico ($d=-1$).
-    \item \textbf{Obstrução de ordem} (ainda aberta para $k>4$):
-    \[
-    A_1^k=I\quad\Longrightarrow\quad\operatorname{tr}(A_1)\in\mathcal{T}_k=\Bigl\{2\cos\frac{2\pi j}{k}:0\le j<k\Bigr\}.
-    \]
-\end{itemize}
+Consequência metodológica: para fechar o Último Teorema de Fermat por esta via seria necessário modificar a própria realização, de modo que o dado aritmético sobreviva até a entrada de \(\Xi\). Idealmente, um diagrama genuinamente comutativo
+\[
+\begin{CD}
+\text{dados de Fermat}@>{\mathcal{A}}>>\text{objeto geométrico enriquecido}\\
+@V{\text{aritmética}}VV@VV{\Xi}V\\
+\text{invariante aritmético}@>{\Phi}>>\text{invariante após refinamento}
+\end{CD}
+\]
+com uma implicação
+\[
+a^k+b^k=c^k\quad\Longrightarrow\quad\Phi(\Xi(A))=\Phi(A),
+\]
+enquanto o cálculo geométrico demonstra \(\Phi(\Xi(A))\neq\Phi(A)\). Na ausência desse diagrama (ou de estrutura matematicamente equivalente),
+\[
+\text{Zsigmondy + realização angular + Koch + obstrução espectral}\;\not\Rightarrow\;\text{FLT}.
+\]
+O caso \(k=4\) mostra ainda que não se pode simplesmente postular a ponte depois do fato: qualquer lema genérico afirmando que ``a origem Fermat implica preservação da ordem sob \(\Xi\)'' entraria em conflito com a dinâmica geométrica já calculada.
 
-O ponto decisivo não é, a priori, atacar $\mathcal{T}_k$. A pergunta anterior é estrutural e agora pode ser formulada em termos da interface de Viviani:
-
+Neste estágio o polinômio \(P_D\) e a obstrução espectral dentro do modelo consideram-se encerrados. A próxima etapa é uma investigação independente:
 \begin{quote}
-O refinamento $\Xi$ aplicado à interface de Viviani gerada pelo ciclo aritmético de ordem $k$ (vindo do primo de Zsigmondy) deve preservar a classe de conjugação elíptica, ou a geometria da fratura/Koch é \emph{desenhada} para deformá-la?
+Existe uma realização aritmético-geométrica não degenerada que preserve informação suficiente da equação de Fermat para produzir uma restrição sobre a holonomia refinada?
 \end{quote}
-
-Há duas vias possíveis:
-
-\begin{enumerate}
-    \item \textbf{Via forte (preservação de classe).} Se a arquitetura exige que $\Xi$ preserve a classe de conjugação da monodromia de Viviani, então
-    \[
-    A_1\sim A_0.
-    \]
-    Nesse caso a obstrução de conjugação já obtida basta: a cadeia
-    \[
-    \text{Fermat}\ \Longrightarrow\ A_1\sim A_0\ \Longrightarrow\ \operatorname{tr}(A_1)=\operatorname{tr}(A_0)
-    \]
-    contradiz o teorema geométrico, e a prova fecha para todo $k>2$ sem necessidade de $\mathcal{T}_k$.
-
-    \item \textbf{Via fraca (preservação de ordem).} Se a propriedade forçada for apenas $A_1^k=I$, então resta excluir $\operatorname{tr}(A_1)\in\mathcal{T}_k$ para $k>4$.
-\end{enumerate}
-
-O trabalho residual prioritário é formalizar, a partir da definição precisa dos operadores de curvatura $Q_1,Q_2,Q_3$ e da interface de Viviani, se $\Xi$ é um morfismo que preserva a classe elíptica ou um operador de fratura que a quebra. Sem esse elo, a contradição com Fermat permanece incompleta.
+Se a resposta for negativa, a própria fatoração da arquitetura atual por \(k\) torna-se um resultado matemático: a construção não distingue soluções aritméticas com o mesmo expoente.
 \end{observacao}
 
 \end{document}
