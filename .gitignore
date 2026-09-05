@@ -18,7 +18,7 @@
 # os binários dos medidores: o .c entra, o executável não. Em Windows saem .exe,
 # e sem esta linha eles entravam no commit com o resto.
 *.exe
-/microprocessador.pdf
+!/microprocessador.pdf
 /viveiro.pdf
 
 # banco/: os programas que guardam e servem dado (a ISA, a MMU, o SQL, a fita, as torres).
