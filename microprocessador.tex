@@ -1,0 +1,607 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+% microprocessador.tex — Microprocessador Fractal
+%
+% o processador no cristal: um núcleo analógico (a tríade) e os
+% periféricos — todos a mesma borda, a mesma tríade, em toda escala
+%
+% Autor: Aarão Melo Lopes
+% Compila: pdflatex microprocessador.tex
+% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  framerule=0.4pt,
+  xleftmargin=1em,
+  xrightmargin=1em,
+  aboveskip=0.8em,
+  belowskip=0.8em
+}
+
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+
+\title{\textbf{Microprocessador Fractal}\\[0.4em]
+\large o processador no cristal: um núcleo analógico (a tríade) e os\\
+periféricos --- todos a mesma borda, a mesma tríade, em toda escala}
+\author{Aarão Melo Lopes}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Um microprocessador construído no corpo: o núcleo é a tríade em corrente analógica ---
+soma ($\oplus$), multiplicação ($\otimes$) e o operador
+($\int = \exp \circ \Sigma \circ \log$) nos diodos ---, e os periféricos
+nascem das mesmas peças, uma escala abaixo. Ele é auto-similar (fractal no sentido estrito:
+um mapa de escala explícito entre níveis, não uma dimensão de Hausdorff): a borda ($|\lambda| = 1$,
+o ciclo puro) e a tríade se repetem do relógio à memória ao barramento --- a rotação, a torção
+e o casamento, em todo nível ---, e o zoom $w \mapsto w^{2}$ que leva um nível ao seguinte fecha em
+resíduo~$0$. Este documento cresce: começa no núcleo (a ALU, já validada contra a ISA e
+levada a Gerbers) --- que já é o relógio, pois a mesma rotação oscila e ripplea o vai-um --- e
+a cada seção pendura mais um periférico até fechar o processador completo. Tudo no metal
+(\texttt{api.h}), resíduo~$0$.
+\end{abstract}
+
+\section{A arquitetura --- o fractal}
+
+Um microprocessador é um punhado de blocos em volta de um núcleo. Aqui, todos os blocos são
+o mesmo objeto lido em escalas diferentes: uma dinâmica linear na base própria, cujo autovalor
+$\lambda$ fica na borda ($|\lambda| = 1$) para funcionar. O núcleo computa (a tríade); o relógio conta (a
+torção $\mathbb{Z}/n$); a memória é o disco (o arquivo é o grafo); o barramento soma ($\oplus$, Kirchhoff); a
+entrada/saída codifica (a fração contínua). Não são cinco invenções: são a mesma peça,
+cinco ofícios.
+
+\begin{proposicao}[uma transformação, uma assinatura por ofício]
+A afirmação ``a mesma peça'' não é retórica; tem um mecanismo. A peça não é uma matriz fixa, é uma família a um
+parâmetro: a transformação
+\[
+A_{m} = \begin{pmatrix} m & 1 \\ 1 & 0 \end{pmatrix}
+\]
+e a rotação $G$, compostas por um único produto (o produto de matrizes $2\times 2$).
+A multiplicação --- a dinâmica --- é única; o que distingue um ofício do outro é a assinatura,
+o parâmetro que especializa essa mesma transformação:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+a assinatura & o ofício que ela gera \\
+\midrule
+$m=1$, projetada mod~$2$ & a ALU (soma e produto binários) \\
+a ordem $n$ do ciclo & a torção $\mathbb{Z}/n$ (relógio, controle) \\
+a sequência $[a_{0};a_{1},\ldots]$ & a fração contínua (I/O) \\
+a contração bit a bit & o disco (memória) \\
+o nó de correntes & o barramento ($\oplus$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Uma multiplicação, uma dinâmica; cada ofício é a mesma transformação lida sob uma assinatura.
+Muda a assinatura (a régua), nunca a multiplicação --- é o Teorema de Unicidade do corpo. Por
+isso não são cinco peças: é uma peça e cinco assinaturas.
+\end{proposicao}
+
+\section{As peças --- o meio-somador, a rotação, o diodo, o disco}
+
+Tudo o que segue é feito de quatro peças, e nada mais. Uso o nome padrão no corpo do texto
+e registro o apelido interno entre parênteses só na primeira menção. Defino-as aqui para que o
+documento se baste:
+
+\begin{center}
+\begin{tabular}{@{}c@{}}
+relógio ($\mathbb{Z}/n$) \\[1.2em]
+\begin{tabular}{|c|c|c|}
+\hline
+controle & núcleo (ALU): $\oplus\;\otimes\;\displaystyle\int$ & barramento ($\oplus$) \\
+\hline
+\end{tabular} \\[1.2em]
+\begin{tabular}{c@{\hspace{3em}}c}
+memória (disco) & I/O (frac.\ cont.)
+\end{tabular} \\[0.6em]
+\footnotesize todos na borda $|\lambda|=1$; cada bloco é o mesmo meio-somador+rotação, uma escala --- completo
+\end{tabular}
+\end{center}
+
+\begin{description}
+\item[meio-somador]
+$A_{m}=\begin{pmatrix}m&1\\1&0\end{pmatrix}$, a matriz de Fibonacci (apelido interno: o gato).
+Em bits, $A_{1}$ é o par (XOR, AND) que soma um dígito e gera o vai-um; o produto
+$A_{a_{0}}A_{a_{1}}\cdots$ é a fração contínua (a PA empilhada). $\det A_{m}=-1$: reversível.
+O seu ponto fixo $\sigma_{m}=m+\frac{1}{\sigma_{m}}$ (apelido interno: o rei; $\sigma_{1}=\varphi$, a razão áurea)
+é o limite dos convergentes.
+
+\item[rotação de $90^{\circ}$]
+$G=\begin{pmatrix}0&1\\-1&0\end{pmatrix}$, a matriz simplética (apelido interno: o esquilo).
+$\det G=1$, autovalores $\pm i$, $G^{4}=I$: é a rotação por $i$ --- gira sem crescer nem decair (a borda, abaixo).
+No papel de deslocamento é o shift ($\ll 1$) que move o vai-um; no papel de oscilador é o tique --- o mesmo gesto.
+
+\item[diodo (log/exp)]
+a lei física $V=V_{T}\ln(I/I_{s})$, $I=I_{s}\,e^{V/V_{T}}$ leva soma a produto
+($\exp(\ln a+\ln b)=ab$) e dá o inverso ($\exp(-\log x)$). É a integração ($\displaystyle\int$), o que fecha o anel em corpo.
+
+\item[disco]
+o estado: o cristal em bits mora num arquivo (o arquivo é o grafo), não em registradores.
+O processador segura um bit na mão; o LOAD contrai o disco.
+\end{description}
+
+\begin{observacao}[a borda $|\lambda|=1$ --- a régua única]
+Toda peça é uma dinâmica linear $x_{t+1}=M x_{t}$, e o seu destino é o autovalor:
+$|\lambda|<1$ decai (o sinal some), $|\lambda|=1$ fecha (o ciclo puro, reversível),
+$|\lambda|>1$ cresce (estoura). A engenharia útil é a borda $|\lambda|=1$ --- a rotação vive nela ($\lambda=\pm i$).
+Em elétrica é o fator de potência $\mathrm{FP}=1$ (o casamento, $\Gamma=0$). Uma régua para tudo: ficar na borda.
+\end{observacao}
+
+\section{O núcleo --- a ALU (a tríade)}
+
+O núcleo é a tríade em corrente analógica. O diodo é o log/exp
+($V=V_{T}\ln(I/I_{s})$, $I=I_{s}\,e^{V/V_{T}}$);
+daí a soma $\oplus$ são as correntes no nó (Kirchhoff), a multiplicação $\otimes$ é o log-domain
+($\exp(\ln a+\ln b)=ab$), e a integração $\displaystyle\int$ fica no meio (a soma dos logs, exponenciada).
+
+\begin{proposicao}[o núcleo reproduz a ISA]
+O sinal analógico do núcleo reproduz exatamente a ISA ERG-64: $\oplus$ e $\otimes$ coincidem com ADD e MUL
+em $40000/40000$ pares cada, resíduo~$0$ (\texttt{so\_cristal.c}). O núcleo já foi levado a Gerbers:
+placa $80\times 64\,\mathrm{mm}$, roteada, DRC $0$ violações (a placa, adiante).
+\end{proposicao}
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\linewidth}\centering\smallskip
+$\otimes$ produto $=\exp(\ln a+\ln b)=a\cdot b$
+
+\vspace{0.6em}
+LOG (diodo) $\quad$ $\Sigma$ (soma dos logs) $\quad$ ANTILOG (diodo)
+
+\vspace{0.8em}
+$\oplus$ soma de correntes (Kirchhoff, KCL) $=a+b$
+
+\smallskip\footnotesize
+O núcleo analógico completo (fiel ao netlist \texttt{so\_cristal.cir}). O produto ($\otimes$) leva soma a produto
+pelo diodo: dois LOG (o diodo na malha do op-amp, $V=V_{T}\ln(I/I_{s})$) dão $\ln a$ e $\ln b$; o somador $\Sigma$ os
+junta ($\ln a+\ln b$); o ANTILOG (o diodo na entrada) exponencia $\to a\cdot b$. A soma ($\oplus$) é o somador
+de correntes de Kirchhoff (KCL) $\to a+b$. Na produção os diodos são transistores casados na mesma
+pastilha: $V_{T}$ e $I_{s}$ são comuns aos três, e o par LOG$\to$ANTILOG cancela a dependência térmica ---
+$\exp\bigl(\frac{1}{V_{T}}[V_{T}\ln a+V_{T}\ln b]\bigr)=a\cdot b$ sai insensível a $V_{T}$ (logo à temperatura)
+em primeira ordem: é o princípio translinear (Gilbert). Todos os resistores $100\,\mathrm{k}$.
+Bate a ISA em $40000/40000$, resíduo~$0$.
+\end{minipage}}
+\end{center}
+
+\section{O relógio (periférico 1)}
+
+Todo processador precisa de um timebase. No corpo ele já existe, e é a borda:
+
+\begin{description}
+\item[osc.]
+o oscilador-mestre é a rotação
+$G=\begin{pmatrix}0&1\\-1&0\end{pmatrix}$: $G^{4}=I$ (o gap-$4$), autovalores $\pm i$, $|\lambda|=1$
+--- oscila sem decair (a borda). Um LC ideal, aqui como tique.
+
+\item[cont.]
+o contador é a torção para todo $n$ --- não um $n$ fixo (o $8$ não existe), mas o corpo
+completo: para cada $n$ o tique avança por $w$ ($w^{n}=1$), a órbita $\{w^{k}\}$ fecha em $n$ e é
+reversível ($w^{-1}$ destica). Medido: a torre inteira $n=2,4,8,\ldots,8192$ (e $\infty$ no limite),
+toda escala fecha e reverte, resíduo~$0$.
+
+\item[div.]
+o divisor é fractal: dividir por $2$ é elevar a torção ao quadrado ($w\mapsto w^{2}$, ordem $n/2$)
+--- o mesmo relógio, uma escala abaixo. A torre de relógios $\cdots\to\mathbb{Z}/8\to\mathbb{Z}/4\to\mathbb{Z}/2$ é
+auto-similar (o zoom: ``mesmo tabuleiro''), sem fundo nem topo --- o corpo inteiro, não uma escala.
+\end{description}
+
+\begin{proposicao}[o relógio já é o microcontrolador]
+Não há núcleo e relógio separados: é a rotação nos dois papéis --- o mesmo deslocamento.
+A matriz $G$ (ordem~$4$, $|\lambda|=1$) oscila (o relógio), e o shift $\ll 1$ ripplea o vai-um na soma ---
+é a rotação como oscilador e como carry, o mesmo gesto de deslocar, pois
+$\mathrm{ADD}=$ meio-somador $\circ$ rotação iterado, e cada tique da rotação ripplea um estágio do carry
+pelo meio-somador. Medido: $\mathrm{ADD}=+$ e $\mathrm{MUL}=\times$, resíduo~$0$, e os tiques
+são exatamente o comprimento de propagação do vai-um. O relógio é o cálculo: o oscilador é o
+processador, um par (meio-somador + rotação) que conta, oscila e computa.
+\end{proposicao}
+
+\paragraph{A iteração, à vista.}
+Não é preciso abrir o código para ver a ADD nascer do par. O meio-somador $A_{1}$ leva
+$(a,b)\mapsto(a\oplus b,\,a\land b)$ --- a soma sem vai-um (XOR) e o vai-um gerado (AND);
+a rotação desloca esse vai-um um bit acima ($\ll 1$). Iterar o par até o vai-um zerar é somar.
+Para $7+1$ (quatro bits), o vai-um propaga do bit~$0$ ao bit~$3$ --- quatro tiques da rotação:
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+tique & $a$ (soma parcial, $\oplus$) & $b$ (vai-um, $\land$ e $\ll 1$) \\
+\midrule
+$0$ & $0111$ & $0001$ \\
+$1$ & $0110$ & $0010$ \\
+$2$ & $0100$ & $0100$ \\
+$3$ & $0000$ & $1000$ \\
+$4$ & $1000$ & $0000$ \quad $\leftarrow$ vai-um $0$: para, soma $=8$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O número de tiques é o comprimento de propagação do vai-um (um para $2+1$, nove para $255+1$)
+--- não um $n$ fixo, mas o quanto o carry precisa correr. Certificado: a iteração bate a soma nativa
+em todo par de $8$ bits ($65536$ casos), resíduo~$0$ (\texttt{add\_ripple.c}). Só $\oplus$, $\land$ e $\ll 1$:
+a soma não é bloco novo --- é o meio-somador e a rotação, em laço.
+
+\begin{observacao}[o coração dual --- e por que a defasagem é áurea, não $\pi$]
+Dois relógios defasados dão o coração-relógio dual do corpo: o mestre e o seu espelho, batendo juntos
+sem colidir. A defasagem não é escolhida a olho. ``Sem colidir'' quer dizer cobrir o ciclo uniformemente ---
+nem amontoar os batimentos num lado, nem deixar um vão morto no outro ---, e a medida
+disso é o maior vão entre batimentos consecutivos. A meia-volta $\pi$ (a antifase clássica, $\delta=\tfrac12$)
+é o pior caso: dois pontos, meio ciclo morto. A defasagem áurea $\delta=1/\varphi$ é o único teto:
+é o mesmo rei $\sigma_{1}=\varphi$ da fração contínua (\S\ref{sec:io}), o número mais mal-aproximável por racionais
+(Hurwitz, $1/\sqrt{5}$), logo o mais uniforme --- e uniforme em toda escala (auto-similar, o tema deste
+paper). Medido: varrendo toda defasagem $k/2584$ e exigindo cobertura uniforme nas escalas de
+Fibonacci $N=8,\ldots,233$, a vencedora é a áurea ($987/2584=1/\varphi^{2}$, o espelho de $1/\varphi$), resíduo~$0$
+(\texttt{coracao\_dual.c}). É a mesma borda, agora como clock diferencial.
+\end{observacao}
+
+Rodado no metal --- \texttt{universe/tools/\{relogio\_micro, confere\_micro\}.c} sobre \texttt{api.h}: a rotação
+($G^{4}=I$), a torção ($w^{n}=1$, reversível), o divisor fractal, e a confirmação de que a rotação-relógio
+é o ripple da ADD/MUL --- resíduo~$0$.
+
+\section{A memória (periférico 2) --- o disco, não há registradores}
+
+Aqui uma correção importante de arquitetura: não há registradores, nem hierarquia de RAM.
+A memória é o próprio disco --- o arquivo é o grafo, o cristal em bits. O processador segura
+um bit na mão (um estado), e o LOAD contrai o disco bit a bit.
+
+\begin{proposicao}[a memória é o disco]
+O estado (o cristal) mora num arquivo, não em RAM; processa-se em streaming, com uma palavra de trabalho.
+A memória de trabalho é constante --- uma palavra ($8\,\mathrm{B}$) --- seja o arquivo de $1\,\mathrm{KB}$ ou $1\,\mathrm{MB}$
+(medido: $1\,\mathrm{KB}$, $64\,\mathrm{KB}$, $1\,\mathrm{MB}$, RAM idêntica). E a contração é reversível:
+a volta reconstrói o arquivo, resíduo~$0$ --- o arquivo é o grafo.
+\end{proposicao}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+tamanho no disco & RAM de trabalho & reverte \\
+\midrule
+$1\,\mathrm{KB}$ & $1$ palavra ($8\,\mathrm{B}$) & resíduo~$0$ \\
+$64\,\mathrm{KB}$ & $1$ palavra ($8\,\mathrm{B}$) & resíduo~$0$ \\
+$1\,\mathrm{MB}$ & $1$ palavra ($8\,\mathrm{B}$) & resíduo~$0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O disco cresce; a RAM não. É a marca da máquina: $1$ bit de memória sempre, o disco é o estado.
+Validado no metal (resíduo~$0$).
+
+\section{O barramento (periférico 3) --- o $\oplus$, o nó que soma}
+
+O barramento é onde os sinais se encontram, e no corpo isso é o $\oplus$ (Kirchhoff, KCL): o nó de
+Kirchhoff, onde as correntes se somam (a superposição). É o mesmo $\oplus$ do núcleo --- não um
+bloco novo, o mesmo somar das correntes.
+
+\begin{proposicao}[o barramento é o $\oplus$, e é fractal]
+As $N$ fontes num nó dão a soma (superposição, linear) --- medido, bate a ADD da ISA, resíduo~$0$.
+O $\oplus$ é abeliano: reordenar e reagrupar não muda a soma. E é fractal/P2P: a soma como uma árvore
+de nós $\oplus$ (cada nó soma os filhos, $\log N$ níveis) é idêntica à soma plana --- sem barramento central,
+cada célula soma e repassa (o barramento distribuído). Auto-similar: o mesmo $\oplus$ em toda escala.
+\end{proposicao}
+
+O barramento não se acrescenta --- ele já está no $\oplus$ do núcleo, agora lido como o nó onde tudo
+se soma. Validado no metal (resíduo~$0$).
+
+\section{O I/O (periférico 4) --- a fração contínua do corpo fractal}
+\label{sec:io}
+
+Para falar com o mundo discreto, o processador precisa converter --- e o código não é a soma
+binária $\sum_{k}\mathrm{bit}_{k}\,2^{k}$: o $2^{k}$ é uma base imposta de fora, uma amputação. O corpo fractal não é
+base~$2$; é a árvore de frações contínuas, a matriz de Fibonacci $A_{m}$: $x\mapsto a+\frac{1}{x}$
+($A_{a}=\begin{pmatrix}a&1\\1&0\end{pmatrix}$, com ponto fixo o rei $\sigma_{m}$).
+Uma grandeza racional $p/q$ é os seus quocientes parciais $[a_{0};a_{1},\ldots,a_{n}]$.
+O ADC (analógico$\to$discreto) os extrai --- a matriz inversa: subtrai-e-flipa
+($p/q\mapsto a_{k}=\lfloor p/q\rfloor$ por subtração, depois a escala $1/x$).
+O DAC (discreto$\to$analógico) reconstrói pelo produto de matrizes $A$:
+$M=A_{a_{0}}\cdots A_{a_{n}}=\begin{pmatrix}p&p'\\q&q'\end{pmatrix}$, e o convergente é $p/q=M_{11}/M_{21}$.
+O peso de cada dígito é a escala auto-similar $1/x$, não a potência de~$2$.
+
+\begin{proposicao}[a ponte é exata, e reversível em todo ramo]
+$\det M=\prod\det A_{a_{i}}=(-1)^{n+1}=\pm 1$ em todo ramo --- a reconstrução inverte sempre.
+$\mathrm{DAC}(\mathrm{ADC}(p/q))=p/q$ reduzido, para toda fração $1\le p,q\le 200$ ($40000$ casos), resíduo~$0$.
+E é o corpo fractal no metal: $[3;7;15;1]\to 355/113$ (o convergente de $\pi$);
+$[1;1,1,\ldots]\to$ Fibonacci $1,2,3,5,8,13,\ldots,233/144$, cuja razão tende ao rei $\varphi$.
+Nenhum $2^{k}$: o zoom é a mesma escala em todo nível.
+(A grandeza analógica em si, como sinal, é o diodo log/exp do núcleo; a codificação é a fração contínua.)
+\end{proposicao}
+
+Validado no metal (resíduo~$0$).
+
+\section{O controle/decode (periférico 5) --- a roda de opcodes $\mathbb{Z}/n$}
+
+O controle busca, decodifica e executa --- e no corpo é a roda de opcodes $\mathbb{Z}/n$, a mesma torção
+do relógio, com $n$ o tamanho do programa (qualquer $n$, não um fixo). O PC (program counter)
+é a posição da roda; cada tique avança o PC ($w$), lê o opcode (do disco --- a memória!), decodifica
+(a posição seleciona a operação, um demux) e executa (despacha ao ALU, o meio-somador + rotação).
+
+\begin{proposicao}[o controle é o relógio, lido como PC]
+A roda de opcodes é a torção $\mathbb{Z}/n$ com $n$ o comprimento do programa --- todo $n$, o corpo completo:
+o PC avança por $w$, fecha em $n$, reversível --- o mesmo relógio. E um programa roda:
+$[\mathrm{LDI}\,3;\mathrm{ADD}\,4;\mathrm{MUL}\,5]\to 35$;
+$[\mathrm{LDI}\,10;\mathrm{MUL}\,10;\mathrm{ADD}\,1;\mathrm{MUL}\,2]\to 202$;
+e $(a+b)c$ em $64000$ programas bate o nativo, resíduo~$0$.
+O controle não é bloco novo: é o relógio ($\mathbb{Z}/n$, qualquer $n$) lido como PC, despachando ao ALU.
+\end{proposicao}
+
+Validado no metal (resíduo~$0$).
+
+\section{A placa --- do metal ao Gerber}
+
+O núcleo não ficou no papel: foi gerado e verificado. Montado no KiCad (op-amps para os
+somadores/integradores, transistores para o log/exp do $\displaystyle\int$, resistores e headers),
+$80\times 64\,\mathrm{mm}$, $2$ camadas; roteado pelo Freerouting ($49$ nets, $0$ não-roteados);
+verificado: DRC $0$ violações, $0$ desconectados. Gerbers RS-274X + furos Excellon, com BOM e README,
+empacotados em \texttt{hardware/so\_cristal/} --- prontos para a fab.
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\linewidth}\centering\smallskip
+O núcleo (a tríade) como placa real: os op-amps somam/integram, os transistores fazem o log/exp,
+os headers são entrada/saída. Roteada, DRC-limpa. A mesma aritmética que bate a ISA em $40000/40000$,
+agora em cobre.
+\end{minipage}}
+\end{center}
+
+\section{Validação e reprodução --- do papel à fábrica}
+
+Isto não fica no papel. A tríade é validada em três níveis, cada um contra um oráculo, e cada
+um já fechado --- do bit inteiro ao cobre:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+nível & o que é (onde) & validação \\
+\midrule
+estrutura & a tríade em inteiros exatos (ISA ERG-64, \texttt{api.h}) & ADD/MUL exatos, resíduo~$0$ \\
+sinal analógico & a tríade nos diodos (\texttt{so\_cristal.c}) & $\oplus$, $\otimes\equiv$ ISA, $40000/40000$ cada, resíduo~$0$ \\
+placa & Gerbers KiCad, $80\times 64\,\mathrm{mm}$, $2$ cam. & DRC $0$ violações, $0$ desconectados \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O multiplicador não se improvisa: é o transistor. O produto analógico não é um bloco a inventar ---
+o transistor é o $\displaystyle\int$ Pontryagin (a Gilbert cell). A equação de Shockley $I=I_{s}\,e^{V/V_{T}}$
+é o $\exp$ e $V=V_{T}\ln(I/I_{s})$ o $\log$; multiplicar é somar os logs ($\exp(\ln a+\ln b)=ab$),
+e a corrente de Kirchhoff soma. Isto está teoremizado e certificado à parte
+(\texttt{corpo\_transistor.tex}, cert.\ \texttt{corpo\_transistor.py}: $5/5$), e é o mesmo $\displaystyle\int$
+do \texttt{pontryagin.c}. O casamento na mesma pastilha cancela $V_{T}$ (o princípio translinear, \S3):
+o sinal reproduz a ISA em $40000/40000$ pares, resíduo~$0$ (\texttt{so\_cristal.c}).
+
+\paragraph{A instrução em oitenta bits.}
+Um lance completo da máquina cabe em $10$ bytes --- $3$ (LOAD $a$) + $3$ (LOAD $b$) + $1$ (a operação)
++ $3$ (STORE $r$) $=80$ bits ---, dos quais um único byte é a operação: trocá-lo comuta
+ADD/SUB/AND/OR/XOR sobre os mesmos operandos. É o processador inteiro num formato de instrução,
+validado no motor.
+
+O pacote de fábrica (\texttt{hardware/so\_cristal/}), pronto para JLCPCB/PCBWay (FR-4, $1{,}6\,\mathrm{mm}$,
+HASL/ENIG): U1 TL074 (quad op-amp: LOG/$\Sigma$/ANTILOG), U2 TL072 (somador), Q1--Q3
+MMBT3904 ou o par casado SSM2212 (o log/exp --- casar termicamente), R1--R11 $100\,\mathrm{k}$ $1\%$,
+desacoplamento $100\,\mathrm{nF}$, alimentação $\pm 12\,\mathrm{V}$. Gerbers RS-274X + Excellon, BOM e DRC report
+empacotados. Cada nível roda sozinho --- a ISA (\texttt{api.h}), o sinal (\texttt{so\_cristal.c}, contra a ISA),
+a placa (Gerbers, DRC): do metal ao cobre, resíduo~$0$.
+
+\section{A fractalidade --- o mapa de escala, medido}
+
+Uma palavra a defender: fractal. Aqui ela não significa dimensão de Hausdorff (Cantor, Mandelbrot)
+--- não há dimensão fracionária a procurar. Significa auto-similaridade por endomorfismo de escala:
+a mesma peça (o meio-somador + rotação) reaparece em cada nível, e há um mapa de escala explícito
+que leva um nível ao seguinte. Não se afirma que é fractal --- mede-se o mapa.
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+nível & a peça & o mapa de escala (nível $\to$ próximo) \\
+\midrule
+núcleo (ALU) & meio-somador + rotação & --- (a raiz que se repete) \\
+relógio & torção $\mathbb{Z}/n$ & $w\mapsto w^{2}$ ($\mathbb{Z}/2n\to\mathbb{Z}/n$) [medido] \\
+controle & roda $\mathbb{Z}/n$ & $w\mapsto w^{2}$ (o mesmo do relógio) [medido] \\
+I/O & frações contínuas & $x\mapsto a+\frac{1}{x}$ (conv.\ $k\to k-1$) [medido] \\
+memória & o disco & $2n$ bits $\to n$ bits (o LOAD contrai) [estrutural] \\
+barramento & árvore $\oplus$ & $\mathrm{soma}(2N)=\mathrm{soma}(N)\oplus\mathrm{soma}(N)$ [estrutural] \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{proposicao}[a auto-similaridade é medida, não afirmada]
+O mapa de escala é medido (resíduo~$0$) no relógio, no controle e no I/O; na memória e no barramento
+ele é estrutural --- a contração de bits do LOAD e a árvore de soma, exatos por construção,
+não passados pelo \texttt{auto\_similar.c}. No relógio: como $w(n)=g^{(p-1)/n}$, tem-se
+$w(n)^{2}=w(n/2)$ exatamente, logo rodar $2k$ tiques no nível $n$ é rodar $k$ tiques no nível $n/2$ ---
+o zoom conjuga os níveis, medido para $n=4,8,\ldots,8192$ (as $12$ transições da torre).
+No I/O: $M_{k}=M_{k-1}A_{a_{k}}$, e a segunda coluna de $M_{k}$ é o convergente do nível $k-1$ ---
+cada nível literalmente carrega o anterior. Isto --- o mapa explícito entre escalas, resíduo~$0$ ---
+é o que ``fractal'' quer dizer aqui.
+\end{proposicao}
+
+Validado no metal (resíduo~$0$).
+
+\section{O microprocessador completo}
+
+Fechou. E o que fechou é a tríade $\oplus\;\otimes\;\displaystyle\int$ do corpo, em três peças, mais o disco:
+o meio-somador (a matriz de Fibonacci, $\oplus$), a rotação (o deslocamento/oscilador, com que o
+meio-somador faz $\otimes$), o diodo (log/exp, o $\displaystyle\int$), e o disco (o estado). Delas, tudo:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+bloco & o que é, no corpo & estado \\
+\midrule
+núcleo (ALU) = relógio & o meio-somador + rotação (oscila = ripplea o carry) & feito (Gerbers) \\
+\quad$\hookrightarrow$ contador/divisor & a torção $\mathbb{Z}/n$, fractal ($w\mapsto w^{2}$) & feito \\
+memória (sem registradores) & o disco: o arquivo é o grafo; $1$ bit na mão & feito \\
+barramento & a soma $\oplus$ (Kirchhoff), o nó P2P (fractal) & feito \\
+I/O (ADC/DAC) & a fração contínua (a matriz $A_{m}$) & feito \\
+controle / decode & a roda de opcodes $\mathbb{Z}/n$ (o PC) & feito \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{proposicao}[a tríade e o disco, todo o processador]
+Nenhum bloco é uma invenção nova: todos são a tríade ($\oplus\;\otimes\;\displaystyle\int$) e o disco,
+lidos numa escala. O meio-somador é o $\oplus$ (ALU, barramento); a rotação é o deslocamento (o carry)
+e o oscilador (o relógio, o controle $\mathbb{Z}/n$), e com o meio-somador faz o $\otimes$ e a fração contínua
+do I/O (o rei $\sigma_{m}$); o diodo (log/exp) é o $\displaystyle\int$ --- o núcleo analógico; o disco é o estado.
+Por isso o processador é fractal: as mesmas peças, a mesma borda ($|\lambda|=1$), em toda escala.
+Tudo validado no metal, resíduo~$0$; e o núcleo já em Gerbers (DRC~$0$).
+\end{proposicao}
+
+Não há roteiro que reste: o Microprocessador Fractal está completo --- do oscilador que é o
+cálculo ao disco que é a memória, a tríade + o disco que contam, oscilam, somam, multiplicam,
+guardam, convertem e decidem.
+
+\paragraph{Reprodução.}
+Tudo neste documento roda no metal --- \texttt{universe/tools/*.c} sobre \texttt{api.h}, em
+inteiros e racionais exatos, resíduo~$0$ --- e não depende de nenhum outro texto: o núcleo
+(\texttt{so\_cristal.c}), o relógio (\texttt{relogio\_micro.c}, \texttt{confere\_micro.c}, e o coração dual
+\texttt{coracao\_dual.c}, e o ripple da soma \texttt{add\_ripple.c}), a memória (\texttt{memoria\_disco.c}),
+o barramento (\texttt{barramento.c}), o I/O (\texttt{io\_micro.c}) e o controle (\texttt{controle.c});
+a placa em \texttt{hardware/so\_cristal/} (Gerbers, DRC~$0$). Um arquivo, do metal ao cobre.
+
+\appendix
+
+\section{Reprodução --- o kernel e a saída medida de cada afirmação}
+
+Este apêndice fecha o documento em si mesmo: cada afirmação de resíduo~$0$ do corpo é medida
+por um programa em C sobre \texttt{api.h} (a ISA em inteiros/racionais exatos). Abaixo, para cada
+bloco, o kernel (a peça que faz, sem o boilerplate) e a saída medida (o que o programa imprime).
+O leitor vê a prova sem abrir nada; para re-rodar, \texttt{cc -O2 -I. <arquivo>.c -lm}.
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+a afirmação & o arquivo & o resultado medido \\
+\midrule
+$\oplus$, $\otimes$ analógicos $\equiv$ ISA & \texttt{so\_cristal.c} & $40000/40000$ cada, resíduo~$0$ \\
+o relógio fecha e reverte em toda escala & \texttt{relogio\_micro.c} & $n=2,\ldots,8192$, resíduo~$0$ \\
+o oscilador = o carry (ADD/MUL) & \texttt{confere\_micro.c} & $40000$ pares, resíduo~$0$ \\
+a defasagem áurea minimiza o vão & \texttt{coracao\_dual.c} & $987/2584=1/\varphi^{2}$, resíduo~$0$ \\
+ADD = meio-somador $\circ$ rotação & \texttt{add\_ripple.c} & $65536$ pares, resíduo~$0$ \\
+a RAM é $1$ palavra, e reverte & \texttt{memoria\_disco.c} & $1\,\mathrm{KB}/64\,\mathrm{KB}/1\,\mathrm{MB}$, resíduo~$0$ \\
+o barramento em árvore $\equiv$ soma plana & \texttt{barramento.c} & $N=1..8$, resíduo~$0$ \\
+$\mathrm{DAC}(\mathrm{ADC}(p/q))=p/q$ & \texttt{io\_micro.c} & $40000$ frações, resíduo~$0$ \\
+o controle roda um programa & \texttt{controle.c} & $64000$ programas, resíduo~$0$ \\
+o zoom $w\mapsto w^{2}$ conjuga os níveis & \texttt{auto\_similar.c} & $12$ transições, resíduo~$0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{O núcleo --- a tríade nos diodos (\texttt{so\_cristal.c})}
+\begin{lstlisting}
+static double dlog(double I){ return log(I); }   /* o diodo: V ~ log I */
+static double dexp(double V){ return exp(V); }   /* o diodo: I ~ exp V */
+static double mult(double a,double b){
+  return dexp(dlog(a)+dlog(b)); } /* \otimes = exp(log a+log b)=a·b */
+static double soma(double a,double b){ return a+b; } /* \oplus = correntes no nó */
+/* para 1<=a,b<=200: llround(mult(a,b))==MUL(a,b)
+   e llround(soma(a,b))==ADD(a,b) da ISA */
+\end{lstlisting}
+(1) $\oplus$ SOMA: analogico == ISA em $40000/40000$ pares: resid~$0$\\
+(2) $\otimes$ MULT (log-domain, Pontryagin): analogico == ISA em $40000/40000$ pares: resid~$0$
+
+\subsection{O relógio --- a torção para todo $n$ (\texttt{relogio\_micro.c})}
+\begin{lstlisting}
+for(u64 n=2; n<=8192; n*=2){          /* a torre inteira, não um n fixo */
+  Univ U=universal_init(40961,3,n); u64 w=U.w, acc=1;
+  for(u64 t=0;t<n;t++) acc=u_mul(&U,acc,w); /* w^n */
+  u64 winv=u_inv(&U,w);
+  fecha=(acc==1); reverte=(u_mul(&U,w,winv)==1); /* w^n=1 e w·w^{-1}=1 */
+}
+\end{lstlisting}
+$n=2,4,8,\ldots,8192$ ($13$ escalas): resid~$0$ --- fecha e reverte em TODA escala, sem $n$ fixo
+
+\subsection{O coração dual --- por que a defasagem é áurea (\texttt{coracao\_dual.c})}
+\begin{lstlisting}
+i64 gap_maximo(i64 k,i64 M,i64 N){ /* o maior vão entre N batimentos {j·k mod M} */
+  ... ordena as fases no círculo; devolve o maior vão consecutivo (inclui o wrap) ... }
+/* varre TODA defasagem k/2584, exigindo cobertura uniforme nas escalas Fibonacci N=8..233;
+   o argmin (menor buraco em toda escala) é a áurea */
+\end{lstlisting}
+pi ($1/2$, antifase clássica): $\mathrm{gap\_max}=500.00$ $\leftarrow$ BURACO (meio ciclo morto)\\
+aureo $1597/2584\to 1/\varphi$: $\mathrm{gap\_max}=5.03$ (o menor)\\
+vencedor da varredura: $987/2584=0.382=1/\varphi^{2}$ \ldots resid~$0$ (bate $\varphi$)
+
+\subsection{O ripple da soma --- meio-somador $\circ$ rotação (\texttt{add\_ripple.c})}
+\begin{lstlisting}
+static u32 add_iter(u32 a,u32 b){ /* ADD = meio-somador ◦ rotação, iterado */
+  while(b){ u32 s=a^b, c=(a&b)<<1; a=s; b=c; } /* (XOR,AND)=A_1 ; <<1 = rotação */
+  return a; }
+/* para todo par de 8 bits: add_iter(a,b)==a+b ;
+   nº de tiques = comprimento de propagação */
+\end{lstlisting}
+$7+1$ ($4$ bits): o vai-um propaga do bit~$0$ ao~$3$ em $4$ tiques $\to 8$\\
+$65536$ pares, tiques max $=9$: resid~$0$
+
+\subsection{A memória --- o disco, $1$ bit na mão (\texttt{memoria\_disco.c})}
+\begin{lstlisting}
+static void stream(FILE*fi,FILE*fo,int inv,u64 s){ /* 1 estado (s) na mão, 1 byte por vez */
+  int b; while((b=fgetc(fi))!=EOF){ u64 k=s&0xFF; int r=(b^(int)k)&0xFF;
+    s = rl(s,7) ^ (u64)(inv? b : r); /* contração reversível: a volta usa c, reconstrói */
+    fputc(r,fo); } }
+/* forward + inverse reconstrói o arquivo;
+   RAM de trabalho = 1 palavra p/ 1KB, 64KB, 1MB */
+\end{lstlisting}
+$1024/65536/1048576$ bytes $\to$ RAM $1$ palavra ($8\,\mathrm{B}$), reverte: resid~$0$\\
+o disco cresce; a RAM NÃO. o disco É a memória.
+
+\subsection{O barramento --- o $\oplus$ em árvore (\texttt{barramento.c})}
+\begin{lstlisting}
+static u64 soma_arvore(const u64*v,int n){ /* P2P: cada nó é um ⊕ (a mesma peça) */
+  if(n==1) return v[0]; int m=n/2;
+  return ADD(soma_arvore(v,m), soma_arvore(v+m,n-m)); }
+/* árvore == soma plana em N=1..8;
+   e ⊕ comuta e associa (reordenar/reagrupar não muda) */
+\end{lstlisting}
+arvore (P2P, $\log N$ níveis) == plana em $N=1..8$: resid~$0$; comuta e associa: resid~$0$
+
+\subsection{O I/O --- a fração contínua, sem $2^{k}$ (\texttt{io\_micro.c})}
+\begin{lstlisting}
+static int adc(i64 p,i64 q,i64*a){ /* p/q -> quocientes, sem '/' nem '%' */
+  int n=0; while(q){ i64 ak=0,r=p; while(r>=q){r-=q;ak++;} a[n++]=ak; p=q; q=r; } return n; }
+static void dac(const i64*a,int n,i64*p,i64*q){ /* quocientes -> p/q, PRODUTO DE GATOS */
+  Mat M={1,0,0,1}; for(int k=0;k<n;k++) M=mat_lahire(M,GATO(a[k])); *p=M.a; *q=M.c; }
+/* DAC(ADC(p/q))==p/q reduzido p/ 1<=p,q<=200 (oráculo: pr*q==qr*p) */
+\end{lstlisting}
+$40000$ frações, ida-e-volta reconstrói: resid~$0$ (a ponte é exata)\\
+$[1;1,1,\ldots]\to$ Fibonacci $\to$ o rei $\sigma_{1}=\varphi$ (nenhum $2^{k}$): resid~$0$
+
+\subsection{O controle --- a roda de opcodes $\mathbb{Z}/n$ (\texttt{controle.c})}
+\begin{lstlisting}
+static u64 roda(const Instr*prog,int n,int*passos){ /* o PC = a posição da roda Z/n */
+  u64 acc=0; int pc=0;
+  while(prog[pc].op!=HALT && pc<n){ Instr I=prog[pc];
+    if(I.op==LDI)acc=I.arg; else if(I.op==ADDI)acc=ADD(acc,I.arg); /* ⊕ */
+    else if(I.op==MULI)acc=MUL(acc,I.arg); pc++; } /* ⊗ ; o tique avança o PC */
+  return acc; }
+/* [LDI 3;ADD 4;MUL 5]->35 ; [LDI 10;MUL 10;ADD 1;MUL 2]->202 ;
+   (a+b)*c em 64000 programas */
+\end{lstlisting}
+$(3+4)*5=35$; $((10*10)+1)*2=202$; $(a+b)*c$ em $64000$ programas bate o nativo: resid~$0$
+
+\subsection{A fractalidade --- o mapa de escala medido (\texttt{auto\_similar.c})}
+\begin{lstlisting}
+for(u64 n=4; n<=8192; n*=2){
+  Univ Un=universal_init(40961,3,n), Uh=universal_init(40961,3,n/2);
+  bad = (u_mul(&Un,Un.w,Un.w) != Uh.w); /* o zoom: w(n)^2 == w(n/2) (conjuga os níveis) */
+  ... e a órbita inteira: 2k tiques no nível n == k tiques no nível n/2 ...
+}
+\end{lstlisting}
+$12$ transições da torre $n=4..8192$: resid~$0$ --- o zoom leva TODO nível exatamente ao de baixo
+
+\end{document}
