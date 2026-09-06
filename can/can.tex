@@ -1,0 +1,782 @@
+% !TeX program = pdflatex
+%
+% can_micro.tex — Leitura de CAN/J1939 pelo Microprocessador Fractal
+%
+% Ponte entre o microprocessador fractal e um barramento CAN de veículo pesado.
+%
+% Autor: Aarão Melo Lopes
+%
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  framerule=0.4pt,
+  xleftmargin=1em,
+  xrightmargin=1em,
+  aboveskip=0.8em,
+  belowskip=0.8em
+}
+
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+
+\title{\textbf{Microprocessador Fractal --- leitura de CAN/J1939}\\[0.4em]
+\large do barramento físico ao estado do veículo}
+
+\author{Aarão Melo Lopes}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+Este documento estabelece uma ponte entre o Microprocessador Fractal e a leitura
+de um barramento CAN utilizado em veículos pesados. O objetivo não é afirmar que
+CAN seja literalmente a operação $\oplus$ do corpo, mas mostrar como o mesmo
+microprocessador pode ser empregado para receber, armazenar, decodificar e
+transformar os frames CAN em grandezas físicas.
+
+A cadeia é:
+
+\[
+\boxed{
+\text{CAN físico}
+\rightarrow
+\text{frame}
+\rightarrow
+\text{identificador}
+\rightarrow
+\text{PGN}
+\rightarrow
+\text{SPN}
+\rightarrow
+\text{bytes}
+\rightarrow
+\text{escala}
+\rightarrow
+\text{estado físico}
+}
+\]
+
+No vocabulário do Microprocessador Fractal, a entrada é uma sequência discreta
+que chega pelo I/O, o identificador funciona como assinatura, o controle seleciona
+o interpretador, a memória conserva o fluxo e a tríade $\oplus,\otimes,\int$
+realiza as transformações necessárias.
+
+Assim, ler CAN não exige introduzir um novo princípio computacional: exige apenas
+uma nova assinatura sobre o mesmo corpo de cálculo.
+
+\end{abstract}
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{O problema}
+
+Um caminhão moderno possui diversos controladores eletrônicos:
+
+\begin{center}
+\begin{tabular}{c}
+ECU do motor
+\\
+$\downarrow$
+\\
+transmissão --- ABS/EBS --- painel --- retarder --- telemetria
+\\
+$\uparrow$
+\\
+CAN
+\end{tabular}
+\end{center}
+
+Esses controladores compartilham um meio físico. Cada participante pode produzir
+mensagens e os demais podem observar o tráfego.
+
+O problema do leitor não é inicialmente ``entender o caminhão''. O problema é
+receber uma sequência de bits e descobrir a transformação que leva essa sequência
+a uma grandeza com significado físico.
+
+O Microprocessador Fractal já possui exatamente os ofícios necessários:
+
+\[
+\text{I/O}
+\rightarrow
+\text{controle}
+\rightarrow
+\text{memória}
+\rightarrow
+\text{núcleo}.
+\]
+
+A leitura CAN é, portanto, um caso de entrada do mundo físico para o corpo.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{CAN como entrada física}
+
+O CAN utiliza dois condutores diferenciais:
+
+\[
+\mathrm{CANH},\qquad \mathrm{CANL}.
+\]
+
+O transceptor converte a diferença elétrica entre esses condutores em bits digitais.
+O microprocessador não precisa operar diretamente sobre a tensão do barramento:
+
+\[
+\boxed{
+\text{CANH/CANL}
+\rightarrow
+\text{transceptor}
+\rightarrow
+\text{bits}
+}
+\]
+
+A partir desse ponto, o barramento deixa de ser uma grandeza analógica para o
+processador e passa a ser uma sequência discreta.
+
+Um frame pode ser representado abstratamente por
+
+\[
+F=(I,D,L),
+\]
+
+onde
+
+\begin{itemize}
+\item $I$ é o identificador;
+\item $D$ é a sequência de dados;
+\item $L$ é o comprimento dos dados.
+\end{itemize}
+
+Para o microprocessador:
+
+\[
+\boxed{
+F=(I,d_0,d_1,\ldots,d_{L-1})
+}
+\]
+
+é simplesmente uma palavra de entrada.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{A primeira assinatura --- o identificador}
+
+O identificador CAN não é ainda a grandeza física. Ele funciona como uma assinatura
+da mensagem.
+
+O leitor recebe:
+
+\[
+I \quad+\quad D
+\]
+
+e utiliza $I$ para selecionar a interpretação apropriada.
+
+No caso de protocolos de veículos pesados, como J1939, identificadores estendidos
+contêm campos que permitem determinar a classe da mensagem e, consequentemente,
+o seu PGN.
+
+A arquitetura pode ser representada como:
+
+\[
+\boxed{
+I
+\rightarrow
+\mathrm{decode}
+\rightarrow
+\mathrm{PGN}
+\rightarrow
+\mathrm{decoder}
+}
+\]
+
+Isso corresponde diretamente ao controle do Microprocessador Fractal:
+
+\[
+\text{PC}
+\rightarrow
+\text{opcode}
+\rightarrow
+\text{operação}.
+\]
+
+A diferença é que, no CAN, a ``operação'' não é ADD ou MUL: é o interpretador
+associado àquela assinatura de mensagem.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{PGN e SPN como assinaturas}
+
+No J1939, o PGN identifica um grupo de parâmetros transmitidos juntos.
+
+Dentro desse grupo aparecem os parâmetros individuais, os SPNs.
+
+A leitura pode ser vista como uma árvore:
+
+\[
+\boxed{
+\text{frame}
+\rightarrow
+\text{PGN}
+\rightarrow
+\text{SPN}
+\rightarrow
+\text{campo de bits}
+}
+\]
+
+O mesmo fluxo de bytes pode, portanto, produzir interpretações diferentes conforme
+a assinatura que o acompanha.
+
+Isso é precisamente o princípio usado no Microprocessador Fractal:
+
+\[
+\text{mesmo corpo}
++
+\text{assinatura}
+=
+\text{ofício}.
+\]
+
+O CAN fornece o fluxo; o identificador seleciona a régua; o decoder realiza a leitura.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{O dado ainda não é uma grandeza física}
+
+Considere uma mensagem abstrata:
+
+\begin{lstlisting}
+ID   = 18F00401
+DATA = 12 34 56 78 9A BC DE F0
+\end{lstlisting}
+
+Os bytes
+
+\[
+12,\;34,\;56,\;78,\;9A,\;BC,\;DE,\;F0
+\]
+
+não são automaticamente ``RPM'', ``temperatura'' ou ``torque''.
+
+Primeiro é necessário selecionar um campo de bits.
+
+Se um parâmetro ocupa os bits $r,\ldots,s$, define-se:
+
+\[
+R =
+\sum_{k=r}^{s}
+b_k2^{k-r}.
+\]
+
+Em uma implementação binária convencional, essa extração pode ser realizada por
+máscara e deslocamento:
+
+\[
+R=(D\mathbin{\&}M)\gg r.
+\]
+
+O Microprocessador Fractal interpreta isso como uma operação de I/O: o fluxo bruto
+é contraído para o estado relevante.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{A transformação para unidade física}
+
+Depois da extração, o valor bruto $R$ ainda pode não ser a grandeza física.
+
+A conversão típica possui a forma
+
+\[
+x=S R+O,
+\]
+
+onde
+
+\begin{itemize}
+\item $R$ é o valor bruto;
+\item $S$ é o fator de escala;
+\item $O$ é o offset;
+\item $x$ é a grandeza física.
+\end{itemize}
+
+Portanto:
+
+\[
+\boxed{
+\text{bits}
+\rightarrow
+R
+\rightarrow
+SR+O
+\rightarrow
+x
+}
+\]
+
+A multiplicação por $S$ e a soma de $O$ pertencem diretamente ao núcleo:
+
+\[
+R
+\xrightarrow{\otimes S}
+SR
+\xrightarrow{\oplus O}
+SR+O.
+\]
+
+Aqui a tríade aparece de maneira operacional:
+
+\[
+\boxed{
+\oplus \quad \otimes
+}
+\]
+
+são suficientes para realizar a transformação linear.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{A leitura completa}
+
+A leitura de um parâmetro CAN pode então ser escrita como a composição
+
+\[
+\mathcal{R}
+=
+\mathcal{S}
+\circ
+\mathcal{E}
+\circ
+\mathcal{D}
+\circ
+\mathcal{I},
+\]
+
+onde:
+
+\begin{center}
+\begin{tabular}{ll}
+$\mathcal{I}$ & recebe o frame;\\
+$\mathcal{D}$ & decodifica a assinatura;\\
+$\mathcal{E}$ & extrai os bits;\\
+$\mathcal{S}$ & aplica escala e offset.
+\end{tabular}
+\end{center}
+
+Explicitamente:
+
+\[
+F
+\longmapsto
+(I,D)
+\longmapsto
+(PGN,SPN)
+\longmapsto
+R
+\longmapsto
+SR+O.
+\]
+
+O resultado final é um estado físico:
+
+\[
+\boxed{x=SR+O}.
+\]
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{O Microprocessador Fractal como leitor CAN}
+
+A arquitetura completa fica:
+
+\begin{center}
+\begin{tabular}{c}
+CANH/CANL
+\\
+$\downarrow$
+\\
+transceptor
+\\
+$\downarrow$
+\\
+frame $(I,D)$
+\\
+$\downarrow$
+\\
+controle / decode
+\\
+$\downarrow$
+\\
+PGN / SPN
+\\
+$\downarrow$
+\\
+I/O --- extração de bits
+\\
+$\downarrow$
+\\
+$\oplus,\otimes$
+\\
+$\downarrow$
+\\
+grandeza física
+\\
+$\downarrow$
+\\
+disco / estado
+\end{tabular}
+\end{center}
+
+Cada bloco já possui um correspondente na arquitetura:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+CAN & Microprocessador & função\\
+\midrule
+frame & entrada & sequência discreta\\
+identifier & assinatura & seleção do interpretador\\
+PGN/SPN & controle & classificação\\
+bit field & I/O & extração\\
+scale/offset & núcleo & $\otimes,\oplus$\\
+log/exp, se necessário & núcleo analógico & $\int$\\
+registro do frame & disco & estado\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{O barramento não é literalmente o $\oplus$}
+
+Há uma distinção importante.
+
+Não se afirma:
+
+\[
+\mathrm{CAN}=\oplus.
+\]
+
+O CAN possui um mecanismo específico de arbitragem e transmissão diferencial.
+O $\oplus$ do Microprocessador Fractal é a operação algébrica de soma.
+
+A correspondência correta é:
+
+\[
+\boxed{
+\text{CAN}
+\sim
+\text{meio compartilhado distribuído}
+}
+\]
+
+enquanto
+
+\[
+\boxed{
+\oplus
+=
+\text{operação de soma do núcleo}.
+}
+\]
+
+A relação entre ambos está no fato de que múltiplos participantes utilizam um
+mesmo meio, mas os mecanismos físicos e algébricos não devem ser identificados.
+
+Essa separação protege a arquitetura contra uma equivalência indevida.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{A memória --- o fluxo CAN como disco}
+
+O barramento produz uma sequência temporal:
+
+\[
+F_0,F_1,F_2,\ldots,F_t.
+\]
+
+O processador pode tratá-la como um arquivo:
+
+\[
+\mathcal{D}
+=
+(F_0,F_1,\ldots,F_t).
+\]
+
+O disco, no vocabulário do corpo, torna-se o histórico do barramento.
+
+Uma janela temporal pode então ser contraída:
+
+\[
+\mathcal{D}
+\rightarrow
+\mathcal{D}_{\mathrm{PGN}}
+\rightarrow
+\mathcal{D}_{\mathrm{SPN}}
+\rightarrow
+\mathcal{D}_{x}.
+\]
+
+O mesmo princípio de contração utilizado pela memória do Microprocessador Fractal
+aparece agora como filtragem e interpretação do fluxo.
+
+O arquivo cresce com o tráfego; a palavra de trabalho necessária para interpretar
+cada frame não precisa crescer proporcionalmente ao tamanho do histórico.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{O tempo --- CAN como sequência de estados}
+
+O barramento não fornece apenas valores; fornece valores no tempo.
+
+Assim:
+
+\[
+x_0,x_1,x_2,\ldots
+\]
+
+constitui uma trajetória do veículo.
+
+O leitor pode construir:
+
+\[
+\Delta x_t=x_t-x_{t-1},
+\]
+
+ou uma taxa aproximada:
+
+\[
+\dot{x}_t
+\approx
+\frac{x_t-x_{t-1}}{t_t-t_{t-1}}.
+\]
+
+Novamente, apenas as operações básicas aparecem:
+
+\[
+\ominus,\quad \otimes,\quad \otimes^{-1}.
+\]
+
+A sequência CAN transforma-se, portanto, em uma dinâmica discreta:
+
+\[
+x_{t+1}=F(x_t,u_t).
+\]
+
+O veículo passa a ser observado como uma sequência de estados.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Um leitor mínimo}
+
+Um leitor conceitual pode ser escrito como:
+
+\begin{lstlisting}
+while (can_read(&frame)) {
+
+    id   = frame.id;
+    data = frame.data;
+
+    pgn = decode_pgn(id);
+
+    if (pgn == PGN_ALVO) {
+
+        raw = extract_bits(data);
+
+        value = raw * SCALE + OFFSET;
+
+        store(value);
+    }
+}
+\end{lstlisting}
+
+A estrutura corresponde diretamente ao corpo:
+
+\begin{lstlisting}
+READ
+  |
+DECODE
+  |
+EXTRACT
+  |
+MUL
+  |
+ADD
+  |
+STORE
+\end{lstlisting}
+
+Não aparece um novo computador. Aparece uma nova aplicação do mesmo computador.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{A assinatura como régua}
+
+O ponto central desta integração pode ser escrito:
+
+\[
+\boxed{
+\text{frame bruto}
++
+\text{assinatura}
+\longrightarrow
+\text{grandeza}.
+}
+\]
+
+A assinatura determina:
+
+\[
+\Sigma_{\mathrm{CAN}}
+=
+(\mathrm{ID},\mathrm{PGN},\mathrm{SPN},
+\mathrm{posição},\mathrm{comprimento},
+\mathrm{escala},\mathrm{offset}).
+\]
+
+Ela funciona como uma régua.
+
+A mesma sequência de bits pode ser lida como diferentes objetos dependendo da
+régua aplicada. O corpo computacional, entretanto, permanece:
+
+\[
+\oplus,\qquad\otimes,\qquad\text{controle},\qquad\text{estado}.
+\]
+
+Muda a assinatura; não muda o núcleo.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{A ponte completa}
+
+A integração pode finalmente ser resumida por:
+
+\[
+\boxed{
+\begin{array}{ccccccccc}
+\text{veículo}
+&\rightarrow&
+\text{CAN}
+&\rightarrow&
+\text{frame}
+&\rightarrow&
+\text{PGN/SPN}
+&\rightarrow&
+\text{estado físico}
+\\
+&&&&
+\downarrow
+&&
+\downarrow
+&&
+\downarrow
+\\
+&&&
+\text{I/O}
+&
+\rightarrow
+&
+\text{controle}
+&
+\rightarrow
+&
+\oplus,\otimes
+\end{array}
+}
+\]
+
+O barramento fornece a sequência.
+
+A assinatura determina como lê-la.
+
+O controle seleciona o caminho.
+
+O I/O extrai o campo.
+
+O núcleo transforma o valor.
+
+O disco conserva o estado.
+
+Assim, o Microprocessador Fractal pode ser utilizado como uma máquina de leitura de
+um barramento CAN sem introduzir uma arquitetura externa ao corpo:
+
+\[
+\boxed{
+\text{CAN}
+\rightarrow
+\text{I/O}
+\rightarrow
+\text{controle}
+\rightarrow
+\text{tríade}
+\rightarrow
+\text{estado}.
+}
+\]
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Conclusão}
+
+O CAN fornece um caso físico particularmente claro para a arquitetura do
+Microprocessador Fractal.
+
+Não porque CAN seja ``a mesma coisa'' que o corpo, mas porque o caminho de uma
+grandeza física até uma decisão computacional apresenta exatamente a decomposição
+que o corpo procura:
+
+\[
+\text{meio}
+\rightarrow
+\text{assinatura}
+\rightarrow
+\text{decodificação}
+\rightarrow
+\text{transformação}
+\rightarrow
+\text{estado}.
+\]
+
+Em um caminhão, uma rotação do motor nasce como fenômeno físico, é medida por um
+sensor, convertida por uma ECU em dados digitais, transportada pelo CAN, identificada
+por sua assinatura, extraída de um campo de bits e finalmente transformada em um
+número físico.
+
+No Microprocessador Fractal, esse caminho pode ser lido como:
+
+\[
+\boxed{
+\text{I/O}
+\rightarrow
+\text{controle}
+\rightarrow
+\oplus,\otimes
+\rightarrow
+\text{memória}.
+}
+\]
+
+O barramento externo torna-se, assim, uma nova fronteira de realização do mesmo
+princípio: não uma nova máquina, mas o mesmo corpo recebendo uma nova régua.
+
+\end{document}
