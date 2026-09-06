@@ -1,28 +1,45 @@
 # CAN + J1939 sobre o Microprocessador Fractal
 
-Modelo digital de referência para integração entre o **Microprocessador Fractal**, um controlador **CAN**, o barramento CAN e a camada semântica **J1939**.
+Modelo digital de referência para integração entre o **Microprocessador Fractal**, um controlador **CAN**, o **barramento CAN** e a camada semântica **J1939**.
 
 O projeto separa explicitamente:
 
 ```text
-ISA / máquina
-      ↓
-   micro.c
-      ↓ I/O
-    can.c
-      ↓
- can_bus.c
-      ↓ frame CAN
-   j1939.c
-      ↓
- grandeza física
+                         ISA / máquina
+                              │
+                              ▼
+                           micro.c
+                              │
+                             I/O
+                              │
+                              ▼
+                            can.c
+                              │
+                              ▼
+                         can_bus.c
+                              │
+                           frame CAN
+                              │
+                              ▼
+                           j1939.c
+                              │
+                              ▼
+                       grandeza física
+
+
+                    ┌──────────────────┐
+                    │   can_micro.c    │
+                    │ integração /     │
+                    │ testbench        │
+                    └──────────────────┘
+                       camada de composição
 ```
 
 O objetivo é demonstrar que um frame CAN/J1939 pode ser recebido, arbitrado, validado, interpretado e transformado em uma grandeza física utilizando a máquina de referência do Microprocessador Fractal, **sem incorporar CAN ou J1939 à ISA**.
 
 ---
 
-## Arquitetura
+# Arquitetura
 
 ```text
 ┌──────────────────────────────┐
@@ -33,54 +50,83 @@ O objetivo é demonstrar que um frame CAN/J1939 pode ser recebido, arbitrado, va
                │
 ┌──────────────▼───────────────┐
 │           micro.c            │
-│    modelo de referência      │
+│     modelo de referência     │
 │                              │
-│    MOVE / ALU / DIV          │
-│    memória / PC / instr 80b  │
+│     MOVE / ALU / DIV         │
+│     memória / PC / instr 80b │
 └──────────────┬───────────────┘
-               │ I/O
+               │
+              I/O
+               │
 ┌──────────────▼───────────────┐
 │            can.c             │
-│     controlador CAN digital  │
+│      controlador CAN         │
 │                              │
-│  frame / arbitragem / CRC    │
-│  stuffing / ACK / erros      │
-│  TEC / REC / BUS_OFF         │
+│ frame / arbitragem / CRC     │
+│ stuffing / ACK / erros       │
+│ TEC / REC / BUS_OFF          │
 └──────────────┬───────────────┘
                │
 ┌──────────────▼───────────────┐
 │          can_bus.c            │
-│       barramento CAN          │
+│       barramento CAN         │
 │                              │
-│    múltiplos nós             │
-│    arbitragem                │
-│    can_bus_tick()            │
+│       múltiplos nós          │
+│       arbitragem             │
+│       can_bus_tick()         │
 └──────────────┬───────────────┘
-               │ frame
+               │
+             frame
+               │
 ┌──────────────▼───────────────┐
 │           j1939.c            │
-│       semântica J1939        │
+│        semântica J1939       │
 │                              │
-│  Priority / DP / PF / PS     │
-│  SA / DA / PGN               │
-│  SPN / escala                │
+│ Priority / DP / PF / PS      │
+│ SA / DA / PGN                │
+│ SPN / escala                 │
 └──────────────┬───────────────┘
                │
                ▼
         grandeza física
 ```
 
-### Regra de dependência
+A integração das camadas é realizada por `can_micro.c`, que funciona como **compositor e testbench**, sem criar uma dependência estrutural entre os módulos.
+
+---
+
+# Regra de dependência
 
 ```text
 micro.c      NÃO conhece CAN
+
 can.c        NÃO conhece J1939
+
 can_bus.c    NÃO conhece J1939
+
 j1939.c      NÃO conhece o micro
-can_micro.c  conhece as camadas para integração e testes
+
+can_micro.c  conhece as interfaces
+             para integração e testes
 ```
 
-A separação permite testar e evoluir cada camada independentemente.
+Essa separação permite testar e evoluir cada camada independentemente.
+
+A arquitetura pode ser entendida como:
+
+```text
+ISA
+ ↓
+máquina
+ ↓
+I/O
+ ↓
+protocolo
+ ↓
+semântica
+ ↓
+grandeza física
+```
 
 ---
 
@@ -109,7 +155,9 @@ Sua abstração fundamental é:
 
 ```text
 MOVE  → transferência de estado
+
 ALU   → transformação
+
 HALT  → controle do modelo
 ```
 
@@ -140,24 +188,26 @@ Diferentemente de uma simples mailbox RX/TX, o controlador modela elementos esse
 
 ```text
 frame
-  │
-  ├── validação
-  ├── arbitragem
-  ├── bit stuffing
-  ├── CRC-15
-  ├── ACK
-  └── tratamento de erros
+ │
+ ├── validação
+ ├── arbitragem
+ ├── bit stuffing
+ ├── CRC-15
+ ├── ACK
+ └── tratamento de erros
 ```
 
 ## Frame CAN
 
 ```c
 typedef struct {
+
     uint32_t id;
     uint8_t  data[8];
     uint8_t  dlc;
     uint8_t  extended;
     uint8_t  rtr;
+
 } CanFrame;
 ```
 
@@ -170,7 +220,9 @@ DLC            → 0..8
 RTR            → 0 ou 1
 ```
 
-## Arbitragem
+---
+
+# Arbitragem
 
 O modelo utiliza a regra fundamental do CAN:
 
@@ -257,11 +309,11 @@ e detectar corrupção:
 
 ```text
 frame
-  ↓
+ ↓
 bit alterado
-  ↓
+ ↓
 CRC mismatch
-  ↓
+ ↓
 erro
 ```
 
@@ -279,7 +331,7 @@ Quando existe um receptor/ouvintes no barramento:
 transmissor
     │
     ▼
- frame
+  frame
     │
     ▼
  receptor
@@ -310,6 +362,7 @@ O controlador mantém:
 
 ```text
 TEC = Transmit Error Counter
+
 REC = Receive Error Counter
 ```
 
@@ -333,7 +386,7 @@ O limite de `TEC` é modelado até:
 TEC = 256
 ```
 
-permitindo a transição correta para:
+permitindo a transição para:
 
 ```text
 BUS_OFF
@@ -356,13 +409,14 @@ que permite sair do estado `BUS_OFF` conforme o contrato do modelo.
 Conceitualmente:
 
 ```text
-             CAN BUS
-                │
-       ┌────────┼────────┐
-       │        │        │
-      ECU1     ECU2     ECU3
-       │        │        │
-       └────────┴────────┘
+                 CAN BUS
+
+                  │
+          ┌───────┼───────┐
+          │       │       │
+        ECU1    ECU2    ECU3
+          │       │       │
+          └───────┴───────┘
 ```
 
 Cada nó possui seu controlador CAN.
@@ -400,12 +454,12 @@ A camada J1939 interpreta um CAN extended frame de 29 bits.
 O identificador é dividido em:
 
 ```text
-28..26  Priority       3 bits
-25      Reserved       1 bit
-24      Data Page      1 bit
-23..16  PDU Format     8 bits
-15..8   PDU Specific   8 bits
-7..0    Source Addr    8 bits
+28..26  Priority        3 bits
+25      Reserved        1 bit
+24      Data Page       1 bit
+23..16  PDU Format      8 bits
+15..8   PDU Specific    8 bits
+7..0    Source Addr     8 bits
 ```
 
 Visualmente:
@@ -568,35 +622,44 @@ O mesmo resultado é obtido através da máquina do Microprocessador Fractal.
 
 # Integração
 
-`can_micro.c` funciona exclusivamente como integrador e testbench.
+`can_micro.c` funciona exclusivamente como **integrador e testbench**.
 
-A sequência é:
+Ele compõe as interfaces das camadas sem alterar suas responsabilidades.
+
+A sequência lógica é:
 
 ```text
-frame
-  ↓
-can_bus / can.c
-  ↓
-arbitragem
-  ↓
-frame CAN
-  ↓
-can_rx()
-  ↓
-J1939 ID decode
-  ↓
-PGN
-  ↓
-SPN
-  ↓
-extração dos bits
-  ↓
-micro.c
-  ├── MOVE / STORE
-  ├── ALU
-  └── DIV
-  ↓
-grandeza física
+                 CAN BUS
+                    │
+                    ▼
+                 can.c
+                    │
+                 frame
+                    │
+                    ▼
+                 j1939.c
+                    │
+                ID decode
+                    │
+                    ▼
+                   PGN
+                    │
+                    ▼
+                   SPN
+                    │
+                    ▼
+              extração raw
+                    │
+                    ▼
+                 micro.c
+              ┌─────┼─────┐
+              │     │     │
+            MOVE   ALU   DIV
+              │     │     │
+              └─────┼─────┘
+                    │
+                    ▼
+             grandeza física
 ```
 
 O teste de integração utiliza:
@@ -738,9 +801,11 @@ Resultado esperado:
 
 ```text
 === auditoria CAN / J1939 ===
+
   [can]        resid 0
   [j1939]      resid 0
   [protocol]   resid 0
+
 [OK] can + j1939 + protocol resid 0
 ```
 
@@ -748,10 +813,15 @@ seguido da integração:
 
 ```text
 CAN  ID=0x0CFEEE00 DLC=8
-J1939 PGN=65262 pri=3 SA=0x00
-SPN 110 raw=1920  J1939=20 C  MICRO=20 C
 
-RESULTADO: Engine Coolant Temperature = 20 deg C
+J1939 PGN=65262 pri=3 SA=0x00
+
+SPN 110 raw=1920
+J1939=20 C
+MICRO=20 C
+
+RESULTADO:
+Engine Coolant Temperature = 20 deg C
 ```
 
 ---
@@ -794,13 +864,15 @@ Isso permite manter a separação entre:
 
 ```text
 ISA
-  ↓
-periférico
-  ↓
+ ↓
+máquina
+ ↓
+I/O
+ ↓
 protocolo
-  ↓
+ ↓
 semântica
-  ↓
+ ↓
 grandeza física
 ```
 
@@ -827,7 +899,7 @@ can_micro.c
 
 ## Resultado consolidado
 
-A suíte atual termina com:
+A suíte termina com:
 
 ```text
 [OK] can + j1939 + protocol resid 0
@@ -849,33 +921,39 @@ tanto pela camada J1939 quanto pela realização através do Microprocessador Fr
                          ISA
                           │
                           ▼
-                      micro.c
+                       micro.c
                           │
                          I/O
                           │
                           ▼
-                        CAN
-                          │
-              ┌───────────┴───────────┐
-              │                       │
-          can.c                    can_bus.c
-              │                       │
-              └───────────┬───────────┘
-                          │
-                       frame
+                        can.c
                           │
                           ▼
-                       J1939
+                     can_bus.c
+                          │
+                        frame
+                          │
+                          ▼
+                       j1939.c
                           │
                      PGN / SPN
                           │
                           ▼
-                   grandeza física
+                  grandeza física
+
+
+              ┌──────────────────────┐
+              │     can_micro.c      │
+              │                      │
+              │ composição /         │
+              │ integração /         │
+              │ testbench            │
+              └──────────────────────┘
 ```
 
 A camada de comunicação permanece **externa à ISA**.
 
-O Microprocessador Fractal não precisa conhecer CAN ou J1939 para executar a transformação de estado.
+O Microprocessador Fractal não precisa conhecer CAN ou J1939 para executar a transformação computacional.
 
 **CAN fornece o frame.**
 
@@ -886,3 +964,5 @@ O Microprocessador Fractal não precisa conhecer CAN ou J1939 para executar a tr
 **J1939 fornece a semântica da mensagem.**
 
 **O Microprocessador Fractal realiza a transformação computacional.**
+
+A composição dessas camadas ocorre em `can_micro.c`, preservando a independência estrutural de cada módulo.
