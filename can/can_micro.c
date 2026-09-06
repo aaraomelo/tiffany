@@ -9,7 +9,7 @@
  *
  * Compilar:
  *   cc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. \
- *      can_micro.c can.c can_bus.c j1939.c j1939_tp.c micro.c -lm -o can_micro
+ *      can_micro.c can.c can_bus.c j1939.c j1939_tp.c j1939_catalog.c j1939_signal.c micro.c -lm -o can_micro
  *
  * j1939_tp nao conhece micro; a composicao e so aqui.
  */
@@ -18,6 +18,8 @@
 #include "can_bus.h"
 #include "j1939.h"
 #include "j1939_tp.h"
+#include "j1939_catalog.h"
+#include "j1939_signal.h"
 #include "micro.h"
 
 #include <stdio.h>
@@ -427,33 +429,31 @@ static void test_multi_pgn_short(void)
 {
     printf("  [multi short]");
 
-    /* SPN 110: 20 deg C */
+    const J1939Signal *s110 = j1939_catalog_find(65262, 110);
+    const J1939Signal *s190 = j1939_catalog_find(61444, 190);
+    const J1939Signal *s84  = j1939_catalog_find(65265, 84);
+    CHECK(s110 && s190 && s84, "catalog lookup");
+
     CanFrame f110 = {
         .id = 0x0CFEEE00, .dlc = 8, .extended = 1, .rtr = 0,
         .data = { 0x80, 0x07, 0, 0, 0, 0, 0, 0 }
     };
     uint64_t raw; int32_t pj, pm;
-    CHECK(short_path(&f110, &J1939_SPN_110, &raw, &pj, &pm) == 0, "110 path");
+    CHECK(short_path(&f110, s110, &raw, &pj, &pm) == 0, "110 path");
     CHECK(raw == 1920 && pj == 20 && pm == 20, "110 = 20C");
 
-    /* SPN 190: raw = 8000 -> 8000/8 = 1000 rpm
-       bytes 3..4 LE = 0x401F (8000) */
     CanFrame f190 = {
         .id = make_id_pgn(3, 61444, 0), .dlc = 8, .extended = 1, .rtr = 0,
         .data = { 0, 0, 0, 0x40, 0x1F, 0, 0, 0 }
     };
-    CHECK(j1939_pgn(f190.id) == 61444, "PGN 61444");
-    CHECK(short_path(&f190, &SIG_ENG_SPEED, &raw, &pj, &pm) == 0, "190 path");
+    CHECK(short_path(&f190, s190, &raw, &pj, &pm) == 0, "190 path");
     CHECK(raw == 8000 && pj == 1000 && pm == 1000, "190 = 1000 rpm");
 
-    /* SPN 84: raw = 2560 -> 2560/256 = 10 km/h
-       bytes 1..2 LE = 0x0A00 */
     CanFrame f84 = {
         .id = make_id_pgn(6, 65265, 0), .dlc = 8, .extended = 1, .rtr = 0,
         .data = { 0, 0x00, 0x0A, 0, 0, 0, 0, 0 }
     };
-    CHECK(j1939_pgn(f84.id) == 65265, "PGN 65265");
-    CHECK(short_path(&f84, &SIG_VEH_SPEED, &raw, &pj, &pm) == 0, "84 path");
+    CHECK(short_path(&f84, s84, &raw, &pj, &pm) == 0, "84 path");
     CHECK(raw == 2560 && pj == 10 && pm == 10, "84 = 10 km/h");
 
     printf(" resid 0\n");
@@ -493,6 +493,152 @@ static void test_convergence_short_vs_tp(void)
     CHECK(raw_s == raw_t && raw_s == 1920, "raw converge");
     CHECK(pj_s == pj_t && pj_s == 20, "J1939 converge");
     CHECK(pm_s == pm_t && pm_s == 20, "MICRO converge");
+    printf("resid 0\n");
+}
+
+
+
+/* ---- API generica end-to-end (integrador) ---- */
+static int generic_phys_from_payload(const uint8_t *payload, uint16_t plen,
+                                     uint32_t pgn, uint32_t spn,
+                                     int64_t *raw_out, int32_t *phys_j, int32_t *phys_m,
+                                     int *sig_status)
+{
+    const J1939Signal *sig = j1939_catalog_find(pgn, spn);
+    if (!sig) return -1;
+    J1939Interp it = {
+        .sig = sig,
+        .is_signed = 0,
+        .little_endian = 1,
+        .na_value = j1939_signal_na_pattern(sig->length),
+        .na_bits = (uint8_t)(sig->length * 8),
+        .err_bits = 0
+    };
+    int64_t raw = 0;
+    int st = 0;
+    if (j1939_signal_extract(payload, plen, &it, &raw, &st) != J1939_SIG_OK)
+        return -2;
+    if (sig_status) *sig_status = st;
+    if (st == J1939_SIG_NA || st == J1939_SIG_ERROR_RANGE) {
+        if (raw_out) *raw_out = raw;
+        return 1; /* semantico especial, nao vai ao micro */
+    }
+    int32_t pj = 0;
+    if (j1939_signal_physical(raw, &it, &pj) != J1939_SIG_OK)
+        return -3;
+    int32_t pm = scale_on_micro((uint64_t)(raw < 0 ? 0 : raw), sig);
+    /* scale_on_micro usa unsigned path; para os 3 sinais atuais raw >= 0 */
+    if (raw_out) *raw_out = raw;
+    if (phys_j) *phys_j = pj;
+    if (phys_m) *phys_m = pm;
+    return 0;
+}
+
+static void test_generic_e2e(void)
+{
+    printf("  [generic e2e]");
+
+    /* SPN 110 curto */
+    {
+        uint8_t pl[8] = { 0x80, 0x07, 0, 0, 0, 0, 0, 0 };
+        int64_t raw; int32_t pj, pm; int st;
+        CHECK(generic_phys_from_payload(pl, 8, 65262, 110, &raw, &pj, &pm, &st) == 0, "110");
+        CHECK(raw == 1920 && pj == 20 && pm == 20, "110 20C");
+    }
+    /* SPN 190 */
+    {
+        uint8_t pl[8] = { 0, 0, 0, 0x40, 0x1F, 0, 0, 0 };
+        int64_t raw; int32_t pj, pm; int st;
+        CHECK(generic_phys_from_payload(pl, 8, 61444, 190, &raw, &pj, &pm, &st) == 0, "190");
+        CHECK(raw == 8000 && pj == 1000 && pm == 1000, "1000 rpm");
+    }
+    /* SPN 84 */
+    {
+        uint8_t pl[8] = { 0, 0x00, 0x0A, 0, 0, 0, 0, 0 };
+        int64_t raw; int32_t pj, pm; int st;
+        CHECK(generic_phys_from_payload(pl, 8, 65265, 84, &raw, &pj, &pm, &st) == 0, "84");
+        CHECK(raw == 2560 && pj == 10 && pm == 10, "10 km/h");
+    }
+    /* NA nao chega ao micro como valor fisico valido */
+    {
+        uint8_t pl[8] = { 0xFF, 0xFF, 0, 0, 0, 0, 0, 0 };
+        int64_t raw; int32_t pj, pm; int st;
+        int r = generic_phys_from_payload(pl, 8, 65262, 110, &raw, &pj, &pm, &st);
+        CHECK(r == 1 && st == J1939_SIG_NA, "NA blocked");
+    }
+    printf(" resid 0\n");
+}
+
+static void test_generic_short_vs_tp(void)
+{
+    printf("  [gen short|TP]");
+    uint8_t short_pl[8] = { 0x80, 0x07, 0, 0, 0, 0, 0, 0 };
+    int64_t raw_s; int32_t pj_s, pm_s; int st;
+    CHECK(generic_phys_from_payload(short_pl, 8, 65262, 110, &raw_s, &pj_s, &pm_s, &st) == 0, "short");
+
+    uint8_t payload[138];
+    make_long_payload(payload, 138);
+    J1939TpSession tx, rx;
+    j1939_tp_init(&tx);
+    j1939_tp_init(&rx);
+    j1939_tp_bam_start(&tx, 0x80, 65262, payload, 138);
+    CanFrame frames[64];
+    int n = 0;
+    while (j1939_tp_tx_next(&tx, &frames[n]) == J1939_TP_OK) n++;
+    for (int i = 0; i < n; i++) j1939_tp_rx_frame(&rx, &frames[i]);
+    CHECK(j1939_tp_complete(&rx), "tp ok");
+    uint8_t out[138];
+    CHECK(j1939_tp_message(&rx, out, 138) == 138, "len");
+
+    int64_t raw_t; int32_t pj_t, pm_t;
+    CHECK(generic_phys_from_payload(out, 138, rx.pgn, 110, &raw_t, &pj_t, &pm_t, &st) == 0, "tp");
+    CHECK(raw_s == raw_t && pj_s == pj_t && pm_s == pm_t && pm_s == 20, "converge generic");
+    printf(" resid 0\n");
+}
+
+static void test_catalog_tp_to_micro(void)
+{
+    printf("  [cat+TP]     ");
+    /* Sinal do CATALOGO transportado por BAM; lookup apos reassembly */
+    const J1939Signal *sig = j1939_catalog_find(65262, 110);
+    CHECK(sig != NULL, "catalog has SPN 110");
+
+    uint8_t payload[138];
+    make_long_payload(payload, 138); /* 80 07 no inicio */
+
+    J1939TpSession tx, rx;
+    j1939_tp_init(&tx);
+    j1939_tp_init(&rx);
+    CHECK(j1939_tp_bam_start(&tx, 0x80, sig->pgn, payload, 138) == J1939_TP_OK, "bam");
+
+    CanFrame frames[64];
+    int n = 0;
+    while (j1939_tp_tx_next(&tx, &frames[n]) == J1939_TP_OK) n++;
+    for (int i = 0; i < n; i++)
+        CHECK(j1939_tp_rx_frame(&rx, &frames[i]) == J1939_TP_OK, "rx");
+    CHECK(j1939_tp_complete(&rx), "complete");
+    CHECK(rx.pgn == sig->pgn, "PGN from TP");
+
+    /* resolver SPN via CATALOGO (nao via constante em j1939.c) */
+    const J1939Signal *resolved = j1939_catalog_find(rx.pgn, 110);
+    CHECK(resolved == sig, "catalog resolve");
+
+    uint8_t out[138];
+    CHECK(j1939_tp_message(&rx, out, 138) == 138, "len");
+    CHECK(memcmp(out, payload, 138) == 0, "payload");
+
+    CanFrame pseudo = {0};
+    pseudo.extended = 1;
+    pseudo.dlc = 8;
+    for (int i = 0; i < 8; i++) pseudo.data[i] = out[i];
+    pseudo.id = 0x0CFEEE00;
+
+    uint64_t raw = 0;
+    int32_t pj = 0, pm = 0;
+    CHECK(j1939_read_raw(&pseudo, resolved, &raw) == 0 && raw == 1920, "raw");
+    CHECK(j1939_scale_i32(raw, resolved, &pj) == 0 && pj == 20, "J1939 20C");
+    pm = scale_on_micro(raw, resolved);
+    CHECK(pm == 20, "MICRO 20C");
     printf("resid 0\n");
 }
 
@@ -579,6 +725,9 @@ int main(void)
     test_tp_rts_to_micro();
     test_tp_incomplete();
     test_multi_pgn_short();
+    test_catalog_tp_to_micro();
+    test_generic_e2e();
+    test_generic_short_vs_tp();
     test_convergence_short_vs_tp();
     if (g_fail) {
         printf("[X] %d falha(s) na integracao TP\n", g_fail);

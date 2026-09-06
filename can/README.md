@@ -71,6 +71,13 @@ Snapshots:
 .snapshot/can-j1939-tp-micro/     + TP + integração MICRO
 ```
 
+### Camada de catálogo (nova, pós-freeze)
+
+```text
+j1939.c         = gramática do protocolo
+j1939_catalog.c = significado dos sinais (crescível)
+```
+
 ### GAPs registrados (não implementados)
 
 ```text
@@ -94,6 +101,8 @@ Diagnóstico J1939
 | `can_bus.h` / `can_bus.c` | Barramento multi-nó |
 | `j1939.h` / `j1939.c` | Decodificação J1939 + interpretação de sinais |
 | `j1939_tp.h` / `j1939_tp.c` | Transport Protocol |
+| `j1939_catalog.h` / `j1939_catalog.c` | Catálogo PGN/SPN (significado dos sinais) |
+| `j1939_catalog_demo.c` | Demo do catálogo sem micro |
 | `j1939_tp_demo.c`  | Auditoria isolada do TP |
 | `can_micro.c`      | Composição + testes de integração |
 | `so_cristal.c`     | Validação analógica da tríade (separada) |
@@ -144,7 +153,7 @@ Somente `can_micro.c` inclui e compõe todas as interfaces.
 ```bash
 # suite completa (CAN + J1939 + TP + MICRO)
 cc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. \
-   can_micro.c can.c can_bus.c j1939.c j1939_tp.c micro.c -lm -o can_micro
+   can_micro.c can.c can_bus.c j1939.c j1939_tp.c j1939_catalog.c micro.c -lm -o can_micro
 ./can_micro
 
 # auditoria isolada do TP
@@ -161,7 +170,7 @@ Windows (CMD):
 
 ```cmd
 gcc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. ^
-  can_micro.c can.c can_bus.c j1939.c j1939_tp.c micro.c -lm -o can_micro.exe
+  can_micro.c can.c can_bus.c j1939.c j1939_tp.c j1939_catalog.c micro.c -lm -o can_micro.exe
 can_micro.exe
 ```
 
