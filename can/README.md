@@ -23,12 +23,22 @@ can.h / can.c                 controlador CAN (frame, arb, CRC, stuff, ACK, TEC)
          │
 can_bus.h / can_bus.c         barramento multi-nó
          │
-j1939.h / j1939.c             PGN / SPN / escala assinada
+j1939.h / j1939.c             decodificação J1939 + interpretação de sinais
          │
-j1939_tp.h / j1939_tp.c       BAM / RTS-CTS / DT / reassembly
-         │
-can_micro.c                   ÚNICA camada de composição / testbench
+         ├──── mensagem curta (≤ 8 B) ─────────────┐
+         │                                         │
+         └→ j1939_tp (BAM / RTS-CTS / DT)          │
+                 → reassembly → mensagem completa ─┤
+                                                   ▼
+                                            can_micro.c
+                                          (única composição)
+                                                   │
+                                                   ▼
+                                                 MICRO
 ```
+
+Os dois caminhos (curto e TP) convergem para a **mesma representação semântica**
+antes de entrar no Microprocessador Fractal.
 
 ### Regras de dependência (congeladas)
 
@@ -82,7 +92,7 @@ Diagnóstico J1939
 | `micro.h` / `micro.c` | Máquina de referência |
 | `can.h` / `can.c`  | Controlador CAN |
 | `can_bus.h` / `can_bus.c` | Barramento multi-nó |
-| `j1939.h` / `j1939.c` | Semântica J1939 |
+| `j1939.h` / `j1939.c` | Decodificação J1939 + interpretação de sinais |
 | `j1939_tp.h` / `j1939_tp.c` | Transport Protocol |
 | `j1939_tp_demo.c`  | Auditoria isolada do TP |
 | `can_micro.c`      | Composição + testes de integração |
@@ -113,6 +123,21 @@ mesmo PGN, mesmo SPN, mesmo raw, mesmo resultado no MICRO
 ```
 
 ---
+
+## Isolamento estrutural
+
+Cada módulo compila **standalone** (sem puxar o Micro nem camadas superiores):
+
+```bash
+# prova de isolamento (sem linkar can_micro)
+cc -c -std=c11 -I. micro.c
+cc -c -std=c11 -I. can.c
+cc -c -std=c11 -I. can_bus.c
+cc -c -std=c11 -I. j1939.c
+cc -c -std=c11 -I. j1939_tp.c
+```
+
+Somente `can_micro.c` inclui e compõe todas as interfaces.
 
 ## Compilação
 
