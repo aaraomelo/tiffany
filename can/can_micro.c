@@ -9,12 +9,15 @@
  *
  * Compilar:
  *   cc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. \
- *      can_micro.c can.c can_bus.c j1939.c micro.c -lm -o can_micro
+ *      can_micro.c can.c can_bus.c j1939.c j1939_tp.c micro.c -lm -o can_micro
+ *
+ * j1939_tp nao conhece micro; a composicao e so aqui.
  */
 
 #include "can.h"
 #include "can_bus.h"
 #include "j1939.h"
+#include "j1939_tp.h"
 #include "micro.h"
 
 #include <stdio.h>
@@ -238,7 +241,290 @@ static int32_t scale_on_micro(uint64_t raw, const J1939Signal *sig)
     return (int32_t)LOAD(&M, M_QUOT);
 }
 
+
+/* ====================================================================
+ * Integracao: J1939-TP -> mensagem -> PGN/SPN -> micro
+ * (composicao apenas; TP e micro nao se conhecem)
+ * ==================================================================== */
+
+/* 138 bytes: bytes[0..1] = SPN 110 raw LE (0x80,0x07)=1920; resto filler */
+static void make_long_payload(uint8_t *buf, uint16_t len)
+{
+    for (uint16_t i = 0; i < len; i++)
+        buf[i] = (uint8_t)(0x40 + (i % 0x40));
+    buf[0] = 0x80;
+    buf[1] = 0x07;  /* raw 1920 -> 20 deg C via SPN 110 */
+}
+
+/*
+ * Apos reassembly: interpreta primeiros bytes como frame J1939 de dados
+ * (SPN ainda cabe em 8 bytes; a mensagem longa e o envelope TP).
+ * j1939.c nao e alterado.
+ */
+static int interpret_spn110(const uint8_t *msg, uint16_t len,
+                            uint32_t expected_pgn,
+                            uint64_t *raw_out, int32_t *phys_j, int32_t *phys_m)
+{
+    if (!msg || len < 2 || expected_pgn != J1939_SPN_110.pgn)
+        return -1;
+
+    CanFrame pseudo = {0};
+    pseudo.extended = 1;
+    pseudo.dlc = 8;
+    for (int i = 0; i < 8 && i < (int)len; i++)
+        pseudo.data[i] = msg[i];
+    pseudo.id = 0x0CFEEE00; /* ID coerente com PGN 65262 SA=0 */
+
+    uint64_t raw = 0;
+    if (j1939_read_raw(&pseudo, &J1939_SPN_110, &raw) != 0)
+        return -1;
+    int32_t pj = 0;
+    if (j1939_scale_i32(raw, &J1939_SPN_110, &pj) != 0)
+        return -1;
+    int32_t pm = scale_on_micro(raw, &J1939_SPN_110);
+    if (raw_out) *raw_out = raw;
+    if (phys_j) *phys_j = pj;
+    if (phys_m) *phys_m = pm;
+    return 0;
+}
+
+static void test_tp_bam_to_micro(void)
+{
+    printf("  [BAM->msg]   ");
+    uint8_t payload[138];
+    make_long_payload(payload, 138);
+
+    J1939TpSession tx, rx;
+    j1939_tp_init(&tx);
+    j1939_tp_init(&rx);
+    CHECK(j1939_tp_bam_start(&tx, 0x80, J1939_SPN_110.pgn, payload, 138) == J1939_TP_OK,
+          "bam start");
+
+    CanFrame frames[64];
+    int n = 0;
+    for (;;) {
+        int r = j1939_tp_tx_next(&tx, &frames[n]);
+        if (r == J1939_TP_DONE) break;
+        CHECK(r == J1939_TP_OK, "tx");
+        n++;
+        CHECK(n < 64, "budget");
+    }
+    CHECK(n == 1 + 20, "1 BAM + 20 DT");
+
+    for (int i = 0; i < n; i++)
+        CHECK(j1939_tp_rx_frame(&rx, &frames[i]) == J1939_TP_OK, "rx");
+
+    CHECK(j1939_tp_complete(&rx), "complete");
+    CHECK(rx.pgn == J1939_SPN_110.pgn, "PGN preserved");
+
+    uint8_t out[138];
+    CHECK(j1939_tp_message(&rx, out, 138) == 138, "len 138");
+    CHECK(memcmp(out, payload, 138) == 0, "bit-identical");
+
+    uint64_t raw = 0;
+    int32_t pj = 0, pm = 0;
+    CHECK(interpret_spn110(out, 138, rx.pgn, &raw, &pj, &pm) == 0, "SPN");
+    CHECK(raw == 1920, "raw 1920");
+    CHECK(pj == 20 && pm == 20, "J1939==MICRO==20");
+    printf("resid 0\n");
+}
+
+static void test_tp_rts_to_micro(void)
+{
+    printf("  [RTS->msg]   ");
+    uint8_t payload[138];
+    make_long_payload(payload, 138);
+
+    J1939TpSession tx, rx;
+    j1939_tp_init(&tx);
+    j1939_tp_init(&rx);
+    CHECK(j1939_tp_rts_start(&tx, 0x10, 0x20, J1939_SPN_110.pgn, payload, 138) == J1939_TP_OK,
+          "rts start");
+
+    CanFrame f;
+    CHECK(j1939_tp_tx_next(&tx, &f) == J1939_TP_OK, "RTS");
+    CHECK(j1939_tp_rx_frame(&rx, &f) == J1939_TP_OK, "rx RTS");
+
+    CanFrame cts;
+    CHECK(j1939_tp_build_cts(&rx, &cts, 0x20) == J1939_TP_OK, "CTS");
+    CHECK(j1939_tp_rx_frame(&tx, &cts) == J1939_TP_OK, "tx CTS");
+
+    int dt = 0;
+    while (j1939_tp_tx_next(&tx, &f) == J1939_TP_OK) {
+        CHECK(j1939_tp_rx_frame(&rx, &f) == J1939_TP_OK, "DT");
+        dt++;
+    }
+    CHECK(dt == 20, "20 DT");
+    CHECK(j1939_tp_complete(&rx), "complete");
+
+    CanFrame eom;
+    CHECK(j1939_tp_build_eom(&rx, &eom, 0x20) == J1939_TP_OK, "EOM");
+
+    CHECK(rx.pgn == J1939_SPN_110.pgn, "PGN");
+    uint8_t out[138];
+    CHECK(j1939_tp_message(&rx, out, 138) == 138, "len");
+    CHECK(memcmp(out, payload, 138) == 0, "bit-identical");
+
+    uint64_t raw = 0;
+    int32_t pj = 0, pm = 0;
+    CHECK(interpret_spn110(out, 138, rx.pgn, &raw, &pj, &pm) == 0, "SPN");
+    CHECK(raw == 1920 && pj == 20 && pm == 20, "TP==J1939==MICRO");
+    printf("resid 0\n");
+}
+
+
+/* Sinais de teste no INTEGRADOR apenas — j1939.c nao e alterado */
+static const J1939Signal SIG_ENG_SPEED = {
+    /* PGN 61444 EEC1, SPN 190 — bytes 3..4 (0-based), 0.125 rpm/bit, offset 0
+       physical = raw * 1 / 8   (porque 0.125 = 1/8) */
+    .pgn = 61444,
+    .spn = 190,
+    .start_byte = 3,
+    .length = 2,
+    .offset = 0,
+    .scale_num = 1,
+    .scale_den = 8,
+    .name = "Engine Speed",
+    .unit = "rpm"
+};
+
+static const J1939Signal SIG_VEH_SPEED = {
+    /* PGN 65265 CCVS, SPN 84 — bytes 1..2, 1/256 km/h per bit */
+    .pgn = 65265,
+    .spn = 84,
+    .start_byte = 1,
+    .length = 2,
+    .offset = 0,
+    .scale_num = 1,
+    .scale_den = 256,
+    .name = "Wheel-Based Vehicle Speed",
+    .unit = "km/h"
+};
+
+static uint32_t make_id_pgn(uint8_t pri, uint32_t pgn, uint8_t sa)
+{
+    return ((uint32_t)(pri & 7) << 26) | ((pgn & 0x3FFFFu) << 8) | sa;
+}
+
+/* caminho curto: frame CAN -> j1939 -> micro */
+static int short_path(const CanFrame *f, const J1939Signal *sig,
+                      uint64_t *raw_out, int32_t *pj, int32_t *pm)
+{
+    if (!j1939_frame_valid(f)) return -1;
+    if (j1939_pgn(f->id) != sig->pgn) return -2;
+    uint64_t raw = 0;
+    if (j1939_read_raw(f, sig, &raw) != 0) return -3;
+    int32_t a = 0, b = 0;
+    if (j1939_scale_i32(raw, sig, &a) != 0) return -4;
+    b = scale_on_micro(raw, sig);
+    if (raw_out) *raw_out = raw;
+    if (pj) *pj = a;
+    if (pm) *pm = b;
+    return 0;
+}
+
+static void test_multi_pgn_short(void)
+{
+    printf("  [multi short]");
+
+    /* SPN 110: 20 deg C */
+    CanFrame f110 = {
+        .id = 0x0CFEEE00, .dlc = 8, .extended = 1, .rtr = 0,
+        .data = { 0x80, 0x07, 0, 0, 0, 0, 0, 0 }
+    };
+    uint64_t raw; int32_t pj, pm;
+    CHECK(short_path(&f110, &J1939_SPN_110, &raw, &pj, &pm) == 0, "110 path");
+    CHECK(raw == 1920 && pj == 20 && pm == 20, "110 = 20C");
+
+    /* SPN 190: raw = 8000 -> 8000/8 = 1000 rpm
+       bytes 3..4 LE = 0x401F (8000) */
+    CanFrame f190 = {
+        .id = make_id_pgn(3, 61444, 0), .dlc = 8, .extended = 1, .rtr = 0,
+        .data = { 0, 0, 0, 0x40, 0x1F, 0, 0, 0 }
+    };
+    CHECK(j1939_pgn(f190.id) == 61444, "PGN 61444");
+    CHECK(short_path(&f190, &SIG_ENG_SPEED, &raw, &pj, &pm) == 0, "190 path");
+    CHECK(raw == 8000 && pj == 1000 && pm == 1000, "190 = 1000 rpm");
+
+    /* SPN 84: raw = 2560 -> 2560/256 = 10 km/h
+       bytes 1..2 LE = 0x0A00 */
+    CanFrame f84 = {
+        .id = make_id_pgn(6, 65265, 0), .dlc = 8, .extended = 1, .rtr = 0,
+        .data = { 0, 0x00, 0x0A, 0, 0, 0, 0, 0 }
+    };
+    CHECK(j1939_pgn(f84.id) == 65265, "PGN 65265");
+    CHECK(short_path(&f84, &SIG_VEH_SPEED, &raw, &pj, &pm) == 0, "84 path");
+    CHECK(raw == 2560 && pj == 10 && pm == 10, "84 = 10 km/h");
+
+    printf(" resid 0\n");
+}
+
+static void test_convergence_short_vs_tp(void)
+{
+    printf("  [converge]   ");
+    /* Mesmo SPN 110: caminho curto e caminho TP devem coincidir */
+
+    CanFrame shortf = {
+        .id = 0x0CFEEE00, .dlc = 8, .extended = 1, .rtr = 0,
+        .data = { 0x80, 0x07, 0, 0, 0, 0, 0, 0 }
+    };
+    uint64_t raw_s; int32_t pj_s, pm_s;
+    CHECK(short_path(&shortf, &J1939_SPN_110, &raw_s, &pj_s, &pm_s) == 0, "short");
+
+    uint8_t payload[138];
+    make_long_payload(payload, 138); /* ja coloca 80 07 no inicio */
+
+    J1939TpSession tx, rx;
+    j1939_tp_init(&tx);
+    j1939_tp_init(&rx);
+    j1939_tp_bam_start(&tx, 0x80, J1939_SPN_110.pgn, payload, 138);
+    CanFrame frames[64];
+    int n = 0;
+    while (j1939_tp_tx_next(&tx, &frames[n]) == J1939_TP_OK) n++;
+    for (int i = 0; i < n; i++)
+        j1939_tp_rx_frame(&rx, &frames[i]);
+    CHECK(j1939_tp_complete(&rx), "tp complete");
+
+    uint8_t out[138];
+    CHECK(j1939_tp_message(&rx, out, 138) == 138, "len");
+    uint64_t raw_t; int32_t pj_t, pm_t;
+    CHECK(interpret_spn110(out, 138, rx.pgn, &raw_t, &pj_t, &pm_t) == 0, "tp interpret");
+
+    CHECK(raw_s == raw_t && raw_s == 1920, "raw converge");
+    CHECK(pj_s == pj_t && pj_s == 20, "J1939 converge");
+    CHECK(pm_s == pm_t && pm_s == 20, "MICRO converge");
+    printf("resid 0\n");
+}
+
+static void test_tp_incomplete(void)
+
+{
+    printf("  [incomplete] ");
+    uint8_t payload[138];
+    make_long_payload(payload, 138);
+
+    J1939TpSession tx, rx;
+    j1939_tp_init(&tx);
+    j1939_tp_init(&rx);
+    j1939_tp_bam_start(&tx, 0x80, J1939_SPN_110.pgn, payload, 138);
+
+    CanFrame frames[64];
+    int n = 0;
+    while (j1939_tp_tx_next(&tx, &frames[n]) == J1939_TP_OK) n++;
+
+    /* so BAM + 5 DT — incompleto */
+    for (int i = 0; i < 6 && i < n; i++)
+        j1939_tp_rx_frame(&rx, &frames[i]);
+
+    CHECK(!j1939_tp_complete(&rx), "not complete");
+    uint8_t out[138];
+    CHECK(j1939_tp_message(&rx, out, 138) < 0, "no message API");
+    /* nao chama micro: incompleto nao atravessa a fronteira */
+    printf("resid 0\n");
+}
+
 static int run_demo(void)
+
 {
     CanFrame frame = {
         .id = 0x0CFEEE00,
@@ -287,5 +573,18 @@ int main(void)
         return 1;
     }
     printf("[OK] can + j1939 + protocol resid 0\n\n");
+
+    printf("=== integracao J1939-TP / MICRO ===\n");
+    test_tp_bam_to_micro();
+    test_tp_rts_to_micro();
+    test_tp_incomplete();
+    test_multi_pgn_short();
+    test_convergence_short_vs_tp();
+    if (g_fail) {
+        printf("[X] %d falha(s) na integracao TP\n", g_fail);
+        return 1;
+    }
+    printf("[OK] TP -> J1939 -> MICRO\n\n");
+
     return run_demo();
 }
