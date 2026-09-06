@@ -1,210 +1,247 @@
-# CAN + J1939 + TP sobre o Microprocessador Fractal
-
-Modelo digital de referência: o **Microprocessador Fractal** processa grandezas
-extraídas de frames **CAN/J1939**, inclusive mensagens longas via **J1939-TP**,
-**sem incorporar protocolo à ISA**.
+# CAN + J1939 + TP + Catálogo + Sinal → Microprocessador Fractal
 
 ```text
-                    CAN / J1939 curto ──────┐
-                                            ├→ mensagem semântica → MICRO
-                    CAN / J1939 TP ─────────┘
+CAN + J1939 + TP  OVER  MICROPROCESSOR FRACTAL
+ARCHITECTURAL BASELINE  v1.0
+```
+
+> **O protocolo é externo à ISA.**
+>
+> CAN, J1939 e J1939-TP realizam transporte e interpretação de dados.
+> A camada de composição converte esse resultado em grandezas semânticas.
+> O Microprocessador Fractal recebe apenas essas grandezas e executa suas
+> operações, **sem conhecer CAN, J1939 ou J1939-TP**.
+
+$$
+\boxed{\text{CAN/J1939/TP} \rightarrow \text{semântica} \rightarrow \text{MICRO}}
+$$
+
+**Baseline intocável:** `.snapshot/arch-closed/`
+
+---
+
+Modelo digital de referência: o **Microprocessador Fractal** consome **grandezas
+já interpretadas**, sem conhecer CAN, J1939, TP ou catálogo.
+
+---
+
+## Princípio arquitetural
+
+> **Transport independence:** a camada semântica recebe uma mensagem J1939 completa
+> independentemente de ela ter sido transportada por um frame CAN curto ou por
+> J1939-TP. A camada de execução recebe apenas a grandeza interpretada.
+
+```text
+CAN/J1939 curto ──┐
+                  ├──→ interpretação genérica ─→ grandeza ─→ MICRO
+J1939-TP ─────────┘
+```
+
+O Micro **não** precisa saber PGN, SPN, origem (curto/TP), reassembly ou escala.
+
+---
+
+## Cadeia de responsabilidades
+
+| Módulo | Responsabilidade | Conhece |
+|--------|------------------|---------|
+| `can.c` | COMO o frame CAN funciona | — |
+| `can_bus.c` | COMO o barramento arbitra | can |
+| `j1939.c` | COMO decodificar o ID/payload | can frame |
+| `j1939_tp.c` | COMO transportar >8 bytes | can, j1939 |
+| `j1939_catalog.c` | O QUE o sinal significa (só dados) | j1939 tipos |
+| `j1939_signal.c` | COMO extrair/converter números | catalog, j1939 |
+| `can_micro.c` | COMO compor tudo | todas as interfaces |
+| `micro.c` | COMO executar transformação | api.h |
+
+**Camadas congeladas:** micro, can, can_bus, j1939, j1939_tp.  
+**Validado:** catalog, signal.  
+**Integrador:** can_micro.
+
+---
+
+## Fluxo end-to-end
+
+```text
+CAN frame
+   ↓
+J1939 decode (ID → PGN)
+   ↓
+short  ──ou──  TP → reassembly → mensagem completa
+   ↓
+catalog_find(PGN, SPN) → J1939Signal*
+   ↓
+signal_extract → raw (+ NA/signed/endian)
+   ↓
+signal_physical → grandeza
+   ↓
+MICRO (MOVE / ALU / DIV)
+```
+
+Demonstrado:
+
+```text
+SPN 110 → 20 °C
+SPN 190 → 1000 rpm
+SPN 84  → 10 km/h
+NA      → bloqueado (não entra no MICRO)
+short   ≡ TP
 ```
 
 ---
 
-## Arquitetura
+## Contratos de API
 
-```text
-api.h / micro.h / micro.c     ISA + máquina (MOVE / ALU / DIV)
-         │
-        I/O
-         │
-can.h / can.c                 controlador CAN (frame, arb, CRC, stuff, ACK, TEC)
-         │
-can_bus.h / can_bus.c         barramento multi-nó
-         │
-j1939.h / j1939.c             decodificação J1939 + interpretação de sinais
-         │
-         ├──── mensagem curta (≤ 8 B) ─────────────┐
-         │                                         │
-         └→ j1939_tp (BAM / RTS-CTS / DT)          │
-                 → reassembly → mensagem completa ─┤
-                                                   ▼
-                                            can_micro.c
-                                          (única composição)
-                                                   │
-                                                   ▼
-                                                 MICRO
-```
+### `j1939_catalog_find(pgn, spn)`
 
-Os dois caminhos (curto e TP) convergem para a **mesma representação semântica**
-antes de entrar no Microprocessador Fractal.
+| | |
+|--|--|
+| **Entrada** | PGN, SPN |
+| **Pré** | — |
+| **Saída** | `const J1939Signal*` ou `NULL` |
+| **Erros** | `NULL` se ausente |
+| **Chama** | ninguém (só tabela) |
+| **Não conhece** | CAN, TP, MICRO, payload |
 
-### Regras de dependência (congeladas)
-
-```text
-micro.c      NÃO conhece CAN
-can.c        NÃO conhece J1939
-can_bus.c    NÃO conhece J1939
-j1939.c      NÃO conhece micro
-j1939_tp.c   NÃO conhece micro
-can_micro.c  conhece as interfaces e compõe
-```
+`J1939Signal*` = **descrição** do sinal (metadados).
 
 ---
 
-## Status das camadas
+### `j1939_signal_extract(payload, len, interp, &raw, &status)`
 
-| Camada        | Status              |
-|---------------|---------------------|
-| `micro.c`     | **FECHADO**         |
-| `can.c`       | **FECHADO**         |
-| `can_bus.c`   | **FECHADO**         |
-| `j1939.c`     | **FECHADO**         |
-| `j1939_tp.c`  | **AUDITADO / FECHADO** |
-| `can_micro.c` | integrador          |
+| | |
+|--|--|
+| **Entrada** | bytes da mensagem + `J1939Interp` (aponta ao signal + signed/LE/NA) |
+| **Pré** | `payload` cobre `start_byte..length`; `interp->sig` válido |
+| **Saída** | `raw` (int64), `status` ∈ {OK, NA, ERROR_RANGE} |
+| **Erros** | `J1939_SIG_ERR` (oob, args nulos) |
+| **Não conhece** | CAN bus, TP, MICRO, catálogo (só o ponteiro `sig`) |
 
-Snapshots:
-
-```text
-.snapshot/can-j1939-closed/       CAN + J1939 + Micro
-.snapshot/can-j1939-tp-micro/     + TP + integração MICRO
-```
-
-### Camada de catálogo (nova, pós-freeze)
-
-```text
-j1939.c         = gramática do protocolo
-j1939_catalog.c = significado dos sinais (crescível)
-```
-
-### GAPs registrados (não implementados)
-
-```text
-timeouts T1–T4 J1939-TP
-API TX de Abort
-CTS multi-janela avançada
-Address Claim
-Request / Response
-Diagnóstico J1939
-```
+`raw` = **representação extraída** do campo.
 
 ---
 
-## Arquivos
+### `j1939_signal_physical(raw, interp, &phys)`
 
-| Arquivo            | Papel |
-|--------------------|--------|
-| `api.h`            | ISA canônica |
-| `micro.h` / `micro.c` | Máquina de referência |
-| `can.h` / `can.c`  | Controlador CAN |
-| `can_bus.h` / `can_bus.c` | Barramento multi-nó |
-| `j1939.h` / `j1939.c` | Decodificação J1939 + interpretação de sinais |
-| `j1939_tp.h` / `j1939_tp.c` | Transport Protocol |
-| `j1939_catalog.h` / `j1939_catalog.c` | Catálogo PGN/SPN (significado dos sinais) |
-| `j1939_catalog_demo.c` | Demo do catálogo sem micro |
-| `j1939_tp_demo.c`  | Auditoria isolada do TP |
-| `can_micro.c`      | Composição + testes de integração |
-| `so_cristal.c`     | Validação analógica da tríade (separada) |
+| | |
+|--|--|
+| **Entrada** | `raw`, metadados de escala/offset via `interp->sig` |
+| **Pré** | `scale_den ≠ 0`; status anterior era OK (não NA) |
+| **Saída** | `phys` (int32) ≈ `raw * num/den + offset` |
+| **Erros** | overflow / args inválidos |
+| **Não conhece** | CAN, TP, MICRO |
+
+`physical` = **grandeza interpretada**.
 
 ---
 
-## Fluxos demonstrados
+### `j1939_tp_*` (BAM / RTS-CTS / DT)
 
-### 1. Mensagem curta (≤ 8 bytes)
-
-```text
-CAN frame → ID 29-bit → PGN → SPN → raw → escala → MICRO → grandeza
-```
-
-### 2. Mensagem longa (J1939-TP)
-
-```text
-CM.BAM / RTS+CTS → DT×N → reassembly → mensagem → PGN → SPN → raw → MICRO
-```
-
-### 3. Convergência
-
-O caminho curto e o caminho TP, para o mesmo sinal, produzem:
-
-```text
-mesmo PGN, mesmo SPN, mesmo raw, mesmo resultado no MICRO
-```
+| | |
+|--|--|
+| **Entrada** | frames CAN CM/DT ou payload a fragmentar |
+| **Saída** | frames ou mensagem reassembled + PGN |
+| **Não conhece** | MICRO, catalog, signal |
 
 ---
 
-## Isolamento estrutural
+### Micro (`LOAD` / `STORE` / `roda80` / ALU)
 
-Cada módulo compila **standalone** (sem puxar o Micro nem camadas superiores):
+| | |
+|--|--|
+| **Entrada** | estado em memória (valores numéricos) |
+| **Saída** | estado transformado |
+| **Não conhece** | CAN, J1939, TP, catalog, signal |
+
+MICRO = **consumidor da grandeza** (ou de raw já preparado pelo integrador).
+
+---
+
+### `can_micro.c` (composição)
+
+Único módulo autorizado a orquestrar:
+
+```text
+catalog_find → signal_extract → signal_physical → micro
+```
+
+e a provar `short ≡ TP`.
+
+---
+
+## Demonstração narrativa
 
 ```bash
-# prova de isolamento (sem linkar can_micro)
+cc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. \
+   demo_e2e.c can.c j1939.c j1939_tp.c j1939_catalog.c j1939_signal.c micro.c -lm \
+   -o demo_e2e
+./demo_e2e
+```
+
+Conta a história completa: CAN short → TP/BAM → convergência → isolamento → `END-TO-END: PASS`.
+
+## Compilação
+
+```bash
+# suite completa
+cc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. \
+  can_micro.c can.c can_bus.c j1939.c j1939_tp.c \
+  j1939_catalog.c j1939_signal.c micro.c -lm -o can_micro
+./can_micro
+
+# isolamento por camada
 cc -c -std=c11 -I. micro.c
 cc -c -std=c11 -I. can.c
 cc -c -std=c11 -I. can_bus.c
 cc -c -std=c11 -I. j1939.c
 cc -c -std=c11 -I. j1939_tp.c
-```
+cc -c -std=c11 -I. j1939_catalog.c
+cc -c -std=c11 -I. j1939_signal.c
 
-Somente `can_micro.c` inclui e compõe todas as interfaces.
-
-## Compilação
-
-```bash
-# suite completa (CAN + J1939 + TP + MICRO)
-cc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. \
-   can_micro.c can.c can_bus.c j1939.c j1939_tp.c j1939_catalog.c micro.c -lm -o can_micro
-./can_micro
-
-# auditoria isolada do TP
-cc -O2 -std=c11 -Wall -I. \
-   j1939_tp_demo.c j1939_tp.c j1939.c can.c -o j1939_tp_demo
-./j1939_tp_demo
-
-# micro isolado
-cc -O2 -std=c11 -Wall -I. micro.c -lm -o micro
-./micro
-```
-
-Windows (CMD):
-
-```cmd
-gcc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. ^
-  can_micro.c can.c can_bus.c j1939.c j1939_tp.c j1939_catalog.c micro.c -lm -o can_micro.exe
-can_micro.exe
+# demos isolados
+cc -O2 -std=c11 -I. j1939_tp_demo.c j1939_tp.c j1939.c can.c -o j1939_tp_demo
+cc -O2 -std=c11 -I. j1939_catalog_demo.c j1939_catalog.c j1939.c can.c -o j1939_catalog_demo
+cc -O2 -std=c11 -I. j1939_signal_demo.c j1939_signal.c j1939_catalog.c j1939.c can.c -o j1939_signal_demo
 ```
 
 ---
 
-## Testes de integração (can_micro)
+## Status
 
 ```text
-CAN protocol audit          resid 0
-J1939 decode                resid 0
-TP BAM 138 B → MICRO        resid 0
-TP RTS/CTS 138 B → MICRO    resid 0
-TP incompleto não vaza      resid 0
-Convergência multi-PGN/SPN  resid 0
-Frame curto SPN 110 → 20°C  resid 0
+arch-closed  =  baseline de referência (não reabrir)
+demo_e2e.c   =  demonstração narrativa
+catálogo     =  crescimento de dados (não de arquitetura)
+```
+
+**Fase de engenharia do núcleo: encerrada.**  
+Próximo valor: publicação / demonstração / catálogo como dado.
+
+## Snapshots
+
+```text
+.snapshot/can-j1939-tp-micro/   FECHADO DEFINITIVO
+.snapshot/j1939-catalog/        VALIDADO
+.snapshot/j1939-signal/         VALIDADO
+.snapshot/arch-closed/          ARQUITETURA FUNCIONAL FECHADA
+```
+
+### GAPs (não implementados de propósito)
+
+```text
+timeouts T1–T4 TP
+Address Claim / Request-Response / Diagnostics
+CTS multi-janela avançada
+catálogo massivo (crescimento de dados, não de arquitetura)
 ```
 
 ---
 
-## Exemplos de sinais
+## Separação de conceitos
 
-| PGN   | SPN | Nome                         | Escala (modelo)        |
-|-------|-----|------------------------------|------------------------|
-| 65262 | 110 | Engine Coolant Temperature   | raw/32 − 40 °C         |
-| 61444 | 190 | Engine Speed                 | raw × 0.125 rpm        |
-| 65265 | 84  | Wheel-Based Vehicle Speed    | raw / 256 km/h         |
-
-Sinais adicionais usados nos testes de convergência são definidos **apenas** no
-integrador (`can_micro.c`), sem alterar `j1939.c`.
-
----
-
-## Princípio
-
-> O Microprocessador Fractal não sabe que existe CAN, J1939 ou TP.
-> Ele recebe estado e transforma estado (MOVE + ALU).
-> Protocolo e semântica ficam nas camadas externas; a composição é `can_micro.c`.
+```text
+J1939Signal*   = descrição do sinal
+raw            = representação extraída
+physical       = grandeza interpretada
+MICRO          = consumidor da grandeza
+```
