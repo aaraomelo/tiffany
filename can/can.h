@@ -1,11 +1,16 @@
 /*
  * can.h — modelo digital do controlador CAN (periferico)
  *
- * Camada de enlace/frame. NAO conhece J1939, PGN, SPN nem o micro.
+ * Modelado:
+ *   frame 11/29-bit, DLC, RTR
+ *   mailbox RX/TX
+ *   arbitragem (MSB-first, dominante=0 vence)
+ *   CRC-15 (polinomio 0x4599)
+ *   bit stuffing / destuff
+ *   TEC/REC + ERROR_ACTIVE / PASSIVE / BUS_OFF
+ *   ACK (via can_bus: precisa de ao menos 1 ouvinte)
  *
- *   micro.c  <- I/O ->  can.c  <- frame ->  j1939.c
- *
- * Compilar junto com can.c.
+ * NAO conhece J1939 nem micro. Multi-no: can_bus.h
  */
 
 #ifndef CAN_H
@@ -16,52 +21,71 @@
 #define CAN_MAX_DLC 8
 
 typedef struct {
-    uint32_t id;              /* 11-bit (standard) ou 29-bit (extended) */
+    uint32_t id;
     uint8_t  data[CAN_MAX_DLC];
-    uint8_t  dlc;             /* 0..8 */
-    uint8_t  extended;        /* 0 = standard 11-bit, 1 = extended 29-bit */
-    uint8_t  rtr;             /* remote transmission request */
+    uint8_t  dlc;
+    uint8_t  extended;
+    uint8_t  rtr;
 } CanFrame;
 
-/* status simples do controlador (modelo de referencia) */
 enum {
     CAN_ST_OK       = 0,
-    CAN_ST_EMPTY    = 1,      /* nada a receber */
-    CAN_ST_FULL     = 2,      /* TX ocupado */
+    CAN_ST_EMPTY    = 1,
+    CAN_ST_FULL     = 2,
     CAN_ST_ERR      = 3,
-    CAN_ST_OVERFLOW = 4
+    CAN_ST_OVERFLOW = 4,
+    CAN_ST_BUS_OFF  = 5,
+    CAN_ST_ACK_ERR  = 6
+};
+
+enum {
+    CAN_ERR_ACTIVE  = 0,
+    CAN_ERR_PASSIVE = 1,
+    CAN_ERR_BUS_OFF = 2
 };
 
 typedef struct {
     CanFrame rx;
     CanFrame tx;
     uint32_t status;
-    uint8_t  rx_pending;      /* 1 se ha frame em rx */
+    uint8_t  rx_pending;
     uint8_t  tx_pending;
+    uint16_t tec;
+    uint16_t rec;
+    uint8_t  err_state;
+    uint8_t  lost_arbitration;
+    uint8_t  ack_seen;          /* 1 se ultimo TX teve ACK */
 } CanController;
 
 void can_init(CanController *c);
 
-/* valida DLC e campos basicos */
 int  can_frame_valid(const CanFrame *f);
-
-/* helpers de ID */
 int  can_id_is_extended(const CanFrame *f);
-uint32_t can_id_mask(const CanFrame *f);   /* 0x7FF ou 0x1FFFFFFF */
+uint32_t can_id_mask(const CanFrame *f);
 
-/* RX: entrega o frame pendente em *out; retorna CAN_ST_* */
 int  can_rx(CanController *c, CanFrame *out);
-
-/* TX: enfileira frame para envio (modelo: fica em c->tx) */
 int  can_tx(CanController *c, const CanFrame *in);
-
-/*
- * Injeta um frame no controlador como se tivesse chegado do barramento.
- * (modelo de referencia — nao ha PHY real)
- */
 int  can_inject_rx(CanController *c, const CanFrame *f);
-
-/* limpa TX pendente apos "envio" bem-sucedido no modelo */
 void can_tx_done(CanController *c);
+
+/* arbitragem */
+int can_arb_bit(const CanFrame *f, int k);
+int can_arb_len(const CanFrame *f);
+int can_arbitrate(const CanFrame *a, const CanFrame *b);
+
+/* CRC-15 */
+uint16_t can_crc15(const uint8_t *bits, int nbits);
+uint16_t can_frame_crc(const CanFrame *f);
+
+/* bit stuffing */
+int can_bit_stuff(const uint8_t *in, int nbits, uint8_t *out, int out_cap);
+int can_bit_destuff(const uint8_t *in, int nbits, uint8_t *out, int out_cap);
+
+/* erros e recuperacao */
+void can_error_tx(CanController *c);
+void can_error_rx(CanController *c);
+void can_success_tx(CanController *c);
+void can_update_err_state(CanController *c);
+void can_recover(CanController *c);   /* modelo: sai de BUS_OFF, zera TEC/REC */
 
 #endif /* CAN_H */

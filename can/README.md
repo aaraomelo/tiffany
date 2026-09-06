@@ -1,6 +1,6 @@
 # CAN + J1939 sobre o Microprocessador Fractal
 
-Modelo digital de referência para integração entre o **Microprocessador Fractal**, um controlador **CAN** e a camada semântica **J1939**.
+Modelo digital de referência para integração entre o **Microprocessador Fractal**, um controlador **CAN**, o barramento CAN e a camada semântica **J1939**.
 
 O projeto separa explicitamente:
 
@@ -10,13 +10,15 @@ ISA / máquina
    micro.c
       ↓ I/O
     can.c
-      ↓ frame
+      ↓
+ can_bus.c
+      ↓ frame CAN
    j1939.c
       ↓
  grandeza física
 ```
 
-O objetivo é demonstrar que um frame CAN/J1939 pode ser recebido, interpretado e transformado em uma grandeza física utilizando a máquina de referência do Microprocessador Fractal, **sem incorporar CAN ou J1939 à ISA**.
+O objetivo é demonstrar que um frame CAN/J1939 pode ser recebido, arbitrado, validado, interpretado e transformado em uma grandeza física utilizando a máquina de referência do Microprocessador Fractal, **sem incorporar CAN ou J1939 à ISA**.
 
 ---
 
@@ -24,32 +26,40 @@ O objetivo é demonstrar que um frame CAN/J1939 pode ser recebido, interpretado 
 
 ```text
 ┌──────────────────────────────┐
-│          api.h               │
-│       ISA canônica           │
-│ ADD / SUB / MUL / ...        │
+│           api.h              │
+│        ISA canônica          │
+│   ADD / SUB / MUL / ...      │
 └──────────────┬───────────────┘
                │
 ┌──────────────▼───────────────┐
-│          micro.c             │
-│  modelo de referência        │
+│           micro.c            │
+│    modelo de referência      │
 │                              │
-│  MOVE / ALU / DIV            │
-│  memória / PC / instr 80-bit │
+│    MOVE / ALU / DIV          │
+│    memória / PC / instr 80b  │
 └──────────────┬───────────────┘
                │ I/O
 ┌──────────────▼───────────────┐
-│           can.c              │
-│   controlador CAN digital    │
+│            can.c             │
+│     controlador CAN digital  │
 │                              │
-│  CanFrame                    │
-│  RX / TX                     │
-│  mailbox                     │
-│  validação                   │
+│  frame / arbitragem / CRC    │
+│  stuffing / ACK / erros      │
+│  TEC / REC / BUS_OFF         │
+└──────────────┬───────────────┘
+               │
+┌──────────────▼───────────────┐
+│          can_bus.c            │
+│       barramento CAN          │
+│                              │
+│    múltiplos nós             │
+│    arbitragem                │
+│    can_bus_tick()            │
 └──────────────┬───────────────┘
                │ frame
 ┌──────────────▼───────────────┐
-│          j1939.c             │
-│      semântica J1939         │
+│           j1939.c            │
+│       semântica J1939        │
 │                              │
 │  Priority / DP / PF / PS     │
 │  SA / DA / PGN               │
@@ -63,28 +73,31 @@ O objetivo é demonstrar que um frame CAN/J1939 pode ser recebido, interpretado 
 ### Regra de dependência
 
 ```text
-micro.c   NÃO conhece CAN
-can.c     NÃO conhece J1939
-j1939.c   NÃO conhece o micro
-can_micro.c conhece as três camadas
+micro.c      NÃO conhece CAN
+can.c        NÃO conhece J1939
+can_bus.c    NÃO conhece J1939
+j1939.c      NÃO conhece o micro
+can_micro.c  conhece as camadas para integração e testes
 ```
 
-Essa separação permite testar e evoluir cada camada independentemente.
+A separação permite testar e evoluir cada camada independentemente.
 
 ---
 
 # Arquivos
 
-| Arquivo       | Responsabilidade                                 |
-| ------------- | ------------------------------------------------ |
-| `api.h`       | ISA canônica                                     |
-| `micro.h`     | Interface pública da máquina                     |
-| `micro.c`     | Modelo digital de referência do microprocessador |
-| `can.h`       | Interface do controlador CAN                     |
-| `can.c`       | Modelo digital de RX/TX CAN                      |
-| `j1939.h`     | Interface da semântica J1939                     |
-| `j1939.c`     | Decodificação J1939 e escala de sinais           |
-| `can_micro.c` | Integração e testbench                           |
+| Arquivo       | Responsabilidade                                         |
+| ------------- | -------------------------------------------------------- |
+| `api.h`       | ISA canônica                                             |
+| `micro.h`     | Interface pública da máquina                             |
+| `micro.c`     | Modelo digital de referência do microprocessador         |
+| `can.h`       | Interface do controlador CAN                             |
+| `can.c`       | Frame, arbitragem, CRC, stuffing, ACK e máquina de erros |
+| `can_bus.h`   | Interface do barramento CAN                              |
+| `can_bus.c`   | Modelo multi-nó e arbitragem do barramento               |
+| `j1939.h`     | Interface da semântica J1939                             |
+| `j1939.c`     | Decodificação J1939 e escala de sinais                   |
+| `can_micro.c` | Integração e testbench                                   |
 
 ---
 
@@ -115,15 +128,28 @@ A camada CAN/J1939 utiliza a máquina através de sua interface pública em `mic
 
 **Nenhuma instrução CAN ou J1939 foi adicionada à ISA.**
 
+A comunicação permanece sendo uma camada externa à máquina.
+
 ---
 
 # `can.c`
 
-`can.c` representa o controlador CAN como um periférico digital.
+`can.c` representa o controlador CAN como um modelo digital de referência.
 
-Ele trabalha somente com frames CAN e não interpreta seu significado.
+Diferentemente de uma simples mailbox RX/TX, o controlador modela elementos essenciais do protocolo CAN:
 
-## Frame
+```text
+frame
+  │
+  ├── validação
+  ├── arbitragem
+  ├── bit stuffing
+  ├── CRC-15
+  ├── ACK
+  └── tratamento de erros
+```
+
+## Frame CAN
 
 ```c
 typedef struct {
@@ -138,41 +164,232 @@ typedef struct {
 Suporta:
 
 ```text
-CAN standard  → 11-bit ID
-CAN extended  → 29-bit ID
+CAN standard   → 11-bit ID
+CAN extended   → 29-bit ID
 DLC            → 0..8
 RTR            → 0 ou 1
 ```
 
-## RX
+## Arbitragem
 
-Um frame pode ser injetado no controlador:
-
-```text
-can_inject_rx()
-        ↓
-      RX
-        ↓
-     can_rx()
-```
-
-A injeção representa um frame que já chegou do barramento.
-
-Não existe PHY real neste modelo.
-
-## TX
-
-A transmissão é modelada por uma mailbox:
+O modelo utiliza a regra fundamental do CAN:
 
 ```text
-can_tx()
-   ↓
-TX pending
-   ↓
-can_tx_done()
+dominante = 0
+recessivo = 1
+
+0 vence 1
 ```
 
-O modelo não transmite eletricamente nenhum frame.
+A arbitragem ocorre bit a bit.
+
+Como consequência, identificadores numericamente menores possuem maior prioridade.
+
+Exemplo:
+
+```text
+ECU1 → 0x300
+ECU2 → 0x100
+ECU3 → 0x200
+```
+
+A ordem de vitória é:
+
+```text
+0x100
+  ↓
+0x200
+  ↓
+0x300
+```
+
+O nó que transmite um bit recessivo e observa um bit dominante perde a arbitragem e abandona a transmissão.
+
+A arbitragem é **não destrutiva**: o frame vencedor continua sendo transmitido sem corrupção causada pela disputa.
+
+---
+
+# Bit stuffing
+
+O controlador modela o mecanismo de bit stuffing utilizado pelo CAN.
+
+Após cinco bits consecutivos com o mesmo valor, um bit complementar é inserido:
+
+```text
+11111 → 11111 0
+
+00000 → 00000 1
+```
+
+O estado da sequência é mantido explicitamente durante o processo de stuffing.
+
+O modelo também possui destuffing e detecção de `stuff error`.
+
+É testado o round-trip:
+
+```text
+bits
+ ↓
+stuff
+ ↓
+destuff
+ ↓
+bits originais
+```
+
+---
+
+# CRC
+
+O frame possui verificação por **CRC-15 CAN**.
+
+O modelo permite verificar:
+
+```text
+frame original
+     ↓
+    CRC
+     ↓
+frame válido
+```
+
+e detectar corrupção:
+
+```text
+frame
+  ↓
+bit alterado
+  ↓
+CRC mismatch
+  ↓
+erro
+```
+
+A suíte verifica tanto a estabilidade do CRC quanto a detecção de corrupção.
+
+---
+
+# ACK
+
+O modelo também representa o comportamento lógico do ACK.
+
+Quando existe um receptor/ouvintes no barramento:
+
+```text
+transmissor
+    │
+    ▼
+ frame
+    │
+    ▼
+ receptor
+    │
+    ▼
+   ACK
+```
+
+Sem um nó capaz de reconhecer o frame:
+
+```text
+TX
+ ↓
+sem ACK
+ ↓
+ACK_ERR
+ ↓
+TEC += 8
+```
+
+O frame permanece pendente no transmissor em caso de `ACK_ERR`, permitindo que o estado de transmissão seja observado pelo testbench.
+
+---
+
+# Máquina de erros
+
+O controlador mantém:
+
+```text
+TEC = Transmit Error Counter
+REC = Receive Error Counter
+```
+
+e os estados:
+
+```text
+ERROR_ACTIVE
+      │
+      │ erros
+      ▼
+ERROR_PASSIVE
+      │
+      │ erros adicionais
+      ▼
+BUS_OFF
+```
+
+O limite de `TEC` é modelado até:
+
+```text
+TEC = 256
+```
+
+permitindo a transição correta para:
+
+```text
+BUS_OFF
+```
+
+A recuperação é explicitamente modelada por:
+
+```c
+can_recover()
+```
+
+que permite sair do estado `BUS_OFF` conforme o contrato do modelo.
+
+---
+
+# `can_bus.c`
+
+`can_bus.c` representa o barramento lógico e permite múltiplos nós CAN.
+
+Conceitualmente:
+
+```text
+             CAN BUS
+                │
+       ┌────────┼────────┐
+       │        │        │
+      ECU1     ECU2     ECU3
+       │        │        │
+       └────────┴────────┘
+```
+
+Cada nó possui seu controlador CAN.
+
+O barramento recebe as transmissões pendentes e executa a arbitragem.
+
+A evolução temporal do modelo é realizada por:
+
+```c
+can_bus_tick()
+```
+
+Exemplo:
+
+```text
+ECU1 = 0x300
+ECU2 = 0x100
+ECU3 = 0x200
+
+tick 1 → 0x100
+tick 2 → 0x200
+tick 3 → 0x300
+```
+
+A fila é, portanto, esvaziada de acordo com a prioridade CAN.
+
+`can_bus.c` não interpreta PGN, SPN ou qualquer semântica J1939.
 
 ---
 
@@ -196,7 +413,7 @@ Visualmente:
 ```text
 ┌────────┬───┬───┬────────┬────────┬────────┐
 │Priority│ R │ DP│   PF   │   PS   │   SA   │
-│  3 bit │1b │1b │ 8 bit  │ 8 bit  │ 8 bit  │
+│ 3 bit  │1b │1b │ 8 bit  │ 8 bit  │ 8 bit  │
 └────────┴───┴───┴────────┴────────┴────────┘
 ```
 
@@ -216,7 +433,7 @@ Nesse formato:
 PS = Destination Address
 ```
 
-e o PGN é:
+e:
 
 ```text
 PGN = DP : PF : 00
@@ -232,13 +449,7 @@ PF >= 240
 
 temos PDU2.
 
-Nesse formato:
-
-```text
-PS
-```
-
-faz parte do PGN:
+Nesse formato, `PS` participa do PGN:
 
 ```text
 PGN = DP : PF : PS
@@ -264,7 +475,7 @@ nome
 unidade
 ```
 
-A representação permite descrever sinais de:
+São suportados sinais de:
 
 ```text
 1..8 bytes
@@ -280,7 +491,7 @@ physical =
     + offset
 ```
 
-ou, de forma racional:
+ou:
 
 ```text
 physical =
@@ -288,9 +499,9 @@ physical =
     / scale_den
 ```
 
-A aritmética da camada J1939 utiliza representação assinada.
+A aritmética da camada J1939 utiliza representação assinada para a grandeza física.
 
-Isso é deliberado:
+Isso mantém a separação:
 
 ```text
 ISA / micro
@@ -299,7 +510,7 @@ u64
 
 J1939 / grandeza física
     ↓
-int64_t
+representação assinada
 ```
 
 A semântica de valores negativos, portanto, não é incorporada à ISA.
@@ -317,7 +528,7 @@ SPN = 110
 
 **Engine Coolant Temperature**
 
-Descrição:
+Parâmetros:
 
 ```text
 resolution = 1/32 °C/bit
@@ -351,20 +562,24 @@ T = 1920 / 32 - 40
   = 20 °C
 ```
 
-O mesmo valor é obtido na integração utilizando as operações do micro.
+O mesmo resultado é obtido através da máquina do Microprocessador Fractal.
 
 ---
 
 # Integração
 
-`can_micro.c` funciona como integrador e testbench.
+`can_micro.c` funciona exclusivamente como integrador e testbench.
 
 A sequência é:
 
 ```text
 frame
   ↓
-can_inject_rx()
+can_bus / can.c
+  ↓
+arbitragem
+  ↓
+frame CAN
   ↓
 can_rx()
   ↓
@@ -388,20 +603,32 @@ O teste de integração utiliza:
 
 ```text
 ID       = 0x0CFEEE00
+extended = 1
+DLC      = 8
+
 PGN      = 65262
-SA       = 0
-DATA     = 80 07 ...
+SA       = 0x00
+
+DATA     = 80 07 00 00 00 00 00 00
+
 SPN      = 110
+raw      = 1920
+
 resultado = 20 °C
+```
+
+Resultado:
+
+```text
+J1939 = 20 °C
+MICRO = 20 °C
 ```
 
 ---
 
 # Testes
 
-A suíte verifica:
-
-### CAN
+## CAN
 
 ```text
 ✓ inicialização
@@ -416,7 +643,35 @@ A suíte verifica:
 ✓ RX overflow
 ```
 
-### J1939
+## Protocolo CAN
+
+```text
+✓ arbitragem 0x100 < 0x200 < 0x300
+✓ empate com mesmo ID
+✓ arbitragem standard
+✓ arbitragem extended
+✓ DLC 0..8
+✓ rejeição de DLC 9
+✓ bit stuffing 11111
+✓ bit stuffing 00000
+✓ destuff round-trip
+✓ detecção de stuff error
+✓ CRC estável
+✓ detecção de corrupção
+✓ ACK com receptor
+✓ ACK_ERR sem receptor
+✓ TEC
+✓ REC
+✓ ERROR_ACTIVE
+✓ ERROR_PASSIVE
+✓ BUS_OFF
+✓ recover
+✓ multi-nó
+✓ can_bus_tick()
+✓ fila em ordem de prioridade
+```
+
+## J1939
 
 ```text
 ✓ campos do identificador
@@ -438,11 +693,12 @@ A suíte verifica:
 ✓ valores negativos
 ```
 
-### Integração
+## Integração
 
 ```text
 ✓ CAN → J1939
-✓ J1939 → SPN
+✓ J1939 → PGN
+✓ PGN → SPN
 ✓ SPN → raw
 ✓ raw → micro
 ✓ micro → escala
@@ -469,7 +725,7 @@ No Windows/MinGW:
 
 ```cmd
 gcc -O2 -std=c11 -Wall -DMICRO_AS_LIB -I. ^
-  can_micro.c can.c j1939.c micro.c -lm -o can_micro.exe
+  can_micro.c can.c can_bus.c j1939.c micro.c -lm -o can_micro.exe
 ```
 
 Executar:
@@ -481,13 +737,21 @@ can_micro.exe
 Resultado esperado:
 
 ```text
-[OK] can + j1939 resid 0
+=== auditoria CAN / J1939 ===
+  [can]        resid 0
+  [j1939]      resid 0
+  [protocol]   resid 0
+[OK] can + j1939 + protocol resid 0
 ```
 
-seguido da integração J1939:
+seguido da integração:
 
 ```text
-SPN 110: Engine Coolant Temperature = 20 deg C
+CAN  ID=0x0CFEEE00 DLC=8
+J1939 PGN=65262 pri=3 SA=0x00
+SPN 110 raw=1920  J1939=20 C  MICRO=20 C
+
+RESULTADO: Engine Coolant Temperature = 20 deg C
 ```
 
 ---
@@ -496,7 +760,23 @@ SPN 110: Engine Coolant Temperature = 20 deg C
 
 Este projeto é um **modelo digital de referência arquitetural**.
 
-Ele não pretende representar literalmente a camada física CAN.
+Ele representa logicamente elementos do protocolo CAN, incluindo:
+
+```text
+frame
+arbitragem
+bit stuffing
+CRC
+ACK
+detecção de erros
+TEC / REC
+ERROR ACTIVE
+ERROR PASSIVE
+BUS_OFF
+barramento multi-nó
+```
+
+Não pretende representar literalmente a camada elétrica CAN.
 
 Não são modelados neste estágio:
 
@@ -505,22 +785,22 @@ CANH / CANL
 transceptor físico
 níveis diferenciais
 temporização elétrica
-bit timing físico
+características analógicas do barramento
 ```
 
-O controlador trabalha na abstração:
-
-```text
-frame CAN
-```
+O barramento é tratado como uma abstração digital de bits dominante/recessivo e frames CAN.
 
 Isso permite manter a separação entre:
 
 ```text
 ISA
+  ↓
 periférico
+  ↓
 protocolo
+  ↓
 semântica
+  ↓
 grandeza física
 ```
 
@@ -533,7 +813,10 @@ api.h / micro.h / micro.c
         → FECHADO
 
 can.h / can.c
-        → FECHADO
+        → AUDITADO / FECHADO
+
+can_bus.h / can_bus.c
+        → AUDITADO / FECHADO
 
 j1939.h / j1939.c
         → FECHADO
@@ -542,30 +825,64 @@ can_micro.c
         → INTEGRADOR + TESTBENCH
 ```
 
-## Arquitetura consolidada
+## Resultado consolidado
+
+A suíte atual termina com:
 
 ```text
-                 ISA
-                  │
-                  ▼
-              micro.c
-                  │
-                 I/O
-                  │
-                  ▼
-                CAN
-                  │
-                frame
-                  │
-                  ▼
-               J1939
-                  │
-              PGN / SPN
-                  │
-                  ▼
-          grandeza física
+[OK] can + j1939 + protocol resid 0
+```
+
+e a integração produz:
+
+```text
+Engine Coolant Temperature = 20 °C
+```
+
+tanto pela camada J1939 quanto pela realização através do Microprocessador Fractal.
+
+---
+
+# Arquitetura consolidada
+
+```text
+                         ISA
+                          │
+                          ▼
+                      micro.c
+                          │
+                         I/O
+                          │
+                          ▼
+                        CAN
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+          can.c                    can_bus.c
+              │                       │
+              └───────────┬───────────┘
+                          │
+                       frame
+                          │
+                          ▼
+                       J1939
+                          │
+                     PGN / SPN
+                          │
+                          ▼
+                   grandeza física
 ```
 
 A camada de comunicação permanece **externa à ISA**.
 
-O Microprocessador Fractal não precisa conhecer CAN ou J1939 para executar a transformação de estado. CAN fornece o frame; J1939 fornece a semântica; o micro realiza a transformação.
+O Microprocessador Fractal não precisa conhecer CAN ou J1939 para executar a transformação de estado.
+
+**CAN fornece o frame.**
+
+**`can.c` fornece o comportamento lógico do protocolo.**
+
+**`can_bus.c` fornece o barramento e a arbitragem entre nós.**
+
+**J1939 fornece a semântica da mensagem.**
+
+**O Microprocessador Fractal realiza a transformação computacional.**
