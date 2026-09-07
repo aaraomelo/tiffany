@@ -1,0 +1,35 @@
+
+12. Printing statistics.
+
+=== micro_fractal ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      137 wires
+     2800 wire bits
+       30 public wires
+      769 public wire bits
+       19 ports
+      373 port bits
+      117 cells
+       11   $add
+        1   $and
+        1   $div
+       18   $eq
+        1   $ge
+        1   $gt
+        3   $logic_not
+        1   $logic_or
+        2   $mem_v2
+        1   $mul
+       32   $mux
+        7   $ne
+        4   $not
+        1   $or
+        8   $pmux
+        8   $reduce_and
+        6   $reduce_bool
+        9   $sdffe
+        1   $sub
+        1   $xor
+

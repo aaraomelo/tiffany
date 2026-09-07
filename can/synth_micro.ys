@@ -1,0 +1,30 @@
+# micro.sv -> Yosys 0.66 — elaboracao e sintese FPGA-like (memorias como $mem).
+# Fluxo:
+#   1) leer SV, elaborar, controle de processos, otimizacoes logicas limpas;
+#   2) manter word[]/imem[] como $mem (ata: BRAM/SSRAM no FPGA);
+#   3) mapear logica combinacional para LUT6 e registradores para FFs.
+# Nao modifica micro.sv; registra warnings/errors e recursos inferidos.
+
+read_verilog -sv micro.sv
+hierarchy -check -top micro_fractal
+proc
+flatten
+opt
+memory -nomap
+opt
+tee -o reports/01_elab_stats.txt stat
+write_json reports/01_elab.json
+
+# mapeamento combinacional para FPGA-like 6-LUT (memorias e FFs nao sao tocadas)
+abc -lut 6
+opt
+tee -o reports/02_synth_lut6_stats.txt stat
+write_json reports/02_synth_lut6.json
+write_verilog -noattr reports/03_micro_synth_lut6.v
+
+# visao gate-level ASCII (AND/OR/XOR/MUX) para conferir a malha logica
+techmap
+abc -g AND,OR,XOR,MUX,NAND,NOR
+opt
+tee -o reports/03_synth_gate_stats.txt stat
+write_verilog -noattr reports/04_micro_synth_gates.v

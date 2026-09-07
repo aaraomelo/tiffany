@@ -1,0 +1,2 @@
+[OK] 10 vetores - micro.sv reproduz o oraculo micro.c (resid 0)
+micro_tb.sv:298: $finish called at 4058000 (1ps)
