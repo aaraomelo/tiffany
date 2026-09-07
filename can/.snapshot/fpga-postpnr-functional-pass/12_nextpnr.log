@@ -1,0 +1,402 @@
+
+
+Info: Logic utilisation before packing:
+Info:     Total LUT4s:      2184/24288     8%
+Info:         logic LUTs:   1670/24288     6%
+Info:         carry LUTs:    514/24288     2%
+Info:           RAM LUTs:      0/ 3036     0%
+Info:          RAMW LUTs:      0/ 6072     0%
+
+Info:      Total DFFs:       895/24288     3%
+
+Info: Packing IOs..
+Info: Packing constants..
+Info: Packing carries...
+Info: Packing LUTs...
+Info: Packing LUT5-7s...
+Info: Packing FFs...
+Info:     277 FFs paired with LUTs.
+Info: Generating derived timing constraints...
+Info: Promoting globals...
+Info:     promoting clock net clk$TRELLIS_IO_IN to global network
+Info: Checksum: 0x5b7cd455
+
+Info: Device utilisation:
+Info: 	          TRELLIS_IO:    31/  197    15%
+Info: 	                DCCA:     1/   56     1%
+Info: 	              DP16KD:    24/   56    42%
+Info: 	          MULT18X18D:    10/   28    35%
+Info: 	              ALU54B:     0/   14     0%
+Info: 	             EHXPLLL:     0/    2     0%
+Info: 	             EXTREFB:     0/    1     0%
+Info: 	                DCUA:     0/    1     0%
+Info: 	           PCSCLKDIV:     0/    2     0%
+Info: 	             IOLOGIC:     0/  128     0%
+Info: 	            SIOLOGIC:     0/   69     0%
+Info: 	                 GSR:     0/    1     0%
+Info: 	               JTAGG:     0/    1     0%
+Info: 	                OSCG:     0/    1     0%
+Info: 	               SEDGA:     0/    1     0%
+Info: 	                 DTR:     0/    1     0%
+Info: 	             USRMCLK:     0/    1     0%
+Info: 	             CLKDIVF:     0/    4     0%
+Info: 	           ECLKSYNCB:     0/   10     0%
+Info: 	             DLLDELD:     0/    8     0%
+Info: 	              DDRDLL:     0/    4     0%
+Info: 	             DQSBUFM:     0/    8     0%
+Info: 	     TRELLIS_ECLKBUF:     0/    8     0%
+Info: 	        ECLKBRIDGECS:     0/    2     0%
+Info: 	                DCSC:     0/    2     0%
+Info: 	          TRELLIS_FF:   895/24288     3%
+Info: 	        TRELLIS_COMB:  2266/24288     9%
+Info: 	        TRELLIS_RAMW:     0/ 3036     0%
+
+Info: Placed 0 cells based on constraints.
+Info: Creating initial analytic placement for 2103 cells, random placement wirelen = 148403.
+Info:     at initial placer iter 0, wirelen = 2874
+Info:     at initial placer iter 1, wirelen = 2787
+Info:     at initial placer iter 2, wirelen = 2800
+Info:     at initial placer iter 3, wirelen = 2831
+Info: Running main analytical placer, max placement attempts per cell = 1301691.
+Info:     at iteration #1, type ALL: wirelen solved = 2789, spread = 31048, legal = 33432; time = 0.08s
+Info:     at iteration #2, type ALL: wirelen solved = 3114, spread = 30981, legal = 33036; time = 0.07s
+Info:     at iteration #3, type ALL: wirelen solved = 3828, spread = 30776, legal = 33343; time = 0.07s
+Info:     at iteration #4, type ALL: wirelen solved = 5101, spread = 27826, legal = 30849; time = 0.07s
+Info:     at iteration #5, type ALL: wirelen solved = 6112, spread = 27026, legal = 30097; time = 0.06s
+Info:     at iteration #6, type ALL: wirelen solved = 7109, spread = 26303, legal = 29408; time = 0.07s
+Info:     at iteration #7, type ALL: wirelen solved = 7929, spread = 25605, legal = 28853; time = 0.06s
+Info:     at iteration #8, type ALL: wirelen solved = 8196, spread = 25119, legal = 28597; time = 0.06s
+Info:     at iteration #9, type ALL: wirelen solved = 8723, spread = 25286, legal = 27992; time = 0.06s
+Info:     at iteration #10, type ALL: wirelen solved = 9155, spread = 24526, legal = 27632; time = 0.06s
+Info:     at iteration #11, type ALL: wirelen solved = 9646, spread = 24112, legal = 28196; time = 0.06s
+Info:     at iteration #12, type ALL: wirelen solved = 9955, spread = 24059, legal = 27191; time = 0.06s
+Info:     at iteration #13, type ALL: wirelen solved = 10203, spread = 23852, legal = 27775; time = 0.06s
+Info:     at iteration #14, type ALL: wirelen solved = 10537, spread = 23914, legal = 26569; time = 0.05s
+Info:     at iteration #15, type ALL: wirelen solved = 10876, spread = 23918, legal = 27876; time = 0.06s
+Info:     at iteration #16, type ALL: wirelen solved = 11023, spread = 23741, legal = 27713; time = 0.05s
+Info:     at iteration #17, type ALL: wirelen solved = 11294, spread = 23602, legal = 28327; time = 0.06s
+Info:     at iteration #18, type ALL: wirelen solved = 11374, spread = 23867, legal = 27640; time = 0.05s
+Info:     at iteration #19, type ALL: wirelen solved = 11887, spread = 23692, legal = 27059; time = 0.05s
+Info: HeAP Placer Time: 1.67s
+Info:   of which solving equations: 1.12s
+Info:   of which spreading cells: 0.13s
+Info:   of which strict legalisation: 0.11s
+
+Info: Running simulated annealing placer for refinement.
+Info:   at iteration #1: temp = 0.000000, timing cost = 2110, wirelen = 26569
+Info:   at iteration #5: temp = 0.000000, timing cost = 1611, wirelen = 22704
+Info:   at iteration #10: temp = 0.000000, timing cost = 1561, wirelen = 21092
+Info:   at iteration #15: temp = 0.000000, timing cost = 1713, wirelen = 20569
+Info:   at iteration #19: temp = 0.000000, timing cost = 1689, wirelen = 20300 
+Info: SA placement time 2.50s
+
+Info: Max frequency for clock '$glbnet$clk$TRELLIS_IO_IN': 45.42 MHz (FAIL at 50.00 MHz)
+
+Info: Max delay <async>                           -> <async>                          : 27.83 ns
+Info: Max delay <async>                           -> posedge $glbnet$clk$TRELLIS_IO_IN: 21.58 ns
+Info: Max delay posedge $glbnet$clk$TRELLIS_IO_IN -> <async>                          : 24.58 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 4 endpoint(s)
+Info:          + represents [1,4) endpoint(s)
+Info: [ -2015,   -952) |*+
+Info: [  -952,    111) |*+
+Info: [   111,   1174) |*****************************+
+Info: [  1174,   2237) |*****************************************************+
+Info: [  2237,   3300) |************************************************************ 
+Info: [  3300,   4363) |*********************+
+Info: [  4363,   5426) |**********************+
+Info: [  5426,   6489) |***************************+
+Info: [  6489,   7552) |********+
+Info: [  7552,   8615) |********+
+Info: [  8615,   9678) |***************+
+Info: [  9678,  10741) |***************+
+Info: [ 10741,  11804) |****+
+Info: [ 11804,  12867) |***************+
+Info: [ 12867,  13930) |**************************+
+Info: [ 13930,  14993) |****************************************+
+Info: [ 14993,  16056) |*****************************************************+
+Info: [ 16056,  17119) |****************************************+
+Info: [ 17119,  18182) |**********************************+
+Info: [ 18182,  19245) |***************+
+Info: Checksum: 0x1a711c91
+Info: Routing globals...
+Info:     routing clock net $glbnet$clk$TRELLIS_IO_IN using global 0
+
+Info: Routing..
+Info: Setting up routing queue.
+Info: Routing 10551 arcs.
+Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
+Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
+Info:       1000 |      339        660 |  339   660 |     10100|       0.37       0.37|
+Info:       2000 |      824       1175 |  485   515 |      9817|       0.23       0.60|
+Info:       3000 |     1239       1760 |  415   585 |      9467|       0.17       0.77|
+Info:       4000 |     1659       2340 |  420   580 |      9053|       0.18       0.95|
+Info:       5000 |     2078       2921 |  419   581 |      8715|       0.20       1.15|
+Info:       6000 |     2646       3353 |  568   432 |      8536|       0.23       1.38|
+Info:       7000 |     3141       3858 |  495   505 |      8339|       0.23       1.61|
+Info:       8000 |     3660       4339 |  519   481 |      8054|       0.20       1.81|
+Info:       9000 |     4307       4692 |  647   353 |      8009|       0.26       2.07|
+Info:      10000 |     4895       5104 |  588   412 |      7845|       0.28       2.34|
+Info:      11000 |     5421       5578 |  526   474 |      7652|       0.26       2.60|
+Info:      12000 |     5975       6024 |  554   446 |      7502|       0.27       2.87|
+Info:      13000 |     6534       6465 |  559   441 |      7372|       0.28       3.15|
+Info:      14000 |     7188       6811 |  654   346 |      7329|       0.34       3.49|
+Info:      15000 |     7759       7240 |  571   429 |      7205|       0.37       3.86|
+Info:      16000 |     8326       7673 |  567   433 |      7047|       0.30       4.16|
+Info:      17000 |     8759       8240 |  433   567 |      6742|       0.21       4.37|
+Info:      18000 |     9305       8694 |  546   454 |      6535|       0.33       4.71|
+Info:      19000 |     9885       9114 |  580   420 |      6411|       0.30       5.01|
+Info:      20000 |    10470       9529 |  585   415 |      6230|       0.34       5.34|
+Info:      21000 |    10989      10010 |  519   481 |      6032|       0.52       5.87|
+Info:      22000 |    11499      10500 |  510   490 |      5817|       0.29       6.16|
+Info:      23000 |    11934      11018 |  435   518 |      5447|       0.23       6.38|
+Info:      24000 |    12363      11489 |  429   471 |      5015|       0.14       6.53|
+Info:      25000 |    12896      11922 |  533   433 |      4686|       0.20       6.72|
+Info:      26000 |    13445      12358 |  549   436 |      4349|       0.21       6.94|
+Info:      27000 |    13960      12808 |  515   450 |      4093|       0.22       7.15|
+Info:      28000 |    14413      13253 |  453   445 |      3674|       0.24       7.39|
+Info:      29000 |    14856      13738 |  443   485 |      3309|       0.27       7.66|
+Info:      30000 |    15263      14327 |  407   589 |      2858|       0.25       7.91|
+Info:      31000 |    15749      14811 |  486   484 |      2524|       0.31       8.22|
+Info:      32000 |    16196      15338 |  447   527 |      2184|       0.35       8.57|
+Info:      33000 |    16714      15820 |  518   482 |      1825|       0.19       8.76|
+Info:      34000 |    17156      16363 |  442   543 |      1466|       0.37       9.13|
+Info:      35000 |    17673      16835 |  517   472 |      1225|       0.31       9.44|
+Info:      36000 |    18130      17365 |  457   530 |       986|       0.40       9.84|
+Info:      37000 |    18656      17830 |  526   465 |       853|       0.44      10.28|
+Info:      38000 |    19268      18217 |  612   387 |       782|       0.54      10.82|
+Info:      39000 |    19863      18618 |  595   401 |       747|       0.58      11.41|
+Info:      40000 |    20423      19056 |  560   438 |       568|       0.53      11.93|
+Info:      41000 |    21017      19460 |  594   404 |       490|       0.43      12.36|
+Info:      42000 |    21578      19898 |  561   438 |       402|       0.45      12.81|
+Info:      43000 |    22159      20315 |  581   417 |       260|       0.45      13.26|
+Info:      44000 |    22769      20702 |  610   387 |       134|       0.53      13.79|
+Info:      45000 |    23315      21155 |  546   453 |        45|       0.50      14.28|
+Info:      45691 |    23723      21439 |  408   284 |         0|       0.33      14.62|
+Info: Routing complete.
+Info: Router1 time 14.62s
+Info: Checksum: 0xefd396c4
+
+Info: Critical path report for clock '$glbnet$clk$TRELLIS_IO_IN' (posedge -> posedge):
+Info: curr total
+Info:  5.8  5.8  Source core.imem.3.0.DOB7
+Info:  1.1  6.9    Net core.imem.3.0_DOB7[0] (15,25) -> (15,24)
+Info:                Sink core.imem.3.0_DOB3_LUT4_Z_D_LUT4_Z_1.A
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/brams_map_16kd.v:46.13-46.16
+Info:  0.2  7.2  Source core.imem.3.0_DOB3_LUT4_Z_D_LUT4_Z_1.F
+Info:  1.6  8.8    Net core.imem.3.0_DOB3_LUT4_Z_D[1] (15,24) -> (14,14)
+Info:                Sink core.imem.3.0_DOB3_LUT4_Z.C
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  9.0  Source core.imem.3.0_DOB3_LUT4_Z.F
+Info:  0.4  9.4    Net core.imem.3.0_DOB3[3] (14,14) -> (14,14)
+Info:                Sink core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z_D_LUT4_Z_D_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  9.6  Source core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z_D_LUT4_Z_D_LUT4_Z.F
+Info:  0.6 10.2    Net core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z_D_LUT4_Z_D[3] (14,14) -> (14,14)
+Info:                Sink core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z_D_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 10.5  Source core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z_D_LUT4_Z.F
+Info:  1.3 11.8    Net core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z_D[1] (14,14) -> (15,9)
+Info:                Sink core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 12.1  Source core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_Z.F
+Info:  0.8 12.8    Net core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D[1] (15,9) -> (15,7)
+Info:                Sink core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_D_1.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 13.1  Source core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_D_1.F
+Info:  1.8 14.9    Net core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_S0[3] (15,7) -> (23,10)
+Info:                Sink core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_PFUMX_Z_BLUT_LUT4_Z.M
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.3 15.1  Source core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:  1.1 16.2    Net core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1[3] (23,10) -> (24,11)
+Info:                Sink core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 16.5  Source core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_Z.F
+Info:  0.6 17.1    Net core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1[2] (24,11) -> (24,11)
+Info:                Sink core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_D.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 17.3  Source core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_D.F
+Info:  0.8 18.2    Net core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_D_Z[4] (24,11) -> (25,14)
+Info:                Sink core.mwdata_PFUMX_Z_60_BLUT_LUT4_Z.M
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.3 18.4  Source core.mwdata_PFUMX_Z_60_BLUT_LUT4_Z.OFX
+Info:  0.6 19.1    Net core.mwdata[63] (25,14) -> (25,15)
+Info:                Sink core.mwdata_TRELLIS_FF_DI_63.M
+Info:                Defined in:
+Info:                  C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:144.22-144.28
+Info:  0.0 19.1  Setup core.mwdata_TRELLIS_FF_DI_63.M
+Info: 8.2 ns logic, 10.8 ns routing
+
+Info: Critical path report for cross-domain path '<async>' -> '<async>':
+Info: curr total
+Info:  0.0  0.0  Source addr[0]$tr_io.O
+Info:  3.9  3.9    Net addr[0]$TRELLIS_IO_IN (72,14) -> (15,16)
+Info:                Sink rdaddr_r_TRELLIS_FF_Q_CE_LUT4_Z_C_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  4.1  Source rdaddr_r_TRELLIS_FF_Q_CE_LUT4_Z_C_LUT4_Z.F
+Info:  1.4  5.5    Net dout_LUT4_Z_D_LUT4_Z_1_D_LUT4_Z_D_LUT4_Z_D_LUT4_D_Z[1] (15,16) -> (12,16)
+Info:                Sink wval_r_TRELLIS_FF_Q_4_CE_LUT4_Z_C_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  5.8  Source wval_r_TRELLIS_FF_Q_4_CE_LUT4_Z_C_LUT4_Z.F
+Info:  0.6  6.4    Net wval_r_TRELLIS_FF_Q_4_CE_LUT4_Z_C[0] (12,16) -> (13,16)
+Info:                Sink core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  6.6  Source core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_Z.F
+Info:  2.2  8.8    Net dout_LUT4_Z_5_D_LUT4_Z_D[1] (13,16) -> (17,9)
+Info:                Sink core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C.C
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  9.1  Source core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C.F
+Info:  0.9 10.0    Net core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_Z[2] (17,9) -> (14,9)
+Info:                Sink core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_Z_LUT4_D.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 10.2  Source core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_Z_LUT4_D.F
+Info:  1.3 11.5    Net core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_Z_LUT4_D_Z[4] (14,9) -> (18,6)
+Info:                Sink dout_LUT4_Z_4_D_LUT4_Z_D_PFUMX_Z_BLUT_LUT4_Z.M
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.3 11.8  Source dout_LUT4_Z_4_D_LUT4_Z_D_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:  1.0 12.8    Net dout_LUT4_Z_4_D_LUT4_Z_D[3] (18,6) -> (17,14)
+Info:                Sink dout_LUT4_Z_4_D_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 13.0  Source dout_LUT4_Z_4_D_LUT4_Z.F
+Info:  0.4 13.5    Net dout_LUT4_Z_4_D[2] (17,14) -> (17,14)
+Info:                Sink dout_LUT4_Z_4.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 13.7  Source dout_LUT4_Z_4.F
+Info:  3.5 17.2    Net dout[3]$TRELLIS_IO_OUT (17,14) -> (72,14)
+Info:                Sink dout[3]$tr_io.I
+Info:                Defined in:
+Info:                  C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:35.23-35.27
+Info: 1.9 ns logic, 15.3 ns routing
+
+Info: Critical path report for cross-domain path '<async>' -> 'posedge $glbnet$clk$TRELLIS_IO_IN':
+Info: curr total
+Info:  0.0  0.0  Source addr[0]$tr_io.O
+Info:  4.3  4.3    Net addr[0]$TRELLIS_IO_IN (72,14) -> (15,16)
+Info:                Sink core.rst_LUT4_Z_D_LUT4_Z_D_LUT4_Z_1.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  4.6  Source core.rst_LUT4_Z_D_LUT4_Z_D_LUT4_Z_1.F
+Info:  0.7  5.3    Net core.rst_LUT4_Z_D_LUT4_Z_D[2] (15,16) -> (13,16)
+Info:                Sink core.rst_LUT4_Z_D_LUT4_Z.C
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  5.5  Source core.rst_LUT4_Z_D_LUT4_Z.F
+Info:  1.8  7.3    Net core.done_LUT4_A_D[2] (13,16) -> (10,8)
+Info:                Sink core.rst_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2  7.5  Source core.rst_LUT4_Z.F
+Info:  2.2  9.7    Net core_reset (10,8) -> (25,10)
+Info:                Sink core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_B_Z_LUT4_D_Z_LUT4_D.C
+Info:                Defined in:
+Info:                  C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:58.10-58.20
+Info:  0.2  9.9  Source core.mwdata_PFUMX_Z_17_C0_LUT4_Z_D_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S1_LUT4_B_Z_LUT4_D_Z_LUT4_D.F
+Info:  0.7 10.6    Net core.div_q_TRELLIS_FF_Q_LSR[2] (25,10) -> (26,3)
+Info:                Sink core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_D_Z_LUT4_Z_1_D_LUT4_Z_C_LUT4_D_Z_LUT4_C.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 10.9  Source core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_D_Z_LUT4_Z_1_D_LUT4_Z_C_LUT4_D_Z_LUT4_C.F
+Info:  0.7 11.6    Net core.state_TRELLIS_FF_Q_8_DI_LUT4_Z_D_LUT4_D_Z_LUT4_Z_1_D_LUT4_Z_C_LUT4_D_Z_LUT4_C_Z[2] (26,3) -> (26,6)
+Info:                Sink core.div_cnt_TRELLIS_FF_Q_CE_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 11.9  Source core.div_cnt_TRELLIS_FF_Q_CE_LUT4_Z.F
+Info:  0.4 12.3    Net core.div_cnt_TRELLIS_FF_Q_CE (26,6) -> (26,6)
+Info:                Sink core.div_cnt_TRELLIS_FF_Q_LSR_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/abc9_unmap.v:13.47-13.48
+Info:  0.2 12.5  Source core.div_cnt_TRELLIS_FF_Q_LSR_LUT4_Z.F
+Info:  0.4 12.9    Net core.div_cnt_TRELLIS_FF_Q_LSR (26,6) -> (27,6)
+Info:                Sink core.div_cnt_TRELLIS_FF_Q_3.LSR
+Info:  0.4 13.3  Setup core.div_cnt_TRELLIS_FF_Q_3.LSR
+Info: 2.1 ns logic, 11.2 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$clk$TRELLIS_IO_IN' -> '<async>':
+Info: curr total
+Info:  5.8  5.8  Source core.word.0.3.DOB0
+Info:  2.1  7.9    Net core.word.0.3_DOB0[1] (13,37) -> (11,11)
+Info:                Sink core.rdata_q_LUT4_Z_43.C
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/brams_map_16kd.v:46.13-46.16
+Info:  0.2  8.2  Source core.rdata_q_LUT4_Z_43.F
+Info:  1.4  9.6    Net d_dout[12] (11,11) -> (9,12)
+Info:                Sink dout_LUT4_Z_D_LUT4_Z_1_D_LUT4_Z_D_LUT4_Z_D_LUT4_D_1_Z_LUT4_C.B
+Info:                Defined in:
+Info:                  C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:53.28-53.34
+Info:  0.2  9.8  Source dout_LUT4_Z_D_LUT4_Z_1_D_LUT4_Z_D_LUT4_Z_D_LUT4_D_1_Z_LUT4_C.F
+Info:  1.4 11.2    Net dout_LUT4_Z_D_LUT4_Z_D_LUT4_Z_1_D[4] (9,12) -> (9,9)
+Info:                Sink core.timeout_LUT4_A_Z_LUT4_Z_C_LUT4_C_Z_PFUMX_Z_BLUT_LUT4_Z.M
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.3 11.4  Source core.timeout_LUT4_A_Z_LUT4_Z_C_LUT4_C_Z_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:  0.9 12.3    Net core.timeout_LUT4_A_Z_LUT4_Z_C_LUT4_C_Z[3] (9,9) -> (9,10)
+Info:                Sink core.timeout_LUT4_A_Z_LUT4_D_B_LUT4_D_Z_LUT4_Z.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 12.5  Source core.timeout_LUT4_A_Z_LUT4_D_B_LUT4_D_Z_LUT4_Z.F
+Info:  1.2 13.7    Net core.timeout_LUT4_A_Z_LUT4_D_B_LUT4_D_Z[3] (9,10) -> (9,12)
+Info:                Sink core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_1_Z_LUT4_Z_1.D
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.2 13.9  Source core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_1_Z_LUT4_Z_1.F
+Info:  1.4 15.3    Net core.done_LUT4_A_Z_LUT4_Z_2_C_LUT4_C_1_Z[4] (9,12) -> (15,15)
+Info:                Sink dout_PFUMX_Z_BLUT_LUT4_Z.M
+Info:                Defined in:
+Info:                  C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v:108.23-108.24
+Info:  0.3 15.5  Source dout_PFUMX_Z_BLUT_LUT4_Z.OFX
+Info:  2.6 18.1    Net dout[4]$TRELLIS_IO_OUT (15,15) -> (15,50)
+Info:                Sink dout[4]$tr_io.I
+Info:                Defined in:
+Info:                  C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:35.23-35.27
+Info: 7.3 ns logic, 10.8 ns routing
+
+Info: Max frequency for clock '$glbnet$clk$TRELLIS_IO_IN': 52.49 MHz (PASS at 50.00 MHz)
+
+Info: Max delay <async>                           -> <async>                          : 17.17 ns
+Info: Max delay <async>                           -> posedge $glbnet$clk$TRELLIS_IO_IN: 13.31 ns
+Info: Max delay posedge $glbnet$clk$TRELLIS_IO_IN -> <async>                          : 18.07 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 4 endpoint(s)
+Info:          + represents [1,4) endpoint(s)
+Info: [   948,   1854) |****+
+Info: [  1854,   2760) |***************+
+Info: [  2760,   3666) |*********+
+Info: [  3666,   4572) |*********************************************+
+Info: [  4572,   5478) |**************************+
+Info: [  5478,   6384) |***********************+
+Info: [  6384,   7290) |+
+Info: [  7290,   8196) |***************+
+Info: [  8196,   9102) |****************************************+
+Info: [  9102,  10008) |********+
+Info: [ 10008,  10914) |**********+
+Info: [ 10914,  11820) |******************+
+Info: [ 11820,  12726) |***+
+Info: [ 12726,  13632) |*****+
+Info: [ 13632,  14538) |********+
+Info: [ 14538,  15444) |***********+
+Info: [ 15444,  16350) |***********************+
+Info: [ 16350,  17256) |******************************************************+
+Info: [ 17256,  18162) |************************************************************ 
+Info: [ 18162,  19068) |***************************+
+
+Info: Program finished normally.

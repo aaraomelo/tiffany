@@ -1,0 +1,2549 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.66 (git sha1 7f8fdfd8d7bc08c749a2a969388d3425d4f369d5, x86_64-w64-mingw32-g++ 16.1.0 -march=nocona -msahf -mtune=generic -O2 -fstack-protector-strong -O3)
+
+-- Running command `read_verilog -sv C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv; read_verilog -sv C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv; synth_ecp5 -top micro_fpga_top -json C:\Users\jssim\AppData\Local\Temp\opencode\micro_divmc_top.json' --
+
+1. Executing Verilog-2005 frontend: C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv
+Parsing SystemVerilog input from `C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv' to AST representation.
+Generating RTLIL representation for module `\micro_fractal'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv
+Parsing SystemVerilog input from `C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv' to AST representation.
+Generating RTLIL representation for module `\micro_fpga_top'.
+Successfully finished Verilog frontend.
+
+3. Executing SYNTH_LATTICE pass.
+
+3.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/cells_sim_ecp5.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/cells_sim_ecp5.v' to AST representation.
+Generating RTLIL representation for module `\LUT4'.
+Generating RTLIL representation for module `\$__ABC9_LUT5'.
+Generating RTLIL representation for module `\$__ABC9_LUT6'.
+Generating RTLIL representation for module `\$__ABC9_LUT7'.
+Generating RTLIL representation for module `\L6MUX21'.
+Generating RTLIL representation for module `\TRELLIS_RAM16X2'.
+Generating RTLIL representation for module `\PFUMX'.
+Generating RTLIL representation for module `\TRELLIS_DPR16X4'.
+Generating RTLIL representation for module `\DPR16X4C'.
+Generating RTLIL representation for module `\LUT2'.
+Generating RTLIL representation for module `\TRELLIS_FF'.
+Generating RTLIL representation for module `\TRELLIS_IO'.
+Generating RTLIL representation for module `\INV'.
+Generating RTLIL representation for module `\TRELLIS_COMB'.
+Generating RTLIL representation for module `\VLO'.
+Generating RTLIL representation for module `\VHI'.
+Generating RTLIL representation for module `\FD1P3AX'.
+Generating RTLIL representation for module `\FD1P3AY'.
+Generating RTLIL representation for module `\FD1P3BX'.
+Generating RTLIL representation for module `\FD1P3DX'.
+Generating RTLIL representation for module `\FD1P3IX'.
+Generating RTLIL representation for module `\FD1P3JX'.
+Generating RTLIL representation for module `\FD1S3AX'.
+Generating RTLIL representation for module `\FD1S3AY'.
+Generating RTLIL representation for module `\FD1S3BX'.
+Generating RTLIL representation for module `\FD1S3DX'.
+Generating RTLIL representation for module `\FD1S3IX'.
+Generating RTLIL representation for module `\FD1S3JX'.
+Generating RTLIL representation for module `\IFS1P3BX'.
+Generating RTLIL representation for module `\IFS1P3DX'.
+Generating RTLIL representation for module `\IFS1P3IX'.
+Generating RTLIL representation for module `\IFS1P3JX'.
+Generating RTLIL representation for module `\OFS1P3BX'.
+Generating RTLIL representation for module `\OFS1P3DX'.
+Generating RTLIL representation for module `\OFS1P3IX'.
+Generating RTLIL representation for module `\OFS1P3JX'.
+Generating RTLIL representation for module `\IB'.
+Generating RTLIL representation for module `\IBPU'.
+Generating RTLIL representation for module `\IBPD'.
+Generating RTLIL representation for module `\OB'.
+Generating RTLIL representation for module `\OBZ'.
+Generating RTLIL representation for module `\OBZPU'.
+Generating RTLIL representation for module `\OBZPD'.
+Generating RTLIL representation for module `\OBCO'.
+Generating RTLIL representation for module `\BB'.
+Generating RTLIL representation for module `\BBPU'.
+Generating RTLIL representation for module `\BBPD'.
+Generating RTLIL representation for module `\ILVDS'.
+Generating RTLIL representation for module `\OLVDS'.
+Generating RTLIL representation for module `\CCU2C'.
+Generating RTLIL representation for module `\DP16KD'.
+Replacing existing blackbox module `\FD1P3AX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:2.1-2.261.
+Generating RTLIL representation for module `\FD1P3AX'.
+Replacing existing blackbox module `\FD1P3AY' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:3.1-3.261.
+Generating RTLIL representation for module `\FD1P3AY'.
+Replacing existing blackbox module `\FD1P3BX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:4.1-4.261.
+Generating RTLIL representation for module `\FD1P3BX'.
+Replacing existing blackbox module `\FD1P3DX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:5.1-5.261.
+Generating RTLIL representation for module `\FD1P3DX'.
+Replacing existing blackbox module `\FD1P3IX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:6.1-6.261.
+Generating RTLIL representation for module `\FD1P3IX'.
+Replacing existing blackbox module `\FD1P3JX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:7.1-7.261.
+Generating RTLIL representation for module `\FD1P3JX'.
+Replacing existing blackbox module `\FD1S3AX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:8.1-8.261.
+Generating RTLIL representation for module `\FD1S3AX'.
+Replacing existing blackbox module `\FD1S3AY' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:9.1-9.261.
+Generating RTLIL representation for module `\FD1S3AY'.
+Replacing existing blackbox module `\FD1S3BX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:10.1-10.261.
+Generating RTLIL representation for module `\FD1S3BX'.
+Replacing existing blackbox module `\FD1S3DX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:11.1-11.261.
+Generating RTLIL representation for module `\FD1S3DX'.
+Replacing existing blackbox module `\FD1S3IX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:12.1-12.261.
+Generating RTLIL representation for module `\FD1S3IX'.
+Replacing existing blackbox module `\FD1S3JX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:13.1-13.261.
+Generating RTLIL representation for module `\FD1S3JX'.
+Replacing existing blackbox module `\IFS1P3BX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:26.1-26.301.
+Generating RTLIL representation for module `\IFS1P3BX'.
+Replacing existing blackbox module `\IFS1P3DX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:27.1-27.301.
+Generating RTLIL representation for module `\IFS1P3DX'.
+Replacing existing blackbox module `\IFS1P3IX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:28.1-28.301.
+Generating RTLIL representation for module `\IFS1P3IX'.
+Replacing existing blackbox module `\IFS1P3JX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:29.1-29.301.
+Generating RTLIL representation for module `\IFS1P3JX'.
+Replacing existing blackbox module `\OFS1P3BX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:31.1-31.302.
+Generating RTLIL representation for module `\OFS1P3BX'.
+Replacing existing blackbox module `\OFS1P3DX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:32.1-32.302.
+Generating RTLIL representation for module `\OFS1P3DX'.
+Replacing existing blackbox module `\OFS1P3IX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:33.1-33.302.
+Generating RTLIL representation for module `\OFS1P3IX'.
+Replacing existing blackbox module `\OFS1P3JX' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_ff.vh:34.1-34.302.
+Generating RTLIL representation for module `\OFS1P3JX'.
+Replacing existing blackbox module `\IB' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:2.1-2.157.
+Generating RTLIL representation for module `\IB'.
+Replacing existing blackbox module `\IBPU' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:3.1-3.157.
+Generating RTLIL representation for module `\IBPU'.
+Replacing existing blackbox module `\IBPD' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:4.1-4.157.
+Generating RTLIL representation for module `\IBPD'.
+Replacing existing blackbox module `\OB' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:5.1-5.157.
+Generating RTLIL representation for module `\OB'.
+Replacing existing blackbox module `\OBZ' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:6.1-6.164.
+Generating RTLIL representation for module `\OBZ'.
+Replacing existing blackbox module `\OBZPU' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:7.1-7.164.
+Generating RTLIL representation for module `\OBZPU'.
+Replacing existing blackbox module `\OBZPD' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:8.1-8.164.
+Generating RTLIL representation for module `\OBZPD'.
+Replacing existing blackbox module `\OBCO' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:9.1-9.90.
+Generating RTLIL representation for module `\OBCO'.
+Replacing existing blackbox module `\BB' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:10.1-10.179.
+Generating RTLIL representation for module `\BB'.
+Replacing existing blackbox module `\BBPU' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:11.1-11.179.
+Generating RTLIL representation for module `\BBPU'.
+Replacing existing blackbox module `\BBPD' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:12.1-12.179.
+Generating RTLIL representation for module `\BBPD'.
+Replacing existing blackbox module `\ILVDS' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:13.1-13.139.
+Generating RTLIL representation for module `\ILVDS'.
+Replacing existing blackbox module `\OLVDS' at C:\msys64\mingw64\bin\../share/yosys/lattice\cells_io.vh:14.1-14.146.
+Generating RTLIL representation for module `\OLVDS'.
+Successfully finished Verilog frontend.
+
+3.2. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/cells_bb_ecp5.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/cells_bb_ecp5.v' to AST representation.
+Generating RTLIL representation for module `\GSR'.
+Generating RTLIL representation for module `\PUR'.
+Generating RTLIL representation for module `\SGSR'.
+Generating RTLIL representation for module `\PDPW16KD'.
+Generating RTLIL representation for module `\MULT18X18D'.
+Generating RTLIL representation for module `\ALU54B'.
+Generating RTLIL representation for module `\CLKDIVF'.
+Generating RTLIL representation for module `\PCSCLKDIV'.
+Generating RTLIL representation for module `\DCSC'.
+Generating RTLIL representation for module `\DCCA'.
+Generating RTLIL representation for module `\ECLKSYNCB'.
+Generating RTLIL representation for module `\ECLKBRIDGECS'.
+Generating RTLIL representation for module `\DELAYF'.
+Generating RTLIL representation for module `\DELAYG'.
+Generating RTLIL representation for module `\USRMCLK'.
+Generating RTLIL representation for module `\DQSBUFM'.
+Generating RTLIL representation for module `\DDRDLLA'.
+Generating RTLIL representation for module `\DLLDELD'.
+Generating RTLIL representation for module `\IDDRX1F'.
+Generating RTLIL representation for module `\IDDRX2F'.
+Generating RTLIL representation for module `\IDDR71B'.
+Generating RTLIL representation for module `\IDDRX2DQA'.
+Generating RTLIL representation for module `\ODDRX1F'.
+Generating RTLIL representation for module `\ODDRX2F'.
+Generating RTLIL representation for module `\ODDR71B'.
+Generating RTLIL representation for module `\OSHX2A'.
+Generating RTLIL representation for module `\TSHX2DQA'.
+Generating RTLIL representation for module `\TSHX2DQSA'.
+Generating RTLIL representation for module `\ODDRX2DQA'.
+Generating RTLIL representation for module `\ODDRX2DQSB'.
+Generating RTLIL representation for module `\EHXPLLL'.
+Generating RTLIL representation for module `\DTR'.
+Generating RTLIL representation for module `\OSCG'.
+Generating RTLIL representation for module `\EXTREFB'.
+Generating RTLIL representation for module `\JTAGG'.
+Generating RTLIL representation for module `\DCUA'.
+Successfully finished Verilog frontend.
+
+3.3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.3.1. Analyzing design hierarchy..
+Top module:  \micro_fpga_top
+Used module:     \micro_fractal
+
+3.3.2. Analyzing design hierarchy..
+Top module:  \micro_fpga_top
+Used module:     \micro_fractal
+Removed 0 unused modules.
+
+3.4. Executing PROC pass (convert processes to netlists).
+
+3.4.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.4.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:142$110 in module micro_fpga_top.
+Marked 1 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109 in module micro_fpga_top.
+Marked 2 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:87$104 in module micro_fpga_top.
+Marked 11 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39 in module micro_fractal.
+Marked 1 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31 in module micro_fractal.
+Marked 1 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:157$23 in module micro_fractal.
+Marked 1 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16 in module micro_fractal.
+Marked 1 switch rules as full_case in process $proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:133$8 in module micro_fractal.
+Removed a total of 0 dead cases.
+
+3.4.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 3 redundant assignments.
+Promoted 11 assignments to connections.
+
+3.4.4. Executing PROC_INIT pass (extract init attributes).
+
+3.4.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.4.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~22 debug messages>
+
+3.4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:142$110'.
+     1/1: $1\dout[7:0]
+Creating decoders for process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+     1/25: $0\rdaddr_r[11:0] [11:8]
+     2/25: $0\rdaddr_r[11:0] [7:0]
+     3/25: $0\wval_r[63:0] [55:48]
+     4/25: $0\wval_r[63:0] [47:40]
+     5/25: $0\wval_r[63:0] [39:32]
+     6/25: $0\wval_r[63:0] [31:24]
+     7/25: $0\wval_r[63:0] [23:16]
+     8/25: $0\wval_r[63:0] [15:8]
+     9/25: $0\wval_r[63:0] [7:0]
+    10/25: $0\waddr_r[11:0] [7:0]
+    11/25: $0\canal_init_r[63:0] [55:48]
+    12/25: $0\canal_init_r[63:0] [47:40]
+    13/25: $0\canal_init_r[63:0] [39:32]
+    14/25: $0\canal_init_r[63:0] [31:24]
+    15/25: $0\canal_init_r[63:0] [23:16]
+    16/25: $0\canal_init_r[63:0] [15:8]
+    17/25: $0\canal_init_r[63:0] [7:0]
+    18/25: $0\prog_bytes_r[23:0] [15:8]
+    19/25: $0\prog_bytes_r[23:0] [7:0]
+    20/25: $0\p_addr_r[7:0]
+    21/25: $0\waddr_r[11:0] [11:8]
+    22/25: $0\wval_r[63:0] [63:56]
+    23/25: $0\canal_init_r[63:0] [63:56]
+    24/25: $0\prog_bytes_r[23:0] [23:16]
+    25/25: $0\p_data_r[7:0]
+Creating decoders for process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:87$104'.
+     1/2: $0\d_wr_r[0:0]
+     2/2: $0\p_wr_r[0:0]
+Creating decoders for process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+     1/25: $5$lookahead\div_q$38[63:0]$81
+     2/25: $3$bitselwrite$pos$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$1[5:0]$80
+     3/25: $4$lookahead\div_q$38[63:0]$77
+     4/25: $3$lookahead\div_q$38[63:0]$75
+     5/25: $2$lookahead\div_q$38[63:0]$45
+     6/25: $2$bitselwrite$pos$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$1[5:0]$44
+     7/25: $1$lookahead\div_q$38[63:0]$43
+     8/25: $1$bitselwrite$pos$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$1[5:0]$42
+     9/25: $0\div_cnt[5:0]
+    10/25: $0\div_r[64:0]
+    11/25: $0\div_b[63:0]
+    12/25: $0\div_a[63:0]
+    13/25: $0\b_tmp[63:0]
+    14/25: $0\a_tmp[63:0]
+    15/25: $0\canal[63:0]
+    16/25: $0\steps[31:0]
+    17/25: $0\pc[23:0]
+    18/25: $0\rop[7:0]
+    19/25: $0\rr[23:0]
+    20/25: $0\rb[23:0]
+    21/25: $0\ra[23:0]
+    22/25: $0\state[3:0]
+    23/25: $0\timeout[0:0]
+    24/25: $0\halted[0:0]
+    25/25: $0\done[0:0]
+Creating decoders for process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31'.
+     1/3: $1$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$37
+     2/3: $1$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_DATA[7:0]$36
+     3/3: $1$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_ADDR[7:0]$35
+Creating decoders for process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:157$23'.
+     1/1: $1\alu_r[63:0]
+Creating decoders for process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16'.
+     1/3: $1$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$22
+     2/3: $1$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_DATA[63:0]$21
+     3/3: $1$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_ADDR[11:0]$20
+Creating decoders for process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:133$8'.
+     1/1: $0\rdata_q[63:0]
+
+3.4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\micro_fpga_top.\dout' from process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:142$110'.
+No latch inferred for signal `\micro_fractal.\alu_r' from process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:157$23'.
+
+3.4.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\micro_fpga_top.\prog_bytes_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1266' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\canal_init_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1267' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\waddr_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1268' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\rdaddr_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1269' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\wval_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1270' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\p_addr_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1271' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\p_data_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+  created $dff cell `$procdff$1272' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\p_wr_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:87$104'.
+  created $dff cell `$procdff$1273' with positive edge clock.
+Creating register for signal `\micro_fpga_top.\d_wr_r' using process `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:87$104'.
+  created $dff cell `$procdff$1274' with positive edge clock.
+Creating register for signal `\micro_fractal.\done' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1275' with positive edge clock.
+Creating register for signal `\micro_fractal.\halted' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1276' with positive edge clock.
+Creating register for signal `\micro_fractal.\timeout' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1277' with positive edge clock.
+Creating register for signal `\micro_fractal.\state' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1278' with positive edge clock.
+Creating register for signal `\micro_fractal.\ra' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1279' with positive edge clock.
+Creating register for signal `\micro_fractal.\rb' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1280' with positive edge clock.
+Creating register for signal `\micro_fractal.\rr' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1281' with positive edge clock.
+Creating register for signal `\micro_fractal.\rop' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1282' with positive edge clock.
+Creating register for signal `\micro_fractal.\pc' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1283' with positive edge clock.
+Creating register for signal `\micro_fractal.\steps' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1284' with positive edge clock.
+Creating register for signal `\micro_fractal.\canal' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1285' with positive edge clock.
+Creating register for signal `\micro_fractal.\a_tmp' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1286' with positive edge clock.
+Creating register for signal `\micro_fractal.\b_tmp' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1287' with positive edge clock.
+Creating register for signal `\micro_fractal.\div_a' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1288' with positive edge clock.
+Creating register for signal `\micro_fractal.\div_b' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1289' with positive edge clock.
+Creating register for signal `\micro_fractal.\div_r' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1290' with positive edge clock.
+Creating register for signal `\micro_fractal.\div_q' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1291' with positive edge clock.
+Creating register for signal `\micro_fractal.\div_cnt' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1292' with positive edge clock.
+Creating register for signal `\micro_fractal.$bitselwrite$pos$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$1' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1293' with positive edge clock.
+Creating register for signal `\micro_fractal.$lookahead\div_q$38' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+  created $dff cell `$procdff$1294' with positive edge clock.
+Creating register for signal `\micro_fractal.$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_ADDR' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31'.
+  created $dff cell `$procdff$1295' with positive edge clock.
+Creating register for signal `\micro_fractal.$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_DATA' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31'.
+  created $dff cell `$procdff$1296' with positive edge clock.
+Creating register for signal `\micro_fractal.$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31'.
+  created $dff cell `$procdff$1297' with positive edge clock.
+Creating register for signal `\micro_fractal.$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_ADDR' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16'.
+  created $dff cell `$procdff$1298' with positive edge clock.
+Creating register for signal `\micro_fractal.$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_DATA' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16'.
+  created $dff cell `$procdff$1299' with positive edge clock.
+Creating register for signal `\micro_fractal.$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16'.
+  created $dff cell `$procdff$1300' with positive edge clock.
+Creating register for signal `\micro_fractal.\rdata_q' using process `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:133$8'.
+  created $dff cell `$procdff$1301' with positive edge clock.
+
+3.4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:142$110'.
+Removing empty process `micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:142$110'.
+Found and cleaned up 3 empty switches in `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+Removing empty process `micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:100$109'.
+Found and cleaned up 2 empty switches in `\micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:87$104'.
+Removing empty process `micro_fpga_top.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:87$104'.
+Found and cleaned up 12 empty switches in `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+Removing empty process `micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:182$39'.
+Found and cleaned up 1 empty switch in `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31'.
+Removing empty process `micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:173$31'.
+Found and cleaned up 1 empty switch in `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:157$23'.
+Removing empty process `micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:157$23'.
+Found and cleaned up 1 empty switch in `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16'.
+Removing empty process `micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:147$16'.
+Found and cleaned up 1 empty switch in `\micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:133$8'.
+Removing empty process `micro_fractal.$proc$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:133$8'.
+Cleaned up 22 empty switches.
+
+3.4.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+Optimizing module micro_fractal.
+<suppressed ~10 debug messages>
+
+3.5. Executing CHECK pass (checking for obvious problems).
+Checking module micro_fpga_top...
+Checking module micro_fractal...
+Found and reported 0 problems.
+
+3.6. Executing FLATTEN pass (flatten design).
+Deleting now unused module micro_fractal.
+<suppressed ~1 debug messages>
+
+3.7. Executing TRIBUF pass.
+
+3.8. Executing DEMINOUT pass (demote inout ports to input or output).
+
+3.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~1 debug messages>
+
+3.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 16 unused cells and 229 unused wires.
+<suppressed ~17 debug messages>
+
+3.11. Executing CHECK pass (checking for obvious problems).
+Checking module micro_fpga_top...
+Found and reported 0 problems.
+
+3.12. Executing OPT pass (performing simple optimizations).
+
+3.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 379 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 335 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 333 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~138 debug messages>
+Removed a total of 46 cells.
+
+3.12.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $flatten\core.$procmux$803.
+    dead port 1/2 on $mux $flatten\core.$procmux$806.
+    dead port 2/2 on $mux $flatten\core.$procmux$830.
+    dead port 2/2 on $mux $flatten\core.$procmux$832.
+    dead port 1/2 on $mux $flatten\core.$procmux$835.
+    dead port 2/2 on $mux $flatten\core.$procmux$846.
+    dead port 1/2 on $mux $flatten\core.$procmux$849.
+    dead port 1/2 on $mux $flatten\core.$procmux$860.
+Removed 8 multiplexer ports.
+<suppressed ~239 debug messages>
+
+3.12.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+    New ctrl vector for $pmux cell $flatten\core.$procmux$982: { $flatten\core.$procmux$983_CMP $flatten\core.$procmux$833_CMP $auto$opt_reduce.cc:135:opt_pmux$1306 $flatten\core.$procmux$995_CMP }
+    Consolidated identical input bits for $mux cell $flatten\core.$procmux$1236:
+      Old ports: A=8'00000000, B=8'11111111, Y=$flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34
+      New ports: A=1'0, B=1'1, Y=$flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0]
+      New connections: $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [7:1] = { $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] $flatten\core.$0$memwr$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:174$3_EN[7:0]$34 [0] }
+    Consolidated identical input bits for $mux cell $flatten\core.$procmux$1255:
+      Old ports: A=64'0000000000000000000000000000000000000000000000000000000000000000, B=64'1111111111111111111111111111111111111111111111111111111111111111, Y=$flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19
+      New ports: A=1'0, B=1'1, Y=$flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0]
+      New connections: $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [63:1] = { $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] $flatten\core.$0$memwr$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:148$2_EN[63:0]$19 [0] }
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 3 changes.
+
+3.12.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 326 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.12.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.12.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 0 unused cells and 54 unused wires.
+<suppressed ~1 debug messages>
+
+3.12.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.12.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.12.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~231 debug messages>
+
+3.12.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.12.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 326 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.12.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.12.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.12.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.12.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.13. Executing FSM pass (extract and optimize FSM).
+
+3.13.1. Executing FSM_DETECT pass (finding FSMs in design).
+Found FSM state register micro_fpga_top.core.state.
+
+3.13.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+Extracting FSM `\core.state' from module `\micro_fpga_top'.
+  found $dff cell for state register: $flatten\core.$procdff$1278
+  root of input selection tree: $flatten\core.$0\state[3:0]
+  found reset state: 4'0000 (guessed from mux tree)
+  found ctrl input: \core.rst
+  found ctrl input: $flatten\core.$procmux$1028_CMP
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:145$14_Y
+  found ctrl input: $flatten\core.$procmux$1139_CMP
+  found ctrl input: $flatten\core.$procmux$1143_CMP
+  found ctrl input: $flatten\core.$procmux$1150_CMP
+  found ctrl input: $flatten\core.$procmux$1151_CMP
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:130$5_Y
+  found ctrl input: $flatten\core.$procmux$1156_CMP
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:129$4_Y
+  found ctrl input: $flatten\core.$procmux$1035_CMP
+  found ctrl input: $flatten\core.$procmux$1018_CMP
+  found ctrl input: $flatten\core.$procmux$1021_CMP
+  found state code: 4'0001
+  found state code: 4'1011
+  found state code: 4'1010
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:296$92_Y
+  found state code: 4'1001
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:144$11_Y
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:267$76_Y
+  found state code: 4'1000
+  found state code: 4'0111
+  found state code: 4'0110
+  found ctrl input: $flatten\core.$logic_or$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:246$73_Y
+  found state code: 4'0101
+  found state code: 4'0100
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:226$69_Y
+  found ctrl input: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:229$70_Y
+  found state code: 4'0011
+  found state code: 4'1100
+  found ctrl input: $flatten\core.$gt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$47_Y
+  found ctrl input: $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:211$48_Y
+  found state code: 4'0010
+  found ctrl input: \core.start
+  found state code: 4'0000
+  found ctrl output: $flatten\core.$procmux$1228_CMP
+  found ctrl output: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:129$4_Y
+  found ctrl output: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:130$5_Y
+  found ctrl output: $flatten\core.$procmux$1035_CMP
+  found ctrl output: $flatten\core.$procmux$1028_CMP
+  found ctrl output: $flatten\core.$procmux$1018_CMP
+  found ctrl output: $flatten\core.$procmux$1021_CMP
+  found ctrl output: $flatten\core.$procmux$1139_CMP
+  found ctrl output: $flatten\core.$procmux$1156_CMP
+  found ctrl output: $flatten\core.$procmux$1151_CMP
+  found ctrl output: $flatten\core.$procmux$1150_CMP
+  found ctrl output: $flatten\core.$procmux$1143_CMP
+  found ctrl output: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:145$14_Y
+  ctrl inputs: { \core.rst \core.start $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:144$11_Y $flatten\core.$gt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$47_Y $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:211$48_Y $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:226$69_Y $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:229$70_Y $flatten\core.$logic_or$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:246$73_Y $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:267$76_Y $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:296$92_Y }
+  ctrl outputs: { $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:129$4_Y $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:130$5_Y $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:145$14_Y $flatten\core.$0\state[3:0] $flatten\core.$procmux$1018_CMP $flatten\core.$procmux$1021_CMP $flatten\core.$procmux$1028_CMP $flatten\core.$procmux$1035_CMP $flatten\core.$procmux$1139_CMP $flatten\core.$procmux$1143_CMP $flatten\core.$procmux$1150_CMP $flatten\core.$procmux$1151_CMP $flatten\core.$procmux$1156_CMP $flatten\core.$procmux$1228_CMP }
+  transition:     4'0000 10'00-------- ->     4'0000 17'00000000100000000
+  transition:     4'0000 10'01-------- ->     4'0001 17'00000010100000000
+  transition:     4'0000 10'1--------- ->     4'0000 17'00000000100000000
+  transition:     4'1000 10'0--------0 ->     4'1000 17'00010000000010000
+  transition:     4'1000 10'0--------1 ->     4'1001 17'00010010000010000
+  transition:     4'1000 10'1--------- ->     4'0000 17'00000000000010000
+  transition:     4'0100 10'0------0-- ->     4'0101 17'00001010000000010
+  transition:     4'0100 10'0------1-- ->     4'0111 17'00001110000000010
+  transition:     4'0100 10'1--------- ->     4'0000 17'00000000000000010
+  transition:     4'1100 10'0--------- ->     4'1100 17'00011000000000001
+  transition:     4'1100 10'1--------- ->     4'0000 17'00000000000000001
+  transition:     4'0010 10'0----00--- ->     4'0011 17'00000110001000000
+  transition:     4'0010 10'0----01--- ->     4'0001 17'00000010001000000
+  transition:     4'0010 10'0----1---- ->     4'1100 17'00011000001000000
+  transition:     4'0010 10'1--------- ->     4'0000 17'00000000001000000
+  transition:     4'1010 10'0--------- ->     4'1011 17'00110110000000000
+  transition:     4'1010 10'1--------- ->     4'0000 17'00100000000000000
+  transition:     4'0110 10'0--------- ->     4'0111 17'00001110000000100
+  transition:     4'0110 10'1--------- ->     4'0000 17'00000000000000100
+  transition:     4'0001 10'0--00----- ->     4'0010 17'00000101000000000
+  transition:     4'0001 10'0--01----- ->     4'1100 17'00011001000000000
+  transition:     4'0001 10'0--1------ ->     4'1100 17'00011001000000000
+  transition:     4'0001 10'1--------- ->     4'0000 17'00000001000000000
+  transition:     4'1001 10'0--------- ->     4'1010 17'00010100000100000
+  transition:     4'1001 10'1--------- ->     4'0000 17'00000000000100000
+  transition:     4'0101 10'0--------- ->     4'0110 17'01001100000000000
+  transition:     4'0101 10'1--------- ->     4'0000 17'01000000000000000
+  transition:     4'0011 10'0--------- ->     4'0100 17'10001000000000000
+  transition:     4'0011 10'1--------- ->     4'0000 17'10000000000000000
+  transition:     4'1011 10'0--------- ->     4'0001 17'00000010010000000
+  transition:     4'1011 10'1--------- ->     4'0000 17'00000000010000000
+  transition:     4'0111 10'0-0------- ->     4'1010 17'00010100000001000
+  transition:     4'0111 10'0-1-----0- ->     4'1000 17'00010000000001000
+  transition:     4'0111 10'0-1-----1- ->     4'1010 17'00010100000001000
+  transition:     4'0111 10'1--------- ->     4'0000 17'00000000000001000
+
+3.13.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+Optimizing FSM `$fsm$\core.state$1307' from module `\micro_fpga_top'.
+
+3.13.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 25 unused cells and 25 unused wires.
+<suppressed ~26 debug messages>
+
+3.13.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+Optimizing FSM `$fsm$\core.state$1307' from module `\micro_fpga_top'.
+  Removing unused output signal $flatten\core.$0\state[3:0] [0].
+  Removing unused output signal $flatten\core.$0\state[3:0] [1].
+  Removing unused output signal $flatten\core.$0\state[3:0] [2].
+  Removing unused output signal $flatten\core.$0\state[3:0] [3].
+
+3.13.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+Recoding FSM `$fsm$\core.state$1307' from module `\micro_fpga_top' using `auto' encoding:
+  mapping auto encoding to `one-hot` for this FSM.
+  0000 -> ------------1
+  1000 -> -----------1-
+  0100 -> ----------1--
+  1100 -> ---------1---
+  0010 -> --------1----
+  1010 -> -------1-----
+  0110 -> ------1------
+  0001 -> -----1-------
+  1001 -> ----1--------
+  0101 -> ---1---------
+  0011 -> --1----------
+  1011 -> -1-----------
+  0111 -> 1------------
+
+3.13.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+FSM `$fsm$\core.state$1307' from module `micro_fpga_top':
+-------------------------------------
+
+  Information on FSM $fsm$\core.state$1307 (\core.state):
+
+  Number of input signals:   10
+  Number of output signals:  13
+  Number of state bits:      13
+
+  Input signals:
+    0: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:296$92_Y
+    1: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:267$76_Y
+    2: $flatten\core.$logic_or$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:246$73_Y
+    3: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:229$70_Y
+    4: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:226$69_Y
+    5: $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:211$48_Y
+    6: $flatten\core.$gt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$47_Y
+    7: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:144$11_Y
+    8: \core.start
+    9: \core.rst
+
+  Output signals:
+    0: $flatten\core.$procmux$1228_CMP
+    1: $flatten\core.$procmux$1156_CMP
+    2: $flatten\core.$procmux$1151_CMP
+    3: $flatten\core.$procmux$1150_CMP
+    4: $flatten\core.$procmux$1143_CMP
+    5: $flatten\core.$procmux$1139_CMP
+    6: $flatten\core.$procmux$1035_CMP
+    7: $flatten\core.$procmux$1028_CMP
+    8: $flatten\core.$procmux$1021_CMP
+    9: $flatten\core.$procmux$1018_CMP
+   10: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:145$14_Y
+   11: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:130$5_Y
+   12: $flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:129$4_Y
+
+  State encoding:
+    0: 13'------------1  <RESET STATE>
+    1: 13'-----------1-
+    2: 13'----------1--
+    3: 13'---------1---
+    4: 13'--------1----
+    5: 13'-------1-----
+    6: 13'------1------
+    7: 13'-----1-------
+    8: 13'----1--------
+    9: 13'---1---------
+   10: 13'--1----------
+   11: 13'-1-----------
+   12: 13'1------------
+
+  Transition Table (state_in, ctrl_in, state_out, ctrl_out):
+      0:     0 10'00--------   ->     0 13'0000100000000
+      1:     0 10'1---------   ->     0 13'0000100000000
+      2:     0 10'01--------   ->     7 13'0000100000000
+      3:     1 10'1---------   ->     0 13'0000000010000
+      4:     1 10'0--------0   ->     1 13'0000000010000
+      5:     1 10'0--------1   ->     8 13'0000000010000
+      6:     2 10'1---------   ->     0 13'0000000000010
+      7:     2 10'0------0--   ->     9 13'0000000000010
+      8:     2 10'0------1--   ->    12 13'0000000000010
+      9:     3 10'1---------   ->     0 13'0000000000001
+     10:     3 10'0---------   ->     3 13'0000000000001
+     11:     4 10'1---------   ->     0 13'0000001000000
+     12:     4 10'0----1----   ->     3 13'0000001000000
+     13:     4 10'0----01---   ->     7 13'0000001000000
+     14:     4 10'0----00---   ->    10 13'0000001000000
+     15:     5 10'1---------   ->     0 13'0010000000000
+     16:     5 10'0---------   ->    11 13'0010000000000
+     17:     6 10'1---------   ->     0 13'0000000000100
+     18:     6 10'0---------   ->    12 13'0000000000100
+     19:     7 10'1---------   ->     0 13'0001000000000
+     20:     7 10'0--01-----   ->     3 13'0001000000000
+     21:     7 10'0--1------   ->     3 13'0001000000000
+     22:     7 10'0--00-----   ->     4 13'0001000000000
+     23:     8 10'1---------   ->     0 13'0000000100000
+     24:     8 10'0---------   ->     5 13'0000000100000
+     25:     9 10'1---------   ->     0 13'0100000000000
+     26:     9 10'0---------   ->     6 13'0100000000000
+     27:    10 10'1---------   ->     0 13'1000000000000
+     28:    10 10'0---------   ->     2 13'1000000000000
+     29:    11 10'1---------   ->     0 13'0000010000000
+     30:    11 10'0---------   ->     7 13'0000010000000
+     31:    12 10'1---------   ->     0 13'0000000001000
+     32:    12 10'0-1-----0-   ->     1 13'0000000001000
+     33:    12 10'0-1-----1-   ->     5 13'0000000001000
+     34:    12 10'0-0-------   ->     5 13'0000000001000
+
+-------------------------------------
+
+3.13.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+Mapping FSM `$fsm$\core.state$1307' from module `\micro_fpga_top'.
+
+3.14. Executing OPT pass (performing simple optimizations).
+
+3.14.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~14 debug messages>
+
+3.14.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 352 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 346 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~18 debug messages>
+Removed a total of 6 cells.
+
+3.14.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~219 debug messages>
+
+3.14.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.14.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 346 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.14.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $procdff$1266 ($dff) from module micro_fpga_top (D = { $procmux$776_Y $procmux$670_Y $procmux$699_Y }, Q = \prog_bytes_r, rval = 24'000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1422 ($sdff) from module micro_fpga_top (D = \din, Q = \prog_bytes_r [15:8]).
+Adding EN signal on $auto$ff.cc:337:slice$1422 ($sdff) from module micro_fpga_top (D = \din, Q = \prog_bytes_r [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$1422 ($sdff) from module micro_fpga_top (D = \din, Q = \prog_bytes_r [23:16]).
+Adding SRST signal on $procdff$1267 ($dff) from module micro_fpga_top (D = { $procmux$749_Y $procmux$501_Y $procmux$522_Y $procmux$544_Y $procmux$567_Y $procmux$591_Y $procmux$616_Y $procmux$642_Y }, Q = \canal_init_r, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [55:48]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [47:40]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [39:32]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [31:24]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [23:16]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [15:8]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$1432 ($sdff) from module micro_fpga_top (D = \din, Q = \canal_init_r [63:56]).
+Adding SRST signal on $procdff$1268 ($dff) from module micro_fpga_top (D = { $procmux$721_Y $procmux$481_Y }, Q = \waddr_r, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1457 ($sdff) from module micro_fpga_top (D = \din, Q = \waddr_r [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$1457 ($sdff) from module micro_fpga_top (D = \din [3:0], Q = \waddr_r [11:8]).
+Adding SRST signal on $procdff$1269 ($dff) from module micro_fpga_top (D = { $procmux$364_Y $procmux$372_Y }, Q = \rdaddr_r, rval = 12'000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1464 ($sdff) from module micro_fpga_top (D = \din [3:0], Q = \rdaddr_r [11:8]).
+Adding EN signal on $auto$ff.cc:337:slice$1464 ($sdff) from module micro_fpga_top (D = \din, Q = \rdaddr_r [7:0]).
+Adding SRST signal on $procdff$1270 ($dff) from module micro_fpga_top (D = { $procmux$730_Y $procmux$382_Y $procmux$393_Y $procmux$405_Y $procmux$418_Y $procmux$432_Y $procmux$447_Y $procmux$463_Y }, Q = \wval_r, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [63:56]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [55:48]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [47:40]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [39:32]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [31:24]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [23:16]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [15:8]).
+Adding EN signal on $auto$ff.cc:337:slice$1471 ($sdff) from module micro_fpga_top (D = \din, Q = \wval_r [7:0]).
+Adding SRST signal on $procdff$1271 ($dff) from module micro_fpga_top (D = $procmux$704_Y, Q = \p_addr_r, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1496 ($sdff) from module micro_fpga_top (D = \addr [7:0], Q = \p_addr_r).
+Adding SRST signal on $procdff$1272 ($dff) from module micro_fpga_top (D = $procmux$781_Y, Q = \p_data_r, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$1498 ($sdff) from module micro_fpga_top (D = \din, Q = \p_data_r).
+Adding SRST signal on $procdff$1273 ($dff) from module micro_fpga_top (D = $logic_and$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:92$106_Y, Q = \p_wr_r, rval = 1'0).
+Adding SRST signal on $procdff$1274 ($dff) from module micro_fpga_top (D = $procmux$787_Y, Q = \d_wr_r, rval = 1'0).
+Adding SRST signal on $flatten\core.$procdff$1301 ($dff) from module micro_fpga_top (D = $flatten\core.$memrd$\word$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:135$9_DATA, Q = \core.rdata_q, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $flatten\core.$procdff$1292 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$886_Y, Q = \core.div_cnt).
+Adding EN signal on $flatten\core.$procdff$1291 ($dff) from module micro_fpga_top (D = $flatten\core.$2$lookahead\div_q$38[63:0]$45, Q = \core.div_q).
+Adding EN signal on $flatten\core.$procdff$1290 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$906_Y, Q = \core.div_r).
+Adding EN signal on $flatten\core.$procdff$1289 ($dff) from module micro_fpga_top (D = \core.b_tmp, Q = \core.div_b).
+Adding EN signal on $flatten\core.$procdff$1288 ($dff) from module micro_fpga_top (D = \core.a_tmp, Q = \core.div_a).
+Adding SRST signal on $flatten\core.$procdff$1287 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$959_Y, Q = \core.b_tmp, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1552 ($sdff) from module micro_fpga_top (D = \core.rdata_q, Q = \core.b_tmp).
+Adding SRST signal on $flatten\core.$procdff$1286 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$973_Y, Q = \core.a_tmp, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1554 ($sdff) from module micro_fpga_top (D = \core.rdata_q, Q = \core.a_tmp).
+Adding SRST signal on $flatten\core.$procdff$1285 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$982_Y, Q = \core.canal, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1556 ($sdff) from module micro_fpga_top (D = $flatten\core.$procmux$982_Y, Q = \core.canal).
+Adding SRST signal on $flatten\core.$procdff$1284 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$1017_Y, Q = \core.steps, rval = 0).
+Adding EN signal on $auto$ff.cc:337:slice$1566 ($sdff) from module micro_fpga_top (D = $flatten\core.$procmux$1017_Y, Q = \core.steps).
+Adding SRST signal on $flatten\core.$procdff$1283 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$1027_Y, Q = \core.pc, rval = 24'000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1578 ($sdff) from module micro_fpga_top (D = $flatten\core.$procmux$1027_Y, Q = \core.pc).
+Adding EN signal on $flatten\core.$procdff$1282 ($dff) from module micro_fpga_top (D = $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$61_DATA, Q = \core.rop).
+Adding EN signal on $flatten\core.$procdff$1281 ($dff) from module micro_fpga_top (D = { $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$67_DATA $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$65_DATA $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$63_DATA }, Q = \core.rr).
+Adding EN signal on $flatten\core.$procdff$1280 ($dff) from module micro_fpga_top (D = { $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$59_DATA $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$57_DATA $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$55_DATA }, Q = \core.rb).
+Adding EN signal on $flatten\core.$procdff$1279 ($dff) from module micro_fpga_top (D = { $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$53_DATA $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$51_DATA $flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$50_DATA }, Q = \core.ra).
+Adding SRST signal on $flatten\core.$procdff$1277 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$1196_Y, Q = \core.timeout, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1626 ($sdff) from module micro_fpga_top (D = $flatten\core.$procmux$1196_Y, Q = \core.timeout).
+Adding SRST signal on $flatten\core.$procdff$1276 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$1218_Y, Q = \core.halted, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1638 ($sdff) from module micro_fpga_top (D = $flatten\core.$procmux$1218_Y, Q = \core.halted).
+Adding SRST signal on $flatten\core.$procdff$1275 ($dff) from module micro_fpga_top (D = $flatten\core.$procmux$1227_Y, Q = \core.done, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$1648 ($sdff) from module micro_fpga_top (D = $flatten\core.$procmux$1227_Y, Q = \core.done).
+
+3.14.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 113 unused cells and 118 unused wires.
+<suppressed ~114 debug messages>
+
+3.14.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~9 debug messages>
+
+3.14.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.14.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~71 debug messages>
+
+3.14.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.14.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 338 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 308 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 304 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~102 debug messages>
+Removed a total of 34 cells.
+
+3.14.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.14.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 0 unused cells and 34 unused wires.
+<suppressed ~1 debug messages>
+
+3.14.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.14.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.14.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~73 debug messages>
+
+3.14.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.14.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 304 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.14.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.14.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.14.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.14.23. Finished fast OPT passes. (There is nothing left to do.)
+
+3.15. Executing WREDUCE pass (reducing word size of cells).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$53 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$55 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$51 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$57 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$59 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$61 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$63 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$65 (core.imem).
+Removed top 24 address bits (of 32) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$67 (core.imem).
+Removed top 16 address bits (of 24) from memory read port micro_fpga_top.$flatten\core.$memrd$\imem$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$50 (core.imem).
+Removed top 12 bits (of 24) from FF cell micro_fpga_top.$auto$ff.cc:337:slice$1608 ($dffe).
+Removed top 12 bits (of 24) from FF cell micro_fpga_top.$auto$ff.cc:337:slice$1599 ($dffe).
+Removed top 1 bits (of 2) from port B of cell micro_fpga_top.$auto$opt_dff.cc:235:make_patterns_logic$1563 ($ne).
+Removed top 1 bits (of 65) from FF cell micro_fpga_top.$auto$ff.cc:337:slice$1527 ($dffe).
+Removed top 1 bits (of 2) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1414 ($eq).
+Removed top 1 bits (of 2) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1398 ($eq).
+Removed top 1 bits (of 2) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1389 ($eq).
+Removed top 2 bits (of 3) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1385 ($eq).
+Removed top 1 bits (of 3) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1368 ($eq).
+Removed top 1 bits (of 2) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1355 ($eq).
+Removed top 2 bits (of 3) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1351 ($eq).
+Removed top 1 bits (of 2) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1347 ($eq).
+Removed top 1 bits (of 3) from port B of cell micro_fpga_top.$auto$fsm_map.cc:77:implement_pattern_cache$1338 ($eq).
+Removed top 7 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$procmux$1253_CMP0 ($eq).
+Removed top 6 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$procmux$1252_CMP0 ($eq).
+Removed top 6 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$procmux$1251_CMP0 ($eq).
+Removed top 5 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$procmux$1250_CMP0 ($eq).
+Removed top 5 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$procmux$1249_CMP0 ($eq).
+Removed top 5 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$procmux$1248_CMP0 ($eq).
+Removed top 1 bits (of 65) from mux cell micro_fpga_top.$flatten\core.$procmux$906 ($pmux).
+Removed top 1 bits (of 65) from mux cell micro_fpga_top.$flatten\core.$procmux$904 ($mux).
+Removed top 28 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:315$94 ($add).
+Removed top 8 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:315$94 ($add).
+Removed top 5 bits (of 6) from port B of cell micro_fpga_top.$flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:299$93 ($sub).
+Converting cell micro_fpga_top.$flatten\core.$neg$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$84 ($neg) from signed to unsigned.
+Removed top 1 bits (of 7) from port A of cell micro_fpga_top.$flatten\core.$neg$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$84 ($neg).
+Removed top 1 bits (of 65) from port B of cell micro_fpga_top.$flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83 ($sub).
+Removed top 1 bits (of 65) from port Y of cell micro_fpga_top.$flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83 ($sub).
+Removed top 1 bits (of 65) from port A of cell micro_fpga_top.$flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83 ($sub).
+Removed top 1 bits (of 65) from port B of cell micro_fpga_top.$flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:290$79 ($ge).
+Removed top 5 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:265$74 ($eq).
+Removed top 4 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:246$72 ($eq).
+Removed top 4 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:246$71 ($eq).
+Removed top 4 bits (of 8) from port B of cell micro_fpga_top.$flatten\core.$eq$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:229$70 ($eq).
+Removed top 28 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$68 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$68 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$68 ($add).
+Removed top 28 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66 ($add).
+Removed top 29 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64 ($add).
+Removed top 29 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62 ($add).
+Removed top 29 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$60 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$60 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$60 ($add).
+Removed top 29 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58 ($add).
+Removed top 30 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56 ($add).
+Removed top 30 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54 ($add).
+Removed top 31 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52 ($add).
+Removed top 24 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52 ($add).
+Removed top 16 bits (of 24) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52 ($add).
+Removed top 31 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:215$49 ($add).
+Removed top 15 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:211$48 ($ge).
+Removed top 8 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$gt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$47 ($gt).
+Removed top 8 bits (of 32) from port A of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46 ($add).
+Removed top 28 bits (of 32) from port B of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46 ($add).
+Removed top 7 bits (of 32) from port Y of cell micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46 ($add).
+Removed top 1 bits (of 65) from mux cell micro_fpga_top.$flatten\core.$procmux$912 ($mux).
+Removed top 1 bits (of 65) from mux cell micro_fpga_top.$flatten\core.$procmux$910 ($mux).
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$60_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52_Y.
+Removed top 1 bits (of 65) from wire micro_fpga_top.$flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83_Y.
+Removed top 7 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46_Y.
+Removed top 1 bits (of 65) from wire micro_fpga_top.$flatten\core.$procmux$904_Y.
+Removed top 1 bits (of 65) from wire micro_fpga_top.$flatten\core.$procmux$906_Y.
+Removed top 1 bits (of 65) from wire micro_fpga_top.$flatten\core.$procmux$910_Y.
+Removed top 8 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:315$94_Y.
+Removed top 1 bits (of 65) from wire micro_fpga_top.$flatten\core.$procmux$912_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66_Y.
+Removed top 24 bits (of 32) from wire micro_fpga_top.$flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$68_Y.
+
+3.16. Executing PEEPOPT pass (run peephole optimizers).
+
+3.17. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 4 unused cells and 20 unused wires.
+<suppressed ~5 debug messages>
+
+3.18. Executing SHARE pass (SAT-based resource sharing).
+
+3.19. Executing TECHMAP pass (map to technology primitives).
+
+3.19.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/cmp2lut.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/cmp2lut.v' to AST representation.
+Generating RTLIL representation for module `\_90_lut_cmp_'.
+Successfully finished Verilog frontend.
+
+3.19.2. Continuing TECHMAP pass.
+No more expansions possible.
+<suppressed ~114 debug messages>
+
+3.20. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.22. Executing TECHMAP pass (map to technology primitives).
+
+3.22.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v' to AST representation.
+Generating RTLIL representation for module `\_80_mul'.
+Generating RTLIL representation for module `\_90_soft_mul'.
+Successfully finished Verilog frontend.
+
+3.22.2. Continuing TECHMAP pass.
+Using template $paramod$335e17a7cf8567278515f1ab72d68067b73bea68\_80_mul for cells of type $mul.
+Using template $paramod$ab0e9c1d5c08e052e83ad657178f45525e00d63e\_80_mul for cells of type $__mul.
+Using template $paramod$9054fdfec5dc46a5ba12fe7f7f7489ac98294eab\_80_mul for cells of type $__mul.
+Using template $paramod$62b0135e17f0efaaed653208dff83efa50a0834e\_80_mul for cells of type $__mul.
+Using template $paramod$011bd28ed3a20aeae623609b208f8a5c6a29a348\_80_mul for cells of type $__mul.
+Using template $paramod$bb0a4c91fdfe24e3cde6b26d237c71b50df78251\_80_mul for cells of type $__mul.
+Using template $paramod$ba1b36458f074a6329f9cad9c8b71be8774bccea\_80_mul for cells of type $__mul.
+No more expansions possible.
+<suppressed ~633 debug messages>
+
+3.23. Executing TECHMAP pass (map to technology primitives).
+
+3.23.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/dsp_map_18x18.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/dsp_map_18x18.v' to AST representation.
+Generating RTLIL representation for module `$__MUL18X18'.
+Successfully finished Verilog frontend.
+
+3.23.2. Continuing TECHMAP pass.
+Using template $paramod$e2221a8e1c62487f5036e26a39a075aafac8168d$__MUL18X18 for cells of type $__MUL18X18.
+Using template $paramod$06736093757f32de297ef10f8bdd6b0120865881$__MUL18X18 for cells of type $__MUL18X18.
+Using template $paramod$e5ade21dea2c4d51df0cdca72b2a93a08fd8e7d1$__MUL18X18 for cells of type $__MUL18X18.
+No more expansions possible.
+<suppressed ~76 debug messages>
+
+3.24. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module micro_fpga_top:
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1696 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1696 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1696 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1692 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1686 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1689 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:173$1682 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1676 ($add).
+  creating $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1679 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:159$24 ($add).
+  creating $macc model for $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:160$25 ($sub).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66 ($add).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:215$49 ($add).
+  creating $macc model for $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83 ($sub).
+  creating $macc model for $flatten\core.$neg$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$84 ($neg).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46 ($add).
+  creating $macc model for $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:299$93 ($sub).
+  creating $macc model for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:315$94 ($add).
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1676 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1679.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1679.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1679.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1696 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1679.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1686 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1689.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1689 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1692.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1696 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1696 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699.
+  merging $macc model for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:216$1699 into $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:159$24.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54.
+  creating $alu model for $macc $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:160$25.
+  creating $alu model for $macc $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:173$1682.
+  creating $alu model for $macc $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:215$49.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46.
+  creating $alu model for $macc $flatten\core.$neg$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$84.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:315$94.
+  creating $alu model for $macc $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:299$93.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66.
+  creating $alu model for $macc $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62.
+  creating $macc cell for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702: $auto$alumacc.cc:382:replace_macc$1735
+  creating $macc cell for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1702: $auto$alumacc.cc:382:replace_macc$1736
+  creating $macc cell for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:230$1692: $auto$alumacc.cc:382:replace_macc$1737
+  creating $macc cell for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:159$1679: $auto$alumacc.cc:382:replace_macc$1738
+  creating $alu model for $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:211$48 ($ge): new $alu
+  creating $alu model for $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:290$79 ($ge): new $alu
+  creating $alu model for $lt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:92$105 ($lt): new $alu
+  creating $alu model for $flatten\core.$gt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$47 ($gt): new $alu
+  creating $alu model for $procmux$698_CMP0 ($eq): merged with $lt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:92$105.
+  creating $alu cell for $flatten\core.$gt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$47: $auto$alumacc.cc:512:replace_alu$1743
+  creating $alu cell for $lt$C:\Users\jssim\AppData\Local\Temp\opencode\micro_fpga_top.sv:92$105, $procmux$698_CMP0: $auto$alumacc.cc:512:replace_alu$1754
+  creating $alu cell for $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:290$79: $auto$alumacc.cc:512:replace_alu$1761
+  creating $alu cell for $flatten\core.$ge$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:211$48: $auto$alumacc.cc:512:replace_alu$1774
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:219$62: $auto$alumacc.cc:512:replace_alu$1787
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$66: $auto$alumacc.cc:512:replace_alu$1790
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:220$64: $auto$alumacc.cc:512:replace_alu$1793
+  creating $alu cell for $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:299$93: $auto$alumacc.cc:512:replace_alu$1796
+  creating $alu cell for $flatten\core.$neg$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:292$84: $auto$alumacc.cc:512:replace_alu$1799
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:315$94: $auto$alumacc.cc:512:replace_alu$1802
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:209$46: $auto$alumacc.cc:512:replace_alu$1805
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:215$49: $auto$alumacc.cc:512:replace_alu$1808
+  creating $alu cell for $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:291$83: $auto$alumacc.cc:512:replace_alu$1811
+  creating $alu cell for $techmap$flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.$add$C:\msys64\mingw64\bin\../share/yosys/mul2dsp.v:173$1682: $auto$alumacc.cc:512:replace_alu$1814
+  creating $alu cell for $flatten\core.$sub$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:160$25: $auto$alumacc.cc:512:replace_alu$1817
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$54: $auto$alumacc.cc:512:replace_alu$1820
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$56: $auto$alumacc.cc:512:replace_alu$1823
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:218$58: $auto$alumacc.cc:512:replace_alu$1826
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:217$52: $auto$alumacc.cc:512:replace_alu$1829
+  creating $alu cell for $flatten\core.$add$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:159$24: $auto$alumacc.cc:512:replace_alu$1832
+  created 20 $alu and 4 $macc cells.
+
+3.25. Executing OPT pass (performing simple optimizations).
+
+3.25.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~3 debug messages>
+
+3.25.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 344 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.25.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~73 debug messages>
+
+3.25.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+    New input vector for $reduce_and cell $auto$opt_dff.cc:252:make_patterns_logic$1428: { \wr $auto$alumacc.cc:528:replace_alu$1755 }
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 1 changes.
+
+3.25.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 344 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.25.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.25.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 11 unused cells and 184 unused wires.
+<suppressed ~12 debug messages>
+
+3.25.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.25.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.25.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~73 debug messages>
+
+3.25.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.25.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 333 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.25.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.25.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.25.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.25.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.26. Executing MEMORY pass.
+
+3.26.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+3.26.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+3.26.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+  Analyzing micro_fpga_top.core.word write port 0.
+  Analyzing micro_fpga_top.core.imem write port 0.
+
+3.26.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+3.26.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `\core.word'[0] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[0] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[1] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[2] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[3] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[4] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[5] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[6] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+Checking read port `\core.imem'[7] in module `\micro_fpga_top': merging output FF to cell.
+    Write port 0: non-transparent.
+
+3.26.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 5 unused cells and 127 unused wires.
+<suppressed ~6 debug messages>
+
+3.26.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+Consolidating read ports of memory micro_fpga_top.core.imem by address:
+
+3.26.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+3.26.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.26.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+3.27. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.28. Executing MEMORY_LIBMAP pass (mapping memories to cells).
+mapping memory micro_fpga_top.core.imem via $__DP16KD_
+mapping memory micro_fpga_top.core.word via $__DP16KD_
+<suppressed ~1910015 debug messages>
+
+3.29. Executing TECHMAP pass (map to technology primitives).
+
+3.29.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/lutrams_map_trellis.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/lutrams_map_trellis.v' to AST representation.
+Generating RTLIL representation for module `$__TRELLIS_DPR16X4_'.
+Successfully finished Verilog frontend.
+
+3.29.2. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/brams_map_16kd.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/brams_map_16kd.v' to AST representation.
+Generating RTLIL representation for module `$__DP16KD_'.
+Generating RTLIL representation for module `$__PDPW16KD_'.
+Successfully finished Verilog frontend.
+
+3.29.3. Continuing TECHMAP pass.
+Using template $paramod$eed5c07ccc20b30fea5f07adc53d361b0ef0f8bc$__DP16KD_ for cells of type $__DP16KD_.
+Using template $paramod$010b43b1129c56ed77e29e317aac8b1982eb1b6a$__DP16KD_ for cells of type $__DP16KD_.
+No more expansions possible.
+<suppressed ~87 debug messages>
+
+3.30. Executing OPT pass (performing simple optimizations).
+
+3.30.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~139 debug messages>
+
+3.30.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 379 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 372 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~21 debug messages>
+Removed a total of 7 cells.
+
+3.30.3. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $auto$ff.cc:337:slice$1503 ($dffe) from module micro_fpga_top (D = $flatten\core.$procmux$884_Y, Q = \core.div_cnt, rval = 6'111111).
+Adding SRST signal on $auto$ff.cc:337:slice$1516 ($dffe) from module micro_fpga_top (D = $flatten\core.$5$lookahead\div_q$38[63:0]$81, Q = \core.div_q, rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding SRST signal on $auto$ff.cc:337:slice$1527 ($dffe) from module micro_fpga_top (D = $auto$wreduce.cc:514:run$1665 [63:0], Q = \core.div_r [63:0], rval = 64'0000000000000000000000000000000000000000000000000000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$1579 ($sdffe) from module micro_fpga_top (D = $flatten\core.$procmux$1027_Y [0], Q = \core.pc [0]).
+Removing always-active EN on $auto$mem.cc:1169:emulate_transparency$2089 ($dffe) from module micro_fpga_top.
+
+3.30.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 3 unused cells and 617 unused wires.
+<suppressed ~4 debug messages>
+
+3.30.5. Rerunning OPT passes. (Removed registers in this run.)
+
+3.30.6. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~4 debug messages>
+
+3.30.7. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 369 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.30.8. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.30.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+3.30.10. Finished fast OPT passes.
+
+3.31. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+
+3.32. Executing OPT pass (performing simple optimizations).
+
+3.32.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.32.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 369 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.32.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~44 debug messages>
+
+3.32.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+    New input vector for $reduce_and cell $auto$opt_dff.cc:252:make_patterns_logic$2481: { $auto$opt_dff.cc:234:make_patterns_logic$1562 $auto$opt_dff.cc:234:make_patterns_logic$1580 $auto$opt_dff.cc:234:make_patterns_logic$1582 $auto$opt_dff.cc:234:make_patterns_logic$1584 $auto$opt_dff.cc:234:make_patterns_logic$2478 }
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 1 changes.
+
+3.32.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 369 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.32.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.32.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.32.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.32.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.32.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~44 debug messages>
+
+3.32.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.32.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 369 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.32.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.32.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.32.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.32.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.33. Executing TECHMAP pass (map to technology primitives).
+
+3.33.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/techmap.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.33.2. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/arith_map_ccu2c.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/arith_map_ccu2c.v' to AST representation.
+Generating RTLIL representation for module `\_80_ccu2c_alu'.
+Successfully finished Verilog frontend.
+
+3.33.3. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $reduce_and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $sdffce.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $dff.
+Using extmapper simplemap for cells of type $dffe.
+Using template $paramod$039520c137afc9cd69dd56c3fb11a4e1fbe5f664\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$c3cd1564c35d873179656addd6052d7ea8b6d991\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$32efbfac1c4dc57230cf86180788fdfd12e3b511\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$a950948e19702336540a1f557d0a91306bdb9188\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$103b4016182df467cceab67bcf3e18e6361ec0fd\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$d708da304ab4bd635dc98328cb56593f40370d14\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$constmap:dba4f2067ffa567551fb10fb06b704ab22ef6e36$paramod$05fd02ee8975e559bee57b6e5e564b3ecd2ab687\_90_shift_shiftx for cells of type $shiftx.
+Using template $paramod$6a42b6fefed750f8a1c58eab59479d960557103c\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$a12ca7767ff539b907de1f9d840271065730e6ef\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$1ee90ea719ae3927db70f19bf41203d0b5cf6427\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$25417eb1ceb444220a2cc387484bf7cf31b9177f\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$a04dd9d4d8b430140c4ff94b50470fb380fda2a0\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$fa8d9e4c2749d63ae521a69564d54ead1ad1232d\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$672a140277c71df8314410f22acc08d55222c3c7\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$e82bc780abe45b949d821aa3d0d92433ac3b9e09\_80_ccu2c_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $or.
+Using template $paramod$6cc7bde01f66986965727fe07a5478a074c29493\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$a27c9aef1c47a95c185d364a14d70477e63e5d36\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod$fc972a7a46956c1788f3cb5257b53c8f1df2d0cc\_90_alu for cells of type $alu.
+Using template $paramod$bf20f0d9d6970e76e8696adf2070a12d95a8945b\_80_ccu2c_alu for cells of type $alu.
+Using extmapper maccmap for cells of type $macc_v2.
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[2] [27:0] 36'000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[1] [45:0] 18'000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.last_partial [9:0] 54'000000000000000000000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[2] [27:0] 36'000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[1] 18'000000000000000000 } (54 bits, unsigned)
+  add $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[0].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[0] (36 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.last_partial 54'000000000000000000000000000000000000000000000000000000 } (74 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[2] 36'000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[1] 18'000000000000000000 } (46 bits, unsigned)
+  add $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA.last.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[0] (28 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.last_partial [9:0] 54'000000000000000000000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[2] [27:0] 36'000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[1] 18'000000000000000000 } (54 bits, unsigned)
+  add $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[2].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[0] (36 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.last_partial [9:0] 54'000000000000000000000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[2] [27:0] 36'000000000000000000000000000000000000 } (64 bits, unsigned)
+  add { $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[1] 18'000000000000000000 } (54 bits, unsigned)
+  add $flatten\core.$mul$C:\Users\jssim\AppData\Local\Temp\opencode\micro_alu_divmc.sv:161$26.genblk1.genblk1.genblk1.genblk1.genblk1.sliceA[1].mul.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.blk.partial[0] (36 bits, unsigned)
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $logic_and.
+Using extmapper simplemap for cells of type $pmux.
+Using template $paramod$constmap:c741d8d15ca6ce9584b08ae063f00a8f71c9280d$paramod$26de505cffdea93ae4a65cab40d30691657b5725\_90_shift_shiftx for cells of type $shift.
+Using extmapper simplemap for cells of type $logic_or.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod$5b6befb72d9e8cb4800d8d538ef0b4af2d21773e\_80_ccu2c_alu for cells of type $alu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000001000000 for cells of type $fa.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000001 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000001 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~3012 debug messages>
+
+3.34. Executing OPT pass (performing simple optimizations).
+
+3.34.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~3376 debug messages>
+
+3.34.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 8429 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 7745 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 7491 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 7431 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~2994 debug messages>
+Removed a total of 998 cells.
+
+3.34.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.34.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 1833 unused cells and 2589 unused wires.
+<suppressed ~1834 debug messages>
+
+3.34.5. Finished fast OPT passes.
+
+3.35. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.36. Executing DFFLEGALIZE pass (convert FFs to types supported by the target).
+
+3.37. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 5866 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 5735 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 5604 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~786 debug messages>
+Removed a total of 262 cells.
+
+3.38. Executing TECHMAP pass (map to technology primitives).
+
+3.38.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v' to AST representation.
+Generating RTLIL representation for module `$_DFF_N_'.
+Generating RTLIL representation for module `$_DFF_P_'.
+Generating RTLIL representation for module `$_DFFE_NN_'.
+Generating RTLIL representation for module `$_DFFE_PN_'.
+Generating RTLIL representation for module `$_DFFE_NP_'.
+Generating RTLIL representation for module `$_DFFE_PP_'.
+Generating RTLIL representation for module `$_DFF_NP0_'.
+Generating RTLIL representation for module `$_DFF_NP1_'.
+Generating RTLIL representation for module `$_DFF_PP0_'.
+Generating RTLIL representation for module `$_DFF_PP1_'.
+Generating RTLIL representation for module `$_SDFF_NP0_'.
+Generating RTLIL representation for module `$_SDFF_NP1_'.
+Generating RTLIL representation for module `$_SDFF_PP0_'.
+Generating RTLIL representation for module `$_SDFF_PP1_'.
+Generating RTLIL representation for module `$_DFFE_NP0P_'.
+Generating RTLIL representation for module `$_DFFE_NP1P_'.
+Generating RTLIL representation for module `$_DFFE_PP0P_'.
+Generating RTLIL representation for module `$_DFFE_PP1P_'.
+Generating RTLIL representation for module `$_DFFE_NP0N_'.
+Generating RTLIL representation for module `$_DFFE_NP1N_'.
+Generating RTLIL representation for module `$_DFFE_PP0N_'.
+Generating RTLIL representation for module `$_DFFE_PP1N_'.
+Generating RTLIL representation for module `$_SDFFE_NP0P_'.
+Generating RTLIL representation for module `$_SDFFE_NP1P_'.
+Generating RTLIL representation for module `$_SDFFE_PP0P_'.
+Generating RTLIL representation for module `$_SDFFE_PP1P_'.
+Generating RTLIL representation for module `$_SDFFE_NP0N_'.
+Generating RTLIL representation for module `$_SDFFE_NP1N_'.
+Generating RTLIL representation for module `$_SDFFE_PP0N_'.
+Generating RTLIL representation for module `$_SDFFE_PP1N_'.
+Generating RTLIL representation for module `$_ALDFF_NP_'.
+Generating RTLIL representation for module `$_ALDFF_PP_'.
+Generating RTLIL representation for module `$_ALDFFE_NPN_'.
+Generating RTLIL representation for module `$_ALDFFE_NPP_'.
+Generating RTLIL representation for module `$_ALDFFE_PPN_'.
+Generating RTLIL representation for module `$_ALDFFE_PPP_'.
+Generating RTLIL representation for module `\FD1P3AX'.
+Generating RTLIL representation for module `\FD1P3AY'.
+Generating RTLIL representation for module `\FD1P3BX'.
+Generating RTLIL representation for module `\FD1P3DX'.
+Generating RTLIL representation for module `\FD1P3IX'.
+Generating RTLIL representation for module `\FD1P3JX'.
+Generating RTLIL representation for module `\FD1S3AX'.
+Generating RTLIL representation for module `\FD1S3AY'.
+Generating RTLIL representation for module `\FD1S3BX'.
+Generating RTLIL representation for module `\FD1S3DX'.
+Generating RTLIL representation for module `\FD1S3IX'.
+Generating RTLIL representation for module `\FD1S3JX'.
+Generating RTLIL representation for module `\IFS1P3BX'.
+Generating RTLIL representation for module `\IFS1P3DX'.
+Generating RTLIL representation for module `\IFS1P3IX'.
+Generating RTLIL representation for module `\IFS1P3JX'.
+Generating RTLIL representation for module `\OFS1P3BX'.
+Generating RTLIL representation for module `\OFS1P3DX'.
+Generating RTLIL representation for module `\OFS1P3IX'.
+Generating RTLIL representation for module `\OFS1P3JX'.
+Generating RTLIL representation for module `\IB'.
+Generating RTLIL representation for module `\IBPU'.
+Generating RTLIL representation for module `\IBPD'.
+Generating RTLIL representation for module `\OB'.
+Generating RTLIL representation for module `\OBZ'.
+Generating RTLIL representation for module `\OBZPU'.
+Generating RTLIL representation for module `\OBZPD'.
+Generating RTLIL representation for module `\OBCO'.
+Generating RTLIL representation for module `\BB'.
+Generating RTLIL representation for module `\BBPU'.
+Generating RTLIL representation for module `\BBPD'.
+Generating RTLIL representation for module `\ILVDS'.
+Generating RTLIL representation for module `\OLVDS'.
+Successfully finished Verilog frontend.
+
+3.38.2. Continuing TECHMAP pass.
+Using template $paramod$_DFF_P_\_TECHMAP_WIREINIT_Q_=1'x for cells of type $_DFF_P_.
+Using template $_SDFFE_PP0P_ for cells of type $_SDFFE_PP0P_.
+Using template $_SDFF_PP0_ for cells of type $_SDFF_PP0_.
+Using template $paramod$_DFFE_PP_\_TECHMAP_WIREINIT_Q_=1'x for cells of type $_DFFE_PP_.
+Using template $_SDFFE_PP1P_ for cells of type $_SDFFE_PP1P_.
+No more expansions possible.
+<suppressed ~988 debug messages>
+
+3.39. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.40. Executing SIMPLEMAP pass (map simple cells to gate primitives).
+
+3.41. Executing LATTICE_GSR pass (implement FF init values).
+Handling GSR in micro_fpga_top.
+
+3.42. Executing ATTRMVCP pass (move or copy attributes).
+
+3.43. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 0 unused cells and 5143 unused wires.
+<suppressed ~1 debug messages>
+
+3.44. Executing TECHMAP pass (map to technology primitives).
+
+3.44.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/latches_map.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/latches_map.v' to AST representation.
+Generating RTLIL representation for module `$_DLATCH_N_'.
+Generating RTLIL representation for module `$_DLATCH_P_'.
+Successfully finished Verilog frontend.
+
+3.44.2. Continuing TECHMAP pass.
+No more expansions possible.
+<suppressed ~4 debug messages>
+
+3.45. Executing ABC9 pass.
+
+3.45.1. Executing ABC9_OPS pass (helper functions for ABC9).
+
+3.45.2. Executing ABC9_OPS pass (helper functions for ABC9).
+
+3.45.3. Executing SCC pass (detecting logic loops).
+Found an SCC: $auto$ff.cc:337:slice$2729 $auto$simplemap.cc:198:logic_reduce$10081 $auto$ff.cc:337:slice$2728 $auto$ff.cc:337:slice$2727 $auto$simplemap.cc:198:logic_reduce$10080 $auto$ff.cc:337:slice$2726 $auto$ff.cc:337:slice$2725 $auto$simplemap.cc:157:simplemap_reduce$4821 $auto$simplemap.cc:198:logic_reduce$10085 $auto$simplemap.cc:198:logic_reduce$10083 $auto$simplemap.cc:198:logic_reduce$10079 $auto$ff.cc:337:slice$2724 $auto$dfflegalize.cc:941:flip_pol$17287 $auto$ff.cc:573:convert_ce_over_srst$17817 $auto$simplemap.cc:157:simplemap_reduce$4798 $auto$simplemap.cc:157:simplemap_reduce$4796 $auto$simplemap.cc:157:simplemap_reduce$4794
+Found 1 SCCs in module micro_fpga_top.
+Found 1 SCCs.
+
+3.45.4. Executing ABC9_OPS pass (helper functions for ABC9).
+
+3.45.5. Executing TECHMAP pass (map to technology primitives).
+
+3.45.5.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/techmap.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.45.5.2. Continuing TECHMAP pass.
+No more expansions possible.
+<suppressed ~166 debug messages>
+
+3.45.6. Executing OPT pass (performing simple optimizations).
+
+3.45.6.1. Executing OPT_EXPR pass (perform const folding).
+
+3.45.6.2. Executing OPT_MERGE pass (detect identical cells).
+Removed a total of 0 cells.
+
+3.45.6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Removed 0 multiplexer ports.
+
+3.45.6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+Performed a total of 0 changes.
+
+3.45.6.5. Executing OPT_MERGE pass (detect identical cells).
+Removed a total of 0 cells.
+
+3.45.6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.45.6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+
+3.45.6.8. Executing OPT_EXPR pass (perform const folding).
+
+3.45.6.9. Finished fast OPT passes. (There is nothing left to do.)
+
+3.45.7. Executing TECHMAP pass (map to technology primitives).
+
+3.45.7.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/abc9_map.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/abc9_map.v' to AST representation.
+Successfully finished Verilog frontend.
+
+3.45.7.2. Continuing TECHMAP pass.
+No more expansions possible.
+<suppressed ~2 debug messages>
+
+3.45.8. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/abc9_model.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/abc9_model.v' to AST representation.
+Generating RTLIL representation for module `$__ABC9_DELAY'.
+Generating RTLIL representation for module `$__ABC9_SCC_BREAKER'.
+Generating RTLIL representation for module `$__DFF_N__$abc9_flop'.
+Generating RTLIL representation for module `$__DFF_P__$abc9_flop'.
+Successfully finished Verilog frontend.
+
+3.45.9. Executing ABC9_OPS pass (helper functions for ABC9).
+<suppressed ~2 debug messages>
+
+3.45.10. Executing ABC9_OPS pass (helper functions for ABC9).
+
+3.45.11. Executing ABC9_OPS pass (helper functions for ABC9).
+<suppressed ~2 debug messages>
+
+3.45.12. Executing TECHMAP pass (map to technology primitives).
+
+3.45.12.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/techmap.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+3.45.12.2. Continuing TECHMAP pass.
+Using template $paramod$838872d5a4bab89607f53482b205c0fd50d8b82e\CCU2C for cells of type $paramod$838872d5a4bab89607f53482b205c0fd50d8b82e\CCU2C.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\LUT2\INIT=4'1010 for cells of type LUT2.
+Using template $paramod\LUT4\INIT=16'1001011010101010 for cells of type LUT4.
+Using extmapper simplemap for cells of type $mux.
+No more expansions possible.
+<suppressed ~205 debug messages>
+
+3.45.13. Executing OPT pass (performing simple optimizations).
+
+3.45.13.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+<suppressed ~18 debug messages>
+
+3.45.13.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 59 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Computing hashes of 57 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+3.45.13.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+3.45.13.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.45.13.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 57 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.45.13.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.45.13.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+Removed 0 unused cells and 55 unused wires.
+<suppressed ~1 debug messages>
+
+3.45.13.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.45.13.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+3.45.13.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \micro_fpga_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+3.45.13.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \micro_fpga_top.
+Performed a total of 0 changes.
+
+3.45.13.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\micro_fpga_top'.
+Computing hashes of 57 cells of `\micro_fpga_top'.
+Finding duplicate cells in `\micro_fpga_top'.
+Removed a total of 0 cells.
+
+3.45.13.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+3.45.13.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \micro_fpga_top..
+
+3.45.13.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module micro_fpga_top.
+
+3.45.13.16. Finished fast OPT passes. (There is nothing left to do.)
+
+3.45.14. Executing AIGMAP pass (map logic to AIG).
+Module micro_fpga_top: replaced 18 cells with 120 new cells, skipped 39 cells.
+  replaced 3 cell types:
+      14 $_MUX_
+       2 $_OR_
+       2 $_XOR_
+  not replaced 3 cell types:
+       4 $_AND_
+       4 $_NOT_
+      31 $specify2
+
+3.45.15. Executing AIGMAP pass (map logic to AIG).
+Module micro_fpga_top: replaced 2560 cells with 13825 new cells, skipped 3045 cells.
+  replaced 4 cell types:
+     810 $_MUX_
+       3 $_ORNOT_
+    1361 $_OR_
+     386 $_XOR_
+  not replaced 8 cell types:
+    1445 $_AND_
+     360 $_NOT_
+       1 $__ABC9_SCC_BREAKER
+       1 $scopeinfo
+     895 TRELLIS_FF
+      24 DP16KD
+      10 MULT18X18D
+     309 $paramod$838872d5a4bab89607f53482b205c0fd50d8b82e\CCU2C
+
+3.45.15.1. Executing ABC9_OPS pass (helper functions for ABC9).
+
+3.45.15.2. Executing ABC9_OPS pass (helper functions for ABC9).
+
+3.45.15.3. Executing XAIGER backend.
+<suppressed ~11 debug messages>
+Extracted 6397 AND gates and 18276 wires from module `micro_fpga_top' to a netlist network with 1268 inputs and 782 outputs.
+
+3.45.15.4. Executing ABC9_EXE pass (technology mapping using ABC9).
+
+3.45.15.5. Executing ABC9.
+Running ABC command: "<yosys-exe-dir>/yosys-abc" -s -f <abc-temp-dir>/abc.script 2>&1
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_lut <abc-temp-dir>/input.lut 
+ABC: + read_box <abc-temp-dir>/input.box 
+ABC: + &read <abc-temp-dir>/input.xaig 
+ABC: + &ps 
+ABC: <abc-temp-dir>/input : i/o =   1268/    782  and =    5391  lev =   27 (   1.57)  mem = 0.15 MB  box = 309  bb = 0
+ABC: + &scorr 
+ABC: Warning: The network is combinational.
+ABC: + &sweep 
+ABC: + &dc2 
+ABC: + &dch -f -r 
+ABC: + &ps 
+ABC: <abc-temp-dir>/input : i/o =   1268/    782  and =    6905  lev =   49 (   1.27)  mem = 0.16 MB  ch =  576  box = 257  bb = 0
+ABC: cst =       0  cls =    485  lit =     576  unused =    7883  proof =     0
+ABC: + &if -W 300 -v 
+ABC: K = 7. Memory (bytes): Truth =    0. Cut =   76. Obj =  156. Set =  780. CutMin = no
+ABC: Node =    6905.  Ch =   485.  Total mem =    1.97 MB. Peak cut mem =    0.08 MB.
+ABC: P:  Del = 5066.00.  Ar =    5834.0.  Edge =     7155.  Cut =    68346.  T =     0.01 sec
+ABC: P:  Del = 5066.00.  Ar =    5663.0.  Edge =     6951.  Cut =    67877.  T =     0.00 sec
+ABC: P:  Del = 5066.00.  Ar =    2009.0.  Edge =     6004.  Cut =   142361.  T =     0.03 sec
+ABC: F:  Del = 5066.00.  Ar =    1713.0.  Edge =     5745.  Cut =   131033.  T =     0.03 sec
+ABC: A:  Del = 5066.00.  Ar =    1667.0.  Edge =     5402.  Cut =   127076.  T =     0.02 sec
+ABC: A:  Del = 5066.00.  Ar =    1665.0.  Edge =     5395.  Cut =   127714.  T =     0.03 sec
+ABC: Total time =     0.12 sec
+ABC: + &write -n <abc-temp-dir>/output.aig 
+ABC: + &mfs 
+ABC: + &ps -l 
+ABC: <abc-temp-dir>/input : i/o =   1268/    782  and =    5693  lev =   17 (   1.29)  mem = 0.14 MB  box = 257  bb = 0
+ABC: Mapping (K=7)  :  lut =   1420  edge =    5370  lev =   10 (0.71)  levB =   37  mem = 0.07 MB
+ABC: LUT = 1420 : 2=104 7.3 %  3=332 23.4 %  4=761 53.6 %  5=218 15.4 %  6=3 0.2 %  7=2 0.1 %  Ave = 3.78
+ABC: + &write -n <abc-temp-dir>/output.aig 
+ABC: + &verify 
+ABC: Networks are equivalent.  Time =     0.11 sec
+ABC: + time 
+ABC: elapse: 1.96 seconds, total: 1.96 seconds
+
+3.45.15.6. Executing AIGER frontend.
+<suppressed ~4162 debug messages>
+Removed 9116 unused cells and 15063 unused wires.
+
+3.45.15.7. Executing ABC9_OPS pass (helper functions for ABC9).
+ABC RESULTS:              $lut cells:     1429
+ABC RESULTS:   $paramod$838872d5a4bab89607f53482b205c0fd50d8b82e\CCU2C cells:      257
+ABC RESULTS:           input signals:       48
+ABC RESULTS:          output signals:       93
+Removing temp directory.
+
+3.45.16. Executing TECHMAP pass (map to technology primitives).
+
+3.45.16.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/abc9_unmap.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/abc9_unmap.v' to AST representation.
+Generating RTLIL representation for module `$__DFF_x__$abc9_flop'.
+Generating RTLIL representation for module `$__ABC9_SCC_BREAKER'.
+Successfully finished Verilog frontend.
+
+3.45.16.2. Continuing TECHMAP pass.
+Using template $paramod$__ABC9_SCC_BREAKER\WIDTH=32'00000000000000000000000000000001 for cells of type $__ABC9_SCC_BREAKER.
+Using template $paramod$838872d5a4bab89607f53482b205c0fd50d8b82e\CCU2C for cells of type $paramod$838872d5a4bab89607f53482b205c0fd50d8b82e\CCU2C.
+No more expansions possible.
+<suppressed ~275 debug messages>
+Removed 274 unused cells and 20057 unused wires.
+
+3.46. Executing TECHMAP pass (map to technology primitives).
+
+3.46.1. Executing Verilog-2005 frontend: C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v
+Parsing Verilog input from `C:\msys64\mingw64\bin\../share/yosys/lattice/cells_map_trellis.v' to AST representation.
+Generating RTLIL representation for module `$_DFF_N_'.
+Generating RTLIL representation for module `$_DFF_P_'.
+Generating RTLIL representation for module `$_DFFE_NN_'.
+Generating RTLIL representation for module `$_DFFE_PN_'.
+Generating RTLIL representation for module `$_DFFE_NP_'.
+Generating RTLIL representation for module `$_DFFE_PP_'.
+Generating RTLIL representation for module `$_DFF_NP0_'.
+Generating RTLIL representation for module `$_DFF_NP1_'.
+Generating RTLIL representation for module `$_DFF_PP0_'.
+Generating RTLIL representation for module `$_DFF_PP1_'.
+Generating RTLIL representation for module `$_SDFF_NP0_'.
+Generating RTLIL representation for module `$_SDFF_NP1_'.
+Generating RTLIL representation for module `$_SDFF_PP0_'.
+Generating RTLIL representation for module `$_SDFF_PP1_'.
+Generating RTLIL representation for module `$_DFFE_NP0P_'.
+Generating RTLIL representation for module `$_DFFE_NP1P_'.
+Generating RTLIL representation for module `$_DFFE_PP0P_'.
+Generating RTLIL representation for module `$_DFFE_PP1P_'.
+Generating RTLIL representation for module `$_DFFE_NP0N_'.
+Generating RTLIL representation for module `$_DFFE_NP1N_'.
+Generating RTLIL representation for module `$_DFFE_PP0N_'.
+Generating RTLIL representation for module `$_DFFE_PP1N_'.
+Generating RTLIL representation for module `$_SDFFE_NP0P_'.
+Generating RTLIL representation for module `$_SDFFE_NP1P_'.
+Generating RTLIL representation for module `$_SDFFE_PP0P_'.
+Generating RTLIL representation for module `$_SDFFE_PP1P_'.
+Generating RTLIL representation for module `$_SDFFE_NP0N_'.
+Generating RTLIL representation for module `$_SDFFE_NP1N_'.
+Generating RTLIL representation for module `$_SDFFE_PP0N_'.
+Generating RTLIL representation for module `$_SDFFE_PP1N_'.
+Generating RTLIL representation for module `$_ALDFF_NP_'.
+Generating RTLIL representation for module `$_ALDFF_PP_'.
+Generating RTLIL representation for module `$_ALDFFE_NPN_'.
+Generating RTLIL representation for module `$_ALDFFE_NPP_'.
+Generating RTLIL representation for module `$_ALDFFE_PPN_'.
+Generating RTLIL representation for module `$_ALDFFE_PPP_'.
+Generating RTLIL representation for module `\FD1P3AX'.
+Generating RTLIL representation for module `\FD1P3AY'.
+Generating RTLIL representation for module `\FD1P3BX'.
+Generating RTLIL representation for module `\FD1P3DX'.
+Generating RTLIL representation for module `\FD1P3IX'.
+Generating RTLIL representation for module `\FD1P3JX'.
+Generating RTLIL representation for module `\FD1S3AX'.
+Generating RTLIL representation for module `\FD1S3AY'.
+Generating RTLIL representation for module `\FD1S3BX'.
+Generating RTLIL representation for module `\FD1S3DX'.
+Generating RTLIL representation for module `\FD1S3IX'.
+Generating RTLIL representation for module `\FD1S3JX'.
+Generating RTLIL representation for module `\IFS1P3BX'.
+Generating RTLIL representation for module `\IFS1P3DX'.
+Generating RTLIL representation for module `\IFS1P3IX'.
+Generating RTLIL representation for module `\IFS1P3JX'.
+Generating RTLIL representation for module `\OFS1P3BX'.
+Generating RTLIL representation for module `\OFS1P3DX'.
+Generating RTLIL representation for module `\OFS1P3IX'.
+Generating RTLIL representation for module `\OFS1P3JX'.
+Generating RTLIL representation for module `\IB'.
+Generating RTLIL representation for module `\IBPU'.
+Generating RTLIL representation for module `\IBPD'.
+Generating RTLIL representation for module `\OB'.
+Generating RTLIL representation for module `\OBZ'.
+Generating RTLIL representation for module `\OBZPU'.
+Generating RTLIL representation for module `\OBZPD'.
+Generating RTLIL representation for module `\OBCO'.
+Generating RTLIL representation for module `\BB'.
+Generating RTLIL representation for module `\BBPU'.
+Generating RTLIL representation for module `\BBPD'.
+Generating RTLIL representation for module `\ILVDS'.
+Generating RTLIL representation for module `\OLVDS'.
+Generating RTLIL representation for module `$lut'.
+Successfully finished Verilog frontend.
+
+3.46.2. Continuing TECHMAP pass.
+Using template $paramod$b2192df6f90569fea4015d0a6658bdc192199f95$lut for cells of type $lut.
+Using template $paramod$703a13a751e631ef123f38f7d2125aeabec0f94c$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10101100 for cells of type $lut.
+Using template $paramod$448496cb53eb7c1242b5786d67bd117d88f563fb$lut for cells of type $lut.
+Using template $paramod$c064d9f267b09049d631f66733af1b91c12aa819$lut for cells of type $lut.
+Using template $paramod$68fe50ee5a60a0bed36b1b1843c805d7bc807f41$lut for cells of type $lut.
+Using template $paramod$3702268f692b8bf258e428f65d3bca4e1f76d98b$lut for cells of type $lut.
+Using template $paramod$d400f0cc4534feb4f845bb8bcf61ddbfc72ad205$lut for cells of type $lut.
+Using template $paramod$afc24e7a0cf8a9846730b7534c40e737e0e6eb00$lut for cells of type $lut.
+Using template $paramod$e5e9da8fed769f971686eed8c5eea50e61f73aaa$lut for cells of type $lut.
+Using template $paramod$dc50adeea4afc3604ad7e9fa33bba564ed04966e$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01010100 for cells of type $lut.
+Using template $paramod$a197ef6f3b51d411ae3e5b42b5d77a606c4fb11a$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10101000 for cells of type $lut.
+Using template $paramod$f560411265e719997f617fcfec52f4babfa6e228$lut for cells of type $lut.
+Using template $paramod$4fbae9a10a465642752c7465a492003601f920a3$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00000010 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00000001 for cells of type $lut.
+Using template $paramod$a850cb8ae931238b60b5faa3718336795f9c35b9$lut for cells of type $lut.
+Using template $paramod$e53493f89400484e4e19015869a8a6f7d3804aa9$lut for cells of type $lut.
+Using template $paramod$18368a3da11a7221c7fb674ec80ee0d0bd64b883$lut for cells of type $lut.
+Using template $paramod$7f7120086b74d2ad6501bbaa30925c183268a1c2$lut for cells of type $lut.
+Using template $paramod$017956f4c5398e8e749c96f264cfc9518b2da1dc$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10010110 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11101000 for cells of type $lut.
+Using template $paramod$fd904e9e35cfd343a9df248824bd3f1408724879$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01101001 for cells of type $lut.
+Using template $paramod$f5c97e291c8b48d9f1b4239d871ab7639e5a24ac$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000010\LUT=4'1011 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00010000 for cells of type $lut.
+Using template $paramod$5e9374f44a27c3f8a1c38af244ec43ceb4fb8d4f$lut for cells of type $lut.
+Using template $paramod$571404c0889eaf57f492cb5e37f8acb5df5852f9$lut for cells of type $lut.
+Using template $paramod$66e741791413519a466d4f44240bc83d3a191818$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11001010 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000010\LUT=4'0001 for cells of type $lut.
+Using template $paramod$658b9ed803f0d3d335616d3858b53e0a2522f1e8$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00011011 for cells of type $lut.
+Using template $paramod$8fd8efe0a495790cc9ddc97266933ea8a8cd7b45$lut for cells of type $lut.
+Using template $paramod$c1a19a87ccbbb03d43a72335db63f692ddf82cc1$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000010\LUT=4'1000 for cells of type $lut.
+Using template $paramod$47a8214374025465e226fa66bee690ff33268a25$lut for cells of type $lut.
+Using template $paramod$181733d3e31dcdcea8c52d0a4fc252b3aa453564$lut for cells of type $lut.
+Using template $paramod$e77dca5e1fc847f9005cbcedebcb6de355499010$lut for cells of type $lut.
+Using template $paramod$e49f6e3576ef1a6d2f58c54414dbb786af8cc869$lut for cells of type $lut.
+Using template $paramod$0331e023d83b8009e60defb446ce9fa640b122c7$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01000000 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000010\LUT=4'0010 for cells of type $lut.
+Using template $paramod$153c6cdaaddbc43e6ef3facd06aa851de33910ae$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000010\LUT=4'0100 for cells of type $lut.
+Using template $paramod$3b3cec784ad9f88bb8bdb4a4ea9d698cb80fedd1$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00100000 for cells of type $lut.
+Using template $paramod$b88ea504dd4925c1f40b04b2f96620228b58de11$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000010\LUT=4'1110 for cells of type $lut.
+Using template $paramod$c217e185eb8e6463ca272982ba8c5940fa90d81f$lut for cells of type $lut.
+Using template $paramod$11e02da475d79a576ba6e324a327d8816c4aec8f$lut for cells of type $lut.
+Using template $paramod$873c285bdccf0ac2b60d2304ea5cd14bf211d2a6$lut for cells of type $lut.
+Using template $paramod$2215adffcdd7c66f9e4b11abacf3c5f15845b576$lut for cells of type $lut.
+Using template $paramod$17c27ffdda03355f95b2ba5edc73ca082237c935$lut for cells of type $lut.
+Using template $paramod$d53578aacfd93124244778d88be0e90eb09c1b1b$lut for cells of type $lut.
+Using template $paramod$316a80854e4e81b9a9ad78bbddcbf2f8da9893f1$lut for cells of type $lut.
+Using template $paramod$71cfe6e19ddc6e812a1295585225c5141cd09837$lut for cells of type $lut.
+Using template $paramod$f3ada871809f362efd8eb0c4fb952bb5c98f0750$lut for cells of type $lut.
+Using template $paramod$179512a187da069f3b79ef6612a41e494e7d54b6$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01110000 for cells of type $lut.
+Using template $paramod$aec5adc22a5de0e60f45219ea31779531b0c2b22$lut for cells of type $lut.
+Using template $paramod$a5516fc31d1e552de2435200bb732b4d4ad63a9c$lut for cells of type $lut.
+Using template $paramod$2bf796e0fd6e6f7f76aac424a34e617ed5d61822$lut for cells of type $lut.
+Using template $paramod$2758fe53e944c993fefc635a73ed88fb1d940311$lut for cells of type $lut.
+Using template $paramod$0d3ac82cf5b8a192d5ff4c23e3143360366ae882$lut for cells of type $lut.
+Using template $paramod$975817b14e428934970c836668538a3bbe3dd485$lut for cells of type $lut.
+Using template $paramod$ddace04fba544e6adc4cdda6a50048ddd7c111af$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10111010 for cells of type $lut.
+Using template $paramod$f8f63b209b7230e81958663ff24fef1613156af7$lut for cells of type $lut.
+Using template $paramod$e51a8a571bee774247b38f52d6e85fd62ae52cea$lut for cells of type $lut.
+Using template $paramod$5dc745bb48e2cf535179547ba13f0fe5364d6d54$lut for cells of type $lut.
+Using template $paramod$bba54c1ef87367812b4c15f4aed5ac70773df775$lut for cells of type $lut.
+Using template $paramod$1296cd12d7d8d60e8ba52edc0786b08b20146340$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00000100 for cells of type $lut.
+Using template $paramod$f9813472aa48e533b3838c6f2316dc2e78c66111$lut for cells of type $lut.
+Using template $paramod$d6ca727e39f31d51d29072e0f33aa09c65e37336$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11011000 for cells of type $lut.
+Using template $paramod$6d6beead1425af15cf78b27fd9b11b41b5d4bce8$lut for cells of type $lut.
+Using template $paramod$30305e55a780880b9c824fe3509a4d981acb0f2b$lut for cells of type $lut.
+Using template $paramod$72d04cda0ad63fcea17225ad4256bc664683b513$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11101100 for cells of type $lut.
+Using template $paramod$fdcae86fcfd036c1880a04306ae771a9d7579c31$lut for cells of type $lut.
+Using template $paramod$364c9ffbffac467d60dfec81bba4e18476c15602$lut for cells of type $lut.
+Using template $paramod$7491e7206ae8c682d288373efe06a43b67c277cf$lut for cells of type $lut.
+Using template $paramod$13caa797f9204188208579865e8a63f743d9eed1$lut for cells of type $lut.
+Using template $paramod$a82a699dba54b8465366aeb90aba90d3d29adde0$lut for cells of type $lut.
+Using template $paramod$d9e869de4ea8677851dc452d380224cee441f821$lut for cells of type $lut.
+Using template $paramod$ffc80aea4aa44f0166b2d4713ba5912f56e92991$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10000000 for cells of type $lut.
+Using template $paramod$ffc2ea81a65101fbef8a332deddf112494d27163$lut for cells of type $lut.
+Using template $paramod$a492ef44f3fc5ddd0babdda92e9c6e6fff6f3b4f$lut for cells of type $lut.
+Using template $paramod$7e8d331d1e06632d29fbdf6c3afc2de1856d3c67$lut for cells of type $lut.
+Using template $paramod$8a77a4b825e7cd0e2a0cbe1bb8ec99794d7f5906$lut for cells of type $lut.
+Using template $paramod$18df3812bc12364e5ebcb6c3ed05c0294e4c26fc$lut for cells of type $lut.
+Using template $paramod$5625c0c6def530beb96c16e17997d6d42e5e6d89$lut for cells of type $lut.
+Using template $paramod$a988852add2bdce7c1dfac786401ba7c7bc832c1$lut for cells of type $lut.
+Using template $paramod$98162d862d449f7c67182f5a43cdfe4123defff8$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11101010 for cells of type $lut.
+Using template $paramod$e0286d7bdebdb6346cb367bb1962e01892ba2e32$lut for cells of type $lut.
+Using template $paramod$5c32c59025c0b98f20e63f249d83e7ebb4b085e3$lut for cells of type $lut.
+Using template $paramod$06e62c2045624c211a1abe4f2f36c8f22c688165$lut for cells of type $lut.
+Using template $paramod$3718b46f9fc8e7db62b1202aeaec21c3331ed565$lut for cells of type $lut.
+Using template $paramod$ce2c489dd7a9b2d907e13c9835a6652709faecbe$lut for cells of type $lut.
+Using template $paramod$4541c098116f7292d10d7d30a0922be20fa68a41$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10110000 for cells of type $lut.
+Using template $paramod$80391560553c319a276589d73b8536c1d8475e1d$lut for cells of type $lut.
+Using template $paramod$c43e1e0b5060801aa1b416cfabed5ec826c32a89$lut for cells of type $lut.
+Using template $paramod$272652f6c6fbe9a75eff76e45cc7e2788835518b$lut for cells of type $lut.
+Using template $paramod$37c9af120c85145419565a9ccf4ceb7397fbbe92$lut for cells of type $lut.
+Using template $paramod$a15fd389a2f54cb7b94707b25934d226e68d9e2e$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01111111 for cells of type $lut.
+Using template $paramod$929c423ec3a91c0a8d61ccde91ce3fda786dddbb$lut for cells of type $lut.
+Using template $paramod$b587e1dcd8f8a9800d395e4aeecac52c55d6f585$lut for cells of type $lut.
+Using template $paramod$7e3d8ac009723e554811ad53385162c0e6a41625$lut for cells of type $lut.
+Using template $paramod$a7c07944e10969b2e1fd563a5b72f89493cb3705$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00010011 for cells of type $lut.
+Using template $paramod$8dd42bf81ffad3d97e207e1565310c97cc60f1a7$lut for cells of type $lut.
+Using template $paramod$3cf17af4dec005d980213d0886699f8d0bff95c7$lut for cells of type $lut.
+Using template $paramod$2978a73989be3e1278af72b9db666c30fa0ff85b$lut for cells of type $lut.
+Using template $paramod$eab8c2e20ad6848564bec45c7148558972138f5b$lut for cells of type $lut.
+Using template $paramod$2ea69c779d6c1b79ac5a87b0d1523c67d5628dba$lut for cells of type $lut.
+Using template $paramod$fca001e3e0b52158a872e76e56c01ec10dfbb1de$lut for cells of type $lut.
+Using template $paramod$1241d759e3df4cac11dc7c99c36b0d1b07f7a673$lut for cells of type $lut.
+Using template $paramod$86d1a43c2f1d620ff2cef866448dd1258c868fad$lut for cells of type $lut.
+Using template $paramod$9851cb11f88bbbf4a516c0595f3b0113b1f100c4$lut for cells of type $lut.
+Using template $paramod$df196ed0a1da5c4a58c5e08a1dac304fd3fccaab$lut for cells of type $lut.
+Using template $paramod$2d0851aaf69d987e6e98f82ee90958b71216e885$lut for cells of type $lut.
+Using template $paramod$456d59706a6b79f30784d135401df0094470c74c$lut for cells of type $lut.
+Using template $paramod$69f20e0703606f2ffd2ee27cd26f815bd5eeb6e9$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10001110 for cells of type $lut.
+Using template $paramod$114cec172d8a99287ecce5b94f20863d32d39458$lut for cells of type $lut.
+Using template $paramod$ee0d8770f142857e1e665d7f6c8b0ea034def1f5$lut for cells of type $lut.
+Using template $paramod$2d5bc20486d975ad93935a66efca425d6df3f432$lut for cells of type $lut.
+Using template $paramod$6e238df02989b317f10820a22773676e71120644$lut for cells of type $lut.
+Using template $paramod$64c98a93c00f2932cdb01ce29e3a216b58ad51fe$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11010000 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00001011 for cells of type $lut.
+Using template $paramod$0babebe51def8f4db6daaf70fa957a9414a7eb6e$lut for cells of type $lut.
+Using template $paramod$8512f4fb47fa9596f76cdbe5b407a5b54df368e7$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00001001 for cells of type $lut.
+Using template $paramod$464d286cc302627c2e44b6c4a8450c9bebc28389$lut for cells of type $lut.
+Using template $paramod$1be3a10aca64bc8b3d140a9dcfb9bac7a6744be9$lut for cells of type $lut.
+Using template $paramod$3e9386ccff279159163720f27709d6c1649de9df$lut for cells of type $lut.
+Using template $paramod$e8b1383c6901b56df73ac402d78a5e0a42461be0$lut for cells of type $lut.
+Using template $paramod$baa939b0bd5b3e0c8760492528669bd58f640542$lut for cells of type $lut.
+Using template $paramod$f65cf6380214e831938c4f25f730307ae86218f7$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'00001110 for cells of type $lut.
+Using template $paramod$36b7d8209200ca95c844934f9e4add2d5121b073$lut for cells of type $lut.
+Using template $paramod$2e37a29808ea9d028852cbc67bbcbc7bc127b77a$lut for cells of type $lut.
+Using template $paramod$2f17e1be43f3ac07ddcc5afec3b8e6a34320bd15$lut for cells of type $lut.
+Using template $paramod$c508ffccf3cb0d44491eb1a488b3e92b1375f011$lut for cells of type $lut.
+Using template $paramod$b43cdd6ca89f8faa7ea02c4f2b202cefaf655ede$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'11100000 for cells of type $lut.
+Using template $paramod$d61dc5ff3a9102f3e1b420770cb57c48730b6a64$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01001100 for cells of type $lut.
+Using template $paramod$67be80acf92b4861aed3d8085a5bb296f128f875$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'01100000 for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000011\LUT=8'10010000 for cells of type $lut.
+Using template $paramod$edc5a73130589b9210f4bdf92e14bdcacac8945d$lut for cells of type $lut.
+Using template $paramod$7c0c958e927437390cb58f1395b98e0852db607c$lut for cells of type $lut.
+Using template $paramod$3fd3cd243a8b2f71b0ffe04bdaebf6ad83bcc78e$lut for cells of type $lut.
+Using template $paramod$2d07c1a6c53c7b878509360922c4fa5ebedc3011$lut for cells of type $lut.
+Using template $paramod$f45429e380905f064bb0bad3a8bdb941708e63a7$lut for cells of type $lut.
+Using template $paramod$54759f5ae8bf44e3057a0f0f232a267d8bb8ec1c$lut for cells of type $lut.
+Using template $paramod$e3e4230bb990723642112b292aa705ee0cbad0d4$lut for cells of type $lut.
+Using template $paramod$85b779ce5ab505dbf25e5e046fb43ca2b76b878b$lut for cells of type $lut.
+Using template $paramod$05ac1639ab7543654a2476d11c1711de01f760e6$lut for cells of type $lut.
+Using template $paramod$58df2c605746858c7e53492c8f57d6f1fafa12d2$lut for cells of type $lut.
+Using template $paramod$8aa914641d9da3ceaab54a09681d988e5887c82c$lut for cells of type $lut.
+Using template $paramod$d9bb8a5ad37488281c0a8124fa86886fb1fb5a26$lut for cells of type $lut.
+Using template $paramod$c388bdf5bc34e848632d723db494e9a79bee28dd$lut for cells of type $lut.
+Using template $paramod$234fd643079033ba0cbc98ff572df9b7b7a0dc86$lut for cells of type $lut.
+Using template $paramod$973818279bc95792902f3c09371fd2407d04a2a5$lut for cells of type $lut.
+Using template $paramod$15b1be980a14edac79713e171a9494e1b4bd5060$lut for cells of type $lut.
+Using template $paramod$32ccf65669c41e1e3bce1f16051f6d60ad96a2a0$lut for cells of type $lut.
+Using template $paramod$7b809938766c3068dc017c276033f224fcfb7189$lut for cells of type $lut.
+Using template $paramod$b4410865e8124402796f9dfbf73ef8d279fdbd08$lut for cells of type $lut.
+Using template $paramod$ad6b4d5ad38a4cbaa4f894cef275c852d95af4e8$lut for cells of type $lut.
+Using template $paramod$cf899fad71f672c04fd67e5ddce1640d326ef992$lut for cells of type $lut.
+Using template $paramod$lut\WIDTH=32'00000000000000000000000000000001\LUT=2'01 for cells of type $lut.
+No more expansions possible.
+<suppressed ~3893 debug messages>
+
+3.47. Executing OPT_LUT_INS pass (discard unused LUT inputs).
+Optimizing LUTs in micro_fpga_top.
+  Optimizing lut $abc$46867$lut$auto$opt_dff.cc:251:make_patterns_logic$1588.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $abc$46867$lut\core.mwaddr[9].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[1].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[3].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46921.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46924.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46927.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46936.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46987.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46995.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47006.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$4052.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47027.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47035.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47043.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47048.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47054.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2082.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2155.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut3 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2155.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut5 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2155.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut7 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2148.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut2 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2148.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut3 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2185.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut2 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2185.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut3 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut2 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut3 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut4 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut5 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut6 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut7 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$2224.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $abc$46867$lut$auto$fsm_map.cc:170:map_fsm$1322[7].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46872.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47050.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2195.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47031.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$7694.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46877.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$6993.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$3467.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46881.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46883.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$6577.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47061.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2991.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$2969.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$7649.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46887.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46890.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46891.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwdata[58].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $abc$46867$lut$aiger46866$7639.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46894.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46897.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$7632.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$7625.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$3882.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46902.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46906.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46979.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46909.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46988.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[0].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[0].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46912.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46914.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46915.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46918.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$7572.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$auto$opt_dff.cc:251:make_patterns_logic$2480.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$3021.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46920.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$7559.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46910.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[9].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46923.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46991.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46984.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46926.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46928.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46930.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3536.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46931.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46933.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47012.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46978.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$7529.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$auto$rtlil.cc:3302:And$1976.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$7516.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46935.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46937.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$3925.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46939.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46940.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46942.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46943.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46945.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3069.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46948.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$6882.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46949.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$3571.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46997.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46951.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwdata[57].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46954.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$2406.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47087.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46957.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46960.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47024.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[10].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46963.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[10].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46966.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[1].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46968.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46970.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46971.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$6848.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46973.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3123.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46974.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46976.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46980.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46982.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46986.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46989.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[2].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[2].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwdata[56].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46992.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46994.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47081.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwdata[63].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46999.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47001.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$7284.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[11].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[11].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3188.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47005.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46967.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47009.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwdata[62].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47014.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[5].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47018.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47021.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47026.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46952.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[3].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46961.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3681.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47032.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47034.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47039.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47042.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[4].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[4].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47047.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$auto$fsm_map.cc:118:implement_pattern_cache$1365.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$6729.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46916.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47052.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47053.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$3285.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$7179.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47058.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwdata[55].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $abc$46867$lut\core.mwdata[61].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47063.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$3734.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47073.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47067.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47072.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47070.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47076.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47079.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut$aiger46866$7140.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47017.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$6687.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47083.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47085.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[5].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwdata[60].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $abc$46867$lut\core.mwdata[54].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47093.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 2)
+  Optimizing lut $abc$46867$lut\core.mwaddr[6].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47016.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[6].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47060.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46946.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47078.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47037.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46964.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2848.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$3790.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut\core.mwaddr[7].genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47065.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47089.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3412.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46958.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$3824.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$7035.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 2)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47003.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwaddr[7].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $abc$46867$lut\core.mwdata[59].genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 1)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$46955.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2103.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2148.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2155.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+  Optimizing lut $auto$abc9_ops.cc:1612:reintegrate$47142.genblk1.genblk1.genblk1.genblk1.genblk1.lut0 (4 -> 3)
+  Optimizing lut $abc$46867$lut$aiger46866$2185.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 0)
+  Optimizing lut $abc$46867$lut$aiger46866$2148.genblk1.genblk1.genblk1.genblk1.genblk1.genblk1.lut1 (4 -> 3)
+Removed 0 unused cells and 3282 unused wires.
+
+3.48. Executing AUTONAME pass.
+Renamed 5001 objects in module micro_fpga_top (766 iterations).
+<suppressed ~5001 debug messages>
+
+3.49. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `micro_fpga_top'. Setting top module to micro_fpga_top.
+
+3.49.1. Analyzing design hierarchy..
+Top module:  \micro_fpga_top
+
+3.49.2. Analyzing design hierarchy..
+Top module:  \micro_fpga_top
+Removed 0 unused modules.
+
+3.50. Printing statistics.
+
+=== micro_fpga_top ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     1989 wires
+     7854 wire bits
+     1989 public wires
+     7854 public wire bits
+        9 ports
+       31 port bits
+       35 cells
+        1   $scopeinfo
+       24   DP16KD
+       10   MULT18X18D
+     3063 submodules
+      257   CCU2C
+        9   L6MUX21
+     1670   LUT4
+      232   PFUMX
+      895   TRELLIS_FF
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+       35 micro_fpga_top
+
+        +----------Count including submodules.
+        | 
+     1989 wires
+     7854 wire bits
+     1989 public wires
+     7854 public wire bits
+        9 ports
+       31 port bits
+        - memories
+        - memory bits
+        - processes
+       35 cells
+        1   $scopeinfo
+       24   DP16KD
+       10   MULT18X18D
+     3063 submodules
+      257   CCU2C
+        9   L6MUX21
+     1670   LUT4
+      232   PFUMX
+      895   TRELLIS_FF
+
+3.51. Executing CHECK pass (checking for obvious problems).
+Checking module micro_fpga_top...
+Found and reported 0 problems.
+
+3.52. Executing JSON backend.
+
+End of script. Logfile hash: 26aa476750
+Yosys 0.66 (git sha1 7f8fdfd8d7bc08c749a2a969388d3425d4f369d5, x86_64-w64-mingw32-g++ 16.1.0 -march=nocona -msahf -mtune=generic -O2 -fstack-protector-strong -O3)
+Time spent: 1% 38x opt_expr (0 sec), 1% 25x opt_clean (0 sec), ...

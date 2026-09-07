@@ -1,0 +1,15 @@
+=== micro_divmc_post_struct.v (top pos-P&R) vs oraculo micro.c (V01..V10) ===
+
+  V1 OK  result=2a  pc=10  steps=2  halted=1  timeout=0  canal=2a
+  V2 OK  result=3a  pc=10  steps=2  halted=1  timeout=0  canal=3a
+  V3 OK  result=90  pc=10  steps=2  halted=1  timeout=0  canal=90
+  V4 OK  result=e  pc=10  steps=2  halted=1  timeout=0  canal=e
+  V5 OK  result=deadbeef  pc=10  steps=2  halted=1  timeout=0  canal=deadbeef
+  V6 OK  result=63  pc=30  steps=3  halted=1  timeout=0  canal=63
+  V7 OK  result=0  pc=0  steps=1  halted=1  timeout=0  canal=0
+  V8 OK  result=2d  pc=20  steps=3  halted=1  timeout=0  canal=2d
+  V9 OK  result=14  pc=20  steps=3  halted=1  timeout=0  canal=14
+  V10 OK  result=0  pc=20  steps=3  halted=1  timeout=0  canal=0
+
+[OK] 10 vetores - netlist pos-P&R reproduz o oraculo micro.c
+C:\Users\jssim\AppData\Local\Temp\opencode\combO2.v:45255: $finish called at 9782000 (1ps)
