@@ -1,0 +1,5 @@
+; Test LE_len1 with TROCA
+LOAD 40
+TROCA
+STORE_IND 24
+HALT

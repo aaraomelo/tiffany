@@ -1,0 +1,6 @@
+; test_load40d.erg — test LOAD/STORE with slot 1
+; Load from slot 1, store to slot 2
+
+LOAD 1         ; A = fmem[1]
+STORE 2        ; fmem[2] = A
+HALT

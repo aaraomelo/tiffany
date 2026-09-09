@@ -1,0 +1,7 @@
+; teste_load40.erg — minimal test for LOAD 40
+; Test: LOAD 40, STORE 50, HALT
+; Expected: fmem[50] = 0xAB after running
+
+LOAD 40        ; A = fmem[40] = 0xAB
+STORE 50       ; fmem[50] = A = 0xAB
+HALT

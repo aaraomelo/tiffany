@@ -1,0 +1,5 @@
+; test_add_no_store.erg
+LOAD 40
+LOAD 0
+ADD
+HALT

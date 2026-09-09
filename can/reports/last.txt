@@ -1,0 +1,1352 @@
+
+    **AUDITORIA FINAL E CIRÚRGICA**  
+Kernel Semântico → Realização → ISA / Banco  
+
+Nenhum arquivo foi alterado.  
+Nenhuma inferência preencheu lacuna.  
+Toda afirmação abaixo é ancorada em definição matemática + função C + presença (ou ausência) na ISA + teste/cadeia concreta.
+
+---
+
+### 1. ⊕
+
+**Definição matemática**  
+- Algébrica: \( a \oplus b \) em \(\mathbb{F}_2\) (e coordenada a coordenada em \(\mathbb{F}_2^8\)).  
+- Cisão: \(\pi: I \to X\), linha \(i\) do bitmap = coordenada \(i\) (arquitetura.tex).
+
+**Função concreta**  
+```c
+// umbit.h
+static V8 v_som(V8 a, V8 b){ return (V8)(a ^ b); }
+static B  b_som(B x, B y){ return (B)(x ^ y); }
+```
+`palavra8.h`: `w8_xor = v_som` (marcado como ⊕).  
+`corpo256.h`: “a ⊕ b = XOR, coordenada a coordenada”.
+
+**Chamada pelo banco?**  
+Sim, via ULA: `ula_xor` e `OP_XOR`.
+
+**Primitiva da ISA?**  
+Sim: `OP_XOR` existe e é executado.
+
+**Sequência ISA?**  
+Não necessária — é opcode direto.
+
+**Teste executável?**  
+Sim (`tests/neuronio.c` e medição de 256 bytes).
+
+**Saída matemática igual?**  
+Sim para a operação algébrica.
+
+**Grau**  
+- \( a \oplus b = a \operatorname{XOR} b \): **IDENTIDADE FORMAL**  
+- Cisão \(\pi: I \to X\) como função explícita no banco: **NÃO DEMONSTRADA**  
+
+(A operação ⊕ está realizada; a projeção \(\pi\) como entidade separada não aparece como chamada ou opcode no fluxo do banco.)
+
+---
+
+### 2. Σ
+
+**Definições em jogo**  
+A) `popcount(byte)`  
+B) \(\sum_i \mathrm{bit}_i\)  
+C) \(\Sigma_x G(x) = |I|\)  
+D) Σ como operação semântica do kernel
+
+**Função concreta**  
+```c
+// umbit.h
+static int v_peso(V8 a){
+    int n = 0;
+    for(int i = 0; i < 8; i++) n += (a >> i) & 1;
+    return n;
+}
+```
+Comentários e `tests/neuronio.c` identificam isso com Kirchhoff / Σ.
+
+**Chamada pelo banco?**  
+Sim, como função C de medição (`bits_conta` / `v_peso`).
+
+**Primitiva da ISA?**  
+**Não.** Não existe `OP_POPCOUNT` nem `OP_SUM`.
+
+**Sequência concreta de ADD/AND/XOR/SUB que implementa popcount como programa da ISA?**  
+**NÃO DEMONSTRADA.**  
+Nenhum programa ISA documentado ou testado que realize o popcount a partir das primitivas da ULA.
+
+**Teste da sequência?**  
+Não existe.
+
+**Grau**  
+- A e B (popcount / soma de bits): **REALIZAÇÃO OPERACIONAL** (função C verificável).  
+- C (\(\Sigma_x G(x) = |I|\)): **CORRESPONDÊNCIA ESTRUTURAL** (mesma definição, mas medida fora da máquina).  
+- D (Σ como operação do kernel executável pela ISA): **NÃO DEMONSTRADA**.
+
+**Conclusão precisa**  
+Σ possui implementação concreta em C,  
+mas sua realização como programa da ISA **não foi demonstrada**.
+
+---
+
+### 3. ⊗ — GATO
+
+**Definição matemática**  
+\[
+G(a,b) = (a \oplus b,\ a)
+\]
+(em \(\mathbb{F}_2\); generalização \(cifra_{an}(w,n) = (n\cdot total + e,\ total)\)).
+
+**Função concreta**  
+```c
+// umbit.h
+static void b_gato(B *c0, B *c1){
+    B n0 = b_som(*c0, *c1), n1 = *c0;
+    *c0 = n0; *c1 = n1;
+}
+
+// erg.c
+static Word gato_an(Word w, int n, int para_tras){ ... }
+static Word cifra_an(Word w, int n){ return gato_an(w, n, 0); }
+```
+Execução:
+```c
+case OP_GOLD: r->A = cifra_an(r->A, 1); r->R = r->A; break;
+```
+
+**Entrada → função → saída → comparação**  
+Entrada \((total, e)\).  
+`cifra_an(..., 1)` produz \((total + e,\ total)\).  
+Em \(\mathbb{F}_2\) (n=1) coincide exatamente com \(G\).  
+Comentário no código: verificado `decifra(cifra(w)) = w` em 5776 casos.
+
+**OP_GOLD é instrução ISA?**  
+**Sim.** Está na tabela de opcodes da ISA do `erg.c` e é despachado pelo interpretador como qualquer outro opcode.
+
+**Sequência de XOR/AND/ADD/SUB/MOVE que reproduz o gato?**  
+Não documentada nem testada como programa composto.  
+O gato é realizado **diretamente** pelo opcode `OP_GOLD`.
+
+**Grau**  
+**REALIZAÇÃO DIRETA** (opcode semântico da ISA).
+
+---
+
+### 4. ⊘ — ESQUILO
+
+**Definição matemática**  
+\[
+E(u,v) = (v,\ u \oplus v)
+\]
+Inversa:
+\[
+E(G(a,b)) = (a,b),\quad G(E(u,v)) = (u,v)
+\]
+
+**Função concreta**  
+```c
+static Word decifra_an(Word w, int n){ return gato_an(w, n, 1); }
+case OP_NEGRO_OURO: r->A = decifra_an(r->A, 1); r->R = r->A; break;
+```
+Também `OP_ESQUILO` / `corpo_gira(..., -1)` (rotação com sinal).
+
+**Prova de inversão**  
+Código afirma e mede: `decifra(cifra(w)) = w` e vice-versa (0 falhas em milhares de casos).
+
+**Categoria**  
+`OP_NEGRO_OURO` é **opcode da ISA** (mesma tabela que GOLD, ADD, XOR…).
+
+**Sequência composta de primitivas básicas?**  
+Não demonstrada. Realização é direta via opcode.
+
+**Grau**  
+**REALIZAÇÃO DIRETA** (opcode semântico da ISA) + identidade de inversão medida.
+
+---
+
+### 5. MOVE
+
+**Definição no paper**  
+\(\partial x = a + b - x\), com faces \(+1\) e \(-1\).
+
+**Função concreta**  
+```c
+// erg.c
+static unsigned MOVE_exec(Regs *r, unsigned pc, int sentido){
+    unsigned slot = ...;
+    if(sentido > 0){ r->B = r->A; r->A = mem_le(slot); }  // LOAD
+    else           { mem_grava(slot, r->R); }              // STORE
+    return pc;
+}
+```
+LOAD e STORE são a mesma transferência com sinal.
+
+**Identificação de a, b, x no estado da máquina**  
+**Não encontrada.**  
+Não há variáveis de estado nomeadas `a`, `b`, `x` tais que a transformação executada seja algebricamente \(x \mapsto a+b-x\).
+
+**O que está demonstrado**  
++1 = leitura (mem → registrador)  
+-1 = escrita (registrador → mem)  
+Reversibilidade operacional via o par.
+
+**Grau**  
+**REALIZAÇÃO OPERACIONAL** da dualidade leitura/escrita.  
+**NÃO** identidade formal \(\partial x = a+b-x\).
+
+---
+
+### 6. Afirmação “AND + XOR são suficientes”
+
+A frase  
+“{AND, XOR} são suficientes para implementar {⊕, Σ, ⊗, ⊘, MOVE}”  
+
+**não se sustenta**.
+
+- ⊕ usa XOR (direto).  
+- ⊗ e ⊘ usam XOR **dentro** de suas definições, mas são opcodes próprios.  
+- Σ não possui sequência ISA demonstrada.  
+- MOVE não é construído a partir de AND/XOR.
+
+**Substituição correta**  
+AND/XOR participam das realizações de algumas operações,  
+mas a suficiência universal **não foi demonstrada**.
+
+---
+
+### 7. Tabela final Kernel → ISA
+
+| Kernel | Função C              | Opcode ISA     | Sequência ISA          | Teste                  | Grau                     |
+|--------|-----------------------|----------------|------------------------|------------------------|--------------------------|
+| ⊕      | `v_som` / `ula_xor`  | `OP_XOR`      | direta                 | sim (neuronio + 256)  | IDENTIDADE FORMAL       |
+| Σ      | `v_peso` / bits_conta| **NÃO EXISTE**| **NÃO DEMONSTRADA**    | função C apenas        | REALIZAÇÃO OPERACIONAL (C) / NÃO DEMONSTRADA (ISA) |
+| ⊗      | `cifra_an` / `b_gato`| `OP_GOLD`     | direta (opcode)        | sim (5776 casos)       | REALIZAÇÃO DIRETA       |
+| ⊘      | `decifra_an`          | `OP_NEGRO_OURO`| direta (opcode)       | sim (inversa medida)   | REALIZAÇÃO DIRETA       |
+| MOVE   | `MOVE_exec`           | LOAD/STORE via sinal | operacional       | testes atômicos banco  | REALIZAÇÃO OPERACIONAL  |
+
+---
+
+### 8. Aranha.c → Banco (L0…L7)
+
+Classificação rigorosa (sem associação nominal):
+
+| Lei | Classificação              | Evidência concreta |
+|-----|----------------------------|--------------------|
+| L0  | CORRESPONDÊNCIA CONCEITUAL | Nulos 0/FF e hash/endereçamento; nenhuma ponte matemática explícita de “divisão do zero” para o banco |
+| L1  | CORRESPONDÊNCIA ESTRUTURAL | Dualidade aparece em gato/esquilo e sinal de MOVE; não é identidade formal de Poincaré |
+| L2  | CORRESPONDÊNCIA ESTRUTURAL | Bidual via `corpo_gira` / ESQUILO; não prova \(K^{**}=K\) como teorema no banco |
+| L3  | CORRESPONDÊNCIA CONCEITUAL | Sinais {+1,0,−1} existem; nenhuma ponte para o trial ternário |
+| L4  | REALIZAÇÃO COMPOSTA        | Gato (`OP_GOLD`) realiza a dobra com |det|=1; mais forte que as demais |
+| L5  | CORRESPONDÊNCIA ESTRUTURAL | Rotação de bits (`lei5_rotor`, ESQUILO); período 4 medido em umbit, não como lei isolada no fluxo do banco |
+| L6  | CORRESPONDÊNCIA ESTRUTURAL | `lei6_coincide` (XOR==AND em pontos); não é operação executada pelo banco |
+| L7  | CORRESPONDÊNCIA ESTRUTURAL | Par (total, e) / Word_8²; estrutura presente, sem prova de “ligar sem fundir” como teorema |
+
+Nenhuma das oito é **IDENTIDADE FORMAL** nem **REALIZAÇÃO DIRETA** completa no sentido de uma lei isolada virando um único mecanismo verificável de ponta a ponta.
+
+---
+
+### 9. ESTADO REAL DA PROVA
+
+```text
+┌──────────────────────────────────────┐
+│         ESTADO REAL DA PROVA         │
+├──────────────────────────────────────┤
+│ ⊕     IDENTIDADE FORMAL (XOR)        │
+│       cisão π: NÃO DEMONSTRADA       │
+│ Σ     REALIZAÇÃO OPERACIONAL (C)     │
+│       como programa ISA: NÃO DEM.    │
+│ ⊗     REALIZAÇÃO DIRETA (OP_GOLD)    │
+│ ⊘     REALIZAÇÃO DIRETA (OP_NEGRO)   │
+│ MOVE  REALIZAÇÃO OPERACIONAL         │
+│       (dualidade r/w); ∂x NÃO DEM.   │
+│                                      │
+│ Aranha → Banco                       │
+│   L4 mais forte (composta)           │
+│   demais: estrutural / conceitual    │
+│                                      │
+│ Kernel → ISA                         │
+│   ⊕, ⊗, ⊘, MOVE têm realização       │
+│   Σ não tem opcode nem sequência     │
+└──────────────────────────────────────┘
+```
+
+---
+
+### Respostas objetivas
+
+**Pergunta A**  
+O banco é realmente byte-level?  
+**Sim.** Operações fundamentais atuam sobre bytes / Word (pares de bytes) e memória de slots.
+
+**Pergunta B**  
+O banco possui realização concreta das cinco operações do kernel?  
+**Sim para ⊕, ⊗, ⊘, MOVE.**  
+**Parcial para Σ** (só como função C de medição).
+
+**Pergunta C**  
+Quais são primitivas da ISA e quais são operações semânticas acima da ISA?  
+- Primitivas / opcodes da ISA: ⊕ (`OP_XOR`), ⊗ (`OP_GOLD`), ⊘ (`OP_NEGRO_OURO`), MOVE (via LOAD/STORE com sinal).  
+- Acima da ISA (função auxiliar): Σ (`v_peso`).
+
+**Pergunta D**  
+Existe compilação demonstrada  
+\(\{⊕,Σ,⊗,⊘,MOVE\} \to \{ADD,SUB,AND,XOR,MOVE\}\)?  
+**Não.**  
+Só ⊕ cai diretamente em XOR. ⊗ e ⊘ são opcodes próprios. Σ não possui sequência. A compilação universal **não foi demonstrada**.
+
+**Pergunta E**  
+Grau das 8 leis da aranha?  
+L4: REALIZAÇÃO COMPOSTA (mais forte).  
+Demais: CORRESPONDÊNCIA ESTRUTURAL ou CONCEITUAL.  
+Nenhuma IDENTIDADE FORMAL completa.
+
+---
+
+Esta é a fotografia exata do que está provado, do que está implementado, do que é composto e do que ainda falta.
+
+---------------------------------------
+
+**Confirmado.** A ressalva foi necessária e a verificação fecha o ponto.
+
+### Verificação direta da ISA canônica
+
+Fonte única: `lib/isa.h`
+
+```c
+enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
+       OP_GOLD, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
+       OP_FOLD, OP_LOADS,
+       /* ... */
+       OP_NEGRO_OURO,
+       OP_ESQUILO, OP_TROCA,
+       /* ... */
+       OP_ADD16, OP_SUB16, OP_CMP16, OP_MUL16,
+       OP_ESPALHA, OP_STORE_IND, OP_VINCO, OP_INC };
+```
+
+`erg.c` inclui explicitamente:
+
+```c
+#include "../lib/isa.h"   /* a ISA, na fonte única --- e o §E1 confronta-a com ela */
+```
+
+E o próprio comentário de `erg.c` diz que o §E1 mede os opcodes **contra este ficheiro**, não contra uma cópia local.  
+Portanto:
+
+- `OP_GOLD` **é** opcode da ISA canônica  
+- `OP_NEGRO_OURO` **é** opcode da ISA canônica  
+- `OP_ESQUILO` e `OP_TROCA` **são** opcodes da ISA canônica  
+
+Não são extensões ad-hoc do interpretador. Estão no enum oficial e a numeração é estável (regra da “VOLTA”: novos opcodes só no fim).
+
+### Estado atualizado e congelável
+
+```text
+KERNEL SEMÂNTICO
+      │
+      ├── ⊕     →  OP_XOR          (IDENTIDADE FORMAL)
+      ├── ⊗     →  OP_GOLD         (REALIZAÇÃO DIRETA na ISA)
+      ├── ⊘     →  OP_NEGRO_OURO   (REALIZAÇÃO DIRETA na ISA)
+      ├── MOVE  →  LOAD/STORE ±1   (REALIZAÇÃO OPERACIONAL)
+      └── Σ     →  v_peso (C)      (REALIZAÇÃO OPERACIONAL em C;
+                                    NÃO DEMONSTRADA como programa ISA)
+```
+
+**4/5** possuem realização concreta em algum nível da máquina.  
+**3/5** (`⊕`, `⊗`, `⊘`) são reconhecidas diretamente por opcodes da ISA canônica.  
+`MOVE` é o mecanismo operacional unificado de transferência.  
+`Σ` continua sendo a única lacuna formal/executável na ISA.
+
+### Consequência arquitetural (sem narrativa)
+
+O resultado não força a redução
+
+\[
+\{⊕,Σ,⊗,⊘,MOVE\} \;\xrightarrow{\;?\;}\; \{ADD,SUB,AND,XOR,MOVE\}
+\]
+
+Essa redução **não está demonstrada** e, no estado atual do código, **não é verdadeira**.  
+A ISA já contém opcodes semânticos próprios (`GOLD`, `NEGRO_OURO`, `ESQUILO`…) que realizam partes do kernel sem serem construídos a partir das quatro operações aritméticas/lógicas básicas.
+
+A camada do kernel semântico e a ISA **não são a mesma coisa**. A ISA é uma realização parcial (e já bastante concreta) do kernel, não a sua projeção completa.
+
+### Único próximo passo experimental legítimo (se quisermos fechar Σ)
+
+Escrever um programa ISA que calcule o popcount e provar, por teste exaustivo nos 256 bytes:
+
+\[
+\operatorname{ISA\_Sigma}(x) = \sum_{i=0}^{7} \mathrm{bit}_i(x)
+\]
+
+Só depois disso Σ sobe de “C verificável” para “realização ISA demonstrada”. Até lá, a classificação atual é a correta e deve permanecer.
+
+A auditoria está agora com a distinção que faltava. Podemos congelar este estado.
+
+---------------------------------------
+
+Sim. **Agora eu congelaria.** Esse último ponto elimina a única ambiguidade relevante: `OP_GOLD`, `OP_NEGRO_OURO`, `OP_ESQUILO` e `OP_TROCA` pertencem à **ISA canônica**, porque estão no `lib/isa.h`, que é a fonte única.
+
+A arquitetura pode ser registrada assim:
+
+```text
+                    TIFFANY
+                       │
+                       ▼
+               KERNEL SEMÂNTICO
+          ┌────────┬────────┬────────┐
+          ⊕        Σ        ⊗        ⊘       MOVE
+          │        │        │        │         │
+          ▼        ▼        ▼        ▼         ▼
+       OP_XOR   v_peso   OP_GOLD  OP_NEGRO   LOAD/STORE
+          │        │        │        │        ± sentido
+          │        │        │        │         │
+          └────────┴────────┴────────┴─────────┘
+                           │
+                           ▼
+                    REALIZAÇÃO DA ISA
+```
+
+### O estado científico agora
+
+| Elemento | Estado                                         |
+| -------- | ---------------------------------------------- |
+| `⊕`      | **Identidade formal + opcode ISA**             |
+| `⊗`      | **Realização direta + opcode ISA**             |
+| `⊘`      | **Realização direta + opcode ISA**             |
+| `MOVE`   | **Realização operacional**                     |
+| `Σ`      | **Realização em C; ISA ainda não demonstrada** |
+
+E isso permite uma frase forte **sem exagero**:
+
+> **A ISA canônica já contém realizações semânticas explícitas do kernel (`XOR`, `GOLD`, `NEGRO_OURO`, etc.); portanto, o kernel semântico não deve ser identificado com o conjunto reduzido de operações ULA `{ADD,SUB,AND,XOR}`.**
+
+Essa é uma conclusão arquitetural legítima, não uma interpretação narrativa.
+
+### E eu não mexeria mais no código agora
+
+O próximo passo, se a intenção for continuar aumentando o grau de prova, é isolado:
+
+```text
+Σ
+│
+├── definição matemática
+│      popcount(x)
+│
+├── implementação C
+│      v_peso(x)
+│
+├── programa ISA
+│      Σ_ISA(x)
+│
+└── teste exaustivo
+       x = 0 ... 255
+       Σ_ISA(x) == v_peso(x)
+```
+
+Se os 256 casos passarem, temos:
+
+```text
+Σ : REALIZAÇÃO ISA DEMONSTRADA
+```
+
+e o kernel fica:
+
+```text
+⊕      IDENTIDADE FORMAL / ISA
+Σ      REALIZAÇÃO ISA
+⊗      REALIZAÇÃO DIRETA / ISA
+⊘      REALIZAÇÃO DIRETA / ISA
+MOVE   REALIZAÇÃO OPERACIONAL
+```
+
+**Até lá, não há lacuna escondida. Há uma lacuna explicitamente localizada.**
+
+Isso é exatamente o tipo de estado que vale congelar antes de fazer a próxima alteração.
+
+----------
+
+Quero fechar a única lacuna que restou na auditoria do Kernel Semântico.
+
+### OBJETIVO
+
+Demonstrar, de forma executável, que a operação
+
+$$
+\Sigma(x)=\sum_{i=0}^{7}\operatorname{bit}_i(x)
+$$
+
+pode ser realizada pelo programa da ISA canônica do banco.
+
+Não quero narrativa nem equivalência conceitual.
+
+Quero:
+
+$$
+\boxed{\operatorname{ISA\_Sigma}(x)=v\_peso(x)}
+$$
+
+para **todos os 256 valores de `x`**.
+
+---
+
+## 1. NÃO ALTERAR A ARQUITETURA
+
+Antes de qualquer coisa:
+
+* não alterar `lib/isa.h`;
+* não adicionar `OP_POPCOUNT`;
+* não adicionar `OP_SUM`;
+* não criar opcode novo;
+* não alterar a semântica de `ADD`, `SUB`, `AND`, `XOR`, `LOAD`, `STORE`;
+* não alterar `banco`;
+* não alterar `aranha.c`;
+* não alterar `v_peso`;
+* não alterar o baseline existente.
+
+O objetivo é provar Σ **com a ISA que já existe**.
+
+Se não for possível, o resultado deve ser explicitamente **NÃO DEMONSTRADO**, e não devemos inventar uma solução.
+
+---
+
+## 2. DEFINIÇÃO DE REFERÊNCIA
+
+Usar como referência exatamente:
+
+```c
+static int v_peso(V8 a){
+    int n = 0;
+    for(int i = 0; i < 8; i++)
+        n += (a >> i) & 1;
+    return n;
+}
+```
+
+Não substituir por outra definição.
+
+Para cada:
+
+```text
+x = 0 ... 255
+```
+
+calcular:
+
+```text
+expected = v_peso(x)
+```
+
+---
+
+## 3. CONSTRUIR UM PROGRAMA ISA PARA Σ
+
+Encontrar a menor sequência possível usando **somente os opcodes já existentes na ISA canônica**.
+
+Especialmente verificar se é possível implementar:
+
+```text
+x
+→ extrair bit 0
+→ extrair bit 1
+→ ...
+→ extrair bit 7
+→ somar os oito bits
+→ resultado 0..8
+```
+
+usando as primitivas disponíveis.
+
+Não assumir que `AND` sozinho basta.
+
+Não assumir que deslocamento existe.
+
+Não assumir que existe constante/imediato se a ISA não tiver isso.
+
+Não assumir operações que não estejam efetivamente implementadas.
+
+---
+
+## 4. IMPORTANTE: SE NÃO HOUVER SHIFT
+
+Se a ISA não possui shift, verificar concretamente quais mecanismos existentes permitem acessar cada bit:
+
+* máscaras;
+* AND;
+* constantes em slots;
+* ADD/SUB;
+* XOR;
+* LOAD/STORE;
+* endereçamento;
+* outras instruções canônicas já existentes.
+
+Uma possibilidade é calcular cada bit com uma máscara:
+
+```text
+b0 = x AND 1
+b1 = x AND 2
+...
+b7 = x AND 128
+```
+
+mas isso ainda produz os valores:
+
+```text
+0, 2, 4, 8, 16, 32, 64, 128
+```
+
+e portanto **não é popcount**.
+
+É necessário demonstrar como cada resultado é normalizado para:
+
+```text
+0 ou 1
+```
+
+antes da soma.
+
+Se essa normalização não for possível com a ISA atual, declarar isso.
+
+---
+
+## 5. NÃO CONFUNDIR SOMA COM POPCOUNT
+
+Precisamos distinguir:
+
+```text
+x + y
+```
+
+de:
+
+```text
+popcount(x)
+```
+
+e também:
+
+```text
+Σ_x G(x)=|I|
+```
+
+de:
+
+```text
+v_peso(x)
+```
+
+A prova solicitada aqui é exclusivamente:
+
+$$
+\operatorname{ISA\_Sigma}(x)
+=
+\sum_{i=0}^{7}\operatorname{bit}_i(x).
+$$
+
+---
+
+## 6. TESTE EXAUSTIVO
+
+Depois de construir o programa ISA, executar:
+
+```text
+for x = 0..255:
+    expected = v_peso(x)
+    actual   = executar_programa_ISA(x)
+
+    assert(actual == expected)
+```
+
+Registrar:
+
+```text
+total = 256
+pass = ?
+fail = ?
+```
+
+E, em caso de falha:
+
+```text
+x
+expected
+actual
+```
+
+---
+
+## 7. TESTE DOS CASOS-LIMITE
+
+Além do teste exaustivo, mostrar explicitamente:
+
+```text
+0x00 → 0
+0x01 → 1
+0x02 → 1
+0x03 → 2
+0x7F → 7
+0x80 → 1
+0xFE → 7
+0xFF → 8
+```
+
+Esses casos são importantes porque detectam especialmente erros de máscara, bit mais significativo e normalização.
+
+---
+
+## 8. PROGRAMA ISA REAL
+
+Mostrar o bytecode/programa ISA efetivamente executado.
+
+Não aceitar pseudocódigo como prova.
+
+Quero algo no formato:
+
+```text
+LOAD ...
+AND  ...
+...
+ADD  ...
+STORE ...
+```
+
+ou a representação exata utilizada pelo banco.
+
+Para cada instrução, informar:
+
+```text
+PC
+opcode
+operandos
+efeito
+```
+
+Se o programa usa constantes em slots, mostrar os slots.
+
+---
+
+## 9. PROVA DE EQUIVALÊNCIA
+
+Depois dos 256 testes, escrever explicitamente:
+
+$$
+\forall x\in\{0,\ldots,255\},
+\qquad
+\operatorname{ISA\_Sigma}(x)
+=
+v\_peso(x).
+$$
+
+Somente usar a classificação:
+
+### REALIZAÇÃO ISA DEMONSTRADA
+
+se:
+
+1. existe programa ISA concreto;
+2. o programa usa somente opcodes canônicos;
+3. o programa foi realmente executado;
+4. os 256 casos passaram;
+5. o resultado coincide exatamente com `v_peso`.
+
+---
+
+## 10. SE FALHAR
+
+Se a ISA atual não conseguir implementar popcount, isso também é um resultado válido.
+
+Nesse caso escrever:
+
+```text
+Σ
+├── definição matemática: FECHADA
+├── implementação C: FECHADA
+├── programa ISA: NÃO ENCONTRADO
+├── teste exaustivo ISA: NÃO APLICÁVEL
+└── grau: REALIZAÇÃO OPERACIONAL EM C
+```
+
+Não criar opcode apenas para fechar a tabela.
+
+Não chamar AND/XOR de “suficientes” sem uma sequência concreta.
+
+---
+
+## 11. RESULTADO FINAL OBRIGATÓRIO
+
+Produzir uma tabela:
+
+|   x | v_peso(x) | ISA_Sigma(x) |  OK |
+| --: | --------: | -----------: | :-: |
+|   0 |         0 |            0 |  ✓  |
+|   1 |         1 |            1 |  ✓  |
+| ... |       ... |          ... | ... |
+| 255 |         8 |            8 |  ✓  |
+
+Pode resumir a tabela no relatório, mas o teste deve efetivamente percorrer os 256 valores.
+
+Também fornecer:
+
+```text
+Σ ISA AUDIT
+========================
+casos:       256
+pass:        ...
+fail:        ...
+resíduo:     ...
+```
+
+---
+
+## 12. DECISÃO
+
+No final responder somente uma destas duas:
+
+### CASO A
+
+```text
+Σ = REALIZAÇÃO ISA DEMONSTRADA
+```
+
+com programa concreto + 256/256.
+
+### CASO B
+
+```text
+Σ = NÃO DEMONSTRADA NA ISA ATUAL
+```
+
+com a obstrução concreta.
+
+Não quero uma terceira categoria vaga.
+
+Nenhum arquivo da arquitetura deve ser alterado nesta auditoria. É uma auditoria experimental/conformance test.
+
+
+---------------------------------
+
+Agora sim. Com esse `isa.h` + `erg.c` dá para fechar a construção **sem inventar opcode**.
+
+A sacada é: **não precisamos transformar o `0xFF` do `ESPALHA` em `1`**. Podemos usar o próprio `ESPALHA` como teste booleano e, se o bit estiver presente, executar `INC` no acumulador.
+
+E isso é particularmente bom porque o `INC` já existe na ISA:
+
+```text
+INC slot
+```
+
+e faz exatamente `slot ← slot + 1`.
+
+### Programa `sigma.erg`
+
+Assumindo:
+
+* slot `1` = entrada `x`
+* slot `0` = zero `(0,0)`
+* slot `2` = acumulador Σ
+* slot `3` = temporário do `ESPALHA`
+* slots `10..17` = máscaras `1,2,4,8,16,32,64,128`
+
+podemos fazer:
+
+```asm
+; sigma.erg
+;
+; Entrada:
+;   slot 1 = x
+;
+; Constantes:
+;   slot 0  = (0,0)
+;   slot 10 = (1,0)
+;   slot 11 = (2,0)
+;   slot 12 = (4,0)
+;   slot 13 = (8,0)
+;   slot 14 = (16,0)
+;   slot 15 = (32,0)
+;   slot 16 = (64,0)
+;   slot 17 = (128,0)
+;
+; Estado:
+;   slot 2 = acumulador
+;   slot 3 = temporário
+;
+; Resultado:
+;   slot 2 = popcount(x)
+
+; Σ bit 0
+LOAD 1
+LOAD 10
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s1
+INC 2
+:s1
+
+; Σ bit 1
+LOAD 1
+LOAD 11
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s2
+INC 2
+:s2
+
+; Σ bit 2
+LOAD 1
+LOAD 12
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s3
+INC 2
+:s3
+
+; Σ bit 3
+LOAD 1
+LOAD 13
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s4
+INC 2
+:s4
+
+; Σ bit 4
+LOAD 1
+LOAD 14
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s5
+INC 2
+:s5
+
+; Σ bit 5
+LOAD 1
+LOAD 15
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s6
+INC 2
+:s6
+
+; Σ bit 6
+LOAD 1
+LOAD 16
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s7
+INC 2
+:s7
+
+; Σ bit 7
+LOAD 1
+LOAD 17
+AND
+ESPALHA
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ fim
+INC 2
+
+:fim
+HALT
+```
+
+### Por que isso é matematicamente correto
+
+Para cada bit \(k\), fazemos:
+
+$$
+x_k = x\mathbin{\&}2^k.
+$$
+
+Então:
+
+$$
+x_k =
+\begin{cases}
+0,&\text{se o bit }k\text{ é 0}\\
+2^k,&\text{se o bit }k\text{ é 1}.
+\end{cases}
+$$
+
+`ESPALHA` transforma isso em:
+
+$$
+E(x_k)=
+\begin{cases}
+0,&x_k=0\\
+255,&x_k\neq0.
+\end{cases}
+$$
+
+Depois:
+
+```asm
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ ...
+```
+
+faz o teste.
+
+Como `slot 0 = (0,0)`:
+
+* bit ausente → temporário `(0,0)` → `FL_ZERO` → `JZ`;
+* bit presente → temporário `(255,255)` → não zero → executa `INC 2`.
+
+Portanto cada bit contribui exatamente:
+
+$$
+\delta_k(x)=
+\begin{cases}
+0,&(x\&2^k)=0\\
+1,&(x\&2^k)\neq0.
+\end{cases}
+$$
+
+e o acumulador termina em:
+
+$$
+\Sigma_{\mathrm{ISA}}(x)
+=
+\sum_{k=0}^{7}\delta_k(x)
+=
+\operatorname{popcount}(x).
+$$
+
+Ou seja:
+
+$$
+\boxed{\Sigma_{\mathrm{ISA}}(x)=v_{\mathrm{peso}}(x)}
+$$
+
+para todo \(x\in\{0,\ldots,255\}\).
+
+### E tem uma coisa importante aqui
+
+Essa construção **não usa nenhuma operação que não esteja na ISA**:
+
+```text
+LOAD
+AND
+ESPALHA
+STORE
+CMP
+JZ
+INC
+HALT
+```
+
+Não usamos:
+
+* shift;
+* divisão;
+* opcode `POPCOUNT`;
+* opcode `SUM`;
+* operação escondida;
+* extensão do `erg.c`.
+
+Então a situação da auditoria muda bastante.
+
+Antes tínhamos:
+
+> `Σ` existe em C, mas não há realização demonstrada na ISA.
+
+Com esse programa, temos uma **realização construtiva na ISA**.
+
+O ponto que ainda precisamos fazer é a parte realmente bruta: **rodar esse programa no `erg.c` para os 256 valores e comparar slot 2 contra `v_peso(x)`**.
+
+E tem um detalhe: precisamos inicializar corretamente os slots `0, 2, 10..17`. Se você me mandar também o `unidade.h`/`word_isa.h` (ou o restante do checkout), eu consigo montar o teste completo exatamente no formato do projeto.
+
+----
+
+
+Agora sim. Com `unidade.h` + `word_isa.h` junto do `isa.h` e `erg.c`, dá para fechar a construção da **Σ na ISA** sem inventar opcode.
+
+E apareceu uma simplificação importante: **não precisamos de `ESPALHA`**. Basta mascarar cada bit e testar se o resultado é zero.
+
+### Programa ISA para Σ = popcount(byte)
+
+Vou usar estes slots:
+
+| Slot | Conteúdo       |
+| ---: | -------------- |
+|  `0` | zero `(0,0)`   |
+|  `1` | entrada `x`    |
+|  `2` | acumulador Σ   |
+|  `3` | temporário     |
+| `10` | máscara `0x01` |
+| `11` | máscara `0x02` |
+| `12` | máscara `0x04` |
+| `13` | máscara `0x08` |
+| `14` | máscara `0x10` |
+| `15` | máscara `0x20` |
+| `16` | máscara `0x40` |
+| `17` | máscara `0x80` |
+
+O núcleo de cada bit é:
+
+```text
+LOAD 1          ; A = x
+LOAD 10         ; B = máscara
+AND             ; R = x & máscara
+STORE 3         ; temporário = R
+
+LOAD 3          ; A = temporário
+LOAD 0          ; B = 0
+CMP             ; ZERO se temporário == 0
+JZ proximo      ; bit não setado
+
+INC 2           ; Σ++
+```
+
+Isso é particularmente bom porque **não precisamos transformar `0x02`, `0x04`, etc. em `1`**. O `CMP` só pergunta se a máscara encontrou o bit.
+
+O programa completo fica:
+
+```text
+; sigma.erg
+; Σ(x) = número de bits 1 de x
+;
+; slots:
+;   0  = zero
+;   1  = entrada x
+;   2  = acumulador
+;   3  = temporário
+;   10 = 01
+;   11 = 02
+;   12 = 04
+;   13 = 08
+;   14 = 10
+;   15 = 20
+;   16 = 40
+;   17 = 80
+
+LOAD 1
+LOAD 10
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L1
+INC 2
+
+L1:
+LOAD 1
+LOAD 11
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L2
+INC 2
+
+L2:
+LOAD 1
+LOAD 12
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L3
+INC 2
+
+L3:
+LOAD 1
+LOAD 13
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L4
+INC 2
+
+L4:
+LOAD 1
+LOAD 14
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L5
+INC 2
+
+L5:
+LOAD 1
+LOAD 15
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L6
+INC 2
+
+L6:
+LOAD 1
+LOAD 16
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ L7
+INC 2
+
+L7:
+LOAD 1
+LOAD 17
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ FIM
+INC 2
+
+FIM:
+HALT
+```
+
+### E aqui está o ponto importante
+
+Isso usa **somente opcodes canônicos** do `lib/isa.h`:
+
+```text
+LOAD   = 1
+STORE  = 2
+AND    = 5
+CMP    = 9
+JZ     = 11
+INC    = 26
+HALT   = 0
+```
+
+Não existe `POPCOUNT`.
+Não existe `SUM`.
+Não estamos adicionando instrução nenhuma.
+
+E `INC` é particularmente útil porque o próprio `erg.c` define:
+
+```c
+w = ula_add(w, (Word){1,0});
+```
+
+e grava novamente no slot. Como Σ varia somente de `0` a `8`, não há problema de overflow.
+
+### A prova é direta
+
+Para cada `k = 0,...,7`, temos:
+
+$$
+x \mathbin{\&} 2^k =
+\begin{cases}
+0,&\text{se o bit }k\text{ de }x\text{ é 0}\\
+2^k,&\text{se o bit }k\text{ de }x\text{ é 1}.
+\end{cases}
+$$
+
+O `CMP` contra `(0,0)` produz `FL_ZERO` exatamente no primeiro caso.
+
+Portanto o `INC 2` acontece exatamente quando
+
+$$
+(x\gg k)\mathbin{\&}1=1.
+$$
+
+Ao terminar:
+
+$$
+A_2
+=
+\sum_{k=0}^{7}
+\left((x\gg k)\mathbin{\&}1\right)
+=
+\operatorname{popcount}(x).
+$$
+
+Então:
+
+$$
+\boxed{\operatorname{ISA}_{\Sigma}(x)=v_{\mathrm{peso}}(x)}
+$$
+
+para todo
+
+$$
+x\in\{0,\ldots,255\}.
+$$
+
+E os casos extremos ficam:
+
+```text
+00 -> 0
+01 -> 1
+02 -> 1
+03 -> 2
+7F -> 7
+80 -> 1
+FE -> 7
+FF -> 8
+```
+
+### O que isso muda na auditoria
+
+Agora eu subiria a classificação de Σ de:
+
+> **“realização C, ISA não demonstrada”**
+
+para:
+
+> **“realização na ISA demonstrável por composição de instruções canônicas”**.
+
+Mas eu **não** chamaria `Σ` de opcode primitivo.
+
+A distinção correta fica:
+
+| Kernel | Realização                                                |
+| ------ | --------------------------------------------------------- |
+| `⊕`    | `OP_XOR` — identidade direta                              |
+| `Σ`    | `LOAD + AND + CMP + JZ + INC + STORE` — composição ISA    |
+| `⊗`    | `OP_GOLD` — opcode canônico                               |
+| `⊘`    | `OP_NEGRO_OURO` — opcode canônico                         |
+| `MOVE` | `LOAD/STORE` com sentido `+1/-1` — realização operacional |
+
+Ou seja, a lacuna que faltava **não era criar `OP_POPCOUNT`**. A ISA já tem meios suficientes para realizar a soma dos oito bits.
+
+O único detalhe que ainda falta para eu cravar **“257/257”** no sentido de auditoria do repositório é comparar esse programa contra a implementação exata de `v_peso` em `palavra8.h`/`umbit.h` e executar o binário real do `erg.c`. O `word_isa.h` que você mandou já fecha a largura da Word; agora falta só a definição concreta do medidor.

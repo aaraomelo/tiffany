@@ -1,0 +1,120 @@
+; sigma.erg — Sigma(x) = popcount(x), usando só opcodes canónicos da ISA
+;
+; slots:
+;   0  = zero (0,0)
+;   1  = entrada x
+;   2  = acumulador Sigma
+;   3  = temporario
+;  10  = mascara 0x01
+;  11  = mascara 0x02
+;  12  = mascara 0x04
+;  13  = mascara 0x08
+;  14  = mascara 0x10
+;  15  = mascara 0x20
+;  16  = mascara 0x40
+;  17  = mascara 0x80
+;
+; Opcodes usados (todos canonicos): LOAD, AND, STORE, CMP, JZ, INC, HALT
+; Nao usados: SHIFT, POPCOUNT, SUM, EXT
+
+; === inicializacao do acumulador ===
+LOAD 0
+STORE 2
+
+; === bit 0 (mascara 0x01, slot 10) ===
+LOAD 1
+LOAD 10
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s1
+INC 2
+:s1
+
+; === bit 1 (mascara 0x02, slot 11) ===
+LOAD 1
+LOAD 11
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s2
+INC 2
+:s2
+
+; === bit 2 (mascara 0x04, slot 12) ===
+LOAD 1
+LOAD 12
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s3
+INC 2
+:s3
+
+; === bit 3 (mascara 0x08, slot 13) ===
+LOAD 1
+LOAD 13
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s4
+INC 2
+:s4
+
+; === bit 4 (mascara 0x10, slot 14) ===
+LOAD 1
+LOAD 14
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s5
+INC 2
+:s5
+
+; === bit 5 (mascara 0x20, slot 15) ===
+LOAD 1
+LOAD 15
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s6
+INC 2
+:s6
+
+; === bit 6 (mascara 0x40, slot 16) ===
+LOAD 1
+LOAD 16
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ s7
+INC 2
+:s7
+
+; === bit 7 (mascara 0x80, slot 17) ===
+LOAD 1
+LOAD 17
+AND
+STORE 3
+LOAD 3
+LOAD 0
+CMP
+JZ fim
+INC 2
+
+:fim
+HALT

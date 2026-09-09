@@ -1,0 +1,93 @@
+; j1939_read_raw — ERG-64 program v51
+; ABA: slots 0..7 payload, 8..15 raw, 16 start, 17 length, 18 i, 19 err_flag
+; Constants: slot 20=0, 21=1, 22=8, 23=7, 24=9
+; Temporaries: slot 25=ptr_payload, 26=ptr_raw
+;
+; Semantics: copy bytes from payload[start..start+length-1] to raw[0..length-1],
+; zero remaining raw entries, set err_flag.
+; Uses only DISCO byte movement (LOADS/STORE_IND), no arithmetic uint64_t construction.
+
+; === Validate length != 0 ===
+:validate_len0
+LOAD 17          ; A = length
+LOAD 20          ; B = 0
+CMP              ; compare A - B
+JNZ check_len9   ; if length != 0, skip to next check
+LOAD 21          ; A = 1
+STORE 19         ; err_flag = 1
+HALT             ; done, err=1
+
+; === Validate length != 9 ===
+:check_len9
+LOAD 17          ; A = length
+LOAD 24          ; B = 9
+CMP              ; compare A - B
+JZ len9_fail     ; if length == 9, fail
+
+; === Validate start != 8 ===
+LOAD 16          ; A = start
+LOAD 22          ; B = 8
+CMP              ; compare A - B
+JNZ setup        ; if start != 8, continue
+LOAD 21          ; A = 1
+STORE 19         ; err_flag = 1
+HALT             ; done, err=1
+
+; === Setup ===
+:setup
+LOAD 16          ; A = start
+STORE 25         ; ptr_payload = start
+LOAD 8           ; A = 0 (raw offset)
+STORE 26         ; ptr_raw = 0
+LOAD 20          ; A = 0
+STORE 18         ; i = 0
+STORE 19         ; err_flag = 0
+
+; === Read loop ===
+:read_loop
+LOAD 18          ; A = i
+LOAD 17          ; B = length
+CMP              ; compare i - length
+JZ done          ; if i == length, done
+LOAD 25          ; A = ptr_payload
+LOAD 22          ; B = 8
+CMP              ; compare ptr_payload - 8
+JZ overflow_fail ; if ptr_payload >= 8, overflow
+LOADS 25         ; A = payload[ptr_payload]
+TROCA            ; A <-> R
+STORE_IND 26     ; raw[ptr_raw] = R
+INC 25           ; ptr_payload++
+INC 26           ; ptr_raw++
+INC 18           ; i++
+JMP read_loop    ; repeat
+
+; === Overflow fail ===
+:overflow_fail
+LOAD 21          ; A = 1
+STORE 19         ; err_flag = 1
+HALT             ; done
+
+; === Length==9 fail ===
+:len9_fail
+LOAD 21          ; A = 1
+STORE 19         ; err_flag = 1
+HALT             ; done
+
+; === Zero loop ===
+:zero_loop
+LOAD 18          ; A = i
+LOAD 22          ; B = 8
+CMP              ; compare i - 8
+JZ done          ; if i >= 8, done
+LOAD 20          ; A = 0
+TROCA            ; A <-> R
+STORE_IND 26     ; raw[ptr_raw] = 0
+INC 26           ; ptr_raw++
+INC 18           ; i++
+JMP zero_loop    ; repeat
+
+; === Done ===
+:done
+LOAD 20          ; A = 0
+STORE 19         ; err_flag = 0
+HALT             ; done

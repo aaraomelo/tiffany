@@ -1,0 +1,51 @@
+; j1939_signal_na_pattern — ERG-64 program v2
+; Computa o padrao NA (all-ones) para um campo de nbytes bytes.
+;
+; ABI:
+;   slot 0 = nbytes (entrada)
+;   slots 8..15 = uint64_t result, little-endian (8 bytes)
+;   slot 16 = i (loop counter)
+;   slot 17 = err_flag
+;   slot 20 = 0 (constant)
+;   slot 21 = 1 (constant)
+;   slot 22 = 8 (constant)
+;   slot 24 = 0xFF (byte mask para escrita)
+;   slot 25 = ptr_raw (ponteiro para slots 8..15)
+;
+; Contrato:
+;   nbytes == 0   -> result = 0x0000000000000000
+;   1 <= n <= 7   -> result = (1ULL << (n*8)) - 1
+;   nbytes == 8   -> result = 0xFFFFFFFFFFFFFFFF
+;   nbytes > 8    -> result = 0x0000000000000000
+;
+; Semantica: byte a byte no DISCO, sem construcao aritmetica uint64_t.
+; Usa LOADS/STORE_IND para acesso ao fmem.
+
+; === nbytes == 0 -> result = 0, err=0, HALT ===
+:check_zero
+LOAD 0           ; A = nbytes
+LOAD 20          ; B = 0
+CMP              ; compare A - B
+JNZ write_loop   ; if nbytes != 0, write bytes
+LOAD 20          ; A = 0
+STORE 17         ; err_flag = 0
+HALT             ; done
+
+; === Write loop: write 0xFF for i = 0..nbytes-1 ===
+:write_loop
+LOAD 16          ; A = i
+LOAD 0           ; B = nbytes
+CMP              ; compare i - nbytes
+JZ done          ; if i == nbytes, done
+LOAD 24          ; A = 0xFF
+TROCA            ; A <-> R (R = 0xFF)
+STORE_IND 25     ; raw[ptr_raw] = 0xFF  (ptr_raw starts at 8)
+INC 25           ; ptr_raw++
+INC 16           ; i++
+JMP write_loop   ; repeat
+
+; === Done ===
+:done
+LOAD 20          ; A = 0
+STORE 17         ; err_flag = 0
+HALT             ; done

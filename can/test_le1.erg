@@ -1,0 +1,6 @@
+; Test LE_len1
+LOAD 40
+LOAD 0
+ADD
+STORE_IND 24
+HALT

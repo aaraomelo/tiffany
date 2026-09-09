@@ -1,0 +1,42 @@
+; VINCO — SUB face ⊕ + flags←zero(R)
+;
+; Semantica canonica (lib/isa.h):
+;   R = A - B   (subtracao componente a componente, Word8)
+;   flags = FL_ZERO se zero(R), senao 0
+;   FL_ZERO = 0x01  (zero sse A.total==0 AND A.e==0)
+;
+; Implementacao: composicao de primitivas ERG-64
+;   SUB  -> R = A - B
+;   CMP  -> flags = FL_ZERO se zero(R) e zero(0)
+;   (zero(0) e verdadeiro, entao CMP R,0 espelha zero(R))
+;
+; Slots:
+;   0 = zero (0,0)
+;   1 = operando A
+;   2 = operando B
+;   3 = resultado R (via SUB)
+;
+; Opcodes: LOAD, SUB, CMP, HALT (todos canonicos ERG-64)
+; Nao cria opcode especial VINCO.
+; Nao usa operacao C escondida.
+;
+; Dependencia de flags: VINCO depende de FL_ZERO ser atualizado por CMP.
+;   CMP e' definido como: flags = zero(A) && zero(B) ? FL_ZERO : 0
+;   Logo CMP R, 0 atualiza flags com zero(R).
+
+; === A = slot 1 ===
+LOAD 1
+
+; === B = slot 2 ===
+LOAD 2
+
+; === R = A - B ===
+SUB
+
+; === CMP R, 0 -> flags = zero(R) ===
+; A=R (resultado da SUB), B=0
+LOAD 0
+CMP
+
+; === HALT ===
+HALT

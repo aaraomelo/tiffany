@@ -1,0 +1,6 @@
+; j1939_signal_extract_mínimo.erg
+; payload[0] = 0x34, little_endian=1, length=1, unsigned
+; Slot layout: 40=payload[0], 24=raw_out[0]
+LOAD 40
+STORE_IND 24
+HALT

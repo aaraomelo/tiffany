@@ -487,8 +487,13 @@ static int monta(const char *texto, unsigned char *saida, int cap, char *erro, i
             char mnem[64] = {0}, arg[64] = {0};
             int campos = sscanf(s, "%63s %63s", mnem, arg);
             for(char *q = mnem; *q; q++) *q = (char)toupper((unsigned char)*q);
+            /* Normalize label references: strip leading ':' if present */
+            if(arg[0] == ':'){
+                memmove(arg, arg + 1, strlen(arg));
+            }
             for(char *q = arg; *q; q++){
                 if(*q == '\r' || isspace((unsigned char)*q)){ *q = 0; break; }
+
             }
             const Instr *in = acha_nome(mnem);
             if(!in){ snprintf(erro,(size_t)nerro,"linha %d: opcode desconhecido '%s'",linha,mnem); return -1; }
@@ -587,15 +592,17 @@ static int le_ficheiro(const char *caminho, unsigned char *b, int cap){
 
 /* monta um texto, corre-o sobre um ficheiro de memória, e devolve os passos. Usada pelas
  * medidas todas — o caminho do piloto e o caminho do medidor são O MESMO. */
-static long corre_texto(const char *texto, const char *mem, long teto, char *erro, int nerro){
+static long corre_texto(const char *prog, const char *mem, long teto, char *erro, int nerro){
     unsigned char b[4096];
-    int n = monta(texto, b, (int)sizeof b, erro, nerro);
+    int n = monta(prog, b, (int)sizeof b, erro, nerro);
     if(n < 0) return -1;
-    const char *tmp = "/tmp/erg_prog.bin";
-    if(escreve(tmp, b, n) < 0){ snprintf(erro,(size_t)nerro,"não gravou %s", tmp); return -1; }
     if(fprog >= 0) close(fprog);
-    fprog = open(tmp, O_RDONLY | OPEN_BIN);
-    if(fprog < 0){ snprintf(erro,(size_t)nerro,"não abriu %s", tmp); return -1; }
+    fprog = open("/c/tmp/erg_prog.bin", O_WRONLY | O_CREAT | O_TRUNC | OPEN_BIN, 0644);
+    if(fprog < 0){ snprintf(erro,(size_t)nerro,"não gravou /c/tmp/erg_prog.bin"); return -1; }
+    if(write(fprog, b, n) != n){ close(fprog); snprintf(erro,(size_t)nerro,"não gravou /c/tmp/erg_prog.bin"); return -1; }
+    close(fprog);
+    fprog = open("/c/tmp/erg_prog.bin", O_RDONLY | OPEN_BIN);
+    if(fprog < 0){ snprintf(erro,(size_t)nerro,"não abriu /c/tmp/erg_prog.bin"); return -1; }
     if(fmem >= 0) close(fmem);
     if(abre_mem(mem) < 0){ snprintf(erro,(size_t)nerro,"não abriu %s", mem); return -1; }
     long passos = rodar((unsigned)n, teto);

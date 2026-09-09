@@ -1,0 +1,6 @@
+; test_load40c.erg — test with slot 0 (low slot number)
+; Load from slot 0, store to slot 10
+
+LOAD 0         ; A = fmem[0]
+STORE 10       ; fmem[10] = A
+HALT

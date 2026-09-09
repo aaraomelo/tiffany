@@ -1,0 +1,19 @@
+; microtest TROCA + STORE_IND + INC
+; Test TROCA isolated: A.total=0x12, A.e=0x34 -> R.total=0x34, R.e=0x12
+; Then STORE_IND + INC chain
+
+LOAD 24          ; A = 0xFF (slot 24 = 0xFF)
+LOAD 25          ; B = 8
+TROCA            ; R = (0xFF, 0x00) -> (0x00, 0xFF) = R.total=0, R.e=0xFF
+STORE_IND 25     ; store R.total=0 at slot indexed by mem[25]=8 -> mem[8] = 0
+INC 25           ; mem[25] = 9
+TROCA            ; R = (0xFF, 0x00) -> (0x00, 0xFF) = R.total=0, R.e=0xFF
+STORE_IND 25     ; store R.total=0 at slot indexed by mem[25]=9 -> mem[9] = 0
+INC 25           ; mem[25] = 10
+TROCA            ; R = (0xFF, 0x00) -> (0x00, 0xFF) = R.total=0, R.e=0xFF
+STORE_IND 25     ; store R.total=0 at slot indexed by mem[25]=10 -> mem[10] = 0
+INC 25           ; mem[25] = 11
+HALT
+
+:DATA
+: 0xFF 0x00 0x08

@@ -1,0 +1,14 @@
+; VINCO — SUB face ⊕ + flags←zero(R)
+; Semantica canonica (lib/isa.h):
+;   R = A - B (subtracao componente a componente, Word8)
+;   flags = FL_ZERO se zero(R), senao 0
+;   FL_ZERO = 0x01 (zero sempre AMBOS os componentes)
+; VINCO e' opcode nativo ERG-64 (OP_VINCO=21).
+; slot 0 = R, slot 1 = A, slot 2 = B, slot 4 = flags
+; ciclo: LOAD 2, LOAD 1, VINCO, STORE 0, HALT
+; (ordem invertida: VINCO faz A-B, e apos LOAD 2; LOAD 1, A=slot1, B=slot2)
+LOAD 2
+LOAD 1
+VINCO
+STORE 0
+HALT

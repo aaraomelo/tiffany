@@ -1,0 +1,6 @@
+; pipeline_canônico.erg
+LOAD 40
+LOAD 0
+ADD
+STORE 50
+HALT

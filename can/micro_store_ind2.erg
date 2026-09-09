@@ -1,0 +1,13 @@
+; microtest STORE_IND + INC
+; slot 25 = ptr = 8
+; Write 0xFF to slot 8, increment ptr, write again, increment, write again
+; Expected: mem[8]=FF, mem[9]=FF, mem[10]=FF, mem[25]=11
+
+LOAD 24          ; A = 0xFF
+TROCA            ; R = 0xFF
+STORE_IND 25     ; write 0xFF to slot_indice(25) = 8
+INC 25           ; ptr_raw = 9
+STORE_IND 25     ; write 0xFF to slot_indice(25) = 9
+INC 25           ; ptr_raw = 10
+STORE_IND 25     ; write 0xFF to slot_indice(25) = 10
+HALT

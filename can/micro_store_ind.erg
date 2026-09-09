@@ -1,0 +1,10 @@
+; microtest STORE_IND
+; slot 25 = ptr = 13
+; slot 13 = target (initially 0)
+; R = 0xFF
+; STORE_IND 25 -> should write 0xFF to slot 13
+
+LOAD 24          ; A = 0xFF
+TROCA            ; R = 0xFF
+STORE_IND 25     ; write R to slot_indice(25) = 13
+HALT

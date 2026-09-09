@@ -1,0 +1,8 @@
+; test_load40e.erg — test LOAD/STORE with ADD to put value in R
+; Load from slot 40, add slot 0, store result to slot 50
+
+LOAD 40        ; A = fmem[40] = 0xAB
+LOAD 0         ; A = fmem[0] = 0x42, B = 0xAB
+ADD            ; R = 0x42 + 0xAB = 0xED
+STORE 50       ; fmem[50] = R = 0xED
+HALT

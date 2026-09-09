@@ -1,0 +1,13 @@
+; Teste LOADS — verificação de endereçamento indireto
+; slot 16 = 0 (ponteiro: slot_indice(16) = mem[16].total=0, mem[16].e=0 → endereco 0)
+; slot 17 = 1 (ponteiro: slot_indice(17) = mem[17].total=1, mem[17].e=0 → endereco 1)
+; LOADS 16 → lê mem[slot_indice(16)] = mem[0] = 0xAB = 171
+; LOADS 17 → lê mem[slot_indice(17)] = mem[1] = 0xCD = 205
+; slot 10 = resultado LOADS 16 (esperado 171)
+; slot 11 = resultado LOADS 17 (esperado 205)
+
+LOADS 16
+STORE 10
+LOADS 17
+STORE 11
+HALT

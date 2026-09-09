@@ -1,0 +1,9 @@
+; teste_load40b.erg — test LOAD/STORE with different slots
+; Load from slot 40, store to slot 50
+; Then load from slot 50 and store to slot 60
+
+LOAD 40        ; A = fmem[40] = 0xAB
+STORE 50       ; fmem[50] = A = 0xAB
+LOAD 50        ; A = fmem[50] = 0xAB
+STORE 60       ; fmem[60] = A = 0xAB
+HALT

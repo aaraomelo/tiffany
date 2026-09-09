@@ -1,0 +1,4 @@
+; test_load_store.erg
+LOAD 40
+STORE 50
+HALT

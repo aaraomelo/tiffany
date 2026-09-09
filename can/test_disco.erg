@@ -1,0 +1,40 @@
+; Teste LOADS com endereços grandes no DISCO — verificação completa
+; slot 0 = 0 (ponteiro para payload[0])
+; slot 1 = 1 (ponteiro para payload[1])
+; slot 2 = 2 (ponteiro para payload[2])
+; slot 3 = 3 (ponteiro para payload[3])
+; slot 4 = 8 (ponteiro para raw[0])
+; slot 5 = 9 (ponteiro para raw[1])
+; slot 6 = 10 (ponteiro para raw[2])
+; slot 7 = 11 (ponteiro para raw[3])
+; slot 8 = 100 (ponteiro para raw[4])
+; slot 9 = 101 (ponteiro para raw[5])
+; slot 10 = 102 (ponteiro para raw[6])
+; slot 11 = 103 (ponteiro para raw[7])
+; HALT
+
+LOAD 0
+LOAD 1
+ADD
+STORE 20
+LOAD 2
+LOAD 3
+ADD
+STORE 21
+LOAD 4
+LOAD 5
+ADD
+STORE 22
+LOAD 6
+LOAD 7
+ADD
+STORE 23
+LOAD 8
+LOAD 9
+ADD
+STORE 24
+LOAD 10
+LOAD 11
+ADD
+STORE 25
+HALT
