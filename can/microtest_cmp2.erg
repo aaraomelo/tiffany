@@ -1,0 +1,43 @@
+; Microteste 4: comparacao de dois bytes
+; Testa se podemos comparar payload[0] com um valor constante
+; e fazer branch condicional
+
+; Se payload[0] == 0x12, goto EQUAL
+; Senao, goto NOT_EQUAL
+
+LOAD 40        ; A = payload[0]
+LOAD 49        ; B = 0x01  (placeholder para 0x12)
+; Precisamos carregar 0x12 como constante
+; Mas NAO temos immediate byte de 8 bits direto
+; Podemos usar STORE/LOAD para colocar 0x12 em um slot
+
+; Estrategia: usar constante existente
+; slot 48 = 0x00
+; slot 49 = 0x01
+; slot 50 = 0xFF
+; slot 51 = 0x80
+; slot 52 = 0x7F
+
+; Vamos testar CMP com payload[0] vs 0x01 (slot 49)
+LOAD 40        ; A = payload[0]
+LOAD 49        ; B = 0x01
+CMP            ; compare
+JZ EQUAL       ; if equal, goto EQUAL
+JMP NOT_EQUAL  ; if not equal, goto NOT_EQUAL
+
+:EQUAL
+LOAD 50        ; A = 0xFF
+STORE 32       ; return_code = 0xFF (mark equal)
+JMP DONE
+
+:NOT_EQUAL
+LOAD 49        ; A = 0x01
+STORE 32       ; return_code = 0x01 (mark not equal)
+JMP DONE
+
+:DONE
+LOAD 48        ; A = 0x00
+STORE_IND 32   ; return_code = 0x00
+LOAD 48        ; A = 0x00
+STORE_IND 33   ; status = 0x00
+HALT

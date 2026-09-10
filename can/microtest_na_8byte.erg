@@ -1,0 +1,57 @@
+; Microtest: NA 8-byte comparison
+; payload = 11 22 33 44 55 66 77 89
+; na_value = 11 22 33 44 55 66 77 88
+; Expected: NA does NOT trigger (last byte differs)
+; return_code = OK, status = OK
+LOAD 40        ; A = payload[0]
+LOAD 8         ; B = na_value[0]
+CMP
+JNZ DONE       ; if payload[0] != na_value[0], no NA
+
+LOAD 41        ; A = payload[1]
+LOAD 9         ; B = na_value[1]
+CMP
+JNZ DONE       ; if payload[1] != na_value[1], no NA
+
+LOAD 42        ; A = payload[2]
+LOAD 10        ; B = na_value[2]
+CMP
+JNZ DONE       ; if payload[2] != na_value[2], no NA
+
+LOAD 43        ; A = payload[3]
+LOAD 11        ; B = na_value[3]
+CMP
+JNZ DONE       ; if payload[3] != na_value[3], no NA
+
+LOAD 44        ; A = payload[4]
+LOAD 12        ; B = na_value[4]
+CMP
+JNZ DONE       ; if payload[4] != na_value[4], no NA
+
+LOAD 45        ; A = payload[5]
+LOAD 13        ; B = na_value[5]
+CMP
+JNZ DONE       ; if payload[5] != na_value[5], no NA
+
+LOAD 46        ; A = payload[6]
+LOAD 14        ; B = na_value[6]
+CMP
+JNZ DONE       ; if payload[6] != na_value[6], no NA
+
+LOAD 47        ; A = payload[7]
+LOAD 15        ; B = na_value[7]
+CMP
+JNZ DONE       ; if payload[7] != na_value[7], no NA
+
+; All bytes equal - NA match
+LOAD 49        ; A = 0x01 (NA)
+STORE 33       ; status = NA
+LOAD 49        ; A = 0x00 (OK)
+STORE 32       ; return_code = OK
+HALT
+
+:DONE
+LOAD 48        ; A = 0x00 (OK)
+STORE 32       ; return_code = OK
+STORE 33       ; status = OK
+HALT

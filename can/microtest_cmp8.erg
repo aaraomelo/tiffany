@@ -1,0 +1,63 @@
+; Microteste 5: comparacao de 8 bytes (na_value)
+; Compara payload[0..7] com na_value[0..7]
+; Se todos iguais, goto MATCH
+; Senao, goto NO_MATCH
+
+; Estrategia: comparar byte a byte, saltar se qualquer diferente
+
+LOAD 40        ; A = payload[0]
+LOAD 8         ; B = na_value[0]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 41        ; A = payload[1]
+LOAD 9         ; B = na_value[1]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 42        ; A = payload[2]
+LOAD 10        ; B = na_value[2]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 43        ; A = payload[3]
+LOAD 11        ; B = na_value[3]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 44        ; A = payload[4]
+LOAD 12        ; B = na_value[4]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 45        ; A = payload[5]
+LOAD 13        ; B = na_value[5]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 46        ; A = payload[6]
+LOAD 14        ; B = na_value[6]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+LOAD 47        ; A = payload[7]
+LOAD 15        ; B = na_value[7]
+CMP
+JNZ NO_MATCH   ; if different, not NA
+
+; All bytes equal - MATCH
+LOAD 49        ; A = 0x01 (NA status)
+STORE 33       ; status = 0x01
+JMP DONE
+
+:NO_MATCH
+LOAD 48        ; A = 0x00 (OK status)
+STORE 33       ; status = 0x00
+JMP DONE
+
+:DONE
+LOAD 48        ; A = 0x00
+STORE_IND 32   ; return_code = 0x00
+LOAD 48        ; A = 0x00
+STORE_IND 33   ; status = 0x00
+HALT

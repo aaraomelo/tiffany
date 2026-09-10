@@ -1,0 +1,24 @@
+; Microtest: BE len=4
+; payload[0..3] = 12 34 56 78
+; BE logical = 0x12345678
+; stored LE in slots 24..31: 78 56 34 12 00 00 00 00
+LOAD 43        ; A = payload[3] = 0x78
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x78
+STORE_IND 24   ; raw_out[0] = 0x78
+LOAD 42        ; A = payload[2] = 0x56
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x56
+STORE_IND 25   ; raw_out[1] = 0x56
+LOAD 41        ; A = payload[1] = 0x34
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x34
+STORE_IND 26   ; raw_out[2] = 0x34
+LOAD 40        ; A = payload[0] = 0x12
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x12
+STORE_IND 27   ; raw_out[3] = 0x12
+LOAD 48        ; A = 0x00
+STORE 32       ; return_code = OK
+STORE 33       ; status = OK
+HALT

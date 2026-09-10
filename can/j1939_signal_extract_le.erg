@@ -1,0 +1,59 @@
+; === LE EXTRACTION v2 — correct: LOAD+LOAD+ADD+STORE_IND ===
+; Payload at slots 40..47
+; raw_out at slots 24..31 (LE ABI)
+; return_code at slot 32, status at slot 33
+; Slot 0 = zero constant
+
+; Copy payload[0] to raw_out[0]
+LOAD 40        ; A = payload[0]
+LOAD 0         ; B = 0
+ADD            ; R = payload[0] + 0
+STORE_IND 24   ; raw_out[0] = R = payload[0]
+
+; Copy payload[1] to raw_out[1]
+LOAD 41        ; A = payload[1]
+LOAD 0         ; B = 0
+ADD            ; R = payload[1]
+STORE_IND 25   ; raw_out[1] = R
+
+; Copy payload[2] to raw_out[2]
+LOAD 42        ; A = payload[2]
+LOAD 0         ; B = 0
+ADD            ; R = payload[2]
+STORE_IND 26   ; raw_out[2] = R
+
+; Copy payload[3] to raw_out[3]
+LOAD 43        ; A = payload[3]
+LOAD 0         ; B = 0
+ADD            ; R = payload[3]
+STORE_IND 27   ; raw_out[3] = R
+
+; Copy payload[4] to raw_out[4]
+LOAD 44        ; A = payload[4]
+LOAD 0         ; B = 0
+ADD            ; R = payload[4]
+STORE_IND 28   ; raw_out[4] = R
+
+; Copy payload[5] to raw_out[5]
+LOAD 45        ; A = payload[5]
+LOAD 0         ; B = 0
+ADD            ; R = payload[5]
+STORE_IND 29   ; raw_out[5] = R
+
+; Copy payload[6] to raw_out[6]
+LOAD 46        ; A = payload[6]
+LOAD 0         ; B = 0
+ADD            ; R = payload[6]
+STORE_IND 30   ; raw_out[6] = R
+
+; Copy payload[7] to raw_out[7]
+LOAD 47        ; A = payload[7]
+LOAD 0         ; B = 0
+ADD            ; R = payload[7]
+STORE_IND 31   ; raw_out[7] = R
+
+; Set return_code = 0, status = 0
+LOAD 48        ; A = 0
+STORE 32       ; return_code = 0
+STORE 33       ; status = 0
+HALT

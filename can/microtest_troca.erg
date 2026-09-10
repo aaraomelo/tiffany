@@ -1,0 +1,41 @@
+; Microteste 8: construcao 0x0001 -> 0x0100
+; A Word16 (1, 0) representa 0x0001
+; Queremos (0, 1) = 0x0100
+; 
+; Estrategia: TROCA inverte os componentes
+; TROCA: (a, b) -> (b, a)
+; (1, 0) -> (0, 1) = 0x0100 ✓
+; 
+; Vamos testar se TROCA funciona na ISA
+
+LOAD 49        ; A = 0x01
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x01
+STORE 34       ; slot 34 = 0x01 (low byte)
+
+LOAD 48        ; A = 0x00
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x00
+STORE 35       ; slot 35 = 0x00 (high byte)
+
+; Agora slot 34 = 0x01, slot 35 = 0x00
+; Representa Word16 (1, 0) = 0x0001
+
+; Usar TROCA para inverter
+; TROCA opera no par (A, B)
+; Precisamos carregar A e B dos slots 34 e 35
+
+LOAD 34        ; A = slot 34 = 0x01
+LOAD 35        ; B = slot 35 = 0x00
+TROCA          ; troca A e B: A = 0x00, B = 0x01
+STORE 34       ; slot 34 = 0x00
+STORE 35       ; slot 35 = 0x01
+
+; Agora slot 34 = 0x00, slot 35 = 0x01
+; Representa Word16 (0, 1) = 0x0100 ✓
+
+LOAD 48        ; A = 0x00
+STORE_IND 32   ; return_code = 0x00
+LOAD 48        ; A = 0x00
+STORE_IND 33   ; status = 0x00
+HALT

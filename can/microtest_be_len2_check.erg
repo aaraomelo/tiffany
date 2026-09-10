@@ -1,0 +1,16 @@
+; Microtest: BE len=2
+; payload[0]=0x12, payload[1]=0x34
+; Expected BE: raw logical = 0x1234
+; stored LE in slots 24..31: 34 12 00 00 00 00 00 00
+LOAD 41        ; A = payload[1] = 0x34
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x34
+STORE_IND 24   ; raw_out[0] = 0x34
+LOAD 40        ; A = payload[0] = 0x12
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x12
+STORE_IND 25   ; raw_out[1] = 0x12
+LOAD 48        ; A = 0x00
+STORE 32       ; return_code = OK
+STORE 33       ; status = OK
+HALT

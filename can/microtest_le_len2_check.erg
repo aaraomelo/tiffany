@@ -1,0 +1,17 @@
+; Microtest: LE len=2
+; payload[0]=0x12, payload[1]=0x34
+; Expected LE: raw = 0x3412 -> slots 24..31: 34 12 00 00 00 00 00 00
+; is_signed=0, little_endian=1, na_bits=0, err_bits=0
+; payload_len=2, start=0, length=2
+LOAD 40        ; A = payload[0] = 0x12
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x12
+STORE_IND 24   ; raw_out[0] = 0x12
+LOAD 41        ; A = payload[1] = 0x34
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x34
+STORE_IND 25   ; raw_out[1] = 0x34
+LOAD 48        ; A = 0x00
+STORE 32       ; return_code = OK
+STORE 33       ; status = OK
+HALT

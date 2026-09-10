@@ -1,0 +1,8 @@
+; Microteste STORE 50 — cadeia básica LOAD/ADD/STORE
+; payload[0] = 0x34 em slot 40
+; Esperado: mem[50] = 0x0034
+LOAD 40
+LOAD 0
+ADD
+STORE 50
+HALT

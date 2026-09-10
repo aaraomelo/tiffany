@@ -1,0 +1,24 @@
+; Microteste 1: LE length 2
+; payload = [0x12, 0x34]
+; LE expected: raw_out = 0x3412
+;   raw_out[0] = 0x34 (payload[1])
+;   raw_out[1] = 0x12 (payload[0])
+
+LOAD 40        ; A = payload[0] = 0x12
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x12
+STORE_IND 24   ; raw_out[0] = 0x12
+
+LOAD 41        ; A = payload[1] = 0x34
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x34
+STORE_IND 25   ; raw_out[1] = 0x34
+
+JMP DONE
+
+:DONE
+LOAD 48        ; A = 0x00
+STORE_IND 32   ; return_code = 0x00
+LOAD 48        ; A = 0x00
+STORE_IND 33   ; status = 0x00
+HALT

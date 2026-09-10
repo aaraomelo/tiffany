@@ -1,0 +1,27 @@
+; Microtest: Sign extension len=1
+; Test 0x80 -> should be -128 -> raw_out = 0x80 stored as signed byte
+; payload[0] = 0x80
+; is_signed = 1
+; length = 1
+LOAD 40        ; A = payload[0] = 0x80
+LOAD 51        ; B = 0x80
+CMP            ; compare vs 0x80
+JZ SE_neg      ; if == 0x80, negative
+JMP DONE       ; if < 0x80, positive
+
+:SE_neg
+LOAD 40        ; A = payload[0]
+LOAD 48        ; B = 0x00
+ADD            ; R = payload[0]
+STORE_IND 24   ; raw_out[0] = R
+LOAD 50        ; A = 0xFF
+LOAD 48        ; B = 0x00
+ADD            ; R = 0xFF
+STORE_IND 25   ; raw_out[1] = 0xFF
+JMP DONE
+
+:DONE
+LOAD 48        ; A = 0x00
+STORE 32       ; return_code = OK
+STORE 33       ; status = OK
+HALT

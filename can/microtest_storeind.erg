@@ -1,0 +1,8 @@
+; Microteste STORE_IND — só STORE_IND
+; r->R = 0x0034 (definido por LOAD 40 + LOAD 0 + ADD)
+; STORE_IND 24 deve gravar 0x0034 em mem[24]
+LOAD 40
+LOAD 0
+ADD
+STORE_IND 24
+HALT

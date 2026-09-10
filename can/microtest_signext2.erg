@@ -1,0 +1,27 @@
+; Microteste 7: sign extension length 2
+; Se payload[1] bit 7 set, raw_out[0..1] = 0xFFFF
+; Senao, raw_out[0..1] = 0x0000
+
+LOAD 41        ; A = payload[1]
+LOAD 51        ; B = 0x80
+CMP            ; compare payload[1] vs 0x80
+JZ NEGATIVE    ; if bit 7 set, negative
+
+; Positive - zero extend
+LOAD 48        ; A = 0x00
+STORE_IND 24   ; raw_out[0] = 0x00
+STORE_IND 25   ; raw_out[1] = 0x00
+JMP DONE
+
+:NEGATIVE
+LOAD 50        ; A = 0xFF
+STORE_IND 24   ; raw_out[0] = 0xFF
+STORE_IND 25   ; raw_out[1] = 0xFF
+JMP DONE
+
+:DONE
+LOAD 48        ; A = 0x00
+STORE_IND 32   ; return_code = 0x00
+LOAD 48        ; A = 0x00
+STORE_IND 33   ; status = 0x00
+HALT

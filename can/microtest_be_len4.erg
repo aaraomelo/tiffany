@@ -1,0 +1,36 @@
+; Microteste 3: BE length 4
+; payload = [0x12, 0x34, 0x56, 0x78]
+; BE expected: raw_out = 0x12345678
+;   raw_out[0] = 0x12 (payload[0])
+;   raw_out[1] = 0x34 (payload[1])
+;   raw_out[2] = 0x56 (payload[2])
+;   raw_out[3] = 0x78 (payload[3])
+
+LOAD 40        ; A = payload[0] = 0x12
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x12
+STORE_IND 24   ; raw_out[0] = 0x12
+
+LOAD 41        ; A = payload[1] = 0x34
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x34
+STORE_IND 25   ; raw_out[1] = 0x34
+
+LOAD 42        ; A = payload[2] = 0x56
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x56
+STORE_IND 26   ; raw_out[2] = 0x56
+
+LOAD 43        ; A = payload[3] = 0x78
+LOAD 48        ; B = 0x00
+ADD            ; R = 0x78
+STORE_IND 27   ; raw_out[3] = 0x78
+
+JMP DONE
+
+:DONE
+LOAD 48        ; A = 0x00
+STORE_IND 32   ; return_code = 0x00
+LOAD 48        ; A = 0x00
+STORE_IND 33   ; status = 0x00
+HALT
