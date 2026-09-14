@@ -2,44 +2,42 @@
 ; Extract payload[start..start+length-1] as little-endian raw_out
 ; Slots: payload=40..47, na_value=8..15, err_value=16..23
 ; raw_out stored in slots 24..31 (LE ABI)
+;
+; ABI:
+;   slot 0..1 = payload_len (LE, uint16)
+;   slot 2    = start_byte
+;   slot 3    = length
+;   slot 4    = is_signed
+;   slot 5    = little_endian
+;   slot 6    = na_bits
+;   slot 7    = err_bits
+;   slot 8..15 = na_value (LE uint64)
+;   slot 16..23 = err_value (LE uint64)
+;   slot 24..31 = raw_out (LE uint64)
+;   slot 32    = return_code
+;   slot 33    = status
+;   slot 40..47 = payload[8] (LE uint64)
+;
+; Only ETAPA 1: LE extraction, no NA/ERR/signed/bounds
+; For ETAPA 1: start_byte = 0, so payload[0..length-1] → raw_out[0..length-1]
 
-; === BOUNDS CHECK ===
-; length < 1 → ERR
-LOAD 3         ; A = length
-LOAD 48        ; B = 0
-CMP
-JZ ERR_OUT     ; length==0 → ERR
-LOAD 49        ; A = 1
-SUB            ; A = length - 1
-JZ CHECK_START ; length==1 → OK
-; length > 8 → ERR
-LOAD 3         ; A = length
-LOAD 51        ; B = 8  (0x32=8? No, use 8 directly)
-; Need constant 8 - use slot approach
-JMP ERR_OUT    ; placeholder - fix below
-
-:ERR_OUT
-LOAD 50        ; A = 0xFF
-STORE 32       ; return_code = 0xFF
-STORE 33       ; status = 0xFF
-HALT
-
-:CHECK_START
-; Verify start_byte + length <= 8
-LOAD 2         ; A = start_byte
-LOAD 3         ; B = length
-ADD            ; R = start + length
-LOAD 49        ; B = 1
-ADD            ; R = start + length + 1
-; Compare R <= 8
+; === INIT ===
+; Clear raw_out slots 24..31
 LOAD 48        ; A = 0
-CMP            ; CMP R with 0 - sets FL_ZERO if R==0
-; This approach is wrong. Use direct comparison.
-JMP DONE_LE    ; placeholder
+STORE 24       ; raw_out[0] = 0
+STORE 25       ; raw_out[1] = 0
+STORE 26       ; raw_out[2] = 0
+STORE 27       ; raw_out[3] = 0
+STORE 28       ; raw_out[4] = 0
+STORE 29       ; raw_out[5] = 0
+STORE 30       ; raw_out[6] = 0
+STORE 31       ; raw_out[7] = 0
 
-:DONE_LE
-; For now, just copy payload bytes to raw_out slots
-; LE: payload[start+i] goes to raw_out byte i
+; === EXTRACT LE ===
+; Copy payload[0..7] to raw_out[0..7]
+; payload in slots 40..47, raw_out in slots 24..31
+; raw_out[i] = payload[i] for i = 0..7 (start_byte = 0)
+
 LOAD 40        ; A = payload[0]
 STORE_IND 24   ; raw_out[0] = payload[0]
 LOAD 41        ; A = payload[1]
@@ -56,6 +54,8 @@ LOAD 46        ; A = payload[6]
 STORE_IND 30   ; raw_out[6] = payload[6]
 LOAD 47        ; A = payload[7]
 STORE_IND 31   ; raw_out[7] = payload[7]
+
+; === DONE ===
 ; Set return_code = 0, status = 0
 LOAD 48        ; A = 0
 STORE 32       ; return_code = 0

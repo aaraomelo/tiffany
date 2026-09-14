@@ -18,14 +18,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#if !defined(__USE_XOPEN2K) && !defined(_GNU_SOURCE)
+#if 1
 extern ssize_t pread(int, void *, size_t, off_t);
 extern ssize_t pwrite(int, const void *, size_t, off_t);
 #endif
 
 typedef uint8_t SlotWord;           /* = Word_8 = F_8 (palavra8.h / naturais) */
 
-#define SLOT_WORD_BYTES 1
+#define SLOT_WORD_BYTES 2
 #define WORD8_MAX       255u
 
 static long slot_w8_wrap = 0;

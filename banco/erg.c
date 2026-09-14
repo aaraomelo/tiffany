@@ -349,13 +349,13 @@ static int passo(Regs *r, unsigned prog_len){
         break; }
     case OP_STORE: pc = MOVE_exec(r, pc, -1); break;
     case OP_STORE_IND: {
-        /* Arena[s] ↔ slot (NULO+s).total — só o átomo baixo; .e não é arena[s+1]. */
-        unsigned ptr = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
-        pc += 2;
-        unsigned tgt = slot_indice(ptr);
-        if(fmem >= 0)
-            slot_mem_grava(fmem, tgt * 2u, r->R.total);
-        break; }
+            unsigned ptr = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
+            pc += 2;
+
+            if(fmem >= 0)
+                slot_mem_grava(fmem, ptr * 2u, r->R.total);
+
+            break; }
     case OP_GOLD:       r->A = cifra_an  (r->A, 1); r->R = r->A; break;
     case OP_NEGRO_OURO: r->A = decifra_an(r->A, 1); r->R = r->A; break;
     /* ── ESQUILO e TROCA sao A MESMA operacao, e o sinal e' argumento ──────────────
@@ -597,15 +597,13 @@ static long corre_texto(const char *prog, const char *mem, long teto, char *erro
     int n = monta(prog, b, (int)sizeof b, erro, nerro);
     if(n < 0) return -1;
     if(fprog >= 0) close(fprog);
-    fprog = open("/c/tmp/erg_prog.bin", O_WRONLY | O_CREAT | O_TRUNC | OPEN_BIN, 0644);
-    if(fprog < 0){ snprintf(erro,(size_t)nerro,"não gravou /c/tmp/erg_prog.bin"); return -1; }
-    if(write(fprog, b, n) != n){ close(fprog); snprintf(erro,(size_t)nerro,"não gravou /c/tmp/erg_prog.bin"); return -1; }
-    close(fprog);
-    fprog = open("/c/tmp/erg_prog.bin", O_RDONLY | OPEN_BIN);
-    if(fprog < 0){ snprintf(erro,(size_t)nerro,"não abriu /c/tmp/erg_prog.bin"); return -1; }
+    fprog = open(prog, O_RDONLY | OPEN_BIN);
+    if(fprog < 0){ snprintf(erro,(size_t)nerro,"não abriu %s", prog); return -1; }
+    off_t len = lseek(fprog, 0, SEEK_END);
     if(fmem >= 0) close(fmem);
     if(abre_mem(mem) < 0){ snprintf(erro,(size_t)nerro,"não abriu %s", mem); return -1; }
     long passos = rodar((unsigned)n, teto);
+    if(fmem >= 0){ close(fmem); fmem = -1; }
     return passos;
 }
 static void zera_mem(const char *caminho, int nslots){
@@ -1075,16 +1073,19 @@ int main(int argc, char **argv){
         return 0;
     }
     if(argc >= 2 && !strcmp(argv[1], "corre")){
-        if(argc < 4){ fprintf(stderr, "uso: erg corre <prog.bin> <mem.dat> [teto]\n"); return 2; }
-        long teto = (argc >= 5) ? strtol(argv[4], NULL, 0) : 1000000;
-        fprog = open(argv[2], O_RDONLY | OPEN_BIN);
-        if(fprog < 0){ fprintf(stderr, "não abriu %s\n", argv[2]); return 1; }
-        off_t len = lseek(fprog, 0, SEEK_END);
-        if(abre_mem(argv[3]) < 0){ fprintf(stderr, "não abriu %s\n", argv[3]); return 1; }
-        long passos = rodar((unsigned)len, teto);
-        printf("%ld passos, %" PRId64 " bytes de programa\n", passos, (int64_t)len);
-        return 0;
-    }
+            if(argc < 4){ fprintf(stderr, "uso: erg corre <prog.bin> <mem.dat> [teto]\n"); return 2; }
+            long teto = (argc >= 5) ? strtol(argv[4], NULL, 0) : 1000000;
+            if(fprog >= 0) close(fprog);
+            fprog = open(argv[2], O_RDONLY | OPEN_BIN);
+            if(fprog < 0){ fprintf(stderr, "não abriu %s\n", argv[2]); return 1; }
+            off_t len = lseek(fprog, 0, SEEK_END);
+            if(fmem >= 0) close(fmem);
+            if(abre_mem(argv[3]) < 0){ fprintf(stderr, "não abriu %s\n", argv[3]); return 1; }
+            long passos = rodar((unsigned)len, teto);
+            if(fmem >= 0){ close(fmem); fmem = -1; }
+            printf("%ld passos, %" PRId64 " bytes de programa\n", passos, (int64_t)len);
+            return 0;
+        }
     if(argc >= 2 && !strcmp(argv[1], "desmonta")){
         if(argc < 3){ fprintf(stderr, "uso: erg desmonta <prog.bin>\n"); return 2; }
         unsigned char b[65536];

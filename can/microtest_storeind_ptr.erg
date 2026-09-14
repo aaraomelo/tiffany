@@ -1,0 +1,10 @@
+; === Microteste STORE_IND com ponteiro — pointer em slot 100 aponta para slot 24
+; r->R = 0x0034 (definido por LOAD 40 + LOAD 0 + ADD)
+; SLOT 100 = 0x0018 (slot 24 em little-endian: 24 = 0x0018)
+; STORE_IND 100 deve gravar R em slot 24
+LOAD 40
+LOAD 0
+ADD
+LOAD 100
+STORE_IND 100
+HALT
