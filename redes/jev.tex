@@ -419,8 +419,78 @@ measure the fraction of customers without a workaround'') e também não é
 reivindicada aqui de modo diferente.
 \end{observacao}
 
-% ═══════════════════════════════════════════════════════════════════════════
-\section{Unificação}
+\begin{proposicao}[Scores finitos são racionais; no limite pode surgir um irracional]
+\label{prop:score-limite}
+Seja \(S=\{s_0,\dots,s_m\}\subset\mathbb Q\) com \(s_0<\dots<s_m\). Para toda
+realização finita não vazia \(I\),
+\[
+\boxed{
+\mathbb E_G[S]
+=
+\frac{\sum_{i=0}^{m}s_i\,G_q(s_i)}{\lvert I\rvert}
+\in\mathbb Q.
+}
+\]
+Por outro lado, uma sequência destes scores pode convergir para um número
+irracional. Fixemos \(\alpha\in(0,1)\setminus\mathbb Q\) (p.\,ex.\
+\(\alpha=\sqrt2/2\)) e \(S=\{0,1\}\). Para cada \(n\ge1\), tomemos uma
+realização \(I_n\) finita com \(\lvert I_n\rvert=n\) e
+\(G_{q,n}(1)=\lfloor\alpha n\rfloor\),
+\(G_{q,n}(0)=n-\lfloor\alpha n\rfloor\). Então
+\[
+\mathbb E_{G_n}[S]=\frac{\lfloor\alpha n\rfloor}{n}\in\mathbb Q,
+\qquad
+\lim_{n\to\infty}\mathbb E_{G_n}[S]=\alpha\notin\mathbb Q.
+\]
+\end{proposicao}
+
+\begin{proof}
+A primeira parte é Def.~\ref{def:q-score} e Def.~\ref{def:esperado}:
+\(s_i\in\mathbb Q\) e \(G_q(s_i)\in\mathbb N_0\), logo o numerador é racional e,
+dividido por \(\lvert I\rvert\in\mathbb Z_{>0}\), o score é racional. Para a
+convergência, \(\lfloor\alpha n\rfloor\le\alpha n<\lfloor\alpha n\rfloor+1\)
+implica
+\[
+\left\lvert\frac{\lfloor\alpha n\rfloor}{n}-\alpha\right\rvert
+=\frac{\alpha n-\lfloor\alpha n\rfloor}{n}<\frac1n,
+\]
+e portanto \(\lfloor\alpha n\rfloor/n\to\alpha\). Cada \(G_{q,n}\) é um campo de
+contagem legítimo (conserva \(n=\lvert I_n\rvert\), isto é,
+\(G_{q,n}(0)+G_{q,n}(1)=n\); Prop.~\ref{prop:gq-conserva}) e cada score
+\(\lfloor\alpha n\rfloor/n\) é um quociente de inteiros, logo racional. Por
+último, \(\alpha=\sqrt2/2\notin\mathbb Q\) pela irracionalidade clássica de
+\(\sqrt2\).
+\end{proof}
+
+\begin{observacao}[O irracional é do limite, não da realização]
+\label{obs:score-limite}
+A irracionalidade em Prop.~\ref{prop:score-limite} pertence ao
+\emph{valor-limite} da sequência, não a qualquer realização finita individual:
+nenhum \(\mathbb E_{G_n}[S]\) é irracional. A cadeia conceptual é
+\[
+\boxed{
+\text{inteiro}
+\;\longrightarrow\;
+\text{racional}
+\;\longrightarrow\;
+\text{real no limite},
+}
+\]
+e o último passo não exige representar um irracional dentro do motor finito —
+basta o par \((N,D)\) da Def.~\ref{def:esperado} com \(N=\sum_i s_iG_q(s_i)\)
+e \(D=\lvert I\rvert\); a divisão racional fica fora. É uma propriedade
+matemática da construção de campos de contagem (realização \(\to\) projeção
+\(\to\) score); não se atribui o limite ao JEV nem à sua implementação interna:
+\[
+\boxed{
+\text{realização finita}
+\;\neq\;
+\text{sequência/limite}
+\;\neq\;
+\text{implementação interna do JEV}.
+}
+\]
+\end{observacao}
 
 \begin{proposicao}[Forma unificada]
 \label{prop:unificada}
