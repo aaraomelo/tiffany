@@ -1,0 +1,523 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[expansion=false]{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{lema}{Lema}
+\newtheorem{observacao}{Observação}
+\newtheorem{corolario}{Corolário}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\title{O par $(E,B)$ e o campo de contagem:\\
+um paralelo estrutural entre o eletromagnetismo de \texttt{fisica.tex}\\
+e a construção de \texttt{campos.tex}\,/\,\texttt{jev.tex}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+\texttt{fisica.tex} escreve o par eletromagnético $(E,B)$ como \emph{leitura}:
+uma realização com duas componentes, lida em três modos --- a forma
+$E^{2}-B^{2}$, o metal $\abs{E}/\abs{B}$ e o cruzado $E\times B$ ---, e recusa
+promover qualquer deles a lei (\texttt{fis:em-tese}). Este documento lê com
+essa mesma lente a construção de campos de contagem de \texttt{campos.tex}
+(realização $\pi\to G$) e a sua instanciação tipada de \texttt{jev.tex}
+($G\to$ projeção $q\to G_q\to$ normalização $p_q\to$ leitura $L(p_q)$).
+O paralelo é estrutural e interno: o par único com várias leituras, o quociente
+como leitura local invariante sob reescala simultânea das duas escritas, o
+invariante catalogado sem corpo, a cisão directo\,/\,cruzado, a marginalização
+como redução de cada componente ao mesmo objecto e uma estrutura de ordem
+quatro partilhada (Hodge, gerador $J$, fecho $R^{4}=\mathrm{id}$).
+Os limites são explícitos e colocam-se no mesmo sítio onde \texttt{fisica.tex}
+os coloca: $G$ não é o par $(E,B)$; não se deriva Maxwell da construção; e a
+analogia é leitura, não axioma.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Fim e método}\label{sec:metodo}
+
+O que se pede a \texttt{fisica.tex} não é uma teoria física importável. Pede-se-
+lhe um \emph{método de leitura}, e é esse método que a parte Eletromagnetismo
+(\texttt{fis:em-tese} e seguintes) expõe em forma limpa:
+
+\begin{quote}
+\emph{Não se postula Maxwell. Não se postula uma equação de continuidade.}
+\ldots\ \emph{O que esta parte faz é ler o par já escrito, sem lhe fabricar a
+lei que o repositório não tem.}
+\end{quote}
+
+\begin{center}
+\boxed{\;\text{é leitura, não axioma}\;}
+\end{center}
+
+A construção de \texttt{campos.tex}/\texttt{jev.tex} já está escrita. A cadeia
+\begin{center}
+\boxed{\;\text{realização }\pi\to G\to\text{ projeção }q\to G_q\to
+\text{ normalização }p_q\to\text{ leitura }L(p_q)\;}
+\end{center}
+\noindent é o ``par já escrito'' deste lado; e \texttt{jev.tex} diz, dos três
+tipos de decisão tipada, que \emph{aparecem como casos de $Y$ e de $L$, não
+como três teorias independentes} --- uma frase que é o eco exacto da leitura do
+par $(E,B)$ em três modos.
+
+O paralelo usa a mesma disciplina de \texttt{fis:em-tese}: cada correspondência
+enumera a estrutura e o que a obriga; cada analogia marca o que \textbf{não}
+identifica; e o que continua pergunta fica pergunta. Analogia estrutural e
+interna --- tipo $E$/\,$C$, no vocabulário da Observação ``Paridade'' de
+\texttt{campos.tex} --- não identidade formal, e não transformação da construção
+em eletromagnetismo.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O dicionário que \texttt{fisica.tex} deixa escrito}\label{sec:dicionario}
+
+A parte Eletromagnetismo de \texttt{fisica.tex} reduz-se a um dicionário curto,
+e é ele que se vai reutilizar. Para cada entrada diga-se a estrutura e o que a
+obriga (tabela ecoando \texttt{fis:em-tese}):
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.26\textwidth}p{0.36\textwidth}l@{}}
+\toprule
+ & \textbf{a estrutura} & \textbf{o que a obriga} \\
+\midrule
+o par de escritas & $(E,B)$, sobre a mesma grade; realização com duas
+  componentes & Def.~\texttt{fis:def:em-par} \\
+a forma & $E^{2}-B^{2}$, catalogada; não é um corpo & Def.~\texttt{fis:def:em-forma} \\
+o metal & $\abs{E}/\abs{B}$, a leitura local; invariante sob reescala simultânea das duas escritas & Def.~\texttt{fis:def:em-metal} \\
+o interior & $E\cdot B$, a metade directa do par & Lema~\texttt{fis:lem:em-lagrange} \\
+o cruzado & $E\times B$, a leitura orientada; não é grandeza de estado & Def.~\texttt{fis:def:em-fluxo} \\
+o fecho do par & $\abs{E\times B}^{2}=\abs{E}^{2}\abs{B}^{2}-(E\cdot B)^{2}$ & Lema~\texttt{fis:lem:em-lagrange} \\
+a forma nula & $\text{metal}=1\iff E^{2}-B^{2}=0$; \emph{não} é o vácuo & Lema~\texttt{fis:lem:em-cone} \\
+Hodge, no plano & preserva o cruzado, inverte o metal; $H^{2}=-\mathrm{id}$, $H^{4}=\mathrm{id}$ & Teor.~\texttt{fis:thm:em-hodge} \\
+o que não se deriva & Maxwell, continuidade, $\partial$, vácuo, dimensão três & \texttt{fis:em-naoderiva} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Os três pontos que este documento vai usar com mais peso são:
+
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Um par de escritas, três leituras.} $(E,B)$ admite três leituras
+      (forma, metal, cruzado), e a parte não as funde. \emph{O mesmo objecto lê-
+      se em mais do que um modo, e nenhum modo se promove a lei.}
+\item \textbf{Estado local $\neq$ quantidade transportada.} A forma e o metal
+      pertencem à escrita; o cruzado regista a orientação; ``o resto é medição,
+      e não se promove'' (\texttt{fis:em-hodge}).
+\item \textbf{A troca já estava escrita.} A transposição $\tau\colon(E,B)%
+      \mapsto(B,E)$ troca as duas escritas: o interior fica, o cruzado muda de
+      sinal (\texttt{fis:em-porque}).
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O campo de contagem lê-se como o par lido}\label{sec:paralelo}
+
+\subsection{Um objecto, várias leituras}
+
+No eletromagnetismo o objecto é o par $(E,B)$; as leituras são a forma, o metal
+e o cruzado. Na construção de campos o objecto é a realização $\pi$ com o seu
+campo de multiplicidade $G$; as leituras são a contagem em três graus
+(\texttt{fis:thm:tresgraus}: espaço $=$ suporte, matéria $=$ excesso, energia
+$=$ quadrado) e, no nível tipado de \texttt{jev.tex}, as leituras $L(p_q)$:
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.46\textwidth}p{0.46\textwidth}@{}}
+\toprule
+O par $(E,B)$, lido em três modos (\texttt{fis:em-tese}) &
+A realização $\pi$ e o campo $G$, lidos em três graus e em três leituras \\
+\midrule
+forma $E^{2}-B^{2}$ & energia $=\sum_x G(x)^{2}$ (leitura quadrática) \\
+metal $\abs{E}/\abs{B}$ & matéria $=|I|-|X|$ (leitura por excesso) \\
+cruzado $E\times B$ & leitura orientada (ordem da passagem) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Os dois padrões de leitura não se identificam: no par, as três leituras são
+funções \emph{locais} das duas escritas (uma forma, uma razão, um
+determinante); na construção, as leituras $L(p_q)$ são funcionais \emph{tipados}
+sobre a distribuição, com contradomínios distintos ($[0,1]$, $C\times[0,1]$,
+$\mathbb R$). A analogia é o \emph{gesto} --- um objecto, vários modos de
+leitura --- não a forma das leituras.
+
+\begin{observacao}[Três leituras, não três teorias]
+\label{obs:tres-leituras}
+\texttt{jev.tex} formula os três contratos como casos de um só par
+$(Y,L)$:
+\[
+\begin{array}{rcl}
+\text{Noul} &=& \text{caso binário }(Y=\{0,1\}),\ L(p_q)=p_q(1),\\[2pt]
+\text{Choice} &=& \text{caso categorial }(Y=C),\ L(p_q)=(c^\star,\kappa),\\[2pt]
+\text{Score} &=& \text{caso ordenado }(Y=S),\ L(p_q)=\mathbb E_G[S].
+\end{array}
+\]
+O gesto é o mesmo do par $(E,B)$ com as suas três leituras: \emph{o
+objecto não se multiplica; multiplicam-se as leituras}. Os padrões, porém,
+diferem: no par as leituras são funções locais das duas escritas; na construção
+são funcionais tipados sobre $p_q$, com contradomínios distintos. Limite: no
+JEV a
+projeção $q$ é análogo estrutural da classificação (``$\leadsto$'', não ``$=$'',
+Observação~\texttt{obs:question-q} de \texttt{jev.tex}); nada aqui é física.
+\end{observacao}
+
+\subsection{O quociente como leitura local}
+
+O metal $\abs{E}/\abs{B}$ é a \textbf{leitura local} do par: um quociente,
+invariante sob a \emph{reescala simultânea} das duas escritas,
+$(E,B)\mapsto(\lambda E,\lambda B)$ com $\lambda\neq0$ --- a mesma classe,
+``como duas fracções da mesma razão''. Duas propriedades do quociente merecem
+destaque:
+
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Invariância de escala (reescala simultânea).} Reescalar as duas
+      escritas em simultâneo não muda a razão; uma reescala independente de $E$
+      e $B$ já a mudaria.
+\item \textbf{Sem inventar grandeza nova.} O quociente é leitura; não é um
+      terceiro campo, não é um corpo, não se soma célula a célula.
+\end{enumerate}
+
+A construção de campos apresenta uma operação com papel estrutural análogo em
+duas instâncias:
+
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Normalização.} $P=G/\lVert G\rVert_1$ e $p_q=G_q/|I|$ são
+      invariantes sob reescala uniforme $G\mapsto\lambda G$ ($\lambda>0$): o
+      denominador escala com o numerador, e a razão fica. \texttt{campos.tex}
+      distingue a normalização (operação da realização) da transformação de
+      representação $\mathcal T$ (mudança de leitura): a razão e o que a escala
+      lê ficam em camadas separadas.
+\item \textbf{O quociente no Score.} \texttt{jev.tex} lê o Score como par
+      $(N,D)$, $N=\sum_i s_i\,G_q(s_i)$, $D=|I|$, e afirma que ``a divisão
+      racional fica fora'' do motor: o valor $\mathbb E_G[S]=N/D$ é leitura
+      posterior, e o irracional só pode aparecer \emph{no limite} da sequência,
+      nunca numa realização finita (Prop.~\texttt{prop:score-limite},
+      Obs.~\texttt{obs:score-limite}).
+\end{enumerate}
+
+\begin{observacao}[Limite]
+\label{obs:limite-quociente}
+$N/D$ \textbf{não} é o metal do eletromagnetismo; $p_q$ não é carga; $P$ não é
+razão entre campos físicos. A correspondência é de \emph{papel}: leitura local
+por quociente, invariante sob reescala simultânea, sem corpo próprio ---
+exactamente o papel que o metal ocupa no par $(E,B)$.
+\end{observacao}
+
+\subsection{O invariante catalogado, sem corpo}
+
+A forma $E^{2}-B^{2}$ é catalogada (assinatura $(3,3,0)$) mas \emph{não é um
+corpo}: ``não é um troço de $I$, não tem $c_S$, não se superpõe célula a
+célula'' (\texttt{fis:def:em-forma}). Na construção de campos o invariante que
+tem o mesmo estatuto é a \textbf{conservação}
+
+\[
+\sum_x G(x)=|I|, \qquad \sum_y G_q(y)=|I|
+\]
+
+(\texttt{campos.tex} Prop.~\texttt{prop:conservacao}; \texttt{jev.tex}
+Prop.~\texttt{prop:gq-conserva}). A conservação é o que resta depois da dobra:
+``a medida conserva-se, a fibra perde-se'' (\texttt{fis:thm:medida}). É, como a
+forma, uma \emph{marca do par} que não se superpõe célula a célula e não
+distingue realizações:
+
+\begin{center}
+\boxed{\;\text{a conservação é cega à dobra; }G\text{ reconta o que a medida esquece.}\;}
+\end{center}
+
+\begin{observacao}[Limite]
+\label{obs:limite-forma}
+A conservação $\sum G=|I|$ não é a forma $E^{2}-B^{2}$: uma é a identidade de
+partição de uma fibra; a outra é uma expressão bilinear sobre duas escritas. O
+que coincide é o estatuto: invariante da escrita, catalogado, sem corpo, que
+nada soma ao objecto além de si próprio.
+\end{observacao}
+
+\subsection{A cisão directo / cruzado e a leitura do par}
+
+\texttt{fisica.tex} lê o par pela cisão já escrita (Observação
+\texttt{fis:obs:cisao}): metade \emph{directa} (o interior $E\cdot B$, que
+$\tau$ preserva) e metade \emph{cruzada} (o cruzado $E\times B$, que $\tau$
+inverte). O cruzado ``regista a orientação da passagem; não é grandeza de
+estado''. Na construção de campos a mesma cisão tem três realizações distintas,
+todas marcadas como analogia estrutural e não identidade:
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{Directo = projeção individual; cruzado = projeção conjunta.}
+      \texttt{jev.tex} lê cada contrato pela projeção individual
+      $G\to G_{q_i}$ e o conjunto pela projeção conjunta
+      $G_q(y_1,\dots,y_n)$: ``as leituras expostas ao contrato são marginais;
+      o campo conjunto é a descrição estrutural'' (Obs.~\texttt{obs:conjunta-items}
+      de \texttt{jev.tex}). A conjunta não se materializa como corpo; os
+      marginais são as leituras operacionais. É o cruzado sem grandeza de
+      estado: descreve-se, não se soma.
+\item \textbf{Directo / cruzado na ordem das operações.} \texttt{campos.tex}
+      distingue $\mathcal T\circ\text{count}$ (definida) de
+      $\text{count}\circ\mathcal T$ (não definida): a leitura da passagem
+      depende da ordem em que a transformação é aplicada --- a mesma orientação
+      que o cruzado regista no par.
+\item \textbf{A cisão par/ímpar.} \texttt{campos.tex} regista que a partição
+      por paridade da série $\exp(tJ)$ e a do byte ``são o mesmo tipo de corte
+      \ldots\ classificada como analogia estrutural (tipo $E$/$C$), não como
+      identidade formal''. \emph{A cisão lê-se; não se importa.}
+\end{itemize}
+
+\subsection{Um par único de componentes; a marginalização}
+
+No eletromagnetismo o objecto é o par $(E,B)$: um único par de escritas sobre a
+mesma grade, e cada leitura de componente --- $E$ ou $B$ --- pertence ao mesmo
+objecto representado. \emph{Não se importa aqui nenhuma formulação adicional de
+potencial}: basta o par de \texttt{fis:def:em-par}. Na construção tipada o gesto
+análogo é o Teorema da Marginalização de \texttt{jev.tex}
+
+\[
+\boxed{\;\sum_{j\neq i} G_q(y_1,\dots,y_n)=G_{q_i}(y_i)\;}
+\]
+
+(\texttt{thm:marginal}): cada projeção individual $G_{q_i}$ lê-se do campo
+conjunto $G_q$ por soma exacta sobre as restantes coordenadas. \emph{Cada leitura
+de componente reduz-se ao mesmo objecto; a redução é a soma.}
+
+\begin{observacao}[Limite]
+\label{obs:limite-marginal}
+O objecto de onde se lê é aqui o campo conjunto $G_q$, e não um potencial
+vetorial; não há ``identidade de Bianchi'' nem equações de campo. A
+correspondência é a da \emph{redução}: o componente lê-se do conjunto por soma,
+e a soma é exacta. Nada nesta identidade envolve a orientação espaço-temporal
+do eletromagnetismo.
+\end{observacao}
+
+\subsection{A estrutura de ordem quatro partilhada}
+
+\texttt{fis:em-hodge} escreve $H(E,B)=(B,-E)$, com $H^{2}=-\mathrm{id}$,
+$H^{4}=\mathrm{id}$, preservando o cruzado e invertendo o metal; e nota que,
+quando os domínios se reduzem ao mesmo par de escalares, Hodge e o rotor $R$
+do fecho do plano têm \emph{a mesma estrutura de ordem}: $R^{4}=H^{4}=\mathrm{id}$,
+$R^{2}=H^{2}=-\mathrm{id}$. A frase de \texttt{fisica.tex} é a que importa:
+
+\begin{quote}
+\emph{É a mesma estrutura de ordem, não uma identidade de mapas na grade.}
+\end{quote}
+
+A construção de \texttt{campos.tex} tem \emph{duas} instâncias dessa mesma
+estrutura de ordem, e ambas já estão marcadas no documento:
+
+\begin{itemize}[leftmargin=1.5em]
+\item o \textbf{gerador} $J$ (``ordem quatro; $J^{2}=-1$'',
+      \texttt{sec:pi-operacional}), com a série $\exp(tJ)=c(t)\,1+s(t)\,J$ e a
+      conservação $c^{2}+s^{2}=1$;
+\item o \textbf{fecho} da dinâmica estigmérgica $R^{4}=\mathrm{id}$
+      (escrita/leitura/$\arg\min$/fecho), com a volta fechada em período $2\pi$.
+\end{itemize}
+
+\begin{observacao}[Limite]
+\label{obs:limite-hodge}
+Hodge \textbf{não} é o rotor $R_{ij}$ (domínios distintos), \textbf{não} é
+$\tau$ (ordem quatro contra ordem dois) e \textbf{não} é o gerador $J$ da
+realização (um actua no par de escritas; o outro no espaço de operadores). O
+que se afirma é apenas \emph{a assinatura de período}: o quadrado é $-\mathrm{id}$
+e a quarta potência é a identidade, a mesma em Hodge, em $R$ e em $J$. Estrutura
+de ordem, não identidade de mapas.
+\end{observacao}
+
+\subsection{Não há vácuo}
+
+O Lema da forma nula (\texttt{fis:lem:em-cone}) diz $\text{metal}=1\iff E^{2}-B^{2}=0$,
+e \texttt{fisica.tex} insiste: ``\emph{não} é o vácuo'', porque o vácuo do
+catálogo exige as \emph{duas} condições $E^{2}-B^{2}=0$ e $E\cdot B=0$. A
+construção de campos não tem análogo do vácuo, e a tentação análoga seria
+chamar ``vazio/informativo'' à normalizada uniforme $p_q$. Isso é recusado no
+mesmo gesto: $p_q$ uniforme é apenas um ponto do simplex $\Delta(Y)$; não é um
+estado de equilíbrio físico, nem um zero de campo, nem ``ausência de marca''.
+
+\begin{center}
+\boxed{\;p_q\text{ uniforme }\neq\text{ vazio};\;\text{forma nula }\neq\text{ vácuo}.\;}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Tabela de correspondência}\label{sec:tabela}
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.25\textwidth}p{0.22\textwidth}p{0.26\textwidth}p{0.14\textwidth}@{}}
+\toprule
+\textbf{Eletromagnetismo} (\texttt{fis:em-*}) & \texttt{campos.tex} & \texttt{jev.tex} & \textbf{Estatuto} \\
+\midrule
+par de escritas $(E,B)$; realização com duas componentes; não é o campo $G$
+  & realização $\pi_S\colon I\to S$; campo $G_S(s)=|\pi^{-1}(s)|$
+  & realização $\pi\colon I\to X$; $G(x)=|\pi^{-1}(x)|$, $D=|I|$
+  & analogia de papel: objecto único, leituras múltiplas \\
+três leituras do par: forma, metal, cruzado
+  & três graus do campo: suporte, excesso, quadrado (\texttt{fis:thm:tresgraus})
+  & três casos de $(Y,L)$: Noul, Choice, Score
+  & um objecto, vários modos de leitura; padrões distintos \\
+metal $\abs{E}/\abs{B}$; quociente invariante sob reescala simultânea das duas escritas (``fracções da mesma razão'')
+  & normalização $P=G/\lVert G\rVert_1$; razão de escala
+  & $p_q=G_q/|I|$; $\mathbb E_G[S]=N/D$ com divisão fora do motor
+  & leitura local por quociente \\
+forma $E^{2}-B^{2}$; catalogada, sem corpo
+  & conservação $\sum G=|I|$; a fibra perde-se, a medida fica
+  & conservação $\sum G_q=|I|$; normalização $\sum p_q=1$
+  & invariante da escrita, cego à dobra \\
+interior $E\cdot B$ / cruzado $E\times B$; $\tau$ troca, interior fica, cruzado muda
+  & cisão par/ímpar (série, byte); ordem das operações
+  & individual vs.\ conjunta; marginais operacionais sem materializar o produto
+  & a cisão lê-se, não se importa \\
+o par $(E,B)$ como um único par de componentes; $E$ e $B$ lêem-se do mesmo objecto
+  & transformação de representação $\mathcal T$; dualidade
+  & projeção conjunta $G_q$; marginalização $\sum_{j\neq i}G_q=G_{q_i}$
+  & cada leitura de componente reduz-se ao mesmo objecto por soma exacta \\
+Hodge $H(E,B)=(B,-E)$; $H^{2}=-\mathrm{id}$, $H^{4}=\mathrm{id}$
+  & gerador $J$ ($J^{2}=-1$); fecho $R^{4}=\mathrm{id}$; período $2\pi$
+  & (herdado do fecho)
+  & assinatura de período partilhada; não é identidade de mapas \\
+forma nula $\iff$ metal $=1$; \emph{não} é o vácuo
+  & --- / (sem análogo)
+  & $p_q$ uniforme $\neq$ vazio
+  & não há vácuo na construção \\
+Maxwell, continuidade, $\partial$, dimensão três: não se deriva
+  & mecanismo interno do JEV; ``como o JEV calcula'': não se responde
+  & implementação JEV não determinada (tabela de estatuto)
+  & a lei que o repositório não tem não se fabrica \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Limites --- recusas}\label{sec:limites}
+
+\noindent Na mesma forma de \texttt{fis:em-naoderiva} (``recusas, e dizem-se
+porque não dizê-las seria fazê-las passar''):
+
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Maxwell e as equações de campo não entram.} Nada na construção de
+      campos produz rotacional, divergente, continuidade ou estado de
+      transporte. O cruzado da leitura tipada (os marginais) é soma exacta de
+      contagens, não um termo de acoplamento vectorial.
+\item \textbf{$G$ não é o par $(E,B)$, nem o potencial.} $G$ conta visitas
+      (\texttt{fis:def:em-par} é explícito: ``$G$ conta visitas; $(E,B)$ é uma
+      realização com duas componentes''). A construção não tem ``duas
+      componentes do mesmo fenômeno''; tem uma contagem e leituras.
+\item \textbf{Os quocientes não se identificam com os físicos.} $N/D$ não é o
+      metal; $P$ não é razão de campos; $p_q$ não é carga; $\mathbb E_G[S]$
+      não é uma quantidade física transportada. São leituras no mesmo
+      \emph{papel}, não no mesmo \emph{objeto}.
+\item \textbf{Hodge não é $R_{ij}$, nem $\tau$, nem $J$.} A estrutura de ordem
+      coincide; as aplicações e os domínios não.
+\item \textbf{A forma nula não é o vácuo, e a uniformidade não é vazio.} A
+      tentação de chamar ``vácuo'' à normalizada uniforme recusa-se como
+      \texttt{fisica.tex} recusa chamar vácuo à forma nula sozinha.
+\item \textbf{As marcações $E$/$C$ são mantidas.} A Observação ``Paridade'' de
+      \texttt{campos.tex} chama à cisão par/ímpar ``analogia estrutural (tipo
+      $E$/$C$), não identidade formal''; o mesmo vale para cada linha desta
+      tabela.
+\item \textbf{O piloto não instaura o paralelo.} A validação experimental
+      (piloto E1--E6; \texttt{jev.tex} 577/577 verificações, 0 falhas)
+      valida a construção computacional do campo e das leituras, não a analogia
+      eletromagnética, e não o mecanismo interno de coisa nenhuma.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que o paralelo ilumina}\label{sec:ilumina}
+
+A analogia não prova nada; dá linguagem. As correspondências que organizam
+\emph{uso}:
+
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{Leitura por quociente como contrato.} O Score como par $(N,D)$
+      ``sem divisão no motor'' é o mesmo gesto do metal ``sem terceiro campo'';
+      a disciplina de \emph{não materializar o quociente} é partilhada.
+\item \textbf{Três leituras, e o objecto único.} A leitura do par em vários
+      modos sustenta ``uma realização, múltiplas leituras tipadas'': Noul,
+      Choice e Score não são três teorias, são três leituras do mesmo campo
+      --- no mesmo gesto, ainda que os padrões (funções locais contra
+      funcionais tipados) difiram.
+\item \textbf{Dividir para ler.} A marginalização como ``somar as outras
+      componentes'' dá um vocabulário para o campo conjunto (descrição
+      estrutural) e os marginais (leituras operacionais) --- o mesmo
+      vocabulário que separa a forma do cruzado.
+\item \textbf{Ordem quatro como assinatura de ciclo.} O fecho $R^{4}=\mathrm{id}$,
+      a volta $2\pi$, Hodge $H^{4}=\mathrm{id}$: um mesmo ``ciclo de leitura''
+      com o quadrado a inverter o sentido. Estrutura de período, sem promotor de
+      aplicação.
+\item \textbf{Cisão directo/cruzado.} Separar o que a leitura preserva do que
+      ela inverte (interior vs.\ cruzado; marginais vs.\ conjunta) organiza as
+      decisões de projeto sem as fundar em física.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O que continua pergunta}\label{sec:perguntas}
+
+\noindent \texttt{fis:em-pergunta} deixa três perguntas no eletromagnetismo,
+``e ficam perguntas'' ($\Gamma=0$, $\mathrm{FP}=1$, $\Sigma h=\log\det G$). Do
+lado da construção deixam-se as que a leitura não responde:
+
+\begin{enumerate}[leftmargin=1.5em]
+\item O mecanismo interno do JEV (como o modelo produz a calibração): não
+      determinado, e fora do alcance de uma analogia.
+\item Se a leitura por quociente $\mathbb E_G[S]=N/D$ \emph{operacionalmente}
+      serve pipelines que já produzem realizações e ocupações --- a pergunta
+      de trabalho de \texttt{jev.tex}.
+\item Se a tríade forma/metal/cruzado tem, na construção de campos,
+      \emph{medidores} reais (no sentido de \texttt{fisica.tex}: ``o resto é
+      medição''), ou se fica no estatuto de leitura sem grandeza.
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Conclusão}\label{sec:conclusao}
+
+Lê-se o par já escrito, sem lhe fabricar a lei. O eletromagnetismo de
+\texttt{fisica.tex} deixou o gesto; a construção de \texttt{campos.tex}/
+\texttt{jev.tex} já tinha escrito o objecto. O paralelo proposto organiza o
+que já está, no mesmo estatuto em que \texttt{fis:em-tese} organiza o par:
+
+\begin{center}
+\boxed{\;\text{um objecto, três leituras;}\;}
+\qquad
+\boxed{\;\text{o quociente lê; a conservação catáloga; o cruzado orienta;}\;}
+\qquad
+\boxed{\;\text{é leitura, não axioma.}\;}
+\end{center}
+
+\begin{quote}
+\emph{O paralelo é estrutural e interno, e não transforma a construção de
+campos em eletromagnetismo} --- tal como a analogia de \texttt{fisica.tex} com
+Kirchhoff não transforma a Mecânica em eletromagnetismo.
+\end{quote}
+
+\begin{thebibliography}{9}
+
+\bibitem{fisica}
+A.~M.~Lopes (projecto Tiffany),
+\emph{Física / formalismo de realização e multiplicidade}
+(\texttt{fisica.tex}), repositório do projecto --- parte Eletromagnetismo
+(\texttt{fis:em-tese} a \texttt{fis:em-pergunta}).
+
+\bibitem{campos}
+A.~M.~Lopes (projecto Tiffany),
+\emph{Campos de Contagem e Mudança de Representação}
+(\texttt{campos.tex}), repositório do projecto, 2026.
+
+\bibitem{jev}
+A.~M.~Lopes (projecto Tiffany),
+\emph{JEV e Campos de Contagem: Camada de Representação para Decisão Tipada}
+(\texttt{jev.tex}), repositório do projecto, 2026.
+
+\end{thebibliography}
+
+\end{document}
