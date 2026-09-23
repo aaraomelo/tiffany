@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "preview:banco": "vite preview --open /banco/",
-    "test:canal": "node ../tests/canal_browser.js && node ../tests/canal_chunk.js"
+    "test:canal": "node ../tests/canal_browser.js && node ../tests/canal_chunk.js",
+    "test:jev": "node ../tests/jev_backends.js && node ../tests/jev_front.js"
   },
   "devDependencies": {
     "vite": "^5.4.10"

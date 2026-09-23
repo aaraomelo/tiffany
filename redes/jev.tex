@@ -840,6 +840,87 @@ Não responde à pergunta de \emph{como o JEV calcula}. Confundir as duas é
 precisamente o que este paper evita.
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{Validação experimental da construção}
+
+A construção proposta foi levada ao motor wasm da Tiffany no piloto
+\texttt{JEV-WASM} (experiências E1--E6, fechadas; registo em
+\texttt{docs/INTEGRACAO\_JEV\_WASM.md}). Preserva-se a distinção:
+\[
+\boxed{
+\text{contrato JEV documentado}
+\neq
+\text{implementação interna JEV}
+\neq
+\text{realização experimental Tiffany}.
+}
+\]
+O módulo de contagem
+(\texttt{conecthus/backends/wasm/jev/marginal.c}
+\(\to\) \texttt{assets/figuras/wasm/jev/marginal.wasm}) re-conta o campo \(G\)
+sobre realizações determinísticas (LCG fixo), e cada saída é comparada com um
+oráculo em JS puro --- o selo
+\(\text{WASM}\equiv\text{oráculo}\equiv\text{esperado}\). A cadeia experimental
+validada é
+\[
+\boxed{
+G
+\;\to\;
+G_q
+\;\to\;
+(N,D)
+\;\to\;
+N/D
+\;\to\;
+\mathbb E_G[S],
+}
+\]
+fechada na prática do motor: do campo à projecção \(q\), ao par racional exacto
+\(N=\sum_i s_iG_q(s_i)\), \(D=\lvert I\rvert\)
+(Prop.~\ref{prop:score-limite}, Def.~\ref{def:esperado}), e à média \(N/D\)
+\emph{lida do par}, sem divisão no motor.
+
+Resultados fechados:
+\[
+\text{E1--E5: }509/509,\qquad
+\text{E6: }68/68,
+\]
+\[
+\boxed{577/577\text{ verificações, }0\text{ falhas}.}
+\]
+
+Cada bloco valida:
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{E1} --- conservação: \(\sum_x G(x)=\lvert I\rvert\)
+      (Prop.~\ref{prop:conservacao});
+\item \textbf{E2} --- marginalização: \(G_{q_i}\) recuperado por somas do campo
+      conjunto, exacto em inteiros (Teor.~\ref{thm:marginal});
+\item \textbf{E3} --- múltiplas leituras sobre a mesma realização:
+      Noul/Choice/Score como marginais de uma única leitura conjunta
+      (Cor.~\ref{cor:marginais}, Obs.~\ref{obs:multi-q-marg});
+\item \textbf{E4} --- Score e par exacto \((N,D)\): \(\mathbb E_G[S]=N/D\) com
+      \(N=\sum_i s_iG_q(s_i)\), sem divisão no motor
+      (Prop.~\ref{prop:score-limite});
+\item \textbf{E5} --- leituras paralelas sobre o mesmo campo: Noul e Score no
+      mesmo percurso, campo \(G\) não recriado;
+\item \textbf{E6} --- integração no front: demonstração ao vivo do selo na
+      página da aplicação --- integração, não prova nova.
+\end{itemize}
+
+A formulação de leitura é: os experimentos \emph{validam a realização
+computacional da construção proposta e a sua compatibilidade com os contratos
+de saída considerados}; eles não identificam nem reconstroem o mecanismo
+interno do JEV. Os testes cobrem casos testados; os teoremas continuam a valer
+pelas suas demonstrações. Artefactos versionados:
+\code{tests/jev\_backends.js}, \code{tests/jev\_front.js},
+\code{conecthus/backends/wasm/jev/marginal.c},
+\code{assets/figuras/wasm/jev/marginal.wasm} e
+\code{app/src/jev\_contratos.js}. Os invariantes gerais que esta secção instancia
+estão registados e caracterizados em \texttt{campos.tex} (secção de validação
+computacional); os dois textos referem-se mutuamente e não duplicam provas.
+Esta é a instanciação \emph{tipada}; a evidência reforça a construção, não a
+transforma em implementação do JEV.
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{Comparação estrutural JEV \(\times\) Tiffany}
 
 \begin{center}
@@ -897,6 +978,7 @@ Memory & no state & no campo \(G\) & interpretação (Tiffany) \\
 Fourier & --- & leitura aditiva (instância clássica) & reformulação \\
 Mellin & --- & leitura multiplicativa via \(\log\) & reformulação \\
 Implementação JEV & --- & \textbf{não determinada} & lacuna \\
+Validação experimental (piloto E1--E6) & --- & 577/577 verificações, 0 falhas; WASM $\equiv$ oráculo sobre casos testados & validação de implementação (não prova o mecanismo) \\
 \bottomrule
 \end{tabular}
 \end{center}

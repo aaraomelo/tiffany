@@ -4,6 +4,7 @@ import art from './kernels_campo.json'         // os kernels EMITIDOS pela broca
 import { initCardsKernel } from './cards_kernel.js'
 import substratosData from './substratos.json'
 import { initSubstratos } from './substratos.js'
+import { initJevSelo } from './jev_contratos.js'
 import pontesData from './pontes.json'
 import { initPontes } from './pontes.js'
 import { initVelocidade } from './velocidade.js'
@@ -228,6 +229,7 @@ main.insertAdjacentHTML('beforeend', hero(manifesto))
 manifesto.secoes.forEach((s) => main.insertAdjacentHTML('beforeend', secao(s)))
 main.insertAdjacentHTML('beforeend', trailer(manifesto.trailer))
 main.appendChild(initSubstratos(substratosData))
+main.appendChild(initJevSelo())
 main.appendChild(initPontes(pontesData))
 main.appendChild(initAssistente())
 initTerminal().then((sec) => main.appendChild(sec))

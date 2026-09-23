@@ -1202,6 +1202,110 @@ A questão permanece aberta no sentido estrito: a comutatividade só pode ser di
 Consequentemente: a reversibilidade de \(\mathcal T\) (quando existe) recupera o campo; não recupera a realização ordenada. A assimetria do Corolário~\ref{cor:assimetria} permanece.
 
 % ═══════════════════════════════════════════════════════════════════════════
+\section{Validação computacional da construção}
+
+Esta secção regista a validação computacional da construção de campos de
+contagem no piloto \texttt{JEV-WASM} (experiências E1--E6, fechadas; registo em
+\texttt{docs/INTEGRACAO\_JEV\_WASM.md}). O motor da Tiffany foi usado como
+\emph{ambiente experimental} da construção: um módulo wasm de contagem
+(\texttt{conecthus/backends/wasm/jev/marginal.c}
+\(\to\) \texttt{assets/figuras/wasm/jev/marginal.wasm}) re-conta um campo \(G\)
+sobre realizações determinísticas (sementes fixas), e cada resultado é
+comparado com um oráculo em JS puro --- o selo
+\(\text{WASM}\equiv\text{oráculo}\equiv\text{esperado}\). \textbf{Isto não
+demonstra a implementação interna do JEV}: o motor foi o ambiente experimental;
+o que se valida é a implementação da construção em casos testados, e apenas
+isso.
+
+\begin{quote}
+Os experimentos validam a \emph{implementação da construção} em casos
+testados (realizações determinísticas, sementes fixas); não provam
+universalmente os teoremas matemáticos, que continuam a valer pelas suas
+demonstrações. O mecanismo interno do JEV permanece indeterminado.
+\end{quote}
+
+São invariantes da construção, validados no piloto sobre a mesma realização
+(com a conservação \(\sum_x G(x)=\lvert I\rvert\),
+Prop.~\ref{prop:conservacao}):
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{conservação de \(G\)}: para toda a realização finita,
+      \(\sum_x G(x)=\lvert I\rvert\);
+\item \textbf{conservação após agregação} \(G\to G_q\) (mudança de suporte /
+      projecção por classificação \(q\)): \(\sum_y G_q(y)=\lvert I\rvert\);
+\item \textbf{normalização}: \(\sum_y p_q(y)=1\), com
+      \(p_q(y)=G_q(y)/\lvert I\rvert\);
+\item \textbf{marginalização exata}: cada \(G_{q_i}\) recuperado por somas do
+      campo conjunto, \emph{exato em inteiros} (o teorema das marginais,
+      demonstrado e validado em \texttt{jev.tex});
+\item \textbf{múltiplas leituras sobre a mesma realização}: as três leituras
+      tipadas (Noul, Choice e Score) lidas de um único \(G\);
+\item \textbf{Score como par inteiro} \((N,D)\):
+      \[
+      \boxed{\mathbb E_G[S]=\frac{N}{D},\qquad
+      N=\sum_i s_i\,G_q(s_i),\quad D=\lvert I\rvert,}
+      \]
+      o motor entrega o \emph{par} exacto; a divisão racional \(N/D\) é leitura
+      do par no oráculo (não há divisão no motor);
+\item \textbf{paralelismo}: leituras tipadas distintas sobre o mesmo \(G\), no
+      mesmo percurso, sem recriação do campo;
+\item \textbf{equivalência WASM$\equiv$oráculo}: cada leitura do módulo coincide com
+      a re-implementação em JS puro;
+\item \textbf{integração final no front} (E6): demonstração ao vivo no
+      navegador da construção acoplada ao relógio da aplicação ---
+      \emph{demonstração de integração}, não prova adicional.
+\end{itemize}
+
+Resultados fechados (0 falhas):
+\[
+\text{E1--E5: }509/509,\qquad\text{E6: }68/68,
+\qquad
+\boxed{577/577\text{ verificações, }0\text{ falhas}.}
+\]
+Reproduzibilidade: sementes determinísticas e comandos directos
+\code{node tests/jev\_backends.js} e \code{node tests/jev\_front.js} (os dois,
+via \code{npm run test:jev}, na pasta \code{app/}). Os artefactos versionados
+são \code{tests/jev\_backends.js}, \code{tests/jev\_front.js},
+\code{conecthus/backends/wasm/jev/marginal.c} e a documentação do piloto em
+\code{docs/INTEGRACAO\_JEV\_WASM.md}.
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.44\textwidth}p{0.46\textwidth}@{}}
+\toprule
+\textbf{Resultado} & \textbf{Estatuto} \\
+\midrule
+Conservação de \(G\) & resultado matemático + validação computacional \\
+Conservação de \(G_q\) & resultado matemático + validação \\
+Marginalização & teorema + teste computacional \\
+Normalização & consequência matemática + teste \\
+Score \(\mathbb E_G[S]=N/D\) & definição/derivação + teste \\
+Paralelismo (leituras paralelas, campo intacto) & propriedade da construção + teste \\
+WASM $\equiv$ oráculo & validação de implementação \\
+E6 (integração no front) & demonstração de integração \\
+Mecanismo interno do JEV & \textbf{não determinado} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+\boxed{\text{Experimento reforça a construção;}\quad
+\text{não transforma a construção em implementação do JEV.}}
+\]
+
+A instanciação \emph{tipada} destes invariantes --- os contratos Noul, Choice
+e Score como casos de \(Y\) e de \(L\), o teorema de marginalização e o par
+\((N,D)\) --- está construída e validada em \texttt{jev.tex}, que por sua vez
+reutiliza os invariantes gerais que aqui se registam. Não se duplicam provas;
+os dois textos referem-se mutuamente:
+\[
+\boxed{
+\texttt{campos.tex: construção geral}
+\;\longrightarrow\;
+\texttt{jev.tex: instanciação tipada}.
+}
+\]
+
+% ═══════════════════════════════════════════════════════════════════════════
 \section{Conclusão}
 
 Formalizámos a cadeia
