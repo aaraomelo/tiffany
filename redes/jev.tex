@@ -443,11 +443,26 @@ L(p_q)
 \end{array}
 }
 \]
-especializa-se em:
+Seja \(\Delta(Y)\) o simplex das distribuições de probabilidade sobre o finito
+\(Y\). O funcional de leitura \(L\) especializa-se, em cada caso com
+contradomínio e forma próprios sobre \(p_q\in\Delta(Y)\):
 \begin{itemize}[leftmargin=1.5em]
-\item \(Y=\{0,1\}\) --- Noul (leitura: \(p_q(1)\));
-\item \(Y=C\) categorial --- Choice (leitura: \(\arg\max p_q\), opcionalmente \(\kappa\));
-\item \(Y=S\) ordenado --- Score (leitura: \(\mathbb E_G[S]\) ou \(\arg\max\)).
+\item \(Y=\{0,1\}\) --- Noul:
+      \[
+      L\colon\Delta(\{0,1\})\to[0,1],\qquad L(p_q)=p_q(1);
+      \]
+\item \(Y=C\) categorial --- Choice:
+      \[
+      L\colon\Delta(C)\to C\times[0,1],\qquad
+      L(p_q)=\bigl(c^\star,\;\kappa(p_q)\bigr),\quad c^\star\in\arg\max p_q;
+      \]
+\item \(Y=S\) ordenado --- Score:
+      \[
+      L\colon\Delta(S)\to\mathbb R,\qquad
+      L(p_q)=\mathbb E_G[S]=\sum_i s_i\,p_q(s_i),
+      \]
+      com \(s_i\in\mathbb R\) e \(s_0<\dots<s_m\); alternativa discreta:
+      \(c^\star=\arg\max_i p_q(s_i)\).
 \end{itemize}
 \end{proposicao}
 
