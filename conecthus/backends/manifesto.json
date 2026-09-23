@@ -1211,6 +1211,69 @@
           "involucao": "MOVE(-1)∘MOVE(+1)=id"
         }
       }
+    },
+    {
+      "nome": "vaga",
+      "faz": "canonizar",
+      "p": 1,
+      "q": 1,
+      "r": 1,
+      "fonte": "conecthus/backends/vaga/canonizar.c",
+      "wasm": "canonizar.wasm",
+      "exports": [
+        "vaga_move",
+        "vaga_compilar",
+        "vaga_descompilar"
+      ],
+      "pleno": "banco/vaga.c",
+      "nota": "interface padrao; wasm=celula browser; pleno=vaga.c metal",
+      "arena": "browser",
+      "armazenamento": "GKBANCO",
+      "absorcao": {
+        "move": "vaga_move",
+        "exports": [
+          "vaga_move"
+        ],
+        "orbita": "arena",
+        "forma": "bytes4",
+        "pleno": "banco/vaga.c"
+      },
+      "cadeia": {
+        "c": "conecthus/backends/vaga/canonizar.c",
+        "wasm": "canonizar.wasm",
+        "asm": "conecthus/backends/vaga/celula.erg",
+        "pleno": "banco/vaga.c",
+        "traduz": "tools/bin/traduz",
+        "wasm_erg": "tools/wasm_erg.c",
+        "sequencia": [
+          "c",
+          "wasm",
+          "asm"
+        ],
+        "celula": {
+          "nome": "vaga_celula",
+          "p": 1,
+          "q": 1,
+          "r": 1
+        },
+        "metal": {
+          "nome": "vaga_pleno",
+          "p": 1,
+          "q": 1,
+          "r": 1,
+          "suporte": "arena"
+        },
+        "duomorf": {
+          "c_wasm": "figura traduz sobe/desce",
+          "wasm_metal": {
+            "a": 0,
+            "b": 0,
+            "quadrante": "Q00",
+            "orbita": "arena"
+          },
+          "involucao": "MOVE(-1)∘MOVE(+1)=id"
+        }
+      }
     }
   ],
   "pipe_linguagens": [

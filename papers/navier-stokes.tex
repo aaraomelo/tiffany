@@ -1,0 +1,522 @@
+% Navier--Stokes: costura em campo --- leitura pela Lei~4
+% Tiffany — papers/navier-stokes.tex
+% Compila com pdflatex navier-stokes.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+\newcommand\code[1]{\texttt{\small #1}}
+\newcommand\medido[1]{%
+  \par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newcommand\dg{^{\dagger}}
+
+\title{Navier--Stokes:\\a costura em campo --- leitura pela Lei~4}
+\author{broca-so / Tiffany}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Navier--Stokes é lido nesta arquitetura através da
+\textbf{Lei~4} ($T+T^{\dg}$, $|\det|=1$) no palco de campo:
+transporte (esquilo) + dissipação (gato) = costura.
+O contínuo 3D é declarado \emph{fronteira}, não teorema.
+Incluímos o resultado anunciado pela OpenAI (set.~2026) como
+\textbf{claim} documentado, sem transformá-lo em validação
+da arquitetura.
+\end{abstract}
+
+%==========================================================================
+\section{Introdução}\label{sec:intro}
+%==========================================================================
+
+As equações de Navier--Stokes incompressíveis:
+\begin{equation}\label{eq:NS}
+\partial_t u+(u\cdot\nabla)u
+=
+\nu\Delta u-\nabla p+f,
+\qquad
+\nabla\cdot u=0,
+\end{equation}
+com $u:\mathbb R^3\times[0,T)\to\mathbb R^3$,
+$\nu>0$, força $f$ suave compactamente apoiada quando relevante.
+
+A pergunta clássica do Clay: para dados iniciais suaves,
+existe $T=\infty$ com $u$ suave? Ou há \emph{blowup}
+(singularidade em tempo finito)?
+
+Este paper apresenta quatro camadas distintas:
+
+\begin{description}
+\item[A.~Matemática estabelecida] equação NS, incompressibilidade,
+  projeção de Leray $\mathbb P$, operador de Stokes,
+  identidade de energia padrão;
+\item[B.~Resultado medido no projeto] identidades testadas em
+  \code{tests/navier_corpo.js},
+  \code{tests/histerese_navier.js},
+  \code{tests/batuta_continuo.js},
+  \code{tests/curvatura.c};
+\item[C.~Estrutura canônica do projeto] Lei~4, $T+T^{\dg}$,
+  $|\det|=1$, Transformada $\mathcal{F}$, gato/esquilo,
+  costura, fronteira, histerese;
+\item[D.~Interpretação] leitura da Lei~4 sobre a equação de campo,
+  decomposição conservativo/dissipativo, leitura espectral,
+  ponte com Yang--Mills --- \textbf{tudo explicitamente marcado
+  como interpretação}.
+\end{description}
+
+%==========================================================================
+\section{Lei~4 --- $T+T^{\dg}$ e $|\det|=1$}\label{sec:lei4}
+%==========================================================================
+
+A Lei~4 é a \textbf{tetral} ($n=4$) do Corpo Universal~U:
+\begin{equation}\label{eq:lei4}
+T+T^{\dg},\qquad |\det|=1.
+\end{equation}
+O que cada termo significa na arquitetura canónica:
+
+\begin{description}
+\item[$T+T^{\dg}$] operador da tetral; também escrito
+  $T+T^{*}$; é a soma do operador com o seu dual.
+  No contexto do dragão, $T+T^{*}=1$ (identidade).
+\item[$|\det|=1$] métrica canónica de U: conservação de volume.
+  É $\mathrm{I}_{11}$ (morfismos/estado), não $\mathrm{I}_{4}$
+  (GLH).
+\end{description}
+
+\textbf{Não} é correto escrever ``$T+T^{\dg}$ é a estrela'' nem
+``$|\det|=1$ é a estrela''. As estrelas são três autoridades
+distintas (Obs.~($\star$three-canonicos)):
+\begin{equation}\label{eq:tres-estrelas}
+\operatorname{Star}(\mathcal{U})=\mathcal{D}
+\quad\neq\quad
+\operatorname{Star}(K)=\{x:x^{2}=x+1\}
+\quad\neq\quad
+\text{factor/métrica local}.
+\end{equation}
+Star(U)=D é a troca $(\oplus,\otimes)\mapsto(\otimes,\oplus)$
+(bit $a=1$); $T+T^{\dg}$ é o operador da tetral;
+$|\det|=1$ é a métrica de volume. Não se confundem.
+
+A correspondência com Navier--Stokes é \textbf{leitura interna}
+do projeto: não é, por si só, equivalência matemática
+estabelecida com a formulação do Clay.
+
+%==========================================================================
+\section{Navier--Stokes padrão}\label{sec:ns-padrao}
+%==========================================================================
+
+Na formulação com operador de Stokes, define-se
+\begin{equation}\label{eq:stokes}
+A = -\mathbb P\Delta,
+\end{equation}
+$\mathbb P$ a projeção de Leray. Com esta convenção,
+$A$ é \textbf{positivo} e o semigrupo do calor é
+$e^{-\nu tA}$.
+
+A equação fica
+\begin{equation}\label{eq:NS-stokes}
+\partial_t u + \nu A u = -\mathbb P((u\cdot\nabla)u) + \mathbb P f,
+\end{equation}
+e a forma energética (caso $f=0$) é
+\begin{equation}\label{eq:energia-padrao}
+\frac{d}{dt}\frac12\|u\|_2^2 = -\nu\langle Au,u\rangle
+= -\nu\|\nabla u\|_2^2 \le 0.
+\end{equation}
+
+\textbf{Não} se escreve que o espectro de $A$ é negativo:
+se $-A$ tem espectro negativo, $A$ tem espectro \textbf{positivo}.
+O operador $-\nu A$ é que tem espectro negativo; não $A$.
+
+Para o caso forçado:
+\begin{equation}\label{eq:energia-forcada}
+\frac{d}{dt}\frac12\|u\|_2^2
+=
+-\nu\|\nabla u\|_2^2 + \langle f,u\rangle,
+\end{equation}
+e a energia \textbf{não decresce estritamente} em geral
+(o termo $\langle f,u\rangle$ pode injectar energia).
+Isto não é prova de regularidade 3D.
+
+%==========================================================================
+\section{Gato / esquilo}\label{sec:gato-esquilo}
+%==========================================================================
+
+Os nomes \textbf{gato} e \textbf{esquilo} são vocabulário
+estrutural do projeto, não nomenclatura padrão da literatura
+de Navier--Stokes.
+\begin{description}
+\item[gato] $= $ convolução $\zeta$ (operador que sobe; conservativo)
+\item[esquilo] $= $ deconvolução $\mu=\zeta^{-1}$ (operador que desce; dissipativo)
+\end{description}
+Conforme as definições canónicas encontradas em
+\code{fisica.tex}~\S f{is:def:gato}.
+
+Na leitura do projeto:
+\begin{equation}\label{eq:costura-leitura}
+\underbrace{\text{transporte/concentração}}_{\text{esquilo}}
+\;+\;
+\underbrace{\text{dissipação}}_{\text{gato}}
+\;=\;
+\text{costura}.
+\end{equation}
+Esta é \textbf{interpretação estrutural do projeto}:
+a equação de NS não é ``definida'' pela nomenclatura
+gato/esquilo na literatura clássica.
+
+A associação
+\[
+\text{transporte} \leftrightarrow \text{esquilo},\qquad
+\text{dissipação} \leftrightarrow \text{gato}
+\]
+é uma \textbf{escolha interpretativa da linguagem do projeto}
+e não uma identificação entre as propriedades energéticas
+esses termos e as definições internas de gato/esquilo.
+O transporte incompressível satisfaz a identidade de
+cancelamento energético sob as hipóteses usuais;
+a viscosidade é o termo dissipativo.
+
+%==========================================================================
+\section{Identidade de energia}\label{sec:energia}
+%==========================================================================
+
+A identidade de energia~(\ref{eq:energia-padrao}) é estimativa fundamental,
+mas \textbf{isoladamente não fecha a regularidade global 3D}.
+A estimativa de energia em $L^2$, embora fundamental,
+não é suficiente por si só para concluir existência global
+e regularidade suave em três dimensões.
+
+\subsection{Identidade discreta (MEDIDO NO PROJETO)}
+No anel $\mathbb Z/P\mathbb Z$ com $P=65537$, $M=16$ modos,
+Laplaciano $\Delta u_i = u_{i+1}-2u_i+u_{i-1}$ e
+transporte em forma fluxo:
+\begin{equation}\label{eq:energia-discreta}
+\sum_i u_i\Delta u_i
+=
+-\sum_i(u_{i+1}-u_i)^2,\qquad
+\sum_i\text{fluxo}(u_i^2)=0.
+\end{equation}
+Isto é \textbf{exato no modelo discreto testado}
+(medido em \code{tests/navier_corpo.js}, $8{:}0$).
+\textbf{Não é prova de regularidade do PDE contínuo.}
+
+\medido{\code{tests/navier_corpo.js} ($8{:}0$; assinado por $M$).}
+
+%==========================================================================
+\section{Transformada Universal}\label{sec:transformada}
+%==========================================================================
+
+A Transformada Universal do projeto é (transformada.tex~\S~575):
+\begin{equation}\label{eq:transformada}
+\mathcal{G} = \mathcal{F}\circ\Lambda,\qquad
+(\Lambda x)(u)=x(e^u),
+\end{equation}
+com $\mathcal{F}$ Fourier no eixo aditivo (fase) e
+$\Lambda$ a mudança $x=e^u$ que converte escala
+multiplicativa em soma aditiva. No eixo multiplicativo
+corresponde a Mellin.
+
+Papel no paper:
+\begin{equation}\label{eq:transformada-papel}
+\text{campo/representação}
+\;\xrightarrow{\;\mathcal{G}\;}\;
+\text{estrutura espectral}.
+\end{equation}
+A Transformada \textbf{não prova} regularidade: é ferramenta
+de representação/análise dentro da arquitetura.
+
+%==========================================================================
+\section{Modelo discreto do projeto}\label{sec:discreto}
+%==========================================================================
+
+Além da identidade de energia, os testes do projeto
+documentam:
+\begin{itemize}
+\item \code{tests/histerese_navier.js} ($6{:}0$): passo de
+  calor como retencao espectral, espectro $\{1,\tfrac12,0\}$
+  no ciclo $M=4$;
+\item \code{tests/batuta_continuo.js} ($6{:}0$): segmento
+  afim $B(s,t)=p(t)+s\,u(t)$; gap
+  $(\Delta c)^2+(\Delta s)^2=2-t_1$ ($16/16$ no anel);
+\item \code{tests/curvatura.c}: a borda $x^2=nx+1$ fecha sem
+  tolerância --- o gap de Yang--Mills por andar é o
+  comprimento da batuta entre ticks.
+\end{itemize}
+Estes resultados são \textbf{medidas do projeto}: testam
+identidades internas no modelo discreto.
+\textbf{Não constituem validação externa da questão do Clay.}
+
+\medido{\code{tests/histerese_navier.js} ($6{:}0$);
+\code{tests/batuta_continuo.js} ($6{:}0$);
+\code{tests/curvatura.c}.}
+
+%==========================================================================
+\section{O resultado anunciado pela OpenAI (set.~2026)}
+\label{sec:openai}
+%==========================================================================
+
+Segundo o anúncio oficial da OpenAI (8 set.~2026),
+a OpenAI apresentou um resultado que afirma resolver
+as partes C e D da formulação oficial do problema
+de Navier--Stokes (existência e suavidade). A fonte
+primária é o anúncio oficial de 8 de setembro de
+2026 da OpenAI.
+
+NÃO afirmamos que este resultado seja consenso,
+teorema demonstrado ou validação independente. A
+classificação aqui é apenas: \textbf{anunciado}.
+
+\subsection{O que é afirmado (anunciado)}
+\begin{enumerate}
+\item \textbf{Afirmativa}: existe tempo finito $T$ com
+  $\max|u(t)|\to\infty$ quando $t\to T^{-}$, energia
+  cinética $\tfrac12\|u\|^2$ limitada.
+\item \textbf{Formalização}: Lean; verificação adicional
+  reportada.
+\end{enumerate}
+
+\subsection{Trabalho contemporâneo de Alpöge/Buckmaster}
+Buckmaster e Alpöge publicaram preprints sobre
+blowup forçado para Euler 3D (comentário externo;
+sem entrada bibliográfica verificável neste paper).
+Este trabalho é distinto do anúncio da OpenAI e
+trata de Euler com força externa, não de Navier--Stokes
+sem forçante. O estatuto de prioridade é documentado,
+não decidido aqui.
+
+\subsection{O que permanece independente}
+\begin{itemize}
+\item Um \textbf{anúncio} não é consenso matemático independente.
+  Revisão por pares, críticas e lacunas são etapas separadas.
+\item O anúncio da OpenAI afirma tratar as partes C e D
+  da formulação oficial do problema. Seu estatuto
+  matemático independente permanece uma questão
+  distinta do anúncio.
+\item Tao classificou o resultado de Euler como ``notável'';
+  comentário externo, não validação do resultado da OpenAI.
+\end{itemize}
+
+\subsection{Classificação}
+Tratamos o resultado como \textbf{CLAIMED} (anunciado,
+não como teorema consolidado): a menos que fontes
+independentes confirmem, mantemos \emph{anunciado/claimed}.
+
+%==========================================================================
+\section{Leitura do projeto sobre o resultado anunciado}
+\label{sec:leitura-openai}
+%==========================================================================
+
+Na leitura interna do projeto, o fenómeno anunciado
+interessa pela competição:
+\[
+\text{transporte/concentração}
+\quad\leftrightarrow\quad
+\text{dissipação}.
+\]
+
+Na leitura interna do projeto, o fenómeno anunciado é
+interpretado heuristicamente como competição entre
+concentração (esquilo) e dissipação (gato): o esquilo
+concentra energia num núcleo que se contrai; o gato
+dissipa no bordo. Na construção anunciada, a velocidade
+diverge enquanto a energia permanece finita --- o gato
+não impede a divergência, e o esquilo domina a escala
+interna do núcleo.
+
+\textbf{Não afirmamos} que esta decomposição seja
+reformulação formal da prova da OpenAI, nem que a prova
+confirme o Corpo Universal. A leitura é interpretação
+do projeto.
+
+%==========================================================================
+\section{Costura}\label{sec:costura}
+%==========================================================================
+
+Chamamos de ``costura'' a leitura estrutural pela qual os
+componentes conservativo e dissipativo são observados
+conjunta\-mente no mesmo campo.
+
+% Nota: \S{thm:costura} do projeto demonstra o seguinte:
+% três domínios (mecânica, Carnot, Hopfield) partilham o
+% mesmo invariante $Q$; o espelho $T$ vive nos três;
+% o mesmo empurrão (translação / gérmen aditivo da fronteira)
+% quebra os três. É teorema do projeto, não definição
+% clássica de Navier--Stokes.
+
+A identidade de energia~(\ref{eq:energia-discreta}) no
+modelo discreto é a evidência computacional desta costura;
+a sua extensão ao contínuo 3D é \textbf{declarada como
+leitura}, não como teorema demonstrado.
+
+%==========================================================================
+\section{Fronteira e histerese}\label{sec:fronteira}
+%==========================================================================
+
+São conceitos canónicos internos do projeto:
+\begin{description}
+\item[fronteira] conceito formal interno da arquitetura do projeto:
+  ``onde o irracional acaba''; é teorema interno, não lacuna.
+\item[histerese] memória da borda / dependência do caminho;
+  ``dobra $+$ seletor sobre o tick''.
+\end{description}
+
+\textbf{Não} afirmamos automaticamente que ``a fronteira é
+exatamente a fronteira do problema de Navier--Stokes de Clay''.
+São afirmações de níveis distintos.
+
+Neste paper, investigamos se esta linguagem fornece uma
+leitura útil da passagem do modelo discreto para o
+regime contínuo.
+
+\medido{\code{tests/histerese_navier.js} ($6{:}0$).}
+
+%==========================================================================
+\section{Vórtice e geometria}\label{sec:vortice}
+%==========================================================================
+
+A construção anunciada descreve um núcleo vortical que se
+contrai e se alonga. O modelo do projeto utiliza uma
+representação toroidal para determinados regimes vorticais;
+esta identificação é \textbf{construção geométrica do modelo}
+e não teorema topológico geral sobre vórtices de Navier--Stokes.
+
+%==========================================================================
+\section{Correspondência com Yang--Mills}\label{sec:yang-mills}
+%==========================================================================
+
+A conexão entre Navier--Stokes e Yang--Mills é uma
+\textbf{correspondência estrutural interna / hipótese
+estrutural do projeto} (Lei~2 $K^{**}=K$; Lei~4
+$T+T^{\dg}$, $|\det|=1$).
+
+\textbf{Não afirmamos} que o resultado da OpenAI resolva,
+reduza ou prove qualquer parte do problema Yang--Mills
+do Clay. Se não houver ponte matemática demonstrada nos
+arquivos do projeto, não fabricamos uma.
+
+%==========================================================================
+\section{Tabela de classificação}\label{sec:tabela}
+%==========================================================================
+
+\begin{center}\small
+\begin{tabular}{p{0.22\textwidth}p{0.42\textwidth}p{0.24\textwidth}}
+\toprule
+CAMADA & EXEMPLO & STATUS \\
+\midrule
+Matemática padrão & identidade de energia NS,
+  $\partial_t u+(u\cdot\nabla)u=\nu\Delta u-\nabla p+f$ &
+  literatura estabelecida \\
+Resultado do modelo discreto &
+  $\sum u\Delta u=-\sum(\Delta u)^2$, exato em $\mathbb Z/P\mathbb Z$ &
+  MEDIDO NO PROJETO \\
+Definição canônica do projeto &
+  $T+T^{\dg}$, $|\det|=1$, gato/esquilo, costura &
+  LEITURA DO PROJETO \\
+Interpretação &
+  gato/esquilo aplicado a NS, leitura espectral &
+  interpretação estrutural \\
+Hipótese/conjectura &
+  fronteira contínua 3D, regularidade global &
+  FRONTEIRA/CONJECTURA \\
+Construção geométrica do projeto &
+  toro como modelo de vórtice &
+  modelo interpretativo \\
+Ponte interna &
+  correspondência Yang--Mills &
+  hipótese do projeto \\
+Resultado externo anunciado &
+  OpenAI set.~2026 &
+  CLAIMED; sujeito a fonte e validação \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%==========================================================================
+\section{Estaduto}\label{sec:estaduto}
+%==========================================================================
+
+\begin{enumerate}
+\item No vocabulário do projeto, a formulação cristalizada
+representa uma tensão entre as componentes
+conservativa e dissipativa. Esta é uma leitura
+interna da arquitetura e não uma afirmação de
+má colocação no sentido matemático usual.
+\item Na linguagem interna do projeto, a formulação
+  é organizada pela Lei~4 da tetral; nessa
+  formulação a metade conservativa
+  \textbf{fecha} (Liouville, $|\det|=1$ exacto, medido).
+\item A regularidade global 3D é a \textbf{borda aberta} do
+  Clay --- na linguagem interna do projeto, a passagem
+  ao contínuo tridimensional é lida como uma fronteira
+  da arquitetura, associada ao conceito interno de
+  histerese; o projeto aponta a fronteira, não a fecha
+  (não alegada).
+\item O resultado anunciado pela OpenAI é uma
+  \textbf{afirmação externa} sobre a formulação
+  oficial do Clay (partes C e D); não prova das
+  formulações não-forçadas (A/B).
+\item Os testes discretos do projeto verificam identidades
+  internas; não constituem validação independente do PDE
+  contínuo.
+\end{enumerate}
+
+%==========================================================================
+\section{Conclusão}\label{sec:conclusao}
+%==========================================================================
+
+Para a arquitetura do projeto, o anúncio fornece um
+novo objeto externo sobre o qual a leitura de Lei~4/
+costura pode ser aplicada; ele não transforma essa
+leitura em prova do próprio formalismo.
+
+Antes da construção, a pergunta era ``pode a dinâmica 3D
+desenvolver uma singularidade?''. Depois do anúncio, a
+pergunta passa a ser: o mecanismo, o enunciado exacto e a
+formalização resistem ao escrutínio independente?
+
+Para a arquitetura do Corpo Universal, a leitura permanece:
+\begin{equation}\label{eq:costura-final}
+\text{Lei~4}
+\longrightarrow
+\text{transporte}
++\text{dissipação}
+\longrightarrow
+\text{costura}
+\longrightarrow
+\text{fronteira}.
+\end{equation}
+
+\begin{quote}
+\textbf{O projeto não reivindica que sua linguagem substitua
+a teoria clássica de Navier--Stokes. Registra uma leitura da
+equação de campo através da Lei~4, da Transformada e da
+estrutura de costura, apoiada por identidades exactas no
+modelo discreto e separada explicitamente das questões ainda
+abertas no contínuo tridimensional.}
+\end{quote}
+
+A disputa de prioridade (Buckmaster/Alpöge vs OpenAI), o
+estado da revisão por pares e a distinção A/B vs C/D são
+etapas externas a este paper: este paper registra a
+leitura interna, não decreta a resolução do Clay.
+
+\medido{OpenAI (set. 2026): resultado anunciado.
+Leitura Corpo Universal/Arquitetura: Lei~4,
+gato/esquilo, histerese, fronteira interna.}
+
+\begin{thebibliography}{9}
+\bibitem{openai2026}
+OpenAI (set.~2026),
+\textit{An OpenAI model proposes a solution to the Navier--Stokes problem},
+anúncio oficial de 8 de set.~2026.
+\end{thebibliography}
+\end{document}

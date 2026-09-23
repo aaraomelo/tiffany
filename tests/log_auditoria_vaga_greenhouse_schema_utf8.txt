@@ -1,0 +1,94 @@
+═══ AUDITORIA DE COBERTURA — schema VAGA × Greenhouse(duolingo) ═══
+  board   : https://boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true
+  total   : 80 vagas reais
+
+══════════════════════════════════════════════════════════════════════════
+═══ RESULTADOS POR VAGA — idempotência CANON₁≡CANON₂ (byte a byte) ═══
+
+· [#8653419002] Ad Sales Lead, Central
+    local=Remote - Illinois · data=2026-08-21 · url=https://careers.duolingo.com/jobs/8653419002?gh_jid=86534190
+    salário estruturado na fonte: NÃO (AUSENTE NA FONTE)
+    CANON₁≡CANON₂ : ✗ DIFERENTE
+    metadata Greenhouse : Division=Business · Req Type=Industry · Featured Title=null · Featured City Name=null
+    ┌─ schema VAGA campo a campo ─────────────────────────────────
+    │ ■ fonte        origem/lote Greenhouse     EXTRAÍDO               EXTRAÍDO
+    │ ■ ext_id       id externo Greenhouse      EXTRAÍDO               EXTRAÍDO
+    │ ■ titulo       título da vaga             EXTRAÍDO               EXTRAÍDO
+    │ □ empresa      empresa/org                NORMALIZADO            NORMALIZADO
+    │ ■ url          URL canónico               EXTRAÍDO               EXTRAÍDO
+    │ ■ local        local (location.name)      EXTRAÍDO               EXTRAÍDO
+    │ ◈ modalidade   remota · híbrida · presencial DERIVADO               DERIVADO
+    │ · contrato     CTO/full-time/part-time    AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ ◈ senioridade  junior · mid · senior · staff DERIVADO               DERIVADO
+    │ · salario_min  limite inferior            AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ · salario_max  limite superior            AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ · moeda        USD/EUR/…                  AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ □ data         data (updated_at / data de publicação) NORMALIZADO            NORMALIZADO
+    │ ◈ idioma       idioma principal           DERIVADO               DERIVADO
+    │ ■ descricao    descrição/requisitos (corpo) EXTRAÍDO               EXTRAÍDO
+    │ ○ req_min      requisitos mínimos         AINDA NÃO IMPLEMENTADO AINDA NÃO IMPLEMENTADO
+    │ ○ tecnologias  stack/tecnologias          AINDA NÃO IMPLEMENTADO AINDA NÃO IMPLEMENTADO
+    └─────────────────────────────────────────────────────────────
+
+· [#8625579002] Consumer Product Lead
+    local=Tokyo, Japan · data=2026-07-29 · url=https://careers.duolingo.com/jobs/8625579002?gh_jid=86255790
+    salário estruturado na fonte: NÃO (AUSENTE NA FONTE)
+    CANON₁≡CANON₂ : ✗ DIFERENTE
+    metadata Greenhouse : Division=Marketing and Communications · Req Type=Industry · Featured Title=null · Featured City Name=null
+    ┌─ schema VAGA campo a campo ─────────────────────────────────
+    │ ■ fonte        origem/lote Greenhouse     EXTRAÍDO               EXTRAÍDO
+    │ ■ ext_id       id externo Greenhouse      EXTRAÍDO               EXTRAÍDO
+    │ ■ titulo       título da vaga             EXTRAÍDO               EXTRAÍDO
+    │ □ empresa      empresa/org                NORMALIZADO            NORMALIZADO
+    │ ■ url          URL canónico               EXTRAÍDO               EXTRAÍDO
+    │ ■ local        local (location.name)      EXTRAÍDO               EXTRAÍDO
+    │ ◈ modalidade   remota · híbrida · presencial DERIVADO               DERIVADO
+    │ · contrato     CTO/full-time/part-time    AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ ◈ senioridade  junior · mid · senior · staff DERIVADO               DERIVADO
+    │ · salario_min  limite inferior            AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ · salario_max  limite superior            AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ · moeda        USD/EUR/…                  AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ □ data         data (updated_at / data de publicação) NORMALIZADO            NORMALIZADO
+    │ ◈ idioma       idioma principal           DERIVADO               DERIVADO
+    │ ■ descricao    descrição/requisitos (corpo) EXTRAÍDO               EXTRAÍDO
+    │ ○ req_min      requisitos mínimos         AINDA NÃO IMPLEMENTADO AINDA NÃO IMPLEMENTADO
+    │ ○ tecnologias  stack/tecnologias          AINDA NÃO IMPLEMENTADO AINDA NÃO IMPLEMENTADO
+    └─────────────────────────────────────────────────────────────
+
+· [#8747131002] Senior Product Manager, Notifications
+    local=New York, NY · data=2026-08-25 · url=https://careers.duolingo.com/jobs/8747131002?gh_jid=87471310
+    salário estruturado na fonte: NÃO (AUSENTE NA FONTE)
+    CANON₁≡CANON₂ : ✗ DIFERENTE
+    metadata Greenhouse : Division=Product · Req Type=Industry · Featured Title=null · Featured City Name=null
+    ┌─ schema VAGA campo a campo ─────────────────────────────────
+    │ ■ fonte        origem/lote Greenhouse     EXTRAÍDO               EXTRAÍDO
+    │ ■ ext_id       id externo Greenhouse      EXTRAÍDO               EXTRAÍDO
+    │ ■ titulo       título da vaga             EXTRAÍDO               EXTRAÍDO
+    │ □ empresa      empresa/org                NORMALIZADO            NORMALIZADO
+    │ ■ url          URL canónico               EXTRAÍDO               EXTRAÍDO
+    │ ■ local        local (location.name)      EXTRAÍDO               EXTRAÍDO
+    │ ◈ modalidade   remota · híbrida · presencial DERIVADO               DERIVADO
+    │ · contrato     CTO/full-time/part-time    AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ ◈ senioridade  junior · mid · senior · staff DERIVADO               DERIVADO
+    │ · salario_min  limite inferior            AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ · salario_max  limite superior            AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ · moeda        USD/EUR/…                  AUSENTE NA FONTE       AUSENTE NA FONTE
+    │ □ data         data (updated_at / data de publicação) NORMALIZADO            NORMALIZADO
+    │ ◈ idioma       idioma principal           DERIVADO               DERIVADO
+    │ ■ descricao    descrição/requisitos (corpo) EXTRAÍDO               EXTRAÍDO
+    │ ○ req_min      requisitos mínimos         AINDA NÃO IMPLEMENTADO AINDA NÃO IMPLEMENTADO
+    │ ○ tecnologias  stack/tecnologias          AINDA NÃO IMPLEMENTADO AINDA NÃO IMPLEMENTADO
+    └─────────────────────────────────────────────────────────────
+
+══════════════════════════════════════════════════════════════════════════
+═══ SUMÁRIO DE COBERTURA (3 vagas Greenhouse reais) ═══
+  idempotência CANON₁≡CANON₂ : 0/3 ✓
+
+  LACUNAS REGISTADAS (AINDA NÃO IMPLEMENTADO — NÃO invento solução):
+    · req_min  ← parsing de HTML/requisitos/stack está FORA do contrato actual da dobradiça
+    · tecnologias  ← parsing de HTML/requisitos/stack está FORA do contrato actual da dobradiça
+
+  → PARO PARA DECISÃO antes de banco/vaga.c e persistência definitiva.
+
+  rascunho (auditoria, NÃO catálogo): C:\Users\jssim\aarao\tiffany\tests\rascunho_auditoria_vaga_greenhouse
+  NÃO tocados: banco/vaga.c · manifesto.json · assets como catálogo · 6 falhas bash/powershell/node

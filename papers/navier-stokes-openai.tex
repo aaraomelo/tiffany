@@ -1,0 +1,206 @@
+% OpenAI solução Navier--Stokes — leitura do Corpo Algébrico
+% Tiffany — papers/navier-stokes.tex (secção adicionada)
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand\code[1]{\texttt{\small #1}}
+\newcommand\medido[1]{%
+  \par\medskip\noindent{\small\color{gray}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newcommand\dg{^{\dagger}}
+
+\title{Navier--Stokes:\\
+a solução OpenAI --- leitura do Corpo Algébrico}
+\author{broca-so / Tiffany}
+\date{Setembro 2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A OpenAI anunciou (8/Set/2026) uma prova de que as equações
+Navier--Stokes tridimensionais incompressíveis podem desenvolver
+uma \textbf{singularidade em tempo finito}: um vórtice que se
+contrai espiralando para dentro, afinando-se como esparguete,
+com velocidade ilimitada e energia finita.
+A prova resolve as declarações ``C'' e ``D'' da formulação do Clay
+(forçada, com força suave compacta), não as declarações ``A''/``B''
+(não-forçada).
+Esta secção traduz a solução para a gramática do Corpo Algébrico:
+gato/esquilo, Lei~4, histerese e a fronteira renomeada.
+\end{abstract}
+
+\section{O que a OpenAI provou}\label{sec:openai}
+
+\begin{enumerate}
+\item \textbf{Configuração}: fluido em repouso inicial suave,
+  força suave aplicada, viscosidade $\nu>0$ qualquer.
+\item \textbf{Resultado}: existe tempo finito $T$ tal que
+  $\max|u(t)|\to\infty$ quando $t\to T^{-}$,
+  com energia cinética $\tfrac12\|u\|^2$ limitada durante toda a
+  dinâmica — de repouso à singularidade.
+\item \textbf{Mecanismo}: um vórtice que gira e se contrai;
+  raio do núcleo $\sim\sqrt{T-t}$, velocidade máxima
+  $\sim(T-t)^{-1/2+\varepsilon}$.
+\item \textbf{Força}: o resíduo das equações é cancelado por
+  pulsos espacialmente oscilatórios antes de remover os erros
+  ordem a ordem — é aí que vai os 166 páginas.
+\item \textbf{Formalização}: Lean (GPT-6 Astra, 17h adicionais).
+\item \textbf{Escala}: $\sim$10\,000 agentes concorrentes,
+  88 horas até a resolução (5/Set), mais 17h Lean.
+  2,7 milhões de mensagens, 130 bilhões de tokens.
+\end{enumerate}
+
+\subsection{O que NÃO provou}
+\begin{itemize}
+\item Não provou as declarações ``A''/``B'' (não-forçada):
+  a questão original do Clay sem força externa continua aberta.
+\item Não afirma blowup com energia ilimitada — a energia fica
+  finita, só a velocidade diverge.
+\item A singularidade está abaixo da escala molecular antes do
+  limite: o modelo continuado anuncia onde deixa de ser válido,
+  não preve`` velocidade infinita``.
+\end{itemize}
+
+\section{Leitura pelo Corpo Algébrico}\label{sec:leitura}
+
+\subsection{A equação como gato + esquilo}
+Navier--Stokes incompressível:
+\begin{equation}\label{eq:NS}
+\partial_t u+(u\cdot\nabla)u=\nu\nabla^2 u-\nabla p,\qquad
+\nabla\cdot u=0.
+\end{equation}
+Decompõe-se no Corpo Algébrico em:
+\begin{enumerate}
+\item \textbf{Stokes (linear)} = corpo parabólico = calor = \textbf{gato}:
+  $A=-\nu\P\Delta$, autovalores $-\nu k^2<0$, a viscosidade dissipa.
+\item \textbf{Convectivo (não-linear)} = \textbf{esquilo}:
+  $\langle\P(u\cdot\nabla u),u\rangle=0$ --- conserva a energia
+  (verificado $1$e$-18$); como a rotação do esquilos.
+\item \textbf{Pressão/incompressibilidade} = projeção de Leray $\P$.
+\end{enumerate}
+
+\subsection{A solução como história de dois espectros}
+A prova da OpenAI constrói um fluxo onde:
+\begin{itemize}
+\item O \textbf{esquilo} (convectivo) concentra a energia num núcleo
+  que shrinks --- a energia conserva-se, só se redistribui.
+\item O \textbf{gato} (viscoso) dissipa no bordo --- a viscosidade
+  $\nu>0$ suaviza, mas não suficientemente depressa.
+\item A \textbf{batalha} acontece na borda 3D: o esquilo ganha
+  dentro do núcleo, o gato perde fora; no limite, a velocidade
+  diverge e o modelo quebra.
+\end{itemize}
+
+\subsection{A força como seletor}
+A força suave compacta é o \textbf{seletor} que mete o sistema
+na trajetória da singularidade --- sem ela, o blowup não acontece.
+No vocabulário do Corpo Algébrico: a força é a ``medida'' que
+escolhe o caminho pelo projector espectral composto com o
+Quantizador (Teorema~\ref{thm:maestro-memoria},
+\code{tests/maestro\_memoria.js}).
+
+\subsection{Lei~4 — a tetral}
+Navier--Stokes é a Lei~4 ($T+T^{\dg}$, $|\det|=1$) lida em fluido:
+o transporte incompressível é o \textbf{boost} com $|\det|=1$
+(Liouville), e a regularidade em 3D é a pergunta do cruzado.
+A solução da OpenAI é a metade dissipativa grampeada sobre a
+metade conservativa --- exatamente a leitura que o Corpo Algébrico
+nomeia como \textbf{fronteira} (docs/MAPA\_UNIVERSAL.md, §Navier--Stokes).
+
+\subsection{Histerese e o limite contínuo}
+O limite contínuo é a \textbf{histerese} (memória do caminho):
+dobra+seletor sobre o tick. A solução da OpenAI constrói o
+limite pelo seletor (a força) --- o caminho que leva à singularidade
+é histórico, depende da força aplicada. A regularidade global 3D
+é a borda aberta: o corpo aponta a fronteira, não a fecha.
+
+\subsection{Custo mínimo e identidade de energia}
+Para toda solução suave com força suave compacta:
+\[
+\mathcal E[u]=\int|u|^2dx
+\]
+decresce estritamente para $u$ não-constante. A identidade de
+energia por partes em $\mathbb Z$:
+\[
+\sum u\,\Delta u=-\sum(u_{i+1}-u_i)^2
+\]
+(teorema \code{tests/navier\_corpo.js}, $8{:}0$).
+A OpenAI constrói um contra-exemplo: energia finita, velocidade
+ilimitada --- o gato dissipa, mas o esquilo concentra mais depressa.
+
+\subsection{O vórtice como toro}
+O vórtice esparguete é uma geometria de toro: o núcleo gira
+(rotação do esquilo) e contrai (gradiente do gato). No toro
+$T^2$, a acção de volume exige $|\det|=1$ (Lei~4); as ordens
+do grupo de automorfismos são $\{1,2,3,4,6\}$. A contração
+do núcleo é a acção de um elemento de ordem infinita --- fora
+do grupo de automorfismos do toro, i.e., fora do corpo, no limite.
+
+\section{Controvérsia e prioridade}\label{sec:prioridade}
+\begin{itemize}
+\item Buckmaster (NYU) e Alpöge (Anthropic) publicaram preprints
+  (15/Ago) com blowup forçado para Euler 3D, equação de poros
+  e Boussinesq 2D, usando LLMs (Claude, Codex/GPT-5.6 Sol, Astra).
+  A OpenAI diz que não viu o trabalho antes da publicação
+  (9/Set), mas Buckmaster alega que soube do método da OpenAI
+  antes da execução.
+\item Tao (Fields medal) chamou o resultado de Euler
+  ``notável'' e perto de uma solução completa de Navier--Stokes.
+\item A OpenAI não reclama o prémio do Clay.
+\end{itemize}
+
+\section{Tradução para os testes do Corpo Algébrico}\label{sec:testes}
+
+A solução da OpenAI traduz-se nos testes existentes:
+\begin{itemize}
+\item \code{tests/navier\_corpo.js} ($8{:}0$): a identidade de
+  energia \eqref{eq:energia} é o a-priori conhecido; a OpenAI
+  mostra que é \emph{insuficiente} no 3D supercrítico.
+\item \code{tests/histerese\_navier.js} ($6{:}0$): o passo de
+  calor como retenção espectral --- a contração do vórtice é
+  a histerese em acção (dobra+seletor).
+\item \code{tests/batuta\_continuo.js} ($6{:}0$): o segmento
+  afim $B(s,t)=p(t)+s\,u(t)$ --- a força é o vector director
+  que leva ao blowup.
+\item \code{tests/curvatura.c}: a borda $x^2=nx+1$ fecha sem
+  tolerância --- o gap de Yang--Mills por andar é o comprimento
+  do segmento entre ticks; na solução da OpenAI, o segmento
+  encolhe a zero.
+\end{itemize}
+
+\section{Conclusão}\label{sec:conclusao}
+
+A solução da OpenAI confirma a leitura do Corpo Algébrico:
+\begin{enumerate}
+\item Navier--Stokes é a \textbf{Lei~4} (tetral, $|\det|=1$).
+\item A metade conservativa fecha (Liouville, medida).
+\item A metade dissipativa é a \textbf{fronteira} --- o limite
+  contínuo 3D é a histerese, e a regularidade global é a borda
+  aberta (Clay).
+\item A OpenAI constrói o contra-exemplo forçado: a singularidade
+  existe \emph{com} a força, mas a questão original (sem força)
+  continua aberta.
+\item A gramática é uma: sete problemas, cinco operações
+  (corpo\_algebrico.tex, Teorema de soluções primitivas).
+\end{enumerate}
+
+\textbf{Estaduto honesto}: a prova da OpenAI é uma claimed
+resolução das declarações C/D (forçada), não das declarações
+A/B (não-forçada). O Corpo Algébrico já declarava a regularidade
+global 3D como fronteira aberta --- a prova da OpenAI fecha
+uma das metades (a dissipativa forçada) e deixa a outra
+(conservativa não-forçada) no mesmo lugar: a fronteira.
+
+\medido{OpenAI (8/Set/2026): prova analítica + Lean formalization,
+166 páginas, $\sim$10\,000 agentes, 88h + 17h Lean.
+Leitura Corpo Algébrico: Lei~4, gato/esquilo, histerese,
+fronteira renomeada.}
+\end{document}
