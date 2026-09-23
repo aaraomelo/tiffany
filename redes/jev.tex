@@ -1,0 +1,920 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[expansion=false]{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{lema}{Lema}
+\newtheorem{observacao}{Observação}
+\newtheorem{corolario}{Corolário}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\title{JEV e Campos de Contagem:\\
+Construção de uma Camada de Representação para Decisão Tipada}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Investiga-se se os contratos documentados de decisão tipada do JEV
+(Choice, Score e Noul) admitem uma representação matemática sobre campos de
+contagem induzidos por uma realização discreta
+\(\pi\colon I\to X\), com
+\(G(x)=\lvert\pi^{-1}(x)\rvert\) e
+\(p_G(x)=G(x)/\lvert I\rvert\).
+
+A distinção é central:
+\[
+\begin{array}{rcl}
+\text{JEV} &\colon&
+\text{estado}\to\text{pergunta tipada}\to\text{decisão},\\[2pt]
+\text{construção deste paper} &\colon&
+\text{realização}\to G\to\text{projeção }q\to G_q\to\text{distribuição}\to\text{leitura}.
+\end{array}
+\]
+Não se afirma que o JEV implemente campos \(G\) internamente, nem que Tiffany
+seja um ``JEV matemático'', nem que se tenha reconstruído o mecanismo do
+modelo. Mostra-se apenas que Noul, Choice e Score são especializações de uma
+mesma operação de projeção e normalização sobre \(G\), como
+\emph{realizações matemáticas possíveis dos contratos de saída} no nível da
+representação. A função \(q\) é um critério de classificação abstrato
+(\(\text{question}\leadsto q\)), não a pergunta de API. A implementação
+interna do JEV permanece indeterminada.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Introdução}
+
+O JEV (TypeSafe AI) é um modelo de decisão tipada: recebe um \emph{state} e um
+mapa de perguntas tipadas e devolve respostas com probabilidades calibradas
+conforme o tipo~\cite{typesafe-docs,jev-docs,systemone-primitives}. Os três
+tipos documentados são:
+\begin{itemize}[leftmargin=1.5em]
+\item \textbf{Choice} --- selecção entre opções rotuladas, com distribuição e
+confiança;
+\item \textbf{Score} --- posição numa escala ordenada (2 a 10 níveis), com
+distribuição, legenda e confiança; o valor pode ser fraccionário;
+\item \textbf{Noul} --- probabilidade de \emph{yes} numa proposição binária
+(sem campo de confiança separado).
+\end{itemize}
+
+Por outro lado, a arquitectura de campos de contagem (documentada em
+\texttt{campos.tex}, com base em \texttt{fisica.tex}) formaliza
+\[
+I\xrightarrow{\pi}X\xrightarrow{\text{contagem}}G,
+\qquad
+G(x)=\lvert\pi^{-1}(x)\rvert,
+\]
+com conservação \(\sum_x G(x)=\lvert I\rvert\) e normalização
+\(p_G(x)=G(x)/\lvert I\rvert\).
+
+A pergunta deste paper é estritamente matemática:
+\begin{quote}
+É possível construir uma representação por campos de contagem que
+\emph{exprime} os contratos Choice, Score e Noul, sem afirmar que o JEV
+realize essa construção internamente?
+\end{quote}
+
+A resposta afirmativa limita-se ao nível do \emph{contrato de representação}.
+A implementação, o treino e a calibração do JEV ficam fora do escopo.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{O contrato JEV}
+
+O que se utiliza abaixo é apenas o contrato público documentado
+\cite{typesafe-docs,jev-docs,systemone-primitives,cloudflare-jev}.
+\texttt{docs.typesafe.ai} é a documentação oficial da TypeSafe;
+\texttt{jevtypesafeai.com} e \texttt{systemonemodels.org} são plataformas
+independentes (não afiliadas à TypeSafe AI) que reproduzem o contrato; e
+\texttt{developers.cloudflare.com} é uma página de integração de terceiros.
+O estatuto aqui usado --- \emph{state}, questões tipadas, respostas
+calibradas e os três primitivos --- é coerente entre todas elas.
+
+\subsection{Estado e pergunta}
+
+O pedido fundamental tem a forma
+\[
+(\textit{state},\;\{\textit{id}\mapsto\textit{question}\})
+\;\longrightarrow\;
+\{\textit{id}\mapsto\textit{answer}\}.
+\]
+O \emph{state} é o conteúdo a avaliar (texto ou estrutura serializável).
+As perguntas são avaliadas em paralelo, cada uma em isolamento, sobre o mesmo
+estado. O código da aplicação consome as respostas tipadas.
+
+\subsection{Choice}
+
+Uma pergunta Choice fornece \texttt{instructions} e um mapa
+\texttt{criteria} de opções (até 255). A resposta documentada inclui:
+\begin{itemize}[leftmargin=1.5em]
+\item a opção seleccionada (\texttt{choice});
+\item uma probabilidade para cada opção (\texttt{probabilities});
+\item um valor de confiança (\texttt{confidence}) associado à opção
+seleccionada.
+\end{itemize}
+Não se especifica aqui a fórmula interna de \texttt{confidence}; trata-se de
+um campo documentado no contrato de saída, não de uma definição matemática
+deste paper.
+
+\subsection{Score}
+
+Uma pergunta Score fornece \texttt{instructions} e uma lista ordenada de
+níveis (2 a 10), do mais baixo ao mais alto. A resposta documentada inclui:
+\begin{itemize}[leftmargin=1.5em]
+\item um valor \texttt{score} (possivelmente fraccionário, entre níveis);
+\item probabilidades por nível;
+\item uma legenda dos níveis;
+\item confiança.
+\end{itemize}
+A documentação descreve o score como uma posição na escala de níveis --- não a
+medida de uma quantidade --- e define o valor fraccionário como a média
+ponderada dos níveis pelas probabilidades (cada nível vezes a sua
+probabilidade, somado sobre os níveis).
+
+\subsection{Noul}
+
+Uma pergunta Noul fornece \texttt{instructions} (e, opcionalmente, critérios
+para \texttt{true}/\texttt{false}). A resposta é um único número
+\(\texttt{noul}\in[0,1]\): a probabilidade calibrada de \emph{yes}. Não há
+campo de confiança separado.
+
+\subsection{Limite documental}
+
+Nada no material público afirma que o JEV mantenha um campo de multiplicidade
+\(G\), que conte realizações, ou que implemente Fourier/Mellin. Qualquer
+construção deste paper que use \(G\) é, portanto, uma \emph{representação
+externa} dos contratos, não uma descrição de implementação.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Realização e campo de contagem}
+
+Reutiliza-se a notação de \texttt{campos.tex} / \texttt{fisica.tex}.
+
+\begin{definicao}[Realização e multiplicidade]
+\label{def:realizacao}
+Seja \(I\) um conjunto finito (eventos / observações / índices de realização)
+e \(X\) um conjunto discreto finito (células / estados observáveis). Uma
+realização é uma aplicação \(\pi\colon I\to X\). O campo de multiplicidade
+induzido é
+\[
+G(x)=\lvert\pi^{-1}(x)\rvert\in\mathbb N_0.
+\]
+\end{definicao}
+
+\begin{proposicao}[Conservação]
+\label{prop:conservacao}
+\[
+\sum_{x\in X}G(x)=\lvert I\rvert.
+\]
+\end{proposicao}
+
+\begin{proof}
+As fibras \(\{\pi^{-1}(x)\}_{x\in X}\) particionam \(I\). A aditividade da
+cardinalidade sobre partições finitas dá a igualdade. (Resultado já
+estabelecido na construção de base; cf.\ lemas de conservação em
+\texttt{fisica.tex} e Proposição de conservação em \texttt{campos.tex}.)
+\end{proof}
+
+\begin{definicao}[Normalização]
+\label{def:pg}
+Quando \(\lvert I\rvert>0\),
+\[
+p_G(x)=\frac{G(x)}{\lvert I\rvert}.
+\]
+\end{definicao}
+
+\begin{proposicao}
+\label{prop:pg-soma}
+\(\sum_x p_G(x)=1\).
+\end{proposicao}
+
+\begin{proof}
+Imediato da Proposição~\ref{prop:conservacao}.
+\end{proof}
+
+\begin{observacao}[Estatuto de \(p_G\)]
+\label{obs:pg-nao-jev}
+\(p_G\) é a distribuição de frequência induzida pela realização \(\pi\).
+\textbf{Não} é a probabilidade interna do JEV, nem uma regra de Born, nem um
+output documentado da API. É objecto da construção Tiffany.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Projeção de um campo}
+
+A operação central é agregar \(G\) através de uma classificação \(q\).
+
+\begin{observacao}[Pergunta tipada \(\leadsto\) critério \(q\)]
+\label{obs:question-q}
+Uma pergunta JEV documentada contém \texttt{instructions} e, consoante o tipo,
+\texttt{criteria} (opções, níveis ou true/false). Isso \textbf{não} é a função
+matemática \(q\colon X\to Y\). A relação adoptada neste paper é apenas
+estrutural:
+\[
+\boxed{\text{question}\;\leadsto\;\text{critério de classificação }q}
+\]
+e não \(\text{question}=q\). A função \(q\) é uma abstracção que fixa, sobre o
+suporte \(X\), a partição relevante para agregar \(G\); a pergunta JEV é um
+objecto de API com texto e critérios interpretados pelo modelo.
+\end{observacao}
+
+\begin{definicao}[Projeção / classificação]
+\label{def:projecao}
+Seja \(Y\) um conjunto finito e \(q\colon X\to Y\). O campo agregado é
+\[
+G_q(y)=\sum_{x\in q^{-1}(y)}G(x)=\lvert\pi^{-1}(q^{-1}(y))\rvert.
+\]
+\end{definicao}
+
+\begin{proposicao}[Conservação sob projeção]
+\label{prop:gq-conserva}
+\[
+\sum_{y\in Y}G_q(y)=\lvert I\rvert.
+\]
+\end{proposicao}
+
+\begin{proof}
+As pré-imagens \(q^{-1}(y)\) particionam \(X\); a soma dos \(G\) sobre essas
+partes recupera \(\sum_x G(x)=\lvert I\rvert\).
+\end{proof}
+
+\begin{definicao}[Distribuição induzida]
+\label{def:pq}
+\[
+p_q(y)=\frac{G_q(y)}{\lvert I\rvert}\qquad(\lvert I\rvert>0).
+\]
+(Pela Prop.~\ref{prop:gq-conserva}, \(\sum_y p_q(y)=1\).)
+\end{definicao}
+
+Os três casos de interesse são especializações de \(Y\):
+\begin{itemize}[leftmargin=1.5em]
+\item \(Y=\{0,1\}\) --- binário (Noul);
+\item \(Y=C=\{c_1,\dots,c_n\}\) --- categorial (Choice);
+\item \(Y=S=\{s_0,\dots,s_m\}\) ordenado --- níveis (Score).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Construção dos três contratos}
+
+\subsection{Noul como caso binário}
+
+\begin{definicao}[Proposição binária sobre \(X\)]
+\label{def:P}
+Seja \(P\colon X\to\{0,1\}\). Defina
+\[
+G_P(1)=\sum_{x\in X}G(x)\,P(x),\qquad
+G_P(0)=\sum_{x\in X}G(x)\,(1-P(x)).
+\]
+\end{definicao}
+
+\begin{proposicao}
+\label{prop:noul-gq}
+\(G_P(0)+G_P(1)=\lvert I\rvert\). Com \(\lvert I\rvert>0\),
+\[
+p_P(\mathrm{yes})=\frac{G_P(1)}{\lvert I\rvert},\qquad
+p_P(\mathrm{no})=\frac{G_P(0)}{\lvert I\rvert},
+\]
+e \(p_P(\mathrm{yes})+p_P(\mathrm{no})=1\).
+\end{proposicao}
+
+\begin{proof}
+Cálculo directo a partir das definições e da conservação de \(G\).
+\end{proof}
+
+\begin{observacao}[Comparação com o contrato Noul]
+\label{obs:noul}
+O contrato Noul devolve um único número em \([0,1]\): a probabilidade de
+\emph{yes}. A construção acima produz \(p_P(\mathrm{yes})\) como frequência
+normalizada de uma proposição \(P\) sobre o suporte da realização.
+Classifica-se como
+\[
+\boxed{\text{realização possível do contrato Noul por campo de contagem.}}
+\]
+Não se afirma que o JEV calcule \(G_P\) nem que \(P\) seja a sua representação
+interna do \emph{state}.
+\end{observacao}
+
+\subsection{Choice como caso categorial}
+
+\begin{definicao}[Classificação categorial]
+\label{def:q-choice}
+Seja \(C=\{c_1,\dots,c_n\}\) um conjunto finito de opções e
+\(q\colon X\to C\). Então
+\[
+G_q(c_i)=\sum_{x:\,q(x)=c_i}G(x),\qquad
+p_q(c_i)=\frac{G_q(c_i)}{\lvert I\rvert}.
+\]
+\end{definicao}
+
+\begin{proposicao}
+\label{prop:choice-dist}
+\(\sum_i p_q(c_i)=1\). Em particular, \(p_q\) é uma distribuição sobre as
+opções.
+\end{proposicao}
+
+\begin{proof}
+Proposição~\ref{prop:gq-conserva} e Definição~\ref{def:pq}.
+\end{proof}
+
+Uma leitura canónica da opção seleccionada, \emph{neste paper}, é
+\[
+c^\star\in\arg\max_{c\in C}p_q(c)
+\]
+(qualquer desempate fixo). Isto é uma política de leitura, não a política do
+JEV.
+
+\begin{definicao}[Concentração auxiliar]
+\label{def:concentracao}
+Para uso interno deste paper, define-se a medida de concentração
+\[
+\kappa(p_q)=\max_{c\in C}p_q(c)\in[0,1].
+\]
+\end{definicao}
+
+\begin{observacao}
+\label{obs:confidence}
+\(\kappa\) \textbf{não} é o campo \texttt{confidence} do JEV. A fórmula
+interna de confiança do JEV não é pública neste nível de detalhe e não é
+reproduzida aqui. \(\kappa\) é apenas uma medida auxiliar de concentração da
+distribuição \(p_q\).
+\end{observacao}
+
+\begin{observacao}[Comparação com o contrato Choice]
+\label{obs:choice}
+O contrato Choice devolve opção seleccionada, distribuição sobre opções e
+confiança. A construção \(p_q\) fornece a distribuição; \(c^\star\) e \(\kappa\)
+fornecem leituras possíveis de selecção e concentração.
+Classifica-se como realização possível do contrato Choice por campo de
+contagem, no nível da representação.
+\end{observacao}
+
+\subsection{Score como caso ordenado}
+
+\begin{definicao}[Classificação ordenada]
+\label{def:q-score}
+Seja \(S=\{s_0,\dots,s_m\}\subset\mathbb R\), finito, com
+\(s_0<\dots<s_m\) (tipicamente \(s_i=i\)), e \(q\colon X\to S\). Então
+\[
+G_q(s_i)=\sum_{x:\,q(x)=s_i}G(x),\qquad
+p_q(s_i)=\frac{G_q(s_i)}{\lvert I\rvert}.
+\]
+\end{definicao}
+
+\begin{definicao}[Valor esperado discreto]
+\label{def:esperado}
+\[
+\mathbb E_G[S]=\sum_{i=0}^{m}s_i\,p_q(s_i).
+\]
+Como \(S\subset\mathbb R\), \(\mathbb E_G[S]\) é a média ponderada dos níveis
+pela distribuição \(p_q\) (e pode cair entre dois níveis).
+\end{definicao}
+
+\begin{observacao}[Quatro objectos distintos]
+\label{obs:score-distincao}
+Não se confundem:
+\begin{enumerate}[leftmargin=1.5em]
+\item a distribuição \(\{p_q(s_i)\}\) sobre níveis;
+\item o valor esperado \(\mathbb E_G[S]\) (possivelmente entre níveis);
+\item um score discreto \(\arg\max_i p_q(s_i)\);
+\item um score contínuo / fraccionário como funcional de leitura.
+\end{enumerate}
+O contrato Score do JEV documenta um valor (possivelmente fraccionário),
+probabilidades por nível, legenda e confiança. A documentação oficial define o
+score fraccionário exactamente como a média ponderada dos níveis --- o mesmo
+funcional de \(\mathbb E_G[S]\). A coincidência é formal: nesta construção
+\(\mathbb E_G[S]\) aplica o funcional à frequência \(p_q\) da realização; o
+JEV aplica-o à distribuição calibrada produzida pelo modelo. Os dois inputs
+não se identificam.
+\end{observacao}
+
+\begin{observacao}[Comparação com o contrato Score]
+\label{obs:score}
+A construção produz distribuição ordenada e um funcional de leitura
+(\(\mathbb E_G[S]\) ou \(\arg\max\)). Classifica-se como realização possível
+do contrato Score por campo de contagem. A interpretação de níveis como \emph{posições} numa escala, e não como medida
+de uma quantidade física, está explícita na documentação (o score ``does not
+measure the fraction of customers without a workaround'') e também não é
+reivindicada aqui de modo diferente.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Unificação}
+
+\begin{proposicao}[Forma unificada]
+\label{prop:unificada}
+Sejam \(Y\) finito e \(q\colon X\to Y\). A cadeia
+\[
+\boxed{
+\begin{array}{c}
+\text{realização }\pi
+\;\longrightarrow\;
+G
+\;\longrightarrow\;
+\text{projeção }q
+\;\longrightarrow\;
+G_q
+\;\longrightarrow\;
+p_q
+\;\longrightarrow\;
+\text{leitura }
+L(p_q)
+\end{array}
+}
+\]
+especializa-se em:
+\begin{itemize}[leftmargin=1.5em]
+\item \(Y=\{0,1\}\) --- Noul (leitura: \(p_q(1)\));
+\item \(Y=C\) categorial --- Choice (leitura: \(\arg\max p_q\), opcionalmente \(\kappa\));
+\item \(Y=S\) ordenado --- Score (leitura: \(\mathbb E_G[S]\) ou \(\arg\max\)).
+\end{itemize}
+\end{proposicao}
+
+\begin{proof}
+Definições~\ref{def:projecao}--\ref{def:pq} e as secções anteriores.
+\end{proof}
+
+Esta é a construção central do paper. Os três tipos de decisão tipada
+aparecem como \emph{casos de \(Y\) e de \(L\)}, não como três teorias
+independentes.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Projeção conjunta e marginalização}
+\label{sec:conjunta}
+
+Uma realização admite várias classificações \(q_i\) sobre o mesmo campo
+(Obs.~\ref{obs:multi-q}). A versão conjunta consiste em agregar \(G\) através
+de todas as classificações em simultâneo; a leitura de cada pergunta isolada
+torna-se, então, uma \emph{marginalização} do campo agregado. É uma extensão
+matemática da construção unificada --- \emph{uma realização, múltiplas leituras
+tipadas} --- e não uma alteração do contrato JEV.
+
+\begin{definicao}[Projeção conjunta]
+\label{def:projecao-conjunta}
+Sejam \(Y_1,\dots,Y_n\) conjuntos finitos e \(q_i\colon X\to Y_i\). A projeção
+conjunta é
+\[
+q=(q_1,\dots,q_n)\colon X\to Y_1\times\cdots\times Y_n,
+\qquad
+q(x)=\bigl(q_1(x),\dots,q_n(x)\bigr).
+\]
+O campo conjunto é
+\[
+G_q(y_1,\dots,y_n)
+=
+\sum_{\substack{x\in X\\ q_i(x)=y_i\;\forall i}}G(x)
+=
+\bigl\lvert\pi^{-1}\bigl(q^{-1}(y_1,\dots,y_n)\bigr)\bigr\rvert.
+\]
+Para \(n=1\), \(G_q\) coincide com a projeção simples
+(Def.~\ref{def:projecao}): a definição conjunta é uma generalização.
+\end{definicao}
+
+\begin{proposicao}[Conservação conjunta]
+\label{prop:conjunta-conserva}
+\[
+\sum_{(y_1,\dots,y_n)\in Y_1\times\cdots\times Y_n}G_q(y_1,\dots,y_n)=\lvert I\rvert.
+\]
+\end{proposicao}
+
+\begin{proof}
+As pré-imagens conjuntas \(q^{-1}(y_1,\dots,y_n)\) particionam \(X\) (\(q\) é
+função); a soma recupera \(\sum_x G(x)=\lvert I\rvert\)
+(Prop.~\ref{prop:conservacao}).
+\end{proof}
+
+\begin{definicao}[Normalização conjunta]
+\label{def:pq-conjunta}
+Quando \(\lvert I\rvert>0\),
+\[
+p_q(y_1,\dots,y_n)=\frac{G_q(y_1,\dots,y_n)}{\lvert I\rvert}.
+\]
+Pela Prop.~\ref{prop:conjunta-conserva}, \(\sum p_q=1\).
+\end{definicao}
+
+\begin{teorema}[Marginalização]
+\label{thm:marginal}
+Para cada \(i\in\{1,\dots,n\}\) e cada \(y_i\in Y_i\),
+\[
+\boxed{
+\sum_{\substack{(y_1,\dots,y_n)\\ j\neq i}}G_q(y_1,\dots,y_n)
+=
+G_{q_i}(y_i),
+}
+\]
+sendo a soma sobre todas as coordenadas excepto \(i\). Equivalentemente,
+\[
+\sum_{\substack{(y_1,\dots,y_n)\\ j\neq i}}p_q(y_1,\dots,y_n)
+=
+p_{q_i}(y_i).
+\]
+Cada projeção individual \(G_{q_i}\) (Def.~\ref{def:projecao}) é a
+marginalização do campo conjunto sobre as restantes coordenadas.
+\end{teorema}
+
+\begin{proof}
+Fixa \(y_i\in Y_i\). As fibras conjuntas com \(i\)-ésima coordenada \(y_i\)
+particionam a pré-imagem \(q_i^{-1}(y_i)\):
+\[
+q_i^{-1}(y_i)
+=
+\bigsqcup_{(y_j)_{j\neq i}}
+\bigl\{x\in X:\ q_j(x)=y_j\ \forall j\bigr\}.
+\]
+Somando \(G\) sobre essa partição e usando a definição de \(G_q\),
+\[
+\sum_{\substack{(y_1,\dots,y_n)\\ j\neq i}}G_q(y_1,\dots,y_n)
+=
+\sum_{x\in q_i^{-1}(y_i)}G(x)
+=
+G_{q_i}(y_i).
+\]
+A versão com \(p_q\) é a mesma soma dividida por \(\lvert I\rvert\)
+(Def.~\ref{def:pq-conjunta}).
+\end{proof}
+
+\begin{corolario}[Os três contratos admitem projeções individuais e marginais conjuntas]
+\label{cor:marginais}
+Em primeiro lugar, cada contrato \textbf{já} se realiza por uma projeção
+\emph{individual} \(G\to q_i\to G_{q_i}\) (Def.~\ref{def:projecao};
+Obs.~\ref{obs:noul}, Obs.~\ref{obs:choice}, Obs.~\ref{obs:score}):
+\begin{itemize}[leftmargin=1.5em]
+\item coordenada binária \(Y_i=\{0,1\}\) --- Noul: \(p_P(\mathrm{yes})=p_{q_i}(1)\);
+\item coordenada categorial \(Y_i=C\) --- Choice: distribuição \(p_{q_i}\),
+\(c^\star=\arg\max\), \(\kappa\) auxiliar;
+\item coordenada ordenada \(Y_i=S\) --- Score: distribuição \(p_{q_i}\) e
+leitura \(\mathbb E_G[S]\) ou \(\arg\max\).
+\end{itemize}
+A marginalização não é, portanto, requisito para nenhum dos três. Quando várias
+projeções \(q_1,\dots,q_n\) são consideradas \emph{simultaneamente} sobre o
+mesmo \(G\), as suas distribuições individuais \(\{G_{q_i}\}\) são marginais do
+campo conjunto \(G_q\) (Teor.~\ref{thm:marginal}):
+\[
+\boxed{
+\text{individualmente, cada contrato basta-se com }G\to q_i\to G_{q_i};
+}
+\qquad
+\boxed{
+\text{em conjunto, }G_{q_i}=\sum_{j\neq i}G_q.
+}
+\]
+\end{corolario}
+
+\begin{proof}
+Teor.~\ref{thm:marginal} aplicado a cada coordenada; as leituras são as das
+Obs.~\ref{obs:noul}, Obs.~\ref{obs:choice} e Obs.~\ref{obs:score}.
+\end{proof}
+
+\begin{observacao}[Várias perguntas, uma realização]
+\label{obs:multi-q-marg}
+O contrato JEV avalia várias perguntas em paralelo sobre o mesmo
+\textit{state} (Obs.~\ref{obs:multi-q}). Na construção, várias classificações
+\(q_i\) sobre o mesmo \(G\) são coordenadas de uma única projeção conjunta;
+cada saída tipada é a leitura de um marginal. Isto é uma propriedade da
+construção --- \emph{uma realização, múltiplas leituras tipadas} --- e
+\textbf{não} uma alegação de que o JEV implemente um campo conjunto \(G_q\).
+\end{observacao}
+
+\begin{observacao}[Objecto conceptual, leituras operacionais]
+\label{obs:conjunta-itens}
+O campo conjunto \(G_q\) vive no produto \(Y_1\times\cdots\times Y_n\), que
+cresce com o número de perguntas. Mas as leituras expostas ao contrato são
+\emph{marginais}: cada \(G_{q_i}\) calcula-se directamente por projeção simples
+(Def.~\ref{def:projecao}), sem materializar o produto. O campo conjunto é a
+descrição estrutural; os marginais são as leituras operacionais. Mantém-se a
+separação entre representação construída e implementação (do JEV ou de um
+pipeline Tiffany).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Memória no ambiente e leitura local}
+
+Em \texttt{campos.tex}, o campo \(G\) é interpretado como traço ambiental
+formal da realização: cada visita incrementa a ocupação da célula. A leitura
+local (vizinhança, \(\arg\min G\), etc.) coordena agentes sem que nenhum
+carregue a história completa.
+
+\begin{observacao}
+\label{obs:memoria}
+A estrutura
+\[
+\text{acção}\to\text{traço em }G\to\text{leitura posterior}\to\text{nova acção}
+\]
+é compatível com o padrão de estigmergia discutido em \texttt{campos.tex}.
+Não se afirma que isso prove estigmergia em geral, nem que o JEV opere por
+estigmergia. Apenas se regista que \(G\) funciona, nesta construção, como
+memória agregada da realização sobre a qual se definem projeções \(q\).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Campo e mudança de representação}
+
+A arquitectura já estabelecida em \texttt{campos.tex} / \texttt{transformada.tex}
+distingue:
+\[
+\boxed{\text{Fourier lê o incremento (coordenada aditiva);}}
+\qquad
+\boxed{\text{Mellin lê o salto (coordenada multiplicativa, via }u=\log x\text{).}}
+\]
+Magnitude e fase são componentes de uma decomposição polar de uma
+representação complexa; Fourier e Mellin são transformadas associadas a
+estruturas de grupo distintas. Não se identificam.
+
+Quando o suporte admite estrutura de grupo (ou de escala com pesos
+\(w_{k+1}=\rho_k w_k\)), pode aplicar-se uma transformação \(\mathcal T\) a
+\(G\) ou a \(p_G\) \emph{depois} da normalização:
+\[
+G\;\longrightarrow\;p_G\;\longrightarrow\;\mathcal T(p_G).
+\]
+A projeção \(q\) que produz Choice/Score/Noul actua tipicamente sobre o
+suporte \(X\) \emph{antes} ou \emph{independentemente} dessa mudança de
+representação. Não se introduz relação entre \(\rho_k\) e \(p_q\).
+
+No formalismo Walsh de \texttt{fisica.tex} (\(\chi_k\in\{\pm1\}\)), a
+magnitude de \(\mathcal F(G)\) é determinada por \(G\); a base só transporta
+sinal. Esse resultado não se exporta automaticamente para uma DFT complexa
+sobre \(\psi=A e^{i\theta}\) sem hipóteses adicionais
+(\texttt{campos.tex}, secção espectral).
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Estado, campo e decisão}
+
+Formaliza-se a diferença entre campo e decisão.
+
+\begin{definicao}[Cadeia de representação e política]
+\label{def:cadeia}
+\[
+\begin{array}{c}
+\text{realização }\pi
+\;\longrightarrow\;
+G
+\;\longrightarrow\;
+\text{projeção }q
+\;\longrightarrow\;
+p_q
+\;\longrightarrow\;
+\text{leitura }L
+\;\longrightarrow\;
+\text{política }\Pi
+\;\longrightarrow\;
+\text{acção.}
+\end{array}
+\]
+\end{definicao}
+
+\begin{observacao}[Correspondência de contratos]
+\label{obs:correspondencia}
+Comparando com o fluxo documentado do JEV
+\[
+\textit{state}
+\;\longrightarrow\;
+\textit{question}
+\;\longrightarrow\;
+\textit{typed answer}
+\;\longrightarrow\;
+\textit{application code / action},
+\]
+obtém-se uma correspondência \emph{estrutural} de camadas:
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Camada Tiffany & Papel & Camada JEV (contrato) \\
+\midrule
+realização / \(G\) & representação agregada & (não documentada) \\
+\(q\) & critério de classificação
+  (analogia; Obs.~\ref{obs:question-q}) & pergunta tipada (instruções + critérios) \\
+\(p_q\) & distribuição de frequência & \texttt{probabilities} / \texttt{noul} \\
+\(L(p_q)\) & leitura tipada & \texttt{choice} / \texttt{score} / \texttt{noul} \\
+\(\Pi\) & política externa & código da aplicação \\
+\bottomrule
+\end{tabular}
+\end{center}
+A correspondência \textbf{não} implica identidade de implementação. O
+\emph{state} do JEV não é identificado com \(G\); a pergunta tipada
+\textbf{não} se identifica com a função \(q\) (Obs.~\ref{obs:question-q}).
+O mesmo contrato de saída não implica o mesmo mecanismo interno.
+\end{observacao}
+
+\begin{observacao}[Várias projeções sobre o mesmo campo]
+\label{obs:multi-q}
+O contrato JEV permite várias perguntas em paralelo sobre o mesmo
+\textit{state}. Na construção deste paper, o mesmo \(G\) admite várias
+classificações \(q_1,\dots,q_n\), induzindo \(p_{q_1},\dots,p_{q_n}\) sem
+alterar a realização. Isto é uma propriedade formal da cadeia
+\(\pi\to G\to\{q_i\}\); não se afirma que o JEV implemente múltiplas
+perguntas via um campo de contagem.
+\end{observacao}
+
+\subsection{O que a construção explica}
+
+\begin{itemize}[leftmargin=1.5em]
+\item Como obter distribuições normalizadas sobre \(\{0,1\}\), categorias ou
+níveis ordenados a partir de uma realização e de uma classificação \(q\).
+\item Como unificar os três contratos como casos de \(Y\) e de \(L\).
+\item Como ler várias perguntas sobre a mesma realização: projeção conjunta
+e marginalização (Sec.~\ref{sec:conjunta}).
+\item Como separar representação (\(G\), \(p_q\)) de decisão (política
+externa sobre a leitura).
+\end{itemize}
+
+\subsection{O que permanece externo}
+
+\begin{itemize}[leftmargin=1.5em]
+\item Como o JEV obtém \(p_q\) a partir do \emph{state} (modelo, treino,
+calibração).
+\item A fórmula de \texttt{confidence}.
+\item Qualquer mecanismo interno de contagem ou de campo \(G\).
+\end{itemize}
+
+\subsection{Limites da correspondência}
+
+A construção responde à pergunta de \emph{representabilidade} dos contratos.
+Não responde à pergunta de \emph{como o JEV calcula}. Confundir as duas é
+precisamente o que este paper evita.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Comparação estrutural JEV \(\times\) Tiffany}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.22\textwidth}p{0.32\textwidth}p{0.38\textwidth}@{}}
+\toprule
+Camada & JEV (documentado) & Tiffany / este paper \\
+\midrule
+Entrada & \textit{state} & realização \(\pi\colon I\to X\) \\
+Estrutura intermédia & (não especificada) & campo \(G\), \(p_G\) \\
+Operação & julgamento tipado & contagem + projeção \(q\) \\
+Espaço de saída & Choice / Score / Noul & \(p_q\) + leitura \(L\) \\
+Probabilidade & \texttt{probabilities} / \texttt{noul} & \(p_q=G_q/\lvert I\rvert\) (frequência) \\
+Transformação & estado \(\to\) decisão & \(\pi\to G\to\mathcal T(G)\) (opcional) \\
+Escala & Score com níveis ordenados & pesos \(w_k\), razões \(\rho_k\) (outro eixo) \\
+Coordenação & resposta consumível por código & leitura local / transformada \\
+Memória & no \textit{state} fornecido & no campo \(G\) (traço) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Formulação precisa:
+\[
+\boxed{\text{JEV formaliza a decisão;}\quad
+\text{Tiffany formaliza a representação que antecede a leitura.}}
+\]
+Não:
+``Tiffany é um JEV matemático.''
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Tabela de estatuto}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.18\textwidth}p{0.28\textwidth}p{0.28\textwidth}p{0.18\textwidth}@{}}
+\toprule
+Conceito & JEV (documentado) & Construção deste paper & Estatuto \\
+\midrule
+State & entrada da avaliação & --- (não identificado com \(G\)) & contrato \\
+Question & Choice / Score / Noul (instruções + critérios) & \(q\) critério de classificação (\(\leadsto\), não \(=\)) & analogia estrutural \\
+Choice & opção + probs + confidence & \(p_q\) sobre \(C\), \(\arg\max\), \(\kappa\) auxiliar & construção \\
+Score & score (frac.) + probs + legend & \(p_q\) sobre \(S\), \(\mathbb E_G[S]\) (\(\neq\) fórmula interna) & construção \\
+Noul & \(P(\mathrm{yes})\in[0,1]\) & \(p_P(\mathrm{yes})=G_P(1)/\lvert I\rvert\) & construção \\
+Probability & saída calibrada do modelo & frequência \(p_G\), \(p_q\) & definição / cálculo \\
+Confidence & campo documentado (Choice/Score) & \(\kappa=\max p_q\) (auxiliar; \textbf{não} confidence JEV) & definição auxiliar \\
+Field \(G\) & \textbf{não documentado} & \(G(x)=\lvert\pi^{-1}(x)\rvert\) & definição \\
+Projection \(q\) & \textbf{não documentado} & \(G_q(y)=\lvert\pi^{-1}(q^{-1}(y))\rvert\) & definição \\
+Projeção conjunta \(q=(q_1,\dots,q_n)\) & \textbf{não documentado} & \(G_q(y_1,\dots,y_n)=\sum G(x)\) sobre \(q_i(x){=}y_i\) & definição (Def.~\ref{def:projecao-conjunta}) \\
+Marginalização & --- & \(G_{q_i}(y_i)=\sum_{j\neq i}G_q\) (Teor.~\ref{thm:marginal}) & teorema \\
+Várias perguntas em paralelo & avaliadas sobre o mesmo \textit{state} & uma realização, múltiplas leituras tipadas (marginais) & construção (Obs.~\ref{obs:multi-q-marg}) \\
+Normalization & --- & \(p_q=G_q/\lvert I\rvert\) & definição \\
+Decision & typed answer & leitura \(L(p_q)\) & comparação estrutural \\
+Action & código da aplicação & política \(\Pi\) externa & observação \\
+Memory & no state & no campo \(G\) & interpretação (Tiffany) \\
+Fourier & --- & leitura aditiva (instância clássica) & reformulação \\
+Mellin & --- & leitura multiplicativa via \(\log\) & reformulação \\
+Implementação JEV & --- & \textbf{não determinada} & lacuna \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Conclusão}
+
+Demonstrou-se a cadeia
+\[
+\boxed{
+\begin{array}{c}
+\text{realização }\pi
+\;\to\;
+G
+\;\to\;
+\text{projeção }q
+\;\to\;
+G_q
+\;\to\;
+\text{normalização }p_q
+\;\to\;
+\text{leitura }L
+\;\to\;
+\text{decisão / política.}
+\end{array}
+}
+\]
+Noul, Choice e Score aparecem como especializações:
+\[
+\begin{array}{rcl}
+\text{Noul} &=& \text{caso binário }(Y=\{0,1\}),\\
+\text{Choice} &=& \text{caso categorial }(Y=C),\\
+\text{Score} &=& \text{caso ordenado }(Y=S).
+\end{array}
+\]
+
+A conclusão \textbf{não} é: ``o JEV é implementado por campos de contagem'',
+nem ``descobrimos como o JEV funciona''. A arquitectura pública do modelo não
+expõe o mecanismo interno; este paper não o reconstrói.
+
+A conclusão é:
+\begin{quote}
+Os contratos documentados de saída (Choice, Score, Noul) admitem uma
+\emph{realização matemática} por projeção e normalização de um campo de
+contagem \(G\), desde que se mantenha a distinção entre essa representação
+construída e a implementação interna do sistema.
+\end{quote}
+
+Em particular: mesmo contrato de saída \(\neq\) mesmo mecanismo interno.
+
+A pergunta em aberto para trabalho futuro é se Choice, Score e Noul podem ser
+expressos como operações sobre um campo \(G\) \emph{de forma operacionalmente
+útil} (por exemplo, em pipelines que já produzem realizações e ocupações),
+sem pressupor a arquitectura interna do JEV --- e se um único \(G\) com
+várias projeções \(q_i\), lidas como marginais do campo conjunto
+(Sec.~\ref{sec:conjunta}, Teor.~\ref{thm:marginal}), é um modelo útil de
+``uma realização, muitas leituras tipadas''.
+
+\begin{thebibliography}{9}
+
+\bibitem{typesafe-docs}
+TypeSafe AI,
+\emph{Documentation --- Choice, Score, Noul and System One}
+(fonte primária: documentação oficial),
+\url{https://docs.typesafe.ai/},
+acedido em 2026.
+
+\bibitem{jev-docs}
+JevTypeSafeAI.com,
+\emph{API decide --- state, questions, typed answers}
+(plataforma independente, não afiliada à TypeSafe AI),
+\url{https://jevtypesafeai.com/docs},
+acedido em 2026.
+
+\bibitem{systemone-primitives}
+System One Models,
+\emph{Choice, Score and Noul: the three primitives}
+(hub independente que agrega a documentação oficial),
+\url{https://systemonemodels.org/guides/choice-score-noul/},
+acedido em 2026.
+
+\bibitem{cloudflare-jev}
+Cloudflare AI,
+\emph{typesafe/jev --- structured evaluation model}
+(página de integração de terceiros),
+\url{https://developers.cloudflare.com/ai/models/typesafe/jev/},
+acedido em 2026.
+
+\bibitem{campos}
+A.~M.~Lopes (projecto Tiffany),
+\emph{Campos de Contagem e Mudança de Representação}
+(\texttt{campos.tex}), repositório do projecto, 2026.
+
+\bibitem{fisica}
+A.~M.~Lopes (projecto Tiffany),
+\emph{Física / formalismo de realização e multiplicidade}
+(\texttt{fisica.tex}), repositório do projecto.
+
+\bibitem{transformada}
+A.~M.~Lopes (projecto Tiffany),
+\emph{Transformada}
+(\texttt{transformada.tex}), repositório do projecto.
+
+\end{thebibliography}
+
+\end{document}

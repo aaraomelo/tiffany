@@ -1,0 +1,1326 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[expansion=false]{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{lema}{Lema}
+\newtheorem{observacao}{Observação}
+\newtheorem{corolario}{Corolário}
+\newtheorem{questao}{Questão}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\title{Campos de Contagem e Mudança de Representação:\\
+da Realização à Transformada}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Dada uma realização discreta \(\pi_S\colon I\to S\) que produz um campo de contagem
+\[
+G_S=(\pi_S)_{\#}\#I\in\mathbb N_0^S,
+\]
+perguntamos em que condições uma transformação de representação \(\mathcal T\) pode ser aplicada a esse campo, o que ela preserva, o que perde e quando é reversível.
+
+A Transformada formalizada em \texttt{transformada.tex} fornece o caso estrutural que motiva a investigação. A cadeia
+\[
+I\xrightarrow{\pi_S}G_S\xrightarrow{\mathcal T}\widehat G_S
+\]
+é a hipótese de trabalho cujos limites se examinam.
+
+O formalismo admite uma leitura estigmérgica: o suporte \(X\) é o território; cada realização \(\pi\) é a trajetória de um agente; o campo \(G\) é o traço ambiental formal (ocupação/multiplicidade). A colónia coordena-se pela leitura local dessas marcas, sem que nenhum agente carregue a história completa. Matematicamente, \(G\) permanece a multiplicidade da realização. «Feromônio» é apenas uma analogia biológica específica (marker-based); o mecanismo formal actual está mais próximo da estigmergia sematectónica, em que a própria modificação produzida pela actividade funciona como estímulo.
+
+Formalizamos o espaço dos campos, distinguimos compressão da realização de transformação de representação, verificamos a DFT-8, separamos mudança de suporte de transformação de representação, e incorporamos: a representação posicional por bytes (carry interno vs.\ overflow global); a definição operacional de \(\pi\) via gerador \(J\) e série de \(\exp(tJ)\); a dinâmica estigmérgica (escrita/leitura/\(\arg\min\)/fecho \(R^4=\mathrm{id}\)); e a estrutura espectral de \texttt{fermat.tex} (realização angular, regimes elíptico/hiperbólico, factoração \(\mathcal R=\widetilde{\mathcal R}\circ\kappa\)), que amarra Fourier (incremento) e Mellin (salto) sem reorganizar o sistema em eixos de magnitude e fase. Resultados clássicos e construções de \texttt{fisica.tex}/\texttt{fermat.tex} são usados como instâncias; não se reivindica novidade sobre eles, nem equivalência com ACO ou com biologia de formigas reais. Onde uma propriedade não pode ser demonstrada, marca-se como questão em aberto.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Pergunta central}
+
+A pergunta deste artigo é:
+
+\begin{quote}
+\textit{Dada uma realização discreta projetada sobre um suporte, produzindo um campo de contagem \(G_S\), em que condições uma transformação de representação pode ser aplicada a esse campo, o que ela preserva, o que ela perde e quando ela é reversível?}
+\end{quote}
+
+Não se transforma essa pergunta numa afirmação universal. A Transformada de \texttt{transformada.tex} aparece como o caso estrutural que motiva a investigação: mudança reversível de leitura entre representações compatíveis do mesmo objecto discreto. O objectivo é descobrir se a cadeia
+\[
+I\xrightarrow{\pi_S}G_S\xrightarrow{\mathcal T}\widehat G_S
+\]
+permite resultados matemáticos precisos além da reorganização conceptual.
+
+Em linguagem estigmérgica: o território (\(X\) ou \(S\)) recebe as trajetórias dos agentes; cada trajetória deixa uma marca (\(G\)); a colônia coordena-se lendo essas marcas localmente, sem memória central da história completa. A pergunta matemática permanece a mesma; a colônia é a interpretação conceptual central, não um organismo biológico modelado.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Espaço dos campos}
+
+Seja \(S\) um conjunto finito. Identificamos funções \(S\to\mathbb N_0\) com vectores em \(\mathbb N_0^S\) (e analogamente para \(\mathbb R\) e \(\mathbb C\)).
+
+\begin{definicao}[Níveis de campo]
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Campo inteiro de contagem:} \(G\in\mathbb N_0^S\). É o objecto produzido directamente por \(G_S(s)=\lvert\pi_S^{-1}(s)\rvert\).
+\item \textbf{Campo real:} \(G\in\mathbb R^S\). Extensão natural para permitir operações lineares.
+\item \textbf{Campo normalizado:} \(P=G/\lVert G\rVert_1\) quando \(\lVert G\rVert_1>0\), com valores em \([0,1]^S\) e soma \(1\).
+\item \textbf{Distribuição/probabilidade:} o mesmo \(P\), lido como medida de probabilidade discreta sobre \(S\).
+\end{enumerate}
+\end{definicao}
+
+Estes níveis não se misturam. Em particular:
+\[
+G\in\mathbb N_0^S\quad\not\Rightarrow\quad
+\mathcal T(G)\in\mathbb N_0^S
+\]
+para uma transformação espectral típica. A normalização \(G\mapsto P\) é uma operação distinta da transformação de representação.
+
+\begin{observacao}
+Os documentos de base distinguem ainda \(G_{\mathrm{real}}\), \(G_{\mathrm{visit}}\), \(G_{\mathrm{event}}\), \(G_{\mathrm{focus}}\), \(G_{\mathrm{state}}^{\mathrm{esc}}\), \(G_{\mathrm{state}}^{\mathrm{surv}}\). Uma transformação \(\mathcal T\) deve especificar sobre qual destes objectos actua. A notação \(G_S\) indica apenas o tipo (função de contagem sobre um suporte).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Realização e campo de contagem}
+
+\begin{definicao}[Realização e multiplicidade]
+\label{def:realizacao}
+Seja \(I\) um conjunto finito e \(S\) um conjunto discreto com igualdade decidível. Uma realização sobre \(S\) é uma aplicação \(\pi_S\colon I\to S\). O campo de multiplicidade induzido é
+\[
+G_S\colon S\to\mathbb N_0,\qquad
+G_S(s)=\lvert\pi_S^{-1}(s)\rvert.
+\]
+Equivalentemente, \(G_S=(\pi_S)_{\#}\#I\).
+\end{definicao}
+
+\begin{observacao}[Leitura estigmérgica]
+\label{obs:leitura-estigmergica}
+Na interpretação de colónia:
+\begin{itemize}[leftmargin=1.5em]
+\item \(S\) (ou \(X\)) é o \emph{território} (arena);
+\item \(\pi_S\) é a \emph{trajetória} (trilha) de um agente;
+\item \(G_S(s)\) é o \emph{traço ambiental} formal na célula \(s\) --- a ocupação/multiplicidade.
+\end{itemize}
+Matematicamente:
+\[
+\boxed{G=\text{campo formal de ocupação/marca}}.
+\]
+Estigmergicamente, \(G\) é um traço ambiental. Por analogia biológica, é interpretável como um campo de feromônio, mas \textbf{não} se identifica com feromônio: a literatura distingue estigmergia sematectónica (a própria modificação produzida pelo trabalho funciona como estímulo) de estigmergia baseada em marcadores (feromônios como sinal). O mecanismo actual
+\[
+\text{visita}(x)\;\longrightarrow\;G(x)\leftarrow G(x)+1
+\]
+está mais próximo da sematectónica: a marca é o resultado acumulado da actividade, não uma substância química independente. Em particular:
+\[
+\boxed{\arg\min G\;\neq\;\text{regra clássica de seguimento de feromônio}}.
+\]
+A regra \(\arg\min G\) produz exploração/evitação da marca acumulada, distinta da dinâmica atrativa em que maior concentração aumenta a probabilidade de seguir a trilha (como em ACO clássico).
+\end{observacao}
+
+\begin{definicao}[Colónia e campo colectivo]
+\label{def:colonia}
+Seja \(A=\{1,\dots,m\}\) um conjunto finito de agentes. Para cada \(a\in A\), seja \(\pi_a\colon I_a\to X\) uma realização. Defina
+\[
+G_a(x)=\lvert\pi_a^{-1}(x)\rvert,\qquad
+G_{\mathrm{col}}(x)=\sum_{a\in A}G_a(x).
+\]
+\(G_{\mathrm{col}}\) é o campo colectivo: a memória ambiental da colónia. Nenhum agente individual precisa carregar a história completa \(\{\pi_a\}\); a coordenação é mediada pelas marcas no território.
+\end{definicao}
+
+\begin{proposicao}[Conservação]
+\label{prop:conservacao}
+\[
+\sum_{s\in S}G_S(s)=\lvert I\rvert.
+\]
+\end{proposicao}
+
+\begin{proof}
+As fibras de \(\pi_S\) particionam \(I\). A aditividade da cardinalidade sobre partições finitas dá a igualdade. (Resultado já estabelecido na construção de base; cf.\ Lema de conservação em \texttt{fisica.tex}.)
+\end{proof}
+
+\begin{proposicao}[Invariância por reordenação]
+\label{prop:reordenacao}
+Se \(\sigma\colon I\to I\) é uma bijecção e \(\pi_S'=\pi_S\circ\sigma\), então \(G_S'=G_S\).
+\end{proposicao}
+
+\begin{proof}
+As fibras de \(\pi_S'\) são as imagens das fibras de \(\pi_S\) sob \(\sigma\); os cardinais coincidem.
+\end{proof}
+
+\begin{proposicao}[Perda de ordem]
+\label{prop:perda-ordem}
+O campo \(G_S\) não determina, em geral, a ordem temporal da realização. Existem realizações distintas como sequências ordenadas que induzem o mesmo \(G_S\).
+\end{proposicao}
+
+\begin{proof}
+Tome \(I=\{1,2\}\), \(S=\{a,b\}\), \(\pi_S(1)=a\), \(\pi_S(2)=b\) e a sequência invertida. Os campos coincidem; as ordens diferem.
+\end{proof}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Transformação de representação como operador}
+
+\begin{definicao}[Transformação de representação]
+\label{def:T}
+Seja \(V_S\) um espaço de campos sobre \(S\) (por exemplo \(\mathbb R^S\) ou \(\mathbb C^S\)). Uma transformação de representação é um operador
+\[
+\mathcal T\colon V_S\to W
+\]
+para algum espaço \(W\) (em geral \(\mathbb C^S\) ou um dual). Não se pressupõe linearidade, injectividade nem invertibilidade.
+\end{definicao}
+
+Para cada propriedade, adoptamos o formato: hipótese \(\to\) proposição \(\to\) demonstração, ou questão em aberto.
+
+\subsection{Linearidade}
+
+\begin{proposicao}[Linearidade da DFT]
+A DFT-8
+\[
+(\mathcal F_8 x)_j=\frac1{\sqrt8}\sum_{k=0}^{7}x_k\omega^{jk},\qquad
+\omega=e^{2\pi i/8},
+\]
+é linear em \(\mathbb C^8\).
+\end{proposicao}
+
+\begin{proof}
+Segue imediatamente da definição: cada coordenada é combinação linear das coordenadas de \(x\). (Resultado clássico; cf.\ \texttt{transformada.tex}.)
+\end{proof}
+
+\begin{questao}
+Para um operador \(\mathcal T\) genérico sobre campos de contagem, a linearidade não é automática. Depende da definição concreta de \(\mathcal T\).
+\end{questao}
+
+\subsection{Inversibilidade --- caso DFT-8}
+
+\begin{proposicao}[Inversibilidade da DFT-8]
+\label{prop:dft8-inv}
+A DFT-8 é invertível, com inversa
+\[
+x_k=\frac1{\sqrt8}\sum_{j=0}^{7}(\mathcal F_8 x)_j\,\omega^{-jk},
+\]
+e \(\mathcal F_8^{-1}\mathcal F_8=I_8=\mathcal F_8\mathcal F_8^{-1}\).
+\end{proposicao}
+
+\begin{proof}
+É a fórmula de inversão da transformada de Fourier discreta sobre o grupo cíclico \(C_8\), já estabelecida em \texttt{transformada.tex} pela diagonalização da acção de \(\sigma\). A verificação directa usa a ortogonalidade dos caracteres:
+\[
+\sum_{j=0}^{7}\omega^{j(k-k')}=8\,\delta_{kk'}.
+\]
+\end{proof}
+
+\subsection{Preservação de soma}
+
+\begin{proposicao}[Coeficiente de frequência nula]
+Para a DFT-8,
+\[
+(\mathcal F_8 x)_0=\frac1{\sqrt8}\sum_{k=0}^{7}x_k.
+\]
+Em particular, se \(x\in\mathbb N_0^8\) e \(\sum x_k=N\), então \((\mathcal F_8 x)_0=N/\sqrt8\).
+\end{proposicao}
+
+\begin{proof}
+Substituição directa de \(j=0\) na definição (\(\omega^{0}=1\)).
+\end{proof}
+
+Assim, a soma total é recuperável a partir do coeficiente de frequência nula (a menos do factor de normalização \(\sqrt8\)). Isto é preservação da medida de contagem total, lida no dual.
+
+\subsection{Preservação de norma}
+
+\begin{proposicao}[Parseval para DFT-8]
+\[
+\lVert\mathcal F_8 x\rVert_2=\lVert x\rVert_2.
+\]
+\end{proposicao}
+
+\begin{proof}
+Consequência da unitariedade de \(\mathcal F_8\) (os caracteres formam base ortonormal). Resultado clássico.
+\end{proof}
+
+\subsection{Mudança de natureza da representação}
+
+\begin{proposicao}[A DFT não preserva a classe dos campos inteiros]
+\label{prop:nao-inteiro}
+Existe \(x\in\mathbb N_0^8\) tal que \(\mathcal F_8 x\notin\mathbb N_0^8\).
+\end{proposicao}
+
+\begin{proof}
+Tome \(x=(1,0,0,0,0,0,0,0)\). Então
+\[
+(\mathcal F_8 x)_j=\frac1{\sqrt8}\omega^{0\cdot j}=\frac1{\sqrt8}\notin\mathbb N_0
+\]
+para todo \(j\). Logo \(\mathcal F_8 x\notin\mathbb N_0^8\).
+\end{proof}
+
+A transformação muda a natureza da representação: o input pode ser um campo de contagem inteiro; o output, em geral, não o é.
+
+\begin{observacao}
+A mesma observação aplica-se a qualquer transformada de Fourier discreta sobre um grupo cíclico finito: a imagem de \(\mathbb N_0^n\) sob a DFT não está contida em \(\mathbb N_0^n\).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Compressão da realização versus transformação de representação}
+
+As duas passagens perdem informação de modos diferentes.
+
+\begin{proposicao}[Duas perdas distintas]
+\label{prop:duas-perdas}
+\begin{enumerate}[leftmargin=1.5em]
+\item A passagem \(\pi_S\mapsto G_S\) (compressão) perde a ordem temporal e a identidade dos eventos. É, em geral, irreversível: \(G_S\) não determina \(\pi_S\) como sequência ordenada (Proposição~\ref{prop:perda-ordem}).
+\item A passagem \(G_S\mapsto\widehat G_S=\mathcal T(G_S)\), quando \(\mathcal T\) é invertível (como a DFT-8), permite recuperar \(G_S\) a partir de \(\widehat G_S\). A perda, se existir, é de outra natureza (por exemplo, anulação espectral em deconvoluções).
+\end{enumerate}
+\end{proposicao}
+
+\begin{proof}
+(1) é a Proposição~\ref{prop:perda-ordem}. (2) segue da Proposição~\ref{prop:dft8-inv} no caso da DFT-8: \(\mathcal F_8^{-1}(\mathcal F_8 G)=G\).
+\end{proof}
+
+\begin{corolario}[Assimetria]
+\label{cor:assimetria}
+A compressão da realização pode ser irreversível enquanto a transformação de representação subsequente é reversível. Formalmente:
+\[
+\boxed{
+\text{compressão da realização}
+\;\neq\;
+\text{transformação reversível da representação}.
+}
+\]
+A recuperação de \(G_S\) a partir de \(\widehat G_S\) não restaura \(\pi_S\) como sequência ordenada.
+\end{corolario}
+
+Esta assimetria é consequência directa das proposições já estabelecidas; não é um teorema novo, mas uma leitura estrutural da distinção entre os dois níveis.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Levantamento}
+
+\begin{definicao}[Coordenada de ocorrência e levantamento]
+Para \(\pi_S\colon I\to S\), defina
+\[
+k(i)=\lvert\{j\in I:j\le i,\ \pi_S(j)=\pi_S(i)\}\rvert.
+\]
+O levantamento é
+\[
+\widetilde\pi_S(i)=\bigl(\pi_S(i),k(i)\bigr)\colon I\to S\times\mathbb N.
+\]
+\end{definicao}
+
+\begin{proposicao}[Levantamento injectivo]
+\label{prop:levant}
+\(\widetilde\pi_S\) é injectivo. Em particular, o campo induzido satisfaz \(\widetilde G=1\) na imagem.
+\end{proposicao}
+
+\begin{proof}
+Adaptada de \texttt{fis:thm:levant}. Fixe \(s\in\operatorname{im}\pi_S\). Os índices da fibra ordenados \(i_1<\dots<i_g\) satisfazem \(k(i_r)=r\). Logo \(k\) é injectiva em cada fibra. Se \(\widetilde\pi_S(i)=\widetilde\pi_S(j)\), então \(\pi_S(i)=\pi_S(j)\) e \(k(i)=k(j)\), donde \(i=j\).
+\end{proof}
+
+\begin{proposicao}[O que o levantamento recupera]
+O levantamento recupera a injectividade da realização e, com ela, a possibilidade de distinguir eventos que caíam na mesma célula. Não recupera, por si só, uma ordem temporal absoluta independente da enumeração de \(I\): a coordenada \(k(i)\) depende da ordem já presente em \(I\).
+\end{proposicao}
+
+\begin{proof}
+A injectividade é a Proposição~\ref{prop:levant}. A dependência de \(k\) da ordem de \(I\) é imediata da definição: se se reordena \(I\), os valores de \(k\) mudam em geral, embora o campo \(G_S\) permaneça invariante (Proposição~\ref{prop:reordenacao}).
+\end{proof}
+
+\begin{observacao}
+O levantamento desfaz a dobra no nível da realização (torna \(\widetilde\pi\) injectiva). Não desfaz a compressão no sentido de restaurar, a partir de \(G_S\) apenas, a sequência original: para aplicar o levantamento é preciso conhecer \(\pi_S\) (ou uma realização ordenada), não apenas \(G_S\).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Mudança de suporte versus transformação de representação}
+
+São operações de natureza distinta.
+
+\begin{definicao}[Mudança de suporte]
+Se \(f\colon S\to T\) é uma aplicação entre suportes e \(G_S\in\mathbb N_0^S\), define-se
+\[
+G_T=f_{\#}G_S,\qquad
+G_T(t)=\sum_{s\in f^{-1}(t)}G_S(s).
+\]
+\end{definicao}
+
+\begin{proposicao}[Pushforward composto]
+Se \(\pi_T=f\circ\pi_S\), então \(G_T=f_{\#}G_S\).
+\end{proposicao}
+
+\begin{proof}
+Por definição de fibra:
+\[
+\pi_T^{-1}(t)=\pi_S^{-1}(f^{-1}(t)),
+\]
+logo o cardinal é a soma dos cardinais das fibras de \(\pi_S\) sobre \(f^{-1}(t)\).
+\end{proof}
+
+\begin{observacao}[Distinção operacional]
+\begin{itemize}[leftmargin=1.5em]
+\item Mudança de suporte: \(S\xrightarrow{f}T\), actua no domínio do campo, produz novo campo de contagem \(G_T\in\mathbb N_0^T\).
+\item Transformação de representação: \(G_S\xrightarrow{\mathcal T}\widehat G\), actua nos valores/coordenadas do campo, produz objecto em geral noutro espaço (por exemplo \(\mathbb C^S\)), sem necessariamente mudar o suporte.
+\end{itemize}
+Não se identificam as duas operações.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Representação posicional por bytes e carry}
+\label{sec:byte-carry}
+
+A aritmética posicional em base \(256\) é estrutura clássica. Formaliza-se aqui como exemplo de representação com coordenadas internas, sucessor e extensão dimensional, para contrastar com a transformação de representação que actua \emph{dentro} de um espaço fixo.
+
+\subsection{Espaço e codificação}
+
+\begin{definicao}[Espaço de \(d\) bytes]
+\label{def:Xd}
+Para \(d\ge 1\),
+\[
+X_d:=(\mathbb Z/256\mathbb Z)^d.
+\]
+Um estado escreve-se \(x=(b_0,\dots,b_{d-1})\) com \(b_k\in\{0,\dots,255\}\). A codificação inteira é
+\[
+C_d:X_d\to\{0,\dots,256^d-1\},
+\qquad
+C_d(b_0,\dots,b_{d-1})=\sum_{k=0}^{d-1}b_k\,256^k.
+\]
+É bijecção. Em particular \(\lvert X_d\rvert=256^d=2^{8d}\).
+\end{definicao}
+
+\subsection{Sucessor com carry}
+
+\begin{definicao}[Sucessor]
+\label{def:Sd}
+O sucessor \(S_d:X_d\to X_d\) define-se por carries. Ponha-se \(c_0=1\) e
+\[
+c_{k+1}
+=
+\begin{cases}
+1 & \text{se }c_k=1\text{ e }b_k=255,\\
+0 & \text{caso contrário.}
+\end{cases}
+\]
+O estado seguinte é \(b_k'=(b_k+c_k)\bmod 256\) para \(k=0,\dots,d-1\).
+\end{definicao}
+
+\begin{proposicao}[Incremento da codificação]
+\label{prop:Cd-Sd}
+Se \(x\neq(255,\dots,255)\), então \(C_d(S_d(x))=C_d(x)+1\).
+Se \(x=(255,\dots,255)\), então \(S_d(x)=(0,\dots,0)\) e \(C_d(S_d(x))=0\).
+\end{proposicao}
+
+\begin{proof}
+Seja \(k_0\) o menor índice com \(b_{k_0}<255\) (existe se \(x\) não é saturado). Então \(c_k=1\) para \(0\le k\le k_0\) e \(c_k=0\) para \(k>k_0\). Logo
+\[
+b_k'=0\quad(0\le k<k_0),\qquad
+b_{k_0}'=b_{k_0}+1,\qquad
+b_k'=b_k\quad(k>k_0).
+\]
+Portanto
+\[
+C_d(S_d(x))
+=
+(b_{k_0}+1)\,256^{k_0}+\sum_{k>k_0}b_k\,256^k
+=
+C_d(x)-\sum_{k=0}^{k_0-1}255\cdot 256^k+256^{k_0}
+=
+C_d(x)+1,
+\]
+pois \(\sum_{k=0}^{k_0-1}255\cdot 256^k=256^{k_0}-1\). O caso saturado é imediato.
+\end{proof}
+
+\begin{proposicao}[Período]
+\label{prop:periodo-Sd}
+A órbita de \(S_d\) a partir de \((0,\dots,0)\) tem período exacto \(256^d\): percorre todos os estados de \(X_d\) antes de regressar.
+\end{proposicao}
+
+\begin{proof}
+Segue de \(C_d\) ser bijecção e de \(C_d(S_d(x))=C_d(x)+1\pmod{256^d}\).
+\end{proof}
+
+\subsection{Saturação local e persistência}
+
+\begin{observacao}[A coordenada não é eliminada]
+\label{obs:saturacao}
+Quando o carry atinge a coordenada \(k\) (\(c_k=1\) e \(b_k=255\)), tem-se \(b_k'=0\) e \(c_{k+1}=1\) (se \(k+1<d\)). As coordenadas de índice \(>k\) permanecem inalteradas enquanto o carry não as alcançar. A saturação é
+\[
+\boxed{\text{fechamento local da coordenada}+\text{transferência do carry}},
+\]
+não eliminação da coordenada da representação. O byte de ordem \(k\) continua a existir em todos os estados; apenas regressa ao início do seu ciclo.
+\end{observacao}
+
+Exemplo em duas coordenadas:
+\[
+(254,0)\to(255,0)\to(0,1)\to(1,1)\to\cdots.
+\]
+O primeiro byte permanece a primeira coordenada em todos os estados.
+
+\subsection{Carry interno versus overflow global}
+
+\begin{definicao}[Carry interno]
+\label{def:carry-interno}
+Ocorre \emph{carry interno} na coordenada \(k\) (\(0\le k\le d-2\)) quando \(c_k=1\) e \(b_k=255\). O estado permanece em \(X_d\); a dimensão \(d\) não muda.
+\end{definicao}
+
+\begin{definicao}[Overflow global]
+\label{def:overflow}
+Ocorre \emph{overflow global} quando \(x=(255,\dots,255)\). Então \(S_d(x)=(0,\dots,0)\) e \(C_d\) regressa a \(0\). O inteiro seguinte \(256^d\) não cabe em \(X_d\).
+\end{definicao}
+
+A inclusão
+\[
+\iota_d:X_d\hookrightarrow X_{d+1},
+\qquad
+(b_0,\dots,b_{d-1})\mapsto(b_0,\dots,b_{d-1},0)
+\]
+permite escrever
+\[
+256^d\;\longleftrightarrow\;(0,\dots,0,1)\in X_{d+1}.
+\]
+Assim:
+\[
+\boxed{\text{carry interno}\;\Rightarrow\; d\text{ permanece}},
+\qquad
+\boxed{\text{overflow global}\;\Rightarrow\;\text{pode exigir nova coordenada}}.
+\]
+
+\subsection{Interpretação geométrica}
+
+A órbita de \(S_d\) é a travessia lexicográfica da grade \(\{0,\dots,255\}^d\), induzida pela bijecção \(C_d\):
+\begin{itemize}[leftmargin=1.5em]
+\item \(d=1\): ciclo de comprimento \(256\) sobre \(\mathbb Z/256\mathbb Z\);
+\item \(d=2\): percorre a linha \(b_1=0\), depois \(b_1=1\), \ldots, até \(b_1=255\);
+\item \(d=3\): percorre planos sucessivos \(b_2=\mathrm{const}\).
+\end{itemize}
+Não é metáfora: é a ordem total induzida por \(C_d\).
+
+\subsection{Três distâncias}
+
+Sobre \(X_d\) definem-se, pelo menos:
+\begin{enumerate}[leftmargin=1.5em]
+\item \(d_C(x,y)=\lvert C_d(x)-C_d(y)\rvert\) --- separação ao longo da ordem lexicográfica;
+\item \(d_H(x,y)=\#\{k:b_k\neq c_k\}\) --- Hamming entre bytes;
+\item distância hierárquica: se \(k_*\) é o maior índice em que \(x\) e \(y\) diferem (\(k_*=-1\) se iguais),
+\[
+d_{\mathrm{hier}}(x,y)
+=
+\begin{cases}
+0 & \text{se }x=y,\\
+256^{-(k_*+1)} & \text{caso contrário.}
+\end{cases}
+\]
+\end{enumerate}
+
+\begin{proposicao}[Ultrametricidade de \(d_{\mathrm{hier}}\)]
+\label{prop:hier-ultra}
+\(d_{\mathrm{hier}}\) é ultramétrica: \(d_{\mathrm{hier}}(x,z)\le\max\{d_{\mathrm{hier}}(x,y),d_{\mathrm{hier}}(y,z)\}\).
+\end{proposicao}
+
+\begin{proof}
+Se \(x=z\), o lado esquerdo é \(0\). Caso contrário seja \(k_*\) o maior índice de diferença entre \(x\) e \(z\). Em pelo menos um dos pares \((x,y)\) ou \((y,z)\) esse índice (ou um maior) deve diferir, logo o máximo à direita é pelo menos \(256^{-(k_*+1)}\).
+\end{proof}
+
+Nenhuma das três é canónica; cada uma regista um aspecto (ordem total, diferença coordenada a coordenada, hierarquia posicional). A ultramétrica \(d=2^{-\mathrm{prof}}\) de \texttt{fisica.tex} (árvore de prefixos sobre palavras binárias) é objecto distinto: vive sobre \(\{0,1\}^p\) e mede profundidade de concordância de bits, não de bytes.
+
+\subsection{Relação com realização}
+
+A sequência \(\pi_d(n)=S_d^n(x_0)\) (com \(x_0=(0,\dots,0)\), por exemplo) é uma realização \(\pi_d\colon\{0,\dots,256^d-1\}\to X_d\). Pela Proposição~\ref{prop:periodo-Sd},
+\[
+G(y)=\lvert\pi_d^{-1}(y)\rvert=1
+\]
+para todo \(y\in X_d\). O carry é regra de transição entre estados consecutivos; não se interpreta aqui como fluxo orientado (falta grafo de arestas e corrente).
+
+\subsection{Relação com transformação de representação e extensão dimensional}
+
+A transformação de representação \(\mathcal T\) (Definição~\ref{def:T}) actua tipicamente \emph{dentro} de um espaço de campos fixo. A passagem
+\[
+X_d\xrightarrow{\iota_d}X_{d+1}
+\]
+é uma \emph{extensão} do espaço de estados, não uma transformação de representação no sentido de \(\mathcal T\). Não se identificam.
+
+\subsection{Relação com as oito leis e com \(L_7\to L_0\)}
+
+Em \texttt{fisica.tex}:
+\begin{itemize}[leftmargin=1.5em]
+\item \(e_k=2^k\) (\(k=0,\dots,7\)) é base ortonormal (\texttt{fis:thm:base});
+\item as oito leis indexam-se por essa base;
+\item \(\operatorname{Ind}(e_k)=e_{k+1\bmod 8}\);
+\item o retorno canónico é \(\pi_{\mathcal U}(\mathcal F(L_7))=L_0\) com \(\operatorname{Res}=0\).
+\end{itemize}
+A coincidência \(2^8=256\) é de cardinalidade. A identificação ``oito leis \(\leftrightarrow\) oito bits de um byte'' é uma \emph{reformulação possível} (tipo C), não um resultado demonstrado no material de base. O retorno \(L_7\to L_0\) é o fecho sob a transformada; o overflow de um byte \(11111111_2\to 00000000_2+\)carry é aritmética posicional. São estruturas de naturezas distintas; não se identificam.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Nível, peso e razão de escala}
+\label{sec:nivel-peso-escala}
+
+A secção~\ref{sec:byte-carry} formaliza a representação posicional e o sucessor com carry. Aqui regista-se a estrutura de \emph{pesos} dessa representação, distinguindo dígito de escala. Toda a matemática abaixo é a aritmética posicional clássica reescrita em termos de nível e escala; não se introduz estrutura geométrica adicional.
+
+\subsection{Coordenada e peso}
+
+Fixe a base \(b\ge 2\). Para \(d\ge 1\),
+\[
+X_d=\{0,\dots,b-1\}^d,\qquad
+x=(x_0,\dots,x_{d-1})\in X_d,
+\qquad
+C_d(x)=\sum_{k=0}^{d-1}x_k\,b^k
+\]
+(little-endian, como em~\ref{sec:byte-carry}; no caso dos bytes, \(b=256\)).
+
+\begin{definicao}[Dígito e peso]
+\label{def:peso}
+\[
+x_k=\text{dígito (valor da coordenada }k),\qquad
+w_k=b^k=\text{peso (escala) da posição }k.
+\]
+\end{definicao}
+
+São objectos distintos. Em particular \(x_k\) pode anular-se, pelo que a razão \(x_{k+1}/x_k\) \textbf{não} é uma quantidade estrutural do sistema.
+
+\subsection{Razão de pesos}
+
+\begin{definicao}[Razão de pesos]
+\label{def:rho}
+\[
+\rho_k:=\frac{w_{k+1}}{w_k}.
+\]
+\end{definicao}
+
+No sistema posicional, \(\rho_k=b^{k+1}/b^k=b\) para todo \(k\).
+
+\begin{proposicao}[Razão de escala por salto]
+\label{prop:razao-escala}
+Para quaisquer \(k\ge 0\) e \(r\ge 1\),
+\[
+\boxed{\frac{w_{k+r}}{w_k}=b^r}.
+\]
+O resultado depende exclusivamente da estrutura dos pesos \(w_k=b^k\); não depende dos dígitos \(x_k\).
+\end{proposicao}
+
+\begin{proof}
+\[
+\frac{w_{k+r}}{w_k}=\frac{b^{k+r}}{b^k}=b^r.
+\]
+\end{proof}
+
+\subsection{Overflow como entrada em nova escala}
+
+Na secção~\ref{sec:byte-carry}, o overflow global leva de \(X_d\) a \(X_{d+1}\) quando \(x=\max X_d\). O novo peso activado é \(w_d=b^d\); o peso máximo do nível anterior é \(w_{d-1}=b^{d-1}\). Logo
+\[
+\frac{w_d}{w_{d-1}}=b.
+\]
+
+Exemplo em base \(2\): \(11_2=3\) e \(100_2=4\). A passagem \(11\to 100\) é simultaneamente (i)~carry total, (ii)~saída da largura \(2\), (iii)~activação da posição de peso \(w_2=2^2\). Em geral:
+\[
+\boxed{\text{overflow}=\text{entrada da representação na nova escala }w_d=b^d}.
+\]
+Isto é \emph{reformulação} da aritmética posicional, não uma operação nova.
+
+\subsection{Salto de \(r\) níveis e escala do nível}
+
+Além do peso de uma posição \(w_k=b^k\), defina a \emph{escala associada ao nível} \(d\):
+\[
+s_d:=b^d.
+\]
+Numericamente \(s_d=w_d\), mas o papel conceptual é o da escala do nível (profundidade), não o de uma única coordenada. Então
+\[
+s_{d+r}=b^{d+r}=b^r s_d,
+\]
+logo
+\[
+\boxed{\Delta d=r\quad\Longrightarrow\quad\frac{s_{d+r}}{s_d}=b^r}.
+\]
+Assim \(d\) regista o nível (profundidade / largura) e \(b^d\) a escala associada; não se identificam «dimensão» e «escala».
+
+\subsection{Concatenação de blocos}
+
+Com a convenção little-endian de \(C_d\), a concatenação de um bloco baixo \(x\in X_d\) com um bloco alto \(y\in X_r\) satisfaz
+\[
+C_{d+r}(x,y)=C_d(x)+b^d\,C_r(y).
+\]
+O bloco novo entra multiplicado por \(b^d\): a escala do salto é exactamente a do nível \(d\). Consequência directa da definição posicional.
+
+\subsection{Árvore e profundidade}
+
+Na árvore \(\mathcal T=\{0,\dots,b-1\}^*\) tem-se \(\operatorname{depth}(\omega)=|\omega|\). Identificando o nível \(d\) com a profundidade,
+\[
+d\to d+r\quad\Longrightarrow\quad s_d\to s_{d+r}=b^r s_d.
+\]
+A noção geométrica correspondente ao comprimento da representação é a \emph{profundidade}; a escala do nível é \(b^d\).
+
+\subsection{Ultramétrica}
+
+A distância hierárquica \(d_{\mathrm{hier}}\) da secção~\ref{sec:byte-carry} (baseada no maior índice em que as coordenadas diferem) incorpora a razão de escala: cada nível mais profundo contribui um factor \(b^{-1}\) (ou \(2^{-1}\) em base \(2\)). Em termos conceptuais, o peso cresce por \(b\) e a resolução hierárquica decresce por \(b^{-1}\). Não se introduz métrica nova.
+
+\subsection{Compatibilidade com \(e_k=2^k\)}
+
+Em \texttt{fisica.tex}, \(e_k=2^k\) são os pesos da base binária. Na leitura desta secção,
+\[
+e_k=\text{peso/escala da posição }k,\qquad
+\frac{e_{k+1}}{e_k}=2,\qquad
+\frac{e_{k+r}}{e_k}=2^r.
+\]
+Não se afirma que \(e_k\) seja direcção nem operador de salto. A compatibilidade formal de escala com os pesos \(1,2,4,\dots,128\) é registada; a identificação ontológica com as oito leis permanece fora do escopo (como em~\ref{sec:byte-carry}).
+
+\subsection{Pesos com razão variável}
+
+Se \(w_{k+1}=\rho_k w_k\) com \(\rho_k>0\) arbitrário, então
+\[
+w_{k+r}=\Bigl(\prod_{j=k}^{k+r-1}\rho_j\Bigr)w_k.
+\]
+O caso \(\rho_k\equiv b\) recupera o sistema radix clássico e a lei \(b^r\). Com \(\rho_k\) variável obtém-se um sistema ponderado mais geral; a razão deixa de ser potência de uma única base. Unicidade e completude exigem condições adicionais (sistemas greedy); não se demonstram aqui.
+
+\subsection{Estatuto}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.52\textwidth}p{0.40\textwidth}@{}}
+\toprule
+Afirmação & Estatuto \\
+\midrule
+\(w_k=b^k\) & definição do sistema posicional \\
+\(\rho_k=b\) & consequência da definição \\
+\(w_{k+r}/w_k=b^r\) & teorema / cálculo directo (Prop.~\ref{prop:razao-escala}) \\
+Overflow activa \(w_d=b^d\) & reformulação da aritmética \\
+\(d=\) nível e \(b^d=\) escala & reformulação estrutural \\
+\(C_{d+r}(x,y)=C_d(x)+b^d C_r(y)\) & consequência da definição \\
+Ultramétrica contém razão \(b^{-1}\) por nível & observação \\
+\(e_k=2^k\) como peso & definição / compatibilidade \\
+\(e_k\) como operador de salto & \textbf{não} demonstrado \\
+Razão variável \(\rho_k\) & generalização \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+No sistema posicional, os pesos satisfazem \(w_{k+1}/w_k=b\). O overflow de \(X_d\) para \(X_{d+1}\) activa a escala \(w_d=b^d\), na razão \(b\) relativamente à posição anterior. Um salto de \(r\) níveis corresponde à razão de escala \(b^r\). Essa relação é a própria aritmética posicional reescrita em termos de nível e escala, e não uma estrutura geométrica adicional.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Gerador de ordem quatro, série e definição operacional de \(\pi\)}
+\label{sec:pi-operacional}
+
+A construção seguinte é transportada de \texttt{fisica.tex} (Proposições \texttt{fis:prop:pi} e \texttt{fis:prop:piexiste}). Não se reivindica novidade sobre a série de \(\exp\) nem sobre as funções \(c\) e \(s\); o ponto específico é a definição operacional de \(\pi\) como primeiro tempo de retorno e a demonstração de existência por cotas e corte.
+
+\subsection{Recebido: \(J^2=-1\)}
+
+O gerador \(J\) de ordem quatro satisfaz
+\[
+J^0=1,\quad J^1=J,\quad J^2=-1,\quad J^3=-J,\quad J^4=1,\dots
+\]
+Este facto é \emph{recebido} da estrutura anterior do documento de base (Teor.\ \texttt{fis:thm:largura} / \texttt{fis:thm:fecho}): um gerador de ordem quatro, aplicado duas vezes, tem de dar \(-\mathrm{id}\). Não se re-demonstra aqui.
+
+\subsection{Cisão da série por paridade}
+
+Partindo da série clássica \(\exp(z)=\sum_{n\ge0}z^n/n!\) e substituindo \(z=tJ\),
+\[
+\exp(tJ)=\sum_{n\ge0}\frac{t^n J^n}{n!}.
+\]
+As potências de \(J\) têm período quatro. Separando índices pares e ímpares obtém-se
+\[
+\boxed{\exp(tJ)=c(t)\cdot 1+s(t)\cdot J}
+\]
+com
+\[
+c(t)=\sum_{k\ge0}\frac{(-1)^k t^{2k}}{(2k)!},\qquad
+s(t)=\sum_{k\ge0}\frac{(-1)^k t^{2k+1}}{(2k+1)!}.
+\]
+A decomposição é consequência da periodicidade de \(J^n\) e da linearidade da série; não se invoca a priori a identificação com seno/cosseno.
+
+\begin{observacao}[Paridade]
+A cisão par/ímpar da série é o mesmo tipo de corte que, no byte, separa posições pares e ímpares. Em \texttt{fisica.tex} a correspondência é registada como o mesmo mecanismo de partição por paridade em dois sítios distintos. No presente paper classifica-se como \emph{analogia estrutural} (tipo E / C), não como identidade formal entre os dois mecanismos.
+\end{observacao}
+
+\subsection{Conservação}
+
+\begin{proposicao}[Conservação \(c^2+s^2=1\)]
+\label{prop:cs-conserva}
+Para todo \(t\) no domínio de convergência das séries,
+\[
+c(t)^2+s(t)^2=1.
+\]
+\end{proposicao}
+
+\begin{proof}
+Como \(c\) é par e \(s\) é ímpar, \(\exp(-tJ)=c(t)-s(t)J\). Multiplicando e usando apenas \(J^2=-1\):
+\[
+\exp(tJ)\exp(-tJ)=1
+\implies
+(c+sJ)(c-sJ)=c^2-s^2 J^2=c^2+s^2.
+\]
+(A multiplicação das séries é justificada pela convergência absoluta da série de \(\exp\) em todo o plano complexo; o mesmo tratamento é o usado em \texttt{fisica.tex}.)
+\end{proof}
+
+\subsection{Definição operacional de \(\pi\)}
+
+\begin{definicao}[Definição operacional de \(\pi\)]
+\label{def:pi-op}
+\[
+\boxed{\pi=\min\{t>0:\ \exp(tJ)\cdot 1=-1\}.}
+\]
+\end{definicao}
+
+Como \(\exp(tJ)\cdot 1=c(t)+s(t)J\), a condição \(\exp(tJ)\cdot 1=-1\) equivale a \(c(t)=-1\) e \(s(t)=0\). Pela conservação \(c^2+s^2=1\), \(c(t)=-1\) já força \(s(t)=0\). Basta, portanto, procurar onde \(c\) vale \(-1\).
+
+Esta definição não importa \(\pi\) como constante externa; define-o como o primeiro tempo positivo em que o fluxo produzido pela exponencial atinge o oposto da unidade. A relação com as funções trigonométricas clássicas (\(c=\cos\), \(s=\sin\)) é consequência, não premissa.
+
+\subsection{Existência do primeiro tempo}
+
+\begin{proposicao}[Existência do mínimo e estrutura]
+\label{prop:pi-existe}
+O conjunto \(\{t>0:\exp(tJ)\cdot 1=-1\}\) não é vazio e possui mínimo. Sendo \(t_0\) o primeiro zero de \(c\),
+\[
+\exp(t_0 J)=J,\qquad
+\pi=2t_0,\qquad
+\exp(2\pi J)=1
+\]
+com \(2\pi\) o menor tempo positivo que fecha na unidade.
+\end{proposicao}
+
+\begin{proof}[Alinhado a \texttt{fis:prop:piexiste}, com leis de adição]
+Para \(0<t\le 2\) as séries de \(c\) e \(s\) admitem cotas alternadas:
+\[
+1-\frac{t^2}{2}\le c(t)\le 1-\frac{t^2}{2}+\frac{t^4}{24},\qquad
+s(t)\ge t\Bigl(1-\frac{t^2}{6}\Bigr).
+\]
+Em particular \(c(0)=1>0\) e \(c(2)\le -1/3<0\): \(c\) muda de sinal em \([0,2]\). O mecanismo de corte/bissecção (já disponível no documento de base) produz o menor \(t_0\in(0,2]\) com \(c(t_0)=0\) e \(c>0\) em \([0,t_0)\).
+
+Como \(t_0\le 2<\sqrt 6\), a cota de \(s\) é positiva em \((0,t_0]\). A conservação com \(c(t_0)=0\) dá \(s(t_0)=1\). Logo \(\exp(t_0 J)=J\).
+
+A lei de composição \(\exp((u+v)J)=\exp(uJ)\exp(vJ)\) (consequência da série de \(\exp\) e de \(J^2=-1\)) fornece as fórmulas de adição
+\[
+c(u+v)=c(u)c(v)-s(u)s(v),\qquad
+s(u+v)=s(u)c(v)+c(u)s(v).
+\]
+Com \(c(t_0)=0\) e \(s(t_0)=1\):
+\[
+c(t_0+r)=-s(r),\qquad
+s(t_0+r)=c(r).
+\]
+Portanto \(\exp((t_0+r)J)=-1\) exigiria \(c(t_0+r)=-1\) e \(s(t_0+r)=0\), isto é \(c(r)=0\). Se \(0<r<t_0\), isso contradiz a definição de \(t_0\) como primeiro zero positivo de \(c\). Para \(0<t<t_0\) tem-se \(c(t)>0\), logo \(\exp(tJ)\neq -1\). Assim o conjunto é não vazio e o seu mínimo é \(\pi=2t_0\).
+
+Finalmente \(\exp(2\pi J)=(\exp(\pi J))^2=(-1)^2=1\). Que nenhum \(\tau\in(0,2\pi)\) feche na unidade segue por descida: se \(\exp(\tau J)=1\), então \(\exp(\tau/2\,J)=c+sJ\) satisfaz \(c^2-s^2=1\) e \(2cs=0\); com a conservação obtém-se \(s=0\) e \(c=\pm 1\). O caso \(c=-1\) força \(\tau/2\ge\pi\); o caso \(c=+1\) e a cota \(c(t)<1\) em \((0,2]\) levam a contradição por iteração.
+\end{proof}
+
+\begin{observacao}[Significado de ``primeiro'']
+O objectivo não é apenas encontrar algum \(t\) com \(\exp(tJ)=-1\); é o \emph{menor} \(t>0\). As fórmulas de adição e a minimalidade de \(t_0\) impedem soluções em \((0,2t_0)\). Distinguem-se:
+\[
+\pi=\text{primeiro retorno ao oposto da unidade},
+\qquad
+2\pi=\text{primeiro retorno à própria unidade}.
+\]
+\end{observacao}
+
+A construção é algébrica (série + \(J^2=-1\) + cotas + corte). A interpretação geométrica (quarto de volta, meia volta, volta completa) é posterior: o círculo aparece como rasto da órbita, não como premissa.
+
+\subsection{Relação com a cadeia realização / representação / transformada}
+
+A aplicação \(t\mapsto\exp(tJ)\) é uma parametrização (realização contínua) do grupo gerado por \(J\). Produz uma órbita no espaço de operadores (ou no plano coordenado onde \(J\) actua). A transformação de representação \(\mathcal T\) (Definição~\ref{def:T}) continua a ser um operador sobre campos; não se identifica com a dinâmica \(\Phi_t=\exp(tJ)\). A passagem do parâmetro aditivo \(t\) à multiplicação pelo operador \(\Phi_t\) é a estrutura clássica do grupo a um parâmetro; no quadro do paper é uma instância de mudança de descrição, não uma instância de \(\mathcal T\) sobre campos de contagem.
+
+\subsection{Analogia estrutural com byte/carry}
+
+Ambas as construções exibem o padrão
+\[
+\text{regra local}\;\longrightarrow\;\text{órbita}\;\longrightarrow\;\text{estado especial}\;\longrightarrow\;\text{fechamento}.
+\]
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Byte/carry & Fluxo de \(J\) \\
+\midrule
+\(S_d:X_d\to X_d\) (discreto, modular) & \(\Phi_t=\exp(tJ)\) (contínuo, exponencial) \\
+Saturação local de uma coordenada & \(c(t)\) atravessar zero \\
+Overflow global (\(256^d\)) & Fecho do período \(2\pi\) \\
+Período \(256^d\) & Período \(2\pi\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+A analogia é estrutural (mecanismos de fechamento). Não se identifica carry com fluxo, nem \(\pi\) com ``overflow contínuo''. As naturezas permanecem distintas: aritmética posicional discreta versus parametrização contínua por série.
+
+\subsection{Estatuto dos elementos desta secção}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.45\textwidth}p{0.45\textwidth}@{}}
+\toprule
+Elemento & Estatuto \\
+\midrule
+\(J^2=-1\) e ciclo de \(J^n\) & recebido (\texttt{fisica.tex}) \\
+Série de \(\exp\) & estrutura clássica \\
+Cisão par/ímpar \(\to c,s\) & derivada da série + periodicidade de \(J^n\) \\
+\(c^2+s^2=1\) & demonstrada (Prop.~\ref{prop:cs-conserva}) \\
+Definição operacional de \(\pi\) & definição no modelo (Def.~\ref{def:pi-op}) \\
+Existência do primeiro tempo / \(\pi=2t_0\) & demonstrada por cotas + corte (Prop.~\ref{prop:pi-existe}) \\
+Período \(2\pi\) & consequência demonstrada \\
+Analogia byte \(\leftrightarrow\) fluxo de \(J\) & interpretação estrutural \\
+Identificação \(c=\cos\), \(s=\sin\) & consequência clássica, não premissa \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{A dinâmica estigmérgica da realização}
+\label{sec:aranha-estigmergica}
+
+A construção seguinte é transportada de \texttt{fisica.tex} (secção \texttt{fis:algoritmo} e Teor.\ \texttt{fis:thm:agentes}). Não se introduz um algoritmo externo: a dinâmica é a própria realização lida como autómato. Na leitura de colónia, o espaço \(X\) é a \emph{arena} (território); cada agente (formiga) deixa marcas no território e responde às marcas já presentes. A sequência fundamental é
+\[
+\pi\colon I\to X
+\longrightarrow
+G(x)=\lvert\pi^{-1}(x)\rvert
+\longrightarrow
+\text{vizinhança}
+\longrightarrow
+\text{regra local}
+\longrightarrow
+\text{órbita}.
+\]
+O campo \(G\colon X\to\mathbb N_0\) é memória distribuída no ambiente: cada visita escreve no próprio local. A «aranha» do documento de base é, nesta leitura, a \emph{arena} --- o território no qual a colónia deixa e lê marcas ---, não uma formiga literal.
+
+\subsection{Os quatro passos}
+
+\begin{definicao}[Ciclo da aranha / regra local do agente]
+\label{def:ciclo-aranha}
+Dada a realização \(\pi\) e o campo \(G_t\) no instante \(t\), com célula corrente \(x_t=\pi(t)\):
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Marcação (escrita).} Actualizar
+\[
+G_{t+1}(x)=G_t(x)+\mathbf 1_{\{x=x_t\}}.
+\]
+O agente deixa uma marca no território. Formalmente: incrementa a multiplicidade na célula corrente.
+\item \textbf{Percepção da trilha (leitura).} Formar o perfil local
+\[
+\mathcal P_t(x_t)=\bigl(G_t(y)\bigr)_{y\in\mathcal V(x_t)},
+\]
+onde \(\mathcal V(x)\) é a vizinhança admissível de \(x\). A fronteira lê-se como obstáculo. O agente lê localmente o campo de marcas.
+\item \textbf{Escolha (decisão).} O passo seguinte é
+\[
+x_{t+1}\in\operatorname*{arg\,min}_{y\in\mathcal V(x_t)}G_t(y).
+\]
+«Gradiente de exploração» é o nome do passo no documento de base; o gradiente formal aparece noutro sítio e o passo não depende dele para correr. Não há deliberação nem comparação de percursos futuros: o agente reage à marca local, não à história \(\pi(0),\dots,\pi(t)\). Como a regra usa \(\arg\min G\), trata-se de exploração/evitação da marca acumulada --- distinto de modelos em que maior concentração de feromônio atrai o agente.
+\item \textbf{Fecho.} Ao fim dos passos de exploração, o rotor satisfaz \(R^4=\mathrm{id}\) (Teor.\ \texttt{fis:thm:fecho}). Não se chama este fecho de «ciclo de feromônio»; é o fecho do rotor da dinâmica individual.
+\end{enumerate}
+\end{definicao}
+
+\begin{observacao}[Memória da colónia \(\neq\) memória de uma formiga]
+\label{obs:memoria-espaco}
+O \emph{sistema} mantém dois dados: o campo \(G\) (no território) e a célula corrente. O \emph{agente} não mantém a história como memória interna. Dizer «não há estado» seria falso; o que não há é estado histórico \emph{no agente}. Em linguagem de colónia:
+\[
+\boxed{\text{memória da colónia}\;\neq\;\text{memória de uma formiga}},
+\qquad
+\boxed{\text{coordenação}=\text{leitura das marcas no ambiente}}.
+\]
+Isto é estigmergia: a acção deixa uma marca no meio e essa marca influencia acções subsequentes, sem comunicação directa nem planeamento central.
+\end{observacao}
+
+\subsection{Invariância ao construtor}
+
+\begin{proposicao}[\(G\) não vê o construtor / a marca não identifica a formiga]
+\label{prop:G-construtor}
+Se duas execuções produzem a mesma multiplicidade por célula (por exemplo, um agente visitando cada célula \(K\) vezes, ou \(K\) agentes visitando cada célula uma vez), então os campos coincidem célula a célula. \(G\) é invariante sob qualquer reatribuição de agentes que preserve a ocupação.
+\end{proposicao}
+
+\begin{proof}
+Cada escrita incrementa \(G\) na célula corrente e nada mais regista; em particular nenhuma escrita carrega a identidade de quem a fez. Se as multiplicidades por célula coincidem, os campos coincidem. (Teor.\ \texttt{fis:thm:agentes}.)
+\end{proof}
+
+Assim \(G\) regista \emph{ocupação} (a marca colectiva no território), não \emph{identidade do construtor}. A colónia vê a marca colectiva; não precisa de registar qual formiga produziu cada marca.
+
+\subsection{Representação esparsa e complexidade}
+
+Armazenar \(G\) como tabela sobre todo \(X\) custa \(O(\lvert X\rvert)\). A representação fiel à multiplicidade é \emph{esparsa}: a memória existe onde a trajetória passou. Com capacidade fixa \(C\ge 2\lvert I\rvert\), escrita/leitura têm custo esperado \(O(1)\) e a memória total é \(O(\lvert I\rvert)\). No posto \(n\) (vizinhança de \(2n\) células), o custo total da exploração é
+\[
+\Theta\bigl(n\,\lvert I\rvert\bigr)\ \text{operações},\qquad
+\Theta\bigl(\lvert I\rvert\bigr)\ \text{memória},
+\]
+sem dependência de \(\lvert X\rvert\). A execução depende da trajetória realizada, não da varredura de todo \(X\). (Análise da implementação em \texttt{fisica.tex}; não se apresenta como teorema físico novo.)
+
+\subsection{Relação com a cadeia do paper}
+
+A dinâmica induzida pela realização lê-se como
+\[
+\boxed{\text{realização}\to\text{multiplicidade}\to\text{leitura local}\to\text{regra de transição}\to\text{órbita}}.
+\]
+Formalmente:
+\[
+I\xrightarrow{\pi}X\xrightarrow{\#}G\xrightarrow{\mathcal V}\mathcal P\xrightarrow{\arg\min}X.
+\]
+Isto é uma dinâmica induzida pela representação (o campo \(G\)), não uma transformação de representação no sentido de \(\mathcal T\).
+
+\begin{observacao}[Transformar \(\neq\) executar]
+A transformação de representação \(\mathcal T\colon V_S\to W\) (Definição~\ref{def:T}) muda a leitura do campo --- por exemplo, a mesma actividade colectiva \(G\) observada noutro sistema de coordenadas ou no espectro. A dinâmica estigmérgica muda o estado corrente segundo o campo produzido pela própria realização (a formiga responde à marca e deixa nova marca). Portanto
+\[
+\boxed{\text{transformar a representação}\;\neq\;\text{executar a dinâmica}}.
+\]
+Ambas operam sobre representações do objecto, mas não se identificam. Em particular, Fourier/Mellin não são «feromônio transformado»; são operadores sobre o campo formal.
+\end{observacao}
+
+\subsection{Comparação estrutural com byte/carry e com o fluxo de \(J\)}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.22\textwidth}p{0.35\textwidth}p{0.35\textwidth}@{}}
+\toprule
+ & Byte/carry & Aranha estigmérgica \\
+\midrule
+Estado & palavra de bytes & campo \(G\) + célula corrente \\
+Regra local & sucessor / carry & escrita + leitura + \(\arg\min\) \\
+Trajectória & órbita de \(S_d\) & órbita \(x_t\) \\
+Memória & coordenadas da palavra & ocupação do espaço \\
+Fechamento & período modular \(256^d\) & \(R^4=\mathrm{id}\) \\
+Natureza & aritmética discreta & dinâmica discreta sobre realização \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Com o fluxo de \(J\): regra local \(\to\) órbita \(\to\) estado especial \(\to\) fechamento aparece em ambos (\(G\to\arg\min\to R^4=\mathrm{id}\) versus \(J^2=-1\to\exp(tJ)\to\) corte \(\to\pi\to 2\pi\)). A semelhança é de arquitectura de fechamento; não implica identidade matemática. Em particular:
+- \(R^4=\mathrm{id}\) não é o ciclo de \(\pi\) nem o período do byte;
+- a estigmergia aqui é a construção específica \(G(x)\mathrel{+}=1\), ler \(\mathcal V(x)\), \(\arg\min G\); não se afirma equivalência com ACO (Ant Colony Optimization).
+
+\subsection{Estatuto dos elementos desta secção}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.48\textwidth}p{0.42\textwidth}@{}}
+\toprule
+Elemento & Estatuto \\
+\midrule
+\(G(x)=\lvert\pi^{-1}(x)\rvert\) & definição existente \\
+Escrita \(G(x)\mathrel{+}=1\) & regra derivada da realização \\
+Leitura da vizinhança & regra do algoritmo (\texttt{fis:algoritmo}) \\
+Escolha do menor \(G\) & regra de transição \\
+Ausência de memória histórica no agente & propriedade do modelo \\
+\(R^4=\mathrm{id}\) & consequência / teorema recebido (\texttt{fis:thm:fecho}) \\
+Invariância de \(G\) à reatribuição de agentes & Teor.\ \texttt{fis:thm:agentes} / Prop.~\ref{prop:G-construtor} \\
+Complexidade esparsa & análise computacional da implementação \\
+Relação com byte/carry & analogia estrutural \\
+Relação com \(\pi\) / fluxo de \(J\) & analogia estrutural \\
+Equivalência com ACO & não estabelecida \\
+Evaporação de feromônio & extensão possível; \textbf{não} faz parte da definição de \(G\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacao}[Evaporação como extensão]
+Em modelos clássicos de feromônio é comum a actualização
+\[
+P_{t+1}(x)=(1-\rho)P_t(x)+\Delta P_t(x),\qquad 0\le\rho\le 1,
+\]
+com \(\rho\) a taxa de evaporação. Isso \textbf{não} faz parte da definição de \(G\) no presente modelo (nem em \texttt{fisica.tex}). É uma extensão possível se se quiser um campo de feromônio com decaimento; não se introduz aqui como facto.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Fourier e Mellin como instâncias clássicas}
+
+Os resultados seguintes são clássicos; são invocados como instâncias da pergunta geral, não como contribuições novas.
+
+\begin{proposicao}[Fourier no eixo aditivo]
+Quando \(S\) admite estrutura de grupo abeliano finito (em particular cíclico), a transformada de Fourier discreta fornece um operador linear unitário
+\[
+\mathcal F\colon\mathbb C^S\to\mathbb C^{\widehat S}
+\]
+com inversa explícita. A DFT-8 é o caso \(S=C_8\).
+\end{proposicao}
+
+\begin{proposicao}[Mellin via mudança de variável]
+A transformada de Mellin
+\[
+\mathcal M[f](s)=\int_0^\infty f(x)\,x^{s-1}\,dx
+\]
+relaciona-se com Fourier pela mudança de variável \(x=e^u\), \(g(u)=f(e^u)e^{\sigma u}\). Sob a convenção
+\[
+\widehat g(\tau)=\int_{-\infty}^{\infty}g(u)\,e^{+i\tau u}\,du,
+\]
+tem-se
+\[
+\mathcal M[f](\sigma+i\tau)=\widehat g(\tau).
+\]
+(Sob a convenção com \(e^{-i\tau u}\), o sinal no dual inverte: \(\mathcal M[f](\sigma+i\tau)=\widehat g(-\tau)\).) Em notação de \texttt{transformada.tex}, \(\Lambda\) realiza \(x\mapsto e^u\) e \(\mathfrak G=\mathcal F\circ\Lambda\).
+\end{proposicao}
+
+\begin{observacao}
+A aplicabilidade de Mellin a um campo \(G_S\) exige estrutura multiplicativa no domínio. Nem todo suporte \(S\) a possui. A composição \(\mathfrak G=\mathcal F\circ\Lambda\) é uma mudança de representação sob hipóteses apropriadas sobre o domínio; não se apresenta como resultado novo sobre Fourier ou Mellin.
+\end{observacao}
+
+A formulação estrutural que se preserva é:
+\[
+\boxed{\text{Fourier lê o incremento (coordenada aditiva);}\qquad
+\text{Mellin lê o salto (coordenada multiplicativa, via }u=\log x\text{).}}
+\]
+Magnitude e fase são componentes de uma decomposição polar de uma representação complexa; Fourier e Mellin são transformadas associadas a estruturas de grupo/coordenada distintas. Não se identificam as duas linhas.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Estrutura espectral: ângulo, escala e factoração da realização}
+\label{sec:espectro-angulo-escala}
+
+O manuscrito \texttt{fermat.tex} fornece realizações espectrais concretas que amarram a arquitectura aditiva/multiplicativa sem reorganizá-la em eixos de magnitude e fase. Transportam-se aqui apenas as estruturas que já estão demonstradas ou definidas nesse manuscrito e que conversam com a cadeia \(I\to G_S\to\widehat G_S\).
+
+\subsection{Realização angular e ordem finita}
+
+Em \texttt{fermat.tex} (Definição de convenção de realização angular), um elemento \(u_p\) de ordem multiplicativa \(k\) é associado, por convenção, à fase \(2\pi/k\) na subálgebra real \(\langle 1,J\rangle\) com \(J^2=-1\):
+\[
+\widehat u_{p,k}:=\exp\Bigl(\frac{2\pi}{k}J\Bigr)
+=\cos\frac{2\pi}{k}\cdot 1+\sin\frac{2\pi}{k}\cdot J.
+\]
+Sob a leitura \(1\leftrightarrow 1\), \(J\leftrightarrow i\), obtém-se
+\[
+A_0(k)=\operatorname{diag}\bigl(e^{2\pi i/k},e^{-2\pi i/k}\bigr)\in\operatorname{SL}(2,\mathbb C),
+\]
+com \(\operatorname{tr}(A_0)=2\cos(2\pi/k)\) e \(A_0(k)^k=I\).
+
+Isto é a mesma subálgebra \(\langle 1,J\rangle\) já usada na secção~\ref{sec:pi-operacional} para a definição operacional de \(\pi\). A fase aparece aqui como \emph{coordenada angular de uma realização de ordem finita}, não como ``magnitude zero''. A associação \(u_p\mapsto\widehat u_{p,k}\) é uma convenção de realização, não um functor canónico (\texttt{fermat.tex}, observação de status).
+
+\subsection{Regimes elíptico e hiperbólico}
+
+A recorrência
+\[
+t_k=m\,t_{k-1}-d\,t_{k-2}
+\]
+(\texttt{fermat.tex}, interface de Viviani) distingue:
+\begin{center}
+\small
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\(d\) & regime & leitura \\
+\midrule
+\(+1\) & elíptico / rotação & ângulo \\
+\(-1\) & hiperbólico / crescimento & escala / salto \\
+\bottomrule
+\end{tabular}
+\end{center}
+Para \(A\in\operatorname{SL}(2,\mathbb C)\), \(\lvert\operatorname{tr}(A)\rvert<2\) é elíptico, \(\lvert\operatorname{tr}(A)\rvert>2\) é hiperbólico. A holonomia inicial \(A_0\) situa-se no regime elíptico por construção (\(\lvert\operatorname{tr}(A_0)\rvert\le 2\)).
+
+No caso \(k=4\) (\texttt{fermat.tex}, teorema de quebra de ordem finita), o refinamento produz \(A_1\) com \(\operatorname{tr}(A_1)=11\) e
+\[
+\lambda_\pm=\frac{11\pm\sqrt{117}}{2}
+\]
+(\(\lambda_+>1\), \(0<\lambda_-<1\)): regime hiperbólico, \(A_1^4\neq I\).
+
+\subsection{Decomposição espectral \(\log\lambda=\log\lvert\lambda\rvert+i\arg\lambda\)}
+
+No regime elíptico, \(\lambda_\pm=e^{\pm i\theta}\) com \(\lvert\lambda_\pm\rvert=1\).  
+No regime hiperbólico, \(\lambda_\pm=e^{\pm s}\) com \(s\in\mathbb R\) e \(\lvert\lambda_+\rvert>1\), \(\lvert\lambda_-\rvert<1\).
+
+Em ambos os casos a identidade clássica
+\[
+\log\lambda=\log\lvert\lambda\rvert+i\arg\lambda
+\]
+separa:
+\[
+\underbrace{\arg\lambda}_{\text{coordenada angular}}
+\qquad\text{e}\qquad
+\underbrace{\log\lvert\lambda\rvert}_{\text{coordenada de escala}}.
+\]
+Isto é a decomposição polar do espectro, não uma identificação com o campo \(G\). A passagem
+\[
+\lambda\longmapsto\log\lambda
+\]
+transforma estrutura multiplicativa (autovalores) em coordenadas aditivas --- a mesma lógica que sustenta Mellin via \(x=e^u\).
+
+\begin{observacao}[Estatuto]
+A decomposição \(\log\lambda=\log\lvert\lambda\rvert+i\arg\lambda\) é clássica. A sua presença nos regimes elíptico/hiperbólico de \texttt{fermat.tex} é uma \emph{realização espectral concreta} da arquitectura
+\[
+\text{ângulo}\leftrightarrow\arg,\qquad
+\text{escala}\leftrightarrow\log\lvert\cdot\rvert,
+\]
+paralela a
+\[
+\text{incremento}\leftrightarrow\text{Fourier},\qquad
+\text{salto}\leftrightarrow\text{Mellin}.
+\]
+Não se identifica \(\log\lvert\lambda\rvert\) com \(G\), nem \(\arg\lambda\) com a transformada de um campo de contagem.
+\end{observacao}
+
+\subsection{Factoração da realização e perda de informação}
+
+\texttt{fermat.tex} (Proposição de factoração pela ordem \(k\)) estabelece
+\[
+\mathcal R=\widetilde{\mathcal R}\circ\kappa,
+\qquad
+\kappa(a,b,c,p)=k=\operatorname{ord}_{\mathbb F_p^\times}(bc^{-1}),
+\]
+donde \(\Xi\circ\mathcal R\) é constante nas fibras de \(\kappa\): a realização angular conserva \(k\) e pode perder os restantes dados aritméticos.
+
+Isso conversa directamente com a compressão \(\pi_S\mapsto G_S\) deste paper: a passagem a um invariante (ordem \(k\), ou multiplicidade \(G\)) é uma factoração que descarta informação. A pergunta estrutural comum é
+\[
+\boxed{\text{qual informação da realização sobrevive à mudança de coordenada?}}
+\]
+e não ``qual é a magnitude''. Em particular, reforça-se
+\[
+\boxed{x^2=x+1\;\not\Rightarrow\; A=\text{magnitude de }G}
+\]
+sem ponte explícita: a estrutura de crescimento/estrela e o campo de contagem permanecem objectos distintos enquanto essa ponte não for construída.
+
+\subsection{Síntese da arquitectura}
+
+\[
+\boxed{
+\begin{array}{ccc}
+\text{incremento} &\longleftrightarrow& \text{Fourier}\\
+\text{salto / dilatação} &\longleftrightarrow& \text{Mellin}\\
+\text{ângulo} &\longleftrightarrow& \arg\\
+\text{escala} &\longleftrightarrow& \log\lvert\cdot\rvert
+\end{array}
+}
+\]
+As duas primeiras linhas são transformadas/coordenadas de grupo. As duas últimas são componentes da representação espectral. A distinção evita identificar Fourier com ``fase'' e Mellin com ``magnitude''.
+
+No formalismo Walsh de \texttt{fisica.tex} (\(\chi_k\in\{\pm1\}\)), a realização determina \(G\) e a base fornece o sinal --- teorema já registado. Na representação polar complexa \(\psi=A e^{i\theta}\) a transformada mistura, em geral, magnitude e fase; não se exporta o teorema Walsh para esse nível sem hipóteses adicionais.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Ordem das operações}
+
+Considerem-se as duas composições formais
+\[
+\mathcal T\circ\operatorname{count}
+\qquad\text{e}\qquad
+\operatorname{count}\circ\mathcal T.
+\]
+
+\begin{questao}[Ordem das operações]
+\label{quest:ordem}
+A composição \(\mathcal T\circ\operatorname{count}\) está bem definida quando \(\mathcal T\) actua sobre o espaço de campos. A composição \(\operatorname{count}\circ\mathcal T\) exige que \(\mathcal T\) actue sobre realizações (ou sobre um espaço que contenha realizações), o que não foi introduzido. Sem essa extensão, \(\operatorname{count}\circ\mathcal T\) não está definida no quadro actual.
+\end{questao}
+
+A questão permanece aberta no sentido estrito: a comutatividade só pode ser discutida depois de se postular um operador sobre realizações compatível com a projecção.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Reversibilidade --- síntese}
+
+\begin{enumerate}[leftmargin=1.5em]
+\item A DFT-8 é invertível (Proposição~\ref{prop:dft8-inv}).
+\item A carta local \(T_R\colon\theta\mapsto R\theta\) é invertível por construção.
+\item A deconvolução via espectro falha quando o espectro se anula (resultado clássico, invocado em \texttt{transformada.tex}).
+\item A compressão \(\pi_S\mapsto G_S\) é, em geral, irreversível (Proposição~\ref{prop:perda-ordem}).
+\item O levantamento recupera injectividade a partir de uma realização ordenada, não a partir do campo \(G_S\) isolado.
+\end{enumerate}
+
+Consequentemente: a reversibilidade de \(\mathcal T\) (quando existe) recupera o campo; não recupera a realização ordenada. A assimetria do Corolário~\ref{cor:assimetria} permanece.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Conclusão}
+
+Formalizámos a cadeia
+\[
+I\xrightarrow{\pi_S}G_S\xrightarrow{\mathcal T}\widehat G_S
+\]
+distinguindo o estatuto de cada seta:
+\begin{itemize}[leftmargin=1.5em]
+\item \(I\to G_S\): definição + conservação + perda de ordem (resultados existentes).
+\item \(G_S\to\widehat G_S\): legítima quando o suporte admite a estrutura necessária e quando \(\mathcal T\) é definido sobre o espaço de campos correspondente; invertível em casos concretos (DFT-8).
+\item A recuperação de \(G_S\) não implica a recuperação de \(\pi_S\) como sequência.
+\end{itemize}
+
+A distinção
+\[
+\text{compressão da realização}
+\;\neq\;
+\text{transformação reversível da representação}
+\]
+é consequência directa das proposições estabelecidas. A mudança de suporte (\(f_{\#}\)) e a transformação de representação (\(\mathcal T\)) são operações de naturezas distintas. A representação posicional por bytes (Secção~\ref{sec:byte-carry}), a definição operacional de \(\pi\) (Secção~\ref{sec:pi-operacional}) e a dinâmica estigmérgica (Secção~\ref{sec:aranha-estigmergica}) ilustram, cada uma, um mecanismo de regra local \(\to\) órbita \(\to\) fechamento, em naturezas distintas (aritmética modular, fluxo exponencial, multiplicidade como memória espacial). Nenhuma se identifica com \(\mathcal T\), nem umas com as outras.
+
+Na leitura estigmérgica consolidada:
+\[
+\boxed{\text{realização}\to\text{traço ambiental}\to\text{memória ambiental}\to\text{coordenação local}\to\text{dinâmica colectiva}},
+\]
+e, na leitura do modelo,
+\[
+\boxed{\text{colónia}=\text{agentes}+\text{memória ambiental}+\text{coordenação estigmérgica}}.
+\]
+O modelo matemático não é um organismo biológico; a colónia de formigas é a interpretação/concretização intuitiva do mecanismo, não uma definição biológica universal nem uma afirmação de que o formalismo reproduz uma espécie real. Em particular: \(G\) é traço estigmérgico formal (mais próximo da sematectónica); feromônio é analogia marker-based; \(\arg\min G\neq\) regra clássica de seguimento de feromônio; equivalência com ACO não está estabelecida.
+
+Não se reivindicou novidade para DFT, Parseval, Mellin via \(\Lambda\), aritmética posicional, série de \(\exp\), nem para a conservação da medida de contagem ou o ciclo da aranha. A formulação explícita da ponte entre o eixo realização/campo e o eixo mudança de representação, com classificação rigorosa do estatuto de cada afirmação e com a leitura estigmérgica como camada interpretativa, é a contribuição de organização deste artigo. Onde a estrutura disponível não basta para demonstrar uma propriedade (ordem das operações no sentido \(\operatorname{count}\circ\mathcal T\)), a questão ficou marcada como aberta.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Tabela de estatuto dos resultados}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.48\textwidth}p{0.42\textwidth}@{}}
+\toprule
+\textbf{Objecto / resultado} & \textbf{Estatuto} \\
+\midrule
+Realização \(\pi_S\) & definição existente (\texttt{fisica.tex}) \\
+Campo \(G_S=(\pi_S)_{\#}\#I\) & definição / generalização imediata \\
+Conservação \(\sum G_S=\lvert I\rvert\) & resultado existente \\
+Invariância por reordenação & consequência imediata \\
+Perda de ordem & resultado existente / verificação elementar \\
+DFT-8 e fórmula de inversão & resultado existente (\texttt{transformada.tex}) \\
+Unitariedade / Parseval da DFT-8 & resultado clássico \\
+\(\mathcal F_8(\mathbb N_0^8)\not\subset\mathbb N_0^8\) & observação elementar (Prop.~\ref{prop:nao-inteiro}) \\
+Coeficiente de frequência nula e soma & consequência directa da definição \\
+Levantamento injectivo & resultado existente (\texttt{fis:thm:levant}) \\
+O que o levantamento recupera / não recupera & leitura cuidadosa do existente \\
+Mudança de suporte \(f_{\#}G_S\) & consequência da definição de pushforward \\
+Distinção suporte vs representação & formalização organizacional \\
+Fourier (aditivo) / Mellin via \(\Lambda\) & casos clássicos (instâncias) \\
+Compressão \(\neq\) transformação reversível & corolário estrutural das props.\ existentes \\
+\(\mathcal T\circ\operatorname{count}\) bem definida & observação de categorias \\
+\(\operatorname{count}\circ\mathcal T\) & \textbf{não definida} no quadro actual (Questão~\ref{quest:ordem}) \\
+Comutatividade count/transformada & não investigável sem estender \(\mathcal T\) \\
+\(X_d=(\mathbb Z/256\mathbb Z)^d\), \(C_d\), \(S_d\) & aritmética posicional clássica (formalização) \\
+Carry interno vs overflow global & consequência da definição de \(S_d\) \\
+\(d_{\mathrm{hier}}\) ultramétrica & Proposição~\ref{prop:hier-ultra} \\
+Oito leis \(\leftrightarrow\) oito bits de um byte & reformulação de cardinalidade (tipo C), não teorema \\
+\(L_7\to L_0\) como overflow de byte & analogia (tipo E); estruturas distintas \\
+Extensão \(X_d\hookrightarrow X_{d+1}\) como Transformada & não: extensão dimensional \(\neq\) \(\mathcal T\) \\
+\(J^2=-1\) e ciclo de \(J^n\) & recebido (\texttt{fisica.tex}) \\
+Cisão \(\exp(tJ)=c+sJ\) & derivada da série + periodicidade \\
+\(c^2+s^2=1\) & Proposição~\ref{prop:cs-conserva} \\
+Definição operacional de \(\pi\) & Definição~\ref{def:pi-op} (transporte de \texttt{fisica.tex}) \\
+Existência de \(\pi=2t_0\) e período \(2\pi\) & Proposição~\ref{prop:pi-existe} \\
+Analogia byte/carry \(\leftrightarrow\) fluxo de \(J\) & interpretação estrutural \\
+Ciclo da aranha (escrita/leitura/\(\arg\min\)/fecho) & transporte de \texttt{fis:algoritmo} \\
+\(G\) não vê o construtor / marca não identifica a formiga & Teor.\ \texttt{fis:thm:agentes} / Prop.~\ref{prop:G-construtor} \\
+Memória da colónia \(\neq\) memória de uma formiga & propriedade do modelo \\
+\(R^4=\mathrm{id}\) & recebido (\texttt{fis:thm:fecho}) \\
+Complexidade esparsa \(\Theta(n\lvert I\rvert)\) & análise computacional \\
+Analogia aranha \(\leftrightarrow\) byte / \(\pi\) & interpretação estrutural \\
+Trilha / traço ambiental & interpretação de \(\pi\) / \(G\) \\
+\(G\) como traço estigmérgico (sematectónico) & formal + interpretação; mais próximo da actividade acumulada do que de marcador químico \\
+Feromônio & analogia biológica específica (marker-based); \textbf{não} identidade com \(G\) \\
+Colónia \(A\), \(G_a\), \(G_{\mathrm{col}}\) & extensão multiagente / interpretação \\
+Coordenação indireta / estigmergia & interpretação (literatura consolidada) \\
+\(\arg\min G\neq\) seguimento clássico de feromônio & regra formal de exploração/evitação \\
+Equivalência com ACO & não estabelecida \\
+Equivalência biológica com formigas reais & não estabelecida \\
+Evaporação de feromônio & extensão possível; \textbf{não} presente no modelo de \(G\) \\
+Prova de \(\pi=2t_0\) via leis de adição & corrigida (Prop.~\ref{prop:pi-existe}) \\
+Convenção de sinal Mellin/Fourier & explicitada \\
+Pesos \(w_k=b^k\), razão \(\rho_k=b\) & definição posicional (Sec.~\ref{sec:nivel-peso-escala}) \\
+\(w_{k+r}/w_k=b^r\) & Prop.~\ref{prop:razao-escala} (cálculo directo) \\
+Overflow como entrada na escala \(b^d\) & reformulação da aritmética posicional \\
+\(e_k=2^k\) como peso (não operador de salto) & compatibilidade formal \\
+Realização angular \(\exp(2\pi J/k)\) & transportada de \texttt{fermat.tex} (convenção) \\
+Regimes elíptico (\(d=+1\)) / hiperbólico (\(d=-1\)) & \texttt{fermat.tex} (recorrência / Viviani) \\
+\(\log\lambda=\log\lvert\lambda\rvert+i\arg\lambda\) & clássico; realização espectral em \texttt{fermat.tex} \\
+Factoração \(\mathcal R=\widetilde{\mathcal R}\circ\kappa\) & \texttt{fermat.tex} (perda de informação por \(k\)) \\
+Fourier = incremento; Mellin = salto & reformulação estrutural (não magnitude/fase) \\
+\(x^2=x+1\not\Rightarrow A=G\) & lacuna explícita (sem ponte) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\small
+\textbf{Três níveis de leitura}
+\begin{tabular}{@{}p{0.22\textwidth}p{0.68\textwidth}@{}}
+\toprule
+Nível & Objecto \\
+\midrule
+Matemático & realização \(\pi\), campo \(G\), transformação \(\mathcal T\), \(R\), \(\exp\), \(\mathcal F\) \\
+Dinâmico & agentes, trajetórias, regras locais, órbitas \\
+Biológico / estigmérgico & formigas, colónia, território, trilhas, feromônio (interpretação), memória ambiental, coordenação indireta \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+\boxed{\text{modelo matemático}\;\neq\;\text{organismo biológico}}.
+\]
+
+\end{document}
