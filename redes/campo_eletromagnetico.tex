@@ -108,7 +108,7 @@ o cruzado & $E\times B$, a leitura orientada; não é grandeza de estado & Def.~
 o fecho do par & $\abs{E\times B}^{2}=\abs{E}^{2}\abs{B}^{2}-(E\cdot B)^{2}$ & Lema~\texttt{fis:lem:em-lagrange} \\
 a forma nula & $\text{metal}=1\iff E^{2}-B^{2}=0$; \emph{não} é o vácuo & Lema~\texttt{fis:lem:em-cone} \\
 Hodge, no plano & preserva o cruzado, inverte o metal; $H^{2}=-\mathrm{id}$, $H^{4}=\mathrm{id}$ & Teor.~\texttt{fis:thm:em-hodge} \\
-o que não se deriva & Maxwell, continuidade, $\partial$, vácuo, dimensão três & \texttt{fis:em-naoderiva} \\
+o que não se deriva & Maxwell, continuidade, $\partial$, o fluxo $\mathbf S$, vácuo, dimensão três & \texttt{fis:em-naoderiva} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -407,8 +407,12 @@ porque não dizê-las seria fazê-las passar''):
 \begin{enumerate}[leftmargin=1.5em]
 \item \textbf{Maxwell e as equações de campo não entram.} Nada na construção de
       campos produz rotacional, divergente, continuidade ou estado de
-      transporte. O cruzado da leitura tipada (os marginais) é soma exacta de
-      contagens, não um termo de acoplamento vectorial.
+      transporte. \texttt{fisica.tex} nomeia a forma da continuidade,
+      $\partial u/\partial t+\nabla\cdot\mathbf{S}=-\mathbf{J}\cdot\mathbf{E}$,
+      e recusa-a (``não está na construção. \emph{Não entra.}'',
+      \texttt{fis:em-naoderiva}); o mesmo vale aqui. O cruzado da leitura
+      tipada (os marginais) é soma exacta de contagens, não um termo de
+      acoplamento vectorial, e nenhuma leitura tipada vira fluxo.
 \item \textbf{$G$ não é o par $(E,B)$, nem o potencial.} $G$ conta visitas
       (\texttt{fis:def:em-par} é explícito: ``$G$ conta visitas; $(E,B)$ é uma
       realização com duas componentes''). A construção não tem ``duas
