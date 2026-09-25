@@ -1,0 +1,921 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[expansion=false]{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{lema}{Lema}
+\newtheorem{observacao}{Observação}
+\newtheorem{corolario}{Corolário}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\title{Espaço de parâmetros algébricos\\
+\large Família de álgebras quadráticas parametrizada por \(\mathbb{Q}\)}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Escopo e estatuto matemático}
+
+Esta seção formaliza a família de parâmetros racionais associada aos polinômios
+\[
+P_q(\lambda)=\lambda^2-q\lambda-1,\qquad q\in\mathbb{Q},
+\]
+à sua realização matricial
+\[
+A_q=\begin{pmatrix}q&1\\1&0\end{pmatrix}
+\]
+e à álgebra gerada
+\[
+\mathcal{A}_q=\mathbb{Q}[A_q]\subset M_2(\mathbb{Q}).
+\]
+
+A postura metodológica é a seguinte: formalizar primeiro as estruturas que são
+consequência direta das relações já estabelecidas; introduzir estruturas
+adicionais somente quando forem necessárias e justificadas. Em particular,
+não se definem operações artificiais entre matrizes de parâmetros distintos,
+nem se afirma a existência de uma geometria canônica associada a cada \(q\).
+
+A cadeia central é
+\[
+\boxed{
+q\in\mathbb{Q}
+\longmapsto
+P_q
+\longmapsto
+A_q
+\longmapsto
+\mathcal{A}_q
+}
+\]
+com as identificações
+\[
+\mathcal{A}_q
+\cong
+\mathbb{Q}[t]/(P_q)
+\cong
+\mathbb{Q}[w]/(w^2-\Delta_q),
+\qquad
+\Delta_q=q^2+4.
+\]
+
+A distinção fundamental é
+\[
+\boxed{
+\text{dependência algébrica em }q
+\;\neq\;
+\text{dependência geométrica real em }q.
+}
+\]
+
+\section{Família \(P_q\), \(q\in\mathbb{Q}\)}
+
+\begin{definicao}
+Para cada \(q\in\mathbb{Q}\) define-se o polinômio
+\[
+P_q(\lambda)=\lambda^2-q\lambda-1.
+\]
+O espaço de parâmetros é o conjunto
+\[
+\mathcal{P}_{\mathbb{Q}}
+=
+\bigl\{P_q:q\in\mathbb{Q}\bigr\}.
+\]
+\end{definicao}
+
+A aplicação
+\[
+\Phi:\mathbb{Q}\longrightarrow\mathcal{P}_{\mathbb{Q}},
+\qquad
+\Phi(q)=P_q
+\]
+é bijetiva, pois o coeficiente de \(\lambda\) determina univocamente \(q\).
+Assim,
+\[
+\mathcal{P}_{\mathbb{Q}}\cong\mathbb{Q}
+\]
+como conjuntos. A estrutura aqui é apenas a de parametrização; nenhuma
+topologia, métrica ou estrutura diferencial é implícita.
+
+No nível inteiro define-se analogamente
+\[
+\mathcal{P}_{\mathbb{Z}}=\{P_m:m\in\mathbb{Z}\}\subset\mathcal{P}_{\mathbb{Q}}.
+\]
+
+\section{Realização matricial \(A_q\)}
+
+\begin{definicao}
+Para cada \(q\in\mathbb{Q}\) define-se a matriz companheira
+\[
+A_q=\begin{pmatrix}q&1\\1&0\end{pmatrix}\in M_2(\mathbb{Q}).
+\]
+\end{definicao}
+
+Tem-se imediatamente
+\begin{align*}
+\operatorname{tr}(A_q)&=q,\\
+\det(A_q)&=-1,
+\end{align*}
+e o polinômio característico
+\[
+\chi_{A_q}(\lambda)=\det(\lambda I-A_q)=P_q(\lambda).
+\]
+Logo
+\[
+\boxed{\chi_{A_q}=P_q.}
+\]
+
+Pelo teorema de Cayley--Hamilton,
+\[
+A_q^2-qA_q-I=0,
+\]
+ou equivalentemente
+\[
+\boxed{A_q^2=qA_q+I.}
+\]
+
+A matriz
+\[
+T_q=\begin{pmatrix}0&1\\1&q\end{pmatrix}
+\]
+é semelhante a \(A_q\) via a permutação
+\[
+J=\begin{pmatrix}0&1\\1&0\end{pmatrix},
+\qquad
+T_q=JA_qJ.
+\]
+A escolha entre \(A_q\) e \(T_q\) é apenas de representação matricial.
+
+\section{Álgebra \(\mathcal{A}_q\)}
+
+\begin{definicao}
+A álgebra gerada por \(A_q\) é o subespaço
+\[
+\mathcal{A}_q:=\operatorname{span}_{\mathbb{Q}}\{I,A_q\}\subset M_2(\mathbb{Q}).
+\]
+\end{definicao}
+
+\begin{proposicao}
+\(\mathcal{A}_q\) é uma \(\mathbb{Q}\)-álgebra comutativa de dimensão \(2\),
+com elemento identidade \(I\). Explicitamente, todo elemento escreve-se de
+modo único como \(\alpha I+\beta A_q\) com \(\alpha,\beta\in\mathbb{Q}\), e
+a multiplicação é determinada pela relação \(A_q^2=qA_q+I\).
+\end{proposicao}
+
+\begin{proof}
+A independência linear de \(I\) e \(A_q\) segue imediatamente da forma das
+matrizes. O fechamento multiplicativo decorre da relação de Cayley--Hamilton.
+A comutatividade é imediata.
+\end{proof}
+
+\begin{teorema}
+O mapa
+\[
+\varphi:\mathbb{Q}[t]/(t^2-qt-1)\longrightarrow\mathcal{A}_q,
+\qquad
+\overline{t}\longmapsto A_q
+\]
+é um isomorfismo de \(\mathbb{Q}\)-álgebras.
+\end{teorema}
+
+\begin{proof}
+O mapa é bem-definido porque \(A_q\) satisfaz \(P_q\). É sobrejetivo por
+construção de \(\mathcal{A}_q\). É injetivo porque ambos os espaços têm
+dimensão \(2\).
+\end{proof}
+
+Assim,
+\[
+\boxed{\mathcal{A}_q\cong\mathbb{Q}[t]/(P_q)}.
+\]
+Não se trata de uma álgebra nova: é a realização matricial canônica da
+álgebra quociente associada ao polinômio \(P_q\).
+
+As potências de \(A_q\) admitem a expressão
+\[
+A_q^n=a_n(q)A_q+b_n(q)I,
+\]
+onde as sequências \((a_n)\) e \((b_n)\) satisfazem a recorrência
+\[
+a_{n+2}=qa_{n+1}+a_n
+\]
+com condições iniciais adequadas.
+
+\section{Apresentação equivalente via \(W_q\)}
+
+\begin{definicao}
+Define-se o operador
+\[
+W_q=2A_q-qI=\begin{pmatrix}q&2\\2&-q\end{pmatrix}.
+\]
+\end{definicao}
+
+Tem-se a relação inversa
+\[
+A_q=\frac{W_q+qI}{2}.
+\]
+
+\begin{proposicao}
+\[
+W_q^2=(q^2+4)I.
+\]
+\end{proposicao}
+
+\begin{proof}
+Expandindo e usando \(A_q^2=qA_q+I\) obtém-se
+\begin{align*}
+W_q^2
+&=(2A_q-qI)^2
+=4A_q^2-4qA_q+q^2I
+=4(qA_q+I)-4qA_q+q^2I
+=(q^2+4)I.
+\end{align*}
+\end{proof}
+
+Como \(\{I,W_q\}\) também gera \(\mathcal{A}_q\), tem-se
+\[
+\mathcal{A}_q=\operatorname{span}_{\mathbb{Q}}\{I,W_q\}.
+\]
+
+\begin{teorema}
+O mapa
+\[
+\psi:\mathbb{Q}[w]/(w^2-(q^2+4))\longrightarrow\mathcal{A}_q,
+\qquad
+\overline{w}\longmapsto W_q
+\]
+é um isomorfismo de \(\mathbb{Q}\)-álgebras. Portanto
+\[
+\boxed{\mathcal{A}_q\cong\mathbb{Q}[w]/(w^2-\Delta_q)},
+\qquad
+\Delta_q=q^2+4.
+\]
+\end{teorema}
+
+As duas apresentações são isomorfas via a mudança de variável \(w=2t-q\).
+
+\section{Involução e paridade interna}
+
+A relação \(A_q^2=qA_q+I\) determina uma involução natural na álgebra \(\mathcal{A}_q\).
+
+\begin{definicao}
+Define-se
+\[
+\overline{A_q}:=qI-A_q=\begin{pmatrix}0&-1\\-1&q\end{pmatrix}.
+\]
+\end{definicao}
+
+\begin{proposicao}
+Tem-se
+\[
+\overline{\overline{A_q}}=A_q
+\qquad\text{e}\qquad
+A_q\overline{A_q}=\overline{A_q}A_q=-I.
+\]
+Em particular \(\overline{A_q}=-A_q^{-1}\).
+\end{proposicao}
+
+\begin{proof}
+A primeira identidade é imediata. A segunda segue de
+\begin{align*}
+A_q\overline{A_q}
+&=A_q(qI-A_q)
+=qA_q-A_q^2
+=qA_q-(qA_q+I)
+=-I.
+\end{align*}
+\end{proof}
+
+Aplicando a mesma involução a \(W_q=2A_q-qI\) obtém-se
+\[
+\overline{W_q}=2\overline{A_q}-qI=-W_q.
+\]
+Logo \(W_q\) é anti-invariante. Como \(\mathcal{A}_q=\operatorname{span}_{\mathbb{Q}}\{I,W_q\}\), a involução induz a decomposição em eigenspaces
+\[
+\mathcal{A}_q=\mathcal{A}_q^+\oplus\mathcal{A}_q^-,
+\]
+onde
+\[
+\boxed{
+\mathcal{A}_q^+=\mathbb{Q}I,
+\qquad
+\mathcal{A}_q^-=\mathbb{Q}W_q.
+}
+\]
+A parte \(+\) é fixa e a parte \(-\) é anti-fixa. Esta é uma estrutura de paridade interna da álgebra, consequência direta das relações já estabelecidas; não constitui uma dualidade importada de estruturas externas.
+
+A simetria de parâmetro \(q\mapsto-q\) é compatível com a involução: tem-se
+\[
+P_{-q}(t)=P_q(-t)
+\]
+e, no nível dos autovalores,
+\[
+\alpha_{-q}^+=\frac1{\alpha_q^+}.
+\]
+
+\section{Discriminante \(\Delta_q=q^2+4\)}
+
+\begin{definicao}
+O discriminante associado a \(q\) é
+\[
+\Delta_q:=q^2+4.
+\]
+\end{definicao}
+
+Observa-se que \(\Delta_q\ge 4>0\) para todo \(q\in\mathbb{Q}\), logo
+\(\Delta_q\neq 0\). Em particular \(W_q\) é sempre invertível e
+\[
+W_q^{-1}=\frac{1}{\Delta_q}W_q.
+\]
+
+\section{Fibras split e parametrização completa}
+
+\begin{proposicao}
+As seguintes condições são equivalentes:
+\begin{enumerate}[label=(\roman*)]
+\item \(\Delta_q\) é um quadrado em \(\mathbb{Q}\);
+\item \(P_q\) se fatore em dois fatores lineares distintos sobre \(\mathbb{Q}\);
+\item \(\mathcal{A}_q\cong\mathbb{Q}\times\mathbb{Q}\);
+\item os autovalores de \(A_q\) pertencem a \(\mathbb{Q}\).
+\end{enumerate}
+Caso contrário, \(P_q\) é irredutível e \(\mathcal{A}_q\) é um corpo
+quadrático (isomorfo a \(\mathbb{Q}(\sqrt{\Delta_q})\)).
+\end{proposicao}
+
+\begin{teorema}[Parametrização das fibras split]
+As soluções racionais da equação \(r^2=q^2+4\) são dadas por
+\[
+q=\frac{4-s^2}{2s},\qquad
+r=\frac{4+s^2}{2s},
+\qquad
+s\in\mathbb{Q}^\times.
+\]
+Em particular, o conjunto dos parâmetros \(q\) para os quais a fibra é split
+é precisamente
+\[
+\Bigl\{\frac{4-s^2}{2s}:s\in\mathbb{Q}^\times\Bigr\}.
+\]
+\end{teorema}
+
+\begin{proof}
+A equação \(r^2-q^2=4\) escreve-se \((r-q)(r+q)=4\). Pondo \(s=r-q\) e
+\(t=r+q\), tem-se \(st=4\). Resolvendo o sistema linear obtém-se a
+parametrização acima. A verificação direta confirma que toda escolha de
+\(s\in\mathbb{Q}^\times\) produz uma solução, e que toda solução racional
+surge dessa forma.
+\end{proof}
+
+Assim a classificação das fibras é completa:
+\[
+\mathcal{A}_q\cong
+\begin{cases}
+\mathbb{Q}\times\mathbb{Q}
+& \text{se }\Delta_q\in(\mathbb{Q}^\times)^2,\\[1mm]
+\mathbb{Q}(\sqrt{\Delta_q})
+& \text{se }\Delta_q\notin(\mathbb{Q}^\times)^2.
+\end{cases}
+\]
+
+\section{Extensão mínima \(K_q\) e diagonalização}
+
+\begin{definicao}
+A extensão mínima associada a \(q\) é
+\[
+K_q:=\mathbb{Q}(\sqrt{\Delta_q}).
+\]
+\end{definicao}
+
+\begin{proposicao}
+\begin{itemize}
+\item Se \(\Delta_q\) é quadrado em \(\mathbb{Q}\), então \(K_q=\mathbb{Q}\).
+\item Caso contrário, \(K_q/\mathbb{Q}\) é uma extensão quadrática.
+\end{itemize}
+\end{proposicao}
+
+Os autovalores de \(A_q\) são
+\[
+\lambda_\pm=\frac{q\pm\sqrt{\Delta_q}}{2}.
+\]
+Eles satisfazem
+\[
+\lambda_++\lambda_-=q,\qquad\lambda_+\lambda_-=-1.
+\]
+Sobre \(K_q\), \(A_q\) é sempre diagonalizável (os autovalores são distintos
+porque \(\Delta_q\neq 0\)).
+
+Uma matriz de mudança de base explícita é
+\[
+P=\begin{pmatrix}\lambda_+&\lambda_-\\1&1\end{pmatrix},
+\]
+que satisfaz
+\[
+P^{-1}A_qP=\operatorname{diag}(\lambda_+,\lambda_-)
+\]
+sempre que \(\det P=\sqrt{\Delta_q}\neq 0\). Quando a fibra é split tem-se
+\(P\in M_2(\mathbb{Q})\).
+
+\section{Similaridade dos \(A_q\)}
+
+\begin{proposicao}
+\[
+A_q\sim A_r\quad\Longleftrightarrow\quad q=r.
+\]
+\end{proposicao}
+
+\begin{proof}
+O traço é invariante por similaridade e \(\operatorname{tr}(A_q)=q\).
+A recíproca é trivial.
+\end{proof}
+
+A classe de similaridade de \(A_q\) contém outras matrizes além de \(A_q\)
+(por exemplo \(T_q\)). Assim
+\[
+q\neq A_q\neq[A_q]_{\mathrm{similaridade}}.
+\]
+A parametrização por \(q\) é mais fina do que a classificação abstrata das
+álgebras: diferentes valores de \(q\) podem produzir álgebras
+abstratamente isomorfas (por exemplo quando \(\Delta_q\) e \(\Delta_r\)
+estão na mesma classe módulo quadrados), enquanto \(A_q\) e \(A_r\) só
+são semelhantes quando \(q=r\).
+
+\section{Forma \(B_q\) e isotropia racional}
+
+A matriz \(W_q\) é simétrica. Define-se a forma bilinear associada
+\[
+B_q(u,v)=u^\top W_q v
+=
+q\,u_1v_1+2u_1v_2+2u_2v_1-q\,u_2v_2,
+\]
+onde \(u=(u_1,u_2)\) e \(v=(v_1,v_2)\). A forma quadrática associada é
+\[
+Q_q(u):=B_q(u,u)=q\,u_1^2+4u_1u_2-q\,u_2^2.
+\]
+Tem-se
+\[
+\operatorname{tr}W_q=0,\qquad\det W_q=-\Delta_q.
+\]
+Como \(\Delta_q>0\), a forma é não-degenerada. Sobre \(\mathbb{R}\) toda
+forma bilineares simétrica não-degenerada de dimensão \(2\) com
+determinante negativo possui assinatura \((1,1)\). Logo todas as formas
+\(B_q\) (e as formas quadráticas \(Q_q\)) são isométricas sobre \(\mathbb{R}\).
+
+\subsection{Isotropia sobre \(\mathbb{Q}\)}
+
+Um vetor \(u\neq0\) é isotrópico quando \(Q_q(u)=B_q(u,u)=0\). Para
+\(q=0\) a forma \(Q_0(u)=4u_1u_2\) é claramente isotrópica. Para
+\(q\neq0\), pondo \(t=u_1/u_2\) (com \(u_2\neq0\)), a equação torna-se
+\(qt^2+4t-q=0\), cujo discriminante é \(4\Delta_q\). Logo existe solução
+racional se e somente se \(\Delta_q\) é um quadrado em \(\mathbb{Q}\). Em
+resumo:
+\[
+\boxed{
+Q_q\text{ é isotrópica sobre }\mathbb{Q}
+\quad\Longleftrightarrow\quad
+\Delta_q\in(\mathbb{Q}^\times)^2.
+}
+\]
+Assim o mesmo discriminante que classifica as fibras \(\mathcal{A}_q\)
+controla também a isotropia racional da forma quadrática \(Q_q\).
+
+\subsection{Regime split}
+
+Quando \(\Delta_q=r^2\) com \(r\in\mathbb{Q}^\times\) e \(q\neq0\), as raízes
+\[
+t_\pm=\frac{-2\pm r}{q}
+\]
+fornecem vetores isotrópicos. A matriz
+\[
+P=\begin{pmatrix}t_+&t_-\\1&1\end{pmatrix}
+\]
+pertence a \(\mathrm{GL}_2(\mathbb{Q})\) (\(\det P=2r/q\)) e satisfaz
+\[
+P^\top W_q P
+=
+-\frac{2\Delta_q}{q}
+\begin{pmatrix}0&1\\1&0\end{pmatrix}.
+\]
+O fator de escala \(\lambda=-2\Delta_q/q\neq0\) não altera o grupo
+ortogonal: \(O(\lambda H;\mathbb{Q})=O(H;\mathbb{Q})\). Portanto
+\[
+\boxed{
+O(B_q;\mathbb{Q})\cong O(1,1;\mathbb{Q})
+}
+\]
+sempre que \(\Delta_q\) é um quadrado racional. (O caso \(q=0\) já havia
+sido verificado por mudança de base independente.)
+
+\subsection{Regime não-split}
+
+Quando \(\Delta_q\notin(\mathbb{Q}^\times)^2\) a forma quadrática \(Q_q\) é
+anisotrópica sobre \(\mathbb{Q}\) (apesar de indefinida sobre \(\mathbb{R}\)).
+A descrição explícita do grupo \(O(B_q;\mathbb{Q})\) em termos de unidades
+do corpo \(\mathbb{Q}(\sqrt{\Delta_q})\) não é desenvolvida aqui.
+
+\subsection{Observação metodológica}
+
+O discriminante \(\Delta_q\) aparece em três construções distintas
+(\(\mathcal{A}_q\), \(B_q\), \(O(B_q;\mathbb{Q})\)). Isso não autoriza
+identificá-las:
+\[
+\boxed{
+\text{álgebra }\mathcal{A}_q
+\;\neq\;
+\text{forma }B_q
+\;\neq\;
+O(B_q;\mathbb{Q}).
+}
+\]
+A forma \(B_q\) continua sendo uma construção adicional; não constitui,
+por si só, uma geometria canônica associada a \(q\). Em particular
+\[
+\boxed{
+\text{dependência algébrica em }q
+\;\neq\;
+\text{dependência geométrica real em }q.
+}
+\]
+
+\section{Estruturas externas: ramos de Gentil e formas multiplicativas}
+
+As operações por partes reportadas por Gentil constituem uma estrutura
+\textbf{externa} em análise. Elas não fazem parte do núcleo algébrico da
+família \(\mathcal{A}_q\) e não são identificadas com ela neste texto.
+A postura é de confronto formal, não de assimilação.
+
+A regra reportada é
+\[
+\mu(a,b;c,d)=(ac+\varepsilon(c)bd,\,ad+bc),
+\]
+onde
+\[
+\varepsilon(c)=\begin{cases}
+-1 & \text{se }c\ge0,\\
++1 & \text{se }c<0.
+\end{cases}
+\]
+Isso determina dois ramos constantes:
+\begin{align*}
+\mu_-(x,y)&=(ac-bd,\,ad+bc),\\
+\mu_+(x,y)&=(ac+bd,\,ad+bc).
+\end{align*}
+
+Para \(x=(a,b)\) define-se inicialmente a norma euclidiana
+\[
+N(x)=a^2+b^2.
+\]
+No ramo negativo obtém-se a identidade clássica
+\[
+N(\mu_-(x,y))=N(x)N(y).
+\]
+Assim \(\mu_-\) coincide com a multiplicação complexa usual em coordenadas
+reais e preserva a forma positiva \(a^2+b^2\).
+
+No ramo positivo a situação é diferente:
+\[
+N(\mu_+(x,y))=(a^2+b^2)(c^2+d^2)+4abcd,
+\]
+logo a norma euclidiana \textbf{não} é multiplicativa em geral. Em
+compensação, a forma indefinida
+\[
+Q_+(a,b)=a^2-b^2
+\]
+satisfaz
+\[
+Q_+(\mu_+(x,y))=Q_+(x)Q_+(y).
+\]
+Resumindo:
+\[
+\begin{array}{c|c|c}
+\text{ramo} & \text{produto} & \text{forma multiplicativa}\\
+\hline
+- & (ac-bd,\,ad+bc) & a^2+b^2\\
++ & (ac+bd,\,ad+bc) & a^2-b^2
+\end{array}
+\]
+
+Estas são duas multiplicatividades de formas quadráticas distintas,
+correspondentes respectivamente às álgebras \(\mathbb{C}\) e
+\(\mathbb{R}\times\mathbb{R}\) (ou, em linguagem de polinômios,
+\(t^2+1\) e \(t^2-1\)).
+
+A preservação de uma forma quadrática é uma propriedade algébrica
+verificável da operação; não constitui, por si só, uma identificação
+entre as estruturas.
+
+\subsection{Classificação algébrica dos ramos fixos}
+
+Os ramos \(\mu_+\) e \(\mu_-\) são tratados aqui como álgebras separadas
+(produto constante, sem escolha de sinal dependente do estado). Os
+resultados abaixo referem-se exclusivamente a esses ramos fixos.
+
+\paragraph{Ramo \(\mu_+\): isomorfismo explícito.}
+Com a adição componente a componente, \((\mathbb{Q}^2,\mu_+)\) é uma
+\(\mathbb{Q}\)-álgebra comutativa de dimensão 2. Defina
+\[
+\Phi_+:\mathbb{Q}^2\to\mathcal{A}_0,
+\qquad
+\Phi_+(a,b)=aI+bA_0.
+\]
+Como \(A_0^2=I\) (pois \(P_0(t)=t^2-1\)) e
+\[
+\mu_+((a,b),(c,d))=(ac+bd,\,ad+bc),
+\]
+tem-se
+\begin{align*}
+\Phi_+(\mu_+(x,y))
+&=\Phi_+(ac+bd,\,ad+bc)
+=(ac+bd)I+(ad+bc)A_0
+\\
+&=(aI+bA_0)(cI+dA_0)
+=\Phi_+(x)\Phi_+(y).
+\end{align*}
+O mapa é linear e leva a base canônica de \(\mathbb{Q}^2\) na base
+\(\{I,A_0\}\) de \(\mathcal{A}_0\), logo é bijetivo. Portanto
+\[
+\boxed{(\mathbb{Q}^2,\mu_+)\cong\mathcal{A}_0}.
+\]
+(DEMONSTRADO)
+
+\paragraph{Ramo \(\mu_-\): obstrução para toda a família.}
+A álgebra \((\mathbb{Q}^2,\mu_-)\) é isomorfa a \(\mathbb{Q}[i]\) com
+\(i^2=-1\) (a multiplicação complexa usual). O polinômio mínimo de \(i\)
+é \(t^2+1\), de discriminante \(-4<0\).
+
+Por outro lado, para todo \(q\in\mathbb{Q}\),
+\[
+\mathcal{A}_q\cong\mathbb{Q}[t]/(t^2-qt-1)
+\]
+tem discriminante \(\Delta_q=q^2+4>0\). Duas \(\mathbb{Q}\)-álgebras
+quadráticas isomorfas possuem discriminantes que diferem por um
+quadrado em \(\mathbb{Q}^\times\). Como um discriminante positivo nunca
+é um quadrado racional vezes um discriminante negativo, nenhuma fibra
+\(\mathcal{A}_q\) pode ser isomorfa a \(\mathbb{Q}[i]\). Logo
+\[
+\boxed{(\mathbb{Q}^2,\mu_-)\not\cong\mathcal{A}_q\quad\forall q\in\mathbb{Q}}.
+\]
+(DEMONSTRADO)
+
+\paragraph{Alcance da conclusão.}
+Os resultados acima valem para os ramos \emph{fixos} \(\mu_+\) e
+\(\mu_-\), tratados como álgebras separadas. Eles \textbf{não}
+demonstram que a operação original de Gentil (caso esta seja uma
+operação global definida por escolha de sinal dependente do estado)
+seja isomorfa a \(\mathcal{A}_0\), nem estabelecem qualquer relação com
+estruturas tridimensionais. Em particular, não se afirma dualidade,
+identificação global ou “caso limite” entre Gentil e a família
+\(\{\mathcal{A}_q\}\).
+
+Uma comparação adicional legítima (ainda em nível de observação) é a
+seguinte: a forma \(B_q\) associada a \(W_q\) tem sempre assinatura real
+\((1,1)\), enquanto \(Q_+\) é a forma indefinida padrão de dimensão 2.
+No caso particular \(q=0\) tem-se
+\[
+W_0=\begin{pmatrix}0&2\\2&0\end{pmatrix},
+\]
+logo
+\[
+B_0\begin{pmatrix}u\\v\end{pmatrix}=4uv.
+\]
+A identidade
+\[
+4uv=(u+v)^2-(u-v)^2
+\]
+mostra que, sob a mudança de variáveis
+\[
+\begin{pmatrix}a\\b\end{pmatrix}
+=
+\begin{pmatrix}1&1\\1&-1\end{pmatrix}
+\begin{pmatrix}u\\v\end{pmatrix},
+\]
+obtém-se
+\[
+B_0\begin{pmatrix}u\\v\end{pmatrix}=a^2-b^2.
+\]
+A matriz da mudança tem determinante \(-2\neq0\), portanto é invertível
+sobre \(\mathbb{Q}\). A equivalência racional é assim explícita e
+verificável. Essa equivalência pontual não se estende automaticamente
+a uma identificação das estruturas.
+
+\section{Família global e distinção entre parâmetro e tipo de álgebra}
+
+Os objetos matemáticos distintos são:
+\begin{itemize}
+\item o espaço de parâmetros \(\mathbb{Q}\) (ou \(\mathcal{P}_{\mathbb{Q}}\));
+\item a família de polinômios \(\{P_q:q\in\mathbb{Q}\}\);
+\item a família de matrizes \(\{A_q:q\in\mathbb{Q}\}\);
+\item a família de álgebras \(\{\mathcal{A}_q:q\in\mathbb{Q}\}\).
+\end{itemize}
+
+A união disjunta
+\[
+\bigsqcup_{q\in\mathbb{Q}}\mathcal{A}_q
+\]
+é bem-definida como conjunto. Cada fibra carrega sua própria estrutura de
+\(\mathbb{Q}\)-álgebra de dimensão \(2\). Não existe, no estado atual,
+estrutura de álgebra (nem de espaço vetorial) no total que misture
+diferentes parâmetros.
+
+O objeto mais fiel aos dados é a
+\[
+\boxed{
+\text{família de álgebras quadráticas parametrizada por }\mathbb{Q}.
+}
+\]
+Não se introduz estrutura de moduli, fibrado ou variedade sem justificativa
+adicional.
+
+\section{Relação com a implementação Tiffany}
+
+A aritmética racional necessária para parametrizar \(q\) possui realização
+computacional no Tiffany (tipo \(\mathtt{Qz}\), normalização por sinal do
+denominador e redução por máximo divisor comum). A identidade
+\[
+A_q^2=qA_q+I
+\]
+e a relação \(W_q^2=\Delta_q I\) foram verificadas experimentalmente para
+inteiros e simuladas para racionais.
+
+A composição computacional direta \(q\mapsto A_q\) com \(q\in\mathbb{Q}\)
+ainda requer uma camada matricial racional explícita ou uma generalização
+do contrato matricial existente (atualmente centrado em parâmetros inteiros).
+
+A assinatura prima
+\[
+\Sigma_{\mathrm{rad}}(x)=(\nu_p(x))_{p\in\mathbb{P}}
+\]
+não possui implementação computacional correspondente a uma aplicação
+\[
+\Sigma_{\mathrm{rad}}:\mathbb{Q}^*\to\mathbb{Z}^{(\mathbb{P})}
+\]
+no estado atual. Consequentemente a cadeia
+\[
+x\longmapsto\Sigma_{\mathrm{rad}}(x)\longmapsto q\longmapsto P_q
+\]
+não está realizada. Qualquer conexão futura deverá ser introduzida e
+demonstrada separadamente.
+
+O mecanismo JEV e a família \(\mathcal{P}_{\mathbb{Q}}\) permanecem
+construções paralelas; não há aplicação demonstrada \(G\mapsto q\).
+
+\section{Classificação epistemológica}
+
+\begin{center}
+\begin{tabular}{@{}p{0.55\textwidth}p{0.35\textwidth}@{}}
+\toprule
+Afirmação & Estatuto \\
+\midrule
+\(\mathcal{A}_q\cong\mathbb{Q}[t]/(P_q)\) & DEMONSTRADO \\
+\(\mathcal{A}_q\cong\mathbb{Q}[w]/(w^2-\Delta_q)\) & DEMONSTRADO \\
+Classificação split / corpo segundo \(\Delta_q\) & DEMONSTRADO \\
+Parametrização racional completa das fibras split & DEMONSTRADO \\
+\(A_q\sim A_r\Leftrightarrow q=r\) & DEMONSTRADO \\
+Extensão mínima \(K_q=\mathbb{Q}(\sqrt{\Delta_q})\) & DEMONSTRADO \\
+Diagonalização explícita sobre \(K_q\) & DEMONSTRADO \\
+Involução \(\overline{A_q}=qI-A_q\), \(\overline{\overline{A_q}}=A_q\) & DEMONSTRADO \\
+\(A_q\overline{A_q}=-I\) & DEMONSTRADO \\
+Paridade \(\mathcal{A}_q=\mathbb{Q}I\oplus\mathbb{Q}W_q\) & DEMONSTRADO \\
+\(\det W_q=-\Delta_q\), assinatura real \((1,1)\) & DEMONSTRADO \\
+Isometria real de todas as \(B_q\) & DEMONSTRADO \\
+\(Q_q\) isotrópica \(\Leftrightarrow\Delta_q\in(\mathbb{Q}^\times)^2\) & DEMONSTRADO \\
+Matriz \(P\) e fator \(\lambda=-2\Delta_q/q\) no caso split & DEMONSTRADO \\
+\(O(B_q;\mathbb{Q})\cong O(1,1;\mathbb{Q})\) quando \(\Delta_q\) é quadrado & DEMONSTRADO \\
+Descrição de \(O(B_q;\mathbb{Q})\) no regime não-split & NÃO ESTABELECIDO \\
+\(N(\mu_-)=N(x)N(y)\) (forma \(a^2+b^2\)) & DEMONSTRADO \\
+\(Q_+(\mu_+)=Q_+(x)Q_+(y)\) (forma \(a^2-b^2\)) & DEMONSTRADO \\
+\((\mathbb{Q}^2,\mu_+)\cong\mathcal{A}_0\) & DEMONSTRADO \\
+\((\mathbb{Q}^2,\mu_-)\not\cong\mathcal{A}_q\) para todo \(q\in\mathbb{Q}\) & DEMONSTRADO \\
+Identificação da operação global de Gentil com \(\mathcal{A}_q\) & NÃO ESTABELECIDO \\
+Classificação completa de isometria racional de \(B_q\) & NÃO ESTABELECIDO \\
+Estrutura geométrica canônica por fibra & NÃO ESTABELECIDO \\
+Operações naturais entre parâmetros distintos & NÃO ESTABELECIDO \\
+Cadeia \(\Sigma_{\mathrm{rad}}\to q\) & NÃO ESTABELECIDO \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Conclusão}
+
+A construção sustentada estabelece a cadeia matemática
+\[
+\boxed{
+q\in\mathbb{Q}
+\longmapsto
+P_q(\lambda)=\lambda^2-q\lambda-1
+\longmapsto
+A_q
+\longmapsto
+\mathcal{A}_q
+\cong
+\mathbb{Q}[t]/(P_q)
+\cong
+\mathbb{Q}[w]/(w^2-\Delta_q)
+}
+\]
+com \(\Delta_q=q^2+4\), e a dicotomia
+\[
+\Delta_q\in(\mathbb{Q}^\times)^2
+\quad\Longleftrightarrow\quad
+\mathcal{A}_q\cong\mathbb{Q}\times\mathbb{Q},
+\]
+\[
+\Delta_q\notin(\mathbb{Q}^\times)^2
+\quad\Longleftrightarrow\quad
+\mathcal{A}_q\cong\mathbb{Q}(\sqrt{\Delta_q}).
+\]
+
+A parametrização por \(q\) é mais fina que a classificação abstrata das
+álgebras. O mesmo discriminante controla independentemente a natureza
+das fibras e a isotropia das formas quadráticas:
+\[
+\Delta_q\in(\mathbb{Q}^\times)^2
+\quad\Longleftrightarrow\quad
+\mathcal{A}_q\cong\mathbb{Q}\times\mathbb{Q}
+\quad\text{e}\quad
+Q_q\text{ isotrópica},
+\]
+com a consequência
+\[
+O(B_q;\mathbb{Q})\cong O(1,1;\mathbb{Q})
+\]
+no regime split. No regime não-split a forma quadrática \(Q_q\) é
+anisotrópica sobre \(\mathbb{Q}\) e a descrição do grupo ortogonal não é
+desenvolvida. A coincidência do invariante não identifica os objetos:
+\[
+\mathcal{A}_q\;\neq\;B_q\;\neq\;O(B_q;\mathbb{Q}).
+\]
+
+A álgebra \(\mathcal{A}_q\) possui uma involução interna
+\[
+\overline{A_q}=qI-A_q
+\]
+que induz a paridade
+\[
+\mathcal{A}_q=\mathbb{Q}I\oplus\mathbb{Q}W_q.
+\]
+Esta é estrutura interna, consequência direta das relações já estabelecidas.
+
+Os ramos fixos de Gentil foram classificados algebricamente:
+\[
+(\mathbb{Q}^2,\mu_+)\cong\mathcal{A}_0,
+\qquad
+(\mathbb{Q}^2,\mu_-)\not\cong\mathcal{A}_q\quad\forall q\in\mathbb{Q}.
+\]
+Estes resultados referem-se exclusivamente aos ramos constantes;
+não se estendem automaticamente à operação global (com escolha de
+sinal dependente do estado) nem a estruturas tridimensionais.
+
+O objeto matemático central é a família de álgebras quadráticas
+parametrizada por \(\mathbb{Q}\). Nenhuma geometria canônica, nenhuma
+operação entre parâmetros distintos e nenhuma estrutura global mais forte
+foram introduzidas.
+
+A ordem metodológica preservada é
+\[
+\boxed{
+\text{realização}
+\rightarrow
+\text{representação}
+\rightarrow
+\text{estrutura algébrica}
+\rightarrow
+\text{simetria interna (involução/paridade)}
+\rightarrow
+\text{classificação aritmética das fibras}
+\rightarrow
+\text{estruturas externas em confronto}
+\rightarrow
+\text{possível construção geométrica}.
+}
+\]
+
+\begin{thebibliography}{9}
+
+\bibitem{geometria-observador-m}
+Auditoria do Tiffany --- geometria observacional e realização aritmética.
+\texttt{geometria\_observador\_md}.
+Seções relevantes: estruturas reais, cadeia de realização,
+extensão \(\mathbb{Z}\!\to\!\mathbb{Q}\), construção \(P_q\),
+matriz \(T_q\), estruturas geométricas, assinatura prima, JEV,
+classificação final e auditoria cirúrgica \(\mathbb{Q}\!\to\!P_q\).
+
+\end{thebibliography}
+
+\end{document}
