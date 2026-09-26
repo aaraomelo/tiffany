@@ -79,6 +79,13 @@ static Mat mat_soma(Mat A, Mat B){
         C.a[i][j] = qz_soma(A.a[i][j], B.a[i][j]);
     return C;
 }
+/* ── ESCALAR (multiplicação por Qz) ────────────────────────────────────── */
+static Mat mat_esc(Qz l, Mat A){
+    Mat R = mat0(A.m, A.n);
+    for(int i = 0; i < A.m; i++) for(int j = 0; j < A.n; j++)
+        R.a[i][j] = qz_mult(l, A.a[i][j]);
+    return R;
+}
 static Mat mat_esc_neg(Mat A){                    /* −A, que a Cayley–Hamilton pede */
     Mat R = mat0(A.m, A.n);
     for(int i = 0; i < A.m; i++) for(int j = 0; j < A.n; j++) R.a[i][j] = qz_oposto(A.a[i][j]);
