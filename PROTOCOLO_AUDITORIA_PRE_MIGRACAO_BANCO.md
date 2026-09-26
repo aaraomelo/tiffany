@@ -406,3 +406,29 @@ A auditoria demonstrou que a resposta a "O que precisamos mudar?" foi:
 **"O que o sistema já garante, onde estão suas fronteiras e como sabemos que continuará garantindo isso?"**
 
 Isso constitui o produto principal desta etapa: conhecimento verificável sobre a semântica do sistema, com contratos explícitos e medidores. A investigação Mat2Q permanece como etapa separada e posterior.
+
+## 19. BURACO MAT2Q ↔ Qz ↔ BANCO — q = 15/4 (2026-09-26)
+
+### Resultado medido
+
+| Secção | Pergunta | Resultado |
+|--------|----------|-----------|
+| §1 Mat2Q | A_q, W_q, split em q=15/4 | ✓ invariantes preservados |
+| §2 esp_disc | recusa de racional não inteiro | -1 (contrato forma.h:143) |
+| §3 mat_mult | operação da casa sobre Mat | A² = qA + I ✓ |
+| §4 round-trip | Mat2Q → Mat → Mat2Q | identidade ✓ |
+| §5 invariantes | tr, det antes/depois | preservados ✓ |
+
+Commit: `1039ae7f` — `lib/linear.h` +7 (mat_esc), `tests/buraco_racional.c` +117.
+
+### Contrato
+
+**Extensão de domínio operacional:** para q = 15/4, a camada Mat2Q representa e opera A_q; esp_disc da casa mantém sua recusa documentada para racionais não inteiros; a representação correspondente em Mat pode ser submetida a mat_mult e satisfaz A_q² = qA_q + I; o round-trip Mat2Q → Mat → Mat2Q preserva o objeto e os invariantes tr e det medidos.
+
+### Contenção
+
+Este resultado demonstra uma extensão de domínio operacional para o caso medido; não demonstra equivalência geral entre Mat2Q e Qz, nem substituição da aritmética existente do banco.
+
+### Classificação do +mat_esc
+
+Infraestrutura de medição que expôs lacuna funcional preexistente: esp_cayley já usava operação equivalente via mat_esc_neg; mat_esc como primitiva explícita era conceitualmente necessária na camada matricial e ausente. Aditivo, static inline, sem regressão (matriz_q 10/10, ponte_matriz_q 65/65).
