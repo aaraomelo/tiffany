@@ -405,7 +405,50 @@ A auditoria demonstrou que a resposta a "O que precisamos mudar?" foi:
 
 **"O que o sistema já garante, onde estão suas fronteiras e como sabemos que continuará garantindo isso?"**
 
-Isso constitui o produto principal desta etapa: conhecimento verificável sobre a semântica do sistema, com contratos explícitos e medidores. A investigação Mat2Q permanece como etapa separada e posterior.
+## 20. CHECKPOINT FINAL DA FASE — FOTOGRAFIA CONSOLIDADA
+
+### O que foi demonstrado
+
+- 7/7 contratos de schema: medidos, contratados, 0 linhas do motor alteradas.
+- 21 contratos/identidades Mat2Q: bateria verde, ponte identidade, sem regressão.
+- Buraco Mat2Q ↔ Qz ↔ banco q=15/4: 5 secções, 0 falhas.
+
+### O que foi deliberadamente NÃO demonstrado
+
+- Equivalência geral Mat2Q ≡ Qz.
+- Substituição da aritmética do banco.
+- Correcção de esp_disc (recusa documentada mantida).
+- Comportamento para outros racionais além de q=15/4.
+
+### Contratos congelados
+
+| Schema | 7/7 | Mat2Q | 21/21 | Buraco | medido |
+
+### Alterações de código efectivas
+
+- `lib/linear.h` +mat_esc (7 linhas): infraestrutura de medição, aditivo, sem regressão.
+- `tests/buraco_racional.c` (117 linhas): medidor, 0 falhas.
+
+### Commits relevantes
+
+- `c4abccc5` docs: registrar buraco Mat2Q q=15/4 no protocolo (sec. 19)
+- `1039ae7f` medidor: buraco racional nao inteiro q=15/4 (extensao de dominio)
+- `9693d89d` docs: add final checkpoint of schema contracts audit (7/7, 0 motor lines)
+
+### Sincronização
+
+- Repo → GitHub: master up-to-date.
+- Repo → Patria: push confirmado.
+
+### Capacidades fora de escopo
+
+- RLS INSERT, UNIQUE composto, operações vetoriais, isolamento transitivo via JOIN.
+
+### Perguntas futuras possíveis (não iniciadas)
+
+- Outros racionais não inteiros além de q=15/4.
+- Relação exacta Mat2Q ↔ Qz ↔ banco por contrato local.
+- Qualquer extensão de capacidade documentada nas fronteiras.
 
 ## 19. BURACO MAT2Q ↔ Qz ↔ BANCO — q = 15/4 (2026-09-26)
 
