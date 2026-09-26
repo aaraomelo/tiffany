@@ -106,12 +106,15 @@ static void barr_abre(const char *base){
 static void no_banco(int b){ fd = fdv[b]; }
 
 static uint8_t le_atom(long p){
-    uint8_t v = 0;
-    if(fd >= 0) pread(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
-    return v;
+    unsigned char b[SL_ATOM] = { 0, 0 };
+    if(fd >= 0) pread(fd, b, SL_ATOM, (off_t)p * SL_ATOM);
+    return b[0];
 }
 static void grava_atom(long p, uint8_t v){
-    if(fd >= 0) pwrite(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
+    if(fd >= 0){
+        unsigned char b[SL_ATOM] = { v, 0 };
+        pwrite(fd, b, SL_ATOM, (off_t)p * SL_ATOM);
+    }
 }
 
 /* A ENTRADA E A SAIDA SAO UMA OPERACAO: MOVE(slot, sentido). E' a unica instrucao da

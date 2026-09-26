@@ -610,27 +610,30 @@ static void zera_mem(const char *caminho, int nslots){
     int f = open(caminho, O_WRONLY | O_CREAT | O_TRUNC | OPEN_BIN, 0644);
     if(f < 0) return;
     SlotWord z = 0;
-    for(int i = 0; i < nslots * 2; i++) (void)!write(f, &z, SLOT);  /* n Words = 2n átomos */
+    for(int i = 0; i < nslots * 2; i++){
+        unsigned char zb[SLOT] = { z, 0 };
+        (void)!write(f, zb, SLOT);
+    }
     close(f);
 }
 /* Disco: Word ISA = 2 átomos (total,e), base = slot*2 (Lei 7). */
 static void poe_slot(const char *caminho, unsigned slot, long total, long e){
     int f = open(caminho, O_WRONLY | O_CREAT | OPEN_BIN, 0644);
     if(f < 0) return;
-    SlotWord a = (SlotWord)(int8_t)total, b = (SlotWord)(int8_t)e;
-    (void)!pwrite(f, &a, SLOT, (off_t)(slot * 2u) * SLOT);
-    (void)!pwrite(f, &b, SLOT, (off_t)(slot * 2u + 1u) * SLOT);
+    unsigned char a[SLOT] = { (unsigned char)(int8_t)total, 0 }, b[SLOT] = { (unsigned char)(int8_t)e, 0 };
+    (void)!pwrite(f, a, SLOT, (off_t)(slot * 2u) * SLOT);
+    (void)!pwrite(f, b, SLOT, (off_t)(slot * 2u + 1u) * SLOT);
     close(f);
 }
 static Word ve_slot(const char *caminho, unsigned slot){
     Word w = { 0, 0 };
     int f = open(caminho, O_RDONLY | OPEN_BIN);
     if(f < 0) return w;
-    SlotWord a = 0, b = 0;
-    (void)!pread(f, &a, SLOT, (off_t)(slot * 2u) * SLOT);
-    (void)!pread(f, &b, SLOT, (off_t)(slot * 2u + 1u) * SLOT);
-    w.total = a;
-    w.e = b;
+    unsigned char a[SLOT] = { 0, 0 }, b[SLOT] = { 0, 0 };
+    (void)!pread(f, a, SLOT, (off_t)(slot * 2u) * SLOT);
+    (void)!pread(f, b, SLOT, (off_t)(slot * 2u + 1u) * SLOT);
+    w.total = a[0];
+    w.e = b[0];
     close(f);
     return w;
 }

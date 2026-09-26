@@ -42,12 +42,15 @@ typedef struct { uint32_t a, b; } Slot;  /* par lógico; disco = 8 átomos u32 L
 static int fd = -1;
 
 static uint8_t le_atom(long p){
-    uint8_t v = 0;
-    if(fd >= 0) pread(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
-    return v;
+    unsigned char b[SL_ATOM] = { 0, 0 };
+    if(fd >= 0) pread(fd, b, SL_ATOM, (off_t)p * SL_ATOM);
+    return b[0];
 }
 static void grava_atom(long p, uint8_t v){
-    if(fd >= 0) pwrite(fd, &v, SL_ATOM, (off_t)p * SL_ATOM);
+    if(fd >= 0){
+        unsigned char b[SL_ATOM] = { v, 0 };
+        pwrite(fd, b, SL_ATOM, (off_t)p * SL_ATOM);
+    }
 }
 
 /* MOVE(slot, sentido): Lei 1 — 1† = -1. slot lógico → phys(slot)..+7. */

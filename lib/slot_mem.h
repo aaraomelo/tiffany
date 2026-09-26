@@ -54,15 +54,16 @@ static inline int slot_equiv4(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
 }
 
 static inline SlotWord slot_mem_le(int fd, unsigned slot){
-    SlotWord w = 0;
+    unsigned char buf[SLOT_WORD_BYTES] = { 0, 0 };
     if(fd >= 0)
-        pread(fd, &w, SLOT_WORD_BYTES, (off_t)slot * SLOT_WORD_BYTES);
-    return w;
+        pread(fd, buf, sizeof buf, (off_t)slot * SLOT_WORD_BYTES);
+    return buf[0];
 }
 
 static inline void slot_mem_grava(int fd, unsigned slot, SlotWord w){
+    unsigned char buf[SLOT_WORD_BYTES] = { w, 0 };
     if(fd >= 0)
-        pwrite(fd, &w, SLOT_WORD_BYTES, (off_t)slot * SLOT_WORD_BYTES);
+        pwrite(fd, buf, sizeof buf, (off_t)slot * SLOT_WORD_BYTES);
 }
 
 /* Par (a,b) = dois átomos: slot e slot+1. */
