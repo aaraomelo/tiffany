@@ -1,0 +1,121 @@
+/* tests/medidor_iota1.c — ORÁCULO INDEPENDENTE para ι₁ : X₁ ↪ X₂
+ *
+   ESTADO: instrumento estruturado, alvo ainda não implementado.
+   Não existe iota₁() em nenhum ficheiro do repo (verificado: 0 ocorrências).
+   Este ficheiro compila e executa o oráculo + controles negativos + autoteste.
+   O teste da implementação de ι₁ fica deliberadamente como FAIL documentado,
+   porque fabricar um resultado verde sem alvo seria o tipo de falso fechamento
+   que este medidor existe para eliminar.
+ *
+ * Porquê existe: o CONTRATO_X2.md fecha X₂ como espaço sem definir a seta.
+ * Este instrumento mede o que existe independentemente da seta:
+ *   - oráculo O(b) = (b, 0₂)  (definição do espaço, não implementação)
+ *   - canais π₁ e π₂ independentes
+ *   - dois controles negativos, cada um mirando um canal
+ *   - autoteste do instrumento antes de confiar em qualquer zero
+ *
+ * Representação: uint16_t via C₂ do paper (campos.tex:382-395).
+ *   C₂(b₀,b₁) = b₀ + 256·b₁. Leitura independente:
+ *   π₁(x) = (uint8_t)(x & 0xFF), π₂(x) = (uint8_t)((x >> 8) & 0xFF).
+ *
+ * Não altera: campos.tex, espaco.tex, papers, headers existentes.
+ * ────────────────────────────────────────────────────────────────────
+ * Compilar:
+ *   cc -O2 -std=c99 -Ilib -o medidor_iota1 tests/medidor_iota1.c -lm
+ * Executar:
+ *   ./medidor_iota1
+ */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+/* ─── representação C₂ do paper: uint16_t ─── */
+static uint16_t C2(uint8_t b0, uint8_t b1){ return (uint16_t)b0 + (uint16_t)b1 * 256u; }
+
+/* leituras independentes da representação, sem chamar iota₁ */
+static uint8_t pi1(uint16_t x){ return (uint8_t)(x & 0xFFu); }
+static uint8_t pi2(uint16_t x){ return (uint8_t)((x >> 8) & 0xFFu); }
+
+/* ─── oráculo da definição do espaço: O(b) = (b, 0₂) ─── */
+static uint16_t oracle(uint8_t b){ return C2(b, 0); }
+
+/* ─── sucessor S₁ do paper: S₁(b) = (b+1) mod 256 ─── */
+static uint8_t S1(uint8_t b){ return (uint8_t)(b + 1u); }
+
+/* ─── contadores ─── */
+static int ok_canal1 = 0, ok_canal2 = 0;
+static int fail_canal1 = 0, fail_canal2 = 0;
+static int ctrl1_falha = 0, ctrl1_passa = 0;   /* (b,b): falha canal 2 */
+static int ctrl2_falha = 0, ctrl2_passa = 0;   /* (S₁(b),0): falha canal 1, b=0..254 */
+static int instrumento_falhas = 0;
+
+int main(void){
+    printf("═══ medidor_iota1 — oráculo independente, sem ι₁ implementada ═══\n\n");
+
+    /* ── 1. ORÁCULO + CANAIS, b = 0..255 ── */
+    printf("§1  oráculo O(b)=(b,0₂) — canais medidos separadamente\n");
+    for(int b = 0; b < 256; b++){
+        uint16_t esperado = oracle((uint8_t)b);
+        uint8_t p1 = pi1(esperado);
+        uint8_t p2 = pi2(esperado);
+        if(p1 == (uint8_t)b) ok_canal1++; else fail_canal1++;
+        if(p2 == 0)          ok_canal2++; else fail_canal2++;
+    }
+    printf("      canal 1 (π₁==b): %d/256\n", ok_canal1);
+    printf("      canal 2 (π₂==0): %d/256\n", ok_canal2);
+
+    /* ── 2. CONTROLES NEGATIVOS ── */
+    printf("\n§2  controles negativos independentes\n");
+    /* control 1: (b,b) → canal 1 passa, canal 2 falha */
+    for(int b = 0; b < 256; b++){
+        uint16_t x = C2((uint8_t)b, (uint8_t)b);
+        int c1 = (pi1(x) == (uint8_t)b);
+        int c2 = (pi2(x) == 0);
+        if(c1 && !c2) ctrl1_passa++; else ctrl1_falha++;
+    }
+    printf("      (b,b):       canal1=%d canal2=%d  (esperado: canal1 passa, canal2 falha)\n",
+           ctrl1_passa, ctrl1_falha);
+
+    /* control 2: (S₁(b),0) → canal 1 falha, canal 2 passa, b=0..254 */
+    for(int b = 0; b < 255; b++){
+        uint8_t sb = S1((uint8_t)b);
+        uint16_t x = C2(sb, 0);
+        int c1 = (pi1(x) == (uint8_t)b);
+        int c2 = (pi2(x) == 0);
+        if(!c1 && c2) ctrl2_passa++; else ctrl2_falha++;
+    }
+    printf("      (S₁(b),0):   canal1=%d canal2=%d  (esperado: canal1 falha, canal2 passa, b=0..254)\n",
+           ctrl2_passa, ctrl2_falha);
+
+    /* ── 3. AUTOTESTE DO INSTRUMENTO ── */
+    printf("\n§3  autoteste do instrumento\n");
+    int instrumento_ok = 1;
+    if(!(ctrl1_passa == 256 && ctrl1_falha == 0)){
+        printf("      FALHA: controle (b,b) não produziu padrão esperado.\n");
+        instrumento_ok = 0; instrumento_falhas++;
+    }
+    if(!(ctrl2_passa == 255 && ctrl2_falha == 0)){
+        printf("      FALHA: controle (S₁(b),0) não produziu padrão esperado.\n");
+        instrumento_ok = 0; instrumento_falhas++;
+    }
+    if(instrumento_ok){
+        printf("      instrumento passa: ambos os controles negativos com padrões correctos.\n");
+    }
+
+    /* ── 4. ALVO ι₁ — deliberadamente não implementado ── */
+    printf("\n§4  ι₁ : X₁ ↪ X₂ — AINDA NÃO IMPLEMENTADA\n");
+    printf("      Não existe iota₁() no repo. Este teste fica como FAIL documentado.\n");
+    printf("      Compilar e correr este medidor NÃO fabrica resultado verde para ι₁.\n");
+    instrumento_falhas++;
+
+    /* ── 5. RESUMO ── */
+    printf("\n══════════════════════════════════════════════════════════════\n");
+    printf("  oráculo   canal1=%d/256  canal2=%d/256\n", ok_canal1, ok_canal2);
+    printf("  ctrl1 (b,b):         passa=%d falha=%d\n", ctrl1_passa, ctrl1_falha);
+    printf("  ctrl2 (S₁(b),0):     passa=%d falha=%d\n", ctrl2_passa, ctrl2_falha);
+    printf("  autoteste instrumento: %s\n", instrumento_ok ? "PASS" : "FAIL");
+    printf("  cobertura: 256/256 entradas\n");
+    printf("  falhas deliberadas (alvo inexistente): %d\n", instrumento_falhas);
+    printf("  estado: instrumento pronto / alvo ι₁ ainda não implementado\n");
+    return instrumento_falhas ? 1 : 0;
+}
