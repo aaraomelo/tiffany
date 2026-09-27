@@ -35,11 +35,11 @@
 static uint16_t C2(uint8_t b0, uint8_t b1){ return (uint16_t)b0 + (uint16_t)b1 * 256u; }
 
 /* leituras independentes da representação, sem chamar iota₁ */
-static uint8_t pi1(uint16_t x){ return iota1_pi1(x); }
-static uint8_t pi2(uint16_t x){ return iota1_pi2(x); }
+static uint8_t pi1(uint16_t x){ return (uint8_t)(x & 0xFFu); }
+static uint8_t pi2(uint16_t x){ return (uint8_t)((x >> 8) & 0xFFu); }
 
-/* ─── oráculo da definição do espaço: O(b) = (b, 0₂) ─── */
-static uint16_t oracle(uint8_t b){ return iota1(b); }
+/* ─── oráculo INDEPENDENTE: O(b) = C₂(b,0) = b ─── */
+static uint16_t oracle(uint8_t b){ return (uint16_t)b; }
 
 /* ─── sucessor S₁ do paper: S₁(b) = (b+1) mod 256 ─── */
 static uint8_t S1(uint8_t b){ return (uint8_t)(b + 1u); }
