@@ -44,13 +44,14 @@ static uint16_t oracle(uint8_t b){ return (uint16_t)b; }
 /* ─── sucessor S₁ do paper: S₁(b) = (b+1) mod 256 ─── */
 static uint8_t S1(uint8_t b){ return (uint8_t)(b + 1u); }
 
-/* ─── contadores ─── */
-static int ok_canal1 = 0, ok_canal2 = 0;
-static int fail_canal1 = 0, fail_canal2 = 0;
-static int ctrl1_falha = 0, ctrl1_passa = 0;   /* (b,b): falha canal 2, b=1..255 */
-static int ctrl2_falha = 0, ctrl2_passa = 0;   /* (S₁(b),0): falha canal 1, b=0..254 */
-static int instrumento_falhas = 0;
+/* ─── contadores — cada secção tem os seus próprios contadores ─── */
+static int oracle_ok_canal1 = 0, oracle_ok_canal2 = 0;
+static int oracle_fail_canal1 = 0, oracle_fail_canal2 = 0;
+static int ctrl1_passa = 0, ctrl1_falha = 0;      /* (b,b): falha canal 2, b=1..255 */
+static int ctrl2_passa = 0, ctrl2_falha = 0;      /* (S₁(b),0): falha canal 1, b=0..254 */
+static int impl_ok_canal1 = 0, impl_ok_canal2 = 0;
 static int impl_falhas = 0;
+static int instrumento_falhas = 0;
 
 int main(void){
     printf("═══ medidor_iota1 — ι₁ implementada, oráculo independente ═══\n\n");
@@ -61,11 +62,11 @@ int main(void){
         uint16_t esperado = oracle((uint8_t)b);
         uint8_t p1 = pi1(esperado);
         uint8_t p2 = pi2(esperado);
-        if(p1 == (uint8_t)b) ok_canal1++; else fail_canal1++;
-        if(p2 == 0)          ok_canal2++; else fail_canal2++;
+        if(p1 == (uint8_t)b) oracle_ok_canal1++; else oracle_fail_canal1++;
+        if(p2 == 0)          oracle_ok_canal2++; else oracle_fail_canal2++;
     }
-    printf("      canal 1 (π₁==b): %d/256\n", ok_canal1);
-    printf("      canal 2 (π₂==0): %d/256\n", ok_canal2);
+    printf("      canal 1 (π₁==b): %d/256\n", oracle_ok_canal1);
+    printf("      canal 2 (π₂==0): %d/256\n", oracle_ok_canal2);
 
     /* ── 2. CONTROLES NEGATIVOS ── */
     printf("\n§2  controles negativos independentes\n");
@@ -109,13 +110,11 @@ int main(void){
     printf("\n§4  medição ι₁ : X₁ ↪ X₂\n");
     for(int b = 0; b < 256; b++){
         uint16_t x = iota1((uint8_t)b);
-        if(pi1(x) != (uint8_t)b){ impl_falhas++; fail_canal1++; }
-        else { ok_canal1++; }
-        if(pi2(x) != 0){ impl_falhas++; fail_canal2++; }
-        else { ok_canal2++; }
+        if(pi1(x) != (uint8_t)b){ impl_falhas++; } else { impl_ok_canal1++; }
+        if(pi2(x) != 0){ impl_falhas++; } else { impl_ok_canal2++; }
     }
-    printf("      ι₁ canal1 (π₁==b): %d/256\n", ok_canal1);
-    printf("      ι₁ canal2 (π₂==0): %d/256\n", ok_canal2);
+    printf("      ι₁ canal1 (π₁==b): %d/256\n", impl_ok_canal1);
+    printf("      ι₁ canal2 (π₂==0): %d/256\n", impl_ok_canal2);
     if(impl_falhas == 0){
         printf("      ι₁: 256/256 — resíduo 0\n");
     } else {
@@ -125,11 +124,11 @@ int main(void){
 
     /* ── 5. RESUMO ── */
     printf("\n══════════════════════════════════════════════════════════════\n");
-    printf("  oráculo   canal1=%d/256  canal2=%d/256\n", ok_canal1, ok_canal2);
+    printf("  oracle canal1: %d/256  canal2: %d/256\n", oracle_ok_canal1, oracle_ok_canal2);
     printf("  ctrl1 (b,b) b=1..255:      passa=%d falha=%d\n", ctrl1_passa, ctrl1_falha);
     printf("  ctrl2 (S₁(b),0) b=0..254:  passa=%d falha=%d\n", ctrl2_passa, ctrl2_falha);
-    printf("  ι₁ implementação canal1:   %d/256\n", ok_canal1);
-    printf("  ι₁ implementação canal2:   %d/256\n", ok_canal2);
+    printf("  ι₁ implementação canal1:   %d/256\n", impl_ok_canal1);
+    printf("  ι₁ implementação canal2:   %d/256\n", impl_ok_canal2);
     printf("  autoteste instrumento: %s\n", instrumento_ok ? "PASS" : "FAIL");
     printf("  cobertura: 256/256 entradas\n");
     printf("  falhas: %d\n", instrumento_falhas + impl_falhas);
