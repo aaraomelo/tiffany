@@ -324,6 +324,9 @@ Resposta: sim para os dois, com uma restrição de domínio num deles.
 
     Primeira posição correcta, segunda posição errada. Viola exactamente um
     invariante. Construível a partir de §1 e §3, sem seta, sem código novo.
+    Domínio genuíno: b ∈ {1,…,255}. Para b=0, (0,0) coincide exactamente
+    com o oráculo O(0)=(0,0) — não é perturbação, é o próprio oráculo.
+    Não contar b=0 como controle.
 
   Canal 1 — violar π₁∘ι₁ = id mantendo π₂∘ι₁ = 0:
 
@@ -334,6 +337,15 @@ Resposta: sim para os dois, com uma restrição de domínio num deles.
     sucessor S₁ do paper, que está definido em campos.tex:399-411 e que para
     d = 1 dá S₁(b) = (b + 1) mod 256. O nome "b+1" não é operação que o paper
     defina; S₁ é.
+    Domínio genuíno: b ∈ {0,…,254}. S₁(255)=0 invalida o controle (coincide
+    com o oráculo de b=0); fica fora por periodicidade.
+
+  Mesma classe de fenômeno das duas correcções:
+
+    S₁(255)=0  pode coincidir com o oráculo de outro input;
+    (0,0)=(O(0)) coincide com o próprio oráculo de b=0;
+    em ambos os casos há coincidência entre casos de entrada,
+    não ponto fixo da aplicação nem falha do mapa.
 
   A restrição: S₁(255) = 0, pelo overflow global. Logo, em b = 255, a
   perturbação (S₁(255), 0) = (0, 0) deixa de ser uma perturbação: coincide com
