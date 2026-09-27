@@ -18,6 +18,10 @@
  *   C₂(b₀,b₁) = b₀ + 256·b₁. Leitura independente:
  *   π₁(x) = (uint8_t)(x & 0xFF), π₂(x) = (uint8_t)((x >> 8) & 0xFF).
  *
+ * Controles (domínios correctos após correcção §9 do contrato):
+ *   - (b,b):  b ∈ {1,…,255}  → 255 casos (b=0 é oráculo, não perturbação)
+ *   - (S₁(b),0):  b ∈ {0,…,254} → 255 casos (S₁(255)=0 invalida controle)
+ *
  * Não altera: campos.tex, espaco.tex, papers, headers existentes.
  * ────────────────────────────────────────────────────────────────────
  * Compilar:
@@ -45,7 +49,7 @@ static uint8_t S1(uint8_t b){ return (uint8_t)(b + 1u); }
 /* ─── contadores ─── */
 static int ok_canal1 = 0, ok_canal2 = 0;
 static int fail_canal1 = 0, fail_canal2 = 0;
-static int ctrl1_falha = 0, ctrl1_passa = 0;   /* (b,b): falha canal 2 */
+static int ctrl1_falha = 0, ctrl1_passa = 0;   /* (b,b): falha canal 2, b=1..255 */
 static int ctrl2_falha = 0, ctrl2_passa = 0;   /* (S₁(b),0): falha canal 1, b=0..254 */
 static int instrumento_falhas = 0;
 
@@ -66,17 +70,17 @@ int main(void){
 
     /* ── 2. CONTROLES NEGATIVOS ── */
     printf("\n§2  controles negativos independentes\n");
-    /* control 1: (b,b) → canal 1 passa, canal 2 falha */
-    for(int b = 0; b < 256; b++){
+    /* control 1: (b,b) → canal 1 passa, canal 2 falha; b=1..255 */
+    for(int b = 1; b < 256; b++){
         uint16_t x = C2((uint8_t)b, (uint8_t)b);
         int c1 = (pi1(x) == (uint8_t)b);
         int c2 = (pi2(x) == 0);
         if(c1 && !c2) ctrl1_passa++; else ctrl1_falha++;
     }
-    printf("      (b,b):       canal1=%d canal2=%d  (esperado: canal1 passa, canal2 falha)\n",
+    printf("      (b,b) b=1..255: canal1=%d canal2=%d  (esperado: canal1 passa, canal2 falha)\n",
            ctrl1_passa, ctrl1_falha);
 
-    /* control 2: (S₁(b),0) → canal 1 falha, canal 2 passa, b=0..254 */
+    /* control 2: (S₁(b),0) → canal 1 falha, canal 2 passa; b=0..254 */
     for(int b = 0; b < 255; b++){
         uint8_t sb = S1((uint8_t)b);
         uint16_t x = C2(sb, 0);
@@ -84,13 +88,13 @@ int main(void){
         int c2 = (pi2(x) == 0);
         if(!c1 && c2) ctrl2_passa++; else ctrl2_falha++;
     }
-    printf("      (S₁(b),0):   canal1=%d canal2=%d  (esperado: canal1 falha, canal2 passa, b=0..254)\n",
+    printf("      (S₁(b),0) b=0..254: canal1=%d canal2=%d  (esperado: canal1 falha, canal2 passa)\n",
            ctrl2_passa, ctrl2_falha);
 
     /* ── 3. AUTOTESTE DO INSTRUMENTO ── */
     printf("\n§3  autoteste do instrumento\n");
     int instrumento_ok = 1;
-    if(!(ctrl1_passa == 256 && ctrl1_falha == 0)){
+    if(!(ctrl1_passa == 255 && ctrl1_falha == 0)){
         printf("      FALHA: controle (b,b) não produziu padrão esperado.\n");
         instrumento_ok = 0; instrumento_falhas++;
     }
@@ -111,8 +115,8 @@ int main(void){
     /* ── 5. RESUMO ── */
     printf("\n══════════════════════════════════════════════════════════════\n");
     printf("  oráculo   canal1=%d/256  canal2=%d/256\n", ok_canal1, ok_canal2);
-    printf("  ctrl1 (b,b):         passa=%d falha=%d\n", ctrl1_passa, ctrl1_falha);
-    printf("  ctrl2 (S₁(b),0):     passa=%d falha=%d\n", ctrl2_passa, ctrl2_falha);
+    printf("  ctrl1 (b,b) b=1..255:      passa=%d falha=%d\n", ctrl1_passa, ctrl1_falha);
+    printf("  ctrl2 (S₁(b),0) b=0..254:  passa=%d falha=%d\n", ctrl2_passa, ctrl2_falha);
     printf("  autoteste instrumento: %s\n", instrumento_ok ? "PASS" : "FAIL");
     printf("  cobertura: 256/256 entradas\n");
     printf("  falhas deliberadas (alvo inexistente): %d\n", instrumento_falhas);
