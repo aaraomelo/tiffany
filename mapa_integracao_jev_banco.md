@@ -169,8 +169,8 @@ Sem tocar em sql.c. Sem implementar. Sem assumir equivalência.
 **Candidatos a persistência (representação externa):**
 - G(x) — campo de multiplicidade: tabela `ocupacao(célula, contagem)` sobre realização I
 - q — critério de classificação: metadata da pergunta, não dado do banco
-- G_q(y) — campo agregado: view materializada sobre G, computed at query time
-- p_q(y) — distribuição: derivada de G_q, não persistir (derivável)
+- G_q(y) — campo agregado: **derivado** de G, não persistir (computável por query)
+- p_q(y) — distribuição: **derivado** de G_q, não persistir (derivável)
 - L(p_q) — leitura tipada: saída da API, não persistir no schema do banco
 - π — realização: eventos da aplicação, já existem no DISCO/arena
 
@@ -200,7 +200,7 @@ Sem tocar em sql.c. Sem implementar. Sem assumir equivalência.
 
 **HIPÓTESE (não demonstrada):**
 - G poderia ser persistido como tabela de ocupação sobre realizações
-- Uma query poderia computar G_q como view materializada
+- Uma query poderia computar G_q como derivado de G
 - q poderia ser metadata de pergunta no schema
 - lib/racionais.h e lib/linear.h são partilhados mas não pontes
 
