@@ -394,6 +394,38 @@ C_d(b_0,\dots,b_{d-1})=\sum_{k=0}^{d-1}b_k\,256^k.
 É bijecção. Em particular \(\lvert X_d\rvert=256^d=2^{8d}\).
 \end{definicao}
 
+\begin{definicao}[Inclusão canónica entre níveis]
+\label{def:iota-d}
+A passagem de \(X_d\) a \(X_{d+1}\) é o produto
+\[
+X_{d+1}=X_d\times(\mathbb Z/256\mathbb Z).
+\]
+A inclusão correspondente é
+\[
+\iota_d:X_d\hookrightarrow X_{d+1},
+\qquad
+\iota_d(b_0,\dots,b_{d-1})=(b_0,\dots,b_{d-1},0).
+\]
+Ou seja: \(\iota_d\) acrescenta uma coordenada nula na posição nova, a de peso
+\(256^d\). É injectiva, porque a projecção para as primeiras \(d\) coordenadas
+compõe com \(\iota_d\) na identidade de \(X_d\).
+
+As inclusões encadeiam-se por partilha do mesmo factor nulo: para \(k\ge 1\),
+\[
+\iota_{d+k}\circ\cdots\circ\iota_{d+1}\circ\iota_d(b_0,\dots,b_{d-1})
+=(b_0,\dots,b_{d-1},\underbrace{0,\dots,0}_{k}).
+\]
+Em particular \(\iota_{d+1}\circ\iota_d\) acrescenta um segundo zero. O caso
+\(d=1\) é \(\iota_1(b)=(b,0)\).
+
+Sob a codificação \(C_d\) a inclusão é a identidade: a coordenada acrescentada
+tem peso \(256^d\) e vale \(0\), logo
+\[
+C_{d+1}\bigl(\iota_d(x)\bigr)=C_d(x),
+\]
+por ser o caso \(r=1\) da concatenação de blocos da secção~\ref{sec:byte-carry}.
+\end{definicao}
+
 \subsection{Sucessor com carry}
 
 \begin{definicao}[Sucessor]
@@ -474,13 +506,7 @@ Ocorre \emph{carry interno} na coordenada \(k\) (\(0\le k\le d-2\)) quando \(c_k
 Ocorre \emph{overflow global} quando \(x=(255,\dots,255)\). Então \(S_d(x)=(0,\dots,0)\) e \(C_d\) regressa a \(0\). O inteiro seguinte \(256^d\) não cabe em \(X_d\).
 \end{definicao}
 
-A inclusão
-\[
-\iota_d:X_d\hookrightarrow X_{d+1},
-\qquad
-(b_0,\dots,b_{d-1})\mapsto(b_0,\dots,b_{d-1},0)
-\]
-permite escrever
+A inclusão~\eqref{def:iota-d} permite escrever
 \[
 256^d\;\longleftrightarrow\;(0,\dots,0,1)\in X_{d+1}.
 \]
@@ -543,7 +569,7 @@ A transformação de representação \(\mathcal T\) (Definição~\ref{def:T}) ac
 \[
 X_d\xrightarrow{\iota_d}X_{d+1}
 \]
-é uma \emph{extensão} do espaço de estados, não uma transformação de representação no sentido de \(\mathcal T\). Não se identificam.
+(Definição~\ref{def:iota-d}) é uma \emph{extensão} do espaço de estados, não uma transformação de representação no sentido de \(\mathcal T\). Não se identificam.
 
 \subsection{Relação com as oito leis e com \(L_7\to L_0\)}
 

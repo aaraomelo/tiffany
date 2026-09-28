@@ -67,6 +67,11 @@ int main(void){
     }
     printf("      canal 1 (π₁==b): %d/256\n", oracle_ok_canal1);
     printf("      canal 2 (π₂==0): %d/256\n", oracle_ok_canal2);
+    int oracle_valido = (oracle_fail_canal1 == 0 && oracle_fail_canal2 == 0);
+    if(!oracle_valido){
+        printf("      INVÁLIDO: o oráculo não é (b,0₂) — §1 não fecha.\n");
+        instrumento_falhas++;
+    }
 
     /* ── 2. CONTROLES NEGATIVOS ── */
     printf("\n§2  controles negativos independentes\n");
@@ -83,7 +88,7 @@ int main(void){
     /* control 2: (S₁(b),0) → canal 1 falha, canal 2 passa; b=0..254 */
     for(int b = 0; b < 255; b++){
         uint8_t sb = S1((uint8_t)b);
-        uint16_t x = iota1(sb);           /* (S₁(b),0) — primeira posição errada */
+        uint16_t x = C2(sb, 0);           /* (S₁(b),0) — primeira posição errada */
         int c1 = (pi1(x) == (uint8_t)b);
         int c2 = (pi2(x) == 0);
         if(!c1 && c2) ctrl2_passa++; else ctrl2_falha++;
@@ -130,8 +135,9 @@ int main(void){
     printf("  ι₁ implementação canal1:   %d/256\n", impl_ok_canal1);
     printf("  ι₁ implementação canal2:   %d/256\n", impl_ok_canal2);
     printf("  autoteste instrumento: %s\n", instrumento_ok ? "PASS" : "FAIL");
+    printf("  oráculo §1 válido: %s\n", oracle_valido ? "SIM" : "NÃO");
     printf("  cobertura: 256/256 entradas\n");
     printf("  falhas: %d\n", instrumento_falhas + impl_falhas);
-    printf("  estado: %s\n", (instrumento_ok && impl_falhas==0) ? "FECHADO" : "ABERTO");
-    return (instrumento_ok && impl_falhas==0) ? 0 : 1;
+    printf("  estado: %s\n", (oracle_valido && instrumento_ok && impl_falhas==0) ? "FECHADO" : "ABERTO");
+    return (oracle_valido && instrumento_ok && impl_falhas==0) ? 0 : 1;
 }

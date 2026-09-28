@@ -29,10 +29,20 @@ Cada canal é medido SEPARADAMENTE. Não se usa "par == esperado" como único te
 O esperado é construído da definição de X₂, sem chamar iota₁:
 O(b) = (b, 0)  →  código: (uint8_t)b, (uint8_t)0
 
+Este §1 participa no veredicto. Se qualquer uma das suas verificações falhar
+(`oracle_fail_canal1` ou `oracle_fail_canal2` diferente de zero), o medidor
+conta a falha em `instrumento_falhas` e devolve `estado: ABERTO` com código de
+saída diferente de zero. Um oráculo corrompido não pode coexistir com um
+fechamento. Verificado por mutação: `oracle(b) = b + 5` produz §1 `0/256` e
+`251/256` e, ainda assim, tem de produzir ABERTO — não basta que os números
+impressos fiquem errados.
+
 ## Controles negativos independentes
 
-1. (b, b) — passa canal 1, falha canal 2, para TODO b (256 casos).
-2. (S₁(b), 0) — falha canal 1, passa canal 2, PARA b ∈ {0, …, 254}. S₁(255)=0 invalida o controle; fica fora por periodicidade, não por defeito do medidor.
+1. (b, b) — passa canal 1, falha canal 2, para b ∈ {1, …, 255} (255 casos). b = 0 fica de fora: (0,0) coincide exactamente com o oráculo O(0), logo não é perturbação. Ver CONTRATO_X2.md §9 (corrigido em c227c84f).
+2. (S₁(b), 0) — falha canal 1, passa canal 2, PARA b ∈ {0, …, 254} (255 casos). S₁(255)=0 invalida o controle; fica fora por periodicidade, não por defeito do medidor.
+
+Ambos os controles são construídos por `C2(...)`, sem chamar iota₁: o controle negativo tem de construir independentemente o ponto que testa, e não pode chamar a implementação sob teste.
 
 ## Autoteste do instrumento
 
