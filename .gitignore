@@ -277,3 +277,11 @@ tests/claim_fronteira
 corpus/
 node_modules/
 **/node_modules/
+
+# --- higiene pre-release I0 (2026-09-30) ---------------------------------------
+# Cabecalhos pre-compilados do GCC: binarios gerados, versionados como se
+# fossem fonte. Nao afectam a build (o .gch removido era de GCC 14 e a build
+# usa GCC 13.3, portanto nunca foi carregado), mas nao pertencem ao produto.
+/lib/*.gch
+# ficheiro temporario dentro de banco/apps/
+/banco/apps/*.tmp
