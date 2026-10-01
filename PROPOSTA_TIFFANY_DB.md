@@ -1609,3 +1609,101 @@ nenhuma desversionamento e nenhuma limpeza altera isso.
 
 I1 pode ser investigada ou preparada. **Publicar não.**
 Nenhuma chave GPG gerada. Nenhum repositório APT público.
+
+## 28. J — REPOSITÓRIO INDEPENDENTE `tiffany-db` (criado 2026-10-01)
+
+```text
+tiffany-db: CRIADO, LOCAL, PRIVADO
+54 ficheiros de produto + README
+Baseline: bdf56b27
+Commits: 01948973, 2ba670ed
+Push: NÃO
+```
+
+### 1. O que existe
+
+| Item | Valor |
+|---|---|
+| Endereço | <https://github.com/aaraomelo/tiffany-db> |
+| Branch | `main` |
+| Visibilidade | `PRIVATE` |
+| Commits | 2 (locais) |
+| Árvore | 55 ficheiros (54 de produto + `README.md`) |
+| Remoto | vazio no momento desta secção |
+
+### 2. Os dois commits
+
+| # | Hash | Mensagem | Ficheiros |
+|---|---|---|---:|
+| 1 | `019489734a9c8fa3e84fdc1893f1ae695f6a83b5` | `chore: importa a closure do produto Tiffany DB v1.0.0` | 54 |
+| 2 | `2ba670ed17bd6be38431b92b6fc31a319762a03f` | `docs: README do repositório independente + relação com o monorepo` | 1 |
+
+Autoria de ambos: Aarão Melo Lopes. O commit 1 é raiz — não tem parent.
+
+### 3. O que entrou, e de onde
+
+Os 54 ficheiros de produto foram extraídos **verbatim** do commit
+`bdf56b27d82162cd86d49f916fda4c8d80b02af8` deste repositório, por
+`git cat-file blob`. Nada foi copiado do worktree:
+
+| Área | Ficheiros |
+|---|---:|
+| `banco/` | 10 (2 translation units, 8 headers) |
+| `lib/` | 31 headers |
+| `debian/` | 9 |
+| raiz | 4 (`LICENSE`, `NOTICE`, `PROPOSTA_TIFFANY_DB.md`, `RELEASE_MANIFEST_TIFFANY_DB_V1.md`) |
+
+O commit 2 acrescenta **apenas** `README.md`, o único ficheiro do repositório
+independente que não é cópia byte-a-byte.
+
+### 4. Relação com este repositório
+
+`tiffany` continua a ser o **repositório principal e o corpus**. O
+`tiffany-db` contém apenas a closure independente do produto Tiffany DB
+v1.0.0, e relaciona-se com este por **proveniência declarada e cópia**, não por
+referência.
+
+**Não há, e não se pretende que haja, relação de submódulo.** Os 118 ficheiros de
+`lib/` fora da closure, os 628 de `tests/` e o restante corpus continuam
+versionados aqui e não foram movidos.
+
+### 5. Verificações feitas ao repositório independente
+
+| Verificação | Resultado |
+|---|---|
+| Blobs dos 54 ficheiros do commit 1 vs `bdf56b27` | **54/54 idênticos** |
+| Modos dos 54 ficheiros vs `bdf56b27` | **54/54 idênticos** |
+| `debian/rules` | `100755` (igual à origem) |
+| `LICENSE` e `NOTICE` presentes | sim, verbatim |
+| `.deb` versionados | **0** |
+| `.gitmodules` / submódulos | **0 / 0** |
+| Ocorrências de segredos | **0** |
+| `README.md` commitado | `d314fd61…` = versão aprovada |
+
+### Higiene desta etapa
+
+`git diff -- banco/` e `git diff -- lib/` continuam **vazios**. Nenhum fonte do
+núcleo alterado, nenhuma ABI mexida, nenhuma assinatura tocada. A única
+alteração nesta etapa é este ficheiro, `PROPOSTA_TIFFANY_DB.md`. Nenhum outro
+dos 8 ficheiros modificados nem dos 169 untracked deste repositório foi tocado,
+e não se usou `git add -A`.
+
+### O que esta secção NÃO decide
+
+1. **A licença não mudou.** `Tiffany-License-2026-08` continua a não conceder
+   redistribuição; a Via B continua a exigir acordo escrito que, segundo o
+   `debian/copyright`, ainda não existe. O `README.md` do `tiffany-db` é uma
+   descrição factual e declara explicitamente que não concede, implicitamente
+   nem explicitamente, nenhuma autorização que a `LICENSE` não conceda. O facto
+   de um `README` existir não amplia, restringe nem substitui os termos da
+   `LICENSE`.
+2. Nenhuma tag, nenhum release, nenhuma chave GPG, nenhum repositório APT
+   público.
+3. A visibilidade do repositório remoto não é alterada por este commit.
+
+### O que esta secção NÃO abre
+
+Esta secção regista a **existência e o conteúdo** do repositório independente.
+A publicação da branch `main` no GitHub é uma operação separada, com
+autorização própria, e não é feita por este commit. O mesmo se aplica a qualquer
+promoção de visibilidade.
