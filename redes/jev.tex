@@ -370,6 +370,59 @@ Classifica-se como realização possível do contrato Choice por campo de
 contagem, no nível da representação.
 \end{observacao}
 
+\subsection{Choice intervalar como especialização coordenada}
+\label{sec:choice-intervalar}
+
+Quando o suporte possui a estrutura coordenada \((X_d,C_d)\) de
+\texttt{campos.tex} (secção da representação posicional por bytes), a classificação categorial
+admite uma especialização definida por cortes na coordenada. Não se redefine o
+Choice: \(q\colon X\to C\) continua a ser a definição geral
+(Definição~\ref{def:q-choice}); a construção seguinte é uma restrição adicional
+de estrutura sobre o domínio.
+
+\begin{definicao}[Choice intervalar]
+\label{def:choice-intervalar}
+Sejam \((X_d,C_d)\) um suporte coordenado com \(\lvert X_d\rvert=N\),
+\(C=\{c_1,\dots,c_k\}\) finito, e fronteiras
+\[
+0=b_0<b_1<\dots<b_k=N.
+\]
+Define-se \(q_b\colon X_d\to C\) por
+\[
+q_b(x)=c_j\iff b_j\le C_d(x)<b_{j+1}.
+\]
+Equivalentemente, em coordenadas,
+\[
+q_b^{-1}(c_j)=C_d^{-1}\bigl([b_j,b_{j+1})\bigr).
+\]
+\end{definicao}
+
+\begin{proposicao}[Choice intervalar é Choice categorial]
+\label{prop:choice-intervalar-fibra}
+\(q_b\) é uma classificação categorial no sentido da
+Definição~\ref{def:q-choice}; em particular \(\sum_j G_{q_b}(c_j)=\lvert I\rvert\).
+A recíproca falha em geral: uma classificação categorial \(q\colon X_d\to C\)
+é representável como \(q_b\) se e só se as suas fibras são
+\(C_d\)-convexas, isto é, se e só se existem intervalos
+\(I_1,\dots,I_k\subseteq\{0,\dots,N-1\}\) aos pares disjuntos com
+\(\bigcup_j I_j=\{0,\dots,N-1\}\) tais que \(q^{-1}(c_j)=C_d^{-1}(I_j)\).
+\end{proposicao}
+
+\begin{proof}
+Os intervalos \([b_j,b_{j+1})\), \(j=0,\dots,k-1\), particionam
+\(\{0,\dots,N-1\}\); aplicando a bijecção \(C_d^{-1}\) obtêm-se fibras
+\(q_b^{-1}(c_j)\) que particionam \(X_d\), logo \(q_b\) é uma classificação
+categorial e a conservação segue de \ref{prop:gq-conserva}. Para a recíproca,
+se \(q=q_b\) então \(q^{-1}(c_j)=C_d^{-1}([b_j,b_{j+1}))\) é a pré-imagem de um
+intervalo. Inversamente, se \(q^{-1}(c_j)=C_d^{-1}(I_j)\) com os \(I_j\)
+disjuntos cobrindo \(\{0,\dots,N-1\}\), os extremos de \(I_j\), tomados por
+ordem crescente, definem as fronteiras \(b_j\), donde \(q=q_b\). A recíproca é
+efectivamente estrita: por exemplo, com \(X_2=\{0,1,2,3\}\), \(C_2=\mathrm{id}\)
+e \(C=\{a,b\}\), a classificação \(q(0)=a,\ q(1)=b,\ q(2)=a,\ q(3)=b\) tem fibra
+\(q^{-1}(a)=\{0,2\}\), que não é um intervalo de \(\{0,1,2,3\}\), logo não é
+intervalar.
+\end{proof}
+
 \subsection{Score como caso ordenado}
 
 \begin{definicao}[Classificação ordenada]

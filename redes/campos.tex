@@ -375,7 +375,7 @@ Não se identificam as duas operações.
 \section{Representação posicional por bytes e carry}
 \label{sec:byte-carry}
 
-A aritmética posicional em base \(256\) é estrutura clássica. Formaliza-se aqui como exemplo de representação com coordenadas internas, sucessor e extensão dimensional, para contrastar com a transformação de representação que actua \emph{dentro} de um espaço fixo.
+A aritmética posicional em base \(256\) é estrutura clássica. Formaliza-se aqui como exemplo de representação com coordenadas internas, sucessor e extensão dimensional, para contrastar com a transformação de representação que actua \emph{dentro} de um espaço fixo. A mesma estrutura é adiante usada como \emph{suporte coordenado}: a codificação \(C_d\) fornece a coordenada de representação que ordena \(X_d\) (Definição~\ref{def:suporte-coordenado}, Proposição~\ref{prop:Cd-relativa}).
 
 \subsection{Espaço e codificação}
 
@@ -393,6 +393,57 @@ C_d(b_0,\dots,b_{d-1})=\sum_{k=0}^{d-1}b_k\,256^k.
 \]
 É bijecção. Em particular \(\lvert X_d\rvert=256^d=2^{8d}\).
 \end{definicao}
+
+\begin{definicao}[Suporte coordenado]
+\label{def:suporte-coordenado}
+Um \emph{suporte coordenado} é um par \((X,C)\) em que \(X\) é um conjunto finito e
+\[
+C\colon X\to\{0,\dots,\lvert X\rvert-1\}
+\]
+é uma bijecção. A \emph{coordenada de representação} de \(x\in X\) é
+\[
+\operatorname{coord}_C(x)=C(x),
+\]
+e a \emph{ordem induzida} em \(X\) é
+\[
+x\le_C y\iff C(x)\le C(y).
+\]
+\end{definicao}
+
+\begin{observacao}
+\label{obs:coord-nao-intrinseca}
+A coordenada \(\operatorname{coord}_C\) pertence ao par \((X,C)\), não ao conjunto \(X\) isolado: sem \(C\) não há coordenada nem ordem \(\le_C\). Dizer que \(C\) é ``canónica'' só tem sentido relativamente à estrutura fixada em \(X\); não é uma propriedade intrínseca de \(X\).
+\end{observacao}
+
+\begin{proposicao}[Canonicidade relativa de \(C_d\)]
+\label{prop:Cd-relativa}
+Fixe-se a estrutura posicional de base \(b=256\), com os eixos ordenados e convenção little-endian, e a lei posicional \(C_d(b_0,\dots,b_{d-1})=\sum_{k=0}^{d-1}b_k\,256^k\). Então \((X_d,C_d)\) é um suporte coordenado e \(C_d\) é a única coordenada de representação compatível com essa estrutura. Em particular, para todo \(x\in X_d\),
+\[
+C_{d+1}\bigl(\iota_d(x)\bigr)=C_d(x).
+\]
+\end{proposicao}
+
+\begin{proof}
+\(C_d\) é bijecção por \ref{def:Xd}, logo \((X_d,C_d)\) é um suporte coordenado. A unicidade segue da lei posicional fixada: qualquer bijecção que escreva cada estado na forma \(\sum_k b_k256^k\), com base, ordem dos eixos e endianness fixados, coincide necessariamente com \(C_d\). A compatibilidade com a inclusão é o cálculo já registado em \ref{def:iota-d}: a coordenada acrescentada tem peso \(256^d\) e valor \(0\), donde \(C_{d+1}(\iota_d(x))=\sum_k b_k256^k=C_d(x)\).
+\end{proof}
+
+\begin{corolario}[Coerência da família]
+\label{cor:Cd-iota}
+A família \(\{(X_d,C_d)\}_{d\ge1}\) é uma família coerente de suportes coordenados: as inclusões canónicas \(\iota_d\) são compatíveis com as coordenadas, isto é, \(C_{d+1}\circ\iota_d=C_d\) para todo \(d\ge1\).
+\end{corolario}
+
+\begin{observacao}[\(G\) em coordenadas]
+\label{obs:G-coordenado}
+Sobre o suporte coordenado \((X_d,C_d)\), o campo reindexado
+\[
+\widehat G(c)=G\bigl(C_d^{-1}(c)\bigr),\qquad c\in\{0,\dots,256^d-1\},
+\]
+é a mudança de suporte \(G\mapsto(C_d)_{\#}G\) ao longo da bijecção \(C_d\). Como \(C_d\) é bijecção,
+\[
+\sum_{x\in X_d}G(x)=\sum_{c=0}^{256^d-1}\widehat G(c).
+\]
+É uma reindexação do mesmo campo, não uma nova grandeza.
+\end{observacao}
 
 \begin{definicao}[Inclusão canónica entre níveis]
 \label{def:iota-d}
@@ -544,7 +595,7 @@ A órbita de \(S_d\) é a travessia lexicográfica da grade \(\{0,\dots,255\}^d\
 \item \(d=2\): percorre a linha \(b_1=0\), depois \(b_1=1\), \ldots, até \(b_1=255\);
 \item \(d=3\): percorre planos sucessivos \(b_2=\mathrm{const}\).
 \end{itemize}
-Não é metáfora: é a ordem total induzida por \(C_d\).
+Não é metáfora: é a ordem total \(\le_{C_d}\) induzida por \(C_d\) (Definição~\ref{def:suporte-coordenado}).
 
 \subsection{Três distâncias}
 
