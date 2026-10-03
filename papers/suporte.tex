@@ -922,6 +922,36 @@ q\cdot C^{(n)}.
 \]
 Isto corresponde a multiplicar por \(q\) os pesos anteriores e inserir \(0\) na posição de peso \(q^0\).
 
+\begin{observacao}[Família coerente de extensão no extremo de peso mínimo]
+\label{obs:extensao-pesomin}
+O que precede define a \emph{família coerente de extensão no extremo de peso
+mínimo}: a passagem a \(X^{(n+1)}\) insere o símbolo de código zero no slot de
+peso \(q^0\), o menos significativo da tupla little-endian, deslocando cada peso
+anterior uma unidade, como em \ref{prop:escalonamento}. Isto não é uma
+reformulação de \texttt{campos.tex}, cuja família
+\(\bigl\{\bigl(X_d,C_d\bigr)\bigr\}_{d\ge1}\) insere o zero no slot de peso
+\(256^d\) e por isso satisfaz \(C_{d+1}\circ\iota_d=C_d\).
+
+As duas famílias partilham a definição de suporte coordenado de
+\texttt{campos.tex} ao nível de um único par \((X,C)\), e partilham também a
+coordenada posicional quando comparadas nível a nível sob a mesma codificação:
+para \(n\ge2\), \(X^{(n)}=B^n\) tem o mesmo conjunto e a mesma lei
+\(\sum_{i=1}^{n}q^{\,i-1}d(b_i)\) que o nível correspondente de
+\texttt{campos.tex} na instanciação de bytes, com o slot de peso \(q^{k}\)
+identificado nas duas tuplas. É a divergência dos mapas de transição --- e não
+uma convenção de notação --- que as distingue como estruturas coerentes
+distintas.
+
+Em particular, a escolha da inclusão pertence a uma estrutura de família
+coerente, adicional, e não faz parte da definição mínima de suporte
+coordenado: exige-se apenas que
+\(C\colon X\to\{0,\dots,\lvert X\rvert-1\}\) seja uma bijecção. As duas famílias
+são ambas legítimas e adequadas a papéis diferentes --- a de \texttt{campos.tex}
+preserva o valor do inteiro ao acrescentar um símbolo nulo no peso máximo, e a
+presente mantém alinhados a forma aninhada e a expansão posicional --- e ambas
+devem ser mantidas.
+\end{observacao}
+
 O caso dos bytes corresponde à instanciação
 \[
 q=256,

@@ -432,6 +432,34 @@ C_{d+1}\bigl(\iota_d(x)\bigr)=C_d(x).
 A família \(\{(X_d,C_d)\}_{d\ge1}\) é uma família coerente de suportes coordenados: as inclusões canónicas \(\iota_d\) são compatíveis com as coordenadas, isto é, \(C_{d+1}\circ\iota_d=C_d\) para todo \(d\ge1\).
 \end{corolario}
 
+\begin{observacao}[Família coerente de extensão no extremo de peso máximo]
+\label{obs:extensao-pesomax}
+A família \(\bigl\{\bigl(X_d,C_d\bigr)\bigr\}_{d\ge1}\) é a
+\emph{família coerente de extensão no extremo de peso máximo}: a passagem a
+\(X_{d+1}\) insere um símbolo nulo no slot de peso \(256^d\), o mais significativo
+da tupla little-endian, e por isso não desloca nenhum dos pesos anteriores ---
+daí
+\[
+C_{d+1}\circ\iota_d=C_d.
+\]
+Isto é uma escolha de estrutura coerente, e não \emph{a} construção recursiva
+de suporte: a Definição~\ref{def:suporte-coordenado} exige apenas que
+\(C\colon X\to\{0,\dots,\lvert X\rvert-1\}\) seja uma bijecção, e não menciona
+qualquer inclusão.
+
+Na instanciação de bytes (\(q=256\), codificação a identidade) a coordenada
+coincide nível a nível com a de \texttt{suporte.tex}: para \(d\ge2\), o nível
+\(d\) desta família e o nível \(d\) de \texttt{suporte.tex} têm o mesmo conjunto
+\(B^d\) e a mesma lei posicional little-endian \(\sum_j b_j q^j\), lida a partir do
+slot de peso \(q^0\), com o slot de peso \(q^{k}\) identificado nas duas tuplas.
+Divergem os mapas de transição: a inserção no extremo de peso máximo preserva a
+coordenada, ao passo que a inserção no extremo de peso mínimo de
+\texttt{suporte.tex} multiplica-a por \(q\). São portanto estruturas coerentes
+distintas --- a mesma coordenada posicional nível a nível, dois conjuntos de
+inclusões diferentes --- e não duas convenções de notação para uma só
+construção.
+\end{observacao}
+
 \begin{observacao}[\(G\) em coordenadas]
 \label{obs:G-coordenado}
 Sobre o suporte coordenado \((X_d,C_d)\), o campo reindexado
@@ -640,6 +668,21 @@ A transformação de representação \(\mathcal T\) (Definição~\ref{def:T}) ac
 X_d\xrightarrow{\iota_d}X_{d+1}
 \]
 (Definição~\ref{def:iota-d}) é uma \emph{extensão} do espaço de estados, não uma transformação de representação no sentido de \(\mathcal T\). Não se identificam.
+
+\begin{observacao}[A fronteira entre construção e observação; a ponte da bateria]
+\label{obs:ponte-bateria}
+A passagem anterior separa extensão de espaço de transformação de representação. Do mesmo modo, a transformada \(\mathcal F\) (\code{fis:def:transf}; \texttt{transformada.tex}) não actua sobre os estados de \(X_d\): é uma transformação de representação sobre campos/coeficientes. Não se identificam os dois blocos, e não se reivindica composição formal entre eles. A ponte operacional entre construção e observação é a \textbf{bateria}: sobre o vector de resíduos dos medidores, a unitariedade de \(\mathcal F\) dá o \textbf{selo} pela norma --- nulo se e só se todos os resíduos são nulos (\texttt{tests/transformada.c} §U3--§U5). Este selo não se identifica com o selo JEV-WASM da validação computacional.
+\end{observacao}
+
+\begin{observacao}[O que se transporta para \(\mathbb C\): o núcleo algébrico, não a torre de bytes]
+\label{obs:nucleo-algebrico}
+Leitura, não teorema --- uma \emph{reformulação possível} (tipo C, como o \(2^8=256\) adiante) de conteúdo já formalizado: conjugado e norma, \(N=\det\), \(u^{-1}=\bar u/N(u)\) (\texttt{catalogo.tex} §Q(\(\sigma\))); o teorema \emph{os atratores formam} \(\mathbb C\) (\texttt{catalogo.tex}, eixo real fixo); o ramo \(\mu_-\) como multiplicação complexa (\texttt{espaco.tex}); o passo de Cayley--Dickson \(\mathbb R\to\mathbb C\) (\texttt{catalogo.tex} §torre).
+Da arquitectura dimensional sobrevive o \textbf{núcleo algébrico} --- no sentido de \texttt{racionais.tex} (§MMC): o núcleo de operações, separado do que é normalização de representação:
+\[
+(\mathbb K^2,J),\ J^2=-1\ \to\ z\mapsto\bar z\ \to\ N(z)=z\bar z\ \to\ N(z)=0\iff z=0\ \to\ z^{-1}=\bar z/N(z),
+\]
+com inclusão \(x\mapsto(x,0)\) e interface \(\operatorname{Fix}(\bar z)=\mathbb K\) (o eixo real fixo). O \(i\) não é postulado: é o que o segundo eixo passa a valer (\texttt{catalogo.tex} §chicote). E \(\mathbb C\) é um \emph{salto}, não um andar da torre --- não se transportam \(256^d\), o carry \(S_d\), a codificação \(C_d\), a ordem lexicográfica nem a bateria binária. \(\bar z\neq\partial\), \(\bar z\neq\mathcal D\), e preservação de norma não é identificação de estruturas (\texttt{espaco.tex}); o selo algébrico (invertibilidade) não se confunde com o selo da bateria (\ref{obs:ponte-bateria}). A transformada pode usar \(\mathbb C\) como corpo de coeficientes (\texttt{corpo\_universal.tex}) sem que \(\mathbb C\) seja o domínio estrutural.
+\end{observacao}
 
 \subsection{Relação com as oito leis e com \(L_7\to L_0\)}
 

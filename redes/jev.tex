@@ -370,12 +370,84 @@ Classifica-se como realização possível do contrato Choice por campo de
 contagem, no nível da representação.
 \end{observacao}
 
+\subsection{Suporte coordenado recursivo}
+\label{sec:suporte-coordenado}
+
+Nenhuma estrutura sobre \(X\) foi usada até aqui: para Definição~\ref{def:projecao}
+um conjunto finito discreto basta. Quando porém se quer falar de \emph{cortes}
+numa classificação, é necessária uma ordem, e nenhuma ordem é intrínseca a um
+conjunto abstracto. É para fornecer uma ordem \emph{junto com a estrutura que
+a produz} que se admite, em casos específicos, um suporte coordenado.
+
+Em \texttt{campos.tex} (secção da representação posicional por bytes), um
+suporte coordenado é um par \((X,C)\) em que \(X\) é finito e
+\(C\colon X\to\{0,\dots,\lvert X\rvert-1\}\) é bijecção. A coordenada é parte do
+objecto estruturado: é o par \((X,C)\) que é ordenado, não \(X\).
+
+O texto \texttt{suporte.tex} concrete esta noção numa família recursiva por
+aninhamento de pares sobre um alfabeto finito arbitrário, com a cadeia
+\[
+B
+\;\longrightarrow\;
+d
+\;\longrightarrow\;
+\bigl(X^{(n)},C^{(n)}\bigr)
+\;\longrightarrow\;
+(b_1,\dots,b_n),
+\]
+isto é: alfabeto \(B\) com \(q=\lvert B\rvert\ge2\); codificação
+\(d\colon B\overset{\sim}{\longrightarrow}\{0,\dots,q-1\}\); e, para \(n\ge2\),
+\[
+X^{(2)}=B\times B,\qquad
+X^{(n+1)}=B\times X^{(n)},\qquad
+C^{(2)}(b_1,b_2)=d(b_1)+q\,d(b_2).
+\]
+Mantém-se a convenção já usada no trabalho: a \emph{primeira} componente tem
+peso \(q^{0}\) e é a menos significativa; a segunda tem peso \(q^{1}\). Não
+existe nível de comprimento \(1\): a base estrutural é o par.
+
+O caso dos bytes é uma instanciação desta construção, não uma construção
+paralela:
+\[
+B=\mathbb Z/256\mathbb Z,\qquad q=256,\qquad d=\mathrm{id},\qquad
+X^{(2)}=B\times B,\qquad C^{(2)}(b_1,b_2)=b_1+256\,b_2.
+\]
+
+\begin{observacao}[``Canónico'' é relativo a \(d\)]
+\label{obs:canonico-relativo}
+Dizer que uma leitura, uma ordem ou um estado ``canónico'' sobre \(X_d\) é
+canónico significa apenas que é determinado pela codificação \(d\) e pela
+convenção de pesos fixada --- não que seja propriedade do conjunto abstracto.
+Trocar \(d\) troca \(C\), e com ela tudo o que dela depende. Em particular
+\emph{não} se afirma que \(X\) \emph{é} \(\{0,\dots,q^{n}-1\}\): o que existe é
+a bijecção
+\[
+C^{(n)}\colon X^{(n)}\overset{\sim}{\longrightarrow}\{0,\dots,q^{n}-1\},
+\]
+e é ela que fornece a ordem. É esta bijecção, e não \(X\), que torna
+significativa a convexidade usada na secção seguinte.
+\end{observacao}
+
+\begin{observacao}[Suporte recursivo não é Choice recursiva]
+\label{obs:recursivo-nao-choice}
+A família \(X^{(n)}\) é recursiva por aninhamento de pares e \(C^{(n)}\) é uma
+aplicação de conjunto. Nada disto define uma Choice recursiva. A construção de
+Choice deste paper continua a ser
+\(q\colon X\to C\) (Definição~\ref{def:q-choice}), com \(C\) um conjunto de
+opções \emph{fixo}, não uma opção por nível. A especialização da
+secção seguinte é uma escolha de estrutura \emph{adicional} sobre o domínio;
+não é induzida pela recursividade do suporte, e não produz nenhuma cadeia de
+Choice por níveis.
+\end{observacao}
+
 \subsection{Choice intervalar como especialização coordenada}
 \label{sec:choice-intervalar}
 
 Quando o suporte possui a estrutura coordenada \((X_d,C_d)\) de
-\texttt{campos.tex} (secção da representação posicional por bytes), a classificação categorial
-admite uma especialização definida por cortes na coordenada. Não se redefine o
+\texttt{campos.tex} (secção da representação posicional por bytes) ou uma das
+instâncias recursivas de \texttt{suporte.tex} (Sec.~\ref{sec:suporte-coordenado}),
+a classificação categorial admite uma especialização definida por cortes na
+coordenada. Não se redefine o
 Choice: \(q\colon X\to C\) continua a ser a definição geral
 (Definição~\ref{def:q-choice}); a construção seguinte é uma restrição adicional
 de estrutura sobre o domínio.
@@ -383,13 +455,13 @@ de estrutura sobre o domínio.
 \begin{definicao}[Choice intervalar]
 \label{def:choice-intervalar}
 Sejam \((X_d,C_d)\) um suporte coordenado com \(\lvert X_d\rvert=N\),
-\(C=\{c_1,\dots,c_k\}\) finito, e fronteiras
+\(C=\{c_0,\dots,c_{k-1}\}\) finito, e fronteiras
 \[
 0=b_0<b_1<\dots<b_k=N.
 \]
 Define-se \(q_b\colon X_d\to C\) por
 \[
-q_b(x)=c_j\iff b_j\le C_d(x)<b_{j+1}.
+q_b(x)=c_j\iff b_j\le C_d(x)<b_{j+1}\qquad(j=0,\dots,k-1).
 \]
 Equivalentemente, em coordenadas,
 \[
@@ -402,10 +474,13 @@ q_b^{-1}(c_j)=C_d^{-1}\bigl([b_j,b_{j+1})\bigr).
 \(q_b\) é uma classificação categorial no sentido da
 Definição~\ref{def:q-choice}; em particular \(\sum_j G_{q_b}(c_j)=\lvert I\rvert\).
 A recíproca falha em geral: uma classificação categorial \(q\colon X_d\to C\)
-é representável como \(q_b\) se e só se as suas fibras são
-\(C_d\)-convexas, isto é, se e só se existem intervalos
-\(I_1,\dots,I_k\subseteq\{0,\dots,N-1\}\) aos pares disjuntos com
-\(\bigcup_j I_j=\{0,\dots,N-1\}\) tais que \(q^{-1}(c_j)=C_d^{-1}(I_j)\).
+é representável como \(q_b\) se e só se as suas fibras são \(C_d\)-convexas
+\emph{e} a rotulagem respeita a ordem da coordenada, isto é, se e só se
+existem fronteiras \(0=b_0<b_1<\dots<b_k=N\) tais que
+\[
+q^{-1}(c_j)=C_d^{-1}\bigl([b_j,b_{j+1})\bigr)
+\qquad(j=0,\dots,k-1).
+\]
 \end{proposicao}
 
 \begin{proof}
@@ -415,12 +490,29 @@ Os intervalos \([b_j,b_{j+1})\), \(j=0,\dots,k-1\), particionam
 categorial e a conservação segue de \ref{prop:gq-conserva}. Para a recíproca,
 se \(q=q_b\) então \(q^{-1}(c_j)=C_d^{-1}([b_j,b_{j+1}))\) é a pré-imagem de um
 intervalo. Inversamente, se \(q^{-1}(c_j)=C_d^{-1}(I_j)\) com os \(I_j\)
-disjuntos cobrindo \(\{0,\dots,N-1\}\), os extremos de \(I_j\), tomados por
-ordem crescente, definem as fronteiras \(b_j\), donde \(q=q_b\). A recíproca é
-efectivamente estrita: por exemplo, com \(X_2=\{0,1,2,3\}\), \(C_2=\mathrm{id}\)
-e \(C=\{a,b\}\), a classificação \(q(0)=a,\ q(1)=b,\ q(2)=a,\ q(3)=b\) tem fibra
-\(q^{-1}(a)=\{0,2\}\), que não é um intervalo de \(\{0,1,2,3\}\), logo não é
-intervalar.
+intervalos disjuntos a cobrir \(\{0,\dots,N-1\}\), então --- sendo uma
+partição de um intervalo em intervalos necessariamente consecutiva --- os
+extremos, por ordem crescente, dão as fronteiras \(b_j\). Falta porém
+verificar que o intervalo \([b_j,b_{j+1})\) é precisamente a fibra de \(c_j\),
+e não de outro \(c_\ell\): é esta exigência de ordem que falha em geral.
+Por exemplo, com \(N=4\), \(k=3\), \(C=\{c_0,c_1,c_2\}\) e
+\[
+q^{-1}(c_0)=\{0\},\qquad q^{-1}(c_1)=\{3\},\qquad q^{-1}(c_2)=\{1,2\},
+\]
+todas as fibras são intervalos disjuntos que cobrem \(\{0,1,2,3\}\), mas não
+existem fronteiras: \(q_b^{-1}(c_0)=[0,b_1)=\{0\}\) obriga \(b_1=1\), e então
+\(q_b^{-1}(c_1)=[1,b_2)\neq\{3\}\).
+
+A recíproca é
+efectivamente estrita também por perda de convexidade: tome-se o
+nível \(n=2\) da família de \texttt{suporte.tex} com \(B=\{0,1\}\),
+\(d=\mathrm{id}\) e \(q=2\), donde \(X^{(2)}=\{0,1\}\times\{0,1\}\) e
+\(C^{(2)}(b_1,b_2)=b_1+2b_2\); com \(C=\{a,b\}\), a classificação
+\[
+q(0,0)=q(1,1)=a,\qquad q(1,0)=q(0,1)=b
+\]
+tem fibra \(q^{-1}(a)=\{(0,0),(1,1)\}=C^{(2)-1}(\{0,3\})\), e \(\{0,3\}\)
+não é um intervalo de \(\{0,\dots,3\}\), logo não é intervalar.
 \end{proof}
 
 \subsection{Score como caso ordenado}
@@ -1019,6 +1111,7 @@ Score & score (frac.) + probs + legend & \(p_q\) sobre \(S\), \(\mathbb E_G[S]\)
 Noul & \(P(\mathrm{yes})\in[0,1]\) & \(p_P(\mathrm{yes})=G_P(1)/\lvert I\rvert\) & construção \\
 Probability & saída calibrada do modelo & frequência \(p_G\), \(p_q\) & definição / cálculo \\
 Confidence & campo documentado (Choice/Score) & \(\kappa=\max p_q\) (auxiliar; \textbf{não} confidence JEV) & definição auxiliar \\
+Suporte coordenado \((X_d,C_d)\) & --- & alfabeto \(B\), codificação \(d\), \(X^{(n)}\), coordenada \(C^{(n)}\); base do Choice intervalar & estrutura (Sec.~\ref{sec:suporte-coordenado}) \\
 Field \(G\) & \textbf{não documentado} & \(G(x)=\lvert\pi^{-1}(x)\rvert\) & definição \\
 Projection \(q\) & \textbf{não documentado} & \(G_q(y)=\lvert\pi^{-1}(q^{-1}(y))\rvert\) & definição \\
 Projeção conjunta \(q=(q_1,\dots,q_n)\) & \textbf{não documentado} & \(G_q(y_1,\dots,y_n)=\sum G(x)\) sobre \(q_i(x){=}y_i\) & definição (Def.~\ref{def:projecao-conjunta}) \\
