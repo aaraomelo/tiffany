@@ -1707,3 +1707,164 @@ Esta secção regista a **existência e o conteúdo** do repositório independen
 A publicação da branch `main` no GitHub é uma operação separada, com
 autorização própria, e não é feita por este commit. O mesmo se aplica a qualquer
 promoção de visibilidade.
+
+## 29. J1 — ESTADO SINCRONIZADO DO PRODUTO TIFFANY DB (2026-10-03)
+
+Esta secção é **aditiva**. A §28 fica intacta: registava com verdade o estado
+de 2026-10-01 e reescrevê-la destruiria a proveniência. O que segue é o estado
+medido em 2026-10-03.
+
+```text
+tiffany-db: HEAD c6ff1c4, branch main, upstream origin/main
+Commits: 8 no total — 6 publicados, 2 locais (b6d8cb9, c6ff1c4)
+Remote: existe e está configurado
+Push desta sincronização: NÃO
+```
+
+### 1. Estado actual
+
+| Item | §28 (2026-10-01) | Estado medido (2026-10-03) |
+|---|---|---|
+| Endereço | <https://github.com/aaraomelo/tiffany-db> | o mesmo |
+| Branch | `main` | `main` |
+| Remoto | vazio | **configurado**, com upstream `origin/main` |
+| Commits | 2 (locais) | **8** |
+| Publicados | 0 | **6** |
+| Locais por publicar | — | **2** (`b6d8cb9`, `c6ff1c4`) |
+| Visibilidade | `PRIVATE` | `PRIVATE` |
+
+### 2. Os oito commits
+
+| # | Hash | Mensagem |
+|---:|---|---|
+| 1 | `019489734a9c8fa3e84fdc1893f1ae695f6a83b5` | `chore: importa a closure do produto Tiffany DB v1.0.0` |
+| 2 | `2ba670ed17bd6be38431b92b6fc31a319762a03f` | `docs: README do repositório independente + relação com o monorepo` |
+| 3 | `c9cb6e5969bd6bc108830b5837153e3e8b34f9f0` | `jev: promove area-jev/ para produto Tiffany DB` |
+| 4 | `a81d4df7443e85537540386149975d37067298e6` | `debian: integra JEV no pacote 1.1.0-1` |
+| 5 | `ceb460b9f0231ee5cc0c8ed6a3483da40853f062` | `JEV: integração Debian 1.1.0-1 - debian/rules atualizado (jev.o em ar/shared), SONAME libtiffanydb.so.1, ABI 45, sem push/tag/release` |
+| 6 | `3deb2da039df04aa04ef5b0fecd8c09200cf7de1` | `gitignore: remove *.tar ampla; mantem *.deb para artefatos Debian` |
+| 7 | `b6d8cb90f6506c859a2924236ebb4ccc777f12f5` | `debian: corrige compilação dos objetos e prova anti-LTO` |
+| 8 | `c6ff1c453c13ed1cfae4f61442e059f059f7378d` | `feat: realiza a Choice intervalar em sql_hist_jev e fecha os testes` |
+
+Os commits 1 a 6 estão publicados em `origin/main`. Os commits **7 e 8 são
+locais e não estão publicados**. Autoria: Aarão Melo Lopes. O commit 1 é raiz —
+não tem parent. Os commits 3 a 5 são a tracção do JEV para dentro do produto; o
+commit 7 é o fecho do empacotamento Debian; o commit 8 é a realização SQL.
+
+### 3. Promoção do JEV para o produto
+
+O commit `c9cb6e5` promoveu `area-jev/` a produto: 8 ficheiros, 1647
+inserções — `JEV.md`, `banco/jev.c`, `banco/jev_api.h`, `banco/jev_core.h`,
+`tests/jev_casos.c`, `tests/jev_casos.h`, `tests/test_jev_api.c`,
+`tests/test_jev_oraculo.c`. É este commit que cria o directório `tests/` no
+produto, e é ele que traz `banco/jev.c` e a API JEV para dentro de `banco/`.
+
+### 4. Realização SQL da Choice intervalar
+
+O commit `c6ff1c4` acrescenta `sql_hist_jev()` a `banco/sql.c` e cria
+`tests/test_sql_hist_jev.c`. É a **realização, no motor SQL, da Choice
+intervalar já formalizada** neste repositório pelo commit `dd1d82ed`
+(`docs: formaliza suporte coordenado e choice intervalar`, em `redes/jev.tex` e
+`redes/campos.tex`).
+
+**Não é uma definição matemática nova.** Não introduce notação, contrato ou
+teoria; especializa num consumidor (o motor SQL) uma estrutura já definida. Os
+papers não foram alterados por este commit, e o layout matemático da arena JEV,
+a interpretação de `J`/`D2` e a definição de `Choice` permanecem os que estão
+nestes repositórios.
+
+### 5. Qualificação dos rótulos da auditoria JEV
+
+Os itens de realização da auditoria JEV do commit `c6ff1c4` recebem nesta
+secção o sufixo `-JEV`. **Os mesmos dois números** já são usados na §23 deste
+documento pela lista de features da proposta, cujas entradas «versionamento» e
+«documento» nada têm a ver com a arena JEV. A colisão é real e não é cosmética.
+
+Para que nenhum número sem sufixo possa ser lido como item JEV, os dois
+conjuntos escrevem-se **sempre qualificados**:
+
+| Qualificado | Significado |
+|---|---|
+| `F9-JEV` | cópia de `hist_local` para a arena antes de `jev_marginal` |
+| `F10-JEV` | derivação de `D1 = X + k + 10`, com o bloco de 48 margens entre `D1` e `J` |
+| `F17-JEV` | recusa de valor vivo `v >= X` como `E3`, incrementando `jev_hist_erros[2]` |
+| `F9-prop` | §23, lista de features da proposta: versionamento |
+| `F10-prop` | §23, lista de features da proposta: documento |
+
+`F9-JEV` é cópia para a arena; `F9-prop` é versionamento. Os sufixos `-JEV` e
+`-prop` são etiquetas documentais introduzidas por esta secção para distinguir
+dois usos do mesmo número; não alteram a numeração original de nenhum dos lados,
+e a §23 continua por escrever como escreve.
+
+### 6. Estado de validação do `c6ff1c4`
+
+Medido em Linux (Ubuntu 24.04.4, gcc 13.3.0), pelo caminho SQL real e sem
+harness directo de `jev.c`:
+
+| Verificação | Resultado |
+|---|---|
+| Compilação com `-Wall -Wextra` | 0 erros; **zero avisos no bloco R4 e no teste novo** |
+| Execução da bateria | **15/15 PASS**, `RESUMO: 0 falhas`, `exit 0` |
+| `Gq` nominal | `(2,5,3)` com `X=10`, `k=3`, `B={0,2,7,10}`, `\|I\|=10` |
+| Conservação | `ΣG_q = \|I\| = 10`, verificada dentro da própria realização |
+| `E1`/`E2`/`E3`/`E5`/`E6`/`E7` | todos exercitados |
+| `E4` | **inalcançável** pela gramática actual de `spec_decode` (`k>16` recusa em `E6`); `T12` confirma a recusa |
+| `T14` | determinismo: duas arenas distintas, mesmo `Gq` |
+| `T15` | restauração da arena, em sucesso e em erro |
+| Poder discriminante de `T15` | confirmado por controlos negativos: sem o restore de sucesso, ou sem selar a arena antes da chamada, o teste **falha** |
+
+### 7. Divergência documental registada, não corrigida aqui
+
+O `README.md` do `tiffany-db` continua a descrever a closure de fecho com a
+contagem histórica: afirma `banco/` = 10 ficheiros (2 translation units e 8
+headers), raiz = 4, **total 54** (+ `README.md` = 55), e não tem linha para o
+directório `tests/`. O estado real em 2026-10-03 é `banco/` = **13** (3
+translation units — `sql.c`, `jev.c`, `pgwire.c` — e 10 headers), `lib/` = 31,
+`debian/` = 9, `tests/` = **5**, raiz = **7**, **total 65** ficheiros
+versionados. A tabela `PRODUCT CLOSURE` e a frase «42 ficheiros, dos quais 10
+estão aqui» estão desactualizadas.
+
+Isto é uma divergência **do produto sobre si próprio**, causada pelos commits
+`c9cb6e5` e `c6ff1c4`. O `README.md` do `tiffany-db` ainda possui a contagem
+histórica de fecho desatualizada e será tratado em alteração documental própria
+do produto. **Não foi corrigido nesta sincronização**, e este commit não o
+afirma corrigido.
+
+### Higiene desta etapa
+
+O único ficheiro alterado neste repositório é `PROPOSTA_TIFFANY_DB.md`, e só
+pela secção §29 acrescentada ao fim. Nenhum dos 11 ficheiros já modificados
+(`app/src/jev_contratos.js`, `assets/figuras/wasm/jev/marginal.wasm`,
+`conecthus/backends/wasm/jev/marginal.c`, `docs/INTEGRACAO_JEV_WASM.md`,
+`enredo.tex`, `papers/suporte.tex`, `redes/campos.pdf`, `redes/campos.tex`,
+`redes/jev.tex`, `tests/jev_backends.js`, `tests/jev_front.js`) foi tocado, e
+nenhum dos ~139 untracked foi removido ou adicionado. Não se usou `git add -A`
+nem `git add .`: o stage foi explícito, ficheiro a ficheiro.
+
+No `tiffany-db` **nada foi alterado** — nem `README.md`, nem `JEV.md`, nem
+`banco/sql.c`, nem `banco/jev.c`, nem `tests/test_sql_hist_jev.c`, nem os 7
+untracked. O commit `c6ff1c4` e o commit `b6d8cb9` permanecem intactos e
+locais.
+
+### O que esta secção NÃO decide
+
+1. **Não publica nada.** Os commits `b6d8cb9` e `c6ff1c4` continuam locais; o
+   push é uma operação separada, com autorização própria.
+2. **Não altera a `LICENSE`**, a visibilidade do repositório remoto, nem abre
+   tag, release ou chave GPG.
+3. **Não afirma que a closure do produto foi recontada.** O `README.md` do
+   `tiffany-db` continua desatualizado, por decisão, e a correcção cabe ao
+   produto.
+4. **Não muda o contrato matemático.** Nada aqui reinterpreta `Choice`, `J`/`D2`
+   ou o layout da arena.
+
+### O que esta secção NÃO abre
+
+Os papers ficam **fora** desta sincronização. `redes/jev.tex`,
+`papers/suporte.tex`, `redes/campos.tex` e `enredo.tex` têm já alterações
+locais independentes e não commitadas — trabalho em curso, da responsabilidade
+de quem o fez — e **não há contradição factual directa** causada por
+`b6d8cb9` ou `c6ff1c4` que exija correcção: a realização SQL especializa a
+Choice já formalizada e não toca a papers. Qualquer reconciliação entre o texto
+dos papers e o estado do produto é um trabalho distinto, com autoria distinta,
+e esta secção não o inicia.
