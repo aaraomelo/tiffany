@@ -1,0 +1,942 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[expansion=false]{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{lema}{Lema}
+\newtheorem{observacao}{Observação}
+\newtheorem{corolario}{Corolário}
+\newtheorem{questao}{Questão}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\title{Suporte Coordenado Recursivo\\
+por Aninhamento de Pares}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Formalizamos uma família recursiva de suportes coordenados construída por aninhamento de pares sobre um alfabeto finito arbitrário.
+A base estrutural é sempre um par; a recursão acrescenta símbolos à esquerda.
+A construção separa explicitamente
+\[
+\begin{array}{rcl}
+\text{alfabeto} &\longrightarrow& B,\\
+\text{codificação dos símbolos} &\longrightarrow& d,\\
+\text{estrutura recursiva} &\longrightarrow& X^{(n)},\\
+\text{coordenada} &\longrightarrow& C^{(n)},\\
+\text{representação} &\longrightarrow& (b_1,b_2,\dots,b_n).
+\end{array}
+\]
+A forma aninhada
+\[
+\bigl(b_1,(b_2,(b_3,\dots,(b_{n-1},b_n)\dots))\bigr)
+\]
+corresponde exactamente à expansão posicional
+\[
+d(b_1)+q\,d(b_2)+\cdots+q^{n-1}\,d(b_n).
+\]
+O caso dos bytes (\(q=256\)) aparece apenas como instanciação particular.
+\end{abstract}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Motivação}
+
+Em \texttt{campos.tex} um suporte coordenado é um par \((X,C)\) em que \(C\colon X\to\{0,\dots,\lvert X\rvert-1\}\) é bijecção.
+
+Aqui construímos o suporte de forma recursiva por aninhamento de pares, com um alfabeto finito arbitrário.
+A base estrutural é o par; a recursão acrescenta um novo símbolo à esquerda.
+Cada nível contém uma cópia canónica do nível anterior, determinada por uma inclusão \(\iota_n\).
+
+O objectivo é alinhar a estrutura sintáctica do aninhamento com a expansão posicional da coordenada:
+\[
+\bigl(b_1,(b_2,\dots,(b_{n-1},b_n)\dots)\bigr)
+\quad\longleftrightarrow\quad
+\sum_{i=1}^{n} q^{i-1}\,d(b_i).
+\]
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Definição}
+
+\begin{definicao}[Alfabeto e codificação]
+\label{def:alfabeto}
+Seja \(B\) um conjunto finito com
+\[
+q
+:=
+\lvert B\rvert
+\ge 2.
+\]
+Fixe uma bijecção (codificação dos símbolos)
+\[
+d\colon B\overset{\sim}{\longrightarrow}\{0,1,\dots,q-1\}.
+\]
+\end{definicao}
+
+\begin{observacao}[Separação alfabeto/codificação]
+\label{obs:alfabeto-codificacao}
+O alfabeto \(B\) é um conjunto de símbolos; a codificação \(d\) atribui a cada símbolo um valor numérico.
+Estas duas escolhas são independentes da estrutura recursiva do suporte.
+Casos particulares:
+\begin{itemize}[leftmargin=1.5em]
+\item binário: \(q=2\), \(B=\{0,1\}\), \(d=\mathrm{id}\);
+\item hexadecimal: \(q=16\);
+\item byte: \(q=256\), \(B=\mathbb Z/256\mathbb Z\), \(d=\mathrm{id}\).
+\end{itemize}
+Nenhum deles é privilegiado pela definição.
+\end{observacao}
+
+\begin{definicao}[Família recursiva de suportes por aninhamento]
+\label{def:suporte-aninhado}
+Definimos indutivamente o conjunto \(X^{(n)}\) e a coordenada \(C^{(n)}\) para \(n\ge 2\).
+
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Base} (\(n=2\)):
+\[
+X^{(2)}
+:=
+B\times B,
+\qquad
+C^{(2)}(b_1,b_2)
+:=
+d(b_1)
++
+q\,d(b_2).
+\]
+Assim \((X^{(2)},C^{(2)})\) é um suporte coordenado.
+
+\item \textbf{Passo} (\(n\ge 3\)):
+\[
+X^{(n)}
+:=
+B\times X^{(n-1)}.
+\]
+Um elemento de \(X^{(n)}\) escreve-se
+\[
+x
+=
+(b,\, \xi)
+\quad\text{com}\quad
+b\in B,\quad
+\xi\in X^{(n-1)}.
+\]
+A coordenada é definida por
+\[
+C^{(n)}(b,\, \xi)
+\;:=\;
+d(b)
+\;+\;
+q\, C^{(n-1)}(\xi).
+\]
+\end{enumerate}
+
+Para cada \(n\ge 2\), o par \(\bigl(X^{(n)},\, C^{(n)}\bigr)\) é um suporte coordenado.
+\end{definicao}
+
+\begin{observacao}[Notação de aninhamento]
+\label{obs:aninhamento}
+Um estado de comprimento \(n\) escreve-se
+\[
+x
+=
+\bigl(
+b_1,\,
+\bigl(
+b_2,\,
+\bigl(
+b_3,\,
+\dots,\,
+(b_{n-1},\, b_n)
+\dots
+\bigr)
+\bigr)
+\bigr),
+\]
+com \(b_i\in B\).
+Aqui \(b_1\) é o símbolo menos significativo (peso \(q^0\)) e \(b_n\) o mais significativo (peso \(q^{n-1}\)).
+A coordenada correspondente é
+\[
+C^{(n)}(x)
+=
+d(b_1)
++
+q\,d(b_2)
++
+\cdots
++
+q^{n-1}\,d(b_n).
+\]
+A estrutura sintáctica e a expansão posicional estão alinhadas: o aninhamento à direita corresponde exactamente aos pesos crescentes.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Inclusão canónica}
+
+\begin{definicao}[Inclusão canónica]
+\label{def:iota-n}
+Para cada \(n\ge 2\), a inclusão canónica é
+\[
+\iota_n\colon X^{(n)}\hookrightarrow X^{(n+1)},
+\qquad
+\iota_n(\xi)
+:=
+(b_\ast,\, \xi),
+\]
+onde \(b_\ast = d^{-1}(0)\) é o (único) símbolo de código zero.
+A inclusão é determinada unicamente pela codificação \(d\).
+Isto é: multiplica-se por \(q\) os pesos anteriores e insere-se \(0\) na posição de peso \(q^0\).
+\end{definicao}
+
+\begin{proposicao}[Escalonamento da coordenada sob inclusão]
+\label{prop:escalonamento}
+Para todo \(n\ge 2\),
+\[
+C^{(n+1)}\circ\iota_n
+=
+q\cdot C^{(n)}.
+\]
+Explicitamente:
+\[
+C^{(n+1)}\bigl(\iota_n(\xi)\bigr)
+=
+C^{(n+1)}(b_\ast,\, \xi)
+=
+d(b_\ast)
++
+q\, C^{(n)}(\xi)
+=
+0
++
+q\, C^{(n)}(\xi)
+=
+q\, C^{(n)}(\xi).
+\]
+\end{proposicao}
+
+\begin{proof}
+Imediato da definição de \(C^{(n+1)}\) e de \(\iota_n\).
+\end{proof}
+
+\begin{observacao}[Escalonamento de pesos]
+\label{obs:escalonamento}
+Ao contrário de uma construção que acrescenta o novo símbolo no extremo de peso máximo (e preserva a coordenada exactamente), aqui o novo símbolo é introduzido no extremo de peso mínimo.
+Consequentemente a coordenada do nível anterior é multiplicada por \(q\): todos os pesos existentes sobem uma unidade.
+A inclusão é injectiva e determinada unicamente pela codificação \(d\) (via \(b_\ast=d^{-1}(0)\)); a relação entre coordenadas é
+\[
+C^{(n+1)}\circ\iota_n
+=
+q\cdot C^{(n)}.
+\]
+\end{observacao}
+
+\begin{corolario}[Coerência da família]
+\label{cor:coerencia}
+Para todo \(k\ge 1\),
+\[
+C^{(n+k)}\circ\iota_{n+k-1}\circ\cdots\circ\iota_n
+=
+q^k\cdot C^{(n)}.
+\]
+\end{corolario}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Propriedades fundamentais}
+
+\begin{proposicao}[Bijecção]
+\label{prop:bijecao}
+Para todo \(n\ge 2\),
+\[
+C^{(n)}\colon X^{(n)}\overset{\sim}{\longrightarrow}\{0,1,\dots,q^{n}-1\}
+\]
+é bijecção.
+Em particular \(\lvert X^{(n)}\rvert = q^{n}\).
+\end{proposicao}
+
+\begin{proof}
+Por indução em \(n\).
+
+\begin{itemize}[leftmargin=1.5em]
+\item Base (\(n=2\)): \(C^{(2)}(b_1,b_2)=d(b_1)+q\,d(b_2)\) é a representação posicional clássica em base \(q\) com dois dígitos; a imagem é \(\{0,\dots,q^2-1\}\) e a aplicação é bijectiva.
+
+\item Passo: suponha \(C^{(n)}\) bijecção sobre \(\{0,\dots,q^{n}-1\}\).
+Então a aplicação
+\[
+(b,\, \xi)
+\mapsto
+d(b)
++
+q\, C^{(n)}(\xi)
+\]
+é a representação posicional clássica em base \(q\), com \(d(b)\) no dígito de peso \(q^0\) e \(C^{(n)}(\xi)\) a ocupar os dígitos de pesos \(q^1,\dots,q^{n}\).
+Como \(d(b)\) percorre \(\{0,\dots,q-1\}\) e \(C^{(n)}(\xi)\) percorre um bloco completo de comprimento \(q^{n}\), a imagem é \(\{0,\dots,q^{n+1}-1\}\) e a aplicação é injectiva (e portanto bijectiva).
+\end{itemize}
+\end{proof}
+
+\begin{proposicao}[Ordem induzida]
+\label{prop:ordem}
+A ordem induzida por \(C^{(n)}\),
+\[
+\xi\le_{C^{(n)}}\eta
+\quad\iff\quad
+C^{(n)}(\xi)\le C^{(n)}(\eta),
+\]
+é total.
+Sob a inclusão,
+\[
+\xi\le_{C^{(n)}}\eta
+\quad\Longrightarrow\quad
+\iota_n(\xi)\le_{C^{(n+1)}}\iota_n(\eta),
+\]
+porque \(C^{(n+1)}\circ\iota_n=q\cdot C^{(n)}\) e a multiplicação por \(q>0\) preserva a ordem.
+\end{proposicao}
+
+\begin{proof}
+A totalidade segue de \(C^{(n)}\) ser bijecção para um intervalo de inteiros.
+A preservação da ordem sob \(\iota_n\) é consequência directa da Proposição~\ref{prop:escalonamento}.
+\end{proof}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Camadas distintas}
+
+\begin{observacao}[Separação estrutural]
+\label{obs:camadas}
+A construção distingue explicitamente:
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Alfabeto} \(B\) --- conjunto finito de símbolos;
+\item \textbf{Codificação} \(d\) --- bijecção que atribui valores numéricos aos símbolos;
+\item \textbf{Estrutura recursiva} \(X^{(n)}\) --- o suporte propriamente dito, construído por aninhamento de pares a partir de um par-base;
+\item \textbf{Coordenada} \(C^{(n)}\) --- a bijecção que atribui a cada estado um inteiro em \(\{0,\dots,q^{n}-1\}\);
+\item \textbf{Representação} \((b_1,b_2,\dots,b_n)\) --- a sequência de símbolos que aparece quando se desaninha o estado.
+\end{enumerate}
+O suporte não é identificado com a representação numérica.
+A coordenada é uma aplicação \emph{sobre} o suporte e depende da codificação \(d\).
+A base estrutural é o par \(X^{(2)}=B\times B\); não existe nível de comprimento 1 na família.
+\end{observacao}
+
+\begin{observacao}[Comparação com o produto plano]
+\label{obs:comparacao-produto}
+Matematicamente, \(X^{(n)}\) é equipotente a \(B^{n}\) e transporta a mesma informação.
+A diferença não está na cardinalidade nem na informação representada, mas na estrutura escolhida para o suporte:
+em vez de apresentar cada nível directamente como um produto cartesiano plano \(B^{n}\), a construção o apresenta recursivamente por aninhamento de pares, com base no par.
+Cada nível contém uma cópia canónica do nível anterior, determinada pela inclusão \(\iota_n\).
+\end{observacao}
+
+\begin{observacao}[Não se trata de um único objecto]
+\label{obs:familia}
+A construção produz uma \emph{família} recursiva de suportes
+\[
+X^{(2)},\ X^{(3)},\ X^{(4)},\ \dots
+\]
+na qual cada nível contém uma cópia canónica do nível anterior, determinada por \(\iota_n\).
+Não se afirma a existência de um único suporte \(X^{(\infty)}\).
+Uma eventual colagem indutiva
+\[
+X^{(\infty)}
+:=
+\varinjlim X^{(n)}
+\]
+seria uma estrutura adicional, desnecessária para a distinção entre suporte, coordenada e representação que se pretende aqui.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Espaço de campos sobre o suporte aninhado}
+
+A construção do suporte aninhado introduz apenas estrutura combinatória e uma coordenada posicional.
+Em particular, não se impõe estrutura linear sobre \(X^{(n)}\) nem sobre o alfabeto \(B\).
+A estrutura linear pode ser introduzida posteriormente sobre os campos definidos no suporte.
+
+\begin{definicao}[Espaço de campos escalares]
+\label{def:espaco-campos}
+Seja \(\mathbb K\) um corpo e seja \(X^{(n)}\) um suporte da família recursiva.
+Definimos o espaço de campos escalares sobre \(X^{(n)}\) por
+\[
+\mathcal V_n
+\;:=\;
+\mathbb K^{X^{(n)}}
+=
+\{V\mid V\colon X^{(n)}\to\mathbb K\}.
+\]
+As operações são definidas ponto a ponto:
+\[
+(V+W)(x)
+:=
+V(x)+W(x),
+\qquad
+(\lambda V)(x)
+:=
+\lambda\,V(x),
+\]
+para \(V,W\in\mathcal V_n\), \(\lambda\in\mathbb K\) e \(x\in X^{(n)}\).
+Com essas operações, \(\mathcal V_n\) é um espaço vectorial sobre \(\mathbb K\).
+\end{definicao}
+
+\begin{observacao}[Separação entre suporte e campo]
+\label{obs:suporte-campo}
+O suporte \(X^{(n)}\) e o espaço de campos \(\mathcal V_n\) desempenham papéis distintos:
+\[
+x\in X^{(n)}
+\]
+é um elemento do suporte, enquanto
+\[
+V\in\mathcal V_n
+\]
+é um campo definido sobre o suporte e
+\[
+V(x)\in\mathbb K
+\]
+é o valor desse campo em \(x\).
+Assim
+\[
+\boxed{X^{(n)}\neq\mathcal V_n}
+\]
+e nenhuma estrutura linear é atribuída ao suporte apenas pela definição de \(\mathcal V_n\).
+\end{observacao}
+
+\begin{proposicao}[Dimensão]
+\label{prop:dimensao-campos}
+Para todo \(n\ge 2\),
+\[
+\dim_{\mathbb K}\mathcal V_n
+=
+\lvert X^{(n)}\rvert
+=
+q^{n}.
+\]
+\end{proposicao}
+
+\begin{proof}
+Como \(X^{(n)}\) é finito, o espaço de funções \(\mathcal V_n=\mathbb K^{X^{(n)}}\) possui uma base canónica indexada pelos elementos de \(X^{(n)}\).
+Para cada \(x\in X^{(n)}\), defina
+\[
+e_x(y)
+:=
+\begin{cases}
+1 & \text{se }y=x,\\
+0 & \text{se }y\neq x.
+\end{cases}
+\]
+Então
+\[
+\mathcal E_n
+:=
+\{e_x\mid x\in X^{(n)}\}
+\]
+é uma base de \(\mathcal V_n\).
+Como \(\lvert X^{(n)}\rvert=q^{n}\), segue que
+\[
+\dim_{\mathbb K}\mathcal V_n
+=
+q^{n}.
+\]
+\end{proof}
+
+\begin{observacao}[A coordenada como índice da base]
+\label{obs:coordenada-base}
+A coordenada
+\[
+C^{(n)}\colon X^{(n)}\overset{\sim}{\longrightarrow}\{0,\dots,q^{n}-1\}
+\]
+permite indexar a base canónica por inteiros.
+Escrevendo
+\[
+e_c
+:=
+e_{(C^{(n)})^{-1}(c)},
+\]
+obtemos
+\[
+\mathcal E_n
+=
+\{e_c\mid 0\le c<q^{n}\}.
+\]
+Consequentemente, todo campo \(V\in\mathcal V_n\) possui a expansão
+\[
+V
+=
+\sum_{c=0}^{q^{n}-1}
+V\bigl((C^{(n)})^{-1}(c)\bigr)\,e_c.
+\]
+A coordenada, portanto, indexa a base, mas não identifica o suporte com a base.
+\end{observacao}
+
+\begin{observacao}[Representação coordenada do campo]
+\label{obs:campo-coordenado}
+A bijecção \(C^{(n)}\) permite transportar um campo \(V\in\mathcal V_n\) para a representação coordenada
+\[
+\widehat V
+\colon
+\{0,\dots,q^{n}-1\}
+\to
+\mathbb K,
+\]
+definida por
+\[
+\widehat V(c)
+:=
+V\bigl((C^{(n)})^{-1}(c)\bigr).
+\]
+Assim,
+\[
+V
+\longleftrightarrow
+\widehat V
+\]
+é apenas uma mudança de índice determinada pela bijecção \(C^{(n)}\).
+Não se introduz um novo campo nem uma nova grandeza: trata-se do mesmo campo escrito segundo a coordenada escolhida.
+\end{observacao}
+
+\begin{observacao}[Valores vectoriais]
+\label{obs:valores-vectoriais}
+A construção não depende de os valores dos campos serem escalares.
+Se \(r\ge 1\), pode-se considerar
+\[
+\mathcal V_n^{(r)}
+:=
+(\mathbb K^r)^{X^{(n)}}.
+\]
+Um elemento \(V\in\mathcal V_n^{(r)}\) associa a cada \(x\in X^{(n)}\) um vector \(V(x)\in\mathbb K^r\).
+Nesse caso,
+\[
+\dim_{\mathbb K}\mathcal V_n^{(r)}
+=
+r\cdot q^{n}.
+\]
+A estrutura do suporte e a coordenada permanecem inalteradas; somente o contradomínio dos campos é ampliado.
+\end{observacao}
+
+\begin{observacao}[Extensão entre níveis]
+\label{obs:extensao-campo}
+A inclusão canónica
+\[
+\iota_n\colon X^{(n)}\hookrightarrow X^{(n+1)}
+\]
+permite definir extensões de campos, mas tal extensão é uma construção adicional e não uma propriedade intrínseca do suporte.
+Dado \(V\colon X^{(n)}\to\mathbb K\), podemos, por exemplo, escolher a extensão
+\[
+\widetilde V\colon X^{(n+1)}\to\mathbb K
+\]
+definida por
+\[
+\widetilde V(b,\xi)
+:=
+\begin{cases}
+V(\xi) & \text{se }d(b)=0,\\
+0 & \text{se }d(b)\neq 0.
+\end{cases}
+\]
+Essa escolha preserva os valores do campo na cópia canónica \(\iota_n(X^{(n)})\subseteq X^{(n+1)}\) e atribui valor nulo às posições acrescentadas.
+Nenhuma unicidade dessa extensão é afirmada.
+\end{observacao}
+
+\begin{observacao}[Camadas]
+\label{obs:camadas-campo}
+A construção pode ser resumida pelas seguintes camadas distintas:
+\[
+\begin{array}{rcl}
+B &\longrightarrow& \text{alfabeto},\\[0.3em]
+d &\longrightarrow& \text{codificação dos símbolos},\\[0.3em]
+X^{(n)} &\longrightarrow& \text{suporte},\\[0.3em]
+C^{(n)} &\longrightarrow& \text{coordenada},\\[0.3em]
+\mathcal V_n=\mathbb K^{X^{(n)}} &\longrightarrow& \text{espaço de campos (vectorial)},\\[0.3em]
+V(x) &\longrightarrow& \text{valor do campo}.
+\end{array}
+\]
+A passagem de uma camada à seguinte não identifica os respectivos objectos.
+Em particular, a estrutura linear pertence a \(\mathcal V_n\), e não é introduzida no suporte \(X^{(n)}\).
+Quando o contradomínio é ele próprio um corpo, a camada de valores admite ainda uma estrutura de álgebra (secção seguinte).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Álgebra de campos sobre o suporte}
+
+Quando o contradomínio dos campos é ele próprio um corpo \(Y\), a estrutura deixa de ser apenas vectorial: a multiplicação de \(Y\) induz uma multiplicação ponto a ponto no espaço de funções.
+
+\begin{definicao}[Álgebra de campos]
+\label{def:algebra-campos}
+Seja \(Y\) um corpo e seja \(X^{(n)}\) um suporte da família recursiva.
+Definimos
+\[
+\mathcal A_n(Y)
+\;:=\;
+Y^{X^{(n)}}
+=
+\{V\mid V\colon X^{(n)}\to Y\}.
+\]
+As operações são definidas ponto a ponto:
+\begin{align*}
+(V+W)(x)
+&:=
+V(x)+W(x),\\
+(VW)(x)
+&:=
+V(x)\,W(x),\\
+(\lambda V)(x)
+&:=
+\lambda\,V(x),\\
+\mathbf 1(x)
+&:=
+1_Y,
+\end{align*}
+para \(V,W\in\mathcal A_n(Y)\), \(\lambda\in Y\) e \(x\in X^{(n)}\).
+\end{definicao}
+
+\begin{proposicao}[Base de idempotentes]
+\label{prop:idempotentes}
+Para cada \(x\in X^{(n)}\) defina
+\[
+e_x\colon X^{(n)}\to Y,
+\qquad
+e_x(y)
+=
+\begin{cases}
+1_Y & \text{se }y=x,\\
+0 & \text{se }y\neq x.
+\end{cases}
+\]
+O conjunto \(\{e_x:x\in X^{(n)}\}\) é uma base de \(\mathcal A_n(Y)\) como espaço vectorial sobre \(Y\), e satisfaz
+\[
+e_x\,e_y
+=
+\begin{cases}
+e_x & \text{se }x=y,\\
+0 & \text{se }x\neq y,
+\end{cases}
+\]
+bem como
+\[
+\mathbf 1
+=
+\sum_{x\in X^{(n)}} e_x.
+\]
+\end{proposicao}
+
+\begin{proof}
+Todo \(V\in\mathcal A_n(Y)\) escreve-se
+\[
+V
+=
+\sum_{x\in X^{(n)}}
+V(x)\,e_x,
+\]
+pois, para cada \(y\in X^{(n)}\),
+\[
+\biggl(\sum_{x\in X^{(n)}}V(x)\,e_x\biggr)(y)
+=
+V(y).
+\]
+Se \(\sum_{x}\lambda_x e_x=0\) com \(\lambda_x\in Y\), então, avaliando em \(y\), obtém-se \(\lambda_y=0\). Logo \(\{e_x\}\) é linearmente independente e, portanto, base.
+A relação de idempotência e ortogonalidade é verificação directa da definição ponto a ponto.
+A decomposição da unidade é imediata.
+\end{proof}
+
+\begin{proposicao}[Estrutura de álgebra]
+\label{prop:algebra}
+\(\mathcal A_n(Y)\) é uma \(Y\)-álgebra comutativa unitária.
+Além disso,
+\[
+\dim_Y\mathcal A_n(Y)
+=
+\lvert X^{(n)}\rvert
+=
+q^{n}.
+\]
+\end{proposicao}
+
+\begin{proof}
+As operações ponto a ponto herdam de \(Y\) a comutatividade, a associatividade e a distributividade.
+A unidade é o campo constante \(\mathbf 1\).
+A dimensão segue de \(\lvert X^{(n)}\rvert=q^{n}\) e da base de idempotentes \(\{e_x\}\) estabelecida na Proposição~\ref{prop:idempotentes}.
+\end{proof}
+
+\begin{observacao}[Produto de cópias]
+\label{obs:produto-copias}
+Como \(X^{(n)}\) é finito,
+\[
+\mathcal A_n(Y)
+\;\cong\;
+\prod_{x\in X^{(n)}} Y,
+\]
+com operações componente a componente.
+A estrutura de álgebra é, portanto, a do produto finito de cópias de \(Y\).
+\end{observacao}
+
+\begin{observacao}[Separação de camadas]
+\label{obs:separacao-algebra}
+A álgebra \(\mathcal A_n(Y)\) vive no espaço de funções sobre o suporte.
+Nenhuma estrutura algébrica é introduzida em \(B\) nem em \(X^{(n)}\).
+O corpo de valores \(Y\) é uma escolha adicional, independente do alfabeto e da codificação \(d\).
+Em particular, \(Y\) pode ser distinto de qualquer corpo usado noutras camadas do formalismo.
+\end{observacao}
+
+\begin{observacao}[Relação com o espaço vectorial]
+\label{obs:relacao-Vn}
+Quando \(Y=\mathbb K\), temos a identificação
+\[
+\mathcal A_n(\mathbb K)
+=
+\mathcal V_n
+\]
+como espaços vectoriais.
+A multiplicação ponto a ponto é a estrutura adicional que só aparece quando se toma o contradomínio como corpo e se activa a operação \((VW)(x)=V(x)W(x)\).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Corpo de valores complexos por extensão quadrática}
+
+A construção do corpo de valores é independente do suporte posicional \(X^{(n)}\).
+Tratamos \(\mathbb R\) como dado e construímos o corpo complexo por quociente de polinómios.
+
+\begin{definicao}[Anel de polinómios e ideal]
+\label{def:RX}
+Seja \(\mathbb R[X]\) o anel dos polinómios com coeficientes reais na indeterminada \(X\).
+Considere o ideal principal gerado por \(X^2+1\):
+\[
+(X^2+1)
+=
+\{(X^2+1)\,g
+\mid
+g\in\mathbb R[X]\}.
+\]
+\end{definicao}
+
+\begin{definicao}[Relação de congruência]
+\label{def:congruencia}
+Declare
+\[
+f\sim g
+\quad\Longleftrightarrow\quad
+f-g\in(X^2+1).
+\]
+Isto é uma relação de equivalência em \(\mathbb R[X]\).
+\end{definicao}
+
+\begin{definicao}[Quociente]
+\label{def:Cconstr}
+O corpo de valores complexos por construção é o anel quociente
+\[
+\mathbb C_{\mathrm{constr}}
+\;:=\;
+\mathbb R[X]/(X^2+1).
+\]
+Denote por \([f]\) a classe de equivalência de \(f\in\mathbb R[X]\).
+\end{definicao}
+
+\begin{proposicao}[Elemento \(i\)]
+\label{prop:i}
+Defina
+\[
+i
+\;:=\;
+[X].
+\]
+Então
+\[
+i^2
+=
+-1.
+\]
+\end{proposicao}
+
+\begin{proof}
+\[
+i^2+1
+=
+[X]^2+[1]
+=
+[X^2+1]
+=
+[0],
+\]
+porque \(X^2+1\in(X^2+1)\). Logo \(i^2=-1\).
+\end{proof}
+
+\begin{proposicao}[Forma normal]
+\label{prop:forma-normal}
+Para todo \(f\in\mathbb R[X]\) existem únicos \(a,b\in\mathbb R\) tais que
+\[
+[f]
+=
+[a+bX].
+\]
+\end{proposicao}
+
+\begin{proof}
+Pelo algoritmo de divisão euclidiana em \(\mathbb R[X]\), existem únicos \(q,r\in\mathbb R[X]\) com
+\[
+f
+=
+(X^2+1)\,q
++
+r
+\quad\text{e}\quad
+\deg r<2.
+\]
+Assim \(r=a+bX\) para únicos \(a,b\in\mathbb R\), e
+\[
+[f]
+=
+[r]
+=
+[a+bX].
+\]
+\end{proof}
+
+\begin{observacao}[Identificação]
+\label{obs:identificacao-C}
+A forma normal permite a identificação
+\[
+[a+bX]
+\;\longleftrightarrow\;
+a+bi,
+\]
+onde \(i=[X]\). Esta é uma reescrita das classes, não uma definição prévia de \(\mathbb C\).
+\end{observacao}
+
+\begin{proposicao}[Multiplicação nas classes]
+\label{prop:mult-classes}
+Para \(a,b,c,d\in\mathbb R\),
+\[
+[a+bX]\,[c+dX]
+=
+[(ac-bd)+(ad+bc)X].
+\]
+\end{proposicao}
+
+\begin{proof}
+O produto dos representantes é
+\[
+(a+bX)(c+dX)
+=
+ac+(ad+bc)X+bd\,X^2.
+\]
+Como \(X^2\sim -1\), tem-se \(bd\,X^2\sim -bd\), logo
+\[
+[(a+bX)(c+dX)]
+=
+[(ac-bd)+(ad+bc)X].
+\]
+\end{proof}
+
+\begin{observacao}[A fórmula familiar como leitura]
+\label{obs:formula-leitura}
+A expressão
+\[
+(a+bi)(c+di)
+=
+(ac-bd)+(ad+bc)i
+\]
+não é o ponto de partida: é o resultado da multiplicação de classes lida na forma normal.
+\end{observacao}
+
+\begin{proposicao}[\(\mathbb C_{\mathrm{constr}}\) é um corpo]
+\label{prop:C-corpo}
+\(\mathbb C_{\mathrm{constr}}\) é um corpo.
+\end{proposicao}
+
+\begin{proof}
+\(\mathbb R[X]\) é um domínio de integridade euclidiano e \(X^2+1\) é irredutível sobre \(\mathbb R\) (não possui raízes reais). Logo o ideal \((X^2+1)\) é maximal e o quociente é um corpo.
+\end{proof}
+
+\begin{observacao}[Campos complexos sobre o suporte]
+\label{obs:An-C}
+Tomando \(Y=\mathbb C_{\mathrm{constr}}\) na álgebra de campos, obtém-se
+\[
+\mathcal A_n(\mathbb C_{\mathrm{constr}})
+=
+\mathbb C_{\mathrm{constr}}^{X^{(n)}}.
+\]
+A multiplicação de dois campos \(Z,W\) é
+\[
+(ZW)(x)
+=
+Z(x)\,W(x),
+\]
+onde o produto à direita é a multiplicação de classes já construída.
+Quando se escolhe a forma normal em cada ponto,
+\[
+Z(x)=a_x+b_x i,
+\qquad
+W(x)=c_x+d_x i,
+\]
+recupera-se a fórmula clássica
+\[
+(ZW)(x)
+=
+(a_xc_x-b_xd_x)
++
+(a_xd_x+b_xc_x)i.
+\]
+Nenhuma estrutura algébrica é introduzida no suporte \(X^{(n)}\).
+\end{observacao}
+
+\begin{observacao}[Independência das camadas]
+\label{obs:independencia-C}
+A construção
+\[
+\mathbb R
+\;\longrightarrow\;
+\mathbb R[X]
+\;\longrightarrow\;
+(X^2+1)
+\;\longrightarrow\;
+\mathbb R[X]/(X^2+1)
+\;\longrightarrow\;
+a+bi
+\]
+pertence exclusivamente à camada dos corpos de valores.
+O suporte posicional \(X^{(n)}\) e a coordenada \(C^{(n)}\) permanecem inalterados.
+A etapa \(\mathbb Q\to\mathbb R\) (cortes de Dedekind ou classes de Cauchy) pode ser documentada à parte; para o presente formalismo trata-se \(\mathbb R\) como dado.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Relação com \texttt{campos.tex}}
+
+A família \(\bigl\{\bigl(X^{(n)},C^{(n)}\bigr)\bigr\}_{n\ge 2}\) satisfaz as condições de suporte coordenado de \texttt{campos.tex} (Definição de suporte coordenado).
+
+A orientação do aninhamento (produto à esquerda, símbolo novo com peso mínimo) produz a relação
+\[
+C^{(n+1)}\circ\iota_n
+=
+q\cdot C^{(n)}.
+\]
+Isto corresponde a multiplicar por \(q\) os pesos anteriores e inserir \(0\) na posição de peso \(q^0\).
+
+O caso dos bytes corresponde à instanciação
+\[
+q=256,
+\qquad
+B=\mathbb Z/256\mathbb Z,
+\qquad
+d=\mathrm{id}.
+\]
+
+A base estrutural é o par \(X^{(2)}=B\times B\); não há nível de comprimento unitário na família.
+A forma aninhada e a expansão posicional ficam perfeitamente alinhadas:
+\[
+\bigl(b_1,(b_2,\dots,(b_{n-1},b_n)\dots)\bigr)
+\quad\longleftrightarrow\quad
+\sum_{i=1}^{n} q^{i-1}\,d(b_i).
+\]
+
+\end{document}
