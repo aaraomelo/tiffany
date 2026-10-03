@@ -32,6 +32,10 @@
  *   §M8  a forma traco E' o emparelhamento dual, e o seu determinante e' Delta = n^2+4
  *   §M9  n = 0 e' a involucao, e e' o unico n em que o anel DECOMPOE
  *   §M10 o que R acrescenta, e o que ele NAO acrescenta — a fronteira, medida
+ *   §M13 o CRITERIO: f_n tem raiz em K  <=>  Delta_n e' quadrado em K (sem R, sem Z)
+ *   §M14 a TRICOTOMIA: corpo / K x K / nao reduzido, decidida por Delta — com
+ *        idempotente e nilpotente EXIBIDOS, nao afirmados
+ *   §M15 a EXCEPCAO de caracteristica 2, registada a parte: la o Delta nao decide nada
  *
  * ZERO doubles neste ficheiro. Nem um. Se aparecer um, a tese caiu.
  *
@@ -67,6 +71,76 @@ static Zs estaca(Zs a, L n){ return zs(a.p + n*a.q, -a.q); }
 /* a norma e o traco: os dois invariantes do par, ambos em Z */
 static L norma(Zs a, L n){ Zs r = mul(a, estaca(a, n), n); return r.q == 0 ? r.p : (L)0x7fffffff; }
 static L traco(Zs a, L n){ Zs r = add(a, estaca(a, n)); return r.q == 0 ? r.p : (L)0x7fffffff; }
+
+/* ─── §M13–§M15: a aritmética mod p, para decidir o discriminante sem reais ────────────
+ * A irredutibilidade de f_n = x^2 - n x - 1 decide-se por BUSCA: conta-se quantos r em
+ * F_p satisfazem f_n(r) = 0. O "Delta_n e' quadrado?" decide-se do mesmo modo, por busca
+ * em F_p. Nenhum real, nenhuma raiz quadrada de ponto flutuante — o espirito de §M9.
+ *
+ * Os elementos de F_p[x]/(x^2 - n x - 1) sao pares (c0, c1) = c0 + c1·s, e a multiplicacao
+ * e' a de §M1–§M8 com s^2 = n s + 1 — a MESMA borda, so' que agora reduzida modulo p.
+ * E' por isso que o idempotente e o nilpotente de §M14 se medem: sao elementos do anel. */
+typedef struct { int c0, c1; } Fp;
+
+static int imod(long long a, int p){ a %= p; if(a < 0) a += p; return (int)a; }
+
+static Fp fp_mul(Fp a, Fp b, int n, int p){
+    long long t0 = (long long)a.c0*b.c0 + (long long)a.c1*b.c1;
+    long long t1 = (long long)a.c0*b.c1 + (long long)a.c1*b.c0
+                 + (long long)n*a.c1*b.c1;
+    return (Fp){ imod(t0, p), imod(t1, p) };
+}
+static Fp fp_add(Fp a, Fp b, int p){
+    return (Fp){ imod((long long)a.c0 + b.c0, p), imod((long long)a.c1 + b.c1, p) };
+}
+static Fp fp_sub(Fp a, Fp b, int p){
+    return (Fp){ imod((long long)a.c0 - b.c0, p), imod((long long)a.c1 - b.c1, p) };
+}
+static Fp fp_const(int c, int p){ return (Fp){ imod(c, p), 0 }; }
+static int  fp_zero(Fp a){ return a.c0 == 0 && a.c1 == 0; }
+static int  fp_eq(Fp a, Fp b){ return a.c0 == b.c0 && a.c1 == b.c1; }
+
+/* avaliar c0 + c1·s numa raiz r de F_p: e' um polinomio de grau 1, logo so' uma mult. */
+static int fp_em(Fp a, int r, int p){ return imod((long long)a.c0 + (long long)a.c1*r, p); }
+
+/* quantas raizes f_n tem em F_p, e onde */
+static int fp_raizes(int n, int p, int *onde){
+    int k = 0;
+    for(int r = 0; r < p; r++)
+        if(imod((long long)r*r - (long long)n*r - 1, p) == 0){ if(onde) onde[k] = r; k++; }
+    return k;
+}
+
+/* Delta_n = n^2 + 4 em F_p: 0 = quadrado NULO, 1 = quadrado nao nulo, 2 = nao quadrado */
+static int fp_classe(int n, int p, int *s){
+    int d = imod((long long)n*n + 4, p);
+    if(d == 0) return 0;
+    for(int u = 1; u < p; u++)
+        if((long long)u*u % p == d){ if(s) *s = u; return 1; }
+    return 2;
+}
+
+/* inverso modulo p, por busca (p e' sempre pequeno aqui) */
+static int fp_inv(int a, int p){
+    for(int u = 1; u < p; u++) if((long long)a*u % p == 1) return u;
+    return 0;
+}
+
+/* F_4 = F_2[t]/(t^2 + t + 1): o elemento i = c0 + c1·t e' guardado como c0 | (c1 << 1),
+ * e t^2 = t + 1. Caracteristica 2, logo a soma e' XOR. Existe para §M15: e' o unico
+ * corpo de caracteristica 2 com mais de dois elementos que a excepcao exige. */
+static int f4_mul(int a, int b){
+    int a0 = a & 1, a1 = (a >> 1) & 1, b0 = b & 1, b1 = (b >> 1) & 1;
+    int c0 = (a0*b0 + a1*b1) & 1;                      /* o termo t^2 vira t + 1 */
+    int c1 = (a0*b1 + a1*b0 + a1*b1) & 1;
+    return c0 | (c1 << 1);
+}
+static int f4_add(int a, int b){ return a ^ b; }
+static int f4_inv(int a){
+    if(a == 0) return 0;
+    for(int u = 1; u < 4; u++) if(f4_mul(a, u) == 1) return u;
+    return 0;
+}
 
 int main(void){
     puts("\n  A FAMILIA METALICA, ALGEBRICA — sem um unico real\n");
@@ -360,6 +434,237 @@ int main(void){
     ok("a cruz ordena: (traco, norma) lexicografico e' total e transitiva — a ordem sai do DUAL",
        nao_total == 0 && nao_trans == 0);
 
+    /* ═══ §M13 — O CRITERIO: a irredutibilidade decide-se pelo discriminante, sem R ══════
+     *
+     * §M9 mediu QUE n = 0 e' o unico onde o anel decompoe, por busca em Z. O que faltava
+     * era o CRITERIO, e o que o torna honesto e' que ele nao esta escrito em N nem em Z:
+     *
+     *     f_n = x^2 - n x - 1 tem raiz em K   <=>   Delta_n = n^2 + 4 e' quadrado em K
+     *
+     * A ponte e' (2 r - n)^2 = n^2 + 4 quando r e' raiz de f_n, e r = (n ± s)/2 quando
+     * s^2 = n^2 + 4. O 2 e' o unico ponto onde a caracteristica entra — e e' por isso que
+     * §M15 existe e nao e' uma cautela de estilo.
+     *
+     * Aqui a equivalencia e' MEDIDA em corpos finitos, onde "quadrado" se decide por busca:
+     * os dois lados sao calculados por metodos INDEPENDENTES (contar raizes de f_n, por um
+     * lado; classificar Delta, pelo outro) e comparados. Um so' mediria o que ja sabe. */
+    const int primos[] = {3,5,7,11,13,17,19,23,29,31,37,41,101,1009};
+    int nprimos = (int)(sizeof(primos)/sizeof(primos[0]));
+    int medidos = 0, disc_c2 = 0, quantos_corpo = 0;
+    for(int i = 0; i < nprimos; i++){
+        int p = primos[i];
+        for(int n = 0; n < p; n++){
+            int tem_raiz     = (fp_raizes(n, p, NULL) != 0);
+            int eh_quadrado  = (fp_classe(n, p, NULL) != 2);
+            if(tem_raiz != eh_quadrado) disc_c2++;
+            if(!tem_raiz) quantos_corpo++;
+            medidos++;
+        }
+    }
+    printf("      %d pares (p, n) em %d primos: %d com f_n irredutivel, %d discordancias\n",
+           medidos, nprimos, quantos_corpo, disc_c2);
+    ok("em F_p, nos 14 primos medidos: f_n tem raiz <=> Delta_n e' quadrado — dois caminhos, zero discordancias",
+       disc_c2 == 0 && medidos == 1346 && quantos_corpo > 0);
+
+    /* e a identidade que DA a ponte, verificada no anel e nao na memoria:
+     *     (2·s - n)^2 = n^2 + 4 = Delta_n.
+     * E' ela que separa a caracteristica 2 das outras, e e' o que torna a u de §M14 uma
+     * involucao. Primeiro em Z, depois em F_p. */
+    int id_zeta = 0;
+    for(L n = -40; n <= 40; n++){
+        Zs u = zs(-n, 2);                            /* 2·sigma - n */
+        Zs q = mul(u, u, n);
+        if(!eq(q, zs(n*n + 4, 0))) id_zeta++;         /* n^2 + 4, lido em Z */
+    }
+    ok("a identidade (2·sigma - n)^2 = Delta_n = n^2 + 4 vale em Z[sigma] para todo n em [-40,40]",
+       id_zeta == 0);
+
+    int id_fp = 0;
+    for(int i = 0; i < nprimos; i++){
+        int p = primos[i];
+        for(int n = 0; n < p; n++){
+            Fp u = (Fp){ imod(-n, p), imod(2, p) };
+            if(!fp_eq(fp_mul(u, u, n, p), (Fp){ imod((long long)n*n + 4, p), 0 })) id_fp++;
+        }
+    }
+    ok("e a mesma identidade vale em F_p[x]/(x^2 - n x - 1) em todos os (p, n) medidos",
+       id_fp == 0);
+
+    /* ═══ §M14 — A TRICOTOMIA: o mesmo Delta decide tres objectos de especies diferentes ═
+     *
+     * §M13 disse QUANDO f_n tem raiz. O que o quociente E' ainda nao foi dito, e e' a
+     * consequencia que interessa: o Delta nao e' so' o determinante da leitura (§M8), e' o
+     * QUE DECIDE o anel — e decide objectos de especies diferentes,
+     *
+     *     Delta_n NAO quadrado  ->  corpo         (extensao quadratica de K)
+     *     Delta_n = s^2 != 0    ->  K x K         (reduzido, com divisores de zero)
+     *     Delta_n = 0           ->  nao reduzido  (com o nilpotente sigma - n/2)
+     *
+     * Primeiro contam-se os tres regimes e compara-se com as formulas fechadas — a
+     * contagem por pares (n, s) com s^2 = n^2 + 4, que em F_p e' p - 1. Depois EXIBEM-SE
+     * as testemunhas: o par de idempotentes complementares no regime K x K, e o nilpotente
+     * no regime nao reduzido.Afirmar que existem e' barato; exibi-los e' o que fecha. */
+    int conta_certa = 0, soma_corpo = 0, soma_prod = 0, soma_nred = 0;
+    for(int i = 0; i < nprimos; i++){
+        int p = primos[i], c = 0, pr = 0, nr = 0;
+        for(int n = 0; n < p; n++){
+            int cl = fp_classe(n, p, NULL);
+            if(cl == 2) c++;
+            else if(cl == 1) pr++;
+            else nr++;
+        }
+        /* formulas fechadas: (p+1)/2 corpos se p = 3 (mod 4), (p-1)/2 se p = 1 (mod 4);
+         * Delta = 0 em 2 valores se p = 1 (mod 4) (as raizes de -1, multiplicadas por 2). */
+        int nr_esperado  = (p % 4 == 1) ? 2 : 0;
+        int c_esperado   = (p % 4 == 1) ? (p - 1)/2 : (p + 1)/2;
+        if(c == c_esperado && nr == nr_esperado && pr == p - c - nr) conta_certa++;
+        soma_corpo += c; soma_prod += pr; soma_nred += nr;
+    }
+    printf("      %d primos: %d n com f_n irredutivel (corpo), %d com f_n a partir em\n"
+             "      factores distintos (K x K), %d com Delta = 0 (nao reduzido)\n",
+           nprimos, soma_corpo, soma_prod, soma_nred);
+    ok("os tres regimes particionam F_p e as contagens fecham: (p+1)/2 corpos se p = 3 (mod 4),\n"
+       "      (p-1)/2 se p = 1 (mod 4), e Delta = 0 em 2 valores so' quando p = 1 (mod 4)",
+       conta_certa == nprimos && soma_corpo + soma_prod + soma_nred == 1346);
+
+    /* as testemunhas. Regime K x K: u = (2·s - n)/s tem u^2 = 1, e e± = (1 ± u)/2 são
+     * complementares — um em cada factor. Regime nao reduzido: eps = s - n/2 tem eps^2 = 0
+     * e eps != 0. As duas expressões sao as do texto, escritas no anel e reduzidas mod p. */
+    int idem_falhou = 0, quantos_idem = 0, nil_falhou = 0, quantos_nil = 0;
+    for(int i = 0; i < nprimos; i++){
+        int p = primos[i], meio = fp_inv(2, p);
+        for(int n = 0; n < p; n++){
+            int s = 0, cl = fp_classe(n, p, &s);
+
+            if(cl == 1){
+                Fp w  = fp_mul((Fp){ imod(-n, p), imod(2, p) }, fp_const(fp_inv(s, p), p), n, p);
+                Fp ep = fp_mul(fp_add(fp_const(1, p), w, p), fp_const(meio, p), n, p);
+                Fp em = fp_mul(fp_sub(fp_const(1, p), w, p), fp_const(meio, p), n, p);
+                int rp = imod((long long)n + s, p) * meio % p;    /* (n + s)/2 */
+                int rm = imod((long long)n - s, p) * meio % p;    /* (n - s)/2 */
+                /* as duas raizes sao mesmo raizes, e sao distintas (s != 0 neste regime) */
+                if(fp_raizes(n, p, NULL) != 2 || rp == rm) idem_falhou++;
+                if(!fp_eq(fp_add(ep, em, p), fp_const(1, p))) idem_falhou++;   /* e+ + e- = 1 */
+                if(!fp_zero(fp_mul(ep, em, n, p)))            idem_falhou++;   /* e+ · e- = 0 */
+                if(!fp_eq(ep, fp_mul(ep, ep, n, p)))           idem_falhou++;   /* e+ ^2 = e+ */
+                if(fp_em(ep, rp, p) != 1)                     idem_falhou++;   /* 1 na sua */
+                if(fp_em(ep, rm, p) != 0)                     idem_falhou++;   /* 0 na outra */
+                quantos_idem++;
+            }
+            else if(cl == 0){
+                Fp eps = (Fp){ imod(-(long long)n * meio, p), 1 };
+                if(fp_zero(eps) || !fp_zero(fp_mul(eps, eps, n, p))) nil_falhou++;
+                quantos_nil++;
+            }
+        }
+    }
+    printf("      testemunhas: %d pares de idempotentes complementares (e+ + e- = 1, e+ · e- = 0,\n"
+             "      e+ = 1 na raiz (n+s)/2 e 0 na outra), %d nilpotentes eps com eps^2 = 0 != eps\n",
+           quantos_idem, quantos_nil);
+    ok("o regime K x K EXIBE idempotentes complementares: e± = (1 ± (2·s - n)/s)/2, com e+ em cada raiz",
+       quantos_idem > 0 && idem_falhou == 0);
+    ok("e o regime nao reduzido EXIBE o nilpotente eps = s - n/2: eps^2 = 0 e eps != 0",
+       quantos_nil > 0 && nil_falhou == 0);
+
+    /* e a ponte com o §M9 fecha pelo outro lado: em Z o anel Z[s] so' DEPOE em n = 0, e
+     * e' la que aparecem divisores de zero — (s - 1)(s + 1) = s^2 - 1 = 0 com os dois
+     * factores NAO nulos. Para n != 0 o anel e' dominio de integridade, e nao ha' tal par
+     * (Z[s] esta' dentro de Q(sqrt(sf(Delta))), que e' dominio). Logo o criterio de §M13 e'
+     * o mesmo, visto por dentro: o que o Delta proibe e' exactamente o que §M9 mediu. */
+    int zd_n0 = (eq(mul(zs(-1,1), zs(1,1), 0), zs(0,0))
+                 && !eq(zs(-1,1), zs(0,0)) && !eq(zs(1,1), zs(0,0)));
+    int zd_fora = 0;
+    for(L n = 1; n <= 8; n++)
+      for(L p = -6; p <= 6; p++) for(L q = -6; q <= 6; q++)
+        for(L r = -6; r <= 6; r++) for(L s = -6; s <= 6; s++){
+            Zs x = zs(p,q), y = zs(r,s);
+            if(eq(x, zs(0,0)) || eq(y, zs(0,0))) continue;
+            if(eq(mul(x, y, n), zs(0,0))) zd_fora++;
+        }
+    ok("e em Z concorda com §M9, visto por dentro: so' n = 0 tem divisores de zero\n"
+       "      ((sigma - 1)(sigma + 1) = 0 com ambos nao nulos), e nenhum para n != 0",
+       zd_n0 && zd_fora == 0);
+
+    /* ═══ §M15 — A EXCEPCAO DE CARACTERISTICA 2, registada a parte ══════════════════════
+     *
+     * §M13 usa (2 r - n)^2 = Delta_n E a volta r = (n ± s)/2 — e e' a segunda perna que
+     * quebra: em caracteristica 2 nao ha' por onde dividir. O resultado e' que o criterio do
+     * discriminante fica VAZIO: la Delta_n = n^2 + 4 = n^2 = (n)^2 e' quadrado para todo
+     * n, logo o criterio prometeria "sempre redutivel" — e isso e' FALSO. O criterio certo,
+     * sem o 2, escreve-se por r:
+     *
+     *     f_n tem raiz em K (char 2)  <=>  n = r + r^-1 para alguma r em K^×
+     *
+     * porque r^2 + n r + 1 = 0  <=>  n = (r^2 + 1)/r = r + r^-1. E medido em F_2 e F_4. */
+    ok("em F_2, n = 0: f_n = x^2 + 1 = (x + 1)^2 tem raiz — o regime nao reduzido",
+       fp_raizes(0, 2, NULL) == 1);
+    ok("em F_2, n = 1: f_n = x^2 + x + 1 nao tem raiz nenhuma — logo e' CORPO, o campo F_4",
+       fp_raizes(1, 2, NULL) == 0);
+
+    /* o criterio do §M13 promete "redutivel" em TODO o lado, e so' um cumpre: a excecao
+     * e' NECESSARIA, e a contra-exemplo e' um corpo de 4 elementos. */
+    int promete = 0, cumpre = 0;
+    for(int n = 0; n < 2; n++){
+        if(fp_classe(n, 2, NULL) != 2) promete++;       /* Delta quadrado => "redutivel" */
+        if(fp_raizes(n, 2, NULL) != 0) cumpre++;
+    }
+    ok("o criterio de §M13 promete 'redutivel' nos 2 valores de n de F_2 e so' 1 cumpre:\n"
+       "      logo a excecao de caracteristica 2 e' NECESSARIA, nao uma cautela de estilo",
+       promete == 2 && cumpre == 1);
+
+    /* F_2 pelo criterio certo: S = {r + r^-1 : r nao nulo}. O unico r nao nulo e' 1, e
+     * 1 + 1/1 = 0, logo S = {0} — e o criterio "redutivel <=> n em S" tem de bater com a
+     * busca de §M13, medido pelos dois lados. */
+    int tam_S2 = 0, S2[2];
+    for(int i = 0; i < 2; i++) S2[i] = -1;
+    for(int r = 1; r < 2; r++){
+        int v = imod(r + r, 2), novo = 1;          /* com r = 1 tem-se r^-1 = r */
+        for(int i = 0; i < 2; i++) if(S2[i] == v) novo = 0;
+        if(novo) S2[tam_S2++] = v;
+    }
+    int inequiv2 = 0, com_raiz2 = 0;
+    for(int n = 0; n < 2; n++){
+        int em_S = 0;
+        for(int i = 0; i < tam_S2; i++) if(S2[i] == n) em_S = 1;
+        int achou = (fp_raizes(n, 2, NULL) != 0);
+        if(em_S != achou) inequiv2++;
+        if(achou) com_raiz2++;
+    }
+    ok("em F_2 o criterio certo da S = {r + r^-1} = {0}, e bate certo com a busca: so' n = 0",
+       inequiv2 == 0 && tam_S2 == 1 && com_raiz2 == 1);
+
+    /* F_4: S = {0, 1} e' o corpo TODO, logo nenhum n da um corpo */
+    int tam_S = 0, S[4];
+    for(int i = 0; i < 4; i++) S[i] = -1;
+    for(int r = 1; r < 4; r++){
+        int v = f4_add(r, f4_inv(r)), novo = 1;
+        for(int i = 0; i < 4; i++) if(S[i] == v) novo = 0;
+        if(novo) S[tam_S++] = v;
+    }
+    int inequiv = 0, sem_raiz = 0, quantos_raiz4 = 0, quebra4 = 0;
+    for(int n = 0; n < 4; n++){
+        int em_S = 0;
+        for(int i = 0; i < tam_S; i++) if(S[i] == n) em_S = 1;
+        int achou = 0;
+        for(int r = 0; r < 4; r++)
+            if(f4_add(f4_add(f4_mul(r, r), f4_mul(n, r)), 1) == 0) achou = 1;
+        if(em_S != achou) inequiv++;
+        if(achou) quantos_raiz4++;
+        if(!achou){
+            sem_raiz++;
+            /* o teste do §M13 promete "redutivel" (Delta = n^2 e' quadrado, sempre) e aqui
+             * f_n NAO tem raiz nenhuma: o corpo e' um campo de 16 elementos */
+            if(fp_classe(n, 4, NULL) != 2) quebra4++;
+        }
+    }
+    printf("      char 2: em F_2, S = {r + r^-1} = {0} e 1 dos 2 n da' corpo;\n"
+             "              em F_4, S = %d elementos e %d dos 4 n dao' corpo (os %d irredutiveis)\n",
+           tam_S, quantos_raiz4, sem_raiz);
+    ok("char 2: f_n tem raiz <=> n = r + r^-1 — o criterio certo, verificado em F_2 e em F_4",
+       inequiv == 0 && tam_S == 2 && sem_raiz == 2 && quantos_raiz4 == 2);
+    ok("e o teste do discriminante ERRA em caracteristica 2, e no mesmo sentido: promete\n"
+       "      'redutivel' onde f_n e' irredutivel — 1 caso em F_2 e 2 em F_4, todos campos", quebra4 == 2);
+
     /* ═══ e a contagem de reais neste ficheiro ═════════════════════════════════════════ */
     puts("");
     if(!falhas){
@@ -378,6 +683,20 @@ int main(void){
         puts("  fraccoes continuas. Os dois criterios nao coincidem — ha' Pisot que nao e'");
         puts("  unidade e unidade que nao e' Pisot. A familia metalica esta' na interseccao,");
         puts("  e e' por isso que o teorema vale: nao por sorte, por estar nos dois lados.");
+        puts("");
+        puts("  E O DELTA DECIDE O ANEL. Nao e' so' o determinante da leitura (§M8): e' o que");
+        puts("  diz QUE OBJETO o quociente e'. f_n tem raiz em K <=> Delta_n e' quadrado em K,");
+        puts("  e entao o quociente e' corpo; se Delta_n = s^2 != 0, e' K x K, com idempotentes");
+        puts("  EXIBIDOS — u = (2·sigma - n)/s tem u^2 = 1, e e± = (1 ± u)/2 sao complementares,");
+        puts("  um em cada factor; e se Delta_n = 0, o anel nao e' reduzido e o nilpotente");
+        puts("  eps = sigma - n/2 se ve: eps^2 = 0 com eps != 0.");
+        puts("");
+puts("  Sobre R a familia nunca da' um corpo: da' sempre R x R. E a excecao de");
+        puts("  caracteristica 2 ficou registada A PARTE, porque la o discriminante nao decide");
+        puts("  nada — em F_2 o n = 1 da' o campo F_4, e em F_4 sao 2 dos 4 n que dao' campo,");
+        puts("  sempre contra o que o teste do Delta promete. Um instrumento que esconde a");
+        puts("  excecao mede o instrumento, nao a familia.");
+
     } else printf("  FALHOU\n");
     return falhas ? 1 : 0;
 }

@@ -260,7 +260,244 @@ dobra $A_0\to A_1$; não identificar $n$ de $A_n$ com $k$ de $d_k$ sem
 essa convenção.
 \end{teorema}
 
-%======================================================================
+%======================================================================%======================================================================
+\section{A classificação da família por irredutibilidade}\label{sec:metal-irred}
+
+A família metálica (Def.~\ref{def:metal}) é $A_n=K[x]/(x^{2}-nx-1)$, com $\sigma^{2}=n\sigma+1$,
+$\sigma^{\dg}=n-\sigma$, $N(\sigma)=-1$ e $\Delta_n=n^{2}+4$. Até aqui já sabemos que
+$\Delta_n$ é o determinante da leitura dual (Thm.~\ref{thm:ponte-universal}), e
+\code{tests/metalica.c} §M9 mede que $n=0$ é o único índice em que o anel decompõe. Falta
+o \textbf{critério}, e o que o torna honesto é não estar escrito em $\mathbb{N}$ nem em
+$\mathbb{Z}$: o mesmo discriminante decide, sem mudar de substantivo, sobre um corpo
+qualquer. É o passo que fecha a família como \emph{família} --- sem ele, $\Delta_n$ é um
+número que aparece em três sítios sem decidir nada.
+
+\noindent\emph{Notação.} Escrevo $m$ (e não $n$) porque a matriz companheira de
+Def.~\ref{def:metal} é $A_m$ e é dela que a família é nomeada; $n$ fica reservado ao
+índice de nível, e $m=\operatorname{tr}(\sigma)$ é o traço, lido no anel
+(\code{tests/metalica.c} §M6).
+
+\begin{teorema}[irredutibilidade: o discriminante decide]\label{thm:irred}
+Seja $K$ um corpo com $\operatorname{char}K\neq2$ e seja $m\in K$. Então
+\[
+f_m=x^{2}-mx-1\ \text{é irredutível em }K[x]
+\quad\Longleftrightarrow\quad
+\Delta_m=m^{2}+4\notin K^{2},
+\]
+onde $K^{2}=\{s^{2}:s\in K\}$, \emph{com o $0$ incluído}. Em particular
+\[
+\boxed{
+K[x]/(f_m)\ \text{é corpo}
+\iff
+K[x]/(f_m)\ \text{é domínio de integridade}
+\iff
+m^{2}+4\ \text{não é quadrado em }K,
+}
+\]
+e no caso affirmative é a extensão quadrática $K(\sqrt{m^{2}+4})$, de grau $2$ sobre $K$.
+\end{teorema}
+
+\begin{proof}
+$f_m$ é irredutível em $K[x]$ \emph{se e somente se} não tem raiz em $K$, por ser de grau
+$2$ e $K$ ser corpo. Se $r\in K$ é raiz, então
+\[
+(2r-m)^{2}
+=
+4r^{2}-4mr+m^{2}
+=
+4\underbrace{(r^{2}-mr-1)}_{=\,0}+m^{2}
+=
+m^{2}+4
+=
+\Delta_m,
+\]
+e raiz implica $\Delta_m$ quadrado em $K$. Reciprocamente, se $\Delta_m=s^{2}$ com $s\in K$,
+então
+\[
+r_{\pm}:=\frac{m\pm s}{2}\in K
+\qquad\text{e}\qquad
+(2r_{\pm}-m)^{2}=s^{2}=\Delta_m=m^{2}+4,
+\]
+o que, pela identidade acima invertida, dá $r_{\pm}^{2}-mr_{\pm}-1=0$: as duas $r_{\pm}$
+são raízes. (Quando $s=0$ --- e isso é possível em característica $\neq2$, por exemplo em
+$\mathbb{F}_5$ com $m=1$ --- as duas coincidem, e é precisamente o caso $\Delta_m=0$ do
+Teorema~\ref{thm:tricot} abaixo.) $\square$
+\end{proof}
+
+\begin{teorema}[a tricotomia do quociente]\label{thm:tricot}
+Nas hipóteses do Teorema~\ref{thm:irred} ($K$ de característica $\neq2$, $m\in K$), o
+quociente $A_m=K[x]/(f_m)$ é \emph{exatamente um} de três objectos, e a escolha é
+disjunta e exaustiva:
+\[
+\boxed{
+\begin{array}{ccl}
+\Delta_m\notin K^{2} &\Longrightarrow& A_m\ \text{é corpo}\ \ (\text{extensão quadrática de }K),\\[0.3em]
+\Delta_m=s^{2}\neq0 &\Longrightarrow& A_m\cong K\times K,\\[0.3em]
+\Delta_m=0 &\Longrightarrow& A_m\cong K[\varepsilon]/(\varepsilon^{2}),
+\end{array}}
+\]
+com os dois últimos regimes \emph{exibidos}: no segundo os idempotentes são explícitos, e
+no terceiro há um nilpotente explícito. Escrevendo $u=(2\sigma-m)/s$ no segundo regime,
+\[
+\boxed{
+e_{\pm}=\frac{1\pm u}{2},\qquad
+e_{+}+e_{-}=1,\quad e_{+}e_{-}=0,\quad
+e_{\pm}(r_{\pm})=1,\quad e_{\pm}(r_{\mp})=0,
+}
+\qquad
+\boxed{\varepsilon=\sigma-\tfrac m2,\qquad \varepsilon^{2}=0\neq\varepsilon.}
+\]
+\end{teorema}
+
+\begin{proof}
+\textbf{Primeiro regime.} Pelo Teorema~\ref{thm:irred} e pelo critério de corpo para
+$K[x]/(f)$, com $f$ irredutível.
+
+\textbf{Segundo regime.} $\Delta_m=s^{2}\neq0$ dá $f_m=(x-r_{+})(x-r_{-})$ com
+$r_{+}\neq r_{-}$ em $K$, e o \emph{teorema chinês dos restos} dá
+$K[x]/(f_m)\cong K[x]/(x-r_{+})\times K[x]/(x-r_{-})\cong K\times K$.
+Os idempotentes: $(2\sigma-m)^{2}=m^{2}+4=s^{2}$, logo $u^{2}=1$, e então
+\[
+e_{+}+e_{-}=1,\qquad
+e_{+}e_{-}=\frac{1-u^{2}}{4}=0,
+\]
+e $e_{\pm}^{2}=e_{\pm}$. Evaluando em $r_{\pm}$: $u(r_{\pm})=(2r_{\pm}-m)/s=\pm1$, donde
+$e_{\pm}(r_{\pm})=1$ e $e_{\pm}(r_{\mp})=0$ --- são as projeções sobre cada factor.
+
+\textbf{Terceiro regime.} $\Delta_m=0$ dá $f_m=(x-m/2)^{2}$, e com
+$\varepsilon=\sigma-m/2$ tem-se $\varepsilon^{2}=0$. E $\varepsilon\neq0$: se
+$\sigma-m/2=0$ em $A_m$, então $f_m$ dividiria $x-m/2$, o que é impossível por graus
+($x-m/2$ não é nem o zero nem o elemento associado a $f_m$).
+\end{proof}
+
+\begin{corolario}[sobre $\mathbb{Q}$ e sobre $\mathbb{Z}$]\label{cor:metal-q}
+Para $m\in\mathbb{Z}$, $f_m$ é irredutível em $\mathbb{Q}[x]$ \emph{se e somente se}
+$m\neq0$, e nesse caso
+\[
+\mathbb{Q}[x]/(x^{2}-mx-1)\ \cong\ \mathbb{Q}\Bigl(\sqrt{\operatorname{sf}(m^{2}+4)}\Bigr),
+\]
+com $\operatorname{sf}$ a parte livre de quadrados de $\Delta_m$. Consequentemente
+$\mathbb{Z}[\sigma]$ é domínio de integridade exactamente para $m\neq0$, e para $m=0$
+tem-se $\sigma^{2}=1$ --- a involução pura, com $(\sigma-1)(\sigma+1)=0$ e ambos os
+factores não nulos: é o único nível onde o anel decompõe (\code{tests/metalica.c} §M9).
+\end{corolario}
+
+\begin{proof}
+Um inteiro que é quadrado em $\mathbb{Q}$ é quadrado em $\mathbb{Z}$. Escrevendo
+$\Delta_m=k^{2}$ com $k\in\mathbb{Z}$, tem-se $(k-m)(k+m)=4$; e $k-m$ e $k+m$ têm a mesma
+paridade, logo são ambos pares ou ambos ímpares, e o produto $4$ obriga a
+$(k-m,k+m)=(2,2)$ ou $(-2,-2)$ --- de onde $m=0$. (O par $(1,4)$ é excluído pela
+paridade.) Para $m\neq0$ tem-se $\sqrt{\Delta_m}\notin\mathbb{Q}$, logo
+$\mathbb{Q}(\sqrt{\Delta_m})=\mathbb{Q}(\sqrt{\operatorname{sf}(\Delta_m)})$, e a
+tradução $\sigma\mapsto\sigma-m/2$ leva $f_m$ em $T^{2}-\Delta_m/4$, o que dá a
+identificação. $\square$
+\end{proof}
+
+\begin{observacao}[sobre $\mathbb{R}$: a família nunca dá um corpo]\label{obs:metal-real}
+Como $m^{2}+4>0$ é quadrado em $\mathbb{R}$ para todo $m\in\mathbb{R}$, o
+Teorema~\ref{thm:irred} nunca dá corpo e o Teorema~\ref{thm:tricot} cai \emph{sempre} no
+segundo caso:
+\[
+\boxed{
+\mathbb{R}[x]/(x^{2}-mx-1)\ \cong\ \mathbb{R}\times\mathbb{R}
+\qquad\text{para todo }m\in\mathbb{R},
+}
+\]
+com $r_{\pm}=\tfrac{m\pm\sqrt{m^{2}+4}}{2}$ distintas. Todos estes quocientes são
+isomórficos \emph{entre si}: a tradução $\sigma\mapsto\sigma-m/2$ leva $f_m$ em
+$T^{2}-(m^{2}+4)/4$, e sobre $\mathbb{R}$ esse é um quadrado não nulo, logo o isomorfismo
+é o mesmo para todo $m$. Ou seja: \emph{sobre $\mathbb{R}$ o parâmetro $m$ não transporta
+nenhuma informação} --- o que separa estes quocientes de um corpo é sempre o mesmo par de
+idempotentes, e a família só fica injectiva quando o corpo de base é $\mathbb{Q}$, ou
+qualquer $K$ onde $\Delta_m$ não seja quadrado.
+\end{observacao}
+
+\begin{corolario}[corpos finitos: quantos $m$ dão corpo]\label{cor:metal-fp}
+Seja $p$ ímpar. Em $\mathbb{F}_p$, o número de $m\in\mathbb{F}_p$ para os quais
+$\mathbb{F}_p[x]/(f_m)$ é corpo é
+\[
+\boxed{
+\#\{m:\mathbb{F}_p[x]/(x^{2}-mx-1)\ \text{é corpo}\}
+=
+\begin{cases}
+\dfrac{p+1}{2}, & p\equiv3\!\!\!\pmod4,\\[0.6em]
+\dfrac{p-1}{2}, & p\equiv1\!\!\!\pmod4.
+\end{cases}}
+\]
+\end{corolario}
+
+\begin{proof}
+Conta-se por $\#\{(m,s)\in\mathbb{F}_p^{2}:s^{2}=m^{2}+4\}$, que é $p-1$: a equivalência
+$(s-m)(s+m)=4$ dá uma bijecção com $\mathbb{F}_p^{\times}$ (escolhe-se $s-m$, e $s+m$
+fica determinado por $4/(s-m)$). Logo $2A+B=p-1$, onde $A=\#\{m:\Delta_m\ \text{quadrado
+não nulo}\}$ e $B=\#\{m:\Delta_m=0\}$. E $B=2$ quando $-1$ é quadrado em $\mathbb{F}_p$
+--- isto é, $p\equiv1\ (4)$, e as duas raízes de $m^{2}=-4$ são $m=\pm2i$ --- e $B=0$
+caso contrário. O número de corpos é, pelo Teorema~\ref{thm:irred}, $p-A-B=\tfrac{p+1-B}{2}$,
+que dá as duas fórmulas. $\square$
+\end{proof}
+
+\begin{observacao}[a excepção de característica $2$, registada à parte]\label{obs:metal-char2}
+O Teorema~\ref{thm:irred} usa $(2r-m)^{2}=\Delta_m$ \emph{e} $r=(m\pm s)/2$, e é a
+segunda perna que falha: em característica $2$ não há por onde dividir. O critério do
+discriminante fica então \emph{vazio}: lá $\Delta_m=m^{2}+4=m^{2}=(m)^{2}$ é quadrado para
+todo $m$, e o critério prometeria ``sempre redutível'' --- o que é \emph{falso}. O critério
+certo, sem o $2$, escreve-se por $r$:
+\[
+\boxed{
+f_m\ \text{tem raiz em }K
+\iff
+m=r+r^{-1}\ \text{para alguma }r\in K^{\times},
+\qquad(\operatorname{char}K=2),
+}
+\]
+porque $r^{2}+mr+1=0\iff m=(r^{2}+1)/r=r+r^{-1}$. Os dois corpos pequenos são
+instructivos, e o contraste é o do texto: em $\mathbb{F}_2$ tem-se $\{r+r^{-1}\}=\{0\}$, e
+logo $m=1$ dá $x^{2}+x+1$ sem raiz nenhuma --- \emph{corpo}, isto é, $\mathbb{F}_4$; em
+$\mathbb{F}_4$ tem-se $\{r+r^{-1}\}=\{0,1\}$, que é estritamente menor que $\mathbb{F}_4$,
+e são $2$ dos $4$ valores de $m$ a dar corpo. Em ambos, o teste do discriminante erra, e
+erra \emph{no mesmo sentido}: promete redutível onde $f_m$ é irredutível. A excepção é,
+portanto, substancial, e é o único sítio onde a família precisa de duas frases em vez de
+uma.
+\end{observacao}
+
+\noindent\textbf{Leitura.} O discriminante não é um invariante accessor: é o que decide
+que \emph{objecto} o quociente é, e decide objectos de espécies diferentes --- corpo,
+produto de corpos, anel não reduzido:
+\[
+\boxed{
+\text{quociente quadrático}
+\ \xrightarrow{\ \Delta\ }\ 
+\begin{cases}
+\text{corpo} & (\Delta\notin K^{2})\\
+\text{produto de corpos } K\times K & (\Delta=s^{2}\neq0)\\
+\text{anel não reduzido } K[\varepsilon]/(\varepsilon^{2}) & (\Delta=0),
+\end{cases}}
+\qquad(\operatorname{char}K\neq2),
+\]
+a que se acresce a quarta espécie de Observação~\ref{obs:metal-char2}. O ramo $\Delta<0$
+é o único que dá corpo sobre $\mathbb{R}$, e é onde a construção de $\mathbb{C}$ por
+$\mathbb{R}[x]/(x^{2}+1)$ se encaixa (\code{papers/suporte.tex}, secção
+\emph{Corpo de valores complexos por extensão quadrática}), com $\Delta=-4$. Os dois ramos
+de $\Delta>0$ ficam do lado oposto: o segundo é a menor realização de $K\times K$ como
+quociente de polinómios --- a mesma álgebra que $Y^{X^{(2)}}$ em \code{suporte}
+(Prop.~\emph{Base de idempotentes}) ---, e o terceiro é o único onde o anel tem
+nilpotentes. \emph{Aí} é que a classificação é aplicação; aqui ela é fundamento, e por isso
+fica antes da borda.
+
+\noindent\textbf{Verificação.} \code{tests/metalica.c} §M13 (o critério: $1346$ pares
+$(p,m)$ em $14$ primos, \emph{zero} discordancias entre ``$f_m$ tem raiz'' e
+``$\Delta_m$ quadrado'', calculados por caminhos independentes; e a identidade
+$(2\sigma-m)^{2}=\Delta_m$ verificada no anel em $\mathbb{Z}$ e em $\mathbb{F}_p$);
+§M14 (a tricotomia: contagens fechadas nos $14$ primos, com o par de idempotentes
+\emph{exibido} nos $658$ casos do regime $K\times K$ e o nilpotente \emph{exibido} nos
+$16$ casos do regime não reduzido); §M15 (característica $2$: $\mathbb{F}_2$ e
+$\mathbb{F}_4$, com o critério $m=r+r^{-1}$ verificado nos dois e o contra-exemplo do
+discriminante medido). §M9 foi corrigido no mesmo dia: a busca por $\Delta_n$ quadrado
+usava \code{long}, que no Windows tem $32$ bits, e transbordava acima de $n=46340$ ---
+produzia cinco casos falsos, o primeiro em $n=65536$, onde
+$n^{2}+4\equiv4\ (\mathrm{mod}\ 2^{32})$.
+
+
 \section{A borda --- definição e unicidade de $bx^{a}$}
 
 \begin{definicao}[borda]\label{def:borda}
