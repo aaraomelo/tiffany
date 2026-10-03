@@ -362,7 +362,11 @@ e_{+}+e_{-}=1,\qquad
 e_{+}e_{-}=\frac{1-u^{2}}{4}=0,
 \]
 e $e_{\pm}^{2}=e_{\pm}$. Evaluando em $r_{\pm}$: $u(r_{\pm})=(2r_{\pm}-m)/s=\pm1$, donde
-$e_{\pm}(r_{\pm})=1$ e $e_{\pm}(r_{\mp})=0$ --- são as projeções sobre cada factor.
+$e_{\pm}(r_{\pm})=1$ e $e_{\pm}(r_{\mp})=0$ --- são as projeções sobre cada factor, e
+exactamente os indicadores canónicos de $S=\{r_{+},r_{-}\}$: com $|S|=2$,
+$K\times K$ é a forma $\prod_{\alpha\in S}K$ de \emph{Produto de cópias}
+(\code{suporte}, \code{obs:produto-copias}). Daí a reconstrução, para todo
+$a,b\in K$, $a+b\sigma=(a+br_{+})e_{+}+(a+br_{-})e_{-}$.
 
 \textbf{Terceiro regime.} $\Delta_m=0$ dá $f_m=(x-m/2)^{2}$, e com
 $\varepsilon=\sigma-m/2$ tem-se $\varepsilon^{2}=0$. E $\varepsilon\neq0$: se
@@ -479,8 +483,11 @@ a que se acresce a quarta espécie de Observação~\ref{obs:metal-char2}. O ramo
 $\mathbb{R}[x]/(x^{2}+1)$ se encaixa (\code{papers/suporte.tex}, secção
 \emph{Corpo de valores complexos por extensão quadrática}), com $\Delta=-4$. Os dois ramos
 de $\Delta>0$ ficam do lado oposto: o segundo é a menor realização de $K\times K$ como
-quociente de polinómios --- a mesma álgebra que $Y^{X^{(2)}}$ em \code{suporte}
-(Prop.~\emph{Base de idempotentes}) ---, e o terceiro é o único onde o anel tem
+quociente de polinómios --- a forma $\prod_{\alpha\in S}K$ de
+Observação~\emph{Produto de cópias} (\code{papers/suporte.tex},
+\code{obs:produto-copias}), com $S=\{r_{+},r_{-}\}$ o conjunto das raízes de $f_m$ e
+$|S|=2$; $S$ não é nenhum $X^{(n)}$, que tem sempre $|X^{(n)}|=q^{n}\ge4$ ---, e o
+terceiro é o único onde o anel tem
 nilpotentes. \emph{Aí} é que a classificação é aplicação; aqui ela é fundamento, e por isso
 fica antes da borda.
 
