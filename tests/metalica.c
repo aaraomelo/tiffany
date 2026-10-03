@@ -207,15 +207,28 @@ int main(void){
 
     /* ═══ §M9 — n = 0 e' a involucao, e e' o unico n onde o anel DECOMPOE ══════════════
      * Delta = n^2+4 e' quadrado perfeito so' em n = 0 (Delta = 4). Procurado por busca
-     * inteira, nao afirmado. E em n = 0 tem-se sigma^2 = 1: e' a involucao pura. */
-    int quadrados = 0; L onde = -1;
-    for(L n = 0; n <= 100000; n++){
-        L d = n*n + 4, r = (L)0;
+     * inteira, nao afirmado. E em n = 0 tem-se sigma^2 = 1: e' a involucao pura.
+     *
+     * NOTA DE ARITMETICA (transbordo corrigido). Esta busca usava `long`, que no Windows
+     * tem 32 bits — o modelo LLP64 diz int=32, long=32, long long=64, e `long` NAO e' o
+     * inteiro longo de que se fala. Acima de n = 46340 o produto n*n transborda e a
+     * busca passa a ver numeros que nao sao n^2+4: o teste acusava 6 casos, sendo 5
+     * falsos — o primeiro em n = 65536, onde n^2 + 4 ≡ 4 (mod 2^32) e o falso quadrado
+     * perfeito e' exatamente o 4 do n = 0, e mais quatro em n = 65664, 67616, 71464,
+     * 72344. A MATEMATICA estava certa (a unica solucao de (k-n)(k+n) = 4 e' n = 0); o
+     * instrumento e' que estava errado. Num transbordo silencioso isto e' pior que a
+     * asercao que denuncia, porque e' o unico lugar do ficheiro que diz ONDE o anel
+     * decompoe. Por isso `long long` explicito, e por isso a janela vai nos dois
+     * sentidos: Delta so' depende de |n|, e |n| = 0 e' o unico. */
+    long long quadrados = 0; long long onde = -1;
+    for(long long m = 0; m <= 100000; m++){
+        long long d = m*m + 4, r = 0;
         while(r*r < d) r++;                      /* raiz inteira por busca, sem sqrt */
-        if(r*r == d){ quadrados++; if(onde < 0) onde = n; }
+        if(r*r == d){ quadrados++; if(onde < 0) onde = m; }
     }
-    printf("      Delta = n^2+4 e' quadrado perfeito em %d dos 100001 casos (n = %ld)\n", quadrados, onde);
-    ok("n = 0 e' o UNICO n em [0,100000] com Delta quadrado: o unico onde o anel decompoe",
+    printf("      Delta = n^2+4 e' quadrado perfeito em %lld dos 100001 casos (|n| = %lld)\n",
+           quadrados, onde);
+    ok("|n| = 0 e' o UNICO |n| em [0,100000] com Delta quadrado: o unico onde o anel decompoe",
        quadrados == 1 && onde == 0);
 
     ok("e nesse n a borda da' sigma^2 = 1: o nivel 0 da escada E' a involucao pura",
