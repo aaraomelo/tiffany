@@ -1,0 +1,1377 @@
+% !TeX program = pdflatex
+% papers/sql.tex — O campo de contagem G_q entre a tabela e a arena:
+%   sql_hist_jev do tiffany-db, nos tres niveis (matematica / contrato SQL / C).
+%
+% Fontes da escrita:
+%   tiffany-db/banco/sql.c        (sql_hist_jev:16261, spec_decode:16233,
+%                                   celula_valor:7260, S_VIVO/S_PRES, INSERT,
+%                                   DELETE, UPDATE)
+%   tiffany-db/banco/sql_api.h:148
+%   tiffany-db/banco/jev.c        (jev_proj_raw:85, jev_marginal_raw:97,
+%                                   jev_escore_raw:156)
+%   tiffany-db/banco/jev_api.h, jev_core.h
+%   tiffany-db/tests/test_sql_hist_jev.c
+%   tiffany-db/FASE_4_9_R3_RESULTADO.md
+%
+% Auto-contido: cd papers && pdflatex sql.tex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage[margin=2.4cm]{geometry}
+
+\usepackage{booktabs}
+\usepackage{array}
+
+\usepackage{xcolor}
+
+\usepackage[hidelinks,breaklinks]{hyperref}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}[teorema]{Proposi\c{c}\~ao}
+\newtheorem{corolario}[teorema]{Corol\'ario}
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{definicao}{Defini\c{c}\~ao}
+\newtheorem{observacao}{Observa\c{c}\~ao}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\cp}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\Word}{\mathcal{W}}
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\Qq}{\mathbb{Q}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Zz}{\mathbb{Z}}
+\newcommand{\Un}[1]{\underline{#1}}
+\newcommand{\nr}{\mathrm{nr}}
+\newcommand{\nc}{\mathrm{nc}}
+\newcommand{\ind}[1]{\mathbf{1}_{\{#1\}}}
+\newcommand{\sti}{\textbf{Implementado e demonstrado.}}
+\newcommand{\stipa}{\textbf{Implementado, mas interpreta\c{c}\~ao matem\'atica
+  parcial.}}
+\newcommand{\stco}{\textbf{Compat\'ivel, mas n\~ao demonstrado.}}
+\newcommand{\stni}{\textbf{N\~ao estabelecido pela implementa\c{c}\~ao
+  atual.}}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+
+\input{gkcapa}
+
+\begin{document}
+\gkcapa{O campo de contagem $G_q$ entre a tabela e a arena}
+       {$G_q(j)=\displaystyle\sum_{x\in q^{-1}(j)}G(x)$,
+        com $G(x)=\lvert \pi^{-1}(x)\rvert$, no caminho C do tiffany-db}
+       {sql\_hist\_jev, spec base-36, jev\_marginal, S\_VIVO / S\_PRES /
+        S\_LINHAS / S\_ALTO, celula\_valor, guardas E1..E7 e F17}
+\maketitle
+
+%=======================================================================
+\begin{abstract}
+Este paper documenta o que a fun\c{c}\~ao \cp{sql_hist_jev} do
+\cp{tiffany-db} realmente faz: l\^e uma coluna de uma tabela, conta as
+linhas vivas por valor, constr\'oi o campo de contagem $G$, aplica a
+parti\c{c}\~ao por fronteiras $q$ dada pela \cp{spec} base-36, e devolve a
+marginal $G_q(j)=\sum_{x\in q^{-1}(j)}G(x)$ com a soma de conserva\c{c}\~ao
+$\sum_j G_q(j)=\lvert I\rvert$. O paper cobre tamb\'em a camada relacional que
+o motor implementa --- selec\c{c}\~ao, projec\c{c}\~ao, agrupamento, jun\c{c}\~ao,
+ordem e escritas ---, modelada como opera\c{c}\~oes matem\'aticas sobre a tabela
+ao longo da cadeia
+$\text{SQL}\to\text{objecto matem\'atico}\to\text{representa\c{c}\~ao
+Tiffany}\to\text{JEV, quando aplic\'avel}$ (Sec.~\ref{sec:relacional}). Cada afirma\c{c}\~ao \'e marcada com um de
+tr\^es carimbos: \textbf{Contrato implementado.} (o que a interface diz),
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} (o objecto
+matem\'atico que o c\'odigo sustenta), e \textbf{N\~ao estabelecido pela
+implementa\c{c}\~ao atual.} (o que o c\'odigo n\~ao faz). N\~ao se importa
+teoria: o que n\~ao est\'a no c\'odigo n\~ao \'e afirmado.
+\end{abstract}
+
+%=======================================================================
+\section{O que este paper mede}
+
+\paragraph{Tr\^es n\'iveis.} Todo o enunciado fica num de tr\^es n\'iveis:
+\begin{itemize}
+\item \textbf{N\'ivel 1 (Matem\'atica):} objectos — campo de contagem,
+  parti\c{c}\~ao, marginal — e as suas identidades ($\sum_x G(x)=\lvert I\rvert$,
+  $\sum_j G_q(j)=\lvert I\rvert$).
+\item \textbf{N\'ivel 2 (Contrato SQL):} a assinatura p\'ublica
+  \cp{sql_hist_jev}, o que ela recebe e o que devolve em \cp{SqlOut};
+  o c\'odigo de erro em \cp{out->err}.
+\item \textbf{N\'ivel 3 (Implementa\c{c}\~ao C):} mem\'oria e datas —
+  \cp{mem_le}, \cp{celula_valor}, os bitmaps \cp{S_VIVO}/\cp{S_PRES},
+  o topo \cp{cat_nrows}, o layout da arena, os offsets $D_1,J,D_2,\mathrm{OUT}$.
+\end{itemize}
+
+\paragraph{A cadeia.} Quando a opera\c{c}\~ao se aplica \`a coluna-alvo da
+leitura JEV, o caminho completo \'e
+\[
+\text{SQL}
+\;\longrightarrow\;
+\text{opera\c{c}\~ao matem\'atica}
+\;\longrightarrow\;
+\text{representa\c{c}\~ao Tiffany}
+\;\longrightarrow\;
+\text{JEV},
+\]
+em que o \'ultimo passo \'e o que as Secs.~\ref{sec:nivel1}--\ref{sec:porta}
+documentam. A Sec.~\ref{sec:relacional} preenche os passos anteriores: \'e uma
+camada \emph{anterior e complementar} \`a JEV, e n\~ao a substitui.
+
+\paragraph{Carimbos.} \textbf{Contrato implementado.} e
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} acompanham
+afirma\c{c}\~oes verific\'aveis no c\'odigo; \textbf{N\~ao estabelecido pela
+implementa\c{c}\~ao atual.} marca aquilo que este ficheiro n\~ao faz e que,
+portanto, este paper n\~ao atribui.
+
+\paragraph{O que n\~ao se afirma.} N\~ao se afirma aqui que o motor SQL
+execute a \`{a}lgebra do \cp{jev.tex}: o caminho que ele executa n\~ao calcula
+nem $p_q=G_q/\lvert I\rvert$, nem o funcional $L$, nem probabilitate. O que o
+c\'odigo calcula \'e a marginal $G_q$ — nada mais — e \'e isso que se documenta.
+
+%=======================================================================
+\section{N\'ivel 2 — o contrato SQL}
+
+\begin{definicao}[Objeto]
+\label{def:sqlhistjev}
+\textbf{Contrato implementado.}
+\begin{center}
+\ttfamily\small
+\detokenize{int sql_hist_jev(const char *tabela, const char *coluna,}\\
+\detokenize{                     SqlOut *out, long *pi1, long *pi2,}\\
+\detokenize{                     const char *spec)}
+\end{center}
+declarada em \cp{banco/sql_api.h:148}, definida em \cp{banco/sql.c:16261}
+(n\~ao \'e \cp{static}). Devolve $1$ em sucesso e $0$ em recusa, com a
+mensagem em \cp{out->err} quando \cp{out} existe. Os par\^ametros obrigat\'orios
+s\~ao \cp{tabela}, \cp{coluna}, \cp{out}, \cp{pi1} (o \'unico canal de
+$\lvert I\rvert$) e \cp{spec}. O par\^ametro \cp{pi2} \'e ignorado
+(\cp{sql.c:16273-16274}): as duas dimens\~oes da conjunta s\~ao
+\cp{c1 = c2 = 1} por decis\~ao F10, n\~ao lidas de \cp{pi2}.
+\end{definicao}
+
+\begin{observacao}[Alcance]
+\textbf{Contrato implementado.} \cp{sql_hist_jev} n\~ao \'e alcan\c{c}avel por
+texto SQL: \cp{sql.c} s\'o chama \cp{jev_arena} e \cp{jev_marginal} dentro
+dela; n\~ao existe sintaxe SQL que a invoque. O acesso \'e pela porta C
+(declarada em \cp{sql_api.h}) — testes e \cp{harness} s\~ao os consumidores.
+\end{observacao}
+
+\begin{definicao}[Sa\'ida]
+\label{def:saida}
+\textbf{Contrato implementado.} Em sucesso,
+\cp{out->nrows = k} (o n\'umero de intervalos), \cp{out->ncols = 3}, e as tr\^es
+colunas s\~ao de tipo \cp{SQL_TIPO_INT4}:
+\cp{classe} ($j\in\cp{0..k-1}$), \cp{gq} ($G_q(j)$), \cp{i_total}
+($\lvert I\rvert$, o mesmo valor devolvido por \cp{*pi1}). As c\'elulas
+\cp{nulo[][]} s\~ao zeradas e não h\'a c\'elula ausente na sa\'ida
+(\cp{sql.c:16472-16483}).
+\end{definicao}
+
+\textbf{Contrato implementado.} \'Os erros E1..E7 (Sec.~\ref{sec:guardas})
+devolvem $0$ e gravam a raz\~ao em \cp{out->err}; para além dos E-c\'odigos
+existem as recusas \cp{argumentos nulos}, \cp{jev_marginal falhou} e
+\cp{conservacao violada}. Em toda a recusa a tabela anterior em
+\cp{g_tabela} \'e restaurada.
+
+%=======================================================================
+\section{N\'ivel 1 — a tabela como objecto matem\'atico}
+\label{sec:tabela}
+
+\begin{definicao}[Dom\'inios de \'indice]
+Escreve-se $\Un{n}=\{0,1,\ldots,n-1\}$. O dom\'inio dos valores de uma c\'elula
+\cp{INTEIRO} \'e $V=\{0,\ldots,65535\}$ (16 bits sem sinal).
+\end{definicao}
+
+\begin{definicao}[Tabela]
+\label{def:tabela}
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} Uma tabela
+\'e um qu\'adruplo
+\[
+T=(I,J,\mathrm{pres},v),
+\]
+com: $I\subseteq\Un{nr}$ o conjunto de \emph{linhas vivas}; $J=\Un{nc}$ o
+conjunto de colunas; $\mathrm{pres}\colon I\times J\to\{0,1\}$ a \emph{presen\c
+{c}a} por c\'elula; e $v\colon\{(i,j)\in I\times J:\mathrm{pres}(i,j)=1\}\to V$
+o \emph{valor} das c\'elulas presentes. A linha $i$ \'e a fun\c{c}\~ao parcial
+$r_i\colon J\dashrightarrow V$ dada por $r_i(j)=v(i,j)$ se
+$\mathrm{pres}(i,j)=1$, e indefinida caso contr\'ario.
+\end{definicao}
+
+\begin{observacao}[Porque uma fam\'ilia de parciais, e n\~ao uma rela\c{c}\~ao]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} O c\'odigo
+sustenta esta abstrac\c{c}\~ao e n\~ao as alternativas:
+\begin{itemize}
+\item \emph{n\~ao} \'e uma rela\c{c}\~ao $R\subseteq X\times Y$: n\~ao h\'a
+  chave de valor; valores repetem-se entre linhas, e as linhas distinguem-se
+  pelo \'indice $i$, n\~ao pelo conte\'udo;
+\item a c\'elula \'e endere\c{c}ada pelo produto $i\cdot nc+j$
+  (\cp{cel_ix(i*nc+j)}, \cp{sql.c:895}), o que faz de $(I\times J)$ o gr\'afico
+  de uma fam\'ilia indexada e n\~ao de um atributo de um produto;
+\item a aus\^encia \'e um bit pr\'oprio por c\'elula (\cp{S_PRES}), n\~ao um
+  valor convencionado — logo $r_i$ \'e realmente parcial;
+\item o bit \cp{S_VIVO} separa \emph{existe a linha} de \emph{n\~ao existe},
+  o que explica $I\subseteq\Un{nr}$ (o \'indice \'e topo, n\~ao cardinal).
+\end{itemize}
+\end{observacao}
+
+\begin{observacao}[O que \'e e o que n\~ao \'e um nulo]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.}
+\begin{itemize}
+\item \textbf{Aus\^encia:} $\mathrm{pres}(i,j)=0$ — a c\'elula n\~ao tem
+  valor. Nasce assim por omiss\~ao num \cp{INSERT INTO t (a) VALUES (\dots)}
+  em que a coluna n\~ao \'e nomeada (\cp{sql.c:3795}, \emph{``nascem
+  AUSENTES''}), a menos que um \cp{DEFAULT} ocupe o seu lugar
+  (\cp{sql.c:3800-3801}). Um \cp{NULL} expl\'icito tamb\'em grava
+  aus\^encia (\cp{nulo[j]=1}, \cp{sql.c:3689-3690}).
+\item \textbf{Escrever faz existir:} um valor posto \'e uma presen\c{c}a — o
+  \cp{UPDATE} acende \cp{S_PRES} nas c\'elulas que tocou
+  (\cp{sql.c:6126-6133}); mas \cp{SET col = NULL} \emph{desliga} a presen\c{c}a
+  (\cp{set_anula ? 0 : 1}).
+\item \textbf{Zero \'e um valor:} $\mathrm{pres}(i,j)=1$ com $v(i,j)=0$ conta
+  no campo em $G(0)$; n\~ao \'e aus\^encia.
+\item \textbf{Linha morta \'e linha fora de $I$:} um \cp{DELETE} s\'o desliga o
+  bit \cp{S_VIVO} (\cp{sql.c:6116,6303}); a c\'elula esvaziada n\~ao \'e um
+  nulo, \'e uma linha que deixou de fazer parte de $I$.
+\end{itemize}
+No que diz respeito \`a coluna-alvo de \cp{sql_hist_jev}, a guarda G2
+(Sec.~\ref{sec:guardas}) exige $\mathrm{pres}(i,oc)=1$ para toda a linha
+viva, pelo que a leitura s\'o corre sobre colunas em que $r_i(oc)$ \'e total.
+\end{observacao}
+
+%=======================================================================
+\section{N\'ivel 3 — planos, tectos, topo, a c\'elula}
+\label{sec:nivel3}
+
+\begin{definicao}[O modelo]
+\textbf{Contrato implementado.} O ficheiro de modelo \'e lido por
+\cp{mem_le(slot)}, que devolve uma \emph{palavra} ISA de dois \'atomos de 8
+bits (\cp{sql.c:1213-1221}); uma zona \'e \cp{ZONA(k)=k<<14}
+(\cp{sql.c:208}) com \cp{ZONA_SLOTS=16384} palavras (\cp{sql.c:209}).
+Os planos relevantes:
+\[
+\cp{S_LINHAS}=\cp{ZONA(1)},\quad
+\cp{S_DEN}=\cp{ZONA(2)},\quad
+\cp{S_ALTO}=\cp{ZONA(3)}
+\quad(\cp{sql.c:753,751,834}),
+\]
+e o tecto de c\'elulas \'e $\cp{CEL\_TECTO}=\cp{S\_ALTO\_N}=16384$
+(\cp{sql.c:865-866}). Os bitmaps s\~ao \emph{bit por linha} ou \emph{bit por
+c\'elula}:
+\[
+\cp{S\_VIVO}\subset[512,1024)\ \text{(bit por linha)},\quad
+\cp{S\_MATCH}\subset[256,512)\quad(\cp{sql.c:492,495,538})
+\]
+\[
+\cp{S\_PRES}\ \text{(bit por c\'elula)}.
+\]
+com \cp{LIN\_VIVO}=$512\cdot16=8192$ bits, \cp{LIN\_MATCH}=$4096$ e
+\cp{LIN\_TECTO}=\cp{min}=$4096$ (\cp{sql.c:513-516}). O tamp\~ao de nomes
+comporta \cp{S_COLNOME_N}=\cp{COL\_MAX}=$1024$ colunas (\cp{sql.c:225,960}).
+No \cp{INSERT} recusam-se as linhas acima do tecto
+(\cp{sql.c:3649-3654}) e o produto linhas$\times$colunas acima do tecto de
+c\'elulas (\cp{sql.c:3659-3664}).
+\end{definicao}
+
+\begin{definicao}[Linhas vivas e \emph{topo}]
+\label{def:vivo}
+\textbf{Contrato implementado.} O \emph{topo} \'e $\cp{nr}=\cp{cat\_nrows()}$
+(\cp{sql.c:1504}), o apontador high-water de linhas — n\~ao uma contagem. O
+conjunto de linhas vivas \'e
+\[
+I=\{i\in\Un{nr}:\cp{S\_VIVO}(i)=1\},
+\]
+e o cardinal $\lvert I\rvert$ s\'o se obt\'em por varredura dos bits
+(\cp{sql.c:16354-16357}). Em geral $\lvert I\rvert\ne\nr$: ap\'os um
+\cp{DELETE}, $\nr$ fica inalterado e a linha viva deixa de contar.
+$\lvert I\rvert=0$ com $\nr>0$ n\~ao \'e erro aqui; a guarda E7 de \emph{tabela
+vazia} s\'o dispara para $\nc\le0$ ou $\nr\le0$ (\cp{sql.c:16308}).
+\end{definicao}
+
+\begin{definicao}[Valor de c\'elula]
+\label{def:celula}
+\textbf{Contrato implementado.} Para a c\'elula de endere\c{c}o
+$k=i\cdot\nc+j$ (\cp{cel_ix}), o valor lido por \cp{celula_valor}
+(\cp{sql.c:7260-7263}) \'e
+\[
+v(i,j)=w_0{.}\mathrm{total}\;\big|\;(w_1{.}\mathrm{total}\ll 8),
+\]
+\[
+w_0=\cp{mem\_le}(\cp{S\_LINHAS}+k),\qquad
+w_1=\cp{mem\_le}(\cp{S\_ALTO}+k),
+\]
+o inteiro sem sinal de 16 bits em $[0,65535]$. Esta leitura \textbf{n\~ao
+consult\~a} \cp{S_PRES} (a presen\c{c}a decide-se \`a parte, guarda G2), e
+ignora o segundo \'atomo de cada palavra (o denominador / coeficiente).
+O envelope do \cp{INSERT} para \cp{CORPO\_INTEIRO} \'e exactamente
+$[0,65535]$ (\cp{sql.c:3665-3690}).
+\end{definicao}
+
+%=======================================================================
+\section{A leitura: guardas e erros}
+\label{sec:guardas}
+
+\textbf{Contrato implementado.} A ordem exacta de guardas de
+\cp{sql_hist_jev} (todas em recusa $\Rightarrow$ retorno $0$ e
+\cp{out->ok=0}) \'e:
+\[
+\cp{G7}\xrightarrow{\ \text{E7}\ }\cp{G1}\xrightarrow{\ \text{E1}\ }\cp{G2}\xrightarrow{\ \text{E2}\ }
+\cp{G3}\xrightarrow{\ \text{E3}\ }\cp{spec\_decode}\xrightarrow{\ \text{E6}\ }\cp{G4}
+\]
+\[
+\cp{G4}\xrightarrow{\ \text{E4 (inalcan\c{c}avel via \cp{spec})}\ }\cp{G5}\xrightarrow{\ \text{E5}\ }
+\cp{F17}\xrightarrow{\ \text{E3}\ }\cp{G6},
+\]
+seguida da constru\c{c}\~ao da arena, \cp{jev_marginal(X)}, a verifica\c{c}\~ao
+de conserva\c{c}\~ao e a sa\'ida. Numericamente:
+
+\begin{center}
+\begin{tabular}{@{}l l l@{}}
+\toprule
+c\'odigo & condi\c{c}\~ao & ponto exacto (\cp{sql.c}) \\
+\midrule
+E7 & tabela n\~ao existe / coluna n\~ao existe / $\nc\le0$ ou $\nr\le0$ &
+16399, 16303, 16308 \\
+E1 & corpo da coluna $\cp{oc}\ne\cp{CORPO\_INTEIRO}$ ($=0$) &
+16314 \\
+E2 & linha viva com $\cp{pres}(i_2,oc)=0$ (\emph{presen\c{c}a incompleta}) &
+16323 \\
+E3 & valor vivo $v\notin[0,16384)$ (limite do tamp\~ao) &
+16338 \\
+--  & \cp{spec\_decode} falha (spec malformada) & 16359 \\
+E4 & $k\notin[1,16]$ & 16369 \\
+E5 & $X<1$ ou $X+2k>16230$ & 16376 \\
+E3 & valor vivo $v\ge X$ (F17: limite do suporte) & 16393 \\
+E6 & fronteira $b_i\notin(0,X)$ ou n\~ao estritamente crescente & 16402 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacao}[Contadores]
+\textbf{Contrato implementado.} \cp{jev_hist_erros[7]} (\cp{sql.c:16224})
+conta E1..E6; \'e \cp{static} e nunca \'e exportado — n\~ao faz parte do
+observ\'avel. E7 n\~ao tem contador (\'indice 6 nunca incrementado); E6 usa o
+\'indice 5 nas duas ocorr\^encias; E3 usa o \'indice 2 tamb\'em para F17.
+\end{observacao}
+
+\begin{observacao}[A ordem \'e contratual]
+\textbf{Contrato implementado.} E7 vem antes de G1: uma tabela vazia
+($\nr=0$) responde \cp{"E7: tabela vazia"} e nunca G1/E1 — o teste
+\cp{test_sql_hist_jev.c} cria uma coluna \cp{TEXTO} com uma linha justamente
+para que E1 seja alcan\c{c}avel. G2 vem depois de G1: s\'o se fala de
+presen\c{c}a depois de se saber o corpo.
+\end{observacao}
+
+%=======================================================================
+\section{N\'ivel 1 — realiza\c{c}\~ao, campo e marginal}
+\label{sec:nivel1}
+
+Fixam-se, daqui em diante, a tabela $T=(I,J,\mathrm{pres},v)$, a coluna
+$\cp{oc}\in J$ e as guardas G1-G6/F17 vencidas.
+
+\begin{definicao}[Realiza\c{c}\~ao]
+\label{def:realizacao}
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} Gra\c{c}as a
+G2, $r_i(\cp{oc})$ \'e total em $I$; gra\c{c}as a G3 e F17, o seu valor vive em
+$\Un{X}=\{0,\ldots,X-1\}$. Define-se a \emph{realiza\c{c}\~ao}
+\[
+\pi\colon I\to\Un{X},\qquad \pi(i)=r_i(\cp{oc}),
+\]
+e o \emph{campo de contagem}
+\[
+G\colon\Un{X}\to\N,\qquad G(x)=\lvert\pi^{-1}(x)\rvert,
+\]
+estendido por $0$ a todo o $V$. Esta \'e exactamente a constru\c{c}\~ao do
+\cp{hist_local[16384]} (\cp{sql.c:16338-16352}), que conta com
+\cp{celula\_valor}, uma entrada por valor em $[0,16384)$.
+\end{definicao}
+
+\begin{definicao}[Parti\c{c}\~ao por fronteiras]
+\label{def:particao}
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} A \cp{spec}
+codifica, por G6, uma sequ\^encia estritamente crescente
+\[
+B=(b_0,b_1,\ldots,b_k),\qquad b_0=0< b_1<\cdots<b_{k-1}< b_k=X,
+\]
+e com ela a parti\c{c}\~ao de $\Un{X}$ em $k$ intervalos
+\[
+q\colon\Un{X}\to\Un{k},\qquad q(x)=j \iff b_j\le x<b_{j+1}.
+\]
+Como $b_0=0$ e $b_k=X$, $q$ \'e total e cada classe \'e n\~ao vazia.
+\end{definicao}
+
+\begin{definicao}[Marginal]
+\label{def:marginal}
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.}
+\[
+G_q\colon\Un{k}\to\N,\qquad
+G_q(j)\;=\;\sum_{x\in q^{-1}(j)}G(x)\;=\;\lvert\{i\in I:q(\pi(i))=j\}\rvert .
+\]
+\end{definicao}
+
+\begin{lema}[Conserva\c{c}\~ao; duas somas]
+\label{lem:conserva}
+$\displaystyle\sum_{x\in\Un{X}}G(x)=\lvert I\rvert$
+\quad e \quad
+$\displaystyle\sum_{j\in\Un{k}}G_q(j)=\lvert I\rvert$.
+\begin{proof}
+As fibras $\pi^{-1}(x)$ particionam $I$ (aplica\c{c}\~ao total), logo
+$\sum_x\lvert\pi^{-1}(x)\rvert=\lvert I\rvert$. A segunda identidade segue de
+$\sum_j\sum_{x\in q^{-1}(j)}G(x)=\sum_{x\in\Un{X}}G(x)$, pois $q$ particiona
+$\Un{X}$.
+\end{proof}
+\end{lema}
+
+\begin{proposicao}[Correspond\^encia com a arena]
+\label{prop:corr}
+\textbf{Contrato implementado.} Sob as mesmas guardas, com $\cp{spec}$ a dar
+$(X,k,B)$, o c\'odigo monta na arena (Sec.~\ref{sec:arena}) e chama
+\cp{jev_marginal(X)}. Dado $D_1=X+k+10$, o resultado da primitiva satisfaz
+\[
+\cp{a}[D_1+j]=G_q(j)\quad(j\in\Un{k}),
+\]
+e a soma de conserva\c{c}\~ao \'e verificada por
+$\sum_{j<k}\cp{a}[D_1+j]=\lvert I\rvert$ (\cp{sql.c:16461-16470}), onde
+$\lvert I\rvert$ veio de \cp{a[X]}=\cp{*pi1}.
+\begin{proof}
+Em \cp{jev_marginal_raw} (\cp{jev.c:97-141}) com
+$(c_0,c_1,c_2)=(k,1,1)$, para cada $x\in\Un{X}$:
+$y_0=\cp{proj}(b_0..b_k,c_0,x)=q(x)\in\Un{k}$, e $y_1=y_2=0$ pois ambos os
+blocos s\~ao $\{0,X\}$. Logo $\cp{a}[D_1+y_0]\mathrel{+}=G(x)$; como $q(\cdot)$
+avalia \`a \'antiga de cada $x$ que contribui, o acumulador na posi\c{c}\~ao $j$
+recebe precisamente $\sum_{x\in q^{-1}(j)}G(x)$. A conjunta
+$J[\cdot]$ com \'indice $\cp{idx}=y_2+c_2(y_1+c_1y_0)=y_0$ recebe o mesmo, e por
+isso $D_1[0..k)=J[0..k)$ (a segunda passagem, o od\'ometro,
+\cp{jev.c:127-137}, n\~ao os altera — ver Sec.~\ref{sec:arena}). No bloco
+\cp{OUT}: $\cp{a[OUT]}=\sum_x G(x)=\lvert I\rvert$ e
+$\cp{a[OUT+1]}=\cp{a[X]}=\lvert I\rvert$.
+\end{proof}
+\end{proposicao}
+
+\begin{observacao}[A verifica\c{c}\~ao l\^e a pr\'opria sa\'ida]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} A guarda de
+conserva\c{c}\~ao n\~ao recalcula $G_q$ por outra via: soma os valores de
+\cp{D1} que a primitiva escreveu e compara-os com $\lvert I\rvert$. \'E uma
+auto-consist\^encia estrutural apoiada no Lema~\ref{lem:conserva} — e, na
+hist\'oria do ficheiro, foi ela que apanhou G nulo (F9) e $D_1$ deslocado
+(F10), como o pr\'oprio coment\'ario de \cp{sql.c:16455-16460} regista.
+\end{observacao}
+
+%=======================================================================
+\section{A \cp{spec} base-36}
+\label{sec:spec}
+
+\begin{definicao}[Decodificador]
+\textbf{Contrato implementado.} \cp{spec_decode} (\cp{sql.c:16233}) l\^e
+$s=\cp{spec}$ sob o alfabeto base-36 ($0\ldots9,a\ldots z$; mai\'usculas s\~ao
+d\'igito inv\'alido, \cp{base36\_digit} devolve $-1$). O comprimento \'e da
+forma
+\[
+\ell = 4+3(k-1), \qquad k=\frac{\ell-4}{3}+1\in[1,16],
+\]
+e os blocos s\~ao: \'indices $0..2$ o valor $X=d_0\cdot1296+d_1\cdot36+d_2$
+($X\ge1$); \'indice $3$ uma redund\^ancia: o d\'igito tem de ser igual a $k$
+(\cp{sql.c:16246-16247}); cada triplo $3j..3j+2$, $j=1..k-1$, decifra a
+fronteira $b_j$. O decodificador n\~ao valida as fronteiras (valores at\'e
+$46655$): essa valida\c{c}\~ao \'e G6, logo ap\'os ($0<b_j<X$ e estritamente
+crescentes). A recusa do decodificador \'e \cp{"E6: spec invalida"}
+(\cp{sql.c:16362-16365}).
+\end{definicao}
+
+\begin{definicao}[O objecto codificado]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} A \cp{spec}
+\emph{sob guardas vencidas} codifica a tripla
+\[
+(X,\ k,\ B=(b_1,\ldots,b_{k-1}))
+\]
+da Sec.\ref{sec:nivel1}. A redund\^ancia do 4.\'o d\'igito torna o
+comprimento observ\'avel pelo pr\'oprio c\'odigo: um \cp{spec} com
+$\ell=4+3(k'-1)$ e d\'igito $d_3\ne k'$ \'e rejeitado mesmo que $\ell$ seja
+formalmente v\'alido.
+\end{definicao}
+
+Nota: o exemplo can\'onico dos testes \'e \cp{"00a3002007"}, que codifica
+$X=10$, $k=3$, $B=(b_1,b_2)=(2,7)$ — com $b_0=0$ e $b_3=10$ impl\'icitos.
+
+%=======================================================================
+\section{A arena e a constante $16230$}
+\label{sec:arena}
+
+\begin{definicao}[Arena]
+\textbf{Contrato implementado.} \cp{jev_arena()} devolve o \'unico
+\cp{static unsigned char arena[65536]} (\cp{jev.c:83,319-321}), lido como
+$\cp{JEV\_ARENA\_BYTES}/4=2^{14}=16384$ inteiros \cp{int32}
+$\cp{a}[0..16383]$ (\cp{jev_api.h:36}). N\~ao \'e o ficheiro de modelo: \'e
+outro buffer, em mem\'oria nativa, de 16\,384 palavras de 32 bits — coincidindo
+em n\'umero com \cp{ZONA\_SLOTS} sem ser o mesmo objecto.
+\end{definicao}
+
+\begin{definicao}[Layout da marginal com $(k,1,1)$]
+\label{def:layout}
+\textbf{Contrato implementado.} O bloco que \cp{sql_hist_jev} monta
+(\cp{sql.c:16417-16442}) e que \cp{jev_marginal_raw} interpreta
+(\cp{jev.c:97-141}) — numerando as c\'elulas:
+\begin{center}
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\'indice & conte\'udo & origem \\
+\midrule
+$[0,X)$ & $G(x)=\cp{a}[x]$ & \cp{hist\_local} \cp{sql.c:16422} \\
+$X$ & $\lvert I\rvert$ & \cp{*pi1} \cp{sql.c:16423} \\
+$X+1$ & $0$ ($n$; s\'o \cp{marginal\_d} o l\^e) & fixo \cp{sql.c:16424} \\
+$X+2..X+4$ & $c_0=k,\ c_1=1,\ c_2=1$ & F10 \cp{sql.c:16425} \\
+$X+5$ & $b_0=0$ & fixo \\
+$X+5+j\ (1\le j<k)$ & $b_j$ & \cp{bspec[j-1]} \\
+$X+5+k$ & $b_k=X$ & fixo \\
+$X+5+k+1..X+5+k+4$ & $0,X,0,X$ (blocos 1 e 2) & fixo \cp{sql.c:16429-16430} \\
+$D_1=X+k+10$ & marginais directas, linha $p$ em $16p$ & \cp{jev_marginal} \\
+$J=D_1+48$ & conjunta, $\cp{PROD}=k$ c\'elulas & \cp{jev_marginal} \\
+$D_2=J+\cp{PROD}$ & marginais da conjunta & \cp{jev_marginal} \\
+$\cp{OUT}=D_2+48$ & $\cp{OUT[0]}$=total, $\cp{OUT[1]}=\lvert I\rvert$ &
+\cp{jev_marginal} \\
+\bottomrule
+\end{tabular}
+\end{center}
+A express\~ao de $D_1$ reproduz a da primitiva (n\~ao \'e uma constante
+escolhida): $\cp{P}=X+2$, $\cp{B}=\cp{P}+3$, $\cp{S}=c_0+c_1+c_2+3=k+5$, e
+$D_1=\cp{B}+\cp{S}=X+k+10$ (\cp{sql.c:16437-16440}; idem \cp{jev.c:99-103}).
+\end{definicao}
+
+\begin{proposicao}[A constante $16230$]
+\label{prop:16230}
+\textbf{Contrato implementado.} A \'ultima c\'elula que a marginal escreve \'e
+$\cp{OUT}+47$, e a condi\c{c}\~ao de caber na arena \'e
+\[
+\cp{OUT}+47 = X+2k+106+47 = X+2k+153 \le 16383
+\iff X+2k\le 16230 ,
+\]
+que \'e exactamente a guarda G5/E5 (\cp{sql.c:16376}). Deriva\c{c}\~ao:
+$J=X+k+58$, $D_2=J+\cp{PROD}=X+2k+58$ (com $\cp{PROD}=c_0c_1c_2=k$),
+$\cp{OUT}=D_2+48=X+2k+106$. O resto $16384-16230=154$ \'e o \'onus fixo
+$106+48$ acima da fronteira $X+2k$.
+\end{proposicao}
+
+\begin{observacao}[Restaura\c{c}\~ao da arena]
+\textbf{Contrato implementado.} \cp{sql_hist_jev} grava os $65536$ bytes antes
+de tocar na arena (\cp{sql.c:16417-16418}, \cp{memcpy} para \cp{guardado}) e
+restaura a c\'opia em todos os caminhos que passam pela constru\c{c}\~ao:
+falha de \cp{jev_marginal} (\cp{16448}), conserva\c{c}\~ao violada
+(\cp{16464}) e sucesso (\cp{16481}); os caminhos anteriores a 16417 nunca
+tocam na arena. O resultado \'e a transpar\^encia da arena. O coment\'ario do
+cabe\c{c}alho \cp{sql.c:16223-16224} diz que o snapshot \'e \emph{por conta do
+chamador} — o c\'odigo \'e mais forte do que o coment\'ario: faz o pr\'oprio.
+\textbf{(N\~ao estabelecido pela implementa\c{c}\~ao atual:} se a inten\c{c}\~ao
+era deixar o snapshot ao chamador, o c\'odigo atual n\~ao o deixa.)
+\end{observacao}
+
+%=======================================================================
+\section{As leituras da porta C}
+\label{sec:porta}
+
+\textbf{Contrato implementado.} A porta \cp{jev_api.h} exp\~oe as cinco
+primitivas e a projec\c{c}\~ao; todas com retorno $1$ ($\cp{JEV\_OK}$) ou $0$
+($\cp{JEV\_ERR\_CLASSE}$), excepto \cp{jev_proj}, que responde $-1$ como
+resposta leg\'itima (\cp{jev_api.h:22-31,74-77}; wrappers \cp{jev.c:325-351}):
+
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.8cm} >{\raggedright\arraybackslash}p{5.4cm} >{\raggedright\arraybackslash}p{5.2cm}@{}}
+\toprule
+primitiva & interpreta\c{c}\~ao & layout (N\'ivel 3) \\
+\midrule
+\cp{jev_proj}(b,c,x) & classe de $x$ em $c+1$ fronteiras $b_0..b_c$; $-1$ se fora & varredura de compara\c{c}\~oes, \cp{jev.c:85-95} \\
+\cp{jev_marginal}(X) & marginais da conjunta igualam as directas ($\sum_{j}D_2=\sum_j D_1$); $\cp{OUT[0]}$=total, $\cp{OUT[1]}=\lvert I\rvert$ & $c_0c_1c_2$, od\'ometro, \cp{jev.c:97-141} \\
+\cp{jev_escore}(X) & funcional $N=\sum_{i}s_i\,G_q(s_i)$ como par racional ex\'acto $(N,\lvert I\rvert)$, sem divis\~ao & $m=\cp{a[X+1]}$, pesos em $\cp{W}=\cp{B}+m+1$, $\cp{OUT[0..2]}=N,\lvert I\rvert,m$; \cp{jev.c:156-171} \\
+\cp{jev_duas}(X) & Noul e Score na mesma varredura sobre o mesmo $G$ & \cp{jev.c:191-...} \\
+\cp{jev_marginal\_d}(X) & projec\c{c}\~oes como coordenadas de $\mathcal{X}_d$ & \cp{jev.c:238-...} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{observacao}[O caminho SQL usa duas]
+\textbf{Contrato implementado.} O caminho \cp{sql_hist_jev} chama
+\cp{jev_arena} e \cp{jev_marginal} apenas. As outras leituras existem na
+porta para o produto, mas este ficheiro n\~ao as invoca; \emph{em particular,
+\cp{jev_escore} n\~ao \'e chamado}, logo o funcional $L(p)$ n\~ao interv\'em no
+resultado SQL (ver Sec.~\ref{sec:naoest}).
+\end{observacao}
+
+%=======================================================================
+\section{Verifica\c{c}\~ao}
+\label{sec:verif}
+
+\begin{itemize}
+\item \medido{\cp{tests/test\_sql\_hist\_jev.c} exercita o caminho completo
+  \cp{tabela -> linhas vivas -> hist\_local -> arena G -> jev\_marginal ->
+  D1 -> SqlOut}. O caso nominal T1: $X=10$, $B=\{0,2,7,10\}$, valores $0..9$
+  ($\lvert I\rvert=10$) devolve $G_q=(2,5,3)$ e soma $10$. T2 (fronteira
+  $v=X-1$), T3/T4 (F17: $v=X$ e $v>X$ recusados com E3), T5 (E3, limite do
+  tamp\~ao: $v=20000$), T6 (E1: corpo \cp{TEXTO}), T7 (E7).
+  Cada chamada sela a arena com um padr\~ao alternante ($0\mathsf{x}A5\oplus i$)
+  e compara-a byte a byte depois — prova de restaura\c{c}\~ao.}
+\item \medido{\cp{FASE\_4\_9\_R3\_RESULTADO.md}: 11 casos sobre o mesmo
+  harness. PASS 7/11 (E7, E4/$k>16$, E5/$X+2k>16230$, E6/n\~ao crescente,
+  B/$X{=}10\ B{=}\{0,3,8,10\}$, C/$k{=}1\ X{=}1$, setup); 2 FAIL eram
+  anomalias dos checks do harness (A comparava \cp{gq} com \cp{'0'} apesar de
+  $G_0=2$; D usava $b_1=0$, proibido por G6); 3 NI (E1, E2, E3 sem tabela
+  populada). Conclus\~ao do relat\'orio: os checks falhavam, n\~ao o
+  \cp{sql.c}.}
+\item \medido{Re-deriva\c{c}\~ao independente desta auditoria: um harness
+  avulso, ligado s\'o a \cp{banco/jev.c}, monta o layout da
+  Def.~\ref{def:layout} e confirma $D_1=X+k+10=23$, $G_q=(4,12,9)$ contra uma
+  soma intervalar independente para $X=10$, $\lvert I\rvert=25$,
+  $\cp{OUT[0]}=\cp{OUT[1]}=25$, e \cp{jev_marginal}=\cp{JEV_OK}.}
+\end{itemize}
+
+%=======================================================================
+\section{N\'ivel 2 --- opera\c{c}\~oes relacionais implementadas}
+\label{sec:relacional}
+
+Esta sec\c{c}\~ao modela as opera\c{c}\~oes que \cp{sql.c} realmente executa,
+como objectos e opera\c{c}\~oes matem\'aticas sobre o modelo da
+Def.~\ref{def:tabela}. S\'o entra o que o c\'odigo faz; a matem\'atica nasce do
+c\'odigo e n\~ao de um tratado de \'algebra relacional. Para cada opera\c{c}\~ao
+diz-se a defini\c{c}\~ao (N\'ivel 1), o que a implementa\c{c}\~ao sustenta
+(N\'ivel 3) e o estado de correspond\^encia. A leitura JEV n\~ao \'e alterada:
+ela \'e o \'ultimo elo da cadeia e permanece como nas
+Secs.~\ref{sec:nivel1}--\ref{sec:porta}.
+
+\subsection{Os quatro estados}
+Os tr\^es carimbos das Secs.~\ref{sec:guardas} (marcas de
+\textbf{Contrato implementado.}, \textbf{Interpreta\c{c}\~ao matem\'atica da
+implementa\c{c}\~ao.} e \textbf{N\~ao estabelecido pela implementa\c{c}\~ao
+atual.}) continuam a valer. Para auditar
+opera\c{c}\~ao a opera\c{c}\~ao, o primeiro deles refina-se em tr\^es estados,
+que somam quatro com o terceiro carimbo:
+
+\begin{center}
+\begin{tabular}{@{}p{6.2cm} p{9.0cm}@{}}
+\toprule
+estado & leitura \\
+\midrule
+\sti & o \textbf{Contrato implementado.} com a constru\c{c}\~ao matem\'atica
+escrita e ancorada no c\'odigo; \\
+\stipa & o \textbf{Contrato implementado.} vale, mas o canal de sa\'ida ou o
+protocolo n\~ao determinam sozinho a matem\'atica --- o conflito fica
+declarado, n\~ao resolvido por suposi\c{c}\~ao; \\
+\stco & o comportamento \'e compat\'ivel com a leitura, mas este paper n\~ao o
+demonstra; \\
+\stni & o que a implementa\c{c}\~ao atual n\~ao faz (o terceiro carimbo, sem
+altera\c{c}\~ao). \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{A tabela como multiconjunto}
+\label{sec:mult}
+\begin{definicao}[Multiconjunto de linhas]
+\label{def:multiconjunto}
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} A tabela $T$
+da Def.~\ref{def:tabela} lida como objecto relacional \'e o \emph{multiconjunto}
+das suas linhas vivas,
+\[
+R=\big(\,r_i\;\big)_{i\in I},
+\]
+indexado pelo conjunto $I$ (Def.~\ref{def:vivo}). Duas linhas com o mesmo
+conte\'udo coexistem: a identidade \'e o \'indice $i$, nunca o valor. Nada no
+c\'odigo funde linhas iguais automaticamente --- dois \cp{INSERT} do mesmo
+\cp{VALUES} d\~ao duas linhas vivas ---, e a fus\~ao por conte\'udo \'e
+expl\'icita e s\'o acontece na sa\'ida de \cp{DISTINCT} ou \cp{UNION}
+(Secs.~\ref{sec:proj} e \ref{sec:uni}). A multiplicidade \'e o que faz do
+campo $G$ uma contagem: na coluna $\cp{oc}$, $G(x)=\#\{i\in I:r_i(\cp{oc})=x\}$
+(Def.~\ref{def:realizacao}).
+\end{definicao}
+
+\begin{observacao}[Corpo e envelope]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} Cada coluna
+$j$ declara um \emph{corpo} $D_j$ --- um dos oito do \cp{CREATE TABLE}
+(\cp{Inteiro, Racional, \'Aureo, M\'orfico, Cristalino, Booleano, Texto, Data};
+\cp{sql.c:3066-3546}) --- e um \emph{envelope}: a g\'ama declarada que aceita. O
+valor de c\'elula vive em $V_j=D_j$: a palavra de dois andares da
+Def.~\ref{def:celula} (num racional, o primeiro \'atomo \'e o numerador
+assinado e o segundo o denominador). A \emph{aus\^encia} \'e o dual (bit
+\cp{S_PRES} a $0$, Obs. da Sec.~\ref{sec:tabela}); a leitura de uma c\'elula
+ausente devolve o neutro do corpo, mas esse neutro n\~ao \'e um dado --- o que
+faz o valor \'e o bit de presen\c{c}a. O envelope recusa em voz alta o que n\~ao
+cabe, e a recusa n\~ao altera o estado.
+\end{observacao}
+
+\subsection{Selec\c{c}\~ao: \cp{WHERE}}
+\label{sec:where}
+A condi\c{c}\~ao $\varphi$ \'e lida por \cp{le_expr} (\cp{sql.c:4798}):
+\'atomos ``$L\;op\;R$'' com $op\in\{=,\ne,<,\le,>,\ge\}$, compostos por
+\cp{AND}, \cp{OR} e \cp{NOT} (este empurrado para as folhas por De Morgan,
+\cp{nega_arvore}, \cp{sql.c:4669-4681}); \cp{x IN (v1, v2, ...)} \'e a
+disjun\c{c}\~ao das igualdades
+($\varphi=(x{=}v_1)\lor\cdots\lor(x{=}v_m)$), \cp{sql.c:4704-4749}); e
+\cp{x IS [NOT] NULL} \'e uma cl\'ausula \`a parte, lida do bit \cp{S_PRES} e
+n\~ao compilada para a ISA (\cp{sql.c:8232-8262, 8988-8994}).
+
+Seja $C(\varphi)\subseteq J$ o conjunto das colunas que $\varphi$ \emph{cita}
+(o \cp{citadas_where} do motor) e $\tilde r_i$ a linha $r_i$ estendida pelo
+neutro onde est\'a ausente. A regra efectiva \'e determinada pela
+implementa\c{c}\~ao, e \'e \emph{bivalente}:
+\begin{definicao}[Selec\c{c}\~ao]
+\label{def:selecao}
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} Para cada
+linha viva $i\in I$,
+\[
+i\in I(\varphi)
+\;\;\Longleftrightarrow\;\;
+\Big(\ \forall j\in C(\varphi):\ \mathrm{pres}(i,j)=1\ \Big)
+\;\wedge\;
+\varphi\big(\tilde r_i\big)=\mathbf{t},
+\]
+e a selec\c{c}\~ao \'e
+\[
+\sigma_\varphi(R)=\big(\,r_i\;\big)_{i\in I(\varphi)} .
+\]
+O molde emitido por linha avalia $\varphi$ sobre $\tilde r_i$ (as oito
+rela\c{c}\~oes de \cp{contrato.h} e a contra\c{c}\~ao \cp{fecha_cond},
+\cp{sql.c:4633-4653}, que decide na compila\c{c}\~ao o que n\~ao depende da
+linha); depois, uma passagem final apaga toda a linha que cita uma coluna
+ausente (\cp{sql.c:8933-8941}). O resultado n\~ao depende do que esteja escrito
+numa c\'elula ausente: essa linha j\'a n\~ao casa.
+\end{definicao}
+
+Consequ\^encias determinadas pela mesma leitura:
+\begin{itemize}
+\item \textbf{A compara\c{c}\~ao com a aus\^encia n\~ao casa.} \emph{Comparar
+  \'e pedir um valor, e a aus\^encia n\~ao o tem} (\cp{sql.c:8792-8799}). Uma
+  condi\c{c}\~ao que cite uma c\'elula ausente exclui a linha, em qualquer
+  polaridade: $\lnot(A\lor B)$ com $B$ a citar a aus\^encia exclui tanto quanto
+  $A\lor B$. \stni{} l\'ogica tern\'aria: n\~ao existe \texttt{UNKNOWN}, e o
+  \texttt{NULL} do SQL n\~ao \'e aqui um valor de verdade.
+\item \textbf{\cp{IS [NOT] NULL} s\~ao os \'unicos testes do dual.} Mant\^em ou
+  deitam fora as linhas conforme o bit \cp{S_PRES} da coluna (\cp{nul_nega},
+  \cp{sql.c:8988-8994}); a coluna testada n\~ao entra em $C(\varphi)$.
+\item \textbf{\cp{IN} e \cp{NOT IN} sobre subconsulta.} A linha cuja chave \'e
+  ausente \'e retirada \emph{antes} da perten\c{c}a, nos dois sentidos --- ``a
+  aus\^encia n\~ao pertence nem deixa de pertencer'' (\cp{sql.c:8862-8869}); a
+  perten\c{c}a decide-se sobre o corpo da subconsulta, e o \cp{NOT IN} \'e o
+  complemento sobre essas linhas (\cp{sql.c:8903-8909}).
+\item \textbf{\cp{EXISTS} \'e um quantificador.} Decide-se uma vez sobre a
+  tabela da subconsulta (existe linha viva l\'a?) e \'e por isso uma constante
+  para a consulta; \cp{NOT EXISTS} \'e o complemento --- a mesma De Morgan
+  sobre um conjunto (\cp{sql.c:8280-8331, 8982-8986}).
+\item \textbf{Poda por alcance.} Com um s\'o \'atomo, sem agrega\c{c}\~ao nem
+  agrupamento, a guarda \cp{atom_possivel} (\cp{sql.c:8571-8576}) esvazia o
+  campo sem correr molde quando a gama que as colunas citadas deixaram escrita
+  torna o \'atomo imposs\'ivel: \'e uma optimiza\c{c}\~ao que preserva a
+  resposta, n\~ao uma sem\^antica nova.
+\end{itemize}
+
+\textbf{Status: \sti} A leitura de \cp{le_expr} e do percurso de
+\cp{sql.c:8710-8841, 8933-8941} determina uma \'unica sem\^antica: a bivalente
+da Def.~\ref{def:selecao}. N\~ao se inventou l\'ogica tern\'aria.
+
+\subsection{Projec\c{c}\~ao e \cp{DISTINCT}}
+\label{sec:proj}
+\begin{definicao}[Projec\c{c}\~ao]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} A lista do
+\cp{SELECT} \'e um mapa $p\colon\Un{m}\to J$ (ou express\~oes). Dada a
+selec\c{c}\~ao $\sigma_\varphi(R)$, a projec\c{c}\~ao devolve a fam\'ilia
+\[
+\pi_{p}\big(\sigma_\varphi(R)\big)=\big(\ \rho_{i}\ \big)_{i\in I(\varphi)},
+\qquad
+\rho_i(k)=\beta_k(r_i),
+\]
+onde $\beta_k$ \'e o valor da coluna $p(k)$ ou o polin\'omio (tensor) da
+express\~ao sobre as colunas citadas --- at\'e \cp{NCOL}$=6$ colunas por
+express\~ao, e o excesso \'e recusado (\cp{sql.c:4170, 4540-4543}). Se alguma
+coluna citada pela express\~ao est\'a ausente em $i$, a c\'elula $\rho_i(k)$ \'e
+emitida como ausente --- a mesma regra do \cp{CHECK} e do \cp{WHERE}, ``se o
+resultado d\'a com uma coluna ausente, o resultado \'e ausente''
+(\cp{sql.c:13048-13050}).
+\end{definicao}
+
+\textbf{Contrato implementado.} \cp{SELECT <constante>} (sem \cp{FROM}) \'e o
+caso degenerado da projec\c{c}\~ao: a express\~ao sem vari\'aveis, que devolve
+uma linha com o valor, e o caminho por que um cliente testa a liga\c{c}\~ao
+(\cp{sql.c:15899-15927}).
+
+\begin{definicao}[Distinct de uma coluna]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} O
+\cp{DISTINCT} devolve a \emph{imagem da fibra}:
+\[
+\operatorname{DISTINCT}_d\big(\sigma_\varphi(R)\big)
+=\big\{\, r_i(d) : i\in I(\varphi) \,\big\},
+\]
+com um representante can\'onico por valor --- ``a folha 1 de cada fibra''
+(\cp{sql.c:12857-12861}) --- e a aus\^encia como \emph{um} valor distinto, que
+n\~ao se junta ao zero escrito. \textbf{Contrato implementado:} pede uma
+coluna de cada vez --- ``a linha inteira n\~ao \'e index\'avel pela \'arvore'' e
+\'e recusada com o n\'umero (\cp{proj_n != 1}, \cp{sql.c:12846-12854}). A
+deduplica\c{c}\~ao \'e a inser\c{c}\~ao na \'arvore do corpo e \cp{ord_tira_repetidos}
+(\cp{sql.c:12885-12898}); se a \'arvore n\~ao couber, recusa (nunca devolve
+repetidos).
+\end{definicao}
+
+\textbf{Status das duas: \sti} com as particularidades declaradas (uma coluna
+por \cp{DISTINCT}; a aus\^encia \'e uma classe).
+
+\subsection{Agrega\c{c}\~ao e contagem}
+\label{sec:agreg}
+\begin{itemize}
+\item \textbf{\cp{COUNT(*)}} \'e a cardinalidade $|I(\varphi)|$, \emph{lida} e
+  n\~ao reconta: soma-se o campo do match (o popcount), ``a leitura da que j\'a
+  ficou escrita'' (\cp{sql.c:15929-15935}); numa tabela vazia \'e zerado
+  explicitamente (\cp{sql.c:8664-8679}). Zero aqui \'e o valor correcto: contar
+  nada \'e zero, n\~ao uma aus\^encia.
+\item \textbf{\cp{COUNT(DISTINCT d)}} \'e o n\'umero de classes do quociente por
+  $d$ sobre $I(\varphi)$ --- o mesmo objecto do \cp{GROUP BY} lido em
+  quantidade --- e a aus\^encia \'e uma classe, uma s\'o (\cp{sql.c:9000-9044}).
+\item \textbf{\cp{SUM}, \cp{MAX}, \cp{MIN}, \cp{AVG}} correm na mesma passagem
+  com um acumulador por agrega\c{c}\~ao (\cp{sql.c:12713-12745}) e somam o
+  \emph{corpo}, n\~ao o suporte: c\'elulas ausentes n\~ao alimentam
+  (\cp{sql.c:12739}). \cp{AVG} devolve o par racional reduzido (a classe racional
+  do corpo, \cp{sql.c:12708}). ``A soma de nada \'e \emph{ausente}, n\~ao zero.''
+\item \textbf{A agrega\c{c}\~ao sem \cp{GROUP BY} \'e o quociente pelo mapa
+  constante:} uma fibra s\'o, a tabela inteira (\cp{sql.c:9766-9777}).
+\end{itemize}
+
+\textbf{Status: \sti}
+
+\subsection{\cp{GROUP BY} e \cp{HAVING}}
+\label{sec:grp}
+A chave de agrupamento é dada por uma ou duas colunas. Para uma coluna,
+$k(i)=r_i(c)$; para duas, $g(i)=(k_1(i),k_2(i))$ com
+$k_1(i)=r_i(c_1), k_2(i)=r_i(c_2)$. A construção é por fibras (Sec.~\ref{sec:fibras}); a mesma árvore partilha a estrutura de indexação (\cp{sql.c:12612-12656}).
+
+\begin{definicao}[Agrupamento]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.}
+Seja $k$ a função de chave sobre $I(\varphi)\cap I'$. Defina
+\[
+\operatorname{GROUP}(I(\varphi),k)
+=
+\{\operatorname{Fib}(k,v): v\in\operatorname{im}(k)\}.
+\]
+Para chave composta,
+\[
+\operatorname{Fib}(g,(v_1,v_2))
+=
+\{i\in I(\varphi)\cap I': g(i)=(v_1,v_2)\}
+=
+\operatorname{Fib}(k_1,v_1)\cap\operatorname{Fib}(k_2,v_2),
+\]
+e
+\[
+\operatorname{GROUP}(I(\varphi),g)
+=
+\{\operatorname{Fib}(g,(v_1,v_2)): (v_1,v_2)\in\operatorname{im}(g)\}.
+\]
+A saída tem uma linha por fibra com a chave. A coluna \cp{count} é
+\emph{sempre} emitida com a cardinalidade da fibra
+\[
+\operatorname{COUNT}(*)=|\operatorname{Fib}(k,v)|\quad\text{(resp. }|\operatorname{Fib}(g,(v_1,v_2))|\text{)}\quad (\cp{sql.c:12703}).
+\]
+As instâncias cuja chave está ausente ($I_\bot\cap I(\varphi)$) formam a sua
+própria classe no fim --- ``o dual é um grupo, e não o grupo do zero''
+(\cp{sql.c:12628-12633}) --- e não são elementos de nenhuma $\operatorname{Fib}(k,v)$ ordinária.
+As fibras ordinárias enumeram-se por ordem da árvore (\cp{sql.c:12612-12656}).
+Conservação: $\sum_{F\in\operatorname{GROUP}(I(\varphi),k)} |F| + |I_\bot\cap I(\varphi)| = |I(\varphi)|$
+(\cp{sql.c:12745-12748}).
+\end{definicao}
+
+\textbf{Contrato implementado.} O \cp{HAVING} s\'o aceita uma condi\c{c}\~ao
+sobre o \cp{count}: $|R_k|>n$, $|R_k|<n$ ou $|R_k|=n$, filtrada depois das
+fibras (\cp{sql.c:8393-8429, 12749-12753}). \stni{} \cp{HAVING} geral (sobre
+somas, m\'edias ou chaves).
+
+\textbf{Status: \sti}
+
+\subsection{Ordem e a fatia: \cp{ORDER BY}, \cp{LIMIT}, \cp{OFFSET}}
+\label{sec:ord}
+\begin{definicao}[Ordem]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} O
+\cp{ORDER BY} \'e a permuta\c{c}\~ao $\sigma$ de $I(\varphi)$ que ordena as
+linhas pela \emph{r\'egua} da primeira coluna, isto \'e, pela chave
+$\kappa_1(i)$ que \cp{col_regua_chave}($i$, \cp{c1}, \cp{ncols}) devolve
+(\cp{sql.c:9685, 9666-9676}),
+ascendente ou descendente conforme a direc\c{c}\~ao da descida da \'arvore
+(\cp{ord_desc}); dentro de cada fibra da primeira, corre-se a mesma descida com
+a segunda coluna (\cp{sql.c:9703-9752}). A r\'egua \'e a do corpo --- numa
+coluna quad\'ratica, a norma $q(a,b)=a^2+B\,ab+C\,b^2$ de assinatura
+$\Delta=B^2-4C$, que o motor \emph{declara} numa nota a cada consulta
+(\cp{sql.c:9666-9676}) --- n\~ao a ordem dos bits da c\'elula. Se a \'arvore de
+ordena\c{c}\~ao n\~ao couber, a consulta \'e recusada (ordenar metade seria
+devolver uma ordem que ningu\'em pediu, \cp{sql.c:9612-9615, 9686-9693}).
+\end{definicao}
+
+\textbf{Contrato implementado.} As particularidades:
+\begin{itemize}
+\item \textbf{Texto recusado.} \cp{ORDER BY} sobre coluna de texto \'e
+  recusado com a raz\~ao: a c\'elula guarda o \emph{endere\c{c}o} no pool, que
+  preserva a igualdade e n\~ao a ordem; ordenar pelo prefixo daria uma ordem
+  parcial apresentada como total (\cp{sql.c:9620-9647}).
+\item \textbf{Ausentes ao fim, em bloco.} A linha cuja primeira chave \'e
+  ausente n\~ao tem com que comparar; vai ao fim, em bloco --- a conven\c{c}\~ao
+  do \cp{NULLS LAST}: ``o dual n\~ao \'e pequeno, \'e de outro n\'ivel''
+  (\cp{sql.c:9648-9653, 9700}).
+\end{itemize}
+
+\begin{definicao}[A fatia]
+\textbf{Contrato implementado.} Sobre a sequ\^encia ordenada aplica-se a janela:
+o \cp{OFFSET} salta primeiro e o \cp{LIMIT} conta depois --- ``s\~ao os dois
+extremos da mesma faixa, e trocar a ordem deles daria outra fatia''
+(\cp{sql.c:12906-12910}). Sintaticamente aceitam-se \cp{LIMIT n [OFFSET m]} ou
+\cp{OFFSET m} (\cp{sql.c:8504-8531}); o resto \'e recusado. A porta C limita a
+materializa\c{c}\~ao: no m\'aximo \cp{SQL\_OUT\_MAX\_ROWS} $=64$ linhas, 64
+colunas e 64 bytes por c\'elula (\cp{sql_api.h:82-84}); o excesso n\~ao cabe no
+\cp{SqlOut} e corta-se em sil\^encio (\cp{sql.c:12913}).
+\end{definicao}
+
+\textbf{Status: \sti}
+
+\subsection{Jun\c{c}\~ao}
+\label{sec:join}
+Duas tabelas $R=(r_i)_{i\in I_R}$ e $S=(s_t)_{t\in I_S}$ com conjuntos de
+colunas disjuntos $J_R$, $J_S$. O \cp{ON} da jun\c{c}\~ao \'e \emph{um}
+predicado de uma coluna de cada lado, $\mathrm{x}.\mathrm{a}\;\theta\;\mathrm{y}.\mathrm{b}$
+com $\theta\in\{=,<,\le,>,\ge\}$ (sem constantes, sem \cp{<>}, sem \cp{AND}; os
+lados trocados invertem o operador, \cp{sql.c:7710-7736}).
+
+\begin{definicao}[Concatena\c{c}\~ao e $\theta$-jun\c{c}\~ao]
+\textbf{Interpreta\c{c}\~ao matem\'atica da implementa\c{c}\~ao.} Com colunas
+disjuntas, a concatena\c{c}\~ao $r_i\oplus s_t\colon J_R\uplus J_S\dashrightarrow V$
+\'e a linha dada por $r_i$ em $J_R$ e por $s_t$ em $J_S$. Definam-se
+$I_R'=\{i\in I_R:\mathrm{pres}_R(i,a)=1\}$,
+$I_S'=\{i\in I_S:\mathrm{pres}_S(i,b)=1\}$ e as fibras
+$\operatorname{Fib}(k_B,v)=\{t\in I_S': k_B(t)=v\}$ (Sec.~\ref{sec:fibras}).
+
+A $\theta$-jun\c{c}\~ao interna é
+\[
+R\Join^{\theta}_{a,b}\, S
+=\big\{\, r_i\oplus s_t :
+          i\in I_R',\ t\in I_S',\ k_R(i)\,\theta\, k_B(t) \,\big\},
+\]
+em que, para igualdade,
+\[
+\boxed{
+R\Join^{=}_{a,b}\, S
+=
+\bigcup_{i\in I_R'}
+\{r_i\oplus s_t : t\in \operatorname{Fib}(k_B,k_R(i))\}
+=
+\bigcup_{i\in I_R'}
+\left(\{r_i\}\times
+\operatorname{Fib}(k_B,k_R(i))\right)
+}
+\]
+(vista no conjunto de pares de linhas), e, para desigualdades,
+\[
+R\Join^{\theta}_{a,b}\, S
+=
+\bigcup_{i\in I_R'}
+\left(
+\{r_i\}\times
+\bigcup_{\substack{v\in\operatorname{im}(k_B)\\
+v\theta k_R(i)}}
+\operatorname{Fib}(k_B,v)
+\right).
+\]
+O produto tem multiplicidade por pares: se dois índices $t_1\neq t_2$
+coexistem em $\operatorname{Fib}(k_B,v)$, ambos casam com cada $i$ tal que
+$k_R(i)=v$ --- não há deduplicação na junção. A condição exige presença nos
+dois lados: ``a chave ausente não junta'' (esquerda \cp{sql.c:9279-9285};
+direita \cp{sql.c:7358-7363}). A realização distingue os dois modos do dual:
+para $=$, corte da árvore (\cp{j_casam}) retorna a fibra inteira; para as
+quatro desigualdades, a ordem e intervalos (\cp{sql.c:7713-7717,
+9240-9610}) retornam exatamente as fibras relevantes.
+\end{definicao}
+
+A \emph{aus\^encia} entra nas jun\c{c}\~oes externas, e a forma como entra \'e
+por \emph{fibras vazias} (\cp{sql.c:7679-7689}). Dada a jun\c{c}\~ao interna $P =
+R\Join S$, seja $\bot_S$ a linha sem nenhum valor em $J_S$ (a aus\^encia
+completa) e $\bot_R$ a sua sim\'etrica:
+\[
+R\Join^{L,\theta} S = P\ \cup\
+\big\{\, r_i\oplus\bot_S : i\in I_R,\ \mathrm{pres}_R(i,a)=1,\
+        \nexists\,t : r_i(a)\,\theta\, s_t(b) \,\big\},
+\]
+\[
+R\Join^{R,\theta} S = P\ \cup\
+\big\{\, \bot_R\oplus s_t : t\in I_S,\ \mathrm{pres}_S(t,b)=1,\
+        \nexists\,i : r_i(a)\,\theta\, s_t(b) \,\big\},
+\]
+e \cp{FULL OUTER} \'e a uni\~ao das duas extens\~oes
+(\cp{j_left = j_right = 1}, \cp{sql.c:7699-7702}). Nota: uma linha com a chave
+ausente no seu pr\'oprio lado n\~ao entra em $P$ \emph{e} n\~ao tem fantasma ---
+em \cp{LEFT}, a linha de $R$ sem \cp{pres}(i,a) desaparece por completo
+(\cp{sql.c:9279-9285}).
+
+\begin{observacao}[O conflito do zero fantasma]
+\label{obs:ghost}
+\textbf{Interpreta\c{c}\~ao matem\'atica parcial.} Os fantasmas de \cp{LEFT},
+\cp{RIGHT} e \cp{FULL} imprimem ``0'' nas c\'elulas do lado ausente e escrevem
+no \cp{SqlOut} a c\'elula ``0'' \emph{com o bit de nulo desligado}
+(\cp{sql.c:9451-9455, 9510-9512}); o texto diz que o zero \'e ``a
+aus\^encia: $b=0$'' (\cp{sql.c:7648, 9451}). Matem\'aticamente queremos uma
+\emph{c\'elula ausente}; o canal entrega um \cp{INT4} $0$ \emph{presente}. Do
+c\'odigo e do protocolo n\~ao se tira qual das duas leituras \'e a do contrato;
+\emph{n\~ao se resolve por suposi\c{c}\~ao}. \stipa{} para as formas externas.
+\end{observacao}
+
+\textbf{Contrato implementado.} Os limites s\~ao recusas com o n\'umero, nunca
+trunca\c{c}\~ao: o lado esquerdo materializado cabe em \cp{J\_MAXLIN} $=512$
+linhas e o total em \cp{J\_MAXCOL} $=\cp{COL\_MAX}=1024$ colunas
+(\cp{sql.c:7215-7223, 9254-9276, 9308-9324, 9317-9323}). Uma segunda
+jun\c{c}\~ao (tr\^es tabelas) \'e a mesma opera\c{c}\~ao em sequ\^encia: o par de
+$R\Join S$ \'e a esquerda de $\Join T$, com o segundo \cp{ON} resolvido contra a
+concatena\c{c}\~ao (\cp{sql.c:9532-9604}); n\~ao existe jun\c{c}\~ao tern\'aria.
+\stni{} \cp{CROSS}, \cp{NATURAL}, \cp{ON} com mais de uma coluna por lado, ou
+constantes no predicado.
+
+\textbf{Status:} jun\c{c}\~ao interna ($\theta$ qualquer, incl. a de tr\^es
+tabelas): \sti. \cp{LEFT}/\cp{RIGHT}/\cp{FULL OUTER}: \stipa{} (Obs.~\ref{obs:ghost}).
+
+\subsection{Fibras de chave}
+\label{sec:fibras}
+
+Seja $I'=\{i\in I:\operatorname{pres}(i,c)=1\}$ o conjunto de instâncias
+vivas com a chave presente na coluna $c$. Defina separadamente
+$I_\bot = I\setminus I'$ para as instâncias cuja chave está ausente. O
+tratamento de $I_\bot$ é específico de cada operação e não altera a
+definição de fibra ordinária.
+
+Para uma função de chave
+\[
+k:I'\to V,
+\]
+a \emph{fibra} ordinária de $v$ é
+\[
+\boxed{
+\operatorname{Fib}(k,v)
+=
+\{i\in I':k(i)=v\}.
+}
+\]
+Trata-se de um conjunto de \emph{índices de instâncias}, logo preserva
+duplicadas de conteúdo. As fibras $\{\operatorname{Fib}(k,v):v\in\operatorname{im}(k)\}$
+formam uma partição de $I'$.
+
+\subsubsection{Representação por endereçamento recursivo}
+\label{sec:fibras-repr}
+A implementação indexa as chaves pela \emph{aranha}. Para valores de 32 bits,
+\[
+B=\mathbb Z/16\mathbb Z,\qquad n=8,\qquad X^{(n)}=B\times X^{(n-1)}.
+\]
+Tem-se
+\[
+I'
+\xrightarrow{k}
+V
+\xrightarrow{\operatorname{code}}
+X^{(n)}
+\xrightarrow{F}
+\mathcal P(I'),
+\qquad
+F(x_v)=\operatorname{Fib}(k,v),\; x_v=\operatorname{code}(v)\in X^{(n)}.
+\]
+Aqui $X^{(n)}$ é o \emph{carrier de endereçamento} das chaves; $F$ é a
+camada relacional de fibras. A \emph{aranha} é a representação/indexação
+eficiente de $F$. A coordenada $C^{(n)}$ intervém apenas quando necessário
+para descrever intervalos de endereços (desigualdades), não sendo parte
+da definição básica de $\operatorname{Fib}(k,v)$.
+
+\subsection{Escritas}
+\label{sec:esc}
+\begin{itemize}
+\item \textbf{\cp{INSERT}} \'e a adi\c{c}\~ao ao multiconjunto:
+  \[
+  I' = I\,\uplus\,\{\text{linha nova}\},
+  \]
+  \emph{escrever faz existir}: o valor posto acende $\mathrm{pres}$ e o bit do
+  vivo (\cp{insere}, \cp{sql.c:3592}; \cp{insere_muitas}, \cp{sql.c:2967}). Um
+  \cp{NULL} expl\'icito grava aus\^encia (\cp{sql.c:3689-3690}); uma coluna n\~ao
+  nomeada nasce ausente a menos que um \cp{DEFAULT} a ocupe (\cp{sql.c:3795-3801});
+  o envelope recusa o que n\~ao cabe (\cp{sql.c:3665-3690}). O
+  \cp{SELECT <constante>} da Sec.~\ref{sec:proj} n\~ao toca o estado.
+  \textbf{Status: \sti} (linha \'unica). O multi-\cp{VALUES} corre dentro de uma
+  transac\c{c}\~ao de di\'ario (\cp{sql_tx_abre}, \cp{sql.c:1519; 1238-1309});
+  o comportamento exacto quando o di\'ario enche a meio de um \cp{VALUES} com
+  v\'arias linhas \'e \stni{} neste paper.
+\item \textbf{\cp{UPDATE} \cp{SET}} \'e a escrita pontual: $r_i(j)$ troca de
+  valor, acende $\mathrm{pres}(i,j)$ quando havia aus\^encia, e
+  \cp{SET col = NULL} desliga-a para o dual (\cp{ACAO_SET}, \cp{sql.c:7817-7930,
+  6126-6133}). Antes de gravar, revalidam-se \cp{CHECK} e \cp{NOT NULL}/\cp{UNIQUE}
+  (\cp{sql.c:9111-9145}); a recusa \"e at\'omica --- o estado n\~ao muda. Um
+  racional com denominador $\ne1$ \'e recusado em voz alta
+  (\cp{sql.c:7918-7929}).
+  \textbf{Status: \sti}
+\item \textbf{\cp{DELETE}} \'e a subtrac\c{c}\~ao do multiconjunto: $I'=I\setminus
+  \{i\}$ via o bit do vivo (\cp{ACAO_APAGA}, \cp{sql.c:6116, 6303}). Quando a
+  linha apontada \'e chave de uma filha, aplica-se a tripla resposta a uma seta
+  sem destino --- \cp{RESTRICT} recusa (nada muda), \cp{CASCADE} leva a fibra
+  $\pi^{-1}$ atr\'as, \cp{SET NULL} solta-a para o dual (\cp{sql.c:6194-6226}),
+  e com v\'arias filhas pergunta-se primeiro a todas se alguma recusa, e s\'o
+  depois se age.
+  \textbf{Status: \sti}
+\item \textbf{Transac\c{c}\~ao e lote.} O ficheiro de sess\~ao tem um di\'ario
+  (\cp{sql.c:1238-1309}); o motor aceita v\'arias instru\c{c}\~oes num texto,
+  separadas por ``;'', com coment\'arios (batch, \cp{sql.c:16576-16626}).
+  \emph{\stco{} que a porta C exponha \cp{COMMIT}/\cp{ROLLBACK} como
+  primitivas:} quem as tem \'e o servidor de sess\~ao, n\~ao este caminho.
+\end{itemize}
+
+\subsection{\cp{UNION}, vistas, subconsulta}
+\label{sec:uni}
+\begin{itemize}
+\item \textbf{\cp{UNION}} e \cp{UNION ALL} admitem exactamente duas consultas e
+  exigem o mesmo n\'umero de colunas. \cp{UNION ALL} \'e a soma de
+  multiconjuntos das duas sa\'idas. O \cp{UNION} deduplica \emph{por texto}: o
+  crit\'erio \'e a igualdade das c\'elulas formatadas (o \cp{strcmp} sobre a
+  linha de texto do \cp{SqlOut}), n\~ao a igualdade dos objectos; duas linhas que
+  se l\^em igual s\~ao a mesma (\cp{sql.c:16486-16695}). \textbf{Status: \sti}
+  com a particularidade textual declarada.
+\item \textbf{Vistas} guardam o texto da consulta; o que uma vista comp\~oe \'e
+  exactamente o que o parser do cliente comp\~oe quando a l\^e --- a
+  composi\c{c}\~ao \'e textual (\cp{CREATE VIEW}, \cp{sql.c:15539-15596;
+  636-641}). \textbf{Status: \sti} para o mecanismo; o fecho alg\'ebrico das
+  vistas compos\'iveis \'e \stni{}.
+\item \textbf{Subconsulta} na cl\'ausula: s\'o a forma
+  ``\cp{(SELECT <col> FROM <t> WHERE …})'' dentro de \cp{IN}/\cp{NOT IN}, e
+  reescreve-se para a lista de perten\c{c}a sobre a \'arvore; a fibra vazia da
+  subconsulta d\'a uma condi\c{c}\~ao que \emph{nunca casa}
+  (\cp{subconsulta_reescreve}, \cp{sql.c:16905; 8848-8919}). Uma consulta n\~ao
+  pode trocar a tabela da sess\~ao por baixo de quem a fez: a origem restaura-se
+  (\cp{sql.c:8912-8918}). \stni{} subconsultas correlacionadas.
+\end{itemize}
+
+\subsection{Delimita\c{c}\~ao do escopo}
+\label{sec:escopo}
+Fora desta \'algebra --- \stni{} como primitivas do motor --- ficam: \cp{CASE},
+janelas/\cp{OVER}, \cp{WITH}/\cp{CTE}, \cp{HAVING} geral, \cp{GROUP BY} com
+express\~ao, \cp{ORDER BY} textual, \cp{DISTINCT} multi-coluna, \cp{CROSS}/
+\cp{NATURAL} e \cp{ON} com mais de uma coluna por lado, subconsulta
+correlacionada, \cp{INSERT..SELECT}, \cp{UPDATE..FROM}/\cp{JOIN},
+\cp{DELETE..USING}, \cp{SELECT count(*)} sem \cp{FROM}, e a l\'ogica tern\'aria.
+O motor aceita ainda um punhado de opera\c{c}\~oes n\~ao-padr\~ao ---
+\cp{ACUMULA}/\cp{DELTA}, o bloco matricial (\cp{triade}, \cp{edo},
+\cp{global}, \cp{completa}, \dots), \cp{BUSCA}/\cp{ACHA}/\cp{DISTANCIA},
+\cp{GET}/\cp{PARSE}/\cp{MINERA} e os escapes de shell \cp{BASH}/\cp{POWERSHELL}/
+\cp{NODE} (\cp{sql.c:9794-11600, 15119, 15800-15802}). Elas s\~ao
+gramaticalmente aceites, mas n\~ao s\~ao modeladas aqui: \stco{} nesta sec\c{c}\~ao
+(o papel que teriam numa \'algebra do Tiffany est\'a por escrever).
+
+%=======================================================================
+\section{N\~ao estabelecido pela implementa\c{c}\~ao atual}
+\label{sec:naoest}
+
+Cada item a seguir \'e \textbf{N\~ao estabelecido pela implementa\c{c}\~ao
+atual:} — o paper n\~ao o afirma, e o leitor n\~ao deve l\^e-lo no c\'odigo.
+
+\begin{enumerate}
+\item \textbf{Probabilidade $p_q$.} N\~ao existe divis\~ao pelo cardinal:
+  n\~ao se calcula $p_q(j)=G_q(j)/\lvert I\rvert$ nem se emite. A sa\'ida \'e
+  a contagem inteira $G_q$ e o denominador $\lvert I\rvert$ na coluna
+  \cp{i_total}.
+\item \textbf{Funcional $L(p_q)$.} N\~ao \'e calculado no caminho SQL;
+  \cp{jev_escore} (que devolve o par $(N,\lvert I\rvert)$ com
+  $N=\sum_i s_i G_q(s_i)$) existe na porta C mas \cp{sql_hist_jev} n\~ao o
+  chama. A leitura de $N/\lvert I\rvert$ \'e, no contrato do \cp{jev_api.h},
+  \emph{externa} ao motor.
+\item \textbf{Realiza\c{c}\~ao armazenada.} $\pi$ n\~ao \'e guardada: o
+  c\'odigo percorre as linhas vivas, conta por valor no tamp\~ao e deita fora
+  as linhas. S\'o o campo $G$ entra na arena. Distribui\c{c}\~oes conjuntas
+  entre duas colunas n\~ao s\~ao constru\'idas aqui.
+\item \textbf{Colunas fantasma sem nomes.} Numa tabela sem nomes guardados,
+  \cp{col_indice} cai na letra (de $a..z$ a \'indices $0..25$) sem validar
+  $\cp{oc}<\cp{nc}$ (\cp{sql.c:2075}); com $c$ colunas e $\cp{nc}\le25$, G2/G3
+  podem ent\~ao ler presen\c{c}a e valor de uma c\'elula fora de $J$. O
+  contracto n\~ao exclui este caso.
+\item \textbf{Corpo largo e o limite de colunas.} \cp{col_indice} s\'o procura
+  em $\cp{S\_COLNOME\_N}=1024$ colunas; para $j\ge\cp{COL\_MAX}$,
+  \cp{corpo\_de} devolve $\{0,0\}$ cujo \cp{total}=0 \'e \cp{CORPO\_INTEIRO}
+  (\cp{sql.c:1715-1719}) — G1 passaria a ver uma coluna fantasma vazia. A
+  recusa directa vem de E2/E3, n\~ao de G1.
+\item \textbf{Marginal $d$-dimensional.} A ponte \cp{jev_marginal_d} (o
+  \cp{sec:byte-carry} do \cp{jev.tex}) n\~ao \'e usada neste caminho: as
+  projec\c{c}\~oes aqui s\~ao \'indices de intervalo, n\~ao coordenadas de
+  $\mathcal{X}_d$.
+\item \textbf{Estado global.} \cp{jev_hist_erros} e \cp{cels\_fora} s\~ao
+  contadores \cp{static}, n\~ao observ\'aveis pela API; o papel que teriam
+  numa garantia externa n\~ao est\'a escrito em lado nenhum.
+\item \textbf{Conserva\c{c}\~ao como prova independente.} A guarda final soma
+  a sa\'ida da pr\'opria primitiva; n\~ao \'e uma segunda implementa\c{c}\~ao.
+  Uma margem incorrecta e \emph{consistentemente} auto-somada n\~ao seria
+  apanhada aqui (ver Obs. da Sec.~\ref{sec:nivel1}).
+\end{enumerate}
+
+%=======================================================================
+\section{Tabela de correspond\^encias}
+\label{sec:corr}
+
+\begin{center}
+\begin{tabular}{@{}p{4.2cm} p{4.0cm} p{5.4cm} p{2.8cm}@{}}
+\toprule
+\textbf{opera\c{c}\~ao SQL} &
+\textbf{defini\c{c}\~ao matem\'atica} &
+\textbf{c\'odigo C} &
+\textbf{status} \\
+\midrule
+\cp{SELECT} (projec\c{c}\~ao, express\~oes) &
+$\pi_p$, tensor $a+b$ e s\'eries exp/sin/cos/log &
+\cp{varre} 7751--7810, emiss\~ao 12902--13164 &
+\sti \\
+\cp{WHERE} (AND/OR/NOT, =,<,<=,>,>=, BETWEEN/IN, IS NULL) &
+$\sigma_\varphi$ com $C(\varphi)$ e aus\^encia $=$ fila ausente &
+\cp{le_where}/\cp{le_expr} $\sim$4922--4810, 8933--8995 &
+\sti \\
+\cp{DISTINCT} (1 coluna) &
+imagem por fibra (classe + aus\^encia) &
+\cp{sql.c:12845--12900} &
+\sti \\
+\cp{JOIN INNER} (\cp{a.x $\theta$ b.y}, 1:1, $\theta\in\{=,<,\le,>,\ge\}$) &
+$R\Join^\theta S$ por pares, presen\c{c}a nos dois lados, corte/ordem &
+\cp{le_join} 7675--7739, \cp{j_carrega_direita} 7338, materializa\c{c}\~ao 9240--9610 &
+\sti \\
+\cp{JOIN LEFT} &
+$R\Join^L S$; coluna fantasma ``0'' presente no \cp{SqlOut} &
+\cp{sql.c:7680--7690, 9440--9461} &
+\stipa \\
+\cp{JOIN RIGHT/FULL OUTER} &
+formas externas; mesmo fantasma para o lado ausente &
+\cp{sql.c:7695--7702, 9502--9528} &
+\stipa \\
+\cp{GROUP BY} (1--2 colunas) &
+$\bigsqcup_k R_k$, $k=g(i)$; aus\^encia = grupo pr\'oprio; \cp{count} sempre emitido &
+\cp{sql.c:8362--8390, 12612--12836} &
+\sti \\
+\cp{SUM/MAX/MIN/AVG} (num\'ericas) &
+sobre fibras (soma/\'extremo); \cp{AVG} racional reduzido; ausentes n\~ao entram &
+\cp{sql.c:12527--12610} &
+\sti \\
+\cp{COUNT(*)} &
+$|I(\varphi)|$ (popcount do campo) &
+\cp{sql.c:15929--15935, 8664--8679} &
+\sti \\
+\cp{COUNT(DISTINCT)} (1 coluna) &
+n\'umero de classes (inclui aus\^encia) &
+\cp{sql.c:9000--9044} &
+\sti \\
+\cp{HAVING} (s\'o \cp{count(*)} $\theta n$) &
+filtragem de $|R_k|$ &
+\cp{sql.c:8393--8429, 12749--12753} &
+\sti \\
+\cp{ORDER BY} (1--2 colunas, ASC/DESC) &
+permuta\c{c}\~ao por r\'egua do corpo (declara norma); ausentes ao fim; texto recusado &
+\cp{sql.c:8431--8500, 9617--9701} &
+\sti \\
+\cp{LIMIT/OFFSET} &
+fatia $[o, o+\ell)$ (OFFSET antes de LIMIT) &
+\cp{sql.c:8504--8531, 12906--12910} &
+\sti \\
+\cp{INSERT} (uma linha; multi-\cp{VALUES} em TX) &
+$I'=I\uplus\{r\}$; \cp{NULL}$=$aus\^encia; escrever acende \cp{S_PRES}; envelope recusa &
+\cp{insere_muitas} 2967, \cp{insere} 3592, 3681--3692 &
+\sti \\
+\cp{UPDATE SET} &
+escrita pontual; recusa racional den!=1; revalida \cp{CHECK}/\cp{NOT NULL}/\cp{UNIQUE} &
+\cp{sql.c:7817--7930, 9111--9145, 6126--6133} &
+\sti \\
+\cp{DELETE} (FK \cp{RESTRICT}/\cp{CASCADE}/\cp{SET NULL}) &
+$I'=I\setminus\{i\}$ (bit vivo); cascata/solta com regra de duas passagens &
+\cp{sql.c:6116, 6303, 6194--6226} &
+\sti \\
+\cp{UNION}/\cp{UNION ALL} (2 consultas, ncols iguais) &
+soma de multiconjuntos; \cp{UNION} dedup por \cp{strcmp} textual das linhas &
+\cp{sql.c:16486--16695} &
+\sti \\
+\cp{CREATE VIEW} &
+composi\c{c}\~ao textual (guardado como texto) &
+\cp{sql.c:15539--15596} &
+\sti \\
+\cp{CREATE INDEX [UNIQUE]} ON t(c); \cp{CREATE TYPE ENUM}; \cp{ALTER/DROP} &
+metadados/\'indice na \'arvore; limita\c{c}\~oes documentadas &
+\cp{sql.c:15452--15727} &
+\stco \\
+\cp{EXISTS} (forma restrita: \cp{SELECT * FROM t} ou \cp{col FROM t}) &
+quantificador constante para a consulta; \cp{NOT EXISTS} complemento &
+\cp{sql.c:8280--8331, 8982--8986} &
+\stco \\
+\cp{subconsulta \cp{(SELECT)} em \cp{IN}/\cp{NOT IN}} (s\'o lista) &
+reescrita para perten\c{c}a sobre \'arvore; fibra vazia $=$ nunca casa; restaura tabela &
+\cp{subconsulta_reescreve} 16905, 8848--8919 &
+\stco \\
+\cp{SELECT <constante>} (sem \cp{FROM}) &
+express\~ao sem vari\'aveis (teste de liga\c{c}\~ao) &
+\cp{sql.c:15899--15927} &
+\stco \\
+Opera\c{c}\~oes n\~ao-padr\~ao (mat\_op, ACUMULA/DELTA, BUSCA/ACHA/MINERA, escapes shell) &
+n\~ao modeladas nesta \'algebra do Tiffany & citado &
+\stco \\
+\cp{CROSS}, \cp{NATURAL}, \cp{ON} multi-coluna, \cp{CASE}, \cp{OVER}, \cp{WITH}, \cp{HAVING} geral, \cp{INSERT..SELECT}, \cp{UPDATE..FROM}, \cp{DELETE..USING}, subconsulta correlacionada, \cp{DISTINCT} multi-coluna, \cp{GROUP BY} com express\~ao &
+n\~ao implementadas / n\~ao estabelecidas & citado &
+\stni \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\paragraph{Notas:} ``implementado mas interpreta\c{c}\~ao matem\'atica parcial''
+aplica-se \`as jun\c{c}\~oes externas, porque o fantasma ``0'' emitido no
+\cp{SqlOut} (\cp{sql.c:9451, 9510}) n\~ao tem o bit de nulo aceso, e o
+protocolo n\~ao permite decidir sozinho entre ``valor 0 presente'' e
+``c\'elula ausente''. Para \cp{WHERE}, a sem\^antica de aus\^encia/NULL \'e
+determinada (bivalente): as linhas que citam coluna ausente s\~ao exclu\'idas
+(\cp{sql.c:8933--8941}), \cp{IS [NOT] NULL} decide pelo \cp{S_PRES}, e
+\cp{EXISTS} \'e um quantificador. \textbf{COUNT} \'e sempre por campo/popcount
+conforme estabelecido; \cp{DISTINCT} \'e de uma coluna s\'o; \cp{JOIN} limitado
+a um predicado de uma coluna por lado e a at\'e 3 tabelas em sequ\^encia; o
+tamanho da \'arvore e $\cp{SQL\_OUT\_MAX\_*}$ recusa (nunca trunca); a deduplica\c{c}\~ao
+do \cp{UNION} \'e por texto (\cp{strcmp}); \cp{OFFSET} antes de \cp{LIMIT};
+\cp{ORDER BY} em corpos quadr\'aticos usa a norma declarada; \cp{GROUP BY}
+emite sempre \cp{count}; \cp{COUNT(DISTINCT)} conta a classe da aus\^encia;
+\cp{SELECT count(*)} sem \cp{FROM} n\~ao existe; \cp{EXISTS} s\'o na forma
+restrita. O di\'ario do multi-\cp{VALUES} em transac\c{c}\~ao permanece com o
+ponto ``indetermina\c{c}\~ao de estado'' citado no invent\'ario (\stni).
+
+\medskip
+E o mapa de recusas (N\'ivel 1 $\leftrightarrow$ N\'ivel 2):
+\begin{center}
+\begin{tabular}{@{}c l@{}}
+\toprule
+G7& tabela/coluna inexistentes, tabela vazia \\
+G1& corpo != \cp{CORPO\_INTEIRO} (E1) \\
+G2& \emph{presen\c{c}a incompleta} (E2) \\
+G3& valor fora do tamp\~ao $[0,16384)$ (E3) \\
+\cp{spec\_decode}& \emph{spec inv\'alida} (E6) \\
+G4& $k\notin[1,16]$ (E4; inalcan\c{c}avel via \cp{spec}) \\
+G5& $X<1$ ou $X+2k>16230$ (E5) \\
+F17& $v\ge X$ (E3) \\
+G6& fronteiras fora de $(0,X)$ ou n\~ao crescentes (E6) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%=======================================================================
+\section{Compila\c{c}\~ao e proveni\^encia}
+
+\paragraph{Para este paper (auto-contido).}
+\[
+\cp{cd papers \&\& pdflatex sql.tex}
+\]
+Usa \cp{\\input\{gkcapa\}} e o estilo de \cp{naturais.tex}; n\~ao precisa de
+nada mais (o \cp{pdflatex} basta; duas passagens para o \cp{hyperref}).
+
+\paragraph{Para o c\'odigo (grafo de depend\^encias do motor SQL).}
+\[
+\cp{gcc -MM -Ibanco -Ilib banco/sql.c banco/pgwire.c}
+\]
+(\cp{debian/rules} \'e a receita oficial; o \cp{tiffany-db} n\~ao tem
+Makefile/CMake.)
+
+\paragraph{Proveni\^encia dos n\'umeros citados.}
+\cp{tiffany-db/JEV.md}; \cp{PROPOSTA\_TIFFANY\_DB.md};
+\cp{FASE\_4\_9\_R3\_STATUS.md}; \cp{FASE\_4\_9\_R3\_RESULTADO.md}.
+O alinhamento de nota\c{c}\~ao ($\pi$, $G$, $q$, $G_q$) est\'a em
+\cp{tiffany/redes/jev.tex} (\cp{def:realizacao}, \cp{prop:gq-conserva}) —
+usado aqui como vocabul\'ario, n\~ao como justifica\c{c}\~ao.
+
+\end{document}
