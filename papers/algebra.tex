@@ -1,0 +1,1067 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[expansion=false]{microtype}
+
+\sloppy
+\emergencystretch=2em
+
+\newtheorem{definicao}{Definição}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{lema}{Lema}
+\newtheorem{observacao}{Observação}
+\newtheorem{corolario}{Corolário}
+\newtheorem{questao}{Questão}
+
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\title{Álgebra do Suporte Coordenado Recursivo}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Formalizamos uma família recursiva de suportes coordenados construída por
+aninhamento de pares sobre um alfabeto finito arbitrário.
+A construção separa explicitamente alfabeto, codificação, estrutura recursiva,
+coordenada e representação.
+Sobre esta família definem-se a álgebra de campos (com valores num corpo ou
+numa álgebra associativa com unidade) e a álgebra de valores obtida por
+extensões quadráticas.
+Demonstramos a bijecção da coordenada posicional, o escalonamento sob a
+inclusão canónica de peso mínimo, a estrutura de álgebra de campos com base
+de idempotentes, a decomposição da álgebra de valores quando o discriminante
+é um quadrado, e a existência do colimite de conjuntos do sistema indutivo
+das inclusões.
+Distinguimos a inclusão de peso mínimo, que multiplica a coordenada pela
+cardinalidade do alfabeto, da inclusão alternativa de peso máximo, que
+preserva a coordenada.
+Questões em aberto incluem a existência de uma coordenada canónica no
+colimite, a extensão da categoria restrita dos níveis da família, e a
+passagem da soma parcial algébrica a uma exponencial sem topologia adicional.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introdução}
+
+Um \emph{suporte coordenado} é um conjunto finito munido de uma bijecção para
+um intervalo inicial de inteiros.
+Essa estrutura mínima permite indexar estados discretos e definir campos
+(funções com valores num corpo ou numa álgebra) sem impor, a priori, produto
+cartesiano plano, ordem intrínseca ou estrutura linear no conjunto de estados.
+
+Neste artigo construímos uma família recursiva de suportes coordenados por
+aninhamento de pares a partir de um alfabeto finito.
+A recursão acrescenta um símbolo na posição de peso mínimo, de modo que a
+coordenada do nível anterior é multiplicada pela cardinalidade do alfabeto.
+Sobre cada nível definem-se o espaço vectorial dos campos escalares e a
+álgebra de campos com valores numa álgebra associativa com unidade.
+Uma segunda camada, independente do suporte, produz álgebras de valores por
+quocientes quadráticos e, sob hipóteses adequadas, uma duplicação do índice
+do suporte.
+
+A contribuição principal é a formalização autocontida desta álgebra:
+definições, demonstrações e distinção rigorosa entre o que é estrutura do
+suporte, o que é coordenada, o que é campo e o que é valor.
+Em particular, separamos a inclusão de peso mínimo (escalonamento da
+coordenada) da inclusão alternativa de peso máximo (preservação da
+coordenada), e registamos que o colimite de conjuntos do sistema indutivo
+não herda automaticamente uma coordenada compatível com todas as aplicações
+coordenadas dos níveis finitos.
+
+\paragraph{Pré-requisitos.}
+Assumimos familiaridade com anéis comutativos com unidade, ideais, anéis
+quociente, corpos, e álgebras associativas com unidade sobre um corpo.
+O Teorema Chinês dos Restos é enunciado na forma utilizada
+(Secção~\ref{sec:valores}).
+
+\paragraph{Organização.}
+A Secção~\ref{sec:axiomas} fixa o suporte coordenado e os morfismos.
+A Secção~\ref{sec:alfabeto} introduz alfabeto, codificação e par-base.
+A Secção~\ref{sec:familia} constrói a família recursiva e a inclusão canónica.
+A Secção~\ref{sec:campos} define a álgebra de campos.
+A Secção~\ref{sec:valores} trata das álgebras de valores e da decomposição
+quadrática.
+A Secção~\ref{sec:categoria} discute o sistema indutivo, o colimite e a
+categoria restrita dos níveis.
+A Secção~\ref{sec:realizacoes} introduz realizações e campos de contagem.
+A Secção~\ref{sec:abertas} recolhe questões em aberto.
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Axiomas mínimos e objecto fundamental}
+\label{sec:axiomas}
+
+\begin{definicao}[Suporte coordenado]
+\label{def:suporte-coordenado}
+Um \emph{suporte coordenado} é um par \((X,C)\) em que \(X\) é um conjunto
+finito não-vazio e
+\[
+C\colon X\overset{\sim}{\longrightarrow}\{0,1,\dots,\lvert X\rvert-1\}
+\]
+é uma bijecção.
+\end{definicao}
+
+\begin{observacao}[Minimalidade]
+\label{obs:minimalidade}
+A Definição~\ref{def:suporte-coordenado} exige apenas finitude e a existência
+de uma bijecção para um intervalo inicial de inteiros.
+Nenhuma estrutura de ordem, produto, inclusão ou operação algébrica é
+imposta ao conjunto \(X\) neste nível.
+\end{observacao}
+
+\begin{definicao}[Morfismos de suportes coordenados]
+\label{def:morfismos}
+Sejam \((X,C)\) e \((Y,D)\) suportes coordenados e seja \(q\ge 2\) um inteiro
+fixado no contexto.
+\begin{enumerate}[leftmargin=1.5em]
+\item Um \emph{morfismo estrito} é uma função \(f\colon X\to Y\) tal que
+\[
+D\circ f = C.
+\]
+Como \(D\) é bijecção, esta igualdade equivale a
+\(f = D^{-1}\circ C\), e a condição de existência reduz-se a
+\(\operatorname{im} C\subseteq\operatorname{im} D\)
+(o que é automático quando os contradomínios coincidem).
+
+\item Um \emph{morfismo de escala \(k\)} (\(k\in\mathbb N\), \(k\ge 1\))
+é uma função \(f\colon X\to Y\) para a qual se verificam simultaneamente:
+\begin{enumerate}[label=(\alph*)]
+\item a condição de imagem
+\[
+q^k\cdot\operatorname{im} C
+\subseteq
+\operatorname{im} D;
+\]
+\item a igualdade
+\[
+D\circ f = q^k\cdot C.
+\]
+\end{enumerate}
+Sob a condição~(a), a igualdade~(b) determina \(f\) de forma única:
+\[
+f = D^{-1}\circ(q^k\cdot C).
+\]
+\end{enumerate}
+As duas classes são disjuntas quando \(k\ge 1\) e \(\lvert X\rvert\ge 2\):
+nesse caso \(q^k\cdot C\neq C\) (pois \(C\) não é identicamente nula e
+\(q^k\neq 1\)), logo nenhuma função pode satisfazer simultaneamente
+\(D\circ f=C\) e \(D\circ f=q^k\cdot C\).
+Se \(\lvert X\rvert=1\), então \(C\) é a função constante \(0\) e
+\(q^k\cdot C=C\), pelo que a distinção entre as duas classes colapsa.
+\end{definicao}
+
+\begin{observacao}[Existência e unicidade]
+\label{obs:compatibilidade}
+A condição de imagem \(q^k\cdot\operatorname{im} C\subseteq\operatorname{im} D\)
+é necessária e suficiente para a existência de \(f\).
+Quando ela se verifica, \(f\) é única porque \(D\) é injectiva.
+A notação \(q^k\cdot\operatorname{im} C\) designa o conjunto
+\(\{q^k\cdot c:c\in\operatorname{im} C\}\subseteq\mathbb N\), isto é, a
+imagem de \(C\) sob a multiplicação escalar de inteiros; não se trata de
+uma operação sobre o suporte \(X\).
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Alfabeto, codificação e par-base}
+\label{sec:alfabeto}
+
+\begin{definicao}[Alfabeto e codificação]
+\label{def:alfabeto}
+Seja \(B\) um conjunto finito com
+\[
+q := \lvert B\rvert \ge 2.
+\]
+Fixe uma bijecção (codificação dos símbolos)
+\[
+d\colon B\overset{\sim}{\longrightarrow}\{0,1,\dots,q-1\}.
+\]
+\end{definicao}
+
+\begin{observacao}[Independência]
+\label{obs:independencia-alfabeto}
+O alfabeto \(B\) e a codificação \(d\) são escolhas independentes da
+estrutura recursiva que será construída a seguir.
+Casos particulares (não privilegiados):
+\begin{itemize}[leftmargin=1.5em]
+\item binário: \(q=2\), \(B=\{0,1\}\), \(d=\mathrm{id}\);
+\item hexadecimal: \(q=16\);
+\item byte: \(q=256\), \(B=\{0,1,\dots,255\}\), \(d=\mathrm{id}_B\);
+equivalentemente, \(B=\mathbb Z/256\mathbb Z\), com \(d\) dado pelo
+representante canónico de cada classe em \(\{0,\dots,255\}\).
+\end{itemize}
+\end{observacao}
+
+\begin{definicao}[Par-base]
+\label{def:par-base}
+\[
+X^{(2)} := B\times B,
+\qquad
+C^{(2)}(b_1,b_2) := d(b_1) + q\, d(b_2).
+\]
+O par \(\bigl(X^{(2)},C^{(2)}\bigr)\) é um suporte coordenado.
+\end{definicao}
+
+\begin{proposicao}[Bijecção do par-base]
+\label{prop:bijecao-base}
+A aplicação \(C^{(2)}\) é bijecção sobre \(\{0,1,\dots,q^2-1\}\).
+\end{proposicao}
+
+\begin{proof}
+Trata-se da representação posicional clássica em base \(q\) com dois
+dígitos.
+Para cada \(c\in\{0,\dots,q^2-1\}\) existem únicos \(r_0,r_1\in\{0,\dots,q-1\}\)
+com \(c=r_0+q\,r_1\).
+Como \(d\) é bijecção, existem únicos \(b_1,b_2\in B\) com
+\(d(b_1)=r_0\) e \(d(b_2)=r_1\).
+Logo \(C^{(2)}\) é bijectiva.
+\end{proof}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Família recursiva e inclusão canónica}
+\label{sec:familia}
+
+\begin{definicao}[Família recursiva por aninhamento]
+\label{def:familia}
+Definimos indutivamente \(X^{(n)}\) e \(C^{(n)}\) para \(n\ge 2\).
+
+\begin{enumerate}[leftmargin=1.5em]
+\item Base (\(n=2\)): conforme Definição~\ref{def:par-base}.
+
+\item Passo (\(n\ge 3\)):
+\[
+X^{(n)} := B\times X^{(n-1)}.
+\]
+Um elemento escreve-se \(x=(b,\xi)\) com \(b\in B\) e \(\xi\in X^{(n-1)}\).
+A coordenada é
+\[
+C^{(n)}(b,\xi) := d(b) + q\, C^{(n-1)}(\xi).
+\]
+\end{enumerate}
+\end{definicao}
+
+\begin{observacao}[Notação de aninhamento]
+\label{obs:aninhamento}
+Um estado de comprimento \(n\) escreve-se
+\[
+x = \bigl(b_1,\bigl(b_2,\bigl(b_3,\dots,(b_{n-1},b_n)\dots\bigr)\bigr)\bigr),
+\]
+com \(b_i\in B\).
+Aqui \(b_1\) é o símbolo de peso \(q^0\) (menos significativo) e \(b_n\) o de
+peso \(q^{n-1}\) (mais significativo).
+A coordenada correspondente é
+\[
+C^{(n)}(x) = \sum_{i=1}^{n} q^{i-1}\, d(b_i).
+\]
+A estrutura sintáctica do aninhamento e a expansão posicional estão alinhadas.
+\end{observacao}
+
+\begin{proposicao}[Bijecção]
+\label{prop:bijecao}
+Para todo \(n\ge 2\),
+\[
+C^{(n)}\colon X^{(n)}\overset{\sim}{\longrightarrow}\{0,1,\dots,q^n-1\}
+\]
+é bijecção.
+Em particular \(\lvert X^{(n)}\rvert = q^n\).
+\end{proposicao}
+
+\begin{proof}
+Por indução em \(n\).
+
+\begin{itemize}[leftmargin=1.5em]
+\item Base (\(n=2\)): Proposição~\ref{prop:bijecao-base}.
+
+\item Passo: assuma o resultado no nível \(n-1\) (\(n\ge 3\)), isto é,
+que \(C^{(n-1)}\) é bijecção sobre \(\{0,\dots,q^{n-1}-1\}\).
+A aplicação
+\[
+C^{(n)}\colon(b,\xi)\mapsto d(b)+q\, C^{(n-1)}(\xi)
+\]
+é a representação posicional clássica em base \(q\): \(d(b)\) ocupa o dígito
+de peso \(q^0\) e \(C^{(n-1)}(\xi)\) ocupa os dígitos de pesos
+\(q^1,\dots,q^{n-1}\).
+Como \(d(b)\) percorre \(\{0,\dots,q-1\}\) e \(C^{(n-1)}(\xi)\) percorre um
+bloco completo de comprimento \(q^{n-1}\), a imagem é
+\(\{0,\dots,q^{n}-1\}\) e a aplicação é injectiva, logo bijectiva.
+\end{itemize}
+\end{proof}
+
+\begin{definicao}[Inclusão canónica de peso mínimo]
+\label{def:iota}
+Para cada \(n\ge 2\), seja \(b_*=d^{-1}(0)\) o (único) símbolo de código zero.
+A inclusão canónica é
+\[
+\iota_n\colon X^{(n)}\hookrightarrow X^{(n+1)},
+\qquad
+\iota_n(\xi) := (b_*,\xi).
+\]
+A inclusão é determinada unicamente pela codificação \(d\).
+\end{definicao}
+
+\begin{proposicao}[Escalonamento da coordenada]
+\label{prop:escalonamento}
+Para todo \(n\ge 2\),
+\[
+C^{(n+1)}\circ\iota_n = q\cdot C^{(n)}.
+\]
+\end{proposicao}
+
+\begin{proof}
+Por definição,
+\begin{align*}
+C^{(n+1)}\bigl(\iota_n(\xi)\bigr)
+&= C^{(n+1)}(b_*,\xi)
+= d(b_*) + q\, C^{(n)}(\xi)
+= 0 + q\, C^{(n)}(\xi)
+= q\, C^{(n)}(\xi).
+\end{align*}
+\end{proof}
+
+\begin{corolario}[Coerência da família]
+\label{cor:coerencia}
+Para todo \(k\ge 1\),
+\[
+C^{(n+k)}\circ\iota_{n+k-1}\circ\cdots\circ\iota_n = q^k\cdot C^{(n)}.
+\]
+\end{corolario}
+
+\begin{proof}
+Indução em \(k\). O caso \(k=1\) é a Proposição~\ref{prop:escalonamento}.
+O passo indutivo segue por composição.
+\end{proof}
+
+\begin{proposicao}[Ordem induzida]
+\label{prop:ordem}
+A relação
+\[
+\xi\le_{C^{(n)}}\eta
+\quad\Longleftrightarrow\quad
+C^{(n)}(\xi)\le C^{(n)}(\eta)
+\]
+é uma ordem total em \(X^{(n)}\).
+Sob a inclusão,
+\[
+\xi\le_{C^{(n)}}\eta
+\quad\Longrightarrow\quad
+\iota_n(\xi)\le_{C^{(n+1)}}\iota_n(\eta),
+\]
+porque \(C^{(n+1)}\circ\iota_n=q\cdot C^{(n)}\) e a multiplicação por \(q>0\)
+preserva a ordem.
+\end{proposicao}
+
+\begin{proof}
+A totalidade segue de \(C^{(n)}\) ser bijecção sobre um intervalo de inteiros.
+A preservação da ordem sob \(\iota_n\) é consequência directa da
+Proposição~\ref{prop:escalonamento}.
+\end{proof}
+
+\begin{observacao}[Inclusões como morfismos de escala]
+\label{obs:iota-escala}
+Pela Proposição~\ref{prop:escalonamento} e pela condição de imagem
+\(q\cdot\operatorname{im} C^{(n)}\subseteq\operatorname{im} C^{(n+1)}\)
+(satisfeita porque
+\(\operatorname{im} C^{(n)}=\{0,\dots,q^n-1\}\) e
+\(\operatorname{im} C^{(n+1)}=\{0,\dots,q^{n+1}-1\}\)),
+cada \(\iota_n\) é um morfismo de escala \(1\) no sentido da
+Definição~\ref{def:morfismos}.
+\end{observacao}
+
+\begin{definicao}[Inclusão alternativa de peso máximo]
+\label{def:iota-peso-max}
+Fixe o mesmo alfabeto \(B\) e a mesma codificação \(d\).
+Para cada \(n\ge 2\), seja \(Y^{(n)}\) o conjunto das \(n\)-tuplas
+\((b_0,\dots,b_{n-1})\) com \(b_i\in B\), equipado com a coordenada
+\[
+C'_n(b_0,\dots,b_{n-1})=\sum_{k=0}^{n-1}d(b_k)\,q^k.
+\]
+A \emph{inclusão de peso máximo} é
+\[
+\iota'_n\colon Y^{(n)}\hookrightarrow Y^{(n+1)},
+\qquad
+\iota'_n(b_0,\dots,b_{n-1})=(b_0,\dots,b_{n-1},b_*),
+\]
+onde \(b_*=d^{-1}(0)\).
+\end{definicao}
+
+\begin{proposicao}[Preservação da coordenada sob inclusão de peso máximo]
+\label{prop:peso-max}
+Com as notações da Definição~\ref{def:iota-peso-max},
+\[
+C'_{n+1}\circ\iota'_n = C'_n.
+\]
+\end{proposicao}
+
+\begin{proof}
+O símbolo acrescentado ocupa a posição de peso \(q^n\) e tem código zero, logo
+não altera a soma posicional dos \(n\) símbolos anteriores.
+\end{proof}
+
+\begin{observacao}[Duas famílias distintas]
+\label{obs:comparacao-familias}
+A inclusão de peso mínimo (Definição~\ref{def:iota}) satisfaz
+\(C^{(n+1)}\circ\iota_n=q\cdot C^{(n)}\).
+A inclusão de peso máximo (Definição~\ref{def:iota-peso-max}) satisfaz
+\(C'_{n+1}\circ\iota'_n=C'_n\).
+Os conjuntos \(X^{(n)}\) (aninhados) e \(Y^{(n)}\) (tuplas planas) não são
+literalmente iguais; são canonicamente identificáveis pela aplicação de
+achatamento
+\[
+(b_1,(b_2,\dots,(b_{n-1},b_n)\dots))\longmapsto(b_1,\dots,b_n),
+\]
+que preserva a coordenada posicional.
+Sob essa identificação, na instanciação \(q=256\), \(d\) como abaixo, as leis
+posicionais coincidem nível a nível (para \(n\ge 2\)), mas os sistemas de
+transição permanecem distintos.
+Ambas as construções produzem famílias de suportes coordenados no sentido da
+Definição~\ref{def:suporte-coordenado}; a escolha da inclusão é estrutura
+adicional.
+\end{observacao}
+
+\begin{proposicao}[Instanciação particular]
+\label{prop:instanciacao-bytes}
+Seja \(q=256\) e seja \(B=\{0,1,\dots,255\}\) (o conjunto de representantes
+canónicos módulo \(256\)), com \(d=\mathrm{id}_B\).
+Equivalentemente, pode-se tomar \(B=\mathbb Z/256\mathbb Z\) e definir
+\(d([r])\) como o único representante de \([r]\) em \(\{0,\dots,255\}\).
+Em ambos os casos obtém-se uma família de suportes coordenados: para cada
+\(n\ge 2\), o par \(\bigl(X^{(n)},C^{(n)}\bigr)\) satisfaz a
+Definição~\ref{def:suporte-coordenado}.
+\end{proposicao}
+
+\begin{proof}
+Consequência directa da Proposição~\ref{prop:bijecao}, uma vez que \(d\) é
+bijecção sobre \(\{0,\dots,q-1\}\).
+\end{proof}
+
+\begin{observacao}[Camadas distintas]
+\label{obs:camadas}
+A construção distingue explicitamente:
+\begin{enumerate}[leftmargin=1.5em]
+\item alfabeto \(B\);
+\item codificação \(d\);
+\item estrutura recursiva \(X^{(n)}\);
+\item coordenada \(C^{(n)}\);
+\item representação \((b_1,\dots,b_n)\).
+\end{enumerate}
+O suporte não é identificado com a representação numérica.
+A base estrutural é o par \(X^{(2)}=B\times B\); não existe nível de
+comprimento \(1\) na família.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Álgebra de campos}
+\label{sec:campos}
+
+\begin{definicao}[Espaço de campos escalares]
+\label{def:espaco-campos}
+Seja \(\mathbb K\) um corpo e seja \(X^{(n)}\) um suporte da família.
+O espaço de campos escalares sobre \(X^{(n)}\) é
+\[
+\mathcal V_n := \mathbb K^{X^{(n)}}
+= \{V\mid V\colon X^{(n)}\to\mathbb K\}.
+\]
+As operações são ponto a ponto:
+\[
+(V+W)(x) := V(x)+W(x),
+\qquad
+(\lambda V)(x) := \lambda\, V(x).
+\]
+Assim \(\mathcal V_n\) é um espaço vectorial sobre \(\mathbb K\).
+\end{definicao}
+
+\begin{observacao}[Separação suporte/campo]
+\label{obs:suporte-campo}
+Tem-se \(X^{(n)}\neq\mathcal V_n\).
+Nenhuma estrutura linear é atribuída ao suporte apenas pela definição de
+\(\mathcal V_n\).
+\end{observacao}
+
+\begin{proposicao}[Dimensão e base canónica]
+\label{prop:dimensao}
+Para todo \(n\ge 2\),
+\[
+\dim_{\mathbb K}\mathcal V_n = \lvert X^{(n)}\rvert = q^n.
+\]
+A família \(\{e_x\mid x\in X^{(n)}\}\) definida por
+\[
+e_x(y) :=
+\begin{cases}
+1 & \text{se }y=x,\\
+0 & \text{se }y\neq x
+\end{cases}
+\]
+é uma base de \(\mathcal V_n\).
+\end{proposicao}
+
+\begin{proof}
+Como \(X^{(n)}\) é finito, o espaço de funções \(\mathbb K^{X^{(n)}}\)
+possui a base canónica indexada pelos elementos de \(X^{(n)}\).
+A verificação de que \(\{e_x\}\) é linearmente independente e gera é
+imediata.
+\end{proof}
+
+\begin{definicao}[Álgebra de campos]
+\label{def:algebra-campos}
+Seja \(Y\) uma \(\mathbb K\)-álgebra associativa com unidade.
+A álgebra de campos com valores em \(Y\) é
+\[
+\mathcal A_n(Y) := Y^{X^{(n)}}
+= \{F\mid F\colon X^{(n)}\to Y\},
+\]
+com adição e multiplicação ponto a ponto e unidade o campo constante
+\(\mathbf 1(x)=1_Y\).
+\end{definicao}
+
+\begin{proposicao}[Idempotentes canónicos]
+\label{prop:idempotentes}
+Os elementos \(e_x\) da base de \(\mathcal V_n\) (Proposição~\ref{prop:dimensao}),
+quando vistos como elementos da álgebra \(\mathcal A_n(\mathbb K)\),
+satisfazem
+\[
+e_x^2 = e_x,
+\qquad
+e_x\, e_{x'} = 0 \text{ se } x\neq x',
+\qquad
+\sum_{x\in X^{(n)}} e_x = \mathbf 1.
+\]
+São, portanto, idempotentes mutuamente ortogonais que somam à unidade da
+álgebra.
+A distinção é a seguinte: como elementos de \(\mathcal V_n\) formam uma
+base do espaço vectorial; como elementos de \(\mathcal A_n(\mathbb K)\)
+são idempotentes da álgebra de campos.
+\end{proposicao}
+
+\begin{proof}
+Verificação ponto a ponto a partir da definição de \(e_x\).
+A multiplicação em \(\mathcal A_n(\mathbb K)\) é ponto a ponto, logo
+\((e_x\, e_{x'})(y)=e_x(y)\,e_{x'}(y)\), que vale \(1\) apenas quando
+\(y=x=x'\) e \(0\) nos restantes casos.
+\end{proof}
+
+\begin{proposicao}[Extensão por zero ao longo da inclusão]
+\label{prop:extensao-zero}
+Dado \(V\in\mathcal V_n\), define-se \(\widetilde V\in\mathcal V_{n+1}\) por
+\[
+\widetilde V(b,\xi) :=
+\begin{cases}
+V(\xi) & \text{se } d(b)=0,\\
+0 & \text{se } d(b)\neq 0.
+\end{cases}
+\]
+Então \(\widetilde V\circ\iota_n = V\).
+Além disso, \(\widetilde V\) anula-se fora da imagem de \(\iota_n\).
+\end{proposicao}
+
+\begin{proof}
+Para \(\xi\in X^{(n)}\),
+\[
+\widetilde V\bigl(\iota_n(\xi)\bigr)
+= \widetilde V(b_*,\xi)
+= V(\xi),
+\]
+porque \(d(b_*)=0\).
+Se \(d(b)\neq 0\), então \((b,\xi)\) não pertence à imagem de \(\iota_n\) e
+\(\widetilde V(b,\xi)=0\) por definição.
+\end{proof}
+
+\begin{observacao}[Propriedades da extensão por zero]
+\label{obs:distincao-extensoes}
+A extensão da Proposição~\ref{prop:extensao-zero} é a \emph{extensão por zero}
+fora da imagem da inclusão.
+Uma \emph{extensão constante} (atribuir o mesmo valor \(V(\xi)\) a todos os
+símbolos \(b\)) é uma operação distinta e não é considerada aqui.
+
+A extensão por zero \(V\mapsto\widetilde V\) é linear.
+Além disso, para o produto ponto a ponto,
+\[
+\widetilde{VW}=\widetilde V\,\widetilde W,
+\]
+porque fora da imagem de \(\iota_n\) ambos os lados se anulam e, na imagem,
+coincidem com o produto em \(\mathcal V_n\).
+Em contrapartida, a extensão \emph{não} preserva a unidade global: o campo
+constante \(\mathbf 1\) de \(\mathcal A_n(\mathbb K)\) é enviado para o
+indicador da imagem de \(\iota_n\), e não para o campo constante
+\(\mathbf 1\) de \(\mathcal A_{n+1}(\mathbb K)\).
+Logo a extensão por zero é um morfismo de anéis sem unidade (ou de álgebras
+não unital), mas não um morfismo de álgebras com unidade.
+\end{observacao}
+
+\begin{observacao}[Valores vectoriais]
+\label{obs:valores-vectoriais}
+Para \(r\ge 1\) pode-se considerar \(\mathcal V_n^{(r)}=(\mathbb K^r)^{X^{(n)}}\).
+A dimensão passa a ser \(r\cdot q^n\).
+A estrutura do suporte e a coordenada permanecem inalteradas.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Álgebra de valores}
+\label{sec:valores}
+
+Seja \(K\) um corpo comutativo de característica zero.
+A característica zero garante que \(k!\) é invertível em \(K\) para todo
+\(k\ge 0\) (condição usada em somas parciais algébricas) e exclui a
+degenerescência da característica \(2\).
+
+\begin{definicao}[Extensão quadrática de valor]
+\label{def:AmK}
+Para \(m\in K\),
+\[
+A_m(K) := K[X]/(X^2-mX-1).
+\]
+Denote por \(u=[X]\) a classe da indeterminada.
+\end{definicao}
+
+\begin{proposicao}[Forma normal de \(A_m(K)\)]
+\label{prop:forma-Am}
+Todo elemento de \(A_m(K)\) escreve-se unicamente na forma \(a+bu\) com
+\(a,b\in K\).
+A multiplicação é determinada por \(u^2=mu+1\).
+\end{proposicao}
+
+\begin{proof}
+O algoritmo de divisão euclidiana em \(K[X]\) produz resto de grau menor
+que \(2\). A relação \(X^2-mX-1=0\) no quociente dá \(u^2=mu+1\).
+\end{proof}
+
+\begin{lema}[Teorema Chinês dos Restos para ideais principais comaximais]
+\label{lema:tcr}
+Seja \(R\) um anel comutativo com unidade e sejam \(a,b\in R\) tais que os
+ideais \((a)\) e \((b)\) são comaximais, isto é, \((a)+(b)=R\).
+Então
+\[
+R/(ab)\;\cong\; R/(a)\times R/(b)
+\]
+como anéis (e como \(R\)-álgebras).
+O isomorfismo envia a classe de \(r\) no par das classes de \(r\) módulo
+\((a)\) e módulo \((b)\).
+\end{lema}
+
+\begin{proof}
+O morfismo \(\varphi\colon R\to R/(a)\times R/(b)\),
+\(r\mapsto(r+(a),\,r+(b))\), tem núcleo \((a)\cap(b)\).
+Como \((a)\) e \((b)\) são comaximais, \((a)\cap(b)=(ab)\).
+Para a sobrejectividade: dados \(r_1,r_2\in R\), a comaximalidade fornece
+\(x,y\in R\) com \(xa+yb=1\).
+O elemento \(r:=r_2\,xa+r_1\,yb\) satisfaz
+\[
+r-r_1=(r_2-r_1)xa\in(a),
+\qquad
+r-r_2=(r_1-r_2)yb\in(b),
+\]
+logo \(\varphi(r)=(r_1+(a),\,r_2+(b))\).
+\end{proof}
+
+\begin{proposicao}[Decomposição quando o discriminante é quadrado]
+\label{prop:decomposicao}
+Suponha \(\mathrm{char}\,K\neq 2\) e \(\Delta=m^2+4\in K^{\times 2}\), isto é,
+existe \(s\in K^\times\) com \(s^2=\Delta\).
+Sejam \(\alpha=(m+s)/2\) e \(\beta=(m-s)/2\).
+Então
+\[
+X^2-mX-1=(X-\alpha)(X-\beta)
+\]
+e o Lema~\ref{lema:tcr} fornece um isomorfismo de \(K\)-álgebras
+\[
+A_m(K)\xrightarrow{\cong} K\times K,
+\qquad
+[f]\longmapsto\bigl(f(\alpha),f(\beta)\bigr).
+\]
+\end{proposicao}
+
+\begin{proof}
+Como \(\mathrm{char}\,K\neq 2\), a divisão por \(2\) é legítima.
+Os ideais \((X-\alpha)\) e \((X-\beta)\) em \(K[X]\) são comaximais porque
+\(\alpha-\beta=s\neq 0\).
+O Lema~\ref{lema:tcr} aplica-se com \(R=K[X]\).
+\end{proof}
+
+\begin{proposicao}[Idempotentes do valor]
+\label{prop:idempotentes-valor}
+Nas condições da Proposição~\ref{prop:decomposicao}, os elementos
+\[
+e_\alpha := \frac{u-\beta}{\alpha-\beta},
+\qquad
+e_\beta := \frac{\alpha-u}{\alpha-\beta}
+\]
+satisfazem
+\[
+e_\alpha^2=e_\alpha,\quad
+e_\beta^2=e_\beta,\quad
+e_\alpha e_\beta=0,\quad
+e_\alpha+e_\beta=1,
+\]
+e \(A_m(K)=K e_\alpha\oplus K e_\beta\).
+\end{proposicao}
+
+\begin{proof}
+Verificação directa usando \(u^2=mu+1\), \(\alpha+\beta=m\),
+\(\alpha\beta=-1\) e \(\alpha-\beta=s\neq 0\).
+\end{proof}
+
+\begin{teorema}[Duplicação de índice]
+\label{thm:duplicacao}
+Nas condições da Proposição~\ref{prop:decomposicao}, existe um isomorfismo
+natural de \(K\)-álgebras
+\[
+\mathsf T\colon A_m(K)^{X^{(n)}}
+\xrightarrow{\;\cong\;}
+K^{X^{(n)}\times\{0,1\}}.
+\]
+Explicitamente, se \(\psi\colon A_m(K)\xrightarrow{\cong}K\times K\) é o
+isomorfismo da Proposição~\ref{prop:decomposicao}, então
+\[
+\bigl(\mathsf T(F)\bigr)(x,i) := \psi_i\bigl(F(x)\bigr).
+\]
+\end{teorema}
+
+\begin{proof}
+\(\mathsf T\) é morfismo de \(K\)-álgebras por definição ponto a ponto.
+A inversa
+\[
+\bigl(\mathsf T^{-1}(G)\bigr)(x)
+:= \psi^{-1}\bigl(G(x,0),G(x,1)\bigr)
+\]
+está bem definida e verifica as identidades de composição.
+\end{proof}
+
+\begin{observacao}[Produto cartesiano no domínio]
+\label{obs:dominio}
+O isomorfismo identifica \((K\times K)^{X^{(n)}}\) com
+\(K^{X^{(n)}\times\{0,1\}}\).
+O produto cartesiano aparece no \emph{domínio} da função após o isomorfismo,
+não no contradomínio.
+A definição original de \(X^{(n)}\) permanece inalterada.
+\end{observacao}
+
+\begin{proposicao}[Base de idempotentes ampliada]
+\label{prop:idempotentes-ampliados}
+Nas condições do Teorema~\ref{thm:duplicacao}, os elementos
+\[
+e_{(x,\alpha)} := e_x\, e_\alpha,
+\qquad
+e_{(x,\beta)} := e_x\, e_\beta
+\]
+(\(x\in X^{(n)}\)) formam uma família de \(2q^n\) idempotentes mutuamente
+ortogonais que somam à unidade.
+Em particular são linearmente independentes sobre \(K\) e
+\[
+\dim_K A_m(K)^{X^{(n)}} = 2q^n.
+\]
+\end{proposicao}
+
+\begin{proof}
+As relações de idempotência e ortogonalidade seguem das correspondentes
+propriedades de \(\{e_x\}\) e \(\{e_\alpha,e_\beta\}\) por multiplicação
+ponto a ponto.
+Cada \(e_{(x,\alpha)}\) (resp.\ \(e_{(x,\beta)}\)) é não nulo:
+no ponto \(x\), o seu valor é \(e_\alpha\) (resp.\ \(e_\beta\)).
+Como \(s=\alpha-\beta\neq 0\) e todo elemento de \(A_m(K)\) tem forma
+normal única \(a+bu\), com \(1\) e \(u\) linearmente independentes sobre
+\(K\), as fórmulas
+\[
+e_\alpha=(u-\beta)/s,\qquad e_\beta=(\alpha-u)/s
+\]
+implicam \(e_\alpha\neq 0\) e \(e_\beta\neq 0\)
+(o coeficiente de \(u\) é \(1/s\neq 0\)).
+A dimensão de \(A_m(K)^{X^{(n)}}\) é \(\dim_K A_m(K)\cdot q^n=2q^n\).
+Uma família de \(2q^n\) elementos mutuamente ortogonais não nulos que somam
+à unidade é linearmente independente (se \(\sum\lambda_i e_i=0\), multiplicar
+por \(e_j\) dá \(\lambda_j e_j=0\), logo \(\lambda_j=0\)).
+\end{proof}
+
+% --- construção de i ---
+
+\begin{definicao}[Álgebra de valores por \(X^2+1\)]
+\label{def:Kconstr}
+\[
+K_{\mathrm{constr}} := K[X]/(X^2+1).
+\]
+Denote \(i:=[X]\).
+\end{definicao}
+
+\begin{proposicao}[Relação fundamental]
+\label{prop:i}
+\(i^2=-1\).
+\end{proposicao}
+
+\begin{proof}
+\(i^2+1=[X^2+1]=[0]\).
+\end{proof}
+
+\begin{proposicao}[Forma normal]
+\label{prop:forma-normal}
+Para todo \(f\in K[X]\) existem únicos \(a,b\in K\) tais que
+\([f]=[a+bX]\).
+\end{proposicao}
+
+\begin{proof}
+Divisão euclidiana: resto de grau menor que \(2\).
+\end{proof}
+
+\begin{proposicao}[Multiplicação nas classes]
+\label{prop:mult-classes}
+Para \(a,b,c,d\in K\),
+\[
+[a+bX]\,[c+dX] = [(ac-bd)+(ad+bc)X].
+\]
+\end{proposicao}
+
+\begin{proof}
+O produto dos representantes é \(ac+(ad+bc)X+bd\,X^2\).
+Como \(X^2\sim -1\), tem-se \(bd\,X^2\sim -bd\).
+\end{proof}
+
+\begin{proposicao}[Estrutura de corpo]
+\label{prop:K-corpo}
+Se \(X^2+1\) é irredutível sobre \(K\), então \(K_{\mathrm{constr}}\) é um
+corpo.
+Em característica zero, \(X^2+1\) é irredutível precisamente quando \(-1\)
+não é um quadrado em \(K\).
+\end{proposicao}
+
+\begin{proof}
+\(K[X]\) é domínio de integridade euclidiano.
+Se \(X^2+1\) é irredutível, o ideal \((X^2+1)\) é maximal e o quociente é
+corpo.
+Em característica zero um polinómio quadrático sem raízes é irredutível.
+\end{proof}
+
+\begin{observacao}[Independência das camadas]
+\label{obs:independencia-K}
+A construção
+\[
+K\to K[X]\to(X^2+1)\to K[X]/(X^2+1)\to a+bi
+\]
+pertence exclusivamente à camada dos corpos de valores.
+O suporte \(X^{(n)}\) e a coordenada \(C^{(n)}\) permanecem inalterados.
+\end{observacao}
+
+\begin{lema}[Soma parcial por paridade]
+\label{lema:soma-parcial}
+Seja \(A\) uma álgebra associativa com unidade sobre \(K\) e seja
+\(J\in A\) com \(J^2=-1_A\).
+Para \(t\in K\) e \(N\ge 0\),
+\[
+P_N(t,J)
+:= \sum_{k=0}^{N}\frac{(tJ)^k}{k!}
+= \Biggl(\sum_{0\le 2k\le N}\frac{(-1)^k t^{2k}}{(2k)!}\Biggr)1_A
++ J\Biggl(\sum_{0\le 2k+1\le N}\frac{(-1)^k t^{2k+1}}{(2k+1)!}\Biggr).
+\]
+A identidade é puramente algébrica (soma finita); não intervêm limites nem
+convergência.
+\end{lema}
+
+\begin{proof}
+Particiona-se a soma pela paridade do índice.
+De \(J^2=-1_A\) segue \(J^{2m}=(-1)^m 1_A\) e \(J^{2m+1}=(-1)^m J\).
+Os escalares de \(K\) são centrais, logo \((tJ)^m=t^m J^m\).
+\end{proof}
+
+\begin{observacao}[Soma parcial versus exponencial]
+\label{obs:parcial-vs-exp}
+O Lema~\ref{lema:soma-parcial} estabelece uma identidade finita.
+Não se afirma a convergência da série infinita
+\(\sum_{k\ge0}(tJ)^k/k!\), nem a existência de uma exponencial em
+\(\mathcal A_n(K_{\mathrm{constr}})\) sem topologia ou formalismo de
+séries formais adicionais.
+\end{observacao}
+
+
+% ═══════════════════════════════════════════════════════════════════════════
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Sistema indutivo, colimite e categoria restrita}
+\label{sec:categoria}
+
+\begin{definicao}[Sistema indutivo das inclusões]
+\label{def:sistema-indutivo}
+A sequência
+\[
+X^{(2)}\xrightarrow{\iota_2}X^{(3)}\xrightarrow{\iota_3}X^{(4)}\xrightarrow{\iota_4}\cdots
+\]
+é um sistema indutivo de conjuntos (cada \(\iota_n\) é injectiva).
+\end{definicao}
+
+\begin{proposicao}[Existência e propriedade universal do colimite de conjuntos]
+\label{prop:colimite-conjuntos}
+Seja
+\[
+U=\bigsqcup_{n\ge 2}X^{(n)}
+\]
+a união disjunta e seja \(\sim\) a relação de equivalência gerada por
+\((n,x)\sim(n+1,\iota_n(x))\).
+O quociente
+\[
+X^{(\infty)}
+:=
+U/{\sim}
+=
+\varinjlim_{n\ge 2}X^{(n)}
+\]
+é o colimite de conjuntos do sistema.
+As aplicações canónicas \(\lambda_n\colon X^{(n)}\to X^{(\infty)}\) enviam
+\(x\) na classe de \((n,x)\).
+
+Além disso, se \(Z\) é um conjunto e \(f_n\colon X^{(n)}\to Z\) são funções
+com \(f_{n+1}\circ\iota_n=f_n\) para todo \(n\), então existe uma única
+função \(\overline f\colon X^{(\infty)}\to Z\) tal que
+\(\overline f\circ\lambda_n=f_n\) para todo \(n\).
+\end{proposicao}
+
+\begin{proof}
+A construção do colimite de um sistema indutivo de conjuntos é padrão.
+A aplicação \(\overline f([(n,x)])=f_n(x)\) está bem definida pela condição
+de compatibilidade e é a única que factoriza as \(f_n\).
+\end{proof}
+
+\begin{observacao}[O colimite não herda a coordenada dos níveis]
+\label{obs:colimite-coordenada}
+A existência de \(X^{(\infty)}\) como conjunto não produz, por si só, uma
+coordenada
+\(C^{(\infty)}\colon X^{(\infty)}\to\mathbb N\)
+compatível com todas as \(C^{(n)}\) no sentido
+\(C^{(\infty)}\circ\lambda_n=C^{(n)}\).
+Como \(\lambda_{n+1}\circ\iota_n=\lambda_n\), uma função
+\(C^{(\infty)}\colon X^{(\infty)}\to\mathbb N\) que satisfizesse
+\(C^{(\infty)}\circ\lambda_n=C^{(n)}\) para todo \(n\) teria de verificar
+\[
+C^{(n)}(x)
+=C^{(\infty)}(\lambda_n(x))
+=C^{(\infty)}(\lambda_{n+1}(\iota_n(x)))
+=C^{(n+1)}(\iota_n(x))
+=q\,C^{(n)}(x).
+\]
+Como \(q\ge 2\) e \(C^{(n)}\) assume o valor \(1\) (existe \(x\in X^{(n)}\)
+com \(C^{(n)}(x)=1\)), essa igualdade é impossível.
+Portanto, não existe uma função no colimite que restrinja exactamente a
+\(C^{(n)}\) em todos os níveis.
+Isto não exclui a existência de outras coordenadas com propriedades
+distintas.
+\end{observacao}
+
+\begin{definicao}[Categoria dos níveis da família]
+\label{def:categoria-niveis}
+Seja \(\mathbf{SC}_q^{\mathrm{fam}}\) a categoria cujos
+\begin{itemize}[leftmargin=1.5em]
+\item objectos são os pares \(\bigl(X^{(n)},C^{(n)}\bigr)\) para \(n\ge 2\);
+\item morfismos de \(\bigl(X^{(n)},C^{(n)}\bigr)\) para
+\(\bigl(X^{(m)},C^{(m)}\bigr)\) (\(m\ge n\)) são as composições de
+inclusões
+\[
+\iota_{m-1}\circ\cdots\circ\iota_n
+\]
+(quando \(m>n\)) e a identidade (quando \(m=n\));
+\item se \(m<n\), não há morfismos.
+\end{itemize}
+A composição é a composição usual de funções; as identidades são as
+funções identidade.
+\end{definicao}
+
+\begin{proposicao}[A estrutura é uma categoria]
+\label{prop:categoria}
+\(\mathbf{SC}_q^{\mathrm{fam}}\) é uma categoria.
+\end{proposicao}
+
+\begin{proof}
+A composição de composições de inclusões é novamente uma composição de
+inclusões (associatividade da composição de funções).
+As identidades satisfazem as leis unitárias por definição.
+\end{proof}
+
+\begin{observacao}[Âmbito da categoria]
+\label{obs:ambito-categoria}
+A categoria \(\mathbf{SC}_q^{\mathrm{fam}}\) contém apenas os níveis da
+família recursiva e as inclusões canónicas de peso mínimo.
+Não se afirma que ela esgote todos os morfismos possíveis entre suportes
+coordenados arbitrários.
+\end{observacao}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Realizações e campos de contagem}
+\label{sec:realizacoes}
+
+\begin{definicao}[Realização]
+\label{def:realizacao}
+Uma \emph{realização} de comprimento \(N\) sobre \(X^{(n)}\) é uma função
+\[
+\pi\colon\{1,\dots,N\}\to X^{(n)}.
+\]
+\end{definicao}
+
+\begin{definicao}[Campo de contagem]
+\label{def:campo-contagem}
+O campo de contagem associado a \(\pi\) é
+\[
+G_\pi\colon X^{(n)}\to\mathbb N_0,
+\qquad
+G_\pi(x) := \lvert\pi^{-1}(x)\rvert.
+\]
+Assim \(G_\pi\) define um elemento de \(\mathcal A_n(\mathbb Z)\) sob a
+inclusão natural \(\mathbb N_0\subset\mathbb Z\).
+\end{definicao}
+
+\begin{proposicao}[Soma de realizações]
+\label{prop:soma-realizacoes}
+Se \(\pi\) e \(\rho\) são realizações (de comprimentos \(N\) e \(M\)) sobre
+o mesmo suporte, a concatenação \(\pi\ast\rho\) satisfaz
+\[
+G_{\pi\ast\rho} = G_\pi + G_\rho
+\]
+(ponto a ponto).
+\end{proposicao}
+
+\begin{proof}
+A pré-imagem de \(x\) sob a concatenação é a união disjunta das pré-imagens
+sob \(\pi\) e sob \(\rho\).
+\end{proof}
+
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Questões em aberto}
+\label{sec:abertas}
+
+\begin{questao}[Estrutura e coordenada no colimite]
+\label{questao:colimite}
+Qual estrutura (se alguma) e qual coordenada (se alguma) sobrevivem de forma
+canónica no colimite \(X^{(\infty)}\)?
+A existência do colimite de conjuntos está estabelecida
+(Proposição~\ref{prop:colimite-conjuntos}); a questão interessante é a
+preservação de estrutura adicional.
+\end{questao}
+
+\begin{questao}[Categoria mais ampla]
+\label{questao:categoria-ampla}
+É possível estender \(\mathbf{SC}_q^{\mathrm{fam}}\) a uma categoria que
+inclua morfismos entre suportes coordenados não relacionados pela família
+recursiva, de modo que os morfismos de escala da
+Definição~\ref{def:morfismos} sejam morfismos dessa categoria?
+\end{questao}
+
+\begin{questao}[Extensão da soma parcial]
+\label{questao:analitica}
+A soma parcial do Lema~\ref{lema:soma-parcial} pode ser completada a uma
+exponencial formal em \(\mathcal A_n(K_{\mathrm{constr}})\) de forma
+rigorosa sem introduzir topologia adicional?
+\end{questao}
+
+\section*{Nota final}
+
+Os resultados das Secções~\ref{sec:axiomas}--\ref{sec:realizacoes}
+decorrem das definições e hipóteses enunciadas no próprio texto.
+As questões da Secção~\ref{sec:abertas} delimitam o que permanece em aberto
+sem invocar estruturas externas ao artigo.
+
+\end{document}
